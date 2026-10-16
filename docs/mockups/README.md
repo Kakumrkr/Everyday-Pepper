@@ -3,7 +3,7 @@
 Clickable HTML prototype of the key V1 screens. It is a **design artefact, not product code**: sample data, no backend, nothing saved or sent. The production design system will be rebuilt in `packages/ui` (React + Tailwind) in Phase 4, using the tokens below once you approve them.
 
 - **Prototype:** [`floty-prototype.html`](floty-prototype.html) (published preview: https://claude.ai/artifact/WNTU3YyQgBjJvCC9hxHqS1, private to the owner)
-- **Status:** Part 1 (S1) built 2026-10-16. Awaiting user feedback. Part 2 (S2) adds the remaining screens.
+- **Status:** Part 1 (S1) built and approved 2026-10-16. Part 2 (S2) adds the remaining screens.
 
 ## What part 1 covers
 | Screen | What you can try | Requirements shown |
@@ -16,7 +16,7 @@ Clickable HTML prototype of the key V1 screens. It is a **design artefact, not p
 
 Layouts: phone (bottom tabs + thumb-zone "Ask Floty" bar) and desktop ≥ 960 px (sidebar; Home gains a "today at a glance" rail). Light and dark themes follow the system, with a toggle under More / the sidebar.
 
-## Proposed design direction (pending your sign-off)
+## Design direction (approved with part 1)
 - **Mark:** a speech bubble with a face. The product is someone you talk to. Wordmark: lowercase **floty** in Bricolage Grotesque ExtraBold.
 - **Type:** Bricolage Grotesque for display (headings, wordmark, big numbers) · Figtree for everything else (15 px base).
 - **Shape:** 24 px card radius, pill buttons and chips, 44 px minimum tap targets, shadows only on floating things (sheets, toasts, selected tab).
@@ -49,4 +49,4 @@ These are throwaway checks for the prototype only. They are not part of the prod
 ## Feedback log
 | Date | Feedback | Action |
 |---|---|---|
-| — | _awaiting first review_ | — |
+| 2026-10-16 | Part 1 approved as-is ("all good"): look, feed order, card detail, calendar layout | Direction locked for part 2; tokens get recorded in `ux-principles.md` at S2 sign-off |
