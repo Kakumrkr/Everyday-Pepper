@@ -1,6 +1,6 @@
 # ADR-0010: Database roles, migrations and the tenant context
 
-- **Status:** Proposed (Claude default in S6, user to confirm) · **Date:** 2026-10-16 · Builds on ADR-0002 and ADR-0008
+- **Status:** Accepted (2026-10-16, user) · **Date:** 2026-10-16 · Builds on ADR-0002 and ADR-0008
 
 ## Context
 ADR-0002 decided on row-level security (RLS) keyed on `app.tenant_id`, an app role without `BYPASSRLS`, and a separate migration role. Until S6 every process connected as the Compose superuser, which RLS never applies to. We need concrete roles, a way to create them in dev, CI and the pilot, a safe way to set the tenant per transaction, and tests that fail when isolation is missing.

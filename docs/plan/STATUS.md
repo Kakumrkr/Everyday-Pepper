@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 2 — Platform core. S6 (Phase 2a: db + tenancy/RLS) done, PR #8 green and waiting for the user's review/merge → next: S7 (auth)
+**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 2 — Platform core. S6 (Phase 2a: db + tenancy/RLS) done and merged (PR #8) → next: S7 (auth)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -48,7 +48,7 @@
   - **Readiness:** the probe moved from runtime to `@floty/db` (`DatabaseHandle.ping`) and fails if the role bypasses RLS. Runtime exports a `DATABASE` token.
   - **Contracts:** `TenantId`, `UserId`, `TenantSlug`, `TimeZone`, `Locale`, `MembershipRole`, `NewTenant`.
   - **Testing:** `postgresUrlAs` added to `@floty/testing`.
-  - **Docs:** ADR-0010 (proposed); data-model, dependency-map, dev-setup, testing-strategy, security-and-tenancy and traceability (AC-X-1) updated.
+  - **Docs:** ADR-0010 (accepted by the user, 2026-10-16); data-model, dependency-map, dev-setup, testing-strategy, security-and-tenancy and traceability (AC-X-1) updated.
   - **Checks run:**
     - `pnpm check` green: db 22 unit tests, 97% statements / 100% branches; contracts 67 tests; runtime 74 tests.
     - `pnpm test:integration` green, 6 files / 55 tests. db: 51 tests (migrations, provisioning, repositories, cross-tenant suite 30/30).
@@ -79,7 +79,7 @@
 - **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images. Replacement is open decision **D10** (recommendation: SeaweedFS); needed by Phase 4.
 - **GitHub settings done by the user (2026-10-16, before S6):** default branch is `main`; branch protection on `main` requires a PR and the three CI checks (**CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)**, **CI / E2E smoke (Docker Compose)**); head branches are deleted automatically after merge; stale branches deleted.
 - **Phase 2 order confirmed (user, S6 start):** S6 db + tenancy/RLS → S7 auth → S8 roles/audit. **ADR-0009 accepted** (user, S6 start).
-- **S6 defaults (Claude, user to confirm or change) — ADR-0010 (proposed):**
+- **S6 defaults — ADR-0010, accepted by the user (2026-10-16, end of S6):**
   - (a) The services connect as their own login role (`floty_service`), a member of the `floty_app` group role. The migrate step creates and updates it from `DATABASE_URL`, using a separate `MIGRATION_DATABASE_URL` for the owner. Readiness fails for a role that bypasses RLS.
   - (b) IDs are UUID v7, generated in the app with the `uuid` package (Postgres 17 has no `uuidv7()`).
   - (c) The `users` table waits for S7, so Better Auth shapes it. `memberships.user_id` has no foreign key until then.
@@ -89,9 +89,8 @@
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Review and merge the S6 PR; confirm or change the S6 defaults / **ADR-0010** (database roles, migrations, tenant context).
-2. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
-3. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 S6–S8 split Phase 2: db + tenancy/RLS before auth, so auth can build on the tenant context. **Order confirmed by the user at the S6 Session Brief (2026-10-16).**
