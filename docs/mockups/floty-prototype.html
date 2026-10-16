@@ -1,0 +1,1550 @@
+<title>Floty Prototype</title>
+<meta name="description" content="Clickable mockup of Floty, the AI employee for appointment-based businesses: operator feed, chat with cards, and calendar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: phone-first app shell. Top bar, one scrolling view, and a thumb-zone dock (ask bar + tabs).
+   From 960px it becomes sidebar + view, and Home gains a "today at a glance" rail. */
+:root {
+  /* Neutrals lean toward the raspberry brand so greys never look default. */
+  --bg: #FFF8F7;
+  --surface: #FFFFFF;
+  --surface-2: #FBEEEC;
+  --line: #EEDCD9;
+  --ink: #2B1B24;
+  --ink-2: #6A5560;
+  /* Brand: raspberry. --brand for text/icons on light surfaces, --brand-strong for filled buttons. */
+  --brand: #BE2759;
+  --brand-strong: #B01F52;
+  --brand-soft: #FDE5ED;
+  --on-brand: #FFFFFF;
+  /* Semantic: done / needs your OK / info. Separate from the brand hue. */
+  --ok: #23703A;
+  --ok-soft: #E2F2E5;
+  --wait: #8F4C00;
+  --wait-soft: #FFEFD6;
+  --info: #1D65A8;
+  --info-soft: #E2EEFA;
+  /* Per-stylist calendar colours (soft fill + readable ink). */
+  --s1: #FCE3EC; --s1-ink: #8E1D47;
+  --s2: #DAF2EB; --s2-ink: #0D5E4F;
+  --s3: #FFEFC7; --s3-ink: #7A4F00;
+  --hatch: rgba(106, 85, 96, .14);
+  --shadow: 0 1px 2px rgba(43, 27, 36, .06), 0 10px 28px rgba(43, 27, 36, .08);
+  --scrim: rgba(43, 27, 36, .42);
+
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --hour: 56px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161015; --surface: #211820; --surface-2: #2B2029; --line: #3B2D38;
+    --ink: #F8ECF1; --ink-2: #BDA8B3;
+    --brand: #FF7FA8; --brand-strong: #FF8FB3; --brand-soft: #46202F; --on-brand: #2A0D19;
+    --ok: #7FD69A; --ok-soft: #1D3324; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
+    --s1: #4A2032; --s1-ink: #FFC2D6; --s2: #173A33; --s2-ink: #A6EBD9; --s3: #3D3012; --s3-ink: #FFDE8A;
+    --hatch: rgba(189, 168, 179, .12);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+    --scrim: rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161015; --surface: #211820; --surface-2: #2B2029; --line: #3B2D38;
+  --ink: #F8ECF1; --ink-2: #BDA8B3;
+  --brand: #FF7FA8; --brand-strong: #FF8FB3; --brand-soft: #46202F; --on-brand: #2A0D19;
+  --ok: #7FD69A; --ok-soft: #1D3324; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
+  --s1: #4A2032; --s1-ink: #FFC2D6; --s2: #173A33; --s2-ink: #A6EBD9; --s3: #3D3012; --s3-ink: #FFDE8A;
+  --hatch: rgba(189, 168, 179, .12);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+  --scrim: rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- shell ---------- */
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "top" "stage" "dock";
+}
+.side { display: none; grid-area: side; }
+.top {
+  grid-area: top;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.top .biz { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.biz-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  background: var(--s2); color: var(--s2-ink);
+  font: 700 13px/1 var(--font-body);
+}
+.biz-name { font-weight: 600; font-size: 14px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.biz-sub { font-size: 12px; color: var(--ink-2); }
+.proto-pill {
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--info); background: var(--info-soft); padding: 4px 9px; border-radius: 999px; white-space: nowrap;
+}
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--surface); display: grid; place-items: center; color: var(--ink);
+}
+.stage { grid-area: stage; position: relative; min-height: 0; }
+.view { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+.view-inner {
+  padding-block: 20px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  max-width: 1120px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 22px;
+}
+.dock {
+  grid-area: dock;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 8px;
+}
+.ask-pill {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; min-height: 48px; padding: 0 8px 0 16px;
+  border-radius: 999px; border: 1.5px solid var(--line);
+  background: var(--bg); color: var(--ink-2); text-align: left;
+}
+.ask-pill .mark { width: 26px; height: 26px; }
+.ask-pill span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ask-pill .go {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--brand-strong); color: var(--on-brand);
+}
+.ask-pill .go svg { width: 18px; height: 18px; }
+.tabs { display: grid; grid-template-columns: repeat(5, 1fr); }
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 0 4px; border: 0; background: none; color: var(--ink-2);
+  font-size: 11px; font-weight: 600; border-radius: 12px;
+}
+.tab[aria-current="page"] { color: var(--brand); }
+.tab[aria-current="page"] svg.i { stroke-width: 2.3; }
+.badge {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 999px; background: var(--wait); color: var(--surface); font-size: 11px; font-weight: 700;
+}
+.tab .tab-ic { position: relative; }
+.tab .badge { position: absolute; top: -6px; right: -12px; }
+
+/* ---------- wordmark ---------- */
+.mark { width: 32px; height: 32px; flex: none; }
+.wordmark { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); text-decoration: none; }
+.wordmark b { font: 800 26px/1 var(--font-display); letter-spacing: -.04em; }
+
+/* ---------- shared bits ---------- */
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-2); }
+.muted { color: var(--ink-2); }
+.small { font-size: 13px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 0 18px; border-radius: 999px;
+  border: 1.5px solid transparent; font-weight: 650; font-size: 15px; white-space: nowrap;
+}
+.btn svg.i { width: 18px; height: 18px; }
+.btn-primary { background: var(--brand-strong); color: var(--on-brand); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ink); }
+.btn-ghost:hover { background: var(--surface-2); }
+.btn-text { background: none; color: var(--brand); padding: 0 10px; min-height: 36px; }
+.btn-sm { min-height: 36px; padding: 0 14px; font-size: 14px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+}
+.pill svg.i { width: 14px; height: 14px; stroke-width: 2.4; }
+.pill-ok { background: var(--ok-soft); color: var(--ok); }
+.pill-wait { background: var(--wait-soft); color: var(--wait); }
+.pill-info { background: var(--info-soft); color: var(--info); }
+.pill-brand { background: var(--brand-soft); color: var(--brand); }
+.pill-plain { background: var(--surface-2); color: var(--ink-2); }
+
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+.card-raised { box-shadow: var(--shadow); border-color: transparent; }
+.card-row { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.card-row > .grow { flex: 1; min-width: 0; }
+.card h3 { font-size: 17px; line-height: 1.3; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; font-weight: 600; min-width: 0; }
+.notice {
+  display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--r-sm);
+  background: var(--wait-soft); color: var(--ink); font-size: 14px;
+}
+.notice svg.i { color: var(--wait); margin-top: 1px; }
+.notice b { color: var(--wait); }
+.notice .src { display: block; font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  font-weight: 700; font-size: 14px;
+}
+.av-ok { background: var(--ok-soft); color: var(--ok); }
+.av-wait { background: var(--wait-soft); color: var(--wait); }
+.av-brand { background: var(--brand-soft); color: var(--brand); }
+.av-info { background: var(--info-soft); color: var(--info); }
+.avatar svg.i { width: 20px; height: 20px; }
+
+/* ---------- home ---------- */
+.home-grid { display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); }
+.hello h1 { font-size: 30px; line-height: 1.1; font-weight: 800; }
+.hello .date { margin-bottom: 4px; }
+.briefing {
+  background: var(--brand-soft); border-radius: var(--r-lg); padding: 18px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.briefing p { font-size: 16px; line-height: 1.55; max-width: 62ch; }
+.briefing .who { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--brand); font-size: 14px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { background: var(--surface); border-radius: var(--r-md); padding: 10px 12px; }
+.stat b { display: block; font: 800 24px/1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--ink-2); font-weight: 600; }
+.feed-section { display: flex; flex-direction: column; gap: 10px; }
+.feed-section > header { display: flex; align-items: center; gap: 8px; }
+.feed-section > header h2 { font-size: 20px; font-weight: 700; }
+.feed-list { display: flex; flex-direction: column; gap: 10px; }
+.feed-item .title { font-weight: 650; line-height: 1.35; }
+.feed-item .meta { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+.draft {
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--bg); padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.draft label { font-size: 12px; font-weight: 700; color: var(--ink-2); }
+.draft textarea {
+  width: 100%; min-height: 128px; resize: vertical; border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: var(--surface); padding: 10px; line-height: 1.5;
+}
+.draft .to { font-size: 13px; }
+.empty-note { font-size: 14px; color: var(--ink-2); padding: 4px 2px; }
+.glance { display: none; }
+.home-ask { display: none; }
+.agenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.agenda li { display: grid; grid-template-columns: 58px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.agenda li:last-child { border-bottom: 0; }
+.agenda .t { color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.dot.s1 { background: var(--s1-ink); } .dot.s2 { background: var(--s2-ink); } .dot.s3 { background: var(--s3-ink); }
+
+/* ---------- chat ---------- */
+#view-chat { display: flex; flex-direction: column; overflow: hidden; }
+.chat-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.chat-log {
+  max-width: 760px; margin: 0 auto;
+  padding-block: 20px 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px;
+}
+.day-sep { text-align: center; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.msg { display: flex; gap: 10px; align-items: flex-start; min-width: 0; }
+.msg .mark { width: 30px; height: 30px; margin-top: 2px; }
+.msg-body { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1; }
+.msg.user { justify-content: flex-end; }
+.msg.user .bubble {
+  background: var(--brand-strong); color: var(--on-brand); padding: 10px 14px;
+  border-radius: 20px 20px 6px 20px; max-width: 82%; line-height: 1.45;
+}
+.msg.ai .text { line-height: 1.55; max-width: 62ch; }
+.msg.ai .card { max-width: 520px; }
+.msg .time { font-size: 11px; color: var(--ink-2); }
+.card-type { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.slot {
+  text-align: left; padding: 10px 12px; border-radius: var(--r-md); border: 1.5px solid var(--line);
+  background: var(--bg); display: flex; flex-direction: column; gap: 1px;
+}
+.slot:hover { border-color: var(--brand); }
+.slot b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.slot span { font-size: 12px; color: var(--ink-2); }
+.slot[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); }
+.slot:disabled { cursor: default; opacity: .55; }
+.slot[aria-pressed="true"]:disabled { opacity: 1; }
+.diff { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+.diff > div { padding: 10px 12px; border-radius: var(--r-md); background: var(--surface-2); font-size: 14px; min-width: 0; }
+.diff .before { color: var(--ink-2); }
+.diff .before .when { text-decoration: line-through; }
+.diff .after { background: var(--ok-soft); }
+.diff .when { display: block; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.diff .before .when { color: var(--ink-2); }
+.diff .lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.check { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.check input { width: 20px; height: 20px; accent-color: var(--brand-strong); }
+.fine { font-size: 12px; color: var(--ink-2); }
+.fine a, .link { color: var(--brand); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; background: none; border: 0; padding: 0; font-size: inherit; }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0 4px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none; border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px;
+  padding: 8px 14px; font-size: 14px; font-weight: 600; white-space: nowrap;
+}
+.chip:hover, .chip[aria-pressed="true"] { border-color: var(--brand); color: var(--brand); }
+.composer-wrap {
+  border-top: 1px solid var(--line); background: var(--bg);
+  padding-block: 8px 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.composer-inner { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; }
+.composer { display: flex; gap: 8px; align-items: center; }
+.composer input {
+  flex: 1; min-width: 0; min-height: 48px; border-radius: 999px; border: 1.5px solid var(--line);
+  background: var(--surface); padding: 0 18px;
+}
+.composer input:focus-visible { outline-offset: 0; border-radius: 999px; }
+.composer .send { width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--brand-strong); color: var(--on-brand); display: grid; place-items: center; }
+.typing { display: inline-flex; gap: 4px; padding: 10px 0; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-2); animation: blink 1s infinite ease-in-out; }
+.typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+.status-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- calendar ---------- */
+.cal-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; justify-content: space-between; }
+.daynav { display: flex; align-items: center; gap: 6px; }
+.daynav h1 { font-size: 22px; font-weight: 700; min-width: 0; }
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: none; padding: 7px 14px; border-radius: 999px; font-weight: 650; font-size: 14px; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.staff-filter { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.staff-filter .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; }
+.cal {
+  display: grid; grid-template-columns: 44px repeat(var(--cols), minmax(0, 1fr));
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: clip;
+}
+.cal-colhead {
+  position: sticky; top: 0; z-index: 3; background: var(--surface);
+  padding: 10px 6px; border-bottom: 1px solid var(--line); border-left: 1px solid var(--line);
+  display: flex; align-items: center; gap: 8px; min-width: 0;
+}
+.cal-colhead:first-child { border-left: 0; }
+.cal-colhead .avatar { width: 30px; height: 30px; font-size: 12px; }
+.cal-colhead .nm { font-weight: 700; font-size: 14px; line-height: 1.2; }
+.cal-colhead .sub { font-size: 11px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-colhead > div { min-width: 0; }
+.times { position: relative; }
+.times span {
+  position: absolute; right: 6px; transform: translateY(-50%);
+  font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; font-weight: 600;
+}
+.col {
+  position: relative; border-left: 1px solid var(--line);
+  background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size: 100% var(--hour);
+}
+.ev {
+  position: absolute; left: 4px; right: 4px; border-radius: 12px; padding: 6px 8px; border: 0;
+  text-align: left; overflow: hidden; display: flex; flex-direction: column; gap: 1px; font-size: 12px; line-height: 1.25;
+}
+.ev b { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .9; }
+.ev.s1 { background: var(--s1); color: var(--s1-ink); }
+.ev.s2 { background: var(--s2); color: var(--s2-ink); }
+.ev.s3 { background: var(--s3); color: var(--s3-ink); }
+.ev.open { background: transparent; border: 1.5px dashed var(--brand); color: var(--brand); align-items: flex-start; }
+.ev.block { background: repeating-linear-gradient(135deg, var(--hatch) 0 6px, transparent 6px 12px); color: var(--ink-2); }
+.ev.fresh { box-shadow: 0 0 0 2px var(--brand); }
+.ev .flag { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; }
+.ev .flag svg.i { width: 12px; height: 12px; stroke-width: 2.4; }
+.nowline { position: absolute; left: 0; right: 0; height: 2px; background: var(--brand); z-index: 2; pointer-events: none; }
+.nowline::before { content: ""; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); }
+.week-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); }
+.week { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+.week th, .week td { padding: 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.week thead th { font-size: 12px; color: var(--ink-2); font-weight: 700; }
+.week thead th.today { color: var(--brand); }
+.week tr:last-child td, .week tr:last-child th { border-bottom: 0; }
+.week td button { width: 100%; border: 0; background: none; text-align: left; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.wk { display: flex; flex-direction: column; gap: 6px; }
+.util { display: block; height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.util i { display: block; height: 100%; border-radius: 999px; }
+.closed { color: var(--ink-2); font-size: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+
+/* ---------- sheet + toast ---------- */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
+.sheet {
+  width: 100%; max-width: 560px; max-height: 86%; overflow-y: auto;
+  background: var(--surface); border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding: 10px max(18px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 14px;
+  animation: rise .22s ease-out;
+}
+.sheet .grab { width: 40px; height: 5px; border-radius: 999px; background: var(--line); margin: 0 auto 4px; }
+.sheet-head { display: flex; align-items: flex-start; gap: 12px; justify-content: space-between; }
+.sheet h2 { font-size: 21px; }
+.why-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.why-block { display: flex; flex-direction: column; gap: 6px; }
+.why-block .eyebrow { font-size: 11px; }
+@keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.toasts {
+  position: absolute; left: 0; right: 0; bottom: 12px; z-index: 30; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.stage[data-view="chat"] .toasts { bottom: 128px; }
+.toast {
+  pointer-events: auto; max-width: 520px; width: 100%;
+  background: var(--ink); color: var(--bg); border-radius: var(--r-md); padding: 10px 10px 10px 16px;
+  display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); font-size: 14px;
+  animation: rise .2s ease-out;
+}
+.toast p { flex: 1; min-width: 0; }
+.toast button { border: 0; background: none; color: var(--bg); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; padding: 8px 10px; border-radius: 8px; }
+
+/* ---------- brand + more ---------- */
+.brand-hero { display: flex; flex-direction: column; gap: 14px; }
+.brand-hero .wordmark .mark { width: 64px; height: 64px; }
+.brand-hero .wordmark b { font-size: 64px; }
+.brand-hero p { font-size: 17px; max-width: 58ch; }
+.section-title { font-size: 22px; font-weight: 700; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.sw { border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--surface); }
+.sw i { display: block; height: 64px; }
+.sw div { padding: 8px 10px; font-size: 13px; }
+.sw code { font-size: 12px; color: var(--ink-2); }
+.type-spec { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+.type-spec .card p { max-width: 62ch; }
+.spec-display { font: 800 40px/1.05 var(--font-display); letter-spacing: -.03em; }
+.spec-body { font-size: 17px; }
+.tone { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+.tone .card { gap: 6px; }
+.more-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.more-list button {
+  width: 100%; display: flex; align-items: center; gap: 12px; text-align: left;
+  border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-md); padding: 14px;
+}
+.more-list .grow { flex: 1; min-width: 0; }
+.client-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.client-list li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.client-list .grow { flex: 1; min-width: 0; }
+
+/* ---------- desktop ---------- */
+@media (min-width: 960px) {
+  .app {
+    grid-template-columns: 252px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "side top" "side stage";
+  }
+  .dock { display: none; }
+  .side {
+    display: flex; flex-direction: column; gap: 20px; padding: 18px 14px;
+    border-right: 1px solid var(--line); background: var(--surface); overflow-y: auto;
+  }
+  .side .wordmark { padding: 4px 8px; }
+  .side nav { display: flex; flex-direction: column; gap: 2px; }
+  .side .nav-label { padding: 12px 10px 4px; }
+  .side-link {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; border: 0;
+    background: none; text-align: left; font-weight: 600; color: var(--ink-2); width: 100%;
+  }
+  .side-link:hover { background: var(--surface-2); color: var(--ink); }
+  .side-link[aria-current="page"] { background: var(--brand-soft); color: var(--brand); }
+  .side-link .badge { margin-left: auto; }
+  .side-link .soon { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--ink-2); }
+  .side .foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .top .menu-btn { display: none; }
+  .top { padding-inline: 28px; }
+  .view-inner { padding-inline: 28px; padding-block: 28px 40px; }
+  .home-grid { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+  .glance { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 0; }
+  .home-ask { display: flex; }
+  .hello h1 { font-size: 36px; }
+  .type-spec, .tone { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scrim { align-items: center; }
+  .sheet { border-radius: var(--r-lg); padding: 12px 24px 24px; }
+  .sheet .grab { display: none; }
+  .stage[data-view="chat"] .toasts { bottom: 140px; }
+  .toasts { align-items: flex-end; padding-right: 28px; }
+}
+@media (max-width: 959px) {
+  .stage[data-view="chat"] ~ .dock .ask-pill,
+  .stage[data-view="more"] ~ .dock .ask-pill,
+  .stage[data-view="brand"] ~ .dock .ask-pill { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12Z"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 2.8 19.5h18.4Z"/><path d="M12 10v4M12 17v.01"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.4 0 2-1 1.5-2.2-.6-1.4.3-2.8 1.8-2.8H17a4 4 0 0 0 4-4c0-5-4-9-9-9Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></symbol>
+    <symbol id="i-dial" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 12 16 8"/><path d="M12 3.5v2M3.5 12h2M18.5 12h2"/></symbol>
+    <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3V4Z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3V4Z"/><path d="M9 4h6M9 20h6"/></symbol>
+    <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8 20 18M8 16 20 6"/></symbol>
+    <symbol id="i-web" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 3 2.5 14 0 17M12 3.5c-2.5 3-2.5 14 0 17"/></symbol>
+    <symbol id="i-floty" viewBox="0 0 40 40">
+      <!-- Inline var() styles: class selectors can't reach inside <use> clones, but custom properties inherit. -->
+      <path style="fill:var(--brand-strong)" d="M20 3c9.9 0 17 6.6 17 15.2S29.9 33.4 20 33.4c-1.9 0-3.7-.2-5.4-.7L7 37l1.3-7.2C5 27 3 22.9 3 18.2 3 9.6 10.1 3 20 3Z"/>
+      <circle style="fill:var(--on-brand)" cx="14.2" cy="16.4" r="2.3"/><circle style="fill:var(--on-brand)" cx="25.8" cy="16.4" r="2.3"/>
+      <path style="fill:none;stroke:var(--on-brand);stroke-width:2.4;stroke-linecap:round" d="M14.4 22.6c3.2 3 8 3 11.2 0"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app" id="app">
+  <aside class="side" aria-label="Main">
+    <a class="wordmark" href="#home" data-go="home" aria-label="Floty home"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg><b>floty</b></a>
+    <nav aria-label="Sections">
+      <button class="side-link" data-go="home"><svg class="i"><use href="#i-home"/></svg>Home<span class="badge" data-needs-count>2</span></button>
+      <button class="side-link" data-go="chat"><svg class="i"><use href="#i-chat"/></svg>Chat</button>
+      <button class="side-link" data-go="calendar"><svg class="i"><use href="#i-cal"/></svg>Calendar</button>
+      <button class="side-link" data-go="clients"><svg class="i"><use href="#i-users"/></svg>Clients<span class="soon">Part 2</span></button>
+      <div class="eyebrow nav-label">Trust</div>
+      <button class="side-link" data-soon="Autonomy settings"><svg class="i"><use href="#i-dial"/></svg>Autonomy<span class="soon">Part 2</span></button>
+      <button class="side-link" data-soon="What I know"><svg class="i"><use href="#i-brain"/></svg>What I know<span class="soon">Part 2</span></button>
+      <div class="eyebrow nav-label">Prototype</div>
+      <button class="side-link" data-go="brand"><svg class="i"><use href="#i-palette"/></svg>Design direction</button>
+    </nav>
+    <div class="foot">
+      <button class="btn btn-ghost btn-sm" data-action="theme"><svg class="i"><use href="#i-moon"/></svg><span data-theme-label>Theme: system</span></button>
+      <p class="fine">Mockup with sample data. Nothing here is saved or sent.</p>
+    </div>
+  </aside>
+
+  <header class="top">
+    <div class="biz">
+      <span class="biz-avatar" aria-hidden="true">JH</span>
+      <div style="min-width:0">
+        <div class="biz-name">Juniper Hair Studio</div>
+        <div class="biz-sub">Ana Reyes · Owner</div>
+      </div>
+    </div>
+    <span class="proto-pill">Prototype</span>
+  </header>
+
+  <main class="stage" id="stage" data-view="home">
+    <!-- HOME / OPERATOR FEED -->
+    <section class="view" id="view-home" aria-labelledby="home-title">
+      <div class="view-inner">
+        <div class="home-grid">
+          <div style="display:flex;flex-direction:column;gap:22px;min-width:0">
+            <div class="hello">
+              <p class="eyebrow date">Thursday, October 15</p>
+              <h1 id="home-title">Good morning, Ana</h1>
+            </div>
+            <button class="ask-pill home-ask" data-go="chat" data-focus-composer>
+              <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg>
+              <span>Ask Floty to book, move or look up anything…</span>
+              <i class="go"><svg class="i"><use href="#i-send"/></svg></i>
+            </button>
+            <article class="briefing" aria-label="Daily briefing">
+              <div class="who"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true" style="width:24px;height:24px"><use href="#i-floty"/></svg>Your 8:00 am briefing</div>
+              <p>Busy day: 13 appointments across your three stylists. Marco has a gap from 1:00 to 2:30, and Kim Sato cancelled Priya's 4:00 gloss last night. I found someone on the waitlist who wants that exact slot. Two things need your OK below.</p>
+              <div class="stats">
+                <div class="stat"><b>13</b><span>appointments</span></div>
+                <div class="stat"><b>2</b><span>open gaps</span></div>
+                <div class="stat"><b>$1,840</b><span>booked today</span></div>
+              </div>
+            </article>
+
+            <section class="feed-section" aria-labelledby="needs-h">
+              <header><h2 id="needs-h">Needs your OK</h2><span class="badge" data-needs-count>2</span></header>
+              <div class="feed-list" id="feed-needs"></div>
+            </section>
+
+            <section class="feed-section" aria-labelledby="done-h">
+              <header><h2 id="done-h">Done for you</h2><span class="pill pill-plain" id="done-count">3 today</span></header>
+              <div class="feed-list" id="feed-done"></div>
+            </section>
+
+            <section class="feed-section" aria-labelledby="sugg-h">
+              <header><h2 id="sugg-h">Suggestions</h2></header>
+              <div class="feed-list" id="feed-sugg"></div>
+            </section>
+          </div>
+
+          <aside class="glance" aria-label="Today at a glance">
+            <div class="card">
+              <div class="card-type"><span class="eyebrow">Up next</span><button class="link small" data-go="calendar">Open calendar</button></div>
+              <ul class="agenda">
+                <li><span class="t">10:30</span><span><span class="dot s2"></span>Sam Wright · Cut &amp; beard with Marco</span></li>
+                <li><span class="t">11:30</span><span><span class="dot s1"></span>Ruth Okafor · Cut &amp; style with Jess</span></li>
+                <li><span class="t">11:30</span><span><span class="dot s2"></span>Nadia Ali · Cut &amp; style with Marco</span></li>
+                <li><span class="t">11:30</span><span><span class="dot s3"></span>Mei Tanaka · Keratin with Priya</span></li>
+              </ul>
+            </div>
+            <div class="card">
+              <span class="eyebrow">Open today</span>
+              <ul class="agenda">
+                <li><span class="t">1:00</span><span><span class="dot s2"></span>Marco · 1 h 30 m free</span></li>
+                <li><span class="t">4:00</span><span><span class="dot s3"></span>Priya · 1 h free (waitlist match)</span></li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="view" id="view-chat" aria-label="Chat with Floty" hidden>
+      <div class="chat-scroll" id="chat-scroll">
+        <div class="chat-log" id="chat-log" aria-live="polite"></div>
+      </div>
+      <div class="composer-wrap">
+        <div class="composer-inner">
+          <div class="chips" id="chat-chips" aria-label="Try asking"></div>
+          <form class="composer" id="composer" autocomplete="off">
+            <label class="sr-only" for="composer-input">Message Floty</label>
+            <input id="composer-input" name="message" placeholder="Ask Floty…" enterkeyhint="send">
+            <button class="send" type="submit" aria-label="Send"><svg class="i"><use href="#i-send"/></svg></button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALENDAR -->
+    <section class="view" id="view-calendar" aria-labelledby="cal-title" hidden>
+      <div class="view-inner">
+        <div class="cal-head">
+          <div class="daynav">
+            <button class="icon-btn" data-action="cal-prev" aria-label="Previous day"><svg class="i"><use href="#i-left"/></svg></button>
+            <h1 id="cal-title" class="num">Thu, Oct 15</h1>
+            <button class="icon-btn" data-action="cal-next" aria-label="Next day"><svg class="i"><use href="#i-right"/></svg></button>
+          </div>
+          <div class="seg" role="group" aria-label="Calendar range">
+            <button data-action="cal-mode" data-mode="day" aria-pressed="true">Day</button>
+            <button data-action="cal-mode" data-mode="week" aria-pressed="false">Week</button>
+          </div>
+        </div>
+        <div class="staff-filter" id="staff-filter" role="group" aria-label="Show stylists"></div>
+        <div id="cal-body"></div>
+        <div class="legend" aria-label="Legend">
+          <span><i style="border:1.5px dashed var(--brand)"></i>Open time</span>
+          <span><i style="background:repeating-linear-gradient(135deg,var(--hatch) 0 4px,transparent 4px 8px);border:1px solid var(--line)"></i>Blocked</span>
+          <span><svg class="i" style="width:14px;height:14px;color:var(--wait)"><use href="#i-alert"/></svg>Client has a sensitive note</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLIENTS (placeholder for part 2) -->
+    <section class="view" id="view-clients" aria-labelledby="clients-title" hidden>
+      <div class="view-inner" style="max-width:760px">
+        <div><p class="eyebrow">Coming in mockups part 2</p><h1 id="clients-title" style="font-size:28px">Clients</h1></div>
+        <p class="muted">The client profile and "What I know" screens are planned for the next session. Here is a preview of the list.</p>
+        <ul class="client-list">
+          <li><span class="avatar av-brand">ML</span><div class="grow"><b>Maria Lopez</b><div class="small muted">Color &amp; gloss every 6 weeks · last visit Sep 4</div></div><span class="pill pill-wait"><svg class="i"><use href="#i-alert"/></svg>PPD allergy</span></li>
+          <li><span class="avatar av-info">LP</span><div class="grow"><b>Lena Park</b><div class="small muted">Cut with Marco · 9 weeks since last visit</div></div><span class="pill pill-plain">Overdue</span></li>
+          <li><span class="avatar av-ok">SM</span><div class="grow"><b>Sarah Mitchell</b><div class="small muted">Cut &amp; style · next visit Fri 3:00</div></div></li>
+          <li><span class="avatar av-wait">RD</span><div class="grow"><b>Rosa Diaz</b><div class="small muted">On the waitlist · gloss, weekday afternoons</div></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- MORE (mobile) -->
+    <section class="view" id="view-more" aria-labelledby="more-title" hidden>
+      <div class="view-inner" style="max-width:640px">
+        <h1 id="more-title" style="font-size:28px">More</h1>
+        <ul class="more-list">
+          <li><button data-go="brand"><span class="avatar av-brand"><svg class="i"><use href="#i-palette"/></svg></span><span class="grow"><b>Design direction</b><br><span class="small muted">Colors, type and the Floty wordmark</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-soon="Autonomy settings"><span class="avatar av-info"><svg class="i"><use href="#i-dial"/></svg></span><span class="grow"><b>Autonomy</b><br><span class="small muted">What Floty may do on its own · part 2</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-soon="What I know"><span class="avatar av-ok"><svg class="i"><use href="#i-brain"/></svg></span><span class="grow"><b>What I know</b><br><span class="small muted">Facts and rules Floty remembers · part 2</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-soon="Team and services"><span class="avatar av-wait"><svg class="i"><use href="#i-scissors"/></svg></span><span class="grow"><b>Team &amp; services</b><br><span class="small muted">Stylists, hours and your menu · part 2</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-action="theme"><span class="avatar av-info"><svg class="i"><use href="#i-moon"/></svg></span><span class="grow"><b data-theme-label>Theme: system</b><br><span class="small muted">Switch between system, light and dark</span></span></button></li>
+        </ul>
+        <p class="fine">Mockup with sample data. Nothing here is saved or sent.</p>
+      </div>
+    </section>
+
+    <!-- DESIGN DIRECTION -->
+    <section class="view" id="view-brand" aria-labelledby="brand-title" hidden>
+      <div class="view-inner" style="max-width:960px">
+        <div class="brand-hero">
+          <p class="eyebrow">Design direction · proposal for your feedback</p>
+          <h1 id="brand-title" class="sr-only">Floty design direction</h1>
+          <span class="wordmark"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg><b>floty</b></span>
+          <p>Your new front-desk employee. The mark is a speech bubble with a face: the product is someone you talk to, not a dashboard you click through. Lowercase, rounded and a little playful, so it feels at home in a salon or a studio.</p>
+        </div>
+
+        <h2 class="section-title">Color</h2>
+        <p class="muted" style="max-width:62ch">One brand color, raspberry, used for the things you act on. Status colors are separate so "needs your OK" never looks like a brand flourish. Every color has a dark-mode twin; all text pairs pass WCAG AA contrast.</p>
+        <div class="swatches">
+          <div class="sw"><i style="background:var(--brand-strong)"></i><div><b>Raspberry</b><br><code>brand · buttons, links</code></div></div>
+          <div class="sw"><i style="background:var(--brand-soft)"></i><div><b>Blush</b><br><code>brand-soft · highlights</code></div></div>
+          <div class="sw"><i style="background:var(--bg)"></i><div><b>Petal</b><br><code>bg · app background</code></div></div>
+          <div class="sw"><i style="background:var(--ink)"></i><div><b>Aubergine</b><br><code>ink · text</code></div></div>
+          <div class="sw"><i style="background:var(--ok)"></i><div><b>Fern</b><br><code>ok · done</code></div></div>
+          <div class="sw"><i style="background:var(--wait)"></i><div><b>Amber</b><br><code>wait · needs your OK</code></div></div>
+          <div class="sw"><i style="background:var(--info)"></i><div><b>Lake</b><br><code>info · tips</code></div></div>
+          <div class="sw"><i style="background:linear-gradient(90deg,var(--s1) 0 33%,var(--s2) 33% 66%,var(--s3) 66%)"></i><div><b>Team tints</b><br><code>s1–s3 · calendar</code></div></div>
+        </div>
+
+        <h2 class="section-title">Type</h2>
+        <div class="type-spec">
+          <div class="card"><span class="eyebrow">Display · Bricolage Grotesque</span><p class="spec-display">Good morning, Ana</p><p class="small muted">Headings, the wordmark and big numbers. Used sparingly.</p></div>
+          <div class="card"><span class="eyebrow">Body · Figtree</span><p class="spec-body">Jess is with Dana 3–5 pm Friday, so 4:00 doesn't fit a 2-hour color. Here are the nearest openings.</p><p class="small muted">Everything else. 15px base, 16–17px for reading.</p></div>
+        </div>
+
+        <h2 class="section-title">Shape &amp; components</h2>
+        <div class="card">
+          <div class="actions">
+            <button class="btn btn-primary">Book it</button>
+            <button class="btn btn-ghost">Change</button>
+            <button class="btn btn-text">Why?</button>
+            <span class="pill pill-ok"><svg class="i"><use href="#i-check"/></svg>Booked</span>
+            <span class="pill pill-wait">Needs your OK</span>
+            <span class="pill pill-info">Tip</span>
+          </div>
+          <p class="small muted">Soft 24px corners on cards, fully rounded buttons and pills, 44px minimum tap targets. Shadows only on things that float (sheets, toasts, the selected tab).</p>
+        </div>
+
+        <h2 class="section-title">How Floty talks</h2>
+        <div class="tone">
+          <div class="card"><span class="pill pill-ok" style="align-self:start">Like this</span><p>"Booked Maria with Jess, Friday 5:15. I flagged her PPD allergy on the appointment."</p></div>
+          <div class="card"><span class="pill pill-plain" style="align-self:start">Not this</span><p>"Success! Your appointment has been created successfully. 🎉"</p></div>
+          <div class="card"><span class="pill pill-ok" style="align-self:start">Like this</span><p>"Jess is booked 3–5, so 4:00 won't fit. Here are three times that do."</p></div>
+          <div class="card"><span class="pill pill-plain" style="align-self:start">Not this</span><p>"Error: conflict detected for resource STAFF_02."</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+  </main>
+
+  <nav class="dock" aria-label="Quick actions">
+    <button class="ask-pill" data-go="chat" data-focus-composer>
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg>
+      <span>Ask Floty to book, move or look up…</span>
+      <i class="go"><svg class="i"><use href="#i-send"/></svg></i>
+    </button>
+    <div class="tabs">
+      <button class="tab" data-go="home"><span class="tab-ic"><svg class="i"><use href="#i-home"/></svg><span class="badge" data-needs-count>2</span></span>Home</button>
+      <button class="tab" data-go="chat"><span class="tab-ic"><svg class="i"><use href="#i-chat"/></svg></span>Chat</button>
+      <button class="tab" data-go="calendar"><span class="tab-ic"><svg class="i"><use href="#i-cal"/></svg></span>Calendar</button>
+      <button class="tab" data-go="clients"><span class="tab-ic"><svg class="i"><use href="#i-users"/></svg></span>Clients</button>
+      <button class="tab" data-go="more"><span class="tab-ic"><svg class="i"><use href="#i-more"/></svg></span>More</button>
+    </div>
+  </nav>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1"></div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
+  const icon = (id, cls = "i") => `<svg class="${cls}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+  const mark = (size = 30) => `<svg class="mark" viewBox="0 0 40 40" aria-hidden="true" style="width:${size}px;height:${size}px"><use href="#i-floty"/></svg>`;
+
+  /* ---------------- sample data ---------------- */
+  const STAFF = [
+    { id: "jess", name: "Jess", role: "Senior stylist", tint: "s1", initials: "JM" },
+    { id: "marco", name: "Marco", role: "Stylist & barber", tint: "s2", initials: "MR" },
+    { id: "priya", name: "Priya", role: "Colorist", tint: "s3", initials: "PS" },
+  ];
+  // Times are minutes from midnight, in the studio's time zone (America/Chicago).
+  const t = (h, m = 0) => h * 60 + m;
+  const DAYS = {
+    thu: {
+      title: "Thu, Oct 15", now: t(10, 40),
+      events: [
+        { staff: "jess", s: t(9), e: t(10, 15), client: "Amelia Hart", svc: "Balayage" },
+        { staff: "jess", s: t(10, 15), e: t(11), client: "Chloe Nguyen", svc: "Blowout" },
+        { staff: "jess", s: t(11, 30), e: t(12, 30), client: "Ruth Okafor", svc: "Cut & style", id: "ruth", note: "Moved from 11:00 at your request" },
+        { staff: "jess", s: t(13, 30), e: t(15, 30), client: "Hannah Brooks", svc: "Color & gloss" },
+        { staff: "jess", s: t(16), e: t(17), client: "Zoe Patel", svc: "Trim" },
+        { staff: "marco", s: t(9, 30), e: t(10, 15), client: "Luis Ortega", svc: "Men's cut" },
+        { staff: "marco", s: t(10, 30), e: t(11, 15), client: "Sam Wright", svc: "Cut & beard trim" },
+        { staff: "marco", s: t(11, 30), e: t(12, 30), client: "Nadia Ali", svc: "Cut & style" },
+        { staff: "marco", s: t(12, 30), e: t(13), kind: "block", svc: "Lunch" },
+        { staff: "marco", s: t(13), e: t(14, 30), kind: "open", svc: "Open · 1 h 30 m" },
+        { staff: "marco", s: t(14, 30), e: t(15, 15), client: "Evan Cole", svc: "Men's cut" },
+        { staff: "marco", s: t(15, 30), e: t(17), client: "Grace Lin", svc: "Highlights" },
+        { staff: "priya", s: t(9), e: t(11), client: "Olivia Grant", svc: "Full color" },
+        { staff: "priya", s: t(11, 30), e: t(14), client: "Mei Tanaka", svc: "Keratin treatment" },
+        { staff: "priya", s: t(14, 30), e: t(15, 30), client: "Isabel Cruz", svc: "Gloss" },
+        { staff: "priya", s: t(16), e: t(17), kind: "open", svc: "Open · 1 h", id: "priya-gap" },
+      ],
+    },
+    fri: {
+      title: "Fri, Oct 16", now: null,
+      events: [
+        { staff: "jess", s: t(9), e: t(10), client: "Ava Johnson", svc: "Trim" },
+        { staff: "jess", s: t(10, 15), e: t(12, 15), client: "Erin Walsh", svc: "Balayage" },
+        { staff: "jess", s: t(12, 30), e: t(14, 45), kind: "open", svc: "Open · 2 h 15 m" },
+        { staff: "jess", s: t(15), e: t(17), client: "Dana Kim", svc: "Color" },
+        { staff: "jess", s: t(17, 15), e: t(19, 15), client: "Maria Lopez", svc: "Color & gloss", id: "maria", sensitive: "Allergic to PPD" },
+        { staff: "marco", s: t(10), e: t(10, 45), client: "Tom Becker", svc: "Men's cut", note: "Booked online last night" },
+        { staff: "marco", s: t(11), e: t(12, 30), client: "Jade Moreau", svc: "Highlights" },
+        { staff: "marco", s: t(12, 30), e: t(14), kind: "open", svc: "Open · 1 h 30 m" },
+        { staff: "marco", s: t(14), e: t(14, 45), client: "Omar Haddad", svc: "Beard trim" },
+        { staff: "marco", s: t(15), e: t(16), client: "Sarah Mitchell", svc: "Cut & style", id: "sarah" },
+        { staff: "priya", s: t(9, 30), e: t(11, 30), client: "Beth Carter", svc: "Full color" },
+        { staff: "priya", s: t(12), e: t(13), client: "Fiona Reid", svc: "Gloss" },
+        { staff: "priya", s: t(14), e: t(16), client: "Kayla Brooks", svc: "Highlights" },
+        { staff: "priya", s: t(16), e: t(19), kind: "open", svc: "Open · 3 h" },
+      ],
+    },
+  };
+  const DAY_ORDER = ["thu", "fri"];
+  const CAL_START = t(9), CAL_END = t(20);
+
+  const state = {
+    view: "home",
+    calDay: "thu", calMode: "day", calStaff: "all",
+    theme: "system",
+    needs: ["lena", "rosa"],
+    done: ["tom", "reminders", "ruth"],
+    sugg: ["autoconfirm", "jessbreak"],
+    mariaFlow: "idle",
+  };
+
+  /* ---------------- explanations ("Why?") ---------------- */
+  const WHY = {
+    lena: {
+      title: "Why I suggested emailing Lena",
+      asked: "Nobody asked. I look for regulars who are overdue every morning.",
+      used: ["Lena books a cut with Marco about every 6 weeks (her last 5 visits).", "Her last visit was August 13, 9 weeks ago.", "Marco is free tomorrow 1:00–2:00, which matches her usual weekday-lunch time."],
+      not: "I didn't send anything. Emails to clients wait for your OK.",
+      setting: "Emailing a client: Ask me first",
+    },
+    rosa: {
+      title: "Why Rosa gets the first offer",
+      asked: "Kim Sato cancelled Priya's 4:00 gloss at 9:42 pm last night.",
+      used: ["2 people on the waitlist want a gloss this week.", "Rosa asked for weekday afternoons with Priya; that's an exact match.", "She's been waiting 12 days, longer than the other match."],
+      not: "I haven't offered the slot to anyone yet. If Rosa doesn't answer in 2 hours, I'll suggest the next person.",
+      setting: "Waitlist offers: Ask me first",
+    },
+    tom: {
+      title: "Why Tom's booking went through on its own",
+      asked: "Tom Becker booked a men's cut on your booking page at 10:12 pm and verified his email.",
+      used: ["Marco offers men's cuts and was free Friday 10:00–10:45.", "Your rules: 12 hours minimum notice, 15 minutes between appointments. Both were met."],
+      not: "Nothing else changed. Tom got the usual confirmation email.",
+      setting: "Booking-page requests: Do it and tell me",
+    },
+    reminders: {
+      title: "Why I sent 10 reminders",
+      asked: "You set reminders to go out 24 hours before each appointment.",
+      used: ["10 appointments are booked for Friday.", "No one cancelled after the reminder list was made."],
+      not: "Cancelled appointments never get reminders.",
+      setting: "Appointment reminders: Just do it",
+    },
+    ruth: {
+      title: "Why I moved Ruth",
+      asked: "At 8:12 am you wrote: \"Push Ruth to 11:30, she's running late.\"",
+      used: ["Jess was free 11:30–12:30.", "Ruth's cut & style takes 1 hour, so it still ends before Jess's 1:30 color."],
+      not: "I didn't email Ruth. She told you herself, so it wasn't needed.",
+      setting: "Moving a booking: Do it and tell me",
+    },
+    maria: {
+      title: "Why I picked these times for Maria",
+      asked: "You asked me to book Maria Lopez for color & gloss with Jess, Friday at 4:00.",
+      used: ["Jess is with Dana Kim 3:00–5:00 Friday, so a 2-hour color at 4:00 would overlap.", "Your rule leaves 15 minutes between appointments, so the next start is 5:15.", "Maria's profile says she's allergic to PPD. I added that to the booking so Jess sees it."],
+      not: "I didn't move Dana or anyone else. I also asked before booking, as your settings require.",
+      setting: "Creating a booking: Ask me first",
+    },
+    sarah: {
+      title: "Why I moved Sarah this way",
+      asked: "You asked me to move Sarah to Tuesday at 2.",
+      used: ["Sarah has one upcoming appointment: Friday 3:00 with Marco.", "\"Tuesday\" is the next one, October 20. Marco is free 2:00–3:00 that day.", "Sarah always sees Marco, so I kept him."],
+      not: "I didn't email Sarah. Messages to clients wait for your OK.",
+      setting: "Moving a booking: Do it and tell me",
+    },
+  };
+
+  /* ---------------- feed ---------------- */
+  const FEED = {
+    lena: () => `
+      <article class="card feed-item" data-item="lena">
+        <div class="card-row">
+          <span class="avatar av-wait">${icon("mail")}</span>
+          <div class="grow">
+            <p class="title">Lena Park is 3 weeks overdue for her cut. Marco is free tomorrow at 1:00.</p>
+            <p class="meta">Draft email ready · usually rebooks every 6 weeks</p>
+          </div>
+        </div>
+        <div class="draft" id="draft-lena" hidden>
+          <p class="to"><span class="muted">To</span> <b>Lena Park</b> <span class="muted">· lena.p@example.com</span></p>
+          <label for="draft-lena-text">Email Floty drafted (you can edit it)</label>
+          <textarea id="draft-lena-text">Hi Lena! It's been a little while since your last cut with Marco. He has an opening tomorrow (Friday) at 1:00 pm. Want me to hold it for you? Just reply yes, or pick another time here: juniperhair.floty.app
+
+Ana at Juniper Hair Studio</textarea>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary btn-sm" data-action="lena-review">Review email</button>
+          <button class="btn btn-ghost btn-sm" data-action="dismiss" data-id="lena">Not now</button>
+          <button class="btn btn-text btn-sm" data-why="lena">Why?</button>
+        </div>
+      </article>`,
+    rosa: () => `
+      <article class="card feed-item" data-item="rosa">
+        <div class="card-row">
+          <span class="avatar av-wait">${icon("clock")}</span>
+          <div class="grow">
+            <p class="title">Kim cancelled Priya's 4:00 gloss today. Offer it to Rosa Diaz from the waitlist?</p>
+            <p class="meta">Exact match for her request · waiting 12 days</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary btn-sm" data-action="rosa-offer">Send offer</button>
+          <button class="btn btn-ghost btn-sm" data-action="dismiss" data-id="rosa">Skip</button>
+          <button class="btn btn-text btn-sm" data-why="rosa">Why?</button>
+        </div>
+      </article>`,
+    tom: () => doneItem("tom", "Booked Tom Becker for a men's cut with Marco, Fri 10:00", "From your booking page · 10:12 pm", false),
+    reminders: () => doneItem("reminders", "Sent 10 reminder emails for Friday's appointments", "7:00 am · 0 bounced", false),
+    ruth: () => doneItem("ruth", "Moved Ruth Okafor to 11:30 with Jess", "You asked at 8:12 am", true),
+    lenaSent: () => doneItem("lenaSent", "Emailed Lena Park about Marco's Friday 1:00 opening", "Approved by you · just now", false),
+    rosaSent: () => doneItem("rosaSent", "Offered Priya's 4:00 gloss to Rosa Diaz", "Approved by you · holds for 2 hours", false),
+    autoconfirm: () => `
+      <article class="card feed-item" data-item="autoconfirm">
+        <div class="card-row">
+          <span class="avatar av-info">${icon("dial")}</span>
+          <div class="grow">
+            <p class="title">You've approved all 23 booking-page requests this month. Should I confirm them on my own from now on?</p>
+            <p class="meta">You'll still see each one under Done, with Undo.</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" data-action="sugg-yes" data-id="autoconfirm" data-msg="Booking-page requests now confirm automatically">Yes, confirm them</button>
+          <button class="btn btn-text btn-sm" data-action="dismiss" data-id="autoconfirm">No thanks</button>
+        </div>
+      </article>`,
+    jessbreak: () => `
+      <article class="card feed-item" data-item="jessbreak">
+        <div class="card-row">
+          <span class="avatar av-brand">${icon("spark")}</span>
+          <div class="grow">
+            <p class="title">Jess works 9:00 to 5:00 Friday with no lunch. Block 12:30–1:00 for her?</p>
+            <p class="meta">She has a 2 h 15 m gap after Erin's balayage.</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" data-action="sugg-yes" data-id="jessbreak" data-msg="Blocked 12:30–1:00 Friday for Jess's lunch">Block it</button>
+          <button class="btn btn-text btn-sm" data-action="dismiss" data-id="jessbreak">Not now</button>
+        </div>
+      </article>`,
+  };
+  function doneItem(id, title, meta, undoable) {
+    return `
+      <article class="card feed-item" data-item="${id}">
+        <div class="card-row">
+          <span class="avatar av-ok">${icon("check")}</span>
+          <div class="grow"><p class="title">${title}</p><p class="meta">${meta}</p></div>
+        </div>
+        <div class="actions">
+          ${WHY[id] ? `<button class="btn btn-text btn-sm" data-why="${id}">Why?</button>` : ""}
+          ${undoable ? `<button class="btn btn-ghost btn-sm" data-action="undo-feed" data-id="${id}">${icon("undo")}Undo</button>` : ""}
+        </div>
+      </article>`;
+  }
+  function renderFeed() {
+    $("#feed-needs").innerHTML = state.needs.length
+      ? state.needs.map((id) => FEED[id]()).join("")
+      : `<p class="empty-note">You're all caught up. I'll put anything that needs you here.</p>`;
+    $("#feed-done").innerHTML = state.done.map((id) => FEED[id]()).join("");
+    $("#feed-sugg").innerHTML = state.sugg.length
+      ? state.sugg.map((id) => FEED[id]()).join("")
+      : `<p class="empty-note">No suggestions right now.</p>`;
+    $$("[data-needs-count]").forEach((b) => { b.textContent = state.needs.length; b.hidden = state.needs.length === 0; });
+    $("#done-count").textContent = `${state.done.length} today`;
+  }
+
+  /* ---------------- toasts ---------------- */
+  function toast(text, opts = {}) {
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.setAttribute("role", "status");
+    el.innerHTML = `<p>${text}</p>${opts.undo ? `<button type="button">Undo</button>` : ""}`;
+    const close = () => el.remove();
+    if (opts.undo) el.querySelector("button").addEventListener("click", () => { close(); opts.undo(); });
+    $("#toasts").replaceChildren(el);
+    setTimeout(close, opts.ms || (opts.undo ? 8000 : 3500));
+  }
+
+  /* ---------------- sheet ---------------- */
+  let lastFocus = null;
+  function openSheet(html) {
+    lastFocus = document.activeElement;
+    const sheet = $("#sheet");
+    sheet.innerHTML = `<div class="grab" aria-hidden="true"></div>${html}`;
+    $("#scrim").hidden = false;
+    sheet.focus();
+  }
+  function closeSheet() {
+    $("#scrim").hidden = true;
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  }
+  function openWhy(id) {
+    const w = WHY[id];
+    if (!w) return;
+    openSheet(`
+      <div class="sheet-head"><h2 id="sheet-title">${w.title}</h2><button class="icon-btn" data-action="close-sheet" aria-label="Close">${icon("x")}</button></div>
+      <div class="why-block"><span class="eyebrow">What started it</span><p>${w.asked}</p></div>
+      <div class="why-block"><span class="eyebrow">What I checked</span><ul class="why-list">${w.used.map((u) => `<li>${u}</li>`).join("")}</ul></div>
+      <div class="why-block"><span class="eyebrow">What I didn't do</span><p>${w.not}</p></div>
+      <div class="notice" style="background:var(--info-soft)">${icon("dial")}<span>Setting used: <b style="color:var(--info)">${w.setting}</b><span class="src">Change it in Autonomy (mockups part 2).</span></span></div>`);
+  }
+
+  /* ---------------- chat ---------------- */
+  const log = () => $("#chat-log");
+  const nowLabel = () => "now";
+  function scrollChat() { const s = $("#chat-scroll"); s.scrollTop = s.scrollHeight; }
+  function addUser(text) {
+    log().insertAdjacentHTML("beforeend", `<div class="msg user"><div class="bubble">${text}</div></div>`);
+    scrollChat();
+  }
+  function addAi(html, id) {
+    log().insertAdjacentHTML("beforeend", `<div class="msg ai"${id ? ` id="${id}"` : ""}>${mark()}<div class="msg-body">${html}</div></div>`);
+    scrollChat();
+  }
+  function aiReply(html, id, delay = 650) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const tmp = document.createElement("div");
+    tmp.className = "msg ai";
+    tmp.innerHTML = `${mark()}<div class="msg-body"><span class="typing" aria-label="Floty is typing"><i></i><i></i><i></i></span></div>`;
+    log().appendChild(tmp);
+    scrollChat();
+    setTimeout(() => { tmp.remove(); addAi(html, id); }, reduce ? 0 : delay);
+  }
+
+  const CHIPS = [
+    { id: "maria", label: "Book Maria for color & gloss with Jess Friday at 4" },
+    { id: "sarah", label: "Move Sarah to Tuesday at 2" },
+    { id: "tomorrow", label: "What does tomorrow look like?" },
+  ];
+  const usedChips = new Set();
+  function renderChips() {
+    const left = CHIPS.filter((c) => !usedChips.has(c.id));
+    $("#chat-chips").innerHTML = left.map((c) => `<button class="chip" data-chip="${c.id}">${c.label}</button>`).join("");
+    $("#chat-chips").hidden = left.length === 0;
+  }
+
+  function seedChat() {
+    log().innerHTML = `<p class="day-sep">Today · 8:12 am</p>`;
+    addUser("Push Ruth to 11:30, she's running late");
+    addAi(`
+      <p class="text">Done. Ruth's cut &amp; style with Jess now starts at 11:30 and still ends before Jess's 1:30 color.</p>
+      ${diffCard({ id: "ruth", type: "Moved", who: "Ruth Okafor · Cut & style · Jess", before: "Thu 11:00–12:00", after: "Thu 11:30–12:30", status: "done" })}`);
+    log().insertAdjacentHTML("beforeend", `<p class="day-sep">10:40 am</p>`);
+    addAi(`<p class="text">Hi Ana. Ask me to book, move or cancel appointments, look up a client, or plan your day. Try one of the suggestions below.</p>`);
+  }
+
+  function diffCard({ id, type, who, before, after, status }) {
+    const statusHtml = status === "done"
+      ? `<span class="pill pill-ok">${icon("check")}${type}</span>`
+      : `<span class="pill pill-plain">Undone</span>`;
+    return `
+      <div class="card card-raised" data-card="${id}">
+        <div class="card-type"><span class="eyebrow">Change</span>${statusHtml}</div>
+        <p style="font-weight:650">${who}</p>
+        <div class="diff">
+          <div class="before"><span class="lbl">Before</span><span class="when">${before}</span></div>
+          <span class="muted" aria-hidden="true">${icon("right")}</span>
+          <div class="after"><span class="lbl">After</span><span class="when">${after}</span></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-text btn-sm" data-why="${id}">Why?</button>
+          ${status === "done" ? `<button class="btn btn-ghost btn-sm" data-action="undo-diff" data-id="${id}">${icon("undo")}Undo</button>` : ""}
+        </div>
+      </div>`;
+  }
+
+  function slotPicker() {
+    return `
+      <div class="card card-raised" data-card="maria-slots">
+        <div class="card-type"><span class="eyebrow">Pick a time · Color &amp; gloss, 2 h</span></div>
+        <div class="slots" role="group" aria-label="Available times">
+          <button class="slot" data-slot="fri-1230" aria-pressed="false"><b>Fri 12:30</b><span>to 2:30 pm · Jess</span></button>
+          <button class="slot" data-slot="fri-1715" aria-pressed="false"><b>Fri 5:15</b><span>to 7:15 pm · Jess</span></button>
+          <button class="slot" data-slot="sat-1000" aria-pressed="false"><b>Sat 10:00</b><span>to 12:00 pm · Jess</span></button>
+          <button class="slot" data-slot="fri-1600-priya" aria-pressed="false"><b>Fri 4:00</b><span>to 6:00 pm · Priya</span></button>
+        </div>
+        <p class="fine">Times include your 15-minute gap between appointments.</p>
+      </div>`;
+  }
+  const SLOT_TEXT = {
+    "fri-1230": { label: "Friday 12:30 works", when: "Fri, Oct 16 · 12:30–2:30 pm", staff: "Jess" },
+    "fri-1715": { label: "Friday 5:15 works", when: "Fri, Oct 16 · 5:15–7:15 pm", staff: "Jess" },
+    "sat-1000": { label: "Saturday 10:00 works", when: "Sat, Oct 17 · 10:00 am–12:00 pm", staff: "Jess" },
+    "fri-1600-priya": { label: "Let's do Priya at 4", when: "Fri, Oct 16 · 4:00–6:00 pm", staff: "Priya" },
+  };
+  let mariaSlot = "fri-1715";
+
+  function confirmCard(slotKey) {
+    const s = SLOT_TEXT[slotKey];
+    return `
+      <div class="card card-raised" data-card="maria-confirm">
+        <div class="card-type"><span class="eyebrow">Confirm booking</span><span class="pill pill-wait">Needs your OK</span></div>
+        <dl class="kv">
+          <dt>Client</dt><dd>Maria Lopez</dd>
+          <dt>Service</dt><dd>Color &amp; gloss · 2 h · $145</dd>
+          <dt>Stylist</dt><dd>${s.staff}</dd>
+          <dt>When</dt><dd class="num">${s.when}</dd>
+        </dl>
+        <div class="notice">${icon("alert")}<span><b>Maria is allergic to PPD.</b> Use the PPD-free color line. I'll add this to the appointment.<span class="src">From Maria's profile · added Sep 4 by you</span></span></div>
+        <label class="check"><input type="checkbox" id="maria-email" checked> Email Maria a confirmation</label>
+        <div class="actions">
+          <button class="btn btn-primary" data-action="maria-book">${icon("check")}Book it</button>
+          <button class="btn btn-ghost" data-action="maria-change">Pick another time</button>
+        </div>
+        <p class="fine">You asked me to check with you before booking. <button class="link" data-soon="Autonomy settings">Change this</button></p>
+      </div>`;
+  }
+  function bookedCard(slotKey, emailed) {
+    const s = SLOT_TEXT[slotKey];
+    return `
+      <div class="card card-raised" data-card="maria-booked">
+        <div class="card-type"><span class="eyebrow">Booking</span><span class="pill pill-ok" data-maria-status>${icon("check")}Booked</span></div>
+        <dl class="kv">
+          <dt>Client</dt><dd>Maria Lopez</dd>
+          <dt>Service</dt><dd>Color &amp; gloss with ${s.staff}</dd>
+          <dt>When</dt><dd class="num">${s.when}</dd>
+          <dt>Note</dt><dd style="color:var(--wait)">PPD allergy, use PPD-free line</dd>
+        </dl>
+        <p class="small muted" data-maria-email>${emailed ? "Confirmation email to Maria sends in 2 minutes, unless you undo." : "No email sent to Maria."}</p>
+        <div class="actions">
+          <button class="btn btn-text btn-sm" data-why="maria">Why?</button>
+          <button class="btn btn-ghost btn-sm" data-action="maria-undo">${icon("undo")}Undo</button>
+          <button class="btn btn-text btn-sm" data-action="open-cal-fri">See in calendar</button>
+        </div>
+      </div>`;
+  }
+
+  function tomorrowCard() {
+    return `
+      <div class="card card-raised">
+        <div class="card-type"><span class="eyebrow">Friday, October 16</span><span class="pill pill-plain">10 booked</span></div>
+        <div class="stats" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+          <div class="stat" style="background:var(--s1)"><b style="color:var(--s1-ink)">3</b><span>Jess</span></div>
+          <div class="stat" style="background:var(--s2)"><b style="color:var(--s2-ink)">4</b><span>Marco</span></div>
+          <div class="stat" style="background:var(--s3)"><b style="color:var(--s3-ink)">3</b><span>Priya</span></div>
+        </div>
+        <ul class="why-list" style="font-size:14px">
+          <li>Open: Jess 12:30–2:45, Marco 12:30–2:00, Priya after 4:00.</li>
+          <li>Dana Kim's color with Jess at 3:00 is her first visit. I'll remind Jess to do a consultation.</li>
+          <li>Jess has no lunch break. I suggested one on your Home feed.</li>
+        </ul>
+        <div class="actions"><button class="btn btn-ghost btn-sm" data-action="open-cal-fri">${icon("cal")}Open Friday</button></div>
+      </div>`;
+  }
+
+  function runChip(id, typed) {
+    usedChips.add(id);
+    renderChips();
+    addUser(typed || CHIPS.find((c) => c.id === id).label);
+    if (id === "maria") {
+      state.mariaFlow = "picking";
+      aiReply(`<p class="text">Jess is with Dana Kim 3:00–5:00 Friday, so 4:00 doesn't fit a 2-hour color. These are the nearest times that do:</p>${slotPicker()}`, "maria-slots-msg");
+    } else if (id === "sarah") {
+      sarahMoved = true;
+      aiReply(`<p class="text">Moved. Sarah's cut &amp; style with Marco is now Tuesday at 2:00.</p>
+        ${diffCard({ id: "sarah", type: "Moved", who: "Sarah Mitchell · Cut & style · Marco", before: "Fri, Oct 16 · 3:00 pm", after: "Tue, Oct 20 · 2:00 pm", status: "done" })}
+        <div class="card" data-card="sarah-email">
+          <p style="font-weight:650">Email Sarah about the new time?</p>
+          <p class="small muted">"Hi Sarah, we've moved your cut &amp; style with Marco to Tuesday, Oct 20 at 2:00 pm. Reply if that doesn't work."</p>
+          <div class="actions">
+            <button class="btn btn-primary btn-sm" data-action="sarah-email">${icon("mail")}Send email</button>
+            <button class="btn btn-ghost btn-sm" data-action="sarah-noemail">Don't email</button>
+          </div>
+        </div>`);
+      renderCalendar();
+    } else if (id === "tomorrow") {
+      aiReply(`<p class="text">Friday looks steady. Here's the shape of it:</p>${tomorrowCard()}`);
+    }
+  }
+  let sarahMoved = false;
+
+  /* ---------------- calendar ---------------- */
+  const fmt = (m) => {
+    const h = Math.floor(m / 60), mm = m % 60;
+    const h12 = ((h + 11) % 12) + 1;
+    return `${h12}${mm ? ":" + String(mm).padStart(2, "0") : ""}`;
+  };
+  const fmtRange = (s, e) => `${fmt(s)}–${fmt(e)} ${e >= t(12) ? "pm" : "am"}`;
+  function visibleEvents(dayKey) {
+    return DAYS[dayKey].events.filter((ev) => {
+      if (ev.id === "maria") return state.mariaFlow === "booked";
+      if (ev.id === "sarah") return !sarahMoved;
+      return true;
+    });
+  }
+  function renderStaffFilter() {
+    const opts = [{ id: "all", name: "Everyone" }, ...STAFF];
+    $("#staff-filter").innerHTML = opts.map((s) => `
+      <button class="chip" data-action="cal-staff" data-staff="${s.id}" aria-pressed="${state.calStaff === s.id}">
+        ${s.tint ? `<span class="dot ${s.tint}" aria-hidden="true"></span>` : ""}${s.name}</button>`).join("");
+  }
+  function renderCalendar() {
+    const day = DAYS[state.calDay];
+    $("#cal-title").textContent = state.calMode === "day" ? day.title : "Week of Oct 12";
+    $$("[data-action='cal-mode']").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.calMode)));
+    $$("[data-action='cal-prev'],[data-action='cal-next']").forEach((b) => { b.hidden = state.calMode !== "day"; });
+    $("[data-action='cal-prev']").disabled = state.calDay === DAY_ORDER[0];
+    $("[data-action='cal-next']").disabled = state.calDay === DAY_ORDER[DAY_ORDER.length - 1];
+    renderStaffFilter();
+    if (state.calMode === "week") { renderWeek(); return; }
+
+    const staff = state.calStaff === "all" ? STAFF : STAFF.filter((s) => s.id === state.calStaff);
+    const hourPx = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hour")) || 56;
+    const px = (m) => ((m - CAL_START) / 60) * hourPx;
+    const height = px(CAL_END);
+    const evs = visibleEvents(state.calDay);
+    let times = "";
+    for (let m = CAL_START + 60; m < CAL_END; m += 60) times += `<span style="top:${px(m)}px">${fmt(m)}${m >= t(12) ? "p" : "a"}</span>`;
+
+    const cols = staff.map((s) => {
+      const items = evs.filter((ev) => ev.staff === s.id).map((ev) => {
+        const top = px(ev.s) + 1, h = Math.max(px(ev.e) - px(ev.s) - 3, 22);
+        const short = ev.e - ev.s <= 45;
+        if (ev.kind === "open") {
+          return `<button class="ev open" style="top:${top}px;height:${h}px" data-action="cal-open" data-staff="${s.id}" data-s="${ev.s}" data-e="${ev.e}"><b>Open</b>${short ? "" : `<span class="num">${fmtRange(ev.s, ev.e)}</span>`}</button>`;
+        }
+        if (ev.kind === "block") {
+          return `<div class="ev block" style="top:${top}px;height:${h}px"><b>${ev.svc}</b></div>`;
+        }
+        const flag = ev.sensitive ? `<span class="flag">${icon("alert")}Allergy</span>` : "";
+        const fresh = ev.id === "maria" ? " fresh" : "";
+        return `<button class="ev ${s.tint}${fresh}" style="top:${top}px;height:${h}px" data-action="cal-ev" data-day="${state.calDay}" data-idx="${DAYS[state.calDay].events.indexOf(ev)}" aria-label="${ev.client}, ${ev.svc}, ${fmtRange(ev.s, ev.e)} with ${s.name}">
+          <b>${ev.client.split(" ")[0]}</b>${short ? "" : `<span>${ev.svc}</span><span class="num">${fmtRange(ev.s, ev.e)}</span>`}${flag}</button>`;
+      }).join("");
+      const now = day.now ? `<div class="nowline" style="top:${px(day.now)}px" aria-hidden="true"></div>` : "";
+      return `<div class="col" style="height:${height}px">${items}${now}</div>`;
+    }).join("");
+
+    const heads = staff.map((s) => {
+      const n = evs.filter((ev) => ev.staff === s.id && ev.client).length;
+      return `<div class="cal-colhead"><span class="avatar ${s.tint === "s1" ? "av-brand" : s.tint === "s2" ? "av-ok" : "av-wait"}">${s.initials}</span><div><div class="nm">${s.name}</div><div class="sub">${n} booked</div></div></div>`;
+    }).join("");
+
+    $("#cal-body").innerHTML = `
+      <div class="cal" style="--cols:${staff.length}" role="region" aria-label="Day schedule">
+        <div class="cal-colhead" aria-hidden="true"></div>${heads}
+        <div class="times" style="height:${height}px" aria-hidden="true">${times}</div>${cols}
+      </div>`;
+  }
+  const WEEK = [
+    { d: "Mon 12", closed: true }, { d: "Tue 13", v: [72, 80, 65] }, { d: "Wed 14", v: [90, 70, 85] },
+    { d: "Thu 15", v: [88, 74, 79], today: true }, { d: "Fri 16", v: [70, 78, 72] },
+    { d: "Sat 17", v: [96, 100, 92] }, { d: "Sun 18", closed: true },
+  ];
+  function renderWeek() {
+    const staff = state.calStaff === "all" ? STAFF : STAFF.filter((s) => s.id === state.calStaff);
+    const rows = staff.map((s, si) => {
+      const idx = STAFF.indexOf(s);
+      const cells = WEEK.map((w) => {
+        if (w.closed) return `<td><span class="closed">Closed</span></td>`;
+        let v = w.v[idx];
+        if (w.d === "Fri 16" && s.id === "jess" && state.mariaFlow === "booked") v = Math.min(100, v + 20);
+        const go = w.d === "Thu 15" ? "thu" : w.d === "Fri 16" ? "fri" : "";
+        const inner = `<span class="wk"><span class="num" style="font-weight:700">${v}%</span><span class="util"><i style="width:${v}%;background:var(--${s.tint}-ink)"></i></span></span>`;
+        return `<td>${go ? `<button data-action="cal-goto" data-day="${go}" aria-label="${s.name}, ${w.d}: ${v}% booked. Open day">${inner}</button>` : inner}</td>`;
+      }).join("");
+      return `<tr><th scope="row"><span class="dot ${s.tint}"></span>${s.name}</th>${cells}</tr>`;
+    }).join("");
+    $("#cal-body").innerHTML = `
+      <div class="week-wrap"><table class="week">
+        <caption class="sr-only">How full each stylist is this week</caption>
+        <thead><tr><th scope="col">Stylist</th>${WEEK.map((w) => `<th scope="col" class="${w.today ? "today" : ""}">${w.d}</th>`).join("")}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <p class="small muted">Percent of working hours booked. Tap Thursday or Friday to open the day.</p>`;
+  }
+  function openEventSheet(dayKey, idx) {
+    const ev = DAYS[dayKey].events[idx];
+    const s = STAFF.find((x) => x.id === ev.staff);
+    openSheet(`
+      <div class="sheet-head"><div><p class="eyebrow">${DAYS[dayKey].title} · ${s.name}</p><h2 id="sheet-title">${ev.client}</h2></div><button class="icon-btn" data-action="close-sheet" aria-label="Close">${icon("x")}</button></div>
+      <dl class="kv"><dt>Service</dt><dd>${ev.svc}</dd><dt>Time</dt><dd class="num">${fmtRange(ev.s, ev.e)}</dd><dt>Stylist</dt><dd>${s.name}</dd></dl>
+      ${ev.sensitive ? `<div class="notice">${icon("alert")}<span><b>${ev.sensitive}.</b> Use the PPD-free color line.<span class="src">From Maria's profile · sensitive</span></span></div>` : ""}
+      ${ev.note ? `<p class="small muted">${ev.note}</p>` : ""}
+      <div class="actions">
+        <button class="btn btn-primary btn-sm" data-soon="Rescheduling from the calendar">Reschedule</button>
+        <button class="btn btn-ghost btn-sm" data-soon="Cancelling from the calendar">Cancel booking</button>
+        <button class="btn btn-text btn-sm" data-action="ask-about" data-name="${ev.client}">Ask Floty about ${ev.client.split(" ")[0]}</button>
+      </div>`);
+  }
+  function openGapSheet(staffId, s, e) {
+    const st = STAFF.find((x) => x.id === staffId);
+    const waitlist = staffId === "priya" && state.calDay === "thu";
+    openSheet(`
+      <div class="sheet-head"><div><p class="eyebrow">${DAYS[state.calDay].title}</p><h2 id="sheet-title">${st.name} is free ${fmtRange(+s, +e)}</h2></div><button class="icon-btn" data-action="close-sheet" aria-label="Close">${icon("x")}</button></div>
+      <p class="muted">${waitlist ? "Kim Sato cancelled this gloss. Rosa Diaz on your waitlist wants exactly this time." : "I can help fill this time."}</p>
+      <div class="actions" style="flex-direction:column;align-items:stretch">
+        <button class="btn btn-primary" data-action="gap-fill" data-msg="${waitlist ? "Offer sent to Rosa Diaz. She has 2 hours to accept." : `Drafted a note to 2 regulars who are due. It's on your Home feed for review.`}">${waitlist ? "Offer it to Rosa (waitlist)" : "Find a regular who's due"}</button>
+        <button class="btn btn-ghost" data-action="gap-fill" data-msg="Blocked ${fmtRange(+s, +e)} for ${st.name}">Block this time</button>
+      </div>`);
+  }
+
+  /* ---------------- navigation ---------------- */
+  const VIEWS = ["home", "chat", "calendar", "clients", "more", "brand"];
+  function go(view, opts = {}) {
+    if (!VIEWS.includes(view)) view = "home";
+    state.view = view;
+    VIEWS.forEach((v) => { $(`#view-${v}`).hidden = v !== view; });
+    $("#stage").dataset.view = view;
+    const navTarget = view === "brand" ? (window.innerWidth >= 960 ? "brand" : "more") : view;
+    $$("[data-go]").forEach((b) => {
+      if (b.classList.contains("tab") || b.classList.contains("side-link")) {
+        if (b.dataset.go === navTarget || (b.classList.contains("side-link") && b.dataset.go === view)) b.setAttribute("aria-current", "page");
+        else b.removeAttribute("aria-current");
+      }
+    });
+    if (location.hash.slice(1) !== view) history.replaceState(null, "", `#${view}`);
+    if (view === "chat") {
+      scrollChat();
+      if (opts.focus) $("#composer-input").focus();
+    }
+    if (view === "calendar") renderCalendar();
+  }
+
+  /* ---------------- theme ---------------- */
+  const THEMES = ["system", "light", "dark"];
+  function applyTheme() {
+    if (state.theme === "system") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", state.theme);
+    $$("[data-theme-label]").forEach((el) => { el.textContent = `Theme: ${state.theme}`; });
+  }
+  try { const saved = localStorage.getItem("floty-theme"); if (THEMES.includes(saved)) state.theme = saved; } catch (_) { /* storage unavailable */ }
+
+  /* ---------------- events ---------------- */
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest("button, a");
+    if (!el) {
+      if (e.target === $("#scrim")) closeSheet();
+      return;
+    }
+    if (el.dataset.go) { e.preventDefault(); go(el.dataset.go, { focus: "focusComposer" in el.dataset }); return; }
+    if (el.dataset.why) { openWhy(el.dataset.why); return; }
+    if (el.dataset.soon) { closeSheet(); toast(`${el.dataset.soon} is designed in the next mockup session.`); return; }
+    if (el.dataset.chip) { runChip(el.dataset.chip); return; }
+    if (el.dataset.slot) { pickSlot(el); return; }
+    const a = el.dataset.action;
+    if (!a) return;
+    switch (a) {
+      case "theme":
+        state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % THEMES.length];
+        try { localStorage.setItem("floty-theme", state.theme); } catch (_) { /* ignore */ }
+        applyTheme();
+        break;
+      case "close-sheet": closeSheet(); break;
+      case "lena-review": {
+        const d = $("#draft-lena");
+        if (d.hidden) { d.hidden = false; el.textContent = "Send email"; $("#draft-lena-text").focus(); }
+        else {
+          state.needs = state.needs.filter((x) => x !== "lena");
+          state.done.unshift("lenaSent");
+          renderFeed();
+          toast("Email to Lena sends in 2 minutes.", { undo: () => {
+            state.done = state.done.filter((x) => x !== "lenaSent");
+            state.needs.unshift("lena");
+            renderFeed();
+            toast("Cancelled. Lena won't get the email.");
+          } });
+        }
+        break;
+      }
+      case "rosa-offer":
+        state.needs = state.needs.filter((x) => x !== "rosa");
+        state.done.unshift("rosaSent");
+        renderFeed();
+        toast("Offer to Rosa sends in 2 minutes.", { undo: () => {
+          state.done = state.done.filter((x) => x !== "rosaSent");
+          state.needs.push("rosa");
+          renderFeed();
+          toast("Cancelled. Rosa won't get the offer.");
+        } });
+        break;
+      case "dismiss": {
+        const id = el.dataset.id;
+        state.needs = state.needs.filter((x) => x !== id);
+        state.sugg = state.sugg.filter((x) => x !== id);
+        renderFeed();
+        toast("Dismissed. I won't bring this up again today.");
+        break;
+      }
+      case "sugg-yes": {
+        state.sugg = state.sugg.filter((x) => x !== el.dataset.id);
+        renderFeed();
+        toast(`${el.dataset.msg}.`);
+        break;
+      }
+      case "undo-feed": undoRuth(); break;
+      case "undo-diff": {
+        const id = el.dataset.id;
+        if (id === "ruth") { undoRuth(); break; }
+        markDiffUndone(el.closest("[data-card]"));
+        if (id === "sarah") {
+          sarahMoved = false;
+          const em = $("[data-card='sarah-email']");
+          if (em) em.querySelector(".actions").innerHTML = `<span class="small muted">No email needed. Sarah is back on Friday at 3:00.</span>`;
+          renderCalendar();
+        }
+        toast("Undone. Sarah is back on Friday at 3:00.");
+        break;
+      }
+      case "sarah-email":
+        el.closest(".actions").innerHTML = `<span class="pill pill-ok">${icon("check")}Email queued</span><span class="small muted">Sends in 2 minutes</span>`;
+        toast("Email to Sarah sends in 2 minutes.");
+        break;
+      case "sarah-noemail":
+        el.closest(".actions").innerHTML = `<span class="small muted">OK, I won't email Sarah.</span>`;
+        break;
+      case "maria-book": bookMaria(el); break;
+      case "maria-change": {
+        el.closest("[data-card]").remove();
+        $$("[data-card='maria-slots'] .slot").forEach((b) => { b.disabled = false; b.setAttribute("aria-pressed", "false"); });
+        state.mariaFlow = "picking";
+        $("[data-card='maria-slots']").scrollIntoView({ block: "center" });
+        break;
+      }
+      case "maria-undo": undoMaria(); break;
+      case "open-cal-fri": state.calDay = "fri"; state.calMode = "day"; go("calendar"); break;
+      case "cal-prev": case "cal-next": {
+        const i = DAY_ORDER.indexOf(state.calDay) + (a === "cal-next" ? 1 : -1);
+        if (DAY_ORDER[i]) { state.calDay = DAY_ORDER[i]; renderCalendar(); }
+        break;
+      }
+      case "cal-mode": state.calMode = el.dataset.mode; renderCalendar(); break;
+      case "cal-staff": state.calStaff = el.dataset.staff; renderCalendar(); break;
+      case "cal-goto": state.calDay = el.dataset.day; state.calMode = "day"; renderCalendar(); break;
+      case "cal-ev": openEventSheet(el.dataset.day, +el.dataset.idx); break;
+      case "cal-open": openGapSheet(el.dataset.staff, el.dataset.s, el.dataset.e); break;
+      case "gap-fill": closeSheet(); toast(el.dataset.msg); break;
+      case "ask-about": {
+        closeSheet();
+        go("chat");
+        addUser(`Tell me about ${el.dataset.name}`);
+        aiReply(`<p class="text">The client profile card for ${el.dataset.name} is part of mockups part 2. It will show visit history, preferences and anything sensitive, like allergies.</p>`);
+        break;
+      }
+    }
+  });
+
+  function markDiffUndone(card) {
+    if (!card) return;
+    const pill = card.querySelector(".pill");
+    pill.className = "pill pill-plain"; pill.textContent = "Undone";
+    const btn = card.querySelector("[data-action='undo-diff']");
+    if (btn) btn.remove();
+  }
+  function undoRuth() {
+    const ev = DAYS.thu.events.find((x) => x.id === "ruth");
+    if (ev.s === t(11)) return;
+    ev.s = t(11); ev.e = t(12); ev.note = "Back at the original time";
+    state.done = state.done.filter((x) => x !== "ruth");
+    renderFeed();
+    markDiffUndone($("[data-card='ruth']"));
+    renderCalendar();
+    toast("Undone. Ruth is back at 11:00 with Jess.");
+  }
+
+  function pickSlot(btn) {
+    const key = btn.dataset.slot;
+    mariaSlot = key;
+    $$("[data-card='maria-slots'] .slot").forEach((b) => { b.setAttribute("aria-pressed", String(b === btn)); b.disabled = true; });
+    state.mariaFlow = "confirming";
+    addUser(SLOT_TEXT[key].label);
+    aiReply(`<p class="text">Here's the booking. Maria has an allergy note, so I've flagged it for ${SLOT_TEXT[key].staff}.</p>${confirmCard(key)}`);
+  }
+  function bookMaria(btn) {
+    const emailed = $("#maria-email") ? $("#maria-email").checked : true;
+    btn.closest("[data-card]").remove();
+    state.mariaFlow = "booked";
+    const ev = DAYS.fri.events.find((x) => x.id === "maria");
+    const slotTimes = { "fri-1230": [t(12, 30), t(14, 30), "jess"], "fri-1715": [t(17, 15), t(19, 15), "jess"], "fri-1600-priya": [t(16), t(18), "priya"] };
+    // Saturday isn't in the sample calendar, so that choice only shows in chat.
+    if (slotTimes[mariaSlot]) [ev.s, ev.e, ev.staff] = slotTimes[mariaSlot];
+    else ev.staff = "none";
+    addAi(`<p class="text">Booked. I added Maria's PPD allergy to the appointment so ${SLOT_TEXT[mariaSlot].staff} sees it.</p>${bookedCard(mariaSlot, emailed)}`, "maria-booked-msg");
+    toast(`Booked Maria with ${SLOT_TEXT[mariaSlot].staff}.`, { undo: undoMaria });
+  }
+  function undoMaria() {
+    if (state.mariaFlow !== "booked") return;
+    state.mariaFlow = "undone";
+    const pill = $("[data-maria-status]");
+    if (pill) { pill.className = "pill pill-plain"; pill.textContent = "Undone"; }
+    const em = $("[data-maria-email]");
+    if (em) em.textContent = "Booking removed. The confirmation email was cancelled before it went out.";
+    const undoBtn = $("[data-card='maria-booked'] [data-action='maria-undo']");
+    if (undoBtn) undoBtn.remove();
+    toast("Undone. Maria's booking is removed and no email was sent.");
+  }
+
+  $("#composer").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = $("#composer-input");
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    const safe = text.replace(/[<>&]/g, (ch) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[ch]));
+    const match = CHIPS.find((c) => !usedChips.has(c.id) && text.toLowerCase().includes(c.id));
+    if (match) { runChip(match.id, safe); return; }
+    addUser(safe);
+    aiReply(`<p class="text">In this prototype I only know the sample requests. Try one of the suggestions above the message box.</p>`);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("#scrim").hidden) closeSheet();
+  });
+  window.addEventListener("hashchange", () => go(location.hash.slice(1) || "home"));
+
+  /* ---------------- boot ---------------- */
+  applyTheme();
+  renderFeed();
+  renderChips();
+  seedChat();
+  go(location.hash.slice(1) || "home");
+})();
+</script>

@@ -1,6 +1,6 @@
 # UX Principles
 
-**Direction:** warm and friendly (Airbnb-like): soft rounded shapes, generous spacing, friendly microcopy, real photography/illustration accents; calm, never cluttered. Brand name and palette TBD (`../plan/open-decisions.md`).
+**Direction:** warm and friendly (Airbnb-like): soft rounded shapes, generous spacing, friendly microcopy, real photography/illustration accents; calm, never cluttered. Working name **Floty**. Proposed palette, type and wordmark: [`../mockups/README.md`](../mockups/README.md) (pending sign-off in S2, then recorded here).
 
 ## Principles
 1. **Mobile-first, one-thumb.** Owners use the app between clients. Primary actions reachable with one thumb; works great at 375 px width.
