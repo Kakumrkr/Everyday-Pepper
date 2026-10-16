@@ -10,7 +10,7 @@
 
 ## V1 workflows
 ### W1 — Zero-setup onboarding
-Owner signs up → picks business type (template) → provides website URL / Google Business profile / price-list photo → AI drafts services, prices, durations, hours, staff → owner reviews a summary card and confirms/edits → optional client CSV import (Vagaro/Fresha/Square/Booksy/generic) → optional Google Calendar connect → booking page link ready.
+Owner signs up → picks business type (template) → provides website URL / Google Business profile / price-list photo → AI drafts services, prices, durations, hours, staff → owner reviews a summary card and confirms/edits → optional client CSV import (Vagaro/Fresha/Square/Booksy/generic) → optional Google Calendar connect → pick the booking page's brand color (PCR-001) → booking page link ready.
 
 ### W2 — Conversational scheduling
 Book, reschedule, cancel, check availability, "what does tomorrow look like?", block time. AI replies with cards; conflicts produce alternatives. Every write goes through rules + autonomy dial.
@@ -31,7 +31,7 @@ Appointment confirmations and reminders to customers (email); owner to-dos ("rem
 Autonomy settings page; per-action "Why?" panel; undo from feed/history; "What I know" page to view/edit/delete memory and learned rules.
 
 ### W8 — Public booking (customer)
-Branded page → pick service → staff (or any) → time → name/email → email verification code → confirmation email with reschedule/cancel link. Respects rules, buffers and staff calendars.
+Page in the business's own brand color (PCR-001) → pick service → staff (or any) → time → name/email → email verification code → confirmation email with reschedule/cancel link. Respects rules, buffers and staff calendars.
 
 ### W9 — Team & permissions
 Invite staff, assign roles and services, set individual hours.
