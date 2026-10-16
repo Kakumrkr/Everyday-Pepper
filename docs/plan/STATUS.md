@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 1 — Foundations complete (S5 done; Phase 1 exit criteria met) → next: Phase 2 (S6)
+**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 1 — Foundations complete and merged (S5, PR #6) → next: Phase 2 (S6)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -38,6 +38,8 @@
     - `@sentry/node` 11 adds ~65 MB (it pulls in the Sentry CLI); api/worker images are 426 MB.
     - In this sandbox `dockerd` must be started by hand.
 
+- **Maintenance (2026-10-16, after S5):** PR #6 (S5) merged into `main` by Claude at the user's request ("you do the work"). Dependabot PR #5 (Node 22 → 25 Docker image) closed: Node stays on 22 LTS, and Dependabot now ignores Node majors for the Docker image. Added a SessionStart hook for cloud sessions (`.claude/hooks/session-start.sh`: `pnpm install`, start `dockerd`), tested from a clean state (no `node_modules`, Docker stopped) and on a re-run.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, MinIO and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -61,8 +63,8 @@
 ## Waiting on the user (GitHub settings, one-time)
 1. Settings → General → **Default branch → `main`** (currently the stale `claude/youthful-cori-cexdi2`).
 2. Settings → General → Pull Requests → **Automatically delete head branches**.
-3. Delete stale branches `claude/youthful-cori-cexdi2`, `claude/wonderful-newton-opp16r` (unused duplicate S1) and, once merged, `claude/sharp-noether-re1wo9`.
-4. Branch protection on `main` requiring a PR and the **CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)** (after the S5 PR is green) and **CI / E2E smoke (Docker Compose)** checks.
+3. Delete stale branches `claude/youthful-cori-cexdi2`, `claude/wonderful-newton-opp16r` (unused duplicate S1), `claude/sharp-noether-re1wo9` and `dependabot/docker/node-25-alpine` (PR #5, closed).
+4. Branch protection on `main` requiring a PR and the **CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)** and **CI / E2E smoke (Docker Compose)** checks (all three passed on PR #6).
 5. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
 6. Confirm or change the S5 defaults / ADR-0009 (observability wiring).
 7. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).

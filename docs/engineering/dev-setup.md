@@ -39,6 +39,7 @@ Run `pnpm check` before every push.
 - One `Dockerfile` builds all apps (`--target api|worker|web`): pinned base image digest, production-only dependencies (`pnpm deploy`), Next.js standalone output, non-root `node` user, `HEALTHCHECK` per app.
 - **Object storage is not in Compose yet.** MinIO no longer publishes community images; choosing a replacement is open decision D10 (`../plan/open-decisions.md`). Nothing uses storage before Phase 4.
 - **Playwright with a preinstalled browser** (e.g. a sandbox without browser downloads): set `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome`.
+- **Claude Code cloud sessions** run `.claude/hooks/session-start.sh` at start-up (registered in `.claude/settings.json`): `pnpm install` and, if needed, start `dockerd`. Unit tests, lint and integration tests work right away; it does nothing outside cloud sessions.
 - **Docker build behind a TLS-inspecting proxy** (some cloud dev sandboxes): the build container needs the proxy CA and `HTTPS_PROXY`; CI and normal machines need nothing extra. If `docker info` says the daemon is not running, start `dockerd` first (integration tests need it too).
 
 ## Layout
@@ -77,7 +78,7 @@ Planned packages (`db`, `modules/*`, `templates/*`, `ai`, `integrations`, `ui`) 
 
 ## Tooling versions and known constraints
 - **TypeScript is pinned to 6.0.x** because typescript-eslint supports `< 6.1`. Dependabot ignores TypeScript ≥ 6.1; lift this when typescript-eslint supports TypeScript 7.
-- `@types/node` tracks Node 22 (major updates ignored by Dependabot).
+- `@types/node` and the Docker `node` base image track Node 22 LTS (major updates ignored by Dependabot; a Node upgrade is a planned change).
 - GitHub Actions are pinned to commit SHAs and Docker images to digests; Dependabot (`.github/dependabot.yml`: npm, docker, docker-compose, github-actions) proposes updates weekly.
 - `@swc/core`'s install script is not run (`ignoredBuiltDependencies` in `pnpm-workspace.yaml`); its prebuilt binary comes from the optional platform package. The same goes for Testcontainers' optional native extras (`ssh2`, `cpu-features`) and `protobufjs`'s version-check script.
 - `@opentelemetry/instrumentation-nestjs-core` supports Nest < 12 only, so it is not installed; add it back when it supports Nest 12.
