@@ -17,5 +17,5 @@ Links each requirement to its design and tests. Test columns are filled in as ph
 | AC-W7-1/2/3 trust | ai-agent-and-trust-layer, memory | 6, 7 | _tbd_ |
 | AC-W8-1/2 public booking | data-model (exclusion constraint), security | 3, 4 | _tbd_ |
 | AC-W9-1 staff scope | security-and-tenancy | 2 | _tbd_ |
-| AC-X-1 tenant isolation | security-and-tenancy | 2+ | _tbd_ |
+| AC-X-1 tenant isolation | security-and-tenancy, ADR-0010 | 2+ | DB level: `packages/db/src/isolation.int.test.ts` (S6); endpoints/tools: _tbd_ (S7+) |
 | AC-X-2 LLM outage degradation | reliability-and-observability | 6 | _tbd_ |

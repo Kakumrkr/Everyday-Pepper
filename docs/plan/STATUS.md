@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 1 — Foundations complete and merged (S5, PR #6) → next: Phase 2 (S6)
+**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 2 — Platform core. S6 (Phase 2a: db + tenancy/RLS) done and merged (PR #8) → next: S7 (auth)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -24,7 +24,7 @@
   - **Tracing and errors:** OpenTelemetry tracing (http, express, pg, ioredis → OTLP/HTTP; query strings redacted) and Sentry errors-only (all data collection off, events redacted). Each is off unless its env var is set.
   - **Start-up:** `node --import ./dist/instrument.js` preload via the new `@floty/runtime/instrument` entry. `createServiceApp` does the shared Nest wiring, flushes telemetry on shutdown and reports unexpected errors.
   - **Testing:** new `@floty/testing` package with Testcontainers Postgres/Redis (images read from `docker-compose.yml`) and a recording HTTP server. Integration tests are `*.int.test.ts` run by `pnpm test:integration`; CI job **Integration (Testcontainers)** runs them.
-  - **Docs:** ADR-0009 (proposed); dev-setup, observability and dependency-map updated.
+  - **Docs:** ADR-0009 (accepted by the user before S6); dev-setup, observability and dependency-map updated.
   - **Checks run:**
     - `pnpm check` green: 145 unit tests; runtime coverage 97.6% lines / 91.7% branches; every other package 100%.
     - `pnpm test:integration` green, 3 files: containers reachable; readiness 200 against real Postgres + Redis; the built api started with `--import` exports http/express/pg/ioredis spans to a fake OTLP collector, its logs carry `request_id` + a `trace_id` that matches the exported spans, no email/credentials/query leave the process, and SIGTERM flushes spans.
@@ -39,6 +39,25 @@
     - In this sandbox `dockerd` must be started by hand.
 
 - **Maintenance (2026-10-16, after S5):** PR #6 (S5) merged into `main` by Claude at the user's request ("you do the work"). Dependabot PR #5 (Node 22 → 25 Docker image) closed: Node stays on 22 LTS, and Dependabot now ignores Node majors for the Docker image. Added a SessionStart hook for cloud sessions (`.claude/hooks/session-start.sh`: `pnpm install`, start `dockerd`), tested from a clean state (no `node_modules`, Docker stopped) and on a re-run.
+
+- **S6 Phase 2a (2026-10-16):** database layer and tenant isolation.
+  - **`@floty/db` (new):** Drizzle 0.45 schema, SQL migrations (drizzle-kit 0.31 generates; hand-written migrations add what it cannot express), and repositories. It is the only package that talks to Postgres.
+  - **Migrations:** `0000` creates the `floty_app` group role, `current_tenant_id()` and `set_updated_at()`. `0001` creates `tenants` and `memberships` with their `tenant_isolation` policies. `0002` adds `FORCE ROW LEVEL SECURITY` and the `updated_at` triggers.
+  - **Tenant context:** `withTenant(db, tenantId, work)` sets the tenant transaction-locally with a bound parameter.
+  - **Migrate step:** `runMigrations` (serialised by an advisory lock) and `provisionAppRole` (creates or updates the login role, refuses privileged roles). They run from the `migrate` CLI, `pnpm db:migrate`, and the one-shot Compose `migrate` service. api and worker now connect as `floty_service`.
+  - **Readiness:** the probe moved from runtime to `@floty/db` (`DatabaseHandle.ping`) and fails if the role bypasses RLS. Runtime exports a `DATABASE` token.
+  - **Contracts:** `TenantId`, `UserId`, `TenantSlug`, `TimeZone`, `Locale`, `MembershipRole`, `NewTenant`.
+  - **Testing:** `postgresUrlAs` added to `@floty/testing`.
+  - **Docs:** ADR-0010 (accepted by the user, 2026-10-16); data-model, dependency-map, dev-setup, testing-strategy, security-and-tenancy and traceability (AC-X-1) updated.
+  - **Checks run:**
+    - `pnpm check` green: db 22 unit tests, 97% statements / 100% branches; contracts 67 tests; runtime 74 tests.
+    - `pnpm test:integration` green, 6 files / 55 tests. db: 51 tests (migrations, provisioning, repositories, cross-tenant suite 30/30).
+    - Mutation checks, each caught: a policy `USING (true)` → 6 failures; `FORCE` removed → catalog test fails; session-wide `set_config` → 6 failures; no `NULLIF` → 4 failures; a schema change without a migration → drift test fails.
+    - Docker images built. `docker compose up --wait` → 6 services healthy and `migrate` exited 0; also with `up --build` (api image built from cache twice, harmless). A second `up` re-runs `migrate` idempotently. Playwright smoke 8/8. `pg_stat_activity` shows api and worker connected as `floty_service`. `pnpm db:migrate` works against Compose Postgres.
+  - **CI on PR #8:** all three required checks green (lint/typecheck/test/build, Integration, E2E smoke with the `migrate` service).
+  - **Findings:**
+    - drizzle-kit needs a relative `--out` path and exits 0 even on errors, so the drift test also checks its "No schema changes" message.
+    - Existing local volumes keep working: `POSTGRES_USER` is unchanged, and `migrate` adds the schema and the new role.
 
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
@@ -56,26 +75,29 @@
 - **TypeScript pinned to 6.0.x** until typescript-eslint supports 6.1+/7 (S3 finding; see dev-setup.md).
 - **Module format: ESM** for all packages (NodeNext). Confirmed in S4: Nest 12 ships ESM, so api/worker run as native ESM.
 - **S4 defaults (Claude, user to confirm or change):** NestJS on Express (not Fastify); Vitest compiles Nest code with SWC; shared Nest wiring lives in a new `packages/runtime` (`@floty/runtime`) that S5 extends with config/logger/telemetry; the readiness `SELECT 1` lives in runtime until `packages/db` exists (Phase 2); web unit tests cover `lib/` and route handlers, pages are covered by Playwright.
-- **S5 defaults (Claude, user to confirm or change) — ADR-0009 (proposed):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@floty/runtime/instrument` (lint allows exactly this one); `@floty/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
+- **S5 defaults — ADR-0009, accepted by the user (2026-10-16, S6 start):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@floty/runtime/instrument` (lint allows exactly this one); `@floty/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
 - **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images. Replacement is open decision **D10** (recommendation: SeaweedFS); needed by Phase 4.
+- **GitHub settings done by the user (2026-10-16, before S6):** default branch is `main`; branch protection on `main` requires a PR and the three CI checks (**CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)**, **CI / E2E smoke (Docker Compose)**); head branches are deleted automatically after merge; stale branches deleted.
+- **Phase 2 order confirmed (user, S6 start):** S6 db + tenancy/RLS → S7 auth → S8 roles/audit. **ADR-0009 accepted** (user, S6 start).
+- **S6 defaults — ADR-0010, accepted by the user (2026-10-16, end of S6):**
+  - (a) The services connect as their own login role (`floty_service`), a member of the `floty_app` group role. The migrate step creates and updates it from `DATABASE_URL`, using a separate `MIGRATION_DATABASE_URL` for the owner. Readiness fails for a role that bypasses RLS.
+  - (b) IDs are UUID v7, generated in the app with the `uuid` package (Postgres 17 has no `uuidv7()`).
+  - (c) The `users` table waits for S7, so Better Auth shapes it. `memberships.user_id` has no foreign key until then.
+  - (d) RLS goes through a `current_tenant_id()` SQL function with `NULLIF`. `tenant_id` defaults to it, so repositories never take a tenant id.
+  - (e) `runtime` may import `db` (lint and dependency map updated). The api image carries the migrate CLI (`@floty/db` is a direct api dependency).
+  - (f) Repositories, migrations and RLS are covered by integration tests and excluded from the unit coverage gate.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
-## Waiting on the user (GitHub settings, one-time)
-1. Settings → General → **Default branch → `main`** (currently the stale `claude/youthful-cori-cexdi2`).
-2. Settings → General → Pull Requests → **Automatically delete head branches**.
-3. Delete stale branches `claude/youthful-cori-cexdi2`, `claude/wonderful-newton-opp16r` (unused duplicate S1), `claude/sharp-noether-re1wo9` and `dependabot/docker/node-25-alpine` (PR #5, closed).
-4. Branch protection on `main` requiring a PR and the **CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)** and **CI / E2E smoke (Docker Compose)** checks (all three passed on PR #6).
-5. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
-6. Confirm or change the S5 defaults / ADR-0009 (observability wiring).
-7. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+## Waiting on the user
+1. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-S6–S8 are Claude's proposed split of Phase 2. It puts db + tenancy/RLS before auth, so auth can build on the tenant context. The user confirms or reorders it at the S6 Session Brief.
+S6–S8 split Phase 2: db + tenancy/RLS before auth, so auth can build on the tenant context. **Order confirmed by the user at the S6 Session Brief (2026-10-16).**
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S6 | **Phase 2a:** `packages/db` (Drizzle, migrations, readiness probe moves there), tenants + memberships schema, tenant-scoped transaction helper (`SET LOCAL`), RLS policies, cross-tenant isolation suite started (Testcontainers) | 2 | RLS proven by integration tests; cross-tenant suite 100% for what exists |
-| S7 | **Phase 2b:** auth (Better Auth + MFA for owners), session → tenant context (+ `tenant_id`/`user_id` on log lines), auth E2E | 2 | auth E2E passing |
+| S7 | **Phase 2b:** auth (Better Auth + MFA for owners), session → tenant context (+ `tenant_id`/`user_id` on log lines), auth E2E. Carry-overs from S6: `users` table (Better Auth's, uuid ids) + FK from `memberships.user_id` and an index on it; the sign-in lookup of a user's tenants across tenants (a narrow `SECURITY DEFINER` function or a user-keyed policy) added to the isolation suite; classify auth tables as global in the suite | 2 | auth E2E passing; isolation suite 100% incl. auth tables |
 | S8 | **Phase 2c:** roles/permissions matrix, audit log, usage-metering skeleton | 2 | role matrix 100%; Phase 2 exit criteria |
 
 ## How to resume in a new session

@@ -1,7 +1,9 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { prepareDatabase } from '@floty/db';
 import {
   freePort,
+  postgresUrlAs,
   recordingServer,
   startPostgres,
   startRedis,
@@ -30,6 +32,9 @@ describe('api process: logs and traces', () => {
       startRedis(),
       recordingServer(),
     ]);
+    // As in Compose: migrate as the owner, run as the services' login role.
+    const databaseUrl = postgresUrlAs(postgres.url, 'floty_service', 'test-password');
+    await prepareDatabase(postgres.url, databaseUrl);
     const port = await freePort();
     baseUrl = `http://127.0.0.1:${String(port)}`;
     api = spawn('node', ['--import', './dist/instrument.js', 'dist/main.js'], {
@@ -37,7 +42,7 @@ describe('api process: logs and traces', () => {
       env: {
         PATH: process.env['PATH'],
         PORT: String(port),
-        DATABASE_URL: postgres.url,
+        DATABASE_URL: databaseUrl,
         REDIS_URL: redis.url,
         LOG_LEVEL: 'debug',
         DEPLOYMENT_ENVIRONMENT: 'ci',

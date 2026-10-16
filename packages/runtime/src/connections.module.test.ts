@@ -8,16 +8,16 @@ import { ConnectionsModule, readinessChecks } from './connections.module.js';
 import { HealthModule } from './health.module.js';
 
 describe('readinessChecks', () => {
-  it('probes Postgres with SELECT 1 and Redis with PING', async () => {
-    const pool = { query: vi.fn(() => Promise.resolve({ rows: [] })) };
-    const redis = { ping: vi.fn(() => Promise.resolve('PONG')) };
+  it('probes the database (reachable, RLS applies) and Redis with PING', async () => {
+    const database = { ping: vi.fn(() => Promise.resolve()) };
+    const redis = { ping: vi.fn(() => Promise.resolve('PONG' as const)) };
 
-    const checks = readinessChecks(pool as never, redis as never);
+    const checks = readinessChecks(database, redis);
     await checks['database']?.();
     await checks['redis']?.();
 
     expect(Object.keys(checks)).toEqual(['database', 'redis']);
-    expect(pool.query).toHaveBeenCalledWith('SELECT 1');
+    expect(database.ping).toHaveBeenCalledOnce();
     expect(redis.ping).toHaveBeenCalledOnce();
   });
 });

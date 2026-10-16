@@ -2,7 +2,7 @@
 
 > Provides: entities and invariants · Depends on: modules-and-templates, memory, AI trust layer · Consumed by: packages/db, all services
 
-All tenant-owned tables: `id (uuid v7)`, `tenant_id`, `created_at`, `updated_at`, RLS policy `tenant_id = current_setting('app.tenant_id')`. Timestamps UTC (`timestamptz`).
+All tenant-owned tables: `id (uuid v7)`, `tenant_id` (defaults to the transaction's tenant), `created_at`, `updated_at` (trigger), forced RLS with one policy `tenant_isolation`: `tenant_id = current_tenant_id()`, i.e. `NULLIF(current_setting('app.tenant_id', true), '')::uuid`, for reads and writes. Timestamps UTC (`timestamptz`). Roles, migrations and `withTenant`: [ADR-0010](../adr/0010-database-roles-and-migrations.md). Built so far (S6): `tenants` (name, slug, time_zone, locale), `memberships` (user_id, role).
 
 ## L1 Core
 | Entity | Key fields / notes |

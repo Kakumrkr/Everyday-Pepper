@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792190629422,
+      "tag": "0000_roles_and_helpers",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792190650172,
+      "tag": "0001_tenants_and_memberships",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792190655814,
+      "tag": "0002_tenancy_hardening",
+      "breakpoints": true
+    }
+  ]
+}

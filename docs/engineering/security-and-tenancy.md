@@ -5,7 +5,7 @@ Target: OWASP ASVS Level 2.
 ## Threat model (top threats → controls)
 | Threat | Control |
 |---|---|
-| Cross-tenant data access | `tenant_id` + Postgres RLS on every tenant table; app DB role without `BYPASSRLS`; tenant set via `SET LOCAL app.tenant_id` per transaction from the authenticated session; cross-tenant test suite in CI (100% required) |
+| Cross-tenant data access | `tenant_id` + Postgres RLS on every tenant table; app DB role without `BYPASSRLS`; tenant set via `SET LOCAL app.tenant_id` per transaction from the authenticated session; cross-tenant test suite in CI (100% required); roles and the tenant helper: ADR-0010 |
 | Privilege escalation within tenant | RBAC (owner/manager/staff) + resource scoping enforced in domain services (shared by UI and AI); role-matrix tests |
 | Prompt injection (notes, imported data, websites, calendar text) | Untrusted content wrapped/labelled; tools cannot change tenant or permissions; external/irreversible actions gated by autonomy rules; bulk sends never fully automatic; evals include injection cases |
 | AI performing unintended actions | Risk tiers, autonomy dial, proposals, undo, audit log, eval gate |

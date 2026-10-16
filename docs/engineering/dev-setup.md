@@ -20,6 +20,8 @@ How to run the monorepo locally and how work reaches `main`. Keep this file in s
 | `pnpm build` | Compile packages to `dist/` and the web app to `.next/` (Turborepo, dependency order, cached) |
 | `pnpm dev` | Builds the packages, then runs api (:4000), worker (:4100) and web (:3000) in watch mode. Needs the infra containers and a `.env` (copy `.env.example`) |
 | `pnpm test:e2e` | Playwright smoke test against a running stack (see below) |
+| `pnpm db:migrate` | Builds `@floty/db`, applies migrations as `MIGRATION_DATABASE_URL`, then creates/updates the login role in `DATABASE_URL` (reads `.env`) |
+| `pnpm db:generate` | After changing `packages/db/src/schema.ts`: writes the next SQL migration (drizzle-kit; no database needed). Review it and commit it with the schema |
 
 `pnpm check` does not run integration tests (they need Docker); CI runs them in their own job.
 
@@ -29,13 +31,14 @@ Run `pnpm check` before every push.
 | Goal | Command |
 |---|---|
 | Everything in containers | `docker compose up --build --wait` → web http://localhost:3000, api http://localhost:4000, worker http://localhost:4100 |
-| Infra only, apps via `pnpm dev` | `docker compose up -d --wait postgres redis mailpit`, `cp .env.example .env`, `pnpm dev` |
+| Infra only, apps via `pnpm dev` | `docker compose up -d --wait postgres redis mailpit`, `cp .env.example .env`, `pnpm db:migrate`, `pnpm dev` |
 | Fake inbox (Mailpit) | http://localhost:8025 (SMTP `localhost:1025`) |
 | E2E smoke | stack up, then `pnpm test:e2e` (first time: `pnpm --filter @floty/e2e exec playwright install chromium`) |
 | Stop and wipe data | `docker compose down --volumes` |
 
 - Health: `GET /health/live` (process up, no dependency calls) and `GET /health/ready` (Postgres and Redis reachable; **503** with the same body when not) on api and worker; web has `GET /health/live`. Bodies follow `HealthReportSchema` (`@floty/contracts`) and say only `up`/`down` per check; error details go to the server log.
 - Compose credentials are local-only defaults (override in a git-ignored `.env`); every port binds to `127.0.0.1`.
+- **Database roles** ([ADR-0010](../adr/0010-database-roles-and-migrations.md)): the one-shot `migrate` service (api image, `node node_modules/@floty/db/dist/migrate-cli.js`) runs migrations as the `POSTGRES_USER` superuser and creates the `APP_DB_USER` login role (`floty_service`); api and worker start after it exits successfully and connect as `floty_service`, which RLS applies to. Readiness reports the database `down` if `DATABASE_URL` uses a superuser or `BYPASSRLS` role. To inspect data as the owner: `docker compose exec postgres psql -U floty`.
 - One `Dockerfile` builds all apps (`--target api|worker|web`): pinned base image digest, production-only dependencies (`pnpm deploy`), Next.js standalone output, non-root `node` user, `HEALTHCHECK` per app.
 - **Object storage is not in Compose yet.** MinIO no longer publishes community images; choosing a replacement is open decision D10 (`../plan/open-decisions.md`). Nothing uses storage before Phase 4.
 - **Playwright with a preinstalled browser** (e.g. a sandbox without browser downloads): set `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome`.
@@ -48,6 +51,7 @@ packages/
   config/      shared tsconfig presets (@floty/config)
   contracts/   Zod schemas, events, cards — the only cross-module interface (@floty/contracts)
   core/        L1 platform core, framework-free (@floty/core)
+  db/          Drizzle schema, SQL migrations + migrate CLI, withTenant (RLS), repositories (@floty/db)
   runtime/     process wiring shared by api + worker: config, logging, telemetry, health, connections (@floty/runtime)
   testing/     test-only helpers: Testcontainers Postgres/Redis, recording HTTP server (@floty/testing)
 apps/
@@ -56,7 +60,7 @@ apps/
   web/         Next.js PWA + booking page (@floty/web)
 e2e/           Playwright tests against a running stack (@floty/e2e)
 ```
-Planned packages (`db`, `modules/*`, `templates/*`, `ai`, `integrations`, `ui`) follow `../architecture/overview.md` and `../plan/dependency-map.md`.
+Planned packages (`modules/*`, `templates/*`, `ai`, `integrations`, `ui`) follow `../architecture/overview.md` and `../plan/dependency-map.md`.
 
 ## Conventions
 - **ESM + TypeScript strict** (`packages/config/tsconfig.base.json`): `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`. Relative imports use the `.js` extension (NodeNext).
@@ -65,11 +69,12 @@ Planned packages (`db`, `modules/*`, `templates/*`, `ai`, `integrations`, `ui`) 
 - **No `any`, no unexplained `!`.** A non-null assertion needs `// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- <why>`; every disable comment must have a `-- reason`.
 - **Time:** domain code takes a `Clock` (`@floty/core`), never `new Date()` directly; tests use `ManualClock`. Instants cross boundaries as `UtcDateTime` (`@floty/contracts`).
 - **Tests** live next to code as `*.test.ts` (unit) and `*.int.test.ts` (integration: real Postgres/Redis via `@floty/testing`, own `vitest.int.config.ts`, no coverage gate); both are excluded from `dist/`. `@floty/testing` is a devDependency only; it reads the Postgres and Redis images from `docker-compose.yml`, so tests and the dev stack always run the same pinned images. Unit tests import other workspace packages from `dist/` (Turborepo builds them first), so run a package's tests via `pnpm test` or after `pnpm build`.
+- **Database access** goes through `@floty/db` only. Tenant data is read and written inside `withTenant(db, tenantId, tx => ...)` using repository functions, which never take a tenant id: `tenant_id` defaults to the transaction's tenant and RLS hides everything else. `tenantId` comes from the authenticated session or a job's stored context, never from request bodies or LLM arguments. A new table needs: the Drizzle table with the `tenantIsolation` policy (or a reason it is global), `pnpm db:generate`, a custom migration with `FORCE ROW LEVEL SECURITY` and the `set_updated_at` trigger, and an entry in the isolation suite (`packages/db/src/isolation.int.test.ts`), which fails until the table is classified. Repositories, migrations and RLS are tested against real Postgres (`*.int.test.ts`) and excluded from the unit coverage gate.
 - **NestJS (api, worker, runtime)** is ESM (Nest 12 ships ESM) on Express 5, compiled by `tsc` with `@floty/config/tsconfig.nest.json` (decorator metadata on). Vitest compiles Nest code with SWC (`unplugin-swc`) because esbuild cannot emit decorator metadata. Inject by token (`@Inject(TOKEN)`) for interfaces and values.
 - **Next.js (web)** uses bundler resolution: imports inside `apps/web` have no `.js` extension. `next-env.d.ts` and `.next/` are generated (`next typegen` runs in `typecheck`) and git-ignored. Env is read per request so one image runs everywhere.
 
 ## Configuration, logging and observability (api, worker)
-- **Config** is read once at startup by `loadServiceConfig` (`@floty/runtime`) and validated with Zod. An invalid variable stops the process with an error that names the variable but never its value. An empty variable counts as unset. Variables: `PORT`, `DATABASE_URL`, `REDIS_URL` (required), `LOG_LEVEL` (`info`), `DEPLOYMENT_ENVIRONMENT` (`local`), `RELEASE`, `SENTRY_DSN`, `OTEL_EXPORTER_OTLP_ENDPOINT` (optional). `OTEL_EXPORTER_OTLP_HEADERS` is read by the OTLP exporter itself (collector auth). See `.env.example`.
+- **Config** is read once at startup by `loadServiceConfig` (`@floty/runtime`) and validated with Zod. An invalid variable stops the process with an error that names the variable but never its value. An empty variable counts as unset. Variables: `PORT`, `DATABASE_URL` (the services' login role, never the migration role), `REDIS_URL` (required), `LOG_LEVEL` (`info`), `DEPLOYMENT_ENVIRONMENT` (`local`), `RELEASE`, `SENTRY_DSN`, `OTEL_EXPORTER_OTLP_ENDPOINT` (optional). `OTEL_EXPORTER_OTLP_HEADERS` is read by the OTLP exporter itself (collector auth). See `.env.example`.
 - **Start-up:** `node --import ./dist/instrument.js dist/main.js` (`pnpm dev`, `start`, the Docker image). `src/instrument.ts` imports only `@floty/runtime/instrument` and `./config.js`, so tracing is set up before NestJS, pg or ioredis load. Never import those from the preload.
 - **Logs:** JSON lines on stdout (pino) with `service`, `env`, `release`, `request_id`, and `trace_id`/`span_id` when tracing is on. Use Nest's `Logger`; it goes through the same logger. Everything passes through `redact` (sensitive keys, emails, phones, URL credentials, bearer tokens), but **never log personal data on purpose**: log ids, not names, emails or phone numbers. Each request gets `x-request-id` (a safe incoming value is reused) and one log line (method, path without query string, status, duration; health probes at `debug`). For readable local logs, pipe through `npx pino-pretty`.
 - **Traces** (OpenTelemetry → OTLP/HTTP) are on only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set: http, express, pg and ioredis spans; `/health/live` is not traced. Query strings and pg bound values are never exported.
