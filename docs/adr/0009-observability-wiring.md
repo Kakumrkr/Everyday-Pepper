@@ -1,6 +1,6 @@
 # ADR-0009: Observability wiring — pino logs, OpenTelemetry traces, Sentry errors
 
-- **Status:** Proposed (Claude default in S5, user to confirm) · **Date:** 2026-10-16
+- **Status:** Accepted (2026-10-16, user) · **Date:** 2026-10-16
 
 ## Context
 The plan names pino (logs), OpenTelemetry (traces) and Sentry (errors) for api and worker (`../engineering/reliability-and-observability.md`). These need wiring that never leaks secrets or personal data, works with ESM NestJS 12, and costs nothing until an endpoint is configured. Since v8 the Sentry SDK has been built on OpenTelemetry, so the two can end up competing for the global tracer provider.

@@ -24,7 +24,7 @@
   - **Tracing and errors:** OpenTelemetry tracing (http, express, pg, ioredis → OTLP/HTTP; query strings redacted) and Sentry errors-only (all data collection off, events redacted). Each is off unless its env var is set.
   - **Start-up:** `node --import ./dist/instrument.js` preload via the new `@floty/runtime/instrument` entry. `createServiceApp` does the shared Nest wiring, flushes telemetry on shutdown and reports unexpected errors.
   - **Testing:** new `@floty/testing` package with Testcontainers Postgres/Redis (images read from `docker-compose.yml`) and a recording HTTP server. Integration tests are `*.int.test.ts` run by `pnpm test:integration`; CI job **Integration (Testcontainers)** runs them.
-  - **Docs:** ADR-0009 (proposed); dev-setup, observability and dependency-map updated.
+  - **Docs:** ADR-0009 (accepted by the user before S6); dev-setup, observability and dependency-map updated.
   - **Checks run:**
     - `pnpm check` green: 145 unit tests; runtime coverage 97.6% lines / 91.7% branches; every other package 100%.
     - `pnpm test:integration` green, 3 files: containers reachable; readiness 200 against real Postgres + Redis; the built api started with `--import` exports http/express/pg/ioredis spans to a fake OTLP collector, its logs carry `request_id` + a `trace_id` that matches the exported spans, no email/credentials/query leave the process, and SIGTERM flushes spans.
@@ -56,21 +56,17 @@
 - **TypeScript pinned to 6.0.x** until typescript-eslint supports 6.1+/7 (S3 finding; see dev-setup.md).
 - **Module format: ESM** for all packages (NodeNext). Confirmed in S4: Nest 12 ships ESM, so api/worker run as native ESM.
 - **S4 defaults (Claude, user to confirm or change):** NestJS on Express (not Fastify); Vitest compiles Nest code with SWC; shared Nest wiring lives in a new `packages/runtime` (`@floty/runtime`) that S5 extends with config/logger/telemetry; the readiness `SELECT 1` lives in runtime until `packages/db` exists (Phase 2); web unit tests cover `lib/` and route handlers, pages are covered by Playwright.
-- **S5 defaults (Claude, user to confirm or change) — ADR-0009 (proposed):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@floty/runtime/instrument` (lint allows exactly this one); `@floty/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
+- **S5 defaults — ADR-0009, accepted by the user (2026-10-16, S6 start):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@floty/runtime/instrument` (lint allows exactly this one); `@floty/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
 - **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images. Replacement is open decision **D10** (recommendation: SeaweedFS); needed by Phase 4.
+- **GitHub settings done by the user (2026-10-16, before S6):** default branch is `main`; branch protection on `main` requires a PR and the three CI checks (**CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)**, **CI / E2E smoke (Docker Compose)**); head branches are deleted automatically after merge; stale branches deleted.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
-## Waiting on the user (GitHub settings, one-time)
-1. Settings → General → **Default branch → `main`** (currently the stale `claude/youthful-cori-cexdi2`).
-2. Settings → General → Pull Requests → **Automatically delete head branches**.
-3. Delete stale branches `claude/youthful-cori-cexdi2`, `claude/wonderful-newton-opp16r` (unused duplicate S1), `claude/sharp-noether-re1wo9` and `dependabot/docker/node-25-alpine` (PR #5, closed).
-4. Branch protection on `main` requiring a PR and the **CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)** and **CI / E2E smoke (Docker Compose)** checks (all three passed on PR #6).
-5. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
-6. Confirm or change the S5 defaults / ADR-0009 (observability wiring).
-7. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+## Waiting on the user
+1. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-S6–S8 are Claude's proposed split of Phase 2. It puts db + tenancy/RLS before auth, so auth can build on the tenant context. The user confirms or reorders it at the S6 Session Brief.
+S6–S8 split Phase 2: db + tenancy/RLS before auth, so auth can build on the tenant context. **Order confirmed by the user at the S6 Session Brief (2026-10-16).**
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
