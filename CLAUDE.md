@@ -22,12 +22,13 @@ Act as the project's **Principal Software Engineer, Software Architect, Product 
 
 ## Session protocol
 The user guides each feature session. For every session:
-1. **Read** `CLAUDE.md`, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed.
+1. **Read** `CLAUDE.md`, **`docs/plan/STATUS.md` (where the last session stopped)**, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed.
 2. **Plan**: restate the goal, list affected parts (from the dependency map), propose small tasks with acceptance criteria and tests.
 3. **Get approval** before writing code.
 4. **Implement** task by task; run lint, typecheck and tests after each.
 5. **Review** your own diff adversarially (security, tenancy, edge cases).
 6. **Summarize** (principle 10) and update docs/traceability.
+7. **Update `docs/plan/STATUS.md`** (done, decisions made in conversation, next steps) and commit it, so the next session can continue exactly where this one stopped. Decisions that exist only in chat are lost — always write them down.
 
 ## Plan change process
 The plan is versioned. Any change to an approved plan or contract needs a **Plan Change Record** (`docs/plan/changes/PCR-NNN.md`, from `PCR-template.md`) listing affected parts from `docs/plan/dependency-map.md`, impact on each, compatibility strategy, and tests proving no regression. Record it in `docs/plan/CHANGELOG.md`. Do not implement until the user approves the PCR.

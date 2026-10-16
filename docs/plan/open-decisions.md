@@ -4,7 +4,7 @@ Resolved decisions move into an ADR (`../adr/`) and are logged in `CHANGELOG.md`
 
 | # | Decision | Recommendation | Needed by |
 |---|---|---|---|
-| D1 | Product name & brand | User to choose; Claude can propose options | Phase 0 (mockups) |
+| D1 | Product name & brand | Candidates: Hiro (recommended), Tendly, Bizzy, Staffie, Remy, Okayo, Kora — check trademark/domain before choosing. Working name "AI Employee" until then | Before pilot (mockups may use placeholder) |
 | D2 | Auth solution | Better Auth (self-hosted, free, works with NestJS) vs Auth.js vs Clerk free tier — recommend Better Auth for cost and control | Phase 2 |
 | D3 | ORM / migrations | Drizzle (SQL-first, good for RLS and exclusion constraints) vs Prisma — recommend Drizzle | Phase 1 |
 | D4 | Email provider | Amazon SES (cheapest) vs Resend (simplest DX) — recommend Resend for pilot, SES at scale | Phase 5 |

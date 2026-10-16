@@ -31,6 +31,7 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [Deployment & costs](engineering/deployment-and-costs.md)
 
 ## Plan
+- [**Status — start here**](plan/STATUS.md)
 - [Roadmap & phases](plan/roadmap-phases.md)
 - [Dependency map](plan/dependency-map.md)
 - [Traceability](plan/traceability.md)
