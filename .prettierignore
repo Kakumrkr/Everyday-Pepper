@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+dist/
+coverage/
+.turbo/
+# planning docs and the Phase 0 prototype are hand-formatted
+docs/
+CLAUDE.md
