@@ -1,48 +1,53 @@
 # AI Employee — Planning Docs
 
-> Status: **Draft for review** · Phase: planning only (no application code yet)
+> Status: **Draft for review** · Plan version 0.2 · Phase 0 (planning; no application code yet)
 
-An AI Employee for small businesses, starting with independent US salons. Owners and staff run day-to-day operations through natural-language conversation; the AI executes tasks, remembers business preferences, surfaces opportunities, and follows through on scheduled work.
+One app that lets small service businesses run day-to-day operations by talking to an AI employee that acts, remembers, suggests, and follows through. V1: appointment-based US businesses (Beauty, Wellness & fitness). Project rules for every Claude Code session: [`../CLAUDE.md`](../CLAUDE.md).
 
-## Index
+## Research
+- [Competitor audit](research/competitor-audit.md)
+- [Owner interview script](research/owner-interview-script.md)
 
-### Product
-- [01 — Vision & problems](product/01-vision-and-problems.md)
-- [02 — Personas & workflows](product/02-personas-and-workflows.md)
-- [03 — V1 scope](product/03-v1-scope.md)
-- [04 — Acceptance criteria](product/04-acceptance-criteria.md)
+## Product
+- [Vision & differentiation](product/vision-and-differentiation.md)
+- [Personas & workflows](product/personas-and-workflows.md)
+- [V1 scope & roadmap](product/v1-scope.md)
+- [Acceptance criteria](product/acceptance-criteria.md)
+- [UX principles](product/ux-principles.md)
 
-### Architecture
-- [00 — Overview](architecture/00-overview.md)
-- [01 — AI orchestration](architecture/01-ai-orchestration.md)
-- [02 — Memory](architecture/02-memory.md)
-- [03 — Core domain & industry packs](architecture/03-core-domain-and-industry-packs.md)
-- [04 — Data model](architecture/04-data-model.md)
-- [05 — Jobs & integrations](architecture/05-jobs-and-integrations.md)
+## Architecture
+- [Overview & layers](architecture/overview.md)
+- [AI agent & trust layer](architecture/ai-agent-and-trust-layer.md)
+- [Memory](architecture/memory.md)
+- [Modules & industry templates](architecture/modules-and-templates.md)
+- [Data model](architecture/data-model.md)
+- [Jobs, messaging & integrations](architecture/jobs-messaging-integrations.md)
+- [Voice readiness](architecture/voice-readiness.md)
 
-### Engineering
+## Engineering
 - [Security & tenancy](engineering/security-and-tenancy.md)
-- [Reliability](engineering/reliability.md)
 - [Testing strategy](engineering/testing-strategy.md)
-- [Observability](engineering/observability.md)
-- [Deployment & environments](engineering/deployment-and-environments.md)
-- [AI-assisted development](engineering/ai-assisted-development.md)
+- [Reliability & observability](engineering/reliability-and-observability.md)
+- [Deployment & costs](engineering/deployment-and-costs.md)
 
-### Delivery
-- [Roadmap & phases](delivery/roadmap-phases.md)
-- [Risks](delivery/risks.md)
-- [Open decisions](delivery/open-decisions.md)
-- [Assumptions](delivery/assumptions.md)
+## Plan
+- [Roadmap & phases](plan/roadmap-phases.md)
+- [Dependency map](plan/dependency-map.md)
+- [Traceability](plan/traceability.md)
+- [Risks](plan/risks.md)
+- [Open decisions](plan/open-decisions.md)
+- [Changelog](plan/CHANGELOG.md)
+- [PCR template](plan/changes/PCR-template.md)
 
-### Architecture Decision Records
-- [ADR-0001 — TypeScript monorepo with Next.js](adr/0001-typescript-monorepo-nextjs.md)
-- [ADR-0002 — Postgres with Row-Level Security](adr/0002-postgres-with-rls.md)
-- [ADR-0003 — Postgres-backed job queue (pg-boss)](adr/0003-postgres-job-queue.md)
-- [ADR-0004 — Provider-agnostic LLM adapter, Claude default](adr/0004-llm-adapter.md)
-- [ADR-0005 — LLM proposes, domain decides](adr/0005-llm-proposes-domain-decides.md)
+## Architecture Decision Records (all Proposed)
+- [ADR-0001 TypeScript monorepo](adr/0001-typescript-monorepo.md)
+- [ADR-0002 Postgres + RLS](adr/0002-postgres-rls.md)
+- [ADR-0003 BullMQ + outbox](adr/0003-bullmq-outbox.md)
+- [ADR-0004 LLM provider adapter](adr/0004-llm-provider-adapter.md)
+- [ADR-0005 Model proposes, domain decides](adr/0005-model-proposes-domain-decides.md)
+- [ADR-0006 Lean deployment](adr/0006-lean-deployment.md)
 
 ## How these docs are maintained
-- Docs live with the code and change in the same PR as the behaviour they describe.
-- Any significant decision gets an ADR (`docs/adr/NNNN-title.md`, status: Proposed → Accepted → Superseded).
-- Acceptance criteria in `product/04` are the source for E2E tests and LLM evals; a criterion without a test is a gap.
-- Open decisions move from `delivery/open-decisions.md` into an ADR once resolved.
+- Docs change in the same commit as the behaviour they describe.
+- Changes to the approved plan go through a PCR (`plan/changes/`), checked against the dependency map, and are logged in the changelog.
+- Every acceptance criterion maps to automated tests in `plan/traceability.md`.
