@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 2 — Platform core. S6 (Phase 2a: db + tenancy/RLS) done on its branch, PR open → next: S7 (auth)
+**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 2 — Platform core. S6 (Phase 2a: db + tenancy/RLS) done, PR #8 green and waiting for the user's review/merge → next: S7 (auth)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -54,7 +54,7 @@
     - `pnpm test:integration` green, 6 files / 55 tests. db: 51 tests (migrations, provisioning, repositories, cross-tenant suite 30/30).
     - Mutation checks, each caught: a policy `USING (true)` → 6 failures; `FORCE` removed → catalog test fails; session-wide `set_config` → 6 failures; no `NULLIF` → 4 failures; a schema change without a migration → drift test fails.
     - Docker images built. `docker compose up --wait` → 6 services healthy and `migrate` exited 0; also with `up --build` (api image built from cache twice, harmless). A second `up` re-runs `migrate` idempotently. Playwright smoke 8/8. `pg_stat_activity` shows api and worker connected as `floty_service`. `pnpm db:migrate` works against Compose Postgres.
-  - **Not yet proven:** the CI run on the PR.
+  - **CI on PR #8:** all three required checks green (lint/typecheck/test/build, Integration, E2E smoke with the `migrate` service).
   - **Findings:**
     - drizzle-kit needs a relative `--out` path and exits 0 even on errors, so the drift test also checks its "No schema changes" message.
     - Existing local volumes keep working: `POSTGRES_USER` is unchanged, and `migrate` adds the schema and the new role.
