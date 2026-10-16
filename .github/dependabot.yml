@@ -21,6 +21,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # The node base image tracks the Node LTS major in .nvmrc; major upgrades are planned changes.
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker-compose
     directory: /
