@@ -5,6 +5,7 @@ import {
   createLogger,
   currentRequestContext,
   PinoNestLogger,
+  identifyRequest,
   runWithRequestContext,
 } from './logger.js';
 import { REDACTED } from './redact.js';
@@ -83,6 +84,30 @@ describe('createLogger', () => {
 
     expect(lines[0]).toMatchObject({ request_id: 'req-1', msg: 'inside' });
     expect(lines[1]).not.toHaveProperty('request_id');
+  });
+
+  it('adds the user and tenant once the request is identified', async () => {
+    const { logger, lines } = setup();
+    const userId = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708193';
+    const tenantId = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192';
+
+    identifyRequest({ userId }); // outside a request: ignored
+    await runWithRequestContext({ requestId: 'req-2' }, async () => {
+      logger.info('anonymous');
+      identifyRequest({ userId });
+      await Promise.resolve();
+      logger.info('signed in');
+      identifyRequest({ userId, tenantId });
+      logger.info('in a business');
+    });
+    logger.info('outside');
+
+    expect(lines[0]).not.toHaveProperty('user_id');
+    expect(lines[1]).toMatchObject({ request_id: 'req-2', user_id: userId });
+    expect(lines[1]).not.toHaveProperty('tenant_id');
+    // UUIDs survive redaction (they are not mistaken for phone numbers).
+    expect(lines[2]).toMatchObject({ user_id: userId, tenant_id: tenantId });
+    expect(lines[3]).not.toHaveProperty('user_id');
   });
 
   it('adds trace and span ids while a span is active', () => {
