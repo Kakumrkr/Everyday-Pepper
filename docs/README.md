@@ -1,6 +1,6 @@
 # AI Employee — Planning Docs
 
-> Status: **Draft for review** · Plan version 0.2 · Phase 0 (planning; no application code yet)
+> Status: **Approved** · Plan version 0.4 · Phase 1 (Foundations) in progress — see [STATUS](plan/STATUS.md)
 
 One app that lets small service businesses run day-to-day operations by talking to an AI employee that acts, remembers, suggests, and follows through. V1: appointment-based US businesses (Beauty, Wellness & fitness). Project rules for every Claude Code session: [`../CLAUDE.md`](../CLAUDE.md).
 
@@ -32,6 +32,7 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [Testing strategy](engineering/testing-strategy.md)
 - [Reliability & observability](engineering/reliability-and-observability.md)
 - [Deployment & costs](engineering/deployment-and-costs.md)
+- [Developer setup & workflow](engineering/dev-setup.md)
 
 ## Plan
 - [**Status — start here**](plan/STATUS.md)
