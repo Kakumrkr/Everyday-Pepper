@@ -8,6 +8,9 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [Competitor audit](research/competitor-audit.md)
 - [Owner interview script](research/owner-interview-script.md)
 
+## Mockups
+- [Floty prototype & design direction](mockups/README.md)
+
 ## Product
 - [Vision & differentiation](product/vision-and-differentiation.md)
 - [Personas & workflows](product/personas-and-workflows.md)
