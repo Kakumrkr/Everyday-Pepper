@@ -5,6 +5,7 @@
   "description": "Shared TypeScript configuration for Floty packages and apps.",
   "exports": {
     "./tsconfig.base.json": "./tsconfig.base.json",
-    "./tsconfig.lib.json": "./tsconfig.lib.json"
+    "./tsconfig.lib.json": "./tsconfig.lib.json",
+    "./tsconfig.nest.json": "./tsconfig.nest.json"
   }
 }

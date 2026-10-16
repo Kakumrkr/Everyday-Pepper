@@ -1,0 +1,7 @@
+{
+  "extends": "@floty/config/tsconfig.nest.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src", "vitest.config.ts"]
+}

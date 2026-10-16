@@ -3,3 +3,8 @@ packages:
   - packages/*
   - packages/modules/*
   - packages/templates/*
+
+# @swc/core's install script only verifies its prebuilt binary; the optional platform package
+# provides it, so the script stays blocked (pnpm runs no dependency scripts unless listed).
+ignoredBuiltDependencies:
+  - '@swc/core'

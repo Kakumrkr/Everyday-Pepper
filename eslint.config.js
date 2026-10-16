@@ -2,6 +2,7 @@
 import { defineConfig } from 'eslint/config';
 import comments from '@eslint-community/eslint-plugin-eslint-comments/configs';
 import eslint from '@eslint/js';
+import nextPlugin from '@next/eslint-plugin-next';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -21,6 +22,12 @@ const allowedInternalImports = {
   'packages/ai': ['contracts', 'core'],
   'packages/integrations': ['contracts', 'core'],
   'packages/ui': ['contracts'],
+  'packages/runtime': ['contracts', 'core'],
+  // Apps also get each modules/* and templates/* package as it is created.
+  'apps/api': ['contracts', 'core', 'db', 'ai', 'runtime'],
+  'apps/worker': ['contracts', 'core', 'db', 'integrations', 'runtime'],
+  'apps/web': ['contracts', 'ui'],
+  e2e: ['contracts'],
 };
 
 const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowed]) => ({
@@ -52,7 +59,15 @@ const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowe
 export default defineConfig(
   {
     name: 'floty/ignores',
-    ignores: ['**/dist/**', '**/coverage/**', '**/.turbo/**', '**/node_modules/**', 'docs/**'],
+    ignores: [
+      '**/dist/**',
+      '**/coverage/**',
+      '**/.turbo/**',
+      '**/.next/**',
+      '**/next-env.d.ts',
+      '**/node_modules/**',
+      'docs/**',
+    ],
   },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
@@ -73,9 +88,18 @@ export default defineConfig(
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
+      // NestJS modules are decorated classes with only static `forRoot` factories.
+      '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
       'no-console': 'error',
       eqeqeq: ['error', 'always'],
     },
+  },
+  {
+    name: 'floty/web',
+    files: ['apps/web/**/*.{ts,tsx}'],
+    extends: [nextPlugin.configs['core-web-vitals']],
+    languageOptions: { globals: globals.browser },
+    settings: { next: { rootDir: 'apps/web' } },
   },
   {
     name: 'floty/js-config-files',

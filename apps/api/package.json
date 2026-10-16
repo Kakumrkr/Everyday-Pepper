@@ -1,0 +1,37 @@
+{
+  "name": "@floty/api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "HTTP API (NestJS): the only writer to the database; hosts domain services and the AI agent.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc-watch -p tsconfig.build.json --onSuccess \"node --env-file-if-exists=../../.env dist/main.js\"",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@floty/contracts": "workspace:*",
+    "@floty/core": "workspace:*",
+    "@floty/runtime": "workspace:*",
+    "@nestjs/common": "^12.1.3",
+    "@nestjs/core": "^12.1.3",
+    "@nestjs/platform-express": "^12.1.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@floty/config": "workspace:*",
+    "@nestjs/testing": "^12.1.3",
+    "@swc/core": "^1.16.18",
+    "@types/supertest": "^7.2.1",
+    "@vitest/coverage-v8": "^5.0.5",
+    "supertest": "^7.3.1",
+    "tsc-watch": "^7.2.1",
+    "unplugin-swc": "^2.0.0",
+    "vitest": "^5.0.5"
+  }
+}
