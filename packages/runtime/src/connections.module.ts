@@ -7,8 +7,8 @@ import {
   type DynamicModule,
   type OnApplicationShutdown,
 } from '@nestjs/common';
+import { createDatabase, type DatabaseHandle } from '@floty/db';
 import { Redis } from 'ioredis';
-import pg from 'pg';
 import { READINESS_CHECKS, type ReadinessChecks } from './health.tokens.js';
 
 export interface ConnectionsOptions {
@@ -16,17 +16,18 @@ export interface ConnectionsOptions {
   redisUrl: string;
 }
 
-const PG_POOL = Symbol('PG_POOL');
+/** The process's `DatabaseHandle` (`@floty/db`); inject it to reach repositories. */
+export const DATABASE = Symbol('DATABASE');
 const REDIS = Symbol('REDIS');
 
 /** Readiness probes over the shared clients. */
 export function readinessChecks(
-  pool: Pick<pg.Pool, 'query'>,
+  database: Pick<DatabaseHandle, 'ping'>,
   redis: Pick<Redis, 'ping'>,
 ): ReadinessChecks {
   return {
-    // The only raw SQL outside packages/db: a liveness probe. Moves there with the db package (Phase 2).
-    database: () => pool.query('SELECT 1'),
+    // Reachable, and connected as a role that row-level security applies to.
+    database: () => database.ping(),
     redis: () => redis.ping(),
   };
 }
@@ -34,16 +35,16 @@ export function readinessChecks(
 @Injectable()
 class ConnectionsLifecycle implements OnApplicationShutdown {
   constructor(
-    @Inject(PG_POOL) private readonly pool: pg.Pool,
+    @Inject(DATABASE) private readonly database: DatabaseHandle,
     @Inject(REDIS) private readonly redis: Redis,
   ) {}
 
   async onApplicationShutdown(): Promise<void> {
-    await Promise.allSettled([this.pool.end(), this.redis.quit()]);
+    await Promise.allSettled([this.database.close(), this.redis.quit()]);
   }
 }
 
-/** Postgres pool and Redis client for the process, closed on shutdown. */
+/** Database (Postgres pool) and Redis client for the process, closed on shutdown. */
 @Global()
 @Module({})
 export class ConnectionsModule {
@@ -53,20 +54,15 @@ export class ConnectionsModule {
       module: ConnectionsModule,
       providers: [
         {
-          provide: PG_POOL,
-          useFactory: () => {
-            const pool = new pg.Pool({
-              connectionString: options.databaseUrl,
-              max: 2,
-              connectionTimeoutMillis: 2_000,
-              idleTimeoutMillis: 10_000,
-            });
-            // An idle client losing its connection must not crash the process.
-            pool.on('error', (error) => {
-              logger.warn(`Postgres idle client error: ${error.message}`);
-            });
-            return pool;
-          },
+          provide: DATABASE,
+          useFactory: () =>
+            createDatabase({
+              url: options.databaseUrl,
+              // An idle client losing its connection must not crash the process.
+              onIdleError: (error) => {
+                logger.warn(`Postgres idle client error: ${error.message}`);
+              },
+            }),
         },
         {
           provide: REDIS,
@@ -89,12 +85,12 @@ export class ConnectionsModule {
         },
         {
           provide: READINESS_CHECKS,
-          inject: [PG_POOL, REDIS],
+          inject: [DATABASE, REDIS],
           useFactory: readinessChecks,
         },
         ConnectionsLifecycle,
       ],
-      exports: [READINESS_CHECKS],
+      exports: [READINESS_CHECKS, DATABASE],
     };
   }
 }

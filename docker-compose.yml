@@ -6,8 +6,12 @@
 # Ports bind to 127.0.0.1 so nothing is exposed beyond this machine.
 name: floty
 
+# api and worker connect as their own login role, which row-level security applies to; the
+# POSTGRES_USER superuser only runs migrations (ADR-0010). `migrate` creates the login role.
+x-database-url: &database-url postgres://${APP_DB_USER:-floty_service}:${APP_DB_PASSWORD:-floty_service_dev}@postgres:5432/${POSTGRES_DB:-floty}
+
 x-app-env: &app-env
-  DATABASE_URL: postgres://${POSTGRES_USER:-floty}:${POSTGRES_PASSWORD:-floty_dev}@postgres:5432/${POSTGRES_DB:-floty}
+  DATABASE_URL: *database-url
   REDIS_URL: redis://redis:6379
   LOG_LEVEL: ${LOG_LEVEL:-info}
   DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-local}
@@ -53,6 +57,19 @@ services:
       timeout: 3s
       retries: 10
 
+  # One-shot: applies migrations and provisions the services' login role, then exits.
+  migrate:
+    build: { context: ., target: api }
+    image: floty-api:dev
+    command: ['node', 'node_modules/@floty/db/dist/migrate-cli.js']
+    environment:
+      MIGRATION_DATABASE_URL: postgres://${POSTGRES_USER:-floty}:${POSTGRES_PASSWORD:-floty_dev}@postgres:5432/${POSTGRES_DB:-floty}
+      DATABASE_URL: *database-url
+    healthcheck: { disable: true }
+    restart: 'no'
+    depends_on:
+      postgres: { condition: service_healthy }
+
   api:
     build: { context: ., target: api }
     image: floty-api:dev
@@ -61,7 +78,7 @@ services:
       PORT: '4000'
     ports: ['127.0.0.1:4000:4000']
     depends_on:
-      postgres: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
       redis: { condition: service_healthy }
 
   worker:
@@ -72,7 +89,7 @@ services:
       PORT: '4100'
     ports: ['127.0.0.1:4100:4100']
     depends_on:
-      postgres: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
       redis: { condition: service_healthy }
 
   web:

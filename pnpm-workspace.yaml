@@ -9,8 +9,10 @@ packages:
 # provides it, so the script stays blocked (pnpm runs no dependency scripts unless listed).
 # Testcontainers' Docker client pulls in ssh2 (optional native crypto, pure-JS fallback),
 # cpu-features (optional, for ssh2) and protobufjs (postinstall only checks versions): not needed.
+# esbuild (drizzle-kit, dev-only) gets its binary from the optional platform package, like swc.
 ignoredBuiltDependencies:
   - '@swc/core'
   - cpu-features
+  - esbuild
   - protobufjs
   - ssh2

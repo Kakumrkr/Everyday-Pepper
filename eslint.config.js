@@ -15,14 +15,14 @@ import tseslint from 'typescript-eslint';
 const allowedInternalImports = {
   'packages/config': [],
   'packages/contracts': [],
-  'packages/db': ['contracts'],
+  'packages/db': ['contracts', 'testing'],
   'packages/core': ['contracts', 'db'],
   'packages/modules/*': ['contracts', 'db', 'core'],
   'packages/templates/*': ['contracts'],
   'packages/ai': ['contracts', 'core'],
   'packages/integrations': ['contracts', 'core'],
   'packages/ui': ['contracts'],
-  'packages/runtime': ['contracts', 'core', 'testing'],
+  'packages/runtime': ['contracts', 'core', 'db', 'testing'],
   // Test-only helpers; a devDependency wherever used, so a production import fails the image.
   'packages/testing': [],
   // Apps also get each modules/* and templates/* package as it is created.
