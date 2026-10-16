@@ -26,6 +26,9 @@
   --wait-soft: #FFEFD6;
   --info: #1D65A8;
   --info-soft: #E2EEFA;
+  --danger: #B3261E;
+  /* The business's own brand, used on its public booking page (Juniper: deep teal). */
+  --biz: #0E6656; --biz-strong: #0D5E4F; --biz-soft: #DAF2EB; --biz-on: #FFFFFF;
   /* Per-stylist calendar colours (soft fill + readable ink). */
   --s1: #FCE3EC; --s1-ink: #8E1D47;
   --s2: #DAF2EB; --s2-ink: #0D5E4F;
@@ -48,6 +51,7 @@
     --ink: #F8ECF1; --ink-2: #BDA8B3;
     --brand: #FF7FA8; --brand-strong: #FF8FB3; --brand-soft: #46202F; --on-brand: #2A0D19;
     --ok: #7FD69A; --ok-soft: #1D3324; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
+    --danger: #FFB4AB; --biz: #6FD9C0; --biz-strong: #7FE0C9; --biz-soft: #173A33; --biz-on: #062019;
     --s1: #4A2032; --s1-ink: #FFC2D6; --s2: #173A33; --s2-ink: #A6EBD9; --s3: #3D3012; --s3-ink: #FFDE8A;
     --hatch: rgba(189, 168, 179, .12);
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
@@ -60,6 +64,7 @@
   --ink: #F8ECF1; --ink-2: #BDA8B3;
   --brand: #FF7FA8; --brand-strong: #FF8FB3; --brand-soft: #46202F; --on-brand: #2A0D19;
   --ok: #7FD69A; --ok-soft: #1D3324; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
+    --danger: #FFB4AB; --biz: #6FD9C0; --biz-strong: #7FE0C9; --biz-soft: #173A33; --biz-on: #062019;
   --s1: #4A2032; --s1-ink: #FFC2D6; --s2: #173A33; --s2-ink: #A6EBD9; --s3: #3D3012; --s3-ink: #FFDE8A;
   --hatch: rgba(189, 168, 179, .12);
   --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
@@ -457,8 +462,188 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
 }
 .more-list .grow { flex: 1; min-width: 0; }
 .client-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.client-list li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
-.client-list .grow { flex: 1; min-width: 0; }
+
+/* ---------- part 2: shared ---------- */
+.page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; }
+.page-head h1 { font-size: 28px; font-weight: 800; line-height: 1.15; }
+.lede { max-width: 62ch; color: var(--ink-2); }
+.back { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; border: 0; background: none; color: var(--brand); font-weight: 650; padding: 6px 0; }
+.back svg.i { width: 18px; height: 18px; }
+.search {
+  width: 100%; min-height: 46px; border-radius: 999px; border: 1.5px solid var(--line);
+  background: var(--surface); padding: 0 18px;
+}
+.chips-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.client-row {
+  width: 100%; display: flex; align-items: center; gap: 12px; text-align: left;
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface);
+}
+.client-row:hover { border-color: var(--brand); }
+.client-row .grow { flex: 1; min-width: 0; }
+
+/* client profile */
+.profile { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.profile-hero { display: flex; gap: 14px 16px; align-items: center; flex-wrap: wrap; }
+.profile-hero .avatar { width: 68px; height: 68px; font-size: 22px; }
+.profile-hero h1 { font-size: 30px; font-weight: 800; line-height: 1.1; }
+.timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.timeline li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.timeline li:last-child { border-bottom: 0; }
+
+/* what I know */
+.facts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.fact { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.fact .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.fact .src { font-size: 12px; color: var(--ink-2); }
+.fact-actions { display: flex; gap: 6px; flex: none; }
+.fact-actions .icon-btn { width: 38px; height: 38px; }
+.fact-actions svg.i { width: 18px; height: 18px; }
+.fact-edit input { width: 100%; min-height: 42px; border: 1.5px solid var(--line); border-radius: var(--r-sm); padding: 0 12px; background: var(--bg); }
+.confirm-inline { margin-top: 8px; background: var(--wait-soft); border-radius: var(--r-sm); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.add-fact { display: flex; gap: 8px; }
+.add-fact input { flex: 1; min-width: 0; min-height: 46px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); padding: 0 18px; }
+.group-title { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; }
+
+/* autonomy */
+.tier { display: flex; flex-direction: column; gap: 10px; }
+.tier-head { display: flex; gap: 12px; align-items: flex-start; }
+.tier-head h2 { font-size: 19px; font-weight: 700; }
+.tier-head p { font-size: 14px; color: var(--ink-2); max-width: 62ch; }
+.dial-row { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.dial-row .lbl { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dial-row .lbl b { font-weight: 650; }
+.dial { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: var(--surface-2); border-radius: 14px; padding: 4px; border: 0; margin: 0; min-width: 0; }
+.dial input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.dial label {
+  display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;
+  min-height: 42px; padding: 4px 6px; border-radius: 10px; font-size: 13px; font-weight: 650;
+  color: var(--ink-2); cursor: pointer; line-height: 1.2;
+}
+.dial label svg.i { width: 14px; height: 14px; }
+.dial input:checked + label { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.dial input:focus-visible + label { outline: 3px solid var(--brand); outline-offset: 1px; }
+.dial input:disabled + label { cursor: not-allowed; opacity: .55; }
+.dial-example { font-size: 13px; color: var(--ink-2); }
+
+/* team & services */
+.team-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+.photo {
+  width: 64px; height: 64px; border-radius: 50%; flex: none; position: relative;
+  display: grid; place-items: center; font: 800 21px/1 var(--font-display);
+}
+.photo.s1 { background: var(--s1); color: var(--s1-ink); }
+.photo.s2 { background: var(--s2); color: var(--s2-ink); }
+.photo.s3 { background: var(--s3); color: var(--s3-ink); }
+.photo .cam {
+  position: absolute; right: -2px; bottom: -2px; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink-2);
+}
+.photo .cam svg.i { width: 13px; height: 13px; }
+.svc-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); overflow: clip; }
+.svc-list li { display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.svc-list li:last-child { border-bottom: 0; }
+.svc-list .grow { flex: 1; min-width: 0; }
+.price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.radio-card { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1.5px solid var(--line); border-radius: var(--r-md); cursor: pointer; }
+.radio-card input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--brand-strong); flex: none; }
+.radio-card:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+
+/* full-screen flows: onboarding + booking page */
+.app[data-full] { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); grid-template-areas: "stage"; }
+.app[data-full] .side, .app[data-full] .top, .app[data-full] .dock { display: none; }
+.flow { min-height: 100%; display: flex; flex-direction: column; }
+.flow-bar {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px; justify-content: space-between;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.flow-bar .biz { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.flow-body {
+  width: 100%; max-width: 720px; margin: 0 auto; flex: 1;
+  padding-block: 24px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 18px;
+}
+.flow-body h1 { font-size: 28px; font-weight: 800; line-height: 1.15; }
+.flow-body h2 { font-size: 18px; font-weight: 700; }
+.steps { display: flex; gap: 6px; }
+.steps i { flex: 1; height: 5px; border-radius: 999px; background: var(--line); }
+.steps i.on { background: var(--brand-strong); }
+.choice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.choice {
+  text-align: left; border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--r-md);
+  padding: 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+}
+.choice:hover { border-color: var(--brand); }
+.choice[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); }
+.choice b { font-weight: 700; }
+.choice span { font-size: 13px; color: var(--ink-2); }
+.pick-list { display: flex; flex-direction: column; gap: 8px; }
+.choice-row {
+  width: 100%; display: flex; gap: 12px; align-items: center; text-align: left;
+  border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--r-md); padding: 14px 16px;
+}
+.choice-row:hover { border-color: var(--brand); }
+.choice-row .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.choice-row .grow span { font-size: 13px; color: var(--ink-2); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 700; }
+.field input, .field textarea {
+  min-height: 48px; border-radius: var(--r-sm); border: 1.5px solid var(--line); background: var(--surface); padding: 0 14px; width: 100%;
+}
+.field textarea { padding: 10px 14px; min-height: 84px; resize: vertical; }
+.field .err { color: var(--danger); font-size: 13px; font-weight: 600; }
+.field [aria-invalid="true"] { border-color: var(--danger); }
+.field .hint { font-size: 12px; color: var(--ink-2); }
+.progress-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.progress-list li { display: flex; gap: 10px; align-items: center; }
+.progress-list li svg.i { color: var(--ok); }
+.flow-actions {
+  position: sticky; bottom: 0; z-index: 4; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+  background: var(--bg); border-top: 1px solid var(--line);
+  padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.flow-actions .spacer { flex: 1; }
+.review-row { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.review-row:last-child { border-bottom: 0; }
+.review-row input { width: 20px; height: 20px; accent-color: var(--brand-strong); flex: none; }
+.review-row .grow { flex: 1; min-width: 0; }
+.big-check { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--ok-soft); color: var(--ok); }
+.big-check svg.i { width: 32px; height: 32px; stroke-width: 2.4; }
+.linkbox { display: flex; gap: 8px; align-items: center; padding: 6px 6px 6px 14px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); }
+.linkbox code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 15px/1.2 var(--font-body); user-select: all; }
+
+/* booking page: the business's own brand replaces Floty's */
+.bookpage { --brand: var(--biz); --brand-strong: var(--biz-strong); --brand-soft: var(--biz-soft); --on-brand: var(--biz-on); }
+.bookpage .biz-avatar { background: var(--biz-soft); color: var(--biz); }
+.date-strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.date-strip::-webkit-scrollbar { display: none; }
+.date {
+  flex: none; width: 64px; border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--r-md);
+  padding: 8px 0; display: flex; flex-direction: column; align-items: center;
+}
+.date b { font: 700 20px/1.15 var(--font-display); font-variant-numeric: tabular-nums; }
+.date span { font-size: 12px; color: var(--ink-2); font-weight: 600; }
+.date[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); }
+.date:disabled { opacity: .5; cursor: default; }
+.code-input { font: 700 26px/1 var(--font-display) !important; letter-spacing: .35em; text-align: center; }
+.picked { display: flex; flex-wrap: wrap; gap: 6px; }
+.picked button { border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 650; }
+.powered { text-align: center; font-size: 12px; color: var(--ink-2); padding-block: 8px 16px; }
+@media (min-width: 960px) {
+  .profile { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+  .dial-row { flex-direction: row; align-items: center; gap: 20px; }
+  .dial-row .lbl { flex: 1; }
+  .dial-row .dial { width: 400px; flex: none; }
+  .flow-body h1 { font-size: 34px; }
+}
+@media (max-width: 599px) {
+  .fact > .avatar { display: none; }
+}
+.nowrap { white-space: nowrap; }
 
 /* ---------- desktop ---------- */
 @media (min-width: 960px) {
@@ -501,6 +686,8 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
 @media (max-width: 959px) {
   .stage[data-view="chat"] ~ .dock .ask-pill,
   .stage[data-view="more"] ~ .dock .ask-pill,
+  .stage[data-view="autonomy"] ~ .dock .ask-pill,
+  .stage[data-view="team"] ~ .dock .ask-pill,
   .stage[data-view="brand"] ~ .dock .ask-pill { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -531,6 +718,12 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
     <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3V4Z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3V4Z"/><path d="M9 4h6M9 20h6"/></symbol>
     <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8 20 18M8 16 20 6"/></symbol>
     <symbol id="i-web" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 3 2.5 14 0 17M12 3.5c-2.5 3-2.5 14 0 17"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3.5L9 5.5h6L16.5 8H20v11H4Z"/><circle cx="12" cy="13" r="3.2"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
     <symbol id="i-floty" viewBox="0 0 40 40">
       <!-- Inline var() styles: class selectors can't reach inside <use> clones, but custom properties inherit. -->
       <path style="fill:var(--brand-strong)" d="M20 3c9.9 0 17 6.6 17 15.2S29.9 33.4 20 33.4c-1.9 0-3.7-.2-5.4-.7L7 37l1.3-7.2C5 27 3 22.9 3 18.2 3 9.6 10.1 3 20 3Z"/>
@@ -547,11 +740,15 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
       <button class="side-link" data-go="home"><svg class="i"><use href="#i-home"/></svg>Home<span class="badge" data-needs-count>2</span></button>
       <button class="side-link" data-go="chat"><svg class="i"><use href="#i-chat"/></svg>Chat</button>
       <button class="side-link" data-go="calendar"><svg class="i"><use href="#i-cal"/></svg>Calendar</button>
-      <button class="side-link" data-go="clients"><svg class="i"><use href="#i-users"/></svg>Clients<span class="soon">Part 2</span></button>
+      <button class="side-link" data-go="clients"><svg class="i"><use href="#i-users"/></svg>Clients</button>
       <div class="eyebrow nav-label">Trust</div>
-      <button class="side-link" data-soon="Autonomy settings"><svg class="i"><use href="#i-dial"/></svg>Autonomy<span class="soon">Part 2</span></button>
-      <button class="side-link" data-soon="What I know"><svg class="i"><use href="#i-brain"/></svg>What I know<span class="soon">Part 2</span></button>
+      <button class="side-link" data-go="autonomy"><svg class="i"><use href="#i-dial"/></svg>Autonomy</button>
+      <button class="side-link" data-go="know"><svg class="i"><use href="#i-brain"/></svg>What I know</button>
+      <div class="eyebrow nav-label">Business</div>
+      <button class="side-link" data-go="team"><svg class="i"><use href="#i-scissors"/></svg>Team &amp; services</button>
+      <button class="side-link" data-action="book-start"><svg class="i"><use href="#i-web"/></svg>Booking page</button>
       <div class="eyebrow nav-label">Prototype</div>
+      <button class="side-link" data-action="ob-start"><svg class="i"><use href="#i-spark"/></svg>Onboarding</button>
       <button class="side-link" data-go="brand"><svg class="i"><use href="#i-palette"/></svg>Design direction</button>
     </nav>
     <div class="foot">
@@ -675,19 +872,64 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
       </div>
     </section>
 
-    <!-- CLIENTS (placeholder for part 2) -->
+    <!-- CLIENTS -->
     <section class="view" id="view-clients" aria-labelledby="clients-title" hidden>
-      <div class="view-inner" style="max-width:760px">
-        <div><p class="eyebrow">Coming in mockups part 2</p><h1 id="clients-title" style="font-size:28px">Clients</h1></div>
-        <p class="muted">The client profile and "What I know" screens are planned for the next session. Here is a preview of the list.</p>
-        <ul class="client-list">
-          <li><span class="avatar av-brand">ML</span><div class="grow"><b>Maria Lopez</b><div class="small muted">Color &amp; gloss every 6 weeks · last visit Sep 4</div></div><span class="pill pill-wait"><svg class="i"><use href="#i-alert"/></svg>PPD allergy</span></li>
-          <li><span class="avatar av-info">LP</span><div class="grow"><b>Lena Park</b><div class="small muted">Cut with Marco · 9 weeks since last visit</div></div><span class="pill pill-plain">Overdue</span></li>
-          <li><span class="avatar av-ok">SM</span><div class="grow"><b>Sarah Mitchell</b><div class="small muted">Cut &amp; style · next visit Fri 3:00</div></div></li>
-          <li><span class="avatar av-wait">RD</span><div class="grow"><b>Rosa Diaz</b><div class="small muted">On the waitlist · gloss, weekday afternoons</div></div></li>
-        </ul>
+      <div class="view-inner" style="max-width:820px">
+        <div class="page-head"><div><p class="eyebrow">Sample of 412 clients</p><h1 id="clients-title">Clients</h1></div></div>
+        <label class="sr-only" for="client-search">Search clients</label>
+        <input class="search" id="client-search" type="search" placeholder="Search by name" autocomplete="off">
+        <ul class="client-list" id="client-list"></ul>
       </div>
     </section>
+
+    <!-- CLIENT PROFILE -->
+    <section class="view" id="view-client" aria-labelledby="client-title" hidden>
+      <div class="view-inner" style="max-width:1040px" id="client-body"></div>
+    </section>
+
+    <!-- WHAT I KNOW -->
+    <section class="view" id="view-know" aria-labelledby="know-title" hidden>
+      <div class="view-inner" style="max-width:820px">
+        <div class="page-head"><div><p class="eyebrow">Trust</p><h1 id="know-title">What I know</h1></div></div>
+        <p class="lede">Everything I remember about Juniper Hair Studio. Fix anything that's wrong. When you delete something, I forget it everywhere, including chat and bookings.</p>
+        <form class="add-fact" id="know-add" autocomplete="off">
+          <label class="sr-only" for="know-add-input">Tell Floty something new</label>
+          <input id="know-add-input" placeholder="Tell me something, like: we close at 3 on Christmas Eve">
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+        <div class="chips" id="know-filter" role="group" aria-label="Show"></div>
+        <div id="know-body" style="display:flex;flex-direction:column;gap:24px"></div>
+      </div>
+    </section>
+
+    <!-- AUTONOMY -->
+    <section class="view" id="view-autonomy" aria-labelledby="aut-title" hidden>
+      <div class="view-inner" style="max-width:920px">
+        <div class="page-head"><div><p class="eyebrow">Trust</p><h1 id="aut-title">Autonomy</h1></div></div>
+        <p class="lede">Choose what I do on my own. Start careful and give me more room as you get comfortable. I can suggest changes, but only you can make them here, and every change is logged.</p>
+        <div id="aut-body" style="display:flex;flex-direction:column;gap:26px"></div>
+      </div>
+    </section>
+
+    <!-- TEAM & SERVICES -->
+    <section class="view" id="view-team" aria-labelledby="team-title" hidden>
+      <div class="view-inner" style="max-width:1040px">
+        <div class="page-head">
+          <div><p class="eyebrow">Business</p><h1 id="team-title">Team &amp; services</h1></div>
+          <div class="seg" role="group" aria-label="Show">
+            <button data-action="team-tab" data-tab="team" aria-pressed="true">Team</button>
+            <button data-action="team-tab" data-tab="services" aria-pressed="false">Services</button>
+          </div>
+        </div>
+        <div id="team-body" style="display:flex;flex-direction:column;gap:18px"></div>
+      </div>
+    </section>
+
+    <!-- ONBOARDING (full screen) -->
+    <section class="view" id="view-onboarding" aria-label="Set up Floty" hidden><div class="flow" id="ob-root"></div></section>
+
+    <!-- PUBLIC BOOKING PAGE (full screen, the business's brand) -->
+    <section class="view bookpage" id="view-book" aria-label="Juniper Hair Studio booking page" hidden><div class="flow" id="book-root"></div></section>
 
     <!-- MORE (mobile) -->
     <section class="view" id="view-more" aria-labelledby="more-title" hidden>
@@ -695,9 +937,11 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
         <h1 id="more-title" style="font-size:28px">More</h1>
         <ul class="more-list">
           <li><button data-go="brand"><span class="avatar av-brand"><svg class="i"><use href="#i-palette"/></svg></span><span class="grow"><b>Design direction</b><br><span class="small muted">Colors, type and the Floty wordmark</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
-          <li><button data-soon="Autonomy settings"><span class="avatar av-info"><svg class="i"><use href="#i-dial"/></svg></span><span class="grow"><b>Autonomy</b><br><span class="small muted">What Floty may do on its own · part 2</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
-          <li><button data-soon="What I know"><span class="avatar av-ok"><svg class="i"><use href="#i-brain"/></svg></span><span class="grow"><b>What I know</b><br><span class="small muted">Facts and rules Floty remembers · part 2</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
-          <li><button data-soon="Team and services"><span class="avatar av-wait"><svg class="i"><use href="#i-scissors"/></svg></span><span class="grow"><b>Team &amp; services</b><br><span class="small muted">Stylists, hours and your menu · part 2</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-go="autonomy"><span class="avatar av-info"><svg class="i"><use href="#i-dial"/></svg></span><span class="grow"><b>Autonomy</b><br><span class="small muted">What Floty may do on its own</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-go="know"><span class="avatar av-ok"><svg class="i"><use href="#i-brain"/></svg></span><span class="grow"><b>What I know</b><br><span class="small muted">Facts and rules Floty remembers</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-go="team"><span class="avatar av-wait"><svg class="i"><use href="#i-scissors"/></svg></span><span class="grow"><b>Team &amp; services</b><br><span class="small muted">Stylists, roles, hours and your menu</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-action="book-start"><span class="avatar av-ok"><svg class="i"><use href="#i-web"/></svg></span><span class="grow"><b>Booking page</b><br><span class="small muted">See what your clients see</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-action="ob-start"><span class="avatar av-brand"><svg class="i"><use href="#i-spark"/></svg></span><span class="grow"><b>Onboarding</b><br><span class="small muted">Replay the 10-minute setup</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
           <li><button data-action="theme"><span class="avatar av-info"><svg class="i"><use href="#i-moon"/></svg></span><span class="grow"><b data-theme-label>Theme: system</b><br><span class="small muted">Switch between system, light and dark</span></span></button></li>
         </ul>
         <p class="fine">Mockup with sample data. Nothing here is saved or sent.</p>
@@ -1034,7 +1278,7 @@ Ana at Juniper Hair Studio</textarea>
       <div class="why-block"><span class="eyebrow">What started it</span><p>${w.asked}</p></div>
       <div class="why-block"><span class="eyebrow">What I checked</span><ul class="why-list">${w.used.map((u) => `<li>${u}</li>`).join("")}</ul></div>
       <div class="why-block"><span class="eyebrow">What I didn't do</span><p>${w.not}</p></div>
-      <div class="notice" style="background:var(--info-soft)">${icon("dial")}<span>Setting used: <b style="color:var(--info)">${w.setting}</b><span class="src">Change it in Autonomy (mockups part 2).</span></span></div>`);
+      <div class="notice" style="background:var(--info-soft)">${icon("dial")}<span>Setting used: <b style="color:var(--info)">${w.setting}</b><span class="src"><button class="link" data-go="autonomy">Change it in Autonomy</button></span></span></div>`);
   }
 
   /* ---------------- chat ---------------- */
@@ -1133,13 +1377,13 @@ Ana at Juniper Hair Studio</textarea>
           <dt>Stylist</dt><dd>${s.staff}</dd>
           <dt>When</dt><dd class="num">${s.when}</dd>
         </dl>
-        <div class="notice">${icon("alert")}<span><b>Maria is allergic to PPD.</b> Use the PPD-free color line. I'll add this to the appointment.<span class="src">From Maria's profile · added Sep 4 by you</span></span></div>
+        ${state.mariaAllergy ? `<div class="notice">${icon("alert")}<span><b>Maria is allergic to PPD.</b> Use the PPD-free color line. I'll add this to the appointment.<span class="src">From Maria's profile · added Sep 4 by you</span></span></div>` : ""}
         <label class="check"><input type="checkbox" id="maria-email" checked> Email Maria a confirmation</label>
         <div class="actions">
           <button class="btn btn-primary" data-action="maria-book">${icon("check")}Book it</button>
           <button class="btn btn-ghost" data-action="maria-change">Pick another time</button>
         </div>
-        <p class="fine">You asked me to check with you before booking. <button class="link" data-soon="Autonomy settings">Change this</button></p>
+        <p class="fine">You asked me to check with you before booking. <button class="link" data-go="autonomy">Change this</button></p>
       </div>`;
   }
   function bookedCard(slotKey, emailed) {
@@ -1151,7 +1395,7 @@ Ana at Juniper Hair Studio</textarea>
           <dt>Client</dt><dd>Maria Lopez</dd>
           <dt>Service</dt><dd>Color &amp; gloss with ${s.staff}</dd>
           <dt>When</dt><dd class="num">${s.when}</dd>
-          <dt>Note</dt><dd style="color:var(--wait)">PPD allergy, use PPD-free line</dd>
+          ${state.mariaAllergy ? `<dt>Note</dt><dd style="color:var(--wait)">PPD allergy, use PPD-free line</dd>` : ""}
         </dl>
         <p class="small muted" data-maria-email>${emailed ? "Confirmation email to Maria sends in 2 minutes, unless you undo." : "No email sent to Maria."}</p>
         <div class="actions">
@@ -1254,7 +1498,7 @@ Ana at Juniper Hair Studio</textarea>
         if (ev.kind === "block") {
           return `<div class="ev block" style="top:${top}px;height:${h}px"><b>${ev.svc}</b></div>`;
         }
-        const flag = ev.sensitive ? `<span class="flag">${icon("alert")}Allergy</span>` : "";
+        const flag = ev.sensitive && state.mariaAllergy ? `<span class="flag">${icon("alert")}Allergy</span>` : "";
         const fresh = ev.id === "maria" ? " fresh" : "";
         return `<button class="ev ${s.tint}${fresh}" style="top:${top}px;height:${h}px" data-action="cal-ev" data-day="${state.calDay}" data-idx="${DAYS[state.calDay].events.indexOf(ev)}" aria-label="${ev.client}, ${ev.svc}, ${fmtRange(ev.s, ev.e)} with ${s.name}">
           <b>${ev.client.split(" ")[0]}</b>${short ? "" : `<span>${ev.svc}</span><span class="num">${fmtRange(ev.s, ev.e)}</span>`}${flag}</button>`;
@@ -1307,11 +1551,12 @@ Ana at Juniper Hair Studio</textarea>
     openSheet(`
       <div class="sheet-head"><div><p class="eyebrow">${DAYS[dayKey].title} · ${s.name}</p><h2 id="sheet-title">${ev.client}</h2></div><button class="icon-btn" data-action="close-sheet" aria-label="Close">${icon("x")}</button></div>
       <dl class="kv"><dt>Service</dt><dd>${ev.svc}</dd><dt>Time</dt><dd class="num">${fmtRange(ev.s, ev.e)}</dd><dt>Stylist</dt><dd>${s.name}</dd></dl>
-      ${ev.sensitive ? `<div class="notice">${icon("alert")}<span><b>${ev.sensitive}.</b> Use the PPD-free color line.<span class="src">From Maria's profile · sensitive</span></span></div>` : ""}
+      ${ev.sensitive && state.mariaAllergy ? `<div class="notice">${icon("alert")}<span><b>${ev.sensitive}.</b> Use the PPD-free color line.<span class="src">From Maria's profile · sensitive</span></span></div>` : ""}
       ${ev.note ? `<p class="small muted">${ev.note}</p>` : ""}
       <div class="actions">
         <button class="btn btn-primary btn-sm" data-soon="Rescheduling from the calendar">Reschedule</button>
         <button class="btn btn-ghost btn-sm" data-soon="Cancelling from the calendar">Cancel booking</button>
+        ${clientIdByName(ev.client) ? `<button class="btn btn-ghost btn-sm" data-action="open-client" data-id="${clientIdByName(ev.client)}">View profile</button>` : ""}
         <button class="btn btn-text btn-sm" data-action="ask-about" data-name="${ev.client}">Ask Floty about ${ev.client.split(" ")[0]}</button>
       </div>`);
   }
@@ -1328,25 +1573,32 @@ Ana at Juniper Hair Studio</textarea>
   }
 
   /* ---------------- navigation ---------------- */
-  const VIEWS = ["home", "chat", "calendar", "clients", "more", "brand"];
+  const VIEWS = ["home", "chat", "calendar", "clients", "client", "know", "autonomy", "team", "more", "brand", "onboarding", "book"];
+  const FULL_SCREEN = ["onboarding", "book"];
+  // Which tab / sidebar item lights up for views that have no entry of their own.
+  const TAB_FOR = { client: "clients", know: "more", autonomy: "more", team: "more", brand: "more" };
+  const SIDE_FOR = { client: "clients" };
   function go(view, opts = {}) {
     if (!VIEWS.includes(view)) view = "home";
+    if (!$("#scrim").hidden) closeSheet();
     state.view = view;
     VIEWS.forEach((v) => { $(`#view-${v}`).hidden = v !== view; });
     $("#stage").dataset.view = view;
-    const navTarget = view === "brand" ? (window.innerWidth >= 960 ? "brand" : "more") : view;
-    $$("[data-go]").forEach((b) => {
-      if (b.classList.contains("tab") || b.classList.contains("side-link")) {
-        if (b.dataset.go === navTarget || (b.classList.contains("side-link") && b.dataset.go === view)) b.setAttribute("aria-current", "page");
-        else b.removeAttribute("aria-current");
-      }
+    $("#app").toggleAttribute("data-full", FULL_SCREEN.includes(view));
+    $$(".tab[data-go]").forEach((b) => {
+      if (b.dataset.go === (TAB_FOR[view] || view)) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    $$(".side-link[data-go]").forEach((b) => {
+      if (b.dataset.go === (SIDE_FOR[view] || view)) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     });
     if (location.hash.slice(1) !== view) history.replaceState(null, "", `#${view}`);
+    if (view !== "chat") $(`#view-${view}`).scrollTop = 0;
     if (view === "chat") {
       scrollChat();
       if (opts.focus) $("#composer-input").focus();
     }
-    if (view === "calendar") renderCalendar();
+    const RENDER = { calendar: renderCalendar, clients: renderClients, client: renderClient, know: renderKnow, autonomy: renderAutonomy, team: renderTeam, onboarding: renderOb, book: renderBook };
+    if (RENDER[view]) RENDER[view]();
   }
 
   /* ---------------- theme ---------------- */
@@ -1367,11 +1619,12 @@ Ana at Juniper Hair Studio</textarea>
     }
     if (el.dataset.go) { e.preventDefault(); go(el.dataset.go, { focus: "focusComposer" in el.dataset }); return; }
     if (el.dataset.why) { openWhy(el.dataset.why); return; }
-    if (el.dataset.soon) { closeSheet(); toast(`${el.dataset.soon} is designed in the next mockup session.`); return; }
+    if (el.dataset.soon) { closeSheet(); toast(`${el.dataset.soon} isn't clickable in this prototype. It works like the same action in chat.`); return; }
     if (el.dataset.chip) { runChip(el.dataset.chip); return; }
     if (el.dataset.slot) { pickSlot(el); return; }
     const a = el.dataset.action;
     if (!a) return;
+    if (EXTRA[a]) { EXTRA[a](el, e); return; }
     switch (a) {
       case "theme":
         state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % THEMES.length];
@@ -1416,6 +1669,7 @@ Ana at Juniper Hair Studio</textarea>
       }
       case "sugg-yes": {
         state.sugg = state.sugg.filter((x) => x !== el.dataset.id);
+        if (el.dataset.id === "autoconfirm") state.autonomy.pageRequests = "auto";
         renderFeed();
         toast(`${el.dataset.msg}.`);
         break;
@@ -1462,13 +1716,7 @@ Ana at Juniper Hair Studio</textarea>
       case "cal-ev": openEventSheet(el.dataset.day, +el.dataset.idx); break;
       case "cal-open": openGapSheet(el.dataset.staff, el.dataset.s, el.dataset.e); break;
       case "gap-fill": closeSheet(); toast(el.dataset.msg); break;
-      case "ask-about": {
-        closeSheet();
-        go("chat");
-        addUser(`Tell me about ${el.dataset.name}`);
-        aiReply(`<p class="text">The client profile card for ${el.dataset.name} is part of mockups part 2. It will show visit history, preferences and anything sensitive, like allergies.</p>`);
-        break;
-      }
+      case "ask-about": askAbout(el.dataset.name); break;
     }
   });
 
@@ -1496,18 +1744,20 @@ Ana at Juniper Hair Studio</textarea>
     $$("[data-card='maria-slots'] .slot").forEach((b) => { b.setAttribute("aria-pressed", String(b === btn)); b.disabled = true; });
     state.mariaFlow = "confirming";
     addUser(SLOT_TEXT[key].label);
-    aiReply(`<p class="text">Here's the booking. Maria has an allergy note, so I've flagged it for ${SLOT_TEXT[key].staff}.</p>${confirmCard(key)}`);
+    if (state.autonomy.create !== "ask") { bookMaria(null); return; }
+    aiReply(`<p class="text">Here's the booking.${state.mariaAllergy ? ` Maria has an allergy note, so I've flagged it for ${SLOT_TEXT[key].staff}.` : ""}</p>${confirmCard(key)}`);
   }
   function bookMaria(btn) {
     const emailed = $("#maria-email") ? $("#maria-email").checked : true;
-    btn.closest("[data-card]").remove();
+    if (btn) btn.closest("[data-card]").remove();
     state.mariaFlow = "booked";
     const ev = DAYS.fri.events.find((x) => x.id === "maria");
     const slotTimes = { "fri-1230": [t(12, 30), t(14, 30), "jess"], "fri-1715": [t(17, 15), t(19, 15), "jess"], "fri-1600-priya": [t(16), t(18), "priya"] };
     // Saturday isn't in the sample calendar, so that choice only shows in chat.
     if (slotTimes[mariaSlot]) [ev.s, ev.e, ev.staff] = slotTimes[mariaSlot];
     else ev.staff = "none";
-    addAi(`<p class="text">Booked. I added Maria's PPD allergy to the appointment so ${SLOT_TEXT[mariaSlot].staff} sees it.</p>${bookedCard(mariaSlot, emailed)}`, "maria-booked-msg");
+    const lead = btn ? "Booked." : "Booked. You let me make bookings without asking, so here it is with Undo.";
+    addAi(`<p class="text">${lead}${state.mariaAllergy ? ` I added Maria's PPD allergy to the appointment so ${SLOT_TEXT[mariaSlot].staff} sees it.` : ""}</p>${bookedCard(mariaSlot, emailed)}`, "maria-booked-msg");
     toast(`Booked Maria with ${SLOT_TEXT[mariaSlot].staff}.`, { undo: undoMaria });
   }
   function undoMaria() {
@@ -1539,6 +1789,694 @@ Ana at Juniper Hair Studio</textarea>
     if (e.key === "Escape" && !$("#scrim").hidden) closeSheet();
   });
   window.addEventListener("hashchange", () => go(location.hash.slice(1) || "home"));
+
+  /* ================= part 2: profiles, memory, autonomy, team, onboarding, booking page ================= */
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fmtDur = (m) => (m < 60 ? `${m} m` : `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} m` : ""}`);
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  Object.assign(state, {
+    mariaAllergy: true,
+    clientId: "maria",
+    knowFilter: "all",
+    editing: null,
+    confirmingDelete: null,
+    teamTab: "team",
+    autonomy: { create: "ask", move: "notify", pageRequests: "notify", block: "notify", notes: "notify", confirmations: "auto", rebook: "ask", waitlist: "ask", bulk: "ask" },
+    ob: { step: 1, type: null, source: "web", read: "idle", readCount: 0, importSrc: "vagaro", imported: false, gcal: false },
+    book: { step: "service", svc: null, staff: null, date: "fri", slot: null, name: "", email: "", raced: false },
+  });
+
+  /* ---------- memory ("What I know") ---------- */
+  let facts = [
+    { id: "f-ppd", group: "clients", client: "maria", text: "Maria Lopez is allergic to PPD", detail: "Use the PPD-free color line for every color service.", sensitive: true, source: "You told me in chat · Sep 4" },
+    { id: "f-latte", group: "clients", client: "maria", text: "Maria likes an oat-milk latte when she arrives", source: "Jess added a note · Aug 1" },
+    { id: "f-lena", group: "clients", client: "lena", text: "Lena Park prefers weekday lunchtime appointments", source: "Learned from her last 5 bookings", learned: true },
+    { id: "f-sarah", group: "clients", client: "sarah", text: "Sarah Mitchell only sees Marco", source: "You told me · Jul 22" },
+    { id: "f-dana", group: "clients", client: "dana", text: "Dana Kim is new to color", detail: "First visit Friday. Jess should do a strand test.", source: "From her booking-page answers" },
+    { id: "b-hours", group: "business", text: "Open Tuesday to Saturday", detail: "Tue–Fri 9:00 am–7:30 pm, Sat 9:00 am–5:00 pm. Closed Sunday and Monday.", source: "From your website · setup" },
+    { id: "b-cancel", group: "business", text: "Cancellations need 24 hours' notice", source: "From your website's policy page" },
+    { id: "b-parking", group: "business", text: "Free parking behind the building on Elm St", source: "You told me · Oct 2" },
+    { id: "r-buffer", group: "rules", text: "Leave 15 minutes between appointments", source: "Your booking rules", enforced: true },
+    { id: "r-late", group: "rules", text: "Don't start a full color after 5:30 pm", source: "You told me · Aug 19", enforced: true },
+    { id: "r-keratin", group: "rules", text: "Only Priya does keratin treatments", source: "From Team & services", enforced: true },
+    { id: "r-consult", group: "rules", text: "New color clients get a 15-minute consultation first", source: "Learned from your edits · Sep 28", learned: true },
+  ];
+  const GROUPS = {
+    business: { title: "About the business", icon: "home", av: "av-info" },
+    clients: { title: "About clients", icon: "users", av: "av-brand" },
+    rules: { title: "Rules I follow", icon: "dial", av: "av-ok" },
+  };
+  function factRow(f) {
+    if (state.editing === f.id) {
+      return `<li class="fact" data-fact="${f.id}"><div class="grow fact-edit">
+        <label class="sr-only" for="fact-edit-${f.id}">Edit fact</label><input id="fact-edit-${f.id}" value="${esc(f.text)}">
+        <div class="actions" style="margin-top:8px"><button class="btn btn-primary btn-sm" data-action="fact-save" data-id="${f.id}">Save</button><button class="btn btn-ghost btn-sm" data-action="fact-cancel">Cancel</button></div>
+      </div></li>`;
+    }
+    const pills = [
+      f.sensitive ? `<span class="pill pill-wait">${icon("alert")}Sensitive</span>` : "",
+      f.enforced ? `<span class="pill pill-info">Always applied</span>` : "",
+      f.learned ? `<span class="pill pill-brand">${icon("spark")}Learned</span>` : "",
+    ].join("");
+    const confirm = state.confirmingDelete === f.id
+      ? `<div class="confirm-inline" role="alert"><span>Forget this? I'll stop using it everywhere, including chat and bookings.</span>
+          <div class="actions"><button class="btn btn-primary btn-sm" data-action="fact-delete" data-id="${f.id}">Forget it</button><button class="btn btn-ghost btn-sm" data-action="fact-keep">Keep</button></div></div>`
+      : "";
+    return `<li class="fact" data-fact="${f.id}">
+      <span class="avatar ${GROUPS[f.group].av}">${icon(GROUPS[f.group].icon)}</span>
+      <div class="grow">
+        <p style="font-weight:650">${esc(f.text)}</p>
+        ${f.detail ? `<p class="small">${esc(f.detail)}</p>` : ""}
+        <p class="src">${esc(f.source)}</p>
+        ${pills ? `<div class="chips-row" style="margin-top:6px">${pills}</div>` : ""}
+        ${confirm}
+      </div>
+      <div class="fact-actions">
+        <button class="icon-btn" data-action="fact-edit" data-id="${f.id}" aria-label="Edit: ${esc(f.text)}">${icon("edit")}</button>
+        <button class="icon-btn" data-action="fact-ask-delete" data-id="${f.id}" aria-label="Delete: ${esc(f.text)}">${icon("trash")}</button>
+      </div>
+    </li>`;
+  }
+  function renderKnow() {
+    const filters = [["all", "All"], ["business", "Business"], ["clients", "Clients"], ["rules", "Rules"]];
+    $("#know-filter").innerHTML = filters.map(([k, label]) => {
+      const n = k === "all" ? facts.length : facts.filter((f) => f.group === k).length;
+      return `<button class="chip" data-action="know-filter" data-k="${k}" aria-pressed="${state.knowFilter === k}">${label} · ${n}</button>`;
+    }).join("");
+    const groups = Object.keys(GROUPS).filter((g) => state.knowFilter === "all" || state.knowFilter === g);
+    $("#know-body").innerHTML = groups.map((g) => {
+      const list = facts.filter((f) => f.group === g);
+      return `<section class="tier" aria-label="${GROUPS[g].title}">
+        <h2 class="group-title">${GROUPS[g].title}</h2>
+        ${list.length ? `<ul class="facts">${list.map(factRow).join("")}</ul>` : `<p class="empty-note">Nothing here yet.</p>`}
+        ${g === "clients" ? `<p class="fine">Sensitive facts are visible to owners and the client's stylist only.</p>` : ""}
+      </section>`;
+    }).join("");
+    if (state.editing) { const inp = $(`#fact-edit-${state.editing}`); if (inp) inp.focus(); }
+  }
+  function refreshMemoryViews() {
+    renderKnow();
+    renderClients();
+    if (state.view === "client") renderClient();
+    renderCalendar();
+  }
+
+  /* ---------- clients ---------- */
+  const CLIENTS = {
+    maria: { name: "Maria Lopez", ini: "ML", av: "av-brand", since: "March 2023", visits: 14, spend: "$138", email: "maria.lopez@example.com", phone: "(512) 555-0187", usual: "Color & gloss with Jess, every 6 weeks",
+      history: [["Sep 4", "Color & gloss · Jess", "$145", "PPD-free 6N, clear gloss"], ["Jul 24", "Color & gloss · Jess", "$145", ""], ["Jun 12", "Cut & style · Jess", "$75", ""], ["May 1", "Color & gloss · Priya", "$145", "Jess was away"]] },
+    lena: { name: "Lena Park", ini: "LP", av: "av-info", since: "June 2022", visits: 21, spend: "$75", email: "lena.p@example.com", phone: "(512) 555-0121", usual: "Cut & style with Marco, every 6 weeks", tag: ["Overdue", "pill-plain"],
+      history: [["Aug 13", "Cut & style · Marco", "$75", ""], ["Jul 2", "Cut & style · Marco", "$75", ""], ["May 21", "Cut & style · Marco", "$75", ""]] },
+    sarah: { name: "Sarah Mitchell", ini: "SM", av: "av-ok", since: "January 2024", visits: 9, spend: "$75", email: "sarah.m@example.com", phone: "(512) 555-0164", usual: "Cut & style with Marco",
+      history: [["Sep 3", "Cut & style · Marco", "$75", ""], ["Jul 22", "Cut & style · Marco", "$75", "Asked to stay with Marco"]] },
+    rosa: { name: "Rosa Diaz", ini: "RD", av: "av-wait", since: "August 2025", visits: 3, spend: "$65", email: "rosa.d@example.com", phone: "(512) 555-0133", usual: "Gloss with Priya", tag: ["On waitlist", "pill-info"],
+      history: [["Sep 10", "Gloss · Priya", "$65", ""]] },
+    dana: { name: "Dana Kim", ini: "DK", av: "av-info", since: "October 2026", visits: 0, spend: "—", email: "dana.kim@example.com", phone: "(512) 555-0110", usual: "New client", tag: ["New", "pill-brand"], history: [] },
+    tom: { name: "Tom Becker", ini: "TB", av: "av-ok", since: "October 2026", visits: 0, spend: "—", email: "tom.b@example.com", phone: "(512) 555-0199", usual: "New client, booked online", tag: ["New", "pill-brand"], history: [] },
+    ruth: { name: "Ruth Okafor", ini: "RO", av: "av-wait", since: "April 2021", visits: 38, spend: "$75", email: "ruth.o@example.com", phone: "(512) 555-0148", usual: "Cut & style with Jess, every 5 weeks",
+      history: [["Sep 10", "Cut & style · Jess", "$75", ""], ["Aug 6", "Cut & style · Jess", "$75", ""]] },
+    hannah: { name: "Hannah Brooks", ini: "HB", av: "av-brand", since: "February 2025", visits: 6, spend: "$145", email: "hannah.b@example.com", phone: "(512) 555-0176", usual: "Color & gloss with Jess",
+      history: [["Aug 27", "Color & gloss · Jess", "$145", ""]] },
+  };
+  const clientIdByName = (name) => Object.keys(CLIENTS).find((k) => CLIENTS[k].name === name);
+  function upcoming(id) {
+    switch (id) {
+      case "maria": return state.mariaFlow === "booked" ? [SLOT_TEXT[mariaSlot].when, `Color & gloss with ${SLOT_TEXT[mariaSlot].staff}`] : null;
+      case "sarah": return sarahMoved ? ["Tue, Oct 20 · 2:00 pm", "Cut & style with Marco"] : ["Fri, Oct 16 · 3:00 pm", "Cut & style with Marco"];
+      case "dana": return ["Fri, Oct 16 · 3:00–5:00 pm", "Color with Jess"];
+      case "tom": return ["Fri, Oct 16 · 10:00 am", "Men's cut with Marco"];
+      case "ruth": { const ev = DAYS.thu.events.find((x) => x.id === "ruth"); return [`Today · ${fmtRange(ev.s, ev.e)}`, "Cut & style with Jess"]; }
+      case "hannah": return ["Today · 1:30–3:30 pm", "Color & gloss with Jess"];
+      default: return null;
+    }
+  }
+  function clientLine(id) {
+    const u = upcoming(id);
+    if (u) return `Next: ${u[0]}`;
+    return { maria: "Due for color around Oct 16", lena: "9 weeks since her last cut", rosa: "Wants a weekday-afternoon gloss" }[id] || "Nothing booked";
+  }
+  function renderClients() {
+    const q = ($("#client-search").value || "").trim().toLowerCase();
+    const ids = Object.keys(CLIENTS).filter((id) => CLIENTS[id].name.toLowerCase().includes(q));
+    $("#client-list").innerHTML = ids.length ? ids.map((id) => {
+      const c = CLIENTS[id];
+      const pills = [
+        id === "maria" && state.mariaAllergy ? `<span class="pill pill-wait">${icon("alert")}PPD allergy</span>` : "",
+        c.tag ? `<span class="pill ${c.tag[1]}">${c.tag[0]}</span>` : "",
+      ].join("");
+      return `<li><button class="client-row" data-action="open-client" data-id="${id}">
+        <span class="avatar ${c.av}">${c.ini}</span>
+        <span class="grow"><b>${c.name}</b><br><span class="small muted num">${clientLine(id)}</span></span>${pills}</button></li>`;
+    }).join("") : `<li class="empty-note">No clients match "${esc(q)}".</li>`;
+  }
+  function renderClient() {
+    const id = state.clientId, c = CLIENTS[id];
+    const first = c.name.split(" ")[0];
+    const mine = facts.filter((f) => f.client === id);
+    const sens = mine.filter((f) => f.sensitive);
+    const u = upcoming(id);
+    $("#client-body").innerHTML = `
+      <button class="back" data-go="clients">${icon("left")}Clients</button>
+      <div class="profile-hero">
+        <span class="avatar ${c.av}">${c.ini}</span>
+        <div style="flex:1 1 220px;min-width:0"><h1 id="client-title">${c.name}</h1><p class="muted">Client since ${c.since} · ${c.visits} visits${c.visits ? ` · usually ${c.spend}` : ""}</p></div>
+        <div class="actions">
+          <button class="btn btn-primary" data-action="client-book" data-id="${id}">${icon("cal")}Book</button>
+          <button class="btn btn-ghost" data-action="ask-about" data-name="${c.name}">${icon("chat")}Ask Floty</button>
+        </div>
+      </div>
+      <div class="profile">
+        <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+          ${sens.map((f) => `<div class="notice" data-sensitive>${icon("alert")}<span><b>${esc(f.text)}.</b> ${esc(f.detail || "")}<span class="src">Sensitive · only you and ${first}'s stylist see this · ${esc(f.source)}</span></span></div>`).join("")}
+          <div class="card"><span class="eyebrow">Next visit</span>
+            ${u ? `<p style="font-weight:650" class="num">${u[0]}</p><p class="small muted">${u[1]}</p>` : `<p style="font-weight:650">Nothing booked</p>${id === "maria" ? `<p class="small muted">She's due for color around October 16.</p>` : ""}`}
+          </div>
+          <div class="card">
+            <div class="card-type"><span class="eyebrow">What I know about ${first}</span><button class="link small" data-go="know">Edit</button></div>
+            ${mine.length ? `<ul class="why-list" style="font-size:15px">${mine.map((f) => `<li>${esc(f.text)}${f.sensitive ? ` <span class="pill pill-wait">Sensitive</span>` : ""}</li>`).join("")}</ul>` : `<p class="small muted">Nothing yet. Tell me in chat, like "${first} prefers mornings".</p>`}
+            <p class="small muted">Usually books: ${c.usual}</p>
+          </div>
+          <div class="card"><span class="eyebrow">Contact</span>
+            <dl class="kv"><dt>Email</dt><dd style="overflow-wrap:anywhere">${c.email}</dd><dt>Phone</dt><dd class="num">${c.phone}</dd><dt>Reminders</dt><dd>Email, 24 hours before</dd></dl>
+          </div>
+        </div>
+        <div class="card"><span class="eyebrow">Visit history</span>
+          ${c.history.length ? `<ol class="timeline">${c.history.map((h) => `<li><span class="muted num" style="font-weight:600">${h[0]}</span><div><p style="font-weight:650">${h[1]} <span class="muted num">· ${h[2]}</span></p>${h[3] ? `<p class="small muted">${h[3]}</p>` : ""}</div></li>`).join("")}</ol>` : `<p class="small muted">No visits yet.</p>`}
+        </div>
+      </div>`;
+  }
+  function askAbout(name) {
+    closeSheet();
+    go("chat");
+    addUser(`Tell me about ${esc(name)}`);
+    const id = clientIdByName(name);
+    if (!id) { aiReply(`<p class="text">I don't have more on ${esc(name)} in this prototype.</p>`); return; }
+    const c = CLIENTS[id], first = c.name.split(" ")[0];
+    const mine = facts.filter((f) => f.client === id);
+    const u = upcoming(id);
+    aiReply(`<p class="text">${first} has been a client since ${c.since}${c.visits ? ` (${c.visits} visits)` : ""}. Usually books: ${c.usual}.${u ? ` Next visit: ${u[0]}.` : ""}</p>
+      <div class="card card-raised">
+        <span class="eyebrow">Things to remember</span>
+        ${mine.length ? `<ul class="why-list" style="font-size:14px">${mine.map((f) => `<li>${f.sensitive ? `<b style="color:var(--wait)">${esc(f.text)}</b>` : esc(f.text)}</li>`).join("")}</ul>` : `<p class="small muted">Nothing saved about ${first} yet.</p>`}
+        <div class="actions"><button class="btn btn-ghost btn-sm" data-action="open-client" data-id="${id}">Open profile</button></div>
+      </div>`);
+  }
+
+  /* ---------- autonomy ---------- */
+  const DIAL_OPTS = [["ask", "Ask me"], ["notify", "Do it and tell me"], ["auto", "Just do it"]];
+  const DIAL_TEXT = {
+    ask: "I show you exactly what I'm about to do and wait for your OK.",
+    notify: "I do it, then tell you right away with an Undo button.",
+    auto: "I do it and list it under Done for you on Home.",
+  };
+  const AUTONOMY = [
+    { title: "Looking things up", icon: "web", av: "av-info", desc: "Checking availability, finding clients, summarizing your day. These never change anything, so I always just do them.",
+      rows: [{ label: "Check availability, look up clients, plan your day", fixed: true }] },
+    { title: "Changes inside Floty", icon: "cal", av: "av-ok", desc: "Bookings, blocked time and notes. You can undo any of these.",
+      rows: [
+        { k: "create", label: "Create a booking" },
+        { k: "move", label: "Move or reschedule a booking" },
+        { k: "pageRequests", label: "Accept requests from your booking page" },
+        { k: "block", label: "Block time on a calendar" },
+        { k: "notes", label: "Save notes and preferences about clients" },
+      ] },
+    { title: "Messages to clients", icon: "mail", av: "av-wait", desc: "Emails leave Floty and can't be unsent, so I hold each one for 2 minutes in case you want to undo.",
+      rows: [
+        { k: "confirmations", label: "Booking confirmations and reminders" },
+        { k: "rebook", label: "Rebooking nudges to regulars who are due" },
+        { k: "waitlist", label: "Offering open slots to the waitlist" },
+        { k: "bulk", label: "One message to more than 10 clients", lock: true },
+      ] },
+  ];
+  function renderAutonomy() {
+    $("#aut-body").innerHTML = AUTONOMY.map((tier) => `
+      <section class="tier">
+        <div class="tier-head"><span class="avatar ${tier.av}">${icon(tier.icon)}</span><div><h2>${tier.title}</h2><p>${tier.desc}</p></div></div>
+        ${tier.rows.map((r) => r.fixed
+          ? `<div class="dial-row"><div class="lbl"><b>${r.label}</b><span class="dial-example">Always on. Reading never changes anything.</span></div><span class="pill pill-ok" style="align-self:flex-start">${icon("check")}Always</span></div>`
+          : `<div class="dial-row" data-row="${r.k}">
+              <div class="lbl"><b id="aut-${r.k}-label">${r.label}</b><span class="dial-example" id="aut-${r.k}-ex">${r.lock ? "Always needs your OK when more than 10 people would get it. This protects your clients from a costly mistake." : DIAL_TEXT[state.autonomy[r.k]]}</span></div>
+              <fieldset class="dial" aria-labelledby="aut-${r.k}-label">
+                ${DIAL_OPTS.map(([v, l]) => {
+                  const locked = r.lock && v === "auto";
+                  return `<input type="radio" id="aut-${r.k}-${v}" name="aut-${r.k}" value="${v}"${state.autonomy[r.k] === v ? " checked" : ""}${locked ? " disabled" : ""}><label for="aut-${r.k}-${v}">${locked ? icon("lock") : ""}${l}</label>`;
+                }).join("")}
+              </fieldset>
+            </div>`).join("")}
+      </section>`).join("");
+  }
+  $("#view-autonomy").addEventListener("change", (e) => {
+    const inp = e.target;
+    if (!inp.name || !inp.name.startsWith("aut-")) return;
+    const k = inp.name.slice(4);
+    state.autonomy[k] = inp.value;
+    const ex = $(`#aut-${k}-ex`);
+    if (ex && k !== "bulk") ex.textContent = DIAL_TEXT[inp.value];
+    const label = $(`#aut-${k}-label`).textContent;
+    toast(`Saved. ${label}: ${DIAL_OPTS.find((o) => o[0] === inp.value)[1]}.`);
+  });
+
+  /* ---------- team & services ---------- */
+  const TEAM = [
+    { id: "ana", name: "Ana Reyes", role: "Owner", tint: "s2", ini: "AR", hours: "Doesn't take appointments", cal: null },
+    { id: "jess", name: "Jess Morgan", role: "Manager", tint: "s1", ini: "JM", hours: "Tue–Fri 9:00 am–7:30 pm · Sat 9:00 am–3:00 pm", cal: true },
+    { id: "marco", name: "Marco Rossi", role: "Staff", tint: "s2", ini: "MR", hours: "Tue–Sat 9:30 am–5:00 pm", cal: true },
+    { id: "priya", name: "Priya Shah", role: "Staff", tint: "s3", ini: "PS", hours: "Tue–Fri 9:00 am–7:00 pm", cal: false },
+  ];
+  const SERVICES = [
+    { id: "cut", group: "Cuts & styling", name: "Women's cut & style", dur: 60, price: 75, staff: ["jess", "marco"], desc: "Consultation, wash, cut and blow-dry." },
+    { id: "mens", group: "Cuts & styling", name: "Men's cut", dur: 45, price: 45, staff: ["marco"], desc: "Clipper or scissor cut, finished with a hot towel." },
+    { id: "trim", group: "Cuts & styling", name: "Trim & style", dur: 60, price: 55, staff: ["jess", "marco"], desc: "Shape-up between full cuts." },
+    { id: "blowout", group: "Cuts & styling", name: "Blowout", dur: 45, price: 50, staff: ["jess", "marco"], desc: "Wash and blow-dry, smooth or bouncy." },
+    { id: "beard", group: "Cuts & styling", name: "Beard trim", dur: 45, price: 30, staff: ["marco"], desc: "Shape, line-up and beard oil." },
+    { id: "colorgloss", group: "Color", name: "Color & gloss", dur: 120, price: 145, staff: ["jess", "priya"], desc: "Root or all-over color with a gloss finish. PPD-free option." },
+    { id: "fullcolor", group: "Color", name: "Full color", dur: 120, price: 160, staff: ["priya", "jess"], desc: "Single-process color from roots to ends." },
+    { id: "highlights", group: "Color", name: "Highlights", dur: 90, price: 180, staff: ["marco", "priya"], desc: "Foils for dimension. Partial or full." },
+    { id: "balayage", group: "Color", name: "Balayage", dur: 120, price: 220, from: true, staff: ["jess"], desc: "Hand-painted, soft grow-out.", estimated: true },
+    { id: "gloss", group: "Color", name: "Gloss", dur: 60, price: 65, staff: ["priya"], desc: "Shine and tone refresh." },
+    { id: "keratin", group: "Treatments", name: "Keratin treatment", dur: 150, price: 250, staff: ["priya"], desc: "Smooths frizz for up to 4 months." },
+  ];
+  const svcGroups = () => [...new Set(SERVICES.map((s) => s.group))];
+  const priceText = (s) => `${s.from ? "from " : ""}$${s.price}`;
+  const staffDots = (ids) => ids.map((id) => { const s = STAFF.find((x) => x.id === id); return `<span class="nowrap"><span class="dot ${s.tint}" aria-hidden="true"></span>${s.name}</span>`; }).join(" ");
+  function renderTeam() {
+    $$("[data-action='team-tab']").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === state.teamTab)));
+    if (state.teamTab === "team") {
+      $("#team-body").innerHTML = `
+        <div class="team-grid">${TEAM.map((m) => {
+          const n = SERVICES.filter((s) => s.staff.includes(m.id)).length;
+          const rolePill = m.role === "Owner" ? "pill-brand" : m.role === "Manager" ? "pill-info" : "pill-plain";
+          return `<article class="card">
+            <div class="card-row"><span class="photo ${m.tint}" role="img" aria-label="Photo placeholder for ${m.name}">${m.ini}<span class="cam">${icon("camera")}</span></span>
+              <div class="grow"><h3>${m.name}</h3><span class="pill ${rolePill}">${m.role}</span></div></div>
+            <dl class="kv"><dt>Hours</dt><dd>${m.hours}</dd><dt>Services</dt><dd>${n ? `${n} services` : "—"}</dd><dt>Calendar</dt><dd>${m.cal === null ? "—" : m.cal ? "Google Calendar synced" : `<span class="muted">Not connected</span>`}</dd></dl>
+          </article>`;
+        }).join("")}</div>
+        <div class="actions"><button class="btn btn-primary" data-action="invite">${icon("users")}Invite a teammate</button></div>
+        <div class="card"><span class="eyebrow">Who can do what</span>
+          <dl class="kv"><dt>Owner</dt><dd>Everything, including autonomy settings and billing.</dd><dt>Manager</dt><dd>Everyone's schedule and clients. Can't change autonomy or billing.</dd><dt>Staff</dt><dd>Only their own appointments and client notes.</dd></dl>
+        </div>`;
+    } else {
+      $("#team-body").innerHTML = svcGroups().map((g) => `
+        <section class="tier"><h2 class="group-title">${g}</h2>
+          <ul class="svc-list">${SERVICES.filter((s) => s.group === g).map((s) => `
+            <li><div class="grow"><b>${s.name}</b><div class="small muted">${fmtDur(s.dur)} · ${staffDots(s.staff)}</div></div><span class="price">${priceText(s)}</span></li>`).join("")}
+          </ul></section>`).join("") + `
+        <p class="small muted">Every service leaves 15 minutes before the next appointment. Change that in What I know.</p>
+        <div class="actions"><button class="btn btn-primary" data-action="svc-add">${icon("chat")}Add a service with Floty</button></div>`;
+    }
+  }
+  function openInvite() {
+    openSheet(`
+      <div class="sheet-head"><h2 id="sheet-title">Invite a teammate</h2><button class="icon-btn" data-action="close-sheet" aria-label="Close">${icon("x")}</button></div>
+      <form id="invite-form" novalidate style="display:flex;flex-direction:column;gap:14px">
+        <div class="field"><label for="invite-email">Their email</label><input id="invite-email" type="email" autocomplete="off" placeholder="name@example.com"><span class="err" id="invite-email-err" hidden></span></div>
+        <div class="field" role="radiogroup" aria-label="Role">
+          <span style="font-size:13px;font-weight:700">Role</span>
+          <label class="radio-card"><input type="radio" name="invite-role" id="invite-role-staff" value="Staff" checked><span><b>Staff</b><br><span class="small muted">Sees and edits only their own appointments and client notes.</span></span></label>
+          <label class="radio-card"><input type="radio" name="invite-role" id="invite-role-manager" value="Manager"><span><b>Manager</b><br><span class="small muted">Runs everyone's schedule and clients. Can't change autonomy or billing.</span></span></label>
+        </div>
+        <div class="actions"><button class="btn btn-primary" type="submit">Send invite</button><button class="btn btn-ghost" type="button" data-action="close-sheet">Cancel</button></div>
+      </form>`);
+  }
+
+  /* ---------- onboarding ---------- */
+  const TEMPLATES = [
+    ["salon", "Hair salon", "Cuts, color, styling", "clients", "stylists"],
+    ["barber", "Barbershop", "Cuts, fades, beards", "clients", "barbers"],
+    ["nails", "Nail salon", "Manicures, pedicures, art", "clients", "nail techs"],
+    ["spa", "Day spa", "Facials, body treatments", "guests", "therapists"],
+    ["lash", "Lash & brow", "Extensions, lifts, tints", "clients", "artists"],
+    ["trainer", "Personal trainer", "1:1 and small-group sessions", "clients", "trainers"],
+    ["massage", "Massage", "Therapeutic and relaxation", "clients", "therapists"],
+    ["yoga", "Yoga & Pilates", "Private sessions", "members", "instructors"],
+  ];
+  const IMPORT_SOURCES = {
+    vagaro: ["Vagaro", "In Vagaro, open Reports → Customers → Customer list and choose Export to CSV."],
+    fresha: ["Fresha", "In Fresha, open Clients, select all, then Options → Export → CSV."],
+    square: ["Square", "In Square Dashboard, open Customers → Directory → Export customers."],
+    booksy: ["Booksy", "In Booksy Biz, open Clients → Export client list."],
+    other: ["Other CSV", "Any spreadsheet saved as CSV with names and an email or phone number."],
+  };
+  const READ_STEPS = ["Found 11 services and prices", "Found your opening hours", "Found 3 stylists on your Team page", "Found your cancellation policy"];
+  let readTimer = null;
+  function obShell(body, actions) {
+    const s = state.ob.step;
+    return `
+      <div class="flow-bar">
+        <span class="wordmark"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg><b style="font-size:22px">floty</b></span>
+        <span class="small muted num">Step ${s} of 5</span>
+        <button class="btn btn-ghost btn-sm" data-go="home">Exit preview</button>
+      </div>
+      <div class="flow-body">
+        <div class="steps" aria-hidden="true">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= s ? "on" : ""}"></i>`).join("")}</div>
+        ${body}
+      </div>
+      ${actions ? `<div class="flow-actions">${actions}</div>` : ""}`;
+  }
+  function renderOb() {
+    const ob = state.ob;
+    let html = "";
+    if (ob.step === 1) {
+      const t = TEMPLATES.find((x) => x[0] === ob.type);
+      html = obShell(`
+        <div><p class="eyebrow">Welcome to Floty</p><h1>What kind of business is it?</h1></div>
+        <p class="lede">This sets the words I use and sensible defaults. You can change everything later.</p>
+        <div class="choice-grid" role="group" aria-label="Business type">
+          ${TEMPLATES.map(([id, name, desc]) => `<button class="choice" data-action="ob-type" data-id="${id}" aria-pressed="${ob.type === id}"><b>${name}</b><span>${desc}</span></button>`).join("")}
+        </div>
+        ${t ? `<p class="notice" style="background:var(--info-soft)">${icon("spark")}<span>I'll call your customers <b style="color:var(--info)">${t[3]}</b> and your team <b style="color:var(--info)">${t[4]}</b>.</span></p>` : ""}`,
+        `<button class="btn btn-primary" data-action="ob-next"${ob.type ? "" : " disabled"}>Continue</button>`);
+    } else if (ob.step === 2) {
+      const reading = ob.read !== "idle";
+      html = obShell(`
+        <div><h1>Where can I learn about your business?</h1></div>
+        <p class="lede">Point me at something you already have. I'll draft your services, prices, hours and team for you to check.</p>
+        ${reading ? `
+          <div class="card card-raised" aria-live="polite">
+            <p style="font-weight:650">Reading juniperhair.com…</p>
+            <ul class="progress-list">${READ_STEPS.slice(0, ob.readCount).map((s) => `<li>${icon("check")}${s}</li>`).join("")}</ul>
+            ${ob.read === "reading" ? `<span class="typing" aria-label="Still reading"><i></i><i></i><i></i></span>` : ""}
+          </div>` : `
+          <div class="pick-list" role="radiogroup" aria-label="Source">
+            <label class="radio-card"><input type="radio" name="ob-source" value="web"${ob.source === "web" ? " checked" : ""}><span style="flex:1;min-width:0"><b>Your website</b>
+              <span class="field" style="margin-top:8px"><label for="ob-url" class="sr-only">Website address</label><input id="ob-url" value="juniperhair.com" inputmode="url"></span></span></label>
+            <label class="radio-card"><input type="radio" name="ob-source" value="google"${ob.source === "google" ? " checked" : ""}><span style="flex:1;min-width:0"><b>Your Google Business profile</b>
+              <span class="field" style="margin-top:8px"><label for="ob-google" class="sr-only">Business name and city</label><input id="ob-google" value="Juniper Hair Studio, Austin TX"></span></span></label>
+            <label class="radio-card"><input type="radio" name="ob-source" value="photo"${ob.source === "photo" ? " checked" : ""}><span style="flex:1;min-width:0"><b>A photo of your price list</b><br><span class="small muted">A menu board, flyer or screenshot works.</span>
+              <span class="field" style="margin-top:8px"><label for="ob-photo" class="sr-only">Price list photo</label><input id="ob-photo" type="file" accept="image/*" style="padding:10px"></span></span></label>
+          </div>
+          <button class="link small" style="align-self:flex-start" data-action="ob-manual">I'd rather set it up by hand</button>`}`,
+        reading
+          ? `<button class="btn btn-ghost" data-action="ob-back">Back</button><span class="spacer"></span><button class="btn btn-primary" data-action="ob-next"${ob.read === "done" ? "" : " disabled"}>See what I found</button>`
+          : `<button class="btn btn-ghost" data-action="ob-back">Back</button><span class="spacer"></span><button class="btn btn-primary" data-action="ob-read">Read it</button>`);
+    } else if (ob.step === 3) {
+      html = obShell(`
+        <div><h1>Here's what I found</h1></div>
+        <div class="notice" style="background:var(--info-soft)">${icon("dial")}<span>Nothing is saved until you tap <b style="color:var(--info)">Set it up</b>. Untick anything you don't offer.</span></div>
+        <div class="card"><div class="card-type"><h2>Services</h2><span class="pill pill-plain">${SERVICES.length} found</span></div>
+          <div>${SERVICES.map((s) => `
+            <label class="review-row" for="ob-svc-${s.id}">
+              <input type="checkbox" id="ob-svc-${s.id}" checked>
+              <span class="grow"><b>${s.name}</b><br><span class="small muted">${fmtDur(s.dur)} · ${staffDots(s.staff)}</span>
+                ${s.estimated ? `<br><span class="pill pill-wait" style="margin-top:4px">Time estimated: your site didn't list it</span>` : ""}</span>
+              <span class="price">${priceText(s)}</span>
+            </label>`).join("")}</div></div>
+        <div class="card"><h2>Opening hours</h2>
+          <dl class="kv num"><dt>Tue–Fri</dt><dd>9:00 am–7:30 pm</dd><dt>Saturday</dt><dd>9:00 am–5:00 pm</dd><dt>Sun, Mon</dt><dd>Closed</dd></dl></div>
+        <div class="card"><h2>Team</h2>
+          <div class="pick-list">${STAFF.map((s) => `<div class="card-row" style="align-items:center"><span class="photo ${s.tint}" style="width:44px;height:44px;font-size:15px" role="img" aria-label="Photo placeholder">${s.initials}</span><div class="grow"><b>${s.name}</b><br><span class="small muted">${s.role}</span></div></div>`).join("")}</div>
+          <p class="small muted">You can invite them by email later. Nothing is sent now.</p></div>
+        <div class="card"><h2>Policies</h2><p>Cancellations need 24 hours' notice.</p></div>`,
+        `<button class="btn btn-ghost" data-action="ob-back">Back</button><span class="spacer"></span><button class="btn btn-primary" data-action="ob-confirm">${icon("check")}Set it up</button>`);
+    } else if (ob.step === 4) {
+      const src = IMPORT_SOURCES[ob.importSrc];
+      html = obShell(`
+        <div><p class="eyebrow">Optional</p><h1>Bring your clients with you</h1></div>
+        <p class="lede">Moving from another booking app? Import your client list so I know your regulars from day one.</p>
+        <div class="chips" role="group" aria-label="Where from">${Object.entries(IMPORT_SOURCES).map(([k, v]) => `<button class="chip" data-action="ob-src" data-k="${k}" aria-pressed="${ob.importSrc === k}">${v[0]}</button>`).join("")}</div>
+        <p class="small">${src[1]}</p>
+        ${ob.imported ? `
+          <div class="card card-raised" data-card="import-report">
+            <div class="card-type"><span class="eyebrow">Import report · ${src[0]}</span><span class="pill pill-ok">${icon("check")}Done</span></div>
+            <div class="stats"><div class="stat" style="background:var(--ok-soft)"><b style="color:var(--ok)">406</b><span>clients added</span></div><div class="stat" style="background:var(--wait-soft)"><b style="color:var(--wait)">6</b><span>rows skipped</span></div><div class="stat" style="background:var(--surface-2)"><b>0</b><span>duplicates</span></div></div>
+            <ul class="why-list" style="font-size:14px"><li>3 rows have no email or phone (rows 18, 202, 377)</li><li>2 rows have an email that isn't valid (rows 64, 311)</li><li>1 row has no name (row 290)</li></ul>
+            <p class="fine">Importing the same file again updates these clients. It never creates duplicates.</p>
+          </div>` : `
+          <div class="card" style="align-items:flex-start">
+            <div class="field" style="width:100%"><label for="ob-file">Client list (CSV)</label><input id="ob-file" type="file" accept=".csv,text/csv" style="padding:10px"></div>
+            <button class="btn btn-ghost btn-sm" data-action="ob-import">Use the sample file instead</button>
+          </div>`}`,
+        `<button class="btn btn-ghost" data-action="ob-back">Back</button><span class="spacer"></span>${ob.imported ? "" : `<button class="btn btn-ghost" data-action="ob-next">Skip for now</button>`}<button class="btn btn-primary" data-action="ob-next"${ob.imported ? "" : " disabled"}>Continue</button>`);
+    } else {
+      html = obShell(`
+        <span class="big-check">${icon("check")}</span>
+        <div><h1>Juniper Hair Studio is ready</h1><p class="lede" style="margin-top:6px">Your booking page is live. Share the link on Instagram, Google and your website.</p></div>
+        <div class="linkbox"><code id="ob-link">juniperhair.floty.app</code><button class="btn btn-primary btn-sm" data-action="ob-copy">${icon("copy")}Copy</button></div>
+        <div class="card">
+          <div class="card-row"><span class="avatar av-info">${icon("cal")}</span><div class="grow"><h3>Connect Google Calendar</h3><p class="small muted">Optional. I'll keep stylists' personal events blocked and add bookings to their calendars.</p></div></div>
+          <div class="actions">${ob.gcal ? `<span class="pill pill-ok">${icon("check")}Connected (sample)</span>` : `<button class="btn btn-ghost btn-sm" data-action="ob-gcal">Connect</button>`}</div>
+        </div>`,
+        `<button class="btn btn-ghost" data-action="book-start">Preview booking page</button><button class="btn btn-primary" data-go="home">Go to Home</button>`);
+    }
+    $("#ob-root").innerHTML = html;
+  }
+  function startReading() {
+    const ob = state.ob;
+    ob.read = "reading"; ob.readCount = 0;
+    renderOb();
+    clearInterval(readTimer);
+    const tick = () => {
+      ob.readCount += 1;
+      if (ob.readCount >= READ_STEPS.length) { ob.read = "done"; clearInterval(readTimer); }
+      if (state.view === "onboarding") renderOb();
+    };
+    if (reduceMotion()) { ob.readCount = READ_STEPS.length - 1; tick(); }
+    else readTimer = setInterval(tick, 550);
+  }
+
+  /* ---------- public booking page ---------- */
+  const BOOK_DATES = [
+    { id: "thu", dow: "Thu", d: 15, full: true }, { id: "fri", dow: "Fri", d: 16 }, { id: "sat", dow: "Sat", d: 17 },
+    { id: "tue", dow: "Tue", d: 20 }, { id: "wed", dow: "Wed", d: 21 }, { id: "thu2", dow: "Thu", d: 22 },
+  ];
+  const BOOK_SLOTS = {
+    fri: [["12:30 pm", "jess", true], ["1:00 pm", "marco"], ["4:00 pm", "priya"], ["5:15 pm", "jess"]],
+    sat: [["10:00 am", "jess"], ["10:30 am", "marco"], ["1:00 pm", "priya"], ["2:15 pm", "marco"]],
+    tue: [["9:00 am", "priya"], ["11:00 am", "jess"], ["2:00 pm", "marco"], ["3:30 pm", "jess"]],
+    wed: [["9:30 am", "marco"], ["10:00 am", "jess"], ["1:30 pm", "priya"], ["4:00 pm", "jess"]],
+    thu2: [["9:00 am", "jess"], ["12:00 pm", "priya"], ["2:00 pm", "marco"]],
+  };
+  const BOOK_STEPS = ["service", "staff", "time", "details", "verify"];
+  function slotsFor(dateId) {
+    const b = state.book, svc = SERVICES.find((s) => s.id === b.svc);
+    const all = BOOK_SLOTS[dateId] || [];
+    if (b.staff && b.staff !== "any") return all.map(([tm, , race]) => [tm, b.staff, race]);
+    const ok = all.filter(([, st]) => svc.staff.includes(st));
+    return ok.length ? ok : all.map(([tm, , race]) => [tm, svc.staff[0], race]);
+  }
+  const staffName = (id) => STAFF.find((s) => s.id === id).name;
+  const dateLabel = (id) => { const d = BOOK_DATES.find((x) => x.id === id); return `${d.dow}, Oct ${d.d}`; };
+  function bookShell(body) {
+    const b = state.book;
+    const idx = BOOK_STEPS.indexOf(b.step);
+    const svc = SERVICES.find((s) => s.id === b.svc);
+    const picked = [];
+    if (svc && idx > 0) picked.push(["service", `${svc.name} · ${priceText(svc)}`]);
+    if (b.staff && idx > 1) picked.push(["staff", b.staff === "any" ? "Anyone available" : staffName(b.staff)]);
+    if (b.slot && idx > 2) picked.push(["time", `${dateLabel(b.date)} · ${b.slot[0]}`]);
+    return `
+      <div class="flow-bar">
+        <div class="biz"><span class="biz-avatar" aria-hidden="true">JH</span><div style="min-width:0"><div class="biz-name">Juniper Hair Studio</div><div class="biz-sub">214 Elm St, Austin, TX</div></div></div>
+        <button class="btn btn-ghost btn-sm" data-go="home">Exit preview</button>
+      </div>
+      <div class="flow-body">
+        ${idx >= 0 ? `<div class="steps" aria-hidden="true">${BOOK_STEPS.map((_, i) => `<i class="${i <= idx ? "on" : ""}"></i>`).join("")}</div>` : ""}
+        ${picked.length ? `<div class="picked" aria-label="Your choices">${picked.map(([st, l]) => `<button data-action="book-goto" data-step="${st}" aria-label="Change: ${esc(l)}">${esc(l)} · <span style="color:var(--brand)">Change</span></button>`).join("")}</div>` : ""}
+        ${body}
+      </div>
+      <p class="powered">Booking by floty · Your details stay with Juniper Hair Studio</p>`;
+  }
+  function renderBook() {
+    const b = state.book;
+    const svc = SERVICES.find((s) => s.id === b.svc);
+    let body = "";
+    if (b.step === "service") {
+      body = `
+        <div><h1>Book a visit</h1><p class="lede" style="margin-top:6px">Choose a service. Free cancellation up to 24 hours before.</p></div>
+        ${svcGroups().map((g) => `<section class="tier"><h2>${g}</h2><div class="pick-list">${SERVICES.filter((s) => s.group === g).map((s) => `
+          <button class="choice-row" data-action="book-svc" data-id="${s.id}"><span class="grow"><b>${s.name}</b><span>${s.desc}</span><span>${fmtDur(s.dur)}</span></span><span class="price">${priceText(s)}</span></button>`).join("")}</div></section>`).join("")}`;
+    } else if (b.step === "staff") {
+      body = `
+        <div><h1>Who would you like?</h1></div>
+        <div class="pick-list">
+          <button class="choice-row" data-action="book-staff" data-id="any"><span class="avatar av-info">${icon("users")}</span><span class="grow"><b>Anyone available</b><span>Shows the most times</span></span>${icon("right")}</button>
+          ${svc.staff.map((id) => { const s = STAFF.find((x) => x.id === id); return `
+            <button class="choice-row" data-action="book-staff" data-id="${id}"><span class="photo ${s.tint}" role="img" aria-label="Photo placeholder for ${s.name}">${s.initials}<span class="cam">${icon("camera")}</span></span><span class="grow"><b>${s.name}</b><span>${s.role}</span></span>${icon("right")}</button>`; }).join("")}
+        </div>`;
+    } else if (b.step === "time") {
+      const slots = slotsFor(b.date);
+      body = `
+        <div><h1>Pick a time</h1></div>
+        <div class="date-strip" role="group" aria-label="Day">${BOOK_DATES.map((d) => `<button class="date" data-action="book-date" data-id="${d.id}" aria-pressed="${b.date === d.id}"${d.full ? " disabled" : ""} aria-label="${d.dow} October ${d.d}${d.full ? ", fully booked" : ""}"><span>${d.dow}</span><b>${d.d}</b><span>${d.full ? "Full" : "Oct"}</span></button>`).join("")}</div>
+        <div class="slots" role="group" aria-label="Times on ${dateLabel(b.date)}">${slots.map(([tm, st, race], i) => `<button class="slot" data-action="book-slot" data-i="${i}"><b>${tm}</b><span>with ${staffName(st)}${race ? " · last one" : ""}</span></button>`).join("")}</div>
+        <p class="fine">Times are in Central Time (Austin).</p>
+        ${b.date === "fri" ? `<p class="notice" style="background:var(--info-soft)">${icon("spark")}<span>Prototype: pick <b style="color:var(--info)">Friday 12:30 pm</b> to see what happens when someone else books it a moment before you.</span></p>` : ""}`;
+    } else if (b.step === "details") {
+      body = `
+        <div><h1>Your details</h1><p class="lede" style="margin-top:6px">We'll email you a code to confirm it's you.</p></div>
+        <form id="book-form" novalidate style="display:flex;flex-direction:column;gap:14px">
+          <div class="field"><label for="book-name">Full name</label><input id="book-name" autocomplete="name" value="${esc(b.name)}"><span class="err" id="book-name-err" hidden></span></div>
+          <div class="field"><label for="book-email">Email</label><input id="book-email" type="email" autocomplete="email" inputmode="email" value="${esc(b.email)}"><span class="err" id="book-email-err" hidden></span></div>
+          <div class="field"><label for="book-phone">Phone <span class="muted" style="font-weight:500">(optional)</span></label><input id="book-phone" type="tel" autocomplete="tel"></div>
+          <div class="field"><label for="book-note">Anything we should know? <span class="muted" style="font-weight:500">(optional)</span></label><textarea id="book-note" placeholder="Allergies, hair history, the look you want"></textarea></div>
+          <p class="fine">By booking you agree to Juniper's 24-hour cancellation policy. We only use your details for this appointment and reminders.</p>
+          <button class="btn btn-primary" type="submit">Send my code</button>
+        </form>`;
+    } else if (b.step === "verify") {
+      body = `
+        <div><h1>Check your email</h1><p class="lede" style="margin-top:6px">We sent a 6-digit code to <b>${esc(b.email)}</b>.</p></div>
+        <form id="verify-form" novalidate style="display:flex;flex-direction:column;gap:14px">
+          <div class="field"><label for="book-code">Code</label><input id="book-code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••"><span class="err" id="book-code-err" hidden></span><span class="hint">Prototype: any 6 digits work.</span></div>
+          <button class="btn btn-primary" type="submit">Confirm booking</button>
+          <button class="link small" type="button" data-action="book-resend" style="align-self:flex-start">Send a new code</button>
+        </form>`;
+    } else if (b.step === "taken") {
+      const alts = [["fri", "1:00 pm"], ["fri", "5:15 pm"], ["sat", "10:00 am"]];
+      body = `
+        <div class="notice">${icon("alert")}<span><b>Someone just booked ${dateLabel("fri")} at 12:30 pm.</b> It happened a moment before you confirmed. Your details are saved, so pick another time and you're done.</span></div>
+        <h1>Closest times with ${staffName(b.slot[1])}</h1>
+        <div class="slots" role="group" aria-label="Other times">${alts.map(([d, tm], i) => `<button class="slot" data-action="book-alt" data-i="${i}" data-d="${d}" data-t="${tm}"><b>${tm}</b><span>${dateLabel(d)}</span></button>`).join("")}</div>`;
+    } else if (b.step === "done") {
+      const first = b.name.split(" ")[0];
+      body = `
+        <span class="big-check">${icon("check")}</span>
+        <div><h1>You're booked, ${esc(first)}</h1><p class="lede" style="margin-top:6px">We emailed a confirmation to <b>${esc(b.email)}</b>. It has links to reschedule or cancel this appointment.</p></div>
+        <div class="card">
+          <dl class="kv"><dt>Service</dt><dd>${svc.name}</dd><dt>With</dt><dd>${staffName(b.slot[1])}</dd><dt>When</dt><dd class="num">${dateLabel(b.date)} · ${b.slot[0]}</dd><dt>Where</dt><dd>214 Elm St, Austin, TX</dd><dt>Price</dt><dd>${priceText(svc)}, paid at the salon</dd></dl>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" data-action="book-info" data-msg="In the real page this adds the visit to your calendar app.">${icon("cal")}Add to calendar</button>
+          <button class="btn btn-ghost btn-sm" data-action="book-info" data-msg="Reschedule and cancel open from the secure link in your confirmation email.">Reschedule</button>
+          <button class="btn btn-ghost btn-sm" data-action="book-info" data-msg="Reschedule and cancel open from the secure link in your confirmation email.">Cancel</button>
+        </div>
+        <button class="link small" data-action="book-start" style="align-self:flex-start">Book another visit</button>`;
+    }
+    $("#book-root").innerHTML = bookShell(body);
+  }
+  function setErr(id, msg) {
+    const el = $(`#${id}-err`), inp = $(`#${id}`);
+    el.hidden = !msg; el.textContent = msg || "";
+    if (msg) inp.setAttribute("aria-invalid", "true"); else inp.removeAttribute("aria-invalid");
+    if (msg) inp.setAttribute("aria-describedby", `${id}-err`);
+    return !msg;
+  }
+
+  document.addEventListener("submit", (e) => {
+    const f = e.target;
+    if (f.id === "know-add") {
+      e.preventDefault();
+      const inp = $("#know-add-input");
+      const text = inp.value.trim();
+      if (!text) { inp.focus(); return; }
+      facts.unshift({ id: `u-${Date.now()}`, group: "business", text, source: "You added · just now" });
+      inp.value = "";
+      state.knowFilter = "all";
+      renderKnow();
+      toast("Got it. I'll remember that.");
+    } else if (f.id === "invite-form") {
+      e.preventDefault();
+      const email = $("#invite-email").value.trim();
+      if (!setErr("invite-email", EMAIL_RE.test(email) ? "" : "Enter an email address, like jo@example.com.")) return;
+      const role = $("input[name='invite-role']:checked").value;
+      closeSheet();
+      toast(`Invite sent to ${esc(email)} as ${role}. It expires in 7 days.`);
+    } else if (f.id === "book-form") {
+      e.preventDefault();
+      const name = $("#book-name").value.trim(), email = $("#book-email").value.trim();
+      const okName = setErr("book-name", name.length >= 2 ? "" : "Enter your name so the salon knows who's coming.");
+      const okEmail = setErr("book-email", EMAIL_RE.test(email) ? "" : "Enter a valid email. We'll send your code there.");
+      if (!okName || !okEmail) { (okName ? $("#book-email") : $("#book-name")).focus(); return; }
+      Object.assign(state.book, { name, email, step: "verify" });
+      renderBook();
+      $("#book-code").focus();
+    } else if (f.id === "verify-form") {
+      e.preventDefault();
+      const code = $("#book-code").value.trim();
+      if (!setErr("book-code", /^\d{6}$/.test(code) ? "" : "Enter the 6 digits from the email.")) { $("#book-code").focus(); return; }
+      const b = state.book;
+      b.step = b.slot[2] && !b.raced ? "taken" : "done";
+      if (b.step === "taken") b.raced = true;
+      renderBook();
+      $("#view-book").scrollTop = 0;
+    }
+  });
+  $("#client-search").addEventListener("input", renderClients);
+  $("#view-onboarding").addEventListener("change", (e) => {
+    if (e.target.name === "ob-source") state.ob.source = e.target.value;
+    if (e.target.id === "ob-file" && e.target.files.length) { state.ob.imported = true; renderOb(); }
+    if (e.target.id === "ob-photo" && e.target.files.length) state.ob.source = "photo";
+  });
+
+  const EXTRA = {
+    "open-client": (el) => { state.clientId = el.dataset.id; closeSheet(); go("client"); },
+    "client-book": (el) => {
+      const id = el.dataset.id;
+      go("chat");
+      if (id === "maria" && !usedChips.has("maria")) { runChip("maria"); return; }
+      const inp = $("#composer-input");
+      inp.value = `Book ${CLIENTS[id].name} for `;
+      inp.focus();
+    },
+    "know-filter": (el) => { state.knowFilter = el.dataset.k; renderKnow(); },
+    "fact-edit": (el) => { state.editing = el.dataset.id; state.confirmingDelete = null; renderKnow(); },
+    "fact-cancel": () => { state.editing = null; renderKnow(); },
+    "fact-save": (el) => {
+      const f = facts.find((x) => x.id === el.dataset.id);
+      const v = $(`#fact-edit-${f.id}`).value.trim();
+      if (v) { f.text = v; f.source = "Edited by you · just now"; }
+      state.editing = null;
+      refreshMemoryViews();
+      toast("Saved. I'll use the new version from now on.");
+    },
+    "fact-ask-delete": (el) => { state.confirmingDelete = el.dataset.id; state.editing = null; renderKnow(); },
+    "fact-keep": () => { state.confirmingDelete = null; renderKnow(); },
+    "fact-delete": (el) => {
+      const idx = facts.findIndex((x) => x.id === el.dataset.id);
+      const [removed] = facts.splice(idx, 1);
+      if (removed.id === "f-ppd") state.mariaAllergy = false;
+      state.confirmingDelete = null;
+      refreshMemoryViews();
+      toast("Forgotten. I won't use this anymore.", { undo: () => {
+        facts.splice(idx, 0, removed);
+        if (removed.id === "f-ppd") state.mariaAllergy = true;
+        refreshMemoryViews();
+        toast("Restored.");
+      } });
+    },
+    "team-tab": (el) => { state.teamTab = el.dataset.tab; renderTeam(); },
+    "invite": () => openInvite(),
+    "svc-add": () => { go("chat"); const inp = $("#composer-input"); inp.value = "Add a 30-minute fringe trim for $20 with Jess and Marco"; inp.focus(); },
+    "ob-start": () => { clearInterval(readTimer); state.ob = { step: 1, type: null, source: "web", read: "idle", readCount: 0, importSrc: "vagaro", imported: false, gcal: false }; go("onboarding"); },
+    "ob-type": (el) => { state.ob.type = el.dataset.id; renderOb(); },
+    "ob-next": () => { state.ob.step = Math.min(5, state.ob.step + 1); renderOb(); $("#view-onboarding").scrollTop = 0; },
+    "ob-back": () => {
+      const ob = state.ob;
+      if (ob.step === 2 && ob.read !== "idle") { clearInterval(readTimer); ob.read = "idle"; ob.readCount = 0; }
+      else ob.step = Math.max(1, ob.step - 1);
+      renderOb();
+    },
+    "ob-read": () => startReading(),
+    "ob-manual": () => toast("Manual setup uses the same review screen with empty rows."),
+    "ob-confirm": () => {
+      const n = SERVICES.filter((s) => $(`#ob-svc-${s.id}`).checked).length;
+      toast(`Created ${n} services, your hours and 3 team members.`);
+      state.ob.step = 4; renderOb(); $("#view-onboarding").scrollTop = 0;
+    },
+    "ob-src": (el) => { state.ob.importSrc = el.dataset.k; renderOb(); },
+    "ob-import": () => { state.ob.imported = true; renderOb(); },
+    "ob-gcal": () => { state.ob.gcal = true; renderOb(); toast("Google Calendar connected (sample)."); },
+    "ob-copy": () => {
+      const link = "https://juniperhair.floty.app";
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents($("#ob-link")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Link selected. Copy it with your keyboard or long-press."); };
+      try { navigator.clipboard.writeText(link).then(() => toast("Link copied."), fallback); } catch (_) { fallback(); }
+    },
+    "book-start": () => { state.book = { step: "service", svc: null, staff: null, date: "fri", slot: null, name: "", email: "", raced: false }; go("book"); },
+    "book-svc": (el) => { state.book.svc = el.dataset.id; state.book.step = "staff"; renderBook(); $("#view-book").scrollTop = 0; },
+    "book-staff": (el) => { state.book.staff = el.dataset.id; state.book.step = "time"; renderBook(); $("#view-book").scrollTop = 0; },
+    "book-date": (el) => { state.book.date = el.dataset.id; renderBook(); },
+    "book-slot": (el) => { state.book.slot = slotsFor(state.book.date)[+el.dataset.i]; state.book.step = "details"; renderBook(); $("#view-book").scrollTop = 0; },
+    "book-alt": (el) => {
+      const b = state.book;
+      b.date = el.dataset.d; b.slot = [el.dataset.t, b.slot[1], false]; b.step = "done";
+      renderBook(); $("#view-book").scrollTop = 0;
+    },
+    "book-goto": (el) => { state.book.step = el.dataset.step; renderBook(); },
+    "book-resend": () => toast("New code sent. It works for 10 minutes."),
+    "book-info": (el) => toast(el.dataset.msg),
+  };
 
   /* ---------------- boot ---------------- */
   applyTheme();
