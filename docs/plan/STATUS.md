@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 1 — Foundations (S4 done → next: S5)
+**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 1 — Foundations complete (S5 done; Phase 1 exit criteria met) → next: Phase 2 (S6)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -16,6 +16,27 @@
 - **S3 Phase 1a (2026-10-16):** pnpm + Turborepo monorepo; strict ESM TypeScript (`packages/config`); ESLint (typescript-eslint strict, layer-boundary rule from the dependency map, no deep imports, disable comments need a reason) + Prettier + EditorConfig; Vitest with ≥ 80% coverage gate; placeholder packages `@floty/contracts` (`RiskTier`, `AutonomyLevel`, `UtcDateTime` schemas) and `@floty/core` (`Clock`, `ManualClock`, `utcNow`); CI workflow (format → lint → typecheck → test+coverage → build, actions pinned to SHAs); Dependabot; `docs/engineering/dev-setup.md`; root README. `main` branch created at the Phase 0 sign-off commit. Checks run: clean `pnpm install --frozen-lockfile` + `pnpm check` all green (30 tests, 100% coverage); verified lint rejects `any`, unexplained `!`, layer violations, deep imports, undescribed disables; typecheck rejects type errors; coverage gate fails at 68%; actionlint clean.
 
 - **S4 Phase 1b (2026-10-16):** apps skeletons: `apps/api` + `apps/worker` (NestJS 12, ESM, Express 5) with `GET /health/live` and `/health/ready` (Postgres + Redis; 503 when down, body says only up/down), `apps/web` (Next.js 16) placeholder home showing API readiness + `/health/live`. Shared pieces: `HealthReportSchema` (`@floty/contracts`), `runHealthChecks` with per-check timeout (`@floty/core`), new `@floty/runtime` package (Nest health/connections modules, env helpers that never echo values). One multi-stage `Dockerfile` (digest-pinned base, `pnpm deploy --prod`, Next standalone, non-root, healthchecks); `docker-compose.yml` with Postgres+pgvector, Redis, Mailpit, api, worker, web (ports on 127.0.0.1, local-only default credentials, `.env.example`). `e2e/` Playwright smoke on phone + desktop; CI job **E2E smoke (Docker Compose)**; Dependabot for docker/compose. Checks run: `pnpm check` green (81 unit tests, coverage ≥ 90% everywhere); `docker compose up --wait` → all 6 services healthy; Playwright smoke 8/8 passing against Compose; stopping Postgres → api ready 503 + web shows "starting up", recovers on restart; containers run as `node`, stop in < 1 s; `pnpm dev` serves all three apps against Compose infra; actionlint + `docker compose config` clean. **Not yet proven:** the CI e2e job itself (runs on the PR). Local Docker builds in the cloud sandbox needed the session proxy CA (scratch Dockerfile, not committed).
+
+- **S5 Phase 1c (2026-10-16):** shared config, logging, telemetry and integration tests.
+  - **Config:** `loadServiceConfig` in `@floty/runtime` replaces the per-app `loadEnv`. It is validated with Zod; errors name the variable but never its value; empty means unset. Adds `LOG_LEVEL`, `DEPLOYMENT_ENVIRONMENT`, `RELEASE`, `SENTRY_DSN` and `OTEL_EXPORTER_OTLP_ENDPOINT`.
+  - **Logging:** pino logger with one `redact` path (sensitive keys; emails, phones, URL credentials and bearer tokens in free text), Nest logger adapter, `x-request-id` and one log line per request (no query string).
+  - **Correlation:** `request_id` (AsyncLocalStorage) and `trace_id`/`span_id` on every log line.
+  - **Tracing and errors:** OpenTelemetry tracing (http, express, pg, ioredis → OTLP/HTTP; query strings redacted) and Sentry errors-only (all data collection off, events redacted). Each is off unless its env var is set.
+  - **Start-up:** `node --import ./dist/instrument.js` preload via the new `@floty/runtime/instrument` entry. `createServiceApp` does the shared Nest wiring, flushes telemetry on shutdown and reports unexpected errors.
+  - **Testing:** new `@floty/testing` package with Testcontainers Postgres/Redis (images read from `docker-compose.yml`) and a recording HTTP server. Integration tests are `*.int.test.ts` run by `pnpm test:integration`; CI job **Integration (Testcontainers)** runs them.
+  - **Docs:** ADR-0009 (proposed); dev-setup, observability and dependency-map updated.
+  - **Checks run:**
+    - `pnpm check` green: 145 unit tests; runtime coverage 97.6% lines / 91.7% branches; every other package 100%.
+    - `pnpm test:integration` green, 3 files: containers reachable; readiness 200 against real Postgres + Redis; the built api started with `--import` exports http/express/pg/ioredis spans to a fake OTLP collector, its logs carry `request_id` + a `trace_id` that matches the exported spans, no email/credentials/query leave the process, and SIGTERM flushes spans.
+    - Mutation check: removing the ESM loader hook makes that test fail (no spans).
+    - Docker images rebuilt; `docker compose up --wait` → 6/6 healthy; Playwright smoke 8/8 (now also asserts `x-request-id` and no `X-Powered-By`); api stops in < 1 s.
+    - actionlint and `docker compose config` clean.
+  - **Not yet proven:** the new CI integration job itself (runs on the PR).
+  - **Findings:**
+    - `@opentelemetry/instrumentation-nestjs-core` supports Nest < 12 only, so it is not installed; express spans carry routes.
+    - Readiness reports Redis down for a moment right after boot (the client fails fast while connecting); Docker's start period absorbs it.
+    - `@sentry/node` 11 adds ~65 MB (it pulls in the Sentry CLI); api/worker images are 426 MB.
+    - In this sandbox `dockerd` must be started by hand.
 
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
@@ -33,6 +54,7 @@
 - **TypeScript pinned to 6.0.x** until typescript-eslint supports 6.1+/7 (S3 finding; see dev-setup.md).
 - **Module format: ESM** for all packages (NodeNext). Confirmed in S4: Nest 12 ships ESM, so api/worker run as native ESM.
 - **S4 defaults (Claude, user to confirm or change):** NestJS on Express (not Fastify); Vitest compiles Nest code with SWC; shared Nest wiring lives in a new `packages/runtime` (`@floty/runtime`) that S5 extends with config/logger/telemetry; the readiness `SELECT 1` lives in runtime until `packages/db` exists (Phase 2); web unit tests cover `lib/` and route handlers, pages are covered by Playwright.
+- **S5 defaults (Claude, user to confirm or change) — ADR-0009 (proposed):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@floty/runtime/instrument` (lint allows exactly this one); `@floty/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
 - **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images. Replacement is open decision **D10** (recommendation: SeaweedFS); needed by Phase 4.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
@@ -40,14 +62,19 @@
 1. Settings → General → **Default branch → `main`** (currently the stale `claude/youthful-cori-cexdi2`).
 2. Settings → General → Pull Requests → **Automatically delete head branches**.
 3. Delete stale branches `claude/youthful-cori-cexdi2`, `claude/wonderful-newton-opp16r` (unused duplicate S1) and, once merged, `claude/sharp-noether-re1wo9`.
-4. After the S4 PR is green: branch protection on `main` requiring a PR and the **CI / Lint, typecheck, test, build** and **CI / E2E smoke (Docker Compose)** checks.
+4. Branch protection on `main` requiring a PR and the **CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)** (after the S5 PR is green) and **CI / E2E smoke (Docker Compose)** checks.
 5. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
+6. Confirm or change the S5 defaults / ADR-0009 (observability wiring).
+7. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
+S6–S8 are Claude's proposed split of Phase 2. It puts db + tenancy/RLS before auth, so auth can build on the tenant context. The user confirms or reorders it at the S6 Session Brief.
+
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S5 | **Phase 1c:** env validation (Zod, shared config in `@floty/runtime` replacing the per-app `loadEnv`), redacting logger (pino), Sentry + OpenTelemetry wiring, Testcontainers integration-test harness (first test: readiness against real Postgres + Redis) | 1 | Phase 1 exit criteria met |
-| … | Phase 2 split into: auth (Better Auth + MFA) · tenancy + RLS + cross-tenant suite · roles + audit log | 2 | per roadmap |
+| S6 | **Phase 2a:** `packages/db` (Drizzle, migrations, readiness probe moves there), tenants + memberships schema, tenant-scoped transaction helper (`SET LOCAL`), RLS policies, cross-tenant isolation suite started (Testcontainers) | 2 | RLS proven by integration tests; cross-tenant suite 100% for what exists |
+| S7 | **Phase 2b:** auth (Better Auth + MFA for owners), session → tenant context (+ `tenant_id`/`user_id` on log lines), auth E2E | 2 | auth E2E passing |
+| S8 | **Phase 2c:** roles/permissions matrix, audit log, usage-metering skeleton | 2 | role matrix 100%; Phase 2 exit criteria |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

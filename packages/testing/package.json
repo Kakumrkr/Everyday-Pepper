@@ -1,0 +1,34 @@
+{
+  "name": "@floty/testing",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Test-only helpers: Testcontainers for Postgres and Redis (integration tests). Never a production dependency.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@floty/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.int.config.ts"
+  },
+  "devDependencies": {
+    "@floty/config": "workspace:*",
+    "@vitest/coverage-v8": "^5.0.5",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "@testcontainers/postgresql": "^12.2.1",
+    "@testcontainers/redis": "^12.2.1",
+    "testcontainers": "^12.2.1"
+  }
+}

@@ -1,14 +1,9 @@
-import { DatabaseUrlSchema, loadEnv, PortSchema, RedisUrlSchema } from '@floty/runtime';
-import { z } from 'zod';
+import { loadServiceConfig, type ServiceConfig } from '@floty/runtime/instrument';
 
-const WorkerEnvSchema = z.object({
-  PORT: PortSchema.default(4100),
-  DATABASE_URL: DatabaseUrlSchema,
-  REDIS_URL: RedisUrlSchema,
-});
-export type WorkerEnv = z.infer<typeof WorkerEnvSchema>;
-
-/** The worker's environment. Never log the result: connection strings carry credentials. */
-export function loadWorkerEnv(env: NodeJS.ProcessEnv): WorkerEnv {
-  return loadEnv('worker', WorkerEnvSchema, env);
+/**
+ * The worker's configuration. Read by `instrument.ts` (before anything else loads) and by
+ * `main.ts`. Never log it: connection strings and the Sentry DSN carry credentials.
+ */
+export function loadWorkerConfig(env: NodeJS.ProcessEnv): ServiceConfig {
+  return loadServiceConfig('worker', env, { port: 4100 });
 }

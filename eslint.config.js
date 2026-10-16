@@ -22,10 +22,12 @@ const allowedInternalImports = {
   'packages/ai': ['contracts', 'core'],
   'packages/integrations': ['contracts', 'core'],
   'packages/ui': ['contracts'],
-  'packages/runtime': ['contracts', 'core'],
+  'packages/runtime': ['contracts', 'core', 'testing'],
+  // Test-only helpers; a devDependency wherever used, so a production import fails the image.
+  'packages/testing': [],
   // Apps also get each modules/* and templates/* package as it is created.
-  'apps/api': ['contracts', 'core', 'db', 'ai', 'runtime'],
-  'apps/worker': ['contracts', 'core', 'db', 'integrations', 'runtime'],
+  'apps/api': ['contracts', 'core', 'db', 'ai', 'runtime', 'testing'],
+  'apps/worker': ['contracts', 'core', 'db', 'integrations', 'runtime', 'testing'],
   'apps/web': ['contracts', 'ui'],
   e2e: ['contracts'],
 };
@@ -47,7 +49,9 @@ const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowe
             } (layer rules, docs/plan/dependency-map.md).`,
           },
           {
-            group: ['@floty/*/*'],
+            // `@floty/runtime/instrument` is the one extra entry point: the `node --import` preload
+            // must not load what tracing patches (see packages/runtime/src/instrument.ts).
+            group: ['@floty/*/*', '!@floty/runtime/instrument'],
             message: 'Import packages through their public entry point, not deep paths.',
           },
         ],

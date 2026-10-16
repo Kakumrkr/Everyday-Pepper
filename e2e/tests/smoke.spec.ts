@@ -17,6 +17,9 @@ test.describe('smoke: the stack is up', () => {
         status: 'ok',
         checks: { database: 'up', redis: 'up' },
       });
+      // Shared process wiring (@floty/runtime): request ids, no framework fingerprint.
+      expect(response.headers()['x-request-id']).toMatch(/^[0-9a-f-]{36}$/);
+      expect(response.headers()['x-powered-by']).toBeUndefined();
     });
   }
 
