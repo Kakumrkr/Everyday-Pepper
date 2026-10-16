@@ -1,0 +1,53 @@
+import 'reflect-metadata';
+import type { Server } from 'node:http';
+import { HealthReportSchema } from '@floty/contracts';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
+import { describe, expect, it, vi } from 'vitest';
+import { ConnectionsModule, readinessChecks } from './connections.module.js';
+import { HealthModule } from './health.module.js';
+
+describe('readinessChecks', () => {
+  it('probes Postgres with SELECT 1 and Redis with PING', async () => {
+    const pool = { query: vi.fn(() => Promise.resolve({ rows: [] })) };
+    const redis = { ping: vi.fn(() => Promise.resolve('PONG')) };
+
+    const checks = readinessChecks(pool as never, redis as never);
+    await checks['database']?.();
+    await checks['redis']?.();
+
+    expect(Object.keys(checks)).toEqual(['database', 'redis']);
+    expect(pool.query).toHaveBeenCalledWith('SELECT 1');
+    expect(redis.ping).toHaveBeenCalledOnce();
+  });
+});
+
+describe('ConnectionsModule', () => {
+  // Port 1 on localhost refuses connections: the real clients are wired but nothing answers.
+  // The happy path against real Postgres and Redis is the Compose smoke test (e2e/).
+  it('wires real clients into readiness and closes them on shutdown', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConnectionsModule.forRoot({
+          databaseUrl: 'postgres://floty:floty@127.0.0.1:1/floty',
+          redisUrl: 'redis://127.0.0.1:1',
+        }),
+        HealthModule.forRoot({ service: 'worker' }),
+      ],
+    }).compile();
+    const app = moduleRef.createNestApplication({ logger: false });
+    app.enableShutdownHooks();
+    await app.init();
+
+    const response = await request(app.getHttpServer() as Server)
+      .get('/health/ready')
+      .expect(503);
+    expect(HealthReportSchema.parse(response.body)).toMatchObject({
+      service: 'worker',
+      status: 'unavailable',
+      checks: { database: 'down', redis: 'down' },
+    });
+
+    await expect(app.close()).resolves.toBeUndefined();
+  });
+});

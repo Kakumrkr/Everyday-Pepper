@@ -25,4 +25,4 @@ Per staff OAuth connection. Inbound: external events → `ExternalBusyBlock` (bl
 Fetch website / Google Business profile (public data) or OCR a price-list photo → LLM structured output into template-shaped draft → validation → review card. Fetched content treated as untrusted. Competitor CSV import via column mapping presets + AI-assisted mapping for unknown formats; dry-run report before commit.
 
 ## Files
-S3-compatible storage (MinIO in dev, R2/S3 in pilot): uploads, imports, exports. Pre-signed URLs, private by default, tenant-prefixed keys.
+S3-compatible storage (dev server: open decision D10 — MinIO no longer ships images; R2/S3 in pilot): uploads, imports, exports. Pre-signed URLs, private by default, tenant-prefixed keys.

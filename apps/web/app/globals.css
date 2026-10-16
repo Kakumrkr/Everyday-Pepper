@@ -1,0 +1,89 @@
+/* Approved tokens (docs/product/ux-principles.md). Phase 4 moves these into packages/ui. */
+:root {
+  color-scheme: light dark;
+  --bg: #fff8f7;
+  --surface: #ffffff;
+  --line: #eedcd9;
+  --ink: #2b1b24;
+  --ink-2: #6a5560;
+  --brand: #be2759;
+  --ok: #23703a;
+  --ok-soft: #e2f2e5;
+  --wait: #8f4c00;
+  --wait-soft: #ffefd6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161015;
+    --surface: #211820;
+    --line: #3b2d38;
+    --ink: #f8ecf1;
+    --ink-2: #bda8b3;
+    --brand: #ff7fa8;
+    --ok: #7fd69a;
+    --ok-soft: #1d3324;
+    --wait: #ffc274;
+    --wait-soft: #3a2a12;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  line-height: 1.5;
+}
+
+main {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+}
+
+.wordmark {
+  margin: 0;
+  color: var(--brand);
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.tagline {
+  margin: 4px 0 24px;
+  color: var(--ink-2);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--wait-soft);
+  color: var(--wait);
+  font-weight: 600;
+}
+
+.status[data-state='ok'] {
+  background: var(--ok-soft);
+  color: var(--ok);
+}

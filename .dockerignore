@@ -1,0 +1,16 @@
+# Keep the build context small and free of secrets and host builds.
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+**/*.tsbuildinfo
+**/next-env.d.ts
+.git
+.github
+docs
+e2e/test-results
+e2e/playwright-report
+.env
+.env.*
+!.env.example

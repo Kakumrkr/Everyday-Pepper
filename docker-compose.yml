@@ -1,0 +1,82 @@
+# Local development and CI smoke stack. `docker compose up --build` serves:
+#   web http://localhost:3000 · api http://localhost:4000 · worker http://localhost:4100 (health only)
+#   Mailpit (fake inbox) http://localhost:8025, SMTP localhost:1025
+# Infra only, for `pnpm dev`: docker compose up postgres redis mailpit
+# Credentials below are local-only defaults; override them in a git-ignored .env (see .env.example).
+# Ports bind to 127.0.0.1 so nothing is exposed beyond this machine.
+name: floty
+
+x-app-env: &app-env
+  DATABASE_URL: postgres://${POSTGRES_USER:-floty}:${POSTGRES_PASSWORD:-floty_dev}@postgres:5432/${POSTGRES_DB:-floty}
+  REDIS_URL: redis://redis:6379
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17@sha256:ac08538c6f8b9904c33c8224c5e5706dbe760aca29db1d096972b4052c22a75d
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-floty}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-floty_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-floty}
+    ports: ['127.0.0.1:5432:5432']
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
+    # BullMQ needs keys to stay put: never evict under memory pressure.
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    ports: ['127.0.0.1:6379:6379']
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.31.6@sha256:23fe39e81bde596a918000b3135c0f85dc8bb4c9ea6be274b051143f3e300387
+    ports: ['127.0.0.1:1025:1025', '127.0.0.1:8025:8025']
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: { context: ., target: api }
+    image: floty-api:dev
+    environment:
+      <<: *app-env
+      PORT: '4000'
+    ports: ['127.0.0.1:4000:4000']
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  worker:
+    build: { context: ., target: worker }
+    image: floty-worker:dev
+    environment:
+      <<: *app-env
+      PORT: '4100'
+    ports: ['127.0.0.1:4100:4100']
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  web:
+    build: { context: ., target: web }
+    image: floty-web:dev
+    environment:
+      API_INTERNAL_URL: http://api:4000
+    ports: ['127.0.0.1:3000:3000']
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  postgres-data:
+  redis-data:

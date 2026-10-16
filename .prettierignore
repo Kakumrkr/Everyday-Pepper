@@ -5,3 +5,7 @@ coverage/
 # planning docs and the Phase 0 prototype are hand-formatted
 docs/
 CLAUDE.md
+.next/
+next-env.d.ts
+e2e/test-results/
+e2e/playwright-report/

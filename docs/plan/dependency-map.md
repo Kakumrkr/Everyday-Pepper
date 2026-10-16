@@ -21,9 +21,10 @@ Use this before any change: find the part you're changing, then check everything
 | **feed / insights** | appointments, customers, memory, trust layer, messaging | PWA home, daily briefing |
 | **onboarding** | adapter, templates, appointments, import | signup flow |
 | **integrations/google-calendar** | OAuth tokens, worker, appointments | availability (busy blocks), bookings (outbound) |
+| **runtime** (Nest process wiring: health, connections, env helpers; S5 adds config, logger, telemetry) | contracts, core, NestJS | apps/api, apps/worker |
 | **ui** (design system, cards) | contracts (card schemas) | web app, booking page |
 | **apps/web** | ui, API client (contracts) | users |
-| **apps/api** | core, modules, ai | web, booking page, webhooks |
-| **apps/worker** | core, modules, integrations | jobs |
+| **apps/api** | core, modules, ai, runtime | web, booking page, webhooks, e2e |
+| **apps/worker** | core, modules, integrations, runtime | jobs, e2e |
 
 **High-blast-radius parts** (changes need extra review): contracts, db/RLS, tenancy/RBAC, trust layer, availability engine.

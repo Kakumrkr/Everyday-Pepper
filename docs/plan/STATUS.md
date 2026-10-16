@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 1 — Foundations (S3 done → next: S4)
+**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 1 — Foundations (S4 done → next: S5)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -14,6 +14,8 @@
 - **Phase 0 signed off (2026-10-16):** user approved all mockups and the 5 S2 questions. Design tokens recorded in `docs/product/ux-principles.md`. PCR-001 approved (business brand color on the booking page, picked in onboarding). Plan version 0.4.
 
 - **S3 Phase 1a (2026-10-16):** pnpm + Turborepo monorepo; strict ESM TypeScript (`packages/config`); ESLint (typescript-eslint strict, layer-boundary rule from the dependency map, no deep imports, disable comments need a reason) + Prettier + EditorConfig; Vitest with ≥ 80% coverage gate; placeholder packages `@floty/contracts` (`RiskTier`, `AutonomyLevel`, `UtcDateTime` schemas) and `@floty/core` (`Clock`, `ManualClock`, `utcNow`); CI workflow (format → lint → typecheck → test+coverage → build, actions pinned to SHAs); Dependabot; `docs/engineering/dev-setup.md`; root README. `main` branch created at the Phase 0 sign-off commit. Checks run: clean `pnpm install --frozen-lockfile` + `pnpm check` all green (30 tests, 100% coverage); verified lint rejects `any`, unexplained `!`, layer violations, deep imports, undescribed disables; typecheck rejects type errors; coverage gate fails at 68%; actionlint clean.
+
+- **S4 Phase 1b (2026-10-16):** apps skeletons: `apps/api` + `apps/worker` (NestJS 12, ESM, Express 5) with `GET /health/live` and `/health/ready` (Postgres + Redis; 503 when down, body says only up/down), `apps/web` (Next.js 16) placeholder home showing API readiness + `/health/live`. Shared pieces: `HealthReportSchema` (`@floty/contracts`), `runHealthChecks` with per-check timeout (`@floty/core`), new `@floty/runtime` package (Nest health/connections modules, env helpers that never echo values). One multi-stage `Dockerfile` (digest-pinned base, `pnpm deploy --prod`, Next standalone, non-root, healthchecks); `docker-compose.yml` with Postgres+pgvector, Redis, Mailpit, api, worker, web (ports on 127.0.0.1, local-only default credentials, `.env.example`). `e2e/` Playwright smoke on phone + desktop; CI job **E2E smoke (Docker Compose)**; Dependabot for docker/compose. Checks run: `pnpm check` green (81 unit tests, coverage ≥ 90% everywhere); `docker compose up --wait` → all 6 services healthy; Playwright smoke 8/8 passing against Compose; stopping Postgres → api ready 503 + web shows "starting up", recovers on restart; containers run as `node`, stop in < 1 s; `pnpm dev` serves all three apps against Compose infra; actionlint + `docker compose config` clean. **Not yet proven:** the CI e2e job itself (runs on the PR). Local Docker builds in the cloud sandbox needed the session proxy CA (scratch Dockerfile, not committed).
 
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
@@ -29,20 +31,22 @@
 - **Branch workflow (S3, user):** `main` is the integration branch (created from `ea2a951`). Each session works on a `claude/*` branch and opens a PR into `main`; the user reviews and merges; head branches are deleted after merge. The S1/S2 work had lived on `claude/sharp-noether-re1wo9`, which was never merged — always start a session from `main`.
 - **Lint/format: ESLint + Prettier** (user, S3), not Biome.
 - **TypeScript pinned to 6.0.x** until typescript-eslint supports 6.1+/7 (S3 finding; see dev-setup.md).
-- **Module format: ESM** for all packages (NodeNext). NestJS apps in S4 must consume ESM packages (Node 22 `require(esm)` works, or run Nest as ESM) — confirm in S4.
+- **Module format: ESM** for all packages (NodeNext). Confirmed in S4: Nest 12 ships ESM, so api/worker run as native ESM.
+- **S4 defaults (Claude, user to confirm or change):** NestJS on Express (not Fastify); Vitest compiles Nest code with SWC; shared Nest wiring lives in a new `packages/runtime` (`@floty/runtime`) that S5 extends with config/logger/telemetry; the readiness `SELECT 1` lives in runtime until `packages/db` exists (Phase 2); web unit tests cover `lib/` and route handlers, pages are covered by Playwright.
+- **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images. Replacement is open decision **D10** (recommendation: SeaweedFS); needed by Phase 4.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user (GitHub settings, one-time)
 1. Settings → General → **Default branch → `main`** (currently the stale `claude/youthful-cori-cexdi2`).
 2. Settings → General → Pull Requests → **Automatically delete head branches**.
 3. Delete stale branches `claude/youthful-cori-cexdi2`, `claude/wonderful-newton-opp16r` (unused duplicate S1) and, once merged, `claude/sharp-noether-re1wo9`.
-4. After the S3 PR is green: branch protection on `main` requiring a PR and the **CI / Lint, typecheck, test, build** check.
+4. After the S4 PR is green: branch protection on `main` requiring a PR and the **CI / Lint, typecheck, test, build** and **CI / E2E smoke (Docker Compose)** checks.
+5. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
 
 ## Planned sessions (next first)
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S4 | **Phase 1b:** apps skeletons (Next.js web, NestJS api + worker), Docker Compose (Postgres+pgvector, Redis, MinIO, Mailpit), health checks, Playwright smoke test | 1 | `docker compose up` serves all apps; E2E smoke passes in CI |
-| S5 | **Phase 1c:** env validation (Zod), redacting logger, Sentry + OpenTelemetry wiring, Testcontainers integration-test harness | 1 | Phase 1 exit criteria met |
+| S5 | **Phase 1c:** env validation (Zod, shared config in `@floty/runtime` replacing the per-app `loadEnv`), redacting logger (pino), Sentry + OpenTelemetry wiring, Testcontainers integration-test harness (first test: readiness against real Postgres + Redis) | 1 | Phase 1 exit criteria met |
 | … | Phase 2 split into: auth (Better Auth + MFA) · tenancy + RLS + cross-tenant suite · roles + audit log | 2 | per roadmap |
 
 ## How to resume in a new session
