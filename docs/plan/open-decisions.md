@@ -5,8 +5,8 @@ Resolved decisions move into an ADR (`../adr/`) and are logged in `CHANGELOG.md`
 | # | Decision | Recommendation | Needed by |
 |---|---|---|---|
 | D1 | Product name & brand | **Working name: Floty** (user, 2026-10-16). Confirm trademark/domain before pilot | Before pilot |
-| D2 | Auth solution | Better Auth (self-hosted, free, works with NestJS) vs Auth.js vs Clerk free tier — recommend Better Auth for cost and control | Phase 2 |
-| D3 | ORM / migrations | Drizzle (SQL-first, good for RLS and exclusion constraints) vs Prisma — recommend Drizzle | Phase 1 |
+| D2 | Auth solution | ✅ **Resolved: Better Auth** → [ADR-0007](../adr/0007-auth-better-auth.md) | — |
+| D3 | ORM / migrations | ✅ **Resolved: Drizzle** → [ADR-0008](../adr/0008-orm-drizzle.md) | — |
 | D4 | Email provider | Amazon SES (cheapest) vs Resend (simplest DX) — recommend Resend for pilot, SES at scale | Phase 5 |
 | D5 | OpenAI models | Small model for routine turns, stronger model for planning/extraction; pin via config and evals | Phase 6 |
 | D6 | Pilot host | Hetzner VPS (cheapest) vs AWS Lightsail (closer to AWS later) | Phase 11 |

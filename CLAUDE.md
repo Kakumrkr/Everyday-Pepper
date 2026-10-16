@@ -21,10 +21,24 @@ Act as the project's **Principal Software Engineer, Software Architect, Product 
 10. **End every task with a summary**: changes made · tests run and results · remaining risks · next recommended step.
 
 ## Session protocol
-The user guides each feature session. For every session:
-1. **Read** `CLAUDE.md`, **`docs/plan/STATUS.md` (where the last session stopped)**, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed.
-2. **Plan**: restate the goal, list affected parts (from the dependency map), propose small tasks with acceptance criteria and tests.
-3. **Get approval** before writing code.
+The user guides each feature session. **One session = one feature-sized goal** (one big feature, or a few small related tasks). Big phases are split across several sessions; unrelated small fixes are batched into a separate maintenance session. If a session's goal turns out larger than expected, finish a clean, tested sub-part, commit, and move the rest to the next planned session.
+
+For every session:
+1. **Read** `CLAUDE.md`, **`docs/plan/STATUS.md` (where the last session stopped, and the planned sessions list)**, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed.
+2. **Before doing any work, present a Session Brief** and wait for the user to confirm or adjust it:
+   ```
+   ## Session Brief
+   - Where we are: <phase, what the last session finished>
+   - Target of this session: <one sentence>
+   - In scope: <bullets>        - Out of scope: <bullets>
+   - Tasks: <small ordered tasks, each with its test>
+   - Done when: <measurable acceptance criteria / AC IDs>
+   - Affected parts: <from dependency-map>
+   - Decisions needed from you: <questions with options, or "none">
+   - Risks: <bullets>
+   ```
+   Take the target from the next entry in STATUS.md "Planned sessions" unless the user says otherwise.
+3. **Plan detail and get approval** before writing code.
 4. **Implement** task by task; run lint, typecheck and tests after each.
 5. **Review** your own diff adversarially (security, tenancy, edge cases).
 6. **Summarize** (principle 10) and update docs/traceability.

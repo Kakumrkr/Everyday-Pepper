@@ -40,13 +40,15 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [Changelog](plan/CHANGELOG.md)
 - [PCR template](plan/changes/PCR-template.md)
 
-## Architecture Decision Records (all Proposed)
+## Architecture Decision Records (all Accepted)
 - [ADR-0001 TypeScript monorepo](adr/0001-typescript-monorepo.md)
 - [ADR-0002 Postgres + RLS](adr/0002-postgres-rls.md)
 - [ADR-0003 BullMQ + outbox](adr/0003-bullmq-outbox.md)
 - [ADR-0004 LLM provider adapter](adr/0004-llm-provider-adapter.md)
 - [ADR-0005 Model proposes, domain decides](adr/0005-model-proposes-domain-decides.md)
 - [ADR-0006 Lean deployment](adr/0006-lean-deployment.md)
+- [ADR-0007 Auth with Better Auth](adr/0007-auth-better-auth.md)
+- [ADR-0008 Drizzle ORM](adr/0008-orm-drizzle.md)
 
 ## How these docs are maintained
 - Docs change in the same commit as the behaviour they describe.

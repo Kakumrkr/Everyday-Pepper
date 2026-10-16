@@ -1,6 +1,6 @@
 # ADR-0001: TypeScript monorepo — Next.js web, NestJS API and worker
 
-- **Status:** Proposed · **Date:** 2026-10-16
+- **Status:** Accepted (2026-10-16) · **Date:** 2026-10-16
 
 ## Context
 Solo developer with AI assistance; need one language end to end, shared types, and clear module boundaries for a layered, multi-industry product. User selected Next.js + NestJS.

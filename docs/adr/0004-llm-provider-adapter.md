@@ -1,6 +1,6 @@
 # ADR-0004: OpenAI behind a provider adapter
 
-- **Status:** Proposed · **Date:** 2026-10-16
+- **Status:** Accepted (2026-10-16) · **Date:** 2026-10-16
 
 ## Context
 User selected the OpenAI API (and Realtime API for V2 voice). Models, prices and capabilities change frequently.

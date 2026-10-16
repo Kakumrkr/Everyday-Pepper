@@ -1,6 +1,6 @@
 # ADR-0006: Lean deployment path — Docker Compose → single VPS → AWS
 
-- **Status:** Proposed · **Date:** 2026-10-16
+- **Status:** Accepted (2026-10-16) · **Date:** 2026-10-16
 
 ## Context
 User has a tight budget; AWS is the long-term target.

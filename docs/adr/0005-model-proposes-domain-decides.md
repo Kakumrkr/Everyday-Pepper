@@ -1,6 +1,6 @@
 # ADR-0005: The model proposes, the domain decides
 
-- **Status:** Proposed · **Date:** 2026-10-16
+- **Status:** Accepted (2026-10-16) · **Date:** 2026-10-16
 
 ## Context
 The AI executes real business operations. Mistakes and prompt injection must not corrupt data or message customers wrongly.

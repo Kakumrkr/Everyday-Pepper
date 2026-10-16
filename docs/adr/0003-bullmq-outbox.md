@@ -1,6 +1,6 @@
 # ADR-0003: Redis + BullMQ for jobs, with a Postgres transactional outbox
 
-- **Status:** Proposed · **Date:** 2026-10-16
+- **Status:** Accepted (2026-10-16) · **Date:** 2026-10-16
 
 ## Context
 Reminders, briefings, waitlist offers, sync and imports need scheduling, retries and delays. Side effects must never be lost or duplicated. User selected Redis + BullMQ.

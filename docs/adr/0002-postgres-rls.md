@@ -1,6 +1,6 @@
 # ADR-0002: PostgreSQL + pgvector with Row-Level Security for tenant isolation
 
-- **Status:** Proposed · **Date:** 2026-10-16
+- **Status:** Accepted (2026-10-16) · **Date:** 2026-10-16
 
 ## Context
 Multi-tenant SaaS holding customer PII; AI agent issues queries on behalf of users; isolation failures are the highest-impact risk.
