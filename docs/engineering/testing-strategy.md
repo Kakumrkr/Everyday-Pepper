@@ -7,7 +7,7 @@ Every feature and bug fix ships with automated tests that were actually run. Acc
 | Unit | Vitest (Jest for NestJS if needed) | Domain logic, rules engine, availability engine, card renderers | ≥ 80% coverage on core/modules |
 | Property-based | fast-check | Availability (no overlaps, rules respected), recurrence, time zones/DST | 10k cases in CI |
 | Integration | Testcontainers (Postgres + pgvector, Redis) | Repositories, migrations, RLS, outbox, BullMQ handlers | All pass |
-| Cross-tenant suite | Integration | Every endpoint/tool attempted with another tenant's IDs | 100% |
+| Cross-tenant suite | Integration | Every endpoint/tool attempted with another tenant's IDs; at the database level (`packages/db/src/isolation.int.test.ts`) every table is classified, and each tenant-owned table is checked for forced RLS and attacked across tenants | 100% |
 | Role matrix | Integration | Every action × role | 100% |
 | Contract | Zod schemas + recorded fixtures | Module events/interfaces; Google Calendar, email providers | All pass |
 | E2E | Playwright (mobile + desktop viewports) | Onboarding, booking page, chat with cards, feed, undo | All pass on PR to main |

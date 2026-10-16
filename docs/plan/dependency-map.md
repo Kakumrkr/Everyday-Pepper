@@ -5,7 +5,7 @@ Use this before any change: find the part you're changing, then check everything
 | Part | Depends on | Consumed by |
 |---|---|---|
 | **contracts** (Zod schemas, events, cards) | — | everything |
-| **db** (schema, RLS, repositories) | contracts | core, modules, ai, worker |
+| **db** (`@floty/db`: Drizzle schema, SQL migrations + migrate CLI, roles, RLS, `withTenant`, repositories, readiness probe) | contracts, Postgres | core, modules, ai, runtime, apps/api (migrate CLI in the image), worker |
 | **core: tenancy/auth/RBAC** | db, contracts | every API endpoint, AI tools, worker |
 | **core: audit log** | db | all write services, trust layer |
 | **core: customers** | db, RBAC | appointments, memory, messaging, feed, import |
@@ -21,8 +21,8 @@ Use this before any change: find the part you're changing, then check everything
 | **feed / insights** | appointments, customers, memory, trust layer, messaging | PWA home, daily briefing |
 | **onboarding** | adapter, templates, appointments, import | signup flow |
 | **integrations/google-calendar** | OAuth tokens, worker, appointments | availability (busy blocks), bookings (outbound) |
-| **runtime** (Nest process wiring: config, redacting logger, request ids, OTel tracing, Sentry errors, health, connections; `./instrument` preload entry) | contracts, core, NestJS, pino, OpenTelemetry, Sentry | apps/api, apps/worker |
-| **testing** (test-only: Testcontainers Postgres/Redis using the Compose images, recording HTTP server) | Testcontainers, docker-compose.yml | integration tests of runtime, apps (devDependency only) |
+| **runtime** (Nest process wiring: config, redacting logger, request ids, OTel tracing, Sentry errors, health, connections incl. the `DATABASE` handle; `./instrument` preload entry) | contracts, core, db, NestJS, pino, OpenTelemetry, Sentry | apps/api, apps/worker |
+| **testing** (test-only: Testcontainers Postgres/Redis using the Compose images, recording HTTP server, `postgresUrlAs`) | Testcontainers, docker-compose.yml | integration tests of db, runtime, apps (devDependency only) |
 | **ui** (design system, cards) | contracts (card schemas) | web app, booking page |
 | **apps/web** | ui, API client (contracts) | users |
 | **apps/api** | core, modules, ai, runtime | web, booking page, webhooks, e2e |
