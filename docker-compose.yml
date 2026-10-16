@@ -9,6 +9,13 @@ name: floty
 x-app-env: &app-env
   DATABASE_URL: postgres://${POSTGRES_USER:-floty}:${POSTGRES_PASSWORD:-floty_dev}@postgres:5432/${POSTGRES_DB:-floty}
   REDIS_URL: redis://redis:6379
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-local}
+  # Optional; empty means off (see .env.example).
+  RELEASE: ${RELEASE:-}
+  SENTRY_DSN: ${SENTRY_DSN:-}
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+  OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
 
 services:
   postgres:

@@ -33,14 +33,14 @@ COPY --from=build --chown=node:node /out/api ./
 EXPOSE 4000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
     CMD wget -qO /dev/null http://127.0.0.1:4000/health/ready || exit 1
-CMD ["node", "dist/main.js"]
+CMD ["node", "--import", "./dist/instrument.js", "dist/main.js"]
 
 FROM runtime AS worker
 COPY --from=build --chown=node:node /out/worker ./
 EXPOSE 4100
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
     CMD wget -qO /dev/null http://127.0.0.1:4100/health/ready || exit 1
-CMD ["node", "dist/main.js"]
+CMD ["node", "--import", "./dist/instrument.js", "dist/main.js"]
 
 FROM runtime AS web
 # Next.js standalone output keeps the monorepo layout: the server lives at apps/web/server.js.

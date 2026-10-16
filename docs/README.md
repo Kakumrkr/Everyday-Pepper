@@ -53,6 +53,7 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [ADR-0006 Lean deployment](adr/0006-lean-deployment.md)
 - [ADR-0007 Auth with Better Auth](adr/0007-auth-better-auth.md)
 - [ADR-0008 Drizzle ORM](adr/0008-orm-drizzle.md)
+- [ADR-0009 Observability wiring](adr/0009-observability-wiring.md) (proposed)
 
 ## How these docs are maintained
 - Docs change in the same commit as the behaviour they describe.

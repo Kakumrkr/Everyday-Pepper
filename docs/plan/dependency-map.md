@@ -21,7 +21,8 @@ Use this before any change: find the part you're changing, then check everything
 | **feed / insights** | appointments, customers, memory, trust layer, messaging | PWA home, daily briefing |
 | **onboarding** | adapter, templates, appointments, import | signup flow |
 | **integrations/google-calendar** | OAuth tokens, worker, appointments | availability (busy blocks), bookings (outbound) |
-| **runtime** (Nest process wiring: health, connections, env helpers; S5 adds config, logger, telemetry) | contracts, core, NestJS | apps/api, apps/worker |
+| **runtime** (Nest process wiring: config, redacting logger, request ids, OTel tracing, Sentry errors, health, connections; `./instrument` preload entry) | contracts, core, NestJS, pino, OpenTelemetry, Sentry | apps/api, apps/worker |
+| **testing** (test-only: Testcontainers Postgres/Redis using the Compose images, recording HTTP server) | Testcontainers, docker-compose.yml | integration tests of runtime, apps (devDependency only) |
 | **ui** (design system, cards) | contracts (card schemas) | web app, booking page |
 | **apps/web** | ui, API client (contracts) | users |
 | **apps/api** | core, modules, ai, runtime | web, booking page, webhooks, e2e |

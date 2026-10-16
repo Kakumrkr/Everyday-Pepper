@@ -5,14 +5,14 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { AppModule } from './app.module.js';
+import { loadApiConfig } from './config.js';
 
 // Port 1 on localhost refuses connections: the real clients are wired but nothing answers.
 // The happy path against real Postgres and Redis is covered by the Compose smoke test (e2e/).
-const unreachable = {
-  PORT: 0,
+const unreachable = loadApiConfig({
   DATABASE_URL: 'postgres://floty:floty@127.0.0.1:1/floty',
   REDIS_URL: 'redis://127.0.0.1:1',
-};
+});
 
 describe('AppModule', () => {
   it('reports dependencies down, stays live, and shuts down cleanly', async () => {
