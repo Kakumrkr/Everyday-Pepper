@@ -78,4 +78,17 @@ describe('GET /health/ready', () => {
     });
     expect(response.text).not.toContain('password');
   });
+
+  it('treats a check that rejects with a non-Error value as down', async () => {
+    const server = (
+      await start({
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- third-party clients can reject with anything
+        database: () => Promise.reject('socket closed'),
+      })
+    ).getHttpServer() as Server;
+
+    const response = await request(server).get('/health/ready').expect(503);
+
+    expect(response.body).toMatchObject({ checks: { database: 'down' } });
+  });
 });

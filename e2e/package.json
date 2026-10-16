@@ -1,0 +1,18 @@
+{
+  "name": "@floty/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Playwright end-to-end tests against a running stack (docker compose up).",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@floty/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@floty/config": "workspace:*",
+    "@playwright/test": "^1.64.1"
+  }
+}

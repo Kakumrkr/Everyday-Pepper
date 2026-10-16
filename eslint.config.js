@@ -66,6 +66,8 @@ export default defineConfig(
       '**/.next/**',
       '**/next-env.d.ts',
       '**/node_modules/**',
+      'e2e/test-results/**',
+      'e2e/playwright-report/**',
       'docs/**',
     ],
   },

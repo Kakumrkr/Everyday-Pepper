@@ -7,3 +7,5 @@ docs/
 CLAUDE.md
 .next/
 next-env.d.ts
+e2e/test-results/
+e2e/playwright-report/

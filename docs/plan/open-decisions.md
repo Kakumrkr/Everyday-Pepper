@@ -13,3 +13,4 @@ Resolved decisions move into an ADR (`../adr/`) and are logged in `CHANGELOG.md`
 | D7 | Pricing & plan limits | Monthly per business with included AI/email usage; finalise from metering data | Before pilot |
 | D8 | Real-time transport for chat | SSE for streaming + REST for actions vs WebSocket — recommend SSE (simpler, proxy-friendly) | Phase 6 |
 | D9 | IaC tool for AWS | Terraform vs CDK | Growth stage |
+| D10 | Dev object storage (S3-compatible) | MinIO no longer publishes community Docker images (`minio/minio` is gone from Docker Hub; found in S4). Options: **SeaweedFS** (Apache-2.0, mature, one container with `-s3`) — recommended; Garage (AGPL, needs a layout bootstrap); RustFS (Apache-2.0, young); last MinIO build from quay.io (frozen, no fixes). Code talks S3 API only, so this is dev-only and swappable | Phase 4 (stylist photos) |

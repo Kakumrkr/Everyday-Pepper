@@ -5,7 +5,7 @@ Goal: near-zero cost while building, cheap pilot, AWS only when revenue justifie
 ## Environments
 | Env | Where | Contents |
 |---|---|---|
-| dev | Local / cloud dev session via Docker Compose | web, api, worker, Postgres+pgvector, Redis, MinIO, Mailpit (fake email) |
+| dev | Local / cloud dev session via Docker Compose | web, api, worker, Postgres+pgvector, Redis, Mailpit (fake email); S3-compatible storage per D10 |
 | CI | GitHub Actions | lint, typecheck, unit, integration (Testcontainers), E2E, evals (budget-capped), image build, security scans |
 | staging | Same VPS as pilot, separate compose project & DB | Deployed on merge to main |
 | pilot/prod | One small VPS (Hetzner ~$5–10/mo or AWS Lightsail ~$10–20/mo) | Docker Compose + Caddy (TLS), nightly encrypted backups to R2/S3 |
