@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done and merged (PR #9) → next: S8 (roles/audit/metering) → next: S8 (roles/audit/metering)
+**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done and merged (PR #9) → next: S8 (roles/audit/metering)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
