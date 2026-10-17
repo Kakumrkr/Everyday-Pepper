@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a) merged. **S11 (Phase 3b: booking rules + availability engine) done** on `claude/blissful-lovelace-q6q43j`, ADR-0016 **proposed** (waiting for the user) → next: S12 (bookings + waitlist)
+**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a) merged. **S11 (Phase 3b: booking rules + availability engine) done** on `claude/blissful-lovelace-q6q43j`, ADR-0016 **accepted**, PR opened → next: S12 (bookings + waitlist)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -158,7 +158,7 @@
   - **CI fix:** the S9 team e2e test reloaded the page before the role change had saved (a race CI hit once). It now waits for the save; 3 local runs of the full e2e suite, 26/26 each.
   - **Findings:** a foreign key check bypasses RLS, so a single-column reference could link to another business's row by id. Composite keys are now the rule for tenant references (ADR-0015, dev-setup, security doc).
 
-- **S11 Phase 3b (2026-10-17):** booking rules and the availability engine ([ADR-0016](../adr/0016-booking-rules-and-availability.md), **proposed**).
+- **S11 Phase 3b (2026-10-17):** booking rules and the availability engine ([ADR-0016](../adr/0016-booking-rules-and-availability.md), accepted by the user).
   - **contracts:**
     - `RuleSchema`: five versioned rule types (`slot_interval` 5/10/15/20/30/60, `minimum_notice`, `maximum_advance`, `max_bookings_per_day`, `blackout_window` as local dates, both ends included), each for the business or one staff member.
     - `BookingRulesSchema`: the whole set, sorted, one per type and scope except blackouts.
@@ -190,7 +190,7 @@
       - **api 44:** Ana sets rules; Cara reads but gets 403 on changes; validation 400; Dev probes with Ana's staff member and gets 404, and sees no rules; `booking_rules.replaced` in the audit log.
       - core 57, runtime 2, testing 1.
   - **Not run this session:** Docker image builds, `docker compose up`, and Playwright (no UI change; the migrations are applied by `migrate.int.test.ts` and every integration suite). CI's E2E smoke will run Compose.
-  - **Not yet proven:** CI on the S11 PR (not opened yet).
+  - **Not yet proven:** CI on the S11 PR (opened at the user's request after accepting ADR-0016).
   - **Findings:**
     - Temporal's "compatible" handling of skipped times is not monotonic: 02:01 → 03:01 lands after 03:00 → 03:00. With it, hours of 01:00–02:50 and 03:00–04:00 would overlap in real time on spring-forward night. Skipped times now map to the moment of the change (ADR-0016 §9).
     - The engine lets buffers reach outside working hours, and checks the occupied range (with buffers) against other bookings' occupied ranges. S12's exclusion constraint should use the same occupied range.
@@ -263,7 +263,7 @@
   - (2) **Time zones with the built-in `Intl`**, no date library; fast-check only as a dev dependency.
   - (3) **Defaults:** 15-minute slots, 2 hours' notice, 90 days ahead, no daily cap.
   - (4) **Blackout windows are local dates** in the business's time zone.
-- **S11 defaults (Claude, in ADR-0016, for the user to accept):**
+- **S11 defaults — ADR-0016, accepted by the user (2026-10-17):**
   - Working hours, buffers and staff–service eligibility stay base data, not rule types.
   - A staff member's rule beats the business's; blackouts add up.
   - The whole set is replaced under an advisory lock and audited before and after.
@@ -276,11 +276,11 @@
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Accept or change ADR-0016** (booking rules and the availability engine; the S11 defaults listed under Decisions). Then, if you want, ask Claude to open the S11 PR.
+1. Review and merge the S11 PR once CI is green.
 2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 is merged, S11 is done (PR not opened yet). S12 should build its exclusion constraint on the occupied range (with buffers) and feed bookings into `availableSlots` (ADR-0016 Consequences).
+Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 is merged, S11 is done (PR open). S12 should build its exclusion constraint on the occupied range (with buffers) and feed bookings into `availableSlots` (ADR-0016 Consequences).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|

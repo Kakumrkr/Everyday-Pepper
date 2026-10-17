@@ -1,6 +1,6 @@
 # ADR-0016: Booking rules and the availability engine
 
-- **Status:** Proposed (Claude, S11). Four decisions were made by the user at the S11 Session Brief: store rules now, `Intl` for time zones, the defaults, and blackout windows as local dates. The rest is for the user to accept. · **Date:** 2026-10-17 · Builds on ADR-0015 (base data), ADR-0013 (roles, audit log), ADR-0010 (RLS)
+- **Status:** Accepted (user, 2026-10-17). Four decisions were made by the user at the S11 Session Brief: store rules now, `Intl` for time zones, the defaults, and blackout windows as local dates; the rest was accepted with this ADR. · **Date:** 2026-10-17 · Builds on ADR-0015 (base data), ADR-0013 (roles, audit log), ADR-0010 (RLS)
 
 ## Context
 Phase 3b turns a business's base data (ADR-0015) into bookable times. Owners need limits beyond weekly hours: how much notice they want, how far ahead people may book, the steps start times fall on, a daily cap, closed days. Templates (S13) will ship defaults for these, and learned rules (Phase 7) will add more later. The engine has to be pure so that the booking page, the calendar, and the AI tools (Phase 6) all get the same answer, and so that it can be property-tested. Times are wall-clock hours in the business's time zone (ADR-0015), so the engine has to get daylight-saving changes right.
