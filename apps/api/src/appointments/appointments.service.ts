@@ -2,16 +2,20 @@ import {
   addTimeOff,
   createService,
   createStaffMember,
+  getBookingRules,
   getWorkingHours,
   listServices,
   listStaff,
   listTimeOff,
   removeTimeOff,
+  replaceBookingRules,
   replaceWorkingHours,
   updateService,
   updateStaffMember,
 } from '@floty/appointments';
 import type {
+  BookingRules,
+  BookingRulesInput,
   Service,
   ServiceId,
   ServiceInput,
@@ -92,6 +96,14 @@ export class AppointmentsService {
 
   removeTimeOff(tenant: TenantContext, id: StaffMemberId, timeOffId: TimeOffId): Promise<void> {
     return removeTimeOff(this.db, actorOf(tenant), id, timeOffId);
+  }
+
+  rules(tenant: TenantContext): Promise<BookingRules> {
+    return getBookingRules(this.db, actorOf(tenant));
+  }
+
+  replaceRules(tenant: TenantContext, input: BookingRulesInput): Promise<BookingRules> {
+    return replaceBookingRules(this.db, actorOf(tenant), input);
   }
 }
 

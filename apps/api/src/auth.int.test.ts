@@ -4,6 +4,7 @@ import { Writable } from 'node:stream';
 import {
   ApiErrorSchema,
   AuditLogResponseSchema,
+  BookingRulesResponseSchema,
   CreateInviteResponseSchema,
   CurrentBusinessResponseSchema,
   InvitesResponseSchema,
@@ -794,6 +795,39 @@ describe('appointments base data (ADR-0015)', () => {
     await cara.delete(`/v1/staff/${marco.id}/time-off/${ofMarco.id}`).expect(403);
   });
 
+  it('the owner sets booking rules; Cara reads them but cannot change them', async () => {
+    const [staff] = StaffResponseSchema.parse((await ana.get('/v1/staff').expect(200)).body).staff;
+    const staffId = staff?.id ?? '';
+    const rules = BookingRulesResponseSchema.parse(
+      (
+        await ana
+          .put('/v1/rules', {
+            rules: [
+              { type: 'minimum_notice', staffMemberId: staffId, params: { minutes: 0 } },
+              { type: 'minimum_notice', params: { minutes: 1440 } },
+              {
+                type: 'blackout_window',
+                params: { startDate: '2030-12-25', endDate: '2030-12-26' },
+              },
+            ],
+          })
+          .expect(200)
+      ).body,
+    );
+    expect(rules.rules.map((r) => [r.staffMemberId, r.type])).toEqual([
+      [null, 'minimum_notice'],
+      [null, 'blackout_window'],
+      [staffId, 'minimum_notice'],
+    ]);
+    expect((await cara.get('/v1/rules').expect(200)).body).toEqual(rules);
+    const denied = await cara.put('/v1/rules', { rules: [] }).expect(403);
+    expect(errorCode(denied.body)).toBe('forbidden');
+    const invalid = await ana.put('/v1/rules', {
+      rules: [{ type: 'slot_interval', params: { minutes: 7 } }],
+    });
+    expect([invalid.status, errorCode(invalid.body)]).toEqual([400, 'validation_failed']);
+  });
+
   it("another business's owner finds none of it (AC-X-1)", async () => {
     const [staff] = StaffResponseSchema.parse((await ana.get('/v1/staff').expect(200)).body).staff;
     const services = (await ana.get('/v1/services').expect(200)).body as {
@@ -812,6 +846,9 @@ describe('appointments base data (ADR-0015)', () => {
         endsAt: '2030-01-07T18:00:00.000Z',
       }),
       await dev.put(`/v1/services/${serviceId}`, { name: 'Stolen', durationMinutes: 30 }),
+      await dev.put('/v1/rules', {
+        rules: [{ type: 'minimum_notice', staffMemberId: staffId, params: { minutes: 0 } }],
+      }),
     ];
     expect(probes.map((r) => [r.status, errorCode(r.body)])).toEqual([
       [404, 'staff_member_not_found'],
@@ -819,7 +856,9 @@ describe('appointments base data (ADR-0015)', () => {
       [404, 'staff_member_not_found'],
       [404, 'staff_member_not_found'],
       [404, 'service_not_found'],
+      [404, 'staff_member_not_found'],
     ]);
+    expect((await dev.get('/v1/rules').expect(200)).body).toEqual({ rules: [] });
     // Nor can Dev offer Ana's service or link Ana's staff login.
     const offered = await dev.post('/v1/staff', { displayName: 'X', serviceIds: [serviceId] });
     expect([offered.status, errorCode(offered.body)]).toEqual([404, 'service_not_found']);
@@ -838,6 +877,7 @@ describe('appointments base data (ADR-0015)', () => {
       'working_hours.replaced',
       'time_off.created',
       'time_off.deleted',
+      'booking_rules.replaced',
     ]) {
       expect(actions).toContain(action);
     }

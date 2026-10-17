@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a: services, staff, hours, time off) **done and merged** (PR #12, ADR-0015 accepted) → next: S11 (rules + availability engines)
+**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a) merged. **S11 (Phase 3b: booking rules + availability engine) done** on `claude/blissful-lovelace-q6q43j`, ADR-0016 **proposed** (waiting for the user) → next: S12 (bookings + waitlist)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -158,6 +158,44 @@
   - **CI fix:** the S9 team e2e test reloaded the page before the role change had saved (a race CI hit once). It now waits for the save; 3 local runs of the full e2e suite, 26/26 each.
   - **Findings:** a foreign key check bypasses RLS, so a single-column reference could link to another business's row by id. Composite keys are now the rule for tenant references (ADR-0015, dev-setup, security doc).
 
+- **S11 Phase 3b (2026-10-17):** booking rules and the availability engine ([ADR-0016](../adr/0016-booking-rules-and-availability.md), **proposed**).
+  - **contracts:**
+    - `RuleSchema`: five versioned rule types (`slot_interval` 5/10/15/20/30/60, `minimum_notice`, `maximum_advance`, `max_bookings_per_day`, `blackout_window` as local dates, both ends included), each for the business or one staff member.
+    - `BookingRulesSchema`: the whole set, sorted, one per type and scope except blackouts.
+    - `PLATFORM_RULE_DEFAULTS` (15 min / 2 h / 90 days / no cap).
+    - Permissions `rules.read` (everyone) and `rules.manage` (owners, managers).
+    - Audit action `booking_rules.replaced`.
+  - **db:**
+    - `booking_rules` table: forced RLS, composite staff key, checks on type, version and object params, and a partial unique index `NULLS NOT DISTINCT`.
+    - Repositories `listBookingRules`, `lockBookingRules` (advisory lock), `replaceBookingRules`, `findStaffMemberIds`.
+    - Migrations 0013–0014.
+  - **modules/appointments:**
+    - `zoned-time.ts`: local time ↔ UTC with `Intl`. A skipped time maps to the moment of the change, so the conversion is monotonic; a repeated time maps to the earlier instant.
+    - `resolveRules` (staff → business → template → platform).
+    - The pure `availableSlots` engine.
+    - `getBookingRules`/`replaceBookingRules` services (locked, audited, staff members must be the business's own).
+    - fast-check is a new dev dependency.
+  - **api:** `GET /v1/rules` (everyone) and `PUT /v1/rules` (owners and managers; 404 `staff_member_not_found` for a rule naming another business's or an unknown staff member).
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 241, core 513, db 33, appointments 58, runtime 75, testing 13, api 154, web 82, worker 3. Coverage: contracts 100% lines; core 100%; appointments 100% lines / 94.1% branches; api 96.7%; db 93.2% lines.
+    - Property tests, 10,000 cases each, across seven US time zones (incl. Phoenix and Honolulu), clustered around DST changes:
+      - every offered slot passes an independent checker (hours, grid, range, notice, advance, time off, outside busy time, buffers on both sides, blackouts, daily cap);
+      - a brute-force enumeration finds no missing slot;
+      - the output does not depend on input order;
+      - `zoned-time` round-trip, gap and monotonicity properties.
+    - Mutation checks, each caught by the properties: buffer before dropped; off-grid starts; blackout ignored; daily cap off by one; maximum advance inclusive (caught only after `now` was made to fall on 5-minute marks); minimum notice exclusive. Dropping `FORCE` on `booking_rules` fails the isolation catalog test.
+    - `pnpm test:integration` green, 363 tests:
+      - **db 226:** the isolation suite incl. `booking_rules`, a rule for another business's staff member (`23503`), cascade on staff deletion, the unique index, check constraints, and the advisory lock (waits within a business, not across businesses).
+      - **appointments 33:** 7 new tests covering permissions, ZodError before the database, other businesses' staff, isolation, audit before/after, and concurrent replaces that chain exactly.
+      - **api 44:** Ana sets rules; Cara reads but gets 403 on changes; validation 400; Dev probes with Ana's staff member and gets 404, and sees no rules; `booking_rules.replaced` in the audit log.
+      - core 57, runtime 2, testing 1.
+  - **Not run this session:** Docker image builds, `docker compose up`, and Playwright (no UI change; the migrations are applied by `migrate.int.test.ts` and every integration suite). CI's E2E smoke will run Compose.
+  - **Not yet proven:** CI on the S11 PR (not opened yet).
+  - **Findings:**
+    - Temporal's "compatible" handling of skipped times is not monotonic: 02:01 → 03:01 lands after 03:00 → 03:00. With it, hours of 01:00–02:50 and 03:00–04:00 would overlap in real time on spring-forward night. Skipped times now map to the moment of the change (ADR-0016 §9).
+    - The engine lets buffers reach outside working hours, and checks the occupied range (with buffers) against other bookings' occupied ranges. S12's exclusion constraint should use the same occupied range.
+    - Unit tests run against the built `dist/` of their dependencies (turbo `^build`), so run `pnpm --filter <dep> build` after changing contracts before running a dependent package's tests on their own.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -220,17 +258,32 @@
   - No delete endpoints yet (deactivate instead).
   - Staff names stay out of the audit log, so a name-only change is not audited.
   - Default staff colour is the raspberry brand colour.
+- **S11 decisions (user, 2026-10-17, S11 Session Brief):**
+  - (1) **Store rules now** (table, RLS, `GET/PUT /v1/rules`), not just the pure engine.
+  - (2) **Time zones with the built-in `Intl`**, no date library; fast-check only as a dev dependency.
+  - (3) **Defaults:** 15-minute slots, 2 hours' notice, 90 days ahead, no daily cap.
+  - (4) **Blackout windows are local dates** in the business's time zone.
+- **S11 defaults (Claude, in ADR-0016, for the user to accept):**
+  - Working hours, buffers and staff–service eligibility stay base data, not rule types.
+  - A staff member's rule beats the business's; blackouts add up.
+  - The whole set is replaced under an advisory lock and audited before and after.
+  - A skipped (spring-forward) time means the moment of the change.
+  - Buffers may reach outside working hours.
+  - Maximum advance counts from `now` (instant), not by calendar days.
+  - The daily cap counts bookings by the local day they start on.
+  - A query covers at most 62 days.
+  - Template defaults are not stored per business.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. **Accept or change ADR-0016** (booking rules and the availability engine; the S11 defaults listed under Decisions). Then, if you want, ask Claude to open the S11 PR.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 is merged.
+Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 is merged, S11 is done (PR not opened yet). S12 should build its exclusion constraint on the occupied range (with buffers) and feed bookings into `availableSlots` (ADR-0016 Consequences).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S11 | **Phase 3b:** rules engine (Zod-validated, versioned rule types: working hours, buffers, minimum notice, maximum advance, blackout windows, staff–service eligibility, max bookings per day; tenant overrides) and the pure availability engine (local hours → UTC slots across DST, time off, buffers) | 3 | property tests (10k cases): no slot outside hours or in time off, rules respected, deterministic, DST and several US time zones |
 | S12 | **Phase 3c:** bookings (`tstzrange` + exclusion constraint against double booking, statuses, sources; staff-scoped RLS for AC-W9-1) and the waitlist model | 3 | property tests: no double booking under concurrency; AC-W9-1 at RLS level; isolation suite + matrix extended |
 | S13 | **Phase 3d:** template system (Zod schema) + the 8 V1 templates; Phase 3 exit (`/security-review`, ≥ 80% coverage) | 3 | template schema tests; Phase 3 exit criteria |
 

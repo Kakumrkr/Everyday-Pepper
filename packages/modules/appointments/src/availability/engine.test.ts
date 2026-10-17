@@ -208,6 +208,15 @@ describe('availableSlots', () => {
     expect(availableSlots(friday({ to: friday().from }))).toEqual([]);
   });
 
+  it('refuses a slot interval that is not a positive whole number of minutes', () => {
+    for (const slotIntervalMinutes of [0, -15, 7.5]) {
+      const odd = staff({
+        rules: { ...staff().rules, slotIntervalMinutes: slotIntervalMinutes as 15 },
+      });
+      expect(() => availableSlots(friday({ staff: [odd] }))).toThrow(RangeError);
+    }
+  });
+
   describe('daylight saving', () => {
     const night = [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
       weekday,

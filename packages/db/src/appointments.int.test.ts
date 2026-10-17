@@ -3,6 +3,7 @@ import {
   StaffMemberIdSchema,
   TenantIdSchema,
   TimeOffIdSchema,
+  type Rule,
   type ServiceFields,
   type ServiceId,
   type StaffMemberId,
@@ -26,6 +27,9 @@ import {
   listWorkingHours,
   lockService,
   lockStaffMember,
+  listBookingRules,
+  lockBookingRules,
+  replaceBookingRules,
   replaceStaffServices,
   replaceWorkingHours,
   updateService,
@@ -82,6 +86,20 @@ async function newStaff(tx: TenantTx, membershipId: string | null = null) {
     membershipId,
   });
   return StaffMemberIdSchema.parse(row.id);
+}
+
+/** A minimum-notice rule for the business, or for one staff member. */
+function notice(minutes: number, staffMemberId: StaffMemberId | null = null): Rule {
+  return { type: 'minimum_notice', version: 1, staffMemberId, params: { minutes } };
+}
+
+function blackout(date: string, staffMemberId: StaffMemberId | null = null): Rule {
+  return {
+    type: 'blackout_window',
+    version: 1,
+    staffMemberId,
+    params: { startDate: date, endDate: date },
+  };
 }
 
 async function newService(tx: TenantTx, name = haircut.name): Promise<ServiceId> {
@@ -259,6 +277,7 @@ describe('references stay inside a business', () => {
     ['link another business’s staff member to a service', 'staff_services', 'staff'],
     ['give another business’s staff member hours', 'working_hours', 'staff'],
     ['give another business’s staff member time off', 'time_off', 'staff'],
+    ['give another business’s staff member a booking rule', 'booking_rules', 'staff'],
   ])('cannot %s', async (_label, table, foreign) => {
     const [a, b] = [await newTenant(), await newTenant()];
     const ofB = await withTenant(db, b, async (tx) => ({
@@ -273,6 +292,9 @@ describe('references stay inside a business', () => {
       if (table === 'working_hours') {
         return replaceWorkingHours(tx, staff, [{ weekday: 1, startMinute: 0, endMinute: 60 }]);
       }
+      if (table === 'booking_rules') {
+        return replaceBookingRules(tx, [notice(0, staff)]);
+      }
       return insertTimeOff(tx, {
         staffMemberId: staff,
         startsAt: new Date('2026-10-20T13:00:00Z'),
@@ -283,7 +305,7 @@ describe('references stay inside a business', () => {
     expect(sqlState(error)).toBe('23503');
   });
 
-  it('deleting a staff member removes their services, hours and time off', async () => {
+  it('deleting a staff member removes their services, hours, time off and rules', async () => {
     const tenant = await newTenant();
     const staff = await withTenant(db, tenant, async (tx) => {
       const staff = await newStaff(tx);
@@ -295,6 +317,7 @@ describe('references stay inside a business', () => {
         endsAt: new Date('2026-10-20T14:00:00Z'),
         createdBy: await insertUser(db),
       });
+      await replaceBookingRules(tx, [notice(0, staff)]);
       return staff;
     });
     const counts = await withTenant(db, tenant, async (tx) => {
@@ -302,7 +325,8 @@ describe('references stay inside a business', () => {
       const { rows } = await tx.execute<{ n: number }>(sql`
         SELECT (SELECT count(*) FROM staff_services)::int
              + (SELECT count(*) FROM working_hours)::int
-             + (SELECT count(*) FROM time_off)::int AS n`);
+             + (SELECT count(*) FROM time_off)::int
+             + (SELECT count(*) FROM booking_rules)::int AS n`);
       return rows[0]?.n;
     });
     expect(counts).toBe(0);
@@ -423,5 +447,106 @@ describe('time off', () => {
       }),
     ).catch((e: unknown) => e);
     expect(sqlState(error)).toBe('23514');
+  });
+});
+
+describe('booking rules', () => {
+  it('replaces the whole set and lists it', async () => {
+    const tenant = await newTenant();
+    await withTenant(db, tenant, async (tx) => {
+      const staff = await newStaff(tx);
+      await replaceBookingRules(tx, [notice(60), notice(0, staff), blackout('2026-12-25')]);
+      const rows = await listBookingRules(tx);
+      expect(rows.map((r) => [r.type, r.staffMemberId, r.version, r.params])).toEqual(
+        expect.arrayContaining([
+          ['minimum_notice', null, 1, { minutes: 60 }],
+          ['minimum_notice', staff, 1, { minutes: 0 }],
+          ['blackout_window', null, 1, { startDate: '2026-12-25', endDate: '2026-12-25' }],
+        ]),
+      );
+      expect(rows).toHaveLength(3);
+      await replaceBookingRules(tx, [notice(30)]);
+      expect((await listBookingRules(tx)).map((r) => r.params)).toEqual([{ minutes: 30 }]);
+      await replaceBookingRules(tx, []);
+      expect(await listBookingRules(tx)).toEqual([]);
+    });
+  });
+
+  it("replacing one business's set leaves another's alone", async () => {
+    const [a, b] = [await newTenant(), await newTenant()];
+    await withTenant(db, b, (tx) => replaceBookingRules(tx, [notice(45)]));
+    await withTenant(db, a, (tx) => replaceBookingRules(tx, [notice(10)]));
+    await withTenant(db, a, (tx) => replaceBookingRules(tx, []));
+    const ofB = await withTenant(db, b, (tx) => listBookingRules(tx));
+    expect(ofB.map((r) => r.params)).toEqual([{ minutes: 45 }]);
+  });
+
+  it('allows one single-valued rule per business and per staff member (unique index)', async () => {
+    const tenant = await newTenant();
+    const staff = await withTenant(db, tenant, (tx) => newStaff(tx));
+    for (const pair of [
+      [notice(60), notice(30)],
+      [notice(60, staff), notice(30, staff)],
+    ]) {
+      const error = await withTenant(db, tenant, (tx) => replaceBookingRules(tx, pair)).catch(
+        (e: unknown) => e,
+      );
+      expect(sqlState(error)).toBe('23505');
+    }
+    // Several blackout windows, and a business rule next to a staff member's, are fine.
+    await withTenant(db, tenant, (tx) =>
+      replaceBookingRules(tx, [
+        notice(60),
+        notice(30, staff),
+        blackout('2026-12-25'),
+        blackout('2026-12-25'),
+        blackout('2026-12-25', staff),
+      ]),
+    );
+  });
+
+  it.each([
+    ['an unknown type', sql`'learned_rule'`, sql`1`, sql`'{}'::jsonb`],
+    ['version 0', sql`'minimum_notice'`, sql`0`, sql`'{"minutes": 60}'::jsonb`],
+    ['params that are not an object', sql`'minimum_notice'`, sql`1`, sql`'[60]'::jsonb`],
+  ])('the database rejects %s', async (_label, type, version, params) => {
+    const tenant = await newTenant();
+    const error = await withTenant(db, tenant, (tx) =>
+      tx.execute(
+        sql`INSERT INTO booking_rules (id, type, version, params) VALUES (gen_random_uuid(), ${type}, ${version}, ${params})`,
+      ),
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('23514');
+  });
+
+  it("the rules lock makes a second change to a business's rules wait", async () => {
+    const tenant = await newTenant();
+    const order: string[] = [];
+    let releaseFirst = (): void => undefined;
+    const firstHolds = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    let firstLocked = (): void => undefined;
+    const locked = new Promise<void>((resolve) => {
+      firstLocked = resolve;
+    });
+    const first = withTenant(db, tenant, async (tx) => {
+      await lockBookingRules(tx);
+      firstLocked();
+      await firstHolds;
+      order.push('first');
+    });
+    await locked;
+    const second = withTenant(db, tenant, async (tx) => {
+      await lockBookingRules(tx);
+      order.push('second');
+    });
+    // Another business is not held up.
+    await withTenant(db, await newTenant(), (tx) => lockBookingRules(tx));
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(order).toEqual([]);
+    releaseFirst();
+    await Promise.all([first, second]);
+    expect(order).toEqual(['first', 'second']);
   });
 });

@@ -7,6 +7,7 @@ import {
   TimeZoneSchema,
   UserIdSchema,
 } from './tenancy.js';
+import { RuleSchema } from './rules.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // The audit log (ADR-0013): one append-only entry per change to a business, written in the
@@ -53,6 +54,9 @@ const TimeOffValuesSchema = z
     endsAt: UtcDateTimeSchema,
   })
   .strict();
+
+// Booking rules (ADR-0016) hold settings only: durations, counts and dates.
+const RulesValuesSchema = z.object({ rules: z.array(RuleSchema) }).strict();
 
 function entity<T extends string>(type: T) {
   return z.object({ type: z.literal(type), id: z.uuid() }).strict();
@@ -171,6 +175,14 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('time_off'),
       before: TimeOffValuesSchema,
       after: z.null(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('booking_rules.replaced'),
+      entity: entity('tenant'),
+      before: RulesValuesSchema,
+      after: RulesValuesSchema,
     })
     .strict(),
 ]);

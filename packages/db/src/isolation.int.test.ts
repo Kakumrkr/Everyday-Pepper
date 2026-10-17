@@ -21,6 +21,7 @@ import {
   insertService,
   insertStaffMember,
   insertTimeOff,
+  replaceBookingRules,
   replaceStaffServices,
   replaceWorkingHours,
 } from './repositories/appointments.js';
@@ -190,6 +191,17 @@ const TENANT_TABLES: Record<string, TenantTable> = {
         })
       ).id,
     touch: 'created_at = created_at',
+  },
+  booking_rules: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const staff = await seedStaff(tx);
+      await replaceBookingRules(tx, [
+        { type: 'max_bookings_per_day', version: 1, staffMemberId: staff, params: { count: 6 } },
+      ]);
+      return idWhere(tx, 'booking_rules', 'staff_member_id', staff);
+    },
+    touch: 'version = version',
   },
 };
 

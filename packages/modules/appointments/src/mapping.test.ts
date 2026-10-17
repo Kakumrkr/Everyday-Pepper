@@ -1,7 +1,8 @@
-import type { ServiceRow, StaffMemberRecord, TimeOffRow } from '@floty/db';
+import type { BookingRuleRow, ServiceRow, StaffMemberRecord, TimeOffRow } from '@floty/db';
 import { describe, expect, it } from 'vitest';
 import {
   hoursToMinutes,
+  rowsToRules,
   minutesToHours,
   sameValues,
   serviceAuditValues,
@@ -160,5 +161,37 @@ describe('sameValues', () => {
   it('compares audit values structurally', () => {
     expect(sameValues({ a: 1, b: [1] }, { a: 1, b: [1] })).toBe(true);
     expect(sameValues({ a: 1 }, { a: 2 })).toBe(false);
+  });
+});
+
+describe('rowsToRules', () => {
+  const row = (fields: Partial<BookingRuleRow>): BookingRuleRow => ({
+    id: TIME_OFF,
+    tenantId: TENANT,
+    staffMemberId: null,
+    type: 'minimum_notice',
+    version: 1,
+    params: { minutes: 60 },
+    createdAt: CREATED,
+    ...fields,
+  });
+
+  it('validates and sorts stored rules', () => {
+    expect(
+      rowsToRules([
+        row({ staffMemberId: STAFF, params: { minutes: 0 } }),
+        row({ type: 'slot_interval', params: { minutes: 30 } }),
+      ]),
+    ).toEqual({
+      rules: [
+        { type: 'slot_interval', version: 1, staffMemberId: null, params: { minutes: 30 } },
+        { type: 'minimum_notice', version: 1, staffMemberId: STAFF, params: { minutes: 0 } },
+      ],
+    });
+  });
+
+  it('fails loudly on a rule it does not understand', () => {
+    expect(() => rowsToRules([row({ version: 2 })])).toThrow();
+    expect(() => rowsToRules([row({ params: { minutes: 'soon' } })])).toThrow();
   });
 });

@@ -16,7 +16,7 @@ Use this before any change: find the part you're changing, then check everything
 | **core: messaging + outbox** | db, worker, integrations/email | reminders, feed drafts, waitlist offers, booking page |
 | **core: tasks** | db, worker | AI tools, feed |
 | **core: metering** (S8: `usage_meters`, `addUsage`, `recordUsage`/`usageFor`, `usagePeriodOf`) | db, contracts | AI agent (budgets), email sending (Phase 5), billing (future) |
-| **modules/appointments** (`@floty/appointments`; S10: services, staff, hours, time off; next: rules, availability, bookings, waitlist) | core, db, contracts | AI tools, PWA calendar, booking page, feed insights, calendar sync, reminders |
+| **modules/appointments** (`@floty/appointments`; S10: services, staff, hours, time off; S11: booking rules (`booking_rules`, `/v1/rules`), `resolveRules`, the pure availability engine and `Intl` time-zone helpers; next: bookings, waitlist) | core, db, contracts | AI tools, PWA calendar, booking page, feed insights, calendar sync, reminders |
 | **templates/*** | template schema (contracts), appointments extension schema | tenant setup, onboarding, AI prompts, insights thresholds, UI terminology |
 | **ai: provider adapter** | OpenAI SDK | agent loop, onboarding extraction, memory embeddings |
 | **ai: tool registry + agent loop** | adapter, all domain services, trust layer, memory | chat, feed, onboarding, voice (V2) |

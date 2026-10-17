@@ -1,6 +1,7 @@
 import {
   ServiceInputSchema,
   StaffColorSchema,
+  type Rule,
   type ServiceFields,
   type ServiceId,
   type StaffMemberId,
@@ -11,12 +12,14 @@ import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { isUniqueViolation, ServiceNameTakenError, StaffMemberLinkTakenError } from '../errors.js';
 import {
+  bookingRules,
   memberships,
   services,
   staffMembers,
   staffServices,
   timeOff,
   workingHours,
+  type BookingRuleRow,
   type ServiceRow,
   type StaffMemberRow,
   type TimeOffRow,
@@ -352,4 +355,54 @@ export async function deleteTimeOff(
     .where(and(eq(timeOff.id, Id.parse(id)), eq(timeOff.staffMemberId, Id.parse(staffMemberId))))
     .returning();
   return row;
+}
+
+// Booking rules (ADR-0016) -------------------------------------------------------------------
+
+/** The tenant's booking rules as stored; the appointments module validates their params. */
+export async function listBookingRules(tx: TenantTx): Promise<BookingRuleRow[]> {
+  return tx.select().from(bookingRules).orderBy(asc(bookingRules.createdAt), asc(bookingRules.id));
+}
+
+/**
+ * Serialises changes to the tenant's rule set until the transaction ends (an advisory lock:
+ * the set may be empty, so there is no row to lock).
+ */
+export async function lockBookingRules(tx: TenantTx): Promise<void> {
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtextextended('floty.booking_rules:' || current_tenant_id()::text, 0))`,
+  );
+}
+
+/** Which of `ids` are staff members of the tenant. */
+export async function findStaffMemberIds(
+  tx: TenantTx,
+  ids: readonly StaffMemberId[],
+): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const rows = await tx
+    .select({ id: staffMembers.id })
+    .from(staffMembers)
+    .where(
+      inArray(
+        staffMembers.id,
+        ids.map((id) => Id.parse(id)),
+      ),
+    );
+  return rows.map((row) => row.id);
+}
+
+/** Replaces the tenant's whole rule set. */
+export async function replaceBookingRules(tx: TenantTx, rules: readonly Rule[]): Promise<void> {
+  // RLS already limits this to the tenant; the condition keeps it so without RLS too.
+  await tx.delete(bookingRules).where(sql`${bookingRules.tenantId} = current_tenant_id()`);
+  if (rules.length === 0) return;
+  await tx.insert(bookingRules).values(
+    rules.map((rule) => ({
+      staffMemberId: rule.staffMemberId === null ? null : Id.parse(rule.staffMemberId),
+      type: rule.type,
+      version: rule.version,
+      params: rule.params,
+    })),
+  );
 }

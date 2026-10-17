@@ -92,6 +92,20 @@
       "when": 1792243197793,
       "tag": "0012_appointments_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792248130640,
+      "tag": "0013_booking_rules",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792248131788,
+      "tag": "0014_booking_rules_hardening",
+      "breakpoints": true
     }
   ]
 }

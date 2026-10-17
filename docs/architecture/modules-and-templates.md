@@ -13,8 +13,8 @@ Modules never import other modules; cross-module behaviour uses events.
 
 ## Appointments module (V1)
 - Entities: Service, StaffMember (resource), WorkingHours, TimeOff/Blocks, Booking, WaitlistEntry, ExternalBusyBlock.
-- **Rules engine**: rule types — working hours, buffers before/after, minimum notice, maximum advance booking, blackout windows, staff–service eligibility, max bookings per day, learned rules. Each rule Zod-validated and versioned; tenant overrides template defaults.
-- **Availability engine**: pure function `(hours, rules, bookings, externalBusy, service, staff?, range) → slots`. Property-tested (no overlaps, respects all rules, deterministic).
+- **Rules engine**: rule types — working hours, buffers before/after, minimum notice, maximum advance booking, blackout windows, staff–service eligibility, max bookings per day, learned rules. Each rule Zod-validated and versioned; tenant overrides template defaults. Built in S11 ([ADR-0016](../adr/0016-booking-rules-and-availability.md)): working hours, buffers and eligibility are base data (ADR-0015); slot interval, notice, advance, daily cap and blackout windows are stored rules, per business or staff member (staff → business → template → platform default); learned rules come in Phase 7.
+- **Availability engine**: pure function `(hours, rules, bookings, externalBusy, service, staff?, range) → slots`. Property-tested (no overlaps, respects all rules, deterministic). Built in S11 as `availableSlots` (ADR-0016): local hours → UTC across DST with `Intl`, buffers may reach outside hours, 10k-case property tests with a brute-force oracle.
 - **Concurrency**: booking creation uses a Postgres exclusion constraint on `(staff_id, tstzrange)` so double booking is impossible even under races.
 - **Waitlist**: matching + ranking (time window fit, client value, waiting time); offers via messaging with expiry.
 

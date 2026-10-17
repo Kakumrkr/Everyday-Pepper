@@ -122,6 +122,10 @@ function slotsFor(query: AvailabilityQuery, staff: StaffAvailability): Slot[] {
   const before = service.bufferBeforeMinutes * MINUTE_MS;
   const after = service.bufferAfterMinutes * MINUTE_MS;
   const step = rules.slotIntervalMinutes * MINUTE_MS;
+  // Rules normally come through the contracts; a hand-made step of 0 would never end.
+  if (!Number.isInteger(rules.slotIntervalMinutes) || step <= 0) {
+    throw new RangeError('The slot interval must be a positive whole number of minutes');
+  }
   const blocked = mergeIntervals([
     ...staff.timeOff,
     ...staff.busy,
