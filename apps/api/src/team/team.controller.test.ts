@@ -193,6 +193,12 @@ describe('DELETE /v1/members/:userId', () => {
     expect(auth.setActiveTenant).toHaveBeenCalledWith(auth.session, null);
   });
 
+  it('treats the own id in capitals as leaving too', async () => {
+    await del(`/v1/members/${USER.toUpperCase()}`).expect(204);
+    expect(team.remove).toHaveBeenCalledWith(context(), USER);
+    expect(auth.setActiveTenant).toHaveBeenCalledWith(auth.session, null);
+  });
+
   it('keeps the session when leaving fails', async () => {
     team.remove.mockRejectedValueOnce(new LastOwnerError());
     expect(code((await del(`/v1/members/${USER}`).expect(409)).body)).toBe('last_owner');

@@ -1,14 +1,15 @@
 import { z } from 'zod';
 
 /**
- * A tenant (business) id: a UUID. It comes from the authenticated session only, never from
- * request bodies or LLM arguments (CLAUDE.md "Tenant isolation").
+ * A tenant (business) id: a UUID, lowercased so ids compare equal as strings (Postgres prints
+ * them lowercase). It comes from the authenticated session only, never from request bodies or
+ * LLM arguments (CLAUDE.md "Tenant isolation").
  */
-export const TenantIdSchema = z.uuid().brand<'TenantId'>();
+export const TenantIdSchema = z.uuid().toLowerCase().brand<'TenantId'>();
 export type TenantId = z.infer<typeof TenantIdSchema>;
 
-/** A user id: a UUID. Users are global; a membership links one to a tenant. */
-export const UserIdSchema = z.uuid().brand<'UserId'>();
+/** A user id: a lowercased UUID. Users are global; a membership links one to a tenant. */
+export const UserIdSchema = z.uuid().toLowerCase().brand<'UserId'>();
 export type UserId = z.infer<typeof UserIdSchema>;
 
 /**

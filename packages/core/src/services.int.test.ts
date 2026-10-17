@@ -254,6 +254,13 @@ describe('removeMember', () => {
     await expect(auditActions(team)).resolves.toEqual(['tenant.created', 'membership.removed']);
   });
 
+  it("recognises the actor's own id in any letter case as leaving", async () => {
+    const team = await newTeam();
+    const upper = team.staff.toUpperCase() as UserId;
+    await removeMember(db, as(team, team.staff, 'staff'), upper);
+    await expect(roleOf(team, team.staff)).resolves.toBeUndefined();
+  });
+
   it('the last owner cannot leave; one of two owners can', async () => {
     const team = await newTeam();
     const owner = as(team, team.owner, 'owner');
