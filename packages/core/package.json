@@ -2,7 +2,7 @@
   "name": "@floty/core",
   "version": "0.0.0",
   "private": true,
-  "description": "L1 platform core: framework-free domain services shared by api and worker.",
+  "description": "L1 platform core: framework-free domain rules and services shared by api, worker and (later) AI tools.",
   "type": "module",
   "exports": {
     ".": {
@@ -18,13 +18,16 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.int.config.ts"
   },
   "dependencies": {
-    "@floty/contracts": "workspace:*"
+    "@floty/contracts": "workspace:*",
+    "@floty/db": "workspace:*"
   },
   "devDependencies": {
     "@floty/config": "workspace:*",
+    "@floty/testing": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",
     "vitest": "^5.0.5"
   }

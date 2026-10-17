@@ -16,7 +16,7 @@ const allowedInternalImports = {
   'packages/config': [],
   'packages/contracts': [],
   'packages/db': ['contracts', 'testing'],
-  'packages/core': ['contracts', 'db'],
+  'packages/core': ['contracts', 'db', 'testing'],
   'packages/modules/*': ['contracts', 'db', 'core'],
   'packages/templates/*': ['contracts'],
   'packages/ai': ['contracts', 'core'],

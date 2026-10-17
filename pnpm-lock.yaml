@@ -248,10 +248,16 @@ importers:
       '@floty/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@floty/db':
+        specifier: workspace:*
+        version: link:../db
     devDependencies:
       '@floty/config':
         specifier: workspace:*
         version: link:../config
+      '@floty/testing':
+        specifier: workspace:*
+        version: link:../testing
       '@vitest/coverage-v8':
         specifier: ^5.0.5
         version: 5.0.5(vitest@5.0.5)
