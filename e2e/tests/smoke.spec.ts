@@ -33,7 +33,7 @@ test.describe('smoke: the stack is up', () => {
     });
   });
 
-  test('home page renders and reaches the api', async ({ page }) => {
+  test('signed-out visitors land on sign-in, which reaches the api', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => {
@@ -42,7 +42,8 @@ test.describe('smoke: the stack is up', () => {
 
     await page.goto('/');
 
-    await expect(page).toHaveTitle('Floty');
+    await expect(page).toHaveURL(/\/sign-in$/);
+    await expect(page).toHaveTitle('Sign in · Floty');
     await expect(page.getByRole('heading', { level: 1, name: 'floty' })).toBeVisible();
     const status = page.getByTestId('api-status');
     await expect(status).toHaveAttribute('data-state', 'ok');

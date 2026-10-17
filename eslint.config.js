@@ -29,7 +29,7 @@ const allowedInternalImports = {
   'apps/api': ['contracts', 'core', 'db', 'ai', 'runtime', 'testing'],
   'apps/worker': ['contracts', 'core', 'db', 'integrations', 'runtime', 'testing'],
   'apps/web': ['contracts', 'ui'],
-  e2e: ['contracts'],
+  e2e: ['contracts', 'testing'],
 };
 
 const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowed]) => ({
@@ -83,7 +83,7 @@ export default defineConfig(
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        projectService: { allowDefaultProject: ['*.js'] },
+        projectService: { allowDefaultProject: ['*.js', '.pnpmfile.cjs'] },
         tsconfigRootDir: import.meta.dirname,
       },
     },

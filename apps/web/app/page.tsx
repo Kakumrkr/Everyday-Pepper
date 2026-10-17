@@ -1,35 +1,39 @@
-import { fetchApiHealth, type ApiHealth } from '../lib/api-health';
-import { loadWebServerEnv } from '../lib/env';
+import { redirect } from 'next/navigation';
+import { requiredStep } from '../lib/account';
+import { currentAccount, currentBusiness } from './_server/account';
+import { BusinessSwitcher, SignOutButton } from './_components/account-actions';
+import { Unavailable } from './_components/unavailable';
 
-// Rendered per request: the status must be live, and env is read at runtime, not build time.
+// Per request: the page depends on the session cookie.
 export const dynamic = 'force-dynamic';
 
-const reasons = {
-  network: 'not reachable',
-  timeout: 'not answering',
-  'invalid-response': 'answering unexpectedly',
-} as const;
-
-function describe(health: ApiHealth): { state: 'ok' | 'problem'; text: string } {
-  if (!health.reachable) return { state: 'problem', text: reasons[health.reason] };
-  return health.report.status === 'ok'
-    ? { state: 'ok', text: 'ready' }
-    : { state: 'problem', text: 'starting up' };
-}
-
-/** Phase 1 placeholder: proves web → api wiring. The real home (operator feed) comes in Phase 4. */
+/** Signed-in home. Phase 4 replaces the body with the operator feed. */
 export default async function HomePage() {
-  const { API_INTERNAL_URL } = loadWebServerEnv(process.env);
-  const { state, text } = describe(await fetchApiHealth({ baseUrl: API_INTERNAL_URL }));
+  const account = await currentAccount();
+  const step = requiredStep(account);
+  if (step !== null) redirect(step);
+  if (account.state !== 'signed-in') return <Unavailable />;
 
+  const { me } = account;
+  const current = await currentBusiness();
   return (
     <main>
       <h1 className="wordmark">floty</h1>
-      <p className="tagline">Your AI employee is getting ready.</p>
-      <p className="status" data-testid="api-status" data-state={state} role="status">
-        <span>API</span>
-        <span>{text}</span>
-      </p>
+      <p className="tagline">Hi {me.user.name}, your AI employee is getting ready.</p>
+      {current === null ? (
+        <p className="status">Choose a business below.</p>
+      ) : (
+        <p className="status" data-state="ok" data-testid="current-business">
+          <span data-testid="business-name">{current.business.name}</span>
+          <span data-testid="business-role">{current.role}</span>
+        </p>
+      )}
+      {me.businesses.length > 1 || current === null ? (
+        <BusinessSwitcher businesses={me.businesses} activeTenantId={me.activeTenantId} />
+      ) : null}
+      <div className="actions">
+        <SignOutButton />
+      </div>
     </main>
   );
 }
