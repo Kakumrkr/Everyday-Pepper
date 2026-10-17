@@ -23,8 +23,8 @@ export function toNestLog(
 
 /**
  * Sign-in (Better Auth at `/api/auth/*`), the session and tenant guards, the origin check for
- * every write, and the account endpoints (`/v1/me`, `/v1/tenants`, `/v1/tenant`).
- * Needs `ConnectionsModule` (the `DATABASE` handle).
+ * every write, and the account endpoints (`/v1/me`, `/v1/tenants`, `/v1/tenant`). Global, so
+ * feature modules can use its guards. Needs `ConnectionsModule` (the `DATABASE` handle).
  */
 @Module({})
 export class AuthModule {
@@ -32,6 +32,7 @@ export class AuthModule {
     const log = toNestLog(new Logger('BetterAuth'));
     return {
       module: AuthModule,
+      global: true,
       controllers: [AuthController, AccountController],
       providers: [
         {

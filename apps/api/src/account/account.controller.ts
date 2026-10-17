@@ -6,10 +6,8 @@ import {
   type MeResponse,
 } from '@floty/contracts';
 import type { TenantContext } from '@floty/core';
-import { TenantSlugTakenError } from '@floty/db';
 import {
   Body,
-  ConflictException,
   Controller,
   ForbiddenException,
   Get,
@@ -23,9 +21,11 @@ import {
   apiError,
   CurrentSession,
   CurrentTenant,
+  RequirePermission,
   SessionGuard,
   TenantGuard,
 } from '../auth/guards.js';
+import { answering } from '../http/domain-errors.js';
 import { parseBody } from '../http/zod-body.js';
 import { TenancyService } from './tenancy.service.js';
 
@@ -62,7 +62,10 @@ export class AccountController {
     await this.auth.setActiveTenant(session, tenantId);
   }
 
-  /** Creates a business owned by the user and makes it the session's active business. */
+  /**
+   * Creates a business owned by the user and makes it the session's active business. 409
+   * `slug_taken`, or `business_limit_reached` once the user owns the most one may create.
+   */
   @Post('tenants')
   @UseGuards(SessionGuard)
   async createBusiness(
@@ -70,21 +73,15 @@ export class AccountController {
     @Body() body: unknown,
   ): Promise<Business> {
     const input = parseBody(NewTenantSchema, body);
-    try {
-      const business = await this.tenancy.createBusiness(session.user.id, input);
-      await this.auth.setActiveTenant(session, business.id);
-      return business;
-    } catch (error) {
-      if (error instanceof TenantSlugTakenError) {
-        throw new ConflictException(apiError('slug_taken'));
-      }
-      throw error;
-    }
+    const business = await answering(() => this.tenancy.createBusiness(session.user.id, input));
+    await this.auth.setActiveTenant(session, business.id);
+    return business;
   }
 
   /** The session's active business and the user's role in it. */
   @Get('tenant')
   @UseGuards(TenantGuard)
+  @RequirePermission('business.read')
   async currentBusiness(@CurrentTenant() tenant: TenantContext): Promise<CurrentBusinessResponse> {
     const business = await this.tenancy.business(tenant.tenantId);
     // TenantGuard just found the membership, so the business exists (deleted concurrently: 403).

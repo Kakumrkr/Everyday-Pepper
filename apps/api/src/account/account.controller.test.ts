@@ -9,7 +9,7 @@ import {
   type MembershipRole,
   type TenantId,
 } from '@floty/contracts';
-import { TenantSlugTakenError } from '@floty/db';
+import { BusinessLimitReachedError, TenantSlugTakenError } from '@floty/db';
 import { DATABASE } from '@floty/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -150,6 +150,12 @@ describe('GET /v1/tenant (tenant guard)', () => {
     expectError((await get().expect(403)).body, 'mfa_required');
   });
 
+  it('403 mfa_required for a manager without a second factor', async () => {
+    roles.set(TENANT, 'manager');
+    auth.session = { ...auth.session, user: { ...auth.session.user, twoFactorEnabled: false } };
+    expectError((await get().expect(403)).body, 'mfa_required');
+  });
+
   it('lets staff in without a second factor', async () => {
     roles.set(TENANT, 'staff');
     auth.session = { ...auth.session, user: { ...auth.session.user, twoFactorEnabled: false } };
@@ -206,6 +212,12 @@ describe('POST /v1/tenants', () => {
   it('409 slug_taken for a taken slug', async () => {
     tenancy.createBusiness.mockRejectedValueOnce(new TenantSlugTakenError());
     expectError((await post(input).expect(409)).body, 'slug_taken');
+  });
+
+  it('409 business_limit_reached once the user owns the most businesses allowed', async () => {
+    tenancy.createBusiness.mockRejectedValueOnce(new BusinessLimitReachedError(5));
+    expectError((await post(input).expect(409)).body, 'business_limit_reached');
+    expect(auth.setActiveTenant).not.toHaveBeenCalled();
   });
 
   it('500 for an unexpected failure, without details', async () => {

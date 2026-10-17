@@ -1,6 +1,6 @@
 import type { IncomingMessage } from 'node:http';
-import type { ApiErrorCode } from '@floty/contracts';
-import { decideTenantAccess, type TenantContext } from '@floty/core';
+import type { ApiErrorCode, Permission } from '@floty/contracts';
+import { can, decideTenantAccess, type TenantContext } from '@floty/core';
 import { identifyRequest } from '@floty/runtime';
 import {
   createParamDecorator,
@@ -29,6 +29,10 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   forbidden_origin: 'This request did not come from the Floty app',
   slug_taken: 'That booking link is already taken',
   validation_failed: 'Some fields are invalid',
+  forbidden: 'Your role in this business does not allow this',
+  member_not_found: 'No such member in this business',
+  last_owner: 'A business needs at least one owner',
+  business_limit_reached: 'You already own as many businesses as one account may create',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */
@@ -55,15 +59,27 @@ export class SessionGuard implements CanActivate {
   }
 }
 
+const REQUIRED_PERMISSION = Symbol('requiredPermission');
+
 /**
- * Requires a signed-in member of the session's active business (with MFA if they own it);
- * 401 or 403 otherwise. The tenant comes from the session only. Use `@CurrentTenant()`.
+ * The permission a `TenantGuard` route needs (ADR-0013): 403 `forbidden` for a role without
+ * it. A permission scoped to the member's own records passes here; the domain service then
+ * checks the record. The service checks the permission again, so this is defence in depth.
+ */
+export const RequirePermission = (permission: Permission) =>
+  SetMetadata(REQUIRED_PERMISSION, permission);
+
+/**
+ * Requires a signed-in member of the session's active business (with MFA if they are an owner
+ * or manager) and the route's `@RequirePermission`; 401 or 403 otherwise. The tenant comes
+ * from the session only. Use `@CurrentTenant()`.
  */
 @Injectable()
 export class TenantGuard implements CanActivate {
   constructor(
     private readonly sessions: SessionGuard,
     private readonly tenancy: TenancyService,
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -82,6 +98,13 @@ export class TenantGuard implements CanActivate {
     if (!access.allowed) throw new ForbiddenException(apiError(access.reason));
     request.tenantContext = access.context;
     identifyRequest(access.context);
+    const permission = this.reflector.getAllAndOverride<Permission | undefined>(
+      REQUIRED_PERMISSION,
+      [context.getHandler(), context.getClass()],
+    );
+    if (permission !== undefined && !can(access.context, permission)) {
+      throw new ForbiddenException(apiError('forbidden'));
+    }
     return true;
   }
 }
