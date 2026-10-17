@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.6 · **Current phase:** 2 — Platform core **complete** (S6–S9; exit criteria met; S9 merged at the user's request, ADR-0014 accepted) → next: S10 (Phase 3a)
+**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a: services, staff, hours, time off) done; PR not opened yet → next: S11 (rules + availability engines)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -134,6 +134,30 @@
     - A `<label>` wrapping a `<select>` includes the option texts in its name, so tests find the role field as a combobox.
     - Until email verification (Phase 5), email binding checks the address someone signed up with, not one they proved (ADR-0014 Consequences).
 
+- **S10 Phase 3a (2026-10-17):** appointments base data ([ADR-0015](../adr/0015-appointments-base-data.md), accepted by the user).
+  - **contracts:**
+    - Schemas for services (price "from", optional "to", in cents), staff members (optional login link, service ids), weekly hours (`HH:MM` local time, ISO weekday, no overlaps, sorted) and time off (UTC span ≤ 366 days, no reason).
+    - Permissions `staff.read`, `staff.manage`, `hours.manage`, `time_off.manage`.
+    - Seven audit actions (no staff names).
+    - Five error codes.
+  - **db:**
+    - Tables `services`, `staff_members`, `staff_services`, `working_hours`, `time_off`: forced RLS, composite `(tenant_id, id)` foreign keys, check constraints mirroring the contracts.
+    - Case-insensitive unique service names, one staff member per membership (unlinked when the member is removed), and an exclusion constraint against overlapping hours (`btree_gist`).
+    - Repositories. Migrations 0011–0012.
+  - **modules/appointments** (new `@floty/appointments`, L2): `listServices`/`createService`/`updateService`, `listStaff`/`createStaffMember`/`updateStaffMember`, `getWorkingHours`/`replaceWorkingHours` (locked, whole week), `listTimeOff`/`addTimeOff`/`removeTimeOff` (staff: own linked staff member only). Audit entries are written in the same transaction; an unchanged save is not audited.
+  - **api:** `GET/POST /v1/services`, `PUT /v1/services/:id`; `GET/POST /v1/staff`, `PUT /v1/staff/:id`; `GET/PUT /v1/staff/:id/hours`; `GET/POST /v1/staff/:id/time-off`, `DELETE …/time-off/:timeOffId`.
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 208, core 483, db 33, appointments 11, runtime 75, testing 13, api 145, web 82, worker 3. Coverage: contracts 100% lines; appointments 100%; core 100%; api 96.6%; db 93.8% lines.
+    - `pnpm test:integration` green, 339 tests:
+      - **db 210:** the isolation suite now covers the 5 new tables. The new repository tests show that every reference to another business's service, staff member or membership fails with `23503`, plus case-insensitive names, link uniqueness, unlink on member removal, the overlap exclusion, check constraints and cascades.
+      - **appointments 26:** permissions per role, a staff member's own time off only, unlinked or removed logins, other businesses' ids, audit entries, no audit for unchanged saves, concurrent week edits serialised.
+      - **api 43:** owner sets up a service, staff and hours; staff reads them and manages only their own time off; another business finds nothing (404s); audit log without staff names.
+      - core 57, runtime 2, testing 1 (unchanged).
+    - Docker images rebuilt (sandbox CA via a scratch Dockerfile, not committed). `docker compose up --wait`: all services healthy, `migrate` exited 0 (incl. `btree_gist`). Playwright 26/26.
+  - **Not yet proven:** CI on the S10 PR (not opened yet).
+  - **CI fix:** the S9 team e2e test reloaded the page before the role change had saved (a race CI hit once). It now waits for the save; 3 local runs of the full e2e suite, 26/26 each.
+  - **Findings:** a foreign key check bypasses RLS, so a single-column reference could link to another business's row by id. Composite keys are now the rule for tenant references (ADR-0015, dev-setup, security doc).
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -183,17 +207,33 @@
   - (g) Tenant and user ids are lowercased by the contracts.
 - **S9 decisions (user, 2026-10-17, S9 Session Brief):** invite links work for **7 days**; an invite is **bound to the invitee's email** (a forwarded link is useless); at most **20 open invites per business**. Also restated: managers need MFA like owners (already decided at S8 and built).
 - **S9 defaults — ADR-0014, accepted by the user (2026-10-17):** token in the link's fragment, hashed with SHA-256 in the database; token-keyed read-only RLS policy for the not-yet-member lookup, with the business taken from the invite row; re-inviting an email replaces its open invite; one `invite_invalid` answer for unknown/used/revoked/expired; `permissions` on `GET /v1/tenant`; inline confirmation (no browser dialogs) for remove and leave.
+- **S10 decisions (user, 2026-10-17, S10 Session Brief):**
+  - (1) Phase 3 in **four sessions**: S10 base data, S11 rules + availability, S12 bookings + waitlist, S13 templates + exit.
+  - (2) Domain code in a **new `packages/modules/appointments`**, not in core.
+  - (3) A **staff member is separate from a login and optionally linked to one membership**, so a stylist without the app can be booked.
+  - (4) **Owners and managers** edit services, staff, hours and time off; **staff add and remove their own time off** but cannot change their weekly hours.
+  - (5) Service price shown as **"from" with an optional "to"** (cents).
+- **S10 defaults (Claude, in ADR-0015, accepted with it):**
+  - Composite `(tenant_id, id)` foreign keys for tenant references.
+  - Hours are local wall-clock time; touching intervals are allowed; no overnight shifts; `24:00` allowed.
+  - Time off is UTC with no reason field, visible to the whole team.
+  - No delete endpoints yet (deactivate instead).
+  - Staff names stay out of the audit log, so a name-only change is not audited.
+  - Default staff colour is the raspberry brand colour.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Review and merge the S10 PR once CI is green.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done: the user accepted ADR-0014 and asked for S9 to be merged into `main` (2026-10-17). Phase 3 is split at the S10 Session Brief.
+Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S10 | **Phase 3a (to plan at its Session Brief):** services, staff and working hours (tenant tables with RLS, core services with permissions and audit entries), as the base for the rules and availability engines | 3 | isolation suite + matrix extended to the new tables; Phase 3 split confirmed with the user |
+| S11 | **Phase 3b:** rules engine (Zod-validated, versioned rule types: working hours, buffers, minimum notice, maximum advance, blackout windows, staff–service eligibility, max bookings per day; tenant overrides) and the pure availability engine (local hours → UTC slots across DST, time off, buffers) | 3 | property tests (10k cases): no slot outside hours or in time off, rules respected, deterministic, DST and several US time zones |
+| S12 | **Phase 3c:** bookings (`tstzrange` + exclusion constraint against double booking, statuses, sources; staff-scoped RLS for AC-W9-1) and the waitlist model | 3 | property tests: no double booking under concurrency; AC-W9-1 at RLS level; isolation suite + matrix extended |
+| S13 | **Phase 3d:** template system (Zod schema) + the 8 V1 templates; Phase 3 exit (`/security-review`, ≥ 80% coverage) | 3 | template schema tests; Phase 3 exit criteria |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

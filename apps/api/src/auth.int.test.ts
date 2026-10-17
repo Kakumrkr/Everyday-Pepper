@@ -9,7 +9,13 @@ import {
   InvitesResponseSchema,
   MeResponseSchema,
   MembersResponseSchema,
+  ServiceSchema,
+  StaffMemberSchema,
+  StaffResponseSchema,
   TenantIdSchema,
+  TimeOffResponseSchema,
+  TimeOffSchema,
+  WeeklyHoursSchema,
   UserIdSchema,
 } from '@floty/contracts';
 import {
@@ -685,5 +691,156 @@ describe('invites (ADR-0014)', () => {
     const logged = JSON.stringify(logLines);
     for (const token of tokens) expect(logged).not.toContain(token);
     for (const email of inviteeEmails) expect(logged.toLowerCase()).not.toContain(email);
+  });
+});
+
+describe('appointments base data (ADR-0015)', () => {
+  let ana: Browser;
+  let cara: Browser;
+  let dev: Browser;
+  let ids: { ana: string; cara: string };
+  let tenantId: string;
+
+  beforeAll(async () => {
+    ({ browser: ana } = await signUp('ana'));
+    ({ browser: cara } = await signUp('cara'));
+    ({ browser: dev } = await signUp('dev'));
+    ids = { ana: (await me(ana)).user.id, cara: (await me(cara)).user.id };
+    tenantId = (
+      (await ana.post('/v1/tenants', { ...juniper, slug: 'appointments-salon' }).expect(201))
+        .body as { id: string }
+    ).id;
+    await enrolTotp(ana);
+    await withTenant(db, TenantIdSchema.parse(tenantId), (tx) =>
+      addMembership(tx, { userId: UserIdSchema.parse(ids.cara), role: 'staff' }),
+    );
+    await cara.put('/v1/me/active-tenant', { tenantId }).expect(204);
+    // Dev runs another business.
+    await dev.post('/v1/tenants', { ...juniper, slug: 'other-salon' }).expect(201);
+    await enrolTotp(dev);
+  });
+
+  it('the owner sets up a service, a staff member linked to Cara, and her week', async () => {
+    const service = ServiceSchema.parse(
+      (
+        await ana
+          .post('/v1/services', {
+            name: "Women's haircut",
+            durationMinutes: 60,
+            bufferAfterMinutes: 10,
+            priceFromCents: 4000,
+            priceToCents: 6500,
+          })
+          .expect(201)
+      ).body,
+    );
+    const staff = StaffMemberSchema.parse(
+      (
+        await ana
+          .post('/v1/staff', { displayName: 'Cara', userId: ids.cara, serviceIds: [service.id] })
+          .expect(201)
+      ).body,
+    );
+    const week = WeeklyHoursSchema.parse(
+      (
+        await ana
+          .put(`/v1/staff/${staff.id}/hours`, {
+            intervals: [
+              { weekday: 2, start: '09:00', end: '17:00' },
+              { weekday: 6, start: '10:00', end: '14:00' },
+            ],
+          })
+          .expect(200)
+      ).body,
+    );
+    expect(week.intervals).toHaveLength(2);
+
+    // Staff read the menu, the team and the hours.
+    expect((await cara.get('/v1/services').expect(200)).body).toEqual({ services: [service] });
+    const team = StaffResponseSchema.parse((await cara.get('/v1/staff').expect(200)).body);
+    expect(team.staff).toEqual([staff]);
+    expect((await cara.get(`/v1/staff/${staff.id}/hours`).expect(200)).body).toEqual(week);
+  });
+
+  it('Cara adds and removes her own time off, but cannot change her hours or the menu', async () => {
+    const [staff] = StaffResponseSchema.parse((await cara.get('/v1/staff').expect(200)).body).staff;
+    if (staff === undefined) throw new Error('no staff member');
+    const span = { startsAt: '2030-01-07T14:00:00.000Z', endsAt: '2030-01-07T18:00:00.000Z' };
+    const entry = TimeOffSchema.parse(
+      (await cara.post(`/v1/staff/${staff.id}/time-off`, span).expect(201)).body,
+    );
+    expect(
+      TimeOffResponseSchema.parse(
+        (await ana.get(`/v1/staff/${staff.id}/time-off`).expect(200)).body,
+      ).timeOff,
+    ).toEqual([entry]);
+    await cara.delete(`/v1/staff/${staff.id}/time-off/${entry.id}`).expect(204);
+
+    const hours = await cara.put(`/v1/staff/${staff.id}/hours`, { intervals: [] }).expect(403);
+    expect(errorCode(hours.body)).toBe('forbidden');
+    await cara.post('/v1/services', { name: 'Free', durationMinutes: 5 }).expect(403);
+  });
+
+  it("Cara cannot manage a colleague's time off", async () => {
+    const marco = StaffMemberSchema.parse(
+      (await ana.post('/v1/staff', { displayName: 'Marco' }).expect(201)).body,
+    );
+    const span = { startsAt: '2030-01-08T14:00:00.000Z', endsAt: '2030-01-08T18:00:00.000Z' };
+    const denied = await cara.post(`/v1/staff/${marco.id}/time-off`, span).expect(403);
+    expect(errorCode(denied.body)).toBe('forbidden');
+    const ofMarco = TimeOffSchema.parse(
+      (await ana.post(`/v1/staff/${marco.id}/time-off`, span).expect(201)).body,
+    );
+    await cara.delete(`/v1/staff/${marco.id}/time-off/${ofMarco.id}`).expect(403);
+  });
+
+  it("another business's owner finds none of it (AC-X-1)", async () => {
+    const [staff] = StaffResponseSchema.parse((await ana.get('/v1/staff').expect(200)).body).staff;
+    const services = (await ana.get('/v1/services').expect(200)).body as {
+      services: { id: string }[];
+    };
+    const serviceId = services.services[0]?.id ?? '';
+    const staffId = staff?.id ?? '';
+    expect((await dev.get('/v1/services').expect(200)).body).toEqual({ services: [] });
+    expect((await dev.get('/v1/staff').expect(200)).body).toEqual({ staff: [] });
+    const probes = [
+      await dev.get(`/v1/staff/${staffId}/hours`),
+      await dev.put(`/v1/staff/${staffId}`, { displayName: 'Stolen' }),
+      await dev.put(`/v1/staff/${staffId}/hours`, { intervals: [] }),
+      await dev.post(`/v1/staff/${staffId}/time-off`, {
+        startsAt: '2030-01-07T14:00:00.000Z',
+        endsAt: '2030-01-07T18:00:00.000Z',
+      }),
+      await dev.put(`/v1/services/${serviceId}`, { name: 'Stolen', durationMinutes: 30 }),
+    ];
+    expect(probes.map((r) => [r.status, errorCode(r.body)])).toEqual([
+      [404, 'staff_member_not_found'],
+      [404, 'staff_member_not_found'],
+      [404, 'staff_member_not_found'],
+      [404, 'staff_member_not_found'],
+      [404, 'service_not_found'],
+    ]);
+    // Nor can Dev offer Ana's service or link Ana's staff login.
+    const offered = await dev.post('/v1/staff', { displayName: 'X', serviceIds: [serviceId] });
+    expect([offered.status, errorCode(offered.body)]).toEqual([404, 'service_not_found']);
+    const linked = await dev.post('/v1/staff', { displayName: 'X', userId: ids.cara });
+    expect([linked.status, errorCode(linked.body)]).toEqual([404, 'member_not_found']);
+  });
+
+  it('every change is in the audit log, without staff names', async () => {
+    const log = AuditLogResponseSchema.parse(
+      (await ana.get('/v1/audit-log?limit=100').expect(200)).body,
+    );
+    const actions = log.entries.map((e) => e.action);
+    for (const action of [
+      'service.created',
+      'staff_member.created',
+      'working_hours.replaced',
+      'time_off.created',
+      'time_off.deleted',
+    ]) {
+      expect(actions).toContain(action);
+    }
+    expect(JSON.stringify(log)).not.toContain('Marco');
   });
 });

@@ -8,7 +8,17 @@ import {
   LastOwnerError,
   MemberNotFoundError,
 } from '@floty/core';
-import { BusinessLimitReachedError, TenantSlugTakenError } from '@floty/db';
+import {
+  ServiceNotFoundError,
+  StaffMemberNotFoundError,
+  TimeOffNotFoundError,
+} from '@floty/appointments';
+import {
+  BusinessLimitReachedError,
+  ServiceNameTakenError,
+  StaffMemberLinkTakenError,
+  TenantSlugTakenError,
+} from '@floty/db';
 import {
   ConflictException,
   ForbiddenException,
@@ -44,6 +54,21 @@ export function toHttpError(error: unknown): unknown {
   }
   if (error instanceof AlreadyAMemberError) {
     return new ConflictException(apiError('already_a_member'));
+  }
+  if (error instanceof ServiceNotFoundError) {
+    return new NotFoundException(apiError('service_not_found'));
+  }
+  if (error instanceof ServiceNameTakenError) {
+    return new ConflictException(apiError('service_name_taken'));
+  }
+  if (error instanceof StaffMemberNotFoundError) {
+    return new NotFoundException(apiError('staff_member_not_found'));
+  }
+  if (error instanceof StaffMemberLinkTakenError) {
+    return new ConflictException(apiError('staff_member_link_taken'));
+  }
+  if (error instanceof TimeOffNotFoundError) {
+    return new NotFoundException(apiError('time_off_not_found'));
   }
   return error;
 }

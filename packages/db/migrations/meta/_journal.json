@@ -78,6 +78,20 @@
       "when": 1792201049806,
       "tag": "0010_invites_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792243188829,
+      "tag": "0011_appointments_base",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792243197793,
+      "tag": "0012_appointments_hardening",
+      "breakpoints": true
     }
   ]
 }

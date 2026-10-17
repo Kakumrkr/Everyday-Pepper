@@ -3,6 +3,8 @@ import {
   BusinessLimitReachedError,
   isUniqueViolation,
   MembershipExistsError,
+  ServiceNameTakenError,
+  StaffMemberLinkTakenError,
   TenantSlugTakenError,
 } from './errors.js';
 
@@ -53,6 +55,14 @@ describe('domain errors', () => {
       name: 'BusinessLimitReachedError',
       limit: 5,
       message: 'A user may own at most 5 businesses',
+    });
+    expect(new ServiceNameTakenError({ cause })).toMatchObject({
+      name: 'ServiceNameTakenError',
+      cause,
+    });
+    expect(new StaffMemberLinkTakenError({ cause })).toMatchObject({
+      name: 'StaffMemberLinkTakenError',
+      cause,
     });
   });
 });

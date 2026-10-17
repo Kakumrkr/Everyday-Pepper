@@ -86,7 +86,12 @@ test('an owner invites a manager, who signs up, joins and sets up MFA; the owner
   const row = page.getByTestId('member').filter({ hasText: 'Jess' });
   await expect(row.getByLabel('Role for Jess')).toHaveValue('manager');
   await expect(page.getByTestId('invite')).toHaveCount(0);
+  // Choosing a role saves in the background: wait for the save, or the reload can cancel it.
+  const saved = page.waitForResponse(
+    (r) => r.request().method() === 'PATCH' && r.url().includes('/v1/members/'),
+  );
   await row.getByLabel('Role for Jess').selectOption('staff');
+  expect((await saved).status()).toBe(200);
   await page.reload();
   await expect(row.getByLabel('Role for Jess')).toHaveValue('staff');
 
