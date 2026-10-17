@@ -155,6 +155,7 @@
       - core 57, runtime 2, testing 1 (unchanged).
     - Docker images rebuilt (sandbox CA via a scratch Dockerfile, not committed). `docker compose up --wait`: all services healthy, `migrate` exited 0 (incl. `btree_gist`). Playwright 26/26.
   - **Not yet proven:** CI on the S10 PR (not opened yet).
+  - **CI fix:** the S9 team e2e test reloaded the page before the role change had saved (a race CI hit once). It now waits for the save; 3 local runs of the full e2e suite, 26/26 each.
   - **Findings:** a foreign key check bypasses RLS, so a single-column reference could link to another business's row by id. Composite keys are now the rule for tenant references (ADR-0015, dev-setup, security doc).
 
 ## Decisions made in conversation
