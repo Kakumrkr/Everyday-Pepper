@@ -63,6 +63,9 @@ export const PERMISSION_MATRIX: Readonly<
   'staff.manage': OWNER_AND_MANAGER,
   'hours.manage': OWNER_AND_MANAGER,
   'time_off.manage': STAFF_OWN,
+  // ADR-0016: everyone sees when the business can be booked; owners and managers set it.
+  'rules.read': ALL,
+  'rules.manage': OWNER_AND_MANAGER,
   'calendar.read': ALL,
   'bookings.read': STAFF_OWN,
   'bookings.manage': STAFF_OWN,

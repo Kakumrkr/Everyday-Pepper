@@ -1,4 +1,5 @@
 import {
+  BookingRulesSchema,
   ServiceIdSchema,
   ServiceInputSchema,
   StaffMemberIdSchema,
@@ -7,6 +8,7 @@ import {
   TimeOffInputSchema,
   TimeOffQuerySchema,
   WeeklyHoursSchema,
+  type BookingRulesResponse,
   type Service,
   type ServicesResponse,
   type StaffMember,
@@ -39,10 +41,11 @@ const StaffParamsSchema = z.object({ staffMemberId: StaffMemberIdSchema });
 const TimeOffParamsSchema = StaffParamsSchema.extend({ timeOffId: TimeOffIdSchema });
 
 /**
- * The appointments base data of the active business (ADR-0015): `/v1/services` and
- * `/v1/staff` with each staff member's `hours` and `time-off`. Route guards check the
- * permission at all; the domain services check it again, on the record where it is scoped
- * (a staff member's own time off), and write the audit entries.
+ * The appointments data of the active business: `/v1/services` and `/v1/staff` with each
+ * staff member's `hours` and `time-off` (ADR-0015), and its booking rules, `/v1/rules`
+ * (ADR-0016). Route guards check the permission at all; the domain services check it again,
+ * on the record where it is scoped (a staff member's own time off), and write the audit
+ * entries.
  */
 @Controller('v1')
 @UseGuards(TenantGuard)
@@ -166,5 +169,22 @@ export class AppointmentsController {
   ): Promise<void> {
     const { staffMemberId, timeOffId } = parseBody(TimeOffParamsSchema, params);
     await answering(() => this.appointments.removeTimeOff(tenant, staffMemberId, timeOffId));
+  }
+
+  @Get('rules')
+  @RequirePermission('rules.read')
+  rules(@CurrentTenant() tenant: TenantContext): Promise<BookingRulesResponse> {
+    return answering(() => this.appointments.rules(tenant));
+  }
+
+  /** Replaces the whole rule set. 404 `staff_member_not_found` for a rule's staff member. */
+  @Put('rules')
+  @RequirePermission('rules.manage')
+  replaceRules(
+    @CurrentTenant() tenant: TenantContext,
+    @Body() body: unknown,
+  ): Promise<BookingRulesResponse> {
+    const rules = parseBody(BookingRulesSchema, body);
+    return answering(() => this.appointments.replaceRules(tenant, rules));
   }
 }

@@ -487,6 +487,44 @@ export const timeOff = pgTable(
   ],
 );
 
+/**
+ * A booking rule of a business (ADR-0016): its type, the schema version of its `params` (the
+ * contracts' `RuleSchema` validates them when written and read), and the staff member it is
+ * for (`NULL`: the whole business). At most one rule of each single-valued type per staff
+ * member or business (partial unique index, migration 0014); blackout windows may repeat.
+ */
+export const bookingRules = pgTable(
+  'booking_rules',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    staffMemberId: uuid('staff_member_id'),
+    type: text('type').notNull(),
+    version: smallint('version').notNull(),
+    params: jsonb('params').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check(
+      'booking_rules_type_known',
+      sql`${table.type} IN ('slot_interval', 'minimum_notice', 'maximum_advance', 'max_bookings_per_day', 'blackout_window')`,
+    ),
+    check('booking_rules_version_positive', sql`${table.version} >= 1`),
+    check('booking_rules_params_object', sql`jsonb_typeof(${table.params}) = 'object'`),
+    index('booking_rules_staff_member_idx').on(table.tenantId, table.staffMemberId),
+    // A business-wide rule has no staff member; the key is then not checked (MATCH SIMPLE).
+    foreignKey({
+      name: 'booking_rules_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
@@ -496,3 +534,4 @@ export type ServiceRow = typeof services.$inferSelect;
 export type StaffMemberRow = typeof staffMembers.$inferSelect;
 export type WorkingHoursRow = typeof workingHours.$inferSelect;
 export type TimeOffRow = typeof timeOff.$inferSelect;
+export type BookingRuleRow = typeof bookingRules.$inferSelect;

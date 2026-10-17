@@ -1,5 +1,6 @@
 import {
   ServiceIdSchema,
+  type BookingRulesInput,
   StaffMemberIdSchema,
   TenantIdSchema,
   TimeOffIdSchema,
@@ -29,6 +30,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
 import { ServiceNotFoundError, StaffMemberNotFoundError, TimeOffNotFoundError } from './errors.js';
 import { getWorkingHours, replaceWorkingHours } from './services/hours.js';
+import { getBookingRules, replaceBookingRules } from './services/rules.js';
 import { createService, listServices, updateService } from './services/services.js';
 import { createStaffMember, listStaff, updateStaffMember } from './services/staff.js';
 import { addTimeOff, listTimeOff, removeTimeOff } from './services/time-off.js';
@@ -356,6 +358,99 @@ describe('working hours', () => {
     expect(results.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled']);
     const final = await getWorkingHours(db, owner, jess.id);
     expect([weekString(week), weekString(other)]).toContain(weekString(final));
+  });
+});
+
+describe('booking rules', () => {
+  const rulesFor = (staffMemberId: string): BookingRulesInput => ({
+    rules: [
+      { type: 'blackout_window', params: { startDate: '2026-12-25', endDate: '2026-12-26' } },
+      { type: 'minimum_notice', staffMemberId, params: { minutes: 0 } },
+      { type: 'minimum_notice', params: { minutes: 1440 } },
+    ],
+  });
+
+  it('owners and managers set the rules; everyone reads them, sorted', async () => {
+    const { owner, manager, staff, jess } = await withStaff();
+    expect(await getBookingRules(db, staff)).toEqual({ rules: [] });
+    const set = await replaceBookingRules(db, manager, rulesFor(jess.id));
+    expect(set.rules.map((r) => [r.staffMemberId, r.type])).toEqual([
+      [null, 'minimum_notice'],
+      [null, 'blackout_window'],
+      [jess.id, 'minimum_notice'],
+    ]);
+    expect(await getBookingRules(db, staff)).toEqual(set);
+    expect(await replaceBookingRules(db, owner, { rules: [] })).toEqual({ rules: [] });
+  });
+
+  it('staff may not change the rules, not even their own', async () => {
+    const { staff, jess } = await withStaff();
+    await expect(replaceBookingRules(db, staff, rulesFor(jess.id))).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+  });
+
+  it('rejects invalid or duplicate rules before touching the database', async () => {
+    const { owner } = await withStaff();
+    for (const rules of [
+      [{ type: 'slot_interval', params: { minutes: 7 } }],
+      [
+        { type: 'minimum_notice', params: { minutes: 60 } },
+        { type: 'minimum_notice', params: { minutes: 30 } },
+      ],
+    ]) {
+      await expect(
+        replaceBookingRules(db, owner, { rules } as BookingRulesInput),
+      ).rejects.toBeInstanceOf(ZodError);
+    }
+  });
+
+  it("refuses rules for another business's staff member, or an unknown one", async () => {
+    const [a, b] = [await withStaff(), await withStaff()];
+    await expect(replaceBookingRules(db, a.owner, rulesFor(b.jess.id))).rejects.toBeInstanceOf(
+      StaffMemberNotFoundError,
+    );
+    await expect(
+      replaceBookingRules(db, a.owner, rulesFor('0199f0a4-0000-7000-8000-000000000000')),
+    ).rejects.toBeInstanceOf(StaffMemberNotFoundError);
+    expect(await getBookingRules(db, a.owner)).toEqual({ rules: [] });
+  });
+
+  it("does not show one business's rules to another", async () => {
+    const [a, b] = [await withStaff(), await withStaff()];
+    await replaceBookingRules(db, a.owner, rulesFor(a.jess.id));
+    expect(await getBookingRules(db, b.owner)).toEqual({ rules: [] });
+  });
+
+  it('audits a changed set with before and after, not an unchanged one', async () => {
+    const { tenantId, owner, jess } = await withStaff();
+    await replaceBookingRules(db, owner, rulesFor(jess.id));
+    await replaceBookingRules(db, owner, rulesFor(jess.id));
+    const entries = (await auditOf(tenantId)).filter((e) => e.action === 'booking_rules.replaced');
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({
+      entity: { type: 'tenant', id: tenantId },
+      actor: { userId: owner.context.userId },
+      before: { rules: [] },
+    });
+    expect(entries[0]?.after).toMatchObject({ rules: { length: 3 } });
+  });
+
+  it('serialises concurrent changes, so the audit trail chains exactly', async () => {
+    const { tenantId, owner, manager, jess } = await withStaff();
+    const other = { rules: [{ type: 'slot_interval' as const, params: { minutes: 30 as const } }] };
+    const results = await Promise.allSettled([
+      replaceBookingRules(db, owner, rulesFor(jess.id)),
+      replaceBookingRules(db, manager, other),
+    ]);
+    expect(results.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled']);
+    const entries = (await auditOf(tenantId))
+      .filter((e) => e.action === 'booking_rules.replaced')
+      .reverse();
+    expect(entries).toHaveLength(2);
+    // The second change starts from what the first one left.
+    expect(entries[1]?.before).toEqual(entries[0]?.after);
+    expect(await getBookingRules(db, owner)).toEqual(entries[1]?.after);
   });
 });
 

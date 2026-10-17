@@ -3,6 +3,7 @@
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
 ## 0.7 — 2026-10-17
+- S11 (Phase 3b): [ADR-0016](../adr/0016-booking-rules-and-availability.md) (accepted by the user): versioned booking rules (slot interval, minimum notice, maximum advance, daily cap, blackout windows as local dates) per business or staff member, stored in `booking_rules`; the pure availability engine; `Intl`-based time zones. Storing rules in S11, the defaults and local-date blackouts were approved by the user at the S11 Session Brief. Working hours, buffers and staff–service eligibility stay in the base data (no duplicate rule types). No change to phases, scope or exit criteria.
 - S10 (Phase 3a): [ADR-0015](../adr/0015-appointments-base-data.md) (accepted by the user): services (price "from", optional "to", in cents), staff members optionally linked to one membership, weekly hours in local time, time off in UTC; a new L2 package `@floty/appointments`; staff manage only their own time off; composite `(tenant_id, id)` foreign keys for references between tenant tables.
 - Data model: a staff member links to a membership (`staff_members.membership_id`) instead of `memberships.staff_member_id`, approved by the user at the S10 Session Brief. No scope change.
 - Session plan: Phase 3 split into **S10** (base data), **S11** (rules + availability), **S12** (bookings + waitlist), **S13** (templates + exit), approved by the user. No change to phases, scope or exit criteria.

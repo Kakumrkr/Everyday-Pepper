@@ -40,7 +40,7 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 | StaffMember (`staff_members`, S10) | display_name, color `#rrggbb`, active, membership_id? (→ memberships, one staff member per membership, SET NULL when the member is removed); services M:N via `staff_services` |
 | WorkingHours (`working_hours`, S10) | staff, ISO weekday, start/end minute after **local** midnight (tenant time zone); no overlap per staff and day (exclusion constraint) |
 | TimeOff (`time_off`, S10) | staff, starts_at/ends_at (UTC, ≤ 366 days), created_by_user_id; no free-text reason |
-| Rule | type, params (JSON, Zod), source (`template`/`tenant`/`learned`), version |
+| BookingRule (`booking_rules`, S11) | type (`slot_interval`/`minimum_notice`/`maximum_advance`/`max_bookings_per_day`/`blackout_window`), params (JSONB, validated by the contracts' `RuleSchema`), schema version, optional staff member (`NULL`: the whole business); one per type and scope except blackout windows (partial unique index). Template defaults are not stored (resolved at read time, S13); learned rules add a source in Phase 7 (ADR-0016) |
 | Booking | customer, staff, service, `during tstzrange`, status, source (`owner`/`staff`/`ai`/`booking_page`), external_event_ref; **EXCLUDE USING gist (staff_id WITH =, during WITH &&) WHERE status active** |
 | WaitlistEntry | customer, service, staff?, windows, status, expires_at |
 | ExternalBusyBlock | staff, during, source calendar, external id |

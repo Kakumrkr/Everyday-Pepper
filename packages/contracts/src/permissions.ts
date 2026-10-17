@@ -32,6 +32,9 @@ export const PermissionSchema = z.enum([
   'staff.manage',
   'hours.manage',
   'time_off.manage',
+  // Booking rules: notice, how far ahead, slot steps, daily caps, closed days (ADR-0016).
+  'rules.read',
+  'rules.manage',
   // Calendar and bookings (Phase 3): everyone sees when the team is busy; booking details and
   // changes are scoped to a member's own bookings for staff (AC-W9-1).
   'calendar.read',

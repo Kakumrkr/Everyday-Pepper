@@ -1,4 +1,5 @@
 import {
+  BookingRulesSchema,
   clockTime,
   minutesOfDay,
   ServiceSchema,
@@ -7,13 +8,20 @@ import {
   UserIdSchema,
   WeeklyHoursSchema,
   type AuditChange,
+  type BookingRules,
   type Service,
   type StaffMember,
   type TimeOff,
   type WeeklyHours,
 } from '@floty/contracts';
 import type { OwnedRecord } from '@floty/core';
-import type { ServiceRow, StaffMemberRecord, TimeOffRow, WorkingMinutes } from '@floty/db';
+import type {
+  BookingRuleRow,
+  ServiceRow,
+  StaffMemberRecord,
+  TimeOffRow,
+  WorkingMinutes,
+} from '@floty/db';
 
 // Between database rows and the api's shapes (ADR-0015), and what the audit log keeps of each.
 
@@ -103,6 +111,21 @@ export function timeOffAuditValues(row: TimeOffRow): Values<'time_off.created'> 
     staffMemberId: row.staffMemberId,
     startsAt: row.startsAt.toISOString(),
     endsAt: row.endsAt.toISOString(),
+  });
+}
+
+/**
+ * Stored rules as the api returns them, validated and sorted. A row the contracts reject (a
+ * version this code does not know) fails loudly rather than being ignored.
+ */
+export function rowsToRules(rows: readonly BookingRuleRow[]): BookingRules {
+  return BookingRulesSchema.parse({
+    rules: rows.map((row) => ({
+      type: row.type,
+      version: row.version,
+      staffMemberId: row.staffMemberId,
+      params: row.params,
+    })),
   });
 }
 

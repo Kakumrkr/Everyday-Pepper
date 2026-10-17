@@ -36,6 +36,8 @@ const EXPECTED: Record<Permission, [PermissionScope, PermissionScope, Permission
   'staff.manage': ['all', 'all', null],
   'hours.manage': ['all', 'all', null],
   'time_off.manage': ['all', 'all', 'own'],
+  'rules.read': ['all', 'all', 'all'],
+  'rules.manage': ['all', 'all', null],
   'calendar.read': ['all', 'all', 'all'],
   'bookings.read': ['all', 'all', 'own'],
   'bookings.manage': ['all', 'all', 'own'],

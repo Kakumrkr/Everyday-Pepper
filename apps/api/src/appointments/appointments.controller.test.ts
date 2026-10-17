@@ -13,6 +13,7 @@ import {
   TimeOffIdSchema,
   UserIdSchema,
   UtcDateTimeSchema,
+  type BookingRules,
   type MembershipRole,
   type Service,
   type StaffMember,
@@ -64,6 +65,12 @@ const STAFF: StaffMember = {
   updatedAt: AT,
 };
 const HOURS: WeeklyHours = { intervals: [{ weekday: 1, start: '09:00', end: '17:00' }] };
+const RULES: BookingRules = {
+  rules: [
+    { type: 'minimum_notice', version: 1, staffMemberId: null, params: { minutes: 60 } },
+    { type: 'maximum_advance', version: 1, staffMemberId: STAFF_ID, params: { days: 30 } },
+  ],
+};
 const TIME_OFF: TimeOff = {
   id: TIME_OFF_ID,
   staffMemberId: STAFF_ID,
@@ -99,6 +106,8 @@ const appointments = {
   timeOff: vi.fn(() => Promise.resolve([TIME_OFF])),
   addTimeOff: vi.fn((): Promise<TimeOff> => Promise.resolve(TIME_OFF)),
   removeTimeOff: vi.fn((): Promise<void> => Promise.resolve()),
+  rules: vi.fn(() => Promise.resolve(RULES)),
+  replaceRules: vi.fn((): Promise<BookingRules> => Promise.resolve(RULES)),
 };
 
 @Global()
@@ -158,6 +167,7 @@ describe('reading: every role', () => {
     expect((await get('/v1/services').expect(200)).body).toEqual({ services: [SERVICE] });
     expect((await get('/v1/staff').expect(200)).body).toEqual({ staff: [STAFF] });
     expect((await get(`/v1/staff/${STAFF_ID}/hours`).expect(200)).body).toEqual(HOURS);
+    expect((await get('/v1/rules').expect(200)).body).toEqual(RULES);
     expect(
       (
         await get(`/v1/staff/${STAFF_ID}/time-off?from=2026-10-01T00:00:00.000Z&limit=5`).expect(
@@ -338,5 +348,72 @@ describe('time off', () => {
       400,
     );
     expect(appointments.addTimeOff).not.toHaveBeenCalled();
+  });
+});
+
+describe('booking rules', () => {
+  const body = {
+    rules: [
+      { type: 'maximum_advance', staffMemberId: STAFF_ID, params: { days: 30 } },
+      { type: 'minimum_notice', params: { minutes: 60 } },
+    ],
+  };
+
+  it('owners and managers replace the set, validated, defaulted and sorted', async () => {
+    for (const r of ['owner', 'manager'] as const) {
+      role = r;
+      expect((await send('put', '/v1/rules', body).expect(200)).body).toEqual(RULES);
+      expect(appointments.replaceRules).toHaveBeenLastCalledWith(context(), RULES);
+    }
+  });
+
+  it('403 for staff, before the service is asked', async () => {
+    role = 'staff';
+    expect(code((await send('put', '/v1/rules', body).expect(403)).body)).toBe('forbidden');
+    expect(appointments.replaceRules).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['an unknown rule type', { rules: [{ type: 'learned', params: {} }] }, 'rules.0.type'],
+    [
+      'a slot step that does not divide an hour',
+      { rules: [{ type: 'slot_interval', params: { minutes: 45 } }] },
+      'rules.0.params.minutes',
+    ],
+    [
+      'the same rule twice',
+      {
+        rules: [
+          { type: 'minimum_notice', params: { minutes: 60 } },
+          { type: 'minimum_notice', params: { minutes: 30 } },
+        ],
+      },
+      'rules',
+    ],
+    [
+      'a blackout ending before it starts',
+      {
+        rules: [
+          { type: 'blackout_window', params: { startDate: '2026-12-26', endDate: '2026-12-25' } },
+        ],
+      },
+      'rules.0.params.endDate',
+    ],
+    ['a smuggled tenant', { rules: [], tenantId: TENANT }, '(body)'],
+  ])('400 for %s', async (_label, invalid, field) => {
+    const response = await send('put', '/v1/rules', invalid).expect(400);
+    expect(response.body).toMatchObject({ code: 'validation_failed', fields: [field] });
+    expect(appointments.replaceRules).not.toHaveBeenCalled();
+  });
+
+  it('404 staff_member_not_found for a staff member the business does not have', async () => {
+    appointments.replaceRules.mockRejectedValueOnce(new StaffMemberNotFoundError());
+    const response = await send('put', '/v1/rules', body).expect(404);
+    expect(code(response.body)).toBe('staff_member_not_found');
+  });
+
+  it('403 forbidden_origin without the app origin (CSRF)', async () => {
+    await request(server).put('/v1/rules').set('cookie', 'signed-in').send(body).expect(403);
+    expect(appointments.replaceRules).not.toHaveBeenCalled();
   });
 });

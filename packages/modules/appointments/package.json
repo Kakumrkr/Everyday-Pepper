@@ -2,7 +2,7 @@
   "name": "@floty/appointments",
   "version": "0.0.0",
   "private": true,
-  "description": "L2 appointments module: services, staff members, working hours and time off (later rules, availability, bookings and waitlist).",
+  "description": "L2 appointments module: services, staff members, working hours, time off, booking rules and the availability engine (later bookings and waitlist).",
   "type": "module",
   "exports": {
     ".": {
@@ -30,6 +30,7 @@
     "@floty/config": "workspace:*",
     "@floty/testing": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",
+    "fast-check": "^4.10.2",
     "vitest": "^5.0.5",
     "zod": "^4.6.7"
   }
