@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-16 · **Plan version:** 0.4 · **Current phase:** 2 — Platform core. S6 (Phase 2a: db + tenancy/RLS) done and merged (PR #8) → next: S7 (auth)
+**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done and merged (PR #9) → next: S8 (roles/audit/metering) → next: S8 (roles/audit/metering)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -59,9 +59,48 @@
     - drizzle-kit needs a relative `--out` path and exits 0 even on errors, so the drift test also checks its "No schema changes" message.
     - Existing local volumes keep working: `POSTGRES_USER` is unchanged, and `migrate` adds the schema and the new role.
 
+- **S7 Phase 2b (2026-10-17):** sign-in, MFA for owners and tenant context from the session ([ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md), accepted by the user).
+  - **db:**
+    - Better Auth's global tables: `users`, `sessions` (+ `active_tenant_id`), `accounts`, `verifications`, `two_factors`. UUID v7 ids; emails lowercased by a CHECK constraint.
+    - `memberships.user_id` gets a foreign key (cascade) and an index.
+    - "My businesses": `current_user_id()` and read-only `member_read` policies (only when no tenant is set), used through `withUser`.
+    - New repository functions: `listUserBusinesses`, `createTenant(..., { owner })`, `setSessionActiveTenant`, `authDatabaseAdapter`.
+    - Migrations 0003–0005.
+  - **api:**
+    - Better Auth 1.7 at `/api/auth`: email and password (≥ 10 characters), TOTP with backup codes, 7-day DB sessions without cookie cache, built-in rate limits, telemetry off. Its CSRF checks are pinned on even under `NODE_ENV=test`.
+    - It sits behind an `AuthService` interface.
+    - Guards: `SessionGuard`, `TenantGuard` (`decideTenantAccess` in core: no business / not a member / owner without MFA) and `SameOriginGuard` (Origin check on every write).
+    - Endpoints: `GET /v1/me`, `PUT /v1/me/active-tenant`, `POST /v1/tenants`, `GET /v1/tenant`.
+    - A new session starts in the user's first business. Log lines carry `user_id`/`tenant_id` (`identifyRequest` in runtime).
+    - Config: `AUTH_SECRET`, `AUTH_BASE_URL` (https outside localhost).
+  - **web:**
+    - Forwards `/api/auth/*` and `/v1/*` to the api at request time: allowlisted headers, every `Set-Cookie` kept, 100 KB body cap, 502 when the api is down.
+    - Screens: sign in (TOTP or backup code), sign up, create business (slug suggested from the name, browser time zone), two-step setup (QR via `uqr`, manual key, backup codes), and a signed-in home with business switcher and sign-out.
+    - Pages route to the next required step.
+  - **Also:**
+    - `@floty/contracts`: account schemas.
+    - `@floty/testing`: RFC 6238 `totpCode`.
+    - Compose and `.env.example`: auth variables.
+    - `.pnpmfile.cjs`: keeps only better-auth's `drizzle-orm`/`pg` peers. api image 1.26 GB → 461 MB; it was 426 MB before S7.
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 76, core 25, db 29, runtime 75, testing 13, api 48, web 55, worker 3. Coverage: db 100%, api 95.6%, web 98.4%.
+    - `pnpm test:integration` green: db 70 (isolation suite 42, incl. auth tables and the user context), api 21 (owner journey, cross-business denials, membership removal, update-session, CSRF, rate limit 429, no secrets in logs or the DB), runtime 2, testing 1.
+    - Mutation check: dropping `current_tenant_id() IS NULL` from `member_read` → 2 isolation failures.
+    - Docker images built. `docker compose up --wait`: 6 services healthy, `migrate` exited 0.
+    - Playwright 18/18 on phone and desktop, three runs in a row: full owner journey, backup code, wrong password, signed-out redirects, no sideways overflow.
+    - api logs: no errors, no emails or passwords, `user_id`/`tenant_id` present.
+  - **CI on PR #9:** all three required checks green (lint/typecheck/test/build, Integration, E2E smoke incl. the new auth journey). ADR-0012 accepted and PR merged by Claude at the user's request (2026-10-17).
+  - **Findings:**
+    - Better Auth turns off its CSRF and origin checks when `NODE_ENV=test`, so we pin them on.
+    - pnpm resolves optional peers from the whole workspace, which put next/react/vitest/playwright into the api image (fixed by `.pnpmfile.cjs`).
+    - Next.js keeps a client-sent `X-Forwarded-For`, so per-address rate limits can be dodged until an edge proxy overwrites it (Phase 11).
+    - Better Auth logs a few messages (e.g. "Invalid origin") to the console, bypassing our logger. No personal data seen.
+    - Sign-up reveals whether an email exists (422) until email verification (Phase 5).
+    - Next's route announcer is also `role="alert"`; tests match form errors by text.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
-- **Free development setup:** Postgres+pgvector, Redis, MinIO and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
+- **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
 - **OpenAI cost:** $0 until Phase 6 (tests use a fake provider). At Phase 6 either add ~$5–10 credit with a hard monthly limit (recommended) or develop on a free local/free-tier model via the provider adapter and run evals on OpenAI before pilot.
 - **Sessions:** one feature-sized goal per session; every session starts with a Session Brief (see `CLAUDE.md`) and ends by updating this file.
 - **Mockups approved to start:** all 7 key screens, as a clickable HTML prototype, branded Floty, warm & friendly, mobile-first.
@@ -76,7 +115,8 @@
 - **Module format: ESM** for all packages (NodeNext). Confirmed in S4: Nest 12 ships ESM, so api/worker run as native ESM.
 - **S4 defaults (Claude, user to confirm or change):** NestJS on Express (not Fastify); Vitest compiles Nest code with SWC; shared Nest wiring lives in a new `packages/runtime` (`@floty/runtime`) that S5 extends with config/logger/telemetry; the readiness `SELECT 1` lives in runtime until `packages/db` exists (Phase 2); web unit tests cover `lib/` and route handlers, pages are covered by Playwright.
 - **S5 defaults — ADR-0009, accepted by the user (2026-10-16, S6 start):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@floty/runtime/instrument` (lint allows exactly this one); `@floty/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
-- **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images. Replacement is open decision **D10** (recommendation: SeaweedFS); needed by Phase 4.
+- **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images.
+- **D10 resolved (user, 2026-10-16, S7 start): SeaweedFS** for dev/CI object storage ([ADR-0011](../adr/0011-dev-object-storage-seaweedfs.md)). It is added to Compose in Phase 4, when stylist photos first need storage; not in S7.
 - **GitHub settings done by the user (2026-10-16, before S6):** default branch is `main`; branch protection on `main` requires a PR and the three CI checks (**CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)**, **CI / E2E smoke (Docker Compose)**); head branches are deleted automatically after merge; stale branches deleted.
 - **Phase 2 order confirmed (user, S6 start):** S6 db + tenancy/RLS → S7 auth → S8 roles/audit. **ADR-0009 accepted** (user, S6 start).
 - **S6 defaults — ADR-0010, accepted by the user (2026-10-16, end of S6):**
@@ -86,19 +126,27 @@
   - (d) RLS goes through a `current_tenant_id()` SQL function with `NULLIF`. `tenant_id` defaults to it, so repositories never take a tenant id.
   - (e) `runtime` may import `db` (lint and dependency map updated). The api image carries the migrate CLI (`@floty/db` is a direct api dependency).
   - (f) Repositories, migrations and RLS are covered by integration tests and excluded from the unit coverage gate.
+- **S7 defaults — ADR-0012, accepted by the user (2026-10-17, end of S7):**
+  - (a) Auth tables are global (no RLS), classified in the isolation suite, reached only through `authDatabaseAdapter`.
+  - (b) "My businesses" uses read-only, user-keyed `member_read` policies via `withUser`, not a `SECURITY DEFINER` function (FORCE RLS would filter it unless the owner is a superuser).
+  - (c) The active business is stored in the session, set only after a membership check. New sessions start in the first business.
+  - (d) Membership is re-checked on every request. Owners are blocked until TOTP is on; managers and staff are not (yet).
+  - (e) The web app forwards `/api/auth/*` and `/v1/*` (one origin, no CORS).
+  - (f) Origin check on every write.
+  - (g) Passwords ≥ 10 characters until the breached-password check lands.
+  - (h) Rate limits in memory (one instance) for now.
+  - (i) Out of S7: email verification and password reset (Phase 5), social login (Phase 10), breached-password check, edge proxy and CSP/HSTS (Phase 11).
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Decide **D10** (dev object storage replacing MinIO) — before Phase 4.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 S6–S8 split Phase 2: db + tenancy/RLS before auth, so auth can build on the tenant context. **Order confirmed by the user at the S6 Session Brief (2026-10-16).**
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S7 | **Phase 2b:** auth (Better Auth + MFA for owners), session → tenant context (+ `tenant_id`/`user_id` on log lines), auth E2E. Carry-overs from S6: `users` table (Better Auth's, uuid ids) + FK from `memberships.user_id` and an index on it; the sign-in lookup of a user's tenants across tenants (a narrow `SECURITY DEFINER` function or a user-keyed policy) added to the isolation suite; classify auth tables as global in the suite | 2 | auth E2E passing; isolation suite 100% incl. auth tables |
-| S8 | **Phase 2c:** roles/permissions matrix, audit log, usage-metering skeleton | 2 | role matrix 100%; Phase 2 exit criteria |
+| S8 | **Phase 2c:** roles/permissions matrix (in core, next to `decideTenantAccess`; decide whether managers also need MFA), audit log, usage-metering skeleton. Carry-overs from S7: invite a member to a business (needs email → may stay a link until Phase 5); a per-user limit on creating businesses; `/security-review` before Phase 2 exit | 2 | role matrix 100%; Phase 2 exit criteria |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

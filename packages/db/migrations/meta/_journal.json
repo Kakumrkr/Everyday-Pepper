@@ -22,6 +22,27 @@
       "when": 1792190655814,
       "tag": "0002_tenancy_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792193925718,
+      "tag": "0003_user_context",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792193926467,
+      "tag": "0004_auth_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792193927268,
+      "tag": "0005_auth_hardening",
+      "breakpoints": true
     }
   ]
 }

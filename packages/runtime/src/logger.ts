@@ -10,6 +10,10 @@ export type { Logger } from 'pino';
 /** Per-request values attached to every log line written while handling the request. */
 export interface RequestContext {
   requestId: string;
+  /** Set once the request is authenticated (`identifyRequest`). Ids only, never names. */
+  userId?: string;
+  /** Set once the request's business is resolved from the session (`identifyRequest`). */
+  tenantId?: string;
 }
 
 const requestContext = new AsyncLocalStorage<RequestContext>();
@@ -24,11 +28,26 @@ export function currentRequestContext(): RequestContext | undefined {
   return requestContext.getStore();
 }
 
+/**
+ * Records who the current request acts as, so its later log lines (including the request's
+ * own completion line) carry `user_id` and `tenant_id`. A no-op outside a request.
+ */
+export function identifyRequest(actor: { userId: string; tenantId?: string }): void {
+  const context = requestContext.getStore();
+  if (!context) return;
+  context.userId = actor.userId;
+  if (actor.tenantId !== undefined) context.tenantId = actor.tenantId;
+}
+
 /** Correlation fields: the request and, when tracing is on, the active trace and span. */
 function correlationFields(): Record<string, string> {
   const fields: Record<string, string> = {};
   const context = requestContext.getStore();
-  if (context) fields['request_id'] = context.requestId;
+  if (context) {
+    fields['request_id'] = context.requestId;
+    if (context.userId !== undefined) fields['user_id'] = context.userId;
+    if (context.tenantId !== undefined) fields['tenant_id'] = context.tenantId;
+  }
   const span = trace.getActiveSpan()?.spanContext();
   if (span && isSpanContextValid(span)) {
     fields['trace_id'] = span.traceId;

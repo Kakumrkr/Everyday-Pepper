@@ -40,7 +40,14 @@ Run `pnpm check` before every push.
 - Compose credentials are local-only defaults (override in a git-ignored `.env`); every port binds to `127.0.0.1`.
 - **Database roles** ([ADR-0010](../adr/0010-database-roles-and-migrations.md)): the one-shot `migrate` service (api image, `node node_modules/@floty/db/dist/migrate-cli.js`) runs migrations as the `POSTGRES_USER` superuser and creates the `APP_DB_USER` login role (`floty_service`); api and worker start after it exits successfully and connect as `floty_service`, which RLS applies to. Readiness reports the database `down` if `DATABASE_URL` uses a superuser or `BYPASSRLS` role. To inspect data as the owner: `docker compose exec postgres psql -U floty`.
 - One `Dockerfile` builds all apps (`--target api|worker|web`): pinned base image digest, production-only dependencies (`pnpm deploy`), Next.js standalone output, non-root `node` user, `HEALTHCHECK` per app.
-- **Object storage is not in Compose yet.** MinIO no longer publishes community images; choosing a replacement is open decision D10 (`../plan/open-decisions.md`). Nothing uses storage before Phase 4.
+- **Sign-in (S7, [ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md)):**
+  - Open http://localhost:3000 and create an account. You then create a business and set up two-step verification with any authenticator app.
+  - The web app forwards `/api/auth/*` and `/v1/*` to the api, so the browser uses one origin.
+  - The api needs `AUTH_SECRET` (≥ 32 characters; Compose has a local-only default) and `AUTH_BASE_URL` (the browser's origin, `http://localhost:3000`).
+  - Changing `AUTH_SECRET` signs everyone out and makes stored TOTP secrets unreadable.
+  - Sign-in is rate limited per client address (3 tries per 10 s per endpoint).
+- **`.pnpmfile.cjs`** trims better-auth's optional framework peers, which pnpm would otherwise install into the api image. Change it if we start using another Better Auth integration.
+- **Object storage is not in Compose yet.** MinIO no longer publishes community images; the replacement is SeaweedFS ([ADR-0011](../adr/0011-dev-object-storage-seaweedfs.md)), added in Phase 4 when the first feature needs storage.
 - **Playwright with a preinstalled browser** (e.g. a sandbox without browser downloads): set `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome`.
 - **Claude Code cloud sessions** run `.claude/hooks/session-start.sh` at start-up (registered in `.claude/settings.json`): `pnpm install` and, if needed, start `dockerd`. Unit tests, lint and integration tests work right away; it does nothing outside cloud sessions.
 - **Docker build behind a TLS-inspecting proxy** (some cloud dev sandboxes): the build container needs the proxy CA and `HTTPS_PROXY`; CI and normal machines need nothing extra. If `docker info` says the daemon is not running, start `dockerd` first (integration tests need it too).

@@ -1,16 +1,22 @@
-import { TenantIdSchema, type TenantId } from '@floty/contracts';
+import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@floty/contracts';
 import { PgDialect } from 'drizzle-orm/pg-core';
 import type { SQL } from 'drizzle-orm';
 import { describe, expect, it, vi } from 'vitest';
 import type { Database } from './client.js';
-import { withTenant } from './tenant.js';
+import { withTenant, withUser } from './tenant.js';
 
 const TENANT = TenantIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192');
+const USER = UserIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708193');
 
 function fakeDb() {
   const executed: SQL[] = [];
   const tx = { execute: vi.fn((query: SQL) => (executed.push(query), Promise.resolve())) };
-  const db = { transaction: vi.fn((work: (t: typeof tx) => Promise<unknown>) => work(tx)) };
+  const db = {
+    // The second argument (transaction config) is asserted by the tests that pass one.
+    transaction: vi.fn((...args: [work: (t: typeof tx) => Promise<unknown>, config?: object]) =>
+      args[0](tx),
+    ),
+  };
   return { db: db as unknown as Database, tx, executed, transaction: db.transaction };
 }
 
@@ -45,5 +51,29 @@ describe('withTenant', () => {
     await expect(withTenant(db, TENANT, () => Promise.reject(new Error('nope')))).rejects.toThrow(
       'nope',
     );
+  });
+});
+
+describe('withUser', () => {
+  it('sets the user transaction-locally, as a bound parameter, in a read-only transaction', async () => {
+    const { db, tx, executed, transaction } = fakeDb();
+    const result = await withUser(db, USER, (given) => {
+      expect(given).toBe(tx);
+      return Promise.resolve('done');
+    });
+    expect(result).toBe('done');
+    expect(transaction).toHaveBeenCalledWith(expect.any(Function), { accessMode: 'read only' });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- the setting is the first statement
+    const query = new PgDialect().sqlToQuery(executed[0]!);
+    expect(query).toMatchObject({
+      sql: "SELECT set_config('app.user_id', $1, true)",
+      params: [USER],
+    });
+  });
+
+  it.each(['', 'not-a-uuid'])('rejects user id %j before touching the database', async (value) => {
+    const { db, transaction } = fakeDb();
+    await expect(withUser(db, value as UserId, () => Promise.resolve())).rejects.toThrow();
+    expect(transaction).not.toHaveBeenCalled();
   });
 });

@@ -17,5 +17,6 @@ Links each requirement to its design and tests. Test columns are filled in as ph
 | AC-W7-1/2/3 trust | ai-agent-and-trust-layer, memory | 6, 7 | _tbd_ |
 | AC-W8-1/2 public booking | data-model (exclusion constraint), security | 3, 4 | _tbd_ |
 | AC-W9-1 staff scope | security-and-tenancy | 2 | _tbd_ |
-| AC-X-1 tenant isolation | security-and-tenancy, ADR-0010 | 2+ | DB level: `packages/db/src/isolation.int.test.ts` (S6); endpoints/tools: _tbd_ (S7+) |
+| AC-X-1 tenant isolation | security-and-tenancy, ADR-0010, ADR-0012 | 2+ | DB level: `packages/db/src/isolation.int.test.ts` (S6, + auth tables and `withUser` in S7); endpoints: `apps/api/src/auth.int.test.ts` "across businesses" + `account.controller.test.ts` guard cases (S7); AI tools: _tbd_ (Phase 6) |
+| Owner MFA, sign-in (v1-scope "Platform core") | ADR-0007, ADR-0012, security-and-tenancy | 2 | `apps/api/src/auth.int.test.ts` "owner journey", `packages/core/src/tenant-access.test.ts`, `e2e/tests/auth.spec.ts` (S7) |
 | AC-X-2 LLM outage degradation | reliability-and-observability | 6 | _tbd_ |

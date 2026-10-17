@@ -48,12 +48,16 @@ describe('runMigrations', () => {
   });
 
   it('is idempotent and safe to run concurrently', async () => {
+    const before = await query(
+      database.migrationUrl,
+      'SELECT hash FROM drizzle.__drizzle_migrations',
+    );
     await Promise.all([1, 2, 3].map(() => runMigrations(database.migrationUrl)));
     const applied = await query(
       database.migrationUrl,
       'SELECT hash FROM drizzle.__drizzle_migrations',
     );
-    expect(applied).toHaveLength(3);
+    expect(applied).toEqual(before);
   });
 
   it('matches the Drizzle schema (no ungenerated changes)', async () => {

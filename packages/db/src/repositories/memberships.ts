@@ -4,10 +4,10 @@ import {
   type MembershipRole,
   type UserId,
 } from '@floty/contracts';
-import { asc, eq } from 'drizzle-orm';
+import { asc, eq, sql } from 'drizzle-orm';
 import { isUniqueViolation, MembershipExistsError } from '../errors.js';
-import { memberships, type Membership } from '../schema.js';
-import type { TenantTx } from '../tenant.js';
+import { memberships, tenants, type Membership } from '../schema.js';
+import type { TenantTx, UserTx } from '../tenant.js';
 
 // Every function runs inside `withTenant`: `tenant_id` defaults to the transaction's tenant and
 // RLS hides other tenants' rows, so no function takes a tenant id.
@@ -45,4 +45,27 @@ export async function findMembership(
     .from(memberships)
     .where(eq(memberships.userId, UserIdSchema.parse(userId)));
   return membership;
+}
+
+/** One of the signed-in user's businesses, as listed for switching between them. */
+export interface UserBusiness {
+  tenantId: string;
+  name: string;
+  slug: string;
+  role: MembershipRole;
+}
+
+/** The transaction user's businesses (inside `withUser`), oldest membership first. */
+export async function listUserBusinesses(tx: UserTx): Promise<UserBusiness[]> {
+  return tx
+    .select({
+      tenantId: tenants.id,
+      name: tenants.name,
+      slug: tenants.slug,
+      role: memberships.role,
+    })
+    .from(memberships)
+    .innerJoin(tenants, eq(tenants.id, memberships.tenantId))
+    .where(eq(memberships.userId, sql`current_user_id()`))
+    .orderBy(asc(memberships.createdAt), asc(memberships.id));
 }

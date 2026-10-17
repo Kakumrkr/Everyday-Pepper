@@ -1,4 +1,4 @@
-import { TenantIdSchema, type TenantId } from '@floty/contracts';
+import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@floty/contracts';
 import { sql } from 'drizzle-orm';
 import type { Database } from './client.js';
 
@@ -22,4 +22,30 @@ export async function withTenant<T>(
     await tx.execute(sql`SELECT set_config('app.tenant_id', ${id}, true)`);
     return work(tx);
   });
+}
+
+/**
+ * A transaction bound to one signed-in user and no tenant: the `member_read` policies let it
+ * read that user's memberships and their businesses across tenants, and nothing else (no
+ * writes, no other tenant data).
+ */
+export type UserTx = TenantTx;
+
+/**
+ * Runs `work` in a read-only "my businesses" transaction for `userId` (ADR-0012), e.g. to list
+ * the businesses a user may switch to. `userId` must come from the authenticated session.
+ */
+export async function withUser<T>(
+  db: Database,
+  userId: UserId,
+  work: (tx: UserTx) => Promise<T>,
+): Promise<T> {
+  const id = UserIdSchema.parse(userId);
+  return db.transaction(
+    async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.user_id', ${id}, true)`);
+      return work(tx);
+    },
+    { accessMode: 'read only' },
+  );
 }

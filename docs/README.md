@@ -55,6 +55,8 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [ADR-0008 Drizzle ORM](adr/0008-orm-drizzle.md)
 - [ADR-0009 Observability wiring](adr/0009-observability-wiring.md)
 - [ADR-0010 Database roles, migrations and tenant context](adr/0010-database-roles-and-migrations.md)
+- [ADR-0011 Dev object storage: SeaweedFS](adr/0011-dev-object-storage-seaweedfs.md)
+- [ADR-0012 Auth wiring: sessions, tenant context, web forwarding](adr/0012-auth-sessions-and-tenant-context.md)
 
 ## How these docs are maintained
 - Docs change in the same commit as the behaviour they describe.

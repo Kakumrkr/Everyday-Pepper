@@ -1,7 +1,10 @@
 // Integration-test helpers (not built into dist).
+import { UserIdSchema, type UserId } from '@floty/contracts';
 import { startPostgres, postgresUrlAs } from '@floty/testing';
-import { createDatabase, type DatabaseHandle } from './client.js';
+import { createDatabase, type Database, type DatabaseHandle } from './client.js';
+import { newId } from './ids.js';
 import { prepareDatabase } from './migrate.js';
+import { users } from './schema.js';
 
 export const APP_LOGIN = 'floty_service';
 
@@ -41,4 +44,11 @@ export function sqlState(error: unknown): string | undefined {
     if (typeof code === 'string') return code;
   }
   return undefined;
+}
+
+/** Inserts a user directly (Better Auth creates them in the app); returns its id. */
+export async function insertUser(db: Database, name = 'Test User'): Promise<UserId> {
+  const id = newId();
+  await db.insert(users).values({ id, name, email: `user-${id}@example.test` });
+  return UserIdSchema.parse(id);
 }

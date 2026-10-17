@@ -12,6 +12,8 @@ import { loadApiConfig } from './config.js';
 const unreachable = loadApiConfig({
   DATABASE_URL: 'postgres://floty:floty@127.0.0.1:1/floty',
   REDIS_URL: 'redis://127.0.0.1:1',
+  AUTH_SECRET: 'a-local-test-secret-of-32-characters!',
+  AUTH_BASE_URL: 'http://localhost:3000',
 });
 
 describe('AppModule', () => {

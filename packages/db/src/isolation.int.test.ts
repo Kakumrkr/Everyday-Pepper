@@ -1,20 +1,30 @@
 // Cross-tenant isolation suite (docs/engineering/testing-strategy.md; must stay at 100%).
 // Every table in `public` must be listed in TENANT_TABLES (row access limited by RLS) or in
 // GLOBAL_TABLES (with a reason); the catalog test fails for a table that is in neither.
-import { TenantIdSchema, UserIdSchema, type TenantId } from '@floty/contracts';
+import { TenantIdSchema, type TenantId, type UserId } from '@floty/contracts';
 import { sql } from 'drizzle-orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDatabase, type Database } from './client.js';
 import { newId } from './ids.js';
 import { APP_ROLE } from './migrate.js';
-import { addMembership } from './repositories/memberships.js';
+import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { createTenant } from './repositories/tenants.js';
-import { withTenant, type TenantTx } from './tenant.js';
-import { sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
+import { withTenant, withUser, type TenantTx } from './tenant.js';
+import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
-/** Tables that are not tenant-owned, with why. Empty until users/auth (S7). */
-const GLOBAL_TABLES: Record<string, string> = {};
+/**
+ * Tables that are not tenant-owned, with why. They have no RLS: the services' role reads and
+ * writes them, and only Better Auth (through `authDatabaseAdapter`) and the session repository
+ * use them (ADR-0012).
+ */
+const GLOBAL_TABLES: Record<string, string> = {
+  users: 'auth identity; one person may belong to several businesses',
+  sessions: 'Better Auth looks sessions up by cookie token before any tenant is known',
+  accounts: 'sign-in methods (password hash) of a global user',
+  verifications: 'short-lived Better Auth tokens, keyed by identifier, not by tenant',
+  two_factors: 'TOTP secret and backup codes of a global user',
+};
 
 interface TenantTable {
   /** Column holding the owning tenant (`id` for `tenants` itself). */
@@ -23,6 +33,8 @@ interface TenantTable {
   seed: (tx: TenantTx) => Promise<string>;
   /** A harmless assignment for UPDATE probes. */
   touch: string;
+  /** The `member_read` (withUser) predicate, as Postgres prints it, if the table has one. */
+  memberRead?: string;
 }
 
 const TENANT_TABLES: Record<string, TenantTable> = {
@@ -34,12 +46,15 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       return String(rows[0]?.id);
     },
     touch: "name = name || ''",
+    memberRead:
+      '((current_tenant_id() IS NULL) AND (id IN ( SELECT memberships.tenant_id\n   FROM memberships\n  WHERE (memberships.user_id = current_user_id()))))',
   },
   memberships: {
     tenantColumn: 'tenant_id',
     seed: async (tx) =>
-      (await addMembership(tx, { userId: UserIdSchema.parse(newId()), role: 'staff' })).id,
+      (await addMembership(tx, { userId: await insertUser(db), role: 'staff' })).id,
     touch: "role = 'manager'",
+    memberRead: '((current_tenant_id() IS NULL) AND (user_id = current_user_id()))',
   },
 };
 
@@ -105,7 +120,7 @@ describe('catalog', () => {
   });
 
   it.each(Object.entries(TENANT_TABLES))(
-    '%s has forced RLS and exactly the tenant_isolation policy',
+    '%s has forced RLS, the tenant_isolation policy and at most a read-only member_read policy',
     async (table, spec) => {
       const [flags] = await asAdmin<{ enabled: boolean; forced: boolean }>(
         `SELECT relrowsecurity AS enabled, relforcerowsecurity AS forced
@@ -115,11 +130,23 @@ describe('catalog', () => {
       expect(flags).toEqual({ enabled: true, forced: true });
       const policies = await asAdmin(
         `SELECT policyname, permissive, cmd, roles::text[] AS roles, qual, with_check
-           FROM pg_policies WHERE schemaname = 'public' AND tablename = $1`,
+           FROM pg_policies WHERE schemaname = 'public' AND tablename = $1 ORDER BY policyname`,
         [table],
       );
       const predicate = `(${spec.tenantColumn} = current_tenant_id())`;
       expect(policies).toEqual([
+        ...(spec.memberRead === undefined
+          ? []
+          : [
+              {
+                policyname: 'member_read',
+                permissive: 'PERMISSIVE',
+                cmd: 'SELECT',
+                roles: ['public'],
+                qual: spec.memberRead,
+                with_check: null,
+              },
+            ]),
         {
           policyname: 'tenant_isolation',
           permissive: 'PERMISSIVE',
@@ -253,6 +280,113 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
     const updated = await db.execute(sql.raw(`UPDATE ${table} SET ${spec.touch}`));
     const deleted = await db.execute(sql.raw(`DELETE FROM ${table}`));
     expect([updated.rowCount, deleted.rowCount]).toEqual([0, 0]);
+  });
+});
+
+describe('user context (withUser: "my businesses")', () => {
+  let ana: UserId;
+  let ben: UserId;
+
+  beforeAll(async () => {
+    // Ana owns A and is staff at B; Ben is staff at A only.
+    ana = await insertUser(db, 'Ana');
+    ben = await insertUser(db, 'Ben');
+    await withTenant(db, tenantA, (tx) => addMembership(tx, { userId: ana, role: 'owner' }));
+    await withTenant(db, tenantB, (tx) => addMembership(tx, { userId: ana, role: 'staff' }));
+    await withTenant(db, tenantA, (tx) => addMembership(tx, { userId: ben, role: 'staff' }));
+  });
+
+  it("lists exactly the user's businesses with their role", async () => {
+    const anas = await withUser(db, ana, listUserBusinesses);
+    expect(anas.map((b) => [b.tenantId, b.role])).toEqual([
+      [tenantA, 'owner'],
+      [tenantB, 'staff'],
+    ]);
+    const bens = await withUser(db, ben, listUserBusinesses);
+    expect(bens.map((b) => [b.tenantId, b.role])).toEqual([[tenantA, 'staff']]);
+  });
+
+  it("sees only the user's own memberships, not their colleagues'", async () => {
+    const { rows: seen } = await withUser(db, ben, (tx) =>
+      tx.execute<{ user_id: string }>(sql`SELECT user_id::text FROM memberships`),
+    );
+    expect(seen).toEqual([{ user_id: ben }]);
+  });
+
+  it('sees no tenant the user is not a member of', async () => {
+    const { rows: seen } = await withUser(db, ben, (tx) =>
+      tx.execute<{ id: string }>(sql`SELECT id::text FROM tenants`),
+    );
+    expect(seen).toEqual([{ id: tenantA }]);
+  });
+
+  it('sees nothing for a user without memberships', async () => {
+    const loner = await insertUser(db, 'Loner');
+    await expect(withUser(db, loner, listUserBusinesses)).resolves.toEqual([]);
+  });
+
+  it.each([
+    [
+      'insert a membership',
+      (user: UserId) => `INSERT INTO memberships (id, tenant_id, user_id, role)
+       VALUES ('${newId()}', (SELECT tenant_id FROM memberships LIMIT 1), '${user}', 'owner')`,
+    ],
+    ['update a membership', () => "UPDATE memberships SET role = 'owner'"],
+    ['delete a membership', () => 'DELETE FROM memberships'],
+    ['rename a business', () => "UPDATE tenants SET name = 'mine'"],
+  ])('cannot %s (read-only transaction)', async (_label, statement) => {
+    const error = await withUser(db, ben, (tx) => tx.execute(sql.raw(statement(ben)))).catch(
+      (e: unknown) => e,
+    );
+    expect(sqlState(error)).toBe('25006'); // read_only_sql_transaction
+  });
+
+  it('cannot write even in a read-write transaction: member_read is SELECT only', async () => {
+    const { updated, deleted } = await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.user_id', ${ben}, true)`);
+      return {
+        updated: (await tx.execute(sql`UPDATE memberships SET role = 'owner'`)).rowCount,
+        deleted: (await tx.execute(sql`DELETE FROM tenants`)).rowCount,
+      };
+    });
+    expect([updated, deleted]).toEqual([0, 0]);
+  });
+
+  it("does not widen a tenant transaction: with a tenant set, the user's other businesses stay hidden", async () => {
+    const { tenantIds, memberIds } = await withTenant(db, tenantB, async (tx) => {
+      // Ana belongs to A as well; setting her as the user must not reveal A inside B.
+      await tx.execute(sql`SELECT set_config('app.user_id', ${ana}, true)`);
+      const t = await tx.execute<{ id: string }>(sql`SELECT id::text FROM tenants`);
+      const m = await tx.execute<{ tenant_id: string }>(
+        sql`SELECT DISTINCT tenant_id::text FROM memberships`,
+      );
+      return { tenantIds: t.rows.map((r) => r.id), memberIds: m.rows.map((r) => r.tenant_id) };
+    });
+    expect(tenantIds).toEqual([tenantB]);
+    expect(memberIds).toEqual([tenantB]);
+  });
+
+  it('does not outlive the transaction on a pooled connection', async () => {
+    const single = createDatabase({ url: database.appUrl, maxConnections: 1 });
+    try {
+      await expect(withUser(single.db, ana, listUserBusinesses)).resolves.toHaveLength(2);
+      const after = await single.db.execute(
+        sql`SELECT current_user_id() AS id, count(*)::int AS n FROM memberships`,
+      );
+      expect(after.rows).toEqual([{ id: null, n: 0 }]);
+    } finally {
+      await single.close();
+    }
+  });
+
+  it('fails closed on a malformed user setting', async () => {
+    const error = await db
+      .transaction(async (tx) => {
+        await tx.execute(sql`SELECT set_config('app.user_id', 'garbage', true)`);
+        await tx.execute(sql`SELECT * FROM memberships`);
+      })
+      .catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('22P02');
   });
 });
 

@@ -44,6 +44,8 @@ describe('api process: logs and traces', () => {
         PORT: String(port),
         DATABASE_URL: databaseUrl,
         REDIS_URL: redis.url,
+        AUTH_SECRET: 'an-integration-test-secret-32-chars',
+        AUTH_BASE_URL: 'http://localhost:3000',
         LOG_LEVEL: 'debug',
         DEPLOYMENT_ENVIRONMENT: 'ci',
         RELEASE: 'int-test',
