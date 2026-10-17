@@ -1,6 +1,6 @@
 # ADR-0014: Inviting members with a single-use link
 
-- **Status:** Proposed (S9, 2026-10-17; the user approved a 7-day link, binding to the invitee's email and at most 20 open invites per business at the S9 Session Brief) · **Date:** 2026-10-17 · Builds on ADR-0010 (RLS), ADR-0012 (session tenant context) and ADR-0013 (roles, audit log)
+- **Status:** Accepted (user, 2026-10-17; proposed in S9; the user approved a 7-day link, binding to the invitee's email and at most 20 open invites per business at the S9 Session Brief) · **Date:** 2026-10-17 · Builds on ADR-0010 (RLS), ADR-0012 (session tenant context) and ADR-0013 (roles, audit log)
 
 ## Context
 Until S9, members could only be added by tests and the database. Phase 2 needs owners and managers to bring their team in. Sending email comes in Phase 5, so for now the inviter copies a link and shares it. The invitee is usually not a member of the business yet, and often has no account, so the usual tenant context from the session does not exist when they look at or accept the invite.

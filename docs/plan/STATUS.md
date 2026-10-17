@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.6 · **Current phase:** 2 — Platform core, exit criteria met (S9: invites, Team screen, security review); ADR-0014 proposed; S9 PR not opened yet → next: Phase 2 sign-off, then S10 (Phase 3a)
+**Last updated:** 2026-10-17 · **Plan version:** 0.6 · **Current phase:** 2 — Platform core **complete** (S6–S9; exit criteria met; S9 merged at the user's request, ADR-0014 accepted) → next: S10 (Phase 3a)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -116,7 +116,7 @@
     - The worker image now carries `@floty/db` through `@floty/core` (it already had it for readiness).
     - AC-W9-1 also asks for RLS-level enforcement: the staff-scoped policy belongs on the bookings and notes tables (Phase 3).
 
-- **S9 Phase 2c, part 2 (2026-10-17):** invites, Team screen, security review, Phase 2 exit ([ADR-0014](../adr/0014-invites.md), proposed).
+- **S9 Phase 2c, part 2 (2026-10-17):** invites, Team screen, security review, Phase 2 exit ([ADR-0014](../adr/0014-invites.md), accepted by the user).
   - **contracts:** invite schemas (`InviteToken`: 43 base64url characters; `InviteEmail` trimmed and lowercased; create/list/lookup/accept bodies), audit actions `invite.created`/`invite.revoked`/`invite.accepted` (no emails), error codes `invite_invalid`, `invite_wrong_account`, `invite_not_found`, `invite_limit_reached`, `already_a_member`; `GET /v1/tenant` returns `permissions`.
   - **db:** `invites` table (forced RLS, `tenant_isolation`, read-only token-keyed `invite_lookup` policy via `current_invite_token_hash()`; SHA-256 token hash; one unresolved invite per email; accepted xor revoked); repositories and `withInviteTenant` (finds the invite by hash with no tenant, then binds the transaction to its business); `isMemberEmail`. Migrations 0008–0010.
   - **core:** `createInvite` (7-day link, at most 20 open per business, re-inviting replaces the old link), `listInvites`, `revokeInvite`, `previewInvite`, `acceptInvite` (email-bound, single use, locked); `canGrantRole` (only owners invite owners), `permissionsOf`, `newInviteToken`/`hashInviteToken`.
@@ -182,16 +182,14 @@
   - (f) Removing someone else needs `members.manage`, checked before any lookup (staff cannot probe membership); leaving clears the session's business.
   - (g) Tenant and user ids are lowercased by the contracts.
 - **S9 decisions (user, 2026-10-17, S9 Session Brief):** invite links work for **7 days**; an invite is **bound to the invitee's email** (a forwarded link is useless); at most **20 open invites per business**. Also restated: managers need MFA like owners (already decided at S8 and built).
-- **S9 defaults — ADR-0014, proposed (user to accept or change):** token in the link's fragment, hashed with SHA-256 in the database; token-keyed read-only RLS policy for the not-yet-member lookup, with the business taken from the invite row; re-inviting an email replaces its open invite; one `invite_invalid` answer for unknown/used/revoked/expired; `permissions` on `GET /v1/tenant`; inline confirmation (no browser dialogs) for remove and leave.
+- **S9 defaults — ADR-0014, accepted by the user (2026-10-17):** token in the link's fragment, hashed with SHA-256 in the database; token-keyed read-only RLS policy for the not-yet-member lookup, with the business taken from the invite row; re-inviting an email replaces its open invite; one `invite_invalid` answer for unknown/used/revoked/expired; `permissions` on `GET /v1/tenant`; inline confirmation (no browser dialogs) for remove and leave.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Accept or change ADR-0014 (invites) and sign off Phase 2 (exit criteria met, see S9).
-2. Ask Claude to open the S9 PR (branch `claude/blissful-lovelace-q6q43j`, pushed), then review and merge it once CI is green.
-3. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done once the user signs it off. Phase 3 is split at the S10 Session Brief.
+Phase 2 (S6–S9) is done: the user accepted ADR-0014 and asked for S9 to be merged into `main` (2026-10-17). Phase 3 is split at the S10 Session Brief.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
