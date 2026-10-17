@@ -23,3 +23,46 @@ export class LastOwnerError extends Error {
     this.name = 'LastOwnerError';
   }
 }
+
+/**
+ * The invite link does not work: no such token, or the invite was accepted, revoked or has
+ * expired. One error for all, so a token reveals nothing about why.
+ */
+export class InviteInvalidError extends Error {
+  constructor() {
+    super('This invite link is no longer valid');
+    this.name = 'InviteInvalidError';
+  }
+}
+
+/** The invite is for another email than the signed-in user's. */
+export class InviteWrongAccountError extends Error {
+  constructor() {
+    super('This invite is for another account');
+    this.name = 'InviteWrongAccountError';
+  }
+}
+
+/** No such open invite in the business. */
+export class InviteNotFoundError extends Error {
+  constructor() {
+    super('No such open invite in this business');
+    this.name = 'InviteNotFoundError';
+  }
+}
+
+/** The business has as many open invites as it may. */
+export class InviteLimitReachedError extends Error {
+  constructor(readonly limit: number) {
+    super(`A business may have at most ${String(limit)} open invites`);
+    this.name = 'InviteLimitReachedError';
+  }
+}
+
+/** The person is already a member of the business. */
+export class AlreadyAMemberError extends Error {
+  constructor() {
+    super('Already a member of this business');
+    this.name = 'AlreadyAMemberError';
+  }
+}

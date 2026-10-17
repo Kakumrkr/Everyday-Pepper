@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   accounts,
   auditLog,
+  invites,
   memberships,
   sessions,
   tenants,
@@ -63,5 +64,15 @@ describe('schema foreign keys', () => {
 
   it('keeps users and tenants free of outgoing references', () => {
     expect([foreignKeys(users), foreignKeys(tenants)]).toEqual([[], []]);
+  });
+
+  it('removes invites with their tenant and keeps them when the inviter or accepter is deleted', () => {
+    expect(foreignKeys(invites)).toEqual(
+      expect.arrayContaining([
+        { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+        { from: ['invited_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+        { from: ['accepted_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+      ]),
+    );
   });
 });

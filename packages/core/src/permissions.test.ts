@@ -6,7 +6,13 @@ import {
   type Permission,
 } from '@floty/contracts';
 import { describe, expect, it } from 'vitest';
-import { can, PERMISSION_MATRIX, permissionScope, type PermissionScope } from './permissions.js';
+import {
+  can,
+  PERMISSION_MATRIX,
+  permissionScope,
+  permissionsOf,
+  type PermissionScope,
+} from './permissions.js';
 
 // The role matrix, written out cell by cell (Phase 2 exit: "role matrix 100%"). Changing a cell
 // here is a permission change: it needs the user's approval and an ADR-0013 update.
@@ -96,5 +102,22 @@ describe('can', () => {
     expect(
       can({ userId: ME, role: 'manager' }, 'bookings.manage', { ownerUserId: COLLEAGUE }),
     ).toBe(true);
+  });
+});
+
+describe('permissionsOf', () => {
+  it.each(ROLES.map((role, column) => ({ role, column })))(
+    'lists exactly the permissions a(n) $role has at any scope, in schema order',
+    ({ role, column }) => {
+      const expected = PermissionSchema.options.filter((p) => EXPECTED[p][column] !== null);
+      expect(permissionsOf(role)).toEqual(expected);
+    },
+  );
+
+  it('gives staff no team, trust or settings permissions', () => {
+    const staff = permissionsOf('staff');
+    for (const permission of ['members.read', 'members.invite', 'audit.read'] as const) {
+      expect(staff).not.toContain(permission);
+    }
   });
 });

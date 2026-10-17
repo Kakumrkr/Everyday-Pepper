@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PermissionSchema } from './permissions.js';
 import {
   LocaleSchema,
   MembershipRoleSchema,
@@ -26,6 +27,11 @@ export const ApiErrorCodeSchema = z.enum([
   'member_not_found',
   'last_owner',
   'business_limit_reached',
+  'invite_invalid',
+  'invite_wrong_account',
+  'invite_not_found',
+  'invite_limit_reached',
+  'already_a_member',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 
@@ -75,10 +81,14 @@ export const BusinessSchema = z.object({
 });
 export type Business = z.infer<typeof BusinessSchema>;
 
-/** `GET /v1/tenant`: the session's active business and the user's role in it. */
+/**
+ * `GET /v1/tenant`: the session's active business, the user's role in it, and what that role
+ * may do (the permission matrix in core), so the UI shows only what the api will allow.
+ */
 export const CurrentBusinessResponseSchema = z.object({
   business: BusinessSchema,
   role: MembershipRoleSchema,
+  permissions: z.array(PermissionSchema),
 });
 export type CurrentBusinessResponse = z.infer<typeof CurrentBusinessResponseSchema>;
 
