@@ -24,6 +24,11 @@ const RESPONSE_HEADERS = [
   'x-request-id',
 ] as const;
 
+/** Largest body forwarded; the api's JSON parser accepts no more (Express default, 100 KB). */
+export const MAX_BODY_BYTES = 100 * 1024;
+
+const TOO_LARGE = { code: 'payload_too_large', message: 'That request is too large.' };
+
 export interface ForwardOptions {
   /** Base URL of the api as seen from the web server (`API_INTERNAL_URL`). */
   apiBaseUrl: string;
@@ -48,13 +53,21 @@ export async function forwardToApi(request: Request, options: ForwardOptions): P
     if (value !== null) headers.set(name, value);
   }
   const hasBody = request.method !== 'GET' && request.method !== 'HEAD';
+  // Checked before and after reading, so a missing or false Content-Length cannot get past it.
+  if (Number(request.headers.get('content-length') ?? 0) > MAX_BODY_BYTES) {
+    return Response.json(TOO_LARGE, { status: 413 });
+  }
+  const body = hasBody ? await request.arrayBuffer() : undefined;
+  if (body !== undefined && body.byteLength > MAX_BODY_BYTES) {
+    return Response.json(TOO_LARGE, { status: 413 });
+  }
 
   let upstream: Response;
   try {
     upstream = await fetch(target, {
       method: request.method,
       headers,
-      ...(hasBody && { body: await request.arrayBuffer() }),
+      ...(body !== undefined && { body }),
       redirect: 'manual',
       cache: 'no-store',
       signal: AbortSignal.timeout(timeoutMs),

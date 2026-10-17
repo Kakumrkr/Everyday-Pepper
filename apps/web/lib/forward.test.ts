@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { forwardToApi } from './forward';
+import { forwardToApi, MAX_BODY_BYTES } from './forward';
 
 const API = 'http://api:4000';
 
@@ -77,6 +77,22 @@ describe('forwardToApi', () => {
     expect(response.headers.get('x-powered-by')).toBeNull();
     expect(response.headers.get('content-encoding')).toBeNull();
   });
+
+  it.each([
+    ['declared', { 'content-length': String(MAX_BODY_BYTES + 1) }, 'x'],
+    ['actual', {}, 'x'.repeat(MAX_BODY_BYTES + 1)],
+  ])(
+    'refuses a body over the limit (%s size) without calling the api',
+    async (_l, headers, body) => {
+      const { fetch, calls } = upstream(new Response('{}'));
+      const response = await forwardToApi(
+        new Request('http://localhost:3000/v1/tenants', { method: 'POST', headers, body }),
+        { apiBaseUrl: API, fetch },
+      );
+      expect(response.status).toBe(413);
+      expect(calls).toHaveLength(0);
+    },
+  );
 
   it('answers 502 without details when the api is unreachable', async () => {
     const fetch = vi.fn(() =>

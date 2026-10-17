@@ -303,6 +303,13 @@ describe('across businesses (AC-X-1)', () => {
     expect(errorCode((await ben.get('/v1/tenant').expect(403)).body)).toBe('not_a_member');
   });
 
+  it("cannot set the session's business through Better Auth's own endpoints", async () => {
+    const before = (await me(ben)).activeTenantId;
+    const response = await ben.post('/api/auth/update-session', { activeTenantId: anaTenant });
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect((await me(ben)).activeTenantId).toBe(before);
+  });
+
   it('a session pointed at a foreign business by other means still gets nothing', async () => {
     await db.update(sessions).set({ activeTenantId: anaTenant }).where(eq(sessions.userId, benId));
     expect(errorCode((await ben.get('/v1/tenant').expect(403)).body)).toBe('not_a_member');
