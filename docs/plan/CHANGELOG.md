@@ -4,7 +4,7 @@ Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility
 
 ## 0.5 — 2026-10-16
 - D10 resolved by the user: **SeaweedFS** as the dev/CI S3-compatible server → [ADR-0011](../adr/0011-dev-object-storage-seaweedfs.md). Added to Compose in Phase 4.
-- S7: [ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md) (proposed): auth tables, user-keyed "my businesses" policy, session tenant context, web forwarding. Implements ADR-0007 within the approved plan; no scope change.
+- S7: [ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md) (accepted by the user): auth tables, user-keyed "my businesses" policy, session tenant context, web forwarding. Implements ADR-0007 within the approved plan; no scope change.
 
 ## 0.4 — 2026-10-16
 - Mockups of all key screens approved (S1 + S2). Design tokens recorded in `product/ux-principles.md`. Phase 0 complete.

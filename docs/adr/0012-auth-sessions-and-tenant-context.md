@@ -1,6 +1,6 @@
 # ADR-0012: Auth wiring — Better Auth tables, session tenant context, web forwarding
 
-- **Status:** Proposed (2026-10-17, Claude, S7) — user to accept · **Date:** 2026-10-17 · Builds on ADR-0007 (Better Auth) and ADR-0010 (roles, `withTenant`)
+- **Status:** Accepted (2026-10-17, user) · **Date:** 2026-10-17 · Builds on ADR-0007 (Better Auth) and ADR-0010 (roles, `withTenant`)
 
 ## Context
 ADR-0007 chose Better Auth for identity, with MFA for owners and memberships in our own tables. S7 had to decide how it fits the database rules of ADR-0010 (RLS everywhere, only `@floty/db` touches Postgres), how a request gets its tenant, how a signed-in user finds their businesses across tenants (RLS hides other tenants' memberships), and how the browser reaches the api.

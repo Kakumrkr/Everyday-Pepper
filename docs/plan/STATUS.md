@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done, PR #9 green and waiting for review → next: S8 (roles/audit/metering)
+**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done and merged (PR #9) → next: S8 (roles/audit/metering) → next: S8 (roles/audit/metering)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -59,7 +59,7 @@
     - drizzle-kit needs a relative `--out` path and exits 0 even on errors, so the drift test also checks its "No schema changes" message.
     - Existing local volumes keep working: `POSTGRES_USER` is unchanged, and `migrate` adds the schema and the new role.
 
-- **S7 Phase 2b (2026-10-17):** sign-in, MFA for owners and tenant context from the session ([ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md), proposed).
+- **S7 Phase 2b (2026-10-17):** sign-in, MFA for owners and tenant context from the session ([ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md), accepted by the user).
   - **db:**
     - Better Auth's global tables: `users`, `sessions` (+ `active_tenant_id`), `accounts`, `verifications`, `two_factors`. UUID v7 ids; emails lowercased by a CHECK constraint.
     - `memberships.user_id` gets a foreign key (cascade) and an index.
@@ -89,7 +89,7 @@
     - Docker images built. `docker compose up --wait`: 6 services healthy, `migrate` exited 0.
     - Playwright 18/18 on phone and desktop, three runs in a row: full owner journey, backup code, wrong password, signed-out redirects, no sideways overflow.
     - api logs: no errors, no emails or passwords, `user_id`/`tenant_id` present.
-  - **CI on PR #9:** all three required checks green (lint/typecheck/test/build, Integration, E2E smoke incl. the new auth journey); mergeable.
+  - **CI on PR #9:** all three required checks green (lint/typecheck/test/build, Integration, E2E smoke incl. the new auth journey). ADR-0012 accepted and PR merged by Claude at the user's request (2026-10-17).
   - **Findings:**
     - Better Auth turns off its CSRF and origin checks when `NODE_ENV=test`, so we pin them on.
     - pnpm resolves optional peers from the whole workspace, which put next/react/vitest/playwright into the api image (fixed by `.pnpmfile.cjs`).
@@ -126,7 +126,7 @@
   - (d) RLS goes through a `current_tenant_id()` SQL function with `NULLIF`. `tenant_id` defaults to it, so repositories never take a tenant id.
   - (e) `runtime` may import `db` (lint and dependency map updated). The api image carries the migrate CLI (`@floty/db` is a direct api dependency).
   - (f) Repositories, migrations and RLS are covered by integration tests and excluded from the unit coverage gate.
-- **S7 defaults — ADR-0012, proposed by Claude (2026-10-17), user to accept or change:**
+- **S7 defaults — ADR-0012, accepted by the user (2026-10-17, end of S7):**
   - (a) Auth tables are global (no RLS), classified in the isolation suite, reached only through `authDatabaseAdapter`.
   - (b) "My businesses" uses read-only, user-keyed `member_read` policies via `withUser`, not a `SECURITY DEFINER` function (FORCE RLS would filter it unless the owner is a superuser).
   - (c) The active business is stored in the session, set only after a membership check. New sessions start in the first business.
