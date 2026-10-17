@@ -45,7 +45,7 @@ export const LocaleSchema = z.string().refine((value) => {
   }
 }, 'Use a canonical BCP 47 locale such as en-US');
 
-/** What a member may do in a tenant; the permission matrix lives in core (Phase 2c). */
+/** A member's role in a tenant; what each role may do is the permission matrix in core. */
 export const MembershipRoleSchema = z.enum(['owner', 'manager', 'staff']);
 export type MembershipRole = z.infer<typeof MembershipRoleSchema>;
 

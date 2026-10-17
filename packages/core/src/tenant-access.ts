@@ -1,4 +1,4 @@
-import type { MembershipRole, TenantId, UserId } from '@floty/contracts';
+import { roleRequiresMfa, type MembershipRole, type TenantId, type UserId } from '@floty/contracts';
 
 /** Who is acting, in which business, with which role: what tenant-scoped work runs as. */
 export interface TenantContext {
@@ -23,18 +23,16 @@ export interface TenantAccessInput {
   twoFactorEnabled: boolean;
 }
 
-/** Roles that must have a second factor before they can work in a business (ADR-0007). */
-const ROLES_REQUIRING_MFA: ReadonlySet<MembershipRole> = new Set(['owner']);
-
 /**
  * Decides whether a signed-in user may work in the session's active business. Membership is
- * re-checked on every request, so removing a member takes effect at once; owners must have
- * MFA, so a stolen password alone never reaches an owner's business.
+ * re-checked on every request, so removing a member takes effect at once; owners and managers
+ * must have MFA (`roleRequiresMfa`), so a stolen password alone never reaches all of a
+ * business's clients.
  */
 export function decideTenantAccess(input: TenantAccessInput): TenantAccess {
   if (input.activeTenantId === null) return { allowed: false, reason: 'no_active_tenant' };
   if (input.role === null) return { allowed: false, reason: 'not_a_member' };
-  if (ROLES_REQUIRING_MFA.has(input.role) && !input.twoFactorEnabled) {
+  if (roleRequiresMfa(input.role) && !input.twoFactorEnabled) {
     return { allowed: false, reason: 'mfa_required' };
   }
   return {

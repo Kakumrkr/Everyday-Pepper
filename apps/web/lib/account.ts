@@ -1,6 +1,7 @@
 import {
   CurrentBusinessResponseSchema,
   MeResponseSchema,
+  roleRequiresMfa,
   type CurrentBusinessResponse,
   type MeResponse,
 } from '@floty/contracts';
@@ -62,8 +63,8 @@ export const ROUTES = {
 } as const;
 
 /**
- * Where someone must go before the home page: sign in, create a business, then (owners) set
- * up two-step verification, mirroring the api's tenant guard. `null`: the home page is fine.
+ * Where someone must go before the home page: sign in, create a business, then (owners and
+ * managers) set up two-step verification, mirroring the api's tenant guard. `null`: the home page is fine.
  */
 export function requiredStep(account: Account): string | null {
   if (account.state === 'signed-out') return ROUTES.signIn;
@@ -71,6 +72,8 @@ export function requiredStep(account: Account): string | null {
   const { me } = account;
   if (me.businesses.length === 0) return ROUTES.createBusiness;
   const active = me.businesses.find((business) => business.tenantId === me.activeTenantId);
-  if (active?.role === 'owner' && !me.user.twoFactorEnabled) return ROUTES.twoFactor;
+  if (active !== undefined && roleRequiresMfa(active.role) && !me.user.twoFactorEnabled) {
+    return ROUTES.twoFactor;
+  }
   return null;
 }

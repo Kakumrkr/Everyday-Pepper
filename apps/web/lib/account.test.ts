@@ -103,6 +103,14 @@ describe('requiredStep', () => {
     );
   });
 
+  it('sends a manager without MFA to set it up', () => {
+    const manager = signedIn({
+      user: { ...me.user, twoFactorEnabled: false },
+      businesses: [{ tenantId: TENANT, name: 'Juniper', slug: 'juniper', role: 'manager' }],
+    });
+    expect(requiredStep(manager)).toBe(ROUTES.twoFactor);
+  });
+
   it('lets staff without MFA in, and anyone else who is set up', () => {
     const staff = signedIn({
       user: { ...me.user, twoFactorEnabled: false },
