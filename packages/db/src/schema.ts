@@ -4,7 +4,9 @@ import {
   check,
   index,
   bigint,
+  foreignKey,
   integer,
+  smallint,
   jsonb,
   pgEnum,
   pgPolicy,
@@ -181,6 +183,8 @@ export const memberships = pgTable(
   },
   (table) => [
     unique('memberships_tenant_user_unique').on(table.tenantId, table.userId),
+    // Target of tenant-scoped foreign keys (staff_members.membership_id, ADR-0015).
+    unique('memberships_tenant_id_id_unique').on(table.tenantId, table.id),
     // The unique index leads with tenant_id; "my businesses" looks memberships up by user.
     index('memberships_user_id_idx').on(table.userId),
     tenantIsolation(sql.raw('tenant_id')),
@@ -311,8 +315,184 @@ export const invites = pgTable(
   ],
 );
 
+// Appointments base data (ADR-0015). Rows reference each other with composite foreign keys on
+// (tenant_id, id): a foreign key check bypasses RLS, so a single-column reference could point
+// at another business's row by its id. With the tenant in the key it cannot.
+
+/** A service the business offers. Prices in cents; the name is unique per business. */
+export const services = pgTable(
+  'services',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    category: text('category'),
+    durationMinutes: integer('duration_minutes').notNull(),
+    bufferBeforeMinutes: integer('buffer_before_minutes').notNull().default(0),
+    bufferAfterMinutes: integer('buffer_after_minutes').notNull().default(0),
+    priceFromCents: integer('price_from_cents'),
+    priceToCents: integer('price_to_cents'),
+    active: boolean('active').notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    unique('services_tenant_id_id_unique').on(table.tenantId, table.id),
+    uniqueIndex('services_tenant_name_unique').on(table.tenantId, sql`lower(${table.name})`),
+    check('services_name_length', sql`length(${table.name}) BETWEEN 1 AND 120`),
+    check('services_category_length', sql`length(${table.category}) BETWEEN 1 AND 60`),
+    check('services_duration_range', sql`${table.durationMinutes} BETWEEN 5 AND 720`),
+    check(
+      'services_buffers_range',
+      sql`${table.bufferBeforeMinutes} BETWEEN 0 AND 240 AND ${table.bufferAfterMinutes} BETWEEN 0 AND 240`,
+    ),
+    check(
+      'services_price_range',
+      sql`${table.priceFromCents} BETWEEN 0 AND 10000000 AND ${table.priceToCents} BETWEEN 0 AND 10000000`,
+    ),
+    check(
+      'services_price_to_after_from',
+      sql`${table.priceToCents} IS NULL OR (${table.priceFromCents} IS NOT NULL AND ${table.priceToCents} > ${table.priceFromCents})`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
+/**
+ * Someone who can be booked. `membership_id` links them to a member's app login (at most one
+ * staff member per membership); removing the member unlinks them (migration 0012).
+ */
+export const staffMembers = pgTable(
+  'staff_members',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    displayName: text('display_name').notNull(),
+    color: text('color').notNull(),
+    active: boolean('active').notNull().default(true),
+    membershipId: uuid('membership_id'),
+    ...timestamps,
+  },
+  (table) => [
+    unique('staff_members_tenant_id_id_unique').on(table.tenantId, table.id),
+    unique('staff_members_membership_id_unique').on(table.membershipId),
+    check('staff_members_display_name_length', sql`length(${table.displayName}) BETWEEN 1 AND 80`),
+    check('staff_members_color_format', sql`${table.color} ~ '^#[0-9a-f]{6}$'`),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
+/** Which services a staff member offers. */
+export const staffServices = pgTable(
+  'staff_services',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    serviceId: uuid('service_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('staff_services_staff_service_unique').on(table.staffMemberId, table.serviceId),
+    index('staff_services_tenant_service_idx').on(table.tenantId, table.serviceId),
+    foreignKey({
+      name: 'staff_services_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'staff_services_service_fk',
+      columns: [table.tenantId, table.serviceId],
+      foreignColumns: [services.tenantId, services.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
+/**
+ * A staff member's weekly working interval, in the business's local time: ISO weekday
+ * (1 = Monday) and minutes after midnight. Intervals of one staff member and day never overlap
+ * (exclusion constraint, migration 0012).
+ */
+export const workingHours = pgTable(
+  'working_hours',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    weekday: smallint('weekday').notNull(),
+    startMinute: smallint('start_minute').notNull(),
+    endMinute: smallint('end_minute').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check('working_hours_weekday_range', sql`${table.weekday} BETWEEN 1 AND 7`),
+    check(
+      'working_hours_minutes_range',
+      sql`${table.startMinute} >= 0 AND ${table.endMinute} <= 1440 AND ${table.endMinute} > ${table.startMinute}`,
+    ),
+    foreignKey({
+      name: 'working_hours_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
+/** A span when a staff member cannot be booked, in UTC. */
+export const timeOff = pgTable(
+  'time_off',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+    // Who entered it; NULL once their account is deleted.
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check('time_off_ends_after_start', sql`${table.endsAt} > ${table.startsAt}`),
+    check('time_off_max_length', sql`${table.endsAt} - ${table.startsAt} <= interval '366 days'`),
+    index('time_off_staff_member_ends_at_idx').on(
+      table.tenantId,
+      table.staffMemberId,
+      table.endsAt,
+    ),
+    index('time_off_created_by_user_id_idx').on(table.createdByUserId),
+    foreignKey({
+      name: 'time_off_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
+export type ServiceRow = typeof services.$inferSelect;
+export type StaffMemberRow = typeof staffMembers.$inferSelect;
+export type WorkingHoursRow = typeof workingHours.$inferSelect;
+export type TimeOffRow = typeof timeOff.$inferSelect;

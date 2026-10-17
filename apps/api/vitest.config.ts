@@ -20,6 +20,7 @@ export default defineConfig({
         'src/account/tenancy.service.ts',
         'src/team/invites.service.ts',
         'src/team/team.service.ts',
+        'src/appointments/appointments.service.ts',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },

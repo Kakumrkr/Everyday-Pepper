@@ -1,4 +1,9 @@
 import {
+  ServiceNotFoundError,
+  StaffMemberNotFoundError,
+  TimeOffNotFoundError,
+} from '@floty/appointments';
+import {
   AlreadyAMemberError,
   ForbiddenError,
   InviteInvalidError,
@@ -8,7 +13,12 @@ import {
   LastOwnerError,
   MemberNotFoundError,
 } from '@floty/core';
-import { BusinessLimitReachedError, TenantSlugTakenError } from '@floty/db';
+import {
+  BusinessLimitReachedError,
+  ServiceNameTakenError,
+  StaffMemberLinkTakenError,
+  TenantSlugTakenError,
+} from '@floty/db';
 import { BadRequestException, HttpException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 import { answering, toHttpError } from './domain-errors.js';
@@ -25,6 +35,11 @@ describe('toHttpError', () => {
     [new InviteNotFoundError(), 404, 'invite_not_found'],
     [new InviteLimitReachedError(20), 409, 'invite_limit_reached'],
     [new AlreadyAMemberError(), 409, 'already_a_member'],
+    [new ServiceNotFoundError(), 404, 'service_not_found'],
+    [new ServiceNameTakenError(), 409, 'service_name_taken'],
+    [new StaffMemberNotFoundError(), 404, 'staff_member_not_found'],
+    [new StaffMemberLinkTakenError(), 409, 'staff_member_link_taken'],
+    [new TimeOffNotFoundError(), 404, 'time_off_not_found'],
   ])('%s → %d %s', (error, status, code) => {
     const answer = toHttpError(error);
     expect(answer).toBeInstanceOf(HttpException);

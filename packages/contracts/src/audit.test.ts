@@ -10,6 +10,32 @@ const TENANT = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192';
 const USER = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708193';
 const MEMBERSHIP = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708195';
 const INVITE = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708196';
+const SERVICE = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708197';
+const STAFF = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708198';
+const TIME_OFF = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708199';
+
+const serviceValues = {
+  name: "Women's haircut",
+  category: 'Cuts',
+  durationMinutes: 60,
+  bufferBeforeMinutes: 0,
+  bufferAfterMinutes: 10,
+  priceFromCents: 6500,
+  priceToCents: null,
+  active: true,
+};
+const staffValues = { active: true, userId: USER, serviceIds: [SERVICE] };
+const staffCreated = {
+  action: 'staff_member.created',
+  entity: { type: 'staff_member', id: STAFF },
+  before: null,
+  after: staffValues,
+} as const;
+const timeOffValues = {
+  staffMemberId: STAFF,
+  startsAt: '2026-10-20T13:00:00.000Z',
+  endsAt: '2026-10-20T17:00:00.000Z',
+};
 
 const inviteCreated = {
   action: 'invite.created',
@@ -70,6 +96,61 @@ describe('AuditChangeSchema', () => {
         after: { userId: USER, role: 'staff', membershipId: MEMBERSHIP },
       },
     ],
+    [
+      'service.created',
+      {
+        action: 'service.created',
+        entity: { type: 'service', id: SERVICE },
+        before: null,
+        after: serviceValues,
+      },
+    ],
+    [
+      'service.updated',
+      {
+        action: 'service.updated',
+        entity: { type: 'service', id: SERVICE },
+        before: serviceValues,
+        after: { ...serviceValues, active: false },
+      },
+    ],
+    ['staff_member.created', staffCreated],
+    [
+      'staff_member.updated',
+      {
+        action: 'staff_member.updated',
+        entity: { type: 'staff_member', id: STAFF },
+        before: staffValues,
+        after: { ...staffValues, userId: null, serviceIds: [] },
+      },
+    ],
+    [
+      'working_hours.replaced',
+      {
+        action: 'working_hours.replaced',
+        entity: { type: 'staff_member', id: STAFF },
+        before: { intervals: [] },
+        after: { intervals: [{ weekday: 1, start: '09:00', end: '17:00' }] },
+      },
+    ],
+    [
+      'time_off.created',
+      {
+        action: 'time_off.created',
+        entity: { type: 'time_off', id: TIME_OFF },
+        before: null,
+        after: timeOffValues,
+      },
+    ],
+    [
+      'time_off.deleted',
+      {
+        action: 'time_off.deleted',
+        entity: { type: 'time_off', id: TIME_OFF },
+        before: timeOffValues,
+        after: null,
+      },
+    ],
   ])('accepts %s', (_action, change) => {
     expect(AuditChangeSchema.parse(change)).toEqual(change);
   });
@@ -93,6 +174,11 @@ describe('AuditChangeSchema', () => {
       { ...inviteCreated, entity: { type: 'membership', id: INVITE } },
     ],
     ['a missing before', { ...roleChanged, before: null }],
+    // A staff member's name is a person's name: never in the audit log.
+    [
+      "a staff member's display name",
+      { ...staffCreated, after: { ...staffValues, displayName: 'Jess Lee' } },
+    ],
   ])('rejects %s', (_label, change) => {
     expect(AuditChangeSchema.safeParse(change).success).toBe(false);
   });

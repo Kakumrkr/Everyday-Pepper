@@ -57,6 +57,12 @@ export const PERMISSION_MATRIX: Readonly<
   'integrations.manage': OWNER_AND_MANAGER,
   'services.read': ALL,
   'services.manage': OWNER_AND_MANAGER,
+  // ADR-0015: staff see the team and its hours; they manage only their own time off (a staff
+  // member is "theirs" when it is linked to their login), never their weekly hours.
+  'staff.read': ALL,
+  'staff.manage': OWNER_AND_MANAGER,
+  'hours.manage': OWNER_AND_MANAGER,
+  'time_off.manage': STAFF_OWN,
   'calendar.read': ALL,
   'bookings.read': STAFF_OWN,
   'bookings.manage': STAFF_OWN,

@@ -42,3 +42,19 @@ export class BusinessLimitReachedError extends Error {
     this.name = 'BusinessLimitReachedError';
   }
 }
+
+/** The business already has a service with this name (names are compared case-insensitively). */
+export class ServiceNameTakenError extends Error {
+  constructor(options?: ErrorOptions) {
+    super('The business already has a service with this name', options);
+    this.name = 'ServiceNameTakenError';
+  }
+}
+
+/** The member's login is already linked to another staff member. */
+export class StaffMemberLinkTakenError extends Error {
+  constructor(options?: ErrorOptions) {
+    super("This member's login is already linked to another staff member", options);
+    this.name = 'StaffMemberLinkTakenError';
+  }
+}

@@ -14,6 +14,7 @@
     "test:integration": "vitest run --config vitest.int.config.ts"
   },
   "dependencies": {
+    "@floty/appointments": "workspace:*",
     "@floty/contracts": "workspace:*",
     "@floty/core": "workspace:*",
     "@floty/db": "workspace:*",

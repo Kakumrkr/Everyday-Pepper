@@ -3,6 +3,7 @@ export * from './client.js';
 export * from './errors.js';
 export { newId } from './ids.js';
 export * from './migrate.js';
+export * from './repositories/appointments.js';
 export * from './repositories/audit.js';
 export * from './repositories/invites.js';
 export * from './repositories/memberships.js';

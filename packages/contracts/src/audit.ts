@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
 import {
   LocaleSchema,
   MembershipRoleSchema,
@@ -22,6 +23,36 @@ export type AuditActor = z.infer<typeof AuditActorSchema>;
 
 const MemberValuesSchema = z.object({ userId: UserIdSchema, role: MembershipRoleSchema }).strict();
 const InviteValuesSchema = z.object({ role: MembershipRoleSchema }).strict();
+
+// Appointments base data (ADR-0015). A service's name and category describe the business, not
+// a person; a staff member's display name is a person's name, so it is never in an entry.
+const ServiceValuesSchema = z
+  .object({
+    name: z.string(),
+    category: z.string().nullable(),
+    durationMinutes: z.number().int(),
+    bufferBeforeMinutes: z.number().int(),
+    bufferAfterMinutes: z.number().int(),
+    priceFromCents: z.number().int().nullable(),
+    priceToCents: z.number().int().nullable(),
+    active: z.boolean(),
+  })
+  .strict();
+const StaffMemberValuesSchema = z
+  .object({
+    active: z.boolean(),
+    userId: UserIdSchema.nullable(),
+    serviceIds: z.array(ServiceIdSchema),
+  })
+  .strict();
+const HoursValuesSchema = z.object({ intervals: z.array(WorkingIntervalSchema) }).strict();
+const TimeOffValuesSchema = z
+  .object({
+    staffMemberId: StaffMemberIdSchema,
+    startsAt: UtcDateTimeSchema,
+    endsAt: UtcDateTimeSchema,
+  })
+  .strict();
 
 function entity<T extends string>(type: T) {
   return z.object({ type: z.literal(type), id: z.uuid() }).strict();
@@ -84,6 +115,62 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       before: InviteValuesSchema,
       // The membership the invite created.
       after: MemberValuesSchema.extend({ membershipId: z.uuid() }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('service.created'),
+      entity: entity('service'),
+      before: z.null(),
+      after: ServiceValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('service.updated'),
+      entity: entity('service'),
+      before: ServiceValuesSchema,
+      after: ServiceValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('staff_member.created'),
+      entity: entity('staff_member'),
+      before: z.null(),
+      after: StaffMemberValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('staff_member.updated'),
+      entity: entity('staff_member'),
+      before: StaffMemberValuesSchema,
+      after: StaffMemberValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('working_hours.replaced'),
+      entity: entity('staff_member'),
+      before: HoursValuesSchema,
+      after: HoursValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('time_off.created'),
+      entity: entity('time_off'),
+      before: z.null(),
+      after: TimeOffValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('time_off.deleted'),
+      entity: entity('time_off'),
+      before: TimeOffValuesSchema,
+      after: z.null(),
     })
     .strict(),
 ]);

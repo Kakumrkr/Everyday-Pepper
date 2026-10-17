@@ -38,6 +38,11 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   invite_not_found: 'No such open invite in this business',
   invite_limit_reached: 'This business has as many open invites as it may',
   already_a_member: 'Already a member of this business',
+  service_not_found: 'No such service in this business',
+  service_name_taken: 'The business already has a service with this name',
+  staff_member_not_found: 'No such staff member in this business',
+  staff_member_link_taken: "This member's login is already linked to another staff member",
+  time_off_not_found: 'No such time off for this staff member',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */

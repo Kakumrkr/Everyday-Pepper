@@ -32,6 +32,11 @@ export const ApiErrorCodeSchema = z.enum([
   'invite_not_found',
   'invite_limit_reached',
   'already_a_member',
+  'service_not_found',
+  'service_name_taken',
+  'staff_member_not_found',
+  'staff_member_link_taken',
+  'time_off_not_found',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

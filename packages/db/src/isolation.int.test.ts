@@ -2,13 +2,28 @@
 // Every table in `public` must be listed in TENANT_TABLES (row access limited by RLS) or in
 // GLOBAL_TABLES (with a reason); the catalog test fails for a table that is in neither.
 import { randomBytes } from 'node:crypto';
-import { TenantIdSchema, UsagePeriodSchema, type TenantId, type UserId } from '@floty/contracts';
+import {
+  ServiceIdSchema,
+  StaffMemberIdSchema,
+  TenantIdSchema,
+  UsagePeriodSchema,
+  type StaffMemberId,
+  type TenantId,
+  type UserId,
+} from '@floty/contracts';
 import { sql } from 'drizzle-orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDatabase, type Database } from './client.js';
 import { newId } from './ids.js';
 import { APP_ROLE } from './migrate.js';
+import {
+  insertService,
+  insertStaffMember,
+  insertTimeOff,
+  replaceStaffServices,
+  replaceWorkingHours,
+} from './repositories/appointments.js';
 import { appendAuditEntry } from './repositories/audit.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
@@ -113,7 +128,89 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     touch: "role = 'owner'",
     inviteLookup: '((current_tenant_id() IS NULL) AND (token_hash = current_invite_token_hash()))',
   },
+  services: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) =>
+      (
+        await insertService(tx, {
+          name: `Haircut ${newId()}`,
+          category: null,
+          durationMinutes: 60,
+          bufferBeforeMinutes: 0,
+          bufferAfterMinutes: 0,
+          priceFromCents: 6500,
+          priceToCents: null,
+          active: true,
+        })
+      ).id,
+    touch: "name = name || ''",
+  },
+  staff_members: {
+    tenantColumn: 'tenant_id',
+    seed: seedStaff,
+    touch: 'active = NOT active',
+  },
+  staff_services: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const staff = await seedStaff(tx);
+      const service = await insertService(tx, {
+        name: `Colour ${newId()}`,
+        category: null,
+        durationMinutes: 90,
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+        priceFromCents: null,
+        priceToCents: null,
+        active: true,
+      });
+      await replaceStaffServices(tx, staff, [ServiceIdSchema.parse(service.id)]);
+      return idWhere(tx, 'staff_services', 'staff_member_id', staff);
+    },
+    touch: 'created_at = created_at',
+  },
+  working_hours: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const staff = await seedStaff(tx);
+      await replaceWorkingHours(tx, staff, [{ weekday: 1, startMinute: 540, endMinute: 1020 }]);
+      return idWhere(tx, 'working_hours', 'staff_member_id', staff);
+    },
+    touch: 'weekday = weekday',
+  },
+  time_off: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) =>
+      (
+        await insertTimeOff(tx, {
+          staffMemberId: await seedStaff(tx),
+          startsAt: new Date('2026-10-20T13:00:00Z'),
+          endsAt: new Date('2026-10-20T17:00:00Z'),
+          createdBy: await insertUser(db),
+        })
+      ).id,
+    touch: 'created_at = created_at',
+  },
 };
+
+/** A new active staff member of the transaction's tenant. */
+async function seedStaff(tx: TenantTx): Promise<StaffMemberId> {
+  const staff = await insertStaffMember(tx, {
+    displayName: 'Jess',
+    color: '#be2759',
+    active: true,
+    membershipId: null,
+  });
+  return StaffMemberIdSchema.parse(staff.id);
+}
+
+/** The id of the one row of `table` that `column` = `value` selects. */
+async function idWhere(tx: TenantTx, table: string, column: string, value: string) {
+  const { rows } = await tx.execute<{ id: string }>(
+    sql.raw(`SELECT id::text FROM ${table} WHERE ${column} = '${value}'`),
+  );
+  return String(rows[0]?.id);
+}
 
 let database: TestDatabase;
 let db: Database;

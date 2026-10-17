@@ -20,12 +20,18 @@ export const PermissionSchema = z.enum([
   // Trust.
   'audit.read',
   'autonomy.manage',
-  // Settings and integrations (hours, booking page, Google Calendar).
+  // Settings and integrations (booking page, Google Calendar).
   'settings.manage',
   'integrations.manage',
   // Services menu (Phase 3).
   'services.read',
   'services.manage',
+  // Staff who can be booked, their weekly hours and their time off (Phase 3, ADR-0015).
+  // Staff members manage their own time off; owners and managers everyone's.
+  'staff.read',
+  'staff.manage',
+  'hours.manage',
+  'time_off.manage',
   // Calendar and bookings (Phase 3): everyone sees when the team is busy; booking details and
   // changes are scoped to a member's own bookings for staff (AC-W9-1).
   'calendar.read',
