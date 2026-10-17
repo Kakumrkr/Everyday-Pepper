@@ -1,10 +1,20 @@
 import {
+  BookingNotChangeableError,
+  BookingNotFoundError,
+  BookingNotStartedError,
+  IdempotencyKeyReusedError,
   ServiceNotFoundError,
+  SlotUnavailableError,
   StaffMemberNotFoundError,
   TimeOffNotFoundError,
+  WaitlistEntryNotChangeableError,
+  WaitlistEntryNotFoundError,
+  WaitlistExpiredError,
 } from '@floty/appointments';
+import { AvailableSlotSchema, SlotUnavailableSchema } from '@floty/contracts';
 import {
   AlreadyAMemberError,
+  ClientNotFoundError,
   ForbiddenError,
   InviteInvalidError,
   InviteLimitReachedError,
@@ -15,6 +25,7 @@ import {
 } from '@floty/core';
 import {
   BusinessLimitReachedError,
+  ClientEmailTakenError,
   ServiceNameTakenError,
   StaffMemberLinkTakenError,
   TenantSlugTakenError,
@@ -40,11 +51,35 @@ describe('toHttpError', () => {
     [new StaffMemberNotFoundError(), 404, 'staff_member_not_found'],
     [new StaffMemberLinkTakenError(), 409, 'staff_member_link_taken'],
     [new TimeOffNotFoundError(), 404, 'time_off_not_found'],
+    [new ClientNotFoundError(), 404, 'client_not_found'],
+    [new ClientEmailTakenError(), 409, 'client_email_taken'],
+    [new BookingNotFoundError(), 404, 'booking_not_found'],
+    [new BookingNotChangeableError(), 409, 'booking_not_changeable'],
+    [new BookingNotStartedError(), 409, 'booking_not_started'],
+    [new IdempotencyKeyReusedError(), 409, 'idempotency_key_reused'],
+    [new WaitlistEntryNotFoundError(), 404, 'waitlist_entry_not_found'],
+    [new WaitlistEntryNotChangeableError(), 409, 'waitlist_entry_not_changeable'],
+    [new WaitlistExpiredError(), 400, 'waitlist_expired'],
   ])('%s → %d %s', (error, status, code) => {
     const answer = toHttpError(error);
     expect(answer).toBeInstanceOf(HttpException);
     expect((answer as HttpException).getStatus()).toBe(status);
     expect((answer as HttpException).getResponse()).toMatchObject({ code });
+  });
+
+  it('answers a refused booking time with 409 and the alternatives', () => {
+    const alternative = AvailableSlotSchema.parse({
+      staffMemberId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708198',
+      startsAt: '2026-11-03T20:15:00.000Z',
+      endsAt: '2026-11-03T21:15:00.000Z',
+    });
+    const answer = toHttpError(new SlotUnavailableError([alternative])) as HttpException;
+    expect(answer.getStatus()).toBe(409);
+    expect(SlotUnavailableSchema.parse(answer.getResponse())).toEqual({
+      code: 'slot_unavailable',
+      message: 'That time cannot be booked',
+      alternatives: [alternative],
+    });
   });
 
   it('passes HTTP errors and unexpected errors through unchanged', () => {

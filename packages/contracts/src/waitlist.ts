@@ -95,9 +95,9 @@ export type WaitlistEntry = z.infer<typeof WaitlistEntrySchema>;
 export const WaitlistQuerySchema = z
   .object({
     serviceId: ServiceIdSchema.optional(),
+    // A query string carries "true" or "false"; code may pass a boolean.
     all: z
-      .enum(['true', 'false'])
-      .transform((v) => v === 'true')
+      .union([z.boolean(), z.enum(['true', 'false']).transform((v) => v === 'true')])
       .default(false),
     limit: z.coerce.number().int().min(1).max(200).default(100),
   })

@@ -90,7 +90,9 @@ describe('WaitlistQuerySchema', () => {
     });
   });
 
-  it('rejects anything but true or false for all', () => {
+  it('takes a boolean from code; rejects anything but true or false', () => {
+    expect(WaitlistQuerySchema.parse({ all: true }).all).toBe(true);
+    expect(WaitlistQuerySchema.parse({ all: 'false' }).all).toBe(false);
     expect(WaitlistQuerySchema.safeParse({ all: 'yes' }).success).toBe(false);
   });
 });

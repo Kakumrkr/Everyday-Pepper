@@ -1,0 +1,149 @@
+import 'reflect-metadata';
+import type { IncomingHttpHeaders, Server } from 'node:http';
+import {
+  ApiErrorSchema,
+  ClientIdSchema,
+  TenantIdSchema,
+  UserIdSchema,
+  UtcDateTimeSchema,
+  type Client,
+  type MembershipRole,
+} from '@floty/contracts';
+import { ClientNotFoundError } from '@floty/core';
+import { ClientEmailTakenError } from '@floty/db';
+import { DATABASE } from '@floty/runtime';
+import { Global, Module, type INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { TenancyService } from '../account/tenancy.service.js';
+import { AuthModule } from '../auth/auth.module.js';
+import { AuthService, type AuthSession } from '../auth/auth.service.js';
+import { ClientsModule } from './clients.module.js';
+import { ClientsService } from './clients.service.js';
+
+const ORIGIN = 'http://localhost:3000';
+const TENANT = TenantIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192');
+const USER = UserIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708193');
+const CLIENT_ID = ClientIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708190');
+const AT = UtcDateTimeSchema.parse('2026-10-17T12:00:00.000Z');
+const CLIENT: Client = {
+  id: CLIENT_ID,
+  name: 'Maria Lopez',
+  email: 'maria@example.test',
+  phone: null,
+  source: 'team',
+  createdAt: AT,
+  updatedAt: AT,
+};
+
+class FakeAuth extends AuthService {
+  session: AuthSession = {
+    id: 'session-1',
+    user: { id: USER, name: 'Ana', email: 'ana@example.test', twoFactorEnabled: true },
+    activeTenantId: TENANT,
+  };
+  readonly setActiveTenant = vi.fn(() => Promise.resolve());
+  handle = vi.fn(() => Promise.resolve());
+  getSession(headers: IncomingHttpHeaders): Promise<AuthSession | null> {
+    return Promise.resolve(headers.cookie === 'signed-in' ? this.session : null);
+  }
+}
+
+let role: MembershipRole = 'owner';
+const tenancy = { roleIn: vi.fn(() => Promise.resolve(role)) };
+const clients = {
+  list: vi.fn(() => Promise.resolve([CLIENT])),
+  get: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
+  create: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
+};
+
+@Global()
+@Module({ providers: [{ provide: DATABASE, useValue: { db: {} } }], exports: [DATABASE] })
+class FakeConnectionsModule {}
+
+let app: INestApplication;
+let server: Server;
+
+beforeAll(async () => {
+  const moduleRef = await Test.createTestingModule({
+    imports: [
+      FakeConnectionsModule,
+      AuthModule.forRoot({ baseUrl: ORIGIN, secret: 'x'.repeat(32) }),
+      ClientsModule,
+    ],
+  })
+    .overrideProvider(AuthService)
+    .useValue(new FakeAuth())
+    .overrideProvider(TenancyService)
+    .useValue(tenancy)
+    .overrideProvider(ClientsService)
+    .useValue(clients)
+    .compile();
+  app = moduleRef.createNestApplication({ logger: false });
+  await app.init();
+  server = app.getHttpServer() as Server;
+});
+
+afterAll(async () => {
+  await app.close();
+});
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  role = 'owner';
+});
+
+const context = () => ({ tenantId: TENANT, userId: USER, role });
+const get = (path: string) => request(server).get(path).set('cookie', 'signed-in');
+const post = (body: object) =>
+  request(server).post('/v1/clients').set('cookie', 'signed-in').set('origin', ORIGIN).send(body);
+
+function code(body: unknown): string {
+  return ApiErrorSchema.parse(body).code;
+}
+
+describe('/v1/clients', () => {
+  it.each<MembershipRole>(['owner', 'manager', 'staff'])('a(n) %s lists and reads', async (r) => {
+    role = r;
+    expect((await get('/v1/clients?search=mar&limit=10').expect(200)).body).toEqual({
+      clients: [CLIENT],
+    });
+    expect(clients.list).toHaveBeenCalledWith(context(), { search: 'mar', limit: 10 });
+    expect((await get(`/v1/clients/${CLIENT_ID}`).expect(200)).body).toEqual(CLIENT);
+  });
+
+  it('404 client_not_found (also for a client who is not a staff member’s own)', async () => {
+    role = 'staff';
+    clients.get.mockRejectedValueOnce(new ClientNotFoundError());
+    expect(code((await get(`/v1/clients/${CLIENT_ID}`).expect(404)).body)).toBe('client_not_found');
+  });
+
+  it.each<MembershipRole>(['owner', 'manager'])('a(n) %s adds a client (201)', async (r) => {
+    role = r;
+    await post({ name: 'Maria Lopez', email: 'Maria@Example.test' }).expect(201);
+    expect(clients.create).toHaveBeenCalledWith(context(), {
+      name: 'Maria Lopez',
+      email: 'maria@example.test',
+      phone: null,
+    });
+  });
+
+  it('403 for staff, before the service is asked', async () => {
+    role = 'staff';
+    expect(code((await post({ name: 'Walk-in' }).expect(403)).body)).toBe('forbidden');
+    expect(clients.create).not.toHaveBeenCalled();
+  });
+
+  it('409 client_email_taken; 400 for a malformed phone number', async () => {
+    clients.create.mockRejectedValueOnce(new ClientEmailTakenError());
+    expect(
+      code((await post({ name: 'Maria', email: 'maria@example.test' }).expect(409)).body),
+    ).toBe('client_email_taken');
+    await post({ name: 'Maria', phone: '555-1234' }).expect(400);
+  });
+
+  it('401 signed out', async () => {
+    await request(server).get('/v1/clients').expect(401);
+  });
+});
