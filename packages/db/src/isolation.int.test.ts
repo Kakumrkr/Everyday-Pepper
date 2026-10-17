@@ -1,15 +1,17 @@
 // Cross-tenant isolation suite (docs/engineering/testing-strategy.md; must stay at 100%).
 // Every table in `public` must be listed in TENANT_TABLES (row access limited by RLS) or in
 // GLOBAL_TABLES (with a reason); the catalog test fails for a table that is in neither.
-import { TenantIdSchema, type TenantId, type UserId } from '@floty/contracts';
+import { TenantIdSchema, UsagePeriodSchema, type TenantId, type UserId } from '@floty/contracts';
 import { sql } from 'drizzle-orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDatabase, type Database } from './client.js';
 import { newId } from './ids.js';
 import { APP_ROLE } from './migrate.js';
+import { appendAuditEntry } from './repositories/audit.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { createTenant } from './repositories/tenants.js';
+import { addUsage } from './repositories/usage.js';
 import { withTenant, withUser, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
@@ -35,6 +37,8 @@ interface TenantTable {
   touch: string;
   /** The `member_read` (withUser) predicate, as Postgres prints it, if the table has one. */
   memberRead?: string;
+  /** The services may only insert and read (no UPDATE or DELETE grant). */
+  appendOnly?: true;
 }
 
 const TENANT_TABLES: Record<string, TenantTable> = {
@@ -55,6 +59,40 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       (await addMembership(tx, { userId: await insertUser(db), role: 'staff' })).id,
     touch: "role = 'manager'",
     memberRead: '((current_tenant_id() IS NULL) AND (user_id = current_user_id()))',
+  },
+  audit_log: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const entityId = newId();
+      await appendAuditEntry(tx, {
+        actor: { kind: 'system' },
+        change: {
+          action: 'membership.removed',
+          entity: { type: 'membership', id: entityId },
+          before: { userId: await insertUser(db), role: 'staff' },
+          after: null,
+        },
+      });
+      const { rows } = await tx.execute<{ id: string }>(
+        sql`SELECT id::text FROM audit_log WHERE entity_id = ${entityId}`,
+      );
+      return String(rows[0]?.id);
+    },
+    touch: 'action = action',
+    appendOnly: true,
+  },
+  usage_meters: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      await addUsage(tx, {
+        metric: 'llm_tokens',
+        period: UsagePeriodSchema.parse('2026-10'),
+        amount: 1,
+      });
+      const { rows } = await tx.execute<{ id: string }>(sql`SELECT id::text FROM usage_meters`);
+      return String(rows[0]?.id);
+    },
+    touch: 'amount = amount + 1',
   },
 };
 
@@ -198,6 +236,21 @@ describe('the services role', () => {
     expect(sqlState(error)).toBe('42501');
   });
 
+  it(`${APP_ROLE} may write every tenant table except the append-only ones`, async () => {
+    const grants = await asAdmin<{ table: string; privileges: string[] }>(
+      `SELECT table_name AS table, array_agg(privilege_type::text ORDER BY privilege_type) AS privileges
+         FROM information_schema.role_table_grants
+        WHERE grantee = $1 AND table_schema = 'public' GROUP BY table_name`,
+      [APP_ROLE],
+    );
+    const byTable = Object.fromEntries(grants.map((g) => [g.table, g.privileges]));
+    for (const [table, spec] of Object.entries(TENANT_TABLES)) {
+      expect(byTable[table], table).toEqual(
+        spec.appendOnly === true ? ['INSERT', 'SELECT'] : ['DELETE', 'INSERT', 'SELECT', 'UPDATE'],
+      );
+    }
+  });
+
   it(`gets its table privileges from ${APP_ROLE}`, async () => {
     const [privileges] = await asAdmin<{ count: number }>(
       `SELECT count(*)::int AS count FROM information_schema.role_table_grants
@@ -234,14 +287,25 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
     expect(seen).toEqual([]);
   });
 
+  /** Runs a write probe: affected row count, or 'denied' on an append-only table. */
+  async function write(tenant: TenantId, statement: string): Promise<number | null | 'denied'> {
+    if (spec.appendOnly === true) {
+      const error = await inTenant(tenant, statement).catch((e: unknown) => e);
+      expect(sqlState(error)).toBe('42501');
+      return 'denied';
+    }
+    return (await inTenant(tenant, statement)).rowCount;
+  }
+  const none = spec.appendOnly === true ? 'denied' : 0;
+
   it("another tenant's row cannot be updated or deleted", async () => {
     const before = await inTenant(tenantB, `SELECT * FROM ${table} WHERE id = '${ids().b}'`);
-    const updated = await inTenant(
+    const updated = await write(
       tenantA,
       `UPDATE ${table} SET ${spec.touch} WHERE id = '${ids().b}'`,
     );
-    const deleted = await inTenant(tenantA, `DELETE FROM ${table} WHERE id = '${ids().b}'`);
-    expect([updated.rowCount, deleted.rowCount]).toEqual([0, 0]);
+    const deleted = await write(tenantA, `DELETE FROM ${table} WHERE id = '${ids().b}'`);
+    expect([updated, deleted]).toEqual([none, none]);
     const after = await inTenant(tenantB, `SELECT * FROM ${table} WHERE id = '${ids().b}'`);
     expect(after.rows).toEqual(before.rows);
     expect(after.rows).toHaveLength(1);
@@ -261,6 +325,7 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
 
   it('a row cannot be moved to another tenant', async () => {
     if (column === 'id') return; // moving a tenant means changing its primary key; covered above
+    // 42501 either way: the policy's WITH CHECK, or no UPDATE grant on an append-only table.
     const error = await inTenant(
       tenantA,
       `UPDATE ${table} SET ${column} = '${tenantB}' WHERE id = '${ids().a}'`,
@@ -277,9 +342,14 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
   });
 
   it('nothing can be changed without a tenant', async () => {
-    const updated = await db.execute(sql.raw(`UPDATE ${table} SET ${spec.touch}`));
-    const deleted = await db.execute(sql.raw(`DELETE FROM ${table}`));
-    expect([updated.rowCount, deleted.rowCount]).toEqual([0, 0]);
+    const probe = async (statement: string) => {
+      if (spec.appendOnly !== true) return (await db.execute(sql.raw(statement))).rowCount;
+      const error = await db.execute(sql.raw(statement)).catch((e: unknown) => e);
+      return sqlState(error) === '42501' ? 'denied' : error;
+    };
+    const updated = await probe(`UPDATE ${table} SET ${spec.touch}`);
+    const deleted = await probe(`DELETE FROM ${table}`);
+    expect([updated, deleted]).toEqual([none, none]);
   });
 });
 

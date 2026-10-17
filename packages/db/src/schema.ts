@@ -3,7 +3,9 @@ import {
   boolean,
   check,
   index,
+  bigint,
   integer,
+  jsonb,
   pgEnum,
   pgPolicy,
   pgTable,
@@ -182,6 +184,78 @@ export const memberships = pgTable(
     index('memberships_user_id_idx').on(table.userId),
     tenantIsolation(sql.raw('tenant_id')),
     memberRead(sql`user_id = ${currentUserId}`),
+  ],
+);
+
+export const auditActorKind = pgEnum('audit_actor_kind', ['user', 'system']);
+
+/**
+ * What changed in a business, who changed it and when (ADR-0013). Append-only: the services
+ * may insert and read rows but not update or delete them (grants in migration 0007). Entries
+ * are written in the same transaction as the change and validated against `AuditChangeSchema`
+ * (`@floty/contracts`), whose per-action schemas keep personal data out of `before`/`after`.
+ * Ids are UUID v7, so `id` order is time order.
+ */
+export const auditLog = pgTable(
+  'audit_log',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    actorKind: auditActorKind('actor_kind').notNull(),
+    // NULL for the system, and once the user's account is deleted (the entry stays).
+    actorUserId: uuid('actor_user_id').references(() => users.id, { onDelete: 'set null' }),
+    action: text('action').notNull(),
+    entityType: text('entity_type').notNull(),
+    entityId: uuid('entity_id').notNull(),
+    before: jsonb('before'),
+    after: jsonb('after'),
+    // The `x-request-id` of the change, to find its log lines.
+    requestId: text('request_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check(
+      'audit_log_system_has_no_user',
+      sql`${table.actorKind} = 'user' OR ${table.actorUserId} IS NULL`,
+    ),
+    check('audit_log_request_id_length', sql`length(${table.requestId}) <= 128`),
+    // Newest-first pages per tenant.
+    index('audit_log_tenant_id_id_idx').on(table.tenantId, table.id),
+    // Deleting a user nulls their entries' actor.
+    index('audit_log_actor_user_id_idx').on(table.actorUserId),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
+export const usageMetric = pgEnum('usage_metric', ['llm_tokens', 'emails_sent']);
+
+/** How much of each metered thing a business used per UTC month (ADR-0013). */
+export const usageMeters = pgTable(
+  'usage_meters',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    metric: usageMetric('metric').notNull(),
+    // `YYYY-MM`, a calendar month in UTC.
+    period: text('period').notNull(),
+    amount: bigint('amount', { mode: 'number' }).notNull().default(0),
+    ...timestamps,
+  },
+  (table) => [
+    unique('usage_meters_tenant_metric_period_unique').on(
+      table.tenantId,
+      table.metric,
+      table.period,
+    ),
+    check('usage_meters_period_format', sql`${table.period} ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'`),
+    check('usage_meters_amount_not_negative', sql`${table.amount} >= 0`),
+    tenantIsolation(sql.raw('tenant_id')),
   ],
 );
 

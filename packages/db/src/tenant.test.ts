@@ -3,7 +3,7 @@ import { PgDialect } from 'drizzle-orm/pg-core';
 import type { SQL } from 'drizzle-orm';
 import { describe, expect, it, vi } from 'vitest';
 import type { Database } from './client.js';
-import { withTenant, withUser } from './tenant.js';
+import { setTransactionTenant, setTransactionUser, withTenant, withUser } from './tenant.js';
 
 const TENANT = TenantIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192');
 const USER = UserIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708193');
@@ -75,5 +75,28 @@ describe('withUser', () => {
     const { db, transaction } = fakeDb();
     await expect(withUser(db, value as UserId, () => Promise.resolve())).rejects.toThrow();
     expect(transaction).not.toHaveBeenCalled();
+  });
+});
+
+describe('setTransactionTenant / setTransactionUser', () => {
+  it('bind the open transaction with bound parameters; a null user unbinds', async () => {
+    const { tx, executed } = fakeDb();
+    const open = tx as unknown as Parameters<typeof setTransactionTenant>[0];
+    await setTransactionTenant(open, TENANT);
+    await setTransactionUser(open, USER);
+    await setTransactionUser(open, null);
+    expect(executed.map((query) => new PgDialect().sqlToQuery(query))).toMatchObject([
+      { sql: "SELECT set_config('app.tenant_id', $1, true)", params: [TENANT] },
+      { sql: "SELECT set_config('app.user_id', $1, true)", params: [USER] },
+      { sql: "SELECT set_config('app.user_id', $1, true)", params: [''] },
+    ]);
+  });
+
+  it('reject malformed ids', async () => {
+    const { tx, executed } = fakeDb();
+    const open = tx as unknown as Parameters<typeof setTransactionTenant>[0];
+    await expect(setTransactionTenant(open, 'nope' as TenantId)).rejects.toThrow();
+    await expect(setTransactionUser(open, 'nope' as UserId)).rejects.toThrow();
+    expect(executed).toEqual([]);
   });
 });

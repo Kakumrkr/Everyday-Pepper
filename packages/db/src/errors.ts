@@ -34,3 +34,11 @@ export class MembershipExistsError extends Error {
     this.name = 'MembershipExistsError';
   }
 }
+
+/** The user already owns as many businesses as one person may create. */
+export class BusinessLimitReachedError extends Error {
+  constructor(readonly limit: number) {
+    super(`A user may own at most ${String(limit)} businesses`);
+    this.name = 'BusinessLimitReachedError';
+  }
+}
