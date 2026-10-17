@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a) merged. **S11 (Phase 3b: booking rules + availability engine) done** on `claude/blissful-lovelace-q6q43j`, ADR-0016 **accepted**, PR opened → next: S12 (bookings + waitlist)
+**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a) merged. **S11 (Phase 3b: booking rules + availability engine) done** on `claude/blissful-lovelace-q6q43j`, ADR-0016 **accepted**, PR #14 green and waiting for merge → next: S12 (bookings + waitlist)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -190,7 +190,7 @@
       - **api 44:** Ana sets rules; Cara reads but gets 403 on changes; validation 400; Dev probes with Ana's staff member and gets 404, and sees no rules; `booking_rules.replaced` in the audit log.
       - core 57, runtime 2, testing 1.
   - **Not run this session:** Docker image builds, `docker compose up`, and Playwright (no UI change; the migrations are applied by `migrate.int.test.ts` and every integration suite). CI's E2E smoke will run Compose.
-  - **Not yet proven:** CI on the S11 PR (opened at the user's request after accepting ADR-0016).
+  - **CI on PR #14:** all three required checks green on the first run (Lint/typecheck/test/build, Integration, E2E smoke incl. Compose with migrations 0013–0014). PR opened at the user's request after accepting ADR-0016; waiting for the user to merge.
   - **Findings:**
     - Temporal's "compatible" handling of skipped times is not monotonic: 02:01 → 03:01 lands after 03:00 → 03:00. With it, hours of 01:00–02:50 and 03:00–04:00 would overlap in real time on spring-forward night. Skipped times now map to the moment of the change (ADR-0016 §9).
     - The engine lets buffers reach outside working hours, and checks the occupied range (with buffers) against other bookings' occupied ranges. S12's exclusion constraint should use the same occupied range.
@@ -276,11 +276,11 @@
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Review and merge the S11 PR once CI is green.
+1. Review and merge the S11 PR (#14; CI green).
 2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 is merged, S11 is done (PR open). S12 should build its exclusion constraint on the occupied range (with buffers) and feed bookings into `availableSlots` (ADR-0016 Consequences).
+Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 is merged, S11 is done (PR #14 green, waiting for merge). S12 should build its exclusion constraint on the occupied range (with buffers) and feed bookings into `availableSlots` (ADR-0016 Consequences).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
