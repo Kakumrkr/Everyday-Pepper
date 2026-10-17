@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-16 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S6 merged (PR #8); D10 resolved (SeaweedFS) → S7 (auth) in progress
+**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done on `claude/blissful-lovelace-q6q43j`, PR to `main` open → next: S8 (roles/audit/metering)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -59,6 +59,44 @@
     - drizzle-kit needs a relative `--out` path and exits 0 even on errors, so the drift test also checks its "No schema changes" message.
     - Existing local volumes keep working: `POSTGRES_USER` is unchanged, and `migrate` adds the schema and the new role.
 
+- **S7 Phase 2b (2026-10-17):** sign-in, MFA for owners and tenant context from the session ([ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md), proposed).
+  - **db:**
+    - Better Auth's global tables: `users`, `sessions` (+ `active_tenant_id`), `accounts`, `verifications`, `two_factors`. UUID v7 ids; emails lowercased by a CHECK constraint.
+    - `memberships.user_id` gets a foreign key (cascade) and an index.
+    - "My businesses": `current_user_id()` and read-only `member_read` policies (only when no tenant is set), used through `withUser`.
+    - New repository functions: `listUserBusinesses`, `createTenant(..., { owner })`, `setSessionActiveTenant`, `authDatabaseAdapter`.
+    - Migrations 0003–0005.
+  - **api:**
+    - Better Auth 1.7 at `/api/auth`: email and password (≥ 10 characters), TOTP with backup codes, 7-day DB sessions without cookie cache, built-in rate limits, telemetry off. Its CSRF checks are pinned on even under `NODE_ENV=test`.
+    - It sits behind an `AuthService` interface.
+    - Guards: `SessionGuard`, `TenantGuard` (`decideTenantAccess` in core: no business / not a member / owner without MFA) and `SameOriginGuard` (Origin check on every write).
+    - Endpoints: `GET /v1/me`, `PUT /v1/me/active-tenant`, `POST /v1/tenants`, `GET /v1/tenant`.
+    - A new session starts in the user's first business. Log lines carry `user_id`/`tenant_id` (`identifyRequest` in runtime).
+    - Config: `AUTH_SECRET`, `AUTH_BASE_URL` (https outside localhost).
+  - **web:**
+    - Forwards `/api/auth/*` and `/v1/*` to the api at request time: allowlisted headers, every `Set-Cookie` kept, 100 KB body cap, 502 when the api is down.
+    - Screens: sign in (TOTP or backup code), sign up, create business (slug suggested from the name, browser time zone), two-step setup (QR via `uqr`, manual key, backup codes), and a signed-in home with business switcher and sign-out.
+    - Pages route to the next required step.
+  - **Also:**
+    - `@floty/contracts`: account schemas.
+    - `@floty/testing`: RFC 6238 `totpCode`.
+    - Compose and `.env.example`: auth variables.
+    - `.pnpmfile.cjs`: keeps only better-auth's `drizzle-orm`/`pg` peers. api image 1.26 GB → 461 MB; it was 426 MB before S7.
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 76, core 25, db 29, runtime 75, testing 13, api 48, web 55, worker 3. Coverage: db 100%, api 95.6%, web 98.4%.
+    - `pnpm test:integration` green: db 70 (isolation suite 42, incl. auth tables and the user context), api 21 (owner journey, cross-business denials, membership removal, update-session, CSRF, rate limit 429, no secrets in logs or the DB), runtime 2, testing 1.
+    - Mutation check: dropping `current_tenant_id() IS NULL` from `member_read` → 2 isolation failures.
+    - Docker images built. `docker compose up --wait`: 6 services healthy, `migrate` exited 0.
+    - Playwright 18/18 on phone and desktop, three runs in a row: full owner journey, backup code, wrong password, signed-out redirects, no sideways overflow.
+    - api logs: no errors, no emails or passwords, `user_id`/`tenant_id` present.
+  - **Findings:**
+    - Better Auth turns off its CSRF and origin checks when `NODE_ENV=test`, so we pin them on.
+    - pnpm resolves optional peers from the whole workspace, which put next/react/vitest/playwright into the api image (fixed by `.pnpmfile.cjs`).
+    - Next.js keeps a client-sent `X-Forwarded-For`, so per-address rate limits can be dodged until an edge proxy overwrites it (Phase 11).
+    - Better Auth logs a few messages (e.g. "Invalid origin") to the console, bypassing our logger. No personal data seen.
+    - Sign-up reveals whether an email exists (422) until email verification (Phase 5).
+    - Next's route announcer is also `role="alert"`; tests match form errors by text.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -87,6 +125,16 @@
   - (d) RLS goes through a `current_tenant_id()` SQL function with `NULLIF`. `tenant_id` defaults to it, so repositories never take a tenant id.
   - (e) `runtime` may import `db` (lint and dependency map updated). The api image carries the migrate CLI (`@floty/db` is a direct api dependency).
   - (f) Repositories, migrations and RLS are covered by integration tests and excluded from the unit coverage gate.
+- **S7 defaults — ADR-0012, proposed by Claude (2026-10-17), user to accept or change:**
+  - (a) Auth tables are global (no RLS), classified in the isolation suite, reached only through `authDatabaseAdapter`.
+  - (b) "My businesses" uses read-only, user-keyed `member_read` policies via `withUser`, not a `SECURITY DEFINER` function (FORCE RLS would filter it unless the owner is a superuser).
+  - (c) The active business is stored in the session, set only after a membership check. New sessions start in the first business.
+  - (d) Membership is re-checked on every request. Owners are blocked until TOTP is on; managers and staff are not (yet).
+  - (e) The web app forwards `/api/auth/*` and `/v1/*` (one origin, no CORS).
+  - (f) Origin check on every write.
+  - (g) Passwords ≥ 10 characters until the breached-password check lands.
+  - (h) Rate limits in memory (one instance) for now.
+  - (i) Out of S7: email verification and password reset (Phase 5), social login (Phase 10), breached-password check, edge proxy and CSP/HSTS (Phase 11).
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
@@ -97,8 +145,7 @@ S6–S8 split Phase 2: db + tenancy/RLS before auth, so auth can build on the te
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S7 | **Phase 2b:** auth (Better Auth + MFA for owners), session → tenant context (+ `tenant_id`/`user_id` on log lines), auth E2E. Carry-overs from S6: `users` table (Better Auth's, uuid ids) + FK from `memberships.user_id` and an index on it; the sign-in lookup of a user's tenants across tenants (a narrow `SECURITY DEFINER` function or a user-keyed policy) added to the isolation suite; classify auth tables as global in the suite | 2 | auth E2E passing; isolation suite 100% incl. auth tables |
-| S8 | **Phase 2c:** roles/permissions matrix, audit log, usage-metering skeleton | 2 | role matrix 100%; Phase 2 exit criteria |
+| S8 | **Phase 2c:** roles/permissions matrix (in core, next to `decideTenantAccess`; decide whether managers also need MFA), audit log, usage-metering skeleton. Carry-overs from S7: invite a member to a business (needs email → may stay a link until Phase 5); a per-user limit on creating businesses; `/security-review` before Phase 2 exit | 2 | role matrix 100%; Phase 2 exit criteria |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

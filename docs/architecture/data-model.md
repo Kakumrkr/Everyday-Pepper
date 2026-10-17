@@ -2,13 +2,22 @@
 
 > Provides: entities and invariants · Depends on: modules-and-templates, memory, AI trust layer · Consumed by: packages/db, all services
 
-All tenant-owned tables: `id (uuid v7)`, `tenant_id` (defaults to the transaction's tenant), `created_at`, `updated_at` (trigger), forced RLS with one policy `tenant_isolation`: `tenant_id = current_tenant_id()`, i.e. `NULLIF(current_setting('app.tenant_id', true), '')::uuid`, for reads and writes. Timestamps UTC (`timestamptz`). Roles, migrations and `withTenant`: [ADR-0010](../adr/0010-database-roles-and-migrations.md). Built so far (S6): `tenants` (name, slug, time_zone, locale), `memberships` (user_id, role).
+All tenant-owned tables: `id (uuid v7)`, `tenant_id` (defaults to the transaction's tenant), `created_at`, `updated_at` (trigger), forced RLS with one policy `tenant_isolation`: `tenant_id = current_tenant_id()`, i.e. `NULLIF(current_setting('app.tenant_id', true), '')::uuid`, for reads and writes. Timestamps UTC (`timestamptz`). Roles, migrations and `withTenant`: [ADR-0010](../adr/0010-database-roles-and-migrations.md). Built so far (S6–S7): `tenants` (name, slug, time_zone, locale), `memberships` (user_id → users, role), and the global auth tables below.
+
+**Global (not tenant-owned) tables** have no `tenant_id` and no RLS, and are listed with a reason in the isolation suite. They are Better Auth's tables ([ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md)):
+- `users`: name, email (lowercased, unique), `two_factor_enabled`.
+- `sessions`: token, expiry, IP and user agent for security, `active_tenant_id` (set only by the api after a membership check; `SET NULL` when the business is deleted).
+- `accounts`: password hash; OAuth tokens later.
+- `verifications`.
+- `two_factors`: encrypted TOTP secret and backup codes, lockout counters.
+
+Deleting a user cascades to their sessions, accounts, second factor and memberships. A signed-in user reads their own memberships and businesses across tenants only through `withUser` (read-only `member_read` policies, applied only when no tenant is set).
 
 ## L1 Core
 | Entity | Key fields / notes |
 |---|---|
 | Tenant | name, slug (booking page), template_id, time_zone, locale, plan, settings (JSON, versioned) |
-| User | auth identity (global), email, MFA |
+| User | auth identity (global, Better Auth `users`), email, MFA (`two_factors`) |
 | Membership | user_id, tenant_id, role (`owner`/`manager`/`staff`), staff_member_id? |
 | Customer | names, email, phone?, consent flags, tags, source, import_ref |
 | Conversation / Message | channel (`app`; later `sms`, `voice`), role, content, cards |

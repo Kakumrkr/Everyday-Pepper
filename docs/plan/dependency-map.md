@@ -5,8 +5,9 @@ Use this before any change: find the part you're changing, then check everything
 | Part | Depends on | Consumed by |
 |---|---|---|
 | **contracts** (Zod schemas, events, cards) | — | everything |
-| **db** (`@floty/db`: Drizzle schema, SQL migrations + migrate CLI, roles, RLS, `withTenant`, repositories, readiness probe) | contracts, Postgres | core, modules, ai, runtime, apps/api (migrate CLI in the image), worker |
-| **core: tenancy/auth/RBAC** | db, contracts | every API endpoint, AI tools, worker |
+| **db** (`@floty/db`: Drizzle schema incl. Better Auth's global tables, SQL migrations + migrate CLI, roles, RLS, `withTenant`/`withUser`, repositories, `authDatabaseAdapter`, readiness probe) | contracts, Postgres, better-auth (Drizzle adapter only) | core, modules, ai, runtime, apps/api (migrate CLI in the image), worker |
+| **core: tenancy/auth/RBAC** (S7: `decideTenantAccess`, owners need MFA; RBAC matrix S8) | db, contracts | every API endpoint, AI tools, worker |
+| **api: auth** (`apps/api/src/auth`: Better Auth at `/api/auth`, `AuthService`, `SessionGuard`/`TenantGuard`/`SameOriginGuard`; `/v1/me`, `/v1/tenants`, `/v1/tenant`) | db, core, contracts, runtime, better-auth | every tenant-scoped endpoint, web, e2e |
 | **core: audit log** | db | all write services, trust layer |
 | **core: customers** | db, RBAC | appointments, memory, messaging, feed, import |
 | **core: messaging + outbox** | db, worker, integrations/email | reminders, feed drafts, waitlist offers, booking page |
@@ -22,9 +23,9 @@ Use this before any change: find the part you're changing, then check everything
 | **onboarding** | adapter, templates, appointments, import | signup flow |
 | **integrations/google-calendar** | OAuth tokens, worker, appointments | availability (busy blocks), bookings (outbound) |
 | **runtime** (Nest process wiring: config, redacting logger, request ids, OTel tracing, Sentry errors, health, connections incl. the `DATABASE` handle; `./instrument` preload entry) | contracts, core, db, NestJS, pino, OpenTelemetry, Sentry | apps/api, apps/worker |
-| **testing** (test-only: Testcontainers Postgres/Redis using the Compose images, recording HTTP server, `postgresUrlAs`) | Testcontainers, docker-compose.yml | integration tests of db, runtime, apps (devDependency only) |
+| **testing** (test-only: Testcontainers Postgres/Redis using the Compose images, recording HTTP server, `postgresUrlAs`, RFC 6238 `totpCode`) | Testcontainers, docker-compose.yml | integration tests of db, runtime, apps; e2e (devDependency only) |
 | **ui** (design system, cards) | contracts (card schemas) | web app, booking page |
-| **apps/web** | ui, API client (contracts) | users |
+| **apps/web** (S7: forwards `/api/auth/*` and `/v1/*` to the api; sign-in, sign-up, MFA setup, create business) | ui, API client (contracts), api (forwarding) | users |
 | **apps/api** | core, modules, ai, runtime | web, booking page, webhooks, e2e |
 | **apps/worker** | core, modules, integrations, runtime | jobs, e2e |
 
