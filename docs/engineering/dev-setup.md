@@ -46,6 +46,7 @@ Run `pnpm check` before every push.
   - The api needs `AUTH_SECRET` (≥ 32 characters; Compose has a local-only default) and `AUTH_BASE_URL` (the browser's origin, `http://localhost:3000`).
   - Changing `AUTH_SECRET` signs everyone out and makes stored TOTP secrets unreadable.
   - Sign-in is rate limited per client address (3 tries per 10 s per endpoint).
+- **Team and audit log (S8, [ADR-0013](../adr/0013-roles-audit-log-and-metering.md)):** `GET /v1/members`, `PATCH /v1/members/:userId` `{ role }`, `DELETE /v1/members/:userId` (your own id: leave the business), `GET /v1/audit-log?limit=&before=`. Managers, like owners, must set up two-step verification. One account can own at most 5 businesses. There is no invite flow until S9; to add a member locally, insert a `memberships` row as the owner (`docker compose exec postgres psql -U floty`).
 - **`.pnpmfile.cjs`** trims better-auth's optional framework peers, which pnpm would otherwise install into the api image. Change it if we start using another Better Auth integration.
 - **Object storage is not in Compose yet.** MinIO no longer publishes community images; the replacement is SeaweedFS ([ADR-0011](../adr/0011-dev-object-storage-seaweedfs.md)), added in Phase 4 when the first feature needs storage.
 - **Playwright with a preinstalled browser** (e.g. a sandbox without browser downloads): set `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome`.
@@ -57,7 +58,7 @@ Run `pnpm check` before every push.
 packages/
   config/      shared tsconfig presets (@floty/config)
   contracts/   Zod schemas, events, cards — the only cross-module interface (@floty/contracts)
-  core/        L1 platform core, framework-free (@floty/core)
+  core/        L1 platform core, framework-free: rules (permission matrix, membership rules) and domain services over db (@floty/core)
   db/          Drizzle schema, SQL migrations + migrate CLI, withTenant (RLS), repositories (@floty/db)
   runtime/     process wiring shared by api + worker: config, logging, telemetry, health, connections (@floty/runtime)
   testing/     test-only helpers: Testcontainers Postgres/Redis, recording HTTP server (@floty/testing)
@@ -77,6 +78,7 @@ Planned packages (`modules/*`, `templates/*`, `ai`, `integrations`, `ui`) follow
 - **Time:** domain code takes a `Clock` (`@floty/core`), never `new Date()` directly; tests use `ManualClock`. Instants cross boundaries as `UtcDateTime` (`@floty/contracts`).
 - **Tests** live next to code as `*.test.ts` (unit) and `*.int.test.ts` (integration: real Postgres/Redis via `@floty/testing`, own `vitest.int.config.ts`, no coverage gate); both are excluded from `dist/`. `@floty/testing` is a devDependency only; it reads the Postgres and Redis images from `docker-compose.yml`, so tests and the dev stack always run the same pinned images. Unit tests import other workspace packages from `dist/` (Turborepo builds them first), so run a package's tests via `pnpm test` or after `pnpm build`.
 - **Database access** goes through `@floty/db` only. Tenant data is read and written inside `withTenant(db, tenantId, tx => ...)` using repository functions, which never take a tenant id: `tenant_id` defaults to the transaction's tenant and RLS hides everything else. `tenantId` comes from the authenticated session or a job's stored context, never from request bodies or LLM arguments. A new table needs: the Drizzle table with the `tenantIsolation` policy (or a reason it is global), `pnpm db:generate`, a custom migration with `FORCE ROW LEVEL SECURITY` and the `set_updated_at` trigger, and an entry in the isolation suite (`packages/db/src/isolation.int.test.ts`), which fails until the table is classified. Repositories, migrations and RLS are tested against real Postgres (`*.int.test.ts`) and excluded from the unit coverage gate.
+- **Domain services** (`packages/core/src/services/`) take an `Actor` (the session's tenant context and the request id), check the permission matrix, and write their audit entries in the same transaction as the change; the api and (Phase 6) AI tools call them, never repositories for writes. A new write needs an action in `AuditChangeSchema` (contracts) with a strict before/after schema. Core's services are integration-tested (`pnpm test:integration`) and excluded from its unit coverage gate; the pure rules they apply are unit-tested at 100%.
 - **NestJS (api, worker, runtime)** is ESM (Nest 12 ships ESM) on Express 5, compiled by `tsc` with `@floty/config/tsconfig.nest.json` (decorator metadata on). Vitest compiles Nest code with SWC (`unplugin-swc`) because esbuild cannot emit decorator metadata. Inject by token (`@Inject(TOKEN)`) for interfaces and values.
 - **Next.js (web)** uses bundler resolution: imports inside `apps/web` have no `.js` extension. `next-env.d.ts` and `.next/` are generated (`next typegen` runs in `typecheck`) and git-ignored. Env is read per request so one image runs everywhere.
 
