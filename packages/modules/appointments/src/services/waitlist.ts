@@ -33,6 +33,7 @@ import {
   type Database,
 } from '@floty/db';
 import { waitlistExpiry } from '../bookings/planning.js';
+import { ownStaffMemberId } from './bookings.js';
 import {
   ServiceNotFoundError,
   StaffMemberNotFoundError,
@@ -102,9 +103,19 @@ export async function listWaitlist(
   requirePermission(actor, 'bookings.read');
   const { all, serviceId, limit } = WaitlistQuerySchema.parse(query);
   const now = (options.clock ?? systemClock).now();
-  const rows = await withMember(db, actor.context, (tx) =>
-    listWaitlistEntries(tx, { now, all, limit, ...(serviceId !== undefined && { serviceId }) }),
-  );
+  const rows = await withMember(db, actor.context, async (tx) => {
+    const own = await ownStaffMemberId(tx, actor, 'bookings.read');
+    const entries = await listWaitlistEntries(tx, {
+      now,
+      all,
+      limit,
+      ...(serviceId !== undefined && { serviceId }),
+    });
+    // Staff reach only entries for their own staff member (RLS enforces the same).
+    return own === undefined
+      ? entries
+      : entries.filter((e) => own !== null && e.staffMemberId === own);
+  });
   return rows.map((row) => toWaitlistEntry(row, now));
 }
 

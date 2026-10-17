@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   AlreadyAMemberError,
+  ClientNotFoundError,
   ForbiddenError,
   InviteInvalidError,
   InviteLimitReachedError,
@@ -29,6 +30,7 @@ describe('domain errors', () => {
       'A business may have at most 20 open invites',
     ],
     [new AlreadyAMemberError(), 'AlreadyAMemberError', 'Already a member of this business'],
+    [new ClientNotFoundError(), 'ClientNotFoundError', 'No such client in this business'],
   ])('%s', (error, name, message) => {
     expect(error).toBeInstanceOf(Error);
     expect([error.name, error.message]).toEqual([name, message]);

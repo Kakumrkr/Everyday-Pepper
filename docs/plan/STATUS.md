@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a) merged. **S11 (Phase 3b: booking rules + availability engine) done** on `claude/blissful-lovelace-q6q43j`, ADR-0016 **accepted**, PR #14 green and waiting for merge → next: S12 (bookings + waitlist)
+**Last updated:** 2026-10-17 · **Plan version:** 0.8 · **Current phase:** 3 — Appointments + templates. S10 and S11 merged. **S12 (Phase 3c: bookings, clients, waitlist, staff-scoped RLS) done** on `claude/blissful-lovelace-q6q43j`, ADR-0017 **proposed** (waiting for the user) → next: S13 (templates + Phase 3 exit)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -196,6 +196,32 @@
     - The engine lets buffers reach outside working hours, and checks the occupied range (with buffers) against other bookings' occupied ranges. S12's exclusion constraint should use the same occupied range.
     - Unit tests run against the built `dist/` of their dependencies (turbo `^build`), so run `pnpm --filter <dep> build` after changing contracts before running a dependent package's tests on their own.
 
+- **S12 Phase 3c (2026-10-17):** clients, bookings, busy times and the waitlist, with staff-scoped RLS ([ADR-0017](../adr/0017-bookings-clients-and-waitlist.md), proposed).
+  - **contracts:** client, booking (statuses `confirmed`/`completed`/`no_show`/`cancelled`, sources `team`/`ai`/`booking_page`, idempotency key, range queries ≤ 62 days, busy times, availability, the `slot_unavailable` body with alternatives) and waitlist schemas (1–10 local windows); audit actions `client.created`, `booking.created/updated`, `waitlist_entry.created/updated` (ids, times, statuses only); ten error codes.
+  - **db:**
+    - Tables `clients`, `bookings`, `booking_occupancy` (kept by a trigger; `occupied tstzrange` = appointment + buffers) and `waitlist_entries`: forced RLS, composite tenant keys, checks.
+    - **Exclusion constraint** `booking_occupancy_no_overlap` on `(staff_member_id, occupied)`.
+    - **Member scope:** `withMember` binds tenant and user; `current_member_sees_all()` / `current_member_staff_ids()`; restrictive `member_scope*` policies (staff: own staff member's bookings and waitlist entries; read-only clients of those; everyone reads busy times).
+    - Migrations 0015–0017.
+  - **core:** `listClients`/`getClient`/`createClient`, `ClientNotFoundError`.
+  - **modules/appointments:**
+    - `createBooking` (engine check under a staff lock; owner/manager override; 3 nearest alternatives; idempotency keys).
+    - `changeBooking` (move with staff locked in id order, or status).
+    - `getBooking`/`listBookings`/`listBusyTimes`/`findAvailability`.
+    - `addToWaitlist`/`listWaitlist`/`changeWaitlistEntry`.
+    - Pure helpers in `bookings/planning.ts`.
+    - Services also apply the own-staff scope on reads (defence in depth).
+  - **api:** `GET/POST /v1/clients`, `GET /v1/clients/:id`; `GET/POST /v1/bookings`, `GET/PATCH /v1/bookings/:id`; `GET /v1/calendar/busy`; `GET /v1/availability`; `GET/POST /v1/waitlist`, `PATCH /v1/waitlist/:id`. Domain errors mapped from one table.
+  - **Checks run:**
+    - `pnpm check` green (format, lint, typecheck, unit tests with coverage, build). Coverage: contracts 100% lines; core 100%; appointments 100% lines / 94.7% branches; api 97.6%; db 90.2%.
+    - Integration: db (isolation suite with the four new tables and their exact policies; `bookings.int` 41 tests: constraint incl. 8 concurrent attempts, trigger, references, checks, idempotency keys, member scope per role); appointments 64 (services per role, AC-W2-1 alternatives, idempotency incl. concurrent first attempts, two fast-check properties against real Postgres: no double booking under concurrent bookings and overrides, daily cap never exceeded); api 51 (journeys for AC-W9-1, AC-W2-1, waitlist, other business, no client data in audit log or logs).
+    - Mutation checks: bookings `member_scope` → `true` fails 6 db tests; with RLS off the services still refuse (only the RLS-only clients scope test fails); replacing the staff lock with a plain read fails the daily-cap property.
+    - Not run: Docker image builds, Compose, Playwright (no UI change); CI's E2E smoke runs Compose with migrations 0015–0017.
+  - **Findings:**
+    - `= ANY ((SELECT array_fn()))` in a policy is parsed as a subquery (uuid = uuid[]); the policies use `IN (SELECT setof_fn())`.
+    - The idempotency lookup must come after the staff lock, or concurrent first attempts with one key get "time taken" instead of the first booking (caught by a test).
+    - Staff can book only clients they already have (a booking or waitlist entry with them): see "Waiting on the user".
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -273,18 +299,35 @@
   - The daily cap counts bookings by the local day they start on.
   - A query covers at most 62 days.
   - Template defaults are not stored per business.
+- **S12 decisions (user, 2026-10-17, S12 Session Brief): all five recommendations, plus the waitlist API.**
+  - (1) A **minimal clients table now** (core), not an optional client on bookings.
+  - (2) A **separate `booking_occupancy` table** carries the exclusion constraint and the team's busy times (readable by all); `bookings` gets the staff-only policy.
+  - (3) Statuses **`confirmed`/`completed`/`no_show`/`cancelled`**, no "pending"; only `cancelled` frees the time.
+  - (4) Every booking passes the engine; **owners and managers may override** hours and rules, never an overlap.
+  - (5) Waitlist **windows are local date + time spans (≤ 10)**, expiring at the end of the last one; statuses `waiting`/`offered`/`booked`/`expired`/`cancelled`; **with API endpoints**.
+- **S12 defaults — ADR-0017, proposed (Claude, for the user to accept or change):**
+  - "Customer" is called **client** everywhere (table, contracts, API), as the permissions and UI already were.
+  - Booking source **`team`** for anything made in the app (who made it is in `created_by_user_id` and the audit log).
+  - A booking keeps a **copy of the service's buffers and price**.
+  - `completed`/`no_show` only **after the start**; moves only while `confirmed`.
+  - **3 alternatives**, same service and staff member, a week either side, nearest first.
+  - Optional **idempotency key** per booking, unique per business.
+  - `expired` waitlist status is **derived on read** (nothing has to run).
+  - Staff may add waitlist entries **only for their own staff member**; an entry for "anyone" is the owner's/manager's.
+  - Work without a user (jobs, the booking page) keeps the full tenant scope; member requests use `withMember`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Review and merge the S11 PR (#14; CI green).
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. **Review ADR-0017** (proposed) and accept it or change its defaults (listed under "S12 defaults" above).
+2. **Decide before the Phase 4 screens: may staff book clients they don't have yet?** Today a stylist can book only clients they already have a booking or waitlist entry with; owners and managers book everyone. Options: (a) staff may find any client by exact email or phone, (b) staff may also add clients (changes the S8 matrix: `clients.manage`), (c) keep it as is.
+3. Then: open the S12 PR (on request, as before).
+4. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 is merged, S11 is done (PR #14 green, waiting for merge). S12 should build its exclusion constraint on the occupied range (with buffers) and feed bookings into `availableSlots` (ADR-0016 Consequences).
+Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 and S11 are merged, S12 is done (ADR-0017 proposed, PR not yet opened). S13 passes template rule defaults to `resolveRules` (`staffAvailabilityOf` already takes them) and runs the Phase 3 exit, including `/security-review` over S10–S12.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S12 | **Phase 3c:** bookings (`tstzrange` + exclusion constraint against double booking, statuses, sources; staff-scoped RLS for AC-W9-1) and the waitlist model | 3 | property tests: no double booking under concurrency; AC-W9-1 at RLS level; isolation suite + matrix extended |
 | S13 | **Phase 3d:** template system (Zod schema) + the 8 V1 templates; Phase 3 exit (`/security-review`, ≥ 80% coverage) | 3 | template schema tests; Phase 3 exit criteria |
 
 ## How to resume in a new session

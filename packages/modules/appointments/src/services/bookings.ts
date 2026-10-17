@@ -38,6 +38,7 @@ import {
   findBookingByIdempotencyKey,
   findClient,
   findService,
+  findStaffMemberOfUser,
   insertBooking,
   listBookings as listBookingRows,
   listOccupancy,
@@ -176,7 +177,11 @@ export async function getBooking(
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.read');
   const id = BookingIdSchema.parse(bookingId);
-  const row = await withMember(db, actor.context, (tx) => findBooking(tx, id));
+  const row = await withMember(db, actor.context, async (tx) => {
+    const found = await findBooking(tx, id);
+    const own = await ownStaffMemberId(tx, actor, 'bookings.read');
+    return own === undefined || found?.staffMemberId === own ? found : undefined;
+  });
   if (row === undefined) throw new BookingNotFoundError();
   return toBooking(row);
 }
@@ -189,14 +194,22 @@ export async function listBookings(
 ): Promise<Booking[]> {
   requirePermission(actor, 'bookings.read');
   const { from, to, staffMemberId, status } = BookingsQuerySchema.parse(query);
-  const rows = await withMember(db, actor.context, (tx) =>
-    listBookingRows(tx, {
+  const rows = await withMember(db, actor.context, async (tx) => {
+    const own = await ownStaffMemberId(tx, actor, 'bookings.read');
+    const only = own ?? staffMemberId;
+    if (
+      own === null ||
+      (own !== undefined && staffMemberId !== undefined && staffMemberId !== own)
+    ) {
+      return [];
+    }
+    return listBookingRows(tx, {
       from: new Date(from),
       to: new Date(to),
-      ...(staffMemberId !== undefined && { staffMemberId }),
+      ...(only !== undefined && { staffMemberId: only }),
       ...(status !== undefined && { status }),
-    }),
-  );
+    });
+  });
   return rows.map(toBooking);
 }
 
@@ -284,6 +297,22 @@ export async function changeBooking(
   }
 }
 
+/**
+ * The staff member whose records the actor reaches with `permission`: `undefined` for every
+ * record (owners, managers), the staff member linked to their login for staff, or `null` when
+ * staff have none. The database's member scope enforces the same (AC-W9-1); the services
+ * check it too, as for every scoped permission (ADR-0013).
+ */
+export async function ownStaffMemberId(
+  tx: TenantTx,
+  actor: Actor,
+  permission: 'bookings.read' | 'bookings.manage',
+): Promise<StaffMemberId | null | undefined> {
+  if (permissionScope(actor.context.role, permission) === 'all') return undefined;
+  const staff = await findStaffMemberOfUser(tx, actor.context.userId);
+  return staff === undefined ? null : StaffMemberIdSchema.parse(staff.id);
+}
+
 /** The engine refused the time (internal: answered as `SlotUnavailableError`). */
 class SlotTaken extends Error {}
 
@@ -319,7 +348,11 @@ async function lockOwnBooking(
   moveTo?: StaffMemberId,
 ): Promise<{ row: BookingRow; staff: StaffMemberRecord }> {
   const row = await lockBooking(tx, id);
-  if (row === undefined) throw new BookingNotFoundError();
+  const own = await ownStaffMemberId(tx, actor, 'bookings.manage');
+  // Another staff member's booking is not found, as the database's member scope answers.
+  if (row === undefined || (own !== undefined && row.staffMemberId !== own)) {
+    throw new BookingNotFoundError();
+  }
   const current = StaffMemberIdSchema.parse(row.staffMemberId);
   const target = moveTo ?? current;
   const locked = new Map<string, StaffMemberRecord>();
