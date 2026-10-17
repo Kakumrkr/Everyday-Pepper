@@ -1,6 +1,6 @@
 # ADR-0013: Roles and permissions, the audit log and usage metering
 
-- **Status:** Proposed (2026-10-17, S8; the user approved the matrix, manager MFA, the session split and the business limit at the S8 Session Brief) · **Date:** 2026-10-17 · Builds on ADR-0005 (model proposes, domain decides), ADR-0010 (roles, RLS) and ADR-0012 (session tenant context)
+- **Status:** Accepted (2026-10-17, user) · S8; the user approved the matrix, manager MFA, the session split and the business limit at the S8 Session Brief) · **Date:** 2026-10-17 · Builds on ADR-0005 (model proposes, domain decides), ADR-0010 (roles, RLS) and ADR-0012 (session tenant context)
 
 ## Context
 Phase 2 needs owner/manager/staff roles that the UI and (from Phase 6) the AI enforce in the same way, an audit log of every change to a business, and a metering skeleton that AI budgets and billing can build on. S8 also had to decide where domain services live: until now the api's `TenancyService` called repositories directly, but AI tools (`packages/ai`, allowed to import only contracts and core) must call the same services as the UI.

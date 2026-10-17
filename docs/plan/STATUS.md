@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.6 · **Current phase:** 2 — Platform core. S8 (Phase 2c: roles, audit log, metering) done on `claude/blissful-lovelace-q6q43j`, not yet merged → next: S9 (invites, Team screen, security review, Phase 2 exit)
+**Last updated:** 2026-10-17 · **Plan version:** 0.6 · **Current phase:** 2 — Platform core. S8 (Phase 2c: roles, audit log, metering) done; ADR-0013 accepted; PR open into `main` → next: S9 (invites, Team screen, security review, Phase 2 exit)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -98,7 +98,7 @@
     - Sign-up reveals whether an email exists (422) until email verification (Phase 5).
     - Next's route announcer is also `role="alert"`; tests match form errors by text.
 
-- **S8 Phase 2c (2026-10-17):** roles and permissions, audit log, usage metering, team API ([ADR-0013](../adr/0013-roles-audit-log-and-metering.md), proposed).
+- **S8 Phase 2c (2026-10-17):** roles and permissions, audit log, usage metering, team API ([ADR-0013](../adr/0013-roles-audit-log-and-metering.md), accepted by the user).
   - **contracts:** `Permission` (every action incl. later phases), `roleRequiresMfa` (owners and managers), `AuditChangeSchema` (strict per-action before/after: no personal data), audit log query/response, `UsageMetric`/`UsagePeriod`/`UsageAmount`, member list and role-change bodies, error codes `forbidden`, `member_not_found`, `last_owner`, `business_limit_reached`. Tenant and user ids are lowercased.
   - **core:** `PERMISSION_MATRIX` + `can()` (`all`/`own`/none; staff reach only their own bookings, clients, notes), `decideMembershipChange` (anyone may leave; only owners touch owners; one owner always remains), `requirePermission`/`Actor`, `usagePeriodOf`. Domain services in `src/services/`: `listMembers`, `changeMemberRole`, `removeMember` (lock the business's memberships, re-read the actor's role, audit entry in the same transaction), `createBusiness` (5 per owner, `tenant.created` entry), `readAuditLog` (cursor pages), `recordUsage`/`usageFor`. Core now depends on db and has integration tests.
   - **db:** `audit_log` (forced RLS; the services may only INSERT/SELECT; actor nulled when a user is deleted) and `usage_meters` (atomic upsert per tenant/metric/UTC month); repositories `appendAuditEntry`, `listAuditEntries`, `addUsage`, `listUsage`, `listTenantMembers`, `updateMembershipRole`, `deleteMembership`, `countOwners`, `lockTenantMemberships`, `countOwnedBusinesses`; `createTenant` gains `ownerLimit` (per-user advisory lock, same transaction) and `afterInsert`; `setTransactionTenant`/`setTransactionUser`. Migrations 0006–0007.
@@ -110,7 +110,7 @@
     - Mutation checks, each caught: no `REVOKE` on `audit_log` → 5 failures; no `FORCE` on `usage_meters` → catalog test fails; no membership lock in the services → 9 of 10 concurrency rounds fail.
     - Self-review found that an own id in capitals was not treated as leaving; fixed with tests first (ids lowercased in contracts).
     - Docker images built (api 462 MB, worker 461 MB, web 322 MB; local builds need the sandbox CA, scratch Dockerfile not committed). `docker compose up --wait`: 6 services healthy, `migrate` exited 0. Playwright 18/18, four runs (three before the id fix, one after). api logs: no errors, no emails; e2e owners' `tenant.created` entries present.
-  - **Not yet proven:** CI on the PR (not opened yet; the user asked for no PR so far).
+  - **Not yet proven:** CI on the PR (opened at the user's request after accepting ADR-0013).
   - **Findings:**
     - With RLS on, an insert without a tenant fails the policy's WITH CHECK (42501) before the NOT NULL constraint.
     - The worker image now carries `@floty/db` through `@floty/core` (it already had it for readiness).
@@ -155,7 +155,7 @@
   - (h) Rate limits in memory (one instance) for now.
   - (i) Out of S7: email verification and password reset (Phase 5), social login (Phase 10), breached-password check, edge proxy and CSP/HSTS (Phase 11).
 - **S8 decisions (user, 2026-10-17, S8 Session Brief):** (1) managers need MFA like owners; (2) permission matrix as proposed (owner everything; manager everything except deleting the business, billing and changes to owners; staff: business, services, team calendar, only their own bookings and notes); (3) Phase 2c split into S8 and S9; (4) at most 5 businesses per owner.
-- **S8 defaults — ADR-0013, proposed (user to accept):**
+- **S8 defaults — ADR-0013, accepted by the user (2026-10-17, end of S8):**
   - (a) Domain services live in `@floty/core` (`src/services/`) and call `@floty/db`, so AI tools (Phase 6) use the same code as the UI; the api keeps thin binding services (`TenancyService`, `TeamService`). Core's database-backed services are integration-tested and excluded from its unit coverage gate.
   - (b) Route guards check the permission "at all"; services check it again and apply record scope.
   - (c) Audit entries carry only allowlisted fields per action (no names, emails, free text), the request id, and survive user deletion with the actor nulled; managers can read the audit log.
@@ -166,7 +166,7 @@
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Review S8 and accept ADR-0013** (or ask for changes), and say whether to open the PR into `main` (CI runs there).
+1. Review and merge the S8 PR once CI is green.
 2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
@@ -174,7 +174,7 @@ S6–S9 split Phase 2: db + tenancy/RLS before auth, so auth can build on the te
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S9 | **Phase 2c, part 2:** accept ADR-0013 (or adjust it); invite a member (hashed, expiring, single-use link token; you grant only roles you may grant; accepted after sign-in or sign-up; email delivery in Phase 5) with `invite.created`/`invite.accepted` audit entries; minimal Team screen (list, change role, remove, leave, create invite link) and `permissions` for the UI; `/security-review` of Phase 2; Phase 2 exit check | 2 | invite tests (expired, reused, escalation, other business) + Playwright journey; no open high-severity findings; Phase 2 exit criteria (cross-tenant 100%, role matrix 100%, auth E2E) |
+| S9 | **Phase 2c, part 2:** invite a member (hashed, expiring, single-use link token; you grant only roles you may grant; accepted after sign-in or sign-up; email delivery in Phase 5) with `invite.created`/`invite.accepted` audit entries; minimal Team screen (list, change role, remove, leave, create invite link) and `permissions` for the UI; `/security-review` of Phase 2; Phase 2 exit check | 2 | invite tests (expired, reused, escalation, other business) + Playwright journey; no open high-severity findings; Phase 2 exit criteria (cross-tenant 100%, role matrix 100%, auth E2E) |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.
