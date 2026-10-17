@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import { requiredStep } from '../lib/account';
+import Link from 'next/link';
+import { requiredStep, ROUTES } from '../lib/account';
 import { currentAccount, currentBusiness } from './_server/account';
 import { BusinessSwitcher, SignOutButton } from './_components/account-actions';
 import { Unavailable } from './_components/unavailable';
@@ -32,6 +33,7 @@ export default async function HomePage() {
         <BusinessSwitcher businesses={me.businesses} activeTenantId={me.activeTenantId} />
       ) : null}
       <div className="actions">
+        {current === null ? null : <Link href={ROUTES.team}>Team</Link>}
         <SignOutButton />
       </div>
     </main>

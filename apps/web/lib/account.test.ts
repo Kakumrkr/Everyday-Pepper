@@ -1,6 +1,15 @@
 import { MeResponseSchema, type MeResponse } from '@floty/contracts';
 import { describe, expect, it, vi } from 'vitest';
-import { loadAccount, loadCurrentBusiness, requiredStep, ROUTES, type Account } from './account';
+import {
+  loadAccount,
+  loadCurrentBusiness,
+  loadInvites,
+  loadMembers,
+  requiredStep,
+  ROUTES,
+  withNext,
+  type Account,
+} from './account';
 
 const TENANT = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192';
 const OTHER = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708194';
@@ -64,6 +73,7 @@ describe('loadCurrentBusiness', () => {
       locale: 'en-US',
     },
     role: 'owner',
+    permissions: ['business.read', 'members.read'],
   };
 
   it('returns the business', async () => {
@@ -78,6 +88,40 @@ describe('loadCurrentBusiness', () => {
   ])('returns null for %i %j', async (status, body) => {
     const { fetch } = answering(status, body);
     await expect(loadCurrentBusiness({ ...base, fetch })).resolves.toBeNull();
+  });
+});
+
+describe('loadMembers and loadInvites', () => {
+  const member = {
+    userId: OTHER,
+    name: 'Jess',
+    email: 'jess@example.test',
+    role: 'staff',
+    joinedAt: '2026-10-17T12:00:00.000Z',
+  };
+  const invite = {
+    id: OTHER,
+    email: 'priya@example.test',
+    role: 'manager',
+    invitedBy: null,
+    createdAt: '2026-10-17T12:00:00.000Z',
+    expiresAt: '2026-10-24T12:00:00.000Z',
+  };
+
+  it('return the lists from their endpoints', async () => {
+    const members = answering(200, { members: [member] });
+    await expect(loadMembers({ ...base, fetch: members.fetch })).resolves.toEqual([member]);
+    expect(members.calls[0]?.url).toBe('http://api:4000/v1/members');
+    const invites = answering(200, { invites: [invite] });
+    await expect(loadInvites({ ...base, fetch: invites.fetch })).resolves.toEqual([invite]);
+    expect(invites.calls[0]?.url).toBe('http://api:4000/v1/invites');
+  });
+
+  it('return null when the api refuses (e.g. staff) or answers nonsense', async () => {
+    const forbidden = answering(403, { code: 'forbidden', message: 'x' });
+    await expect(loadMembers({ ...base, fetch: forbidden.fetch })).resolves.toBeNull();
+    const nonsense = answering(200, { invites: [{ id: 1 }] });
+    await expect(loadInvites({ ...base, fetch: nonsense.fetch })).resolves.toBeNull();
   });
 });
 
@@ -134,5 +178,12 @@ describe('requiredStep', () => {
 
   it('shows the page (with its own error) when the api is unavailable', () => {
     expect(requiredStep({ state: 'unavailable' })).toBeNull();
+  });
+});
+
+describe('withNext', () => {
+  it('adds the page to return to, encoded', () => {
+    expect(withNext(ROUTES.signIn, '/invite')).toBe('/sign-in?next=%2Finvite');
+    expect(withNext(ROUTES.signUp, null)).toBe('/sign-up');
   });
 });
