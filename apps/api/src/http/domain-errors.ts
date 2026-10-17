@@ -1,5 +1,20 @@
 import {
+  BookingNotChangeableError,
+  BookingNotFoundError,
+  BookingNotStartedError,
+  IdempotencyKeyReusedError,
+  ServiceNotFoundError,
+  SlotUnavailableError,
+  StaffMemberNotFoundError,
+  TimeOffNotFoundError,
+  WaitlistEntryNotChangeableError,
+  WaitlistEntryNotFoundError,
+  WaitlistExpiredError,
+} from '@floty/appointments';
+import type { ApiErrorCode, SlotUnavailable } from '@floty/contracts';
+import {
   AlreadyAMemberError,
+  ClientNotFoundError,
   ForbiddenError,
   InviteInvalidError,
   InviteLimitReachedError,
@@ -9,17 +24,14 @@ import {
   MemberNotFoundError,
 } from '@floty/core';
 import {
-  ServiceNotFoundError,
-  StaffMemberNotFoundError,
-  TimeOffNotFoundError,
-} from '@floty/appointments';
-import {
   BusinessLimitReachedError,
+  ClientEmailTakenError,
   ServiceNameTakenError,
   StaffMemberLinkTakenError,
   TenantSlugTakenError,
 } from '@floty/db';
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   HttpException,
@@ -27,48 +39,54 @@ import {
 } from '@nestjs/common';
 import { apiError } from '../auth/guards.js';
 
+type ErrorClass = abstract new (...args: never[]) => Error;
+type Answer = new (body: object) => HttpException;
+
+/** Each domain error and the api's answer to it: the HTTP status and the stable code. */
+const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
+  [ForbiddenError, ForbiddenException, 'forbidden'],
+  [MemberNotFoundError, NotFoundException, 'member_not_found'],
+  [LastOwnerError, ConflictException, 'last_owner'],
+  [BusinessLimitReachedError, ConflictException, 'business_limit_reached'],
+  [TenantSlugTakenError, ConflictException, 'slug_taken'],
+  [InviteInvalidError, NotFoundException, 'invite_invalid'],
+  [InviteWrongAccountError, ForbiddenException, 'invite_wrong_account'],
+  [InviteNotFoundError, NotFoundException, 'invite_not_found'],
+  [InviteLimitReachedError, ConflictException, 'invite_limit_reached'],
+  [AlreadyAMemberError, ConflictException, 'already_a_member'],
+  [ServiceNotFoundError, NotFoundException, 'service_not_found'],
+  [ServiceNameTakenError, ConflictException, 'service_name_taken'],
+  [StaffMemberNotFoundError, NotFoundException, 'staff_member_not_found'],
+  [StaffMemberLinkTakenError, ConflictException, 'staff_member_link_taken'],
+  [TimeOffNotFoundError, NotFoundException, 'time_off_not_found'],
+  [ClientNotFoundError, NotFoundException, 'client_not_found'],
+  [ClientEmailTakenError, ConflictException, 'client_email_taken'],
+  [BookingNotFoundError, NotFoundException, 'booking_not_found'],
+  [BookingNotChangeableError, ConflictException, 'booking_not_changeable'],
+  [BookingNotStartedError, ConflictException, 'booking_not_started'],
+  [IdempotencyKeyReusedError, ConflictException, 'idempotency_key_reused'],
+  [WaitlistEntryNotFoundError, NotFoundException, 'waitlist_entry_not_found'],
+  [WaitlistEntryNotChangeableError, ConflictException, 'waitlist_entry_not_changeable'],
+  [WaitlistExpiredError, BadRequestException, 'waitlist_expired'],
+];
+
 /**
- * The api's answer to a domain error (`{ code, message }`); any other error is returned
- * unchanged, so unexpected ones still become a reported 500.
+ * The api's answer to a domain error (`{ code, message }`; a refused booking time also lists
+ * `alternatives`); any other error is returned unchanged, so unexpected ones still become a
+ * reported 500.
  */
 export function toHttpError(error: unknown): unknown {
   if (error instanceof HttpException) return error;
-  if (error instanceof ForbiddenError) return new ForbiddenException(apiError('forbidden'));
-  if (error instanceof MemberNotFoundError) {
-    return new NotFoundException(apiError('member_not_found'));
+  if (error instanceof SlotUnavailableError) {
+    const body: SlotUnavailable = {
+      ...apiError('slot_unavailable'),
+      code: 'slot_unavailable',
+      alternatives: [...error.alternatives],
+    };
+    return new ConflictException(body);
   }
-  if (error instanceof LastOwnerError) return new ConflictException(apiError('last_owner'));
-  if (error instanceof BusinessLimitReachedError) {
-    return new ConflictException(apiError('business_limit_reached'));
-  }
-  if (error instanceof TenantSlugTakenError) return new ConflictException(apiError('slug_taken'));
-  if (error instanceof InviteInvalidError) return new NotFoundException(apiError('invite_invalid'));
-  if (error instanceof InviteWrongAccountError) {
-    return new ForbiddenException(apiError('invite_wrong_account'));
-  }
-  if (error instanceof InviteNotFoundError) {
-    return new NotFoundException(apiError('invite_not_found'));
-  }
-  if (error instanceof InviteLimitReachedError) {
-    return new ConflictException(apiError('invite_limit_reached'));
-  }
-  if (error instanceof AlreadyAMemberError) {
-    return new ConflictException(apiError('already_a_member'));
-  }
-  if (error instanceof ServiceNotFoundError) {
-    return new NotFoundException(apiError('service_not_found'));
-  }
-  if (error instanceof ServiceNameTakenError) {
-    return new ConflictException(apiError('service_name_taken'));
-  }
-  if (error instanceof StaffMemberNotFoundError) {
-    return new NotFoundException(apiError('staff_member_not_found'));
-  }
-  if (error instanceof StaffMemberLinkTakenError) {
-    return new ConflictException(apiError('staff_member_link_taken'));
-  }
-  if (error instanceof TimeOffNotFoundError) {
-    return new NotFoundException(apiError('time_off_not_found'));
+  for (const [errorClass, Answer, code] of ANSWERS) {
+    if (error instanceof errorClass) return new Answer(apiError(code));
   }
   return error;
 }

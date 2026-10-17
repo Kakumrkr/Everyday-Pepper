@@ -1,5 +1,12 @@
 import {
   BookingRulesSchema,
+  BookingSchema,
+  BusyTimeSchema,
+  WaitlistEntrySchema,
+  WaitlistStatusSchema,
+  type Booking,
+  type BusyTime,
+  type WaitlistEntry,
   clockTime,
   minutesOfDay,
   ServiceSchema,
@@ -16,7 +23,10 @@ import {
 } from '@floty/contracts';
 import type { OwnedRecord } from '@floty/core';
 import type {
+  BookingRow,
   BookingRuleRow,
+  Occupancy,
+  WaitlistEntryRow,
   ServiceRow,
   StaffMemberRecord,
   TimeOffRow,
@@ -132,4 +142,85 @@ export function rowsToRules(rows: readonly BookingRuleRow[]): BookingRules {
 /** Whether two audit values describe the same state (an unchanged update is not audited). */
 export function sameValues(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
+}
+
+export function toBooking(row: BookingRow): Booking {
+  return BookingSchema.parse({
+    ...bookingAuditValues(row),
+    id: row.id,
+    bufferBeforeMinutes: row.bufferBeforeMinutes,
+    bufferAfterMinutes: row.bufferAfterMinutes,
+    priceFromCents: row.priceFromCents,
+    priceToCents: row.priceToCents,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  });
+}
+
+/** A booking for the audit log: ids, times and statuses (no client details). */
+export function bookingAuditValues(row: BookingRow): Values<'booking.created'> {
+  return BookingSchema.pick({
+    clientId: true,
+    serviceId: true,
+    staffMemberId: true,
+    startsAt: true,
+    endsAt: true,
+    status: true,
+    source: true,
+    overridden: true,
+  }).parse({
+    clientId: row.clientId,
+    serviceId: row.serviceId,
+    staffMemberId: row.staffMemberId,
+    startsAt: row.startsAt.toISOString(),
+    endsAt: row.endsAt.toISOString(),
+    status: row.status,
+    source: row.source,
+    overridden: row.overridden,
+  });
+}
+
+export function toBusyTime(occupancy: Occupancy): BusyTime {
+  return BusyTimeSchema.parse({
+    staffMemberId: occupancy.staffMemberId,
+    startsAt: occupancy.startsAt.toISOString(),
+    endsAt: occupancy.endsAt.toISOString(),
+    occupiedFrom: occupancy.occupiedFrom.toISOString(),
+    occupiedTo: occupancy.occupiedTo.toISOString(),
+  });
+}
+
+/**
+ * A waitlist entry as the api returns it. A waiting entry whose last window has passed reads as
+ * `expired` (expiry is not stored, so nothing has to run to expire entries).
+ */
+export function toWaitlistEntry(row: WaitlistEntryRow, now: Date): WaitlistEntry {
+  const expired = row.status === 'waiting' && row.expiresAt.getTime() <= now.getTime();
+  return WaitlistEntrySchema.parse({
+    ...waitlistAuditValues(row),
+    id: row.id,
+    windows: row.windows,
+    status: expired ? 'expired' : row.status,
+    bookingId: row.bookingId,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  });
+}
+
+const WaitlistAuditValuesSchema = WaitlistEntrySchema.pick({
+  clientId: true,
+  serviceId: true,
+  staffMemberId: true,
+  expiresAt: true,
+}).extend({ status: WaitlistStatusSchema.exclude(['expired']) });
+
+/** A waitlist entry for the audit log: ids, expiry and stored status (no windows or client). */
+export function waitlistAuditValues(row: WaitlistEntryRow): Values<'waitlist_entry.created'> {
+  return WaitlistAuditValuesSchema.parse({
+    clientId: row.clientId,
+    serviceId: row.serviceId,
+    staffMemberId: row.staffMemberId,
+    expiresAt: row.expiresAt.toISOString(),
+    status: row.status,
+  });
 }

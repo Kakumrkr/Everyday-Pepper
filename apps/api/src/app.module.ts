@@ -2,6 +2,7 @@ import { ConnectionsModule, HealthModule } from '@floty/runtime';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { AppointmentsModule } from './appointments/appointments.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { ClientsModule } from './clients/clients.module.js';
 import type { ApiConfig } from './config.js';
 import { TeamModule } from './team/team.module.js';
 
@@ -15,6 +16,7 @@ export class AppModule {
         HealthModule.forRoot({ service: config.service }),
         AuthModule.forRoot(config.auth),
         TeamModule,
+        ClientsModule,
         AppointmentsModule,
       ],
     };

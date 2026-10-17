@@ -13,6 +13,9 @@ const INVITE = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708196';
 const SERVICE = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708197';
 const STAFF = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708198';
 const TIME_OFF = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708199';
+const CLIENT = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708190';
+const BOOKING = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f70819b';
+const WAITLIST_ENTRY = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f70819c';
 
 const serviceValues = {
   name: "Women's haircut",
@@ -36,6 +39,36 @@ const timeOffValues = {
   startsAt: '2026-10-20T13:00:00.000Z',
   endsAt: '2026-10-20T17:00:00.000Z',
 };
+
+const bookingValues = {
+  clientId: CLIENT,
+  serviceId: SERVICE,
+  staffMemberId: STAFF,
+  startsAt: '2026-10-20T14:00:00.000Z',
+  endsAt: '2026-10-20T15:00:00.000Z',
+  status: 'confirmed',
+  source: 'team',
+  overridden: false,
+} as const;
+const bookingCreated = {
+  action: 'booking.created',
+  entity: { type: 'booking', id: BOOKING },
+  before: null,
+  after: bookingValues,
+} as const;
+const waitlistValues = {
+  clientId: CLIENT,
+  serviceId: SERVICE,
+  staffMemberId: null,
+  expiresAt: '2026-10-23T22:00:00.000Z',
+  status: 'waiting',
+} as const;
+const clientCreated = {
+  action: 'client.created',
+  entity: { type: 'client', id: CLIENT },
+  before: null,
+  after: { source: 'team' },
+} as const;
 
 const inviteCreated = {
   action: 'invite.created',
@@ -151,6 +184,35 @@ describe('AuditChangeSchema', () => {
         after: null,
       },
     ],
+    ['client.created', clientCreated],
+    ['booking.created', bookingCreated],
+    [
+      'booking.updated',
+      {
+        action: 'booking.updated',
+        entity: { type: 'booking', id: BOOKING },
+        before: bookingValues,
+        after: { ...bookingValues, status: 'cancelled' },
+      },
+    ],
+    [
+      'waitlist_entry.created',
+      {
+        action: 'waitlist_entry.created',
+        entity: { type: 'waitlist_entry', id: WAITLIST_ENTRY },
+        before: null,
+        after: waitlistValues,
+      },
+    ],
+    [
+      'waitlist_entry.updated',
+      {
+        action: 'waitlist_entry.updated',
+        entity: { type: 'waitlist_entry', id: WAITLIST_ENTRY },
+        before: waitlistValues,
+        after: { ...waitlistValues, status: 'cancelled' },
+      },
+    ],
   ])('accepts %s', (_action, change) => {
     expect(AuditChangeSchema.parse(change)).toEqual(change);
   });
@@ -178,6 +240,21 @@ describe('AuditChangeSchema', () => {
     [
       "a staff member's display name",
       { ...staffCreated, after: { ...staffValues, displayName: 'Jess Lee' } },
+    ],
+    // A client's name, email and phone are personal data: never in the audit log.
+    ["a client's name", { ...clientCreated, after: { source: 'team', name: 'Maria Lopez' } }],
+    [
+      "a client's email on a booking",
+      { ...bookingCreated, after: { ...bookingValues, clientEmail: 'maria@example.test' } },
+    ],
+    [
+      'a stored "expired" waitlist status (it is derived)',
+      {
+        action: 'waitlist_entry.updated',
+        entity: { type: 'waitlist_entry', id: WAITLIST_ENTRY },
+        before: waitlistValues,
+        after: { ...waitlistValues, status: 'expired' },
+      },
     ],
   ])('rejects %s', (_label, change) => {
     expect(AuditChangeSchema.safeParse(change).success).toBe(false);

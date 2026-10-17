@@ -1,10 +1,24 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
 import { Writable } from 'node:stream';
+import { addDays, formatDate, fromZoned, parseDate, toZoned } from '@floty/appointments';
 import {
   ApiErrorSchema,
   AuditLogResponseSchema,
+  AvailabilityResponseSchema,
   BookingRulesResponseSchema,
+  BookingSchema,
+  BookingsResponseSchema,
+  BusyResponseSchema,
+  ClientSchema,
+  ClientsResponseSchema,
+  minutesOfDay,
+  SlotUnavailableSchema,
+  WaitlistEntrySchema,
+  WaitlistResponseSchema,
+  type Client,
+  type Service,
+  type StaffMember,
   CreateInviteResponseSchema,
   CurrentBusinessResponseSchema,
   InvitesResponseSchema,
@@ -882,5 +896,285 @@ describe('appointments base data (ADR-0015)', () => {
       expect(actions).toContain(action);
     }
     expect(JSON.stringify(log)).not.toContain('Marco');
+  });
+});
+
+describe('clients, bookings and the waitlist (ADR-0017)', () => {
+  let ana: Browser;
+  let cara: Browser;
+  let dev: Browser;
+  let ids: { cara: string };
+  let tenantId: string;
+  let service: Service;
+  let caraStaff: StaffMember;
+  let marco: StaffMember;
+  let maria: Client;
+  let lee: Client;
+  /** `HH:MM` in New York three days from now (local time, any weekday: Juniper is open daily). */
+  let date: string;
+  let at: (time: string) => string;
+  let day: { from: string; to: string };
+
+  beforeAll(async () => {
+    ({ browser: ana } = await signUp('ana'));
+    ({ browser: cara } = await signUp('cara'));
+    ({ browser: dev } = await signUp('dev'));
+    ids = { cara: (await me(cara)).user.id };
+    tenantId = (
+      (await ana.post('/v1/tenants', { ...juniper, slug: 'bookings-salon' }).expect(201)).body as {
+        id: string;
+      }
+    ).id;
+    await enrolTotp(ana);
+    await withTenant(db, TenantIdSchema.parse(tenantId), (tx) =>
+      addMembership(tx, { userId: UserIdSchema.parse(ids.cara), role: 'staff' }),
+    );
+    await cara.put('/v1/me/active-tenant', { tenantId }).expect(204);
+    await dev.post('/v1/tenants', { ...juniper, slug: 'other-bookings-salon' }).expect(201);
+    await enrolTotp(dev);
+
+    service = ServiceSchema.parse(
+      (
+        await ana
+          .post('/v1/services', { name: 'Haircut', durationMinutes: 60, bufferAfterMinutes: 10 })
+          .expect(201)
+      ).body,
+    );
+    const staff = (displayName: string, userId: string | null) =>
+      ana
+        .post('/v1/staff', { displayName, userId, serviceIds: [service.id] })
+        .expect(201)
+        .then((r) => StaffMemberSchema.parse(r.body));
+    caraStaff = await staff('Cara', ids.cara);
+    marco = await staff('Marco', null);
+    const week = {
+      intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
+        weekday,
+        start: '08:00',
+        end: '20:00',
+      })),
+    };
+    for (const s of [caraStaff, marco]) {
+      await ana.put(`/v1/staff/${s.id}/hours`, week).expect(200);
+    }
+    date = formatDate(addDays(toZoned('America/New_York', Date.now()), 3));
+    at = (time: string) =>
+      new Date(fromZoned('America/New_York', parseDate(date), minutesOfDay(time))).toISOString();
+    day = { from: at('00:00'), to: at('23:59') };
+  });
+
+  it('owners add clients; staff cannot, and see only the clients they have bookings with', async () => {
+    maria = ClientSchema.parse(
+      (
+        await ana
+          .post('/v1/clients', { name: 'Maria Lopez', email: 'maria@example.test' })
+          .expect(201)
+      ).body,
+    );
+    lee = ClientSchema.parse((await ana.post('/v1/clients', { name: 'Lee' }).expect(201)).body);
+    expect(errorCode((await cara.post('/v1/clients', { name: 'Walk-in' }).expect(403)).body)).toBe(
+      'forbidden',
+    );
+    const taken = await ana.post('/v1/clients', { name: 'M', email: 'MARIA@example.test' });
+    expect([taken.status, errorCode(taken.body)]).toEqual([409, 'client_email_taken']);
+    expect((await cara.get('/v1/clients').expect(200)).body).toEqual({ clients: [] });
+    expect(errorCode((await cara.get(`/v1/clients/${maria.id}`).expect(404)).body)).toBe(
+      'client_not_found',
+    );
+  });
+
+  it('AC-W9-1: Cara sees and changes only her own bookings; everyone sees busy times', async () => {
+    const hers = BookingSchema.parse(
+      (
+        await ana
+          .post('/v1/bookings', {
+            clientId: maria.id,
+            serviceId: service.id,
+            staffMemberId: caraStaff.id,
+            startsAt: at('10:00'),
+          })
+          .expect(201)
+      ).body,
+    );
+    const marcos = BookingSchema.parse(
+      (
+        await ana
+          .post('/v1/bookings', {
+            clientId: lee.id,
+            serviceId: service.id,
+            staffMemberId: marco.id,
+            startsAt: at('10:00'),
+          })
+          .expect(201)
+      ).body,
+    );
+    const query = `from=${day.from}&to=${day.to}`;
+    expect(
+      BookingsResponseSchema.parse((await cara.get(`/v1/bookings?${query}`).expect(200)).body)
+        .bookings,
+    ).toEqual([hers]);
+    expect(
+      BookingsResponseSchema.parse((await ana.get(`/v1/bookings?${query}`).expect(200)).body)
+        .bookings,
+    ).toHaveLength(2);
+    expect(
+      ClientsResponseSchema.parse((await cara.get('/v1/clients').expect(200)).body).clients,
+    ).toEqual([maria]);
+
+    const probes = [
+      await cara.get(`/v1/bookings/${marcos.id}`),
+      await cara.patch(`/v1/bookings/${marcos.id}`, { status: 'cancelled' }),
+    ];
+    expect(probes.map((r) => [r.status, errorCode(r.body)])).toEqual([
+      [404, 'booking_not_found'],
+      [404, 'booking_not_found'],
+    ]);
+    const forMarco = await cara.post('/v1/bookings', {
+      clientId: maria.id,
+      serviceId: service.id,
+      staffMemberId: marco.id,
+      startsAt: at('14:00'),
+    });
+    expect([forMarco.status, errorCode(forMarco.body)]).toEqual([403, 'forbidden']);
+
+    const busy = BusyResponseSchema.parse(
+      (await cara.get(`/v1/calendar/busy?${query}`).expect(200)).body,
+    );
+    expect(busy.busy.map((b) => b.staffMemberId).sort()).toEqual([caraStaff.id, marco.id].sort());
+    expect(JSON.stringify(busy)).not.toContain(lee.id);
+  });
+
+  it('AC-W2-1: a taken time is refused with the 3 nearest free times', async () => {
+    const refused = await ana
+      .post('/v1/bookings', {
+        clientId: maria.id,
+        serviceId: service.id,
+        staffMemberId: caraStaff.id,
+        startsAt: at('10:30'),
+      })
+      .expect(409);
+    const body = SlotUnavailableSchema.parse(refused.body);
+    // Her 10:00 haircut occupies 10:00–11:10; slots are every 15 minutes.
+    expect(body.alternatives.map((a) => a.startsAt)).toEqual([
+      at('11:15'),
+      at('11:30'),
+      at('11:45'),
+    ]);
+    const slots = AvailabilityResponseSchema.parse(
+      (
+        await cara
+          .get(
+            `/v1/availability?serviceId=${service.id}&staffMemberId=${caraStaff.id}&${new URLSearchParams(day).toString()}`,
+          )
+          .expect(200)
+      ).body,
+    ).slots;
+    for (const alternative of body.alternatives) expect(slots).toContainEqual(alternative);
+  });
+
+  it('Cara moves and cancels her booking; the time is then free again', async () => {
+    const query = `from=${day.from}&to=${day.to}&staffMemberId=${caraStaff.id}`;
+    const [hers] = BookingsResponseSchema.parse(
+      (await cara.get(`/v1/bookings?${query}`).expect(200)).body,
+    ).bookings;
+    if (hers === undefined) throw new Error('no booking');
+    const moved = BookingSchema.parse(
+      (await cara.patch(`/v1/bookings/${hers.id}`, { startsAt: at('12:00') }).expect(200)).body,
+    );
+    expect(moved.startsAt).toBe(at('12:00'));
+    const cancelled = BookingSchema.parse(
+      (await cara.patch(`/v1/bookings/${hers.id}`, { status: 'cancelled' }).expect(200)).body,
+    );
+    expect(cancelled.status).toBe('cancelled');
+    const again = await cara.patch(`/v1/bookings/${hers.id}`, { status: 'no_show' });
+    expect([again.status, errorCode(again.body)]).toEqual([409, 'booking_not_changeable']);
+    await ana
+      .post('/v1/bookings', {
+        clientId: maria.id,
+        serviceId: service.id,
+        staffMemberId: caraStaff.id,
+        startsAt: at('12:00'),
+      })
+      .expect(201);
+  });
+
+  it('the waitlist: Cara sees and cancels only entries for her', async () => {
+    const windows = [{ date, start: '09:00', end: '12:00' }];
+    const anyone = WaitlistEntrySchema.parse(
+      (
+        await ana
+          .post('/v1/waitlist', { clientId: lee.id, serviceId: service.id, windows })
+          .expect(201)
+      ).body,
+    );
+    expect(anyone).toMatchObject({
+      status: 'waiting',
+      staffMemberId: null,
+      expiresAt: at('12:00'),
+    });
+    const hers = WaitlistEntrySchema.parse(
+      (
+        await cara
+          .post('/v1/waitlist', {
+            clientId: maria.id,
+            serviceId: service.id,
+            staffMemberId: caraStaff.id,
+            windows,
+          })
+          .expect(201)
+      ).body,
+    );
+    expect(
+      WaitlistResponseSchema.parse((await cara.get('/v1/waitlist').expect(200)).body).entries,
+    ).toEqual([hers]);
+    expect(
+      WaitlistResponseSchema.parse((await ana.get('/v1/waitlist').expect(200)).body).entries,
+    ).toEqual([anyone, hers]);
+    const notHers = await cara.patch(`/v1/waitlist/${anyone.id}`, { status: 'cancelled' });
+    expect([notHers.status, errorCode(notHers.body)]).toEqual([404, 'waitlist_entry_not_found']);
+    await cara.patch(`/v1/waitlist/${hers.id}`, { status: 'cancelled' }).expect(200);
+  });
+
+  it("another business's owner finds none of it (AC-X-1)", async () => {
+    const query = `from=${day.from}&to=${day.to}`;
+    expect((await dev.get(`/v1/bookings?${query}`).expect(200)).body).toEqual({ bookings: [] });
+    expect((await dev.get(`/v1/calendar/busy?${query}`).expect(200)).body).toEqual({ busy: [] });
+    expect((await dev.get('/v1/clients').expect(200)).body).toEqual({ clients: [] });
+    expect((await dev.get('/v1/waitlist?all=true').expect(200)).body).toEqual({ entries: [] });
+    const probes = [
+      await dev.get(`/v1/clients/${maria.id}`),
+      await dev.post('/v1/bookings', {
+        clientId: maria.id,
+        serviceId: service.id,
+        staffMemberId: caraStaff.id,
+        startsAt: at('16:00'),
+      }),
+      await dev.get(`/v1/availability?serviceId=${service.id}&${query}`),
+    ];
+    expect(probes.map((r) => [r.status, errorCode(r.body)])).toEqual([
+      [404, 'client_not_found'],
+      [404, 'staff_member_not_found'],
+      [404, 'service_not_found'],
+    ]);
+  });
+
+  it('every change is audited without client details, and no client data is logged', async () => {
+    const log = AuditLogResponseSchema.parse(
+      (await ana.get('/v1/audit-log?limit=100').expect(200)).body,
+    );
+    const actions = log.entries.map((e) => e.action);
+    for (const action of [
+      'client.created',
+      'booking.created',
+      'booking.updated',
+      'waitlist_entry.created',
+      'waitlist_entry.updated',
+    ]) {
+      expect(actions).toContain(action);
+    }
+    const logged = JSON.stringify(log) + JSON.stringify(logLines);
+    for (const personal of ['Maria Lopez', 'maria@example.test']) {
+      expect(logged).not.toContain(personal);
+    }
   });
 });

@@ -19,7 +19,7 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 | Tenant | name, slug (booking page), template_id, time_zone, locale, plan, settings (JSON, versioned) |
 | User | auth identity (global, Better Auth `users`), email, MFA (`two_factors`) |
 | Membership | user_id, tenant_id, role (`owner`/`manager`/`staff`); a staff member may link to it (ADR-0015) |
-| Customer | names, email, phone?, consent flags, tags, source, import_ref |
+| Client (`clients`, S12) | name, email? (lowercased, unique per tenant), phone? (E.164), source (`team`/`ai`/`booking_page`/`import`); consent flags, tags and import_ref come with the features that use them. Called "client" everywhere (permissions `clients.*`, UI); staff read only clients they have a booking or waitlist entry with, and never write (ADR-0017) |
 | Conversation / Message | channel (`app`; later `sms`, `voice`), role, content, cards |
 | ActionProposal / ActionExecution | see AI trust layer; idempotency_key unique per tenant |
 | MemoryFact / MemoryEpisode | episode has `embedding vector` (pgvector, HNSW index) |
@@ -41,10 +41,11 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 | WorkingHours (`working_hours`, S10) | staff, ISO weekday, start/end minute after **local** midnight (tenant time zone); no overlap per staff and day (exclusion constraint) |
 | TimeOff (`time_off`, S10) | staff, starts_at/ends_at (UTC, ≤ 366 days), created_by_user_id; no free-text reason |
 | BookingRule (`booking_rules`, S11) | type (`slot_interval`/`minimum_notice`/`maximum_advance`/`max_bookings_per_day`/`blackout_window`), params (JSONB, validated by the contracts' `RuleSchema`), schema version, optional staff member (`NULL`: the whole business); one per type and scope except blackout windows (partial unique index). Template defaults are not stored (resolved at read time, S13); learned rules add a source in Phase 7 (ADR-0016) |
-| Booking | customer, staff, service, `during tstzrange`, status, source (`owner`/`staff`/`ai`/`booking_page`), external_event_ref; **EXCLUDE USING gist (staff_id WITH =, during WITH &&) WHERE status active** |
-| WaitlistEntry | customer, service, staff?, windows, status, expires_at |
+| Booking (`bookings`, S12) | client, service, staff member (composite tenant keys), starts_at/ends_at (UTC), copy of the service's buffers and price, status (`confirmed`/`completed`/`no_show`/`cancelled`), source (`team`/`ai`/`booking_page`), overridden, idempotency_key? (unique per tenant), created_by_user_id; external_event_ref comes with calendar sync (Phase 10). Staff reach only their own staff member's rows (`member_scope`, AC-W9-1) (ADR-0017) |
+| BookingOccupancy (`booking_occupancy`, S12) | one row per active booking, kept by a trigger on `bookings`: staff member, appointment times, `occupied tstzrange` (appointment + buffers); **`EXCLUDE USING gist (staff_member_id WITH =, occupied WITH &&)`** — no double booking; readable by every member (busy times without details) (ADR-0017) |
+| WaitlistEntry (`waitlist_entries`, S12) | client, service, staff member? (`NULL`: anyone), windows (1–10 local date + `HH:MM` spans, jsonb), status (`waiting`/`offered`/`booked`/`cancelled`; `expired` derived on read), expires_at (end of the last window), booking_id (set iff `booked`) (ADR-0017) |
 | ExternalBusyBlock | staff, during, source calendar, external id |
 | BookingVerification | email code hash, expires, attempts (public booking) |
 
 ## Invariants
-References between tenant tables are composite foreign keys on `(tenant_id, id)` (ADR-0015) · No overlapping active bookings per staff (DB constraint) · every write has an audit entry · every side effect goes through `OutboxMessage` · deleting a customer cascades memory facts/episodes about them.
+References between tenant tables are composite foreign keys on `(tenant_id, id)` (ADR-0015) · No overlapping occupied time (buffers included) of active bookings per staff member (DB constraint on `booking_occupancy`) · every write has an audit entry · every side effect goes through `OutboxMessage` · deleting a customer cascades memory facts/episodes about them.

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BookingIdempotencyKeyTakenError,
+  BookingOverlapError,
   BusinessLimitReachedError,
+  ClientEmailTakenError,
+  isExclusionViolation,
   isUniqueViolation,
   MembershipExistsError,
   ServiceNameTakenError,
@@ -44,6 +48,23 @@ describe('isUniqueViolation', () => {
   });
 });
 
+describe('isExclusionViolation', () => {
+  const constraint = 'booking_occupancy_no_overlap';
+
+  it('matches the driver error, also wrapped', () => {
+    expect(isExclusionViolation(pgError('23P01', constraint), constraint)).toBe(true);
+    const wrapped = new Error('Failed query', { cause: pgError('23P01', constraint) });
+    expect(isExclusionViolation(wrapped, constraint)).toBe(true);
+  });
+
+  it('ignores a unique violation and another constraint', () => {
+    expect(isExclusionViolation(pgError('23505', constraint), constraint)).toBe(false);
+    expect(isExclusionViolation(pgError('23P01', 'working_hours_no_overlap'), constraint)).toBe(
+      false,
+    );
+  });
+});
+
 describe('domain errors', () => {
   it('keep the cause and a safe message', () => {
     const cause = pgError('23505');
@@ -62,6 +83,18 @@ describe('domain errors', () => {
     });
     expect(new StaffMemberLinkTakenError({ cause })).toMatchObject({
       name: 'StaffMemberLinkTakenError',
+      cause,
+    });
+    expect(new ClientEmailTakenError({ cause })).toMatchObject({
+      name: 'ClientEmailTakenError',
+      cause,
+    });
+    expect(new BookingOverlapError({ cause })).toMatchObject({
+      name: 'BookingOverlapError',
+      cause,
+    });
+    expect(new BookingIdempotencyKeyTakenError({ cause })).toMatchObject({
+      name: 'BookingIdempotencyKeyTakenError',
       cause,
     });
   });

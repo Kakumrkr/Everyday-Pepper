@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
+import { BookingSourceSchema, BookingStatusSchema } from './bookings.js';
+import { ClientIdSchema, RecordSourceSchema } from './clients.js';
 import {
   LocaleSchema,
   MembershipRoleSchema,
@@ -57,6 +59,31 @@ const TimeOffValuesSchema = z
 
 // Booking rules (ADR-0016) hold settings only: durations, counts and dates.
 const RulesValuesSchema = z.object({ rules: z.array(RuleSchema) }).strict();
+
+// Clients, bookings and the waitlist (ADR-0017): ids, times and statuses only. A client's name,
+// email and phone are personal data and never in an entry.
+const ClientValuesSchema = z.object({ source: RecordSourceSchema }).strict();
+const BookingValuesSchema = z
+  .object({
+    clientId: ClientIdSchema,
+    serviceId: ServiceIdSchema,
+    staffMemberId: StaffMemberIdSchema,
+    startsAt: UtcDateTimeSchema,
+    endsAt: UtcDateTimeSchema,
+    status: BookingStatusSchema,
+    source: BookingSourceSchema,
+    overridden: z.boolean(),
+  })
+  .strict();
+const WaitlistValuesSchema = z
+  .object({
+    clientId: ClientIdSchema,
+    serviceId: ServiceIdSchema,
+    staffMemberId: StaffMemberIdSchema.nullable(),
+    expiresAt: UtcDateTimeSchema,
+    status: z.enum(['waiting', 'offered', 'booked', 'cancelled']),
+  })
+  .strict();
 
 function entity<T extends string>(type: T) {
   return z.object({ type: z.literal(type), id: z.uuid() }).strict();
@@ -183,6 +210,48 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('tenant'),
       before: RulesValuesSchema,
       after: RulesValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('client.created'),
+      entity: entity('client'),
+      before: z.null(),
+      after: ClientValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('booking.created'),
+      entity: entity('booking'),
+      before: z.null(),
+      after: BookingValuesSchema,
+    })
+    .strict(),
+  // A move (time or staff member) or a status change; `overridden` says whether the new time
+  // was booked outside hours or rules.
+  z
+    .object({
+      action: z.literal('booking.updated'),
+      entity: entity('booking'),
+      before: BookingValuesSchema,
+      after: BookingValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('waitlist_entry.created'),
+      entity: entity('waitlist_entry'),
+      before: z.null(),
+      after: WaitlistValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('waitlist_entry.updated'),
+      entity: entity('waitlist_entry'),
+      before: WaitlistValuesSchema,
+      after: WaitlistValuesSchema,
     })
     .strict(),
 ]);
