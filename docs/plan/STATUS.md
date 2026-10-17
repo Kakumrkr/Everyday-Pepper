@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a: services, staff, hours, time off) done; PR not opened yet → next: S11 (rules + availability engines)
+**Last updated:** 2026-10-17 · **Plan version:** 0.7 · **Current phase:** 3 — Appointments + templates. S10 (Phase 3a: services, staff, hours, time off) **done and merged** (PR #12, ADR-0015 accepted) → next: S11 (rules + availability engines)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -154,7 +154,7 @@
       - **api 43:** owner sets up a service, staff and hours; staff reads them and manages only their own time off; another business finds nothing (404s); audit log without staff names.
       - core 57, runtime 2, testing 1 (unchanged).
     - Docker images rebuilt (sandbox CA via a scratch Dockerfile, not committed). `docker compose up --wait`: all services healthy, `migrate` exited 0 (incl. `btree_gist`). Playwright 26/26.
-  - **Not yet proven:** CI on the S10 PR (not opened yet).
+  - **CI on PR #12:** all three required checks green (after the e2e fix below). Merged into `main` by Claude at the user's request (2026-10-17).
   - **CI fix:** the S9 team e2e test reloaded the page before the role change had saved (a race CI hit once). It now waits for the save; 3 local runs of the full e2e suite, 26/26 each.
   - **Findings:** a foreign key check bypasses RLS, so a single-column reference could link to another business's row by id. Composite keys are now the rule for tenant references (ADR-0015, dev-setup, security doc).
 
@@ -223,11 +223,10 @@
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Review and merge the S10 PR once CI is green.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief).
+Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 is merged.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
