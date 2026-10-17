@@ -63,8 +63,8 @@ export function TwoFactorSetup() {
     return (
       <form className="form" onSubmit={(event) => void start(event)} noValidate>
         <p className="hint">
-          Owners protect their business with a code from an authenticator app (such as Google
-          Authenticator, 1Password or Authy) each time they sign in.
+          Owners and managers protect their business with a code from an authenticator app (such as
+          Google Authenticator, 1Password or Authy) each time they sign in.
         </p>
         <label>
           Confirm your password

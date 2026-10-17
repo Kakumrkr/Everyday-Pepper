@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { isUniqueViolation, MembershipExistsError, TenantSlugTakenError } from './errors.js';
+import {
+  BusinessLimitReachedError,
+  isUniqueViolation,
+  MembershipExistsError,
+  TenantSlugTakenError,
+} from './errors.js';
 
 function pgError(code: string, constraint?: string): Error {
   return Object.assign(new Error('duplicate key value violates unique constraint'), {
@@ -44,5 +49,10 @@ describe('domain errors', () => {
     expect(slug).toMatchObject({ name: 'TenantSlugTakenError', cause });
     expect(slug.message).toBe('This slug is already taken');
     expect(new MembershipExistsError()).toMatchObject({ name: 'MembershipExistsError' });
+    expect(new BusinessLimitReachedError(5)).toMatchObject({
+      name: 'BusinessLimitReachedError',
+      limit: 5,
+      message: 'A user may own at most 5 businesses',
+    });
   });
 });

@@ -26,8 +26,8 @@ describe('decideTenantAccess', () => {
     });
   });
 
-  it('denies an owner without MFA', () => {
-    expect(decideTenantAccess({ ...base, role: 'owner' })).toEqual({
+  it.each<MembershipRole>(['owner', 'manager'])('denies a %s without MFA', (role) => {
+    expect(decideTenantAccess({ ...base, role })).toEqual({
       allowed: false,
       reason: 'mfa_required',
     });
@@ -35,7 +35,6 @@ describe('decideTenantAccess', () => {
 
   it.each<[MembershipRole, boolean]>([
     ['owner', true],
-    ['manager', false],
     ['manager', true],
     ['staff', false],
     ['staff', true],

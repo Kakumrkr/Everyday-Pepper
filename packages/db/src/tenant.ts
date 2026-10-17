@@ -16,12 +16,28 @@ export async function withTenant<T>(
   tenantId: TenantId,
   work: (tx: TenantTx) => Promise<T>,
 ): Promise<T> {
-  // Branded types can be cast; re-check at the boundary to the database.
+  // Branded types can be cast; re-check at the boundary to the database, before opening it.
   const id = TenantIdSchema.parse(tenantId);
   return db.transaction(async (tx) => {
-    await tx.execute(sql`SELECT set_config('app.tenant_id', ${id}, true)`);
+    await setTransactionTenant(tx, id);
     return work(tx);
   });
+}
+
+/**
+ * Binds the open transaction to `tenantId`, transaction-locally. For repository functions
+ * that need more than one context in a transaction (`createTenant`); everything else uses
+ * `withTenant`.
+ */
+export async function setTransactionTenant(tx: TenantTx, tenantId: TenantId): Promise<void> {
+  const id = TenantIdSchema.parse(tenantId);
+  await tx.execute(sql`SELECT set_config('app.tenant_id', ${id}, true)`);
+}
+
+/** Binds the open transaction to `userId` (`null` unbinds it), transaction-locally. */
+export async function setTransactionUser(tx: TenantTx, userId: UserId | null): Promise<void> {
+  const id = userId === null ? '' : UserIdSchema.parse(userId);
+  await tx.execute(sql`SELECT set_config('app.user_id', ${id}, true)`);
 }
 
 /**
@@ -43,7 +59,7 @@ export async function withUser<T>(
   const id = UserIdSchema.parse(userId);
   return db.transaction(
     async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.user_id', ${id}, true)`);
+      await setTransactionUser(tx, id);
       return work(tx);
     },
     { accessMode: 'read only' },

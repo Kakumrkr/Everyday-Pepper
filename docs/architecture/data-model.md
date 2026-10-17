@@ -2,7 +2,7 @@
 
 > Provides: entities and invariants · Depends on: modules-and-templates, memory, AI trust layer · Consumed by: packages/db, all services
 
-All tenant-owned tables: `id (uuid v7)`, `tenant_id` (defaults to the transaction's tenant), `created_at`, `updated_at` (trigger), forced RLS with one policy `tenant_isolation`: `tenant_id = current_tenant_id()`, i.e. `NULLIF(current_setting('app.tenant_id', true), '')::uuid`, for reads and writes. Timestamps UTC (`timestamptz`). Roles, migrations and `withTenant`: [ADR-0010](../adr/0010-database-roles-and-migrations.md). Built so far (S6–S7): `tenants` (name, slug, time_zone, locale), `memberships` (user_id → users, role), and the global auth tables below.
+All tenant-owned tables: `id (uuid v7)`, `tenant_id` (defaults to the transaction's tenant), `created_at`, `updated_at` (trigger), forced RLS with one policy `tenant_isolation`: `tenant_id = current_tenant_id()`, i.e. `NULLIF(current_setting('app.tenant_id', true), '')::uuid`, for reads and writes. Timestamps UTC (`timestamptz`). Roles, migrations and `withTenant`: [ADR-0010](../adr/0010-database-roles-and-migrations.md). Built so far (S6–S8): `tenants` (name, slug, time_zone, locale), `memberships` (user_id → users, role), `audit_log` and `usage_meters` (S8, [ADR-0013](../adr/0013-roles-audit-log-and-metering.md)), and the global auth tables below.
 
 **Global (not tenant-owned) tables** have no `tenant_id` and no RLS, and are listed with a reason in the isolation suite. They are Better Auth's tables ([ADR-0012](../adr/0012-auth-sessions-and-tenant-context.md)):
 - `users`: name, email (lowercased, unique), `two_factor_enabled`.
@@ -27,8 +27,8 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 | FeedItem | kind, status (`done`/`needs_ok`/`suggestion`/`dismissed`), payload, action_proposal_id? |
 | OutboxMessage | type, payload, status, attempts, dedupe_key unique |
 | Notification / MessageDelivery | channel, recipient, template, status, provider_id |
-| AuditLog | actor, action, entity, before/after (redacted), at — append-only |
-| UsageMeter | tenant, metric (llm_tokens, emails, …), period, amount |
+| AuditLog (`audit_log`, S8) | actor_kind (`user`/`system`), actor_user_id (→ users, nulled on user deletion), action, entity_type, entity_id, before/after (jsonb, per-action allowlist in contracts: no personal data), request_id, created_at — append-only (the services' role has INSERT/SELECT only) |
+| UsageMeter (`usage_meters`, S8) | tenant, metric (`llm_tokens`, `emails_sent`), period (`YYYY-MM`, UTC month), amount (bigint ≥ 0); unique per tenant + metric + period, atomic upsert |
 | Integration / OAuthToken | provider, encrypted tokens (envelope encryption), status |
 | File | storage key, mime, size, purpose |
 

@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done and merged (PR #9) → next: S8 (roles/audit/metering) → next: S8 (roles/audit/metering)
+**Last updated:** 2026-10-17 · **Plan version:** 0.6 · **Current phase:** 2 — Platform core. S8 (Phase 2c: roles, audit log, metering) done; ADR-0013 accepted; PR open into `main` → next: S9 (invites, Team screen, security review, Phase 2 exit)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -98,6 +98,24 @@
     - Sign-up reveals whether an email exists (422) until email verification (Phase 5).
     - Next's route announcer is also `role="alert"`; tests match form errors by text.
 
+- **S8 Phase 2c (2026-10-17):** roles and permissions, audit log, usage metering, team API ([ADR-0013](../adr/0013-roles-audit-log-and-metering.md), accepted by the user).
+  - **contracts:** `Permission` (every action incl. later phases), `roleRequiresMfa` (owners and managers), `AuditChangeSchema` (strict per-action before/after: no personal data), audit log query/response, `UsageMetric`/`UsagePeriod`/`UsageAmount`, member list and role-change bodies, error codes `forbidden`, `member_not_found`, `last_owner`, `business_limit_reached`. Tenant and user ids are lowercased.
+  - **core:** `PERMISSION_MATRIX` + `can()` (`all`/`own`/none; staff reach only their own bookings, clients, notes), `decideMembershipChange` (anyone may leave; only owners touch owners; one owner always remains), `requirePermission`/`Actor`, `usagePeriodOf`. Domain services in `src/services/`: `listMembers`, `changeMemberRole`, `removeMember` (lock the business's memberships, re-read the actor's role, audit entry in the same transaction), `createBusiness` (5 per owner, `tenant.created` entry), `readAuditLog` (cursor pages), `recordUsage`/`usageFor`. Core now depends on db and has integration tests.
+  - **db:** `audit_log` (forced RLS; the services may only INSERT/SELECT; actor nulled when a user is deleted) and `usage_meters` (atomic upsert per tenant/metric/UTC month); repositories `appendAuditEntry`, `listAuditEntries`, `addUsage`, `listUsage`, `listTenantMembers`, `updateMembershipRole`, `deleteMembership`, `countOwners`, `lockTenantMemberships`, `countOwnedBusinesses`; `createTenant` gains `ownerLimit` (per-user advisory lock, same transaction) and `afterInsert`; `setTransactionTenant`/`setTransactionUser`. Migrations 0006–0007.
+  - **api:** `@RequirePermission` on `TenantGuard` (403 `forbidden`); managers need MFA; `GET /v1/members`, `PATCH /v1/members/:userId`, `DELETE /v1/members/:userId` (own id = leave, clears the session's business), `GET /v1/audit-log`; `POST /v1/tenants` through core (409 `business_limit_reached`); domain errors mapped in `http/domain-errors.ts`; `AuthModule` is global; new `TeamModule`.
+  - **web:** managers are sent to two-step setup like owners; message for `business_limit_reached`. (Team screen: S9.)
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 119, core 397 (matrix: every role × permission cell, own/colleague/unassigned records; membership rules: every role × target × change), db 32, runtime 75, testing 13, api 83, web 57, worker 3. Coverage: contracts, core, db 100%; api 94.8%; web 98.4%.
+    - `pnpm test:integration` green: db 113 (isolation suite incl. `audit_log`/`usage_meters` and per-table grants; append-only, allowlist, rollback, erasure; usage sums and 40 concurrent increments; team repositories, lock, owner limit under concurrency), core 33 (services per role, stale actor role, staff cannot probe membership, 5 rounds each of two owners demoting each other / leaving at once), api 31 (manager MFA gate, staff denials, role change with request id in the audit row, cross-business 404, last owner 409, staff leaves, no emails in logs, 5-business limit), runtime 2, testing 1.
+    - Mutation checks, each caught: no `REVOKE` on `audit_log` → 5 failures; no `FORCE` on `usage_meters` → catalog test fails; no membership lock in the services → 9 of 10 concurrency rounds fail.
+    - Self-review found that an own id in capitals was not treated as leaving; fixed with tests first (ids lowercased in contracts).
+    - Docker images built (api 462 MB, worker 461 MB, web 322 MB; local builds need the sandbox CA, scratch Dockerfile not committed). `docker compose up --wait`: 6 services healthy, `migrate` exited 0. Playwright 18/18, four runs (three before the id fix, one after). api logs: no errors, no emails; e2e owners' `tenant.created` entries present.
+  - **Not yet proven:** CI on the PR (opened at the user's request after accepting ADR-0013).
+  - **Findings:**
+    - With RLS on, an insert without a tenant fails the policy's WITH CHECK (42501) before the NOT NULL constraint.
+    - The worker image now carries `@floty/db` through `@floty/core` (it already had it for readiness).
+    - AC-W9-1 also asks for RLS-level enforcement: the staff-scoped policy belongs on the bookings and notes tables (Phase 3).
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -136,17 +154,27 @@
   - (g) Passwords ≥ 10 characters until the breached-password check lands.
   - (h) Rate limits in memory (one instance) for now.
   - (i) Out of S7: email verification and password reset (Phase 5), social login (Phase 10), breached-password check, edge proxy and CSP/HSTS (Phase 11).
+- **S8 decisions (user, 2026-10-17, S8 Session Brief):** (1) managers need MFA like owners; (2) permission matrix as proposed (owner everything; manager everything except deleting the business, billing and changes to owners; staff: business, services, team calendar, only their own bookings and notes); (3) Phase 2c split into S8 and S9; (4) at most 5 businesses per owner.
+- **S8 defaults — ADR-0013, accepted by the user (2026-10-17, end of S8):**
+  - (a) Domain services live in `@floty/core` (`src/services/`) and call `@floty/db`, so AI tools (Phase 6) use the same code as the UI; the api keeps thin binding services (`TenancyService`, `TeamService`). Core's database-backed services are integration-tested and excluded from its unit coverage gate.
+  - (b) Route guards check the permission "at all"; services check it again and apply record scope.
+  - (c) Audit entries carry only allowlisted fields per action (no names, emails, free text), the request id, and survive user deletion with the actor nulled; managers can read the audit log.
+  - (d) Usage periods are UTC months, not the business's time zone.
+  - (e) Staff get the `own` scope for clients too (least privilege; AC-W9-1 names bookings and notes).
+  - (f) Removing someone else needs `members.manage`, checked before any lookup (staff cannot probe membership); leaving clears the session's business.
+  - (g) Tenant and user ids are lowercased by the contracts.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Review and merge the S8 PR once CI is green.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-S6–S8 split Phase 2: db + tenancy/RLS before auth, so auth can build on the tenant context. **Order confirmed by the user at the S6 Session Brief (2026-10-16).**
+S6–S9 split Phase 2: db + tenancy/RLS before auth, so auth can build on the tenant context; Phase 2c split into S8 and S9 (user, S8 Session Brief).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S8 | **Phase 2c:** roles/permissions matrix (in core, next to `decideTenantAccess`; decide whether managers also need MFA), audit log, usage-metering skeleton. Carry-overs from S7: invite a member to a business (needs email → may stay a link until Phase 5); a per-user limit on creating businesses; `/security-review` before Phase 2 exit | 2 | role matrix 100%; Phase 2 exit criteria |
+| S9 | **Phase 2c, part 2:** invite a member (hashed, expiring, single-use link token; you grant only roles you may grant; accepted after sign-in or sign-up; email delivery in Phase 5) with `invite.created`/`invite.accepted` audit entries; minimal Team screen (list, change role, remove, leave, create invite link) and `permissions` for the UI; `/security-review` of Phase 2; Phase 2 exit check | 2 | invite tests (expired, reused, escalation, other business) + Playwright journey; no open high-severity findings; Phase 2 exit criteria (cross-tenant 100%, role matrix 100%, auth E2E) |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

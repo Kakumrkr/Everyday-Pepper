@@ -6,36 +6,61 @@ import {
   type UserId,
 } from '@floty/contracts';
 import { eq, sql } from 'drizzle-orm';
+import { z } from 'zod';
 import type { Database } from '../client.js';
-import { isUniqueViolation, TenantSlugTakenError } from '../errors.js';
+import { BusinessLimitReachedError, isUniqueViolation, TenantSlugTakenError } from '../errors.js';
 import { newId } from '../ids.js';
 import { memberships, tenants, type Tenant } from '../schema.js';
-import { withTenant, type TenantTx } from '../tenant.js';
+import { setTransactionTenant, setTransactionUser, type TenantTx } from '../tenant.js';
+import { countOwnedBusinesses } from './memberships.js';
+
+export interface CreateTenantOptions {
+  /** Becomes the business's owner, in the same transaction. */
+  owner?: UserId;
+  /**
+   * With `owner`: the most businesses that user may own. Checked and inserted in one
+   * transaction, serialised per user, so concurrent sign-ups cannot exceed it.
+   */
+  ownerLimit?: number;
+  /** Runs in the new tenant's context before commit (e.g. to write its audit entry). */
+  afterInsert?: (tx: TenantTx, tenant: Tenant) => Promise<void>;
+}
 
 /**
  * Creates a business, and with `owner` that user's owner membership in the same transaction.
  * Its id is generated here and becomes the tenant of the insert's own transaction, which is the
- * only way RLS lets a row into `tenants`.
+ * only way RLS lets a row into `tenants`. Throws `TenantSlugTakenError` for a taken slug and
+ * `BusinessLimitReachedError` when the owner is at `ownerLimit`.
  */
 export async function createTenant(
   db: Database,
   input: NewTenant,
-  options: { owner?: UserId } = {},
+  options: CreateTenantOptions = {},
 ): Promise<Tenant> {
   const values = NewTenantSchema.parse(input);
   const owner = options.owner === undefined ? undefined : UserIdSchema.parse(options.owner);
+  const { ownerLimit, afterInsert } = options;
+  if (ownerLimit !== undefined && owner === undefined) {
+    throw new Error('ownerLimit needs an owner');
+  }
   const id = TenantIdSchema.parse(newId());
   try {
-    return await withTenant(db, id, async (tx) => {
+    return await db.transaction(async (tx) => {
+      if (owner !== undefined && ownerLimit !== undefined) {
+        await checkOwnerLimit(tx, owner, z.number().int().min(1).parse(ownerLimit));
+      }
+      await setTransactionTenant(tx, id);
       const [tenant] = await tx
         .insert(tenants)
         .values({ id, ...values })
         .returning();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
+      const created = tenant!;
       if (owner !== undefined) {
         await tx.insert(memberships).values({ userId: owner, role: 'owner' });
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
-      return tenant!;
+      await afterInsert?.(tx, created);
+      return created;
     });
   } catch (error) {
     if (isUniqueViolation(error, 'tenants_slug_unique')) {
@@ -43,6 +68,21 @@ export async function createTenant(
     }
     throw error;
   }
+}
+
+/**
+ * Throws if `owner` already owns `limit` businesses. Runs before the transaction gets its
+ * tenant: in the user context, `member_read` shows the user's memberships across tenants. The
+ * advisory lock (released at commit) makes a second concurrent creation wait for this one.
+ */
+async function checkOwnerLimit(tx: TenantTx, owner: UserId, limit: number): Promise<void> {
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtextextended(${`floty.create_tenant:${owner}`}, 0))`,
+  );
+  await setTransactionUser(tx, owner);
+  const owned = await countOwnedBusinesses(tx);
+  await setTransactionUser(tx, null);
+  if (owned >= limit) throw new BusinessLimitReachedError(limit);
 }
 
 /** The transaction's tenant. */

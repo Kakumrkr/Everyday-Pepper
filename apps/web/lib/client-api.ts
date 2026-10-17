@@ -20,6 +20,7 @@ const MESSAGES: Record<string, string> = {
   INVALID_TWO_FACTOR_COOKIE: 'Your sign-in timed out. Start again.',
   ACCOUNT_TEMPORARILY_LOCKED: 'Too many wrong codes. Try again in 15 minutes.',
   slug_taken: 'That booking link is taken. Try another.',
+  business_limit_reached: 'One account can own at most 5 businesses.',
   validation_failed: 'Some fields need another look.',
   unauthenticated: 'Your session ended. Sign in again.',
 };

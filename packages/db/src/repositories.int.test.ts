@@ -2,13 +2,23 @@ import { TenantIdSchema, UserIdSchema } from '@floty/contracts';
 import { eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
-import { MembershipExistsError, TenantSlugTakenError } from './errors.js';
+import {
+  BusinessLimitReachedError,
+  MembershipExistsError,
+  TenantSlugTakenError,
+} from './errors.js';
 import { newId } from './ids.js';
 import {
   addMembership,
+  countOwnedBusinesses,
+  countOwners,
+  deleteMembership,
   findMembership,
   listMemberships,
+  listTenantMembers,
   listUserBusinesses,
+  lockTenantMemberships,
+  updateMembershipRole,
 } from './repositories/memberships.js';
 import { setSessionActiveTenant } from './repositories/sessions.js';
 import { createTenant, findCurrentTenant } from './repositories/tenants.js';
@@ -147,6 +157,161 @@ describe('memberships', () => {
       return listMemberships(tx);
     });
     expect(remaining).toEqual([]);
+  });
+});
+
+describe('team changes', () => {
+  async function team(slug: string) {
+    const tenant = TenantIdSchema.parse((await createTenant(db, { ...juniper, slug })).id);
+    const [owner, stylist, outsider] = [
+      await insertUser(db, 'Owner'),
+      await insertUser(db, 'Stylist'),
+      await insertUser(db, 'Outsider'),
+    ];
+    await withTenant(db, tenant, async (tx) => {
+      await addMembership(tx, { userId: owner, role: 'owner' });
+      await addMembership(tx, { userId: stylist, role: 'staff' });
+    });
+    // The outsider belongs to another business only.
+    const other = TenantIdSchema.parse(
+      (await createTenant(db, { ...juniper, slug: `${slug}-x` })).id,
+    );
+    await withTenant(db, other, (tx) => addMembership(tx, { userId: outsider, role: 'owner' }));
+    return { tenant, other, owner, stylist, outsider };
+  }
+
+  it('lists members with their name and email, for the current tenant only', async () => {
+    const { tenant, owner, stylist } = await team('team-list');
+    const members = await withTenant(db, tenant, listTenantMembers);
+    expect(members.map((m) => [m.userId, m.name, m.role])).toEqual([
+      [owner, 'Owner', 'owner'],
+      [stylist, 'Stylist', 'staff'],
+    ]);
+    expect(members[0]?.email).toBe(`user-${owner}@example.test`);
+    expect(members[0]?.joinedAt).toBeInstanceOf(Date);
+  });
+
+  it('changes a role and removes a member, only within the current tenant', async () => {
+    const { tenant, other, stylist, outsider } = await team('team-change');
+    const promoted = await withTenant(db, tenant, (tx) =>
+      updateMembershipRole(tx, stylist, 'manager'),
+    );
+    expect(promoted).toMatchObject({ userId: stylist, role: 'manager', tenantId: tenant });
+    // Someone from another business is invisible: nothing to change or remove.
+    await expect(
+      withTenant(db, tenant, (tx) => updateMembershipRole(tx, outsider, 'staff')),
+    ).resolves.toBeUndefined();
+    await expect(
+      withTenant(db, tenant, (tx) => deleteMembership(tx, outsider)),
+    ).resolves.toBeUndefined();
+    await expect(
+      withTenant(db, other, (tx) => findMembership(tx, outsider)),
+    ).resolves.toMatchObject({
+      role: 'owner',
+    });
+
+    const removed = await withTenant(db, tenant, (tx) => deleteMembership(tx, stylist));
+    expect(removed).toMatchObject({ userId: stylist, role: 'manager' });
+    await expect(
+      withTenant(db, tenant, (tx) => findMembership(tx, stylist)),
+    ).resolves.toBeUndefined();
+  });
+
+  it('counts owners of the current tenant', async () => {
+    const { tenant, stylist } = await team('team-owners');
+    await expect(withTenant(db, tenant, countOwners)).resolves.toBe(1);
+    await withTenant(db, tenant, (tx) => updateMembershipRole(tx, stylist, 'owner'));
+    await expect(withTenant(db, tenant, countOwners)).resolves.toBe(2);
+  });
+
+  it('lockTenantMemberships makes a second change wait for the first', async () => {
+    const { tenant } = await team('team-lock');
+    let release: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    let locked: () => void = () => undefined;
+    const isLocked = new Promise<void>((resolve) => (locked = resolve));
+    const first = withTenant(db, tenant, async (tx) => {
+      await lockTenantMemberships(tx);
+      locked();
+      await held;
+    });
+    await isLocked;
+    const second = await withTenant(db, tenant, async (tx) => {
+      await tx.execute(sql`SET LOCAL lock_timeout = '200ms'`);
+      await lockTenantMemberships(tx);
+    }).catch((e: unknown) => e);
+    expect(sqlState(second)).toBe('55P03'); // lock_not_available
+    release();
+    await first;
+    // Released at commit; adding a member (a foreign key to the tenant) was never blocked.
+    await expect(withTenant(db, tenant, lockTenantMemberships)).resolves.toBeUndefined();
+  });
+});
+
+describe('business limit per owner', () => {
+  it('counts only the businesses a user owns', async () => {
+    const user = await insertUser(db, 'Counter');
+    await createTenant(db, { ...juniper, slug: 'owned-1' }, { owner: user });
+    const staffAt = TenantIdSchema.parse(
+      (await createTenant(db, { ...juniper, slug: 'staff-at' })).id,
+    );
+    await withTenant(db, staffAt, (tx) => addMembership(tx, { userId: user, role: 'staff' }));
+    await expect(withUser(db, user, countOwnedBusinesses)).resolves.toBe(1);
+  });
+
+  it('refuses a business beyond the limit and creates nothing', async () => {
+    const user = await insertUser(db, 'Limited');
+    await createTenant(db, { ...juniper, slug: 'limit-1' }, { owner: user, ownerLimit: 2 });
+    await createTenant(db, { ...juniper, slug: 'limit-2' }, { owner: user, ownerLimit: 2 });
+    await expect(
+      createTenant(db, { ...juniper, slug: 'limit-3' }, { owner: user, ownerLimit: 2 }),
+    ).rejects.toBeInstanceOf(BusinessLimitReachedError);
+    // The slug is still free.
+    await expect(createTenant(db, { ...juniper, slug: 'limit-3' })).resolves.toBeDefined();
+  });
+
+  it('holds under concurrent creation', async () => {
+    const user = await insertUser(db, 'Racer');
+    const results = await Promise.allSettled(
+      Array.from({ length: 6 }, (_, i) =>
+        createTenant(db, { ...juniper, slug: `race-${String(i)}` }, { owner: user, ownerLimit: 3 }),
+      ),
+    );
+    const failures = results.filter((r) => r.status === 'rejected');
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(3);
+    for (const failure of failures)
+      expect(failure.reason).toBeInstanceOf(BusinessLimitReachedError);
+    await expect(withUser(db, user, countOwnedBusinesses)).resolves.toBe(3);
+  });
+
+  it('needs an owner', async () => {
+    await expect(
+      createTenant(db, { ...juniper, slug: 'no-owner' }, { ownerLimit: 1 }),
+    ).rejects.toThrow('ownerLimit needs an owner');
+  });
+
+  it('runs afterInsert in the new tenant, in the same transaction', async () => {
+    const user = await insertUser(db, 'Hooked');
+    const created = await createTenant(
+      db,
+      { ...juniper, slug: 'hooked' },
+      {
+        owner: user,
+        afterInsert: async (tx, tenant) => {
+          const members = await listMemberships(tx);
+          expect(members.map((m) => [m.tenantId, m.role])).toEqual([[tenant.id, 'owner']]);
+        },
+      },
+    );
+    expect(created.slug).toBe('hooked');
+    await expect(
+      createTenant(
+        db,
+        { ...juniper, slug: 'hook-fails' },
+        { afterInsert: () => Promise.reject(new Error('no')) },
+      ),
+    ).rejects.toThrow('no');
+    await expect(createTenant(db, { ...juniper, slug: 'hook-fails' })).resolves.toBeDefined();
   });
 });
 

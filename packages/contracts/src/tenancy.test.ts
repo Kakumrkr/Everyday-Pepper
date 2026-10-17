@@ -16,6 +16,12 @@ describe('TenantIdSchema / UserIdSchema', () => {
     expect(UserIdSchema.parse(id)).toBe(id);
   });
 
+  it('lowercase them, so the same id always compares equal', () => {
+    const id = '0199F0A4-7C1E-7D2A-9B3C-4D5E6F708192';
+    expect(TenantIdSchema.parse(id)).toBe(id.toLowerCase());
+    expect(UserIdSchema.parse(id)).toBe(id.toLowerCase());
+  });
+
   it.each(['', 'tenant-1', "' OR 1=1 --", '0199f0a4-7c1e-7d2a-9b3c'])('reject %j', (value) => {
     expect(TenantIdSchema.safeParse(value).success).toBe(false);
     expect(UserIdSchema.safeParse(value).success).toBe(false);

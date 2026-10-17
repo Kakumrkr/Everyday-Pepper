@@ -3,14 +3,17 @@ import type { Server } from 'node:http';
 import { Writable } from 'node:stream';
 import {
   ApiErrorSchema,
+  AuditLogResponseSchema,
   CurrentBusinessResponseSchema,
   MeResponseSchema,
+  MembersResponseSchema,
   TenantIdSchema,
   UserIdSchema,
 } from '@floty/contracts';
 import {
   accounts,
   addMembership,
+  auditLog,
   prepareDatabase,
   sessions,
   twoFactors,
@@ -93,6 +96,8 @@ function browser() {
     get: (path: string) => send(agent.get(path)),
     post: (path: string, body: object = {}) => send(agent.post(path)).send(body),
     put: (path: string, body: object) => send(agent.put(path)).send(body),
+    patch: (path: string, body: object) => send(agent.patch(path)).send(body),
+    delete: (path: string) => send(agent.delete(path)),
   };
 }
 type Browser = ReturnType<typeof browser>;
@@ -373,5 +378,155 @@ describe('Better Auth safeguards', () => {
     const agentResponse = await b.post('/api/auth/sign-out').set('origin', 'https://evil.example');
     expect(agentResponse.status).toBe(403);
     await b.get('/v1/me').expect(200);
+  });
+});
+
+describe('team and audit log (ADR-0013)', () => {
+  let ana: Browser;
+  let ben: Browser;
+  let cara: Browser;
+  let caraEmail: string;
+  let ids: { ana: string; ben: string; cara: string };
+  let tenantId: string;
+
+  beforeAll(async () => {
+    ({ browser: ana } = await signUp('ana'));
+    ({ browser: ben } = await signUp('ben'));
+    ({ browser: cara, email: caraEmail } = await signUp('cara'));
+    ids = {
+      ana: (await me(ana)).user.id,
+      ben: (await me(ben)).user.id,
+      cara: (await me(cara)).user.id,
+    };
+    tenantId = (
+      (await ana.post('/v1/tenants', { ...juniper, slug: 'team-salon' }).expect(201)).body as {
+        id: string;
+      }
+    ).id;
+    await enrolTotp(ana);
+    await withTenant(db, TenantIdSchema.parse(tenantId), async (tx) => {
+      await addMembership(tx, { userId: UserIdSchema.parse(ids.ben), role: 'manager' });
+      await addMembership(tx, { userId: UserIdSchema.parse(ids.cara), role: 'staff' });
+    });
+    await ben.put('/v1/me/active-tenant', { tenantId }).expect(204);
+    await cara.put('/v1/me/active-tenant', { tenantId }).expect(204);
+  });
+
+  async function members(b: Browser) {
+    return MembersResponseSchema.parse((await b.get('/v1/members').expect(200)).body).members;
+  }
+
+  it('a manager needs a second factor before working in the business', async () => {
+    expect(errorCode((await ben.get('/v1/members').expect(403)).body)).toBe('mfa_required');
+    await enrolTotp(ben);
+    expect((await members(ben)).map((m) => [m.userId, m.role])).toEqual([
+      [ids.ana, 'owner'],
+      [ids.ben, 'manager'],
+      [ids.cara, 'staff'],
+    ]);
+  });
+
+  it('staff can open the business but not see the team or the audit log', async () => {
+    await cara.get('/v1/tenant').expect(200);
+    expect(errorCode((await cara.get('/v1/members').expect(403)).body)).toBe('forbidden');
+    expect(errorCode((await cara.get('/v1/audit-log').expect(403)).body)).toBe('forbidden');
+    const patched = await cara.patch(`/v1/members/${ids.cara}`, { role: 'owner' }).expect(403);
+    expect(errorCode(patched.body)).toBe('forbidden');
+  });
+
+  it('the owner changes a role; the audit log records who, what and the request', async () => {
+    const response = await ana.patch(`/v1/members/${ids.cara}`, { role: 'manager' }).expect(200);
+    expect(response.body).toMatchObject({ userId: ids.cara, role: 'manager' });
+    // Back to staff, so Cara keeps working without a second factor.
+    await ana.patch(`/v1/members/${ids.cara}`, { role: 'staff' }).expect(200);
+
+    const log = AuditLogResponseSchema.parse(
+      (await ana.get('/v1/audit-log?limit=2').expect(200)).body,
+    );
+    expect(log.entries.map((e) => [e.action, e.before, e.after])).toEqual([
+      [
+        'membership.role_changed',
+        { userId: ids.cara, role: 'manager' },
+        { userId: ids.cara, role: 'staff' },
+      ],
+      [
+        'membership.role_changed',
+        { userId: ids.cara, role: 'staff' },
+        { userId: ids.cara, role: 'manager' },
+      ],
+    ]);
+    expect(log.entries[1]?.actor).toEqual({ kind: 'user', userId: ids.ana });
+    expect(log.nextBefore).not.toBeNull();
+    const [row] = await withTenant(db, TenantIdSchema.parse(tenantId), (tx) =>
+      tx
+        .select({ requestId: auditLog.requestId })
+        .from(auditLog)
+        .where(eq(auditLog.id, log.entries[1]?.id ?? '')),
+    );
+    expect(row?.requestId).toBe(response.headers['x-request-id']);
+  });
+
+  it('records the business creation too', async () => {
+    const log = AuditLogResponseSchema.parse((await ben.get('/v1/audit-log').expect(200)).body);
+    expect(log.entries.at(-1)).toMatchObject({
+      action: 'tenant.created',
+      entity: { type: 'tenant', id: tenantId },
+      actor: { kind: 'user', userId: ids.ana },
+    });
+  });
+
+  it('a manager cannot change or remove the owner, nor make anyone an owner', async () => {
+    expect(
+      errorCode((await ben.patch(`/v1/members/${ids.ana}`, { role: 'staff' }).expect(403)).body),
+    ).toBe('forbidden');
+    expect(errorCode((await ben.delete(`/v1/members/${ids.ana}`).expect(403)).body)).toBe(
+      'forbidden',
+    );
+    expect(
+      errorCode((await ben.patch(`/v1/members/${ids.cara}`, { role: 'owner' }).expect(403)).body),
+    ).toBe('forbidden');
+  });
+
+  it('someone from another business is not found here', async () => {
+    const { browser: dan } = await signUp('dan');
+    const danId = (await me(dan)).user.id;
+    await dan.post('/v1/tenants', { ...juniper, slug: 'dan-studio' }).expect(201);
+    const response = await ana.patch(`/v1/members/${danId}`, { role: 'staff' }).expect(404);
+    expect(errorCode(response.body)).toBe('member_not_found');
+    expect((await me(dan)).businesses.map((b) => b.role)).toEqual(['owner']);
+  });
+
+  it('the last owner cannot leave', async () => {
+    const response = await ana.delete(`/v1/members/${ids.ana}`).expect(409);
+    expect(errorCode(response.body)).toBe('last_owner');
+  });
+
+  it('staff can leave; their session then has no business', async () => {
+    await cara.delete(`/v1/members/${ids.cara}`).expect(204);
+    expect(await me(cara)).toMatchObject({ activeTenantId: null, businesses: [] });
+    expect(errorCode((await cara.get('/v1/tenant').expect(403)).body)).toBe('no_active_tenant');
+    const log = AuditLogResponseSchema.parse(
+      (await ana.get('/v1/audit-log?limit=1').expect(200)).body,
+    );
+    expect(log.entries[0]).toMatchObject({
+      action: 'membership.removed',
+      actor: { kind: 'user', userId: ids.cara },
+      before: { userId: ids.cara, role: 'staff' },
+    });
+  });
+
+  it('logs no emails from the team endpoints (the member list carries them)', () => {
+    expect(JSON.stringify(logLines)).not.toContain(caraEmail);
+  });
+
+  it('one user may own at most 5 businesses', async () => {
+    for (let i = 2; i <= 5; i++) {
+      await ana.post('/v1/tenants', { ...juniper, slug: `team-salon-${String(i)}` }).expect(201);
+    }
+    const response = await ana
+      .post('/v1/tenants', { ...juniper, slug: 'team-salon-6' })
+      .expect(409);
+    expect(errorCode(response.body)).toBe('business_limit_reached');
+    expect((await me(ana)).businesses).toHaveLength(5);
   });
 });

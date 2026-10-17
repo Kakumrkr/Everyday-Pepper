@@ -7,6 +7,7 @@ import {
   TimeZoneSchema,
   UserIdSchema,
 } from './tenancy.js';
+import { UtcDateTimeSchema } from './time.js';
 
 // The signed-in user's account and businesses: bodies of the api's `/v1/me` and `/v1/tenant`
 // endpoints (ADR-0012). Sign-up, sign-in and second factor go through Better Auth's own
@@ -21,6 +22,10 @@ export const ApiErrorCodeSchema = z.enum([
   'forbidden_origin',
   'slug_taken',
   'validation_failed',
+  'forbidden',
+  'member_not_found',
+  'last_owner',
+  'business_limit_reached',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 
@@ -76,3 +81,21 @@ export const CurrentBusinessResponseSchema = z.object({
   role: MembershipRoleSchema,
 });
 export type CurrentBusinessResponse = z.infer<typeof CurrentBusinessResponseSchema>;
+
+/** A member of the active business, as the team page lists them. */
+export const MemberSchema = z.object({
+  userId: UserIdSchema,
+  name: z.string(),
+  email: z.email(),
+  role: MembershipRoleSchema,
+  joinedAt: UtcDateTimeSchema,
+});
+export type Member = z.infer<typeof MemberSchema>;
+
+/** `GET /v1/members`: everyone in the active business, longest-standing first. */
+export const MembersResponseSchema = z.object({ members: z.array(MemberSchema) });
+export type MembersResponse = z.infer<typeof MembersResponseSchema>;
+
+/** `PATCH /v1/members/:userId`: give a member another role. */
+export const ChangeMemberRoleRequestSchema = z.object({ role: MembershipRoleSchema }).strict();
+export type ChangeMemberRoleRequest = z.infer<typeof ChangeMemberRoleRequestSchema>;

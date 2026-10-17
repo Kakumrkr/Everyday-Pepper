@@ -6,6 +6,7 @@ describe('messageFor', () => {
     [401, { code: 'INVALID_EMAIL_OR_PASSWORD', message: 'Invalid email or password' }, 'match'],
     [422, { code: 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL' }, 'already exists'],
     [409, { code: 'slug_taken', message: 'x' }, 'booking link is taken'],
+    [409, { code: 'business_limit_reached', message: 'x' }, 'at most 5 businesses'],
     [401, { code: 'INVALID_CODE' }, 'code didn’t work'],
   ])('explains %i %j', (status, body, expected) => {
     expect(messageFor(status, body)).toContain(expected);

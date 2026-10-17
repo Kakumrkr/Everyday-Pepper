@@ -1,6 +1,15 @@
 import { getTableConfig, type PgTable } from 'drizzle-orm/pg-core';
 import { describe, expect, it } from 'vitest';
-import { accounts, memberships, sessions, tenants, twoFactors, users } from './schema.js';
+import {
+  accounts,
+  auditLog,
+  memberships,
+  sessions,
+  tenants,
+  twoFactors,
+  usageMeters,
+  users,
+} from './schema.js';
 
 function foreignKeys(table: PgTable) {
   return getTableConfig(table).foreignKeys.map((fk) => {
@@ -33,6 +42,21 @@ describe('schema foreign keys', () => {
     expect(foreignKeys(sessions)).toContainEqual({
       from: ['active_tenant_id'],
       to: 'tenants(id)',
+      onDelete: 'set null',
+    });
+  });
+
+  it('removes audit entries and usage with their tenant, and keeps entries of a deleted user', () => {
+    for (const table of [auditLog, usageMeters]) {
+      expect(foreignKeys(table)).toContainEqual({
+        from: ['tenant_id'],
+        to: 'tenants(id)',
+        onDelete: 'cascade',
+      });
+    }
+    expect(foreignKeys(auditLog)).toContainEqual({
+      from: ['actor_user_id'],
+      to: 'users(id)',
       onDelete: 'set null',
     });
   });

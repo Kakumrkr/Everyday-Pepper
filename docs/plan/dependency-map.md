@@ -6,13 +6,14 @@ Use this before any change: find the part you're changing, then check everything
 |---|---|---|
 | **contracts** (Zod schemas, events, cards) | — | everything |
 | **db** (`@floty/db`: Drizzle schema incl. Better Auth's global tables, SQL migrations + migrate CLI, roles, RLS, `withTenant`/`withUser`, repositories, `authDatabaseAdapter`, readiness probe) | contracts, Postgres, better-auth (Drizzle adapter only) | core, modules, ai, runtime, apps/api (migrate CLI in the image), worker |
-| **core: tenancy/auth/RBAC** (S7: `decideTenantAccess`, owners need MFA; RBAC matrix S8) | db, contracts | every API endpoint, AI tools, worker |
-| **api: auth** (`apps/api/src/auth`: Better Auth at `/api/auth`, `AuthService`, `SessionGuard`/`TenantGuard`/`SameOriginGuard`; `/v1/me`, `/v1/tenants`, `/v1/tenant`) | db, core, contracts, runtime, better-auth | every tenant-scoped endpoint, web, e2e |
-| **core: audit log** | db | all write services, trust layer |
+| **core: tenancy/auth/RBAC** (`decideTenantAccess`, owners and managers need MFA; S8: `PERMISSION_MATRIX`/`can`, `decideMembershipChange`, team services `listMembers`/`changeMemberRole`/`removeMember`, `createBusiness` with the per-owner limit) | db, contracts | every API endpoint, AI tools, worker, web (`roleRequiresMfa` from contracts) |
+| **api: auth** (`apps/api/src/auth`: Better Auth at `/api/auth`, `AuthService`, `SessionGuard`/`TenantGuard` (+ `@RequirePermission`)/`SameOriginGuard`; `/v1/me`, `/v1/tenants`, `/v1/tenant`) | db, core, contracts, runtime, better-auth | every tenant-scoped endpoint, web, e2e |
+| **api: team** (`apps/api/src/team`, S8: `/v1/members`, `/v1/audit-log`) | core, contracts, runtime, api auth | web (Team screen, S9), e2e |
+| **core: audit log** (S8: `audit_log` + `appendAuditEntry` in db, `readAuditLog` in core, per-action schemas in contracts) | db, contracts | all write services, trust layer |
 | **core: customers** | db, RBAC | appointments, memory, messaging, feed, import |
 | **core: messaging + outbox** | db, worker, integrations/email | reminders, feed drafts, waitlist offers, booking page |
 | **core: tasks** | db, worker | AI tools, feed |
-| **core: metering** | db | AI agent (budgets), billing (future) |
+| **core: metering** (S8: `usage_meters`, `addUsage`, `recordUsage`/`usageFor`, `usagePeriodOf`) | db, contracts | AI agent (budgets), email sending (Phase 5), billing (future) |
 | **modules/appointments** (rules, availability, bookings, waitlist) | core, contracts | AI tools, PWA calendar, booking page, feed insights, calendar sync, reminders |
 | **templates/*** | template schema (contracts), appointments extension schema | tenant setup, onboarding, AI prompts, insights thresholds, UI terminology |
 | **ai: provider adapter** | OpenAI SDK | agent loop, onboarding extraction, memory embeddings |

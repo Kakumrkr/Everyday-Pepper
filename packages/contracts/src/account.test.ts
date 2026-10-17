@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   ApiErrorSchema,
+  ChangeMemberRoleRequestSchema,
   CurrentBusinessResponseSchema,
   MeResponseSchema,
+  MembersResponseSchema,
   SetActiveTenantRequestSchema,
 } from './account.js';
 
@@ -62,5 +64,37 @@ describe('ApiErrorSchema', () => {
       true,
     );
     expect(ApiErrorSchema.safeParse({ code: 'teapot', message: 'no' }).success).toBe(false);
+  });
+});
+
+describe('members', () => {
+  const member = {
+    userId: USER,
+    name: 'Ana Reyes',
+    email: 'ana@example.test',
+    role: 'owner',
+    joinedAt: '2026-10-17T12:00:00.000Z',
+  };
+
+  it('accepts a member list', () => {
+    expect(MembersResponseSchema.parse({ members: [member] })).toEqual({ members: [member] });
+  });
+
+  it('rejects a local time', () => {
+    const local = { ...member, joinedAt: '2026-10-17T08:00:00-04:00' };
+    expect(MembersResponseSchema.safeParse({ members: [local] }).success).toBe(false);
+  });
+
+  it.each([{ role: 'manager' }])('accepts the role change %j', (body) => {
+    expect(ChangeMemberRoleRequestSchema.parse(body)).toEqual(body);
+  });
+
+  it.each([
+    {},
+    { role: 'admin' },
+    { role: 'staff', userId: USER },
+    { role: 'staff', tenantId: TENANT },
+  ])('rejects the role change %j', (body) => {
+    expect(ChangeMemberRoleRequestSchema.safeParse(body).success).toBe(false);
   });
 });
