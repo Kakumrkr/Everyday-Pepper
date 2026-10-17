@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done on `claude/blissful-lovelace-q6q43j`, PR to `main` open → next: S8 (roles/audit/metering)
+**Last updated:** 2026-10-17 · **Plan version:** 0.5 · **Current phase:** 2 — Platform core. S7 (Phase 2b: auth) done, PR #9 green and waiting for review → next: S8 (roles/audit/metering)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -89,6 +89,7 @@
     - Docker images built. `docker compose up --wait`: 6 services healthy, `migrate` exited 0.
     - Playwright 18/18 on phone and desktop, three runs in a row: full owner journey, backup code, wrong password, signed-out redirects, no sideways overflow.
     - api logs: no errors, no emails or passwords, `user_id`/`tenant_id` present.
+  - **CI on PR #9:** all three required checks green (lint/typecheck/test/build, Integration, E2E smoke incl. the new auth journey); mergeable.
   - **Findings:**
     - Better Auth turns off its CSRF and origin checks when `NODE_ENV=test`, so we pin them on.
     - pnpm resolves optional peers from the whole workspace, which put next/react/vitest/playwright into the api image (fixed by `.pnpmfile.cjs`).
