@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.8 · **Current phase:** 3 — Appointments + templates. S10 and S11 merged. **S12 (Phase 3c: bookings, clients, waitlist, staff-scoped RLS) done** on `claude/blissful-lovelace-q6q43j`, ADR-0017 **proposed** (waiting for the user) → next: S13 (templates + Phase 3 exit)
+**Last updated:** 2026-10-17 · **Plan version:** 0.8 · **Current phase:** 3 — Appointments + templates. S10 and S11 merged. **S12 (Phase 3c: bookings, clients, waitlist, staff-scoped RLS) done**, ADR-0017 **accepted**; merged into `main` at the user's request → next: S13 (templates + Phase 3 exit)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -196,7 +196,7 @@
     - The engine lets buffers reach outside working hours, and checks the occupied range (with buffers) against other bookings' occupied ranges. S12's exclusion constraint should use the same occupied range.
     - Unit tests run against the built `dist/` of their dependencies (turbo `^build`), so run `pnpm --filter <dep> build` after changing contracts before running a dependent package's tests on their own.
 
-- **S12 Phase 3c (2026-10-17):** clients, bookings, busy times and the waitlist, with staff-scoped RLS ([ADR-0017](../adr/0017-bookings-clients-and-waitlist.md), proposed).
+- **S12 Phase 3c (2026-10-17):** clients, bookings, busy times and the waitlist, with staff-scoped RLS ([ADR-0017](../adr/0017-bookings-clients-and-waitlist.md), accepted by the user).
   - **contracts:** client, booking (statuses `confirmed`/`completed`/`no_show`/`cancelled`, sources `team`/`ai`/`booking_page`, idempotency key, range queries ≤ 62 days, busy times, availability, the `slot_unavailable` body with alternatives) and waitlist schemas (1–10 local windows); audit actions `client.created`, `booking.created/updated`, `waitlist_entry.created/updated` (ids, times, statuses only); ten error codes.
   - **db:**
     - Tables `clients`, `bookings`, `booking_occupancy` (kept by a trigger; `occupied tstzrange` = appointment + buffers) and `waitlist_entries`: forced RLS, composite tenant keys, checks.
@@ -305,7 +305,7 @@
   - (3) Statuses **`confirmed`/`completed`/`no_show`/`cancelled`**, no "pending"; only `cancelled` frees the time.
   - (4) Every booking passes the engine; **owners and managers may override** hours and rules, never an overlap.
   - (5) Waitlist **windows are local date + time spans (≤ 10)**, expiring at the end of the last one; statuses `waiting`/`offered`/`booked`/`expired`/`cancelled`; **with API endpoints**.
-- **S12 defaults — ADR-0017, proposed (Claude, for the user to accept or change):**
+- **S12 defaults — ADR-0017, accepted by the user (2026-10-17):**
   - "Customer" is called **client** everywhere (table, contracts, API), as the permissions and UI already were.
   - Booking source **`team`** for anything made in the app (who made it is in `created_by_user_id` and the audit log).
   - A booking keeps a **copy of the service's buffers and price**.
@@ -315,16 +315,14 @@
   - `expired` waitlist status is **derived on read** (nothing has to run).
   - Staff may add waitlist entries **only for their own staff member**; an entry for "anyone" is the owner's/manager's.
   - Work without a user (jobs, the booking page) keeps the full tenant scope; member requests use `withMember`.
+- **After S12 (user, 2026-10-17):** ADR-0017 accepted as proposed. **Staff may find any client by exact email or phone** (Claude's recommendation, chosen by the user) and then book them; they still cannot add clients (`clients.manage` stays owners and managers; matrix unchanged). Built with the Phase 4 booking screens. S12 PR opened and merged at the user's request.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Review ADR-0017** (proposed) and accept it or change its defaults (listed under "S12 defaults" above).
-2. **Decide before the Phase 4 screens: may staff book clients they don't have yet?** Today a stylist can book only clients they already have a booking or waitlist entry with; owners and managers book everyone. Options: (a) staff may find any client by exact email or phone, (b) staff may also add clients (changes the S8 matrix: `clients.manage`), (c) keep it as is.
-3. Then: open the S12 PR (on request, as before).
-4. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10 and S11 are merged, S12 is done (ADR-0017 proposed, PR not yet opened). S13 passes template rule defaults to `resolveRules` (`staffAvailabilityOf` already takes them) and runs the Phase 3 exit, including `/security-review` over S10–S12.
+Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10, S11 and S12 are merged. S13 passes template rule defaults to `resolveRules` (`staffAvailabilityOf` already takes them) and runs the Phase 3 exit, including `/security-review` over S10–S12.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|

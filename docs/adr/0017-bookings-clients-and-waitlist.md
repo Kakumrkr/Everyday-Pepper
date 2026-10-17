@@ -1,6 +1,6 @@
 # ADR-0017: Bookings, clients and the waitlist
 
-- **Status:** Proposed (Claude, 2026-10-17). The user made five decisions at the S12 Session Brief: a minimal clients table now, a separate occupancy table for busy times, no "pending" status, an owner/manager override, and the waitlist window format with API endpoints. The other choices below are defaults for the user to accept or change. · **Date:** 2026-10-17 · Builds on ADR-0016 (rules, availability engine), ADR-0015 (base data), ADR-0013 (roles, audit log), ADR-0012 (sessions, tenant context) and ADR-0010 (RLS)
+- **Status:** Accepted (user, 2026-10-17). Proposed by Claude the same day. The user made five decisions at the S12 Session Brief: a minimal clients table now, a separate occupancy table for busy times, no "pending" status, an owner/manager override, and the waitlist window format with API endpoints. The other choices below are defaults for the user to accept or change. · **Date:** 2026-10-17 · Builds on ADR-0016 (rules, availability engine), ADR-0015 (base data), ADR-0013 (roles, audit log), ADR-0012 (sessions, tenant context) and ADR-0010 (RLS)
 
 ## Context
 Phase 3c makes bookings real. The roadmap asks for a booking table whose exclusion constraint makes double booking impossible, and for statuses and sources. It also asks for AC-W9-1 enforced at the RLS level: a staff user sees and edits only their own bookings. Two more needs follow:
@@ -81,6 +81,8 @@ ADR-0016 also requires the database to guard the same *occupied* time the engine
   - let staff search all clients by exact email or phone;
   - let staff add clients;
   - keep it as it is.
+
+  **Decided (user, 2026-10-17, on Claude's recommendation): staff may find any client by exact email or phone.** A match lets them book that client; it shows only that one client and never lists the rest. Staff still cannot add clients, so `clients.manage` stays with owners and managers and the S8 matrix is unchanged. A walk-in is added by an owner or manager. Built with the Phase 4 booking screens; until then the api behaves as described above.
 - `current_user_id()` is now used inside tenant transactions too, not only by `member_read`. Code that runs without a user (jobs, the booking page) gets the business's full tenant scope, as before. Only member requests go through `withMember`.
 - Bookings and waitlist entries keep services, staff members and clients by `NO ACTION` keys: none of these can be deleted yet. Deleting a client (GDPR) needs a decision on their bookings, anonymise or delete, in the phase that adds it.
 - The trigger rewrites a booking's occupancy row on every relevant update. That is cheap at salon scale.
