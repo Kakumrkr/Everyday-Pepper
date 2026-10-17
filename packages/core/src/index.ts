@@ -7,6 +7,7 @@ export * from './membership-rules.js';
 export * from './permissions.js';
 export * from './services/audit.js';
 export * from './services/business.js';
+export * from './services/clients.js';
 export * from './services/invites.js';
 export * from './services/team.js';
 export * from './services/usage.js';

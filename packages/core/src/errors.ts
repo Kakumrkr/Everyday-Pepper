@@ -66,3 +66,11 @@ export class AlreadyAMemberError extends Error {
     this.name = 'AlreadyAMemberError';
   }
 }
+
+/** No such client in the business, or not one the member may see (staff: their own). */
+export class ClientNotFoundError extends Error {
+  constructor() {
+    super('No such client in this business');
+    this.name = 'ClientNotFoundError';
+  }
+}

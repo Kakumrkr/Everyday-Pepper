@@ -42,6 +42,15 @@ export async function listServices(tx: TenantTx): Promise<ServiceRow[]> {
     .orderBy(asc(sql`lower(${services.name})`), asc(services.id));
 }
 
+/** The service with this id. */
+export async function findService(tx: TenantTx, id: ServiceId): Promise<ServiceRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(services)
+    .where(eq(services.id, Id.parse(id)));
+  return row;
+}
+
 /** The service with this id, locked until the transaction ends (`FOR UPDATE`). */
 export async function lockService(tx: TenantTx, id: ServiceId): Promise<ServiceRow | undefined> {
   const [row] = await tx
