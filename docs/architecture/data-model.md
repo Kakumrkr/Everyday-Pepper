@@ -18,7 +18,7 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 |---|---|
 | Tenant | name, slug (booking page), template_id, time_zone, locale, plan, settings (JSON, versioned) |
 | User | auth identity (global, Better Auth `users`), email, MFA (`two_factors`) |
-| Membership | user_id, tenant_id, role (`owner`/`manager`/`staff`), staff_member_id? |
+| Membership | user_id, tenant_id, role (`owner`/`manager`/`staff`); a staff member may link to it (ADR-0015) |
 | Customer | names, email, phone?, consent flags, tags, source, import_ref |
 | Conversation / Message | channel (`app`; later `sms`, `voice`), role, content, cards |
 | ActionProposal / ActionExecution | see AI trust layer; idempotency_key unique per tenant |
@@ -36,9 +36,10 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 ## L2 Appointments
 | Entity | Key fields / notes |
 |---|---|
-| Service | name, duration, buffers, price_display, category, active |
-| StaffMember | display name, services (M:N), color |
-| WorkingHours / TimeOff | per staff, recurrence, tz-aware |
+| Service (`services`, S10) | name (unique per tenant, case-insensitive), category?, duration 5–720 min, buffers before/after 0–240 min, price_from_cents? / price_to_cents? (integer cents; "from", optionally up to "to"), active |
+| StaffMember (`staff_members`, S10) | display_name, color `#rrggbb`, active, membership_id? (→ memberships, one staff member per membership, SET NULL when the member is removed); services M:N via `staff_services` |
+| WorkingHours (`working_hours`, S10) | staff, ISO weekday, start/end minute after **local** midnight (tenant time zone); no overlap per staff and day (exclusion constraint) |
+| TimeOff (`time_off`, S10) | staff, starts_at/ends_at (UTC, ≤ 366 days), created_by_user_id; no free-text reason |
 | Rule | type, params (JSON, Zod), source (`template`/`tenant`/`learned`), version |
 | Booking | customer, staff, service, `during tstzrange`, status, source (`owner`/`staff`/`ai`/`booking_page`), external_event_ref; **EXCLUDE USING gist (staff_id WITH =, during WITH &&) WHERE status active** |
 | WaitlistEntry | customer, service, staff?, windows, status, expires_at |
@@ -46,4 +47,4 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 | BookingVerification | email code hash, expires, attempts (public booking) |
 
 ## Invariants
-No overlapping active bookings per staff (DB constraint) · every write has an audit entry · every side effect goes through `OutboxMessage` · deleting a customer cascades memory facts/episodes about them.
+References between tenant tables are composite foreign keys on `(tenant_id, id)` (ADR-0015) · No overlapping active bookings per staff (DB constraint) · every write has an audit entry · every side effect goes through `OutboxMessage` · deleting a customer cascades memory facts/episodes about them.

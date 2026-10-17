@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.7 — 2026-10-17
+- S10 (Phase 3a): [ADR-0015](../adr/0015-appointments-base-data.md) (accepted by the user): services (price "from", optional "to", in cents), staff members optionally linked to one membership, weekly hours in local time, time off in UTC; a new L2 package `@floty/appointments`; staff manage only their own time off; composite `(tenant_id, id)` foreign keys for references between tenant tables.
+- Data model: a staff member links to a membership (`staff_members.membership_id`) instead of `memberships.staff_member_id`, approved by the user at the S10 Session Brief. No scope change.
+- Session plan: Phase 3 split into **S10** (base data), **S11** (rules + availability), **S12** (bookings + waitlist), **S13** (templates + exit), approved by the user. No change to phases, scope or exit criteria.
+
 ## 0.6 — 2026-10-17
 - S9 (Phase 2c, part 2): [ADR-0014](../adr/0014-invites.md) (accepted by the user): single-use, 7-day invite links bound to the invitee's email, hashed tokens, at most 20 open invites per business. **Phase 2 complete** (exit criteria met; S9 merged at the user's request).
 - S8 (Phase 2c): [ADR-0013](../adr/0013-roles-audit-log-and-metering.md) (accepted by the user): permission matrix in core, MFA for managers as well as owners, append-only audit log, usage meters, at most 5 businesses per owner, domain services in core. Matrix, manager MFA and the limit approved by the user at the S8 Session Brief.
