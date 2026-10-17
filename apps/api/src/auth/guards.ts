@@ -43,6 +43,16 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   staff_member_not_found: 'No such staff member in this business',
   staff_member_link_taken: "This member's login is already linked to another staff member",
   time_off_not_found: 'No such time off for this staff member',
+  client_not_found: 'No such client in this business',
+  client_email_taken: 'The business already has a client with this email',
+  booking_not_found: 'No such booking in this business',
+  slot_unavailable: 'That time cannot be booked',
+  booking_not_changeable: 'This booking can no longer be changed this way',
+  booking_not_started: 'Mark a booking completed or no-show once it has started',
+  idempotency_key_reused: 'This idempotency key was already used for a different booking',
+  waitlist_entry_not_found: 'No such waitlist entry in this business',
+  waitlist_entry_not_changeable: 'This waitlist entry can no longer be changed',
+  waitlist_expired: 'Every window of this waitlist entry has already passed',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */

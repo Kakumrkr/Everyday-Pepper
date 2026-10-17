@@ -3,7 +3,13 @@ import { PgDialect } from 'drizzle-orm/pg-core';
 import type { SQL } from 'drizzle-orm';
 import { describe, expect, it, vi } from 'vitest';
 import type { Database } from './client.js';
-import { setTransactionTenant, setTransactionUser, withTenant, withUser } from './tenant.js';
+import {
+  setTransactionTenant,
+  setTransactionUser,
+  withMember,
+  withTenant,
+  withUser,
+} from './tenant.js';
 
 const TENANT = TenantIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192');
 const USER = UserIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708193');
@@ -74,6 +80,33 @@ describe('withUser', () => {
   it.each(['', 'not-a-uuid'])('rejects user id %j before touching the database', async (value) => {
     const { db, transaction } = fakeDb();
     await expect(withUser(db, value as UserId, () => Promise.resolve())).rejects.toThrow();
+    expect(transaction).not.toHaveBeenCalled();
+  });
+});
+
+describe('withMember', () => {
+  it('binds the tenant and then the user, as bound parameters, before the work', async () => {
+    const { db, tx, executed, transaction } = fakeDb();
+    const result = await withMember(db, { tenantId: TENANT, userId: USER }, (given) => {
+      expect(given).toBe(tx);
+      expect(executed).toHaveLength(2);
+      return Promise.resolve('done');
+    });
+    expect(result).toBe('done');
+    // A read-write transaction: members change bookings through it.
+    expect(transaction).toHaveBeenCalledWith(expect.any(Function));
+    expect(executed.map((query) => new PgDialect().sqlToQuery(query))).toMatchObject([
+      { sql: "SELECT set_config('app.tenant_id', $1, true)", params: [TENANT] },
+      { sql: "SELECT set_config('app.user_id', $1, true)", params: [USER] },
+    ]);
+  });
+
+  it.each([
+    ['tenant', { tenantId: 'nope' as TenantId, userId: USER }],
+    ['user', { tenantId: TENANT, userId: 'nope' as UserId }],
+  ])('rejects a malformed %s id before touching the database', async (_label, member) => {
+    const { db, transaction } = fakeDb();
+    await expect(withMember(db, member, () => Promise.resolve())).rejects.toThrow();
     expect(transaction).not.toHaveBeenCalled();
   });
 });

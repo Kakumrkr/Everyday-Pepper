@@ -8,7 +8,7 @@ import {
   type TimeOffId,
   type UserId,
 } from '@floty/contracts';
-import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { isUniqueViolation, ServiceNameTakenError, StaffMemberLinkTakenError } from '../errors.js';
 import {
@@ -405,4 +405,56 @@ export async function replaceBookingRules(tx: TenantTx, rules: readonly Rule[]):
       params: rule.params,
     })),
   );
+}
+
+// Availability inputs (ADR-0016, ADR-0017) -------------------------------------------------
+
+/** Weekly working intervals of several staff members, by staff member, weekday and start. */
+export async function listWorkingHoursOf(
+  tx: TenantTx,
+  staffMemberIds: readonly StaffMemberId[],
+): Promise<(WorkingMinutes & { staffMemberId: string })[]> {
+  if (staffMemberIds.length === 0) return [];
+  return tx
+    .select({
+      staffMemberId: workingHours.staffMemberId,
+      weekday: workingHours.weekday,
+      startMinute: workingHours.startMinute,
+      endMinute: workingHours.endMinute,
+    })
+    .from(workingHours)
+    .where(
+      inArray(
+        workingHours.staffMemberId,
+        staffMemberIds.map((id) => Id.parse(id)),
+      ),
+    )
+    .orderBy(
+      asc(workingHours.staffMemberId),
+      asc(workingHours.weekday),
+      asc(workingHours.startMinute),
+    );
+}
+
+/** Time off of several staff members that overlaps [from, to), by start. */
+export async function listTimeOffBetween(
+  tx: TenantTx,
+  staffMemberIds: readonly StaffMemberId[],
+  range: { from: Date; to: Date },
+): Promise<TimeOffRow[]> {
+  if (staffMemberIds.length === 0) return [];
+  return tx
+    .select()
+    .from(timeOff)
+    .where(
+      and(
+        inArray(
+          timeOff.staffMemberId,
+          staffMemberIds.map((id) => Id.parse(id)),
+        ),
+        lt(timeOff.startsAt, range.to),
+        gt(timeOff.endsAt, range.from),
+      ),
+    )
+    .orderBy(asc(timeOff.startsAt), asc(timeOff.id));
 }

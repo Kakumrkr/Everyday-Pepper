@@ -2,6 +2,7 @@ import { sql, type SQL } from 'drizzle-orm';
 import {
   boolean,
   check,
+  customType,
   index,
   bigint,
   foreignKey,
@@ -46,6 +47,23 @@ function memberRead(using: SQL): ReturnType<typeof pgPolicy> {
     using: sql`${currentTenantId} IS NULL AND ${using}`,
   });
 }
+
+/**
+ * Restricts a table's rows to the records the current member may reach (ADR-0017): every row
+ * for owners, managers and work without a user (jobs, the booking page); for staff, only rows
+ * of the staff member linked to their login (AC-W9-1). Restrictive, so it narrows the
+ * `tenant_isolation` policy and never widens it. The functions are defined in migration 0015;
+ * the sub-selects make Postgres evaluate them once per statement, not once per row.
+ */
+const memberSeesAll = sql`(SELECT current_member_sees_all())`;
+function ownStaffMember(column: SQL): SQL {
+  return sql`${memberSeesAll} OR ${column} IN (SELECT current_member_staff_ids())`;
+}
+
+/** A Postgres `tstzrange`, as Postgres prints it (e.g. `["2026-10-20 14:00:00+00",...)`). */
+const tstzrange = customType<{ data: string }>({
+  dataType: () => 'tstzrange',
+});
 
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -525,6 +543,274 @@ export const bookingRules = pgTable(
   ],
 );
 
+/**
+ * A client of the business (ADR-0017): who bookings and waitlist entries are for. Personal
+ * data: never logged or audited. Staff see only clients they have a booking or waitlist entry
+ * with, and cannot change or delete any (policies `member_scope*`).
+ */
+export const clients = pgTable(
+  'clients',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    email: text('email'),
+    phone: text('phone'),
+    source: text('source').notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    unique('clients_tenant_id_id_unique').on(table.tenantId, table.id),
+    // One client per email in a business (the booking page will find returning clients by it).
+    uniqueIndex('clients_tenant_email_unique').on(table.tenantId, table.email),
+    index('clients_tenant_name_idx').on(table.tenantId, sql`lower(${table.name})`),
+    check('clients_name_length', sql`length(${table.name}) BETWEEN 1 AND 120`),
+    check(
+      'clients_email_format',
+      sql`${table.email} = lower(${table.email}) AND length(${table.email}) BETWEEN 3 AND 254 AND ${table.email} LIKE '%_@_%'`,
+    ),
+    check('clients_phone_format', sql`${table.phone} ~ '^[+][1-9][0-9]{6,14}$'`),
+    check('clients_source_known', sql`${table.source} IN ('team', 'ai', 'booking_page', 'import')`),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${memberSeesAll} OR id IN (SELECT client_id FROM bookings) OR id IN (SELECT client_id FROM waitlist_entries)`,
+      withCheck: memberSeesAll,
+    }),
+    // FOR ALL's USING lets a row be deleted that may be read; staff may read, not delete.
+    pgPolicy('member_scope_delete', { as: 'restrictive', for: 'delete', using: memberSeesAll }),
+  ],
+);
+
+/**
+ * A booking (ADR-0017): a client's appointment for a service with a staff member, with a copy
+ * of the service's duration (`ends_at`), buffers and price when it was made. Its occupied time
+ * is kept in `booking_occupancy` by a trigger (migration 0017), which also holds the exclusion
+ * constraint against double booking. Staff reach only their own staff member's bookings.
+ */
+export const bookings = pgTable(
+  'bookings',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    clientId: uuid('client_id').notNull(),
+    serviceId: uuid('service_id').notNull(),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+    bufferBeforeMinutes: integer('buffer_before_minutes').notNull(),
+    bufferAfterMinutes: integer('buffer_after_minutes').notNull(),
+    priceFromCents: integer('price_from_cents'),
+    priceToCents: integer('price_to_cents'),
+    status: text('status').notNull().default('confirmed'),
+    source: text('source').notNull(),
+    overridden: boolean('overridden').notNull().default(false),
+    idempotencyKey: text('idempotency_key'),
+    // Who made it; NULL for the booking page and once their account is deleted.
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('bookings_tenant_id_id_unique').on(table.tenantId, table.id),
+    uniqueIndex('bookings_tenant_idempotency_key_unique').on(table.tenantId, table.idempotencyKey),
+    index('bookings_staff_member_starts_at_idx').on(
+      table.tenantId,
+      table.staffMemberId,
+      table.startsAt,
+    ),
+    index('bookings_tenant_starts_at_idx').on(table.tenantId, table.startsAt),
+    index('bookings_client_idx').on(table.tenantId, table.clientId),
+    index('bookings_service_idx').on(table.tenantId, table.serviceId),
+    index('bookings_created_by_user_id_idx').on(table.createdByUserId),
+    check(
+      'bookings_duration_range',
+      sql`${table.endsAt} - ${table.startsAt} BETWEEN interval '5 minutes' AND interval '720 minutes'`,
+    ),
+    check(
+      'bookings_buffers_range',
+      sql`${table.bufferBeforeMinutes} BETWEEN 0 AND 240 AND ${table.bufferAfterMinutes} BETWEEN 0 AND 240`,
+    ),
+    check(
+      'bookings_price_range',
+      sql`${table.priceFromCents} BETWEEN 0 AND 10000000 AND ${table.priceToCents} BETWEEN 0 AND 10000000`,
+    ),
+    check(
+      'bookings_status_known',
+      sql`${table.status} IN ('confirmed', 'completed', 'no_show', 'cancelled')`,
+    ),
+    check('bookings_source_known', sql`${table.source} IN ('team', 'ai', 'booking_page')`),
+    check(
+      'bookings_idempotency_key_format',
+      sql`${table.idempotencyKey} ~ '^[A-Za-z0-9_-]{8,100}$'`,
+    ),
+    foreignKey({
+      name: 'bookings_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }),
+    foreignKey({
+      name: 'bookings_service_fk',
+      columns: [table.tenantId, table.serviceId],
+      foreignColumns: [services.tenantId, services.id],
+    }),
+    foreignKey({
+      name: 'bookings_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: ownStaffMember(sql.raw('staff_member_id')),
+      withCheck: ownStaffMember(sql.raw('staff_member_id')),
+    }),
+  ],
+);
+
+/**
+ * The time each active (not cancelled) booking occupies: the appointment and its buffers, in
+ * `occupied`. Written only by the `bookings` trigger (migration 0017); `id` is the booking's.
+ * Everyone in the business may read it (the team calendar's busy times carry no booking
+ * details); staff may write only their own staff member's rows. The exclusion constraint
+ * `booking_occupancy_no_overlap` (migration 0017) is what makes double booking impossible.
+ */
+export const bookingOccupancy = pgTable(
+  'booking_occupancy',
+  {
+    id: uuid('id').primaryKey(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+    occupied: tstzrange('occupied').notNull(),
+  },
+  (table) => [
+    foreignKey({
+      name: 'booking_occupancy_booking_fk',
+      columns: [table.tenantId, table.id],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'booking_occupancy_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }),
+    check(
+      'booking_occupancy_covers_booking',
+      sql`lower(${table.occupied}) <= ${table.startsAt} AND ${table.endsAt} <= upper(${table.occupied}) AND ${table.endsAt} > ${table.startsAt}`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope_insert', {
+      as: 'restrictive',
+      for: 'insert',
+      withCheck: ownStaffMember(sql.raw('staff_member_id')),
+    }),
+    pgPolicy('member_scope_update', {
+      as: 'restrictive',
+      for: 'update',
+      using: ownStaffMember(sql.raw('staff_member_id')),
+      withCheck: ownStaffMember(sql.raw('staff_member_id')),
+    }),
+    pgPolicy('member_scope_delete', {
+      as: 'restrictive',
+      for: 'delete',
+      using: ownStaffMember(sql.raw('staff_member_id')),
+    }),
+  ],
+);
+
+/**
+ * A client waiting for a service at times that are full (ADR-0017): local-time `windows`
+ * (validated by the contracts' `WaitlistWindowSchema`), optionally with one staff member, until
+ * `expires_at` (the end of the last window). `booking_id` is set when an offer is taken
+ * (Phase 8). Staff reach only entries for their own staff member.
+ */
+export const waitlistEntries = pgTable(
+  'waitlist_entries',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    clientId: uuid('client_id').notNull(),
+    serviceId: uuid('service_id').notNull(),
+    staffMemberId: uuid('staff_member_id'),
+    windows: jsonb('windows').notNull(),
+    status: text('status').notNull().default('waiting'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    bookingId: uuid('booking_id'),
+    // Who added it; NULL once their account is deleted.
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    index('waitlist_entries_open_idx')
+      .on(table.tenantId, table.createdAt)
+      .where(sql`${table.status} IN ('waiting', 'offered')`),
+    index('waitlist_entries_client_idx').on(table.tenantId, table.clientId),
+    index('waitlist_entries_service_idx').on(table.tenantId, table.serviceId),
+    index('waitlist_entries_staff_member_idx').on(table.tenantId, table.staffMemberId),
+    index('waitlist_entries_booking_idx').on(table.tenantId, table.bookingId),
+    index('waitlist_entries_created_by_user_id_idx').on(table.createdByUserId),
+    check(
+      'waitlist_entries_status_known',
+      sql`${table.status} IN ('waiting', 'offered', 'booked', 'cancelled')`,
+    ),
+    check(
+      'waitlist_entries_booked_has_booking',
+      sql`(${table.status} = 'booked') = (${table.bookingId} IS NOT NULL)`,
+    ),
+    check(
+      'waitlist_entries_windows_array',
+      sql`jsonb_typeof(${table.windows}) = 'array' AND jsonb_array_length(${table.windows}) BETWEEN 1 AND 10`,
+    ),
+    foreignKey({
+      name: 'waitlist_entries_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }),
+    foreignKey({
+      name: 'waitlist_entries_service_fk',
+      columns: [table.tenantId, table.serviceId],
+      foreignColumns: [services.tenantId, services.id],
+    }),
+    // Without a staff member (anyone) or a booking the key is not checked (MATCH SIMPLE).
+    foreignKey({
+      name: 'waitlist_entries_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }),
+    foreignKey({
+      name: 'waitlist_entries_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: ownStaffMember(sql.raw('staff_member_id')),
+      withCheck: ownStaffMember(sql.raw('staff_member_id')),
+    }),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
@@ -535,3 +821,7 @@ export type StaffMemberRow = typeof staffMembers.$inferSelect;
 export type WorkingHoursRow = typeof workingHours.$inferSelect;
 export type TimeOffRow = typeof timeOff.$inferSelect;
 export type BookingRuleRow = typeof bookingRules.$inferSelect;
+export type ClientRow = typeof clients.$inferSelect;
+export type BookingRow = typeof bookings.$inferSelect;
+export type BookingOccupancyRow = typeof bookingOccupancy.$inferSelect;
+export type WaitlistEntryRow = typeof waitlistEntries.$inferSelect;

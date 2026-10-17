@@ -5,6 +5,8 @@ export { newId } from './ids.js';
 export * from './migrate.js';
 export * from './repositories/appointments.js';
 export * from './repositories/audit.js';
+export * from './repositories/bookings.js';
+export * from './repositories/clients.js';
 export * from './repositories/invites.js';
 export * from './repositories/memberships.js';
 export * from './repositories/sessions.js';

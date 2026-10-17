@@ -1,6 +1,8 @@
 export * from './account.js';
 export * from './appointments.js';
 export * from './audit.js';
+export * from './bookings.js';
+export * from './clients.js';
 export * from './health.js';
 export * from './invites.js';
 export * from './permissions.js';
@@ -9,3 +11,4 @@ export * from './time.js';
 export * from './trust.js';
 export * from './tenancy.js';
 export * from './usage.js';
+export * from './waitlist.js';

@@ -3,6 +3,7 @@
 // GLOBAL_TABLES (with a reason); the catalog test fails for a table that is in neither.
 import { randomBytes } from 'node:crypto';
 import {
+  ClientIdSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
   TenantIdSchema,
@@ -26,6 +27,8 @@ import {
   replaceWorkingHours,
 } from './repositories/appointments.js';
 import { appendAuditEntry } from './repositories/audit.js';
+import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
+import { insertClient } from './repositories/clients.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { createTenant } from './repositories/tenants.js';
@@ -59,7 +62,22 @@ interface TenantTable {
   inviteLookup?: string;
   /** The services may only insert and read (no UPDATE or DELETE grant). */
   appendOnly?: true;
+  /**
+   * The restrictive `member_scope*` policies (staff reach only their own records, ADR-0017),
+   * as Postgres prints them; the staff scope itself is proven in bookings.int.test.ts.
+   */
+  memberScope?: {
+    policyname: string;
+    cmd: string;
+    qual: string | null;
+    with_check: string | null;
+  }[];
 }
+
+/** The member-scope predicate on a staff member column, as Postgres prints it. */
+const OWN_STAFF =
+  '(( SELECT current_member_sees_all() AS current_member_sees_all) OR (staff_member_id IN ( SELECT current_member_staff_ids() AS current_member_staff_ids)))';
+const SEES_ALL = '( SELECT current_member_sees_all() AS current_member_sees_all)';
 
 const TENANT_TABLES: Record<string, TenantTable> = {
   tenants: {
@@ -203,7 +221,106 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'version = version',
   },
+  clients: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => (await seedClient(tx)).toString(),
+    touch: "name = name || ''",
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '(( SELECT current_member_sees_all() AS current_member_sees_all) OR (id IN ( SELECT bookings.client_id\n   FROM bookings)) OR (id IN ( SELECT waitlist_entries.client_id\n   FROM waitlist_entries)))',
+        with_check: SEES_ALL,
+      },
+      { policyname: 'member_scope_delete', cmd: 'DELETE', qual: SEES_ALL, with_check: null },
+    ],
+  },
+  bookings: {
+    tenantColumn: 'tenant_id',
+    seed: seedBooking,
+    touch: "status = 'cancelled'",
+    memberScope: [
+      { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
+    ],
+  },
+  booking_occupancy: {
+    tenantColumn: 'tenant_id',
+    // The trigger writes the booking's occupied time under the booking's id.
+    seed: seedBooking,
+    touch: 'starts_at = starts_at',
+    memberScope: [
+      { policyname: 'member_scope_delete', cmd: 'DELETE', qual: OWN_STAFF, with_check: null },
+      { policyname: 'member_scope_insert', cmd: 'INSERT', qual: null, with_check: OWN_STAFF },
+      { policyname: 'member_scope_update', cmd: 'UPDATE', qual: OWN_STAFF, with_check: OWN_STAFF },
+    ],
+  },
+  waitlist_entries: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const service = await seedService(tx);
+      return (
+        await insertWaitlistEntry(tx, {
+          clientId: await seedClient(tx),
+          serviceId: service,
+          staffMemberId: null,
+          windows: [{ date: '2026-10-23', start: '15:00', end: '18:00' }],
+          expiresAt: new Date('2026-10-23T22:00:00Z'),
+          createdBy: await insertUser(db),
+        })
+      ).id;
+    },
+    touch: "status = 'cancelled'",
+    memberScope: [
+      { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
+    ],
+  },
 };
+
+/** A new client of the transaction's tenant. */
+async function seedClient(tx: TenantTx) {
+  const client = await insertClient(tx, {
+    name: 'Maria Lopez',
+    email: `maria-${newId()}@example.test`,
+    phone: null,
+    source: 'team',
+  });
+  return ClientIdSchema.parse(client.id);
+}
+
+/** A new active service of the transaction's tenant. */
+async function seedService(tx: TenantTx) {
+  const service = await insertService(tx, {
+    name: `Blow-dry ${newId()}`,
+    category: null,
+    durationMinutes: 45,
+    bufferBeforeMinutes: 0,
+    bufferAfterMinutes: 0,
+    priceFromCents: null,
+    priceToCents: null,
+    active: true,
+  });
+  return ServiceIdSchema.parse(service.id);
+}
+
+/** A new confirmed booking (with its client, service and staff member); returns its id. */
+async function seedBooking(tx: TenantTx): Promise<string> {
+  const booking = await insertBooking(tx, {
+    clientId: await seedClient(tx),
+    serviceId: await seedService(tx),
+    staffMemberId: await seedStaff(tx),
+    startsAt: new Date('2026-10-20T14:00:00Z'),
+    endsAt: new Date('2026-10-20T14:45:00Z'),
+    bufferBeforeMinutes: 0,
+    bufferAfterMinutes: 10,
+    priceFromCents: null,
+    priceToCents: null,
+    source: 'team',
+    overridden: false,
+    idempotencyKey: null,
+    createdBy: null,
+  });
+  return booking.id;
+}
 
 /** A new active staff member of the transaction's tenant. */
 async function seedStaff(tx: TenantTx): Promise<StaffMemberId> {
@@ -286,7 +403,7 @@ describe('catalog', () => {
   });
 
   it.each(Object.entries(TENANT_TABLES))(
-    '%s has forced RLS, the tenant_isolation policy and only the read-only lookup policies listed',
+    '%s has forced RLS, the tenant_isolation policy and only the policies listed',
     async (table, spec) => {
       const [flags] = await asAdmin<{ enabled: boolean; forced: boolean }>(
         `SELECT relrowsecurity AS enabled, relforcerowsecurity AS forced
@@ -300,7 +417,7 @@ describe('catalog', () => {
         [table],
       );
       const predicate = `(${spec.tenantColumn} = current_tenant_id())`;
-      expect(policies).toEqual([
+      const expected = [
         ...(spec.inviteLookup === undefined
           ? []
           : [
@@ -325,6 +442,11 @@ describe('catalog', () => {
                 with_check: null,
               },
             ]),
+        ...(spec.memberScope ?? []).map((policy) => ({
+          ...policy,
+          permissive: 'RESTRICTIVE',
+          roles: ['public'],
+        })),
         {
           policyname: 'tenant_isolation',
           permissive: 'PERMISSIVE',
@@ -333,7 +455,8 @@ describe('catalog', () => {
           qual: predicate,
           with_check: predicate,
         },
-      ]);
+      ];
+      expect(policies).toEqual(expected);
     },
   );
 });

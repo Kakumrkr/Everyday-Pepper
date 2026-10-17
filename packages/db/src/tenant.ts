@@ -25,6 +25,26 @@ export async function withTenant<T>(
 }
 
 /**
+ * Runs `work` in a transaction of `member.tenantId` bound to `member.userId` as well, so the
+ * restrictive `member_scope` policies limit staff to their own records (ADR-0017, AC-W9-1):
+ * their staff member's bookings and waitlist entries, and only those bookings' clients. Owners
+ * and managers reach everything. Both ids must come from the authenticated session.
+ */
+export async function withMember<T>(
+  db: Database,
+  member: { tenantId: TenantId; userId: UserId },
+  work: (tx: TenantTx) => Promise<T>,
+): Promise<T> {
+  const tenantId = TenantIdSchema.parse(member.tenantId);
+  const userId = UserIdSchema.parse(member.userId);
+  return db.transaction(async (tx) => {
+    await setTransactionTenant(tx, tenantId);
+    await setTransactionUser(tx, userId);
+    return work(tx);
+  });
+}
+
+/**
  * Binds the open transaction to `tenantId`, transaction-locally. For repository functions
  * that need more than one context in a transaction (`createTenant`); everything else uses
  * `withTenant`.

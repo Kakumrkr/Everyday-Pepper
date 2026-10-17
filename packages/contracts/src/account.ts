@@ -37,6 +37,16 @@ export const ApiErrorCodeSchema = z.enum([
   'staff_member_not_found',
   'staff_member_link_taken',
   'time_off_not_found',
+  'client_not_found',
+  'client_email_taken',
+  'booking_not_found',
+  'slot_unavailable',
+  'booking_not_changeable',
+  'booking_not_started',
+  'idempotency_key_reused',
+  'waitlist_entry_not_found',
+  'waitlist_entry_not_changeable',
+  'waitlist_expired',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 
