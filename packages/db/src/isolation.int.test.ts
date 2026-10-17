@@ -1,6 +1,7 @@
 // Cross-tenant isolation suite (docs/engineering/testing-strategy.md; must stay at 100%).
 // Every table in `public` must be listed in TENANT_TABLES (row access limited by RLS) or in
 // GLOBAL_TABLES (with a reason); the catalog test fails for a table that is in neither.
+import { randomBytes } from 'node:crypto';
 import { TenantIdSchema, UsagePeriodSchema, type TenantId, type UserId } from '@floty/contracts';
 import { sql } from 'drizzle-orm';
 import pg from 'pg';
@@ -9,6 +10,7 @@ import { createDatabase, type Database } from './client.js';
 import { newId } from './ids.js';
 import { APP_ROLE } from './migrate.js';
 import { appendAuditEntry } from './repositories/audit.js';
+import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { createTenant } from './repositories/tenants.js';
 import { addUsage } from './repositories/usage.js';
@@ -37,6 +39,8 @@ interface TenantTable {
   touch: string;
   /** The `member_read` (withUser) predicate, as Postgres prints it, if the table has one. */
   memberRead?: string;
+  /** The `invite_lookup` (withInviteTenant) predicate, as Postgres prints it, if any. */
+  inviteLookup?: string;
   /** The services may only insert and read (no UPDATE or DELETE grant). */
   appendOnly?: true;
 }
@@ -93,6 +97,21 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       return String(rows[0]?.id);
     },
     touch: 'amount = amount + 1',
+  },
+  invites: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) =>
+      (
+        await insertInvite(tx, {
+          email: `invitee-${newId()}@example.test`,
+          role: 'staff',
+          tokenHash: randomBytes(32).toString('hex'),
+          invitedBy: await insertUser(db),
+          expiresAt: new Date(Date.now() + 86_400_000),
+        })
+      ).id,
+    touch: "role = 'owner'",
+    inviteLookup: '((current_tenant_id() IS NULL) AND (token_hash = current_invite_token_hash()))',
   },
 };
 
@@ -158,7 +177,7 @@ describe('catalog', () => {
   });
 
   it.each(Object.entries(TENANT_TABLES))(
-    '%s has forced RLS, the tenant_isolation policy and at most a read-only member_read policy',
+    '%s has forced RLS, the tenant_isolation policy and only the read-only lookup policies listed',
     async (table, spec) => {
       const [flags] = await asAdmin<{ enabled: boolean; forced: boolean }>(
         `SELECT relrowsecurity AS enabled, relforcerowsecurity AS forced
@@ -173,6 +192,18 @@ describe('catalog', () => {
       );
       const predicate = `(${spec.tenantColumn} = current_tenant_id())`;
       expect(policies).toEqual([
+        ...(spec.inviteLookup === undefined
+          ? []
+          : [
+              {
+                policyname: 'invite_lookup',
+                permissive: 'PERMISSIVE',
+                cmd: 'SELECT',
+                roles: ['public'],
+                qual: spec.inviteLookup,
+                with_check: null,
+              },
+            ]),
         ...(spec.memberRead === undefined
           ? []
           : [
@@ -457,6 +488,105 @@ describe('user context (withUser: "my businesses")', () => {
       })
       .catch((e: unknown) => e);
     expect(sqlState(error)).toBe('22P02');
+  });
+});
+
+describe('invite lookup (withInviteTenant: an invitee who is not a member yet)', () => {
+  function inviteIds(): { a: string; b: string } {
+    const ids = rows['invites'];
+    if (ids === undefined) throw new Error('no seed invites');
+    return ids;
+  }
+
+  async function hashOf(tenant: TenantId, id: string): Promise<string> {
+    const { rows: found } = await inTenant<{ token_hash: string }>(
+      tenant,
+      `SELECT token_hash FROM invites WHERE id = '${id}'`,
+    );
+    return String(found[0]?.token_hash);
+  }
+
+  /** Raw SQL with only the token hash set (no tenant), in one transaction. */
+  function withHash<T extends Record<string, unknown>>(hash: string, statement: string) {
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.invite_token_hash', ${hash}, true)`);
+      return tx.execute<T>(sql.raw(statement));
+    });
+  }
+
+  it("shows exactly the invite whose token hash is presented, bound to that invite's tenant", async () => {
+    const invites = inviteIds();
+    const seen = await withInviteTenant(
+      db,
+      await hashOf(tenantB, invites.b),
+      async (tx, invite) => {
+        const { rows: tenant } = await tx.execute<{ id: string }>(
+          sql`SELECT current_tenant_id()::text AS id`,
+        );
+        return { invite: invite.id, tenant: tenant[0]?.id };
+      },
+    );
+    expect(seen).toEqual({ invite: invites.b, tenant: tenantB });
+  });
+
+  it('shows nothing for a hash no invite has', async () => {
+    let called = false;
+    const result = await withInviteTenant(db, randomBytes(32).toString('hex'), () => {
+      called = true;
+      return Promise.resolve('reached');
+    });
+    expect([result, called]).toEqual([undefined, false]);
+  });
+
+  it('a hash reveals no other invite, tenant or membership', async () => {
+    const hash = await hashOf(tenantA, inviteIds().a);
+    const { rows: seen } = await withHash<{ id: string }>(hash, 'SELECT id::text FROM invites');
+    expect(seen).toEqual([{ id: inviteIds().a }]);
+    for (const table of ['tenants', 'memberships', 'audit_log', 'usage_meters']) {
+      const { rows: other } = await withHash(hash, `SELECT * FROM ${table}`);
+      expect(other, table).toEqual([]);
+    }
+  });
+
+  it('a hash cannot change the invite: invite_lookup is SELECT only', async () => {
+    const hash = await hashOf(tenantA, inviteIds().a);
+    const updated = await withHash(hash, "UPDATE invites SET role = 'owner'");
+    const deleted = await withHash(hash, 'DELETE FROM invites');
+    expect([updated.rowCount, deleted.rowCount]).toEqual([0, 0]);
+  });
+
+  it("does not widen a tenant transaction: another tenant's invite stays hidden", async () => {
+    const hash = await hashOf(tenantB, inviteIds().b);
+    const { rows: seen } = await withTenant(db, tenantA, async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.invite_token_hash', ${hash}, true)`);
+      return tx.execute(sql`SELECT * FROM invites WHERE token_hash = ${hash}`);
+    });
+    expect(seen).toEqual([]);
+  });
+
+  it('a read-only lookup cannot write', async () => {
+    const hash = await hashOf(tenantA, inviteIds().a);
+    const error = await withInviteTenant(
+      db,
+      hash,
+      (tx) => tx.execute(sql`UPDATE invites SET role = role`),
+      { readOnly: true },
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('25006');
+  });
+
+  it('does not outlive the transaction on a pooled connection', async () => {
+    const single = createDatabase({ url: database.appUrl, maxConnections: 1 });
+    try {
+      const hash = await hashOf(tenantA, inviteIds().a);
+      await withInviteTenant(single.db, hash, () => Promise.resolve());
+      const after = await single.db.execute(
+        sql`SELECT current_invite_token_hash() AS hash, count(*)::int AS n FROM invites`,
+      );
+      expect(after.rows).toEqual([{ hash: null, n: 0 }]);
+    } finally {
+      await single.close();
+    }
   });
 });
 

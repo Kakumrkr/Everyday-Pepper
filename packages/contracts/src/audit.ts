@@ -21,6 +21,7 @@ export const AuditActorSchema = z.discriminatedUnion('kind', [
 export type AuditActor = z.infer<typeof AuditActorSchema>;
 
 const MemberValuesSchema = z.object({ userId: UserIdSchema, role: MembershipRoleSchema }).strict();
+const InviteValuesSchema = z.object({ role: MembershipRoleSchema }).strict();
 
 function entity<T extends string>(type: T) {
   return z.object({ type: z.literal(type), id: z.uuid() }).strict();
@@ -57,6 +58,32 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('membership'),
       before: MemberValuesSchema,
       after: z.null(),
+    })
+    .strict(),
+  // Invites (ADR-0014): the invitee's email is personal data, so it is never in an entry.
+  z
+    .object({
+      action: z.literal('invite.created'),
+      entity: entity('invite'),
+      before: z.null(),
+      after: InviteValuesSchema.extend({ expiresAt: UtcDateTimeSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('invite.revoked'),
+      entity: entity('invite'),
+      before: InviteValuesSchema,
+      after: z.null(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('invite.accepted'),
+      entity: entity('invite'),
+      before: InviteValuesSchema,
+      // The membership the invite created.
+      after: MemberValuesSchema.extend({ membershipId: z.uuid() }).strict(),
     })
     .strict(),
 ]);

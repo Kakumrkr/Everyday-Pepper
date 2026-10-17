@@ -1,4 +1,5 @@
 import {
+  InviteEmailSchema,
   MembershipRoleSchema,
   UserIdSchema,
   type MembershipRole,
@@ -71,6 +72,16 @@ export async function listTenantMembers(tx: TenantTx): Promise<TenantMember[]> {
     .from(memberships)
     .innerJoin(users, eq(users.id, memberships.userId))
     .orderBy(asc(memberships.createdAt), asc(memberships.id));
+}
+
+/** Whether someone with this email (compared lowercased) is a member of the tenant. */
+export async function isMemberEmail(tx: TenantTx, email: string): Promise<boolean> {
+  const [row] = await tx
+    .select({ id: memberships.id })
+    .from(memberships)
+    .innerJoin(users, eq(users.id, memberships.userId))
+    .where(eq(users.email, InviteEmailSchema.parse(email)));
+  return row !== undefined;
 }
 
 /**

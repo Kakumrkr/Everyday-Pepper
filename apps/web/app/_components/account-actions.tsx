@@ -2,22 +2,29 @@
 
 import type { UserBusiness } from '@floty/contracts';
 import { useState } from 'react';
-import { ROUTES } from '../../lib/account';
+import { ROUTES, withNext } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
 import { FormError } from './form-error';
 
-export function SignOutButton() {
+/** Signs out, then shows sign-in (returning to `next` afterwards, if given). */
+export function SignOutButton({
+  next = null,
+  label = 'Sign out',
+}: {
+  next?: string | null;
+  label?: string;
+}) {
   return (
     <button
       type="button"
       className="secondary"
       onClick={() => {
         void sendJson('POST', '/api/auth/sign-out', {}).then(() => {
-          window.location.assign(ROUTES.signIn);
+          window.location.assign(withNext(ROUTES.signIn, next));
         });
       }}
     >
-      Sign out
+      {label}
     </button>
   );
 }

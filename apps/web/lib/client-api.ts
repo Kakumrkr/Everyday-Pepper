@@ -23,6 +23,15 @@ const MESSAGES: Record<string, string> = {
   business_limit_reached: 'One account can own at most 5 businesses.',
   validation_failed: 'Some fields need another look.',
   unauthenticated: 'Your session ended. Sign in again.',
+  forbidden: 'Your role in this business doesn’t allow this.',
+  member_not_found: 'That person is no longer in this business.',
+  last_owner: 'A business needs at least one owner. Make someone else an owner first.',
+  already_a_member: 'They’re already in this business.',
+  invite_invalid: 'This invite link no longer works. Ask for a new one.',
+  invite_wrong_account:
+    'This invite is for a different email. Sign in with the email it was sent to.',
+  invite_not_found: 'That invite was already used or cancelled.',
+  invite_limit_reached: 'You have 20 open invites. Cancel some before inviting more.',
 };
 
 const FALLBACK = 'Something went wrong. Try again.';
@@ -39,10 +48,11 @@ export function messageFor(status: number, body: unknown): string {
 
 /**
  * Sends JSON to the app's own origin (`/api/auth/*` or `/v1/*`, forwarded to the api). The
- * browser adds the session cookie and the `Origin` header the api checks.
+ * browser adds the session cookie and the `Origin` header the api checks. `body` `undefined`
+ * sends none (e.g. for `DELETE`).
  */
 export async function sendJson<T = unknown>(
-  method: 'POST' | 'PUT',
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   path: string,
   body: unknown,
   fetch: typeof globalThis.fetch = globalThis.fetch,
@@ -51,8 +61,10 @@ export async function sendJson<T = unknown>(
   try {
     response = await fetch(path, {
       method,
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
+      ...(body !== undefined && {
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      }),
       credentials: 'same-origin',
     });
   } catch {

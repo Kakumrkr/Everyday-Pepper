@@ -1,5 +1,5 @@
 import type { MembershipRole, UserId } from '@floty/contracts';
-import { can } from './permissions.js';
+import { can, permissionScope } from './permissions.js';
 
 /** A change to someone's membership: a new role, or leaving the business. */
 export type MembershipChange = { kind: 'change_role'; role: MembershipRole } | { kind: 'remove' };
@@ -45,4 +45,13 @@ export function decideMembershipChange(input: MembershipChangeInput): Membership
 
 function deny(reason: MembershipChangeDenial): MembershipChangeDecision {
   return { allowed: false, reason };
+}
+
+/**
+ * Whether a member with `actorRole` may invite someone as `role` (ADR-0014): it takes
+ * `members.invite`, and only owners make owners, as in `decideMembershipChange`.
+ */
+export function canGrantRole(actorRole: MembershipRole, role: MembershipRole): boolean {
+  if (permissionScope(actorRole, 'members.invite') === null) return false;
+  return role !== 'owner' || actorRole === 'owner';
 }

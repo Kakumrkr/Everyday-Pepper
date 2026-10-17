@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.6 · **Current phase:** 2 — Platform core. S8 (Phase 2c: roles, audit log, metering) done; ADR-0013 accepted; PR open into `main` → next: S9 (invites, Team screen, security review, Phase 2 exit)
+**Last updated:** 2026-10-17 · **Plan version:** 0.6 · **Current phase:** 2 — Platform core **complete** (S6–S9; exit criteria met; S9 merged at the user's request, ADR-0014 accepted) → next: S10 (Phase 3a)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -116,6 +116,24 @@
     - The worker image now carries `@floty/db` through `@floty/core` (it already had it for readiness).
     - AC-W9-1 also asks for RLS-level enforcement: the staff-scoped policy belongs on the bookings and notes tables (Phase 3).
 
+- **S9 Phase 2c, part 2 (2026-10-17):** invites, Team screen, security review, Phase 2 exit ([ADR-0014](../adr/0014-invites.md), accepted by the user).
+  - **contracts:** invite schemas (`InviteToken`: 43 base64url characters; `InviteEmail` trimmed and lowercased; create/list/lookup/accept bodies), audit actions `invite.created`/`invite.revoked`/`invite.accepted` (no emails), error codes `invite_invalid`, `invite_wrong_account`, `invite_not_found`, `invite_limit_reached`, `already_a_member`; `GET /v1/tenant` returns `permissions`.
+  - **db:** `invites` table (forced RLS, `tenant_isolation`, read-only token-keyed `invite_lookup` policy via `current_invite_token_hash()`; SHA-256 token hash; one unresolved invite per email; accepted xor revoked); repositories and `withInviteTenant` (finds the invite by hash with no tenant, then binds the transaction to its business); `isMemberEmail`. Migrations 0008–0010.
+  - **core:** `createInvite` (7-day link, at most 20 open per business, re-inviting replaces the old link), `listInvites`, `revokeInvite`, `previewInvite`, `acceptInvite` (email-bound, single use, locked); `canGrantRole` (only owners invite owners), `permissionsOf`, `newInviteToken`/`hashInviteToken`.
+  - **api:** `GET/POST /v1/invites`, `DELETE /v1/invites/:inviteId` (owners and managers), `POST /v1/invites/lookup` and `/accept` (signed in; accepting switches the session to the business). `permissions` in `GET /v1/tenant` (the brief said `/v1/me`; `/v1/tenant` is where the role is known).
+  - **web:** `/invite` (token from the link's fragment, kept in `sessionStorage`, `?next=/invite` through sign-up/sign-in, allowlisted by `safeNext`), `/team` (members, role change, remove with confirmation, invite link with copy, open invites with cancel, leave; staff see only "Leave"; dates in the business's time zone), "Team" link on home.
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 144, core 423, db 33, runtime 75, testing 13, api 113, web 82, worker 3. Coverage: contracts, core, db 100%; api 95.7%; web 98.6%.
+    - `pnpm test:integration` green: db 141 (isolation suite incl. `invites` and the invite lookup: a hash shows only its row, no other table, cannot write, does not widen a tenant transaction, ends with the transaction; invite repository), core 57 (24 invite tests: expired at 7 days, reused, revoked, wrong account, email case, escalation per role, stale actor role, other business, already a member, limit 20, replacement, 5 rounds of 3 concurrent accepts), api 38 (manager invite → sign-up → accept → MFA, forwarded link, revoke, escalation, other business, no tokens or invitee emails in logs), runtime 2, testing 1.
+    - Mutation checks, each caught: no email check → 1 failure; managers may grant owner → 1 unit + 3 integration failures; `invite_lookup` without `current_tenant_id() IS NULL` → 2 isolation failures; no `FORCE` on `invites` → catalog test fails.
+    - Docker images built (sandbox CA via a scratch Dockerfile, not committed). `docker compose up --wait`: 6 services healthy, `migrate` exited 0. Playwright 26/26 (8 new team tests on phone and desktop: invite → sign up → join → MFA → role change → remove; forwarded link refused; sign in → join as staff → leave; no sideways overflow), three runs in a row. api logs: no errors, no emails, no invite tokens.
+    - `/security-review` of the branch: no findings at or above the reporting bar. Two design notes are recorded in ADR-0014 (an invite outlives its creator's demotion; "wrong account" vs "invalid" is distinguishable to a token holder).
+  - **Phase 2 exit check:** cross-tenant suite 100% (`isolation.int.test.ts`, every table classified, incl. `invites`); role matrix 100% (`permissions.test.ts` every role × permission cell, `membership-rules.test.ts` incl. `canGrantRole`); auth E2E (`e2e/tests/auth.spec.ts` + `team.spec.ts`). **Met.**
+  - **Not yet proven:** CI on the S9 PR (not opened yet).
+  - **Findings:**
+    - A `<label>` wrapping a `<select>` includes the option texts in its name, so tests find the role field as a combobox.
+    - Until email verification (Phase 5), email binding checks the address someone signed up with, not one they proved (ADR-0014 Consequences).
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -163,18 +181,19 @@
   - (e) Staff get the `own` scope for clients too (least privilege; AC-W9-1 names bookings and notes).
   - (f) Removing someone else needs `members.manage`, checked before any lookup (staff cannot probe membership); leaving clears the session's business.
   - (g) Tenant and user ids are lowercased by the contracts.
+- **S9 decisions (user, 2026-10-17, S9 Session Brief):** invite links work for **7 days**; an invite is **bound to the invitee's email** (a forwarded link is useless); at most **20 open invites per business**. Also restated: managers need MFA like owners (already decided at S8 and built).
+- **S9 defaults — ADR-0014, accepted by the user (2026-10-17):** token in the link's fragment, hashed with SHA-256 in the database; token-keyed read-only RLS policy for the not-yet-member lookup, with the business taken from the invite row; re-inviting an email replaces its open invite; one `invite_invalid` answer for unknown/used/revoked/expired; `permissions` on `GET /v1/tenant`; inline confirmation (no browser dialogs) for remove and leave.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Review and merge the S8 PR once CI is green.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-S6–S9 split Phase 2: db + tenancy/RLS before auth, so auth can build on the tenant context; Phase 2c split into S8 and S9 (user, S8 Session Brief).
+Phase 2 (S6–S9) is done: the user accepted ADR-0014 and asked for S9 to be merged into `main` (2026-10-17). Phase 3 is split at the S10 Session Brief.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S9 | **Phase 2c, part 2:** invite a member (hashed, expiring, single-use link token; you grant only roles you may grant; accepted after sign-in or sign-up; email delivery in Phase 5) with `invite.created`/`invite.accepted` audit entries; minimal Team screen (list, change role, remove, leave, create invite link) and `permissions` for the UI; `/security-review` of Phase 2; Phase 2 exit check | 2 | invite tests (expired, reused, escalation, other business) + Playwright journey; no open high-severity findings; Phase 2 exit criteria (cross-tenant 100%, role matrix 100%, auth E2E) |
+| S10 | **Phase 3a (to plan at its Session Brief):** services, staff and working hours (tenant tables with RLS, core services with permissions and audit entries), as the base for the rules and availability engines | 3 | isolation suite + matrix extended to the new tables; Phase 3 split confirmed with the user |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

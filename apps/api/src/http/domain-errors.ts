@@ -1,4 +1,13 @@
-import { ForbiddenError, LastOwnerError, MemberNotFoundError } from '@floty/core';
+import {
+  AlreadyAMemberError,
+  ForbiddenError,
+  InviteInvalidError,
+  InviteLimitReachedError,
+  InviteNotFoundError,
+  InviteWrongAccountError,
+  LastOwnerError,
+  MemberNotFoundError,
+} from '@floty/core';
 import { BusinessLimitReachedError, TenantSlugTakenError } from '@floty/db';
 import {
   ConflictException,
@@ -23,6 +32,19 @@ export function toHttpError(error: unknown): unknown {
     return new ConflictException(apiError('business_limit_reached'));
   }
   if (error instanceof TenantSlugTakenError) return new ConflictException(apiError('slug_taken'));
+  if (error instanceof InviteInvalidError) return new NotFoundException(apiError('invite_invalid'));
+  if (error instanceof InviteWrongAccountError) {
+    return new ForbiddenException(apiError('invite_wrong_account'));
+  }
+  if (error instanceof InviteNotFoundError) {
+    return new NotFoundException(apiError('invite_not_found'));
+  }
+  if (error instanceof InviteLimitReachedError) {
+    return new ConflictException(apiError('invite_limit_reached'));
+  }
+  if (error instanceof AlreadyAMemberError) {
+    return new ConflictException(apiError('already_a_member'));
+  }
   return error;
 }
 

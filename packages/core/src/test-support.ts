@@ -34,8 +34,8 @@ export async function startTestDatabase(): Promise<TestDatabase> {
 }
 
 /** Inserts a user directly (Better Auth creates them in the app); returns its id. */
-export async function insertUser(db: Database, name: string): Promise<UserId> {
+export async function insertUser(db: Database, name: string, email?: string): Promise<UserId> {
   const id = newId();
-  await db.insert(users).values({ id, name, email: `user-${id}@example.test` });
+  await db.insert(users).values({ id, name, email: email ?? `user-${id}@example.test` });
   return UserIdSchema.parse(id);
 }

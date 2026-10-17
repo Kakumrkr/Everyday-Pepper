@@ -1,4 +1,9 @@
-import type { MembershipRole, Permission, UserId } from '@floty/contracts';
+import {
+  PermissionSchema,
+  type MembershipRole,
+  type Permission,
+  type UserId,
+} from '@floty/contracts';
 import type { TenantContext } from './tenant-access.js';
 
 /**
@@ -64,6 +69,16 @@ export const PERMISSION_MATRIX: Readonly<
 /** How far `role`'s `permission` reaches. */
 export function permissionScope(role: MembershipRole, permission: Permission): PermissionScope {
   return PERMISSION_MATRIX[permission][role];
+}
+
+/**
+ * Every permission `role` has, at any scope, in `PermissionSchema` order: what the UI may offer
+ * (`GET /v1/tenant`). The api still checks each action.
+ */
+export function permissionsOf(role: MembershipRole): Permission[] {
+  return PermissionSchema.options.filter(
+    (permission) => permissionScope(role, permission) !== null,
+  );
 }
 
 /** The record a permission is checked against: whose it is (`null`: nobody's, e.g. unassigned). */

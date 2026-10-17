@@ -53,8 +53,26 @@ describe('CurrentBusinessResponseSchema', () => {
         locale: 'en-US',
       },
       role: 'staff',
+      permissions: ['business.read', 'calendar.read'],
     };
     expect(CurrentBusinessResponseSchema.parse(body)).toEqual(body);
+  });
+
+  it('rejects an unknown permission or a missing list', () => {
+    const body = {
+      business: {
+        id: TENANT,
+        name: 'Juniper Hair Studio',
+        slug: 'juniper',
+        timeZone: 'America/New_York',
+        locale: 'en-US',
+      },
+      role: 'staff',
+    };
+    expect(CurrentBusinessResponseSchema.safeParse(body).success).toBe(false);
+    expect(
+      CurrentBusinessResponseSchema.safeParse({ ...body, permissions: ['everything'] }).success,
+    ).toBe(false);
   });
 });
 

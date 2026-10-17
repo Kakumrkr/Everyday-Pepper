@@ -10,7 +10,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      // TenancyService and TeamService only bind the database to @floty/db repositories and
+      // TenancyService, TeamService and InvitesService only bind the database to @floty/db repositories and
       // @floty/core services; like them they are proven against real Postgres by the
       // integration tests (src/**/*.int.test.ts), not by unit tests.
       exclude: [
@@ -18,6 +18,7 @@ export default defineConfig({
         'src/main.ts',
         'src/instrument.ts',
         'src/account/tenancy.service.ts',
+        'src/team/invites.service.ts',
         'src/team/team.service.ts',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

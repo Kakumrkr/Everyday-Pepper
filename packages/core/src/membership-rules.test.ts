@@ -1,6 +1,7 @@
 import { MembershipRoleSchema, UserIdSchema, type MembershipRole } from '@floty/contracts';
 import { describe, expect, it } from 'vitest';
 import {
+  canGrantRole,
   decideMembershipChange,
   type MembershipChange,
   type MembershipChangeDecision,
@@ -140,5 +141,22 @@ describe('decideMembershipChange', () => {
               target === 'owner' && (change.kind === 'remove' || change.role !== 'owner');
             if (removesOwner) expect(decision.allowed).toBe(false);
           }
+  });
+});
+
+describe('canGrantRole', () => {
+  // Who may invite someone as which role (ADR-0014).
+  //                                  as: owner  manager staff
+  const GRANTS: Record<MembershipRole, [boolean, boolean, boolean]> = {
+    owner: [true, true, true],
+    manager: [false, true, true],
+    staff: [false, false, false],
+  };
+  const cases = ROLES.flatMap((actor) =>
+    ROLES.map((role, column) => ({ actor, role, expected: GRANTS[actor][column] })),
+  );
+
+  it.each(cases)('a(n) $actor inviting as $role → $expected', ({ actor, role, expected }) => {
+    expect(canGrantRole(actor, role)).toBe(expected);
   });
 });

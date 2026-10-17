@@ -58,6 +58,7 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [ADR-0011 Dev object storage: SeaweedFS](adr/0011-dev-object-storage-seaweedfs.md)
 - [ADR-0012 Auth wiring: sessions, tenant context, web forwarding](adr/0012-auth-sessions-and-tenant-context.md)
 - [ADR-0013 Roles and permissions, audit log, usage metering](adr/0013-roles-audit-log-and-metering.md)
+- [ADR-0014 Inviting members with a single-use link](adr/0014-invites.md)
 
 ## How these docs are maintained
 - Docs change in the same commit as the behaviour they describe.

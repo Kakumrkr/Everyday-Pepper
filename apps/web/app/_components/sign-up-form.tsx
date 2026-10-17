@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { useState, type SubmitEvent } from 'react';
-import { ROUTES } from '../../lib/account';
+import { ROUTES, withNext } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
 import { FormError } from './form-error';
 
-/** Creates an account and signs in; the home page then asks for the business. */
-export function SignUpForm() {
+/**
+ * Creates an account and signs in; then `next` (e.g. the invite to accept) or the home page,
+ * which asks for the business.
+ */
+export function SignUpForm({ next = null }: { next?: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -27,7 +30,7 @@ export function SignUpForm() {
       setError(result.message);
       return;
     }
-    window.location.assign(ROUTES.home);
+    window.location.assign(next ?? ROUTES.home);
   }
 
   return (
@@ -59,7 +62,7 @@ export function SignUpForm() {
         Create account
       </button>
       <p className="hint">
-        Already have an account? <Link href={ROUTES.signIn}>Sign in</Link>
+        Already have an account? <Link href={withNext(ROUTES.signIn, next)}>Sign in</Link>
       </p>
     </form>
   );

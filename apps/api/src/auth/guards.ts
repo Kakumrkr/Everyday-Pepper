@@ -33,6 +33,11 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   member_not_found: 'No such member in this business',
   last_owner: 'A business needs at least one owner',
   business_limit_reached: 'You already own as many businesses as one account may create',
+  invite_invalid: 'This invite link is no longer valid. Ask for a new one',
+  invite_wrong_account: 'This invite is for another email. Sign in with the email it was sent to',
+  invite_not_found: 'No such open invite in this business',
+  invite_limit_reached: 'This business has as many open invites as it may',
+  already_a_member: 'Already a member of this business',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */

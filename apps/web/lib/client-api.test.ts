@@ -8,6 +8,12 @@ describe('messageFor', () => {
     [409, { code: 'slug_taken', message: 'x' }, 'booking link is taken'],
     [409, { code: 'business_limit_reached', message: 'x' }, 'at most 5 businesses'],
     [401, { code: 'INVALID_CODE' }, 'code didn’t work'],
+    [404, { code: 'invite_invalid', message: 'x' }, 'Ask for a new one'],
+    [403, { code: 'invite_wrong_account', message: 'x' }, 'email it was sent to'],
+    [409, { code: 'last_owner', message: 'x' }, 'at least one owner'],
+    [409, { code: 'already_a_member', message: 'x' }, 'already in this business'],
+    [409, { code: 'invite_limit_reached', message: 'x' }, '20 open invites'],
+    [403, { code: 'forbidden', message: 'x' }, 'doesn’t allow this'],
   ])('explains %i %j', (status, body, expected) => {
     expect(messageFor(status, body)).toContain(expected);
   });
@@ -34,6 +40,20 @@ describe('sendJson', () => {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: '{"name":"J"}',
+      credentials: 'same-origin',
+    });
+  });
+
+  it('sends no body when there is none (DELETE)', async () => {
+    const fetch = vi.fn<(path: string, init?: RequestInit) => Promise<Response>>(() =>
+      Promise.resolve(new Response(null, { status: 204 })),
+    );
+    await expect(sendJson('DELETE', '/v1/invites/1', undefined, fetch as never)).resolves.toEqual({
+      ok: true,
+      data: null,
+    });
+    expect(fetch).toHaveBeenCalledWith('/v1/invites/1', {
+      method: 'DELETE',
       credentials: 'same-origin',
     });
   });

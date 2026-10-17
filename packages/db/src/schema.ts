@@ -12,6 +12,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { newId } from './ids.js';
@@ -259,7 +260,59 @@ export const usageMeters = pgTable(
   ],
 );
 
+/**
+ * An invitation to join a business with a role (ADR-0014). Only the SHA-256 hash of the link's
+ * token is stored. Open until accepted, revoked or past `expires_at`; at most one open invite
+ * per email per business. The invitee is not a member yet, so the `invite_lookup` policy lets
+ * a transaction without a tenant read the one invite whose token it presents
+ * (`withInviteTenant`).
+ */
+export const invites = pgTable(
+  'invites',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    // Lowercased; acceptance requires the signed-in user's email to match.
+    email: text('email').notNull(),
+    role: membershipRole('role').notNull(),
+    tokenHash: text('token_hash').notNull().unique(),
+    invitedByUserId: uuid('invited_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+    acceptedByUserId: uuid('accepted_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    check('invites_email_lowercase', sql`${table.email} = lower(${table.email})`),
+    check('invites_token_hash_format', sql`${table.tokenHash} ~ '^[0-9a-f]{64}$'`),
+    check(
+      'invites_accepted_or_revoked',
+      sql`${table.acceptedAt} IS NULL OR ${table.revokedAt} IS NULL`,
+    ),
+    uniqueIndex('invites_open_email_unique')
+      .on(table.tenantId, table.email)
+      .where(sql`${table.acceptedAt} IS NULL AND ${table.revokedAt} IS NULL`),
+    // Deleting a user nulls these.
+    index('invites_invited_by_user_id_idx').on(table.invitedByUserId),
+    index('invites_accepted_by_user_id_idx').on(table.acceptedByUserId),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('invite_lookup', {
+      for: 'select',
+      using: sql`${currentTenantId} IS NULL AND token_hash = current_invite_token_hash()`,
+    }),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
+export type InviteRow = typeof invites.$inferSelect;

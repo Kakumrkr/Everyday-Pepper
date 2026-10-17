@@ -1,7 +1,13 @@
 import { headers } from 'next/headers';
-import { loadAccount, loadCurrentBusiness, type Account } from '../../lib/account';
+import type { CurrentBusinessResponse, Invite, Member } from '@floty/contracts';
+import {
+  loadAccount,
+  loadCurrentBusiness,
+  loadInvites,
+  loadMembers,
+  type Account,
+} from '../../lib/account';
 import { loadWebServerEnv } from '../../lib/env';
-import type { CurrentBusinessResponse } from '@floty/contracts';
 
 async function callOptions() {
   const { API_INTERNAL_URL } = loadWebServerEnv(process.env);
@@ -16,4 +22,14 @@ export async function currentAccount(): Promise<Account> {
 /** The session's active business, or `null`. */
 export async function currentBusiness(): Promise<CurrentBusinessResponse | null> {
   return loadCurrentBusiness(await callOptions());
+}
+
+/** The active business's members, or `null` (e.g. staff may not list them). */
+export async function currentMembers(): Promise<Member[] | null> {
+  return loadMembers(await callOptions());
+}
+
+/** The active business's open invites, or `null`. */
+export async function currentInvites(): Promise<Invite[] | null> {
+  return loadInvites(await callOptions());
 }

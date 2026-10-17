@@ -4,13 +4,16 @@ import Link from 'next/link';
 import { useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
-import { ROUTES } from '../../lib/account';
+import { ROUTES, withNext } from '../../lib/account';
 import { FormError } from './form-error';
 
 type Step = 'credentials' | 'code' | 'backup-code';
 
-/** Email and password, then (if set up) the authenticator code or a backup code. */
-export function SignInForm() {
+/**
+ * Email and password, then (if set up) the authenticator code or a backup code; then `next`
+ * (an allowed page, see `safeNext`) or home.
+ */
+export function SignInForm({ next = null }: { next?: string | null }) {
   const [step, setStep] = useState<Step>('credentials');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -45,7 +48,7 @@ export function SignInForm() {
       setStep('code');
       return;
     }
-    window.location.assign(ROUTES.home);
+    window.location.assign(next ?? ROUTES.home);
   }
 
   if (step === 'credentials') {
@@ -64,7 +67,7 @@ export function SignInForm() {
           Sign in
         </button>
         <p className="hint">
-          New to Floty? <Link href={ROUTES.signUp}>Create an account</Link>
+          New to Floty? <Link href={withNext(ROUTES.signUp, next)}>Create an account</Link>
         </p>
       </form>
     );
