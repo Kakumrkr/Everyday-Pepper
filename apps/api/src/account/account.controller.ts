@@ -5,7 +5,7 @@ import {
   type CurrentBusinessResponse,
   type MeResponse,
 } from '@floty/contracts';
-import type { TenantContext } from '@floty/core';
+import { permissionsOf, type TenantContext } from '@floty/core';
 import {
   Body,
   Controller,
@@ -78,7 +78,7 @@ export class AccountController {
     return business;
   }
 
-  /** The session's active business and the user's role in it. */
+  /** The session's active business, the user's role in it and what that role may do. */
   @Get('tenant')
   @UseGuards(TenantGuard)
   @RequirePermission('business.read')
@@ -86,6 +86,6 @@ export class AccountController {
     const business = await this.tenancy.business(tenant.tenantId);
     // TenantGuard just found the membership, so the business exists (deleted concurrently: 403).
     if (business === null) throw new ForbiddenException(apiError('not_a_member'));
-    return { business, role: tenant.role };
+    return { business, role: tenant.role, permissions: permissionsOf(tenant.role) };
   }
 }

@@ -4,7 +4,9 @@ import { Writable } from 'node:stream';
 import {
   ApiErrorSchema,
   AuditLogResponseSchema,
+  CreateInviteResponseSchema,
   CurrentBusinessResponseSchema,
+  InvitesResponseSchema,
   MeResponseSchema,
   MembersResponseSchema,
   TenantIdSchema,
@@ -528,5 +530,160 @@ describe('team and audit log (ADR-0013)', () => {
       .expect(409);
     expect(errorCode(response.body)).toBe('business_limit_reached');
     expect((await me(ana)).businesses).toHaveLength(5);
+  });
+});
+
+describe('invites (ADR-0014)', () => {
+  let ana: Browser;
+  let tenantId: string;
+  const tokens: string[] = [];
+  const inviteeEmails: string[] = [];
+
+  beforeAll(async () => {
+    ({ browser: ana } = await signUp('ana'));
+    tenantId = (
+      (await ana.post('/v1/tenants', { ...juniper, slug: 'invite-salon' }).expect(201)).body as {
+        id: string;
+      }
+    ).id;
+    await enrolTotp(ana);
+  });
+
+  async function invite(by: Browser, email: string, role: string) {
+    const response = await by.post('/v1/invites', { email, role }).expect(201);
+    const created = CreateInviteResponseSchema.parse(response.body);
+    tokens.push(created.token);
+    inviteeEmails.push(email);
+    return created;
+  }
+
+  it('an owner invites a manager who signs up with that email, accepts and must set up MFA', async () => {
+    const email = newEmail('jess');
+    inviteeEmails.push(email);
+    const { invite: created, token } = await invite(ana, email.toUpperCase(), 'manager');
+    expect(created).toMatchObject({ email, role: 'manager' });
+    const listed = InvitesResponseSchema.parse((await ana.get('/v1/invites').expect(200)).body);
+    expect(listed.invites.map((i) => i.id)).toEqual([created.id]);
+
+    const jess = browser();
+    await jess.post('/api/auth/sign-up/email', { name: 'Jess', email, password: PASSWORD });
+    expect((await me(jess)).businesses).toEqual([]);
+    const preview = await jess.post('/v1/invites/lookup', { token }).expect(200);
+    expect(preview.body).toMatchObject({ businessName: juniper.name, role: 'manager' });
+
+    const accepted = await jess.post('/v1/invites/accept', { token }).expect(200);
+    expect(accepted.body).toEqual({ tenantId, role: 'manager' });
+    expect(await me(jess)).toMatchObject({
+      activeTenantId: tenantId,
+      businesses: [{ tenantId, role: 'manager' }],
+    });
+    // A manager works in the business only with a second factor.
+    expect(errorCode((await jess.get('/v1/tenant').expect(403)).body)).toBe('mfa_required');
+    await enrolTotp(jess);
+    const current = CurrentBusinessResponseSchema.parse(
+      (await jess.get('/v1/tenant').expect(200)).body,
+    );
+    expect(current.permissions).toContain('members.invite');
+    expect(current.permissions).not.toContain('billing.manage');
+
+    // Single use, and no longer listed.
+    expect(errorCode((await jess.post('/v1/invites/accept', { token }).expect(404)).body)).toBe(
+      'invite_invalid',
+    );
+    expect(InvitesResponseSchema.parse((await ana.get('/v1/invites').expect(200)).body)).toEqual({
+      invites: [],
+    });
+
+    // Audited without the email, with the request id.
+    const log = AuditLogResponseSchema.parse(
+      (await ana.get('/v1/audit-log?limit=2').expect(200)).body,
+    );
+    expect(log.entries.map((e) => e.action)).toEqual(['invite.accepted', 'invite.created']);
+    expect(JSON.stringify(log)).not.toContain('jess');
+    const [row] = await withTenant(db, TenantIdSchema.parse(tenantId), (tx) =>
+      tx
+        .select({ requestId: auditLog.requestId })
+        .from(auditLog)
+        .where(eq(auditLog.id, log.entries[0]?.id ?? '')),
+    );
+    expect(row?.requestId).toBe(accepted.headers['x-request-id']);
+  });
+
+  it('a forwarded link is refused for anyone else, and reveals nothing', async () => {
+    const email = newEmail('priya');
+    const { token } = await invite(ana, email, 'staff');
+    const { browser: stranger } = await signUp('stranger');
+    for (const path of ['/v1/invites/lookup', '/v1/invites/accept']) {
+      const response = await stranger.post(path, { token }).expect(403);
+      expect(response.body).toEqual({
+        code: 'invite_wrong_account',
+        message: expect.any(String) as string,
+      });
+    }
+    expect((await me(stranger)).businesses).toEqual([]);
+  });
+
+  it('a revoked invite no longer works; revoking it again is not found', async () => {
+    const email = newEmail('marco');
+    const { invite: created, token } = await invite(ana, email, 'staff');
+    await ana.delete(`/v1/invites/${created.id}`).expect(204);
+    const marco = browser();
+    await marco.post('/api/auth/sign-up/email', { name: 'Marco', email, password: PASSWORD });
+    expect(errorCode((await marco.post('/v1/invites/accept', { token }).expect(404)).body)).toBe(
+      'invite_invalid',
+    );
+    expect(errorCode((await ana.delete(`/v1/invites/${created.id}`).expect(404)).body)).toBe(
+      'invite_not_found',
+    );
+  });
+
+  it('nobody grants a role they may not: managers cannot invite owners, staff cannot invite', async () => {
+    const email = newEmail('staffer');
+    const { token } = await invite(ana, email, 'staff');
+    const staffer = browser();
+    await staffer.post('/api/auth/sign-up/email', { name: 'Staffer', email, password: PASSWORD });
+    await staffer.post('/v1/invites/accept', { token }).expect(200);
+    const asStaff = await staffer.post('/v1/invites', { email: newEmail('x'), role: 'staff' });
+    expect([asStaff.status, errorCode(asStaff.body)]).toEqual([403, 'forbidden']);
+    expect(errorCode((await staffer.get('/v1/invites').expect(403)).body)).toBe('forbidden');
+
+    const managerEmail = newEmail('mgr');
+    const { token: managerToken } = await invite(ana, managerEmail, 'manager');
+    const manager = browser();
+    await manager.post('/api/auth/sign-up/email', {
+      name: 'Mgr',
+      email: managerEmail,
+      password: PASSWORD,
+    });
+    await manager.post('/v1/invites/accept', { token: managerToken }).expect(200);
+    await enrolTotp(manager);
+    const asManager = await manager.post('/v1/invites', { email: newEmail('y'), role: 'owner' });
+    expect([asManager.status, errorCode(asManager.body)]).toEqual([403, 'forbidden']);
+    await manager.post('/v1/invites', { email: newEmail('z'), role: 'manager' }).expect(201);
+  });
+
+  it("another business cannot see or revoke this business's invites", async () => {
+    const { invite: created } = await invite(ana, newEmail('kept'), 'staff');
+    const { browser: dan } = await signUp('dan');
+    await dan.post('/v1/tenants', { ...juniper, slug: 'dan-invites' }).expect(201);
+    await enrolTotp(dan);
+    expect(InvitesResponseSchema.parse((await dan.get('/v1/invites').expect(200)).body)).toEqual({
+      invites: [],
+    });
+    expect(errorCode((await dan.delete(`/v1/invites/${created.id}`).expect(404)).body)).toBe(
+      'invite_not_found',
+    );
+  });
+
+  it('refuses to invite an existing member', async () => {
+    const anaEmail = (await me(ana)).user.email;
+    const response = await ana.post('/v1/invites', { email: anaEmail, role: 'staff' }).expect(409);
+    expect(errorCode(response.body)).toBe('already_a_member');
+  });
+
+  it('logs no invite tokens or invitee emails', () => {
+    const logged = JSON.stringify(logLines);
+    for (const token of tokens) expect(logged).not.toContain(token);
+    for (const email of inviteeEmails) expect(logged.toLowerCase()).not.toContain(email);
   });
 });

@@ -3,6 +3,7 @@ import type { IncomingHttpHeaders, IncomingMessage, Server, ServerResponse } fro
 import {
   ApiErrorSchema,
   MeResponseSchema,
+  PermissionSchema,
   TenantIdSchema,
   UserIdSchema,
   type Business,
@@ -127,7 +128,11 @@ describe('GET /v1/tenant (tenant guard)', () => {
 
   it('returns the active business and role', async () => {
     const response = await get().expect(200);
-    expect(response.body).toEqual({ business: BUSINESS, role: 'owner' });
+    expect(response.body).toEqual({
+      business: BUSINESS,
+      role: 'owner',
+      permissions: PermissionSchema.options,
+    });
     expect(tenancy.roleIn).toHaveBeenCalledWith(TENANT, USER);
   });
 
@@ -159,7 +164,11 @@ describe('GET /v1/tenant (tenant guard)', () => {
   it('lets staff in without a second factor', async () => {
     roles.set(TENANT, 'staff');
     auth.session = { ...auth.session, user: { ...auth.session.user, twoFactorEnabled: false } };
-    expect((await get().expect(200)).body).toMatchObject({ role: 'staff' });
+    const body = (await get().expect(200)).body as { role: string; permissions: string[] };
+    expect(body.role).toBe('staff');
+    // The UI offers only what the role may do: no team or audit log for staff.
+    expect(body.permissions).toContain('bookings.read');
+    expect(body.permissions).not.toContain('members.read');
   });
 
   it('403 when the business vanished after the membership check', async () => {
