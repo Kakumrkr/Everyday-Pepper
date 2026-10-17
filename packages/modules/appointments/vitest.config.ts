@@ -9,7 +9,13 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       // Services run their rules (unit-tested here) inside database transactions; they are
       // proven against real Postgres by the integration tests (`pnpm test:integration`).
-      exclude: ['src/**/*.test.ts', 'src/index.ts', 'src/services/**', 'src/test-support.ts'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/index.ts',
+        'src/services/**',
+        'src/test-support.ts',
+        'src/**/test-arbitraries.ts',
+      ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },
