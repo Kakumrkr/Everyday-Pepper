@@ -9,7 +9,17 @@ import {
   parseDate,
   toZoned,
 } from './zoned-time.js';
-import { US_TIME_ZONES } from './test-arbitraries.js';
+
+// The US zones of the V1 market (the appointments engine's property tests use the same set).
+const US_TIME_ZONES = [
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Phoenix',
+  'America/Los_Angeles',
+  'America/Anchorage',
+  'Pacific/Honolulu',
+] as const;
 
 const NY = 'America/New_York';
 const at = (iso: string) => Date.parse(iso);
