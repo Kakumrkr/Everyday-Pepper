@@ -80,7 +80,7 @@ describe('MembershipRoleSchema', () => {
 });
 
 describe('NewTenantSchema', () => {
-  it('trims the name and defaults the locale', () => {
+  it('trims the name and defaults the locale and template', () => {
     expect(
       NewTenantSchema.parse({
         name: '  Juniper Hair Studio ',
@@ -92,7 +92,16 @@ describe('NewTenantSchema', () => {
       slug: 'juniper',
       timeZone: 'America/New_York',
       locale: 'en-US',
+      templateId: null,
     });
+  });
+
+  it('accepts a known template and rejects an unknown one', () => {
+    const tenant = { name: 'Juniper', slug: 'juniper', timeZone: 'UTC' };
+    expect(NewTenantSchema.parse({ ...tenant, templateId: 'beauty-salon' })).toMatchObject({
+      templateId: 'beauty-salon',
+    });
+    expect(NewTenantSchema.safeParse({ ...tenant, templateId: 'florist' }).success).toBe(false);
   });
 
   it('rejects a blank name', () => {

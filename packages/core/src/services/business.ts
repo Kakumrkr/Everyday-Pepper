@@ -33,6 +33,7 @@ export async function createBusiness(
             slug: tenant.slug,
             timeZone: tenant.timeZone,
             locale: tenant.locale,
+            templateId: tenant.templateId,
             ownerUserId,
           },
         },

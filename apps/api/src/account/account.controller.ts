@@ -4,8 +4,10 @@ import {
   type Business,
   type CurrentBusinessResponse,
   type MeResponse,
+  type TemplatesResponse,
 } from '@floty/contracts';
 import { permissionsOf, type TenantContext } from '@floty/core';
+import { templateSummaries } from '@floty/templates';
 import {
   Body,
   Controller,
@@ -29,7 +31,10 @@ import { answering } from '../http/domain-errors.js';
 import { parseBody } from '../http/zod-body.js';
 import { TenancyService } from './tenancy.service.js';
 
-/** The signed-in user's account and businesses (`/v1/me`, `/v1/tenants`, `/v1/tenant`). */
+/**
+ * The signed-in user's account and businesses (`/v1/me`, `/v1/tenants`, `/v1/tenant`), and the
+ * industry templates to start a business from (`/v1/templates`).
+ */
 @Controller('v1')
 export class AccountController {
   constructor(
@@ -45,6 +50,13 @@ export class AccountController {
       activeTenantId: session.activeTenantId,
       businesses: await this.tenancy.businessesOf(session.user.id),
     };
+  }
+
+  /** The business types a new business can start from (public data, but signed in only). */
+  @Get('templates')
+  @UseGuards(SessionGuard)
+  templates(): TemplatesResponse {
+    return { templates: templateSummaries() };
   }
 
   /** Switches the session to one of the user's own businesses. */

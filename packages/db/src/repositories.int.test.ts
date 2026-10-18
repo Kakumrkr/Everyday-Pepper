@@ -43,12 +43,27 @@ const juniper = { name: 'Juniper Hair Studio', slug: 'juniper', timeZone: 'Ameri
 describe('tenants', () => {
   it('creates a tenant visible inside its own context', async () => {
     const created = await createTenant(db, juniper);
-    expect(created).toMatchObject({ ...juniper, locale: 'en-US' });
+    expect(created).toMatchObject({ ...juniper, locale: 'en-US', templateId: null });
     expect(created.id).toMatch(/^[0-9a-f-]{8}-[0-9a-f]{4}-7/); // UUID v7
     expect(created.createdAt).toBeInstanceOf(Date);
 
     const current = await withTenant(db, TenantIdSchema.parse(created.id), findCurrentTenant);
     expect(current).toEqual(created);
+  });
+
+  it('stores the industry template it starts from (ADR-0018)', async () => {
+    const tenant = await createTenant(db, { ...juniper, slug: 'with-template', templateId: 'spa' });
+    expect(tenant.templateId).toBe('spa');
+    const current = await withTenant(db, TenantIdSchema.parse(tenant.id), findCurrentTenant);
+    expect(current?.templateId).toBe('spa');
+  });
+
+  it('refuses a malformed template id in the database', async () => {
+    const tenant = await createTenant(db, { ...juniper, slug: 'template-check' });
+    const error = await withTenant(db, TenantIdSchema.parse(tenant.id), (tx) =>
+      tx.execute(sql`UPDATE tenants SET template_id = 'Beauty Salon'`),
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('23514'); // check_violation
   });
 
   it('rejects a taken slug with a domain error', async () => {
@@ -81,6 +96,13 @@ describe('tenants', () => {
 
   it('validates input before writing', async () => {
     await expect(createTenant(db, { ...juniper, slug: 'Bad Slug' })).rejects.toThrow();
+    await expect(
+      createTenant(db, {
+        ...juniper,
+        slug: 'unknown-template',
+        templateId: 'florist' as 'spa',
+      }),
+    ).rejects.toThrow();
     await expect(
       createTenant(db, { ...juniper, slug: 'tz-check', timeZone: 'Mars/Base' }),
     ).rejects.toThrow();

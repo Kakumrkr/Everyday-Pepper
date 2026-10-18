@@ -1,0 +1,112 @@
+import type { TemplateInput } from '@floty/contracts';
+
+/** Personal training: recurring one-to-one sessions, often several a week. */
+export const personalTrainer: TemplateInput = {
+  id: 'personal-trainer',
+  version: 1,
+  name: 'Personal training',
+  group: 'wellness_fitness',
+  terminology: {
+    client: { singular: 'client', plural: 'clients' },
+    staff: { singular: 'trainer', plural: 'trainers' },
+    service: { singular: 'session type', plural: 'session types' },
+    booking: { singular: 'session', plural: 'sessions' },
+  },
+  modules: ['appointments'],
+  serviceCatalog: [
+    {
+      name: 'Free consultation',
+      category: 'Getting started',
+      durationMinutes: 30,
+      priceFromCents: 0,
+    },
+    {
+      name: 'Fitness assessment',
+      category: 'Getting started',
+      durationMinutes: 60,
+      bufferAfterMinutes: 10,
+      priceFromCents: 7500,
+    },
+    {
+      name: 'Personal training, 30 minutes',
+      category: 'Training',
+      durationMinutes: 30,
+      bufferAfterMinutes: 10,
+      priceFromCents: 4500,
+      priceToCents: 6000,
+      rebookAfterDays: 7,
+    },
+    {
+      name: 'Personal training, 60 minutes',
+      category: 'Training',
+      durationMinutes: 60,
+      bufferAfterMinutes: 10,
+      priceFromCents: 7500,
+      priceToCents: 11000,
+      rebookAfterDays: 7,
+    },
+    {
+      name: 'Partner training, 60 minutes',
+      category: 'Training',
+      durationMinutes: 60,
+      bufferAfterMinutes: 10,
+      priceFromCents: 10000,
+      priceToCents: 14000,
+      rebookAfterDays: 7,
+    },
+    {
+      name: 'Virtual session',
+      category: 'Training',
+      durationMinutes: 45,
+      priceFromCents: 5000,
+      priceToCents: 7500,
+      rebookAfterDays: 7,
+    },
+  ],
+  defaultRules: { slotIntervalMinutes: 30, minimumNoticeMinutes: 720, maximumAdvanceDays: 60 },
+  defaultAutonomy: {},
+  intakeFields: [
+    { key: 'goals', label: 'Goals', type: 'long_text' },
+    {
+      key: 'experience',
+      label: 'Training experience',
+      type: 'select',
+      options: ['Beginner', 'Intermediate', 'Advanced'],
+    },
+    { key: 'injuries', label: 'Injuries or limitations', type: 'long_text', sensitive: true },
+    {
+      key: 'medical_clearance',
+      label: 'Medical clearance on file',
+      type: 'boolean',
+      sensitive: true,
+    },
+    { key: 'emergency_contact', label: 'Emergency contact', type: 'text' },
+  ],
+  insights: {
+    enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'waitlist_match'],
+    rebookingIntervalDays: 7,
+    minGapMinutes: 30,
+  },
+  promptFragments: [
+    'Clients usually train 1 to 3 times a week at the same times; offer the same slot next week first.',
+    'A new client starts with a consultation or assessment before regular sessions.',
+    'Never give medical advice; note injuries on the client profile and leave training decisions to the trainer.',
+  ],
+  onboardingHints: {
+    lookFor: [
+      'session prices and packages',
+      'trainer bio and specialties',
+      'availability',
+      'cancellation policy (often 12 or 24 hours)',
+    ],
+    serviceKeywords: [
+      'personal training',
+      'session',
+      'assessment',
+      'consultation',
+      'package',
+      'strength',
+      'HIIT',
+    ],
+  },
+};

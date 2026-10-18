@@ -18,6 +18,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import type { TemplateId } from '@floty/contracts';
 import { newId } from './ids.js';
 
 // Source of truth for the tables. `pnpm --filter @floty/db generate` turns changes into a SQL
@@ -80,9 +81,13 @@ export const tenants = pgTable(
     slug: text('slug').notNull().unique(),
     timeZone: text('time_zone').notNull(),
     locale: text('locale').notNull(),
+    // The industry template it started from (ADR-0018); NULL: none, platform defaults only.
+    // Validated against the known templates by the contracts; the check keeps the shape.
+    templateId: text('template_id').$type<TemplateId>(),
     ...timestamps,
   },
-  () => [
+  (table) => [
+    check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
     tenantIsolation(sql.raw('id')),
     memberRead(sql`id IN (SELECT tenant_id FROM memberships WHERE user_id = ${currentUserId})`),
   ],

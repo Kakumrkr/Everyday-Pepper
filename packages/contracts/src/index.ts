@@ -7,6 +7,7 @@ export * from './health.js';
 export * from './invites.js';
 export * from './permissions.js';
 export * from './rules.js';
+export * from './templates.js';
 export * from './time.js';
 export * from './trust.js';
 export * from './tenancy.js';

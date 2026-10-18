@@ -50,11 +50,28 @@ export const LocaleSchema = z.string().refine((value) => {
 export const MembershipRoleSchema = z.enum(['owner', 'manager', 'staff']);
 export type MembershipRole = z.infer<typeof MembershipRoleSchema>;
 
-/** Input for creating a tenant (business). */
+/**
+ * The industry template a business starts from (ADR-0018); the templates themselves are in
+ * `templates.ts` and `@floty/templates`. V1: Beauty and Wellness & fitness (v1-scope.md).
+ */
+export const TemplateIdSchema = z.enum([
+  'beauty-salon',
+  'barber',
+  'nails',
+  'spa',
+  'lash-brow',
+  'personal-trainer',
+  'massage',
+  'yoga-pilates-private',
+]);
+export type TemplateId = z.infer<typeof TemplateIdSchema>;
+
+/** Input for creating a tenant (business); no template: platform defaults only. */
 export const NewTenantSchema = z.object({
   name: z.string().trim().min(1).max(120),
   slug: TenantSlugSchema,
   timeZone: TimeZoneSchema,
   locale: LocaleSchema.default('en-US'),
+  templateId: TemplateIdSchema.nullable().default(null),
 });
 export type NewTenant = z.input<typeof NewTenantSchema>;

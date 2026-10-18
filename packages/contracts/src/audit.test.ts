@@ -100,6 +100,21 @@ describe('AuditChangeSchema', () => {
         },
       },
     ],
+    [
+      'tenant.created (with a template, S13)',
+      {
+        action: 'tenant.created',
+        entity: { type: 'tenant', id: TENANT },
+        before: null,
+        after: {
+          slug: 'juniper',
+          timeZone: 'America/New_York',
+          locale: 'en-US',
+          templateId: 'barber',
+          ownerUserId: USER,
+        },
+      },
+    ],
     ['membership.role_changed', roleChanged],
     [
       'membership.removed',

@@ -4,6 +4,7 @@ import {
   LocaleSchema,
   MembershipRoleSchema,
   TenantIdSchema,
+  TemplateIdSchema,
   TenantSlugSchema,
   TimeZoneSchema,
   UserIdSchema,
@@ -93,6 +94,8 @@ export const BusinessSchema = z.object({
   slug: TenantSlugSchema,
   timeZone: TimeZoneSchema,
   locale: LocaleSchema,
+  /** The industry template it started from; `null`: none (platform defaults). */
+  templateId: TemplateIdSchema.nullable(),
 });
 export type Business = z.infer<typeof BusinessSchema>;
 

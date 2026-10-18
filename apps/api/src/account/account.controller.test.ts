@@ -4,6 +4,8 @@ import {
   ApiErrorSchema,
   MeResponseSchema,
   PermissionSchema,
+  TemplateIdSchema,
+  TemplatesResponseSchema,
   TenantIdSchema,
   UserIdSchema,
   type Business,
@@ -30,6 +32,7 @@ const BUSINESS: Business = {
   slug: 'juniper',
   timeZone: 'America/New_York',
   locale: 'en-US',
+  templateId: 'beauty-salon',
 };
 
 /** Signed in as USER when the request carries `cookie: signed-in`. */
@@ -119,6 +122,34 @@ describe('GET /v1/me', () => {
       user: auth.session.user,
       activeTenantId: TENANT,
       businesses: [{ tenantId: TENANT, name: BUSINESS.name, slug: 'juniper', role: 'owner' }],
+    });
+  });
+});
+
+describe('GET /v1/templates', () => {
+  it('401 without a session', async () => {
+    const response = await request(server).get('/v1/templates').expect(401);
+    expectError(response.body, 'unauthenticated');
+  });
+
+  it('lists the eight templates for a signed-in user without a business', async () => {
+    auth.session = { ...auth.session, activeTenantId: null };
+    const response = await request(server)
+      .get('/v1/templates')
+      .set('cookie', 'signed-in')
+      .expect(200);
+    const { templates } = TemplatesResponseSchema.parse(response.body);
+    expect(templates.map((t) => t.id)).toEqual(TemplateIdSchema.options);
+    expect(templates[1]).toEqual({
+      id: 'barber',
+      name: 'Barbershop',
+      group: 'beauty',
+      terminology: {
+        client: { singular: 'client', plural: 'clients' },
+        staff: { singular: 'barber', plural: 'barbers' },
+        service: { singular: 'service', plural: 'services' },
+        booking: { singular: 'appointment', plural: 'appointments' },
+      },
     });
   });
 });
@@ -214,8 +245,27 @@ describe('POST /v1/tenants', () => {
   it('creates a business owned by the user and makes it active', async () => {
     const response = await post(input).expect(201);
     expect(response.body).toEqual(BUSINESS);
-    expect(tenancy.createBusiness).toHaveBeenCalledWith(USER, { ...input, locale: 'en-US' });
+    expect(tenancy.createBusiness).toHaveBeenCalledWith(USER, {
+      ...input,
+      locale: 'en-US',
+      templateId: null,
+    });
     expect(auth.setActiveTenant).toHaveBeenCalledWith(auth.session, TENANT);
+  });
+
+  it('passes the chosen template on', async () => {
+    await post({ ...input, templateId: 'beauty-salon' }).expect(201);
+    expect(tenancy.createBusiness).toHaveBeenCalledWith(USER, {
+      ...input,
+      locale: 'en-US',
+      templateId: 'beauty-salon',
+    });
+  });
+
+  it('400 for an unknown template', async () => {
+    const response = await post({ ...input, templateId: 'florist' }).expect(400);
+    expect(response.body).toMatchObject({ fields: ['templateId'] });
+    expect(tenancy.createBusiness).not.toHaveBeenCalled();
   });
 
   it('409 slug_taken for a taken slug', async () => {

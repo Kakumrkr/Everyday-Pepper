@@ -2,9 +2,12 @@ import {
   AvailabilityQuerySchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
+  TemplateIdSchema,
   type AvailabilityQueryInput,
   type AvailableSlot,
+  type RuleDefaults,
   type StaffMemberId,
+  type TemplateId,
 } from '@floty/contracts';
 import { requirePermission, systemClock, type Actor, type Clock } from '@floty/core';
 import {
@@ -30,12 +33,19 @@ import { rowsToRules } from '../mapping.js';
 // business may ask (`calendar.read`): occupied times carry no booking details, so staff get
 // the same answer as owners. Booking itself re-runs the same check under a lock.
 
+/**
+ * The booking rule defaults of the business's industry template (ADR-0016's "template" step,
+ * ADR-0018). The app passes `templateRuleDefaults` from `@floty/templates`: modules (L2) do not
+ * import templates (L3). Without it, only the platform defaults apply.
+ */
+export type TemplateRuleDefaultsOf = (templateId: TemplateId | null) => Partial<RuleDefaults>;
+
 /** Start times in [from, to) for the service, with one staff member or anyone who offers it. */
 export async function findAvailability(
   db: Database,
   actor: Actor,
   query: AvailabilityQueryInput,
-  options: { clock?: Clock } = {},
+  options: { clock?: Clock; templateRuleDefaults?: TemplateRuleDefaultsOf } = {},
 ): Promise<AvailableSlot[]> {
   requirePermission(actor, 'calendar.read');
   const { serviceId, staffMemberId, from, to } = AvailabilityQuerySchema.parse(query);
@@ -49,6 +59,7 @@ export async function findAvailability(
       from: Date.parse(from),
       to: Date.parse(to),
       now,
+      templateRuleDefaults: options.templateRuleDefaults,
     });
     return slots.map(toAvailableSlot);
   });
@@ -63,6 +74,7 @@ export interface SlotSearch {
   now: number;
   /** A booking being moved: its own time does not block it. */
   excludeBookingId?: string;
+  templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
 }
 
 /** The engine's slots for a search, from the transaction's data. */
@@ -83,6 +95,8 @@ export async function slotsFor(tx: TenantTx, search: SlotSearch): Promise<Slot[]
     to: new Date(search.to + LOAD_MARGIN_MS),
   };
   const rules = rowsToRules(await listBookingRules(tx)).rules;
+  const templateDefaults =
+    search.templateRuleDefaults?.(TemplateIdSchema.nullable().parse(tenant.templateId)) ?? {};
   const hours = await listWorkingHoursOf(tx, ids);
   const timeOff = await listTimeOffBetween(tx, ids, around);
   const occupancy = await listOccupancy(tx, { ...around, staffMemberIds: ids });
@@ -99,6 +113,7 @@ export async function slotsFor(tx: TenantTx, search: SlotSearch): Promise<Slot[]
         timeOff,
         occupancy,
         rules,
+        templateDefaults,
         ...(search.excludeBookingId !== undefined && { excludeBookingId: search.excludeBookingId }),
       }),
     ),

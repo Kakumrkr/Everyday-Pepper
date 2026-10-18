@@ -100,6 +100,20 @@ describe('createBusiness', () => {
     });
   });
 
+  it('records the industry template in tenant.created (ADR-0018)', async () => {
+    const owner = await insertUser(db, 'Bo');
+    const tenant = await createBusiness(db, owner, {
+      name: 'Bo’s Barbers',
+      slug: 'bos-barbers',
+      timeZone: 'America/Chicago',
+      templateId: 'barber',
+    });
+    expect(tenant.templateId).toBe('barber');
+    const tenantId = TenantIdSchema.parse(tenant.id);
+    const [entry] = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 1 }));
+    expect(entry?.after).toMatchObject({ templateId: 'barber' });
+  });
+
   it(`stops at ${String(BUSINESS_LIMIT_PER_OWNER)} businesses per owner`, async () => {
     const owner = await insertUser(db, 'Serial');
     for (let i = 0; i < BUSINESS_LIMIT_PER_OWNER; i++) {

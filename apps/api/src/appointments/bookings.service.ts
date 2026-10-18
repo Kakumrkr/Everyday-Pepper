@@ -28,11 +28,12 @@ import type {
 import type { Actor, TenantContext } from '@floty/core';
 import type { Database } from '@floty/db';
 import { currentRequestContext, DATABASE } from '@floty/runtime';
+import { templateRuleDefaults } from '@floty/templates';
 import { Inject, Injectable } from '@nestjs/common';
 
 /**
- * The bookings, availability and waitlist services for a request: binds the database and the
- * request id (for the audit log). Domain errors pass through; the controller answers them.
+ * The bookings, availability and waitlist services for a request: binds the database, the
+ * request id (for the audit log) and the industry templates' rule defaults (ADR-0018). Domain errors pass through; the controller answers them.
  */
 @Injectable()
 export class BookingsService {
@@ -51,11 +52,11 @@ export class BookingsService {
   }
 
   createBooking(tenant: TenantContext, input: BookingInput): Promise<Booking> {
-    return createBooking(this.db, actorOf(tenant), input);
+    return createBooking(this.db, actorOf(tenant), input, { templateRuleDefaults });
   }
 
   changeBooking(tenant: TenantContext, id: BookingId, change: BookingChange): Promise<Booking> {
-    return changeBooking(this.db, actorOf(tenant), id, change);
+    return changeBooking(this.db, actorOf(tenant), id, change, { templateRuleDefaults });
   }
 
   busy(tenant: TenantContext, query: BusyQuery): Promise<BusyTime[]> {
@@ -63,7 +64,7 @@ export class BookingsService {
   }
 
   availability(tenant: TenantContext, query: AvailabilityQueryInput): Promise<AvailableSlot[]> {
-    return findAvailability(this.db, actorOf(tenant), query);
+    return findAvailability(this.db, actorOf(tenant), query, { templateRuleDefaults });
   }
 
   waitlist(tenant: TenantContext, query: WaitlistQuery): Promise<WaitlistEntry[]> {

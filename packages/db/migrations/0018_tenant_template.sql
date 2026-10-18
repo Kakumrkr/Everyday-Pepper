@@ -1,0 +1,2 @@
+ALTER TABLE "tenants" ADD COLUMN "template_id" text;--> statement-breakpoint
+ALTER TABLE "tenants" ADD CONSTRAINT "tenants_template_id_format" CHECK ("tenants"."template_id" ~ '^[a-z][a-z0-9-]{0,62}$');

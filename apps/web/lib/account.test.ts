@@ -71,6 +71,7 @@ describe('loadCurrentBusiness', () => {
       slug: 'juniper',
       timeZone: 'America/New_York',
       locale: 'en-US',
+      templateId: null,
     },
     role: 'owner',
     permissions: ['business.read', 'members.read'],

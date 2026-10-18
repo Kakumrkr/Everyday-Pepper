@@ -51,6 +51,7 @@ describe('CurrentBusinessResponseSchema', () => {
         slug: 'juniper',
         timeZone: 'America/New_York',
         locale: 'en-US',
+        templateId: 'beauty-salon',
       },
       role: 'staff',
       permissions: ['business.read', 'calendar.read'],
@@ -66,6 +67,7 @@ describe('CurrentBusinessResponseSchema', () => {
         slug: 'juniper',
         timeZone: 'America/New_York',
         locale: 'en-US',
+        templateId: null,
       },
       role: 'staff',
     };

@@ -4,7 +4,9 @@ import {
   type Client,
   type MembershipRole,
   type Service,
+  type RuleDefaults,
   type StaffMember,
+  type TemplateId,
   type TenantId,
   type UserId,
 } from '@floty/contracts';
@@ -40,7 +42,7 @@ import {
   WaitlistEntryNotChangeableError,
   WaitlistExpiredError,
 } from './errors.js';
-import { findAvailability } from './services/availability.js';
+import { findAvailability, type TemplateRuleDefaultsOf } from './services/availability.js';
 import {
   changeBooking,
   createBooking,
@@ -102,13 +104,14 @@ interface Business {
  * offers it and works Monday–Friday 09:00–17:00; Marco (linked to the colleague) works the same
  * hours but offers no service yet. Default rules: 15-minute slots, 2 hours' notice.
  */
-async function newBusiness(): Promise<Business> {
+async function newBusiness(templateId: TemplateId | null = null): Promise<Business> {
   slugs += 1;
   const ownerId = await insertUser(db, 'Ana');
   const tenant = await createBusiness(db, ownerId, {
     name: 'Juniper Hair Studio',
     slug: `juniper-bookings-${String(slugs)}`,
     timeZone: 'America/New_York',
+    templateId,
   });
   const tenantId = TenantIdSchema.parse(tenant.id);
   const actor = (userId: UserId, role: MembershipRole): Actor => ({
@@ -791,5 +794,90 @@ describe('under concurrency (property tests)', () => {
       ),
       { numRuns: 15, seed: 20261018 },
     );
+  });
+});
+
+describe('industry template defaults (ADR-0018)', () => {
+  // A stand-in for `@floty/templates` (the app passes the real one; modules do not import it).
+  // Its values are made up to check the plumbing: a "barber" business gets a 30-minute grid and
+  // 30 minutes' notice. The api journey test uses the real templates.
+  const asked: (TemplateId | null)[] = [];
+  const templateRuleDefaults: TemplateRuleDefaultsOf = (templateId) => {
+    asked.push(templateId);
+    const barber: Partial<RuleDefaults> = { slotIntervalMinutes: 30, minimumNoticeMinutes: 30 };
+    return templateId === 'barber' ? barber : {};
+  };
+  const tuesday = (b: Business) => ({
+    serviceId: b.service.id,
+    staffMemberId: b.jess.id,
+    from: tue('00:00'),
+    to: tue('23:59'),
+  });
+
+  it("offers times on the template's grid when the business has no rule of its own", async () => {
+    const b = await newBusiness('barber');
+    asked.length = 0;
+    const slots = await findAvailability(db, b.owner, tuesday(b), {
+      clock: b.clock,
+      templateRuleDefaults,
+    });
+    expect(asked).toEqual(['barber']);
+    expect(slots.slice(0, 3).map((s) => s.startsAt)).toEqual([
+      tue('09:00'),
+      tue('09:30'),
+      tue('10:00'),
+    ]);
+    expect(slots.every((s) => new Date(s.startsAt).getUTCMinutes() % 30 === 0)).toBe(true);
+  });
+
+  it("uses the template's notice: 30 minutes, not the platform's 2 hours", async () => {
+    const b = await newBusiness('barber');
+    b.clock.set(tue('09:40'));
+    const slots = await findAvailability(db, b.owner, tuesday(b), {
+      clock: b.clock,
+      templateRuleDefaults,
+    });
+    expect(slots[0]?.startsAt).toBe(tue('10:30'));
+  });
+
+  it("lets the business's own rule win over the template", async () => {
+    const b = await newBusiness('barber');
+    await replaceBookingRules(db, b.owner, {
+      rules: [{ type: 'slot_interval', params: { minutes: 20 } }],
+    });
+    const slots = await findAvailability(db, b.owner, tuesday(b), {
+      clock: b.clock,
+      templateRuleDefaults,
+    });
+    expect(slots.slice(0, 3).map((s) => s.startsAt)).toEqual([
+      tue('09:00'),
+      tue('09:20'),
+      tue('09:40'),
+    ]);
+  });
+
+  it("refuses a booking off the template's grid, with alternatives on it, and moves alike", async () => {
+    const b = await newBusiness('barber');
+    const options = { clock: b.clock, templateRuleDefaults };
+    const { alternatives } = await refusal(
+      createBooking(db, b.owner, request(b, tue('10:15')), options),
+    );
+    expect(alternatives.map((a) => a.startsAt)).toEqual([tue('10:00'), tue('10:30'), tue('09:30')]);
+
+    const booking = await createBooking(db, b.owner, request(b, tue('10:30')), options);
+    await refusal(changeBooking(db, b.owner, booking.id, { startsAt: tue('13:15') }, options));
+    const moved = await changeBooking(db, b.owner, booking.id, { startsAt: tue('13:30') }, options);
+    expect(moved.startsAt).toBe(tue('13:30'));
+  });
+
+  it('asks for no template for a business without one, and keeps the platform defaults', async () => {
+    const b = await newBusiness();
+    asked.length = 0;
+    const slots = await findAvailability(db, b.owner, tuesday(b), {
+      clock: b.clock,
+      templateRuleDefaults,
+    });
+    expect(asked).toEqual([null]);
+    expect(slots[1]?.startsAt).toBe(tue('09:15'));
   });
 });
