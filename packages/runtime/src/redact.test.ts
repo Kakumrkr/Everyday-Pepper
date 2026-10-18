@@ -14,6 +14,14 @@ describe('redactString', () => {
     ['call +1 (555) 123-4567 now', 'call [phone] now'],
     ['call 555.123.4567', 'call [phone]'],
     ['sms to 5551234567', 'sms to [phone]'],
+    // Clients' phones are any E.164 number (contracts' PhoneSchema), not only North American.
+    ['client +447911123456 added', 'client [phone] added'],
+    ['client +4915112345678', 'client [phone]'],
+    // Drizzle's failed-query message lists the bound values (client names, notes, ...).
+    [
+      'Failed query: insert into "clients" ("name", "phone") values ($1, $2)\nparams: Maria Lopez,+15551234567',
+      `Failed query: insert into "clients" ("name", "phone") values ($1, $2)\nparams: ${REDACTED}`,
+    ],
   ])('scrubs %j', (input, expected) => {
     expect(redactString(input)).toBe(expected);
   });
@@ -77,6 +85,31 @@ describe('redact', () => {
       cause: { type: 'Error', message: `dial redis://${REDACTED}@cache:6379` },
     });
     expect(output['stack']).toEqual(expect.stringContaining('no client with email [email]'));
+  });
+
+  it("drops a failed query's bound values and Postgres's row details from errors", () => {
+    // What drizzle-orm's DrizzleQueryError and a pg check violation carry.
+    const cause = Object.assign(new Error('new row violates check constraint "clients_name"'), {
+      code: '23514',
+      detail: 'Failing row contains (0199, Maria Lopez, null).',
+    });
+    const error = Object.assign(
+      new Error('Failed query: insert into "clients" ("name") values ($1)\nparams: Maria Lopez', {
+        cause,
+      }),
+      { query: 'insert into "clients" ("name") values ($1)', params: ['Maria Lopez'] },
+    );
+
+    const output = redact(error);
+
+    expect(JSON.stringify(output)).not.toContain('Maria');
+    expect(output).toMatchObject({
+      query: 'insert into "clients" ("name") values ($1)',
+      params: REDACTED,
+      cause: { code: '23514', detail: REDACTED },
+    });
+    // The stack keeps its frames after the dropped values.
+    expect((output as { stack: string }).stack).toMatch(/params: \[redacted\]\n\s+at /);
   });
 
   it('handles primitives, dates, binary, cycles and deep nesting', () => {

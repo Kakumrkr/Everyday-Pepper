@@ -18,15 +18,15 @@ const allowedInternalImports = {
   'packages/db': ['contracts', 'testing'],
   'packages/core': ['contracts', 'db', 'testing'],
   'packages/modules/*': ['contracts', 'db', 'core', 'testing'],
-  'packages/templates/*': ['contracts'],
+  'packages/templates': ['contracts'],
   'packages/ai': ['contracts', 'core'],
   'packages/integrations': ['contracts', 'core'],
   'packages/ui': ['contracts'],
   'packages/runtime': ['contracts', 'core', 'db', 'testing'],
   // Test-only helpers; a devDependency wherever used, so a production import fails the image.
   'packages/testing': [],
-  // Apps also get each modules/* and templates/* package as it is created.
-  'apps/api': ['contracts', 'core', 'db', 'ai', 'runtime', 'testing', 'appointments'],
+  // Apps also get each modules/* package as it is created.
+  'apps/api': ['contracts', 'core', 'db', 'ai', 'runtime', 'testing', 'appointments', 'templates'],
   'apps/worker': ['contracts', 'core', 'db', 'integrations', 'runtime', 'testing'],
   'apps/web': ['contracts', 'ui'],
   e2e: ['contracts', 'testing'],

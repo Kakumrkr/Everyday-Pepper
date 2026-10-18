@@ -2,7 +2,7 @@ packages:
   - apps/*
   - packages/*
   - packages/modules/*
-  - packages/templates/*
+  - packages/templates
   - e2e
 
 # @swc/core's install script only verifies its prebuilt binary; the optional platform package

@@ -64,7 +64,7 @@ import {
   StaffMemberNotFoundError,
 } from '../errors.js';
 import { bookingAuditValues, sameValues, staffOwner, toBooking, toBusyTime } from '../mapping.js';
-import { serviceToBook, slotsFor } from './availability.js';
+import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 
 // Bookings (ADR-0017). `bookings.manage` lets owners and managers book anyone and staff only
 // their own staff member (AC-W9-1); the database's member scope enforces the same, so staff
@@ -81,7 +81,11 @@ export async function createBooking(
   db: Database,
   actor: Actor,
   input: BookingInput,
-  options: { clock?: Clock; source?: BookingSource } = {},
+  options: {
+    clock?: Clock;
+    source?: BookingSource;
+    templateRuleDefaults?: TemplateRuleDefaultsOf;
+  } = {},
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.manage');
   const request = BookingInputSchema.parse(input);
@@ -89,6 +93,7 @@ export async function createBooking(
   const now = (options.clock ?? systemClock).now().getTime();
   const start = Date.parse(request.startsAt);
   const key = request.idempotencyKey ?? null;
+  const { templateRuleDefaults } = options;
   const sameRequest = (row: BookingRow) =>
     row.clientId === request.clientId &&
     row.serviceId === request.serviceId &&
@@ -116,7 +121,13 @@ export async function createBooking(
       const end = start + service.durationMinutes * MINUTE_MS;
       const fits = request.override
         ? offers(staff, service)
-        : await isBookable(tx, { service, staffMemberId: request.staffMemberId, start, now });
+        : await isBookable(tx, {
+            service,
+            staffMemberId: request.staffMemberId,
+            start,
+            now,
+            templateRuleDefaults,
+          });
       if (!fits) throw new SlotTaken();
 
       const row = await insertBooking(tx, {
@@ -154,6 +165,7 @@ export async function createBooking(
           staffMemberId: request.staffMemberId,
           start,
           now,
+          templateRuleDefaults,
         }),
       );
     }
@@ -241,7 +253,7 @@ export async function changeBooking(
   actor: Actor,
   bookingId: BookingId,
   change: BookingChange,
-  options: { clock?: Clock } = {},
+  options: { clock?: Clock; templateRuleDefaults?: TemplateRuleDefaultsOf } = {},
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.manage');
   const id = BookingIdSchema.parse(bookingId);
@@ -276,7 +288,12 @@ export async function changeBooking(
         bufferBeforeMinutes: row.bufferBeforeMinutes,
         bufferAfterMinutes: row.bufferAfterMinutes,
       };
-      search = { service, staffMemberId: target, excludeBookingId: row.id };
+      search = {
+        service,
+        staffMemberId: target,
+        excludeBookingId: row.id,
+        templateRuleDefaults: options.templateRuleDefaults,
+      };
       const fits = parsed.override
         ? offers(staff, service)
         : await isBookable(tx, { ...search, start, now });
@@ -375,6 +392,7 @@ interface AlternativesSearch {
   start: number;
   now: number;
   excludeBookingId?: string;
+  templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
 }
 
 /** Whether the engine offers exactly this start time with this staff member. */
@@ -385,6 +403,7 @@ async function isBookable(tx: TenantTx, search: AlternativesSearch): Promise<boo
     from: search.start,
     to: search.start + 1,
     now: search.now,
+    templateRuleDefaults: search.templateRuleDefaults,
     ...(search.excludeBookingId !== undefined && { excludeBookingId: search.excludeBookingId }),
   });
   return slots.some((slot) => slot.start === search.start);
@@ -403,6 +422,7 @@ async function alternatives(
       staffMemberIds: [search.staffMemberId],
       ...range,
       now: search.now,
+      templateRuleDefaults: search.templateRuleDefaults,
       ...(search.excludeBookingId !== undefined && { excludeBookingId: search.excludeBookingId }),
     }),
   );

@@ -1,0 +1,31 @@
+{
+  "name": "@floty/templates",
+  "version": "0.0.0",
+  "private": true,
+  "description": "L3 industry templates: terminology, service menus, rule and autonomy defaults for the eight V1 business types (data only).",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@floty/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@floty/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@floty/config": "workspace:*",
+    "@vitest/coverage-v8": "^5.0.5",
+    "vitest": "^5.0.5"
+  }
+}

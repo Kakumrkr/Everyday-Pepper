@@ -62,6 +62,7 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [ADR-0015 Appointments base data](adr/0015-appointments-base-data.md)
 - [ADR-0016 Booking rules and the availability engine](adr/0016-booking-rules-and-availability.md)
 - [ADR-0017 Bookings, clients and the waitlist](adr/0017-bookings-clients-and-waitlist.md)
+- [ADR-0018 Industry templates](adr/0018-industry-templates.md)
 
 ## How these docs are maintained
 - Docs change in the same commit as the behaviour they describe.

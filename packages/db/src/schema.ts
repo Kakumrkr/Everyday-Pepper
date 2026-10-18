@@ -18,6 +18,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import type { TemplateId } from '@floty/contracts';
 import { newId } from './ids.js';
 
 // Source of truth for the tables. `pnpm --filter @floty/db generate` turns changes into a SQL
@@ -56,6 +57,32 @@ function memberRead(using: SQL): ReturnType<typeof pgPolicy> {
  * the sub-selects make Postgres evaluate them once per statement, not once per row.
  */
 const memberSeesAll = sql`(SELECT current_member_sees_all())`;
+
+/**
+ * Only owners, managers and work without a user may change the rows that decide what a member
+ * reaches (roles, staff links), so the member scope holds even if a service check is missed
+ * (S13 security review). Updates check the new row only: staff may still lock these rows
+ * (`SELECT ... FOR UPDATE` needs the UPDATE policy's USING clause) but not change them.
+ */
+function changesNeedSeesAll(options: { canDelete?: SQL } = {}) {
+  return [
+    pgPolicy('member_scope_update', {
+      as: 'restrictive',
+      for: 'update',
+      using: sql`true`,
+      withCheck: memberSeesAll,
+    }),
+    pgPolicy('member_scope_delete', {
+      as: 'restrictive',
+      for: 'delete',
+      using:
+        options.canDelete === undefined
+          ? memberSeesAll
+          : sql`${memberSeesAll} OR ${options.canDelete}`,
+    }),
+  ];
+}
+
 function ownStaffMember(column: SQL): SQL {
   return sql`${memberSeesAll} OR ${column} IN (SELECT current_member_staff_ids())`;
 }
@@ -80,9 +107,13 @@ export const tenants = pgTable(
     slug: text('slug').notNull().unique(),
     timeZone: text('time_zone').notNull(),
     locale: text('locale').notNull(),
+    // The industry template it started from (ADR-0018); NULL: none, platform defaults only.
+    // Validated against the known templates by the contracts; the check keeps the shape.
+    templateId: text('template_id').$type<TemplateId>(),
     ...timestamps,
   },
-  () => [
+  (table) => [
+    check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
     tenantIsolation(sql.raw('id')),
     memberRead(sql`id IN (SELECT tenant_id FROM memberships WHERE user_id = ${currentUserId})`),
   ],
@@ -207,6 +238,9 @@ export const memberships = pgTable(
     index('memberships_user_id_idx').on(table.userId),
     tenantIsolation(sql.raw('tenant_id')),
     memberRead(sql`user_id = ${currentUserId}`),
+    // A member may leave (delete their own membership), not change roles. Inserts stay with the
+    // services: a business's first owner and invitees are not members yet when they are added.
+    ...changesNeedSeesAll({ canDelete: sql`user_id = ${currentUserId}` }),
   ],
 );
 
@@ -402,6 +436,12 @@ export const staffMembers = pgTable(
     check('staff_members_display_name_length', sql`length(${table.displayName}) BETWEEN 1 AND 80`),
     check('staff_members_color_format', sql`${table.color} ~ '^#[0-9a-f]{6}$'`),
     tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope_insert', {
+      as: 'restrictive',
+      for: 'insert',
+      withCheck: memberSeesAll,
+    }),
+    ...changesNeedSeesAll(),
   ],
 );
 

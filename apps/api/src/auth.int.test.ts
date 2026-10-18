@@ -27,6 +27,8 @@ import {
   ServiceSchema,
   StaffMemberSchema,
   StaffResponseSchema,
+  TemplateIdSchema,
+  TemplatesResponseSchema,
   TenantIdSchema,
   TimeOffResponseSchema,
   TimeOffSchema,
@@ -1176,5 +1178,119 @@ describe('clients, bookings and the waitlist (ADR-0017)', () => {
     for (const personal of ['Maria Lopez', 'maria@example.test']) {
       expect(logged).not.toContain(personal);
     }
+  });
+});
+
+describe('industry templates (ADR-0018)', () => {
+  let bo: Browser;
+  let service: Service;
+  let trainer: StaffMember;
+  let client: Client;
+  let at: (time: string) => string;
+  let day: { from: string; to: string };
+
+  beforeAll(async () => {
+    ({ browser: bo } = await signUp('bo'));
+  });
+
+  it('a new owner sees the eight business types before having a business', async () => {
+    const { templates } = TemplatesResponseSchema.parse(
+      (await bo.get('/v1/templates').expect(200)).body,
+    );
+    expect(templates.map((t) => t.id)).toEqual(TemplateIdSchema.options);
+    expect(templates.find((t) => t.id === 'spa')?.terminology.client.singular).toBe('guest');
+  });
+
+  it('refuses an unknown business type', async () => {
+    const response = await bo
+      .post('/v1/tenants', { ...juniper, slug: 'bo-florist', templateId: 'florist' })
+      .expect(400);
+    expect(response.body).toMatchObject({ fields: ['templateId'] });
+  });
+
+  it('creates a training business from the personal-trainer template; the business shows it', async () => {
+    const created = await bo
+      .post('/v1/tenants', {
+        name: 'Bo’s Training',
+        slug: 'bos-training',
+        timeZone: 'America/Chicago',
+        templateId: 'personal-trainer',
+      })
+      .expect(201);
+    expect(created.body).toMatchObject({ templateId: 'personal-trainer' });
+    await enrolTotp(bo);
+    const current = CurrentBusinessResponseSchema.parse(
+      (await bo.get('/v1/tenant').expect(200)).body,
+    );
+    expect(current.business.templateId).toBe('personal-trainer');
+  });
+
+  it("books on the template's 30-minute grid while the business has no rules of its own", async () => {
+    service = ServiceSchema.parse(
+      (
+        await bo
+          .post('/v1/services', { name: 'Personal training', durationMinutes: 30 })
+          .expect(201)
+      ).body,
+    );
+    trainer = StaffMemberSchema.parse(
+      (await bo.post('/v1/staff', { displayName: 'Bo', serviceIds: [service.id] }).expect(201))
+        .body,
+    );
+    const week = {
+      intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
+        weekday,
+        start: '09:00',
+        end: '17:00',
+      })),
+    };
+    await bo.put(`/v1/staff/${trainer.id}/hours`, week).expect(200);
+    client = ClientSchema.parse((await bo.post('/v1/clients', { name: 'Sam' }).expect(201)).body);
+    const date = formatDate(addDays(toZoned('America/Chicago', Date.now()), 3));
+    at = (time: string) =>
+      new Date(fromZoned('America/Chicago', parseDate(date), minutesOfDay(time))).toISOString();
+    day = { from: at('00:00'), to: at('23:59') };
+
+    const { slots } = AvailabilityResponseSchema.parse(
+      (
+        await bo
+          .get(`/v1/availability?serviceId=${service.id}&${new URLSearchParams(day).toString()}`)
+          .expect(200)
+      ).body,
+    );
+    expect(slots.slice(0, 3).map((s) => s.startsAt)).toEqual([
+      at('09:00'),
+      at('09:30'),
+      at('10:00'),
+    ]);
+
+    const booking = { clientId: client.id, serviceId: service.id, staffMemberId: trainer.id };
+    const refused = await bo
+      .post('/v1/bookings', { ...booking, startsAt: at('10:15') })
+      .expect(409);
+    expect(SlotUnavailableSchema.parse(refused.body).alternatives.map((a) => a.startsAt)).toEqual([
+      at('10:00'),
+      at('10:30'),
+      at('09:30'),
+    ]);
+    await bo.post('/v1/bookings', { ...booking, startsAt: at('10:30') }).expect(201);
+  });
+
+  it("the business's own rule then wins over the template", async () => {
+    await bo
+      .put('/v1/rules', { rules: [{ type: 'slot_interval', params: { minutes: 15 } }] })
+      .expect(200);
+    const { slots } = AvailabilityResponseSchema.parse(
+      (
+        await bo
+          .get(`/v1/availability?serviceId=${service.id}&${new URLSearchParams(day).toString()}`)
+          .expect(200)
+      ).body,
+    );
+    expect(slots.slice(0, 3).map((s) => s.startsAt)).toEqual([
+      at('09:00'),
+      at('09:15'),
+      at('09:30'),
+    ]);
   });
 });

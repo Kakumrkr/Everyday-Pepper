@@ -1,0 +1,5 @@
+CREATE POLICY "member_scope_update" ON "memberships" AS RESTRICTIVE FOR UPDATE TO public USING (true) WITH CHECK ((SELECT current_member_sees_all()));--> statement-breakpoint
+CREATE POLICY "member_scope_delete" ON "memberships" AS RESTRICTIVE FOR DELETE TO public USING ((SELECT current_member_sees_all()) OR user_id = current_user_id());--> statement-breakpoint
+CREATE POLICY "member_scope_insert" ON "staff_members" AS RESTRICTIVE FOR INSERT TO public WITH CHECK ((SELECT current_member_sees_all()));--> statement-breakpoint
+CREATE POLICY "member_scope_update" ON "staff_members" AS RESTRICTIVE FOR UPDATE TO public USING (true) WITH CHECK ((SELECT current_member_sees_all()));--> statement-breakpoint
+CREATE POLICY "member_scope_delete" ON "staff_members" AS RESTRICTIVE FOR DELETE TO public USING ((SELECT current_member_sees_all()));

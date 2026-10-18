@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-17 · **Plan version:** 0.8 · **Current phase:** 3 — Appointments + templates. S10 and S11 merged. **S12 (Phase 3c: bookings, clients, waitlist, staff-scoped RLS) done**, ADR-0017 **accepted**; merged into `main` at the user's request → next: S13 (templates + Phase 3 exit)
+**Last updated:** 2026-10-18 · **Plan version:** 0.8 · **Current phase:** 3 — Appointments + templates. S10–S12 merged. **S13 (Phase 3d: templates + Phase 3 exit) done**, ADR-0018 **accepted**; PR opened and merged at the user's request → **Phase 3 complete** → next: Phase 4 (PWA + booking page), to be split into sessions at its Session Brief
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -222,6 +222,35 @@
     - The idempotency lookup must come after the staff lock, or concurrent first attempts with one key get "time taken" instead of the first booking (caught by a test).
     - Staff can book only clients they already have (a booking or waitlist entry with them): see "Waiting on the user".
 
+- **S13 Phase 3d (2026-10-18):** industry templates and the Phase 3 exit ([ADR-0018](../adr/0018-industry-templates.md), accepted by the user).
+  - **contracts:**
+    - `TemplateSchema` (terminology, modules, service catalog with typical US prices and rebooking intervals, rule defaults, autonomy defaults, intake fields with `sensitive`, insights, prompt fragments, onboarding hints).
+    - `TemplateIdSchema` (8 ids, in `tenancy.ts`).
+    - `templateId` on `NewTenantSchema` (optional, `null` default), `BusinessSchema` and `tenant.created`.
+    - The autonomy dial as a contract: `AutonomyActionSchema`, `AUTONOMY_ACTIONS` (risk tier, approved default, `allowsAuto`: never for bulk), `AutonomySettingsSchema`.
+  - **templates (new `@floty/templates`):** `beauty-salon`, `barber`, `nails`, `spa`, `lash-brow`, `personal-trainer`, `massage`, `yoga-pilates-private`; parsed at load and frozen; `getTemplate`, `listTemplates`, `templateSummaries`, `templateRuleDefaults`. Workspace glob is now `packages/templates`; lint lets only apps import it.
+  - **db:** `tenants.template_id` (nullable, shape check), migration 0018.
+  - **appointments:** `findAvailability`/`createBooking`/`changeBooking` take an optional `templateRuleDefaults` lookup (L2 does not import L3); the api passes the real one.
+  - **api:** `POST /v1/tenants` takes `templateId` (unknown: 400), `GET /v1/tenant` returns it, `GET /v1/templates` (signed in, no business needed).
+  - **Phase 3 exit security review** (`/security-review` scope, S10–S13, `1e7dbd4..HEAD`, three reviewers: db/RLS, domain services, api/contracts). No high-severity findings. Fixed:
+    - **Medium:** client names and non-US phone numbers could reach logs and Sentry through drizzle's failed-query message (`params: …`) and Postgres's `detail`. The redacting logger now drops both and redacts any E.164 number (tests first).
+    - **Medium (defence in depth):** inside `withMember`, staff could have re-linked a staff member or raised their own role at the database level, widening their RLS scope if a service check were ever missed. Restrictive write policies on `staff_members` and `memberships` (migration 0019), with an escalation test and the isolation catalog updated.
+    - Not fixed, recorded for later phases (all need a service bug first, or are inside one business):
+      - `booking_occupancy` can be written directly by the services' role (only the trigger should): harden with a definer-owned trigger or a consistency check (Phase 11 hardening).
+      - Foreign key checks ignore RLS, so staff could reference a client they cannot see if a service skipped its `findClient` check (services check today).
+      - Work without a user gets full scope (`current_user_id() IS NULL`); a missing `withMember` would widen access. Consider an explicit system marker (Phase 5, when jobs arrive).
+      - `GET /v1/availability`, `/v1/bookings` and `/v1/calendar/busy` have no response cap: a 62-day, all-staff query can build a very large answer. Cap or paginate with the Phase 4 calendar screens.
+      - Idempotency keys are unique per business, so a staff member can learn that a colleague used a key (no data). Scope per user if the AI derives keys from client data (Phase 6).
+      - Owner/manager overrides may book in the past (flagged `overridden`).
+      - A stored template id unknown to the contracts makes availability fail loudly for that business (by design, ADR-0018 §Consequences).
+      - Older helper functions (`current_tenant_id()`, `current_user_id()`, `set_updated_at()`) have no fixed `search_path` (negligible: invoker, no CREATE on public).
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 355, templates 96, core 514, db 38, appointments 84, runtime 79, testing 13, api 194, web 82, worker 3. Coverage: contracts 100% lines; templates 100% lines; core 100%; appointments 100% lines / 94.7% branches; api 97.6%; db 90.2%.
+    - `pnpm test:integration` green, 488 tests: db 302 (incl. template column and check, the staff escalation test, isolation catalog with the new policies), appointments 69 (incl. 5 on template defaults: grid, notice, business rule wins, booking and move refused off the grid, no template), core 58, api 56 (incl. the templates journey on the real personal-trainer template), runtime 2, testing 1.
+    - Phase 3 exit criteria: 10k-case property tests (S11) and the concurrency properties (S12) green; coverage ≥ 80% on core and modules; template schema tests for all eight; no open high-severity findings.
+    - Not run: Docker image builds, Compose and Playwright (no UI change; the web fixture now carries `templateId`). CI's E2E smoke runs Compose with migrations 0018–0019.
+  - **Findings:** I first assumed barbers book on a 30-minute grid; the barber template uses 15. The api journey now uses the personal-trainer template (30). Drizzle 0.45 puts bound values in error messages, so any future logging of database errors must go through `redact`.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -316,17 +345,25 @@
   - Staff may add waitlist entries **only for their own staff member**; an entry for "anyone" is the owner's/manager's.
   - Work without a user (jobs, the booking page) keeps the full tenant scope; member requests use `withMember`.
 - **After S12 (user, 2026-10-17):** ADR-0017 accepted as proposed. **Staff may find any client by exact email or phone** (Claude's recommendation, chosen by the user) and then book them; they still cannot add clients (`clients.manage` stays owners and managers; matrix unchanged). Built with the Phase 4 booking screens. S12 PR opened and merged at the user's request.
+- **S13 decisions (user, 2026-10-18, S13 Session Brief): all four recommendations.**
+  - (1) **One `@floty/templates` package** with a data file per template, not one package per industry.
+  - (2) **`template_id` nullable**, optional in the API now (no template = platform defaults); onboarding makes it required in the UI (Phase 4/9).
+  - (3) **Schema tests now; onboarding fixtures in Phase 9 and eval sets in Phase 6**, for all eight templates.
+  - (4) **Claude drafts the template content** (menus, durations, prices, rules); the user reviews it in the PR.
+- **S13 defaults — ADR-0018, accepted by the user (2026-10-18, "all good"):** rule defaults reach the appointments services through a lookup the api passes in; templates are parsed at load and frozen; `GET /v1/templates` needs a session but no business; autonomy defaults are empty in all eight templates (the platform's approved defaults apply); no template caps bookings per day; the nine autonomy actions and their tiers as listed in `trust.ts`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. **Product question from the security review:** today a booking's outcome can be changed again after the fact (`completed` ↔ `no_show`, or either → `cancelled`), by staff too on their own bookings; only `cancelled` is final. Options: (a) keep it (fixes mistakes easily; audited); (b) make `completed`/`no_show` final for staff, owners and managers may still correct them (recommended, before payments and commissions arrive); (c) final for everyone.
+   Not answered explicitly at the S13 merge ("all good"); confirm at the S14 Session Brief before the Phase 4 booking screens.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) is done. Phase 3 is split into S10–S13 (user, S10 Session Brief); S10, S11 and S12 are merged. S13 passes template rule defaults to `resolveRules` (`staffAvailabilityOf` already takes them) and runs the Phase 3 exit, including `/security-review` over S10–S12.
+Phase 2 (S6–S9) and Phase 3 (S10–S13) are done and merged. Phase 4 (PWA + booking page) is split into sessions at its first Session Brief.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S13 | **Phase 3d:** template system (Zod schema) + the 8 V1 templates; Phase 3 exit (`/security-review`, ≥ 80% coverage) | 3 | template schema tests; Phase 3 exit criteria |
+| S14 | **Phase 4 start:** split Phase 4 into sessions with the user, then the first one (proposed: design system + app shell + calendar screen on the S10–S12 api, with staff client lookup by exact email/phone and response caps on availability/bookings/busy) | 4 | Phase 4 plan approved; first session's ACs green |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

@@ -5,6 +5,7 @@ import { ClientIdSchema, RecordSourceSchema } from './clients.js';
 import {
   LocaleSchema,
   MembershipRoleSchema,
+  TemplateIdSchema,
   TenantSlugSchema,
   TimeZoneSchema,
   UserIdSchema,
@@ -101,6 +102,8 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
           slug: TenantSlugSchema,
           timeZone: TimeZoneSchema,
           locale: LocaleSchema,
+          // Entries written before S13 have none.
+          templateId: TemplateIdSchema.nullable().optional(),
           ownerUserId: UserIdSchema,
         })
         .strict(),

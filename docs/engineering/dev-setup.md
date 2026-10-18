@@ -61,7 +61,8 @@ packages/
   core/        L1 platform core, framework-free: rules (permission matrix, membership rules) and domain services over db (@floty/core)
   db/          Drizzle schema, SQL migrations + migrate CLI, withTenant (RLS), repositories (@floty/db)
   modules/
-    appointments/  L2 appointments module: services, staff, hours, time off (@floty/appointments)
+    appointments/  L2 appointments module: services, staff, hours, time off, rules, availability, bookings, waitlist (@floty/appointments)
+  templates/   L3 industry templates, data only; imported by apps only (@floty/templates)
   runtime/     process wiring shared by api + worker: config, logging, telemetry, health, connections (@floty/runtime)
   testing/     test-only helpers: Testcontainers Postgres/Redis, recording HTTP server (@floty/testing)
 apps/
@@ -70,7 +71,7 @@ apps/
   web/         Next.js PWA + booking page (@floty/web)
 e2e/           Playwright tests against a running stack (@floty/e2e)
 ```
-Planned packages (more `modules/*`, `templates/*`, `ai`, `integrations`, `ui`) follow `../architecture/overview.md` and `../plan/dependency-map.md`.
+Planned packages (more `modules/*`, `ai`, `integrations`, `ui`) follow `../architecture/overview.md` and `../plan/dependency-map.md`.
 
 ## Conventions
 - **ESM + TypeScript strict** (`packages/config/tsconfig.base.json`): `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`. Relative imports use the `.js` extension (NodeNext).
