@@ -33,7 +33,8 @@ import { Inject, Injectable } from '@nestjs/common';
 
 /**
  * The bookings, availability and waitlist services for a request: binds the database, the
- * request id (for the audit log) and the industry templates' rule defaults (ADR-0018). Domain errors pass through; the controller answers them.
+ * request id (for the audit log) and the industry templates' rule defaults (ADR-0018). Domain
+ * errors pass through; the controller answers them.
  */
 @Injectable()
 export class BookingsService {
@@ -43,8 +44,8 @@ export class BookingsService {
     this.db = database.db;
   }
 
-  bookings(tenant: TenantContext, query: BookingsQuery): Promise<Booking[]> {
-    return listBookings(this.db, actorOf(tenant), query);
+  bookings(tenant: TenantContext, query: BookingsQuery, limit: number): Promise<Booking[]> {
+    return listBookings(this.db, actorOf(tenant), query, { limit });
   }
 
   booking(tenant: TenantContext, id: BookingId): Promise<Booking> {
@@ -59,12 +60,16 @@ export class BookingsService {
     return changeBooking(this.db, actorOf(tenant), id, change, { templateRuleDefaults });
   }
 
-  busy(tenant: TenantContext, query: BusyQuery): Promise<BusyTime[]> {
-    return listBusyTimes(this.db, actorOf(tenant), query);
+  busy(tenant: TenantContext, query: BusyQuery, limit: number): Promise<BusyTime[]> {
+    return listBusyTimes(this.db, actorOf(tenant), query, { limit });
   }
 
-  availability(tenant: TenantContext, query: AvailabilityQueryInput): Promise<AvailableSlot[]> {
-    return findAvailability(this.db, actorOf(tenant), query, { templateRuleDefaults });
+  availability(
+    tenant: TenantContext,
+    query: AvailabilityQueryInput,
+    limit: number,
+  ): Promise<AvailableSlot[]> {
+    return findAvailability(this.db, actorOf(tenant), query, { templateRuleDefaults, limit });
   }
 
   waitlist(tenant: TenantContext, query: WaitlistQuery): Promise<WaitlistEntry[]> {

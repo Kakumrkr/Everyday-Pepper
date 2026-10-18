@@ -7,9 +7,13 @@ import {
 } from '@floty/appointments';
 import {
   ApiErrorSchema,
+  AvailabilityResponseSchema,
   AvailableSlotSchema,
   BookingIdSchema,
+  BookingsResponseSchema,
+  BusyResponseSchema,
   ClientIdSchema,
+  MAX_LIST_ITEMS,
   ServiceIdSchema,
   SlotUnavailableSchema,
   StaffMemberIdSchema,
@@ -32,6 +36,7 @@ import { TenancyService } from '../account/tenancy.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { AuthService, type AuthSession } from '../auth/auth.service.js';
 import { AppointmentsModule } from './appointments.module.js';
+import { capped } from './bookings.controller.js';
 import { BookingsService } from './bookings.service.js';
 
 const ORIGIN = 'http://localhost:3000';
@@ -177,26 +182,55 @@ describe('reading: every role', () => {
       role = r;
       expect(
         (await get(`/v1/bookings?from=${FROM}&to=${TO}&status=confirmed`).expect(200)).body,
-      ).toEqual({ bookings: [BOOKING] });
-      expect(bookings.bookings).toHaveBeenCalledWith(context(), {
-        from: FROM,
-        to: TO,
-        status: 'confirmed',
-      });
+      ).toEqual({ bookings: [BOOKING], truncated: false });
+      expect(bookings.bookings).toHaveBeenCalledWith(
+        context(),
+        { from: FROM, to: TO, status: 'confirmed' },
+        MAX_LIST_ITEMS + 1,
+      );
       expect((await get(`/v1/bookings/${BOOKING_ID}`).expect(200)).body).toEqual(BOOKING);
       expect((await get(`/v1/calendar/busy?from=${FROM}&to=${TO}`).expect(200)).body).toEqual({
         busy: [BUSY],
+        truncated: false,
       });
       expect(
         (await get(`/v1/availability?serviceId=${SERVICE_ID}&from=${FROM}&to=${TO}`).expect(200))
           .body,
-      ).toEqual({ slots: [SLOT] });
+      ).toEqual({ slots: [SLOT], truncated: false });
       expect((await get('/v1/waitlist?all=true&limit=5').expect(200)).body).toEqual({
         entries: [ENTRY],
       });
       expect(bookings.waitlist).toHaveBeenCalledWith(context(), { all: true, limit: 5 });
     },
   );
+
+  it('cuts long answers at MAX_LIST_ITEMS and says so', async () => {
+    const more = <T>(item: T): T[] => Array.from({ length: MAX_LIST_ITEMS + 1 }, () => item);
+    bookings.bookings.mockResolvedValueOnce(more(BOOKING));
+    bookings.busy.mockResolvedValueOnce(more(BUSY));
+    bookings.availability.mockResolvedValueOnce(more(SLOT));
+    const listed = BookingsResponseSchema.parse(
+      (await get(`/v1/bookings?from=${FROM}&to=${TO}`).expect(200)).body,
+    );
+    expect(listed.bookings).toHaveLength(MAX_LIST_ITEMS);
+    expect(listed.truncated).toBe(true);
+    const busy = BusyResponseSchema.parse(
+      (await get(`/v1/calendar/busy?from=${FROM}&to=${TO}`).expect(200)).body,
+    );
+    expect([busy.busy.length, busy.truncated]).toEqual([MAX_LIST_ITEMS, true]);
+    const slots = AvailabilityResponseSchema.parse(
+      (await get(`/v1/availability?serviceId=${SERVICE_ID}&from=${FROM}&to=${TO}`).expect(200))
+        .body,
+    );
+    expect([slots.slots.length, slots.truncated]).toEqual([MAX_LIST_ITEMS, true]);
+  });
+
+  it('exactly MAX_LIST_ITEMS is not truncated', () => {
+    const items = Array.from({ length: MAX_LIST_ITEMS }, (_, i) => i);
+    expect(capped(items)).toEqual([items, false]);
+    expect(capped([...items, MAX_LIST_ITEMS])).toEqual([items, true]);
+    expect(capped([])).toEqual([[], false]);
+  });
 
   it('401 signed out', async () => {
     await request(server).get(`/v1/bookings?from=${FROM}&to=${TO}`).expect(401);

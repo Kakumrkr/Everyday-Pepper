@@ -5,6 +5,7 @@ import {
   BookingInputSchema,
   BookingsQuerySchema,
   BusyQuerySchema,
+  MAX_LIST_ITEMS,
   WaitlistChangeSchema,
   WaitlistEntryIdSchema,
   WaitlistEntryInputSchema,
@@ -38,7 +39,10 @@ const WaitlistParamsSchema = z.object({ entryId: WaitlistEntryIdSchema });
 export class BookingsController {
   constructor(private readonly bookings: BookingsService) {}
 
-  /** Bookings whose appointment overlaps [from, to) (at most 62 days), by start. */
+  /**
+   * Bookings whose appointment overlaps [from, to) (at most 62 days), by start; at most
+   * `MAX_LIST_ITEMS`, with `truncated` when more exist.
+   */
   @Get('bookings')
   @RequirePermission('bookings.read')
   async list(
@@ -46,7 +50,10 @@ export class BookingsController {
     @Query() query: unknown,
   ): Promise<BookingsResponse> {
     const parsed = parseBody(BookingsQuerySchema, query);
-    return { bookings: await answering(() => this.bookings.bookings(tenant, parsed)) };
+    const [bookings, truncated] = capped(
+      await answering(() => this.bookings.bookings(tenant, parsed, MAX_LIST_ITEMS + 1)),
+    );
+    return { bookings, truncated };
   }
 
   /** 404 `booking_not_found`. */
@@ -86,7 +93,10 @@ export class BookingsController {
     return answering(() => this.bookings.changeBooking(tenant, bookingId, change));
   }
 
-  /** When each staff member is booked (buffers included), without booking details. */
+  /**
+   * When each staff member is booked (buffers included), without booking details; capped like
+   * bookings.
+   */
   @Get('calendar/busy')
   @RequirePermission('calendar.read')
   async busy(
@@ -94,10 +104,16 @@ export class BookingsController {
     @Query() query: unknown,
   ): Promise<BusyResponse> {
     const parsed = parseBody(BusyQuerySchema, query);
-    return { busy: await answering(() => this.bookings.busy(tenant, parsed)) };
+    const [busy, truncated] = capped(
+      await answering(() => this.bookings.busy(tenant, parsed, MAX_LIST_ITEMS + 1)),
+    );
+    return { busy, truncated };
   }
 
-  /** Start times in [from, to) for a service; 404 for an unknown service or staff member. */
+  /**
+   * Start times in [from, to) for a service, capped like bookings; 404 for an unknown service or
+   * staff member.
+   */
   @Get('availability')
   @RequirePermission('calendar.read')
   async availability(
@@ -105,7 +121,10 @@ export class BookingsController {
     @Query() query: unknown,
   ): Promise<AvailabilityResponse> {
     const parsed = parseBody(AvailabilityQuerySchema, query);
-    return { slots: await answering(() => this.bookings.availability(tenant, parsed)) };
+    const [slots, truncated] = capped(
+      await answering(() => this.bookings.availability(tenant, parsed, MAX_LIST_ITEMS + 1)),
+    );
+    return { slots, truncated };
   }
 
   /** Open entries (or `all=true`), longest waiting first. */
@@ -142,4 +161,9 @@ export class BookingsController {
     const change = parseBody(WaitlistChangeSchema, body);
     return answering(() => this.bookings.changeWaitlistEntry(tenant, entryId, change));
   }
+}
+
+/** The first `MAX_LIST_ITEMS` of up to one more, and whether there were more. */
+export function capped<T>(items: readonly T[]): [T[], boolean] {
+  return [items.slice(0, MAX_LIST_ITEMS), items.length > MAX_LIST_ITEMS];
 }

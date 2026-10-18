@@ -40,12 +40,15 @@ import { rowsToRules } from '../mapping.js';
  */
 export type TemplateRuleDefaultsOf = (templateId: TemplateId | null) => Partial<RuleDefaults>;
 
-/** Start times in [from, to) for the service, with one staff member or anyone who offers it. */
+/**
+ * Start times in [from, to) for the service, with one staff member or anyone who offers it;
+ * at most `limit`, earliest first.
+ */
 export async function findAvailability(
   db: Database,
   actor: Actor,
   query: AvailabilityQueryInput,
-  options: { clock?: Clock; templateRuleDefaults?: TemplateRuleDefaultsOf } = {},
+  options: { clock?: Clock; templateRuleDefaults?: TemplateRuleDefaultsOf; limit?: number } = {},
 ): Promise<AvailableSlot[]> {
   requirePermission(actor, 'calendar.read');
   const { serviceId, staffMemberId, from, to } = AvailabilityQuerySchema.parse(query);
@@ -61,7 +64,8 @@ export async function findAvailability(
       now,
       templateRuleDefaults: options.templateRuleDefaults,
     });
-    return slots.map(toAvailableSlot);
+    const kept = options.limit === undefined ? slots : slots.slice(0, options.limit);
+    return kept.map(toAvailableSlot);
   });
 }
 

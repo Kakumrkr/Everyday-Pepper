@@ -198,11 +198,15 @@ export async function getBooking(
   return toBooking(row);
 }
 
-/** Bookings whose appointment overlaps [from, to), by start. Staff see only their own. */
+/**
+ * Bookings whose appointment overlaps [from, to), by start; at most `limit`, earliest first.
+ * Staff see only their own.
+ */
 export async function listBookings(
   db: Database,
   actor: Actor,
   query: BookingsQuery,
+  options: { limit?: number } = {},
 ): Promise<Booking[]> {
   requirePermission(actor, 'bookings.read');
   const { from, to, staffMemberId, status } = BookingsQuerySchema.parse(query);
@@ -220,16 +224,21 @@ export async function listBookings(
       to: new Date(to),
       ...(only !== undefined && { staffMemberId: only }),
       ...(status !== undefined && { status }),
+      ...(options.limit !== undefined && { limit: options.limit }),
     });
   });
   return rows.map(toBooking);
 }
 
-/** The team's busy times overlapping [from, to): when each staff member is booked. */
+/**
+ * The team's busy times overlapping [from, to): when each staff member is booked; at most
+ * `limit`, earliest first.
+ */
 export async function listBusyTimes(
   db: Database,
   actor: Actor,
   query: BusyQuery,
+  options: { limit?: number } = {},
 ): Promise<BusyTime[]> {
   requirePermission(actor, 'calendar.read');
   const { from, to, staffMemberId } = BusyQuerySchema.parse(query);
@@ -238,6 +247,7 @@ export async function listBusyTimes(
       from: new Date(from),
       to: new Date(to),
       ...(staffMemberId !== undefined && { staffMemberIds: [staffMemberId] }),
+      ...(options.limit !== undefined && { limit: options.limit }),
     }),
   );
   return rows.map(toBusyTime);
