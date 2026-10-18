@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-18 · **Plan version:** 0.8 · **Current phase:** 3 — Appointments + templates. S10–S12 merged. **S13 (Phase 3d: templates + Phase 3 exit) done** on `claude/blissful-lovelace-q6q43j`, ADR-0018 **proposed** → waiting on the user (accept ADR-0018, one product question, PR) → next: Phase 4 (PWA + booking page), to be split into sessions at its Session Brief
+**Last updated:** 2026-10-18 · **Plan version:** 0.8 · **Current phase:** 3 — Appointments + templates. S10–S12 merged. **S13 (Phase 3d: templates + Phase 3 exit) done**, ADR-0018 **accepted**; PR opened and merged at the user's request → **Phase 3 complete** → next: Phase 4 (PWA + booking page), to be split into sessions at its Session Brief
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -222,7 +222,7 @@
     - The idempotency lookup must come after the staff lock, or concurrent first attempts with one key get "time taken" instead of the first booking (caught by a test).
     - Staff can book only clients they already have (a booking or waitlist entry with them): see "Waiting on the user".
 
-- **S13 Phase 3d (2026-10-18):** industry templates and the Phase 3 exit ([ADR-0018](../adr/0018-industry-templates.md), proposed).
+- **S13 Phase 3d (2026-10-18):** industry templates and the Phase 3 exit ([ADR-0018](../adr/0018-industry-templates.md), accepted by the user).
   - **contracts:**
     - `TemplateSchema` (terminology, modules, service catalog with typical US prices and rebooking intervals, rule defaults, autonomy defaults, intake fields with `sensitive`, insights, prompt fragments, onboarding hints).
     - `TemplateIdSchema` (8 ids, in `tenancy.ts`).
@@ -350,17 +350,16 @@
   - (2) **`template_id` nullable**, optional in the API now (no template = platform defaults); onboarding makes it required in the UI (Phase 4/9).
   - (3) **Schema tests now; onboarding fixtures in Phase 9 and eval sets in Phase 6**, for all eight templates.
   - (4) **Claude drafts the template content** (menus, durations, prices, rules); the user reviews it in the PR.
-- **S13 defaults (Claude, in ADR-0018, for the user to accept or change):** rule defaults reach the appointments services through a lookup the api passes in; templates are parsed at load and frozen; `GET /v1/templates` needs a session but no business; autonomy defaults are empty in all eight templates (the platform's approved defaults apply); no template caps bookings per day; the nine autonomy actions and their tiers as listed in `trust.ts`.
+- **S13 defaults — ADR-0018, accepted by the user (2026-10-18, "all good"):** rule defaults reach the appointments services through a lookup the api passes in; templates are parsed at load and frozen; `GET /v1/templates` needs a session but no business; autonomy defaults are empty in all eight templates (the platform's approved defaults apply); no template caps bookings per day; the nine autonomy actions and their tiers as listed in `trust.ts`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Accept or change ADR-0018** (industry templates) and review the template content in `packages/templates/src/catalog/`.
-2. **Product question from the security review:** today a booking's outcome can be changed again after the fact (`completed` ↔ `no_show`, or either → `cancelled`), by staff too on their own bookings; only `cancelled` is final. Options: (a) keep it (fixes mistakes easily; audited); (b) make `completed`/`no_show` final for staff, owners and managers may still correct them (recommended, before payments and commissions arrive); (c) final for everyone.
-3. Open the S13 PR when you're ready (Claude can open it on request).
-4. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. **Product question from the security review:** today a booking's outcome can be changed again after the fact (`completed` ↔ `no_show`, or either → `cancelled`), by staff too on their own bookings; only `cancelled` is final. Options: (a) keep it (fixes mistakes easily; audited); (b) make `completed`/`no_show` final for staff, owners and managers may still correct them (recommended, before payments and commissions arrive); (c) final for everyone.
+   Not answered explicitly at the S13 merge ("all good"); confirm at the S14 Session Brief before the Phase 4 booking screens.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) and Phase 3 (S10–S13) are done; S13 waits for the user's review and merge. Phase 4 (PWA + booking page) is split into sessions at its first Session Brief.
+Phase 2 (S6–S9) and Phase 3 (S10–S13) are done and merged. Phase 4 (PWA + booking page) is split into sessions at its first Session Brief.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
