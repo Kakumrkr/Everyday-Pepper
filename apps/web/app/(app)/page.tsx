@@ -1,14 +1,13 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { requiredStep, ROUTES } from '../lib/account';
-import { currentAccount, currentBusiness } from './_server/account';
-import { BusinessSwitcher, SignOutButton } from './_components/account-actions';
-import { Unavailable } from './_components/unavailable';
+import { requiredStep } from '../../lib/account';
+import { currentAccount, currentBusiness } from '../_server/account';
+import { BusinessSwitcher, SignOutButton } from '../_components/account-actions';
+import { Unavailable } from '../_components/unavailable';
 
 // Per request: the page depends on the session cookie.
 export const dynamic = 'force-dynamic';
 
-/** Signed-in home. Phase 4 replaces the body with the operator feed. */
+/** Signed-in home, inside the app shell. Phase 8 replaces the body with the operator feed. */
 export default async function HomePage() {
   const account = await currentAccount();
   const step = requiredStep(account);
@@ -18,9 +17,9 @@ export default async function HomePage() {
   const { me } = account;
   const current = await currentBusiness();
   return (
-    <main>
-      <h1 className="wordmark">floty</h1>
-      <p className="tagline">Hi {me.user.name}, your AI employee is getting ready.</p>
+    <div className="mx-auto max-w-xl">
+      <h1>Hi {me.user.name}</h1>
+      <p className="tagline">Your AI employee is getting ready.</p>
       {current === null ? (
         <p className="status">Choose a business below.</p>
       ) : (
@@ -33,9 +32,8 @@ export default async function HomePage() {
         <BusinessSwitcher businesses={me.businesses} activeTenantId={me.activeTenantId} />
       ) : null}
       <div className="actions">
-        {current === null ? null : <Link href={ROUTES.team}>Team</Link>}
         <SignOutButton />
       </div>
-    </main>
+    </div>
   );
 }
