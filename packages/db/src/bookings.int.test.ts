@@ -12,7 +12,7 @@ import {
   type TenantId,
   type UserId,
 } from '@floty/contracts';
-import { sql } from 'drizzle-orm';
+import { sql, type SQL } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
 import {
@@ -563,6 +563,42 @@ describe('member scope (AC-W9-1 at the RLS level)', () => {
       jessWaitlist = (await waitlist(b.jess)).id;
       anyoneWaitlist = (await waitlist(null)).id;
     });
+  });
+
+  it('staff cannot change roles or staff links, so they cannot widen their own scope (S13 review)', async () => {
+    const refused = async (statement: SQL) => {
+      const error = await as(jessUser, (tx) => tx.execute(statement)).catch((e: unknown) => e);
+      expect(sqlState(error)).toBe('42501'); // insufficient_privilege: row-level security
+    };
+    // Taking over Marco's staff member would show Jess his bookings and clients.
+    await refused(sql`UPDATE staff_members SET membership_id = NULL WHERE id = ${b.jess}`);
+    await refused(sql`UPDATE staff_members SET active = active WHERE id = ${b.marco}`);
+    await refused(
+      sql`INSERT INTO staff_members (display_name, color) VALUES ('Jess 2', '#be2759')`,
+    );
+    await refused(sql`UPDATE memberships SET role = 'owner' WHERE user_id = ${jessUser}`);
+    const deleted = (statement: SQL, userId: UserId) =>
+      as(userId, async (tx) => (await tx.execute(statement)).rowCount);
+    expect(await deleted(sql`DELETE FROM staff_members`, jessUser)).toBe(0);
+    expect(await deleted(sql`DELETE FROM memberships WHERE user_id = ${ben}`, jessUser)).toBe(0);
+    // Staff may still lock staff members (booking does) and leave the business themselves.
+    const locked = await as(
+      jessUser,
+      async (tx) => (await tx.execute(sql`SELECT id FROM staff_members FOR UPDATE`)).rows.length,
+    );
+    expect(locked).toBe(2);
+    const leave = await as(ben, async (tx) => {
+      const { rowCount } = await tx.execute(sql`DELETE FROM memberships WHERE user_id = ${ben}`);
+      throw Object.assign(new Error('roll back'), { rowCount });
+    }).catch((e: unknown) => (e as { rowCount: number }).rowCount);
+    expect(leave).toBe(1);
+    // Owners and managers still change both.
+    await as(cara, (tx) =>
+      tx.execute(sql`UPDATE staff_members SET active = active WHERE id = ${b.marco}`),
+    );
+    await as(ana, (tx) =>
+      tx.execute(sql`UPDATE memberships SET role = 'staff' WHERE user_id = ${ben}`),
+    );
   });
 
   it('owners, managers and work without a user see every booking', async () => {

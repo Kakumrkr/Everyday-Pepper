@@ -6,25 +6,36 @@
 
 export const REDACTED = '[redacted]';
 
-/** Keys whose values are never written out, whatever they hold. */
+/**
+ * Keys whose values are never written out, whatever they hold. `params` (drizzle-orm's failed
+ * query) and `detail` (Postgres: "Failing row contains (...)", "Key (...)=(...)") carry the
+ * row's values, e.g. client names.
+ */
 const SENSITIVE_KEY =
-  /pass(word|wd|phrase)?$|secret|token$|session(_?id)?$|authori[sz]ation|cookie|api[-_]?key|private[-_]?key|credential|dsn|e-?mail|phone|ssn|database_?url|redis_?url/i;
+  /pass(word|wd|phrase)?$|secret|token$|session(_?id)?$|authori[sz]ation|cookie|api[-_]?key|private[-_]?key|credential|dsn|e-?mail|phone|ssn|database_?url|redis_?url|^params$|^detail$/i;
 
 const URL_CREDENTIALS = /\b([a-z][a-z0-9+.-]*:\/\/)[^\s/@]+@/gi;
 // Bearer tokens in free text; an `authorization` key is redacted whole anyway.
 const BEARER = /\b(bearer)\s+[\w.~+/=-]{8,}/gi;
 const EMAIL = /[\w.+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}/gi;
+// Any E.164 number (clients' phones, contracts' PhoneSchema), e.g. +447911123456.
+const E164 = /(?<![\w+])\+[1-9]\d{6,14}(?!\w)/g;
+// drizzle-orm's failed-query message ends with the bound values: "...\nparams: a,b". Up to the
+// stack frames, in case a value spans lines.
+const QUERY_PARAMS = /(^|\n)params: [\s\S]*?(?=\n\s+at |$)/g;
 // North American numbers in common formats: +1 (555) 123-4567, 555.123.4567, 5551234567.
 const PHONE = /(?<![\w-])(\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}(?![\w-])/g;
 
 const MAX_DEPTH = 8;
 
-/** Scrubs credentials, emails and phone numbers out of free text. */
+/** Scrubs credentials, emails, phone numbers and failed queries' values out of free text. */
 export function redactString(value: string): string {
   return value
+    .replace(QUERY_PARAMS, `$1params: ${REDACTED}`)
     .replace(URL_CREDENTIALS, `$1${REDACTED}@`)
     .replace(BEARER, `$1 ${REDACTED}`)
     .replace(EMAIL, '[email]')
+    .replace(E164, '[phone]')
     .replace(PHONE, '[phone]');
 }
 

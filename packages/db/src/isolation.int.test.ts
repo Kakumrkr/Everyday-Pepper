@@ -97,6 +97,15 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       (await addMembership(tx, { userId: await insertUser(db), role: 'staff' })).id,
     touch: "role = 'manager'",
     memberRead: '((current_tenant_id() IS NULL) AND (user_id = current_user_id()))',
+    memberScope: [
+      {
+        policyname: 'member_scope_delete',
+        cmd: 'DELETE',
+        qual: `(${SEES_ALL} OR (user_id = current_user_id()))`,
+        with_check: null,
+      },
+      { policyname: 'member_scope_update', cmd: 'UPDATE', qual: 'true', with_check: SEES_ALL },
+    ],
   },
   audit_log: {
     tenantColumn: 'tenant_id',
@@ -168,6 +177,11 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     tenantColumn: 'tenant_id',
     seed: seedStaff,
     touch: 'active = NOT active',
+    memberScope: [
+      { policyname: 'member_scope_delete', cmd: 'DELETE', qual: SEES_ALL, with_check: null },
+      { policyname: 'member_scope_insert', cmd: 'INSERT', qual: null, with_check: SEES_ALL },
+      { policyname: 'member_scope_update', cmd: 'UPDATE', qual: 'true', with_check: SEES_ALL },
+    ],
   },
   staff_services: {
     tenantColumn: 'tenant_id',

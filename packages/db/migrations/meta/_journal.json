@@ -134,6 +134,13 @@
       "when": 1792343889983,
       "tag": "0018_tenant_template",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792345000873,
+      "tag": "0019_member_scope_writes",
+      "breakpoints": true
     }
   ]
 }
