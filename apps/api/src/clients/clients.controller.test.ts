@@ -8,10 +8,10 @@ import {
   UtcDateTimeSchema,
   type Client,
   type MembershipRole,
-} from '@floty/contracts';
-import { ClientNotFoundError } from '@floty/core';
-import { ClientEmailTakenError } from '@floty/db';
-import { DATABASE } from '@floty/runtime';
+} from '@pepper/contracts';
+import { ClientNotFoundError } from '@pepper/core';
+import { ClientEmailTakenError } from '@pepper/db';
+import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';

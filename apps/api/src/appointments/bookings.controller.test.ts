@@ -4,7 +4,7 @@ import {
   BookingNotFoundError,
   SlotUnavailableError,
   WaitlistExpiredError,
-} from '@floty/appointments';
+} from '@pepper/appointments';
 import {
   ApiErrorSchema,
   AvailabilityResponseSchema,
@@ -25,9 +25,9 @@ import {
   type BusyTime,
   type MembershipRole,
   type WaitlistEntry,
-} from '@floty/contracts';
-import { ForbiddenError } from '@floty/core';
-import { DATABASE } from '@floty/runtime';
+} from '@pepper/contracts';
+import { ForbiddenError } from '@pepper/core';
+import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';

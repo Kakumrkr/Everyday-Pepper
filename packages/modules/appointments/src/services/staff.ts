@@ -5,8 +5,8 @@ import {
   type StaffMemberFields,
   type StaffMemberId,
   type StaffMemberInput,
-} from '@floty/contracts';
-import { MemberNotFoundError, requirePermission, type Actor } from '@floty/core';
+} from '@pepper/contracts';
+import { MemberNotFoundError, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
   findMembership,
@@ -21,7 +21,7 @@ import {
   type StaffMemberRecord,
   type StaffMemberValues,
   type TenantTx,
-} from '@floty/db';
+} from '@pepper/db';
 import { ServiceNotFoundError, StaffMemberNotFoundError } from '../errors.js';
 import { sameValues, staffAuditValues, toStaffMember } from '../mapping.js';
 

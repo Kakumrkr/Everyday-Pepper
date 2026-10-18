@@ -10,4 +10,4 @@ export {
   toZoned,
   type CivilDate,
   type ZonedDateTime,
-} from '@floty/contracts';
+} from '@pepper/contracts';

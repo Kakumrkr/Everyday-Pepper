@@ -20,8 +20,8 @@ import {
   type StaffMember,
   type TimeOff,
   type WeeklyHours,
-} from '@floty/contracts';
-import type { OwnedRecord } from '@floty/core';
+} from '@pepper/contracts';
+import type { OwnedRecord } from '@pepper/core';
 import type {
   BookingRow,
   BookingRuleRow,
@@ -31,7 +31,7 @@ import type {
   StaffMemberRecord,
   TimeOffRow,
   WorkingMinutes,
-} from '@floty/db';
+} from '@pepper/db';
 
 // Between database rows and the api's shapes (ADR-0015), and what the audit log keeps of each.
 

@@ -1,5 +1,5 @@
-import type { HealthReport, ServiceName } from '@floty/contracts';
-import { runHealthChecks, type Clock } from '@floty/core';
+import type { HealthReport, ServiceName } from '@pepper/contracts';
+import { runHealthChecks, type Clock } from '@pepper/core';
 import {
   Controller,
   Get,

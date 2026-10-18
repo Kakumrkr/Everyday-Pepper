@@ -1,5 +1,5 @@
-import type { DatabaseHandle } from '@floty/db';
-import { DATABASE } from '@floty/runtime';
+import type { DatabaseHandle } from '@pepper/db';
+import { DATABASE } from '@pepper/runtime';
 import { Logger, Module, type DynamicModule } from '@nestjs/common';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { AccountController } from '../account/account.controller.js';

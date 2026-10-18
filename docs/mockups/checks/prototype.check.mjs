@@ -6,10 +6,10 @@ import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const SP = process.argv[2] || fs.mkdtempSync(path.join(os.tmpdir(), 'floty-proto-'));
+const SP = process.argv[2] || fs.mkdtempSync(path.join(os.tmpdir(), 'pepper-proto-'));
 fs.mkdirSync(`${SP}/shots`, { recursive: true });
 const here = path.dirname(fileURLToPath(import.meta.url));
-const src = fs.readFileSync(path.join(here, '..', 'floty-prototype.html'), 'utf8');
+const src = fs.readFileSync(path.join(here, '..', 'pepper-prototype.html'), 'utf8');
 // Mimic the artifact publish skeleton.
 const page_html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style></head><body>${src}</body></html>`;
 fs.writeFileSync(`${SP}/wrapped.html`, page_html);

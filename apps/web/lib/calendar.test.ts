@@ -1,4 +1,4 @@
-import { StaffMemberSchema, type StaffMember } from '@floty/contracts';
+import { StaffMemberSchema, type StaffMember } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   calendarHref,

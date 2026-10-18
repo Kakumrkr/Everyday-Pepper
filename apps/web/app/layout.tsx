@@ -7,7 +7,7 @@ import '@fontsource-variable/bricolage-grotesque';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Floty',
+  title: 'Pepper',
   description: 'Your AI employee for appointment-based businesses.',
 };
 

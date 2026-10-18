@@ -9,14 +9,14 @@ import {
   type StaffMember,
   type TenantId,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   createBusiness,
   ForbiddenError,
   ManualClock,
   MemberNotFoundError,
   type Actor,
-} from '@floty/core';
+} from '@pepper/core';
 import {
   addMembership,
   deleteMembership,
@@ -25,7 +25,7 @@ import {
   StaffMemberLinkTakenError,
   withTenant,
   type Database,
-} from '@floty/db';
+} from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
 import { ServiceNotFoundError, StaffMemberNotFoundError, TimeOffNotFoundError } from './errors.js';

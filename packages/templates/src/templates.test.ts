@@ -6,7 +6,7 @@ import {
   TemplateSchema,
   TemplateSummarySchema,
   type Template,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   getTemplate,

@@ -18,10 +18,10 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import type { TemplateId } from '@floty/contracts';
+import type { TemplateId } from '@pepper/contracts';
 import { newId } from './ids.js';
 
-// Source of truth for the tables. `pnpm --filter @floty/db generate` turns changes into a SQL
+// Source of truth for the tables. `pnpm --filter @pepper/db generate` turns changes into a SQL
 // migration; RLS hardening that drizzle-kit cannot express (FORCE, grants, triggers) goes in
 // hand-written migrations (see migrations/ and docs/adr/0010-database-roles-and-migrations.md).
 // Keep this file free of relative imports other than ./ids.js: drizzle-kit loads it directly.
@@ -250,7 +250,7 @@ export const auditActorKind = pgEnum('audit_actor_kind', ['user', 'system']);
  * What changed in a business, who changed it and when (ADR-0013). Append-only: the services
  * may insert and read rows but not update or delete them (grants in migration 0007). Entries
  * are written in the same transaction as the change and validated against `AuditChangeSchema`
- * (`@floty/contracts`), whose per-action schemas keep personal data out of `before`/`after`.
+ * (`@pepper/contracts`), whose per-action schemas keep personal data out of `before`/`after`.
  * Ids are UUID v7, so `id` order is time order.
  */
 export const auditLog = pgTable(

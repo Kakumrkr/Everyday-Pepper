@@ -1,5 +1,5 @@
 import { randomInt } from 'node:crypto';
-import { totpCode } from '@floty/testing';
+import { totpCode } from '@pepper/testing';
 import { expect, type BrowserContext, type Page } from '@playwright/test';
 
 // Shared steps of the journeys through the real stack (web → api → Postgres).

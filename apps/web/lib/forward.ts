@@ -74,7 +74,7 @@ export async function forwardToApi(request: Request, options: ForwardOptions): P
     });
   } catch {
     return Response.json(
-      { code: 'api_unavailable', message: 'Floty is not reachable right now. Try again soon.' },
+      { code: 'api_unavailable', message: 'Pepper is not reachable right now. Try again soon.' },
       { status: 502 },
     );
   }

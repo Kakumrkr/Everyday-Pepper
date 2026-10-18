@@ -1,4 +1,4 @@
-import { UtcDateTimeSchema, type UtcDateTime } from '@floty/contracts';
+import { UtcDateTimeSchema, type UtcDateTime } from '@pepper/contracts';
 
 /**
  * Source of the current time. Domain code takes a Clock instead of calling `new Date()`

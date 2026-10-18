@@ -8,7 +8,7 @@ import {
   startObservability,
   tracesUrl,
 } from './telemetry.js';
-import { recordingServer } from '@floty/testing';
+import { recordingServer } from '@pepper/testing';
 
 const base = { service: 'api', environment: 'test', release: '1.2.3' } as const;
 
@@ -68,7 +68,7 @@ describe('startObservability', () => {
       expect(collector.requests.map((entry) => entry.path)).toContain('/otlp/v1/traces');
       const exported = collector.requests.map((entry) => entry.body).join('\n');
       expect(exported).toContain('unit-of-work');
-      expect(exported).toContain('floty-api');
+      expect(exported).toContain('pepper-api');
       expect(exported).toContain('1.2.3');
     } finally {
       await collector.close();

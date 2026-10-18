@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { prepareDatabase } from '@floty/db';
+import { prepareDatabase } from '@pepper/db';
 import {
   freePort,
   postgresUrlAs,
@@ -8,7 +8,7 @@ import {
   startPostgres,
   startRedis,
   type TestService,
-} from '@floty/testing';
+} from '@pepper/testing';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 // The built api, started exactly as in the Docker image (`node --import ./dist/instrument.js
@@ -33,7 +33,7 @@ describe('api process: logs and traces', () => {
       recordingServer(),
     ]);
     // As in Compose: migrate as the owner, run as the services' login role.
-    const databaseUrl = postgresUrlAs(postgres.url, 'floty_service', 'test-password');
+    const databaseUrl = postgresUrlAs(postgres.url, 'pepper_service', 'test-password');
     await prepareDatabase(postgres.url, databaseUrl);
     const port = await freePort();
     baseUrl = `http://127.0.0.1:${String(port)}`;
@@ -116,7 +116,7 @@ describe('api process: logs and traces', () => {
     const exported = collector?.requests.filter((request) => request.path === '/v1/traces') ?? [];
     expect(exported.length).toBeGreaterThan(0);
     const spans = exported.map((request) => request.body).join('\n');
-    expect(spans).toContain('floty-api');
+    expect(spans).toContain('pepper-api');
     expect(spans).toContain('"name":"GET /health/ready"'); // http
     expect(spans).toContain('"name":"request handler - /health/ready"'); // express
     expect(spans).toContain('"name":"pg.query:SELECT'); // pg

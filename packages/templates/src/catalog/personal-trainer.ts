@@ -1,4 +1,4 @@
-import type { TemplateInput } from '@floty/contracts';
+import type { TemplateInput } from '@pepper/contracts';
 
 /** Personal training: recurring one-to-one sessions, often several a week. */
 export const personalTrainer: TemplateInput = {

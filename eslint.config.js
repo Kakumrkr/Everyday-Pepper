@@ -9,7 +9,7 @@ import tseslint from 'typescript-eslint';
 
 /**
  * Layer boundaries (CLAUDE.md "Architecture rules", docs/plan/dependency-map.md).
- * Each package may import only the @floty packages listed for it; everything else is an error.
+ * Each package may import only the @pepper packages listed for it; everything else is an error.
  * Add a row when a package is created.
  */
 const allowedInternalImports = {
@@ -33,7 +33,7 @@ const allowedInternalImports = {
 };
 
 const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowed]) => ({
-  name: `floty/boundaries/${dir}`,
+  name: `pepper/boundaries/${dir}`,
   files: [`${dir}/**/*.{ts,tsx,js,mjs}`],
   rules: {
     'no-restricted-imports': [
@@ -41,17 +41,17 @@ const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowe
       {
         patterns: [
           {
-            group: ['@floty/*', ...allowed.map((name) => `!@floty/${name}`)],
+            group: ['@pepper/*', ...allowed.map((name) => `!@pepper/${name}`)],
             message: `${dir} ${
               allowed.length
-                ? `may only import ${allowed.map((n) => `@floty/${n}`).join(', ')}`
-                : 'must not import other @floty packages'
+                ? `may only import ${allowed.map((n) => `@pepper/${n}`).join(', ')}`
+                : 'must not import other @pepper packages'
             } (layer rules, docs/plan/dependency-map.md).`,
           },
           {
-            // `@floty/runtime/instrument` is the one extra entry point: the `node --import` preload
+            // `@pepper/runtime/instrument` is the one extra entry point: the `node --import` preload
             // must not load what tracing patches (see packages/runtime/src/instrument.ts).
-            group: ['@floty/*/*', '!@floty/runtime/instrument'],
+            group: ['@pepper/*/*', '!@pepper/runtime/instrument'],
             message: 'Import packages through their public entry point, not deep paths.',
           },
         ],
@@ -62,7 +62,7 @@ const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowe
 
 export default defineConfig(
   {
-    name: 'floty/ignores',
+    name: 'pepper/ignores',
     ignores: [
       '**/dist/**',
       '**/coverage/**',
@@ -79,7 +79,7 @@ export default defineConfig(
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
   {
-    name: 'floty/typescript',
+    name: 'pepper/typescript',
     languageOptions: {
       globals: globals.node,
       parserOptions: {
@@ -103,20 +103,20 @@ export default defineConfig(
     },
   },
   {
-    name: 'floty/web',
+    name: 'pepper/web',
     files: ['apps/web/**/*.{ts,tsx}'],
     extends: [nextPlugin.configs['core-web-vitals']],
     languageOptions: { globals: globals.browser },
     settings: { next: { rootDir: 'apps/web' } },
   },
   {
-    name: 'floty/js-config-files',
+    name: 'pepper/js-config-files',
     files: ['**/*.js'],
     extends: [tseslint.configs.disableTypeChecked],
   },
   comments.recommended,
   {
-    name: 'floty/disable-directives-need-reasons',
+    name: 'pepper/disable-directives-need-reasons',
     rules: {
       // Every eslint-disable must say why, e.g. `// eslint-disable-next-line rule -- reason`.
       '@eslint-community/eslint-comments/require-description': ['error', { ignore: [] }],

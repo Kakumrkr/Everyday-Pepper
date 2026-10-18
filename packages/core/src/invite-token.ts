@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { InviteTokenSchema, type InviteToken } from '@floty/contracts';
+import { InviteTokenSchema, type InviteToken } from '@pepper/contracts';
 
 /** A new invite token: 32 random bytes, base64url (ADR-0014). */
 export function newInviteToken(): InviteToken {

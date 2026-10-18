@@ -9,7 +9,7 @@ import {
   type MembershipRole,
   type Service,
   type StaffMember,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { loadJson, type ApiCallOptions } from './account';
 
 /** The most client names one day view looks up (one request each); others show as "Client". */

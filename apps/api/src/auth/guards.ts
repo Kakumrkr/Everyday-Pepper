@@ -1,7 +1,7 @@
 import type { IncomingMessage } from 'node:http';
-import type { ApiErrorCode, Permission } from '@floty/contracts';
-import { can, decideTenantAccess, type TenantContext } from '@floty/core';
-import { identifyRequest } from '@floty/runtime';
+import type { ApiErrorCode, Permission } from '@pepper/contracts';
+import { can, decideTenantAccess, type TenantContext } from '@pepper/core';
+import { identifyRequest } from '@pepper/runtime';
 import {
   createParamDecorator,
   ForbiddenException,
@@ -26,7 +26,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   no_active_tenant: 'Choose or create a business first',
   not_a_member: 'You are not a member of this business',
   mfa_required: 'Set up two-step verification to manage your business',
-  forbidden_origin: 'This request did not come from the Floty app',
+  forbidden_origin: 'This request did not come from the Pepper app',
   slug_taken: 'That booking link is already taken',
   validation_failed: 'Some fields are invalid',
   forbidden: 'Your role in this business does not allow this',

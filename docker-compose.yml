@@ -4,11 +4,11 @@
 # Infra only, for `pnpm dev`: docker compose up postgres redis mailpit
 # Credentials below are local-only defaults; override them in a git-ignored .env (see .env.example).
 # Ports bind to 127.0.0.1 so nothing is exposed beyond this machine.
-name: floty
+name: pepper
 
 # api and worker connect as their own login role, which row-level security applies to; the
 # POSTGRES_USER superuser only runs migrations (ADR-0010). `migrate` creates the login role.
-x-database-url: &database-url postgres://${APP_DB_USER:-floty_service}:${APP_DB_PASSWORD:-floty_service_dev}@postgres:5432/${POSTGRES_DB:-floty}
+x-database-url: &database-url postgres://${APP_DB_USER:-pepper_service}:${APP_DB_PASSWORD:-pepper_service_dev}@postgres:5432/${POSTGRES_DB:-pepper}
 
 x-app-env: &app-env
   DATABASE_URL: *database-url
@@ -25,9 +25,9 @@ services:
   postgres:
     image: pgvector/pgvector:pg17@sha256:ac08538c6f8b9904c33c8224c5e5706dbe760aca29db1d096972b4052c22a75d
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-floty}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-floty_dev}
-      POSTGRES_DB: ${POSTGRES_DB:-floty}
+      POSTGRES_USER: ${POSTGRES_USER:-pepper}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pepper_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-pepper}
     ports: ['127.0.0.1:5432:5432']
     volumes: [postgres-data:/var/lib/postgresql/data]
     healthcheck:
@@ -60,10 +60,10 @@ services:
   # One-shot: applies migrations and provisions the services' login role, then exits.
   migrate:
     build: { context: ., target: api }
-    image: floty-api:dev
-    command: ['node', 'node_modules/@floty/db/dist/migrate-cli.js']
+    image: pepper-api:dev
+    command: ['node', 'node_modules/@pepper/db/dist/migrate-cli.js']
     environment:
-      MIGRATION_DATABASE_URL: postgres://${POSTGRES_USER:-floty}:${POSTGRES_PASSWORD:-floty_dev}@postgres:5432/${POSTGRES_DB:-floty}
+      MIGRATION_DATABASE_URL: postgres://${POSTGRES_USER:-pepper}:${POSTGRES_PASSWORD:-pepper_dev}@postgres:5432/${POSTGRES_DB:-pepper}
       DATABASE_URL: *database-url
     healthcheck: { disable: true }
     restart: 'no'
@@ -72,7 +72,7 @@ services:
 
   api:
     build: { context: ., target: api }
-    image: floty-api:dev
+    image: pepper-api:dev
     environment:
       <<: *app-env
       PORT: '4000'
@@ -87,7 +87,7 @@ services:
 
   worker:
     build: { context: ., target: worker }
-    image: floty-worker:dev
+    image: pepper-worker:dev
     environment:
       <<: *app-env
       PORT: '4100'
@@ -98,7 +98,7 @@ services:
 
   web:
     build: { context: ., target: web }
-    image: floty-web:dev
+    image: pepper-web:dev
     environment:
       API_INTERNAL_URL: http://api:4000
     ports: ['127.0.0.1:3000:3000']

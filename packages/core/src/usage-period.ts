@@ -1,4 +1,4 @@
-import { UsagePeriodSchema, type UsagePeriod } from '@floty/contracts';
+import { UsagePeriodSchema, type UsagePeriod } from '@pepper/contracts';
 
 /** The metering period (UTC calendar month) an instant falls in. */
 export function usagePeriodOf(instant: Date): UsagePeriod {

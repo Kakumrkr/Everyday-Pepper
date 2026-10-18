@@ -11,7 +11,7 @@ import {
   type StaffMemberId,
   type TenantId,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { sql, type SQL } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';

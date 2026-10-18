@@ -1,4 +1,4 @@
-import { HealthReportSchema } from '@floty/contracts';
+import { HealthReportSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import { GET } from './route';
 

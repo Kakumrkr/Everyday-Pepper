@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
-import { HealthReportSchema } from '@floty/contracts';
+import { HealthReportSchema } from '@pepper/contracts';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
@@ -10,7 +10,7 @@ import { loadWorkerConfig } from './config.js';
 // Port 1 on localhost refuses connections: the real clients are wired but nothing answers.
 // The happy path against real Postgres and Redis is covered by the Compose smoke test (e2e/).
 const unreachable = loadWorkerConfig({
-  DATABASE_URL: 'postgres://floty:floty@127.0.0.1:1/floty',
+  DATABASE_URL: 'postgres://pepper:pepper@127.0.0.1:1/pepper',
   REDIS_URL: 'redis://127.0.0.1:1',
 });
 

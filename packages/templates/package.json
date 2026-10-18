@@ -1,12 +1,12 @@
 {
-  "name": "@floty/templates",
+  "name": "@pepper/templates",
   "version": "0.0.0",
   "private": true,
   "description": "L3 industry templates: terminology, service menus, rule and autonomy defaults for the eight V1 business types (data only).",
   "type": "module",
   "exports": {
     ".": {
-      "@floty/source": "./src/index.ts",
+      "@pepper/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -21,10 +21,10 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@floty/contracts": "workspace:*"
+    "@pepper/contracts": "workspace:*"
   },
   "devDependencies": {
-    "@floty/config": "workspace:*",
+    "@pepper/config": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",
     "vitest": "^5.0.5"
   }

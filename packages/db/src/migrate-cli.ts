@@ -1,4 +1,4 @@
-// `pnpm --filter @floty/db migrate` and the Compose `migrate` service: applies migrations as
+// `pnpm --filter @pepper/db migrate` and the Compose `migrate` service: applies migrations as
 // MIGRATION_DATABASE_URL, then (if DATABASE_URL is set) provisions the services' login role.
 import { z } from 'zod';
 import { provisionAppRole, runMigrations } from './migrate.js';

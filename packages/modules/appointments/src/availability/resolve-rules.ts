@@ -4,7 +4,7 @@ import {
   type Rule,
   type RuleDefaults,
   type StaffMemberId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 
 // Which rule applies to a staff member (ADR-0016): their own rule, else the business's, else
 // the industry template's default, else the platform default. Blackout windows add up: the

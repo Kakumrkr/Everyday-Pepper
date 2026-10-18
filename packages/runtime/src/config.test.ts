@@ -15,7 +15,7 @@ const Schema = z.object({
 });
 
 const valid = {
-  DATABASE_URL: 'postgres://floty:secret@localhost:5432/floty',
+  DATABASE_URL: 'postgres://pepper:secret@localhost:5432/pepper',
   REDIS_URL: 'redis://localhost:6379',
 };
 

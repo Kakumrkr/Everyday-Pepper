@@ -1,6 +1,6 @@
 # WCAG AA contrast check for the prototype's colour tokens. Usage: python3 docs/mockups/checks/contrast.py
 import re, sys, pathlib
-s = (pathlib.Path(__file__).resolve().parent.parent / 'floty-prototype.html').read_text()
+s = (pathlib.Path(__file__).resolve().parent.parent / 'pepper-prototype.html').read_text()
 def block(sel):
     i=s.index(sel); j=s.index('}',i); return dict(re.findall(r'--([\w-]+):\s*(#[0-9A-Fa-f]{6})',s[i:j]))
 light=block(':root {'); dark={**light,**block(':root[data-theme="dark"] {')}

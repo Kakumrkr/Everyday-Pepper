@@ -5,7 +5,7 @@ import type {
   StaffMemberRecord,
   TimeOffRow,
   WaitlistEntryRow,
-} from '@floty/db';
+} from '@pepper/db';
 import { describe, expect, it } from 'vitest';
 import {
   bookingAuditValues,

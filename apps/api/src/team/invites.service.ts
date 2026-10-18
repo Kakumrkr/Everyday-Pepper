@@ -5,7 +5,7 @@ import type {
   Invite,
   InvitePreviewResponse,
   InviteToken,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   acceptInvite,
   createInvite,
@@ -15,9 +15,9 @@ import {
   type Actor,
   type Invitee,
   type TenantContext,
-} from '@floty/core';
-import type { Database } from '@floty/db';
-import { currentRequestContext, DATABASE } from '@floty/runtime';
+} from '@pepper/core';
+import type { Database } from '@pepper/db';
+import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { Inject, Injectable } from '@nestjs/common';
 
 /**

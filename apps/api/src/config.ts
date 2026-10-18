@@ -1,4 +1,4 @@
-import { loadEnv, loadServiceConfig, type ServiceConfig } from '@floty/runtime/instrument';
+import { loadEnv, loadServiceConfig, type ServiceConfig } from '@pepper/runtime/instrument';
 import { z } from 'zod';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);

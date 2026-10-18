@@ -3,7 +3,7 @@ import { redact, REDACTED, redactString } from './redact.js';
 
 describe('redactString', () => {
   it.each([
-    ['postgres://floty:hunter2@db:5432/floty', `postgres://${REDACTED}@db:5432/floty`],
+    ['postgres://pepper:hunter2@db:5432/pepper', `postgres://${REDACTED}@db:5432/pepper`],
     [
       'connect redis://:s3cret@cache.example.com:6379 failed',
       `connect redis://${REDACTED}@cache.example.com:6379 failed`,

@@ -3,7 +3,7 @@ import type { MembershipRole } from './tenancy.js';
 
 /**
  * What a member may do in their business. Which role may do what, and on whose records, is the
- * permission matrix in `@floty/core` (ADR-0013); domain services check it for the UI and the
+ * permission matrix in `@pepper/core` (ADR-0013); domain services check it for the UI and the
  * AI alike. Actions for later phases are listed now so the matrix is reviewed as a whole.
  */
 export const PermissionSchema = z.enum([

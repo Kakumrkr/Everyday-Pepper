@@ -1,5 +1,5 @@
-import type { ServiceName } from '@floty/contracts';
-import { systemClock } from '@floty/core';
+import type { ServiceName } from '@pepper/contracts';
+import { systemClock } from '@pepper/core';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { HealthController } from './health.controller.js';
 import { CLOCK, SERVICE_NAME } from './health.tokens.js';

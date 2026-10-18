@@ -3,8 +3,8 @@ import {
   type TenantId,
   type UsageMetric,
   type UsagePeriod,
-} from '@floty/contracts';
-import { addUsage, listUsage, withTenant, type Database } from '@floty/db';
+} from '@pepper/contracts';
+import { addUsage, listUsage, withTenant, type Database } from '@pepper/db';
 import type { Clock } from '../clock.js';
 import { usagePeriodOf } from '../usage-period.js';
 

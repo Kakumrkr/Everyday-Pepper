@@ -5,8 +5,8 @@ const TOKEN = 'q1W2e3R4t5Y6u7I8o9P0a_S-d1F2g3H4j5K6l7Z8x9C';
 
 describe('inviteLink', () => {
   it('puts the token in the fragment of the invite page', () => {
-    expect(inviteLink('https://app.floty.test', TOKEN)).toBe(
-      `https://app.floty.test/invite#${TOKEN}`,
+    expect(inviteLink('https://app.pepper.test', TOKEN)).toBe(
+      `https://app.pepper.test/invite#${TOKEN}`,
     );
   });
 });

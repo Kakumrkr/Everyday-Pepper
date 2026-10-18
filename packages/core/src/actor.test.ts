@@ -1,4 +1,4 @@
-import { TenantIdSchema, UserIdSchema } from '@floty/contracts';
+import { TenantIdSchema, UserIdSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import { requirePermission, type Actor } from './actor.js';
 import { ForbiddenError, LastOwnerError, MemberNotFoundError } from './errors.js';

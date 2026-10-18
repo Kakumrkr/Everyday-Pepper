@@ -10,8 +10,8 @@ import {
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
   WaitlistExpiredError,
-} from '@floty/appointments';
-import { AvailableSlotSchema, SlotUnavailableSchema } from '@floty/contracts';
+} from '@pepper/appointments';
+import { AvailableSlotSchema, SlotUnavailableSchema } from '@pepper/contracts';
 import {
   AlreadyAMemberError,
   ClientNotFoundError,
@@ -22,14 +22,14 @@ import {
   InviteWrongAccountError,
   LastOwnerError,
   MemberNotFoundError,
-} from '@floty/core';
+} from '@pepper/core';
 import {
   BusinessLimitReachedError,
   ClientEmailTakenError,
   ServiceNameTakenError,
   StaffMemberLinkTakenError,
   TenantSlugTakenError,
-} from '@floty/db';
+} from '@pepper/db';
 import { BadRequestException, HttpException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 import { answering, toHttpError } from './domain-errors.js';

@@ -7,7 +7,7 @@ import {
   type DynamicModule,
   type OnApplicationShutdown,
 } from '@nestjs/common';
-import { createDatabase, type DatabaseHandle } from '@floty/db';
+import { createDatabase, type DatabaseHandle } from '@pepper/db';
 import { Redis } from 'ioredis';
 import { READINESS_CHECKS, type ReadinessChecks } from './health.tokens.js';
 
@@ -16,7 +16,7 @@ export interface ConnectionsOptions {
   redisUrl: string;
 }
 
-/** The process's `DatabaseHandle` (`@floty/db`); inject it to reach repositories. */
+/** The process's `DatabaseHandle` (`@pepper/db`); inject it to reach repositories. */
 export const DATABASE = Symbol('DATABASE');
 const REDIS = Symbol('REDIS');
 

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { postgresUrlAs } from '@floty/testing';
+import { postgresUrlAs } from '@pepper/testing';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDatabase } from './client.js';
@@ -63,7 +63,7 @@ describe('runMigrations', () => {
   it('matches the Drizzle schema (no ungenerated changes)', async () => {
     // drizzle-kit compares src/schema.ts with the latest snapshot; work on a copy of migrations/.
     const root = fileURLToPath(new URL('..', import.meta.url));
-    const scratch = await mkdtemp(join(tmpdir(), 'floty-db-'));
+    const scratch = await mkdtemp(join(tmpdir(), 'pepper-db-'));
     try {
       await cp(join(root, 'migrations'), join(scratch, 'migrations'), { recursive: true });
       const out = join(scratch, 'migrations');
@@ -89,7 +89,7 @@ describe('runMigrations', () => {
 });
 
 describe('provisionAppRole', () => {
-  it('creates a login role that RLS applies to, with only the floty_app privileges', async () => {
+  it('creates a login role that RLS applies to, with only the pepper_app privileges', async () => {
     const [role] = await query<Record<string, boolean>>(
       database.migrationUrl,
       `SELECT rolcanlogin, rolsuper, rolbypassrls, rolcreaterole, rolcreatedb, rolreplication, rolinherit,

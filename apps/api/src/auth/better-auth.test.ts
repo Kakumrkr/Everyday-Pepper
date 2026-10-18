@@ -1,4 +1,4 @@
-import type { Database } from '@floty/db';
+import type { Database } from '@pepper/db';
 import { describe, expect, it, vi } from 'vitest';
 import { AUTH_BASE_PATH, createBetterAuth, MIN_PASSWORD_LENGTH } from './better-auth.js';
 
@@ -45,12 +45,12 @@ describe('createBetterAuth', () => {
     const { options } = create();
     expect(options.rateLimit).toMatchObject({ enabled: true });
     expect(options.telemetry).toEqual({ enabled: false });
-    expect(options.advanced.cookiePrefix).toBe('floty');
+    expect(options.advanced.cookiePrefix).toBe('pepper');
     expect(options.plugins.map((plugin) => plugin.id)).toEqual(['two-factor']);
   });
 
   it('uses Secure cookies on https only', () => {
-    expect(create('https://app.floty.example').options.advanced.useSecureCookies).toBe(true);
+    expect(create('https://app.pepper.example').options.advanced.useSecureCookies).toBe(true);
     expect(create().options.advanced.useSecureCookies).toBe(false);
   });
 

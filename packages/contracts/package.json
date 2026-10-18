@@ -1,12 +1,12 @@
 {
-  "name": "@floty/contracts",
+  "name": "@pepper/contracts",
   "version": "0.0.0",
   "private": true,
   "description": "Shared Zod schemas, events and card contracts (the only way modules talk to each other).",
   "type": "module",
   "exports": {
     ".": {
-      "@floty/source": "./src/index.ts",
+      "@pepper/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -24,7 +24,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@floty/config": "workspace:*",
+    "@pepper/config": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",
     "fast-check": "^4.10.2",
     "vitest": "^5.0.5"

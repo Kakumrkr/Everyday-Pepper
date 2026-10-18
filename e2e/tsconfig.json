@@ -1,5 +1,5 @@
 {
-  "extends": "@floty/config/tsconfig.base.json",
+  "extends": "@pepper/config/tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2023", "DOM"],
     "noEmit": true

@@ -1,5 +1,5 @@
-import { AuditLogQuerySchema, type AuditLogQuery, type AuditLogResponse } from '@floty/contracts';
-import { listAuditEntries, withTenant, type Database } from '@floty/db';
+import { AuditLogQuerySchema, type AuditLogQuery, type AuditLogResponse } from '@pepper/contracts';
+import { listAuditEntries, withTenant, type Database } from '@pepper/db';
 import { requirePermission, type Actor } from '../actor.js';
 
 /** A page of the actor's business's audit log, newest first. Needs `audit.read`. */

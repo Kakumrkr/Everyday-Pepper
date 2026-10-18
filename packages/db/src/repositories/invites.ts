@@ -5,7 +5,7 @@ import {
   UserIdSchema,
   type MembershipRole,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { and, count, desc, eq, gt, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';

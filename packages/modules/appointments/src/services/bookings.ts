@@ -20,7 +20,7 @@ import {
   type BusyQuery,
   type BusyTime,
   type StaffMemberId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   ClientNotFoundError,
   ForbiddenError,
@@ -29,7 +29,7 @@ import {
   systemClock,
   type Actor,
   type Clock,
-} from '@floty/core';
+} from '@pepper/core';
 import {
   appendAuditEntry,
   BookingIdempotencyKeyTakenError,
@@ -51,7 +51,7 @@ import {
   type Database,
   type StaffMemberRecord,
   type TenantTx,
-} from '@floty/db';
+} from '@pepper/db';
 import type { ServiceToBook } from '../availability/engine.js';
 import { alternativesRange, nearestSlots, toAvailableSlot } from '../bookings/planning.js';
 import {

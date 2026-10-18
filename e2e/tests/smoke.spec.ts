@@ -1,4 +1,4 @@
-import { HealthReportSchema, type ServiceName } from '@floty/contracts';
+import { HealthReportSchema, type ServiceName } from '@pepper/contracts';
 import { expect, test } from '@playwright/test';
 
 const services: Record<Exclude<ServiceName, 'web'>, string> = {
@@ -17,7 +17,7 @@ test.describe('smoke: the stack is up', () => {
         status: 'ok',
         checks: { database: 'up', redis: 'up' },
       });
-      // Shared process wiring (@floty/runtime): request ids, no framework fingerprint.
+      // Shared process wiring (@pepper/runtime): request ids, no framework fingerprint.
       expect(response.headers()['x-request-id']).toMatch(/^[0-9a-f-]{36}$/);
       expect(response.headers()['x-powered-by']).toBeUndefined();
     });
@@ -43,8 +43,8 @@ test.describe('smoke: the stack is up', () => {
     await page.goto('/');
 
     await expect(page).toHaveURL(/\/sign-in$/);
-    await expect(page).toHaveTitle('Sign in · Floty');
-    await expect(page.getByRole('heading', { level: 1, name: 'floty' })).toBeVisible();
+    await expect(page).toHaveTitle('Sign in · Pepper');
+    await expect(page.getByRole('heading', { level: 1, name: 'pepper' })).toBeVisible();
     const status = page.getByTestId('api-status');
     await expect(status).toHaveAttribute('data-state', 'ok');
     await expect(status).toContainText('ready');

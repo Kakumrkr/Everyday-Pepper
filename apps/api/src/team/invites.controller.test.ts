@@ -11,7 +11,7 @@ import {
   type InvitePreviewResponse,
   type MembershipRole,
   type TenantId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   AlreadyAMemberError,
   ForbiddenError,
@@ -19,8 +19,8 @@ import {
   InviteLimitReachedError,
   InviteNotFoundError,
   InviteWrongAccountError,
-} from '@floty/core';
-import { DATABASE } from '@floty/runtime';
+} from '@pepper/core';
+import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';

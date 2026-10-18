@@ -5,9 +5,9 @@ import {
   type CurrentBusinessResponse,
   type MeResponse,
   type TemplatesResponse,
-} from '@floty/contracts';
-import { permissionsOf, type TenantContext } from '@floty/core';
-import { templateSummaries } from '@floty/templates';
+} from '@pepper/contracts';
+import { permissionsOf, type TenantContext } from '@pepper/core';
+import { templateSummaries } from '@pepper/templates';
 import {
   Body,
   Controller,

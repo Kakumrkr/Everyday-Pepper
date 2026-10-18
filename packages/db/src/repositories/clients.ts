@@ -4,7 +4,7 @@ import {
   type ClientFields,
   type ClientId,
   type RecordSource,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { asc, eq, ilike, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { ClientEmailTakenError, isUniqueViolation } from '../errors.js';

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { manualSecret, qrModules } from './totp-qr';
 
-const URI = 'otpauth://totp/Floty:ana%40example.test?secret=JBSWY3DPEHPK3PXP&issuer=Floty';
+const URI = 'otpauth://totp/Pepper:ana%40example.test?secret=JBSWY3DPEHPK3PXP&issuer=Pepper';
 
 describe('qrModules', () => {
   it('encodes the URI as a square grid with a quiet border', () => {

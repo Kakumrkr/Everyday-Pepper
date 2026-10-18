@@ -1,4 +1,4 @@
-import { RULE_LIMITS, type ServiceId, type StaffMemberId } from '@floty/contracts';
+import { RULE_LIMITS, type ServiceId, type StaffMemberId } from '@pepper/contracts';
 import fc from 'fast-check';
 import type {
   AvailabilityQuery,

@@ -1,4 +1,4 @@
-import type { Permission } from '@floty/contracts';
+import type { Permission } from '@pepper/contracts';
 
 /** The member's role does not allow this (`permission`, if one permission decided it). */
 export class ForbiddenError extends Error {

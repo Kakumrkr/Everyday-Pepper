@@ -12,7 +12,7 @@ import {
   replaceWorkingHours,
   updateService,
   updateStaffMember,
-} from '@floty/appointments';
+} from '@pepper/appointments';
 import type {
   BookingRules,
   BookingRulesInput,
@@ -28,10 +28,10 @@ import type {
   TimeOffQuery,
   WeeklyHours,
   WeeklyHoursInput,
-} from '@floty/contracts';
-import type { Actor, TenantContext } from '@floty/core';
-import type { Database } from '@floty/db';
-import { currentRequestContext, DATABASE } from '@floty/runtime';
+} from '@pepper/contracts';
+import type { Actor, TenantContext } from '@pepper/core';
+import type { Database } from '@pepper/db';
+import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { Inject, Injectable } from '@nestjs/common';
 
 /**

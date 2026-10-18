@@ -1,6 +1,6 @@
 'use client';
 
-import { cx, Icon, Logo } from '@floty/ui';
+import { cx, Icon, Logo } from '@pepper/ui';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { isCurrent, type NavItem } from '../../lib/nav';
@@ -17,7 +17,7 @@ export function AppNav({ items, businessName }: { items: NavItem[]; businessName
         aria-label="Main"
         className="sticky top-0 hidden h-dvh flex-col gap-1 border-r border-line bg-surface px-4 py-6 desk:flex"
       >
-        <Link href="/" aria-label="Floty home" className="mb-1 px-3 no-underline">
+        <Link href="/" aria-label="Pepper home" className="mb-1 px-3 no-underline">
           <Logo />
         </Link>
         {businessName === null ? null : (

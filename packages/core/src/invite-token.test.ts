@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { InviteTokenSchema, type InviteToken } from '@floty/contracts';
+import { InviteTokenSchema, type InviteToken } from '@pepper/contracts';
 import { hashInviteToken, newInviteToken } from './invite-token.js';
 
 describe('newInviteToken', () => {

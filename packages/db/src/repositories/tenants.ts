@@ -4,7 +4,7 @@ import {
   UserIdSchema,
   type NewTenant,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
@@ -77,7 +77,7 @@ export async function createTenant(
  */
 async function checkOwnerLimit(tx: TenantTx, owner: UserId, limit: number): Promise<void> {
   await tx.execute(
-    sql`SELECT pg_advisory_xact_lock(hashtextextended(${`floty.create_tenant:${owner}`}, 0))`,
+    sql`SELECT pg_advisory_xact_lock(hashtextextended(${`pepper.create_tenant:${owner}`}, 0))`,
   );
   await setTransactionUser(tx, owner);
   const owned = await countOwnedBusinesses(tx);

@@ -6,7 +6,7 @@ import { SignUpForm } from '../_components/sign-up-form';
 import { currentAccount } from '../_server/account';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Create your account · Floty' };
+export const metadata: Metadata = { title: 'Create your account · Pepper' };
 
 export default async function SignUpPage({
   searchParams,
@@ -17,7 +17,7 @@ export default async function SignUpPage({
   if ((await currentAccount()).state === 'signed-in') redirect(next ?? ROUTES.home);
   return (
     <main>
-      <h1 className="wordmark">floty</h1>
+      <h1 className="wordmark">pepper</h1>
       <p className="tagline">Hire your AI employee. Start with your account.</p>
       <SignUpForm next={next} />
     </main>

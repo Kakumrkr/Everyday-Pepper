@@ -1,6 +1,6 @@
 import { cx } from './class-names.js';
 
-/** The Floty mark: a speech bubble with a face (the product is someone you talk to). */
+/** The Pepper mark: a speech bubble with a face (the product is someone you talk to). */
 export function Mark({ className }: { className?: string | undefined }) {
   return (
     <svg viewBox="0 0 40 40" aria-hidden="true" className={cx('size-8 shrink-0', className)}>
@@ -25,7 +25,7 @@ export function Logo({ className }: { className?: string | undefined }) {
   return (
     <span className={cx('inline-flex items-center gap-2', className)}>
       <Mark />
-      <span className="font-display text-2xl font-extrabold tracking-tight text-brand">floty</span>
+      <span className="font-display text-2xl font-extrabold tracking-tight text-brand">pepper</span>
     </span>
   );
 }

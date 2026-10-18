@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { TenantIdSchema, type TenantId, type UserId } from '@floty/contracts';
+import { TenantIdSchema, type TenantId, type UserId } from '@pepper/contracts';
 import { eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';

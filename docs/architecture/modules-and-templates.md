@@ -35,7 +35,7 @@ Classes & Memberships (capacity, passes) · Quotes & Jobs (estimates, approvals,
 
 V1 templates: `beauty-salon`, `barber`, `nails`, `spa`, `lash-brow`, `personal-trainer`, `massage`, `yoga-pilates-private`. Adding a template requires: schema validation test, onboarding fixture, eval set.
 
-Built in S13 ([ADR-0018](../adr/0018-industry-templates.md)): `TemplateSchema` in `packages/contracts/src/templates.ts` (plus `insights.enabled`/`rebookingIntervalDays`/`minGapMinutes`, per-service `rebookAfterDays`, and `sensitive` intake fields); one package `packages/templates` (`@floty/templates`) with a data file per template, parsed at load and frozen; `tenants.template_id`; `GET /v1/templates`. Only the rule defaults are consumed so far (through a lookup the api passes to the appointments services, since L2 does not import L3). Schema tests exist for all eight; onboarding fixtures come in Phase 9 and eval sets in Phase 6.
+Built in S13 ([ADR-0018](../adr/0018-industry-templates.md)): `TemplateSchema` in `packages/contracts/src/templates.ts` (plus `insights.enabled`/`rebookingIntervalDays`/`minGapMinutes`, per-service `rebookAfterDays`, and `sensitive` intake fields); one package `packages/templates` (`@pepper/templates`) with a data file per template, parsed at load and frozen; `tenants.template_id`; `GET /v1/templates`. Only the rule defaults are consumed so far (through a lookup the api passes to the appointments services, since L2 does not import L3). Schema tests exist for all eight; onboarding fixtures come in Phase 9 and eval sets in Phase 6.
 
 ## Tenant customization (L4)
 Tenant settings override template defaults (rules, autonomy, terminology tweaks). Stored versioned; changes audited.

@@ -6,7 +6,7 @@ import { Unavailable } from '../../_components/unavailable';
 import { currentAccount } from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Two-step verification · Floty' };
+export const metadata: Metadata = { title: 'Two-step verification · Pepper' };
 
 export default async function TwoFactorPage() {
   const account = await currentAccount();

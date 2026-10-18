@@ -98,7 +98,7 @@ function startTracing(config: ObservabilityConfig, endpoint: string): () => Prom
 
   const provider = new NodeTracerProvider({
     resource: resourceFromAttributes({
-      [ATTR_SERVICE_NAME]: `floty-${config.service}`,
+      [ATTR_SERVICE_NAME]: `pepper-${config.service}`,
       ...(config.release !== undefined && { [ATTR_SERVICE_VERSION]: config.release }),
       'deployment.environment.name': config.environment,
     }),

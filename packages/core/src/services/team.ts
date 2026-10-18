@@ -5,7 +5,7 @@ import {
   type Member,
   type MembershipRole,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   appendAuditEntry,
   countOwners,
@@ -19,7 +19,7 @@ import {
   type Membership,
   type TenantMember,
   type TenantTx,
-} from '@floty/db';
+} from '@pepper/db';
 import { requirePermission, type Actor } from '../actor.js';
 import { ForbiddenError, LastOwnerError, MemberNotFoundError } from '../errors.js';
 import { decideMembershipChange, type MembershipChange } from '../membership-rules.js';

@@ -1,4 +1,4 @@
-import type { StaffMemberId } from '@floty/contracts';
+import type { StaffMemberId } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   availableSlots,

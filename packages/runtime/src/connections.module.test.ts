@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
-import { HealthReportSchema } from '@floty/contracts';
+import { HealthReportSchema } from '@pepper/contracts';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
@@ -29,7 +29,7 @@ describe('ConnectionsModule', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConnectionsModule.forRoot({
-          databaseUrl: 'postgres://floty:floty@127.0.0.1:1/floty',
+          databaseUrl: 'postgres://pepper:pepper@127.0.0.1:1/pepper',
           redisUrl: 'redis://127.0.0.1:1',
         }),
         HealthModule.forRoot({ service: 'worker' }),

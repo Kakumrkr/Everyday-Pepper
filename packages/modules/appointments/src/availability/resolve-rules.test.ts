@@ -1,4 +1,4 @@
-import { BookingRulesSchema, type BookingRulesInput, type StaffMemberId } from '@floty/contracts';
+import { BookingRulesSchema, type BookingRulesInput, type StaffMemberId } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import { resolveRules } from './resolve-rules.js';
 

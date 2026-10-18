@@ -7,7 +7,7 @@ import {
   type TemplateId,
   type TemplateInput,
   type TemplateSummary,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { barber } from './catalog/barber.js';
 import { beautySalon } from './catalog/beauty-salon.js';
 import { lashBrow } from './catalog/lash-brow.js';

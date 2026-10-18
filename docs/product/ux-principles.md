@@ -1,6 +1,6 @@
 # UX Principles
 
-**Direction:** warm and friendly (Airbnb-like): soft rounded shapes, generous spacing, friendly microcopy, real photography/illustration accents; calm, never cluttered. Working name **Floty**. Design direction **approved 2026-10-16** (S1/S2 mockups: [`../mockups/README.md`](../mockups/README.md)); tokens below.
+**Direction:** warm and friendly (Airbnb-like): soft rounded shapes, generous spacing, friendly microcopy, real photography/illustration accents; calm, never cluttered. Working name **Pepper**. Design direction **approved 2026-10-16** (S1/S2 mockups: [`../mockups/README.md`](../mockups/README.md)); tokens below.
 
 ## Principles
 1. **Mobile-first, one-thumb.** Owners use the app between clients. Primary actions reachable with one thumb; works great at 375 px width.
@@ -18,10 +18,10 @@
 Operator feed (home) · Chat with cards · Calendar (day/week, per staff) · Client profile · "What I know" · Autonomy settings · Onboarding flow · Public booking page · Team & services.
 
 ## Approved design tokens (2026-10-16)
-Source of truth for `packages/ui`. The prototype `../mockups/floty-prototype.html` uses exactly these values.
+Source of truth for `packages/ui`. The prototype `../mockups/pepper-prototype.html` uses exactly these values.
 
 - **Type:** Bricolage Grotesque (display: headings, wordmark, big numbers) · Figtree (everything else, 15 px base). Always declare system fallbacks.
-- **Mark:** speech bubble with a face. Wordmark: lowercase "floty", Bricolage Grotesque ExtraBold.
+- **Mark:** speech bubble with a face. Wordmark: lowercase "pepper", Bricolage Grotesque ExtraBold.
 - **Shape:** radius 10 / 16 / 24 px (sm / md / lg cards), pill buttons and chips, ≥ 44 px tap targets. Shadows only on floating elements.
 - **Voice:** short, plain, first person. Say what happened and what didn't. No exclamation marks, emoji or system jargon.
 

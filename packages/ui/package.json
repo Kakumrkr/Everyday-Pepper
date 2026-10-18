@@ -1,12 +1,12 @@
 {
-  "name": "@floty/ui",
+  "name": "@pepper/ui",
   "version": "0.0.0",
   "private": true,
   "description": "Design system: the approved tokens (light and dark), the Tailwind theme and shared React components for the PWA and the booking page.",
   "type": "module",
   "exports": {
     ".": {
-      "@floty/source": "./src/index.ts",
+      "@pepper/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
@@ -26,7 +26,7 @@
     "react": "^19.3.1"
   },
   "devDependencies": {
-    "@floty/config": "workspace:*",
+    "@pepper/config": "workspace:*",
     "@types/react": "^19.3.0",
     "@vitest/coverage-v8": "^5.0.5",
     "react": "^19.3.1",

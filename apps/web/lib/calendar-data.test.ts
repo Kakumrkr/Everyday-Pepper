@@ -5,7 +5,7 @@ import {
   type Client,
   type Service,
   type StaffMember,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import { loadCalendarDay, MAX_CLIENT_LOOKUPS, seesDetailsOf } from './calendar-data';
 

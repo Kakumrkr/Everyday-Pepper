@@ -7,7 +7,7 @@ import {
   type StaffMemberId,
   type TimeOffId,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { and, asc, eq, gt, inArray, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { isUniqueViolation, ServiceNameTakenError, StaffMemberLinkTakenError } from '../errors.js';
@@ -379,7 +379,7 @@ export async function listBookingRules(tx: TenantTx): Promise<BookingRuleRow[]> 
  */
 export async function lockBookingRules(tx: TenantTx): Promise<void> {
   await tx.execute(
-    sql`SELECT pg_advisory_xact_lock(hashtextextended('floty.booking_rules:' || current_tenant_id()::text, 0))`,
+    sql`SELECT pg_advisory_xact_lock(hashtextextended('pepper.booking_rules:' || current_tenant_id()::text, 0))`,
   );
 }
 

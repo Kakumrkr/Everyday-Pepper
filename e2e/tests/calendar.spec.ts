@@ -8,7 +8,7 @@ import {
   formatDate,
   fromZoned,
   toZoned,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import { onboardOwner, ownClientAddress } from './helpers.js';
 

@@ -1,6 +1,6 @@
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
-import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@floty/contracts';
-import { setSessionActiveTenant, type Database } from '@floty/db';
+import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@pepper/contracts';
+import { setSessionActiveTenant, type Database } from '@pepper/db';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { z } from 'zod';
 import type { BetterAuth } from './better-auth.js';

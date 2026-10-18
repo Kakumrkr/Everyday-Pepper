@@ -29,7 +29,7 @@ describe('test containers', () => {
 
   it('start Postgres and Redis on reachable random ports', async () => {
     expect(postgres?.url).toMatch(
-      /^postgres(ql)?:\/\/floty_test:floty_test@[^/]+:\d+\/floty_test$/,
+      /^postgres(ql)?:\/\/pepper_test:pepper_test@[^/]+:\d+\/pepper_test$/,
     );
     expect(redis?.url).toMatch(/^redis:\/\/[^/]+:\d+$/);
     await expect(reachable(postgres?.url ?? '')).resolves.toBeUndefined();

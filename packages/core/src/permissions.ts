@@ -3,7 +3,7 @@ import {
   type MembershipRole,
   type Permission,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import type { TenantContext } from './tenant-access.js';
 
 /**

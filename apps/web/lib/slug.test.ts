@@ -1,4 +1,4 @@
-import { TenantSlugSchema } from '@floty/contracts';
+import { TenantSlugSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import { suggestSlug } from './slug';
 

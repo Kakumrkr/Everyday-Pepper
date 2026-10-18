@@ -5,8 +5,8 @@ import {
   type AuditLogResponse,
   type Member,
   type MembersResponse,
-} from '@floty/contracts';
-import type { TenantContext } from '@floty/core';
+} from '@pepper/contracts';
+import type { TenantContext } from '@pepper/core';
 import {
   Body,
   Controller,

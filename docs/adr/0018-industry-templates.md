@@ -6,9 +6,9 @@
 Phase 3 ends with "template system + 8 V1 templates" (roadmap). `modules-and-templates.md` describes a template as data only, validated by a Zod schema: terminology, modules, service catalog, default rules, default autonomy, intake fields, insights, prompt fragments and onboarding hints. ADR-0016 set the rule precedence as staff member → business → template → platform, with template defaults resolved at read time rather than stored per business. Most of a template's fields are used only in later phases (AI in 6, insights in 8, onboarding in 9). This session builds the schema, the data, and the first real use: rule defaults.
 
 ## Decision
-1. **One package (user, S13): `packages/templates` (`@floty/templates`)** with one data file per template under `src/catalog/`, not one package per industry.
+1. **One package (user, S13): `packages/templates` (`@pepper/templates`)** with one data file per template under `src/catalog/`, not one package per industry.
    - The workspace glob `packages/templates/*` became `packages/templates`.
-   - The package may import only `@floty/contracts`.
+   - The package may import only `@pepper/contracts`.
    - Only apps import it (L3 sits above modules and core). Lint enforces this; today only `apps/api` does.
 2. **The schema lives in contracts** (`templates.ts`).
    - `TemplateSchema` is strict and versioned (`version: 1`).
@@ -33,7 +33,7 @@ Phase 3 ends with "template system + 8 V1 templates" (roadmap). `modules-and-tem
    - Changing a business's template later is out of scope.
 5. **Rule defaults reach the engine through a lookup passed in.**
    - The appointments services (`findAvailability`, `createBooking`, `changeBooking`) take an optional `templateRuleDefaults` lookup (`TemplateRuleDefaultsOf`), because L2 must not import L3.
-   - The api passes `templateRuleDefaults` from `@floty/templates`.
+   - The api passes `templateRuleDefaults` from `@pepper/templates`.
    - `slotsFor` reads the business's template id and passes the defaults to `resolveRules`.
    - Without the lookup, only the platform defaults apply.
    - Template defaults are still not stored per business (ADR-0016). A business's own rule always wins.

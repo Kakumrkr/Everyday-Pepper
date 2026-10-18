@@ -1,5 +1,11 @@
-import { UserIdSchema } from '@floty/contracts';
-import { authDatabaseAdapter, listUserBusinesses, newId, withUser, type Database } from '@floty/db';
+import { UserIdSchema } from '@pepper/contracts';
+import {
+  authDatabaseAdapter,
+  listUserBusinesses,
+  newId,
+  withUser,
+  type Database,
+} from '@pepper/db';
 import { betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins';
 import type { AuthConfig } from '../config.js';
@@ -23,7 +29,7 @@ export interface BetterAuthOptions extends AuthConfig {
  */
 export function createBetterAuth(options: BetterAuthOptions) {
   return betterAuth({
-    appName: 'Floty',
+    appName: 'Pepper',
     baseURL: options.baseUrl,
     basePath: AUTH_BASE_PATH,
     secret: options.secret,
@@ -63,7 +69,7 @@ export function createBetterAuth(options: BetterAuthOptions) {
       changeEmail: { enabled: false },
       deleteUser: { enabled: false },
     },
-    plugins: [twoFactor({ issuer: 'Floty' })],
+    plugins: [twoFactor({ issuer: 'Pepper' })],
     // Built-in limits (stricter on sign-in, sign-up and second-factor checks), kept in memory:
     // enough for one api instance; move to Redis before running several.
     rateLimit: { enabled: true, storage: 'memory' },
@@ -72,7 +78,7 @@ export function createBetterAuth(options: BetterAuthOptions) {
       // tests exercise exactly what runs in production.
       disableCSRFCheck: false,
       disableOriginCheck: false,
-      cookiePrefix: 'floty',
+      cookiePrefix: 'pepper',
       useSecureCookies: options.baseUrl.startsWith('https:'),
       database: { generateId: () => newId() },
     },

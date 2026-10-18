@@ -1,6 +1,6 @@
 'use client';
 
-import type { AcceptInviteResponse, InvitePreviewResponse, InviteToken } from '@floty/contracts';
+import type { AcceptInviteResponse, InvitePreviewResponse, InviteToken } from '@pepper/contracts';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ROUTES, withNext } from '../../lib/account';
@@ -102,7 +102,7 @@ export function InviteAcceptance({ email }: { email: string | null }) {
     case 'signed-out':
       return (
         <section aria-labelledby="invite-heading" className="form">
-          <h2 id="invite-heading">You’re invited to join a business on Floty</h2>
+          <h2 id="invite-heading">You’re invited to join a business on Pepper</h2>
           <p className="hint">
             Create an account or sign in with the email address the invite was sent to.
           </p>
@@ -125,7 +125,7 @@ export function InviteAcceptance({ email }: { email: string | null }) {
               <SignOutButton next={ROUTES.invite} label="Sign in with another email" />
             </>
           ) : (
-            <Link href={ROUTES.home}>Go to Floty</Link>
+            <Link href={ROUTES.home}>Go to Pepper</Link>
           )}
         </section>
       );

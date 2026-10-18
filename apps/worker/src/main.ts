@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { createServiceApp } from '@floty/runtime';
+import { createServiceApp } from '@pepper/runtime';
 import { AppModule } from './app.module.js';
 import { loadWorkerConfig } from './config.js';
 

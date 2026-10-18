@@ -6,8 +6,8 @@ import {
   type CreateInviteResponse,
   type InvitePreviewResponse,
   type InvitesResponse,
-} from '@floty/contracts';
-import type { Invitee, TenantContext } from '@floty/core';
+} from '@pepper/contracts';
+import type { Invitee, TenantContext } from '@pepper/core';
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { AuthService, type AuthSession } from '../auth/auth.service.js';

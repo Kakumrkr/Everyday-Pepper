@@ -1,5 +1,5 @@
 {
-  "extends": "@floty/config/tsconfig.nest.json",
+  "extends": "@pepper/config/tsconfig.nest.json",
   "compilerOptions": {
     "noEmit": true
   },

@@ -8,7 +8,7 @@ import {
   type ServiceId,
   type StaffMemberId,
   type TenantId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';

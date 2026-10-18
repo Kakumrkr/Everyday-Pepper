@@ -1,12 +1,12 @@
 // Integration-test helpers (not built into dist).
-import { UserIdSchema, type UserId } from '@floty/contracts';
-import { startPostgres, postgresUrlAs } from '@floty/testing';
+import { UserIdSchema, type UserId } from '@pepper/contracts';
+import { startPostgres, postgresUrlAs } from '@pepper/testing';
 import { createDatabase, type Database, type DatabaseHandle } from './client.js';
 import { newId } from './ids.js';
 import { prepareDatabase } from './migrate.js';
 import { users } from './schema.js';
 
-export const APP_LOGIN = 'floty_service';
+export const APP_LOGIN = 'pepper_service';
 
 export interface TestDatabase {
   /** Superuser of the container: runs migrations, like MIGRATION_DATABASE_URL. */

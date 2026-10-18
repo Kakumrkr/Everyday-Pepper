@@ -11,9 +11,9 @@ import {
   type Business,
   type MembershipRole,
   type TenantId,
-} from '@floty/contracts';
-import { BusinessLimitReachedError, TenantSlugTakenError } from '@floty/db';
-import { DATABASE } from '@floty/runtime';
+} from '@pepper/contracts';
+import { BusinessLimitReachedError, TenantSlugTakenError } from '@pepper/db';
+import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';

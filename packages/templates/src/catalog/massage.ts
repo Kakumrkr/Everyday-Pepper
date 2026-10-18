@@ -1,4 +1,4 @@
-import type { TemplateInput } from '@floty/contracts';
+import type { TemplateInput } from '@pepper/contracts';
 
 /** Massage therapy: 60–90 minute sessions with time to reset the room between clients. */
 export const massage: TemplateInput = {

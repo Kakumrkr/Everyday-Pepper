@@ -15,11 +15,11 @@ FROM base AS build
 COPY . .
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile
-RUN pnpm turbo run build --filter=@floty/api --filter=@floty/worker --filter=@floty/web
+RUN pnpm turbo run build --filter=@pepper/api --filter=@pepper/worker --filter=@pepper/web
 # Production-only, self-contained copies of the Nest apps (workspace packages included as dist).
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm --filter=@floty/api deploy --prod --legacy /out/api && \
-    pnpm --filter=@floty/worker deploy --prod --legacy /out/worker
+    pnpm --filter=@pepper/api deploy --prod --legacy /out/api && \
+    pnpm --filter=@pepper/worker deploy --prod --legacy /out/worker
 
 # ---- runtime images: no build tools, no sources, non-root ----
 FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS runtime

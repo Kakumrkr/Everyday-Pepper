@@ -1,4 +1,4 @@
-import type { HealthCheckStatus, HealthReport, ServiceName } from '@floty/contracts';
+import type { HealthCheckStatus, HealthReport, ServiceName } from '@pepper/contracts';
 import { utcNow, type Clock } from './clock.js';
 
 /** A dependency probe: resolves when the dependency is reachable, rejects (or hangs) otherwise. */

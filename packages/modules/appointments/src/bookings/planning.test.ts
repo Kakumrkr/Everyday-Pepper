@@ -3,8 +3,8 @@ import {
   StaffMemberIdSchema,
   type Rule,
   type WaitlistWindow,
-} from '@floty/contracts';
-import type { Occupancy, TimeOffRow } from '@floty/db';
+} from '@pepper/contracts';
+import type { Occupancy, TimeOffRow } from '@pepper/db';
 import { describe, expect, it } from 'vitest';
 import type { Slot } from '../availability/engine.js';
 import {
