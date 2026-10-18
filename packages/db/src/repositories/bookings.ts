@@ -164,7 +164,14 @@ export async function setBookingStatus(
  */
 export async function listBookings(
   tx: TenantTx,
-  options: { from: Date; to: Date; staffMemberId?: StaffMemberId; status?: BookingStatus },
+  options: {
+    from: Date;
+    to: Date;
+    staffMemberId?: StaffMemberId;
+    status?: BookingStatus;
+    /** At most this many rows, earliest first. */
+    limit?: number;
+  },
 ): Promise<BookingRow[]> {
   const conditions: SQL[] = [lt(bookings.startsAt, options.to), gt(bookings.endsAt, options.from)];
   if (options.staffMemberId !== undefined) {
@@ -173,11 +180,12 @@ export async function listBookings(
   if (options.status !== undefined) {
     conditions.push(eq(bookings.status, BookingStatusSchema.parse(options.status)));
   }
-  return tx
+  const query = tx
     .select()
     .from(bookings)
     .where(and(...conditions))
     .orderBy(asc(bookings.startsAt), asc(bookings.id));
+  return options.limit === undefined ? query : query.limit(options.limit);
 }
 
 async function bookingWrite<T>(write: () => Promise<T>): Promise<T> {
@@ -212,7 +220,13 @@ export interface Occupancy {
  */
 export async function listOccupancy(
   tx: TenantTx,
-  options: { from: Date; to: Date; staffMemberIds?: readonly StaffMemberId[] },
+  options: {
+    from: Date;
+    to: Date;
+    staffMemberIds?: readonly StaffMemberId[];
+    /** At most this many rows, earliest first. */
+    limit?: number;
+  },
 ): Promise<Occupancy[]> {
   const conditions: SQL[] = [
     sql`${bookingOccupancy.occupied} && tstzrange(${options.from.toISOString()}::timestamptz, ${options.to.toISOString()}::timestamptz, '[)')`,
@@ -226,7 +240,7 @@ export async function listOccupancy(
       ),
     );
   }
-  const rows = await tx
+  const query = tx
     .select({
       bookingId: bookingOccupancy.id,
       staffMemberId: bookingOccupancy.staffMemberId,
@@ -238,6 +252,7 @@ export async function listOccupancy(
     .from(bookingOccupancy)
     .where(and(...conditions))
     .orderBy(asc(bookingOccupancy.startsAt), asc(bookingOccupancy.id));
+  const rows = await (options.limit === undefined ? query : query.limit(options.limit));
   return rows.map((row) => ({
     ...row,
     // Raw expressions come back as Postgres text, not through the column's Date mapping.

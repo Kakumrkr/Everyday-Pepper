@@ -1,15 +1,14 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { requiredStep, ROUTES } from '../../lib/account';
-import { TeamManager } from '../_components/team-manager';
-import { Unavailable } from '../_components/unavailable';
+import { requiredStep, ROUTES } from '../../../lib/account';
+import { TeamManager } from '../../_components/team-manager';
+import { Unavailable } from '../../_components/unavailable';
 import {
   currentAccount,
   currentBusiness,
   currentInvites,
   currentMembers,
-} from '../_server/account';
+} from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Team · Floty' };
@@ -32,10 +31,7 @@ export default async function TeamPage() {
     ? await Promise.all([currentMembers(), currentInvites()])
     : [null, null];
   return (
-    <main>
-      <p className="hint">
-        <Link href={ROUTES.home}>← {current.business.name}</Link>
-      </p>
+    <div className="mx-auto max-w-xl">
       <h1>Team</h1>
       <TeamManager
         me={account.me.user.id}
@@ -46,6 +42,6 @@ export default async function TeamPage() {
         members={members}
         invites={invites}
       />
-    </main>
+    </div>
   );
 }

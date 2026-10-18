@@ -41,4 +41,4 @@ Source of truth for `packages/ui`. The prototype `../mockups/floty-prototype.htm
 All text/background pairs must meet WCAG 2.2 AA (≥ 4.5:1) in both themes.
 
 ## Design system
-`packages/ui`: tokens (color, type, spacing, radius, shadow) with light/dark themes, components built on accessible primitives (e.g. Radix) + Tailwind. Card components are shared between chat and screens.
+`packages/ui`: tokens (color, type, spacing, radius, shadow) with light/dark themes, components built on accessible primitives (e.g. Radix) + Tailwind. Card components are shared between chat and screens. Built from S14 ([ADR-0019](../adr/0019-design-system-and-app-shell.md)): `packages/ui/src/tokens.ts` holds the values above, and a test checks them against AA.

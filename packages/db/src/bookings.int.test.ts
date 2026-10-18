@@ -284,6 +284,20 @@ describe('booking_occupancy', () => {
     ).toEqual([b.marco]);
     expect(await list('2026-11-02T00:00:00Z', '2026-11-03T00:00:00Z', [])).toEqual([]);
   });
+
+  it('returns at most `limit` rows, earliest first', async () => {
+    const b = await newBusiness();
+    await book(b, booking(b, b.marco, '2026-11-02T16:00:00Z'));
+    const early = await book(b, booking(b, b.jess, '2026-11-02T14:00:00Z'));
+    const rows = await withTenant(db, b.tenant, (tx) =>
+      listOccupancy(tx, {
+        from: at('2026-11-02T00:00:00Z'),
+        to: at('2026-11-03T00:00:00Z'),
+        limit: 1,
+      }),
+    );
+    expect(rows.map((o) => o.bookingId)).toEqual([early.id]);
+  });
 });
 
 describe('bookings', () => {
@@ -309,6 +323,7 @@ describe('bookings', () => {
     expect(
       await list({ from: at('2026-11-02T15:00:00Z'), to: at('2026-11-02T16:00:00Z') }),
     ).toEqual([]);
+    expect((await list({ limit: 1 })).map((r) => r.id)).toEqual([early.id]);
   });
 
   it('finds and locks by id, and finds by idempotency key', async () => {

@@ -83,7 +83,9 @@ export default defineConfig(
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        projectService: { allowDefaultProject: ['*.js', '.pnpmfile.cjs'] },
+        projectService: {
+          allowDefaultProject: ['*.js', '.pnpmfile.cjs', 'apps/web/postcss.config.mjs'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },

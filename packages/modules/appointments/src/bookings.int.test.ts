@@ -392,6 +392,23 @@ describe('reading bookings', () => {
     expect(new Set(forOwner.map((s) => s.staffMemberId))).toEqual(new Set([b.jess.id]));
   });
 
+  it('a limit keeps the earliest bookings, busy times and start times', async () => {
+    const b = await newBusiness();
+    const early = await book(b, b.owner, request(b, tue('10:00')));
+    await book(b, b.owner, request(b, tue('14:00')));
+    const range = { from: tue('00:00'), to: tue('23:59') };
+    expect(await listBookings(db, b.owner, range, { limit: 1 })).toEqual([early]);
+    expect((await listBusyTimes(db, b.staff, range, { limit: 1 })).map((t) => t.startsAt)).toEqual([
+      tue('10:00'),
+    ]);
+    const query = { serviceId: b.service.id, ...range };
+    const all = await findAvailability(db, b.owner, query, { clock: b.clock });
+    expect(all.length).toBeGreaterThan(2);
+    expect(await findAvailability(db, b.owner, query, { clock: b.clock, limit: 2 })).toEqual(
+      all.slice(0, 2),
+    );
+  });
+
   it('availability: unknown service or staff member; at most 62 days', async () => {
     const b = await newBusiness();
     const other = await newBusiness();

@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-18 · **Plan version:** 0.8 · **Current phase:** 3 — Appointments + templates. S10–S12 merged. **S13 (Phase 3d: templates + Phase 3 exit) done**, ADR-0018 **accepted**; PR opened and merged at the user's request → **Phase 3 complete** → next: Phase 4 (PWA + booking page), to be split into sessions at its Session Brief
+**Last updated:** 2026-10-18 · **Plan version:** 0.9 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. **S14 (Phase 4a: design system + app shell + calendar day view) done**, ADR-0019 **proposed** (review it in the PR); PR opened and merged at the user's request → next: **S15** (booking screens)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -251,6 +251,28 @@
     - Not run: Docker image builds, Compose and Playwright (no UI change; the web fixture now carries `templateId`). CI's E2E smoke runs Compose with migrations 0018–0019.
   - **Findings:** I first assumed barbers book on a 30-minute grid; the barber template uses 15. The api journey now uses the personal-trainer template (30). Drizzle 0.45 puts bound values in error messages, so any future logging of database errors must go through `redact`.
 
+- **S14 Phase 4a (2026-10-18):** design system, app shell, calendar day view ([ADR-0019](../adr/0019-design-system-and-app-shell.md), proposed). The user asked Claude to go ahead after the Session Brief without waiting, so the decisions below are Claude's recommendations, to review in the PR.
+  - **ui (new `@floty/ui`):**
+    - `tokens.ts` holds the approved tokens (light/dark, radii, tap target, 960 px) and `contrastRatio`.
+    - `theme.css` is the Tailwind v4 theme (CSS variables, `desk:` breakpoint, fonts, radii).
+    - Components: `Logo`/`Mark`, `Icon`, `Card`, `buttonClass`/`chipClass`.
+    - Tests: theme equals tokens; every text pair reaches AA in both themes.
+  - **web:**
+    - Tailwind v4 (CSS-first) and self-hosted Figtree and Bricolage Grotesque (Fontsource). The Phase 2 stylesheet now sits in `@layer base`, and its card layout applies only outside the shell.
+    - Route group `app/(app)` with the shell: bottom tabs on phones, sidebar from 960 px; Home, Calendar (with `calendar.read`), Team. Account and business are loaded once per request (`cache`).
+    - **Calendar day view** (`/calendar?date=&staff=`, read-only): one column per active staff member on the business's clock (wall-clock positions, clock-change days, midnight clipping), day navigation, staff filter chips and a now-line. Owners and managers see bookings in full (client, service, time, done/no-show, "outside the usual hours"); staff see their own in full and colleagues' as busy. Client names come from one `GET /v1/clients/:id` per client of the day (at most 60). Notices appear when an answer is cut or fails.
+  - **contracts:** the time-zone helpers moved here from appointments (re-exported there, so the engine is unchanged). `MAX_LIST_ITEMS = 500` and `truncated` on the bookings, busy-time and availability responses.
+  - **db / appointments / api:** an optional `limit` on `listBookings`/`listOccupancy`, the services and `findAvailability`. The api asks for 501 and answers at most 500 with `truncated` (closes the S13 finding on response size).
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 374 (+19 time-zone tests moved from appointments), ui 58, templates 96, core 514, db 38, appointments 65, runtime 79, testing 13, api 196, web 116, worker 3. Coverage: ui 100% lines; web 100% lines; contracts 100%; api 97.7%; db 90.2%.
+    - `pnpm test:integration` green, 490 tests: db 303 (incl. the `limit` on occupancy and bookings), appointments 70 (incl. limits on bookings, busy times and availability), core 58, api 56, runtime 2, testing 1. The first run found one api test still expecting the old response shape (no `truncated`); its expectation was updated.
+    - Playwright: all 28 green (phone and desktop), incl. the new calendar journey. They ran against api, worker and web started with `pnpm` on the Compose Postgres, Redis and Mailpit, because `docker build` cannot reach npm through this sandbox's proxy (as in earlier sessions). The dev-setup doc now describes this way.
+    - Visual check: screenshots of the calendar (phone and desktop, light and dark) and the team page.
+  - **Not done / for later:**
+    - Docker image builds and Compose: not run here; CI runs them.
+    - A staff-member Playwright journey (busy blocks): covered by unit tests and the api's AC-W9-1 tests; add it with the S15 booking screens, which need the invite flow anyway.
+    - A batch client lookup: wait for S16.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -351,19 +373,28 @@
   - (3) **Schema tests now; onboarding fixtures in Phase 9 and eval sets in Phase 6**, for all eight templates.
   - (4) **Claude drafts the template content** (menus, durations, prices, rules); the user reviews it in the PR.
 - **S13 defaults — ADR-0018, accepted by the user (2026-10-18, "all good"):** rule defaults reach the appointments services through a lookup the api passes in; templates are parsed at load and frozen; `GET /v1/templates` needs a session but no business; autonomy defaults are empty in all eight templates (the platform's approved defaults apply); no template caps bookings per day; the nine autonomy actions and their tiers as listed in `trust.ts`.
+- **S14 (2026-10-18): the user said "give me the Session Brief, then continue"** and asked for the PR to be opened and merged at the end. Claude went ahead on its recommendations, to be confirmed or changed in review:
+  - **Phase 4 split** into S14–S18 (see Planned sessions).
+  - **Tailwind v4 + self-hosted fonts**, Radix only when a screen needs a dialog or menu (ADR-0019).
+  - **Response caps**: 500 items with `truncated`, not pagination.
+  - **Booking outcomes (open question 1 below):** Claude recommends (b), and S15 builds (b) unless the user says otherwise.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
 1. **Product question from the security review:** today a booking's outcome can be changed again after the fact (`completed` ↔ `no_show`, or either → `cancelled`), by staff too on their own bookings; only `cancelled` is final. Options: (a) keep it (fixes mistakes easily; audited); (b) make `completed`/`no_show` final for staff, owners and managers may still correct them (recommended, before payments and commissions arrive); (c) final for everyone.
-   Not answered explicitly at the S13 merge ("all good"); confirm at the S14 Session Brief before the Phase 4 booking screens.
+   Not answered at S13 or S14. **S15 builds (b) by default**; answer at the S15 Session Brief to change it.
 2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phase 2 (S6–S9) and Phase 3 (S10–S13) are done and merged. Phase 4 (PWA + booking page) is split into sessions at its first Session Brief.
+Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S14–S18 (Claude's proposal at S14, with the go-ahead to continue; change it at any Session Brief).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S14 | **Phase 4 start:** split Phase 4 into sessions with the user, then the first one (proposed: design system + app shell + calendar screen on the S10–S12 api, with staff client lookup by exact email/phone and response caps on availability/bookings/busy) | 4 | Phase 4 plan approved; first session's ACs green |
+| S14 | ~~Design system + app shell + calendar day view; response caps~~ **done** | 4a | — |
+| S15 | **Booking screens:** create a booking from the calendar (service, staff member, free times from `/v1/availability`, client picker; staff find clients by exact email or phone), the booking sheet (details, move, status, cancel) with Radix dialogs, the 409 alternatives, the waitlist entry; booking outcomes rule (b) unless the user says otherwise; staff journey in Playwright | 4b | Playwright "manual booking" (owner and staff) green; AC-W9-1 in the UI |
+| S16 | **Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system | 4c | Playwright "setup" journey: a new owner sets up services, staff and hours without the api |
+| S17 | **Public booking page with email verification:** the business's own brand color (PCR-001), service → staff → time → details → email code → confirmation with reschedule/cancel links. Needs an email sender before Phase 5's outbox (decide at the brief: dev Mailpit sender now, outbox later) | 4d | AC-W8-2; Playwright public booking |
+| S18 | **Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17 | 4e | Phase 4 exit criteria green; no open high-severity findings |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

@@ -98,6 +98,12 @@ export type Booking = z.infer<typeof BookingSchema>;
 /** The longest range one bookings, busy-time or availability query may cover. */
 export const MAX_QUERY_RANGE_DAYS = 62;
 
+/**
+ * The most bookings, busy times or start times one answer carries, earliest first. A longer
+ * answer is cut there and says `truncated: true`: ask again from the last one's start.
+ */
+export const MAX_LIST_ITEMS = 500;
+
 const RangeShape = { from: UtcDateTimeSchema, to: UtcDateTimeSchema };
 
 /** Checks a query's `from`–`to`: `to` after `from`, at most `MAX_QUERY_RANGE_DAYS` apart. */
@@ -128,7 +134,11 @@ export const BookingsQuerySchema = z
   .superRefine(checkRange);
 export type BookingsQuery = z.input<typeof BookingsQuerySchema>;
 
-export const BookingsResponseSchema = z.object({ bookings: z.array(BookingSchema) });
+export const BookingsResponseSchema = z.object({
+  bookings: z.array(BookingSchema).max(MAX_LIST_ITEMS),
+  /** More bookings exist in the range after the last one (see `MAX_LIST_ITEMS`). */
+  truncated: z.boolean(),
+});
 export type BookingsResponse = z.infer<typeof BookingsResponseSchema>;
 
 /**
@@ -153,7 +163,11 @@ export const BusyQuerySchema = z
   .superRefine(checkRange);
 export type BusyQuery = z.input<typeof BusyQuerySchema>;
 
-export const BusyResponseSchema = z.object({ busy: z.array(BusyTimeSchema) });
+export const BusyResponseSchema = z.object({
+  busy: z.array(BusyTimeSchema).max(MAX_LIST_ITEMS),
+  /** More busy times exist in the range after the last one (see `MAX_LIST_ITEMS`). */
+  truncated: z.boolean(),
+});
 export type BusyResponse = z.infer<typeof BusyResponseSchema>;
 
 /** A start time the service can be booked at, with one staff member. */
@@ -178,7 +192,11 @@ export const AvailabilityQuerySchema = z
   .superRefine(checkRange);
 export type AvailabilityQueryInput = z.input<typeof AvailabilityQuerySchema>;
 
-export const AvailabilityResponseSchema = z.object({ slots: z.array(AvailableSlotSchema) });
+export const AvailabilityResponseSchema = z.object({
+  slots: z.array(AvailableSlotSchema).max(MAX_LIST_ITEMS),
+  /** More start times exist in the range after the last one (see `MAX_LIST_ITEMS`). */
+  truncated: z.boolean(),
+});
 export type AvailabilityResponse = z.infer<typeof AvailabilityResponseSchema>;
 
 /** How many nearby start times a refused booking offers instead (AC-W2-1). */

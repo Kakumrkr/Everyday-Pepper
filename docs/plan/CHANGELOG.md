@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.9 — 2026-10-18
+- S13 (Phase 3d): [ADR-0018](../adr/0018-industry-templates.md) accepted; **Phase 3 complete**.
+- Session plan: Phase 4 split into **S14** (design system, app shell, calendar day view), **S15** (booking screens), **S16** (clients, services, team screens), **S17** (public booking page + email verification), **S18** (Phase 4 exit). Proposed by Claude at S14, which the user asked to go ahead with. No change to phases, scope or exit criteria.
+- S14 (Phase 4a): [ADR-0019](../adr/0019-design-system-and-app-shell.md) (proposed): `@floty/ui` with Tailwind v4 as planned, self-hosted fonts, the app shell, time-zone helpers shared through contracts, and a 500-item cap with `truncated` on the bookings, busy-time and availability answers (additive contract change, closes the S13 finding).
+
 ## 0.8 — 2026-10-17
 - S12 (Phase 3c): [ADR-0017](../adr/0017-bookings-clients-and-waitlist.md) (accepted by the user): bookings with a `booking_occupancy` exclusion constraint (buffers included), staff-scoped RLS (AC-W9-1), statuses `confirmed`/`completed`/`no_show`/`cancelled`, owner/manager override, alternatives for refused times, idempotency keys; a minimal `clients` table in core; the waitlist model and API. Decided by the user at the S12 Session Brief: clients table now, occupancy table, no "pending", the override, the waitlist window format and its API. Data model: "Customer" is named "client" (as the permissions and UI already were), and booking sources `owner`/`staff` became `team`. No change to phases, scope or exit criteria. After S12 the user chose: staff may find any client by exact email or phone (built in Phase 4); staff still cannot add clients.
 

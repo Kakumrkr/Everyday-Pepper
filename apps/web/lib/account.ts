@@ -47,7 +47,7 @@ export async function loadAccount(options: ApiCallOptions): Promise<Account> {
 }
 
 /** A JSON body from the api, or `null` if the api refuses, fails or answers something else. */
-async function loadJson<T extends z.ZodType>(
+export async function loadJson<T extends z.ZodType>(
   path: string,
   schema: T,
   options: ApiCallOptions,
@@ -83,6 +83,7 @@ export const ROUTES = {
   twoFactor: '/security/two-factor',
   invite: '/invite',
   team: '/team',
+  calendar: '/calendar',
   home: '/',
 } as const;
 
