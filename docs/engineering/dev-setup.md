@@ -49,6 +49,12 @@ Run `pnpm check` before every push.
 - **Team and audit log (S8, [ADR-0013](../adr/0013-roles-audit-log-and-metering.md)):** `GET /v1/members`, `PATCH /v1/members/:userId` `{ role }`, `DELETE /v1/members/:userId` (your own id: leave the business), `GET /v1/audit-log?limit=&before=`. Managers, like owners, must set up two-step verification. One account can own at most 5 businesses. There is no invite flow until S9; to add a member locally, insert a `memberships` row as the owner (`docker compose exec postgres psql -U floty`).
 - **`.pnpmfile.cjs`** trims better-auth's optional framework peers, which pnpm would otherwise install into the api image. Change it if we start using another Better Auth integration.
 - **Object storage is not in Compose yet.** MinIO no longer publishes community images; the replacement is SeaweedFS ([ADR-0011](../adr/0011-dev-object-storage-seaweedfs.md)), added in Phase 4 when the first feature needs storage.
+- **Screens and styling (S14, [ADR-0019](../adr/0019-design-system-and-app-shell.md)):**
+  - Tailwind v4 with the theme from `@floty/ui/theme.css` (colors such as `bg-surface`, `text-ink-2`, `bg-brand-soft`; `font-display`; radii `rounded-sm/md/lg`; the `desk:` breakpoint at 960 px). Colors come only from the tokens in `packages/ui/src/tokens.ts`; a new one needs a token, and the contrast test checks it.
+  - Signed-in screens live in the route group `apps/web/app/(app)` and get the app shell (bottom tabs, sidebar from 960 px). Pages outside it (sign-in, setup) keep the centered card.
+  - Fonts are self-hosted (Fontsource); the build needs no request to Google.
+  - Calendar: http://localhost:3000/calendar (`?date=YYYY-MM-DD&staff=<id>`). Services, staff and bookings are made through the api until their screens arrive (S15–S16).
+- **Playwright without Docker images** (when `docker build` cannot reach npm): `docker compose up -d --wait postgres redis mailpit`, `cp .env.example .env`, `pnpm db:migrate`, `pnpm build`, then start the api (`node --env-file=../../.env --import ./dist/instrument.js dist/main.js` in `apps/api`) and the web app (`API_INTERNAL_URL=http://localhost:4000 pnpm --filter @floty/web start`), and run `pnpm --filter @floty/e2e test:e2e`.
 - **Playwright with a preinstalled browser** (e.g. a sandbox without browser downloads): set `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome`.
 - **Claude Code cloud sessions** run `.claude/hooks/session-start.sh` at start-up (registered in `.claude/settings.json`): `pnpm install` and, if needed, start `dockerd`. Unit tests, lint and integration tests work right away; it does nothing outside cloud sessions.
 - **Docker build behind a TLS-inspecting proxy** (some cloud dev sandboxes): the build container needs the proxy CA and `HTTPS_PROXY`; CI and normal machines need nothing extra. If `docker info` says the daemon is not running, start `dockerd` first (integration tests need it too).
@@ -63,6 +69,7 @@ packages/
   modules/
     appointments/  L2 appointments module: services, staff, hours, time off, rules, availability, bookings, waitlist (@floty/appointments)
   templates/   L3 industry templates, data only; imported by apps only (@floty/templates)
+  ui/          design system: tokens (light/dark), Tailwind theme, shared React components; imported by apps only (@floty/ui)
   runtime/     process wiring shared by api + worker: config, logging, telemetry, health, connections (@floty/runtime)
   testing/     test-only helpers: Testcontainers Postgres/Redis, recording HTTP server (@floty/testing)
 apps/
@@ -71,7 +78,7 @@ apps/
   web/         Next.js PWA + booking page (@floty/web)
 e2e/           Playwright tests against a running stack (@floty/e2e)
 ```
-Planned packages (more `modules/*`, `ai`, `integrations`, `ui`) follow `../architecture/overview.md` and `../plan/dependency-map.md`.
+Planned packages (more `modules/*`, `ai`, `integrations`) follow `../architecture/overview.md` and `../plan/dependency-map.md`.
 
 ## Conventions
 - **ESM + TypeScript strict** (`packages/config/tsconfig.base.json`): `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`. Relative imports use the `.js` extension (NodeNext).

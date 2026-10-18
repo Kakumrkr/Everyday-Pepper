@@ -4,7 +4,7 @@ Use this before any change: find the part you're changing, then check everything
 
 | Part | Depends on | Consumed by |
 |---|---|---|
-| **contracts** (Zod schemas, events, cards) | — | everything |
+| **contracts** (Zod schemas, events, cards; S14: the time-zone helpers `toZoned`/`fromZoned`/… moved here from appointments, and `MAX_LIST_ITEMS` with `truncated` on the bookings, busy-time and availability answers) | — | everything |
 | **db** (`@floty/db`: Drizzle schema incl. Better Auth's global tables, SQL migrations + migrate CLI, roles, RLS incl. the restrictive `member_scope` policies (S12), `withTenant`/`withUser`/`withMember`, repositories, `authDatabaseAdapter`, readiness probe) | contracts, Postgres, better-auth (Drizzle adapter only) | core, modules, ai, runtime, apps/api (migrate CLI in the image), worker |
 | **core: tenancy/auth/RBAC** (`decideTenantAccess`, owners and managers need MFA; S8: `PERMISSION_MATRIX`/`can`, `decideMembershipChange`, team services `listMembers`/`changeMemberRole`/`removeMember`, `createBusiness` with the per-owner limit; S9: `permissionsOf` for the UI) | db, contracts | every API endpoint, AI tools, worker, web (`roleRequiresMfa` from contracts) |
 | **api: auth** (`apps/api/src/auth`: Better Auth at `/api/auth`, `AuthService`, `SessionGuard`/`TenantGuard` (+ `@RequirePermission`)/`SameOriginGuard`; `/v1/me`, `/v1/tenants`, `/v1/tenant`) | db, core, contracts, runtime, better-auth | every tenant-scoped endpoint, web, e2e |
@@ -27,8 +27,8 @@ Use this before any change: find the part you're changing, then check everything
 | **integrations/google-calendar** | OAuth tokens, worker, appointments | availability (busy blocks), bookings (outbound) |
 | **runtime** (Nest process wiring: config, redacting logger, request ids, OTel tracing, Sentry errors, health, connections incl. the `DATABASE` handle; `./instrument` preload entry) | contracts, core, db, NestJS, pino, OpenTelemetry, Sentry | apps/api, apps/worker |
 | **testing** (test-only: Testcontainers Postgres/Redis using the Compose images, recording HTTP server, `postgresUrlAs`, RFC 6238 `totpCode`) | Testcontainers, docker-compose.yml | integration tests of db, runtime, apps; e2e (devDependency only) |
-| **ui** (design system, cards) | contracts (card schemas) | web app, booking page |
-| **apps/web** (S7: forwards `/api/auth/*` and `/v1/*` to the api; sign-in, sign-up, MFA setup, create business; S9: Team screen, invite page) | ui, API client (contracts), api (forwarding) | users |
+| **ui** (`@floty/ui`, S14, ADR-0019: tokens as the source of truth with a contrast test, `theme.css` for Tailwind v4, `Logo`/`Icon`/`Card`, `buttonClass`/`chipClass`; cards in Phase 6) | contracts (card schemas) | web app, booking page |
+| **apps/web** (S7: forwards `/api/auth/*` and `/v1/*` to the api; sign-in, sign-up, MFA setup, create business; S9: Team screen, invite page; S14: app shell route group `(app)`, calendar day view on `/v1/staff`, `/v1/services`, `/v1/bookings`, `/v1/calendar/busy`, `/v1/clients/:id`) | ui, API client (contracts), api (forwarding) | users |
 | **apps/api** | core, modules, ai, runtime | web, booking page, webhooks, e2e |
 | **apps/worker** | core, modules, integrations, runtime | jobs, e2e |
 

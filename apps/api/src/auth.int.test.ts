@@ -1139,8 +1139,14 @@ describe('clients, bookings and the waitlist (ADR-0017)', () => {
 
   it("another business's owner finds none of it (AC-X-1)", async () => {
     const query = `from=${day.from}&to=${day.to}`;
-    expect((await dev.get(`/v1/bookings?${query}`).expect(200)).body).toEqual({ bookings: [] });
-    expect((await dev.get(`/v1/calendar/busy?${query}`).expect(200)).body).toEqual({ busy: [] });
+    expect((await dev.get(`/v1/bookings?${query}`).expect(200)).body).toEqual({
+      bookings: [],
+      truncated: false,
+    });
+    expect((await dev.get(`/v1/calendar/busy?${query}`).expect(200)).body).toEqual({
+      busy: [],
+      truncated: false,
+    });
     expect((await dev.get('/v1/clients').expect(200)).body).toEqual({ clients: [] });
     expect((await dev.get('/v1/waitlist?all=true').expect(200)).body).toEqual({ entries: [] });
     const probes = [
