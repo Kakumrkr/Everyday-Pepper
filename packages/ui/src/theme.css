@@ -1,0 +1,97 @@
+/*
+ * Floty theme for Tailwind v4 (import after `tailwindcss`). The color values mirror
+ * src/tokens.ts, the source of truth; theme.test.ts keeps them in step. Light and dark follow
+ * the system setting.
+ */
+
+:root {
+  color-scheme: light dark;
+  --bg: #fff8f7;
+  --surface: #ffffff;
+  --surface-2: #fbeeec;
+  --line: #eedcd9;
+  --ink: #2b1b24;
+  --ink-2: #6a5560;
+  --brand: #be2759;
+  --brand-strong: #b01f52;
+  --brand-soft: #fde5ed;
+  --on-brand: #ffffff;
+  --ok: #23703a;
+  --ok-soft: #e2f2e5;
+  --wait: #8f4c00;
+  --wait-soft: #ffefd6;
+  --info: #1d65a8;
+  --info-soft: #e2eefa;
+  --danger: #b3261e;
+  --s1: #fce3ec;
+  --s1-ink: #8e1d47;
+  --s2: #daf2eb;
+  --s2-ink: #0d5e4f;
+  --s3: #ffefc7;
+  --s3-ink: #7a4f00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161015;
+    --surface: #211820;
+    --surface-2: #2b2029;
+    --line: #3b2d38;
+    --ink: #f8ecf1;
+    --ink-2: #bda8b3;
+    --brand: #ff7fa8;
+    --brand-strong: #ff8fb3;
+    --brand-soft: #46202f;
+    --on-brand: #2a0d19;
+    --ok: #7fd69a;
+    --ok-soft: #1d3324;
+    --wait: #ffc274;
+    --wait-soft: #3a2a12;
+    --info: #8cc2f5;
+    --info-soft: #172b3e;
+    --danger: #ffb4ab;
+    --s1: #4a2032;
+    --s1-ink: #ffc2d6;
+    --s2: #173a33;
+    --s2-ink: #a6ebd9;
+    --s3: #3d3012;
+    --s3-ink: #ffde8a;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-wait: var(--wait);
+  --color-wait-soft: var(--wait-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-danger: var(--danger);
+  --color-s1: var(--s1);
+  --color-s1-ink: var(--s1-ink);
+  --color-s2: var(--s2);
+  --color-s2-ink: var(--s2-ink);
+  --color-s3: var(--s3);
+  --color-s3-ink: var(--s3-ink);
+}
+
+@theme {
+  --font-sans: 'Figtree Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display:
+    'Bricolage Grotesque Variable', 'Figtree Variable', system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --breakpoint-desk: 60rem;
+}

@@ -1,0 +1,12 @@
+{
+  "extends": "@floty/config/tsconfig.lib.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"],
+    "jsx": "react-jsx",
+    "rootDir": "src",
+    "outDir": "dist",
+    "customConditions": []
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}
