@@ -256,7 +256,7 @@ export async function listBusyTimes(
 /**
  * Moves a booking (same client and service; optionally to another staff member who offers
  * it) or changes its status. A cancelled booking is final; completed and no-show need the
- * appointment to have started.
+ * appointment to have started, and only owners and managers may change them afterwards.
  */
 export async function changeBooking(
   db: Database,
@@ -272,7 +272,10 @@ export async function changeBooking(
   if ('status' in parsed) {
     return withMember(db, actor.context, async (tx) => {
       const { row } = await lockOwnBooking(tx, actor, id);
-      if (!canChangeStatus(BookingStatusSchema.parse(row.status), parsed.status)) {
+      const correctsOutcomes = permissionScope(actor.context.role, 'bookings.manage') === 'all';
+      if (
+        !canChangeStatus(BookingStatusSchema.parse(row.status), parsed.status, correctsOutcomes)
+      ) {
         throw new BookingNotChangeableError();
       }
       if (statusNeedsStart(parsed.status) && row.startsAt.getTime() > now) {

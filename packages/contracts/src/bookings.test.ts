@@ -76,11 +76,21 @@ describe('BookingChangeSchema', () => {
 describe('status rules', () => {
   const statuses = BookingStatusSchema.options;
 
-  it('a cancelled booking is final; anything else may change to another status', () => {
+  it('owners and managers: a cancelled booking is final; anything else may change', () => {
     for (const from of statuses) {
       for (const to of statuses) {
-        expect(canChangeStatus(from, to), `${from} → ${to}`).toBe(
+        expect(canChangeStatus(from, to, true), `${from} → ${to}`).toBe(
           from !== 'cancelled' && from !== to,
+        );
+      }
+    }
+  });
+
+  it('staff: completed and no-show are final too; a confirmed booking may still change', () => {
+    for (const from of statuses) {
+      for (const to of statuses) {
+        expect(canChangeStatus(from, to, false), `${from} → ${to}`).toBe(
+          from === 'confirmed' && to !== 'confirmed',
         );
       }
     }

@@ -557,6 +557,20 @@ describe('changeBooking', () => {
       changeBooking(db, b.owner, booking.id, { startsAt: tue('15:00') }, { clock: b.clock }),
     ).rejects.toBeInstanceOf(BookingNotChangeableError);
   });
+
+  it('staff record completed or no-show once; only owners and managers correct it', async () => {
+    const b = await newBusiness();
+    await introduce(b);
+    const booking = await book(b, b.staff, request(b, tue('10:00')));
+    b.clock.set(tue('11:00'));
+    const status = (actor: Actor, to: 'completed' | 'no_show' | 'cancelled') =>
+      changeBooking(db, actor, booking.id, { status: to }, { clock: b.clock });
+    expect((await status(b.staff, 'no_show')).status).toBe('no_show');
+    await expect(status(b.staff, 'completed')).rejects.toBeInstanceOf(BookingNotChangeableError);
+    await expect(status(b.staff, 'cancelled')).rejects.toBeInstanceOf(BookingNotChangeableError);
+    expect((await status(b.manager, 'completed')).status).toBe('completed');
+    expect((await status(b.owner, 'cancelled')).status).toBe('cancelled');
+  });
 });
 
 describe('clients', () => {
