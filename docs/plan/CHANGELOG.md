@@ -2,6 +2,9 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.10 — 2026-10-18
+- [PCR-002](changes/PCR-002.md): the product is renamed from **Floty** to **Pepper** everywhere (UI, docs, mockup, `@pepper/*` packages, database roles and names, cookies, telemetry), and the theme is **Pepper green + chili accent** (new `accent` tokens; "done" teal; plum sample business). No change to phases, scope or exit criteria.
+
 ## 0.9 — 2026-10-18
 - S13 (Phase 3d): [ADR-0018](../adr/0018-industry-templates.md) accepted; **Phase 3 complete**.
 - Session plan: Phase 4 split into **S14** (design system, app shell, calendar day view), **S15** (booking screens), **S16** (clients, services, team screens), **S17** (public booking page + email verification), **S18** (Phase 4 exit). Proposed by Claude at S14, which the user asked to go ahead with. No change to phases, scope or exit criteria.

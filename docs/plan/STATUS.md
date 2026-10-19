@@ -1,12 +1,12 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-18 · **Plan version:** 0.9 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. **S14 (Phase 4a: design system + app shell + calendar day view) done**, ADR-0019 **proposed** (review it in the PR); PR opened and merged at the user's request → next: **S15** (booking screens)
+**Last updated:** 2026-10-19 · **Plan version:** 0.10 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. **S14 (Phase 4a: design system + app shell + calendar day view) done**, ADR-0019 **proposed** (review it in the PR); PR opened and merged at the user's request. Then, in the same session, **renamed Floty → Pepper and switched to the Pepper green + chili theme** ([PCR-002](changes/PCR-002.md)) → next: **S15** (booking screens), unchanged
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
 - Competitor audit v0.1 (`docs/research/competitor-audit.md`).
 - ADR-0001…0008 **accepted** (incl. Better Auth for auth, Drizzle for the database layer).
-- Working name chosen: **Pepper**.
+- Working name chosen: **Floty**, renamed to **Pepper** on 2026-10-18 ([PCR-002](changes/PCR-002.md)).
 - **S1 Mockups part 1 (2026-10-16):** clickable prototype `docs/mockups/pepper-prototype.html` with Home/operator feed, Chat with cards, Calendar (day/week), a design-direction page, and placeholders for part 2. Phone + desktop layouts, light + dark. Preview: https://claude.ai/artifact/WNTU3YyQgBjJvCC9hxHqS1. **User approved part 1 with no changes.** Checks: Playwright click-through (112 assertions, 4 viewport/theme combos) and WCAG AA token contrast, both passing (`docs/mockups/checks/`).
 
 - **S2 Mockups part 2 (2026-10-16):** added Clients + client profile, What I know (add/edit/delete with Undo; deleting the PPD allergy removes it everywhere), Autonomy (per-action dial, bulk "Just do it" locked), Team & services (roles, invite, menu), full-screen Onboarding (type → source → review → optional CSV import → link + Google Calendar) and the public Booking page (business-branded, stylist photo placeholders, prices, email code, "slot just taken" alternatives). Same preview link. Checks: 260 Playwright assertions across 4 viewport/theme combos + WCAG AA contrast (incl. new `danger` and `biz` tokens), all passing.
@@ -273,15 +273,24 @@
     - A staff-member Playwright journey (busy blocks): covered by unit tests and the api's AC-W9-1 tests; add it with the S15 booking screens, which need the invite flow anyway.
     - A batch client lookup: wait for S16.
 
+- **S14 follow-up: rename + theme (2026-10-18/19, [PCR-002](changes/PCR-002.md), approved by the user):**
+  - **Rename Floty → Pepper everywhere:** wordmark and page titles, docs, the mockup (`docs/mockups/pepper-prototype.html`), package scope `@pepper/*`, database roles `pepper_app` / `pepper_service` and the `pepper` dev database (migrations 0000 and 0007 edited in place), the migration advisory lock key ("pepper" in ASCII), cookie prefix `pepper.*`, 2-step login issuer `Pepper`, telemetry service names, Docker image and Compose project names, the `pepper.app/<business>` hint (display only, domain not registered).
+  - **Theme "A. Pepper green + chili accent":** pepper-green brand and green-leaning neutrals; new `accent` / `accent-soft` / `on-accent` (chili) for the mark and Pepper's own voice, never for status; "done" is teal, `danger` a deeper crimson; staff tints green / coral / amber; sample business color plum. New mark: chili speech bubble with a face and a green stem (ui `Logo`, favicon, mockup). Default staff color is now the brand green `#2a7230`.
+  - **Checks run:**
+    - Baseline before the change: `pnpm check` and `pnpm test:integration` (490) green. Docker had stopped in the sandbox and was restarted first.
+    - After: `pnpm check` green (ui 68 tests, +10 for the accent pairs; every other count unchanged). `pnpm test:integration` green, 490. Playwright 28/28 against api, worker and web on the renamed Compose infra. Mockup: contrast check all AA (now with `accent`), click-through 260/260 in 4 viewport/theme combos. `docker compose config` valid. Screenshots of the mockup and the sign-in page in light and dark.
+    - "Floty" now appears only in the notes that record the rename (STATUS, PCR-002, CHANGELOG, the rebuild note in `dev-setup.md`).
+  - **For you:** rebuild your local dev database once (`docker compose down --volumes`, then start as usual) and copy the new database names from `.env.example` into your `.env`. The old preview link of the mockup shows the old look until it is republished.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
 - **OpenAI cost:** $0 until Phase 6 (tests use a fake provider). At Phase 6 either add ~$5–10 credit with a hard monthly limit (recommended) or develop on a free local/free-tier model via the provider adapter and run evals on OpenAI before pilot.
 - **Sessions:** one feature-sized goal per session; every session starts with a Session Brief (see `CLAUDE.md`) and ends by updating this file.
 - **Mockups approved to start:** all 7 key screens, as a clickable HTML prototype, branded Pepper, warm & friendly, mobile-first.
-- **Design direction approved by the user (S1 feedback: "all good", no changes):** raspberry brand (`#BE2759`/`#B01F52`) on warm neutrals, separate status colors (fern/amber/lake), Bricolage Grotesque (display) + Figtree (body), speech-bubble-with-a-face mark, lowercase "pepper" wordmark. Details in `docs/mockups/README.md`. Avoided the generic cream + terracotta + serif look on purpose.
+- **Design direction approved by the user (S1 feedback: "all good", no changes):** raspberry brand (`#BE2759`/`#B01F52`) on warm neutrals, separate status colors (fern/amber/lake), Bricolage Grotesque (display) + Figtree (body), speech-bubble-with-a-face mark, lowercase wordmark. **Colors superseded on 2026-10-18 by the Pepper green + chili theme ([PCR-002](changes/PCR-002.md)); type, shape and voice unchanged.** Details in `docs/mockups/README.md`. Avoided the generic cream + terracotta + serif look on purpose.
 - **S2 decisions (user, 2026-10-16):** booking page shows prices and stylist photos (placeholders in the mockup); onboarding includes an optional client-import step (Vagaro/Fresha/Square/Booksy/CSV).
-- **Booking page uses the business's own brand color** (`biz` tokens; Pepper raspberry only in the "Booking by pepper" footer). Owners pick that color in onboarding (PCR-001, approved).
+- **Booking page uses the business's own brand color** (`biz` tokens; Pepper's own colors only in the "Booking by pepper" footer). Owners pick that color in onboarding (PCR-001, approved).
 - **Autonomy defaults approved:** create booking = Ask me; move/accept page requests/block/notes = Do it and tell me; confirmations & reminders = Just do it; rebooking nudges & waitlist offers = Ask me; bulk (>10) = Ask me, "Just do it" locked.
 - **Prototype sample business:** Juniper Hair Studio (salon template: "client", "stylist"); owner Ana Reyes; stylists Jess, Marco, Priya; mock "today" = Thu Oct 15 2026.
 - **Branch workflow (S3, user):** `main` is the integration branch (created from `ea2a951`). Each session works on a `claude/*` branch and opens a PR into `main`; the user reviews and merges; head branches are deleted after merge. The S1/S2 work had lived on `claude/sharp-noether-re1wo9`, which was never merged — always start a session from `main`.
@@ -334,7 +343,7 @@
   - Time off is UTC with no reason field, visible to the whole team.
   - No delete endpoints yet (deactivate instead).
   - Staff names stay out of the audit log, so a name-only change is not audited.
-  - Default staff colour is the raspberry brand colour.
+  - Default staff colour is the brand colour (pepper green `#2a7230` since PCR-002).
 - **S11 decisions (user, 2026-10-17, S11 Session Brief):**
   - (1) **Store rules now** (table, RLS, `GET/PUT /v1/rules`), not just the pure engine.
   - (2) **Time zones with the built-in `Intl`**, no date library; fast-check only as a dev dependency.
@@ -373,6 +382,7 @@
   - (3) **Schema tests now; onboarding fixtures in Phase 9 and eval sets in Phase 6**, for all eight templates.
   - (4) **Claude drafts the template content** (menus, durations, prices, rules); the user reviews it in the PR.
 - **S13 defaults — ADR-0018, accepted by the user (2026-10-18, "all good"):** rule defaults reach the appointments services through a lookup the api passes in; templates are parsed at load and frozen; `GET /v1/templates` needs a session but no business; autonomy defaults are empty in all eight templates (the platform's approved defaults apply); no template caps bookings per day; the nine autonomy actions and their tiers as listed in `trust.ts`.
+- **Rename + theme (user, 2026-10-18, after S14):** rename Floty → Pepper everywhere and use theme "A. Pepper green + chili accent" (the user's pick), only those two things, in this session; S15 and the rest of the plan stay as planned. Decisions: edit the first migrations in place and rebuild local databases (no rename migration); teal "done", chili as an accent only, plum sample business; `pepper.app` in the address hint. Recorded in [PCR-002](changes/PCR-002.md).
 - **S14 (2026-10-18): the user said "give me the Session Brief, then continue"** and asked for the PR to be opened and merged at the end. Claude went ahead on its recommendations, to be confirmed or changed in review:
   - **Phase 4 split** into S14–S18 (see Planned sessions).
   - **Tailwind v4 + self-hosted fonts**, Radix only when a screen needs a dialog or menu (ADR-0019).
