@@ -19,6 +19,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   anotherPerson,
   callApi,
+  hydrated,
   onboardOwner,
   ownClientAddress,
   signUp,
@@ -93,7 +94,7 @@ function sheet(page: Page): Locator {
 }
 
 async function openNewBooking(page: Page): Promise<Locator> {
-  await page.getByRole('button', { name: 'New booking' }).click();
+  await (await hydrated(page.getByRole('button', { name: 'New booking' }))).click();
   const dialog = sheet(page);
   await expect(dialog.getByRole('heading', { name: 'New booking' })).toBeVisible();
   return dialog;
@@ -201,7 +202,9 @@ test('an owner books from the calendar: free times, a taken time with alternativ
     BookingSchema,
   );
   await page.goto(`/calendar?date=${formatDate(yesterday)}`);
-  await page.getByRole('region', { name: 'Jess' }).getByTestId('booking-block').click();
+  await (
+    await hydrated(page.getByRole('region', { name: 'Jess' }).getByTestId('booking-block'))
+  ).click();
   await sheet(page).getByRole('button', { name: 'Mark done' }).click();
   await expect(sheet(page)).toBeHidden();
   await expect(page.getByTestId('booking-block')).toContainText('Done');
@@ -235,7 +238,7 @@ test('a staff member finds a client by exact phone and books for themselves; col
   await priya.getByRole('link', { name: 'Create an account' }).click();
   await signUp(priya, priyaEmail, { name: 'Priya', onPage: true });
   await expect(priya).toHaveURL(/\/invite$/);
-  await priya.getByRole('button', { name: `Join ${owner.business}` }).click();
+  await (await hydrated(priya.getByRole('button', { name: `Join ${owner.business}` }))).click();
   await expect(priya.getByTestId('business-role')).toHaveText('staff');
   const members = MembersResponseSchema.parse(
     await (await page.request.get('/v1/members')).json(),
@@ -309,7 +312,7 @@ test('a staff member finds a client by exact phone and books for themselves; col
   );
   await priya.goto(`/calendar?date=${formatDate(yesterday)}`);
   const block = priya.getByRole('region', { name: 'Priya' }).getByTestId('booking-block');
-  await block.click();
+  await (await hydrated(block)).click();
   await sheet(priya).getByRole('button', { name: 'No-show' }).click();
   await expect(sheet(priya)).toBeHidden();
   await expect(block).toContainText('No-show');

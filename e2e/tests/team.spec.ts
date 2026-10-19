@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import {
   anotherPerson,
   enterPassword,
+  hydrated,
   onboardOwner,
   ownClientAddress,
   setUpTwoFactor,
@@ -19,6 +20,7 @@ test.beforeEach(async ({ context }) => {
 
 /** On the team page: invites `email` as `role`; returns the link to share. */
 async function createInvite(page: Page, email: string, role: string): Promise<string> {
+  await hydrated(page.getByRole('button', { name: 'Create invite link' }));
   await page.getByLabel('Their email').fill(email);
   await page.getByRole('combobox', { name: 'Role', exact: true }).selectOption({ label: role });
   await page.getByRole('button', { name: 'Create invite link' }).click();
