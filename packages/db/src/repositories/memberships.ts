@@ -4,7 +4,7 @@ import {
   UserIdSchema,
   type MembershipRole,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { and, asc, count, eq, sql } from 'drizzle-orm';
 import { isUniqueViolation, MembershipExistsError } from '../errors.js';
 import { memberships, tenants, users, type Membership } from '../schema.js';

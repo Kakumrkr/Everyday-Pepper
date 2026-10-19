@@ -1,4 +1,4 @@
-import { buttonClass, Card, chipClass, Icon } from '@floty/ui';
+import { buttonClass, Card, chipClass, Icon } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -18,7 +18,7 @@ import { DayGrid, type CalendarColumn } from '../../_components/day-grid';
 import { currentAccount, currentBusiness, currentCalendarDay } from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Calendar · Floty' };
+export const metadata: Metadata = { title: 'Calendar · Pepper' };
 
 /**
  * The calendar's day view (S14, read-only): one column per staff member on the business's

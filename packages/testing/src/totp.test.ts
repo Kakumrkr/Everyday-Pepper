@@ -25,7 +25,7 @@ describe('totpCode', () => {
 
 describe('totpCodeFromUri', () => {
   it('reads the secret, digits and period from the URI', () => {
-    const uri = `otpauth://totp/Floty:ana%40example.test?secret=${RFC_SECRET}&issuer=Floty&digits=8&period=30`;
+    const uri = `otpauth://totp/Pepper:ana%40example.test?secret=${RFC_SECRET}&issuer=Pepper&digits=8&period=30`;
     expect(totpCodeFromUri(uri, new Date(59_000))).toBe('94287082');
     expect(totpCodeFromUri(uri.replace('&digits=8', ''), new Date(59_000))).toBe('287082');
   });

@@ -1,6 +1,6 @@
 'use client';
 
-import type { Business } from '@floty/contracts';
+import type { Business } from '@pepper/contracts';
 import { useMemo, useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
@@ -54,7 +54,7 @@ export function CreateBusinessForm() {
       <label>
         Booking link
         <span className="prefixed">
-          <span aria-hidden="true">floty.app/</span>
+          <span aria-hidden="true">pepper.app/</span>
           <input
             name="slug"
             required

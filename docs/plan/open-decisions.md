@@ -4,7 +4,7 @@ Resolved decisions move into an ADR (`../adr/`) and are logged in `CHANGELOG.md`
 
 | # | Decision | Recommendation | Needed by |
 |---|---|---|---|
-| D1 | Product name & brand | **Working name: Floty** (user, 2026-10-16). Confirm trademark/domain before pilot | Before pilot |
+| D1 | Product name & brand | **Working name: Pepper** (user, 2026-10-16). Confirm trademark/domain before pilot | Before pilot |
 | D2 | Auth solution | ✅ **Resolved: Better Auth** → [ADR-0007](../adr/0007-auth-better-auth.md) | — |
 | D3 | ORM / migrations | ✅ **Resolved: Drizzle** → [ADR-0008](../adr/0008-orm-drizzle.md) | — |
 | D4 | Email provider | Amazon SES (cheapest) vs Resend (simplest DX) — recommend Resend for pilot, SES at scale | Phase 5 |

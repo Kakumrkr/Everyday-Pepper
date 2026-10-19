@@ -91,7 +91,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Chromium
-        run: pnpm --filter @floty/e2e exec playwright install --with-deps chromium
+        run: pnpm --filter @pepper/e2e exec playwright install --with-deps chromium
 
       - name: Start the stack
         run: docker compose up --build --wait --wait-timeout 300

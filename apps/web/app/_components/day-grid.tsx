@@ -1,5 +1,5 @@
-import type { BookingStatus, CivilDate, StaffMember } from '@floty/contracts';
-import { cx } from '@floty/ui';
+import type { BookingStatus, CivilDate, StaffMember } from '@pepper/contracts';
+import { cx } from '@pepper/ui';
 import { hourLabel, layoutDay, timeRange } from '../../lib/calendar';
 
 export type CalendarEntry =

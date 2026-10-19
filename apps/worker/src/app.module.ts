@@ -1,4 +1,4 @@
-import { ConnectionsModule, HealthModule, type ServiceConfig } from '@floty/runtime';
+import { ConnectionsModule, HealthModule, type ServiceConfig } from '@pepper/runtime';
 import { Module, type DynamicModule } from '@nestjs/common';
 
 @Module({})

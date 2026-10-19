@@ -1,8 +1,8 @@
-# Floty mockups (Phase 0)
+# Pepper mockups (Phase 0)
 
 Clickable HTML prototype of the key V1 screens. It is a **design artefact, not product code**: sample data, no backend, nothing saved or sent. The production design system will be rebuilt in `packages/ui` (React + Tailwind) in Phase 4, using the tokens below once you approve them.
 
-- **Prototype:** [`floty-prototype.html`](floty-prototype.html) (published preview: https://claude.ai/artifact/WNTU3YyQgBjJvCC9hxHqS1, private to the owner)
+- **Prototype:** [`pepper-prototype.html`](pepper-prototype.html) (published preview: https://claude.ai/artifact/WNTU3YyQgBjJvCC9hxHqS1, private to the owner)
 - **Status:** Part 1 (S1) built and approved 2026-10-16. Part 2 (S2) built and approved 2026-10-16. **All key screens signed off.** Tokens are recorded in `docs/product/ux-principles.md`.
 
 ## What the prototype covers
@@ -17,32 +17,33 @@ Clickable HTML prototype of the key V1 screens. It is a **design artefact, not p
 ### Part 2
 | Screen | What you can try | Requirements shown |
 |---|---|---|
-| **Clients + client profile** | Search; profile with sensitive allergy banner, next visit, "What I know about Maria", contact, visit history; Book / Ask Floty from the profile; "View profile" from calendar bookings | W3, AC-W3-1, AC-W3-2 |
-| **What I know** | Facts about the business, clients and rules (sensitive / always applied / learned tags); add, edit, delete with an inline confirm and Undo. **Deleting Maria's PPD allergy removes it from the client list, profile, calendar flag, booking cards and Floty's answers** | W7, AC-W7-2 |
-| **Autonomy** | Ask me / Do it and tell me / Just do it per action, grouped by risk (look up · changes inside Floty · messages to clients). "Just do it" is locked for messages to more than 10 clients. Setting *Create a booking* to "Do it and tell me" makes the chat book Maria without a confirm card, with Undo | W7, AC-W2-2, AC-W7-3 |
+| **Clients + client profile** | Search; profile with sensitive allergy banner, next visit, "What I know about Maria", contact, visit history; Book / Ask Pepper from the profile; "View profile" from calendar bookings | W3, AC-W3-1, AC-W3-2 |
+| **What I know** | Facts about the business, clients and rules (sensitive / always applied / learned tags); add, edit, delete with an inline confirm and Undo. **Deleting Maria's PPD allergy removes it from the client list, profile, calendar flag, booking cards and Pepper's answers** | W7, AC-W7-2 |
+| **Autonomy** | Ask me / Do it and tell me / Just do it per action, grouped by risk (look up · changes inside Pepper · messages to clients). "Just do it" is locked for messages to more than 10 clients. Setting *Create a booking* to "Do it and tell me" makes the chat book Maria without a confirm card, with Undo | W7, AC-W2-2, AC-W7-3 |
 | **Team & services** | Team cards with photo placeholders, roles, hours, calendar status; invite a teammate (email validation, Staff/Manager role explained); service menu with durations, prices and who offers each | W9, AC-W9-1 |
 | **Onboarding** (full screen) | 1 business type (sets terminology) → 2 website / Google profile / price-list photo → reading progress → 3 review the draft (nothing saved until *Set it up*, untick services, estimated-time flag) → 4 optional client import from Vagaro / Fresha / Square / Booksy / CSV with an import report → 5 booking link + optional Google Calendar | W1, AC-W1-1, AC-W1-2, AC-W1-3 |
-| **Public booking page** (full screen, salon's own teal brand) | Service with prices → stylist (photo placeholders) or anyone → day + time → details (validated) → email code → confirmation with reschedule/cancel links. Picking **Fri 12:30** shows the "someone just booked it" case with the closest alternatives | W8, AC-W8-1, AC-W8-2 |
+| **Public booking page** (full screen, salon's own plum brand) | Service with prices → stylist (photo placeholders) or anyone → day + time → details (validated) → email code → confirmation with reschedule/cancel links. Picking **Fri 12:30** shows the "someone just booked it" case with the closest alternatives | W8, AC-W8-1, AC-W8-2 |
 
-Layouts: phone (bottom tabs + thumb-zone "Ask Floty" bar) and desktop ≥ 960 px (sidebar; Home gains a "today at a glance" rail). Light and dark themes follow the system, with a toggle under More / the sidebar.
+Layouts: phone (bottom tabs + thumb-zone "Ask Pepper" bar) and desktop ≥ 960 px (sidebar; Home gains a "today at a glance" rail). Light and dark themes follow the system, with a toggle under More / the sidebar.
 
-## Design direction (approved with part 1)
-- **Mark:** a speech bubble with a face. The product is someone you talk to. Wordmark: lowercase **floty** in Bricolage Grotesque ExtraBold.
+## Design direction (approved with part 1; Pepper green + chili accent since PCR-002, 2026-10-18)
+- **Mark:** a chili-red speech bubble with a face and a green pepper stem. The product is someone you talk to. Wordmark: lowercase **pepper** in Bricolage Grotesque ExtraBold.
 - **Type:** Bricolage Grotesque for display (headings, wordmark, big numbers) · Figtree for everything else (15 px base).
 - **Shape:** 24 px card radius, pill buttons and chips, 44 px minimum tap targets, shadows only on floating things (sheets, toasts, selected tab).
 - **Voice:** short, plain, first person; say what happened and what didn't ("I didn't email Sarah"). No exclamation marks, emoji or system jargon.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `brand` / `brand-strong` | `#BE2759` / `#B01F52` | `#FF7FA8` / `#FF8FB3` | Raspberry: links, primary buttons, selected nav |
-| `brand-soft` | `#FDE5ED` | `#46202F` | Blush highlights, briefing |
-| `bg` / `surface` / `surface-2` | `#FFF8F7` / `#FFFFFF` / `#FBEEEC` | `#161015` / `#211820` / `#2B2029` | Backgrounds |
-| `ink` / `ink-2` | `#2B1B24` / `#6A5560` | `#F8ECF1` / `#BDA8B3` | Text / secondary text |
-| `line` | `#EEDCD9` | `#3B2D38` | Borders |
-| `ok`, `wait`, `info` (+ `-soft`) | `#23703A`, `#8F4C00`, `#1D65A8` | `#7FD69A`, `#FFC274`, `#8CC2F5` | Done / Needs your OK / Tips. Kept separate from brand |
-| `s1`–`s3` (+ `-ink`) | pink, mint, butter tints | deep tints | Per-staff calendar colors |
-| `danger` | `#B3261E` | `#FFB4AB` | Form errors |
-| `biz` / `biz-strong` / `biz-soft` | `#0E6656` / `#0D5E4F` / `#DAF2EB` | `#6FD9C0` / `#7FE0C9` / `#173A33` | The business's own brand on its booking page (sample: Juniper teal). Replaces `brand` there |
+| `brand` / `brand-strong` | `#2A7230` / `#23652A` | `#86D28E` / `#97DB9E` | Pepper green: links, primary buttons, selected nav |
+| `brand-soft` | `#E2F0E0` | `#1B3320` | Sprout highlights, briefing |
+| `accent` / `accent-soft` / `on-accent` | `#C2361B` / `#FDE6DF` / `#FFFFFF` | `#FF8C70` / `#3D1E16` / `#2A0B04` | Chili: the mark, Pepper's own suggestions. Never a status color |
+| `bg` / `surface` / `surface-2` | `#F7FAF5` / `#FFFFFF` / `#EDF3EA` | `#0F1510` / `#172019` / `#202A22` | Backgrounds |
+| `ink` / `ink-2` | `#1B2A1E` / `#536257` | `#EAF3EA` / `#A7B7AA` | Text / secondary text |
+| `line` | `#DCE6D8` | `#2F3B31` | Borders |
+| `ok`, `wait`, `info` (+ `-soft`) | `#0B6B63`, `#8F4C00`, `#1D65A8` | `#6BD5C6`, `#FFC274`, `#8CC2F5` | Done (teal) / Needs your OK / Tips. Kept separate from brand and accent |
+| `s1`–`s3` (+ `-ink`) | green, coral, butter tints | deep tints | Per-staff calendar colors |
+| `danger` | `#9F1D2B` | `#FFB4AB` | Form errors (always with text) |
+| `biz` / `biz-strong` / `biz-soft` | `#7A3B8F` / `#6E3382` / `#F3E6F7` | `#DDA6F0` / `#E5B6F5` / `#3A2244` | The business's own brand on its booking page (sample: Juniper plum). Replaces `brand` there |
 
 All text/background token pairs meet WCAG 2.2 AA (≥ 4.5:1) in both themes. Run `checks/contrast.py` to verify.
 

@@ -1,4 +1,4 @@
-import { HealthReportSchema, type HealthReport } from '@floty/contracts';
+import { HealthReportSchema, type HealthReport } from '@pepper/contracts';
 
 export type ApiHealth =
   | { reachable: true; report: HealthReport }

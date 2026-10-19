@@ -1,4 +1,4 @@
-import type { TemplateInput } from '@floty/contracts';
+import type { TemplateInput } from '@pepper/contracts';
 
 /** Barbershop: short, frequent cuts and beard work; many regulars book a few weeks out. */
 export const barber: TemplateInput = {

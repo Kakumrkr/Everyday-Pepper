@@ -7,8 +7,8 @@ import {
   type Rule,
   type RuleDefaults,
   type WaitlistWindow,
-} from '@floty/contracts';
-import type { Occupancy, StaffMemberRecord, TimeOffRow, WorkingMinutes } from '@floty/db';
+} from '@pepper/contracts';
+import type { Occupancy, StaffMemberRecord, TimeOffRow, WorkingMinutes } from '@pepper/db';
 import type { ExistingBooking, Slot, StaffAvailability } from '../availability/engine.js';
 import { resolveRules } from '../availability/resolve-rules.js';
 import { fromZoned, parseDate } from '../availability/zoned-time.js';

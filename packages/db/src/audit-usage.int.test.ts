@@ -4,7 +4,7 @@ import {
   type AuditChange,
   type TenantId,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { eq, sql } from 'drizzle-orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';

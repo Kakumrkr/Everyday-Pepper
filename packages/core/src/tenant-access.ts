@@ -1,4 +1,9 @@
-import { roleRequiresMfa, type MembershipRole, type TenantId, type UserId } from '@floty/contracts';
+import {
+  roleRequiresMfa,
+  type MembershipRole,
+  type TenantId,
+  type UserId,
+} from '@pepper/contracts';
 
 /** Who is acting, in which business, with which role: what tenant-scoped work runs as. */
 export interface TenantContext {

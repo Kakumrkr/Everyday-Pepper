@@ -12,9 +12,9 @@ export interface TestService {
 /** Postgres with pgvector, the Compose image, on a random host port. */
 export async function startPostgres(): Promise<TestService> {
   const container = await new PostgreSqlContainer(composeImage('postgres'))
-    .withDatabase('floty_test')
-    .withUsername('floty_test')
-    .withPassword('floty_test')
+    .withDatabase('pepper_test')
+    .withUsername('pepper_test')
+    .withPassword('pepper_test')
     .start();
   return {
     url: container.getConnectionUri(),

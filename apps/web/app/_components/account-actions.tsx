@@ -1,6 +1,6 @@
 'use client';
 
-import type { UserBusiness } from '@floty/contracts';
+import type { UserBusiness } from '@pepper/contracts';
 import { useState } from 'react';
 import { ROUTES, withNext } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';

@@ -1,4 +1,4 @@
-import type { AvailableSlot } from '@floty/contracts';
+import type { AvailableSlot } from '@pepper/contracts';
 
 /** No such service in the business (also for a service id given in a staff member's list). */
 export class ServiceNotFoundError extends Error {

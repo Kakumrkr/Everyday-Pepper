@@ -1,4 +1,4 @@
-import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@floty/contracts';
+import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@pepper/contracts';
 import { PgDialect } from 'drizzle-orm/pg-core';
 import type { SQL } from 'drizzle-orm';
 import { describe, expect, it, vi } from 'vitest';

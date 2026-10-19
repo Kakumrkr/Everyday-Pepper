@@ -6,7 +6,7 @@ import type {
   Member,
   MembershipRole,
   Permission,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../lib/account';

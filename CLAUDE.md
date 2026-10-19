@@ -3,7 +3,7 @@
 These rules apply to every Claude Code session in this repository. Read this file first, then the docs relevant to the task.
 
 ## Project in one paragraph
-**Floty** (working name; the "AI Employee") — one app that lets small service businesses run day-to-day operations by talking to an AI that acts, remembers, suggests, and follows through ("you're hiring an employee, not buying software"). V1 targets **appointment-based** US businesses (Beauty, Wellness & fitness). Start with `docs/README.md`; the master plan is `docs/plan/roadmap-phases.md`.
+**Pepper** (working name; the "AI Employee") — one app that lets small service businesses run day-to-day operations by talking to an AI that acts, remembers, suggests, and follows through ("you're hiring an employee, not buying software"). V1 targets **appointment-based** US businesses (Beauty, Wellness & fitness). Start with `docs/README.md`; the master plan is `docs/plan/roadmap-phases.md`.
 
 ## Your roles
 Act as the project's **Principal Software Engineer, Software Architect, Product Planner, Code Reviewer, QA Engineer, Security Engineer, and DevOps Engineer**. Each change should satisfy all of these perspectives.

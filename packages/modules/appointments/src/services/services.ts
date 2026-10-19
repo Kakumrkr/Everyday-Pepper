@@ -4,8 +4,8 @@ import {
   type Service,
   type ServiceId,
   type ServiceInput,
-} from '@floty/contracts';
-import { requirePermission, type Actor } from '@floty/core';
+} from '@pepper/contracts';
+import { requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
   insertService,
@@ -14,7 +14,7 @@ import {
   updateService as updateServiceRow,
   withTenant,
   type Database,
-} from '@floty/db';
+} from '@pepper/db';
 import { ServiceNotFoundError } from '../errors.js';
 import { sameValues, serviceAuditValues, toService } from '../mapping.js';
 
@@ -28,7 +28,7 @@ export async function listServices(db: Database, actor: Actor): Promise<Service[
   return rows.map(toService);
 }
 
-/** Adds a service. Throws `ServiceNameTakenError` (`@floty/db`) for a name already in use. */
+/** Adds a service. Throws `ServiceNameTakenError` (`@pepper/db`) for a name already in use. */
 export async function createService(
   db: Database,
   actor: Actor,

@@ -1,4 +1,4 @@
-import type { Permission } from '@floty/contracts';
+import type { Permission } from '@pepper/contracts';
 import { ForbiddenError } from './errors.js';
 import { can, type OwnedRecord } from './permissions.js';
 import type { TenantContext } from './tenant-access.js';

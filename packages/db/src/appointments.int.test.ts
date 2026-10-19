@@ -8,7 +8,7 @@ import {
   type ServiceId,
   type StaffMemberId,
   type TenantId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
@@ -81,7 +81,7 @@ async function newTenant(): Promise<TenantId> {
 async function newStaff(tx: TenantTx, membershipId: string | null = null) {
   const row = await insertStaffMember(tx, {
     displayName: 'Jess',
-    color: '#be2759',
+    color: '#2a7230',
     active: true,
     membershipId,
   });

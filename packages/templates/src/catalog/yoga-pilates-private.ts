@@ -1,4 +1,4 @@
-import type { TemplateInput } from '@floty/contracts';
+import type { TemplateInput } from '@pepper/contracts';
 
 /** Private yoga and Pilates: one-to-one or duet sessions, often weekly at a fixed time. */
 export const yogaPilatesPrivate: TemplateInput = {

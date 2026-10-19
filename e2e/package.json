@@ -1,5 +1,5 @@
 {
-  "name": "@floty/e2e",
+  "name": "@pepper/e2e",
   "version": "0.0.0",
   "private": true,
   "description": "Playwright end-to-end tests against a running stack (docker compose up).",
@@ -9,11 +9,11 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@floty/contracts": "workspace:*"
+    "@pepper/contracts": "workspace:*"
   },
   "devDependencies": {
-    "@floty/config": "workspace:*",
-    "@floty/testing": "workspace:*",
+    "@pepper/config": "workspace:*",
+    "@pepper/testing": "workspace:*",
     "@playwright/test": "^1.64.1"
   }
 }

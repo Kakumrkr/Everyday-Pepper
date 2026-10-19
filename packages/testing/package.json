@@ -1,12 +1,12 @@
 {
-  "name": "@floty/testing",
+  "name": "@pepper/testing",
   "version": "0.0.0",
   "private": true,
   "description": "Test-only helpers: Testcontainers for Postgres and Redis (integration tests). Never a production dependency.",
   "type": "module",
   "exports": {
     ".": {
-      "@floty/source": "./src/index.ts",
+      "@pepper/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -22,7 +22,7 @@
     "test:integration": "vitest run --config vitest.int.config.ts"
   },
   "devDependencies": {
-    "@floty/config": "workspace:*",
+    "@pepper/config": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",
     "vitest": "^5.0.5"
   },

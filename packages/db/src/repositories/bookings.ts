@@ -12,7 +12,7 @@ import {
   type UserId,
   type WaitlistEntryId,
   type WaitlistWindow,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { and, asc, eq, gt, inArray, lt, or, sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
 import {

@@ -1,4 +1,4 @@
-import { MembershipRoleSchema, UserIdSchema, type MembershipRole } from '@floty/contracts';
+import { MembershipRoleSchema, UserIdSchema, type MembershipRole } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   canGrantRole,

@@ -1,12 +1,12 @@
 {
-  "name": "@floty/db",
+  "name": "@pepper/db",
   "version": "0.0.0",
   "private": true,
   "description": "Database layer: Drizzle schema, SQL migrations, tenant-scoped transactions (RLS) and repositories. The only package that talks to Postgres.",
   "type": "module",
   "exports": {
     ".": {
-      "@floty/source": "./src/index.ts",
+      "@pepper/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -25,7 +25,7 @@
     "generate": "drizzle-kit generate"
   },
   "dependencies": {
-    "@floty/contracts": "workspace:*",
+    "@pepper/contracts": "workspace:*",
     "better-auth": "1.7.10",
     "drizzle-orm": "^0.45.4",
     "pg": "^8.23.1",
@@ -33,8 +33,8 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@floty/config": "workspace:*",
-    "@floty/testing": "workspace:*",
+    "@pepper/config": "workspace:*",
+    "@pepper/testing": "workspace:*",
     "@types/pg": "^8.23.1",
     "@vitest/coverage-v8": "^5.0.5",
     "drizzle-kit": "^0.31.11",

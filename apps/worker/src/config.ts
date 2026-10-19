@@ -1,4 +1,4 @@
-import { loadServiceConfig, type ServiceConfig } from '@floty/runtime/instrument';
+import { loadServiceConfig, type ServiceConfig } from '@pepper/runtime/instrument';
 
 /**
  * The worker's configuration. Read by `instrument.ts` (before anything else loads) and by

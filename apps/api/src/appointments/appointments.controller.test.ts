@@ -4,7 +4,7 @@ import {
   ServiceNotFoundError,
   StaffMemberNotFoundError,
   TimeOffNotFoundError,
-} from '@floty/appointments';
+} from '@pepper/appointments';
 import {
   ApiErrorSchema,
   ServiceIdSchema,
@@ -19,10 +19,10 @@ import {
   type StaffMember,
   type TimeOff,
   type WeeklyHours,
-} from '@floty/contracts';
-import { ForbiddenError, MemberNotFoundError } from '@floty/core';
-import { ServiceNameTakenError, StaffMemberLinkTakenError } from '@floty/db';
-import { DATABASE } from '@floty/runtime';
+} from '@pepper/contracts';
+import { ForbiddenError, MemberNotFoundError } from '@pepper/core';
+import { ServiceNameTakenError, StaffMemberLinkTakenError } from '@pepper/db';
+import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -57,7 +57,7 @@ const SERVICE: Service = {
 const STAFF: StaffMember = {
   id: STAFF_ID,
   displayName: 'Jess',
-  color: '#be2759',
+  color: '#2a7230',
   active: true,
   userId: USER,
   serviceIds: [SERVICE_ID],
@@ -263,7 +263,7 @@ describe('staff members', () => {
     expect((await send('post', '/v1/staff', jess).expect(201)).body).toEqual(STAFF);
     expect(appointments.createStaffMember).toHaveBeenCalledWith(context(), {
       ...jess,
-      color: '#be2759',
+      color: '#2a7230',
       active: true,
     });
     await send('put', `/v1/staff/${STAFF_ID}`, jess).expect(200);

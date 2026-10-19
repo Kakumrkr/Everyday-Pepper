@@ -1,12 +1,12 @@
 {
-  "name": "@floty/appointments",
+  "name": "@pepper/appointments",
   "version": "0.0.0",
   "private": true,
   "description": "L2 appointments module: services, staff members, working hours, time off, booking rules and the availability engine (later bookings and waitlist).",
   "type": "module",
   "exports": {
     ".": {
-      "@floty/source": "./src/index.ts",
+      "@pepper/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -22,13 +22,13 @@
     "test:integration": "vitest run --config vitest.int.config.ts"
   },
   "dependencies": {
-    "@floty/contracts": "workspace:*",
-    "@floty/core": "workspace:*",
-    "@floty/db": "workspace:*"
+    "@pepper/contracts": "workspace:*",
+    "@pepper/core": "workspace:*",
+    "@pepper/db": "workspace:*"
   },
   "devDependencies": {
-    "@floty/config": "workspace:*",
-    "@floty/testing": "workspace:*",
+    "@pepper/config": "workspace:*",
+    "@pepper/testing": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",
     "fast-check": "^4.10.2",
     "vitest": "^5.0.5",

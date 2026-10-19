@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
-import { HealthReportSchema } from '@floty/contracts';
-import { prepareDatabase } from '@floty/db';
-import { postgresUrlAs, startPostgres, startRedis, type TestService } from '@floty/testing';
+import { HealthReportSchema } from '@pepper/contracts';
+import { prepareDatabase } from '@pepper/db';
+import { postgresUrlAs, startPostgres, startRedis, type TestService } from '@pepper/testing';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -18,7 +18,7 @@ describe('readiness against real Postgres and Redis', () => {
   beforeAll(async () => {
     [postgres, redis] = await Promise.all([startPostgres(), startRedis()]);
     // As in Compose: migrate as the owner, connect as the services' login role.
-    const databaseUrl = postgresUrlAs(postgres.url, 'floty_service', 'test-password');
+    const databaseUrl = postgresUrlAs(postgres.url, 'pepper_service', 'test-password');
     await prepareDatabase(postgres.url, databaseUrl);
     const moduleRef = await Test.createTestingModule({
       imports: [

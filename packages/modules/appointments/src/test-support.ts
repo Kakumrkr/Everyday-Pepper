@@ -1,5 +1,5 @@
 // Integration-test helpers (not built into dist).
-import { UserIdSchema, type UserId } from '@floty/contracts';
+import { UserIdSchema, type UserId } from '@pepper/contracts';
 import {
   createDatabase,
   newId,
@@ -7,8 +7,8 @@ import {
   users,
   type Database,
   type DatabaseHandle,
-} from '@floty/db';
-import { postgresUrlAs, startPostgres } from '@floty/testing';
+} from '@pepper/db';
+import { postgresUrlAs, startPostgres } from '@pepper/testing';
 
 export interface TestDatabase {
   migrationUrl: string;
@@ -20,7 +20,7 @@ export interface TestDatabase {
 /** A migrated Postgres with the services' login role provisioned. */
 export async function startTestDatabase(): Promise<TestDatabase> {
   const postgres = await startPostgres();
-  const appUrl = postgresUrlAs(postgres.url, 'floty_service', 'service-test-password');
+  const appUrl = postgresUrlAs(postgres.url, 'pepper_service', 'service-test-password');
   await prepareDatabase(postgres.url, appUrl);
   const app = createDatabase({ url: appUrl, maxConnections: 8 });
   return {

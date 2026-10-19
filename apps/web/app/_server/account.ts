@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import { cache } from 'react';
-import type { CurrentBusinessResponse, Invite, Member } from '@floty/contracts';
+import type { CurrentBusinessResponse, Invite, Member } from '@pepper/contracts';
 import {
   loadAccount,
   loadCurrentBusiness,

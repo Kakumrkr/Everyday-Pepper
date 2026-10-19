@@ -1,4 +1,4 @@
-import type { TemplateInput } from '@floty/contracts';
+import type { TemplateInput } from '@pepper/contracts';
 
 /** Nail salon: manicures, pedicures and enhancements; gel and acrylic need regular fills. */
 export const nails: TemplateInput = {

@@ -1,5 +1,5 @@
-import { BookingRulesSchema, type BookingRules, type BookingRulesInput } from '@floty/contracts';
-import { requirePermission, type Actor } from '@floty/core';
+import { BookingRulesSchema, type BookingRules, type BookingRulesInput } from '@pepper/contracts';
+import { requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
   findStaffMemberIds,
@@ -8,7 +8,7 @@ import {
   replaceBookingRules as replaceBookingRuleRows,
   withTenant,
   type Database,
-} from '@floty/db';
+} from '@pepper/db';
 import { StaffMemberNotFoundError } from '../errors.js';
 import { rowsToRules, sameValues } from '../mapping.js';
 

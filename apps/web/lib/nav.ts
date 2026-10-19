@@ -1,5 +1,5 @@
-import type { Permission } from '@floty/contracts';
-import type { IconName } from '@floty/ui';
+import type { Permission } from '@pepper/contracts';
+import type { IconName } from '@pepper/ui';
 import { ROUTES } from './account';
 
 export interface NavItem {

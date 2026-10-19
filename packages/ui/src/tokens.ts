@@ -1,32 +1,36 @@
-// The approved design tokens (docs/product/ux-principles.md, 2026-10-16): the one source of
-// truth. `theme.css` carries the same values as CSS variables; a test keeps the two in step and
-// checks every text/background pair against WCAG 2.2 AA in both themes.
+// The approved design tokens (docs/product/ux-principles.md; pepper green + chili accent since
+// PCR-002, 2026-10-18): the one source of truth. `theme.css` carries the same values as CSS
+// variables; a test keeps the two in step and checks every text/background pair against
+// WCAG 2.2 AA in both themes.
 
 export type Theme = 'light' | 'dark';
 
 /** Color tokens: name → [light, dark]. */
 export const COLORS = {
-  bg: ['#FFF8F7', '#161015'],
-  surface: ['#FFFFFF', '#211820'],
-  'surface-2': ['#FBEEEC', '#2B2029'],
-  line: ['#EEDCD9', '#3B2D38'],
-  ink: ['#2B1B24', '#F8ECF1'],
-  'ink-2': ['#6A5560', '#BDA8B3'],
-  brand: ['#BE2759', '#FF7FA8'],
-  'brand-strong': ['#B01F52', '#FF8FB3'],
-  'brand-soft': ['#FDE5ED', '#46202F'],
-  'on-brand': ['#FFFFFF', '#2A0D19'],
-  ok: ['#23703A', '#7FD69A'],
-  'ok-soft': ['#E2F2E5', '#1D3324'],
+  bg: ['#F7FAF5', '#0F1510'],
+  surface: ['#FFFFFF', '#172019'],
+  'surface-2': ['#EDF3EA', '#202A22'],
+  line: ['#DCE6D8', '#2F3B31'],
+  ink: ['#1B2A1E', '#EAF3EA'],
+  'ink-2': ['#536257', '#A7B7AA'],
+  brand: ['#2A7230', '#86D28E'],
+  'brand-strong': ['#23652A', '#97DB9E'],
+  'brand-soft': ['#E2F0E0', '#1B3320'],
+  'on-brand': ['#FFFFFF', '#0A1F0D'],
+  accent: ['#C2361B', '#FF8C70'],
+  'accent-soft': ['#FDE6DF', '#3D1E16'],
+  'on-accent': ['#FFFFFF', '#2A0B04'],
+  ok: ['#0B6B63', '#6BD5C6'],
+  'ok-soft': ['#DDF1EE', '#13322E'],
   wait: ['#8F4C00', '#FFC274'],
   'wait-soft': ['#FFEFD6', '#3A2A12'],
   info: ['#1D65A8', '#8CC2F5'],
   'info-soft': ['#E2EEFA', '#172B3E'],
-  danger: ['#B3261E', '#FFB4AB'],
-  s1: ['#FCE3EC', '#4A2032'],
-  's1-ink': ['#8E1D47', '#FFC2D6'],
-  s2: ['#DAF2EB', '#173A33'],
-  's2-ink': ['#0D5E4F', '#A6EBD9'],
+  danger: ['#9F1D2B', '#FFB4AB'],
+  s1: ['#E2F0DC', '#1E3519'],
+  's1-ink': ['#2D5C25', '#B5E3A8'],
+  s2: ['#FDE4DB', '#40211A'],
+  's2-ink': ['#8A2D14', '#FFC4B3'],
   s3: ['#FFEFC7', '#3D3012'],
   's3-ink': ['#7A4F00', '#FFDE8A'],
 } as const satisfies Record<string, readonly [string, string]>;
@@ -35,7 +39,7 @@ export type ColorToken = keyof typeof COLORS;
 
 /** Text (first) on background (second) pairs the screens use; each must reach 4.5:1. */
 export const TEXT_PAIRS: readonly (readonly [ColorToken, ColorToken])[] = [
-  ...(['ink', 'ink-2', 'brand', 'danger'] as const).flatMap((text) =>
+  ...(['ink', 'ink-2', 'brand', 'accent', 'danger'] as const).flatMap((text) =>
     (['bg', 'surface', 'surface-2'] as const).map((bg) => [text, bg] as const),
   ),
   ['ink', 'brand-soft'],
@@ -45,6 +49,8 @@ export const TEXT_PAIRS: readonly (readonly [ColorToken, ColorToken])[] = [
   ['wait', 'brand-soft'],
   ['on-brand', 'brand'],
   ['on-brand', 'brand-strong'],
+  ['accent', 'accent-soft'],
+  ['on-accent', 'accent'],
   ['ok', 'ok-soft'],
   ['wait', 'wait-soft'],
   ['info', 'info-soft'],

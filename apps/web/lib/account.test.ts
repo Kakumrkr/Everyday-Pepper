@@ -1,4 +1,4 @@
-import { MeResponseSchema, type MeResponse } from '@floty/contracts';
+import { MeResponseSchema, type MeResponse } from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import {
   loadAccount,
@@ -33,14 +33,14 @@ function answering(status: number, body: unknown) {
   return { fetch: fetch as unknown as typeof globalThis.fetch, calls };
 }
 
-const base = { baseUrl: 'http://api:4000', cookie: 'floty.session_token=abc' };
+const base = { baseUrl: 'http://api:4000', cookie: 'pepper.session_token=abc' };
 
 describe('loadAccount', () => {
   it('passes the cookie and returns the parsed account', async () => {
     const { fetch, calls } = answering(200, me);
     await expect(loadAccount({ ...base, fetch })).resolves.toEqual({ state: 'signed-in', me });
     expect(calls[0]?.url).toBe('http://api:4000/v1/me');
-    expect(calls[0]?.init?.headers).toEqual({ cookie: 'floty.session_token=abc' });
+    expect(calls[0]?.init?.headers).toEqual({ cookie: 'pepper.session_token=abc' });
   });
 
   it('sends no cookie header without a cookie', async () => {

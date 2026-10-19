@@ -4,13 +4,13 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import pg from 'pg';
 
 /** Group role holding the services' privileges (created by migration 0000). */
-export const APP_ROLE = 'floty_app';
+export const APP_ROLE = 'pepper_app';
 
 /** The SQL migrations, shipped with the package (`files` in package.json). */
 const MIGRATIONS_FOLDER = fileURLToPath(new URL('../migrations', import.meta.url));
 
-/** Advisory lock key serialising migrators and provisioning ("floty" in ASCII). */
-const MIGRATION_LOCK = 0x666c6f7479;
+/** Advisory lock key serialising migrators and provisioning ("pepper" in ASCII). */
+const MIGRATION_LOCK = 0x706570706572;
 
 const ROLE_NAME = /^[a-z_][a-z0-9_]{0,62}$/;
 
@@ -42,7 +42,7 @@ export async function runMigrations(migrationUrl: string): Promise<void> {
 
 /**
  * Creates or updates the services' login role from `appUrl` (user and password) and grants it
- * `floty_app`. Refuses to touch a role with elevated attributes, so pointing DATABASE_URL at an
+ * `pepper_app`. Refuses to touch a role with elevated attributes, so pointing DATABASE_URL at an
  * admin role fails loudly instead of demoting it. For dev, CI and the pilot; managed databases
  * may provision the role elsewhere.
  */

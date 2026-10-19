@@ -1,4 +1,4 @@
-import type { ServiceId, StaffMemberId } from '@floty/contracts';
+import type { ServiceId, StaffMemberId } from '@pepper/contracts';
 import type { ResolvedRules } from './resolve-rules.js';
 import {
   addDays,

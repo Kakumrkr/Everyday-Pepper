@@ -15,7 +15,7 @@ import {
   type InviteToken,
   type MembershipRole,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   addMembership,
   appendAuditEntry,
@@ -35,7 +35,7 @@ import {
   type Database,
   type InviteRow,
   type TenantTx,
-} from '@floty/db';
+} from '@pepper/db';
 import { requirePermission, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
 import {

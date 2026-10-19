@@ -1,7 +1,7 @@
-import type { Client, ClientId, ClientInput, ClientsQuery } from '@floty/contracts';
-import { createClient, getClient, listClients, type Actor, type TenantContext } from '@floty/core';
-import type { Database } from '@floty/db';
-import { currentRequestContext, DATABASE } from '@floty/runtime';
+import type { Client, ClientId, ClientInput, ClientsQuery } from '@pepper/contracts';
+import { createClient, getClient, listClients, type Actor, type TenantContext } from '@pepper/core';
+import type { Database } from '@pepper/db';
+import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { Inject, Injectable } from '@nestjs/common';
 
 /**

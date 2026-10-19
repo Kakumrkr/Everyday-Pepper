@@ -4,7 +4,7 @@ import { Unavailable } from '../_components/unavailable';
 import { currentAccount } from '../_server/account';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Join a business · Floty' };
+export const metadata: Metadata = { title: 'Join a business · Pepper' };
 
 /**
  * Where an invite link leads (`/invite#<token>`). The token never reaches this server: the
@@ -15,7 +15,7 @@ export default async function InvitePage() {
   if (account.state === 'unavailable') return <Unavailable />;
   return (
     <main>
-      <h1 className="wordmark">floty</h1>
+      <h1 className="wordmark">pepper</h1>
       <InviteAcceptance email={account.state === 'signed-in' ? account.me.user.email : null} />
     </main>
   );

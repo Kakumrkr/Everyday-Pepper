@@ -1,4 +1,4 @@
-import type { TemplateInput } from '@floty/contracts';
+import type { TemplateInput } from '@pepper/contracts';
 
 /** Lash and brow studio: extensions need fills every few weeks; tinting needs a patch test. */
 export const lashBrow: TemplateInput = {

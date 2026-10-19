@@ -1,11 +1,11 @@
 @import 'tailwindcss';
-@import '@floty/ui/theme.css';
+@import '@pepper/ui/theme.css';
 /* Class names used by the design system's components. */
 @source '../../../packages/ui/src';
 
 /*
  * Screens built before the design system (Phase 2 forms and setup pages). In the base layer,
- * so Tailwind's utilities win wherever both apply; new screens use utilities and @floty/ui.
+ * so Tailwind's utilities win wherever both apply; new screens use utilities and @pepper/ui.
  */
 @layer base {
   * {

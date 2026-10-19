@@ -8,8 +8,8 @@ import {
   type TimeOffId,
   type TimeOffInput,
   type TimeOffQuery,
-} from '@floty/contracts';
-import { requirePermission, systemClock, type Actor, type Clock } from '@floty/core';
+} from '@pepper/contracts';
+import { requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
 import {
   appendAuditEntry,
   deleteTimeOff,
@@ -21,7 +21,7 @@ import {
   type Database,
   type StaffMemberRecord,
   type TenantTx,
-} from '@floty/db';
+} from '@pepper/db';
 import { StaffMemberNotFoundError, TimeOffNotFoundError } from '../errors.js';
 import { staffOwner, timeOffAuditValues, toTimeOff } from '../mapping.js';
 

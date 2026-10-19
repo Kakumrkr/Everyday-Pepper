@@ -4,7 +4,7 @@ import {
   type MembershipRole,
   type TenantId,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   addMembership,
   BusinessLimitReachedError,
@@ -15,7 +15,7 @@ import {
   updateMembershipRole,
   withTenant,
   type Database,
-} from '@floty/db';
+} from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';

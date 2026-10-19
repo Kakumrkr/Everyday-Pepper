@@ -1,5 +1,5 @@
 {
-  "extends": "@floty/config/tsconfig.lib.json",
+  "extends": "@pepper/config/tsconfig.lib.json",
   "compilerOptions": {
     "noEmit": true
   },

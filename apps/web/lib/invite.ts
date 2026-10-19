@@ -1,4 +1,4 @@
-import { InviteTokenSchema, type InviteToken, type MembershipRole } from '@floty/contracts';
+import { InviteTokenSchema, type InviteToken, type MembershipRole } from '@pepper/contracts';
 import { ROUTES } from './account';
 
 // The invite link (ADR-0014): `<origin>/invite#<token>`. The token is in the fragment, which
@@ -6,7 +6,7 @@ import { ROUTES } from './account';
 // invite page keeps it in sessionStorage while the invitee signs in or signs up.
 
 /** Where the invite page keeps the token between pages (this tab only). */
-export const INVITE_TOKEN_KEY = 'floty.invite-token';
+export const INVITE_TOKEN_KEY = 'pepper.invite-token';
 
 /** The link to share for an invite. */
 export function inviteLink(origin: string, token: InviteToken): string {

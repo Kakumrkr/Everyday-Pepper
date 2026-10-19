@@ -1,4 +1,4 @@
-import type { MembershipRole, UserId } from '@floty/contracts';
+import type { MembershipRole, UserId } from '@pepper/contracts';
 import { can, permissionScope } from './permissions.js';
 
 /** A change to someone's membership: a new role, or leaving the business. */

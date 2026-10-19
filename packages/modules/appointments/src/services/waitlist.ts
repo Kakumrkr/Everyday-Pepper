@@ -11,14 +11,14 @@ import {
   type WaitlistEntryId,
   type WaitlistEntryInput,
   type WaitlistQuery,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   ClientNotFoundError,
   requirePermission,
   systemClock,
   type Actor,
   type Clock,
-} from '@floty/core';
+} from '@pepper/core';
 import {
   appendAuditEntry,
   cancelWaitlistEntry as cancelWaitlistEntryRow,
@@ -31,7 +31,7 @@ import {
   lockWaitlistEntry,
   withMember,
   type Database,
-} from '@floty/db';
+} from '@pepper/db';
 import { waitlistExpiry } from '../bookings/planning.js';
 import { ownStaffMemberId } from './bookings.js';
 import {

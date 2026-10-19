@@ -55,7 +55,7 @@ describe('createLogger', () => {
       { client: { email: 'ana@juniper.example.com', id: 'c1' } },
       'mail ana@juniper.example.com',
     );
-    logger.warn('dial %s', 'postgres://floty:hunter2@db/floty');
+    logger.warn('dial %s', 'postgres://pepper:hunter2@db/pepper');
     logger.error(error, 'boom');
     logger.error({ err: error, token: 'abc' }, 'boom again');
 
@@ -64,7 +64,7 @@ describe('createLogger', () => {
     expect(text).not.toContain('hunter2');
     expect(text).not.toContain('"abc"');
     expect(lines[0]).toMatchObject({ client: { email: REDACTED, id: 'c1' }, msg: 'mail [email]' });
-    expect(lines[1]).toMatchObject({ msg: `dial postgres://${REDACTED}@db/floty` });
+    expect(lines[1]).toMatchObject({ msg: `dial postgres://${REDACTED}@db/pepper` });
     expect(lines[2]).toMatchObject({
       msg: 'boom',
       err: { type: 'Error', message: 'lookup failed for [email]' },

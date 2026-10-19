@@ -11,7 +11,7 @@ import {
 } from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Team · Floty' };
+export const metadata: Metadata = { title: 'Team · Pepper' };
 
 /**
  * The team of the active business (Phase 2: list, roles, remove, leave, invite links). What it

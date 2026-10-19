@@ -5,7 +5,7 @@ import {
   type Client,
   type Service,
   type StaffMember,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import { loadCalendarDay, MAX_CLIENT_LOOKUPS, seesDetailsOf } from './calendar-data';
 
@@ -14,7 +14,7 @@ const id = (n: number) => `0199f0a4-7c1e-7d2a-9b3c-${String(n).padStart(12, '0')
 const STAFF: StaffMember = {
   id: id(1),
   displayName: 'Jess',
-  color: '#be2759',
+  color: '#2a7230',
   active: true,
   userId: id(9),
   serviceIds: [id(2)],

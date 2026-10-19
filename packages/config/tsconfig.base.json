@@ -6,9 +6,9 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "types": ["node"],
-    // Resolve workspace packages to their TypeScript sources (see "@floty/source" in package
+    // Resolve workspace packages to their TypeScript sources (see "@pepper/source" in package
     // exports) so typecheck, lint and editors work without building first. Builds turn it off.
-    "customConditions": ["@floty/source"],
+    "customConditions": ["@pepper/source"],
 
     "strict": true,
     "noUncheckedIndexedAccess": true,

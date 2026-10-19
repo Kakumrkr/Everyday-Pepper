@@ -5,7 +5,7 @@ import {
   type AuditActor,
   type AuditChange,
   type AuditLogEntry,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { desc, lt } from 'drizzle-orm';
 import { z } from 'zod';
 import { auditLog } from '../schema.js';

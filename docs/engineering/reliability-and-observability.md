@@ -18,7 +18,7 @@
 - Backups: nightly encrypted dumps to object storage + restore drill each quarter (RPO ≤ 24 h pilot; tighten with managed DB later).
 
 ## Observability
-Wiring (Phase 1, S5): `@floty/runtime` — see [ADR-0009](../adr/0009-observability-wiring.md) and `dev-setup.md` → *Configuration, logging and observability*. Built so far: JSON logs with `request_id` and trace ids, redaction, OTLP tracing (http, express, pg, ioredis), Sentry errors. Still to come: `tenant_id`/`user_id` on log lines (Phase 2, from the request context), log shipping, metrics, alerts.
+Wiring (Phase 1, S5): `@pepper/runtime` — see [ADR-0009](../adr/0009-observability-wiring.md) and `dev-setup.md` → *Configuration, logging and observability*. Built so far: JSON logs with `request_id` and trace ids, redaction, OTLP tracing (http, express, pg, ioredis), Sentry errors. Still to come: `tenant_id`/`user_id` on log lines (Phase 2, from the request context), log shipping, metrics, alerts.
 - **Logs**: structured JSON (pino) with `request_id`, `tenant_id`, `user_id` (no PII), shipped to Grafana Cloud free tier (Loki).
 - **Traces**: OpenTelemetry across web → api → worker → external calls; AI turns traced per tool call with latency and token counts.
 - **Errors**: Sentry (free tier) for web, api, worker; release tagging.

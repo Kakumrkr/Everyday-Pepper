@@ -5,8 +5,8 @@
 -- `provisionAppRole`; neither owns tables, is a superuser, or may bypass row-level security.
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'floty_app') THEN
-    CREATE ROLE floty_app NOLOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'pepper_app') THEN
+    CREATE ROLE pepper_app NOLOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
   END IF;
 END
 $$;
@@ -14,13 +14,13 @@ $$;
 -- No one but the owner creates objects in public (already the default since Postgres 15).
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 --> statement-breakpoint
-GRANT USAGE ON SCHEMA public TO floty_app;
+GRANT USAGE ON SCHEMA public TO pepper_app;
 --> statement-breakpoint
 -- Every table created by later migrations is readable and writable by the services, row access
 -- still limited by its RLS policy (the isolation suite fails for a table without one).
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO floty_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO pepper_app;
 --> statement-breakpoint
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO floty_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO pepper_app;
 --> statement-breakpoint
 -- The tenant of the current transaction, set by `withTenant` with set_config(..., true).
 -- NULL when unset: outside a transaction the setting reads '' once it has been used on the

@@ -8,7 +8,7 @@ import {
   type ClientInput,
   type ClientsQuery,
   type RecordSource,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   appendAuditEntry,
   findClient,
@@ -17,7 +17,7 @@ import {
   withMember,
   type ClientRow,
   type Database,
-} from '@floty/db';
+} from '@pepper/db';
 import { requirePermission, type Actor } from '../actor.js';
 import { ClientNotFoundError } from '../errors.js';
 

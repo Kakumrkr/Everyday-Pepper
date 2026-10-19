@@ -1,4 +1,4 @@
-import type { TemplateInput } from '@floty/contracts';
+import type { TemplateInput } from '@pepper/contracts';
 
 /** Day spa: facials, body treatments and massage; rooms need turning over between guests. */
 export const spa: TemplateInput = {

@@ -4,7 +4,7 @@ import {
   UserIdSchema,
   type MembershipRole,
   type Permission,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   can,

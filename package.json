@@ -1,5 +1,5 @@
 {
-  "name": "floty",
+  "name": "pepper",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.28.0",
@@ -18,9 +18,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm build",
-    "test:e2e": "turbo run build --filter=@floty/e2e^... --output-logs=errors-only && pnpm --filter @floty/e2e test:e2e",
-    "db:migrate": "turbo run build --filter=@floty/db --output-logs=errors-only && pnpm --filter @floty/db migrate",
-    "db:generate": "pnpm --filter @floty/db generate"
+    "test:e2e": "turbo run build --filter=@pepper/e2e^... --output-logs=errors-only && pnpm --filter @pepper/e2e test:e2e",
+    "db:migrate": "turbo run build --filter=@pepper/db --output-logs=errors-only && pnpm --filter @pepper/db migrate",
+    "db:generate": "pnpm --filter @pepper/db generate"
   },
   "devDependencies": {
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",

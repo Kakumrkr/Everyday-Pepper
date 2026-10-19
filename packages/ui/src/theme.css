@@ -1,59 +1,65 @@
 /*
- * Floty theme for Tailwind v4 (import after `tailwindcss`). The color values mirror
- * src/tokens.ts, the source of truth; theme.test.ts keeps them in step. Light and dark follow
- * the system setting.
+ * Pepper theme (pepper green + chili accent) for Tailwind v4 (import after `tailwindcss`). The
+ * color values mirror src/tokens.ts, the source of truth; theme.test.ts keeps them in step. Light
+ * and dark follow the system setting.
  */
 
 :root {
   color-scheme: light dark;
-  --bg: #fff8f7;
+  --bg: #f7faf5;
   --surface: #ffffff;
-  --surface-2: #fbeeec;
-  --line: #eedcd9;
-  --ink: #2b1b24;
-  --ink-2: #6a5560;
-  --brand: #be2759;
-  --brand-strong: #b01f52;
-  --brand-soft: #fde5ed;
+  --surface-2: #edf3ea;
+  --line: #dce6d8;
+  --ink: #1b2a1e;
+  --ink-2: #536257;
+  --brand: #2a7230;
+  --brand-strong: #23652a;
+  --brand-soft: #e2f0e0;
   --on-brand: #ffffff;
-  --ok: #23703a;
-  --ok-soft: #e2f2e5;
+  --accent: #c2361b;
+  --accent-soft: #fde6df;
+  --on-accent: #ffffff;
+  --ok: #0b6b63;
+  --ok-soft: #ddf1ee;
   --wait: #8f4c00;
   --wait-soft: #ffefd6;
   --info: #1d65a8;
   --info-soft: #e2eefa;
-  --danger: #b3261e;
-  --s1: #fce3ec;
-  --s1-ink: #8e1d47;
-  --s2: #daf2eb;
-  --s2-ink: #0d5e4f;
+  --danger: #9f1d2b;
+  --s1: #e2f0dc;
+  --s1-ink: #2d5c25;
+  --s2: #fde4db;
+  --s2-ink: #8a2d14;
   --s3: #ffefc7;
   --s3-ink: #7a4f00;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #161015;
-    --surface: #211820;
-    --surface-2: #2b2029;
-    --line: #3b2d38;
-    --ink: #f8ecf1;
-    --ink-2: #bda8b3;
-    --brand: #ff7fa8;
-    --brand-strong: #ff8fb3;
-    --brand-soft: #46202f;
-    --on-brand: #2a0d19;
-    --ok: #7fd69a;
-    --ok-soft: #1d3324;
+    --bg: #0f1510;
+    --surface: #172019;
+    --surface-2: #202a22;
+    --line: #2f3b31;
+    --ink: #eaf3ea;
+    --ink-2: #a7b7aa;
+    --brand: #86d28e;
+    --brand-strong: #97db9e;
+    --brand-soft: #1b3320;
+    --on-brand: #0a1f0d;
+    --accent: #ff8c70;
+    --accent-soft: #3d1e16;
+    --on-accent: #2a0b04;
+    --ok: #6bd5c6;
+    --ok-soft: #13322e;
     --wait: #ffc274;
     --wait-soft: #3a2a12;
     --info: #8cc2f5;
     --info-soft: #172b3e;
     --danger: #ffb4ab;
-    --s1: #4a2032;
-    --s1-ink: #ffc2d6;
-    --s2: #173a33;
-    --s2-ink: #a6ebd9;
+    --s1: #1e3519;
+    --s1-ink: #b5e3a8;
+    --s2: #40211a;
+    --s2-ink: #ffc4b3;
     --s3: #3d3012;
     --s3-ink: #ffde8a;
   }
@@ -70,6 +76,9 @@
   --color-brand-strong: var(--brand-strong);
   --color-brand-soft: var(--brand-soft);
   --color-on-brand: var(--on-brand);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-wait: var(--wait);

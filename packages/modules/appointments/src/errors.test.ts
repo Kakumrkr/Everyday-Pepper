@@ -1,4 +1,4 @@
-import { AvailableSlotSchema } from '@floty/contracts';
+import { AvailableSlotSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   BookingNotChangeableError,

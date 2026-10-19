@@ -7,7 +7,7 @@ import { SignInForm } from '../_components/sign-in-form';
 import { currentAccount } from '../_server/account';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Sign in · Floty' };
+export const metadata: Metadata = { title: 'Sign in · Pepper' };
 
 export default async function SignInPage({
   searchParams,
@@ -18,7 +18,7 @@ export default async function SignInPage({
   if ((await currentAccount()).state === 'signed-in') redirect(next ?? ROUTES.home);
   return (
     <main>
-      <h1 className="wordmark">floty</h1>
+      <h1 className="wordmark">pepper</h1>
       <p className="tagline">Sign in to your business.</p>
       <SignInForm next={next} />
       <ApiStatus />

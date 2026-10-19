@@ -11,7 +11,7 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.ts'],
       // TenancyService, TeamService, InvitesService, AppointmentsService, BookingsService and
-      // ClientsService only bind the database to @floty/db repositories and domain services;
+      // ClientsService only bind the database to @pepper/db repositories and domain services;
       // like them they are proven against real Postgres by the integration tests
       // (src/**/*.int.test.ts), not by unit tests.
       exclude: [

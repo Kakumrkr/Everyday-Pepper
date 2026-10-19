@@ -10,8 +10,8 @@ import {
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
   WaitlistExpiredError,
-} from '@floty/appointments';
-import type { ApiErrorCode, SlotUnavailable } from '@floty/contracts';
+} from '@pepper/appointments';
+import type { ApiErrorCode, SlotUnavailable } from '@pepper/contracts';
 import {
   AlreadyAMemberError,
   ClientNotFoundError,
@@ -22,14 +22,14 @@ import {
   InviteWrongAccountError,
   LastOwnerError,
   MemberNotFoundError,
-} from '@floty/core';
+} from '@pepper/core';
 import {
   BusinessLimitReachedError,
   ClientEmailTakenError,
   ServiceNameTakenError,
   StaffMemberLinkTakenError,
   TenantSlugTakenError,
-} from '@floty/db';
+} from '@pepper/db';
 import {
   BadRequestException,
   ConflictException,

@@ -1,4 +1,4 @@
-import type { TemplateInput } from '@floty/contracts';
+import type { TemplateInput } from '@pepper/contracts';
 
 /** Hair salon: cuts, color and styling; color needs a patch test and processing time. */
 export const beautySalon: TemplateInput = {

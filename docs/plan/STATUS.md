@@ -1,29 +1,29 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-18 · **Plan version:** 0.9 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. **S14 (Phase 4a: design system + app shell + calendar day view) done**, ADR-0019 **proposed** (review it in the PR); PR opened and merged at the user's request → next: **S15** (booking screens)
+**Last updated:** 2026-10-19 · **Plan version:** 0.10 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. **S14 (Phase 4a: design system + app shell + calendar day view) done**, ADR-0019 **proposed** (review it in the PR); PR opened and merged at the user's request. Then, in the same session, **renamed Floty → Pepper and switched to the Pepper green + chili theme** ([PCR-002](changes/PCR-002.md)) → next: **S15** (booking screens), unchanged
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
 - Competitor audit v0.1 (`docs/research/competitor-audit.md`).
 - ADR-0001…0008 **accepted** (incl. Better Auth for auth, Drizzle for the database layer).
-- Working name chosen: **Floty**.
-- **S1 Mockups part 1 (2026-10-16):** clickable prototype `docs/mockups/floty-prototype.html` with Home/operator feed, Chat with cards, Calendar (day/week), a design-direction page, and placeholders for part 2. Phone + desktop layouts, light + dark. Preview: https://claude.ai/artifact/WNTU3YyQgBjJvCC9hxHqS1. **User approved part 1 with no changes.** Checks: Playwright click-through (112 assertions, 4 viewport/theme combos) and WCAG AA token contrast, both passing (`docs/mockups/checks/`).
+- Working name chosen: **Floty**, renamed to **Pepper** on 2026-10-18 ([PCR-002](changes/PCR-002.md)).
+- **S1 Mockups part 1 (2026-10-16):** clickable prototype `docs/mockups/pepper-prototype.html` with Home/operator feed, Chat with cards, Calendar (day/week), a design-direction page, and placeholders for part 2. Phone + desktop layouts, light + dark. Preview: https://claude.ai/artifact/WNTU3YyQgBjJvCC9hxHqS1. **User approved part 1 with no changes.** Checks: Playwright click-through (112 assertions, 4 viewport/theme combos) and WCAG AA token contrast, both passing (`docs/mockups/checks/`).
 
 - **S2 Mockups part 2 (2026-10-16):** added Clients + client profile, What I know (add/edit/delete with Undo; deleting the PPD allergy removes it everywhere), Autonomy (per-action dial, bulk "Just do it" locked), Team & services (roles, invite, menu), full-screen Onboarding (type → source → review → optional CSV import → link + Google Calendar) and the public Booking page (business-branded, stylist photo placeholders, prices, email code, "slot just taken" alternatives). Same preview link. Checks: 260 Playwright assertions across 4 viewport/theme combos + WCAG AA contrast (incl. new `danger` and `biz` tokens), all passing.
 
 - **Phase 0 signed off (2026-10-16):** user approved all mockups and the 5 S2 questions. Design tokens recorded in `docs/product/ux-principles.md`. PCR-001 approved (business brand color on the booking page, picked in onboarding). Plan version 0.4.
 
-- **S3 Phase 1a (2026-10-16):** pnpm + Turborepo monorepo; strict ESM TypeScript (`packages/config`); ESLint (typescript-eslint strict, layer-boundary rule from the dependency map, no deep imports, disable comments need a reason) + Prettier + EditorConfig; Vitest with ≥ 80% coverage gate; placeholder packages `@floty/contracts` (`RiskTier`, `AutonomyLevel`, `UtcDateTime` schemas) and `@floty/core` (`Clock`, `ManualClock`, `utcNow`); CI workflow (format → lint → typecheck → test+coverage → build, actions pinned to SHAs); Dependabot; `docs/engineering/dev-setup.md`; root README. `main` branch created at the Phase 0 sign-off commit. Checks run: clean `pnpm install --frozen-lockfile` + `pnpm check` all green (30 tests, 100% coverage); verified lint rejects `any`, unexplained `!`, layer violations, deep imports, undescribed disables; typecheck rejects type errors; coverage gate fails at 68%; actionlint clean.
+- **S3 Phase 1a (2026-10-16):** pnpm + Turborepo monorepo; strict ESM TypeScript (`packages/config`); ESLint (typescript-eslint strict, layer-boundary rule from the dependency map, no deep imports, disable comments need a reason) + Prettier + EditorConfig; Vitest with ≥ 80% coverage gate; placeholder packages `@pepper/contracts` (`RiskTier`, `AutonomyLevel`, `UtcDateTime` schemas) and `@pepper/core` (`Clock`, `ManualClock`, `utcNow`); CI workflow (format → lint → typecheck → test+coverage → build, actions pinned to SHAs); Dependabot; `docs/engineering/dev-setup.md`; root README. `main` branch created at the Phase 0 sign-off commit. Checks run: clean `pnpm install --frozen-lockfile` + `pnpm check` all green (30 tests, 100% coverage); verified lint rejects `any`, unexplained `!`, layer violations, deep imports, undescribed disables; typecheck rejects type errors; coverage gate fails at 68%; actionlint clean.
 
-- **S4 Phase 1b (2026-10-16):** apps skeletons: `apps/api` + `apps/worker` (NestJS 12, ESM, Express 5) with `GET /health/live` and `/health/ready` (Postgres + Redis; 503 when down, body says only up/down), `apps/web` (Next.js 16) placeholder home showing API readiness + `/health/live`. Shared pieces: `HealthReportSchema` (`@floty/contracts`), `runHealthChecks` with per-check timeout (`@floty/core`), new `@floty/runtime` package (Nest health/connections modules, env helpers that never echo values). One multi-stage `Dockerfile` (digest-pinned base, `pnpm deploy --prod`, Next standalone, non-root, healthchecks); `docker-compose.yml` with Postgres+pgvector, Redis, Mailpit, api, worker, web (ports on 127.0.0.1, local-only default credentials, `.env.example`). `e2e/` Playwright smoke on phone + desktop; CI job **E2E smoke (Docker Compose)**; Dependabot for docker/compose. Checks run: `pnpm check` green (81 unit tests, coverage ≥ 90% everywhere); `docker compose up --wait` → all 6 services healthy; Playwright smoke 8/8 passing against Compose; stopping Postgres → api ready 503 + web shows "starting up", recovers on restart; containers run as `node`, stop in < 1 s; `pnpm dev` serves all three apps against Compose infra; actionlint + `docker compose config` clean. **Not yet proven:** the CI e2e job itself (runs on the PR). Local Docker builds in the cloud sandbox needed the session proxy CA (scratch Dockerfile, not committed).
+- **S4 Phase 1b (2026-10-16):** apps skeletons: `apps/api` + `apps/worker` (NestJS 12, ESM, Express 5) with `GET /health/live` and `/health/ready` (Postgres + Redis; 503 when down, body says only up/down), `apps/web` (Next.js 16) placeholder home showing API readiness + `/health/live`. Shared pieces: `HealthReportSchema` (`@pepper/contracts`), `runHealthChecks` with per-check timeout (`@pepper/core`), new `@pepper/runtime` package (Nest health/connections modules, env helpers that never echo values). One multi-stage `Dockerfile` (digest-pinned base, `pnpm deploy --prod`, Next standalone, non-root, healthchecks); `docker-compose.yml` with Postgres+pgvector, Redis, Mailpit, api, worker, web (ports on 127.0.0.1, local-only default credentials, `.env.example`). `e2e/` Playwright smoke on phone + desktop; CI job **E2E smoke (Docker Compose)**; Dependabot for docker/compose. Checks run: `pnpm check` green (81 unit tests, coverage ≥ 90% everywhere); `docker compose up --wait` → all 6 services healthy; Playwright smoke 8/8 passing against Compose; stopping Postgres → api ready 503 + web shows "starting up", recovers on restart; containers run as `node`, stop in < 1 s; `pnpm dev` serves all three apps against Compose infra; actionlint + `docker compose config` clean. **Not yet proven:** the CI e2e job itself (runs on the PR). Local Docker builds in the cloud sandbox needed the session proxy CA (scratch Dockerfile, not committed).
 
 - **S5 Phase 1c (2026-10-16):** shared config, logging, telemetry and integration tests.
-  - **Config:** `loadServiceConfig` in `@floty/runtime` replaces the per-app `loadEnv`. It is validated with Zod; errors name the variable but never its value; empty means unset. Adds `LOG_LEVEL`, `DEPLOYMENT_ENVIRONMENT`, `RELEASE`, `SENTRY_DSN` and `OTEL_EXPORTER_OTLP_ENDPOINT`.
+  - **Config:** `loadServiceConfig` in `@pepper/runtime` replaces the per-app `loadEnv`. It is validated with Zod; errors name the variable but never its value; empty means unset. Adds `LOG_LEVEL`, `DEPLOYMENT_ENVIRONMENT`, `RELEASE`, `SENTRY_DSN` and `OTEL_EXPORTER_OTLP_ENDPOINT`.
   - **Logging:** pino logger with one `redact` path (sensitive keys; emails, phones, URL credentials and bearer tokens in free text), Nest logger adapter, `x-request-id` and one log line per request (no query string).
   - **Correlation:** `request_id` (AsyncLocalStorage) and `trace_id`/`span_id` on every log line.
   - **Tracing and errors:** OpenTelemetry tracing (http, express, pg, ioredis → OTLP/HTTP; query strings redacted) and Sentry errors-only (all data collection off, events redacted). Each is off unless its env var is set.
-  - **Start-up:** `node --import ./dist/instrument.js` preload via the new `@floty/runtime/instrument` entry. `createServiceApp` does the shared Nest wiring, flushes telemetry on shutdown and reports unexpected errors.
-  - **Testing:** new `@floty/testing` package with Testcontainers Postgres/Redis (images read from `docker-compose.yml`) and a recording HTTP server. Integration tests are `*.int.test.ts` run by `pnpm test:integration`; CI job **Integration (Testcontainers)** runs them.
+  - **Start-up:** `node --import ./dist/instrument.js` preload via the new `@pepper/runtime/instrument` entry. `createServiceApp` does the shared Nest wiring, flushes telemetry on shutdown and reports unexpected errors.
+  - **Testing:** new `@pepper/testing` package with Testcontainers Postgres/Redis (images read from `docker-compose.yml`) and a recording HTTP server. Integration tests are `*.int.test.ts` run by `pnpm test:integration`; CI job **Integration (Testcontainers)** runs them.
   - **Docs:** ADR-0009 (accepted by the user before S6); dev-setup, observability and dependency-map updated.
   - **Checks run:**
     - `pnpm check` green: 145 unit tests; runtime coverage 97.6% lines / 91.7% branches; every other package 100%.
@@ -41,19 +41,19 @@
 - **Maintenance (2026-10-16, after S5):** PR #6 (S5) merged into `main` by Claude at the user's request ("you do the work"). Dependabot PR #5 (Node 22 → 25 Docker image) closed: Node stays on 22 LTS, and Dependabot now ignores Node majors for the Docker image. Added a SessionStart hook for cloud sessions (`.claude/hooks/session-start.sh`: `pnpm install`, start `dockerd`), tested from a clean state (no `node_modules`, Docker stopped) and on a re-run.
 
 - **S6 Phase 2a (2026-10-16):** database layer and tenant isolation.
-  - **`@floty/db` (new):** Drizzle 0.45 schema, SQL migrations (drizzle-kit 0.31 generates; hand-written migrations add what it cannot express), and repositories. It is the only package that talks to Postgres.
-  - **Migrations:** `0000` creates the `floty_app` group role, `current_tenant_id()` and `set_updated_at()`. `0001` creates `tenants` and `memberships` with their `tenant_isolation` policies. `0002` adds `FORCE ROW LEVEL SECURITY` and the `updated_at` triggers.
+  - **`@pepper/db` (new):** Drizzle 0.45 schema, SQL migrations (drizzle-kit 0.31 generates; hand-written migrations add what it cannot express), and repositories. It is the only package that talks to Postgres.
+  - **Migrations:** `0000` creates the `pepper_app` group role, `current_tenant_id()` and `set_updated_at()`. `0001` creates `tenants` and `memberships` with their `tenant_isolation` policies. `0002` adds `FORCE ROW LEVEL SECURITY` and the `updated_at` triggers.
   - **Tenant context:** `withTenant(db, tenantId, work)` sets the tenant transaction-locally with a bound parameter.
-  - **Migrate step:** `runMigrations` (serialised by an advisory lock) and `provisionAppRole` (creates or updates the login role, refuses privileged roles). They run from the `migrate` CLI, `pnpm db:migrate`, and the one-shot Compose `migrate` service. api and worker now connect as `floty_service`.
-  - **Readiness:** the probe moved from runtime to `@floty/db` (`DatabaseHandle.ping`) and fails if the role bypasses RLS. Runtime exports a `DATABASE` token.
+  - **Migrate step:** `runMigrations` (serialised by an advisory lock) and `provisionAppRole` (creates or updates the login role, refuses privileged roles). They run from the `migrate` CLI, `pnpm db:migrate`, and the one-shot Compose `migrate` service. api and worker now connect as `pepper_service`.
+  - **Readiness:** the probe moved from runtime to `@pepper/db` (`DatabaseHandle.ping`) and fails if the role bypasses RLS. Runtime exports a `DATABASE` token.
   - **Contracts:** `TenantId`, `UserId`, `TenantSlug`, `TimeZone`, `Locale`, `MembershipRole`, `NewTenant`.
-  - **Testing:** `postgresUrlAs` added to `@floty/testing`.
+  - **Testing:** `postgresUrlAs` added to `@pepper/testing`.
   - **Docs:** ADR-0010 (accepted by the user, 2026-10-16); data-model, dependency-map, dev-setup, testing-strategy, security-and-tenancy and traceability (AC-X-1) updated.
   - **Checks run:**
     - `pnpm check` green: db 22 unit tests, 97% statements / 100% branches; contracts 67 tests; runtime 74 tests.
     - `pnpm test:integration` green, 6 files / 55 tests. db: 51 tests (migrations, provisioning, repositories, cross-tenant suite 30/30).
     - Mutation checks, each caught: a policy `USING (true)` → 6 failures; `FORCE` removed → catalog test fails; session-wide `set_config` → 6 failures; no `NULLIF` → 4 failures; a schema change without a migration → drift test fails.
-    - Docker images built. `docker compose up --wait` → 6 services healthy and `migrate` exited 0; also with `up --build` (api image built from cache twice, harmless). A second `up` re-runs `migrate` idempotently. Playwright smoke 8/8. `pg_stat_activity` shows api and worker connected as `floty_service`. `pnpm db:migrate` works against Compose Postgres.
+    - Docker images built. `docker compose up --wait` → 6 services healthy and `migrate` exited 0; also with `up --build` (api image built from cache twice, harmless). A second `up` re-runs `migrate` idempotently. Playwright smoke 8/8. `pg_stat_activity` shows api and worker connected as `pepper_service`. `pnpm db:migrate` works against Compose Postgres.
   - **CI on PR #8:** all three required checks green (lint/typecheck/test/build, Integration, E2E smoke with the `migrate` service).
   - **Findings:**
     - drizzle-kit needs a relative `--out` path and exits 0 even on errors, so the drift test also checks its "No schema changes" message.
@@ -78,8 +78,8 @@
     - Screens: sign in (TOTP or backup code), sign up, create business (slug suggested from the name, browser time zone), two-step setup (QR via `uqr`, manual key, backup codes), and a signed-in home with business switcher and sign-out.
     - Pages route to the next required step.
   - **Also:**
-    - `@floty/contracts`: account schemas.
-    - `@floty/testing`: RFC 6238 `totpCode`.
+    - `@pepper/contracts`: account schemas.
+    - `@pepper/testing`: RFC 6238 `totpCode`.
     - Compose and `.env.example`: auth variables.
     - `.pnpmfile.cjs`: keeps only better-auth's `drizzle-orm`/`pg` peers. api image 1.26 GB → 461 MB; it was 426 MB before S7.
   - **Checks run:**
@@ -113,7 +113,7 @@
   - **Not yet proven:** CI on the PR (opened at the user's request after accepting ADR-0013).
   - **Findings:**
     - With RLS on, an insert without a tenant fails the policy's WITH CHECK (42501) before the NOT NULL constraint.
-    - The worker image now carries `@floty/db` through `@floty/core` (it already had it for readiness).
+    - The worker image now carries `@pepper/db` through `@pepper/core` (it already had it for readiness).
     - AC-W9-1 also asks for RLS-level enforcement: the staff-scoped policy belongs on the bookings and notes tables (Phase 3).
 
 - **S9 Phase 2c, part 2 (2026-10-17):** invites, Team screen, security review, Phase 2 exit ([ADR-0014](../adr/0014-invites.md), accepted by the user).
@@ -144,7 +144,7 @@
     - Tables `services`, `staff_members`, `staff_services`, `working_hours`, `time_off`: forced RLS, composite `(tenant_id, id)` foreign keys, check constraints mirroring the contracts.
     - Case-insensitive unique service names, one staff member per membership (unlinked when the member is removed), and an exclusion constraint against overlapping hours (`btree_gist`).
     - Repositories. Migrations 0011–0012.
-  - **modules/appointments** (new `@floty/appointments`, L2): `listServices`/`createService`/`updateService`, `listStaff`/`createStaffMember`/`updateStaffMember`, `getWorkingHours`/`replaceWorkingHours` (locked, whole week), `listTimeOff`/`addTimeOff`/`removeTimeOff` (staff: own linked staff member only). Audit entries are written in the same transaction; an unchanged save is not audited.
+  - **modules/appointments** (new `@pepper/appointments`, L2): `listServices`/`createService`/`updateService`, `listStaff`/`createStaffMember`/`updateStaffMember`, `getWorkingHours`/`replaceWorkingHours` (locked, whole week), `listTimeOff`/`addTimeOff`/`removeTimeOff` (staff: own linked staff member only). Audit entries are written in the same transaction; an unchanged save is not audited.
   - **api:** `GET/POST /v1/services`, `PUT /v1/services/:id`; `GET/POST /v1/staff`, `PUT /v1/staff/:id`; `GET/PUT /v1/staff/:id/hours`; `GET/POST /v1/staff/:id/time-off`, `DELETE …/time-off/:timeOffId`.
   - **Checks run:**
     - `pnpm check` green. Unit tests: contracts 208, core 483, db 33, appointments 11, runtime 75, testing 13, api 145, web 82, worker 3. Coverage: contracts 100% lines; appointments 100%; core 100%; api 96.6%; db 93.8% lines.
@@ -228,7 +228,7 @@
     - `TemplateIdSchema` (8 ids, in `tenancy.ts`).
     - `templateId` on `NewTenantSchema` (optional, `null` default), `BusinessSchema` and `tenant.created`.
     - The autonomy dial as a contract: `AutonomyActionSchema`, `AUTONOMY_ACTIONS` (risk tier, approved default, `allowsAuto`: never for bulk), `AutonomySettingsSchema`.
-  - **templates (new `@floty/templates`):** `beauty-salon`, `barber`, `nails`, `spa`, `lash-brow`, `personal-trainer`, `massage`, `yoga-pilates-private`; parsed at load and frozen; `getTemplate`, `listTemplates`, `templateSummaries`, `templateRuleDefaults`. Workspace glob is now `packages/templates`; lint lets only apps import it.
+  - **templates (new `@pepper/templates`):** `beauty-salon`, `barber`, `nails`, `spa`, `lash-brow`, `personal-trainer`, `massage`, `yoga-pilates-private`; parsed at load and frozen; `getTemplate`, `listTemplates`, `templateSummaries`, `templateRuleDefaults`. Workspace glob is now `packages/templates`; lint lets only apps import it.
   - **db:** `tenants.template_id` (nullable, shape check), migration 0018.
   - **appointments:** `findAvailability`/`createBooking`/`changeBooking` take an optional `templateRuleDefaults` lookup (L2 does not import L3); the api passes the real one.
   - **api:** `POST /v1/tenants` takes `templateId` (unknown: 400), `GET /v1/tenant` returns it, `GET /v1/templates` (signed in, no business needed).
@@ -252,7 +252,7 @@
   - **Findings:** I first assumed barbers book on a 30-minute grid; the barber template uses 15. The api journey now uses the personal-trainer template (30). Drizzle 0.45 puts bound values in error messages, so any future logging of database errors must go through `redact`.
 
 - **S14 Phase 4a (2026-10-18):** design system, app shell, calendar day view ([ADR-0019](../adr/0019-design-system-and-app-shell.md), proposed). The user asked Claude to go ahead after the Session Brief without waiting, so the decisions below are Claude's recommendations, to review in the PR.
-  - **ui (new `@floty/ui`):**
+  - **ui (new `@pepper/ui`):**
     - `tokens.ts` holds the approved tokens (light/dark, radii, tap target, 960 px) and `contrastRatio`.
     - `theme.css` is the Tailwind v4 theme (CSS variables, `desk:` breakpoint, fonts, radii).
     - Components: `Logo`/`Mark`, `Icon`, `Card`, `buttonClass`/`chipClass`.
@@ -273,33 +273,42 @@
     - A staff-member Playwright journey (busy blocks): covered by unit tests and the api's AC-W9-1 tests; add it with the S15 booking screens, which need the invite flow anyway.
     - A batch client lookup: wait for S16.
 
+- **S14 follow-up: rename + theme (2026-10-18/19, [PCR-002](changes/PCR-002.md), approved by the user):**
+  - **Rename Floty → Pepper everywhere:** wordmark and page titles, docs, the mockup (`docs/mockups/pepper-prototype.html`), package scope `@pepper/*`, database roles `pepper_app` / `pepper_service` and the `pepper` dev database (migrations 0000 and 0007 edited in place), the migration advisory lock key ("pepper" in ASCII), cookie prefix `pepper.*`, 2-step login issuer `Pepper`, telemetry service names, Docker image and Compose project names, the `pepper.app/<business>` hint (display only, domain not registered).
+  - **Theme "A. Pepper green + chili accent":** pepper-green brand and green-leaning neutrals; new `accent` / `accent-soft` / `on-accent` (chili) for the mark and Pepper's own voice, never for status; "done" is teal, `danger` a deeper crimson; staff tints green / coral / amber; sample business color plum. New mark: chili speech bubble with a face and a green stem (ui `Logo`, favicon, mockup). Default staff color is now the brand green `#2a7230`.
+  - **Checks run:**
+    - Baseline before the change: `pnpm check` and `pnpm test:integration` (490) green. Docker had stopped in the sandbox and was restarted first.
+    - After: `pnpm check` green (ui 68 tests, +10 for the accent pairs; every other count unchanged). `pnpm test:integration` green, 490. Playwright 28/28 against api, worker and web on the renamed Compose infra. Mockup: contrast check all AA (now with `accent`), click-through 260/260 in 4 viewport/theme combos. `docker compose config` valid. Screenshots of the mockup and the sign-in page in light and dark.
+    - "Floty" now appears only in the notes that record the rename (STATUS, PCR-002, CHANGELOG, the rebuild note in `dev-setup.md`).
+  - **For you:** rebuild your local dev database once (`docker compose down --volumes`, then start as usual) and copy the new database names from `.env.example` into your `.env`. The old preview link of the mockup shows the old look until it is republished.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
 - **OpenAI cost:** $0 until Phase 6 (tests use a fake provider). At Phase 6 either add ~$5–10 credit with a hard monthly limit (recommended) or develop on a free local/free-tier model via the provider adapter and run evals on OpenAI before pilot.
 - **Sessions:** one feature-sized goal per session; every session starts with a Session Brief (see `CLAUDE.md`) and ends by updating this file.
-- **Mockups approved to start:** all 7 key screens, as a clickable HTML prototype, branded Floty, warm & friendly, mobile-first.
-- **Design direction approved by the user (S1 feedback: "all good", no changes):** raspberry brand (`#BE2759`/`#B01F52`) on warm neutrals, separate status colors (fern/amber/lake), Bricolage Grotesque (display) + Figtree (body), speech-bubble-with-a-face mark, lowercase "floty" wordmark. Details in `docs/mockups/README.md`. Avoided the generic cream + terracotta + serif look on purpose.
+- **Mockups approved to start:** all 7 key screens, as a clickable HTML prototype, branded Pepper, warm & friendly, mobile-first.
+- **Design direction approved by the user (S1 feedback: "all good", no changes):** raspberry brand (`#BE2759`/`#B01F52`) on warm neutrals, separate status colors (fern/amber/lake), Bricolage Grotesque (display) + Figtree (body), speech-bubble-with-a-face mark, lowercase wordmark. **Colors superseded on 2026-10-18 by the Pepper green + chili theme ([PCR-002](changes/PCR-002.md)); type, shape and voice unchanged.** Details in `docs/mockups/README.md`. Avoided the generic cream + terracotta + serif look on purpose.
 - **S2 decisions (user, 2026-10-16):** booking page shows prices and stylist photos (placeholders in the mockup); onboarding includes an optional client-import step (Vagaro/Fresha/Square/Booksy/CSV).
-- **Booking page uses the business's own brand color** (`biz` tokens; Floty raspberry only in the "Booking by floty" footer). Owners pick that color in onboarding (PCR-001, approved).
+- **Booking page uses the business's own brand color** (`biz` tokens; Pepper's own colors only in the "Booking by pepper" footer). Owners pick that color in onboarding (PCR-001, approved).
 - **Autonomy defaults approved:** create booking = Ask me; move/accept page requests/block/notes = Do it and tell me; confirmations & reminders = Just do it; rebooking nudges & waitlist offers = Ask me; bulk (>10) = Ask me, "Just do it" locked.
 - **Prototype sample business:** Juniper Hair Studio (salon template: "client", "stylist"); owner Ana Reyes; stylists Jess, Marco, Priya; mock "today" = Thu Oct 15 2026.
 - **Branch workflow (S3, user):** `main` is the integration branch (created from `ea2a951`). Each session works on a `claude/*` branch and opens a PR into `main`; the user reviews and merges; head branches are deleted after merge. The S1/S2 work had lived on `claude/sharp-noether-re1wo9`, which was never merged — always start a session from `main`.
 - **Lint/format: ESLint + Prettier** (user, S3), not Biome.
 - **TypeScript pinned to 6.0.x** until typescript-eslint supports 6.1+/7 (S3 finding; see dev-setup.md).
 - **Module format: ESM** for all packages (NodeNext). Confirmed in S4: Nest 12 ships ESM, so api/worker run as native ESM.
-- **S4 defaults (Claude, user to confirm or change):** NestJS on Express (not Fastify); Vitest compiles Nest code with SWC; shared Nest wiring lives in a new `packages/runtime` (`@floty/runtime`) that S5 extends with config/logger/telemetry; the readiness `SELECT 1` lives in runtime until `packages/db` exists (Phase 2); web unit tests cover `lib/` and route handlers, pages are covered by Playwright.
-- **S5 defaults — ADR-0009, accepted by the user (2026-10-16, S6 start):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@floty/runtime/instrument` (lint allows exactly this one); `@floty/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
+- **S4 defaults (Claude, user to confirm or change):** NestJS on Express (not Fastify); Vitest compiles Nest code with SWC; shared Nest wiring lives in a new `packages/runtime` (`@pepper/runtime`) that S5 extends with config/logger/telemetry; the readiness `SELECT 1` lives in runtime until `packages/db` exists (Phase 2); web unit tests cover `lib/` and route handlers, pages are covered by Playwright.
+- **S5 defaults — ADR-0009, accepted by the user (2026-10-16, S6 start):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@pepper/runtime/instrument` (lint allows exactly this one); `@pepper/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
 - **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images.
 - **D10 resolved (user, 2026-10-16, S7 start): SeaweedFS** for dev/CI object storage ([ADR-0011](../adr/0011-dev-object-storage-seaweedfs.md)). It is added to Compose in Phase 4, when stylist photos first need storage; not in S7.
 - **GitHub settings done by the user (2026-10-16, before S6):** default branch is `main`; branch protection on `main` requires a PR and the three CI checks (**CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)**, **CI / E2E smoke (Docker Compose)**); head branches are deleted automatically after merge; stale branches deleted.
 - **Phase 2 order confirmed (user, S6 start):** S6 db + tenancy/RLS → S7 auth → S8 roles/audit. **ADR-0009 accepted** (user, S6 start).
 - **S6 defaults — ADR-0010, accepted by the user (2026-10-16, end of S6):**
-  - (a) The services connect as their own login role (`floty_service`), a member of the `floty_app` group role. The migrate step creates and updates it from `DATABASE_URL`, using a separate `MIGRATION_DATABASE_URL` for the owner. Readiness fails for a role that bypasses RLS.
+  - (a) The services connect as their own login role (`pepper_service`), a member of the `pepper_app` group role. The migrate step creates and updates it from `DATABASE_URL`, using a separate `MIGRATION_DATABASE_URL` for the owner. Readiness fails for a role that bypasses RLS.
   - (b) IDs are UUID v7, generated in the app with the `uuid` package (Postgres 17 has no `uuidv7()`).
   - (c) The `users` table waits for S7, so Better Auth shapes it. `memberships.user_id` has no foreign key until then.
   - (d) RLS goes through a `current_tenant_id()` SQL function with `NULLIF`. `tenant_id` defaults to it, so repositories never take a tenant id.
-  - (e) `runtime` may import `db` (lint and dependency map updated). The api image carries the migrate CLI (`@floty/db` is a direct api dependency).
+  - (e) `runtime` may import `db` (lint and dependency map updated). The api image carries the migrate CLI (`@pepper/db` is a direct api dependency).
   - (f) Repositories, migrations and RLS are covered by integration tests and excluded from the unit coverage gate.
 - **S7 defaults — ADR-0012, accepted by the user (2026-10-17, end of S7):**
   - (a) Auth tables are global (no RLS), classified in the isolation suite, reached only through `authDatabaseAdapter`.
@@ -313,7 +322,7 @@
   - (i) Out of S7: email verification and password reset (Phase 5), social login (Phase 10), breached-password check, edge proxy and CSP/HSTS (Phase 11).
 - **S8 decisions (user, 2026-10-17, S8 Session Brief):** (1) managers need MFA like owners; (2) permission matrix as proposed (owner everything; manager everything except deleting the business, billing and changes to owners; staff: business, services, team calendar, only their own bookings and notes); (3) Phase 2c split into S8 and S9; (4) at most 5 businesses per owner.
 - **S8 defaults — ADR-0013, accepted by the user (2026-10-17, end of S8):**
-  - (a) Domain services live in `@floty/core` (`src/services/`) and call `@floty/db`, so AI tools (Phase 6) use the same code as the UI; the api keeps thin binding services (`TenancyService`, `TeamService`). Core's database-backed services are integration-tested and excluded from its unit coverage gate.
+  - (a) Domain services live in `@pepper/core` (`src/services/`) and call `@pepper/db`, so AI tools (Phase 6) use the same code as the UI; the api keeps thin binding services (`TenancyService`, `TeamService`). Core's database-backed services are integration-tested and excluded from its unit coverage gate.
   - (b) Route guards check the permission "at all"; services check it again and apply record scope.
   - (c) Audit entries carry only allowlisted fields per action (no names, emails, free text), the request id, and survive user deletion with the actor nulled; managers can read the audit log.
   - (d) Usage periods are UTC months, not the business's time zone.
@@ -334,7 +343,7 @@
   - Time off is UTC with no reason field, visible to the whole team.
   - No delete endpoints yet (deactivate instead).
   - Staff names stay out of the audit log, so a name-only change is not audited.
-  - Default staff colour is the raspberry brand colour.
+  - Default staff colour is the brand colour (pepper green `#2a7230` since PCR-002).
 - **S11 decisions (user, 2026-10-17, S11 Session Brief):**
   - (1) **Store rules now** (table, RLS, `GET/PUT /v1/rules`), not just the pure engine.
   - (2) **Time zones with the built-in `Intl`**, no date library; fast-check only as a dev dependency.
@@ -368,11 +377,12 @@
   - Work without a user (jobs, the booking page) keeps the full tenant scope; member requests use `withMember`.
 - **After S12 (user, 2026-10-17):** ADR-0017 accepted as proposed. **Staff may find any client by exact email or phone** (Claude's recommendation, chosen by the user) and then book them; they still cannot add clients (`clients.manage` stays owners and managers; matrix unchanged). Built with the Phase 4 booking screens. S12 PR opened and merged at the user's request.
 - **S13 decisions (user, 2026-10-18, S13 Session Brief): all four recommendations.**
-  - (1) **One `@floty/templates` package** with a data file per template, not one package per industry.
+  - (1) **One `@pepper/templates` package** with a data file per template, not one package per industry.
   - (2) **`template_id` nullable**, optional in the API now (no template = platform defaults); onboarding makes it required in the UI (Phase 4/9).
   - (3) **Schema tests now; onboarding fixtures in Phase 9 and eval sets in Phase 6**, for all eight templates.
   - (4) **Claude drafts the template content** (menus, durations, prices, rules); the user reviews it in the PR.
 - **S13 defaults — ADR-0018, accepted by the user (2026-10-18, "all good"):** rule defaults reach the appointments services through a lookup the api passes in; templates are parsed at load and frozen; `GET /v1/templates` needs a session but no business; autonomy defaults are empty in all eight templates (the platform's approved defaults apply); no template caps bookings per day; the nine autonomy actions and their tiers as listed in `trust.ts`.
+- **Rename + theme (user, 2026-10-18, after S14):** rename Floty → Pepper everywhere and use theme "A. Pepper green + chili accent" (the user's pick), only those two things, in this session; S15 and the rest of the plan stay as planned. Decisions: edit the first migrations in place and rebuild local databases (no rename migration); teal "done", chili as an accent only, plum sample business; `pepper.app` in the address hint. Recorded in [PCR-002](changes/PCR-002.md).
 - **S14 (2026-10-18): the user said "give me the Session Brief, then continue"** and asked for the PR to be opened and merged at the end. Claude went ahead on its recommendations, to be confirmed or changed in review:
   - **Phase 4 split** into S14–S18 (see Planned sessions).
   - **Tailwind v4 + self-hosted fonts**, Radix only when a screen needs a dialog or menu (ADR-0019).

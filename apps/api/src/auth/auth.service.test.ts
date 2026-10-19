@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import type { Database } from '@floty/db';
+import type { Database } from '@pepper/db';
 import { describe, expect, it, vi } from 'vitest';
 import { BetterAuthService } from './auth.service.js';
 import type { BetterAuth } from './better-auth.js';
@@ -24,13 +24,13 @@ describe('BetterAuthService.getSession', () => {
       session: { id: 's1', token: 'secret-token', activeTenantId: TENANT },
       user: { id: USER, name: 'Ana', email: 'ana@example.test', twoFactorEnabled: true },
     });
-    await expect(service.getSession({ cookie: 'floty.session_token=x' })).resolves.toEqual({
+    await expect(service.getSession({ cookie: 'pepper.session_token=x' })).resolves.toEqual({
       id: 's1',
       user: { id: USER, name: 'Ana', email: 'ana@example.test', twoFactorEnabled: true },
       activeTenantId: TENANT,
     });
     const [[{ headers }]] = getSession.mock.calls as unknown as [[{ headers: Headers }]];
-    expect(headers.get('cookie')).toBe('floty.session_token=x');
+    expect(headers.get('cookie')).toBe('pepper.session_token=x');
   });
 
   it('treats missing optional fields as "no business" and "no second factor"', async () => {

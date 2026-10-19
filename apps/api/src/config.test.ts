@@ -16,8 +16,8 @@ describe('loadApiConfig', () => {
 
   it('reads the auth settings', () => {
     expect(
-      loadApiConfig({ ...required, AUTH_BASE_URL: 'https://app.floty.example/' }).auth,
-    ).toEqual({ secret: SECRET, baseUrl: 'https://app.floty.example' });
+      loadApiConfig({ ...required, AUTH_BASE_URL: 'https://app.pepper.example/' }).auth,
+    ).toEqual({ secret: SECRET, baseUrl: 'https://app.pepper.example' });
   });
 
   it('requires DATABASE_URL and REDIS_URL', () => {
@@ -34,8 +34,8 @@ describe('loadApiConfig', () => {
   });
 
   it.each([
-    ['http outside localhost', 'http://app.floty.example'],
-    ['a path', 'https://app.floty.example/app'],
+    ['http outside localhost', 'http://app.pepper.example'],
+    ['a path', 'https://app.pepper.example/app'],
     ['another scheme', 'ftp://localhost'],
   ])('rejects an AUTH_BASE_URL with %s', (_label, url) => {
     expect(() => loadApiConfig({ ...required, AUTH_BASE_URL: url })).toThrow(

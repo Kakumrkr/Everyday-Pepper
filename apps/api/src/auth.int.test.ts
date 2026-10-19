@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
 import { Writable } from 'node:stream';
-import { addDays, formatDate, fromZoned, parseDate, toZoned } from '@floty/appointments';
+import { addDays, formatDate, fromZoned, parseDate, toZoned } from '@pepper/appointments';
 import {
   ApiErrorSchema,
   AuditLogResponseSchema,
@@ -34,7 +34,7 @@ import {
   TimeOffSchema,
   WeeklyHoursSchema,
   UserIdSchema,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   accounts,
   addMembership,
@@ -46,15 +46,15 @@ import {
   withTenant,
   type Database,
   type DatabaseHandle,
-} from '@floty/db';
-import { createLogger, createServiceApp, DATABASE } from '@floty/runtime';
+} from '@pepper/db';
+import { createLogger, createServiceApp, DATABASE } from '@pepper/runtime';
 import {
   postgresUrlAs,
   startPostgres,
   startRedis,
   totpCodeFromUri,
   type TestService,
-} from '@floty/testing';
+} from '@pepper/testing';
 import type { INestApplication } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
 import request from 'supertest';
@@ -77,7 +77,7 @@ let ipCounter = 0;
 
 beforeAll(async () => {
   [postgres, redis] = await Promise.all([startPostgres(), startRedis()]);
-  const databaseUrl = postgresUrlAs(postgres.url, 'floty_service', 'test-password');
+  const databaseUrl = postgresUrlAs(postgres.url, 'pepper_service', 'test-password');
   await prepareDatabase(postgres.url, databaseUrl);
   const config = loadApiConfig({
     DATABASE_URL: databaseUrl,
@@ -172,7 +172,7 @@ describe('owner journey', () => {
       .post('/api/auth/sign-up/email', { name: 'Ana Reyes', email: anaEmail, password: PASSWORD })
       .expect(200);
     const cookies = ([] as string[]).concat(response.headers['set-cookie'] ?? []);
-    const session = cookies.find((c) => c.startsWith('floty.session_token='));
+    const session = cookies.find((c) => c.startsWith('pepper.session_token='));
     expect(session).toMatch(/HttpOnly/i);
     expect(session).toMatch(/SameSite=Lax/i);
     expect(session).toMatch(/Path=\//);

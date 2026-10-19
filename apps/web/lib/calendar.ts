@@ -6,7 +6,7 @@ import {
   toZoned,
   type CivilDate,
   type StaffMember,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 
 // The calendar day view (S14): which day and staff to show, and where each appointment sits
 // on the business's wall clock. Everything here is pure; the page loads the data.

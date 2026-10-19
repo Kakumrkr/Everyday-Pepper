@@ -1,4 +1,4 @@
-import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@floty/contracts';
+import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@pepper/contracts';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';

@@ -8,7 +8,7 @@ import {
   type Invite,
   type MeResponse,
   type Member,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import type { z } from 'zod';
 
 export interface ApiCallOptions {

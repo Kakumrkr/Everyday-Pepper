@@ -11,7 +11,7 @@ import {
   type StaffMemberId,
   type TenantId,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { sql } from 'drizzle-orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -340,7 +340,7 @@ async function seedBooking(tx: TenantTx): Promise<string> {
 async function seedStaff(tx: TenantTx): Promise<StaffMemberId> {
   const staff = await insertStaffMember(tx, {
     displayName: 'Jess',
-    color: '#be2759',
+    color: '#2a7230',
     active: true,
     membershipId: null,
   });

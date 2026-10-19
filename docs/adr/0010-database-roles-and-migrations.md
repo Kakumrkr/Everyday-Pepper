@@ -8,8 +8,8 @@ ADR-0002 decided on row-level security (RLS) keyed on `app.tenant_id`, an app ro
 ## Decision
 - **Three roles.**
   - The **migration role** (`MIGRATION_DATABASE_URL`; in Compose, the `POSTGRES_USER` superuser) owns the schema and runs migrations. It needs `CREATEROLE`.
-  - **`floty_app`** (NOLOGIN, created by migration 0000) holds the services' privileges: `USAGE` on `public`, plus `SELECT/INSERT/UPDATE/DELETE` on every table, granted through default privileges.
-  - The **services' login role** (`DATABASE_URL`, `floty_service` in Compose) is a member of `floty_app`. It is not a superuser, has no `BYPASSRLS`/`CREATEROLE`/`CREATEDB`, and owns nothing.
+  - **`pepper_app`** (NOLOGIN, created by migration 0000) holds the services' privileges: `USAGE` on `public`, plus `SELECT/INSERT/UPDATE/DELETE` on every table, granted through default privileges.
+  - The **services' login role** (`DATABASE_URL`, `pepper_service` in Compose) is a member of `pepper_app`. It is not a superuser, has no `BYPASSRLS`/`CREATEROLE`/`CREATEDB`, and owns nothing.
 - **Provisioning.**
   - `prepareDatabase` (the `migrate` CLI, Compose's one-shot `migrate` service, `pnpm db:migrate`) applies migrations, then creates or updates the login role from `DATABASE_URL`'s user and password.
   - It refuses to touch a role that has elevated attributes, so a misconfigured URL fails instead of demoting an admin.

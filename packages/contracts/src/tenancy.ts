@@ -52,7 +52,7 @@ export type MembershipRole = z.infer<typeof MembershipRoleSchema>;
 
 /**
  * The industry template a business starts from (ADR-0018); the templates themselves are in
- * `templates.ts` and `@floty/templates`. V1: Beauty and Wellness & fitness (v1-scope.md).
+ * `templates.ts` and `@pepper/templates`. V1: Beauty and Wellness & fitness (v1-scope.md).
  */
 export const TemplateIdSchema = z.enum([
   'beauty-salon',

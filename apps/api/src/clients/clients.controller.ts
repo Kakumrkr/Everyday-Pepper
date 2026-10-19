@@ -4,8 +4,8 @@ import {
   ClientsQuerySchema,
   type Client,
   type ClientsResponse,
-} from '@floty/contracts';
-import type { TenantContext } from '@floty/core';
+} from '@pepper/contracts';
+import type { TenantContext } from '@pepper/core';
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';

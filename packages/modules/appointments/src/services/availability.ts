@@ -8,8 +8,8 @@ import {
   type RuleDefaults,
   type StaffMemberId,
   type TemplateId,
-} from '@floty/contracts';
-import { requirePermission, systemClock, type Actor, type Clock } from '@floty/core';
+} from '@pepper/contracts';
+import { requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
 import {
   findCurrentTenant,
   findService,
@@ -22,7 +22,7 @@ import {
   type Database,
   type ServiceRow,
   type TenantTx,
-} from '@floty/db';
+} from '@pepper/db';
 import { availableSlots, type ServiceToBook, type Slot } from '../availability/engine.js';
 import { LOAD_MARGIN_MS, staffAvailabilityOf, toAvailableSlot } from '../bookings/planning.js';
 import { ServiceNotFoundError, StaffMemberNotFoundError } from '../errors.js';
@@ -35,7 +35,7 @@ import { rowsToRules } from '../mapping.js';
 
 /**
  * The booking rule defaults of the business's industry template (ADR-0016's "template" step,
- * ADR-0018). The app passes `templateRuleDefaults` from `@floty/templates`: modules (L2) do not
+ * ADR-0018). The app passes `templateRuleDefaults` from `@pepper/templates`: modules (L2) do not
  * import templates (L3). Without it, only the platform defaults apply.
  */
 export type TemplateRuleDefaultsOf = (templateId: TemplateId | null) => Partial<RuleDefaults>;

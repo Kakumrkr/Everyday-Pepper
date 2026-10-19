@@ -1,5 +1,5 @@
-import type { ServiceName } from '@floty/contracts';
-import type { HealthCheck } from '@floty/core';
+import type { ServiceName } from '@pepper/contracts';
+import type { HealthCheck } from '@pepper/core';
 
 /** Injection token: the readiness checks, keyed by dependency name. */
 export const READINESS_CHECKS = Symbol('READINESS_CHECKS');

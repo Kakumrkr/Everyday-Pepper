@@ -46,22 +46,22 @@ importers:
 
   apps/api:
     dependencies:
-      '@floty/appointments':
+      '@pepper/appointments':
         specifier: workspace:*
         version: link:../../packages/modules/appointments
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@floty/core':
+      '@pepper/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@floty/db':
+      '@pepper/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@floty/runtime':
+      '@pepper/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
-      '@floty/templates':
+      '@pepper/templates':
         specifier: workspace:*
         version: link:../../packages/templates
       '@nestjs/common':
@@ -86,10 +86,10 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@floty/testing':
+      '@pepper/testing':
         specifier: workspace:*
         version: link:../../packages/testing
       '@nestjs/testing':
@@ -122,10 +122,10 @@ importers:
 
   apps/web:
     dependencies:
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@floty/ui':
+      '@pepper/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -144,7 +144,7 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@fontsource-variable/bricolage-grotesque':
@@ -174,13 +174,13 @@ importers:
 
   apps/worker:
     dependencies:
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@floty/core':
+      '@pepper/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@floty/runtime':
+      '@pepper/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
       '@nestjs/common':
@@ -199,10 +199,10 @@ importers:
         specifier: ^7.8.2
         version: 7.8.2
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@floty/testing':
+      '@pepper/testing':
         specifier: workspace:*
         version: link:../../packages/testing
       '@nestjs/testing':
@@ -232,14 +232,14 @@ importers:
 
   e2e:
     dependencies:
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../packages/contracts
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../packages/config
-      '@floty/testing':
+      '@pepper/testing':
         specifier: workspace:*
         version: link:../packages/testing
       '@playwright/test':
@@ -254,7 +254,7 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../config
       '@vitest/coverage-v8':
@@ -269,17 +269,17 @@ importers:
 
   packages/core:
     dependencies:
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@floty/db':
+      '@pepper/db':
         specifier: workspace:*
         version: link:../db
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../config
-      '@floty/testing':
+      '@pepper/testing':
         specifier: workspace:*
         version: link:../testing
       '@vitest/coverage-v8':
@@ -291,7 +291,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../contracts
       better-auth:
@@ -310,10 +310,10 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../config
-      '@floty/testing':
+      '@pepper/testing':
         specifier: workspace:*
         version: link:../testing
       '@types/pg':
@@ -331,20 +331,20 @@ importers:
 
   packages/modules/appointments:
     dependencies:
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../../contracts
-      '@floty/core':
+      '@pepper/core':
         specifier: workspace:*
         version: link:../../core
-      '@floty/db':
+      '@pepper/db':
         specifier: workspace:*
         version: link:../../db
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../../config
-      '@floty/testing':
+      '@pepper/testing':
         specifier: workspace:*
         version: link:../../testing
       '@vitest/coverage-v8':
@@ -362,13 +362,13 @@ importers:
 
   packages/runtime:
     dependencies:
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@floty/core':
+      '@pepper/core':
         specifier: workspace:*
         version: link:../core
-      '@floty/db':
+      '@pepper/db':
         specifier: workspace:*
         version: link:../db
       '@opentelemetry/api':
@@ -417,10 +417,10 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../config
-      '@floty/testing':
+      '@pepper/testing':
         specifier: workspace:*
         version: link:../testing
       '@nestjs/common':
@@ -462,11 +462,11 @@ importers:
 
   packages/templates:
     dependencies:
-      '@floty/contracts':
+      '@pepper/contracts':
         specifier: workspace:*
         version: link:../contracts
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../config
       '@vitest/coverage-v8':
@@ -488,7 +488,7 @@ importers:
         specifier: ^12.2.1
         version: 12.2.1
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../config
       '@vitest/coverage-v8':
@@ -500,7 +500,7 @@ importers:
 
   packages/ui:
     devDependencies:
-      '@floty/config':
+      '@pepper/config':
         specifier: workspace:*
         version: link:../config
       '@types/react':

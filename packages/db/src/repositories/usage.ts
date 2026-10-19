@@ -4,7 +4,7 @@ import {
   UsagePeriodSchema,
   type UsageMetric,
   type UsagePeriod,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import { asc, eq, sql } from 'drizzle-orm';
 import { usageMeters } from '../schema.js';
 import type { TenantTx } from '../tenant.js';

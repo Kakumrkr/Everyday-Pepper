@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
-import { HealthReportSchema } from '@floty/contracts';
-import { ManualClock } from '@floty/core';
+import { HealthReportSchema } from '@pepper/contracts';
+import { ManualClock } from '@pepper/core';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -65,7 +65,7 @@ describe('GET /health/ready', () => {
   it('answers 503 with a report that hides the error', async () => {
     const server = (
       await start({
-        database: () => Promise.reject(new Error('password authentication failed for "floty"')),
+        database: () => Promise.reject(new Error('password authentication failed for "pepper"')),
         redis: () => Promise.resolve('PONG'),
       })
     ).getHttpServer() as Server;

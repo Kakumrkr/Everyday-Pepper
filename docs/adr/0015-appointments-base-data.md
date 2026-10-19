@@ -6,7 +6,7 @@
 Phase 3 builds the appointments module: rules, availability, bookings and a waitlist on top of what a business offers, who can be booked and when they work. Those base records come first (S10). They are tenant data, read by everyone in a business and changed by owners and managers. Staff need to block their own time without being able to rearrange the business.
 
 ## Decision
-1. **A new L2 package, `@floty/appointments`** (`packages/modules/appointments`), holds the domain services: services, staff, hours, time off; later the rules and availability engines, bookings and the waitlist. It depends on contracts, db and core only. Tables and repositories stay in `@floty/db` (no database access outside it). The api calls the module; Phase 6 AI tools will call the same functions.
+1. **A new L2 package, `@pepper/appointments`** (`packages/modules/appointments`), holds the domain services: services, staff, hours, time off; later the rules and availability engines, bookings and the waitlist. It depends on contracts, db and core only. Tables and repositories stay in `@pepper/db` (no database access outside it). The api calls the module; Phase 6 AI tools will call the same functions.
 2. **Tables** (all tenant-owned, forced RLS, `tenant_isolation`, in the isolation suite):
    - `services`:
      - Duration 5–720 minutes and buffers 0–240 minutes.
@@ -52,7 +52,7 @@ Phase 3 builds the appointments module: rules, availability, bookings and a wait
 
 ## Alternatives considered
 - **Every staff member is a membership** (`memberships.staff_member_id` in the original data model): rejected by the user. Owners must be able to list a stylist who never signs in.
-- **Domain services in `@floty/core`**: rejected by the user. Appointments is an L2 module, and core stays the platform layer.
+- **Domain services in `@pepper/core`**: rejected by the user. Appointments is an L2 module, and core stays the platform layer.
 - **Hours as UTC instants**: rejected, because they would shift by an hour at every daylight-saving change.
 - **Single-column foreign keys plus an app-level tenant check**: rejected. A missed check would be a silent cross-tenant link; the composite key makes it impossible.
 - **A single price, or a range only**: the user chose "from" with an optional "to", which covers fixed prices, "from $40" and "$40–60".

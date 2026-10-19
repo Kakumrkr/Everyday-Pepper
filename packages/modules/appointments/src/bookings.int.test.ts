@@ -9,7 +9,7 @@ import {
   type TemplateId,
   type TenantId,
   type UserId,
-} from '@floty/contracts';
+} from '@pepper/contracts';
 import {
   ClientNotFoundError,
   createBusiness,
@@ -19,7 +19,7 @@ import {
   listClients,
   ManualClock,
   type Actor,
-} from '@floty/core';
+} from '@pepper/core';
 import {
   addMembership,
   ClientEmailTakenError,
@@ -27,7 +27,7 @@ import {
   listOccupancy,
   withTenant,
   type Database,
-} from '@floty/db';
+} from '@pepper/db';
 import fc from 'fast-check';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
@@ -815,7 +815,7 @@ describe('under concurrency (property tests)', () => {
 });
 
 describe('industry template defaults (ADR-0018)', () => {
-  // A stand-in for `@floty/templates` (the app passes the real one; modules do not import it).
+  // A stand-in for `@pepper/templates` (the app passes the real one; modules do not import it).
   // Its values are made up to check the plumbing: a "barber" business gets a 30-minute grid and
   // 30 minutes' notice. The api journey test uses the real templates.
   const asked: (TemplateId | null)[] = [];

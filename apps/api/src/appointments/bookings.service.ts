@@ -8,7 +8,7 @@ import {
   listBookings,
   listBusyTimes,
   listWaitlist,
-} from '@floty/appointments';
+} from '@pepper/appointments';
 import type {
   AvailabilityQueryInput,
   AvailableSlot,
@@ -24,11 +24,11 @@ import type {
   WaitlistEntryId,
   WaitlistEntryInput,
   WaitlistQuery,
-} from '@floty/contracts';
-import type { Actor, TenantContext } from '@floty/core';
-import type { Database } from '@floty/db';
-import { currentRequestContext, DATABASE } from '@floty/runtime';
-import { templateRuleDefaults } from '@floty/templates';
+} from '@pepper/contracts';
+import type { Actor, TenantContext } from '@pepper/core';
+import type { Database } from '@pepper/db';
+import { currentRequestContext, DATABASE } from '@pepper/runtime';
+import { templateRuleDefaults } from '@pepper/templates';
 import { Inject, Injectable } from '@nestjs/common';
 
 /**

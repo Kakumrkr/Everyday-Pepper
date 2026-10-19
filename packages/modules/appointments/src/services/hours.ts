@@ -4,8 +4,8 @@ import {
   type StaffMemberId,
   type WeeklyHours,
   type WeeklyHoursInput,
-} from '@floty/contracts';
-import { requirePermission, type Actor } from '@floty/core';
+} from '@pepper/contracts';
+import { requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
   findStaffMember,
@@ -14,7 +14,7 @@ import {
   replaceWorkingHours as replaceWorkingHourRows,
   withTenant,
   type Database,
-} from '@floty/db';
+} from '@pepper/db';
 import { StaffMemberNotFoundError } from '../errors.js';
 import { hoursToMinutes, minutesToHours, sameValues } from '../mapping.js';
 

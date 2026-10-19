@@ -1,4 +1,4 @@
-import { StaffMemberSchema, type StaffMember } from '@floty/contracts';
+import { StaffMemberSchema, type StaffMember } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   calendarHref,
@@ -23,7 +23,7 @@ function staffMember(id: string, active = true): StaffMember {
   return StaffMemberSchema.parse({
     id,
     displayName: `Staff ${id.slice(-2)}`,
-    color: '#be2759',
+    color: '#2a7230',
     active,
     userId: null,
     serviceIds: [],

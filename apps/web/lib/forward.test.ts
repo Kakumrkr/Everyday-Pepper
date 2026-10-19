@@ -20,7 +20,7 @@ describe('forwardToApi', () => {
       body: JSON.stringify({ name: 'Juniper' }),
       headers: {
         'content-type': 'application/json',
-        cookie: 'floty.session_token=abc',
+        cookie: 'pepper.session_token=abc',
         origin: 'http://localhost:3000',
         'x-forwarded-for': '203.0.113.7',
         authorization: 'Bearer should-not-pass',
@@ -38,7 +38,7 @@ describe('forwardToApi', () => {
     const sent = new Headers(call?.init.headers);
     expect(Object.fromEntries(sent)).toEqual({
       'content-type': 'application/json',
-      cookie: 'floty.session_token=abc',
+      cookie: 'pepper.session_token=abc',
       origin: 'http://localhost:3000',
       'x-forwarded-for': '203.0.113.7',
     });
@@ -58,8 +58,8 @@ describe('forwardToApi', () => {
       'x-powered-by': 'something',
       'content-encoding': 'gzip',
     });
-    headers.append('set-cookie', 'floty.session_token=a; HttpOnly; SameSite=Lax; Path=/');
-    headers.append('set-cookie', 'floty.session_data=; Max-Age=0; Path=/');
+    headers.append('set-cookie', 'pepper.session_token=a; HttpOnly; SameSite=Lax; Path=/');
+    headers.append('set-cookie', 'pepper.session_data=; Max-Age=0; Path=/');
     const { fetch } = upstream(new Response('{"ok":true}', { status: 200, headers }));
 
     const response = await forwardToApi(
@@ -70,8 +70,8 @@ describe('forwardToApi', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true });
     expect(response.headers.getSetCookie()).toEqual([
-      'floty.session_token=a; HttpOnly; SameSite=Lax; Path=/',
-      'floty.session_data=; Max-Age=0; Path=/',
+      'pepper.session_token=a; HttpOnly; SameSite=Lax; Path=/',
+      'pepper.session_data=; Max-Age=0; Path=/',
     ]);
     expect(response.headers.get('x-request-id')).toBe('req-1');
     expect(response.headers.get('x-powered-by')).toBeNull();

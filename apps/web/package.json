@@ -1,5 +1,5 @@
 {
-  "name": "@floty/web",
+  "name": "@pepper/web",
   "version": "0.0.0",
   "private": true,
   "description": "Owner/staff PWA and public booking page (Next.js). Renders and calls the API; no business logic.",
@@ -13,8 +13,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@floty/contracts": "workspace:*",
-    "@floty/ui": "workspace:*",
+    "@pepper/contracts": "workspace:*",
+    "@pepper/ui": "workspace:*",
     "next": "^16.4.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -22,7 +22,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@floty/config": "workspace:*",
+    "@pepper/config": "workspace:*",
     "@fontsource-variable/bricolage-grotesque": "5.3.0",
     "@fontsource-variable/figtree": "5.3.0",
     "@tailwindcss/postcss": "4.3.3",

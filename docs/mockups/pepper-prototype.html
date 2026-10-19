@@ -1,5 +1,5 @@
-<title>Floty Prototype</title>
-<meta name="description" content="Clickable mockup of Floty, the AI employee for appointment-based businesses: operator feed, chat with cards, and calendar.">
+<title>Pepper Prototype</title>
+<meta name="description" content="Clickable mockup of Pepper, the AI employee for appointment-based businesses: operator feed, chat with cards, and calendar.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
@@ -7,35 +7,39 @@
 /* Layout: phone-first app shell. Top bar, one scrolling view, and a thumb-zone dock (ask bar + tabs).
    From 960px it becomes sidebar + view, and Home gains a "today at a glance" rail. */
 :root {
-  /* Neutrals lean toward the raspberry brand so greys never look default. */
-  --bg: #FFF8F7;
+  /* Neutrals lean toward the pepper-green brand so greys never look default. */
+  --bg: #F7FAF5;
   --surface: #FFFFFF;
-  --surface-2: #FBEEEC;
-  --line: #EEDCD9;
-  --ink: #2B1B24;
-  --ink-2: #6A5560;
-  /* Brand: raspberry. --brand for text/icons on light surfaces, --brand-strong for filled buttons. */
-  --brand: #BE2759;
-  --brand-strong: #B01F52;
-  --brand-soft: #FDE5ED;
+  --surface-2: #EDF3EA;
+  --line: #DCE6D8;
+  --ink: #1B2A1E;
+  --ink-2: #536257;
+  /* Brand: pepper green. --brand for text/icons on light surfaces, --brand-strong for filled buttons. */
+  --brand: #2A7230;
+  --brand-strong: #23652A;
+  --brand-soft: #E2F0E0;
   --on-brand: #FFFFFF;
-  /* Semantic: done / needs your OK / info. Separate from the brand hue. */
-  --ok: #23703A;
-  --ok-soft: #E2F2E5;
+  /* Accent: chili. The mark, Pepper's own voice and highlights; never a status color. */
+  --accent: #C2361B;
+  --accent-soft: #FDE6DF;
+  --on-accent: #FFFFFF;
+  /* Semantic: done (teal) / needs your OK / info. Separate from the brand and accent hues. */
+  --ok: #0B6B63;
+  --ok-soft: #DDF1EE;
   --wait: #8F4C00;
   --wait-soft: #FFEFD6;
   --info: #1D65A8;
   --info-soft: #E2EEFA;
-  --danger: #B3261E;
-  /* The business's own brand, used on its public booking page (Juniper: deep teal). */
-  --biz: #0E6656; --biz-strong: #0D5E4F; --biz-soft: #DAF2EB; --biz-on: #FFFFFF;
+  --danger: #9F1D2B;
+  /* The business's own brand, used on its public booking page (Juniper: plum). */
+  --biz: #7A3B8F; --biz-strong: #6E3382; --biz-soft: #F3E6F7; --biz-on: #FFFFFF;
   /* Per-stylist calendar colours (soft fill + readable ink). */
-  --s1: #FCE3EC; --s1-ink: #8E1D47;
-  --s2: #DAF2EB; --s2-ink: #0D5E4F;
+  --s1: #E2F0DC; --s1-ink: #2D5C25;
+  --s2: #FDE4DB; --s2-ink: #8A2D14;
   --s3: #FFEFC7; --s3-ink: #7A4F00;
-  --hatch: rgba(106, 85, 96, .14);
-  --shadow: 0 1px 2px rgba(43, 27, 36, .06), 0 10px 28px rgba(43, 27, 36, .08);
-  --scrim: rgba(43, 27, 36, .42);
+  --hatch: rgba(83, 98, 87, .14);
+  --shadow: 0 1px 2px rgba(27, 42, 30, .06), 0 10px 28px rgba(27, 42, 30, .08);
+  --scrim: rgba(27, 42, 30, .42);
 
   --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -47,26 +51,26 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #161015; --surface: #211820; --surface-2: #2B2029; --line: #3B2D38;
-    --ink: #F8ECF1; --ink-2: #BDA8B3;
-    --brand: #FF7FA8; --brand-strong: #FF8FB3; --brand-soft: #46202F; --on-brand: #2A0D19;
-    --ok: #7FD69A; --ok-soft: #1D3324; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
-    --danger: #FFB4AB; --biz: #6FD9C0; --biz-strong: #7FE0C9; --biz-soft: #173A33; --biz-on: #062019;
-    --s1: #4A2032; --s1-ink: #FFC2D6; --s2: #173A33; --s2-ink: #A6EBD9; --s3: #3D3012; --s3-ink: #FFDE8A;
-    --hatch: rgba(189, 168, 179, .12);
+    --bg: #0F1510; --surface: #172019; --surface-2: #202A22; --line: #2F3B31;
+    --ink: #EAF3EA; --ink-2: #A7B7AA;
+    --brand: #86D28E; --brand-strong: #97DB9E; --brand-soft: #1B3320; --on-brand: #0A1F0D; --accent: #FF8C70; --accent-soft: #3D1E16; --on-accent: #2A0B04;
+    --ok: #6BD5C6; --ok-soft: #13322E; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
+    --danger: #FFB4AB; --biz: #DDA6F0; --biz-strong: #E5B6F5; --biz-soft: #3A2244; --biz-on: #23102B;
+    --s1: #1E3519; --s1-ink: #B5E3A8; --s2: #40211A; --s2-ink: #FFC4B3; --s3: #3D3012; --s3-ink: #FFDE8A;
+    --hatch: rgba(167, 183, 170, .12);
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
     --scrim: rgba(0, 0, 0, .6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #161015; --surface: #211820; --surface-2: #2B2029; --line: #3B2D38;
-  --ink: #F8ECF1; --ink-2: #BDA8B3;
-  --brand: #FF7FA8; --brand-strong: #FF8FB3; --brand-soft: #46202F; --on-brand: #2A0D19;
-  --ok: #7FD69A; --ok-soft: #1D3324; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
-    --danger: #FFB4AB; --biz: #6FD9C0; --biz-strong: #7FE0C9; --biz-soft: #173A33; --biz-on: #062019;
-  --s1: #4A2032; --s1-ink: #FFC2D6; --s2: #173A33; --s2-ink: #A6EBD9; --s3: #3D3012; --s3-ink: #FFDE8A;
-  --hatch: rgba(189, 168, 179, .12);
+  --bg: #0F1510; --surface: #172019; --surface-2: #202A22; --line: #2F3B31;
+  --ink: #EAF3EA; --ink-2: #A7B7AA;
+  --brand: #86D28E; --brand-strong: #97DB9E; --brand-soft: #1B3320; --on-brand: #0A1F0D; --accent: #FF8C70; --accent-soft: #3D1E16; --on-accent: #2A0B04;
+  --ok: #6BD5C6; --ok-soft: #13322E; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
+    --danger: #FFB4AB; --biz: #DDA6F0; --biz-strong: #E5B6F5; --biz-soft: #3A2244; --biz-on: #23102B;
+  --s1: #1E3519; --s1-ink: #B5E3A8; --s2: #40211A; --s2-ink: #FFC4B3; --s3: #3D3012; --s3-ink: #FFDE8A;
+  --hatch: rgba(167, 183, 170, .12);
   --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
   --scrim: rgba(0, 0, 0, .6);
   color-scheme: dark;
@@ -227,6 +231,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
 .av-ok { background: var(--ok-soft); color: var(--ok); }
 .av-wait { background: var(--wait-soft); color: var(--wait); }
 .av-brand { background: var(--brand-soft); color: var(--brand); }
+.av-accent { background: var(--accent-soft); color: var(--accent); }
 .av-info { background: var(--info-soft); color: var(--info); }
 .avatar svg.i { width: 20px; height: 20px; }
 
@@ -616,7 +621,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
 .linkbox { display: flex; gap: 8px; align-items: center; padding: 6px 6px 6px 14px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); }
 .linkbox code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 15px/1.2 var(--font-body); user-select: all; }
 
-/* booking page: the business's own brand replaces Floty's */
+/* booking page: the business's own brand replaces Pepper's */
 .bookpage { --brand: var(--biz); --brand-strong: var(--biz-strong); --brand-soft: var(--biz-soft); --on-brand: var(--biz-on); }
 .bookpage .biz-avatar { background: var(--biz-soft); color: var(--biz); }
 .date-strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
@@ -724,18 +729,19 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
     <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3.5L9 5.5h6L16.5 8H20v11H4Z"/><circle cx="12" cy="13" r="3.2"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></symbol>
     <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
-    <symbol id="i-floty" viewBox="0 0 40 40">
+    <symbol id="i-pepper" viewBox="0 0 40 40">
       <!-- Inline var() styles: class selectors can't reach inside <use> clones, but custom properties inherit. -->
-      <path style="fill:var(--brand-strong)" d="M20 3c9.9 0 17 6.6 17 15.2S29.9 33.4 20 33.4c-1.9 0-3.7-.2-5.4-.7L7 37l1.3-7.2C5 27 3 22.9 3 18.2 3 9.6 10.1 3 20 3Z"/>
-      <circle style="fill:var(--on-brand)" cx="14.2" cy="16.4" r="2.3"/><circle style="fill:var(--on-brand)" cx="25.8" cy="16.4" r="2.3"/>
-      <path style="fill:none;stroke:var(--on-brand);stroke-width:2.4;stroke-linecap:round" d="M14.4 22.6c3.2 3 8 3 11.2 0"/>
+      <path style="fill:var(--accent)" d="M20 5c9.9 0 17 6.2 17 14.4S29.9 33.8 20 33.8c-1.9 0-3.7-.2-5.4-.7L7 37.4l1.3-7.2C5 27.6 3 23.7 3 19.4 3 11.2 10.1 5 20 5Z"/>
+      <path style="fill:none;stroke:var(--brand-strong);stroke-width:3;stroke-linecap:round" d="M20 7.2c0-2.6 1.4-4.6 4.4-5.6"/>
+      <circle style="fill:var(--on-accent)" cx="14.2" cy="17.4" r="2.3"/><circle style="fill:var(--on-accent)" cx="25.8" cy="17.4" r="2.3"/>
+      <path style="fill:none;stroke:var(--on-accent);stroke-width:2.4;stroke-linecap:round" d="M14.4 23.6c3.2 3 8 3 11.2 0"/>
     </symbol>
   </defs>
 </svg>
 
 <div class="app" id="app">
   <aside class="side" aria-label="Main">
-    <a class="wordmark" href="#home" data-go="home" aria-label="Floty home"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg><b>floty</b></a>
+    <a class="wordmark" href="#home" data-go="home" aria-label="Pepper home"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-pepper"/></svg><b>pepper</b></a>
     <nav aria-label="Sections">
       <button class="side-link" data-go="home"><svg class="i"><use href="#i-home"/></svg>Home<span class="badge" data-needs-count>2</span></button>
       <button class="side-link" data-go="chat"><svg class="i"><use href="#i-chat"/></svg>Chat</button>
@@ -779,12 +785,12 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
               <h1 id="home-title">Good morning, Ana</h1>
             </div>
             <button class="ask-pill home-ask" data-go="chat" data-focus-composer>
-              <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg>
-              <span>Ask Floty to book, move or look up anything…</span>
+              <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-pepper"/></svg>
+              <span>Ask Pepper to book, move or look up anything…</span>
               <i class="go"><svg class="i"><use href="#i-send"/></svg></i>
             </button>
             <article class="briefing" aria-label="Daily briefing">
-              <div class="who"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true" style="width:24px;height:24px"><use href="#i-floty"/></svg>Your 8:00 am briefing</div>
+              <div class="who"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true" style="width:24px;height:24px"><use href="#i-pepper"/></svg>Your 8:00 am briefing</div>
               <p>Busy day: 13 appointments across your three stylists. Marco has a gap from 1:00 to 2:30, and Kim Sato cancelled Priya's 4:00 gloss last night. I found someone on the waitlist who wants that exact slot. Two things need your OK below.</p>
               <div class="stats">
                 <div class="stat"><b>13</b><span>appointments</span></div>
@@ -832,7 +838,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
     </section>
 
     <!-- CHAT -->
-    <section class="view" id="view-chat" aria-label="Chat with Floty" hidden>
+    <section class="view" id="view-chat" aria-label="Chat with Pepper" hidden>
       <div class="chat-scroll" id="chat-scroll">
         <div class="chat-log" id="chat-log" aria-live="polite"></div>
       </div>
@@ -840,8 +846,8 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
         <div class="composer-inner">
           <div class="chips" id="chat-chips" aria-label="Try asking"></div>
           <form class="composer" id="composer" autocomplete="off">
-            <label class="sr-only" for="composer-input">Message Floty</label>
-            <input id="composer-input" name="message" placeholder="Ask Floty…" enterkeyhint="send">
+            <label class="sr-only" for="composer-input">Message Pepper</label>
+            <input id="composer-input" name="message" placeholder="Ask Pepper…" enterkeyhint="send">
             <button class="send" type="submit" aria-label="Send"><svg class="i"><use href="#i-send"/></svg></button>
           </form>
         </div>
@@ -893,7 +899,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
         <div class="page-head"><div><p class="eyebrow">Trust</p><h1 id="know-title">What I know</h1></div></div>
         <p class="lede">Everything I remember about Juniper Hair Studio. Fix anything that's wrong. When you delete something, I forget it everywhere, including chat and bookings.</p>
         <form class="add-fact" id="know-add" autocomplete="off">
-          <label class="sr-only" for="know-add-input">Tell Floty something new</label>
+          <label class="sr-only" for="know-add-input">Tell Pepper something new</label>
           <input id="know-add-input" placeholder="Tell me something, like: we close at 3 on Christmas Eve">
           <button class="btn btn-primary" type="submit">Add</button>
         </form>
@@ -926,7 +932,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
     </section>
 
     <!-- ONBOARDING (full screen) -->
-    <section class="view" id="view-onboarding" aria-label="Set up Floty" hidden><div class="flow" id="ob-root"></div></section>
+    <section class="view" id="view-onboarding" aria-label="Set up Pepper" hidden><div class="flow" id="ob-root"></div></section>
 
     <!-- PUBLIC BOOKING PAGE (full screen, the business's brand) -->
     <section class="view bookpage" id="view-book" aria-label="Juniper Hair Studio booking page" hidden><div class="flow" id="book-root"></div></section>
@@ -936,12 +942,12 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
       <div class="view-inner" style="max-width:640px">
         <h1 id="more-title" style="font-size:28px">More</h1>
         <ul class="more-list">
-          <li><button data-go="brand"><span class="avatar av-brand"><svg class="i"><use href="#i-palette"/></svg></span><span class="grow"><b>Design direction</b><br><span class="small muted">Colors, type and the Floty wordmark</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
-          <li><button data-go="autonomy"><span class="avatar av-info"><svg class="i"><use href="#i-dial"/></svg></span><span class="grow"><b>Autonomy</b><br><span class="small muted">What Floty may do on its own</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
-          <li><button data-go="know"><span class="avatar av-ok"><svg class="i"><use href="#i-brain"/></svg></span><span class="grow"><b>What I know</b><br><span class="small muted">Facts and rules Floty remembers</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-go="brand"><span class="avatar av-brand"><svg class="i"><use href="#i-palette"/></svg></span><span class="grow"><b>Design direction</b><br><span class="small muted">Colors, type and the Pepper wordmark</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-go="autonomy"><span class="avatar av-info"><svg class="i"><use href="#i-dial"/></svg></span><span class="grow"><b>Autonomy</b><br><span class="small muted">What Pepper may do on its own</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-go="know"><span class="avatar av-ok"><svg class="i"><use href="#i-brain"/></svg></span><span class="grow"><b>What I know</b><br><span class="small muted">Facts and rules Pepper remembers</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
           <li><button data-go="team"><span class="avatar av-wait"><svg class="i"><use href="#i-scissors"/></svg></span><span class="grow"><b>Team &amp; services</b><br><span class="small muted">Stylists, roles, hours and your menu</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
           <li><button data-action="book-start"><span class="avatar av-ok"><svg class="i"><use href="#i-web"/></svg></span><span class="grow"><b>Booking page</b><br><span class="small muted">See what your clients see</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
-          <li><button data-action="ob-start"><span class="avatar av-brand"><svg class="i"><use href="#i-spark"/></svg></span><span class="grow"><b>Onboarding</b><br><span class="small muted">Replay the 10-minute setup</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-action="ob-start"><span class="avatar av-accent"><svg class="i"><use href="#i-spark"/></svg></span><span class="grow"><b>Onboarding</b><br><span class="small muted">Replay the 10-minute setup</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
           <li><button data-action="theme"><span class="avatar av-info"><svg class="i"><use href="#i-moon"/></svg></span><span class="grow"><b data-theme-label>Theme: system</b><br><span class="small muted">Switch between system, light and dark</span></span></button></li>
         </ul>
         <p class="fine">Mockup with sample data. Nothing here is saved or sent.</p>
@@ -953,19 +959,20 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
       <div class="view-inner" style="max-width:960px">
         <div class="brand-hero">
           <p class="eyebrow">Design direction · proposal for your feedback</p>
-          <h1 id="brand-title" class="sr-only">Floty design direction</h1>
-          <span class="wordmark"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg><b>floty</b></span>
-          <p>Your new front-desk employee. The mark is a speech bubble with a face: the product is someone you talk to, not a dashboard you click through. Lowercase, rounded and a little playful, so it feels at home in a salon or a studio.</p>
+          <h1 id="brand-title" class="sr-only">Pepper design direction</h1>
+          <span class="wordmark"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-pepper"/></svg><b>pepper</b></span>
+          <p>Your new front-desk employee. The mark is a chili-red speech bubble with a face and a green pepper stem: the product is someone you talk to, not a dashboard you click through. Lowercase, rounded and a little playful, so it feels at home in a salon or a studio.</p>
         </div>
 
         <h2 class="section-title">Color</h2>
-        <p class="muted" style="max-width:62ch">One brand color, raspberry, used for the things you act on. Status colors are separate so "needs your OK" never looks like a brand flourish. Every color has a dark-mode twin; all text pairs pass WCAG AA contrast.</p>
+        <p class="muted" style="max-width:62ch">Pepper green for the things you act on, chili red as a small accent for the mark and Pepper's own voice. Status colors are separate (done is teal, not green), and chili is never used for status, so it never looks like an error. Every color has a dark-mode twin; all text pairs pass WCAG AA contrast.</p>
         <div class="swatches">
-          <div class="sw"><i style="background:var(--brand-strong)"></i><div><b>Raspberry</b><br><code>brand · buttons, links</code></div></div>
-          <div class="sw"><i style="background:var(--brand-soft)"></i><div><b>Blush</b><br><code>brand-soft · highlights</code></div></div>
-          <div class="sw"><i style="background:var(--bg)"></i><div><b>Petal</b><br><code>bg · app background</code></div></div>
-          <div class="sw"><i style="background:var(--ink)"></i><div><b>Aubergine</b><br><code>ink · text</code></div></div>
-          <div class="sw"><i style="background:var(--ok)"></i><div><b>Fern</b><br><code>ok · done</code></div></div>
+          <div class="sw"><i style="background:var(--brand-strong)"></i><div><b>Pepper green</b><br><code>brand · buttons, links</code></div></div>
+          <div class="sw"><i style="background:var(--accent)"></i><div><b>Chili</b><br><code>accent · mark, Pepper's voice</code></div></div>
+          <div class="sw"><i style="background:var(--brand-soft)"></i><div><b>Sprout</b><br><code>brand-soft · highlights</code></div></div>
+          <div class="sw"><i style="background:var(--bg)"></i><div><b>Mist</b><br><code>bg · app background</code></div></div>
+          <div class="sw"><i style="background:var(--ink)"></i><div><b>Forest</b><br><code>ink · text</code></div></div>
+          <div class="sw"><i style="background:var(--ok)"></i><div><b>Lagoon</b><br><code>ok · done</code></div></div>
           <div class="sw"><i style="background:var(--wait)"></i><div><b>Amber</b><br><code>wait · needs your OK</code></div></div>
           <div class="sw"><i style="background:var(--info)"></i><div><b>Lake</b><br><code>info · tips</code></div></div>
           <div class="sw"><i style="background:linear-gradient(90deg,var(--s1) 0 33%,var(--s2) 33% 66%,var(--s3) 66%)"></i><div><b>Team tints</b><br><code>s1–s3 · calendar</code></div></div>
@@ -990,7 +997,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
           <p class="small muted">Soft 24px corners on cards, fully rounded buttons and pills, 44px minimum tap targets. Shadows only on things that float (sheets, toasts, the selected tab).</p>
         </div>
 
-        <h2 class="section-title">How Floty talks</h2>
+        <h2 class="section-title">How Pepper talks</h2>
         <div class="tone">
           <div class="card"><span class="pill pill-ok" style="align-self:start">Like this</span><p>"Booked Maria with Jess, Friday 5:15. I flagged her PPD allergy on the appointment."</p></div>
           <div class="card"><span class="pill pill-plain" style="align-self:start">Not this</span><p>"Success! Your appointment has been created successfully. 🎉"</p></div>
@@ -1005,8 +1012,8 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
 
   <nav class="dock" aria-label="Quick actions">
     <button class="ask-pill" data-go="chat" data-focus-composer>
-      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg>
-      <span>Ask Floty to book, move or look up…</span>
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-pepper"/></svg>
+      <span>Ask Pepper to book, move or look up…</span>
       <i class="go"><svg class="i"><use href="#i-send"/></svg></i>
     </button>
     <div class="tabs">
@@ -1029,7 +1036,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
   const icon = (id, cls = "i") => `<svg class="${cls}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
-  const mark = (size = 30) => `<svg class="mark" viewBox="0 0 40 40" aria-hidden="true" style="width:${size}px;height:${size}px"><use href="#i-floty"/></svg>`;
+  const mark = (size = 30) => `<svg class="mark" viewBox="0 0 40 40" aria-hidden="true" style="width:${size}px;height:${size}px"><use href="#i-pepper"/></svg>`;
 
   /* ---------------- sample data ---------------- */
   const STAFF = [
@@ -1160,8 +1167,8 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
         </div>
         <div class="draft" id="draft-lena" hidden>
           <p class="to"><span class="muted">To</span> <b>Lena Park</b> <span class="muted">· lena.p@example.com</span></p>
-          <label for="draft-lena-text">Email Floty drafted (you can edit it)</label>
-          <textarea id="draft-lena-text">Hi Lena! It's been a little while since your last cut with Marco. He has an opening tomorrow (Friday) at 1:00 pm. Want me to hold it for you? Just reply yes, or pick another time here: juniperhair.floty.app
+          <label for="draft-lena-text">Email Pepper drafted (you can edit it)</label>
+          <textarea id="draft-lena-text">Hi Lena! It's been a little while since your last cut with Marco. He has an opening tomorrow (Friday) at 1:00 pm. Want me to hold it for you? Just reply yes, or pick another time here: juniperhair.pepper.app
 
 Ana at Juniper Hair Studio</textarea>
         </div>
@@ -1208,7 +1215,7 @@ Ana at Juniper Hair Studio</textarea>
     jessbreak: () => `
       <article class="card feed-item" data-item="jessbreak">
         <div class="card-row">
-          <span class="avatar av-brand">${icon("spark")}</span>
+          <span class="avatar av-accent">${icon("spark")}</span>
           <div class="grow">
             <p class="title">Jess works 9:00 to 5:00 Friday with no lunch. Block 12:30–1:00 for her?</p>
             <p class="meta">She has a 2 h 15 m gap after Erin's balayage.</p>
@@ -1297,7 +1304,7 @@ Ana at Juniper Hair Studio</textarea>
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const tmp = document.createElement("div");
     tmp.className = "msg ai";
-    tmp.innerHTML = `${mark()}<div class="msg-body"><span class="typing" aria-label="Floty is typing"><i></i><i></i><i></i></span></div>`;
+    tmp.innerHTML = `${mark()}<div class="msg-body"><span class="typing" aria-label="Pepper is typing"><i></i><i></i><i></i></span></div>`;
     log().appendChild(tmp);
     scrollChat();
     setTimeout(() => { tmp.remove(); addAi(html, id); }, reduce ? 0 : delay);
@@ -1509,7 +1516,7 @@ Ana at Juniper Hair Studio</textarea>
 
     const heads = staff.map((s) => {
       const n = evs.filter((ev) => ev.staff === s.id && ev.client).length;
-      return `<div class="cal-colhead"><span class="avatar ${s.tint === "s1" ? "av-brand" : s.tint === "s2" ? "av-ok" : "av-wait"}">${s.initials}</span><div><div class="nm">${s.name}</div><div class="sub">${n} booked</div></div></div>`;
+      return `<div class="cal-colhead"><span class="avatar ${s.tint === "s1" ? "av-brand" : s.tint === "s2" ? "av-accent" : "av-wait"}">${s.initials}</span><div><div class="nm">${s.name}</div><div class="sub">${n} booked</div></div></div>`;
     }).join("");
 
     $("#cal-body").innerHTML = `
@@ -1557,7 +1564,7 @@ Ana at Juniper Hair Studio</textarea>
         <button class="btn btn-primary btn-sm" data-soon="Rescheduling from the calendar">Reschedule</button>
         <button class="btn btn-ghost btn-sm" data-soon="Cancelling from the calendar">Cancel booking</button>
         ${clientIdByName(ev.client) ? `<button class="btn btn-ghost btn-sm" data-action="open-client" data-id="${clientIdByName(ev.client)}">View profile</button>` : ""}
-        <button class="btn btn-text btn-sm" data-action="ask-about" data-name="${ev.client}">Ask Floty about ${ev.client.split(" ")[0]}</button>
+        <button class="btn btn-text btn-sm" data-action="ask-about" data-name="${ev.client}">Ask Pepper about ${ev.client.split(" ")[0]}</button>
       </div>`);
   }
   function openGapSheet(staffId, s, e) {
@@ -1608,7 +1615,7 @@ Ana at Juniper Hair Studio</textarea>
     else document.documentElement.setAttribute("data-theme", state.theme);
     $$("[data-theme-label]").forEach((el) => { el.textContent = `Theme: ${state.theme}`; });
   }
-  try { const saved = localStorage.getItem("floty-theme"); if (THEMES.includes(saved)) state.theme = saved; } catch (_) { /* storage unavailable */ }
+  try { const saved = localStorage.getItem("pepper-theme"); if (THEMES.includes(saved)) state.theme = saved; } catch (_) { /* storage unavailable */ }
 
   /* ---------------- events ---------------- */
   document.addEventListener("click", (e) => {
@@ -1628,7 +1635,7 @@ Ana at Juniper Hair Studio</textarea>
     switch (a) {
       case "theme":
         state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % THEMES.length];
-        try { localStorage.setItem("floty-theme", state.theme); } catch (_) { /* ignore */ }
+        try { localStorage.setItem("pepper-theme", state.theme); } catch (_) { /* ignore */ }
         applyTheme();
         break;
       case "close-sheet": closeSheet(); break;
@@ -1944,7 +1951,7 @@ Ana at Juniper Hair Studio</textarea>
         <div style="flex:1 1 220px;min-width:0"><h1 id="client-title">${c.name}</h1><p class="muted">Client since ${c.since} · ${c.visits} visits${c.visits ? ` · usually ${c.spend}` : ""}</p></div>
         <div class="actions">
           <button class="btn btn-primary" data-action="client-book" data-id="${id}">${icon("cal")}Book</button>
-          <button class="btn btn-ghost" data-action="ask-about" data-name="${c.name}">${icon("chat")}Ask Floty</button>
+          <button class="btn btn-ghost" data-action="ask-about" data-name="${c.name}">${icon("chat")}Ask Pepper</button>
         </div>
       </div>
       <div class="profile">
@@ -1994,7 +2001,7 @@ Ana at Juniper Hair Studio</textarea>
   const AUTONOMY = [
     { title: "Looking things up", icon: "web", av: "av-info", desc: "Checking availability, finding clients, summarizing your day. These never change anything, so I always just do them.",
       rows: [{ label: "Check availability, look up clients, plan your day", fixed: true }] },
-    { title: "Changes inside Floty", icon: "cal", av: "av-ok", desc: "Bookings, blocked time and notes. You can undo any of these.",
+    { title: "Changes inside Pepper", icon: "cal", av: "av-ok", desc: "Bookings, blocked time and notes. You can undo any of these.",
       rows: [
         { k: "create", label: "Create a booking" },
         { k: "move", label: "Move or reschedule a booking" },
@@ -2002,7 +2009,7 @@ Ana at Juniper Hair Studio</textarea>
         { k: "block", label: "Block time on a calendar" },
         { k: "notes", label: "Save notes and preferences about clients" },
       ] },
-    { title: "Messages to clients", icon: "mail", av: "av-wait", desc: "Emails leave Floty and can't be unsent, so I hold each one for 2 minutes in case you want to undo.",
+    { title: "Messages to clients", icon: "mail", av: "av-wait", desc: "Emails leave Pepper and can't be unsent, so I hold each one for 2 minutes in case you want to undo.",
       rows: [
         { k: "confirmations", label: "Booking confirmations and reminders" },
         { k: "rebook", label: "Rebooking nudges to regulars who are due" },
@@ -2085,7 +2092,7 @@ Ana at Juniper Hair Studio</textarea>
             <li><div class="grow"><b>${s.name}</b><div class="small muted">${fmtDur(s.dur)} · ${staffDots(s.staff)}</div></div><span class="price">${priceText(s)}</span></li>`).join("")}
           </ul></section>`).join("") + `
         <p class="small muted">Every service leaves 15 minutes before the next appointment. Change that in What I know.</p>
-        <div class="actions"><button class="btn btn-primary" data-action="svc-add">${icon("chat")}Add a service with Floty</button></div>`;
+        <div class="actions"><button class="btn btn-primary" data-action="svc-add">${icon("chat")}Add a service with Pepper</button></div>`;
     }
   }
   function openInvite() {
@@ -2126,7 +2133,7 @@ Ana at Juniper Hair Studio</textarea>
     const s = state.ob.step;
     return `
       <div class="flow-bar">
-        <span class="wordmark"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-floty"/></svg><b style="font-size:22px">floty</b></span>
+        <span class="wordmark"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-pepper"/></svg><b style="font-size:22px">pepper</b></span>
         <span class="small muted num">Step ${s} of 5</span>
         <button class="btn btn-ghost btn-sm" data-go="home">Exit preview</button>
       </div>
@@ -2142,7 +2149,7 @@ Ana at Juniper Hair Studio</textarea>
     if (ob.step === 1) {
       const t = TEMPLATES.find((x) => x[0] === ob.type);
       html = obShell(`
-        <div><p class="eyebrow">Welcome to Floty</p><h1>What kind of business is it?</h1></div>
+        <div><p class="eyebrow">Welcome to Pepper</p><h1>What kind of business is it?</h1></div>
         <p class="lede">This sets the words I use and sensible defaults. You can change everything later.</p>
         <div class="choice-grid" role="group" aria-label="Business type">
           ${TEMPLATES.map(([id, name, desc]) => `<button class="choice" data-action="ob-type" data-id="${id}" aria-pressed="${ob.type === id}"><b>${name}</b><span>${desc}</span></button>`).join("")}
@@ -2214,7 +2221,7 @@ Ana at Juniper Hair Studio</textarea>
       html = obShell(`
         <span class="big-check">${icon("check")}</span>
         <div><h1>Juniper Hair Studio is ready</h1><p class="lede" style="margin-top:6px">Your booking page is live. Share the link on Instagram, Google and your website.</p></div>
-        <div class="linkbox"><code id="ob-link">juniperhair.floty.app</code><button class="btn btn-primary btn-sm" data-action="ob-copy">${icon("copy")}Copy</button></div>
+        <div class="linkbox"><code id="ob-link">juniperhair.pepper.app</code><button class="btn btn-primary btn-sm" data-action="ob-copy">${icon("copy")}Copy</button></div>
         <div class="card">
           <div class="card-row"><span class="avatar av-info">${icon("cal")}</span><div class="grow"><h3>Connect Google Calendar</h3><p class="small muted">Optional. I'll keep stylists' personal events blocked and add bookings to their calendars.</p></div></div>
           <div class="actions">${ob.gcal ? `<span class="pill pill-ok">${icon("check")}Connected (sample)</span>` : `<button class="btn btn-ghost btn-sm" data-action="ob-gcal">Connect</button>`}</div>
@@ -2277,7 +2284,7 @@ Ana at Juniper Hair Studio</textarea>
         ${picked.length ? `<div class="picked" aria-label="Your choices">${picked.map(([st, l]) => `<button data-action="book-goto" data-step="${st}" aria-label="Change: ${esc(l)}">${esc(l)} · <span style="color:var(--brand)">Change</span></button>`).join("")}</div>` : ""}
         ${body}
       </div>
-      <p class="powered">Booking by floty · Your details stay with Juniper Hair Studio</p>`;
+      <p class="powered">Booking by pepper · Your details stay with Juniper Hair Studio</p>`;
   }
   function renderBook() {
     const b = state.book;
@@ -2459,7 +2466,7 @@ Ana at Juniper Hair Studio</textarea>
     "ob-import": () => { state.ob.imported = true; renderOb(); },
     "ob-gcal": () => { state.ob.gcal = true; renderOb(); toast("Google Calendar connected (sample)."); },
     "ob-copy": () => {
-      const link = "https://juniperhair.floty.app";
+      const link = "https://juniperhair.pepper.app";
       const fallback = () => { const r = document.createRange(); r.selectNodeContents($("#ob-link")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Link selected. Copy it with your keyboard or long-press."); };
       try { navigator.clipboard.writeText(link).then(() => toast("Link copied."), fallback); } catch (_) { fallback(); }
     },

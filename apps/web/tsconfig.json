@@ -1,5 +1,5 @@
 {
-  "extends": "@floty/config/tsconfig.base.json",
+  "extends": "@pepper/config/tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],

@@ -6,7 +6,7 @@ import { Unavailable } from '../../_components/unavailable';
 import { currentAccount } from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Your business · Floty' };
+export const metadata: Metadata = { title: 'Your business · Pepper' };
 
 /** Phase 9 turns this into zero-setup onboarding; for now it asks the essentials. */
 export default async function CreateBusinessPage() {

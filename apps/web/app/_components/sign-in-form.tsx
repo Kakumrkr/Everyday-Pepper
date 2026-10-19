@@ -67,7 +67,7 @@ export function SignInForm({ next = null }: { next?: string | null }) {
           Sign in
         </button>
         <p className="hint">
-          New to Floty? <Link href={withNext(ROUTES.signUp, next)}>Create an account</Link>
+          New to Pepper? <Link href={withNext(ROUTES.signUp, next)}>Create an account</Link>
         </p>
       </form>
     );

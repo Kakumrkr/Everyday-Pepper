@@ -7,8 +7,8 @@ import {
   type TenantId,
   type UserBusiness,
   type UserId,
-} from '@floty/contracts';
-import { createBusiness } from '@floty/core';
+} from '@pepper/contracts';
+import { createBusiness } from '@pepper/core';
 import {
   findCurrentTenant,
   findMembership,
@@ -16,8 +16,8 @@ import {
   withTenant,
   withUser,
   type Database,
-} from '@floty/db';
-import { currentRequestContext, DATABASE } from '@floty/runtime';
+} from '@pepper/db';
+import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { Inject, Injectable } from '@nestjs/common';
 
 /** Businesses and memberships of signed-in users, over the tenant-scoped repositories. */
@@ -43,7 +43,7 @@ export class TenancyService {
 
   /**
    * Creates a business owned by `owner`, with its audit entry. Throws `TenantSlugTakenError`
-   * or `BusinessLimitReachedError` (`@floty/db`).
+   * or `BusinessLimitReachedError` (`@pepper/db`).
    */
   async createBusiness(owner: UserId, input: NewTenant): Promise<Business> {
     const requestId = currentRequestContext()?.requestId;

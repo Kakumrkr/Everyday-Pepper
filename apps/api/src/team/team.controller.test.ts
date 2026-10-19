@@ -9,9 +9,9 @@ import {
   type Member,
   type MembershipRole,
   type TenantId,
-} from '@floty/contracts';
-import { ForbiddenError, LastOwnerError, MemberNotFoundError } from '@floty/core';
-import { DATABASE } from '@floty/runtime';
+} from '@pepper/contracts';
+import { ForbiddenError, LastOwnerError, MemberNotFoundError } from '@pepper/core';
+import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
