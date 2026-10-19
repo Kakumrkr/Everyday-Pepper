@@ -43,6 +43,7 @@ import {
   findClientsByContact,
   insertClient,
   listClients,
+  updateClient,
 } from './repositories/clients.js';
 import { addMembership, deleteMembership } from './repositories/memberships.js';
 import { createTenant } from './repositories/tenants.js';
@@ -332,6 +333,23 @@ describe('bookings', () => {
     expect((await list({ limit: 1 })).map((r) => r.id)).toEqual([early.id]);
   });
 
+  it("lists one client's bookings (S16: a client's visits)", async () => {
+    const b = await newBusiness();
+    const lee = await withTenant(db, b.tenant, (tx) =>
+      insertClient(tx, { name: 'Lee', email: null, phone: null, source: 'team' }),
+    );
+    const maria = await book(b, booking(b, b.jess, '2026-11-02T14:00:00Z'));
+    const lees = await book(b, {
+      ...booking(b, b.marco, '2026-11-02T14:00:00Z'),
+      clientId: ClientIdSchema.parse(lee.id),
+    });
+    const range = { from: at('2026-11-01T00:00:00Z'), to: at('2026-11-03T00:00:00Z') };
+    const of = (clientId: ClientId) =>
+      withTenant(db, b.tenant, (tx) => listBookings(tx, { ...range, clientId }));
+    expect((await of(b.client)).map((r) => r.id)).toEqual([maria.id]);
+    expect((await of(ClientIdSchema.parse(lee.id))).map((r) => r.id)).toEqual([lees.id]);
+  });
+
   it('finds and locks by id, and finds by idempotency key', async () => {
     const b = await newBusiness();
     const row = await book(b, {
@@ -441,6 +459,49 @@ describe('clients', () => {
       expect(await names('_')).toEqual([]);
       expect(await listClients(tx, { limit: 1 })).toHaveLength(1);
       expect(await findClient(tx, b.client)).toMatchObject({ name: 'Maria Lopez', source: 'team' });
+    });
+  });
+
+  it('replaces a client’s details; an email another client has is refused; another business’s client is not found', async () => {
+    const b = await newBusiness();
+    const other = await newBusiness();
+    await withTenant(db, b.tenant, async (tx) => {
+      const lee = await insertClient(tx, {
+        name: 'Lee',
+        email: 'lee@example.test',
+        phone: null,
+        source: 'import',
+      });
+      const updated = await updateClient(tx, b.client, {
+        name: 'Maria L.',
+        email: 'MARIA.L@example.test',
+        phone: '+15551234567',
+      });
+      expect(updated).toMatchObject({
+        name: 'Maria L.',
+        email: 'maria.l@example.test',
+        phone: '+15551234567',
+        source: 'team',
+      });
+      expect(updated?.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        updated?.createdAt.getTime() ?? 0,
+      );
+      expect(await findClient(tx, ClientIdSchema.parse(lee.id))).toMatchObject({
+        source: 'import',
+      });
+    });
+    await expect(
+      withTenant(db, b.tenant, (tx) =>
+        updateClient(tx, b.client, { name: 'Maria', email: 'lee@example.test', phone: null }),
+      ),
+    ).rejects.toBeInstanceOf(ClientEmailTakenError);
+    expect(
+      await withTenant(db, b.tenant, (tx) =>
+        updateClient(tx, other.client, { name: 'Taken over', email: null, phone: null }),
+      ),
+    ).toBeUndefined();
+    expect(await withTenant(db, other.tenant, (tx) => findClient(tx, other.client))).toMatchObject({
+      name: 'Maria Lopez',
     });
   });
 

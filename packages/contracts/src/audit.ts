@@ -64,6 +64,15 @@ const RulesValuesSchema = z.object({ rules: z.array(RuleSchema) }).strict();
 // Clients, bookings and the waitlist (ADR-0017): ids, times and statuses only. A client's name,
 // email and phone are personal data and never in an entry.
 const ClientValuesSchema = z.object({ source: RecordSourceSchema }).strict();
+/** Which of a client's details an edit changed (never the values). */
+const ClientEditSchema = z
+  .object({
+    changed: z
+      .array(z.enum(['name', 'email', 'phone']))
+      .min(1)
+      .max(3),
+  })
+  .strict();
 const BookingValuesSchema = z
   .object({
     clientId: ClientIdSchema,
@@ -221,6 +230,14 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('client'),
       before: z.null(),
       after: ClientValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('client.updated'),
+      entity: entity('client'),
+      before: z.null(),
+      after: ClientEditSchema,
     })
     .strict(),
   z

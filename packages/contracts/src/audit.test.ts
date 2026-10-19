@@ -200,6 +200,15 @@ describe('AuditChangeSchema', () => {
       },
     ],
     ['client.created', clientCreated],
+    [
+      'client.updated',
+      {
+        action: 'client.updated',
+        entity: { type: 'client', id: CLIENT },
+        before: null,
+        after: { changed: ['email', 'phone'] },
+      },
+    ],
     ['booking.created', bookingCreated],
     [
       'booking.updated',
@@ -258,6 +267,24 @@ describe('AuditChangeSchema', () => {
     ],
     // A client's name, email and phone are personal data: never in the audit log.
     ["a client's name", { ...clientCreated, after: { source: 'team', name: 'Maria Lopez' } }],
+    [
+      "a client's new email on an edit",
+      {
+        action: 'client.updated',
+        entity: { type: 'client', id: CLIENT },
+        before: null,
+        after: { changed: ['email'], email: 'maria@example.test' },
+      },
+    ],
+    [
+      'an edit that changed nothing',
+      {
+        action: 'client.updated',
+        entity: { type: 'client', id: CLIENT },
+        before: null,
+        after: { changed: [] },
+      },
+    ],
     [
       "a client's email on a booking",
       { ...bookingCreated, after: { ...bookingValues, clientEmail: 'maria@example.test' } },

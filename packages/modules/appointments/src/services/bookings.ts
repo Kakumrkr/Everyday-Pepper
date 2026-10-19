@@ -208,7 +208,7 @@ export async function listBookings(
   options: { limit?: number } = {},
 ): Promise<Booking[]> {
   requirePermission(actor, 'bookings.read');
-  const { from, to, staffMemberId, status } = BookingsQuerySchema.parse(query);
+  const { from, to, staffMemberId, clientId, status } = BookingsQuerySchema.parse(query);
   const rows = await withMember(db, actor.context, async (tx) => {
     const own = await ownStaffMemberId(tx, actor, 'bookings.read');
     const only = own ?? staffMemberId;
@@ -222,6 +222,7 @@ export async function listBookings(
       from: new Date(from),
       to: new Date(to),
       ...(only !== undefined && { staffMemberId: only }),
+      ...(clientId !== undefined && { clientId }),
       ...(status !== undefined && { status }),
       ...(options.limit !== undefined && { limit: options.limit }),
     });

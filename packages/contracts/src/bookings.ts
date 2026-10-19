@@ -132,13 +132,15 @@ function checkRange(q: { from: string; to: string }, ctx: z.RefinementCtx): void
 }
 
 /**
- * Query of `GET /v1/bookings`: bookings whose appointment overlaps [from, to), by start.
- * Staff see only their own (AC-W9-1).
+ * Query of `GET /v1/bookings`: bookings whose appointment overlaps [from, to), by start;
+ * optionally of one staff member, one client (a client's visits) or with one status. Staff see
+ * only their own (AC-W9-1).
  */
 export const BookingsQuerySchema = z
   .object({
     ...RangeShape,
     staffMemberId: StaffMemberIdSchema.optional(),
+    clientId: ClientIdSchema.optional(),
     status: BookingStatusSchema.optional(),
   })
   .strict()

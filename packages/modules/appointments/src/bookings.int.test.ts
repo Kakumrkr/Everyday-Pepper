@@ -19,6 +19,7 @@ import {
   listClients,
   lookUpClients,
   ManualClock,
+  updateClient,
   type Actor,
 } from '@pepper/core';
 import {
@@ -381,6 +382,30 @@ describe('reading bookings', () => {
     );
   });
 
+  it("lists one client's bookings; staff only their own of them", async () => {
+    const b = await newBusiness();
+    const lee = await createClient(db, b.owner, { name: 'Lee' });
+    await updateStaffMember(db, b.owner, b.marco.id, {
+      displayName: 'Marco',
+      userId: b.colleague.context.userId,
+      serviceIds: [b.service.id],
+    });
+    const withJess = await book(b, b.owner, request(b, tue('10:00')));
+    const withMarco = await book(
+      b,
+      b.owner,
+      request(b, tue('10:00'), { staffMemberId: b.marco.id }),
+    );
+    await book(b, b.owner, request(b, tue('13:00'), { clientId: lee.id }));
+    const range = { from: tue('00:00'), to: tue('23:59'), clientId: b.client.id };
+    // Same start: ordered by id.
+    expect((await listBookings(db, b.owner, range)).map((x) => x.id)).toEqual(
+      [withJess.id, withMarco.id].sort(),
+    );
+    expect((await listBookings(db, b.staff, range)).map((x) => x.id)).toEqual([withJess.id]);
+    expect((await listBookings(db, b.colleague, range)).map((x) => x.id)).toEqual([withMarco.id]);
+  });
+
   it('staff get the same availability as owners', async () => {
     const b = await newBusiness();
     await book(b, b.owner, request(b, tue('10:00')));
@@ -590,6 +615,46 @@ describe('clients', () => {
       action: 'client.created',
       entity: { type: 'client', id: lee.id },
       after: { source: 'team' },
+    });
+  });
+
+  it('owners and managers edit a client; staff cannot; the audit entry names only what changed', async () => {
+    const b = await newBusiness();
+    const edited = await updateClient(db, b.manager, b.client.id, {
+      name: 'Maria Lopez',
+      email: 'maria@example.test',
+      phone: '+15551234567',
+    });
+    expect(edited).toMatchObject({ id: b.client.id, phone: '+15551234567', source: 'team' });
+    // Nothing changed: no write, no entry.
+    expect(
+      await updateClient(db, b.owner, b.client.id, {
+        name: 'Maria Lopez',
+        email: 'maria@example.test',
+        phone: '+15551234567',
+      }),
+    ).toEqual(edited);
+    await introduce(b);
+    await expect(updateClient(db, b.staff, b.client.id, { name: 'Maria' })).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    const lee = await createClient(db, b.owner, { name: 'Lee', email: 'lee@example.test' });
+    await expect(
+      updateClient(db, b.owner, lee.id, { name: 'Lee', email: 'MARIA@example.test' }),
+    ).rejects.toBeInstanceOf(ClientEmailTakenError);
+    const other = await newBusiness();
+    await expect(
+      updateClient(db, b.owner, other.client.id, { name: 'Taken over' }),
+    ).rejects.toBeInstanceOf(ClientNotFoundError);
+    await expect(updateClient(db, b.owner, b.client.id, { name: '' })).rejects.toBeInstanceOf(
+      ZodError,
+    );
+    const updates = (await auditOf(b.tenantId)).filter((e) => e.action === 'client.updated');
+    expect(updates).toHaveLength(1);
+    expect(updates[0]).toMatchObject({
+      entity: { type: 'client', id: b.client.id },
+      before: null,
+      after: { changed: ['phone'] },
     });
   });
 

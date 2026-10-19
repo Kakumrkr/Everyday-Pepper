@@ -18,6 +18,7 @@ import {
   insertClient,
   listClients as listClientRows,
   setTransactionClientContact,
+  updateClient as updateClientRow,
   withMember,
   type ClientRow,
   type Database,
@@ -30,8 +31,8 @@ import { ClientNotFoundError } from '../errors.js';
 // database's member scope applies that (AC-W9-1), so staff never see the others at all.
 // Anyone with `clients.read` may also find any client by an exact email or phone (ADR-0020),
 // so staff can book a returning client of a colleague. `clients.manage` (owners and managers)
-// adds clients. A client's details are personal data: the audit entry records only where the
-// client came from.
+// adds and edits clients. A client's details are personal data: the audit entries record only
+// where the client came from and which details an edit changed.
 
 /** Clients by name; with `search`, those whose name or email contains it. */
 export async function listClients(
@@ -97,6 +98,44 @@ export async function createClient(
     return toClient(row);
   });
 }
+
+/**
+ * Replaces a client's name, email and phone. `ClientNotFoundError` for an unknown id,
+ * `ClientEmailTakenError` (from the database) when another client has the email. An edit that
+ * changes nothing writes nothing.
+ */
+export async function updateClient(
+  db: Database,
+  actor: Actor,
+  clientId: ClientId,
+  input: ClientInput,
+): Promise<Client> {
+  requirePermission(actor, 'clients.manage');
+  const id = ClientIdSchema.parse(clientId);
+  const fields = ClientInputSchema.parse(input);
+  return withMember(db, actor.context, async (tx) => {
+    const before = await findClient(tx, id);
+    if (before === undefined) throw new ClientNotFoundError();
+    const changed = CLIENT_DETAILS.filter((key) => before[key] !== fields[key]);
+    if (changed.length === 0) return toClient(before);
+    const row = await updateClientRow(tx, id, fields);
+    // The row was just found in this transaction, and only owners and managers write clients.
+    if (row === undefined) throw new ClientNotFoundError();
+    await appendAuditEntry(tx, {
+      actor: { kind: 'user', userId: actor.context.userId },
+      change: {
+        action: 'client.updated',
+        entity: { type: 'client', id },
+        before: null,
+        after: { changed },
+      },
+      requestId: actor.requestId,
+    });
+    return toClient(row);
+  });
+}
+
+const CLIENT_DETAILS = ['name', 'email', 'phone'] as const;
 
 export function toClient(row: ClientRow): Client {
   return ClientSchema.parse({

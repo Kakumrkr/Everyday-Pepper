@@ -142,6 +142,14 @@ describe('range queries', () => {
     ).toMatchObject({ staffMemberId: STAFF.toLowerCase(), status: 'cancelled' });
   });
 
+  it('bookings filter by client (a client’s visits)', () => {
+    const range = { from, to: '2026-10-02T00:00:00.000Z' };
+    expect(BookingsQuerySchema.parse({ ...range, clientId: CLIENT.toUpperCase() })).toMatchObject({
+      clientId: CLIENT,
+    });
+    expect(BookingsQuerySchema.safeParse({ ...range, clientId: 'maria' }).success).toBe(false);
+  });
+
   it('availability needs a service', () => {
     expect(
       AvailabilityQuerySchema.safeParse({ from, to: '2026-10-02T00:00:00.000Z' }).success,

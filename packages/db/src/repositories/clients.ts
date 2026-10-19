@@ -40,6 +40,35 @@ export async function insertClient(
   }
 }
 
+/**
+ * Replaces a client's name, email and phone; `undefined` when the transaction may not see the
+ * client. Throws `ClientEmailTakenError` when another client of the business has the email.
+ */
+export async function updateClient(
+  tx: TenantTx,
+  id: ClientId,
+  fields: ClientFields,
+): Promise<ClientRow | undefined> {
+  const values = ClientInputSchema.parse({
+    name: fields.name,
+    email: fields.email,
+    phone: fields.phone,
+  });
+  try {
+    const [row] = await tx
+      .update(clients)
+      .set(values)
+      .where(eq(clients.id, Id.parse(id)))
+      .returning();
+    return row;
+  } catch (error) {
+    if (isUniqueViolation(error, 'clients_tenant_email_unique')) {
+      throw new ClientEmailTakenError({ cause: error });
+    }
+    throw error;
+  }
+}
+
 /** The client with this id, if the transaction may see them. */
 export async function findClient(tx: TenantTx, id: ClientId): Promise<ClientRow | undefined> {
   const [row] = await tx

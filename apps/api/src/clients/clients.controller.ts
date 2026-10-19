@@ -7,7 +7,17 @@ import {
   type ClientsResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
-import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { z } from 'zod';
 import { CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';
 import { answering } from '../http/domain-errors.js';
@@ -17,8 +27,8 @@ import { ClientsService } from './clients.service.js';
 const ClientParamsSchema = z.object({ clientId: ClientIdSchema });
 
 /**
- * The active business's clients, `/v1/clients` (ADR-0017). Owners and managers see and add
- * every client; staff see only the clients they have a booking or waitlist entry with (the
+ * The active business's clients, `/v1/clients` (ADR-0017). Owners and managers see, add and
+ * edit every client; staff see only the clients they have a booking or waitlist entry with (the
  * database's member scope, AC-W9-1), so another client is simply not found. Everyone may find
  * a client by an exact email or phone (`POST /v1/clients/lookup`, ADR-0020).
  */
@@ -66,5 +76,21 @@ export class ClientsController {
   create(@CurrentTenant() tenant: TenantContext, @Body() body: unknown): Promise<Client> {
     const input = parseBody(ClientInputSchema, body);
     return answering(() => this.clients.create(tenant, input));
+  }
+
+  /**
+   * Replaces the name, email and phone (ADR-0021). 404 `client_not_found`, 409
+   * `client_email_taken`.
+   */
+  @Put(':clientId')
+  @RequirePermission('clients.manage')
+  update(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+    @Body() body: unknown,
+  ): Promise<Client> {
+    const { clientId } = parseBody(ClientParamsSchema, params);
+    const input = parseBody(ClientInputSchema, body);
+    return answering(() => this.clients.update(tenant, clientId, input));
   }
 }
