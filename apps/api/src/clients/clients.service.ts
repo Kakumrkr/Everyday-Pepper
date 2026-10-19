@@ -4,6 +4,7 @@ import {
   getClient,
   listClients,
   lookUpClients,
+  updateClient,
   type Actor,
   type TenantContext,
 } from '@pepper/core';
@@ -37,6 +38,10 @@ export class ClientsService {
 
   create(tenant: TenantContext, input: ClientInput): Promise<Client> {
     return createClient(this.db, actorOf(tenant), input);
+  }
+
+  update(tenant: TenantContext, id: ClientId, input: ClientInput): Promise<Client> {
+    return updateClient(this.db, actorOf(tenant), id, input);
   }
 }
 

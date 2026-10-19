@@ -115,6 +115,14 @@ export function localParts(timeZone: string, instant: string): { date: string; t
   return { date: formatDate(zoned), time: clockTime(zoned.minuteOfDay) };
 }
 
+/** A booking's status in words. */
+export const STATUS_LABELS: Record<BookingStatus, string> = {
+  confirmed: 'Booked',
+  completed: 'Done',
+  no_show: 'No-show',
+  cancelled: 'Cancelled',
+};
+
 /** What a booking sheet offers for a booking's current status, at `now`. */
 export interface BookingActions {
   complete: boolean;

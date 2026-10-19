@@ -14,6 +14,7 @@ import {
   bookingActions,
   dateTimeLabel,
   localParts,
+  STATUS_LABELS,
   timeLabel,
   type BookingSetup,
 } from '../../../lib/booking';
@@ -35,13 +36,6 @@ export interface BookingSummary {
   status: BookingStatus;
   overridden: boolean;
 }
-
-const STATUS_LABELS: Record<BookingStatus, string> = {
-  confirmed: 'Booked',
-  completed: 'Done',
-  no_show: 'No-show',
-  cancelled: 'Cancelled',
-};
 
 /**
  * A booking on the calendar, as a button that opens its sheet: the details, done or no-show

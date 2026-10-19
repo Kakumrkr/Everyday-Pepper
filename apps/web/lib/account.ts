@@ -84,6 +84,9 @@ export const ROUTES = {
   invite: '/invite',
   team: '/team',
   calendar: '/calendar',
+  clients: '/clients',
+  services: '/services',
+  rules: '/services/rules',
   home: '/',
 } as const;
 

@@ -159,8 +159,8 @@ export async function setBookingStatus(
 }
 
 /**
- * Bookings whose appointment overlaps [from, to), by start; optionally of one staff member or
- * with one status. Staff see only their own (RLS).
+ * Bookings whose appointment overlaps [from, to), by start; optionally of one staff member, of
+ * one client or with one status. Staff see only their own (RLS).
  */
 export async function listBookings(
   tx: TenantTx,
@@ -168,6 +168,7 @@ export async function listBookings(
     from: Date;
     to: Date;
     staffMemberId?: StaffMemberId;
+    clientId?: ClientId;
     status?: BookingStatus;
     /** At most this many rows, earliest first. */
     limit?: number;
@@ -176,6 +177,9 @@ export async function listBookings(
   const conditions: SQL[] = [lt(bookings.startsAt, options.to), gt(bookings.endsAt, options.from)];
   if (options.staffMemberId !== undefined) {
     conditions.push(eq(bookings.staffMemberId, Id.parse(options.staffMemberId)));
+  }
+  if (options.clientId !== undefined) {
+    conditions.push(eq(bookings.clientId, Id.parse(options.clientId)));
   }
   if (options.status !== undefined) {
     conditions.push(eq(bookings.status, BookingStatusSchema.parse(options.status)));

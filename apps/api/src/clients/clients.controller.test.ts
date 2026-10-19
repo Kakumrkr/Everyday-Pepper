@@ -57,6 +57,7 @@ const clients = {
   get: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
   lookUp: vi.fn(() => Promise.resolve([CLIENT])),
   create: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
+  update: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
 };
 
 @Global()
@@ -142,6 +143,56 @@ describe('/v1/clients', () => {
       code((await post({ name: 'Maria', email: 'maria@example.test' }).expect(409)).body),
     ).toBe('client_email_taken');
     await post({ name: 'Maria', phone: '555-1234' }).expect(400);
+  });
+
+  describe('PUT /v1/clients/:id', () => {
+    const put = (body: object, id: string = CLIENT_ID) =>
+      request(server)
+        .put(`/v1/clients/${id}`)
+        .set('cookie', 'signed-in')
+        .set('origin', ORIGIN)
+        .send(body);
+
+    it.each<MembershipRole>(['owner', 'manager'])('a(n) %s edits a client (200)', async (r) => {
+      role = r;
+      expect((await put({ name: 'Maria L.', phone: '+15551234567' }).expect(200)).body).toEqual(
+        CLIENT,
+      );
+      expect(clients.update).toHaveBeenCalledWith(context(), CLIENT_ID, {
+        name: 'Maria L.',
+        email: null,
+        phone: '+15551234567',
+      });
+    });
+
+    it('403 for staff, before the service is asked', async () => {
+      role = 'staff';
+      expect(code((await put({ name: 'Maria' }).expect(403)).body)).toBe('forbidden');
+      expect(clients.update).not.toHaveBeenCalled();
+    });
+
+    it('404 client_not_found, 409 client_email_taken, 400 for a bad id or body', async () => {
+      clients.update.mockRejectedValueOnce(new ClientNotFoundError());
+      expect(code((await put({ name: 'Maria' }).expect(404)).body)).toBe('client_not_found');
+      clients.update.mockRejectedValueOnce(new ClientEmailTakenError());
+      expect(code((await put({ name: 'Maria', email: 'jo@example.test' }).expect(409)).body)).toBe(
+        'client_email_taken',
+      );
+      await put({ name: 'Maria' }, 'not-an-id').expect(400);
+      await put({ name: '' }).expect(400);
+      await put({ name: 'Maria', source: 'import' }).expect(400);
+      expect(clients.update).toHaveBeenCalledTimes(2);
+    });
+
+    it('403 from another origin', async () => {
+      await request(server)
+        .put(`/v1/clients/${CLIENT_ID}`)
+        .set('cookie', 'signed-in')
+        .set('origin', 'https://evil.test')
+        .send({ name: 'Maria' })
+        .expect(403);
+      expect(clients.update).not.toHaveBeenCalled();
+    });
   });
 
   it.each<MembershipRole>(['owner', 'manager', 'staff'])(

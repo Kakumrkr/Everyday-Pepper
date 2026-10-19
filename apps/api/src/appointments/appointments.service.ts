@@ -3,6 +3,7 @@ import {
   createService,
   createStaffMember,
   getBookingRules,
+  getRuleDefaults,
   getWorkingHours,
   listServices,
   listStaff,
@@ -14,8 +15,8 @@ import {
   updateStaffMember,
 } from '@pepper/appointments';
 import type {
-  BookingRules,
   BookingRulesInput,
+  BookingRulesResponse,
   Service,
   ServiceId,
   ServiceInput,
@@ -32,11 +33,13 @@ import type {
 import type { Actor, TenantContext } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
+import { templateRuleDefaults } from '@pepper/templates';
 import { Inject, Injectable } from '@nestjs/common';
 
 /**
- * The appointments module's services for a request: binds the database and the request id (for
- * the audit log). Domain errors pass through; the controller answers them.
+ * The appointments module's services for a request: binds the database, the request id (for
+ * the audit log) and the industry templates' rule defaults (ADR-0018). Domain errors pass
+ * through; the controller answers them.
  */
 @Injectable()
 export class AppointmentsService {
@@ -98,12 +101,22 @@ export class AppointmentsService {
     return removeTimeOff(this.db, actorOf(tenant), id, timeOffId);
   }
 
-  rules(tenant: TenantContext): Promise<BookingRules> {
-    return getBookingRules(this.db, actorOf(tenant));
+  async rules(tenant: TenantContext): Promise<BookingRulesResponse> {
+    const actor = actorOf(tenant);
+    const [{ rules }, defaults] = await Promise.all([
+      getBookingRules(this.db, actor),
+      getRuleDefaults(this.db, actor, { templateRuleDefaults }),
+    ]);
+    return { rules, defaults };
   }
 
-  replaceRules(tenant: TenantContext, input: BookingRulesInput): Promise<BookingRules> {
-    return replaceBookingRules(this.db, actorOf(tenant), input);
+  async replaceRules(
+    tenant: TenantContext,
+    input: BookingRulesInput,
+  ): Promise<BookingRulesResponse> {
+    const actor = actorOf(tenant);
+    const { rules } = await replaceBookingRules(this.db, actor, input);
+    return { rules, defaults: await getRuleDefaults(this.db, actor, { templateRuleDefaults }) };
   }
 }
 

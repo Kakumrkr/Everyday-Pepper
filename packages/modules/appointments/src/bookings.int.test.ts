@@ -1,4 +1,5 @@
 import {
+  PLATFORM_RULE_DEFAULTS,
   TenantIdSchema,
   type BookingInput,
   type Client,
@@ -19,6 +20,7 @@ import {
   listClients,
   lookUpClients,
   ManualClock,
+  updateClient,
   type Actor,
 } from '@pepper/core';
 import {
@@ -52,7 +54,7 @@ import {
   listBusyTimes,
 } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
-import { replaceBookingRules } from './services/rules.js';
+import { getRuleDefaults, replaceBookingRules } from './services/rules.js';
 import { createService } from './services/services.js';
 import { createStaffMember, updateStaffMember } from './services/staff.js';
 import { addToWaitlist, changeWaitlistEntry, listWaitlist } from './services/waitlist.js';
@@ -381,6 +383,30 @@ describe('reading bookings', () => {
     );
   });
 
+  it("lists one client's bookings; staff only their own of them", async () => {
+    const b = await newBusiness();
+    const lee = await createClient(db, b.owner, { name: 'Lee' });
+    await updateStaffMember(db, b.owner, b.marco.id, {
+      displayName: 'Marco',
+      userId: b.colleague.context.userId,
+      serviceIds: [b.service.id],
+    });
+    const withJess = await book(b, b.owner, request(b, tue('10:00')));
+    const withMarco = await book(
+      b,
+      b.owner,
+      request(b, tue('10:00'), { staffMemberId: b.marco.id }),
+    );
+    await book(b, b.owner, request(b, tue('13:00'), { clientId: lee.id }));
+    const range = { from: tue('00:00'), to: tue('23:59'), clientId: b.client.id };
+    // Same start: ordered by id.
+    expect((await listBookings(db, b.owner, range)).map((x) => x.id)).toEqual(
+      [withJess.id, withMarco.id].sort(),
+    );
+    expect((await listBookings(db, b.staff, range)).map((x) => x.id)).toEqual([withJess.id]);
+    expect((await listBookings(db, b.colleague, range)).map((x) => x.id)).toEqual([withMarco.id]);
+  });
+
   it('staff get the same availability as owners', async () => {
     const b = await newBusiness();
     await book(b, b.owner, request(b, tue('10:00')));
@@ -590,6 +616,46 @@ describe('clients', () => {
       action: 'client.created',
       entity: { type: 'client', id: lee.id },
       after: { source: 'team' },
+    });
+  });
+
+  it('owners and managers edit a client; staff cannot; the audit entry names only what changed', async () => {
+    const b = await newBusiness();
+    const edited = await updateClient(db, b.manager, b.client.id, {
+      name: 'Maria Lopez',
+      email: 'maria@example.test',
+      phone: '+15551234567',
+    });
+    expect(edited).toMatchObject({ id: b.client.id, phone: '+15551234567', source: 'team' });
+    // Nothing changed: no write, no entry.
+    expect(
+      await updateClient(db, b.owner, b.client.id, {
+        name: 'Maria Lopez',
+        email: 'maria@example.test',
+        phone: '+15551234567',
+      }),
+    ).toEqual(edited);
+    await introduce(b);
+    await expect(updateClient(db, b.staff, b.client.id, { name: 'Maria' })).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    const lee = await createClient(db, b.owner, { name: 'Lee', email: 'lee@example.test' });
+    await expect(
+      updateClient(db, b.owner, lee.id, { name: 'Lee', email: 'MARIA@example.test' }),
+    ).rejects.toBeInstanceOf(ClientEmailTakenError);
+    const other = await newBusiness();
+    await expect(
+      updateClient(db, b.owner, other.client.id, { name: 'Taken over' }),
+    ).rejects.toBeInstanceOf(ClientNotFoundError);
+    await expect(updateClient(db, b.owner, b.client.id, { name: '' })).rejects.toBeInstanceOf(
+      ZodError,
+    );
+    const updates = (await auditOf(b.tenantId)).filter((e) => e.action === 'client.updated');
+    expect(updates).toHaveLength(1);
+    expect(updates[0]).toMatchObject({
+      entity: { type: 'client', id: b.client.id },
+      before: null,
+      after: { changed: ['phone'] },
     });
   });
 
@@ -923,6 +989,24 @@ describe('industry template defaults (ADR-0018)', () => {
       tue('10:00'),
     ]);
     expect(slots.every((s) => new Date(s.startsAt).getUTCMinutes() % 30 === 0)).toBe(true);
+  });
+
+  it("reports the defaults in force: the template's over the platform's, to every role", async () => {
+    const barber = await newBusiness('barber');
+    const plain = await newBusiness();
+    const expected = {
+      ...PLATFORM_RULE_DEFAULTS,
+      slotIntervalMinutes: 30,
+      minimumNoticeMinutes: 30,
+    };
+    for (const actor of [barber.owner, barber.staff]) {
+      expect(await getRuleDefaults(db, actor, { templateRuleDefaults })).toEqual(expected);
+    }
+    expect(await getRuleDefaults(db, plain.owner, { templateRuleDefaults })).toEqual(
+      PLATFORM_RULE_DEFAULTS,
+    );
+    // Without the app's lookup, only the platform's.
+    expect(await getRuleDefaults(db, barber.owner)).toEqual(PLATFORM_RULE_DEFAULTS);
   });
 
   it("uses the template's notice: 30 minutes, not the platform's 2 hours", async () => {

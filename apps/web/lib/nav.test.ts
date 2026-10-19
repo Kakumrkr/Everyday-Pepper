@@ -6,12 +6,15 @@ describe('navItems', () => {
     expect(navItems(null).map((item) => item.label)).toEqual(['Home']);
   });
 
-  it('with a business: Calendar when the role may read it, and Team', () => {
+  it('with a business: Calendar, Clients and Services when the role may read them, and Team', () => {
     expect(navItems(['calendar.read', 'bookings.read']).map((item) => item.href)).toEqual([
       '/',
       '/calendar',
       '/team',
     ]);
+    expect(
+      navItems(['calendar.read', 'clients.read', 'services.read']).map((item) => item.label),
+    ).toEqual(['Home', 'Calendar', 'Clients', 'Services', 'Team']);
     expect(navItems([]).map((item) => item.label)).toEqual(['Home', 'Team']);
   });
 });

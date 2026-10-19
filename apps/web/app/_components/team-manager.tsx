@@ -7,6 +7,7 @@ import type {
   MembershipRole,
   Permission,
 } from '@pepper/contracts';
+import { buttonClass, Card } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../lib/account';
@@ -20,6 +21,8 @@ const ROLE_LABELS: Record<MembershipRole, string> = {
   manager: 'Manager',
   staff: 'Staff',
 };
+
+const ROW = 'flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3';
 
 interface TeamManagerProps {
   me: string;
@@ -48,11 +51,11 @@ export function TeamManager(props: TeamManagerProps) {
   }
 
   return (
-    <div className="team">
+    <div className="grid gap-4">
       {members === null ? null : (
-        <section aria-labelledby="members-heading">
-          <h2 id="members-heading">People at {businessName}</h2>
-          <ul className="rows" data-testid="members">
+        <Card as="section" className="grid gap-2">
+          <h3 className="m-0 text-base font-bold">People at {businessName}</h3>
+          <ul className="m-0 grid list-none divide-y divide-line p-0" data-testid="members">
             {members.map((member) => (
               <MemberRow
                 key={member.userId}
@@ -64,7 +67,7 @@ export function TeamManager(props: TeamManagerProps) {
               />
             ))}
           </ul>
-        </section>
+        </Card>
       )}
       <FormError message={error} />
       {permissions.includes('members.invite') ? <InviteSection {...props} settle={settle} /> : null}
@@ -92,19 +95,20 @@ function MemberRow({
   const roles = [...new Set([member.role, ...grantableRoles(myRole)])];
   const path = `/v1/members/${member.userId}`;
   return (
-    <li className="row" data-testid="member">
-      <div>
+    <li className={ROW} data-testid="member">
+      <div className="min-w-0 [overflow-wrap:anywhere]">
         <strong>{member.name}</strong>
-        {isMe ? <span className="hint"> (you)</span> : null}
-        <span className="hint block">{member.email}</span>
+        {isMe ? <span className="text-ink-2"> (you)</span> : null}
+        <span className="block text-sm text-ink-2">{member.email}</span>
       </div>
       {editable ? (
-        <div className="row-actions">
+        <div className="flex flex-wrap items-center gap-2">
           <label className="visually-hidden" htmlFor={`role-${member.userId}`}>
             Role for {member.name}
           </label>
           <select
             id={`role-${member.userId}`}
+            className="w-auto"
             value={member.role}
             onChange={(event) => {
               void sendJson('PATCH', path, { role: event.target.value }).then(settle);
@@ -120,13 +124,14 @@ function MemberRow({
             <>
               <button
                 type="button"
+                className={buttonClass({ size: 'sm' })}
                 onClick={() => void sendJson('DELETE', path, undefined).then(settle)}
               >
                 Yes, remove {member.name}
               </button>
               <button
                 type="button"
-                className="secondary"
+                className={buttonClass({ variant: 'secondary', size: 'sm' })}
                 onClick={() => {
                   setConfirming(false);
                 }}
@@ -137,7 +142,7 @@ function MemberRow({
           ) : (
             <button
               type="button"
-              className="secondary"
+              className={buttonClass({ variant: 'secondary', size: 'sm' })}
               onClick={() => {
                 setConfirming(true);
               }}
@@ -147,7 +152,10 @@ function MemberRow({
           )}
         </div>
       ) : (
-        <span className="pill" data-testid="member-role">
+        <span
+          className="rounded-full bg-ok-soft px-2.5 py-0.5 text-sm font-semibold text-ok"
+          data-testid="member-role"
+        >
           {ROLE_LABELS[member.role]}
         </span>
       )}
@@ -191,14 +199,14 @@ function InviteSection({
   }
 
   return (
-    <section aria-labelledby="invite-heading">
-      <h2 id="invite-heading">Invite someone</h2>
-      <form className="form" onSubmit={(event) => void submit(event)} noValidate>
-        <label>
+    <Card as="section" className="grid gap-3">
+      <h3 className="m-0 text-base font-bold">Invite someone</h3>
+      <form className="grid gap-3" onSubmit={(event) => void submit(event)} noValidate>
+        <label className="grid gap-1.5 font-semibold">
           Their email
           <input name="email" type="email" autoComplete="off" required />
         </label>
-        <label>
+        <label className="grid gap-1.5 font-semibold">
           Role
           <select name="role" defaultValue="staff">
             {roles.map((r) => (
@@ -208,19 +216,27 @@ function InviteSection({
             ))}
           </select>
         </label>
-        <button type="submit" disabled={busy}>
+        <button
+          type="submit"
+          disabled={busy}
+          className={buttonClass({ className: 'w-full desk:w-auto desk:justify-self-start' })}
+        >
           Create invite link
         </button>
       </form>
       {created === null ? null : (
-        <div className="invite-link" role="status">
-          <p className="hint">
+        <div className="grid gap-2 rounded-md bg-ok-soft p-3" role="status">
+          <p className="m-0">
             Send this link to {created.email}. It works once, for 7 days, and only for that email.
           </p>
           <code data-testid="invite-link">{created.link}</code>
           <button
             type="button"
-            className="secondary"
+            className={buttonClass({
+              variant: 'secondary',
+              size: 'sm',
+              className: 'justify-self-start',
+            })}
             onClick={() => {
               void navigator.clipboard.writeText(created.link).then(
                 () => {
@@ -238,13 +254,13 @@ function InviteSection({
       )}
       {invites === null || invites.length === 0 ? null : (
         <>
-          <h3>Waiting to join</h3>
-          <ul className="rows" data-testid="invites">
+          <h4 className="m-0 mt-2 text-sm font-bold">Waiting to join</h4>
+          <ul className="m-0 grid list-none divide-y divide-line p-0" data-testid="invites">
             {invites.map((invite) => (
-              <li className="row" key={invite.id} data-testid="invite">
-                <div>
+              <li className={ROW} key={invite.id} data-testid="invite">
+                <div className="min-w-0 [overflow-wrap:anywhere]">
                   <strong>{invite.email}</strong>
-                  <span className="hint block">
+                  <span className="block text-sm text-ink-2">
                     {ROLE_LABELS[invite.role]} · link works until{' '}
                     {expires.format(new Date(invite.expiresAt))}
                   </span>
@@ -252,7 +268,7 @@ function InviteSection({
                 {role === 'owner' || invite.role !== 'owner' ? (
                   <button
                     type="button"
-                    className="secondary"
+                    className={buttonClass({ variant: 'secondary', size: 'sm' })}
                     onClick={() =>
                       void sendJson('DELETE', `/v1/invites/${invite.id}`, undefined).then(settle)
                     }
@@ -265,7 +281,7 @@ function InviteSection({
           </ul>
         </>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -284,18 +300,24 @@ function LeaveBusiness({ me, businessName }: { me: string; businessName: string 
   }
 
   return (
-    <section aria-labelledby="leave-heading" className="leave">
-      <h2 id="leave-heading">Leave {businessName}</h2>
-      <p className="hint">You’ll lose access to this business until someone invites you again.</p>
+    <Card as="section" className="grid gap-3">
+      <h3 className="m-0 text-base font-bold">Leave {businessName}</h3>
+      <p className="m-0 text-ink-2">
+        You’ll lose access to this business until someone invites you again.
+      </p>
       <FormError message={error} />
       {confirming ? (
-        <div className="row-actions">
-          <button type="button" onClick={() => void leave()}>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={buttonClass({ size: 'sm' })}
+            onClick={() => void leave()}
+          >
             Yes, leave {businessName}
           </button>
           <button
             type="button"
-            className="secondary"
+            className={buttonClass({ variant: 'secondary', size: 'sm' })}
             onClick={() => {
               setConfirming(false);
             }}
@@ -306,7 +328,11 @@ function LeaveBusiness({ me, businessName }: { me: string; businessName: string 
       ) : (
         <button
           type="button"
-          className="secondary"
+          className={buttonClass({
+            variant: 'secondary',
+            size: 'sm',
+            className: 'justify-self-start',
+          })}
           onClick={() => {
             setConfirming(true);
           }}
@@ -314,6 +340,6 @@ function LeaveBusiness({ me, businessName }: { me: string; businessName: string 
           Leave {businessName}
         </button>
       )}
-    </section>
+    </Card>
   );
 }
