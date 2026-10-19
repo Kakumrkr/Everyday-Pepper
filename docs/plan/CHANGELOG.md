@@ -2,6 +2,9 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.11 — 2026-10-19
+- S15 (Phase 4b): [ADR-0020](../adr/0020-booking-screens-and-client-lookup.md) (proposed): booking screens on the calendar (new booking, booking sheet, alternatives, waitlist), with Radix Dialog as planned. Implements two earlier decisions: staff find any client by exact email or phone (user, 2026-10-17; migration 0020 widens the clients read policy for that exact contact only; `POST /v1/clients/lookup`; optional `clientContact` on bookings and waitlist entries, additive), and outcomes rule (b): `completed`/`no_show` final for staff, correctable by owners and managers (Claude's recommendation, built by default because open question 1 was still unanswered). No change to phases, scope or exit criteria.
+
 ## 0.10 — 2026-10-18
 - [PCR-002](changes/PCR-002.md): the product is renamed from **Floty** to **Pepper** everywhere (UI, docs, mockup, `@pepper/*` packages, database roles and names, cookies, telemetry), and the theme is **Pepper green + chili accent** (new `accent` tokens; "done" teal; plum sample business). No change to phases, scope or exit criteria.
 
