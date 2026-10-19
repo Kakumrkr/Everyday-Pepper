@@ -1,5 +1,6 @@
-import { expect, test, type Browser, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
+  anotherPerson,
   enterPassword,
   onboardOwner,
   ownClientAddress,
@@ -15,21 +16,6 @@ import {
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
 });
-
-/** A separate browser for another person: the same device, their own client address. */
-async function anotherPerson(browser: Browser, baseURL: string | undefined): Promise<Page> {
-  const { viewport, userAgent, deviceScaleFactor, isMobile, hasTouch } = test.info().project.use;
-  const context = await browser.newContext({
-    ...(baseURL !== undefined && { baseURL }),
-    ...(viewport !== undefined && { viewport }),
-    ...(userAgent !== undefined && { userAgent }),
-    ...(deviceScaleFactor !== undefined && { deviceScaleFactor }),
-    ...(isMobile !== undefined && { isMobile }),
-    ...(hasTouch !== undefined && { hasTouch }),
-  });
-  await ownClientAddress(context);
-  return context.newPage();
-}
 
 /** On the team page: invites `email` as `role`; returns the link to share. */
 async function createInvite(page: Page, email: string, role: string): Promise<string> {

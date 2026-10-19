@@ -1,7 +1,11 @@
 import { z } from 'zod';
 
-/** The outcome of a browser call to the api, with a message fit to show the user. */
-export type CallResult<T> = { ok: true; data: T } | { ok: false; status: number; message: string };
+/**
+ * The outcome of a browser call to the api, with a message fit to show the user. A failure
+ * keeps the api's body for answers that carry more (the 409 `slot_unavailable` alternatives).
+ */
+export type CallResult<T> =
+  { ok: true; data: T } | { ok: false; status: number; message: string; body?: unknown };
 
 const ErrorBodySchema = z.object({ code: z.string().optional(), message: z.string().optional() });
 
@@ -32,10 +36,24 @@ const MESSAGES: Record<string, string> = {
     'This invite is for a different email. Sign in with the email it was sent to.',
   invite_not_found: 'That invite was already used or cancelled.',
   invite_limit_reached: 'You have 20 open invites. Cancel some before inviting more.',
+  service_not_found: 'That service is no longer on the menu.',
+  staff_member_not_found: 'That staff member is no longer bookable.',
+  client_not_found: 'I couldn’t find that client.',
+  client_email_taken: 'A client with this email already exists. Search for them instead.',
+  booking_not_found: 'That booking is gone, or it isn’t yours to change.',
+  slot_unavailable: 'That time can’t be booked.',
+  booking_not_changeable: 'This booking can’t be changed any more.',
+  booking_not_started: 'Mark it done or a no-show once it has started.',
+  waitlist_expired: 'Those times have already passed.',
 };
 
 const FALLBACK = 'Something went wrong. Try again.';
 const TOO_MANY = 'Too many attempts. Wait a few seconds and try again.';
+const OFFLINE = {
+  ok: false,
+  status: 0,
+  message: 'You seem to be offline. Check your connection.',
+} as const;
 
 /** The message for a failed call: by code, else rate limiting, else a generic one. */
 export function messageFor(status: number, body: unknown): string {
@@ -68,10 +86,43 @@ export async function sendJson<T = unknown>(
       credentials: 'same-origin',
     });
   } catch {
-    return { ok: false, status: 0, message: 'You seem to be offline. Check your connection.' };
+    return OFFLINE;
   }
+  return answerOf<T>(response);
+}
+
+/**
+ * Reads JSON from the app's own origin (`/v1/*`), checked against `schema`: an answer of
+ * another shape is a failure, like any refusal.
+ */
+export async function fetchJson<T extends z.ZodType>(
+  path: string,
+  schema: T,
+  fetch: typeof globalThis.fetch = globalThis.fetch,
+): Promise<CallResult<z.infer<T>>> {
+  let response: Response;
+  try {
+    response = await fetch(path, { credentials: 'same-origin' });
+  } catch {
+    return OFFLINE;
+  }
+  const answer = await answerOf(response);
+  if (!answer.ok) return answer;
+  const parsed = schema.safeParse(answer.data);
+  return parsed.success
+    ? { ok: true, data: parsed.data }
+    : { ok: false, status: response.status, message: FALLBACK };
+}
+
+async function answerOf<T>(response: Response): Promise<CallResult<T>> {
   const data: unknown = await response.json().catch(() => null);
-  if (!response.ok)
-    return { ok: false, status: response.status, message: messageFor(response.status, data) };
+  if (!response.ok) {
+    return {
+      ok: false,
+      status: response.status,
+      message: messageFor(response.status, data),
+      body: data,
+    };
+  }
   return { ok: true, data: data as T };
 }

@@ -9,11 +9,14 @@ import {
   columnsFor,
   dayRange,
   dayTitle,
+  formatDate,
   readCalendarParams,
   sameDate,
   todayIn,
 } from '../../../lib/calendar';
+import { bookableStaff, bookingAbilities, type BookingSetup } from '../../../lib/booking';
 import { seesDetailsOf } from '../../../lib/calendar-data';
+import { NewBooking } from '../../_components/booking/new-booking';
 import { DayGrid, type CalendarColumn } from '../../_components/day-grid';
 import { currentAccount, currentBusiness, currentCalendarDay } from '../../_server/account';
 
@@ -21,9 +24,10 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Calendar · Pepper' };
 
 /**
- * The calendar's day view (S14, read-only): one column per staff member on the business's
- * clock. Owners and managers see every booking; staff see their own in full and colleagues'
- * as busy times (AC-W9-1: the api decides what each role gets).
+ * The calendar's day view: one column per staff member on the business's clock. Owners and
+ * managers see every booking; staff see their own in full and colleagues' as busy times
+ * (AC-W9-1: the api decides what each role gets). Members who may book get "New booking" and
+ * a sheet for each booking they see in full (S15).
  */
 export default async function CalendarPage({
   searchParams,
@@ -62,6 +66,7 @@ export default async function CalendarPage({
           startsAt: booking.startsAt,
           endsAt: booking.endsAt,
           service: services.get(booking.serviceId) ?? 'Appointment',
+          serviceId: booking.serviceId,
           client: day.clientNames.get(booking.clientId) ?? 'Client',
           status: booking.status,
           overridden: booking.overridden,
@@ -69,6 +74,17 @@ export default async function CalendarPage({
     };
   });
   const filterable = day.staff.filter((member) => member.active);
+  const abilities = bookingAbilities(current.permissions, current.role);
+  const setup: BookingSetup = {
+    timeZone,
+    userId,
+    abilities,
+    services: day.services.filter((service) => service.active),
+    staff: day.staff,
+  };
+  const books =
+    abilities.books &&
+    bookableStaff(day.staff, { userId, ownOnly: abilities.ownStaffOnly }).length > 0;
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -79,29 +95,32 @@ export default async function CalendarPage({
             {dayTitle(date, today)}
           </p>
         </div>
-        <nav aria-label="Day" className="flex items-center gap-1">
-          <Link
-            href={calendarHref(addDays(date, -1), staffMemberId)}
-            aria-label="Previous day"
-            className={buttonClass({ variant: 'secondary', size: 'sm', className: 'w-11 px-0' })}
-          >
-            <Icon name="left" />
-          </Link>
-          <Link
-            href={calendarHref(today, staffMemberId)}
-            aria-current={sameDate(date, today) ? 'date' : undefined}
-            className={buttonClass({ variant: 'secondary', size: 'sm' })}
-          >
-            Today
-          </Link>
-          <Link
-            href={calendarHref(addDays(date, 1), staffMemberId)}
-            aria-label="Next day"
-            className={buttonClass({ variant: 'secondary', size: 'sm', className: 'w-11 px-0' })}
-          >
-            <Icon name="right" />
-          </Link>
-        </nav>
+        <div className="flex flex-wrap items-center gap-2">
+          {books ? <NewBooking setup={setup} date={formatDate(date)} /> : null}
+          <nav aria-label="Day" className="flex items-center gap-1">
+            <Link
+              href={calendarHref(addDays(date, -1), staffMemberId)}
+              aria-label="Previous day"
+              className={buttonClass({ variant: 'secondary', size: 'sm', className: 'w-11 px-0' })}
+            >
+              <Icon name="left" />
+            </Link>
+            <Link
+              href={calendarHref(today, staffMemberId)}
+              aria-current={sameDate(date, today) ? 'date' : undefined}
+              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+            >
+              Today
+            </Link>
+            <Link
+              href={calendarHref(addDays(date, 1), staffMemberId)}
+              aria-label="Next day"
+              className={buttonClass({ variant: 'secondary', size: 'sm', className: 'w-11 px-0' })}
+            >
+              <Icon name="right" />
+            </Link>
+          </nav>
+        </div>
       </header>
 
       {filterable.length > 1 ? (
@@ -156,6 +175,7 @@ export default async function CalendarPage({
           date={date}
           columns={columns}
           now={sameDate(date, today) ? new Date().toISOString() : null}
+          setup={books ? setup : null}
         />
       )}
     </div>

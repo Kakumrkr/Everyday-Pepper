@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { messageFor, sendJson } from './client-api';
+import { z } from 'zod';
+import { fetchJson, messageFor, sendJson } from './client-api';
 
 describe('messageFor', () => {
   it.each([
@@ -14,6 +15,11 @@ describe('messageFor', () => {
     [409, { code: 'already_a_member', message: 'x' }, 'already in this business'],
     [409, { code: 'invite_limit_reached', message: 'x' }, '20 open invites'],
     [403, { code: 'forbidden', message: 'x' }, 'doesn’t allow this'],
+    [409, { code: 'slot_unavailable', message: 'x', alternatives: [] }, 'can’t be booked'],
+    [409, { code: 'booking_not_changeable', message: 'x' }, 'can’t be changed'],
+    [409, { code: 'booking_not_started', message: 'x' }, 'once it has started'],
+    [404, { code: 'client_not_found', message: 'x' }, 'couldn’t find that client'],
+    [409, { code: 'client_email_taken', message: 'x' }, 'Search for them instead'],
   ])('explains %i %j', (status, body, expected) => {
     expect(messageFor(status, body)).toContain(expected);
   });
@@ -58,14 +64,15 @@ describe('sendJson', () => {
     });
   });
 
-  it('returns a friendly message on failure', async () => {
+  it('returns a friendly message on failure, and the body for answers that carry more', async () => {
     const fetch = vi.fn(() =>
       Promise.resolve(Response.json({ code: 'INVALID_CODE' }, { status: 401 })),
     );
-    await expect(sendJson('POST', '/x', {}, fetch as never)).resolves.toMatchObject({
+    await expect(sendJson('POST', '/x', {}, fetch as never)).resolves.toEqual({
       ok: false,
       status: 401,
       message: expect.stringContaining('code didn’t work') as unknown,
+      body: { code: 'INVALID_CODE' },
     });
   });
 
@@ -77,6 +84,43 @@ describe('sendJson', () => {
     });
     const offline = vi.fn(() => Promise.reject(new TypeError('Failed to fetch')));
     await expect(sendJson('PUT', '/x', {}, offline as never)).resolves.toMatchObject({
+      ok: false,
+      status: 0,
+    });
+  });
+});
+
+describe('fetchJson', () => {
+  const Schema = z.object({ n: z.number() });
+
+  it('reads JSON from the same origin, checked against the schema', async () => {
+    const fetch = vi.fn<(path: string, init?: RequestInit) => Promise<Response>>(() =>
+      Promise.resolve(Response.json({ n: 1, extra: true })),
+    );
+    await expect(fetchJson('/v1/x?a=1', Schema, fetch as never)).resolves.toEqual({
+      ok: true,
+      data: { n: 1 },
+    });
+    expect(fetch).toHaveBeenCalledWith('/v1/x?a=1', { credentials: 'same-origin' });
+  });
+
+  it('treats another shape, a refusal and being offline as failures', async () => {
+    const odd = vi.fn(() => Promise.resolve(Response.json({ n: 'one' })));
+    await expect(fetchJson('/x', Schema, odd as never)).resolves.toEqual({
+      ok: false,
+      status: 200,
+      message: 'Something went wrong. Try again.',
+    });
+    const refused = vi.fn(() =>
+      Promise.resolve(Response.json({ code: 'forbidden', message: 'x' }, { status: 403 })),
+    );
+    await expect(fetchJson('/x', Schema, refused as never)).resolves.toMatchObject({
+      ok: false,
+      status: 403,
+      message: expect.stringContaining('doesn’t allow this') as unknown,
+    });
+    const offline = vi.fn(() => Promise.reject(new TypeError('Failed to fetch')));
+    await expect(fetchJson('/x', Schema, offline as never)).resolves.toMatchObject({
       ok: false,
       status: 0,
     });

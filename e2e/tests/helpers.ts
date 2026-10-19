@@ -1,6 +1,6 @@
 import { randomInt } from 'node:crypto';
 import { totpCode } from '@pepper/testing';
-import { expect, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
 // Shared steps of the journeys through the real stack (web → api → Postgres).
 // Better Auth rate limits per client address and path; each test gets its own address
@@ -105,4 +105,40 @@ export async function enterPassword(page: Page, email: string, password = PASSWO
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
+}
+
+/** A separate browser for another person: the same device, their own client address. */
+export async function anotherPerson(browser: Browser, baseURL: string | undefined): Promise<Page> {
+  const { viewport, userAgent, deviceScaleFactor, isMobile, hasTouch } = test.info().project.use;
+  const context = await browser.newContext({
+    ...(baseURL !== undefined && { baseURL }),
+    ...(viewport !== undefined && { viewport }),
+    ...(userAgent !== undefined && { userAgent }),
+    ...(deviceScaleFactor !== undefined && { deviceScaleFactor }),
+    ...(isMobile !== undefined && { isMobile }),
+    ...(hasTouch !== undefined && { hasTouch }),
+  });
+  await ownClientAddress(context);
+  return context.newPage();
+}
+
+/**
+ * Calls the api as the signed-in browser (the app's own origin, as the api requires) and
+ * expects `status`; returns the body parsed by `schema`.
+ */
+export async function callApi<T>(
+  page: Page,
+  method: 'POST' | 'PUT',
+  path: string,
+  body: object,
+  schema: { parse: (value: unknown) => T },
+  status = method === 'POST' ? 201 : 200,
+): Promise<T> {
+  const response = await page.request.fetch(path, {
+    method,
+    data: body,
+    headers: { origin: new URL(page.url()).origin },
+  });
+  expect(response.status(), `${method} ${path}: ${await response.text()}`).toBe(status);
+  return schema.parse(await response.json());
 }
