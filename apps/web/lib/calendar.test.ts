@@ -23,7 +23,7 @@ function staffMember(id: string, active = true): StaffMember {
   return StaffMemberSchema.parse({
     id,
     displayName: `Staff ${id.slice(-2)}`,
-    color: '#be2759',
+    color: '#2a7230',
     active,
     userId: null,
     serviceIds: [],

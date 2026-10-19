@@ -53,7 +53,7 @@ const staffRecord: StaffMemberRecord = {
   id: STAFF,
   tenantId: TENANT,
   displayName: 'Jess',
-  color: '#be2759',
+  color: '#2a7230',
   active: true,
   membershipId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708195',
   userId: USER,
@@ -110,7 +110,7 @@ describe('staff members', () => {
     expect(toStaffMember(staffRecord)).toEqual({
       id: STAFF,
       displayName: 'Jess',
-      color: '#be2759',
+      color: '#2a7230',
       active: true,
       userId: USER,
       serviceIds: [SERVICE],

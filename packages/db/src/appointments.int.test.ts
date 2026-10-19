@@ -81,7 +81,7 @@ async function newTenant(): Promise<TenantId> {
 async function newStaff(tx: TenantTx, membershipId: string | null = null) {
   const row = await insertStaffMember(tx, {
     displayName: 'Jess',
-    color: '#be2759',
+    color: '#2a7230',
     active: true,
     membershipId,
   });

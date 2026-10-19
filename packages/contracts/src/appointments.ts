@@ -88,7 +88,7 @@ export type ServicesResponse = z.infer<typeof ServicesResponseSchema>;
 /** A colour for the calendar, `#rrggbb` (stored lowercase). */
 export const StaffColorSchema = z
   .string()
-  .regex(/^#[0-9a-fA-F]{6}$/, 'Use a colour like #be2759')
+  .regex(/^#[0-9a-fA-F]{6}$/, 'Use a colour like #2a7230')
   .toLowerCase();
 
 /**
@@ -100,7 +100,7 @@ export const StaffColorSchema = z
 export const StaffMemberInputSchema = z
   .object({
     displayName: z.string().trim().min(1).max(80),
-    color: StaffColorSchema.default('#be2759'),
+    color: StaffColorSchema.default('#2a7230'),
     active: z.boolean().default(true),
     userId: UserIdSchema.nullable().default(null),
     serviceIds: z

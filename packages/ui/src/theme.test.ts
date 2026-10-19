@@ -66,7 +66,7 @@ describe('contrastRatio', () => {
   it('is 21 for black on white and 1 for a color on itself, in either order', () => {
     expect(contrastRatio('#000000', '#FFFFFF')).toBeCloseTo(21, 5);
     expect(contrastRatio('#ffffff', '#000000')).toBeCloseTo(21, 5);
-    expect(contrastRatio('#BE2759', '#be2759')).toBe(1);
+    expect(contrastRatio('#2A7230', '#2a7230')).toBe(1);
   });
 
   it('refuses anything but #rrggbb', () => {

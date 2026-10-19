@@ -13,7 +13,7 @@ def cr(a,b):
 pairs=[('ink','bg'),('ink','surface'),('ink-2','bg'),('ink-2','surface'),('ink-2','surface-2'),('brand','bg'),('brand','surface'),('brand','brand-soft'),
 ('on-brand','brand-strong'),('ok','ok-soft'),('ok','surface'),('wait','wait-soft'),('wait','surface'),('info','info-soft'),('ink','wait-soft'),('ink-2','wait-soft'),
 ('s1-ink','s1'),('s2-ink','s2'),('s3-ink','s3'),('ink','brand-soft'),('surface','wait'),('bg','ink'),
-('danger','surface'),('danger','bg'),('biz','surface'),('biz','bg'),('biz','biz-soft'),('biz-on','biz-strong')]
+('danger','surface'),('danger','bg'),('accent','surface'),('accent','bg'),('accent','accent-soft'),('on-accent','accent'),('brand','surface-2'),('biz','surface'),('biz','bg'),('biz','biz-soft'),('biz-on','biz-strong')]
 bad=0
 for name,t in (('light',light),('dark',dark)):
     for f,b in pairs:

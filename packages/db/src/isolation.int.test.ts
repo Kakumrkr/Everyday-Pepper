@@ -340,7 +340,7 @@ async function seedBooking(tx: TenantTx): Promise<string> {
 async function seedStaff(tx: TenantTx): Promise<StaffMemberId> {
   const staff = await insertStaffMember(tx, {
     displayName: 'Jess',
-    color: '#be2759',
+    color: '#2a7230',
     active: true,
     membershipId: null,
   });

@@ -7,35 +7,39 @@
 /* Layout: phone-first app shell. Top bar, one scrolling view, and a thumb-zone dock (ask bar + tabs).
    From 960px it becomes sidebar + view, and Home gains a "today at a glance" rail. */
 :root {
-  /* Neutrals lean toward the raspberry brand so greys never look default. */
-  --bg: #FFF8F7;
+  /* Neutrals lean toward the pepper-green brand so greys never look default. */
+  --bg: #F7FAF5;
   --surface: #FFFFFF;
-  --surface-2: #FBEEEC;
-  --line: #EEDCD9;
-  --ink: #2B1B24;
-  --ink-2: #6A5560;
-  /* Brand: raspberry. --brand for text/icons on light surfaces, --brand-strong for filled buttons. */
-  --brand: #BE2759;
-  --brand-strong: #B01F52;
-  --brand-soft: #FDE5ED;
+  --surface-2: #EDF3EA;
+  --line: #DCE6D8;
+  --ink: #1B2A1E;
+  --ink-2: #536257;
+  /* Brand: pepper green. --brand for text/icons on light surfaces, --brand-strong for filled buttons. */
+  --brand: #2A7230;
+  --brand-strong: #23652A;
+  --brand-soft: #E2F0E0;
   --on-brand: #FFFFFF;
-  /* Semantic: done / needs your OK / info. Separate from the brand hue. */
-  --ok: #23703A;
-  --ok-soft: #E2F2E5;
+  /* Accent: chili. The mark, Pepper's own voice and highlights; never a status color. */
+  --accent: #C2361B;
+  --accent-soft: #FDE6DF;
+  --on-accent: #FFFFFF;
+  /* Semantic: done (teal) / needs your OK / info. Separate from the brand and accent hues. */
+  --ok: #0B6B63;
+  --ok-soft: #DDF1EE;
   --wait: #8F4C00;
   --wait-soft: #FFEFD6;
   --info: #1D65A8;
   --info-soft: #E2EEFA;
-  --danger: #B3261E;
-  /* The business's own brand, used on its public booking page (Juniper: deep teal). */
-  --biz: #0E6656; --biz-strong: #0D5E4F; --biz-soft: #DAF2EB; --biz-on: #FFFFFF;
+  --danger: #9F1D2B;
+  /* The business's own brand, used on its public booking page (Juniper: plum). */
+  --biz: #7A3B8F; --biz-strong: #6E3382; --biz-soft: #F3E6F7; --biz-on: #FFFFFF;
   /* Per-stylist calendar colours (soft fill + readable ink). */
-  --s1: #FCE3EC; --s1-ink: #8E1D47;
-  --s2: #DAF2EB; --s2-ink: #0D5E4F;
+  --s1: #E2F0DC; --s1-ink: #2D5C25;
+  --s2: #FDE4DB; --s2-ink: #8A2D14;
   --s3: #FFEFC7; --s3-ink: #7A4F00;
-  --hatch: rgba(106, 85, 96, .14);
-  --shadow: 0 1px 2px rgba(43, 27, 36, .06), 0 10px 28px rgba(43, 27, 36, .08);
-  --scrim: rgba(43, 27, 36, .42);
+  --hatch: rgba(83, 98, 87, .14);
+  --shadow: 0 1px 2px rgba(27, 42, 30, .06), 0 10px 28px rgba(27, 42, 30, .08);
+  --scrim: rgba(27, 42, 30, .42);
 
   --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -47,26 +51,26 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #161015; --surface: #211820; --surface-2: #2B2029; --line: #3B2D38;
-    --ink: #F8ECF1; --ink-2: #BDA8B3;
-    --brand: #FF7FA8; --brand-strong: #FF8FB3; --brand-soft: #46202F; --on-brand: #2A0D19;
-    --ok: #7FD69A; --ok-soft: #1D3324; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
-    --danger: #FFB4AB; --biz: #6FD9C0; --biz-strong: #7FE0C9; --biz-soft: #173A33; --biz-on: #062019;
-    --s1: #4A2032; --s1-ink: #FFC2D6; --s2: #173A33; --s2-ink: #A6EBD9; --s3: #3D3012; --s3-ink: #FFDE8A;
-    --hatch: rgba(189, 168, 179, .12);
+    --bg: #0F1510; --surface: #172019; --surface-2: #202A22; --line: #2F3B31;
+    --ink: #EAF3EA; --ink-2: #A7B7AA;
+    --brand: #86D28E; --brand-strong: #97DB9E; --brand-soft: #1B3320; --on-brand: #0A1F0D; --accent: #FF8C70; --accent-soft: #3D1E16; --on-accent: #2A0B04;
+    --ok: #6BD5C6; --ok-soft: #13322E; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
+    --danger: #FFB4AB; --biz: #DDA6F0; --biz-strong: #E5B6F5; --biz-soft: #3A2244; --biz-on: #23102B;
+    --s1: #1E3519; --s1-ink: #B5E3A8; --s2: #40211A; --s2-ink: #FFC4B3; --s3: #3D3012; --s3-ink: #FFDE8A;
+    --hatch: rgba(167, 183, 170, .12);
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
     --scrim: rgba(0, 0, 0, .6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #161015; --surface: #211820; --surface-2: #2B2029; --line: #3B2D38;
-  --ink: #F8ECF1; --ink-2: #BDA8B3;
-  --brand: #FF7FA8; --brand-strong: #FF8FB3; --brand-soft: #46202F; --on-brand: #2A0D19;
-  --ok: #7FD69A; --ok-soft: #1D3324; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
-    --danger: #FFB4AB; --biz: #6FD9C0; --biz-strong: #7FE0C9; --biz-soft: #173A33; --biz-on: #062019;
-  --s1: #4A2032; --s1-ink: #FFC2D6; --s2: #173A33; --s2-ink: #A6EBD9; --s3: #3D3012; --s3-ink: #FFDE8A;
-  --hatch: rgba(189, 168, 179, .12);
+  --bg: #0F1510; --surface: #172019; --surface-2: #202A22; --line: #2F3B31;
+  --ink: #EAF3EA; --ink-2: #A7B7AA;
+  --brand: #86D28E; --brand-strong: #97DB9E; --brand-soft: #1B3320; --on-brand: #0A1F0D; --accent: #FF8C70; --accent-soft: #3D1E16; --on-accent: #2A0B04;
+  --ok: #6BD5C6; --ok-soft: #13322E; --wait: #FFC274; --wait-soft: #3A2A12; --info: #8CC2F5; --info-soft: #172B3E;
+    --danger: #FFB4AB; --biz: #DDA6F0; --biz-strong: #E5B6F5; --biz-soft: #3A2244; --biz-on: #23102B;
+  --s1: #1E3519; --s1-ink: #B5E3A8; --s2: #40211A; --s2-ink: #FFC4B3; --s3: #3D3012; --s3-ink: #FFDE8A;
+  --hatch: rgba(167, 183, 170, .12);
   --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
   --scrim: rgba(0, 0, 0, .6);
   color-scheme: dark;
@@ -227,6 +231,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
 .av-ok { background: var(--ok-soft); color: var(--ok); }
 .av-wait { background: var(--wait-soft); color: var(--wait); }
 .av-brand { background: var(--brand-soft); color: var(--brand); }
+.av-accent { background: var(--accent-soft); color: var(--accent); }
 .av-info { background: var(--info-soft); color: var(--info); }
 .avatar svg.i { width: 20px; height: 20px; }
 
@@ -726,9 +731,10 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
     <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
     <symbol id="i-pepper" viewBox="0 0 40 40">
       <!-- Inline var() styles: class selectors can't reach inside <use> clones, but custom properties inherit. -->
-      <path style="fill:var(--brand-strong)" d="M20 3c9.9 0 17 6.6 17 15.2S29.9 33.4 20 33.4c-1.9 0-3.7-.2-5.4-.7L7 37l1.3-7.2C5 27 3 22.9 3 18.2 3 9.6 10.1 3 20 3Z"/>
-      <circle style="fill:var(--on-brand)" cx="14.2" cy="16.4" r="2.3"/><circle style="fill:var(--on-brand)" cx="25.8" cy="16.4" r="2.3"/>
-      <path style="fill:none;stroke:var(--on-brand);stroke-width:2.4;stroke-linecap:round" d="M14.4 22.6c3.2 3 8 3 11.2 0"/>
+      <path style="fill:var(--accent)" d="M20 5c9.9 0 17 6.2 17 14.4S29.9 33.8 20 33.8c-1.9 0-3.7-.2-5.4-.7L7 37.4l1.3-7.2C5 27.6 3 23.7 3 19.4 3 11.2 10.1 5 20 5Z"/>
+      <path style="fill:none;stroke:var(--brand-strong);stroke-width:3;stroke-linecap:round" d="M20 7.2c0-2.6 1.4-4.6 4.4-5.6"/>
+      <circle style="fill:var(--on-accent)" cx="14.2" cy="17.4" r="2.3"/><circle style="fill:var(--on-accent)" cx="25.8" cy="17.4" r="2.3"/>
+      <path style="fill:none;stroke:var(--on-accent);stroke-width:2.4;stroke-linecap:round" d="M14.4 23.6c3.2 3 8 3 11.2 0"/>
     </symbol>
   </defs>
 </svg>
@@ -941,7 +947,7 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
           <li><button data-go="know"><span class="avatar av-ok"><svg class="i"><use href="#i-brain"/></svg></span><span class="grow"><b>What I know</b><br><span class="small muted">Facts and rules Pepper remembers</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
           <li><button data-go="team"><span class="avatar av-wait"><svg class="i"><use href="#i-scissors"/></svg></span><span class="grow"><b>Team &amp; services</b><br><span class="small muted">Stylists, roles, hours and your menu</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
           <li><button data-action="book-start"><span class="avatar av-ok"><svg class="i"><use href="#i-web"/></svg></span><span class="grow"><b>Booking page</b><br><span class="small muted">See what your clients see</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
-          <li><button data-action="ob-start"><span class="avatar av-brand"><svg class="i"><use href="#i-spark"/></svg></span><span class="grow"><b>Onboarding</b><br><span class="small muted">Replay the 10-minute setup</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
+          <li><button data-action="ob-start"><span class="avatar av-accent"><svg class="i"><use href="#i-spark"/></svg></span><span class="grow"><b>Onboarding</b><br><span class="small muted">Replay the 10-minute setup</span></span><svg class="i"><use href="#i-right"/></svg></button></li>
           <li><button data-action="theme"><span class="avatar av-info"><svg class="i"><use href="#i-moon"/></svg></span><span class="grow"><b data-theme-label>Theme: system</b><br><span class="small muted">Switch between system, light and dark</span></span></button></li>
         </ul>
         <p class="fine">Mockup with sample data. Nothing here is saved or sent.</p>
@@ -955,17 +961,18 @@ svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
           <p class="eyebrow">Design direction · proposal for your feedback</p>
           <h1 id="brand-title" class="sr-only">Pepper design direction</h1>
           <span class="wordmark"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-pepper"/></svg><b>pepper</b></span>
-          <p>Your new front-desk employee. The mark is a speech bubble with a face: the product is someone you talk to, not a dashboard you click through. Lowercase, rounded and a little playful, so it feels at home in a salon or a studio.</p>
+          <p>Your new front-desk employee. The mark is a chili-red speech bubble with a face and a green pepper stem: the product is someone you talk to, not a dashboard you click through. Lowercase, rounded and a little playful, so it feels at home in a salon or a studio.</p>
         </div>
 
         <h2 class="section-title">Color</h2>
-        <p class="muted" style="max-width:62ch">One brand color, raspberry, used for the things you act on. Status colors are separate so "needs your OK" never looks like a brand flourish. Every color has a dark-mode twin; all text pairs pass WCAG AA contrast.</p>
+        <p class="muted" style="max-width:62ch">Pepper green for the things you act on, chili red as a small accent for the mark and Pepper's own voice. Status colors are separate (done is teal, not green), and chili is never used for status, so it never looks like an error. Every color has a dark-mode twin; all text pairs pass WCAG AA contrast.</p>
         <div class="swatches">
-          <div class="sw"><i style="background:var(--brand-strong)"></i><div><b>Raspberry</b><br><code>brand · buttons, links</code></div></div>
-          <div class="sw"><i style="background:var(--brand-soft)"></i><div><b>Blush</b><br><code>brand-soft · highlights</code></div></div>
-          <div class="sw"><i style="background:var(--bg)"></i><div><b>Petal</b><br><code>bg · app background</code></div></div>
-          <div class="sw"><i style="background:var(--ink)"></i><div><b>Aubergine</b><br><code>ink · text</code></div></div>
-          <div class="sw"><i style="background:var(--ok)"></i><div><b>Fern</b><br><code>ok · done</code></div></div>
+          <div class="sw"><i style="background:var(--brand-strong)"></i><div><b>Pepper green</b><br><code>brand · buttons, links</code></div></div>
+          <div class="sw"><i style="background:var(--accent)"></i><div><b>Chili</b><br><code>accent · mark, Pepper's voice</code></div></div>
+          <div class="sw"><i style="background:var(--brand-soft)"></i><div><b>Sprout</b><br><code>brand-soft · highlights</code></div></div>
+          <div class="sw"><i style="background:var(--bg)"></i><div><b>Mist</b><br><code>bg · app background</code></div></div>
+          <div class="sw"><i style="background:var(--ink)"></i><div><b>Forest</b><br><code>ink · text</code></div></div>
+          <div class="sw"><i style="background:var(--ok)"></i><div><b>Lagoon</b><br><code>ok · done</code></div></div>
           <div class="sw"><i style="background:var(--wait)"></i><div><b>Amber</b><br><code>wait · needs your OK</code></div></div>
           <div class="sw"><i style="background:var(--info)"></i><div><b>Lake</b><br><code>info · tips</code></div></div>
           <div class="sw"><i style="background:linear-gradient(90deg,var(--s1) 0 33%,var(--s2) 33% 66%,var(--s3) 66%)"></i><div><b>Team tints</b><br><code>s1–s3 · calendar</code></div></div>
@@ -1208,7 +1215,7 @@ Ana at Juniper Hair Studio</textarea>
     jessbreak: () => `
       <article class="card feed-item" data-item="jessbreak">
         <div class="card-row">
-          <span class="avatar av-brand">${icon("spark")}</span>
+          <span class="avatar av-accent">${icon("spark")}</span>
           <div class="grow">
             <p class="title">Jess works 9:00 to 5:00 Friday with no lunch. Block 12:30–1:00 for her?</p>
             <p class="meta">She has a 2 h 15 m gap after Erin's balayage.</p>
@@ -1509,7 +1516,7 @@ Ana at Juniper Hair Studio</textarea>
 
     const heads = staff.map((s) => {
       const n = evs.filter((ev) => ev.staff === s.id && ev.client).length;
-      return `<div class="cal-colhead"><span class="avatar ${s.tint === "s1" ? "av-brand" : s.tint === "s2" ? "av-ok" : "av-wait"}">${s.initials}</span><div><div class="nm">${s.name}</div><div class="sub">${n} booked</div></div></div>`;
+      return `<div class="cal-colhead"><span class="avatar ${s.tint === "s1" ? "av-brand" : s.tint === "s2" ? "av-accent" : "av-wait"}">${s.initials}</span><div><div class="nm">${s.name}</div><div class="sub">${n} booked</div></div></div>`;
     }).join("");
 
     $("#cal-body").innerHTML = `

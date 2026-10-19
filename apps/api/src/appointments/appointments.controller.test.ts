@@ -57,7 +57,7 @@ const SERVICE: Service = {
 const STAFF: StaffMember = {
   id: STAFF_ID,
   displayName: 'Jess',
-  color: '#be2759',
+  color: '#2a7230',
   active: true,
   userId: USER,
   serviceIds: [SERVICE_ID],
@@ -263,7 +263,7 @@ describe('staff members', () => {
     expect((await send('post', '/v1/staff', jess).expect(201)).body).toEqual(STAFF);
     expect(appointments.createStaffMember).toHaveBeenCalledWith(context(), {
       ...jess,
-      color: '#be2759',
+      color: '#2a7230',
       active: true,
     });
     await send('put', `/v1/staff/${STAFF_ID}`, jess).expect(200);

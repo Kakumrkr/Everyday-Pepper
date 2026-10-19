@@ -65,13 +65,13 @@ describe('StaffMemberInputSchema', () => {
     expect(
       StaffMemberInputSchema.parse({
         displayName: ' Jess ',
-        color: '#BE2759',
+        color: '#2A7230',
         userId: USER,
         serviceIds: [SERVICE_A.toUpperCase()],
       }),
     ).toEqual({
       displayName: 'Jess',
-      color: '#be2759',
+      color: '#2a7230',
       active: true,
       userId: USER.toLowerCase(),
       serviceIds: [SERVICE_A],
@@ -99,7 +99,7 @@ describe('StaffMemberInputSchema', () => {
     ).toHaveLength(2);
   });
 
-  it.each(['#000000', '#ffffff', '#Be2759'])('accepts the colour %s', (color) => {
+  it.each(['#000000', '#ffffff', '#C2361b'])('accepts the colour %s', (color) => {
     expect(StaffColorSchema.safeParse(color).success).toBe(true);
   });
 });

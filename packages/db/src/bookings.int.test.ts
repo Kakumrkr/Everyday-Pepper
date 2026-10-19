@@ -92,7 +92,7 @@ async function newBusiness(): Promise<Business> {
       active: true,
     });
     const staff = (displayName: string) =>
-      insertStaffMember(tx, { displayName, color: '#be2759', active: true, membershipId: null });
+      insertStaffMember(tx, { displayName, color: '#2a7230', active: true, membershipId: null });
     const client = await insertClient(tx, {
       name: 'Maria Lopez',
       email: 'maria@example.test',
@@ -589,7 +589,7 @@ describe('member scope (AC-W9-1 at the RLS level)', () => {
     await refused(sql`UPDATE staff_members SET membership_id = NULL WHERE id = ${b.jess}`);
     await refused(sql`UPDATE staff_members SET active = active WHERE id = ${b.marco}`);
     await refused(
-      sql`INSERT INTO staff_members (display_name, color) VALUES ('Jess 2', '#be2759')`,
+      sql`INSERT INTO staff_members (display_name, color) VALUES ('Jess 2', '#2a7230')`,
     );
     await refused(sql`UPDATE memberships SET role = 'owner' WHERE user_id = ${jessUser}`);
     const deleted = (statement: SQL, userId: UserId) =>
