@@ -22,7 +22,6 @@ import {
   type StaffMemberId,
 } from '@pepper/contracts';
 import {
-  ClientNotFoundError,
   ForbiddenError,
   permissionScope,
   requirePermission,
@@ -36,7 +35,6 @@ import {
   BookingOverlapError,
   findBooking,
   findBookingByIdempotencyKey,
-  findClient,
   findService,
   findStaffMemberOfUser,
   insertBooking,
@@ -65,6 +63,7 @@ import {
 } from '../errors.js';
 import { bookingAuditValues, sameValues, staffOwner, toBooking, toBusyTime } from '../mapping.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
+import { findClientToBook } from './clients.js';
 
 // Bookings (ADR-0017). `bookings.manage` lets owners and managers book anyone and staff only
 // their own staff member (AC-W9-1); the database's member scope enforces the same, so staff
@@ -116,7 +115,7 @@ export async function createBooking(
       const serviceRow = await findService(tx, request.serviceId);
       if (serviceRow === undefined) throw new ServiceNotFoundError();
       service = serviceToBook(serviceRow);
-      if ((await findClient(tx, request.clientId)) === undefined) throw new ClientNotFoundError();
+      await findClientToBook(tx, request.clientId, request.clientContact);
 
       const end = start + service.durationMinutes * MINUTE_MS;
       const fits = request.override

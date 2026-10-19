@@ -55,6 +55,7 @@ const tenancy = { roleIn: vi.fn(() => Promise.resolve(role)) };
 const clients = {
   list: vi.fn(() => Promise.resolve([CLIENT])),
   get: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
+  lookUp: vi.fn(() => Promise.resolve([CLIENT])),
   create: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
 };
 
@@ -143,7 +144,28 @@ describe('/v1/clients', () => {
     await post({ name: 'Maria', phone: '555-1234' }).expect(400);
   });
 
+  it.each<MembershipRole>(['owner', 'manager', 'staff'])(
+    'a(n) %s finds clients by exact email or phone (200)',
+    async (r) => {
+      role = r;
+      const lookUp = (body: object) =>
+        request(server)
+          .post('/v1/clients/lookup')
+          .set('cookie', 'signed-in')
+          .set('origin', ORIGIN)
+          .send(body);
+      expect((await lookUp({ contact: ' Maria@Example.test ' }).expect(200)).body).toEqual({
+        clients: [CLIENT],
+      });
+      expect(clients.lookUp).toHaveBeenCalledWith(context(), { contact: 'maria@example.test' });
+      expect(code((await lookUp({ contact: 'maria' }).expect(400)).body)).toBe('validation_failed');
+      await lookUp({ contact: '+15551234567', search: 'x' }).expect(400);
+      expect(clients.lookUp).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it('401 signed out', async () => {
     await request(server).get('/v1/clients').expect(401);
+    await request(server).post('/v1/clients/lookup').set('origin', ORIGIN).expect(401);
   });
 });

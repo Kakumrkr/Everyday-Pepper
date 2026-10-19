@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { ClientInputSchema, ClientsQuerySchema, PhoneSchema } from './clients.js';
+import {
+  ClientContactSchema,
+  ClientInputSchema,
+  ClientLookupSchema,
+  ClientsQuerySchema,
+  PhoneSchema,
+} from './clients.js';
 
 describe('ClientInputSchema', () => {
   it('trims, lowercases the email and defaults what is missing', () => {
@@ -52,5 +58,32 @@ describe('ClientsQuerySchema', () => {
   it('rejects an empty search and a page over 200', () => {
     expect(ClientsQuerySchema.safeParse({ search: ' ' }).success).toBe(false);
     expect(ClientsQuerySchema.safeParse({ limit: '201' }).success).toBe(false);
+  });
+});
+
+describe('ClientContactSchema', () => {
+  it('reads an email (trimmed, lowercased) or an E.164 phone', () => {
+    expect(ClientContactSchema.parse(' Maria@Example.COM ')).toBe('maria@example.com');
+    expect(ClientContactSchema.parse('+15551234567')).toBe('+15551234567');
+  });
+
+  it.each([
+    ['a part of a name', 'mar'],
+    ['a part of an email', '@example.com'],
+    ['a local phone number', '555-123-4567'],
+    ['nothing', '  '],
+    ['a wildcard', '%'],
+    ['a too-long address', `${'a'.repeat(250)}@x.co`],
+  ])('rejects %s', (_label, input) => {
+    expect(ClientContactSchema.safeParse(input).success).toBe(false);
+  });
+
+  it('a lookup body carries only the contact', () => {
+    expect(ClientLookupSchema.parse({ contact: '+15551234567' })).toEqual({
+      contact: '+15551234567',
+    });
+    expect(ClientLookupSchema.safeParse({ contact: '+15551234567', limit: 50 }).success).toBe(
+      false,
+    );
   });
 });

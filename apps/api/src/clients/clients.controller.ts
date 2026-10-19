@@ -1,12 +1,13 @@
 import {
   ClientIdSchema,
   ClientInputSchema,
+  ClientLookupSchema,
   ClientsQuerySchema,
   type Client,
   type ClientsResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';
 import { answering } from '../http/domain-errors.js';
@@ -18,7 +19,8 @@ const ClientParamsSchema = z.object({ clientId: ClientIdSchema });
 /**
  * The active business's clients, `/v1/clients` (ADR-0017). Owners and managers see and add
  * every client; staff see only the clients they have a booking or waitlist entry with (the
- * database's member scope, AC-W9-1), so another client is simply not found.
+ * database's member scope, AC-W9-1), so another client is simply not found. Everyone may find
+ * a client by an exact email or phone (`POST /v1/clients/lookup`, ADR-0020).
  */
 @Controller('v1/clients')
 @UseGuards(TenantGuard)
@@ -33,6 +35,21 @@ export class ClientsController {
   ): Promise<ClientsResponse> {
     const parsed = parseBody(ClientsQuerySchema, query);
     return { clients: await answering(() => this.clients.list(tenant, parsed)) };
+  }
+
+  /**
+   * 200 `{ clients }`: those with exactly this email or phone (none: an empty list). A POST, so
+   * the contact stays out of URLs and access logs.
+   */
+  @Post('lookup')
+  @HttpCode(200)
+  @RequirePermission('clients.read')
+  async lookUp(
+    @CurrentTenant() tenant: TenantContext,
+    @Body() body: unknown,
+  ): Promise<ClientsResponse> {
+    const lookup = parseBody(ClientLookupSchema, body);
+    return { clients: await answering(() => this.clients.lookUp(tenant, lookup)) };
   }
 
   /** 404 `client_not_found` (also for staff asking about a client who is not theirs). */

@@ -26,6 +26,25 @@ export const PhoneSchema = z
 /** An email address, stored lowercased (one client per address in a business). */
 export const ClientEmailSchema = z.email().max(254).toLowerCase();
 
+/**
+ * An exact email or phone to find a client by (ADR-0020): with an "@" it is an email
+ * (lowercased), otherwise an E.164 phone. Staff may find any client this way, never by a part.
+ */
+export const ClientContactSchema = z
+  .string()
+  .trim()
+  .max(254)
+  .pipe(z.union([ClientEmailSchema, PhoneSchema]))
+  .brand<'ClientContact'>();
+export type ClientContact = z.infer<typeof ClientContactSchema>;
+
+/**
+ * `POST /v1/clients/lookup`: the clients with exactly this email or phone (a body, not a query
+ * string, so the contact stays out of URLs and access logs).
+ */
+export const ClientLookupSchema = z.object({ contact: ClientContactSchema }).strict();
+export type ClientLookup = z.input<typeof ClientLookupSchema>;
+
 /** A client as a team member enters them (`POST /v1/clients`). */
 export const ClientInputSchema = z
   .object({

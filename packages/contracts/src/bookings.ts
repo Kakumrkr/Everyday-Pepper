@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
-import { ClientIdSchema, RecordSourceSchema } from './clients.js';
+import { ClientContactSchema, ClientIdSchema, RecordSourceSchema } from './clients.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // Bookings (ADR-0017). A booking is one client's appointment for one service with one staff
@@ -55,11 +55,13 @@ export const IdempotencyKeySchema = z
 /**
  * A booking as a team member makes it (`POST /v1/bookings`). `override` (owners and managers
  * only) books outside working hours, time off and the booking rules; it never allows two
- * bookings of a staff member to overlap.
+ * bookings of a staff member to overlap. `clientContact`: the exact email or phone staff found
+ * the client by (ADR-0020), so they may book a client they have no booking with yet.
  */
 export const BookingInputSchema = z
   .object({
     clientId: ClientIdSchema,
+    clientContact: ClientContactSchema.optional(),
     serviceId: ServiceIdSchema,
     staffMemberId: StaffMemberIdSchema,
     startsAt: UtcDateTimeSchema,

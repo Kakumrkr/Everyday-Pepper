@@ -271,6 +271,18 @@ describe('booking', () => {
     },
   );
 
+  it('passes on the exact contact staff found the client by (ADR-0020), normalised', async () => {
+    role = 'staff';
+    const found = { ...newBooking, clientContact: 'Maria@Example.test' };
+    await send('post', '/v1/bookings', found).expect(201);
+    expect(bookings.createBooking).toHaveBeenCalledWith(context(), {
+      ...newBooking,
+      clientContact: 'maria@example.test',
+      override: false,
+    });
+    await send('post', '/v1/bookings', { ...newBooking, clientContact: 'mar' }).expect(400);
+  });
+
   it('409 slot_unavailable carries the nearest alternatives (AC-W2-1)', async () => {
     bookings.createBooking.mockRejectedValueOnce(new SlotUnavailableError([SLOT]));
     const response = await send('post', '/v1/bookings', newBooking).expect(409);

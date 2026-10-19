@@ -1,5 +1,6 @@
 import {
   BookingIdSchema,
+  ClientContactSchema,
   ClientIdSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
@@ -37,10 +38,15 @@ import {
   setBookingStatus,
   type NewBooking,
 } from './repositories/bookings.js';
-import { findClient, insertClient, listClients } from './repositories/clients.js';
+import {
+  findClient,
+  findClientsByContact,
+  insertClient,
+  listClients,
+} from './repositories/clients.js';
 import { addMembership, deleteMembership } from './repositories/memberships.js';
 import { createTenant } from './repositories/tenants.js';
-import { withMember, withTenant, type TenantTx } from './tenant.js';
+import { setTransactionClientContact, withMember, withTenant, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // Clients, bookings, their occupied time and the waitlist against real Postgres (ADR-0017):
@@ -734,6 +740,66 @@ describe('member scope (AC-W9-1 at the RLS level)', () => {
     expect(await withTenant(db, b.tenant, (tx) => findClient(tx, b.client))).toMatchObject({
       name: 'Maria Lopez',
     });
+  });
+
+  it('ADR-0020: an exact email or phone shows staff those clients, read-only, for that transaction', async () => {
+    const add = (name: string, email: string | null, phone: string | null) =>
+      withTenant(db, b.tenant, async (tx) =>
+        ClientIdSchema.parse((await insertClient(tx, { name, email, phone, source: 'team' })).id),
+      );
+    const dee = await add('Dee', 'dee@example.test', '+15550001111');
+    const dan = await add('Dan', null, '+15550001111');
+    const other = await add('Olive', 'olive@example.test', '+15550002222');
+    const lookUp = (userId: UserId, contact: string) =>
+      as(userId, async (tx) => {
+        const parsed = ClientContactSchema.parse(contact);
+        await setTransactionClientContact(tx, parsed);
+        const found = (await findClientsByContact(tx, parsed)).map((c) => c.id);
+        const visible = await tx.execute<{ id: string }>(
+          sql`SELECT id::text FROM clients ORDER BY id`,
+        );
+        return { found, visible: visible.rows.map((r) => r.id) };
+      });
+
+    // A phone shared by two clients finds both (by name); the email finds one.
+    const own = await rows(jessUser, 'clients');
+    const byPhone = await lookUp(jessUser, '+15550001111');
+    expect(byPhone.found).toEqual([dan, dee]);
+    expect(byPhone.visible).toEqual([...own, dee, dan].sort());
+    expect((await lookUp(jessUser, 'DEE@example.test')).found).toEqual([dee]);
+    // Staff without a staff member get the match too, and nothing else.
+    expect(await lookUp(ben, 'olive@example.test')).toEqual({ found: [other], visible: [other] });
+    // Another business's member finds nothing.
+    const elsewhere = await newBusiness();
+    const outsider = await insertUser(db, 'Outsider');
+    await withTenant(db, elsewhere.tenant, (tx) =>
+      addMembership(tx, { userId: outsider, role: 'staff' }),
+    );
+    const outside = await withMember(db, { tenantId: elsewhere.tenant, userId: outsider }, (tx) =>
+      setTransactionClientContact(tx, ClientContactSchema.parse('dee@example.test')).then(() =>
+        findClientsByContact(tx, ClientContactSchema.parse('dee@example.test')),
+      ),
+    );
+    expect(outside).toEqual([]);
+
+    // The match is read-only, and gone once the setting is cleared or the transaction ends.
+    const write = await as(jessUser, async (tx) => {
+      await setTransactionClientContact(tx, ClientContactSchema.parse('dee@example.test'));
+      return tx.execute(sql`UPDATE clients SET name = 'Changed' WHERE id = ${dee}`);
+    }).catch((e: unknown) => e);
+    expect(sqlState(write)).toBe('42501');
+    const deleted = await as(jessUser, async (tx) => {
+      await setTransactionClientContact(tx, ClientContactSchema.parse('dee@example.test'));
+      return (await tx.execute(sql`DELETE FROM clients WHERE id = ${dee}`)).rowCount;
+    });
+    expect(deleted).toBe(0);
+    const cleared = await as(jessUser, async (tx) => {
+      await setTransactionClientContact(tx, ClientContactSchema.parse('dee@example.test'));
+      await setTransactionClientContact(tx, null);
+      return findClientsByContact(tx, ClientContactSchema.parse('dee@example.test'));
+    });
+    expect(cleared).toEqual([]);
+    expect(await rows(jessUser, 'clients')).toEqual(own);
   });
 
   it('a removed member loses their scope at once', async () => {

@@ -1,19 +1,23 @@
 import {
   ClientIdSchema,
   ClientInputSchema,
+  ClientLookupSchema,
   ClientSchema,
   ClientsQuerySchema,
   type Client,
   type ClientId,
   type ClientInput,
+  type ClientLookup,
   type ClientsQuery,
   type RecordSource,
 } from '@pepper/contracts';
 import {
   appendAuditEntry,
   findClient,
+  findClientsByContact,
   insertClient,
   listClients as listClientRows,
+  setTransactionClientContact,
   withMember,
   type ClientRow,
   type Database,
@@ -24,8 +28,10 @@ import { ClientNotFoundError } from '../errors.js';
 // The business's clients (ADR-0017). `clients.read` reaches every client for owners and
 // managers and, for staff, the clients they have a booking or waitlist entry with: the
 // database's member scope applies that (AC-W9-1), so staff never see the others at all.
-// `clients.manage` (owners and managers) adds them. A client's details are personal data:
-// the audit entry records only where the client came from.
+// Anyone with `clients.read` may also find any client by an exact email or phone (ADR-0020),
+// so staff can book a returning client of a colleague. `clients.manage` (owners and managers)
+// adds clients. A client's details are personal data: the audit entry records only where the
+// client came from.
 
 /** Clients by name; with `search`, those whose name or email contains it. */
 export async function listClients(
@@ -36,6 +42,24 @@ export async function listClients(
   requirePermission(actor, 'clients.read');
   const { search, limit } = ClientsQuerySchema.parse(query);
   const rows = await withMember(db, actor.context, (tx) => listClientRows(tx, { search, limit }));
+  return rows.map(toClient);
+}
+
+/**
+ * The clients with exactly this email or phone, by name (at most `MAX_CONTACT_MATCHES`). Staff
+ * find them too, though they have no booking with them yet; never a list of the others.
+ */
+export async function lookUpClients(
+  db: Database,
+  actor: Actor,
+  lookup: ClientLookup,
+): Promise<Client[]> {
+  requirePermission(actor, 'clients.read');
+  const { contact } = ClientLookupSchema.parse(lookup);
+  const rows = await withMember(db, actor.context, async (tx) => {
+    await setTransactionClientContact(tx, contact);
+    return findClientsByContact(tx, contact);
+  });
   return rows.map(toClient);
 }
 
