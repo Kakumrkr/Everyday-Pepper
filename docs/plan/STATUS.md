@@ -414,11 +414,12 @@
   - **Booking outcomes (open question 1 below):** Claude recommends (b), and S15 builds (b) unless the user says otherwise.
 - **S15 (2026-10-19): the user said "give me the Session Brief, then continue".** Claude went ahead on its recommendations, to confirm or change in review: outcomes rule (b); the exact-contact mechanism (transaction setting + read-only policy clause, contact passed with the booking); Radix Dialog 1.1.23 as the one new dependency; the screen flow in ADR-0020.
 - **ADR-0020 accepted (user, 2026-10-19, "ADR-0020 is good"):** the exact-contact lookup mechanism, Radix Dialog 1.1.23 and the booking screen flow. Asked for Claude's best recommendation on booking outcomes: Claude recommends keeping (b), as built (see Waiting on the user).
+- **Booking outcomes rule (b) confirmed (user, 2026-10-19, "confirm b"):** `completed`/`no_show` are final for staff; owners and managers may correct them (audited). Closes open question 1 from S13. Later (payments phase) consider a required reason for corrections.
+- **End of S15 (user, 2026-10-19):** open the PR and merge it to `main`; S16 starts in a new session.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Booking outcomes (open question 1 since S13):** S15 built option (b): `completed`/`no_show` are final for staff, owners and managers may still correct them. Claude's recommendation (2026-10-19) is to keep (b): staff can't rewrite what happened (this matters for no-show fees, commissions and client history), mistakes stay fixable by owners and managers, and every change is audited. (a) leaves records editable by the people they affect; (c) leaves a wrong tap with no fix, even for the owner. Waiting for the user to confirm (b) or pick another option.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S14–S18 (Claude's proposal at S14, with the go-ahead to continue; change it at any Session Brief).
