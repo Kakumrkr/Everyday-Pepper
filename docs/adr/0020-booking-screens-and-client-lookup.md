@@ -1,6 +1,6 @@
 # ADR-0020: Booking screens, finding a client by exact contact, and final outcomes for staff
 
-- **Status:** Proposed (Claude, 2026-10-19, S15). The user asked the session to go ahead after the Session Brief. The lookup itself was decided by the user on 2026-10-17 (ADR-0017 §Consequences); the outcome rule (b) was Claude's recommendation since S13, built because the user had not chosen otherwise. The mechanism and the screen choices below are for the user to accept or change in the PR. · **Date:** 2026-10-19 · Builds on ADR-0017 (bookings, clients, member scope), ADR-0014 (the invite lookup policy), ADR-0019 (design system)
+- **Status:** Accepted (user, 2026-10-19). Proposed by Claude the same day (S15). The lookup itself was decided by the user on 2026-10-17 (ADR-0017 §Consequences). The outcome rule (b) is Claude's recommendation, built by default; the user's confirmation is tracked in `plan/STATUS.md` (Waiting on the user). · **Date:** 2026-10-19 · Builds on ADR-0017 (bookings, clients, member scope), ADR-0014 (the invite lookup policy), ADR-0019 (design system)
 
 ## Context
 S15 adds booking from the calendar. Two open points from Phase 3 had to be closed first:

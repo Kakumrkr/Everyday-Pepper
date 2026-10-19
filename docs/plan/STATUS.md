@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-19 · **Plan version:** 0.11 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14 (design system, app shell, calendar) and the Pepper rename/theme (PCR-002) are merged. **S15 (Phase 4b: booking screens) done** on branch `claude/affectionate-babbage-mqm6pp`, with ADR-0020 **proposed** (review it in the PR) → next: **S16** (clients, services and team screens)
+**Last updated:** 2026-10-19 · **Plan version:** 0.11 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14 (design system, app shell, calendar) and the Pepper rename/theme (PCR-002) are merged. **S15 (Phase 4b: booking screens) done** on branch `claude/affectionate-babbage-mqm6pp`, with ADR-0020 **accepted** by the user → next: **S16** (clients, services and team screens)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -282,7 +282,7 @@
     - "Floty" now appears only in the notes that record the rename (STATUS, PCR-002, CHANGELOG, the rebuild note in `dev-setup.md`).
   - **For you:** rebuild your local dev database once (`docker compose down --volumes`, then start as usual) and copy the new database names from `.env.example` into your `.env`. The old preview link of the mockup shows the old look until it is republished.
 
-- **S15 Phase 4b (2026-10-19):** booking screens, staff client lookup, outcomes rule (b) ([ADR-0020](../adr/0020-booking-screens-and-client-lookup.md), proposed). The user said "give me the Session Brief, then continue", so Claude went ahead on its recommendations, to be reviewed in the PR.
+- **S15 Phase 4b (2026-10-19):** booking screens, staff client lookup, outcomes rule (b) ([ADR-0020](../adr/0020-booking-screens-and-client-lookup.md), accepted by the user on 2026-10-19). The user said "give me the Session Brief, then continue", so Claude went ahead on its recommendations, to be reviewed in the PR.
   - **Outcomes rule (b):** `canChangeStatus(from, to, correctsOutcomes)` in contracts; `changeBooking` makes `completed`/`no_show` final for staff (`409 booking_not_changeable`); owners and managers may still correct them.
   - **Staff find a client by exact email or phone** (the user's 2026-10-17 decision):
     - **db:** migration 0020, `current_client_contact()` reads the transaction-local `app.client_contact`; the clients `member_scope` USING also matches `email`/`phone` equal to it, read-only. `setTransactionClientContact` and `findClientsByContact` (at most 10).
@@ -413,10 +413,11 @@
   - **Response caps**: 500 items with `truncated`, not pagination.
   - **Booking outcomes (open question 1 below):** Claude recommends (b), and S15 builds (b) unless the user says otherwise.
 - **S15 (2026-10-19): the user said "give me the Session Brief, then continue".** Claude went ahead on its recommendations, to confirm or change in review: outcomes rule (b); the exact-contact mechanism (transaction setting + read-only policy clause, contact passed with the booking); Radix Dialog 1.1.23 as the one new dependency; the screen flow in ADR-0020.
+- **ADR-0020 accepted (user, 2026-10-19, "ADR-0020 is good"):** the exact-contact lookup mechanism, Radix Dialog 1.1.23 and the booking screen flow. Asked for Claude's best recommendation on booking outcomes: Claude recommends keeping (b), as built (see Waiting on the user).
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Booking outcomes (open question 1 since S13):** S15 built option (b): `completed`/`no_show` are final for staff, owners and managers may still correct them. Confirm it, or ask for (a) keep changeable for everyone, or (c) final for everyone.
+1. **Booking outcomes (open question 1 since S13):** S15 built option (b): `completed`/`no_show` are final for staff, owners and managers may still correct them. Claude's recommendation (2026-10-19) is to keep (b): staff can't rewrite what happened (this matters for no-show fees, commissions and client history), mistakes stay fixable by owners and managers, and every change is audited. (a) leaves records editable by the people they affect; (c) leaves a wrong tap with no fix, even for the owner. Waiting for the user to confirm (b) or pick another option.
 2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
