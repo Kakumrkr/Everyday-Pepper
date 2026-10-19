@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-19 · **Plan version:** 0.12 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14, the Pepper rename/theme (PCR-002) and S15 (booking screens, ADR-0020 accepted) are merged. **S16 (Phase 4c: setup screens) done** on branch `claude/s16-setup-screens` (not pushed; ADR-0021 **proposed**, to review) → next: **S17** (public booking page with email verification)
+**Last updated:** 2026-10-19 · **Plan version:** 0.12 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14, the Pepper rename/theme (PCR-002) and S15 (booking screens, ADR-0020 accepted) are merged. **S16 (Phase 4c: setup screens) done**, ADR-0021 **accepted** by the user, PR opened and merged into `main` at the user's request → next: **S17** (public booking page with email verification)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -306,7 +306,7 @@
     - The free times shown for a move exclude the booking's own time ("another time" covers it).
     - Booking a client to "anyone" (no staff member chosen) and the owner/manager override in the UI: not built; the api supports both.
 
-- **S16 Phase 4c (2026-10-19):** setup screens: services, booking rules, team with staff pages, clients ([ADR-0021](../adr/0021-setup-screens.md), proposed). The user said "give me the Session Brief, then continue", so Claude went ahead on its recommendations, to be reviewed in the PR.
+- **S16 Phase 4c (2026-10-19):** setup screens: services, booking rules, team with staff pages, clients ([ADR-0021](../adr/0021-setup-screens.md), accepted by the user on 2026-10-19). The user said "give me the Session Brief, then continue", so Claude went ahead on its recommendations, to be reviewed in the PR.
   - **api (additive):**
     - `PUT /v1/clients/:clientId` (owners and managers; 404/409). Audit `client.updated` holds only which fields changed; no-op edits write nothing.
     - `clientId` filter on `GET /v1/bookings` (62-day range and staff scope kept).
@@ -456,11 +456,11 @@
 - **Booking outcomes rule (b) confirmed (user, 2026-10-19, "confirm b"):** `completed`/`no_show` are final for staff; owners and managers may correct them (audited). Closes open question 1 from S13. Later (payments phase) consider a required reason for corrections.
 - **End of S15 (user, 2026-10-19):** open the PR and merge it to `main`; S16 starts in a new session.
 - **S16 (2026-10-19): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0021): (a) a client's visits through a `clientId` filter on `GET /v1/bookings` (±62 days), not a new endpoint; (b) client editing now, auditing only which fields changed; (c) rule defaults returned by the api so the web app does not import templates; business-wide rules only on the rules screen; nav order Home · Calendar · Clients · Services · Team.
+- **End of S16 (user, 2026-10-19):** "ADR-0021 approve. open PR and merge to main." ADR-0021 accepted as proposed (visits via the `clientId` filter, client editing with field-name-only audit, rule defaults from the api, business-wide rules only on the rules screen, nav order). S17 starts in a new session; its brief must settle the email sender (dev Mailpit sender now vs. the Phase 5 outbox).
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Review ADR-0021 (S16 screens and the three additive api changes) on branch `claude/s16-setup-screens`, and say whether to push it and open a PR.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S14–S18 (Claude's proposal at S14, with the go-ahead to continue; change it at any Session Brief).
@@ -469,7 +469,7 @@ Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S
 |---|---|---|---|
 | S14 | ~~Design system + app shell + calendar day view; response caps~~ **done** | 4a | — |
 | S15 | ~~**Booking screens:** create a booking from the calendar (service, staff member, free times from `/v1/availability`, client picker; staff find clients by exact email or phone), the booking sheet (details, move, status, cancel) with Radix dialogs, the 409 alternatives, the waitlist entry; booking outcomes rule (b) unless the user says otherwise; staff journey in Playwright~~ **done** | 4b | — |
-| S16 | ~~**Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system~~ **done** (ADR-0021 proposed) | 4c | — |
+| S16 | ~~**Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system~~ **done** (ADR-0021 accepted) | 4c | — |
 | S17 | **Public booking page with email verification:** the business's own brand color (PCR-001), service → staff → time → details → email code → confirmation with reschedule/cancel links. Needs an email sender before Phase 5's outbox (decide at the brief: dev Mailpit sender now, outbox later) | 4d | AC-W8-2; Playwright public booking |
 | S18 | **Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17 | 4e | Phase 4 exit criteria green; no open high-severity findings |
 

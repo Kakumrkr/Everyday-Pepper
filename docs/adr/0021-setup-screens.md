@@ -1,6 +1,6 @@
 # ADR-0021: Setup screens: services, team, hours, time off, booking rules and clients
 
-- **Status:** Proposed (Claude, S16, 2026-10-19). The user said "give me the Session Brief, then continue", so these are Claude's recommendations, to confirm or change in review. · **Date:** 2026-10-19 · Builds on ADR-0015 (base data), ADR-0016 (rules), ADR-0017 (clients, bookings), ADR-0018 (templates), ADR-0019 (design system), ADR-0020 (booking screens)
+- **Status:** Accepted (user, 2026-10-19). Proposed by Claude the same day (S16), after the user said "give me the Session Brief, then continue". · **Date:** 2026-10-19 · Builds on ADR-0015 (base data), ADR-0016 (rules), ADR-0017 (clients, bookings), ADR-0018 (templates), ADR-0019 (design system), ADR-0020 (booking screens)
 
 ## Context
 Phase 4 needs a new owner to set up the business in the app, without the api: the service menu, who can be booked with their hours, time off and services, the booking rules, and the clients. The api for services, staff, hours, time off and rules exists since S10–S11. Three things were missing:
