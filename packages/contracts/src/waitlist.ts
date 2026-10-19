@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingIdSchema } from './bookings.js';
-import { ClientIdSchema } from './clients.js';
+import { ClientContactSchema, ClientIdSchema } from './clients.js';
 import { LocalDateSchema } from './rules.js';
 import { UtcDateTimeSchema } from './time.js';
 
@@ -61,10 +61,12 @@ function sortWindows(windows: WaitlistWindow[]): WaitlistWindow[] {
 /**
  * A waitlist entry as a team member adds it (`POST /v1/waitlist`). Without a staff member the
  * client takes anyone who offers the service. The entry expires when its last window ends.
+ * `clientContact`: as for bookings, the exact email or phone staff found the client by.
  */
 export const WaitlistEntryInputSchema = z
   .object({
     clientId: ClientIdSchema,
+    clientContact: ClientContactSchema.optional(),
     serviceId: ServiceIdSchema,
     staffMemberId: StaffMemberIdSchema.nullable().default(null),
     windows: z.array(WaitlistWindowSchema).min(1).max(MAX_WAITLIST_WINDOWS).transform(sortWindows),

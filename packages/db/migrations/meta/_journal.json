@@ -141,6 +141,13 @@
       "when": 1792345000873,
       "tag": "0019_member_scope_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792372505969,
+      "tag": "0020_client_contact_lookup",
+      "breakpoints": true
     }
   ]
 }

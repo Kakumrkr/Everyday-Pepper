@@ -1,6 +1,8 @@
 import type { BookingStatus, CivilDate, StaffMember } from '@pepper/contracts';
 import { cx } from '@pepper/ui';
+import type { BookingSetup } from '../../lib/booking';
 import { hourLabel, layoutDay, timeRange } from '../../lib/calendar';
+import { BookingSheet } from './booking/booking-sheet';
 
 export type CalendarEntry =
   | {
@@ -9,6 +11,7 @@ export type CalendarEntry =
       startsAt: string;
       endsAt: string;
       service: string;
+      serviceId: string;
       client: string;
       status: BookingStatus;
       overridden: boolean;
@@ -32,18 +35,21 @@ const STATUS_LABELS: Partial<Record<BookingStatus, string>> = {
 /**
  * One day on a time grid, a column per staff member; the hours fit every entry (8 am – 8 pm at
  * least). Columns scroll sideways inside the grid on narrow screens; the page itself never does.
+ * With `setup` (the member may book), a booking opens its sheet when tapped.
  */
 export function DayGrid({
   timeZone,
   date,
   columns,
   now,
+  setup = null,
 }: {
   timeZone: string;
   date: CivilDate;
   columns: CalendarColumn[];
   /** The current instant when the day is today (draws the now-line). */
   now: string | null;
+  setup?: BookingSetup | null;
 }) {
   // One layout for every entry (and the now-line), so all columns share the grid's hours.
   const placed = [
@@ -108,6 +114,8 @@ export function DayGrid({
                       <Entry
                         key={`${item.startsAt}-${item.entry.kind === 'booking' ? item.entry.id : 'busy'}`}
                         entry={item.entry}
+                        staffMemberId={member.id}
+                        setup={setup}
                         timeZone={timeZone}
                         color={HEX_COLOR.test(member.color) ? member.color : null}
                         top={top}
@@ -133,12 +141,16 @@ export function DayGrid({
 
 function Entry({
   entry,
+  staffMemberId,
+  setup,
   timeZone,
   color,
   top,
   height,
 }: {
   entry: CalendarEntry;
+  staffMemberId: string;
+  setup: BookingSetup | null;
   timeZone: string;
   color: string | null;
   top: number;
@@ -160,21 +172,40 @@ function Entry({
     );
   }
   const status = STATUS_LABELS[entry.status];
+  const className = cx(
+    'absolute inset-x-1 overflow-hidden rounded-sm border-l-4 bg-brand-soft px-2 py-1 text-xs leading-tight text-ink',
+    entry.status === 'no_show' && 'opacity-70',
+  );
+  const style = { ...position, borderLeftColor: color ?? 'var(--brand)' };
+  const content = (
+    <>
+      <span className="block truncate font-bold">{entry.client}</span>
+      <span className="block truncate">{entry.service}</span>
+      <span className="block truncate text-ink-2">{time}</span>
+      {status === undefined ? null : <span className="block font-semibold">{status}</span>}
+      {entry.overridden ? <span className="block text-wait">Outside the usual hours</span> : null}
+    </>
+  );
+  if (setup !== null) {
+    return (
+      <BookingSheet
+        booking={{ ...entry, staffMemberId }}
+        setup={setup}
+        className={className}
+        style={style}
+      >
+        {content}
+      </BookingSheet>
+    );
+  }
   return (
     <article
       data-testid="booking-block"
       aria-label={`${time}, ${entry.service} with ${entry.client}`}
-      className={cx(
-        'absolute inset-x-1 overflow-hidden rounded-sm border-l-4 bg-brand-soft px-2 py-1 text-xs leading-tight text-ink',
-        entry.status === 'no_show' && 'opacity-70',
-      )}
-      style={{ ...position, borderLeftColor: color ?? 'var(--brand)' }}
+      className={className}
+      style={style}
     >
-      <p className="m-0 truncate font-bold">{entry.client}</p>
-      <p className="m-0 truncate">{entry.service}</p>
-      <p className="m-0 truncate text-ink-2">{time}</p>
-      {status === undefined ? null : <p className="m-0 font-semibold">{status}</p>}
-      {entry.overridden ? <p className="m-0 text-wait">Outside the usual hours</p> : null}
+      {content}
     </article>
   );
 }

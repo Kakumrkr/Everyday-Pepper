@@ -586,7 +586,9 @@ export const bookingRules = pgTable(
 /**
  * A client of the business (ADR-0017): who bookings and waitlist entries are for. Personal
  * data: never logged or audited. Staff see only clients they have a booking or waitlist entry
- * with, and cannot change or delete any (policies `member_scope*`).
+ * with, plus, inside a transaction that names an exact email or phone
+ * (`setTransactionClientContact`, ADR-0020), the clients with that contact. They cannot change
+ * or delete any (policies `member_scope*`).
  */
 export const clients = pgTable(
   'clients',
@@ -618,7 +620,7 @@ export const clients = pgTable(
     pgPolicy('member_scope', {
       as: 'restrictive',
       for: 'all',
-      using: sql`${memberSeesAll} OR id IN (SELECT client_id FROM bookings) OR id IN (SELECT client_id FROM waitlist_entries)`,
+      using: sql`${memberSeesAll} OR id IN (SELECT client_id FROM bookings) OR id IN (SELECT client_id FROM waitlist_entries) OR (SELECT current_client_contact()) IN (email, phone)`,
       withCheck: memberSeesAll,
     }),
     // FOR ALL's USING lets a row be deleted that may be read; staff may read, not delete.

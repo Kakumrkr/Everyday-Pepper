@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-19 · **Plan version:** 0.10 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. **S14 (Phase 4a: design system + app shell + calendar day view) done**, ADR-0019 **proposed** (review it in the PR); PR opened and merged at the user's request. Then, in the same session, **renamed Floty → Pepper and switched to the Pepper green + chili theme** ([PCR-002](changes/PCR-002.md)) → next: **S15** (booking screens), unchanged
+**Last updated:** 2026-10-19 · **Plan version:** 0.11 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14 (design system, app shell, calendar) and the Pepper rename/theme (PCR-002) are merged. **S15 (Phase 4b: booking screens) done** on branch `claude/affectionate-babbage-mqm6pp`, with ADR-0020 **accepted** by the user → next: **S16** (clients, services and team screens)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -282,6 +282,30 @@
     - "Floty" now appears only in the notes that record the rename (STATUS, PCR-002, CHANGELOG, the rebuild note in `dev-setup.md`).
   - **For you:** rebuild your local dev database once (`docker compose down --volumes`, then start as usual) and copy the new database names from `.env.example` into your `.env`. The old preview link of the mockup shows the old look until it is republished.
 
+- **S15 Phase 4b (2026-10-19):** booking screens, staff client lookup, outcomes rule (b) ([ADR-0020](../adr/0020-booking-screens-and-client-lookup.md), accepted by the user on 2026-10-19). The user said "give me the Session Brief, then continue", so Claude went ahead on its recommendations, to be reviewed in the PR.
+  - **Outcomes rule (b):** `canChangeStatus(from, to, correctsOutcomes)` in contracts; `changeBooking` makes `completed`/`no_show` final for staff (`409 booking_not_changeable`); owners and managers may still correct them.
+  - **Staff find a client by exact email or phone** (the user's 2026-10-17 decision):
+    - **db:** migration 0020, `current_client_contact()` reads the transaction-local `app.client_contact`; the clients `member_scope` USING also matches `email`/`phone` equal to it, read-only. `setTransactionClientContact` and `findClientsByContact` (at most 10).
+    - **contracts:** `ClientContactSchema` (email lowercased or E.164 phone, branded), `ClientLookupSchema`; optional `clientContact` on `BookingInputSchema` and `WaitlistEntryInputSchema`.
+    - **core / appointments / api:** `lookUpClients`, `findClientToBook` (sets the contact before finding the client); `POST /v1/clients/lookup` (200 `{ clients }`, a POST to keep contacts out of URLs).
+  - **web:**
+    - Radix Dialog (`@radix-ui/react-dialog` 1.1.23, months old; the 1.2/1.3 releases were under two weeks old).
+    - `lib/booking.ts` (pure helpers) and `fetchJson`; failures keep the api body (409 alternatives); booking error messages.
+    - Calendar header **New booking**: client picker (owners/managers search or add; staff exact email or phone, US numbers typed locally become E.164), service, staff (staff: only their own), day with free times from `/v1/availability` or another time; idempotency key per opening; a refused time shows the 3 nearest times and **Add to the waitlist** (suggested window: the wanted day, 2 hours from the wanted time, editable).
+    - Booking blocks open a **booking sheet**: details, Mark done / No-show once started, Move (same picker; owners/managers may change staff), Cancel with confirmation; a refused move shows alternatives.
+    - `ui`: `close` and `plus` icons.
+  - **e2e:** `booking.spec.ts`, owner and staff journeys; `anotherPerson` and `callApi` moved to `helpers.ts`.
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 383, ui 68, templates 96, core 514, db 38, appointments 65, runtime 79, testing 13, api 200, web 142, worker 3. Coverage: web 100% lines; contracts 100%; core 100%; appointments 100% lines; api 97.7%; db 88.9%.
+    - `pnpm test:integration` green, 495 tests: db 304 (isolation catalog with the new policy; "ADR-0020: an exact email or phone…"), appointments 74 (rule b for staff; lookup, booking and waitlist with the contact), core 58, api 56, runtime 2, testing 1.
+    - Playwright: all 32 green (phone and desktop), incl. the two new journeys, against api, worker and web started with `pnpm` on the Compose Postgres, Redis and Mailpit (as in S14). The staff journey first failed in the test itself (it opened the invite while sign-up was still redirecting); it now follows the team spec's invite flow.
+    - Visual check: screenshots of the new-booking sheet, a refused time with the waitlist form, and the booking sheet, on phone and desktop, light and dark.
+  - **Not done / for later:**
+    - Docker image builds and Compose: not run here (as in S14); CI runs them.
+    - Rate limiting or auditing of client lookups (ADR-0020 §Consequences; Phase 11 hardening).
+    - The free times shown for a move exclude the booking's own time ("another time" covers it).
+    - Booking a client to "anyone" (no staff member chosen) and the owner/manager override in the UI: not built; the api supports both.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -388,12 +412,14 @@
   - **Tailwind v4 + self-hosted fonts**, Radix only when a screen needs a dialog or menu (ADR-0019).
   - **Response caps**: 500 items with `truncated`, not pagination.
   - **Booking outcomes (open question 1 below):** Claude recommends (b), and S15 builds (b) unless the user says otherwise.
+- **S15 (2026-10-19): the user said "give me the Session Brief, then continue".** Claude went ahead on its recommendations, to confirm or change in review: outcomes rule (b); the exact-contact mechanism (transaction setting + read-only policy clause, contact passed with the booking); Radix Dialog 1.1.23 as the one new dependency; the screen flow in ADR-0020.
+- **ADR-0020 accepted (user, 2026-10-19, "ADR-0020 is good"):** the exact-contact lookup mechanism, Radix Dialog 1.1.23 and the booking screen flow. Asked for Claude's best recommendation on booking outcomes: Claude recommends keeping (b), as built (see Waiting on the user).
+- **Booking outcomes rule (b) confirmed (user, 2026-10-19, "confirm b"):** `completed`/`no_show` are final for staff; owners and managers may correct them (audited). Closes open question 1 from S13. Later (payments phase) consider a required reason for corrections.
+- **End of S15 (user, 2026-10-19):** open the PR and merge it to `main`; S16 starts in a new session.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Product question from the security review:** today a booking's outcome can be changed again after the fact (`completed` ↔ `no_show`, or either → `cancelled`), by staff too on their own bookings; only `cancelled` is final. Options: (a) keep it (fixes mistakes easily; audited); (b) make `completed`/`no_show` final for staff, owners and managers may still correct them (recommended, before payments and commissions arrive); (c) final for everyone.
-   Not answered at S13 or S14. **S15 builds (b) by default**; answer at the S15 Session Brief to change it.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S14–S18 (Claude's proposal at S14, with the go-ahead to continue; change it at any Session Brief).
@@ -401,7 +427,7 @@ Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S
 | # | Session target | Phase | Done when |
 |---|---|---|---|
 | S14 | ~~Design system + app shell + calendar day view; response caps~~ **done** | 4a | — |
-| S15 | **Booking screens:** create a booking from the calendar (service, staff member, free times from `/v1/availability`, client picker; staff find clients by exact email or phone), the booking sheet (details, move, status, cancel) with Radix dialogs, the 409 alternatives, the waitlist entry; booking outcomes rule (b) unless the user says otherwise; staff journey in Playwright | 4b | Playwright "manual booking" (owner and staff) green; AC-W9-1 in the UI |
+| S15 | ~~**Booking screens:** create a booking from the calendar (service, staff member, free times from `/v1/availability`, client picker; staff find clients by exact email or phone), the booking sheet (details, move, status, cancel) with Radix dialogs, the 409 alternatives, the waitlist entry; booking outcomes rule (b) unless the user says otherwise; staff journey in Playwright~~ **done** | 4b | — |
 | S16 | **Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system | 4c | Playwright "setup" journey: a new owner sets up services, staff and hours without the api |
 | S17 | **Public booking page with email verification:** the business's own brand color (PCR-001), service → staff → time → details → email code → confirmation with reschedule/cancel links. Needs an email sender before Phase 5's outbox (decide at the brief: dev Mailpit sender now, outbox later) | 4d | AC-W8-2; Playwright public booking |
 | S18 | **Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17 | 4e | Phase 4 exit criteria green; no open high-severity findings |

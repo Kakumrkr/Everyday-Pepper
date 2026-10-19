@@ -1,5 +1,12 @@
-import type { Client, ClientId, ClientInput, ClientsQuery } from '@pepper/contracts';
-import { createClient, getClient, listClients, type Actor, type TenantContext } from '@pepper/core';
+import type { Client, ClientId, ClientInput, ClientLookup, ClientsQuery } from '@pepper/contracts';
+import {
+  createClient,
+  getClient,
+  listClients,
+  lookUpClients,
+  type Actor,
+  type TenantContext,
+} from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { Inject, Injectable } from '@nestjs/common';
@@ -18,6 +25,10 @@ export class ClientsService {
 
   list(tenant: TenantContext, query: ClientsQuery): Promise<Client[]> {
     return listClients(this.db, actorOf(tenant), query);
+  }
+
+  lookUp(tenant: TenantContext, lookup: ClientLookup): Promise<Client[]> {
+    return lookUpClients(this.db, actorOf(tenant), lookup);
   }
 
   get(tenant: TenantContext, id: ClientId): Promise<Client> {

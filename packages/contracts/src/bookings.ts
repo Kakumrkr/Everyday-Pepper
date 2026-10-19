@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
-import { ClientIdSchema, RecordSourceSchema } from './clients.js';
+import { ClientContactSchema, ClientIdSchema, RecordSourceSchema } from './clients.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // Bookings (ADR-0017). A booking is one client's appointment for one service with one staff
@@ -25,9 +25,18 @@ export type BookingStatus = z.infer<typeof BookingStatusSchema>;
 export const BookingSourceSchema = RecordSourceSchema.exclude(['import']);
 export type BookingSource = z.infer<typeof BookingSourceSchema>;
 
-/** A booking's status can move from the first to the second. */
-export function canChangeStatus(from: BookingStatus, to: BookingStatus): boolean {
-  return from !== 'cancelled' && from !== to;
+/**
+ * A booking's status can move from the first to the second. `cancelled` is final. What
+ * happened (`completed`, `no_show`) is final for staff; owners and managers
+ * (`correctsOutcomes`) may still correct it, before payments and commissions depend on it.
+ */
+export function canChangeStatus(
+  from: BookingStatus,
+  to: BookingStatus,
+  correctsOutcomes: boolean,
+): boolean {
+  if (from === 'cancelled' || from === to) return false;
+  return correctsOutcomes || !statusNeedsStart(from);
 }
 
 /** Whether `status` needs the appointment to have started (it records what happened). */
@@ -46,11 +55,13 @@ export const IdempotencyKeySchema = z
 /**
  * A booking as a team member makes it (`POST /v1/bookings`). `override` (owners and managers
  * only) books outside working hours, time off and the booking rules; it never allows two
- * bookings of a staff member to overlap.
+ * bookings of a staff member to overlap. `clientContact`: the exact email or phone staff found
+ * the client by (ADR-0020), so they may book a client they have no booking with yet.
  */
 export const BookingInputSchema = z
   .object({
     clientId: ClientIdSchema,
+    clientContact: ClientContactSchema.optional(),
     serviceId: ServiceIdSchema,
     staffMemberId: StaffMemberIdSchema,
     startsAt: UtcDateTimeSchema,

@@ -12,17 +12,10 @@ import {
   type WaitlistEntryInput,
   type WaitlistQuery,
 } from '@pepper/contracts';
-import {
-  ClientNotFoundError,
-  requirePermission,
-  systemClock,
-  type Actor,
-  type Clock,
-} from '@pepper/core';
+import { requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
 import {
   appendAuditEntry,
   cancelWaitlistEntry as cancelWaitlistEntryRow,
-  findClient,
   findCurrentTenant,
   findService,
   findStaffMember,
@@ -34,6 +27,7 @@ import {
 } from '@pepper/db';
 import { waitlistExpiry } from '../bookings/planning.js';
 import { ownStaffMemberId } from './bookings.js';
+import { findClientToBook } from './clients.js';
 import {
   ServiceNotFoundError,
   StaffMemberNotFoundError,
@@ -67,7 +61,7 @@ export async function addToWaitlist(
       requirePermission(actor, 'bookings.manage', staffOwner(staff));
     }
     if ((await findService(tx, entry.serviceId)) === undefined) throw new ServiceNotFoundError();
-    if ((await findClient(tx, entry.clientId)) === undefined) throw new ClientNotFoundError();
+    await findClientToBook(tx, entry.clientId, entry.clientContact);
     const tenant = await findCurrentTenant(tx);
     // withMember always has a tenant; its row is visible to every member.
     if (tenant === undefined) throw new Error('No tenant in this transaction');
@@ -75,7 +69,10 @@ export async function addToWaitlist(
     if (expiresAt <= now.getTime()) throw new WaitlistExpiredError();
 
     const row = await insertWaitlistEntry(tx, {
-      ...entry,
+      clientId: entry.clientId,
+      serviceId: entry.serviceId,
+      staffMemberId: entry.staffMemberId,
+      windows: entry.windows,
       expiresAt: new Date(expiresAt),
       createdBy: actor.context.userId,
     });

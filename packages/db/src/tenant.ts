@@ -1,4 +1,11 @@
-import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@pepper/contracts';
+import {
+  ClientContactSchema,
+  TenantIdSchema,
+  UserIdSchema,
+  type ClientContact,
+  type TenantId,
+  type UserId,
+} from '@pepper/contracts';
 import { sql } from 'drizzle-orm';
 import type { Database } from './client.js';
 
@@ -58,6 +65,20 @@ export async function setTransactionTenant(tx: TenantTx, tenantId: TenantId): Pr
 export async function setTransactionUser(tx: TenantTx, userId: UserId | null): Promise<void> {
   const id = userId === null ? '' : UserIdSchema.parse(userId);
   await tx.execute(sql`SELECT set_config('app.user_id', ${id}, true)`);
+}
+
+/**
+ * Names an exact client email (lowercased) or phone (E.164) for the rest of the open member
+ * transaction (`null` clears it): the clients `member_scope` policy then shows staff the
+ * clients with exactly that contact too, read-only (ADR-0020). Only a contact the member typed
+ * may be passed, never one read from the database.
+ */
+export async function setTransactionClientContact(
+  tx: TenantTx,
+  contact: ClientContact | null,
+): Promise<void> {
+  const value = contact === null ? '' : ClientContactSchema.parse(contact);
+  await tx.execute(sql`SELECT set_config('app.client_contact', ${value}, true)`);
 }
 
 /**

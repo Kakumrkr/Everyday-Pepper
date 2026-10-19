@@ -1,6 +1,8 @@
 import {
+  ClientContactSchema,
   ClientInputSchema,
   RecordSourceSchema,
+  type ClientContact,
   type ClientFields,
   type ClientId,
   type RecordSource,
@@ -45,6 +47,26 @@ export async function findClient(tx: TenantTx, id: ClientId): Promise<ClientRow 
     .from(clients)
     .where(eq(clients.id, Id.parse(id)));
   return row;
+}
+
+/** The most clients one exact contact finds (people sharing a phone, e.g. a family). */
+export const MAX_CONTACT_MATCHES = 10;
+
+/**
+ * Clients whose email or phone is exactly `contact`, by name. Staff see them only when the
+ * transaction names the same contact (`setTransactionClientContact`, ADR-0020).
+ */
+export async function findClientsByContact(
+  tx: TenantTx,
+  contact: ClientContact,
+): Promise<ClientRow[]> {
+  const value = ClientContactSchema.parse(contact);
+  return tx
+    .select()
+    .from(clients)
+    .where(or(eq(clients.email, value), eq(clients.phone, value)))
+    .orderBy(asc(sql`lower(${clients.name})`), asc(clients.id))
+    .limit(MAX_CONTACT_MATCHES);
 }
 
 /**

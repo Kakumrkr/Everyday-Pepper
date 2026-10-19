@@ -1,0 +1,173 @@
+import {
+  canChangeStatus,
+  formatDate,
+  fromZoned,
+  minutesOfDay,
+  statusNeedsStart,
+  toZoned,
+  type BookingStatus,
+  type CivilDate,
+  type Permission,
+  type Service,
+  type StaffMember,
+  type WaitlistWindow,
+} from '@pepper/contracts';
+import { dayRange } from './calendar';
+
+// The booking screens (S15): who can be booked, the times to offer and what a booking sheet
+// may do. Everything here is pure; the screens call the api, which decides (AC-W9-1).
+
+/** What the member may do on the booking screens, from their role's permissions. */
+export interface BookingAbilities {
+  /** Book and change bookings (staff: their own staff member's). */
+  books: boolean;
+  /** Search clients by name and add new ones (owners and managers). */
+  managesClients: boolean;
+  /** Change a done or no-show booking again (owners and managers, rule (b)). */
+  correctsOutcomes: boolean;
+  /** Book only the staff member linked to their own login (staff, AC-W9-1). */
+  ownStaffOnly: boolean;
+}
+
+export function bookingAbilities(
+  permissions: readonly Permission[],
+  role: 'owner' | 'manager' | 'staff',
+): BookingAbilities {
+  return {
+    books: permissions.includes('bookings.manage'),
+    managesClients: permissions.includes('clients.manage'),
+    correctsOutcomes: role !== 'staff',
+    ownStaffOnly: role === 'staff',
+  };
+}
+
+/** What every booking screen needs to know about the business and the member. */
+export interface BookingSetup {
+  timeZone: string;
+  userId: string;
+  abilities: BookingAbilities;
+  /** Active services, by name. */
+  services: Service[];
+  /** Every staff member (names for any booking); `bookableStaff` picks whom to offer. */
+  staff: StaffMember[];
+}
+
+/**
+ * The staff members the member may book: active ones (with `serviceId`, only those who offer
+ * it). Staff book only the staff member linked to their own login.
+ */
+export function bookableStaff(
+  staff: readonly StaffMember[],
+  options: { userId: string; ownOnly: boolean; serviceId?: string },
+): StaffMember[] {
+  return staff.filter(
+    (member) =>
+      member.active &&
+      (!options.ownOnly || member.userId === options.userId) &&
+      (options.serviceId === undefined || member.serviceIds.some((id) => id === options.serviceId)),
+  );
+}
+
+/** `GET /v1/availability` for one service (and staff member) over the business's local day. */
+export function availabilityPath(
+  timeZone: string,
+  date: CivilDate,
+  query: { serviceId: string; staffMemberId?: string },
+): string {
+  const params = new URLSearchParams({ ...dayRange(timeZone, date), serviceId: query.serviceId });
+  if (query.staffMemberId !== undefined) params.set('staffMemberId', query.staffMemberId);
+  return `/v1/availability?${params.toString()}`;
+}
+
+/** `9:15 AM` on the business's clock. */
+export function timeLabel(timeZone: string, instant: string): string {
+  return new Intl.DateTimeFormat('en-US', { timeZone, hour: 'numeric', minute: '2-digit' }).format(
+    new Date(instant),
+  );
+}
+
+/** `Tue, Nov 3, 9:15 AM` on the business's clock. */
+export function dateTimeLabel(timeZone: string, instant: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(instant));
+}
+
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * The instant of a wall-clock `HH:MM` on a local date of the business, or `null` for a
+ * malformed time. A time skipped by a clock change resolves as `fromZoned` does.
+ */
+export function instantAt(timeZone: string, date: CivilDate, time: string): string | null {
+  if (!TIME_PATTERN.test(time)) return null;
+  return new Date(fromZoned(timeZone, date, minutesOfDay(time))).toISOString();
+}
+
+/** The business's local date (`YYYY-MM-DD`) and time (`HH:MM`) of an instant. */
+export function localParts(timeZone: string, instant: string): { date: string; time: string } {
+  const zoned = toZoned(timeZone, Date.parse(instant));
+  return { date: formatDate(zoned), time: clockTime(zoned.minuteOfDay) };
+}
+
+/** What a booking sheet offers for a booking's current status, at `now`. */
+export interface BookingActions {
+  complete: boolean;
+  noShow: boolean;
+  cancel: boolean;
+  move: boolean;
+}
+
+export function bookingActions(
+  booking: { status: BookingStatus; startsAt: string },
+  now: number,
+  correctsOutcomes: boolean,
+): BookingActions {
+  const started = Date.parse(booking.startsAt) <= now;
+  const may = (to: BookingStatus) =>
+    canChangeStatus(booking.status, to, correctsOutcomes) && (!statusNeedsStart(to) || started);
+  return {
+    complete: may('completed'),
+    noShow: may('no_show'),
+    cancel: may('cancelled'),
+    move: booking.status === 'confirmed',
+  };
+}
+
+/** How long a waitlist window lasts by default, from the time the client wanted. */
+const WAITLIST_WINDOW_MINUTES = 120;
+
+/**
+ * The waitlist window to suggest for a refused time: that local day, from the wanted time for
+ * two hours (to midnight at most). The member can change it before adding the entry.
+ */
+export function suggestedWindow(timeZone: string, startsAt: string): WaitlistWindow {
+  const { date, time } = localParts(timeZone, startsAt);
+  const end = Math.min(minutesOfDay(time) + WAITLIST_WINDOW_MINUTES, 1440);
+  return { date, start: time, end: clockTime(end) };
+}
+
+/** `HH:MM` for minutes after local midnight (1440 is `24:00`). */
+function clockTime(minuteOfDay: number): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(Math.floor(minuteOfDay / 60))}:${pad(minuteOfDay % 60)}`;
+}
+
+/**
+ * The exact contact a member typed, in the form the api expects: an email as typed (the api
+ * lowercases it), a phone in E.164. US numbers may be typed locally (`(555) 123-4567` or
+ * `1 555 123 4567`); other countries need their `+` code.
+ */
+export function normalizeContact(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.includes('@')) return trimmed;
+  const digits = trimmed.replace(/[\s().-]/g, '');
+  if (/^\d{10}$/.test(digits)) return `+1${digits}`;
+  if (/^1\d{10}$/.test(digits)) return `+${digits}`;
+  return digits;
+}

@@ -22,7 +22,6 @@ import {
   type StaffMemberId,
 } from '@pepper/contracts';
 import {
-  ClientNotFoundError,
   ForbiddenError,
   permissionScope,
   requirePermission,
@@ -36,7 +35,6 @@ import {
   BookingOverlapError,
   findBooking,
   findBookingByIdempotencyKey,
-  findClient,
   findService,
   findStaffMemberOfUser,
   insertBooking,
@@ -65,6 +63,7 @@ import {
 } from '../errors.js';
 import { bookingAuditValues, sameValues, staffOwner, toBooking, toBusyTime } from '../mapping.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
+import { findClientToBook } from './clients.js';
 
 // Bookings (ADR-0017). `bookings.manage` lets owners and managers book anyone and staff only
 // their own staff member (AC-W9-1); the database's member scope enforces the same, so staff
@@ -116,7 +115,7 @@ export async function createBooking(
       const serviceRow = await findService(tx, request.serviceId);
       if (serviceRow === undefined) throw new ServiceNotFoundError();
       service = serviceToBook(serviceRow);
-      if ((await findClient(tx, request.clientId)) === undefined) throw new ClientNotFoundError();
+      await findClientToBook(tx, request.clientId, request.clientContact);
 
       const end = start + service.durationMinutes * MINUTE_MS;
       const fits = request.override
@@ -256,7 +255,7 @@ export async function listBusyTimes(
 /**
  * Moves a booking (same client and service; optionally to another staff member who offers
  * it) or changes its status. A cancelled booking is final; completed and no-show need the
- * appointment to have started.
+ * appointment to have started, and only owners and managers may change them afterwards.
  */
 export async function changeBooking(
   db: Database,
@@ -272,7 +271,10 @@ export async function changeBooking(
   if ('status' in parsed) {
     return withMember(db, actor.context, async (tx) => {
       const { row } = await lockOwnBooking(tx, actor, id);
-      if (!canChangeStatus(BookingStatusSchema.parse(row.status), parsed.status)) {
+      const correctsOutcomes = permissionScope(actor.context.role, 'bookings.manage') === 'all';
+      if (
+        !canChangeStatus(BookingStatusSchema.parse(row.status), parsed.status, correctsOutcomes)
+      ) {
         throw new BookingNotChangeableError();
       }
       if (statusNeedsStart(parsed.status) && row.startsAt.getTime() > now) {

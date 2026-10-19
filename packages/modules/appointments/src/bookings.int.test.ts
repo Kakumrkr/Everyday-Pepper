@@ -17,6 +17,7 @@ import {
   ForbiddenError,
   getClient,
   listClients,
+  lookUpClients,
   ManualClock,
   type Actor,
 } from '@pepper/core';
@@ -557,6 +558,20 @@ describe('changeBooking', () => {
       changeBooking(db, b.owner, booking.id, { startsAt: tue('15:00') }, { clock: b.clock }),
     ).rejects.toBeInstanceOf(BookingNotChangeableError);
   });
+
+  it('staff record completed or no-show once; only owners and managers correct it', async () => {
+    const b = await newBusiness();
+    await introduce(b);
+    const booking = await book(b, b.staff, request(b, tue('10:00')));
+    b.clock.set(tue('11:00'));
+    const status = (actor: Actor, to: 'completed' | 'no_show' | 'cancelled') =>
+      changeBooking(db, actor, booking.id, { status: to }, { clock: b.clock });
+    expect((await status(b.staff, 'no_show')).status).toBe('no_show');
+    await expect(status(b.staff, 'completed')).rejects.toBeInstanceOf(BookingNotChangeableError);
+    await expect(status(b.staff, 'cancelled')).rejects.toBeInstanceOf(BookingNotChangeableError);
+    expect((await status(b.manager, 'completed')).status).toBe('completed');
+    expect((await status(b.owner, 'cancelled')).status).toBe('cancelled');
+  });
 });
 
 describe('clients', () => {
@@ -604,6 +619,69 @@ describe('clients', () => {
     expect((await listClients(db, b.owner, { search: 'lop' })).map((c) => c.name)).toEqual([
       'Maria Lopez',
     ]);
+  });
+});
+
+describe('finding a client by exact email or phone (ADR-0020)', () => {
+  it('staff find any client by exact email or phone, never by a part of it', async () => {
+    const b = await newBusiness();
+    const lee = await createClient(db, b.owner, { name: 'Lee', phone: '+15551234567' });
+    expect(await lookUpClients(db, b.staff, { contact: 'MARIA@example.test' })).toEqual([b.client]);
+    expect(await lookUpClients(db, b.colleague, { contact: '+15551234567' })).toEqual([lee]);
+    expect(await lookUpClients(db, b.owner, { contact: '+15559999999' })).toEqual([]);
+    await expect(lookUpClients(db, b.staff, { contact: 'maria' })).rejects.toBeInstanceOf(ZodError);
+    // Finding them shows only them, and only then: the staff member still lists no one.
+    expect(await listClients(db, b.staff)).toEqual([]);
+  });
+
+  it('staff book a client they found, with the contact they found them by', async () => {
+    const b = await newBusiness();
+    await expect(book(b, b.staff, request(b, tue('10:00')))).rejects.toBeInstanceOf(
+      ClientNotFoundError,
+    );
+    await expect(
+      book(b, b.staff, request(b, tue('10:00'), { clientContact: 'someone@example.test' })),
+    ).rejects.toBeInstanceOf(ClientNotFoundError);
+    const booking = await book(
+      b,
+      b.staff,
+      request(b, tue('10:00'), { clientContact: 'maria@example.test' }),
+    );
+    expect(booking).toMatchObject({ clientId: b.client.id, staffMemberId: b.jess.id });
+    // Now Maria is Jess's client like any other.
+    expect(await listClients(db, b.staff)).toEqual([b.client]);
+    // The contact never lets staff book for a colleague.
+    await expect(
+      book(
+        b,
+        b.staff,
+        request(b, tue('13:00'), {
+          staffMemberId: b.marco.id,
+          clientContact: 'maria@example.test',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  it('staff add a client they found to their waitlist', async () => {
+    const b = await newBusiness();
+    const entry = {
+      clientId: b.client.id,
+      serviceId: b.service.id,
+      staffMemberId: b.jess.id,
+      windows: [{ date: '2026-11-05', start: '09:00', end: '12:00' }],
+    };
+    await expect(addToWaitlist(db, b.staff, entry, { clock: b.clock })).rejects.toBeInstanceOf(
+      ClientNotFoundError,
+    );
+    const added = await addToWaitlist(
+      db,
+      b.staff,
+      { ...entry, clientContact: 'maria@example.test' },
+      { clock: b.clock },
+    );
+    expect(added).toMatchObject({ clientId: b.client.id, status: 'waiting' });
+    expect(added).not.toHaveProperty('clientContact');
   });
 });
 

@@ -243,7 +243,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       {
         policyname: 'member_scope',
         cmd: 'ALL',
-        qual: '(( SELECT current_member_sees_all() AS current_member_sees_all) OR (id IN ( SELECT bookings.client_id\n   FROM bookings)) OR (id IN ( SELECT waitlist_entries.client_id\n   FROM waitlist_entries)))',
+        qual: '(( SELECT current_member_sees_all() AS current_member_sees_all) OR (id IN ( SELECT bookings.client_id\n   FROM bookings)) OR (id IN ( SELECT waitlist_entries.client_id\n   FROM waitlist_entries)) OR ((( SELECT current_client_contact() AS current_client_contact) = email) OR (( SELECT current_client_contact() AS current_client_contact) = phone)))',
         with_check: SEES_ALL,
       },
       { policyname: 'member_scope_delete', cmd: 'DELETE', qual: SEES_ALL, with_check: null },
