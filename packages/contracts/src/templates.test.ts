@@ -4,7 +4,7 @@ import { RULE_LIMITS } from './rules.js';
 import {
   CatalogServiceSchema,
   IntakeFieldSchema,
-  RuleDefaultsSchema,
+  TemplateRuleDefaultsSchema,
   ruleDefaultsOf,
   TEMPLATE_LIMITS,
   TemplateInsightsSchema,
@@ -220,22 +220,23 @@ describe('CatalogServiceSchema', () => {
   );
 });
 
-describe('RuleDefaultsSchema', () => {
+describe('TemplateRuleDefaultsSchema', () => {
   it('accepts no defaults', () => {
-    expect(RuleDefaultsSchema.parse({})).toEqual({});
+    expect(TemplateRuleDefaultsSchema.parse({})).toEqual({});
   });
 
   it('uses the stored rules’ ranges', () => {
-    expect(RuleDefaultsSchema.safeParse({ slotIntervalMinutes: 45 }).success).toBe(false);
+    expect(TemplateRuleDefaultsSchema.safeParse({ slotIntervalMinutes: 45 }).success).toBe(false);
     expect(
-      RuleDefaultsSchema.safeParse({ maximumAdvanceDays: RULE_LIMITS.maxAdvanceDays + 1 }).success,
+      TemplateRuleDefaultsSchema.safeParse({ maximumAdvanceDays: RULE_LIMITS.maxAdvanceDays + 1 })
+        .success,
     ).toBe(false);
-    expect(RuleDefaultsSchema.safeParse({ maxBookingsPerDay: 0 }).success).toBe(false);
-    expect(RuleDefaultsSchema.safeParse({ maxBookingsPerDay: null }).success).toBe(true);
+    expect(TemplateRuleDefaultsSchema.safeParse({ maxBookingsPerDay: 0 }).success).toBe(false);
+    expect(TemplateRuleDefaultsSchema.safeParse({ maxBookingsPerDay: null }).success).toBe(true);
   });
 
   it('rejects unknown keys', () => {
-    expect(RuleDefaultsSchema.safeParse({ bufferMinutes: 10 }).success).toBe(false);
+    expect(TemplateRuleDefaultsSchema.safeParse({ bufferMinutes: 10 }).success).toBe(false);
   });
 });
 

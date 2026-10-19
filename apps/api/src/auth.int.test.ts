@@ -7,6 +7,7 @@ import {
   AuditLogResponseSchema,
   AvailabilityResponseSchema,
   BookingRulesResponseSchema,
+  PLATFORM_RULE_DEFAULTS,
   BookingSchema,
   BookingsResponseSchema,
   BusyResponseSchema,
@@ -874,7 +875,10 @@ describe('appointments base data (ADR-0015)', () => {
       [404, 'service_not_found'],
       [404, 'staff_member_not_found'],
     ]);
-    expect((await dev.get('/v1/rules').expect(200)).body).toEqual({ rules: [] });
+    expect((await dev.get('/v1/rules').expect(200)).body).toEqual({
+      rules: [],
+      defaults: PLATFORM_RULE_DEFAULTS,
+    });
     // Nor can Dev offer Ana's service or link Ana's staff login.
     const offered = await dev.post('/v1/staff', { displayName: 'X', serviceIds: [serviceId] });
     expect([offered.status, errorCode(offered.body)]).toEqual([404, 'service_not_found']);
@@ -1269,6 +1273,16 @@ describe('industry templates (ADR-0018)', () => {
       at('09:30'),
       at('10:00'),
     ]);
+    // The rules screen shows these defaults (S16): the template's, the platform's daily cap.
+    expect((await bo.get('/v1/rules').expect(200)).body).toEqual({
+      rules: [],
+      defaults: {
+        slotIntervalMinutes: 30,
+        minimumNoticeMinutes: 720,
+        maximumAdvanceDays: 60,
+        maxBookingsPerDay: null,
+      },
+    });
 
     const booking = { clientId: client.id, serviceId: service.id, staffMemberId: trainer.id };
     const refused = await bo

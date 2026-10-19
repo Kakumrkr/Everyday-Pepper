@@ -1,4 +1,5 @@
 import {
+  PLATFORM_RULE_DEFAULTS,
   TenantIdSchema,
   type BookingInput,
   type Client,
@@ -53,7 +54,7 @@ import {
   listBusyTimes,
 } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
-import { replaceBookingRules } from './services/rules.js';
+import { getRuleDefaults, replaceBookingRules } from './services/rules.js';
 import { createService } from './services/services.js';
 import { createStaffMember, updateStaffMember } from './services/staff.js';
 import { addToWaitlist, changeWaitlistEntry, listWaitlist } from './services/waitlist.js';
@@ -988,6 +989,24 @@ describe('industry template defaults (ADR-0018)', () => {
       tue('10:00'),
     ]);
     expect(slots.every((s) => new Date(s.startsAt).getUTCMinutes() % 30 === 0)).toBe(true);
+  });
+
+  it("reports the defaults in force: the template's over the platform's, to every role", async () => {
+    const barber = await newBusiness('barber');
+    const plain = await newBusiness();
+    const expected = {
+      ...PLATFORM_RULE_DEFAULTS,
+      slotIntervalMinutes: 30,
+      minimumNoticeMinutes: 30,
+    };
+    for (const actor of [barber.owner, barber.staff]) {
+      expect(await getRuleDefaults(db, actor, { templateRuleDefaults })).toEqual(expected);
+    }
+    expect(await getRuleDefaults(db, plain.owner, { templateRuleDefaults })).toEqual(
+      PLATFORM_RULE_DEFAULTS,
+    );
+    // Without the app's lookup, only the platform's.
+    expect(await getRuleDefaults(db, barber.owner)).toEqual(PLATFORM_RULE_DEFAULTS);
   });
 
   it("uses the template's notice: 30 minutes, not the platform's 2 hours", async () => {

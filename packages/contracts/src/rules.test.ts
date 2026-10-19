@@ -5,6 +5,7 @@ import {
   LocalDateSchema,
   PLATFORM_RULE_DEFAULTS,
   RULE_LIMITS,
+  RuleDefaultsSchema,
   RuleSchema,
 } from './rules.js';
 
@@ -206,5 +207,25 @@ describe('PLATFORM_RULE_DEFAULTS', () => {
       maximumAdvanceDays: 90,
       maxBookingsPerDay: null,
     });
+  });
+});
+
+describe('RuleDefaultsSchema', () => {
+  it('accepts the platform defaults and a template’s cap', () => {
+    expect(RuleDefaultsSchema.parse(PLATFORM_RULE_DEFAULTS)).toEqual(PLATFORM_RULE_DEFAULTS);
+    const capped = { ...PLATFORM_RULE_DEFAULTS, maxBookingsPerDay: 8 };
+    expect(RuleDefaultsSchema.parse(capped)).toEqual(capped);
+  });
+
+  it.each([
+    ['a grid that does not divide an hour', { slotIntervalMinutes: 45 }],
+    ['negative notice', { minimumNoticeMinutes: -1 }],
+    ['no days ahead', { maximumAdvanceDays: 0 }],
+    ['a cap of zero', { maxBookingsPerDay: 0 }],
+    ['an extra field', { learned: true }],
+  ])('rejects %s', (_label, change) => {
+    expect(RuleDefaultsSchema.safeParse({ ...PLATFORM_RULE_DEFAULTS, ...change }).success).toBe(
+      false,
+    );
   });
 });

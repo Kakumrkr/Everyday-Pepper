@@ -174,8 +174,26 @@ export const BookingRulesSchema = z
 export type BookingRules = z.output<typeof BookingRulesSchema>;
 export type BookingRulesInput = z.input<typeof BookingRulesSchema>;
 
-/** `GET /v1/rules` and `PUT /v1/rules`: the business's rules. */
-export const BookingRulesResponseSchema = z.object({ rules: z.array(RuleSchema) });
+/** The single-valued rules' values where neither the business nor a staff member sets one. */
+export const RuleDefaultsSchema = z
+  .object({
+    slotIntervalMinutes: z.union(
+      RULE_LIMITS.slotIntervalMinutes.map((minutes) => z.literal(minutes)),
+    ),
+    minimumNoticeMinutes: z.number().int().min(0).max(RULE_LIMITS.maxMinimumNoticeMinutes),
+    maximumAdvanceDays: z.number().int().min(1).max(RULE_LIMITS.maxAdvanceDays),
+    maxBookingsPerDay: z.number().int().min(1).max(RULE_LIMITS.maxBookingsPerDay).nullable(),
+  })
+  .strict();
+
+/**
+ * `GET /v1/rules` and `PUT /v1/rules`: the business's rules, and the defaults that apply where
+ * it sets none (its industry template's, else the platform's), so screens can show them (S16).
+ */
+export const BookingRulesResponseSchema = z.object({
+  rules: z.array(RuleSchema),
+  defaults: RuleDefaultsSchema,
+});
 export type BookingRulesResponse = z.infer<typeof BookingRulesResponseSchema>;
 
 function sortKey(rule: Rule): readonly [string, number, string, string] {

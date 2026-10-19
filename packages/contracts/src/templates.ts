@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { PriceCentsSchema, SERVICE_LIMITS } from './appointments.js';
-import { RULE_LIMITS, type RuleDefaults } from './rules.js';
+import { RuleDefaultsSchema, type RuleDefaults } from './rules.js';
 import { TemplateIdSchema } from './tenancy.js';
 import { AutonomySettingsSchema } from './trust.js';
 
@@ -88,19 +88,11 @@ export const CatalogServiceSchema = z
 export type CatalogService = z.output<typeof CatalogServiceSchema>;
 
 /**
- * Defaults for the single-valued booking rules (ADR-0016); unset values fall back to the
- * platform's. Same ranges as the stored rules.
+ * A template's defaults for the single-valued booking rules (ADR-0016); unset values fall back
+ * to the platform's. Same ranges as the stored rules.
  */
-export const RuleDefaultsSchema = z
-  .object({
-    slotIntervalMinutes: z.union(RULE_LIMITS.slotIntervalMinutes.map((m) => z.literal(m))),
-    minimumNoticeMinutes: z.number().int().min(0).max(RULE_LIMITS.maxMinimumNoticeMinutes),
-    maximumAdvanceDays: z.number().int().min(1).max(RULE_LIMITS.maxAdvanceDays),
-    maxBookingsPerDay: z.number().int().min(1).max(RULE_LIMITS.maxBookingsPerDay).nullable(),
-  })
-  .strict()
-  .partial();
-export type TemplateRuleDefaults = z.output<typeof RuleDefaultsSchema>;
+export const TemplateRuleDefaultsSchema = RuleDefaultsSchema.partial();
+export type TemplateRuleDefaults = z.output<typeof TemplateRuleDefaultsSchema>;
 
 /** The values a template sets, without unset keys, to lay over the platform defaults. */
 export function ruleDefaultsOf(defaults: TemplateRuleDefaults): Partial<RuleDefaults> {
@@ -183,7 +175,7 @@ export const TemplateSchema = z
       .refine((services) => isUnique(services.map((s) => s.name.toLowerCase())), {
         message: 'Service names are unique (ignoring case)',
       }),
-    defaultRules: RuleDefaultsSchema,
+    defaultRules: TemplateRuleDefaultsSchema,
     defaultAutonomy: AutonomySettingsSchema,
     intakeFields: z
       .array(IntakeFieldSchema)

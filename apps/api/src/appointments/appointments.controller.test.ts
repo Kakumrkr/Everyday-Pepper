@@ -14,6 +14,8 @@ import {
   UserIdSchema,
   UtcDateTimeSchema,
   type BookingRules,
+  type BookingRulesResponse,
+  PLATFORM_RULE_DEFAULTS,
   type MembershipRole,
   type Service,
   type StaffMember,
@@ -71,6 +73,10 @@ const RULES: BookingRules = {
     { type: 'maximum_advance', version: 1, staffMemberId: STAFF_ID, params: { days: 30 } },
   ],
 };
+const RULES_RESPONSE: BookingRulesResponse = {
+  ...RULES,
+  defaults: { ...PLATFORM_RULE_DEFAULTS, slotIntervalMinutes: 30 },
+};
 const TIME_OFF: TimeOff = {
   id: TIME_OFF_ID,
   staffMemberId: STAFF_ID,
@@ -106,8 +112,8 @@ const appointments = {
   timeOff: vi.fn(() => Promise.resolve([TIME_OFF])),
   addTimeOff: vi.fn((): Promise<TimeOff> => Promise.resolve(TIME_OFF)),
   removeTimeOff: vi.fn((): Promise<void> => Promise.resolve()),
-  rules: vi.fn(() => Promise.resolve(RULES)),
-  replaceRules: vi.fn((): Promise<BookingRules> => Promise.resolve(RULES)),
+  rules: vi.fn(() => Promise.resolve(RULES_RESPONSE)),
+  replaceRules: vi.fn((): Promise<BookingRulesResponse> => Promise.resolve(RULES_RESPONSE)),
 };
 
 @Global()
@@ -167,7 +173,7 @@ describe('reading: every role', () => {
     expect((await get('/v1/services').expect(200)).body).toEqual({ services: [SERVICE] });
     expect((await get('/v1/staff').expect(200)).body).toEqual({ staff: [STAFF] });
     expect((await get(`/v1/staff/${STAFF_ID}/hours`).expect(200)).body).toEqual(HOURS);
-    expect((await get('/v1/rules').expect(200)).body).toEqual(RULES);
+    expect((await get('/v1/rules').expect(200)).body).toEqual(RULES_RESPONSE);
     expect(
       (
         await get(`/v1/staff/${STAFF_ID}/time-off?from=2026-10-01T00:00:00.000Z&limit=5`).expect(
@@ -362,7 +368,7 @@ describe('booking rules', () => {
   it('owners and managers replace the set, validated, defaulted and sorted', async () => {
     for (const r of ['owner', 'manager'] as const) {
       role = r;
-      expect((await send('put', '/v1/rules', body).expect(200)).body).toEqual(RULES);
+      expect((await send('put', '/v1/rules', body).expect(200)).body).toEqual(RULES_RESPONSE);
       expect(appointments.replaceRules).toHaveBeenLastCalledWith(context(), RULES);
     }
   });

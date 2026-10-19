@@ -1,7 +1,15 @@
-import { BookingRulesSchema, type BookingRules, type BookingRulesInput } from '@pepper/contracts';
+import {
+  BookingRulesSchema,
+  PLATFORM_RULE_DEFAULTS,
+  TemplateIdSchema,
+  type BookingRules,
+  type BookingRulesInput,
+  type RuleDefaults,
+} from '@pepper/contracts';
 import { requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
+  findCurrentTenant,
   findStaffMemberIds,
   listBookingRules,
   lockBookingRules,
@@ -10,6 +18,7 @@ import {
   type Database,
 } from '@pepper/db';
 import { StaffMemberNotFoundError } from '../errors.js';
+import type { TemplateRuleDefaultsOf } from './availability.js';
 import { rowsToRules, sameValues } from '../mapping.js';
 
 // The business's booking rules (ADR-0016). Everyone in the business may read them
@@ -22,6 +31,23 @@ export async function getBookingRules(db: Database, actor: Actor): Promise<Booki
   return withTenant(db, actor.context.tenantId, async (tx) =>
     rowsToRules(await listBookingRules(tx)),
   );
+}
+
+/**
+ * What applies where the business sets no rule: its industry template's defaults (through the
+ * app's `templateRuleDefaults`, ADR-0018), else the platform's.
+ */
+export async function getRuleDefaults(
+  db: Database,
+  actor: Actor,
+  options: { templateRuleDefaults?: TemplateRuleDefaultsOf } = {},
+): Promise<RuleDefaults> {
+  requirePermission(actor, 'rules.read');
+  const tenant = await withTenant(db, actor.context.tenantId, (tx) => findCurrentTenant(tx));
+  // withTenant always has a tenant; its row is visible to every member.
+  if (tenant === undefined) throw new Error('No tenant in this transaction');
+  const templateId = TemplateIdSchema.nullable().parse(tenant.templateId);
+  return { ...PLATFORM_RULE_DEFAULTS, ...options.templateRuleDefaults?.(templateId) };
 }
 
 /**
