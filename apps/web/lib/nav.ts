@@ -18,6 +18,12 @@ export function navItems(permissions: readonly Permission[] | null): NavItem[] {
   if (permissions.includes('calendar.read')) {
     items.push({ href: ROUTES.calendar, label: 'Calendar', icon: 'calendar' });
   }
+  if (permissions.includes('clients.read')) {
+    items.push({ href: ROUTES.clients, label: 'Clients', icon: 'clients' });
+  }
+  if (permissions.includes('services.read')) {
+    items.push({ href: ROUTES.services, label: 'Services', icon: 'services' });
+  }
   items.push({ href: ROUTES.team, label: 'Team', icon: 'team' });
   return items;
 }

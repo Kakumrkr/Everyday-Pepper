@@ -1,10 +1,12 @@
 import { headers } from 'next/headers';
 import { cache } from 'react';
 import type { CurrentBusinessResponse, Invite, Member } from '@pepper/contracts';
+import type { z } from 'zod';
 import {
   loadAccount,
   loadCurrentBusiness,
   loadInvites,
+  loadJson,
   loadMembers,
   type Account,
 } from '../../lib/account';
@@ -45,4 +47,15 @@ export async function currentCalendarDay(range: {
   to: string;
 }): Promise<CalendarDay> {
   return loadCalendarDay(await callOptions(), range);
+}
+
+/**
+ * A JSON answer of the api for the browser's session, checked against `schema`, or `null` if
+ * the api refuses, fails or answers something else (the setup screens, S16).
+ */
+export async function currentJson<T extends z.ZodType>(
+  path: string,
+  schema: T,
+): Promise<z.infer<T> | null> {
+  return loadJson(path, schema, await callOptions());
 }

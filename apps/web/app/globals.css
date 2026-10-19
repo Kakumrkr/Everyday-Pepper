@@ -256,75 +256,13 @@
     color: var(--ink);
   }
 
-  .team {
-    display: grid;
-    gap: 24px;
-    margin-top: 16px;
-  }
-
-  .team section {
-    display: grid;
-    gap: 12px;
-  }
-
   h3 {
     margin: 8px 0 0;
     font-size: 1rem;
   }
 
-  .rows {
-    display: grid;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px 12px;
-    padding: 12px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-  }
-
-  .row > div:first-child {
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-
-  .row-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .row-actions select {
-    width: auto;
-  }
-
   .block {
     display: block;
-  }
-
-  .pill {
-    padding: 2px 10px;
-    border-radius: 999px;
-    background: var(--ok-soft);
-    color: var(--ok);
-    font-size: 0.875rem;
-    font-weight: 600;
-  }
-
-  .invite-link {
-    display: grid;
-    gap: 8px;
-    padding: 12px;
-    border-radius: 12px;
-    background: var(--ok-soft);
   }
 
   .visually-hidden {

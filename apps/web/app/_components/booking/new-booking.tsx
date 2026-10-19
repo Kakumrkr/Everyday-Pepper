@@ -12,16 +12,25 @@ import { Field, Notice, Sheet } from './sheet';
 import { TimePicker } from './time-picker';
 
 /**
- * "New booking" on the calendar: client, service, staff member and a time, then
- * `POST /v1/bookings`. A refused time shows the nearest free ones and the waitlist (AC-W2-1).
- * One idempotency key per opening, so a double tap or a retried request books once.
+ * "New booking" on the calendar (or "Book" on a client's profile, with the client chosen):
+ * client, service, staff member and a time, then `POST /v1/bookings`. A refused time shows the
+ * nearest free ones and the waitlist (AC-W2-1). One idempotency key per opening, so a double
+ * tap or a retried request books once.
  */
-export function NewBooking({ setup, date }: { setup: BookingSetup; date: string }) {
+export function NewBooking({
+  setup,
+  date,
+  client,
+}: {
+  setup: BookingSetup;
+  date: string;
+  client?: ChosenClient;
+}) {
   const [open, setOpen] = useState(false);
   const [key, setKey] = useState(0);
   return (
     <Sheet
-      title="New booking"
+      title={client === undefined ? 'New booking' : `Book ${client.client.name}`}
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
@@ -31,7 +40,7 @@ export function NewBooking({ setup, date }: { setup: BookingSetup; date: string 
       trigger={
         <button type="button" className={buttonClass({ size: 'sm' })}>
           <Icon name="plus" />
-          New booking
+          {client === undefined ? 'New booking' : 'Book'}
         </button>
       }
     >
@@ -39,6 +48,7 @@ export function NewBooking({ setup, date }: { setup: BookingSetup; date: string 
         key={key}
         setup={setup}
         date={date}
+        client={client ?? null}
         onDone={() => {
           setOpen(false);
         }}
@@ -50,16 +60,18 @@ export function NewBooking({ setup, date }: { setup: BookingSetup; date: string 
 function NewBookingForm({
   setup,
   date: initialDate,
+  client: initialClient,
   onDone,
 }: {
   setup: BookingSetup;
   date: string;
+  client: ChosenClient | null;
   onDone: () => void;
 }) {
   const router = useRouter();
   const { timeZone, services, abilities } = setup;
   const [idempotencyKey] = useState(() => crypto.randomUUID());
-  const [client, setClient] = useState<ChosenClient | null>(null);
+  const [client, setClient] = useState<ChosenClient | null>(initialClient);
   const [serviceId, setServiceId] = useState(services[0]?.id ?? '');
   const offering = bookableStaff(setup.staff, {
     userId: setup.userId,
