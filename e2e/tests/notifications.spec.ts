@@ -2,11 +2,12 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { hydrated, onboardOwner, ownClientAddress } from './helpers.js';
 
 // Notifications on this device (S21, ADR-0026) through the real stack. A test browser cannot
-// reach a real push service, so the browser's subscription is a stand-in (the endpoint and
+// reach a real push service (and the headless shell cannot grant notifications), so the
+// permission and the browser's subscription are stand-ins (the endpoint and
 // keys a browser would give, kept across reloads like a real one); everything from the app to
 // the api and Postgres is real. Sending pushes is proven in apps/worker and packages/core.
 
-/** Gives the context notification permission and a stand-in push subscription. */
+/** Gives the context notification permission and a stand-in push subscription (and permission). */
 async function fakePush(context: BrowserContext): Promise<void> {
   await context.grantPermissions(['notifications']);
   await context.addInitScript(() => {
@@ -20,6 +21,10 @@ async function fakePush(context: BrowserContext): Promise<void> {
       }),
       unsubscribe: () => Promise.resolve(true),
     });
+    // The headless shell reports notifications as denied whatever is granted: stand in for
+    // the permission a person gives, as for the subscription.
+    Object.defineProperty(Notification, 'permission', { get: () => 'granted' });
+    Notification.requestPermission = () => Promise.resolve('granted');
     const stored = () => localStorage.getItem(KEY);
     PushManager.prototype.getSubscription = function () {
       const endpoint = stored();
