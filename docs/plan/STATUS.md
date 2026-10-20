@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.16 · **Current phase:** 5 — Messaging + jobs (S19–S21). **S20 (Phase 5b) done** on branch `claude/stoic-fermat-d5ocbc`, not yet merged: team-made bookings email the client, reminders go out 24 h before (AC-W6-1 proven end to end), and a daily clean-up deletes expired booking requests and old outbox rows. [ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md) proposed, for the user to accept in review → next: **S21** (tasks + push notifications, Phase 5 exit)
+**Last updated:** 2026-10-20 · **Plan version:** 0.16 · **Current phase:** 5 — Messaging + jobs (S19–S21). **S20 (Phase 5b) done**: team-made bookings email the client, reminders go out 24 h before (AC-W6-1 proven end to end), and a daily clean-up deletes expired booking requests and old outbox rows. [ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md) accepted; PR merged into `main` at the user's request → next: **S21** (tasks + push notifications, Phase 5 exit)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -454,7 +454,7 @@
 
 - **Maintenance after S19 (2026-10-20):** CI on `main` after the S19 merge failed once in Integration: `packages/runtime/src/connections.module.int.test.ts` "answers 200 once the clients have connected" polled readiness with `expect.poll`'s 1-second default, too short on a runner now busier with the S19 outbox and worker suites (it passed on the PR's own run, and locally even under CPU load). It now waits up to 30 s like `apps/api/src/main.int.test.ts`. No product code changed.
 
-- **S20 Phase 5b (2026-10-20): reminders, emails for team-made bookings, clean-up** ([ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md), proposed). The user chose Claude's recommendation on all six Session Brief questions, then approved the plan after the plain-language explanation.
+- **S20 Phase 5b (2026-10-20): reminders, emails for team-made bookings, clean-up** ([ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md), accepted). The user chose Claude's recommendation on all six Session Brief questions, then approved the plan after the plain-language explanation.
   - **Database** (migrations 0027–0029):
     - `booking_reminders`: one row per confirmed booking whose reminder is still to be sent (booking id, tenant, due time, planned start; no content). It has tenant RLS and a cascading composite foreign key to the booking.
     - Read-only **`job_scan`** policies (`current_job_scan(job)`, `withJobScan`): `reminders` on `booking_reminders`, `cleanup` on `tenants`.
@@ -634,7 +634,7 @@
   - (5) Retention: expired booking requests deleted **24 h** after they expire; sent/dead outbox rows after **30 days**.
   - (6) A **reminder schedule table in Postgres**, checked every minute, instead of BullMQ delayed jobs with a nightly rebuild.
   - The user also asked again for a plain-language explanation before coding. Claude gave it ("a notebook line per booking, crossed out on cancel, rewritten on move; the worker checks it every minute and double-checks before sending").
-- **S20 defaults (Claude, in ADR-0025, for the user to accept in review):**
+- **S20 defaults (Claude, in ADR-0025; accepted by the user with "All good", 2026-10-20):**
   - A team move with the box ticked **replaces** the client's link, because the old secret cannot be recovered; unticked, the link is kept.
   - Completed and no-show send no email.
   - The `job_scan` policy is one function with the job's name (`reminders`, `cleanup`), rather than one setting per job.
@@ -642,11 +642,11 @@
   - The reminder job runs without `SMTP_URL`; its emails wait in the outbox.
   - Reminder passes are capped at 20 batches of 100.
   - `REMINDER_POLL_MS` may be at most 4 minutes, so AC-W6-1 holds.
+- **End of S20 (user, 2026-10-20):** "All good. Raise the PR and merge to main." ADR-0025 accepted as proposed, with Claude's defaults. S21 starts in a new session from `main`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Review S20 and accept (or change) [ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md)**, including Claude's defaults (above). Say whether to open the PR and merge it into `main`.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into S19–S21 (user, S19 Session Brief); S19 and S20 are done.
@@ -659,7 +659,7 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into 
 | S17 | ~~**Public booking page with email verification**~~ **done** (ADR-0022 accepted) | 4d | — |
 | S18 | ~~**Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17~~ **done** (ADR-0023 accepted; Phase 4 complete) | 4e | — |
 | S19 | ~~**Phase 5 planning + outbox**~~ **done** (ADR-0024 accepted; D4: Resend) | 5a | — |
-| S20 | ~~**Confirmations and reminders**~~ **done** (ADR-0025 proposed) | 5b | — |
+| S20 | ~~**Confirmations and reminders**~~ **done** (ADR-0025 accepted) | 5b | — |
 | S21 | **Tasks + push notifications (Phase 5 exit):** core tasks, web push for the installed app, Phase 5 security review | 5c | Phase 5 exit criteria (AC-W4-2 done in S19, AC-W6-1 in S20) proven; push subscription and delivery tested |
 
 ## How to resume in a new session
