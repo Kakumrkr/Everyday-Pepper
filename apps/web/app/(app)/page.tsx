@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { requiredStep } from '../../lib/account';
 import { currentAccount, currentBusiness, currentJson, currentMembers } from '../_server/account';
 import { BusinessSwitcher, SignOutButton } from '../_components/account-actions';
+import { NotificationsCard } from '../_components/push/notifications-card';
 import { TaskCard } from '../_components/tasks/task-card';
 import { Unavailable } from '../_components/unavailable';
 
@@ -51,6 +52,11 @@ export default async function HomePage() {
           />
         </div>
       ) : null}
+      {current === null ? null : (
+        <div className="mt-6">
+          <NotificationsCard />
+        </div>
+      )}
       {me.businesses.length > 1 || current === null ? (
         <BusinessSwitcher businesses={me.businesses} activeTenantId={me.activeTenantId} />
       ) : null}
