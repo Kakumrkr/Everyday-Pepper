@@ -152,7 +152,7 @@ This layer is the product, so each session also looks for a better way, not only
 ### Improvement log
 | Session | Learned / next try |
 |---|---|
-| S22 | _(filled at the end of S22)_ |
+| S22 | The SDK raises an in-stream `error` event as an `APIError` without a status: a fixture test caught it (now `unavailable`); keep testing every provider event shape we rely on. Reasoning models need their reasoning items sent back between tool calls when nothing is stored (`replay`). Next: S23 should store proposals and executions with ids only (no client contacts) and give `decideAutonomy` property tests first. Try in S24: generate each tool's eval cases from its description to catch vague descriptions early. |
 
 ## 10. References (read the ones named in your session)
 - Anthropic, *Building effective agents* (2024) — simple composable patterns over frameworks, tool design ("agent-computer interface"): https://www.anthropic.com/engineering/building-effective-agents

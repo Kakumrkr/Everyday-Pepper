@@ -81,7 +81,7 @@ Phase 6 starts the AI layer. ADR-0004 put OpenAI behind an adapter with model id
      - Record mode (S27) calls the real provider and writes the entry with its fingerprint.
    - **Budget guard:**
      - Before a real run the runner estimates the cost from the tokens of the requests it will send, a per-call output allowance and a price table. Prices are configuration, re-checked on OpenAI's pricing page at S27.
-     - It **refuses above a per-run cap ($1.50 by default)**.
+     - It **refuses above a per-run cap ($1.50 by default)**. The cap must be a positive number of at most $4.50, so a mistyped cap can never mean "no cap".
      - It refuses without a price for the model.
      - The cumulative ledger and its $4.50 stop come in S27.
      - The fake and cassette runs cost $0. CI never calls OpenAI.

@@ -6,11 +6,11 @@
 The LLM selects tools and fills arguments. It never accesses the database, never chooses the tenant, and never bypasses domain validation. AI and UI share one code path.
 
 ## Components (`packages/ai`)
-- **Provider adapter** — `LlmProvider` interface (`chat`, `stream`, `embed`, `structuredOutput`). Default implementation: OpenAI. Model IDs are config, not code. A cheap/fast model handles routine turns; a stronger model is used for multi-step planning and onboarding extraction.
+- **Provider adapter** (S22, [ADR-0027](../adr/0027-llm-provider-port-and-evals.md)) — `LlmProvider` (`respond`, `stream`; `embed` joins in Phase 7) over provider-neutral contracts (`contracts/ai.ts`). Default implementation: OpenAI's Responses API with `store: false` and encrypted reasoning replay. Model IDs are config per route (`routine`, `strong`), not code. A cheap/fast model handles routine turns; a stronger model is used for multi-step planning and onboarding extraction. Tool argument schemas are strict JSON Schema generated from Zod.
 - **Tool registry** — each tool: `name`, Zod argument schema (from `packages/contracts`), `riskTier`, `actionType` (for autonomy), `handler` → domain service, `toCard` renderer, eval cases.
 - **Agent loop** — context assembly → model call → tool calls (max N steps, timeout) → result → reply with cards. Deterministic fallback message when limits are hit or the provider fails.
 - **Prompt assembly** — system prompt + template fragments (L3) + tenant preferences (L4) + recalled memory. Untrusted content (client notes, imported data, calendar text, web pages) is wrapped and labelled as data.
-- **Evals** — golden conversations with expected tool calls/arguments, refusals, and confirmation behaviour; run in CI; gate prompt/model/tool changes.
+- **Evals** — golden conversations with expected tool calls/arguments, refusals, and confirmation behaviour; deterministic graders, pass^k, cassettes replayed in CI, a budget guard for real runs; gate prompt/model/tool changes. Plan and quality bar: [Phase 6 playbook](../plan/phase-6-playbook.md).
 
 ## Risk tiers
 | Tier | Examples | Default autonomy | Can be "just do it"? |

@@ -68,4 +68,19 @@ describe('refuseRun', () => {
       refuseRun({ model: 'model-a', prices: PRICES, estimateUsd: 1.5, capUsd: 1.5 }),
     ).toBeNull();
   });
+
+  it.each([Number.NaN, 0, -1, 4.51, Number.POSITIVE_INFINITY])(
+    'refuses a cap of %s instead of treating it as no cap',
+    (capUsd) => {
+      expect(refuseRun({ model: 'model-a', prices: PRICES, estimateUsd: 0.1, capUsd })).toMatch(
+        /The cap must be/,
+      );
+    },
+  );
+
+  it('refuses a run that could not be estimated', () => {
+    expect(
+      refuseRun({ model: 'model-a', prices: PRICES, estimateUsd: Number.NaN, capUsd: 1.5 }),
+    ).toBe('The run could not be estimated.');
+  });
 });

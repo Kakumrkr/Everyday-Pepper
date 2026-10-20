@@ -20,6 +20,8 @@ export type PriceTable = z.infer<typeof PriceTableSchema>;
 
 /** The largest estimate a real run may start with unless told otherwise (playbook §4). */
 export const DEFAULT_RUN_CAP_USD = 1.5;
+/** No single run may plan to spend more than the whole Phase 6 budget's working part. */
+export const MAX_RUN_CAP_USD = 4.5;
 /** Output tokens assumed per call when estimating. Generous on purpose. */
 export const OUTPUT_ALLOWANCE_TOKENS = 600;
 /** Characters per token when estimating input: low, so the estimate errs high. */
@@ -74,6 +76,11 @@ export function refuseRun(options: {
   estimateUsd: number;
   capUsd: number;
 }): string | null {
+  // A cap that is not a positive number (a typo on the command line) must never mean "no cap".
+  if (!Number.isFinite(options.capUsd) || options.capUsd <= 0 || options.capUsd > MAX_RUN_CAP_USD) {
+    return `The cap must be a number of dollars above 0 and at most ${MAX_RUN_CAP_USD.toFixed(2)}.`;
+  }
+  if (!Number.isFinite(options.estimateUsd)) return 'The run could not be estimated.';
   if (options.prices.models[options.model] === undefined) {
     return `No price for ${options.model} in evals/prices.json: add it from the provider's pricing page first.`;
   }
