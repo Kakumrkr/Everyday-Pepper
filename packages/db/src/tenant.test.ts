@@ -8,6 +8,7 @@ import {
   setTransactionUser,
   withMember,
   withTenant,
+  withJobScan,
   withUser,
 } from './tenant.js';
 
@@ -80,6 +81,34 @@ describe('withUser', () => {
   it.each(['', 'not-a-uuid'])('rejects user id %j before touching the database', async (value) => {
     const { db, transaction } = fakeDb();
     await expect(withUser(db, value as UserId, () => Promise.resolve())).rejects.toThrow();
+    expect(transaction).not.toHaveBeenCalled();
+  });
+});
+
+describe('withJobScan', () => {
+  it.each(['reminders', 'cleanup'] as const)(
+    'names the %s job transaction-locally, as a bound parameter, in a read-only transaction',
+    async (job) => {
+      const { db, tx, executed, transaction } = fakeDb();
+      const result = await withJobScan(db, job, (given) => {
+        expect(given).toBe(tx);
+        return Promise.resolve('done');
+      });
+      expect(result).toBe('done');
+      expect(transaction).toHaveBeenCalledWith(expect.any(Function), { accessMode: 'read only' });
+      expect(executed).toHaveLength(1);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- asserted length 1 above
+      const query = new PgDialect().sqlToQuery(executed[0]!);
+      expect(query).toMatchObject({
+        sql: "SELECT set_config('app.job_scan', $1, true)",
+        params: [job],
+      });
+    },
+  );
+
+  it('rejects an unknown job before touching the database', async () => {
+    const { db, transaction } = fakeDb();
+    await expect(withJobScan(db, 'outbox' as never, () => Promise.resolve())).rejects.toThrow();
     expect(transaction).not.toHaveBeenCalled();
   });
 });

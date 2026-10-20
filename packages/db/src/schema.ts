@@ -42,6 +42,17 @@ function tenantIsolation(column: SQL): ReturnType<typeof pgPolicy> {
  * rows across tenants. Only applies when no tenant is set, so tenant transactions never see
  * another tenant's rows through it.
  */
+/**
+ * Read-only access, across businesses, for one worker job's scan (`withJobScan`, ADR-0025):
+ * only in a transaction without a tenant whose `app.job_scan` setting names `job`.
+ */
+function jobScan(job: 'reminders' | 'cleanup'): ReturnType<typeof pgPolicy> {
+  return pgPolicy('job_scan', {
+    for: 'select',
+    using: sql`${currentTenantId} IS NULL AND current_job_scan(${sql.raw(`'${job}'`)})`,
+  });
+}
+
 function memberRead(using: SQL): ReturnType<typeof pgPolicy> {
   return pgPolicy('member_read', {
     for: 'select',
@@ -130,6 +141,9 @@ export const tenants = pgTable(
       for: 'select',
       using: sql`${currentTenantId} IS NULL AND slug = current_public_slug()`,
     }),
+    // The worker's daily clean-up lists the businesses (ADR-0025) and then cleans each one
+    // under its own tenant: read-only, and only while no tenant is set.
+    jobScan('cleanup'),
   ],
 );
 
@@ -1024,6 +1038,36 @@ export const outboxDispatch = pgTable(
   ],
 );
 
+/**
+ * The reminder email planned for a confirmed booking (W6, ADR-0025): one row per booking while
+ * its reminder is still to be sent, with the booking's id, when the reminder is due and the
+ * start it was planned for. The booking services keep it in step in the booking's own
+ * transaction (planned, moved, removed on cancel); the worker's reminder job finds due rows
+ * across businesses (`job_scan`, ids and times only) and, under each business's tenant, checks
+ * the booking again before it queues the email and removes the row.
+ */
+export const bookingReminders = pgTable(
+  'booking_reminders',
+  {
+    // The booking's id.
+    id: uuid('id').primaryKey(),
+    tenantId: uuid('tenant_id').notNull().default(currentTenantId),
+    dueAt: timestamp('due_at', { withTimezone: true }).notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index('booking_reminders_due_at_idx').on(table.dueAt),
+    check('booking_reminders_due_before_start', sql`${table.dueAt} < ${table.startsAt}`),
+    foreignKey({
+      name: 'booking_reminders_booking_fk',
+      columns: [table.tenantId, table.id],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    jobScan('reminders'),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
@@ -1038,5 +1082,6 @@ export type ClientRow = typeof clients.$inferSelect;
 export type BookingRow = typeof bookings.$inferSelect;
 export type BookingOccupancyRow = typeof bookingOccupancy.$inferSelect;
 export type WaitlistEntryRow = typeof waitlistEntries.$inferSelect;
+export type BookingReminderRow = typeof bookingReminders.$inferSelect;
 export type BookingVerificationRow = typeof bookingVerifications.$inferSelect;
 export type OutboxMessageRow = typeof outboxMessages.$inferSelect;

@@ -1,8 +1,9 @@
-import type { BookingEmailDetails } from '@pepper/appointments';
 import type { EmailMessage } from '@pepper/core';
+import type { BookingEmailDetails } from './services/notices.js';
 
-// The booking page's emails (ADR-0022): plain text, in the business's time zone. They carry
-// only what the client typed or booked; the code and the link are secrets for this client.
+// The emails to a booking's client (ADR-0022, ADR-0025): plain text, in the business's time
+// zone. They carry only what the client typed or booked; the code and the link are secrets for
+// this client. The api sends the booking page's and the team's; the worker sends reminders.
 
 /** "Tuesday, November 3 at 10:00 AM" in the business's time zone. */
 export function formatWhen(startsAt: string, timeZone: string): string {
@@ -92,6 +93,26 @@ export function cancelledEmail(details: BookingEmailDetails): EmailMessage {
       `${what(details)}.`,
       '',
       'We hope to see you another time.',
+    ].join('\n'),
+  };
+}
+
+/**
+ * The reminder a day before (AC-W6-1). It carries no link: only the link's hash is stored, so
+ * the client uses the one from their confirmation, or contacts the business.
+ */
+export function reminderEmail(details: BookingEmailDetails): EmailMessage {
+  return {
+    to: details.email,
+    subject: `Reminder: your booking at ${details.businessName}`,
+    text: [
+      `Hi ${details.clientName},`,
+      '',
+      `This is a reminder of your booking at ${details.businessName}:`,
+      `${what(details)}.`,
+      '',
+      'To reschedule or cancel, use the link in your booking confirmation email, or contact',
+      `${details.businessName}.`,
     ].join('\n'),
   };
 }

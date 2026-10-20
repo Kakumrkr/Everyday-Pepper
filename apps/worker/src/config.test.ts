@@ -37,4 +37,21 @@ describe('loadWorkerConfig', () => {
       /^Invalid worker environment: OUTBOX_POLL_MS$/,
     );
   });
+
+  it('reads the reminder and clean-up intervals, within their limits', () => {
+    expect(loadWorkerConfig(required)).toMatchObject({
+      reminderPollMs: 60_000,
+      cleanupIntervalMs: 86_400_000,
+    });
+    expect(
+      loadWorkerConfig({ ...required, REMINDER_POLL_MS: '5000', CLEANUP_INTERVAL_MS: '3600000' }),
+    ).toMatchObject({ reminderPollMs: 5000, cleanupIntervalMs: 3_600_000 });
+    // More than 4 minutes between passes could miss AC-W6-1's 5 minutes.
+    expect(() => loadWorkerConfig({ ...required, REMINDER_POLL_MS: '300000' })).toThrow(
+      /^Invalid worker environment: REMINDER_POLL_MS$/,
+    );
+    expect(() => loadWorkerConfig({ ...required, CLEANUP_INTERVAL_MS: '1000' })).toThrow(
+      /^Invalid worker environment: CLEANUP_INTERVAL_MS$/,
+    );
+  });
 });

@@ -173,6 +173,14 @@ export async function callApi<T>(
 /** Mailpit's API (the fake inbox of Compose): `MAILPIT_URL`, default the Compose port. */
 const MAILPIT_URL = process.env['MAILPIT_URL'] ?? 'http://localhost:8025';
 
+/** The emails Mailpit holds for `to`, newest first. */
+export async function emailsTo(to: string): Promise<{ ID: string; Subject: string }[]> {
+  const search = await fetch(
+    `${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`,
+  );
+  return ((await search.json()) as { messages: { ID: string; Subject: string }[] }).messages;
+}
+
 /**
  * The text of the newest email to `to` whose subject contains `subject`, waiting up to 15
  * seconds for it to arrive.
@@ -180,12 +188,7 @@ const MAILPIT_URL = process.env['MAILPIT_URL'] ?? 'http://localhost:8025';
 export async function emailTo(to: string, subject: string): Promise<string> {
   const deadline = Date.now() + 15_000;
   for (;;) {
-    const search = await fetch(
-      `${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`,
-    );
-    const { messages } = (await search.json()) as {
-      messages: { ID: string; Subject: string }[];
-    };
+    const messages = await emailsTo(to);
     const found = messages.find((message) => message.Subject.includes(subject));
     if (found !== undefined) {
       const message = await fetch(`${MAILPIT_URL}/api/v1/message/${found.ID}`);

@@ -1,4 +1,4 @@
-import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
 import {
   AvailabilityQuerySchema,
   BookingConfirmInputSchema,
@@ -21,7 +21,6 @@ import {
   type AvailabilityQueryInput,
   type AvailableSlot,
   type BookingConfirmInput,
-  type BookingId,
   type BookingRequestId,
   type BookingRequestInput,
   type ManageToken,
@@ -39,7 +38,6 @@ import {
   BookingOverlapError,
   countBookingVerificationsExpiringAfter,
   findBookingByManageTokenHash,
-  findClient,
   findClientsByContact,
   findService,
   findStaffMember,
@@ -80,6 +78,15 @@ import {
 import { bookingAuditValues } from '../mapping.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import {
+  changeOf,
+  emailDetailsOf,
+  manageTokenHash,
+  newManageToken,
+  type BookingEmailDetails,
+  type BookingNotify,
+} from './notices.js';
+import { keepReminderInStep } from './reminders.js';
+import {
   isBookable,
   nearestAlternatives,
   SlotTaken,
@@ -114,42 +121,6 @@ export interface CodeOptions extends PublicOptions {
   /** HMAC key for the stored code hashes (at least 32 bytes), never stored with them. */
   codeKey: Buffer;
 }
-
-/** Details of the business and booking for the email the caller sends. */
-export interface BookingEmailDetails {
-  businessName: string;
-  timeZone: string;
-  serviceName: string;
-  staffName: string | null;
-  startsAt: string;
-  email: string;
-  clientName: string;
-}
-
-/** A change of a booking-page booking that its client is told about by email. */
-export type BookingNotice =
-  | {
-      kind: 'confirmed';
-      email: BookingEmailDetails;
-      manageToken: ManageToken;
-      change: BookingChange;
-    }
-  | {
-      kind: 'rescheduled';
-      email: BookingEmailDetails;
-      manageToken: ManageToken;
-      change: BookingChange;
-    }
-  | { kind: 'cancelled'; email: BookingEmailDetails; change: BookingChange };
-
-/** Which booking changed, and when (the row's `updated_at`: one value per change). */
-export interface BookingChange {
-  bookingId: BookingId;
-  at: Date;
-}
-
-/** Receives a notice inside the change's transaction (`PublicOptions.notify`). */
-export type BookingNotify = (tx: TenantTx, notice: BookingNotice) => Promise<void>;
 
 /** The menu and team the booking page shows. */
 export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise<PublicBusiness> {
@@ -289,6 +260,7 @@ export async function requestBooking(
         code,
         email: {
           businessName: tenant.name,
+          slug: tenant.slug,
           timeZone: tenant.timeZone,
           serviceName: serviceRow.name,
           staffName,
@@ -354,7 +326,7 @@ export async function confirmBookingRequest(
       break;
   }
 
-  const manageToken = ManageTokenSchema.parse(randomBytes(32).toString('base64url'));
+  const { token: manageToken, hash: newHash } = newManageToken();
   let search: AlternativesSearch | undefined;
   try {
     return await inPage(db, slug, async (tx, tenant) => {
@@ -392,9 +364,10 @@ export async function confirmBookingRequest(
         overridden: false,
         idempotencyKey: null,
         createdBy: null,
-        manageTokenHash: manageTokenHash(manageToken),
+        manageTokenHash: newHash,
       });
       await setVerificationBooking(tx, id, BookingIdSchema.parse(row.id));
+      await keepReminderInStep(tx, row, now);
       await appendAuditEntry(tx, {
         actor: { kind: 'system' },
         change: {
@@ -407,6 +380,7 @@ export async function confirmBookingRequest(
       const booking = await toPublicBooking(tx, row, now);
       const email: BookingEmailDetails = {
         businessName: tenant.name,
+        slug: tenant.slug,
         timeZone: tenant.timeZone,
         serviceName: booking.service.name,
         staffName: booking.staff.displayName,
@@ -460,6 +434,7 @@ export async function cancelManagedBooking(
     const cancelled = await setBookingStatus(tx, BookingIdSchema.parse(row.id), 'cancelled');
     if (cancelled === undefined) throw new BookingNotFoundError();
     await auditUpdate(tx, row, cancelled);
+    await keepReminderInStep(tx, cancelled, now);
     const result = await withEmail(tx, tenant, cancelled, now);
     await options.notify?.(tx, {
       kind: 'cancelled',
@@ -516,6 +491,7 @@ export async function rescheduleManagedBooking(
       });
       if (moved === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, moved);
+      await keepReminderInStep(tx, moved, now);
       const result = await withEmail(tx, tenant, moved, now);
       await options.notify?.(tx, {
         kind: 'rescheduled',
@@ -531,11 +507,6 @@ export async function rescheduleManagedBooking(
     }
     throw error;
   }
-}
-
-/** SHA-256 (hex) of a link token: 256 random bits need no key or slow hash (as invites). */
-export function manageTokenHash(token: ManageToken): string {
-  return createHash('sha256').update(ManageTokenSchema.parse(token)).digest('hex');
 }
 
 /**
@@ -701,31 +672,15 @@ async function toPublicBooking(tx: TenantTx, row: BookingRow, now: number): Prom
   });
 }
 
-function changeOf(row: BookingRow): BookingChange {
-  return { bookingId: BookingIdSchema.parse(row.id), at: row.updatedAt };
-}
-
 async function withEmail(
   tx: TenantTx,
   tenant: Tenant,
   row: BookingRow,
   now: number,
 ): Promise<{ booking: PublicBooking; email: BookingEmailDetails }> {
-  const booking = await toPublicBooking(tx, row, now);
-  const client = await findClient(tx, ClientIdSchema.parse(row.clientId));
-  // Bookings reference their client with a foreign key.
-  if (client === undefined) throw new BookingNotFoundError();
   return {
-    booking,
-    email: {
-      businessName: tenant.name,
-      timeZone: tenant.timeZone,
-      serviceName: booking.service.name,
-      staffName: booking.staff.displayName,
-      startsAt: booking.startsAt,
-      // The address the link was sent to, or the one the business has on file now.
-      email: client.email ?? '',
-      clientName: client.name,
-    },
+    booking: await toPublicBooking(tx, row, now),
+    // The address the link was sent to, or the one the business has on file now.
+    email: await emailDetailsOf(tx, tenant, row),
   };
 }

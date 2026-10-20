@@ -8,11 +8,14 @@ import {
   PublicBookingResponseSchema,
   PublicBusinessSchema,
   TenantIdSchema,
+  UserIdSchema,
   type AvailableSlot,
+  type StaffMemberId,
   type TenantId,
 } from '@pepper/contracts';
 import {
   createBusiness,
+  createClient,
   deliverOutboxMessage,
   outboxKeyFrom,
   systemClock,
@@ -20,6 +23,7 @@ import {
   type Actor,
   type EmailMessage,
   type Mailer,
+  type TenantContext,
 } from '@pepper/core';
 import {
   listDueOutboxMessages,
@@ -37,6 +41,7 @@ import { sql } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { AppModule } from './app.module.js';
+import { BookingsService } from './appointments/bookings.service.js';
 import { loadApiConfig } from './config.js';
 
 // The public booking page through the api against real Postgres and Redis (ADR-0022): a
@@ -66,6 +71,9 @@ let db: Database;
 const mailer = new RecordingMailer();
 let serviceId: string;
 let tenantId: TenantId;
+/** The owner's context, for team bookings through `BookingsService`. */
+let ownerContext: TenantContext;
+let jessId: StaffMemberId;
 let ipCounter = 0;
 
 beforeAll(async () => {
@@ -101,13 +109,8 @@ beforeAll(async () => {
     timeZone: 'UTC',
   });
   tenantId = TenantIdSchema.parse(tenant.id);
-  const actor: Actor = {
-    context: {
-      tenantId,
-      userId: owner.id as never,
-      role: 'owner',
-    },
-  };
+  ownerContext = { tenantId, userId: UserIdSchema.parse(owner.id), role: 'owner' };
+  const actor: Actor = { context: ownerContext };
   await updateBookingPage(db, actor, { brandColor: '#7a3e6c' });
   const service = await createService(db, actor, { name: 'Cut', durationMinutes: 60 });
   serviceId = service.id;
@@ -115,6 +118,7 @@ beforeAll(async () => {
     displayName: 'Jess',
     serviceIds: [service.id],
   });
+  jessId = jess.id;
   await replaceWorkingHours(db, actor, jess.id, {
     intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({ weekday, start: '09:00', end: '17:00' })),
   });
@@ -282,5 +286,54 @@ describe('the public booking page', () => {
       .set('origin', 'https://evil.example')
       .send({ token: 'A'.repeat(43) })
       .expect(403);
+  });
+});
+
+describe('team bookings (ADR-0025)', () => {
+  it("email the client a confirmation with a link that works on the business's page", async () => {
+    const [slot, later] = await freeSlots();
+    if (slot === undefined || later === undefined) throw new Error('no free times');
+    const bookings = app.get(BookingsService);
+    const maria = await createClient(
+      db,
+      { context: ownerContext },
+      {
+        name: 'Maria Lopez',
+        email: 'maria@example.test',
+      },
+    );
+    const booking = await bookings.createBooking(ownerContext, {
+      clientId: maria.id,
+      serviceId,
+      staffMemberId: jessId,
+      startsAt: slot.startsAt,
+    });
+    expect(await deliverQueued()).toBe(1);
+    const confirmation = mailer.sent.at(-1);
+    expect(confirmation).toMatchObject({
+      to: 'maria@example.test',
+      subject: "You're booked at Plum Salon",
+    });
+    const token = new RegExp(`${ORIGIN}/book/${SLUG}/manage#([A-Za-z0-9_-]{43})`).exec(
+      confirmation?.text ?? '',
+    )?.[1];
+    if (token === undefined) throw new Error('no link in the confirmation');
+    const looked = await visitor().post('/booking/lookup', { token }).expect(200);
+    expect(PublicBookingResponseSchema.parse(looked.body).booking.startsAt).toBe(slot.startsAt);
+
+    // A move without telling the client sends nothing, and keeps the link working.
+    await bookings.changeBooking(ownerContext, booking.id, {
+      startsAt: later.startsAt,
+      notifyClient: false,
+    });
+    expect(await deliverQueued()).toBe(0);
+    await visitor().post('/booking/lookup', { token }).expect(200);
+
+    await bookings.changeBooking(ownerContext, booking.id, { status: 'cancelled' });
+    expect(await deliverQueued()).toBe(1);
+    expect(mailer.sent.at(-1)).toMatchObject({
+      to: 'maria@example.test',
+      subject: 'Your booking at Plum Salon is cancelled',
+    });
   });
 });

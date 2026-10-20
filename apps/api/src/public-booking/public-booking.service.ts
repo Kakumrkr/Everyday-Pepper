@@ -6,11 +6,9 @@ import {
   getPublicBusiness,
   rescheduleManagedBooking,
   requestBooking,
-  type BookingNotice,
-  type BookingNotify,
+  codeEmail,
 } from '@pepper/appointments';
 import {
-  OutboxDedupeKeySchema,
   VERIFICATION_CODE_TTL_MINUTES,
   type AvailabilityQueryInput,
   type AvailableSlot,
@@ -24,28 +22,17 @@ import {
   type PublicBusiness,
   type TenantSlug,
 } from '@pepper/contracts';
-import { queueEmail, systemClock, type Clock, type EmailMessage, type Mailer } from '@pepper/core';
-import type { Database, TenantTx } from '@pepper/db';
+import type { Mailer } from '@pepper/core';
+import type { Database } from '@pepper/db';
 import { DATABASE, MAILER } from '@pepper/runtime';
 import { templateRuleDefaults } from '@pepper/templates';
 import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { apiError } from '../auth/guards.js';
-import {
-  cancelledEmail,
-  codeEmail,
-  confirmationEmail,
-  manageUrl,
-  rescheduledEmail,
-} from './emails.js';
+import { BookingEmails } from '../booking-emails/booking-emails.js';
 
 export interface PublicBookingOptions {
-  /** The web app's origin, for links in emails. */
-  baseUrl: string;
   /** HMAC key of the stored code hashes. */
   codeKey: Buffer;
-  /** Seals the emails queued in the outbox (ADR-0024). */
-  outboxKey: Buffer;
-  clock?: Clock;
 }
 
 export const PUBLIC_BOOKING_OPTIONS = Symbol('PUBLIC_BOOKING_OPTIONS');
@@ -54,8 +41,8 @@ export const PUBLIC_BOOKING_OPTIONS = Symbol('PUBLIC_BOOKING_OPTIONS');
  * The public booking page's services for a request (ADR-0022): binds the database, the code
  * key and the industry templates' rule defaults. The code email is sent at once, because the
  * client is waiting for it: failing to send it is an error (503). The emails about a booking
- * (confirmed, moved, cancelled) are queued in the outbox inside the change's transaction, and
- * the worker sends each exactly once, with retries (ADR-0024).
+ * (confirmed, moved, cancelled) are queued in the outbox inside the change's transaction by
+ * `BookingEmails`, and the worker sends each exactly once, with retries (ADR-0024).
  */
 @Injectable()
 export class PublicBookingService {
@@ -66,6 +53,7 @@ export class PublicBookingService {
     @Inject(DATABASE) database: { db: Database },
     @Inject(MAILER) private readonly mailer: Mailer | null,
     @Inject(PUBLIC_BOOKING_OPTIONS) private readonly options: PublicBookingOptions,
+    private readonly emails: BookingEmails,
   ) {
     this.db = database.db;
   }
@@ -105,7 +93,7 @@ export class PublicBookingService {
     const confirmed = await confirmBookingRequest(this.db, slug, requestId, input, {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
-      notify: this.notifier(slug),
+      notify: this.emails.notify,
     });
     return { booking: confirmed.booking, manageToken: confirmed.manageToken };
   }
@@ -117,14 +105,14 @@ export class PublicBookingService {
   async reschedule(slug: TenantSlug, token: ManageToken, startsAt: string): Promise<PublicBooking> {
     const moved = await rescheduleManagedBooking(this.db, slug, token, startsAt, {
       templateRuleDefaults,
-      notify: this.notifier(slug),
+      notify: this.emails.notify,
     });
     return moved.booking;
   }
 
   async cancel(slug: TenantSlug, token: ManageToken): Promise<PublicBooking> {
     const cancelled = await cancelManagedBooking(this.db, slug, token, {
-      notify: this.notifier(slug),
+      notify: this.emails.notify,
     });
     return cancelled.booking;
   }
@@ -135,32 +123,6 @@ export class PublicBookingService {
       throw new ServiceUnavailableException(apiError('email_unavailable'));
     }
     return this.mailer;
-  }
-
-  /**
-   * Queues the email about a booking change in the change's transaction. Clients without an
-   * email address get none.
-   */
-  private notifier(slug: TenantSlug): BookingNotify {
-    return async (tx: TenantTx, notice: BookingNotice) => {
-      if (notice.email.email === '') return;
-      const link = (token: ManageToken) => manageUrl(this.options.baseUrl, slug, token);
-      const message: EmailMessage =
-        notice.kind === 'cancelled'
-          ? cancelledEmail(notice.email)
-          : notice.kind === 'confirmed'
-            ? confirmationEmail(notice.email, link(notice.manageToken))
-            : rescheduledEmail(notice.email, link(notice.manageToken));
-      // One email per change: `at` is the booking's `updated_at`, one value per transaction.
-      const { bookingId, at } = notice.change;
-      await queueEmail(tx, message, {
-        key: this.options.outboxKey,
-        dedupeKey: OutboxDedupeKeySchema.parse(
-          `booking.${notice.kind}:${bookingId}:${String(at.getTime())}`,
-        ),
-        now: (this.options.clock ?? systemClock).now(),
-      });
-    };
   }
 }
 

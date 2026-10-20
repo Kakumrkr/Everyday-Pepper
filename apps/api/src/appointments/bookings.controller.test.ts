@@ -267,6 +267,7 @@ describe('booking', () => {
       expect(bookings.createBooking).toHaveBeenCalledWith(context(), {
         ...newBooking,
         override: false,
+        notifyClient: true,
       });
     },
   );
@@ -279,6 +280,7 @@ describe('booking', () => {
       ...newBooking,
       clientContact: 'maria@example.test',
       override: false,
+      notifyClient: true,
     });
     await send('post', '/v1/bookings', { ...newBooking, clientContact: 'mar' }).expect(400);
   });
@@ -319,10 +321,20 @@ describe('booking', () => {
     expect(bookings.changeBooking).toHaveBeenCalledWith(context(), BOOKING_ID, {
       startsAt: newBooking.startsAt,
       override: false,
+      notifyClient: true,
     });
     await send('patch', `/v1/bookings/${BOOKING_ID}`, { status: 'cancelled' }).expect(200);
     expect(bookings.changeBooking).toHaveBeenLastCalledWith(context(), BOOKING_ID, {
       status: 'cancelled',
+      notifyClient: true,
+    });
+    await send('patch', `/v1/bookings/${BOOKING_ID}`, {
+      status: 'cancelled',
+      notifyClient: false,
+    }).expect(200);
+    expect(bookings.changeBooking).toHaveBeenLastCalledWith(context(), BOOKING_ID, {
+      status: 'cancelled',
+      notifyClient: false,
     });
     await send('patch', `/v1/bookings/${BOOKING_ID}`, { status: 'confirmed' }).expect(400);
   });

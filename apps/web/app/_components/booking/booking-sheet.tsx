@@ -20,6 +20,7 @@ import {
 } from '../../../lib/booking';
 import { timeRange } from '../../../lib/calendar';
 import { sendJson } from '../../../lib/client-api';
+import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
 import { Field, Notice, Sheet } from './sheet';
 import { TimePicker } from './time-picker';
@@ -40,7 +41,8 @@ export interface BookingSummary {
 /**
  * A booking on the calendar, as a button that opens its sheet: the details, done or no-show
  * once it has started, move and cancel. Every change goes through `PATCH /v1/bookings/:id`,
- * which checks it again (staff: their own bookings; done and no-show final for them).
+ * which checks it again (staff: their own bookings; done and no-show final for them). A move or
+ * cancellation emails the client unless the team unticks it (ADR-0025).
  */
 export function BookingSheet({
   booking,
@@ -111,6 +113,7 @@ function BookingDetails({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [refused, setRefused] = useState<AvailableSlot[] | null>(null);
+  const [notifyClient, setNotifyClient] = useState(true);
   // The sheet's clock: the api checks the real one (done and no-show only once started).
   const [now] = useState(() => Date.now());
   const actions = bookingActions(booking, now, abilities.correctsOutcomes);
@@ -153,13 +156,16 @@ function BookingDetails({
       <div className="grid gap-4">
         {summary}
         <p className="m-0 font-semibold">Cancel this booking? The time becomes free again.</p>
+        <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
+          Email the client that it is cancelled
+        </NotifyClient>
         {error === null ? null : <Notice tone="error">{error}</Notice>}
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             disabled={busy}
             className={buttonClass({ variant: 'secondary', className: 'text-danger' })}
-            onClick={() => void change({ status: 'cancelled' })}
+            onClick={() => void change({ status: 'cancelled', notifyClient })}
           >
             Cancel booking
           </button>
@@ -186,7 +192,9 @@ function BookingDetails({
         busy={busy}
         error={error}
         refused={refused}
-        onMove={(startsAt, staffMemberId) => void change({ startsAt, staffMemberId })}
+        notifyClient={notifyClient}
+        onNotifyClientChange={setNotifyClient}
+        onMove={(startsAt, staffMemberId) => void change({ startsAt, staffMemberId, notifyClient })}
         onBack={() => {
           setView('details');
           setError(null);
@@ -265,6 +273,8 @@ function MoveBooking({
   busy,
   error,
   refused,
+  notifyClient,
+  onNotifyClientChange,
   onMove,
   onBack,
 }: {
@@ -273,6 +283,8 @@ function MoveBooking({
   busy: boolean;
   error: string | null;
   refused: AvailableSlot[] | null;
+  notifyClient: boolean;
+  onNotifyClientChange: (checked: boolean) => void;
   onMove: (startsAt: string, staffMemberId: string) => void;
   onBack: () => void;
 }) {
@@ -322,6 +334,9 @@ function MoveBooking({
         value={startsAt}
         onChange={setStartsAt}
       />
+      <NotifyClient checked={notifyClient} onChange={onNotifyClientChange}>
+        Email the client the new time
+      </NotifyClient>
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       {refused === null ? null : (
         <Refusal

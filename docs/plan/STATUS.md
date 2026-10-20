@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.15 · **Current phase:** 5 — Messaging + jobs (S19–S21). **S19 (Phase 5a: transactional outbox) done**: booking page emails go through the outbox and the worker sends each exactly once under retries (AC-W4-2 proven end to end). [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md) accepted; D4 resolved (Resend for the pilot); PR merged into `main` at the user's request → next: **S20** (confirmations for team-made bookings, reminders with timing AC-W6-1, expired-request cleanup)
+**Last updated:** 2026-10-20 · **Plan version:** 0.16 · **Current phase:** 5 — Messaging + jobs (S19–S21). **S20 (Phase 5b) done**: team-made bookings email the client, reminders go out 24 h before (AC-W6-1 proven end to end), and a daily clean-up deletes expired booking requests and old outbox rows. [ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md) accepted; PR merged into `main` at the user's request → next: **S21** (tasks + push notifications, Phase 5 exit)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -454,6 +454,54 @@
 
 - **Maintenance after S19 (2026-10-20):** CI on `main` after the S19 merge failed once in Integration: `packages/runtime/src/connections.module.int.test.ts` "answers 200 once the clients have connected" polled readiness with `expect.poll`'s 1-second default, too short on a runner now busier with the S19 outbox and worker suites (it passed on the PR's own run, and locally even under CPU load). It now waits up to 30 s like `apps/api/src/main.int.test.ts`. No product code changed.
 
+- **S20 Phase 5b (2026-10-20): reminders, emails for team-made bookings, clean-up** ([ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md), accepted). The user chose Claude's recommendation on all six Session Brief questions, then approved the plan after the plain-language explanation.
+  - **Database** (migrations 0027–0029):
+    - `booking_reminders`: one row per confirmed booking whose reminder is still to be sent (booking id, tenant, due time, planned start; no content). It has tenant RLS and a cascading composite foreign key to the booking.
+    - Read-only **`job_scan`** policies (`current_job_scan(job)`, `withJobScan`): `reminders` on `booking_reminders`, `cleanup` on `tenants`.
+    - Clean-up repositories; `setBookingManageTokenHash`.
+    - Both scans are in the isolation suite.
+  - **Appointments:**
+    - `keepReminderInStep` on every booking write (team create, move and status; booking-page confirm, reschedule and cancel). A reminder is due 24 h before the start; there is none when the booking is less than 24 h ahead or not confirmed.
+    - `sendDueReminders`/`sendDueReminder`: lock the booking, take the row, re-check, and queue the reminder email in one transaction. Batches run until the backlog is empty.
+    - Team create, move and cancel call `notify`. A confirmation or move mints a new reschedule/cancel link, so the old one stops working.
+    - The client email templates moved here from the api, plus the new reminder email.
+  - **Core:** `cleanUp` deletes booking requests 24 h after they expire and `sent`/`dead` outbox rows after 30 days, per business, in batches.
+  - **Contracts:** `notifyClient` (default `true`) on `POST /v1/bookings` and both forms of `PATCH /v1/bookings/:id`.
+  - **Api:** `BookingEmails` (`apps/api/src/booking-emails`), one global provider used by the booking page and team bookings.
+  - **Worker:** `JobsModule` runs the reminder job every `REMINDER_POLL_MS` (default 60 s, at most 4 min) and the clean-up at start-up and every `CLEANUP_INTERVAL_MS` (default 1 day), on a small `Periodic` helper. The worker may now import `@pepper/appointments`: the lint rule now matches the dependency map.
+  - **Web:** an "Email the client …" checkbox, ticked by default, on the new-booking, move and cancel screens. A client without an email address shows that no confirmation is sent.
+  - **Docs:**
+    - ADR-0025 and CHANGELOG 0.16.
+    - Architecture: jobs-messaging-integrations (reminders are Postgres-driven, not BullMQ delayed jobs), data-model.
+    - Engineering: security-and-tenancy (`job_scan` row), security review (L7 fixed), reliability, dev-setup and `.env.example` (the two new optional variables).
+    - Plan: traceability (AC-W6-1), dependency map.
+  - **Checks run:**
+    - `pnpm check` green, with all coverage gates passing (db functions needed a `withJobScan` unit test, now added).
+    - `pnpm test:integration` green, **657** in total:
+
+      | Package | Tests | New in S20 |
+      |---|---|---|
+      | db | 391 | reminders and clean-up repositories 10; isolation incl. both job scans |
+      | appointments | 124 | reminders, team notices and AC-W6-1 with a controlled clock: 20 |
+      | core | 73 | clean-up 1 |
+      | api | 61 | a team booking's confirmation, link, unticked move and cancellation through the real app module |
+      | worker | 4 | AC-W6-1 end to end on the real clock: reminder received within seconds of its due time, once, none for a cancelled booking |
+      | runtime | 2 | |
+      | testing | 2 | |
+
+      After the run, the reminder file gained the backlog test, and that file was re-run green (21).
+    - The AC-W6-1 file was run 3× (stable).
+    - Playwright **52/52 green** (phone and desktop) against api, worker and `next start` on Compose Postgres, Redis and Mailpit (project `pepper-s20`), `--workers=2`. The owner's booking journey now checks the confirmation (with her link) and the moved time in Mailpit, and that an unticked cancellation sends nothing.
+    - Afterwards the database held 34 outbox messages, all `sent` on the first attempt, with content cleared. There were 26 planned reminders (bookings a week ahead), no dispatch rows left, and no worker warnings.
+  - **Self-review fix:** a reminder pass first handled only 100 reminders, so a backlog after downtime could take several minutes. Passes now continue in batches, with a test.
+  - **Not done / for later:**
+    - Docker image builds were not run here (the known npm/corepack fetch failure in this sandbox). CI builds them; the worker image now also carries `@pepper/appointments`.
+    - Per-business reminder timing (the table stores each due time, so it can come without a migration).
+    - SMS reminders (V1.1).
+    - Unsubscribe/opt-out for reminders (they are transactional; revisit with marketing emails).
+    - A screen showing delivery status.
+    - The autonomy dial for confirmations and reminders (Phase 6; the approved default is "Just do it").
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -578,13 +626,30 @@
   - Also asked: explain the feature in plain business terms before coding. That was done: "a note to send the email is saved together with the booking; the worker sends it, retries if needed, never twice".
 - **S19 defaults (Claude, in ADR-0024; accepted by the user with "All good", 2026-10-20):** the index table under RLS too, with a transaction-local `app.outbox_scan` setting instead of being global (the isolation suite requires RLS on every `tenant_id` table); `OUTBOX_SECRET` as a new secret rather than one derived from `AUTH_SECRET` (the worker does not need the auth secret); retries in Postgres rather than BullMQ; polling only (no notify after commit); 8 attempts, 30 s doubling to 1 h; 5xx gives up at once; a 5-minute lease; dedupe key `booking.<kind>:<booking id>:<updated_at ms>`.
 - **End of S19 (user, 2026-10-20):** "All good. Raise PR and merge." ADR-0024 accepted as proposed, with Claude's defaults. S20 starts in a new session from `main`.
+- **S20 decisions (user, 2026-10-20, S20 Session Brief: "Go with your recommendations"; plan approved with "All sounds good start it"):**
+  - (1) Reminders **24 h before, the same for every business** for now (templates may change it later).
+  - (2) **No reminder** for a booking made or moved less than 24 h ahead.
+  - (3) Team changes **email the client**, with an "Email the client" checkbox ticked by default.
+  - (4) Team-made bookings get the **same reschedule/cancel link** as booking-page ones. The reminder carries no link, because only its hash is stored.
+  - (5) Retention: expired booking requests deleted **24 h** after they expire; sent/dead outbox rows after **30 days**.
+  - (6) A **reminder schedule table in Postgres**, checked every minute, instead of BullMQ delayed jobs with a nightly rebuild.
+  - The user also asked again for a plain-language explanation before coding. Claude gave it ("a notebook line per booking, crossed out on cancel, rewritten on move; the worker checks it every minute and double-checks before sending").
+- **S20 defaults (Claude, in ADR-0025; accepted by the user with "All good", 2026-10-20):**
+  - A team move with the box ticked **replaces** the client's link, because the old secret cannot be recovered; unticked, the link is kept.
+  - Completed and no-show send no email.
+  - The `job_scan` policy is one function with the job's name (`reminders`, `cleanup`), rather than one setting per job.
+  - The clean-up job lists businesses through `tenants`, whose names and slugs the booking page shows publicly anyway.
+  - The reminder job runs without `SMTP_URL`; its emails wait in the outbox.
+  - Reminder passes are capped at 20 batches of 100.
+  - `REMINDER_POLL_MS` may be at most 4 minutes, so AC-W6-1 holds.
+- **End of S20 (user, 2026-10-20):** "All good. Raise the PR and merge to main." ADR-0025 accepted as proposed, with Claude's defaults. S21 starts in a new session from `main`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
 1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into S19–S21 (user, S19 Session Brief); S19 is done.
+Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into S19–S21 (user, S19 Session Brief); S19 and S20 are done.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
@@ -594,7 +659,7 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into 
 | S17 | ~~**Public booking page with email verification**~~ **done** (ADR-0022 accepted) | 4d | — |
 | S18 | ~~**Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17~~ **done** (ADR-0023 accepted; Phase 4 complete) | 4e | — |
 | S19 | ~~**Phase 5 planning + outbox**~~ **done** (ADR-0024 accepted; D4: Resend) | 5a | — |
-| S20 | **Confirmations and reminders:** confirmation emails for team-made bookings (queued in the booking transaction), reminders scheduled per booking with timing (AC-W6-1: sent within 5 minutes of schedule; cancelled bookings never get one), reconciled from Postgres, and cleanup of expired booking requests (S18 L7) and old outbox rows | 5b | AC-W6-1 integration test with a controlled clock; no reminder for a cancelled or moved booking; cleanup job tested |
+| S20 | ~~**Confirmations and reminders**~~ **done** (ADR-0025 accepted) | 5b | — |
 | S21 | **Tasks + push notifications (Phase 5 exit):** core tasks, web push for the installed app, Phase 5 security review | 5c | Phase 5 exit criteria (AC-W4-2 done in S19, AC-W6-1 in S20) proven; push subscription and delivery tested |
 
 ## How to resume in a new session

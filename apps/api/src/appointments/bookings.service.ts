@@ -30,17 +30,22 @@ import type { Database } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { templateRuleDefaults } from '@pepper/templates';
 import { Inject, Injectable } from '@nestjs/common';
+import { BookingEmails } from '../booking-emails/booking-emails.js';
 
 /**
  * The bookings, availability and waitlist services for a request: binds the database, the
- * request id (for the audit log) and the industry templates' rule defaults (ADR-0018). Domain
- * errors pass through; the controller answers them.
+ * request id (for the audit log), the industry templates' rule defaults (ADR-0018) and the
+ * client's emails, queued with each change when `notifyClient` (ADR-0025). Domain errors pass
+ * through; the controller answers them.
  */
 @Injectable()
 export class BookingsService {
   private readonly db: Database;
 
-  constructor(@Inject(DATABASE) database: { db: Database }) {
+  constructor(
+    @Inject(DATABASE) database: { db: Database },
+    private readonly emails: BookingEmails,
+  ) {
     this.db = database.db;
   }
 
@@ -53,11 +58,17 @@ export class BookingsService {
   }
 
   createBooking(tenant: TenantContext, input: BookingInput): Promise<Booking> {
-    return createBooking(this.db, actorOf(tenant), input, { templateRuleDefaults });
+    return createBooking(this.db, actorOf(tenant), input, {
+      templateRuleDefaults,
+      notify: this.emails.notify,
+    });
   }
 
   changeBooking(tenant: TenantContext, id: BookingId, change: BookingChange): Promise<Booking> {
-    return changeBooking(this.db, actorOf(tenant), id, change, { templateRuleDefaults });
+    return changeBooking(this.db, actorOf(tenant), id, change, {
+      templateRuleDefaults,
+      notify: this.emails.notify,
+    });
   }
 
   busy(tenant: TenantContext, query: BusyQuery, limit: number): Promise<BusyTime[]> {

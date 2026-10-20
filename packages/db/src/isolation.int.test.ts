@@ -3,6 +3,7 @@
 // GLOBAL_TABLES (with a reason); the catalog test fails for a table that is in neither.
 import { randomBytes } from 'node:crypto';
 import {
+  BookingIdSchema,
   ClientIdSchema,
   OutboxMessageIdSchema,
   ServiceIdSchema,
@@ -33,7 +34,9 @@ import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
+import { listTenantIdsForCleanup } from './repositories/cleanup.js';
 import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbox.js';
+import { listDueBookingReminders, planBookingReminder } from './repositories/reminders.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
 import { addUsage } from './repositories/usage.js';
 import { withTenant, withUser, type TenantTx } from './tenant.js';
@@ -67,6 +70,8 @@ interface TenantTable {
   publicLookup?: string;
   /** The `outbox_scan` (listDueOutboxMessages) predicate, as Postgres prints it, if any. */
   outboxScan?: string;
+  /** The `job_scan` (withJobScan) predicate, as Postgres prints it, if any. */
+  jobScan?: string;
   /** The services may only insert and read (no UPDATE or DELETE grant). */
   appendOnly?: true;
   /**
@@ -98,6 +103,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     memberRead:
       '((current_tenant_id() IS NULL) AND (id IN ( SELECT memberships.tenant_id\n   FROM memberships\n  WHERE (memberships.user_id = current_user_id()))))',
     publicLookup: '((current_tenant_id() IS NULL) AND (slug = current_public_slug()))',
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('cleanup'::text))",
   },
   memberships: {
     tenantColumn: 'tenant_id',
@@ -352,6 +358,21 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     touch: 'available_at = available_at',
     outboxScan: '((current_tenant_id() IS NULL) AND current_outbox_scan())',
   },
+  booking_reminders: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const bookingId = BookingIdSchema.parse(await seedBooking(tx));
+      await planBookingReminder(tx, {
+        bookingId,
+        dueAt: new Date('2026-10-19T14:00:00Z'),
+        startsAt: new Date('2026-10-20T14:00:00Z'),
+      });
+      // The reminder row has the booking's id.
+      return bookingId;
+    },
+    touch: 'due_at = due_at',
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('reminders'::text))",
+  },
 };
 
 /** A new client of the transaction's tenant. */
@@ -505,6 +526,18 @@ describe('catalog', () => {
                 cmd: 'SELECT',
                 roles: ['public'],
                 qual: spec.inviteLookup,
+                with_check: null,
+              },
+            ]),
+        ...(spec.jobScan === undefined
+          ? []
+          : [
+              {
+                policyname: 'job_scan',
+                permissive: 'PERMISSIVE',
+                cmd: 'SELECT',
+                roles: ['public'],
+                qual: spec.jobScan,
                 with_check: null,
               },
             ]),
@@ -1054,6 +1087,80 @@ describe('outbox scan (listDueOutboxMessages: the relay finds work across busine
     await scanning('SELECT 1');
     const { rows: after } = await db.transaction((tx) =>
       tx.execute(sql`SELECT * FROM outbox_dispatch`),
+    );
+    expect(after).toEqual([]);
+  });
+});
+
+describe.each([
+  ['reminders', 'booking_reminders'],
+  ['cleanup', 'tenants'],
+] as const)('job scan %s (withJobScan: the job finds work across businesses)', (job, table) => {
+  /** Runs `statement` in a transaction with `app.job_scan` set to `name` (and a tenant). */
+  async function scanning(statement: string, options: { name?: string; tenant?: TenantId } = {}) {
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.job_scan', ${options.name ?? job}, true)`);
+      if (options.tenant !== undefined) {
+        await tx.execute(sql`SELECT set_config('app.tenant_id', ${options.tenant}, true)`);
+      }
+      return tx.execute(sql.raw(statement));
+    });
+  }
+  const seeded = () => {
+    const ids = rows[table];
+    if (ids === undefined) throw new Error(`no seed rows for ${table}`);
+    return [ids.a, ids.b];
+  };
+
+  it("lists both businesses' rows", async () => {
+    const found =
+      job === 'reminders'
+        ? (await listDueBookingReminders(db, new Date('2026-10-19T15:00:00Z'), 1000)).map(
+            (due) => due.bookingId,
+          )
+        : await listTenantIdsForCleanup(db, null, 1000);
+    expect(found).toEqual(expect.arrayContaining(seeded()));
+  });
+
+  it(`reaches only ${table}, read-only`, async () => {
+    for (const other of [
+      'booking_reminders',
+      'tenants',
+      'bookings',
+      'clients',
+      'outbox_dispatch',
+    ]) {
+      if (other === table) continue;
+      const { rows: seen } = await scanning(`SELECT * FROM ${other}`);
+      expect(seen, other).toEqual([]);
+    }
+    const touch = TENANT_TABLES[table]?.touch ?? '';
+    const updated = await scanning(`UPDATE ${table} SET ${touch}`);
+    const deleted = await scanning(`DELETE FROM ${table}`);
+    expect([updated.rowCount, deleted.rowCount]).toEqual([0, 0]);
+  });
+
+  it('needs its own job name', async () => {
+    const otherJob = job === 'reminders' ? 'cleanup' : 'reminders';
+    for (const name of [otherJob, '', 'REMINDERS']) {
+      const { rows: seen } = await scanning(`SELECT * FROM ${table}`, { name });
+      expect(seen, name).toEqual([]);
+    }
+  });
+
+  it('does not widen a tenant transaction', async () => {
+    const column = TENANT_TABLES[table]?.tenantColumn ?? 'tenant_id';
+    const { rows: seen } = await scanning(`SELECT ${column}::text AS owner FROM ${table}`, {
+      tenant: tenantA,
+    });
+    expect(seen.length).toBeGreaterThan(0);
+    expect(seen.every((row) => row['owner'] === tenantA)).toBe(true);
+  });
+
+  it('ends with the transaction', async () => {
+    await scanning('SELECT 1');
+    const { rows: after } = await db.transaction((tx) =>
+      tx.execute(sql.raw(`SELECT * FROM ${table}`)),
     );
     expect(after).toEqual([]);
   });
