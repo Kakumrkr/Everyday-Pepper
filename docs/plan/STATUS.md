@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.13 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14–S16 merged. **S17 (Phase 4d: public booking page with email verification) done**, [ADR-0022](../adr/0022-public-booking-page.md) **accepted** by the user, PR opened and merged into `main` at the user's request → next: **S18** (Phase 4 exit)
+**Last updated:** 2026-10-20 · **Plan version:** 0.14 · **Current phase:** 4 — PWA + booking page, **complete** (S14–S18). **S18 (Phase 4e: Phase 4 exit) done**: AC-W8-1 in Playwright, installable app with an offline page, axe gate, Phase 4 security review (no high findings; two medium fixed). [ADR-0023](../adr/0023-pwa-offline-and-phase-4-exit.md) accepted; PR merged into `main` at the user's request → next: **Phase 5 planning** (S19, messaging + jobs)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -390,6 +390,32 @@
     - Confirmation emails for team-made bookings (Phase 5).
     - The concurrent last slot in Playwright (S18).
 
+- **S18 Phase 4e (2026-10-20): Phase 4 exit** ([ADR-0023](../adr/0023-pwa-offline-and-phase-4-exit.md), accepted). At the Session Brief the user chose all three of Claude's recommendations and asked Claude to finish, open the PR and merge it.
+  - **AC-W8-1 in Playwright** (`e2e/tests/public-booking.spec.ts`): Jess works one hour a day, two clients on separate browsers confirm the same last time at once; exactly one is booked, the other gets the nearest times and books one with the same code; two bookings at different times.
+  - **PWA:**
+    - `public/manifest.webmanifest` with 192/512/maskable/apple-touch icons rendered once from `app/icon.svg`.
+    - A hand-written `public/sw.js` that caches only the self-contained `public/offline.html` and answers failed page loads with it. Pages and api answers are never cached.
+    - Linked and registered from the `(app)` layout only (not on `/book`, not in dev). `lib/pwa.ts` holds the registration.
+    - The Dockerfile copies `apps/web/public`.
+  - **Security review** of S14–S17 in `docs/engineering/security-review-s18.md`. No high findings.
+    - M1 fixed: clickjacking; security headers are in `lib/security-headers.ts` and `next.config.ts`.
+    - M2 fixed: forwarded api answers now get `private, no-store`.
+    - L1–L8 logged for Phase 5/11: XFF trust, rate-limit key length, the manage token kept in history, script CSP, staff lookup throttling, caller text in code emails, expired request cleanup, dev-only `braces`/`esbuild` advisories with no patch.
+  - **Accessibility:** `e2e/tests/accessibility.spec.ts` (`@axe-core/playwright` 4.13.0, the one new dependency, e2e only) on 16 screens and steps, light and dark, phone and desktop. 0 violations of any impact. A planted image without alt, a nameless button and low contrast were caught, proving the check. The check waits for color transitions after the scheme switch (a mid-fade sample failed once).
+  - **Docs:** ADR-0023, security-and-tenancy (headers), testing-strategy (axe row), dev-setup (PWA, Docker Hub mirror), traceability (AC-W8-1 Playwright, PWA, accessibility, security review), dependency map, CHANGELOG 0.14.
+  - **Checks run:**
+    - `pnpm check` green. Web unit tests 221 (+14: `pwa.test.ts` 13, forward 1); all coverage gates pass (web 100% lines).
+    - `pnpm test:integration` green, 555: db 330, appointments 102, core 60, api 60, runtime 2, testing 1.
+    - Playwright: **52/52 green** (phone and desktop) against api, worker and `next start` on Compose Postgres, Redis and Mailpit (project `pepper-s18`), `--workers=2`, `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium`. The new specs were also repeated 4× (AC-W8-1 8/8, PWA 8/8, axe 16/16).
+    - `pnpm audit --prod`: no known vulnerabilities.
+    - Phase 4 exit criteria proven: setup (`setup.spec.ts`), manual booking (`booking.spec.ts`), public booking (`public-booking.spec.ts`), concurrent last slot (AC-W8-1, above).
+  - **Not done / for later:**
+    - Docker image builds and the Compose E2E job were not run here; CI runs them, including the new `public/` copy.
+    - The first baseline run had one sign-up redirect timeout on a cold server (the known password-hashing slowness; it passed on every later run).
+    - Docker Hub answered 429 at the start; images came from `mirror.gcr.io` (same digests).
+    - Push notifications (Phase 5).
+    - The low findings above.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -504,13 +530,14 @@
 - **End of S16 (user, 2026-10-19):** "ADR-0021 approve. open PR and merge to main." ADR-0021 accepted as proposed (visits via the `clientId` filter, client editing with field-name-only audit, rule defaults from the api, business-wide rules only on the rules screen, nav order). S17 starts in a new session; its brief must settle the email sender (dev Mailpit sender now vs. the Phase 5 outbox).
 - **S17 (2026-10-20): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0022): (a) **email sender: a dev SMTP sender now** (nodemailer → Mailpit; any SMTP in production) called directly by the api behind a `Mailer` port, with the outbox in Phase 5; (b) `/book/<slug>` URLs, link `/book/<slug>/manage#<token>`; (c) `tenants.brand_color` column, slate default; (d) the time is not held while the client verifies, and the same code may confirm an alternative; (e) audit actor `system`, booking source `booking_page`.
 - **End of S17 (user, 2026-10-20):** "ADR-0022 approve. open PR and merge to main." ADR-0022 accepted as proposed (dev SMTP sender until the Phase 5 outbox, `/book/<slug>` URLs, `tenants.brand_color` with a slate default, no hold during verification and the same code may confirm an alternative, audit actor `system`). S18 starts in a new session.
+- **S18 (user, 2026-10-20):** asked for the Session Brief with any decisions, then to complete the session, approve, open the PR and merge it into `main`, and from then on to go with Claude's recommendations. Decisions at the brief: (a) **a hand-written service worker** (no Serwist), caching only an offline page; (b) **`@axe-core/playwright`, failing on serious and critical**; (c) **fix high and medium security findings, log low ones**. ADR-0023 recorded these as accepted. For the rest of this session Claude chose on its recommendations: the worker only on the signed-in app; headers in `next.config.ts`; `no-store` in the forwarder.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
 1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S14–S18 (Claude's proposal at S14, with the go-ahead to continue; change it at any Session Brief).
+Phases 2, 3 and 4 are done and merged. Phase 4 was split into S14–S18. Phase 5 (messaging + jobs) is Claude's proposal for S19–S21 below; confirm or change it at the S19 Session Brief.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
@@ -518,7 +545,8 @@ Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S
 | S15 | ~~**Booking screens:** create a booking from the calendar (service, staff member, free times from `/v1/availability`, client picker; staff find clients by exact email or phone), the booking sheet (details, move, status, cancel) with Radix dialogs, the 409 alternatives, the waitlist entry; booking outcomes rule (b) unless the user says otherwise; staff journey in Playwright~~ **done** | 4b | — |
 | S16 | ~~**Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system~~ **done** (ADR-0021 accepted) | 4c | — |
 | S17 | ~~**Public booking page with email verification**~~ **done** (ADR-0022 accepted) | 4d | — |
-| S18 | **Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17 | 4e | Phase 4 exit criteria green; no open high-severity findings |
+| S18 | ~~**Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17~~ **done** (ADR-0023 accepted; Phase 4 complete) | 4e | — |
+| S19 | **Phase 5 planning + outbox:** split Phase 5 into sessions (proposal: S19 transactional outbox + BullMQ handlers with idempotency keys, booking page emails moved onto it (AC-W4-2 "no duplicate sends on retry"); S20 confirmations and reminders with timing (AC-W6-1) and expired-request cleanup (S18 L7); S21 tasks + push notifications), and decide D4 email provider for later (Resend vs SES) | 5a | Outbox delivers each email exactly once under retries (integration test); plan for S20–S21 confirmed |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.
