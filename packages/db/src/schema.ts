@@ -110,12 +110,21 @@ export const tenants = pgTable(
     // The industry template it started from (ADR-0018); NULL: none, platform defaults only.
     // Validated against the known templates by the contracts; the check keeps the shape.
     templateId: text('template_id').$type<TemplateId>(),
+    // The booking page's color (PCR-001); NULL: Pepper's neutral default.
+    brandColor: text('brand_color'),
     ...timestamps,
   },
   (table) => [
     check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
+    check('tenants_brand_color_format', sql`${table.brandColor} ~ '^#[0-9a-f]{6}$'`),
     tenantIsolation(sql.raw('id')),
     memberRead(sql`id IN (SELECT tenant_id FROM memberships WHERE user_id = ${currentUserId})`),
+    // The public booking page finds its business by the slug in its URL (ADR-0022), before any
+    // tenant is known: read-only, one row, and only while no tenant is set.
+    pgPolicy('public_lookup', {
+      for: 'select',
+      using: sql`${currentTenantId} IS NULL AND slug = current_public_slug()`,
+    }),
   ],
 );
 
@@ -655,6 +664,8 @@ export const bookings = pgTable(
     source: text('source').notNull(),
     overridden: boolean('overridden').notNull().default(false),
     idempotencyKey: text('idempotency_key'),
+    // SHA-256 of the client's reschedule/cancel link token (ADR-0022); booking page only.
+    manageTokenHash: text('manage_token_hash'),
     // Who made it; NULL for the booking page and once their account is deleted.
     createdByUserId: uuid('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
@@ -694,6 +705,8 @@ export const bookings = pgTable(
       'bookings_idempotency_key_format',
       sql`${table.idempotencyKey} ~ '^[A-Za-z0-9_-]{8,100}$'`,
     ),
+    uniqueIndex('bookings_manage_token_hash_unique').on(table.manageTokenHash),
+    check('bookings_manage_token_hash_format', sql`${table.manageTokenHash} ~ '^[0-9a-f]{64}$'`),
     foreignKey({
       name: 'bookings_client_fk',
       columns: [table.tenantId, table.clientId],
@@ -853,6 +866,72 @@ export const waitlistEntries = pgTable(
   ],
 );
 
+/**
+ * A booking the public booking page was asked for, waiting for the client to type the code
+ * emailed to them (ADR-0022, AC-W8-2). Nothing is booked before that: the time is checked
+ * again when the code is confirmed. Only the code's keyed hash is stored; attempts are capped.
+ * No member reads these (only work without a user, i.e. the booking page itself).
+ */
+export const bookingVerifications = pgTable(
+  'booking_verifications',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    serviceId: uuid('service_id').notNull(),
+    // NULL: anyone who offers the service.
+    staffMemberId: uuid('staff_member_id'),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    name: text('name').notNull(),
+    email: text('email').notNull(),
+    phone: text('phone'),
+    codeHash: text('code_hash').notNull(),
+    attempts: smallint('attempts').notNull().default(0),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    bookingId: uuid('booking_id'),
+    ...timestamps,
+  },
+  (table) => [
+    index('booking_verifications_email_idx').on(table.tenantId, table.email, table.expiresAt),
+    index('booking_verifications_service_idx').on(table.tenantId, table.serviceId),
+    index('booking_verifications_staff_member_idx').on(table.tenantId, table.staffMemberId),
+    index('booking_verifications_booking_idx').on(table.tenantId, table.bookingId),
+    check('booking_verifications_name_length', sql`length(${table.name}) BETWEEN 1 AND 120`),
+    check(
+      'booking_verifications_email_format',
+      sql`${table.email} = lower(${table.email}) AND length(${table.email}) BETWEEN 3 AND 254 AND ${table.email} LIKE '%_@_%'`,
+    ),
+    check('booking_verifications_phone_format', sql`${table.phone} ~ '^[+][1-9][0-9]{6,14}$'`),
+    check('booking_verifications_code_hash_format', sql`${table.codeHash} ~ '^[0-9a-f]{64}$'`),
+    check('booking_verifications_attempts_range', sql`${table.attempts} BETWEEN 0 AND 100`),
+    foreignKey({
+      name: 'booking_verifications_service_fk',
+      columns: [table.tenantId, table.serviceId],
+      foreignColumns: [services.tenantId, services.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'booking_verifications_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'booking_verifications_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }),
+    tenantIsolation(sql.raw('tenant_id')),
+    // Members never reach them; only work without a user (the booking page) does.
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`current_user_id() IS NULL`,
+      withCheck: sql`current_user_id() IS NULL`,
+    }),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
@@ -867,3 +946,4 @@ export type ClientRow = typeof clients.$inferSelect;
 export type BookingRow = typeof bookings.$inferSelect;
 export type BookingOccupancyRow = typeof bookingOccupancy.$inferSelect;
 export type WaitlistEntryRow = typeof waitlistEntries.$inferSelect;
+export type BookingVerificationRow = typeof bookingVerifications.$inferSelect;

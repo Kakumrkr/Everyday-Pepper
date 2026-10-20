@@ -72,6 +72,7 @@ describe('loadCurrentBusiness', () => {
       timeZone: 'America/New_York',
       locale: 'en-US',
       templateId: null,
+      brandColor: null,
     },
     role: 'owner',
     permissions: ['business.read', 'members.read'],

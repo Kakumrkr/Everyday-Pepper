@@ -228,6 +228,7 @@ const bookingRow: BookingRow = {
   source: 'team',
   overridden: false,
   idempotencyKey: 'ai-run-0001',
+  manageTokenHash: null,
   createdByUserId: USER,
   createdAt: CREATED,
   updatedAt: UPDATED,

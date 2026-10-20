@@ -33,6 +33,7 @@ const BUSINESS: Business = {
   timeZone: 'America/New_York',
   locale: 'en-US',
   templateId: 'beauty-salon',
+  brandColor: null,
 };
 
 /** Signed in as USER when the request carries `cookie: signed-in`. */

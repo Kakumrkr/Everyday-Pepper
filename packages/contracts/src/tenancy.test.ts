@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BrandColorSchema,
   LocaleSchema,
   MembershipRoleSchema,
   NewTenantSchema,
@@ -76,6 +77,16 @@ describe('LocaleSchema', () => {
 describe('MembershipRoleSchema', () => {
   it('has the three V1 roles', () => {
     expect(MembershipRoleSchema.options).toEqual(['owner', 'manager', 'staff']);
+  });
+});
+
+describe('BrandColorSchema', () => {
+  it('trims and lowercases a #rrggbb color', () => {
+    expect(BrandColorSchema.parse(' #7A3E6C ')).toBe('#7a3e6c');
+  });
+
+  it.each(['7a3e6c', '#7a3e6', '#7a3e6cff', '#zzzzzz', 'plum', ''])('rejects %j', (value) => {
+    expect(BrandColorSchema.safeParse(value).success).toBe(false);
   });
 });
 

@@ -148,6 +148,27 @@
       "when": 1792372505969,
       "tag": "0020_client_contact_lookup",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792460273345,
+      "tag": "0021_public_slug_lookup",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792460995833,
+      "tag": "0022_public_booking",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792460996744,
+      "tag": "0023_public_booking_hardening",
+      "breakpoints": true
     }
   ]
 }

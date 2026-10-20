@@ -21,7 +21,11 @@ import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';
 import { ForbiddenError, LastOwnerError, MemberNotFoundError } from './errors.js';
 import { readAuditLog } from './services/audit.js';
-import { BUSINESS_LIMIT_PER_OWNER, createBusiness } from './services/business.js';
+import {
+  BUSINESS_LIMIT_PER_OWNER,
+  createBusiness,
+  updateBookingPage,
+} from './services/business.js';
 import { changeMemberRole, listMembers, removeMember } from './services/team.js';
 import { recordUsage, usageFor } from './services/usage.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
@@ -122,6 +126,34 @@ describe('createBusiness', () => {
     await expect(
       createBusiness(db, owner, { name: 'B', slug: 'serial-x', timeZone: 'UTC' }),
     ).rejects.toBeInstanceOf(BusinessLimitReachedError);
+  });
+});
+
+describe('updateBookingPage (PCR-001, ADR-0022)', () => {
+  it('sets and clears the color, auditing only real changes', async () => {
+    const team = await newTeam();
+    const manager = as(team, team.manager, 'manager', 'req-color');
+    expect((await updateBookingPage(db, manager, { brandColor: '#7A3E6C' })).brandColor).toBe(
+      '#7a3e6c',
+    );
+    await updateBookingPage(db, manager, { brandColor: '#7a3e6c' });
+    expect((await updateBookingPage(db, manager, { brandColor: null })).brandColor).toBeNull();
+    const entries = await withTenant(db, team.tenantId, (tx) =>
+      listAuditEntries(tx, { limit: 10 }),
+    );
+    expect(
+      entries.filter((e) => e.action === 'tenant.updated').map((e) => [e.before, e.after]),
+    ).toEqual([
+      [{ brandColor: '#7a3e6c' }, { brandColor: null }],
+      [{ brandColor: null }, { brandColor: '#7a3e6c' }],
+    ]);
+  });
+
+  it('is not for staff', async () => {
+    const team = await newTeam();
+    await expect(
+      updateBookingPage(db, as(team, team.staff, 'staff'), { brandColor: '#7a3e6c' }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
   });
 });
 

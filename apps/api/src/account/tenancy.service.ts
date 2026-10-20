@@ -64,7 +64,8 @@ function toBusiness(tenant: {
   timeZone: string;
   locale: string;
   templateId: string | null;
+  brandColor: string | null;
 }): Business {
-  const { id, name, slug, timeZone, locale, templateId } = tenant;
-  return BusinessSchema.parse({ id, name, slug, timeZone, locale, templateId });
+  const { id, name, slug, timeZone, locale, templateId, brandColor } = tenant;
+  return BusinessSchema.parse({ id, name, slug, timeZone, locale, templateId, brandColor });
 }

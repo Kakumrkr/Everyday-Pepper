@@ -6,6 +6,7 @@ export * from './clients.js';
 export * from './health.js';
 export * from './invites.js';
 export * from './permissions.js';
+export * from './public-booking.js';
 export * from './rules.js';
 export * from './templates.js';
 export * from './time.js';
