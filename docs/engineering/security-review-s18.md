@@ -17,7 +17,7 @@ No high-severity findings. Two medium findings were fixed in S18. Seven low find
 | L4 | Low | **No script-restricting CSP.** XSS defences are React's escaping and no `dangerouslySetInnerHTML` (none found); a `script-src` CSP needs nonces with Next.js. | Phase 11 with HSTS (security-and-tenancy.md). |
 | L5 | Low | **Staff client lookup is not throttled.** A signed-in staff member can try many exact emails or phones (ADR-0020 §Consequences). | Phase 11 hardening. |
 | L6 | Low | **Code emails carry caller-typed text.** The name typed on the booking page appears in the code email to any address, a small spam or phishing channel, bounded by 5 per email address per business per hour and 100 per business per hour. | Phase 11: Turnstile; consider leaving the name out of the code email. |
-| L7 | Low | **Expired booking requests are kept.** `booking_verifications` rows (name, email, phone, code hash) are never deleted. | Planned: the Phase 5 cleanup job (STATUS S17 "for later"). |
+| L7 | Low | **Expired booking requests are kept.** `booking_verifications` rows (name, email, phone, code hash) are never deleted. | **Fixed in S20** ([ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md)): the worker's daily clean-up deletes requests 24 h after they expire. |
 | L8 | Low | **`pnpm audit`:** `braces` ≤ 3.0.3 (GHSA-vfj7-8cjw-p6xm, rated high, **no patched version exists**) only in the lint toolchain (`@next/eslint-plugin-next` → `fast-glob`); `esbuild` ≤ 0.24.2 (moderate) only in `drizzle-kit`'s loader. Neither is in a running service (`pnpm audit --prod`: no known vulnerabilities); braces needs attacker-chosen glob patterns, and only our own config supplies them. | Low in context. Re-check when a patch ships. |
 
 ## Checked and fine

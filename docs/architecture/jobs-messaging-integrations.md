@@ -6,7 +6,8 @@
 | Queue | Purpose | Trigger |
 |---|---|---|
 | `outbox` | Deliver `OutboxMessage` rows (S19: email) | The relay polls `outbox_dispatch` every second and queues one job per due message, job id = message id (ADR-0024) |
-| `reminders` | Booking confirmations/reminders | Scheduled per booking (delayed jobs), reconciled nightly |
+| Reminder job (S20, no queue) | Booking reminders 24 h before (AC-W6-1) | Every `REMINDER_POLL_MS` (60 s) the worker queues the due rows of `booking_reminders` into the outbox; the schedule is kept in step in each booking's own transaction (ADR-0025) |
+| Clean-up job (S20, no queue) | Delete expired booking requests (24 h) and sent/dead outbox rows (30 days) | At worker start-up and every `CLEANUP_INTERVAL_MS` (one day) |
 | `daily-briefing` | Build operator feed per tenant at local morning | Repeatable job per tenant time zone |
 | `insights` | Compute open slots, overdue regulars, no-show patterns | Hourly + on events |
 | `waitlist` | Match and offer on cancellation | `booking.cancelled` event |
@@ -14,6 +15,8 @@
 | `imports` | CSV import, onboarding extraction | User action |
 
 **Built (S19, [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md)):** `queueEmail` in the business change's transaction; `deliverOutboxMessage` claims a message under a 5-minute lease, sends it with a stable `Message-ID`, marks it sent and meters `emails_sent`; retries live in Postgres (30 s doubling to 1 h, 8 attempts), a 5xx answer gives up at once, a message given up raises an alert. The booking page's code email stays direct (the client is waiting); its other emails use the outbox.
+
+**Built (S20, [ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md)):** team-made bookings email the client (confirmed with a new reschedule/cancel link, moved with a new link, cancelled) through the same `notify` path as the booking page, unless the team unticks "Email the client" (`notifyClient`). Reminders are rows in `booking_reminders` (no content), planned, moved or removed in the booking's own transaction; the worker's reminder job locks the booking, takes the row and queues the email in one transaction, so a cancelled booking never gets one and concurrent workers queue one. The daily clean-up deletes what is past its retention. Both jobs find work across businesses through the read-only `job_scan` policy and are driven by Postgres, not Redis (the delayed jobs and nightly reconciliation first sketched here are not needed).
 
 **Guarantees:** the DB is the source of truth; jobs carry IDs, not data. Transactional outbox (write + outbox row in one transaction) avoids lost/phantom side effects. Handlers are idempotent (dedupe keys). Exponential backoff, max attempts, dead-letter queue with alert. Redis loss is recoverable: reconciliation jobs rebuild schedules from Postgres.
 

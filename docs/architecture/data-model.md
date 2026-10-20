@@ -25,6 +25,7 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 | MemoryFact / MemoryEpisode | episode has `embedding vector` (pgvector, HNSW index) |
 | Task | title, due_at, assignee, status, source |
 | FeedItem | kind, status (`done`/`needs_ok`/`suggestion`/`dismissed`), payload, action_proposal_id? |
+| BookingReminder | `booking_reminders` (S20, ADR-0025): one row per confirmed booking whose reminder is still to be sent: id (the booking's), tenant, due_at (24 h before the start), starts_at it was planned for; kept in step in the booking's transaction; the read-only `job_scan` policy for the reminder job. `tenants` also has a `job_scan` policy (clean-up job) |
 | OutboxMessage | `outbox_messages` (S19, ADR-0024): type, sealed payload (cleared once sent or dead), status `pending`/`sent`/`dead`, attempts, available_at, lease_until, last_error (a name only), sent_at, dedupe_key unique per tenant; `outbox_dispatch`: the relay's index of pending messages (id, tenant, due time; the read-only `outbox_scan` policy) |
 | Notification / MessageDelivery | channel, recipient, template, status, provider_id |
 | AuditLog (`audit_log`, S8) | actor_kind (`user`/`system`), actor_user_id (→ users, nulled on user deletion), action, entity_type, entity_id, before/after (jsonb, per-action allowlist in contracts: no personal data), request_id, created_at — append-only (the services' role has INSERT/SELECT only) |
