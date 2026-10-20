@@ -26,7 +26,7 @@ async function fakePush(context: BrowserContext): Promise<void> {
       return Promise.resolve(endpoint === null ? null : make(endpoint)) as never;
     };
     PushManager.prototype.subscribe = function () {
-      const endpoint = stored() ?? `https://push.example.test/e2e/${crypto.randomUUID()}`;
+      const endpoint = stored() ?? `https://fcm.googleapis.com/fcm/send/e2e-${crypto.randomUUID()}`;
       localStorage.setItem(KEY, endpoint);
       return Promise.resolve(make(endpoint)) as never;
     };
@@ -80,7 +80,7 @@ test('a browser where notifications are blocked says how to allow them', async (
   await expect(card(page).getByRole('button')).toHaveCount(0);
 });
 
-test('the api refuses a device on an http endpoint, or saved for another site', async ({
+test('the api refuses a device off the push services, or saved from another site', async ({
   page,
 }) => {
   await onboardOwner(page);
@@ -89,7 +89,13 @@ test('the api refuses a device on an http endpoint, or saved for another site', 
   const save = (body: object, from = origin) =>
     page.request.put('/v1/push/subscription', { data: body, headers: { origin: from } });
   expect((await save({ endpoint: 'http://push.example.test/x', keys })).status()).toBe(400);
+  // A member cannot make the worker call anything but a push service.
+  expect((await save({ endpoint: 'https://internal.example.test/admin', keys })).status()).toBe(
+    400,
+  );
   expect(
-    (await save({ endpoint: 'https://push.example.test/x', keys }, 'https://evil.test')).status(),
+    (
+      await save({ endpoint: 'https://fcm.googleapis.com/fcm/send/x', keys }, 'https://evil.test')
+    ).status(),
   ).toBe(403);
 });

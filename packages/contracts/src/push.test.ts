@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { OutboxPushSchema } from './outbox.js';
-import { PushEndpointSchema, PushKeyResponseSchema, PushSubscriptionInputSchema } from './push.js';
+import {
+  isPushServiceEndpoint,
+  PushEndpointSchema,
+  PushKeyResponseSchema,
+  PushSubscriptionInputSchema,
+} from './push.js';
 
 const keys = { p256dh: 'B'.repeat(87), auth: 'a'.repeat(22) };
 const ENDPOINT = 'https://fcm.googleapis.com/fcm/send/abc';
@@ -14,7 +19,8 @@ describe('PushSubscriptionInputSchema (ADR-0026)', () => {
 
   it.each([
     { endpoint: 'http://push.example.test/x', keys },
-    { endpoint: `https://push.example.test/${'x'.repeat(1000)}`, keys },
+    { endpoint: `https://fcm.googleapis.com/${'x'.repeat(1000)}`, keys },
+    { endpoint: 'https://internal.example.test/admin', keys },
     { endpoint: ENDPOINT, keys: { p256dh: 'short', auth: keys.auth } },
     { endpoint: ENDPOINT, keys: { ...keys, auth: 'not base64url!' } },
     { endpoint: ENDPOINT, keys: { ...keys, extra: 'x' } },
@@ -26,6 +32,29 @@ describe('PushSubscriptionInputSchema (ADR-0026)', () => {
     expect(PushEndpointSchema.safeParse({ endpoint: ENDPOINT }).success).toBe(true);
     expect(PushEndpointSchema.safeParse({ endpoint: 'ftp://x' }).success).toBe(false);
     expect(PushKeyResponseSchema.parse({ publicKey: null })).toEqual({ publicKey: null });
+  });
+});
+
+describe('isPushServiceEndpoint (S21 security review)', () => {
+  it.each([
+    'https://fcm.googleapis.com/fcm/send/abc',
+    'https://updates.push.services.mozilla.com/wpush/v2/abc',
+    'https://web.push.apple.com/abc',
+    'https://wns2-par02p.notify.windows.com/w/?token=abc',
+  ])('accepts %s', (endpoint) => {
+    expect(isPushServiceEndpoint(endpoint)).toBe(true);
+  });
+
+  it.each([
+    'https://internal.example.test/x',
+    'https://fcm.googleapis.com.evil.test/x',
+    'https://evilnotify.windows.com/x',
+    'https://fcm.googleapis.com:444/x',
+    'https://user:pw@fcm.googleapis.com/x',
+    'http://fcm.googleapis.com/x',
+    'not a url',
+  ])('refuses %s', (endpoint) => {
+    expect(isPushServiceEndpoint(endpoint)).toBe(false);
   });
 });
 

@@ -78,7 +78,7 @@ class FakePusher implements Pusher {
 const as = (userId: UserId, role: MembershipRole): Actor => ({
   context: { tenantId: tenant, userId, role },
 });
-const device = () => `https://push.example.test/${newId()}`;
+const device = () => `https://fcm.googleapis.com/fcm/send/${newId()}`;
 
 /** Queues `notice` to these members' devices under a fresh dedupe key. */
 function queueTo(userIds: UserId[], dedupeKey = `test.push:${newId()}`) {
@@ -151,7 +151,18 @@ describe('devices', () => {
     await removePushDevice(db, as(jess, 'staff'), { endpoint: phone });
   });
 
-  it('refuses an http endpoint, and a caller without a role', async () => {
+  it('a shared device moves to whoever turned it on last', async () => {
+    const tablet = device();
+    await savePushDevice(db, as(ana, 'owner'), { endpoint: tablet, keys });
+    await savePushDevice(db, as(jess, 'staff'), { endpoint: tablet, keys });
+    expect(await pushDeviceStatus(db, as(jess, 'staff'), { endpoint: tablet })).toBe(true);
+    expect(await pushDeviceStatus(db, as(ana, 'owner'), { endpoint: tablet })).toBe(false);
+  });
+
+  it('refuses an endpoint off the push services, and a caller without a role', async () => {
+    await expect(
+      savePushDevice(db, as(jess, 'staff'), { endpoint: 'https://internal.example.test/x', keys }),
+    ).rejects.toThrow();
     await expect(
       savePushDevice(db, as(jess, 'staff'), { endpoint: 'http://push.example.test/x', keys }),
     ).rejects.toThrow();

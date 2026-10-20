@@ -1,3 +1,4 @@
+import { isPushServiceEndpoint } from '@pepper/contracts';
 import { PushRejectedError, type PushMessage, type Pusher } from '@pepper/core';
 import type { PushConfig } from '@pepper/runtime';
 import webpush from 'web-push';
@@ -19,6 +20,8 @@ export class WebPusher implements Pusher {
   ) {}
 
   async send(message: PushMessage): Promise<void> {
+    // Checked when the device was saved; checked again, as nothing else may be called.
+    if (!isPushServiceEndpoint(message.endpoint)) throw new PushEndpointNotAllowedError();
     const details = webpush.generateRequestDetails(
       { endpoint: message.endpoint, keys: message.keys },
       message.payload,
@@ -44,5 +47,17 @@ export class WebPusher implements Pusher {
     // Drain the body so the connection can be reused; push services answer briefly.
     await response.arrayBuffer().catch(() => undefined);
     if (!response.ok) throw new PushRejectedError(response.status);
+  }
+}
+
+/**
+ * A device endpoint that is not a known push service: never called. A refusal for good
+ * (like a push service's 400), so the outbox gives up on it and alerts.
+ */
+export class PushEndpointNotAllowedError extends PushRejectedError {
+  constructor() {
+    super(400);
+    this.name = 'PushEndpointNotAllowedError';
+    this.message = 'The device endpoint is not a known push service';
   }
 }

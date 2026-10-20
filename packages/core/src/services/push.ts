@@ -16,6 +16,7 @@ import {
   listPushSubscriptionsOf,
   savePushSubscription,
   withMember,
+  withTenant,
   type Database,
   type TenantTx,
 } from '@pepper/db';
@@ -27,7 +28,11 @@ import { queuePush } from './outbox.js';
 // notify the team call `queuePushToMembers` inside their transaction, so a push is sent if and
 // only if the change commits, through the outbox like an email.
 
-/** Turns this device's notifications on for the member in the active business. */
+/**
+ * Turns this device's notifications on for the member in the active business. A device another
+ * member turned on before (a shared front-desk tablet) moves to this member: the member cannot
+ * see that row, so the save runs as work without a user, always for the authenticated member.
+ */
 export async function savePushDevice(
   db: Database,
   actor: Actor,
@@ -35,7 +40,7 @@ export async function savePushDevice(
 ): Promise<void> {
   requirePermission(actor, 'business.read');
   const { endpoint, keys } = PushSubscriptionInputSchema.parse(input);
-  await withMember(db, actor.context, (tx) =>
+  await withTenant(db, actor.context.tenantId, (tx) =>
     savePushSubscription(tx, { userId: actor.context.userId, endpoint, ...keys }),
   );
 }

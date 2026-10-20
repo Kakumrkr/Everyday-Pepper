@@ -269,4 +269,46 @@ describe('push subscriptions', () => {
     expect(await withTenant(db, tenant, (tx) => listPushSubscriptionsOf(tx, [ana]))).toEqual([]);
     expect(saved.userId).toBe(leaving);
   });
+
+  it('keeps each member’s newest 10 devices, so nobody crowds out the others', async () => {
+    const many = await insertUser(db, 'Many devices');
+    await withTenant(db, tenant, (tx) => addMembership(tx, { userId: many, role: 'staff' }));
+    const endpoints = Array.from({ length: 12 }, () => endpoint());
+    for (const device of endpoints) {
+      await as(many, (tx) => savePushSubscription(tx, { userId: many, endpoint: device, ...keys }));
+    }
+    const kept = await withTenant(db, tenant, (tx) => listPushSubscriptionsOf(tx, [many, ana]));
+    const mine = kept.filter((row) => row.userId === many).map((row) => row.endpoint);
+    expect(mine.sort()).toEqual(endpoints.slice(2).sort());
+    // Saving an older device again makes it the newest.
+    await as(many, (tx) =>
+      savePushSubscription(tx, { userId: many, endpoint: endpoints[2] ?? '', ...keys }),
+    );
+    await as(many, (tx) =>
+      savePushSubscription(tx, { userId: many, endpoint: endpoint(), ...keys }),
+    );
+    const after = (await withTenant(db, tenant, (tx) => listPushSubscriptionsOf(tx, [many]))).map(
+      (row) => row.endpoint,
+    );
+    expect(after).toHaveLength(10);
+    expect(after).toContain(endpoints[2]);
+    expect(after).not.toContain(endpoints[3]);
+  });
+
+  it('a shared device moves to whoever turned it on last (saved without a user)', async () => {
+    const shared = endpoint();
+    await as(ana, (tx) => savePushSubscription(tx, { userId: ana, endpoint: shared, ...keys }));
+    // Jess cannot see Ana's row, so her own save fails under her member scope...
+    await expect(
+      as(jess, (tx) => savePushSubscription(tx, { userId: jess, endpoint: shared, ...keys })),
+    ).rejects.toSatisfy((error) => sqlState(error) === '42501');
+    // ...and the service saves it as work without a user, for the authenticated member.
+    await withTenant(db, tenant, (tx) =>
+      savePushSubscription(tx, { userId: jess, endpoint: shared, ...keys }),
+    );
+    expect(await as(jess, (tx) => findPushSubscriptionByEndpoint(tx, shared))).toMatchObject({
+      userId: jess,
+    });
+    expect(await as(ana, (tx) => findPushSubscriptionByEndpoint(tx, shared))).toBeUndefined();
+  });
 });

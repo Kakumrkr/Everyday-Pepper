@@ -359,7 +359,7 @@ describe('team bookings (ADR-0025)', () => {
 
 describe('team pushes (ADR-0026)', () => {
   it("tell the owner's device about a booking made on the page, never naming the client; not about the team's own", async () => {
-    const endpoint = 'https://push.example.test/owner-phone';
+    const endpoint = 'https://fcm.googleapis.com/fcm/send/owner-phone';
     await savePushDevice(
       db,
       { context: ownerContext },

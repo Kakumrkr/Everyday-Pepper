@@ -1,5 +1,5 @@
 import type { UserId } from '@pepper/contracts';
-import { asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { pushSubscriptions, type PushSubscriptionRow } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
@@ -10,6 +10,12 @@ import type { TenantTx } from '../tenant.js';
 
 const Id = z.uuid();
 
+/**
+ * Devices kept per member and business: saving an eleventh drops the one used longest ago,
+ * so nobody can crowd out others' devices or fan every push out to thousands (S21 review).
+ */
+export const MAX_DEVICES_PER_MEMBER = 10;
+
 export interface NewPushSubscription {
   userId: UserId;
   endpoint: string;
@@ -19,7 +25,8 @@ export interface NewPushSubscription {
 
 /**
  * Saves a device for the user; a device already saved for this business (same endpoint)
- * gets the new keys and owner, so a shared device notifies whoever turned it on last.
+ * gets the new keys and owner, so a shared device notifies whoever turned it on last. Keeps
+ * the user's newest `MAX_DEVICES_PER_MEMBER` devices.
  */
 export async function savePushSubscription(
   tx: TenantTx,
@@ -39,6 +46,18 @@ export async function savePushSubscription(
       set: { userId: values.userId, p256dh: values.p256dh, auth: values.auth },
     })
     .returning();
+  // Newest first by the last save (`updated_at` moves on every save, by trigger).
+  const keep = tx
+    .select({ id: pushSubscriptions.id })
+    .from(pushSubscriptions)
+    .where(eq(pushSubscriptions.userId, values.userId))
+    .orderBy(desc(pushSubscriptions.updatedAt), desc(pushSubscriptions.id))
+    .limit(MAX_DEVICES_PER_MEMBER);
+  await tx
+    .delete(pushSubscriptions)
+    .where(
+      and(eq(pushSubscriptions.userId, values.userId), notInArray(pushSubscriptions.id, keep)),
+    );
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... ON CONFLICT DO UPDATE ... RETURNING returns the row
   return row!;
 }
@@ -83,7 +102,7 @@ export async function deletePushSubscription(tx: TenantTx, id: string): Promise<
   await tx.delete(pushSubscriptions).where(eq(pushSubscriptions.id, Id.parse(id)));
 }
 
-/** The devices of these users in the transaction's tenant, oldest first (at most 100). */
+/** The devices of these users in the transaction's tenant, oldest first (each user's ≤ 10). */
 export async function listPushSubscriptionsOf(
   tx: TenantTx,
   userIds: readonly UserId[],
@@ -99,5 +118,5 @@ export async function listPushSubscriptionsOf(
       ),
     )
     .orderBy(asc(pushSubscriptions.createdAt), asc(pushSubscriptions.id))
-    .limit(100);
+    .limit(userIds.length * MAX_DEVICES_PER_MEMBER);
 }

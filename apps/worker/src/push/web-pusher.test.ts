@@ -9,7 +9,7 @@ import {
 import { PushRejectedError } from '@pepper/core';
 import { describe, expect, it, vi } from 'vitest';
 import webpush from 'web-push';
-import { WebPusher } from './web-pusher.js';
+import { PushEndpointNotAllowedError, WebPusher } from './web-pusher.js';
 
 // The device's side of Web Push (RFC 8291): its key pair and auth secret, and how it opens a
 // message, so the test proves a browser could read what we send.
@@ -22,7 +22,7 @@ const keys = {
 };
 const vapid = webpush.generateVAPIDKeys();
 const config = { ...vapid, subject: 'mailto:bookings@pepper.localhost' };
-const ENDPOINT = 'https://push.example.test/send/abc123';
+const ENDPOINT = 'https://fcm.googleapis.com/fcm/send/abc123';
 
 const hmac = (key: Buffer, data: Buffer) => createHmac('sha256', key).update(data).digest();
 
@@ -99,7 +99,7 @@ describe('WebPusher (ADR-0026)', () => {
     expect(match?.[2]).toBe(vapid.publicKey);
     const [header = '', claims = '', signature = ''] = (match?.[1] ?? '').split('.');
     expect(JSON.parse(Buffer.from(claims, 'base64url').toString())).toMatchObject({
-      aud: 'https://push.example.test',
+      aud: 'https://fcm.googleapis.com',
       sub: 'mailto:bookings@pepper.localhost',
     });
     const point = Buffer.from(vapid.publicKey, 'base64url');
@@ -132,5 +132,21 @@ describe('WebPusher (ADR-0026)', () => {
         new PushRejectedError(status),
       );
     }
+  });
+
+  it('never calls an endpoint that is not a known push service (refused for good)', async () => {
+    const { fetch, calls } = capture();
+    for (const endpoint of [
+      'https://internal.example.test/admin',
+      'https://fcm.googleapis.com:8443/x',
+      'http://fcm.googleapis.com/x',
+    ]) {
+      const error = await new WebPusher(config, fetch)
+        .send({ ...message, endpoint })
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(PushEndpointNotAllowedError);
+      expect(error).toMatchObject({ statusCode: 400, name: 'PushEndpointNotAllowedError' });
+    }
+    expect(calls).toEqual([]);
   });
 });

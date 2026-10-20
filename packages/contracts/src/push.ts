@@ -5,6 +5,30 @@ import { z } from 'zod';
 // subscription for the active business. The worker sends each push encrypted to the device's
 // keys and signed with the private VAPID key.
 
+/**
+ * The browsers' push services (Chrome and Android, Firefox, Safari, Edge): a device endpoint
+ * must be on one of them, so a member cannot make the worker send requests anywhere else
+ * (S21 security review: the worker POSTs to the endpoint a member saved).
+ */
+export const PUSH_SERVICE_HOSTS: readonly string[] = [
+  'fcm.googleapis.com',
+  'updates.push.services.mozilla.com',
+  'web.push.apple.com',
+  '.notify.windows.com',
+];
+
+/** Whether `endpoint` is an https URL on a known push service (no port, no credentials). */
+export function isPushServiceEndpoint(endpoint: string): boolean {
+  if (!URL.canParse(endpoint)) return false;
+  const url = new URL(endpoint);
+  if (url.protocol !== 'https:' || url.port !== '' || url.username !== '' || url.password !== '') {
+    return false;
+  }
+  return PUSH_SERVICE_HOSTS.some((host) =>
+    host.startsWith('.') ? url.hostname.endsWith(host) : url.hostname === host,
+  );
+}
+
 /** A base64url string, as the browser's `PushSubscription.toJSON()` gives the keys. */
 const Base64UrlSchema = z.string().regex(/^[A-Za-z0-9_-]+$/, 'Expected base64url');
 
@@ -13,7 +37,10 @@ const Base64UrlSchema = z.string().regex(/^[A-Za-z0-9_-]+$/, 'Expected base64url
  * expiration time it may carry is ignored.
  */
 export const PushSubscriptionInputSchema = z.object({
-  endpoint: z.url({ protocol: /^https$/ }).max(1000),
+  endpoint: z
+    .url({ protocol: /^https$/ })
+    .max(1000)
+    .refine(isPushServiceEndpoint, 'Not a known push service'),
   expirationTime: z.number().nullable().optional(),
   keys: z
     .object({
