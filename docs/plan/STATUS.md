@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.15 · **Current phase:** 5 — Messaging + jobs (S19–S21). **S19 (Phase 5a: transactional outbox) done**: booking page emails go through the outbox and the worker sends each exactly once under retries (AC-W4-2 proven end to end). [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md) proposed, for the user to accept in review; D4 resolved (Resend for the pilot) → next: **S20** (confirmations for team-made bookings, reminders with timing AC-W6-1, expired-request cleanup)
+**Last updated:** 2026-10-20 · **Plan version:** 0.15 · **Current phase:** 5 — Messaging + jobs (S19–S21). **S19 (Phase 5a: transactional outbox) done**: booking page emails go through the outbox and the worker sends each exactly once under retries (AC-W4-2 proven end to end). [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md) accepted; D4 resolved (Resend for the pilot); PR merged into `main` at the user's request → next: **S20** (confirmations for team-made bookings, reminders with timing AC-W6-1, expired-request cleanup)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -416,7 +416,7 @@
     - Push notifications (Phase 5).
     - The low findings above.
 
-- **S19 Phase 5a (2026-10-20): transactional outbox and email delivery** ([ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md), proposed). At the Session Brief the user chose all five of Claude's recommendations ("sounds good, go with your recommendation and start").
+- **S19 Phase 5a (2026-10-20): transactional outbox and email delivery** ([ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md), accepted). At the Session Brief the user chose all five of Claude's recommendations ("sounds good, go with your recommendation and start").
   - **Database** (migrations 0024–0026):
     - `outbox_messages` (tenant RLS): sealed content, status `pending`/`sent`/`dead`, attempts, lease, last error name, a dedupe key unique per business.
     - `outbox_dispatch`: the relay's index of pending messages (ids and due times only), tenant RLS plus a read-only `outbox_scan` policy behind the transaction-local `app.outbox_scan` setting (`current_outbox_scan()`).
@@ -574,12 +574,12 @@
   - (4) D4: **Resend for the pilot**.
   - (5) Phase 5 split: S19 outbox, S20 confirmations + reminders + expired-request cleanup, S21 tasks + push.
   - Also asked: explain the feature in plain business terms before coding. That was done: "a note to send the email is saved together with the booking; the worker sends it, retries if needed, never twice".
-- **S19 defaults (Claude, in ADR-0024, for the user to confirm in review):** the index table under RLS too, with a transaction-local `app.outbox_scan` setting instead of being global (the isolation suite requires RLS on every `tenant_id` table); `OUTBOX_SECRET` as a new secret rather than one derived from `AUTH_SECRET` (the worker does not need the auth secret); retries in Postgres rather than BullMQ; polling only (no notify after commit); 8 attempts, 30 s doubling to 1 h; 5xx gives up at once; a 5-minute lease; dedupe key `booking.<kind>:<booking id>:<updated_at ms>`.
+- **S19 defaults (Claude, in ADR-0024; accepted by the user with "All good", 2026-10-20):** the index table under RLS too, with a transaction-local `app.outbox_scan` setting instead of being global (the isolation suite requires RLS on every `tenant_id` table); `OUTBOX_SECRET` as a new secret rather than one derived from `AUTH_SECRET` (the worker does not need the auth secret); retries in Postgres rather than BullMQ; polling only (no notify after commit); 8 attempts, 30 s doubling to 1 h; 5xx gives up at once; a 5-minute lease; dedupe key `booking.<kind>:<booking id>:<updated_at ms>`.
+- **End of S19 (user, 2026-10-20):** "All good. Raise PR and merge." ADR-0024 accepted as proposed, with Claude's defaults. S20 starts in a new session from `main`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Review S19 and accept or change [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md), including Claude's defaults listed under "S19 defaults" below. Open the PR when you want it reviewed.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into S19–S21 (user, S19 Session Brief); S19 is done.
@@ -591,7 +591,7 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into 
 | S16 | ~~**Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system~~ **done** (ADR-0021 accepted) | 4c | — |
 | S17 | ~~**Public booking page with email verification**~~ **done** (ADR-0022 accepted) | 4d | — |
 | S18 | ~~**Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17~~ **done** (ADR-0023 accepted; Phase 4 complete) | 4e | — |
-| S19 | ~~**Phase 5 planning + outbox**~~ **done** (ADR-0024 proposed; D4: Resend) | 5a | — |
+| S19 | ~~**Phase 5 planning + outbox**~~ **done** (ADR-0024 accepted; D4: Resend) | 5a | — |
 | S20 | **Confirmations and reminders:** confirmation emails for team-made bookings (queued in the booking transaction), reminders scheduled per booking with timing (AC-W6-1: sent within 5 minutes of schedule; cancelled bookings never get one), reconciled from Postgres, and cleanup of expired booking requests (S18 L7) and old outbox rows | 5b | AC-W6-1 integration test with a controlled clock; no reminder for a cancelled or moved booking; cleanup job tested |
 | S21 | **Tasks + push notifications (Phase 5 exit):** core tasks, web push for the installed app, Phase 5 security review | 5c | Phase 5 exit criteria (AC-W4-2 done in S19, AC-W6-1 in S20) proven; push subscription and delivery tested |
 

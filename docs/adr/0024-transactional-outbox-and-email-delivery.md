@@ -1,6 +1,6 @@
 # ADR-0024: Transactional outbox, email delivery in the worker, and the email provider
 
-- **Status:** Proposed (Claude, 2026-10-20, S19). At the S19 Session Brief the user chose Claude's recommendations on all five questions: the code email stays direct; queued content is encrypted and cleared after sending; the worker finds work through a small index table; Resend is the email provider for the pilot; Phase 5 is split as below. · **Date:** 2026-10-20 · Builds on ADR-0003 (BullMQ + outbox), ADR-0010 (roles and RLS), ADR-0013 (metering), ADR-0022 (booking page emails)
+- **Status:** Accepted (user, 2026-10-20, "All good" after reviewing S19, including Claude's defaults). At the S19 Session Brief the user chose Claude's recommendations on all five questions: the code email stays direct; queued content is encrypted and cleared after sending; the worker finds work through a small index table; Resend is the email provider for the pilot; Phase 5 is split as below. · **Date:** 2026-10-20 · Builds on ADR-0003 (BullMQ + outbox), ADR-0010 (roles and RLS), ADR-0013 (metering), ADR-0022 (booking page emails)
 
 ## Context
 ADR-0003 decided that every side effect is first written as an outbox row in the same transaction as the business change, and that a relay and idempotent BullMQ handlers deliver it. Until now (ADR-0022) the api sent the booking page's emails directly over SMTP while the client waited. A failed send was lost, and nothing retried it. Phase 5's exit criterion is AC-W4-2: *exactly one email per recipient is sent even if the job retries*.
