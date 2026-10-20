@@ -3,6 +3,7 @@ import {
   CurrentBusinessResponseSchema,
   ServiceSchema,
   StaffMemberSchema,
+  StaffResponseSchema,
 } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import {
@@ -154,4 +155,81 @@ test('an unknown booking page is not found, and a broken link says so', async ({
   const slug = await salon(page);
   await page.goto(`/book/${slug}/manage#not-a-token`);
   await expect(page.getByText('This link is incomplete. Open it from your email.')).toBeVisible();
+});
+
+/** On the page: Haircut with Jess, tomorrow's first time, details, then the emailed code typed in. */
+async function requestFirstTime(client: Page, slug: string, name: string): Promise<void> {
+  const email = `${unique('client')}@example.test`;
+  await client.goto(`/book/${slug}`);
+  await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
+  await client.getByRole('button', { name: /Jess/ }).click();
+  await pickTime(client, 1);
+  await client.getByLabel('Full name').fill(name);
+  await client.getByLabel('Email').fill(email);
+  await client.getByRole('button', { name: 'Send my code' }).click();
+  await expect(client.getByRole('heading', { name: 'Check your email' })).toBeVisible();
+  const code = /^ {4}(\d{6})$/m.exec(await emailTo(email, 'is your code'))?.[1] ?? '';
+  expect(code).toMatch(/^\d{6}$/);
+  await client.getByLabel('Code').fill(code);
+}
+
+test('AC-W8-1: two clients confirm the same last time at once; one is booked, the other is offered the nearest times', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page);
+  const slug = await salon(page);
+  // Jess works one hour a day, so each day has exactly one time: the last slot.
+  const [jess] = StaffResponseSchema.parse(
+    await (await page.request.get('/v1/staff')).json(),
+  ).staff;
+  await callApi(
+    page,
+    'PUT',
+    `/v1/staff/${jess?.id ?? ''}/hours`,
+    {
+      intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
+        weekday,
+        start: '09:00',
+        end: '10:00',
+      })),
+    },
+    { parse: (body: unknown) => body },
+  );
+
+  const ana = await anotherPerson(browser, baseURL);
+  const bea = await anotherPerson(browser, baseURL);
+  await requestFirstTime(ana, slug, 'Ana Ruiz');
+  await requestFirstTime(bea, slug, 'Bea Lima');
+
+  // Both press Confirm at the same moment.
+  await Promise.all(
+    [ana, bea].map((client) => client.getByRole('button', { name: 'Confirm booking' }).click()),
+  );
+  const booked = (client: Page) => client.getByRole('heading', { name: /You’re booked/ });
+  const taken = (client: Page) => client.getByRole('region', { name: 'That time was taken' });
+  for (const client of [ana, bea]) {
+    await expect(booked(client).or(taken(client))).toBeVisible();
+  }
+  const outcomes = await Promise.all([ana, bea].map((client) => booked(client).isVisible()));
+  expect(outcomes.filter(Boolean)).toHaveLength(1);
+  const loser = outcomes[0] === true ? bea : ana;
+
+  // The other is offered the nearest free times and books one with the same code.
+  const alternatives = taken(loser).getByTestId('alternatives').getByRole('button');
+  await expect(alternatives.first()).toBeVisible();
+  await alternatives.first().click();
+  await expect(booked(loser)).toBeVisible();
+
+  // Two bookings, at different times: never a double booking.
+  const range = `from=${encodeURIComponent(new Date().toISOString())}&to=${encodeURIComponent(
+    new Date(Date.now() + 14 * 86_400_000).toISOString(),
+  )}`;
+  const { bookings } = BookingsResponseSchema.parse(
+    await (await page.request.get(`/v1/bookings?${range}`)).json(),
+  );
+  expect(bookings).toHaveLength(2);
+  expect(new Set(bookings.map((booking) => booking.startsAt)).size).toBe(2);
 });
