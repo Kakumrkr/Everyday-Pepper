@@ -2,16 +2,22 @@ import {
   BookingNotChangeableError,
   BookingNotFoundError,
   BookingNotStartedError,
+  BookingPageNotFoundError,
+  BookingRequestExpiredError,
+  BookingRequestNotFoundError,
+  BookingRequestUsedError,
   IdempotencyKeyReusedError,
   ServiceNotFoundError,
   SlotUnavailableError,
   StaffMemberNotFoundError,
   TimeOffNotFoundError,
+  TooManyBookingRequestsError,
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
   WaitlistExpiredError,
+  WrongVerificationCodeError,
 } from '@pepper/appointments';
-import { AvailableSlotSchema, SlotUnavailableSchema } from '@pepper/contracts';
+import { AvailableSlotSchema, SlotUnavailableSchema, WrongCodeSchema } from '@pepper/contracts';
 import {
   AlreadyAMemberError,
   ClientNotFoundError,
@@ -60,6 +66,11 @@ describe('toHttpError', () => {
     [new WaitlistEntryNotFoundError(), 404, 'waitlist_entry_not_found'],
     [new WaitlistEntryNotChangeableError(), 409, 'waitlist_entry_not_changeable'],
     [new WaitlistExpiredError(), 400, 'waitlist_expired'],
+    [new BookingPageNotFoundError(), 404, 'booking_page_not_found'],
+    [new BookingRequestNotFoundError(), 404, 'booking_request_not_found'],
+    [new BookingRequestExpiredError(), 410, 'booking_request_expired'],
+    [new BookingRequestUsedError(), 409, 'booking_request_used'],
+    [new TooManyBookingRequestsError(), 429, 'too_many_requests'],
   ])('%s → %d %s', (error, status, code) => {
     const answer = toHttpError(error);
     expect(answer).toBeInstanceOf(HttpException);
@@ -79,6 +90,16 @@ describe('toHttpError', () => {
       code: 'slot_unavailable',
       message: 'That time cannot be booked',
       alternatives: [alternative],
+    });
+  });
+
+  it('answers a wrong code with 422 and the attempts left', () => {
+    const answer = toHttpError(new WrongVerificationCodeError(3)) as HttpException;
+    expect(answer.getStatus()).toBe(422);
+    expect(WrongCodeSchema.parse(answer.getResponse())).toEqual({
+      code: 'wrong_code',
+      message: 'That code is not right. Check the email and try again',
+      attemptsLeft: 3,
     });
   });
 

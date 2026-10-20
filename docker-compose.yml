@@ -80,10 +80,14 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-local-dev-only-auth-secret-not-for-real-use}
       # The browser talks to web, which forwards /api/auth and /v1 to the api (ADR-0012).
       AUTH_BASE_URL: ${AUTH_BASE_URL:-http://localhost:3000}
+      # Email (the booking page's codes, ADR-0022) goes to Mailpit's inbox (port 8025).
+      SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
+      MAIL_FROM: ${MAIL_FROM:-Pepper <bookings@pepper.localhost>}
     ports: ['127.0.0.1:4000:4000']
     depends_on:
       migrate: { condition: service_completed_successfully }
       redis: { condition: service_healthy }
+      mailpit: { condition: service_healthy }
 
   worker:
     build: { context: ., target: worker }

@@ -287,7 +287,7 @@ export async function changeBooking(
 
   if (parsed.override) requireOverride(actor);
   const start = Date.parse(parsed.startsAt);
-  let search: Omit<AlternativesSearch, 'start' | 'now'> | undefined;
+  let search: Omit<BookableSearch, 'start' | 'now'> | undefined;
   try {
     return await withMember(db, actor.context, async (tx) => {
       const { row, staff } = await lockOwnBooking(tx, actor, id, parsed.staffMemberId);
@@ -344,7 +344,7 @@ export async function ownStaffMemberId(
 }
 
 /** The engine refused the time (internal: answered as `SlotUnavailableError`). */
-class SlotTaken extends Error {}
+export class SlotTaken extends Error {}
 
 /** Overriding hours and rules is for owners and managers (`bookings.manage` on every record). */
 function requireOverride(actor: Actor): void {
@@ -399,17 +399,21 @@ function offers(staff: StaffMemberRecord, service: ServiceToBook): boolean {
   return staff.active && service.active && staff.serviceIds.includes(service.id);
 }
 
-interface AlternativesSearch {
+export interface AlternativesSearch {
   service: ServiceToBook;
-  staffMemberId: StaffMemberId;
+  /** `undefined`: anyone who offers the service. */
+  staffMemberId: StaffMemberId | undefined;
   start: number;
   now: number;
   excludeBookingId?: string;
   templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
 }
 
+/** A time with one staff member. */
+export type BookableSearch = AlternativesSearch & { staffMemberId: StaffMemberId };
+
 /** Whether the engine offers exactly this start time with this staff member. */
-async function isBookable(tx: TenantTx, search: AlternativesSearch): Promise<boolean> {
+export async function isBookable(tx: TenantTx, search: BookableSearch): Promise<boolean> {
   const slots = await slotsFor(tx, {
     service: search.service,
     staffMemberIds: [search.staffMemberId],
@@ -422,24 +426,41 @@ async function isBookable(tx: TenantTx, search: AlternativesSearch): Promise<boo
   return slots.some((slot) => slot.start === search.start);
 }
 
+/** Opens a transaction for reading alternatives: a member's, or the booking page's. */
+export type OpenTransaction = <T>(work: (tx: TenantTx) => Promise<T>) => Promise<T>;
+
 /** The nearest bookable times instead, read after the refused transaction rolled back. */
 async function alternatives(
   db: Database,
   actor: Actor,
   search: AlternativesSearch,
 ): Promise<AvailableSlot[]> {
+  return nearestAlternatives((work) => withMember(db, actor.context, work), search);
+}
+
+/**
+ * The nearest bookable times to a refused one, nearest first, with the same service and staff
+ * member (`staffMemberId` undefined: anyone, one time per start).
+ */
+export async function nearestAlternatives(
+  open: OpenTransaction,
+  search: AlternativesSearch,
+): Promise<AvailableSlot[]> {
   const range = alternativesRange(search.start, search.now);
-  const slots = await withMember(db, actor.context, (tx) =>
+  const slots = await open((tx) =>
     slotsFor(tx, {
       service: search.service,
-      staffMemberIds: [search.staffMemberId],
+      staffMemberIds: search.staffMemberId === undefined ? undefined : [search.staffMemberId],
       ...range,
       now: search.now,
       templateRuleDefaults: search.templateRuleDefaults,
       ...(search.excludeBookingId !== undefined && { excludeBookingId: search.excludeBookingId }),
     }),
   );
-  return nearestSlots(slots, search.start, ALTERNATIVE_SLOT_COUNT).map(toAvailableSlot);
+  const firstPerStart = slots.filter(
+    (slot, index) => slots.findIndex((other) => other.start === slot.start) === index,
+  );
+  return nearestSlots(firstPerStart, search.start, ALTERNATIVE_SLOT_COUNT).map(toAvailableSlot);
 }
 
 /** Audits a change of `before` to `after` (unless nothing changed) and returns the booking. */

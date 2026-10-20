@@ -7,6 +7,7 @@ export * from './mapping.js';
 export * from './services/availability.js';
 export * from './services/bookings.js';
 export * from './services/hours.js';
+export * from './services/public-booking.js';
 export * from './services/rules.js';
 export * from './services/services.js';
 export * from './services/staff.js';

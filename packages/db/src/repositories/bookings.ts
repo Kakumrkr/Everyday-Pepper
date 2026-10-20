@@ -36,6 +36,7 @@ import type { TenantTx } from '../tenant.js';
 // written only by the bookings trigger; everyone in the business may read it.
 
 const Id = z.uuid();
+const TokenHashSchema = z.string().regex(/^[0-9a-f]{64}$/, 'Expected a SHA-256 hex digest');
 
 // Bookings ----------------------------------------------------------------------------------
 
@@ -53,6 +54,8 @@ export interface NewBooking {
   overridden: boolean;
   idempotencyKey: string | null;
   createdBy: UserId | null;
+  /** SHA-256 (hex) of the client's reschedule/cancel link token (booking page, ADR-0022). */
+  manageTokenHash?: string | null;
 }
 
 /**
@@ -75,6 +78,10 @@ export async function insertBooking(tx: TenantTx, input: NewBooking): Promise<Bo
     idempotencyKey:
       input.idempotencyKey === null ? null : IdempotencyKeySchema.parse(input.idempotencyKey),
     createdByUserId: input.createdBy === null ? null : Id.parse(input.createdBy),
+    manageTokenHash:
+      input.manageTokenHash === undefined || input.manageTokenHash === null
+        ? null
+        : TokenHashSchema.parse(input.manageTokenHash),
   };
   return bookingWrite(async () => {
     const [row] = await tx.insert(bookings).values(values).returning();

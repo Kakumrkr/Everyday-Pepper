@@ -3,6 +3,7 @@ import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './a
 import { BookingSourceSchema, BookingStatusSchema } from './bookings.js';
 import { ClientIdSchema, RecordSourceSchema } from './clients.js';
 import {
+  BrandColorSchema,
   LocaleSchema,
   MembershipRoleSchema,
   TemplateIdSchema,
@@ -116,6 +117,15 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
           ownerUserId: UserIdSchema,
         })
         .strict(),
+    })
+    .strict(),
+  // The booking page's settings (ADR-0022).
+  z
+    .object({
+      action: z.literal('tenant.updated'),
+      entity: entity('tenant'),
+      before: z.object({ brandColor: BrandColorSchema.nullable() }).strict(),
+      after: z.object({ brandColor: BrandColorSchema.nullable() }).strict(),
     })
     .strict(),
   z

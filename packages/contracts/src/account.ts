@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { PermissionSchema } from './permissions.js';
 import {
+  BrandColorSchema,
   LocaleSchema,
   MembershipRoleSchema,
   TenantIdSchema,
@@ -48,6 +49,15 @@ export const ApiErrorCodeSchema = z.enum([
   'waitlist_entry_not_found',
   'waitlist_entry_not_changeable',
   'waitlist_expired',
+  // The public booking page (ADR-0022).
+  'booking_page_not_found',
+  'booking_request_not_found',
+  'booking_request_expired',
+  'booking_request_used',
+  'wrong_code',
+  'too_many_requests',
+  'email_unavailable',
+  'temporarily_unavailable',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 
@@ -96,8 +106,16 @@ export const BusinessSchema = z.object({
   locale: LocaleSchema,
   /** The industry template it started from; `null`: none (platform defaults). */
   templateId: TemplateIdSchema.nullable(),
+  /** The booking page's color (PCR-001); `null`: Pepper's neutral default. */
+  brandColor: BrandColorSchema.nullable(),
 });
 export type Business = z.infer<typeof BusinessSchema>;
+
+/** `PUT /v1/tenant/booking-page`: the booking page's settings (owners and managers). */
+export const BookingPageSettingsSchema = z
+  .object({ brandColor: BrandColorSchema.nullable() })
+  .strict();
+export type BookingPageSettings = z.infer<typeof BookingPageSettingsSchema>;
 
 /**
  * `GET /v1/tenant`: the session's active business, the user's role in it, and what that role

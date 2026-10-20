@@ -16,7 +16,7 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 ## L1 Core
 | Entity | Key fields / notes |
 |---|---|
-| Tenant | name, slug (booking page), template_id (S13: nullable, one of the V1 template ids from the contracts; `NULL` = platform defaults only, ADR-0018), time_zone, locale, plan, settings (JSON, versioned) |
+| Tenant | name, slug (booking page), brand_color (S17, PCR-001: `#rrggbb` or `NULL`), template_id (S13: nullable, one of the V1 template ids from the contracts; `NULL` = platform defaults only, ADR-0018), time_zone, locale, plan, settings (JSON, versioned) |
 | User | auth identity (global, Better Auth `users`), email, MFA (`two_factors`) |
 | Membership | user_id, tenant_id, role (`owner`/`manager`/`staff`); a staff member may link to it (ADR-0015) |
 | Client (`clients`, S12) | name, email? (lowercased, unique per tenant), phone? (E.164), source (`team`/`ai`/`booking_page`/`import`); consent flags, tags and import_ref come with the features that use them. Called "client" everywhere (permissions `clients.*`, UI); staff read only clients they have a booking or waitlist entry with, and never write (ADR-0017) |
@@ -45,7 +45,7 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 | BookingOccupancy (`booking_occupancy`, S12) | one row per active booking, kept by a trigger on `bookings`: staff member, appointment times, `occupied tstzrange` (appointment + buffers); **`EXCLUDE USING gist (staff_member_id WITH =, occupied WITH &&)`** — no double booking; readable by every member (busy times without details) (ADR-0017) |
 | WaitlistEntry (`waitlist_entries`, S12) | client, service, staff member? (`NULL`: anyone), windows (1–10 local date + `HH:MM` spans, jsonb), status (`waiting`/`offered`/`booked`/`cancelled`; `expired` derived on read), expires_at (end of the last window), booking_id (set iff `booked`) (ADR-0017) |
 | ExternalBusyBlock | staff, during, source calendar, external id |
-| BookingVerification | email code hash, expires, attempts (public booking) |
+| BookingVerification | `booking_verifications` (S17, ADR-0022): service, staff member or `NULL` (anyone), time, name, email, phone, HMAC code hash, attempts, expires, booking once confirmed (public booking). Bookings made from it keep `manage_token_hash` for the client's link |
 
 ## Invariants
 References between tenant tables are composite foreign keys on `(tenant_id, id)` (ADR-0015) · No overlapping occupied time (buffers included) of active bookings per staff member (DB constraint on `booking_occupancy`) · every write has an audit entry · every side effect goes through `OutboxMessage` · deleting a customer cascades memory facts/episodes about them.

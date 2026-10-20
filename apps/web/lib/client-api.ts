@@ -48,6 +48,14 @@ const MESSAGES: Record<string, string> = {
   booking_not_changeable: 'This booking can’t be changed any more.',
   booking_not_started: 'Mark it done or a no-show once it has started.',
   waitlist_expired: 'Those times have already passed.',
+  booking_page_not_found: 'This booking page doesn’t exist.',
+  booking_request_not_found: 'That booking request has expired. Start again.',
+  booking_request_expired: 'That code has expired. Send a new one.',
+  booking_request_used: 'This booking is already confirmed. Check your email.',
+  wrong_code: 'That code isn’t right. Check the email and try again.',
+  too_many_requests: 'Too many tries. Wait a little and try again.',
+  email_unavailable: 'Online booking isn’t available right now. Contact the business.',
+  temporarily_unavailable: 'This isn’t available right now. Try again in a moment.',
 };
 
 const FALLBACK = 'Something went wrong. Try again.';

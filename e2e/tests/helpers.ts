@@ -169,3 +169,29 @@ export async function callApi<T>(
   expect(response.status(), `${method} ${path}: ${await response.text()}`).toBe(status);
   return schema.parse(await response.json());
 }
+
+/** Mailpit's API (the fake inbox of Compose): `MAILPIT_URL`, default the Compose port. */
+const MAILPIT_URL = process.env['MAILPIT_URL'] ?? 'http://localhost:8025';
+
+/**
+ * The text of the newest email to `to` whose subject contains `subject`, waiting up to 15
+ * seconds for it to arrive.
+ */
+export async function emailTo(to: string, subject: string): Promise<string> {
+  const deadline = Date.now() + 15_000;
+  for (;;) {
+    const search = await fetch(
+      `${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`,
+    );
+    const { messages } = (await search.json()) as {
+      messages: { ID: string; Subject: string }[];
+    };
+    const found = messages.find((message) => message.Subject.includes(subject));
+    if (found !== undefined) {
+      const message = await fetch(`${MAILPIT_URL}/api/v1/message/${found.ID}`);
+      return ((await message.json()) as { Text: string }).Text;
+    }
+    if (Date.now() > deadline) throw new Error(`No email to ${to} about "${subject}"`);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+}

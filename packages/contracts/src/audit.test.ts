@@ -115,6 +115,15 @@ describe('AuditChangeSchema', () => {
         },
       },
     ],
+    [
+      'tenant.updated',
+      {
+        action: 'tenant.updated',
+        entity: { type: 'tenant', id: TENANT },
+        before: { brandColor: null },
+        after: { brandColor: '#7a3e6c' },
+      },
+    ],
     ['membership.role_changed', roleChanged],
     [
       'membership.removed',

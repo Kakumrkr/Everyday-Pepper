@@ -27,11 +27,12 @@ import {
   replaceWorkingHours,
 } from './repositories/appointments.js';
 import { appendAuditEntry } from './repositories/audit.js';
+import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
-import { createTenant } from './repositories/tenants.js';
+import { createTenant, withPublicTenant } from './repositories/tenants.js';
 import { addUsage } from './repositories/usage.js';
 import { withTenant, withUser, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
@@ -60,6 +61,8 @@ interface TenantTable {
   memberRead?: string;
   /** The `invite_lookup` (withInviteTenant) predicate, as Postgres prints it, if any. */
   inviteLookup?: string;
+  /** The `public_lookup` (withPublicTenant) predicate, as Postgres prints it, if any. */
+  publicLookup?: string;
   /** The services may only insert and read (no UPDATE or DELETE grant). */
   appendOnly?: true;
   /**
@@ -90,6 +93,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     touch: "name = name || ''",
     memberRead:
       '((current_tenant_id() IS NULL) AND (id IN ( SELECT memberships.tenant_id\n   FROM memberships\n  WHERE (memberships.user_id = current_user_id()))))',
+    publicLookup: '((current_tenant_id() IS NULL) AND (slug = current_public_slug()))',
   },
   memberships: {
     tenantColumn: 'tenant_id',
@@ -288,6 +292,32 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
     ],
   },
+  booking_verifications: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) =>
+      (
+        await insertBookingVerification(tx, {
+          serviceId: await seedService(tx),
+          staffMemberId: null,
+          startsAt: new Date('2026-10-23T15:00:00Z'),
+          name: 'Ana Ruiz',
+          email: `ana-${newId()}@example.test`,
+          phone: null,
+          codeHash: randomBytes(32).toString('hex'),
+          expiresAt: new Date('2026-10-20T15:10:00Z'),
+        })
+      ).id,
+    touch: 'attempts = attempts + 1',
+    // Members never reach booking requests; only the booking page (no user) does.
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '(current_user_id() IS NULL)',
+        with_check: '(current_user_id() IS NULL)',
+      },
+    ],
+  },
 };
 
 /** A new client of the transaction's tenant. */
@@ -461,6 +491,18 @@ describe('catalog', () => {
           permissive: 'RESTRICTIVE',
           roles: ['public'],
         })),
+        ...(spec.publicLookup === undefined
+          ? []
+          : [
+              {
+                policyname: 'public_lookup',
+                permissive: 'PERMISSIVE',
+                cmd: 'SELECT',
+                roles: ['public'],
+                qual: spec.publicLookup,
+                with_check: null,
+              },
+            ]),
         {
           policyname: 'tenant_isolation',
           permissive: 'PERMISSIVE',
@@ -830,6 +872,94 @@ describe('invite lookup (withInviteTenant: an invitee who is not a member yet)',
         sql`SELECT current_invite_token_hash() AS hash, count(*)::int AS n FROM invites`,
       );
       expect(after.rows).toEqual([{ hash: null, n: 0 }]);
+    } finally {
+      await single.close();
+    }
+  });
+});
+
+describe('public lookup (withPublicTenant: the booking page finds its business by slug)', () => {
+  /** Raw SQL with only the slug set (no tenant), in one transaction. */
+  function withSlug<T extends Record<string, unknown>>(slug: string, statement: string) {
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.public_slug', ${slug}, true)`);
+      return tx.execute<T>(sql.raw(statement));
+    });
+  }
+
+  it('binds the transaction to the business with that slug, without a user', async () => {
+    const seen = await withPublicTenant(db, 'tenant-b', async (tx, tenant) => {
+      const { rows: context } = await tx.execute<{ tenant: string; user: string | null }>(
+        sql`SELECT current_tenant_id()::text AS tenant, current_user_id()::text AS user`,
+      );
+      return { id: tenant.id, ...context[0] };
+    });
+    expect(seen).toEqual({ id: tenantB, tenant: tenantB, user: null });
+  });
+
+  it('finds nothing for a slug no business has', async () => {
+    let called = false;
+    const result = await withPublicTenant(db, 'no-such-business', () => {
+      called = true;
+      return Promise.resolve('reached');
+    });
+    expect([result, called]).toEqual([undefined, false]);
+  });
+
+  it('a slug shows only its own business row, and no other table', async () => {
+    const { rows: seen } = await withSlug<{ id: string }>(
+      'tenant-a',
+      'SELECT id::text FROM tenants',
+    );
+    expect(seen).toEqual([{ id: tenantA }]);
+    for (const table of Object.keys(TENANT_TABLES).filter((t) => t !== 'tenants')) {
+      const { rows: other } = await withSlug('tenant-a', `SELECT * FROM ${table}`);
+      expect(other, table).toEqual([]);
+    }
+  });
+
+  it('a slug cannot change the business: public_lookup is SELECT only', async () => {
+    const updated = await withSlug('tenant-a', "UPDATE tenants SET name = 'taken'");
+    const deleted = await withSlug('tenant-a', 'DELETE FROM tenants');
+    expect([updated.rowCount, deleted.rowCount]).toEqual([0, 0]);
+  });
+
+  it("does not widen a tenant transaction: another business's row stays hidden", async () => {
+    const { rows: seen } = await withTenant(db, tenantA, async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.public_slug', 'tenant-b', true)`);
+      return tx.execute(sql`SELECT id FROM tenants WHERE slug = 'tenant-b'`);
+    });
+    expect(seen).toEqual([]);
+  });
+
+  it("a member transaction cannot read booking requests, even an owner's", async () => {
+    const user = await insertUser(db);
+    await withTenant(db, tenantA, (tx) => addMembership(tx, { userId: user, role: 'owner' }));
+    const { rows: seen } = await withTenant(db, tenantA, async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.user_id', ${user}, true)`);
+      return tx.execute(sql`SELECT id FROM booking_verifications`);
+    });
+    expect(seen).toEqual([]);
+  });
+
+  it('a read-only lookup cannot write', async () => {
+    const error = await withPublicTenant(
+      db,
+      'tenant-a',
+      (tx) => tx.execute(sql`UPDATE tenants SET name = name`),
+      { readOnly: true },
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('25006');
+  });
+
+  it('does not outlive the transaction on a pooled connection', async () => {
+    const single = createDatabase({ url: database.appUrl, maxConnections: 1 });
+    try {
+      await withPublicTenant(single.db, 'tenant-a', () => Promise.resolve());
+      const after = await single.db.execute(
+        sql`SELECT current_public_slug() AS slug, count(*)::int AS n FROM tenants`,
+      );
+      expect(after.rows).toEqual([{ slug: null, n: 0 }]);
     } finally {
       await single.close();
     }

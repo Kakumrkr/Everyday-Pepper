@@ -104,3 +104,23 @@
   --radius-lg: 24px;
   --breakpoint-desk: 60rem;
 }
+
+/*
+ * The public booking page in the business's own color (PCR-001): `brandStyle()` sets the
+ * `--biz-*-light`/`-dark` variables on the page; here they replace the brand tokens.
+ */
+.bookpage {
+  --brand: var(--biz-light);
+  --brand-strong: var(--biz-strong-light);
+  --brand-soft: var(--biz-soft-light);
+  --on-brand: var(--biz-on-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .bookpage {
+    --brand: var(--biz-dark);
+    --brand-strong: var(--biz-strong-dark);
+    --brand-soft: var(--biz-soft-dark);
+    --on-brand: var(--biz-on-dark);
+  }
+}

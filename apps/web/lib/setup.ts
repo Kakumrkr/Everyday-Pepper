@@ -68,10 +68,10 @@ export function durationLabel(minutes: number): string {
 }
 
 /** Services grouped by category (by name, case-insensitive); those without one last. */
-export function servicesByCategory(
-  services: readonly Service[],
-): { category: string | null; services: Service[] }[] {
-  const groups = new Map<string, { category: string | null; services: Service[] }>();
+export function servicesByCategory<T extends Pick<Service, 'category'>>(
+  services: readonly T[],
+): { category: string | null; services: T[] }[] {
+  const groups = new Map<string, { category: string | null; services: T[] }>();
   for (const service of services) {
     const key = service.category?.toLowerCase() ?? '';
     const group = groups.get(key) ?? { category: service.category, services: [] };

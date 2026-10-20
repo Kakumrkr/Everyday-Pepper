@@ -91,3 +91,53 @@ export class WaitlistExpiredError extends Error {
     this.name = 'WaitlistExpiredError';
   }
 }
+
+// The public booking page (ADR-0022).
+
+/** No business has a booking page at this address. */
+export class BookingPageNotFoundError extends Error {
+  constructor() {
+    super('No booking page at this address');
+    this.name = 'BookingPageNotFoundError';
+  }
+}
+
+/** No such booking request in the business. */
+export class BookingRequestNotFoundError extends Error {
+  constructor() {
+    super('No such booking request');
+    this.name = 'BookingRequestNotFoundError';
+  }
+}
+
+/** The request's code expired or was typed wrong too often: ask for a new one. */
+export class BookingRequestExpiredError extends Error {
+  constructor() {
+    super('This code has expired; ask for a new one');
+    this.name = 'BookingRequestExpiredError';
+  }
+}
+
+/** The request's code was already used: its booking exists. */
+export class BookingRequestUsedError extends Error {
+  constructor() {
+    super('This booking request was already confirmed');
+    this.name = 'BookingRequestUsedError';
+  }
+}
+
+/** The typed code is not the one emailed; `attemptsLeft` more may be tried. */
+export class WrongVerificationCodeError extends Error {
+  constructor(readonly attemptsLeft: number) {
+    super('That code is not right');
+    this.name = 'WrongVerificationCodeError';
+  }
+}
+
+/** Too many booking requests for one email address in a short time. */
+export class TooManyBookingRequestsError extends Error {
+  constructor() {
+    super('Too many booking requests for this email address; try again later');
+    this.name = 'TooManyBookingRequestsError';
+  }
+}

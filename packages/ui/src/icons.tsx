@@ -44,6 +44,7 @@ const PATHS = {
   right: <path d="m9 5 7 7-7 7" />,
   close: <path d="M6 6l12 12M18 6 6 18" />,
   plus: <path d="M12 5v14M5 12h14" />,
+  check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;

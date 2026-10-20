@@ -4,6 +4,10 @@ import {
   BookingNotChangeableError,
   BookingNotFoundError,
   BookingNotStartedError,
+  BookingPageNotFoundError,
+  BookingRequestExpiredError,
+  BookingRequestNotFoundError,
+  BookingRequestUsedError,
   IdempotencyKeyReusedError,
   ServiceNotFoundError,
   SlotUnavailableError,
@@ -11,7 +15,9 @@ import {
   TimeOffNotFoundError,
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
+  TooManyBookingRequestsError,
   WaitlistExpiredError,
+  WrongVerificationCodeError,
 } from './errors.js';
 
 describe('appointments errors', () => {
@@ -27,10 +33,20 @@ describe('appointments errors', () => {
     [new WaitlistEntryNotFoundError(), 'WaitlistEntryNotFoundError'],
     [new WaitlistEntryNotChangeableError(), 'WaitlistEntryNotChangeableError'],
     [new WaitlistExpiredError(), 'WaitlistExpiredError'],
+    [new BookingPageNotFoundError(), 'BookingPageNotFoundError'],
+    [new BookingRequestNotFoundError(), 'BookingRequestNotFoundError'],
+    [new BookingRequestExpiredError(), 'BookingRequestExpiredError'],
+    [new BookingRequestUsedError(), 'BookingRequestUsedError'],
+    [new WrongVerificationCodeError(3), 'WrongVerificationCodeError'],
+    [new TooManyBookingRequestsError(), 'TooManyBookingRequestsError'],
   ])('%s is a named Error', (error, name) => {
     expect(error).toBeInstanceOf(Error);
     expect(error.name).toBe(name);
     expect(error.message).not.toBe('');
+  });
+
+  it('a wrong code carries the attempts left', () => {
+    expect(new WrongVerificationCodeError(2).attemptsLeft).toBe(2);
   });
 
   it('a refused time carries its alternatives', () => {

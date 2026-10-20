@@ -53,6 +53,14 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   waitlist_entry_not_found: 'No such waitlist entry in this business',
   waitlist_entry_not_changeable: 'This waitlist entry can no longer be changed',
   waitlist_expired: 'Every window of this waitlist entry has already passed',
+  booking_page_not_found: 'There is no booking page at this address',
+  booking_request_not_found: 'This booking request was not found. Start again',
+  booking_request_expired: 'This code has expired. Ask for a new one',
+  booking_request_used: 'This booking is already confirmed. Check your email',
+  wrong_code: 'That code is not right. Check the email and try again',
+  too_many_requests: 'Too many tries. Wait a little and try again',
+  email_unavailable: 'Online booking is not available right now. Contact the business',
+  temporarily_unavailable: 'This is not available right now. Try again in a moment',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */

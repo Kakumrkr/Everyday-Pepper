@@ -1,0 +1,250 @@
+'use client';
+
+import {
+  PublicBookingResponseSchema,
+  type AvailableSlot,
+  type PublicBooking,
+  type PublicBusiness,
+} from '@pepper/contracts';
+import { buttonClass, chipClass } from '@pepper/ui';
+import { useEffect, useMemo, useState } from 'react';
+import { dateTimeLabel, STATUS_LABELS } from '../../../lib/booking';
+import { sendJson, type CallResult } from '../../../lib/client-api';
+import { publicApiPath, readManageToken } from '../../../lib/public-booking';
+import { Notice } from '../booking/sheet';
+import { alternativesOf } from '../booking/refusal';
+import { SlotPicker } from './slot-picker';
+
+type View =
+  | { state: 'loading' }
+  | { state: 'broken'; message: string }
+  | { state: 'ready'; booking: PublicBooking };
+
+/**
+ * The client's own booking behind the link in their email (`/book/<slug>/manage#<token>`).
+ * The secret stays in the fragment: the page reads it in the browser and sends it only in
+ * POST bodies. While the booking may still change, it can be moved (same service and staff
+ * member) or cancelled.
+ */
+export function ManageBooking({ business, now }: { business: PublicBusiness; now: number }) {
+  const { slug, timeZone } = business;
+  const [token, setToken] = useState<string | null>(null);
+  const [view, setView] = useState<View>({ state: 'loading' });
+  const [mode, setMode] = useState<'view' | 'move' | 'cancel'>('view');
+  const [alternatives, setAlternatives] = useState<AvailableSlot[] | null>(null);
+  const [notice, setNotice] = useState<{ tone: 'error' | 'ok'; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const staffNames = useMemo(
+    () => new Map<string, string>(business.staff.map((member) => [member.id, member.displayName])),
+    [business.staff],
+  );
+
+  useEffect(() => {
+    const read = readManageToken(window.location.hash);
+    setToken(read);
+    if (read === null) {
+      setView({ state: 'broken', message: 'This link is incomplete. Open it from your email.' });
+      return;
+    }
+    void sendJson('POST', publicApiPath(slug, '/booking/lookup'), { token: read }).then(
+      (answer) => {
+        const parsed = answer.ok ? PublicBookingResponseSchema.safeParse(answer.data) : null;
+        setView(
+          parsed?.success === true
+            ? { state: 'ready', booking: parsed.data.booking }
+            : {
+                state: 'broken',
+                message:
+                  !answer.ok && answer.status === 404
+                    ? 'We couldn’t find this booking. Check the link in your email.'
+                    : answer.ok
+                      ? 'Something went wrong. Try again.'
+                      : answer.message,
+              },
+        );
+      },
+    );
+  }, [slug]);
+
+  function settle(answer: CallResult<unknown>, done: string): void {
+    const parsed = answer.ok ? PublicBookingResponseSchema.safeParse(answer.data) : null;
+    if (parsed?.success === true) {
+      setView({ state: 'ready', booking: parsed.data.booking });
+      setMode('view');
+      setAlternatives(null);
+      setNotice({ tone: 'ok', text: done });
+      return;
+    }
+    const others = alternativesOf(answer);
+    if (others !== null) {
+      setAlternatives(others);
+      setNotice({ tone: 'error', text: 'Someone just took that time. Pick another one.' });
+      return;
+    }
+    setNotice({
+      tone: 'error',
+      text: answer.ok ? 'Something went wrong. Try again.' : answer.message,
+    });
+  }
+
+  async function move(startsAt: string): Promise<void> {
+    if (token === null) return;
+    setBusy(true);
+    const answer = await sendJson('POST', publicApiPath(slug, '/booking/reschedule'), {
+      token,
+      startsAt,
+    });
+    setBusy(false);
+    settle(answer, `Moved to ${dateTimeLabel(timeZone, startsAt)}. We emailed you the new time.`);
+  }
+
+  async function cancel(): Promise<void> {
+    if (token === null) return;
+    setBusy(true);
+    const answer = await sendJson('POST', publicApiPath(slug, '/booking/cancel'), { token });
+    setBusy(false);
+    settle(answer, 'Your booking is cancelled.');
+  }
+
+  if (view.state === 'loading') {
+    return (
+      <p className="m-0 text-ink-2" role="status">
+        Opening your booking…
+      </p>
+    );
+  }
+  if (view.state === 'broken') {
+    return (
+      <>
+        <h1 className="m-0 font-display text-2xl font-bold">Your booking</h1>
+        <Notice tone="error">{view.message}</Notice>
+        <a
+          href={`/book/${encodeURIComponent(slug)}`}
+          className={buttonClass({ variant: 'secondary' })}
+        >
+          Book a visit
+        </a>
+      </>
+    );
+  }
+
+  const { booking } = view;
+  return (
+    <div className="grid gap-4">
+      <h1 className="m-0 font-display text-2xl font-bold">Your booking</h1>
+      {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
+      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-md border border-line bg-surface p-4">
+        <dt className="text-ink-2">Service</dt>
+        <dd className="m-0 font-semibold">{booking.service.name}</dd>
+        <dt className="text-ink-2">With</dt>
+        <dd className="m-0 font-semibold">{booking.staff.displayName}</dd>
+        <dt className="text-ink-2">When</dt>
+        <dd className="m-0 font-semibold">{dateTimeLabel(timeZone, booking.startsAt)}</dd>
+        <dt className="text-ink-2">Status</dt>
+        <dd className="m-0 font-semibold" data-testid="booking-status">
+          {STATUS_LABELS[booking.status]}
+        </dd>
+      </dl>
+      {!booking.changeable ? (
+        <p className="m-0 text-ink-2">
+          {booking.status === 'cancelled'
+            ? 'This booking is cancelled.'
+            : 'This booking can’t be changed online any more. Contact the business.'}
+        </p>
+      ) : mode === 'view' ? (
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={buttonClass()}
+            onClick={() => {
+              setNotice(null);
+              setMode('move');
+            }}
+          >
+            Reschedule
+          </button>
+          <button
+            type="button"
+            className={buttonClass({ variant: 'secondary' })}
+            onClick={() => {
+              setNotice(null);
+              setMode('cancel');
+            }}
+          >
+            Cancel booking
+          </button>
+        </div>
+      ) : mode === 'cancel' ? (
+        <section
+          aria-label="Cancel this booking"
+          className="grid gap-3 rounded-md bg-wait-soft p-4"
+        >
+          <p className="m-0 font-semibold text-wait">Cancel this booking? This can’t be undone.</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              className={buttonClass()}
+              onClick={() => void cancel()}
+            >
+              {busy ? 'Cancelling…' : 'Yes, cancel it'}
+            </button>
+            <button
+              type="button"
+              className={buttonClass({ variant: 'secondary' })}
+              onClick={() => {
+                setMode('view');
+              }}
+            >
+              Keep it
+            </button>
+          </div>
+        </section>
+      ) : (
+        <section aria-label="Pick a new time" className="grid gap-3">
+          <h2 className="m-0 text-lg font-bold">
+            Pick a new time with {booking.staff.displayName}
+          </h2>
+          {alternatives === null || alternatives.length === 0 ? null : (
+            <div className="flex flex-wrap gap-2" data-testid="alternatives">
+              {alternatives.map((other) => (
+                <button
+                  key={other.startsAt}
+                  type="button"
+                  disabled={busy}
+                  className={chipClass()}
+                  onClick={() => void move(other.startsAt)}
+                >
+                  {dateTimeLabel(timeZone, other.startsAt)}
+                </button>
+              ))}
+            </div>
+          )}
+          <SlotPicker
+            slug={slug}
+            timeZone={timeZone}
+            now={now}
+            serviceId={booking.service.id}
+            staffMemberId={booking.staff.id}
+            staffNames={staffNames}
+            onPick={(slot) => void move(slot.startsAt)}
+          />
+          <button
+            type="button"
+            className={buttonClass({
+              variant: 'quiet',
+              size: 'sm',
+              className: 'justify-self-start',
+            })}
+            onClick={() => {
+              setMode('view');
+              setAlternatives(null);
+            }}
+          >
+            Keep the current time
+          </button>
+        </section>
+      )}
+    </div>
+  );
+}

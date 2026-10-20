@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ApiErrorSchema,
+  BookingPageSettingsSchema,
   ChangeMemberRoleRequestSchema,
   CurrentBusinessResponseSchema,
   MeResponseSchema,
@@ -52,6 +53,7 @@ describe('CurrentBusinessResponseSchema', () => {
         timeZone: 'America/New_York',
         locale: 'en-US',
         templateId: 'beauty-salon',
+        brandColor: '#7a3e6c',
       },
       role: 'staff',
       permissions: ['business.read', 'calendar.read'],
@@ -68,6 +70,7 @@ describe('CurrentBusinessResponseSchema', () => {
         timeZone: 'America/New_York',
         locale: 'en-US',
         templateId: null,
+        brandColor: null,
       },
       role: 'staff',
     };
@@ -75,6 +78,23 @@ describe('CurrentBusinessResponseSchema', () => {
     expect(
       CurrentBusinessResponseSchema.safeParse({ ...body, permissions: ['everything'] }).success,
     ).toBe(false);
+  });
+});
+
+describe('BookingPageSettingsSchema', () => {
+  it('takes a color or null (the neutral default)', () => {
+    expect(BookingPageSettingsSchema.parse({ brandColor: '#7A3E6C' })).toEqual({
+      brandColor: '#7a3e6c',
+    });
+    expect(BookingPageSettingsSchema.parse({ brandColor: null })).toEqual({ brandColor: null });
+  });
+
+  it('rejects a missing or invalid color and unknown fields', () => {
+    expect(BookingPageSettingsSchema.safeParse({}).success).toBe(false);
+    expect(BookingPageSettingsSchema.safeParse({ brandColor: 'plum' }).success).toBe(false);
+    expect(BookingPageSettingsSchema.safeParse({ brandColor: null, slug: 'other' }).success).toBe(
+      false,
+    );
   });
 });
 

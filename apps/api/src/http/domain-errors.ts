@@ -2,16 +2,22 @@ import {
   BookingNotChangeableError,
   BookingNotFoundError,
   BookingNotStartedError,
+  BookingPageNotFoundError,
+  BookingRequestExpiredError,
+  BookingRequestNotFoundError,
+  BookingRequestUsedError,
   IdempotencyKeyReusedError,
   ServiceNotFoundError,
   SlotUnavailableError,
   StaffMemberNotFoundError,
   TimeOffNotFoundError,
+  TooManyBookingRequestsError,
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
   WaitlistExpiredError,
+  WrongVerificationCodeError,
 } from '@pepper/appointments';
-import type { ApiErrorCode, SlotUnavailable } from '@pepper/contracts';
+import type { ApiErrorCode, SlotUnavailable, WrongCode } from '@pepper/contracts';
 import {
   AlreadyAMemberError,
   ClientNotFoundError,
@@ -34,13 +40,23 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  GoneException,
   HttpException,
+  HttpStatus,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { apiError } from '../auth/guards.js';
 
 type ErrorClass = abstract new (...args: never[]) => Error;
 type Answer = new (body: object) => HttpException;
+
+/** 429: too many requests (Nest has no exception class for it). */
+export class TooManyRequestsException extends HttpException {
+  constructor(body: object) {
+    super(body, HttpStatus.TOO_MANY_REQUESTS);
+  }
+}
 
 /** Each domain error and the api's answer to it: the HTTP status and the stable code. */
 const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
@@ -68,6 +84,11 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [WaitlistEntryNotFoundError, NotFoundException, 'waitlist_entry_not_found'],
   [WaitlistEntryNotChangeableError, ConflictException, 'waitlist_entry_not_changeable'],
   [WaitlistExpiredError, BadRequestException, 'waitlist_expired'],
+  [BookingPageNotFoundError, NotFoundException, 'booking_page_not_found'],
+  [BookingRequestNotFoundError, NotFoundException, 'booking_request_not_found'],
+  [BookingRequestExpiredError, GoneException, 'booking_request_expired'],
+  [BookingRequestUsedError, ConflictException, 'booking_request_used'],
+  [TooManyBookingRequestsError, TooManyRequestsException, 'too_many_requests'],
 ];
 
 /**
@@ -84,6 +105,14 @@ export function toHttpError(error: unknown): unknown {
       alternatives: [...error.alternatives],
     };
     return new ConflictException(body);
+  }
+  if (error instanceof WrongVerificationCodeError) {
+    const body: WrongCode = {
+      ...apiError('wrong_code'),
+      code: 'wrong_code',
+      attemptsLeft: error.attemptsLeft,
+    };
+    return new UnprocessableEntityException(body);
   }
   for (const [errorClass, Answer, code] of ANSWERS) {
     if (error instanceof errorClass) return new Answer(apiError(code));

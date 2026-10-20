@@ -1,8 +1,12 @@
 import {
+  BrandColorSchema,
   NewTenantSchema,
   TenantIdSchema,
+  TenantSlugSchema,
   UserIdSchema,
+  type BrandColor,
   type NewTenant,
+  type TenantSlug,
   type UserId,
 } from '@pepper/contracts';
 import { eq, sql } from 'drizzle-orm';
@@ -92,4 +96,44 @@ export async function findCurrentTenant(tx: TenantTx): Promise<Tenant | undefine
     .from(tenants)
     .where(eq(tenants.id, sql`current_tenant_id()`));
   return tenant;
+}
+
+/** Sets the transaction's business's booking page color; `undefined` when there is none. */
+export async function updateCurrentTenantBrandColor(
+  tx: TenantTx,
+  brandColor: BrandColor | null,
+): Promise<Tenant | undefined> {
+  const [tenant] = await tx
+    .update(tenants)
+    .set({ brandColor: brandColor === null ? null : BrandColorSchema.parse(brandColor) })
+    .where(eq(tenants.id, sql`current_tenant_id()`))
+    .returning();
+  return tenant;
+}
+
+/**
+ * Runs `work` in a transaction bound to the business whose booking page is at `slug`, for
+ * anonymous visitors (ADR-0022); `undefined` when no business has that slug. The business is
+ * found through the read-only `public_lookup` policy, which needs no tenant; the transaction is
+ * then bound to that business, without a user, so the work has the full tenant scope: it must
+ * return only what the booking page may show.
+ */
+export async function withPublicTenant<T>(
+  db: Database,
+  slug: TenantSlug,
+  work: (tx: TenantTx, tenant: Tenant) => Promise<T>,
+  options: { readOnly?: boolean } = {},
+): Promise<T | undefined> {
+  const value = TenantSlugSchema.parse(slug);
+  return db.transaction(
+    async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.public_slug', ${value}, true)`);
+      const [tenant] = await tx.select().from(tenants).where(eq(tenants.slug, value));
+      await tx.execute(sql`SELECT set_config('app.public_slug', '', true)`);
+      if (tenant === undefined) return undefined;
+      await setTransactionTenant(tx, TenantIdSchema.parse(tenant.id));
+      return work(tx, tenant);
+    },
+    { accessMode: options.readOnly === true ? 'read only' : 'read write' },
+  );
 }

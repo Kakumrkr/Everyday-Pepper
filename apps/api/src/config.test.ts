@@ -42,4 +42,35 @@ describe('loadApiConfig', () => {
       'Invalid api environment: AUTH_BASE_URL',
     );
   });
+
+  it('has no email sender unless SMTP_URL is set, and a default sender address', () => {
+    expect(loadApiConfig(required).mail).toBeNull();
+    expect(loadApiConfig({ ...required, SMTP_URL: 'smtp://localhost:1025' }).mail).toEqual({
+      smtpUrl: 'smtp://localhost:1025',
+      from: 'Pepper <bookings@pepper.localhost>',
+    });
+    expect(
+      loadApiConfig({
+        ...required,
+        SMTP_URL: 'smtps://u:p@mail.example',
+        MAIL_FROM: 'Juniper <a@b.c>',
+      }).mail,
+    ).toEqual({ smtpUrl: 'smtps://u:p@mail.example', from: 'Juniper <a@b.c>' });
+  });
+
+  it('rejects an SMTP_URL that is not smtp, without echoing it', () => {
+    expect(() => loadApiConfig({ ...required, SMTP_URL: 'http://u:secret@mail.example' })).toThrow(
+      /^Invalid api environment: SMTP_URL$/,
+    );
+  });
+
+  it('derives a 32-byte booking code key from the auth secret, not the secret itself', () => {
+    const key = loadApiConfig(required).bookingCodeKey;
+    expect(key).toHaveLength(32);
+    expect(key.equals(loadApiConfig(required).bookingCodeKey)).toBe(true);
+    expect(key.toString('utf8')).not.toContain(SECRET.slice(0, 8));
+    expect(
+      key.equals(loadApiConfig({ ...required, AUTH_SECRET: `${SECRET}x` }).bookingCodeKey),
+    ).toBe(false);
+  });
 });

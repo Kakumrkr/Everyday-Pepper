@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-19 · **Plan version:** 0.12 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14, the Pepper rename/theme (PCR-002) and S15 (booking screens, ADR-0020 accepted) are merged. **S16 (Phase 4c: setup screens) done**, ADR-0021 **accepted** by the user, PR opened and merged into `main` at the user's request → next: **S17** (public booking page with email verification)
+**Last updated:** 2026-10-20 · **Plan version:** 0.13 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14–S16 merged. **S17 (Phase 4d: public booking page with email verification) done**, [ADR-0022](../adr/0022-public-booking-page.md) **accepted** by the user, PR opened and merged into `main` at the user's request → next: **S18** (Phase 4 exit)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -345,6 +345,51 @@
     - A batch hours endpoint for the Team list (one request per staff member, at most 40).
     - The client profile shows "not found" also when the api fails (it cannot tell the two apart from the loader's `null`).
 
+- **S17 Phase 4d (2026-10-20):** public booking page with email verification ([ADR-0022](../adr/0022-public-booking-page.md), accepted by the user on 2026-10-20). The user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue", so Claude went ahead on its recommendations, to be reviewed.
+  - **db:**
+    - Migrations 0021–0023: `current_public_slug()` and the read-only `public_lookup` policy on `tenants`, plus `withPublicTenant`.
+    - `tenants.brand_color`.
+    - The `booking_verifications` table (HMAC code hash, attempts, expiry; restrictive `member_scope` so no member reaches it).
+    - `bookings.manage_token_hash` (unique). Isolation suite extended.
+  - **contracts:**
+    - `BrandColorSchema` and `BookingPageSettingsSchema`.
+    - Audit action `tenant.updated`.
+    - `public-booking.ts`: the page, the request, confirm with an optional `startsAt`, the link token, `WrongCodeSchema`.
+    - New api error codes.
+  - **core:** `updateBookingPage` (`settings.manage`, audited).
+  - **appointments:**
+    - `getPublicBusiness`, `findPublicAvailability`.
+    - `requestBooking` (5 per email per hour).
+    - `confirmBookingRequest` (5 attempts, 10 minutes; reuses a client by the verified email; anyone → the first free staff member under lock).
+    - `getManagedBooking` / `rescheduleManagedBooking` / `cancelManagedBooking`.
+    - `nearestAlternatives` is shared with team bookings (one time per start for anyone).
+  - **api:**
+    - `/v1/public/businesses/:slug` (page, availability, booking-requests, confirm, booking/lookup|reschedule|cancel) with no session; writes still need the app's Origin.
+    - `PUT /v1/tenant/booking-page`.
+    - `Mailer` port with an SMTP adapter (nodemailer 10.0.15, the one new dependency). `SMTP_URL`/`MAIL_FROM` in config; Compose points at Mailpit.
+    - Redis fixed-window rate limits per address and per business, fail closed.
+    - HKDF code key from `AUTH_SECRET`. `REDIS` is exported from runtime.
+  - **ui:** `brandTokens`/`brandStyle` (any color → AA in both themes; property test), `.bookpage` in `theme.css`, `check` icon, `Card labelledBy`.
+  - **web:**
+    - `/book/<slug>` (service → staff or anyone → day strip + free times → details → code → booked; a taken time offers alternatives booked with the same code).
+    - `/book/<slug>/manage#<token>` (view, reschedule, cancel).
+    - A "Your booking page" card on Services (link; color for owners and managers).
+    - The server page load passes the visitor's `X-Forwarded-For`.
+  - **e2e:** `public-booking.spec.ts`. The journey reads the code and the link from Mailpit, checks the business color on the button, a wrong code, nothing booked before the code, then reschedule and cancel. Also an unknown page and a broken link.
+  - **Checks run:**
+    - `pnpm check` green. Unit tests: contracts 425, ui 79, templates 96, core 514, db 38, appointments 72, runtime 79, testing 13, api 246, web 207, worker 3. Coverage: core 100%, contracts 100% lines, appointments 100% lines, web 100% lines, api 96.8%, ui 98.2%, db 88.4%.
+    - `pnpm test:integration` green, **555**: db 330 (incl. the public lookup and booking-request isolation), appointments 102 (incl. AC-W8-1 two confirmations of the last slot, one wins), core 60, api 60 (incl. the full AC-W8-2 flow against real Postgres and Redis), runtime 2, testing 1. One api assertion was flaky (a six-digit run inside a random UUID) and was fixed.
+    - Playwright: **42/42 green** (phone and desktop) against api, worker and web started with `node`/`next start` on a separate Compose project (`pepper-s17`: Postgres, Redis, Mailpit), `--workers=2`, using `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium`.
+    - Visual check: screenshots of every step on phone and desktop, light and dark, in the sample plum.
+  - **Not done / for later:**
+    - Docker image builds and the Compose E2E job were not run here; CI runs them, now with `SMTP_URL` to Mailpit.
+    - Cleanup of expired booking requests (a Phase 5 job).
+    - Sending through the outbox with retries (Phase 5).
+    - Turnstile and the edge proxy that makes per-address limits trustworthy (Phase 11).
+    - Address, notes, "add to calendar", a cancellation policy, and staff photos on the page.
+    - Confirmation emails for team-made bookings (Phase 5).
+    - The concurrent last slot in Playwright (S18).
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -457,6 +502,8 @@
 - **End of S15 (user, 2026-10-19):** open the PR and merge it to `main`; S16 starts in a new session.
 - **S16 (2026-10-19): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0021): (a) a client's visits through a `clientId` filter on `GET /v1/bookings` (±62 days), not a new endpoint; (b) client editing now, auditing only which fields changed; (c) rule defaults returned by the api so the web app does not import templates; business-wide rules only on the rules screen; nav order Home · Calendar · Clients · Services · Team.
 - **End of S16 (user, 2026-10-19):** "ADR-0021 approve. open PR and merge to main." ADR-0021 accepted as proposed (visits via the `clientId` filter, client editing with field-name-only audit, rule defaults from the api, business-wide rules only on the rules screen, nav order). S17 starts in a new session; its brief must settle the email sender (dev Mailpit sender now vs. the Phase 5 outbox).
+- **S17 (2026-10-20): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0022): (a) **email sender: a dev SMTP sender now** (nodemailer → Mailpit; any SMTP in production) called directly by the api behind a `Mailer` port, with the outbox in Phase 5; (b) `/book/<slug>` URLs, link `/book/<slug>/manage#<token>`; (c) `tenants.brand_color` column, slate default; (d) the time is not held while the client verifies, and the same code may confirm an alternative; (e) audit actor `system`, booking source `booking_page`.
+- **End of S17 (user, 2026-10-20):** "ADR-0022 approve. open PR and merge to main." ADR-0022 accepted as proposed (dev SMTP sender until the Phase 5 outbox, `/book/<slug>` URLs, `tenants.brand_color` with a slate default, no hold during verification and the same code may confirm an alternative, audit actor `system`). S18 starts in a new session.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
@@ -470,7 +517,7 @@ Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S
 | S14 | ~~Design system + app shell + calendar day view; response caps~~ **done** | 4a | — |
 | S15 | ~~**Booking screens:** create a booking from the calendar (service, staff member, free times from `/v1/availability`, client picker; staff find clients by exact email or phone), the booking sheet (details, move, status, cancel) with Radix dialogs, the 409 alternatives, the waitlist entry; booking outcomes rule (b) unless the user says otherwise; staff journey in Playwright~~ **done** | 4b | — |
 | S16 | ~~**Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system~~ **done** (ADR-0021 accepted) | 4c | — |
-| S17 | **Public booking page with email verification:** the business's own brand color (PCR-001), service → staff → time → details → email code → confirmation with reschedule/cancel links. Needs an email sender before Phase 5's outbox (decide at the brief: dev Mailpit sender now, outbox later) | 4d | AC-W8-2; Playwright public booking |
+| S17 | ~~**Public booking page with email verification**~~ **done** (ADR-0022 accepted) | 4d | — |
 | S18 | **Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17 | 4e | Phase 4 exit criteria green; no open high-severity findings |
 
 ## How to resume in a new session

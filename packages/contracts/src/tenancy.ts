@@ -24,6 +24,17 @@ export const TenantSlugSchema = z
   );
 export type TenantSlug = z.infer<typeof TenantSlugSchema>;
 
+/**
+ * The booking page's color (PCR-001): `#rrggbb`, stored lowercased. The page derives its
+ * colors from it and adjusts them until text on them passes WCAG AA (`@pepper/ui`).
+ */
+export const BrandColorSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^#[0-9a-f]{6}$/, 'Use a color such as #7a3e6c');
+export type BrandColor = z.infer<typeof BrandColorSchema>;
+
 /** An IANA time zone the runtime knows, e.g. `America/New_York`. */
 export const TimeZoneSchema = z.string().refine(isKnownTimeZone, 'Unknown IANA time zone');
 

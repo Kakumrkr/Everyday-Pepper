@@ -1,4 +1,5 @@
 import {
+  BookingPageSettingsSchema,
   NewTenantSchema,
   SetActiveTenantRequestSchema,
   type Business,
@@ -99,5 +100,17 @@ export class AccountController {
     // TenantGuard just found the membership, so the business exists (deleted concurrently: 403).
     if (business === null) throw new ForbiddenException(apiError('not_a_member'));
     return { business, role: tenant.role, permissions: permissionsOf(tenant.role) };
+  }
+
+  /** The booking page's settings: its color (PCR-001). Owners and managers. */
+  @Put('tenant/booking-page')
+  @UseGuards(TenantGuard)
+  @RequirePermission('settings.manage')
+  updateBookingPage(
+    @CurrentTenant() tenant: TenantContext,
+    @Body() body: unknown,
+  ): Promise<Business> {
+    const settings = parseBody(BookingPageSettingsSchema, body);
+    return answering(() => this.tenancy.updateBookingPage(tenant, settings));
   }
 }
