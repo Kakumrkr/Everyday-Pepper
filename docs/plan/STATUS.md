@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.17 · **Current phase:** 5 — Messaging + jobs, **complete** (S19–S21) once S21 is merged. **S21 (Phase 5c: to-dos + Web Push + Phase 5 security review) done** on branch `claude/stoic-fermat-d5ocbc`, all local checks green; [ADR-0026](../adr/0026-tasks-and-web-push.md) **proposed**, waiting for the user's review → then the PR and merge → next: **S22** (Phase 6 planning)
+**Last updated:** 2026-10-20 · **Plan version:** 0.17 · **Current phase:** 5 — Messaging + jobs, **complete** (S19–S21). **S21 (Phase 5c: to-dos + Web Push + Phase 5 security review) done**, [ADR-0026](../adr/0026-tasks-and-web-push.md) **accepted** by the user, PR opened and merged into `main` at the user's request → next: **S22** (Phase 6 planning)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -504,7 +504,7 @@
 
 - **Maintenance after S20 (2026-10-20): fewer GitHub Actions minutes.** `ci.yml` runs on PRs, weekly (Monday 06:23 UTC) and by hand, no longer on pushes to `main`; a **Code changed?** job skips the three jobs for docs-only PRs. If it fails, everything runs. Its rule was checked on sample file lists, and actionlint 1.7.7 (with shellcheck) is clean. `dependabot.yml` is monthly with grouped PRs. `CLAUDE.md` gains the "save minutes" working rule; dev-setup documents it. Expected cost: about 18 minutes per session, instead of 40–55.
 
-- **S21 Phase 5c (2026-10-20): to-dos, Web Push for the team, Phase 5 security review** ([ADR-0026](../adr/0026-tasks-and-web-push.md), proposed). At the Session Brief the user chose Claude's recommendation on all four questions: the `web-push` library; pushes for booking-page activity and due to-dos; no client names in pushes; staff see their own to-dos, owners and managers all.
+- **S21 Phase 5c (2026-10-20): to-dos, Web Push for the team, Phase 5 security review** ([ADR-0026](../adr/0026-tasks-and-web-push.md), accepted by the user on 2026-10-20). At the Session Brief the user chose Claude's recommendation on all four questions: the `web-push` library; pushes for booking-page activity and due to-dos; no client names in pushes; staff see their own to-dos, owners and managers all.
   - **Database** (migrations 0030–0031):
     - `tasks`: title, due time, assignee (composite key to memberships, cleared when they leave), open/done, source, creator, `due_notified_at`. A restrictive `member_scope` limits staff to tasks assigned to them or that they created; there is a `tasks` job scan.
     - `push_subscriptions`: endpoint and keys per member and business. Each member reaches only their own; the rows are removed with the membership.
@@ -703,16 +703,16 @@
   - (4) one CI run per session: every check run locally first, every commit (docs, "ADR accepted", STATUS) in before the PR is opened, and pushes to an open PR only to fix CI. Written into `CLAUDE.md` (Git) so every session follows it.
 - **End of S20 (user, 2026-10-20):** "All good. Raise the PR and merge to main." ADR-0025 accepted as proposed, with Claude's defaults. S21 starts in a new session from `main`.
 - **S21 decisions (user, 2026-10-20, S21 Session Brief):** (1) **`web-push` 3.6.7** to sign and encrypt pushes (worker only), not hand-written crypto; (2) pushes for **booking-page bookings, moves and cancellations** (to the staff member and the owners and managers) and **due to-dos** (to the assignee); (3) **no client names** in a push; (4) **staff see and manage their own to-dos; owners and managers see and assign everyone's**.
-- **S21 defaults (Claude, in ADR-0026, to confirm in review):** a new to-do is the caller's own, a date without a time is due at 9:00 AM business time, a team (unassigned) to-do notifies the owners and managers; to-dos live in core (L1); devices only on browser push services, at most 10 per member, a shared device moves to whoever turned it on last; turning off removes this business's device but keeps the browser subscription; the due-task job runs on the reminders' interval; a local-only VAPID key pair in Compose and `.env.example`; the To-dos and Notifications cards on Home.
+- **S21 defaults (Claude, in ADR-0026; accepted by the user with "ADR-0026 approve", 2026-10-20):** a new to-do is the caller's own, a date without a time is due at 9:00 AM business time, a team (unassigned) to-do notifies the owners and managers; to-dos live in core (L1); devices only on browser push services, at most 10 per member, a shared device moves to whoever turned it on last; turning off removes this business's device but keeps the browser subscription; the due-task job runs on the reminders' interval; a local-only VAPID key pair in Compose and `.env.example`; the To-dos and Notifications cards on Home.
+- **End of S21 (user, 2026-10-20):** "ADR-0026 approve. open PR and merge to main." ADR-0026 accepted as proposed, with Claude's defaults. S22 starts in a new session from `main`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. **Review [ADR-0026](../adr/0026-tasks-and-web-push.md)** (to-dos and Web Push, incl. Claude's defaults) and say whether to open the S21 PR and merge it (one CI run).
-2. **Turn on "Require branches to be up to date before merging"** for `main` (Settings → Branches → the `main` rule). CI no longer re-runs on `main` after a merge (see "CI minutes" above), so this is what keeps `main` tested.
-3. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. **Turn on "Require branches to be up to date before merging"** for `main` (Settings → Branches → the `main` rule). CI no longer re-runs on `main` after a merge (see "CI minutes" above), so this is what keeps `main` tested.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done (S21 to be merged). Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
+Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
@@ -723,7 +723,7 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
 | S18 | ~~**Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17~~ **done** (ADR-0023 accepted; Phase 4 complete) | 4e | — |
 | S19 | ~~**Phase 5 planning + outbox**~~ **done** (ADR-0024 accepted; D4: Resend) | 5a | — |
 | S20 | ~~**Confirmations and reminders**~~ **done** (ADR-0025 accepted) | 5b | — |
-| S21 | ~~**Tasks + push notifications (Phase 5 exit)**~~ **done** (ADR-0026 proposed; Phase 5 complete once merged) | 5c | — |
+| S21 | ~~**Tasks + push notifications (Phase 5 exit)**~~ **done** (ADR-0026 accepted; Phase 5 complete) | 5c | — |
 | S22 | **Phase 6 planning + provider adapter:** split Phase 6 (AI agent + trust layer) into sessions; decide the OpenAI cost option (credit with a hard monthly limit, or a free local model for development, see Decisions); build the provider adapter with a fake provider and the eval runner skeleton | 6a | Phase 6 plan confirmed; adapter contract tests and a first eval run green |
 
 ## How to resume in a new session
