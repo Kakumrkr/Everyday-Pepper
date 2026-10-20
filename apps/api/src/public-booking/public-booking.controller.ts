@@ -96,7 +96,8 @@ export class PublicBookingController {
   /**
    * 201: booked, with the secret of the reschedule/cancel link (also emailed). 422
    * `wrong_code` with `attemptsLeft`; 410 `booking_request_expired`; 409
-   * `booking_request_used` or `slot_unavailable` with alternatives.
+   * `booking_request_used` or `slot_unavailable` with alternatives, one of which the same
+   * code may then confirm (`startsAt`).
    */
   @Post('booking-requests/:requestId/confirm')
   async confirm(
@@ -105,9 +106,9 @@ export class PublicBookingController {
     @Req() request: IncomingRequest,
   ): Promise<BookingConfirmResponse> {
     const { slug, requestId } = parseBody(RequestParamsSchema, params);
-    const { code } = parseBody(BookingConfirmInputSchema, body);
+    const input = parseBody(BookingConfirmInputSchema, body);
     await this.limits.hit(CODE_CHECKS, clientAddress(request));
-    return answering(() => this.booking.confirm(slug, requestId, code));
+    return answering(() => this.booking.confirm(slug, requestId, input));
   }
 
   /** The booking behind a link; 404 `booking_not_found` for an unknown token. */

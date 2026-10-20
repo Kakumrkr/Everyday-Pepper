@@ -222,7 +222,7 @@ describe('the public booking page api (no session)', () => {
       booking: BOOKING,
       manageToken: TOKEN,
     });
-    expect(service.confirm).toHaveBeenCalledWith('juniper', REQUEST_ID, '042917');
+    expect(service.confirm).toHaveBeenCalledWith('juniper', REQUEST_ID, { code: '042917' });
     expect(hits).toEqual([{ limit: 'confirm-ip', key: '203.0.113.7' }]);
   });
 

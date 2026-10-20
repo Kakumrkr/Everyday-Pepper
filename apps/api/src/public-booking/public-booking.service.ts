@@ -11,6 +11,7 @@ import {
   VERIFICATION_CODE_TTL_MINUTES,
   type AvailabilityQueryInput,
   type AvailableSlot,
+  type BookingConfirmInput,
   type BookingConfirmResponse,
   type BookingRequest,
   type BookingRequestId,
@@ -19,7 +20,6 @@ import {
   type PublicBooking,
   type PublicBusiness,
   type TenantSlug,
-  type VerificationCode,
 } from '@pepper/contracts';
 import type { Database } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
@@ -93,9 +93,9 @@ export class PublicBookingService {
   async confirm(
     slug: TenantSlug,
     requestId: BookingRequestId,
-    code: VerificationCode,
+    input: BookingConfirmInput,
   ): Promise<BookingConfirmResponse> {
-    const confirmed = await confirmBookingRequest(this.db, slug, requestId, code, {
+    const confirmed = await confirmBookingRequest(this.db, slug, requestId, input, {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
     });

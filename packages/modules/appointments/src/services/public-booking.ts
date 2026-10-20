@@ -1,6 +1,7 @@
 import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import {
   AvailabilityQuerySchema,
+  BookingConfirmInputSchema,
   BookingIdSchema,
   BookingRequestIdSchema,
   BookingRequestInputSchema,
@@ -19,6 +20,7 @@ import {
   VerificationCodeSchema,
   type AvailabilityQueryInput,
   type AvailableSlot,
+  type BookingConfirmInput,
   type BookingRequestId,
   type BookingRequestInput,
   type ManageToken,
@@ -279,18 +281,18 @@ export async function requestBooking(
  * secret is returned (only its hash is stored). A wrong code counts an attempt
  * (`WrongVerificationCodeError`); an expired or exhausted request needs a new code
  * (`BookingRequestExpiredError`); a used one is `BookingRequestUsedError`. When the time was
- * taken meanwhile: `SlotUnavailableError` with alternatives, and the request stays usable for
- * nothing else (the client asks for a new time).
+ * taken meanwhile: `SlotUnavailableError` with alternatives; the request stays open, and the
+ * same code may confirm one of them (`input.startsAt`) without another email.
  */
 export async function confirmBookingRequest(
   db: Database,
   slug: TenantSlug,
   requestId: BookingRequestId,
-  typed: VerificationCode,
+  input: BookingConfirmInput,
   options: CodeOptions,
 ): Promise<{ booking: PublicBooking; manageToken: ManageToken; email: BookingEmailDetails }> {
   const id = BookingRequestIdSchema.parse(requestId);
-  const code = VerificationCodeSchema.parse(typed);
+  const { code, startsAt } = BookingConfirmInputSchema.parse(input);
   const now = nowOf(options);
 
   // A wrong code must count even though the answer is an error, so checking commits first.
@@ -335,7 +337,7 @@ export async function confirmBookingRequest(
         request.staffMemberId === null
           ? undefined
           : StaffMemberIdSchema.parse(request.staffMemberId);
-      const start = request.startsAt.getTime();
+      const start = startsAt === undefined ? request.startsAt.getTime() : Date.parse(startsAt);
       search = {
         service,
         staffMemberId: wanted,

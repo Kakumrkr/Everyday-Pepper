@@ -94,8 +94,14 @@ export const BookingRequestResponseSchema = z.object({
 });
 export type BookingRequestResponse = z.infer<typeof BookingRequestResponseSchema>;
 
-/** `POST /v1/public/businesses/:slug/booking-requests/:requestId/confirm`. */
-export const BookingConfirmInputSchema = z.object({ code: VerificationCodeSchema }).strict();
+/**
+ * `POST /v1/public/businesses/:slug/booking-requests/:requestId/confirm`. `startsAt`: another
+ * time instead of the requested one (the client picked an alternative after the time was
+ * taken); the code proves the email address, whatever the time.
+ */
+export const BookingConfirmInputSchema = z
+  .object({ code: VerificationCodeSchema, startsAt: UtcDateTimeSchema.optional() })
+  .strict();
 export type BookingConfirmInput = z.input<typeof BookingConfirmInputSchema>;
 
 /** Body of the 422 `wrong_code` answer: how many more codes may be tried. */

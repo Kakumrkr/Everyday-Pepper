@@ -57,6 +57,9 @@ describe('VerificationCodeSchema', () => {
   it('accepts six digits, trimmed', () => {
     expect(VerificationCodeSchema.parse(' 012345 ')).toBe('012345');
     expect(BookingConfirmInputSchema.parse({ code: '999999' })).toEqual({ code: '999999' });
+    expect(
+      BookingConfirmInputSchema.parse({ code: '999999', startsAt: '2026-11-02T16:00:00.000Z' }),
+    ).toEqual({ code: '999999', startsAt: '2026-11-02T16:00:00.000Z' });
   });
 
   it.each(['12345', '1234567', '12a456', '', '١٢٣٤٥٦'])('rejects %j', (code) => {

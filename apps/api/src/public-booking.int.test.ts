@@ -173,7 +173,8 @@ describe('the public booking page', () => {
       })
       .expect(201);
     const { requestId } = BookingRequestResponseSchema.parse(asked.body);
-    expect(JSON.stringify(asked.body)).not.toMatch(/\d{6}/);
+    // The code only goes to the inbox.
+    expect(Object.keys(asked.body as object).sort()).toEqual(['expiresAt', 'requestId']);
     const [codeMail] = mailer.sent;
     expect(codeMail?.to).toBe('ana.flow@example.test');
     const code = codeIn(codeMail);

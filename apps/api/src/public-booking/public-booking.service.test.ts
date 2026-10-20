@@ -89,7 +89,9 @@ describe('PublicBookingService', () => {
 
   it('confirms even when the confirmation email fails: the page shows the link too', async () => {
     const send = vi.fn(() => Promise.reject(new Error('ECONNREFUSED')));
-    const answer = await serviceWith({ send }).confirm('juniper', 'r-1' as never, '042917');
+    const answer = await serviceWith({ send }).confirm('juniper', 'r-1' as never, {
+      code: '042917',
+    });
     expect(answer).toEqual({ booking: { status: 'confirmed' }, manageToken: TOKEN });
     expect(send).toHaveBeenCalledWith(
       expect.objectContaining({

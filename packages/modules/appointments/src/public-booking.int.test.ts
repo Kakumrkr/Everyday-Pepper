@@ -141,11 +141,17 @@ function request(p: Page, extra: Partial<BookingRequestInput> = {}) {
   return requestBooking(db, p.slug, ask(p, extra), { codeKey: KEY, clock: p.clock });
 }
 
-function confirm(p: Page, requestId: string, code: VerificationCode) {
-  return confirmBookingRequest(db, p.slug, requestId as never, code, {
-    codeKey: KEY,
-    clock: p.clock,
-  });
+function confirm(p: Page, requestId: string, code: VerificationCode, startsAt?: string) {
+  return confirmBookingRequest(
+    db,
+    p.slug,
+    requestId as never,
+    { code, startsAt },
+    {
+      codeKey: KEY,
+      clock: p.clock,
+    },
+  );
 }
 
 /** A code that is not `code`. */
@@ -401,6 +407,20 @@ describe('confirmBookingRequest', () => {
       tue('11:00'),
       tue('11:15'),
     ]);
+  });
+
+  it('the same code confirms an alternative instead, without another email', async () => {
+    const p = await newPage();
+    const asked = await request(p);
+    await book(p, { email: 'first@example.test' });
+    const refused = await confirm(p, asked.requestId, asked.code).catch((e: unknown) => e);
+    const [alternative] = (refused as SlotUnavailableError).alternatives;
+    if (alternative === undefined) throw new Error('no alternative');
+    const booked = await confirm(p, asked.requestId, asked.code, alternative.startsAt);
+    expect(booked.booking.startsAt).toBe(alternative.startsAt);
+    await expect(confirm(p, asked.requestId, asked.code)).rejects.toBeInstanceOf(
+      BookingRequestUsedError,
+    );
   });
 
   it('with anyone, books whoever is free', async () => {
