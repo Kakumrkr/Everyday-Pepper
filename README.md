@@ -1,4 +1,4 @@
-# Pepper
+# Pepper🌶️
 
 The "AI Employee" for small appointment-based service businesses (working name). Start with [`docs/README.md`](docs/README.md); current status and next steps are in [`docs/plan/STATUS.md`](docs/plan/STATUS.md). Rules for contributors (and Claude Code sessions) are in [`CLAUDE.md`](CLAUDE.md).
 
