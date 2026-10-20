@@ -1,13 +1,17 @@
+# Monthly, with each ecosystem's updates grouped into one pull request, so CI runs a few times a
+# month rather than once per package (GitHub Actions minutes are limited; dev-setup.md).
+# Security updates still arrive as soon as an advisory is published.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 3
     groups:
-      dev-tooling:
-        dependency-type: development
+      # Minor and patch updates of every package together; a major update gets its own PR.
+      npm-minor-and-patch:
+        patterns: ['*']
         update-types: [minor, patch]
     ignore:
       # typescript-eslint supports TypeScript < 6.1 (docs/engineering/dev-setup.md).
@@ -20,7 +24,10 @@ updates:
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      docker:
+        patterns: ['*']
     ignore:
       # The node base image tracks the Node LTS major in .nvmrc; major upgrades are planned changes.
       - dependency-name: node
@@ -29,9 +36,15 @@ updates:
   - package-ecosystem: docker-compose
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      docker-compose:
+        patterns: ['*']
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      github-actions:
+        patterns: ['*']
