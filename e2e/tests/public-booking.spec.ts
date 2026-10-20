@@ -18,7 +18,9 @@ import {
 
 // The public booking page through the real stack (S17, W8): the owner gives the page their
 // color (PCR-001); a client books with "anyone", confirms the code emailed to them (AC-W8-2,
-// read from Mailpit), and reschedules and cancels through the link in the confirmation.
+// read from Mailpit), and reschedules and cancels through the link in the confirmation. The
+// code is sent by the api at once; the other emails go through the outbox and the worker
+// (ADR-0024).
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
@@ -145,6 +147,7 @@ test('a client books on the page in the business’s color, confirms the emailed
   await expect(client.getByText('Your booking is cancelled.')).toBeVisible();
   await expect(client.getByTestId('booking-status')).toHaveText('Cancelled');
   expect((await bookings())[0]?.status).toBe('cancelled');
+  await expect(emailTo(email, 'is cancelled')).resolves.toContain('Hi Ana');
 });
 
 test('an unknown booking page is not found, and a broken link says so', async ({ page }) => {

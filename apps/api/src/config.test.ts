@@ -7,6 +7,7 @@ const required = {
   REDIS_URL: 'redis://h:6379',
   AUTH_SECRET: SECRET,
   AUTH_BASE_URL: 'http://localhost:3000',
+  OUTBOX_SECRET: 'a-local-test-outbox-secret-of-32-chars',
 };
 
 describe('loadApiConfig', () => {
@@ -22,6 +23,13 @@ describe('loadApiConfig', () => {
 
   it('requires DATABASE_URL and REDIS_URL', () => {
     expect(() => loadApiConfig({})).toThrow('Invalid api environment: DATABASE_URL, REDIS_URL');
+  });
+
+  it('requires the outbox secret, without echoing it', () => {
+    expect(loadApiConfig(required).outboxSecret).toBe(required.OUTBOX_SECRET);
+    expect(() => loadApiConfig({ ...required, OUTBOX_SECRET: 'short' })).toThrow(
+      /^Invalid api environment: OUTBOX_SECRET$/,
+    );
   });
 
   it('requires the auth settings, without echoing them', () => {

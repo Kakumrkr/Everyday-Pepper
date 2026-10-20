@@ -1,6 +1,12 @@
 import { Socket } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { startPostgres, startRedis, type TestService } from './containers.js';
+import {
+  startMailpit,
+  startPostgres,
+  startRedis,
+  type TestMailpit,
+  type TestService,
+} from './containers.js';
 
 /** Resolves when something accepts TCP connections at the URL's host and port. */
 function reachable(url: string): Promise<void> {
@@ -34,5 +40,25 @@ describe('test containers', () => {
     expect(redis?.url).toMatch(/^redis:\/\/[^/]+:\d+$/);
     await expect(reachable(postgres?.url ?? '')).resolves.toBeUndefined();
     await expect(reachable(redis?.url ?? '')).resolves.toBeUndefined();
+  });
+});
+
+describe('Mailpit test container', () => {
+  let mailpit: TestMailpit | undefined;
+
+  beforeAll(async () => {
+    mailpit = await startMailpit();
+  });
+
+  afterAll(async () => {
+    await mailpit?.stop();
+  });
+
+  it('accepts SMTP and answers its API, with chaos enabled', async () => {
+    await expect(reachable(mailpit?.smtpUrl ?? '')).resolves.toBeUndefined();
+    const messages = await fetch(`${mailpit?.apiUrl ?? ''}/api/v1/messages`);
+    expect(messages.status).toBe(200);
+    const chaos = await fetch(`${mailpit?.apiUrl ?? ''}/api/v1/chaos`);
+    expect(chaos.status).toBe(200);
   });
 });

@@ -21,6 +21,7 @@ import {
   type AvailabilityQueryInput,
   type AvailableSlot,
   type BookingConfirmInput,
+  type BookingId,
   type BookingRequestId,
   type BookingRequestInput,
   type ManageToken,
@@ -101,6 +102,11 @@ export const MAX_REQUESTS_PER_EMAIL_PER_HOUR = 5;
 export interface PublicOptions {
   clock?: Clock;
   templateRuleDefaults?: TemplateRuleDefaultsOf;
+  /**
+   * Called inside a change's transaction with what the client is told about, so an email the
+   * caller queues there (the outbox, ADR-0024) commits with the change, or not at all.
+   */
+  notify?: BookingNotify;
 }
 
 /** What a booking page call needs to hash codes: a secret key of the deployment. */
@@ -119,6 +125,31 @@ export interface BookingEmailDetails {
   email: string;
   clientName: string;
 }
+
+/** A change of a booking-page booking that its client is told about by email. */
+export type BookingNotice =
+  | {
+      kind: 'confirmed';
+      email: BookingEmailDetails;
+      manageToken: ManageToken;
+      change: BookingChange;
+    }
+  | {
+      kind: 'rescheduled';
+      email: BookingEmailDetails;
+      manageToken: ManageToken;
+      change: BookingChange;
+    }
+  | { kind: 'cancelled'; email: BookingEmailDetails; change: BookingChange };
+
+/** Which booking changed, and when (the row's `updated_at`: one value per change). */
+export interface BookingChange {
+  bookingId: BookingId;
+  at: Date;
+}
+
+/** Receives a notice inside the change's transaction (`PublicOptions.notify`). */
+export type BookingNotify = (tx: TenantTx, notice: BookingNotice) => Promise<void>;
 
 /** The menu and team the booking page shows. */
 export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise<PublicBusiness> {
@@ -374,19 +405,17 @@ export async function confirmBookingRequest(
         },
       });
       const booking = await toPublicBooking(tx, row, now);
-      return {
-        booking,
-        manageToken,
-        email: {
-          businessName: tenant.name,
-          timeZone: tenant.timeZone,
-          serviceName: booking.service.name,
-          staffName: booking.staff.displayName,
-          startsAt: booking.startsAt,
-          email: request.email,
-          clientName: client.name,
-        },
+      const email: BookingEmailDetails = {
+        businessName: tenant.name,
+        timeZone: tenant.timeZone,
+        serviceName: booking.service.name,
+        staffName: booking.staff.displayName,
+        startsAt: booking.startsAt,
+        email: request.email,
+        clientName: client.name,
       };
+      await options.notify?.(tx, { kind: 'confirmed', email, manageToken, change: changeOf(row) });
+      return { booking, manageToken, email };
     });
   } catch (error) {
     if ((error instanceof SlotTaken || error instanceof BookingOverlapError) && search) {
@@ -431,7 +460,13 @@ export async function cancelManagedBooking(
     const cancelled = await setBookingStatus(tx, BookingIdSchema.parse(row.id), 'cancelled');
     if (cancelled === undefined) throw new BookingNotFoundError();
     await auditUpdate(tx, row, cancelled);
-    return withEmail(tx, tenant, cancelled, now);
+    const result = await withEmail(tx, tenant, cancelled, now);
+    await options.notify?.(tx, {
+      kind: 'cancelled',
+      email: result.email,
+      change: changeOf(cancelled),
+    });
+    return result;
   });
 }
 
@@ -481,7 +516,14 @@ export async function rescheduleManagedBooking(
       });
       if (moved === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, moved);
-      return withEmail(tx, tenant, moved, now);
+      const result = await withEmail(tx, tenant, moved, now);
+      await options.notify?.(tx, {
+        kind: 'rescheduled',
+        email: result.email,
+        manageToken: ManageTokenSchema.parse(token),
+        change: changeOf(moved),
+      });
+      return result;
     });
   } catch (error) {
     if ((error instanceof SlotTaken || error instanceof BookingOverlapError) && search) {
@@ -657,6 +699,10 @@ async function toPublicBooking(tx: TenantTx, row: BookingRow, now: number): Prom
     staff: { id: staff.id, displayName: staff.displayName },
     changeable: isChangeable(row, now),
   });
+}
+
+function changeOf(row: BookingRow): BookingChange {
+  return { bookingId: BookingIdSchema.parse(row.id), at: row.updatedAt };
 }
 
 async function withEmail(

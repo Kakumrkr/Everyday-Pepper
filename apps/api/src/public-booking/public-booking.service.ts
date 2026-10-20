@@ -6,8 +6,11 @@ import {
   getPublicBusiness,
   rescheduleManagedBooking,
   requestBooking,
+  type BookingNotice,
+  type BookingNotify,
 } from '@pepper/appointments';
 import {
+  OutboxDedupeKeySchema,
   VERIFICATION_CODE_TTL_MINUTES,
   type AvailabilityQueryInput,
   type AvailableSlot,
@@ -21,12 +24,12 @@ import {
   type PublicBusiness,
   type TenantSlug,
 } from '@pepper/contracts';
-import type { Database } from '@pepper/db';
-import { DATABASE } from '@pepper/runtime';
+import { queueEmail, systemClock, type Clock, type EmailMessage, type Mailer } from '@pepper/core';
+import type { Database, TenantTx } from '@pepper/db';
+import { DATABASE, MAILER } from '@pepper/runtime';
 import { templateRuleDefaults } from '@pepper/templates';
 import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { apiError } from '../auth/guards.js';
-import { MAILER, type EmailMessage, type Mailer } from '../mail/mailer.js';
 import {
   cancelledEmail,
   codeEmail,
@@ -40,15 +43,19 @@ export interface PublicBookingOptions {
   baseUrl: string;
   /** HMAC key of the stored code hashes. */
   codeKey: Buffer;
+  /** Seals the emails queued in the outbox (ADR-0024). */
+  outboxKey: Buffer;
+  clock?: Clock;
 }
 
 export const PUBLIC_BOOKING_OPTIONS = Symbol('PUBLIC_BOOKING_OPTIONS');
 
 /**
  * The public booking page's services for a request (ADR-0022): binds the database, the code
- * key and the industry templates' rule defaults, and sends the emails. The code email must
- * reach the client, so failing to send it is an error (503); the other emails are best
- * effort, as the page shows the same details and link.
+ * key and the industry templates' rule defaults. The code email is sent at once, because the
+ * client is waiting for it: failing to send it is an error (503). The emails about a booking
+ * (confirmed, moved, cancelled) are queued in the outbox inside the change's transaction, and
+ * the worker sends each exactly once, with retries (ADR-0024).
  */
 @Injectable()
 export class PublicBookingService {
@@ -98,10 +105,8 @@ export class PublicBookingService {
     const confirmed = await confirmBookingRequest(this.db, slug, requestId, input, {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
+      notify: this.notifier(slug),
     });
-    await this.sendQuietly(
-      confirmationEmail(confirmed.email, this.manageUrl(slug, confirmed.manageToken)),
-    );
     return { booking: confirmed.booking, manageToken: confirmed.manageToken };
   }
 
@@ -112,14 +117,15 @@ export class PublicBookingService {
   async reschedule(slug: TenantSlug, token: ManageToken, startsAt: string): Promise<PublicBooking> {
     const moved = await rescheduleManagedBooking(this.db, slug, token, startsAt, {
       templateRuleDefaults,
+      notify: this.notifier(slug),
     });
-    await this.sendQuietly(rescheduledEmail(moved.email, this.manageUrl(slug, token)));
     return moved.booking;
   }
 
   async cancel(slug: TenantSlug, token: ManageToken): Promise<PublicBooking> {
-    const cancelled = await cancelManagedBooking(this.db, slug, token);
-    await this.sendQuietly(cancelledEmail(cancelled.email));
+    const cancelled = await cancelManagedBooking(this.db, slug, token, {
+      notify: this.notifier(slug),
+    });
     return cancelled.booking;
   }
 
@@ -131,19 +137,30 @@ export class PublicBookingService {
     return this.mailer;
   }
 
-  private manageUrl(slug: TenantSlug, token: ManageToken): string {
-    return manageUrl(this.options.baseUrl, slug, token);
-  }
-
-  /** Sends an email whose content the page also shows; a failure is logged, not raised. */
-  private async sendQuietly(message: EmailMessage): Promise<void> {
-    if (this.mailer === null || message.to === '') return;
-    try {
-      await this.mailer.send(message);
-    } catch (error) {
-      // Never the address or the content: they are personal data and carry the link.
-      this.logger.warn(`Could not send a booking email: ${messageOf(error)}`);
-    }
+  /**
+   * Queues the email about a booking change in the change's transaction. Clients without an
+   * email address get none.
+   */
+  private notifier(slug: TenantSlug): BookingNotify {
+    return async (tx: TenantTx, notice: BookingNotice) => {
+      if (notice.email.email === '') return;
+      const link = (token: ManageToken) => manageUrl(this.options.baseUrl, slug, token);
+      const message: EmailMessage =
+        notice.kind === 'cancelled'
+          ? cancelledEmail(notice.email)
+          : notice.kind === 'confirmed'
+            ? confirmationEmail(notice.email, link(notice.manageToken))
+            : rescheduledEmail(notice.email, link(notice.manageToken));
+      // One email per change: `at` is the booking's `updated_at`, one value per transaction.
+      const { bookingId, at } = notice.change;
+      await queueEmail(tx, message, {
+        key: this.options.outboxKey,
+        dedupeKey: OutboxDedupeKeySchema.parse(
+          `booking.${notice.kind}:${bookingId}:${String(at.getTime())}`,
+        ),
+        now: (this.options.clock ?? systemClock).now(),
+      });
+    };
   }
 }
 

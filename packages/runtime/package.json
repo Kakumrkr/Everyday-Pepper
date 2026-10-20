@@ -27,9 +27,6 @@
     "test:integration": "vitest run --config vitest.int.config.ts"
   },
   "dependencies": {
-    "@pepper/contracts": "workspace:*",
-    "@pepper/core": "workspace:*",
-    "@pepper/db": "workspace:*",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.223.0",
     "@opentelemetry/instrumentation": "^0.223.0",
@@ -41,8 +38,12 @@
     "@opentelemetry/sdk-trace-base": "^2.12.0",
     "@opentelemetry/sdk-trace-node": "^2.12.0",
     "@opentelemetry/semantic-conventions": "^1.43.0",
+    "@pepper/contracts": "workspace:*",
+    "@pepper/core": "workspace:*",
+    "@pepper/db": "workspace:*",
     "@sentry/node": "^11.8.0",
     "ioredis": "^6.0.0",
+    "nodemailer": "10.0.15",
     "pino": "^10.4.0",
     "zod": "^4.6.7"
   },
@@ -54,12 +55,12 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "@pepper/config": "workspace:*",
-    "@pepper/testing": "workspace:*",
     "@nestjs/common": "^12.1.3",
     "@nestjs/core": "^12.1.3",
     "@nestjs/platform-express": "^12.1.3",
     "@nestjs/testing": "^12.1.3",
+    "@pepper/config": "workspace:*",
+    "@pepper/testing": "workspace:*",
     "@swc/core": "^1.16.18",
     "@types/supertest": "^7.2.1",
     "@vitest/coverage-v8": "^5.0.5",

@@ -1,0 +1,126 @@
+import {
+  Inject,
+  Injectable,
+  Logger,
+  Module,
+  type DynamicModule,
+  type OnApplicationBootstrap,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
+import { systemClock, type Clock, type Mailer } from '@pepper/core';
+import type { Database } from '@pepper/db';
+import { DATABASE, MAILER, raiseAlert } from '@pepper/runtime';
+import { Queue, Worker, type Job } from 'bullmq';
+import { Redis } from 'ioredis';
+import { handleDeliveryJob, OUTBOX_QUEUE, relayDue } from './relay.js';
+
+export interface OutboxOptions {
+  redisUrl: string;
+  /** Opens sealed messages (`outboxKeyFrom(OUTBOX_SECRET)`). */
+  key: Buffer;
+  pollMs: number;
+  /** Deliveries in flight per worker process. */
+  concurrency?: number;
+  clock?: Clock;
+}
+
+export const OUTBOX_OPTIONS = Symbol('OUTBOX_OPTIONS');
+
+/**
+ * Runs the outbox in the worker (ADR-0024): a relay that polls Postgres for due messages and
+ * queues them in BullMQ, and a BullMQ worker that delivers them. Without a mailer nothing
+ * runs, and queued emails wait. A message given up raises an alert.
+ */
+@Injectable()
+export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdown {
+  private readonly logger = new Logger(OutboxRunner.name);
+  private readonly db: Database;
+  private connection: Redis | undefined;
+  private queue: Queue | undefined;
+  private worker: Worker | undefined;
+  private timer: NodeJS.Timeout | undefined;
+  private relaying = false;
+  private relayFailing = false;
+
+  constructor(
+    @Inject(DATABASE) database: { db: Database },
+    @Inject(MAILER) private readonly mailer: Mailer | null,
+    @Inject(OUTBOX_OPTIONS) private readonly options: OutboxOptions,
+  ) {
+    this.db = database.db;
+  }
+
+  onApplicationBootstrap(): void {
+    const { mailer } = this;
+    if (mailer === null) {
+      this.logger.warn('No SMTP_URL: queued emails wait until one is configured');
+      return;
+    }
+    // BullMQ's blocking commands need unlimited retries per request.
+    const connection = new Redis(this.options.redisUrl, { maxRetriesPerRequest: null });
+    connection.on('error', () => undefined); // Reported by readiness; BullMQ reconnects.
+    this.connection = connection;
+    this.queue = new Queue(OUTBOX_QUEUE, { connection });
+    const delivery = { key: this.options.key, mailer, clock: this.options.clock ?? systemClock };
+    this.worker = new Worker(
+      OUTBOX_QUEUE,
+      async (job: Job) => {
+        const result = await handleDeliveryJob(this.db, job.data, delivery);
+        if (result === 'dead') this.gaveUp(job);
+        return result;
+      },
+      { connection, concurrency: this.options.concurrency ?? 5 },
+    );
+    this.worker.on('failed', (_job, error) => {
+      // Unexpected (e.g. the database is down): the message is due again later.
+      this.logger.warn(`Outbox delivery failed: ${error.name}`);
+    });
+    this.timer = setInterval(() => void this.relayOnce(), this.options.pollMs);
+  }
+
+  /** One relay pass; passes never overlap, and a failing pass is logged once until it heals. */
+  async relayOnce(): Promise<void> {
+    if (this.relaying || this.queue === undefined) return;
+    this.relaying = true;
+    try {
+      await relayDue(this.db, this.queue, (this.options.clock ?? systemClock).now());
+      this.relayFailing = false;
+    } catch (error) {
+      if (!this.relayFailing) {
+        this.logger.warn(`Outbox relay failed: ${error instanceof Error ? error.name : 'error'}`);
+      }
+      this.relayFailing = true;
+    } finally {
+      this.relaying = false;
+    }
+  }
+
+  async onApplicationShutdown(): Promise<void> {
+    clearInterval(this.timer);
+    await this.worker?.close();
+    await this.queue?.close();
+    await this.connection?.quit().catch(() => undefined);
+  }
+
+  private gaveUp(job: Job): void {
+    // Ids only: the address and content are personal data (and already cleared).
+    const tags = {
+      messageId: String((job.data as { messageId?: unknown }).messageId),
+      tenantId: String((job.data as { tenantId?: unknown }).tenantId),
+    };
+    this.logger.error(`Outbox message given up: ${tags.messageId}`);
+    raiseAlert('Outbox message given up', tags);
+  }
+}
+
+/** The outbox relay and delivery worker. Needs `ConnectionsModule` and `MailModule`. */
+@Module({})
+export class OutboxModule {
+  static forRoot(options: OutboxOptions): DynamicModule {
+    return {
+      module: OutboxModule,
+      providers: [{ provide: OUTBOX_OPTIONS, useValue: options }, OutboxRunner],
+      exports: [OutboxRunner],
+    };
+  }
+}

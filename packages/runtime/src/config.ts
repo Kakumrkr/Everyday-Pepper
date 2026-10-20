@@ -99,3 +99,44 @@ export function loadServiceConfig(
     }),
   };
 }
+
+const MailEnvSchema = z.object({
+  /**
+   * Where email goes (ADR-0022, ADR-0024): an `smtp://` or `smtps://` URL, credentials included
+   * if any. Mailpit in development and CI (`smtp://localhost:1025`). Unset: no email is sent.
+   * Never logged.
+   */
+  SMTP_URL: z.url({ protocol: /^smtps?$/ }).optional(),
+  /** The sender of the emails, e.g. `Pepper <bookings@pepper.app>`. */
+  MAIL_FROM: z.string().trim().min(3).max(200).default('Pepper <bookings@pepper.localhost>'),
+});
+
+export interface MailConfig {
+  smtpUrl: string;
+  from: string;
+}
+
+/** Reads `SMTP_URL` and `MAIL_FROM`; `null` when no `SMTP_URL` is set. Never log it. */
+export function loadMailConfig(
+  service: NestServiceName,
+  env: NodeJS.ProcessEnv,
+): MailConfig | null {
+  const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
+  const mail = loadEnv(service, MailEnvSchema, present);
+  return mail.SMTP_URL === undefined ? null : { smtpUrl: mail.SMTP_URL, from: mail.MAIL_FROM };
+}
+
+const OutboxEnvSchema = z.object({
+  /**
+   * Seals queued messages (ADR-0024): their content, which may carry a client's private link,
+   * is encrypted with a key derived from it. At least 32 random characters, the same in api
+   * and worker. Changing it makes queued messages unreadable (they are given up). Never logged.
+   */
+  OUTBOX_SECRET: z.string().min(32),
+});
+
+/** Reads `OUTBOX_SECRET` (required). Never log it. */
+export function loadOutboxSecret(service: NestServiceName, env: NodeJS.ProcessEnv): string {
+  const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
+  return loadEnv(service, OutboxEnvSchema, present).OUTBOX_SECRET;
+}

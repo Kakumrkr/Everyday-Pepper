@@ -45,6 +45,7 @@ describe('api process: logs and traces', () => {
         DATABASE_URL: databaseUrl,
         REDIS_URL: redis.url,
         AUTH_SECRET: 'an-integration-test-secret-32-chars',
+        OUTBOX_SECRET: 'an-integration-test-outbox-secret-32+',
         AUTH_BASE_URL: 'http://localhost:3000',
         LOG_LEVEL: 'debug',
         DEPLOYMENT_ENVIRONMENT: 'ci',

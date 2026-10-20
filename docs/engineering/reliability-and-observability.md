@@ -11,7 +11,7 @@
 
 ## Reliability patterns
 - Idempotency keys on every write endpoint and AI action.
-- Transactional outbox; idempotent job handlers; retries with backoff; dead-letter + alert.
+- Transactional outbox; idempotent job handlers; retries with backoff; dead-letter + alert. Built for email in S19 ([ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md)): retries in Postgres (30 s doubling to 1 h, 8 attempts), a message given up stays `dead` and raises an error log and a Sentry alert (ids only).
 - Graceful degradation: LLM outage → AI features show a clear message; all manual screens keep working. Redis outage → jobs resume from Postgres reconciliation.
 - Timeouts and circuit breakers on all external calls.
 - Forward-only migrations (expand/contract) so deploys never need downtime.

@@ -5,37 +5,34 @@ import {
   type DynamicModule,
   type OnApplicationShutdown,
 } from '@nestjs/common';
+import type { EmailMessage, Mailer } from '@pepper/core';
 import { createTransport, type Transporter } from 'nodemailer';
-import type { MailConfig } from '../config.js';
+import type { MailConfig } from './config.js';
 
-/** One plain-text email. */
-export interface EmailMessage {
-  to: string;
-  subject: string;
-  text: string;
-}
-
-/**
- * Sends email (ADR-0022). For now the api sends directly over SMTP while the client waits;
- * Phase 5 moves sending behind the transactional outbox, with retries, without changing
- * callers' messages.
- */
-export interface Mailer {
-  send(message: EmailMessage): Promise<void>;
-}
-
-/** The process's `Mailer`, or `null` when no SMTP_URL is configured. */
+/** The process's `Mailer` (`@pepper/core`), or `null` when no SMTP_URL is configured. */
 export const MAILER = Symbol('MAILER');
 
-/** A `Mailer` over SMTP (nodemailer): Mailpit in development and CI. */
+/**
+ * A `Mailer` over SMTP (nodemailer): Mailpit in development and CI. Timeouts stay well below
+ * the outbox lease (ADR-0024), so a hung server fails the attempt instead of outliving it.
+ */
 export class SmtpMailer implements Mailer {
   private readonly transport: Transporter;
+  private readonly domain: string;
 
   constructor(
     private readonly config: MailConfig,
     transport?: Transporter,
   ) {
-    this.transport = transport ?? createTransport(config.smtpUrl);
+    this.transport =
+      transport ??
+      createTransport({
+        url: config.smtpUrl,
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 30_000,
+      });
+    this.domain = /@([A-Za-z0-9.-]+)/.exec(config.from)?.[1] ?? 'pepper.localhost';
   }
 
   async send(message: EmailMessage): Promise<void> {
@@ -45,6 +42,7 @@ export class SmtpMailer implements Mailer {
       // One line: a name with a line break must not start another header.
       subject: message.subject.replace(/\s+/g, ' ').trim(),
       text: message.text,
+      ...(message.id !== undefined && { messageId: `<${message.id}@${this.domain}>` }),
     });
   }
 
@@ -62,7 +60,7 @@ class MailLifecycle implements OnApplicationShutdown {
   }
 }
 
-/** Provides `MAILER` from the api's mail configuration. */
+/** Provides `MAILER` from the process's mail configuration. */
 @Module({})
 export class MailModule {
   static forRoot(config: MailConfig | null): DynamicModule {

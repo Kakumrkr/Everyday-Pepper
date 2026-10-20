@@ -25,7 +25,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { TenancyService } from '../account/tenancy.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { RateLimiter, type RateLimit } from '../http/rate-limit.js';
-import { MailModule } from '../mail/mailer.js';
+import { MailModule } from '@pepper/runtime';
 import { PublicBookingModule } from './public-booking.module.js';
 import { PublicBookingService } from './public-booking.service.js';
 
@@ -112,7 +112,11 @@ beforeAll(async () => {
       FakeConnectionsModule,
       AuthModule.forRoot({ baseUrl: ORIGIN, secret: 'x'.repeat(32) }),
       MailModule.forRoot(null),
-      PublicBookingModule.forRoot({ baseUrl: ORIGIN, codeKey: Buffer.alloc(32) }),
+      PublicBookingModule.forRoot({
+        baseUrl: ORIGIN,
+        codeKey: Buffer.alloc(32),
+        outboxKey: Buffer.alloc(32),
+      }),
     ],
   })
     .overrideProvider(TenancyService)

@@ -14,6 +14,7 @@ const unreachable = loadApiConfig({
   REDIS_URL: 'redis://127.0.0.1:1',
   AUTH_SECRET: 'a-local-test-secret-of-32-characters!',
   AUTH_BASE_URL: 'http://localhost:3000',
+  OUTBOX_SECRET: 'a-local-test-outbox-secret-of-32-chars',
 });
 
 describe('AppModule', () => {

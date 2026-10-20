@@ -1,5 +1,12 @@
 import { hkdfSync } from 'node:crypto';
-import { loadEnv, loadServiceConfig, type ServiceConfig } from '@pepper/runtime/instrument';
+import {
+  loadEnv,
+  loadMailConfig,
+  loadOutboxSecret,
+  loadServiceConfig,
+  type MailConfig,
+  type ServiceConfig,
+} from '@pepper/runtime/instrument';
 import { z } from 'zod';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -21,22 +28,6 @@ const AuthEnvSchema = z.object({
     ),
 });
 
-const MailEnvSchema = z.object({
-  /**
-   * Where email goes (ADR-0022): an `smtp://` or `smtps://` URL, credentials included if any.
-   * Mailpit in development and CI (`smtp://localhost:1025`). Unset: nothing that needs email
-   * (the booking page's codes) is offered. Never logged.
-   */
-  SMTP_URL: z.url({ protocol: /^smtps?$/ }).optional(),
-  /** The sender of the emails, e.g. `Pepper <bookings@pepper.app>`. */
-  MAIL_FROM: z.string().trim().min(3).max(200).default('Pepper <bookings@pepper.localhost>'),
-});
-
-export interface MailConfig {
-  smtpUrl: string;
-  from: string;
-}
-
 export interface AuthConfig {
   secret: string;
   /** Origin, without a trailing slash. */
@@ -50,6 +41,8 @@ export interface ApiConfig extends ServiceConfig {
   mail: MailConfig | null;
   /** HMAC key of the booking page's code hashes, derived from `AUTH_SECRET`. */
   bookingCodeKey: Buffer;
+  /** Seals queued messages (ADR-0024); the worker needs the same one. */
+  outboxSecret: string;
 }
 
 /**
@@ -60,12 +53,12 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
   const service = loadServiceConfig('api', env, { port: 4000 });
   const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
   const auth = loadEnv('api', AuthEnvSchema, present);
-  const mail = loadEnv('api', MailEnvSchema, present);
   return {
     ...service,
     auth: { secret: auth.AUTH_SECRET, baseUrl: new URL(auth.AUTH_BASE_URL).origin },
-    mail: mail.SMTP_URL === undefined ? null : { smtpUrl: mail.SMTP_URL, from: mail.MAIL_FROM },
+    mail: loadMailConfig('api', env),
     bookingCodeKey: deriveKey(auth.AUTH_SECRET, 'pepper/booking-page-codes'),
+    outboxSecret: loadOutboxSecret('api', env),
   };
 }
 
