@@ -211,6 +211,20 @@
       "when": 1792503046255,
       "tag": "0029_booking_reminders_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792510077416,
+      "tag": "0030_tasks_and_push",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792510088139,
+      "tag": "0031_tasks_and_push_hardening",
+      "breakpoints": true
     }
   ]
 }

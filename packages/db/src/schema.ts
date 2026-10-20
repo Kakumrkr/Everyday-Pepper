@@ -46,7 +46,7 @@ function tenantIsolation(column: SQL): ReturnType<typeof pgPolicy> {
  * Read-only access, across businesses, for one worker job's scan (`withJobScan`, ADR-0025):
  * only in a transaction without a tenant whose `app.job_scan` setting names `job`.
  */
-function jobScan(job: 'reminders' | 'cleanup'): ReturnType<typeof pgPolicy> {
+function jobScan(job: 'reminders' | 'cleanup' | 'tasks'): ReturnType<typeof pgPolicy> {
   return pgPolicy('job_scan', {
     for: 'select',
     using: sql`${currentTenantId} IS NULL AND current_job_scan(${sql.raw(`'${job}'`)})`,
@@ -951,7 +951,7 @@ export const bookingVerifications = pgTable(
   ],
 );
 
-export const outboxMessageType = pgEnum('outbox_message_type', ['email']);
+export const outboxMessageType = pgEnum('outbox_message_type', ['email', 'push']);
 export const outboxStatus = pgEnum('outbox_status', ['pending', 'sent', 'dead']);
 
 /**
@@ -1068,6 +1068,109 @@ export const bookingReminders = pgTable(
   ],
 );
 
+/**
+ * A to-do of the business's owners and staff (ADR-0026). Owners, managers and work without a
+ * user reach every task; staff only those assigned to them or that they created (policy
+ * `member_scope`). The assignee is a member of the business: the composite key to memberships
+ * (migration 0031) clears it when they leave. `due_notified_at` is set once the assignee was
+ * notified that it is due; a new due time clears it.
+ */
+export const tasks = pgTable(
+  'tasks',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    dueAt: timestamp('due_at', { withTimezone: true }),
+    assigneeUserId: uuid('assignee_user_id'),
+    status: text('status').notNull().default('open'),
+    source: text('source').notNull().default('manual'),
+    // Who added it; NULL for the platform's or once their account is deleted.
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    dueNotifiedAt: timestamp('due_notified_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('tasks_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('tasks_open_idx')
+      .on(table.tenantId, table.dueAt)
+      .where(sql`${table.status} = 'open'`),
+    index('tasks_assignee_idx').on(table.tenantId, table.assigneeUserId),
+    index('tasks_created_by_user_id_idx').on(table.createdByUserId),
+    // The due-task job's scan: open tasks with a due time not yet notified.
+    index('tasks_due_scan_idx')
+      .on(table.dueAt)
+      .where(
+        sql`${table.status} = 'open' AND ${table.dueAt} IS NOT NULL AND ${table.dueNotifiedAt} IS NULL`,
+      ),
+    check('tasks_title_length', sql`length(${table.title}) BETWEEN 1 AND 200`),
+    check('tasks_status_known', sql`${table.status} IN ('open', 'done')`),
+    check('tasks_source_known', sql`${table.source} IN ('manual', 'ai', 'system')`),
+    check(
+      'tasks_completed_when_done',
+      sql`(${table.status} = 'done') = (${table.completedAt} IS NOT NULL)`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${memberSeesAll} OR assignee_user_id = ${currentUserId} OR created_by_user_id = ${currentUserId}`,
+      withCheck: sql`${memberSeesAll} OR assignee_user_id = ${currentUserId} OR created_by_user_id = ${currentUserId}`,
+    }),
+    jobScan('tasks'),
+  ],
+);
+
+/**
+ * A device a member turned notifications on for, in one business (Web Push, ADR-0026): the
+ * push service's endpoint and the browser's keys that encrypt each message to it. Each member
+ * reaches only their own devices; work without a user (the worker sending a push, the booking
+ * page queueing one) reaches all of the business's. Removed with the membership, or when the push service says the endpoint is gone.
+ */
+export const pushSubscriptions = pgTable(
+  'push_subscriptions',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    unique('push_subscriptions_endpoint_unique').on(table.tenantId, table.endpoint),
+    index('push_subscriptions_user_idx').on(table.tenantId, table.userId),
+    foreignKey({
+      name: 'push_subscriptions_membership_fk',
+      columns: [table.tenantId, table.userId],
+      foreignColumns: [memberships.tenantId, memberships.userId],
+    }).onDelete('cascade'),
+    check(
+      'push_subscriptions_endpoint_format',
+      sql`${table.endpoint} ~ '^https://' AND length(${table.endpoint}) <= 1000`,
+    ),
+    check('push_subscriptions_p256dh_format', sql`${table.p256dh} ~ '^[A-Za-z0-9_-]{80,100}$'`),
+    check('push_subscriptions_auth_format', sql`${table.auth} ~ '^[A-Za-z0-9_-]{16,32}$'`),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+      withCheck: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
@@ -1085,3 +1188,5 @@ export type WaitlistEntryRow = typeof waitlistEntries.$inferSelect;
 export type BookingReminderRow = typeof bookingReminders.$inferSelect;
 export type BookingVerificationRow = typeof bookingVerifications.$inferSelect;
 export type OutboxMessageRow = typeof outboxMessages.$inferSelect;
+export type TaskRow = typeof tasks.$inferSelect;
+export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;

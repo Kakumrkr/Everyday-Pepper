@@ -14,5 +14,6 @@ export * from './time.js';
 export * from './trust.js';
 export * from './tenancy.js';
 export * from './usage.js';
+export * from './tasks.js';
 export * from './waitlist.js';
 export * from './zoned-time.js';

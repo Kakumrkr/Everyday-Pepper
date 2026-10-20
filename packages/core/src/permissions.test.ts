@@ -45,6 +45,8 @@ const EXPECTED: Record<Permission, [PermissionScope, PermissionScope, Permission
   'clients.manage': ['all', 'all', null],
   'client_notes.read': ['all', 'all', 'own'],
   'client_notes.manage': ['all', 'all', 'own'],
+  'tasks.read': ['all', 'all', 'own'],
+  'tasks.manage': ['all', 'all', 'own'],
 };
 
 const ROLES = MembershipRoleSchema.options;

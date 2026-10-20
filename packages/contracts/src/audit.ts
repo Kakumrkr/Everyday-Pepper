@@ -12,6 +12,7 @@ import {
   UserIdSchema,
 } from './tenancy.js';
 import { RuleSchema } from './rules.js';
+import { TaskSourceSchema, TaskStatusSchema } from './tasks.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // The audit log (ADR-0013): one append-only entry per change to a business, written in the
@@ -93,6 +94,16 @@ const WaitlistValuesSchema = z
     staffMemberId: StaffMemberIdSchema.nullable(),
     expiresAt: UtcDateTimeSchema,
     status: z.enum(['waiting', 'offered', 'booked', 'cancelled']),
+  })
+  .strict();
+
+// A task's title is free text a member typed, so it is never in an entry (ADR-0026).
+const TaskValuesSchema = z
+  .object({
+    status: TaskStatusSchema,
+    dueAt: UtcDateTimeSchema.nullable(),
+    assigneeUserId: UserIdSchema.nullable(),
+    source: TaskSourceSchema,
   })
   .strict();
 
@@ -282,6 +293,23 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('waitlist_entry'),
       before: WaitlistValuesSchema,
       after: WaitlistValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('task.created'),
+      entity: entity('task'),
+      before: z.null(),
+      after: TaskValuesSchema,
+    })
+    .strict(),
+  // A changed title alone is recorded as a change with equal values.
+  z
+    .object({
+      action: z.literal('task.updated'),
+      entity: entity('task'),
+      before: TaskValuesSchema,
+      after: TaskValuesSchema,
     })
     .strict(),
 ]);
