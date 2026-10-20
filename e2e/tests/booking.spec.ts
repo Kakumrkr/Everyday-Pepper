@@ -19,6 +19,8 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   anotherPerson,
   callApi,
+  emailsTo,
+  emailTo,
   hydrated,
   onboardOwner,
   ownClientAddress,
@@ -30,8 +32,9 @@ import {
 // free times the engine offers, gets the nearest free times for a taken one (AC-W2-1), adds
 // the client to the waitlist, moves, completes and cancels; a staff member finds a client by
 // exact phone (ADR-0020) and books only for themselves, sees colleagues as busy (AC-W9-1) and
-// cannot change a recorded outcome (rule b). The setup (services, staff, hours) goes through
-// the api until the S16 screens.
+// cannot change a recorded outcome (rule b). The client gets a confirmation with their link and
+// the moved time by email, and no email when the team unticks it (ADR-0025). The setup
+// (services, staff, hours) goes through the api until the S16 screens.
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
@@ -109,21 +112,27 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   await addStaff(page, s, 'Jess');
   await page.goto(`/calendar?date=${formatDate(s.day)}`);
   const jess = page.getByRole('region', { name: 'Jess' });
+  const maria = `${unique('maria')}@example.test`;
 
-  // A new client, the first free time (09:00).
+  // A new client, the first free time (09:00); she gets a confirmation with her own link.
   let dialog = await openNewBooking(page);
   await dialog.getByRole('button', { name: 'New client' }).click();
   await dialog.getByLabel('Name').fill('Maria Lopez');
-  await dialog.getByLabel('Email (optional)').fill('maria@example.test');
+  await dialog.getByLabel('Email (optional)').fill(maria);
   await dialog.getByRole('button', { name: 'Add client' }).click();
   await expect(dialog.getByTestId('chosen-client')).toHaveText('Maria Lopez');
   await expect(dialog.getByLabel('With')).toHaveValue(/.+/);
   await dialog.getByTestId('free-times').getByRole('button', { name: '10:00 AM' }).click();
+  await expect(dialog.getByLabel('Email the client a confirmation')).toBeChecked();
   await dialog.getByRole('button', { name: 'Book', exact: true }).click();
   await expect(dialog).toBeHidden();
   await expect(jess.getByTestId('booking-block')).toHaveAccessibleName(
     /^10:00\s?–\s?11:00\sAM, Haircut with Maria Lopez$/,
   );
+  const confirmation = await emailTo(maria, "You're booked at");
+  expect(confirmation).toContain('Haircut with Jess');
+  expect(confirmation).toMatch(/at 10:00\sAM\./);
+  expect(confirmation).toMatch(/\/book\/[a-z0-9-]+\/manage#[A-Za-z0-9_-]{43}/);
 
   // 10:30 is taken: the nearest free times instead (AC-W2-1); pick the first.
   dialog = await openNewBooking(page);
@@ -144,7 +153,7 @@ test('an owner books from the calendar: free times, a taken time with alternativ
 
   // A taken time once more, and this time the waitlist.
   dialog = await openNewBooking(page);
-  await dialog.getByLabel('Name or email').fill('maria@example.test');
+  await dialog.getByLabel('Name or email').fill(maria);
   await dialog.getByRole('button', { name: 'Search' }).click();
   await dialog.getByRole('button', { name: /Maria Lopez/ }).click();
   await dialog.getByLabel('Or another time').fill('10:30');
@@ -172,13 +181,20 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   await dialog.getByRole('button', { name: 'Move here' }).click();
   await expect(dialog).toBeHidden();
   await expect(jess.getByRole('button', { name: /^1:00\s?–\s?2:00\sPM/ })).toBeVisible();
+  expect(await emailTo(maria, 'has moved')).toMatch(/at 1:00\sPM\./);
 
-  // Cancel it: the time is free again.
+  // Cancel it without telling her: the time is free again, and no email goes.
   await jess.getByRole('button', { name: /^1:00\s?–\s?2:00\sPM/ }).click();
   await sheet(page).getByRole('button', { name: 'Cancel booking' }).click();
+  await sheet(page).getByLabel('Email the client that it is cancelled').uncheck();
   await sheet(page).getByRole('button', { name: 'Cancel booking' }).click();
   await expect(sheet(page)).toBeHidden();
   await expect(jess.getByTestId('booking-block')).toHaveCount(1);
+  // The worker sends queued emails within about a second; give it a few.
+  await page.waitForTimeout(3000);
+  expect((await emailsTo(maria)).map((email) => email.Subject)).not.toContainEqual(
+    expect.stringContaining('is cancelled'),
+  );
 
   // Yesterday's appointment (booked with an override): done, then corrected to a no-show.
   const yesterday = addDays(toZoned(s.timeZone, Date.now()), -1);

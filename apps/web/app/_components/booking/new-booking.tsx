@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { bookableStaff, type BookingSetup } from '../../../lib/booking';
 import { sendJson } from '../../../lib/client-api';
 import { ClientPicker, type ChosenClient } from './client-picker';
+import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
 import { Field, Notice, Sheet } from './sheet';
 import { TimePicker } from './time-picker';
@@ -15,7 +16,8 @@ import { TimePicker } from './time-picker';
  * "New booking" on the calendar (or "Book" on a client's profile, with the client chosen):
  * client, service, staff member and a time, then `POST /v1/bookings`. A refused time shows the
  * nearest free ones and the waitlist (AC-W2-1). One idempotency key per opening, so a double
- * tap or a retried request books once.
+ * tap or a retried request books once. The client gets a confirmation email with their
+ * reschedule/cancel link unless the team unticks it (ADR-0025).
  */
 export function NewBooking({
   setup,
@@ -89,6 +91,7 @@ function NewBookingForm({
     null,
   );
   const [busy, setBusy] = useState(false);
+  const [notifyClient, setNotifyClient] = useState(true);
 
   if (services.length === 0) {
     return <p className="m-0 text-ink-2">Add a service first; then you can book it here.</p>;
@@ -104,6 +107,7 @@ function NewBookingForm({
       staffMemberId,
       startsAt: at,
       idempotencyKey,
+      notifyClient,
     });
     setBusy(false);
     if (answer.ok && BookingSchema.safeParse(answer.data).success) {
@@ -192,6 +196,14 @@ function NewBookingForm({
           </>
         )}
       </section>
+
+      {client === null ? null : client.client.email === null ? (
+        <p className="m-0 text-ink-2">No email address on file, so no confirmation is sent.</p>
+      ) : (
+        <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
+          Email the client a confirmation
+        </NotifyClient>
+      )}
 
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       {refused === null || client === null ? null : (
