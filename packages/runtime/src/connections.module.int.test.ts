@@ -38,8 +38,14 @@ describe('readiness against real Postgres and Redis', () => {
 
   it('answers 200 once the clients have connected', async () => {
     const server = app?.getHttpServer() as Server;
-    // The Redis client fails fast while its first connection is still opening.
-    await expect.poll(async () => (await request(server).get('/health/ready')).status).toBe(200);
+    // The Redis client fails fast while its first connection is still opening. On a busy CI
+    // runner that can take well over expect.poll's 1-second default (as in main.int.test.ts).
+    await expect
+      .poll(async () => (await request(server).get('/health/ready')).status, {
+        timeout: 30_000,
+        interval: 250,
+      })
+      .toBe(200);
 
     const response = await request(server).get('/health/ready').expect(200);
     expect(HealthReportSchema.parse(response.body)).toMatchObject({
