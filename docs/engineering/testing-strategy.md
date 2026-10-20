@@ -21,3 +21,4 @@ Every feature and bug fix ships with automated tests that were actually run. Acc
 - Tests never call the real OpenAI API except the eval job (budget-capped); unit/integration use a fake provider with recorded responses.
 - Time is injected (clock abstraction); tests cover DST transitions and multiple US time zones.
 - Test data contains no real personal data.
+- Tests that pass locally must pass on GitHub, whose runners are slower and run every suite at once: anything that waits on time (polling, property runs, start-up) uses generous explicit limits (`expect.poll`/`vi.waitFor` with a `timeout`, never the 1 s default). CI has no retries; a failure is fixed, never retried away. In cloud sessions Playwright runs CI's headless shell (see [dev-setup](dev-setup.md)).

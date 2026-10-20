@@ -3,6 +3,7 @@
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
 ## 0.17 — 2026-10-20
+- M1 (maintenance, after S21): workflow only, no plan or product change. `STATUS.md` split into a short status, [session-log.md](session-log.md) and [decisions.md](decisions.md) (moved verbatim); `CLAUDE.md` gains checkpoints after each task and a rule for generous test time limits; in cloud sessions local Playwright uses CI's headless shell and Docker pulls through Google's mirror (session-start hook).
 - S21 (Phase 5c): [ADR-0026](../adr/0026-tasks-and-web-push.md) (accepted by the user): to-dos (`tasks`, `/v1/tasks`, the To-dos card on Home; staff see their own, owners and managers all) and Web Push for the team (`push_subscriptions`, `/v1/push`, the outbox type `push`, `web-push` 3.6.7 in the worker; pushes for booking-page activity and due to-dos, never naming a client; the switch on Home). Additive contract changes: permissions `tasks.read`/`tasks.manage` (staff scope `own`), audit actions `task.created`/`task.updated`, error codes `task_not_found`, `task_assignee_not_member`, `push_unavailable`, config `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT`. The [Phase 5 security review](../engineering/security-review-s21.md) found no high-severity issues; two medium ones were fixed. **Phase 5 complete.** No change to phases, scope or exit criteria.
 
 ## 0.16 — 2026-10-20

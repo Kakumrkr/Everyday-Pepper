@@ -24,7 +24,7 @@ Act as the project's **Principal Software Engineer, Software Architect, Product 
 The user guides each feature session. **One session = one feature-sized goal** (one big feature, or a few small related tasks). Big phases are split across several sessions; unrelated small fixes are batched into a separate maintenance session. If a session's goal turns out larger than expected, finish a clean, tested sub-part, commit, and move the rest to the next planned session.
 
 For every session:
-1. **Read** `CLAUDE.md`, **`docs/plan/STATUS.md` (where the last session stopped, and the planned sessions list)**, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed.
+1. **Read** `CLAUDE.md`, **`docs/plan/STATUS.md` (where the last session stopped, what is in progress, and the planned sessions list)**, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed. Open `docs/plan/session-log.md` (every past session in full) and `docs/plan/decisions.md` (every decision made in chat) only when the task needs that history.
 2. **Before doing any work, present a Session Brief** and wait for the user to confirm or adjust it:
    ```
    ## Session Brief
@@ -42,7 +42,9 @@ For every session:
 4. **Implement** task by task; run lint, typecheck and tests after each.
 5. **Review** your own diff adversarially (security, tenancy, edge cases).
 6. **Summarize** (principle 10) and update docs/traceability.
-7. **Update `docs/plan/STATUS.md`** (done, decisions made in conversation, next steps) and commit it, so the next session can continue exactly where this one stopped. Decisions that exist only in chat are lost — always write them down.
+7. **Update `docs/plan/STATUS.md`** (done, decisions made in conversation, next steps) and commit it, so the next session can continue exactly where this one stopped. Decisions that exist only in chat are lost — always write them down. Keep `STATUS.md` short (under ~150 lines): move this session's summary into "Last sessions" (dropping the older one there), append the full entry to `docs/plan/session-log.md` and new decisions to `docs/plan/decisions.md`.
+
+**Checkpoints.** After each finished task (code committed, checks green), commit and update the "In progress" section at the top of `STATUS.md`: what is done, the next step, open questions, and any decision made in chat. Then `/compact`, a worker restart or a usage limit loses nothing, and a new session can continue from the file alone. Clear "In progress" when the session ends.
 
 ## Plan change process
 The plan is versioned. Any change to an approved plan or contract needs a **Plan Change Record** (`docs/plan/changes/PCR-NNN.md`, from `PCR-template.md`) listing affected parts from `docs/plan/dependency-map.md`, impact on each, compatibility strategy, and tests proving no regression. Record it in `docs/plan/CHANGELOG.md`. Do not implement until the user approves the PCR.
@@ -69,6 +71,7 @@ Next.js + TypeScript (PWA, `apps/web`) · NestJS (`apps/api`, `apps/worker`) · 
 
 ## Testing standards
 See `docs/engineering/testing-strategy.md`. Minimum per change: unit tests for logic; integration tests (real Postgres via Testcontainers) for repositories/RLS; contract tests for module interfaces and integrations; Playwright for user-visible flows; LLM evals for any prompt/tool/model change. Coverage gate ≥ 80% on `packages/core` and modules. Cross-tenant isolation suite must stay at 100%.
+- **Tests that pass here must pass on GitHub.** CI runners are slower and run every suite at once, so any test that waits on time (polling, property runs, start-up) uses generous limits (e.g. `expect.poll`/`vi.waitFor` with an explicit `timeout`, never the 1 s default). In cloud sessions run Playwright with CI's browser, the headless shell (the session-start hook sets `PLAYWRIGHT_CHROMIUM_EXECUTABLE`). CI has no retries: a failure is fixed, never retried away.
 
 ## Git
 - Small, focused commits with descriptive messages; never commit failing builds.

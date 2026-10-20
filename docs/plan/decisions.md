@@ -1,0 +1,154 @@
+# Decisions made in conversation
+
+Every decision the user made in chat, and the defaults Claude chose that the user accepted, oldest first. Moved here verbatim from `STATUS.md` in maintenance session M1 (2026-10-20); new decisions are written in `STATUS.md` ("Recent decisions") and appended here. ADRs hold the architectural ones in full.
+
+- **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
+- **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
+- **OpenAI cost:** $0 until Phase 6 (tests use a fake provider). At Phase 6 either add ~$5–10 credit with a hard monthly limit (recommended) or develop on a free local/free-tier model via the provider adapter and run evals on OpenAI before pilot.
+- **Sessions:** one feature-sized goal per session; every session starts with a Session Brief (see `CLAUDE.md`) and ends by updating this file.
+- **Mockups approved to start:** all 7 key screens, as a clickable HTML prototype, branded Pepper, warm & friendly, mobile-first.
+- **Design direction approved by the user (S1 feedback: "all good", no changes):** raspberry brand (`#BE2759`/`#B01F52`) on warm neutrals, separate status colors (fern/amber/lake), Bricolage Grotesque (display) + Figtree (body), speech-bubble-with-a-face mark, lowercase wordmark. **Colors superseded on 2026-10-18 by the Pepper green + chili theme ([PCR-002](changes/PCR-002.md)); type, shape and voice unchanged.** Details in `docs/mockups/README.md`. Avoided the generic cream + terracotta + serif look on purpose.
+- **S2 decisions (user, 2026-10-16):** booking page shows prices and stylist photos (placeholders in the mockup); onboarding includes an optional client-import step (Vagaro/Fresha/Square/Booksy/CSV).
+- **Booking page uses the business's own brand color** (`biz` tokens; Pepper's own colors only in the "Booking by pepper" footer). Owners pick that color in onboarding (PCR-001, approved).
+- **Autonomy defaults approved:** create booking = Ask me; move/accept page requests/block/notes = Do it and tell me; confirmations & reminders = Just do it; rebooking nudges & waitlist offers = Ask me; bulk (>10) = Ask me, "Just do it" locked.
+- **Prototype sample business:** Juniper Hair Studio (salon template: "client", "stylist"); owner Ana Reyes; stylists Jess, Marco, Priya; mock "today" = Thu Oct 15 2026.
+- **Branch workflow (S3, user):** `main` is the integration branch (created from `ea2a951`). Each session works on a `claude/*` branch and opens a PR into `main`; the user reviews and merges; head branches are deleted after merge. The S1/S2 work had lived on `claude/sharp-noether-re1wo9`, which was never merged — always start a session from `main`.
+- **Lint/format: ESLint + Prettier** (user, S3), not Biome.
+- **TypeScript pinned to 6.0.x** until typescript-eslint supports 6.1+/7 (S3 finding; see dev-setup.md).
+- **Module format: ESM** for all packages (NodeNext). Confirmed in S4: Nest 12 ships ESM, so api/worker run as native ESM.
+- **S4 defaults (Claude, user to confirm or change):** NestJS on Express (not Fastify); Vitest compiles Nest code with SWC; shared Nest wiring lives in a new `packages/runtime` (`@pepper/runtime`) that S5 extends with config/logger/telemetry; the readiness `SELECT 1` lives in runtime until `packages/db` exists (Phase 2); web unit tests cover `lib/` and route handlers, pages are covered by Playwright.
+- **S5 defaults — ADR-0009, accepted by the user (2026-10-16, S6 start):** OpenTelemetry owns tracing (lean `NodeTracerProvider` + explicit instrumentations, not the auto-instrumentation bundle); Sentry is errors-only and collects no personal data; pino used directly (no `nestjs-pino`); our own request-logging middleware instead of `pino-http`; `/health/live` not traced, `/health/ready` traced; health request logs at `debug`; one extra package entry point `@pepper/runtime/instrument` (lint allows exactly this one); `@pepper/testing` reads container images from `docker-compose.yml` so tests and the dev stack share pinned digests; integration tests have no coverage gate.
+- **MinIO left out of Compose (S4 finding):** MinIO no longer publishes community images.
+- **D10 resolved (user, 2026-10-16, S7 start): SeaweedFS** for dev/CI object storage ([ADR-0011](../adr/0011-dev-object-storage-seaweedfs.md)). It is added to Compose in Phase 4, when stylist photos first need storage; not in S7.
+- **GitHub settings done by the user (2026-10-16, before S6):** default branch is `main`; branch protection on `main` requires a PR and the three CI checks (**CI / Lint, typecheck, test, build**, **CI / Integration (Testcontainers)**, **CI / E2E smoke (Docker Compose)**); head branches are deleted automatically after merge; stale branches deleted.
+- **Phase 2 order confirmed (user, S6 start):** S6 db + tenancy/RLS → S7 auth → S8 roles/audit. **ADR-0009 accepted** (user, S6 start).
+- **S6 defaults — ADR-0010, accepted by the user (2026-10-16, end of S6):**
+  - (a) The services connect as their own login role (`pepper_service`), a member of the `pepper_app` group role. The migrate step creates and updates it from `DATABASE_URL`, using a separate `MIGRATION_DATABASE_URL` for the owner. Readiness fails for a role that bypasses RLS.
+  - (b) IDs are UUID v7, generated in the app with the `uuid` package (Postgres 17 has no `uuidv7()`).
+  - (c) The `users` table waits for S7, so Better Auth shapes it. `memberships.user_id` has no foreign key until then.
+  - (d) RLS goes through a `current_tenant_id()` SQL function with `NULLIF`. `tenant_id` defaults to it, so repositories never take a tenant id.
+  - (e) `runtime` may import `db` (lint and dependency map updated). The api image carries the migrate CLI (`@pepper/db` is a direct api dependency).
+  - (f) Repositories, migrations and RLS are covered by integration tests and excluded from the unit coverage gate.
+- **S7 defaults — ADR-0012, accepted by the user (2026-10-17, end of S7):**
+  - (a) Auth tables are global (no RLS), classified in the isolation suite, reached only through `authDatabaseAdapter`.
+  - (b) "My businesses" uses read-only, user-keyed `member_read` policies via `withUser`, not a `SECURITY DEFINER` function (FORCE RLS would filter it unless the owner is a superuser).
+  - (c) The active business is stored in the session, set only after a membership check. New sessions start in the first business.
+  - (d) Membership is re-checked on every request. Owners are blocked until TOTP is on; managers and staff are not (yet).
+  - (e) The web app forwards `/api/auth/*` and `/v1/*` (one origin, no CORS).
+  - (f) Origin check on every write.
+  - (g) Passwords ≥ 10 characters until the breached-password check lands.
+  - (h) Rate limits in memory (one instance) for now.
+  - (i) Out of S7: email verification and password reset (Phase 5), social login (Phase 10), breached-password check, edge proxy and CSP/HSTS (Phase 11).
+- **S8 decisions (user, 2026-10-17, S8 Session Brief):** (1) managers need MFA like owners; (2) permission matrix as proposed (owner everything; manager everything except deleting the business, billing and changes to owners; staff: business, services, team calendar, only their own bookings and notes); (3) Phase 2c split into S8 and S9; (4) at most 5 businesses per owner.
+- **S8 defaults — ADR-0013, accepted by the user (2026-10-17, end of S8):**
+  - (a) Domain services live in `@pepper/core` (`src/services/`) and call `@pepper/db`, so AI tools (Phase 6) use the same code as the UI; the api keeps thin binding services (`TenancyService`, `TeamService`). Core's database-backed services are integration-tested and excluded from its unit coverage gate.
+  - (b) Route guards check the permission "at all"; services check it again and apply record scope.
+  - (c) Audit entries carry only allowlisted fields per action (no names, emails, free text), the request id, and survive user deletion with the actor nulled; managers can read the audit log.
+  - (d) Usage periods are UTC months, not the business's time zone.
+  - (e) Staff get the `own` scope for clients too (least privilege; AC-W9-1 names bookings and notes).
+  - (f) Removing someone else needs `members.manage`, checked before any lookup (staff cannot probe membership); leaving clears the session's business.
+  - (g) Tenant and user ids are lowercased by the contracts.
+- **S9 decisions (user, 2026-10-17, S9 Session Brief):** invite links work for **7 days**; an invite is **bound to the invitee's email** (a forwarded link is useless); at most **20 open invites per business**. Also restated: managers need MFA like owners (already decided at S8 and built).
+- **S9 defaults — ADR-0014, accepted by the user (2026-10-17):** token in the link's fragment, hashed with SHA-256 in the database; token-keyed read-only RLS policy for the not-yet-member lookup, with the business taken from the invite row; re-inviting an email replaces its open invite; one `invite_invalid` answer for unknown/used/revoked/expired; `permissions` on `GET /v1/tenant`; inline confirmation (no browser dialogs) for remove and leave.
+- **S10 decisions (user, 2026-10-17, S10 Session Brief):**
+  - (1) Phase 3 in **four sessions**: S10 base data, S11 rules + availability, S12 bookings + waitlist, S13 templates + exit.
+  - (2) Domain code in a **new `packages/modules/appointments`**, not in core.
+  - (3) A **staff member is separate from a login and optionally linked to one membership**, so a stylist without the app can be booked.
+  - (4) **Owners and managers** edit services, staff, hours and time off; **staff add and remove their own time off** but cannot change their weekly hours.
+  - (5) Service price shown as **"from" with an optional "to"** (cents).
+- **S10 defaults (Claude, in ADR-0015, accepted with it):**
+  - Composite `(tenant_id, id)` foreign keys for tenant references.
+  - Hours are local wall-clock time; touching intervals are allowed; no overnight shifts; `24:00` allowed.
+  - Time off is UTC with no reason field, visible to the whole team.
+  - No delete endpoints yet (deactivate instead).
+  - Staff names stay out of the audit log, so a name-only change is not audited.
+  - Default staff colour is the brand colour (pepper green `#2a7230` since PCR-002).
+- **S11 decisions (user, 2026-10-17, S11 Session Brief):**
+  - (1) **Store rules now** (table, RLS, `GET/PUT /v1/rules`), not just the pure engine.
+  - (2) **Time zones with the built-in `Intl`**, no date library; fast-check only as a dev dependency.
+  - (3) **Defaults:** 15-minute slots, 2 hours' notice, 90 days ahead, no daily cap.
+  - (4) **Blackout windows are local dates** in the business's time zone.
+- **S11 defaults — ADR-0016, accepted by the user (2026-10-17):**
+  - Working hours, buffers and staff–service eligibility stay base data, not rule types.
+  - A staff member's rule beats the business's; blackouts add up.
+  - The whole set is replaced under an advisory lock and audited before and after.
+  - A skipped (spring-forward) time means the moment of the change.
+  - Buffers may reach outside working hours.
+  - Maximum advance counts from `now` (instant), not by calendar days.
+  - The daily cap counts bookings by the local day they start on.
+  - A query covers at most 62 days.
+  - Template defaults are not stored per business.
+- **S12 decisions (user, 2026-10-17, S12 Session Brief): all five recommendations, plus the waitlist API.**
+  - (1) A **minimal clients table now** (core), not an optional client on bookings.
+  - (2) A **separate `booking_occupancy` table** carries the exclusion constraint and the team's busy times (readable by all); `bookings` gets the staff-only policy.
+  - (3) Statuses **`confirmed`/`completed`/`no_show`/`cancelled`**, no "pending"; only `cancelled` frees the time.
+  - (4) Every booking passes the engine; **owners and managers may override** hours and rules, never an overlap.
+  - (5) Waitlist **windows are local date + time spans (≤ 10)**, expiring at the end of the last one; statuses `waiting`/`offered`/`booked`/`expired`/`cancelled`; **with API endpoints**.
+- **S12 defaults — ADR-0017, accepted by the user (2026-10-17):**
+  - "Customer" is called **client** everywhere (table, contracts, API), as the permissions and UI already were.
+  - Booking source **`team`** for anything made in the app (who made it is in `created_by_user_id` and the audit log).
+  - A booking keeps a **copy of the service's buffers and price**.
+  - `completed`/`no_show` only **after the start**; moves only while `confirmed`.
+  - **3 alternatives**, same service and staff member, a week either side, nearest first.
+  - Optional **idempotency key** per booking, unique per business.
+  - `expired` waitlist status is **derived on read** (nothing has to run).
+  - Staff may add waitlist entries **only for their own staff member**; an entry for "anyone" is the owner's/manager's.
+  - Work without a user (jobs, the booking page) keeps the full tenant scope; member requests use `withMember`.
+- **After S12 (user, 2026-10-17):** ADR-0017 accepted as proposed. **Staff may find any client by exact email or phone** (Claude's recommendation, chosen by the user) and then book them; they still cannot add clients (`clients.manage` stays owners and managers; matrix unchanged). Built with the Phase 4 booking screens. S12 PR opened and merged at the user's request.
+- **S13 decisions (user, 2026-10-18, S13 Session Brief): all four recommendations.**
+  - (1) **One `@pepper/templates` package** with a data file per template, not one package per industry.
+  - (2) **`template_id` nullable**, optional in the API now (no template = platform defaults); onboarding makes it required in the UI (Phase 4/9).
+  - (3) **Schema tests now; onboarding fixtures in Phase 9 and eval sets in Phase 6**, for all eight templates.
+  - (4) **Claude drafts the template content** (menus, durations, prices, rules); the user reviews it in the PR.
+- **S13 defaults — ADR-0018, accepted by the user (2026-10-18, "all good"):** rule defaults reach the appointments services through a lookup the api passes in; templates are parsed at load and frozen; `GET /v1/templates` needs a session but no business; autonomy defaults are empty in all eight templates (the platform's approved defaults apply); no template caps bookings per day; the nine autonomy actions and their tiers as listed in `trust.ts`.
+- **Rename + theme (user, 2026-10-18, after S14):** rename Floty → Pepper everywhere and use theme "A. Pepper green + chili accent" (the user's pick), only those two things, in this session; S15 and the rest of the plan stay as planned. Decisions: edit the first migrations in place and rebuild local databases (no rename migration); teal "done", chili as an accent only, plum sample business; `pepper.app` in the address hint. Recorded in [PCR-002](changes/PCR-002.md).
+- **S14 (2026-10-18): the user said "give me the Session Brief, then continue"** and asked for the PR to be opened and merged at the end. Claude went ahead on its recommendations, to be confirmed or changed in review:
+  - **Phase 4 split** into S14–S18 (see Planned sessions).
+  - **Tailwind v4 + self-hosted fonts**, Radix only when a screen needs a dialog or menu (ADR-0019).
+  - **Response caps**: 500 items with `truncated`, not pagination.
+  - **Booking outcomes (open question 1 below):** Claude recommends (b), and S15 builds (b) unless the user says otherwise.
+- **S15 (2026-10-19): the user said "give me the Session Brief, then continue".** Claude went ahead on its recommendations, to confirm or change in review: outcomes rule (b); the exact-contact mechanism (transaction setting + read-only policy clause, contact passed with the booking); Radix Dialog 1.1.23 as the one new dependency; the screen flow in ADR-0020.
+- **ADR-0020 accepted (user, 2026-10-19, "ADR-0020 is good"):** the exact-contact lookup mechanism, Radix Dialog 1.1.23 and the booking screen flow. Asked for Claude's best recommendation on booking outcomes: Claude recommends keeping (b), as built (see Waiting on the user).
+- **Booking outcomes rule (b) confirmed (user, 2026-10-19, "confirm b"):** `completed`/`no_show` are final for staff; owners and managers may correct them (audited). Closes open question 1 from S13. Later (payments phase) consider a required reason for corrections.
+- **End of S15 (user, 2026-10-19):** open the PR and merge it to `main`; S16 starts in a new session.
+- **S16 (2026-10-19): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0021): (a) a client's visits through a `clientId` filter on `GET /v1/bookings` (±62 days), not a new endpoint; (b) client editing now, auditing only which fields changed; (c) rule defaults returned by the api so the web app does not import templates; business-wide rules only on the rules screen; nav order Home · Calendar · Clients · Services · Team.
+- **End of S16 (user, 2026-10-19):** "ADR-0021 approve. open PR and merge to main." ADR-0021 accepted as proposed (visits via the `clientId` filter, client editing with field-name-only audit, rule defaults from the api, business-wide rules only on the rules screen, nav order). S17 starts in a new session; its brief must settle the email sender (dev Mailpit sender now vs. the Phase 5 outbox).
+- **S17 (2026-10-20): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0022): (a) **email sender: a dev SMTP sender now** (nodemailer → Mailpit; any SMTP in production) called directly by the api behind a `Mailer` port, with the outbox in Phase 5; (b) `/book/<slug>` URLs, link `/book/<slug>/manage#<token>`; (c) `tenants.brand_color` column, slate default; (d) the time is not held while the client verifies, and the same code may confirm an alternative; (e) audit actor `system`, booking source `booking_page`.
+- **End of S17 (user, 2026-10-20):** "ADR-0022 approve. open PR and merge to main." ADR-0022 accepted as proposed (dev SMTP sender until the Phase 5 outbox, `/book/<slug>` URLs, `tenants.brand_color` with a slate default, no hold during verification and the same code may confirm an alternative, audit actor `system`). S18 starts in a new session.
+- **S18 (user, 2026-10-20):** asked for the Session Brief with any decisions, then to complete the session, approve, open the PR and merge it into `main`, and from then on to go with Claude's recommendations. Decisions at the brief: (a) **a hand-written service worker** (no Serwist), caching only an offline page; (b) **`@axe-core/playwright`, failing on serious and critical**; (c) **fix high and medium security findings, log low ones**. ADR-0023 recorded these as accepted. For the rest of this session Claude chose on its recommendations: the worker only on the signed-in app; headers in `next.config.ts`; `no-store` in the forwarder.
+- **S19 decisions (user, 2026-10-20, S19 Session Brief: "Yeah, sounds good. Go with your recommendation and start"):**
+  - (1) The booking code email stays direct (the client is waiting); the other booking page emails go through the outbox.
+  - (2) Queued content encrypted (AES-256-GCM, key from env) and cleared after sending.
+  - (3) The worker finds work through a small index table with ids and due times only; the messages stay tenant-scoped (RLS).
+  - (4) D4: **Resend for the pilot**.
+  - (5) Phase 5 split: S19 outbox, S20 confirmations + reminders + expired-request cleanup, S21 tasks + push.
+  - Also asked: explain the feature in plain business terms before coding. That was done: "a note to send the email is saved together with the booking; the worker sends it, retries if needed, never twice".
+- **S19 defaults (Claude, in ADR-0024; accepted by the user with "All good", 2026-10-20):** the index table under RLS too, with a transaction-local `app.outbox_scan` setting instead of being global (the isolation suite requires RLS on every `tenant_id` table); `OUTBOX_SECRET` as a new secret rather than one derived from `AUTH_SECRET` (the worker does not need the auth secret); retries in Postgres rather than BullMQ; polling only (no notify after commit); 8 attempts, 30 s doubling to 1 h; 5xx gives up at once; a 5-minute lease; dedupe key `booking.<kind>:<booking id>:<updated_at ms>`.
+- **End of S19 (user, 2026-10-20):** "All good. Raise PR and merge." ADR-0024 accepted as proposed, with Claude's defaults. S20 starts in a new session from `main`.
+- **S20 decisions (user, 2026-10-20, S20 Session Brief: "Go with your recommendations"; plan approved with "All sounds good start it"):**
+  - (1) Reminders **24 h before, the same for every business** for now (templates may change it later).
+  - (2) **No reminder** for a booking made or moved less than 24 h ahead.
+  - (3) Team changes **email the client**, with an "Email the client" checkbox ticked by default.
+  - (4) Team-made bookings get the **same reschedule/cancel link** as booking-page ones. The reminder carries no link, because only its hash is stored.
+  - (5) Retention: expired booking requests deleted **24 h** after they expire; sent/dead outbox rows after **30 days**.
+  - (6) A **reminder schedule table in Postgres**, checked every minute, instead of BullMQ delayed jobs with a nightly rebuild.
+  - The user also asked again for a plain-language explanation before coding. Claude gave it ("a notebook line per booking, crossed out on cancel, rewritten on move; the worker checks it every minute and double-checks before sending").
+- **S20 defaults (Claude, in ADR-0025; accepted by the user with "All good", 2026-10-20):**
+  - A team move with the box ticked **replaces** the client's link, because the old secret cannot be recovered; unticked, the link is kept.
+  - Completed and no-show send no email.
+  - The `job_scan` policy is one function with the job's name (`reminders`, `cleanup`), rather than one setting per job.
+  - The clean-up job lists businesses through `tenants`, whose names and slugs the booking page shows publicly anyway.
+  - The reminder job runs without `SMTP_URL`; its emails wait in the outbox.
+  - Reminder passes are capped at 20 batches of 100.
+  - `REMINDER_POLL_MS` may be at most 4 minutes, so AC-W6-1 holds.
+- **CI minutes (user, 2026-10-20, after S20):** the private repo has 2,000 GitHub Actions minutes a month and one CI run costs ~18 (three jobs, each rounded up), so each session cost ~40–55 minutes. The user chose Claude's four recommendations:
+  - (1) no second CI run on `main` after a merge, relying on "Require branches to be up to date before merging"; plus a weekly run on `main` and a manual one;
+  - (2) Dependabot monthly, with updates grouped into one PR per ecosystem;
+  - (3) docs-only PRs skip the CI jobs;
+  - (4) one CI run per session: every check run locally first, every commit (docs, "ADR accepted", STATUS) in before the PR is opened, and pushes to an open PR only to fix CI. Written into `CLAUDE.md` (Git) so every session follows it.
+- **End of S20 (user, 2026-10-20):** "All good. Raise the PR and merge to main." ADR-0025 accepted as proposed, with Claude's defaults. S21 starts in a new session from `main`.
+- **S21 decisions (user, 2026-10-20, S21 Session Brief):** (1) **`web-push` 3.6.7** to sign and encrypt pushes (worker only), not hand-written crypto; (2) pushes for **booking-page bookings, moves and cancellations** (to the staff member and the owners and managers) and **due to-dos** (to the assignee); (3) **no client names** in a push; (4) **staff see and manage their own to-dos; owners and managers see and assign everyone's**.
+- **S21 defaults (Claude, in ADR-0026; accepted by the user with "ADR-0026 approve", 2026-10-20):** a new to-do is the caller's own, a date without a time is due at 9:00 AM business time, a team (unassigned) to-do notifies the owners and managers; to-dos live in core (L1); devices only on browser push services, at most 10 per member, a shared device moves to whoever turned it on last; turning off removes this business's device but keeps the browser subscription; the due-task job runs on the reminders' interval; a local-only VAPID key pair in Compose and `.env.example`; the To-dos and Notifications cards on Home.
+- **End of S21 (user, 2026-10-20):** "ADR-0026 approve. open PR and merge to main." ADR-0026 accepted as proposed, with Claude's defaults. S22 starts in a new session from `main`.
+- Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
+- **M1 (user, 2026-10-20, after S21):** split `STATUS.md` (keep only the last sessions' summary and recent decisions; history in `session-log.md` and here); a checkpoint after each finished task; no retries in CI (failures stay visible); Docker pulls go through Google's mirror automatically (a daemon registry mirror, since pinned digests cannot be re-tagged after a 429); done in a maintenance session before S22. The user compacts with `/compact` before the PR when the context is long.
