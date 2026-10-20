@@ -502,6 +502,8 @@
     - A screen showing delivery status.
     - The autonomy dial for confirmations and reminders (Phase 6; the approved default is "Just do it").
 
+- **Maintenance after S20 (2026-10-20): fewer GitHub Actions minutes.** `ci.yml` runs on PRs, weekly (Monday 06:23 UTC) and by hand, no longer on pushes to `main`; a **Code changed?** job skips the three jobs for docs-only PRs. If it fails, everything runs. Its rule was checked on sample file lists, and actionlint 1.7.7 (with shellcheck) is clean. `dependabot.yml` is monthly with grouped PRs. `CLAUDE.md` gains the "save minutes" working rule; dev-setup documents it. Expected cost: about 18 minutes per session, instead of 40–55.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -642,11 +644,17 @@
   - The reminder job runs without `SMTP_URL`; its emails wait in the outbox.
   - Reminder passes are capped at 20 batches of 100.
   - `REMINDER_POLL_MS` may be at most 4 minutes, so AC-W6-1 holds.
+- **CI minutes (user, 2026-10-20, after S20):** the private repo has 2,000 GitHub Actions minutes a month and one CI run costs ~18 (three jobs, each rounded up), so each session cost ~40–55 minutes. The user chose Claude's four recommendations:
+  - (1) no second CI run on `main` after a merge, relying on "Require branches to be up to date before merging"; plus a weekly run on `main` and a manual one;
+  - (2) Dependabot monthly, with updates grouped into one PR per ecosystem;
+  - (3) docs-only PRs skip the CI jobs;
+  - (4) one CI run per session: every check run locally first, every commit (docs, "ADR accepted", STATUS) in before the PR is opened, and pushes to an open PR only to fix CI. Written into `CLAUDE.md` (Git) so every session follows it.
 - **End of S20 (user, 2026-10-20):** "All good. Raise the PR and merge to main." ADR-0025 accepted as proposed, with Claude's defaults. S21 starts in a new session from `main`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. **Turn on "Require branches to be up to date before merging"** for `main` (Settings → Branches → the `main` rule). CI no longer re-runs on `main` after a merge (see "CI minutes" above), so this is what keeps `main` tested.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into S19–S21 (user, S19 Session Brief); S19 and S20 are done.

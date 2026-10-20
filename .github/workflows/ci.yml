@@ -1,9 +1,16 @@
 name: CI
 
+# Minutes are limited (private repo), so CI runs once per change (docs/engineering/dev-setup.md):
+# - on pull requests. Branch protection requires the branch to be up to date with main, so the
+#   PR run has tested exactly what a merge lands; main is not tested again on push.
+# - weekly on main, and by hand (workflow_dispatch), as a safety net.
+# A pull request that changes only docs (docs/** or *.md) skips the three jobs below; skipped
+# jobs count as passed for the required checks.
 on:
   pull_request:
-  push:
-    branches: [main]
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,8 +20,41 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: Code changed?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'pull_request'
+        with:
+          persist-credentials: false
+          # The PR's merge commit and its first parent, the base branch.
+          fetch-depth: 2
+
+      - name: Compare with the base branch
+        id: diff
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != 'pull_request' ]; then
+            echo 'code=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          files="$(git diff --name-only HEAD^1 HEAD)"
+          printf '%s\n' "$files"
+          if [ -n "$files" ] && ! printf '%s\n' "$files" | grep -qvE '^docs/|\.md$'; then
+            echo 'Only docs changed: the checks below are skipped.'
+            echo 'code=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'code=true' >> "$GITHUB_OUTPUT"
+          fi
+
   check:
     name: Lint, typecheck, test, build
+    needs: changes
+    # Fail-safe: anything but an explicit "docs only" (including a failed comparison) runs.
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -50,6 +90,8 @@ jobs:
 
   integration:
     name: Integration (Testcontainers)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -73,6 +115,8 @@ jobs:
 
   e2e:
     name: E2E smoke (Docker Compose)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
