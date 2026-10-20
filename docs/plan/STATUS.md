@@ -5,7 +5,11 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: M1 is complete and merged. (During a session, Claude keeps this section current after each finished task: done so far, next step, open questions, decisions made in chat. See "Checkpoints" in `CLAUDE.md`.)
+**S22 (Phase 6 planning + provider adapter), planning step; no code yet.**
+- Done: Session Brief given; [phase-6-playbook.md](phase-6-playbook.md) drafted (Proposed): market gap, five differentiators D-1..D-5, quality bar, design principles, the $5 budget policy, eval strategy, OWASP mapping, guides for S22–S27, references.
+- Decided in chat (user, 2026-10-20): **OpenAI budget is $5 credit in total for Phase 6, used only at the final testing stage (S27)**; until then everything runs on fake providers and reference fixtures.
+- Waiting on the user: confirm the playbook (Phase 6 split S22–S27 and D-1..D-5); the `openai` npm SDK as a new pinned dependency inside `packages/ai` (recommended) or hand-written `fetch`; Sentry/Grafana Cloud now or keep deferring.
+- Next step after confirmation: Task 1, ADR-0027 (provider adapter, routing, metering, eval format), then `contracts/ai.ts`.
 
 ## Last sessions
 - **M1 maintenance (2026-10-20):** `STATUS.md` split into this file, [session-log.md](session-log.md) and [decisions.md](decisions.md); checkpoint rule and generous-time-limits testing rule in `CLAUDE.md`; local Playwright in cloud sessions uses CI's headless shell; the session-start hook starts Docker with Google's mirror (`mirror.gcr.io`) so Docker Hub's rate limit no longer blocks pulls. No product code changed.
@@ -66,7 +70,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
 - **CI minutes:** one CI run per session: all checks locally first, every commit (docs, "ADR accepted", STATUS) in before the PR, pushes to an open PR only to fix CI; docs-only PRs skip the slow jobs; CI runs on PRs, weekly on `main` and by hand. **No retries in CI** (M1).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
-- **OpenAI cost (to decide at S22):** add ~$5–10 credit with a hard monthly limit (recommended) or develop on a free local model via the provider adapter and run evals on OpenAI before the pilot.
+- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4).
 - **Skip domain, business email and LLC** until before the pilot (Phase 11); brand, trademark and domain checks then.
 - **Design:** Pepper green + chili accent (PCR-002), Bricolage Grotesque + Figtree, warm and friendly, mobile-first (`docs/mockups/README.md`).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
@@ -87,7 +91,12 @@ S1–S21 are done and merged (Phases 0–5; details in [session-log.md](session-
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S22 | **Phase 6 planning + provider adapter:** split Phase 6 (AI agent + trust layer) into sessions; decide the OpenAI cost option (credit with a hard monthly limit, or a free local model for development, see Decisions); build the provider adapter with a fake provider and the eval runner skeleton | 6a | Phase 6 plan confirmed; adapter contract tests and a first eval run green |
+| S22 | **Phase 6 planning + provider adapter:** playbook confirmed; ADR-0027; `contracts/ai.ts`; `packages/ai` with the `LlmProvider` port, scripted fake, OpenAI adapter (no real calls), metering, eval runner skeleton | 6a | Playbook confirmed; provider contract suite green on fake and OpenAI adapter (recorded server); first eval run green |
+| S23 | Trust layer data: proposals, executions, undo records, autonomy settings, `decideAutonomy` (proposed, see playbook §7) | 6b | RLS + isolation; property tests for `decideAutonomy` |
+| S24 | Tool registry + about ten tools with dry-run previews, inverses, permissions (proposed) | 6c | Preview = execution and hostile-fake tests green |
+| S25 | Agent loop, conversations, SSE, budgets and rate limits (proposed) | 6d | Eval sets green on the fakes; AC-X-2 |
+| S26 | Chat screen, cards, Why, Undo, Autonomy settings (proposed) | 6e | Playwright journeys, axe |
+| S27 | Real-model evals within the $5 budget, model choice, Phase 6 security review, exit (proposed) | 6f | Scheduling ≥ 90%, safety 100% pass^3, spend ≤ $5 |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* During the session Claude keeps "In progress" current after each finished task; at the end it moves that session's summary into "Last sessions", appends the full entry to `session-log.md` and new decisions to `decisions.md`, and commits all three.
