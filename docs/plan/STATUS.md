@@ -1,14 +1,14 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.18 · **Current phase:** 6 — AI agent + trust layer. **S22** (Phase 6 plan, provider adapter, eval skeleton) done on its branch → next: **S23** (trust-layer data)
+**Last updated:** 2026-10-20 · **Plan version:** 0.18 · **Current phase:** 6 — AI agent + trust layer. **S22** (Phase 6 plan, provider adapter, eval skeleton) done and merged → next: **S23** (trust-layer data)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S22 is complete on branch `ccr-94b03ef8-cim2en` (no PR yet). Waiting on the user: accept ADR-0027 (or ask for changes) and say whether to open the PR.
+Nothing in progress: S22 is complete; ADR-0027 accepted (user) and the PR is opened and merged to `main`. Next: S23 in a new session from `main`.
 
 ## Last sessions
-- **S22 Phase 6a (2026-10-20): Phase 6 plan, provider adapter, eval runner skeleton** ([ADR-0027](../adr/0027-llm-provider-port-and-evals.md), proposed). Full entry in [session-log.md](session-log.md).
+- **S22 Phase 6a (2026-10-20): Phase 6 plan, provider adapter, eval runner skeleton** ([ADR-0027](../adr/0027-llm-provider-port-and-evals.md), accepted). Full entry in [session-log.md](session-log.md).
   - **Plan:** [phase-6-playbook.md](phase-6-playbook.md), confirmed by the user. It covers the market gap, differentiators D-1..D-5, the quality bar, design principles, the **$5 OpenAI budget (real calls only in S27)**, the eval strategy with a hostile fake, the OWASP LLM mapping, guides for S22–S27, §9 "Keep getting better" and an improvement log.
   - **Code:**
     - `contracts/ai.ts`: provider-neutral messages, tools, requests, responses and errors.
@@ -46,7 +46,8 @@ Full wording and the history in [decisions.md](decisions.md).
   - Phase 6 playbook confirmed, with a "keep getting better" rule.
   - The official `openai` SDK.
   - Sentry and Grafana Cloud deferred again.
-- **S22 defaults (Claude, in ADR-0027, proposed):**
+- **End of S22 (user):** "ADR-0027 approved. Open PR and complete the merge."
+- **S22 defaults (Claude, in ADR-0027, accepted by the user):**
   - Responses API with `store: false` and reasoning replay.
   - Our own retries, with a 30 s timeout.
   - Strict tool schemas from Zod (`.nullable()` instead of optional).
@@ -56,13 +57,12 @@ Full wording and the history in [decisions.md](decisions.md).
   - A $1.50 per-run cap (at most $4.50), and a price table filled before any real run.
 
 ## Waiting on the user
-1. **ADR-0027:** accept it as proposed or ask for changes; then "open PR" (one CI run).
-2. Optional, not yet: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development). The user deferred it after M1 and asked Claude to bring it up: **deferred again at S22 (user); raise it before the pilot (S27/Phase 11 briefs).**
+1. Optional, not yet: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development). The user deferred it after M1 and asked Claude to bring it up: **deferred again at S22 (user); raise it before the pilot (S27/Phase 11 briefs).**
 
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S21 are done and merged (Phases 0–5); S22 is done on its branch. Phase 6 (AI agent + trust layer) runs S22–S27 as set in the [Phase 6 playbook](phase-6-playbook.md), whose §7 guides each session; details in [session-log.md](session-log.md).
+S1–S22 are done and merged (Phases 0–5, Phase 6a). Phase 6 (AI agent + trust layer) runs S22–S27 as set in the [Phase 6 playbook](phase-6-playbook.md), whose §7 guides each session; details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|

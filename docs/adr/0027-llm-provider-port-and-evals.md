@@ -1,6 +1,6 @@
 # ADR-0027: The LLM provider port, OpenAI adapter, metering and eval runner
 
-- **Status:** Proposed (Claude, S22, 2026-10-20). The user chose the official `openai` SDK, a **$5 OpenAI budget for all of Phase 6, spent only at the final testing stage (S27)**, and confirmed the [Phase 6 playbook](../plan/phase-6-playbook.md). The rest are Claude's defaults below. · **Date:** 2026-10-20 · Builds on ADR-0004 (provider adapter), ADR-0005 (the model proposes, the domain decides), ADR-0013 (metering)
+- **Status:** Accepted (user, 2026-10-20, as proposed; drafted by Claude in S22). The user chose the official `openai` SDK, a **$5 OpenAI budget for all of Phase 6, spent only at the final testing stage (S27)**, and confirmed the [Phase 6 playbook](../plan/phase-6-playbook.md). The rest are Claude's defaults below. · **Date:** 2026-10-20 · Builds on ADR-0004 (provider adapter), ADR-0005 (the model proposes, the domain decides), ADR-0013 (metering)
 
 ## Context
 Phase 6 starts the AI layer. ADR-0004 put OpenAI behind an adapter with model ids in configuration and an eval gate. This session builds that adapter and the eval runner before any tool or agent loop exists. The budget means no real call may happen until S27, so everything must be provable with fakes and with fixtures shaped like OpenAI's documented responses, and the runner must refuse to overspend once real calls start.
