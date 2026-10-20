@@ -11,12 +11,29 @@ import {
   type TenantSlug,
   TenantSlugSchema,
 } from '@pepper/contracts';
-import { createBusiness, createClient, ManualClock, type Actor } from '@pepper/core';
-import { addMembership, findBookingReminder, withTenant, type Database } from '@pepper/db';
+import {
+  createBusiness,
+  createClient,
+  deliverOutboxMessage,
+  ManualClock,
+  outboxKeyFrom,
+  type Actor,
+  type EmailMessage,
+  type Mailer,
+} from '@pepper/core';
+import {
+  addMembership,
+  findBookingReminder,
+  listDueOutboxMessages,
+  planBookingReminder,
+  withTenant,
+  type Database,
+} from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { BookingNotFoundError } from './errors.js';
 import { changeBooking, createBooking, listBookings } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
+import { sendDueReminder, sendDueReminders } from './services/reminders.js';
 import type { BookingNotice, BookingNotify } from './services/notices.js';
 import {
   cancelManagedBooking,
@@ -382,5 +399,158 @@ describe('team changes tell the client (notifyClient)', () => {
       ),
     ).rejects.toThrow('could not queue');
     expect(await reminderOf(b, booking)).toMatchObject({ dueAt: due(at(3, '10:00')) });
+  });
+});
+
+describe('the reminder job (AC-W6-1)', () => {
+  const OUTBOX_KEY = outboxKeyFrom('a-reminder-test-outbox-secret-32+chars');
+
+  class RecordingMailer implements Mailer {
+    readonly sent: EmailMessage[] = [];
+    send(message: EmailMessage): Promise<void> {
+      this.sent.push(message);
+      return Promise.resolve();
+    }
+  }
+
+  /** One pass of the reminder job, then the outbox delivered as the worker does. */
+  async function runJobs(b: Business, mailer: RecordingMailer) {
+    const pass = await sendDueReminders(db, { key: OUTBOX_KEY, clock: b.clock });
+    const options = { key: OUTBOX_KEY, mailer, clock: b.clock };
+    for (const due of await listDueOutboxMessages(db, b.clock.now(), 1000)) {
+      if (due.tenantId === b.tenantId) await deliverOutboxMessage(db, due, options);
+    }
+    return pass;
+  }
+
+  /** Emails sent to this business's clients (the outbox is shared by the test's businesses). */
+  const remindersIn = (mailer: RecordingMailer) =>
+    mailer.sent.filter((m) => m.subject.startsWith('Reminder:'));
+
+  it('emails the client when the reminder is due, once, in the business time zone', async () => {
+    const b = await newBusiness();
+    const mailer = new RecordingMailer();
+    await createBooking(db, b.owner, input(b, at(3, '10:00')), { clock: b.clock });
+
+    b.clock.set(new Date(due(at(3, '10:00')).getTime() - 60_000));
+    await runJobs(b, mailer);
+    expect(remindersIn(mailer)).toEqual([]);
+
+    b.clock.set(due(at(3, '10:00')));
+    const pass = await runJobs(b, mailer);
+    expect(pass.queued).toBeGreaterThanOrEqual(1);
+    expect(remindersIn(mailer)).toEqual([
+      expect.objectContaining({
+        to: 'maria@example.test',
+        subject: 'Reminder: your booking at Juniper Hair Studio',
+        text: expect.stringContaining(
+          'Haircut with Jess, Tuesday, November 3 at 10:00 AM.',
+        ) as string,
+      }),
+    ]);
+
+    b.clock.advanceBy(10 * 60_000);
+    await runJobs(b, mailer);
+    expect(remindersIn(mailer)).toHaveLength(1);
+  });
+
+  it('never reminds about a cancelled booking', async () => {
+    const b = await newBusiness();
+    const mailer = new RecordingMailer();
+    const booking = await createBooking(db, b.owner, input(b, at(3, '10:00')), { clock: b.clock });
+    await changeBooking(db, b.owner, booking.id, { status: 'cancelled' }, { clock: b.clock });
+    b.clock.set(due(at(3, '10:00')));
+    await runJobs(b, mailer);
+    b.clock.set(new Date(at(3, '09:59')));
+    await runJobs(b, mailer);
+    expect(remindersIn(mailer)).toEqual([]);
+  });
+
+  it('reminds about a moved booking at its new time only', async () => {
+    const b = await newBusiness();
+    const mailer = new RecordingMailer();
+    const booking = await createBooking(db, b.owner, input(b, at(3, '10:00')), { clock: b.clock });
+    await changeBooking(db, b.owner, booking.id, { startsAt: at(4, '14:00') }, { clock: b.clock });
+    b.clock.set(due(at(3, '10:00')));
+    await runJobs(b, mailer);
+    expect(remindersIn(mailer)).toEqual([]);
+    b.clock.set(due(at(4, '14:00')));
+    await runJobs(b, mailer);
+    expect(remindersIn(mailer).map((m) => m.text)).toEqual([
+      expect.stringContaining('Wednesday, November 4 at 2:00 PM'),
+    ]);
+  });
+
+  it('skips, and forgets, a reminder whose booking changed behind its back', async () => {
+    const b = await newBusiness();
+    const booking = await createBooking(db, b.owner, input(b, at(3, '10:00')), { clock: b.clock });
+    const reminder = { bookingId: BookingIdSchema.parse(booking.id), tenantId: b.tenantId };
+    // A reminder planned for another start (as if a move had not re-planned it).
+    await withTenant(db, b.tenantId, (tx) =>
+      planBookingReminder(tx, {
+        bookingId: reminder.bookingId,
+        dueAt: due(at(3, '11:00')),
+        startsAt: new Date(at(3, '11:00')),
+      }),
+    );
+    b.clock.set(new Date(due(at(3, '11:00'))));
+    expect(await sendDueReminder(db, reminder, { key: OUTBOX_KEY, clock: b.clock })).toBe(
+      'skipped',
+    );
+    expect(await reminderOf(b, booking)).toBeUndefined();
+  });
+
+  it('skips a client without an email address, and a booking that has started', async () => {
+    const b = await newBusiness();
+    const mailer = new RecordingMailer();
+    const bos = await createBooking(db, b.owner, input(b, at(3, '10:00'), { clientId: b.bo.id }), {
+      clock: b.clock,
+    });
+    const late = await createBooking(db, b.owner, input(b, at(3, '13:00')), { clock: b.clock });
+    // The job was down for a day: Bo's reminder is due, Maria's booking has started.
+    b.clock.set(new Date(at(3, '13:30')));
+    await runJobs(b, mailer);
+    expect(remindersIn(mailer)).toEqual([]);
+    expect(await reminderOf(b, bos)).toBeUndefined();
+    expect(await reminderOf(b, late)).toBeUndefined();
+  });
+
+  it('queues one email when several workers handle the same reminder at once', async () => {
+    const b = await newBusiness();
+    const mailer = new RecordingMailer();
+    const booking = await createBooking(db, b.owner, input(b, at(3, '10:00')), { clock: b.clock });
+    b.clock.set(due(at(3, '10:00')));
+    const reminder = { bookingId: BookingIdSchema.parse(booking.id), tenantId: b.tenantId };
+    const results = await Promise.all(
+      [1, 2, 3, 4].map(() => sendDueReminder(db, reminder, { key: OUTBOX_KEY, clock: b.clock })),
+    );
+    expect(results.filter((r) => r === 'queued')).toHaveLength(1);
+    await runJobs(b, mailer);
+    expect(remindersIn(mailer)).toHaveLength(1);
+  });
+
+  it('a cancellation racing the job: the job either sends before it or not at all', async () => {
+    for (let round = 0; round < 5; round += 1) {
+      const b = await newBusiness();
+      const mailer = new RecordingMailer();
+      const booking = await createBooking(db, b.owner, input(b, at(3, '10:00')), {
+        clock: b.clock,
+      });
+      b.clock.set(due(at(3, '10:00')));
+      const reminder = { bookingId: BookingIdSchema.parse(booking.id), tenantId: b.tenantId };
+      const order: string[] = [];
+      await Promise.all([
+        sendDueReminder(db, reminder, { key: OUTBOX_KEY, clock: b.clock }).then((r) =>
+          order.push(`reminder:${r}`),
+        ),
+        changeBooking(db, b.owner, booking.id, { status: 'cancelled' }, { clock: b.clock }).then(
+          () => order.push('cancelled'),
+        ),
+      ]);
+      await runJobs(b, mailer);
+      // Queued only if the job committed first; never after the cancellation.
+      if (remindersIn(mailer).length > 0) expect(order[0]).toBe('reminder:queued');
+      else expect(order).toContain('reminder:skipped');
+    }
   });
 });
