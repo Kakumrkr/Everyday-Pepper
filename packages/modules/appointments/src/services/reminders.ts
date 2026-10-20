@@ -45,8 +45,10 @@ export async function keepReminderInStep(
   }
 }
 
-/** Reminders the job handles per pass. */
+/** Reminders the job lists at a time. */
 export const REMINDER_BATCH = 100;
+/** Batches per pass at most, so one pass ends even if reminders keep falling due. */
+export const REMINDER_BATCHES_PER_PASS = 20;
 
 export interface ReminderOptions {
   /** Seals the queued email (the outbox key, ADR-0024). */
@@ -99,17 +101,22 @@ export async function sendDueReminder(
 }
 
 /**
- * One pass of the reminder job: handles up to `REMINDER_BATCH` reminders due now, across
- * businesses, the earliest first. Returns how many emails it queued and skipped.
+ * One pass of the reminder job: handles the reminders due now, across businesses, the earliest
+ * first, in batches until none is left (a backlog after downtime clears in one pass, up to
+ * `REMINDER_BATCHES_PER_PASS` batches). Every reminder handled is removed, queued or skipped,
+ * so the next batch lists new ones. Returns how many emails it queued and skipped.
  */
 export async function sendDueReminders(
   db: Database,
   options: ReminderOptions,
 ): Promise<{ queued: number; skipped: number }> {
-  const due = await listDueBookingReminders(db, options.clock.now(), REMINDER_BATCH);
-  let queued = 0;
-  for (const reminder of due) {
-    if ((await sendDueReminder(db, reminder, options)) === 'queued') queued += 1;
+  const totals = { queued: 0, skipped: 0 };
+  for (let batch = 0; batch < REMINDER_BATCHES_PER_PASS; batch += 1) {
+    const due = await listDueBookingReminders(db, options.clock.now(), REMINDER_BATCH);
+    for (const reminder of due) {
+      totals[await sendDueReminder(db, reminder, options)] += 1;
+    }
+    if (due.length < REMINDER_BATCH) break;
   }
-  return { queued, skipped: due.length - queued };
+  return totals;
 }

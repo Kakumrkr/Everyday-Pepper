@@ -33,7 +33,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { BookingNotFoundError } from './errors.js';
 import { changeBooking, createBooking, listBookings } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
-import { sendDueReminder, sendDueReminders } from './services/reminders.js';
+import { REMINDER_BATCH, sendDueReminder, sendDueReminders } from './services/reminders.js';
 import type { BookingNotice, BookingNotify } from './services/notices.js';
 import {
   cancelManagedBooking,
@@ -527,6 +527,31 @@ describe('the reminder job (AC-W6-1)', () => {
     expect(results.filter((r) => r === 'queued')).toHaveLength(1);
     await runJobs(b, mailer);
     expect(remindersIn(mailer)).toHaveLength(1);
+  });
+
+  it('clears a backlog larger than one batch in one pass', async () => {
+    const b = await newBusiness();
+    const bookings = [];
+    // REMINDER_BATCH + 5 one-hour bookings back to back, booked with the owner's override.
+    for (let i = 0; i < REMINDER_BATCH + 5; i += 1) {
+      bookings.push(
+        await createBooking(
+          db,
+          b.owner,
+          input(b, new Date(Date.parse(at(4, '00:00')) + i * 60 * 60_000).toISOString(), {
+            override: true,
+            notifyClient: false,
+          }),
+          { clock: b.clock },
+        ),
+      );
+    }
+    const last = bookings.at(-1);
+    if (last === undefined) throw new Error('no bookings');
+    // The job was down until every reminder was due.
+    b.clock.set(due(last.startsAt));
+    await sendDueReminders(db, { key: OUTBOX_KEY, clock: b.clock });
+    for (const booking of bookings) expect(await reminderOf(b, booking)).toBeUndefined();
   });
 
   it('a cancellation racing the job: the job either sends before it or not at all', async () => {
