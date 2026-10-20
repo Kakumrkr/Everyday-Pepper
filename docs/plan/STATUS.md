@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.14 · **Current phase:** 4 — PWA + booking page, **complete** (S14–S18). **S18 (Phase 4e: Phase 4 exit) done**: AC-W8-1 in Playwright, installable app with an offline page, axe gate, Phase 4 security review (no high findings; two medium fixed). [ADR-0023](../adr/0023-pwa-offline-and-phase-4-exit.md) accepted; PR merged into `main` at the user's request → next: **Phase 5 planning** (S19, messaging + jobs)
+**Last updated:** 2026-10-20 · **Plan version:** 0.15 · **Current phase:** 5 — Messaging + jobs (S19–S21). **S19 (Phase 5a: transactional outbox) done**: booking page emails go through the outbox and the worker sends each exactly once under retries (AC-W4-2 proven end to end). [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md) proposed, for the user to accept in review; D4 resolved (Resend for the pilot) → next: **S20** (confirmations for team-made bookings, reminders with timing AC-W6-1, expired-request cleanup)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -416,6 +416,42 @@
     - Push notifications (Phase 5).
     - The low findings above.
 
+- **S19 Phase 5a (2026-10-20): transactional outbox and email delivery** ([ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md), proposed). At the Session Brief the user chose all five of Claude's recommendations ("sounds good, go with your recommendation and start").
+  - **Database** (migrations 0024–0026):
+    - `outbox_messages` (tenant RLS): sealed content, status `pending`/`sent`/`dead`, attempts, lease, last error name, a dedupe key unique per business.
+    - `outbox_dispatch`: the relay's index of pending messages (ids and due times only), tenant RLS plus a read-only `outbox_scan` policy behind the transaction-local `app.outbox_scan` setting (`current_outbox_scan()`).
+    - Both tables are in the isolation suite, plus a dedicated "outbox scan" block.
+  - **Core:**
+    - the `Mailer`/`EmailMessage` port
+    - AES-256-GCM sealing bound to the message id, key from `OUTBOX_SECRET` via HKDF
+    - `failureOutcome`: 5xx or unreadable content gives up at once; otherwise backoff of 30 s doubling to 1 h, 8 attempts
+    - `queueEmail`
+    - `deliverOutboxMessage`: claim under a 5-minute lease, send with a stable `Message-ID`, mark sent and meter `emails_sent` in one transaction
+  - **Runtime:** `SmtpMailer`, `MailModule` and `MAILER` moved here from the api (SMTP timeouts added); the `loadMailConfig` and `loadOutboxSecret` env loaders; `raiseAlert` (Sentry, ids only).
+  - **Worker:** `OutboxModule`: a relay polling every `OUTBOX_POLL_MS` (1 s) that queues one BullMQ job per due message (job id = message id), and a delivery worker (concurrency 5). It starts nothing without `SMTP_URL`. New dependency: **BullMQ 6.3.11** (pinned).
+  - **Appointments:** a `notify` option on confirm, reschedule and cancel, called inside the change's transaction with a `BookingNotice`.
+  - **Api:** the booking page queues its confirmed, moved and cancelled emails there. The code email stays direct (503 on failure).
+  - **Config:** Compose and `.env.example` add `OUTBOX_SECRET` (api and worker) and `SMTP_URL`/`MAIL_FROM` for the worker; the worker now depends on Mailpit.
+  - **Testing:** `startMailpit()` (with Mailpit's chaos API, to make SMTP refuse mail).
+  - **Docs:** ADR-0024, jobs-messaging-integrations, data-model, security-and-tenancy, reliability, testing-strategy, dev-setup, open decisions (D4), traceability (AC-W4-2), dependency map, CHANGELOG 0.15.
+  - **Checks run:**
+    - `pnpm check` green. All coverage gates pass. Worker unit tests 13 at 100% lines; core, contracts and runtime unit tests added (outbox sealing and failure rules, schemas, mailer, env loaders, alert).
+    - `pnpm test:integration` green, **604**:
+      - db 363 (outbox repository 13, isolation incl. the two tables and the scan)
+      - core 72 (AC-W4-2 at the service level, 12)
+      - appointments 102 at the full run; the file later gained 2 notify tests (rolling back the change when notify fails), and that file was re-run green (27)
+      - api 60
+      - worker 3 (end to end through relay, BullMQ, Redis and Mailpit: duplicated jobs and relay passes, Mailpit refusing with 451 then recovering, a 550 refusal)
+      - runtime 2
+      - testing 2
+    - Playwright: **52/52 green** (phone and desktop) against api, **worker** and `next start` on Compose Postgres, Redis and Mailpit (project `pepper-s19`), `--workers=2`. Afterwards the database showed 10 outbox messages, all `sent` on the first attempt, content cleared, no dispatch rows left. The public-booking journey now also checks the cancellation email.
+  - **Not done / for later:**
+    - Docker image builds were not run here (`docker compose build` cannot reach npm from this sandbox, the known corepack fetch failure). CI builds them and runs the Compose E2E job, now with the worker sending email.
+    - Resend itself (Phase 11) with its idempotency key, which closes the one remaining duplicate case: a crash after the SMTP server accepted an email and before it was marked sent.
+    - Clean-up of old `sent`/`dead` outbox rows (with S20's clean-up job).
+    - A screen showing delivery status.
+  - **Note:** while preparing Playwright, Claude overwrote the git-ignored local `.env` with a fresh copy of `.env.example` without checking it first. If it held your own values (e.g. a Sentry DSN), set them again.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
@@ -531,13 +567,22 @@
 - **S17 (2026-10-20): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0022): (a) **email sender: a dev SMTP sender now** (nodemailer → Mailpit; any SMTP in production) called directly by the api behind a `Mailer` port, with the outbox in Phase 5; (b) `/book/<slug>` URLs, link `/book/<slug>/manage#<token>`; (c) `tenants.brand_color` column, slate default; (d) the time is not held while the client verifies, and the same code may confirm an alternative; (e) audit actor `system`, booking source `booking_page`.
 - **End of S17 (user, 2026-10-20):** "ADR-0022 approve. open PR and merge to main." ADR-0022 accepted as proposed (dev SMTP sender until the Phase 5 outbox, `/book/<slug>` URLs, `tenants.brand_color` with a slate default, no hold during verification and the same code may confirm an alternative, audit actor `system`). S18 starts in a new session.
 - **S18 (user, 2026-10-20):** asked for the Session Brief with any decisions, then to complete the session, approve, open the PR and merge it into `main`, and from then on to go with Claude's recommendations. Decisions at the brief: (a) **a hand-written service worker** (no Serwist), caching only an offline page; (b) **`@axe-core/playwright`, failing on serious and critical**; (c) **fix high and medium security findings, log low ones**. ADR-0023 recorded these as accepted. For the rest of this session Claude chose on its recommendations: the worker only on the signed-in app; headers in `next.config.ts`; `no-store` in the forwarder.
+- **S19 decisions (user, 2026-10-20, S19 Session Brief: "Yeah, sounds good. Go with your recommendation and start"):**
+  - (1) The booking code email stays direct (the client is waiting); the other booking page emails go through the outbox.
+  - (2) Queued content encrypted (AES-256-GCM, key from env) and cleared after sending.
+  - (3) The worker finds work through a small index table with ids and due times only; the messages stay tenant-scoped (RLS).
+  - (4) D4: **Resend for the pilot**.
+  - (5) Phase 5 split: S19 outbox, S20 confirmations + reminders + expired-request cleanup, S21 tasks + push.
+  - Also asked: explain the feature in plain business terms before coding. That was done: "a note to send the email is saved together with the booking; the worker sends it, retries if needed, never twice".
+- **S19 defaults (Claude, in ADR-0024, for the user to confirm in review):** the index table under RLS too, with a transaction-local `app.outbox_scan` setting instead of being global (the isolation suite requires RLS on every `tenant_id` table); `OUTBOX_SECRET` as a new secret rather than one derived from `AUTH_SECRET` (the worker does not need the auth secret); retries in Postgres rather than BullMQ; polling only (no notify after commit); 8 attempts, 30 s doubling to 1 h; 5xx gives up at once; a 5-minute lease; dedupe key `booking.<kind>:<booking id>:<updated_at ms>`.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Review S19 and accept or change [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md), including Claude's defaults listed under "S19 defaults" below. Open the PR when you want it reviewed.
+2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
-Phases 2, 3 and 4 are done and merged. Phase 4 was split into S14–S18. Phase 5 (messaging + jobs) is Claude's proposal for S19–S21 below; confirm or change it at the S19 Session Brief.
+Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) is split into S19–S21 (user, S19 Session Brief); S19 is done.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
@@ -546,7 +591,9 @@ Phases 2, 3 and 4 are done and merged. Phase 4 was split into S14–S18. Phase 5
 | S16 | ~~**Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system~~ **done** (ADR-0021 accepted) | 4c | — |
 | S17 | ~~**Public booking page with email verification**~~ **done** (ADR-0022 accepted) | 4d | — |
 | S18 | ~~**Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17~~ **done** (ADR-0023 accepted; Phase 4 complete) | 4e | — |
-| S19 | **Phase 5 planning + outbox:** split Phase 5 into sessions (proposal: S19 transactional outbox + BullMQ handlers with idempotency keys, booking page emails moved onto it (AC-W4-2 "no duplicate sends on retry"); S20 confirmations and reminders with timing (AC-W6-1) and expired-request cleanup (S18 L7); S21 tasks + push notifications), and decide D4 email provider for later (Resend vs SES) | 5a | Outbox delivers each email exactly once under retries (integration test); plan for S20–S21 confirmed |
+| S19 | ~~**Phase 5 planning + outbox**~~ **done** (ADR-0024 proposed; D4: Resend) | 5a | — |
+| S20 | **Confirmations and reminders:** confirmation emails for team-made bookings (queued in the booking transaction), reminders scheduled per booking with timing (AC-W6-1: sent within 5 minutes of schedule; cancelled bookings never get one), reconciled from Postgres, and cleanup of expired booking requests (S18 L7) and old outbox rows | 5b | AC-W6-1 integration test with a controlled clock; no reminder for a cancelled or moved booking; cleanup job tested |
+| S21 | **Tasks + push notifications (Phase 5 exit):** core tasks, web push for the installed app, Phase 5 security review | 5c | Phase 5 exit criteria (AC-W4-2 done in S19, AC-W6-1 in S20) proven; push subscription and delivery tested |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."* At the end of each session Claude updates this file (Done / Decisions / Planned sessions) and commits it.

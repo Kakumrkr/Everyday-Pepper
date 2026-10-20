@@ -2,6 +2,9 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.15 — 2026-10-20
+- S19 (Phase 5a): [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md) (proposed; its five decisions were chosen by the user at the S19 Session Brief): the transactional outbox (`outbox_messages` with RLS, the `outbox_dispatch` index read through the read-only `outbox_scan` policy), content sealed with AES-256-GCM under a new required `OUTBOX_SECRET` (api and worker), delivery in the worker through BullMQ 6.3.11 with a lease, retries in Postgres and an alert when a message is given up. The booking page's confirmed/moved/cancelled emails move onto it (ends the temporary exception of 0.13); the code email stays direct. The SMTP mailer moves from the api to `@pepper/runtime`. **D4 resolved: Resend for the pilot.** Phase 5 split: S19 outbox, S20 confirmations for team-made bookings, reminders (AC-W6-1) and expired-request cleanup, S21 tasks and push notifications. No change to scope, contracts' existing shapes or exit criteria.
+
 ## 0.14 — 2026-10-20
 - S18 (Phase 4e): [ADR-0023](../adr/0023-pwa-offline-and-phase-4-exit.md) (accepted by the user): an installable app (manifest, icons) with a hand-written service worker that caches only a static offline page, linked from the signed-in app only; security headers on every web response and `no-store` on forwarded api answers (the two medium findings of the [Phase 4 security review](../engineering/security-review-s18.md); no high ones); axe in Playwright on the key screens (`@axe-core/playwright` 4.13.0, e2e only); AC-W8-1 in Playwright. **Phase 4 complete.** No change to phases, scope, contracts or exit criteria.
 

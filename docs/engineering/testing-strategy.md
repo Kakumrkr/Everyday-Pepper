@@ -6,7 +6,7 @@ Every feature and bug fix ships with automated tests that were actually run. Acc
 |---|---|---|---|
 | Unit | Vitest (Jest for NestJS if needed) | Domain logic, rules engine, availability engine, card renderers | ≥ 80% coverage on core/modules |
 | Property-based | fast-check | Availability (no overlaps, rules respected), recurrence, time zones/DST | 10k cases in CI |
-| Integration | Testcontainers (Postgres + pgvector, Redis) | Repositories, migrations, RLS, outbox, BullMQ handlers | All pass |
+| Integration | Testcontainers (Postgres + pgvector, Redis, Mailpit with its chaos API for SMTP failures) | Repositories, migrations, RLS, outbox, BullMQ handlers | All pass |
 | Cross-tenant suite | Integration | Every endpoint/tool attempted with another tenant's IDs. At the database level (`packages/db/src/isolation.int.test.ts`), every table is classified as tenant-owned or global (auth tables, with a reason). Each tenant-owned table is checked for forced RLS and attacked across tenants, and the read-only `withUser` context is attacked too. At the endpoint level (`apps/api/src/auth.int.test.ts`): switching to or reading a foreign business, tenant ids smuggled in body, query or header, membership removal, and Better Auth's `update-session` | 100% |
 | Role matrix | Unit + integration | Every action × role: `packages/core/src/permissions.test.ts` pins every cell (and own/colleague/unassigned records), `membership-rules.test.ts` every role × target × change; `packages/core/src/services.int.test.ts` runs the services against Postgres (incl. concurrent owner changes); `apps/api` tests the route guards and endpoints per role | 100% |
 | Contract | Zod schemas + recorded fixtures | Module events/interfaces; Google Calendar, email providers | All pass |

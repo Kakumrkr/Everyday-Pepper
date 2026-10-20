@@ -25,7 +25,7 @@ Deleting a user cascades to their sessions, accounts, second factor and membersh
 | MemoryFact / MemoryEpisode | episode has `embedding vector` (pgvector, HNSW index) |
 | Task | title, due_at, assignee, status, source |
 | FeedItem | kind, status (`done`/`needs_ok`/`suggestion`/`dismissed`), payload, action_proposal_id? |
-| OutboxMessage | type, payload, status, attempts, dedupe_key unique |
+| OutboxMessage | `outbox_messages` (S19, ADR-0024): type, sealed payload (cleared once sent or dead), status `pending`/`sent`/`dead`, attempts, available_at, lease_until, last_error (a name only), sent_at, dedupe_key unique per tenant; `outbox_dispatch`: the relay's index of pending messages (id, tenant, due time; the read-only `outbox_scan` policy) |
 | Notification / MessageDelivery | channel, recipient, template, status, provider_id |
 | AuditLog (`audit_log`, S8) | actor_kind (`user`/`system`), actor_user_id (→ users, nulled on user deletion), action, entity_type, entity_id, before/after (jsonb, per-action allowlist in contracts: no personal data), request_id, created_at — append-only (the services' role has INSERT/SELECT only) |
 | Invite (`invites`, S9) | email (lowercased), role, token_hash (SHA-256 hex of the link's token, unique), invited_by_user_id / accepted_by_user_id (→ users, nulled on deletion), expires_at (7 days), accepted_at, revoked_at (never both); one unresolved invite per tenant + email (partial unique index); extra read-only policy `invite_lookup` for the token holder when no tenant is set |
