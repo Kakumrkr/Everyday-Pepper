@@ -1,5 +1,5 @@
 import type { BookingEmailDetails } from '@pepper/appointments';
-import type { EmailMessage } from '../mail/mailer.js';
+import type { EmailMessage } from '@pepper/core';
 
 // The booking page's emails (ADR-0022): plain text, in the business's time zone. They carry
 // only what the client typed or booked; the code and the link are secrets for this client.

@@ -1,5 +1,5 @@
 # Local development and CI smoke stack. `docker compose up --build` serves:
-#   web http://localhost:3000 · api http://localhost:4000 · worker http://localhost:4100 (health only)
+#   web http://localhost:3000 · api http://localhost:4000 · worker http://localhost:4100 (health; runs the outbox)
 #   Mailpit (fake inbox) http://localhost:8025, SMTP localhost:1025
 # Infra only, for `pnpm dev`: docker compose up postgres redis mailpit
 # Credentials below are local-only defaults; override them in a git-ignored .env (see .env.example).
@@ -20,6 +20,9 @@ x-app-env: &app-env
   SENTRY_DSN: ${SENTRY_DSN:-}
   OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
   OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
+  # Local-only default; set your own in .env. Seals queued emails (ADR-0024); api and worker
+  # must share it.
+  OUTBOX_SECRET: ${OUTBOX_SECRET:-local-dev-only-outbox-secret-not-for-real-use}
 
 services:
   postgres:
@@ -80,7 +83,7 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-local-dev-only-auth-secret-not-for-real-use}
       # The browser talks to web, which forwards /api/auth and /v1 to the api (ADR-0012).
       AUTH_BASE_URL: ${AUTH_BASE_URL:-http://localhost:3000}
-      # Email (the booking page's codes, ADR-0022) goes to Mailpit's inbox (port 8025).
+      # The booking page's codes (ADR-0022) go straight to Mailpit's inbox (port 8025).
       SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
       MAIL_FROM: ${MAIL_FROM:-Pepper <bookings@pepper.localhost>}
     ports: ['127.0.0.1:4000:4000']
@@ -95,10 +98,14 @@ services:
     environment:
       <<: *app-env
       PORT: '4100'
+      # Queued emails (the outbox, ADR-0024) go to Mailpit's inbox too.
+      SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
+      MAIL_FROM: ${MAIL_FROM:-Pepper <bookings@pepper.localhost>}
     ports: ['127.0.0.1:4100:4100']
     depends_on:
       migrate: { condition: service_completed_successfully }
       redis: { condition: service_healthy }
+      mailpit: { condition: service_healthy }
 
   web:
     build: { context: ., target: web }

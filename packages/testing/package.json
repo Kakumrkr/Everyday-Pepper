@@ -2,7 +2,7 @@
   "name": "@pepper/testing",
   "version": "0.0.0",
   "private": true,
-  "description": "Test-only helpers: Testcontainers for Postgres and Redis (integration tests). Never a production dependency.",
+  "description": "Test-only helpers: Testcontainers for Postgres, Redis and Mailpit (integration tests). Never a production dependency.",
   "type": "module",
   "exports": {
     ".": {

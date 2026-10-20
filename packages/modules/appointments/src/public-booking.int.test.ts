@@ -20,7 +20,7 @@ import {
   updateBookingPage,
   type Actor,
 } from '@pepper/core';
-import { listAuditEntries, withTenant, type Database } from '@pepper/db';
+import { findCurrentTenant, listAuditEntries, withTenant, type Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   BookingNotChangeableError,
@@ -46,6 +46,8 @@ import {
   MAX_REQUESTS_PER_EMAIL_PER_HOUR,
   requestBooking,
   rescheduleManagedBooking,
+  type BookingNotice,
+  type BookingNotify,
 } from './services/public-booking.js';
 import { createService, updateService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
@@ -516,6 +518,67 @@ describe('the reschedule/cancel link', () => {
     await expect(
       cancelManagedBooking(db, p.slug, token, { clock: p.clock }),
     ).rejects.toBeInstanceOf(BookingNotChangeableError);
+  });
+});
+
+describe('notices (ADR-0024: emails queued with the change)', () => {
+  it('tells notify about each change, inside its transaction', async () => {
+    const p = await newPage();
+    const notices: BookingNotice[] = [];
+    const inTenant: (string | null)[] = [];
+    const notify: BookingNotify = async (tx, notice) => {
+      notices.push(notice);
+      inTenant.push((await findCurrentTenant(tx))?.id ?? null);
+    };
+    const asked = await request(p);
+    const confirmed = await confirmBookingRequest(
+      db,
+      p.slug,
+      asked.requestId,
+      { code: asked.code },
+      { codeKey: KEY, clock: p.clock, notify },
+    );
+    await rescheduleManagedBooking(db, p.slug, confirmed.manageToken, tue('14:00'), {
+      clock: p.clock,
+      notify,
+    });
+    await cancelManagedBooking(db, p.slug, confirmed.manageToken, { clock: p.clock, notify });
+    expect(notices.map((n) => n.kind)).toEqual(['confirmed', 'rescheduled', 'cancelled']);
+    expect(notices.map((n) => 'manageToken' in n && n.manageToken)).toEqual([
+      confirmed.manageToken,
+      confirmed.manageToken,
+      false,
+    ]);
+    const [booking] = await bookingsOf(p);
+    expect(new Set(notices.map((n) => n.change.bookingId))).toEqual(new Set([booking?.id]));
+    expect(new Set(notices.map((n) => n.change.at.getTime())).size).toBe(3);
+    expect(notices[0]?.email).toMatchObject({ email: 'ana@example.test', clientName: 'Ana Ruiz' });
+    expect(inTenant).toEqual([p.tenantId, p.tenantId, p.tenantId]);
+  });
+
+  it('rolls the change back when notify fails, so no email is sent for it', async () => {
+    const p = await newPage();
+    const asked = await request(p);
+    const failing: BookingNotify = () => Promise.reject(new Error('could not queue'));
+    await expect(
+      confirmBookingRequest(
+        db,
+        p.slug,
+        asked.requestId,
+        { code: asked.code },
+        { codeKey: KEY, clock: p.clock, notify: failing },
+      ),
+    ).rejects.toThrow('could not queue');
+    expect(await bookingsOf(p)).toEqual([]);
+    // The request is still open: the same code books it.
+    const confirmed = await confirm(p, asked.requestId, asked.code);
+    await expect(
+      cancelManagedBooking(db, p.slug, confirmed.manageToken, {
+        clock: p.clock,
+        notify: failing,
+      }),
+    ).rejects.toThrow('could not queue');
+    expect((await bookingsOf(p))[0]?.status).toBe('confirmed');
   });
 });
 

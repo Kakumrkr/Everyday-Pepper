@@ -84,6 +84,7 @@ beforeAll(async () => {
     DATABASE_URL: databaseUrl,
     REDIS_URL: redis.url,
     AUTH_SECRET: 'an-integration-test-secret-32-chars',
+    OUTBOX_SECRET: 'an-integration-test-outbox-secret-32+',
     AUTH_BASE_URL: ORIGIN,
     LOG_LEVEL: 'info',
   });

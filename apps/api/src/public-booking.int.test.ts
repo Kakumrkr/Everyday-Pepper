@@ -11,9 +11,25 @@ import {
   type AvailableSlot,
   type TenantId,
 } from '@pepper/contracts';
-import { createBusiness, updateBookingPage, type Actor } from '@pepper/core';
-import { prepareDatabase, users, withTenant, type Database, type DatabaseHandle } from '@pepper/db';
-import { DATABASE } from '@pepper/runtime';
+import {
+  createBusiness,
+  deliverOutboxMessage,
+  outboxKeyFrom,
+  systemClock,
+  updateBookingPage,
+  type Actor,
+  type EmailMessage,
+  type Mailer,
+} from '@pepper/core';
+import {
+  listDueOutboxMessages,
+  prepareDatabase,
+  users,
+  withTenant,
+  type Database,
+  type DatabaseHandle,
+} from '@pepper/db';
+import { DATABASE, MAILER } from '@pepper/runtime';
 import { postgresUrlAs, startPostgres, startRedis, type TestService } from '@pepper/testing';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -22,13 +38,15 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { AppModule } from './app.module.js';
 import { loadApiConfig } from './config.js';
-import { MAILER, type EmailMessage, type Mailer } from './mail/mailer.js';
 
 // The public booking page through the api against real Postgres and Redis (ADR-0022): a
 // booking only after the emailed code (AC-W8-2), the link that reschedules and cancels it, and
-// the Redis rate limits. Email goes to a recording mailer instead of SMTP.
+// the Redis rate limits. Email goes to a recording mailer instead of SMTP: the code at once,
+// the emails about the booking through the outbox (ADR-0024), delivered here as the worker
+// would.
 
 const ORIGIN = 'http://localhost:3000';
+const OUTBOX_SECRET = 'an-integration-test-outbox-secret-32+';
 const SLUG = 'plum-salon';
 const DAY = 86_400_000;
 
@@ -58,6 +76,7 @@ beforeAll(async () => {
     DATABASE_URL: databaseUrl,
     REDIS_URL: redis.url,
     AUTH_SECRET: 'an-integration-test-secret-32-chars',
+    OUTBOX_SECRET,
     AUTH_BASE_URL: ORIGIN,
     SMTP_URL: 'smtp://127.0.0.1:1',
   });
@@ -109,6 +128,16 @@ afterAll(async () => {
 beforeEach(() => {
   mailer.sent.length = 0;
 });
+
+/** Delivers the queued emails, as the worker does; returns how many were sent. */
+async function deliverQueued(): Promise<number> {
+  const options = { key: outboxKeyFrom(OUTBOX_SECRET), mailer, clock: systemClock };
+  const results = [];
+  for (const due of await listDueOutboxMessages(db, new Date(), 100)) {
+    results.push(await deliverOutboxMessage(db, due, options));
+  }
+  return results.filter((result) => result === 'sent').length;
+}
 
 /** A visitor with their own client address, sending the app's Origin. */
 function visitor() {
@@ -197,7 +226,12 @@ describe('the public booking page', () => {
       changeable: true,
     });
     expect(await bookedFor('ana.flow@example.test')).toBe(1);
+    // Queued with the booking, sent by the worker, exactly once.
+    expect(mailer.sent).toHaveLength(1);
+    expect(await deliverQueued()).toBe(1);
+    expect(await deliverQueued()).toBe(0);
     const confirmation = mailer.sent.at(-1);
+    expect(confirmation?.subject).toContain("You're booked");
     expect(confirmation?.text).toContain(`${ORIGIN}/book/${SLUG}/manage#${manageToken}`);
     await ana.post(`/booking-requests/${requestId}/confirm`, { code }).expect(409);
 
@@ -210,10 +244,16 @@ describe('the public booking page', () => {
       .post('/booking/reschedule', { token: manageToken, startsAt: later.startsAt })
       .expect(200);
     expect(moved.body).toMatchObject({ booking: { startsAt: later.startsAt } });
+    expect(await deliverQueued()).toBe(1);
     expect(mailer.sent.at(-1)?.subject).toContain('has moved');
+    expect(mailer.sent.at(-1)?.text).toContain(`${ORIGIN}/book/${SLUG}/manage#${manageToken}`);
     const cancelled = await ana.post('/booking/cancel', { token: manageToken }).expect(200);
     expect(cancelled.body).toMatchObject({ booking: { status: 'cancelled', changeable: false } });
     await ana.post('/booking/cancel', { token: manageToken }).expect(409);
+    // The refused second cancel queued nothing.
+    expect(await deliverQueued()).toBe(1);
+    expect(mailer.sent.at(-1)?.subject).toContain('is cancelled');
+    expect(mailer.sent.map((m) => m.to)).toEqual(Array(4).fill('ana.flow@example.test'));
     // A token for another booking or business is simply not found.
     await ana.post('/booking/lookup', { token: 'A'.repeat(43) }).expect(404);
   });

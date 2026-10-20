@@ -1,10 +1,10 @@
-import { ConnectionsModule, HealthModule } from '@pepper/runtime';
+import { outboxKeyFrom } from '@pepper/core';
+import { ConnectionsModule, HealthModule, MailModule } from '@pepper/runtime';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { AppointmentsModule } from './appointments/appointments.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import type { ApiConfig } from './config.js';
-import { MailModule } from './mail/mailer.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { TeamModule } from './team/team.module.js';
 
@@ -24,6 +24,7 @@ export class AppModule {
         PublicBookingModule.forRoot({
           baseUrl: config.auth.baseUrl,
           codeKey: config.bookingCodeKey,
+          outboxKey: outboxKeyFrom(config.outboxSecret),
         }),
       ],
     };
