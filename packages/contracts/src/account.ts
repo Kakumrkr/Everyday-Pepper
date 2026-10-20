@@ -49,6 +49,15 @@ export const ApiErrorCodeSchema = z.enum([
   'waitlist_entry_not_found',
   'waitlist_entry_not_changeable',
   'waitlist_expired',
+  // The public booking page (ADR-0022).
+  'booking_page_not_found',
+  'booking_request_not_found',
+  'booking_request_expired',
+  'booking_request_used',
+  'wrong_code',
+  'too_many_requests',
+  'email_unavailable',
+  'temporarily_unavailable',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

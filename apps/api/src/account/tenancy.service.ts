@@ -2,13 +2,14 @@ import {
   BusinessSchema,
   UserBusinessSchema,
   type Business,
+  type BookingPageSettings,
   type MembershipRole,
   type NewTenant,
   type TenantId,
   type UserBusiness,
   type UserId,
 } from '@pepper/contracts';
-import { createBusiness } from '@pepper/core';
+import { createBusiness, updateBookingPage, type TenantContext } from '@pepper/core';
 import {
   findCurrentTenant,
   findMembership,
@@ -48,6 +49,12 @@ export class TenancyService {
   async createBusiness(owner: UserId, input: NewTenant): Promise<Business> {
     const requestId = currentRequestContext()?.requestId;
     return toBusiness(await createBusiness(this.db, owner, input, { requestId }));
+  }
+
+  /** Sets the booking page's settings, audited (owners and managers). */
+  async updateBookingPage(tenant: TenantContext, settings: BookingPageSettings): Promise<Business> {
+    const requestId = currentRequestContext()?.requestId;
+    return toBusiness(await updateBookingPage(this.db, { context: tenant, requestId }, settings));
   }
 
   /** The business itself (tenant-scoped read). */

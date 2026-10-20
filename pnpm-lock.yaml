@@ -76,6 +76,9 @@ importers:
       better-auth:
         specifier: 1.7.10
         version: 1.7.10(@opentelemetry/api@1.9.1)(drizzle-orm@0.45.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.1))(pg@8.23.1)
+      nodemailer:
+        specifier: 10.0.15
+        version: 10.0.15
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -3668,6 +3671,10 @@ packages:
   node-cleanup@2.1.2:
     resolution: {integrity: sha512-qN8v/s2PAJwGUtr1/hYTpNKlD6Y9rc4p8KSmJXyGdYGZsDGKXrGThikLFP9OCHFeLeEpQzPwiAtdIvBLqm//Hw==}
 
+  nodemailer@10.0.15:
+    resolution: {integrity: sha512-EUqp5PhtcsYXs9Fq/lS7s/8zlTrnBqmzZWzFFROrNikMiz+om/YRKMwqN907t+0A1KKyT8jd39CBUbFZmaZmcA==}
+    engines: {node: '>=20.0.0'}
+
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
@@ -7226,6 +7233,8 @@ snapshots:
       - babel-plugin-macros
 
   node-cleanup@2.1.2: {}
+
+  nodemailer@10.0.15: {}
 
   normalize-path@3.0.0: {}
 

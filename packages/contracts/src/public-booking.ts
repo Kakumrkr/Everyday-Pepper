@@ -98,6 +98,14 @@ export type BookingRequestResponse = z.infer<typeof BookingRequestResponseSchema
 export const BookingConfirmInputSchema = z.object({ code: VerificationCodeSchema }).strict();
 export type BookingConfirmInput = z.input<typeof BookingConfirmInputSchema>;
 
+/** Body of the 422 `wrong_code` answer: how many more codes may be tried. */
+export const WrongCodeSchema = z.object({
+  code: z.literal('wrong_code'),
+  message: z.string(),
+  attemptsLeft: z.number().int().min(1),
+});
+export type WrongCode = z.infer<typeof WrongCodeSchema>;
+
 /** A booking as its client sees it on the booking page and behind their link. */
 export const PublicBookingSchema = z.object({
   status: BookingStatusSchema,

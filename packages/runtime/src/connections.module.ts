@@ -11,6 +11,8 @@ import { createDatabase, type DatabaseHandle } from '@pepper/db';
 import { Redis } from 'ioredis';
 import { READINESS_CHECKS, type ReadinessChecks } from './health.tokens.js';
 
+export type { Redis };
+
 export interface ConnectionsOptions {
   databaseUrl: string;
   redisUrl: string;
@@ -18,7 +20,8 @@ export interface ConnectionsOptions {
 
 /** The process's `DatabaseHandle` (`@pepper/db`); inject it to reach repositories. */
 export const DATABASE = Symbol('DATABASE');
-const REDIS = Symbol('REDIS');
+/** The process's shared Redis client (ioredis), e.g. for rate limits. */
+export const REDIS = Symbol('REDIS');
 
 /** Readiness probes over the shared clients. */
 export function readinessChecks(
@@ -90,7 +93,7 @@ export class ConnectionsModule {
         },
         ConnectionsLifecycle,
       ],
-      exports: [READINESS_CHECKS, DATABASE],
+      exports: [READINESS_CHECKS, DATABASE, REDIS],
     };
   }
 }

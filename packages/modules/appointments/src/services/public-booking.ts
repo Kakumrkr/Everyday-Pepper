@@ -26,6 +26,7 @@ import {
   type PublicBusiness,
   type StaffMemberId,
   type TenantSlug,
+  type UtcDateTime,
   type VerificationCode,
 } from '@pepper/contracts';
 import { systemClock, type Clock } from '@pepper/core';
@@ -207,7 +208,7 @@ export async function requestBooking(
   options: CodeOptions,
 ): Promise<{
   requestId: BookingRequestId;
-  expiresAt: string;
+  expiresAt: UtcDateTime;
   code: VerificationCode;
   email: BookingEmailDetails;
 }> {
@@ -251,7 +252,7 @@ export async function requestBooking(
       });
       return {
         requestId: BookingRequestIdSchema.parse(row.id),
-        expiresAt: expiresAt.toISOString(),
+        expiresAt: UtcDateTimeSchema.parse(expiresAt.toISOString()),
         code,
         email: {
           businessName: tenant.name,

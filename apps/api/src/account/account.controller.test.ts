@@ -64,6 +64,10 @@ const tenancy = {
   ),
   createBusiness: vi.fn(() => Promise.resolve(BUSINESS)),
   business: vi.fn((): Promise<Business | null> => Promise.resolve(BUSINESS)),
+  updateBookingPage: vi.fn(
+    (_tenant: unknown, settings: { brandColor: string | null }): Promise<Business> =>
+      Promise.resolve({ ...BUSINESS, brandColor: settings.brandColor }),
+  ),
 };
 
 // Stands in for ConnectionsModule: the fakes never touch the database.
@@ -206,6 +210,35 @@ describe('GET /v1/tenant (tenant guard)', () => {
   it('403 when the business vanished after the membership check', async () => {
     tenancy.business.mockResolvedValueOnce(null);
     expectError((await get().expect(403)).body, 'not_a_member');
+  });
+});
+
+describe('PUT /v1/tenant/booking-page', () => {
+  const put = (body: unknown) =>
+    request(server)
+      .put('/v1/tenant/booking-page')
+      .set('cookie', 'signed-in')
+      .set('origin', ORIGIN)
+      .send(body as object);
+
+  it('sets the color for the session’s business, lowercased', async () => {
+    const response = await put({ brandColor: '#7A3E6C' }).expect(200);
+    expect(response.body).toEqual({ ...BUSINESS, brandColor: '#7a3e6c' });
+    expect(tenancy.updateBookingPage).toHaveBeenCalledWith(
+      { tenantId: TENANT, userId: USER, role: 'owner' },
+      { brandColor: '#7a3e6c' },
+    );
+  });
+
+  it('403 for staff', async () => {
+    roles.set(TENANT, 'staff');
+    expectError((await put({ brandColor: null }).expect(403)).body, 'forbidden');
+    expect(tenancy.updateBookingPage).not.toHaveBeenCalled();
+  });
+
+  it('400 for a color that is not #rrggbb', async () => {
+    const response = await put({ brandColor: 'plum' }).expect(400);
+    expect(response.body).toMatchObject({ code: 'validation_failed', fields: ['brandColor'] });
   });
 });
 

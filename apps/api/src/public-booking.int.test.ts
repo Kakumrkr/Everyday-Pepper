@@ -1,0 +1,245 @@
+import 'reflect-metadata';
+import type { Server } from 'node:http';
+import { createService, createStaffMember, replaceWorkingHours } from '@pepper/appointments';
+import {
+  AvailabilityResponseSchema,
+  BookingConfirmResponseSchema,
+  BookingRequestResponseSchema,
+  PublicBookingResponseSchema,
+  PublicBusinessSchema,
+  TenantIdSchema,
+  type AvailableSlot,
+  type TenantId,
+} from '@pepper/contracts';
+import { createBusiness, updateBookingPage, type Actor } from '@pepper/core';
+import { prepareDatabase, users, withTenant, type Database, type DatabaseHandle } from '@pepper/db';
+import { DATABASE } from '@pepper/runtime';
+import { postgresUrlAs, startPostgres, startRedis, type TestService } from '@pepper/testing';
+import type { INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import { sql } from 'drizzle-orm';
+import request from 'supertest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { AppModule } from './app.module.js';
+import { loadApiConfig } from './config.js';
+import { MAILER, type EmailMessage, type Mailer } from './mail/mailer.js';
+
+// The public booking page through the api against real Postgres and Redis (ADR-0022): a
+// booking only after the emailed code (AC-W8-2), the link that reschedules and cancels it, and
+// the Redis rate limits. Email goes to a recording mailer instead of SMTP.
+
+const ORIGIN = 'http://localhost:3000';
+const SLUG = 'plum-salon';
+const DAY = 86_400_000;
+
+class RecordingMailer implements Mailer {
+  readonly sent: EmailMessage[] = [];
+  send(message: EmailMessage): Promise<void> {
+    this.sent.push(message);
+    return Promise.resolve();
+  }
+}
+
+let postgres: TestService;
+let redis: TestService;
+let app: INestApplication;
+let server: Server;
+let db: Database;
+const mailer = new RecordingMailer();
+let serviceId: string;
+let tenantId: TenantId;
+let ipCounter = 0;
+
+beforeAll(async () => {
+  [postgres, redis] = await Promise.all([startPostgres(), startRedis()]);
+  const databaseUrl = postgresUrlAs(postgres.url, 'pepper_service', 'test-password');
+  await prepareDatabase(postgres.url, databaseUrl);
+  const config = loadApiConfig({
+    DATABASE_URL: databaseUrl,
+    REDIS_URL: redis.url,
+    AUTH_SECRET: 'an-integration-test-secret-32-chars',
+    AUTH_BASE_URL: ORIGIN,
+    SMTP_URL: 'smtp://127.0.0.1:1',
+  });
+  const moduleRef = await Test.createTestingModule({ imports: [AppModule.forRoot(config)] })
+    .overrideProvider(MAILER)
+    .useValue(mailer)
+    .compile();
+  app = moduleRef.createNestApplication({ logger: false });
+  await app.init();
+  server = app.getHttpServer() as Server;
+  db = app.get<DatabaseHandle>(DATABASE).db;
+
+  // Plum Salon (UTC): a 60-minute cut with Jess, every day 09:00–17:00.
+  const [owner] = await db
+    .insert(users)
+    .values({ name: 'Ana', email: 'owner@example.test' })
+    .returning({ id: users.id });
+  if (owner === undefined) throw new Error('no owner');
+  const tenant = await createBusiness(db, owner.id as never, {
+    name: 'Plum Salon',
+    slug: SLUG,
+    timeZone: 'UTC',
+  });
+  tenantId = TenantIdSchema.parse(tenant.id);
+  const actor: Actor = {
+    context: {
+      tenantId,
+      userId: owner.id as never,
+      role: 'owner',
+    },
+  };
+  await updateBookingPage(db, actor, { brandColor: '#7a3e6c' });
+  const service = await createService(db, actor, { name: 'Cut', durationMinutes: 60 });
+  serviceId = service.id;
+  const jess = await createStaffMember(db, actor, {
+    displayName: 'Jess',
+    serviceIds: [service.id],
+  });
+  await replaceWorkingHours(db, actor, jess.id, {
+    intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({ weekday, start: '09:00', end: '17:00' })),
+  });
+});
+
+afterAll(async () => {
+  await app.close();
+  await Promise.all([postgres.stop(), redis.stop()]);
+});
+
+beforeEach(() => {
+  mailer.sent.length = 0;
+});
+
+/** A visitor with their own client address, sending the app's Origin. */
+function visitor() {
+  ipCounter += 1;
+  const ip = `198.51.100.${String(ipCounter)}`;
+  return {
+    get: (path: string) =>
+      request(server).get(`/v1/public/businesses/${SLUG}${path}`).set('x-forwarded-for', ip),
+    post: (path: string, body: object) =>
+      request(server)
+        .post(`/v1/public/businesses/${SLUG}${path}`)
+        .set('origin', ORIGIN)
+        .set('x-forwarded-for', ip)
+        .send(body),
+  };
+}
+
+async function freeSlots(): Promise<AvailableSlot[]> {
+  const from = new Date(Math.ceil(Date.now() / DAY) * DAY + DAY).toISOString();
+  const to = new Date(Date.parse(from) + 2 * DAY).toISOString();
+  const response = await visitor().get('/availability').query({ serviceId, from, to }).expect(200);
+  return AvailabilityResponseSchema.parse(response.body).slots;
+}
+
+function codeIn(message: EmailMessage | undefined): string {
+  const code = /^ {4}(\d{6})$/m.exec(message?.text ?? '')?.[1];
+  if (code === undefined) throw new Error('no code in the email');
+  return code;
+}
+
+/** Bookings the booking page made for the client with this email. */
+async function bookedFor(email: string): Promise<number> {
+  const { rows } = await withTenant(db, tenantId, (tx) =>
+    tx.execute<{ n: number }>(
+      sql`SELECT count(*)::int AS n FROM bookings b JOIN clients c ON c.id = b.client_id
+           WHERE c.email = ${email} AND b.source = 'booking_page'`,
+    ),
+  );
+  return rows[0]?.n ?? 0;
+}
+
+describe('the public booking page', () => {
+  it('shows the business in its color, with no ids of the business itself', async () => {
+    const response = await visitor().get('').expect(200);
+    const page = PublicBusinessSchema.parse(response.body);
+    expect(page).toMatchObject({ name: 'Plum Salon', brandColor: '#7a3e6c' });
+    expect(JSON.stringify(response.body)).not.toContain('owner@example.test');
+    await visitor().get('-nobody').expect(404);
+  });
+
+  it('AC-W8-2: books only after the emailed code, with a link to reschedule and cancel', async () => {
+    const [slot, later] = await freeSlots();
+    if (slot === undefined || later === undefined) throw new Error('no free times');
+    const ana = visitor();
+    const asked = await ana
+      .post('/booking-requests', {
+        serviceId,
+        staffMemberId: null,
+        startsAt: slot.startsAt,
+        name: 'Ana Ruiz',
+        email: 'ana.flow@example.test',
+      })
+      .expect(201);
+    const { requestId } = BookingRequestResponseSchema.parse(asked.body);
+    expect(JSON.stringify(asked.body)).not.toMatch(/\d{6}/);
+    const [codeMail] = mailer.sent;
+    expect(codeMail?.to).toBe('ana.flow@example.test');
+    const code = codeIn(codeMail);
+    // Nothing booked before the code.
+    expect(await bookedFor('ana.flow@example.test')).toBe(0);
+
+    const wrongCode = String((Number(code) + 1) % 1_000_000).padStart(6, '0');
+    const wrong = await ana
+      .post(`/booking-requests/${requestId}/confirm`, { code: wrongCode })
+      .expect(422);
+    expect(wrong.body).toMatchObject({ code: 'wrong_code', attemptsLeft: 4 });
+
+    const confirmed = await ana
+      .post(`/booking-requests/${requestId}/confirm`, { code })
+      .expect(201);
+    const { booking, manageToken } = BookingConfirmResponseSchema.parse(confirmed.body);
+    expect(booking).toMatchObject({
+      startsAt: slot.startsAt,
+      status: 'confirmed',
+      changeable: true,
+    });
+    expect(await bookedFor('ana.flow@example.test')).toBe(1);
+    const confirmation = mailer.sent.at(-1);
+    expect(confirmation?.text).toContain(`${ORIGIN}/book/${SLUG}/manage#${manageToken}`);
+    await ana.post(`/booking-requests/${requestId}/confirm`, { code }).expect(409);
+
+    // The taken time is no longer offered to others.
+    expect((await freeSlots()).map((s) => s.startsAt)).not.toContain(slot.startsAt);
+
+    const looked = await ana.post('/booking/lookup', { token: manageToken }).expect(200);
+    expect(PublicBookingResponseSchema.parse(looked.body).booking.startsAt).toBe(slot.startsAt);
+    const moved = await ana
+      .post('/booking/reschedule', { token: manageToken, startsAt: later.startsAt })
+      .expect(200);
+    expect(moved.body).toMatchObject({ booking: { startsAt: later.startsAt } });
+    expect(mailer.sent.at(-1)?.subject).toContain('has moved');
+    const cancelled = await ana.post('/booking/cancel', { token: manageToken }).expect(200);
+    expect(cancelled.body).toMatchObject({ booking: { status: 'cancelled', changeable: false } });
+    await ana.post('/booking/cancel', { token: manageToken }).expect(409);
+    // A token for another booking or business is simply not found.
+    await ana.post('/booking/lookup', { token: 'A'.repeat(43) }).expect(404);
+  });
+
+  it('limits booking requests per client address in Redis', async () => {
+    const [slot] = await freeSlots();
+    if (slot === undefined) throw new Error('no free times');
+    const busy = visitor();
+    const statuses: number[] = [];
+    for (let i = 0; i < 11; i++) {
+      const response = await busy.post('/booking-requests', {
+        serviceId,
+        startsAt: slot.startsAt,
+        name: 'Bo',
+        email: `bo.${String(i)}@example.test`,
+      });
+      statuses.push(response.status);
+    }
+    expect(statuses.slice(0, 10).every((s) => s === 201)).toBe(true);
+    expect(statuses[10]).toBe(429);
+  });
+
+  it('refuses writes from another site', async () => {
+    await request(server)
+      .post(`/v1/public/businesses/${SLUG}/booking/lookup`)
+      .set('origin', 'https://evil.example')
+      .send({ token: 'A'.repeat(43) })
+      .expect(403);
+  });
+});
