@@ -1,0 +1,174 @@
+import {
+  TaskChangeSchema,
+  TaskIdSchema,
+  TaskInputSchema,
+  TaskQuerySchema,
+  TaskSchema,
+  TaskSourceSchema,
+  TaskStatusSchema,
+  UserIdSchema,
+  UtcDateTimeSchema,
+  type Task,
+  type TaskChange,
+  type TaskId,
+  type TaskInput,
+  type TaskQuery,
+  type UserId,
+} from '@pepper/contracts';
+import {
+  appendAuditEntry,
+  findMembership,
+  insertTask,
+  listTasks as listTaskRows,
+  lockTask,
+  updateTask,
+  withMember,
+  type Database,
+  type TaskRow,
+  type TaskUpdate,
+  type TenantTx,
+} from '@pepper/db';
+import { requirePermission, type Actor } from '../actor.js';
+import { systemClock, type Clock } from '../clock.js';
+import { TaskAssigneeNotMemberError, TaskNotFoundError } from '../errors.js';
+
+// To-dos of the business's owners and staff (ADR-0026). `tasks.read` and `tasks.manage` reach
+// every task for owners and managers; staff reach the tasks assigned to them or that they
+// created (the database's member scope applies the same), and give tasks only to themselves.
+// A task's title is free text, so the audit entries record only its status, due time,
+// assignee and source.
+
+/** Tasks the member may see: open ones by default (see `TaskQuerySchema`). */
+export async function listTasks(
+  db: Database,
+  actor: Actor,
+  query: TaskQuery = {},
+): Promise<Task[]> {
+  requirePermission(actor, 'tasks.read');
+  const { status, mine, limit } = TaskQuerySchema.parse(query);
+  const rows = await withMember(db, actor.context, (tx) =>
+    listTaskRows(tx, { status, limit, ...(mine && { assigneeUserId: actor.context.userId }) }),
+  );
+  return rows.map(toTask);
+}
+
+/**
+ * Adds a task. Without an assignee it is the caller's own; `null` leaves it unassigned (owners
+ * and managers only); staff may assign only themselves.
+ */
+export async function createTask(db: Database, actor: Actor, input: TaskInput): Promise<Task> {
+  requirePermission(actor, 'tasks.manage');
+  const fields = TaskInputSchema.parse(input);
+  const assignee =
+    fields.assigneeUserId === undefined ? actor.context.userId : fields.assigneeUserId;
+  return withMember(db, actor.context, async (tx) => {
+    await checkAssignee(tx, actor, assignee);
+    const row = await insertTask(tx, {
+      title: fields.title,
+      dueAt: fields.dueAt === null ? null : new Date(fields.dueAt),
+      assigneeUserId: assignee,
+      source: 'manual',
+      createdBy: actor.context.userId,
+    });
+    await appendAuditEntry(tx, {
+      actor: { kind: 'user', userId: actor.context.userId },
+      change: {
+        action: 'task.created',
+        entity: { type: 'task', id: row.id },
+        before: null,
+        after: auditValues(row),
+      },
+      requestId: actor.requestId,
+    });
+    return toTask(row);
+  });
+}
+
+/**
+ * Changes a task the member may reach: its title, due time (a new one notifies again when it
+ * comes due), assignee, or status (done records when; open again clears it).
+ */
+export async function changeTask(
+  db: Database,
+  actor: Actor,
+  taskId: TaskId,
+  change: TaskChange,
+  options: { clock?: Clock } = {},
+): Promise<Task> {
+  requirePermission(actor, 'tasks.manage');
+  const id = TaskIdSchema.parse(taskId);
+  const fields = TaskChangeSchema.parse(change);
+  const now = (options.clock ?? systemClock).now();
+  return withMember(db, actor.context, async (tx) => {
+    const row = await lockTask(tx, id);
+    if (row === undefined) throw new TaskNotFoundError();
+    const update: TaskUpdate = {};
+    if (fields.title !== undefined && fields.title !== row.title) update.title = fields.title;
+    if (fields.dueAt !== undefined && !sameInstant(fields.dueAt, row.dueAt)) {
+      update.dueAt = fields.dueAt === null ? null : new Date(fields.dueAt);
+      update.dueNotifiedAt = null;
+    }
+    if (fields.assigneeUserId !== undefined && fields.assigneeUserId !== row.assigneeUserId) {
+      await checkAssignee(tx, actor, fields.assigneeUserId);
+      update.assigneeUserId = fields.assigneeUserId;
+    }
+    if (fields.status !== undefined && fields.status !== row.status) {
+      update.status = fields.status;
+      update.completedAt = fields.status === 'done' ? now : null;
+    }
+    if (Object.keys(update).length === 0) return toTask(row);
+
+    const updated = await updateTask(tx, id, update);
+    // The row is locked and the member could see it; a change that hides it from them (a
+    // staff member handing their task to someone else) is refused by the database instead.
+    if (updated === undefined) throw new TaskNotFoundError();
+    await appendAuditEntry(tx, {
+      actor: { kind: 'user', userId: actor.context.userId },
+      change: {
+        action: 'task.updated',
+        entity: { type: 'task', id: row.id },
+        before: auditValues(row),
+        after: auditValues(updated),
+      },
+      requestId: actor.requestId,
+    });
+    return toTask(updated);
+  });
+}
+
+/** Staff assign only themselves; anyone else must be a member; `null` needs the full scope. */
+async function checkAssignee(tx: TenantTx, actor: Actor, assignee: UserId | null): Promise<void> {
+  requirePermission(actor, 'tasks.manage', { ownerUserId: assignee });
+  if (assignee !== null && (await findMembership(tx, assignee)) === undefined) {
+    throw new TaskAssigneeNotMemberError();
+  }
+}
+
+function sameInstant(value: string | null, current: Date | null): boolean {
+  if (value === null || current === null) return value === current;
+  return new Date(value).getTime() === current.getTime();
+}
+
+function auditValues(row: TaskRow) {
+  return {
+    status: TaskStatusSchema.parse(row.status),
+    dueAt: row.dueAt === null ? null : UtcDateTimeSchema.parse(row.dueAt.toISOString()),
+    assigneeUserId: row.assigneeUserId === null ? null : UserIdSchema.parse(row.assigneeUserId),
+    source: TaskSourceSchema.parse(row.source),
+  };
+}
+
+export function toTask(row: TaskRow): Task {
+  return TaskSchema.parse({
+    id: row.id,
+    title: row.title,
+    dueAt: row.dueAt?.toISOString() ?? null,
+    assigneeUserId: row.assigneeUserId,
+    status: row.status,
+    source: row.source,
+    createdByUserId: row.createdByUserId,
+    completedAt: row.completedAt?.toISOString() ?? null,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  });
+}

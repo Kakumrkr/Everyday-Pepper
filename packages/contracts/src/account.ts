@@ -49,6 +49,9 @@ export const ApiErrorCodeSchema = z.enum([
   'waitlist_entry_not_found',
   'waitlist_entry_not_changeable',
   'waitlist_expired',
+  // To-dos (ADR-0026).
+  'task_not_found',
+  'task_assignee_not_member',
   // The public booking page (ADR-0022).
   'booking_page_not_found',
   'booking_request_not_found',

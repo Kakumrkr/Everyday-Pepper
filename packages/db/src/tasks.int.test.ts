@@ -137,7 +137,7 @@ describe('tasks', () => {
         });
       }
       const list = (status: 'open' | 'done' | 'all') =>
-        listTasks(tx, { status, userId: lister, limit: 200 });
+        listTasks(tx, { status, assigneeUserId: lister, limit: 200 });
       return {
         open: (await list('open')).map((t) => t.title),
         done: (await list('done')).map((t) => t.title),

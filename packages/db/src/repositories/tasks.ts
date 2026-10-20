@@ -10,7 +10,7 @@ import {
   type TenantId,
   type UserId,
 } from '@pepper/contracts';
-import { and, asc, desc, eq, isNotNull, isNull, lte, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, isNull, lte, sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import { tasks, type TaskRow } from '../schema.js';
@@ -91,18 +91,17 @@ export async function updateTask(
 
 /**
  * At most `limit` tasks: open ones by due time (those without one last, then oldest first),
- * done ones most recently done first, or both (open first). With `userId`, only the tasks
- * assigned to that user or that they created.
+ * done ones most recently done first, or both (open first). With `assigneeUserId`, only the
+ * tasks assigned to that user.
  */
 export async function listTasks(
   tx: TenantTx,
-  options: { status: TaskStatus | 'all'; userId?: UserId; limit: number },
+  options: { status: TaskStatus | 'all'; assigneeUserId?: UserId; limit: number },
 ): Promise<TaskRow[]> {
   const conditions: (SQL | undefined)[] = [];
   if (options.status !== 'all') conditions.push(eq(tasks.status, options.status));
-  if (options.userId !== undefined) {
-    const userId = Id.parse(options.userId);
-    conditions.push(or(eq(tasks.assigneeUserId, userId), eq(tasks.createdByUserId, userId)));
+  if (options.assigneeUserId !== undefined) {
+    conditions.push(eq(tasks.assigneeUserId, Id.parse(options.assigneeUserId)));
   }
   return tx
     .select()

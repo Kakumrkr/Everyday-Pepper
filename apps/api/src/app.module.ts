@@ -7,6 +7,7 @@ import { BookingEmailsModule } from './booking-emails/booking-emails.js';
 import { ClientsModule } from './clients/clients.module.js';
 import type { ApiConfig } from './config.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
+import { TasksModule } from './tasks/tasks.module.js';
 import { TeamModule } from './team/team.module.js';
 
 @Module({})
@@ -20,6 +21,7 @@ export class AppModule {
         AuthModule.forRoot(config.auth),
         TeamModule,
         ClientsModule,
+        TasksModule,
         AppointmentsModule,
         MailModule.forRoot(config.mail),
         BookingEmailsModule.forRoot({

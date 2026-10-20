@@ -74,3 +74,19 @@ export class ClientNotFoundError extends Error {
     this.name = 'ClientNotFoundError';
   }
 }
+
+/** No such task in the business, or not one the member may see (staff: their own). */
+export class TaskNotFoundError extends Error {
+  constructor() {
+    super('No such task in this business');
+    this.name = 'TaskNotFoundError';
+  }
+}
+
+/** A task can only be given to a member of the business. */
+export class TaskAssigneeNotMemberError extends Error {
+  constructor() {
+    super('The assignee is not a member of this business');
+    this.name = 'TaskAssigneeNotMemberError';
+  }
+}

@@ -24,8 +24,8 @@ export const TASK_TITLE_MAX = 200;
 export const TaskTitleSchema = z.string().trim().min(1).max(TASK_TITLE_MAX);
 
 /**
- * `POST /v1/tasks`. Without `assigneeUserId`, staff's tasks are their own and an owner's or
- * manager's task is unassigned (`null` also means unassigned).
+ * `POST /v1/tasks`. Without `assigneeUserId` the task is the caller's own; `null` leaves it
+ * unassigned, for the whole team (owners and managers only).
  */
 export const TaskInputSchema = z
   .object({
@@ -67,7 +67,7 @@ export type Task = z.infer<typeof TaskSchema>;
 
 /**
  * `GET /v1/tasks`: open tasks (due first, those without a due time last), or done ones (most
- * recently done first), or both; `mine` keeps only the caller's own.
+ * recently done first), or both; `mine` keeps only the tasks assigned to the caller.
  */
 export const TaskQuerySchema = z
   .object({
