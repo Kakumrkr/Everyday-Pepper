@@ -26,3 +26,6 @@ next-env.d.ts
 # Playwright
 e2e/test-results/
 e2e/playwright-report/
+
+# Eval reports (packages/ai/evals/README.md)
+packages/ai/evals/reports/

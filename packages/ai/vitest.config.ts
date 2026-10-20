@@ -12,6 +12,7 @@ export default defineConfig({
         'src/index.ts',
         'src/provider-contract.ts',
         'src/openai/test-fixtures.ts',
+        'src/evals/test-support.ts',
         'src/evals/cli.ts',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

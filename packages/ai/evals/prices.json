@@ -1,0 +1,5 @@
+{
+  "checkedOn": null,
+  "source": "Fill from https://developers.openai.com/api/docs/pricing in S27, before the first real run (the budget guard refuses a model without a price).",
+  "models": {}
+}

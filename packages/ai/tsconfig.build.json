@@ -6,5 +6,10 @@
     "customConditions": []
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/provider-contract.ts", "src/openai/test-fixtures.ts"]
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/provider-contract.ts",
+    "src/openai/test-fixtures.ts",
+    "src/evals/test-support.ts"
+  ]
 }
