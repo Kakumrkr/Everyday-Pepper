@@ -8,6 +8,7 @@ export * from './outbox.js';
 export * from './permissions.js';
 export * from './services/audit.js';
 export * from './services/business.js';
+export * from './services/cleanup.js';
 export * from './services/clients.js';
 export * from './services/invites.js';
 export * from './services/outbox.js';
