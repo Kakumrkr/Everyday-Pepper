@@ -1,0 +1,7 @@
+{
+  "extends": "@pepper/config/tsconfig.lib.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src", "vitest.config.ts"]
+}

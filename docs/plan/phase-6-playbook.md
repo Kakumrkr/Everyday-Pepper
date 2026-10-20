@@ -1,6 +1,6 @@
 # Phase 6 Playbook — AI agent + trust layer
 
-> **Status: Proposed (S22, 2026-10-20), awaiting the user's confirmation.** Once confirmed, every Phase 6 session (S22–S27) reads this file with `CLAUDE.md` and `STATUS.md`: the cross-cutting parts (1–6) always, and its own section in 7. Changes to it after confirmation follow the PCR process.
+> **Status: Confirmed by the user (S22, 2026-10-20).** Every Phase 6 session (S22–S27) reads this file with `CLAUDE.md` and `STATUS.md`: the cross-cutting parts (1–6 and 9) always, and its own section in 7. Changes to it after confirmation follow the PCR process.
 >
 > Builds on [ai-agent-and-trust-layer.md](../architecture/ai-agent-and-trust-layer.md), [ADR-0004](../adr/0004-llm-provider-adapter.md), [ADR-0005](../adr/0005-model-proposes-domain-decides.md), [voice-readiness.md](../architecture/voice-readiness.md) and the acceptance criteria W2, W7 and X. References are in section 9.
 
@@ -142,7 +142,19 @@
 ## 8. Explicitly not in Phase 6
 Memory facts and recall (Phase 7, but the prompt assembly leaves a slot), operator feed and daily briefing (Phase 8), onboarding extraction (Phase 9), voice (V2), a client-facing AI (V3), sending emails composed freely by the model (drafts arrive with the feed in Phase 8; Phase 6 emails are the existing domain templates).
 
-## 9. References (read the ones named in your session)
+## 9. Keep getting better (every Phase 6 session, and Phases 7–9 after it)
+This layer is the product, so each session also looks for a better way, not only the planned way (user, S22):
+- **Before building:** re-check the references for your session and the provider's current docs (APIs, models, prices and recommended patterns move monthly); if something newer is clearly better, say so in the Session Brief with the trade-off.
+- **While building:** when a test, eval failure or review shows a weakness in an earlier session's design, fix it in this session if it is small, or log it below and raise it.
+- **At the end:** add one to three lines to the improvement log below: what we learned, what to try next, what the next session should do differently. Ideas that change an approved plan go through a PCR; the rest the next session simply picks up.
+- **Ideas already queued** (consider them at the session named): per-tool latency budget checks in CI (S24); conversation "undo the whole turn" (S26); a weekly "what Pepper did for you" receipt summary (Phase 8 feed); learning the owner's phrasing ("the usual" = her regular service) from confirmed facts (Phase 7); A/B comparison of tool descriptions on cassettes before spending budget (S27); a public safety page listing what the AI can never do (pilot).
+
+### Improvement log
+| Session | Learned / next try |
+|---|---|
+| S22 | _(filled at the end of S22)_ |
+
+## 10. References (read the ones named in your session)
 - Anthropic, *Building effective agents* (2024) — simple composable patterns over frameworks, tool design ("agent-computer interface"): https://www.anthropic.com/engineering/building-effective-agents
 - OpenAI, *A practical guide to building agents* (2025) — guardrails, human intervention for high-risk actions: https://openai.com/business/guides-and-resources/a-practical-guide-to-building-ai-agents/
 - OpenAI docs — function calling and Structured Outputs (strict schemas): https://developers.openai.com/api/docs/guides/function-calling · prompt caching (static prefix first, `prompt_cache_key`, `cached_tokens`): https://developers.openai.com/api/docs/guides/prompt-caching · pricing (re-check at S27): https://developers.openai.com/api/docs/pricing
