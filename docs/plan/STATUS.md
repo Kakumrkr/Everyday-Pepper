@@ -78,8 +78,9 @@ Full wording and the history in [decisions.md](decisions.md).
 - **M1 (user, 2026-10-20, after S21):** split `STATUS.md`; a checkpoint after each finished task; no retries in CI; Docker pulls go through Google's mirror automatically; done in a maintenance session before S22.
 
 ## Waiting on the user
-1. **Turn on "Require branches to be up to date before merging"** for `main` (Settings → Branches → the `main` rule). CI no longer re-runs on `main` after a merge (see "CI minutes" above), so this is what keeps `main` tested.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, not yet: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development). The user deferred it after M1 and asked Claude to bring it up: **raise it in the next Session Brief's "Decisions needed" (and again before the pilot) until it is done or declined.**
+
+(Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
 S1–S21 are done and merged (Phases 0–5; details in [session-log.md](session-log.md)). Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
