@@ -169,6 +169,27 @@
       "when": 1792460996744,
       "tag": "0023_public_booking_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792497668623,
+      "tag": "0024_outbox_scan",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792497669656,
+      "tag": "0025_outbox",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792497670613,
+      "tag": "0026_outbox_hardening",
+      "breakpoints": true
     }
   ]
 }

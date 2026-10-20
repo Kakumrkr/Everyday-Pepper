@@ -4,6 +4,7 @@
 import { randomBytes } from 'node:crypto';
 import {
   ClientIdSchema,
+  OutboxMessageIdSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
   TenantIdSchema,
@@ -32,6 +33,7 @@ import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
+import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbox.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
 import { addUsage } from './repositories/usage.js';
 import { withTenant, withUser, type TenantTx } from './tenant.js';
@@ -63,6 +65,8 @@ interface TenantTable {
   inviteLookup?: string;
   /** The `public_lookup` (withPublicTenant) predicate, as Postgres prints it, if any. */
   publicLookup?: string;
+  /** The `outbox_scan` (listDueOutboxMessages) predicate, as Postgres prints it, if any. */
+  outboxScan?: string;
   /** The services may only insert and read (no UPDATE or DELETE grant). */
   appendOnly?: true;
   /**
@@ -318,6 +322,36 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       },
     ],
   },
+  outbox_messages: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const row = await insertOutboxMessage(tx, {
+        id: OutboxMessageIdSchema.parse(newId()),
+        type: 'email',
+        dedupeKey: `isolation:${newId()}`,
+        payload: randomBytes(16),
+        availableAt: new Date(),
+      });
+      return String(row?.id);
+    },
+    touch: 'attempts = attempts + 1',
+  },
+  outbox_dispatch: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const row = await insertOutboxMessage(tx, {
+        id: OutboxMessageIdSchema.parse(newId()),
+        type: 'email',
+        dedupeKey: `isolation:${newId()}`,
+        payload: randomBytes(16),
+        availableAt: new Date(),
+      });
+      // The dispatch row has the message's id.
+      return String(row?.id);
+    },
+    touch: 'available_at = available_at',
+    outboxScan: '((current_tenant_id() IS NULL) AND current_outbox_scan())',
+  },
 };
 
 /** A new client of the transaction's tenant. */
@@ -491,6 +525,18 @@ describe('catalog', () => {
           permissive: 'RESTRICTIVE',
           roles: ['public'],
         })),
+        ...(spec.outboxScan === undefined
+          ? []
+          : [
+              {
+                policyname: 'outbox_scan',
+                permissive: 'PERMISSIVE',
+                cmd: 'SELECT',
+                roles: ['public'],
+                qual: spec.outboxScan,
+                with_check: null,
+              },
+            ]),
         ...(spec.publicLookup === undefined
           ? []
           : [
@@ -963,6 +1009,53 @@ describe('public lookup (withPublicTenant: the booking page finds its business b
     } finally {
       await single.close();
     }
+  });
+});
+
+describe('outbox scan (listDueOutboxMessages: the relay finds work across businesses)', () => {
+  /** Runs `statement` in a transaction with the scan setting on (and a tenant, if given). */
+  async function scanning(statement: string, tenant?: TenantId) {
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.outbox_scan', 'on', true)`);
+      if (tenant !== undefined) {
+        await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenant}, true)`);
+      }
+      return tx.execute(sql.raw(statement));
+    });
+  }
+
+  it("lists both businesses' due messages, ids only", async () => {
+    const due = await listDueOutboxMessages(db, new Date(Date.now() + 60_000), 1000);
+    const seeded = rows['outbox_dispatch'];
+    expect(due.map((d) => d.messageId)).toEqual(expect.arrayContaining([seeded?.a, seeded?.b]));
+    expect(new Set(due.map((d) => d.tenantId))).toEqual(new Set([tenantA, tenantB]));
+  });
+
+  it('reaches only the dispatch index, read-only', async () => {
+    for (const table of ['outbox_messages', 'tenants', 'bookings', 'clients']) {
+      const { rows: seen } = await scanning(`SELECT * FROM ${table}`);
+      expect(seen, table).toEqual([]);
+    }
+    const updated = await scanning('UPDATE outbox_dispatch SET available_at = available_at');
+    const deleted = await scanning('DELETE FROM outbox_dispatch');
+    expect([updated.rowCount, deleted.rowCount]).toEqual([0, 0]);
+  });
+
+  it('does not widen a tenant transaction', async () => {
+    const { rows: seen } = await scanning(
+      'SELECT tenant_id::text AS owner FROM outbox_dispatch',
+      tenantA,
+    );
+    expect(seen.length).toBeGreaterThan(0);
+    expect(seen.every((row) => row['owner'] === tenantA)).toBe(true);
+  });
+
+  it('ends with the transaction', async () => {
+    await scanning('SELECT 1');
+    const { rows: after } = await db.transaction((tx) =>
+      tx.execute(sql`SELECT * FROM outbox_dispatch`),
+    );
+    expect(after).toEqual([]);
   });
 });
 

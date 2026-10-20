@@ -92,6 +92,11 @@ const tstzrange = customType<{ data: string }>({
   dataType: () => 'tstzrange',
 });
 
+/** A Postgres `bytea`, as a Node `Buffer`. */
+const bytea = customType<{ data: Buffer }>({
+  dataType: () => 'bytea',
+});
+
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   // Kept current by the set_updated_at trigger.
@@ -932,6 +937,93 @@ export const bookingVerifications = pgTable(
   ],
 );
 
+export const outboxMessageType = pgEnum('outbox_message_type', ['email']);
+export const outboxStatus = pgEnum('outbox_status', ['pending', 'sent', 'dead']);
+
+/**
+ * A side effect waiting to happen, written in the same transaction as the business change
+ * (the transactional outbox, ADR-0003, ADR-0024). The worker claims it for a lease, delivers
+ * it, and marks it sent; a failure retries at `available_at`, and after the last attempt it is
+ * `dead`. The content is encrypted by the caller (it may carry a client's private link) and
+ * cleared once the message is sent or dead. The dedupe key keeps a retried change from
+ * queueing the same message twice.
+ */
+export const outboxMessages = pgTable(
+  'outbox_messages',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    type: outboxMessageType('type').notNull(),
+    dedupeKey: text('dedupe_key').notNull(),
+    // NULL once sent or dead.
+    payload: bytea('payload'),
+    status: outboxStatus('status').notNull().default('pending'),
+    attempts: smallint('attempts').notNull().default(0),
+    availableAt: timestamp('available_at', { withTimezone: true }).notNull().defaultNow(),
+    // While set and in the future, a worker is delivering the message.
+    leaseUntil: timestamp('lease_until', { withTimezone: true }),
+    // The last failure's error name (never its message, which may echo an address).
+    lastError: text('last_error'),
+    sentAt: timestamp('sent_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('outbox_messages_tenant_id_unique').on(table.tenantId, table.id),
+    unique('outbox_messages_dedupe_key_unique').on(table.tenantId, table.dedupeKey),
+    check(
+      'outbox_messages_dedupe_key_format',
+      sql`${table.dedupeKey} ~ '^[A-Za-z0-9.:_-]{1,200}$'`,
+    ),
+    check('outbox_messages_attempts_range', sql`${table.attempts} BETWEEN 0 AND 100`),
+    check(
+      'outbox_messages_last_error_format',
+      sql`${table.lastError} ~ '^[A-Za-z0-9.:_-]{1,100}$'`,
+    ),
+    check(
+      'outbox_messages_payload_while_pending',
+      sql`(${table.status} = 'pending') = (${table.payload} IS NOT NULL)`,
+    ),
+    check(
+      'outbox_messages_sent_at_when_sent',
+      sql`(${table.status} = 'sent') = (${table.sentAt} IS NOT NULL)`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
+/**
+ * The worker's index of pending outbox messages (ADR-0024): ids and due times only, no
+ * content. A row exists while its message is pending. Tenant transactions reach their own rows;
+ * the read-only `outbox_scan` policy lets the worker's relay (`withOutboxScan`, no tenant) read
+ * every row, so it finds work across businesses and then handles each message under its
+ * business's tenant context.
+ */
+export const outboxDispatch = pgTable(
+  'outbox_dispatch',
+  {
+    // The message's id.
+    id: uuid('id').primaryKey(),
+    tenantId: uuid('tenant_id').notNull().default(currentTenantId),
+    availableAt: timestamp('available_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index('outbox_dispatch_available_at_idx').on(table.availableAt),
+    foreignKey({
+      name: 'outbox_dispatch_message_fk',
+      columns: [table.tenantId, table.id],
+      foreignColumns: [outboxMessages.tenantId, outboxMessages.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('outbox_scan', {
+      for: 'select',
+      using: sql`${currentTenantId} IS NULL AND current_outbox_scan()`,
+    }),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
@@ -947,3 +1039,4 @@ export type BookingRow = typeof bookings.$inferSelect;
 export type BookingOccupancyRow = typeof bookingOccupancy.$inferSelect;
 export type WaitlistEntryRow = typeof waitlistEntries.$inferSelect;
 export type BookingVerificationRow = typeof bookingVerifications.$inferSelect;
+export type OutboxMessageRow = typeof outboxMessages.$inferSelect;

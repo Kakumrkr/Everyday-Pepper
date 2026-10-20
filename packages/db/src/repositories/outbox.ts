@@ -1,0 +1,200 @@
+import {
+  OutboxDedupeKeySchema,
+  OutboxMessageIdSchema,
+  OutboxMessageTypeSchema,
+  TenantIdSchema,
+  type OutboxDedupeKey,
+  type OutboxMessageId,
+  type OutboxMessageType,
+  type TenantId,
+} from '@pepper/contracts';
+import { and, asc, eq, isNull, lte, or, sql } from 'drizzle-orm';
+import { z } from 'zod';
+import type { Database } from '../client.js';
+import { outboxDispatch, outboxMessages, type OutboxMessageRow } from '../schema.js';
+import type { TenantTx } from '../tenant.js';
+
+// The transactional outbox (ADR-0003, ADR-0024). Messages and their `outbox_dispatch` index
+// rows are tenant-owned (RLS). The index holds only ids and due times, and the relay reads it
+// across businesses (`listDueOutboxMessages`), then handles each message under its own tenant.
+// Every change of a pending message's due time is mirrored to its index row in the same
+// transaction.
+
+const ErrorNameSchema = z
+  .string()
+  .transform((value) => value.replace(/[^A-Za-z0-9.:_-]/g, '').slice(0, 100) || 'Error');
+
+export interface NewOutboxMessage {
+  /** Chosen by the caller: the encryption binds the payload to it. */
+  id: OutboxMessageId;
+  type: OutboxMessageType;
+  dedupeKey: OutboxDedupeKey;
+  /** The content, encrypted by the caller. */
+  payload: Buffer;
+  availableAt: Date;
+}
+
+/**
+ * Queues a message for the transaction's tenant, with its dispatch row. Returns the new row,
+ * or `undefined` when the business already has a message with this dedupe key (nothing is
+ * queued then).
+ */
+export async function insertOutboxMessage(
+  tx: TenantTx,
+  input: NewOutboxMessage,
+): Promise<OutboxMessageRow | undefined> {
+  const [row] = await tx
+    .insert(outboxMessages)
+    .values({
+      id: OutboxMessageIdSchema.parse(input.id),
+      type: OutboxMessageTypeSchema.parse(input.type),
+      dedupeKey: OutboxDedupeKeySchema.parse(input.dedupeKey),
+      payload: z.instanceof(Buffer).parse(input.payload),
+      availableAt: input.availableAt,
+    })
+    .onConflictDoNothing({ target: [outboxMessages.tenantId, outboxMessages.dedupeKey] })
+    .returning();
+  if (row === undefined) return undefined;
+  await tx
+    .insert(outboxDispatch)
+    .values({ id: row.id, tenantId: row.tenantId, availableAt: row.availableAt });
+  return row;
+}
+
+/** A due message and its business, as the dispatch index lists it. */
+export interface DueOutboxMessage {
+  messageId: OutboxMessageId;
+  tenantId: TenantId;
+}
+
+/**
+ * Up to `limit` messages due at `now`, across businesses, the longest waiting first. Reads the
+ * dispatch index only, in a read-only transaction without a tenant that the `outbox_scan`
+ * policy lets see every business's index rows; the messages are read under their tenant.
+ */
+export async function listDueOutboxMessages(
+  db: Database,
+  now: Date,
+  limit: number,
+): Promise<DueOutboxMessage[]> {
+  const max = z.number().int().min(1).max(1000).parse(limit);
+  const rows = await db.transaction(
+    async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.outbox_scan', 'on', true)`);
+      return tx
+        .select({ id: outboxDispatch.id, tenantId: outboxDispatch.tenantId })
+        .from(outboxDispatch)
+        .where(lte(outboxDispatch.availableAt, now))
+        .orderBy(asc(outboxDispatch.availableAt))
+        .limit(max);
+    },
+    { accessMode: 'read only' },
+  );
+  return rows.map((row) => ({
+    messageId: OutboxMessageIdSchema.parse(row.id),
+    tenantId: TenantIdSchema.parse(row.tenantId),
+  }));
+}
+
+/** The transaction's tenant's message with this id. */
+export async function findOutboxMessage(
+  tx: TenantTx,
+  id: OutboxMessageId,
+): Promise<OutboxMessageRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(outboxMessages)
+    .where(eq(outboxMessages.id, OutboxMessageIdSchema.parse(id)));
+  return row;
+}
+
+/**
+ * Claims a pending, due message for one delivery attempt until `leaseUntil`: counts the
+ * attempt and hides the message from other workers meanwhile. Returns the claimed row, or
+ * `undefined` when it is not there, not pending, not due, or leased by another worker. Commit
+ * the claim before delivering, so a second worker sees it.
+ */
+export async function claimOutboxMessage(
+  tx: TenantTx,
+  id: OutboxMessageId,
+  now: Date,
+  leaseUntil: Date,
+): Promise<OutboxMessageRow | undefined> {
+  const messageId = OutboxMessageIdSchema.parse(id);
+  const [row] = await tx
+    .update(outboxMessages)
+    .set({ attempts: sql`${outboxMessages.attempts} + 1`, leaseUntil })
+    .where(
+      and(
+        eq(outboxMessages.id, messageId),
+        eq(outboxMessages.status, 'pending'),
+        lte(outboxMessages.availableAt, now),
+        or(isNull(outboxMessages.leaseUntil), lte(outboxMessages.leaseUntil, now)),
+      ),
+    )
+    .returning();
+  if (row === undefined) return undefined;
+  // If the worker dies while delivering, the message is due again when the lease ends.
+  await setDispatchTime(tx, messageId, leaseUntil);
+  return row;
+}
+
+/**
+ * Marks a pending message sent and clears its content. Returns whether it was pending (a
+ * message already sent or dead is left as it is).
+ */
+export async function markOutboxMessageSent(
+  tx: TenantTx,
+  id: OutboxMessageId,
+  sentAt: Date,
+): Promise<boolean> {
+  return finish(tx, id, { status: 'sent', sentAt, lastError: null });
+}
+
+/**
+ * Records a failed attempt of a pending message: it is due again at `retryAt`, or, with
+ * `retryAt` `null`, it is `dead` and its content cleared. `errorName` is an error's name or
+ * code, never its message. Returns whether the message was pending.
+ */
+export async function markOutboxMessageFailed(
+  tx: TenantTx,
+  id: OutboxMessageId,
+  failure: { errorName: string; retryAt: Date | null },
+): Promise<boolean> {
+  const lastError = ErrorNameSchema.parse(failure.errorName);
+  if (failure.retryAt === null) return finish(tx, id, { status: 'dead', sentAt: null, lastError });
+  const messageId = OutboxMessageIdSchema.parse(id);
+  const updated = await tx
+    .update(outboxMessages)
+    .set({ availableAt: failure.retryAt, leaseUntil: null, lastError })
+    .where(and(eq(outboxMessages.id, messageId), eq(outboxMessages.status, 'pending')))
+    .returning({ id: outboxMessages.id });
+  if (updated.length === 0) return false;
+  await setDispatchTime(tx, messageId, failure.retryAt);
+  return true;
+}
+
+/** Ends a pending message (sent or dead): content cleared, dispatch row removed. */
+async function finish(
+  tx: TenantTx,
+  id: OutboxMessageId,
+  end: { status: 'sent' | 'dead'; sentAt: Date | null; lastError: string | null },
+): Promise<boolean> {
+  const messageId = OutboxMessageIdSchema.parse(id);
+  const updated = await tx
+    .update(outboxMessages)
+    .set({ ...end, payload: null, leaseUntil: null })
+    .where(and(eq(outboxMessages.id, messageId), eq(outboxMessages.status, 'pending')))
+    .returning({ id: outboxMessages.id });
+  if (updated.length === 0) return false;
+  await tx.delete(outboxDispatch).where(eq(outboxDispatch.id, messageId));
+  return true;
+}
+
+async function setDispatchTime(
+  tx: TenantTx,
+  messageId: OutboxMessageId,
+  availableAt: Date,
+): Promise<void> {
+  await tx.update(outboxDispatch).set({ availableAt }).where(eq(outboxDispatch.id, messageId));
+}

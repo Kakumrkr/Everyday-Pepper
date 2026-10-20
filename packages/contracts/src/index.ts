@@ -5,6 +5,7 @@ export * from './bookings.js';
 export * from './clients.js';
 export * from './health.js';
 export * from './invites.js';
+export * from './outbox.js';
 export * from './permissions.js';
 export * from './public-booking.js';
 export * from './rules.js';
