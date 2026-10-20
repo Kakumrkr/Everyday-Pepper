@@ -17,7 +17,11 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   manifest: MANIFEST_URL,
   appleWebApp: { capable: true, title: 'Pepper', statusBarStyle: 'default' },
-  icons: { apple: '/icons/apple-touch-icon.png' },
+  // Setting icons here replaces the root's app/icon.svg, so the favicon is listed again.
+  icons: {
+    icon: { url: '/icon.svg', type: 'image/svg+xml' },
+    apple: '/icons/apple-touch-icon.png',
+  },
 };
 
 /**

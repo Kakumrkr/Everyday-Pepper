@@ -17,6 +17,11 @@ test('the signed-in app is installable and opens to the offline page without a c
   // The manifest is linked and complete enough to install.
   const href = await page.locator('link[rel="manifest"]').getAttribute('href');
   expect(href).toBe('/manifest.webmanifest');
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /^\/icon\.svg/);
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+    'href',
+    '/icons/apple-touch-icon.png',
+  );
   const manifest = (await (await page.request.get(href ?? '')).json()) as {
     display: string;
     start_url: string;
