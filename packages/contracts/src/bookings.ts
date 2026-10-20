@@ -67,6 +67,8 @@ export const BookingInputSchema = z
     startsAt: UtcDateTimeSchema,
     override: z.boolean().default(false),
     idempotencyKey: IdempotencyKeySchema.optional(),
+    /** Email the client a confirmation with their reschedule/cancel link (ADR-0025). */
+    notifyClient: z.boolean().default(true),
   })
   .strict();
 export type BookingInput = z.input<typeof BookingInputSchema>;
@@ -79,9 +81,17 @@ export const BookingChangeSchema = z.union([
       /** Another staff member who offers the service; default: the same one. */
       staffMemberId: StaffMemberIdSchema.optional(),
       override: z.boolean().default(false),
+      /** Email the client the new time with a new reschedule/cancel link (ADR-0025). */
+      notifyClient: z.boolean().default(true),
     })
     .strict(),
-  z.object({ status: BookingStatusSchema.exclude(['confirmed']) }).strict(),
+  z
+    .object({
+      status: BookingStatusSchema.exclude(['confirmed']),
+      /** Email the client when the booking is cancelled (other statuses send nothing). */
+      notifyClient: z.boolean().default(true),
+    })
+    .strict(),
 ]);
 export type BookingChange = z.input<typeof BookingChangeSchema>;
 

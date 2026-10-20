@@ -6,7 +6,7 @@ import { BookingsService } from './bookings.service.js';
 
 /**
  * Services, staff, hours, time off, rules, bookings, availability and the waitlist. Needs
- * `AuthModule` (global) and `ConnectionsModule`.
+ * `AuthModule` (global), `ConnectionsModule` and `BookingEmailsModule` (global).
  */
 @Module({
   controllers: [AppointmentsController, BookingsController],

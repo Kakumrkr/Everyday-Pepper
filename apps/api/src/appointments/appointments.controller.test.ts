@@ -32,6 +32,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { TenancyService } from '../account/tenancy.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { AuthService, type AuthSession } from '../auth/auth.service.js';
+import { BookingEmailsModule } from '../booking-emails/booking-emails.js';
 import { AppointmentsModule } from './appointments.module.js';
 import { AppointmentsService } from './appointments.service.js';
 
@@ -129,6 +130,7 @@ beforeAll(async () => {
     imports: [
       FakeConnectionsModule,
       AuthModule.forRoot({ baseUrl: ORIGIN, secret: 'x'.repeat(32) }),
+      BookingEmailsModule.forRoot({ baseUrl: ORIGIN, outboxKey: Buffer.alloc(32) }),
       AppointmentsModule,
     ],
   })

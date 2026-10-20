@@ -46,9 +46,8 @@ import {
   MAX_REQUESTS_PER_EMAIL_PER_HOUR,
   requestBooking,
   rescheduleManagedBooking,
-  type BookingNotice,
-  type BookingNotify,
 } from './services/public-booking.js';
+import type { BookingNotice, BookingNotify } from './services/notices.js';
 import { createService, updateService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';

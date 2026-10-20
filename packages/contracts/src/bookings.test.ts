@@ -24,12 +24,14 @@ const booking = {
 };
 
 describe('BookingInputSchema', () => {
-  it('defaults override to false and lowercases ids', () => {
+  it('defaults override to false, notifyClient to true, and lowercases ids', () => {
     expect(BookingInputSchema.parse(booking)).toEqual({
       ...booking,
       staffMemberId: STAFF.toLowerCase(),
       override: false,
+      notifyClient: true,
     });
+    expect(BookingInputSchema.parse({ ...booking, notifyClient: false }).notifyClient).toBe(false);
   });
 
   it('keeps an idempotency key', () => {
@@ -43,6 +45,7 @@ describe('BookingInputSchema', () => {
     ['a status', { ...booking, status: 'completed' }],
     ['a source (taken from who books)', { ...booking, source: 'booking_page' }],
     ['a short idempotency key', { ...booking, idempotencyKey: 'short' }],
+    ['notifyClient as text', { ...booking, notifyClient: 'no' }],
   ])('rejects %s', (_label, input) => {
     expect(BookingInputSchema.safeParse(input).success).toBe(false);
   });
@@ -53,14 +56,22 @@ describe('BookingChangeSchema', () => {
     expect(BookingChangeSchema.parse({ startsAt: booking.startsAt })).toEqual({
       startsAt: booking.startsAt,
       override: false,
+      notifyClient: true,
     });
+    expect(
+      BookingChangeSchema.parse({ startsAt: booking.startsAt, notifyClient: false }),
+    ).toMatchObject({ notifyClient: false });
     expect(
       BookingChangeSchema.parse({ startsAt: booking.startsAt, staffMemberId: STAFF }),
     ).toMatchObject({ staffMemberId: STAFF.toLowerCase() });
   });
 
   it.each(['completed', 'no_show', 'cancelled'])('reads a status change to %s', (status) => {
-    expect(BookingChangeSchema.parse({ status })).toEqual({ status });
+    expect(BookingChangeSchema.parse({ status })).toEqual({ status, notifyClient: true });
+    expect(BookingChangeSchema.parse({ status, notifyClient: false })).toEqual({
+      status,
+      notifyClient: false,
+    });
   });
 
   it.each([

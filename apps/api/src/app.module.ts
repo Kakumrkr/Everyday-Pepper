@@ -3,6 +3,7 @@ import { ConnectionsModule, HealthModule, MailModule } from '@pepper/runtime';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { AppointmentsModule } from './appointments/appointments.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { BookingEmailsModule } from './booking-emails/booking-emails.js';
 import { ClientsModule } from './clients/clients.module.js';
 import type { ApiConfig } from './config.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
@@ -21,11 +22,11 @@ export class AppModule {
         ClientsModule,
         AppointmentsModule,
         MailModule.forRoot(config.mail),
-        PublicBookingModule.forRoot({
+        BookingEmailsModule.forRoot({
           baseUrl: config.auth.baseUrl,
-          codeKey: config.bookingCodeKey,
           outboxKey: outboxKeyFrom(config.outboxSecret),
         }),
+        PublicBookingModule.forRoot({ codeKey: config.bookingCodeKey }),
       ],
     };
   }

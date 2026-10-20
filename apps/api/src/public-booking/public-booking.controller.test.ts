@@ -112,11 +112,7 @@ beforeAll(async () => {
       FakeConnectionsModule,
       AuthModule.forRoot({ baseUrl: ORIGIN, secret: 'x'.repeat(32) }),
       MailModule.forRoot(null),
-      PublicBookingModule.forRoot({
-        baseUrl: ORIGIN,
-        codeKey: Buffer.alloc(32),
-        outboxKey: Buffer.alloc(32),
-      }),
+      PublicBookingModule.forRoot({ codeKey: Buffer.alloc(32) }),
     ],
   })
     .overrideProvider(TenancyService)

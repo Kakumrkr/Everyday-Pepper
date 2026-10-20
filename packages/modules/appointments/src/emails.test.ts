@@ -1,4 +1,3 @@
-import type { BookingEmailDetails } from '@pepper/appointments';
 import { describe, expect, it } from 'vitest';
 import {
   cancelledEmail,
@@ -6,11 +5,14 @@ import {
   confirmationEmail,
   formatWhen,
   manageUrl,
+  reminderEmail,
   rescheduledEmail,
 } from './emails.js';
+import type { BookingEmailDetails } from './services/notices.js';
 
 const DETAILS: BookingEmailDetails = {
   businessName: 'Juniper Hair Studio',
+  slug: 'juniper',
   timeZone: 'America/New_York',
   serviceName: 'Haircut',
   staffName: 'Jess',
@@ -64,5 +66,20 @@ describe('the booking page emails', () => {
       subject: 'Your booking at Juniper Hair Studio is cancelled',
     });
     expect(cancelledEmail(DETAILS).text).not.toContain('#');
+  });
+});
+
+describe('the reminder', () => {
+  it('names the booking in the business time zone and carries no link', () => {
+    const email = reminderEmail(DETAILS);
+    expect(email).toMatchObject({
+      to: 'ana@example.test',
+      subject: 'Reminder: your booking at Juniper Hair Studio',
+    });
+    expect(email.text).toContain('Hi Ana Ruiz,');
+    expect(email.text).toContain('Haircut with Jess, Tuesday, November 3 at 10:00 AM.');
+    expect(email.text).toContain('use the link in your booking confirmation email');
+    expect(email.text).not.toContain('#');
+    expect(email.text).not.toContain('http');
   });
 });

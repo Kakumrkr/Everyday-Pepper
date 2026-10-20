@@ -166,6 +166,23 @@ export async function setBookingStatus(
 }
 
 /**
+ * Replaces a booking's reschedule/cancel link (ADR-0025): the old link stops working. `hash` is
+ * the SHA-256 (hex) of the new token, which only the client's email carries.
+ */
+export async function setBookingManageTokenHash(
+  tx: TenantTx,
+  id: BookingId,
+  hash: string,
+): Promise<BookingRow | undefined> {
+  const [row] = await tx
+    .update(bookings)
+    .set({ manageTokenHash: TokenHashSchema.parse(hash) })
+    .where(eq(bookings.id, Id.parse(id)))
+    .returning();
+  return row;
+}
+
+/**
  * Bookings whose appointment overlaps [from, to), by start; optionally of one staff member, of
  * one client or with one status. Staff see only their own (RLS).
  */

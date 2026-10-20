@@ -35,6 +35,7 @@ import {
   BookingOverlapError,
   findBooking,
   findBookingByIdempotencyKey,
+  findCurrentTenant,
   findService,
   findStaffMemberOfUser,
   insertBooking,
@@ -43,6 +44,7 @@ import {
   lockBooking,
   lockStaffMember,
   moveBooking,
+  setBookingManageTokenHash,
   setBookingStatus,
   withMember,
   type BookingRow,
@@ -64,6 +66,8 @@ import {
 import { bookingAuditValues, sameValues, staffOwner, toBooking, toBusyTime } from '../mapping.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import { findClientToBook } from './clients.js';
+import { changeOf, emailDetailsOf, newManageToken, type BookingNotify } from './notices.js';
+import { keepReminderInStep } from './reminders.js';
 
 // Bookings (ADR-0017). `bookings.manage` lets owners and managers book anyone and staff only
 // their own staff member (AC-W9-1); the database's member scope enforces the same, so staff
@@ -84,6 +88,8 @@ export async function createBooking(
     clock?: Clock;
     source?: BookingSource;
     templateRuleDefaults?: TemplateRuleDefaultsOf;
+    /** Told about the new booking inside its transaction, when `notifyClient` (ADR-0025). */
+    notify?: BookingNotify;
   } = {},
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.manage');
@@ -154,6 +160,10 @@ export async function createBooking(
         },
         requestId: actor.requestId,
       });
+      await keepReminderInStep(tx, row, now);
+      if (request.notifyClient && options.notify) {
+        await tellClient(tx, row, 'confirmed', options.notify);
+      }
       return toBooking(row);
     });
   } catch (error) {
@@ -263,7 +273,12 @@ export async function changeBooking(
   actor: Actor,
   bookingId: BookingId,
   change: BookingChange,
-  options: { clock?: Clock; templateRuleDefaults?: TemplateRuleDefaultsOf } = {},
+  options: {
+    clock?: Clock;
+    templateRuleDefaults?: TemplateRuleDefaultsOf;
+    /** Told about a move or cancellation inside its transaction, when `notifyClient`. */
+    notify?: BookingNotify;
+  } = {},
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.manage');
   const id = BookingIdSchema.parse(bookingId);
@@ -281,7 +296,14 @@ export async function changeBooking(
       if (statusNeedsStart(parsed.status) && row.startsAt.getTime() > now) {
         throw new BookingNotStartedError();
       }
-      return audited(tx, actor, row, await setBookingStatus(tx, id, parsed.status));
+      const changed = await setBookingStatus(tx, id, parsed.status);
+      // The row is locked, so it is still there.
+      if (changed === undefined) throw new BookingNotFoundError();
+      await keepReminderInStep(tx, changed, now);
+      if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
+        await tellClient(tx, changed, 'cancelled', options.notify);
+      }
+      return audited(tx, actor, row, changed);
     });
   }
 
@@ -317,6 +339,11 @@ export async function changeBooking(
         endsAt: new Date(start + service.durationMinutes * MINUTE_MS),
         overridden: parsed.override,
       });
+      if (moved === undefined) throw new BookingNotFoundError();
+      await keepReminderInStep(tx, moved, now);
+      if (parsed.notifyClient && options.notify) {
+        await tellClient(tx, moved, 'rescheduled', options.notify);
+      }
       return audited(tx, actor, row, moved);
     });
   } catch (error) {
@@ -464,6 +491,31 @@ export async function nearestAlternatives(
 }
 
 /** Audits a change of `before` to `after` (unless nothing changed) and returns the booking. */
+/**
+ * Tells the client about a team change of their booking, if the business has their email
+ * address. A confirmation or move comes with a new reschedule/cancel link (the old one, if
+ * any, stops working), because only the link's hash is stored.
+ */
+async function tellClient(
+  tx: TenantTx,
+  row: BookingRow,
+  kind: 'confirmed' | 'rescheduled' | 'cancelled',
+  notify: BookingNotify,
+): Promise<void> {
+  const tenant = await findCurrentTenant(tx);
+  // The transaction's own business always exists.
+  if (tenant === undefined) throw new BookingNotFoundError();
+  const email = await emailDetailsOf(tx, tenant, row);
+  if (email.email === '') return;
+  if (kind === 'cancelled') {
+    await notify(tx, { kind, email, change: changeOf(row) });
+    return;
+  }
+  const link = newManageToken();
+  const linked = await setBookingManageTokenHash(tx, BookingIdSchema.parse(row.id), link.hash);
+  await notify(tx, { kind, email, manageToken: link.token, change: changeOf(linked ?? row) });
+}
+
 async function audited(
   tx: TenantTx,
   actor: Actor,

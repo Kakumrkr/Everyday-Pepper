@@ -7,7 +7,10 @@ import {
   type PublicBookingOptions,
 } from './public-booking.service.js';
 
-/** The public booking page (ADR-0022). Needs `ConnectionsModule` and `MailModule`. */
+/**
+ * The public booking page (ADR-0022). Needs `ConnectionsModule`, `MailModule` and
+ * `BookingEmailsModule`.
+ */
 @Module({})
 export class PublicBookingModule {
   static forRoot(options: PublicBookingOptions): DynamicModule {
