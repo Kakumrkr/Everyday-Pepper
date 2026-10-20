@@ -45,6 +45,9 @@ export const PermissionSchema = z.enum([
   'clients.manage',
   'client_notes.read',
   'client_notes.manage',
+  // To-dos (S21, ADR-0026).
+  'tasks.read',
+  'tasks.manage',
 ]);
 export type Permission = z.infer<typeof PermissionSchema>;
 

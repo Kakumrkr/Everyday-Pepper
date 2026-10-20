@@ -2,8 +2,10 @@ import {
   loadEnv,
   loadMailConfig,
   loadOutboxSecret,
+  loadPushConfig,
   loadServiceConfig,
   type MailConfig,
+  type PushConfig,
   type ServiceConfig,
 } from '@pepper/runtime/instrument';
 import { z } from 'zod';
@@ -26,6 +28,8 @@ const JobsEnvSchema = z.object({
 export interface WorkerConfig extends ServiceConfig {
   /** `null`: no email sender configured; queued emails wait until there is one. */
   mail: MailConfig | null;
+  /** `null`: no VAPID keys, so pushes are not sent (the api then queues none, ADR-0026). */
+  push: PushConfig | null;
   /** Opens the messages the api sealed (ADR-0024); the same as the api's. */
   outboxSecret: string;
   outboxPollMs: number;
@@ -44,6 +48,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
   return {
     ...service,
     mail: loadMailConfig('worker', env),
+    push: loadPushConfig('worker', env),
     outboxSecret: loadOutboxSecret('worker', env),
     outboxPollMs: jobs.OUTBOX_POLL_MS,
     reminderPollMs: jobs.REMINDER_POLL_MS,

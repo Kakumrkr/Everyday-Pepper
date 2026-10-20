@@ -8,10 +8,11 @@ import { JobsRunner, type JobsOptions } from './jobs.module.js';
 
 const appointments = vi.hoisted(() => ({ sendDueReminders: vi.fn() }));
 vi.mock('@pepper/appointments', () => appointments);
-const core = vi.hoisted(() => ({ cleanUp: vi.fn() }));
+const core = vi.hoisted(() => ({ cleanUp: vi.fn(), sendDueTaskPushes: vi.fn() }));
 vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
   cleanUp: core.cleanUp,
+  sendDueTaskPushes: core.sendDueTaskPushes,
 }));
 vi.mock('@pepper/runtime', () => ({ DATABASE: Symbol('DATABASE') }));
 
@@ -28,6 +29,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   appointments.sendDueReminders.mockResolvedValue({ queued: 1, skipped: 0 });
   core.cleanUp.mockResolvedValue({ businesses: 2, bookingRequests: 3, outboxMessages: 4 });
+  core.sendDueTaskPushes.mockResolvedValue(1);
 });
 
 describe('JobsRunner', () => {
@@ -62,6 +64,27 @@ describe('JobsRunner', () => {
       await vi.advanceTimersByTimeAsync(10 * 86_400_000);
       expect(appointments.sendDueReminders).toHaveBeenCalledTimes(1);
       expect(core.cleanUp).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('pushes due to-dos on the reminders interval only when this worker sends pushes', async () => {
+    expect(new JobsRunner(DB as never, OPTIONS).dueTasks).toBeNull();
+    const runner = new JobsRunner(DB as never, { ...OPTIONS, pushes: true });
+    await runner.dueTasks?.runOnce();
+    expect(core.sendDueTaskPushes).toHaveBeenCalledWith(DB.db, { key: OPTIONS.key, clock });
+
+    vi.useFakeTimers();
+    try {
+      core.sendDueTaskPushes.mockClear();
+      const timed = new JobsRunner(DB as never, { ...OPTIONS, pushes: true });
+      timed.onApplicationBootstrap();
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(core.sendDueTaskPushes).toHaveBeenCalledTimes(1);
+      await timed.onApplicationShutdown();
+      await vi.advanceTimersByTimeAsync(600_000);
+      expect(core.sendDueTaskPushes).toHaveBeenCalledTimes(1);
     } finally {
       vi.useRealTimers();
     }

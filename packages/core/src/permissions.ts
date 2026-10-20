@@ -73,6 +73,9 @@ export const PERMISSION_MATRIX: Readonly<
   'clients.manage': OWNER_AND_MANAGER,
   'client_notes.read': STAFF_OWN,
   'client_notes.manage': STAFF_OWN,
+  // ADR-0026: staff reach the tasks assigned to them or that they created.
+  'tasks.read': STAFF_OWN,
+  'tasks.manage': STAFF_OWN,
 };
 
 /** How far `role`'s `permission` reaches. */
@@ -106,7 +109,8 @@ export function can(
   record?: OwnedRecord,
 ): boolean {
   const scope = permissionScope(actor.role, permission);
-  if (scope === null) return false;
+  // Fail closed: a role the matrix does not know (never stored, but typed only) reaches nothing.
+  if (scope !== 'all' && scope !== 'own') return false;
   if (scope === 'all' || record === undefined) return true;
   return record.ownerUserId !== null && record.ownerUserId === actor.userId;
 }

@@ -139,10 +139,21 @@ function loadWorker({ online }: { online: boolean }) {
     match: (url: string, { cacheName }: { cacheName: string }) =>
       Promise.resolve(stored.get(cacheName)?.get(url)),
   };
+  const windows: {
+    url: string;
+    focus: () => Promise<unknown>;
+    navigate: (url: string) => Promise<unknown>;
+  }[] = [];
   const self = {
     addEventListener: (type: string, listener: Listener) => listeners.set(type, listener),
     skipWaiting: vi.fn(() => Promise.resolve()),
-    clients: { claim: vi.fn(() => Promise.resolve()) },
+    location: { origin: 'https://pepper.test' },
+    registration: { showNotification: vi.fn(() => Promise.resolve()) },
+    clients: {
+      claim: vi.fn(() => Promise.resolve()),
+      matchAll: vi.fn(() => Promise.resolve(windows)),
+      openWindow: vi.fn(() => Promise.resolve(null)),
+    },
   };
   runInNewContext(readFileSync(publicFile(SERVICE_WORKER_URL), 'utf8'), {
     self,
@@ -154,6 +165,7 @@ function loadWorker({ online }: { online: boolean }) {
       }
     },
     Response,
+    URL,
   });
 
   async function dispatch(type: string, event: object): Promise<unknown> {
@@ -170,7 +182,7 @@ function loadWorker({ online }: { online: boolean }) {
   const page = (path: string, init: { mode?: string; method?: string } = {}) => ({
     request: { url: `https://pepper.test${path}`, mode: 'navigate', method: 'GET', ...init },
   });
-  return { dispatch, page, stored, fetch, offlinePage, self };
+  return { dispatch, page, stored, fetch, offlinePage, self, windows };
 }
 
 describe('the service worker (public/sw.js)', () => {
@@ -211,5 +223,96 @@ describe('the service worker (public/sw.js)', () => {
       await expect(worker.dispatch('fetch', event)).resolves.toBeUndefined();
     }
     expect(worker.fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('pushes in the service worker (ADR-0026)', () => {
+  const pushOf = (data: unknown) => ({
+    data: {
+      json: () => {
+        if (typeof data === 'string') throw new SyntaxError('not JSON');
+        return data;
+      },
+    },
+  });
+
+  it('shows the push with its title, line and tag, opening an app page', async () => {
+    const worker = loadWorker({ online: true });
+    await worker.dispatch(
+      'push',
+      pushOf({
+        title: 'New booking',
+        body: 'Haircut, Tue 10:00 AM',
+        url: '/calendar?date=2026-11-03',
+        tag: 'booking-1',
+      }),
+    );
+    expect(worker.self.registration.showNotification).toHaveBeenCalledWith('New booking', {
+      body: 'Haircut, Tue 10:00 AM',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      tag: 'booking-1',
+      data: { url: 'https://pepper.test/calendar?date=2026-11-03' },
+    });
+  });
+
+  it.each(['//evil.test/x', '/\\evil.test', 'https://evil.test/', 'calendar', 42])(
+    'opens Home, never another site, for %j',
+    async (url) => {
+      const worker = loadWorker({ online: true });
+      await worker.dispatch('push', pushOf({ title: 'x', url }));
+      expect(worker.self.registration.showNotification).toHaveBeenCalledWith(
+        'x',
+        expect.objectContaining({ data: { url: 'https://pepper.test/' } }),
+      );
+    },
+  );
+
+  it('still shows something for a push that is not ours', async () => {
+    const worker = loadWorker({ online: true });
+    await worker.dispatch('push', pushOf('garbage'));
+    await worker.dispatch('push', { data: null });
+    expect(worker.self.registration.showNotification).toHaveBeenCalledTimes(2);
+    expect(worker.self.registration.showNotification).toHaveBeenLastCalledWith(
+      'Pepper',
+      expect.objectContaining({ body: '', data: { url: 'https://pepper.test/' } }),
+    );
+  });
+
+  const click = (url: unknown) => {
+    const close = vi.fn();
+    return { close, event: { notification: { close, data: { url } } } };
+  };
+
+  it('a tap opens the page in an open window of the app, else a new one', async () => {
+    const worker = loadWorker({ online: true });
+    const { close, event } = click('https://pepper.test/calendar?date=2026-11-03');
+    await worker.dispatch('notificationclick', event);
+    expect(close).toHaveBeenCalled();
+    expect(worker.self.clients.openWindow).toHaveBeenCalledWith(
+      'https://pepper.test/calendar?date=2026-11-03',
+    );
+
+    const navigate = vi.fn(() => Promise.resolve(null));
+    const app = { url: 'https://pepper.test/', navigate, focus: () => Promise.resolve(app) };
+    worker.windows.push(
+      { url: 'https://other.test/', navigate, focus: () => Promise.resolve(null) },
+      app,
+    );
+    await worker.dispatch('notificationclick', click('https://pepper.test/').event);
+    expect(navigate).toHaveBeenCalledWith('https://pepper.test/');
+    expect(worker.self.clients.openWindow).toHaveBeenCalledTimes(1);
+  });
+
+  it('a tap on a notification with another site in its data opens Home', async () => {
+    const worker = loadWorker({ online: true });
+    for (const url of ['https://evil.test/x', 'https://pepper.test.evil.test/x', null]) {
+      await worker.dispatch('notificationclick', click(url).event);
+    }
+    expect(worker.self.clients.openWindow.mock.calls).toEqual([
+      ['https://pepper.test/'],
+      ['https://pepper.test/'],
+      ['https://pepper.test/'],
+    ]);
   });
 });

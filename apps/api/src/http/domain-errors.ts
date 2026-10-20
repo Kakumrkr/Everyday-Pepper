@@ -28,6 +28,8 @@ import {
   InviteWrongAccountError,
   LastOwnerError,
   MemberNotFoundError,
+  TaskAssigneeNotMemberError,
+  TaskNotFoundError,
 } from '@pepper/core';
 import {
   BusinessLimitReachedError,
@@ -84,6 +86,8 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [WaitlistEntryNotFoundError, NotFoundException, 'waitlist_entry_not_found'],
   [WaitlistEntryNotChangeableError, ConflictException, 'waitlist_entry_not_changeable'],
   [WaitlistExpiredError, BadRequestException, 'waitlist_expired'],
+  [TaskNotFoundError, NotFoundException, 'task_not_found'],
+  [TaskAssigneeNotMemberError, UnprocessableEntityException, 'task_assignee_not_member'],
   [BookingPageNotFoundError, NotFoundException, 'booking_page_not_found'],
   [BookingRequestNotFoundError, NotFoundException, 'booking_request_not_found'],
   [BookingRequestExpiredError, GoneException, 'booking_request_expired'],

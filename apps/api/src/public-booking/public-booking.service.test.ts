@@ -4,6 +4,7 @@ import type { Mailer } from '@pepper/core';
 import { type HttpException } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BookingEmails } from '../booking-emails/booking-emails.js';
+import type { TeamPushes } from '../push/team-pushes.js';
 import { PublicBookingService } from './public-booking.service.js';
 
 const appointments = vi.hoisted(() => ({
@@ -29,7 +30,10 @@ const DETAILS: BookingEmailDetails = {
 };
 const TOKEN = 'q1W2e3R4t5Y6u7I8o9P0a_S-d1F2g3H4j5K6l7Z8x9C';
 const OPTIONS = { codeKey: Buffer.alloc(32, 1) };
-const EMAILS = { notify: vi.fn() } as unknown as BookingEmails;
+const emailNotify = vi.fn(() => Promise.resolve());
+const pushBookingPage = vi.fn(() => Promise.resolve());
+const EMAILS = { notify: emailNotify } as unknown as BookingEmails;
+const PUSHES = { bookingPage: pushBookingPage } as unknown as TeamPushes;
 
 /** The `notify` option the service passed to the last call of `fn`. */
 function notifyOf(fn: { mock: { calls: unknown[][] } }): unknown {
@@ -38,7 +42,7 @@ function notifyOf(fn: { mock: { calls: unknown[][] } }): unknown {
 }
 
 function serviceWith(mailer: Mailer | null) {
-  return new PublicBookingService({ db: {} as never }, mailer, OPTIONS, EMAILS);
+  return new PublicBookingService({ db: {} as never }, mailer, OPTIONS, EMAILS, PUSHES);
 }
 
 function status(error: unknown): number {
@@ -104,7 +108,7 @@ describe('PublicBookingService', () => {
     expect(status(error)).toBe(503);
   });
 
-  it('queues the booking emails through BookingEmails, inside each change', async () => {
+  it('queues the client email and the team push inside each change (ADR-0026)', async () => {
     const send = vi.fn(() => Promise.resolve());
     const answer = await serviceWith({ send }).confirm('juniper', 'r-1' as never, {
       code: '042917',
@@ -117,7 +121,12 @@ describe('PublicBookingService', () => {
       appointments.rescheduleManagedBooking,
       appointments.cancelManagedBooking,
     ]) {
-      expect(notifyOf(fn)).toBe(EMAILS.notify);
+      const notify = notifyOf(fn) as Appointments.BookingNotify;
+      const tx = {} as never;
+      const notice = { kind: 'cancelled', email: DETAILS, change: {} } as never;
+      await notify(tx, notice);
+      expect(emailNotify).toHaveBeenLastCalledWith(tx, notice);
+      expect(pushBookingPage).toHaveBeenLastCalledWith(tx, notice);
     }
     // Only the code is sent at once; the rest goes through the outbox.
     expect(send).not.toHaveBeenCalled();

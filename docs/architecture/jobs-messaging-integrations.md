@@ -5,8 +5,9 @@
 ## Background jobs (Redis + BullMQ in `apps/worker`)
 | Queue | Purpose | Trigger |
 |---|---|---|
-| `outbox` | Deliver `OutboxMessage` rows (S19: email) | The relay polls `outbox_dispatch` every second and queues one job per due message, job id = message id (ADR-0024) |
+| `outbox` | Deliver `OutboxMessage` rows (S19: email; S21: push to one device) | The relay polls `outbox_dispatch` every second and queues one job per due message, job id = message id (ADR-0024) |
 | Reminder job (S20, no queue) | Booking reminders 24 h before (AC-W6-1) | Every `REMINDER_POLL_MS` (60 s) the worker queues the due rows of `booking_reminders` into the outbox; the schedule is kept in step in each booking's own transaction (ADR-0025) |
+| Due-task job (S21, no queue) | Push a to-do's assignee (or the owners and managers for a team task) when it comes due | Every `REMINDER_POLL_MS` with the reminders, when the worker has VAPID keys; each task once per due time (ADR-0026) |
 | Clean-up job (S20, no queue) | Delete expired booking requests (24 h) and sent/dead outbox rows (30 days) | At worker start-up and every `CLEANUP_INTERVAL_MS` (one day) |
 | `daily-briefing` | Build operator feed per tenant at local morning | Repeatable job per tenant time zone |
 | `insights` | Compute open slots, overdue regulars, no-show patterns | Hourly + on events |
@@ -18,10 +19,12 @@
 
 **Built (S20, [ADR-0025](../adr/0025-booking-reminders-team-emails-and-cleanup.md)):** team-made bookings email the client (confirmed with a new reschedule/cancel link, moved with a new link, cancelled) through the same `notify` path as the booking page, unless the team unticks "Email the client" (`notifyClient`). Reminders are rows in `booking_reminders` (no content), planned, moved or removed in the booking's own transaction; the worker's reminder job locks the booking, takes the row and queues the email in one transaction, so a cancelled booking never gets one and concurrent workers queue one. The daily clean-up deletes what is past its retention. Both jobs find work across businesses through the read-only `job_scan` policy and are driven by Postgres, not Redis (the delayed jobs and nightly reconciliation first sketched here are not needed).
 
+**Built (S21, [ADR-0026](../adr/0026-tasks-and-web-push.md)):** Web Push for the installed app. `queuePushToMembers` queues one sealed `push` message per device of the recipients in the change's transaction (deduped per change and device); the worker's `WebPusher` (`web-push` builds the RFC 8291 request, `fetch` sends it) delivers it once; 404/410 removes the device and drops the push without an alert. Device endpoints must be on a browser push service. Pushes never name a client: the booking page's team pushes say the service, staff member and time; a due to-do says its title.
+
 **Guarantees:** the DB is the source of truth; jobs carry IDs, not data. Transactional outbox (write + outbox row in one transaction) avoids lost/phantom side effects. Handlers are idempotent (dedupe keys). Exponential backoff, max attempts, dead-letter queue with alert. Redis loss is recoverable: reconciliation jobs rebuild schedules from Postgres.
 
 ## Messaging (channel-agnostic)
-`MessagingChannel` interface: `send(message) → deliveryId`, `status webhook`. V1: **Email** via Resend for the pilot (D4, ADR-0024), Mailpit over SMTP in development and CI, behind the `Mailer` port (core; `SmtpMailer` in runtime). Templates per message type, rendered with tenant branding and template terminology. Unsubscribe/opt-out honoured; CAN-SPAM footer. V1.1 adds SMS (Twilio, A2P 10DLC, TCPA consent) without changing callers.
+`MessagingChannel` interface: `send(message) → deliveryId`, `status webhook`. V1: **Email** via Resend for the pilot (D4, ADR-0024), Mailpit over SMTP in development and CI, behind the `Mailer` port (core; `SmtpMailer` in runtime). Templates per message type, rendered with tenant branding and template terminology. Unsubscribe/opt-out honoured; CAN-SPAM footer. V1.1 adds SMS (Twilio, A2P 10DLC, TCPA consent) without changing callers. **Push** (S21) is the team's channel, not the clients': a `Pusher` port (core) with the worker's `WebPusher`.
 
 ## Google Calendar sync
 Per staff OAuth connection. Inbound: external events → `ExternalBusyBlock` (block availability, details not stored beyond title-optional). Outbound: our bookings → events in the staff's calendar. Source of truth for bookings is our system. Push notifications + sync tokens; full resync on token invalidation; conflicts resolved by "external busy always blocks, our bookings win for our events". Requires Google OAuth app verification before public launch.

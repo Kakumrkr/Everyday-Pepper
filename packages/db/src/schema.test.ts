@@ -5,7 +5,9 @@ import {
   auditLog,
   invites,
   memberships,
+  pushSubscriptions,
   sessions,
+  tasks,
   tenants,
   twoFactors,
   usageMeters,
@@ -74,5 +76,21 @@ describe('schema foreign keys', () => {
         { from: ['accepted_by_user_id'], to: 'users(id)', onDelete: 'set null' },
       ]),
     );
+  });
+
+  it('removes tasks with their tenant and keeps them when their creator is deleted (ADR-0026)', () => {
+    expect(foreignKeys(tasks)).toEqual(
+      expect.arrayContaining([
+        { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+        { from: ['created_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+      ]),
+    );
+  });
+
+  it('removes a device with its tenant or with the membership it belongs to', () => {
+    expect(foreignKeys(pushSubscriptions)).toEqual([
+      { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+      { from: ['tenant_id', 'user_id'], to: 'memberships(tenant_id,user_id)', onDelete: 'cascade' },
+    ]);
   });
 });

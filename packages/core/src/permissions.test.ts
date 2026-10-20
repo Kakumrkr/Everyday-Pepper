@@ -45,6 +45,8 @@ const EXPECTED: Record<Permission, [PermissionScope, PermissionScope, Permission
   'clients.manage': ['all', 'all', null],
   'client_notes.read': ['all', 'all', 'own'],
   'client_notes.manage': ['all', 'all', 'own'],
+  'tasks.read': ['all', 'all', 'own'],
+  'tasks.manage': ['all', 'all', 'own'],
 };
 
 const ROLES = MembershipRoleSchema.options;
@@ -124,6 +126,18 @@ describe('permissionsOf', () => {
     const staff = permissionsOf('staff');
     for (const permission of ['members.read', 'members.invite', 'audit.read'] as const) {
       expect(staff).not.toContain(permission);
+    }
+  });
+});
+
+describe('can with a role the matrix does not know', () => {
+  it('refuses everything (fails closed)', () => {
+    const stranger = {
+      userId: UserIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708193'),
+      role: 'guest' as MembershipRole,
+    };
+    for (const permission of PermissionSchema.options) {
+      expect(can(stranger, permission), permission).toBe(false);
     }
   });
 });

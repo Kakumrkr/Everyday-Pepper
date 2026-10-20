@@ -1,0 +1,204 @@
+import {
+  TenantIdSchema,
+  type MembershipRole,
+  type TaskId,
+  type TenantId,
+  type UserId,
+} from '@pepper/contracts';
+import {
+  addMembership,
+  deleteMembership,
+  listAuditEntries,
+  withTenant,
+  type Database,
+} from '@pepper/db';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { Actor } from './actor.js';
+import { ManualClock } from './clock.js';
+import { ForbiddenError, TaskAssigneeNotMemberError, TaskNotFoundError } from './errors.js';
+import { createBusiness } from './services/business.js';
+import { changeTask, createTask, listTasks } from './services/tasks.js';
+import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
+
+// The task services against real Postgres (ADR-0026): who may create, see, assign and change
+// tasks, and an audit entry without the title for every change.
+
+let database: TestDatabase;
+let db: Database;
+let tenantId: TenantId;
+let owner: UserId;
+let manager: UserId;
+let jess: UserId;
+let priya: UserId;
+
+const as = (userId: UserId, role: MembershipRole): Actor => ({
+  context: { tenantId, userId, role },
+});
+const ana = () => as(owner, 'owner');
+const marco = () => as(manager, 'manager');
+const jessActor = () => as(jess, 'staff');
+const priyaActor = () => as(priya, 'staff');
+
+beforeAll(async () => {
+  database = await startTestDatabase();
+  db = database.app.db;
+  owner = await insertUser(db, 'Ana');
+  const tenant = await createBusiness(db, owner, {
+    name: 'Juniper Hair Studio',
+    slug: 'juniper-tasks',
+    timeZone: 'America/New_York',
+  });
+  tenantId = TenantIdSchema.parse(tenant.id);
+  manager = await insertUser(db, 'Marco');
+  jess = await insertUser(db, 'Jess');
+  priya = await insertUser(db, 'Priya');
+  await withTenant(db, tenantId, async (tx) => {
+    await addMembership(tx, { userId: manager, role: 'manager' });
+    await addMembership(tx, { userId: jess, role: 'staff' });
+    await addMembership(tx, { userId: priya, role: 'staff' });
+  });
+});
+
+afterAll(async () => {
+  await database.stop();
+});
+
+describe('createTask', () => {
+  it("is the caller's own by default; owners and managers may assign anyone or no one", async () => {
+    const own = await createTask(db, jessActor(), { title: 'Restock towels' });
+    expect(own).toMatchObject({
+      title: 'Restock towels',
+      assigneeUserId: jess,
+      createdByUserId: jess,
+      status: 'open',
+      source: 'manual',
+      dueAt: null,
+    });
+    const forJess = await createTask(db, ana(), {
+      title: 'Call the supplier',
+      dueAt: '2026-11-03T14:00:00.000Z',
+      assigneeUserId: jess,
+    });
+    expect(forJess).toMatchObject({ assigneeUserId: jess, dueAt: '2026-11-03T14:00:00.000Z' });
+    const team = await createTask(db, marco(), { title: 'Team meeting', assigneeUserId: null });
+    expect(team.assigneeUserId).toBeNull();
+  });
+
+  it('staff give tasks only to themselves, never to a colleague or no one', async () => {
+    await expect(
+      createTask(db, jessActor(), { title: 'For Priya', assigneeUserId: priya }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(
+      createTask(db, jessActor(), { title: 'For nobody', assigneeUserId: null }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  it('refuses an assignee outside the business', async () => {
+    const outsider = await insertUser(db, 'Outsider');
+    await expect(
+      createTask(db, ana(), { title: 'Nope', assigneeUserId: outsider }),
+    ).rejects.toBeInstanceOf(TaskAssigneeNotMemberError);
+  });
+
+  it('audits the change without the title', async () => {
+    const task = await createTask(db, ana(), { title: 'Secret plan', assigneeUserId: jess });
+    const entries = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 100 }));
+    const entry = entries.find((e) => e.entity.id === task.id);
+    expect(entry).toMatchObject({
+      action: 'task.created',
+      after: { status: 'open', dueAt: null, assigneeUserId: jess, source: 'manual' },
+    });
+    expect(JSON.stringify(entry)).not.toContain('Secret plan');
+  });
+});
+
+describe('listTasks', () => {
+  it('shows staff only their own tasks and owners everyone’s; `mine` narrows to the caller', async () => {
+    const forPriya = await createTask(db, ana(), { title: 'For Priya', assigneeUserId: priya });
+    const forJess = await createTask(db, ana(), { title: 'For Jess', assigneeUserId: jess });
+    const ids = async (actor: Actor, mine = false) =>
+      (await listTasks(db, actor, { status: 'all', mine, limit: 200 })).map((t) => t.id);
+
+    expect(await ids(jessActor())).toContain(forJess.id);
+    expect(await ids(jessActor())).not.toContain(forPriya.id);
+    expect(await ids(ana())).toEqual(expect.arrayContaining([forJess.id, forPriya.id]));
+    expect(await ids(ana(), true)).not.toContain(forJess.id);
+  });
+});
+
+describe('changeTask', () => {
+  it('marks done and open again, records when, and moves the due time', async () => {
+    const clock = new ManualClock(new Date('2026-11-02T12:00:00Z'));
+    const task = await createTask(db, jessActor(), {
+      title: 'Order color',
+      dueAt: '2026-11-03T14:00:00.000Z',
+    });
+    const done = await changeTask(db, jessActor(), task.id, { status: 'done' }, { clock });
+    expect(done).toMatchObject({ status: 'done', completedAt: '2026-11-02T12:00:00.000Z' });
+    const reopened = await changeTask(db, jessActor(), task.id, { status: 'open' }, { clock });
+    expect(reopened).toMatchObject({ status: 'open', completedAt: null });
+    const moved = await changeTask(db, jessActor(), task.id, {
+      dueAt: '2026-11-04T14:00:00.000Z',
+      title: 'Order color (blonde)',
+    });
+    expect(moved).toMatchObject({
+      dueAt: '2026-11-04T14:00:00.000Z',
+      title: 'Order color (blonde)',
+    });
+
+    const entries = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 100 }));
+    const actions = entries.filter((e) => e.entity.id === task.id).map((e) => e.action);
+    expect(actions).toEqual(['task.updated', 'task.updated', 'task.updated', 'task.created']);
+  });
+
+  it('writes nothing for a change that changes nothing', async () => {
+    const task = await createTask(db, ana(), { title: 'Same', assigneeUserId: null });
+    const same = await changeTask(db, ana(), task.id, { title: 'Same', assigneeUserId: null });
+    expect(same.updatedAt).toBe(task.updatedAt);
+    const entries = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 100 }));
+    expect(entries.filter((e) => e.entity.id === task.id)).toHaveLength(1);
+  });
+
+  it("staff cannot reach a colleague's task, nor hand their own away", async () => {
+    const forPriya = await createTask(db, ana(), { title: 'Priya only', assigneeUserId: priya });
+    await expect(
+      changeTask(db, jessActor(), forPriya.id, { status: 'done' }),
+    ).rejects.toBeInstanceOf(TaskNotFoundError);
+    const own = await createTask(db, jessActor(), { title: 'Mine' });
+    await expect(
+      changeTask(db, jessActor(), own.id, { assigneeUserId: priya }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    // Priya can still change her own task.
+    await expect(
+      changeTask(db, priyaActor(), forPriya.id, { status: 'done' }),
+    ).resolves.toMatchObject({ status: 'done' });
+  });
+
+  it('owners reassign, unassign and refuse non-members; an unknown task is not found', async () => {
+    const task = await createTask(db, ana(), { title: 'Move me', assigneeUserId: jess });
+    expect((await changeTask(db, ana(), task.id, { assigneeUserId: priya })).assigneeUserId).toBe(
+      priya,
+    );
+    expect(
+      (await changeTask(db, marco(), task.id, { assigneeUserId: null })).assigneeUserId,
+    ).toBeNull();
+    const outsider = await insertUser(db, 'Outsider 2');
+    await expect(
+      changeTask(db, ana(), task.id, { assigneeUserId: outsider }),
+    ).rejects.toBeInstanceOf(TaskAssigneeNotMemberError);
+    await expect(
+      changeTask(db, ana(), '00000000-0000-4000-8000-000000000000' as TaskId, { status: 'done' }),
+    ).rejects.toBeInstanceOf(TaskNotFoundError);
+  });
+
+  it("a removed member's tasks stay, unassigned, for owners to hand on", async () => {
+    const leaving = await insertUser(db, 'Leaving');
+    await withTenant(db, tenantId, (tx) => addMembership(tx, { userId: leaving, role: 'staff' }));
+    const task = await createTask(db, ana(), { title: 'Theirs', assigneeUserId: leaving });
+    await withTenant(db, tenantId, (tx) => deleteMembership(tx, leaving));
+    const [after] = (await listTasks(db, ana(), { status: 'all', limit: 200 })).filter(
+      (t) => t.id === task.id,
+    );
+    expect(after?.assigneeUserId).toBeNull();
+  });
+});

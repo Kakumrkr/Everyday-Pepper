@@ -8,7 +8,7 @@ import {
   type OnApplicationShutdown,
 } from '@nestjs/common';
 import { sendDueReminders } from '@pepper/appointments';
-import { cleanUp, systemClock, type Clock } from '@pepper/core';
+import { cleanUp, sendDueTaskPushes, systemClock, type Clock } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
 import { Periodic } from './periodic.js';
@@ -20,6 +20,11 @@ export interface JobsOptions {
   reminderPollMs: number;
   /** How often the clean-up runs; it also runs at start-up. */
   cleanupIntervalMs: number;
+  /**
+   * Whether this worker sends pushes (VAPID keys set, ADR-0026); the due-task job runs, on
+   * the reminders' interval, only then.
+   */
+  pushes?: boolean;
   clock?: Clock;
 }
 
@@ -28,13 +33,15 @@ export const JOBS_OPTIONS = Symbol('JOBS_OPTIONS');
 /**
  * The worker's scheduled jobs (ADR-0025), driven by Postgres rather than Redis, so restarting
  * either loses nothing: every `reminderPollMs` due reminders are queued in the outbox (which
- * sends them), and every `cleanupIntervalMs` old rows are deleted. Several worker processes
- * may run them at once: a reminder is taken under a row lock, and deleting is idempotent.
+ * sends them), and so are the pushes of to-dos coming due (ADR-0026, when pushes are on); every
+ * `cleanupIntervalMs` old rows are deleted. Several worker processes may run them at once: a
+ * reminder or due task is taken under a row lock, and deleting is idempotent.
  */
 @Injectable()
 export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown {
   private readonly logger = new Logger(JobsRunner.name);
   readonly reminders: Periodic;
+  readonly dueTasks: Periodic | null;
   readonly cleanup: Periodic;
 
   constructor(
@@ -49,6 +56,15 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       () => sendDueReminders(db, { key: options.key, clock }),
       this.logger,
     );
+    this.dueTasks =
+      options.pushes === true
+        ? new Periodic(
+            'Due-task job',
+            options.reminderPollMs,
+            () => sendDueTaskPushes(db, { key: options.key, clock }),
+            this.logger,
+          )
+        : null;
     this.cleanup = new Periodic(
       'Clean-up job',
       options.cleanupIntervalMs,
@@ -65,15 +81,16 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
 
   onApplicationBootstrap(): void {
     this.reminders.start();
+    this.dueTasks?.start();
     this.cleanup.start({ immediately: true });
   }
 
   async onApplicationShutdown(): Promise<void> {
-    await Promise.all([this.reminders.stop(), this.cleanup.stop()]);
+    await Promise.all([this.reminders.stop(), this.dueTasks?.stop(), this.cleanup.stop()]);
   }
 }
 
-/** The reminder and clean-up jobs. Needs `ConnectionsModule`. */
+/** The reminder, due-task and clean-up jobs. Needs `ConnectionsModule`. */
 @Module({})
 export class JobsModule {
   static forRoot(options: JobsOptions): DynamicModule {

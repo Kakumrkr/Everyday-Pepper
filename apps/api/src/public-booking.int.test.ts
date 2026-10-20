@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { createECDH } from 'node:crypto';
 import type { Server } from 'node:http';
 import { createService, createStaffMember, replaceWorkingHours } from '@pepper/appointments';
 import {
@@ -18,11 +19,15 @@ import {
   createClient,
   deliverOutboxMessage,
   outboxKeyFrom,
+  removePushDevice,
+  savePushDevice,
   systemClock,
   updateBookingPage,
   type Actor,
   type EmailMessage,
   type Mailer,
+  type PushMessage,
+  type Pusher,
   type TenantContext,
 } from '@pepper/core';
 import {
@@ -68,7 +73,20 @@ let redis: TestService;
 let app: INestApplication;
 let server: Server;
 let db: Database;
+class RecordingPusher implements Pusher {
+  readonly sent: PushMessage[] = [];
+  send(message: PushMessage): Promise<void> {
+    this.sent.push(message);
+    return Promise.resolve();
+  }
+}
+
+/** A VAPID public key (an uncompressed P-256 point), so the api turns pushes on. */
+const vapid = createECDH('prime256v1');
+vapid.generateKeys();
+
 const mailer = new RecordingMailer();
+const pusher = new RecordingPusher();
 let serviceId: string;
 let tenantId: TenantId;
 /** The owner's context, for team bookings through `BookingsService`. */
@@ -87,6 +105,7 @@ beforeAll(async () => {
     OUTBOX_SECRET,
     AUTH_BASE_URL: ORIGIN,
     SMTP_URL: 'smtp://127.0.0.1:1',
+    VAPID_PUBLIC_KEY: vapid.getPublicKey().toString('base64url'),
   });
   const moduleRef = await Test.createTestingModule({ imports: [AppModule.forRoot(config)] })
     .overrideProvider(MAILER)
@@ -133,9 +152,9 @@ beforeEach(() => {
   mailer.sent.length = 0;
 });
 
-/** Delivers the queued emails, as the worker does; returns how many were sent. */
+/** Delivers the queued emails and pushes, as the worker does; returns how many were sent. */
 async function deliverQueued(): Promise<number> {
-  const options = { key: outboxKeyFrom(OUTBOX_SECRET), mailer, clock: systemClock };
+  const options = { key: outboxKeyFrom(OUTBOX_SECRET), mailer, pusher, clock: systemClock };
   const results = [];
   for (const due of await listDueOutboxMessages(db, new Date(), 100)) {
     results.push(await deliverOutboxMessage(db, due, options));
@@ -335,5 +354,63 @@ describe('team bookings (ADR-0025)', () => {
       to: 'maria@example.test',
       subject: 'Your booking at Plum Salon is cancelled',
     });
+  });
+});
+
+describe('team pushes (ADR-0026)', () => {
+  it("tell the owner's device about a booking made on the page, never naming the client; not about the team's own", async () => {
+    const endpoint = 'https://fcm.googleapis.com/fcm/send/owner-phone';
+    await savePushDevice(
+      db,
+      { context: ownerContext },
+      {
+        endpoint,
+        keys: { p256dh: 'B'.repeat(87), auth: 'a'.repeat(22) },
+      },
+    );
+    const [slot] = await freeSlots();
+    if (slot === undefined) throw new Error('no free times');
+    const bea = visitor();
+    const asked = await bea
+      .post('/booking-requests', {
+        serviceId,
+        staffMemberId: jessId,
+        startsAt: slot.startsAt,
+        name: 'Bea Lima',
+        email: 'bea.push@example.test',
+      })
+      .expect(201);
+    const { requestId } = BookingRequestResponseSchema.parse(asked.body);
+    const code = codeIn(mailer.sent.at(-1));
+    await bea.post(`/booking-requests/${requestId}/confirm`, { code }).expect(201);
+
+    pusher.sent.length = 0;
+    // The client's confirmation and the owner's push.
+    expect(await deliverQueued()).toBe(2);
+    expect(pusher.sent).toHaveLength(1);
+    const [push] = pusher.sent;
+    expect(push?.endpoint).toBe(endpoint);
+    const shown = JSON.parse(push?.payload ?? '{}') as Record<string, string>;
+    expect(shown).toMatchObject({
+      title: 'New booking',
+      url: expect.stringMatching(/^\/calendar\?date=/) as string,
+    });
+    expect(shown['body']).toContain('Cut with Jess');
+    expect(push?.payload).not.toMatch(/Bea|bea\.push/);
+
+    // A booking the team makes itself pushes nothing.
+    const [other] = await freeSlots();
+    if (other === undefined) throw new Error('no free times');
+    const maria = await createClient(db, { context: ownerContext }, { name: 'Maria Push' });
+    await app.get(BookingsService).createBooking(ownerContext, {
+      clientId: maria.id,
+      serviceId,
+      staffMemberId: jessId,
+      startsAt: other.startsAt,
+    });
+    pusher.sent.length = 0;
+    await deliverQueued();
+    expect(pusher.sent).toEqual([]);
+    await removePushDevice(db, { context: ownerContext }, { endpoint });
   });
 });

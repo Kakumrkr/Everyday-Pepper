@@ -2,11 +2,14 @@ import { randomBytes } from 'node:crypto';
 import { OUTBOX_MAX_ATTEMPTS, OutboxMessageIdSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
+  ChannelUnavailableError,
   errorNameOf,
   failureOutcome,
+  isGonePush,
   openOutboxContent,
   outboxKeyFrom,
   OutboxContentError,
+  PushRejectedError,
   sealOutboxContent,
 } from './outbox.js';
 
@@ -101,5 +104,36 @@ describe('failureOutcome', () => {
     expect(errorNameOf(Object.assign(new Error('x'), { code: '' }))).toBe('Error');
     expect(errorNameOf('a string')).toBe('UnknownError');
     expect(failureOutcome('a string', 1, now).kind).toBe('retry');
+  });
+});
+
+describe('push failures (ADR-0026)', () => {
+  const now = new Date('2026-10-20T12:00:00Z');
+
+  it('drops a push to a device its push service no longer knows (404, 410)', () => {
+    expect([404, 410].map((code) => isGonePush(new PushRejectedError(code)))).toEqual([true, true]);
+    expect(isGonePush(new PushRejectedError(429))).toBe(false);
+    expect(isGonePush(new Error('404'))).toBe(false);
+  });
+
+  it('gives up on a push refused for good, retries one refused for now', () => {
+    for (const code of [400, 401, 403, 413]) {
+      expect(failureOutcome(new PushRejectedError(code), 1, now)).toEqual({
+        kind: 'dead',
+        errorName: 'PushRejectedError',
+      });
+    }
+    for (const code of [408, 429, 500, 503]) {
+      expect(failureOutcome(new PushRejectedError(code), 1, now).kind).toBe('retry');
+    }
+  });
+
+  it('retries while a channel is not configured, naming it', () => {
+    const error = new ChannelUnavailableError('push');
+    expect(error.message).toBe('No push sender is configured');
+    expect(failureOutcome(error, 1, now)).toMatchObject({
+      kind: 'retry',
+      errorName: 'ChannelUnavailableError',
+    });
   });
 });

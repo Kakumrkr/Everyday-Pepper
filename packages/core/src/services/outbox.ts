@@ -2,14 +2,18 @@ import {
   OutboxDedupeKeySchema,
   OutboxEmailSchema,
   OutboxMessageIdSchema,
+  OutboxPushSchema,
   TenantIdSchema,
   type OutboxDedupeKey,
   type OutboxEmailInput,
   type OutboxMessageId,
+  type OutboxPushInput,
 } from '@pepper/contracts';
 import {
   addUsage,
   claimOutboxMessage,
+  deletePushSubscription,
+  findPushSubscription,
   insertOutboxMessage,
   markOutboxMessageFailed,
   markOutboxMessageSent,
@@ -20,11 +24,20 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import type { Clock } from '../clock.js';
-import { failureOutcome, openOutboxContent, sealOutboxContent, type Mailer } from '../outbox.js';
+import {
+  ChannelUnavailableError,
+  failureOutcome,
+  isGonePush,
+  openOutboxContent,
+  sealOutboxContent,
+  type Mailer,
+  type Pusher,
+} from '../outbox.js';
 import { usagePeriodOf } from '../usage-period.js';
 
-// The transactional outbox (ADR-0003, ADR-0024): `queueEmail` runs inside the business
-// change's transaction; the worker calls `deliverOutboxMessage` for each due message.
+// The transactional outbox (ADR-0003, ADR-0024): `queueEmail` and `queuePush` (ADR-0026) run
+// inside the business change's transaction; the worker calls `deliverOutboxMessage` for each
+// due message.
 
 /** How long a claimed message is hidden from other workers while one delivers it. */
 export const OUTBOX_LEASE_MS = 5 * 60_000;
@@ -51,15 +64,48 @@ export async function queueEmail(
   return row === undefined ? undefined : id;
 }
 
-/** What one delivery call did. */
-export type DeliveryResult = 'sent' | 'retry' | 'dead' | 'skipped';
+/**
+ * Queues a push to one device (`OutboxPushSchema`) in the open transaction of a business,
+ * like `queueEmail`. Returns the message id, or `undefined` for a dedupe key already used.
+ */
+export async function queuePush(
+  tx: TenantTx,
+  push: OutboxPushInput,
+  options: { key: Buffer; dedupeKey: OutboxDedupeKey; now: Date },
+): Promise<OutboxMessageId | undefined> {
+  const content = OutboxPushSchema.parse(push);
+  const id = OutboxMessageIdSchema.parse(newId());
+  const row = await insertOutboxMessage(tx, {
+    id,
+    type: 'push',
+    dedupeKey: OutboxDedupeKeySchema.parse(options.dedupeKey),
+    payload: sealOutboxContent(options.key, id, Buffer.from(JSON.stringify(content))),
+    availableAt: options.now,
+  });
+  return row === undefined ? undefined : id;
+}
+
+/**
+ * What one delivery call did. `dropped`: a push whose device is gone (the member turned it
+ * off, or the push service no longer knows it); nothing is wrong, so nothing is alerted.
+ */
+export type DeliveryResult = 'sent' | 'retry' | 'dead' | 'skipped' | 'dropped';
 
 export interface DeliveryOptions {
   key: Buffer;
   mailer: Mailer;
+  /**
+   * `null` or absent: this worker has no VAPID keys, so a queued push fails (and retries,
+   * then gives up with an alert): the api queues pushes only when push is configured, so
+   * that means the api and the worker are configured differently.
+   */
+  pusher?: Pusher | null;
   clock: Clock;
   leaseMs?: number;
 }
+
+/** How long a push service may hold a push for an offline device: a day. */
+export const PUSH_TTL_SECONDS = 24 * 60 * 60;
 
 /**
  * Delivers one due message at most once: claims it (committed, so no other worker gets it
@@ -83,11 +129,17 @@ export async function deliverOutboxMessage(
   );
   if (claimed === undefined || claimed.payload === null) return 'skipped';
 
+  let dropped = false;
   try {
-    const content = OutboxEmailSchema.parse(
-      JSON.parse(openOutboxContent(options.key, id, claimed.payload).toString('utf8')),
+    const opened: unknown = JSON.parse(
+      openOutboxContent(options.key, id, claimed.payload).toString('utf8'),
     );
-    await options.mailer.send({ ...content, id });
+    if (claimed.type === 'push') {
+      dropped = !(await sendPush(db, tenantId, opened, options));
+    } else {
+      const content = OutboxEmailSchema.parse(opened);
+      await options.mailer.send({ ...content, id });
+    }
   } catch (error) {
     const outcome = failureOutcome(error, claimed.attempts, options.clock.now());
     await withTenant(db, tenantId, (tx) =>
@@ -99,11 +151,52 @@ export async function deliverOutboxMessage(
     return outcome.kind;
   }
 
+  if (dropped) {
+    await withTenant(db, tenantId, (tx) =>
+      markOutboxMessageFailed(tx, id, { errorName: 'PushSubscriptionGone', retryAt: null }),
+    );
+    return 'dropped';
+  }
   const sentAt = options.clock.now();
   await withTenant(db, tenantId, async (tx) => {
-    if (await markOutboxMessageSent(tx, id, sentAt)) {
+    if ((await markOutboxMessageSent(tx, id, sentAt)) && claimed.type === 'email') {
       await addUsage(tx, { metric: 'emails_sent', amount: 1, period: usagePeriodOf(sentAt) });
     }
   });
   return 'sent';
+}
+
+/**
+ * Sends one queued push to its device. Returns `false` when the device is gone: the member
+ * turned notifications off (no subscription), or the push service answered 404/410 (the
+ * subscription is removed then). Other failures throw, for `failureOutcome`.
+ */
+async function sendPush(
+  db: Database,
+  tenantId: ReturnType<typeof TenantIdSchema.parse>,
+  opened: unknown,
+  options: DeliveryOptions,
+): Promise<boolean> {
+  const push = OutboxPushSchema.parse(opened);
+  const pusher = options.pusher ?? null;
+  if (pusher === null) throw new ChannelUnavailableError('push');
+  // Work without a user reaches every device of the business.
+  const subscription = await withTenant(db, tenantId, (tx) =>
+    findPushSubscription(tx, push.subscriptionId),
+  );
+  if (subscription === undefined) return false;
+  const { title, body, url, tag } = push;
+  try {
+    await pusher.send({
+      endpoint: subscription.endpoint,
+      keys: { p256dh: subscription.p256dh, auth: subscription.auth },
+      payload: JSON.stringify({ title, body, url, ...(tag !== undefined && { tag }) }),
+      ttlSeconds: PUSH_TTL_SECONDS,
+    });
+  } catch (error) {
+    if (!isGonePush(error)) throw error;
+    await withTenant(db, tenantId, (tx) => deletePushSubscription(tx, subscription.id));
+    return false;
+  }
+  return true;
 }

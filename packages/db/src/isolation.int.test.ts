@@ -36,7 +36,9 @@ import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { listTenantIdsForCleanup } from './repositories/cleanup.js';
 import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbox.js';
+import { savePushSubscription } from './repositories/push-subscriptions.js';
 import { listDueBookingReminders, planBookingReminder } from './repositories/reminders.js';
+import { insertTask, listDueTasks } from './repositories/tasks.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
 import { addUsage } from './repositories/usage.js';
 import { withTenant, withUser, type TenantTx } from './tenant.js';
@@ -372,6 +374,54 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'due_at = due_at',
     jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('reminders'::text))",
+  },
+  tasks: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) =>
+      (
+        await insertTask(tx, {
+          title: 'Order color',
+          dueAt: new Date('2026-10-19T14:00:00Z'),
+          assigneeUserId: null,
+          source: 'manual',
+          createdBy: null,
+        })
+      ).id,
+    touch: "title = title || ''",
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('tasks'::text))",
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: `(${SEES_ALL} OR (assignee_user_id = current_user_id()) OR (created_by_user_id = current_user_id()))`,
+        with_check: `(${SEES_ALL} OR (assignee_user_id = current_user_id()) OR (created_by_user_id = current_user_id()))`,
+      },
+    ],
+  },
+  push_subscriptions: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const userId = await insertUser(db);
+      await addMembership(tx, { userId, role: 'staff' });
+      return (
+        await savePushSubscription(tx, {
+          userId,
+          endpoint: `https://push.example.test/${newId()}`,
+          p256dh: 'B'.repeat(87),
+          auth: 'a'.repeat(22),
+        })
+      ).id;
+    },
+    touch: 'auth = auth',
+    // Each member reaches only their own devices; work without a user reaches all.
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+        with_check: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+      },
+    ],
   },
 };
 
@@ -1095,6 +1145,7 @@ describe('outbox scan (listDueOutboxMessages: the relay finds work across busine
 describe.each([
   ['reminders', 'booking_reminders'],
   ['cleanup', 'tenants'],
+  ['tasks', 'tasks'],
 ] as const)('job scan %s (withJobScan: the job finds work across businesses)', (job, table) => {
   /** Runs `statement` in a transaction with `app.job_scan` set to `name` (and a tenant). */
   async function scanning(statement: string, options: { name?: string; tenant?: TenantId } = {}) {
@@ -1113,18 +1164,20 @@ describe.each([
   };
 
   it("lists both businesses' rows", async () => {
+    const at = new Date('2026-10-19T15:00:00Z');
     const found =
       job === 'reminders'
-        ? (await listDueBookingReminders(db, new Date('2026-10-19T15:00:00Z'), 1000)).map(
-            (due) => due.bookingId,
-          )
-        : await listTenantIdsForCleanup(db, null, 1000);
+        ? (await listDueBookingReminders(db, at, 1000)).map((due) => due.bookingId)
+        : job === 'tasks'
+          ? (await listDueTasks(db, at, 1000)).map((due) => due.taskId)
+          : await listTenantIdsForCleanup(db, null, 1000);
     expect(found).toEqual(expect.arrayContaining(seeded()));
   });
 
   it(`reaches only ${table}, read-only`, async () => {
     for (const other of [
       'booking_reminders',
+      'tasks',
       'tenants',
       'bookings',
       'clients',
@@ -1142,7 +1195,7 @@ describe.each([
 
   it('needs its own job name', async () => {
     const otherJob = job === 'reminders' ? 'cleanup' : 'reminders';
-    for (const name of [otherJob, '', 'REMINDERS']) {
+    for (const name of [otherJob, '', job.toUpperCase()]) {
       const { rows: seen } = await scanning(`SELECT * FROM ${table}`, { name });
       expect(seen, name).toEqual([]);
     }
