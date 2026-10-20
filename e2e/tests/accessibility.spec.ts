@@ -24,6 +24,10 @@ const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 async function expectAccessible(page: Page, screen: string): Promise<void> {
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
+    // Buttons fade between colors (`transition-colors`); measure once the new scheme has settled.
+    await page.evaluate(() =>
+      Promise.all(document.getAnimations().map((animation) => animation.finished)),
+    );
     const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     const blocking = violations.filter(
       ({ impact }) => impact === 'serious' || impact === 'critical',
