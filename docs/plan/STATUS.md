@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.13 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14–S16 merged. **S17 (Phase 4d: public booking page with email verification) done** on branch `claude/cool-hawking-933c19`, [ADR-0022](../adr/0022-public-booking-page.md) **proposed**, waiting for the user's review → next: **S18** (Phase 4 exit)
+**Last updated:** 2026-10-20 · **Plan version:** 0.13 · **Current phase:** 4 — PWA + booking page. Phase 3 complete. Phase 4 split into S14–S18. S14–S16 merged. **S17 (Phase 4d: public booking page with email verification) done**, [ADR-0022](../adr/0022-public-booking-page.md) **accepted** by the user, PR opened and merged into `main` at the user's request → next: **S18** (Phase 4 exit)
 
 ## Done
 - Full planning set in `docs/` (product, architecture, engineering, plan) and `CLAUDE.md`. **Reviewed and approved by the user — no changes.**
@@ -345,7 +345,7 @@
     - A batch hours endpoint for the Team list (one request per staff member, at most 40).
     - The client profile shows "not found" also when the api fails (it cannot tell the two apart from the loader's `null`).
 
-- **S17 Phase 4d (2026-10-20):** public booking page with email verification ([ADR-0022](../adr/0022-public-booking-page.md), proposed). The user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue", so Claude went ahead on its recommendations, to be reviewed.
+- **S17 Phase 4d (2026-10-20):** public booking page with email verification ([ADR-0022](../adr/0022-public-booking-page.md), accepted by the user on 2026-10-20). The user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue", so Claude went ahead on its recommendations, to be reviewed.
   - **db:**
     - Migrations 0021–0023: `current_public_slug()` and the read-only `public_lookup` policy on `tenants`, plus `withPublicTenant`.
     - `tenants.brand_color`.
@@ -503,11 +503,11 @@
 - **S16 (2026-10-19): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0021): (a) a client's visits through a `clientId` filter on `GET /v1/bookings` (±62 days), not a new endpoint; (b) client editing now, auditing only which fields changed; (c) rule defaults returned by the api so the web app does not import templates; business-wide rules only on the rules screen; nav order Home · Calendar · Clients · Services · Team.
 - **End of S16 (user, 2026-10-19):** "ADR-0021 approve. open PR and merge to main." ADR-0021 accepted as proposed (visits via the `clientId` filter, client editing with field-name-only audit, rule defaults from the api, business-wide rules only on the rules screen, nav order). S17 starts in a new session; its brief must settle the email sender (dev Mailpit sender now vs. the Phase 5 outbox).
 - **S17 (2026-10-20): the user said "Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."** Claude went ahead on its recommendations, to confirm or change in review (ADR-0022): (a) **email sender: a dev SMTP sender now** (nodemailer → Mailpit; any SMTP in production) called directly by the api behind a `Mailer` port, with the outbox in Phase 5; (b) `/book/<slug>` URLs, link `/book/<slug>/manage#<token>`; (c) `tenants.brand_color` column, slate default; (d) the time is not held while the client verifies, and the same code may confirm an alternative; (e) audit actor `system`, booking source `booking_page`.
+- **End of S17 (user, 2026-10-20):** "ADR-0022 approve. open PR and merge to main." ADR-0022 accepted as proposed (dev SMTP sender until the Phase 5 outbox, `/book/<slug>` URLs, `tenants.brand_color` with a slate default, no hold during verification and the same code may confirm an alternative, audit actor `system`). S18 starts in a new session.
 - Earlier name candidates (for reference): Hiro, Tendly, Bizzy, Staffie, Remy, Okayo, Kora.
 
 ## Waiting on the user
-1. Review [ADR-0022](../adr/0022-public-booking-page.md) (S17) and say whether to accept it, and whether to open a PR and merge.
-2. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
+1. Optional, any time: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development).
 
 ## Planned sessions (next first)
 Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S14–S18 (Claude's proposal at S14, with the go-ahead to continue; change it at any Session Brief).
@@ -517,7 +517,7 @@ Phases 2 and 3 are done and merged. Phase 4 (PWA + booking page) is split into S
 | S14 | ~~Design system + app shell + calendar day view; response caps~~ **done** | 4a | — |
 | S15 | ~~**Booking screens:** create a booking from the calendar (service, staff member, free times from `/v1/availability`, client picker; staff find clients by exact email or phone), the booking sheet (details, move, status, cancel) with Radix dialogs, the 409 alternatives, the waitlist entry; booking outcomes rule (b) unless the user says otherwise; staff journey in Playwright~~ **done** | 4b | — |
 | S16 | ~~**Clients, services and team screens:** client list and profile, service menu, staff members with hours, time off and services, booking rules; batch client lookup if needed; Team screen moved to the design system~~ **done** (ADR-0021 accepted) | 4c | — |
-| S17 | ~~**Public booking page with email verification**~~ **done** (ADR-0022 proposed) | 4d | — |
+| S17 | ~~**Public booking page with email verification**~~ **done** (ADR-0022 accepted) | 4d | — |
 | S18 | **Phase 4 exit:** concurrent last slot in Playwright (AC-W8-1), PWA manifest and offline shell, accessibility pass (axe), security review of S14–S17 | 4e | Phase 4 exit criteria green; no open high-severity findings |
 
 ## How to resume in a new session

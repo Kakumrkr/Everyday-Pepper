@@ -1,6 +1,6 @@
 # ADR-0022: Public booking page: slug lookup, emailed codes, link tokens and a dev email sender
 
-- **Status:** Proposed by Claude (S17, 2026-10-20), after the user said "give me the Session Brief, then continue"; for the user to accept or change in review. · **Date:** 2026-10-20 · Builds on ADR-0010 (RLS), ADR-0014 (hashed tokens), ADR-0017 (bookings), ADR-0019 (design system), PCR-001 (brand color)
+- **Status:** Accepted (user, 2026-10-20). Proposed by Claude the same day (S17), after the user said "give me the Session Brief, then continue". · **Date:** 2026-10-20 · Builds on ADR-0010 (RLS), ADR-0014 (hashed tokens), ADR-0017 (bookings), ADR-0019 (design system), PCR-001 (brand color)
 
 ## Context
 W8 lets a client book without an account. AC-W8-2 says a booking is made only after email verification, and the confirmation carries reschedule/cancel links scoped to that booking. Four things were missing:
