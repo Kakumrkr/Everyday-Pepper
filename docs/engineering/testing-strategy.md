@@ -13,7 +13,7 @@ Every feature and bug fix ships with automated tests that were actually run. Acc
 | E2E | Playwright (mobile + desktop viewports) | Auth (S7, `e2e/tests/auth.spec.ts`: sign up → business → MFA setup → sign out → sign in with TOTP or backup code; TOTP codes from `totpCode` in `@pepper/testing`), onboarding, booking page, chat with cards, feed, undo | All pass on PR to main |
 | LLM evals | Custom runner in `packages/ai/evals` | Golden conversations: correct tool + args, refusals, confirmations, injection resistance, memory recall/deletion | ≥ 90% scheduling set, 100% safety set |
 | Load | k6 | Booking page + chat turns at pilot scale ×10 | SLOs met |
-| Accessibility | axe in Playwright | Key screens | No serious violations |
+| Accessibility | axe in Playwright (`@axe-core/playwright`, `e2e/tests/accessibility.spec.ts`, S18) | Key screens, WCAG 2.2 A/AA tags, light and dark, phone and desktop | No serious or critical violations (lesser ones are reported as annotations) |
 
 ## Rules
 - Bug fix = failing test first.

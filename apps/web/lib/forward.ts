@@ -84,6 +84,11 @@ export async function forwardToApi(request: Request, options: ForwardOptions): P
     const value = upstream.headers.get(name);
     if (value !== null) responseHeaders.set(name, value);
   }
+  // Answers hold a business's data and people's details: a shared front-desk device must not
+  // keep them in its disk cache (S18 security review). The api may still opt in to caching.
+  if (!responseHeaders.has('cache-control')) {
+    responseHeaders.set('cache-control', 'private, no-store');
+  }
   for (const cookie of upstream.headers.getSetCookie()) {
     responseHeaders.append('set-cookie', cookie);
   }

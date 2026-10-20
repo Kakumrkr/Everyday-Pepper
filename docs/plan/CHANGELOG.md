@@ -2,6 +2,9 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.14 — 2026-10-20
+- S18 (Phase 4e): [ADR-0023](../adr/0023-pwa-offline-and-phase-4-exit.md) (accepted by the user): an installable app (manifest, icons) with a hand-written service worker that caches only a static offline page, linked from the signed-in app only; security headers on every web response and `no-store` on forwarded api answers (the two medium findings of the [Phase 4 security review](../engineering/security-review-s18.md); no high ones); axe in Playwright on the key screens (`@axe-core/playwright` 4.13.0, e2e only); AC-W8-1 in Playwright. **Phase 4 complete.** No change to phases, scope, contracts or exit criteria.
+
 ## 0.13 — 2026-10-20
 - S17 (Phase 4d): [ADR-0022](../adr/0022-public-booking-page.md) (accepted by the user): public booking page with email verification. Implements PCR-001 (brand color, AA-adjusted tokens). Additive changes: `tenants.brand_color`, `booking_verifications`, `bookings.manage_token_hash`, the read-only `public_lookup` policy, `/v1/public/businesses/:slug/*`, `PUT /v1/tenant/booking-page`, audit action `tenant.updated`, new error codes. A dev SMTP sender (nodemailer → Mailpit) is used directly by the api until Phase 5's outbox (a temporary exception to "side effects through the outbox", recorded in the ADR). No change to phases, scope or exit criteria.
 

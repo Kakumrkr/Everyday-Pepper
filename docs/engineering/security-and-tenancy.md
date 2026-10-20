@@ -34,7 +34,12 @@ Built in S7 (ADR-0012):
 - **CSRF.** Every non-GET api request must carry `Origin` = `AUTH_BASE_URL` (`SameOriginGuard`). Better Auth checks the same on its endpoints, pinned on in every environment.
 - **Errors.** `{ code, message }` bodies name invalid fields but never echo their values.
 
-CSP and HSTS headers are Phase 11.
+Added in S18 ([ADR-0023](../adr/0023-pwa-offline-and-phase-4-exit.md), [security review](security-review-s18.md)):
+- **Headers on every web response:** CSP `frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`.
+- **No storing of api answers:** forwarded answers get `Cache-Control: private, no-store` unless the api sets its own.
+- **Service worker:** caches only the static offline page, never pages or api answers.
+
+A script-restricting CSP (nonces) and HSTS are Phase 11.
 
 ## Security process
 Security review checklist on every PR touching auth, tenancy, AI tools, integrations, or file handling; `/security-review` before each phase exit; dependency and secret scanning in CI; pre-pilot external review if budget allows.

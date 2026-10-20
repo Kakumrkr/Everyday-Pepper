@@ -46,6 +46,8 @@ FROM runtime AS web
 # Next.js standalone output keeps the monorepo layout: the server lives at apps/web/server.js.
 COPY --from=build --chown=node:node /repo/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /repo/apps/web/.next/static ./apps/web/.next/static
+# The manifest, icons, offline page and service worker (ADR-0023); standalone output omits them.
+COPY --from=build --chown=node:node /repo/apps/web/public ./apps/web/public
 ENV HOSTNAME=0.0.0.0 \
     PORT=3000
 EXPOSE 3000
