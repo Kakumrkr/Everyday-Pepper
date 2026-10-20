@@ -452,6 +452,8 @@
     - A screen showing delivery status.
   - **Note:** while preparing Playwright, Claude overwrote the git-ignored local `.env` with a fresh copy of `.env.example` without checking it first. If it held your own values (e.g. a Sentry DSN), set them again.
 
+- **Maintenance after S19 (2026-10-20):** CI on `main` after the S19 merge failed once in Integration: `packages/runtime/src/connections.module.int.test.ts` "answers 200 once the clients have connected" polled readiness with `expect.poll`'s 1-second default, too short on a runner now busier with the S19 outbox and worker suites (it passed on the PR's own run, and locally even under CPU load). It now waits up to 30 s like `apps/api/src/main.int.test.ts`. No product code changed.
+
 ## Decisions made in conversation
 - **Skip domain, business email and LLC during development.** Needed only before the pilot (Phase 11) / before charging customers. Final brand, trademark and domain checks also happen before the pilot.
 - **Free development setup:** Postgres+pgvector, Redis, S3-compatible storage (SeaweedFS, see D10 below) and Mailpit (fake inbox) in Docker; GitHub Actions, Sentry and Grafana Cloud free tiers; Google Calendar API with a personal Gmail and the OAuth app in "testing" mode (≤ 100 test users, no verification).
