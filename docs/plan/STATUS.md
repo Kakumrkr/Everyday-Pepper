@@ -9,7 +9,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - Done: Session Brief given; [phase-6-playbook.md](phase-6-playbook.md) confirmed by the user, with §9 "Keep getting better" added at their request: market gap, five differentiators D-1..D-5, quality bar, design principles, the $5 budget policy, eval strategy, OWASP mapping, guides for S22–S27, references.
 - Decided in chat (user, 2026-10-20): **OpenAI budget is $5 credit in total for Phase 6, used only at the final testing stage (S27)**; until then everything runs on fake providers and reference fixtures.
 - Also decided (user, 2026-10-20): playbook confirmed; **official `openai` SDK**, pinned, only in `packages/ai`; **Sentry/Grafana Cloud deferred again** (raise before the pilot).
-- Next step: Task 1, ADR-0027 (proposed), then `contracts/ai.ts`.
+- Done (commit `652d744`): ADR-0027 (proposed); `contracts/ai.ts`; `packages/ai` with the port, `LlmError`, `ScriptedProvider`, `strictToolParameters`, `meteredProvider`, `loadOpenAiConfig` and `OpenAiProvider` (openai 7.32.0); one contract suite green on the fake and the adapter (fixtures only); 54 tests, ~99% coverage. Found and fixed: the SDK raises an in-stream `error` event without a status, now `unavailable`.
+- Next step: the eval runner skeleton (case format, graders, cassettes, budget guard, report, CLI, 3 reference cases), then `pnpm check`, docs, session end.
 
 ## Last sessions
 - **M1 maintenance (2026-10-20):** `STATUS.md` split into this file, [session-log.md](session-log.md) and [decisions.md](decisions.md); checkpoint rule and generous-time-limits testing rule in `CLAUDE.md`; local Playwright in cloud sessions uses CI's headless shell; the session-start hook starts Docker with Google's mirror (`mirror.gcr.io`) so Docker Hub's rate limit no longer blocks pulls. No product code changed.
