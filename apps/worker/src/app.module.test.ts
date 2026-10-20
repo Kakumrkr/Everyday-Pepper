@@ -12,6 +12,7 @@ import { loadWorkerConfig } from './config.js';
 const unreachable = loadWorkerConfig({
   DATABASE_URL: 'postgres://pepper:pepper@127.0.0.1:1/pepper',
   REDIS_URL: 'redis://127.0.0.1:1',
+  OUTBOX_SECRET: 'a-local-test-outbox-secret-of-32-chars',
 });
 
 describe('AppModule', () => {

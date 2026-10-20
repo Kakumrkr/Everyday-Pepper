@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [swc.vite({ module: { type: 'es6' } })],
   test: {
     include: ['src/**/*.test.ts'],
+    exclude: ['src/**/*.int.test.ts'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
