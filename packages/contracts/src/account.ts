@@ -52,6 +52,7 @@ export const ApiErrorCodeSchema = z.enum([
   // To-dos (ADR-0026).
   'task_not_found',
   'task_assignee_not_member',
+  'push_unavailable',
   // The public booking page (ADR-0022).
   'booking_page_not_found',
   'booking_request_not_found',

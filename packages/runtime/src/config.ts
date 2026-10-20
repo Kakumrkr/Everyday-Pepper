@@ -140,3 +140,63 @@ export function loadOutboxSecret(service: NestServiceName, env: NodeJS.ProcessEn
   const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
   return loadEnv(service, OutboxEnvSchema, present).OUTBOX_SECRET;
 }
+
+const base64urlBytes = (bytes: number) =>
+  z
+    .string()
+    .regex(/^[A-Za-z0-9_-]+$/, 'Expected base64url')
+    .refine(
+      (value) => Buffer.from(value, 'base64url').length === bytes,
+      `Expected ${String(bytes)} bytes`,
+    );
+
+const PushEnvSchema = z
+  .object({
+    /**
+     * The VAPID key pair that signs Web Push messages (ADR-0026): base64url, the public key an
+     * uncompressed P-256 point (65 bytes), the private key 32 bytes (`npx web-push
+     * generate-vapid-keys`). Both or neither; unset: no pushes. The private key is a secret.
+     */
+    VAPID_PUBLIC_KEY: base64urlBytes(65).optional(),
+    VAPID_PRIVATE_KEY: base64urlBytes(32).optional(),
+    /** Who push services may contact about our pushes: a `mailto:` or `https:` URL. */
+    VAPID_SUBJECT: z
+      .string()
+      .regex(/^(mailto:\S+@\S+|https:\/\/\S+)$/, 'Use mailto:someone@example.com or an https URL')
+      .default('mailto:bookings@pepper.localhost'),
+  })
+  .refine((env) => (env.VAPID_PUBLIC_KEY === undefined) === (env.VAPID_PRIVATE_KEY === undefined), {
+    message: 'Set both VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY, or neither',
+  });
+
+export interface PushConfig {
+  publicKey: string;
+  privateKey: string;
+  subject: string;
+}
+
+/** Reads the VAPID keys and subject; `null` when no keys are set. Never log the private key. */
+export function loadPushConfig(
+  service: NestServiceName,
+  env: NodeJS.ProcessEnv,
+): PushConfig | null {
+  const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
+  const push = loadEnv(service, PushEnvSchema, present);
+  if (push.VAPID_PUBLIC_KEY === undefined || push.VAPID_PRIVATE_KEY === undefined) return null;
+  return {
+    publicKey: push.VAPID_PUBLIC_KEY,
+    privateKey: push.VAPID_PRIVATE_KEY,
+    subject: push.VAPID_SUBJECT,
+  };
+}
+
+const PushPublicKeyEnvSchema = z.object({ VAPID_PUBLIC_KEY: base64urlBytes(65).optional() });
+
+/**
+ * Reads only `VAPID_PUBLIC_KEY` (the api: browsers subscribe with it, and it means pushes are
+ * on); `null` when unset. The api never needs the private key.
+ */
+export function loadPushPublicKey(service: NestServiceName, env: NodeJS.ProcessEnv): string | null {
+  const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
+  return loadEnv(service, PushPublicKeyEnvSchema, present).VAPID_PUBLIC_KEY ?? null;
+}

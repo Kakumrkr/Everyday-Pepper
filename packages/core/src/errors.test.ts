@@ -8,6 +8,8 @@ import {
   InviteNotFoundError,
   InviteWrongAccountError,
   LastOwnerError,
+  TaskAssigneeNotMemberError,
+  TaskNotFoundError,
   MemberNotFoundError,
 } from './errors.js';
 
@@ -31,6 +33,12 @@ describe('domain errors', () => {
     ],
     [new AlreadyAMemberError(), 'AlreadyAMemberError', 'Already a member of this business'],
     [new ClientNotFoundError(), 'ClientNotFoundError', 'No such client in this business'],
+    [new TaskNotFoundError(), 'TaskNotFoundError', 'No such task in this business'],
+    [
+      new TaskAssigneeNotMemberError(),
+      'TaskAssigneeNotMemberError',
+      'The assignee is not a member of this business',
+    ],
   ])('%s', (error, name, message) => {
     expect(error).toBeInstanceOf(Error);
     expect([error.name, error.message]).toEqual([name, message]);

@@ -3,6 +3,7 @@ import {
   loadEnv,
   loadMailConfig,
   loadOutboxSecret,
+  loadPushPublicKey,
   loadServiceConfig,
   type MailConfig,
   type ServiceConfig,
@@ -43,6 +44,8 @@ export interface ApiConfig extends ServiceConfig {
   bookingCodeKey: Buffer;
   /** Seals queued messages (ADR-0024); the worker needs the same one. */
   outboxSecret: string;
+  /** The public VAPID key (ADR-0026); `null`: no pushes are offered or queued. */
+  pushPublicKey: string | null;
 }
 
 /**
@@ -59,6 +62,7 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     mail: loadMailConfig('api', env),
     bookingCodeKey: deriveKey(auth.AUTH_SECRET, 'pepper/booking-page-codes'),
     outboxSecret: loadOutboxSecret('api', env),
+    pushPublicKey: loadPushPublicKey('api', env),
   };
 }
 

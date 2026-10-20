@@ -86,6 +86,9 @@ services:
       # The booking page's codes (ADR-0022) go straight to Mailpit's inbox (port 8025).
       SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
       MAIL_FROM: ${MAIL_FROM:-Pepper <bookings@pepper.localhost>}
+      # Web Push (ADR-0026): the api only needs the public key. Local-only default key pair (the
+      # worker has the private half); generate your own for anything real.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-BOaUPqJhSDXmacBl4Z6i_HCIBlCN8COqIGiY2jpVS8WxSO0bs5v6zR4YigbzbnlF45tJsCNBHQaAle1oMU1q2Ic}
     ports: ['127.0.0.1:4000:4000']
     depends_on:
       migrate: { condition: service_completed_successfully }
@@ -101,6 +104,10 @@ services:
       # Queued emails (the outbox, ADR-0024) go to Mailpit's inbox too.
       SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
       MAIL_FROM: ${MAIL_FROM:-Pepper <bookings@pepper.localhost>}
+      # Signs and sends pushes (ADR-0026). Local-only default key pair; never for real use.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-BOaUPqJhSDXmacBl4Z6i_HCIBlCN8COqIGiY2jpVS8WxSO0bs5v6zR4YigbzbnlF45tJsCNBHQaAle1oMU1q2Ic}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-80nrfo5XabVQkQ6ud0KhaU-laJ8PtGLU7qw7oHlFyac}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:bookings@pepper.localhost}
     ports: ['127.0.0.1:4100:4100']
     depends_on:
       migrate: { condition: service_completed_successfully }

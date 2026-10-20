@@ -8,6 +8,7 @@ export * from './invites.js';
 export * from './outbox.js';
 export * from './permissions.js';
 export * from './public-booking.js';
+export * from './push.js';
 export * from './rules.js';
 export * from './templates.js';
 export * from './time.js';

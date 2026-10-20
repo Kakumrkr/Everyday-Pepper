@@ -109,7 +109,8 @@ export function can(
   record?: OwnedRecord,
 ): boolean {
   const scope = permissionScope(actor.role, permission);
-  if (scope === null) return false;
+  // Fail closed: a role the matrix does not know (never stored, but typed only) reaches nothing.
+  if (scope !== 'all' && scope !== 'own') return false;
   if (scope === 'all' || record === undefined) return true;
   return record.ownerUserId !== null && record.ownerUserId === actor.userId;
 }

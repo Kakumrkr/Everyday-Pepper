@@ -7,7 +7,7 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
-import { systemClock, type Clock, type Mailer } from '@pepper/core';
+import { systemClock, type Clock, type Mailer, type Pusher } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE, MAILER, raiseAlert } from '@pepper/runtime';
 import { Queue, Worker, type Job } from 'bullmq';
@@ -19,6 +19,8 @@ export interface OutboxOptions {
   /** Opens sealed messages (`outboxKeyFrom(OUTBOX_SECRET)`). */
   key: Buffer;
   pollMs: number;
+  /** Sends pushes (ADR-0026); `null` or absent: no VAPID keys, queued pushes are not sent. */
+  pusher?: Pusher | null;
   /** Deliveries in flight per worker process. */
   concurrency?: number;
   clock?: Clock;
@@ -28,8 +30,9 @@ export const OUTBOX_OPTIONS = Symbol('OUTBOX_OPTIONS');
 
 /**
  * Runs the outbox in the worker (ADR-0024): a relay that polls Postgres for due messages and
- * queues them in BullMQ, and a BullMQ worker that delivers them. Without a mailer nothing
- * runs, and queued emails wait. A message given up raises an alert.
+ * queues them in BullMQ, and a BullMQ worker that delivers them (emails, and pushes when a
+ * pusher is configured, ADR-0026). Without a mailer nothing runs, and queued messages wait. A
+ * message given up raises an alert; a push to a device that is gone does not.
  */
 @Injectable()
 export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -61,7 +64,12 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
     connection.on('error', () => undefined); // Reported by readiness; BullMQ reconnects.
     this.connection = connection;
     this.queue = new Queue(OUTBOX_QUEUE, { connection });
-    const delivery = { key: this.options.key, mailer, clock: this.options.clock ?? systemClock };
+    const delivery = {
+      key: this.options.key,
+      mailer,
+      pusher: this.options.pusher ?? null,
+      clock: this.options.clock ?? systemClock,
+    };
     this.worker = new Worker(
       OUTBOX_QUEUE,
       async (job: Job) => {

@@ -19,11 +19,14 @@ import {
   appendAuditEntry,
   findMembership,
   insertTask,
+  listDueTasks,
   listTasks as listTaskRows,
   lockTask,
   updateTask,
   withMember,
+  withTenant,
   type Database,
+  type DueTask,
   type TaskRow,
   type TaskUpdate,
   type TenantTx,
@@ -31,6 +34,8 @@ import {
 import { requirePermission, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
 import { TaskAssigneeNotMemberError, TaskNotFoundError } from '../errors.js';
+import { taskDuePush } from '../task-pushes.js';
+import { leadUserIds, queuePushToMembers } from './push.js';
 
 // To-dos of the business's owners and staff (ADR-0026). `tasks.read` and `tasks.manage` reach
 // every task for owners and managers; staff reach the tasks assigned to them or that they
@@ -170,5 +175,62 @@ export function toTask(row: TaskRow): Task {
     completedAt: row.completedAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+  });
+}
+
+/** Due tasks handled per pass of the due-task job. */
+const DUE_BATCH = 100;
+
+/**
+ * The due-task job (ADR-0026): for each open task whose due time has come and whose assignee
+ * was not yet told, queues a push to the assignee's devices (an unassigned task: the owners'
+ * and managers'), and records that, in one transaction per task. Passes run until nothing is
+ * due, so a backlog after downtime goes out at once. Returns how many tasks were handled.
+ */
+export async function sendDueTaskPushes(
+  db: Database,
+  options: { key: Buffer; clock?: Clock },
+): Promise<number> {
+  const clock = options.clock ?? systemClock;
+  let handled = 0;
+  for (;;) {
+    const due = await listDueTasks(db, clock.now(), DUE_BATCH);
+    for (const task of due) {
+      if (await sendDueTaskPush(db, task, { key: options.key, now: clock.now() })) handled += 1;
+    }
+    if (due.length < DUE_BATCH) return handled;
+  }
+}
+
+/**
+ * Handles one due task under its business: locked and checked again (it may have been done,
+ * moved or handled meanwhile). Returns whether it was due and is now marked notified.
+ */
+export async function sendDueTaskPush(
+  db: Database,
+  due: DueTask,
+  options: { key: Buffer; now: Date },
+): Promise<boolean> {
+  return withTenant(db, due.tenantId, async (tx) => {
+    const row = await lockTask(tx, due.taskId);
+    if (
+      row?.status !== 'open' ||
+      row.dueAt === null ||
+      row.dueNotifiedAt !== null ||
+      row.dueAt.getTime() > options.now.getTime()
+    ) {
+      return false;
+    }
+    const recipients =
+      row.assigneeUserId === null
+        ? await leadUserIds(tx)
+        : [UserIdSchema.parse(row.assigneeUserId)];
+    await queuePushToMembers(tx, recipients, taskDuePush(row.title, row.id), {
+      key: options.key,
+      dedupeKey: `task.due:${row.id}:${String(row.dueAt.getTime())}`,
+      now: options.now,
+    });
+    await updateTask(tx, due.taskId, { dueNotifiedAt: options.now });
+    return true;
   });
 }

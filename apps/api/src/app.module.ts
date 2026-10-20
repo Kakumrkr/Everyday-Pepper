@@ -7,6 +7,7 @@ import { BookingEmailsModule } from './booking-emails/booking-emails.js';
 import { ClientsModule } from './clients/clients.module.js';
 import type { ApiConfig } from './config.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
+import { PushModule } from './push/push.module.js';
 import { TasksModule } from './tasks/tasks.module.js';
 import { TeamModule } from './team/team.module.js';
 
@@ -26,6 +27,10 @@ export class AppModule {
         MailModule.forRoot(config.mail),
         BookingEmailsModule.forRoot({
           baseUrl: config.auth.baseUrl,
+          outboxKey: outboxKeyFrom(config.outboxSecret),
+        }),
+        PushModule.forRoot({
+          publicKey: config.pushPublicKey,
           outboxKey: outboxKeyFrom(config.outboxSecret),
         }),
         PublicBookingModule.forRoot({ codeKey: config.bookingCodeKey }),

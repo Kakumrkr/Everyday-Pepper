@@ -7,6 +7,7 @@ import {
   rescheduleManagedBooking,
   requestBooking,
   codeEmail,
+  type BookingNotify,
 } from '@pepper/appointments';
 import {
   VERIFICATION_CODE_TTL_MINUTES,
@@ -29,6 +30,7 @@ import { templateRuleDefaults } from '@pepper/templates';
 import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { apiError } from '../auth/guards.js';
 import { BookingEmails } from '../booking-emails/booking-emails.js';
+import { TeamPushes } from '../push/team-pushes.js';
 
 export interface PublicBookingOptions {
   /** HMAC key of the stored code hashes. */
@@ -42,7 +44,8 @@ export const PUBLIC_BOOKING_OPTIONS = Symbol('PUBLIC_BOOKING_OPTIONS');
  * key and the industry templates' rule defaults. The code email is sent at once, because the
  * client is waiting for it: failing to send it is an error (503). The emails about a booking
  * (confirmed, moved, cancelled) are queued in the outbox inside the change's transaction by
- * `BookingEmails`, and the worker sends each exactly once, with retries (ADR-0024).
+ * `BookingEmails`, and the worker sends each exactly once, with retries (ADR-0024); the team
+ * hears about them by push (`TeamPushes`, ADR-0026).
  */
 @Injectable()
 export class PublicBookingService {
@@ -54,9 +57,16 @@ export class PublicBookingService {
     @Inject(MAILER) private readonly mailer: Mailer | null,
     @Inject(PUBLIC_BOOKING_OPTIONS) private readonly options: PublicBookingOptions,
     private readonly emails: BookingEmails,
+    private readonly pushes: TeamPushes,
   ) {
     this.db = database.db;
   }
+
+  /** The client's email and the team's push about a change, both in its transaction. */
+  private readonly notify: BookingNotify = async (tx, notice) => {
+    await this.emails.notify(tx, notice);
+    await this.pushes.bookingPage(tx, notice);
+  };
 
   business(slug: TenantSlug): Promise<PublicBusiness> {
     return getPublicBusiness(this.db, slug);
@@ -93,7 +103,7 @@ export class PublicBookingService {
     const confirmed = await confirmBookingRequest(this.db, slug, requestId, input, {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
-      notify: this.emails.notify,
+      notify: this.notify,
     });
     return { booking: confirmed.booking, manageToken: confirmed.manageToken };
   }
@@ -105,14 +115,14 @@ export class PublicBookingService {
   async reschedule(slug: TenantSlug, token: ManageToken, startsAt: string): Promise<PublicBooking> {
     const moved = await rescheduleManagedBooking(this.db, slug, token, startsAt, {
       templateRuleDefaults,
-      notify: this.emails.notify,
+      notify: this.notify,
     });
     return moved.booking;
   }
 
   async cancel(slug: TenantSlug, token: ManageToken): Promise<PublicBooking> {
     const cancelled = await cancelManagedBooking(this.db, slug, token, {
-      notify: this.emails.notify,
+      notify: this.notify,
     });
     return cancelled.booking;
   }

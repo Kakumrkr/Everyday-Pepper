@@ -26,6 +26,49 @@ export interface Mailer {
   send(message: EmailMessage): Promise<void>;
 }
 
+/** One Web Push message to one device (ADR-0026), ready for its push service. */
+export interface PushMessage {
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+  /** The notification as JSON (`{ title, body, url, tag }`), encrypted to the device. */
+  payload: string;
+  /** How long the push service may hold it while the device is offline. */
+  ttlSeconds: number;
+  /** Replaces a not-yet-delivered push with the same topic (letters and digits, ≤ 32). */
+  topic?: string;
+}
+
+/** Sends Web Push messages (VAPID-signed, encrypted per RFC 8291). */
+export interface Pusher {
+  send(message: PushMessage): Promise<void>;
+}
+
+/** A push service refused a message with this HTTP status. */
+export class PushRejectedError extends Error {
+  constructor(readonly statusCode: number) {
+    super(`The push service answered ${String(statusCode)}`);
+    this.name = 'PushRejectedError';
+  }
+}
+
+/**
+ * The push service no longer knows the device (404, 410: the browser unsubscribed or the
+ * subscription expired): its subscription is removed and the message dropped.
+ */
+export function isGonePush(error: unknown): boolean {
+  return (
+    error instanceof PushRejectedError && (error.statusCode === 404 || error.statusCode === 410)
+  );
+}
+
+/** A channel that this worker has not configured (push without VAPID keys). */
+export class ChannelUnavailableError extends Error {
+  constructor(channel: 'push') {
+    super(`No ${channel} sender is configured`);
+    this.name = 'ChannelUnavailableError';
+  }
+}
+
 const VERSION = 1;
 const IV_BYTES = 12;
 const TAG_BYTES = 16;
@@ -118,6 +161,11 @@ export function errorNameOf(error: unknown): string {
 
 function isPermanent(error: unknown): boolean {
   if (error instanceof OutboxContentError) return true;
+  // A push refused for good (bad request, our keys, too large); 408 and 429 are worth a retry.
+  if (error instanceof PushRejectedError) {
+    const { statusCode } = error;
+    return statusCode >= 400 && statusCode < 500 && statusCode !== 408 && statusCode !== 429;
+  }
   if (!(error instanceof Error)) return false;
   const { responseCode } = error as Error & { responseCode?: unknown };
   return typeof responseCode === 'number' && responseCode >= 500 && responseCode < 600;

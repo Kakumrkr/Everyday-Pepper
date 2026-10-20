@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// The transactional outbox (ADR-0003, ADR-0024). A side effect (today: an email) is written
+// The transactional outbox (ADR-0003, ADR-0024). A side effect (an email or a push, ADR-0026) is written
 // as a message in the same transaction as the business change, and the worker delivers it
 // later, retrying with backoff. Each message is sent at most once after the mail server
 // accepted it; a dedupe key per business keeps a retried change from queueing it twice.
@@ -9,8 +9,8 @@ import { z } from 'zod';
 export const OutboxMessageIdSchema = z.uuid().toLowerCase().brand<'OutboxMessageId'>();
 export type OutboxMessageId = z.infer<typeof OutboxMessageIdSchema>;
 
-/** What a message does when delivered. Only email for now; SMS and push come later. */
-export const OutboxMessageTypeSchema = z.enum(['email']);
+/** What a message does when delivered: an email, or a push to one device (ADR-0026). SMS later. */
+export const OutboxMessageTypeSchema = z.enum(['email', 'push']);
 export type OutboxMessageType = z.infer<typeof OutboxMessageTypeSchema>;
 
 /**
@@ -43,6 +43,24 @@ export const OutboxEmailSchema = z.object({
 });
 export type OutboxEmail = z.infer<typeof OutboxEmailSchema>;
 export type OutboxEmailInput = z.input<typeof OutboxEmailSchema>;
+
+/**
+ * One push to one device, as queued (ADR-0026). Shown on the lock screen, so it never names a
+ * client: a service and a time, or a to-do's title. `url` is a page of the app to open.
+ */
+export const OutboxPushSchema = z.object({
+  subscriptionId: z.uuid(),
+  title: z.string().trim().min(1).max(100),
+  body: z.string().trim().max(200),
+  url: z.string().regex(/^\/(?!\/)[A-Za-z0-9\-._~/?#=&%]*$/, 'An app path such as /calendar'),
+  /** Replaces an earlier notification with the same tag on the device. */
+  tag: z
+    .string()
+    .regex(/^[A-Za-z0-9.:_-]{1,100}$/)
+    .optional(),
+});
+export type OutboxPush = z.infer<typeof OutboxPushSchema>;
+export type OutboxPushInput = z.input<typeof OutboxPushSchema>;
 
 /** Delivery attempts before a message is `dead`. */
 export const OUTBOX_MAX_ATTEMPTS = 8;
