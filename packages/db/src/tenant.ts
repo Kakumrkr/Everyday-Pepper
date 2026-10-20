@@ -7,6 +7,7 @@ import {
   type UserId,
 } from '@pepper/contracts';
 import { sql } from 'drizzle-orm';
+import { z } from 'zod';
 import type { Database } from './client.js';
 
 /** A transaction bound to one tenant: RLS limits every statement in it to that tenant's rows. */
@@ -101,6 +102,30 @@ export async function withUser<T>(
   return db.transaction(
     async (tx) => {
       await setTransactionUser(tx, id);
+      return work(tx);
+    },
+    { accessMode: 'read only' },
+  );
+}
+
+/** A worker job that may scan across businesses through its `job_scan` policy (ADR-0025). */
+export type ScanJob = 'reminders' | 'cleanup';
+
+/**
+ * Runs `work` in a read-only transaction without a tenant in which the `job_scan` policies of
+ * `job` apply: the reminder job sees every business's `booking_reminders` rows (ids and times),
+ * the clean-up job every business's `tenants` rows. Nothing else is visible and nothing can be
+ * written; the job then handles each business under its own tenant (`withTenant`).
+ */
+export async function withJobScan<T>(
+  db: Database,
+  job: ScanJob,
+  work: (tx: TenantTx) => Promise<T>,
+): Promise<T> {
+  const name = z.enum(['reminders', 'cleanup']).parse(job);
+  return db.transaction(
+    async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.job_scan', ${name}, true)`);
       return work(tx);
     },
     { accessMode: 'read only' },
