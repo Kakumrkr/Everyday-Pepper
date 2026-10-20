@@ -8,7 +8,9 @@ import {
   loadInvites,
   loadJson,
   loadMembers,
+  loadPublicBusiness,
   type Account,
+  type PublicPage,
 } from '../../lib/account';
 import { loadCalendarDay, type CalendarDay } from '../../lib/calendar-data';
 import { loadWebServerEnv } from '../../lib/env';
@@ -58,4 +60,17 @@ export async function currentJson<T extends z.ZodType>(
   schema: T,
 ): Promise<z.infer<T> | null> {
   return loadJson(path, schema, await callOptions());
+}
+
+/**
+ * A business's public booking page (no session; S17). The visitor's address goes along, so the
+ * api's per-address limits count the visitor, not this server.
+ */
+export async function publicPage(slug: string): Promise<PublicPage> {
+  const { API_INTERNAL_URL } = loadWebServerEnv(process.env);
+  return loadPublicBusiness(slug, {
+    baseUrl: API_INTERNAL_URL,
+    cookie: null,
+    forwardedFor: (await headers()).get('x-forwarded-for'),
+  });
 }

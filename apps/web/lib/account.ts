@@ -3,11 +3,13 @@ import {
   InvitesResponseSchema,
   MembersResponseSchema,
   MeResponseSchema,
+  PublicBusinessSchema,
   roleRequiresMfa,
   type CurrentBusinessResponse,
   type Invite,
   type MeResponse,
   type Member,
+  type PublicBusiness,
 } from '@pepper/contracts';
 import type { z } from 'zod';
 
@@ -16,6 +18,8 @@ export interface ApiCallOptions {
   baseUrl: string;
   /** The browser's `Cookie` header, passed through to the api. */
   cookie: string | null;
+  /** The browser's address (`X-Forwarded-For`), for the api's per-address rate limits. */
+  forwardedFor?: string | null;
   timeoutMs?: number;
   fetch?: typeof globalThis.fetch;
 }
@@ -25,10 +29,15 @@ export type Account =
   { state: 'signed-out' } | { state: 'signed-in'; me: MeResponse } | { state: 'unavailable' };
 
 async function getJson(path: string, options: ApiCallOptions): Promise<Response | null> {
-  const { baseUrl, cookie, timeoutMs = 5_000, fetch = globalThis.fetch } = options;
+  const { baseUrl, cookie, forwardedFor, timeoutMs = 5_000, fetch = globalThis.fetch } = options;
+  const headers: Record<string, string> = {};
+  if (cookie !== null) headers['cookie'] = cookie;
+  if (forwardedFor !== undefined && forwardedFor !== null) {
+    headers['x-forwarded-for'] = forwardedFor;
+  }
   try {
     return await fetch(new URL(path, baseUrl), {
-      headers: cookie === null ? {} : { cookie },
+      headers,
       cache: 'no-store',
       signal: AbortSignal.timeout(timeoutMs),
     });
@@ -44,6 +53,22 @@ export async function loadAccount(options: ApiCallOptions): Promise<Account> {
   if (response?.status !== 200) return { state: 'unavailable' };
   const me = MeResponseSchema.safeParse(await response.json().catch(() => undefined));
   return me.success ? { state: 'signed-in', me: me.data } : { state: 'unavailable' };
+}
+
+/** A business's public booking page, as the page's server component loads it (ADR-0022). */
+export type PublicPage =
+  { state: 'found'; business: PublicBusiness } | { state: 'missing' } | { state: 'unavailable' };
+
+/** `GET /v1/public/businesses/:slug`: the page, no page (404), or the api failing. */
+export async function loadPublicBusiness(
+  slug: string,
+  options: ApiCallOptions,
+): Promise<PublicPage> {
+  const response = await getJson(`/v1/public/businesses/${encodeURIComponent(slug)}`, options);
+  if (response?.status === 404) return { state: 'missing' };
+  if (response?.status !== 200) return { state: 'unavailable' };
+  const parsed = PublicBusinessSchema.safeParse(await response.json().catch(() => undefined));
+  return parsed.success ? { state: 'found', business: parsed.data } : { state: 'unavailable' };
 }
 
 /** A JSON body from the api, or `null` if the api refuses, fails or answers something else. */

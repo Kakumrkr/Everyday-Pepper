@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
 import { durationLabel, priceLabel, servicesByCategory } from '../../../lib/setup';
+import { BookingPageCard } from '../../_components/setup/booking-page-card';
 import { ServiceEditor } from '../../_components/setup/service-editor';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
 
@@ -69,6 +70,11 @@ export default async function ServicesPage() {
       ) : null}
 
       <div className="grid gap-4">
+        <BookingPageCard
+          slug={current.business.slug}
+          brandColor={current.business.brandColor}
+          manages={current.permissions.includes('settings.manage')}
+        />
         {servicesByCategory(list).map((group) => (
           <Card key={group.category ?? ''} as="section">
             <h2 className="m-0 mb-2 font-display text-lg font-bold">

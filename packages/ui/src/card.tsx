@@ -6,12 +6,20 @@ export function Card({
   children,
   className,
   as: Tag = 'section',
+  labelledBy,
 }: {
   children: ReactNode;
   className?: string | undefined;
   as?: 'section' | 'div' | 'article';
+  /** The id of the card's heading, which names it (a section then becomes a region). */
+  labelledBy?: string | undefined;
 }) {
   return (
-    <Tag className={cx('rounded-lg border border-line bg-surface p-5', className)}>{children}</Tag>
+    <Tag
+      aria-labelledby={labelledBy}
+      className={cx('rounded-lg border border-line bg-surface p-5', className)}
+    >
+      {children}
+    </Tag>
   );
 }

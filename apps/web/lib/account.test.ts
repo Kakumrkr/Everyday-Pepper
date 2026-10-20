@@ -5,6 +5,7 @@ import {
   loadCurrentBusiness,
   loadInvites,
   loadMembers,
+  loadPublicBusiness,
   requiredStep,
   ROUTES,
   withNext,
@@ -187,5 +188,43 @@ describe('withNext', () => {
   it('adds the page to return to, encoded', () => {
     expect(withNext(ROUTES.signIn, '/invite')).toBe('/sign-in?next=%2Finvite');
     expect(withNext(ROUTES.signUp, null)).toBe('/sign-up');
+  });
+});
+
+describe('loadPublicBusiness', () => {
+  const page = {
+    name: 'Juniper Hair Studio',
+    slug: 'juniper',
+    timeZone: 'America/New_York',
+    brandColor: null,
+    services: [],
+    staff: [],
+  };
+
+  it('asks without a cookie, passing the visitor’s address', async () => {
+    const { fetch, calls } = answering(200, page);
+    await expect(
+      loadPublicBusiness('juniper', {
+        baseUrl: 'http://api:4000',
+        cookie: null,
+        forwardedFor: '203.0.113.7',
+        fetch,
+      }),
+    ).resolves.toEqual({ state: 'found', business: page });
+    expect(calls[0]?.url).toBe('http://api:4000/v1/public/businesses/juniper');
+    expect(calls[0]?.init?.headers).toEqual({ 'x-forwarded-for': '203.0.113.7' });
+  });
+
+  it('tells a missing page from an api that fails', async () => {
+    const options = { baseUrl: 'http://api:4000', cookie: null };
+    expect(
+      await loadPublicBusiness('nobody', { ...options, fetch: answering(404, {}).fetch }),
+    ).toEqual({ state: 'missing' });
+    expect(
+      await loadPublicBusiness('juniper', { ...options, fetch: answering(503, {}).fetch }),
+    ).toEqual({ state: 'unavailable' });
+    expect(
+      await loadPublicBusiness('juniper', { ...options, fetch: answering(200, { name: 1 }).fetch }),
+    ).toEqual({ state: 'unavailable' });
   });
 });
