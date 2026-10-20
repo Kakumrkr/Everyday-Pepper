@@ -35,7 +35,9 @@ describe('brandTokens (PCR-001)', () => {
       }),
       { numRuns: 2000 },
     );
-  });
+    // 2000 runs take under a second alone, but CI runs every package's tests at once on few
+    // cores; the 5-second default timed out there once (PR #25).
+  }, 30_000);
 
   it.each(['#ffffff', '#000000', '#ffff00', '#00ff00', '#7a3e6c', '#808080'])(
     'adjusts the hard case %s',
