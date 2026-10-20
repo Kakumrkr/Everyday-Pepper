@@ -110,6 +110,11 @@ export default defineConfig(
     settings: { next: { rootDir: 'apps/web' } },
   },
   {
+    name: 'pepper/web-service-worker',
+    files: ['apps/web/public/sw.js'],
+    languageOptions: { globals: globals.serviceworker, sourceType: 'script' },
+  },
+  {
     name: 'pepper/js-config-files',
     files: ['**/*.js'],
     extends: [tseslint.configs.disableTypeChecked],
