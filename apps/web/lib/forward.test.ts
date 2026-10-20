@@ -78,6 +78,24 @@ describe('forwardToApi', () => {
     expect(response.headers.get('content-encoding')).toBeNull();
   });
 
+  it('marks answers private and not to be stored unless the api says otherwise (S18)', async () => {
+    const plain = upstream(new Response('{"clients":[]}'));
+    const stored = await forwardToApi(new Request('http://localhost:3000/v1/clients'), {
+      apiBaseUrl: API,
+      fetch: plain.fetch,
+    });
+    expect(stored.headers.get('cache-control')).toBe('private, no-store');
+
+    const cacheable = upstream(
+      new Response('{}', { headers: { 'cache-control': 'public, max-age=60' } }),
+    );
+    const kept = await forwardToApi(new Request('http://localhost:3000/v1/templates'), {
+      apiBaseUrl: API,
+      fetch: cacheable.fetch,
+    });
+    expect(kept.headers.get('cache-control')).toBe('public, max-age=60');
+  });
+
   it.each([
     ['declared', { 'content-length': String(MAX_BODY_BYTES + 1) }, 'x'],
     ['actual', {}, 'x'.repeat(MAX_BODY_BYTES + 1)],
