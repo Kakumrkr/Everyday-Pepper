@@ -5,7 +5,15 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S23 is complete; ADR-0028 accepted (user) and the PR is opened and merged to `main`. Next: S24 in a new session from `main`.
+**S24 (6c) tool registry and the first tools**: Session Brief approved by the user (2026-10-21): "Go ahead with your recommendations, ADR-0029 is fine". The user pre-approved ADR-0029 and asked Claude to open the PR, merge it to `main` and end with the prompt for the next session.
+- **Done:**
+  - T1: transaction-taking variants (`createBookingIn`, `changeBookingIn`, `getBookingIn`, `listBookingsIn`, `reinstateBookingIn`, `findAvailabilityIn`, `addTimeOffIn`/`removeTimeOffIn`/`listTimeOffBetweenIn`, `listServicesIn`, `listStaffIn`, `createTaskIn`, `withdrawTaskIn`, `findClientsByNameIn`). Booking writes run in a savepoint. New audit action `task.deleted`.
+- **Next:** T2 `queueBookingEmail` in appointments with the AI's hold; T3 the trust layer's preview in a rolled-back savepoint; T4–T6 the registry and the ten tools; T7 the hostile fake; T8 eval generation and latency; T9 docs, ADR-0029 (accepted), PR, merge.
+- **Decisions (user, brief):**
+  - ADR-0029 for S24; S25's ADR becomes 0030.
+  - `email_client` on write tools: `null` means the screens' default; the email stays on the dial.
+  - Undo never emails the client.
+  - Staff find only their own clients.
 
 ## Last sessions
 - **S23 Phase 6b (2026-10-21): trust-layer data and decisions** ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md), accepted; [PCR-003](changes/PCR-003.md), approved). Full entry in [session-log.md](session-log.md).

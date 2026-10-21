@@ -14,6 +14,7 @@ import {
   updateService as updateServiceRow,
   withTenant,
   type Database,
+  type TenantTx,
 } from '@pepper/db';
 import { ServiceNotFoundError } from '../errors.js';
 import { sameValues, serviceAuditValues, toService } from '../mapping.js';
@@ -26,6 +27,12 @@ export async function listServices(db: Database, actor: Actor): Promise<Service[
   requirePermission(actor, 'services.read');
   const rows = await withTenant(db, actor.context.tenantId, listServiceRows);
   return rows.map(toService);
+}
+
+/** `listServices` inside the caller's transaction. */
+export async function listServicesIn(tx: TenantTx, actor: Actor): Promise<Service[]> {
+  requirePermission(actor, 'services.read');
+  return (await listServiceRows(tx)).map(toService);
 }
 
 /** Adds a service. Throws `ServiceNameTakenError` (`@pepper/db`) for a name already in use. */

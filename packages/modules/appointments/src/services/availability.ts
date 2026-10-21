@@ -48,25 +48,41 @@ export async function findAvailability(
   db: Database,
   actor: Actor,
   query: AvailabilityQueryInput,
-  options: { clock?: Clock; templateRuleDefaults?: TemplateRuleDefaultsOf; limit?: number } = {},
+  options: AvailabilityOptions = {},
+): Promise<AvailableSlot[]> {
+  requirePermission(actor, 'calendar.read');
+  const parsed = AvailabilityQuerySchema.parse(query);
+  return withMember(db, actor.context, (tx) => findAvailabilityIn(tx, actor, parsed, options));
+}
+
+export interface AvailabilityOptions {
+  clock?: Clock;
+  templateRuleDefaults?: TemplateRuleDefaultsOf;
+  limit?: number;
+}
+
+/** `findAvailability` inside the caller's transaction. */
+export async function findAvailabilityIn(
+  tx: TenantTx,
+  actor: Actor,
+  query: AvailabilityQueryInput,
+  options: AvailabilityOptions = {},
 ): Promise<AvailableSlot[]> {
   requirePermission(actor, 'calendar.read');
   const { serviceId, staffMemberId, from, to } = AvailabilityQuerySchema.parse(query);
   const now = (options.clock ?? systemClock).now().getTime();
-  return withMember(db, actor.context, async (tx) => {
-    const service = await findService(tx, serviceId);
-    if (service === undefined) throw new ServiceNotFoundError();
-    const slots = await slotsFor(tx, {
-      service: serviceToBook(service),
-      staffMemberIds: staffMemberId === undefined ? undefined : [staffMemberId],
-      from: Date.parse(from),
-      to: Date.parse(to),
-      now,
-      templateRuleDefaults: options.templateRuleDefaults,
-    });
-    const kept = options.limit === undefined ? slots : slots.slice(0, options.limit);
-    return kept.map(toAvailableSlot);
+  const service = await findService(tx, serviceId);
+  if (service === undefined) throw new ServiceNotFoundError();
+  const slots = await slotsFor(tx, {
+    service: serviceToBook(service),
+    staffMemberIds: staffMemberId === undefined ? undefined : [staffMemberId],
+    from: Date.parse(from),
+    to: Date.parse(to),
+    now,
+    templateRuleDefaults: options.templateRuleDefaults,
   });
+  const kept = options.limit === undefined ? slots : slots.slice(0, options.limit);
+  return kept.map(toAvailableSlot);
 }
 
 export interface SlotSearch {

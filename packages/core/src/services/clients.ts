@@ -22,6 +22,7 @@ import {
   withMember,
   type ClientRow,
   type Database,
+  type TenantTx,
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { ClientNotFoundError } from '../errors.js';
@@ -43,6 +44,21 @@ export async function listClients(
   requirePermission(actor, 'clients.read');
   const { search, limit } = ClientsQuerySchema.parse(query);
   const rows = await withMember(db, actor.context, (tx) => listClientRows(tx, { search, limit }));
+  return rows.map(toClient);
+}
+
+/**
+ * Clients whose name contains `search`, by name, in the caller's transaction: the AI's lookup
+ * matches names only, so it can't be used to test whether an email address is a client's.
+ */
+export async function findClientsByNameIn(
+  tx: TenantTx,
+  actor: Actor,
+  query: { search: string; limit: number },
+): Promise<Client[]> {
+  requirePermission(actor, 'clients.read');
+  const { search, limit } = ClientsQuerySchema.parse(query);
+  const rows = await listClientRows(tx, { search, limit, namesOnly: true });
   return rows.map(toClient);
 }
 

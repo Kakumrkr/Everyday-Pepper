@@ -104,7 +104,12 @@ export async function findClientsByContact(
  */
 export async function listClients(
   tx: TenantTx,
-  options: { search?: string | undefined; limit: number },
+  options: {
+    search?: string | undefined;
+    limit: number;
+    /** Match names only, never email addresses (the AI's lookup, ADR-0029). */
+    namesOnly?: boolean;
+  },
 ): Promise<ClientRow[]> {
   const pattern =
     options.search === undefined ? undefined : `%${options.search.replace(/[\\%_]/g, '\\$&')}%`;
@@ -114,7 +119,9 @@ export async function listClients(
     .where(
       pattern === undefined
         ? undefined
-        : or(ilike(clients.name, pattern), ilike(clients.email, pattern)),
+        : options.namesOnly === true
+          ? ilike(clients.name, pattern)
+          : or(ilike(clients.name, pattern), ilike(clients.email, pattern)),
     )
     .orderBy(asc(sql`lower(${clients.name})`), asc(clients.id))
     .limit(z.number().int().min(1).max(200).parse(options.limit));

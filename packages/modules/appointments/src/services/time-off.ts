@@ -15,7 +15,9 @@ import {
   deleteTimeOff,
   findStaffMember,
   insertTimeOff,
+  listStaffMembers,
   listTimeOff as listTimeOffRows,
+  listTimeOffBetween as listTimeOffRowsBetween,
   lockStaffMember,
   withTenant,
   type Database,
@@ -58,27 +60,38 @@ export async function addTimeOff(
   // At all first, so a role without it learns nothing about the staff member.
   requirePermission(actor, 'time_off.manage');
   const id = StaffMemberIdSchema.parse(staffMemberId);
+  const fields = TimeOffInputSchema.parse(input);
+  return withTenant(db, actor.context.tenantId, (tx) => addTimeOffIn(tx, actor, id, fields));
+}
+
+/** `addTimeOff` inside the caller's transaction. */
+export async function addTimeOffIn(
+  tx: TenantTx,
+  actor: Actor,
+  staffMemberId: StaffMemberId,
+  input: TimeOffInput,
+): Promise<TimeOff> {
+  requirePermission(actor, 'time_off.manage');
+  const id = StaffMemberIdSchema.parse(staffMemberId);
   const { startsAt, endsAt } = TimeOffInputSchema.parse(input);
-  return withTenant(db, actor.context.tenantId, async (tx) => {
-    await authorise(tx, actor, id);
-    const row = await insertTimeOff(tx, {
-      staffMemberId: id,
-      startsAt: new Date(startsAt),
-      endsAt: new Date(endsAt),
-      createdBy: actor.context.userId,
-    });
-    await appendAuditEntry(tx, {
-      actor: auditActorOf(actor),
-      change: {
-        action: 'time_off.created',
-        entity: { type: 'time_off', id: row.id },
-        before: null,
-        after: timeOffAuditValues(row),
-      },
-      requestId: actor.requestId,
-    });
-    return toTimeOff(row);
+  await authorise(tx, actor, id);
+  const row = await insertTimeOff(tx, {
+    staffMemberId: id,
+    startsAt: new Date(startsAt),
+    endsAt: new Date(endsAt),
+    createdBy: actor.context.userId,
   });
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'time_off.created',
+      entity: { type: 'time_off', id: row.id },
+      before: null,
+      after: timeOffAuditValues(row),
+    },
+    requestId: actor.requestId,
+  });
+  return toTimeOff(row);
 }
 
 /** Removes a staff member's time-off entry. */
@@ -91,21 +104,49 @@ export async function removeTimeOff(
   requirePermission(actor, 'time_off.manage');
   const id = StaffMemberIdSchema.parse(staffMemberId);
   const entryId = TimeOffIdSchema.parse(timeOffId);
-  await withTenant(db, actor.context.tenantId, async (tx) => {
-    await authorise(tx, actor, id);
-    const row = await deleteTimeOff(tx, id, entryId);
-    if (row === undefined) throw new TimeOffNotFoundError();
-    await appendAuditEntry(tx, {
-      actor: auditActorOf(actor),
-      change: {
-        action: 'time_off.deleted',
-        entity: { type: 'time_off', id: row.id },
-        before: timeOffAuditValues(row),
-        after: null,
-      },
-      requestId: actor.requestId,
-    });
+  await withTenant(db, actor.context.tenantId, (tx) => removeTimeOffIn(tx, actor, id, entryId));
+}
+
+/** `removeTimeOff` inside the caller's transaction. */
+export async function removeTimeOffIn(
+  tx: TenantTx,
+  actor: Actor,
+  staffMemberId: StaffMemberId,
+  timeOffId: TimeOffId,
+): Promise<void> {
+  requirePermission(actor, 'time_off.manage');
+  const id = StaffMemberIdSchema.parse(staffMemberId);
+  const entryId = TimeOffIdSchema.parse(timeOffId);
+  await authorise(tx, actor, id);
+  const row = await deleteTimeOff(tx, id, entryId);
+  if (row === undefined) throw new TimeOffNotFoundError();
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'time_off.deleted',
+      entity: { type: 'time_off', id: row.id },
+      before: timeOffAuditValues(row),
+      after: null,
+    },
+    requestId: actor.requestId,
   });
+}
+
+/**
+ * Every staff member's time off overlapping [from, to) (or only `staffMemberIds`'), by start, in
+ * the caller's transaction. Everyone in the business may see it.
+ */
+export async function listTimeOffBetweenIn(
+  tx: TenantTx,
+  actor: Actor,
+  range: { from: Date; to: Date },
+  staffMemberIds?: readonly StaffMemberId[],
+): Promise<TimeOff[]> {
+  requirePermission(actor, 'staff.read');
+  const ids =
+    staffMemberIds?.map((id) => StaffMemberIdSchema.parse(id)) ??
+    (await listStaffMembers(tx)).map((staff) => StaffMemberIdSchema.parse(staff.id));
+  return (await listTimeOffRowsBetween(tx, ids, range)).map(toTimeOff);
 }
 
 /**

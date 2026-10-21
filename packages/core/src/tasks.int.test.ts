@@ -9,15 +9,27 @@ import {
   addMembership,
   deleteMembership,
   listAuditEntries,
+  withMember,
   withTenant,
   type Database,
 } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';
-import { ForbiddenError, TaskAssigneeNotMemberError, TaskNotFoundError } from './errors.js';
+import {
+  ForbiddenError,
+  TaskAssigneeNotMemberError,
+  TaskNotFoundError,
+  UndoRefusedError,
+} from './errors.js';
 import { createBusiness } from './services/business.js';
-import { changeTask, createTask, listTasks } from './services/tasks.js';
+import {
+  changeTask,
+  createTask,
+  createTaskIn,
+  listTasks,
+  withdrawTaskIn,
+} from './services/tasks.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // The task services against real Postgres (ADR-0026): who may create, see, assign and change
@@ -200,5 +212,36 @@ describe('changeTask', () => {
       (t) => t.id === task.id,
     );
     expect(after?.assigneeUserId).toBeNull();
+  });
+});
+
+describe("createTaskIn and withdrawTaskIn (the AI's to-dos, ADR-0029)", () => {
+  it('records the source and takes back an untouched to-do, audited without the title', async () => {
+    const task = await withMember(db, jessActor().context, (tx) =>
+      createTaskIn(tx, jessActor(), { title: 'Call Maria' }, { source: 'ai' }),
+    );
+    expect(task).toMatchObject({ source: 'ai', assigneeUserId: jess, status: 'open' });
+    await withMember(db, jessActor().context, (tx) => withdrawTaskIn(tx, jessActor(), task.id));
+    expect((await listTasks(db, ana(), { status: 'all' })).map((t) => t.id)).not.toContain(task.id);
+    const entries = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 1 }));
+    expect(entries[0]).toMatchObject({
+      action: 'task.deleted',
+      entity: { type: 'task', id: task.id },
+      before: { status: 'open', source: 'ai' },
+      after: null,
+    });
+    expect(JSON.stringify(entries[0])).not.toContain('Call Maria');
+  });
+
+  it('refuses once someone changed it, and hides a colleague’s to-do from staff', async () => {
+    const task = await createTask(db, jessActor(), { title: 'Order foils' });
+    await changeTask(db, jessActor(), task.id, { status: 'done' });
+    await expect(
+      withMember(db, jessActor().context, (tx) => withdrawTaskIn(tx, jessActor(), task.id)),
+    ).rejects.toBeInstanceOf(UndoRefusedError);
+    const theirs = await createTask(db, priyaActor(), { title: 'Priya only' });
+    await expect(
+      withMember(db, jessActor().context, (tx) => withdrawTaskIn(tx, jessActor(), theirs.id)),
+    ).rejects.toBeInstanceOf(TaskNotFoundError);
   });
 });
