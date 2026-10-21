@@ -1,0 +1,409 @@
+import { createHash } from 'node:crypto';
+import {
+  ActionIdempotencyKeySchema,
+  ServiceIdSchema,
+  TrustJsonSchema,
+  type ActionExecution,
+  type ActionExecutionId,
+  type ActionProposal,
+  type AutonomyAction,
+  type AvailableSlot,
+  type ChangeSide,
+  type LlmToolCall,
+  type LlmToolDefinition,
+  type LocalSlot,
+  type ServiceId,
+  type ToolCard,
+  type ToolErrorCode,
+  type TrustJson,
+  type UndoReason,
+  type WouldBeEmail,
+} from '@pepper/contracts';
+import {
+  approveProposal,
+  requestAction,
+  undoAction,
+  type ActionRunner,
+  type Actor,
+  type ApprovalResult,
+  type UndoResult,
+} from '@pepper/core';
+import { withMember } from '@pepper/db';
+import { z } from 'zod';
+import { strictToolParameters } from '../strict-schema.js';
+import {
+  findAvailability,
+  findClients,
+  getBooking,
+  getDay,
+  listServicesAndStaff,
+} from './catalog/reads.js';
+import { cancelBooking, createBooking, moveBooking } from './catalog/bookings.js';
+import { directoryOf, localSlot } from './catalog/shared.js';
+import { addTodo, blockTime } from './catalog/time-and-todos.js';
+import {
+  InvalidToolArgumentsError,
+  toolRefusalOf,
+  UnknownToolError,
+  type ToolRefusal,
+} from './errors.js';
+import { describeTool } from './guide.js';
+import { scopeOf, undoWith, writeRunner } from './runner.js';
+import type { AnyTool, ToolDeps, WriteTool } from './tool.js';
+
+// The tool registry (ADR-0029, playbook S24): the ten V1 tools, their definitions for the
+// provider, and `dispatchToolCall`, the one way a model's tool call reaches the business. It
+// parses the arguments twice (the provider's strict schema, then Zod), takes the business and
+// the member from the session only, sends writes through the trust layer (`requestAction`:
+// the dial, proposals, receipts, undo) and turns every refusal into a stable code the model can
+// act on. Nothing here chains writes: one call is one action.
+
+/** Every tool, reads first. */
+export const TOOLS: readonly AnyTool[] = [
+  findAvailability,
+  findClients,
+  getDay,
+  getBooking,
+  listServicesAndStaff,
+  createBooking,
+  moveBooking,
+  cancelBooking,
+  blockTime,
+  addTodo,
+];
+
+const BY_NAME = new Map(TOOLS.map((tool) => [tool.name, tool]));
+
+export function findTool(name: string): AnyTool | undefined {
+  return BY_NAME.get(name);
+}
+
+/** The definitions the provider gets (static: the prompt cache's prefix, playbook §3.12). */
+export function toolDefinitions(): LlmToolDefinition[] {
+  return TOOLS.map((tool) => ({
+    name: tool.name,
+    description: describeTool(tool.guide, { localTimes: tool.localTimes }),
+    parameters: strictToolParameters(tool.args),
+  }));
+}
+
+/** What the agent loop knows about the turn (S25); none of it comes from the model. */
+export interface ToolTurn {
+  /** `(conversation, turn)`: each call's idempotency key adds the call. */
+  turnKey: string;
+  /** The member's message this turn answers (the *Why?* trace refers to it by id). */
+  requestMessageId: string | null;
+  /** The turn's context held untrusted text (tracked by the loop, never by the model). */
+  untrustedContext: boolean;
+}
+
+/** What one tool call came to: for the member (card) and the model (`toolMessageContent`). */
+export type ToolOutcome =
+  | {
+      status: 'answered';
+      tool: string;
+      summary: string;
+      data: TrustJson;
+      card: ToolCard | null;
+      /** The answer holds text a client typed: the loop marks the turn untrusted. */
+      untrustedText: boolean;
+    }
+  | { status: 'done'; tool: string; summary: string; card: ToolCard; execution: ActionExecution }
+  | {
+      status: 'awaiting_approval';
+      tool: string;
+      summary: string;
+      card: ToolCard;
+      proposal: ActionProposal;
+    }
+  | {
+      status: 'refused';
+      tool: string;
+      code: ToolErrorCode;
+      message: string;
+      alternatives: LocalSlot[];
+      card: ToolCard | null;
+      /** The original error for the server's own log (never sent to the model). */
+      error: unknown;
+    };
+
+const TurnKeySchema = z.string().regex(/^[A-Za-z0-9.:_-]{1,150}$/);
+
+/**
+ * Runs one tool call for the member in `deps`. Never throws for anything the model did: an
+ * unknown tool, bad arguments or a refusal by the domain come back as `refused` with a code.
+ */
+export async function dispatchToolCall(
+  deps: ToolDeps,
+  turn: ToolTurn,
+  call: LlmToolCall,
+): Promise<ToolOutcome> {
+  const tool = findTool(call.name);
+  let args: unknown;
+  try {
+    if (tool === undefined) throw new UnknownToolError();
+    args = parseArguments(tool, call.arguments);
+    const member = memberOf(deps.actor);
+    if (tool.kind === 'read') {
+      const ai: Actor = { ...member, via: 'ai' };
+      const answer = await withMember(deps.db, member.context, async (tx) =>
+        tool.run(await scopeOf(tx, ai, deps), args),
+      );
+      return { status: 'answered', tool: tool.name, ...answer, untrustedText: false };
+    }
+    return await requestWrite(deps, turn, tool, args, call.id);
+  } catch (error) {
+    return refused(deps, tool?.name ?? 'unknown', toolRefusalOf(error), error, serviceIdIn(args));
+  }
+}
+
+/** The tool message the model gets back: the outcome as compact JSON, ids and local times. */
+export function toolMessageContent(outcome: ToolOutcome): string {
+  switch (outcome.status) {
+    case 'answered':
+      return JSON.stringify({ status: 'answered', summary: outcome.summary, data: outcome.data });
+    case 'done':
+      return JSON.stringify({
+        status: 'done',
+        summary: outcome.summary,
+        note: 'Done; the member sees it with Undo.',
+      });
+    case 'awaiting_approval':
+      return JSON.stringify({
+        status: 'awaiting_approval',
+        summary: outcome.summary,
+        note: 'Nothing has changed yet: the member approves or rejects it on the card. Say so; never claim it is done.',
+      });
+    case 'refused':
+      return JSON.stringify({
+        status: 'refused',
+        code: outcome.code,
+        message: outcome.message,
+        ...(outcome.alternatives.length > 0 && { alternatives: outcome.alternatives }),
+      });
+  }
+}
+
+/**
+ * A member approves a proposal they were shown (S26): the trust layer re-runs the tool's dry run
+ * on the stored payload and acts only if the fingerprint still matches. People only.
+ */
+export async function approveToolProposal(
+  deps: ToolDeps,
+  proposal: ActionProposal,
+  shownFingerprint: string,
+): Promise<ApprovalResult> {
+  const tool = writeToolNamed(proposal.tool);
+  return approveProposal(
+    deps.db,
+    deps.actor,
+    proposal.id,
+    { shownFingerprint, runner: writeRunner(tool, deps, proposal.payload).runner },
+    { clock: deps.clock },
+  );
+}
+
+/** A member undoes an AI action within its window (S26). People only. */
+export async function undoToolAction(
+  deps: ToolDeps,
+  execution: { id: ActionExecutionId; tool: string; action: AutonomyAction },
+  reason: UndoReason | null,
+): Promise<UndoResult> {
+  const tool = writeToolNamed(execution.tool);
+  return undoAction(
+    deps.db,
+    deps.actor,
+    execution.id,
+    { runner: undoRunner(tool, deps, execution.action), reason },
+    { clock: deps.clock },
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+
+function parseArguments(tool: AnyTool, text: string): unknown {
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new InvalidToolArgumentsError('The arguments are not valid JSON.');
+  }
+  return tool.args.parse(json);
+}
+
+/** The member themselves: the session's identity, whatever `via` the caller set. */
+function memberOf(actor: Actor): Actor {
+  return {
+    context: actor.context,
+    ...(actor.requestId !== undefined && { requestId: actor.requestId }),
+  };
+}
+
+async function requestWrite(
+  deps: ToolDeps,
+  turn: ToolTurn,
+  tool: WriteTool,
+  args: unknown,
+  callId: string,
+): Promise<ToolOutcome> {
+  // Stored with the proposal or receipt: ids, local times, the member's short texts, never a
+  // contact (ADR-0028). The tool's schema refuses those already; this is the second check.
+  const checked = TrustJsonSchema.safeParse(args);
+  if (!checked.success) {
+    throw new InvalidToolArgumentsError(
+      'Leave email addresses and phone numbers out; refer to the client by their id.',
+    );
+  }
+  const payload = checked.data;
+  const { runner, lastPreview } = writeRunner(tool, deps, payload);
+  const result = await requestAction(
+    deps.db,
+    deps.actor,
+    runner,
+    {
+      payload,
+      idempotencyKey: idempotencyKeyOf(turn, callId),
+      explanation: {
+        requestMessageId: turn.requestMessageId,
+        steps: [{ tool: tool.name, input: payload }],
+        facts: [],
+        alternatives: [],
+      },
+      untrustedContext: turn.untrustedContext,
+    },
+    { templateDefaults: deps.autonomy.templateDefaults, clock: deps.clock },
+  );
+  if (result.kind === 'proposed') {
+    const shown = PreviewSchema.parse(result.proposal.preview);
+    return {
+      status: 'awaiting_approval',
+      tool: tool.name,
+      summary: `Waiting for the member's OK: ${shown.summary}`,
+      proposal: result.proposal,
+      card: changeCard(tool.name, result.proposal.action, shown, {
+        state: 'proposed',
+        proposalId: result.proposal.id,
+        fingerprint: result.proposal.fingerprint,
+        executionId: null,
+        undoUntil: null,
+      }),
+    };
+  }
+  const { execution } = result;
+  // A retried call finds its first execution without a fresh preview.
+  const shown = PreviewSchema.safeParse(lastPreview()).data ?? {
+    before: null,
+    after: null,
+    emails: [],
+    summary: 'This was already done.',
+  };
+  return {
+    status: 'done',
+    tool: tool.name,
+    summary: `Done: ${shown.summary}`,
+    execution,
+    card: changeCard(tool.name, execution.action, shown, {
+      state: 'done',
+      proposalId: execution.proposalId,
+      fingerprint: null,
+      executionId: execution.id,
+      undoUntil: execution.undoUntil,
+    }),
+  };
+}
+
+/** `(conversation, turn, tool call)`; the model's call id is hashed, never trusted as text. */
+function idempotencyKeyOf(turn: ToolTurn, callId: string): string {
+  const call = createHash('sha256').update(callId).digest('hex').slice(0, 24);
+  return ActionIdempotencyKeySchema.parse(`${TurnKeySchema.parse(turn.turnKey)}.${call}`);
+}
+
+/** A write's preview as `previewOf` stores it. */
+const PreviewSchema = z.object({
+  before: z.record(z.string(), z.unknown()).nullable(),
+  after: z.record(z.string(), z.unknown()).nullable(),
+  emails: z.array(z.object({ template: z.string(), clientId: z.string() })),
+  summary: z.string(),
+});
+
+function changeCard(
+  tool: string,
+  action: AutonomyAction,
+  shown: z.infer<typeof PreviewSchema>,
+  state: Pick<
+    Extract<ToolCard, { kind: 'change' }>,
+    'state' | 'proposalId' | 'fingerprint' | 'executionId' | 'undoUntil'
+  >,
+): ToolCard {
+  return {
+    kind: 'change',
+    tool,
+    action,
+    ...state,
+    before: shown.before as ChangeSide | null,
+    after: shown.after as ChangeSide | null,
+    emails: shown.emails as WouldBeEmail[],
+  };
+}
+
+async function refused(
+  deps: ToolDeps,
+  tool: string,
+  refusal: ToolRefusal,
+  error: unknown,
+  serviceId: ServiceId | null,
+): Promise<ToolOutcome> {
+  const alternatives = await localAlternatives(deps, refusal.alternatives ?? []);
+  return {
+    status: 'refused',
+    tool,
+    code: refusal.code,
+    message: refusal.message,
+    alternatives,
+    card:
+      alternatives.length === 0
+        ? null
+        : { kind: 'slot_picker', reason: 'alternatives', serviceId, slots: alternatives },
+    error,
+  };
+}
+
+/** The service a refused call named, if any (a move keeps its booking's). */
+function serviceIdIn(args: unknown): ServiceId | null {
+  const parsed = z.object({ serviceId: ServiceIdSchema }).safeParse(args);
+  return parsed.success ? parsed.data.serviceId : null;
+}
+
+/** The alternatives in the business's local time, read as the member. */
+async function localAlternatives(
+  deps: ToolDeps,
+  slots: readonly AvailableSlot[],
+): Promise<LocalSlot[]> {
+  if (slots.length === 0) return [];
+  const member = memberOf(deps.actor);
+  return withMember(deps.db, member.context, async (tx) => {
+    const scope = await scopeOf(tx, { ...member, via: 'ai' }, deps);
+    const directory = await directoryOf(scope);
+    return slots.map((slot) => localSlot(scope, directory, slot));
+  });
+}
+
+function writeToolNamed(name: string): WriteTool {
+  const tool = findTool(name);
+  if (tool?.kind !== 'write') throw new UnknownToolError();
+  return tool;
+}
+
+/** A runner that can only undo (the receipt holds the inverse; no payload is needed). */
+function undoRunner(tool: WriteTool, deps: ToolDeps, action: AutonomyAction): ActionRunner {
+  const refuse = () => Promise.reject(new Error(`${tool.name}: this runner only undoes`));
+  return {
+    tool: tool.name,
+    version: tool.version,
+    actions: [action],
+    tier: tool.tier,
+    preview: refuse,
+    execute: refuse,
+    undo: (tx, actor, receipt) => undoWith(tool, deps, tx, actor, receipt),
+  };
+}

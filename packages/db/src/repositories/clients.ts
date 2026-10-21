@@ -7,7 +7,7 @@ import {
   type ClientId,
   type RecordSource,
 } from '@pepper/contracts';
-import { asc, eq, ilike, or, sql } from 'drizzle-orm';
+import { asc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { ClientEmailTakenError, isUniqueViolation } from '../errors.js';
 import { clients, type ClientRow } from '../schema.js';
@@ -76,6 +76,16 @@ export async function findClient(tx: TenantTx, id: ClientId): Promise<ClientRow 
     .from(clients)
     .where(eq(clients.id, Id.parse(id)));
   return row;
+}
+
+/** The clients with these ids that the transaction may see (at most 200 ids). */
+export async function findClientsByIds(
+  tx: TenantTx,
+  ids: readonly ClientId[],
+): Promise<ClientRow[]> {
+  if (ids.length === 0) return [];
+  const wanted = z.array(Id).max(200).parse(ids);
+  return tx.select().from(clients).where(inArray(clients.id, wanted));
 }
 
 /** The most clients one exact contact finds (people sharing a phone, e.g. a family). */
