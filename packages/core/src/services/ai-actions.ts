@@ -1,4 +1,5 @@
 import {
+  AI_EMAIL_GRACE_SECONDS,
   AUTONOMY_ACTIONS,
   ActionExecutionIdSchema,
   ActionExecutionSchema,
@@ -37,6 +38,7 @@ import {
   expirePendingProposals,
   findExecutionByKey,
   findExecutionOfProposal,
+  findOutboxMessage,
   findProposalByKey,
   insertExecution,
   insertProposal,
@@ -247,6 +249,8 @@ export async function approveProposal(
   const shown = StateFingerprintSchema.parse(approval.shownFingerprint);
   const { runner } = approval;
   const now = (options.clock ?? systemClock).now();
+  // Only a person approves: the AI can never approve its own (or any) proposal.
+  if (actor.via === 'ai') throw new ForbiddenError();
   const member = memberOf(actor);
   const ai: Actor = { ...member, via: 'ai' };
 
@@ -302,7 +306,7 @@ export async function approveProposal(
   });
 }
 
-/** A member turns a proposal down. Rejecting it again is a no-op. */
+/** A member turns a proposal down (people only). Rejecting it again is a no-op. */
 export async function rejectProposal(
   db: Database,
   actor: Actor,
@@ -311,6 +315,7 @@ export async function rejectProposal(
 ): Promise<ActionProposal> {
   const id = ActionProposalIdSchema.parse(proposalId);
   const now = (options.clock ?? systemClock).now();
+  if (actor.via === 'ai') throw new ForbiddenError();
   const member = memberOf(actor);
   return withMember(db, actor.context, async (tx) => {
     const proposal = await lockProposal(tx, id);
@@ -346,6 +351,9 @@ export async function undoAction(
   const reason = UndoReasonSchema.nullable().parse(undo.reason ?? null);
   const { runner } = undo;
   const now = (options.clock ?? systemClock).now();
+  // An undo is a write of its own (it can cancel a booking): only a person may ask for it, so
+  // the AI can't use it to get around the dial.
+  if (actor.via === 'ai') throw new ForbiddenError();
   const member = memberOf(actor);
 
   return withMember(db, actor.context, async (tx) => {
@@ -412,9 +420,9 @@ export async function listPendingProposals(
 ): Promise<ActionProposal[]> {
   requirePermission(actor, 'business.read');
   const now = (options.clock ?? systemClock).now();
-  const rows = await withMember(db, actor.context, (tx) => listPendingProposalRows(tx, 200));
-  // Expired ones are marked by the daily clean-up or on approval; they are not offered.
-  return rows.filter((row) => row.expiresAt.getTime() > now.getTime()).map(toProposal);
+  // Expired ones (marked by the daily clean-up or on approval) are not offered.
+  const rows = await withMember(db, actor.context, (tx) => listPendingProposalRows(tx, now, 200));
+  return rows.map(toProposal);
 }
 
 /** The AI's recent actions with their receipts (staff: those done for them), newest first. */
@@ -453,7 +461,7 @@ export async function expireProposals(tx: TenantTx, now: Date, limit: number): P
 
 // ---------------------------------------------------------------------------------------------
 
-/** The member themselves: an AI flag on the caller's actor is never trusted for decisions. */
+/** The member themselves, as the person deciding (callers refuse an AI actor first). */
 function memberOf(actor: Actor): Actor {
   return { context: actor.context, requestId: actor.requestId };
 }
@@ -608,6 +616,7 @@ async function runAndRecord(
 ): Promise<AiActionExecutionRow> {
   const action = runner.actions[0];
   const effect = await runner.execute(tx, ai, input.payload);
+  await checkQueuedMessages(tx, action, effect.outboxMessageIds, input.now);
   const until = undoUntil(action, input.now, {
     hasInverse: effect.inverse !== null,
     appointmentStartsAt: effect.appointmentStartsAt,
@@ -641,6 +650,32 @@ async function runAndRecord(
     requestId: ai.requestId,
   });
   return row;
+}
+
+/**
+ * The messages a tool says it queued must be this business's, just queued, and (for a message
+ * action) held for the "undo send" grace: otherwise Undo could not take them back. A tool that
+ * breaks this is a bug, so the whole action is refused.
+ */
+async function checkQueuedMessages(
+  tx: TenantTx,
+  action: AutonomyAction,
+  ids: readonly OutboxMessageId[],
+  now: Date,
+): Promise<void> {
+  const graceEnds = now.getTime() + AI_EMAIL_GRACE_SECONDS * 1000;
+  for (const id of ids) {
+    const message = await findOutboxMessage(tx, OutboxMessageIdSchema.parse(id));
+    if (message?.status !== 'pending') {
+      throw new Error(`${action}: linked outbox message ${id} is not a pending message here`);
+    }
+    if (
+      AUTONOMY_ACTIONS[action].undo.kind === 'until_sent' &&
+      message.availableAt.getTime() < graceEnds
+    ) {
+      throw new Error(`${action}: AI messages must wait ${String(AI_EMAIL_GRACE_SECONDS)} s`);
+    }
+  }
 }
 
 function executionValues(row: AiActionExecutionRow) {

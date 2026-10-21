@@ -20,6 +20,7 @@ import {
   markOutboxMessageSent,
 } from './repositories/outbox.js';
 import { createTenant } from './repositories/tenants.js';
+import { createDatabase } from './client.js';
 import {
   decideProposal,
   expirePendingProposals,
@@ -248,15 +249,17 @@ describe('proposals', () => {
     const forBen = await stored(
       inTenant((tx) => insertProposal(tx, proposal({ requestedBy: ben }))),
     );
-    const seen = (await as(jess, (tx) => listPendingProposals(tx, 500))).map((p) => p.id);
+    const seen = (await as(jess, (tx) => listPendingProposals(tx, new Date(), 500))).map(
+      (p) => p.id,
+    );
     expect(seen).toContain(forJess.id);
     expect(seen).not.toContain(forBen.id);
     expect(await as(jess, (tx) => lockProposal(tx, ActionProposalIdSchema.parse(forBen.id)))).toBe(
       undefined,
     );
-    expect((await as(ana, (tx) => listPendingProposals(tx, 500))).map((p) => p.id)).toEqual(
-      expect.arrayContaining([forJess.id, forBen.id]),
-    );
+    expect(
+      (await as(ana, (tx) => listPendingProposals(tx, new Date(), 500))).map((p) => p.id),
+    ).toEqual(expect.arrayContaining([forJess.id, forBen.id]));
     const error = await as(jess, (tx) => insertProposal(tx, proposal({ requestedBy: ben }))).catch(
       (e: unknown) => e,
     );
@@ -430,5 +433,34 @@ describe('cancelOutboxMessages', () => {
     ).toBeUndefined();
     expect(await inTenant((tx) => markOutboxMessageSent(tx, id, now))).toBe(false);
     expect(await statusOf(id)).toMatchObject({ status: 'cancelled' });
+  });
+});
+
+describe('a business deleted', () => {
+  it('takes its proposals and executions with it', async () => {
+    const gone = await createTenant(db, { name: 'Gone', slug: 'gone', timeZone: 'UTC' });
+    const goneId = TenantIdSchema.parse(gone.id);
+    await withTenant(db, goneId, async (tx) => {
+      await addMembership(tx, { userId: ana, role: 'owner' });
+      await saveAutonomySettings(tx, { askFirst: true, levels: {}, updatedBy: ana });
+      const approved = await insertProposal(tx, proposal());
+      if (approved === undefined) throw new Error('not stored');
+      await insertExecution(
+        tx,
+        execution({ proposalId: ActionProposalIdSchema.parse(approved.id), outcome: 'propose' }),
+      );
+    });
+    const owner = createDatabase({ url: database.migrationUrl, maxConnections: 1 });
+    try {
+      await owner.db.execute(sql`DELETE FROM tenants WHERE id = ${goneId}`);
+      const { rows } = await owner.db.execute<{ left: number }>(
+        sql`SELECT (SELECT count(*) FROM ai_action_proposals WHERE tenant_id = ${goneId})
+                 + (SELECT count(*) FROM ai_action_executions WHERE tenant_id = ${goneId})
+                 + (SELECT count(*) FROM autonomy_settings WHERE tenant_id = ${goneId}) AS left`,
+      );
+      expect(Number(rows[0]?.left)).toBe(0);
+    } finally {
+      await owner.close();
+    }
   });
 });

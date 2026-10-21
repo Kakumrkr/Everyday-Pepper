@@ -24,7 +24,7 @@ import {
   type UndoReason,
   type UserId,
 } from '@pepper/contracts';
-import { and, asc, desc, eq, lt, lte } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, lt, lte } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   aiActionExecutions,
@@ -187,15 +187,16 @@ export async function decideProposal(
   return row;
 }
 
-/** Up to `limit` pending proposals, oldest first. */
+/** Up to `limit` pending proposals not yet expired at `now`, oldest first. */
 export async function listPendingProposals(
   tx: TenantTx,
+  now: Date,
   limit: number,
 ): Promise<AiActionProposalRow[]> {
   return tx
     .select()
     .from(aiActionProposals)
-    .where(eq(aiActionProposals.status, 'pending'))
+    .where(and(eq(aiActionProposals.status, 'pending'), gt(aiActionProposals.expiresAt, now)))
     .orderBy(asc(aiActionProposals.createdAt), asc(aiActionProposals.id))
     .limit(LimitSchema.parse(limit));
 }

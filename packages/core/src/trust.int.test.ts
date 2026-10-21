@@ -557,6 +557,17 @@ describe('approveProposal', () => {
     );
   });
 
+  it('the AI can never approve a proposal, not even its own member’s', async () => {
+    const proposal = await propose(jessActor(), jess);
+    await expect(
+      approveProposal(db, { ...jessActor(), via: 'ai' }, proposal.id, {
+        shownFingerprint: proposal.fingerprint,
+        runner: todoRunner,
+      }),
+    ).rejects.toThrow(ForbiddenError);
+    expect((await listPendingProposals(db, jessActor())).map((p) => p.id)).toContain(proposal.id);
+  });
+
   it('staff cannot approve a colleague’s proposal; a manager can', async () => {
     const proposal = await propose(jessActor(), jess);
     const approval = { shownFingerprint: proposal.fingerprint, runner: todoRunner };
@@ -688,6 +699,23 @@ describe('undoAction', () => {
     expect(after).toMatchObject({ id, status: 'done' });
   });
 
+  it('the AI cannot undo or reject on its own: only a person decides', async () => {
+    const id = await executedTodo();
+    await expect(
+      undoAction(
+        db,
+        { ...jessActor(), via: 'ai' },
+        id,
+        { runner: todoRunner },
+        { clock: clockAt(NOW) },
+      ),
+    ).rejects.toThrow(ForbiddenError);
+    const proposal = await propose(jessActor(), jess);
+    await expect(rejectProposal(db, { ...jessActor(), via: 'ai' }, proposal.id)).rejects.toThrow(
+      ForbiddenError,
+    );
+  });
+
   it('staff cannot undo what the AI did for a colleague', async () => {
     const id = await executedTodo();
     await expect(
@@ -706,16 +734,18 @@ describe('undoAction', () => {
         explanation,
         untrustedContext: false,
       },
-      { ...defaults, clock: clockAt(NOW) },
+      { ...defaults, clock: realTime },
     );
     if (result.kind !== 'executed') throw new Error('expected an execution');
-    expect(result.execution.undoUntil).toBe('2026-10-21T15:02:00.000Z');
+    const undoUntil = Date.parse(result.execution.undoUntil ?? '');
+    expect(undoUntil - Date.now()).toBeGreaterThan(100_000);
+    expect(undoUntil - Date.now()).toBeLessThanOrEqual(120_000);
     const undone = await undoAction(
       db,
       ana(),
       result.execution.id,
       { runner: noteRunner, reason: 'changed_mind' },
-      { clock: clockAt('2026-10-21T15:01:00.000Z') },
+      { clock: inAMinute() },
     );
     expect(undone.messages.cancelled).toHaveLength(2);
     for (const id of result.execution.outboxMessageIds)
@@ -782,6 +812,61 @@ describe('undoAction', () => {
         expect(claimed.status === 'fulfilled' && claimed.value !== undefined).toBe(true);
       }
     }
+  });
+});
+
+describe('the receipt’s outbox links', () => {
+  const sloppy = (queueAt: () => Date, link?: OutboxMessageId): ActionRunner => ({
+    ...noteRunner,
+    async execute(tx, actor, payload) {
+      const effect = await noteRunner.execute(tx, actor, payload);
+      if (link !== undefined) return { ...effect, outboxMessageIds: [link] };
+      const id = await queueEmail(
+        tx,
+        { to: 'client@example.test', subject: 'Hi', text: 'Hello' },
+        { key, dedupeKey: `sloppy:${String((keys += 1))}`, now: queueAt() },
+      );
+      return { ...effect, outboxMessageIds: id === undefined ? [] : [id] };
+    },
+  });
+
+  it('refuses a message action whose email skips the undo-send grace, and writes nothing', async () => {
+    const before = (await listRecentActions(db, ana(), { limit: 500 })).length;
+    await expect(
+      requestAction(
+        db,
+        ana(),
+        sloppy(() => new Date()),
+        {
+          payload: { clients: 0, ref: 'nograce' },
+          idempotencyKey: turnKey(),
+          explanation,
+          untrustedContext: false,
+        },
+        { ...defaults, clock: realTime },
+      ),
+    ).rejects.toThrow(/must wait/);
+    expect((await listRecentActions(db, ana(), { limit: 500 })).length).toBe(before);
+  });
+
+  it('refuses a link to a message that is not this business’s pending one', async () => {
+    await expect(
+      requestAction(
+        db,
+        ana(),
+        sloppy(
+          () => new Date(),
+          OutboxMessageIdSchema.parse('0190f5b2-7c1a-7d3e-9a1b-2c3d4e5f6a7b'),
+        ),
+        {
+          payload: { clients: 0, ref: 'badlink' },
+          idempotencyKey: turnKey(),
+          explanation,
+          untrustedContext: false,
+        },
+        { ...defaults, clock: realTime },
+      ),
+    ).rejects.toThrow(/not a pending message/);
   });
 });
 

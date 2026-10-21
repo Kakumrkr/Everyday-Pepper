@@ -191,6 +191,20 @@ describe('TrustJsonSchema', () => {
     );
   });
 
+  it('refuses a huge value quickly, before scanning its text', () => {
+    const huge = `${'a'.repeat(2_000_000)}@${'b'.repeat(2_000_000)}`;
+    const started = performance.now();
+    expect(TrustJsonSchema.safeParse({ text: huge }).success).toBe(false);
+    expect(performance.now() - started).toBeLessThan(2_000);
+  });
+
+  it('scans the largest allowed text in linear time', () => {
+    const text = `${'a'.repeat(4000)}@${'b'.repeat(4000)}`;
+    const started = performance.now();
+    expect(looksLikeContact(text)).toBe(false);
+    expect(performance.now() - started).toBeLessThan(1_000);
+  });
+
   it('never accepts a value holding an email address (property)', () => {
     fc.assert(
       fc.property(fc.jsonValue(), fc.emailAddress(), (value, email) => {

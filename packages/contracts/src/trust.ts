@@ -309,7 +309,8 @@ export const ActionTargetKeySchema = z
 export const TRUST_JSON_MAX_BYTES = 8192;
 const TRUST_JSON_MAX_DEPTH = 8;
 
-const EMAIL_LIKE = /[^\s@<>()]+@[^\s@<>()]+\.[^\s@<>()]{2,}/;
+// Bounded parts (RFC 5321 lengths) keep matching linear on long texts.
+const EMAIL_LIKE = /[^\s@<>()]{1,64}@[^\s@<>()]{1,253}\.[^\s@<>()]{2,63}/;
 // Ids, dates and times are digits and dashes too: they are taken out before looking for a
 // phone number (7 or more digits with only spaces, dots, dashes, brackets or a plus between).
 const NOT_A_PHONE = [
@@ -330,6 +331,16 @@ const encoder = new TextEncoder();
 
 function jsonBytes(value: unknown): number {
   return encoder.encode(JSON.stringify(value)).length;
+}
+
+/** The JSON size of `value`, or `null` if it can't be written as JSON (checked separately). */
+function safeJsonBytes(value: unknown): number | null {
+  try {
+    const text = JSON.stringify(value) as string | undefined;
+    return text === undefined ? null : encoder.encode(text).length;
+  } catch {
+    return null;
+  }
 }
 
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
@@ -369,14 +380,16 @@ function checkJson(value: unknown, depth: number, issues: string[]): void {
  * depth behind each tool's own strict schema).
  */
 export const TrustJsonSchema = z.custom<Json>().superRefine((value, ctx) => {
+  // Size first, so a huge value is refused before any text in it is scanned.
+  const bytes = safeJsonBytes(value);
+  if (bytes !== null && bytes > TRUST_JSON_MAX_BYTES) {
+    ctx.addIssue({ code: 'custom', message: `Larger than ${String(TRUST_JSON_MAX_BYTES)} bytes` });
+    return;
+  }
   const issues: string[] = [];
   checkJson(value, 0, issues);
   for (const issue of new Set(issues)) {
     ctx.addIssue({ code: 'custom', message: `Holds ${issue}` });
-  }
-  if (issues.length > 0) return;
-  if (jsonBytes(value) > TRUST_JSON_MAX_BYTES) {
-    ctx.addIssue({ code: 'custom', message: `Larger than ${String(TRUST_JSON_MAX_BYTES)} bytes` });
   }
 });
 export type TrustJson = Json;
