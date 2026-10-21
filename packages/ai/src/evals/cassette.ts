@@ -7,6 +7,7 @@ import {
 } from '@pepper/contracts';
 import { z } from 'zod';
 import type { LlmCallOptions, LlmProvider } from '../provider.js';
+import { fillPlaceholders, unfillPlaceholders } from './world.js';
 
 /**
  * One answer in a cassette. A recorded answer carries the fingerprint of the request it
@@ -41,11 +42,50 @@ function canonical(value: unknown): unknown {
   return value;
 }
 
-/** SHA-256 of the request with its keys sorted: equal requests, equal fingerprints. */
-export function requestFingerprint(request: LlmRequest): string {
+/**
+ * SHA-256 of the request with its keys sorted: equal requests, equal fingerprints. The seeded
+ * world's ids are put back as placeholders first and the ids the run created are numbered, so
+ * the same case in a fresh world (new ids) makes the same request.
+ */
+export function requestFingerprint(
+  request: LlmRequest,
+  placeholders: ReadonlyMap<string, string> = new Map(),
+): string {
   return createHash('sha256')
-    .update(JSON.stringify(canonical(request)))
+    .update(numberNewIds(unfillPlaceholders(JSON.stringify(canonical(request)), placeholders)))
     .digest('hex');
+}
+
+const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+
+/** Ids the run created (a new booking, a proposal) as `{{new:1}}`, `{{new:2}}` in order. */
+function numberNewIds(text: string): string {
+  const seen = new Map<string, string>();
+  return text.replace(UUID, (id) => {
+    const key = id.toLowerCase();
+    let placeholder = seen.get(key);
+    if (placeholder === undefined) {
+      placeholder = `{{new:${String(seen.size + 1)}}}`;
+      seen.set(key, placeholder);
+    }
+    return placeholder;
+  });
+}
+
+/** A recorded or hand-written answer with the world's ids filled in for its placeholders. */
+function filled(response: LlmResponse, placeholders: ReadonlyMap<string, string>): LlmResponse {
+  if (placeholders.size === 0) return response;
+  return LlmResponseSchema.parse(
+    JSON.parse(fillPlaceholders(JSON.stringify(response), placeholders)),
+  );
+}
+
+/** A real answer with the world's ids put back as placeholders, to be recorded. */
+function unfilled(response: LlmResponse, placeholders: ReadonlyMap<string, string>): LlmResponse {
+  if (placeholders.size === 0) return response;
+  return LlmResponseSchema.parse(
+    JSON.parse(unfillPlaceholders(JSON.stringify(response), placeholders)),
+  );
 }
 
 /** A cassette that has no answer for a call, or whose answer was for another request. */
@@ -63,7 +103,10 @@ export class CassetteError extends Error {
 export class CassetteProvider implements LlmProvider {
   private next = 0;
 
-  constructor(private readonly steps: readonly CassetteStep[]) {}
+  constructor(
+    private readonly steps: readonly CassetteStep[],
+    private readonly placeholders: ReadonlyMap<string, string> = new Map(),
+  ) {}
 
   respond(request: LlmRequest): Promise<LlmResponse> {
     const step = this.steps[this.next];
@@ -73,12 +116,15 @@ export class CassetteProvider implements LlmProvider {
         new CassetteError('miss', `no recorded answer for call ${String(this.next)}`),
       );
     }
-    if (step.fingerprint !== undefined && step.fingerprint !== requestFingerprint(request)) {
+    if (
+      step.fingerprint !== undefined &&
+      step.fingerprint !== requestFingerprint(request, this.placeholders)
+    ) {
       return Promise.reject(
         new CassetteError('stale', `call ${String(this.next)} differs from the recorded request`),
       );
     }
-    return Promise.resolve(step.response);
+    return Promise.resolve(filled(step.response, this.placeholders));
   }
 
   async *stream(request: LlmRequest): AsyncIterable<LlmStreamEvent> {
@@ -92,18 +138,26 @@ export class CassetteProvider implements LlmProvider {
  * Wraps a real provider so each answer is also written down as a cassette step with its
  * request's fingerprint (S27 records the real model once; every later run replays for free).
  */
-export function recordingProvider(provider: LlmProvider, steps: CassetteStep[]): LlmProvider {
+export function recordingProvider(
+  provider: LlmProvider,
+  steps: CassetteStep[],
+  placeholders: ReadonlyMap<string, string> = new Map(),
+): LlmProvider {
+  const record = (request: LlmRequest, response: LlmResponse) => {
+    steps.push({
+      fingerprint: requestFingerprint(request, placeholders),
+      response: unfilled(response, placeholders),
+    });
+  };
   return {
     async respond(request: LlmRequest, options?: LlmCallOptions) {
       const response = await provider.respond(request, options);
-      steps.push({ fingerprint: requestFingerprint(request), response });
+      record(request, response);
       return response;
     },
     async *stream(request: LlmRequest, options?: LlmCallOptions) {
       for await (const event of provider.stream(request, options)) {
-        if (event.type === 'done') {
-          steps.push({ fingerprint: requestFingerprint(request), response: event.response });
-        }
+        if (event.type === 'done') record(request, event.response);
         yield event;
       }
     },

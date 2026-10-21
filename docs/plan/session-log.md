@@ -727,6 +727,42 @@ Everything each session did, oldest first: what was built, the checks run and th
     - A service or staff name typed with a phone number in it would fail the ids-only guard on a preview (`internal`): rare, logged.
     - The eval CLI still uses the S22 sample tools until S25 brings seeded worlds.
 
+- **S25 Phase 6d (2026-10-21): agent loop, conversations, SSE, budgets** ([ADR-0030](../adr/0030-agent-loop-and-conversations.md), proposed by Claude, pre-approved by the user).
+  - **Brief (user):** "Go ahead with your recommendations, ADR is fine"; asked Claude to open the PR, merge it and end with the next session's prompt. Decisions: conversations own-only for every role; 90-day retention; 5M tokens per business per month (soft 80%); turns keep running when the connection drops; amendments to ADR-0027/0029 recorded in ADR-0030 without a PCR.
+  - **Guidance re-checked:** OpenAI prompt caching (prefix ≥ 1,024 tokens, `prompt_cache_key`; `prompt_cache_options` with breakpoints on GPT-5.6+; the docs host did not resolve from the container, so secondary sources), Responses streaming (arguments at `…done`, usage at `completed`), OWASP LLM Top 10 2026 and the Agentic Top 10.
+  - **Weak spots found in S22–S24 and fixed:** the idempotency key ignored the step (a reused `call_1` in a later step returned the first call's execution); `ToolOutcome.untrustedText` was hard-wired false; metering could not hold a hard budget under concurrency; the S22 reference cases used sample tools with other argument names; ADR-0027's "our own retries" had no implementation.
+  - **Built:**
+    - T1: step in the idempotency key; `ToolAnswer.untrustedText`.
+    - T2: contracts `chat.ts`, `ai.chat`; migrations 0034–0035 (three tables, own-only RLS, guards, append-only messages); `reserveUsage`/`settleUsage`.
+    - T3: core conversation services, stale-turn detection, 90-day clean-up.
+    - T4: `reserveLlmTokens` (atomic reserve, settle).
+    - T5: context assembly, trimming by whole turns, untrusted JSON labels with taint, `redactContacts`.
+    - T6: routing rules, circuit breaker.
+    - T7: the loop (`startTurn`, `recoverTurn`), fallback, `turn_limit`.
+    - T8: exactly-once on Postgres.
+    - T9: the hostile fake through the loop.
+    - T10: seeded eval worlds, `loopSubject`, cassette placeholders, the CLI on the registry, 2 new cases (follow-through, autonomy).
+    - T11: api chat module (SSE, Redis event log, resume, cancel, limits, AI config), web forwarder fixes.
+    - T12: OTel spans.
+  - **Checks:**
+    - `pnpm check` green. Unit tests: contracts 537, core 1,190, db 44, ai 183, api 274, web 250, appointments 83, runtime 90, worker 26, templates 96, ui 79, testing 13.
+    - `pnpm test:integration` green, 928 (+66): ai 72 (loop 6, hostile through the loop 5, evals 3, plus S24's 58), api 69 (chat 7), core 137, db 506 (conversations 12, isolation with the three new tables), appointments 136, worker 4, runtime 2, testing 2.
+    - The first run failed once on a load-sensitive test (`isolation.int.test.ts` "keeps concurrent transactions apart": 24 transactions on a 4-connection test pool waited past the 2 s acquire timeout while every suite ran). Fixed, not retried: `createDatabase({ connectionTimeoutMs })`, 30 s in the test pools, 2 s in production; the rerun passed.
+    - Eval CLI on scripted cassettes: 25/25, all gates met, $0.
+    - No OpenAI call. No screen changed (the web change is the forwarder, unit-tested), so no Playwright run.
+  - **Found and fixed (by the integration tests and the self-review):**
+    - turns started on the database clock but ended on the app's (wrong deadlines whenever they differ);
+    - the request's `close` event fires once its body is read, so every SSE stream hung (now the response's);
+    - the web forwarder cut streams at 10 s and dropped `Last-Event-ID`;
+    - the loop turned a stale cassette into a fallback reply (evals now fail on it);
+    - two copies of one request could leave an empty conversation (the loser rolls back and reads the winner);
+    - two requests recovering the same turn could fail one of them;
+    - lint findings (14);
+    - a load-sensitive pool timeout in the test databases (see Checks).
+  - **Not done / for later:**
+    - S26: render the stream's cards, a plan card for a turn's writes, `turn_limit` and fallback links, cancel on close, the AI-off state.
+    - S27: calibrate the token estimate; run eval sets separately (every-step estimate of a full run > $1.50 cap); `prompt_cache_options` for newer models; recorded responses naming ids created in the run.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

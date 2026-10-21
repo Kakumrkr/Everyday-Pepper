@@ -48,6 +48,9 @@ export const PermissionSchema = z.enum([
   // To-dos (S21, ADR-0026).
   'tasks.read',
   'tasks.manage',
+  // Chat with the AI (S25, ADR-0030): everyone, in their own conversations only. What the AI
+  // may do is still each tool's own permission.
+  'ai.chat',
 ]);
 export type Permission = z.infer<typeof PermissionSchema>;
 

@@ -6,7 +6,6 @@ import {
   refuseRun,
   type PriceTable,
 } from './cost.js';
-import { sampleTools } from './sample-tools.js';
 import { evalCase } from './test-support.js';
 
 const PRICE = {
@@ -32,26 +31,23 @@ describe('costOfUsage', () => {
 });
 
 describe('estimateRunCost (the budget guard, playbook §4)', () => {
-  it('counts every call uncached with the full output allowance, times the trials', () => {
+  it('counts every step of every turn uncached with the full output allowance, times the trials', () => {
     const twoTurns = evalCase({ turns: [{ user: 'First' }, { user: 'Second' }] });
-    const tools = sampleTools(twoTurns.tools).definitions;
-    const once = estimateRunCost([{ evalCase: twoTurns, tools }], 1, PRICE);
+    const once = estimateRunCost([twoTurns], 1, PRICE, 1);
     expect(once.usage.outputTokens).toBe(2 * OUTPUT_ALLOWANCE_TOKENS);
     expect(once.usage.cachedInputTokens).toBe(0);
-    // The second call carries the first answer's allowance, so input more than doubles.
-    expect(once.usage.inputTokens).toBeGreaterThan(2 * 1_000);
-    const thrice = estimateRunCost([{ evalCase: twoTurns, tools }], 3, PRICE);
+    // Each call carries the instructions and every tool definition: thousands of tokens.
+    expect(once.usage.inputTokens).toBeGreaterThan(2 * 2_000);
+    const thrice = estimateRunCost([twoTurns], 3, PRICE, 1);
     expect(thrice.usd).toBeCloseTo(once.usd * 3, 10);
+    // By default every turn takes all of the loop's steps (the most a run can cost).
+    expect(estimateRunCost([twoTurns], 1, PRICE).usage.outputTokens).toBe(
+      2 * 6 * OUTPUT_ALLOWANCE_TOKENS,
+    );
   });
 
-  it('keeps a 120-case run of the reference size well under the $1.50 cap', () => {
-    const tools = sampleTools([
-      'find_clients',
-      'get_day',
-      'create_booking',
-      'email_clients',
-    ]).definitions;
-    const cases = Array.from({ length: 120 }, () => ({ evalCase: evalCase(), tools }));
+  it('keeps one set of 30 one-turn cases under the $1.50 cap even at every step', () => {
+    const cases = Array.from({ length: 30 }, () => evalCase());
     expect(estimateRunCost(cases, 1, PRICE).usd).toBeLessThan(1.5);
   });
 });

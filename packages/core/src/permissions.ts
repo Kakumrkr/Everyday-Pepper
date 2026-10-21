@@ -76,6 +76,8 @@ export const PERMISSION_MATRIX: Readonly<
   // ADR-0026: staff reach the tasks assigned to them or that they created.
   'tasks.read': STAFF_OWN,
   'tasks.manage': STAFF_OWN,
+  // ADR-0030: every member chats with the AI in their own conversations.
+  'ai.chat': STAFF_OWN,
 };
 
 /** How far `role`'s `permission` reaches. */

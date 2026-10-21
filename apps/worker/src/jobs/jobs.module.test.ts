@@ -33,6 +33,7 @@ beforeEach(() => {
     bookingRequests: 3,
     outboxMessages: 4,
     expiredProposals: 5,
+    conversations: 6,
   });
   core.sendDueTaskPushes.mockResolvedValue(1);
 });

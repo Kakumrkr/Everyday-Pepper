@@ -55,6 +55,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^12.1.3
         version: 12.1.3(@nestjs/common@12.1.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.1.3)
+      '@pepper/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@pepper/appointments':
         specifier: workspace:*
         version: link:../../packages/modules/appointments
@@ -275,6 +278,9 @@ importers:
 
   packages/ai:
     dependencies:
+      '@opentelemetry/api':
+        specifier: ^1.9.1
+        version: 1.9.1
       '@pepper/appointments':
         specifier: workspace:*
         version: link:../modules/appointments
@@ -294,6 +300,9 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
+      '@opentelemetry/sdk-trace-base':
+        specifier: ^2.12.0
+        version: 2.12.0(@opentelemetry/api@1.9.1)
       '@pepper/config':
         specifier: workspace:*
         version: link:../config
@@ -303,6 +312,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^5.0.5
         version: 5.0.5(vitest@5.0.5)
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.1)
       fast-check:
         specifier: ^4.10.2
         version: 4.10.2

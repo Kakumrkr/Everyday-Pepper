@@ -24,6 +24,9 @@ export default defineConfig({
         'src/appointments/appointments.service.ts',
         'src/appointments/bookings.service.ts',
         'src/clients/clients.service.ts',
+        // Chat runs the agent loop on Postgres and keeps events in Redis: chat.int.test.ts.
+        'src/chat/chat.service.ts',
+        'src/chat/turn-events.ts',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },

@@ -125,4 +125,58 @@ describe('forwardToApi', () => {
     expect(body).toContain('api_unavailable');
     expect(body).not.toContain('10.0.0.5');
   });
+
+  it('passes Last-Event-ID on, so a chat turn resumes after the last event (ADR-0030)', async () => {
+    const { fetch, calls } = upstream(new Response(''));
+    await forwardToApi(
+      new Request('http://localhost:3000/v1/chat/turns/t/events', {
+        headers: { 'last-event-id': '7', accept: 'text/event-stream' },
+      }),
+      { apiBaseUrl: API, fetch },
+    );
+    expect(new Headers(calls[0]?.init.headers).get('last-event-id')).toBe('7');
+  });
+
+  it('times out only until the api answers, so an event stream may run longer', async () => {
+    vi.useFakeTimers();
+    try {
+      let signal: AbortSignal | undefined;
+      const fetch = vi.fn((_url: URL, init?: RequestInit) => {
+        signal = init?.signal ?? undefined;
+        return Promise.resolve(
+          new Response('data: x\n\n', { headers: { 'content-type': 'text/event-stream' } }),
+        );
+      }) as unknown as typeof globalThis.fetch;
+      const response = await forwardToApi(
+        new Request('http://localhost:3000/v1/chat/turns', { method: 'POST', body: '{}' }),
+        {
+          apiBaseUrl: API,
+          fetch,
+          timeoutMs: 1_000,
+        },
+      );
+      vi.advanceTimersByTime(60_000);
+      expect(signal?.aborted).toBe(false);
+      expect(response.headers.get('content-type')).toBe('text/event-stream');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('gives up when the api does not answer in time', async () => {
+    const fetch = vi.fn(
+      (_url: URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            reject(new Error('aborted'));
+          });
+        }),
+    ) as unknown as typeof globalThis.fetch;
+    const response = await forwardToApi(new Request('http://localhost:3000/v1/me'), {
+      apiBaseUrl: API,
+      fetch,
+      timeoutMs: 20,
+    });
+    expect(response.status).toBe(502);
+  });
 });

@@ -8,11 +8,13 @@ import {
 import type { TenantId } from '@pepper/contracts';
 import type { Clock } from '../clock.js';
 import { expireProposals } from './ai-actions.js';
+import { deleteIdleConversationsIn } from './conversations.js';
 
 // The worker's daily clean-up (ADR-0025, S18 L7): rows nothing needs any more are deleted, so
 // less personal data is kept. It lists the businesses and then deletes, under each business's
 // tenant and in small batches (short transactions), what is past its retention. It also marks
-// the AI's proposals whose time ran out as expired (ADR-0028), so nothing offers them again.
+// the AI's proposals whose time ran out as expired (ADR-0028), so nothing offers them again, and
+// deletes conversations with the AI 90 days after their last message (ADR-0030).
 
 /** How long an expired booking request (name, email, phone) is kept after it expires. */
 export const BOOKING_REQUEST_RETENTION_MS = 24 * 60 * 60_000;
@@ -22,12 +24,15 @@ export const OUTBOX_RETENTION_MS = 30 * 24 * 60 * 60_000;
 const TENANT_PAGE = 500;
 const DELETE_BATCH = 1000;
 const EXPIRE_BATCH = 500;
+// A conversation takes its turns and messages with it, so its batches are smaller.
+const CONVERSATION_BATCH = 100;
 
 export interface CleanupResult {
   businesses: number;
   bookingRequests: number;
   outboxMessages: number;
   expiredProposals: number;
+  conversations: number;
 }
 
 /** One clean-up pass over every business, as of `clock.now()`. */
@@ -40,6 +45,7 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
     bookingRequests: 0,
     outboxMessages: 0,
     expiredProposals: 0,
+    conversations: 0,
   };
   let after: TenantId | null = null;
   for (;;) {
@@ -56,6 +62,12 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
         tenantId,
         (tx) => expireProposals(tx, new Date(now), EXPIRE_BATCH),
         EXPIRE_BATCH,
+      );
+      result.conversations += await inBatches(
+        db,
+        tenantId,
+        (tx) => deleteIdleConversationsIn(tx, new Date(now), CONVERSATION_BATCH),
+        CONVERSATION_BATCH,
       );
     }
     result.businesses += page.length;

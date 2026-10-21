@@ -4,6 +4,7 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import { AppointmentsModule } from './appointments/appointments.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { BookingEmailsModule } from './booking-emails/booking-emails.js';
+import { ChatModule } from './chat/chat.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import type { ApiConfig } from './config.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
@@ -34,6 +35,12 @@ export class AppModule {
           outboxKey: outboxKeyFrom(config.outboxSecret),
         }),
         PublicBookingModule.forRoot({ codeKey: config.bookingCodeKey }),
+        ChatModule.forRoot({
+          openai: config.ai.openai,
+          monthlyTokens: config.ai.monthlyTokens,
+          baseUrl: config.auth.baseUrl,
+          outboxKey: outboxKeyFrom(config.outboxSecret),
+        }),
       ],
     };
   }

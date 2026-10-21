@@ -62,6 +62,9 @@ export const ApiErrorCodeSchema = z.enum([
   'too_many_requests',
   'email_unavailable',
   'temporarily_unavailable',
+  // Chat with the AI (ADR-0030).
+  'conversation_not_found',
+  'turn_in_progress',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

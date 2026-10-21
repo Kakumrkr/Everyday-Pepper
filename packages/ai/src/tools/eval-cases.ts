@@ -6,12 +6,20 @@ import { TOOLS } from './registry.js';
 // gives ("Move Maria's 3pm to 4pm" → move_booking with time 16:00) becomes a case that the
 // model must answer with that tool and those arguments. A vague description shows up as a
 // failing generated case in S27 instead of in the pilot; until then the cases are checked for
-// shape here and run on the fakes. Seeded worlds join them in S25.
+// shape here and run end to end on the scripted fake in a seeded world (S25, `evals.int.test.ts`).
+
+/** The clock the generated cases run on: Monday 2 November 2026, 07:00 in New York. */
+export const GENERATED_CASES_CLOCK = {
+  now: '2026-11-02T12:00:00.000Z',
+  timeZone: 'America/New_York',
+} as const;
 
 const FOLLOW_THROUGH = new Set(['add_todo']);
 
 /** One case per example in every tool's guide, on the business's clock. */
-export function toolEvalCases(clock: { now: string; timeZone: string }): EvalCase[] {
+export function toolEvalCases(
+  clock: { now: string; timeZone: string } = GENERATED_CASES_CLOCK,
+): EvalCase[] {
   return TOOLS.flatMap((tool) =>
     tool.guide.examples.map((example, index) =>
       EvalCaseSchema.parse({
@@ -22,7 +30,6 @@ export function toolEvalCases(clock: { now: string; timeZone: string }): EvalCas
         timeZone: clock.timeZone,
         actor: { role: 'owner' },
         turns: [{ user: example.say }],
-        tools: TOOLS.map((each) => each.name),
         expect: {
           toolCalls: [{ name: tool.name, arguments: example.args }],
         },

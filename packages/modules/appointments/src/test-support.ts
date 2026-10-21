@@ -22,7 +22,7 @@ export async function startTestDatabase(): Promise<TestDatabase> {
   const postgres = await startPostgres();
   const appUrl = postgresUrlAs(postgres.url, 'pepper_service', 'service-test-password');
   await prepareDatabase(postgres.url, appUrl);
-  const app = createDatabase({ url: appUrl, maxConnections: 8 });
+  const app = createDatabase({ url: appUrl, maxConnections: 8, connectionTimeoutMs: 30_000 });
   return {
     migrationUrl: postgres.url,
     app,

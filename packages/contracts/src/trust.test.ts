@@ -2,6 +2,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { PermissionSchema } from './permissions.js';
 import {
+  redactContacts,
   AUTONOMY_ACTIONS,
   ActionExplanationSchema,
   AutonomyActionSchema,
@@ -246,5 +247,46 @@ describe('StateFingerprintSchema', () => {
     expect(StateFingerprintSchema.safeParse('a'.repeat(64)).success).toBe(true);
     expect(StateFingerprintSchema.safeParse('A'.repeat(64)).success).toBe(false);
     expect(StateFingerprintSchema.safeParse('a'.repeat(63)).success).toBe(false);
+  });
+});
+
+describe('redactContacts', () => {
+  it('takes out emails and phone numbers and keeps ids, dates and times', () => {
+    expect(
+      redactContacts(
+        'Book Maria (maria.lopez@example.test or +1 212 555 0143) on 2026-11-03 at 14:00 for 0199f4b2-7c1e-7a00-8000-0000000000a1',
+      ),
+    ).toBe(
+      'Book Maria ((email removed) or (phone removed)) on 2026-11-03 at 14:00 for 0199f4b2-7c1e-7a00-8000-0000000000a1',
+    );
+    expect(redactContacts('Move the 3pm to 4pm')).toBe('Move the 3pm to 4pm');
+  });
+
+  it('never leaves anything that looks like a contact', () => {
+    const pieces = fc.constantFrom(
+      ' ',
+      '-',
+      '.',
+      '(',
+      ')',
+      '+',
+      '@',
+      'a',
+      'Maria',
+      'x.y',
+      '2026-11-03',
+      '14:00',
+      '0199f4b2-7c1e-7a00-8000-0000000000a1',
+      '5',
+      '555',
+      '0143',
+      'example.test',
+    );
+    fc.assert(
+      fc.property(fc.array(pieces, { maxLength: 30 }), (parts) => {
+        expect(looksLikeContact(redactContacts(parts.join('')))).toBe(false);
+      }),
+      { numRuns: 2_000 },
+    );
   });
 });

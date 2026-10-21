@@ -239,6 +239,20 @@
       "when": 1792542107373,
       "tag": "0033_trust_layer_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792587835082,
+      "tag": "0034_conversations",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792587844448,
+      "tag": "0035_conversations_hardening",
+      "breakpoints": true
     }
   ]
 }

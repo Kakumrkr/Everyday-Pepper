@@ -9,11 +9,25 @@
             {
               "id": "call_1",
               "name": "get_day",
-              "arguments": "{\"date\":\"2026-10-21\"}"
+              "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Tomorrow, Wednesday, is open so far.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
           "usage": {
             "inputTokens": 0,
             "cachedInputTokens": 0,

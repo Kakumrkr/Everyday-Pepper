@@ -1,7 +1,9 @@
-import type { LlmToolDefinition, LlmUsage } from '@pepper/contracts';
+import type { LlmUsage } from '@pepper/contracts';
 import { z } from 'zod';
+import { agentTools, instructionsFor } from '../agent/context.js';
+import { DEFAULT_LIMITS } from '../agent/loop.js';
 import type { EvalCase } from './case.js';
-import { skeletonInstructions } from './subject.js';
+import { evalBusinessContext } from './subject.js';
 
 /** USD per million tokens for one model, from the provider's pricing page (re-checked at S27). */
 export const ModelPriceSchema = z.strictObject({
@@ -40,25 +42,32 @@ export function costOfUsage(usage: LlmUsage, price: ModelPrice): number {
 }
 
 /**
- * The most a run of `cases`, `trials` times each, should cost: every call's input counted in
- * full and uncached (instructions, tools, the conversation so far with an allowance for each
- * earlier answer) and the full output allowance per call.
+ * The most a run of `cases`, `trials` times each, should cost: every turn taking the loop's
+ * every step (`callsPerTurn`), every call's input counted in full and uncached (instructions,
+ * tools, the conversation so far with an allowance for each earlier answer or tool result)
+ * and the full output allowance per call.
  */
 export function estimateRunCost(
-  cases: readonly { evalCase: EvalCase; tools: LlmToolDefinition[] }[],
+  cases: readonly EvalCase[],
   trials: number,
   price: ModelPrice,
+  callsPerTurn: number = DEFAULT_LIMITS.maxSteps,
 ): { usd: number; usage: LlmUsage } {
   let inputTokens = 0;
   let outputTokens = 0;
-  for (const { evalCase, tools } of cases) {
-    const base = tokensOf(skeletonInstructions(evalCase)) + tokensOf(JSON.stringify(tools));
+  const tools = tokensOf(JSON.stringify(agentTools()));
+  for (const evalCase of cases) {
+    const base =
+      tokensOf(instructionsFor(evalBusinessContext(evalCase), new Date(evalCase.now))) + tools;
     let conversation = 0;
     for (const turn of evalCase.turns) {
       conversation += tokensOf(turn.user);
-      inputTokens += base + conversation;
-      outputTokens += OUTPUT_ALLOWANCE_TOKENS;
-      conversation += OUTPUT_ALLOWANCE_TOKENS;
+      // Every step of the loop sends the turn so far again (a tool result per step, at most).
+      for (let call = 0; call < callsPerTurn; call += 1) {
+        inputTokens += base + conversation;
+        outputTokens += OUTPUT_ALLOWANCE_TOKENS;
+        conversation += OUTPUT_ALLOWANCE_TOKENS;
+      }
     }
   }
   const usage = {

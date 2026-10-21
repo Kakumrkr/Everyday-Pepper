@@ -1,26 +1,22 @@
-import type { z } from 'zod';
 import type { EvalCase } from './case.js';
 import { mismatches } from './matchers.js';
+import { findTool } from '../tools/registry.js';
 import type { Transcript } from './transcript.js';
 
 /**
- * Grades one run with code, never with a model (ADR-0027): the reasons it failed, or none.
- * `schemas` are the offered tools' argument schemas: a call outside them, or with arguments
- * they refuse, fails the case whatever the expectations say.
+ * Grades one run with code, never with a model (ADR-0027, ADR-0030): the reasons it failed, or
+ * none. A call to a tool that doesn't exist, or with arguments its schema refuses, fails the
+ * case whatever the expectations say; so does the business ending up other than expected.
  */
-export function grade(
-  evalCase: EvalCase,
-  transcript: Transcript,
-  schemas: ReadonlyMap<string, z.ZodType>,
-): string[] {
+export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
   const reasons: string[] = [];
   const { expect } = evalCase;
 
   for (const call of transcript.toolCalls) {
-    const schema = schemas.get(call.name);
-    if (schema === undefined || !evalCase.tools.includes(call.name)) {
-      reasons.push(`called ${call.name}, which was not offered`);
-    } else if (!schema.safeParse(call.arguments).success) {
+    const tool = findTool(call.name);
+    if (tool === undefined) {
+      reasons.push(`called ${call.name}, which is not a tool`);
+    } else if (!tool.args.safeParse(call.arguments).success) {
       reasons.push(`called ${call.name} with arguments its schema refuses: ${call.raw}`);
     }
   }
@@ -66,6 +62,26 @@ export function grade(
   }
   for (const pattern of expect.replyMustNotMatch) {
     if (new RegExp(pattern, 'i').test(reply)) reasons.push(`reply matches /${pattern}/i`);
+  }
+
+  const { actions } = expect;
+  if (actions.noWrites) {
+    const wrote = [...transcript.actions.done, ...transcript.actions.proposed];
+    if (wrote.length > 0) reasons.push(`expected no writes, got ${wrote.join(', ')}`);
+  }
+  for (const [kind, wanted] of [
+    ['done', actions.done],
+    ['proposed', actions.proposed],
+  ] as const) {
+    const left = [...transcript.actions[kind]];
+    for (const name of wanted) {
+      const at = left.indexOf(name);
+      if (at === -1) reasons.push(`expected ${name} to be ${kind}`);
+      else left.splice(at, 1);
+    }
+    if (wanted.length > 0 && left.length > 0) {
+      reasons.push(`also ${kind}: ${left.join(', ')}`);
+    }
   }
   return reasons;
 }

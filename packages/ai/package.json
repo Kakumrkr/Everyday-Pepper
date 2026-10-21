@@ -2,13 +2,18 @@
   "name": "@pepper/ai",
   "version": "0.0.0",
   "private": true,
-  "description": "AI agent layer (ADR-0004, ADR-0027, ADR-0029): the provider port and its OpenAI adapter, fake providers (scripted and hostile), metering, the eval runner and the tool registry. Later: the agent loop.",
+  "description": "AI agent layer (ADR-0004, ADR-0027, ADR-0029): the provider port and its OpenAI adapter, fake providers (scripted and hostile), metering, the eval runner, the tool registry and the agent loop (ADR-0030).",
   "type": "module",
   "exports": {
     ".": {
       "@pepper/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./config": {
+      "@pepper/source": "./src/openai/config.ts",
+      "types": "./dist/openai/config.d.ts",
+      "default": "./dist/openai/config.js"
     }
   },
   "files": [
@@ -23,6 +28,7 @@
     "test:integration": "vitest run --config vitest.int.config.ts"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.9.1",
     "@pepper/appointments": "workspace:*",
     "@pepper/contracts": "workspace:*",
     "@pepper/core": "workspace:*",
@@ -31,9 +37,11 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@opentelemetry/sdk-trace-base": "^2.12.0",
     "@pepper/config": "workspace:*",
     "@pepper/testing": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",
+    "drizzle-orm": "^0.45.4",
     "fast-check": "^4.10.2",
     "vitest": "^5.0.5"
   }

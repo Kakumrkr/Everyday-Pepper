@@ -81,4 +81,29 @@ describe('loadApiConfig', () => {
       key.equals(loadApiConfig({ ...required, AUTH_SECRET: `${SECRET}x` }).bookingCodeKey),
     ).toBe(false);
   });
+
+  it('has the AI off without a key, with a 5M-token monthly budget by default', () => {
+    expect(loadApiConfig(required).ai).toEqual({ openai: null, monthlyTokens: 5_000_000 });
+    expect(loadApiConfig({ ...required, AI_MONTHLY_TOKENS: '200000' }).ai.monthlyTokens).toBe(
+      200_000,
+    );
+    expect(() => loadApiConfig({ ...required, AI_MONTHLY_TOKENS: '0' })).toThrow(
+      /^Invalid api environment: AI_MONTHLY_TOKENS$/,
+    );
+  });
+
+  it('reads the OpenAI settings and refuses a key without the models, without echoing it', () => {
+    const key = 'sk-test-0123456789abcdefghij';
+    expect(
+      loadApiConfig({
+        ...required,
+        OPENAI_API_KEY: key,
+        OPENAI_MODEL_ROUTINE: 'small-model',
+        OPENAI_MODEL_STRONG: 'big-model',
+      }).ai.openai,
+    ).toMatchObject({ apiKey: key, models: { routine: 'small-model', strong: 'big-model' } });
+    expect(() => loadApiConfig({ ...required, OPENAI_API_KEY: key })).toThrow(
+      /^Invalid OpenAI environment: Set OPENAI_MODEL_ROUTINE/,
+    );
+  });
 });

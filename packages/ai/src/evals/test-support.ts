@@ -11,7 +11,6 @@ export function evalCase(overrides: Partial<EvalCaseInput> = {}): EvalCase {
     timeZone: 'America/New_York',
     actor: { role: 'owner' },
     turns: [{ user: 'Book Maria for a haircut on Friday at 4pm' }],
-    tools: ['find_clients', 'create_booking', 'email_clients'],
     expect: {},
     ...overrides,
   });
@@ -21,6 +20,7 @@ export function transcript(overrides: Partial<Transcript> = {}): Transcript {
   return {
     toolCalls: [],
     replies: [],
+    actions: { done: [], proposed: [] },
     usage: { inputTokens: 0, cachedInputTokens: 0, outputTokens: 0 },
     models: [],
     ...overrides,

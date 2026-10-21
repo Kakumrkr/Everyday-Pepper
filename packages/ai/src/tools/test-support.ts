@@ -44,7 +44,12 @@ export async function startTestDatabase(
   const postgres = await startPostgres();
   const appUrl = postgresUrlAs(postgres.url, 'pepper_service', 'service-test-password');
   await prepareDatabase(postgres.url, appUrl);
-  const app = createDatabase({ url: appUrl, maxConnections: 8, ...options });
+  const app = createDatabase({
+    url: appUrl,
+    maxConnections: 8,
+    connectionTimeoutMs: 30_000,
+    ...options,
+  });
   return {
     app,
     stop: async () => {
@@ -203,6 +208,7 @@ export function turn(overrides: Partial<ToolTurn> = {}): ToolTurn {
   calls += 1;
   return {
     turnKey: `conv:test:turn:${String(calls)}`,
+    step: 1,
     requestMessageId: null,
     untrustedContext: false,
     ...overrides,

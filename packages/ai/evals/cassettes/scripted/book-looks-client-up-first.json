@@ -9,11 +9,25 @@
             {
               "id": "call_1",
               "name": "find_clients",
-              "arguments": "{\"query\":\"Maria\"}"
+              "arguments": "{\"name\":\"Maria\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "I found Maria L. Which time on Friday works: 4pm with Jess?",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
           "usage": {
             "inputTokens": 0,
             "cachedInputTokens": 0,

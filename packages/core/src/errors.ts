@@ -75,6 +75,14 @@ export class ClientNotFoundError extends Error {
   }
 }
 
+/** No such conversation or turn of the member (every role sees only its own, ADR-0030). */
+export class ConversationNotFoundError extends Error {
+  constructor() {
+    super('No such conversation');
+    this.name = 'ConversationNotFoundError';
+  }
+}
+
 /** No such task in the business, or not one the member may see (staff: their own). */
 export class TaskNotFoundError extends Error {
   constructor() {

@@ -8,6 +8,7 @@ import {
   type MailConfig,
   type ServiceConfig,
 } from '@pepper/runtime/instrument';
+import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
 import { z } from 'zod';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -29,6 +30,18 @@ const AuthEnvSchema = z.object({
     ),
 });
 
+const AiEnvSchema = z.object({
+  /** A business's monthly allowance of model tokens (ADR-0030); soft limit at 80%. */
+  AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
+});
+
+/** The AI employee (ADR-0027, ADR-0030). */
+export interface AiConfig {
+  /** `null`: no key, the AI is off; chat answers with its fallback, every screen works. */
+  openai: OpenAiConfig | null;
+  monthlyTokens: number;
+}
+
 export interface AuthConfig {
   secret: string;
   /** Origin, without a trailing slash. */
@@ -46,6 +59,7 @@ export interface ApiConfig extends ServiceConfig {
   outboxSecret: string;
   /** The public VAPID key (ADR-0026); `null`: no pushes are offered or queued. */
   pushPublicKey: string | null;
+  ai: AiConfig;
 }
 
 /**
@@ -63,6 +77,10 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     bookingCodeKey: deriveKey(auth.AUTH_SECRET, 'pepper/booking-page-codes'),
     outboxSecret: loadOutboxSecret('api', env),
     pushPublicKey: loadPushPublicKey('api', env),
+    ai: {
+      openai: loadOpenAiConfig(env),
+      monthlyTokens: loadEnv('api', AiEnvSchema, present).AI_MONTHLY_TOKENS,
+    },
   };
 }
 

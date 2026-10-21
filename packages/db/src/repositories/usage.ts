@@ -6,6 +6,7 @@ import {
   type UsagePeriod,
 } from '@pepper/contracts';
 import { asc, eq, sql } from 'drizzle-orm';
+import { z } from 'zod';
 import { usageMeters } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
 
@@ -28,6 +29,54 @@ export async function addUsage(
     .onConflictDoUpdate({
       target: [usageMeters.tenantId, usageMeters.metric, usageMeters.period],
       set: { amount: sql`${usageMeters.amount} + excluded.amount` },
+    });
+}
+
+/**
+ * Reserves `amount` of `metric` in `period` if the counter stays within `limit`, atomically
+ * (one conditional upsert of the counter's row): of many concurrent reservations, only those
+ * that fit succeed. Returns the counter after the reservation, or `null` if it did not fit. `settleUsage` later corrects the
+ * reservation to what was really used (ADR-0030: a hard budget that holds under concurrency).
+ */
+export async function reserveUsage(
+  tx: TenantTx,
+  input: { metric: UsageMetric; period: UsagePeriod; amount: number; limit: number },
+): Promise<number | null> {
+  const metric = UsageMetricSchema.parse(input.metric);
+  const period = UsagePeriodSchema.parse(input.period);
+  const amount = UsageAmountSchema.parse(input.amount);
+  const limit = UsageAmountSchema.parse(input.limit);
+  if (amount > limit) return null;
+  const rows = await tx
+    .insert(usageMeters)
+    .values({ metric, period, amount })
+    .onConflictDoUpdate({
+      target: [usageMeters.tenantId, usageMeters.metric, usageMeters.period],
+      set: { amount: sql`${usageMeters.amount} + excluded.amount` },
+      setWhere: sql`${usageMeters.amount} + excluded.amount <= ${limit}`,
+    })
+    .returning({ amount: usageMeters.amount });
+  return rows[0]?.amount ?? null;
+}
+
+/**
+ * Corrects a reservation by `delta` (what was used minus what was reserved; negative gives
+ * back). The counter never goes below zero.
+ */
+export async function settleUsage(
+  tx: TenantTx,
+  input: { metric: UsageMetric; period: UsagePeriod; delta: number },
+): Promise<void> {
+  const metric = UsageMetricSchema.parse(input.metric);
+  const period = UsagePeriodSchema.parse(input.period);
+  const delta = z.int().min(-1_000_000_000).max(1_000_000_000).parse(input.delta);
+  if (delta === 0) return;
+  await tx
+    .insert(usageMeters)
+    .values({ metric, period, amount: Math.max(delta, 0) })
+    .onConflictDoUpdate({
+      target: [usageMeters.tenantId, usageMeters.metric, usageMeters.period],
+      set: { amount: sql`GREATEST(${usageMeters.amount} + ${delta}, 0)` },
     });
 }
 
