@@ -112,6 +112,8 @@ export const ROUTES = {
   clients: '/clients',
   services: '/services',
   rules: '/services/rules',
+  chat: '/chat',
+  autonomy: '/autonomy',
   home: '/',
 } as const;
 

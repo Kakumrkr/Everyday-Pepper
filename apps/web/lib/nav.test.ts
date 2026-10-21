@@ -17,6 +17,15 @@ describe('navItems', () => {
     ).toEqual(['Home', 'Calendar', 'Clients', 'Services', 'Team']);
     expect(navItems([]).map((item) => item.label)).toEqual(['Home', 'Team']);
   });
+
+  it('Chat second, for every role that may talk to Pepper (S26)', () => {
+    expect(navItems(['ai.chat', 'calendar.read']).map((item) => item.href)).toEqual([
+      '/',
+      '/chat',
+      '/calendar',
+      '/team',
+    ]);
+  });
 });
 
 describe('isCurrent', () => {
