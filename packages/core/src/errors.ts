@@ -1,4 +1,4 @@
-import type { Permission } from '@pepper/contracts';
+import type { Permission, UndoRefusal } from '@pepper/contracts';
 
 /** The member's role does not allow this (`permission`, if one permission decided it). */
 export class ForbiddenError extends Error {
@@ -135,11 +135,10 @@ export class UndoWindowClosedError extends Error {
 }
 
 /**
- * Why an undo was refused although its window is open, as a stable code the *Why?* sheet can
- * explain: the world moved on (the slot was rebooked, the appointment started, the email left).
+ * Why an undo was refused although its window is open (`UndoRefusalSchema` in the contracts):
+ * the world moved on (the slot was rebooked, the appointment started, the email left).
  */
-export type UndoRefusal =
-  'slot_taken' | 'already_started' | 'already_sent' | 'changed_since' | 'not_possible';
+export type { UndoRefusal };
 
 /** The inverse was refused by the domain; nothing was changed (ADR-0028). */
 export class UndoRefusedError extends Error {

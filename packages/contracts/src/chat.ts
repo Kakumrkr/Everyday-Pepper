@@ -62,10 +62,13 @@ export type TurnStopReason = z.infer<typeof TurnStopReasonSchema>;
 export const TurnStatusSchema = z.enum(['running', 'completed', 'failed', 'cancelled']);
 export type TurnStatus = z.infer<typeof TurnStatusSchema>;
 
-/** A screen in the app the fallback points to (relative links only). */
+/**
+ * A screen in the app the fallback points to: a path in this app only, never `//host`
+ * (protocol-relative) or a URL (OWASP LLM10, S26).
+ */
 export const ScreenLinkSchema = z.strictObject({
   label: z.string().min(1).max(40),
-  href: z.string().regex(/^\/[a-z0-9/-]*$/),
+  href: z.string().regex(/^\/(?:[a-z0-9-]+(?:\/[a-z0-9-]+)*)?$/),
 });
 export type ScreenLink = z.infer<typeof ScreenLinkSchema>;
 

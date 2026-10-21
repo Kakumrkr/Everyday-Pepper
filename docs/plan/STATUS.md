@@ -5,7 +5,11 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S25 is complete, ADR-0030 is accepted (pre-approved by the user), and the PR is opened and merged to `main`. Next: S26 in a new session from `main`.
+**S26 (6e) started 2026-10-21** on `claude/epic-bardeen-hqs6l4`. Brief confirmed by the user: "Go ahead with your recommendations, draft PCR-004, ADR is pre-approved … I'm pre-approving the PCR and ADR; raise the PR and merge to main; give a prompt for the next session."
+- **Decisions (user, brief):** migration 0036 (`tool_version` on proposals → expired on a version change; `requested_by_user_id` on executions so staff see a lead-approved receipt) recorded in ADR-0031 as an ADR-0028 amendment without a PCR; staff may undo what a lead approved for them while their role allows it; jsdom + Testing Library + axe-core as dev-only test deps in `packages/ui`; managers change autonomy (ADR-0028 wins over the prototype copy); ADR-0031 and PCR-004 pre-approved.
+- **Also decided:** the api's 200 ms Redis polling for chat events and cancel stays; blocking `XREAD` + pub/sub is logged for Phase 11 (load test). PCR-004 adds S26b (tool gaps: `find_client_bookings`, `list_todos`, `complete_todo`, `unblock_time`) before S27; client notes go to Phase 7.
+- **Tasks:** T1 contracts · T2 migration + core · T3 api endpoints · T4 scripted e2e provider · T5 ui cards · T6 chat screen · T7 Autonomy page + Home receipts · T8 Playwright · T9 docs, PR, merge.
+- **Done:** nothing yet. **Next:** T1.
 
 ## Last sessions
 - **S25 Phase 6d (2026-10-21): agent loop, conversations, SSE, budgets** ([ADR-0030](../adr/0030-agent-loop-and-conversations.md), accepted). Full entry in [session-log.md](session-log.md).

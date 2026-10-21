@@ -120,6 +120,11 @@ export const ToolCardSchema = z.discriminatedUnion('kind', [
     before: ChangeSideSchema.nullable(),
     after: ChangeSideSchema.nullable(),
     emails: z.array(WouldBeEmailSchema).max(20),
+    /**
+     * One sentence the tool's code wrote (S26), never the model's text. Optional: cards stored
+     * in conversations before S26 have none.
+     */
+    summary: z.string().max(600).optional(),
   }),
   z.strictObject({ kind: z.literal('booking'), booking: BookingViewSchema }),
   /** One day's schedule. */
