@@ -62,11 +62,12 @@ export async function directoryOf(scope: ToolScope): Promise<Directory> {
   };
 }
 
-/** The staff member linked to the member's own login, if any. */
+/**
+ * The staff member linked to the requesting member's own login, if any: "me" in the request,
+ * also when a lead approves it for them (S26).
+ */
 export function ownStaffMember(scope: ToolScope, directory: Directory): StaffMember | undefined {
-  return [...directory.staff.values()].find(
-    (member) => member.userId === scope.actor.context.userId,
-  );
+  return [...directory.staff.values()].find((member) => member.userId === scope.requester);
 }
 
 /** Whose record a staff member's booking or time off is: their login (ADR-0017). */

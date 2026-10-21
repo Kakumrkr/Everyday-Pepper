@@ -65,6 +65,12 @@ export const ApiErrorCodeSchema = z.enum([
   // Chat with the AI (ADR-0030).
   'conversation_not_found',
   'turn_in_progress',
+  // The AI's proposals and actions (ADR-0031).
+  'proposal_not_found',
+  'proposal_not_pending',
+  'action_not_found',
+  'undo_window_closed',
+  'undo_refused',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

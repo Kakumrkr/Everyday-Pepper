@@ -213,13 +213,64 @@ export async function approveToolProposal(
 ): Promise<ApprovalResult> {
   const proposal = await getProposal(deps.db, deps.actor, proposalId);
   const tool = writeToolNamed(proposal.tool);
+  // "Me" in the request is the member who asked, not the approver (S26: a lead approving a
+  // staff member's "remind me" made the to-do the lead's).
+  const forRequester: ToolDeps =
+    proposal.requestedByUserId === null ? deps : { ...deps, requester: proposal.requestedByUserId };
+  // A proposal from another version of the tool expires (ADR-0031): its payload may not even
+  // parse with today's schema, so it is never re-run.
+  const runner =
+    proposal.toolVersion === tool.version
+      ? writeRunner(tool, forRequester, proposal.payload).runner
+      : expiringRunner(tool, proposal.action);
   return approveProposal(
     deps.db,
     deps.actor,
     proposal.id,
-    { shownFingerprint, runner: writeRunner(tool, deps, proposal.payload).runner },
+    { shownFingerprint, runner },
     { clock: deps.clock },
   );
+}
+
+/**
+ * What a refused approval tells the member (S26): the tool's stable code and plain message,
+ * and for a time taken meanwhile, a SlotPicker with the nearest free times. Never the error's
+ * own text.
+ */
+export async function approvalRefusal(
+  deps: ToolDeps,
+  proposal: Pick<ActionProposal, 'tool' | 'payload'>,
+  error: unknown,
+): Promise<{ code: ToolErrorCode; message: string; card: ToolCard | null }> {
+  const outcome = await refused(
+    deps,
+    proposal.tool,
+    toolRefusalOf(error),
+    error,
+    serviceIdIn(proposal.payload),
+  );
+  if (outcome.status !== 'refused') throw new Error('A refusal is always refused');
+  return { code: outcome.code, message: outcome.message, card: outcome.card };
+}
+
+/**
+ * A stored preview as the cards show it: the tool's summary, the change and the would-be
+ * emails (`null` for a preview that doesn't have that shape).
+ */
+export function shownPreview(preview: unknown): {
+  summary: string;
+  before: ChangeSide | null;
+  after: ChangeSide | null;
+  emails: WouldBeEmail[];
+} | null {
+  const shown = PreviewSchema.safeParse(preview);
+  if (!shown.success) return null;
+  return {
+    summary: shown.data.summary,
+    before: shown.data.before as ChangeSide | null,
+    after: shown.data.after as ChangeSide | null,
+    emails: shown.data.emails as WouldBeEmail[],
+  };
 }
 
 /** A member undoes an AI action within its window (S26), by its id. People only. */
@@ -375,6 +426,7 @@ function changeCard(
     before: shown.before as ChangeSide | null,
     after: shown.after as ChangeSide | null,
     emails: shown.emails as WouldBeEmail[],
+    summary: shown.summary,
   };
 }
 
@@ -424,6 +476,20 @@ function writeToolNamed(name: string): WriteTool {
   const tool = findTool(name);
   if (tool?.kind !== 'write') throw new UnknownToolError();
   return tool;
+}
+
+/** The runner for a proposal of another tool version: the trust layer only expires it. */
+function expiringRunner(tool: WriteTool, action: AutonomyAction): ActionRunner {
+  const refuse = () => Promise.reject(new Error(`${tool.name}: an older proposal only expires`));
+  return {
+    tool: tool.name,
+    version: tool.version,
+    actions: [action],
+    tier: tool.tier,
+    preview: refuse,
+    execute: refuse,
+    undo: refuse,
+  };
 }
 
 /** A runner that can only undo (the receipt holds the inverse; no payload is needed). */

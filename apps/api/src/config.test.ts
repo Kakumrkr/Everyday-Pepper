@@ -83,7 +83,11 @@ describe('loadApiConfig', () => {
   });
 
   it('has the AI off without a key, with a 5M-token monthly budget by default', () => {
-    expect(loadApiConfig(required).ai).toEqual({ openai: null, monthlyTokens: 5_000_000 });
+    expect(loadApiConfig(required).ai).toEqual({
+      openai: null,
+      monthlyTokens: 5_000_000,
+      scripted: false,
+    });
     expect(loadApiConfig({ ...required, AI_MONTHLY_TOKENS: '200000' }).ai.monthlyTokens).toBe(
       200_000,
     );
@@ -105,5 +109,48 @@ describe('loadApiConfig', () => {
     expect(() => loadApiConfig({ ...required, OPENAI_API_KEY: key })).toThrow(
       /^Invalid OpenAI environment: Set OPENAI_MODEL_ROUTINE/,
     );
+  });
+
+  it('allows the scripted e2e model only where tests run, and never next to a real key (S26)', () => {
+    expect(loadApiConfig({ ...required, AI_SCRIPTED_PROVIDER: 'e2e' }).ai.scripted).toBe(true);
+    expect(
+      loadApiConfig({ ...required, AI_SCRIPTED_PROVIDER: 'e2e', DEPLOYMENT_ENVIRONMENT: 'ci' }).ai
+        .scripted,
+    ).toBe(true);
+    for (const environment of ['pilot', 'production', 'staging']) {
+      expect(() =>
+        loadApiConfig({
+          ...required,
+          AI_SCRIPTED_PROVIDER: 'e2e',
+          DEPLOYMENT_ENVIRONMENT: environment,
+        }),
+      ).toThrow(/^Invalid api environment: AI_SCRIPTED_PROVIDER$/);
+    }
+    expect(() =>
+      loadApiConfig({
+        ...required,
+        AI_SCRIPTED_PROVIDER: 'e2e',
+        OPENAI_API_KEY: 'sk-test-0123456789abcdefghij',
+        OPENAI_MODEL_ROUTINE: 'small-model',
+        OPENAI_MODEL_STRONG: 'big-model',
+      }),
+    ).toThrow(/^Invalid api environment: AI_SCRIPTED_PROVIDER$/);
+    // A production build that forgot its environment name (default `local`) is refused too.
+    expect(() =>
+      loadApiConfig({ ...required, AI_SCRIPTED_PROVIDER: 'e2e', NODE_ENV: 'production' }),
+    ).toThrow(/^Invalid api environment: AI_SCRIPTED_PROVIDER$/);
+    expect(
+      loadApiConfig({
+        ...required,
+        AI_SCRIPTED_PROVIDER: 'e2e',
+        NODE_ENV: 'production',
+        DEPLOYMENT_ENVIRONMENT: 'ci',
+      }).ai.scripted,
+    ).toBe(true);
+    expect(() => loadApiConfig({ ...required, AI_SCRIPTED_PROVIDER: 'yes' })).toThrow(
+      /^Invalid api environment: AI_SCRIPTED_PROVIDER$/,
+    );
+    // Empty means unset, as for every variable.
+    expect(loadApiConfig({ ...required, AI_SCRIPTED_PROVIDER: '' }).ai.scripted).toBe(false);
   });
 });

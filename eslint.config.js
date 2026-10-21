@@ -113,6 +113,30 @@ export default defineConfig(
     settings: { next: { rootDir: 'apps/web' } },
   },
   {
+    // OWASP LLM10 (S26, ADR-0031): the AI's words and anything a card carries are rendered as
+    // plain text. No raw HTML, and no Markdown renderer that could turn model text into links.
+    name: 'pepper/no-raw-html',
+    files: ['apps/web/**/*.{ts,tsx}', 'packages/ui/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message: 'Render text as text (OWASP LLM10): never dangerouslySetInnerHTML.',
+        },
+        {
+          selector: 'AssignmentExpression[left.property.name=/^(innerHTML|outerHTML)$/]',
+          message: 'Render text as text (OWASP LLM10): never innerHTML.',
+        },
+        {
+          selector:
+            'ImportDeclaration[source.value=/markdown|^marked$|remark|rehype|sanitize-html/]',
+          message: 'No Markdown or HTML renderers in the app: the AI’s text stays plain text.',
+        },
+      ],
+    },
+  },
+  {
     name: 'pepper/web-service-worker',
     files: ['apps/web/public/sw.js'],
     languageOptions: { globals: globals.serviceworker, sourceType: 'script' },

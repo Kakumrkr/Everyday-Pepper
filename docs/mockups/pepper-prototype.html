@@ -2083,7 +2083,7 @@ Ana at Juniper Hair Studio</textarea>
         }).join("")}</div>
         <div class="actions"><button class="btn btn-primary" data-action="invite">${icon("users")}Invite a teammate</button></div>
         <div class="card"><span class="eyebrow">Who can do what</span>
-          <dl class="kv"><dt>Owner</dt><dd>Everything, including autonomy settings and billing.</dd><dt>Manager</dt><dd>Everyone's schedule and clients. Can't change autonomy or billing.</dd><dt>Staff</dt><dd>Only their own appointments and client notes.</dd></dl>
+          <dl class="kv"><dt>Owner</dt><dd>Everything, including autonomy settings and billing.</dd><dt>Manager</dt><dd>Everyone's schedule and clients, and the autonomy settings. Can't change billing.</dd><dt>Staff</dt><dd>Only their own appointments and client notes.</dd></dl>
         </div>`;
     } else {
       $("#team-body").innerHTML = svcGroups().map((g) => `
@@ -2103,7 +2103,7 @@ Ana at Juniper Hair Studio</textarea>
         <div class="field" role="radiogroup" aria-label="Role">
           <span style="font-size:13px;font-weight:700">Role</span>
           <label class="radio-card"><input type="radio" name="invite-role" id="invite-role-staff" value="Staff" checked><span><b>Staff</b><br><span class="small muted">Sees and edits only their own appointments and client notes.</span></span></label>
-          <label class="radio-card"><input type="radio" name="invite-role" id="invite-role-manager" value="Manager"><span><b>Manager</b><br><span class="small muted">Runs everyone's schedule and clients. Can't change autonomy or billing.</span></span></label>
+          <label class="radio-card"><input type="radio" name="invite-role" id="invite-role-manager" value="Manager"><span><b>Manager</b><br><span class="small muted">Runs everyone's schedule and clients, and the autonomy settings. Can't change billing.</span></span></label>
         </div>
         <div class="actions"><button class="btn btn-primary" type="submit">Send invite</button><button class="btn btn-ghost" type="button" data-action="close-sheet">Cancel</button></div>
       </form>`);

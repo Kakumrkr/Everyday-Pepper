@@ -15,6 +15,10 @@ export interface NavItem {
 export function navItems(permissions: readonly Permission[] | null): NavItem[] {
   const items: NavItem[] = [{ href: ROUTES.home, label: 'Home', icon: 'home' }];
   if (permissions === null) return items;
+  // Second, within thumb reach: talking to Pepper is the app's main way in (S26).
+  if (permissions.includes('ai.chat')) {
+    items.push({ href: ROUTES.chat, label: 'Chat', icon: 'chat' });
+  }
   if (permissions.includes('calendar.read')) {
     items.push({ href: ROUTES.calendar, label: 'Calendar', icon: 'calendar' });
   }

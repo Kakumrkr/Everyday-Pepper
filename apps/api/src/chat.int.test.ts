@@ -2,8 +2,15 @@ import 'reflect-metadata';
 import type { Server } from 'node:http';
 import { Writable } from 'node:stream';
 import {
+  AiActionsResponseSchema,
+  AiActionViewSchema,
+  AiProposalViewSchema,
   ApiErrorSchema,
+  ApproveProposalResponseSchema,
+  BusinessAutonomySchema,
   ChatEventSchema,
+  ChatStatusSchema,
+  UndoActionResponseSchema,
   ChatHistoryResponseSchema,
   ConversationsResponseSchema,
   TenantIdSchema,
@@ -29,6 +36,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { AppModule } from './app.module.js';
 import { ChatModule } from './chat/chat.module.js';
 import { LLM_PROVIDER } from './chat/chat.service.js';
+import { TurnEventLog } from './chat/turn-events.js';
 import { loadApiConfig } from './config.js';
 
 // Chat over HTTP against real Postgres, Redis and Better Auth, with the model swapped for a
@@ -349,6 +357,241 @@ describe('POST /v1/chat/turns', () => {
     const { owner, tenantId } = await business();
     await owner.post('/v1/chat/turns', { ...turnRequest('Hi'), tenantId }).expect(400);
     await owner.post('/v1/chat/turns', turnRequest('')).expect(400);
+  });
+});
+
+describe('S26: proposals, receipts, Why, Undo and the autonomy dial over HTTP (ADR-0031)', () => {
+  const todoCall = (title: string) => () =>
+    scriptedResponse({
+      toolCalls: [
+        {
+          id: 'c1',
+          name: 'add_todo',
+          arguments: JSON.stringify({
+            title,
+            dueDate: null,
+            dueTime: null,
+            assigneeStaffMemberId: null,
+          }),
+        },
+      ],
+    });
+
+  /** A turn in which the member asks for a to-do; returns the card the stream showed. */
+  async function askForTodo(member: Browser, message: string) {
+    model.next.push(todoCall(message), () => scriptedResponse({ text: 'Noted.' }));
+    const stream = frames(
+      (await sse(member.post('/v1/chat/turns', turnRequest(message))).expect(200)).body as string,
+    );
+    const finished = stream.find((frame) => frame.data.type === 'tool.finished')?.data;
+    if (finished?.type !== 'tool.finished' || finished.card?.kind !== 'change') {
+      throw new Error('expected a change card');
+    }
+    return finished.card;
+  }
+
+  it('the dial: everyone reads it, staff cannot change it, "just do it" never for bulk', async () => {
+    const { owner, staff } = await business();
+    const read = BusinessAutonomySchema.parse((await staff.get('/v1/autonomy').expect(200)).body);
+    expect(read.askFirst).toBe(false);
+    expect(errorCode((await staff.put('/v1/autonomy', { askFirst: true }).expect(403)).body)).toBe(
+      'forbidden',
+    );
+    await owner.put('/v1/autonomy', { levels: { 'message.bulk': 'auto' } }).expect(400);
+    const changed = BusinessAutonomySchema.parse(
+      (await owner.put('/v1/autonomy', { askFirst: true }).expect(200)).body,
+    );
+    expect(changed.askFirst).toBe(true);
+    expect(ChatStatusSchema.parse((await staff.get('/v1/chat/status').expect(200)).body)).toEqual({
+      state: 'on',
+    });
+  });
+
+  it('a staff proposal: shown with the member’s own words, approved by the lead exactly as shown, the receipt is the staff member’s too, and Undo takes it back', async () => {
+    const { owner, staff } = await business();
+    await owner.put('/v1/autonomy', { askFirst: true }).expect(200);
+    const card = await askForTodo(staff, 'Remind me to restock the towels');
+    expect(card).toMatchObject({
+      state: 'proposed',
+      summary: expect.stringContaining('towels') as string,
+    });
+    const proposalId = String(card.proposalId);
+
+    const mine = AiProposalViewSchema.parse(
+      (await staff.get(`/v1/ai/proposals/${proposalId}`).expect(200)).body,
+    );
+    expect(mine).toMatchObject({
+      status: 'pending',
+      forYou: true,
+      canDecide: true,
+      fingerprint: card.fingerprint,
+      why: {
+        asked: { kind: 'message', text: 'Remind me to restock the towels' },
+        steps: [{ tool: 'add_todo' }],
+        decision: { outcome: 'propose', reason: 'ask_first' },
+      },
+    });
+    // The owner sees the proposal, but never the staff member's own words (own conversations).
+    const seenByOwner = AiProposalViewSchema.parse(
+      (await owner.get(`/v1/ai/proposals/${proposalId}`).expect(200)).body,
+    );
+    expect(seenByOwner).toMatchObject({
+      forYou: false,
+      canDecide: true,
+      why: { asked: { kind: 'not_shown' } },
+    });
+    // Another business: as if it did not exist.
+    const other = await business();
+    expect(
+      errorCode((await other.owner.get(`/v1/ai/proposals/${proposalId}`).expect(404)).body),
+    ).toBe('proposal_not_found');
+    expect(
+      errorCode(
+        (
+          await other.owner
+            .post(`/v1/ai/proposals/${proposalId}/approve`, { fingerprint: card.fingerprint })
+            .expect(404)
+        ).body,
+      ),
+    ).toBe('proposal_not_found');
+    // Only the fingerprint: a payload in the body is refused.
+    await owner
+      .post(`/v1/ai/proposals/${proposalId}/approve`, {
+        fingerprint: card.fingerprint,
+        payload: { title: 'Something else' },
+      })
+      .expect(400);
+
+    // An out-of-date card: nothing runs, the fresh proposal comes back to show.
+    const stale = ApproveProposalResponseSchema.parse(
+      (
+        await owner
+          .post(`/v1/ai/proposals/${proposalId}/approve`, { fingerprint: 'f'.repeat(64) })
+          .expect(200)
+      ).body,
+    );
+    if (stale.kind !== 'stale') throw new Error('expected stale');
+    expect(stale.proposal.id).not.toBe(proposalId);
+    expect(
+      AiProposalViewSchema.parse(
+        (await staff.get(`/v1/ai/proposals/${proposalId}`).expect(200)).body,
+      ).status,
+    ).toBe('superseded');
+
+    // Approving the fresh one exactly as shown runs it once, also on a double tap.
+    const fresh = stale.proposal;
+    const [first, second] = await Promise.all([
+      owner.post(`/v1/ai/proposals/${fresh.id}/approve`, { fingerprint: fresh.fingerprint }),
+      owner.post(`/v1/ai/proposals/${fresh.id}/approve`, { fingerprint: fresh.fingerprint }),
+    ]);
+    const approved = ApproveProposalResponseSchema.parse(first.body);
+    if (approved.kind !== 'executed') throw new Error('expected an execution');
+    expect(ApproveProposalResponseSchema.parse(second.body)).toMatchObject({
+      kind: 'executed',
+      action: { id: approved.action.id },
+    });
+
+    // The staff member sees the receipt a lead approved for them (S23 log), and may undo it.
+    const receipt = AiActionViewSchema.parse(
+      (await staff.get(`/v1/ai/actions/${approved.action.id}`).expect(200)).body,
+    );
+    expect(receipt).toMatchObject({
+      status: 'done',
+      forYou: true,
+      canUndo: true,
+      approvedByName: 'Ana',
+      summary: expect.stringContaining('towels') as string,
+    });
+    const listed = AiActionsResponseSchema.parse(
+      (await staff.get('/v1/ai/actions').expect(200)).body,
+    );
+    expect(listed.actions.map((a) => a.id)).toContain(approved.action.id);
+    expect(
+      errorCode((await other.owner.get(`/v1/ai/actions/${approved.action.id}`).expect(404)).body),
+    ).toBe('action_not_found');
+    await other.owner
+      .post(`/v1/ai/actions/${approved.action.id}/undo`, { reason: null })
+      .expect(404);
+
+    const undone = UndoActionResponseSchema.parse(
+      (
+        await staff
+          .post(`/v1/ai/actions/${approved.action.id}/undo`, { reason: 'changed_mind' })
+          .expect(200)
+      ).body,
+    );
+    expect(undone).toMatchObject({
+      action: { status: 'undone', canUndo: false, undoReason: 'changed_mind' },
+      takenBack: 0,
+      alreadySent: 0,
+    });
+    const tasks = (await staff.get('/v1/tasks').expect(200)).body as { tasks: { title: string }[] };
+    expect(tasks.tasks.map((t) => t.title)).not.toContain('Remind me to restock the towels');
+  });
+
+  it('rejecting: the member turns it down once; it can no longer be approved', async () => {
+    const { owner, staff } = await business();
+    await owner.put('/v1/autonomy', { askFirst: true }).expect(200);
+    const card = await askForTodo(staff, 'Remind me to order foils');
+    const rejected = AiProposalViewSchema.parse(
+      (await staff.post(`/v1/ai/proposals/${String(card.proposalId)}/reject`).expect(200)).body,
+    );
+    expect(rejected).toMatchObject({ status: 'rejected', canDecide: false });
+    expect(
+      errorCode(
+        (
+          await owner
+            .post(`/v1/ai/proposals/${String(card.proposalId)}/approve`, {
+              fingerprint: card.fingerprint,
+            })
+            .expect(409)
+        ).body,
+      ),
+    ).toBe('proposal_not_pending');
+  });
+
+  it('a staff member cannot see or decide a colleague’s proposal', async () => {
+    const { tenantId, owner, staff } = await business();
+    await owner.put('/v1/autonomy', { askFirst: true }).expect(200);
+    const card = await askForTodo(staff, 'Remind me to sweep');
+    const colleague = await signUp('Priya Shah');
+    await withTenant(database.db, tenantId, (tx) =>
+      addMembership(tx, { userId: UserIdSchema.parse(colleague.userId), role: 'staff' }),
+    );
+    await colleague.browser.put('/v1/me/active-tenant', { tenantId }).expect(204);
+    await colleague.browser.get(`/v1/ai/proposals/${String(card.proposalId)}`).expect(404);
+    await colleague.browser
+      .post(`/v1/ai/proposals/${String(card.proposalId)}/approve`, {
+        fingerprint: card.fingerprint,
+      })
+      .expect(404);
+  });
+
+  it('a resumed turn whose event log expired still shows its cards', async () => {
+    const { owner } = await business();
+    await owner.put('/v1/autonomy', { askFirst: true }).expect(200);
+    model.next.push(todoCall('Call the supplier'), () => scriptedResponse({ text: 'Asked.' }));
+    const stream = frames(
+      (await sse(owner.post('/v1/chat/turns', turnRequest('Call the supplier'))).expect(200))
+        .body as string,
+    );
+    const started = stream[0]?.data;
+    if (started?.type !== 'turn.started') throw new Error('no start');
+    // The log is gone (as after its hour): the events are rebuilt from the conversation.
+    await app.get(TurnEventLog).drop(started.turnId);
+    const rebuilt = frames(
+      (await sse(owner.get(`/v1/chat/turns/${started.turnId}/events`)).expect(200)).body as string,
+    );
+    expect(rebuilt.map((frame) => frame.data.type)).toEqual([
+      'turn.started',
+      'tool.finished',
+      'message.completed',
+      'turn.completed',
+    ]);
+    expect(rebuilt[1]?.data).toMatchObject({
+      status: 'awaiting_approval',
+      card: { kind: 'change', state: 'proposed' },
+    });
   });
 });
 

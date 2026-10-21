@@ -253,6 +253,13 @@
       "when": 1792587844448,
       "tag": "0035_conversations_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792596193960,
+      "tag": "0036_s26_trust_views",
+      "breakpoints": true
     }
   ]
 }

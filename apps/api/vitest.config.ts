@@ -27,6 +27,9 @@ export default defineConfig({
         // Chat runs the agent loop on Postgres and keeps events in Redis: chat.int.test.ts.
         'src/chat/chat.service.ts',
         'src/chat/turn-events.ts',
+        // The AI's proposals and receipts read through the trust layer on Postgres (S26):
+        // chat.int.test.ts; ai-actions.controller.test.ts covers its endpoints.
+        'src/chat/ai-actions.service.ts',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },

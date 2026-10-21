@@ -135,6 +135,8 @@ export interface ActionEffect {
   inverse: TrustJson | null;
   outboxMessageIds: readonly OutboxMessageId[];
   appointmentStartsAt: Date | null;
+  /** One sentence about what it did, in the tool's own words (the receipt shows it, S26). */
+  summary?: string | null;
 }
 
 /** An execution as `undo` receives it. */
@@ -221,6 +223,7 @@ export async function requestAction(
     }
     const execution = await runAndRecord(tx, ai, runner, {
       proposalId: null,
+      requestedBy: member.context.userId,
       outcome: decision.outcome,
       idempotencyKey,
       payload: request.payload,
@@ -280,7 +283,9 @@ export async function approveProposal(
     checkRunner(runner, proposal);
     requirePermission(member, permissionFor(action), { ownerUserId: proposalOwner(proposal) });
 
-    if (proposal.expiresAt.getTime() <= now.getTime()) {
+    // A proposal from an older version of the tool may not mean the same thing any more, and
+    // its payload may not parse: it expires rather than reading as stale (ADR-0031).
+    if (proposal.toolVersion !== runner.version || proposal.expiresAt.getTime() <= now.getTime()) {
       await decide(tx, member, proposal, 'expired', now);
       return { kind: 'expired' };
     }
@@ -314,6 +319,7 @@ export async function approveProposal(
     await decide(tx, member, proposal, 'approved', now);
     const execution = await runAndRecord(tx, ai, runner, {
       proposalId: id,
+      requestedBy: userIdOrNull(proposal.requestedByUserId),
       outcome: 'propose',
       idempotencyKey: proposal.idempotencyKey,
       payload: toJson(proposal.payload),
@@ -379,7 +385,8 @@ export async function undoAction(
     const row = await lockExecution(tx, id);
     if (row === undefined) throw new ActionNotFoundError();
     const action = AutonomyActionSchema.parse(row.action);
-    checkDecider(member, action, row.onBehalfOfUserId);
+    // The member it was done for, or whose request it answered (a lead approved it for them).
+    checkDecider(member, action, row.onBehalfOfUserId, row.requestedByUserId);
     if (row.status === 'undone') {
       return { execution: toExecution(row), messages: { cancelled: [], tooLate: [] } };
     }
@@ -587,8 +594,12 @@ function checkRecordPermissions(
  * Who may approve, reject or undo: the member it was made for, or one whose role reaches every
  * record of this kind (owners and managers). Staff can't decide on a colleague's proposal.
  */
-function checkDecider(member: Actor, action: AutonomyAction, madeFor: string | null): void {
-  if (madeFor !== null && madeFor === member.context.userId) return;
+function checkDecider(
+  member: Actor,
+  action: AutonomyAction,
+  ...madeFor: readonly (string | null)[]
+): void {
+  if (madeFor.includes(member.context.userId)) return;
   if (permissionScope(member.context.role, permissionFor(action)) === 'all') return;
   throw new ForbiddenError(permissionFor(action));
 }
@@ -638,6 +649,7 @@ async function storeProposal(
     const row = await insertProposal(tx, {
       action: runner.actions[0],
       tool: runner.tool,
+      toolVersion: runner.version,
       targetKey: input.preview.targetKey,
       idempotencyKey: input.idempotencyKey,
       payload: input.payload,
@@ -708,6 +720,8 @@ async function runAndRecord(
   runner: ActionRunner,
   input: {
     proposalId: ActionProposalId | null;
+    /** Whose request it answers (a lead may approve a staff member's proposal). */
+    requestedBy: UserId | null;
     outcome: AutonomyDecision['outcome'];
     idempotencyKey: string;
     payload: TrustJson;
@@ -736,7 +750,9 @@ async function runAndRecord(
     explanation: input.explanation,
     outboxMessageIds: effect.outboxMessageIds,
     onBehalfOf: ai.context.userId,
+    requestedBy: input.requestedBy,
     recordOwner: input.recordOwner,
+    summary: effect.summary ?? null,
   });
   // The key was checked at the start of this transaction and the proposal is locked; a
   // concurrent retry with the same key meets the unique constraint and rolls back instead.
@@ -804,6 +820,7 @@ export function toProposal(row: AiActionProposalRow): ActionProposal {
     id: row.id,
     action: row.action,
     tool: row.tool,
+    toolVersion: row.toolVersion,
     targetKey: row.targetKey,
     status: row.status,
     payload: row.payload,
@@ -833,7 +850,9 @@ export function toExecution(row: AiActionExecutionRow): ActionExecution {
     explanation: row.explanation,
     outboxMessageIds: row.outboxMessageIds,
     onBehalfOfUserId: row.onBehalfOfUserId,
+    requestedByUserId: row.requestedByUserId,
     recordOwnerUserId: row.recordOwnerUserId,
+    summary: row.summary,
     undoUntil: iso(row.undoUntil),
     undoneByUserId: row.undoneByUserId,
     undoneAt: iso(row.undoneAt),

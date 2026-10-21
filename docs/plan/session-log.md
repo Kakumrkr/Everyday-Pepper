@@ -763,6 +763,40 @@ Everything each session did, oldest first: what was built, the checks run and th
     - S26: render the stream's cards, a plan card for a turn's writes, `turn_limit` and fallback links, cancel on close, the AI-off state.
     - S27: calibrate the token estimate; run eval sets separately (every-step estimate of a full run > $1.50 cap); `prompt_cache_options` for newer models; recorded responses naming ids created in the run.
 
+- **S26 Phase 6e (2026-10-21): chat screen, cards, Why, Undo, Autonomy settings** ([ADR-0031](../adr/0031-chat-screen-cards-why-undo-and-autonomy-settings.md), accepted; [PCR-004](changes/PCR-004.md), approved). Branch `claude/epic-bardeen-hqs6l4`.
+  - **Brief (user):** "Go ahead with your recommendations, draft PCR-004, ADR is pre-approved … I'm pre-approving the PCR and ADR; raise the PR and merge to main; give a prompt for the next session." Asked during the brief: the chat's Redis polling (keep; blocking reads logged for Phase 11) and what the chat can do (four tool gaps → PCR-004, S26b).
+  - **Tasks:**
+    - T1: contracts `ai-views.ts` (proposal/receipt views, *Why?*, approve/undo answers, chat status), card `summary`, five error codes, `ScreenLinkSchema` refuses `//host`.
+    - T2: migration 0036 (`tool_version`; `requested_by_user_id` and `summary` on receipts; staff scope widened), core version expiry and requester, registry `expiringRunner`.
+    - T3: api `/v1/ai/*`, `/v1/autonomy`, `/v1/chat/status`; resumed turns keep their cards; `ToolDeps.requester`.
+    - T4: `E2eModel` behind `AI_SCRIPTED_PROVIDER=e2e` with its boot guard; Compose and CI wiring.
+    - T5: `@pepper/ui` cards, *Why?* content, chat notices, `cards/labels.ts`; jsdom 28.1.0 (30.x needs Node 22.22.2, the repo allows 22.12), Testing Library, axe-core.
+    - T6: `/chat` (`chat-stream.ts`, `chat-state.ts`, live change cards, *Why?* sheet, plan "Approve all", Stop, cancel on leaving); the no-raw-HTML lint rule.
+    - T7: `/autonomy`, Home's "Needs your OK" and "Done for you".
+    - T8: `e2e/tests/chat.spec.ts`, 7 journeys with axe.
+    - T9: review, docs.
+  - **Checks:**
+    - `pnpm check` green. Unit tests: contracts 547, core 1,190, db 44, ai 183, api 292, web 264, appointments 83, runtime 90, worker 26, templates 96, ui 103, testing 13.
+    - `pnpm test:integration` green, 943 (+15): ai 75, api 74 (chat 12), core 141, db 509, appointments 136, worker 4, runtime 2, testing 2.
+    - Playwright on CI's headless shell, phone and desktop: the full suite 72/72 after T8; the chat journeys 24/24 on a repeat run. A later full run failed 2 of 74: a turn under load took longer than Playwright's 5 s default (the chat spec now waits up to the 20 s turn limit), and the to-dos spec got `ECONNRESET` reusing an idle connection the web server closed at Node's 5 s keep-alive (now 65 s, in `pnpm start` and Compose's `KEEP_ALIVE_TIMEOUT`). After the fixes, the full suite passed 74/74 twice in a row.
+    - Docker images can't be built in the cloud sandbox (npm through the proxy's TLS): Postgres, Redis and Mailpit ran in Compose and the apps locally, as `dev-setup.md` describes; CI builds the images.
+    - `pnpm audit --prod`: no known vulnerabilities. No OpenAI call.
+  - **Found and fixed:**
+    - a lead approving a staff member's "remind me"/"book me" turned "me" into the lead (the fingerprint caught it, so nothing ran unseen, but the lead was offered the wrong to-do); mutation-checked;
+    - resumed turns whose event log expired lost their cards;
+    - focus not returned after closing *Why?* (Radix without a Trigger);
+    - a slot or client tapped while Pepper was still answering was silently dropped (now queued);
+    - the autonomy dial waited for the save before showing the change (now optimistic, rolled back if refused);
+    - the scripted-model switch trusted `DEPLOYMENT_ENVIRONMENT`, which defaults to `local` (a production build now needs `ci`);
+    - `ScreenLinkSchema` allowed `//host`;
+    - the web server closed idle connections at Node's 5 s default, racing reused sockets (`ECONNRESET`).
+  - **Not done / for later:**
+    - S26b (PCR-004): `find_client_bookings`, `list_todos`, `complete_todo`, `unblock_time`; fill explanation `facts`.
+    - S27: check streaming with NVDA/VoiceOver by hand; batch the cards' record reads if a screen holds many.
+    - Phase 11: blocking `XREAD` and pub/sub for chat events and cancel (user, S26).
+    - Still logged: undoing a move whose email was taken back leaves the client's earlier manage link dead.
+    - The chat's AI-off and paused states have no Playwright journey (the e2e stack runs the scripted model); the api tests cover `off` and `paused`.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

@@ -2,10 +2,11 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     coverage: {
       provider: 'v8',
-      // Components (.tsx) are covered by the Playwright journeys (e2e/), like the web pages.
+      // Components (.tsx) have their own tests (jsdom, S26) and the Playwright journeys (e2e/);
+      // the coverage gate is on the logic (.ts).
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.test.ts', 'src/index.ts'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

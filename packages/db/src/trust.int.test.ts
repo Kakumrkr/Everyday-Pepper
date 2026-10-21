@@ -224,6 +224,7 @@ describe('proposals', () => {
       sql`status = 'rejected'`,
       sql`payload = '{"bookingId": "x"}'::jsonb`,
       sql`fingerprint = ${'c'.repeat(64)}`,
+      sql`tool_version = 2`,
       sql`requested_by_user_id = ${jess}`,
       sql`decided_by_user_id = ${jess}`,
     ]) {
@@ -334,6 +335,8 @@ describe('executions', () => {
       sql`after = '{}'::jsonb`,
       sql`undo_until = now() + interval '1 year'`,
       sql`outbox_message_ids = '{}'::uuid[] || ${newId()}::uuid`,
+      sql`summary = 'Something else'`,
+      sql`requested_by_user_id = ${jess}`,
     ]) {
       const error = await inTenant((tx) =>
         tx.execute(sql`UPDATE ai_action_executions SET ${change} WHERE id = ${id}`),
@@ -351,6 +354,53 @@ describe('executions', () => {
     await db.execute(sql`DELETE FROM users WHERE id = ${leaver}`);
     const kept = await inTenant((tx) => lockExecution(tx, ActionExecutionIdSchema.parse(row.id)));
     expect(kept).toMatchObject({ id: row.id, onBehalfOfUserId: null });
+  });
+
+  it('keeps the tool version, the requester and the summary (S26)', async () => {
+    const row = await stored(inTenant((tx) => insertProposal(tx, proposal({ toolVersion: 3 }))));
+    expect(row.toolVersion).toBe(3);
+    const done = await stored(
+      inTenant((tx) =>
+        insertExecution(tx, execution({ onBehalfOf: ana, requestedBy: jess, summary: 'Booked.' })),
+      ),
+    );
+    expect(done).toMatchObject({
+      onBehalfOfUserId: ana,
+      requestedByUserId: jess,
+      summary: 'Booked.',
+    });
+    // By default the receipt answers the member it was done for.
+    const plain = await stored(
+      inTenant((tx) => insertExecution(tx, execution({ onBehalfOf: ben }))),
+    );
+    expect(plain).toMatchObject({ requestedByUserId: ben, summary: null });
+  });
+
+  it('refuses a summary holding a contact or longer than 600 characters', async () => {
+    for (const summary of ['Call Maria on 555 123 4567', 'x'.repeat(601)]) {
+      await expect(inTenant((tx) => insertExecution(tx, execution({ summary })))).rejects.toThrow();
+    }
+    const error = await inTenant((tx) =>
+      tx.execute(
+        sql`INSERT INTO ai_action_executions (id, action, tool, outcome, idempotency_key,
+              entity_type, entity_id, explanation, summary)
+            VALUES (${newId()}, 'task.create', 'add_todo', 'execute', ${`turn:${newId()}`}, 'task',
+              ${newId()}, '{}'::jsonb, ${'x'.repeat(601)})`,
+      ),
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('23514');
+  });
+
+  it('staff see a receipt a lead approved for them, not a colleague’s (RLS, S26)', async () => {
+    const approvedForJess = await stored(
+      inTenant((tx) => insertExecution(tx, execution({ onBehalfOf: ana, requestedBy: jess }))),
+    );
+    const approvedForBen = await stored(
+      inTenant((tx) => insertExecution(tx, execution({ onBehalfOf: ana, requestedBy: ben }))),
+    );
+    const seen = (await as(jess, (tx) => listExecutions(tx, { limit: 500 }))).map((e) => e.id);
+    expect(seen).toContain(approvedForJess.id);
+    expect(seen).not.toContain(approvedForBen.id);
   });
 
   it('staff see only what the AI did for them (RLS)', async () => {

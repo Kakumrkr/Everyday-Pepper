@@ -17,8 +17,9 @@ import {
   WaitlistExpiredError,
   WrongVerificationCodeError,
 } from '@pepper/appointments';
-import type { ApiErrorCode, SlotUnavailable, WrongCode } from '@pepper/contracts';
+import type { ApiErrorCode, SlotUnavailable, UndoRefusedBody, WrongCode } from '@pepper/contracts';
 import {
+  ActionNotFoundError,
   AlreadyAMemberError,
   ClientNotFoundError,
   ConversationNotFoundError,
@@ -29,8 +30,12 @@ import {
   InviteWrongAccountError,
   LastOwnerError,
   MemberNotFoundError,
+  ProposalNotFoundError,
+  ProposalNotPendingError,
   TaskAssigneeNotMemberError,
   TaskNotFoundError,
+  UndoRefusedError,
+  UndoWindowClosedError,
 } from '@pepper/core';
 import {
   BusinessLimitReachedError,
@@ -89,6 +94,10 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [WaitlistExpiredError, BadRequestException, 'waitlist_expired'],
   [TaskNotFoundError, NotFoundException, 'task_not_found'],
   [ConversationNotFoundError, NotFoundException, 'conversation_not_found'],
+  [ProposalNotFoundError, NotFoundException, 'proposal_not_found'],
+  [ProposalNotPendingError, ConflictException, 'proposal_not_pending'],
+  [ActionNotFoundError, NotFoundException, 'action_not_found'],
+  [UndoWindowClosedError, ConflictException, 'undo_window_closed'],
   [TaskAssigneeNotMemberError, UnprocessableEntityException, 'task_assignee_not_member'],
   [BookingPageNotFoundError, NotFoundException, 'booking_page_not_found'],
   [BookingRequestNotFoundError, NotFoundException, 'booking_request_not_found'],
@@ -109,6 +118,14 @@ export function toHttpError(error: unknown): unknown {
       ...apiError('slot_unavailable'),
       code: 'slot_unavailable',
       alternatives: [...error.alternatives],
+    };
+    return new ConflictException(body);
+  }
+  if (error instanceof UndoRefusedError) {
+    const body: UndoRefusedBody = {
+      ...apiError('undo_refused'),
+      code: 'undo_refused',
+      reason: error.reason,
     };
     return new ConflictException(body);
   }

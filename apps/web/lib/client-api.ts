@@ -56,6 +56,14 @@ const MESSAGES: Record<string, string> = {
   too_many_requests: 'Too many tries. Wait a little and try again.',
   email_unavailable: 'Online booking isn’t available right now. Contact the business.',
   temporarily_unavailable: 'This isn’t available right now. Try again in a moment.',
+  // Chat and the AI's proposals and actions (S26).
+  turn_in_progress: 'I’m still answering your last message. Wait for it, or press Stop.',
+  conversation_not_found: 'That conversation is gone. Start a new one.',
+  proposal_not_found: 'That suggestion is gone, or it isn’t yours to decide.',
+  proposal_not_pending: 'That was already decided, or replaced by a newer version.',
+  action_not_found: 'That action is gone, or it isn’t yours to undo.',
+  undo_window_closed: 'This can no longer be undone.',
+  undo_refused: 'This can’t be undone any more: things changed since. Nothing was changed.',
 };
 
 const FALLBACK = 'Something went wrong. Try again.';

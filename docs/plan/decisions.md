@@ -196,3 +196,21 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - SSE events in a Redis stream kept 1 h; resume with `Last-Event-ID`; cancel through Redis;
   - spans after the GenAI conventions, no contents; cache key and safety id are hashes;
   - eval cases run through the loop in seeded worlds with placeholders in cassettes.
+- **S26 Session Brief (user, 2026-10-21):** "Go ahead with your recommendations, draft PCR-004, ADR is pre-approved":
+  - migration 0036 (a proposal's tool version; a receipt's requester and summary) recorded in ADR-0031 as an ADR-0028 amendment without a separate PCR;
+  - staff may undo what a lead approved for them, while their own role allows it;
+  - jsdom, Testing Library and axe-core as dev-only test dependencies of `@pepper/ui`;
+  - owners and managers change autonomy (accepted ADR-0028 wins over the prototype's copy, now corrected);
+  - the chat's 200 ms Redis polling for events and cancel stays; blocking `XREAD` and pub/sub are logged for Phase 11 (asked by the user during the brief);
+  - PCR-004: S26b before S27 adds `find_client_bookings`, `list_todos`, `complete_todo`, `unblock_time`; client notes go to Phase 7.
+
+  The user also said: "I'm pre-approving the PCR and ADR. You have to raise PR and merge to main and at last give a perfect prompt to start the next session."
+- **S26 defaults (Claude, in ADR-0031, pre-approved by the user):**
+  - every card reads its record by id; Approve sends only the shown fingerprint; stale shows the fresh proposal; an older tool version expires;
+  - `ToolDeps.requester`: "me" is the requester through a lead's approval;
+  - the AI's words are plain text (lint rule); links only from `ScreenLinkSchema`; answers parsed on the way out;
+  - the transcript is a polite `role="log"`, busy while streaming, with a status line; no focus theft;
+  - Stop and leaving the chat cancel a turn (keepalive); a card choice during a turn is queued;
+  - the plan card's "Approve all" approves each change as shown, in order, stopping at the first that isn't done;
+  - Home shows "Needs your OK" and up to 5 "Done for you" until the Phase 8 feed;
+  - the e2e model needs `DEPLOYMENT_ENVIRONMENT=ci` (or `local` outside a production build) and no key.

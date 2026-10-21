@@ -172,6 +172,11 @@ async function chooseStaff(
     if (own === undefined) throw new ForbiddenError('bookings.manage');
     return own.id;
   }
+  // A lead approving a member's request: "book me" still books that member (S26).
+  if (scope.requester !== scope.actor.context.userId) {
+    const theirs = ownStaffMember(scope, directory);
+    if (theirs !== undefined) return theirs.id;
+  }
   const start = Date.parse(startsAt);
   const around = await findAvailabilityIn(
     scope.tx,

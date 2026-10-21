@@ -66,6 +66,11 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   temporarily_unavailable: 'This is not available right now. Try again in a moment',
   conversation_not_found: 'No such conversation',
   turn_in_progress: 'Pepper is still answering your last message in this conversation',
+  proposal_not_found: 'No such proposal in this business',
+  proposal_not_pending: 'This was already decided, or replaced by a newer one',
+  action_not_found: 'No such action in this business',
+  undo_window_closed: 'This can no longer be undone',
+  undo_refused: 'This can no longer be undone as it was',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */

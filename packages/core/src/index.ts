@@ -9,6 +9,7 @@ export * from './membership-rules.js';
 export * from './outbox.js';
 export * from './permissions.js';
 export * from './services/ai-actions.js';
+export * from './services/ai-views.js';
 export * from './services/audit.js';
 export * from './services/autonomy.js';
 export * from './services/business.js';

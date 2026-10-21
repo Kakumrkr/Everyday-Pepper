@@ -492,8 +492,8 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       {
         policyname: 'member_scope',
         cmd: 'ALL',
-        qual: `(${SEES_ALL} OR (on_behalf_of_user_id = current_user_id()))`,
-        with_check: `(${SEES_ALL} OR (on_behalf_of_user_id = current_user_id()))`,
+        qual: `(${SEES_ALL} OR (on_behalf_of_user_id = current_user_id()) OR (requested_by_user_id = current_user_id()))`,
+        with_check: `(${SEES_ALL} OR (on_behalf_of_user_id = current_user_id()) OR (requested_by_user_id = current_user_id()))`,
       },
     ],
   },

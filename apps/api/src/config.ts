@@ -33,13 +33,30 @@ const AuthEnvSchema = z.object({
 const AiEnvSchema = z.object({
   /** A business's monthly allowance of model tokens (ADR-0030); soft limit at 80%. */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
+  /**
+   * `e2e`: chat answers from the scripted model of the Playwright journeys (S26, ADR-0031).
+   * Only where tests run (`DEPLOYMENT_ENVIRONMENT` `local` or `ci`) and never with an OpenAI key.
+   */
+  AI_SCRIPTED_PROVIDER: z.literal('e2e').optional(),
 });
+
+/**
+ * Where the e2e model may run: CI, or a development machine. A production build
+ * (`NODE_ENV=production`, the Docker image) needs `DEPLOYMENT_ENVIRONMENT=ci` said explicitly,
+ * so a deployment that forgot its environment name (it defaults to `local`) is still refused.
+ */
+function scriptedAllowed(environment: string, nodeEnv: string | undefined): boolean {
+  if (environment === 'ci') return true;
+  return environment === 'local' && nodeEnv !== 'production';
+}
 
 /** The AI employee (ADR-0027, ADR-0030). */
 export interface AiConfig {
   /** `null`: no key, the AI is off; chat answers with its fallback, every screen works. */
   openai: OpenAiConfig | null;
   monthlyTokens: number;
+  /** The scripted e2e model instead of a provider (tests only; see `AI_SCRIPTED_PROVIDER`). */
+  scripted: boolean;
 }
 
 export interface AuthConfig {
@@ -77,11 +94,24 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     bookingCodeKey: deriveKey(auth.AUTH_SECRET, 'pepper/booking-page-codes'),
     outboxSecret: loadOutboxSecret('api', env),
     pushPublicKey: loadPushPublicKey('api', env),
-    ai: {
-      openai: loadOpenAiConfig(env),
-      monthlyTokens: loadEnv('api', AiEnvSchema, present).AI_MONTHLY_TOKENS,
-    },
+    ai: loadAiConfig(env, present, service.environment),
   };
+}
+
+function loadAiConfig(
+  env: NodeJS.ProcessEnv,
+  present: Record<string, string | undefined>,
+  environment: string,
+): AiConfig {
+  const ai = loadEnv('api', AiEnvSchema, present);
+  const openai = loadOpenAiConfig(env);
+  const scripted = ai.AI_SCRIPTED_PROVIDER === 'e2e';
+  // A test switch must never answer real members (S26): refused outside test environments and
+  // next to a real provider, so a stray variable stops the process instead of faking the AI.
+  if (scripted && (!scriptedAllowed(environment, env['NODE_ENV']) || openai !== null)) {
+    throw new Error('Invalid api environment: AI_SCRIPTED_PROVIDER');
+  }
+  return { openai, monthlyTokens: ai.AI_MONTHLY_TOKENS, scripted };
 }
 
 /** A 32-byte key for one purpose, derived from the secret (HKDF-SHA256). */

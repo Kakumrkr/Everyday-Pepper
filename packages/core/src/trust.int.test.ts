@@ -42,6 +42,8 @@ import { stateFingerprint } from './fingerprint.js';
 import { outboxKeyFrom } from './outbox.js';
 import {
   approveProposal,
+  getAction,
+  getProposal,
   listPendingProposals,
   listRecentActions,
   rejectProposal,
@@ -988,7 +990,78 @@ describe('listing', () => {
     expect(jessPending).toContain(forJess.id);
     expect(jessPending).not.toContain(forAna.id);
     const receipts = await listRecentActions(db, jessActor(), { limit: 200 });
-    expect(receipts.every((r) => r.onBehalfOfUserId === jess)).toBe(true);
+    expect(receipts.every((r) => r.onBehalfOfUserId === jess || r.requestedByUserId === jess)).toBe(
+      true,
+    );
+  });
+});
+
+describe('S26: receipts of approved proposals, tool versions and summaries (ADR-0031)', () => {
+  it('a staff member sees, and may undo, the receipt of their proposal a lead approved', async () => {
+    const proposal = await propose(jessActor(), jess);
+    const result = await approveProposal(db, marco(), proposal.id, {
+      shownFingerprint: proposal.fingerprint,
+      runner: todoRunner,
+    });
+    if (result.kind !== 'executed') throw new Error('expected an execution');
+    expect(result.execution).toMatchObject({ onBehalfOfUserId: manager, requestedByUserId: jess });
+    // Jess sees it (S23 log: the receipt used to be the lead's only); Priya does not.
+    expect((await getAction(db, jessActor(), result.execution.id)).id).toBe(result.execution.id);
+    expect((await listRecentActions(db, jessActor(), { limit: 200 })).map((r) => r.id)).toContain(
+      result.execution.id,
+    );
+    await expect(getAction(db, priyaActor(), result.execution.id)).rejects.toThrow(
+      ActionNotFoundError,
+    );
+    await expect(
+      undoAction(db, priyaActor(), result.execution.id, { runner: todoRunner }),
+    ).rejects.toThrow(ActionNotFoundError);
+    const before = (await tasksOf(jess)).length;
+    const { execution } = await undoAction(
+      db,
+      jessActor(),
+      result.execution.id,
+      { runner: todoRunner, reason: 'changed_mind' },
+      { clock: clockAt('2026-10-22T15:00:00.000Z') },
+    );
+    expect(execution).toMatchObject({ status: 'undone', undoneByUserId: jess });
+    expect((await tasksOf(jess)).length).toBe(before - 1);
+  });
+
+  it('a direct action answers the member it was done for', async () => {
+    const execution = await getAction(db, jessActor(), await executedTodo());
+    expect(execution).toMatchObject({ onBehalfOfUserId: jess, requestedByUserId: jess });
+  });
+
+  it('a proposal from another version of the tool expires instead of running', async () => {
+    const proposal = await propose(jessActor(), jess);
+    expect(proposal.toolVersion).toBe(1);
+    const before = (await tasksOf(jess)).length;
+    const result = await approveProposal(db, jessActor(), proposal.id, {
+      shownFingerprint: proposal.fingerprint,
+      runner: { ...todoRunner, version: 2 },
+    });
+    expect(result).toEqual({ kind: 'expired' });
+    expect((await tasksOf(jess)).length).toBe(before);
+    expect((await getProposal(db, jessActor(), proposal.id)).status).toBe('expired');
+  });
+
+  it('keeps the tool’s one-sentence summary on the receipt', async () => {
+    const summarised: ActionRunner = {
+      ...todoRunner,
+      async execute(tx, actor, payload) {
+        return { ...(await todoRunner.execute(tx, actor, payload)), summary: 'To-do for Jess.' };
+      },
+    };
+    const result = await requestAction(
+      db,
+      jessActor(),
+      summarised,
+      { payload: todo(jess), idempotencyKey: turnKey(), explanation, untrustedContext: false },
+      { ...defaults, clock: clockAt(NOW) },
+    );
+    if (result.kind !== 'executed') throw new Error('expected an execution');
+    expect(result.execution.summary).toBe('To-do for Jess.');
   });
 });
 

@@ -64,3 +64,4 @@ These are throwaway checks for the prototype only. They are not part of the prod
 |---|---|---|
 | 2026-10-16 | Part 1 approved as-is ("all good"): look, feed order, card detail, calendar layout | Direction locked for part 2; tokens get recorded in `ux-principles.md` at S2 sign-off |
 | 2026-10-16 | Part 2 approved; all 5 questions "all good": autonomy defaults, onboarding steps, owner picks booking-page color (→ PCR-001), "Forget it" wording, sign-off | Tokens recorded in `ux-principles.md`; Phase 0 mockups closed |
+| 2026-10-21 | S26 brief: managers change autonomy, as accepted ADR-0028 says (the prototype said they couldn't) | Prototype's role copy corrected; the product follows ADR-0028 |

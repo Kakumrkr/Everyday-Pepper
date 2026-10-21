@@ -17,8 +17,14 @@ import {
   WaitlistExpiredError,
   WrongVerificationCodeError,
 } from '@pepper/appointments';
-import { AvailableSlotSchema, SlotUnavailableSchema, WrongCodeSchema } from '@pepper/contracts';
 import {
+  AvailableSlotSchema,
+  SlotUnavailableSchema,
+  UndoRefusedBodySchema,
+  WrongCodeSchema,
+} from '@pepper/contracts';
+import {
+  ActionNotFoundError,
   AlreadyAMemberError,
   ClientNotFoundError,
   ForbiddenError,
@@ -28,6 +34,10 @@ import {
   InviteWrongAccountError,
   LastOwnerError,
   MemberNotFoundError,
+  ProposalNotFoundError,
+  ProposalNotPendingError,
+  UndoRefusedError,
+  UndoWindowClosedError,
 } from '@pepper/core';
 import {
   BusinessLimitReachedError,
@@ -90,6 +100,28 @@ describe('toHttpError', () => {
       code: 'slot_unavailable',
       message: 'That time cannot be booked',
       alternatives: [alternative],
+    });
+  });
+
+  it('answers the trust layer’s errors with stable codes, and a refused undo with its reason', () => {
+    const cases: [Error, number, string][] = [
+      [new ProposalNotFoundError(), 404, 'proposal_not_found'],
+      [new ProposalNotPendingError('rejected'), 409, 'proposal_not_pending'],
+      [new ActionNotFoundError(), 404, 'action_not_found'],
+      [new UndoWindowClosedError(), 409, 'undo_window_closed'],
+    ];
+    for (const [error, status, code] of cases) {
+      const answer = toHttpError(error) as HttpException;
+      expect([answer.getStatus(), (answer.getResponse() as { code: string }).code]).toEqual([
+        status,
+        code,
+      ]);
+    }
+    const refused = toHttpError(new UndoRefusedError('slot_taken')) as HttpException;
+    expect(refused.getStatus()).toBe(409);
+    expect(UndoRefusedBodySchema.parse(refused.getResponse())).toMatchObject({
+      code: 'undo_refused',
+      reason: 'slot_taken',
     });
   });
 

@@ -1,5 +1,6 @@
 export * from './account.js';
 export * from './ai.js';
+export * from './ai-views.js';
 export * from './appointments.js';
 export * from './audit.js';
 export * from './chat.js';
