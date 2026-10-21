@@ -8,7 +8,7 @@ Resolved decisions move into an ADR (`../adr/`) and are logged in `CHANGELOG.md`
 | D2 | Auth solution | ✅ **Resolved: Better Auth** → [ADR-0007](../adr/0007-auth-better-auth.md) | — |
 | D3 | ORM / migrations | ✅ **Resolved: Drizzle** → [ADR-0008](../adr/0008-orm-drizzle.md) | — |
 | D4 | Email provider | ✅ **Resolved: Resend for the pilot** (user, S19), behind the `Mailer` port; Mailpit over SMTP in development and CI → [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md). Revisit SES at scale | — |
-| D5 | OpenAI models | Small model for routine turns, stronger model for planning/extraction; pin via config and evals | Phase 6 |
+| D5 | OpenAI models | Small model for routine turns, stronger model for planning/extraction; pin via config (`OPENAI_MODEL_ROUTINE`/`_STRONG`, ADR-0027) and choose from eval results within the $5 budget | S27 |
 | D6 | Pilot host | Hetzner VPS (cheapest) vs AWS Lightsail (closer to AWS later) | Phase 11 |
 | D7 | Pricing & plan limits | Monthly per business with included AI/email usage; finalise from metering data | Before pilot |
 | D8 | Real-time transport for chat | SSE for streaming + REST for actions vs WebSocket — recommend SSE (simpler, proxy-friendly) | Phase 6 |

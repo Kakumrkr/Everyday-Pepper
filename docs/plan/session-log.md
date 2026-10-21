@@ -557,6 +557,67 @@ Everything each session did, oldest first: what was built, the checks run and th
 
 - **M1 maintenance (2026-10-20): cheaper, restart-safe sessions.** The user approved the plan after S21 (choices 1 STATUS size, 2a, 3a, 4a, 5a, 6a). `STATUS.md` split into this log, `decisions.md` and a short status (from ~730 lines / 105 KB to under 150 lines); a checkpoint rule in `CLAUDE.md` (after each finished task: commit and update "In progress" in `STATUS.md`, so `/compact`, restarts and usage limits lose nothing); a testing rule for generous time limits; in cloud sessions local Playwright uses CI's headless shell; when the session-start hook starts Docker it pulls through Google's mirror (`registry-mirrors: mirror.gcr.io`, same pinned digests), so Docker Hub's anonymous rate limit no longer stops `docker compose up`. No product code changed.
 
+- **S22 Phase 6a (2026-10-20): Phase 6 plan, provider adapter, eval runner skeleton** ([ADR-0027](../adr/0027-llm-provider-port-and-evals.md), proposed by Claude, accepted by the user).
+  - **Session Brief:** the user asked for careful planning of the most important layer, with Claude as senior advisor and a clear difference from the market.
+    - Desk research (October 2026): competitors' AI is paid add-on receptionists for clients (Boulevard "Beau", Fresha AI Concierge), "ask your data" assistants (Vagaro "Vera", GlossGenius "Growth Analyst") and copy writers. None acts inside the business with permissions, previews, reasons, undo and per-action trust.
+    - Decisions: a **$5 OpenAI budget for all of Phase 6, real calls only at the final testing stage (S27)**; the official `openai` SDK; Sentry deferred again.
+  - **[Phase 6 playbook](phase-6-playbook.md)** (confirmed by the user):
+    - the gap and differentiators D-1 exact previews, D-2 receipts (Why + Undo), D-3 follow-through, D-4 team-aware, D-5 private and dependable;
+    - the measured quality bar and 15 design principles;
+    - the budget policy and the eval strategy (scripted fake, hostile fake, cassettes, pass^k);
+    - the OWASP LLM Top 10 mapping;
+    - guides for S22–S27;
+    - §9 "Keep getting better" with an improvement log (added at the user's request);
+    - references.
+  - **Built:**
+    - `contracts/ai.ts` (additive).
+    - `@pepper/ai`:
+      - the `LlmProvider` port and `LlmError` (codes with `retryable`, optional billed usage);
+      - `OpenAiProvider`: Responses API, `openai` 7.32.0 pinned, `store: false`, `include: reasoning.encrypted_content` with replay, `prompt_cache_key`, `safety_identifier`, strict function tools, `maxRetries: 0`, 30 s timeout, error mapping without provider text;
+      - `loadOpenAiConfig`: `OPENAI_API_KEY`, `OPENAI_MODEL_ROUTINE` and `OPENAI_MODEL_STRONG` required with a key, an https base URL, the timeout;
+      - `ScriptedProvider`;
+      - `strictToolParameters` (closed objects, all fields required, an allow-list of keywords);
+      - `meteredProvider`;
+      - `businessClock` (a 14-day date table on the business clock).
+    - **The eval runner** (`src/evals`, `evals/`):
+      - Zod cases and deterministic graders: ordered tool calls with argument matchers, forbidden calls, the offered tools and their schemas, reply patterns;
+      - pass^k, with gates per set;
+      - cassettes, where recorded steps carry request fingerprints and fail as stale when the request changes;
+      - a budget guard: price table, estimate, a per-run cap of $1.50, at most $4.50, refused without a key or price;
+      - Markdown and JSON reports and the CLI;
+      - three reference cases with hand-written cassettes.
+    - `.env.example` has the OpenAI lines, empty.
+  - **Checks:**
+    - `pnpm check` green:
+
+      | Package | Unit tests |
+      |---|---|
+      | contracts | 492 (+17) |
+      | ai | 81, then 87 after the cap fix (~99.7% lines, gate 80%) |
+      | core | 562 |
+      | web | 247 |
+      | api | 263 |
+      | runtime | 90 |
+      | appointments | 79 |
+      | worker | 26 |
+      | db | 43 |
+      | ui | 79 |
+      | templates | 96 |
+      | testing | 13 |
+
+    - `pnpm test:integration` green, 712 (unchanged).
+    - `pnpm --filter @pepper/ai eval`: all gates met, $0.
+    - The record path refused without a key, without a price and with a non-numeric cap.
+    - **No real OpenAI call was made.**
+  - **Found and fixed during the session:**
+    - the SDK raises an in-stream `error` event as an `APIError` without a status, which first mapped to `bad_request` and now maps to `unavailable` (a fixture test caught it);
+    - `--max-cost abc` (NaN) would have passed the cap check; `refuseRun` now refuses caps that are not a positive number of at most $4.50.
+  - **Not done / for later:**
+    - The adapter is proven only against documented response shapes. S27's smoke step (≤ $0.10) confirms it live, including that `include: reasoning.encrypted_content` and sending reasoning items back with their ids work with `store: false` on the chosen models.
+    - The apps don't wire the provider or metering yet (S25).
+    - The hostile fake and the seeded-world graders come with the tools (S24).
+    - The budget ledger (S27).
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

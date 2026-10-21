@@ -20,7 +20,7 @@ PR: lint → typecheck → unit → integration → E2E → evals (when AI files
 | Item | Build phase | Pilot (5–10 businesses) |
 |---|---|---|
 | Hosting | $0 (local) | $10–25 (VPS) |
-| OpenAI API | $5–15 (dev, hard cap) | ~$1–5 per business (small model default; to be measured) |
+| OpenAI API | $5 for all of Phase 6, spent only in S27 (user, S22; hard cap on the account) | ~$1–5 per business (small model default; to be measured) |
 | Email | $0 (Mailpit) | ~$0–5 (SES $0.10/1k or Resend free tier) |
 | Storage/backups | $0 | $0–2 (R2 free tier/S3) |
 | Sentry, Grafana Cloud, GitHub Actions | $0 (free tiers) | $0 |

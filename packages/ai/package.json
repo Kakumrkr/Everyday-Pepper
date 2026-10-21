@@ -1,0 +1,34 @@
+{
+  "name": "@pepper/ai",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AI agent layer (ADR-0004, ADR-0027): the provider port and its OpenAI adapter, fake providers, metering and the eval runner. Later: tool registry and agent loop.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@pepper/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "eval": "node dist/evals/cli.js"
+  },
+  "dependencies": {
+    "@pepper/contracts": "workspace:*",
+    "openai": "7.32.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@pepper/config": "workspace:*",
+    "@vitest/coverage-v8": "^5.0.5",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,4 +1,5 @@
 export * from './account.js';
+export * from './ai.js';
 export * from './appointments.js';
 export * from './audit.js';
 export * from './bookings.js';
