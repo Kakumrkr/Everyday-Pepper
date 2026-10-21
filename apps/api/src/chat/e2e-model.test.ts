@@ -6,7 +6,14 @@ import { E2eModel } from './e2e-model.js';
 const model = new E2eModel();
 
 function request(messages: LlmMessage[]): LlmRequest {
-  return { route: 'routine', instructions: 'x', messages, tools: [], toolChoice: 'auto' };
+  return {
+    route: 'routine',
+    instructions: 'x',
+    messages,
+    tools: [],
+    toolChoice: 'auto',
+    maxOutputTokens: 512,
+  };
 }
 
 const user = (content: string): LlmMessage => ({ role: 'user', content });
