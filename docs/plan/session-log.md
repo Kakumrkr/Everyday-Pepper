@@ -720,6 +720,7 @@ Everything each session did, oldest first: what was built, the checks run and th
     - by the hostile fake: `alternativesRange` built an inverted range for a time long past (a pre-existing 500 on the calendar screen; failing test first); `get_day` answered an empty day for another business's staff member (now `not_found`);
     - by the self-review: approve and undo took the proposal or receipt object from the caller (now ids, loaded from the database); a racing copy of a tool call answered `internal` (now `ConcurrentActionError`, retried once, so every copy gets the one execution);
     - lint: the `packages/ai` layer rule allowed only contracts and core (widened per ADR-0029).
+    - CI: typed ESLint ran out of memory on the runner's ~2 GB default heap. `main` already peaked at ~2.3 GB and this PR added ~80 MB. Reproduced locally with a 2 GB limit (main passed, the branch crashed), so the `lint` script now gives ESLint a 4 GB heap.
   - **Not done / for later:**
     - S25: replay `hostileProvider` through the real loop; `toolDefinitions()` as the static prefix; run writes one at a time; seeded worlds for `toolEvalCases`; mark turns untrusted from `untrustedText`.
     - S26: "the client was already emailed" on Undo; expire proposals whose tool version changed; show the staff member the receipt when a lead approved their proposal (from S23).
