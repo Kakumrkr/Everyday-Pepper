@@ -37,6 +37,7 @@ export class AppModule {
         PublicBookingModule.forRoot({ codeKey: config.bookingCodeKey }),
         ChatModule.forRoot({
           openai: config.ai.openai,
+          scripted: config.ai.scripted,
           monthlyTokens: config.ai.monthlyTokens,
           baseUrl: config.auth.baseUrl,
           outboxKey: outboxKeyFrom(config.outboxSecret),

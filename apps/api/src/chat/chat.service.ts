@@ -43,6 +43,7 @@ import { findCurrentTenant, withTenant, type Database } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { getTemplate, templateRuleDefaults } from '@pepper/templates';
 import { Inject, Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
+import { E2eModel } from './e2e-model.js';
 import { TurnEventLog } from './turn-events.js';
 
 export const CHAT_OPTIONS = Symbol('CHAT_OPTIONS');
@@ -52,13 +53,18 @@ export const CHAT_CLOCK = Symbol('CHAT_CLOCK');
 
 export interface ChatOptions {
   openai: OpenAiConfig | null;
+  /** The e2e journeys' scripted model (never in production; `loadApiConfig` checks). */
+  scripted?: boolean;
   monthlyTokens: number;
   /** For the client emails a write queues (booking links). */
   baseUrl: string;
   outboxKey: Buffer;
 }
 
-export function llmProviderFor(options: Pick<ChatOptions, 'openai'>): LlmProvider | null {
+export function llmProviderFor(
+  options: Pick<ChatOptions, 'openai' | 'scripted'>,
+): LlmProvider | null {
+  if (options.scripted === true) return new E2eModel();
   return options.openai === null ? null : new OpenAiProvider(options.openai);
 }
 

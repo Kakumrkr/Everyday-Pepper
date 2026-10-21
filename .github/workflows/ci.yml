@@ -137,8 +137,12 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter @pepper/e2e exec playwright install --with-deps chromium
 
+      # Chat runs on the journeys' scripted model (ADR-0031): CI never calls OpenAI.
       - name: Start the stack
         run: docker compose up --build --wait --wait-timeout 300
+        env:
+          AI_SCRIPTED_PROVIDER: e2e
+          DEPLOYMENT_ENVIRONMENT: ci
 
       - name: Smoke test
         run: pnpm test:e2e
