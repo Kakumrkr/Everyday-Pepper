@@ -285,10 +285,7 @@ export async function approveProposal(
 
     // A proposal from an older version of the tool may not mean the same thing any more, and
     // its payload may not parse: it expires rather than reading as stale (ADR-0031).
-    if (
-      proposal.toolVersion !== runner.version ||
-      proposal.expiresAt.getTime() <= now.getTime()
-    ) {
+    if (proposal.toolVersion !== runner.version || proposal.expiresAt.getTime() <= now.getTime()) {
       await decide(tx, member, proposal, 'expired', now);
       return { kind: 'expired' };
     }
