@@ -5,7 +5,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S24 is complete, ADR-0029 is accepted (pre-approved by the user), and the PR is opened and merged to `main`. Next: S25 in a new session from `main`.
+**S25 (6d), branch `claude/s25-agent-loop`.** The user approved the brief ("Go ahead with your recommendations, ADR is fine"), pre-approved ADR-0030, and asked Claude to open the PR, merge it, and end with the next session's prompt. Decisions: conversations own-only for every role; 90-day retention; 5M tokens per business per month (soft 80%); a turn keeps running when the connection drops (explicit cancel); ADR-0027/0029 amendments recorded in ADR-0030 without a PCR.
+- Done: T1 (step in the idempotency key, `ToolAnswer.untrustedText`), T2 (contracts `chat.ts`, `ai.chat`, conversation tables 0034/0035, `reserveUsage`/`settleUsage`).
+- Next: T3 core conversation services and clean-up retention → T4 budget → T5 context/trimming/redaction → T6 routing/breaker → T7 loop → T8 exactly-once → T9 hostile through loop → T10 eval worlds → T11 api SSE → T12 OTel → T13 docs, PR, merge.
 
 ## Last sessions
 - **S24 Phase 6c (2026-10-21): tool registry and the first ten tools** ([ADR-0029](../adr/0029-tool-registry-and-tools.md), accepted). Full entry in [session-log.md](session-log.md).
