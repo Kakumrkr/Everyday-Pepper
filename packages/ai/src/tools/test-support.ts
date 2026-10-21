@@ -203,6 +203,7 @@ export function turn(overrides: Partial<ToolTurn> = {}): ToolTurn {
   calls += 1;
   return {
     turnKey: `conv:test:turn:${String(calls)}`,
+    step: 1,
     requestMessageId: null,
     untrustedContext: false,
     ...overrides,

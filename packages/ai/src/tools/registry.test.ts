@@ -1,7 +1,7 @@
 import { LlmToolDefinitionSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import { DESCRIPTION_MAX, guideProblems } from './guide.js';
-import { findTool, toolDefinitions, TOOLS } from './registry.js';
+import { findTool, idempotencyKeyOf, toolDefinitions, TOOLS } from './registry.js';
 
 // The registry without a database: names, strict schemas, descriptions as prompts, and the
 // arguments the model must never be able to pass (playbook S24 pitfalls).
@@ -122,6 +122,31 @@ describe('the tool registry', () => {
     expect(
       create?.args.safeParse({ ...VALID['create_booking'], date: 'next Friday' }).success,
     ).toBe(false);
+  });
+});
+
+describe('idempotencyKeyOf', () => {
+  const at = { turnKey: 'conv:c1:turn:t1', requestMessageId: null, untrustedContext: false };
+
+  it("names the conversation, turn, step and call, hashing the model's id", () => {
+    const key = idempotencyKeyOf({ ...at, step: 2 }, 'call_1');
+    expect(key).toMatch(/^conv:c1:turn:t1\.s2\.[0-9a-f]{24}$/);
+    expect(key).not.toContain('call_1');
+  });
+
+  it('gives the same call id in another step another key, and a retry the same one', () => {
+    expect(idempotencyKeyOf({ ...at, step: 1 }, 'call_1')).not.toBe(
+      idempotencyKeyOf({ ...at, step: 2 }, 'call_1'),
+    );
+    expect(idempotencyKeyOf({ ...at, step: 1 }, 'call_1')).toBe(
+      idempotencyKeyOf({ ...at, step: 1 }, 'call_1'),
+    );
+  });
+
+  it('refuses a step out of range and a turn key with other characters', () => {
+    expect(() => idempotencyKeyOf({ ...at, step: 0 }, 'call_1')).toThrow();
+    expect(() => idempotencyKeyOf({ ...at, step: 1.5 }, 'call_1')).toThrow();
+    expect(() => idempotencyKeyOf({ ...at, turnKey: 'conv c1', step: 1 }, 'call_1')).toThrow();
   });
 });
 

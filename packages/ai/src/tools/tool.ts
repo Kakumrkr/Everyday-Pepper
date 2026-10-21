@@ -48,6 +48,12 @@ export interface ToolAnswer {
   summary: string;
   data: TrustJson;
   card: ToolCard | null;
+  /**
+   * The answer holds text someone outside the team typed (a client's note, a booking-page
+   * message): the loop labels it as data and marks the turn untrusted (playbook principle 10).
+   * Names are cut to letters, so none of today's reads set it.
+   */
+  untrustedText?: boolean;
 }
 
 export interface ReadTool<S extends z.ZodType = z.ZodType> {

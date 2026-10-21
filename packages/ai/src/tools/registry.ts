@@ -93,8 +93,14 @@ export function toolDefinitions(): LlmToolDefinition[] {
 
 /** What the agent loop knows about the turn (S25); none of it comes from the model. */
 export interface ToolTurn {
-  /** `(conversation, turn)`: each call's idempotency key adds the call. */
+  /** `(conversation, turn)`: each call's idempotency key adds the step and the call. */
   turnKey: string;
+  /**
+   * The loop's step in the turn (1 for the first model answer). Part of the key, so a model
+   * that reuses a call id in a later step (`call_1` again) is a new call, not the old one's
+   * retry.
+   */
+  step: number;
   /** The member's message this turn answers (the *Why?* trace refers to it by id). */
   requestMessageId: string | null;
   /** The turn's context held untrusted text (tracked by the loop, never by the model). */
@@ -132,6 +138,7 @@ export type ToolOutcome =
     };
 
 const TurnKeySchema = z.string().regex(/^[A-Za-z0-9.:_-]{1,150}$/);
+const StepSchema = z.int().min(1).max(99);
 
 /**
  * Runs one tool call for the member in `deps`. Never throws for anything the model did: an
@@ -150,10 +157,15 @@ export async function dispatchToolCall(
     const member = memberOf(deps.actor);
     if (tool.kind === 'read') {
       const ai: Actor = { ...member, via: 'ai' };
-      const answer = await withMember(deps.db, member.context, async (tx) =>
+      const { untrustedText, ...answer } = await withMember(deps.db, member.context, async (tx) =>
         tool.run(await scopeOf(tx, ai, deps), args),
       );
-      return { status: 'answered', tool: tool.name, ...answer, untrustedText: false };
+      return {
+        status: 'answered',
+        tool: tool.name,
+        ...answer,
+        untrustedText: untrustedText ?? false,
+      };
     }
     return await requestWrite(deps, turn, tool, args, call.id);
   } catch (error) {
@@ -326,10 +338,16 @@ async function requestWrite(
   };
 }
 
-/** `(conversation, turn, tool call)`; the model's call id is hashed, never trusted as text. */
-function idempotencyKeyOf(turn: ToolTurn, callId: string): string {
+/**
+ * `(conversation, turn, step, tool call)`; the model's call id is hashed, never trusted as
+ * text. The loop refuses a call id repeated within one answer, so the key names one call.
+ */
+export function idempotencyKeyOf(turn: ToolTurn, callId: string): string {
+  const step = StepSchema.parse(turn.step);
   const call = createHash('sha256').update(callId).digest('hex').slice(0, 24);
-  return ActionIdempotencyKeySchema.parse(`${TurnKeySchema.parse(turn.turnKey)}.${call}`);
+  return ActionIdempotencyKeySchema.parse(
+    `${TurnKeySchema.parse(turn.turnKey)}.s${String(step)}.${call}`,
+  );
 }
 
 /** A write's preview as `previewOf` stores it. */

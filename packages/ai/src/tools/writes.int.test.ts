@@ -469,4 +469,27 @@ describe('the dial and the emails', () => {
     expect(again.id).toBe(first.id);
     expect(await listTasks(db, w.owner, { status: 'all' })).toHaveLength(1);
   });
+
+  it('a call id the model reuses in a later step is a new call, not a retry', async () => {
+    const w = await newWorld(db);
+    await justDoIt(w);
+    const todo = (title: string) => ({
+      id: 'call_1',
+      name: 'add_todo',
+      arguments: JSON.stringify({
+        title,
+        dueDate: null,
+        dueTime: null,
+        assigneeStaffMemberId: null,
+      }),
+    });
+    const first = turn();
+    const one = done(await dispatchToolCall(depsFor(w, w.owner), first, todo('Order foils')));
+    const two = done(
+      await dispatchToolCall(depsFor(w, w.owner), { ...first, step: 2 }, todo('Call the bank')),
+    );
+    expect(two.id).not.toBe(one.id);
+    const titles = (await listTasks(db, w.owner, { status: 'all' })).map((task) => task.title);
+    expect(titles.sort()).toEqual(['Call the bank', 'Order foils']);
+  });
 });
