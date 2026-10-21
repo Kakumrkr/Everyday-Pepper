@@ -13,7 +13,7 @@ import {
 } from '@pepper/contracts';
 import { ChangeCard, SlotPicker, whyModel, type ChangeCardProps } from '@pepper/ui';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { fetchJson, sendJson } from '../../../lib/client-api';
 import { WhySheet } from './why-sheet';
@@ -62,6 +62,7 @@ export function LiveChangeCard({
   const [slots, setSlots] = useState<LocalSlot[] | null>(null);
   const [picked, setPicked] = useState<LocalSlot | null>(null);
   const [whyOpen, setWhyOpen] = useState(false);
+  const whyButton = useRef<HTMLElement | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
   const loadAction = useCallback(async (id: string): Promise<void> => {
@@ -202,6 +203,9 @@ export function LiveChangeCard({
         onUndo={() => void undo()}
         {...(why !== null && {
           onWhy: () => {
+            // The button pressed, so focus returns to it when the sheet closes.
+            whyButton.current =
+              document.activeElement instanceof HTMLElement ? document.activeElement : null;
             setWhyOpen(true);
           },
         })}
@@ -227,6 +231,7 @@ export function LiveChangeCard({
           onOpenChange={setWhyOpen}
           why={why}
           proposed={props.status === 'proposed'}
+          returnFocus={() => whyButton.current}
         />
       )}
     </div>

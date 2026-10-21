@@ -77,6 +77,7 @@ export function ChatScreen({
   const stateRef = useRef(state);
   stateRef.current = state;
   const streaming = useRef<AbortController | null>(null);
+  const queued = useRef<string | null>(null);
   const approvers = useRef(new Map<string, () => Promise<ApproveOutcome>>());
   const [planBusy, setPlanBusy] = useState(false);
   const running = state.turn !== null;
@@ -85,7 +86,12 @@ export function ChatScreen({
   const send = useCallback(
     async (text: string): Promise<void> => {
       const message = text.trim();
-      if (message === '' || stateRef.current.turn !== null || !available) return;
+      if (message === '' || !available) return;
+      // A choice tapped on a card while Pepper is still finishing its sentence goes right after.
+      if (stateRef.current.turn !== null) {
+        queued.current = message;
+        return;
+      }
       const clientTurnId = crypto.randomUUID();
       const conversationId = stateRef.current.conversationId;
       dispatch({ type: 'sent', clientTurnId, text: message });
@@ -148,6 +154,14 @@ export function ChatScreen({
       keepalive,
     }).catch(() => undefined);
   }, []);
+
+  // Sends what was queued once the running turn has ended.
+  useEffect(() => {
+    if (running || queued.current === null) return;
+    const next = queued.current;
+    queued.current = null;
+    void send(next);
+  }, [running, send]);
 
   // Leaving the chat (another screen, closing the tab) cancels a running turn.
   useEffect(() => {

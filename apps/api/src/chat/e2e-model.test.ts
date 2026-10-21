@@ -117,6 +117,26 @@ describe('E2eModel (the journeys’ scripted model, never in production)', () =>
     expect(day.toolCalls[0]?.name).toBe('get_day');
   });
 
+  it('moves a booking found on the day by the client’s name', async () => {
+    const said = user("Move Maria's booking on 2026-10-27 to 15:00");
+    const first = await model.respond(request([said]));
+    expect(first.toolCalls[0]?.name).toBe('get_day');
+    const read = answered(first, {
+      get_day: {
+        status: 'answered',
+        data: { bookings: [{ bookingId: 'bkg-1', clientName: 'Maria L.' }] },
+      },
+    });
+    const moving = await model.respond(request([said, ...read]));
+    expect(JSON.parse(moving.toolCalls[0]?.arguments ?? '')).toEqual({
+      bookingId: 'bkg-1',
+      date: '2026-10-27',
+      time: '15:00',
+      staffMemberId: null,
+      emailClient: null,
+    });
+  });
+
   it('can be "down" without tripping the shared circuit breaker, and offers help otherwise', async () => {
     const down = await model
       .respond(request([user('Simulate an outage')]))

@@ -15,6 +15,7 @@ import type {
 // understands a few fixed phrasings (the journeys and the chat's slot picker use them):
 //   "Book <client> for <service> with <staff> on YYYY-MM-DD at HH:MM"
 //   "Book <Weekday> YYYY-MM-DD at HH:MM with <staff> instead"   (a time picked on a card)
+//   "Move <client>'s booking on YYYY-MM-DD to HH:MM"
 //   "Remind me to <something>"
 //   "Block YYYY-MM-DD HH:MM-HH:MM for <staff>"
 //   "What does YYYY-MM-DD look like?"
@@ -23,6 +24,7 @@ import type {
 
 const BOOK = /^Book (\S+) for (.+?) with (\S+) on (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2})/i;
 const PICKED = /^Book \w{3} (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) with (\S+) instead/i;
+const MOVE = /^Move (\S+)'s booking on (\d{4}-\d{2}-\d{2}) to (\d{2}:\d{2})/i;
 const REMIND = /^Remind me to (.+)$/i;
 const BLOCK = /^Block (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})-(\d{2}:\d{2}) for (\S+)/i;
 const DAY = /^What does (\d{4}-\d{2}-\d{2}) look like/i;
@@ -86,6 +88,30 @@ export class E2eModel implements LlmProvider {
         },
         results,
       );
+    }
+    const move = MOVE.exec(said);
+    if (move !== null) {
+      const day = results.get('get_day');
+      if (day === undefined) return call('get_day', { date: at(move, 2), staffMemberId: null });
+      const done = results.get('move_booking');
+      if (done !== undefined)
+        return reply(answerTo(done, 'Moved.', 'Approve it and I’ll move it.'));
+      const bookingId = idByName(
+        (day.data?.['bookings'] as unknown[] | undefined)?.map((booking) => ({
+          ...(booking as Record<string, unknown>),
+          name: (booking as Record<string, unknown>)['clientName'],
+        })),
+        'bookingId',
+        at(move, 1),
+      );
+      if (bookingId === null) return reply(`I can't find ${at(move, 1)}'s booking that day.`);
+      return call('move_booking', {
+        bookingId,
+        date: at(move, 2),
+        time: at(move, 3),
+        staffMemberId: null,
+        emailClient: null,
+      });
     }
     const remind = REMIND.exec(said);
     if (remind !== null) {

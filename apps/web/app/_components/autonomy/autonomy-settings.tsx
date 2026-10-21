@@ -33,7 +33,10 @@ export function AutonomySettings({
   const [busy, setBusy] = useState(false);
   const switchId = useId();
 
-  async function change(body: object, done: string): Promise<void> {
+  /** Shows the change at once, saves it, and puts it back if the save is refused. */
+  async function change(next: BusinessAutonomy, body: object, done: string): Promise<void> {
+    const before = autonomy;
+    setAutonomy(next);
     setBusy(true);
     const answer = await sendJson('PUT', '/v1/autonomy', body);
     setBusy(false);
@@ -42,6 +45,7 @@ export function AutonomySettings({
       setAutonomy(parsed.data);
       setSaved(done);
     } else {
+      setAutonomy(before);
       setSaved(answer.ok ? 'Something went wrong. Nothing changed.' : answer.message);
     }
   }
@@ -72,6 +76,7 @@ export function AutonomySettings({
             onChange={(event) => {
               const on = event.target.checked;
               void change(
+                { ...autonomy, askFirst: on },
                 { askFirst: on },
                 on
                   ? 'Saved. I’ll ask you first for everything.'
@@ -104,6 +109,7 @@ export function AutonomySettings({
               overridden={autonomy.askFirst}
               onChange={(level) =>
                 void change(
+                  { ...autonomy, levels: { ...autonomy.levels, [action]: level } },
                   { levels: { [action]: level } },
                   `Saved. ${DIAL_LABEL[action]}: ${LEVEL_LABEL[level]}.`,
                 )
