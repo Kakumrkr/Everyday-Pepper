@@ -205,19 +205,21 @@ export async function saveTurnProgress(
   return rows.length === 1;
 }
 
-/** Ends a running turn once. Returns `false` if it had already ended. */
+/** Ends a running turn once, with its final progress (`null`: as recorded). `false` if it had ended. */
 export async function finishTurn(
   tx: TenantTx,
   id: ConversationTurnId,
-  input: { status: Exclude<TurnStatus, 'running'>; stopReason: TurnStopReason; at: Date } & (
-    TurnProgress | Record<never, never>
-  ),
+  input: {
+    status: Exclude<TurnStatus, 'running'>;
+    stopReason: TurnStopReason;
+    at: Date;
+    progress: TurnProgress | null;
+  },
 ): Promise<boolean> {
-  const progress = 'steps' in input ? progressValues(input) : {};
   const rows = await tx
     .update(conversationTurns)
     .set({
-      ...progress,
+      ...(input.progress === null ? {} : progressValues(input.progress)),
       status: z.enum(['completed', 'failed', 'cancelled']).parse(input.status),
       stopReason: TurnStopReasonSchema.parse(input.stopReason),
       finishedAt: input.at,

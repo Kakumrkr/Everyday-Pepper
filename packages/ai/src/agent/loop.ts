@@ -207,7 +207,7 @@ async function runTurn(
   };
 
   const span = tracer.turn({ channel: 'chat' });
-  let reason: TurnStopReason = 'internal';
+  let reason: TurnStopReason;
   try {
     await send({
       type: 'turn.started',
@@ -637,6 +637,8 @@ export async function recoverTurn(deps: AgentDeps, turn: TurnView): Promise<void
     }
   }
   // The recorded progress stays (the tokens were metered when they were used).
-  if (results.length > 0) await deps.store.record(turn, results, null);
+  // Two requests may recover the same turn at once: the one that loses finds the results
+  // recorded (unique per step and call) or the turn ended, and that is the same outcome.
+  if (results.length > 0) await deps.store.record(turn, results, null).catch(() => undefined);
   await deps.store.end(turn.id, 'interrupted', null);
 }

@@ -51,9 +51,10 @@ const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowe
             } (layer rules, docs/plan/dependency-map.md).`,
           },
           {
-            // `@pepper/runtime/instrument` is the one extra entry point: the `node --import` preload
-            // must not load what tracing patches (see packages/runtime/src/instrument.ts).
-            group: ['@pepper/*/*', '!@pepper/runtime/instrument'],
+            // `@pepper/runtime/instrument` and `@pepper/ai/config` are the extra entry points: the
+            // `node --import` preload must not load what tracing patches (see
+            // packages/runtime/src/instrument.ts), and the api's config reads the AI settings there.
+            group: ['@pepper/*/*', '!@pepper/runtime/instrument', '!@pepper/ai/config'],
             message: 'Import packages through their public entry point, not deep paths.',
           },
         ],

@@ -40,7 +40,6 @@ import {
   type ConversationMessageRow,
   type ConversationTurnRow,
   type Database,
-  type NewConversationMessage,
   type TenantTx,
   type TurnProgress,
 } from '@pepper/db';
@@ -261,7 +260,7 @@ export async function recordTurnMessages(
         conversationId: turn.conversationId,
         turnId: turn.id,
         userId: actor.context.userId,
-      } as NewConversationMessage);
+      });
       stored.push(toMessage(row));
     }
     if (progress !== null) await saveTurnProgress(tx, turn.id, progress);
@@ -289,7 +288,7 @@ export async function endTurn(
       status,
       stopReason: input.reason,
       at: input.now,
-      ...(input.progress ?? {}),
+      progress: input.progress,
     }),
   );
 }

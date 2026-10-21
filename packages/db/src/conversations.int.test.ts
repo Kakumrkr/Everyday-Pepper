@@ -75,7 +75,12 @@ const userMessage = (
     untrusted: false,
   }) as const;
 
-const done = { status: 'completed', stopReason: 'answered', at: new Date() } as const;
+const done = {
+  status: 'completed',
+  stopReason: 'answered',
+  at: new Date(),
+  progress: null,
+} as const;
 
 beforeAll(async () => {
   database = await startTestDatabase();
@@ -203,7 +208,7 @@ describe('turns', () => {
       saveTurnProgress(tx, at.turnId, { ...progress, untrusted: false }),
     ).catch((e: unknown) => e);
     expect(sqlState(laundered)).toBe('P0001');
-    expect(await as(ana, (tx) => finishTurn(tx, at.turnId, { ...done, ...progress }))).toBe(true);
+    expect(await as(ana, (tx) => finishTurn(tx, at.turnId, { ...done, progress }))).toBe(true);
     expect(await as(ana, (tx) => finishTurn(tx, at.turnId, done))).toBe(false);
     expect(await as(ana, (tx) => saveTurnProgress(tx, at.turnId, progress))).toBe(false);
     const reopened = await as(ana, (tx) =>
@@ -339,9 +344,9 @@ describe('token budget reservations', () => {
       );
     const results = await Promise.all(Array.from({ length: 25 }, reserve));
     expect(results.filter((after) => after !== null)).toHaveLength(10);
-    expect(results.filter((after) => after !== null).sort((a, b) => (a ?? 0) - (b ?? 0))).toEqual(
-      Array.from({ length: 10 }, (_unused, index) => (index + 1) * 1_000),
-    );
+    expect(
+      results.filter((after): after is number => after !== null).sort((a, b) => a - b),
+    ).toEqual(Array.from({ length: 10 }, (_unused, index) => (index + 1) * 1_000));
     const [usage] = await withTenant(db, business, (tx) => listUsage(tx, period));
     expect(usage).toEqual({ metric: 'llm_tokens', amount: 10_000 });
   });

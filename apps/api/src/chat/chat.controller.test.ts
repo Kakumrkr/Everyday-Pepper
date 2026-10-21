@@ -76,9 +76,11 @@ const envelopes: ChatEventEnvelope[] = [
   { seq: 3, event: { type: 'turn.completed', reason: 'answered' } },
 ];
 const chat = {
-  start: vi.fn(() => Promise.resolve({ kind: 'started' as 'started' | 'busy', turnId: TURN })),
+  start: vi.fn((): Promise<{ kind: 'started' | 'busy'; turnId: typeof TURN }> =>
+    Promise.resolve({ kind: 'started', turnId: TURN }),
+  ),
   turn: vi.fn(() => Promise.resolve(turnView)),
-  follow: vi.fn(async function* (_tenant: unknown, _turn: unknown, after: number) {
+  follow: vi.fn(function* (_tenant: unknown, _turn: unknown, after: number) {
     for (const envelope of envelopes) if (envelope.seq > after) yield envelope;
   }),
   cancel: vi.fn(() => Promise.resolve()),

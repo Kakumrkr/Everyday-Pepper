@@ -6,7 +6,6 @@ import {
 } from '@pepper/appointments';
 import {
   addDays,
-  formatDate,
   fromZoned,
   isoWeekday,
   TenantIdSchema,
@@ -120,12 +119,12 @@ export async function seedEvalWorld(
   };
   const at_ = (date: ReturnType<typeof addDays>, hour: number) =>
     new Date(fromZoned(at.timeZone, date, hour * 60)).toISOString();
-  const book = (clientId: string, startsAt: string) =>
+  const book = (clientId: typeof maria.id, startsAt: string) =>
     createBooking(
       db,
       owner,
       {
-        clientId: clientId as typeof maria.id,
+        clientId,
         serviceId: haircut.id,
         staffMemberId: jess.id,
         startsAt,

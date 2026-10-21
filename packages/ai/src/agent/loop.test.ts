@@ -587,7 +587,10 @@ describe('startTurn', () => {
       (message) => message.turnId === abandoned.turn.id && message.role === 'tool',
     );
     expect(
-      recovered.map((message) => [message.toolCallId, JSON.parse(message.content).status]),
+      recovered.map((message) => [
+        message.toolCallId,
+        (JSON.parse(message.content) as { status: string }).status,
+      ]),
     ).toEqual([
       ['w1', 'done'],
       ['w2', 'refused'],

@@ -365,7 +365,7 @@ describe('AC-X-2: the model is down', () => {
         type: 'turn.failed',
         fallback: {
           reason: 'provider_unavailable',
-          text: expect.stringContaining('can’t reach my AI') as unknown as string,
+          text: expect.stringContaining('can’t reach my AI') as string,
           link: { label: 'Calendar', href: '/calendar' },
         },
       });

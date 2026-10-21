@@ -9,8 +9,8 @@ import {
   type AgentDeps,
   type BusinessContext,
   type LlmProvider,
+  type OpenAiConfig,
 } from '@pepper/ai';
-import type { OpenAiConfig } from '@pepper/ai/config';
 import {
   isFinalChatEvent,
   type ChatEvent,
