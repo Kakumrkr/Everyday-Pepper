@@ -82,7 +82,8 @@ export function staffAvailabilityOf(rows: StaffRows): StaffAvailability {
 export function alternativesRange(around: number, now: number): { from: number; to: number } {
   return {
     from: Math.max(now, around - ALTERNATIVES_SEARCH_DAYS * DAY_MS),
-    to: around + ALTERNATIVES_SEARCH_DAYS * DAY_MS,
+    // A time long past: the week ahead of now, never an inverted (invalid) range.
+    to: Math.max(around, now) + ALTERNATIVES_SEARCH_DAYS * DAY_MS,
   };
 }
 

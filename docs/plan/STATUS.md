@@ -7,6 +7,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S24 (6c) tool registry and the first tools**: Session Brief approved by the user (2026-10-21): "Go ahead with your recommendations, ADR-0029 is fine". The user pre-approved ADR-0029 and asked Claude to open the PR, merge it to `main` and end with the prompt for the next session.
 - **Done:**
+  - T7: the hostile fake (`tools/hostile.ts`, 92 attacks per role, as owner and staff) is 100% stopped; plus AI approve/reject/undo, autonomy, forged fingerprints, foreign and unheld outbox links, the bulk lock, a retry storm and injected names. It found two bugs, now fixed: `alternativesRange` built an inverted range for a time long past (a pre-existing 500 on the calendar too; test first), and `get_day` answered an empty day for another business's staff id (now `not_found`).
   - T6: the five write tools are green on Postgres (26 tests, mutation-checked): preview = execution, inverse restores (and cancels the email), role matrix, cross-tenant, conflicts with 3 nearest, stale and refused approvals, dial and email hold, retries.
   - T4–T5:
     - The registry (`packages/ai/src/tools`): `dispatchToolCall`, `toolDefinitions`, error codes and cards (`contracts/tool-cards.ts`), guides with a lint, `writeRunner`.

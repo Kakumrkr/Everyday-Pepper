@@ -3,6 +3,7 @@ import {
   getBookingIn,
   listBookingsIn,
   listTimeOffBetweenIn,
+  StaffMemberNotFoundError,
 } from '@pepper/appointments';
 import {
   BookingIdSchema,
@@ -199,6 +200,10 @@ export const getDay: ReadTool = {
     const staffId =
       args.staffMemberId === null ? undefined : StaffMemberIdSchema.parse(args.staffMemberId);
     const directory = await directoryOf(scope);
+    // Another business's (or a made-up) staff member is not found, as everywhere else.
+    if (staffId !== undefined && !directory.staff.has(staffId)) {
+      throw new StaffMemberNotFoundError();
+    }
     const bookings = (
       await listBookingsIn(
         scope.tx,
