@@ -1,8 +1,13 @@
-import { TasksResponseSchema } from '@pepper/contracts';
+import {
+  AiActionsResponseSchema,
+  AiProposalsResponseSchema,
+  TasksResponseSchema,
+} from '@pepper/contracts';
 import { redirect } from 'next/navigation';
 import { requiredStep } from '../../lib/account';
 import { currentAccount, currentBusiness, currentJson, currentMembers } from '../_server/account';
 import { BusinessSwitcher, SignOutButton } from '../_components/account-actions';
+import { AiActivity } from '../_components/chat/ai-activity';
 import { NotificationsCard } from '../_components/push/notifications-card';
 import { TaskCard } from '../_components/tasks/task-card';
 import { Unavailable } from '../_components/unavailable';
@@ -28,6 +33,14 @@ export default async function HomePage() {
         current.permissions.includes('members.read') ? currentMembers() : null,
       ])
     : [null, null, null];
+  // Pepper's work: what waits for an OK and "Done for you" (S26).
+  const showsAi = current?.permissions.includes('ai.chat') === true;
+  const [proposals, actions] = showsAi
+    ? await Promise.all([
+        currentJson('/v1/ai/proposals', AiProposalsResponseSchema),
+        currentJson('/v1/ai/actions', AiActionsResponseSchema),
+      ])
+    : [null, null];
   return (
     <div className="mx-auto max-w-xl">
       <h1>Hi {me.user.name}</h1>
@@ -40,6 +53,15 @@ export default async function HomePage() {
           <span data-testid="business-role">{current.role}</span>
         </p>
       )}
+      {current !== null && proposals !== null && actions !== null ? (
+        <div className="mt-6">
+          <AiActivity
+            proposals={proposals.proposals}
+            actions={actions.actions}
+            timeZone={current.business.timeZone}
+          />
+        </div>
+      ) : null}
       {current !== null && open !== null && done !== null ? (
         <div className="mt-6">
           <TaskCard

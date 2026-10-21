@@ -211,18 +211,24 @@ export function ChatScreen({
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="m-0 font-display text-2xl font-bold">Chat with Pepper</h1>
-        {state.items.length === 0 ? null : (
-          <button
-            type="button"
-            disabled={running}
-            onClick={() => {
-              dispatch({ type: 'reset' });
-            }}
-            className={buttonClass({ variant: 'secondary', size: 'sm' })}
-          >
-            New chat
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <Link href={ROUTES.autonomy} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+            <Icon name="dial" />
+            Autonomy
+          </Link>
+          {state.items.length === 0 ? null : (
+            <button
+              type="button"
+              disabled={running}
+              onClick={() => {
+                dispatch({ type: 'reset' });
+              }}
+              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+            >
+              New chat
+            </button>
+          )}
+        </div>
       </div>
       {available ? null : (
         <ChatNotice
