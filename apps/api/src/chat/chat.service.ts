@@ -3,6 +3,7 @@ import {
   CircuitBreaker,
   fallbackFor,
   OpenAiProvider,
+  otelTurnTracer,
   postgresConversationStore,
   startTurn,
   type AgentDeps,
@@ -75,6 +76,7 @@ export class ChatService implements OnModuleDestroy {
   private readonly breaker: CircuitBreaker;
   private readonly running = new Set<Promise<unknown>>();
   private readonly logger = new Logger(ChatService.name);
+  private readonly tracer = otelTurnTracer();
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -264,6 +266,7 @@ export class ChatService implements OnModuleDestroy {
       },
       breaker: this.breaker,
       business,
+      tracer: this.tracer,
       // Hashes, never the ids themselves: the provider needs only something stable.
       cacheKey: `b_${digest(actor.context.tenantId)}`,
       safetyId: `m_${digest(`${actor.context.tenantId}:${actor.context.userId}`)}`,

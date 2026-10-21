@@ -28,6 +28,7 @@
     "test:integration": "vitest run --config vitest.int.config.ts"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.9.1",
     "@pepper/appointments": "workspace:*",
     "@pepper/contracts": "workspace:*",
     "@pepper/core": "workspace:*",
@@ -36,6 +37,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@opentelemetry/sdk-trace-base": "^2.12.0",
     "@pepper/config": "workspace:*",
     "@pepper/testing": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",

@@ -41,7 +41,7 @@ import {
 import { fallbackFor, type DoneSoFar } from './fallback.js';
 import { routeFor } from './routing.js';
 import type { ConversationStore } from './store.js';
-import { noTracing, type TurnTracer } from './tracing.js';
+import { noTracing, type TurnSpan, type TurnTracer } from './tracing.js';
 
 // The agent loop (ADR-0030, playbook principles 1, 7, 10, 12–15). A turn is the member's
 // message and everything done to answer it; it works on events, not on HTTP, so chat and
@@ -245,7 +245,7 @@ async function runTurn(
         invalidCalls,
         signal,
         send,
-        tracer,
+        span,
       });
       progress.inputTokens += response.usage.inputTokens;
       progress.cachedInputTokens += response.usage.cachedInputTokens;
@@ -290,7 +290,7 @@ async function runTurn(
         untrustedContext: progress.untrusted,
       });
       const { outcomes } = await runCalls(
-        { dispatch, deps, limits, deadline, toolTurn, send, tracer },
+        { dispatch, deps, limits, deadline, toolTurn, send, span },
         calls,
         () => writes,
         () => {
@@ -358,7 +358,7 @@ interface CallContext {
   invalidCalls: number;
   signal: AbortSignal | undefined;
   send: (event: ChatEvent) => Promise<void>;
-  tracer: TurnTracer;
+  span: TurnSpan;
 }
 
 /** Retryable provider failures get one more try, if time allows and nothing was streamed. */
@@ -399,7 +399,7 @@ async function callModel(
     const timeout = AbortSignal.timeout(Math.min(remaining, limits.callMs));
     const signal =
       context.signal === undefined ? timeout : AbortSignal.any([context.signal, timeout]);
-    const span = context.tracer.modelCall({ route: routed.route, step: context.step, attempt });
+    const span = context.span.modelCall({ route: routed.route, step: context.step, attempt });
     let streamed = false;
     try {
       let response: LlmResponse | undefined;
@@ -457,7 +457,7 @@ interface RunContext {
   deadline: number;
   toolTurn: () => ToolTurn;
   send: (event: ChatEvent) => Promise<void>;
-  tracer: TurnTracer;
+  span: TurnSpan;
 }
 
 /**
@@ -500,7 +500,7 @@ async function runCalls(
     const call = calls[index];
     if (call === undefined) return;
     await run.send({ type: 'tool.started', tool: toolName(call.name), step: run.toolTurn().step });
-    const span = run.tracer.toolCall({ tool: toolName(call.name) });
+    const span = run.span.toolCall({ tool: toolName(call.name), step: run.toolTurn().step });
     const outcome = await run.dispatch(run.deps.tools, run.toolTurn(), call);
     span.end({ status: outcome.status, code: outcome.status === 'refused' ? outcome.code : null });
     outcomes[index] = outcome;

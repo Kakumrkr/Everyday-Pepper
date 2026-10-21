@@ -2,8 +2,9 @@ import type { LlmResponse, LlmRoute, ToolErrorCode, TurnStopReason } from '@pepp
 import type { TurnProgress } from '@pepper/core';
 
 // What the loop reports for observability (ADR-0030, playbook principle 15): a span per turn,
-// model call and tool call, with codes, counts and timings only, never a message's content.
-// The app binds it to OpenTelemetry (`otelTurnTracer`); tests and evals use `noTracing`.
+// with a span per model call and tool call under it, holding codes, counts and timings only,
+// never a message's content. The app binds it to OpenTelemetry (`otelTurnTracer`); tests and
+// evals use `noTracing`.
 
 export interface ModelCallSpan {
   end(result: { response: LlmResponse }): void;
@@ -15,6 +16,8 @@ export interface ToolCallSpan {
 }
 
 export interface TurnSpan {
+  modelCall(attributes: { route: LlmRoute; step: number; attempt: number }): ModelCallSpan;
+  toolCall(attributes: { tool: string; step: number }): ToolCallSpan;
   error(error: unknown): void;
   end(result: {
     reason: TurnStopReason;
@@ -26,14 +29,15 @@ export interface TurnSpan {
 
 export interface TurnTracer {
   turn(attributes: { channel: string }): TurnSpan;
-  modelCall(attributes: { route: LlmRoute; step: number; attempt: number }): ModelCallSpan;
-  toolCall(attributes: { tool: string }): ToolCallSpan;
 }
 
 const nothing = () => undefined;
 
 export const noTracing: TurnTracer = {
-  turn: () => ({ error: nothing, end: nothing }),
-  modelCall: () => ({ end: nothing, fail: nothing }),
-  toolCall: () => ({ end: nothing }),
+  turn: () => ({
+    modelCall: () => ({ end: nothing, fail: nothing }),
+    toolCall: () => ({ end: nothing }),
+    error: nothing,
+    end: nothing,
+  }),
 };
