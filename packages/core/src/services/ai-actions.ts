@@ -473,6 +473,30 @@ export async function getAction(
   return toExecution(row);
 }
 
+/**
+ * What the tool call with this idempotency key came to, if it reached the trust layer: its
+ * receipt, its proposal, or `null` (it never ran). Recovering an abandoned turn reads this
+ * instead of calling the tool again, so nothing runs twice or late (ADR-0030).
+ */
+export async function findToolCallResult(
+  db: Database,
+  actor: Actor,
+  idempotencyKey: string,
+): Promise<
+  | { kind: 'executed'; execution: ActionExecution }
+  | { kind: 'proposed'; proposal: ActionProposal }
+  | null
+> {
+  requirePermission(actor, 'business.read');
+  return withMember(db, actor.context, async (tx) => {
+    const execution = await findExecutionByKey(tx, idempotencyKey);
+    if (execution !== undefined) return { kind: 'executed', execution: toExecution(execution) };
+    const proposal = await findProposalByKey(tx, idempotencyKey);
+    if (proposal !== undefined) return { kind: 'proposed', proposal: toProposal(proposal) };
+    return null;
+  });
+}
+
 /** The AI's recent actions with their receipts (staff: those done for them), newest first. */
 export async function listRecentActions(
   db: Database,

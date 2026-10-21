@@ -142,6 +142,7 @@ describe('cleanUp', () => {
       bookingRequests: 3,
       outboxMessages: 0,
       expiredProposals: 0,
+      conversations: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -157,6 +158,7 @@ describe('cleanUp', () => {
       bookingRequests: 6,
       outboxMessages: 3,
       expiredProposals: 0,
+      conversations: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
