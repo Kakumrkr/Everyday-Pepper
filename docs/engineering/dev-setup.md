@@ -33,7 +33,7 @@ Run `pnpm check` before every push.
 | Everything in containers | `docker compose up --build --wait` → web http://localhost:3000, api http://localhost:4000, worker http://localhost:4100 |
 | Infra only, apps via `pnpm dev` | `docker compose up -d --wait postgres redis mailpit`, `cp .env.example .env`, `pnpm db:migrate`, `pnpm dev` |
 | Fake inbox (Mailpit) | http://localhost:8025 (SMTP `localhost:1025`) |
-| E2E smoke | stack up with the scripted model for chat (`AI_SCRIPTED_PROVIDER=e2e docker compose up --build --wait`, as CI does; ADR-0031), then `pnpm test:e2e` (first time: `pnpm --filter @pepper/e2e exec playwright install chromium`) |
+| E2E smoke | stack up with the scripted model for chat (`AI_SCRIPTED_PROVIDER=e2e DEPLOYMENT_ENVIRONMENT=ci docker compose up --build --wait`, as CI does; ADR-0031), then `pnpm test:e2e` (first time: `pnpm --filter @pepper/e2e exec playwright install chromium`) |
 | Stop and wipe data | `docker compose down --volumes` |
 
 - Health: `GET /health/live` (process up, no dependency calls) and `GET /health/ready` (Postgres and Redis reachable; **503** with the same body when not) on api and worker; web has `GET /health/live`. Bodies follow `HealthReportSchema` (`@pepper/contracts`) and say only `up`/`down` per check; error details go to the server log.

@@ -135,6 +135,18 @@ describe('loadApiConfig', () => {
         OPENAI_MODEL_STRONG: 'big-model',
       }),
     ).toThrow(/^Invalid api environment: AI_SCRIPTED_PROVIDER$/);
+    // A production build that forgot its environment name (default `local`) is refused too.
+    expect(() =>
+      loadApiConfig({ ...required, AI_SCRIPTED_PROVIDER: 'e2e', NODE_ENV: 'production' }),
+    ).toThrow(/^Invalid api environment: AI_SCRIPTED_PROVIDER$/);
+    expect(
+      loadApiConfig({
+        ...required,
+        AI_SCRIPTED_PROVIDER: 'e2e',
+        NODE_ENV: 'production',
+        DEPLOYMENT_ENVIRONMENT: 'ci',
+      }).ai.scripted,
+    ).toBe(true);
     expect(() => loadApiConfig({ ...required, AI_SCRIPTED_PROVIDER: 'yes' })).toThrow(
       /^Invalid api environment: AI_SCRIPTED_PROVIDER$/,
     );

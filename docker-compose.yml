@@ -90,8 +90,8 @@ services:
       # worker has the private half); generate your own for anything real.
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-BOaUPqJhSDXmacBl4Z6i_HCIBlCN8COqIGiY2jpVS8WxSO0bs5v6zR4YigbzbnlF45tJsCNBHQaAle1oMU1q2Ic}
       # The AI (ADR-0027): off without a key. `AI_SCRIPTED_PROVIDER=e2e` gives chat the
-      # Playwright journeys' scripted model instead (CI sets it; refused outside local/ci and
-      # next to a key, ADR-0031).
+      # Playwright journeys' scripted model instead (CI sets it with DEPLOYMENT_ENVIRONMENT=ci;
+      # the image is a production build, so it is refused otherwise, and next to a key; ADR-0031).
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL_ROUTINE: ${OPENAI_MODEL_ROUTINE:-}
       OPENAI_MODEL_STRONG: ${OPENAI_MODEL_STRONG:-}

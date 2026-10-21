@@ -40,8 +40,15 @@ const AiEnvSchema = z.object({
   AI_SCRIPTED_PROVIDER: z.literal('e2e').optional(),
 });
 
-/** Where the e2e model may run: never in the pilot or production. */
-const SCRIPTED_ENVIRONMENTS = new Set(['local', 'ci']);
+/**
+ * Where the e2e model may run: CI, or a development machine. A production build
+ * (`NODE_ENV=production`, the Docker image) needs `DEPLOYMENT_ENVIRONMENT=ci` said explicitly,
+ * so a deployment that forgot its environment name (it defaults to `local`) is still refused.
+ */
+function scriptedAllowed(environment: string, nodeEnv: string | undefined): boolean {
+  if (environment === 'ci') return true;
+  return environment === 'local' && nodeEnv !== 'production';
+}
 
 /** The AI employee (ADR-0027, ADR-0030). */
 export interface AiConfig {
@@ -101,7 +108,7 @@ function loadAiConfig(
   const scripted = ai.AI_SCRIPTED_PROVIDER === 'e2e';
   // A test switch must never answer real members (S26): refused outside test environments and
   // next to a real provider, so a stray variable stops the process instead of faking the AI.
-  if (scripted && (!SCRIPTED_ENVIRONMENTS.has(environment) || openai !== null)) {
+  if (scripted && (!scriptedAllowed(environment, env['NODE_ENV']) || openai !== null)) {
     throw new Error('Invalid api environment: AI_SCRIPTED_PROVIDER');
   }
   return { openai, monthlyTokens: ai.AI_MONTHLY_TOKENS, scripted };
