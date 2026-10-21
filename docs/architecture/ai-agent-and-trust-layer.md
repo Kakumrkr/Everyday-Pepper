@@ -19,13 +19,16 @@ The LLM selects tools and fills arguments. It never accesses the database, never
 | `internal_write` | create/move booking, add note, block time | do it and tell me (undo shown) | yes |
 | `external_or_irreversible` | email a customer, cancel with notification, bulk change | ask me | single-recipient only; never for bulk (>10) |
 
-## Autonomy dial
-Per tenant, per `actionType`: `ask` / `notify` / `auto`, bounded by tier rules above. Stored in tenant settings; editable in Autonomy settings page; the AI can propose changes ("Want me to auto-confirm bookings from now on?") but changing autonomy is itself an `ask` action.
+The dial's eleven actions, their tiers, defaults, approval permissions and undo windows are `AUTONOMY_ACTIONS` in `packages/contracts/src/trust.ts` (PCR-003 added `booking.cancel` and `task.create`). A tool call involving several actions (a move that emails the client) follows the strictest; the bulk lock counts the recipients the domain's preview found, whatever the action ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md)).
 
-## Action records
-- `ActionProposal` — pending action with exact payload, explanation, expiry; approved/rejected by a user.
-- `ActionExecution` — executed action: actor (`user` | `ai_on_behalf_of:user`), idempotency key, before/after snapshot, **undo record** (inverse operation + window), explanation, links to outbox messages.
-- **Undo** runs the inverse through domain services (so rules still apply) and cancels pending outbox messages not yet sent.
+## Autonomy dial
+Per tenant, per `actionType`: `ask` / `notify` / `auto`, bounded by tier rules above, plus an "Ask me first for everything" switch. Stored in `autonomy_settings` (S23, overrides only; else the template's default, else the platform's); editable in the Autonomy settings page (S26) by owners and managers; the AI can propose changes ("Want me to auto-confirm bookings from now on?") but changing autonomy is itself an `ask` action and the AI can never make it. `decideAutonomy` (pure, property-tested) is called inside the trust layer from the domain's own preview, so no caller can skip it; untrusted text in the turn makes external actions ask and quiet writes visible.
+
+## Action records (S23, [ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md))
+- `ActionProposal` (`ai_action_proposals`) — pending action with the exact payload, the domain's preview, the **state fingerprint** it was previewed on, explanation, expiry (24 h, never past the appointment); one pending per target; approved/rejected by a person, or expired/superseded. Approval re-runs the preview in its transaction: a different fingerprint supersedes it with a fresh proposal instead of running. Only the member it was made for, or an owner/manager, decides, with their own role re-checked at that moment.
+- `ActionExecution` (`ai_action_executions`) — executed action: actor (audit kind `ai_on_behalf_of` with the member), idempotency key, before/after snapshot, **undo record** (inverse + `undo_until`), explanation, links to outbox messages. Written in the same transaction as the change; never changed afterwards (triggers), never deleted by the services.
+- **Undo** runs the inverse through domain services as the member (so rules still apply), within the action's window, and takes back outbox messages not yet sent (status `cancelled`); AI-queued client emails wait 2 minutes first ("undo send"). If the world moved on, nothing changes.
+- **The tool port** `ActionRunner` (`preview`, `execute`, `undo`) runs inside the trust layer's transaction; S24 tools implement it.
 
 ## Explanations ("Why did you do that?")
 Stored per action: user request, tools called, key facts/rules used, alternatives considered. Rendered in plain language. Never includes other tenants' data or hidden prompts.

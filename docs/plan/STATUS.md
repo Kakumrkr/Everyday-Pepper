@@ -1,38 +1,32 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-20 · **Plan version:** 0.18 · **Current phase:** 6 — AI agent + trust layer. **S22** (Phase 6 plan, provider adapter, eval skeleton) done and merged → next: **S23** (trust-layer data)
+**Last updated:** 2026-10-21 · **Plan version:** 0.19 · **Current phase:** 6 — AI agent + trust layer. **S23** (trust-layer data and decisions) done on `claude/dreamy-ride-jkpjgs`, ADR-0028 proposed, PR not opened yet → next: **S24** (tool registry and the first tools)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S23 (6b) trust-layer data and decisions** on `claude/dreamy-ride-jkpjgs`. Brief confirmed by the user ("Go ahead with your recommendations"): PCR-003 (`booking.cancel`, `task.create`, strictest-action rule, bulk lock by recipients), 2-minute "undo send" grace on AI-queued client emails, the undo windows from the brief, and an "Ask me first for everything" switch.
-- **Done (commit aff6a0c):** contracts (trust schemas, ids-only JSON guard, `ai_on_behalf_of` audit actor, trust audit actions, outbox `cancelled`), PCR-003, migrations 0032/0033 (three tables, RLS, staff scope, no deletes, guard triggers), the trust repository, `cancelOutboxMessages`, isolation suite (253) and `trust.int.test.ts` (20) green; `pnpm check` green.
-- **Done (commit 10cc5f7):** `decideAutonomy`/`resolveAutonomy` with property tests (mutation-checked: removing the bulk lock or the untrusted demotion fails 37/43 tests), `stateFingerprint`, `auditActorOf` used by every service (`Actor.via: 'ai'`).
-- **Done (commit 2ba5826):** services `requestAction`/`approveProposal`/`rejectProposal`/`undoAction`/`changeAutonomy`/`getAutonomy`, the `ActionRunner` port for S24 tools, `undoUntil`, proposal expiry in the daily clean-up; 27 service integration tests (concurrent approve, concurrent undo, undo racing the worker). Fixed two timing-sensitive tests found under full load (worker outbox "sent" wait; api start-up wait 30 → 90 s). `pnpm check` and `pnpm test:integration` (785) green.
-- **Next:** adversarial self-review of the diff; T7 docs (ADR-0028 proposed, OWASP 2026 mapping in playbook §6, §9 log, STATUS, session log, decisions, CHANGELOG 0.19, traceability, dependency map).
-- **Watch:** one runtime unit test failed once inside a full `pnpm check` and did not reproduce in 8 runs; logs are now kept to name it if it comes back.
+Nothing in progress: S23 is complete and pushed to `claude/dreamy-ride-jkpjgs`. **Waiting on the user:** review ADR-0028 (proposed) and say "open PR" (one CI run); then S24 starts from `main`.
 
 ## Last sessions
-- **S22 Phase 6a (2026-10-20): Phase 6 plan, provider adapter, eval runner skeleton** ([ADR-0027](../adr/0027-llm-provider-port-and-evals.md), accepted). Full entry in [session-log.md](session-log.md).
-  - **Plan:** [phase-6-playbook.md](phase-6-playbook.md), confirmed by the user. It covers the market gap, differentiators D-1..D-5, the quality bar, design principles, the **$5 OpenAI budget (real calls only in S27)**, the eval strategy with a hostile fake, the OWASP LLM mapping, guides for S22–S27, §9 "Keep getting better" and an improvement log.
+- **S23 Phase 6b (2026-10-21): trust-layer data and decisions** ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md), proposed; [PCR-003](changes/PCR-003.md), approved). Full entry in [session-log.md](session-log.md).
   - **Code:**
-    - `contracts/ai.ts`: provider-neutral messages, tools, requests, responses and errors.
-    - New `@pepper/ai` package:
-      - the `LlmProvider` port and `LlmError`;
-      - `OpenAiProvider` on the Responses API (`openai` 7.32.0, pinned; `store: false`, reasoning replay, prompt cache key, no SDK retries);
-      - `ScriptedProvider`, `strictToolParameters`, `meteredProvider`, `loadOpenAiConfig`, `businessClock`;
-      - the eval runner: cases, deterministic graders, pass^k, cassettes with request fingerprints, a budget guard, the report and `pnpm --filter @pepper/ai eval`;
-      - three reference cases (look the client up first, "tomorrow" on the business clock, a pasted prompt injection).
+    - Tables `autonomy_settings`, `ai_action_proposals`, `ai_action_executions`: RLS, staff scope, guard triggers, no deletes.
+    - `decideAutonomy` (decided inside the trust layer from the domain's preview), the state fingerprint.
+    - Services `requestAction` / `approveProposal` / `rejectProposal` / `undoAction` / `changeAutonomy`.
+    - The `ActionRunner` port for S24 tools.
+    - The audit actor `ai_on_behalf_of` everywhere via `auditActorOf`.
+    - Outbox `cancelled` for undo, with a 2-minute "undo send" grace.
+    - Expired proposals marked by the daily clean-up.
   - **Checks:**
-    - `pnpm check` green: ai 81 tests (87 after the late fix below, rerun: ~99.7% lines), contracts 492, others unchanged.
-    - First eval run green on scripted cassettes at $0.
-    - The record path refuses without a key, without a model price, and with a bad cap.
-    - No real OpenAI call was made.
-    - `pnpm test:integration` green: 712, unchanged (no database or app change).
+    - `pnpm check` green (contracts 530, core 1,172 incl. property tests, db 44).
+    - `pnpm test:integration` green, 790, incl. the isolation suite with the new tables and concurrent approve/undo and undo-vs-worker races.
+    - No OpenAI call.
   - **Found and fixed:**
-    - the SDK raises a stream `error` event as an `APIError` without a status (now `unavailable`);
-    - a non-numeric `--max-cost` would have disabled the cap (now refused).
-- **M1 maintenance (2026-10-20):** `STATUS.md` split into this file, [session-log.md](session-log.md) and [decisions.md](decisions.md); checkpoint rule and generous-time-limits testing rule in `CLAUDE.md`; local Playwright in cloud sessions uses CI's headless shell; the session-start hook starts Docker with Google's mirror (`mirror.gcr.io`) so Docker Hub's rate limit no longer blocks pulls. No product code changed.
+    - AI approve/undo is refused (undo could bypass the dial).
+    - Outbox links from tools are verified.
+    - The guard's quadratic email pattern is bounded.
+    - Two load-sensitive tests are fixed (worker "sent" wait, api start-up 90 s).
+- **S22 Phase 6a (2026-10-20): Phase 6 plan, provider adapter, eval runner skeleton** ([ADR-0027](../adr/0027-llm-provider-port-and-evals.md), accepted). Playbook confirmed; `@pepper/ai` with the `LlmProvider` port, `OpenAiProvider` (Responses API, `store: false`), fakes, strict tool schemas, metering and the eval runner with cassettes and a budget guard. Full entry in [session-log.md](session-log.md).
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -45,6 +39,19 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S23 (user, 2026-10-21, Session Brief):** "Go ahead with your recommendations":
+  - PCR-003 (`booking.cancel`, `task.create`, strictest action, bulk by recipients);
+  - a 2-minute "undo send" grace;
+  - undo windows: bookings 24 h but not past the start; blocked time 24 h; notes and to-dos 7 days; messages until sent;
+  - an "Ask me first for everything" switch.
+- **S23 defaults (Claude, in ADR-0028, proposed):**
+  - The dial is decided inside the trust layer.
+  - Only people approve, reject or undo.
+  - The approver is the requester or a lead, with their role re-checked.
+  - A stale fingerprint means superseded plus a fresh proposal.
+  - Proposals and receipts are immutable and never deleted by the services.
+  - Proposals expire after 24 h (or at the appointment).
+  - Undo reasons feed the wrong-action metric.
 - **S22 (user, 2026-10-20):**
   - Plan Phase 6 with great care, as the product's most important layer: Claude acts as senior advisor, and every decision must improve the product and stand out from the market.
   - **OpenAI budget: $5 in total for Phase 6, spent only at the final testing stage (S27).**
@@ -67,12 +74,11 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S22 are done and merged (Phases 0–5, Phase 6a). Phase 6 (AI agent + trust layer) runs S22–S27 as set in the [Phase 6 playbook](phase-6-playbook.md), whose §7 guides each session; details in [session-log.md](session-log.md).
+S1–S22 are done and merged (Phases 0–5, Phase 6a); S23 (Phase 6b) is done and pushed, waiting for "open PR". Phase 6 (AI agent + trust layer) runs S22–S27 as set in the [Phase 6 playbook](phase-6-playbook.md), whose §7 guides each session; details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S23 | **Trust layer data:** proposals, executions, undo records, autonomy settings, `decideAutonomy` (playbook §7 S23) | 6b | RLS + isolation; property tests for `decideAutonomy` |
-| S24 | Tool registry + about ten tools with dry-run previews, inverses, permissions | 6c | Preview = execution and hostile-fake tests green |
+| S24 | Tool registry + about ten tools with dry-run previews, inverses, permissions; each implements ADR-0028's `ActionRunner` (booking services get transaction-taking variants) | 6c | Preview = execution and hostile-fake tests green (incl. AI approve/undo and foreign outbox links refused) |
 | S25 | Agent loop, conversations, SSE, budgets and rate limits | 6d | Eval sets green on the fakes; AC-X-2 |
 | S26 | Chat screen, cards, Why, Undo, Autonomy settings | 6e | Playwright journeys, axe |
 | S27 | Real-model evals within the $5 budget, model choice, Phase 6 security review, exit | 6f | Scheduling ≥ 90%, safety 100% pass^3, spend ≤ $5 |
