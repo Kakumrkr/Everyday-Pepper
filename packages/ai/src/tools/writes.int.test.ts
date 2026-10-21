@@ -203,7 +203,7 @@ describe.each(SCENARIOS.map((scenario) => [scenario.tool, scenario] as const))(
 
       const approval = await approveToolProposal(
         depsFor(w, w.owner),
-        proposal,
+        proposal.id,
         proposal.fingerprint,
       );
       if (approval.kind !== 'executed') throw new Error(`expected it to run: ${approval.kind}`);
@@ -222,7 +222,7 @@ describe.each(SCENARIOS.map((scenario) => [scenario.tool, scenario] as const))(
       const execution = done(await callTool(depsFor(w, w.owner), scenario.tool, args));
       expect(await state()).not.toEqual(before);
 
-      const undone = await undoToolAction(depsFor(w, w.owner), execution, 'wrong');
+      const undone = await undoToolAction(depsFor(w, w.owner), execution.id, 'wrong');
       expect(undone.execution.status).toBe('undone');
       expect(await state()).toEqual(before);
       for (const id of execution.outboxMessageIds) {
@@ -355,7 +355,11 @@ describe('conflicts and stale approvals', () => {
       }),
     );
     await changeBooking(db, w.owner, booking.id, { startsAt: tuesdayAt('13:00') }, w);
-    const approval = await approveToolProposal(depsFor(w, w.owner), proposal, proposal.fingerprint);
+    const approval = await approveToolProposal(
+      depsFor(w, w.owner),
+      proposal.id,
+      proposal.fingerprint,
+    );
     expect(approval.kind).toBe('stale');
     expect((await getBooking(db, w.owner, booking.id)).startsAt).toBe(tuesdayAt('13:00'));
   });
@@ -374,7 +378,11 @@ describe('conflicts and stale approvals', () => {
       }),
     );
     await bookOnScreen(w, w.jessStaff, w.sara, '14:00');
-    const approval = await approveToolProposal(depsFor(w, w.owner), proposal, proposal.fingerprint);
+    const approval = await approveToolProposal(
+      depsFor(w, w.owner),
+      proposal.id,
+      proposal.fingerprint,
+    );
     expect(approval.kind).toBe('refused');
     expect(await tuesdayBookings(w)()).toHaveLength(1);
   });

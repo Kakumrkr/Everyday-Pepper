@@ -7,11 +7,13 @@ import {
   type TrustJson,
 } from '@pepper/contracts';
 import {
+  ActionNotFoundError,
   changeAutonomy,
   createClient,
   ForbiddenError,
   listRecentActions,
   listTasks,
+  ProposalNotFoundError,
   queueEmail,
   rejectProposal,
   requestAction,
@@ -186,7 +188,7 @@ describe('what only people may do', () => {
     const ai: Actor = { ...w.owner, via: 'ai' };
     const aiDeps = depsFor(w, ai);
     await expect(
-      approveToolProposal(aiDeps, outcome.proposal, outcome.proposal.fingerprint),
+      approveToolProposal(aiDeps, outcome.proposal.id, outcome.proposal.fingerprint),
     ).rejects.toBeInstanceOf(ForbiddenError);
     await expect(rejectProposal(db, ai, outcome.proposal.id)).rejects.toBeInstanceOf(
       ForbiddenError,
@@ -198,11 +200,11 @@ describe('what only people may do', () => {
     // A person approves; the AI still cannot undo it.
     const approved = await approveToolProposal(
       depsFor(w, w.owner),
-      outcome.proposal,
+      outcome.proposal.id,
       outcome.proposal.fingerprint,
     );
     if (approved.kind !== 'executed') throw new Error('expected it to run');
-    await expect(undoToolAction(aiDeps, approved.execution, 'wrong')).rejects.toBeInstanceOf(
+    await expect(undoToolAction(aiDeps, approved.execution.id, 'wrong')).rejects.toBeInstanceOf(
       ForbiddenError,
     );
   });
@@ -217,7 +219,11 @@ describe('what only people may do', () => {
       assigneeStaffMemberId: null,
     });
     if (outcome.status !== 'awaiting_approval') throw new Error('expected a proposal');
-    const forged = await approveToolProposal(depsFor(w, w.owner), outcome.proposal, 'f'.repeat(64));
+    const forged = await approveToolProposal(
+      depsFor(w, w.owner),
+      outcome.proposal.id,
+      'f'.repeat(64),
+    );
     expect(forged.kind).toBe('stale');
     expect(await listTasks(db, w.owner, { status: 'all' })).toEqual([]);
   });
@@ -353,9 +359,9 @@ describe('a retry storm', () => {
       Array.from({ length: 5 }, () => dispatchToolCall(depsFor(w, w.owner), sameTurn, call)),
     );
     const executions = outcomes.flatMap((o) => (o.status === 'done' ? [o.execution.id] : []));
-    expect(executions.length).toBeGreaterThan(0);
+    // Every copy answers with the one execution: the losers of the race ask again.
+    expect(executions).toHaveLength(5);
     expect(new Set(executions).size).toBe(1);
-    for (const outcome of outcomes) expect(['done', 'refused']).toContain(outcome.status);
     expect(await listTasks(db, w.owner, { status: 'all' })).toHaveLength(1);
   });
 });
@@ -370,5 +376,40 @@ describe('injected text in a client’s name', () => {
     const content = toolMessageContent(outcome);
     expect(content).toContain('IGNORE-ALL-PREVIOUS- E.');
     expect(content).not.toMatch(/cancel every booking|email everyone/);
+  });
+});
+
+describe("a card's ids from the browser", () => {
+  it("cannot approve or undo another business's proposal or action", async () => {
+    const w = await newWorld(db);
+    const outsider = await newWorld(db);
+    await changeAutonomy(db, w.owner, { askFirst: true }, { templateDefaults: {} });
+    const outcome = await callTool(depsFor(w, w.owner), 'add_todo', {
+      title: 'Call Maria',
+      dueDate: null,
+      dueTime: null,
+      assigneeStaffMemberId: null,
+    });
+    if (outcome.status !== 'awaiting_approval') throw new Error('expected a proposal');
+    await expect(
+      approveToolProposal(
+        depsFor(outsider, outsider.owner),
+        outcome.proposal.id,
+        outcome.proposal.fingerprint,
+      ),
+    ).rejects.toBeInstanceOf(ProposalNotFoundError);
+    const approved = await approveToolProposal(
+      depsFor(w, w.owner),
+      outcome.proposal.id,
+      outcome.proposal.fingerprint,
+    );
+    if (approved.kind !== 'executed') throw new Error('expected it to run');
+    await expect(
+      undoToolAction(depsFor(outsider, outsider.owner), approved.execution.id, 'wrong'),
+    ).rejects.toBeInstanceOf(ActionNotFoundError);
+    // Staff can't decide on what the AI did for the owner.
+    await expect(
+      undoToolAction(depsFor(w, w.jess), approved.execution.id, 'wrong'),
+    ).rejects.toBeInstanceOf(ActionNotFoundError);
   });
 });

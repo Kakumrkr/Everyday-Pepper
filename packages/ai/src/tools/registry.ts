@@ -6,6 +6,7 @@ import {
   type ActionExecution,
   type ActionExecutionId,
   type ActionProposal,
+  type ActionProposalId,
   type AutonomyAction,
   type AvailableSlot,
   type ChangeSide,
@@ -21,6 +22,9 @@ import {
 } from '@pepper/contracts';
 import {
   approveProposal,
+  ConcurrentActionError,
+  getAction,
+  getProposal,
   requestAction,
   undoAction,
   type ActionRunner,
@@ -185,14 +189,17 @@ export function toolMessageContent(outcome: ToolOutcome): string {
 }
 
 /**
- * A member approves a proposal they were shown (S26): the trust layer re-runs the tool's dry run
- * on the stored payload and acts only if the fingerprint still matches. People only.
+ * A member approves a proposal they were shown (S26), by its id and the fingerprint the card
+ * showed: the stored proposal is loaded here (never a payload the caller sends), and the trust
+ * layer re-runs the tool's dry run on it and acts only if the fingerprint still matches.
+ * People only.
  */
 export async function approveToolProposal(
   deps: ToolDeps,
-  proposal: ActionProposal,
+  proposalId: ActionProposalId,
   shownFingerprint: string,
 ): Promise<ApprovalResult> {
+  const proposal = await getProposal(deps.db, deps.actor, proposalId);
   const tool = writeToolNamed(proposal.tool);
   return approveProposal(
     deps.db,
@@ -203,12 +210,13 @@ export async function approveToolProposal(
   );
 }
 
-/** A member undoes an AI action within its window (S26). People only. */
+/** A member undoes an AI action within its window (S26), by its id. People only. */
 export async function undoToolAction(
   deps: ToolDeps,
-  execution: { id: ActionExecutionId; tool: string; action: AutonomyAction },
+  executionId: ActionExecutionId,
   reason: UndoReason | null,
 ): Promise<UndoResult> {
+  const execution = await getAction(deps.db, deps.actor, executionId);
   const tool = writeToolNamed(execution.tool);
   return undoAction(
     deps.db,
@@ -256,23 +264,29 @@ async function requestWrite(
   }
   const payload = checked.data;
   const { runner, lastPreview } = writeRunner(tool, deps, payload);
-  const result = await requestAction(
-    deps.db,
-    deps.actor,
-    runner,
-    {
-      payload,
-      idempotencyKey: idempotencyKeyOf(turn, callId),
-      explanation: {
-        requestMessageId: turn.requestMessageId,
-        steps: [{ tool: tool.name, input: payload }],
-        facts: [],
-        alternatives: [],
+  const ask = () =>
+    requestAction(
+      deps.db,
+      deps.actor,
+      runner,
+      {
+        payload,
+        idempotencyKey: idempotencyKeyOf(turn, callId),
+        explanation: {
+          requestMessageId: turn.requestMessageId,
+          steps: [{ tool: tool.name, input: payload }],
+          facts: [],
+          alternatives: [],
+        },
+        untrustedContext: turn.untrustedContext,
       },
-      untrustedContext: turn.untrustedContext,
-    },
-    { templateDefaults: deps.autonomy.templateDefaults, clock: deps.clock },
-  );
+      { templateDefaults: deps.autonomy.templateDefaults, clock: deps.clock },
+    );
+  // A copy of the same call racing this one recorded it first: asking again finds its result.
+  const result = await ask().catch((error: unknown) => {
+    if (error instanceof ConcurrentActionError) return ask();
+    throw error;
+  });
   if (result.kind === 'proposed') {
     const shown = PreviewSchema.parse(result.proposal.preview);
     return {

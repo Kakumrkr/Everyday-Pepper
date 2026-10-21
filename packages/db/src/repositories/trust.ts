@@ -117,6 +117,18 @@ export async function insertProposal(
   return row;
 }
 
+/** The proposal with this id, if the transaction may see it. */
+export async function findProposal(
+  tx: TenantTx,
+  id: ActionProposalId,
+): Promise<AiActionProposalRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(aiActionProposals)
+    .where(eq(aiActionProposals.id, ActionProposalIdSchema.parse(id)));
+  return row;
+}
+
 /** The proposal with this id, locked until the transaction ends (`FOR UPDATE`). */
 export async function lockProposal(
   tx: TenantTx,
@@ -301,6 +313,18 @@ export async function findExecutionOfProposal(
     .select()
     .from(aiActionExecutions)
     .where(eq(aiActionExecutions.proposalId, ActionProposalIdSchema.parse(proposalId)));
+  return row;
+}
+
+/** The execution with this id, if the transaction may see it. */
+export async function findExecution(
+  tx: TenantTx,
+  id: ActionExecutionId,
+): Promise<AiActionExecutionRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(aiActionExecutions)
+    .where(eq(aiActionExecutions.id, ActionExecutionIdSchema.parse(id)));
   return row;
 }
 

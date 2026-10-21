@@ -37,8 +37,10 @@ import {
   decideProposal,
   expirePendingProposals,
   findExecutionByKey,
+  findExecution,
   findExecutionOfProposal,
   findOutboxMessage,
+  findProposal,
   findProposalByKey,
   insertExecution,
   insertProposal,
@@ -61,6 +63,7 @@ import { systemClock, type Clock } from '../clock.js';
 import {
   ActionNotFoundError,
   ActionTooLateError,
+  ConcurrentActionError,
   ForbiddenError,
   ProposalNotFoundError,
   ProposalNotPendingError,
@@ -441,6 +444,35 @@ export async function listPendingProposals(
   return rows.map(toProposal);
 }
 
+/**
+ * One proposal as stored (staff: theirs), so a card's Approve runs what was stored, never a
+ * payload the caller sends. `ProposalNotFoundError` for one the member can't see.
+ */
+export async function getProposal(
+  db: Database,
+  actor: Actor,
+  proposalId: ActionProposalId,
+): Promise<ActionProposal> {
+  requirePermission(actor, 'business.read');
+  const id = ActionProposalIdSchema.parse(proposalId);
+  const row = await withMember(db, actor.context, (tx) => findProposal(tx, id));
+  if (row === undefined) throw new ProposalNotFoundError();
+  return toProposal(row);
+}
+
+/** One AI action's receipt as stored (staff: those done for them). */
+export async function getAction(
+  db: Database,
+  actor: Actor,
+  executionId: ActionExecutionId,
+): Promise<ActionExecution> {
+  requirePermission(actor, 'business.read');
+  const id = ActionExecutionIdSchema.parse(executionId);
+  const row = await withMember(db, actor.context, (tx) => findExecution(tx, id));
+  if (row === undefined) throw new ActionNotFoundError();
+  return toExecution(row);
+}
+
 /** The AI's recent actions with their receipts (staff: those done for them), newest first. */
 export async function listRecentActions(
   db: Database,
@@ -684,7 +716,7 @@ async function runAndRecord(
   });
   // The key was checked at the start of this transaction and the proposal is locked; a
   // concurrent retry with the same key meets the unique constraint and rolls back instead.
-  if (row === undefined) throw new Error('This action was recorded by a concurrent request');
+  if (row === undefined) throw new ConcurrentActionError();
   await appendAuditEntry(tx, {
     actor: auditActorOf(ai),
     change: {
