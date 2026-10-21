@@ -35,18 +35,18 @@ export async function addUsage(
 /**
  * Reserves `amount` of `metric` in `period` if the counter stays within `limit`, atomically
  * (one conditional upsert of the counter's row): of many concurrent reservations, only those
- * that fit succeed. Returns whether it was reserved. `settleUsage` later corrects the
+ * that fit succeed. Returns the counter after the reservation, or `null` if it did not fit. `settleUsage` later corrects the
  * reservation to what was really used (ADR-0030: a hard budget that holds under concurrency).
  */
 export async function reserveUsage(
   tx: TenantTx,
   input: { metric: UsageMetric; period: UsagePeriod; amount: number; limit: number },
-): Promise<boolean> {
+): Promise<number | null> {
   const metric = UsageMetricSchema.parse(input.metric);
   const period = UsagePeriodSchema.parse(input.period);
   const amount = UsageAmountSchema.parse(input.amount);
   const limit = UsageAmountSchema.parse(input.limit);
-  if (amount > limit) return false;
+  if (amount > limit) return null;
   const rows = await tx
     .insert(usageMeters)
     .values({ metric, period, amount })
@@ -56,7 +56,7 @@ export async function reserveUsage(
       setWhere: sql`${usageMeters.amount} + excluded.amount <= ${limit}`,
     })
     .returning({ amount: usageMeters.amount });
-  return rows.length === 1;
+  return rows[0]?.amount ?? null;
 }
 
 /**

@@ -338,7 +338,10 @@ describe('token budget reservations', () => {
         reserveUsage(tx, { metric: 'llm_tokens', period, amount: 1_000, limit: 10_000 }),
       );
     const results = await Promise.all(Array.from({ length: 25 }, reserve));
-    expect(results.filter(Boolean)).toHaveLength(10);
+    expect(results.filter((after) => after !== null)).toHaveLength(10);
+    expect(results.filter((after) => after !== null).sort((a, b) => (a ?? 0) - (b ?? 0))).toEqual(
+      Array.from({ length: 10 }, (_unused, index) => (index + 1) * 1_000),
+    );
     const [usage] = await withTenant(db, business, (tx) => listUsage(tx, period));
     expect(usage).toEqual({ metric: 'llm_tokens', amount: 10_000 });
   });
@@ -355,12 +358,12 @@ describe('token budget reservations', () => {
       await inBusiness((tx) =>
         reserveUsage(tx, { metric: 'llm_tokens', period, amount: 20_001, limit: 20_000 }),
       ),
-    ).toBe(false);
+    ).toBeNull();
     expect(
       await inBusiness((tx) =>
         reserveUsage(tx, { metric: 'llm_tokens', period, amount: 5_000, limit: 20_000 }),
       ),
-    ).toBe(true);
+    ).toBe(5_000);
     await inBusiness((tx) => settleUsage(tx, { metric: 'llm_tokens', period, delta: -3_800 }));
     expect(await inBusiness((tx) => listUsage(tx, period))).toEqual([
       { metric: 'llm_tokens', amount: 1_200 },
