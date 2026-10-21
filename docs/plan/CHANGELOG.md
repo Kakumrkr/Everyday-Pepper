@@ -2,6 +2,21 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.20 — 2026-10-21
+- S24 (Phase 6c): [ADR-0029](../adr/0029-tool-registry-and-tools.md) (pre-approved by the user at the S24 Session Brief). **Tools:** the tool registry and ten tools in `@pepper/ai`:
+  - reads: `find_availability`, `find_clients`, `get_day`, `get_booking`, `list_services_and_staff`;
+  - writes, through the trust layer: `create_booking`, `move_booking`, `cancel_booking`, `block_time`, `add_todo`.
+
+  **The trust layer runs every preview in a savepoint it always rolls back** (preview = execution). **Additive changes:**
+  - the domain services' transaction-taking `*In` variants (booking writes in a savepoint), `reinstateBookingIn`, `withdrawTaskIn`;
+  - `queueBookingEmail` moved into appointments (the api delegates);
+  - contracts `tool-cards.ts` (tool error codes and cards), audit action `task.deleted`;
+  - core `getProposal`, `getAction`, `ConcurrentActionError`;
+  - db `findClientsByIds`, `findProposal`, `findExecution`, `createDatabase({ onQuery })`;
+  - the `packages/ai` layer rule allows db and appointments.
+
+  **Fixed:** a time long past no longer makes the alternatives query fail (a 500 on the calendar too). **Plan:** S25's ADR is renumbered ADR-0030. No change to phases, scope or exit criteria.
+
 ## 0.19 — 2026-10-21
 - S23 (Phase 6b): [PCR-003](changes/PCR-003.md) (approved by the user at the S23 brief): `booking.cancel` and `task.create` join the autonomy dial; a tool call follows the strictest of its actions; the bulk lock goes by recipients (> 10), not by action name. [ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md) (accepted by the user): the trust layer — `decideAutonomy` inside the domain, autonomy settings with an "Ask me first for everything" switch, proposals with a state fingerprint (stale → superseded, never run), people-only approval with the approver's role re-checked, receipts with undo windows per action, a 2-minute "undo send" grace on AI-queued client emails, and the `ActionRunner` port for S24 tools. Additive changes: tables `autonomy_settings`, `ai_action_proposals`, `ai_action_executions` (migrations 0032–0033), audit actor `ai_on_behalf_of` and five trust audit actions, outbox status `cancelled`. No change to phases, scope or exit criteria.
 

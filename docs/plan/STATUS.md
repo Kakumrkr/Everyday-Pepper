@@ -1,30 +1,32 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-21 · **Plan version:** 0.19 · **Current phase:** 6 — AI agent + trust layer. **S23** (trust-layer data and decisions) done and merged → next: **S24** (tool registry and the first tools)
+**Last updated:** 2026-10-21 · **Plan version:** 0.20 · **Current phase:** 6 — AI agent + trust layer. **S24** (tool registry and the first ten tools) done and merged → next: **S25** (agent loop, conversations, SSE, budgets)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S24 (6c) tool registry and the first tools**: Session Brief approved by the user (2026-10-21): "Go ahead with your recommendations, ADR-0029 is fine". The user pre-approved ADR-0029 and asked Claude to open the PR, merge it to `main` and end with the prompt for the next session.
-- **Done:**
-  - T8: eval cases generated from the guides (`toolEvalCases`, 20 cases, schema-checked); per-tool budgets on 2,000 bookings (statement counts + p95 ≤ 3× 300 ms; measured p95 7–63 ms); `createDatabase({ onQuery })`.
-  - T7: the hostile fake (`tools/hostile.ts`, 92 attacks per role, as owner and staff) is 100% stopped; plus AI approve/reject/undo, autonomy, forged fingerprints, foreign and unheld outbox links, the bulk lock, a retry storm and injected names. It found two bugs, now fixed: `alternativesRange` built an inverted range for a time long past (a pre-existing 500 on the calendar too; test first), and `get_day` answered an empty day for another business's staff id (now `not_found`).
-  - T6: the five write tools are green on Postgres (26 tests, mutation-checked): preview = execution, inverse restores (and cancels the email), role matrix, cross-tenant, conflicts with 3 nearest, stale and refused approvals, dial and email hold, retries.
-  - T4–T5:
-    - The registry (`packages/ai/src/tools`): `dispatchToolCall`, `toolDefinitions`, error codes and cards (`contracts/tool-cards.ts`), guides with a lint, `writeRunner`.
-    - The five read tools, green on Postgres.
-    - The ai layer rule widened to db and appointments (ADR-0029).
-  - T3: the trust layer runs every preview in a savepoint it always rolls back (`dryRun`). An approval whose fresh preview the domain refuses supersedes the proposal and returns `refused` with the error. Mutation-checked.
-  - T2: `queueBookingEmail` (appointments) with `holdSeconds`, returning the outbox id; the api's `BookingEmails` delegates to it.
-  - T1: transaction-taking variants (`createBookingIn`, `changeBookingIn`, `getBookingIn`, `listBookingsIn`, `reinstateBookingIn`, `findAvailabilityIn`, `addTimeOffIn`/`removeTimeOffIn`/`listTimeOffBetweenIn`, `listServicesIn`, `listStaffIn`, `createTaskIn`, `withdrawTaskIn`, `findClientsByNameIn`). Booking writes run in a savepoint. New audit action `task.deleted`.
-- **Next:** T9 docs, ADR-0029 (accepted), PR, merge.
-- **Decisions (user, brief):**
-  - ADR-0029 for S24; S25's ADR becomes 0030.
-  - `email_client` on write tools: `null` means the screens' default; the email stays on the dial.
-  - Undo never emails the client.
-  - Staff find only their own clients.
+Nothing in progress: S24 is complete, ADR-0029 is accepted (pre-approved by the user), and the PR is opened and merged to `main`. Next: S25 in a new session from `main`.
 
 ## Last sessions
+- **S24 Phase 6c (2026-10-21): tool registry and the first ten tools** ([ADR-0029](../adr/0029-tool-registry-and-tools.md), accepted). Full entry in [session-log.md](session-log.md).
+  - **Code:**
+    - `packages/ai/src/tools`: ten tools (five reads; `create_booking`, `move_booking`, `cancel_booking`, `block_time`, `add_todo` through the trust layer).
+    - `dispatchToolCall`, `toolDefinitions`, and `approveToolProposal`/`undoToolAction` by id.
+    - Error codes and cards in `contracts/tool-cards.ts`.
+    - Guides with a lint and generated eval cases; the hostile fake (`hostileAttacks`, `hostileProvider`).
+    - The trust layer runs every preview in a rolled-back savepoint (preview = execution).
+    - Transaction-taking `*In` services with booking writes in savepoints; `reinstateBookingIn`, `withdrawTaskIn`; `queueBookingEmail` with the AI's hold.
+    - Client names reach the model as first name and last initial.
+  - **Checks:**
+    - `pnpm check` green (ai 146, core 1,172, appointments 83).
+    - `pnpm test:integration` green, 862: ai 57, with the hostile fake at 100% as owner and staff.
+    - Mutation-checked. Per-tool p95 7–63 ms on 2,000 bookings.
+    - No OpenAI call.
+  - **Found and fixed:**
+    - A time long past made the alternatives query fail (a 500 on the calendar too).
+    - `get_day` with another business's staff id now answers `not_found`.
+    - Approve and undo trusted the caller's object (now ids).
+    - A racing retry answered `internal` (now one execution for all).
 - **S23 Phase 6b (2026-10-21): trust-layer data and decisions** ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md), accepted; [PCR-003](changes/PCR-003.md), approved). Full entry in [session-log.md](session-log.md).
   - **Code:**
     - Tables `autonomy_settings`, `ai_action_proposals`, `ai_action_executions`: RLS, staff scope, guard triggers, no deletes.
@@ -43,7 +45,6 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
     - Outbox links from tools are verified.
     - The guard's quadratic email pattern is bounded.
     - Two load-sensitive tests are fixed (worker "sent" wait, api start-up 90 s).
-- **S22 Phase 6a (2026-10-20): Phase 6 plan, provider adapter, eval runner skeleton** ([ADR-0027](../adr/0027-llm-provider-port-and-evals.md), accepted). Playbook confirmed; `@pepper/ai` with the `LlmProvider` port, `OpenAiProvider` (Responses API, `store: false`), fakes, strict tool schemas, metering and the eval runner with cassettes and a budget guard. Full entry in [session-log.md](session-log.md).
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -56,6 +57,19 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S24 (user, 2026-10-21, Session Brief):** "Go ahead with your recommendations, ADR-0029 is fine":
+  - ADR-0029 for the tools; S25's ADR becomes ADR-0030;
+  - `emailClient: null` means the screens' default (email), and the email stays a dial action;
+  - Undo never emails the client;
+  - staff find only their own clients.
+- **End of S24 (user, pre-approved at the brief):** "I'm pre approving the ADR. You have to raise PR and merge to main and at end give a perfect prompt to start the next new session."
+- **S24 defaults (Claude, in ADR-0029):**
+  - preview = the domain's change in a rolled-back savepoint;
+  - fingerprint only what a tool touches;
+  - name-only client search;
+  - target staff ids as arguments, identity never;
+  - approve and undo by id;
+  - per-tool budgets.
 - **S23 (user, 2026-10-21, Session Brief):** "Go ahead with your recommendations":
   - PCR-003 (`booking.cancel`, `task.create`, strictest action, bulk by recipients);
   - a 2-minute "undo send" grace;
@@ -70,21 +84,6 @@ Full wording and the history in [decisions.md](decisions.md).
   - Proposals and receipts are immutable and never deleted by the services.
   - Proposals expire after 24 h (or at the appointment).
   - Undo reasons feed the wrong-action metric.
-- **S22 (user, 2026-10-20):**
-  - Plan Phase 6 with great care, as the product's most important layer: Claude acts as senior advisor, and every decision must improve the product and stand out from the market.
-  - **OpenAI budget: $5 in total for Phase 6, spent only at the final testing stage (S27).**
-  - Phase 6 playbook confirmed, with a "keep getting better" rule.
-  - The official `openai` SDK.
-  - Sentry and Grafana Cloud deferred again.
-- **End of S22 (user):** "ADR-0027 approved. Open PR and complete the merge."
-- **S22 defaults (Claude, in ADR-0027, accepted by the user):**
-  - Responses API with `store: false` and reasoning replay.
-  - Our own retries, with a 30 s timeout.
-  - Strict tool schemas from Zod (`.nullable()` instead of optional).
-  - Model ids only from config, chosen in S27.
-  - A call fails if it can't be metered.
-  - Deterministic graders and cassettes.
-  - A $1.50 per-run cap (at most $4.50), and a price table filled before any real run.
 
 ## Waiting on the user
 1. Optional, not yet: create a free Sentry project and a Grafana Cloud stack and put `SENTRY_DSN` / `OTEL_EXPORTER_OTLP_*` in your local `.env` to see errors and traces (nothing is needed for development). The user deferred it after M1 and asked Claude to bring it up: **deferred again at S22 (user); raise it before the pilot (S27/Phase 11 briefs).**
@@ -92,12 +91,11 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S23 are done and merged (Phases 0–5, Phases 6a–6b). Phase 6 (AI agent + trust layer) runs S22–S27 as set in the [Phase 6 playbook](phase-6-playbook.md), whose §7 guides each session; details in [session-log.md](session-log.md).
+S1–S24 are done and merged (Phases 0–5, Phases 6a–6c). Phase 6 (AI agent + trust layer) runs S22–S27 as set in the [Phase 6 playbook](phase-6-playbook.md), whose §7 guides each session; details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S24 | Tool registry + about ten tools with dry-run previews, inverses, permissions; each implements ADR-0028's `ActionRunner` (booking services get transaction-taking variants) | 6c | Preview = execution and hostile-fake tests green (incl. AI approve/undo and foreign outbox links refused) |
-| S25 | Agent loop, conversations, SSE, budgets and rate limits | 6d | Eval sets green on the fakes; AC-X-2 |
+| S25 | Agent loop, conversations, SSE, budgets and rate limits (ADR-0030); wires S24's `dispatchToolCall`, replays the hostile fake through the loop, seeded worlds for the generated tool eval cases | 6d | Eval sets green on the fakes; AC-X-2 |
 | S26 | Chat screen, cards, Why, Undo, Autonomy settings | 6e | Playwright journeys, axe |
 | S27 | Real-model evals within the $5 budget, model choice, Phase 6 security review, exit | 6f | Scheduling ≥ 90%, safety 100% pass^3, spend ≤ $5 |
 

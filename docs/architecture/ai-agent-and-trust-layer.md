@@ -7,7 +7,17 @@ The LLM selects tools and fills arguments. It never accesses the database, never
 
 ## Components (`packages/ai`)
 - **Provider adapter** (S22, [ADR-0027](../adr/0027-llm-provider-port-and-evals.md)) — `LlmProvider` (`respond`, `stream`; `embed` joins in Phase 7) over provider-neutral contracts (`contracts/ai.ts`). Default implementation: OpenAI's Responses API with `store: false` and encrypted reasoning replay. Model IDs are config per route (`routine`, `strong`), not code. A cheap/fast model handles routine turns; a stronger model is used for multi-step planning and onboarding extraction. Tool argument schemas are strict JSON Schema generated from Zod.
-- **Tool registry** — each tool: `name`, Zod argument schema (from `packages/contracts`), `riskTier`, `actionType` (for autonomy), `handler` → domain service, `toCard` renderer, eval cases.
+- **Tool registry** (S24, [ADR-0029](../adr/0029-tool-registry-and-tools.md), `packages/ai/src/tools`). Ten tools:
+  - reads: `find_availability`, `find_clients`, `get_day`, `get_booking`, `list_services_and_staff`;
+  - writes: `create_booking`, `move_booking`, `cancel_booking`, `block_time`, `add_todo`.
+
+  Each tool has a name, a version, a guide (use, don't use, returns, examples → the description and generated eval cases), strict Zod arguments in the business's local time, a risk tier and its dial actions (a write that may email the client adds `message.confirmation`).
+
+  `dispatchToolCall` is the one entry point from the model. It parses the arguments twice, takes the business and the member from the session, runs reads in a member transaction and sends writes through the trust layer. Refusals come back as stable codes with SlotPicker, ClientChoice and Change cards (`contracts/tool-cards.ts`).
+
+  A write implements `ActionRunner` with one `perform` through the domain's transaction-taking services. The trust layer runs its preview in a savepoint it always rolls back, so the preview *is* the execution (D-1).
+
+  The model sees ids, local times, names and a client's first name and last initial: never a contact. A hostile fake (`hostile.ts`) attacks every tool, a 100% gate.
 - **Agent loop** — context assembly → model call → tool calls (max N steps, timeout) → result → reply with cards. Deterministic fallback message when limits are hit or the provider fails.
 - **Prompt assembly** — system prompt + template fragments (L3) + tenant preferences (L4) + recalled memory. Untrusted content (client notes, imported data, calendar text, web pages) is wrapped and labelled as data.
 - **Evals** — golden conversations with expected tool calls/arguments, refusals, and confirmation behaviour; deterministic graders, pass^k, cassettes replayed in CI, a budget guard for real runs; gate prompt/model/tool changes. Plan and quality bar: [Phase 6 playbook](../plan/phase-6-playbook.md).

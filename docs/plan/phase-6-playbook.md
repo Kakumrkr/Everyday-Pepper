@@ -98,6 +98,14 @@
 
 (LLM04 data poisoning and LLM08 vector weaknesses belong to Phase 7 memory.)
 
+**Update (S24):** the controls S24 built, in the 2026 numbering:
+- **LLM01 prompt injection:** client names reach the model as a first name and an initial only; untrusted context makes external actions ask.
+- **LLM02 sensitive information disclosure:** no contact details in any tool answer, tested for every role; name-only client search.
+- **LLM03 excessive agency:** ten narrow tools; writes only through the trust layer; the hostile fake as a 100% gate.
+- **LLM07 misinformation:** answers come from the domain.
+
+S27 still re-maps the whole table ([ADR-0029](../adr/0029-tool-registry-and-tools.md)).
+
 **Update (S23):** OWASP published the **2026 edition** of the Top 10 for LLM Applications (September 2026); it moves Excessive Agency up to **LLM03:2026** and is mapped to OWASP's Top 10 for Agentic Applications. The controls above are unchanged; S27's security review re-maps this table against the 2026 numbering and the agentic list (https://genai.owasp.org/llm-top-10/).
 
 ## 7. Session guides
@@ -124,7 +132,7 @@
 - **Tests:** per tool: schema tests, preview = execution contract test (D-1), inverse restores state, role matrix through the tool (AC-W2-4), cross-tenant ids rejected; the hostile fake's attacks against every tool.
 
 ### S25 (6d) — Agent loop and conversations
-- **Build:** `conversations` and `conversation_messages` (tenant-owned, RLS, own-only for staff, `channel`, retention), the `Turn` abstraction, context assembly (static prefix → template fragment → business preferences → date table → recent messages, with untrusted data labelled), the loop with step/time limits and parallel reads, model routing rules, per-business budget (soft/hard) and per-user rate limit, the fallback reply, SSE endpoint `POST /v1/chat/turns` streaming typed events with resume (D8: SSE), OTel spans. ADR-0029.
+- **Build:** `conversations` and `conversation_messages` (tenant-owned, RLS, own-only for staff, `channel`, retention), the `Turn` abstraction, context assembly (static prefix → template fragment → business preferences → date table → recent messages, with untrusted data labelled), the loop with step/time limits and parallel reads, model routing rules, per-business budget (soft/hard) and per-user rate limit, the fallback reply, SSE endpoint `POST /v1/chat/turns` streaming typed events with resume (D8: SSE), OTel spans. ADR-0030 (ADR-0029 went to S24's tool registry).
 - **Think hard about:** what goes into the static prefix (cache hits = cost); trimming history by tokens; a turn that produces several writes becomes one plan card; cancelling a turn when the user leaves.
 - **Pitfalls:** history that re-sends untrusted text without its label; logging message contents; holding a DB transaction across a model call.
 - **Tests:** loop unit tests with the scripted fake (limits, errors, parallel reads, fallback), SSE contract test, budget and rate-limit integration tests, AC-X-2 with a failing provider; all eval sets green on the fakes.
@@ -156,6 +164,7 @@ This layer is the product, so each session also looks for a better way, not only
 |---|---|
 | S22 | The SDK raises an in-stream `error` event as an `APIError` without a status: a fixture test caught it (now `unavailable`); keep testing every provider event shape we rely on. Reasoning models need their reasoning items sent back between tool calls when nothing is stored (`replay`). Next: S23 should store proposals and executions with ids only (no client contacts) and give `decideAutonomy` property tests first. Try in S24: generate each tool's eval cases from its description to catch vague descriptions early. |
 | S23 | Deciding autonomy *inside* the trust layer from the domain's own preview (not passed in by the loop) makes "no write without approval" hold even against a compromised loop; mutation-checking the property tests (37/43 failures when a rule is removed) proved they bite. The self-review found the AI could have used undo or approve to get around the dial (now people-only), and a quadratic email pattern in the ids-only guard (size is now checked first). Next (S24): give the booking services transaction-taking variants for `ActionRunner`, fingerprint only the rows a tool touches, and have the hostile fake try approve/undo/foreign outbox links. S26: show a staff member the receipt when a lead approved their proposal (today it is the lead's). |
+| S24 | Running each write's preview as the real domain change in a rolled-back savepoint made D-1 hold by construction. The contract tests and mutation checks proved it, and the fingerprint now covers only what the tool touches. The hostile fake paid off before any model ran: it found a 500 for a time long past (a pre-existing bug, also on the calendar) and an inconsistent `get_day` answer for another business's staff. The self-review found that approve and undo trusted a caller's proposal object (now ids only). Next (S25): replay `hostileProvider` through the real loop; give the loop `toolDefinitions()` as the static prefix and mark turns untrusted from `untrustedText`; run writes one at a time; feed `toolEvalCases` with seeded worlds; record the per-tool budgets in eval reports. S26: show "the client was already emailed" on Undo, and expire proposals whose tool version changed. |
 
 ## 10. References (read the ones named in your session)
 - Anthropic, *Building effective agents* (2024) — simple composable patterns over frameworks, tool design ("agent-computer interface"): https://www.anthropic.com/engineering/building-effective-agents

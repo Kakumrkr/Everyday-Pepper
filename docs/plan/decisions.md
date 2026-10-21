@@ -160,3 +160,21 @@ Every decision the user made in chat, and the defaults Claude chose that the use
 - **S23 Session Brief (user, 2026-10-21):** "Go ahead with your recommendations": (1) **PCR-003**: `booking.cancel` (internal write, default ask) and `task.create` (default notify) on the dial, the strictest-action rule, the bulk lock by recipients; (2) **"undo send"**: AI-queued client emails wait **2 minutes** before leaving, so Undo truly unsends them; (3) the **undo windows**: booking actions 24 h but never after the appointment starts, blocked time 24 h, notes and to-dos 7 days, messages until sent; and an **"Ask me first for everything"** switch.
 - **S23 defaults (Claude, in ADR-0028, accepted by the user):** the trust layer decides autonomy itself from the tool's domain preview (callers can't pass a decision in); after untrusted text, external actions ask and "just do it" becomes "do it and tell me"; proposals expire after 24 h (or at the appointment's start) and a newer request for the same target supersedes the pending one; only a person approves, rejects or undoes (an AI actor is refused); the decider is the member it was made for or an owner/manager, with their own role re-checked at that moment; a stale fingerprint supersedes the proposal with a fresh one; proposals and receipts are immutable (triggers) and never deleted by the services; the trust layer checks every outbox link a tool returns; explanations refer to the member's message by id; the ids-only JSON guard (≤ 8 KB, no email/phone strings) backs every tool's strict schema; autonomy lives in its own table (everyone reads, owners/managers write); undo reasons `wrong`/`changed_mind`/`other` feed the wrong-action metric.
 - **End of S23 (user, 2026-10-21):** "ADR-0028 approved. Raise PR and complete merge." ADR-0028 accepted as proposed, with Claude's defaults. S24 starts in a new session from `main`.
+- **S24 Session Brief (user, 2026-10-21):** "Go ahead with your recommendations, ADR-0029 is fine":
+  - ADR-0029 for the tool registry (S25's ADR becomes ADR-0030);
+  - `emailClient` on writes: `null` means the screens' default (email); the email stays a dial action of its own (`message.confirmation`);
+  - Undo never emails the client;
+  - staff find and book only their own clients, as on the screens.
+
+  The user also said: "I'm pre approving the ADR. You have to raise PR and merge to main and at end give a perfect prompt to start the next new session."
+- **S24 defaults (Claude, in ADR-0029, pre-approved by the user):**
+  - tools live in `@pepper/ai`, which may import db and appointments (never templates);
+  - every preview runs in a savepoint the trust layer always rolls back (preview = execution);
+  - the fingerprint covers only what a tool touches;
+  - client names reach the model as first name and last initial, letters only;
+  - `find_clients` matches names only;
+  - target staff ids are arguments, identity never is;
+  - with no staff member named, staff book themselves and owners get the first one free;
+  - approve and undo take ids;
+  - a racing copy of a call retries once;
+  - per-tool budgets gate statement counts and the p95 at 3× 300 ms.
