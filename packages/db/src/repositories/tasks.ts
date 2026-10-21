@@ -57,6 +57,18 @@ export async function lockTask(tx: TenantTx, id: TaskId): Promise<TaskRow | unde
   return row;
 }
 
+/**
+ * Deletes a task the transaction may reach (undoing a to-do the AI added, ADR-0028). Returns
+ * whether it was there.
+ */
+export async function deleteTask(tx: TenantTx, id: TaskId): Promise<boolean> {
+  const deleted = await tx
+    .delete(tasks)
+    .where(eq(tasks.id, TaskIdSchema.parse(id)))
+    .returning({ id: tasks.id });
+  return deleted.length > 0;
+}
+
 /** A change to a task; `undefined` fields stay as they are. */
 export interface TaskUpdate {
   title?: string;

@@ -36,7 +36,7 @@ import {
   type InviteRow,
   type TenantTx,
 } from '@pepper/db';
-import { requirePermission, type Actor } from '../actor.js';
+import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
 import {
   AlreadyAMemberError,
@@ -115,7 +115,7 @@ export async function createInvite(
       expiresAt: new Date(now.getTime() + INVITE_LIFETIME_MS),
     });
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'invite.created',
         entity: { type: 'invite', id: invite.id },
@@ -240,7 +240,7 @@ async function revokeLocked(
   if (!canGrantRole(actorRole, invite.role)) throw new ForbiddenError('members.invite');
   if ((await revokeInviteRow(tx, invite.id, now)) === undefined) throw new InviteNotFoundError();
   await appendAuditEntry(tx, {
-    actor: { kind: 'user', userId: actor.context.userId },
+    actor: auditActorOf(actor),
     change: {
       action: 'invite.revoked',
       entity: { type: 'invite', id: invite.id },

@@ -11,7 +11,14 @@ import {
   listPushSubscriptionsOf,
   savePushSubscription,
 } from './repositories/push-subscriptions.js';
-import { insertTask, listDueTasks, listTasks, lockTask, updateTask } from './repositories/tasks.js';
+import {
+  deleteTask,
+  insertTask,
+  listDueTasks,
+  listTasks,
+  lockTask,
+  updateTask,
+} from './repositories/tasks.js';
 import { createTenant } from './repositories/tenants.js';
 import { withMember, withTenant, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
@@ -69,6 +76,19 @@ afterAll(async () => {
 });
 
 describe('tasks', () => {
+  it('deletes a task staff may reach, and not one they may not (RLS)', async () => {
+    const [mine, bens] = await withTenant(db, tenant, async (tx) => [
+      (await insertTask(tx, task({ assigneeUserId: jess }))).id,
+      (await insertTask(tx, task({ assigneeUserId: ben }))).id,
+    ]);
+    expect(await as(jess, (tx) => deleteTask(tx, TaskIdSchema.parse(bens)))).toBe(false);
+    expect(await as(jess, (tx) => deleteTask(tx, TaskIdSchema.parse(mine)))).toBe(true);
+    expect(await as(jess, (tx) => deleteTask(tx, TaskIdSchema.parse(mine)))).toBe(false);
+    expect(
+      await withTenant(db, tenant, (tx) => lockTask(tx, TaskIdSchema.parse(bens))),
+    ).toBeDefined();
+  });
+
   it('staff reach only tasks assigned to them or that they created (RLS)', async () => {
     const ids = await withTenant(db, tenant, async (tx) => ({
       forJess: (await insertTask(tx, task({ assigneeUserId: jess, createdBy: ana }))).id,

@@ -12,7 +12,7 @@ import {
   type WaitlistEntryInput,
   type WaitlistQuery,
 } from '@pepper/contracts';
-import { requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
+import { auditActorOf, requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
 import {
   appendAuditEntry,
   cancelWaitlistEntry as cancelWaitlistEntryRow,
@@ -77,7 +77,7 @@ export async function addToWaitlist(
       createdBy: actor.context.userId,
     });
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'waitlist_entry.created',
         entity: { type: 'waitlist_entry', id: row.id },
@@ -147,7 +147,7 @@ export async function changeWaitlistEntry(
     // The row is locked, so it is still there.
     if (updated === undefined) throw new WaitlistEntryNotFoundError();
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'waitlist_entry.updated',
         entity: { type: 'waitlist_entry', id: updated.id },

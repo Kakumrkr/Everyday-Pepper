@@ -14,7 +14,7 @@ import {
   type Database,
   type Tenant,
 } from '@pepper/db';
-import { requirePermission, type Actor } from '../actor.js';
+import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 
 /**
  * The most businesses one user may own (S8, approved by the user). Guards against scripted
@@ -76,7 +76,7 @@ export async function updateBookingPage(
       throw new Error('No tenant in this transaction');
     if (before.brandColor !== after.brandColor) {
       await appendAuditEntry(tx, {
-        actor: { kind: 'user', userId: actor.context.userId },
+        actor: auditActorOf(actor),
         change: {
           action: 'tenant.updated',
           entity: { type: 'tenant', id: after.id },

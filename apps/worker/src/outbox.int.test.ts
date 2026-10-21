@@ -145,7 +145,12 @@ describe('outbox delivery (AC-W4-2)', () => {
       MessageID: `${id}@plum.example`,
       Subject: "You're booked at Plum Salon",
     });
-    expect(await stored(id)).toMatchObject({ status: 'sent', payload: null, attempts: 1 });
+    // The mail server has it before the worker records it as sent: wait for the record.
+    const sent = await eventually(
+      () => stored(id),
+      (row) => row?.status === 'sent',
+    );
+    expect(sent).toMatchObject({ status: 'sent', payload: null, attempts: 1 });
 
     // The same message queued again as another job (a retried relay), and many more relay
     // passes: still one email.

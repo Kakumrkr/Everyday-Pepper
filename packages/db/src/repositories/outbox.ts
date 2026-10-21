@@ -8,7 +8,7 @@ import {
   type OutboxMessageType,
   type TenantId,
 } from '@pepper/contracts';
-import { and, asc, eq, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import { outboxDispatch, outboxMessages, type OutboxMessageRow } from '../schema.js';
@@ -172,6 +172,53 @@ export async function markOutboxMessageFailed(
   if (updated.length === 0) return false;
   await setDispatchTime(tx, messageId, failure.retryAt);
   return true;
+}
+
+/** What became of messages an undo tried to take back (ADR-0028). */
+export interface OutboxCancellation {
+  /** Taken back: they will never be sent. */
+  cancelled: OutboxMessageId[];
+  /** Too late: a worker is delivering them now, or they were sent or given up already. */
+  tooLate: OutboxMessageId[];
+}
+
+/**
+ * Takes back the transaction's tenant's pending messages among `ids` that no worker is
+ * delivering at `now` (no lease, or an ended one): content cleared, dispatch row removed, status
+ * `cancelled`. A message being delivered is never half-cancelled; it is reported as too late,
+ * like one already sent. Ids the business doesn't have are left out of both lists.
+ */
+export async function cancelOutboxMessages(
+  tx: TenantTx,
+  ids: readonly OutboxMessageId[],
+  now: Date,
+): Promise<OutboxCancellation> {
+  const messageIds = z.array(OutboxMessageIdSchema).max(100).parse(ids);
+  if (messageIds.length === 0) return { cancelled: [], tooLate: [] };
+  const cancelled = await tx
+    .update(outboxMessages)
+    .set({ status: 'cancelled', payload: null, leaseUntil: null })
+    .where(
+      and(
+        inArray(outboxMessages.id, messageIds),
+        eq(outboxMessages.status, 'pending'),
+        or(isNull(outboxMessages.leaseUntil), lte(outboxMessages.leaseUntil, now)),
+      ),
+    )
+    .returning({ id: outboxMessages.id });
+  const cancelledIds = cancelled.map((row) => OutboxMessageIdSchema.parse(row.id));
+  if (cancelledIds.length > 0) {
+    await tx.delete(outboxDispatch).where(inArray(outboxDispatch.id, cancelledIds));
+  }
+  const found = await tx
+    .select({ id: outboxMessages.id })
+    .from(outboxMessages)
+    .where(inArray(outboxMessages.id, messageIds));
+  const taken = new Set<string>(cancelledIds);
+  return {
+    cancelled: cancelledIds,
+    tooLate: found.map((row) => OutboxMessageIdSchema.parse(row.id)).filter((id) => !taken.has(id)),
+  };
 }
 
 /** Ends a pending message (sent or dead): content cleared, dispatch row removed. */

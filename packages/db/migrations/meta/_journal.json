@@ -225,6 +225,20 @@
       "when": 1792510088139,
       "tag": "0031_tasks_and_push_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792542106103,
+      "tag": "0032_trust_layer",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792542107373,
+      "tag": "0033_trust_layer_hardening",
+      "breakpoints": true
     }
   ]
 }

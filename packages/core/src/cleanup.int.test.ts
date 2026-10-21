@@ -11,8 +11,11 @@ import {
   createTenant,
   findOutboxMessage,
   insertBookingVerification,
+  insertProposal,
   insertService,
+  listAuditEntries,
   lockBookingVerification,
+  newId,
   withTenant,
   type Database,
 } from '@pepper/db';
@@ -21,7 +24,7 @@ import { ManualClock } from './clock.js';
 import { outboxKeyFrom, type Mailer } from './outbox.js';
 import { BOOKING_REQUEST_RETENTION_MS, cleanUp, OUTBOX_RETENTION_MS } from './services/cleanup.js';
 import { deliverOutboxMessage, queueEmail } from './services/outbox.js';
-import { startTestDatabase, type TestDatabase } from './test-support.js';
+import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // The daily clean-up against real Postgres (ADR-0025, S18 L7): every business's expired
 // booking requests and finished outbox messages go after their retention; nothing else does.
@@ -134,7 +137,12 @@ describe('cleanUp', () => {
     };
 
     const today = await cleanUp(db, { clock: new ManualClock(new Date(NOW)) });
-    expect(today).toEqual({ businesses: 3, bookingRequests: 3, outboxMessages: 0 });
+    expect(today).toEqual({
+      businesses: 3,
+      bookingRequests: 3,
+      outboxMessages: 0,
+      expiredProposals: 0,
+    });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
         requests: [false, true, true],
@@ -148,6 +156,7 @@ describe('cleanUp', () => {
       businesses: 3,
       bookingRequests: 6,
       outboxMessages: 3,
+      expiredProposals: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -155,5 +164,60 @@ describe('cleanUp', () => {
         messages: [false, true],
       });
     }
+  });
+
+  it('marks the AI proposals whose time ran out as expired, with an audit entry (ADR-0028)', async () => {
+    const proposals: string[] = [];
+    for (const tenantId of businesses) {
+      const requestedBy = await insertUser(db, 'Ana');
+      proposals.push(
+        ...(await withTenant(db, tenantId, async (tx) => {
+          const ids: string[] = [];
+          for (const hours of [1, 48]) {
+            const row = await insertProposal(tx, {
+              action: 'booking.cancel',
+              tool: 'cancel_booking',
+              targetKey: `booking:${newId()}`,
+              idempotencyKey: `cleanup:${newId()}`,
+              payload: { bookingId: newId() },
+              preview: {},
+              fingerprint: 'a'.repeat(64),
+              explanation: {
+                requestMessageId: null,
+                steps: [],
+                facts: [],
+                alternatives: [],
+                untrustedContext: false,
+                decision: { outcome: 'propose', reason: 'setting' },
+              },
+              requestedBy,
+              recordOwner: null,
+              expiresAt: new Date(Date.now() + hours * 3_600_000),
+            });
+            if (row === undefined) throw new Error('not stored');
+            ids.push(row.id);
+          }
+          return ids;
+        })),
+      );
+    }
+    const result = await cleanUp(db, {
+      clock: new ManualClock(new Date(Date.now() + 2 * 3_600_000)),
+    });
+    expect(result.expiredProposals).toBe(3);
+    for (const tenantId of businesses) {
+      const [entry] = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 1 }));
+      expect(entry).toMatchObject({
+        action: 'ai_proposal.decided',
+        actor: { kind: 'system', userId: null },
+        after: { status: 'expired' },
+      });
+    }
+    // Run again: nothing more to expire.
+    expect(
+      (await cleanUp(db, { clock: new ManualClock(new Date(Date.now() + 2 * 3_600_000)) }))
+        .expiredProposals,
+    ).toBe(0);
+    expect(proposals).toHaveLength(6);
   });
 });

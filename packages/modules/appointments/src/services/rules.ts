@@ -6,7 +6,7 @@ import {
   type BookingRulesInput,
   type RuleDefaults,
 } from '@pepper/contracts';
-import { requirePermission, type Actor } from '@pepper/core';
+import { auditActorOf, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
   findCurrentTenant,
@@ -75,7 +75,7 @@ export async function replaceBookingRules(
     const after = rowsToRules(await listBookingRules(tx));
     if (!sameValues(before, after)) {
       await appendAuditEntry(tx, {
-        actor: { kind: 'user', userId: actor.context.userId },
+        actor: auditActorOf(actor),
         change: {
           action: 'booking_rules.replaced',
           entity: { type: 'tenant', id: actor.context.tenantId },

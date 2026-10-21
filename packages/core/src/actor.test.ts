@@ -1,6 +1,6 @@
 import { TenantIdSchema, UserIdSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import { requirePermission, type Actor } from './actor.js';
+import { auditActorOf, requirePermission, type Actor } from './actor.js';
 import { ForbiddenError, LastOwnerError, MemberNotFoundError } from './errors.js';
 
 const tenantId = TenantIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192');
@@ -38,5 +38,18 @@ describe('domain errors', () => {
     expect(new ForbiddenError().message).toBe('Not allowed');
     expect(new MemberNotFoundError().name).toBe('MemberNotFoundError');
     expect(new LastOwnerError().name).toBe('LastOwnerError');
+  });
+});
+
+describe('auditActorOf', () => {
+  it('names the member, or the AI acting for them', () => {
+    expect(auditActorOf(staff)).toEqual({ kind: 'user', userId: me });
+    expect(auditActorOf({ ...staff, via: 'ai' })).toEqual({ kind: 'ai_on_behalf_of', userId: me });
+  });
+
+  it('applies the same permissions to the AI as to the member', () => {
+    expect(() => {
+      requirePermission({ ...staff, via: 'ai' }, 'members.manage');
+    }).toThrow(ForbiddenError);
   });
 });

@@ -98,6 +98,8 @@
 
 (LLM04 data poisoning and LLM08 vector weaknesses belong to Phase 7 memory.)
 
+**Update (S23):** OWASP published the **2026 edition** of the Top 10 for LLM Applications (September 2026); it moves Excessive Agency up to **LLM03:2026** and is mapped to OWASP's Top 10 for Agentic Applications. The controls above are unchanged; S27's security review re-maps this table against the 2026 numbering and the agentic list (https://genai.owasp.org/llm-top-10/).
+
 ## 7. Session guides
 
 ### S22 (6a) — Provider adapter, fake providers, metering, eval skeleton
@@ -153,6 +155,7 @@ This layer is the product, so each session also looks for a better way, not only
 | Session | Learned / next try |
 |---|---|
 | S22 | The SDK raises an in-stream `error` event as an `APIError` without a status: a fixture test caught it (now `unavailable`); keep testing every provider event shape we rely on. Reasoning models need their reasoning items sent back between tool calls when nothing is stored (`replay`). Next: S23 should store proposals and executions with ids only (no client contacts) and give `decideAutonomy` property tests first. Try in S24: generate each tool's eval cases from its description to catch vague descriptions early. |
+| S23 | Deciding autonomy *inside* the trust layer from the domain's own preview (not passed in by the loop) makes "no write without approval" hold even against a compromised loop; mutation-checking the property tests (37/43 failures when a rule is removed) proved they bite. The self-review found the AI could have used undo or approve to get around the dial (now people-only), and a quadratic email pattern in the ids-only guard (size is now checked first). Next (S24): give the booking services transaction-taking variants for `ActionRunner`, fingerprint only the rows a tool touches, and have the hostile fake try approve/undo/foreign outbox links. S26: show a staff member the receipt when a lead approved their proposal (today it is the lead's). |
 
 ## 10. References (read the ones named in your session)
 - Anthropic, *Building effective agents* (2024) — simple composable patterns over frameworks, tool design ("agent-computer interface"): https://www.anthropic.com/engineering/building-effective-agents

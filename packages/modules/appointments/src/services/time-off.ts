@@ -9,7 +9,7 @@ import {
   type TimeOffInput,
   type TimeOffQuery,
 } from '@pepper/contracts';
-import { requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
+import { auditActorOf, requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
 import {
   appendAuditEntry,
   deleteTimeOff,
@@ -68,7 +68,7 @@ export async function addTimeOff(
       createdBy: actor.context.userId,
     });
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'time_off.created',
         entity: { type: 'time_off', id: row.id },
@@ -96,7 +96,7 @@ export async function removeTimeOff(
     const row = await deleteTimeOff(tx, id, entryId);
     if (row === undefined) throw new TimeOffNotFoundError();
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'time_off.deleted',
         entity: { type: 'time_off', id: row.id },

@@ -312,7 +312,90 @@ describe('AuditChangeSchema', () => {
   });
 });
 
+describe('trust-layer audit actions (ADR-0028)', () => {
+  const PROPOSAL = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f7081a1';
+  const EXECUTION = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f7081a2';
+  const execution = {
+    action: 'booking.create',
+    outcome: 'execute_and_notify',
+    status: 'done',
+    proposalId: PROPOSAL,
+    undoUntil: '2026-10-22T12:00:00.000Z',
+  } as const;
+
+  it.each([
+    {
+      action: 'autonomy.updated',
+      entity: { type: 'tenant', id: TENANT },
+      before: { askFirst: false, levels: {} },
+      after: { askFirst: true, levels: { 'booking.create': 'notify' } },
+    },
+    {
+      action: 'ai_proposal.created',
+      entity: { type: 'ai_action_proposal', id: PROPOSAL },
+      before: null,
+      after: { action: 'booking.cancel', status: 'pending', expiresAt: '2026-10-22T12:00:00.000Z' },
+    },
+    {
+      action: 'ai_proposal.decided',
+      entity: { type: 'ai_action_proposal', id: PROPOSAL },
+      before: { action: 'booking.cancel', status: 'pending' },
+      after: { action: 'booking.cancel', status: 'approved' },
+    },
+    {
+      action: 'ai_action.executed',
+      entity: { type: 'ai_action_execution', id: EXECUTION },
+      before: null,
+      after: execution,
+    },
+    {
+      action: 'ai_action.undone',
+      entity: { type: 'ai_action_execution', id: EXECUTION },
+      before: execution,
+      after: { ...execution, status: 'undone', undoReason: 'wrong' },
+    },
+  ])('accepts $action', (change) => {
+    expect(AuditChangeSchema.parse(change)).toEqual(change);
+  });
+
+  it('keeps payloads out of proposal entries', () => {
+    expect(
+      AuditChangeSchema.safeParse({
+        action: 'ai_proposal.created',
+        entity: { type: 'ai_action_proposal', id: PROPOSAL },
+        before: null,
+        after: {
+          action: 'booking.cancel',
+          status: 'pending',
+          expiresAt: '2026-10-22T12:00:00.000Z',
+          payload: { bookingId: BOOKING },
+        },
+      }).success,
+    ).toBe(false);
+  });
+
+  it('refuses "just do it" for bulk messages in autonomy entries', () => {
+    expect(
+      AuditChangeSchema.safeParse({
+        action: 'autonomy.updated',
+        entity: { type: 'tenant', id: TENANT },
+        before: { askFirst: false, levels: {} },
+        after: { askFirst: false, levels: { 'message.bulk': 'auto' } },
+      }).success,
+    ).toBe(false);
+  });
+});
+
 describe('AuditActorSchema', () => {
+  it('accepts the AI acting for a member, with the member', () => {
+    expect(AuditActorSchema.parse({ kind: 'ai_on_behalf_of', userId: USER })).toEqual({
+      kind: 'ai_on_behalf_of',
+      userId: USER,
+    });
+    expect(AuditActorSchema.safeParse({ kind: 'ai_on_behalf_of' }).success).toBe(false);
+    expect(AuditActorSchema.safeParse({ kind: 'ai' }).success).toBe(false);
+  });
+
   it('accepts a user or the system, nothing else', () => {
     expect(AuditActorSchema.parse({ kind: 'user', userId: USER })).toEqual({
       kind: 'user',

@@ -618,6 +618,67 @@ Everything each session did, oldest first: what was built, the checks run and th
     - The hostile fake and the seeded-world graders come with the tools (S24).
     - The budget ledger (S27).
 
+- **S23 Phase 6b (2026-10-21): trust-layer data and decisions** ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md), proposed by Claude, accepted by the user; [PCR-003](changes/PCR-003.md), approved).
+  - **Session Brief:** the user confirmed all of Claude's recommendations ("Go ahead with your recommendations").
+    - PCR-003: `booking.cancel` and `task.create` on the dial, the strictest-action rule, the bulk lock by recipients.
+    - A 2-minute "undo send" grace on AI-queued client emails.
+    - Undo windows per action.
+    - An "Ask me first for everything" switch.
+    - Re-checks before building: OWASP published the 2026 LLM Top 10 (Excessive Agency is now LLM03); OpenAI's agent guidance pauses side effects for approval; current practice binds an approval to an argument fingerprint, and Pepper's fingerprint also covers the state the preview read.
+  - **Built:**
+    - **Contracts:**
+      - `trust.ts`: the dial with each action's approval permission and undo window, `BULK_RECIPIENT_LIMIT`, `AI_EMAIL_GRACE_SECONDS`;
+      - the decision, request, proposal, execution and explanation schemas;
+      - `TrustJsonSchema` and `looksLikeContact` (ids-only guard);
+      - `audit.ts`: actor `ai_on_behalf_of` and five trust actions;
+      - `outbox.ts`: status `cancelled`.
+    - **Database** (migrations 0032–0033):
+      - `autonomy_settings`, `ai_action_proposals`, `ai_action_executions`, with RLS, staff `member_scope`, checks, guard triggers and no DELETE;
+      - the trust repository, `cancelOutboxMessages`, `deleteTask`;
+      - isolation-suite entries (new `noDelete`/`guarded` kinds).
+    - **Core:**
+      - `decideAutonomy`, `resolveAutonomy`, `stateFingerprint`/`canonicalJson`, `undoUntil`;
+      - `auditActorOf` with `Actor.via` (all 21 audit writes in core and appointments use it);
+      - services `requestAction`, `approveProposal`, `rejectProposal`, `undoAction`, `listPendingProposals`, `listRecentActions`, `getAutonomy`, `changeAutonomy`, `expireProposals`;
+      - the `ActionRunner` port for S24 tools;
+      - new errors (`ProposalNotFound`, `ProposalNotPending`, `ActionNotFound`, `UndoWindowClosed`, `UndoRefused` with a reason, `ActionTooLate`).
+    - **Worker:** the daily clean-up marks expired proposals (audited as the system) and deletes cancelled outbox rows after 30 days.
+  - **Checks:**
+    - `pnpm check` green:
+
+      | Package | Unit tests |
+      |---|---|
+      | contracts | 530 (+38) |
+      | core | 1,172 (+610: the full action × level × tier × context table and the property tests) |
+      | db | 44 (+1) |
+      | others | unchanged |
+
+      Coverage gates met.
+    - `pnpm test:integration` green, 790 (+78). Among them:
+      - isolation 253 with the three tables;
+      - db trust 21;
+      - core trust 31, including concurrent approve, concurrent undo, and undo racing the worker (5 rounds).
+    - Mutation check: removing the bulk lock or the untrusted demotion from `decideAutonomy` fails 37 / 43 tests.
+    - No real OpenAI call; no screens changed, so no Playwright run.
+  - **Found and fixed during the session:**
+    - **Self-review:**
+      - the AI could have approved its own proposal, or used undo (a cancellation) to get around the dial; now people-only;
+      - the trust layer now verifies each outbox link a tool returns (this business's, pending, and held for the grace on message actions);
+      - pending proposals are filtered by expiry in SQL, not after the limit;
+      - the ids-only guard's email pattern was quadratic (2.2 s on 40 KB); it is now bounded and size is checked first.
+    - **Tests:**
+      - an `undo_reason` check that refused `NULL` (caught by the isolation seed);
+      - mixed fake and real clocks in an outbox test.
+    - **Earlier tests that failed under full parallel load:**
+      - the worker's outbox test read "sent" before the worker recorded it (now waits for it);
+      - the api process test waited 30 s for start-up, which took longer (now 90 s).
+  - **Not done / for later:**
+    - S24 gives the booking services transaction-taking variants and implements `ActionRunner` per tool (the hostile fake attacks approve/undo/outbox links).
+    - S25 wires `requestAction` into the loop and adds the HTTP endpoints and error codes.
+    - S26 builds the cards, the Why sheet, Undo and the Autonomy settings page.
+    - When a lead approves a staff member's proposal the receipt is the lead's (the staff member doesn't list it); logged for S26.
+    - One runtime unit test failed once inside a full `pnpm check` early in the session and did not reproduce in 8 runs, including later full checks; logs are kept to name it if it returns.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

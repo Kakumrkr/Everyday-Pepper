@@ -51,9 +51,9 @@ export async function deleteExpiredBookingVerifications(
 }
 
 /**
- * Deletes up to `limit` of the transaction's tenant's outbox messages that were sent or given
- * up (their content is already cleared) before `before`. Pending messages are never touched.
- * Returns how many it deleted.
+ * Deletes up to `limit` of the transaction's tenant's outbox messages that were sent, given
+ * up or cancelled (their content is already cleared) before `before`. Pending messages are
+ * never touched. Returns how many it deleted.
  */
 export async function deleteFinishedOutboxMessages(
   tx: TenantTx,
@@ -65,7 +65,10 @@ export async function deleteFinishedOutboxMessages(
     .select({ id: outboxMessages.id })
     .from(outboxMessages)
     .where(
-      and(inArray(outboxMessages.status, ['sent', 'dead']), lt(outboxMessages.updatedAt, before)),
+      and(
+        inArray(outboxMessages.status, ['sent', 'dead', 'cancelled']),
+        lt(outboxMessages.updatedAt, before),
+      ),
     )
     .limit(max);
   const deleted = await tx

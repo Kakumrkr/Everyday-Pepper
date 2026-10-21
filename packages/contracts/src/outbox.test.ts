@@ -19,7 +19,7 @@ describe('outbox schemas', () => {
 
   it('knows the message types and statuses', () => {
     expect(OutboxMessageTypeSchema.options).toEqual(['email', 'push']);
-    expect(OutboxStatusSchema.options).toEqual(['pending', 'sent', 'dead']);
+    expect(OutboxStatusSchema.options).toEqual(['pending', 'sent', 'dead', 'cancelled']);
   });
 
   it.each(['booking.confirmed:0199f4b2-7c1e-7a00-8000-000000000001', 'a', 'x_y-z.1:2'])(

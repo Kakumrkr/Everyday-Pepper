@@ -14,10 +14,11 @@ export const OutboxMessageTypeSchema = z.enum(['email', 'push']);
 export type OutboxMessageType = z.infer<typeof OutboxMessageTypeSchema>;
 
 /**
- * Where a message stands: waiting (also between retries), delivered, or given up after the
- * last attempt (`dead`, kept for the alert and a person to look at).
+ * Where a message stands: waiting (also between retries), delivered, given up after the last
+ * attempt (`dead`, kept for the alert and a person to look at), or taken back before it left
+ * (`cancelled`: an undone AI action, ADR-0028).
  */
-export const OutboxStatusSchema = z.enum(['pending', 'sent', 'dead']);
+export const OutboxStatusSchema = z.enum(['pending', 'sent', 'dead', 'cancelled']);
 export type OutboxStatus = z.infer<typeof OutboxStatusSchema>;
 
 /**

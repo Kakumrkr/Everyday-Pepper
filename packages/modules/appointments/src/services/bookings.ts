@@ -22,6 +22,7 @@ import {
   type StaffMemberId,
 } from '@pepper/contracts';
 import {
+  auditActorOf,
   ForbiddenError,
   permissionScope,
   requirePermission,
@@ -151,7 +152,7 @@ export async function createBooking(
         createdBy: actor.context.userId,
       });
       await appendAuditEntry(tx, {
-        actor: { kind: 'user', userId: actor.context.userId },
+        actor: auditActorOf(actor),
         change: {
           action: 'booking.created',
           entity: { type: 'booking', id: row.id },
@@ -527,7 +528,7 @@ async function audited(
   const values = { before: bookingAuditValues(before), after: bookingAuditValues(after) };
   if (!sameValues(values.before, values.after)) {
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: { action: 'booking.updated', entity: { type: 'booking', id: after.id }, ...values },
       requestId: actor.requestId,
     });

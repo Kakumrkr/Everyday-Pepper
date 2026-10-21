@@ -68,7 +68,8 @@ describe('api process: logs and traces', () => {
         const response = await fetch(`${baseUrl}/health/ready`);
         if (response.status !== 200) throw new Error(`ready: ${String(response.status)}`);
       },
-      { timeout: 30_000, interval: 250 },
+      // Generous: with every suite running at once (as in CI), start-up took over 30 s (S23).
+      { timeout: 90_000, interval: 250 },
     );
   });
 
