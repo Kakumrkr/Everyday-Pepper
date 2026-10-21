@@ -50,6 +50,7 @@ export function validArguments(
     find_clients: { name: 'Maria' },
     get_day: { date, staffMemberId: ids.staffMemberId },
     get_booking: { bookingId: ids.bookingId },
+    find_client_bookings: { clientId: ids.clientId },
     list_services_and_staff: {},
     create_booking: {
       clientId: ids.clientId,

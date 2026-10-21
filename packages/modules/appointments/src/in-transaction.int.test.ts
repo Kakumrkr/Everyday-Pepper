@@ -9,6 +9,7 @@ import {
   type UserId,
 } from '@pepper/contracts';
 import {
+  ClientNotFoundError,
   createBusiness,
   createClient,
   findClientsByNameIn,
@@ -31,6 +32,7 @@ import {
   createBookingIn,
   getBooking,
   getBookingIn,
+  listClientBookingsIn,
   reinstateBookingIn,
 } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
@@ -287,5 +289,69 @@ describe('findClientsByNameIn', () => {
         [],
       );
     });
+  });
+});
+
+describe('listClientBookingsIn (S26b)', () => {
+  it("gives a client's next bookings and the last ones, staff only their own", async () => {
+    const b = await newBusiness();
+    const marco = await createStaffMember(db, b.owner, {
+      displayName: 'Marco',
+      userId: null,
+      serviceIds: [b.service.id],
+    });
+    await replaceWorkingHours(db, b.owner, marco.id, {
+      intervals: [1, 2, 3, 4, 5].map((weekday) => ({ weekday, start: '09:00', end: '17:00' })),
+    });
+    const book = (startsAt: string, staffMemberId: StaffMember['id'] = b.jess.id) =>
+      createBooking(db, b.owner, { ...input(b, startsAt), staffMemberId }, { clock: b.clock });
+    const past = await book(tue('09:00'));
+    const withMarco = await book(tue('11:00'), marco.id);
+    const next = await book(tue('14:00'));
+    const dropped = await book(tue('16:00'));
+    await changeBooking(
+      db,
+      b.owner,
+      dropped.id,
+      { status: 'cancelled', notifyClient: false },
+      { clock: b.clock },
+    );
+    const now = new Date(tue('10:30'));
+    const ids = (bookings: readonly Booking[]) => bookings.map((booking) => booking.id);
+
+    const owner = await withMember(db, b.owner.context, (tx) =>
+      listClientBookingsIn(tx, b.owner, b.client.id, { now, upcoming: 5, recent: 3 }),
+    );
+    expect(ids(owner.upcoming)).toEqual([withMarco.id, next.id]);
+    expect(ids(owner.recent)).toEqual([past.id]);
+
+    const staff = await withMember(db, b.staff.context, (tx) =>
+      listClientBookingsIn(tx, b.staff, b.client.id, { now, upcoming: 5, recent: 3 }),
+    );
+    expect(ids(staff.upcoming)).toEqual([next.id]);
+
+    // A client Jess has no booking with, and another business's client, are not found.
+    const marcos = await createClient(db, b.owner, { name: 'Lee Chan' });
+    await createBooking(
+      db,
+      b.owner,
+      { ...input(b, tue('15:00')), clientId: marcos.id, staffMemberId: marco.id },
+      { clock: b.clock },
+    );
+    const other = await newBusiness();
+    for (const clientId of [marcos.id, other.client.id]) {
+      const error = await caught(
+        withMember(db, b.staff.context, (tx) =>
+          listClientBookingsIn(tx, b.staff, clientId, { now, upcoming: 5, recent: 3 }),
+        ),
+      );
+      expect(error).toBeInstanceOf(ClientNotFoundError);
+    }
+    const foreign = await caught(
+      withMember(db, b.owner.context, (tx) =>
+        listClientBookingsIn(tx, b.owner, other.client.id, { now, upcoming: 5, recent: 3 }),
+      ),
+    );
+    expect(foreign).toBeInstanceOf(ClientNotFoundError);
   });
 });

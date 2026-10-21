@@ -2,11 +2,13 @@ import {
   findAvailabilityIn,
   getBookingIn,
   listBookingsIn,
+  listClientBookingsIn,
   listTimeOffBetweenIn,
   StaffMemberNotFoundError,
 } from '@pepper/appointments';
 import {
   BookingIdSchema,
+  ClientIdSchema,
   looksLikeContact,
   ServiceIdSchema,
   StaffMemberIdSchema,
@@ -38,6 +40,8 @@ import {
 const SLOTS_SHOWN = 12;
 const CLIENTS_SHOWN = 10;
 const DAY_BOOKINGS_MAX = 100;
+const CLIENT_UPCOMING_SHOWN = 5;
+const CLIENT_RECENT_SHOWN = 3;
 
 const ownOnly = (scope: ToolScope) =>
   permissionScope(scope.actor.context.role, 'bookings.read') !== 'all';
@@ -274,6 +278,58 @@ export const getBooking: ReadTool = {
       summary: `${view.clientName}: ${view.serviceName} with ${view.staffName}, ${when(view.date, view.time)} (${view.status}).`,
       data: view,
       card: { kind: 'booking', booking: view },
+    };
+  },
+};
+
+export const findClientBookings: ReadTool = {
+  kind: 'read',
+  name: 'find_client_bookings',
+  version: 1,
+  localTimes: false,
+  guide: {
+    use: "Read one client's next appointments and last visits by the client's id: when they are next in, when they were last here.",
+    avoid: [
+      'with a name (use find_clients first for the id)',
+      'to see everyone on a day (use get_day)',
+    ],
+    returns:
+      'up to 5 upcoming bookings (not cancelled), earliest first, and the last 3 (with their status: done, no-show, cancelled), latest first. Staff see only their own bookings with the client.',
+    examples: [
+      { say: "When is Maria's next appointment?", args: { clientId: { $any: true } } },
+      { say: 'When was Sarah last in?', args: { clientId: { $any: true } } },
+    ],
+  },
+  args: z.strictObject({ clientId: IdArg('client') }),
+  async run(scope, args: { clientId: string }) {
+    const clientId = ClientIdSchema.parse(args.clientId);
+    const { upcoming, recent } = await listClientBookingsIn(scope.tx, scope.actor, clientId, {
+      now: scope.now,
+      upcoming: CLIENT_UPCOMING_SHOWN,
+      recent: CLIENT_RECENT_SHOWN,
+    });
+    const directory = await directoryOf(scope);
+    const names = await clientNames(scope, [clientId]);
+    const view = (booking: (typeof upcoming)[number]) =>
+      bookingView(scope, directory, names, booking);
+    const next = upcoming.map(view);
+    const last = recent.map(view);
+    const name = names.get(clientId) ?? 'This client';
+    const [first] = next;
+    const [latest] = last;
+    const scopeNote = ownOnly(scope) ? ' with you' : '';
+    const nextPart =
+      first === undefined
+        ? `no upcoming bookings${scopeNote}`
+        : `next ${when(first.date, first.time)} (${first.serviceName} with ${first.staffName})`;
+    const lastPart =
+      latest === undefined
+        ? 'no earlier visits'
+        : `last ${when(latest.date, latest.time)} (${latest.status})`;
+    return {
+      summary: `${name}: ${nextPart}; ${lastPart}.`,
+      data: { clientId, clientName: name, upcoming: next, recent: last },
+      card: first === undefined ? null : { kind: 'booking', booking: first },
     };
   },
 };

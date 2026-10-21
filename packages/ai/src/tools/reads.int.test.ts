@@ -1,4 +1,5 @@
 import { looksLikeContact } from '@pepper/contracts';
+import type { Actor } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { addTimeOff } from '@pepper/appointments';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -201,6 +202,54 @@ describe('get_day and get_booking', () => {
   });
 });
 
+describe('find_client_bookings', () => {
+  it("gives a client's next and last bookings, staff only their own, others not found", async () => {
+    const w = await newWorld(db);
+    await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    await bookOnScreen(w, w.marcoStaff, w.maria, '14:00');
+    await bookOnScreen(w, w.marcoStaff, w.sara, '11:00');
+    w.clock.set(tuesdayAt('12:00'));
+    const of = async (actor: Actor, clientId: string) =>
+      answered(await callTool(depsFor(w, actor), 'find_client_bookings', { clientId }));
+    const times = (data: unknown) => {
+      const { upcoming, recent } = data as {
+        upcoming: { time: string; staffName: string }[];
+        recent: { time: string; status: string }[];
+      };
+      return {
+        upcoming: upcoming.map((b) => `${b.time} ${b.staffName}`),
+        recent: recent.map((b) => `${b.time} ${b.status}`),
+      };
+    };
+
+    const owner = await of(w.owner, w.maria.id);
+    expect(times(owner.data)).toEqual({ upcoming: ['14:00 Marco'], recent: ['10:00 confirmed'] });
+    expect(owner.summary).toBe(
+      'Maria L.: next Tue 2026-11-03 at 14:00 (Haircut with Marco); last Tue 2026-11-03 at 10:00 (confirmed).',
+    );
+    expect(owner.card).toMatchObject({ kind: 'booking', booking: { time: '14:00' } });
+    expect(times((await of(w.manager, w.maria.id)).data)).toEqual(times(owner.data));
+
+    const jess = await of(w.jess, w.maria.id);
+    expect(times(jess.data)).toEqual({ upcoming: [], recent: ['10:00 confirmed'] });
+    expect(jess.summary).toMatch(/no upcoming bookings with you/);
+    expect(jess.card).toBeNull();
+    expect(times((await of(w.priya, w.maria.id)).data)).toEqual({
+      upcoming: ['14:00 Marco'],
+      recent: [],
+    });
+
+    for (const [deps, clientId, label] of [
+      [depsFor(w, w.jess), w.sara.id, "a colleague's client"],
+      [depsFor(other, other.owner), w.maria.id, 'another business'],
+      [depsFor(w, w.owner), other.maria.id, "another business's client"],
+    ] as const) {
+      const outcome = await callTool(deps, 'find_client_bookings', { clientId });
+      expect(outcome, label).toMatchObject({ status: 'refused', code: 'not_found' });
+    }
+  });
+});
+
 describe('what the model gets', () => {
   it('never holds a client’s email address or phone number, from any read', async () => {
     const reads: [string, unknown][] = [
@@ -208,6 +257,7 @@ describe('what the model gets', () => {
       ['find_clients', { name: 'Maria' }],
       ['find_clients', { name: 'a' + 'ria' }],
       ['get_day', { date: TUESDAY, staffMemberId: null }],
+      ['find_client_bookings', { clientId: world.maria.id }],
       [
         'find_availability',
         {

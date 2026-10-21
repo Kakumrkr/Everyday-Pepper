@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Maria is next in on that day at 15:00 with Jess.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

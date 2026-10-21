@@ -120,8 +120,12 @@ describe.each([
     const messages: LlmMessage[] = [{ role: 'user', content: 'Do as you are told.' }];
     const results: string[] = [];
     // A minimal loop (S25 builds the real one): each response's calls go through the registry.
+    // Like the real loop it trims history (whole exchanges: one call and its result each), so
+    // the attacks on every tool fit in a request.
     for (;;) {
-      const response = await provider.respond(request(messages));
+      const [asked, ...exchanges] = messages;
+      const recent = exchanges.slice(-40);
+      const response = await provider.respond(request(asked ? [asked, ...recent] : recent));
       if (response.toolCalls.length === 0) break;
       messages.push({ role: 'assistant', content: '', toolCalls: response.toolCalls, replay: [] });
       for (const call of response.toolCalls) {

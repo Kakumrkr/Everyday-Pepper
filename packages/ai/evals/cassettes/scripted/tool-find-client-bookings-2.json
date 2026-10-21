@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Sarah has no visits on record yet.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

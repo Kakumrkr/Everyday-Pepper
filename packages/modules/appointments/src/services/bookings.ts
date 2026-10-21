@@ -6,6 +6,7 @@ import {
   BookingsQuerySchema,
   BookingStatusSchema,
   BusyQuerySchema,
+  ClientIdSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
   canChangeStatus,
@@ -19,10 +20,12 @@ import {
   type BookingSource,
   type BusyQuery,
   type BusyTime,
+  type ClientId,
   type StaffMemberId,
 } from '@pepper/contracts';
 import {
   auditActorOf,
+  ClientNotFoundError,
   ForbiddenError,
   permissionScope,
   requirePermission,
@@ -40,7 +43,9 @@ import {
   findService,
   findStaffMemberOfUser,
   insertBooking,
+  findClient,
   listBookings as listBookingRows,
+  listClientBookings,
   listOccupancy,
   lockBooking,
   lockStaffMember,
@@ -264,6 +269,40 @@ export async function listBookingsIn(
     ...(options.limit !== undefined && { limit: options.limit }),
   });
   return rows.map(toBooking);
+}
+
+/**
+ * One client's bookings around `now` (S26b, the AI's "when is Maria next in?"): the next
+ * `upcoming` that aren't cancelled, earliest first, and the last `recent` that started before
+ * `now` (any status, so a no-show or a cancellation shows), latest first. Staff see only their
+ * own bookings, and a client they have none with is not found, as on their screens.
+ */
+export async function listClientBookingsIn(
+  tx: TenantTx,
+  actor: Actor,
+  clientId: ClientId,
+  options: { now: Date; upcoming: number; recent: number },
+): Promise<{ upcoming: Booking[]; recent: Booking[] }> {
+  requirePermission(actor, 'bookings.read');
+  const id = ClientIdSchema.parse(clientId);
+  if ((await findClient(tx, id)) === undefined) throw new ClientNotFoundError();
+  const own = await ownStaffMemberId(tx, actor, 'bookings.read');
+  if (own === null) return { upcoming: [], recent: [] };
+  const query = {
+    clientId: id,
+    now: options.now,
+    ...(own !== undefined && { staffMemberId: own }),
+  };
+  const [upcoming, recent] = [
+    await listClientBookings(tx, {
+      ...query,
+      direction: 'after',
+      limit: options.upcoming,
+      excludeCancelled: true,
+    }),
+    await listClientBookings(tx, { ...query, direction: 'before', limit: options.recent }),
+  ];
+  return { upcoming: upcoming.map(toBooking), recent: recent.map(toBooking) };
 }
 
 /**

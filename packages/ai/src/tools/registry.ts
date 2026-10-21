@@ -37,6 +37,7 @@ import { z } from 'zod';
 import { strictToolParameters } from '../strict-schema.js';
 import {
   findAvailability,
+  findClientBookings,
   findClients,
   getBooking,
   getDay,
@@ -55,17 +56,18 @@ import { describeTool } from './guide.js';
 import { scopeOf, undoWith, writeRunner } from './runner.js';
 import type { AnyTool, ToolDeps, WriteTool } from './tool.js';
 
-// The tool registry (ADR-0029, playbook S24): the ten V1 tools, their definitions for the
-// provider, and `dispatchToolCall`, the one way a model's tool call reaches the business. It
-// parses the arguments twice (the provider's strict schema, then Zod), takes the business and
-// the member from the session only, sends writes through the trust layer (`requestAction`:
-// the dial, proposals, receipts, undo) and turns every refusal into a stable code the model can
-// act on. Nothing here chains writes: one call is one action.
+// The tool registry (ADR-0029, playbook S24; S26b's four, ADR-0032): the fourteen V1 tools,
+// their definitions for the provider, and `dispatchToolCall`, the one way a model's tool call
+// reaches the business. It parses the arguments twice (the provider's strict schema, then Zod),
+// takes the business and the member from the session only, sends writes through the trust layer
+// (`requestAction`: the dial, proposals, receipts, undo) and turns every refusal into a stable
+// code the model can act on. Nothing here chains writes: one call is one action.
 
 /** Every tool, reads first. */
 export const TOOLS: readonly AnyTool[] = [
   findAvailability,
   findClients,
+  findClientBookings,
   getDay,
   getBooking,
   listServicesAndStaff,

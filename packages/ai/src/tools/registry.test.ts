@@ -20,6 +20,7 @@ const VALID: Record<string, Record<string, unknown>> = {
   find_clients: { name: 'Maria' },
   get_day: { date: '2026-11-03', staffMemberId: null },
   get_booking: { bookingId: '0199f4b2-7c1e-7a00-8000-0000000000b1' },
+  find_client_bookings: { clientId: '0199f4b2-7c1e-7a00-8000-0000000000c1' },
   list_services_and_staff: {},
   create_booking: {
     clientId: '0199f4b2-7c1e-7a00-8000-0000000000c1',
@@ -47,10 +48,11 @@ const VALID: Record<string, Record<string, unknown>> = {
 };
 
 describe('the tool registry', () => {
-  it('has the ten V1 tools, named verb_noun, reads first', () => {
+  it('has the V1 tools, named verb_noun, reads first', () => {
     expect(TOOLS.map((tool) => tool.name)).toEqual([
       'find_availability',
       'find_clients',
+      'find_client_bookings',
       'get_day',
       'get_booking',
       'list_services_and_staff',
