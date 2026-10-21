@@ -346,6 +346,15 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       after: TaskValuesSchema,
     })
     .strict(),
+  // A to-do the AI added, taken back by Undo (ADR-0028) before anyone worked on it.
+  z
+    .object({
+      action: z.literal('task.deleted'),
+      entity: entity('task'),
+      before: TaskValuesSchema,
+      after: z.null(),
+    })
+    .strict(),
   // The business's own autonomy choices (only the overrides; the rest are defaults).
   z
     .object({

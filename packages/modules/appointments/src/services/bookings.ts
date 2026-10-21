@@ -56,6 +56,7 @@ import {
 import type { ServiceToBook } from '../availability/engine.js';
 import { alternativesRange, nearestSlots, toAvailableSlot } from '../bookings/planning.js';
 import {
+  BookingAlreadyStartedError,
   BookingNotChangeableError,
   BookingNotFoundError,
   BookingNotStartedError,
@@ -80,18 +81,37 @@ import { keepReminderInStep } from './reminders.js';
 
 const MINUTE_MS = 60_000;
 
+export interface CreateBookingOptions {
+  clock?: Clock;
+  source?: BookingSource;
+  templateRuleDefaults?: TemplateRuleDefaultsOf;
+  /** Told about the new booking inside its transaction, when `notifyClient` (ADR-0025). */
+  notify?: BookingNotify;
+}
+
 /** Books a client. `SlotUnavailableError` (with alternatives) when the time is not free. */
 export async function createBooking(
   db: Database,
   actor: Actor,
   input: BookingInput,
-  options: {
-    clock?: Clock;
-    source?: BookingSource;
-    templateRuleDefaults?: TemplateRuleDefaultsOf;
-    /** Told about the new booking inside its transaction, when `notifyClient` (ADR-0025). */
-    notify?: BookingNotify;
-  } = {},
+  options: CreateBookingOptions = {},
+): Promise<Booking> {
+  requirePermission(actor, 'bookings.manage');
+  const request = BookingInputSchema.parse(input);
+  if (request.override) requireOverride(actor);
+  return withMember(db, actor.context, (tx) => createBookingIn(tx, actor, request, options));
+}
+
+/**
+ * `createBooking` inside the caller's transaction (ADR-0028 §9: the AI's tools run in the trust
+ * layer's). The write runs in a savepoint, so a refused time leaves the transaction usable and
+ * the nearest alternatives are read in it; nothing is committed here.
+ */
+export async function createBookingIn(
+  tx: TenantTx,
+  actor: Actor,
+  input: BookingInput,
+  options: CreateBookingOptions = {},
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.manage');
   const request = BookingInputSchema.parse(input);
@@ -105,38 +125,39 @@ export async function createBooking(
     row.serviceId === request.serviceId &&
     row.staffMemberId === request.staffMemberId &&
     row.startsAt.getTime() === start;
+  const retried = async (): Promise<Booking | undefined> => {
+    if (key === null) return undefined;
+    const existing = await findBookingByIdempotencyKey(tx, key);
+    if (existing === undefined) return undefined;
+    if (!sameRequest(existing)) throw new IdempotencyKeyReusedError();
+    return toBooking(existing);
+  };
 
-  let service: ServiceToBook | undefined;
+  const staff = await lockStaff(tx, actor, request.staffMemberId);
+  // After the lock: a concurrent first attempt with the key (same staff member) has committed
+  // by now, so a retry returns its booking instead of finding the time taken.
+  const earlier = await retried();
+  if (earlier !== undefined) return earlier;
+  const serviceRow = await findService(tx, request.serviceId);
+  if (serviceRow === undefined) throw new ServiceNotFoundError();
+  const service = serviceToBook(serviceRow);
+  await findClientToBook(tx, request.clientId, request.clientContact);
+
+  const search: BookableSearch = {
+    service,
+    staffMemberId: request.staffMemberId,
+    start,
+    now,
+    templateRuleDefaults,
+  };
+  const end = start + service.durationMinutes * MINUTE_MS;
+  const fits = request.override ? offers(staff, service) : await isBookable(tx, search);
+  if (!fits) throw await unavailable(tx, search);
+
+  let row: BookingRow;
   try {
-    return await withMember(db, actor.context, async (tx) => {
-      const staff = await lockStaff(tx, actor, request.staffMemberId);
-      // After the lock: a concurrent first attempt with the key (same staff member) has
-      // committed by now, so a retry returns its booking instead of finding the time taken.
-      if (key !== null) {
-        const existing = await findBookingByIdempotencyKey(tx, key);
-        if (existing !== undefined) {
-          if (!sameRequest(existing)) throw new IdempotencyKeyReusedError();
-          return toBooking(existing);
-        }
-      }
-      const serviceRow = await findService(tx, request.serviceId);
-      if (serviceRow === undefined) throw new ServiceNotFoundError();
-      service = serviceToBook(serviceRow);
-      await findClientToBook(tx, request.clientId, request.clientContact);
-
-      const end = start + service.durationMinutes * MINUTE_MS;
-      const fits = request.override
-        ? offers(staff, service)
-        : await isBookable(tx, {
-            service,
-            staffMemberId: request.staffMemberId,
-            start,
-            now,
-            templateRuleDefaults,
-          });
-      if (!fits) throw new SlotTaken();
-
-      const row = await insertBooking(tx, {
+    row = await inSavepoint(tx, (sp) =>
+      insertBooking(sp, {
         clientId: request.clientId,
         serviceId: request.serviceId,
         staffMemberId: request.staffMemberId,
@@ -150,45 +171,33 @@ export async function createBooking(
         overridden: request.override,
         idempotencyKey: key,
         createdBy: actor.context.userId,
-      });
-      await appendAuditEntry(tx, {
-        actor: auditActorOf(actor),
-        change: {
-          action: 'booking.created',
-          entity: { type: 'booking', id: row.id },
-          before: null,
-          after: bookingAuditValues(row),
-        },
-        requestId: actor.requestId,
-      });
-      await keepReminderInStep(tx, row, now);
-      if (request.notifyClient && options.notify) {
-        await tellClient(tx, row, 'confirmed', options.notify);
-      }
-      return toBooking(row);
-    });
+      }),
+    );
   } catch (error) {
-    if ((error instanceof SlotTaken || error instanceof BookingOverlapError) && service) {
-      throw new SlotUnavailableError(
-        await alternatives(db, actor, {
-          service,
-          staffMemberId: request.staffMemberId,
-          start,
-          now,
-          templateRuleDefaults,
-        }),
-      );
-    }
-    if (error instanceof BookingIdempotencyKeyTakenError && key !== null) {
+    if (error instanceof BookingOverlapError) throw await unavailable(tx, search);
+    if (error instanceof BookingIdempotencyKeyTakenError) {
       // A concurrent request with the same key won the race: answer as the retry would.
-      const existing = await withMember(db, actor.context, (tx) =>
-        findBookingByIdempotencyKey(tx, key),
-      );
-      if (existing === undefined || !sameRequest(existing)) throw new IdempotencyKeyReusedError();
-      return toBooking(existing);
+      const winner = await retried();
+      if (winner === undefined) throw new IdempotencyKeyReusedError();
+      return winner;
     }
     throw error;
   }
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'booking.created',
+      entity: { type: 'booking', id: row.id },
+      before: null,
+      after: bookingAuditValues(row),
+    },
+    requestId: actor.requestId,
+  });
+  await keepReminderInStep(tx, row, now);
+  if (request.notifyClient && options.notify) {
+    await tellClient(tx, row, 'confirmed', options.notify);
+  }
+  return toBooking(row);
 }
 
 /** One booking. Staff reach only their own (`BookingNotFoundError` otherwise). */
@@ -198,14 +207,23 @@ export async function getBooking(
   bookingId: BookingId,
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.read');
+  return withMember(db, actor.context, (tx) => getBookingIn(tx, actor, bookingId));
+}
+
+/** `getBooking` inside the caller's transaction. */
+export async function getBookingIn(
+  tx: TenantTx,
+  actor: Actor,
+  bookingId: BookingId,
+): Promise<Booking> {
+  requirePermission(actor, 'bookings.read');
   const id = BookingIdSchema.parse(bookingId);
-  const row = await withMember(db, actor.context, async (tx) => {
-    const found = await findBooking(tx, id);
-    const own = await ownStaffMemberId(tx, actor, 'bookings.read');
-    return own === undefined || found?.staffMemberId === own ? found : undefined;
-  });
-  if (row === undefined) throw new BookingNotFoundError();
-  return toBooking(row);
+  const found = await findBooking(tx, id);
+  const own = await ownStaffMemberId(tx, actor, 'bookings.read');
+  if (found === undefined || (own !== undefined && found.staffMemberId !== own)) {
+    throw new BookingNotFoundError();
+  }
+  return toBooking(found);
 }
 
 /**
@@ -219,24 +237,31 @@ export async function listBookings(
   options: { limit?: number } = {},
 ): Promise<Booking[]> {
   requirePermission(actor, 'bookings.read');
+  const parsed = BookingsQuerySchema.parse(query);
+  return withMember(db, actor.context, (tx) => listBookingsIn(tx, actor, parsed, options));
+}
+
+/** `listBookings` inside the caller's transaction. */
+export async function listBookingsIn(
+  tx: TenantTx,
+  actor: Actor,
+  query: BookingsQuery,
+  options: { limit?: number } = {},
+): Promise<Booking[]> {
+  requirePermission(actor, 'bookings.read');
   const { from, to, staffMemberId, clientId, status } = BookingsQuerySchema.parse(query);
-  const rows = await withMember(db, actor.context, async (tx) => {
-    const own = await ownStaffMemberId(tx, actor, 'bookings.read');
-    const only = own ?? staffMemberId;
-    if (
-      own === null ||
-      (own !== undefined && staffMemberId !== undefined && staffMemberId !== own)
-    ) {
-      return [];
-    }
-    return listBookingRows(tx, {
-      from: new Date(from),
-      to: new Date(to),
-      ...(only !== undefined && { staffMemberId: only }),
-      ...(clientId !== undefined && { clientId }),
-      ...(status !== undefined && { status }),
-      ...(options.limit !== undefined && { limit: options.limit }),
-    });
+  const own = await ownStaffMemberId(tx, actor, 'bookings.read');
+  const only = own ?? staffMemberId;
+  if (own === null || (own !== undefined && staffMemberId !== undefined && staffMemberId !== own)) {
+    return [];
+  }
+  const rows = await listBookingRows(tx, {
+    from: new Date(from),
+    to: new Date(to),
+    ...(only !== undefined && { staffMemberId: only }),
+    ...(clientId !== undefined && { clientId }),
+    ...(status !== undefined && { status }),
+    ...(options.limit !== undefined && { limit: options.limit }),
   });
   return rows.map(toBooking);
 }
@@ -264,6 +289,13 @@ export async function listBusyTimes(
   return rows.map(toBusyTime);
 }
 
+export interface ChangeBookingOptions {
+  clock?: Clock;
+  templateRuleDefaults?: TemplateRuleDefaultsOf;
+  /** Told about a move or cancellation inside its transaction, when `notifyClient`. */
+  notify?: BookingNotify;
+}
+
 /**
  * Moves a booking (same client and service; optionally to another staff member who offers
  * it) or changes its status. A cancelled booking is final; completed and no-show need the
@@ -274,85 +306,122 @@ export async function changeBooking(
   actor: Actor,
   bookingId: BookingId,
   change: BookingChange,
-  options: {
-    clock?: Clock;
-    templateRuleDefaults?: TemplateRuleDefaultsOf;
-    /** Told about a move or cancellation inside its transaction, when `notifyClient`. */
-    notify?: BookingNotify;
-  } = {},
+  options: ChangeBookingOptions = {},
+): Promise<Booking> {
+  requirePermission(actor, 'bookings.manage');
+  const id = BookingIdSchema.parse(bookingId);
+  const parsed = BookingChangeSchema.parse(change);
+  if ('startsAt' in parsed && parsed.override) requireOverride(actor);
+  return withMember(db, actor.context, (tx) => changeBookingIn(tx, actor, id, parsed, options));
+}
+
+/** `changeBooking` inside the caller's transaction; a move is written in a savepoint. */
+export async function changeBookingIn(
+  tx: TenantTx,
+  actor: Actor,
+  bookingId: BookingId,
+  change: BookingChange,
+  options: ChangeBookingOptions = {},
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.manage');
   const id = BookingIdSchema.parse(bookingId);
   const parsed = BookingChangeSchema.parse(change);
   const now = (options.clock ?? systemClock).now().getTime();
   if ('status' in parsed) {
-    return withMember(db, actor.context, async (tx) => {
-      const { row } = await lockOwnBooking(tx, actor, id);
-      const correctsOutcomes = permissionScope(actor.context.role, 'bookings.manage') === 'all';
-      if (
-        !canChangeStatus(BookingStatusSchema.parse(row.status), parsed.status, correctsOutcomes)
-      ) {
-        throw new BookingNotChangeableError();
-      }
-      if (statusNeedsStart(parsed.status) && row.startsAt.getTime() > now) {
-        throw new BookingNotStartedError();
-      }
-      const changed = await setBookingStatus(tx, id, parsed.status);
-      // The row is locked, so it is still there.
-      if (changed === undefined) throw new BookingNotFoundError();
-      await keepReminderInStep(tx, changed, now);
-      if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
-        await tellClient(tx, changed, 'cancelled', options.notify);
-      }
-      return audited(tx, actor, row, changed);
-    });
+    const { row } = await lockOwnBooking(tx, actor, id);
+    const correctsOutcomes = permissionScope(actor.context.role, 'bookings.manage') === 'all';
+    if (!canChangeStatus(BookingStatusSchema.parse(row.status), parsed.status, correctsOutcomes)) {
+      throw new BookingNotChangeableError();
+    }
+    if (statusNeedsStart(parsed.status) && row.startsAt.getTime() > now) {
+      throw new BookingNotStartedError();
+    }
+    const changed = await setBookingStatus(tx, id, parsed.status);
+    // The row is locked, so it is still there.
+    if (changed === undefined) throw new BookingNotFoundError();
+    await keepReminderInStep(tx, changed, now);
+    if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
+      await tellClient(tx, changed, 'cancelled', options.notify);
+    }
+    return audited(tx, actor, row, changed);
   }
 
   if (parsed.override) requireOverride(actor);
   const start = Date.parse(parsed.startsAt);
-  let search: Omit<BookableSearch, 'start' | 'now'> | undefined;
+  const { row, staff } = await lockOwnBooking(tx, actor, id, parsed.staffMemberId);
+  if (row.status !== 'confirmed') throw new BookingNotChangeableError();
+  const service = bookedService(row);
+  const search: BookableSearch = {
+    service,
+    staffMemberId: StaffMemberIdSchema.parse(staff.id),
+    excludeBookingId: row.id,
+    start,
+    now,
+    templateRuleDefaults: options.templateRuleDefaults,
+  };
+  const fits = parsed.override ? offers(staff, service) : await isBookable(tx, search);
+  if (!fits) throw await unavailable(tx, search);
+  let moved: BookingRow | undefined;
   try {
-    return await withMember(db, actor.context, async (tx) => {
-      const { row, staff } = await lockOwnBooking(tx, actor, id, parsed.staffMemberId);
-      if (row.status !== 'confirmed') throw new BookingNotChangeableError();
-      const target = StaffMemberIdSchema.parse(staff.id);
-      // The booking keeps the service as it was booked (duration and buffers).
-      const service: ServiceToBook = {
-        id: ServiceIdSchema.parse(row.serviceId),
-        active: true,
-        durationMinutes: (row.endsAt.getTime() - row.startsAt.getTime()) / MINUTE_MS,
-        bufferBeforeMinutes: row.bufferBeforeMinutes,
-        bufferAfterMinutes: row.bufferAfterMinutes,
-      };
-      search = {
-        service,
-        staffMemberId: target,
-        excludeBookingId: row.id,
-        templateRuleDefaults: options.templateRuleDefaults,
-      };
-      const fits = parsed.override
-        ? offers(staff, service)
-        : await isBookable(tx, { ...search, start, now });
-      if (!fits) throw new SlotTaken();
-      const moved = await moveBooking(tx, id, {
-        staffMemberId: target,
+    moved = await inSavepoint(tx, (sp) =>
+      moveBooking(sp, id, {
+        staffMemberId: search.staffMemberId,
         startsAt: new Date(start),
         endsAt: new Date(start + service.durationMinutes * MINUTE_MS),
         overridden: parsed.override,
-      });
-      if (moved === undefined) throw new BookingNotFoundError();
-      await keepReminderInStep(tx, moved, now);
-      if (parsed.notifyClient && options.notify) {
-        await tellClient(tx, moved, 'rescheduled', options.notify);
-      }
-      return audited(tx, actor, row, moved);
-    });
+      }),
+    );
   } catch (error) {
-    if ((error instanceof SlotTaken || error instanceof BookingOverlapError) && search) {
-      throw new SlotUnavailableError(await alternatives(db, actor, { ...search, start, now }));
-    }
+    if (error instanceof BookingOverlapError) throw await unavailable(tx, search);
     throw error;
   }
+  if (moved === undefined) throw new BookingNotFoundError();
+  await keepReminderInStep(tx, moved, now);
+  if (parsed.notifyClient && options.notify) {
+    await tellClient(tx, moved, 'rescheduled', options.notify);
+  }
+  return audited(tx, actor, row, moved);
+}
+
+/**
+ * Brings back a cancelled booking as it was (undoing a cancellation the AI made, ADR-0028), in
+ * the caller's transaction: only before it starts and while its time can still be booked (rules
+ * apply; one booked outside them needs an owner or manager again). The client is not emailed.
+ */
+export async function reinstateBookingIn(
+  tx: TenantTx,
+  actor: Actor,
+  bookingId: BookingId,
+  options: { clock?: Clock; templateRuleDefaults?: TemplateRuleDefaultsOf } = {},
+): Promise<Booking> {
+  requirePermission(actor, 'bookings.manage');
+  const id = BookingIdSchema.parse(bookingId);
+  const now = (options.clock ?? systemClock).now().getTime();
+  const { row, staff } = await lockOwnBooking(tx, actor, id);
+  if (row.status !== 'cancelled') throw new BookingNotChangeableError();
+  if (row.startsAt.getTime() <= now) throw new BookingAlreadyStartedError();
+  if (row.overridden) requireOverride(actor);
+  const service = bookedService(row);
+  const search: BookableSearch = {
+    service,
+    staffMemberId: StaffMemberIdSchema.parse(staff.id),
+    excludeBookingId: row.id,
+    start: row.startsAt.getTime(),
+    now,
+    templateRuleDefaults: options.templateRuleDefaults,
+  };
+  const fits = row.overridden ? offers(staff, service) : await isBookable(tx, search);
+  if (!fits) throw await unavailable(tx, search);
+  let restored: BookingRow | undefined;
+  try {
+    restored = await inSavepoint(tx, (sp) => setBookingStatus(sp, id, 'confirmed'));
+  } catch (error) {
+    if (error instanceof BookingOverlapError) throw await unavailable(tx, search);
+    throw error;
+  }
+  if (restored === undefined) throw new BookingNotFoundError();
+  await keepReminderInStep(tx, restored, now);
+  return audited(tx, actor, row, restored);
 }
 
 /**
@@ -457,13 +526,31 @@ export async function isBookable(tx: TenantTx, search: BookableSearch): Promise<
 /** Opens a transaction for reading alternatives: a member's, or the booking page's. */
 export type OpenTransaction = <T>(work: (tx: TenantTx) => Promise<T>) => Promise<T>;
 
-/** The nearest bookable times instead, read after the refused transaction rolled back. */
-async function alternatives(
-  db: Database,
-  actor: Actor,
+/** The time is not free: the error carries the nearest times that are, read in `tx`. */
+async function unavailable(
+  tx: TenantTx,
   search: AlternativesSearch,
-): Promise<AvailableSlot[]> {
-  return nearestAlternatives((work) => withMember(db, actor.context, work), search);
+): Promise<SlotUnavailableError> {
+  return new SlotUnavailableError(await nearestAlternatives((work) => work(tx), search));
+}
+
+/**
+ * Runs one write in a savepoint: a refused write (an overlap, a taken key) rolls back only
+ * itself, so the caller's transaction (the trust layer's) stays usable.
+ */
+function inSavepoint<T>(tx: TenantTx, work: (savepoint: TenantTx) => Promise<T>): Promise<T> {
+  return tx.transaction(work);
+}
+
+/** The service as this booking was booked (its duration and buffers then). */
+function bookedService(row: BookingRow): ServiceToBook {
+  return {
+    id: ServiceIdSchema.parse(row.serviceId),
+    active: true,
+    durationMinutes: (row.endsAt.getTime() - row.startsAt.getTime()) / MINUTE_MS,
+    bufferBeforeMinutes: row.bufferBeforeMinutes,
+    bufferAfterMinutes: row.bufferAfterMinutes,
+  };
 }
 
 /**

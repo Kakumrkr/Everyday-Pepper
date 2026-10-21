@@ -275,9 +275,18 @@ importers:
 
   packages/ai:
     dependencies:
+      '@pepper/appointments':
+        specifier: workspace:*
+        version: link:../modules/appointments
       '@pepper/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@pepper/core':
+        specifier: workspace:*
+        version: link:../core
+      '@pepper/db':
+        specifier: workspace:*
+        version: link:../db
       openai:
         specifier: 7.32.0
         version: 7.32.0(undici@8.12.2)(zod@4.6.7)
@@ -288,9 +297,15 @@ importers:
       '@pepper/config':
         specifier: workspace:*
         version: link:../config
+      '@pepper/testing':
+        specifier: workspace:*
+        version: link:../testing
       '@vitest/coverage-v8':
         specifier: ^5.0.5
         version: 5.0.5(vitest@5.0.5)
+      fast-check:
+        specifier: ^4.10.2
+        version: 4.10.2
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@opentelemetry/api@1.9.1)(@types/node@22.20.5)(@vitest/coverage-v8@5.0.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))

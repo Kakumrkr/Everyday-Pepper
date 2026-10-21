@@ -1,23 +1,13 @@
 import {
-  cancelledEmail,
-  confirmationEmail,
-  manageUrl,
-  rescheduledEmail,
+  queueBookingEmail,
+  type BookingEmailOptions,
   type BookingNotice,
   type BookingNotify,
 } from '@pepper/appointments';
-import { OutboxDedupeKeySchema } from '@pepper/contracts';
-import { queueEmail, systemClock, type Clock, type EmailMessage } from '@pepper/core';
 import type { TenantTx } from '@pepper/db';
 import { Inject, Injectable, Module, type DynamicModule } from '@nestjs/common';
 
-export interface BookingEmailsOptions {
-  /** The web app's origin, for the client's reschedule/cancel link. */
-  baseUrl: string;
-  /** Seals the emails queued in the outbox (ADR-0024). */
-  outboxKey: Buffer;
-  clock?: Clock;
-}
+export type BookingEmailsOptions = Omit<BookingEmailOptions, 'holdSeconds'>;
 
 export const BOOKING_EMAILS_OPTIONS = Symbol('BOOKING_EMAILS_OPTIONS');
 
@@ -32,23 +22,7 @@ export class BookingEmails {
 
   /** Queues the email about a change. Clients without an email address get none. */
   readonly notify: BookingNotify = async (tx: TenantTx, notice: BookingNotice) => {
-    if (notice.email.email === '') return;
-    const link = (token: string) => manageUrl(this.options.baseUrl, notice.email.slug, token);
-    const message: EmailMessage =
-      notice.kind === 'cancelled'
-        ? cancelledEmail(notice.email)
-        : notice.kind === 'confirmed'
-          ? confirmationEmail(notice.email, link(notice.manageToken))
-          : rescheduledEmail(notice.email, link(notice.manageToken));
-    // One email per change: `at` is the booking's `updated_at`, one value per transaction.
-    const { bookingId, at } = notice.change;
-    await queueEmail(tx, message, {
-      key: this.options.outboxKey,
-      dedupeKey: OutboxDedupeKeySchema.parse(
-        `booking.${notice.kind}:${bookingId}:${String(at.getTime())}`,
-      ),
-      now: (this.options.clock ?? systemClock).now(),
-    });
+    await queueBookingEmail(tx, notice, this.options);
   };
 }
 

@@ -35,6 +35,12 @@ export async function listStaff(db: Database, actor: Actor): Promise<StaffMember
   return records.map(toStaffMember);
 }
 
+/** `listStaff` inside the caller's transaction. */
+export async function listStaffIn(tx: TenantTx, actor: Actor): Promise<StaffMember[]> {
+  requirePermission(actor, 'staff.read');
+  return (await listStaffMembers(tx)).map(toStaffMember);
+}
+
 /**
  * Adds a staff member. A `userId` must be a member of the business and not yet linked to
  * another staff member (`MemberNotFoundError`, `StaffMemberLinkTakenError`); every service id

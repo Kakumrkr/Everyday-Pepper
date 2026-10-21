@@ -1,0 +1,230 @@
+import { looksLikeContact } from '@pepper/contracts';
+import type { Database } from '@pepper/db';
+import { addTimeOff } from '@pepper/appointments';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { toolMessageContent, type ToolOutcome } from './registry.js';
+import {
+  bookOnScreen,
+  callTool,
+  depsFor,
+  newWorld,
+  startTestDatabase,
+  tuesdayAt,
+  TUESDAY,
+  type TestDatabase,
+  type World,
+} from './test-support.js';
+
+// The read tools against real Postgres (ADR-0029): answers in the business's local time, staff
+// scoped exactly as on their screens (AC-W2-4), another business's ids "not found", and never a
+// client's email address or phone number in what the model gets (D-5).
+
+let database: TestDatabase;
+let db: Database;
+let world: World;
+let other: World;
+
+beforeAll(async () => {
+  database = await startTestDatabase();
+  db = database.app.db;
+  world = await newWorld(db);
+  other = await newWorld(db);
+  await bookOnScreen(world, world.jessStaff, world.maria, '10:00');
+  await bookOnScreen(world, world.marcoStaff, world.sara, '11:00');
+});
+
+afterAll(async () => {
+  await database.stop();
+});
+
+function answered(outcome: ToolOutcome) {
+  if (outcome.status !== 'answered') {
+    throw new Error(`expected an answer, got ${JSON.stringify(toolMessageContent(outcome))}`, {
+      cause: outcome.status === 'refused' ? outcome.error : undefined,
+    });
+  }
+  return outcome;
+}
+
+describe('list_services_and_staff', () => {
+  it('lists active services and staff with ids, marking the member’s own staff member', async () => {
+    const answer = answered(
+      await callTool(depsFor(world, world.jess), 'list_services_and_staff', {}),
+    );
+    expect(answer.data).toMatchObject({
+      services: [
+        { serviceId: world.colour.id, name: 'Colour', durationMinutes: 90 },
+        { serviceId: world.haircut.id, name: 'Haircut', durationMinutes: 60 },
+      ],
+      staff: [
+        { staffMemberId: world.jessStaff.id, name: 'Jess', isYou: true },
+        { staffMemberId: world.marcoStaff.id, name: 'Marco', isYou: false },
+      ],
+    });
+  });
+});
+
+describe('find_clients', () => {
+  it('finds by name with short names, and shows a choice card for several', async () => {
+    const answer = answered(
+      await callTool(depsFor(world, world.owner), 'find_clients', { name: 'sar' }),
+    );
+    const { matches } = answer.data as { matches: { clientId: string; name: string }[] };
+    expect(matches).toHaveLength(2);
+    expect(matches).toEqual(
+      expect.arrayContaining([
+        { clientId: world.sara.id, name: 'Sara K.' },
+        { clientId: world.sarah.id, name: 'Sarah P.' },
+      ]),
+    );
+    expect(answer.card).toMatchObject({ kind: 'client_choice' });
+    expect(answer.summary).toMatch(/ask the member which one/);
+  });
+
+  it('never matches an email address, and refuses one as the query', async () => {
+    const byDomain = answered(
+      await callTool(depsFor(world, world.owner), 'find_clients', { name: 'example' }),
+    );
+    expect(byDomain.data).toEqual({ matches: [], more: false });
+    const byEmail = await callTool(depsFor(world, world.owner), 'find_clients', {
+      name: 'maria.lopez@example.test',
+    });
+    expect(byEmail).toMatchObject({ status: 'refused', code: 'invalid_arguments' });
+  });
+
+  it('gives staff only the clients they have bookings with', async () => {
+    const jess = answered(
+      await callTool(depsFor(world, world.jess), 'find_clients', { name: 'sar' }),
+    );
+    expect(jess.data).toEqual({ matches: [], more: false });
+    expect(jess.summary).toMatch(/your own clients/);
+    const maria = answered(
+      await callTool(depsFor(world, world.jess), 'find_clients', { name: 'maria' }),
+    );
+    expect(maria.data).toEqual({
+      matches: [{ clientId: world.maria.id, name: 'Maria L.' }],
+      more: false,
+    });
+  });
+
+  it("finds nobody of another business's", async () => {
+    const answer = answered(
+      await callTool(depsFor(other, other.owner), 'find_clients', { name: 'Kim' }),
+    );
+    const ids = (answer.data as { matches: { clientId: string }[] }).matches.map((m) => m.clientId);
+    expect(ids).toEqual([other.sara.id]);
+  });
+});
+
+describe('find_availability', () => {
+  it('answers in local time, one per start, without the booked hour', async () => {
+    const answer = answered(
+      await callTool(depsFor(world, world.jess), 'find_availability', {
+        serviceId: world.haircut.id,
+        staffMemberId: world.jessStaff.id,
+        date: TUESDAY,
+        days: null,
+        notBefore: '09:00',
+      }),
+    );
+    const slots = (answer.data as { slots: { time: string; staffName: string }[] }).slots;
+    // Maria's 10:00 haircut and its clean-up hold 10:00–11:10, so a 60-minute cut can't start
+    // at 09:00 (it would end at 10:10 with its own clean-up); the next start is 11:15.
+    expect(slots[0]).toEqual({
+      date: TUESDAY,
+      time: '11:15',
+      staffMemberId: world.jessStaff.id,
+      staffName: 'Jess',
+    });
+    expect(slots.map((slot) => slot.time)).not.toContain('10:00');
+    expect(answer.card).toMatchObject({ kind: 'slot_picker', reason: 'availability' });
+  });
+
+  it("finds another business's service not found", async () => {
+    const outcome = await callTool(depsFor(other, other.owner), 'find_availability', {
+      serviceId: world.haircut.id,
+      staffMemberId: null,
+      date: TUESDAY,
+      days: null,
+      notBefore: null,
+    });
+    expect(outcome).toMatchObject({ status: 'refused', code: 'not_found' });
+  });
+});
+
+describe('get_day and get_booking', () => {
+  it('shows owners the whole day and staff only their own bookings, with blocked time', async () => {
+    await addTimeOff(db, world.priya, world.marcoStaff.id, {
+      startsAt: tuesdayAt('13:00'),
+      endsAt: tuesdayAt('14:00'),
+    });
+    const day = answered(
+      await callTool(depsFor(world, world.owner), 'get_day', {
+        date: TUESDAY,
+        staffMemberId: null,
+      }),
+    );
+    const data = day.data as {
+      bookings: { clientName: string; time: string }[];
+      blocked: unknown[];
+    };
+    expect(data.bookings.map((b) => [b.time, b.clientName])).toEqual([
+      ['10:00', 'Maria L.'],
+      ['11:00', 'Sara K.'],
+    ]);
+    expect(data.blocked).toEqual([
+      { staffMemberId: world.marcoStaff.id, staffName: 'Marco', from: '13:00', to: '14:00' },
+    ]);
+    const jess = answered(
+      await callTool(depsFor(world, world.jess), 'get_day', { date: TUESDAY, staffMemberId: null }),
+    );
+    expect((jess.data as { bookings: unknown[] }).bookings).toHaveLength(1);
+    expect(jess.summary).toMatch(/your own bookings/);
+  });
+
+  it("refuses a colleague's or another business's booking as not found", async () => {
+    const marcos = await bookOnScreen(world, world.marcoStaff, world.sarah, '15:00');
+    const own = answered(
+      await callTool(depsFor(world, world.priya), 'get_booking', { bookingId: marcos.id }),
+    );
+    expect(own.card).toMatchObject({
+      kind: 'booking',
+      booking: { time: '15:00', staffName: 'Marco' },
+    });
+    for (const [deps, label] of [
+      [depsFor(world, world.jess), 'colleague'],
+      [depsFor(other, other.owner), 'other business'],
+    ] as const) {
+      const outcome = await callTool(deps, 'get_booking', { bookingId: marcos.id });
+      expect(outcome, label).toMatchObject({ status: 'refused', code: 'not_found' });
+    }
+  });
+});
+
+describe('what the model gets', () => {
+  it('never holds a client’s email address or phone number, from any read', async () => {
+    const reads: [string, unknown][] = [
+      ['list_services_and_staff', {}],
+      ['find_clients', { name: 'Maria' }],
+      ['find_clients', { name: 'a' + 'ria' }],
+      ['get_day', { date: TUESDAY, staffMemberId: null }],
+      [
+        'find_availability',
+        {
+          serviceId: world.haircut.id,
+          staffMemberId: null,
+          date: TUESDAY,
+          days: 2,
+          notBefore: null,
+        },
+      ],
+    ];
+    for (const actor of [world.owner, world.manager, world.jess, world.priya]) {
+      for (const [name, args] of reads) {
+        const content = toolMessageContent(await callTool(depsFor(world, actor), name, args));
+        expect(looksLikeContact(content), `${name} as ${actor.context.role}`).toBe(false);
+        expect(content).not.toMatch(/example\.test|2125550143/);
+      }
+    }
+  });
+});

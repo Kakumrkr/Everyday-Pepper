@@ -148,3 +148,14 @@ export class ActionTooLateError extends Error {
     this.name = 'ActionTooLateError';
   }
 }
+
+/**
+ * A concurrent copy of the same AI action (same idempotency key) was recorded first; this one
+ * rolled back. Asking again returns the first one's result.
+ */
+export class ConcurrentActionError extends Error {
+  constructor() {
+    super('This action was recorded by a concurrent request');
+    this.name = 'ConcurrentActionError';
+  }
+}

@@ -60,6 +60,14 @@ export class BookingNotStartedError extends Error {
   }
 }
 
+/** The appointment has already started, so the booking can't be brought back. */
+export class BookingAlreadyStartedError extends Error {
+  constructor() {
+    super('The appointment has already started');
+    this.name = 'BookingAlreadyStartedError';
+  }
+}
+
 /** The idempotency key was already used for a different booking. */
 export class IdempotencyKeyReusedError extends Error {
   constructor() {

@@ -1,0 +1,106 @@
+import type { BookingNotify, TemplateRuleDefaultsOf } from '@pepper/appointments';
+import type {
+  AutonomyAction,
+  ChangeSide,
+  ClientId,
+  RiskTier,
+  ToolCard,
+  TrustJson,
+  UserId,
+} from '@pepper/contracts';
+import type { Actor, AutonomyDefaults, Clock } from '@pepper/core';
+import type { Database, TenantTx } from '@pepper/db';
+import type { z } from 'zod';
+import type { ToolGuide } from './guide.js';
+
+// The AI's tools (ADR-0029, playbook principles 1–5): thin adapters over the same domain
+// services as the screens. A read answers in one member transaction; a write implements the
+// trust layer's `ActionRunner` (ADR-0028) through `writeRunner`, so the dial, the proposal, the
+// receipt and the undo are the trust layer's, never the tool's. Neither ever takes the business,
+// the member or their role from the model: those come from `ToolDeps`, i.e. the session.
+
+/** What the app gives every tool call (S25 builds it from the session and config). */
+export interface ToolDeps {
+  db: Database;
+  /** The signed-in member the AI works for (never from the model). */
+  actor: Actor;
+  clock: Clock;
+  /** The industry template's rule defaults (the app passes them; L2 never imports L3). */
+  templateRuleDefaults?: TemplateRuleDefaultsOf;
+  /** The industry template's autonomy defaults. */
+  autonomy: AutonomyDefaults;
+  /** For the client emails a write queues (held for the undo-send grace). */
+  emails: { baseUrl: string; outboxKey: Buffer };
+}
+
+/** Where a tool runs: one transaction of the member's business, in its time zone. */
+export interface ToolScope {
+  tx: TenantTx;
+  /** The AI acting for the member (`via: 'ai'`), or the member themselves for an undo. */
+  actor: Actor;
+  deps: ToolDeps;
+  timeZone: string;
+  now: Date;
+}
+
+/** A read tool's answer: a short summary, the data for the model, a card for the member. */
+export interface ToolAnswer {
+  summary: string;
+  data: TrustJson;
+  card: ToolCard | null;
+}
+
+export interface ReadTool<S extends z.ZodType = z.ZodType> {
+  kind: 'read';
+  name: string;
+  version: number;
+  guide: ToolGuide;
+  /** Strict Zod arguments: every field required, "not given" as `null`. */
+  args: S;
+  /** Whether the arguments take local dates or times (the description says how). */
+  localTimes: boolean;
+  run(scope: ToolScope, args: z.output<S>): Promise<ToolAnswer>;
+}
+
+/** A write's scope: `notifyClient(clientId)` queues (and records) that client's email. */
+export interface WriteScope extends ToolScope {
+  notifyClient(clientId: ClientId): BookingNotify;
+}
+
+/** What a write did (or, in the dry run, would do), as the domain computed it. */
+export interface Performed {
+  entity: { type: string; id: string };
+  /** One pending proposal per target (`booking:<id>`). */
+  targetKey: string;
+  /** Whose record it changes (the staff member's login, the assignee). */
+  recordOwner: UserId | null;
+  appointmentStartsAt: Date | null;
+  /** The record before and after: ids, local dates and times, codes (no new ids). */
+  before: ChangeSide | null;
+  after: ChangeSide;
+  /** The touched rows' versions, for the fingerprint (ADR-0028: only what the tool touches). */
+  touched: TrustJson;
+  /** What `undo` needs; `null`: nothing to undo. */
+  inverse: TrustJson | null;
+  /** One sentence for the model and the card, in the business's local time. */
+  summary: string;
+}
+
+export interface WriteTool<S extends z.ZodType = z.ZodType> {
+  kind: 'write';
+  name: string;
+  /** Bumped whenever what the tool does changes (part of the fingerprint). */
+  version: number;
+  guide: ToolGuide;
+  args: S;
+  localTimes: boolean;
+  tier: RiskTier;
+  /** The dial actions this call involves: the change first, then any email to the client. */
+  actions(args: z.output<S>): readonly [AutonomyAction, ...AutonomyAction[]];
+  /** Makes the change through the domain (the dry run makes it too, in a rolled-back savepoint). */
+  perform(scope: WriteScope, args: z.output<S>): Promise<Performed>;
+  /** Reverses it through the domain, as the member. */
+  undo(scope: ToolScope, inverse: TrustJson): Promise<void>;
+}
+
+export type AnyTool = ReadTool | WriteTool;

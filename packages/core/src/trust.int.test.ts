@@ -223,6 +223,63 @@ const noteRunner: ActionRunner = {
   },
 };
 
+// A fake tool whose preview makes the real change, as the S24 tools do (ADR-0029): the trust
+// layer must roll it back, so only the execution's to-do stays. `refusing` makes the domain
+// refuse it, as a time booked meanwhile would.
+let refusing = false;
+const dryRunRunner: ActionRunner = {
+  tool: 'dry_run_todo',
+  version: 1,
+  actions: ['booking.create'],
+  tier: 'internal_write',
+  async preview(tx, actor, payload) {
+    if (refusing) throw new Error('The domain refuses it now');
+    const { ref, assignee } = payload as unknown as TodoPayload;
+    await insertTask(tx, {
+      title: `preview ${ref}`,
+      dueAt: null,
+      assigneeUserId: UserIdSchema.parse(assignee),
+      source: 'ai',
+      createdBy: actor.context.userId,
+    });
+    return {
+      preview: { ref },
+      fingerprint: stateFingerprint({
+        tool: 'dry_run_todo',
+        toolVersion: 1,
+        payload,
+        state: null,
+        messages: [],
+      }),
+      recipients: 0,
+      recordOwner: UserIdSchema.parse(assignee),
+      targetKey: `dry:${ref}`,
+      appointmentStartsAt: null,
+    };
+  },
+  async execute(tx, actor, payload) {
+    const { ref, assignee } = payload as unknown as TodoPayload;
+    const task = await insertTask(tx, {
+      title: `executed ${ref}`,
+      dueAt: null,
+      assigneeUserId: UserIdSchema.parse(assignee),
+      source: 'ai',
+      createdBy: actor.context.userId,
+    });
+    return {
+      entity: { type: 'task', id: task.id },
+      before: null,
+      after: { status: 'open' },
+      inverse: null,
+      outboxMessageIds: [],
+      appointmentStartsAt: null,
+    };
+  },
+  undo() {
+    return Promise.resolve();
+  },
+};
+
 const tasksOf = (assignee: UserId) =>
   withTenant(db, tenantId, (tx) =>
     listTasks(tx, { status: 'all', assigneeUserId: assignee, limit: 200 }),
@@ -462,6 +519,59 @@ async function propose(by: Actor, assignee: UserId, clock = clockAt(NOW)) {
     await changeAutonomy(db, ana(), { levels: { 'task.create': null } }, defaults);
   }
 }
+
+describe('previews are dry runs (ADR-0029)', () => {
+  it('rolls back whatever the preview wrote, on request and on approval', async () => {
+    const payload = todo(jess, 'dry-1');
+    const asked = await requestAction(
+      db,
+      jessActor(),
+      dryRunRunner,
+      { payload, idempotencyKey: turnKey(), explanation, untrustedContext: false },
+      defaults,
+    );
+    if (asked.kind !== 'proposed') throw new Error('expected a proposal');
+    const titles = async () => (await tasksOf(jess)).map((task) => task.title);
+    expect(await titles()).not.toContain('preview dry-1');
+
+    const approved = await approveProposal(db, jessActor(), asked.proposal.id, {
+      shownFingerprint: asked.proposal.fingerprint,
+      runner: dryRunRunner,
+    });
+    expect(approved.kind).toBe('executed');
+    expect(await titles()).toContain('executed dry-1');
+    expect(await titles()).not.toContain('preview dry-1');
+  });
+
+  it('supersedes a proposal the domain refuses at approval and says why', async () => {
+    const asked = await requestAction(
+      db,
+      jessActor(),
+      dryRunRunner,
+      {
+        payload: todo(jess, 'dry-2'),
+        idempotencyKey: turnKey(),
+        explanation,
+        untrustedContext: false,
+      },
+      defaults,
+    );
+    if (asked.kind !== 'proposed') throw new Error('expected a proposal');
+    refusing = true;
+    try {
+      const result = await approveProposal(db, jessActor(), asked.proposal.id, {
+        shownFingerprint: asked.proposal.fingerprint,
+        runner: dryRunRunner,
+      });
+      expect(result).toEqual({ kind: 'refused', error: new Error('The domain refuses it now') });
+    } finally {
+      refusing = false;
+    }
+    expect((await listPendingProposals(db, jessActor())).map((p) => p.id)).not.toContain(
+      asked.proposal.id,
+    );
+  });
+});
 
 describe('approveProposal', () => {
   it('runs exactly what was shown, as the approver, once', async () => {

@@ -679,6 +679,54 @@ Everything each session did, oldest first: what was built, the checks run and th
     - When a lead approves a staff member's proposal the receipt is the lead's (the staff member doesn't list it); logged for S26.
     - One runtime unit test failed once inside a full `pnpm check` early in the session and did not reproduce in 8 runs, including later full checks; logs are kept to name it if it returns.
 
+- **S24 Phase 6c (2026-10-21): tool registry and the first ten tools** ([ADR-0029](../adr/0029-tool-registry-and-tools.md), proposed by Claude, pre-approved by the user).
+  - **Session Brief:** the user confirmed all of Claude's recommendations ("Go ahead with your recommendations, ADR-0029 is fine"), pre-approved the ADR, and asked Claude to open the PR, merge it and end with the prompt for the next session.
+    - ADR-0029 for S24 (S25's becomes ADR-0030).
+    - `emailClient` on writes: `null` means the screens' default; the email stays on the dial.
+    - Undo never emails the client.
+    - Staff find only their own clients.
+    - Re-checks before building: OpenAI's function-calling guide (strict schemas, fewer than 20 tools, the "intern test", don't make the model fill what code knows) and OWASP's 2026 LLM Top 10 (LLM01–03: injection, disclosure, excessive agency). The OpenAI and OWASP pages were not reachable from the container, so the check went through search results.
+  - **Weak spots in S22–S23 named at the brief, all handled:**
+    - previews ran in the committing transaction (now a rolled-back savepoint);
+    - an overlap aborted the whole transaction (savepoints in the booking writes);
+    - `ActionRunner.actions` was fixed per tool (the runner is built from the payload);
+    - the S23 fake fingerprinted every open task (only touched rows now);
+    - client search matched emails (name-only for the AI);
+    - the email hold lived in the api (`queueBookingEmail`).
+
+    Logged: undoing a notified move leaves the client's earlier link dead.
+  - **Built:**
+    - T1: the `*In` variants of the booking, availability, time-off, services, staff, task and client services; `reinstateBookingIn`; `withdrawTaskIn` with `task.deleted`; `findClientsByNameIn`.
+    - T2: `queueBookingEmail` with `holdSeconds`.
+    - T3: `dryRun` in the trust layer and the `refused` approval result.
+    - T4–T6: the registry and the ten tools.
+      - Guides with a lint; errors as stable codes; cards.
+      - Short client names; local-time helpers.
+      - `writeRunner`; approve and undo by id.
+    - T7: the hostile fake (92 attacks per role) and the trust-layer attacks.
+    - T8: `toolEvalCases` (20 generated cases) and per-tool budgets.
+  - **Checks:**
+    - `pnpm check` green. Unit tests: contracts 530, core 1,172, db 44, appointments 83, ai 146, api 263, web 247, others unchanged.
+    - `pnpm test:integration` green, 862 (+72):
+      - ai 57: reads 10, writes 26, hostile 11, latency 10;
+      - appointments 136; core 129; db 470; api 62; worker 4; runtime 2; testing 2.
+    - Mutation checks:
+      - a preview that differs from the execution fails 5 tests;
+      - a move undo that doesn't move back fails;
+      - a preview run without the rollback fails the trust test.
+    - Per-tool p95 on 2,000 bookings: reads 7–21 ms, writes 22–63 ms (target 300 ms); statements 6–44.
+    - No OpenAI call; no screen changed, so no Playwright run.
+  - **Found and fixed:**
+    - by the hostile fake: `alternativesRange` built an inverted range for a time long past (a pre-existing 500 on the calendar screen; failing test first); `get_day` answered an empty day for another business's staff member (now `not_found`);
+    - by the self-review: approve and undo took the proposal or receipt object from the caller (now ids, loaded from the database); a racing copy of a tool call answered `internal` (now `ConcurrentActionError`, retried once, so every copy gets the one execution);
+    - lint: the `packages/ai` layer rule allowed only contracts and core (widened per ADR-0029).
+    - CI: typed ESLint ran out of memory on the runner's ~2 GB default heap. `main` already peaked at ~2.3 GB and this PR added ~80 MB. Reproduced locally with a 2 GB limit (main passed, the branch crashed), so the `lint` script now gives ESLint a 4 GB heap.
+  - **Not done / for later:**
+    - S25: replay `hostileProvider` through the real loop; `toolDefinitions()` as the static prefix; run writes one at a time; seeded worlds for `toolEvalCases`; mark turns untrusted from `untrustedText`.
+    - S26: "the client was already emailed" on Undo; expire proposals whose tool version changed; show the staff member the receipt when a lead approved their proposal (from S23).
+    - A service or staff name typed with a phone number in it would fail the ids-only guard on a preview (`internal`): rare, logged.
+    - The eval CLI still uses the S22 sample tools until S25 brings seeded worlds.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

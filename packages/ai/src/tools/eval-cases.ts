@@ -1,0 +1,32 @@
+import type { EvalCase } from '../evals/case.js';
+import { EvalCaseSchema } from '../evals/case.js';
+import { TOOLS } from './registry.js';
+
+// Eval cases generated from the tools' own guides (S22's idea, ADR-0029): each example a guide
+// gives ("Move Maria's 3pm to 4pm" → move_booking with time 16:00) becomes a case that the
+// model must answer with that tool and those arguments. A vague description shows up as a
+// failing generated case in S27 instead of in the pilot; until then the cases are checked for
+// shape here and run on the fakes. Seeded worlds join them in S25.
+
+const FOLLOW_THROUGH = new Set(['add_todo']);
+
+/** One case per example in every tool's guide, on the business's clock. */
+export function toolEvalCases(clock: { now: string; timeZone: string }): EvalCase[] {
+  return TOOLS.flatMap((tool) =>
+    tool.guide.examples.map((example, index) =>
+      EvalCaseSchema.parse({
+        id: `tool-${tool.name.replaceAll('_', '-')}-${String(index + 1)}`,
+        set: FOLLOW_THROUGH.has(tool.name) ? 'follow_through' : 'scheduling',
+        description: `Generated from ${tool.name}'s guide: "${example.say}"`,
+        now: clock.now,
+        timeZone: clock.timeZone,
+        actor: { role: 'owner' },
+        turns: [{ user: example.say }],
+        tools: TOOLS.map((each) => each.name),
+        expect: {
+          toolCalls: [{ name: tool.name, arguments: example.args }],
+        },
+      }),
+    ),
+  );
+}

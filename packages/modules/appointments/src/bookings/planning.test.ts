@@ -129,6 +129,15 @@ describe('alternatives', () => {
     expect(alternativesRange(around, now).from).toBe(now);
   });
 
+  it('searches the week ahead of now for a time long past, never an inverted range', () => {
+    const now = t('2026-11-09T09:00:00Z');
+    const past = t('2020-01-07T19:00:00Z');
+    expect(alternativesRange(past, now)).toEqual({
+      from: now,
+      to: now + ALTERNATIVES_SEARCH_DAYS * DAY_MS,
+    });
+  });
+
   it('takes the nearest slots, earlier first on a tie', () => {
     const slots = [
       slot('2026-11-10T09:00:00Z'),

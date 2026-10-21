@@ -10,6 +10,7 @@
     "src/**/*.test.ts",
     "src/provider-contract.ts",
     "src/openai/test-fixtures.ts",
-    "src/evals/test-support.ts"
+    "src/evals/test-support.ts",
+    "src/tools/test-support.ts"
   ]
 }

@@ -13,10 +13,12 @@ import {
   type TaskId,
   type TaskInput,
   type TaskQuery,
+  type TaskSource,
   type UserId,
 } from '@pepper/contracts';
 import {
   appendAuditEntry,
+  deleteTask,
   findMembership,
   insertTask,
   listDueTasks,
@@ -33,7 +35,7 @@ import {
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
-import { TaskAssigneeNotMemberError, TaskNotFoundError } from '../errors.js';
+import { TaskAssigneeNotMemberError, TaskNotFoundError, UndoRefusedError } from '../errors.js';
 import { taskDuePush } from '../task-pushes.js';
 import { leadUserIds, queuePushToMembers } from './push.js';
 
@@ -64,29 +66,71 @@ export async function listTasks(
 export async function createTask(db: Database, actor: Actor, input: TaskInput): Promise<Task> {
   requirePermission(actor, 'tasks.manage');
   const fields = TaskInputSchema.parse(input);
+  return withMember(db, actor.context, (tx) => createTaskIn(tx, actor, fields));
+}
+
+/** `createTask` inside the caller's transaction; the AI's tools record `source: 'ai'`. */
+export async function createTaskIn(
+  tx: TenantTx,
+  actor: Actor,
+  input: TaskInput,
+  options: { source?: TaskSource } = {},
+): Promise<Task> {
+  requirePermission(actor, 'tasks.manage');
+  const fields = TaskInputSchema.parse(input);
   const assignee =
     fields.assigneeUserId === undefined ? actor.context.userId : fields.assigneeUserId;
-  return withMember(db, actor.context, async (tx) => {
-    await checkAssignee(tx, actor, assignee);
-    const row = await insertTask(tx, {
-      title: fields.title,
-      dueAt: fields.dueAt === null ? null : new Date(fields.dueAt),
-      assigneeUserId: assignee,
-      source: 'manual',
-      createdBy: actor.context.userId,
-    });
-    await appendAuditEntry(tx, {
-      actor: auditActorOf(actor),
-      change: {
-        action: 'task.created',
-        entity: { type: 'task', id: row.id },
-        before: null,
-        after: auditValues(row),
-      },
-      requestId: actor.requestId,
-    });
-    return toTask(row);
+  await checkAssignee(tx, actor, assignee);
+  const row = await insertTask(tx, {
+    title: fields.title,
+    dueAt: fields.dueAt === null ? null : new Date(fields.dueAt),
+    assigneeUserId: assignee,
+    source: options.source ?? 'manual',
+    createdBy: actor.context.userId,
   });
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'task.created',
+      entity: { type: 'task', id: row.id },
+      before: null,
+      after: auditValues(row),
+    },
+    requestId: actor.requestId,
+  });
+  return toTask(row);
+}
+
+/**
+ * Takes back a to-do the AI added (its Undo, ADR-0028), in the caller's transaction: only while
+ * it is open and nobody changed it since (`UndoRefusedError` otherwise, as the work would be
+ * lost). `TaskNotFoundError` for one the member can't reach.
+ */
+export async function withdrawTaskIn(tx: TenantTx, actor: Actor, taskId: TaskId): Promise<void> {
+  requirePermission(actor, 'tasks.manage');
+  const id = TaskIdSchema.parse(taskId);
+  const row = await lockTask(tx, id);
+  if (row === undefined) throw new TaskNotFoundError();
+  requirePermission(actor, 'tasks.manage', { ownerUserId: userIdOf(row.assigneeUserId) });
+  if (row.status !== 'open' || row.updatedAt.getTime() !== row.createdAt.getTime()) {
+    throw new UndoRefusedError('changed_since');
+  }
+  // The row is locked; it can't have gone meanwhile.
+  if (!(await deleteTask(tx, id))) throw new TaskNotFoundError();
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'task.deleted',
+      entity: { type: 'task', id: row.id },
+      before: auditValues(row),
+      after: null,
+    },
+    requestId: actor.requestId,
+  });
+}
+
+function userIdOf(value: string | null): UserId | null {
+  return value === null ? null : UserIdSchema.parse(value);
 }
 
 /**

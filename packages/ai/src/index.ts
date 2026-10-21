@@ -5,3 +5,4 @@ export * from './openai/openai-provider.js';
 export * from './provider.js';
 export * from './scripted-provider.js';
 export * from './strict-schema.js';
+export * from './tools/index.js';
