@@ -5,6 +5,7 @@ import {
   BookingsResponseSchema,
   ChatStatusSchema,
   ClientSchema,
+  ConversationsResponseSchema,
   CreateInviteResponseSchema,
   CurrentBusinessResponseSchema,
   formatDate,
@@ -373,4 +374,37 @@ test('a dropped stream resumes from the last event, showing everything once', as
   // Each event once: one reply (read out as "Pepper: Added.") and one card.
   await expect(log(page).getByText('Added.')).toHaveCount(1);
   await expect(log(page).getByRole('article', { name: 'To-do' })).toHaveCount(1);
+});
+
+test('Stop ends a running turn, and leaving the chat cancels it', async ({ page }) => {
+  test.setTimeout(90_000);
+  await onboardOwner(page);
+  await ask(page, 'Think slowly');
+  await expect(page.getByRole('status').filter({ hasText: 'Pepper is thinking…' })).toBeVisible();
+  await page.getByRole('button', { name: 'Stop' }).click();
+  await expect(log(page).getByText('stopped', { exact: false }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Send' })).toBeVisible();
+
+  // Leaving mid-turn cancels it: the conversation is free again well before the 8 s the
+  // scripted model would think (a turn still running answers 409 turn_in_progress).
+  await ask(page, 'Think slowly');
+  await expect(page.getByRole('button', { name: 'Stop' })).toBeVisible();
+  await page.getByRole('link', { name: 'Calendar' }).first().click();
+  await expect(page).toHaveURL(/\/calendar/);
+  const { conversations } = ConversationsResponseSchema.parse(
+    await (await page.request.get('/v1/chat/conversations')).json(),
+  );
+  const conversationId = conversations[0]?.id ?? null;
+  await expect
+    .poll(
+      async () =>
+        (
+          await page.request.post('/v1/chat/turns', {
+            data: { clientTurnId: crypto.randomUUID(), conversationId, message: 'hello' },
+            headers: { origin: new URL(page.url()).origin },
+          })
+        ).status(),
+      { timeout: 6_000, intervals: [250] },
+    )
+    .toBe(200);
 });
