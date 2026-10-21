@@ -110,6 +110,8 @@ describe('schema foreign keys', () => {
     expect(foreignKeys(aiActionExecutions)).toEqual([
       { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
       { from: ['on_behalf_of_user_id'], to: 'users(id)', onDelete: 'set null' },
+      // S26: whose request it answered.
+      { from: ['requested_by_user_id'], to: 'users(id)', onDelete: 'set null' },
       { from: ['undone_by_user_id'], to: 'users(id)', onDelete: 'set null' },
       {
         from: ['tenant_id', 'proposal_id'],
