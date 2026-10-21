@@ -7,7 +7,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --port 3000",
-    "start": "next start --port 3000",
+    "start": "next start --port 3000 --keepAliveTimeout 65000",
     "typecheck": "next typegen && tsc -p tsconfig.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"

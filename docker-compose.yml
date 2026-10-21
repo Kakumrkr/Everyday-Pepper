@@ -126,6 +126,9 @@ services:
     image: pepper-web:dev
     environment:
       API_INTERNAL_URL: http://api:4000
+      # Idle connections stay open longer than clients and proxies reuse them (Node's default
+      # 5 s races a reused socket: ECONNRESET, seen in S26's Playwright runs).
+      KEEP_ALIVE_TIMEOUT: '65000'
     ports: ['127.0.0.1:3000:3000']
     depends_on:
       api: { condition: service_healthy }

@@ -14,7 +14,7 @@ import {
   StaffMemberSchema,
   toZoned,
 } from '@pepper/contracts';
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect as baseExpect, test, type Locator, type Page } from '@playwright/test';
 import {
   anotherPerson,
   callApi,
@@ -31,6 +31,10 @@ import {
 // Undo; "ask" vs "do it and tell me"; a staff member refused, and their proposal approved by
 // the owner showing as their receipt; a stale approval; the model down; a dropped stream
 // resumed; and axe on the chat and the Autonomy page.
+
+// A turn may take up to its 20 s limit (ADR-0030): assertions on what it shows wait that long,
+// so a slow CI runner is never a failure (CLAUDE.md: generous limits, no retries).
+const expect = baseExpect.configure({ timeout: 20_000 });
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);

@@ -2,6 +2,23 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.22 — 2026-10-21
+- S26 (Phase 6e): [ADR-0031](../adr/0031-chat-screen-cards-why-undo-and-autonomy-settings.md) (pre-approved by the user at the S26 Session Brief). **The AI in the members' hands:**
+  - the chat screen (`/chat`): streamed plain text, resume with `Last-Event-ID`, Stop and cancel on leaving, suggestion chips, the AI off/paused/fallback states;
+  - cards in `@pepper/ui` shared with the future feed (change/confirmation/receipt, slot picker, client choice, booking, day, plan), the *Why?* sheet, Undo with its window and "the client was already emailed";
+  - the Autonomy page (`/autonomy`) and Home's "Needs your OK" and "Done for you".
+
+  **Decisions (user):** migration 0036 recorded in ADR-0031 as an ADR-0028 amendment without a PCR; staff may undo what a lead approved for them; jsdom, Testing Library and axe-core as dev-only test dependencies; managers change autonomy (ADR-0028 over the prototype's copy); the chat's Redis polling stays until Phase 11.
+
+  **Additive changes:**
+  - contracts `ai-views.ts` (proposal and receipt views, *Why?*, approve and undo answers, chat status), an optional `summary` on change cards, five error codes;
+  - db migration 0036 (`ai_action_proposals.tool_version`; `ai_action_executions.requested_by_user_id` and `summary`, the staff scope widened to the requester), core `ownMessageText`, `memberFirstNames`, `actionMessages`, `getActionOfProposal`;
+  - ai `approvalRefusal`, `shownPreview`, `ToolDeps.requester`;
+  - api `/v1/ai/*`, `/v1/autonomy`, `/v1/chat/status`, `AI_SCRIPTED_PROVIDER=e2e` (refused outside CI or local development, and next to a key).
+
+  **Amended:** ADR-0028 (tool version, requester, who may undo) and ADR-0029 (`ToolDeps.requester`). **Hardened:** `ScreenLinkSchema` refuses `//host`; a lint rule bans raw HTML and Markdown rendering. **Fixed:** a lead approving a staff member's "remind me"/"book me" made "me" the lead; resumed turns whose event log expired lost their cards.
+- [PCR-004](changes/PCR-004.md) (approved by the user): **S26b** before S27 adds four tools: `find_client_bookings`, `list_todos`, `complete_todo`, `unblock_time`. No change to phases, scope or exit criteria; S27's eval budget grows by about $0.20.
+
 ## 0.21 — 2026-10-21
 - S25 (Phase 6d): [ADR-0030](../adr/0030-agent-loop-and-conversations.md) (pre-approved by the user at the S25 Session Brief). **The agent loop and chat:**
   - a transport-agnostic `Turn` in `@pepper/ai` (`startTurn`, `recoverTurn`): cache-friendly context, history trimmed by whole turns with untrusted labels kept, routing, limits (6 steps, 20 s, 5 writes, `turn_limit`), parallel reads and serial writes through `dispatchToolCall` only, a circuit breaker and a deterministic fallback;
