@@ -5,7 +5,7 @@ import {
   type ServiceId,
   type ServiceInput,
 } from '@pepper/contracts';
-import { requirePermission, type Actor } from '@pepper/core';
+import { auditActorOf, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
   insertService,
@@ -39,7 +39,7 @@ export async function createService(
   return withTenant(db, actor.context.tenantId, async (tx) => {
     const row = await insertService(tx, fields);
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'service.created',
         entity: { type: 'service', id: row.id },
@@ -70,7 +70,7 @@ export async function updateService(
     const [before, after] = [serviceAuditValues(current), serviceAuditValues(row)];
     if (!sameValues(before, after)) {
       await appendAuditEntry(tx, {
-        actor: { kind: 'user', userId: actor.context.userId },
+        actor: auditActorOf(actor),
         change: { action: 'service.updated', entity: { type: 'service', id }, before, after },
         requestId: actor.requestId,
       });

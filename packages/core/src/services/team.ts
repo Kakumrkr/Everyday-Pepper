@@ -20,7 +20,7 @@ import {
   type TenantMember,
   type TenantTx,
 } from '@pepper/db';
-import { requirePermission, type Actor } from '../actor.js';
+import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { ForbiddenError, LastOwnerError, MemberNotFoundError } from '../errors.js';
 import { decideMembershipChange, type MembershipChange } from '../membership-rules.js';
 
@@ -51,7 +51,7 @@ export async function changeMemberRole(
     if (current.role !== newRole) {
       await updateMembershipRole(tx, target, newRole);
       await appendAuditEntry(tx, {
-        actor: { kind: 'user', userId: actor.context.userId },
+        actor: auditActorOf(actor),
         change: {
           action: 'membership.role_changed',
           entity: { type: 'membership', id: current.id },
@@ -83,7 +83,7 @@ export async function removeMember(
     const current = await authorise(tx, actor, target, { kind: 'remove' });
     await deleteMembership(tx, target);
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'membership.removed',
         entity: { type: 'membership', id: current.id },

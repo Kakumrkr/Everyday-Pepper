@@ -23,7 +23,7 @@ import {
   type ClientRow,
   type Database,
 } from '@pepper/db';
-import { requirePermission, type Actor } from '../actor.js';
+import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { ClientNotFoundError } from '../errors.js';
 
 // The business's clients (ADR-0017). `clients.read` reaches every client for owners and
@@ -86,7 +86,7 @@ export async function createClient(
   return withMember(db, actor.context, async (tx) => {
     const row = await insertClient(tx, { ...fields, source });
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'client.created',
         entity: { type: 'client', id: row.id },
@@ -122,7 +122,7 @@ export async function updateClient(
     // The row was just found in this transaction, and only owners and managers write clients.
     if (row === undefined) throw new ClientNotFoundError();
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'client.updated',
         entity: { type: 'client', id },

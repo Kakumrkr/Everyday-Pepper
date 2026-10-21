@@ -6,7 +6,7 @@ import {
   type StaffMemberId,
   type StaffMemberInput,
 } from '@pepper/contracts';
-import { MemberNotFoundError, requirePermission, type Actor } from '@pepper/core';
+import { auditActorOf, MemberNotFoundError, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
   findMembership,
@@ -54,7 +54,7 @@ export async function createStaffMember(
     await replaceStaffServices(tx, id, fields.serviceIds);
     const created = await reread(tx, id);
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'staff_member.created',
         entity: { type: 'staff_member', id },
@@ -86,7 +86,7 @@ export async function updateStaffMember(
     const [before, after] = [staffAuditValues(current), staffAuditValues(updated)];
     if (!sameValues(before, after)) {
       await appendAuditEntry(tx, {
-        actor: { kind: 'user', userId: actor.context.userId },
+        actor: auditActorOf(actor),
         change: {
           action: 'staff_member.updated',
           entity: { type: 'staff_member', id },

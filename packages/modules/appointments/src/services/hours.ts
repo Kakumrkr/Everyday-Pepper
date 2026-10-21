@@ -5,7 +5,7 @@ import {
   type WeeklyHours,
   type WeeklyHoursInput,
 } from '@pepper/contracts';
-import { requirePermission, type Actor } from '@pepper/core';
+import { auditActorOf, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
   findStaffMember,
@@ -54,7 +54,7 @@ export async function replaceWorkingHours(
     const after = minutesToHours(await listWorkingHours(tx, id));
     if (!sameValues(before, after)) {
       await appendAuditEntry(tx, {
-        actor: { kind: 'user', userId: actor.context.userId },
+        actor: auditActorOf(actor),
         change: {
           action: 'working_hours.replaced',
           entity: { type: 'staff_member', id },

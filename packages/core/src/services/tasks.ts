@@ -31,7 +31,7 @@ import {
   type TaskUpdate,
   type TenantTx,
 } from '@pepper/db';
-import { requirePermission, type Actor } from '../actor.js';
+import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
 import { TaskAssigneeNotMemberError, TaskNotFoundError } from '../errors.js';
 import { taskDuePush } from '../task-pushes.js';
@@ -76,7 +76,7 @@ export async function createTask(db: Database, actor: Actor, input: TaskInput): 
       createdBy: actor.context.userId,
     });
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'task.created',
         entity: { type: 'task', id: row.id },
@@ -128,7 +128,7 @@ export async function changeTask(
     // staff member handing their task to someone else) is refused by the database instead.
     if (updated === undefined) throw new TaskNotFoundError();
     await appendAuditEntry(tx, {
-      actor: { kind: 'user', userId: actor.context.userId },
+      actor: auditActorOf(actor),
       change: {
         action: 'task.updated',
         entity: { type: 'task', id: row.id },

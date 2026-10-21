@@ -232,6 +232,24 @@ export const AutonomyReasonSchema = z.enum([
 ]);
 export type AutonomyReason = z.infer<typeof AutonomyReasonSchema>;
 
+/**
+ * What the domain knows about one tool call, for `decideAutonomy`: the dial actions it involves
+ * (a move that emails the client is `booking.move` and `message.confirmation`; none for a
+ * read), the tier the tool declares (the actions' own tiers apply if stricter), the clients a
+ * message would reach as its preview counted them, whether the turn read untrusted text (a
+ * client's note, a booking-page message), and whether it changes the autonomy settings.
+ */
+export const AutonomyRequestSchema = z
+  .object({
+    actions: z.array(AutonomyActionSchema).max(AutonomyActionSchema.options.length),
+    tier: RiskTierSchema,
+    recipients: z.number().int().min(0),
+    untrustedContext: z.boolean(),
+    changesAutonomy: z.boolean().optional(),
+  })
+  .strict();
+export type AutonomyRequest = z.input<typeof AutonomyRequestSchema>;
+
 export const AutonomyDecisionSchema = z
   .object({ outcome: AutonomyOutcomeSchema, reason: AutonomyReasonSchema })
   .strict();
