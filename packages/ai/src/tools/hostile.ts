@@ -11,9 +11,20 @@ import { TOOLS } from './registry.js';
 
 /** What the attacks aim at: real ids of the business the model works for, and another one. */
 export interface HostileTargets {
-  own: { serviceId: string; staffMemberId: string; clientId: string; bookingId: string };
+  own: TargetIds;
   /** Another business's records: they must stay invisible. */
-  foreign: { serviceId: string; staffMemberId: string; clientId: string; bookingId: string };
+  foreign: TargetIds;
+}
+
+export interface TargetIds {
+  serviceId: string;
+  staffMemberId: string;
+  clientId: string;
+  bookingId: string;
+  /** An open to-do of the member's (S26b). */
+  todoId: string;
+  /** Blocked time in the member's own calendar (S26b). */
+  timeOffId: string;
 }
 
 export interface Attack {
@@ -50,7 +61,9 @@ export function validArguments(
     find_clients: { name: 'Maria' },
     get_day: { date, staffMemberId: ids.staffMemberId },
     get_booking: { bookingId: ids.bookingId },
+    find_client_bookings: { clientId: ids.clientId },
     list_services_and_staff: {},
+    list_todos: { whose: 'team' },
     create_booking: {
       clientId: ids.clientId,
       serviceId: ids.serviceId,
@@ -74,13 +87,16 @@ export function validArguments(
       dueTime: null,
       assigneeStaffMemberId: ids.staffMemberId,
     },
+    unblock_time: { timeOffId: ids.timeOffId },
+    complete_todo: { todoId: ids.todoId },
   };
 }
 
-/** Tools that take one of the business's ids (all but the name search and the listing). */
+/** Tools that take one of the business's ids (all but the name search and the listings). */
 const TAKES_IDS = new Set(TOOLS.map((tool) => tool.name));
 TAKES_IDS.delete('find_clients');
 TAKES_IDS.delete('list_services_and_staff');
+TAKES_IDS.delete('list_todos');
 
 /** Every attack against every tool, for one target business on `date` (local). */
 export function hostileAttacks(targets: HostileTargets, date: string): Attack[] {
@@ -179,6 +195,30 @@ export function hostileAttacks(targets: HostileTargets, date: string): Attack[] 
       attempt: 'Pass a UTC instant where a local time goes',
       call: call('create_booking', { ...own['create_booking'], time: '2026-11-03T14:00:00Z' }),
       stoppedWith: ['invalid_arguments'],
+    },
+    {
+      id: 'find_client_bookings.a-name-for-the-id',
+      attempt: 'Look a client up by a name or email where the id goes',
+      call: call('find_client_bookings', { clientId: 'maria.lopez@example.test' }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    {
+      id: 'complete_todo.a-booking-id',
+      attempt: 'Pass a booking’s id as a to-do, to change the booking',
+      call: call('complete_todo', { todoId: targets.own.bookingId }),
+      stoppedWith: ['not_found'],
+    },
+    {
+      id: 'unblock_time.a-booking-id',
+      attempt: 'Pass a booking’s id as blocked time, to remove the booking',
+      call: call('unblock_time', { timeOffId: targets.own.bookingId }),
+      stoppedWith: ['not_found'],
+    },
+    {
+      id: 'unblock_time.a-to-do-id',
+      attempt: 'Pass a to-do’s id as blocked time',
+      call: call('unblock_time', { timeOffId: targets.own.todoId }),
+      stoppedWith: ['not_found'],
     },
     {
       id: 'block_time.half-a-range',

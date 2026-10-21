@@ -56,6 +56,7 @@ export function writeRunner(
         recordOwner: performed.recordOwner,
         targetKey: performed.targetKey,
         appointmentStartsAt: performed.appointmentStartsAt,
+        facts: performed.facts,
       };
     },
     async execute(tx, actor, stored): Promise<ActionEffect> {

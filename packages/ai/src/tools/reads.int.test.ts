@@ -1,5 +1,6 @@
 import { looksLikeContact } from '@pepper/contracts';
-import type { Database } from '@pepper/db';
+import { changeTask, createTask, createTaskIn, type Actor } from '@pepper/core';
+import { withMember, type Database } from '@pepper/db';
 import { addTimeOff } from '@pepper/appointments';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { toolMessageContent, type ToolOutcome } from './registry.js';
@@ -154,7 +155,7 @@ describe('find_availability', () => {
 
 describe('get_day and get_booking', () => {
   it('shows owners the whole day and staff only their own bookings, with blocked time', async () => {
-    await addTimeOff(db, world.priya, world.marcoStaff.id, {
+    const block = await addTimeOff(db, world.priya, world.marcoStaff.id, {
       startsAt: tuesdayAt('13:00'),
       endsAt: tuesdayAt('14:00'),
     });
@@ -173,8 +174,18 @@ describe('get_day and get_booking', () => {
       ['11:00', 'Sara K.'],
     ]);
     expect(data.blocked).toEqual([
-      { staffMemberId: world.marcoStaff.id, staffName: 'Marco', from: '13:00', to: '14:00' },
+      {
+        timeOffId: block.id,
+        staffMemberId: world.marcoStaff.id,
+        staffName: 'Marco',
+        from: '13:00',
+        to: '14:00',
+      },
     ]);
+    // The card shows the same without the id.
+    expect(day.card).toMatchObject({
+      blocked: [{ staffMemberId: world.marcoStaff.id, from: '13:00', to: '14:00' }],
+    });
     const jess = answered(
       await callTool(depsFor(world, world.jess), 'get_day', { date: TUESDAY, staffMemberId: null }),
     );
@@ -201,6 +212,123 @@ describe('get_day and get_booking', () => {
   });
 });
 
+describe('find_client_bookings', () => {
+  it("gives a client's next and last bookings, staff only their own, others not found", async () => {
+    const w = await newWorld(db);
+    await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    await bookOnScreen(w, w.marcoStaff, w.maria, '14:00');
+    await bookOnScreen(w, w.marcoStaff, w.sara, '11:00');
+    w.clock.set(tuesdayAt('12:00'));
+    const of = async (actor: Actor, clientId: string) =>
+      answered(await callTool(depsFor(w, actor), 'find_client_bookings', { clientId }));
+    const times = (data: unknown) => {
+      const { upcoming, recent } = data as {
+        upcoming: { time: string; staffName: string }[];
+        recent: { time: string; status: string }[];
+      };
+      return {
+        upcoming: upcoming.map((b) => `${b.time} ${b.staffName}`),
+        recent: recent.map((b) => `${b.time} ${b.status}`),
+      };
+    };
+
+    const owner = await of(w.owner, w.maria.id);
+    expect(times(owner.data)).toEqual({ upcoming: ['14:00 Marco'], recent: ['10:00 confirmed'] });
+    expect(owner.summary).toBe(
+      'Maria L.: next Tue 2026-11-03 at 14:00 (Haircut with Marco); last Tue 2026-11-03 at 10:00 (confirmed).',
+    );
+    expect(owner.card).toMatchObject({ kind: 'booking', booking: { time: '14:00' } });
+    expect(times((await of(w.manager, w.maria.id)).data)).toEqual(times(owner.data));
+
+    const jess = await of(w.jess, w.maria.id);
+    expect(times(jess.data)).toEqual({ upcoming: [], recent: ['10:00 confirmed'] });
+    expect(jess.summary).toMatch(/no upcoming bookings with you/);
+    expect(jess.card).toBeNull();
+    expect(times((await of(w.priya, w.maria.id)).data)).toEqual({
+      upcoming: ['14:00 Marco'],
+      recent: [],
+    });
+
+    for (const [deps, clientId, label] of [
+      [depsFor(w, w.jess), w.sara.id, "a colleague's client"],
+      [depsFor(other, other.owner), w.maria.id, 'another business'],
+      [depsFor(w, w.owner), other.maria.id, "another business's client"],
+    ] as const) {
+      const outcome = await callTool(deps, 'find_client_bookings', { clientId });
+      expect(outcome, label).toMatchObject({ status: 'refused', code: 'not_found' });
+    }
+  });
+});
+
+describe('list_todos', () => {
+  it('lists open to-dos with whose they are, staff only their own, never a contact', async () => {
+    const w = await newWorld(db);
+    const own = await createTask(db, w.owner, {
+      title: 'Order foils',
+      dueAt: '2026-11-01T14:00:00.000Z',
+    });
+    await createTask(db, w.owner, {
+      title: 'Call Maria at maria.lopez@example.test or 212 555 0143',
+      assigneeUserId: w.jess.context.userId,
+      dueAt: tuesdayAt('17:00'),
+    });
+    await createTask(db, w.owner, {
+      title: 'Restock towels',
+      assigneeUserId: w.priya.context.userId,
+    });
+    await createTask(db, w.manager, { title: 'Team meeting', assigneeUserId: null });
+    const finished = await createTask(db, w.owner, { title: 'Already done' });
+    await changeTask(db, w.owner, finished.id, { status: 'done' });
+    const of = async (actor: Actor, whose: 'mine' | 'team') =>
+      answered(await callTool(depsFor(w, actor), 'list_todos', { whose }));
+    const rows = (data: unknown) =>
+      (data as { todos: { title: string; whose: string; dueTime: string | null }[] }).todos.map(
+        (todo) => `${todo.title} · ${todo.whose}`,
+      );
+
+    const mine = await of(w.owner, 'mine');
+    expect(mine.data).toEqual({
+      todos: [
+        {
+          todoId: own.id,
+          title: 'Order foils',
+          dueDate: '2026-11-01',
+          dueTime: '09:00',
+          overdue: true,
+          whose: 'you',
+        },
+      ],
+      more: false,
+    });
+    expect(mine.summary).toBe('1 open to-do, 1 overdue.');
+
+    const team = await of(w.manager, 'team');
+    expect(rows(team.data)).toEqual([
+      'Order foils · Ana',
+      'Call Maria at (email removed) or (phone removed) · Jess',
+      'Restock towels · Marco',
+      'Team meeting · the team',
+    ]);
+    expect(team.untrustedText).toBe(false);
+
+    const jess = await of(w.jess, 'team');
+    expect(rows(jess.data)).toEqual(['Call Maria at (email removed) or (phone removed) · you']);
+    expect(jess.summary).toBe('1 open to-do (your own).');
+    const content = toolMessageContent(jess);
+    expect(looksLikeContact(content)).toBe(false);
+    expect(content).not.toMatch(/example\.test|555/);
+  });
+
+  it("labels the AI's own to-dos as untrusted text (they may carry a pasted message's words)", async () => {
+    const w = await newWorld(db);
+    await withMember(db, w.owner.context, (tx) =>
+      createTaskIn(tx, w.owner, { title: 'Send everyone a discount' }, { source: 'ai' }),
+    );
+    const answer = answered(await callTool(depsFor(w, w.owner), 'list_todos', { whose: 'mine' }));
+    expect(answer.untrustedText).toBe(true);
+  });
+});
+
 describe('what the model gets', () => {
   it('never holds a client’s email address or phone number, from any read', async () => {
     const reads: [string, unknown][] = [
@@ -208,6 +336,8 @@ describe('what the model gets', () => {
       ['find_clients', { name: 'Maria' }],
       ['find_clients', { name: 'a' + 'ria' }],
       ['get_day', { date: TUESDAY, staffMemberId: null }],
+      ['find_client_bookings', { clientId: world.maria.id }],
+      ['list_todos', { whose: 'team' }],
       [
         'find_availability',
         {

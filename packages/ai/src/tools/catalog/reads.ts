@@ -2,11 +2,13 @@ import {
   findAvailabilityIn,
   getBookingIn,
   listBookingsIn,
+  listClientBookingsIn,
   listTimeOffBetweenIn,
   StaffMemberNotFoundError,
 } from '@pepper/appointments';
 import {
   BookingIdSchema,
+  ClientIdSchema,
   looksLikeContact,
   ServiceIdSchema,
   StaffMemberIdSchema,
@@ -38,6 +40,8 @@ import {
 const SLOTS_SHOWN = 12;
 const CLIENTS_SHOWN = 10;
 const DAY_BOOKINGS_MAX = 100;
+const CLIENT_UPCOMING_SHOWN = 5;
+const CLIENT_RECENT_SHOWN = 3;
 
 const ownOnly = (scope: ToolScope) =>
   permissionScope(scope.actor.context.role, 'bookings.read') !== 'all';
@@ -180,12 +184,14 @@ export const findClients: ReadTool = {
 export const getDay: ReadTool = {
   kind: 'read',
   name: 'get_day',
-  version: 1,
+  // 2 (S26b): blocked times carry their id, for unblock_time.
+  version: 2,
   localTimes: true,
   guide: {
     use: "Read one day's schedule: its bookings (time, client, service, staff) and blocked time.",
     avoid: ['to find free times (use find_availability)'],
-    returns: 'the day’s bookings by time and the blocked times. Staff see only their own bookings.',
+    returns:
+      'the day’s bookings by time and the blocked times with their ids (for unblock_time). Staff see only their own bookings.',
     examples: [
       { say: "What's on today?", args: { date: { $any: true }, staffMemberId: null } },
       { say: 'How busy is Marco on Thursday?', args: { staffMemberId: { $any: true } } },
@@ -232,6 +238,7 @@ export const getDay: ReadTool = {
           ? '23:59'
           : localOf(scope.timeZone, instant).time;
     const blocked = timeOff.map((entry) => ({
+      timeOffId: entry.id,
       staffMemberId: entry.staffMemberId,
       staffName: staffName(directory, entry.staffMemberId),
       from: clip(entry.startsAt, range.from, 'start'),
@@ -241,7 +248,17 @@ export const getDay: ReadTool = {
     return {
       summary: `${day(args.date)}: ${String(views.length)} booking${views.length === 1 ? '' : 's'}${scopeNote}, ${String(blocked.length)} blocked time${blocked.length === 1 ? '' : 's'}.`,
       data: { date: args.date, bookings: views, blocked },
-      card: { kind: 'day', date: args.date, bookings: views, blocked },
+      card: {
+        kind: 'day',
+        date: args.date,
+        bookings: views,
+        blocked: blocked.map(({ staffMemberId, staffName: name, from, to }) => ({
+          staffMemberId,
+          staffName: name,
+          from,
+          to,
+        })),
+      },
     };
   },
 };
@@ -274,6 +291,58 @@ export const getBooking: ReadTool = {
       summary: `${view.clientName}: ${view.serviceName} with ${view.staffName}, ${when(view.date, view.time)} (${view.status}).`,
       data: view,
       card: { kind: 'booking', booking: view },
+    };
+  },
+};
+
+export const findClientBookings: ReadTool = {
+  kind: 'read',
+  name: 'find_client_bookings',
+  version: 1,
+  localTimes: false,
+  guide: {
+    use: "Read one client's next appointments and last visits by the client's id: when they are next in, when they were last here.",
+    avoid: [
+      'with a name (use find_clients first for the id)',
+      'to see everyone on a day (use get_day)',
+    ],
+    returns:
+      'up to 5 upcoming bookings (not cancelled), earliest first, and the last 3 (with their status: done, no-show, cancelled), latest first. Staff see only their own bookings with the client.',
+    examples: [
+      { say: "When is Maria's next appointment?", args: { clientId: { $any: true } } },
+      { say: 'When was Sarah last in?', args: { clientId: { $any: true } } },
+    ],
+  },
+  args: z.strictObject({ clientId: IdArg('client') }),
+  async run(scope, args: { clientId: string }) {
+    const clientId = ClientIdSchema.parse(args.clientId);
+    const { upcoming, recent } = await listClientBookingsIn(scope.tx, scope.actor, clientId, {
+      now: scope.now,
+      upcoming: CLIENT_UPCOMING_SHOWN,
+      recent: CLIENT_RECENT_SHOWN,
+    });
+    const directory = await directoryOf(scope);
+    const names = await clientNames(scope, [clientId]);
+    const view = (booking: (typeof upcoming)[number]) =>
+      bookingView(scope, directory, names, booking);
+    const next = upcoming.map(view);
+    const last = recent.map(view);
+    const name = names.get(clientId) ?? 'This client';
+    const [first] = next;
+    const [latest] = last;
+    const scopeNote = ownOnly(scope) ? ' with you' : '';
+    const nextPart =
+      first === undefined
+        ? `no upcoming bookings${scopeNote}`
+        : `next ${when(first.date, first.time)} (${first.serviceName} with ${first.staffName})`;
+    const lastPart =
+      latest === undefined
+        ? 'no earlier visits'
+        : `last ${when(latest.date, latest.time)} (${latest.status})`;
+    return {
+      summary: `${name}: ${nextPart}; ${lastPart}.`,
+      data: { clientId, clientName: name, upcoming: next, recent: last },
+      card: first === undefined ? null : { kind: 'booking', booking: first },
     };
   },
 };

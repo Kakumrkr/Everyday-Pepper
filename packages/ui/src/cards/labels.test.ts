@@ -97,6 +97,42 @@ describe('changeRows', () => {
   });
 });
 
+describe('changeRows for completing a to-do and unblocking time (S26b)', () => {
+  it('shows a completed to-do as open → done, and whose it is', () => {
+    const was = { title: 'Order foils', whose: 'you', dueDate: null, dueTime: null };
+    expect(
+      changeRows('task.create', { ...was, status: 'open' }, { ...was, status: 'done' }),
+    ).toEqual([
+      { label: 'To-do', before: null, after: 'Order foils' },
+      { label: 'For', before: null, after: 'You' },
+      { label: 'Status', before: 'Open', after: 'Done' },
+    ]);
+  });
+
+  it('shows the whole span an unblock frees', () => {
+    const before = {
+      staffMemberId: 's1',
+      staffName: 'Marco',
+      fromDate: '2026-11-03',
+      from: '09:00',
+      toDate: '2026-11-06',
+      to: '17:00',
+    };
+    const after = { staffMemberId: 's1', staffName: 'Marco', blocked: false };
+    expect(changeRows('time.block', before, after)).toEqual([
+      { label: 'Whose', before: null, after: 'Marco' },
+      {
+        label: 'Blocked',
+        before: 'Tue, Nov 3 · 9:00 am – Fri, Nov 6 · 5:00 pm',
+        after: 'Free to book',
+      },
+    ]);
+    expect(
+      changeRows('time.block', { ...before, toDate: '2026-11-03', to: '13:00' }, after)[1],
+    ).toEqual({ label: 'Blocked', before: 'Tue, Nov 3 · 9:00 am–1:00 pm', after: 'Free to book' });
+  });
+});
+
 describe('emailLine', () => {
   const now = at('2026-10-27T14:00:00.000Z');
 
@@ -153,9 +189,41 @@ describe('whyModel (assembled from the record, never model prose)', () => {
     expect(whyModel(why(), 'booking.create', 0)).toEqual({
       started: 'You wrote: “Book Maria Friday at 4”',
       did: ['Looked up the client', 'Made the booking'],
+      checked: [],
       didNot: ['I didn’t change anything until someone said OK.', 'I didn’t email the client.'],
       setting: 'Create a booking: Ask me',
     });
+  });
+
+  it('says what the domain checked, from the facts it recorded (S26b), skipping unknown ones', () => {
+    const facts = [
+      { kind: 'slot_was_free', value: { date: '2026-10-30', time: '16:00', staffName: 'Jess' } },
+      { kind: 'staff_chosen', value: { staffName: 'Jess' } },
+      { kind: 'not_started', value: { date: '2026-10-30', time: '16:00' } },
+      { kind: 'bookings_inside', value: { count: 2 } },
+      { kind: 'bookings_inside', value: { count: 1 } },
+      { kind: 'bookings_inside', value: { count: 0 } },
+      { kind: 'bookings_untouched', value: null },
+      { kind: 'reminds', value: { date: '2026-10-30', time: '09:00' } },
+      { kind: 'todo_was_open', value: null },
+      { kind: 'something_new', value: null },
+      { kind: 'slot_was_free', value: { date: 3 } },
+    ];
+    expect(whyModel(why({ facts }), 'booking.create', 1).checked).toEqual([
+      'Jess was free on Fri, Oct 30 · 4:00 pm.',
+      'You didn’t name anyone, so I picked Jess.',
+      'It hadn’t started yet (Fri, Oct 30 · 4:00 pm).',
+      '2 bookings stay inside it; I didn’t move or cancel them.',
+      '1 booking stays inside it; I didn’t move or cancel it.',
+      'No bookings were inside that time.',
+      'Bookings stay as they are; I only removed the block.',
+      'It reminds them Fri, Oct 30 · 9:00 am.',
+      'The to-do was still open.',
+    ]);
+    expect(stepLabel('find_client_bookings')).toBe('Read the client’s bookings');
+    expect(stepLabel('list_todos')).toBe('Read the to-dos');
+    expect(stepLabel('complete_todo')).toBe('Marked the to-do done');
+    expect(stepLabel('unblock_time')).toBe('Removed the blocked time');
   });
 
   it('names each reason the dial gave', () => {

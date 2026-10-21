@@ -30,6 +30,7 @@ import {
   insertBooking,
   insertWaitlistEntry,
   listBookings,
+  listClientBookings,
   listOccupancy,
   listWaitlistEntries,
   lockBooking,
@@ -348,6 +349,38 @@ describe('bookings', () => {
       withTenant(db, b.tenant, (tx) => listBookings(tx, { ...range, clientId }));
     expect((await of(b.client)).map((r) => r.id)).toEqual([maria.id]);
     expect((await of(ClientIdSchema.parse(lee.id))).map((r) => r.id)).toEqual([lees.id]);
+  });
+
+  it("lists a client's bookings either side of a moment, nearest first (S26b)", async () => {
+    const b = await newBusiness();
+    const old = await book(b, booking(b, b.jess, '2026-08-03T14:00:00Z'));
+    const last = await book(b, booking(b, b.marco, '2026-10-30T14:00:00Z'));
+    const next = await book(b, booking(b, b.jess, '2026-11-05T14:00:00Z'));
+    const later = await book(b, booking(b, b.jess, '2027-03-01T15:00:00Z'));
+    const dropped = await book(b, booking(b, b.marco, '2026-11-06T14:00:00Z'));
+    await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, BookingIdSchema.parse(dropped.id), 'cancelled'),
+    );
+    const of = (options: Partial<Parameters<typeof listClientBookings>[1]>) =>
+      withTenant(db, b.tenant, async (tx) =>
+        (
+          await listClientBookings(tx, {
+            clientId: b.client,
+            now: at('2026-11-02T12:00:00Z'),
+            direction: 'after',
+            limit: 5,
+            ...options,
+          })
+        ).map((r) => r.id),
+      );
+    // No window: months either side count.
+    expect(await of({})).toEqual([next.id, dropped.id, later.id]);
+    expect(await of({ excludeCancelled: true })).toEqual([next.id, later.id]);
+    expect(await of({ direction: 'before' })).toEqual([last.id, old.id]);
+    expect(await of({ direction: 'before', limit: 1 })).toEqual([last.id]);
+    expect(await of({ staffMemberId: b.marco })).toEqual([dropped.id]);
+    // An appointment under way has started: it is recent, not upcoming.
+    expect(await of({ now: at('2026-11-05T14:30:00Z') })).toEqual([dropped.id, later.id]);
   });
 
   it('finds and locks by id, and finds by idempotency key', async () => {

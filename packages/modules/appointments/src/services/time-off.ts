@@ -14,6 +14,7 @@ import {
   appendAuditEntry,
   deleteTimeOff,
   findStaffMember,
+  findTimeOff,
   insertTimeOff,
   listStaffMembers,
   listTimeOff as listTimeOffRows,
@@ -130,6 +131,18 @@ export async function removeTimeOffIn(
     },
     requestId: actor.requestId,
   });
+}
+
+/** One time-off entry by its id, in the caller's transaction (S26b); everyone may see it. */
+export async function getTimeOffIn(
+  tx: TenantTx,
+  actor: Actor,
+  timeOffId: TimeOffId,
+): Promise<TimeOff> {
+  requirePermission(actor, 'staff.read');
+  const row = await findTimeOff(tx, TimeOffIdSchema.parse(timeOffId));
+  if (row === undefined) throw new TimeOffNotFoundError();
+  return toTimeOff(row);
 }
 
 /**

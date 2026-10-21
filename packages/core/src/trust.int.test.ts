@@ -575,6 +575,82 @@ describe('previews are dry runs (ADR-0029)', () => {
   });
 });
 
+describe('the facts a preview found (S26b)', () => {
+  // The fake to-do tool, also telling *Why?* how many to-dos the assignee had open.
+  const factsRunner: ActionRunner = {
+    ...todoRunner,
+    async preview(tx, actor, payload) {
+      const shown = await todoRunner.preview(tx, actor, payload);
+      const open = await listTasks(tx, {
+        status: 'open',
+        assigneeUserId: UserIdSchema.parse((payload as unknown as TodoPayload).assignee),
+        limit: 200,
+      });
+      return {
+        ...shown,
+        facts: [{ kind: 'open_todos', ref: null, value: { count: open.length } }],
+      };
+    },
+  };
+  const ask = async (runner: ActionRunner, facts: unknown[] = []) => {
+    await changeAutonomy(db, ana(), { levels: { 'task.create': 'ask' } }, defaults);
+    try {
+      const result = await requestAction(
+        db,
+        jessActor(),
+        runner,
+        {
+          payload: todo(jess),
+          idempotencyKey: turnKey(),
+          explanation: { ...explanation, facts: facts as typeof explanation.facts },
+          untrustedContext: false,
+        },
+        defaults,
+      );
+      if (result.kind !== 'proposed') throw new Error('expected a proposal');
+      return result.proposal;
+    } finally {
+      await changeAutonomy(db, ana(), { levels: { 'task.create': null } }, defaults);
+    }
+  };
+  const count = (facts: readonly { value: unknown }[]) =>
+    (facts[0]?.value as { count?: number } | undefined)?.count;
+
+  it('stores them with the proposal, refreshes them when it is stale, and keeps them on the receipt', async () => {
+    const proposal = await ask(factsRunner);
+    const open = (await tasksOf(jess)).filter((t) => t.status === 'open').length;
+    expect(proposal.explanation.facts).toEqual([
+      { kind: 'open_todos', ref: null, value: { count: open } },
+    ]);
+    await withTenant(db, tenantId, (tx) =>
+      insertTask(tx, {
+        title: 'Sweep',
+        dueAt: null,
+        assigneeUserId: jess,
+        source: 'manual',
+        createdBy: owner,
+      }),
+    );
+    const stale = await approveProposal(db, jessActor(), proposal.id, {
+      shownFingerprint: proposal.fingerprint,
+      runner: factsRunner,
+    });
+    if (stale.kind !== 'stale') throw new Error('expected a stale result');
+    expect(count(stale.proposal.explanation.facts)).toBe(open + 1);
+    const done = await approveProposal(db, jessActor(), stale.proposal.id, {
+      shownFingerprint: stale.proposal.fingerprint,
+      runner: factsRunner,
+    });
+    if (done.kind !== 'executed') throw new Error('expected an execution');
+    expect(count(done.execution.explanation.facts)).toBe(open + 1);
+  });
+
+  it("keeps the request's own facts when the preview has none", async () => {
+    const given = [{ kind: 'asked_for', ref: null, value: 'a call' }];
+    expect((await ask(todoRunner, given)).explanation.facts).toEqual(given);
+  });
+});
+
 describe('approveProposal', () => {
   it('runs exactly what was shown, as the approver, once', async () => {
     const proposal = await propose(jessActor(), jess);

@@ -91,6 +91,30 @@ describe('AiProposalViewSchema and AiActionViewSchema', () => {
   });
 });
 
+describe('the facts *Why?* shows (S26b)', () => {
+  it('carries checked facts as codes with flat values, and never a contact', () => {
+    const facts = [
+      { kind: 'slot_was_free', value: { date: '2026-10-23', time: '17:15', staffName: 'Jess' } },
+      { kind: 'bookings_untouched', value: null },
+    ];
+    expect(AiActionViewSchema.parse({ ...action, why: { ...why, facts } }).why.facts).toEqual(
+      facts,
+    );
+    for (const value of [{ staffName: 'maria@example.com' }, { list: [1, 2] }]) {
+      expect(
+        AiActionViewSchema.safeParse({ ...action, why: { ...why, facts: [{ kind: 'x', value }] } })
+          .success,
+      ).toBe(false);
+    }
+    expect(
+      AiActionViewSchema.safeParse({
+        ...action,
+        why: { ...why, facts: [{ kind: 'Not A Code', value: null }] },
+      }).success,
+    ).toBe(false);
+  });
+});
+
 describe('ApproveProposal', () => {
   it('approves by the fingerprint the card showed, nothing else', () => {
     expect(ApproveProposalRequestSchema.parse({ fingerprint: FINGERPRINT })).toEqual({

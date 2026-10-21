@@ -16,6 +16,7 @@ import {
   ForbiddenError,
   TaskAssigneeNotMemberError,
   TaskNotFoundError,
+  TaskNotOpenError,
   UndoRefusedError,
 } from '@pepper/core';
 import { ZodError } from 'zod';
@@ -99,6 +100,9 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
       code: 'not_changeable',
       message: "The booking's status doesn't allow that change (a cancelled booking is final).",
     };
+  }
+  if (error instanceof TaskNotOpenError) {
+    return { code: 'not_changeable', message: 'That to-do is already done.' };
   }
   if (error instanceof BookingAlreadyStartedError || error instanceof ActionTooLateError) {
     return { code: 'too_late', message: 'The appointment has already started.' };

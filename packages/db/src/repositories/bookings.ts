@@ -13,7 +13,7 @@ import {
   type WaitlistEntryId,
   type WaitlistWindow,
 } from '@pepper/contracts';
-import { and, asc, eq, gt, inArray, lt, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, gte, inArray, lt, ne, or, sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   BookingIdempotencyKeyTakenError,
@@ -214,6 +214,44 @@ export async function listBookings(
     .where(and(...conditions))
     .orderBy(asc(bookings.startsAt), asc(bookings.id));
   return options.limit === undefined ? query : query.limit(options.limit);
+}
+
+/**
+ * One client's bookings either side of `now` (S26b), with no window: those starting at or
+ * after it earliest first (`after`), or those that started before it latest first (`before`);
+ * at most `limit`. Staff see only their own (RLS).
+ */
+export async function listClientBookings(
+  tx: TenantTx,
+  options: {
+    clientId: ClientId;
+    now: Date;
+    direction: 'after' | 'before';
+    limit: number;
+    staffMemberId?: StaffMemberId;
+    excludeCancelled?: boolean;
+  },
+): Promise<BookingRow[]> {
+  const conditions: SQL[] = [
+    eq(bookings.clientId, Id.parse(options.clientId)),
+    options.direction === 'after'
+      ? gte(bookings.startsAt, options.now)
+      : lt(bookings.startsAt, options.now),
+  ];
+  if (options.staffMemberId !== undefined) {
+    conditions.push(eq(bookings.staffMemberId, Id.parse(options.staffMemberId)));
+  }
+  if (options.excludeCancelled === true) conditions.push(ne(bookings.status, 'cancelled'));
+  const order =
+    options.direction === 'after'
+      ? [asc(bookings.startsAt), asc(bookings.id)]
+      : [desc(bookings.startsAt), desc(bookings.id)];
+  return tx
+    .select()
+    .from(bookings)
+    .where(and(...conditions))
+    .orderBy(...order)
+    .limit(z.number().int().min(1).max(50).parse(options.limit));
 }
 
 async function bookingWrite<T>(write: () => Promise<T>): Promise<T> {

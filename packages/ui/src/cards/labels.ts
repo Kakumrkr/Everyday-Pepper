@@ -4,6 +4,7 @@ import {
   ScreenLinkSchema,
   type AiEmailStatus,
   type AiWhy,
+  type AiWhyFact,
   type AutonomyAction,
   type AutonomyLevel,
   type AutonomyOutcome,
@@ -93,6 +94,10 @@ const STEP_LABEL: Record<string, string> = {
   cancel_booking: 'Cancelled the booking',
   block_time: 'Blocked the time',
   add_todo: 'Added the to-do',
+  find_client_bookings: 'Read the client’s bookings',
+  list_todos: 'Read the to-dos',
+  complete_todo: 'Marked the to-do done',
+  unblock_time: 'Removed the blocked time',
 };
 
 /** One step of the *Why?* trace, in words. */
@@ -198,6 +203,11 @@ export function changeRows(
     }
     case 'time.block': {
       add('Whose', null, text(after, 'staffName'));
+      // `unblock_time` (S26b): the block it removes, whole.
+      if (after?.['blocked'] === false) {
+        add('Blocked', blockSpan(before), 'Free to book');
+        return rows;
+      }
       add('When', null, span(after, 'from', 'to'));
       const inside = after?.['bookingsInside'];
       if (typeof inside === 'number' && inside > 0) {
@@ -206,6 +216,18 @@ export function changeRows(
       return rows;
     }
     case 'task.create': {
+      // `complete_todo` (S26b) has a before (`add_todo` doesn't): open → done.
+      if (before !== null) {
+        add('To-do', null, text(after, 'title'));
+        const whose = text(after, 'whose');
+        add('For', null, whose === 'you' ? 'You' : whose);
+        add(
+          'Status',
+          STATUS_LABEL[text(before, 'status') ?? ''] ?? null,
+          STATUS_LABEL[text(after, 'status') ?? ''] ?? null,
+        );
+        return rows;
+      }
       add('To-do', null, text(after, 'title'));
       add('For', null, text(after, 'assigneeName'));
       const dueDate = text(after, 'dueDate');
@@ -224,6 +246,20 @@ export function changeRows(
       // No tool makes these yet (notes: Phase 7, messages: Phase 8); the summary says it all.
       return rows;
   }
+}
+
+const STATUS_LABEL: Record<string, string> = { open: 'Open', done: 'Done' };
+
+/** A block's whole span from `unblock_time`'s before: one day or several. */
+function blockSpan(side: ChangeSide | null): string | null {
+  const fromDate = text(side, 'fromDate');
+  const from = text(side, 'from');
+  const toDate = text(side, 'toDate');
+  const to = text(side, 'to');
+  if (fromDate === null || from === null || toDate === null || to === null) return null;
+  return fromDate === toDate
+    ? `${formatWhen(fromDate, from)}–${formatTime(to)}`
+    : `${formatWhen(fromDate, from)} – ${formatWhen(toDate, to)}`;
 }
 
 /** The client's name a card can show for an email (its sides carry the short name). */
@@ -300,6 +336,8 @@ export function undoLine(undoUntil: string | null, timeZone: string, now: number
 export interface WhyModel {
   started: string;
   did: string[];
+  /** What the domain checked (S26b), in words; empty for older records. */
+  checked: string[];
   didNot: string[];
   setting: string;
 }
@@ -338,9 +376,49 @@ export function whyModel(why: AiWhy, action: AutonomyAction, emails: number): Wh
   return {
     started,
     did: why.steps.map((step) => stepLabel(step.tool)),
+    checked: (why.facts ?? []).flatMap((fact) => {
+      const line = factLine(fact);
+      return line === null ? [] : [line];
+    }),
     didNot,
     setting: settingLine(why.decision.reason, action, why.decision.outcome),
   };
+}
+
+/** One checked fact in words; `null` for a code or value the screens don't know. */
+export function factLine(fact: AiWhyFact): string | null {
+  const value = fact.value;
+  const str = (key: string) => (typeof value?.[key] === 'string' ? value[key] : null);
+  const date = str('date');
+  const time = str('time');
+  const staff = str('staffName');
+  const count = value?.['count'];
+  switch (fact.kind) {
+    case 'slot_was_free':
+      return staff === null || date === null || time === null
+        ? null
+        : `${staff} was free on ${formatWhen(date, time)}.`;
+    case 'staff_chosen':
+      return staff === null ? null : `You didn’t name anyone, so I picked ${staff}.`;
+    case 'not_started':
+      return date === null || time === null
+        ? null
+        : `It hadn’t started yet (${formatWhen(date, time)}).`;
+    case 'bookings_inside':
+      if (typeof count !== 'number') return null;
+      if (count === 0) return 'No bookings were inside that time.';
+      return count === 1
+        ? '1 booking stays inside it; I didn’t move or cancel it.'
+        : `${String(count)} bookings stay inside it; I didn’t move or cancel them.`;
+    case 'bookings_untouched':
+      return 'Bookings stay as they are; I only removed the block.';
+    case 'reminds':
+      return date === null || time === null ? null : `It reminds them ${formatWhen(date, time)}.`;
+    case 'todo_was_open':
+      return 'The to-do was still open.';
+    default:
+      return null;
+  }
 }
 
 function settingLine(

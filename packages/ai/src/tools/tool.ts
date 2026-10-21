@@ -1,5 +1,6 @@
 import type { BookingNotify, TemplateRuleDefaultsOf } from '@pepper/appointments';
 import type {
+  ActionExplanation,
   AutonomyAction,
   ChangeSide,
   ClientId,
@@ -97,6 +98,11 @@ export interface Performed {
   inverse: TrustJson | null;
   /** One sentence for the model and the card, in the business's local time. */
   summary: string;
+  /**
+   * What the domain checked on the way, for *Why?* (S26b): codes with flat values (local dates
+   * and times, display names, counts), never a contact. The wording is the screens'.
+   */
+  facts: ActionExplanation['facts'];
 }
 
 export interface WriteTool<S extends z.ZodType = z.ZodType> {

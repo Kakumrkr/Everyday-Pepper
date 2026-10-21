@@ -15,6 +15,7 @@ import type { Database } from './client.js';
 import { ServiceNameTakenError, StaffMemberLinkTakenError } from './errors.js';
 import {
   deleteTimeOff,
+  findTimeOff,
   findServiceIds,
   findStaffMember,
   findStaffMemberOfUser,
@@ -429,7 +430,17 @@ describe('time off', () => {
       expect((await listTimeOff(tx, other, { from, limit: 10 })).map((t) => t.id)).toEqual([
         ids.otherStaff,
       ]);
+      // Found by its own id alone (S26b), and gone once deleted.
+      expect(await findTimeOff(tx, ids.later)).toMatchObject({
+        id: ids.later,
+        staffMemberId: staff,
+      });
+      expect(await findTimeOff(tx, ids.soon)).toBeUndefined();
     });
+    // Another business's entry is invisible.
+    expect(
+      await withTenant(db, await newTenant(), (tx) => findTimeOff(tx, ids.later)),
+    ).toBeUndefined();
   });
 
   it.each([

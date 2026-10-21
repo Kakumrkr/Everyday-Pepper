@@ -19,7 +19,7 @@ import {
 } from '../tools/hostile.js';
 import { dispatchToolCall, type ToolOutcome } from '../tools/registry.js';
 import {
-  bookOnScreen,
+  hostileTargets,
   newWorld,
   startTestDatabase,
   TUESDAY,
@@ -45,22 +45,7 @@ beforeAll(async () => {
   db = database.app.db;
   world = await newWorld(db);
   other = await newWorld(db);
-  const own = await bookOnScreen(world, world.jessStaff, world.maria, '10:00');
-  const foreign = await bookOnScreen(other, other.jessStaff, other.maria, '10:00');
-  targets = {
-    own: {
-      serviceId: world.haircut.id,
-      staffMemberId: world.jessStaff.id,
-      clientId: world.maria.id,
-      bookingId: own.id,
-    },
-    foreign: {
-      serviceId: other.haircut.id,
-      staffMemberId: other.jessStaff.id,
-      clientId: other.maria.id,
-      bookingId: foreign.id,
-    },
-  };
+  targets = await hostileTargets(world, other);
 });
 
 afterAll(async () => {
@@ -77,7 +62,7 @@ async function snapshot() {
       })
     ).map((b) => [b.id, b.startsAt, b.staffMemberId, b.status]),
     timeOff: await listTimeOff(db, w.owner, w.jessStaff.id, {}, { clock: w.clock }),
-    tasks: (await listTasks(db, w.owner, { status: 'all' })).map((t) => t.id),
+    tasks: (await listTasks(db, w.owner, { status: 'all' })).map((t) => [t.id, t.status, t.title]),
     actions: (await listRecentActions(db, w.owner)).map((a) => a.id),
     proposals: (await listPendingProposals(db, w.owner)).map((p) => p.id),
   });
@@ -188,16 +173,8 @@ describe('injection through untrusted data', () => {
       { askFirst: false, levels: { 'booking.create': 'auto', 'message.confirmation': 'auto' } },
       { templateDefaults: {} },
     );
-    const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
-    const args = validArguments(
-      {
-        serviceId: w.haircut.id,
-        staffMemberId: w.jessStaff.id,
-        clientId: w.maria.id,
-        bookingId: booking.id,
-      },
-      TUESDAY,
-    );
+    const { own } = await hostileTargets(w, await newWorld(db));
+    const args = validArguments(own, TUESDAY);
     const provider = new ScriptedProvider([
       scriptedResponse({
         toolCalls: [

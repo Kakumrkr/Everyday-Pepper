@@ -37,12 +37,14 @@ const SUGGESTIONS: Record<'lead' | 'staff', string[]> = {
     'Find a free time for a haircut this week',
     'Block Jess’s lunch tomorrow 12 to 1',
     'Remind me to call the supplier on Friday',
+    'What’s on my to-do list?',
   ],
   staff: [
     'What does my day look like tomorrow?',
     'When am I free on Friday?',
     'Block my lunch tomorrow 12 to 1',
     'Remind me to restock the towels',
+    'What’s on my to-do list?',
   ],
 };
 

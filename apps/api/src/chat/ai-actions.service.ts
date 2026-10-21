@@ -1,6 +1,7 @@
 import { approvalRefusal, approveToolProposal, shownPreview, undoToolAction } from '@pepper/ai';
 import {
   AiEmailViewSchema,
+  AiWhyFactSchema,
   AUTONOMY_ACTIONS,
   ClientIdSchema,
   type ActionExecution,
@@ -244,6 +245,12 @@ export class AiActionsService {
       steps: explanation.steps.map((step) => ({ tool: step.tool })),
       decision: explanation.decision,
       untrustedContext: explanation.untrustedContext,
+      // What the domain checked (S26b): only flat, contact-free facts; any other is left out
+      // rather than failing the whole view.
+      facts: explanation.facts.flatMap((fact) => {
+        const shown = AiWhyFactSchema.safeParse({ kind: fact.kind, value: fact.value });
+        return shown.success ? [shown.data] : [];
+      }),
     };
   }
 

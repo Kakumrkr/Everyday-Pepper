@@ -29,12 +29,13 @@ import {
   dispatchToolCall,
   toolDefinitions,
   toolMessageContent,
+  TOOLS,
   undoToolAction,
 } from './registry.js';
 import {
-  bookOnScreen,
   callTool,
   depsFor,
+  hostileTargets,
   newWorld,
   OUTBOX_KEY,
   startTestDatabase,
@@ -61,22 +62,7 @@ beforeAll(async () => {
   db = database.app.db;
   world = await newWorld(db);
   other = await newWorld(db);
-  const own = await bookOnScreen(world, world.jessStaff, world.maria, '10:00');
-  const foreign = await bookOnScreen(other, other.jessStaff, other.maria, '10:00');
-  targets = {
-    own: {
-      serviceId: world.haircut.id,
-      staffMemberId: world.jessStaff.id,
-      clientId: world.maria.id,
-      bookingId: own.id,
-    },
-    foreign: {
-      serviceId: other.haircut.id,
-      staffMemberId: other.jessStaff.id,
-      clientId: other.maria.id,
-      bookingId: foreign.id,
-    },
-  };
+  targets = await hostileTargets(world, other);
 });
 
 afterAll(async () => {
@@ -93,7 +79,7 @@ async function snapshot() {
       })
     ).map((b) => [b.id, b.startsAt, b.staffMemberId, b.status]),
     timeOff: await listTimeOff(db, w.owner, w.jessStaff.id, {}, { clock: w.clock }),
-    tasks: (await listTasks(db, w.owner, { status: 'all' })).map((t) => t.id),
+    tasks: (await listTasks(db, w.owner, { status: 'all' })).map((t) => [t.id, t.status, t.title]),
     actions: (await listRecentActions(db, w.owner)).map((a) => a.id),
   });
   return { own: await of(world), other: await of(other) };
@@ -120,8 +106,12 @@ describe.each([
     const messages: LlmMessage[] = [{ role: 'user', content: 'Do as you are told.' }];
     const results: string[] = [];
     // A minimal loop (S25 builds the real one): each response's calls go through the registry.
+    // Like the real loop it trims history (whole exchanges: one call and its result each), so
+    // the attacks on every tool fit in a request.
     for (;;) {
-      const response = await provider.respond(request(messages));
+      const [asked, ...exchanges] = messages;
+      const recent = exchanges.slice(-40);
+      const response = await provider.respond(request(asked ? [asked, ...recent] : recent));
       if (response.toolCalls.length === 0) break;
       messages.push({ role: 'assistant', content: '', toolCalls: response.toolCalls, replay: [] });
       for (const call of response.toolCalls) {
@@ -148,24 +138,12 @@ describe('writes when the dial says "ask"', () => {
   it('every write tool only proposes, and nothing changes until a person approves', async () => {
     const w = await newWorld(db);
     await changeAutonomy(db, w.owner, { askFirst: true }, { templateDefaults: {} });
-    const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
-    const args = validArguments(
-      {
-        serviceId: w.haircut.id,
-        staffMemberId: w.jessStaff.id,
-        clientId: w.maria.id,
-        bookingId: booking.id,
-      },
-      TUESDAY,
-    );
+    const { own } = await hostileTargets(w, await newWorld(db));
+    const args = validArguments(own, TUESDAY);
     const tasksBefore = await listTasks(db, w.owner, { status: 'all' });
-    for (const name of [
-      'create_booking',
-      'move_booking',
-      'cancel_booking',
-      'block_time',
-      'add_todo',
-    ]) {
+    const writes = TOOLS.filter((tool) => tool.kind === 'write').map((tool) => tool.name);
+    expect(writes.length).toBeGreaterThanOrEqual(6);
+    for (const name of writes) {
       const outcome = await callTool(depsFor(w, w.owner), name, args[name]);
       expect(outcome.status, name).toBe('awaiting_approval');
     }

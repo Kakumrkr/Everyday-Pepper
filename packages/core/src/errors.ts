@@ -91,6 +91,14 @@ export class TaskNotFoundError extends Error {
   }
 }
 
+/** The task is already done: there is nothing to complete (S26b). */
+export class TaskNotOpenError extends Error {
+  constructor() {
+    super('This task is already done');
+    this.name = 'TaskNotOpenError';
+  }
+}
+
 /** A task can only be given to a member of the business. */
 export class TaskAssigneeNotMemberError extends Error {
   constructor() {
