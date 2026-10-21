@@ -9,6 +9,12 @@ export interface DatabaseOptions {
   /** The services' login role (`DATABASE_URL`), never the migration role. Carries credentials. */
   url: string;
   maxConnections?: number;
+  /**
+   * How long to wait for a free pooled connection (default 2 s, so an overloaded service fails
+   * fast). Test pools that queue many transactions on few connections while every suite runs
+   * at once set it higher.
+   */
+  connectionTimeoutMs?: number;
   /** Called when an idle pooled connection fails, so it is logged instead of crashing. */
   onIdleError?: (error: Error) => void;
   /** Called before every statement (query budgets in tests, per-turn metrics); no text given. */
@@ -27,7 +33,7 @@ export function createDatabase(options: DatabaseOptions): DatabaseHandle {
   const pool = new pg.Pool({
     connectionString: options.url,
     max: options.maxConnections ?? 10,
-    connectionTimeoutMillis: 2_000,
+    connectionTimeoutMillis: options.connectionTimeoutMs ?? 2_000,
     idleTimeoutMillis: 10_000,
   });
   pool.on('error', (error) => options.onIdleError?.(error));

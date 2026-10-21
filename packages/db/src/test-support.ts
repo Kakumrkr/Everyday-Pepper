@@ -25,7 +25,12 @@ export async function startTestDatabase(
   const postgres = await startPostgres();
   const appUrl = postgresUrlAs(postgres.url, APP_LOGIN, 'service-test-password');
   await prepareDatabase(postgres.url, appUrl);
-  const app = createDatabase({ url: appUrl, maxConnections: options.maxConnections ?? 4 });
+  const app = createDatabase({
+    url: appUrl,
+    maxConnections: options.maxConnections ?? 4,
+    // Generous: tests queue many transactions on a few connections while CI runs every suite.
+    connectionTimeoutMs: 30_000,
+  });
   return {
     migrationUrl: postgres.url,
     appUrl,

@@ -178,3 +178,21 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - approve and undo take ids;
   - a racing copy of a call retries once;
   - per-tool budgets gate statement counts and the p95 at 3× 300 ms.
+- **S25 Session Brief (user, 2026-10-21):** "Go ahead with your recommendations, ADR is fine":
+  - conversations are own-only for every role, owners included;
+  - conversations are deleted 90 days after the last message;
+  - a business's AI allowance is 5M tokens a month (`AI_MONTHLY_TOKENS`), soft at 80%;
+  - a turn keeps running when the connection drops; only an explicit stop cancels it;
+  - ADR-0030 records the amendments to ADR-0027 (eval worlds, `expect.actions`, no per-case tools) and ADR-0029 (step in the idempotency key, untrusted reads) without a separate PCR.
+
+  The user also said: "I'm pre approving the ADR. You have to raise PR and merge to main and at end give a perfect prompt to start the next new session."
+- **S25 defaults (Claude, in ADR-0030, pre-approved by the user):**
+  - layout: static instructions + tools → template fragments → business and member → the turn's clock → history (whole turns, ~6,000 tokens, ≤ 10 turns);
+  - untrusted text JSON-wrapped and labelled every time; answers written after it tainted; member messages redacted of contacts;
+  - limits: 6 steps, 20 s, 15 s per call, 5 writes and 8 calls per answer (`turn_limit`); reads in parallel (4), writes one at a time;
+  - routing: strong after step 3 or 2 invalid calls, never past the soft budget; one retry; breaker 3 failures → 30 s;
+  - rate limits: 20 turns / 5 min per member, 300 / hour per business, 60 / 5 min per address, failing closed;
+  - the model's tool calls are recorded before they run; recovery reads the trust layer's records and never re-runs a tool;
+  - SSE events in a Redis stream kept 1 h; resume with `Last-Event-ID`; cancel through Redis;
+  - spans after the GenAI conventions, no contents; cache key and safety id are hashes;
+  - eval cases run through the loop in seeded worlds with placeholders in cassettes.

@@ -1,6 +1,6 @@
 # ADR-0030: The agent loop, conversations, budgets and chat over SSE
 
-- **Status:** Proposed (drafted by Claude in S25). The user pre-approved this ADR at the S25 Session Brief ("Go ahead with your recommendations, ADR is fine … I'm pre approving the ADR"). The user chose, at that brief:
+- **Status:** Accepted (user, 2026-10-21: pre-approved at the S25 Session Brief; drafted by Claude in S25). The user said "Go ahead with your recommendations, ADR is fine … I'm pre approving the ADR", and chose at that brief:
   - conversations are **own-only for every role** (owners included);
   - conversations are deleted **90 days after the last message**;
   - a business's AI allowance is **5M tokens a month**, soft at 80%;

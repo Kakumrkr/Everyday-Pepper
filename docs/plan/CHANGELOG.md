@@ -2,6 +2,17 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.21 — 2026-10-21
+- S25 (Phase 6d): [ADR-0030](../adr/0030-agent-loop-and-conversations.md) (pre-approved by the user at the S25 Session Brief). **The agent loop and chat:**
+  - a transport-agnostic `Turn` in `@pepper/ai` (`startTurn`, `recoverTurn`): cache-friendly context, history trimmed by whole turns with untrusted labels kept, routing, limits (6 steps, 20 s, 5 writes, `turn_limit`), parallel reads and serial writes through `dispatchToolCall` only, a circuit breaker and a deterministic fallback;
+  - conversations (tables `conversations`, `conversation_turns`, `conversation_messages`, migrations 0034–0035): own-only for every role, 90-day retention in the daily clean-up;
+  - a per-business monthly token budget reserved atomically before every model call (`AI_MONTHLY_TOKENS`, default 5M, soft 80%) and Redis rate limits per member, business and address;
+  - `POST /v1/chat/turns` streaming typed SSE events, resumable with `Last-Event-ID`, cancel and history endpoints; OpenTelemetry spans without contents.
+
+  **Decisions (user):** own-only conversations, 90-day retention, 5M tokens a month, turns keep running when the connection drops, and the amendments below recorded in ADR-0030 without a PCR. **D8 decided: SSE.**
+
+  **Additive changes:** contracts `chat.ts`, permission `ai.chat` (every role, own scope), error codes `turn_in_progress` and `conversation_not_found`, tool error code `turn_limit`, `redactContacts`; core conversation services, `reserveLlmTokens`, `findToolCallResult`, `CleanupResult.conversations`; db `reserveUsage`/`settleUsage`, `insertSeedUser`; `@pepper/ai/config` entry point; `@opentelemetry/api` in `@pepper/ai`. **Amended:** ADR-0027 (eval cases name a seeded `world` and judge `expect.actions`; the per-case `tools` list and the S22 sample tools are gone) and ADR-0029 (the idempotency key adds the loop's step; reads may mark answers untrusted). **Fixed:** the web forwarder cut streamed answers at its 10 s timeout and dropped `Last-Event-ID`. No change to phases, scope or exit criteria.
+
 ## 0.20 — 2026-10-21
 - S24 (Phase 6c): [ADR-0029](../adr/0029-tool-registry-and-tools.md) (pre-approved by the user at the S24 Session Brief). **Tools:** the tool registry and ten tools in `@pepper/ai`:
   - reads: `find_availability`, `find_clients`, `get_day`, `get_booking`, `list_services_and_staff`;
