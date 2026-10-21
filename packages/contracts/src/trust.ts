@@ -327,6 +327,29 @@ export function looksLikeContact(text: string): boolean {
   return PHONE_LIKE.test(rest);
 }
 
+const EMAILS = new RegExp(EMAIL_LIKE.source, 'g');
+const PROTECTED_OR_PHONE = new RegExp(
+  `(${NOT_A_PHONE.map((pattern) => pattern.source).join('|')})|${PHONE_LIKE.source}`,
+  'gi',
+);
+
+/**
+ * `text` with email addresses and phone numbers replaced by a note (D-5: a member's message
+ * goes to the AI provider without contacts; the tools never need them). Ids, dates and times
+ * stay. The result never `looksLikeContact`: a text whose digits only form a number across
+ * a date or time loses its digits instead.
+ */
+export function redactContacts(text: string): string {
+  // The notes are in brackets an address can't contain, so a note never joins what is left
+  // around it into a new address.
+  const redacted = text
+    .replace(EMAILS, '(email removed)')
+    .replace(PROTECTED_OR_PHONE, (match, kept: string | undefined) =>
+      kept === undefined ? '(phone removed)' : match,
+    );
+  return looksLikeContact(redacted) ? redacted.replace(/\d/g, '#') : redacted;
+}
+
 const encoder = new TextEncoder();
 
 function jsonBytes(value: unknown): number {
