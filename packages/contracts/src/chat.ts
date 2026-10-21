@@ -42,10 +42,9 @@ export type ChatTurnRequest = z.infer<typeof ChatTurnRequestSchema>;
  */
 export const TurnStopReasonSchema = z.enum([
   'answered',
-  /** The turn used its steps, time or writes. */
+  /** The turn used its steps or its time. */
   'step_limit',
   'time_limit',
-  'write_limit',
   /** The model could not be reached, kept failing, or stopped itself. */
   'provider_unavailable',
   'provider_refused',

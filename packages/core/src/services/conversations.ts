@@ -223,15 +223,15 @@ export type TurnMessage =
     };
 
 /**
- * Records messages into the member's running turn, in order, with its progress, in one short
- * transaction. The database refuses a message once the turn ended.
+ * Records messages into the member's running turn, in order, with its progress (`null`: leave
+ * it), in one short transaction. The database refuses a message once the turn ended.
  */
 export async function recordTurnMessages(
   db: Database,
   actor: Actor,
   turn: Pick<TurnView, 'id' | 'conversationId'>,
   messages: readonly TurnMessage[],
-  progress: TurnProgress,
+  progress: TurnProgress | null,
   now: Date,
 ): Promise<StoredMessage[]> {
   requirePermission(actor, 'ai.chat');
@@ -246,18 +246,18 @@ export async function recordTurnMessages(
       } as NewConversationMessage);
       stored.push(toMessage(row));
     }
-    await saveTurnProgress(tx, turn.id, progress);
+    if (progress !== null) await saveTurnProgress(tx, turn.id, progress);
     await touchConversation(tx, turn.conversationId, now);
     return stored;
   });
 }
 
-/** Ends the member's running turn once; `false` if it had already ended. */
+/** Ends the member's running turn once (`progress` `null`: as recorded); `false` if it had ended. */
 export async function endTurn(
   db: Database,
   actor: Actor,
   turnId: ConversationTurnId,
-  input: { reason: TurnStopReason; progress: TurnProgress; now: Date },
+  input: { reason: TurnStopReason; progress: TurnProgress | null; now: Date },
 ): Promise<boolean> {
   requirePermission(actor, 'ai.chat');
   const status: Exclude<TurnStatus, 'running'> =
@@ -267,7 +267,12 @@ export async function endTurn(
         ? 'cancelled'
         : 'failed';
   return withMember(db, actor.context, (tx) =>
-    finishTurn(tx, turnId, { status, stopReason: input.reason, at: input.now, ...input.progress }),
+    finishTurn(tx, turnId, {
+      status,
+      stopReason: input.reason,
+      at: input.now,
+      ...(input.progress ?? {}),
+    }),
   );
 }
 

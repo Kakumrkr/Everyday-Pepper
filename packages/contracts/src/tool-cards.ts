@@ -26,7 +26,9 @@ import { UtcDateTimeSchema } from './time.js';
  * - `not_changeable`: the record's state doesn't allow it (a cancelled booking);
  * - `too_late`: the appointment has already started;
  * - `conflict`: the same request was already made differently;
- * - `internal`: something failed on our side; nothing changed.
+ * - `internal`: something failed on our side; nothing changed;
+ * - `turn_limit`: the turn already made as many changes as one turn may, or ran out of time
+ *   (ADR-0030); the member can ask again.
  */
 export const ToolErrorCodeSchema = z.enum([
   'invalid_arguments',
@@ -38,6 +40,7 @@ export const ToolErrorCodeSchema = z.enum([
   'too_late',
   'conflict',
   'internal',
+  'turn_limit',
 ]);
 export type ToolErrorCode = z.infer<typeof ToolErrorCodeSchema>;
 

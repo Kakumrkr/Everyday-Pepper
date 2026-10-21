@@ -2686,7 +2686,7 @@
         },
         "conversation_turns_stop_reason_known": {
           "name": "conversation_turns_stop_reason_known",
-          "value": "\"conversation_turns\".\"stop_reason\" IN ('answered', 'step_limit', 'time_limit', 'write_limit', 'provider_unavailable', 'provider_refused', 'budget_exhausted', 'ai_off', 'cancelled', 'interrupted', 'internal')"
+          "value": "\"conversation_turns\".\"stop_reason\" IN ('answered', 'step_limit', 'time_limit', 'provider_unavailable', 'provider_refused', 'budget_exhausted', 'ai_off', 'cancelled', 'interrupted', 'internal')"
         },
         "conversation_turns_finished_when_done": {
           "name": "conversation_turns_finished_when_done",

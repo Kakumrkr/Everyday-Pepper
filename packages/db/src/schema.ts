@@ -1505,7 +1505,7 @@ export const conversationTurns = pgTable(
     ),
     check(
       'conversation_turns_stop_reason_known',
-      sql`${table.stopReason} IN ('answered', 'step_limit', 'time_limit', 'write_limit', 'provider_unavailable', 'provider_refused', 'budget_exhausted', 'ai_off', 'cancelled', 'interrupted', 'internal')`,
+      sql`${table.stopReason} IN ('answered', 'step_limit', 'time_limit', 'provider_unavailable', 'provider_refused', 'budget_exhausted', 'ai_off', 'cancelled', 'interrupted', 'internal')`,
     ),
     check(
       'conversation_turns_finished_when_done',

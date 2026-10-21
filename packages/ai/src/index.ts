@@ -6,3 +6,4 @@ export * from './provider.js';
 export * from './scripted-provider.js';
 export * from './strict-schema.js';
 export * from './tools/index.js';
+export * from './agent/index.js';

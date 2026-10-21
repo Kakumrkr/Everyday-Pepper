@@ -53,7 +53,7 @@ CREATE TABLE "conversation_turns" (
 	CONSTRAINT "conversation_turns_tenant_id_id_unique" UNIQUE("tenant_id","id"),
 	CONSTRAINT "conversation_turns_client_turn_unique" UNIQUE("tenant_id","user_id","client_turn_id"),
 	CONSTRAINT "conversation_turns_status_known" CHECK ("conversation_turns"."status" IN ('running', 'completed', 'failed', 'cancelled')),
-	CONSTRAINT "conversation_turns_stop_reason_known" CHECK ("conversation_turns"."stop_reason" IN ('answered', 'step_limit', 'time_limit', 'write_limit', 'provider_unavailable', 'provider_refused', 'budget_exhausted', 'ai_off', 'cancelled', 'interrupted', 'internal')),
+	CONSTRAINT "conversation_turns_stop_reason_known" CHECK ("conversation_turns"."stop_reason" IN ('answered', 'step_limit', 'time_limit', 'provider_unavailable', 'provider_refused', 'budget_exhausted', 'ai_off', 'cancelled', 'interrupted', 'internal')),
 	CONSTRAINT "conversation_turns_finished_when_done" CHECK (("conversation_turns"."status" = 'running') = ("conversation_turns"."finished_at" IS NULL) AND ("conversation_turns"."status" = 'running') = ("conversation_turns"."stop_reason" IS NULL)),
 	CONSTRAINT "conversation_turns_steps_range" CHECK ("conversation_turns"."steps" BETWEEN 0 AND 99),
 	CONSTRAINT "conversation_turns_tokens_not_negative" CHECK ("conversation_turns"."input_tokens" >= 0 AND "conversation_turns"."cached_input_tokens" >= 0 AND "conversation_turns"."output_tokens" >= 0)
