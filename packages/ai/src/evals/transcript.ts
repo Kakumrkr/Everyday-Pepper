@@ -11,6 +11,8 @@ export interface TranscriptToolCall {
 export interface Transcript {
   toolCalls: TranscriptToolCall[];
   replies: string[];
+  /** The tools whose actions the run left done (receipts) or proposed, from the database. */
+  actions: { done: string[]; proposed: string[] };
   usage: LlmUsage;
   models: string[];
 }

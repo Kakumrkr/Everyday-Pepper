@@ -21,6 +21,9 @@ export default defineConfig({
         'src/tools/registry.ts',
         'src/tools/runner.ts',
         'src/tools/test-support.ts',
+        // The eval subject and its seeded worlds run the loop on Postgres (evals.int.test.ts).
+        'src/evals/subject.ts',
+        'src/evals/world.ts',
         'src/agent/test-support.ts',
         'src/agent/index.ts',
       ],

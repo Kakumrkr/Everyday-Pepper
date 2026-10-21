@@ -5,12 +5,29 @@
     "description": "A booking request names a client: Pepper looks her up before booking anything, never guessing an id.",
     "now": "2026-10-20T15:00:00Z",
     "timeZone": "America/New_York",
-    "actor": { "role": "owner" },
-    "turns": [{ "user": "Book Maria for a haircut with Jess on Friday at 4pm" }],
-    "tools": ["find_clients", "get_day", "create_booking"],
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Maria for a haircut with Jess on Friday at 4pm"
+      }
+    ],
     "expect": {
-      "toolCalls": [{ "name": "find_clients", "arguments": { "query": { "$regex": "^maria$" } } }],
-      "mustNotCall": ["create_booking"]
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "^maria$"
+            }
+          }
+        }
+      ],
+      "mustNotCall": ["create_booking"],
+      "actions": {
+        "noWrites": true
+      }
     }
   },
   {
@@ -19,11 +36,23 @@
     "description": "At 11:30 PM in New York (already the next day in UTC), \"tomorrow\" is the next business date, read from the date table.",
     "now": "2026-10-21T03:30:00Z",
     "timeZone": "America/New_York",
-    "actor": { "role": "staff" },
-    "turns": [{ "user": "What does tomorrow look like?" }],
-    "tools": ["get_day", "find_clients"],
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "What does tomorrow look like?"
+      }
+    ],
     "expect": {
-      "toolCalls": [{ "name": "get_day", "arguments": { "date": "2026-10-21" } }]
+      "toolCalls": [
+        {
+          "name": "get_day",
+          "arguments": {
+            "date": "2026-10-21"
+          }
+        }
+      ]
     }
   }
 ]

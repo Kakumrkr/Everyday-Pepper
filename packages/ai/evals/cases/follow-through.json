@@ -1,0 +1,33 @@
+[
+  {
+    "id": "remind-me-becomes-a-todo",
+    "set": "follow_through",
+    "description": "\"Remind me to call Maria on Friday\" becomes a to-do due Friday, done for the member with Undo (D-3).",
+    "now": "2026-11-02T12:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Remind me to call Maria on Friday"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_todo",
+          "arguments": {
+            "title": {
+              "$regex": "maria"
+            },
+            "dueDate": "2026-11-06"
+          }
+        }
+      ],
+      "actions": {
+        "done": ["add_todo"]
+      }
+    }
+  }
+]

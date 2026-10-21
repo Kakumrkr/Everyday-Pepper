@@ -20,5 +20,6 @@ export * from './repositories/tasks.js';
 export * from './repositories/tenants.js';
 export * from './repositories/trust.js';
 export * from './repositories/usage.js';
+export * from './repositories/users.js';
 export * from './schema.js';
 export * from './tenant.js';

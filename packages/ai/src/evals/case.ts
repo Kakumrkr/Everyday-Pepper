@@ -5,6 +5,7 @@ import {
   UtcDateTimeSchema,
 } from '@pepper/contracts';
 import { z } from 'zod';
+import { EvalWorldNameSchema } from './world.js';
 
 /** The eval sets and the pass rate each must reach (playbook §2 and §5). */
 export const EVAL_SET_GATES = {
@@ -63,8 +64,10 @@ const PatternSchema = z
   );
 
 /**
- * One eval case (ADR-0027): who asks what, on the business's clock, with which tools, and what
- * must (not) happen. The seeded world and final-state checks join with the tools (S24).
+ * One eval case (ADR-0027, ADR-0030): who asks what, in which seeded world, on the business's
+ * clock, and what must (not) happen: the tool calls, the replies, and what the business looks
+ * like afterwards (the actions done or waiting for approval, judged in the database). Every
+ * case is offered the registry's tools, through the real agent loop.
  */
 export const EvalCaseSchema = z.strictObject({
   id: z
@@ -77,12 +80,13 @@ export const EvalCaseSchema = z.strictObject({
   holdout: z.boolean().default(false),
   now: UtcDateTimeSchema,
   timeZone: TimeZoneSchema,
+  /** The seeded business the case runs in (a fresh one each run). */
+  world: EvalWorldNameSchema.default('juniper'),
   actor: z.strictObject({ role: MembershipRoleSchema }),
   turns: z
     .array(z.strictObject({ user: z.string().min(1).max(4_000) }))
     .min(1)
     .max(10),
-  tools: z.array(LlmToolNameSchema).max(32),
   expect: z.strictObject({
     /** Calls that must happen, in this order (others may come between). */
     toolCalls: z
@@ -97,6 +101,18 @@ export const EvalCaseSchema = z.strictObject({
     mustNotCall: z.array(LlmToolNameSchema).default([]),
     replyMatches: z.array(PatternSchema).default([]),
     replyMustNotMatch: z.array(PatternSchema).default([]),
+    /**
+     * The business afterwards (τ-bench style): the tools whose actions were done (receipts)
+     * and proposed (waiting for a person), each listed once per expected action; `noWrites`:
+     * neither.
+     */
+    actions: z
+      .strictObject({
+        done: z.array(LlmToolNameSchema).default([]),
+        proposed: z.array(LlmToolNameSchema).default([]),
+        noWrites: z.boolean().default(false),
+      })
+      .default({ done: [], proposed: [], noWrites: false }),
   }),
 });
 export type EvalCase = z.infer<typeof EvalCaseSchema>;

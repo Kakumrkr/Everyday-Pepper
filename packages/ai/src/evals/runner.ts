@@ -4,9 +4,9 @@ import type { LlmProvider } from '../provider.js';
 import { EVAL_SET_GATES, type EvalCase, type EvalSet } from './case.js';
 import { CassetteError } from './cassette.js';
 import { grade } from './grade.js';
-import { sampleTools } from './sample-tools.js';
-import { singleCallSubject, type EvalSubject } from './subject.js';
+import type { EvalSubject } from './subject.js';
 import { addUsage, emptyUsage } from './transcript.js';
+import type { EvalWorld } from './world.js';
 
 export interface TrialResult {
   passed: boolean;
@@ -28,9 +28,10 @@ export interface RunOptions {
   cases: readonly EvalCase[];
   /** How many times each case runs (pass^k). */
   trials: number;
-  /** The provider for one trial of one case (a cassette, a fake, or the real model). */
-  providerFor: (evalCase: EvalCase, trial: number) => LlmProvider;
-  subject?: EvalSubject;
+  /** The model for one trial of one case in its seeded world (a cassette, a fake, the real one). */
+  providerFor: (evalCase: EvalCase, trial: number, world: EvalWorld) => LlmProvider;
+  /** Runs a case (`loopSubject`: the agent loop on Postgres). */
+  subject: EvalSubject;
 }
 
 function describeFailure(error: unknown): string {
@@ -41,19 +42,15 @@ function describeFailure(error: unknown): string {
 
 /** Runs every case `trials` times and grades each run with code. */
 export async function runEvals(options: RunOptions): Promise<CaseResult[]> {
-  const subject = options.subject ?? singleCallSubject;
   const results: CaseResult[] = [];
   for (const evalCase of options.cases) {
-    const { definitions, schemas } = sampleTools(evalCase.tools);
     const trials: TrialResult[] = [];
     for (let trial = 0; trial < options.trials; trial += 1) {
       try {
-        const transcript = await subject(
-          evalCase,
-          options.providerFor(evalCase, trial),
-          definitions,
+        const transcript = await options.subject(evalCase, (world) =>
+          options.providerFor(evalCase, trial, world),
         );
-        const reasons = grade(evalCase, transcript, schemas);
+        const reasons = grade(evalCase, transcript);
         trials.push({
           passed: reasons.length === 0,
           reasons,
