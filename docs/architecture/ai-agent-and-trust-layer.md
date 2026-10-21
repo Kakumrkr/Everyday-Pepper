@@ -7,9 +7,9 @@ The LLM selects tools and fills arguments. It never accesses the database, never
 
 ## Components (`packages/ai`)
 - **Provider adapter** (S22, [ADR-0027](../adr/0027-llm-provider-port-and-evals.md)) — `LlmProvider` (`respond`, `stream`; `embed` joins in Phase 7) over provider-neutral contracts (`contracts/ai.ts`). Default implementation: OpenAI's Responses API with `store: false` and encrypted reasoning replay. Model IDs are config per route (`routine`, `strong`), not code. A cheap/fast model handles routine turns; a stronger model is used for multi-step planning and onboarding extraction. Tool argument schemas are strict JSON Schema generated from Zod.
-- **Tool registry** (S24, [ADR-0029](../adr/0029-tool-registry-and-tools.md), `packages/ai/src/tools`). Ten tools:
-  - reads: `find_availability`, `find_clients`, `get_day`, `get_booking`, `list_services_and_staff`;
-  - writes: `create_booking`, `move_booking`, `cancel_booking`, `block_time`, `add_todo`.
+- **Tool registry** (S24, [ADR-0029](../adr/0029-tool-registry-and-tools.md); S26b, [ADR-0032](../adr/0032-four-week-one-tools-and-explanation-facts.md); `packages/ai/src/tools`). Fourteen tools:
+  - reads: `find_availability`, `find_clients`, `find_client_bookings`, `get_day`, `get_booking`, `list_services_and_staff`, `list_todos`;
+  - writes: `create_booking`, `move_booking`, `cancel_booking`, `block_time`, `unblock_time`, `add_todo`, `complete_todo` (`unblock_time` uses the dial's `time.block`, `complete_todo` its `task.create`, PCR-004).
 
   Each tool has a name, a version, a guide (use, don't use, returns, examples → the description and generated eval cases), strict Zod arguments in the business's local time, a risk tier and its dial actions (a write that may email the client adds `message.confirmation`).
 
@@ -43,6 +43,8 @@ Per tenant, per `actionType`: `ask` / `notify` / `auto`, bounded by tier rules a
 
 ## Explanations ("Why did you do that?")
 Stored per action: user request, tools called, key facts/rules used, alternatives considered. Rendered in plain language. Never includes other tenants' data or hidden prompts.
+
+Since S26b ([ADR-0032](../adr/0032-four-week-one-tools-and-explanation-facts.md)), every write records the facts its own domain run established ("Jess was free at 4 pm", "2 bookings stay inside the block", "the to-do was still open") as codes with flat values. The trust layer stores the preview's facts with the proposal and the receipt; the *Why?* sheet words them under "What I checked".
 
 ## Cards (S26, [ADR-0031](../adr/0031-chat-screen-cards-why-undo-and-autonomy-settings.md))
 Typed card payloads (`contracts/tool-cards.ts`, validated with Zod in the browser): `change` (proposed or done, with the tool's own summary), `slot_picker`, `client_choice`, `booking`, `day`. The same React components in `@pepper/ui` render in chat and on Home (the Phase 8 feed takes them over): `ChangeCard` (confirmation and receipt), `SlotPicker`, `ClientChoice`, `BookingCard`, `DayCard`, `PlanCard` (a turn's changes, "Approve all" exactly as shown, in order), `WhyContent`, `ChatNotice`. Later: ClientSummary, Suggestion, ImportReport.

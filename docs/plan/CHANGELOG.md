@@ -2,6 +2,15 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.23 — 2026-10-21
+- S26b (Phase 6e+, [PCR-004](changes/PCR-004.md)): [ADR-0032](../adr/0032-four-week-one-tools-and-explanation-facts.md) (pre-approved by the user at the S26b Session Brief). **Four tools owners ask for in week one** (fourteen in all): `find_client_bookings`, `list_todos`, `complete_todo` (dial `task.create`), `unblock_time` (dial `time.block`), each with its inverse where it writes; `get_day` version 2 lists block ids. **Why? says what was checked:** every write records facts from its own domain run, stored with the proposal and the receipt and shown under "What I checked".
+
+  **Decisions (user):** a colleague's blocked time is `forbidden` for staff; facts in S26b; no new card kinds or journeys.
+
+  **Additive changes:** db `listClientBookings`, `findTimeOff`; appointments `listClientBookingsIn`, `getTimeOffIn`; core `listTasksIn`, `changeTaskIn`, `completeTaskIn`, `reopenTaskIn`, `memberFirstNamesIn`, `TaskNotOpenError`, `ActionPreview.facts`; contracts `AiWhy.facts`; ui `factLine` and the "What I checked" block. No migration; no existing tool's version changes.
+
+  **Amended:** ADR-0029 §2 (fourteen tools, `get_day` v2) and ADR-0028 §6 (facts from the preview). **Plan note:** the cost guard's one run is 25 cases; S27 runs eval sets in chunks of ≤ 25.
+
 ## 0.22 — 2026-10-21
 - S26 (Phase 6e): [ADR-0031](../adr/0031-chat-screen-cards-why-undo-and-autonomy-settings.md) (pre-approved by the user at the S26 Session Brief). **The AI in the members' hands:**
   - the chat screen (`/chat`): streamed plain text, resume with `Last-Event-ID`, Stop and cancel on leaving, suggestion chips, the AI off/paused/fallback states;

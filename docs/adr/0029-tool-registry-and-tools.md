@@ -2,6 +2,7 @@
 
 - **Status:** Accepted (user, 2026-10-21: pre-approved at the S24 Session Brief, "Go ahead with your recommendations, ADR-0029 is fine … I'm pre approving the ADR"; drafted by Claude in S24). S25's planned ADR becomes ADR-0030.
 - **Date:** 2026-10-21
+- **Amended by:** ADR-0031 (`ToolDeps.requester`), [ADR-0032](0032-four-week-one-tools-and-explanation-facts.md) (fourteen tools, `get_day` v2, explanation facts).
 - **Builds on:**
   - ADR-0005 (the model proposes, the domain decides);
   - ADR-0017 (member scope), ADR-0020 (client lookup), ADR-0024/0025 (outbox, booking emails);

@@ -214,3 +214,14 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - the plan card's "Approve all" approves each change as shown, in order, stopping at the first that isn't done;
   - Home shows "Needs your OK" and up to 5 "Done for you" until the Phase 8 feed;
   - the e2e model needs `DEPLOYMENT_ENVIRONMENT=ci` (or `local` outside a production build) and no key.
+- **S26b Session Brief (user, 2026-10-21):** "Go ahead with your recommendations, ADR is pre-approved":
+  - a staff member removing a colleague's blocked time answers `forbidden` (they can see the block in the calendar and in `get_day`); clients and to-dos the member can't see answer `not_found`;
+  - explanation facts are filled in S26b (not deferred to S27);
+  - no new card kinds and no new Playwright journeys (the existing ones run as a regression check).
+- **S26b defaults (Claude, in ADR-0032, pre-approved by the user):**
+  - `find_client_bookings`: the next 5 (not cancelled) and the last 3 (any status) without a date window; staff their own; the next booking's card;
+  - `list_todos`: `whose: mine | team`, 20, titles redacted of contacts, the AI's own to-dos labelled untrusted text;
+  - `complete_todo` (dial `task.create`): Undo reopens only while unchanged since; `unblock_time` (dial `time.block`): by time-off id only, the whole entry, Undo re-blocks the span; `get_day` v2 lists block ids;
+  - facts come from the tool's own domain run and are the stored explanation's (a stale approval refreshes them); not part of the fingerprint, so no tool version changes;
+  - change rows read a completion and an unblock from the change's shape (no `tool` prop through the web app); a "What's on my to-do list?" chip;
+  - the cost guard's one-run size is 25 one-turn cases with 14 tools; S27 runs sets in chunks of ≤ 25 or calibrates the estimate first.

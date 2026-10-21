@@ -796,6 +796,31 @@ Everything each session did, oldest first: what was built, the checks run and th
     - Phase 11: blocking `XREAD` and pub/sub for chat events and cancel (user, S26).
     - Still logged: undoing a move whose email was taken back leaves the client's earlier manage link dead.
     - The chat's AI-off and paused states have no Playwright journey (the e2e stack runs the scripted model); the api tests cover `off` and `paused`.
+- **S26b Phase 6e+ (2026-10-21): the four tools owners ask for in week one, and the facts behind *Why?*** ([ADR-0032](../adr/0032-four-week-one-tools-and-explanation-facts.md), accepted; [PCR-004](changes/PCR-004.md)). Branch `claude/vigilant-darwin-vm01ef`.
+  - **Brief (user):** "Go ahead with your recommendations, ADR is pre-approved." Decided at the brief: a staff member removing a colleague's blocked time is `forbidden` (they can see it), while clients and to-dos they can't see are `not_found`; explanation facts in this session; no new card kinds and no new Playwright journeys. No real API call (ScriptedProvider, cassettes, `E2eModel`).
+  - **Tasks:**
+    - T1: `find_client_bookings`: db `listClientBookings` (no window, nearest first both ways), appointments `listClientBookingsIn` (staff scope, `not_found` for clients the member can't reach), the read tool with the next booking's card.
+    - T2: `list_todos`: core `listTasksIn`, `memberFirstNamesIn`; titles through `redactContacts`; the AI's own to-dos labelled untrusted text.
+    - T3: `complete_todo`: core `changeTaskIn` (the screen's path), `completeTaskIn`, `reopenTaskIn` (Undo only while unchanged), `TaskNotOpenError` → `not_changeable`.
+    - T4: `unblock_time`: db `findTimeOff`, appointments `getTimeOffIn`; `get_day` v2 lists block ids; Undo re-blocks the same span; a booking's id is `not_found`.
+    - T5: the hostile fake: shared `hostileTargets` (booking, to-do, Jess's lunch block); attacks with a booking's or to-do's id as another kind and an email as `clientId`; the "ask" suite covers every write tool; the eval world gains a to-do and a block; 8 generated eval cases with scripted cassettes; latency budgets for the four tools.
+    - T6: facts: `Performed.facts` (`slot_was_free`, `staff_chosen`, `not_started`, `bookings_inside`, `bookings_untouched`, `reminds`, `todo_was_open`) → `ActionPreview.facts` (core: the preview's facts are the explanation's; a stale approval's fresh preview brings its own) → contracts `AiWhy.facts` (optional, flat, contact-free) → the api's views → "What I checked" in the *Why?* sheet (`factLine`); change rows for a completion and an unblock read from the sides; a to-do chip in the empty chat.
+    - T7: ADR-0032 (amends ADR-0029 §2 and ADR-0028 §6), docs, checks, self-review.
+  - **Checks:**
+    - `pnpm check` green. Unit tests: contracts 548, core 1,190, db 44, ai 192, api 292, web 264, appointments 83, runtime 90, worker 26, templates 96, ui 107, testing 13.
+    - `pnpm test:integration` green, 969 (+26): ai 93, api 74, core 147, db 510, appointments 137, worker 4, runtime 2, testing 2.
+    - The hostile fake: all 127 attacks a run stopped (over all 14 tools), as owner and as staff, directly and through the loop, nothing changed in either business. Every eval set on the fakes, with the 8 new generated cases.
+    - Playwright on CI's headless shell against locally started apps with the scripted model: the chat journeys 14/14 on phone and desktop, with axe (regression check for the card labels and the *Why?* sheet).
+    - No OpenAI call.
+  - **Found and fixed:**
+    - The hostile test's own mini-loop kept the whole history and outgrew the 200-message request limit once the four tools' attacks queued up; it now trims whole exchanges like the real loop.
+    - The cost guard's "30 one-turn cases under $1.50 at every step" stopped holding ($1.55): 14 tool definitions add about $0.05 a case to the worst case. Now 25 cases; S27 runs sets in chunks or calibrates the estimate first.
+    - A to-do title typed on the screen may hold a phone number or an email: `list_todos` and `complete_todo` redact it before the model, the card or the stored preview see it.
+    - `changeRows` is keyed by the dial action, so a completion would have shown as a new to-do and an unblock as a bare name; the rows now read the change's shape.
+  - **Not done / for later:**
+    - S27: a tool summary that echoes a member's text (a to-do title) reaches the model unlabelled; label it in the security review. Run eval sets in chunks of ≤ 25. Calibrate the 3-characters-a-token estimate.
+    - Watch `reads.int.test.ts` "list_todos": it failed once with no visible diff, then passed 16 runs in a row and the full suite; not reproduced.
+    - Still logged: undoing a move whose email was taken back leaves the client's earlier manage link dead.
 
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
