@@ -22,6 +22,7 @@ const VALID: Record<string, Record<string, unknown>> = {
   get_booking: { bookingId: '0199f4b2-7c1e-7a00-8000-0000000000b1' },
   find_client_bookings: { clientId: '0199f4b2-7c1e-7a00-8000-0000000000c1' },
   list_services_and_staff: {},
+  list_todos: { whose: 'mine' },
   create_booking: {
     clientId: '0199f4b2-7c1e-7a00-8000-0000000000c1',
     serviceId: '0199f4b2-7c1e-7a00-8000-0000000000a1',
@@ -56,6 +57,7 @@ describe('the tool registry', () => {
       'get_day',
       'get_booking',
       'list_services_and_staff',
+      'list_todos',
       'create_booking',
       'move_booking',
       'cancel_booking',

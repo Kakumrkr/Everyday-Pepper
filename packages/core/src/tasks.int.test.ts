@@ -20,14 +20,18 @@ import {
   ForbiddenError,
   TaskAssigneeNotMemberError,
   TaskNotFoundError,
+  TaskNotOpenError,
   UndoRefusedError,
 } from './errors.js';
 import { createBusiness } from './services/business.js';
 import {
   changeTask,
+  completeTaskIn,
   createTask,
   createTaskIn,
   listTasks,
+  listTasksIn,
+  reopenTaskIn,
   withdrawTaskIn,
 } from './services/tasks.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
@@ -243,5 +247,65 @@ describe("createTaskIn and withdrawTaskIn (the AI's to-dos, ADR-0029)", () => {
     await expect(
       withMember(db, jessActor().context, (tx) => withdrawTaskIn(tx, jessActor(), theirs.id)),
     ).rejects.toBeInstanceOf(TaskNotFoundError);
+  });
+});
+
+describe("completeTaskIn and reopenTaskIn (the AI's complete_todo, S26b)", () => {
+  const now = new Date('2026-11-02T12:00:00Z');
+  const complete = (actor: Actor, id: TaskId) =>
+    withMember(db, actor.context, (tx) => completeTaskIn(tx, actor, id, { now }));
+  const reopen = (actor: Actor, id: TaskId, completedVersion: string) =>
+    withMember(db, actor.context, (tx) => reopenTaskIn(tx, actor, id, { completedVersion }));
+
+  it('marks an open to-do done, and its undo opens it again while nobody touched it', async () => {
+    const task = await createTask(db, jessActor(), { title: 'Sweep up' });
+    const { before, after } = await complete(jessActor(), task.id);
+    expect(before).toMatchObject({ status: 'open', completedAt: null });
+    expect(after).toMatchObject({ status: 'done', completedAt: now.toISOString() });
+    await reopen(jessActor(), task.id, after.updatedAt);
+    const [again] = (await listTasks(db, jessActor(), { status: 'all', limit: 200 })).filter(
+      (t) => t.id === task.id,
+    );
+    expect(again).toMatchObject({ status: 'open', completedAt: null });
+    const entries = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 2 }));
+    expect(entries.map((e) => [e.action, e.entity.id])).toEqual([
+      ['task.updated', task.id],
+      ['task.updated', task.id],
+    ]);
+  });
+
+  it('refuses a to-do already done, and one the member cannot see', async () => {
+    const task = await createTask(db, jessActor(), { title: 'Done already' });
+    await changeTask(db, jessActor(), task.id, { status: 'done' });
+    await expect(complete(jessActor(), task.id)).rejects.toBeInstanceOf(TaskNotOpenError);
+    const theirs = await createTask(db, priyaActor(), { title: 'Priya only' });
+    await expect(complete(jessActor(), theirs.id)).rejects.toBeInstanceOf(TaskNotFoundError);
+    // An owner reaches everyone's.
+    await expect(complete(ana(), theirs.id)).resolves.toMatchObject({ after: { status: 'done' } });
+  });
+
+  it('refuses the undo once the to-do changed after it was done', async () => {
+    const task = await createTask(db, jessActor(), { title: 'Order foils' });
+    const { after } = await complete(jessActor(), task.id);
+    await changeTask(db, jessActor(), task.id, { title: 'Order foils and gloves' });
+    await expect(reopen(jessActor(), task.id, after.updatedAt)).rejects.toBeInstanceOf(
+      UndoRefusedError,
+    );
+    const reopened = await createTask(db, jessActor(), { title: 'Reopened by hand' });
+    const second = await complete(jessActor(), reopened.id);
+    await changeTask(db, jessActor(), reopened.id, { status: 'open' });
+    await expect(reopen(jessActor(), reopened.id, second.after.updatedAt)).rejects.toBeInstanceOf(
+      UndoRefusedError,
+    );
+  });
+
+  it('lists in the caller’s transaction as listTasks does', async () => {
+    const mine = await withMember(db, jessActor().context, (tx) =>
+      listTasksIn(tx, jessActor(), { status: 'open', mine: true }),
+    );
+    expect(mine.every((t) => t.assigneeUserId === jess && t.status === 'open')).toBe(true);
+    expect(mine.map((t) => t.id)).toEqual(
+      (await listTasks(db, jessActor(), { mine: true })).map((t) => t.id),
+    );
   });
 });

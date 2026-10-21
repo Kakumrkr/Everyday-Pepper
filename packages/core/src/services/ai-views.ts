@@ -14,6 +14,7 @@ import {
   withMember,
   withTenant,
   type Database,
+  type TenantTx,
 } from '@pepper/db';
 import { requirePermission, type Actor } from '../actor.js';
 import { toExecution } from './ai-actions.js';
@@ -49,9 +50,19 @@ export async function memberFirstNames(
   userIds: readonly (string | null)[],
 ): Promise<Map<string, string>> {
   requirePermission(actor, 'business.read');
+  return withTenant(db, actor.context.tenantId, (tx) => memberFirstNamesIn(tx, actor, userIds));
+}
+
+/** `memberFirstNames` inside the caller's transaction (the AI's `list_todos`, S26b). */
+export async function memberFirstNamesIn(
+  tx: TenantTx,
+  actor: Actor,
+  userIds: readonly (string | null)[],
+): Promise<Map<string, string>> {
+  requirePermission(actor, 'business.read');
   const wanted = new Set(userIds.filter((id): id is string => id !== null));
   if (wanted.size === 0) return new Map();
-  const members = await withTenant(db, actor.context.tenantId, listTenantMembers);
+  const members = await listTenantMembers(tx);
   return new Map(
     members
       .filter((member) => wanted.has(member.userId))

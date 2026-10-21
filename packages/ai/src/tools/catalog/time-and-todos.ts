@@ -6,6 +6,7 @@ import {
 } from '@pepper/appointments';
 import {
   looksLikeContact,
+  redactContacts,
   StaffMemberIdSchema,
   TaskIdSchema,
   TASK_TITLE_MAX,
@@ -13,12 +14,18 @@ import {
   UtcDateTimeSchema,
   type UserId,
 } from '@pepper/contracts';
-import { createTaskIn, withdrawTaskIn } from '@pepper/core';
+import {
+  createTaskIn,
+  listTasksIn,
+  memberFirstNamesIn,
+  permissionScope,
+  withdrawTaskIn,
+} from '@pepper/core';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { InvalidToolArgumentsError } from '../errors.js';
 import { daysOf, instantOf, localOf } from '../local-time.js';
-import type { Performed, WriteScope, WriteTool } from '../tool.js';
+import type { Performed, ReadTool, ToolScope, WriteScope, WriteTool } from '../tool.js';
 import {
   DateArg,
   day,
@@ -31,8 +38,8 @@ import {
   when,
 } from './shared.js';
 
-// Blocking time and adding to-dos (ADR-0029): the member's own calendar and follow-through
-// (D-3), through the time-off and task services. Neither emails anyone.
+// Blocking time and to-dos (ADR-0029, ADR-0032): the member's own calendar and follow-through
+// (D-3), through the time-off and task services. None of them emails anyone.
 
 const BlockArgs = z.strictObject({
   staffMemberId: IdArg('staff member').nullable().describe('null: the member themselves'),
@@ -228,5 +235,93 @@ export const addTodo: WriteTool = {
   async undo(scope, inverse) {
     const { taskId } = z.strictObject({ taskId: TaskIdSchema }).parse(inverse);
     await withdrawTaskIn(scope.tx, scope.actor, taskId);
+  },
+};
+
+const TODOS_SHOWN = 20;
+
+/** Whose to-do it is, in words: "you", a staff member's name, a member's first name, "the team". */
+async function assigneeNamesOf(
+  scope: ToolScope,
+  assignees: readonly (string | null)[],
+): Promise<(assignee: string | null) => string> {
+  const directory = await directoryOf(scope);
+  const staffNames = new Map<string, string>(
+    [...directory.staff.values()].flatMap((member) =>
+      member.userId === null ? [] : [[member.userId, member.displayName] as const],
+    ),
+  );
+  const firstNames = await memberFirstNamesIn(scope.tx, scope.actor, assignees);
+  return (assignee) => {
+    if (assignee === null) return 'the team';
+    if (assignee === scope.requester) return 'you';
+    const name = staffNames.get(assignee) ?? firstNames.get(assignee) ?? '';
+    return name === '' ? 'a teammate' : name;
+  };
+}
+
+export const listTodos: ReadTool = {
+  kind: 'read',
+  name: 'list_todos',
+  version: 1,
+  localTimes: false,
+  guide: {
+    use: 'List open to-dos with their ids: the member’s own, or everyone’s they may see. Use it for "what’s on my list?" and to find the to-do to mark done.',
+    avoid: [
+      'to add a to-do (use add_todo)',
+      'for appointments (use get_day or find_client_bookings)',
+    ],
+    returns:
+      'up to 20 open to-dos, due first: id, title, local due date and time, whether it is overdue, and whose it is. Staff see only their own.',
+    examples: [
+      { say: 'What are my to-dos?', args: { whose: 'mine' } },
+      { say: "What's still open for the team?", args: { whose: 'team' } },
+    ],
+  },
+  args: z.strictObject({
+    whose: z
+      .enum(['mine', 'team'])
+      .describe("mine: the member's own to-dos; team: everyone's the member may see"),
+  }),
+  async run(scope, args: { whose: 'mine' | 'team' }) {
+    const found = await listTasksIn(scope.tx, scope.actor, {
+      status: 'open',
+      mine: args.whose === 'mine',
+      limit: TODOS_SHOWN + 1,
+    });
+    const tasks = found.slice(0, TODOS_SHOWN);
+    const whose = await assigneeNamesOf(
+      scope,
+      tasks.map((task) => task.assigneeUserId),
+    );
+    const todos = tasks.map((task) => {
+      const due = task.dueAt === null ? null : localOf(scope.timeZone, task.dueAt);
+      return {
+        todoId: task.id,
+        // Typed on the to-do screen, which allows contact details: never to the model.
+        title: redactContacts(task.title),
+        dueDate: due?.date ?? null,
+        dueTime: due?.time ?? null,
+        overdue: task.dueAt !== null && Date.parse(task.dueAt) < scope.now.getTime(),
+        whose: whose(task.assigneeUserId),
+      };
+    });
+    const more = found.length > TODOS_SHOWN;
+    const overdue = todos.filter((todo) => todo.overdue).length;
+    const scopeNote =
+      args.whose === 'team' && permissionScope(scope.actor.context.role, 'tasks.read') !== 'all'
+        ? ' (your own)'
+        : '';
+    return {
+      summary:
+        todos.length === 0
+          ? `No open to-dos${scopeNote}.`
+          : `${String(todos.length)}${more ? '+' : ''} open to-do${todos.length === 1 ? '' : 's'}${scopeNote}${overdue > 0 ? `, ${String(overdue)} overdue` : ''}.`,
+      data: { todos, more },
+      card: null,
+      // The AI's own to-dos may carry words from an earlier turn's untrusted text (a pasted
+      // message): they come back labelled, never as instructions.
+      untrustedText: tasks.some((task) => task.source !== 'manual'),
+    };
   },
 };

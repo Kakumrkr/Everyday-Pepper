@@ -7,7 +7,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S26b** (PCR-004, user 2026-10-21: "Go ahead with your recommendations, ADR is pre-approved"). Decisions at the brief: a staff member unblocking a colleague's time answers `forbidden` (they can see it), clients and to-dos they can't see `not_found`; explanation facts in this session (Task 6, else S27); no new card kinds, no new Playwright journeys.
 - Done: Task 1 `find_client_bookings` (db `listClientBookings`, appointments `listClientBookingsIn`, the tool, reads/hostile/evals/latency tests; the hostile test's mini-loop trims history).
-- Next: Task 2 `list_todos`, then 3 `complete_todo`, 4 `unblock_time` + `get_day` v2, 5 hostile/evals for all, 6 facts, 7 docs + ADR-0032 + checks.
+- Done: Task 2 `list_todos` (core `listTasksIn`, `memberFirstNamesIn`; titles through `redactContacts`; the AI's own to-dos come back labelled untrusted).
+- Watch: `reads.int.test.ts` "list_todos" failed once with no visible diff, then passed 16 runs in a row; re-run it in the full suite.
+- Next: Task 3 `complete_todo`, 4 `unblock_time` + `get_day` v2, 5 hostile/evals for all, 6 facts, 7 docs + ADR-0032 + checks.
 
 ## Last sessions
 - **S26 Phase 6e (2026-10-21): chat screen, cards, Why, Undo, Autonomy settings** ([ADR-0031](../adr/0031-chat-screen-cards-why-undo-and-autonomy-settings.md), accepted; [PCR-004](changes/PCR-004.md), approved). Full entry in [session-log.md](session-log.md).

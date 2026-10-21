@@ -14,7 +14,7 @@ export const GENERATED_CASES_CLOCK = {
   timeZone: 'America/New_York',
 } as const;
 
-const FOLLOW_THROUGH = new Set(['add_todo']);
+const FOLLOW_THROUGH = new Set(['add_todo', 'list_todos', 'complete_todo']);
 
 /** One case per example in every tool's guide, on the business's clock. */
 export function toolEvalCases(

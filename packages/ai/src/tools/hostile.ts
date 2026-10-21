@@ -52,6 +52,7 @@ export function validArguments(
     get_booking: { bookingId: ids.bookingId },
     find_client_bookings: { clientId: ids.clientId },
     list_services_and_staff: {},
+    list_todos: { whose: 'team' },
     create_booking: {
       clientId: ids.clientId,
       serviceId: ids.serviceId,
@@ -78,10 +79,11 @@ export function validArguments(
   };
 }
 
-/** Tools that take one of the business's ids (all but the name search and the listing). */
+/** Tools that take one of the business's ids (all but the name search and the listings). */
 const TAKES_IDS = new Set(TOOLS.map((tool) => tool.name));
 TAKES_IDS.delete('find_clients');
 TAKES_IDS.delete('list_services_and_staff');
+TAKES_IDS.delete('list_todos');
 
 /** Every attack against every tool, for one target business on `date` (local). */
 export function hostileAttacks(targets: HostileTargets, date: string): Attack[] {

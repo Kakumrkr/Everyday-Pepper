@@ -28,6 +28,7 @@ const QUERY_BUDGET: Record<string, number> = {
   get_booking: 15,
   find_client_bookings: 15,
   list_services_and_staff: 12,
+  list_todos: 15,
   create_booking: 60,
   move_booking: 70,
   cancel_booking: 60,

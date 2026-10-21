@@ -35,7 +35,12 @@ import {
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
-import { TaskAssigneeNotMemberError, TaskNotFoundError, UndoRefusedError } from '../errors.js';
+import {
+  TaskAssigneeNotMemberError,
+  TaskNotFoundError,
+  TaskNotOpenError,
+  UndoRefusedError,
+} from '../errors.js';
 import { taskDuePush } from '../task-pushes.js';
 import { leadUserIds, queuePushToMembers } from './push.js';
 
@@ -52,10 +57,23 @@ export async function listTasks(
   query: TaskQuery = {},
 ): Promise<Task[]> {
   requirePermission(actor, 'tasks.read');
+  const parsed = TaskQuerySchema.parse(query);
+  return withMember(db, actor.context, (tx) => listTasksIn(tx, actor, parsed));
+}
+
+/** `listTasks` inside the caller's transaction (the AI's `list_todos`, S26b). */
+export async function listTasksIn(
+  tx: TenantTx,
+  actor: Actor,
+  query: TaskQuery = {},
+): Promise<Task[]> {
+  requirePermission(actor, 'tasks.read');
   const { status, mine, limit } = TaskQuerySchema.parse(query);
-  const rows = await withMember(db, actor.context, (tx) =>
-    listTaskRows(tx, { status, limit, ...(mine && { assigneeUserId: actor.context.userId }) }),
-  );
+  const rows = await listTaskRows(tx, {
+    status,
+    limit,
+    ...(mine && { assigneeUserId: actor.context.userId }),
+  });
   return rows.map(toTask);
 }
 
@@ -148,41 +166,95 @@ export async function changeTask(
   const id = TaskIdSchema.parse(taskId);
   const fields = TaskChangeSchema.parse(change);
   const now = (options.clock ?? systemClock).now();
-  return withMember(db, actor.context, async (tx) => {
-    const row = await lockTask(tx, id);
-    if (row === undefined) throw new TaskNotFoundError();
-    const update: TaskUpdate = {};
-    if (fields.title !== undefined && fields.title !== row.title) update.title = fields.title;
-    if (fields.dueAt !== undefined && !sameInstant(fields.dueAt, row.dueAt)) {
-      update.dueAt = fields.dueAt === null ? null : new Date(fields.dueAt);
-      update.dueNotifiedAt = null;
-    }
-    if (fields.assigneeUserId !== undefined && fields.assigneeUserId !== row.assigneeUserId) {
-      await checkAssignee(tx, actor, fields.assigneeUserId);
-      update.assigneeUserId = fields.assigneeUserId;
-    }
-    if (fields.status !== undefined && fields.status !== row.status) {
-      update.status = fields.status;
-      update.completedAt = fields.status === 'done' ? now : null;
-    }
-    if (Object.keys(update).length === 0) return toTask(row);
+  return withMember(db, actor.context, (tx) => changeTaskIn(tx, actor, id, fields, { now }));
+}
 
-    const updated = await updateTask(tx, id, update);
-    // The row is locked and the member could see it; a change that hides it from them (a
-    // staff member handing their task to someone else) is refused by the database instead.
-    if (updated === undefined) throw new TaskNotFoundError();
-    await appendAuditEntry(tx, {
-      actor: auditActorOf(actor),
-      change: {
-        action: 'task.updated',
-        entity: { type: 'task', id: row.id },
-        before: auditValues(row),
-        after: auditValues(updated),
-      },
-      requestId: actor.requestId,
-    });
-    return toTask(updated);
+/** `changeTask` inside the caller's transaction. */
+export async function changeTaskIn(
+  tx: TenantTx,
+  actor: Actor,
+  taskId: TaskId,
+  change: TaskChange,
+  options: { now: Date },
+): Promise<Task> {
+  requirePermission(actor, 'tasks.manage');
+  const id = TaskIdSchema.parse(taskId);
+  const fields = TaskChangeSchema.parse(change);
+  const row = await lockTask(tx, id);
+  if (row === undefined) throw new TaskNotFoundError();
+  const update: TaskUpdate = {};
+  if (fields.title !== undefined && fields.title !== row.title) update.title = fields.title;
+  if (fields.dueAt !== undefined && !sameInstant(fields.dueAt, row.dueAt)) {
+    update.dueAt = fields.dueAt === null ? null : new Date(fields.dueAt);
+    update.dueNotifiedAt = null;
+  }
+  if (fields.assigneeUserId !== undefined && fields.assigneeUserId !== row.assigneeUserId) {
+    await checkAssignee(tx, actor, fields.assigneeUserId);
+    update.assigneeUserId = fields.assigneeUserId;
+  }
+  if (fields.status !== undefined && fields.status !== row.status) {
+    update.status = fields.status;
+    update.completedAt = fields.status === 'done' ? options.now : null;
+  }
+  if (Object.keys(update).length === 0) return toTask(row);
+
+  const updated = await updateTask(tx, id, update);
+  // The row is locked and the member could see it; a change that hides it from them (a
+  // staff member handing their task to someone else) is refused by the database instead.
+  if (updated === undefined) throw new TaskNotFoundError();
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'task.updated',
+      entity: { type: 'task', id: row.id },
+      before: auditValues(row),
+      after: auditValues(updated),
+    },
+    requestId: actor.requestId,
   });
+  return toTask(updated);
+}
+
+/**
+ * Marks an open to-do done (the AI's `complete_todo`, S26b), in the caller's transaction, as
+ * the screen's "done" does: `TaskNotFoundError` for one the member can't see, `TaskNotOpenError`
+ * for one already done. Returns it before and after.
+ */
+export async function completeTaskIn(
+  tx: TenantTx,
+  actor: Actor,
+  taskId: TaskId,
+  options: { now: Date },
+): Promise<{ before: Task; after: Task }> {
+  requirePermission(actor, 'tasks.manage');
+  const id = TaskIdSchema.parse(taskId);
+  const row = await lockTask(tx, id);
+  if (row === undefined) throw new TaskNotFoundError();
+  if (row.status !== 'open') throw new TaskNotOpenError();
+  const after = await changeTaskIn(tx, actor, id, { status: 'done' }, options);
+  return { before: toTask(row), after };
+}
+
+/**
+ * Opens a to-do the AI completed again (its Undo), only while it is still done and nobody
+ * changed it since: `completedVersion` is its `updatedAt` right after it was completed.
+ * `UndoRefusedError` otherwise, so nobody's later edit is lost.
+ */
+export async function reopenTaskIn(
+  tx: TenantTx,
+  actor: Actor,
+  taskId: TaskId,
+  options: { completedVersion: string },
+): Promise<void> {
+  requirePermission(actor, 'tasks.manage');
+  const id = TaskIdSchema.parse(taskId);
+  const row = await lockTask(tx, id);
+  if (row === undefined) throw new TaskNotFoundError();
+  const version = UtcDateTimeSchema.parse(options.completedVersion);
+  if (row.status !== 'done' || row.updatedAt.getTime() !== Date.parse(version)) {
+    throw new UndoRefusedError('changed_since');
+  }
+  await changeTaskIn(tx, actor, id, { status: 'open' }, { now: row.updatedAt });
 }
 
 /** Staff assign only themselves; anyone else must be a member; `null` needs the full scope. */
