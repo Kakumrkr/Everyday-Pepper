@@ -21,6 +21,7 @@ import type { ApiErrorCode, SlotUnavailable, WrongCode } from '@pepper/contracts
 import {
   AlreadyAMemberError,
   ClientNotFoundError,
+  ConversationNotFoundError,
   ForbiddenError,
   InviteInvalidError,
   InviteLimitReachedError,
@@ -87,6 +88,7 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [WaitlistEntryNotChangeableError, ConflictException, 'waitlist_entry_not_changeable'],
   [WaitlistExpiredError, BadRequestException, 'waitlist_expired'],
   [TaskNotFoundError, NotFoundException, 'task_not_found'],
+  [ConversationNotFoundError, NotFoundException, 'conversation_not_found'],
   [TaskAssigneeNotMemberError, UnprocessableEntityException, 'task_assignee_not_member'],
   [BookingPageNotFoundError, NotFoundException, 'booking_page_not_found'],
   [BookingRequestNotFoundError, NotFoundException, 'booking_request_not_found'],

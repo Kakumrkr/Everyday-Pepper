@@ -138,6 +138,7 @@ export type ConversationSummary = z.infer<typeof ConversationSummarySchema>;
 export const ConversationsResponseSchema = z.strictObject({
   conversations: z.array(ConversationSummarySchema),
 });
+export type ConversationsResponse = z.infer<typeof ConversationsResponseSchema>;
 
 /** One item of a conversation as the member sees it: their words, the AI's, and cards. */
 export const ChatHistoryItemSchema = z.discriminatedUnion('kind', [

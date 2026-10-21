@@ -3,6 +3,8 @@ const REQUEST_HEADERS = [
   'accept',
   'content-type',
   'cookie',
+  // Resuming a chat turn's events after the last one received (ADR-0030).
+  'last-event-id',
   // Better Auth and the api check these against the app origin (CSRF).
   'origin',
   'referer',
@@ -62,6 +64,12 @@ export async function forwardToApi(request: Request, options: ForwardOptions): P
     return Response.json(TOO_LARGE, { status: 413 });
   }
 
+  // The time limit is for the api to answer, not for the body: a chat turn's events stream for
+  // as long as the turn runs (ADR-0030). A browser that leaves stops the forwarding too.
+  const answered = new AbortController();
+  const timer = setTimeout(() => {
+    answered.abort();
+  }, timeoutMs);
   let upstream: Response;
   try {
     upstream = await fetch(target, {
@@ -70,15 +78,17 @@ export async function forwardToApi(request: Request, options: ForwardOptions): P
       ...(body !== undefined && { body }),
       redirect: 'manual',
       cache: 'no-store',
-      signal: AbortSignal.timeout(timeoutMs),
+      signal: AbortSignal.any([answered.signal, request.signal]),
     });
   } catch {
+    clearTimeout(timer);
     return Response.json(
       { code: 'api_unavailable', message: 'Pepper is not reachable right now. Try again soon.' },
       { status: 502 },
     );
   }
 
+  clearTimeout(timer);
   const responseHeaders = new Headers();
   for (const name of RESPONSE_HEADERS) {
     const value = upstream.headers.get(name);

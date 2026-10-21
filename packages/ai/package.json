@@ -9,6 +9,11 @@
       "@pepper/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./config": {
+      "@pepper/source": "./src/openai/config.ts",
+      "types": "./dist/openai/config.d.ts",
+      "default": "./dist/openai/config.js"
     }
   },
   "files": [

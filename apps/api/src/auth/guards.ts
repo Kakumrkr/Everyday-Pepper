@@ -64,6 +64,8 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   too_many_requests: 'Too many tries. Wait a little and try again',
   email_unavailable: 'Online booking is not available right now. Contact the business',
   temporarily_unavailable: 'This is not available right now. Try again in a moment',
+  conversation_not_found: 'No such conversation',
+  turn_in_progress: 'Pepper is still answering your last message in this conversation',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */
