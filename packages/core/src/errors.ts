@@ -90,3 +90,61 @@ export class TaskAssigneeNotMemberError extends Error {
     this.name = 'TaskAssigneeNotMemberError';
   }
 }
+
+/**
+ * No such AI proposal in the business, or not one the member may see (staff: the ones made
+ * for them).
+ */
+export class ProposalNotFoundError extends Error {
+  constructor() {
+    super('No such proposal in this business');
+    this.name = 'ProposalNotFoundError';
+  }
+}
+
+/** The proposal was already rejected, expired or replaced by a newer one (ADR-0028). */
+export class ProposalNotPendingError extends Error {
+  constructor(readonly status: 'approved' | 'rejected' | 'expired' | 'superseded') {
+    super(`This proposal is ${status}`);
+    this.name = 'ProposalNotPendingError';
+  }
+}
+
+/** No such AI action in the business, or not one the member may see. */
+export class ActionNotFoundError extends Error {
+  constructor() {
+    super('No such action in this business');
+    this.name = 'ActionNotFoundError';
+  }
+}
+
+/** The action can no longer be undone: its undo window has closed, or it never had one. */
+export class UndoWindowClosedError extends Error {
+  constructor() {
+    super('This action can no longer be undone');
+    this.name = 'UndoWindowClosedError';
+  }
+}
+
+/**
+ * Why an undo was refused although its window is open, as a stable code the *Why?* sheet can
+ * explain: the world moved on (the slot was rebooked, the appointment started, the email left).
+ */
+export type UndoRefusal =
+  'slot_taken' | 'already_started' | 'already_sent' | 'changed_since' | 'not_possible';
+
+/** The inverse was refused by the domain; nothing was changed (ADR-0028). */
+export class UndoRefusedError extends Error {
+  constructor(readonly reason: UndoRefusal) {
+    super(`This action can't be undone: ${reason}`);
+    this.name = 'UndoRefusedError';
+  }
+}
+
+/** The appointment the action is about has already started: it can't be proposed any more. */
+export class ActionTooLateError extends Error {
+  constructor() {
+    super('The appointment has already started');
+    this.name = 'ActionTooLateError';
+  }
+}

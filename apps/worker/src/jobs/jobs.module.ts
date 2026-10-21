@@ -72,7 +72,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
         const result = await cleanUp(db, { clock });
         // Counts only.
         this.logger.log(
-          `Clean-up: ${String(result.bookingRequests)} booking requests, ${String(result.outboxMessages)} outbox messages in ${String(result.businesses)} businesses`,
+          `Clean-up: ${String(result.bookingRequests)} booking requests, ${String(result.outboxMessages)} outbox messages, ${String(result.expiredProposals)} expired AI proposals in ${String(result.businesses)} businesses`,
         );
       },
       this.logger,

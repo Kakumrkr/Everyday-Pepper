@@ -82,7 +82,8 @@ export interface NewProposal {
   preview: TrustJson;
   fingerprint: string;
   explanation: ActionExplanation;
-  requestedBy: UserId;
+  /** `null` only for a refreshed proposal whose member's account was deleted meanwhile. */
+  requestedBy: UserId | null;
   recordOwner: UserId | null;
   expiresAt: Date;
 }
@@ -107,7 +108,7 @@ export async function insertProposal(
       preview: TrustJsonSchema.parse(input.preview),
       fingerprint: StateFingerprintSchema.parse(input.fingerprint),
       explanation: ActionExplanationSchema.parse(input.explanation),
-      requestedByUserId: Id.parse(input.requestedBy),
+      requestedByUserId: input.requestedBy === null ? null : Id.parse(input.requestedBy),
       recordOwnerUserId: input.recordOwner === null ? null : Id.parse(input.recordOwner),
       expiresAt: input.expiresAt,
     })

@@ -28,7 +28,12 @@ const OPTIONS: JobsOptions = {
 beforeEach(() => {
   vi.clearAllMocks();
   appointments.sendDueReminders.mockResolvedValue({ queued: 1, skipped: 0 });
-  core.cleanUp.mockResolvedValue({ businesses: 2, bookingRequests: 3, outboxMessages: 4 });
+  core.cleanUp.mockResolvedValue({
+    businesses: 2,
+    bookingRequests: 3,
+    outboxMessages: 4,
+    expiredProposals: 5,
+  });
   core.sendDueTaskPushes.mockResolvedValue(1);
 });
 
