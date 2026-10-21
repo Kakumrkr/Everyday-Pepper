@@ -7,6 +7,7 @@ export * from './errors.js';
 export * from './mapping.js';
 export * from './pushes.js';
 export * from './services/availability.js';
+export * from './services/booking-emails.js';
 export * from './services/bookings.js';
 export * from './services/hours.js';
 export * from './services/notices.js';
