@@ -213,11 +213,17 @@ export async function approveToolProposal(
 ): Promise<ApprovalResult> {
   const proposal = await getProposal(deps.db, deps.actor, proposalId);
   const tool = writeToolNamed(proposal.tool);
+  // A proposal from another version of the tool expires (ADR-0031): its payload may not even
+  // parse with today's schema, so it is never re-run.
+  const runner =
+    proposal.toolVersion === tool.version
+      ? writeRunner(tool, deps, proposal.payload).runner
+      : expiringRunner(tool, proposal.action);
   return approveProposal(
     deps.db,
     deps.actor,
     proposal.id,
-    { shownFingerprint, runner: writeRunner(tool, deps, proposal.payload).runner },
+    { shownFingerprint, runner },
     { clock: deps.clock },
   );
 }
@@ -375,6 +381,7 @@ function changeCard(
     before: shown.before as ChangeSide | null,
     after: shown.after as ChangeSide | null,
     emails: shown.emails as WouldBeEmail[],
+    summary: shown.summary,
   };
 }
 
@@ -424,6 +431,20 @@ function writeToolNamed(name: string): WriteTool {
   const tool = findTool(name);
   if (tool?.kind !== 'write') throw new UnknownToolError();
   return tool;
+}
+
+/** The runner for a proposal of another tool version: the trust layer only expires it. */
+function expiringRunner(tool: WriteTool, action: AutonomyAction): ActionRunner {
+  const refuse = () => Promise.reject(new Error(`${tool.name}: an older proposal only expires`));
+  return {
+    tool: tool.name,
+    version: tool.version,
+    actions: [action],
+    tier: tool.tier,
+    preview: refuse,
+    execute: refuse,
+    undo: refuse,
+  };
 }
 
 /** A runner that can only undo (the receipt holds the inverse; no payload is needed). */

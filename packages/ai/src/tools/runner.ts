@@ -67,6 +67,7 @@ export function writeRunner(
         inverse: performed.inverse,
         outboxMessageIds: queued,
         appointmentStartsAt: performed.appointmentStartsAt,
+        summary: performed.summary,
       };
     },
     undo: (tx, actor, receipt) => undoWith(tool, deps, tx, actor, receipt),

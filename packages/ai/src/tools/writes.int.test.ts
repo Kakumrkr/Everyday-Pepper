@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   approveToolProposal,
   dispatchToolCall,
+  findTool,
   undoToolAction,
   type ToolOutcome,
 } from './registry.js';
@@ -385,6 +386,52 @@ describe('conflicts and stale approvals', () => {
     );
     expect(approval.kind).toBe('refused');
     expect(await tuesdayBookings(w)()).toHaveLength(1);
+  });
+
+  it('expires a proposal made by an older version of the tool, and books nothing (S26)', async () => {
+    const w = await newWorld(db);
+    await askFirst(w);
+    const proposal = proposed(
+      await callTool(depsFor(w, w.owner), 'create_booking', {
+        clientId: w.maria.id,
+        serviceId: w.haircut.id,
+        staffMemberId: w.jessStaff.id,
+        date: TUESDAY,
+        time: '14:00',
+        emailClient: false,
+      }),
+    );
+    const tool = findTool('create_booking');
+    if (tool?.kind !== 'write') throw new Error('create_booking is a write tool');
+    const version = tool.version;
+    tool.version = version + 1;
+    try {
+      const approval = await approveToolProposal(
+        depsFor(w, w.owner),
+        proposal.id,
+        proposal.fingerprint,
+      );
+      expect(approval).toEqual({ kind: 'expired' });
+    } finally {
+      tool.version = version;
+    }
+    expect(await tuesdayBookings(w)()).toHaveLength(0);
+  });
+
+  it('the receipt keeps the tool’s summary, and the card shows it', async () => {
+    const w = await newWorld(db);
+    await justDoIt(w);
+    const outcome = await callTool(depsFor(w, w.owner), 'create_booking', {
+      clientId: w.maria.id,
+      serviceId: w.haircut.id,
+      staffMemberId: w.jessStaff.id,
+      date: TUESDAY,
+      time: '11:00',
+      emailClient: false,
+    });
+    const execution = done(outcome);
+    expect(execution.summary).toMatch(/^New booking: Maria/);
+    expect(outcome.card).toMatchObject({ kind: 'change', summary: execution.summary });
   });
 });
 

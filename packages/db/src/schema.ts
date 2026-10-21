@@ -1248,6 +1248,8 @@ export const aiActionProposals = pgTable(
       .references(() => tenants.id, { onDelete: 'cascade' }),
     action: text('action').notNull(),
     tool: text('tool').notNull(),
+    // The tool's version when proposed (S26): a proposal from an older version expires.
+    toolVersion: integer('tool_version').notNull().default(1),
     targetKey: text('target_key').notNull(),
     idempotencyKey: text('idempotency_key').notNull(),
     status: text('status').notNull().default('pending'),
@@ -1282,6 +1284,7 @@ export const aiActionProposals = pgTable(
       .where(sql`${table.status} = 'pending'`),
     check('ai_action_proposals_action_known', sql`${table.action} IN (${autonomyActionList})`),
     check('ai_action_proposals_tool_format', trustCode(table.tool)),
+    check('ai_action_proposals_tool_version_positive', sql`${table.toolVersion} >= 1`),
     check(
       'ai_action_proposals_target_key_format',
       sql`${table.targetKey} ~ '^[A-Za-z0-9.:_-]{1,200}$'`,
@@ -1350,6 +1353,13 @@ export const aiActionExecutions = pgTable(
     onBehalfOfUserId: uuid('on_behalf_of_user_id').references(() => users.id, {
       onDelete: 'set null',
     }),
+    // The member whose request it answered (S26): a staff member whose proposal a lead approved
+    // sees the receipt too. NULL once their account is deleted.
+    requestedByUserId: uuid('requested_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    // The tool's one-sentence summary (its code's words, never the model's); NULL before S26.
+    summary: text('summary'),
     recordOwnerUserId: uuid('record_owner_user_id'),
     undoUntil: timestamp('undo_until', { withTimezone: true }),
     undoneByUserId: uuid('undone_by_user_id').references(() => users.id, { onDelete: 'set null' }),
@@ -1370,6 +1380,11 @@ export const aiActionExecutions = pgTable(
     index('ai_action_executions_entity_idx').on(table.tenantId, table.entityType, table.entityId),
     index('ai_action_executions_on_behalf_of_user_id_idx').on(table.onBehalfOfUserId),
     index('ai_action_executions_undone_by_user_id_idx').on(table.undoneByUserId),
+    index('ai_action_executions_requested_by_user_id_idx').on(table.requestedByUserId),
+    check(
+      'ai_action_executions_summary_length',
+      sql`${table.summary} IS NULL OR char_length(${table.summary}) <= 600`,
+    ),
     check('ai_action_executions_action_known', sql`${table.action} IN (${autonomyActionList})`),
     check('ai_action_executions_tool_format', trustCode(table.tool)),
     check('ai_action_executions_entity_type_format', trustCode(table.entityType)),
@@ -1408,8 +1423,8 @@ export const aiActionExecutions = pgTable(
     pgPolicy('member_scope', {
       as: 'restrictive',
       for: 'all',
-      using: sql`${memberSeesAll} OR on_behalf_of_user_id = ${currentUserId}`,
-      withCheck: sql`${memberSeesAll} OR on_behalf_of_user_id = ${currentUserId}`,
+      using: sql`${memberSeesAll} OR on_behalf_of_user_id = ${currentUserId} OR requested_by_user_id = ${currentUserId}`,
+      withCheck: sql`${memberSeesAll} OR on_behalf_of_user_id = ${currentUserId} OR requested_by_user_id = ${currentUserId}`,
     }),
   ],
 );

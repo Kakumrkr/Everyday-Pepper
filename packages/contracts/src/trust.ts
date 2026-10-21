@@ -455,6 +455,8 @@ export const ActionProposalSchema = z
     id: ActionProposalIdSchema,
     action: AutonomyActionSchema,
     tool: TrustCodeSchema,
+    /** The tool's version when proposed: an older version's proposal expires (S26). */
+    toolVersion: z.int().min(1),
     targetKey: ActionTargetKeySchema,
     status: ProposalStatusSchema,
     payload: TrustJsonSchema,
@@ -486,7 +488,11 @@ export const ActionExecutionSchema = z
     explanation: ActionExplanationSchema,
     outboxMessageIds: z.array(z.uuid()).max(100),
     onBehalfOfUserId: UserIdSchema.nullable(),
+    /** Whose request it answered: a lead may have approved a staff member's proposal (S26). */
+    requestedByUserId: UserIdSchema.nullable(),
     recordOwnerUserId: UserIdSchema.nullable(),
+    /** The tool's one sentence about it; `null` for receipts from before S26. */
+    summary: z.string().max(600).nullable(),
     undoUntil: UtcDateTimeSchema.nullable(),
     undoneByUserId: UserIdSchema.nullable(),
     undoneAt: UtcDateTimeSchema.nullable(),

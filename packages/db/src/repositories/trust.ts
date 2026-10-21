@@ -86,6 +86,8 @@ export interface NewProposal {
   requestedBy: UserId | null;
   recordOwner: UserId | null;
   expiresAt: Date;
+  /** The tool's version (S26: a proposal from an older version expires). Default 1. */
+  toolVersion?: number;
 }
 
 /**
@@ -102,6 +104,10 @@ export async function insertProposal(
     .values({
       action: AutonomyActionSchema.parse(input.action),
       tool: TrustCodeSchema.parse(input.tool),
+      toolVersion: z
+        .int()
+        .min(1)
+        .parse(input.toolVersion ?? 1),
       targetKey: ActionTargetKeySchema.parse(input.targetKey),
       idempotencyKey: ActionIdempotencyKeySchema.parse(input.idempotencyKey),
       payload: TrustJsonSchema.parse(input.payload),
@@ -243,6 +249,15 @@ export async function expirePendingProposals(
   return rows;
 }
 
+/** A receipt's summary: one sentence of the tool's own words, never a contact (TrustJson). */
+const ExecutionSummarySchema = z
+  .string()
+  .max(600)
+  .refine(
+    (text) => TrustJsonSchema.safeParse(text).success,
+    'Holds an email address or phone number',
+  );
+
 export interface NewExecution {
   proposalId: ActionProposalId | null;
   action: AutonomyAction;
@@ -257,7 +272,11 @@ export interface NewExecution {
   explanation: ActionExplanation;
   outboxMessageIds: readonly OutboxMessageId[];
   onBehalfOf: UserId;
+  /** The member whose request it answered (S26); defaults to `onBehalfOf`. */
+  requestedBy?: UserId | null;
   recordOwner: UserId | null;
+  /** The tool's one-sentence summary, at most 600 characters and never a contact (S26). */
+  summary?: string | null;
 }
 
 /**
@@ -285,7 +304,14 @@ export async function insertExecution(
       explanation: ActionExplanationSchema.parse(input.explanation),
       outboxMessageIds: z.array(Id).max(100).parse(input.outboxMessageIds),
       onBehalfOfUserId: Id.parse(input.onBehalfOf),
+      requestedByUserId:
+        input.requestedBy === undefined
+          ? Id.parse(input.onBehalfOf)
+          : input.requestedBy === null
+            ? null
+            : Id.parse(input.requestedBy),
       recordOwnerUserId: input.recordOwner === null ? null : Id.parse(input.recordOwner),
+      summary: ExecutionSummarySchema.nullable().parse(input.summary ?? null),
     })
     .onConflictDoNothing()
     .returning();
