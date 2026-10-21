@@ -5,3 +5,4 @@ export * from './names.js';
 export * from './registry.js';
 export * from './runner.js';
 export * from './tool.js';
+export * from './eval-cases.js';

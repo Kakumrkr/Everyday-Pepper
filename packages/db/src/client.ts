@@ -11,6 +11,8 @@ export interface DatabaseOptions {
   maxConnections?: number;
   /** Called when an idle pooled connection fails, so it is logged instead of crashing. */
   onIdleError?: (error: Error) => void;
+  /** Called before every statement (query budgets in tests, per-turn metrics); no text given. */
+  onQuery?: () => void;
 }
 
 /** The process's database: query builder, readiness probe and shutdown. */
@@ -29,6 +31,17 @@ export function createDatabase(options: DatabaseOptions): DatabaseHandle {
     idleTimeoutMillis: 10_000,
   });
   pool.on('error', (error) => options.onIdleError?.(error));
+  const { onQuery } = options;
+  if (onQuery !== undefined) {
+    // Statements in transactions run on checked-out clients: count those.
+    pool.on('connect', (client) => {
+      const query = client.query.bind(client) as (...args: unknown[]) => unknown;
+      (client as { query: (...args: unknown[]) => unknown }).query = (...args: unknown[]) => {
+        onQuery();
+        return query(...args);
+      };
+    });
+  }
   return {
     db: drizzle({ client: pool, schema }),
     ping: () => checkDatabaseRole(pool),

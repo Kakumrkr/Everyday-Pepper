@@ -38,11 +38,13 @@ export interface TestDatabase {
 }
 
 /** A migrated Postgres with the services' login role provisioned. */
-export async function startTestDatabase(): Promise<TestDatabase> {
+export async function startTestDatabase(
+  options: { onQuery?: () => void } = {},
+): Promise<TestDatabase> {
   const postgres = await startPostgres();
   const appUrl = postgresUrlAs(postgres.url, 'pepper_service', 'service-test-password');
   await prepareDatabase(postgres.url, appUrl);
-  const app = createDatabase({ url: appUrl, maxConnections: 8 });
+  const app = createDatabase({ url: appUrl, maxConnections: 8, ...options });
   return {
     app,
     stop: async () => {

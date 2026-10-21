@@ -7,6 +7,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S24 (6c) tool registry and the first tools**: Session Brief approved by the user (2026-10-21): "Go ahead with your recommendations, ADR-0029 is fine". The user pre-approved ADR-0029 and asked Claude to open the PR, merge it to `main` and end with the prompt for the next session.
 - **Done:**
+  - T8: eval cases generated from the guides (`toolEvalCases`, 20 cases, schema-checked); per-tool budgets on 2,000 bookings (statement counts + p95 ≤ 3× 300 ms; measured p95 7–63 ms); `createDatabase({ onQuery })`.
   - T7: the hostile fake (`tools/hostile.ts`, 92 attacks per role, as owner and staff) is 100% stopped; plus AI approve/reject/undo, autonomy, forged fingerprints, foreign and unheld outbox links, the bulk lock, a retry storm and injected names. It found two bugs, now fixed: `alternativesRange` built an inverted range for a time long past (a pre-existing 500 on the calendar too; test first), and `get_day` answered an empty day for another business's staff id (now `not_found`).
   - T6: the five write tools are green on Postgres (26 tests, mutation-checked): preview = execution, inverse restores (and cancels the email), role matrix, cross-tenant, conflicts with 3 nearest, stale and refused approvals, dial and email hold, retries.
   - T4–T5:
@@ -16,7 +17,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
   - T3: the trust layer runs every preview in a savepoint it always rolls back (`dryRun`). An approval whose fresh preview the domain refuses supersedes the proposal and returns `refused` with the error. Mutation-checked.
   - T2: `queueBookingEmail` (appointments) with `holdSeconds`, returning the outbox id; the api's `BookingEmails` delegates to it.
   - T1: transaction-taking variants (`createBookingIn`, `changeBookingIn`, `getBookingIn`, `listBookingsIn`, `reinstateBookingIn`, `findAvailabilityIn`, `addTimeOffIn`/`removeTimeOffIn`/`listTimeOffBetweenIn`, `listServicesIn`, `listStaffIn`, `createTaskIn`, `withdrawTaskIn`, `findClientsByNameIn`). Booking writes run in a savepoint. New audit action `task.deleted`.
-- **Next:** T7 the hostile fake; T8 eval generation and latency; T9 docs, ADR-0029 (accepted), PR, merge.
+- **Next:** T9 docs, ADR-0029 (accepted), PR, merge.
 - **Decisions (user, brief):**
   - ADR-0029 for S24; S25's ADR becomes 0030.
   - `email_client` on write tools: `null` means the screens' default; the email stays on the dial.
