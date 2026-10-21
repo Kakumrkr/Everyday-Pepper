@@ -13,6 +13,15 @@ import {
 } from './tenancy.js';
 import { RuleSchema } from './rules.js';
 import { TaskSourceSchema, TaskStatusSchema } from './tasks.js';
+import {
+  ActionProposalIdSchema,
+  AutonomyActionSchema,
+  AutonomyOutcomeSchema,
+  AutonomySettingsSchema,
+  ExecutionStatusSchema,
+  ProposalStatusSchema,
+  UndoReasonSchema,
+} from './trust.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // The audit log (ADR-0013): one append-only entry per change to a business, written in the
@@ -20,9 +29,13 @@ import { UtcDateTimeSchema } from './time.js';
 // so an entry holds only the fields listed here: ids, roles and settings, never names, emails,
 // phone numbers or free text. New actions are added here, next to the code that writes them.
 
-/** Who made a change: a signed-in member, or the platform itself (jobs, migrations). */
+/**
+ * Who made a change: a signed-in member, the AI employee acting for a member (ADR-0028: the
+ * member asked, or approved its proposal), or the platform itself (jobs, migrations).
+ */
 export const AuditActorSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('user'), userId: UserIdSchema }).strict(),
+  z.object({ kind: z.literal('ai_on_behalf_of'), userId: UserIdSchema }).strict(),
   z.object({ kind: z.literal('system') }).strict(),
 ]);
 export type AuditActor = z.infer<typeof AuditActorSchema>;
@@ -104,6 +117,27 @@ const TaskValuesSchema = z
     dueAt: UtcDateTimeSchema.nullable(),
     assigneeUserId: UserIdSchema.nullable(),
     source: TaskSourceSchema,
+  })
+  .strict();
+
+// The trust layer (ADR-0028): autonomy settings, and the AI's proposals and executions by
+// action, status and time. Payloads, previews and explanations stay in their own tables.
+const AutonomyValuesSchema = z
+  .object({
+    askFirst: z.boolean(),
+    levels: AutonomySettingsSchema,
+  })
+  .strict();
+const ProposalValuesSchema = z
+  .object({ action: AutonomyActionSchema, status: ProposalStatusSchema })
+  .strict();
+const ExecutionValuesSchema = z
+  .object({
+    action: AutonomyActionSchema,
+    outcome: AutonomyOutcomeSchema,
+    status: ExecutionStatusSchema,
+    proposalId: ActionProposalIdSchema.nullable(),
+    undoUntil: UtcDateTimeSchema.nullable(),
   })
   .strict();
 
@@ -312,6 +346,48 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       after: TaskValuesSchema,
     })
     .strict(),
+  // The business's own autonomy choices (only the overrides; the rest are defaults).
+  z
+    .object({
+      action: z.literal('autonomy.updated'),
+      entity: entity('tenant'),
+      before: AutonomyValuesSchema,
+      after: AutonomyValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('ai_proposal.created'),
+      entity: entity('ai_action_proposal'),
+      before: z.null(),
+      after: ProposalValuesSchema.extend({ expiresAt: UtcDateTimeSchema }).strict(),
+    })
+    .strict(),
+  // Approved, rejected, expired or superseded.
+  z
+    .object({
+      action: z.literal('ai_proposal.decided'),
+      entity: entity('ai_action_proposal'),
+      before: ProposalValuesSchema,
+      after: ProposalValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('ai_action.executed'),
+      entity: entity('ai_action_execution'),
+      before: z.null(),
+      after: ExecutionValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('ai_action.undone'),
+      entity: entity('ai_action_execution'),
+      before: ExecutionValuesSchema,
+      after: ExecutionValuesSchema.extend({ undoReason: UndoReasonSchema.nullable() }).strict(),
+    })
+    .strict(),
 ]);
 export type AuditChange = z.infer<typeof AuditChangeSchema>;
 export type AuditAction = AuditChange['action'];
@@ -321,7 +397,10 @@ export const AuditLogEntrySchema = z
   .object({
     id: z.uuid(),
     at: UtcDateTimeSchema,
-    actor: z.object({ kind: z.enum(['user', 'system']), userId: UserIdSchema.nullable() }),
+    actor: z.object({
+      kind: z.enum(['user', 'ai_on_behalf_of', 'system']),
+      userId: UserIdSchema.nullable(),
+    }),
   })
   .and(AuditChangeSchema);
 export type AuditLogEntry = z.infer<typeof AuditLogEntrySchema>;

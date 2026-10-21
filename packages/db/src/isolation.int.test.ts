@@ -10,6 +10,7 @@ import {
   StaffMemberIdSchema,
   TenantIdSchema,
   UsagePeriodSchema,
+  type ActionExplanation,
   type StaffMemberId,
   type TenantId,
   type UserId,
@@ -40,6 +41,7 @@ import { savePushSubscription } from './repositories/push-subscriptions.js';
 import { listDueBookingReminders, planBookingReminder } from './repositories/reminders.js';
 import { insertTask, listDueTasks } from './repositories/tasks.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
+import { insertExecution, insertProposal, saveAutonomySettings } from './repositories/trust.js';
 import { addUsage } from './repositories/usage.js';
 import { withTenant, withUser, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
@@ -76,6 +78,10 @@ interface TenantTable {
   jobScan?: string;
   /** The services may only insert and read (no UPDATE or DELETE grant). */
   appendOnly?: true;
+  /** The services may insert, read and update, but not delete (receipts, ADR-0028). */
+  noDelete?: true;
+  /** A trigger refuses changes to the row's identity and content (ADR-0028): P0001. */
+  guarded?: true;
   /**
    * The restrictive `member_scope*` policies (staff reach only their own records, ADR-0017),
    * as Postgres prints them; the staff scope itself is proven in bookings.int.test.ts.
@@ -423,7 +429,100 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       },
     ],
   },
+  autonomy_settings: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) =>
+      (
+        await saveAutonomySettings(tx, {
+          askFirst: false,
+          levels: { 'booking.create': 'notify' },
+          updatedBy: await insertUser(db),
+        })
+      ).id,
+    touch: 'ask_first = ask_first',
+    // Everyone reads it; only owners, managers and work without a user change it.
+    memberScope: [
+      { policyname: 'member_scope_delete', cmd: 'DELETE', qual: SEES_ALL, with_check: null },
+      { policyname: 'member_scope_insert', cmd: 'INSERT', qual: null, with_check: SEES_ALL },
+      { policyname: 'member_scope_update', cmd: 'UPDATE', qual: 'true', with_check: SEES_ALL },
+    ],
+  },
+  ai_action_proposals: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => (await seedProposal(tx)).id,
+    touch: 'status = status',
+    noDelete: true,
+    guarded: true,
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: `(${SEES_ALL} OR (requested_by_user_id = current_user_id()))`,
+        with_check: `(${SEES_ALL} OR (requested_by_user_id = current_user_id()))`,
+      },
+    ],
+  },
+  ai_action_executions: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const execution = await insertExecution(tx, {
+        proposalId: null,
+        action: 'time.block',
+        tool: 'block_time',
+        outcome: 'execute_and_notify',
+        idempotencyKey: `seed:${newId()}`,
+        entity: { type: 'time_off', id: newId() },
+        before: null,
+        after: { startsAt: '2026-10-20T14:00:00.000Z' },
+        undo: { inverse: { timeOffId: newId() }, until: new Date('2026-10-21T14:00:00Z') },
+        explanation: EXPLANATION,
+        outboxMessageIds: [],
+        onBehalfOf: await insertUser(db),
+        recordOwner: null,
+      });
+      return String(execution?.id);
+    },
+    touch: 'status = status',
+    noDelete: true,
+    guarded: true,
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: `(${SEES_ALL} OR (on_behalf_of_user_id = current_user_id()))`,
+        with_check: `(${SEES_ALL} OR (on_behalf_of_user_id = current_user_id()))`,
+      },
+    ],
+  },
 };
+
+const EXPLANATION: ActionExplanation = {
+  requestMessageId: null,
+  steps: [],
+  facts: [],
+  alternatives: [],
+  untrustedContext: false,
+  decision: { outcome: 'execute_and_notify', reason: 'setting' },
+};
+
+/** A new pending proposal of the transaction's tenant. */
+async function seedProposal(tx: TenantTx) {
+  const proposal = await insertProposal(tx, {
+    action: 'booking.cancel',
+    tool: 'cancel_booking',
+    targetKey: `booking:${newId()}`,
+    idempotencyKey: `seed:${newId()}`,
+    payload: { bookingId: newId() },
+    preview: { status: 'cancelled' },
+    fingerprint: 'a'.repeat(64),
+    explanation: { ...EXPLANATION, decision: { outcome: 'propose', reason: 'setting' } },
+    requestedBy: await insertUser(db),
+    recordOwner: null,
+    expiresAt: new Date(Date.now() + 86_400_000),
+  });
+  if (proposal === undefined) throw new Error('seed proposal not stored');
+  return proposal;
+}
 
 /** A new client of the transaction's tenant. */
 async function seedClient(tx: TenantTx) {
@@ -684,7 +783,7 @@ describe('the services role', () => {
     expect(sqlState(error)).toBe('42501');
   });
 
-  it(`${APP_ROLE} may write every tenant table except the append-only ones`, async () => {
+  it(`${APP_ROLE} may write every tenant table except the append-only and receipt ones`, async () => {
     const grants = await asAdmin<{ table: string; privileges: string[] }>(
       `SELECT table_name AS table, array_agg(privilege_type::text ORDER BY privilege_type) AS privileges
          FROM information_schema.role_table_grants
@@ -694,7 +793,11 @@ describe('the services role', () => {
     const byTable = Object.fromEntries(grants.map((g) => [g.table, g.privileges]));
     for (const [table, spec] of Object.entries(TENANT_TABLES)) {
       expect(byTable[table], table).toEqual(
-        spec.appendOnly === true ? ['INSERT', 'SELECT'] : ['DELETE', 'INSERT', 'SELECT', 'UPDATE'],
+        spec.appendOnly === true
+          ? ['INSERT', 'SELECT']
+          : spec.noDelete === true
+            ? ['INSERT', 'SELECT', 'UPDATE']
+            : ['DELETE', 'INSERT', 'SELECT', 'UPDATE'],
       );
     }
   });
@@ -745,6 +848,13 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
     return (await inTenant(tenant, statement)).rowCount;
   }
   const none = spec.appendOnly === true ? 'denied' : 0;
+  const noDelete = spec.appendOnly === true || spec.noDelete === true ? 'denied' : 0;
+  async function remove(tenant: TenantId, statement: string): Promise<number | null | 'denied'> {
+    if (spec.noDelete !== true) return write(tenant, statement);
+    const error = await inTenant(tenant, statement).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('42501');
+    return 'denied';
+  }
 
   it("another tenant's row cannot be updated or deleted", async () => {
     const before = await inTenant(tenantB, `SELECT * FROM ${table} WHERE id = '${ids().b}'`);
@@ -752,8 +862,8 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
       tenantA,
       `UPDATE ${table} SET ${spec.touch} WHERE id = '${ids().b}'`,
     );
-    const deleted = await write(tenantA, `DELETE FROM ${table} WHERE id = '${ids().b}'`);
-    expect([updated, deleted]).toEqual([none, none]);
+    const deleted = await remove(tenantA, `DELETE FROM ${table} WHERE id = '${ids().b}'`);
+    expect([updated, deleted]).toEqual([none, noDelete]);
     const after = await inTenant(tenantB, `SELECT * FROM ${table} WHERE id = '${ids().b}'`);
     expect(after.rows).toEqual(before.rows);
     expect(after.rows).toHaveLength(1);
@@ -773,12 +883,18 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
 
   it('a row cannot be moved to another tenant', async () => {
     if (column === 'id') return; // moving a tenant means changing its primary key; covered above
-    // 42501 either way: the policy's WITH CHECK, or no UPDATE grant on an append-only table.
+    // 42501 either way: the policy's WITH CHECK, or no UPDATE grant on an append-only table;
+    // a guarded table's trigger refuses first (P0001).
     const error = await inTenant(
       tenantA,
       `UPDATE ${table} SET ${column} = '${tenantB}' WHERE id = '${ids().a}'`,
     ).catch((e: unknown) => e);
-    expect(sqlState(error)).toBe('42501');
+    expect(sqlState(error)).toBe(spec.guarded === true ? 'P0001' : '42501');
+    const unchanged = await inTenant<{ owner: string }>(
+      tenantA,
+      `SELECT ${column}::text AS owner FROM ${table} WHERE id = '${ids().a}'`,
+    );
+    expect(unchanged.rows).toEqual([{ owner: tenantA }]);
   });
 
   it('nothing is visible without a tenant', async () => {
@@ -796,8 +912,14 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
       return sqlState(error) === '42501' ? 'denied' : error;
     };
     const updated = await probe(`UPDATE ${table} SET ${spec.touch}`);
-    const deleted = await probe(`DELETE FROM ${table}`);
-    expect([updated, deleted]).toEqual([none, none]);
+    const deleted =
+      spec.noDelete === true
+        ? await db
+            .execute(sql.raw(`DELETE FROM ${table}`))
+            .then(() => 'allowed')
+            .catch((e: unknown) => (sqlState(e) === '42501' ? 'denied' : e))
+        : await probe(`DELETE FROM ${table}`);
+    expect([updated, deleted]).toEqual([none, noDelete]);
   });
 });
 

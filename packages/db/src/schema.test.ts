@@ -2,7 +2,10 @@ import { getTableConfig, type PgTable } from 'drizzle-orm/pg-core';
 import { describe, expect, it } from 'vitest';
 import {
   accounts,
+  aiActionExecutions,
+  aiActionProposals,
   auditLog,
+  autonomySettings,
   invites,
   memberships,
   pushSubscriptions,
@@ -91,6 +94,28 @@ describe('schema foreign keys', () => {
     expect(foreignKeys(pushSubscriptions)).toEqual([
       { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
       { from: ['tenant_id', 'user_id'], to: 'memberships(tenant_id,user_id)', onDelete: 'cascade' },
+    ]);
+  });
+
+  it('keeps the trust layer with its tenant, and its receipts when a member is deleted (ADR-0028)', () => {
+    expect(foreignKeys(autonomySettings)).toEqual([
+      { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+      { from: ['updated_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+    ]);
+    expect(foreignKeys(aiActionProposals)).toEqual([
+      { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+      { from: ['requested_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+      { from: ['decided_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+    ]);
+    expect(foreignKeys(aiActionExecutions)).toEqual([
+      { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+      { from: ['on_behalf_of_user_id'], to: 'users(id)', onDelete: 'set null' },
+      { from: ['undone_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+      {
+        from: ['tenant_id', 'proposal_id'],
+        to: 'ai_action_proposals(tenant_id,id)',
+        onDelete: 'no action',
+      },
     ]);
   });
 });

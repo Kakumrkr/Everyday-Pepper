@@ -1,4 +1,4 @@
-import { sql, type SQL } from 'drizzle-orm';
+import { sql, type SQL, type SQLWrapper } from 'drizzle-orm';
 import {
   boolean,
   check,
@@ -272,7 +272,7 @@ export const memberships = pgTable(
   ],
 );
 
-export const auditActorKind = pgEnum('audit_actor_kind', ['user', 'system']);
+export const auditActorKind = pgEnum('audit_actor_kind', ['user', 'system', 'ai_on_behalf_of']);
 
 /**
  * What changed in a business, who changed it and when (ADR-0013). Append-only: the services
@@ -302,9 +302,11 @@ export const auditLog = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
+    // The AI acts for a member (ADR-0028), so it has one too; NULL once their account is
+    // deleted. Written without naming the new kind, which a migration's own transaction can't use.
     check(
       'audit_log_system_has_no_user',
-      sql`${table.actorKind} = 'user' OR ${table.actorUserId} IS NULL`,
+      sql`${table.actorKind} <> 'system' OR ${table.actorUserId} IS NULL`,
     ),
     check('audit_log_request_id_length', sql`length(${table.requestId}) <= 128`),
     // Newest-first pages per tenant.
@@ -952,7 +954,7 @@ export const bookingVerifications = pgTable(
 );
 
 export const outboxMessageType = pgEnum('outbox_message_type', ['email', 'push']);
-export const outboxStatus = pgEnum('outbox_status', ['pending', 'sent', 'dead']);
+export const outboxStatus = pgEnum('outbox_status', ['pending', 'sent', 'dead', 'cancelled']);
 
 /**
  * A side effect waiting to happen, written in the same transaction as the business change
@@ -1171,6 +1173,247 @@ export const pushSubscriptions = pgTable(
   ],
 );
 
+// The trust layer (ADR-0028): a business's autonomy choices, the AI's proposals waiting for a
+// member, and the actions it executed with their undo. Payloads, previews, before/after,
+// inverses and explanations hold ids, times and codes only (`TrustJsonSchema` in the
+// contracts); the size checks below back that up. Staff reach only their own proposals and
+// executions; owners and managers reach all. The services may not delete either (receipts);
+// once written, only a record's status fields may change (triggers in migration 0034).
+
+/** The eleven actions on the dial, for the checks (`AutonomyActionSchema`). */
+const autonomyActionList = sql.raw(
+  "'booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', " +
+    "'client_note.save', 'task.create', 'message.confirmation', 'message.rebooking_nudge', " +
+    "'message.waitlist_offer', 'message.bulk'",
+);
+const trustCode = (column: SQLWrapper) => sql`${column} ~ '^[a-z][a-z0-9_.:-]{0,63}$'`;
+const trustJsonSize = (column: SQLWrapper) => sql`octet_length(${column}::text) <= 8192`;
+
+/**
+ * A business's own autonomy choices (one row, or none: every action at its template's or the
+ * platform's default). `levels` holds only the actions it changed. Everyone in the business
+ * reads it (the AI decides with it for staff too); only owners and managers change it.
+ */
+export const autonomySettings = pgTable(
+  'autonomy_settings',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    askFirst: boolean('ask_first').notNull().default(false),
+    levels: jsonb('levels')
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    updatedByUserId: uuid('updated_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('autonomy_settings_tenant_unique').on(table.tenantId),
+    index('autonomy_settings_updated_by_user_id_idx').on(table.updatedByUserId),
+    check(
+      'autonomy_settings_levels_known',
+      sql`jsonb_typeof(${table.levels}) = 'object' AND ${table.levels} - ARRAY[${autonomyActionList}] = '{}'::jsonb AND NOT jsonb_path_exists(${table.levels}, '$.* ? (@ != "ask" && @ != "notify" && @ != "auto")')`,
+    ),
+    // "Just do it" is never allowed for one message to many clients (AC-W7-3).
+    check(
+      'autonomy_settings_bulk_never_auto',
+      sql`${table.levels}->>'message.bulk' IS DISTINCT FROM 'auto'`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope_insert', {
+      as: 'restrictive',
+      for: 'insert',
+      withCheck: memberSeesAll,
+    }),
+    ...changesNeedSeesAll(),
+  ],
+);
+
+/**
+ * A write the AI proposed and a member must approve (ADR-0028): the exact payload, the
+ * preview the member was shown and the fingerprint of the state it was computed on. At most
+ * one proposal per target is pending; a retried tool call finds its proposal by its key.
+ */
+export const aiActionProposals = pgTable(
+  'ai_action_proposals',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    action: text('action').notNull(),
+    tool: text('tool').notNull(),
+    targetKey: text('target_key').notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    status: text('status').notNull().default('pending'),
+    payload: jsonb('payload').notNull(),
+    preview: jsonb('preview').notNull(),
+    fingerprint: text('fingerprint').notNull(),
+    explanation: jsonb('explanation').notNull(),
+    // The member whose request it answers; NULL once their account is deleted.
+    requestedByUserId: uuid('requested_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    // The member whose record it changes (a staff member's booking), for the approver's check.
+    recordOwnerUserId: uuid('record_owner_user_id'),
+    decidedByUserId: uuid('decided_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    unique('ai_action_proposals_tenant_id_id_unique').on(table.tenantId, table.id),
+    unique('ai_action_proposals_idempotency_key_unique').on(table.tenantId, table.idempotencyKey),
+    uniqueIndex('ai_action_proposals_one_pending_per_target')
+      .on(table.tenantId, table.targetKey)
+      .where(sql`${table.status} = 'pending'`),
+    index('ai_action_proposals_requested_by_idx').on(table.tenantId, table.requestedByUserId),
+    index('ai_action_proposals_requested_by_user_id_idx').on(table.requestedByUserId),
+    index('ai_action_proposals_decided_by_user_id_idx').on(table.decidedByUserId),
+    index('ai_action_proposals_pending_expiry_idx')
+      .on(table.expiresAt)
+      .where(sql`${table.status} = 'pending'`),
+    check('ai_action_proposals_action_known', sql`${table.action} IN (${autonomyActionList})`),
+    check('ai_action_proposals_tool_format', trustCode(table.tool)),
+    check(
+      'ai_action_proposals_target_key_format',
+      sql`${table.targetKey} ~ '^[A-Za-z0-9.:_-]{1,200}$'`,
+    ),
+    check(
+      'ai_action_proposals_idempotency_key_format',
+      sql`${table.idempotencyKey} ~ '^[A-Za-z0-9.:_-]{8,200}$'`,
+    ),
+    check(
+      'ai_action_proposals_status_known',
+      sql`${table.status} IN ('pending', 'approved', 'rejected', 'expired', 'superseded')`,
+    ),
+    check('ai_action_proposals_fingerprint_format', sql`${table.fingerprint} ~ '^[0-9a-f]{64}$'`),
+    check(
+      'ai_action_proposals_decided_when_not_pending',
+      sql`(${table.status} = 'pending') = (${table.decidedAt} IS NULL)`,
+    ),
+    check(
+      'ai_action_proposals_expires_after_created',
+      sql`${table.expiresAt} > ${table.createdAt}`,
+    ),
+    check('ai_action_proposals_payload_size', trustJsonSize(table.payload)),
+    check('ai_action_proposals_preview_size', trustJsonSize(table.preview)),
+    check('ai_action_proposals_explanation_size', trustJsonSize(table.explanation)),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${memberSeesAll} OR requested_by_user_id = ${currentUserId}`,
+      withCheck: sql`${memberSeesAll} OR requested_by_user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
+/**
+ * An action the AI executed (ADR-0028): run at once by the autonomy dial, or after a member
+ * approved its proposal. The receipt: what changed (before/after), why (the explanation), the
+ * messages it queued, and how to undo it (the inverse, until `undo_until`).
+ */
+export const aiActionExecutions = pgTable(
+  'ai_action_executions',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    proposalId: uuid('proposal_id'),
+    action: text('action').notNull(),
+    tool: text('tool').notNull(),
+    outcome: text('outcome').notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    status: text('status').notNull().default('done'),
+    entityType: text('entity_type').notNull(),
+    entityId: uuid('entity_id').notNull(),
+    before: jsonb('before'),
+    after: jsonb('after'),
+    // What the tool's inverse needs; NULL: it cannot be undone.
+    inverse: jsonb('inverse'),
+    explanation: jsonb('explanation').notNull(),
+    outboxMessageIds: uuid('outbox_message_ids')
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
+    // The member the AI acted for (who asked, or who approved); NULL once their account is deleted.
+    onBehalfOfUserId: uuid('on_behalf_of_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    recordOwnerUserId: uuid('record_owner_user_id'),
+    undoUntil: timestamp('undo_until', { withTimezone: true }),
+    undoneByUserId: uuid('undone_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+    undoneAt: timestamp('undone_at', { withTimezone: true }),
+    undoReason: text('undo_reason'),
+    ...timestamps,
+  },
+  (table) => [
+    unique('ai_action_executions_tenant_id_id_unique').on(table.tenantId, table.id),
+    unique('ai_action_executions_idempotency_key_unique').on(table.tenantId, table.idempotencyKey),
+    unique('ai_action_executions_proposal_unique').on(table.tenantId, table.proposalId),
+    foreignKey({
+      name: 'ai_action_executions_proposal_fk',
+      columns: [table.tenantId, table.proposalId],
+      foreignColumns: [aiActionProposals.tenantId, aiActionProposals.id],
+    }),
+    index('ai_action_executions_recent_idx').on(table.tenantId, table.createdAt),
+    index('ai_action_executions_entity_idx').on(table.tenantId, table.entityType, table.entityId),
+    index('ai_action_executions_on_behalf_of_user_id_idx').on(table.onBehalfOfUserId),
+    index('ai_action_executions_undone_by_user_id_idx').on(table.undoneByUserId),
+    check('ai_action_executions_action_known', sql`${table.action} IN (${autonomyActionList})`),
+    check('ai_action_executions_tool_format', trustCode(table.tool)),
+    check('ai_action_executions_entity_type_format', trustCode(table.entityType)),
+    check(
+      'ai_action_executions_outcome_known',
+      sql`${table.outcome} IN ('execute', 'execute_and_notify', 'propose')`,
+    ),
+    // An approved proposal ran as `propose`; only those have a proposal.
+    check(
+      'ai_action_executions_proposal_when_proposed',
+      sql`(${table.outcome} = 'propose') = (${table.proposalId} IS NOT NULL)`,
+    ),
+    check(
+      'ai_action_executions_idempotency_key_format',
+      sql`${table.idempotencyKey} ~ '^[A-Za-z0-9.:_-]{8,200}$'`,
+    ),
+    check('ai_action_executions_status_known', sql`${table.status} IN ('done', 'undone')`),
+    check(
+      'ai_action_executions_undone_when_undone',
+      sql`(${table.status} = 'undone') = (${table.undoneAt} IS NOT NULL)`,
+    ),
+    check(
+      'ai_action_executions_undo_reason_known',
+      sql`${table.undoReason} IS NULL OR (${table.undoReason} IN ('wrong', 'changed_mind', 'other') AND ${table.status} = 'undone')`,
+    ),
+    check(
+      'ai_action_executions_undo_needs_inverse',
+      sql`(${table.inverse} IS NULL) = (${table.undoUntil} IS NULL)`,
+    ),
+    check('ai_action_executions_outbox_links', sql`cardinality(${table.outboxMessageIds}) <= 100`),
+    check('ai_action_executions_before_size', trustJsonSize(table.before)),
+    check('ai_action_executions_after_size', trustJsonSize(table.after)),
+    check('ai_action_executions_inverse_size', trustJsonSize(table.inverse)),
+    check('ai_action_executions_explanation_size', trustJsonSize(table.explanation)),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${memberSeesAll} OR on_behalf_of_user_id = ${currentUserId}`,
+      withCheck: sql`${memberSeesAll} OR on_behalf_of_user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type User = typeof users.$inferSelect;
@@ -1190,3 +1433,6 @@ export type BookingVerificationRow = typeof bookingVerifications.$inferSelect;
 export type OutboxMessageRow = typeof outboxMessages.$inferSelect;
 export type TaskRow = typeof tasks.$inferSelect;
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
+export type AutonomySettingsRow = typeof autonomySettings.$inferSelect;
+export type AiActionProposalRow = typeof aiActionProposals.$inferSelect;
+export type AiActionExecutionRow = typeof aiActionExecutions.$inferSelect;
