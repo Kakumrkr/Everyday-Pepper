@@ -7,9 +7,10 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S24 (6c) tool registry and the first tools**: Session Brief approved by the user (2026-10-21): "Go ahead with your recommendations, ADR-0029 is fine". The user pre-approved ADR-0029 and asked Claude to open the PR, merge it to `main` and end with the prompt for the next session.
 - **Done:**
+  - T3: the trust layer runs every preview in a savepoint it always rolls back (`dryRun`). An approval whose fresh preview the domain refuses supersedes the proposal and returns `refused` with the error. Mutation-checked.
   - T2: `queueBookingEmail` (appointments) with `holdSeconds`, returning the outbox id; the api's `BookingEmails` delegates to it.
   - T1: transaction-taking variants (`createBookingIn`, `changeBookingIn`, `getBookingIn`, `listBookingsIn`, `reinstateBookingIn`, `findAvailabilityIn`, `addTimeOffIn`/`removeTimeOffIn`/`listTimeOffBetweenIn`, `listServicesIn`, `listStaffIn`, `createTaskIn`, `withdrawTaskIn`, `findClientsByNameIn`). Booking writes run in a savepoint. New audit action `task.deleted`.
-- **Next:** T3 the trust layer's preview in a rolled-back savepoint; T4–T6 the registry and the ten tools; T7 the hostile fake; T8 eval generation and latency; T9 docs, ADR-0029 (accepted), PR, merge.
+- **Next:** T4–T6 the registry and the ten tools; T7 the hostile fake; T8 eval generation and latency; T9 docs, ADR-0029 (accepted), PR, merge.
 - **Decisions (user, brief):**
   - ADR-0029 for S24; S25's ADR becomes 0030.
   - `email_client` on write tools: `null` means the screens' default; the email stays on the dial.

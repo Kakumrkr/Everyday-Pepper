@@ -94,7 +94,11 @@ export interface ActionRunner {
   actions: readonly [AutonomyAction, ...AutonomyAction[]];
   /** The tier it declares; the actions' own tiers apply if stricter. */
   tier: RiskTier;
-  /** A dry run: what would change, computed by the domain, and the fingerprint of it all. */
+  /**
+   * A dry run: what would change, computed by the domain, and the fingerprint of it all. The
+   * trust layer runs it in a savepoint it always rolls back, so a preview may make the real
+   * change to see what it does (ADR-0029: preview = execution) and nothing of it stays.
+   */
   preview(tx: TenantTx, actor: Actor, payload: TrustJson): Promise<ActionPreview>;
   /** Makes the change; queued messages are returned so Undo can take them back. */
   execute(tx: TenantTx, actor: Actor, payload: TrustJson): Promise<ActionEffect>;
@@ -185,7 +189,7 @@ export async function requestAction(
     const proposed = await findProposalByKey(tx, idempotencyKey);
     if (proposed !== undefined) return { kind: 'proposed', proposal: toProposal(proposed) };
 
-    const preview = await runner.preview(tx, ai, request.payload);
+    const preview = await dryRun(tx, ai, runner, request.payload);
     checkRecordPermissions(member, runner, preview.recordOwner);
     const decision = decideAutonomy(
       {
@@ -229,6 +233,11 @@ export type ApprovalResult =
   | { kind: 'executed'; execution: ActionExecution }
   /** The world changed since the member saw it: here is the fresh proposal to show. */
   | { kind: 'stale'; proposal: ActionProposal }
+  /**
+   * The domain now refuses it (the time was booked meanwhile, the member lost the right): the
+   * proposal is superseded and `error` says why (the tool turns it into its answer).
+   */
+  | { kind: 'refused'; error: unknown }
   | { kind: 'expired' };
 
 /**
@@ -275,7 +284,14 @@ export async function approveProposal(
 
     // The world as it is now, in this transaction: anything the member's decision rested on
     // (the payload, the rows the preview read, the messages) must be unchanged.
-    const fresh = await runner.preview(tx, ai, toJson(proposal.payload));
+    let fresh: ActionPreview;
+    try {
+      fresh = await dryRun(tx, ai, runner, toJson(proposal.payload));
+    } catch (error) {
+      // The dry run rolled back to its savepoint, so the transaction can still record this.
+      await decide(tx, member, proposal, 'superseded', now);
+      return { kind: 'refused', error };
+    }
     if (shown !== proposal.fingerprint || fresh.fingerprint !== proposal.fingerprint) {
       await decide(tx, member, proposal, 'superseded', now);
       checkRecordPermissions(member, runner, fresh.recordOwner);
@@ -460,6 +476,36 @@ export async function expireProposals(tx: TenantTx, now: Date, limit: number): P
 }
 
 // ---------------------------------------------------------------------------------------------
+
+/** Ends a dry run: carries its preview out of the savepoint it rolls back. */
+class DryRunDone extends Error {
+  constructor(readonly preview: ActionPreview) {
+    super('Dry run done');
+    this.name = 'DryRunDone';
+  }
+}
+
+/**
+ * Runs the tool's preview in a savepoint that is always rolled back (playbook principle 6):
+ * whatever the preview did to see the outcome, nothing of it stays in the transaction.
+ */
+async function dryRun(
+  tx: TenantTx,
+  ai: Actor,
+  runner: ActionRunner,
+  payload: TrustJson,
+): Promise<ActionPreview> {
+  try {
+    await tx.transaction(async (savepoint) => {
+      throw new DryRunDone(await runner.preview(savepoint, ai, payload));
+    });
+  } catch (error) {
+    if (error instanceof DryRunDone) return error.preview;
+    throw error;
+  }
+  // The savepoint above always ends by throwing.
+  throw new Error('The dry run did not end');
+}
 
 /** The member themselves, as the person deciding (callers refuse an AI actor first). */
 function memberOf(actor: Actor): Actor {
