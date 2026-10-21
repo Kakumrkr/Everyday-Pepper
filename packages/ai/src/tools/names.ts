@@ -12,7 +12,9 @@ export function shortClientName(name: string): string {
     .split(/\s+/)
     .map((word) => word.replace(LETTERS, ''))
     .filter((word) => /\p{L}/u.test(word));
-  const first = Array.from(words[0] ?? '').slice(0, FIRST_NAME_MAX).join('');
+  const first = Array.from(words[0] ?? '')
+    .slice(0, FIRST_NAME_MAX)
+    .join('');
   if (first === '') return 'Client';
   const last = words.length > 1 ? Array.from(words[words.length - 1] ?? '')[0] : undefined;
   return last === undefined ? first : `${first} ${last.toUpperCase()}.`;

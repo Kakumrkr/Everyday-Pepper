@@ -1,4 +1,9 @@
-import { addTimeOffIn, listBookingsIn, removeTimeOffIn } from '@pepper/appointments';
+import {
+  addTimeOffIn,
+  listBookingsIn,
+  removeTimeOffIn,
+  StaffMemberNotFoundError,
+} from '@pepper/appointments';
 import {
   looksLikeContact,
   StaffMemberIdSchema,
@@ -176,9 +181,7 @@ export const addTodo: WriteTool = {
     let assigneeName = 'you';
     if (args.assigneeStaffMemberId !== null) {
       const staffId = StaffMemberIdSchema.parse(args.assigneeStaffMemberId);
-      if (!directory.staff.has(staffId)) {
-        throw new InvalidToolArgumentsError('No such staff member here; look them up again.');
-      }
+      if (!directory.staff.has(staffId)) throw new StaffMemberNotFoundError();
       const login = staffLogin(directory, staffId);
       if (login === null) {
         throw new InvalidToolArgumentsError(
