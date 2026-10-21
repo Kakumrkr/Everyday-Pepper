@@ -618,7 +618,7 @@ Everything each session did, oldest first: what was built, the checks run and th
     - The hostile fake and the seeded-world graders come with the tools (S24).
     - The budget ledger (S27).
 
-- **S23 Phase 6b (2026-10-21): trust-layer data and decisions** ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md), proposed by Claude; [PCR-003](changes/PCR-003.md), approved).
+- **S23 Phase 6b (2026-10-21): trust-layer data and decisions** ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md), proposed by Claude, accepted by the user; [PCR-003](changes/PCR-003.md), approved).
   - **Session Brief:** the user confirmed all of Claude's recommendations ("Go ahead with your recommendations").
     - PCR-003: `booking.cancel` and `task.create` on the dial, the strictest-action rule, the bulk lock by recipients.
     - A 2-minute "undo send" grace on AI-queued client emails.

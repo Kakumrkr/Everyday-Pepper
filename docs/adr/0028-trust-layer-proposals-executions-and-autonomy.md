@@ -1,6 +1,6 @@
 # ADR-0028: The trust layer: autonomy decisions, proposals, receipts and undo
 
-- **Status:** Proposed (drafted by Claude in S23, 2026-10-21). The user chose, at the S23 Session Brief ("Go ahead with your recommendations"):
+- **Status:** Accepted (user, 2026-10-21, as proposed; drafted by Claude in S23). The user chose, at the S23 Session Brief ("Go ahead with your recommendations"):
   - PCR-003 (`booking.cancel` and `task.create` on the dial, the strictest-action rule, the bulk lock by recipients);
   - a 2-minute "undo send" grace on AI-queued client emails;
   - the undo windows below;

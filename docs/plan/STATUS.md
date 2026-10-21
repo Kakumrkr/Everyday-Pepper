@@ -1,14 +1,14 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-21 · **Plan version:** 0.19 · **Current phase:** 6 — AI agent + trust layer. **S23** (trust-layer data and decisions) done on `claude/dreamy-ride-jkpjgs`, ADR-0028 proposed, PR not opened yet → next: **S24** (tool registry and the first tools)
+**Last updated:** 2026-10-21 · **Plan version:** 0.19 · **Current phase:** 6 — AI agent + trust layer. **S23** (trust-layer data and decisions) done and merged → next: **S24** (tool registry and the first tools)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S23 is complete and pushed to `claude/dreamy-ride-jkpjgs`. **Waiting on the user:** review ADR-0028 (proposed) and say "open PR" (one CI run); then S24 starts from `main`.
+Nothing in progress: S23 is complete; ADR-0028 accepted (user) and the PR is opened and merged to `main`. Next: S24 in a new session from `main`.
 
 ## Last sessions
-- **S23 Phase 6b (2026-10-21): trust-layer data and decisions** ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md), proposed; [PCR-003](changes/PCR-003.md), approved). Full entry in [session-log.md](session-log.md).
+- **S23 Phase 6b (2026-10-21): trust-layer data and decisions** ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md), accepted; [PCR-003](changes/PCR-003.md), approved). Full entry in [session-log.md](session-log.md).
   - **Code:**
     - Tables `autonomy_settings`, `ai_action_proposals`, `ai_action_executions`: RLS, staff scope, guard triggers, no deletes.
     - `decideAutonomy` (decided inside the trust layer from the domain's preview), the state fingerprint.
@@ -44,7 +44,8 @@ Full wording and the history in [decisions.md](decisions.md).
   - a 2-minute "undo send" grace;
   - undo windows: bookings 24 h but not past the start; blocked time 24 h; notes and to-dos 7 days; messages until sent;
   - an "Ask me first for everything" switch.
-- **S23 defaults (Claude, in ADR-0028, proposed):**
+- **End of S23 (user):** "ADR-0028 approved. Raise PR and complete merge."
+- **S23 defaults (Claude, in ADR-0028, accepted by the user):**
   - The dial is decided inside the trust layer.
   - Only people approve, reject or undo.
   - The approver is the requester or a lead, with their role re-checked.
@@ -74,7 +75,7 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S22 are done and merged (Phases 0–5, Phase 6a); S23 (Phase 6b) is done and pushed, waiting for "open PR". Phase 6 (AI agent + trust layer) runs S22–S27 as set in the [Phase 6 playbook](phase-6-playbook.md), whose §7 guides each session; details in [session-log.md](session-log.md).
+S1–S23 are done and merged (Phases 0–5, Phases 6a–6b). Phase 6 (AI agent + trust layer) runs S22–S27 as set in the [Phase 6 playbook](phase-6-playbook.md), whose §7 guides each session; details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
