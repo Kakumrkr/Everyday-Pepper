@@ -7,7 +7,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S23 (6b) trust-layer data and decisions** on `claude/dreamy-ride-jkpjgs`. Brief confirmed by the user ("Go ahead with your recommendations"): PCR-003 (`booking.cancel`, `task.create`, strictest-action rule, bulk lock by recipients), 2-minute "undo send" grace on AI-queued client emails, the undo windows from the brief, and an "Ask me first for everything" switch.
 - **Done (commit aff6a0c):** contracts (trust schemas, ids-only JSON guard, `ai_on_behalf_of` audit actor, trust audit actions, outbox `cancelled`), PCR-003, migrations 0032/0033 (three tables, RLS, staff scope, no deletes, guard triggers), the trust repository, `cancelOutboxMessages`, isolation suite (253) and `trust.int.test.ts` (20) green; `pnpm check` green.
-- **Next:** T2 `decideAutonomy` (property tests first) and T3 fingerprint helper in `@pepper/core`; then T5 services (autonomy settings, proposals, executions, undo) with concurrency and expiry tests; T6 clean-up marks expired proposals; T7 docs (ADR-0028 proposed, OWASP 2026 mapping in playbook §6, §9 log, STATUS, session log, decisions, CHANGELOG 0.19, traceability, dependency map).
+- **Done (commit 10cc5f7):** `decideAutonomy`/`resolveAutonomy` with property tests (mutation-checked: removing the bulk lock or the untrusted demotion fails 37/43 tests), `stateFingerprint`, `auditActorOf` used by every service (`Actor.via: 'ai'`).
+- **Next:** T5 services (autonomy settings, proposals, executions, undo) with concurrency and expiry tests; T6 clean-up marks expired proposals; T7 docs (ADR-0028 proposed, OWASP 2026 mapping in playbook §6, §9 log, STATUS, session log, decisions, CHANGELOG 0.19, traceability, dependency map).
 - **Watch:** one runtime unit test failed once inside a full `pnpm check` and did not reproduce in 8 runs; logs are now kept to name it if it comes back.
 
 ## Last sessions
