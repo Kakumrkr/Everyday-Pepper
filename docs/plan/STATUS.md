@@ -5,7 +5,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S22 is complete; ADR-0027 accepted (user) and the PR is opened and merged to `main`. Next: S23 in a new session from `main`.
+**S23 (6b) trust-layer data and decisions** on `claude/dreamy-ride-jkpjgs`. Brief confirmed by the user ("Go ahead with your recommendations"): PCR-003 (`booking.cancel`, `task.create`, strictest-action rule, bulk lock by recipients), 2-minute "undo send" grace on AI-queued client emails, the undo windows from the brief, and an "Ask me first for everything" switch.
+- **Done (commit aff6a0c):** contracts (trust schemas, ids-only JSON guard, `ai_on_behalf_of` audit actor, trust audit actions, outbox `cancelled`), PCR-003, migrations 0032/0033 (three tables, RLS, staff scope, no deletes, guard triggers), the trust repository, `cancelOutboxMessages`, isolation suite (253) and `trust.int.test.ts` (20) green; `pnpm check` green.
+- **Next:** T2 `decideAutonomy` (property tests first) and T3 fingerprint helper in `@pepper/core`; then T5 services (autonomy settings, proposals, executions, undo) with concurrency and expiry tests; T6 clean-up marks expired proposals; T7 docs (ADR-0028 proposed, OWASP 2026 mapping in playbook §6, §9 log, STATUS, session log, decisions, CHANGELOG 0.19, traceability, dependency map).
+- **Watch:** one runtime unit test failed once inside a full `pnpm check` and did not reproduce in 8 runs; logs are now kept to name it if it comes back.
 
 ## Last sessions
 - **S22 Phase 6a (2026-10-20): Phase 6 plan, provider adapter, eval runner skeleton** ([ADR-0027](../adr/0027-llm-provider-port-and-evals.md), accepted). Full entry in [session-log.md](session-log.md).
