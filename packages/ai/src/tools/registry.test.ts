@@ -124,3 +124,23 @@ describe('the tool registry', () => {
     ).toBe(false);
   });
 });
+
+describe('guideProblems', () => {
+  it('names what is missing or wrong', () => {
+    const guide = {
+      use: 'x'.repeat(301),
+      avoid: [],
+      returns: 'y'.repeat(900),
+      examples: [
+        { say: 'a', args: { nope: 1 } },
+        { say: 'b', args: {} },
+      ],
+    } as const;
+    expect(guideProblems(guide, { localTimes: true, argNames: ['date'] })).toEqual([
+      'the description is too long',
+      '"use" should be one or two sentences',
+      'say when not to use it',
+      'example "a" names unknown argument nope',
+    ]);
+  });
+});

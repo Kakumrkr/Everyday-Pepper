@@ -18,6 +18,8 @@ export default defineConfig({
         // The tools run domain services in database transactions; they are proven against
         // real Postgres by the integration tests (`pnpm test:integration`).
         'src/tools/catalog/**',
+        'src/tools/registry.ts',
+        'src/tools/runner.ts',
         'src/tools/test-support.ts',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
