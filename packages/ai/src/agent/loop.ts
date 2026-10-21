@@ -186,7 +186,7 @@ async function runTurn(
   const clock = deps.tools.clock;
   const tracer = deps.tracer ?? noTracing;
   const dispatch = deps.dispatch ?? dispatchToolCall;
-  const deadline = turn.startedAt.getTime() + limits.turnMs;
+  const deadline = turn.deadlineAt.getTime();
   const progress: TurnProgress = {
     steps: 0,
     untrusted: false,

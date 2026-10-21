@@ -99,6 +99,8 @@ export async function insertTurn(
     conversationId: ConversationId;
     userId: UserId;
     clientTurnId: string;
+    /** When it started, on the app's clock (the turn's "now" and deadline come from it). */
+    startedAt?: Date;
     deadlineAt: Date;
   },
 ): Promise<ConversationTurnRow | undefined> {
@@ -109,6 +111,7 @@ export async function insertTurn(
       userId: Id.parse(input.userId),
       clientTurnId: Id.parse(input.clientTurnId),
       deadlineAt: input.deadlineAt,
+      ...(input.startedAt !== undefined && { createdAt: input.startedAt }),
     })
     .onConflictDoNothing()
     .returning();

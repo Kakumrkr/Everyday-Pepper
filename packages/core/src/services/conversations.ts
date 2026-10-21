@@ -120,49 +120,67 @@ export async function beginTurn(
   requirePermission(actor, 'ai.chat');
   const userId = actor.context.userId;
   const clientTurnId = ChatTurnRequestSchema.shape.clientTurnId.parse(input.clientTurnId);
-  return withMember(db, actor.context, async (tx) => {
-    const again = await findTurnByClientId(tx, userId, clientTurnId);
-    if (again !== undefined) return { kind: 'existing', turn: toTurn(again) };
+  const started = await withMember(
+    db,
+    actor.context,
+    async (tx): Promise<BeginTurnResult | null> => {
+      const again = await findTurnByClientId(tx, userId, clientTurnId);
+      if (again !== undefined) return { kind: 'existing', turn: toTurn(again) };
 
-    let conversationId: ConversationId;
-    if (input.conversationId === null) {
-      const created = await insertConversation(tx, { userId, channel: input.channel });
-      conversationId = ConversationIdSchema.parse(created.id);
-    } else {
-      const found = await findConversation(tx, input.conversationId, { lock: true });
-      if (found === undefined) throw new ConversationNotFoundError();
-      conversationId = ConversationIdSchema.parse(found.id);
-      const running = await lockRunningTurn(tx, conversationId);
-      if (running !== undefined) {
-        const stale = running.deadlineAt.getTime() + STALE_TURN_GRACE_MS < input.now.getTime();
-        return { kind: stale ? 'stale' : 'busy', turn: toTurn(running) };
+      let conversationId: ConversationId;
+      if (input.conversationId === null) {
+        const created = await insertConversation(tx, { userId, channel: input.channel });
+        conversationId = ConversationIdSchema.parse(created.id);
+      } else {
+        const found = await findConversation(tx, input.conversationId, { lock: true });
+        if (found === undefined) throw new ConversationNotFoundError();
+        conversationId = ConversationIdSchema.parse(found.id);
+        const running = await lockRunningTurn(tx, conversationId);
+        if (running !== undefined) {
+          const stale = running.deadlineAt.getTime() + STALE_TURN_GRACE_MS < input.now.getTime();
+          return { kind: stale ? 'stale' : 'busy', turn: toTurn(running) };
+        }
       }
-    }
-    const row = await insertTurn(tx, {
-      conversationId,
-      userId,
-      clientTurnId,
-      deadlineAt: input.deadlineAt,
-    });
-    // The conversation is locked and runs nothing, and the client id is new: it inserts.
-    if (row === undefined) throw new Error('beginTurn: the turn was not created');
-    const turn = toTurn(row);
-    const message = await insertMessage(tx, {
-      conversationId,
-      turnId: turn.id,
-      userId,
-      role: 'user',
-      content: input.message,
-      untrusted: false,
-    });
-    await touchConversation(tx, conversationId, input.now);
-    return {
-      kind: 'started',
-      turn,
-      requestMessageId: ConversationMessageIdSchema.parse(message.id),
-    };
+      const row = await insertTurn(tx, {
+        conversationId,
+        userId,
+        clientTurnId,
+        startedAt: input.now,
+        deadlineAt: input.deadlineAt,
+      });
+      // A copy of this request (same client turn id) got there first: answer with its turn, in a
+      // fresh read after this transaction rolls back (so no empty conversation is left behind).
+      if (row === undefined) throw new LostTurnRace();
+      const turn = toTurn(row);
+      const message = await insertMessage(tx, {
+        conversationId,
+        turnId: turn.id,
+        userId,
+        role: 'user',
+        content: input.message,
+        untrusted: false,
+      });
+      await touchConversation(tx, conversationId, input.now);
+      return {
+        kind: 'started',
+        turn,
+        requestMessageId: ConversationMessageIdSchema.parse(message.id),
+      };
+    },
+  ).catch((error: unknown) => {
+    if (error instanceof LostTurnRace) return null;
+    throw error;
   });
+  if (started !== null) return started;
+  const winner = await withMember(db, actor.context, (tx) =>
+    findTurnByClientId(tx, userId, clientTurnId),
+  );
+  if (winner === undefined) throw new Error('beginTurn: the turn was neither created nor found');
+  return { kind: 'existing', turn: toTurn(winner) };
 }
+
+/** Another copy of the request created the turn first (unique client turn id). */
+class LostTurnRace extends Error {}
 
 /** The member's turn, or `ConversationNotFoundError`. */
 export async function getTurn(
