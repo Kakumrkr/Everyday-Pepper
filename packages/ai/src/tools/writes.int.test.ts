@@ -260,6 +260,9 @@ describe.each(SCENARIOS.map((scenario) => [scenario.tool, scenario] as const))(
       expect(execution.after).toEqual(shown.after);
       expect(execution.outboxMessageIds).toHaveLength(shown.emails.length);
       expect(await state()).not.toEqual(before);
+      // *Why?* says what the domain checked (S26b), the same on the receipt.
+      expect(proposal.explanation.facts.length).toBeGreaterThan(0);
+      expect(execution.explanation.facts).toEqual(proposal.explanation.facts);
     });
 
     it('undoes back to the state before, taking back the unsent email', async () => {
@@ -398,6 +401,14 @@ describe('conflicts and stale approvals', () => {
       }),
     );
     expect(execution.after).toMatchObject({ staffName: 'Marco', time: '10:00' });
+    expect(execution.explanation.facts).toEqual([
+      {
+        kind: 'slot_was_free',
+        ref: null,
+        value: { date: TUESDAY, time: '10:00', staffName: 'Marco' },
+      },
+      { kind: 'staff_chosen', ref: null, value: { staffName: 'Marco' } },
+    ]);
   });
 
   it('asks again when the booking changed after the proposal (stale)', async () => {
@@ -717,6 +728,9 @@ describe('unblock_time (S26b)', () => {
     expect(execution.summary).toBe(
       "Unblock Marco's time, Tue 2026-11-03 at 09:00 to Fri 2026-11-06 at 17:00, so it can be booked again.",
     );
+    expect(execution.explanation.facts).toEqual([
+      { kind: 'bookings_untouched', ref: null, value: null },
+    ]);
     // A booking's id is no blocked time.
     const outcome = await callTool(depsFor(w, w.owner), 'unblock_time', { timeOffId: booking.id });
     expect(outcome).toMatchObject({ status: 'refused', code: 'not_found' });

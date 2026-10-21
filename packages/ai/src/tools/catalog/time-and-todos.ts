@@ -133,6 +133,7 @@ export const blockTime: WriteTool = {
       touched: null,
       inverse: { staffMemberId: staffId, timeOffId: entry.id },
       summary: `Block ${name}'s time, ${span}.${inside > 0 ? ` ${String(inside)} booking${inside === 1 ? '' : 's'} stay inside it: move or cancel them separately.` : ''}`,
+      facts: [{ kind: 'bookings_inside', ref: null, value: { count: inside } }],
     };
   },
   async undo(scope, inverse) {
@@ -202,6 +203,7 @@ export const unblockTime: WriteTool = {
         endsAt: entry.endsAt,
       },
       summary: `Unblock ${name}'s time, ${span}, so it can be booked again.`,
+      facts: [{ kind: 'bookings_untouched', ref: null, value: null }],
     };
   },
   async undo(scope, inverse) {
@@ -306,6 +308,10 @@ export const addTodo: WriteTool = {
       touched: null,
       inverse: { taskId: task.id },
       summary: `To-do for ${assigneeName}: "${args.title}"${due === null ? '' : `, due ${when(due.date, due.time)}`}.`,
+      facts:
+        due === null
+          ? []
+          : [{ kind: 'reminds', ref: null, value: { date: due.date, time: due.time } }],
     };
   },
   async undo(scope, inverse) {
@@ -454,6 +460,7 @@ export const completeTodo: WriteTool = {
       touched: { todoId: id, updatedAt: before.updatedAt },
       inverse: { taskId: id, completedVersion: after.updatedAt },
       summary: `Mark ${possessive(whose)} to-do "${title}" done.`,
+      facts: [{ kind: 'todo_was_open', ref: null, value: null }],
     };
   },
   async undo(scope, inverse) {

@@ -361,25 +361,31 @@ describe('POST /v1/chat/turns', () => {
 });
 
 describe('S26: proposals, receipts, Why, Undo and the autonomy dial over HTTP (ADR-0031)', () => {
-  const todoCall = (title: string) => () =>
-    scriptedResponse({
-      toolCalls: [
-        {
-          id: 'c1',
-          name: 'add_todo',
-          arguments: JSON.stringify({
-            title,
-            dueDate: null,
-            dueTime: null,
-            assigneeStaffMemberId: null,
-          }),
-        },
-      ],
-    });
+  const todoCall =
+    (title: string, due: { date: string; time: string } | null = null) =>
+    () =>
+      scriptedResponse({
+        toolCalls: [
+          {
+            id: 'c1',
+            name: 'add_todo',
+            arguments: JSON.stringify({
+              title,
+              dueDate: due?.date ?? null,
+              dueTime: due?.time ?? null,
+              assigneeStaffMemberId: null,
+            }),
+          },
+        ],
+      });
 
   /** A turn in which the member asks for a to-do; returns the card the stream showed. */
-  async function askForTodo(member: Browser, message: string) {
-    model.next.push(todoCall(message), () => scriptedResponse({ text: 'Noted.' }));
+  async function askForTodo(
+    member: Browser,
+    message: string,
+    due: { date: string; time: string } | null = null,
+  ) {
+    model.next.push(todoCall(message, due), () => scriptedResponse({ text: 'Noted.' }));
     const stream = frames(
       (await sse(member.post('/v1/chat/turns', turnRequest(message))).expect(200)).body as string,
     );
@@ -410,7 +416,10 @@ describe('S26: proposals, receipts, Why, Undo and the autonomy dial over HTTP (A
   it('a staff proposal: shown with the member’s own words, approved by the lead exactly as shown, the receipt is the staff member’s too, and Undo takes it back', async () => {
     const { owner, staff } = await business();
     await owner.put('/v1/autonomy', { askFirst: true }).expect(200);
-    const card = await askForTodo(staff, 'Remind me to restock the towels');
+    const card = await askForTodo(staff, 'Remind me to restock the towels', {
+      date: '2030-01-15',
+      time: '10:00',
+    });
     expect(card).toMatchObject({
       state: 'proposed',
       summary: expect.stringContaining('towels') as string,
@@ -429,6 +438,8 @@ describe('S26: proposals, receipts, Why, Undo and the autonomy dial over HTTP (A
         asked: { kind: 'message', text: 'Remind me to restock the towels' },
         steps: [{ tool: 'add_todo' }],
         decision: { outcome: 'propose', reason: 'ask_first' },
+        // What the domain checked (S26b), as codes and flat values.
+        facts: [{ kind: 'reminds', value: { date: '2030-01-15', time: '10:00' } }],
       },
     });
     // The owner sees the proposal, but never the staff member's own words (own conversations).

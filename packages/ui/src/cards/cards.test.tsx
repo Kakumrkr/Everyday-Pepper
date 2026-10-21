@@ -278,6 +278,24 @@ describe('BookingCard, DayCard and PlanCard', () => {
 });
 
 describe('WhyContent and the chat notices', () => {
+  it('lists what was checked when the record has facts (S26b)', async () => {
+    const why = whyModel(
+      {
+        asked: { kind: 'none' },
+        steps: [{ tool: 'unblock_time' }],
+        decision: { outcome: 'execute_and_notify', reason: 'setting' },
+        untrustedContext: false,
+        facts: [{ kind: 'bookings_untouched', value: null }],
+      },
+      'time.block',
+      0,
+    );
+    const { container } = render(<WhyContent why={why} />);
+    expect(screen.getByRole('heading', { name: 'What I checked' })).toBeTruthy();
+    expect(screen.getByText('Bookings stay as they are; I only removed the block.')).toBeTruthy();
+    await expectAccessible(container);
+  });
+
   it('shows the record’s parts and a link to the setting', async () => {
     const why = whyModel(
       {

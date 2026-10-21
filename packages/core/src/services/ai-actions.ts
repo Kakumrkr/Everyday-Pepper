@@ -125,6 +125,12 @@ export interface ActionPreview {
   targetKey: string;
   /** The appointment it touches, if any: proposals expire and undo closes when it starts. */
   appointmentStartsAt: Date | null;
+  /**
+   * What the domain checked on the way (S26b: "the time was free", "2 bookings stay inside the
+   * block"), for *Why?*. When given, they are the explanation's facts: a stale approval's fresh
+   * preview brings its own.
+   */
+  facts?: ActionExplanation['facts'];
 }
 
 export interface ActionEffect {
@@ -207,6 +213,7 @@ export async function requestAction(
     );
     const explanation = ActionExplanationSchema.parse({
       ...request.explanation,
+      facts: preview.facts ?? request.explanation.facts,
       untrustedContext: request.untrustedContext,
       decision,
     });
@@ -303,7 +310,11 @@ export async function approveProposal(
     if (shown !== proposal.fingerprint || fresh.fingerprint !== proposal.fingerprint) {
       await decide(tx, member, proposal, 'superseded', now);
       checkRecordPermissions(member, runner, fresh.recordOwner);
-      const explanation = ActionExplanationSchema.parse(proposal.explanation);
+      const shownWhy = ActionExplanationSchema.parse(proposal.explanation);
+      const explanation = ActionExplanationSchema.parse({
+        ...shownWhy,
+        facts: fresh.facts ?? shownWhy.facts,
+      });
       const next = await storeProposal(tx, member, runner, {
         idempotencyKey: `${proposal.id}.refresh`,
         payload: toJson(proposal.payload),

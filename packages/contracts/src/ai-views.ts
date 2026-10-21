@@ -54,6 +54,17 @@ export const WhyAskedSchema = z.discriminatedUnion('kind', [
 ]);
 export type WhyAsked = z.infer<typeof WhyAskedSchema>;
 
+/**
+ * A fact the tool's code checked on the way (S26b: "the time was free", "2 bookings stay
+ * inside it"): a code and a flat value (local dates and times, display names, counts), never
+ * a contact. The screens word it; an unknown code is not shown.
+ */
+export const AiWhyFactSchema = z.strictObject({
+  kind: TrustCodeSchema,
+  value: SafeSideSchema.nullable(),
+});
+export type AiWhyFact = z.infer<typeof AiWhyFactSchema>;
+
 /** *Why?* (playbook principle 9): the request, the tools used, the dial's decision. */
 export const AiWhySchema = z.strictObject({
   asked: WhyAskedSchema,
@@ -61,6 +72,8 @@ export const AiWhySchema = z.strictObject({
   decision: AutonomyDecisionSchema,
   /** The turn held text a client typed: external actions asked first, quiet writes told you. */
   untrustedContext: z.boolean(),
+  /** What the domain checked (S26b). Optional: actions recorded before S26b have none. */
+  facts: z.array(AiWhyFactSchema).max(20).optional(),
 });
 export type AiWhy = z.infer<typeof AiWhySchema>;
 

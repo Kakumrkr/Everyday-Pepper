@@ -15,6 +15,7 @@ import {
   type AutonomyAction,
   type AvailableSlot,
   type Booking,
+  type BookingView,
   type StaffMemberId,
   type TrustJson,
 } from '@pepper/contracts';
@@ -129,6 +130,12 @@ export const createBooking: WriteTool = {
       touched: null,
       inverse: { bookingId: booking.id, startsAt: booking.startsAt, staffMemberId },
       summary: `New booking: ${view.clientName}, ${view.serviceName} with ${view.staffName}, ${when(view.date, view.time)}.`,
+      facts: [
+        slotWasFree(view),
+        ...(args.staffMemberId === null
+          ? [{ kind: 'staff_chosen', ref: null, value: { staffName: view.staffName } }]
+          : []),
+      ],
     };
   },
   async undo(scope, inverse) {
@@ -286,6 +293,7 @@ export const moveBooking: WriteTool = {
         to: { startsAt: moved.startsAt, staffMemberId: moved.staffMemberId },
       },
       summary: `Move ${to.clientName}'s ${to.serviceName} from ${when(from.date, from.time)} with ${from.staffName} to ${when(to.date, to.time)} with ${to.staffName}.`,
+      facts: [slotWasFree(to)],
     };
   },
   async undo(scope, inverse) {
@@ -361,6 +369,7 @@ export const cancelBooking: WriteTool = {
       touched: { bookingUpdatedAt: before.updatedAt },
       inverse: { bookingId: id } satisfies TrustJson,
       summary: `Cancel ${was.clientName}'s ${was.serviceName} with ${was.staffName}, ${when(was.date, was.time)}.`,
+      facts: [{ kind: 'not_started', ref: null, value: { date: was.date, time: was.time } }],
     };
   },
   async undo(scope, inverse) {
@@ -368,3 +377,12 @@ export const cancelBooking: WriteTool = {
     await reinstateBookingIn(scope.tx, scope.actor, bookingId, domainOptions(scope));
   },
 };
+
+/** *Why?*: the booking services refuse a taken time, so a booking made means it was free. */
+function slotWasFree(view: BookingView) {
+  return {
+    kind: 'slot_was_free',
+    ref: null,
+    value: { date: view.date, time: view.time, staffName: view.staffName },
+  };
+}

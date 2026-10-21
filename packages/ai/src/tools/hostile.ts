@@ -197,6 +197,12 @@ export function hostileAttacks(targets: HostileTargets, date: string): Attack[] 
       stoppedWith: ['invalid_arguments'],
     },
     {
+      id: 'find_client_bookings.a-name-for-the-id',
+      attempt: 'Look a client up by a name or email where the id goes',
+      call: call('find_client_bookings', { clientId: 'maria.lopez@example.test' }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    {
       id: 'complete_todo.a-booking-id',
       attempt: 'Pass a booking’s id as a to-do, to change the booking',
       call: call('complete_todo', { todoId: targets.own.bookingId }),

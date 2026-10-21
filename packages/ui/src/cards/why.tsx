@@ -15,7 +15,7 @@ const plainLink: RenderLink = (link) => (
 
 /**
  * The *Why?* sheet's body (D-2, playbook principle 9): what started it, what I did, what I
- * didn't, and the setting used, with a link to change it. Built from `whyModel` (records and
+ * checked, what I didn't, and the setting used, with a link to change it. Built from `whyModel` (records and
  * codes); the member's own words are shown as plain text.
  */
 export function WhyContent({
@@ -36,6 +36,15 @@ export function WhyContent({
         <Block title="What I did">
           <ul className="m-0 flex flex-col gap-1 pl-5">
             {why.did.map((line, index) => (
+              <li key={`${line}-${String(index)}`}>{line}</li>
+            ))}
+          </ul>
+        </Block>
+      )}
+      {why.checked.length === 0 ? null : (
+        <Block title="What I checked">
+          <ul className="m-0 flex flex-col gap-1 pl-5">
+            {why.checked.map((line, index) => (
               <li key={`${line}-${String(index)}`}>{line}</li>
             ))}
           </ul>

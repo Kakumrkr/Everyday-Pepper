@@ -11,7 +11,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - Watch: `reads.int.test.ts` "list_todos" failed once with no visible diff, then passed 16 runs in a row; re-run it in the full suite.
 - Done: Task 3 `complete_todo` (core `changeTaskIn`/`completeTaskIn`/`reopenTaskIn`, `TaskNotOpenError` → `not_changeable`) and Task 4 `unblock_time` (db `findTimeOff`, appointments `getTimeOffIn`; `get_day` v2 gives block ids; a colleague's block is `forbidden`). Hostile targets from one helper (`hostileTargets`), the "ask" test covers every write tool, the eval world has a to-do and Jess's lunch block; ai unit 192, ai integration 93 green.
 - Decided (Claude): the cost guard's "30 one-turn cases under $1.50 at every step" became 25 (14 tools add ~$0.05 a case to the worst case): S27 runs sets in chunks of ≤ 25 or calibrates the estimate first.
-- Next: Task 5 is mostly done with 1–4 (check the hostile catalogue once more), 6 facts, 7 docs + ADR-0032 + `pnpm check` / `pnpm test:integration`.
+- Done: Task 5 (one more attack: a name or email as `clientId`) and Task 6 facts: `Performed.facts` → `ActionPreview.facts` (core: the preview's facts are the explanation's, a stale approval's fresh preview brings its own) → `AiWhy.facts` (optional, flat, contact-free) → "What I checked" in the *Why?* sheet (`factLine`); change rows for a completed to-do and an unblock read from the sides' shape.
+- Next: Task 7: ADR-0032, docs, `pnpm check`, `pnpm test:integration`, the chat Playwright suite once, self-review, push.
 
 ## Last sessions
 - **S26 Phase 6e (2026-10-21): chat screen, cards, Why, Undo, Autonomy settings** ([ADR-0031](../adr/0031-chat-screen-cards-why-undo-and-autonomy-settings.md), accepted; [PCR-004](changes/PCR-004.md), approved). Full entry in [session-log.md](session-log.md).
