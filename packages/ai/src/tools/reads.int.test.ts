@@ -155,7 +155,7 @@ describe('find_availability', () => {
 
 describe('get_day and get_booking', () => {
   it('shows owners the whole day and staff only their own bookings, with blocked time', async () => {
-    await addTimeOff(db, world.priya, world.marcoStaff.id, {
+    const block = await addTimeOff(db, world.priya, world.marcoStaff.id, {
       startsAt: tuesdayAt('13:00'),
       endsAt: tuesdayAt('14:00'),
     });
@@ -174,8 +174,18 @@ describe('get_day and get_booking', () => {
       ['11:00', 'Sara K.'],
     ]);
     expect(data.blocked).toEqual([
-      { staffMemberId: world.marcoStaff.id, staffName: 'Marco', from: '13:00', to: '14:00' },
+      {
+        timeOffId: block.id,
+        staffMemberId: world.marcoStaff.id,
+        staffName: 'Marco',
+        from: '13:00',
+        to: '14:00',
+      },
     ]);
+    // The card shows the same without the id.
+    expect(day.card).toMatchObject({
+      blocked: [{ staffMemberId: world.marcoStaff.id, from: '13:00', to: '14:00' }],
+    });
     const jess = answered(
       await callTool(depsFor(world, world.jess), 'get_day', { date: TUESDAY, staffMemberId: null }),
     );

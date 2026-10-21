@@ -1,5 +1,6 @@
 import {
   addTimeOffIn,
+  getTimeOffIn,
   listBookingsIn,
   removeTimeOffIn,
   StaffMemberNotFoundError,
@@ -15,10 +16,12 @@ import {
   type UserId,
 } from '@pepper/contracts';
 import {
+  completeTaskIn,
   createTaskIn,
   listTasksIn,
   memberFirstNamesIn,
   permissionScope,
+  reopenTaskIn,
   withdrawTaskIn,
 } from '@pepper/core';
 import { createHash } from 'node:crypto';
@@ -137,6 +140,79 @@ export const blockTime: WriteTool = {
       .strictObject({ staffMemberId: StaffMemberIdSchema, timeOffId: TimeOffIdSchema })
       .parse(inverse);
     await removeTimeOffIn(scope.tx, scope.actor, staffMemberId, timeOffId);
+  },
+};
+
+const UnblockArgs = z.strictObject({
+  timeOffId: z.uuid().describe("The blocked time's id, from get_day"),
+});
+type UnblockArgs = z.output<typeof UnblockArgs>;
+
+export const unblockTime: WriteTool = {
+  kind: 'write',
+  name: 'unblock_time',
+  version: 1,
+  localTimes: false,
+  tier: 'internal_write',
+  guide: {
+    use: "Remove blocked time from a staff member's calendar (a break, an errand, a day off) so it can be booked again, by its id from get_day.",
+    avoid: [
+      'to cancel or move a booking (use the booking tools; this never touches bookings)',
+      'to take back a block Pepper just made (the member taps Undo on its card)',
+    ],
+    returns:
+      'the removed block with its whole span (a block over several days goes entirely: block the part that stays again), done or waiting for the member’s OK.',
+    examples: [
+      { say: "Remove Jess's lunch block tomorrow", args: { timeOffId: { $any: true } } },
+      { say: "I'm not off on Friday after all", args: { timeOffId: { $any: true } } },
+    ],
+  },
+  args: UnblockArgs,
+  actions: () => ['time.block'],
+  async perform(scope: WriteScope, args: UnblockArgs): Promise<Performed> {
+    const entry = await getTimeOffIn(scope.tx, scope.actor, TimeOffIdSchema.parse(args.timeOffId));
+    const directory = await directoryOf(scope);
+    // Staff remove only their own (`forbidden` for a colleague's, which they can see).
+    await removeTimeOffIn(scope.tx, scope.actor, entry.staffMemberId, entry.id);
+    const name = staffName(directory, entry.staffMemberId);
+    const start = localOf(scope.timeZone, entry.startsAt);
+    const end = localOf(scope.timeZone, entry.endsAt);
+    const span =
+      start.date === end.date
+        ? `${when(start.date, start.time)}–${end.time}`
+        : `${when(start.date, start.time)} to ${when(end.date, end.time)}`;
+    return {
+      entity: { type: 'time_off', id: entry.id },
+      targetKey: `time_off:${entry.id}`,
+      recordOwner: staffLogin(directory, entry.staffMemberId),
+      appointmentStartsAt: null,
+      before: {
+        staffMemberId: entry.staffMemberId,
+        staffName: name,
+        fromDate: start.date,
+        from: start.time,
+        toDate: end.date,
+        to: end.time,
+      },
+      after: { staffMemberId: entry.staffMemberId, staffName: name, blocked: false },
+      touched: { timeOffId: entry.id, startsAt: entry.startsAt, endsAt: entry.endsAt },
+      inverse: {
+        staffMemberId: entry.staffMemberId,
+        startsAt: entry.startsAt,
+        endsAt: entry.endsAt,
+      },
+      summary: `Unblock ${name}'s time, ${span}, so it can be booked again.`,
+    };
+  },
+  async undo(scope, inverse) {
+    const { staffMemberId, startsAt, endsAt } = z
+      .strictObject({
+        staffMemberId: StaffMemberIdSchema,
+        startsAt: UtcDateTimeSchema,
+        endsAt: UtcDateTimeSchema,
+      })
+      .parse(inverse);
+    await addTimeOffIn(scope.tx, scope.actor, staffMemberId, { startsAt, endsAt });
   },
 };
 
@@ -323,5 +399,67 @@ export const listTodos: ReadTool = {
       // message): they come back labelled, never as instructions.
       untrustedText: tasks.some((task) => task.source !== 'manual'),
     };
+  },
+};
+
+/** "your to-do", "Jess's to-do", "the team's to-do". */
+const possessive = (whose: string) =>
+  whose === 'you' ? 'your' : whose === 'the team' ? "the team's" : `${whose}'s`;
+
+const CompleteArgs = z.strictObject({ todoId: IdArg('to-do') });
+type CompleteArgs = z.output<typeof CompleteArgs>;
+
+export const completeTodo: WriteTool = {
+  kind: 'write',
+  name: 'complete_todo',
+  version: 1,
+  localTimes: false,
+  tier: 'internal_write',
+  guide: {
+    use: 'Mark one open to-do done, by its id from list_todos.',
+    avoid: [
+      'to take back a to-do Pepper just added (the member taps Undo on its card)',
+      'for several to-dos at once (one call each, after the member named them)',
+    ],
+    returns: 'the to-do marked done, done or waiting for the member’s OK.',
+    examples: [
+      { say: 'Mark the Maria call done', args: { todoId: { $any: true } } },
+      { say: 'I ordered the foils, tick that off', args: { todoId: { $any: true } } },
+    ],
+  },
+  args: CompleteArgs,
+  actions: () => ['task.create'],
+  async perform(scope: WriteScope, args: CompleteArgs): Promise<Performed> {
+    const id = TaskIdSchema.parse(args.todoId);
+    const { before, after } = await completeTaskIn(scope.tx, scope.actor, id, {
+      now: scope.now,
+    });
+    const whose = (await assigneeNamesOf(scope, [before.assigneeUserId]))(before.assigneeUserId);
+    // Typed on the to-do screen, which allows contact details: never in a card or to the model.
+    const title = redactContacts(before.title).slice(0, TASK_TITLE_MAX);
+    const due = before.dueAt === null ? null : localOf(scope.timeZone, before.dueAt);
+    const side = {
+      title,
+      whose,
+      dueDate: due?.date ?? null,
+      dueTime: due?.time ?? null,
+    };
+    return {
+      entity: { type: 'task', id },
+      targetKey: `todo:${id}`,
+      recordOwner: before.assigneeUserId,
+      appointmentStartsAt: null,
+      before: { ...side, status: 'open' },
+      after: { ...side, status: 'done' },
+      touched: { todoId: id, updatedAt: before.updatedAt },
+      inverse: { taskId: id, completedVersion: after.updatedAt },
+      summary: `Mark ${possessive(whose)} to-do "${title}" done.`,
+    };
+  },
+  async undo(scope, inverse) {
+    const { taskId, completedVersion } = z
+      .strictObject({ taskId: TaskIdSchema, completedVersion: UtcDateTimeSchema })
+      .parse(inverse);
+    await reopenTaskIn(scope.tx, scope.actor, taskId, { completedVersion });
   },
 };

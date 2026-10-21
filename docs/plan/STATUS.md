@@ -9,7 +9,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - Done: Task 1 `find_client_bookings` (db `listClientBookings`, appointments `listClientBookingsIn`, the tool, reads/hostile/evals/latency tests; the hostile test's mini-loop trims history).
 - Done: Task 2 `list_todos` (core `listTasksIn`, `memberFirstNamesIn`; titles through `redactContacts`; the AI's own to-dos come back labelled untrusted).
 - Watch: `reads.int.test.ts` "list_todos" failed once with no visible diff, then passed 16 runs in a row; re-run it in the full suite.
-- Next: Task 3 `complete_todo`, 4 `unblock_time` + `get_day` v2, 5 hostile/evals for all, 6 facts, 7 docs + ADR-0032 + checks.
+- Done: Task 3 `complete_todo` (core `changeTaskIn`/`completeTaskIn`/`reopenTaskIn`, `TaskNotOpenError` → `not_changeable`) and Task 4 `unblock_time` (db `findTimeOff`, appointments `getTimeOffIn`; `get_day` v2 gives block ids; a colleague's block is `forbidden`). Hostile targets from one helper (`hostileTargets`), the "ask" test covers every write tool, the eval world has a to-do and Jess's lunch block; ai unit 192, ai integration 93 green.
+- Decided (Claude): the cost guard's "30 one-turn cases under $1.50 at every step" became 25 (14 tools add ~$0.05 a case to the worst case): S27 runs sets in chunks of ≤ 25 or calibrates the estimate first.
+- Next: Task 5 is mostly done with 1–4 (check the hostile catalogue once more), 6 facts, 7 docs + ADR-0032 + `pnpm check` / `pnpm test:integration`.
 
 ## Last sessions
 - **S26 Phase 6e (2026-10-21): chat screen, cards, Why, Undo, Autonomy settings** ([ADR-0031](../adr/0031-chat-screen-cards-why-undo-and-autonomy-settings.md), accepted; [PCR-004](changes/PCR-004.md), approved). Full entry in [session-log.md](session-log.md).

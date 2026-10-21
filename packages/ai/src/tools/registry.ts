@@ -45,7 +45,13 @@ import {
 } from './catalog/reads.js';
 import { cancelBooking, createBooking, moveBooking } from './catalog/bookings.js';
 import { directoryOf, localSlot } from './catalog/shared.js';
-import { addTodo, blockTime, listTodos } from './catalog/time-and-todos.js';
+import {
+  addTodo,
+  blockTime,
+  completeTodo,
+  listTodos,
+  unblockTime,
+} from './catalog/time-and-todos.js';
 import {
   InvalidToolArgumentsError,
   toolRefusalOf,
@@ -76,7 +82,9 @@ export const TOOLS: readonly AnyTool[] = [
   moveBooking,
   cancelBooking,
   blockTime,
+  unblockTime,
   addTodo,
+  completeTodo,
 ];
 
 const BY_NAME = new Map(TOOLS.map((tool) => [tool.name, tool]));

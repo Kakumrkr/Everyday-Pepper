@@ -1,6 +1,7 @@
 // Integration-test helpers for the tools (not built into dist): a migrated Postgres and a small
 // seeded business (a "world") per test file, and a way to call tools as a member.
 import {
+  addTimeOff,
   createBooking,
   createService,
   createStaffMember,
@@ -17,7 +18,14 @@ import {
   type TenantId,
   type UserId,
 } from '@pepper/contracts';
-import { createBusiness, createClient, ManualClock, outboxKeyFrom, type Actor } from '@pepper/core';
+import {
+  createBusiness,
+  createClient,
+  createTask,
+  ManualClock,
+  outboxKeyFrom,
+  type Actor,
+} from '@pepper/core';
 import {
   addMembership,
   createDatabase,
@@ -29,6 +37,7 @@ import {
   type DatabaseHandle,
 } from '@pepper/db';
 import { postgresUrlAs, startPostgres } from '@pepper/testing';
+import type { HostileTargets, TargetIds } from './hostile.js';
 import { dispatchToolCall, type ToolOutcome, type ToolTurn } from './registry.js';
 import type { ToolDeps } from './tool.js';
 
@@ -229,4 +238,31 @@ export function callTool(
     arguments: JSON.stringify(args),
   };
   return dispatchToolCall(deps, inTurn, call);
+}
+
+/**
+ * Records of Jess's in `world` for the hostile fake to aim at (so staff reach them too): a
+ * booking at 10:00 on Tuesday, an open to-do and her lunch blocked 12:00–13:00; and the same
+ * in `other`, which must stay invisible.
+ */
+export async function hostileTargets(world: World, other: World): Promise<HostileTargets> {
+  const of = async (w: World): Promise<TargetIds> => ({
+    serviceId: w.haircut.id,
+    staffMemberId: w.jessStaff.id,
+    clientId: w.maria.id,
+    bookingId: (await bookOnScreen(w, w.jessStaff, w.maria, '10:00')).id,
+    todoId: (
+      await createTask(w.db, w.owner, {
+        title: 'Order foils',
+        assigneeUserId: w.jess.context.userId,
+      })
+    ).id,
+    timeOffId: (
+      await addTimeOff(w.db, w.owner, w.jessStaff.id, {
+        startsAt: tuesdayAt('12:00'),
+        endsAt: tuesdayAt('13:00'),
+      })
+    ).id,
+  });
+  return { own: await of(world), foreign: await of(other) };
 }

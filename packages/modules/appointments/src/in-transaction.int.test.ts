@@ -23,6 +23,7 @@ import {
   BookingNotChangeableError,
   BookingNotFoundError,
   SlotUnavailableError,
+  TimeOffNotFoundError,
 } from './errors.js';
 import { findAvailabilityIn } from './services/availability.js';
 import {
@@ -38,7 +39,12 @@ import {
 import { replaceWorkingHours } from './services/hours.js';
 import { createService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
-import { addTimeOffIn, listTimeOffBetweenIn, removeTimeOffIn } from './services/time-off.js';
+import {
+  addTimeOffIn,
+  getTimeOffIn,
+  listTimeOffBetweenIn,
+  removeTimeOffIn,
+} from './services/time-off.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // The booking services inside a caller's transaction (ADR-0028 §9, ADR-0029): the AI's tools run
@@ -271,8 +277,12 @@ describe('time off and availability in a transaction', () => {
       expect(await findAvailabilityIn(tx, b.owner, query, b)).toEqual([]);
       expect(before.length).toBeGreaterThan(0);
       expect(await listTimeOffBetweenIn(tx, b.staff, day)).toEqual([entry]);
+      expect(await getTimeOffIn(tx, b.owner, entry.id)).toEqual(entry);
       await removeTimeOffIn(tx, b.staff, b.jess.id, entry.id);
       expect(await listTimeOffBetweenIn(tx, b.staff, day)).toEqual([]);
+      expect(await caught(getTimeOffIn(tx, b.owner, entry.id))).toBeInstanceOf(
+        TimeOffNotFoundError,
+      );
     });
   });
 });

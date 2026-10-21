@@ -46,10 +46,12 @@ const VALID: Record<string, Record<string, unknown>> = {
     dueTime: null,
     assigneeStaffMemberId: null,
   },
+  complete_todo: { todoId: '0199f4b2-7c1e-7a00-8000-0000000000d1' },
+  unblock_time: { timeOffId: '0199f4b2-7c1e-7a00-8000-0000000000e1' },
 };
 
 describe('the tool registry', () => {
-  it('has the V1 tools, named verb_noun, reads first', () => {
+  it('has the fourteen V1 tools, named verb_noun, reads first', () => {
     expect(TOOLS.map((tool) => tool.name)).toEqual([
       'find_availability',
       'find_clients',
@@ -62,11 +64,13 @@ describe('the tool registry', () => {
       'move_booking',
       'cancel_booking',
       'block_time',
+      'unblock_time',
       'add_todo',
+      'complete_todo',
     ]);
     for (const tool of TOOLS) expect(tool.name).toMatch(/^[a-z]+(?:_[a-z]+)+$/);
     expect(TOOLS.filter((tool) => tool.kind === 'write').map((tool) => tool.tier)).toEqual(
-      Array(5).fill('internal_write'),
+      Array(7).fill('internal_write'),
     );
   });
 

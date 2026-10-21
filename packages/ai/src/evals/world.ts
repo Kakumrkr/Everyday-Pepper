@@ -1,4 +1,5 @@
 import {
+  addTimeOff,
   createBooking,
   createService,
   createStaffMember,
@@ -14,7 +15,7 @@ import {
   type TenantId,
   type UserId,
 } from '@pepper/contracts';
-import { createBusiness, createClient, ManualClock, type Actor } from '@pepper/core';
+import { createBusiness, createClient, createTask, ManualClock, type Actor } from '@pepper/core';
 import { addMembership, insertSeedUser, withTenant, type Database } from '@pepper/db';
 import { z } from 'zod';
 
@@ -47,7 +48,9 @@ let seeded = 0;
  * own staff member) and Marco (staff member, no login). Haircut (60 min + 10 clean-up) and
  * Colour (90 min); both cut, Jess also colours; both work Mon–Fri 09:00–17:00 and Marco
  * Saturdays 10:00–16:00. Clients Maria Lopez, Sara Kim, Sarah Park and Ana Ruiz. Maria is
- * booked with Jess at 15:00 on the next weekday; Ana at 14:00 on the next Friday.
+ * booked with Jess at 15:00 on the next weekday; Ana at 14:00 on the next Friday. Lena has an
+ * open to-do "Call Maria about her colour", and Jess's lunch is blocked 12:00–13:00 on the
+ * next weekday (S26b).
  */
 export async function seedEvalWorld(
   db: Database,
@@ -147,6 +150,18 @@ export async function seedEvalWorld(
     ),
   );
 
+  const todo = await createTask(db, owner, { title: 'Call Maria about her colour' });
+  const lunch = await addTimeOff(db, owner, jess.id, {
+    startsAt: at_(
+      after((day) => day <= 5),
+      12,
+    ),
+    endsAt: at_(
+      after((day) => day <= 5),
+      13,
+    ),
+  });
+
   return {
     name,
     db,
@@ -166,6 +181,8 @@ export async function seedEvalWorld(
       ['{{client:ana}}', ana.id],
       ['{{booking:maria}}', mariaBooking.id],
       ['{{booking:ana}}', anaBooking.id],
+      ['{{todo:call-maria}}', todo.id],
+      ['{{timeoff:jess-lunch}}', lunch.id],
     ]),
   };
 }

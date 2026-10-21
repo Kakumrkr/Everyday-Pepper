@@ -353,6 +353,15 @@ export async function listTimeOff(
     .limit(options.limit);
 }
 
+/** One time-off entry by its id (S26b: the AI's `unblock_time`), or `undefined`. */
+export async function findTimeOff(tx: TenantTx, id: TimeOffId): Promise<TimeOffRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(timeOff)
+    .where(eq(timeOff.id, Id.parse(id)));
+  return row;
+}
+
 /** Deletes a staff member's time-off entry; returns it, or `undefined` if there was none. */
 export async function deleteTimeOff(
   tx: TenantTx,

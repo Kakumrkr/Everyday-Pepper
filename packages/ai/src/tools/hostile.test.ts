@@ -8,6 +8,8 @@ const ids = (n: string) => ({
   staffMemberId: `0199f4b2-7c1e-7a00-8000-0000000000${n}2`,
   clientId: `0199f4b2-7c1e-7a00-8000-0000000000${n}3`,
   bookingId: `0199f4b2-7c1e-7a00-8000-0000000000${n}4`,
+  todoId: `0199f4b2-7c1e-7a00-8000-0000000000${n}5`,
+  timeOffId: `0199f4b2-7c1e-7a00-8000-0000000000${n}6`,
 });
 const targets = { own: ids('a'), foreign: ids('b') };
 

@@ -184,12 +184,14 @@ export const findClients: ReadTool = {
 export const getDay: ReadTool = {
   kind: 'read',
   name: 'get_day',
-  version: 1,
+  // 2 (S26b): blocked times carry their id, for unblock_time.
+  version: 2,
   localTimes: true,
   guide: {
     use: "Read one day's schedule: its bookings (time, client, service, staff) and blocked time.",
     avoid: ['to find free times (use find_availability)'],
-    returns: 'the day’s bookings by time and the blocked times. Staff see only their own bookings.',
+    returns:
+      'the day’s bookings by time and the blocked times with their ids (for unblock_time). Staff see only their own bookings.',
     examples: [
       { say: "What's on today?", args: { date: { $any: true }, staffMemberId: null } },
       { say: 'How busy is Marco on Thursday?', args: { staffMemberId: { $any: true } } },
@@ -236,6 +238,7 @@ export const getDay: ReadTool = {
           ? '23:59'
           : localOf(scope.timeZone, instant).time;
     const blocked = timeOff.map((entry) => ({
+      timeOffId: entry.id,
       staffMemberId: entry.staffMemberId,
       staffName: staffName(directory, entry.staffMemberId),
       from: clip(entry.startsAt, range.from, 'start'),
@@ -245,7 +248,17 @@ export const getDay: ReadTool = {
     return {
       summary: `${day(args.date)}: ${String(views.length)} booking${views.length === 1 ? '' : 's'}${scopeNote}, ${String(blocked.length)} blocked time${blocked.length === 1 ? '' : 's'}.`,
       data: { date: args.date, bookings: views, blocked },
-      card: { kind: 'day', date: args.date, bookings: views, blocked },
+      card: {
+        kind: 'day',
+        date: args.date,
+        bookings: views,
+        blocked: blocked.map(({ staffMemberId, staffName: name, from, to }) => ({
+          staffMemberId,
+          staffName: name,
+          from,
+          to,
+        })),
+      },
     };
   },
 };

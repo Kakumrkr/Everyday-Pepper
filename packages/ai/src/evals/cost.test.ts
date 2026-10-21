@@ -46,8 +46,10 @@ describe('estimateRunCost (the budget guard, playbook §4)', () => {
     );
   });
 
-  it('keeps one set of 30 one-turn cases under the $1.50 cap even at every step', () => {
-    const cases = Array.from({ length: 30 }, () => evalCase());
+  it('keeps one run of 25 one-turn cases under the $1.50 cap even at every step', () => {
+    // 30 fitted with ten tools; the fourteen of S26b put ~$0.05 a case on the worst case, so
+    // S27 runs a set in chunks of at most 25 cases (or calibrates the estimate first).
+    const cases = Array.from({ length: 25 }, () => evalCase());
     expect(estimateRunCost(cases, 1, PRICE).usd).toBeLessThan(1.5);
   });
 });

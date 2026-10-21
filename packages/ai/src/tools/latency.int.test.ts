@@ -1,6 +1,11 @@
 import type { StaffMember } from '@pepper/contracts';
-import { createService, createStaffMember, replaceWorkingHours } from '@pepper/appointments';
-import { changeAutonomy } from '@pepper/core';
+import {
+  addTimeOff,
+  createService,
+  createStaffMember,
+  replaceWorkingHours,
+} from '@pepper/appointments';
+import { changeAutonomy, createTask } from '@pepper/core';
 import { insertBooking, withTenant, type Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { validArguments } from './hostile.js';
@@ -10,6 +15,7 @@ import {
   depsFor,
   newWorld,
   startTestDatabase,
+  tuesdayAt,
   TUESDAY,
   type TestDatabase,
   type World,
@@ -33,7 +39,9 @@ const QUERY_BUDGET: Record<string, number> = {
   move_booking: 70,
   cancel_booking: 60,
   block_time: 40,
+  unblock_time: 40,
   add_todo: 40,
+  complete_todo: 40,
 };
 const P95_TARGET_MS = 300;
 const P95_GATE_MS = 3 * P95_TARGET_MS;
@@ -44,6 +52,8 @@ let db: Database;
 let world: World;
 let queries = 0;
 let bookingId = '';
+let todoId = '';
+let timeOffId = '';
 
 const STAFF = 10;
 const DAYS = 20;
@@ -95,6 +105,13 @@ beforeAll(async () => {
     }
   });
   bookingId = (await bookOnScreen(world, world.jessStaff, world.maria, '10:00')).id;
+  todoId = (await createTask(db, world.owner, { title: 'Order foils' })).id;
+  timeOffId = (
+    await addTimeOff(db, world.owner, world.jessStaff.id, {
+      startsAt: tuesdayAt('12:00'),
+      endsAt: tuesdayAt('13:00'),
+    })
+  ).id;
   // Writes stop at a proposal, so every run measures the same dry run.
   await changeAutonomy(db, world.owner, { askFirst: true }, { templateDefaults: {} });
 }, 300_000);
@@ -123,6 +140,8 @@ describe('per-tool budgets on a busy business', () => {
         staffMemberId: world.jessStaff.id,
         clientId: world.maria.id,
         bookingId,
+        todoId,
+        timeOffId,
       },
       TUESDAY,
     )[name];

@@ -1,11 +1,24 @@
-import { changeBooking, getBooking, listBookings, listTimeOff } from '@pepper/appointments';
+import {
+  addTimeOff,
+  changeBooking,
+  getBooking,
+  listBookings,
+  listTimeOff,
+} from '@pepper/appointments';
 import {
   AI_EMAIL_GRACE_SECONDS,
   OutboxMessageIdSchema,
   type ActionExecution,
   type ActionProposal,
 } from '@pepper/contracts';
-import { changeAutonomy, listTasks, type Actor } from '@pepper/core';
+import {
+  changeAutonomy,
+  changeTask,
+  createTask,
+  listTasks,
+  UndoRefusedError,
+  type Actor,
+} from '@pepper/core';
 import { findOutboxMessage, withTenant, type Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -161,6 +174,22 @@ const SCENARIOS: Scenario[] = [
     },
   },
   {
+    tool: 'unblock_time',
+    setup: async (w) => {
+      const entry = await addTimeOff(db, w.owner, w.jessStaff.id, {
+        startsAt: tuesdayAt('12:00'),
+        endsAt: tuesdayAt('13:00'),
+      });
+      return {
+        args: { timeOffId: entry.id },
+        state: async () =>
+          (await listTimeOff(db, w.owner, w.jessStaff.id, {}, { clock: w.clock })).map(
+            ({ startsAt, endsAt }) => ({ startsAt, endsAt }),
+          ),
+      };
+    },
+  },
+  {
     tool: 'add_todo',
     setup: async (w) => {
       await Promise.resolve();
@@ -175,6 +204,24 @@ const SCENARIOS: Scenario[] = [
           (await listTasks(db, w.owner, { status: 'all' })).map(({ title, dueAt, status }) => ({
             title,
             dueAt,
+            status,
+          })),
+      };
+    },
+  },
+  {
+    tool: 'complete_todo',
+    setup: async (w) => {
+      const task = await createTask(db, w.owner, {
+        title: 'Order foils',
+        dueAt: tuesdayAt('17:00'),
+        assigneeUserId: w.jess.context.userId,
+      });
+      return {
+        args: { todoId: task.id },
+        state: async () =>
+          (await listTasks(db, w.owner, { status: 'all' })).map(({ title, status }) => ({
+            title,
             status,
           })),
       };
@@ -246,6 +293,15 @@ describe('the role matrix through the tools (AC-W2-4)', () => {
   /** Calls on Marco's records: Priya is Marco's login, Jess is a colleague. */
   async function marcosCalls(w: World) {
     const marcos = await bookOnScreen(w, w.marcoStaff, w.sara, '11:00');
+    // Before opening, so it doesn't stand in the way of the other calls.
+    const marcosBlock = await addTimeOff(db, w.owner, w.marcoStaff.id, {
+      startsAt: tuesdayAt('07:00'),
+      endsAt: tuesdayAt('08:00'),
+    });
+    const priyasTodo = await createTask(db, w.owner, {
+      title: 'Sweep up',
+      assigneeUserId: w.priya.context.userId,
+    });
     return {
       create_booking: {
         clientId: w.sara.id,
@@ -270,6 +326,8 @@ describe('the role matrix through the tools (AC-W2-4)', () => {
         dueTime: null,
         assigneeStaffMemberId: w.marcoStaff.id,
       },
+      complete_todo: { todoId: priyasTodo.id },
+      unblock_time: { timeOffId: marcosBlock.id },
     };
   }
 
@@ -577,5 +635,104 @@ describe('the dial and the emails', () => {
     expect(two.id).not.toBe(one.id);
     const titles = (await listTasks(db, w.owner, { status: 'all' })).map((task) => task.title);
     expect(titles.sort()).toEqual(['Call the bank', 'Order foils']);
+  });
+});
+
+describe('complete_todo (S26b)', () => {
+  it('shows the to-do it marks done, refuses one already done and never touches a hidden one', async () => {
+    const w = await newWorld(db);
+    await askFirst(w);
+    const task = await createTask(db, w.owner, {
+      title: 'Call Maria on 212 555 0143',
+      assigneeUserId: w.jess.context.userId,
+    });
+    const proposal = proposed(
+      await callTool(depsFor(w, w.owner), 'complete_todo', { todoId: task.id }),
+    );
+    expect(proposal.preview).toMatchObject({
+      before: { title: 'Call Maria on (phone removed)', whose: 'Jess', status: 'open' },
+      after: { status: 'done' },
+      summary: `Mark Jess's to-do "Call Maria on (phone removed)" done.`,
+    });
+    // Jess sees her to-dos as her own.
+    const jesss = await createTask(db, w.jess, { title: 'Restock towels' });
+    const own = proposed(await callTool(depsFor(w, w.jess), 'complete_todo', { todoId: jesss.id }));
+    expect((own.preview as { summary: string }).summary).toMatch(/^Mark your to-do/);
+
+    await changeTask(db, w.owner, task.id, { status: 'done' });
+    const again = await callTool(depsFor(w, w.owner), 'complete_todo', { todoId: task.id });
+    expect(again).toMatchObject({ status: 'refused', code: 'not_changeable' });
+
+    const priyas = await createTask(db, w.priya, { title: 'Priya only' });
+    const hidden = await callTool(depsFor(w, w.jess), 'complete_todo', { todoId: priyas.id });
+    expect(hidden).toMatchObject({ status: 'refused', code: 'not_found' });
+    expect(
+      (await listTasks(db, w.owner, { status: 'all' })).find((t) => t.id === priyas.id),
+    ).toMatchObject({ status: 'open' });
+  });
+
+  it('a stale approval asks again when the to-do changed after the proposal', async () => {
+    const w = await newWorld(db);
+    await askFirst(w);
+    const task = await createTask(db, w.owner, { title: 'Order foils' });
+    const proposal = proposed(
+      await callTool(depsFor(w, w.owner), 'complete_todo', { todoId: task.id }),
+    );
+    await changeTask(db, w.owner, task.id, { title: 'Order foils and gloves' });
+    const approval = await approveToolProposal(
+      depsFor(w, w.owner),
+      proposal.id,
+      proposal.fingerprint,
+    );
+    expect(approval.kind).toBe('stale');
+  });
+
+  it('its undo is refused once someone changed the to-do after it was done', async () => {
+    const w = await newWorld(db);
+    await justDoIt(w);
+    const task = await createTask(db, w.owner, { title: 'Order foils' });
+    const execution = done(
+      await callTool(depsFor(w, w.owner), 'complete_todo', { todoId: task.id }),
+    );
+    await changeTask(db, w.owner, task.id, { title: 'Ordered foils (box of 500)' });
+    await expect(undoToolAction(depsFor(w, w.owner), execution.id, 'wrong')).rejects.toBeInstanceOf(
+      UndoRefusedError,
+    );
+    expect((await listTasks(db, w.owner, { status: 'all' }))[0]).toMatchObject({ status: 'done' });
+  });
+});
+
+describe('unblock_time (S26b)', () => {
+  it('shows the whole span it frees, and never touches a booking', async () => {
+    const w = await newWorld(db);
+    await justDoIt(w);
+    const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    const week = await addTimeOff(db, w.owner, w.marcoStaff.id, {
+      startsAt: tuesdayAt('09:00'),
+      endsAt: '2026-11-06T22:00:00.000Z',
+    });
+    const execution = done(
+      await callTool(depsFor(w, w.owner), 'unblock_time', { timeOffId: week.id }),
+    );
+    expect(execution.summary).toBe(
+      "Unblock Marco's time, Tue 2026-11-03 at 09:00 to Fri 2026-11-06 at 17:00, so it can be booked again.",
+    );
+    // A booking's id is no blocked time.
+    const outcome = await callTool(depsFor(w, w.owner), 'unblock_time', { timeOffId: booking.id });
+    expect(outcome).toMatchObject({ status: 'refused', code: 'not_found' });
+    expect(await tuesdayBookings(w)()).toHaveLength(1);
+  });
+
+  it("refuses staff a colleague's block they can see as forbidden, their own they may remove", async () => {
+    const w = await newWorld(db);
+    await askFirst(w);
+    const marcos = await addTimeOff(db, w.owner, w.marcoStaff.id, {
+      startsAt: tuesdayAt('12:00'),
+      endsAt: tuesdayAt('13:00'),
+    });
+    const colleague = await callTool(depsFor(w, w.jess), 'unblock_time', { timeOffId: marcos.id });
+    expect(colleague).toMatchObject({ status: 'refused', code: 'forbidden' });
+    const own = await callTool(depsFor(w, w.priya), 'unblock_time', { timeOffId: marcos.id });
+    expect(own.status).toBe('awaiting_approval');
   });
 });

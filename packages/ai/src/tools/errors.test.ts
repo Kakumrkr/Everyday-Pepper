@@ -16,6 +16,7 @@ import {
   ForbiddenError,
   TaskAssigneeNotMemberError,
   TaskNotFoundError,
+  TaskNotOpenError,
   UndoRefusedError,
 } from '@pepper/core';
 import fc from 'fast-check';
@@ -48,6 +49,7 @@ const CASES: [unknown, string][] = [
   [new TimeOffNotFoundError(), 'not_found'],
   [new ClientNotFoundError(), 'not_found'],
   [new TaskNotFoundError(), 'not_found'],
+  [new TaskNotOpenError(), 'not_changeable'],
   [new TaskAssigneeNotMemberError(), 'not_found'],
   [new ForbiddenError('bookings.manage'), 'forbidden'],
   [new BookingNotChangeableError(), 'not_changeable'],
