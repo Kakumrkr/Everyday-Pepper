@@ -42,6 +42,11 @@ export class TurnEventLog {
     );
   }
 
+  /** Forgets a turn's events (tests: as when its log expired). */
+  async drop(turnId: string): Promise<void> {
+    await this.redis.del(streamKey(turnId));
+  }
+
   async requestCancel(turnId: string): Promise<void> {
     await this.redis.set(cancelKey(turnId), '1', 'EX', CANCEL_TTL_SECONDS);
   }

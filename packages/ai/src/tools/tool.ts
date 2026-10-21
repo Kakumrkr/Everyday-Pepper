@@ -31,6 +31,11 @@ export interface ToolDeps {
   autonomy: AutonomyDefaults;
   /** For the client emails a write queues (held for the undo-send grace). */
   emails: { baseUrl: string; outboxKey: Buffer };
+  /**
+   * Whose request the call answers, when it isn't `actor`'s: a lead approving a staff member's
+   * proposal (S26). "Me" in the request ("remind me", "block my lunch") stays the staff member.
+   */
+  requester?: UserId;
 }
 
 /** Where a tool runs: one transaction of the member's business, in its time zone. */
@@ -39,6 +44,8 @@ export interface ToolScope {
   /** The AI acting for the member (`via: 'ai'`), or the member themselves for an undo. */
   actor: Actor;
   deps: ToolDeps;
+  /** Whose request it is ("me" in it): `deps.requester`, else the actor's member. */
+  requester: UserId;
   timeZone: string;
   now: Date;
 }

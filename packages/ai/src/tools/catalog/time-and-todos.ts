@@ -177,8 +177,10 @@ export const addTodo: WriteTool = {
   actions: () => ['task.create'],
   async perform(scope: WriteScope, args: TodoArgs): Promise<Performed> {
     const directory = await directoryOf(scope);
-    let assignee: UserId = scope.actor.context.userId;
-    let assigneeName = 'you';
+    // "Remind me": the member whose request it is, also when a lead approves it (S26).
+    let assignee: UserId = scope.requester;
+    // The same words whoever runs the preview, so a lead's approval matches what was shown.
+    let assigneeName = ownStaffMember(scope, directory)?.displayName ?? 'you';
     if (args.assigneeStaffMemberId !== null) {
       const staffId = StaffMemberIdSchema.parse(args.assigneeStaffMemberId);
       if (!directory.staff.has(staffId)) throw new StaffMemberNotFoundError();

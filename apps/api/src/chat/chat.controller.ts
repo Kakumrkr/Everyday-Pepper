@@ -5,6 +5,7 @@ import {
   ConversationTurnIdSchema,
   type ChatEventEnvelope,
   type ChatHistoryResponse,
+  type ChatStatus,
   type ConversationsResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
@@ -103,6 +104,13 @@ export class ChatController {
   async cancel(@CurrentTenant() tenant: TenantContext, @Param() params: unknown): Promise<void> {
     const { turnId } = parseBody(TurnParamsSchema, params);
     await answering(() => this.chat.cancel(tenant, turnId));
+  }
+
+  /** Whether the AI can answer now: `on`, `off` (not set up) or `paused` (allowance used up). */
+  @Get('status')
+  @RequirePermission('ai.chat')
+  status(@CurrentTenant() tenant: TenantContext): Promise<ChatStatus> {
+    return answering(() => this.chat.status(tenant));
   }
 
   @Get('conversations')

@@ -10,13 +10,17 @@ import {
   type BusinessContext,
   type LlmProvider,
   type OpenAiConfig,
+  type ToolDeps,
 } from '@pepper/ai';
 import {
   isFinalChatEvent,
   type ChatEvent,
   type ChatEventEnvelope,
   type ChatHistoryResponse,
+  type ChatStatus,
   type ChatTurnRequest,
+  type ToolCallStatus,
+  type ToolCard,
   type ConversationId,
   type ConversationsResponse,
   type ConversationTurnId,
@@ -25,6 +29,7 @@ import {
   conversationHistory,
   getTurn,
   listMyConversations,
+  llmBudgetState,
   llmTokenLimits,
   reserveLlmTokens,
   STALE_TURN_GRACE_MS,
@@ -222,6 +227,11 @@ export class ChatService implements OnModuleDestroy {
       if (message.role === 'assistant' && message.content.trim() !== '') {
         events.push({ type: 'message.completed', messageId: message.id, text: message.content });
       }
+      // The cards the member saw, so a resumed turn shows its proposals and receipts too (S26:
+      // before, a turn read back after its event log expired lost them).
+      if (message.role === 'tool' && message.card !== null) {
+        events.push(toolFinishedOf(message.toolName ?? 'unknown', message.isError, message.card));
+      }
     }
     const reason = turn.stopReason ?? 'internal';
     events.push(
@@ -237,10 +247,48 @@ export class ChatService implements OnModuleDestroy {
     }
   }
 
-  private async depsFor(actor: Actor, memberName: string): Promise<AgentDeps> {
+  /**
+   * What the tools need for the member (approve, undo, the cards' views): the session's member,
+   * the template's rule and autonomy defaults, the email settings. Never anything from a body.
+   */
+  async toolDeps(tenant: TenantContext): Promise<ToolDeps> {
+    const actor = actorOf(tenant);
+    const { template } = await this.businessOf(actor);
+    return this.toolDepsFor(actor, template);
+  }
+
+  /** Whether the AI can answer now (`GET /v1/chat/status`); every screen works in all three. */
+  async status(tenant: TenantContext): Promise<ChatStatus> {
+    if (this.provider === null) return { state: 'off' };
+    const budget = await llmBudgetState(
+      this.db,
+      tenant.tenantId,
+      llmTokenLimits(this.options.monthlyTokens),
+      this.clock,
+    );
+    return { state: budget === 'exhausted' ? 'paused' : 'on' };
+  }
+
+  private async businessOf(actor: Actor) {
     const tenant = await withTenant(this.db, actor.context.tenantId, findCurrentTenant);
     if (tenant === undefined) throw new Error('The session’s business does not exist');
     const template = tenant.templateId === null ? null : getTemplate(tenant.templateId);
+    return { tenant, template };
+  }
+
+  private toolDepsFor(actor: Actor, template: ReturnType<typeof getTemplate> | null): ToolDeps {
+    return {
+      db: this.db,
+      actor,
+      clock: this.clock,
+      templateRuleDefaults,
+      autonomy: { templateDefaults: template?.defaultAutonomy ?? {} },
+      emails: { baseUrl: this.options.baseUrl, outboxKey: this.options.outboxKey },
+    };
+  }
+
+  private async depsFor(actor: Actor, memberName: string): Promise<AgentDeps> {
+    const { tenant, template } = await this.businessOf(actor);
     const business: BusinessContext = {
       name: tenant.name,
       timeZone: tenant.timeZone,
@@ -251,14 +299,7 @@ export class ChatService implements OnModuleDestroy {
     const limits = llmTokenLimits(this.options.monthlyTokens);
     return {
       provider: this.provider,
-      tools: {
-        db: this.db,
-        actor,
-        clock: this.clock,
-        templateRuleDefaults,
-        autonomy: { templateDefaults: template?.defaultAutonomy ?? {} },
-        emails: { baseUrl: this.options.baseUrl, outboxKey: this.options.outboxKey },
-      },
+      tools: this.toolDepsFor(actor, template),
       store: postgresConversationStore(this.db, actor, this.clock),
       budget: {
         reserve: (estimate) =>
@@ -274,10 +315,30 @@ export class ChatService implements OnModuleDestroy {
   }
 }
 
+/** A recorded tool result with a card, as the `tool.finished` event the member saw. */
+export function toolFinishedOf(tool: string, isError: boolean, card: ToolCard): ChatEvent {
+  const status: ToolCallStatus = isError
+    ? 'refused'
+    : card.kind !== 'change'
+      ? 'answered'
+      : card.state === 'proposed'
+        ? 'awaiting_approval'
+        : 'done';
+  return {
+    type: 'tool.finished',
+    tool,
+    status,
+    summary: card.kind === 'change' ? (card.summary ?? '') : '',
+    // The stable code went to the model with the result; the card is what the member needs.
+    code: null,
+    card,
+  };
+}
+
 function digest(text: string): string {
   return createHash('sha256').update(text).digest('hex').slice(0, 32);
 }
 
-function actorOf(context: TenantContext): Actor {
+export function actorOf(context: TenantContext): Actor {
   return { context, requestId: currentRequestContext()?.requestId };
 }

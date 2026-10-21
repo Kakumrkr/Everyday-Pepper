@@ -418,6 +418,45 @@ describe('conflicts and stale approvals', () => {
     expect(await tuesdayBookings(w)()).toHaveLength(0);
   });
 
+  it('a lead approving a staff member’s "remind me" and "book me" keeps them that member’s (S26)', async () => {
+    const w = await newWorld(db);
+    await askFirst(w);
+    // Staff reach only their own clients: Maria is Jess's.
+    await bookOnScreen(w, w.jessStaff, w.maria, '15:00');
+    const todo = proposed(
+      await callTool(depsFor(w, w.jess), 'add_todo', {
+        title: 'Restock towels',
+        dueDate: null,
+        dueTime: null,
+        assigneeStaffMemberId: null,
+      }),
+    );
+    const booking = proposed(
+      await callTool(depsFor(w, w.jess), 'create_booking', {
+        clientId: w.maria.id,
+        serviceId: w.haircut.id,
+        staffMemberId: null,
+        date: TUESDAY,
+        time: '10:00',
+        emailClient: false,
+      }),
+    );
+    for (const proposal of [todo, booking]) {
+      const approval = await approveToolProposal(
+        depsFor(w, w.owner),
+        proposal.id,
+        proposal.fingerprint,
+      );
+      // Exactly what Jess was shown, so it runs at once (no "stale" for a different "me").
+      expect(approval.kind).toBe('executed');
+    }
+    const tasks = await listTasks(db, w.jess, { status: 'all' });
+    expect(tasks.map((task) => task.title)).toContain('Restock towels');
+    expect(await tuesdayBookings(w)()).toContainEqual(
+      expect.objectContaining({ staffMemberId: w.jessStaff.id, startsAt: tuesdayAt('10:00') }),
+    );
+  });
+
   it('the receipt keeps the tool’s summary, and the card shows it', async () => {
     const w = await newWorld(db);
     await justDoIt(w);

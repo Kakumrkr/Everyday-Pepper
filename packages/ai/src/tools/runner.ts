@@ -109,7 +109,14 @@ export async function scopeOf(tx: TenantTx, actor: Actor, deps: ToolDeps): Promi
   const tenant = await findCurrentTenant(tx);
   // Every member transaction has its business.
   if (tenant === undefined) throw new Error('No business in this transaction');
-  return { tx, actor, deps, timeZone: tenant.timeZone, now: deps.clock.now() };
+  return {
+    tx,
+    actor,
+    deps,
+    requester: deps.requester ?? actor.context.userId,
+    timeZone: tenant.timeZone,
+    now: deps.clock.now(),
+  };
 }
 
 async function run(
