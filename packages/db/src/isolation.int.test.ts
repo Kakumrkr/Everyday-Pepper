@@ -11,6 +11,8 @@ import {
   TenantIdSchema,
   UsagePeriodSchema,
   type ActionExplanation,
+  type ConversationId,
+  type ConversationTurnId,
   type StaffMemberId,
   type TenantId,
   type UserId,
@@ -33,6 +35,7 @@ import { appendAuditEntry } from './repositories/audit.js';
 import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
+import { insertConversation, insertMessage, insertTurn } from './repositories/conversations.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { listTenantIdsForCleanup } from './repositories/cleanup.js';
@@ -494,7 +497,78 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       },
     ],
   },
+  conversations: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => (await seedTurn(tx)).conversation.id,
+    touch: 'channel = channel',
+    // Every role reaches only its own conversations; work without a user reaches all.
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+        with_check: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+      },
+    ],
+  },
+  conversation_turns: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => (await seedTurn(tx)).turn.id,
+    touch: 'steps = steps',
+    noDelete: true,
+    guarded: true,
+    // Every role reaches only its own conversations; work without a user reaches all.
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+        with_check: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+      },
+    ],
+  },
+  conversation_messages: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const { userId, conversation, turn } = await seedTurn(tx);
+      const message = await insertMessage(tx, {
+        conversationId: conversation.id as ConversationId,
+        turnId: turn.id as ConversationTurnId,
+        userId,
+        role: 'user',
+        content: 'What does tomorrow look like?',
+        untrusted: false,
+      });
+      return message.id;
+    },
+    touch: 'content = content',
+    appendOnly: true,
+    // Every role reaches only its own conversations; work without a user reaches all.
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+        with_check: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+      },
+    ],
+  },
 };
+
+/** A new conversation of a new member of the transaction's tenant, with a running turn. */
+async function seedTurn(tx: TenantTx) {
+  const userId = await insertUser(db);
+  await addMembership(tx, { userId, role: 'staff' });
+  const conversation = await insertConversation(tx, { userId, channel: 'chat' });
+  const turn = await insertTurn(tx, {
+    conversationId: conversation.id as ConversationId,
+    userId,
+    clientTurnId: newId(),
+    deadlineAt: new Date(Date.now() + 60_000),
+  });
+  if (turn === undefined) throw new Error('no turn');
+  return { userId, conversation, turn };
+}
 
 const EXPLANATION: ActionExplanation = {
   requestMessageId: null,

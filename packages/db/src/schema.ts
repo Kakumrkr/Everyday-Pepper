@@ -1416,6 +1416,207 @@ export const aiActionExecutions = pgTable(
 
 export type Tenant = typeof tenants.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
+// Conversations with the AI (ADR-0030): a member's chats, the turns they start with a message,
+// and the messages the model was sent and answered with. Every role reaches only its own
+// conversations (a chat is personal; leads oversee the AI through its proposals and receipts),
+// and work without a user (the clean-up) reaches all. Messages are written once and never
+// changed; a conversation goes 90 days after its last message, with its turns and messages.
+
+/** One conversation of one member. */
+export const conversations = pgTable(
+  'conversations',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    channel: text('channel').notNull().default('chat'),
+    lastMessageAt: timestamp('last_message_at', { withTimezone: true }).notNull().defaultNow(),
+    ...timestamps,
+  },
+  (table) => [
+    unique('conversations_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('conversations_member_recent_idx').on(table.tenantId, table.userId, table.lastMessageAt),
+    index('conversations_retention_idx').on(table.tenantId, table.lastMessageAt),
+    foreignKey({
+      name: 'conversations_membership_fk',
+      columns: [table.tenantId, table.userId],
+      foreignColumns: [memberships.tenantId, memberships.userId],
+    }).onDelete('cascade'),
+    check('conversations_channel_known', sql`${table.channel} IN ('chat', 'voice')`),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+      withCheck: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
+/**
+ * One turn: the member's message and everything the AI did to answer it. At most one turn
+ * runs per conversation; the client's turn id makes a retried request find its turn.
+ */
+export const conversationTurns = pgTable(
+  'conversation_turns',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    conversationId: uuid('conversation_id').notNull(),
+    userId: uuid('user_id').notNull(),
+    clientTurnId: uuid('client_turn_id').notNull(),
+    status: text('status').notNull().default('running'),
+    stopReason: text('stop_reason'),
+    // The turn read text from outside the team (tracked by the loop, never by the model).
+    untrusted: boolean('untrusted').notNull().default(false),
+    steps: smallint('steps').notNull().default(0),
+    inputTokens: integer('input_tokens').notNull().default(0),
+    cachedInputTokens: integer('cached_input_tokens').notNull().default(0),
+    outputTokens: integer('output_tokens').notNull().default(0),
+    deadlineAt: timestamp('deadline_at', { withTimezone: true }).notNull(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('conversation_turns_tenant_id_id_unique').on(table.tenantId, table.id),
+    unique('conversation_turns_client_turn_unique').on(
+      table.tenantId,
+      table.userId,
+      table.clientTurnId,
+    ),
+    uniqueIndex('conversation_turns_one_running')
+      .on(table.tenantId, table.conversationId)
+      .where(sql`${table.status} = 'running'`),
+    index('conversation_turns_conversation_idx').on(table.tenantId, table.conversationId),
+    foreignKey({
+      name: 'conversation_turns_conversation_fk',
+      columns: [table.tenantId, table.conversationId],
+      foreignColumns: [conversations.tenantId, conversations.id],
+    }).onDelete('cascade'),
+    check(
+      'conversation_turns_status_known',
+      sql`${table.status} IN ('running', 'completed', 'failed', 'cancelled')`,
+    ),
+    check(
+      'conversation_turns_stop_reason_known',
+      sql`${table.stopReason} IN ('answered', 'step_limit', 'time_limit', 'write_limit', 'provider_unavailable', 'provider_refused', 'budget_exhausted', 'ai_off', 'cancelled', 'interrupted', 'internal')`,
+    ),
+    check(
+      'conversation_turns_finished_when_done',
+      sql`(${table.status} = 'running') = (${table.finishedAt} IS NULL) AND (${table.status} = 'running') = (${table.stopReason} IS NULL)`,
+    ),
+    check('conversation_turns_steps_range', sql`${table.steps} BETWEEN 0 AND 99`),
+    check(
+      'conversation_turns_tokens_not_negative',
+      sql`${table.inputTokens} >= 0 AND ${table.cachedInputTokens} >= 0 AND ${table.outputTokens} >= 0`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+      withCheck: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
+/**
+ * One message of a conversation, exactly as the model was sent it (the member's words, its
+ * answer with its tool calls, a tool's result) plus what the member saw (a tool's card).
+ * `untrusted` marks text from outside the team, and the AI's answers written after it, so the
+ * label goes with the text every time it is sent again. Written once, never changed.
+ */
+export const conversationMessages = pgTable(
+  'conversation_messages',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    conversationId: uuid('conversation_id').notNull(),
+    turnId: uuid('turn_id').notNull(),
+    userId: uuid('user_id').notNull(),
+    seq: integer('seq').notNull(),
+    role: text('role').notNull(),
+    content: text('content').notNull(),
+    toolCalls: jsonb('tool_calls')
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    replay: jsonb('replay')
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    toolCallId: text('tool_call_id'),
+    toolName: text('tool_name'),
+    isError: boolean('is_error').notNull().default(false),
+    card: jsonb('card'),
+    // The loop's step that wrote it (assistant and tool messages).
+    step: smallint('step'),
+    untrusted: boolean('untrusted').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('conversation_messages_tenant_id_id_unique').on(table.tenantId, table.id),
+    unique('conversation_messages_seq_unique').on(table.tenantId, table.conversationId, table.seq),
+    unique('conversation_messages_tool_result_unique').on(
+      table.tenantId,
+      table.turnId,
+      table.step,
+      table.toolCallId,
+    ),
+    index('conversation_messages_turn_idx').on(table.tenantId, table.turnId),
+    foreignKey({
+      name: 'conversation_messages_conversation_fk',
+      columns: [table.tenantId, table.conversationId],
+      foreignColumns: [conversations.tenantId, conversations.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'conversation_messages_turn_fk',
+      columns: [table.tenantId, table.turnId],
+      foreignColumns: [conversationTurns.tenantId, conversationTurns.id],
+    }).onDelete('cascade'),
+    check('conversation_messages_role_known', sql`${table.role} IN ('user', 'assistant', 'tool')`),
+    check('conversation_messages_seq_positive', sql`${table.seq} >= 1`),
+    check('conversation_messages_content_size', sql`length(${table.content}) <= 100000`),
+    check(
+      'conversation_messages_tool_fields',
+      sql`(${table.role} = 'tool') = (${table.toolCallId} IS NOT NULL AND ${table.toolName} IS NOT NULL) AND (${table.role} = 'user') = (${table.step} IS NULL)`,
+    ),
+    check(
+      'conversation_messages_tool_calls_only_assistant',
+      sql`jsonb_typeof(${table.toolCalls}) = 'array' AND (${table.role} = 'assistant' OR ${table.toolCalls} = '[]'::jsonb) AND jsonb_array_length(${table.toolCalls}) <= 32`,
+    ),
+    check(
+      'conversation_messages_replay_only_assistant',
+      sql`jsonb_typeof(${table.replay}) = 'array' AND (${table.role} = 'assistant' OR ${table.replay} = '[]'::jsonb)`,
+    ),
+    check(
+      'conversation_messages_card_only_tool',
+      sql`${table.card} IS NULL OR ${table.role} = 'tool'`,
+    ),
+    check('conversation_messages_card_size', sql`octet_length(${table.card}::text) <= 32768`),
+    check(
+      'conversation_messages_tool_name_format',
+      sql`${table.toolName} ~ '^[a-z][a-z0-9_]{0,63}$'`,
+    ),
+    check('conversation_messages_tool_call_id_size', sql`length(${table.toolCallId}) <= 200`),
+    check('conversation_messages_step_range', sql`${table.step} BETWEEN 1 AND 99`),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+      withCheck: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
@@ -1436,3 +1637,6 @@ export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
 export type AutonomySettingsRow = typeof autonomySettings.$inferSelect;
 export type AiActionProposalRow = typeof aiActionProposals.$inferSelect;
 export type AiActionExecutionRow = typeof aiActionExecutions.$inferSelect;
+export type ConversationRow = typeof conversations.$inferSelect;
+export type ConversationTurnRow = typeof conversationTurns.$inferSelect;
+export type ConversationMessageRow = typeof conversationMessages.$inferSelect;
