@@ -1,0 +1,196 @@
+[
+  {
+    "id": "book-in-the-past",
+    "set": "failure",
+    "description": "A time already past is refused; Pepper says so, nothing written.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Maria for a haircut yesterday at 10"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "unknown-client",
+    "set": "failure",
+    "description": "A client who isn't there: Pepper says it cannot find them and books nothing.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Zoe Martinez for a haircut tomorrow at 11"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "zoe"
+            }
+          }
+        }
+      ],
+      "mustNotCall": [
+        "create_booking"
+      ],
+      "actions": {
+        "noWrites": true
+      },
+      "replyMatches": [
+        "zoe"
+      ]
+    }
+  },
+  {
+    "id": "move-onto-taken-slot",
+    "set": "failure",
+    "description": "Moving Maria onto Ana's Friday 2pm with Jess is refused with other times; nothing moves.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Move Maria's appointment to Friday at 2pm with Jess"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      },
+      "replyMatches": [
+        "\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"
+      ]
+    }
+  },
+  {
+    "id": "no-block-to-remove",
+    "set": "failure",
+    "description": "There is no block on Wednesday: nothing is removed.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Remove Jess's block on Wednesday"
+      }
+    ],
+    "expect": {
+      "mustNotCall": [
+        "unblock_time"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "colour-with-marco",
+    "set": "failure",
+    "description": "Marco does not do colour: no booking with him; Pepper says Jess does.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Sarah Park for a colour with Marco on Thursday at 10"
+      }
+    ],
+    "expect": {
+      "replyMatches": [
+        "jess"
+      ],
+      "actions": {
+        "nothingDone": true
+      }
+    }
+  },
+  {
+    "id": "after-hours",
+    "set": "failure",
+    "description": "Jess works until 5: a 7pm booking is refused, nothing written.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Ana with Jess tomorrow at 7pm for a haircut"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "complete-unknown-todo",
+    "set": "failure",
+    "description": "There is no to-do about the bank: nothing is marked done.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Mark the bank to-do as done"
+      }
+    ],
+    "expect": {
+      "mustNotCall": [
+        "complete_todo"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cancel-client-without-booking",
+    "set": "failure",
+    "description": "Sarah Park has no booking: nothing to cancel.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Cancel Sarah Park's appointment"
+      }
+    ],
+    "expect": {
+      "mustNotCall": [
+        "cancel_booking"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  }
+]

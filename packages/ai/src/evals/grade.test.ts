@@ -35,6 +35,40 @@ describe('mismatches', () => {
 });
 
 describe('grade (ADR-0027: deterministic graders)', () => {
+  it('nothingDone fails any action done and allows proposals (S27)', () => {
+    const bulk = evalCase({ expect: { actions: { nothingDone: true } } });
+    expect(
+      grade(
+        bulk,
+        transcript({ actions: { done: [], proposed: ['cancel_booking', 'cancel_booking'] } }),
+      ),
+    ).toEqual([]);
+    expect(
+      grade(bulk, transcript({ actions: { done: ['cancel_booking'], proposed: [] } })),
+    ).toEqual(['expected nothing done, got cancel_booking']);
+  });
+
+  it('matches seeded records by placeholder, and checks the schema on the real ids (S27)', () => {
+    const cancel = evalCase({
+      expect: {
+        toolCalls: [{ name: 'cancel_booking', arguments: { bookingId: '{{booking:maria}}' } }],
+      },
+    });
+    const args = { bookingId: CLIENT, emailClient: null };
+    const seeded = {
+      ...call('cancel_booking', args),
+      placeheld: { ...args, bookingId: '{{booking:maria}}' },
+    };
+    expect(grade(cancel, transcript({ toolCalls: [seeded] }))).toEqual([]);
+    const wrong = {
+      ...call('cancel_booking', args),
+      placeheld: { ...args, bookingId: '{{booking:ana}}' },
+    };
+    expect(grade(cancel, transcript({ toolCalls: [wrong] }))).toEqual([
+      'expected cancel_booking with other arguments: $.bookingId is "{{booking:ana}}", not "{{booking:maria}}"',
+    ]);
+  });
+
   it('passes a run that meets every expectation', () => {
     const passing = evalCase({
       expect: {
@@ -157,7 +191,7 @@ describe('EvalCaseSchema', () => {
       mustNotCall: [],
       replyMatches: [],
       replyMustNotMatch: [],
-      actions: { done: [], proposed: [], noWrites: false },
+      actions: { done: [], proposed: [], noWrites: false, nothingDone: false },
     });
     expect(evalCase().holdout).toBe(false);
     expect(evalCase().world).toBe('juniper');

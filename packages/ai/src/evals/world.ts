@@ -41,6 +41,22 @@ export interface EvalWorld {
   placeholders: ReadonlyMap<string, string>;
 }
 
+/** Every placeholder a seeded world fills in (cassettes and case expectations name them). */
+export const WORLD_PLACEHOLDERS = [
+  '{{service:haircut}}',
+  '{{service:colour}}',
+  '{{staff:jess}}',
+  '{{staff:marco}}',
+  '{{client:maria}}',
+  '{{client:sara}}',
+  '{{client:sarah}}',
+  '{{client:ana}}',
+  '{{booking:maria}}',
+  '{{booking:ana}}',
+  '{{todo:call-maria}}',
+  '{{timeoff:jess-lunch}}',
+] as const;
+
 let seeded = 0;
 
 /**

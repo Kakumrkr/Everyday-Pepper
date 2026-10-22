@@ -8,7 +8,7 @@ import { postgresConversationStore } from '../agent/store.js';
 import { isLlmError } from '../errors.js';
 import type { LlmCallOptions, LlmProvider } from '../provider.js';
 import type { EvalCase } from './case.js';
-import { seedEvalWorld, type EvalWorld } from './world.js';
+import { seedEvalWorld, unfillPlaceholders, type EvalWorld } from './world.js';
 import { addUsage, emptyUsage, type Transcript } from './transcript.js';
 
 // The eval subject (ADR-0030): each case runs through the real agent loop, in a freshly seeded
@@ -43,7 +43,12 @@ export function evalBusinessContext(
  * (`LlmError`), such as a cassette with no answer or a stale one, is kept in `failures`: the
  * loop would turn it into a fallback reply, but the run must fail with it.
  */
-function observed(provider: LlmProvider, transcript: Transcript, failures: unknown[]): LlmProvider {
+function observed(
+  provider: LlmProvider,
+  transcript: Transcript,
+  failures: unknown[],
+  placeholders: ReadonlyMap<string, string>,
+): LlmProvider {
   const kept = (error: unknown): never => {
     if (!isLlmError(error)) failures.push(error);
     throw error;
@@ -54,12 +59,19 @@ function observed(provider: LlmProvider, transcript: Transcript, failures: unkno
     if (response.refusal !== undefined) transcript.replies.push(response.refusal);
     for (const call of response.toolCalls) {
       let parsed: unknown = null;
+      let placeheld: unknown = null;
       try {
         parsed = JSON.parse(call.arguments) as unknown;
+        placeheld = JSON.parse(unfillPlaceholders(call.arguments, placeholders)) as unknown;
       } catch {
         // Invalid JSON: graded as arguments the schema refuses.
       }
-      transcript.toolCalls.push({ name: call.name, arguments: parsed, raw: call.arguments });
+      transcript.toolCalls.push({
+        name: call.name,
+        arguments: parsed,
+        raw: call.arguments,
+        placeheld,
+      });
     }
   };
   return {
@@ -101,7 +113,7 @@ export function loopSubject(
     const actor: Actor = world.actorFor(evalCase.actor.role);
     const failures: unknown[] = [];
     const deps: AgentDeps = {
-      provider: observed(providerFor(world), transcript, failures),
+      provider: observed(providerFor(world), transcript, failures, world.placeholders),
       tools: {
         db,
         actor,

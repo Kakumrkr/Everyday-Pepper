@@ -1,0 +1,551 @@
+[
+  {
+    "id": "book-colour-for-sara-kim",
+    "set": "scheduling",
+    "description": "A full name picks the one client: Sara Kim's colour with Jess on Wednesday at 10 waits for the OK (booking.create asks).",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Sara Kim for a colour with Jess on Wednesday at 10am"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "sara"
+            }
+          }
+        },
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:sara}}",
+            "serviceId": "{{service:colour}}",
+            "staffMemberId": "{{staff:jess}}",
+            "date": "2026-11-04",
+            "time": "10:00"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": [
+          "create_booking"
+        ]
+      },
+      "replyMatches": [
+        "(approve|approval|confirm|your ok|the ok|okay|tap)"
+      ]
+    }
+  },
+  {
+    "id": "taken-time-offers-nearest",
+    "set": "scheduling",
+    "description": "AC-W2-1: 3pm tomorrow with Jess is Maria's; Pepper books nothing unasked and offers other times.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Sarah Park for a haircut with Jess tomorrow at 3pm"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      },
+      "replyMatches": [
+        "\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"
+      ]
+    }
+  },
+  {
+    "id": "move-maria-to-ten",
+    "set": "scheduling",
+    "description": "Moving is \"do it and tell me\": Maria's appointment tomorrow moves to 10am, done with Undo.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Move Maria's appointment tomorrow to 10am"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "move_booking",
+          "arguments": {
+            "bookingId": "{{booking:maria}}",
+            "date": "2026-11-03",
+            "time": "10:00"
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "move_booking"
+        ]
+      }
+    }
+  },
+  {
+    "id": "ana-cancels-friday",
+    "set": "scheduling",
+    "description": "\"Ana can't make it Friday\": her Friday booking is the one proposed for cancelling.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Ana can't make it on Friday, cancel her"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "cancel_booking",
+          "arguments": {
+            "bookingId": "{{booking:ana}}"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": [
+          "cancel_booking"
+        ]
+      }
+    }
+  },
+  {
+    "id": "staff-reads-own-tomorrow",
+    "set": "scheduling",
+    "description": "Jess asks about her own tomorrow: the day is read, Maria at 3 is in the answer, nothing written.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "What do I have tomorrow?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_day",
+          "arguments": {
+            "date": "2026-11-03"
+          }
+        }
+      ],
+      "replyMatches": [
+        "maria",
+        "\\b3\\b|15:00"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "next-free-colour",
+    "set": "scheduling",
+    "description": "\"When can Jess next fit a colour?\": availability for colour is looked up, nothing booked.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "When's the next free colour slot with Jess?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_availability",
+          "arguments": {
+            "serviceId": "{{service:colour}}"
+          }
+        }
+      ],
+      "replyMatches": [
+        "\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "anas-next-appointment",
+    "set": "scheduling",
+    "description": "A client's next visit comes from her bookings, not a day's schedule.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "When is Ana's next appointment?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "ana"
+            }
+          }
+        },
+        {
+          "name": "find_client_bookings",
+          "arguments": {
+            "clientId": "{{client:ana}}"
+          }
+        }
+      ],
+      "replyMatches": [
+        "fri|11/6|nov(ember)? 6|2026-11-06"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "who-works-saturdays",
+    "set": "scheduling",
+    "description": "Who works Saturday comes from the team list.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Who can I book on Saturday?"
+      }
+    ],
+    "expect": {
+      "replyMatches": [
+        "marco"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "block-friday-afternoon-leaves-ana",
+    "set": "scheduling",
+    "description": "Blocking Jess's Friday 1–5 is done (notify) and Pepper says Ana's 2pm stays inside the block.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Block Jess's Friday afternoon from 1 to 5"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "block_time",
+          "arguments": {
+            "staffMemberId": "{{staff:jess}}",
+            "date": "2026-11-06",
+            "from": "13:00",
+            "to": "17:00"
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "block_time"
+        ]
+      },
+      "replyMatches": [
+        "ana|booking|appointment"
+      ]
+    }
+  },
+  {
+    "id": "move-ana-to-marco",
+    "set": "scheduling",
+    "description": "Moving Ana's Friday cut to Marco at the same time keeps the date and time.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Move Ana's Friday haircut to Marco, same time"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "move_booking",
+          "arguments": {
+            "bookingId": "{{booking:ana}}",
+            "date": "2026-11-06",
+            "time": "14:00",
+            "staffMemberId": "{{staff:marco}}"
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "move_booking"
+        ]
+      }
+    }
+  },
+  {
+    "id": "manager-books-marco-saturday",
+    "set": "scheduling",
+    "description": "The manager books Sara Kim with Marco on Saturday at 11: proposed for the OK.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "manager"
+    },
+    "turns": [
+      {
+        "user": "Book Sara Kim in with Marco on Saturday at 11 for a haircut"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:sara}}",
+            "staffMemberId": "{{staff:marco}}",
+            "date": "2026-11-07",
+            "time": "11:00"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": [
+          "create_booking"
+        ]
+      }
+    }
+  },
+  {
+    "id": "find-a-slot-then-book",
+    "set": "scheduling",
+    "description": "Multi-step: find Jess a free time on Thursday afternoon for Sarah Park's haircut and propose it.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Find a free time on Thursday afternoon with Jess for Sarah Park's haircut and book it"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_availability",
+          "arguments": {
+            "serviceId": "{{service:haircut}}",
+            "date": "2026-11-05"
+          }
+        },
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:sarah}}",
+            "date": "2026-11-05"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": [
+          "create_booking"
+        ]
+      }
+    }
+  },
+  {
+    "id": "is-maria-still-coming",
+    "set": "scheduling",
+    "description": "\"Is Maria still coming tomorrow?\" answers from her booking: yes, at 3.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Is Maria still coming in tomorrow?"
+      }
+    ],
+    "expect": {
+      "replyMatches": [
+        "\\b3\\b|15:00|3 ?pm"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "busy-week-summary",
+    "set": "scheduling",
+    "description": "How busy is the week: read-only, never a write.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "How busy is Jess this week?"
+      }
+    ],
+    "expect": {
+      "mustNotCall": [
+        "create_booking",
+        "move_booking",
+        "cancel_booking",
+        "block_time",
+        "unblock_time",
+        "add_todo",
+        "complete_todo"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "book-noon-means-twelve",
+    "set": "scheduling",
+    "description": "\"At noon\" is 12:00, which Jess has free on Wednesday.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Ana for a haircut with Jess at noon on Wednesday"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:ana}}",
+            "date": "2026-11-04",
+            "time": "12:00"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": [
+          "create_booking"
+        ]
+      }
+    }
+  },
+  {
+    "id": "book-half-past-two",
+    "set": "scheduling",
+    "description": "\"Half past two\" on Thursday is 14:30.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Can you put Sarah Park in for a haircut with Marco on Thursday at half past two?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:sarah}}",
+            "staffMemberId": "{{staff:marco}}",
+            "date": "2026-11-05",
+            "time": "14:30"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": [
+          "create_booking"
+        ]
+      }
+    }
+  },
+  {
+    "id": "move-without-email",
+    "set": "scheduling",
+    "description": "\"Don't tell her\": the move goes without an email to the client.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Move Maria's appointment tomorrow to 11am, don't email her"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "move_booking",
+          "arguments": {
+            "bookingId": "{{booking:maria}}",
+            "time": "11:00",
+            "emailClient": false
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "move_booking"
+        ]
+      }
+    }
+  }
+]

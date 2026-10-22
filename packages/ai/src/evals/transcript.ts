@@ -5,6 +5,11 @@ export interface TranscriptToolCall {
   name: string;
   arguments: unknown;
   raw: string;
+  /**
+   * `arguments` with the seeded world's ids put back as placeholders (`{{booking:maria}}`), so
+   * a case can say which record a call must name; absent: match on `arguments`.
+   */
+  placeheld?: unknown;
 }
 
 /** What one run of a case produced, for grading and the report. */

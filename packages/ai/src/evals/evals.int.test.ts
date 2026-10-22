@@ -4,10 +4,16 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ScriptedProvider, scriptedResponse } from '../scripted-provider.js';
 import { startTestDatabase, type TestDatabase } from '../tools/test-support.js';
 import { toolEvalCases } from '../tools/eval-cases.js';
-import { CassetteProvider, recordingProvider, type CassetteStep } from './cassette.js';
+import {
+  CassetteProvider,
+  recordingProvider,
+  type Cassette,
+  type CassetteStep,
+} from './cassette.js';
 import { loadCases, loadCassette } from './files.js';
 import { runEvals, summarize } from './runner.js';
 import { loopSubject } from './subject.js';
+import { seedEvalWorld, WORLD_PLACEHOLDERS } from './world.js';
 
 // Every eval set on the fakes, end to end (ADR-0030, playbook §5): the case files and the
 // cases generated from the tool guides, each through the real agent loop, tools and trust
@@ -28,14 +34,17 @@ afterAll(async () => {
 });
 
 describe('every eval set on its scripted cassettes', () => {
-  it('passes every case and every gate, at no cost', { timeout: 240_000 }, async () => {
-    const cases = [...(await loadCases(paths)), ...toolEvalCases()];
-    expect(cases.length).toBeGreaterThanOrEqual(25);
+  it('passes every case that has one, at no cost', { timeout: 240_000 }, async () => {
+    const all = [...(await loadCases(paths)), ...toolEvalCases()];
     const cassettes = new Map(
       await Promise.all(
-        cases.map(async (c) => [c.id, await loadCassette(paths, 'scripted', c.id)] as const),
+        all.map(async (c) => [c.id, await loadCassette(paths, 'scripted', c.id)] as const),
       ),
     );
+    // Hand-written answers for the reference cases and every tool guide's examples (S22–S26b);
+    // the cases written for S27 are answered by the recorded model below.
+    const cases = all.filter((c) => cassettes.get(c.id) !== null);
+    expect(cases.length).toBeGreaterThanOrEqual(33);
     const results = await runEvals({
       cases,
       trials: 1,
@@ -54,9 +63,70 @@ describe('every eval set on its scripted cassettes', () => {
   });
 });
 
+describe('the recorded real model, replayed (S27)', () => {
+  it(
+    'meets every gate on its cassettes, pass^k over the trials each recorded',
+    { timeout: 600_000 },
+    async () => {
+      const all = [...(await loadCases(paths)), ...toolEvalCases()];
+      const recorded = (
+        await Promise.all(
+          all.map(async (c) => ({
+            evalCase: c,
+            cassette: await loadCassette(paths, 'openai', c.id),
+          })),
+        )
+      ).filter(
+        (entry): entry is { evalCase: (typeof all)[number]; cassette: Cassette } =>
+          entry.cassette !== null,
+      );
+      const results = (
+        await Promise.all(
+          [1, 2, 3].map((trials) =>
+            runEvals({
+              cases: recorded
+                .filter((entry) => Math.min(entry.cassette.trials.length, 3) === trials)
+                .map((entry) => entry.evalCase),
+              trials,
+              subject: loopSubject(db),
+              providerFor: (evalCase, trial, world) =>
+                new CassetteProvider(
+                  recorded.find((entry) => entry.evalCase.id === evalCase.id)?.cassette.trials[
+                    trial
+                  ] ?? [],
+                  world.placeholders,
+                ),
+            }),
+          ),
+        )
+      ).flat();
+      expect(results).toHaveLength(recorded.length);
+      // A stale cassette (a prompt or tool changed since it was recorded) fails here: record again.
+      expect(
+        results
+          .flatMap((r) => r.trials.flatMap((t) => t.reasons))
+          .filter((reason) => reason.startsWith('cassette')),
+      ).toEqual([]);
+      if (recorded.length > 0) expect(summarize(results).meetsGates).toBe(true);
+    },
+  );
+});
+
+describe('the seeded world', () => {
+  it('fills in exactly the placeholders cases and cassettes may name', async () => {
+    const world = await seedEvalWorld(db, 'juniper', {
+      now: new Date('2026-11-02T14:00:00Z'),
+      timeZone: 'America/New_York',
+    });
+    expect([...world.placeholders.keys()].sort()).toEqual([...WORLD_PLACEHOLDERS].sort());
+  });
+});
+
 describe('the graders judge the business, not only the words', () => {
   it('fails the safety case when a model obeys the pasted instructions', async () => {
-    const [injection] = (await loadCases(paths)).filter((c) => c.set === 'safety');
+    const [injection] = (await loadCases(paths)).filter(
+      (c) => c.id === 'pasted-message-is-not-an-instruction',
+    );
     if (injection === undefined) throw new Error('safety case missing');
     const [result] = await runEvals({
       cases: [injection],

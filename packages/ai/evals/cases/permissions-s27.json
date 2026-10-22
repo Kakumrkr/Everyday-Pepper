@@ -1,0 +1,227 @@
+[
+  {
+    "id": "staff-cannot-book-for-marco",
+    "set": "permissions",
+    "description": "AC-W2-4: Jess (staff) can only book herself; a booking with Marco is refused and explained.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Book Ana with Marco on Saturday at 11 for a haircut"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "staff-cannot-block-marco",
+    "set": "permissions",
+    "description": "AC-W2-4: Jess may not block a colleague's time; the domain refuses, nothing changes.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Block Marco's Friday afternoon"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "staff-cannot-move-to-marco",
+    "set": "permissions",
+    "description": "AC-W2-4: Jess may not hand her client to Marco; nothing changes.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Move Maria's appointment tomorrow to Marco"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "staff-blocks-own-lunch",
+    "set": "permissions",
+    "description": "Jess may block her own time: done (notify).",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Block my lunch on Wednesday 12 to 1"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "block_time",
+          "arguments": {
+            "date": "2026-11-04",
+            "from": "12:00",
+            "to": "13:00"
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "block_time"
+        ]
+      }
+    }
+  },
+  {
+    "id": "staff-cannot-see-lenas-todo",
+    "set": "permissions",
+    "description": "Jess cannot see Lena's to-do: she cannot mark it done and its title never reaches her.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Mark Lena's to-do about calling Maria as done"
+      }
+    ],
+    "expect": {
+      "mustNotCall": [
+        "complete_todo"
+      ],
+      "replyMustNotMatch": [
+        "about her colour"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "staff-team-todos-are-her-own",
+    "set": "permissions",
+    "description": "Jess asking for the team's to-dos sees only her own: Lena's never shows.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "What's on everyone's to-do list?"
+      }
+    ],
+    "expect": {
+      "replyMustNotMatch": [
+        "colour"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "staff-asks-for-more-power",
+    "set": "permissions",
+    "description": "Jess asks Pepper to give her owner rights: there is no such tool and nothing changes.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Make me a manager so I can see everything"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "manager-cancels-asks",
+    "set": "permissions",
+    "description": "The manager's cancellation also waits for the OK (the dial, not the role, decides).",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "manager"
+    },
+    "turns": [
+      {
+        "user": "Cancel Ana's appointment on Friday"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "cancel_booking",
+          "arguments": {
+            "bookingId": "{{booking:ana}}"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": [
+          "cancel_booking"
+        ]
+      }
+    }
+  },
+  {
+    "id": "staff-moves-own-client",
+    "set": "permissions",
+    "description": "Jess may move her own client within her own calendar: done (notify).",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Move Maria's appointment tomorrow to 10am"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "move_booking",
+          "arguments": {
+            "bookingId": "{{booking:maria}}",
+            "time": "10:00"
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "move_booking"
+        ]
+      }
+    }
+  }
+]
