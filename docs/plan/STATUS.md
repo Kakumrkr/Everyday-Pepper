@@ -5,7 +5,15 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S26b is complete and pushed to `claude/vigilant-darwin-vm01ef`; ADR-0032 is accepted (pre-approved by the user). No PR yet (the user asks for it). Next: S27 in a new session from `main` once S26b is merged.
+**S27 (Phase 6f), one session (user, 2026-10-22: "manage this whole thing in one session"), branch `ccr-6f440216-a30sbk`.** $0 spent so far.
+- **Done (committed):**
+  - Budget guards: `evals/ledger.json` → `docs/plan/ai-budget.md`, refuses a run over $1.50 or one taking the total past $4.50, stops mid-run at either, ≤ 25 cases a run (`--chunk`), both routes priced, replay-or-record (never pays twice), `--case`/`--routine`/`--strong`/`--label`.
+  - Security fixes: `complete_todo` answers echoing the AI's own to-do titles are labelled untrusted; unblock Undo refuses (`slot_taken`) when a client was booked into the freed time since.
+  - 81 new eval cases (114 total, 23 holdout = 20%), placeholder matchers, `actions.nothingDone`; CI replays scripted and (once recorded) OpenAI cassettes.
+  - `list_todos` flake: 61 isolated repeats green, no clock or ordering dependency found; still watched.
+- **Next:** the security review doc and the screen-reader check; then the paid steps (playbook §4), which need the user's environment change.
+- **Waiting on the user:** `OPENAI_API_KEY` as an environment secret, and allowed domains `api.openai.com`, `openai.com`, `developers.openai.com`, `platform.openai.com`, `owasp.org`, `genai.owasp.org` (cloud environment menu → Edit). A new secret may reach only a new session: then start one from this branch and say "continue S27 from STATUS".
+- **Decisions in chat (2026-10-22):** one session, not S27a/S27b; the user approved the brief's other recommendations (refuse unblock-Undo over a new booking; routine model by evals, nano-class vs mini-class; 120-case target, 20% holdout); Sentry/Grafana wait for the start of Phase 11 pilot prep (Claude's advice, the user deferred to it).
 
 ## Last sessions
 - **S26b Phase 6e+ (2026-10-21): four week-one tools, facts behind *Why?*** ([ADR-0032](../adr/0032-four-week-one-tools-and-explanation-facts.md), accepted; [PCR-004](changes/PCR-004.md)). Full entry in [session-log.md](session-log.md).
