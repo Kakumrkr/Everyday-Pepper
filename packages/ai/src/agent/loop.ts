@@ -299,7 +299,8 @@ async function runTurn(
       );
       const results: TurnMessage[] = calls.map((call, index) => {
         const outcome = outcomes[index] ?? notRun(call.name, 'internal');
-        if (outcome.status === 'answered' && outcome.untrustedText) progress.untrusted = true;
+        const untrusted = outcome.status !== 'refused' && outcome.untrustedText;
+        if (untrusted) progress.untrusted = true;
         if (
           outcome.status === 'refused' &&
           (outcome.code === 'invalid_arguments' || outcome.code === 'unknown_tool')
@@ -317,7 +318,7 @@ async function runTurn(
           toolName: findTool(call.name)?.name ?? 'unknown_tool',
           isError: outcome.status === 'refused',
           card: outcome.card,
-          untrusted: outcome.status === 'answered' && outcome.untrustedText,
+          untrusted,
         };
       });
       history.push(...(await deps.store.record(turn, unique(results), progress)));

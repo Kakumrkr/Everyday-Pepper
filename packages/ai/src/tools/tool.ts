@@ -103,6 +103,12 @@ export interface Performed {
    * and times, display names, counts), never a contact. The wording is the screens'.
    */
   facts: ActionExplanation['facts'];
+  /**
+   * The summary echoes free text stored in a record that may hold words from outside the team
+   * (the AI's own to-do title, S27): the loop labels the answer as data and marks the turn
+   * untrusted, as for a read's `untrustedText`.
+   */
+  untrustedText?: boolean;
 }
 
 export interface WriteTool<S extends z.ZodType = z.ZodType> {
