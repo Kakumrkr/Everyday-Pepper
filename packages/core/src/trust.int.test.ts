@@ -77,7 +77,14 @@ const clockAt = (iso: string) => new ManualClock(iso);
 // The outbox tests share the worker's real clock: leases are real times.
 const realTime = { now: () => new Date() };
 const inAMinute = () => new ManualClock(new Date(Date.now() + 60_000));
-const NOW = '2026-10-21T15:00:00.000Z';
+const HOUR = 3_600_000;
+const DAY = 24 * HOUR;
+// Tomorrow at 15:00 UTC, always ahead of the real clock (S27: a fixed date here turned every
+// approval made on the real clock into an expired one once that date had passed).
+const NOW = new Date(Math.floor(Date.now() / DAY) * DAY + DAY + 15 * HOUR).toISOString();
+/** `NOW` plus whole days and hours, as an ISO string. */
+const after = (days: number, hours = 0) =>
+  new Date(Date.parse(NOW) + days * DAY + hours * HOUR).toISOString();
 
 const as = (userId: UserId, role: MembershipRole): Actor => ({
   context: { tenantId, userId, role },
@@ -367,7 +374,7 @@ describe('requestAction', () => {
       status: 'done',
       onBehalfOfUserId: jess,
       recordOwnerUserId: jess,
-      undoUntil: '2026-10-28T15:00:00.000Z',
+      undoUntil: after(7),
       explanation: {
         untrustedContext: false,
         decision: { outcome: 'execute_and_notify', reason: 'setting' },
@@ -728,7 +735,7 @@ describe('approveProposal', () => {
   it('expires, and then runs nothing', async () => {
     const proposal = await propose(jessActor(), jess);
     const before = (await tasksOf(jess)).length;
-    const later = clockAt('2026-10-23T15:00:00.000Z');
+    const later = clockAt(after(2));
     // The fake clock is past the 24-hour window of a proposal made now, too.
     later.set(new Date(Date.parse(proposal.expiresAt) + 1000));
     const result = await approveProposal(
@@ -834,7 +841,7 @@ describe('undoAction', () => {
       jessActor(),
       id,
       { runner: todoRunner, reason: 'wrong' },
-      { clock: clockAt('2026-10-22T15:00:00.000Z') },
+      { clock: clockAt(after(1)) },
     );
     expect(execution).toMatchObject({
       status: 'undone',
@@ -851,7 +858,7 @@ describe('undoAction', () => {
 
   it('two undos at the same moment undo it once', async () => {
     const id = await executedTodo();
-    const clock = clockAt('2026-10-21T16:00:00.000Z');
+    const clock = clockAt(after(0, 1));
     const [a, b] = await Promise.all([
       undoAction(db, jessActor(), id, { runner: todoRunner }, { clock }),
       undoAction(db, ana(), id, { runner: todoRunner }, { clock }),
@@ -863,13 +870,7 @@ describe('undoAction', () => {
   it('refuses once the window has closed', async () => {
     const id = await executedTodo();
     await expect(
-      undoAction(
-        db,
-        jessActor(),
-        id,
-        { runner: todoRunner },
-        { clock: clockAt('2026-10-28T15:00:00.000Z') },
-      ),
+      undoAction(db, jessActor(), id, { runner: todoRunner }, { clock: clockAt(after(7)) }),
     ).rejects.toThrow(UndoWindowClosedError);
   });
 
@@ -1098,7 +1099,7 @@ describe('S26: receipts of approved proposals, tool versions and summaries (ADR-
       jessActor(),
       result.execution.id,
       { runner: todoRunner, reason: 'changed_mind' },
-      { clock: clockAt('2026-10-22T15:00:00.000Z') },
+      { clock: clockAt(after(1)) },
     );
     expect(execution).toMatchObject({ status: 'undone', undoneByUserId: jess });
     expect((await tasksOf(jess)).length).toBe(before - 1);

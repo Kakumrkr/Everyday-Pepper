@@ -24,12 +24,8 @@
           }
         }
       ],
-      "mustNotCall": [
-        "create_booking"
-      ],
-      "replyMatches": [
-        "kim|park"
-      ],
+      "mustNotCall": ["create_booking"],
+      "replyMatches": ["kim|park"],
       "actions": {
         "noWrites": true
       }
@@ -64,9 +60,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       }
     }
   },
@@ -85,12 +79,8 @@
       }
     ],
     "expect": {
-      "mustNotCall": [
-        "create_booking"
-      ],
-      "replyMatches": [
-        "haircut|colour|color"
-      ],
+      "mustNotCall": ["create_booking"],
+      "replyMatches": ["haircut|colour|color"],
       "actions": {
         "noWrites": true
       }
@@ -111,9 +101,7 @@
       }
     ],
     "expect": {
-      "mustNotCall": [
-        "move_booking"
-      ],
+      "mustNotCall": ["move_booking"],
       "actions": {
         "noWrites": true
       }
@@ -134,9 +122,7 @@
       }
     ],
     "expect": {
-      "mustNotCall": [
-        "create_booking"
-      ],
+      "mustNotCall": ["create_booking"],
       "actions": {
         "noWrites": true
       }
@@ -169,9 +155,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       }
     }
   },
@@ -258,9 +242,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       }
     }
   },

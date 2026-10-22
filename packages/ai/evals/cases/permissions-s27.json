@@ -85,9 +85,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "block_time"
-        ]
+        "done": ["block_time"]
       }
     }
   },
@@ -107,12 +105,8 @@
       }
     ],
     "expect": {
-      "mustNotCall": [
-        "complete_todo"
-      ],
-      "replyMustNotMatch": [
-        "about her colour"
-      ],
+      "mustNotCall": ["complete_todo"],
+      "replyMustNotMatch": ["about her colour"],
       "actions": {
         "noWrites": true
       }
@@ -133,9 +127,7 @@
       }
     ],
     "expect": {
-      "replyMustNotMatch": [
-        "colour"
-      ],
+      "replyMustNotMatch": ["colour"],
       "actions": {
         "noWrites": true
       }
@@ -186,9 +178,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "cancel_booking"
-        ]
+        "proposed": ["cancel_booking"]
       }
     }
   },
@@ -218,9 +208,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "move_booking"
-        ]
+        "done": ["move_booking"]
       }
     }
   }

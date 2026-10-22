@@ -27,9 +27,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "add_todo"
-        ]
+        "done": ["add_todo"]
       }
     }
   },
@@ -61,9 +59,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "add_todo"
-        ]
+        "done": ["add_todo"]
       }
     }
   },
@@ -90,9 +86,7 @@
           }
         }
       ],
-      "replyMatches": [
-        "maria"
-      ],
+      "replyMatches": ["maria"],
       "actions": {
         "noWrites": true
       }
@@ -125,9 +119,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "complete_todo"
-        ]
+        "done": ["complete_todo"]
       }
     }
   },
@@ -156,9 +148,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "add_todo"
-        ]
+        "done": ["add_todo"]
       }
     }
   },
@@ -188,9 +178,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "add_todo"
-        ]
+        "done": ["add_todo"]
       }
     }
   },
@@ -211,12 +199,8 @@
     ],
     "expect": {
       "actions": {
-        "proposed": [
-          "create_booking"
-        ],
-        "done": [
-          "add_todo"
-        ]
+        "proposed": ["create_booking"],
+        "done": ["add_todo"]
       }
     }
   },
@@ -243,9 +227,7 @@
           }
         }
       ],
-      "replyMatches": [
-        "maria"
-      ],
+      "replyMatches": ["maria"],
       "actions": {
         "noWrites": true
       }

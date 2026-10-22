@@ -776,7 +776,7 @@ describe('unblock_time (S26b)', () => {
   it('its undo is refused once a client was booked into the freed time; earlier bookings inside it never block it (S27)', async () => {
     const w = await newWorld(db);
     await justDoIt(w);
-    const blocks = () => listTimeOff(db, w.owner, w.jessStaff.id);
+    const blocks = () => listTimeOff(db, w.owner, w.jessStaff.id, {}, { clock: w.clock });
     // A booking already inside the block before it was removed: Undo puts the block back as it was.
     const earlier = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
     const morning = await addTimeOff(db, w.owner, w.jessStaff.id, {

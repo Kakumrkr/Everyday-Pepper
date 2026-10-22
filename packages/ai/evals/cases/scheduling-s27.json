@@ -35,13 +35,9 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       },
-      "replyMatches": [
-        "(approve|approval|confirm|your ok|the ok|okay|tap)"
-      ]
+      "replyMatches": ["(approve|approval|confirm|your ok|the ok|okay|tap)"]
     }
   },
   {
@@ -62,9 +58,7 @@
       "actions": {
         "noWrites": true
       },
-      "replyMatches": [
-        "\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"
-      ]
+      "replyMatches": ["\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"]
     }
   },
   {
@@ -93,9 +87,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "move_booking"
-        ]
+        "done": ["move_booking"]
       }
     }
   },
@@ -123,9 +115,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "cancel_booking"
-        ]
+        "proposed": ["cancel_booking"]
       }
     }
   },
@@ -152,10 +142,7 @@
           }
         }
       ],
-      "replyMatches": [
-        "maria",
-        "\\b3\\b|15:00"
-      ],
+      "replyMatches": ["maria", "\\b3\\b|15:00"],
       "actions": {
         "noWrites": true
       }
@@ -184,9 +171,7 @@
           }
         }
       ],
-      "replyMatches": [
-        "\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"
-      ],
+      "replyMatches": ["\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"],
       "actions": {
         "noWrites": true
       }
@@ -223,9 +208,7 @@
           }
         }
       ],
-      "replyMatches": [
-        "fri|11/6|nov(ember)? 6|2026-11-06"
-      ],
+      "replyMatches": ["fri|11/6|nov(ember)? 6|2026-11-06"],
       "actions": {
         "noWrites": true
       }
@@ -247,9 +230,7 @@
       }
     ],
     "expect": {
-      "replyMatches": [
-        "marco"
-      ],
+      "replyMatches": ["marco"],
       "actions": {
         "noWrites": true
       }
@@ -282,13 +263,9 @@
         }
       ],
       "actions": {
-        "done": [
-          "block_time"
-        ]
+        "done": ["block_time"]
       },
-      "replyMatches": [
-        "ana|booking|appointment"
-      ]
+      "replyMatches": ["ana|booking|appointment"]
     }
   },
   {
@@ -318,9 +295,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "move_booking"
-        ]
+        "done": ["move_booking"]
       }
     }
   },
@@ -351,9 +326,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       }
     }
   },
@@ -390,9 +363,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       }
     }
   },
@@ -412,9 +383,7 @@
       }
     ],
     "expect": {
-      "replyMatches": [
-        "\\b3\\b|15:00|3 ?pm"
-      ],
+      "replyMatches": ["\\b3\\b|15:00|3 ?pm"],
       "actions": {
         "noWrites": true
       }
@@ -475,9 +444,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       }
     }
   },
@@ -509,9 +476,7 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       }
     }
   },
@@ -542,9 +507,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "move_booking"
-        ]
+        "done": ["move_booking"]
       }
     }
   }

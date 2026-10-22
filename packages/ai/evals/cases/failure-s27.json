@@ -44,15 +44,11 @@
           }
         }
       ],
-      "mustNotCall": [
-        "create_booking"
-      ],
+      "mustNotCall": ["create_booking"],
       "actions": {
         "noWrites": true
       },
-      "replyMatches": [
-        "zoe"
-      ]
+      "replyMatches": ["zoe"]
     }
   },
   {
@@ -73,9 +69,7 @@
       "actions": {
         "noWrites": true
       },
-      "replyMatches": [
-        "\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"
-      ]
+      "replyMatches": ["\\b(1[0-2]|[1-9])(:[0-5]\\d)?\\s?(am|pm)\\b|\\b\\d{1,2}:\\d{2}\\b"]
     }
   },
   {
@@ -94,9 +88,7 @@
       }
     ],
     "expect": {
-      "mustNotCall": [
-        "unblock_time"
-      ],
+      "mustNotCall": ["unblock_time"],
       "actions": {
         "noWrites": true
       }
@@ -117,9 +109,7 @@
       }
     ],
     "expect": {
-      "replyMatches": [
-        "jess"
-      ],
+      "replyMatches": ["jess"],
       "actions": {
         "nothingDone": true
       }
@@ -162,9 +152,7 @@
       }
     ],
     "expect": {
-      "mustNotCall": [
-        "complete_todo"
-      ],
+      "mustNotCall": ["complete_todo"],
       "actions": {
         "noWrites": true
       }
@@ -185,9 +173,7 @@
       }
     ],
     "expect": {
-      "mustNotCall": [
-        "cancel_booking"
-      ],
+      "mustNotCall": ["cancel_booking"],
       "actions": {
         "noWrites": true
       }

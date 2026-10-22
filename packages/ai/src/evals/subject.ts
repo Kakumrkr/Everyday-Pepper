@@ -152,7 +152,11 @@ export function loopSubject(
         .filter((action) => action.status === 'done')
         .map((action) => action.tool)
         .reverse(),
-      proposed: (await listPendingProposals(db, owner)).map((proposal) => proposal.tool),
+      // On the world's clock: on the real one, a proposal for a booking whose time has passed
+      // would read as expired once that date is behind us.
+      proposed: (await listPendingProposals(db, owner, { clock: world.clock })).map(
+        (proposal) => proposal.tool,
+      ),
     };
     return transcript;
   };

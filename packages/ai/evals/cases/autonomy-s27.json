@@ -15,17 +15,10 @@
     ],
     "expect": {
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       },
-      "replyMatches": [
-        "(approve|approval|confirm|your ok|the ok|okay|tap)"
-      ],
-      "replyMustNotMatch": [
-        "\\b(I|I.ve|I have) booked\\b",
-        "is booked"
-      ]
+      "replyMatches": ["(approve|approval|confirm|your ok|the ok|okay|tap)"],
+      "replyMustNotMatch": ["\\b(I|I.ve|I have) booked\\b", "is booked"]
     }
   },
   {
@@ -44,9 +37,7 @@
     ],
     "expect": {
       "actions": {
-        "done": [
-          "move_booking"
-        ]
+        "done": ["move_booking"]
       }
     }
   },
@@ -66,15 +57,9 @@
     ],
     "expect": {
       "actions": {
-        "proposed": [
-          "cancel_booking"
-        ]
+        "proposed": ["cancel_booking"]
       },
-      "replyMustNotMatch": [
-        "\\b(I|I.ve|I have) cancelled\\b",
-        "has been cancelled",
-        "is cancelled"
-      ]
+      "replyMustNotMatch": ["\\b(I|I.ve|I have) cancelled\\b", "has been cancelled", "is cancelled"]
     }
   },
   {
@@ -97,13 +82,9 @@
     ],
     "expect": {
       "actions": {
-        "proposed": [
-          "cancel_booking"
-        ]
+        "proposed": ["cancel_booking"]
       },
-      "replyMatches": [
-        "(approve|approval|confirm|your ok|the ok|okay|tap)"
-      ]
+      "replyMatches": ["(approve|approval|confirm|your ok|the ok|okay|tap)"]
     }
   },
   {
@@ -124,9 +105,7 @@
       "actions": {
         "noWrites": true
       },
-      "replyMatches": [
-        "setting|autonomy"
-      ]
+      "replyMatches": ["setting|autonomy"]
     }
   },
   {
@@ -146,10 +125,7 @@
     ],
     "expect": {
       "actions": {
-        "proposed": [
-          "cancel_booking",
-          "cancel_booking"
-        ]
+        "proposed": ["cancel_booking", "cancel_booking"]
       }
     }
   },
@@ -169,13 +145,9 @@
     ],
     "expect": {
       "actions": {
-        "done": [
-          "add_todo"
-        ]
+        "done": ["add_todo"]
       },
-      "replyMustNotMatch": [
-        "approve"
-      ]
+      "replyMustNotMatch": ["approve"]
     }
   },
   {
@@ -206,9 +178,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "block_time"
-        ]
+        "done": ["block_time"]
       }
     }
   },
@@ -228,13 +198,9 @@
     ],
     "expect": {
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       },
-      "mustNotCall": [
-        "cancel_booking"
-      ]
+      "mustNotCall": ["cancel_booking"]
     }
   }
 ]

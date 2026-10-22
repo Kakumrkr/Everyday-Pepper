@@ -86,6 +86,11 @@ export interface NewProposal {
   requestedBy: UserId | null;
   recordOwner: UserId | null;
   expiresAt: Date;
+  /**
+   * When it was proposed, on the same clock as `expiresAt` (S27: the database's own clock could
+   * disagree with the service's and break "expires after created"). Default: the database's.
+   */
+  createdAt?: Date;
   /** The tool's version (S26: a proposal from an older version expires). Default 1. */
   toolVersion?: number;
 }
@@ -117,6 +122,10 @@ export async function insertProposal(
       requestedByUserId: input.requestedBy === null ? null : Id.parse(input.requestedBy),
       recordOwnerUserId: input.recordOwner === null ? null : Id.parse(input.recordOwner),
       expiresAt: input.expiresAt,
+      ...(input.createdAt !== undefined && {
+        createdAt: input.createdAt,
+        updatedAt: input.createdAt,
+      }),
     })
     .onConflictDoNothing()
     .returning();
