@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 const ModelIdSchema = z.string().regex(/^[A-Za-z0-9][\w.:-]{0,99}$/, 'Expected a model id');
+/** How hard a route's model reasons before answering (Responses API `reasoning.effort`). */
+const EffortSchema = z.enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']);
+export type ReasoningEffort = z.infer<typeof EffortSchema>;
 
 const OpenAiEnvSchema = z
   .object({
@@ -9,6 +12,9 @@ const OpenAiEnvSchema = z
     /** The model behind each route (ADR-0027). Required with a key; chosen from evals (S27). */
     OPENAI_MODEL_ROUTINE: ModelIdSchema.optional(),
     OPENAI_MODEL_STRONG: ModelIdSchema.optional(),
+    /** Each route's reasoning effort; unset: the model's default (chosen with the model, S27). */
+    OPENAI_REASONING_ROUTINE: EffortSchema.optional(),
+    OPENAI_REASONING_STRONG: EffortSchema.optional(),
     /** Another https endpoint for the same API (a proxy); unset: OpenAI's. */
     OPENAI_BASE_URL: z.url({ protocol: /^https$/ }).optional(),
     OPENAI_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(30_000),
@@ -23,6 +29,7 @@ const OpenAiEnvSchema = z
 export interface OpenAiConfig {
   apiKey: string;
   models: { routine: string; strong: string };
+  reasoning?: { routine?: ReasoningEffort; strong?: ReasoningEffort };
   baseUrl?: string;
   timeoutMs: number;
 }
@@ -56,6 +63,17 @@ export function loadOpenAiConfig(env: NodeJS.ProcessEnv): OpenAiConfig | null {
   return {
     apiKey: parsed.OPENAI_API_KEY,
     models: { routine: parsed.OPENAI_MODEL_ROUTINE, strong: parsed.OPENAI_MODEL_STRONG },
+    ...((parsed.OPENAI_REASONING_ROUTINE !== undefined ||
+      parsed.OPENAI_REASONING_STRONG !== undefined) && {
+      reasoning: {
+        ...(parsed.OPENAI_REASONING_ROUTINE !== undefined && {
+          routine: parsed.OPENAI_REASONING_ROUTINE,
+        }),
+        ...(parsed.OPENAI_REASONING_STRONG !== undefined && {
+          strong: parsed.OPENAI_REASONING_STRONG,
+        }),
+      },
+    }),
     ...(parsed.OPENAI_BASE_URL !== undefined && { baseUrl: parsed.OPENAI_BASE_URL }),
     timeoutMs: parsed.OPENAI_TIMEOUT_MS,
   };

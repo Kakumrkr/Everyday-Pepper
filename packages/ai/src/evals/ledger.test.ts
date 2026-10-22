@@ -97,6 +97,7 @@ describe('the budget ledger (playbook §4)', () => {
               calls: 9,
               inputTokens: 50_000,
               cachedInputTokens: 30_000,
+              cacheWriteTokens: 5_000,
               outputTokens: 1_200,
               usd: 0.0123,
               latencyMsP50: 900,
@@ -112,7 +113,7 @@ describe('the budget ledger (playbook §4)', () => {
       '| 1 | 2026-10-22 | smoke | completed | 5 × 1 | $0.20 | $0.0123 | $0.0123 |',
     );
     expect(md).toContain(
-      'model-mini: 9 calls, 50000 in (30000 cached), 1200 out, p50 900 ms, p95 2100 ms',
+      'model-mini: 9 calls, 50000 in (30000 cached, 5000 written), 1200 out, p50 900 ms, p95 2100 ms',
     );
     expect(md).toContain('Total spent: **$0.0123** of $5.00');
   });

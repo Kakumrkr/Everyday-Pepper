@@ -1,6 +1,7 @@
 // `pnpm --filter @pepper/ai eval [--provider scripted|openai] [--record] [--set <set>]...
 //   [--case <id>]... [--chunk <n>] [--trials <k>] [--max-cost <usd>] [--routine <model>]
-//   [--strong <model>] [--label <text>]` (ADR-0027, ADR-0030, S27). Replays cassettes by
+//   [--strong <model>] [--routine-effort <e>] [--strong-effort <e>] [--label <text>]
+//   [--cassettes <dir>]` (ADR-0027, ADR-0030, S27). Replays cassettes by
 // default, at no cost: every case (the files and those generated from the tool guides) runs
 // through the real agent loop and tools in a seeded world on Postgres: `EVAL_DATABASE_URL` (a
 // migrated database, the services' login), or a throwaway one in Docker. Only `--provider
@@ -9,6 +10,8 @@
 // estimate under the run's cap and under the ledger's $4.50 stop, a stop during the run when
 // either is reached, and an entry in the ledger whatever happens. A recording replays the
 // answers an earlier one already has for unchanged requests, so nothing is paid for twice.
+// `--cassettes` keeps each candidate model's answers in its own directory (default: the
+// provider's), since a request does not name the model that answered it.
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,7 +68,10 @@ async function main(): Promise<number> {
       'max-cost': { type: 'string', default: String(DEFAULT_RUN_CAP_USD) },
       routine: { type: 'string' },
       strong: { type: 'string' },
+      'routine-effort': { type: 'string' },
+      'strong-effort': { type: 'string' },
       label: { type: 'string' },
+      cassettes: { type: 'string' },
     },
   });
   const here = new URL('../../evals/', import.meta.url);
@@ -80,6 +86,11 @@ async function main(): Promise<number> {
   }
   if (values.record && provider !== 'openai') {
     print('--record is only for --provider openai');
+    return 2;
+  }
+  const cassettes = values.cassettes ?? provider;
+  if (!/^[a-z0-9][a-z0-9.-]{0,63}$/.test(cassettes)) {
+    print('--cassettes is a directory name: lower-case letters, digits, dots and dashes');
     return 2;
   }
   const trials = Number(values.trials);
@@ -102,7 +113,7 @@ async function main(): Promise<number> {
     await Promise.all(
       cases.map(
         async (evalCase) =>
-          [evalCase.id, await loadCassette(paths, provider, evalCase.id)] as const,
+          [evalCase.id, await loadCassette(paths, cassettes, evalCase.id)] as const,
       ),
     ),
   );
@@ -124,7 +135,12 @@ async function main(): Promise<number> {
       );
       return 2;
     }
-    const config = recordingConfig(values.routine, values.strong);
+    const config = recordingConfig({
+      OPENAI_MODEL_ROUTINE: values.routine,
+      OPENAI_MODEL_STRONG: values.strong,
+      OPENAI_REASONING_ROUTINE: values['routine-effort'],
+      OPENAI_REASONING_STRONG: values['strong-effort'],
+    });
     if (typeof config === 'string') {
       print(config);
       return 2;
@@ -150,8 +166,9 @@ async function main(): Promise<number> {
       print(`Refused: ${overall}`);
       return 2;
     }
+    const effort = (route: 'routine' | 'strong') => config.reasoning?.[route] ?? 'default';
     print(
-      `Estimated at most $${estimate.toFixed(2)} for ${String(cases.length)} cases × ${String(trials)} on ${config.models.routine} / ${config.models.strong}; spent so far $${spent.toFixed(4)}.`,
+      `Estimated at most $${estimate.toFixed(2)} for ${String(cases.length)} cases × ${String(trials)} on ${config.models.routine} (${effort('routine')}) / ${config.models.strong} (${effort('strong')}); spent so far $${spent.toFixed(4)}.`,
     );
     const tracker = new SpendTracker({ prices, spentBeforeUsd: spent, capUsd });
     recording = {
@@ -210,7 +227,7 @@ async function main(): Promise<number> {
         kept[trial] = steps;
       });
       if (kept.length > 0)
-        await saveCassette(paths, provider, caseId, { version: 1, trials: kept });
+        await saveCassette(paths, cassettes, caseId, { version: 1, trials: kept });
     }
     const { tracker, ledgerEntry } = recording;
     const ledger = await loadLedger(paths);
@@ -238,7 +255,7 @@ async function main(): Promise<number> {
 
   const summary = summarize(results);
   const report = markdownReport(results, {
-    provider: values.record ? `${provider} (recording)` : `${provider} cassettes`,
+    provider: values.record ? `${cassettes} (recording)` : `${cassettes} cassettes`,
     trials,
     costUsd: recording === null ? null : recording.tracker.runUsd,
     startedAt,
@@ -264,16 +281,10 @@ async function main(): Promise<number> {
   return summary.meetsGates ? 0 : 1;
 }
 
-/** The key from the environment only; the models from the flags or the environment. */
-function recordingConfig(
-  routine: string | undefined,
-  strong: string | undefined,
-): OpenAiConfig | string {
-  const env = {
-    ...process.env,
-    ...(routine !== undefined && { OPENAI_MODEL_ROUTINE: routine }),
-    ...(strong !== undefined && { OPENAI_MODEL_STRONG: strong }),
-  };
+/** The key from the environment only; the models and efforts from the flags or the environment. */
+function recordingConfig(flags: Record<string, string | undefined>): OpenAiConfig | string {
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  for (const [name, value] of Object.entries(flags)) if (value !== undefined) env[name] = value;
   const config = loadOpenAiConfig(env);
   return (
     config ??

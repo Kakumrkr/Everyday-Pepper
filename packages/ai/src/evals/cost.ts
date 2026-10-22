@@ -9,6 +9,8 @@ import { evalBusinessContext } from './subject.js';
 export const ModelPriceSchema = z.strictObject({
   inputPerMillionUsd: z.number().min(0).max(1_000),
   cachedInputPerMillionUsd: z.number().min(0).max(1_000),
+  /** What a token written to the prompt cache costs instead of input (GPT-5.6 and later). */
+  cacheWritePerMillionUsd: z.number().min(0).max(1_000).optional(),
   outputPerMillionUsd: z.number().min(0).max(1_000),
 });
 export type ModelPrice = z.infer<typeof ModelPriceSchema>;
@@ -33,11 +35,14 @@ const CHARS_PER_TOKEN = 3;
 
 const tokensOf = (text: string) => Math.ceil(text.length / CHARS_PER_TOKEN);
 
+/** A written token is billed at the write rate instead of the input rate, not on top of it. */
 export function costOfUsage(usage: LlmUsage, price: ModelPrice): number {
-  const uncached = Math.max(0, usage.inputTokens - usage.cachedInputTokens);
+  const written = usage.cacheWriteTokens ?? 0;
+  const uncached = Math.max(0, usage.inputTokens - usage.cachedInputTokens - written);
   return (
     (uncached * price.inputPerMillionUsd +
       usage.cachedInputTokens * price.cachedInputPerMillionUsd +
+      written * (price.cacheWritePerMillionUsd ?? price.inputPerMillionUsd) +
       usage.outputTokens * price.outputPerMillionUsd) /
     1_000_000
   );
@@ -45,7 +50,8 @@ export function costOfUsage(usage: LlmUsage, price: ModelPrice): number {
 
 /**
  * The most a run of `cases`, `trials` times each, should cost: every turn taking the loop's
- * every step (`callsPerTurn`), every call's input counted in full and uncached (instructions,
+ * every step (`callsPerTurn`), every call's input counted in full, uncached and at the write
+ * rate when that is dearer (instructions,
  * tools, the conversation so far with an allowance for each earlier answer or tool result)
  * and the full output allowance per call.
  */
@@ -77,7 +83,12 @@ export function estimateRunCost(
     cachedInputTokens: 0,
     outputTokens: outputTokens * trials,
   };
-  return { usd: costOfUsage(usage, price), usage };
+  // Every input token at the dearer of the input and cache-write rates.
+  const worst = {
+    ...price,
+    inputPerMillionUsd: Math.max(price.inputPerMillionUsd, price.cacheWritePerMillionUsd ?? 0),
+  };
+  return { usd: costOfUsage(usage, worst), usage };
 }
 
 /** Why a real run may not start, or `null` when it may (the budget guard, ADR-0027). */

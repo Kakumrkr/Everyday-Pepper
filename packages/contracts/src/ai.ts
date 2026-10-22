@@ -122,10 +122,15 @@ export type LlmFinishReason = z.infer<typeof LlmFinishReasonSchema>;
 
 const TokenCountSchema = z.int().min(0);
 
-/** Tokens one answer used. `cachedInputTokens` is the part of the input read from the cache. */
+/**
+ * Tokens one answer used. `cachedInputTokens` is the part of the input read from the cache;
+ * `cacheWriteTokens` the part written to it (billed at its own rate on newer models; absent
+ * when none was written).
+ */
 export const LlmUsageSchema = z.strictObject({
   inputTokens: TokenCountSchema,
   cachedInputTokens: TokenCountSchema,
+  cacheWriteTokens: TokenCountSchema.optional(),
   outputTokens: TokenCountSchema,
 });
 export type LlmUsage = z.infer<typeof LlmUsageSchema>;

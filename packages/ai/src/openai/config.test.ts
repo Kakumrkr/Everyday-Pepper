@@ -32,6 +32,16 @@ describe('loadOpenAiConfig (ADR-0027)', () => {
     ).toThrow('Set OPENAI_MODEL_ROUTINE and OPENAI_MODEL_STRONG with OPENAI_API_KEY');
   });
 
+  it('reads an optional reasoning effort per route (unset: the model default, S27)', () => {
+    expect(
+      loadOpenAiConfig({ OPENAI_API_KEY: KEY, ...MODELS, OPENAI_REASONING_ROUTINE: 'low' }),
+    ).toMatchObject({ reasoning: { routine: 'low' } });
+    expect(loadOpenAiConfig({ OPENAI_API_KEY: KEY, ...MODELS })).not.toHaveProperty('reasoning');
+    expect(() =>
+      loadOpenAiConfig({ OPENAI_API_KEY: KEY, ...MODELS, OPENAI_REASONING_STRONG: 'turbo' }),
+    ).toThrow('Invalid OpenAI environment: OPENAI_REASONING_STRONG');
+  });
+
   it('names invalid variables without echoing their values', () => {
     const attempt = () =>
       loadOpenAiConfig({

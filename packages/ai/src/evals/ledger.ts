@@ -21,6 +21,7 @@ export const ModelSpendSchema = z.strictObject({
   calls: z.number().int().min(0),
   inputTokens: z.number().int().min(0),
   cachedInputTokens: z.number().int().min(0),
+  cacheWriteTokens: z.number().int().min(0),
   outputTokens: z.number().int().min(0),
   usd: UsdSchema,
   /** Whole-answer time of the calls, in milliseconds (`null` when none finished). */
@@ -111,7 +112,7 @@ export class SpendTracker {
   runUsd = 0;
   private readonly models = new Map<
     string,
-    { usage: LlmUsage; calls: number; usd: number; ms: number[] }
+    { usage: LlmUsage & { cacheWriteTokens: number }; calls: number; usd: number; ms: number[] }
   >();
   private charsSent = 0;
   private tokensCounted = 0;
@@ -135,7 +136,7 @@ export class SpendTracker {
     const cost = costOfUsage(usage, priceOf(this.options.prices, model));
     this.runUsd += cost;
     const spend = this.models.get(model) ?? {
-      usage: { inputTokens: 0, cachedInputTokens: 0, outputTokens: 0 },
+      usage: { inputTokens: 0, cachedInputTokens: 0, cacheWriteTokens: 0, outputTokens: 0 },
       calls: 0,
       usd: 0,
       ms: [],
@@ -145,6 +146,7 @@ export class SpendTracker {
     spend.usage = {
       inputTokens: spend.usage.inputTokens + usage.inputTokens,
       cachedInputTokens: spend.usage.cachedInputTokens + usage.cachedInputTokens,
+      cacheWriteTokens: spend.usage.cacheWriteTokens + (usage.cacheWriteTokens ?? 0),
       outputTokens: spend.usage.outputTokens + usage.outputTokens,
     };
     if (ms !== null) spend.ms.push(ms);
@@ -243,7 +245,7 @@ export function budgetMarkdown(ledger: Ledger): string {
   const details = ledger.entries.flatMap((entry) =>
     Object.entries(entry.byModel).map(
       ([model, spend]) =>
-        `- Run ${String(entry.id)}, ${model}: ${String(spend.calls)} calls, ${String(spend.inputTokens)} in (${String(spend.cachedInputTokens)} cached), ${String(spend.outputTokens)} out, p50 ${spend.latencyMsP50 === null ? '–' : String(Math.round(spend.latencyMsP50))} ms, p95 ${spend.latencyMsP95 === null ? '–' : String(Math.round(spend.latencyMsP95))} ms${entry.charsPerToken === null ? '' : `; ${entry.charsPerToken.toFixed(2)} chars a token`}`,
+        `- Run ${String(entry.id)}, ${model}: ${String(spend.calls)} calls, ${String(spend.inputTokens)} in (${String(spend.cachedInputTokens)} cached, ${String(spend.cacheWriteTokens)} written), ${String(spend.outputTokens)} out, p50 ${spend.latencyMsP50 === null ? '–' : String(Math.round(spend.latencyMsP50))} ms, p95 ${spend.latencyMsP95 === null ? '–' : String(Math.round(spend.latencyMsP95))} ms${entry.charsPerToken === null ? '' : `; ${entry.charsPerToken.toFixed(2)} chars a token`}`,
     ),
   );
   return [

@@ -289,6 +289,54 @@ describe('OpenAiProvider answers', () => {
   });
 });
 
+describe('OpenAiProvider reasoning effort', () => {
+  it("sends the route's effort when one is set, and none otherwise", async () => {
+    const fake = fakeOpenAiFetch([
+      { kind: 'json', body: openAiResponse([outputMessage('hi')]) },
+      { kind: 'json', body: openAiResponse([outputMessage('hi')]) },
+    ]);
+    const openai = new OpenAiProvider({
+      apiKey: KEY,
+      models: MODELS,
+      reasoning: { routine: 'low' },
+      timeoutMs: 5_000,
+      baseUrl: 'https://openai.test/v1',
+      fetch: fake.fetch,
+    });
+    await openai.respond(contractRequest);
+    await openai.respond({ ...contractRequest, route: 'strong' });
+    expect(fake.requests[0]?.body['reasoning']).toEqual({ effort: 'low' });
+    expect(fake.requests[1]?.body).not.toHaveProperty('reasoning');
+  });
+});
+
+describe('OpenAiProvider usage', () => {
+  it('reports the tokens written to the prompt cache (GPT-5.6 and later bill them)', async () => {
+    const { provider: openai } = provider([
+      {
+        kind: 'json',
+        body: openAiResponse([outputMessage('hi')], { usage: usage(5_000, 0, 9, 4_800) }),
+      },
+      {
+        kind: 'json',
+        body: openAiResponse([outputMessage('hi')], { usage: usage(5_000, 4_800, 9) }),
+      },
+    ]);
+    expect((await openai.respond(contractRequest)).usage).toEqual({
+      inputTokens: 5_000,
+      cachedInputTokens: 0,
+      cacheWriteTokens: 4_800,
+      outputTokens: 9,
+    });
+    // No write (older models, or a cache read): the usage keeps its usual shape.
+    expect((await openai.respond(contractRequest)).usage).toEqual({
+      inputTokens: 5_000,
+      cachedInputTokens: 4_800,
+      outputTokens: 9,
+    });
+  });
+});
+
 describe('OpenAiProvider failures', () => {
   it('maps a used-up quota to budget_exceeded (not retryable) and other 429s to rate_limited', async () => {
     const quota = provider([

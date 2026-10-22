@@ -32,6 +32,51 @@ describe('costOfUsage', () => {
   });
 });
 
+describe('costOfUsage with cache writes (GPT-5.6 and later, S27)', () => {
+  const LUNA = {
+    inputPerMillionUsd: 0.1,
+    cachedInputPerMillionUsd: 0.01,
+    cacheWritePerMillionUsd: 0.125,
+    outputPerMillionUsd: 0.5,
+  };
+
+  it('prices written tokens at the write rate instead of the input rate, not on top of it', () => {
+    expect(
+      costOfUsage(
+        {
+          inputTokens: 1_000_000,
+          cachedInputTokens: 200_000,
+          cacheWriteTokens: 700_000,
+          outputTokens: 100_000,
+        },
+        LUNA,
+      ),
+    ).toBeCloseTo(0.1 * 0.1 + 0.2 * 0.01 + 0.7 * 0.125 + 0.1 * 0.5, 10);
+  });
+
+  it('prices writes at the input rate for a model without a write price', () => {
+    expect(
+      costOfUsage(
+        {
+          inputTokens: 1_000_000,
+          cachedInputTokens: 0,
+          cacheWriteTokens: 1_000_000,
+          outputTokens: 0,
+        },
+        PRICE,
+      ),
+    ).toBeCloseTo(0.75, 10);
+  });
+
+  it('estimates every input token at the dearer of the input and write rates', () => {
+    const cases = [evalCase()];
+    const plain = estimateRunCost(cases, 1, { ...LUNA, cacheWritePerMillionUsd: undefined });
+    const written = estimateRunCost(cases, 1, LUNA);
+    const inputUsd = (plain.usage.inputTokens * 0.1) / 1_000_000;
+    expect(written.usd - plain.usd).toBeCloseTo(inputUsd * 0.25, 10);
+  });
+});
+
 describe('estimateRunCost (the budget guard, playbook §4)', () => {
   it('counts every step of every turn uncached with the full output allowance, times the trials', () => {
     const twoTurns = evalCase({ turns: [{ user: 'First' }, { user: 'Second' }] });
