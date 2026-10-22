@@ -10,8 +10,10 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
   - Budget guards: `evals/ledger.json` → `docs/plan/ai-budget.md`, refuses a run over $1.50 or one taking the total past $4.50, stops mid-run at either, ≤ 25 cases a run (`--chunk`), both routes priced, replay-or-record (never pays twice), `--case`/`--routine`/`--strong`/`--label`.
   - Security fixes: `complete_todo` answers echoing the AI's own to-do titles are labelled untrusted; unblock Undo refuses (`slot_taken`) when a client was booked into the freed time since.
   - 81 new eval cases (114 total, 23 holdout = 20%), placeholder matchers, `actions.nothingDone`; CI replays scripted and (once recorded) OpenAI cassettes.
-  - `list_todos` flake: 61 isolated repeats green, no clock or ordering dependency found; still watched.
-- **Next:** the security review doc and the screen-reader check; then the paid steps (playbook §4), which need the user's environment change.
+  - Time bombs fixed: proposals' `created_at` on the service clock; core `trust.int.test.ts` clock relative to today; the eval subject lists proposals on the world's clock (found by running the suites six weeks ahead).
+  - `docs/engineering/security-review-s27.md` drafted (OWASP LLM 2026 + Agentic re-map, M1/M2 fixed, W1 watch, screen-reader script); its real-model section waits for the runs.
+  - Checks: `pnpm check` green; `pnpm test:integration` green (973).
+- **Next (paid, in order):** fill `evals/prices.json` from OpenAI's official pricing page; smoke 5 cases on each routine candidate (`--case … --routine <m> --strong <m> --label smoke`); full pass^1 in chunks `--chunk 1..5`; safety pass^3 in chunks of ~8 (`--set safety --trials 3 --case …`); fixes (tool descriptions first, one change, re-run failed only); reserve: stronger model on the hardest cases. Then ADR-0033, the Phase 6 exit record, docs, push.
 - **Waiting on the user:** `OPENAI_API_KEY` as an environment secret, and allowed domains `api.openai.com`, `openai.com`, `developers.openai.com`, `platform.openai.com`, `owasp.org`, `genai.owasp.org` (cloud environment menu → Edit). A new secret may reach only a new session: then start one from this branch and say "continue S27 from STATUS".
 - **Decisions in chat (2026-10-22):** one session, not S27a/S27b; the user approved the brief's other recommendations (refuse unblock-Undo over a new booking; routine model by evals, nano-class vs mini-class; 120-case target, 20% holdout); Sentry/Grafana wait for the start of Phase 11 pilot prep (Claude's advice, the user deferred to it).
 
