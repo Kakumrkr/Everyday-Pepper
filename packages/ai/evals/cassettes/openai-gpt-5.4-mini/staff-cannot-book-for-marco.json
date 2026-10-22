@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d6f95db37145629bec10110865638340b879850b1bfbe3bf6acca81bc181f53e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_y039zVTq64Cuj4JUHPvkhZBd",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_taU7KMCzhFJ60LwR2KpEFEDG",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 3712,
+            "outputTokens": 48
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "531621431e9761eb040ff77954f6c7a951be9156c440d79f764c3edcf5a76fea",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XiS1rHwebLK3FF1CcxROGQIj",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5806,
+            "cachedInputTokens": 5376,
+            "outputTokens": 108
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "fa6ab80e5ad36dcf594c7945c4bbad0340555ae2879e2d3ab79770dc40687c0b",
+        "response": {
+          "text": "I found Ana R. and Marco, but I can’t make that booking from your role. An owner or manager needs to book it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5966,
+            "cachedInputTokens": 5632,
+            "outputTokens": 32
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

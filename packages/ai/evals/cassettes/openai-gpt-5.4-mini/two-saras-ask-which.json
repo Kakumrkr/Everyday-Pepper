@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b42746b923d3df27e00610e563e8ea3b54c4cef4a86f9b6fc36cdfd9dddfa9dd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_w9y5Ct4RlFakCf9VM3yPbqJn",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara\"}"
+            },
+            {
+              "id": "call_dMCzmAk7YEca4f79tgZQrUIh",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 0,
+            "outputTokens": 48
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "3cfd78cea4982989e8a118d6743453a5bd9f88436eff44c51a1f69e54e61f788",
+        "response": {
+          "text": "I found 2 Sara matches:\n- Sarah P.\n- Sara K.\n\nWhich one would you like me to book?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5842,
+            "cachedInputTokens": 5376,
+            "outputTokens": 28
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

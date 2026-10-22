@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c8c53e028c6c1415aaaaab757fdf75d76e717dcd93127766575e143b11046927",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pujYiGddJL4kXWLY8YRmOkwR",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5449,
+            "cachedInputTokens": 3712,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "e7f2dcbf6afd9e0237712565d343af070b38aa3ac86423556cb3eccb5f6d8be1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_T2S07BLywxwHez169t88lQdZ",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-06\",\"dueTime\":\"09:00\",\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5532,
+            "cachedInputTokens": 5376,
+            "outputTokens": 45
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "01d50191ac863e57e62665bdf44b4cd875cf4cdf2aeb51778a5c282dd28c37d8",
+        "response": {
+          "text": "Done — I set a reminder for you to call Maria on Friday at 9:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5634,
+            "cachedInputTokens": 5376,
+            "outputTokens": 24
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

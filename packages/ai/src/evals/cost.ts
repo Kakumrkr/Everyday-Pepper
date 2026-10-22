@@ -114,12 +114,17 @@ export function refuseRun(options: {
 
 /**
  * The cases a run takes: those of the given sets and ids (none given: all), then, with
- * `chunk`, the chunk-th slice of `MAX_CASES_PER_RUN` in order. Unknown ids are an error, so a
+ * `chunk`, the chunk-th slice of `chunkSize` (default and at most `MAX_CASES_PER_RUN`) in order. Unknown ids are an error, so a
  * typo never silently runs nothing.
  */
 export function selectCases(
   cases: readonly EvalCase[],
-  options: { sets: readonly string[]; ids: readonly string[]; chunk: number | null },
+  options: {
+    sets: readonly string[];
+    ids: readonly string[];
+    chunk: number | null;
+    chunkSize?: number;
+  },
 ): EvalCase[] {
   const unknown = options.ids.filter((id) => !cases.some((evalCase) => evalCase.id === id));
   if (unknown.length > 0) throw new Error(`No eval case ${unknown.join(', ')}`);
@@ -132,5 +137,9 @@ export function selectCases(
   if (!Number.isInteger(options.chunk) || options.chunk < 1) {
     throw new Error('--chunk is a whole number from 1');
   }
-  return chosen.slice((options.chunk - 1) * MAX_CASES_PER_RUN, options.chunk * MAX_CASES_PER_RUN);
+  const size = options.chunkSize ?? MAX_CASES_PER_RUN;
+  if (!Number.isInteger(size) || size < 1 || size > MAX_CASES_PER_RUN) {
+    throw new Error(`--chunk-size is a whole number from 1 to ${String(MAX_CASES_PER_RUN)}`);
+  }
+  return chosen.slice((options.chunk - 1) * size, options.chunk * size);
 }

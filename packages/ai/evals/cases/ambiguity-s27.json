@@ -25,7 +25,7 @@
         }
       ],
       "mustNotCall": ["create_booking"],
-      "replyMatches": ["kim|park"],
+      "replyMatches": ["sara k|sarah p|kim|park"],
       "actions": {
         "noWrites": true
       }

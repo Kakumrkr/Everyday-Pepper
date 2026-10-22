@@ -20,6 +20,11 @@ export interface Transcript {
   actions: { done: string[]; proposed: string[] };
   usage: LlmUsage;
   models: string[];
+  /**
+   * The model calls that failed (`code: message`; the message never holds prompt text). The
+   * loop answers the member with a fallback, so the run fails here with the real reason.
+   */
+  modelErrors?: string[];
 }
 
 export const emptyUsage = (): LlmUsage => ({

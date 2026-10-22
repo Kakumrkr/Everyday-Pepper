@@ -50,7 +50,11 @@ function observed(
   placeholders: ReadonlyMap<string, string>,
 ): LlmProvider {
   const kept = (error: unknown): never => {
-    if (!isLlmError(error)) failures.push(error);
+    if (isLlmError(error)) {
+      (transcript.modelErrors ??= []).push(`${error.code}: ${error.message}`);
+    } else {
+      failures.push(error);
+    }
     throw error;
   };
   const seen = (response: Awaited<ReturnType<LlmProvider['respond']>>) => {

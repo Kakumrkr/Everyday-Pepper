@@ -12,6 +12,8 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
   const reasons: string[] = [];
   const { expect } = evalCase;
 
+  for (const error of transcript.modelErrors ?? []) reasons.push(`the model call failed: ${error}`);
+
   for (const call of transcript.toolCalls) {
     const tool = findTool(call.name);
     if (tool === undefined) {

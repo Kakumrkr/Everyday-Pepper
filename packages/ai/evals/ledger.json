@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "budgetUsd": 5,
+  "entries": [
+    {
+      "id": 1,
+      "at": "2026-10-22T23:48:39.822Z",
+      "label": "smoke gpt-6-luna low / gpt-6.1-sol low",
+      "status": "completed",
+      "cases": 5,
+      "trials": 1,
+      "estimateUsd": 0.77055,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
+    },
+    {
+      "id": 2,
+      "at": "2026-10-22T23:49:54.408Z",
+      "label": "smoke retry 1 case (diagnose)",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.15399,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
+    },
+    {
+      "id": 3,
+      "at": "2026-10-22T23:50:09.815Z",
+      "label": "smoke 1/5 gpt-6-luna low",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.15399,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
+    },
+    {
+      "id": 4,
+      "at": "2026-10-22T23:50:36.455Z",
+      "label": "smoke diagnose (no call reached OpenAI)",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.15399,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
+    },
+    {
+      "id": 5,
+      "at": "2026-10-22T23:51:22.911Z",
+      "label": "smoke gpt-6-luna low / gpt-6.1-sol low",
+      "status": "completed",
+      "cases": 5,
+      "trials": 1,
+      "estimateUsd": 0.77055,
+      "actualUsd": 0.03882385,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 12,
+          "inputTokens": 67483,
+          "cachedInputTokens": 38955,
+          "cacheWriteTokens": 28492,
+          "outputTokens": 498,
+          "usd": 0.00420365,
+          "latencyMsP50": 1257.7126899999985,
+          "latencyMsP95": 3285.9716810000004
+        },
+        "gpt-6.1-sol": {
+          "calls": 4,
+          "inputTokens": 24750,
+          "cachedInputTokens": 12287,
+          "cacheWriteTokens": 12451,
+          "outputTokens": 224,
+          "usd": 0.034620200000000004,
+          "latencyMsP50": 2023.4468410000009,
+          "latencyMsP95": 2348.6361350000006
+        }
+      },
+      "charsPerToken": 3.609087853588195
+    },
+    {
+      "id": 6,
+      "at": "2026-10-22T23:53:33.907Z",
+      "label": "smoke gpt-5.4-mini default / gpt-6.1-sol low",
+      "status": "completed",
+      "cases": 5,
+      "trials": 1,
+      "estimateUsd": 0.77055,
+      "actualUsd": 0.017781899999999996,
+      "byModel": {
+        "gpt-5.4-mini-2026-03-17": {
+          "calls": 12,
+          "inputTokens": 67892,
+          "cachedInputTokens": 52992,
+          "cacheWriteTokens": 0,
+          "outputTokens": 585,
+          "usd": 0.017781899999999996,
+          "latencyMsP50": 1020.7297699999999,
+          "latencyMsP95": 1415.0744009999999
+        }
+      },
+      "charsPerToken": 3.5151564249101512
+    }
+  ]
+}

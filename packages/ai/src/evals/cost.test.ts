@@ -149,6 +149,19 @@ describe('selectCases (runs in chunks of at most 25, S27)', () => {
     ).toEqual(['case-3', 'case-55']);
   });
 
+  it('takes smaller chunks with chunkSize (a dear strong model needs them under the cap)', () => {
+    const third = selectCases(cases, { sets: [], ids: [], chunk: 3, chunkSize: 8 });
+    expect(third.map((c) => c.id)).toEqual(
+      Array.from({ length: 8 }, (_, index) => `case-${String(index + 17)}`),
+    );
+    expect(() => selectCases(cases, { sets: [], ids: [], chunk: 1, chunkSize: 26 })).toThrow(
+      /--chunk-size/,
+    );
+    expect(() => selectCases(cases, { sets: [], ids: [], chunk: 1, chunkSize: 0 })).toThrow(
+      /--chunk-size/,
+    );
+  });
+
   it('refuses an unknown id or a chunk that is not 1, 2, 3…', () => {
     expect(() => selectCases(cases, { sets: [], ids: ['case-99'], chunk: null })).toThrow(
       'No eval case case-99',

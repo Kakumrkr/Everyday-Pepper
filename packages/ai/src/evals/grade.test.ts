@@ -35,6 +35,16 @@ describe('mismatches', () => {
 });
 
 describe('grade (ADR-0027: deterministic graders)', () => {
+  it("fails a run whose model call failed, saying why (the loop's fallback hides it, S27)", () => {
+    expect(
+      grade(
+        evalCase(),
+        transcript({ modelErrors: ['bad_request: Unsupported parameter: reasoning.effort'] }),
+      ),
+    ).toContain('the model call failed: bad_request: Unsupported parameter: reasoning.effort');
+    expect(grade(evalCase(), transcript())).toEqual([]);
+  });
+
   it('nothingDone fails any action done and allows proposals (S27)', () => {
     const bulk = evalCase({ expect: { actions: { nothingDone: true } } });
     expect(

@@ -1,5 +1,5 @@
 // `pnpm --filter @pepper/ai eval [--provider scripted|openai] [--record] [--set <set>]...
-//   [--case <id>]... [--chunk <n>] [--trials <k>] [--max-cost <usd>] [--routine <model>]
+//   [--case <id>]... [--chunk <n>] [--chunk-size <n>] [--trials <k>] [--max-cost <usd>] [--routine <model>]
 //   [--strong <model>] [--routine-effort <e>] [--strong-effort <e>] [--label <text>]
 //   [--cassettes <dir>]` (ADR-0027, ADR-0030, S27). Replays cassettes by
 // default, at no cost: every case (the files and those generated from the tool guides) runs
@@ -64,6 +64,7 @@ async function main(): Promise<number> {
       set: { type: 'string', multiple: true },
       case: { type: 'string', multiple: true },
       chunk: { type: 'string' },
+      'chunk-size': { type: 'string' },
       trials: { type: 'string', default: '1' },
       'max-cost': { type: 'string', default: String(DEFAULT_RUN_CAP_USD) },
       routine: { type: 'string' },
@@ -103,6 +104,7 @@ async function main(): Promise<number> {
     sets,
     ids: values.case ?? [],
     chunk: values.chunk === undefined ? null : Number(values.chunk),
+    ...(values['chunk-size'] !== undefined && { chunkSize: Number(values['chunk-size']) }),
   });
   if (cases.length === 0) {
     print('No cases selected.');

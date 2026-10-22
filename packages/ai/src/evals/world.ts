@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import {
   addTimeOff,
   createBooking,
@@ -58,6 +59,8 @@ export const WORLD_PLACEHOLDERS = [
 ] as const;
 
 let seeded = 0;
+/** Tells this process's worlds from an earlier run's in a database the runs share. */
+const RUN = randomBytes(3).toString('hex');
 
 /**
  * Juniper Hair Studio at `now` in `timeZone`: Lena (owner), Cara (manager), Jess (staff, her
@@ -78,7 +81,7 @@ export async function seedEvalWorld(
   const ownerId = await insertSeedUser(db, 'Lena');
   const tenant = await createBusiness(db, ownerId, {
     name: 'Juniper Hair Studio',
-    slug: `eval-${name}-${String(seeded)}-${String(at.now.getTime() % 1_000_000)}`,
+    slug: `eval-${name}-${RUN}-${String(seeded)}-${String(at.now.getTime() % 1_000_000)}`,
     timeZone: at.timeZone,
   });
   const tenantId = TenantIdSchema.parse(tenant.id);

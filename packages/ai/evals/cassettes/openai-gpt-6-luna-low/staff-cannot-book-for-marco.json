@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d6f95db37145629bec10110865638340b879850b1bfbe3bf6acca81bc181f53e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_yg9NGmXDdkjf3AGb5o0c2BJl",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 5450,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "90f264ef1a01fd2b1a47ddb3962267ba713bff6304780d7176927f805e16d2c4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_RyH4xLw3HD9L2wyNL5FZXFxs",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5725,
+            "cachedInputTokens": 5450,
+            "cacheWriteTokens": 272,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "516a530cb73d2e32c5399974018d0dc7743589b752388545985bf7cf21e65938",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eA79HlgnXWZYO9J3K3V4y6Q7",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"01a16606-f4a9-7358-ae51-957a8a97b8f1\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0fd7f94334cf1f95016adaa189abd887d2b35ccd39db70cf0b",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qGL7skRUw0u3D8yoM8Kqa2I2j5zvQMluGjPXaFNorHYfV7xaGqogdp5-NKRKxPG09Gv_bYQTFiJz7JzTjmDpVl1O10kzZw1hrMJaDY3lLVLWkL2csvNixIEPSzIoM7dtDmAs_ECHTvRHqZZsR5bDXVA5H1i1gH2mpUBchnVfFysILjwtORr3MJWL2YLf6N75yoi4JCnaBuhz8WWWwz34tzeO5qx7zSIs6p7pAPAEEjN7pkeFAaUyJt1liyzIzc-jhSYNbm2k9Wo7i2J_EoyaEVIwdIjmaAJ3LE6wudzGpt-dp5NwHpjMfpsCvDIsX1LIh1GN_s5E5ha3tMWQyzVsr2JbGcb14XjuB9vinjaNFhi92VWFUy0BZqHB0FuXCKrBc0jxYjHihgWK7zNy-4GvFOODXxmWyyJoW07kOTnhxar1xdNL8VBIKdxuwPvjTfg4GA-ufUGMbK9lMi-sU1lh9q8bodymyXJeU1Nhpp-5TAvqYllPEL-Fsp_hLkmOsALAoxq1b2HLQBbIBi05LoEVcoxd71SnA8uonFiGPTbTsjN7SRfwdS9rXsftLREYYlb6qd1X9wFICs81EIpI5QxP-guUhmEXa2oKzs1DT1TmLEySUBlYss15ZMQWI7cgzDYoKo2cFxw22pt7V3P_v3QbbFL1ITLjy23uS4-USBcsDrCooPoZ-C0aJoSi4xXusaxFAn2YwSX920li91WtzXYXg5BzO87XM-47SDkFhO72zdWPUzmhUazvv86amApnVzMToGSW-7ew5EBXqoUNXELSAoOF-MEXSIW6SZ_5jRbOkcwmSMM2zjRKQT1wUWGApd5PdorI9jI9H4b0DyfLwYcmAtzLjvLWMzK9RFQGsPEigyn_pOXhQr7AgXbJ59Vc1gns0uwbScHWP4eV_AwngwZMDuIWAsWX79OJGWyL67VLN_Hm4XNSBv5QvNLyIbtBGzH_ECiPTwx9ty-87bkQ4Q1-kLKI7_AqWq20HlnredpEZ5tVxuaZ4RMxdRgsyjpsPAijUZLm-BOHzWTf6s_9Q5IORFORPX0plfYV0bAqSFjak_R8nEDLt33gQ4bWvCk2ObGkL9IoTh0SL5Ib-EFIM79gYwsZZs3K4FHt1dvhx78ZGofCF74sGlQq7omIUTSTu_8dQ92wzxmmMSPQr9pA2Au-7eHBO6-uJXHDLp4QzqZkFFA3iSk-zJ3w_bSNuzoK8gMLRrMESeda1PXqCws5l9GcJd2e7dq-9NavBSRZ1oVYKJasd3eYaJr9Sq7PsxEFhG_BTevNaxe5tIrZ2tArNLQhFDBN6qcZmHn1b12rdOA5S12gxbXXdvUxLDWxxQVeMcuryTDNtlgNkiqaLRxVlw9MMvWzhgiKPcHqIPNeNltrARVun7T1KB7NKDyNaD1dupwu6pmk-ShDYbAb5fAK8nKJ6HaPYOC0j6VY7JduPayQqUX_cDR0-ET4x5Wc5GKDVd6Rou-DSFtSNaB3skOAbl1o19Osf9eXS7q2CCqjtkoxyqdlHZlIPNk9yuQRFUMlBkWsW1SS7ZRwlosWtCkg21EdKceUAqWl2WMq02ibZUCtjIP5kapoyLfjlAIS-ItoOX9-MSakZmckC5SCu0AtjLWiBLlp9MXaMPWHMIJBUIRBgbfXvPtF2cEdaySrpzWQELYmhhy1ytbvzzpB40NVLt_JoqVCQZ13Cuj16oqoRaTze6W0HvL67EqoRgw0efkGn1M5eHibUUpiidNuztH-JZeKM5EuE2P3gRwZNdtDWLtMwLXigCNR5C3D7MTvOFtgPxhXef-21xN6FbdzeP_WO7CA4XubkN6T_IiwvKLs0NnkUInbC8=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5807,
+            "cachedInputTokens": 5722,
+            "cacheWriteTokens": 82,
+            "outputTokens": 149
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cbe287cf6166398aaae945f35c5a91ca5ec20b66aae24502b3d72bea8d152155",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_N3qU5nynTsHNuQGfQM6wMQbI",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0fd7f94334cf1f95016adaa18d3d5c87d2aae05ec0f048480e",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qGNp21wfkQqqCIpOlIebg5cke8j_JxqUkMZHKH4vBQsAmYYJwI3ipa09AbbB2PCQeaxwRCceQig9eI2-rlOhQ69-yCKVI5TWD9QnAMB5kQUeAA94hMwDchRgY9wVksi3Meh8Zn1YXH70rFSNkvIDpRZrQZb-3K1S2ClTgRTPLiDv1Le9pGsvpU7p_hD6QALoXqQ6BGefsSgb4w4r8vS4w7c8epFWrbVbROMag1yXxlWNDw5Nsg4lygH5qMMl2KjZdZwPfvreUiH5DGxQFo4q30p-MHdOa86iKoNRYgj61ZvzbMJQiVprm1S5WCVYVZAkbVb57sTWiEh3ntq2k26-J_NFik5uiM4aInJo3fILGikIzbwMVocC1khA2jr5bZ19biuYYwoC7HsP0MoO-VzZRI-2pPRPGDB7NxXxDz-QILURkOE__V5Ry7ZDC6c24VMLinaqGluLU9LjOy5c7BkRjUhzRKlPz1zWh7ordurTDFTqplRbCdOMmVdbFInxkVbOsUEE_7ZNJollMd3FYaSm88yNPCsND4j0PN_dASinorUcqjSUUXKdIn-x4LNlPQKbq4GYDm-Vy_cdEPpVP1g8RL6EgZtEskkNmRL7UoX3_wjAS9j1USRjarUsszwuRj7TjisQDqFgvlIbiXe8H7xEOybtMzG0Ri1twc-9nJryy3NdEHDBnnGEt20sXXV2ibnyS4GvEOLwOa3Hozr7QzWUvJV9AXREomHd3kiGnWf8D8fl7YoBkQQrOzS1Lo12ubRSyGO0UwItBZ1mt05DUeJrzlLjKY2ORaPFlcYEEw6WQkVJYcfFH9GXUjaNS_KYTV8ZePVrlAayMWJ7ohEtr-0RbTLWBAhvvpu_lk9H0KaC9Aj4leyXrkoE2VCW2SV-xAslANpzA-oG_ilaHjDFYrgZKNhPxXRHuSq-8uEGW2oihNXq2eFbZ0RSrqkCWG0n2IreFi4QQcTzLuGuaQmpSjCNDsk2Q9ynsmWWjQoyfzRoP69xliWAtPqjm1Fv6OOmhKJ5BU9XYRciT89AuYSEjetNJ5vg_TGJJffXzbVA03x_ZHv66UiK_r4wrGTOrIMB3PNfvTlQlLWQ8oCGCN1V5D-gdHI8we2QuQUEWILFfCagilEwMtboMuAyyMqa168TKROALKHrXplSa4-Fcg4aTVLG9VIL8NsRB4fiKMpw1IF9rsg439cTCMT9K1r59ClCJmg5DUZdLbs3cE70IjZ7uWOheW6tFCOHPEBv4sUqwTDr2mJdVCTEpojGtrGkhdDe0oRbnCtUzIRWtXQqWwtmtZEsygBs45uiXjpCB0YWM9ZGI2yZDEfDNQK3BI7PPVoX4NFcBixKiuUtAgXyqL71bl403oJKI5ckQhIMXqwBXjSmP6e1npPEXb8uCKMbtOftfATE65QLnVnCREzb6xVXZUEKSO1KjNj9WLqAIPnjUVV9GTmOclTIhZkI1UL_Ah333P9IVQwy4jwmliqTD75XizbnMw5dOQUuRax8XIMZMKn4glFWu40zaWKusI8jCuPF0zDbIQJe8WW4VIscla8ibu0bnvc_g==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6004,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 6001,
+            "outputTokens": 29
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "6f2e6e2bb30e464067b6ddceb4874a4005bcee7a2bd0a0797273edcce75dd555",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vCdZANglJ7qLqYkQ0G1G29xS",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6289,
+            "cachedInputTokens": 6001,
+            "cacheWriteTokens": 285,
+            "outputTokens": 112
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "c316a7721cc53a8cdc67265de3bef83e74c95fe00e2895f14ffbaba23255fb6d",
+        "response": {
+          "text": "Your staff permissions don’t allow booking Ana with Marco. An owner or manager can book her haircut for Saturday, November 7 at 11 AM. Nothing has been booked.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6453,
+            "cachedInputTokens": 6286,
+            "cacheWriteTokens": 164,
+            "outputTokens": 39
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}
