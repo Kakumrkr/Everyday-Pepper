@@ -5,6 +5,7 @@ import {
   CassetteError,
   CassetteProvider,
   recordingProvider,
+  replayOrRecordProvider,
   requestFingerprint,
   type CassetteStep,
 } from './cassette.js';
@@ -72,5 +73,52 @@ describe('recordingProvider', () => {
     expect(steps[0]?.fingerprint).toBe(requestFingerprint(contractRequest));
     const replay = new CassetteProvider(steps);
     expect((await replay.respond(contractRequest)).text).toBe('hi');
+  });
+});
+
+describe('replayOrRecordProvider (never pay twice for one answer)', () => {
+  it('replays unchanged requests for free and calls the real model from the first change on', async () => {
+    const earlier: CassetteStep[] = [];
+    await recordingProvider(
+      new ScriptedProvider([
+        scriptedResponse({ text: 'old one' }),
+        scriptedResponse({ text: 'old two' }),
+      ]),
+      earlier,
+    ).respond(contractRequest);
+    earlier.push({
+      fingerprint: requestFingerprint(contractRequest),
+      response: scriptedResponse({ text: 'old two' }),
+    });
+
+    const real = new ScriptedProvider([
+      scriptedResponse({ text: 'new two' }),
+      scriptedResponse({ text: 'new three' }),
+    ]);
+    const steps: CassetteStep[] = [];
+    const provider = replayOrRecordProvider(real, earlier, steps);
+    expect((await provider.respond(contractRequest)).text).toBe('old one');
+    expect(real.requests).toHaveLength(0);
+    const changed = { ...contractRequest, instructions: 'A new prompt.' };
+    expect((await provider.respond(changed)).text).toBe('new two');
+    // Once it has left the recording, even an unchanged request goes to the real model.
+    const streamed = [];
+    for await (const event of provider.stream(contractRequest)) streamed.push(event);
+    expect(streamed.at(-1)).toMatchObject({ type: 'done', response: { text: 'new three' } });
+    expect(real.requests).toHaveLength(2);
+    expect(steps.map((step) => step.response.text)).toEqual(['old one', 'new two', 'new three']);
+    expect(steps[1]?.fingerprint).toBe(requestFingerprint(changed));
+  });
+
+  it('records everything when there is no earlier recording, and never replays a hand-written step', async () => {
+    const real = new ScriptedProvider([scriptedResponse({ text: 'real' })]);
+    const steps: CassetteStep[] = [];
+    const provider = replayOrRecordProvider(
+      real,
+      [{ response: scriptedResponse({ text: 'hand' }) }],
+      steps,
+    );
+    expect((await provider.respond(contractRequest)).text).toBe('real');
+    expect(real.requests).toHaveLength(1);
   });
 });

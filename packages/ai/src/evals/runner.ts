@@ -4,6 +4,7 @@ import type { LlmProvider } from '../provider.js';
 import { EVAL_SET_GATES, type EvalCase, type EvalSet } from './case.js';
 import { CassetteError } from './cassette.js';
 import { grade } from './grade.js';
+import { BudgetStopError } from './ledger.js';
 import type { EvalSubject } from './subject.js';
 import { addUsage, emptyUsage } from './transcript.js';
 import type { EvalWorld } from './world.js';
@@ -35,17 +36,23 @@ export interface RunOptions {
 }
 
 function describeFailure(error: unknown): string {
+  if (error instanceof BudgetStopError) return `budget stop: ${error.message}`;
   if (error instanceof CassetteError) return `cassette ${error.kind}: ${error.message}`;
   if (isLlmError(error)) return `provider failed: ${error.code}`;
   return `subject failed: ${error instanceof Error ? error.message : String(error)}`;
 }
 
-/** Runs every case `trials` times and grades each run with code. */
+/**
+ * Runs every case `trials` times and grades each run with code. A budget stop ends the whole
+ * run there: the results so far come back, the stopped trial failed with the reason.
+ */
 export async function runEvals(options: RunOptions): Promise<CaseResult[]> {
   const results: CaseResult[] = [];
+  let stopped = false;
   for (const evalCase of options.cases) {
+    if (stopped) break;
     const trials: TrialResult[] = [];
-    for (let trial = 0; trial < options.trials; trial += 1) {
+    for (let trial = 0; trial < options.trials && !stopped; trial += 1) {
       try {
         const transcript = await options.subject(evalCase, (world) =>
           options.providerFor(evalCase, trial, world),
@@ -58,6 +65,7 @@ export async function runEvals(options: RunOptions): Promise<CaseResult[]> {
           models: transcript.models,
         });
       } catch (error) {
+        stopped = error instanceof BudgetStopError;
         trials.push({
           passed: false,
           reasons: [describeFailure(error)],

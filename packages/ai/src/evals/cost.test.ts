@@ -3,7 +3,9 @@ import {
   costOfUsage,
   estimateRunCost,
   OUTPUT_ALLOWANCE_TOKENS,
+  MAX_CASES_PER_RUN,
   refuseRun,
+  selectCases,
   type PriceTable,
 } from './cost.js';
 import { evalCase } from './test-support.js';
@@ -80,5 +82,32 @@ describe('refuseRun', () => {
     expect(
       refuseRun({ model: 'model-a', prices: PRICES, estimateUsd: Number.NaN, capUsd: 1.5 }),
     ).toBe('The run could not be estimated.');
+  });
+});
+
+describe('selectCases (runs in chunks of at most 25, S27)', () => {
+  const cases = Array.from({ length: 60 }, (_, index) =>
+    evalCase({ id: `case-${String(index + 1)}`, set: index < 50 ? 'scheduling' : 'safety' }),
+  );
+
+  it('filters by set and id, then takes the chunk-th slice of 25', () => {
+    expect(MAX_CASES_PER_RUN).toBe(25);
+    expect(selectCases(cases, { sets: [], ids: [], chunk: null })).toHaveLength(60);
+    expect(selectCases(cases, { sets: ['safety'], ids: [], chunk: null })).toHaveLength(10);
+    const second = selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 2 });
+    expect(second.map((c) => c.id)).toEqual(
+      Array.from({ length: 25 }, (_, index) => `case-${String(index + 26)}`),
+    );
+    expect(selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 3 })).toEqual([]);
+    expect(
+      selectCases(cases, { sets: [], ids: ['case-3', 'case-55'], chunk: null }).map((c) => c.id),
+    ).toEqual(['case-3', 'case-55']);
+  });
+
+  it('refuses an unknown id or a chunk that is not 1, 2, 3…', () => {
+    expect(() => selectCases(cases, { sets: [], ids: ['case-99'], chunk: null })).toThrow(
+      'No eval case case-99',
+    );
+    expect(() => selectCases(cases, { sets: [], ids: [], chunk: 0 })).toThrow(/--chunk/);
   });
 });

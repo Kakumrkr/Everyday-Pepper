@@ -6,7 +6,15 @@ import { describe, expect, it } from 'vitest';
 import { LlmError } from '../errors.js';
 import { ScriptedProvider, scriptedResponse } from '../scripted-provider.js';
 import { CassetteProvider } from './cassette.js';
-import { loadCases, loadCassette, loadPrices, saveCassette } from './files.js';
+import { BudgetStopError } from './ledger.js';
+import {
+  loadCases,
+  loadCassette,
+  loadLedger,
+  loadPrices,
+  saveCassette,
+  saveLedger,
+} from './files.js';
 import { markdownReport } from './report.js';
 import { runEvals, summarize } from './runner.js';
 import type { EvalSubject } from './subject.js';
@@ -66,6 +74,27 @@ describe('runEvals', () => {
       ['provider failed: timeout'],
       ['expected a call to find_clients'],
       [expect.stringMatching(/^subject failed: ScriptedProvider: no step left/)],
+    ]);
+  });
+
+  it('ends the whole run at a budget stop, keeping what ran (playbook §4)', async () => {
+    const results = await runEvals({
+      cases: [evalCase({ id: 'first' }), evalCase({ id: 'second' }), evalCase({ id: 'third' })],
+      trials: 2,
+      subject: oneCallSubject,
+      providerFor: (c, trial) =>
+        c.id === 'second' && trial === 1
+          ? new ScriptedProvider([
+              () => Promise.reject(new BudgetStopError('The total reached the $4.50 stop.')),
+            ])
+          : new ScriptedProvider([scriptedResponse({ text: 'ok' })]),
+    });
+    expect(results.map((r) => [r.id, r.trials.length, r.passed])).toEqual([
+      ['first', 2, true],
+      ['second', 2, false],
+    ]);
+    expect(results[1]?.trials[1]?.reasons).toEqual([
+      'budget stop: The total reached the $4.50 stop.',
     ]);
   });
 
@@ -143,6 +172,50 @@ describe('eval files', () => {
     } finally {
       await rm(root, { recursive: true, force: true });
     }
-    expect((await loadPrices(paths)).models).toEqual({});
+    expect((await loadPrices(paths)).checkedOn).not.toBeUndefined();
+  });
+
+  it("keeps the ledger and rewrites only the budget doc's ledger section", async () => {
+    const root = await mkdtemp(join(tmpdir(), 'pepper-ledger-'));
+    try {
+      const budgetDoc = join(root, 'ai-budget.md');
+      const temp = { root, budgetDoc };
+      expect((await loadLedger(temp)).entries).toEqual([]);
+      await writeFile(
+        budgetDoc,
+        '# Budget\n\nPolicy text.\n\n<!-- ledger:start (written by the eval runner) -->\nold\n<!-- ledger:end -->\n\nNotes.\n',
+      );
+      const ledger = {
+        version: 1 as const,
+        budgetUsd: 5 as const,
+        entries: [
+          {
+            id: 1,
+            at: '2026-10-22T10:00:00.000Z',
+            label: 'smoke',
+            status: 'completed' as const,
+            cases: 5,
+            trials: 1,
+            estimateUsd: 0.3,
+            actualUsd: 0.01,
+            byModel: {},
+            charsPerToken: null,
+          },
+        ],
+      };
+      await saveLedger(temp, ledger);
+      expect(await loadLedger(temp)).toEqual(ledger);
+      const doc = await readFile(budgetDoc, 'utf8');
+      expect(doc).toMatch(/^# Budget\n\nPolicy text\./);
+      expect(doc).toContain(
+        '| 1 | 2026-10-22 | smoke | completed | 5 × 1 | $0.30 | $0.0100 | $0.0100 |',
+      );
+      expect(doc).not.toContain('\nold\n');
+      expect(doc).toMatch(/<!-- ledger:end -->\n\nNotes\.\n$/);
+      await writeFile(budgetDoc, 'no markers');
+      await expect(saveLedger(temp, ledger)).rejects.toThrow(/no ledger markers/);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });
