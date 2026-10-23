@@ -2,6 +2,28 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.25 — 2026-10-23
+- S28 (Phase 7a, planning): the [Phase 7 playbook](phase-7-playbook.md) and [PCR-005](changes/PCR-005.md), approved by the user ("review your plan, if you can build a better plan you can, and start"). Phase 7 runs as S29–S33:
+  - S29: the memory store, pgvector, embeddings, forget everywhere;
+  - S30: facts in the AI, warnings, "the usual";
+  - S31: episodes and learned rules;
+  - S32: "What I know" and the "Remembered" chip;
+  - S33: re-record, pass^3, security review, exit.
+
+  **Quality bar:** recall ≥ 95% pass^1 (≥ 90% pass^3); deletion 100% at pass^3, graded on the provider requests and storage; memory safety 100%; AC-W3-1/2, AC-W7-2.
+
+  **Budget:** Phase 7 cap $1.00 of the remaining $4.26, recorded per session on Luna + Sol and enforced by a new `--phase-cap`.
+
+  **PCR-005 (design changes):**
+  - episodes recalled on demand through `search_memory`;
+  - exact vector search in V1;
+  - values only in the memory tables, and one forget scrubs history, episodes and Undo values;
+  - learned rules through a new dial action `rule.change`, always "ask";
+  - visit notes;
+  - a pause switch.
+
+  memory.md, data-model.md and the roadmap are updated.
+
 ## 0.24 — 2026-10-23
 - S27 (Phase 6f, **Phase 6 exit**): [ADR-0033](../adr/0033-real-model-evals-and-model-choice.md) (accepted: the user asked for the model choice "by pass rate, latency and cost, with numbers"). **Real models, chosen on evidence:** routine `gpt-6-luna` (effort `low`), strong `gpt-6.1-sol` (effort `low`), chosen from a full pass^1 of both `gpt-6-luna` and `gpt-5.4-mini` (a tie on quality; Luna's own calls 8× cheaper). Final: every eval gate met, scheduling 97% (pass^3 95%), safety, permissions and autonomy 100% at pass^3, about $0.0005 a case. **Spent $0.74 of the $5 budget**, every run in the [ledger](ai-budget.md). [Security review](../engineering/security-review-s27.md): no high findings; M1–M3 and L5 fixed.
 

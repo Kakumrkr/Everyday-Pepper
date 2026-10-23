@@ -872,6 +872,32 @@ Everything each session did, oldest first: what was built, the checks run and th
     - By hand before the pilot: the screen-reader check (VoiceOver/NVDA script in the security review); confirm the OWASP 2026 titles in the signed-in PDFs; zero data retention on the OpenAI account (L2).
     - W1 (`reads.int` "list_todos") did not fail again in S27.
 
+- **S28 Phase 7a (2026-10-23): Phase 7 planning (memory)** ([Phase 7 playbook](phase-7-playbook.md), approved; [PCR-005](changes/PCR-005.md), approved). Branch `claude/magical-knuth-ky75f5`. Docs only, no code and no OpenAI call.
+  - **Brief:** the user asked for a playbook like Phase 6's, with one recommendation per decision; then "review your plan, if you can build a better plan you can, and start", acting as technical advisor to make Pepper clearly better than its competitors.
+  - **Desk research:**
+    - Salon tools keep client notes and color formulas as free text or photos on the client file, and nobody surfaces them at booking time.
+    - Their AI for client knowledge is limited or missing.
+    - General assistants have memory pages, but deleting is multi-source and confusing.
+  - **The review fixed the first draft:**
+    - Deleting a fact would have left its value in chat history, proposal and execution records, and episodes. Now values live only in the memory tables, and one forget scrubs the rest.
+    - Undo of an update would have needed the old value permanently. Now the fact's own row keeps it for 7 days only.
+    - Added visit notes ("same as last time"), the last visit on the booking card, a "Remembered" chip, a pause switch and an in-code `--phase-cap`.
+  - **Plan:**
+    - S29: the store, pgvector, embeddings, forget everywhere.
+    - S30: facts in the AI.
+    - S31: episodes and learned rules.
+    - S32: "What I know" and the chip.
+    - S33: re-record, pass^3, security review, exit.
+  - **Quality bar:**
+    - recall ≥ 95% pass^1, ≥ 90% pass^3;
+    - deletion 100% at pass^3, graded on the provider requests and storage, including the same chat continued;
+    - memory safety 100%;
+    - AC-W3-1/2 and AC-W7-2.
+  - **Budget:** Phase 7 cap $1.00 of the remaining $4.26.
+  - **Docs:** the playbook and PCR-005 are new. memory.md, data-model.md, the roadmap (plan 0.25), the CHANGELOG, traceability, STATUS and decisions are updated.
+  - **Checks:** `pnpm check` green (docs only).
+  - **Not done / for later:** S29 re-checks the embedding model and price on OpenAI's official pages before any spend.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 
