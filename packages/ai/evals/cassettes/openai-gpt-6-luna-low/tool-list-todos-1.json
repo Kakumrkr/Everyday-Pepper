@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6e892fcc06c994c5e84cdb4146ff170650a7011f07e478a7b2ed8d2b44aa74d0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_x6zUQrk3Y4BvLb8cFQnp33iQ",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 11,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3e2bbdb697053703c1e946b618c3df07f05c1e30630b59d321f2aa6122e54a4d",
+        "response": {
+          "text": "You have one open to-do: Call Maria about her colour.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5553,
+            "cachedInputTokens": 5445,
+            "cacheWriteTokens": 105,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

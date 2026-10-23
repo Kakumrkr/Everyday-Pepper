@@ -13,14 +13,23 @@ const isMatcher = (value: ArgMatcher) =>
 describe('eval cases generated from the tool guides', () => {
   const cases = toolEvalCases({ now: '2026-11-02T12:00:00.000Z', timeZone: 'America/New_York' });
 
-  it('gives every tool at least two cases with unique ids', () => {
-    expect(cases.length).toBeGreaterThanOrEqual(TOOLS.length * 2);
+  it('gives every example a case with a unique id, unless it says why it cannot be one', () => {
     expect(new Set(cases.map((c) => c.id)).size).toBe(cases.length);
     for (const tool of TOOLS) {
-      expect(
-        cases.filter((c) => c.expect.toolCalls[0]?.name === tool.name).length,
-      ).toBeGreaterThanOrEqual(2);
+      const skipped = tool.guide.examples.filter((example) => example.evalSkip !== undefined);
+      for (const example of skipped) expect(example.evalSkip?.length).toBeGreaterThan(20);
+      expect(cases.filter((c) => c.expect.toolCalls[0]?.name === tool.name)).toHaveLength(
+        tool.guide.examples.length - skipped.length,
+      );
     }
+    // Skipping is the exception: a tool that needs earlier context (get_booking) only.
+    expect(cases.length).toBeGreaterThanOrEqual(TOOLS.length * 2 - 2);
+  });
+
+  it("asks in the eval world's words when the shown example names things that world lacks", () => {
+    const cancel = cases.find((c) => c.id === 'tool-cancel-booking-1');
+    expect(cancel?.turns[0]?.user).toBe("Cancel Maria's appointment tomorrow");
+    expect(cases.some((c) => c.id.startsWith('tool-get-booking-'))).toBe(false);
   });
 
   it("uses only literal values the tool's own schema accepts (an example can't contradict it)", () => {

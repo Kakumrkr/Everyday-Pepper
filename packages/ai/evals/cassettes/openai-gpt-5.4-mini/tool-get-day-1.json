@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "aa12da33e4db72b20556d1750942ff9baaae7526c7bf3839dfff6f1e2580965b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_YVB3uLKJBJ4jKqibeOTK5yV3",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5445,
+            "cachedInputTokens": 5376,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "ff3eec2ae91173a7a501af039fc7dd706949e3255cfc7130cf11e9f02839818b",
+        "response": {
+          "text": "Nothing is booked or blocked today.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5528,
+            "cachedInputTokens": 5376,
+            "outputTokens": 11
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

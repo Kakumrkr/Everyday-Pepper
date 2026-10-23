@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "309b6e1a49d915f15528253d9e1e773802d00866e55b54017e5a7449f78fed14",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8QPm6io7YRdTXLTIaoBTzwLn",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            },
+            {
+              "id": "call_DqIMQG4tJxX0PRboj2KdTfK0",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5454,
+            "cachedInputTokens": 5376,
+            "outputTokens": 49
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "a8271bbdc7dc0803403f6ce68a40c19a14b94739f623f43725927d6f1c1e21cc",
+        "response": {
+          "text": "I found Sarah P., but Marco doesn’t offer Colour, so I can’t book that combination.\n\nIf you want, I can book Sarah for Colour with Jess on Thursday at 10 instead, or help find a service Marco does offer.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5821,
+            "cachedInputTokens": 5376,
+            "outputTokens": 52
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

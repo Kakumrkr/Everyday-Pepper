@@ -167,7 +167,10 @@ export const unblockTime: WriteTool = {
       'the removed block with its whole span (a block over several days goes entirely: block the part that stays again), done or waiting for the member’s OK.',
     examples: [
       { say: "Remove Jess's lunch block tomorrow", args: { timeOffId: { $any: true } } },
-      { say: "I'm not off on Friday after all", args: { timeOffId: { $any: true } } },
+      {
+        say: 'Jess is working through lunch tomorrow after all, free that time',
+        args: { timeOffId: { $any: true } },
+      },
     ],
   },
   args: UnblockArgs,
@@ -257,7 +260,9 @@ const TodoArgs = z.strictObject({
   dueTime: TimeArg.nullable().describe('Time on the due date; null: 09:00'),
   assigneeStaffMemberId: IdArg('staff member')
     .nullable()
-    .describe('Whose to-do (a staff member with a login); null: the member themselves'),
+    .describe(
+      'Whose to-do: a staff member id from list_services_and_staff (one with a login); null: the member themselves',
+    ),
 });
 type TodoArgs = z.output<typeof TodoArgs>;
 
@@ -268,7 +273,7 @@ export const addTodo: WriteTool = {
   localTimes: true,
   tier: 'internal_write',
   guide: {
-    use: 'Add a to-do for the member or a teammate, with an optional due time that reminds them (follow-through).',
+    use: 'Add a to-do for the member or a teammate, with an optional due time that reminds them (follow-through). For a teammate, take their staff member id from list_services_and_staff first.',
     avoid: [
       'to book, move or cancel anything (use the booking tools)',
       'to message a client (Pepper can’t write to clients yet)',
@@ -457,7 +462,10 @@ export const completeTodo: WriteTool = {
     returns: 'the to-do marked done, done or waiting for the member’s OK.',
     examples: [
       { say: 'Mark the Maria call done', args: { todoId: { $any: true } } },
-      { say: 'I ordered the foils, tick that off', args: { todoId: { $any: true } } },
+      {
+        say: 'I called Maria about her colour, you can tick that off',
+        args: { todoId: { $any: true } },
+      },
     ],
   },
   args: CompleteArgs,

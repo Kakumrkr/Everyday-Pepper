@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7866acda48e68b9b8f3e07dcde9c8097dc9c288abed16c75dd9d318288027a03",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2Ut4K4Se12ubhIHS35BfduDZ",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"restock towels\",\"dueDate\":null,\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5449,
+            "cachedInputTokens": 5376,
+            "outputTokens": 39
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "8106984841e4d9f603d160d5f871b9342c1a20623c56c81c154f6e62335240b4",
+        "response": {
+          "text": "Done — I added “restock towels” to your to-do list.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5532,
+            "cachedInputTokens": 5376,
+            "outputTokens": 19
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

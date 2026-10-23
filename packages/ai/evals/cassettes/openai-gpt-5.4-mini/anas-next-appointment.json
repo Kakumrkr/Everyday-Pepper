@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "59e272977d9110765f7e8b5f878feacab1986ecf75fd5ae45b00f4592db09651",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5tYv0TcfINvBkG2cfcqMsuwg",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "631e0d759c85033a90d8306b28d31058341c91de100838213c2b5e4a69b43e3a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UQ8x42Vvsznu4ptgKKDeprn8",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5528,
+            "cachedInputTokens": 5376,
+            "outputTokens": 39
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "8c4488c7a5f896e11441e7c1c0822833a2359d4c4ede87371b0149426787ba64",
+        "response": {
+          "text": "Ana R.’s next appointment is Friday, November 6 at 2:00 PM with Jess for a haircut.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5793,
+            "cachedInputTokens": 5376,
+            "outputTokens": 28
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

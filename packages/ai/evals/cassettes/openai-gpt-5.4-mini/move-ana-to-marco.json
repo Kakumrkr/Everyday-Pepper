@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "cd58f35a465f1df89b8f44ccce66b226a1041d403aada088f64c142258d673b9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dll8EfRVj9WpI4HLat5F7Q2t",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_mREfoEyLu5PoqkNQmjDa5o5F",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 48
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "b3309a110428ac320d2758d6f2a00b28075b9ed575b28d22b679bb96e8027342",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_favKGQrZ9pXGs7F2cmT1oCMV",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5814,
+            "cachedInputTokens": 5376,
+            "outputTokens": 41
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "1e279189fe8746d7e90709e4dcf90beb236f53fa53e1ec0426f3586413b1cdc1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_a36NgR58T56670rMmAiLKM28",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"date\":\"2026-11-06\",\"time\":\"14:00\",\"staffMemberId\":\"{{staff:marco}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6083,
+            "cachedInputTokens": 5632,
+            "outputTokens": 83
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "a378fc6f9e284e6f07ebb1425ad1d09e248d9a55c523640cc8da8fd09b141bd6",
+        "response": {
+          "text": "Moved Ana’s Friday haircut to Marco, keeping it at 2pm.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6238,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 801,
+            "outputTokens": 19
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

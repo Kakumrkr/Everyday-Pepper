@@ -7,6 +7,8 @@ import { TOOLS } from './registry.js';
 // model must answer with that tool and those arguments. A vague description shows up as a
 // failing generated case in S27 instead of in the pilot; until then the cases are checked for
 // shape here and run end to end on the scripted fake in a seeded world (S25, `evals.int.test.ts`).
+// An example the model is shown may name things the eval world lacks: `evalSay` words the case
+// for that world, and `evalSkip` says why an example can't be one turn (S27).
 
 /** The clock the generated cases run on: Monday 2 November 2026, 07:00 in New York. */
 export const GENERATED_CASES_CLOCK = {
@@ -21,19 +23,21 @@ export function toolEvalCases(
   clock: { now: string; timeZone: string } = GENERATED_CASES_CLOCK,
 ): EvalCase[] {
   return TOOLS.flatMap((tool) =>
-    tool.guide.examples.map((example, index) =>
-      EvalCaseSchema.parse({
-        id: `tool-${tool.name.replaceAll('_', '-')}-${String(index + 1)}`,
-        set: FOLLOW_THROUGH.has(tool.name) ? 'follow_through' : 'scheduling',
-        description: `Generated from ${tool.name}'s guide: "${example.say}"`,
-        now: clock.now,
-        timeZone: clock.timeZone,
-        actor: { role: 'owner' },
-        turns: [{ user: example.say }],
-        expect: {
-          toolCalls: [{ name: tool.name, arguments: example.args }],
-        },
-      }),
+    tool.guide.examples.flatMap((example, index) =>
+      example.evalSkip !== undefined
+        ? []
+        : EvalCaseSchema.parse({
+            id: `tool-${tool.name.replaceAll('_', '-')}-${String(index + 1)}`,
+            set: FOLLOW_THROUGH.has(tool.name) ? 'follow_through' : 'scheduling',
+            description: `Generated from ${tool.name}'s guide: "${example.say}"`,
+            now: clock.now,
+            timeZone: clock.timeZone,
+            actor: { role: 'owner' },
+            turns: [{ user: example.evalSay ?? example.say }],
+            expect: {
+              toolCalls: [{ name: tool.name, arguments: example.args }],
+            },
+          }),
     ),
   );
 }

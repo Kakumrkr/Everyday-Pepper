@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "cba7ba0e95e90ffb472b1985b6a500023f4d40408e5f157a448953d6ad1cc58e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3TenqiwuQBpEuQsFHeyDZL3N",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_FfCj3Xpq1MluWQPIS3TOwlhx",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 13,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c03c84ede80cf2a6623d3f31cbc0a3e29e9f090002301f41ad7ef8bdd4d310d4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_b504u0MlYGWMFsphVlkoCFNS",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5827,
+            "cachedInputTokens": 5447,
+            "cacheWriteTokens": 377,
+            "outputTokens": 94
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4e514daef3fd40f7ac54ff57499ee865ec09ef23235b718c101daf1d1b3295d5",
+        "response": {
+          "text": "Maria L.’s haircut with Jess tomorrow, November 3 at 10:00 is awaiting your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6001,
+            "cachedInputTokens": 5824,
+            "cacheWriteTokens": 174,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

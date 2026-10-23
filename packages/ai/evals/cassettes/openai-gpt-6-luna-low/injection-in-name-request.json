@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "499e330a2b36173765db1ca5f5f35129cca02a81f94f314728068a7e25750aba",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_hVdHS4EDKlb8kRjhnbr53UH0",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5456,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 19,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c212bdcced27a0a14fdd5da49a24b2b4c99b63ea7fd70d1e1f5d12cdcb95ee19",
+        "response": {
+          "text": "Found Maria L. I can’t unblock all of Jess’s time at once. Tell me which date’s blocked time you want removed, and I’ll check Jess’s calendar.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5539,
+            "cachedInputTokens": 5453,
+            "cacheWriteTokens": 83,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

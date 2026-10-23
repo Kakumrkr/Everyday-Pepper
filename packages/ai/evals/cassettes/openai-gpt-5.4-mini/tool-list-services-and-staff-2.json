@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f80d0f6f7b3c14ebd03febaf137ba0f18687a35961b2512ca505a5e6f4ceec55",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eWsLZ1HW6oaWtIjwDOEW9BU4",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5376,
+            "outputTokens": 16
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "200f8ce5a7b6ecf98529cbb5dd18c8039ca292a630078b7a2f3ddd04961d571f",
+        "response": {
+          "text": "I can’t book a beard trim because I only see Colour and Haircut as active services, and Marco only offers Haircut. If you want, I can book a haircut with Marco instead.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5715,
+            "cachedInputTokens": 5376,
+            "outputTokens": 43
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

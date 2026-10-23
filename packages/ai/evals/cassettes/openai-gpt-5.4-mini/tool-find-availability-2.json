@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "75965c1317535570ffff9534f00fc919ecfc18fa66ebb1bc36819a6e5c049e7d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Qz2xlkONTKmxjcUCqEdfoS0M",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5452,
+            "cachedInputTokens": 5376,
+            "outputTokens": 16
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "7376b80661b343f252682b120a40845effe3c849631e6deec5699d90799ac0cd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Tnh5wtNQWlhuxCG3KFSjDOtx",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-09\",\"days\":7,\"notBefore\":\"15:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5730,
+            "cachedInputTokens": 5376,
+            "outputTokens": 70
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "ec66ed114f4d51c065c6c40e76c4e246a91c72bd33c24125e312cd2613759691",
+        "response": {
+          "text": "Yes — the first colour opening next week after 3pm is Mon 2026-11-09 at 3:00 with Jess.\n\nThere are more after that too. If you want, I can show the rest or book one.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6431,
+            "cachedInputTokens": 5632,
+            "outputTokens": 53
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

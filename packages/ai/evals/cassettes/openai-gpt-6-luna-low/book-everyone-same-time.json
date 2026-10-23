@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "10c0bc411c9bfc254f76698a4fa9945770cf91b3d90a6193432fc6d28d91815f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_iRvJxed3IdG4DdkXwIS8YDvW",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 16,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "08fc340efb84e4d7b7a64c94a7fe4c95db348f1e150a2f9a728483e646b1f966",
+        "response": {
+          "text": "I can’t identify “all my clients” without their names, and I’ll need a service for each booking. Also, Jess can’t take multiple appointments starting at 9am at once. Which clients and services should I book, and should I find different times for them tomorrow?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_00856c9bb353c4cf016adaa359719087d2ac541233f7a70f53",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qNamjZ9fpG4aRbWGG6jGuQvV6YEpvA04XOOh-o-hVvNFsi7iux_dV0vkYJ1SV92DH0rNAN9ghkYX2-9LJWs8Y1c6KJjkWOmYHd2zuwY4RVnFInFIyPBJ03YxpUc0pR0kv2r5shDAfjaAj1rXWxYZ9H5HpKSat8ETW2VcVhMKlTpUCRwoYbs3nPXPwgviTWHbrZU29ErIgFxzB_uD48ZKN-yys9KIoXUwtUzL83lKrU1x4jfoYCpbihml6pZM0drUU6cd_JvlQRyq_fjhql8Emwuj8phfaFeOH8u9_fFOuheG64gfYH1BSDix9zx-cRzhQYrhYOC2GJmBNkcqtn4hJwwoX2nUfPRj5PeczGrqdeCPNYuNxf2_7vnR8NkLVD4xuQpsIzmkEVTAY2PRkQbzXqLRxmV6r7giucxnEcFPxzJ732SXm017DTyrnDMHcZoM0IuPTcl1u6IraX3ajDtZGvnSRC51xFNHAHkYclWz6kkFNresxH3QV9QfeYf6sgnUxcTEE8yveoNPhTq-xI1bZVKuUpCtMmaM0F1SJ8f584GjRnXvfuBXA6srakYjcwLOSG4U6LkA8ZrgLg5pUD6YXEf8rN5d3papIcyHHMOsMo-_WvVZfTeWIfpbEVV439bmrzgoviVA3SsG6R5-rJsWkbQjSx_Kyo7cd78U9rmSGcqZtuG4qGJC54s0X4s5M0gCcPnk53XT7na2G49iX9_1BGjdchCHolL1xWCz4b7jl-rlIibZQq1EBQa-rYXO5DNiune0iIJNhXyJCGBXWwEa1e-jBazv73EQSwzYeO5vbNbkhMReWNOTgOnjTg7zNrr-RrIkyAo_v3DB1VPO__3Z8FO-CJOx-OMkPlWUtbnF4Zgw2hvCsSWrJyVT_UyGnF_BMiCjrylkoePHF6GGM4Y3ZiTDmMNTimHIiExLQ3q8P8lV0SkeK1rWcPC9JaSqC8PXenKK0O70_cNQjJDZwLSkoSBq_srkkpXjFIaTs69ZVYTXpu5Sq6BA9yOIHX9gJvf41fo0HNO7J23Ctkl-V6vTV1HN5YlRDHK6cRvAypplaD6eLl9Vh6F3cW72IBBeStzHSAtbP5wqb4gae9Qx9-uy-Lb6RFIpm8NnGgUWVbQNEpBZp0lioCa6gL8kA-noCVdz_GpR8uxlPIvendPmHXgOT0SWjfG3JT7dz0qvE9MBR78x6lifgvmHxQlsuxVFHBTQq4TBnAUWrR9YFP7_6FYKaOnn-hd3vZkrh4CdEPP6LPCGFJRHS9YW_txE6yD56stCMlNUzqoLV4H37MLk8Sq1NnWRTdZ6WHgldsNHVAwsH7dfRNz2DSOjgYvmt9ugoaihYdhqvSDz01dXN8M6-TR86Qu6V4tseJVMYoGYmSHzWscSi2sKCELYhScA2QDgJWKmkjP3gvXVASSf0nU3COpSdTuvBw2gTkXvgD3totrYSZfI9ONuWxVWRT_u0317YhAfXqby1iOSVobhs1OIh_qR3QPa2g9yPM2zkA5C85gEyDaBJqAdo5KBQzPudg00PWNmpoWVGxZH_LN-v3EoJsAt6ZcMHczt51On0qAmtOfi9Q47b34lZqGTASRWguQZu-9Qpm4AaKI5hlSpHKXwYwJqcYjb2C89MRI-alZ4vQVgOUx1Eys4rBgk3Z-6Zj_4v6YiQtcR7TaiPZowTkmOUlB4Tcmm1R_OPma9muaEsx2vsX5lMFIi_CJ8HTBED86OU5hCyaFmAJy4eQRRBx02b2r34vN51o3ehz_AcAp5AVU73oYWuEaRE3G289ZbxK3sAoAAbm1ibo3FTpRAX-kiXURs7mpjCV-kA5Dp2QMIQ2-3aAggg0bwm1GYmta8-lodf1c5StY5E8snlsHttxEveMBcCqRRQ0rp0FqXRBW7UrnlI3vhODnbTChWd-arVqNp9IXFprSY7LKH0uqSJeEOaoos6Eri7MBpcaWI5YnpM0qS4d3uYLTX01t6MVn59EPp_mG3zfqPa7jHAfUc-Ojb_8M109OgTKVzXG5dFomTVukmSp2w1MFzgmEAlvMFp7CRotR7Fy99eVkpLfZmimTC0-WGbltWQmItyCh8NbTl2FMa09lJnkjw-dxraWtkjxMs_fi3i7d6RBVmicziNH5bBBL_krmpsZlVdcFWlrf23HUs1zqobVSHAdr2N-PRFhC3jS4jacySz_JmvksZOkj-XOCbIA03A==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5725,
+            "cachedInputTokens": 5450,
+            "cacheWriteTokens": 272,
+            "outputTokens": 118
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

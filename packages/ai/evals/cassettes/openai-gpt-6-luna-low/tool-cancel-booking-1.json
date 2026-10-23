@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "9a42254b88f727cd4e96b288ad204c525120f0d37d337480230ef93a20701a1f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5TSIXfHO4LQp76CF7czChn0X",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 10,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "91f7ca42c2fa90f81a255025d74eb4f6e10944ee5b25a4d477c97c9adbd9c34a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_np4Lk162yKCJgQTUrvQMSXjJ",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5529,
+            "cachedInputTokens": 5444,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a02ccf805ca2ac30c2a405d76630cc64c16f7717c1fbff9218ae0f97d5231521",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nn10LPnI1gjBd3DFVmIO99Z8",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_06a87750f615318c016adaa428fc9087d29d146b0e76e9f114",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qQpesc-R_BaPer-YRLxIsZXAnJCV8c-UtkJo0mkRE6HvJdlBOBGQmt-qeqS82FnwpvbinTCbqBYemyRLsm441pIXj-7R5kHW8YaZQi9X-Lk_pWMWWBMMMKv_OFRu3hPjcD2QsHa0ZhsnQv_pN9z_6JrKobWMWy574R3Pd2rguyQwOcL-CEEDZpHayfZ_OwprIjEQKson97mFVvWfyIobJhw94UtGWYyf6qhTWzUAoEFBQsG0D9iJa6X5MtxaC5kfWXVMPpk7mUdRUTbjPn7B0T0p_duRFLWFlTSCmTFQaBwLdeDg07van7qdiAH3jPVZ8AyNWdkEV-5exFoGaLAp13w8aCkWfqrjOmY6V0fgXcaAmcqK3Ja1pdVtDShl9MdD9_9Oot5FiwkhM4Z6f9YFS3tHgvtkzXo5jqOJCIiR_PU3xofPNY7U20KzNXzqu4WueycJe8sZCbpzJsgL7k3Beo0DpUHmPDH0JWnXs-aTISSHSHI_WTYxM2fJosapg4fsm8J_zxXcapgTuyYNVmKd-kItZ_GmhG4VpMpJuwv1iNu--YSmHCZ33h2rjklWAHtNYsjffLxHbO60cJ19lRtu-HKf53TFMWz0w1P44_HHifT8YArcAAkq0QxWhOSPxSVyA4EfeGpOFkH-eATOQ6gcfF_AJElRh8DhnQiH1kks7Nyrt0QnzO8YgY1_5WutGdF-YSKOS3WggsWsU7lhrYeQXRz1Z_KN4pdQPIGJGDSkMjlho3J9LlobrzP1RgHDi8Vmn2B1a-U_5lEQSDerxrWyTuOa6zYOSNkMRH3TY4x3ogoLBSO8ezGYfbZI7x8F-IlgPrPHPA77X9RIVVNOEQgAoaRHXHmJGZchZIcEPO_CjQxwPMDAJKm7z9cZ62Zy0cxxqaJVbq3x57-GoF79LfyOp93dP-bZq0-2qqoDt3XFCUJvpWBFx8jP1Z6D_9PeblLhNcao1oqACpwwS0DIHamzXckkF3o4nzn0FdAO4vdZmAEAY6ojcujmV8zEAxndQlQjWwTMz9RLTiCCETZYUONt2pulzb7DJsyptFhpTOHC5wqccucFKjeeJhzBF36PWEHs5oiQF3QsiaYJM_Tox4s87baTqCwz9ScasM9oopnBDldfhS1C7-vUNwpb4RSYDeJIK_l68bF0XVO9A0vpOVwcME5fcJ4q71UPA_nq3A3biYJkVFEyUYa-Ru3xxSB6AmqQCPECnS9xpv77uv4VwaMFamrfH1vnfuxTDfWl_S3PYjiFxAfISZzc89TLxubv4g8U4ZjDG8QXyNYs39GK02XPWSRHu8PGJaZ-eLPA07KFBevI_37Djd4HeMKxbw4jOmg_OtJkCz8Q6VxQUDLEtZ9WsvtMEpssxaFY4lde7H3kUEoRv5cFPKNcRIG8iaPLPHJv3sO2SeU1PxGIcbPl-AnfAwxasF6DTd5ZBfA616T3JACFvty2D7WmN3xXNWNjFNRO-JlQqb3PVGX6pvl8_Oq-DnY4jTjqBzR6y6pFlrYCmo4Hx-0KtfIPLzIfGjlQY5GXjHbI4HcWiFLqpsr53NS7W3r2ev_gQdPGCHtB_-oyp253T7kjvzB7aRhk6DGk-ofH6IREQfMoKSVom3N470hScaUtA==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5803,
+            "cachedInputTokens": 5526,
+            "cacheWriteTokens": 274,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c190aa64bd5504769d25a7b768d117966480063594bf74ba09f0a406d2a0da74",
+        "response": {
+          "text": "I couldn’t find an appointment for Maria L. on Friday, November 6. She’s booked Tuesday, November 3 at 3pm with Jess. Did you mean that one?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6054,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 617,
+            "outputTokens": 42
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

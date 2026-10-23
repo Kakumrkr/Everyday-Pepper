@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "fe4e9ee688084ad72cb13407a9c784cfbec0ff66680dbc4fd20bb39abdecc1bf",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_r35IPV2rCb8nIjcvBFIRzMSp",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5452,
+            "cachedInputTokens": 5376,
+            "outputTokens": 34
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "b301a2ea77dc41c645d468994d7d1618c37754b83f79803199190b1d0072caba",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ULSjYTWTA81XjyeJFcvOCvlI",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"from\":\"13:00\",\"to\":\"17:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5724,
+            "cachedInputTokens": 5376,
+            "outputTokens": 61
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "3bd2f7e6102cbab21a2f4c1feb18f8f8a2d3ad656588db6f3ec5d23d5d93e008",
+        "response": {
+          "text": "Done — I blocked Jess on Friday from 1:00 to 5:00 PM.\nThere’s 1 booking inside that block, so you’ll need to move or cancel that one separately.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5853,
+            "cachedInputTokens": 5632,
+            "outputTokens": 44
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

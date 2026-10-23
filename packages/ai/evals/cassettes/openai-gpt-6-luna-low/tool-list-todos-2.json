@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b525eebcc687ca423702c198a3ac9010e12029b6623cf2a5e329bf8f269581f3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rC0Ve0owTYkXgoqkMYRAxOOx",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 11,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bdff37512c147b0553528ed642fcfdf629a6a2c79b82b0a36ae35b8356ba392a",
+        "response": {
+          "text": "There’s 1 open team to-do: Call Maria about her colour. It has no due date.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5552,
+            "cachedInputTokens": 5445,
+            "cacheWriteTokens": 104,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

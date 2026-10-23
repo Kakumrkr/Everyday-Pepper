@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f6bb0201dee2addb607519df6ba8dc8b77d76d82a157f34bc72ab7db5f9a3892",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jYa3cNq6kmdSVdK0lmhVp4nB",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "16edd770e811e4a2bd1abe5e4b48b2b597e4906e24a623bf491b180b8323d225",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1AKLlRuiPkg3wBAEnxDi99Ki",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5725,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 274,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8c01adf05ab619a48cfd55dce3caf54284dc6f1b6b96855d8019bfe02ddd16f0",
+        "response": {
+          "text": "I couldn’t book that yet: Juniper Hair Studio’s service list doesn’t include manicures. It lists Colour and Haircut. Would you like to book Ana for one of those instead?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5807,
+            "cachedInputTokens": 5722,
+            "cacheWriteTokens": 82,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

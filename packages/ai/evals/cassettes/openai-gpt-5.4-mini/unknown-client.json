@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6e99004a50499c5fba21aab59a21894e386d99d15c42f90f88ffd72e9be8e7b6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uVGwlZNEWdGui3bhfd2wUNsO",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Zoe Martinez\"}"
+            },
+            {
+              "id": "call_KBRnxPFQf10x3oJymQDsZXtY",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 50
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "36f6c05dba78ef1678abfa0ec51f87acfd0718ebaee2182eb5fcb35aec79d11f",
+        "response": {
+          "text": "I couldn’t find a client named Zoe Martinez, so I can’t book it yet. Please check the spelling or give me the client’s exact name.\n\nFor the haircut, Jess and Marco both offer it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5810,
+            "cachedInputTokens": 5376,
+            "outputTokens": 46
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

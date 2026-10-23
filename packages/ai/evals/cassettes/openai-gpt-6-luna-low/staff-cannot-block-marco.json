@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "0111867d544d9d0afbfd44b41651002cea92e4526314e6f5d55130e39017be69",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Nlxg15mVAAmxc9yjkcc59Nxb",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 9,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "dc63769f3654c343be9f35167b5f7d87e4aa44e6cfebbf597ae1d108128d0e9e",
+        "response": {
+          "text": "What time range should I block for Marco on Friday, November 6?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0a76e8900f6f1bc9016adaa31282d887d2845dbdb60141197a",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qMTd3-gyeLFZ_2a6v7Pn2wec30njeOeAHHHYh39TzUTKNsJCrbmU-y_VjJ4wyo9UwYOoXrz_ShNFFoeHyJMpSzHPxkgLHcALgczb3XJA6TnBAdjSNykpaobTWuBNraDIwK7W2e_CVGMsNsERJYHTR-fKAYWj3TeI1xK3GgF06N0fkYlsk0Xo_r0xPlVYTIWG45E8sHnW92ty-XSlplG3p7aQMbaz7pUK-8M9_vzicXtbXF9XOoJKpGcxEa7a_7UA6m3YFTfXEoZ-YmVmrNguenmJI0UBMgNHF6LDeyaHFNo4qob6fnWRUfz_mWcoHHrRMZFZdJr68GNu1q3QJ0Mdh0OEFLEA-z3IT4dZ6hYHhvhXs3pBJPjNpeoJrzVt70IYngeZaWHGHxmG5niOLThJr2WODBqYfZCNXA-ap1yK-9M9fVJy5c_TtKxH14r6B0nn9oEJh0BCrNLHhZLxaToyND03d3tKeTRcAd8UCYChopf1U6kMbHSEKoT8t4JtUympxLKbHofdR40zyZvumi95C8-3I3MCit7E2HUxdHMpKYvVZmEgn_0sMQDP0tuxbvMMAiDFK2bCEn6oYKOAk-5eMccRIy57udESr7yalwLwwM4r_YGSVMv88L2KuGWhjnZ4DP5kPoE-Ej5vybtCl34nhujCGys8MOhMNxbsZNUO9aSzAgzQpq4RLs3k7kEFH6IhX_Xs8EDCm5ekNvAkZVXmMKigS42p8b1YLPS2uDbAYOiQkNt2vgw-ecqkcgXbHSeTtVPHu16nllJQhJH5OeEuqPsFvYrqiI_ZJ48b8dqhPDPsH3hnBHDCuhULlg1AC0TYqauLGTcaY05HId4yt5FK9ZxemKXQ_om1z4n6jiiZ3K6mr2FdTz8KScTuvoRzIQgbea19mQZT2XkgmUwgSio_4bwgzOFnoCkOZFW7wNTFFSmW39gkSN1nBcPBWLkQySCtXrypxyEOeJ8IUXQTtwsR-u_6WC0KcsMj1_nwXK8AClRqUt11QrNrBHqUPMsXz5HnMsl6GQWGkYu9GAjX4gZNbMgJwFrldvI-QCnnXDSCJXARlz-Eqj0kw_-fH_iwc2SNhmGE9bZF4D9xanPjwVivl7YB-BpKiEGoV1FZO32FUCH32TOtHF2GWli9RWGnf44UmJUKDAUDTFi0ncrYtxSiHJAqKIevN7AgrLlvjFq0U3BHJ_VFm_kUbOpm1DNtCKriQH5qRPcftwEWaHMCbLuKJGNgVOSAzo2avayjEOQKkLfes2a4ek6ToBMmMJ-wY9Mt5X8s7fNPNZkP9BV7Rto6Y3e_IOiS3y4-TuOgvdrWbPCtCiXRfMDmaDgyT_xuo1luDxjS3PKTiEQKpxqc6FTc_PoebdYn0-X77b7RBS1XAg2NWRliXKpwYJ4J9WIkgV3Gskg0S2tevPADsWN1IT7KGD0HrWjg03F_SgmmSBZiwYZtuwtS34J8kdN-BYy7p2wBRzPL1wkL_W39ihcnamJvMsuRPunzIEzHwU3A0DRhqCmA7WZg_dyFQi428NiO5XJVhQU-pqdVJTNQHJn6HjXhMDdL09j8FEU7bTtrEuCR9OE5ddeT0cUA0GWnTDjW41FFGqYiQ-Rgx-k1X3b52RN1oyZib2GwZU_zoCTdEWrvnwCvuy9RPhZdipibaeTNeYIYeZM4ZrTeuSNJFvCn9Tg-1I9wxdX_pOAPXXvg1IfOxBIOEc=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5724,
+            "cachedInputTokens": 5443,
+            "cacheWriteTokens": 278,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "2f33427e940b82a4fdc320775ecc6631463fca7e01b31e684ae3d838820b96f1",
+        "response": {
+          "text": "I can’t email clients from here or send a mass promo message.\n\nIf you want, I can help you set up follow-up tasks for the team, or book/cancel/move appointments for specific clients.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 5376,
+            "outputTokens": 46
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

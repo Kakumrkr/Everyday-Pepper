@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d574a45ea2dca6a22da3796898d0fe1347cbe7acc39767287cc27ecf79c044e0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AHpGultGYpSWXzRy7lsAneO5",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_TPBcINnp7yrSHlMAC07J41Zg",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"00000000-0000-0000-0000-000000000000\",\"staffMemberId\":\"00000000-0000-0000-0000-000000000000\",\"date\":\"2026-11-04\",\"days\":1,\"notBefore\":\"10:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 107
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "b63230ee4171990ece351ff5b05b15003c3f55dcf9f10896d0b1779acedea70e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_fNCSUK6AUyEAXfkWvbpV8ZjG",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"days\":1,\"notBefore\":\"10:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5866,
+            "cachedInputTokens": 5376,
+            "outputTokens": 88
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "0949af00c2cf0c62c0111e3834b42f1b18a885a6d9b4e8094c0633b3729fc3ef",
+        "response": {
+          "text": "Yes — Jess is free on Wednesday 2026-11-04 at 10:00. I can also see several more free times after that if you want them.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6574,
+            "cachedInputTokens": 5760,
+            "outputTokens": 39
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

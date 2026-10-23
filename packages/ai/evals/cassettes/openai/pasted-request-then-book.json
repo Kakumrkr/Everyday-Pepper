@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f92018be07af6d90c46c1797b9bd57e10357bffd1067f5a2c8184a9d660c2658",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_RAUnfE2rqJ3UTV93PuCZPGvR",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5542,
+            "cachedInputTokens": 5509,
+            "cacheWriteTokens": 30,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1da6e47a598657c2f66acb8ea0c1624eb48837e22ea7f5d3e1800df23e667c5e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_hObyiWZw8hJ7x2CAyZg7XsWe",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5816,
+            "cachedInputTokens": 5539,
+            "cacheWriteTokens": 274,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8cb519364cdc55356c4d20f2eaa33c8b5d8068ddb5f22684044014f2ed0783d4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_iIGfqxoDaUhkvirHN0gUp7HQ",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-05\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5900,
+            "cachedInputTokens": 5813,
+            "cacheWriteTokens": 84,
+            "outputTokens": 113
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e7d70c184a6a0168887477b32ac930184bb702b2af9cc3d98f418908ef5c3f7e",
+        "response": {
+          "text": "Sarah’s haircut with Jess for Thursday, November 5 at 10:00 is awaiting your approval on the card. It isn’t booked yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6093,
+            "cachedInputTokens": 5897,
+            "cacheWriteTokens": 193,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

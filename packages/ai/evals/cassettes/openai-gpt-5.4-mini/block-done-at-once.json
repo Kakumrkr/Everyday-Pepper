@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "1535e98be25925b9216a7935d07d412db699abacf354320a9f2c379cd8ef638d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ijt1f17aOJ7znzfCKrEwZMrS",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 34
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "5f5e82e945b10d64e4376d0d52464b2883c951f07cd197610f56ed5be30437d7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5CJmrs0A5zgBsKskTZhT4Pzp",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5718,
+            "cachedInputTokens": 5376,
+            "outputTokens": 59
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "79cf2bf4b56a8a2ae51abc363561646f03ba0543b534f7df91630fc9ed695cd6",
+        "response": {
+          "text": "Done — I blocked Marco on Thursday, Nov 5 from 9:00 to 12:00.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5832,
+            "cachedInputTokens": 5632,
+            "outputTokens": 26
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b431bfc6b877e4c343f9c1ff48488e112ea586ad8e1ab2fa41f0a95e7ded86f5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pZjv1WCR1qdW6QLZp6wHHr1b",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c3b6f6d43b120a5ebc0458f9ba58d26a94434cc3b033f3b75be94b780bfe5a83",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_C8ZeXRPkH7jRjhcnN2QxpVPF",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5532,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 81,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e32ded043fbc66cbe4d0df1e2885317ba70850c3508e4061165fcf968dca5ebc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0RjhcFU4BDfNEooYmTtXcZSD",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"16:00\",\"staffMemberId\":null,\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5805,
+            "cachedInputTokens": 5529,
+            "cacheWriteTokens": 273,
+            "outputTokens": 64
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e766e93dc3c966a7762a5e00243b90b939bd10231efd3bfe47235543a76f8736",
+        "response": {
+          "text": "Moved Maria L.’s haircut with Jess tomorrow, Tuesday November 3, from 3pm to 4pm.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5941,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 504,
+            "outputTokens": 28
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

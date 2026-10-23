@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "85f54cbbb42bf386632a3cc14c5b05187fc4ee093bfcee530ea798e807d681bc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_zv2tyxvqOdbBX79eiJnztpnB",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5445,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "d4060a07507f32f0cb1f2087af4fbbf098b75d7ea662a39ce69f0986e9fbb35f",
+        "response": {
+          "text": "I found Maria L., but I still need the service and a time for tomorrow. If you want, tell me what she’s booking for, or I can look up openings and offer times.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5526,
+            "cachedInputTokens": 5376,
+            "outputTokens": 43
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

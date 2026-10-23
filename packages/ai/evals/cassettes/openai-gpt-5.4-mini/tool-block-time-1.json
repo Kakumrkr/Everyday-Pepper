@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "caf2371f40515b76e23a74a033073c3a351bbb10a1f2d26242bc8a9883e1921b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_p4JcQMJO7JWh6vLbBGojhfTr",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-03\",\"from\":\"12:00\",\"to\":\"13:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 41
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "1f751adfafec2b8734d0159cfe3d779398dd3b9fb9061fb07dfeb888a6053ac7",
+        "response": {
+          "text": "I need to know whose calendar to block, since there isn’t a personal calendar here.\n\nWhich staff member should I block lunch for tomorrow from 12:00 to 1:00?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5535,
+            "cachedInputTokens": 5376,
+            "outputTokens": 42
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

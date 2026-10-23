@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "912898942496dbea0f4e5b733da7e027db9c1ee0ef9609c1c1082c3c02041a7b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_RglOpCQ4hJXsLc3qZai7ESzu",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_XH7aOK2bNkhdZdJp4Hxz4JYp",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5527,
+            "cachedInputTokens": 5509,
+            "cacheWriteTokens": 15,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5d4752c7fac1f02b355c8a0bf964d45eb018453662862d5d83c595d04142c34d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IfEjk691eWO5OxuP69hFJ28w",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"12:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5891,
+            "cachedInputTokens": 5524,
+            "cacheWriteTokens": 364,
+            "outputTokens": 112
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "52582eff98a08f750d9380fc8613ebb9699f6e37485752cd85c667a8fe1ea263",
+        "response": {
+          "text": "The booking for Ana R. with Jess on Wednesday, November 4 at noon is waiting for your approval on the card. It isn’t booked yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6083,
+            "cachedInputTokens": 5888,
+            "cacheWriteTokens": 192,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

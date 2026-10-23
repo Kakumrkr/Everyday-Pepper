@@ -11,8 +11,9 @@
   - A read of the code against the [Phase 6 playbook §6](../plan/phase-6-playbook.md) checklist, re-mapped to the **OWASP Top 10 for LLM Applications 2026** and the **OWASP Top 10 for Agentic Applications (2026)**.
   - The hostile fake's attacks, the eval sets on the fakes and on the real model, and `pnpm audit`.
 - **Source check:**
-  - The 2026 LLM list's order comes from secondary sources that agree with each other (published August 2026; Excessive Agency up to LLM03, System Prompt Leakage broadened into Hidden Context Exposure at LLM08). owasp.org was not reachable from this session's network when this was written: see "To confirm" at the end.
-  - The agentic list's titles (ASI01–ASI10) are as published by OWASP's GenAI project in December 2025.
+  - Checked on `genai.owasp.org` on 2026-10-22: the **LLM Top 10 2026** was published there on 3 August 2026, and the **Agentic Top 10 2026** in December 2025. Both documents are behind a free sign-in ("No Access" without one), so their item lists could not be read from this session.
+  - The 2026 LLM numbering below comes from secondary sources that agree with each other: Excessive Agency up to LLM03, System Prompt Leakage broadened into Hidden Context Exposure at LLM08. The agentic titles (ASI01–ASI10) are as OWASP announced them.
+  - Cross-check on the official page that is readable: the **2025** list on `genai.owasp.org/llm-top-10/` has the same ten risks, numbered differently: Prompt Injection, Sensitive Information Disclosure, Supply Chain, Data and Model Poisoning, Improper Output Handling, Excessive Agency, System Prompt Leakage, Vector and Embedding Weaknesses, Misinformation, Unbounded Consumption. Each has a row below, so a different 2026 numbering moves rows but leaves no risk unmapped.
 - **Policy (as in S18 and S21):** fix high and medium findings now, each with a test; log low ones for Phase 11.
 
 ## Result
@@ -85,4 +86,4 @@ The chat uses the standard pattern:
 Filled in from the runs recorded in [ai-budget.md](../plan/ai-budget.md); see ADR-0033.
 
 ## To confirm
-- The 2026 LLM list's numbering and the agentic list's titles on owasp.org (`genai.owasp.org`), once the domain is allowed. If anything differs, re-map this table.
+- The 2026 LLM numbering and the agentic titles against the signed-in PDFs on `genai.owasp.org` (free sign-in; a person, before the pilot). If a title differs, rename the row; the 2025 cross-check above shows no risk is missing.

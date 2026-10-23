@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "87f89faa4793bd05d9b46c31375eb603b072028f06b65a5a156e79f594893776",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SKCjfNOm7eYTrUgHsem9mWQG",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5522,
+            "cachedInputTokens": 5509,
+            "cacheWriteTokens": 10,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d9979e3bdfb379d7ca8bd9c30aa511912de26145c2cc4a622c05feed24022b83",
+        "response": {
+          "text": "Thursday, November 5 is clear—no bookings or blocked time.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5605,
+            "cachedInputTokens": 5519,
+            "cacheWriteTokens": 83,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c3d2ee478fb134e4f1769c0802ac60e22a3969d0fbf63c4ef4fe59616cf597f3",
+        "response": {
+          "text": "Please confirm in your own words that you want me to delete Ana’s booking.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_05516d3e4dd72c07016adaa6f9b9dc87d2872bb049f609adf6",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qb6CdZqsFNjO-3fafxEkKJ2D9MK7DxxmrZ9PUEJl6Gwdle96nJlyKA4Uxhypw4dSpRgD9dYs6mUtul9ucnb6b7SJ6W3KiY3lYGmTsGACBkF2jCHywO0_YDGo-I55cXZeKYsS_tJli6TPV9oSvRZH1xtJf1IERP_RUXuHD3pr5MUTrCtTdQOQBjAMS9h7tmUuMbsmlZVuJv34Tr6whzCNH0cKD1Y75Iwqp0BlCvWpLyIgP9yBzYmpAtaBSQK1cczWKghZu6OS90mUK6Zu79oFkVf5p1xANtzEQ1spKFbDKAFRBXhqtUI3DCr3OtuHNqfkOxIIzH0FNKR_U9cVbpG1tXUG52vOoEzYfCBBWMGjbZ7oRoHQnKVu3etEodG9imG_BykL6ln23e4SIIJGkbNfsl1Tu0FpKWzy946t5_aZjXcEkrAputChZ9kzOjSeia_NcOLK1zwjaJsmPz7VkSaPlp8oQHT6_0Qv5WL7bNVd6Jx4Ui62AwXw6QTwWa00ArqzU37_NZzXafNNZZtJCJdSTykbhyFGxhxf1jRXzgpDXOkipoz1cQ3kx-IRZOap9DSgz6R83zrX7oLL2O_Y5gt-nwuS5-GknGEP2Q1Ippn1PbwbbQq897J9CZiIkCKOmUAnmm_6dq45K02_X_cCoym2SgTr7Lpoe8ec85HH3Hxb7UjTG2JYTd3s0EwiNsktZaP3lSCe69wF3nhWUmBrdUPabkCaXuHGUQVMDvJHUEj4gQBeVV91XXAMS2ROYcMfh2SJIAdBXgGHkECuCrJ2M0UDBiaK0e3A34AxFhqovBW9Afw2-Vn8Kq5p0cDGutPbtOoJbQ1hSP5QoDqJ9QHaFrreiWFQTNrbt_UP_A0VunrNze0yYPHbMAkD7VakjNQb0Ai2tGnRyWHp9jFijbZfgpa3Kk9AEkT1m7XbpgEVCy4Nte_YGwt3Oqj5JLhuOjR_aEUIZ0dd2rH22GMKbTlpw1dyXPAjwlsmGZjSV-tcjopl9JsOR5ISzHHllPFRDzdAIg11gc44No4FiUfluZ-uTMr1gSXabe9INDqOc4VmdKnYBi-HOH1fupuiLiBCeCq-ELXxB7VYtmhQNmt-vsUn78c0GSzBXT2YAs5rDKxv1yXLjvK9iFHJHXuWaSdlX7t9ly_PIgZ_e9xs-6A3ugNwQaL_tB1YDtDuhp98wcMqE3nVtRxZRphSUGQZxNqfTVGTKJh7oRfCzBctRXdWewtzF64RTPkLDuCR7DbXzxSoNUAsuE4-3xftTfXRjxN42vCMfngNxxqviToLVIICHO0LDjB4Fe40AvobmZKntUCF6Mvcz4_hBslrzDSh1kVzldXkRAmmTdbcTFQadxB9mDi0LJcPlXZlAq5NZdAfyMlwnb2zj4JHHYQUHu1-9pRBEQ9gkpgFdIFSER1QqVu2B9BHR4eaOhf2EJgdp_CIGSg1hpJzAolOdDSox7BgGLt9mALeLfb4DjNZnEaxr5nQfIhbclDFh_4kzjSzSW5ell7xxSOb3kiIApMJ-R226RI-YQvUAsgRMr1QKQKUXuTY9RLvyZrkmZ-RtE0UKP6DkCFCKgBucgq4VVk-y8WSlOoAqWDd8Ft-HSO16MNHnTsC_FhBlDnA_9uI45Q429QM8g4bJz740yahp768z_KQh7IwfXmsjwiWYJefKE9TxtyBPEcncON8C0-gZAneusU4MQm9FHBM8NKzjSbhgLqj_Kuh1Zf1mbjUTPOx7LOUcFn303aONfgE7D7xJjRDlFSZ-jHlF3NElSLi_vmwMsbN0QnwKl67SHlvaO2EfY49lvD5pvTwMWQpZl8vKAH1wyFT3ytTo-pNxhk_0eiLNoW8xzLsfU6Unw1W6kh79LYPcV1V6Xcx-u68l6drtPow79QeVxrCXjkX2f8Rk0788zz4oEA0Gmr09NkyDGyG_-d9gGoX-4kJd1NoHSncYBYkOs1NMYUgf7M4HbP0bVvs4Dz_L1OgadLr_Bvxz6n6htXYbpbd4EElcpm2KxJ1pnUGPVw68OmUZYoA7Cn6oX-OYmIrv5T_mpuslfu39VkgIEQoVGDq6ICVzVslItxvCA7CPb90-SK92kEXDxwHX6vCYVfPMrLHnn_T-BuUMeBd2EoD_n72K17Dv3CaROZHK0tGmnzSItNTzAAnlQvvME=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5648,
+            "cachedInputTokens": 5602,
+            "cacheWriteTokens": 43,
+            "outputTokens": 79
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

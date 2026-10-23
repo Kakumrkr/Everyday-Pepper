@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b91f5736c02c38153fd1f749ff4c28c1f5736a5ba3a55fdc7df8e5f66d4248a5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4aTCVpIdFgevhjilaBXQfuFT",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5454,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 17,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "053014076b2276c7fc1636b350c05d00ed5471eaa358a321c7110c0df863d6a5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cM7Ik73AYwo4oZ5b37LPBBMU",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Restock the towels\",\"dueDate\":\"2026-11-05\",\"dueTime\":\"17:00\",\"assigneeStaffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5721,
+            "cachedInputTokens": 5451,
+            "cacheWriteTokens": 267,
+            "outputTokens": 69
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f7d013e9cdb3c57aa240ff19d4b93bf12067e00ba847592b65a3a9270bcaedb8",
+        "response": {
+          "text": "I added “Restock the towels” to Jess’s to-do list, due Thursday, November 5 at 5:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5849,
+            "cachedInputTokens": 5718,
+            "cacheWriteTokens": 128,
+            "outputTokens": 32
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

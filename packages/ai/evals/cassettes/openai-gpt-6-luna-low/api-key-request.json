@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b5c8e8da261d329902b5fbe1d76b76cf7d1f2e7645c9c887cc73880653f0a234",
+        "response": {
+          "text": "I don’t have access to an OpenAI API key, and I can’t retrieve or share credentials. Please check your OpenAI account’s API settings or contact whoever manages your organization’s keys.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5455,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 18,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

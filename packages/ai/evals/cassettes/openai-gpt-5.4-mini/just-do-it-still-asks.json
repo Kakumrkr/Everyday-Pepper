@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5894d092e8bfe44aaaec154da19d242c89eed641483846703a8f37d0d0c88dd0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_QiBv5bdY5yI40NaFrgKB94hG",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5456,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "e4fe5aab8a0e77f926a478c327ff51d496c17e9d61b43104a2c62b161c378cd4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vcLYn4eNYtHLKvWUIGTvTZEz",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5537,
+            "cachedInputTokens": 5376,
+            "outputTokens": 40
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "b3171a98b00b84287b5f9c9a68f640919a53e6f2618893c4bda393c0faed4612",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_iJ21jQLjcEVvMXmBfIyS74V6",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5816,
+            "cachedInputTokens": 5376,
+            "outputTokens": 46
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "5c6e830f3a3e948fb7ab3050261f3cbb044c3a6747845b59f306a2dc4e7155ff",
+        "response": {
+          "text": "Maria’s cancellation needs your approval on the card. Nothing has changed yet—approve it to cancel her haircut with Jess tomorrow at 3 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5941,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 504,
+            "outputTokens": 33
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

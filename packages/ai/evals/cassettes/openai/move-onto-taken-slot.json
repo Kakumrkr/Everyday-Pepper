@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b80d625dd3632e804f3a6f346247dfd944d811abd3b98a91ca7c5034d768a241",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HVmQGni0xMlZwpZOQ3VZZdKX",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5528,
+            "cachedInputTokens": 5509,
+            "cacheWriteTokens": 16,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7475d6e3bfe65e991e345b0f7c8611fe06d83dd861d51706606aca9cc5d3279d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_mCRlQzIX5ugGmjX6oVvplfaO",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            },
+            {
+              "id": "call_42hjSqGz6TmnVU6S9iIcBriN",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0f19896a6e33de34016adaa744730c87d297babc9d41718bfb",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qdFaZpGLm9aQiRMDeuOKmq9MHhdXcg97vaUyt_Ien3LSqlOc5RBm5Eo9tJ6OODQuwuJ2AYTB6Dwra3FFIR2CosSLd3NiDi9edGcEti8vV2Z-KKrCtLJ02XO7LcpS1xYPkPEy4ZwFws-q5DYBr-966Vt2ER2IOk3i23tLqiKvrsALdb8bw0DNdjWQCUcgxud1bLADZ3fXOaqkzxwnPixt4O53lgdr1DXkVcjnwJc6-Y-vJsrxTZr8_UW4caFZH5nEtdWd_F_Kdyc9BqZCb2Qsn5bmvIKW0dAbz7Ndi1CpFWQlCpzySaetHhrAoZeqdyLBJwfDsZYzzMu2eIu4-31u0WCV_fDtCX27vPZuzWDdAaVMREXhY2-g6umQ8c-IE4HxDk8WPWgIZYSMoYnGRbYcdhy_geA-1nqOAvRBsYe7SU3Xcp7LvJLXImAxUEpiDowrTsI5iVPJos8XktuGL4TS7RSzw3TjaUdfi4c8gMccQr-E1eYS3-cOK3EU2Qv9y6lS39FT_nhPOSno1SgMUVEAxobpo1x2HK93VXCTdY8Dr5nnRfN5mOfzgdJrDceg1hOvsaBuFSEyhayhqupS1mDhmIctWc1fBmJa352zPdAkLC7sdcfAgvILjYuyPi3ORTubJWKpT_tFT2bbNAA-ouncs_ntaacY7JtdIbdjfYqAi3ipbDo82IjMAIWtqAY5d1LWYwaVTXwUVI-X0xAOp-VW12kQSSjB3bClILlWB1Sft9ZgVUxTa89cNTsZmQWy87VHHHOIxArfS7fl6xU3QSAmRHAdiuyMz0XmrLFOqTFr9kqkpX77EUHNi7lLMJ32YL8k5asV0tbLuOO1_P_wC0gZDwZO9S53wnmfSnqg3G5Z-vFSuWWKsiJpaxyUsVBuyHv46E5Pr1R39QabI3lkDngcFEi0dqUsyiq9VPllnHdjGWIRElXY4lNFIff_NJO4LC9zc41lHBYUZ7OeSGvsvoVgk4ZRK77CWy6u3eUKuc19hEExp-ekZ-TX59LioKnV4rSYBc90ld57bZQxOuKnJp5qVQcCg3NTql4Hy0zTjGWtBPD_KtPtADEJgfxSvINWCiwEFZNJ8TnXla1oSGKXdQUuGr94oZyGQ0ebe9MNOHJsxRUDw8yQF7gypMo2kKrz0MC5h7wqjZc8IG2G5vAal-NpNm-52UVNNXEvhSiK0oVZxfezjyJdAadRoRFq4clxjPghoiVQ4_GHZshlM0b4uNhHz4-h6NUcuV6VEYRb15ic4XqCKJf3dGL4xex3uExDfOXYAfvl-VUD29d5CgDphpjevXNUa8nLzkbEbgB44OAGUwTRZwXg1sahfCWIQL3TC_YXc_q8esa8jK-kkv1YtXA9fyjTYL77L6X0Z_53rzwSmgCnmGynOaNzsHsOdZg_kwx-xf9lKUSbKSuhtt3Nm2wRes__eynpcr9jX5TrxrmMUYz3atHcsWr1lQGWXWZ3a6phUdC7FFfQhYMxxp2efVRqpEZxxhoh-jamD5VK5Sz17AQJ6UweJCux-BYCBuHz9zK6wrmJH0KePNbeZ0FZnikEyesB6bTOjmcV-SqFFbY88w20crCl35cSMtM1usjqPxZ7SI42lf-AdDJWjy7jWzuAqCpXNQC94pDURk9_ITaUVI5K8oQiNwye0lX8WBFIw0RLycpmmNSHAOptJfZmYlxpyVvaXt0sHmeYrZB_bhND9P4zc22n8v4C5FuGfmjB4549_vL-qiu3t0iayfKH9SD2jceVLDBvnLEWqFZRUwmz6yW20Q3JJ7J2a_6h_h8jcK3xkhTR6Ujy2fFu8e5vjAaeRZ_L6w1TmMtxMZh3I5RWl1eG93XjSthFV5xD4iaZpIvZ3hAF2jJoZoRpCFORtV4H76cx57O7HSe_vw6XQ1E6I4q2xjRh0-i4NeiW5hHEGwNf8Ii6o_Q-IihPo-o6VhFtpZrYBs3eYHclaOXUvd_jcWz9qYrewGcogIWImZYCFI5EOvWCw7uOUYUyp5Og5-xvF06DNg6aJ9z81VwIbDFB4hM5ZFFy09LvxsKo8YV1r9ewboT8-bQm7BSyLpUKD5SHWK_VA==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5611,
+            "cachedInputTokens": 5525,
+            "cacheWriteTokens": 83,
+            "outputTokens": 122
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "95f258d95f8ae746b398066b2afad11849ad28b6adf8ed1f8eac144015d1872d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vsSLMM8JmNXdHPmNPnnRhR6O",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-06\",\"time\":\"14:00\",\"staffMemberId\":null,\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6231,
+            "cachedInputTokens": 5608,
+            "cacheWriteTokens": 620,
+            "outputTokens": 66
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0740a4957848137d972e0219d27fcbead7017b1667211ee03b9cdd73dfe9910b",
+        "response": {
+          "text": "Maria’s Friday appointment at 2:00 with Jess isn’t available. Jess’s nearest openings are 12:45, 3:15, and 12:30 on Friday. Which would you like?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6490,
+            "cachedInputTokens": 6228,
+            "cacheWriteTokens": 259,
+            "outputTokens": 47
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "e7ab4ae96e04bf7e5f063d1deacfe21b902510dcafb4171d18137820281004b0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rMrvoWAyq7YbMXRgHBM8pMDI",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 16
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "2eec87ace954d9ac31b040a47925433b9a3702a5efce31380b9bed3380f12d84",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_yXHaZdQowVFd55AFS7i1HCVy",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-02\",\"days\":7,\"notBefore\":\"09:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5746,
+            "cachedInputTokens": 5376,
+            "outputTokens": 92
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "93b3fafdc00eb87abac3a415cbacd13045bfdffb8bb1aeaafcb4af4f382f0bba",
+        "response": {
+          "text": "The next free colour slot with Jess is today at 11:00 AM. There are more free times after that too.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6445,
+            "cachedInputTokens": 5632,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f543e04de72d7de7f50ef49a2d78d8525084c5a6f3f7f6448cf5f5115aff904f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_q2XjrqaO83U2Sq1WvWTrrUjx",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5476,
+            "cachedInputTokens": 5457,
+            "cacheWriteTokens": 16,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "dfba48fb11860ca44e1e8969e71c725b6ffe0ed829b4d3b546a3e5d0af887ad3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sUFW0cHef5qdMIgSMWsADZ3f",
+              "name": "unblock_time",
+              "arguments": "{\"timeOffId\":\"{{timeoff:jess-lunch}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5784,
+            "cachedInputTokens": 5473,
+            "cacheWriteTokens": 308,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "88a484f03bbd92be1aae90450e289c350bfd1a822c5f917ca9552b985c9681f2",
+        "response": {
+          "text": "Jess’s lunch block is removed for tomorrow, 12:00–13:00, so that time is available again.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5887,
+            "cachedInputTokens": 5781,
+            "cacheWriteTokens": 103,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

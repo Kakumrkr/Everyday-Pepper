@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "814244cbb61dcca8a2b5277836b9b644cf6f683fcc2a68b49abb2c6444f5fdb8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_fAEGTmIu6VKd8PZsR2447WfP",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 10,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b034241e5733512a65a2c87585368d161a37f09cd28008eff66f99f13c840d0f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8urumgkue4EE8b6tWZOqSEyc",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5444,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "580f22e77ef6bea4f593f1c3523cea922878041e056310aa3f66f2a1be4338df",
+        "response": {
+          "text": "Sarah P. has no recorded past visits.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5644,
+            "cachedInputTokens": 5527,
+            "cacheWriteTokens": 114,
+            "outputTokens": 13
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

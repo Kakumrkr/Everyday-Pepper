@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "8170ed79ab266fdcbf030fb4898f04bd8eed56083b23a6a08d030dcdb9473bb4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sxmK6YeG8pg7DVu2g6Ahf9J4",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 16,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "48e420f88658fb4531382140c2e6766584f5cd1728f6b5e70e6028f94a496eae",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cAJiDGSfMtkfPRQD3jPernvS",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5535,
+            "cachedInputTokens": 5450,
+            "cacheWriteTokens": 82,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5e639ad6a7dbf560db917c68e57d714fe369173a9293e16d30e0a9c4557c0b7e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AXPn00lMvms19nLeB5FX9M2s",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"days\":1,\"notBefore\":\"19:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5821,
+            "cachedInputTokens": 5532,
+            "cacheWriteTokens": 286,
+            "outputTokens": 91
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "40fc6628b47bd09cd659021cd5a8f0e9563dfdf48fedb961fe0784c3b1e666bb",
+        "response": {
+          "text": "Jess has no available haircut slots tomorrow at or after 7pm. Would you like me to check earlier times or another day?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5955,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 518,
+            "outputTokens": 30
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

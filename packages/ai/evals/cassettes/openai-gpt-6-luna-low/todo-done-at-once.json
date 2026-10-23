@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c6628472cb7cdf11734731ac47fc81703c502ce91fcd3e63bb3ff6fd0baddbfe",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ri2X8HqChSZq8a5DSgc46NYO",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Order more foils\",\"dueDate\":null,\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 13,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ff5c35e1a5400ab9337909623fe23ff1d15c6ad002f2845e77e6392a38ffc083",
+        "response": {
+          "text": "Added “Order more foils” to your to-do list.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5535,
+            "cachedInputTokens": 5447,
+            "cacheWriteTokens": 85,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

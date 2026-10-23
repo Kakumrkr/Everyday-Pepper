@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "e3d59da8e6dc52c7bc0bd0237f3f1089999cfe44d61d4b17cff8a1f442767b7a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_tilQzkVDTqcD2Yues87wzf7z",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_L2IwPnADtR3I6UaQXwgLBGoa",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5458,
+            "cachedInputTokens": 5376,
+            "outputTokens": 48
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "72dadfc0116f2a647a3c7694e634e4b8fb923b28d1cbd7ff1597c315bff6e286",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uRv0c0pDB4tqr4eGc2zO37Qe",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-05\",\"days\":1,\"notBefore\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5816,
+            "cachedInputTokens": 5376,
+            "outputTokens": 87
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "84f952fdbdbfb8f6e23b513e30337054cdb50542e253ac62e9ce9c9841d14439",
+        "response": {
+          "text": "Jess has free haircut times Thursday afternoon starting at 12:00, with more after that. I need you to pick a time, and then I’ll book Sarah Park.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6523,
+            "cachedInputTokens": 5632,
+            "outputTokens": 39
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

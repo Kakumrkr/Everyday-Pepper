@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d3bda6df7b06364e43a7fe703063de0e04239bf0539647bdf9ba9322ab8cd2c8",
+        "response": {
+          "text": "I can add a reminder, but I can’t use phone numbers in the to-do title.\n\nIf you want, I can make it:\n“Call Maria tomorrow”\n\n",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 5376,
+            "outputTokens": 43
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

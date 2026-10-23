@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "e7ab4ae96e04bf7e5f063d1deacfe21b902510dcafb4171d18137820281004b0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_M1BppdcIkk6bvSjeiumhUvwT",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7c58631ac07a79b797b7f9f6a54a8343a3c3e077832c72d1a7effe19f27f730d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OXY3vy1Hyrd5WOTCHOt4Z7wj",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-02\",\"days\":7,\"notBefore\":\"09:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5730,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 279,
+            "outputTokens": 90
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f6e59bb0024976cdf097bcbb4b2965f5ad13346277336ecdf8dade580dde87b9",
+        "response": {
+          "text": "Jess’s next free colour slot is today, Monday, November 2, at 11:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6451,
+            "cachedInputTokens": 5727,
+            "cacheWriteTokens": 721,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

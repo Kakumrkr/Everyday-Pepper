@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "42324af411e43b6c0ed12694db131b024fc9d899fb7caacd1ae720ea9d8dcc23",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nHFnQnHEBtDhYhDwDDTG1CDo",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 5376,
+            "outputTokens": 19
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "74a264c57e7c6ae1cd1027dfcf544edeffb1c51ded40e9aaa1ccd4002235bdc0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_x7t4CZkjYu2G3iPukxsxSiYp",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5529,
+            "cachedInputTokens": 5376,
+            "outputTokens": 41
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "f7641bc6f4524c6fb691f018d8af5926998c5869aca6bd6aada98bddbd4715e8",
+        "response": {
+          "text": "I found Sarah P., but she has no upcoming appointment on file, so there’s nothing to cancel. If you meant a different Sarah, tell me the name and I’ll look again.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5641,
+            "cachedInputTokens": 5376,
+            "outputTokens": 42
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

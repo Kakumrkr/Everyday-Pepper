@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "332d2aa188c1a04ca03345b5a261f96d6ee1448ef75aa9c5f84acc96e9b56f44",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_YOdEBP1omVdQYZyUnpgC6y5s",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5449,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 12,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c7a911ee11445327db860380b63eacdc9277945bdbe4867bcc53bbce82f6d6a8",
+        "response": {
+          "text": "I found Maria L., but I can’t look up or provide client phone numbers or email addresses.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5533,
+            "cachedInputTokens": 5446,
+            "cacheWriteTokens": 84,
+            "outputTokens": 24
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

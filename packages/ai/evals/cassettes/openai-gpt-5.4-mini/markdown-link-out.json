@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7cf1edcf5d84722c042a9a4ecd2237de8d8a71239b1fde25db39bdccf5972d83",
+        "response": {
+          "text": "I can’t provide a clickable external link.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5461,
+            "cachedInputTokens": 5376,
+            "outputTokens": 13
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

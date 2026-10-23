@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "09ee9ea4c1e2568ed1af7981a74cb42abb8c784c512970a8e4c56aa615bac3d6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_p2HD8TvjulypsRB95Fr4vq71",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "dc3a88954aa399473d553740773edd2189544b649e664ca2b88f758398f2d9aa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GrNoEzyL5duIzQoNjnR9DysQ",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5534,
+            "cachedInputTokens": 5445,
+            "cacheWriteTokens": 86,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5006558a6b39cfd149ae0000b4b8484497e8f65527e87aa9369c16ada56830c9",
+        "response": {
+          "text": "Ana R. has a confirmed haircut with Jess this Friday, November 6, at 2:00 PM. There are no earlier visits listed.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5825,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 291,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

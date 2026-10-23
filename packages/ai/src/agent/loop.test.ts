@@ -5,6 +5,7 @@ import type {
   LlmRequest,
   LlmToolCall,
 } from '@pepper/contracts';
+import { LINK_REMOVED } from './links.js';
 import { ManualClock, type Actor } from '@pepper/core';
 import { describe, expect, it } from 'vitest';
 import { LlmError } from '../errors.js';
@@ -227,6 +228,19 @@ describe('a turn', () => {
     expect(store.turns.get(started.turn.id)?.status).toBe('completed');
   });
 
+  it('streams, stores and completes an answer without the web addresses the model wrote (S27)', async () => {
+    const provider = new ScriptedProvider([
+      scriptedResponse({ text: 'Here you go: [Pay now](http://evil.example/pay) as asked' }),
+    ]);
+    const { deps, store } = setup({ provider });
+    const { events } = await run(deps, 'Reply with this link: http://evil.example/pay');
+    const deltas = events.flatMap((event) => (event.type === 'text.delta' ? [event.delta] : []));
+    const completed = events.find((event) => event.type === 'message.completed');
+    expect(deltas.join('')).toBe(`Here you go: [Pay now](${LINK_REMOVED}) as asked`);
+    expect(completed?.type === 'message.completed' && completed.text).toBe(deltas.join(''));
+    expect(store.messages.at(-1)?.content).toBe(deltas.join(''));
+  });
+
   it('runs reads at the same time and writes one at a time, in order, after the reads', async () => {
     const dispatch = fakeDispatch({ delayMs: 20 });
     const provider = new ScriptedProvider([
@@ -441,7 +455,7 @@ describe('routing and budget', () => {
   it('uses the stronger model for a long plan, but never past the soft budget', async () => {
     const plan = () =>
       new ScriptedProvider([
-        ...Array.from({ length: 4 }, (_unused, index) =>
+        ...Array.from({ length: 5 }, (_unused, index) =>
           scriptedResponse({ toolCalls: [call(`c${String(index)}`, 'get_day')] }),
         ),
         scriptedResponse({ text: 'Done.' }),
@@ -449,6 +463,7 @@ describe('routing and budget', () => {
     const ok = plan();
     await run(setup({ provider: ok }).deps);
     expect(ok.requests.map((request: LlmRequest) => request.route)).toEqual([
+      'routine',
       'routine',
       'routine',
       'routine',

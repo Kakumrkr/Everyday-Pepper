@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5a7d3b95fc6d0d4013e6e24a395f645c41fe33f561f654e3961b2a74fe7fbb28",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_YeBQhQrJ22UZTWelQLJN6vE2",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 5444,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "84353c7396e74becb1c1d37a6eaf391e452881eba863da3d347aa78d1005df03",
+        "response": {
+          "text": "Tomorrow, Wednesday the 21st, you have Maria L. booked for a haircut from 3:00 to 4:00 PM, and a blocked hour from 12:00 to 1:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5755,
+            "cachedInputTokens": 5444,
+            "cacheWriteTokens": 308,
+            "outputTokens": 49
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -39,6 +39,7 @@ import {
   type BusinessContext,
 } from './context.js';
 import { fallbackFor, type DoneSoFar } from './fallback.js';
+import { LinkScrubber, withoutLinks } from './links.js';
 import { routeFor } from './routing.js';
 import type { ConversationStore } from './store.js';
 import { noTracing, type TurnSpan, type TurnTracer } from './tracing.js';
@@ -402,20 +403,21 @@ async function callModel(
       context.signal === undefined ? timeout : AbortSignal.any([context.signal, timeout]);
     const span = context.span.modelCall({ route: routed.route, step: context.step, attempt });
     let streamed = false;
+    // No web address reaches the screen or the conversation, streamed or stored (links.ts).
+    const scrubber = new LinkScrubber();
     try {
       let response: LlmResponse | undefined;
       for await (const event of provider.stream(routed, { signal })) {
-        if (event.type === 'text_delta') {
-          if (event.delta !== '') {
-            streamed = true;
-            await context.send({ type: 'text.delta', delta: event.delta.slice(0, 4_000) });
-          }
-        } else {
-          response = event.response;
+        const delta = event.type === 'text_delta' ? scrubber.push(event.delta) : scrubber.flush();
+        if (delta !== '') {
+          streamed = true;
+          await context.send({ type: 'text.delta', delta: delta.slice(0, 4_000) });
         }
+        if (event.type === 'done') response = event.response;
       }
       if (response === undefined)
         throw new LlmError('invalid_response', 'The stream ended without an answer');
+      response = { ...response, text: withoutLinks(response.text) };
       await reservation.settle(response.usage.inputTokens + response.usage.outputTokens);
       deps.breaker.succeeded();
       span.end({ response });

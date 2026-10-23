@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c34daabc4b5fed50ba82c8ea33f5c9fa4263a15b175b61a998f8541dee75f6c8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Jsv7RMAv1QoCRDuBoM9xIsEX",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            },
+            {
+              "id": "call_xdGTLZpE862aouSnMeTr4pNH",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_ExK1oEnrdN7HSkIEXKflzX1X",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Confirm Sara Kim for Thursday haircut with Marco\",\"dueDate\":\"2026-11-04\",\"dueTime\":\"09:00\",\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5463,
+            "cachedInputTokens": 5376,
+            "outputTokens": 95
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "1f3061151e315fda36eb861576c198f34ac9dcc5cba27696e142f8039c78cc50",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3dFwYZCjeGpAQi76DazewOFX",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"11:00\",\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5927,
+            "cachedInputTokens": 5376,
+            "outputTokens": 109
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "98fc926e61414278c626f3401d47d015f04eba4075fdbbba15b44a836ddfc198",
+        "response": {
+          "text": "I found Sara K. and set up the reminder for Wednesday at 9:00 AM.\n\nThe haircut booking for Thu 2026-11-05 at 11:00 with Marco is waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6116,
+            "cachedInputTokens": 5760,
+            "outputTokens": 51
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

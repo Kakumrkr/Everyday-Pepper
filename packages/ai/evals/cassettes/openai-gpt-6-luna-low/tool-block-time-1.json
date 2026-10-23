@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "caf2371f40515b76e23a74a033073c3a351bbb10a1f2d26242bc8a9883e1921b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_i2Uqkvi2qDdsCtyfHpmJ72S4",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-03\",\"from\":\"12:00\",\"to\":\"13:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 13,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f22f2ae10e6f9441099a078eeb0ce49976026884852853c18ea9b410e2ae00f9",
+        "response": {
+          "text": "I can’t block lunch on your calendar because your account doesn’t have its own calendar. Whose calendar should I block instead?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5535,
+            "cachedInputTokens": 5447,
+            "cacheWriteTokens": 85,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "8170ed79ab266fdcbf030fb4898f04bd8eed56083b23a6a08d030dcdb9473bb4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AmrkYAz3KX3rBVVL06ZyvWl3",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_ZqgBDyA6pNvxhYFzknnmdVz2",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 5376,
+            "outputTokens": 48
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "369196c245c9cefa88458c422c5220da2d2117db28e329d702aeda8aff1cc508",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_r1a4SoPJGp0MS64E24ifuzfy",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"19:00\",\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5830,
+            "cachedInputTokens": 5376,
+            "outputTokens": 113
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "b8bb9bbee915a256d2c3fdae5414ad6aa897ace6e843074233f55e45f29719c4",
+        "response": {
+          "text": "Jess isn’t free at 7:00 PM tomorrow.\n\nNearest free times I found for Ana’s haircut with Jess are:\n1:15 PM\n1:30 PM\n1:45 PM\n\nTell me which one you want, and I’ll book it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6133,
+            "cachedInputTokens": 5760,
+            "outputTokens": 57
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

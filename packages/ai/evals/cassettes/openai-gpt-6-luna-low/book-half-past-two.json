@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a7c439159944e6551a47443ca99ca6f971687db01ced78d939f0135581a25f6a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gRpd8PviubiFmLZUJf2DZPVi",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            },
+            {
+              "id": "call_TFu7AtQnhJBt0QZAj0zKoIQg",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5459,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 22,
+            "outputTokens": 49
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7ba83f61572f37e3eba7c681393819de2da5be3056716db774a3afdd1c705066",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_b6xLOzZyOk8ZeXxJNyX2Z4Ch",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"14:30\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_008a680c27eed416016adaa3ceea9887d2aa5c659baf246408",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qPP_7U5yViSVNwdTCyAjVSpqjcg5eLh6KNC6LAvxQBpA9HwV69Hqvpz1J3xBk1bQKDXo-VBJU2brJ-S0eeATF2M2g9v9geLconbhQy3qAiiEOjvC5_6eyWi3FWEH_SbSizT3UZUwOv1SKJbSjvdx5uFsBGrC85CUibDbpazqkspDS9zivItAGsKcml8wAztAOWtIXzPKk_p3QqRiJY_5qM4G_MOcL0uaDldV6NSmS-244bH7HblxCKjEtmbQ6b5J23ZqVguFf2RlcrZknl1mUa6XJCwX1bLbWaKhxtr05TY4IZ3wYlNoL09YhNy1cgRW62ywusBLxF8ena1Nofgnb2xn2jflP4YYb2b6Dufh-F5o909FFT2_h_IaCQWxtWzPI2laA7ghay0yQtzSpYGDxBWgBjD-y5x32iEw7wPpBb5P1j4mVeGTq5xXiVzMCorA9-Qe3iReaoNOeqqzS9oXmf06tcMs7fox2Ot0QY8WVopXWMJv3kU5eymEwNEM2OFTfqYZ7KJhHK3dnWMaVc888MeM1Xe2B6F5qQ2W4LVQc2SJOUy8GIvQz-Fvrm1W62IJ6fqrllyHwIh8phhfkEX3rCFXDxoPw3Ikby6x3RnPPA7kOyd5sOYQYkcRDxsQUVMnxQi59l7QQnDVTQI6D8r94xq5YrtRuTMJNP1-llnCYDbuiUl-bJCIGBxKz5L5jUD7WdjgDBWCzWVLG70ZccM6G8FuhNeuEy6GPiNi_ARZmlWW5i0v-ITAZ_O5OwTShA_CmldBz7soh80eufC5nVhaeT-DkLVdz-GF1H45PbxENrxEp_xYl7MkVFTrCg76IfrZoEFV1WzfjMu2XHlTFuk37lki7V2g0-zUQYK6HDCccM9jmfwApnuFoGamnDb0JUj-K2ZauSSqpqkye08RAFVw-SuhenUgrmIOsO-5fB6AW4qeq485Ro8yMZ4yKUX9bnMmqT2UH4dpHYNyYCh_8kzf2prSXCQIHxOSJ50HY62S9s7PR86ek11_Isl1-a4FmTjSl7tz-i_h5d25Wvm85Ojp4RLAw00S6lGPC1sBH-i6h5xHf8enGpAxtsWvAudYYdVK1TSAJQuRV1BP6zPDtOTzKlYYLFRVEZuSAgnwQM1ErDRambDgrshDke-2ze9g-joSmcanNr7vME7-dAGL92gzRK4MPplV9DII30_DNQVQbscmrYruuueIb9-ypeQ55tvtLsMbouvmOOW8X3rtsrhk7ul6S6eon6weZ2IkEAbXtkTcoaGRbzqNlfAzELmtXEIBTWAc1gRbNfUhL6sNPKu8Jf1-xEeEng8zj8KwbNn9-EIanCHgJLJwddKBzBlVYxbXwlYIvG-9AqDTHGSavXetlI4ifqadD_JkhQVr8OsP7APNZnYBpUx6TnQaHR_6kh8HsjT1hcb5X3rk-CcNszuO0kWg3A5wTjjH6-yi9t4pQMRvui5qua2iW54uw2UX27AoClqASk985_iSQeeOqeQL6dPG6oRshR9XQohRd8DUHfcS94a1mQoIfFkw1qfWz7tNeJ6S0OcGuICikszdvTFQew9gvOkBCiXgz5xX291dWwRqfCMG6_NH7OsLwSX5wKczFsjcAB5K4mAFijFkzSYWJbHfDtAk5gYiG_YKWfPEHh4G7M-2lOn1XHJ0Q_nR_pA73jvhjQ8UtN4k3KbtLl1-ngPNgQUdY01DVSXlRvsgJLFQYRVTmV8dmY7zPnaukCmvxq89IaGezgCr5Z0Q6VAHUo4QidD6NRuIyuOgDfJOLrEzwZXH0alIz5_lXpERCLixjUnuQURbSma1txzvYrjmTthKka2KDH580kT7pcGD-sbfRb9vOh37NZKNGNAVzRqrWWw8jToNPCqLiE62ymNwmBQMutXYYE7v3mek-PBU11eThgIhJGHeTdYgbF5pAulvv7vyZ1toPfkYxBZYXE1jx3NTw==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5822,
+            "cachedInputTokens": 5456,
+            "cacheWriteTokens": 363,
+            "outputTokens": 150
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "31ba6a545c04c43c0b8bb85c98e7959fcc67158d8848eb78457092c2a46f3b69",
+        "response": {
+          "text": "Sarah P.’s haircut with Marco for Thursday, November 5 at 2:30 PM is awaiting your approval on the card. It isn’t booked yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6052,
+            "cachedInputTokens": 5819,
+            "cacheWriteTokens": 230,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

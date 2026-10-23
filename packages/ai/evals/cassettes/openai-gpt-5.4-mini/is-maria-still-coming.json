@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "e66cc7388f96a60ec4a3ab5ed6c7a109e26bec434008059b8521f1891b87e502",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_hl7oRzMB5v4flKJvG3LlXSbz",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "ab40c9d64099220ee7797b269fdb9d16239f51bb5efe65f2aeb8d17e3b44bd58",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kIfvPIa3iSHeNxD2BeVbIxaq",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5532,
+            "cachedInputTokens": 5376,
+            "outputTokens": 43
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "5013705efb790299ac692150db794e871bce3fef30c1657e48789a0b1de9a6bb",
+        "response": {
+          "text": "Yes — Maria L. is booked in tomorrow at 3:00 PM for a haircut with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5810,
+            "cachedInputTokens": 5376,
+            "outputTokens": 25
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

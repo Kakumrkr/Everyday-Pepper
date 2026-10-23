@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5d7e1d07c5e192baf6dd9fd165f1c62afa9eb3b2fcb801c89449a67a2e5426d6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_JFrvqk87eCYqN9UehjwxLhTx",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 16
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "25c3a66f7493077cc4ebb1b24af89bc6b8fb03907cfe3e2b83cd19ed00ab3f0d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Kd81nmNrDfNd35IAX7GEKh2z",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5735,
+            "cachedInputTokens": 5376,
+            "outputTokens": 89
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "204d3d9c8dd462aa72dddadfa802a525ef87ec20130d9d08093c96be212642d5",
+        "response": {
+          "text": "Jess has openings on Friday starting at 9:00 AM, then every 15 minutes through 11:45 AM. There are more after that too.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6456,
+            "cachedInputTokens": 5632,
+            "outputTokens": 36
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

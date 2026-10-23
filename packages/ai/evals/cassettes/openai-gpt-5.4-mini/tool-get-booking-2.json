@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f39ec99391616feedc3ee15b5141870dd2f4d53896a3c0923a2aa5c05f2a7f94",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3ccO8aUlT50ITT2g6x8NNHev",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5376,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "d05c9048885f0832a4ce3338b2599e048970dd629cb5669f0a83418e3e67ef97",
+        "response": {
+          "text": "I don’t see any appointment on today’s schedule.\n\nIf you meant a different day or booking, tell me which one and I’ll check it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 3712,
+            "outputTokens": 34
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

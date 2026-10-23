@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f3e06a17457c00951819d71a74826c6cb437840c956495030f00ef8b354c1070",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rnVjzzrPF8QvZ9XvM9ENDdMd",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 3712,
+            "outputTokens": 19
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "9324508cef3854312229bb47ca58cd28a2bf300b245dafc69b95a742392818a0",
+        "response": {
+          "text": "There’s 1 open team to-do:\n\n- Call Maria about her colour — Lena\n\nIf you want, I can mark it done or add a new reminder.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5556,
+            "cachedInputTokens": 5376,
+            "outputTokens": 37
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a18475e3e88302eec4a8c37f8091a7b00cf7c4301883431c27f1fc01cd8c8bcd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2fadUmDUSeajExPkSMggu4ec",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 10,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2db1acc8bb90bf631125e0043d278089dbb10d072a77c20994c60e183ad35fa7",
+        "response": {
+          "text": "Tomorrow, you have Maria L. booked for a haircut from 3:00 to 4:00 PM, and your calendar is blocked from 12:00 to 1:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5756,
+            "cachedInputTokens": 5444,
+            "cacheWriteTokens": 309,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

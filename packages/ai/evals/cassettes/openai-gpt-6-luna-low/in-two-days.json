@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d574a45ea2dca6a22da3796898d0fe1347cbe7acc39767287cc27ecf79c044e0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NJBHoPii6cnESOvCm9KRmPzE",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0db92a2beb26b1e7d0ab617ac6a7babe54f9b413e80164f5d5a67e1fc14ad78e",
+        "response": {
+          "text": "What service would you like to check with Jess—colour or haircut?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0d4173bdb6387984016adaa2965bf087d28d44feb29d6e9ccd",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qKWluRlFI-5mnf2oTXcq9amQxGv0diXqvsotw84U-KtbdlDg33B4ktSUHkixG1outcyfQ4AW-im5G5HaDzl5-yA-D7g7LCRMfjB_0gqUSgt3WvfCr_GoJlnTo5HK5mwg8sEk-i7pWpXNc9oie3RpwdixS8sYpojh_8XB87Vept5EDZAf6kvGXO6tr3AD-1mzKcZBkxGS7n7ChZOAsnP14a83P6bdk-MYjSj3yI8Kt_8fqstOfrC7B-f4fWkVGQygn2jyWI72GpxIVdwOirOt2RL0CHbGXuv7GDR5KvYs60ARNktutetq8CAZdj-jvTkYNZnKdhcbDbSotY2T0F7Vgv3shxjUU-qJ4oIj33xO4mIk9JvbhJox6bb3Y_da45rStI4oDuWxJPgrl2F2GoVcPusjHsT9nm8g8YpMudc9SiYNPqg0owNu-2L4MgGY-i6ui2x7Tg33GnANXFs81UjVymamJH5BZciDz7qxtSdxbLieZseFsBuUt2GDNMSbm8-8xQZXt698SyuqXmswqPI49OWkcKZ7V5AKOvcQ1yUhU8GZtv4OIJVcPtfvXEhqKSOqtwoZshCrMB8qfinNP7zPsyfld-Y5QDFIWLprA6vT9e7w2UxmUH0HJr1vz6lMSa3kKXGGovWQBoRaivHMDMDu7Hj0yRVCaLM6XDv9GSsvO_dvmgI52YC0Up9ETN1bMS_BBxgI186b3DnTM9DHDB7n0QL146yDLU8G5hJRDaEEmqgSwOeNcqWQpbHoABPRjcUrhznFYa4-cuI5fcD-aiMnMrqGWHnH6u44hMFUufqK5vtRwHBFcPkPy9TPj-kX8mHvHo292aYf33RCX2kn3AfN3G1oWaaIWfIvyXtO_MVBDbr-Sg2sagL3GXzfBjUO6o-ArKDbdd_1quAfz2R5siinj4FXbtCUz6H-ORVF1t-dtNOQM6x4n8AvU8bBwzLiSON0aLA2SfLL60zaOevPAS1sbRnOU5T5f01G6kz730HMrOt4ydp3vyqjgI3PS9T98ySyacUgX7CG5r9_iNZfM20_sSXlmzXrdppXBPiACwGJhjRfLm0Azk7Pdr02m8lhDebYKQVPebK-rP2RKvhpGMg3cmBdFSGxy3pf7yt2qi-ic2mYmp6CcQ1y4Q-O45lGH9eo9dexznjKMe7u0Zrshw5p29wXwm2HD_dJGEnp7zeme6Wg2OR1pYvCuw3n3VjG8dDsfFDqJmuDPKiFLeyNQLFHOSLYt6kZzKSieKRQ0OqvPKDhzPZ1WEazuDky1jvnOJXK2A0Py7aKkxeP1npBaugVkxDFiS_ifesuci42j3yQLOYSGonJQUH2P7Ux30WRWfgWbYm9aMFgQ8hq0T8ttV6U6lguE_tFnvhXmVAWGunc_6zPYDlj376j3qo5QmNi8EwPMKPJW4MTY6CGChQTBwlQjhknmZ5fXfXIash38sJCkRZTCd5u7S71sA-wWPjYrZJZWQYbNJYjPFURjTjPaJsBLy2KCUJuAJimo780q8JgMsObKUZGvdnNpl4eB-qeRJOdz3vcYWYJ1VJGT_rWFRh7EMmh6dWL4Qfb1UcZEUBubJW9GTyCM5LEhMk_Os-VOTY-1HxiaZ17G8Rq6RCp8rpuxUVQbuRid0qNAvqD9-G5724CGs=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5722,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 271,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

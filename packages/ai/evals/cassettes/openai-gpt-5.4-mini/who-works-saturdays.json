@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "72959dff2080e1644df66d05b287a4fa4289323cf63aca483d453042e18a8c92",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_G6h469ha3W00y17uY56uXu3g",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 16
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "8a9ee38b8d92e2b9c23c9dccbe05aef8b1cdf41fbe66c1ed181e6546862375fa",
+        "response": {
+          "text": "On Saturday you can book:\n\nJess for Colour or Haircut\nMarco for Haircut only\n\nIf you want, I can also check their available times on Saturday.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5724,
+            "cachedInputTokens": 5376,
+            "outputTokens": 37
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

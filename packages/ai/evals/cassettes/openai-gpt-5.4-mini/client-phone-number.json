@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "332d2aa188c1a04ca03345b5a261f96d6ee1448ef75aa9c5f84acc96e9b56f44",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MhhqLMDB29M6bhrO9pnN1ddc",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5449,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "9c75f5f97e66c5041e44951ad3db7c849bd7352f1f872632429b5fba6958b7c8",
+        "response": {
+          "text": "I found Maria L., but I can’t see phone numbers or email addresses from this tool. If you want, I can help check her bookings instead.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5376,
+            "outputTokens": 35
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

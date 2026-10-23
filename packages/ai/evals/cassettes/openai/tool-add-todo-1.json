@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bf893d0dce81976036b630c7bc797e7e64529b7c36d00ebecf57d905fadc028f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_B7ukBNZlARA25esZzEDBcohC",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-06\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5472,
+            "cachedInputTokens": 5469,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8c11096d0de122335e1d9f65c29787607056f6b86ebaa110673651d7bcf19bac",
+        "response": {
+          "text": "Added a reminder to call Maria on Friday, November 6, at 9:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5572,
+            "cachedInputTokens": 5569,
+            "outputTokens": 24
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

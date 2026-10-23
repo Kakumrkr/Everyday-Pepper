@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c1e1a72abdea6807262b243047d7f5e26b36953c51f3556123c331be51f25102",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Xuzt5SmeEekG6YodhHr79j3O",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-04\",\"from\":\"12:00\",\"to\":\"13:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f11a6dcccce65ee4f2ea774c7c6e23785257a485003fa74e8c16fef038c8a939",
+        "response": {
+          "text": "Done—your lunch is blocked Wednesday, November 4, from 12:00 to 1:00.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5547,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 96,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

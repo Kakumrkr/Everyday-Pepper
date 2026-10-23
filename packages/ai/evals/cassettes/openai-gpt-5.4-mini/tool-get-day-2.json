@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3e1e7bb302499d990862b2a0da6595321fa772bf486da3f324e7f2f1b372abf7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_v2jDPU7Lk90oFuNTuaNk2oN8",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_B3VnsqHwfTaVau2EI6dHCiNT",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 58
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "387eb5f6c0f41b680831b6d3a6e00db738620628882f8970e393827794f7b3d2",
+        "response": {
+          "text": "Marco has no bookings or blocked time on Thursday, so he looks completely free.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5807,
+            "cachedInputTokens": 5376,
+            "outputTokens": 20
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

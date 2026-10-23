@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "36c2d220ce6637956737f386a892a07ac0a0cc281c65a326a50f863168e61362",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IJBtDkyhP76ICkX8bNSdmioW",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            },
+            {
+              "id": "call_Xs8AfkmTiWABP5MO2vprLhH9",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5455,
+            "cachedInputTokens": 5376,
+            "outputTokens": 49
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "06ef9598016367acf9a3b6376eb5cf9ac540c545267e859e5fd8785e455a1ec5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_T5qGcOXoVEeTLfgGjWBUcNUn",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5822,
+            "cachedInputTokens": 5376,
+            "outputTokens": 112
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "059b9d6696c1936998c7af11a7ea1ddc61f2b70d42afd51086cdf99d216ee04d",
+        "response": {
+          "text": "I’ve set up the booking request for Sara K. with Jess on Wednesday at 10:00 AM for a colour. It’s waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6013,
+            "cachedInputTokens": 5760,
+            "outputTokens": 39
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

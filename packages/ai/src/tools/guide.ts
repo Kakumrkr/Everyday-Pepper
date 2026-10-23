@@ -11,6 +11,13 @@ export interface ToolExample {
   say: string;
   /** Matchers for the arguments (`{ "$any": true }` for ids the world decides). */
   args: Record<string, ArgMatcher>;
+  /**
+   * The same request for the eval world's case, when `say` (shown to the model) names
+   * something that world doesn't have (S27).
+   */
+  evalSay?: string;
+  /** Why the example can't be a one-turn eval case (it needs earlier context); none: it is one. */
+  evalSkip?: string;
 }
 
 export interface ToolGuide {

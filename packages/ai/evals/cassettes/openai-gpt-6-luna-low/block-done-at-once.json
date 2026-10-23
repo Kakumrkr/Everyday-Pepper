@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "1535e98be25925b9216a7935d07d412db699abacf354320a9f2c379cd8ef638d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_b25Utsl4AC1SVlp95jpn1Etr",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9ef5acdf0e2f83bc7cc3d6a8615519044621fbae13fbf8241bd65a879862078e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eKt9FDat2gUf5f4J81UF696H",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5727,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 276,
+            "outputTokens": 64
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "55cf73ec2e2e61d73c5aca269672aa644fd894413b513e38c3e0cf642539cbcf",
+        "response": {
+          "text": "Done—Marco’s time is blocked Thursday, November 5, from 9:00 AM to 12:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5846,
+            "cachedInputTokens": 5724,
+            "cacheWriteTokens": 119,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

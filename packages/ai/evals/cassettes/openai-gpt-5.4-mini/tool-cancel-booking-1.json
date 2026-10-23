@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "9a42254b88f727cd4e96b288ad204c525120f0d37d337480230ef93a20701a1f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_h4M3ICGUt5Us5QHddTcOPrO8",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "7c61a4a655fa07a498483a6e20f96e502b4160f79bc0441dc4e726f040002046",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ay7ctnGH3FhHK54ImbS0YhzC",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5531,
+            "cachedInputTokens": 5376,
+            "outputTokens": 43
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "218f931273a042a4d8cfe0938fe41c4b9f5347b487f5ca0c1d7392678ac369ef",
+        "response": {
+          "text": "Maria L. doesn’t have an appointment on Friday. Her next booking is Tue 2026-11-03 at 3:00 PM with Jess for a haircut.\n\nIf you want, I can cancel that one instead.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5809,
+            "cachedInputTokens": 5376,
+            "outputTokens": 50
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "654362d4f3e2ed92c861de0b6017b58545dee060de585702e58f26cd2b7b2773",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_BrmoZrpH87dUaVG2hrHgi8J9",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_b0k6ofC1QCRKk1kIOjJtQKn7",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5485,
+            "cachedInputTokens": 5457,
+            "cacheWriteTokens": 25,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "de73e9063d84d5595ddc174ee87eae3bd1eef68a6b37982ab1f053bb4f281fd8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1MDbrE0F31iiRqRehCl1Ypu3",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"time\":\"10:30\",\"emailClient\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5854,
+            "cachedInputTokens": 5482,
+            "cacheWriteTokens": 369,
+            "outputTokens": 112
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6d3ff4f4bfdcfd8d1489eaa1d8ee69d97c14e3d3c9a2b65e6b35ee54751e14fa",
+        "response": {
+          "text": "Sarah P.’s haircut with Jess for Friday, November 6 at 10:30 AM is awaiting your approval on the card. No email will be sent.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6046,
+            "cachedInputTokens": 5851,
+            "cacheWriteTokens": 192,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

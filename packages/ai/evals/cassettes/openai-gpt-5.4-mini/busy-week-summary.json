@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c6a6e43c56c4f0f3640333d6ff531dc25744a4666218c1259caa73b755057c84",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1WxgnOmbNBqx3nv4k9G2jrvi",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_Z1SnYTaj5iYMEkjLbL8i6xTz",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_9nxRXrZYbeJ3im5rTavZBu6G",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_iWGokSJTAQR8LftQ9C6QvbwV",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_PAQK9RmoSqBFSlS8vP1Kklya",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_ZbBPEShbqCovTO9PEnu8kRsy",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_jAQkhBfvag1ovNRKRuiL6C6j",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-07\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_NxOAnnWWwlkaTFQBcxRHTJrQ",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-08\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 208
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "b58ab3d1a21bf6308b071ea17b6dcc326e3a41875a37e7f35b913a834d14f018",
+        "response": {
+          "text": "Jess is pretty light this week.\n\nBooked:\nTue Nov 3: 1 haircut at 3:00–4:00, plus 12:00–1:00 blocked\nFri Nov 6: 1 haircut at 2:00–3:00\n\nEverything else this week is empty. If you want, I can also give you a day-by-day summary in a tighter format.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6642,
+            "cachedInputTokens": 5376,
+            "outputTokens": 86
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

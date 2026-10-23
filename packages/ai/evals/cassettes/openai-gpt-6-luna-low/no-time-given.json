@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "85f54cbbb42bf386632a3cc14c5b05187fc4ee093bfcee530ea798e807d681bc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qSThJIFrlyiLXiy2WzoPyzWZ",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5445,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 8,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b6f49ed7f91da87c73af7eeba26dc22e7c4feb253343760e3b82d061822aadf4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GeMiZKyWeI0aqO20cWad7NoN",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5442,
+            "cacheWriteTokens": 85,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3008fa743f5882e017b2b61140186734bc6521e0d53484e2134262ea37d30ac1",
+        "response": {
+          "text": "What service would you like to book Maria for tomorrow? We offer a haircut or colour.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5804,
+            "cachedInputTokens": 5527,
+            "cacheWriteTokens": 274,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

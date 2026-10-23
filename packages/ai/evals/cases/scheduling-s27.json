@@ -483,7 +483,7 @@
   {
     "id": "move-without-email",
     "set": "scheduling",
-    "description": "\"Don't tell her\": the move goes without an email to the client.",
+    "description": "\"Don't tell her\": the move is asked for without an email to the client. 11:00 runs into Jess's 12:00 lunch (60 min + 10 clean-up), so the domain refuses it and Pepper offers the free times (S27 corrected the expectation, which assumed the move went through).",
     "holdout": true,
     "now": "2026-11-02T14:00:00Z",
     "timeZone": "America/New_York",
@@ -507,8 +507,9 @@
         }
       ],
       "actions": {
-        "done": ["move_booking"]
-      }
+        "nothingDone": true
+      },
+      "replyMatches": ["available|taken|free"]
     }
   }
 ]

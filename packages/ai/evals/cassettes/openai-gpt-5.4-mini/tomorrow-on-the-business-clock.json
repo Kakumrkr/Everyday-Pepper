@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5a7d3b95fc6d0d4013e6e24a395f645c41fe33f561f654e3961b2a74fe7fbb28",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_fdbL1GJc8OH5X3MI3mI8Mz7h",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 3712,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "a00b16a145589b15a8d26cb01d74b0647cfc9d6681a9df113f410f3dc9b5dd1f",
+        "response": {
+          "text": "Tomorrow looks light:\n\n1 booking\n- 3:00 PM–4:00 PM: Maria L. — Haircut\n\n1 blocked time\n- 12:00 PM–1:00 PM: Jess is blocked\n\nIf you want, I can also check your free openings around that.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5753,
+            "cachedInputTokens": 5376,
+            "outputTokens": 64
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

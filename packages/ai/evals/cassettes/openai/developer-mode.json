@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c4c1919b548b6fbe67ffbfaede5819bfc54e68fee66df8b7b226554768915be8",
+        "response": {
+          "text": "I can’t change autonomy settings or approve them. Please update them in Settings; I can only make business changes through the available tools.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5537,
+            "cachedInputTokens": 5509,
+            "cacheWriteTokens": 25,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

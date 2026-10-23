@@ -91,8 +91,8 @@ export const createBooking: WriteTool = {
         args: { clientId: { $any: true }, serviceId: { $any: true }, time: '10:00' },
       },
       {
-        say: "Put Ana in with Jess on Friday at 2:30pm, don't email her",
-        args: { staffMemberId: { $any: true }, time: '14:30', emailClient: false },
+        say: "Put Sarah Park in for a haircut with Jess on Friday at 10:30am, don't email her",
+        args: { staffMemberId: { $any: true }, time: '10:30', emailClient: false },
       },
     ],
   },
@@ -337,7 +337,11 @@ export const cancelBooking: WriteTool = {
     ],
     returns: 'the cancellation, done or waiting for the member’s OK.',
     examples: [
-      { say: "Cancel Maria's appointment on Friday", args: { bookingId: { $any: true } } },
+      {
+        say: "Cancel Maria's appointment on Friday",
+        evalSay: "Cancel Maria's appointment tomorrow",
+        args: { bookingId: { $any: true } },
+      },
       {
         say: "Cancel Ana's 2pm but don't email her",
         args: { bookingId: { $any: true }, emailClient: false },

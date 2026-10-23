@@ -273,8 +273,17 @@ export const getBooking: ReadTool = {
     avoid: ['to search for a booking (use get_day or find_clients first)'],
     returns: 'the booking in the business’s local time.',
     examples: [
-      { say: "Is Maria's booking still on?", args: { bookingId: { $any: true } } },
-      { say: 'What time is that appointment?', args: { bookingId: { $any: true } } },
+      {
+        say: "Is Maria's booking still on?",
+        args: { bookingId: { $any: true } },
+        evalSkip:
+          'needs a booking id from earlier in the conversation; asked first, find_client_bookings is the right tool (S27)',
+      },
+      {
+        say: 'What time is that appointment?',
+        args: { bookingId: { $any: true } },
+        evalSkip: 'refers to a booking named earlier in the conversation (S27)',
+      },
     ],
   },
   args: z.strictObject({ bookingId: IdArg('booking') }),
