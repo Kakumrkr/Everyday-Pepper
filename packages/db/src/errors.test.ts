@@ -5,8 +5,11 @@ import {
   BusinessLimitReachedError,
   ClientEmailTakenError,
   isExclusionViolation,
+  isForeignKeyViolation,
+  isPolicyViolation,
   isUniqueViolation,
   MembershipExistsError,
+  MemorySubjectUnreachableError,
   ServiceNameTakenError,
   StaffMemberLinkTakenError,
   TenantSlugTakenError,
@@ -62,6 +65,24 @@ describe('isExclusionViolation', () => {
     expect(isExclusionViolation(pgError('23P01', 'working_hours_no_overlap'), constraint)).toBe(
       false,
     );
+  });
+});
+
+describe('isPolicyViolation and isForeignKeyViolation (memory subjects, ADR-0034)', () => {
+  it('match a row-level security refusal and a missing key, also wrapped', () => {
+    expect(isPolicyViolation(new Error('Failed query', { cause: pgError('42501') }))).toBe(true);
+    expect(isPolicyViolation(pgError('23505'))).toBe(false);
+    expect(isPolicyViolation('not an error')).toBe(false);
+    const missing = pgError('23503', 'memory_facts_client_fk');
+    expect(isForeignKeyViolation(missing, 'memory_facts_client_fk')).toBe(true);
+    expect(isForeignKeyViolation(missing, 'memory_facts_booking_fk')).toBe(false);
+  });
+
+  it('name an unreachable subject safely', () => {
+    expect(new MemorySubjectUnreachableError()).toMatchObject({
+      name: 'MemorySubjectUnreachableError',
+      message: 'No such subject to remember a fact about',
+    });
   });
 });
 

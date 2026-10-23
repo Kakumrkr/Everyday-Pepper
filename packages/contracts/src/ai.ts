@@ -190,7 +190,7 @@ export type LlmEmbeddingRequest = z.infer<typeof LlmEmbeddingRequestSchema>;
 
 /** One embedding per input, in order, with the tokens billed (no output tokens). */
 export const LlmEmbeddingResponseSchema = z.strictObject({
-  embeddings: z.array(z.array(z.number().finite()).min(1)).min(1).max(LLM_EMBED_BATCH_MAX),
+  embeddings: z.array(z.array(z.number()).min(1)).min(1).max(LLM_EMBED_BATCH_MAX),
   usage: LlmUsageSchema,
   model: z.string().min(1).max(200),
 });

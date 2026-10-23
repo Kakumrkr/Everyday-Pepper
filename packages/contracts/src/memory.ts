@@ -165,7 +165,7 @@ export const MemoryFactQuerySchema = z
 export type MemoryFactQuery = z.input<typeof MemoryFactQuerySchema>;
 
 /** An embedding: `EMBEDDING_DIMENSIONS` finite numbers. */
-export const EmbeddingSchema = z.array(z.number().finite()).length(EMBEDDING_DIMENSIONS);
+export const EmbeddingSchema = z.array(z.number()).length(EMBEDDING_DIMENSIONS);
 export type Embedding = z.infer<typeof EmbeddingSchema>;
 
 /** An embedding model's id, as the provider names it. */
