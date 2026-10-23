@@ -1,0 +1,518 @@
+{
+  "now": "2026-11-02T15:00:00.000Z",
+  "timeZone": "America/New_York",
+  "episodes": [
+    {
+      "name": "o-saturdays-marco",
+      "member": "owner",
+      "daysAgo": 40,
+      "summary": "Lena decided Marco covers Saturdays from 10 to 4 and Jess stays off on Saturdays."
+    },
+    {
+      "name": "o-saturdays-haircuts",
+      "member": "owner",
+      "daysAgo": 38,
+      "summary": "Lena said Saturday bookings are for haircuts only, no colour appointments on Saturdays."
+    },
+    {
+      "name": "o-colour-line",
+      "member": "owner",
+      "daysAgo": 25,
+      "summary": "Lena chose the Oway colour line to replace the old brand from January; Jess trains on it first."
+    },
+    {
+      "name": "o-colour-order",
+      "member": "owner",
+      "daysAgo": 22,
+      "summary": "Lena asked for a to-do to order Oway developer and toner before the end of the month."
+    },
+    {
+      "name": "o-prices-december",
+      "member": "owner",
+      "daysAgo": 6,
+      "summary": "Lena plans to raise haircut prices in December and tell clients in November."
+    },
+    {
+      "name": "o-prices-colour",
+      "member": "owner",
+      "daysAgo": 90,
+      "summary": "Lena kept colour prices the same this year after comparing with the salon down the street."
+    },
+    {
+      "name": "o-holiday-party",
+      "member": "owner",
+      "daysAgo": 15,
+      "summary": "Lena planned the team holiday party for Friday, December 18 at 6pm; she will bring the cake."
+    },
+    {
+      "name": "o-thanksgiving",
+      "member": "owner",
+      "daysAgo": 30,
+      "summary": "Lena decided the studio closes on Thanksgiving Day and the Friday after."
+    },
+    {
+      "name": "o-towels",
+      "member": "owner",
+      "daysAgo": 20,
+      "summary": "Lena asked to order more black towels before the holidays."
+    },
+    {
+      "name": "o-maria-patch",
+      "member": "owner",
+      "daysAgo": 14,
+      "summary": "Lena noted Maria wants a patch test before every colour and prefers Jess."
+    },
+    {
+      "name": "o-maria-moved",
+      "member": "owner",
+      "daysAgo": 9,
+      "summary": "Lena moved Maria's Tuesday haircut to Thursday at 3 because Maria had a work trip."
+    },
+    {
+      "name": "o-ana-friday",
+      "member": "owner",
+      "daysAgo": 8,
+      "summary": "Lena checked Ana's Friday haircut with Jess and kept it at 2pm."
+    },
+    {
+      "name": "o-ana-late",
+      "member": "owner",
+      "daysAgo": 45,
+      "summary": "Lena said Ana is often ten minutes late, so leave a gap after her bookings."
+    },
+    {
+      "name": "o-sara-vs-sarah",
+      "member": "owner",
+      "daysAgo": 33,
+      "summary": "Lena explained that Sara Kim and Sarah Park are different clients; Sara Kim is the colour regular."
+    },
+    {
+      "name": "o-marco-training",
+      "member": "owner",
+      "daysAgo": 30,
+      "summary": "Lena decided Marco will shadow Jess on colour appointments in January."
+    },
+    {
+      "name": "o-jess-vacation",
+      "member": "owner",
+      "daysAgo": 50,
+      "summary": "Lena approved Jess's vacation for the first week of February."
+    },
+    {
+      "name": "o-marco-vacation",
+      "member": "owner",
+      "daysAgo": 55,
+      "summary": "Lena approved Marco's week off at the end of March."
+    },
+    {
+      "name": "o-mondays",
+      "member": "owner",
+      "daysAgo": 18,
+      "summary": "Lena said Mondays before 10 are always slow and wondered about opening later."
+    },
+    {
+      "name": "o-reviews",
+      "member": "owner",
+      "daysAgo": 27,
+      "summary": "Lena wants to ask happy clients for online reviews after their second visit."
+    },
+    {
+      "name": "o-gift-cards",
+      "member": "owner",
+      "daysAgo": 120,
+      "summary": "Lena decided not to sell gift cards until the website is redone."
+    },
+    {
+      "name": "o-new-chairs",
+      "member": "owner",
+      "daysAgo": 70,
+      "summary": "Lena ordered two new styling chairs to arrive in mid-December."
+    },
+    {
+      "name": "o-music",
+      "member": "owner",
+      "daysAgo": 100,
+      "summary": "Lena asked the team to keep the music quieter in the mornings."
+    },
+    {
+      "name": "o-cancellations",
+      "member": "owner",
+      "daysAgo": 35,
+      "summary": "Lena decided clients who cancel twice in a month get a reminder call before their next booking."
+    },
+    {
+      "name": "o-walkins",
+      "member": "owner",
+      "daysAgo": 60,
+      "summary": "Lena said walk-ins are welcome on weekday afternoons if someone is free."
+    },
+    {
+      "name": "o-parking",
+      "member": "owner",
+      "daysAgo": 80,
+      "summary": "Lena told clients they can park behind the building after 5pm."
+    },
+    {
+      "name": "o-supplier-call",
+      "member": "owner",
+      "daysAgo": 12,
+      "summary": "Lena asked to be reminded to call the shampoo supplier about the late delivery."
+    },
+    {
+      "name": "o-instagram",
+      "member": "owner",
+      "daysAgo": 24,
+      "summary": "Lena wants a photo of every colour transformation for Instagram, with the client's OK."
+    },
+    {
+      "name": "o-kids-cuts",
+      "member": "owner",
+      "daysAgo": 65,
+      "summary": "Lena decided kids' haircuts are only on weekday afternoons."
+    },
+    {
+      "name": "o-deep-clean",
+      "member": "owner",
+      "daysAgo": 11,
+      "summary": "Lena booked a deep clean of the studio for the Sunday before Thanksgiving."
+    },
+    {
+      "name": "o-saturdays-old",
+      "member": "owner",
+      "daysAgo": 200,
+      "summary": "Lena tried opening on Saturdays at 9 last spring but it was too quiet."
+    },
+    {
+      "name": "m-saturdays-cover",
+      "member": "manager",
+      "daysAgo": 10,
+      "summary": "Cara arranged for Marco to cover two extra Saturdays in December."
+    },
+    {
+      "name": "m-schedule-dec",
+      "member": "manager",
+      "daysAgo": 7,
+      "summary": "Cara drafted the December rota: Jess off on the 24th, Marco off on the 31st."
+    },
+    {
+      "name": "m-supplies",
+      "member": "manager",
+      "daysAgo": 16,
+      "summary": "Cara counted the colour stock and found the Oway toner running low."
+    },
+    {
+      "name": "m-front-desk",
+      "member": "manager",
+      "daysAgo": 40,
+      "summary": "Cara set up a checklist for opening the front desk in the morning."
+    },
+    {
+      "name": "m-ana-complaint",
+      "member": "manager",
+      "daysAgo": 21,
+      "summary": "Cara handled Ana's complaint about a long wait and offered her a free fringe trim."
+    },
+    {
+      "name": "m-training-day",
+      "member": "manager",
+      "daysAgo": 28,
+      "summary": "Cara planned a team training day on colour corrections for January 12."
+    },
+    {
+      "name": "m-cara-hours",
+      "member": "manager",
+      "daysAgo": 35,
+      "summary": "Cara asked to finish at 4 on Wednesdays for her course."
+    },
+    {
+      "name": "m-phones",
+      "member": "manager",
+      "daysAgo": 50,
+      "summary": "Cara said the studio phone should be answered by the third ring."
+    },
+    {
+      "name": "m-laundry",
+      "member": "manager",
+      "daysAgo": 19,
+      "summary": "Cara switched the towel laundry pickup to Tuesdays and Fridays."
+    },
+    {
+      "name": "m-newsletter",
+      "member": "manager",
+      "daysAgo": 44,
+      "summary": "Cara wants to send a short newsletter about the new colour line in January."
+    },
+    {
+      "name": "m-holiday-hours",
+      "member": "manager",
+      "daysAgo": 13,
+      "summary": "Cara proposed shorter opening hours on Christmas Eve, closing at 2."
+    },
+    {
+      "name": "m-maria-note",
+      "member": "manager",
+      "daysAgo": 26,
+      "summary": "Cara noted Maria likes the late-afternoon slots."
+    },
+    {
+      "name": "m-key",
+      "member": "manager",
+      "daysAgo": 90,
+      "summary": "Cara keeps the spare studio key at her desk."
+    },
+    {
+      "name": "m-sarah-park",
+      "member": "manager",
+      "daysAgo": 31,
+      "summary": "Cara booked Sarah Park's first visit and noted she found us on Instagram."
+    },
+    {
+      "name": "m-inventory",
+      "member": "manager",
+      "daysAgo": 60,
+      "summary": "Cara decided to do a full inventory every first Monday of the month."
+    },
+    {
+      "name": "s-jess-lunch",
+      "member": "staff",
+      "daysAgo": 4,
+      "summary": "Jess moved her lunch break to 12:30 on Thursdays."
+    },
+    {
+      "name": "s-jess-saturdays",
+      "member": "staff",
+      "daysAgo": 39,
+      "summary": "Jess asked not to work Saturdays because of her kids' sports."
+    },
+    {
+      "name": "s-jess-colour-training",
+      "member": "staff",
+      "daysAgo": 23,
+      "summary": "Jess will learn the Oway colour line first and then teach Marco."
+    },
+    {
+      "name": "s-jess-maria-formula",
+      "member": "staff",
+      "daysAgo": 14,
+      "summary": "Jess tried a softer formula on Maria and Maria loved it."
+    },
+    {
+      "name": "s-jess-vacation",
+      "member": "staff",
+      "daysAgo": 52,
+      "summary": "Jess asked for the first week of February off."
+    },
+    {
+      "name": "s-jess-wrist",
+      "member": "staff",
+      "daysAgo": 66,
+      "summary": "Jess said her wrist hurts after long colour days, so no more than three colours a day."
+    },
+    {
+      "name": "s-jess-ana",
+      "member": "staff",
+      "daysAgo": 8,
+      "summary": "Jess confirmed Ana's Friday haircut at 2pm."
+    },
+    {
+      "name": "s-jess-scissors",
+      "member": "staff",
+      "daysAgo": 75,
+      "summary": "Jess sent her scissors for sharpening and gets them back next week."
+    },
+    {
+      "name": "s-jess-course",
+      "member": "staff",
+      "daysAgo": 95,
+      "summary": "Jess signed up for a balayage course in the spring."
+    },
+    {
+      "name": "s-jess-early",
+      "member": "staff",
+      "daysAgo": 29,
+      "summary": "Jess can start at 8 on Tuesdays if a client needs an early slot."
+    },
+    {
+      "name": "s-jess-sara",
+      "member": "staff",
+      "daysAgo": 17,
+      "summary": "Jess said Sara Kim prefers no blow-dry after her colour."
+    },
+    {
+      "name": "s-jess-music",
+      "member": "staff",
+      "daysAgo": 100,
+      "summary": "Jess asked for the radio station to change in the afternoons."
+    },
+    {
+      "name": "s-jess-parking",
+      "member": "staff",
+      "daysAgo": 82,
+      "summary": "Jess asked where staff can park on busy days."
+    },
+    {
+      "name": "s-jess-products",
+      "member": "staff",
+      "daysAgo": 47,
+      "summary": "Jess recommended a sulphate-free shampoo for clients with coloured hair."
+    },
+    {
+      "name": "s-jess-thanksgiving",
+      "member": "staff",
+      "daysAgo": 31,
+      "summary": "Jess asked whether the studio is open the Friday after Thanksgiving."
+    }
+  ],
+  "queries": [
+    {
+      "query": "What did we decide about Saturdays?",
+      "member": "owner",
+      "expected": "o-saturdays-marco",
+      "holdout": false
+    },
+    {
+      "query": "Which services can be booked on Saturdays?",
+      "member": "owner",
+      "expected": "o-saturdays-haircuts",
+      "holdout": false
+    },
+    {
+      "query": "What did I say about the new colour line?",
+      "member": "owner",
+      "expected": "o-colour-line",
+      "holdout": false
+    },
+    {
+      "query": "When are we raising haircut prices?",
+      "member": "owner",
+      "expected": "o-prices-december",
+      "holdout": false
+    },
+    {
+      "query": "When is the holiday party?",
+      "member": "owner",
+      "expected": "o-holiday-party",
+      "holdout": false
+    },
+    {
+      "query": "Are we open on Thanksgiving?",
+      "member": "owner",
+      "expected": "o-thanksgiving",
+      "holdout": false
+    },
+    {
+      "query": "Why did Maria's haircut get moved?",
+      "member": "owner",
+      "expected": "o-maria-moved",
+      "holdout": false
+    },
+    {
+      "query": "What did we say about Ana running late?",
+      "member": "owner",
+      "expected": "o-ana-late",
+      "holdout": false
+    },
+    {
+      "query": "Which Sara is the colour regular?",
+      "member": "owner",
+      "expected": "o-sara-vs-sarah",
+      "holdout": false
+    },
+    {
+      "query": "When does Marco start colour training?",
+      "member": "owner",
+      "expected": "o-marco-training",
+      "holdout": false
+    },
+    {
+      "query": "What did we decide about gift cards?",
+      "member": "owner",
+      "expected": "o-gift-cards",
+      "holdout": false
+    },
+    {
+      "query": "What's the plan for clients who keep cancelling?",
+      "member": "owner",
+      "expected": "o-cancellations",
+      "holdout": false
+    },
+    {
+      "query": "When do the new chairs arrive?",
+      "member": "owner",
+      "expected": "o-new-chairs",
+      "holdout": false
+    },
+    {
+      "query": "What did I want to do about reviews?",
+      "member": "owner",
+      "expected": "o-reviews",
+      "holdout": true
+    },
+    {
+      "query": "When can kids get haircuts?",
+      "member": "owner",
+      "expected": "o-kids-cuts",
+      "holdout": true
+    },
+    {
+      "query": "Which extra Saturdays is Marco covering?",
+      "member": "manager",
+      "expected": "m-saturdays-cover",
+      "holdout": false
+    },
+    {
+      "query": "What's the December rota?",
+      "member": "manager",
+      "expected": "m-schedule-dec",
+      "holdout": false
+    },
+    {
+      "query": "When is the colour correction training day?",
+      "member": "manager",
+      "expected": "m-training-day",
+      "holdout": false
+    },
+    {
+      "query": "What did we offer Ana after her complaint?",
+      "member": "manager",
+      "expected": "m-ana-complaint",
+      "holdout": false
+    },
+    {
+      "query": "What are the Christmas Eve hours?",
+      "member": "manager",
+      "expected": "m-holiday-hours",
+      "holdout": true
+    },
+    {
+      "query": "When did I move my lunch break?",
+      "member": "staff",
+      "expected": "s-jess-lunch",
+      "holdout": false
+    },
+    {
+      "query": "How many colours a day can I do?",
+      "member": "staff",
+      "expected": "s-jess-wrist",
+      "holdout": false
+    },
+    {
+      "query": "What did Maria think of the new formula?",
+      "member": "staff",
+      "expected": "s-jess-maria-formula",
+      "holdout": false
+    },
+    {
+      "query": "Does Sara Kim want a blow-dry after colour?",
+      "member": "staff",
+      "expected": "s-jess-sara",
+      "holdout": true
+    },
+    {
+      "query": "Which day can I start early?",
+      "member": "staff",
+      "expected": "s-jess-early",
+      "holdout": true
+    }
+  ]
+}

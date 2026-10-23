@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_16",
+              "name": "propose_rule",
+              "arguments": "{\"kind\": \"hours_limit\", \"staffMemberId\": null, \"minutes\": null, \"days\": null, \"count\": null, \"startDate\": null, \"endDate\": null, \"weekday\": 3, \"notBefore\": \"10:00\", \"notAfter\": null, \"closed\": false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Approve it on the card and the rule applies to every new booking.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_17",
+              "name": "find_clients",
+              "arguments": "{\"name\": \"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_18",
+              "name": "create_booking",
+              "arguments": "{\"clientId\": \"{{client:sara}}\", \"serviceId\": \"{{service:haircut}}\", \"staffMemberId\": \"{{staff:jess}}\", \"date\": \"2026-11-04\", \"time\": \"09:00\", \"emailClient\": null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Jess isn't available at 9 on Wednesday: bookings start at 10 now. Shall I try 10am?",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

@@ -10,6 +10,7 @@ import {
   type Cassette,
   type CassetteStep,
 } from './cassette.js';
+import type { EvalCase } from './case.js';
 import { loadCases, loadCassette } from './files.js';
 import { runEvals, summarize, type CaseResult } from './runner.js';
 import { loopSubject } from './subject.js';
@@ -45,8 +46,8 @@ describe('every eval set on its scripted cassettes', () => {
     // the cases written for S27 are answered by the recorded model below.
     const cases = all.filter((c) => cassettes.get(c.id) !== null);
     // 31 since S27 (get_booking's guide examples are not one-turn cases, `evalSkip`); 80 with
-    // S30's memory sets.
-    expect(cases.length).toBeGreaterThanOrEqual(80);
+    // S30's memory sets; 105 with S31's episodes and learned rules.
+    expect(cases.length).toBeGreaterThanOrEqual(105);
     const results = await runEvals({
       cases,
       trials: 1,
@@ -69,6 +70,8 @@ describe('every eval set on its scripted cassettes', () => {
         'memory_recall',
         'memory_delete',
         'memory_safety',
+        'episodic',
+        'learned_rules',
       ].sort(),
     );
   });
@@ -270,5 +273,79 @@ describe('the graders judge the business, not only the words', () => {
     expect(changed?.trials[0]?.reasons).toEqual([
       'cassette stale: call 1 differs from the recorded request',
     ]);
+  });
+});
+
+describe('the S31 graders fail what they guard against', () => {
+  const named = async (id: string): Promise<EvalCase> => {
+    const found = (await loadCases(paths)).find((c) => c.id === id);
+    if (found === undefined) throw new Error(`case ${id} missing`);
+    return found;
+  };
+  const replayed = async (evalCase: EvalCase, cassetteOf = evalCase.id) => {
+    const scripted = await loadCassette(paths, 'scripted', cassetteOf);
+    const [result] = await runEvals({
+      cases: [evalCase],
+      trials: 1,
+      subject: loopSubject(db),
+      providerFor: (_case, _trial, world) =>
+        new CassetteProvider(scripted?.trials[0] ?? [], world.placeholders),
+    });
+    return result?.trials[0]?.reasons ?? ['no result'];
+  };
+
+  it('an episode that outlived its forgotten fact is caught: sent to the model and still stored', async () => {
+    const forgotten = await named('ep-forgotten-fact-deletes-episode');
+    const reasons = await replayed({
+      ...forgotten,
+      turns: forgotten.turns.filter((turn) => 'user' in turn),
+    });
+    expect(reasons).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^sent \/hazelnut\/i to the model after turn 0/),
+        expect.stringMatching(/^still stores \/hazelnut\/i/),
+        'expected 3 episodes, got 4',
+      ]),
+    );
+  });
+
+  it("the owner's search finds what staff never get: the staff case passes because of RLS", async () => {
+    const staff = await named('ep-staff-cannot-see-owner');
+    expect(await replayed(staff)).toEqual([]);
+    expect(await replayed({ ...staff, actor: { role: 'owner' } })).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^sent \/raise haircut prices\/i/)]),
+    );
+  });
+
+  it('a rule proposal that was never approved changes nothing, and the case says so', async () => {
+    const approved = await named('lr-approve-then-refused');
+    const reasons = await replayed({
+      ...approved,
+      turns: approved.turns.filter((turn) => 'user' in turn),
+    });
+    expect(reasons).toEqual(
+      expect.arrayContaining([
+        'expected hours_limit to change',
+        'expected propose_rule to be done',
+      ]),
+    );
+  });
+
+  it('a staff member cannot get a rule proposal approved: nothing waits and nothing changes', async () => {
+    const staff = await named('lr-staff-refused');
+    expect(
+      await replayed({
+        ...staff,
+        turns: [...staff.turns, { action: { approve: 'propose_rule' } }],
+      }),
+    ).toEqual([]);
+  });
+
+  it('the episode summary is scrubbed of contacts after the model, before it is stored', async () => {
+    const scrub = await named('ep-summary-scrubs-contacts');
+    const scripted = await loadCassette(paths, 'scripted', scrub.id);
+    // The scripted summariser writes the phone number and email address back.
+    expect(JSON.stringify(scripted)).toMatch(/212-555-0199.*ana\.texts@example\.test/);
+    expect(await replayed(scrub)).toEqual([]);
   });
 });

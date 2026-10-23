@@ -39,6 +39,17 @@ export interface Transcript {
   stored?: string[];
   /** What the AI actions' cards show from memory, read live (S30, AC-W3-2). */
   cards?: { warnings: string[]; lastVisitNotes: string[] };
+  /**
+   * The booking rules and working hours as seeded and afterwards, by `kind:scope` (S31), and
+   * the member turns during which they changed (only a screen's OK may change them).
+   */
+  rules?: {
+    before: Record<string, string>;
+    after: Record<string, string>;
+    changedInTurns: number[];
+  };
+  /** Every member's stored episodes afterwards (S31). */
+  episodes?: { member: 'owner' | 'manager' | 'staff'; summary: string }[];
 }
 
 export const emptyUsage = (): LlmUsage => ({

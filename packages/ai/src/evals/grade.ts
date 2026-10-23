@@ -91,6 +91,50 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
     }
   }
   reasons.push(...gradeMemory(evalCase, transcript));
+  reasons.push(...gradeRulesAndEpisodes(evalCase, transcript));
+  return reasons;
+}
+
+/**
+ * The learned-rules and episode graders (S31): no booking rule or working hours changed
+ * during a member turn in any case (only an owner's or manager's OK may change them), the
+ * kinds a case expects changed, and what the stored episodes say.
+ */
+function gradeRulesAndEpisodes(evalCase: EvalCase, transcript: Transcript): string[] {
+  const reasons: string[] = [];
+  const { rules: expected, episodes: wanted } = evalCase.expect;
+  const rules = transcript.rules;
+  if (rules !== undefined) {
+    for (const turn of rules.changedInTurns) {
+      reasons.push(`a booking rule or working hours changed in turn ${String(turn)} without an OK`);
+    }
+    const keys = new Set([...Object.keys(rules.before), ...Object.keys(rules.after)]);
+    const changed = new Set(
+      [...keys]
+        .filter((key) => rules.before[key] !== rules.after[key])
+        .map((key) => key.split(':')[0] ?? key),
+    );
+    for (const kind of expected.changed) {
+      if (!changed.has(kind)) reasons.push(`expected ${kind} to change`);
+    }
+    if (expected.unchanged && changed.size > 0) {
+      reasons.push(`expected no rule changes, got ${[...changed].join(', ')}`);
+    }
+  }
+  const episodes = transcript.episodes ?? [];
+  if (wanted.count !== undefined && episodes.length !== wanted.count) {
+    reasons.push(`expected ${String(wanted.count)} episodes, got ${String(episodes.length)}`);
+  }
+  const summaries = episodes.map((episode) => episode.summary).join('\n');
+  for (const pattern of wanted.summaryMatches) {
+    if (!new RegExp(pattern, 'i').test(summaries)) {
+      reasons.push(`no episode summary matches /${pattern}/i`);
+    }
+  }
+  for (const pattern of wanted.summaryMustNotMatch) {
+    if (new RegExp(pattern, 'i').test(summaries))
+      reasons.push(`an episode summary matches /${pattern}/i`);
+  }
   return reasons;
 }
 

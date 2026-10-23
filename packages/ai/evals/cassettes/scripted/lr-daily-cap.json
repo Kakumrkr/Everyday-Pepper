@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_11",
+              "name": "propose_rule",
+              "arguments": "{\"kind\": \"max_bookings_per_day\", \"staffMemberId\": null, \"minutes\": null, \"days\": null, \"count\": 6, \"startDate\": null, \"endDate\": null, \"weekday\": null, \"notBefore\": null, \"notAfter\": null, \"closed\": null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Approve it on the card and the rule applies to every new booking.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

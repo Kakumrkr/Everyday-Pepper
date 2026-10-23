@@ -1,6 +1,7 @@
 import type { LlmRequest, LlmResponse, LlmStreamEvent, LlmUsage } from '@pepper/contracts';
 import { z } from 'zod';
 import { isLlmError } from '../errors.js';
+import type { Embedder } from '../embedder.js';
 import type { LlmCallOptions, LlmProvider } from '../provider.js';
 import { costOfUsage, type ModelPrice, type PriceTable } from './cost.js';
 
@@ -177,7 +178,8 @@ export class SpendTracker {
     return null;
   }
 
-  add(model: string, usage: LlmUsage, request: LlmRequest, ms: number | null): void {
+  /** `request`: the chat request answered (`null`: an embedding, not in the chars a token). */
+  add(model: string, usage: LlmUsage, request: LlmRequest | null, ms: number | null): void {
     const cost = costOfUsage(usage, priceOf(this.options.prices, model));
     this.runUsd += cost;
     const spend = this.models.get(model) ?? {
@@ -196,7 +198,7 @@ export class SpendTracker {
     };
     if (ms !== null) spend.ms.push(ms);
     this.models.set(model, spend);
-    if (usage.inputTokens > 0) {
+    if (usage.inputTokens > 0 && request !== null) {
       this.charsSent += requestChars(request);
       this.tokensCounted += usage.inputTokens;
     }
@@ -275,6 +277,26 @@ export function guardedProvider(provider: LlmProvider, tracker: SpendTracker): L
       } catch (error) {
         failed(request, error);
       }
+    },
+  };
+}
+
+/** `guardedProvider` for the embedding model (S31): counted, and refused past the caps. */
+export function guardedEmbedder(embedder: Embedder, tracker: SpendTracker): Embedder {
+  return {
+    model: embedder.model,
+    async embed(request, options) {
+      const reason = tracker.stopReason();
+      if (reason !== null) throw new BudgetStopError(reason);
+      const started = performance.now();
+      const response = await embedder.embed(request, options).catch((error: unknown) => {
+        if (isLlmError(error) && error.usage !== undefined) {
+          tracker.add(embedder.model, error.usage, null, null);
+        }
+        throw error;
+      });
+      tracker.add(response.model, response.usage, null, performance.now() - started);
+      return response;
     },
   };
 }

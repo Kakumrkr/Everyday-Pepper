@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8",
+              "name": "propose_rule",
+              "arguments": "{\"kind\": \"hours_limit\", \"staffMemberId\": null, \"minutes\": null, \"days\": null, \"count\": null, \"startDate\": null, \"endDate\": null, \"weekday\": 1, \"notBefore\": \"10:00\", \"notAfter\": null, \"closed\": false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Approve it on the card and the rule applies to every new booking.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

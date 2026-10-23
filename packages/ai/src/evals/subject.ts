@@ -1,13 +1,18 @@
-import type {
-  ConversationId,
-  LlmRequest,
-  LlmStreamEvent,
-  MemoryWarningRule,
+import { getBookingRules, getWorkingHours } from '@pepper/appointments';
+import {
+  OutboxEpisodeSchema,
+  StaffMemberIdSchema,
+  type ConversationId,
+  type ConversationTurnId,
+  type LlmRequest,
+  type LlmStreamEvent,
+  type MemoryWarningRule,
 } from '@pepper/contracts';
 import {
   changeFact,
   forgetFact,
   listFacts,
+  listMyEpisodes,
   listPendingProposals,
   listRecentActions,
   memoryOfAction,
@@ -26,13 +31,14 @@ import type { BusinessContext } from '../agent/context.js';
 import { startTurn, type AgentDeps, type LoopLimits } from '../agent/loop.js';
 import { memberMemory } from '../agent/memory.js';
 import { postgresConversationStore } from '../agent/store.js';
+import { hashEmbedder, type Embedder } from '../embedder.js';
 import { isLlmError } from '../errors.js';
+import { writeEpisode } from '../memory/episodes.js';
 import type { LlmCallOptions, LlmProvider } from '../provider.js';
 import { approveToolProposal, undoToolAction } from '../tools/registry.js';
 import type { ToolDeps } from '../tools/tool.js';
-import type { EvalCase } from './case.js';
+import type { EvalCase, EvalTurn } from './case.js';
 import { seedEvalWorld, unfillPlaceholders, type EvalWorld } from './world.js';
-import type { EvalTurn } from './case.js';
 import { addUsage, emptyUsage, type Transcript } from './transcript.js';
 
 // The eval subject (ADR-0030): each case runs through the real agent loop, in a freshly seeded
@@ -133,17 +139,42 @@ function observed(
   };
 }
 
-/** The subject on a migrated database (the app's login role). */
+/** An embedder whose failures that are not the provider's (a missing recording) fail the run. */
+function observedEmbedder(embedder: Embedder, failures: unknown[]): Embedder {
+  return {
+    model: embedder.model,
+    async embed(request, options) {
+      try {
+        return await embedder.embed(request, options);
+      } catch (error) {
+        if (!isLlmError(error)) failures.push(error);
+        throw error;
+      }
+    },
+  };
+}
+
+/** How long the episode job waits after a conversation's last turn, and a minute more. */
+const EPISODE_WAIT_MS = 31 * 60_000;
+
+/**
+ * The subject on a migrated database (the app's login role). `embedder` embeds seeded
+ * episodes and `search_memory`'s questions (S31): the hash embedder by default (scripted
+ * cassettes), the recorded embeddings for real runs.
+ */
 export function loopSubject(
   db: Database,
-  options: { limits?: Partial<LoopLimits> } = {},
+  options: { limits?: Partial<LoopLimits>; embedder?: Embedder } = {},
 ): EvalSubject {
   return async (evalCase, providerFor) => {
+    const failures: unknown[] = [];
+    const embedder = observedEmbedder(options.embedder ?? hashEmbedder(), failures);
     const world = await seedEvalWorld(
       db,
       evalCase.world,
       { now: new Date(evalCase.now), timeZone: evalCase.timeZone },
       evalCase.seed,
+      { embedder },
     );
     let memberTurn = 0;
     const transcript: Transcript = {
@@ -154,7 +185,6 @@ export function loopSubject(
       models: [],
     };
     const actor: Actor = world.actorFor(evalCase.actor.role);
-    const failures: unknown[] = [];
     const tools: ToolDeps = {
       db,
       actor,
@@ -162,15 +192,17 @@ export function loopSubject(
       autonomy: { templateDefaults: {} },
       memoryWarnings: EVAL_MEMORY_WARNINGS,
       emails: { baseUrl: 'http://localhost:3000', outboxKey: EVAL_OUTBOX_KEY },
+      embedder,
     };
+    const provider = observed(
+      providerFor(world),
+      transcript,
+      failures,
+      world.placeholders,
+      () => memberTurn,
+    );
     const deps: AgentDeps = {
-      provider: observed(
-        providerFor(world),
-        transcript,
-        failures,
-        world.placeholders,
-        () => memberTurn,
-      ),
+      provider,
       tools,
       memory: memberMemory(tools),
       store: postgresConversationStore(db, actor, world.clock),
@@ -184,9 +216,22 @@ export function loopSubject(
     };
     let conversationId: ConversationId | null = null;
     const owner = world.actorFor('owner');
+    // Each conversation's latest turn, for the episode job (S31).
+    const latestTurns = new Map<ConversationId, ConversationTurnId>();
+    const seededRules = await rulesOf(db, owner, world);
+    let rulesBefore = seededRules;
+    const changedInTurns: number[] = [];
     for (const [index, turn] of evalCase.turns.entries()) {
       if (!('user' in turn)) {
-        await screenAction({ ...tools, actor: owner }, world, turn);
+        if ('writeEpisodes' in turn.action) {
+          world.clock.advanceBy(EPISODE_WAIT_MS);
+          await writeEpisodes(world, provider, embedder, actor, latestTurns);
+          latestTurns.clear();
+        } else {
+          await screenAction({ ...tools, actor: owner }, world, turn);
+        }
+        if (failures.length > 0) throw failures[0];
+        rulesBefore = await rulesOf(db, owner, world);
         continue;
       }
       memberTurn += 1;
@@ -199,12 +244,32 @@ export function loopSubject(
       });
       if (started.kind !== 'started') throw new Error(`turn ${String(index + 1)}: ${started.kind}`);
       conversationId = started.turn.conversationId;
+      latestTurns.set(conversationId, started.turn.id);
       await started.run((event) => {
         if (event.type === 'message.completed') transcript.replies.push(event.text);
         if (event.type === 'turn.failed') transcript.replies.push(event.fallback.text);
       });
       if (failures.length > 0) throw failures[0];
+      // Only an owner's or manager's OK on a screen may change rules or hours, never a turn.
+      const rulesAfter = await rulesOf(db, owner, world);
+      if (!sameRules(rulesBefore, rulesAfter)) changedInTurns.push(memberTurn);
+      rulesBefore = rulesAfter;
     }
+    transcript.rules = {
+      before: Object.fromEntries(seededRules),
+      after: Object.fromEntries(rulesBefore),
+      changedInTurns,
+    };
+    transcript.episodes = (
+      await Promise.all(
+        (['owner', 'manager', 'staff'] as const).map(async (role) =>
+          (await listMyEpisodes(db, world.actorFor(role))).map((episode) => ({
+            member: role,
+            summary: episode.summary,
+          })),
+        ),
+      )
+    ).flat();
     const executions = await listRecentActions(db, owner);
     const proposals = await listPendingProposals(db, owner, { clock: world.clock });
     transcript.actions = {
@@ -253,13 +318,63 @@ async function screenAction(
     for (const proposal of waiting.filter((each) => each.tool === action.approve)) {
       await approveToolProposal(deps, proposal.id, proposal.fingerprint);
     }
-  } else {
+  } else if ('undo' in action) {
     const [latest] = (await listRecentActions(db, owner)).filter(
       (each) => each.tool === action.undo && each.status === 'done',
     );
     if (latest === undefined) throw new Error(`Nothing of ${action.undo} to undo`);
     await undoToolAction(deps, latest.id, 'wrong');
   }
+}
+
+/**
+ * The episode job, as the worker runs it (S31): every conversation of the case so far is
+ * summarised by the case's model (the same cassette, so its request is fingerprinted too),
+ * embedded and stored. Budgets are not metered here: the run's cost guard covers real calls.
+ */
+async function writeEpisodes(
+  world: EvalWorld,
+  provider: LlmProvider,
+  embedder: Embedder,
+  member: Actor,
+  latestTurns: ReadonlyMap<ConversationId, ConversationTurnId>,
+): Promise<void> {
+  for (const [conversationId, turnId] of latestTurns) {
+    await writeEpisode(
+      {
+        db: world.db,
+        provider,
+        embedder,
+        clock: world.clock,
+        reserve: () => Promise.resolve({ state: 'ok', settle: () => Promise.resolve() }),
+      },
+      world.tenantId,
+      OutboxEpisodeSchema.parse({ conversationId, userId: member.context.userId, turnId }),
+    );
+  }
+}
+
+/**
+ * The booking rules and every staff member's working hours, by kind and scope (S31): a rule's
+ * type or `hours_limit`, and `business` or the staff member's placeholder.
+ */
+async function rulesOf(db: Database, owner: Actor, world: EvalWorld): Promise<Map<string, string>> {
+  const placeheld = (text: string) => unfillPlaceholders(text, world.placeholders);
+  const entries = new Map<string, string>();
+  for (const rule of (await getBookingRules(db, owner)).rules) {
+    const scope = rule.staffMemberId === null ? 'business' : placeheld(rule.staffMemberId);
+    entries.set(`${rule.type}:${scope}`, JSON.stringify(rule.params));
+  }
+  for (const staff of ['{{staff:jess}}', '{{staff:marco}}']) {
+    const id = StaffMemberIdSchema.parse(world.placeholders.get(staff));
+    const hours = await getWorkingHours(db, owner, id);
+    entries.set(`hours_limit:${staff}`, JSON.stringify(hours.intervals));
+  }
+  return entries;
+}
+
+function sameRules(a: ReadonlyMap<string, string>, b: ReadonlyMap<string, string>): boolean {
+  return a.size === b.size && [...a].every(([key, value]) => b.get(key) === value);
 }
 
 /** What the business remembers and stores afterwards, and what the cards show (S30). */

@@ -8,8 +8,11 @@ import {
 } from '@pepper/appointments';
 import {
   addDays,
+  ClientIdSchema,
   fromZoned,
   isoWeekday,
+  LLM_EMBED_BATCH_MAX,
+  MemoryFactIdSchema,
   MemorySubjectSchema,
   TenantIdSchema,
   type MemorySubject,
@@ -24,11 +27,13 @@ import {
   createClient,
   createTask,
   ManualClock,
+  saveEpisode,
   saveFact,
   type Actor,
 } from '@pepper/core';
 import { addMembership, insertSeedUser, withTenant, type Database } from '@pepper/db';
 import { z } from 'zod';
+import type { Embedder } from '../embedder.js';
 
 // Seeded eval worlds (ADR-0030, playbook §5): a real business in Postgres for each run of a
 // case, so the loop's tool calls hit the real domain and the final state can be judged. The
@@ -71,7 +76,10 @@ export const WORLD_PLACEHOLDERS = [
 /** What `juniper_memory` adds (S30): Maria's last colour visit, two weeks back. */
 export const MEMORY_WORLD_PLACEHOLDERS = ['{{booking:maria-last}}'] as const;
 
-/** What a case seeds besides the world (S30): remembered facts, and the pause switch. */
+/**
+ * What a case seeds besides the world (S30): remembered facts, past conversations' summaries
+ * (S31, embedded by the run's embedder), and the pause switch.
+ */
 export interface WorldSeed {
   facts: readonly {
     name: string;
@@ -79,6 +87,14 @@ export interface WorldSeed {
     key: string;
     value: string;
     sensitive?: boolean | undefined;
+  }[];
+  episodes?: readonly {
+    name: string;
+    member: MembershipRole;
+    summary: string;
+    daysAgo: number;
+    facts: readonly string[];
+    clients: readonly string[];
   }[];
   memoryPaused: boolean;
 }
@@ -103,6 +119,7 @@ export async function seedEvalWorld(
   name: EvalWorldName,
   at: { now: Date; timeZone: string },
   seed: WorldSeed = { facts: [], memoryPaused: false },
+  options: { embedder?: Embedder } = {},
 ): Promise<EvalWorld> {
   // Numbered before the first await: worlds seeded at the same time must not share a slug.
   seeded += 1;
@@ -257,6 +274,39 @@ export async function seedEvalWorld(
       ...(fact.sensitive !== undefined && { sensitive: fact.sensitive }),
     });
     placeholders.set(`{{fact:${fact.name}}}`, saved.id);
+  }
+  const episodes = seed.episodes ?? [];
+  if (episodes.length > 0) {
+    const { embedder } = options;
+    if (embedder === undefined) throw new Error('Seeding episodes needs an embedder');
+    const embeddings: number[][] = [];
+    for (let from = 0; from < episodes.length; from += LLM_EMBED_BATCH_MAX) {
+      const batch = episodes.slice(from, from + LLM_EMBED_BATCH_MAX);
+      embeddings.push(
+        ...(await embedder.embed({ input: batch.map((each) => each.summary) })).embeddings,
+      );
+    }
+    for (const [index, episode] of episodes.entries()) {
+      const idOf = (ref: string) => {
+        const id = placeholders.get(ref);
+        if (id === undefined) throw new Error(`No seeded record ${ref}`);
+        return id;
+      };
+      const saved = await saveEpisode(
+        db,
+        actorFor(episode.member).context,
+        {
+          conversationId: null,
+          summary: episode.summary,
+          clientIds: episode.clients.map((ref) => ClientIdSchema.parse(idOf(ref))),
+          factIds: episode.facts.map((ref) => MemoryFactIdSchema.parse(idOf(ref))),
+          embedding: embeddings[index] ?? [],
+          embeddingModel: embedder.model,
+        },
+        { clock: new ManualClock(new Date(at.now.getTime() - episode.daysAgo * 86_400_000)) },
+      );
+      placeholders.set(`{{episode:${episode.name}}}`, saved.id);
+    }
   }
   if (seed.memoryPaused) await changeMemorySettings(db, owner, { paused: true });
 

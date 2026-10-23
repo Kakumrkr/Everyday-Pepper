@@ -1,8 +1,9 @@
 // `pnpm --filter @pepper/ai eval [--provider scripted|openai] [--record] [--set <set>]...
 //   [--case <id>]... [--chunk <n>] [--chunk-size <n>] [--trials <k>] [--max-cost <usd>] [--routine <model>]
 //   [--strong <model>] [--routine-effort <e>] [--strong-effort <e>] [--label <text>]
-//   [--cassettes <dir>] [--phase <n>] [--concurrency <n>]` (ADR-0027, ADR-0030, S27; `--phase`, S29;
-//   `--concurrency`, S31: cases at once, default 4). Replays cassettes by
+//   [--cassettes <dir>] [--phase <n>] [--concurrency <n>] [--retrieval]` (ADR-0027, ADR-0030, S27;
+//   `--phase`, S29; `--concurrency`, S31: cases at once, default 4; `--retrieval`, S31: the
+//   episode_retrieval set's recall@5 instead of the cases). Replays cassettes by
 // default, at no cost: every case (the files and those generated from the tool guides) runs
 // through the real agent loop and tools in a seeded world on Postgres: `EVAL_DATABASE_URL` (a
 // migrated database, the services' login), or a throwaway one in Docker. Only `--provider
@@ -12,13 +13,17 @@
 // either is reached, and an entry in the ledger whatever happens. A recording replays the
 // answers an earlier one already has for unchanged requests, so nothing is paid for twice.
 // `--cassettes` keeps each candidate model's answers in its own directory (default: the
-// provider's), since a request does not name the model that answered it.
+// provider's), since a request does not name the model that answered it. Embeddings (S31): the
+// hash embedder with scripted cassettes; with openai the recorded ones (`evals/embeddings/`),
+// a recording embedding what they lack with the real model under the same guards.
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { createDatabase, prepareDatabase, type DatabaseHandle } from '@pepper/db';
 import { loadOpenAiConfig, type OpenAiConfig } from '../openai/config.js';
+import { hashEmbedder, type Embedder } from '../embedder.js';
+import { OpenAiEmbedder } from '../openai/openai-embedder.js';
 import { OpenAiProvider } from '../openai/openai-provider.js';
 import type { LlmProvider } from '../provider.js';
 import { EvalSetSchema } from './case.js';
@@ -44,6 +49,13 @@ import {
   saveLedger,
 } from './files.js';
 import {
+  loadEmbeddingStore,
+  saveEmbeddingStore,
+  storeEmbedder,
+  type EmbeddingStore,
+} from './embeddings.js';
+import {
+  guardedEmbedder,
   guardedProvider,
   refuseCumulative,
   PHASE_CAPS_USD,
@@ -55,11 +67,15 @@ import {
   type LedgerEntry,
 } from './ledger.js';
 import { markdownReport } from './report.js';
+import { loadRetrievalSet, retrievalTexts, runRetrieval } from './retrieval.js';
 import { runEvals, summarize, type CaseResult } from './runner.js';
 import { loopSubject } from './subject.js';
 import { toolEvalCases } from '../tools/eval-cases.js';
 
 const print = (text: string) => process.stdout.write(`${text}\n`);
+
+/** The embedding model the evals record with (playbook D-5). */
+const EVAL_EMBEDDING_MODEL = 'text-embedding-3-small';
 
 async function main(): Promise<number> {
   const { values } = parseArgs({
@@ -80,6 +96,7 @@ async function main(): Promise<number> {
       cassettes: { type: 'string' },
       phase: { type: 'string' },
       concurrency: { type: 'string', default: '4' },
+      retrieval: { type: 'boolean', default: false },
     },
   });
   const here = new URL('../../evals/', import.meta.url);
@@ -117,6 +134,9 @@ async function main(): Promise<number> {
     print('--concurrency is 1 to 8');
     return 2;
   }
+  const embeddings: EmbeddingStore | null =
+    provider === 'openai' ? await loadEmbeddingStore(paths, EVAL_EMBEDDING_MODEL) : null;
+  if (values.retrieval) return retrieval(paths, embeddings, values.record ? phase : null);
   const sets = (values.set ?? []).map((set) => EvalSetSchema.parse(set));
   const cases = selectCases([...(await loadCases(paths)), ...toolEvalCases()], {
     sets,
@@ -143,6 +163,7 @@ async function main(): Promise<number> {
     placeholders: ReadonlyMap<string, string>,
   ) => LlmProvider;
   const recorded = new Map<string, CassetteStep[][]>();
+  let embedder: Embedder = embeddings === null ? hashEmbedder() : storeEmbedder(embeddings);
   let recording: {
     tracker: SpendTracker;
     ledgerEntry: Omit<LedgerEntry, 'status' | 'actualUsd' | 'byModel' | 'charsPerToken'>;
@@ -223,6 +244,17 @@ async function main(): Promise<number> {
       },
     };
     const real = guardedProvider(new OpenAiProvider(config), tracker);
+    embedder = storeEmbedder(
+      embeddings ?? { version: 1, model: EVAL_EMBEDDING_MODEL, vectors: {} },
+      guardedEmbedder(
+        new OpenAiEmbedder({
+          apiKey: config.apiKey,
+          model: EVAL_EMBEDDING_MODEL,
+          timeoutMs: config.timeoutMs,
+        }),
+        tracker,
+      ),
+    );
     providerFor = (caseId, trial, placeholders) => {
       const runs = recorded.get(caseId) ?? [];
       recorded.set(caseId, runs);
@@ -250,7 +282,7 @@ async function main(): Promise<number> {
         cases,
         trials,
         concurrency,
-        subject: loopSubject(database.db),
+        subject: loopSubject(database.db, { embedder }),
         providerFor: (evalCase, trial, world) =>
           providerFor(evalCase.id, trial, world.placeholders),
       });
@@ -261,7 +293,8 @@ async function main(): Promise<number> {
     failure = error;
   }
   if (recording !== null) {
-    // Whatever happened, what was paid for is kept: the answers and the ledger entry.
+    // Whatever happened, what was paid for is kept: the answers, embeddings, the ledger entry.
+    if (embeddings !== null) await saveEmbeddingStore(paths, embeddings);
     for (const [caseId, runs] of recorded) {
       const kept = [...(earlier.get(caseId)?.trials ?? [])];
       runs.forEach((steps, trial) => {
@@ -320,6 +353,91 @@ async function main(): Promise<number> {
   );
   print(report);
   return summary.meetsGates ? 0 : 1;
+}
+
+/**
+ * The episode_retrieval set (S31): recall@5 on the recorded embeddings (openai), or on the
+ * hash embedder (scripted: a smoke run, not the gate). A recording embeds what the store lacks
+ * (the set's texts only, a few thousand tokens), under the phase's cap, with a ledger entry.
+ */
+async function retrieval(
+  paths: { root: string; budgetDoc: string },
+  store: EmbeddingStore | null,
+  /** The phase a recording is for (`null`: replay only). */
+  phase: number | null,
+): Promise<number> {
+  const set = await loadRetrievalSet(paths);
+  let embedder: Embedder = store === null ? hashEmbedder() : storeEmbedder(store);
+  let tracker: SpendTracker | null = null;
+  const ledger = await loadLedger(paths);
+  if (phase !== null && store !== null) {
+    const apiKey = process.env['OPENAI_API_KEY'];
+    if (apiKey === undefined || apiKey === '') {
+      print('Recording needs OPENAI_API_KEY in the environment.');
+      return 2;
+    }
+    const prices = await loadPrices(paths);
+    const phaseSpent = phaseSpentUsd(ledger, phase);
+    tracker = new SpendTracker({
+      prices,
+      spentBeforeUsd: spentUsd(ledger),
+      capUsd: 0.01,
+      phase: { spentBeforeUsd: phaseSpent, capUsd: PHASE_CAPS_USD[phase] ?? 0 },
+    });
+    const reason = tracker.stopReason();
+    if (reason !== null) {
+      print(`Refused: ${reason}`);
+      return 2;
+    }
+    embedder = storeEmbedder(
+      store,
+      guardedEmbedder(
+        new OpenAiEmbedder({ apiKey, model: EVAL_EMBEDDING_MODEL, timeoutMs: 30_000 }),
+        tracker,
+      ),
+    );
+    // Embedded together, in as few calls as the batch limit allows.
+    const texts = retrievalTexts(set);
+    for (let from = 0; from < texts.length; from += 64) {
+      await embedder.embed({ input: texts.slice(from, from + 64) });
+    }
+  }
+  const database = await evalDatabase();
+  let result: Awaited<ReturnType<typeof runRetrieval>>;
+  try {
+    result = await runRetrieval(database.db, embedder, set);
+  } finally {
+    await database.close();
+  }
+  if (tracker !== null && store !== null) {
+    await saveEmbeddingStore(paths, store);
+    await saveLedger(paths, {
+      ...ledger,
+      entries: [
+        ...ledger.entries,
+        {
+          id: ledger.entries.length + 1,
+          at: new Date().toISOString(),
+          label: phaseLabel(phase ?? 7, 'episode_retrieval embeddings'),
+          cases: set.queries.length,
+          trials: 1,
+          estimateUsd: 0.01,
+          status: 'completed',
+          actualUsd: tracker.runUsd,
+          byModel: tracker.byModel(),
+          charsPerToken: tracker.charsPerToken(),
+        },
+      ],
+    });
+    print(`Spent $${tracker.runUsd.toFixed(6)} on embeddings.`);
+  }
+  print(
+    `episode_retrieval recall@5: ${String(result.found)}/${String(result.queries)} (${(result.recall * 100).toFixed(1)}%), gate 95%: ${result.meetsGate ? 'met' : 'missed'}`,
+  );
+  for (const miss of result.misses) {
+    print(`- missed "${miss.query}" (${miss.expected}): got ${miss.got.join(', ')}`);
+  }
+  return result.meetsGate ? 0 : 1;
 }
 
 /** The key from the environment only; the models and efforts from the flags or the environment. */

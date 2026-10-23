@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_29",
+              "name": "propose_rule",
+              "arguments": "{\"kind\": \"minimum_notice\", \"staffMemberId\": \"{{staff:jess}}\", \"minutes\": 120, \"days\": null, \"count\": null, \"startDate\": null, \"endDate\": null, \"weekday\": null, \"notBefore\": null, \"notAfter\": null, \"closed\": null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Only an owner or manager can set booking rules, so ask Lena or Cara.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

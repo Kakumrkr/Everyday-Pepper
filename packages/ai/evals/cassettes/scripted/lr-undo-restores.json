@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_19",
+              "name": "propose_rule",
+              "arguments": "{\"kind\": \"hours_limit\", \"staffMemberId\": null, \"minutes\": null, \"days\": null, \"count\": null, \"startDate\": null, \"endDate\": null, \"weekday\": 3, \"notBefore\": \"10:00\", \"notAfter\": null, \"closed\": false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Approve it on the card and the rule applies to every new booking.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_20",
+              "name": "find_clients",
+              "arguments": "{\"name\": \"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_21",
+              "name": "create_booking",
+              "arguments": "{\"clientId\": \"{{client:sara}}\", \"serviceId\": \"{{service:haircut}}\", \"staffMemberId\": \"{{staff:jess}}\", \"date\": \"2026-11-04\", \"time\": \"09:00\", \"emailClient\": null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Sara Kim's haircut with Jess on Wednesday at 9am is ready: approve it on the card.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}
