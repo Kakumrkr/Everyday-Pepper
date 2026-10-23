@@ -1,3 +1,5 @@
+'use client';
+
 import { MEMORY_LIMITS, type MemoryFactShown } from '@pepper/contracts';
 import { useId, useState, type SubmitEvent } from 'react';
 import { buttonClass, chipClass, cx } from '../class-names.js';

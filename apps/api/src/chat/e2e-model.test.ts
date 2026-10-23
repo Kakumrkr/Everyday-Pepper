@@ -169,6 +169,28 @@ describe('E2eModel (the journeys’ scripted model, never in production)', () =>
     expect((await model.respond(request([said, ...read, ...saved]))).text).toBe('Saved.');
   });
 
+  it('says what memory recalled about a client, and nothing once it is forgotten (S32)', async () => {
+    const said = user('What do you know about Maria?');
+    const first = await model.respond(request([said]));
+    expect(JSON.parse(first.toolCalls[0]?.arguments ?? '')).toEqual({ name: 'Maria' });
+    const lookup = (memory: unknown[]) =>
+      answered(first, {
+        find_clients: {
+          untrusted_data: JSON.stringify({
+            status: 'answered',
+            data: { matches: [{ clientId: 'cli-maria', name: 'Maria L.', memory }] },
+          }),
+        },
+      });
+    const known = lookup([{ factId: 'f1', key: 'allergy', value: 'PPD', sensitive: true }]);
+    expect((await model.respond(request([said, ...known]))).text).toBe(
+      'About Maria: allergy: PPD.',
+    );
+    expect((await model.respond(request([said, ...lookup([])]))).text).toBe(
+      "I don't know anything about Maria yet.",
+    );
+  });
+
   it('can be "down" without tripping the shared circuit breaker, and offers help otherwise', async () => {
     const down = await model
       .respond(request([user('Simulate an outage')]))

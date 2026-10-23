@@ -18,6 +18,7 @@ import type {
 //   "Move <client>'s booking on YYYY-MM-DD to HH:MM"
 //   "Remind me to <something>"
 //   "Remember <client>'s <what> is <value>"                     (S30: a remembered fact)
+//   "What do you know about <client>?"                          (S32: what memory recalls)
 //   "Block YYYY-MM-DD HH:MM-HH:MM for <staff>"
 //   "What does YYYY-MM-DD look like?"
 //   "Simulate an outage"                                        (the model can't be reached)
@@ -28,6 +29,7 @@ const PICKED = /^Book \w{3} (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) with (\S+) inst
 const MOVE = /^Move (\S+)'s booking on (\d{4}-\d{2}-\d{2}) to (\d{2}:\d{2})/i;
 const REMIND = /^Remind me to (.+)$/i;
 const REMEMBER = /^Remember (\S+)'s (.+?) is (.+)$/i;
+const RECALL = /^What do you know about (\S+?)\??$/i;
 const BLOCK = /^Block (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})-(\d{2}:\d{2}) for (\S+)/i;
 const DAY = /^What does (\d{4}-\d{2}-\d{2}) look like/i;
 
@@ -149,6 +151,28 @@ export class E2eModel implements LlmProvider {
         value: at(remember, 3).trim(),
         sensitive: null,
       });
+    }
+    const recall = RECALL.exec(said);
+    if (recall !== null) {
+      const clients = results.get('find_clients');
+      if (clients === undefined) return call('find_clients', { name: at(recall, 1) });
+      const matches = clients.data?.['matches'];
+      const match: unknown = Array.isArray(matches) ? matches[0] : undefined;
+      // The facts the loop filled in from memory, read live (a forgotten one is gone).
+      const memory =
+        typeof match === 'object' && match !== null
+          ? (match as Record<string, unknown>)['memory']
+          : undefined;
+      const facts = (Array.isArray(memory) ? memory : []).flatMap((fact: unknown) => {
+        const key = idOf(fact, 'key');
+        const value = idOf(fact, 'value');
+        return key === null || value === null ? [] : [`${key.replaceAll('_', ' ')}: ${value}`];
+      });
+      return reply(
+        facts.length === 0
+          ? `I don't know anything about ${at(recall, 1)} yet.`
+          : `About ${at(recall, 1)}: ${facts.join('; ')}.`,
+      );
     }
     const block = BLOCK.exec(said);
     if (block !== null) {
