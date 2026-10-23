@@ -546,10 +546,8 @@ describe('forget everywhere', () => {
     // The provider's opaque reasoning may hold it too: dropped, the phase kept.
     expect(call?.replay).toEqual([{ type: 'pepper.message_phase', phase: 'commentary' }]);
     expect(JSON.parse(tool?.content ?? '')).toEqual({ saved: 'allergy: [forgotten]' });
-    expect(tool?.card).toEqual({
-      kind: 'client_choice',
-      clients: [{ clientId: maria, name: 'Maria ([forgotten])' }],
-    });
+    // A card that held it is dropped: a longer text could break its shape.
+    expect(tool?.card).toBeNull();
     expect(answer?.content).toBe('Saved: Maria is allergic to [forgotten].');
     // A staff member's own chat is scrubbed too, though the owner deleted it.
     expect((await stored(jessChat))[0]?.content).toBe(
@@ -628,6 +626,58 @@ describe('forget everywhere', () => {
     expect(
       (await inTenant((tx) => listMemoryEpisodes(tx, 100))).map((row) => row.id),
     ).not.toContain(named.id);
+  });
+
+  it('touches only text since the fact existed, and the turn it came from', async () => {
+    const before = await chat(ana, [{ role: 'user', content: 'Ordered Olaplex for the shop.' }]);
+    const source = await chat(ana, [{ role: 'user', content: 'Lee is sensitive to Olaplex.' }]);
+    const id = await save(
+      fact({ type: 'client', id: lee }, 'product_allergy', 'Olaplex', {
+        source: 'chat',
+        sourceTurnId: source,
+      }),
+    );
+    const after = await chat(ana, [{ role: 'user', content: 'Skip Olaplex for Lee next time.' }]);
+    await inTenant((tx) => deleteMemoryFact(tx, id));
+    expect((await stored(before))[0]?.content).toBe('Ordered Olaplex for the shop.');
+    expect((await stored(source))[0]?.content).toBe('Lee is sensitive to [forgotten].');
+    expect((await stored(after))[0]?.content).toBe('Skip [forgotten] for Lee next time.');
+  });
+
+  it('finds values with quotes inside tool calls, and letters beyond ASCII', async () => {
+    const quoted = await save(
+      fact({ type: 'client', id: lee }, 'nickname', 'the "Queen" of curls'),
+    );
+    const accented = await save(fact({ type: 'client', id: lee }, 'drink', 'Crème brûlée latte'));
+    const told = await chat(ana, [
+      {
+        role: 'assistant',
+        content: 'Lee likes a crème brûlée latte.',
+        args: JSON.stringify({ value: 'the "Queen" of curls' }),
+      },
+      { role: 'tool', content: JSON.stringify({ saved: 'the "Queen" of curls' }) },
+    ]);
+    await inTenant(async (tx) => {
+      await deleteMemoryFact(tx, quoted);
+      await deleteMemoryFact(tx, accented);
+    });
+    const [call, tool] = await stored(told);
+    expect(call?.content).toBe('Lee likes a [forgotten].');
+    expect(call?.tool_calls).toEqual([
+      { id: 'call_1', name: 'remember_fact', arguments: '{"value":"[forgotten]"}' },
+    ]);
+    expect(JSON.parse(tool?.content ?? '')).toEqual({ saved: '[forgotten]' });
+  });
+
+  it('the scrub can only be reached by deleting a fact', async () => {
+    const direct = await inTenant((tx) =>
+      tx.execute(sql`SELECT memory_scrub(${tenant}::uuid, 'Maria', now(), NULL)`),
+    ).catch((e: unknown) => e);
+    expect(sqlState(direct)).toBe('42501');
+    const update = await as(ana, (tx) =>
+      tx.execute(sql`UPDATE conversation_messages SET content = 'rewritten'`),
+    ).catch((e: unknown) => e);
+    expect(sqlState(update)).toBe('42501');
   });
 
   it('a whole business can still be deleted', async () => {

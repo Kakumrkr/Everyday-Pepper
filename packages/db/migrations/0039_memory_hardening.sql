@@ -51,24 +51,25 @@ CREATE FUNCTION memory_needle_pattern(needle text) RETURNS text
         || '(?![[:alnum:]_])'
   $$;
 --> statement-breakpoint
--- `j` with `pattern` replaced by "[forgotten]" in every string value (never in keys, so a
--- card or tool call keeps its shape).
-CREATE FUNCTION memory_scrub_jsonb(j jsonb, pattern text) RETURNS jsonb
+-- `j` with `plain` and `escaped` (the same text as it appears inside JSON) replaced by
+-- "[forgotten]" in every string value, never in keys, so a tool call keeps its shape.
+CREATE FUNCTION memory_scrub_jsonb(j jsonb, plain text, escaped text) RETURNS jsonb
   LANGUAGE plpgsql IMMUTABLE PARALLEL SAFE
   SET search_path = public, pg_temp
   AS $$
 BEGIN
   CASE jsonb_typeof(j)
     WHEN 'string' THEN
-      RETURN to_jsonb(regexp_replace(j #>> '{}', pattern, '[forgotten]', 'gi'));
+      RETURN to_jsonb(regexp_replace(regexp_replace(j #>> '{}', plain, '[forgotten]', 'gi'),
+                                     escaped, '[forgotten]', 'gi'));
     WHEN 'array' THEN
       RETURN COALESCE(
-        (SELECT jsonb_agg(memory_scrub_jsonb(e, pattern) ORDER BY i)
+        (SELECT jsonb_agg(memory_scrub_jsonb(e, plain, escaped) ORDER BY i)
            FROM jsonb_array_elements(j) WITH ORDINALITY AS t(e, i)),
         '[]'::jsonb);
     WHEN 'object' THEN
       RETURN COALESCE(
-        (SELECT jsonb_object_agg(k, memory_scrub_jsonb(v, pattern))
+        (SELECT jsonb_object_agg(k, memory_scrub_jsonb(v, plain, escaped))
            FROM jsonb_each(j) AS t(k, v)),
         '{}'::jsonb);
     ELSE
@@ -77,14 +78,18 @@ BEGIN
 END;
 $$;
 --> statement-breakpoint
--- Forget everywhere (playbook principle 7): removes `needle` from the business's stored
--- conversations (every member's: what the model is sent again when a chat continues) and
--- deletes the episodes that mention it. In each conversation turn that held it, the text is
--- replaced by "[forgotten]" and the provider's opaque reasoning items are dropped (they may
--- hold it too; the message phase is kept). Values shorter than 3 characters are too ambiguous
--- to match and are left to their fact's deletion alone. Called only by the triggers below,
--- which run as the schema owner: messages and episodes are otherwise never updated.
-CREATE FUNCTION memory_scrub(p_tenant uuid, needle text) RETURNS void
+-- Forget everywhere (playbook principle 7): removes a fact's `needle` from the business's
+-- stored conversations (every member's: what the model is sent again when a chat continues)
+-- and deletes the episodes that mention it. Only text written since the fact existed (`since`)
+-- and the turn it came from (`source_turn`) is touched: that is everywhere the fact could have
+-- travelled, and it keeps a member from erasing a word from older chats by saving and deleting
+-- a fact (S29 review). In each turn that held it, the text is replaced by "[forgotten]", a card
+-- that held it is dropped (a longer text could break its shape), and the provider's opaque
+-- reasoning items are dropped (they may hold it too; the message phase is kept). Values shorter
+-- than 3 characters are too ambiguous to match and go with their fact alone. Called only by the
+-- triggers below, which run as the schema owner: messages are otherwise never updated.
+CREATE FUNCTION memory_scrub(p_tenant uuid, needle text, since timestamptz, source_turn uuid)
+  RETURNS void
   LANGUAGE plpgsql
   SET search_path = public, pg_temp
   AS $$
@@ -103,8 +108,9 @@ BEGIN
      SET content = regexp_replace(
                      regexp_replace(m.content, plain, '[forgotten]', 'gi'),
                      escaped, '[forgotten]', 'gi'),
-         tool_calls = memory_scrub_jsonb(m.tool_calls, plain),
-         card = memory_scrub_jsonb(m.card, plain),
+         tool_calls = memory_scrub_jsonb(m.tool_calls, plain, escaped),
+         card = CASE WHEN m.card::text ~* plain OR m.card::text ~* escaped THEN NULL
+                     ELSE m.card END,
          replay = COALESCE(
            (SELECT jsonb_agg(e) FROM jsonb_array_elements(m.replay) AS t(e)
              WHERE e ->> 'type' = 'pepper.message_phase'),
@@ -113,13 +119,18 @@ BEGIN
      AND m.turn_id IN (
        SELECT h.turn_id FROM conversation_messages h
         WHERE h.tenant_id = p_tenant
+          AND (h.created_at >= since OR h.turn_id = source_turn)
           AND (h.content ~* plain OR h.content ~* escaped
-               OR h.tool_calls::text ~* escaped OR h.card::text ~* escaped));
-  DELETE FROM memory_episodes WHERE tenant_id = p_tenant AND summary ~* plain;
+               OR h.tool_calls::text ~* escaped OR h.card::text ~* plain
+               OR h.card::text ~* escaped));
+  DELETE FROM memory_episodes
+   WHERE tenant_id = p_tenant AND created_at >= since AND summary ~* plain;
 END;
 $$;
 --> statement-breakpoint
-REVOKE EXECUTE ON FUNCTION memory_scrub(uuid, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION memory_scrub(uuid, text, timestamptz, uuid) FROM PUBLIC;
+--> statement-breakpoint
+REVOKE EXECUTE ON FUNCTION memory_scrub_jsonb(jsonb, text, text) FROM PUBLIC;
 --> statement-breakpoint
 -- After a fact is deleted (by a member, with its client, staff member, service or visit, or by
 -- Undo), its value and its Undo-window previous value are scrubbed in the same transaction.
@@ -137,8 +148,8 @@ BEGIN
     RETURN OLD;
   END IF;
   PERFORM set_config('app.user_id', '', true);
-  PERFORM memory_scrub(OLD.tenant_id, OLD.value);
-  PERFORM memory_scrub(OLD.tenant_id, OLD.previous_value);
+  PERFORM memory_scrub(OLD.tenant_id, OLD.value, OLD.created_at, OLD.source_turn_id);
+  PERFORM memory_scrub(OLD.tenant_id, OLD.previous_value, OLD.created_at, OLD.source_turn_id);
   PERFORM set_config('app.user_id', COALESCE(member, ''), true);
   RETURN OLD;
 END;
