@@ -45,6 +45,7 @@ import {
 } from '@pepper/db';
 import { requirePermission, type Actor } from '../actor.js';
 import { ConversationNotFoundError } from '../errors.js';
+import { queueEpisodeIn } from './episodes.js';
 
 // A member's conversations with the AI (ADR-0030). Every role reaches only its own (the
 // database's member scope says the same): a chat is personal, and leads oversee the AI through
@@ -274,7 +275,16 @@ export async function endTurn(
   db: Database,
   actor: Actor,
   turnId: ConversationTurnId,
-  input: { reason: TurnStopReason; progress: TurnProgress | null; now: Date },
+  input: {
+    reason: TurnStopReason;
+    progress: TurnProgress | null;
+    now: Date;
+    /**
+     * Queues the conversation's episode with the turn (S31, ADR-0037): the outbox key, when
+     * the app writes episodes (an embedding model is configured).
+     */
+    episodes?: { key: Buffer };
+  },
 ): Promise<boolean> {
   requirePermission(actor, 'ai.chat');
   const status: Exclude<TurnStatus, 'running'> =
@@ -283,14 +293,23 @@ export async function endTurn(
       : input.reason === 'cancelled'
         ? 'cancelled'
         : 'failed';
-  return withMember(db, actor.context, (tx) =>
-    finishTurn(tx, turnId, {
+  return withMember(db, actor.context, async (tx) => {
+    const ended = await finishTurn(tx, turnId, {
       status,
       stopReason: input.reason,
       at: input.now,
       progress: input.progress,
-    }),
-  );
+    });
+    const turn = ended && input.episodes !== undefined ? await findTurn(tx, turnId) : undefined;
+    if (turn !== undefined && input.episodes !== undefined) {
+      await queueEpisodeIn(
+        tx,
+        { conversationId: turn.conversationId, userId: turn.userId, turnId: turn.id },
+        { key: input.episodes.key, now: input.now },
+      );
+    }
+    return ended;
+  });
 }
 
 /** The member's conversations, most recently active first. */

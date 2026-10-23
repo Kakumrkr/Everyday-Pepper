@@ -61,12 +61,18 @@ export interface ConversationStore {
   toolCallResult(idempotencyKey: string): Promise<ToolCallResult>;
 }
 
-/** The store on Postgres, as the member in `actor`. */
+/**
+ * The store on Postgres, as the member in `actor`. With `episodeKey` (the outbox key, when the
+ * app writes episodes, S31) every turn that ends queues its conversation's episode.
+ */
 export function postgresConversationStore(
   db: Database,
   actor: Actor,
   clock: Clock,
+  options: { episodeKey?: Buffer } = {},
 ): ConversationStore {
+  const episodes =
+    options.episodeKey === undefined ? {} : { episodes: { key: options.episodeKey } };
   return {
     begin: (input) => beginTurn(db, actor, input),
     history: (conversationId, limit) => recentMessages(db, actor, conversationId, limit),
@@ -74,7 +80,7 @@ export function postgresConversationStore(
     record: (turn, messages, progress) =>
       recordTurnMessages(db, actor, turn, messages, progress, clock.now()),
     end: (turnId, reason, progress) =>
-      endTurn(db, actor, turnId, { reason, progress, now: clock.now() }),
+      endTurn(db, actor, turnId, { reason, progress, now: clock.now(), ...episodes }),
     toolCallResult: (key) => findToolCallResult(db, actor, key),
   };
 }

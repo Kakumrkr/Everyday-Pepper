@@ -4,6 +4,7 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import type { WorkerConfig } from './config.js';
 import { JobsModule } from './jobs/jobs.module.js';
 import { OutboxModule } from './outbox/outbox.module.js';
+import { episodeWriterFor } from './outbox/episodes.js';
 import { WebPusher } from './push/web-pusher.js';
 
 @Module({})
@@ -20,6 +21,7 @@ export class AppModule {
           key: outboxKeyFrom(config.outboxSecret),
           pollMs: config.outboxPollMs,
           pusher: config.push === null ? null : new WebPusher(config.push),
+          episodes: config.episodes === null ? null : episodeWriterFor(config.episodes),
         }),
         JobsModule.forRoot({
           key: outboxKeyFrom(config.outboxSecret),

@@ -1,10 +1,13 @@
 import {
   OutboxDedupeKeySchema,
   OutboxEmailSchema,
+  OutboxEpisodeSchema,
   OutboxMessageIdSchema,
   OutboxPushSchema,
   TenantIdSchema,
   type OutboxDedupeKey,
+  type OutboxEpisode,
+  type TenantId,
   type OutboxEmailInput,
   type OutboxMessageId,
   type OutboxPushInput,
@@ -91,9 +94,24 @@ export async function queuePush(
  */
 export type DeliveryResult = 'sent' | 'retry' | 'dead' | 'skipped' | 'dropped';
 
+/**
+ * Writes the episode an outbox message names (S31, ADR-0037): `@pepper/ai`'s writer, given by
+ * the worker. It throws to be retried (the model, the embedding, a changed conversation).
+ */
+export type EpisodeWriter = (
+  db: Database,
+  tenantId: TenantId,
+  job: OutboxEpisode,
+) => Promise<unknown>;
+
 export interface DeliveryOptions {
   key: Buffer;
   mailer: Mailer;
+  /**
+   * `null` or absent: this worker writes no episodes, so a queued one fails (and retries, then
+   * gives up with an alert): the api queues them only when an embedding model is configured.
+   */
+  episodes?: EpisodeWriter | null;
   /**
    * `null` or absent: this worker has no VAPID keys, so a queued push fails (and retries,
    * then gives up with an alert): the api queues pushes only when push is configured, so
@@ -136,6 +154,10 @@ export async function deliverOutboxMessage(
     );
     if (claimed.type === 'push') {
       dropped = !(await sendPush(db, tenantId, opened, options));
+    } else if (claimed.type === 'episode') {
+      const writer = options.episodes ?? null;
+      if (writer === null) throw new ChannelUnavailableError('episode');
+      await writer(db, tenantId, OutboxEpisodeSchema.parse(opened));
     } else {
       const content = OutboxEmailSchema.parse(opened);
       await options.mailer.send({ ...content, id });

@@ -63,7 +63,7 @@ export function isGonePush(error: unknown): boolean {
 
 /** A channel that this worker has not configured (push without VAPID keys). */
 export class ChannelUnavailableError extends Error {
-  constructor(channel: 'push') {
+  constructor(channel: 'push' | 'episode') {
     super(`No ${channel} sender is configured`);
     this.name = 'ChannelUnavailableError';
   }

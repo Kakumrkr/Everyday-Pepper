@@ -311,7 +311,12 @@ export class ChatService implements OnModuleDestroy {
       provider: this.provider,
       tools,
       memory: memberMemory(tools),
-      store: postgresConversationStore(this.db, actor, this.clock),
+      // Episodes need an embedding model (ADR-0034); the worker writes them (S31).
+      store: postgresConversationStore(this.db, actor, this.clock, {
+        ...(this.options.openai?.embeddingModel !== undefined && {
+          episodeKey: this.options.outboxKey,
+        }),
+      }),
       budget: {
         reserve: (estimate) =>
           reserveLlmTokens(this.db, actor.context.tenantId, { estimate, limits }, this.clock),
