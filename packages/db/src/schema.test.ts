@@ -8,6 +8,8 @@ import {
   autonomySettings,
   invites,
   memberships,
+  memoryEpisodes,
+  memoryFacts,
   pushSubscriptions,
   sessions,
   tasks,
@@ -119,5 +121,51 @@ describe('schema foreign keys', () => {
         onDelete: 'no action',
       },
     ]);
+  });
+});
+
+describe('memory (ADR-0034)', () => {
+  it('goes with its business, subject or member; keeps facts of a deleted account', () => {
+    expect(foreignKeys(memoryFacts)).toEqual(
+      expect.arrayContaining([
+        { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+        { from: ['created_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+        { from: ['tenant_id', 'client_id'], to: 'clients(tenant_id,id)', onDelete: 'cascade' },
+        {
+          from: ['tenant_id', 'staff_member_id'],
+          to: 'staff_members(tenant_id,id)',
+          onDelete: 'cascade',
+        },
+        { from: ['tenant_id', 'service_id'], to: 'services(tenant_id,id)', onDelete: 'cascade' },
+        { from: ['tenant_id', 'booking_id'], to: 'bookings(tenant_id,id)', onDelete: 'cascade' },
+      ]),
+    );
+    expect(foreignKeys(memoryEpisodes)).toEqual(
+      expect.arrayContaining([
+        { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+        {
+          from: ['tenant_id', 'user_id'],
+          to: 'memberships(tenant_id,user_id)',
+          onDelete: 'cascade',
+        },
+      ]),
+    );
+  });
+
+  it('declares one active value per subject and key, and the member-scope policies', () => {
+    const facts = getTableConfig(memoryFacts);
+    expect(facts.indexes.map((index) => index.config.name)).toContain('memory_facts_one_active');
+    expect(facts.policies.map((policy) => policy.name).sort()).toEqual([
+      'member_scope_delete',
+      'member_scope_insert',
+      'member_scope_read',
+      'member_scope_update',
+      'tenant_isolation',
+    ]);
+    expect(
+      getTableConfig(memoryEpisodes)
+        .policies.map((policy) => policy.name)
+        .sort(),
+    ).toEqual(['member_scope', 'tenant_isolation']);
   });
 });

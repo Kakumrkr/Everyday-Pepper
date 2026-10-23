@@ -12,6 +12,7 @@ export * from './repositories/clients.js';
 export * from './repositories/conversations.js';
 export * from './repositories/invites.js';
 export * from './repositories/memberships.js';
+export * from './repositories/memory.js';
 export * from './repositories/outbox.js';
 export * from './repositories/push-subscriptions.js';
 export * from './repositories/reminders.js';

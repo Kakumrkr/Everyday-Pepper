@@ -16,6 +16,23 @@ export function isUniqueViolation(error: unknown, constraint: string): boolean {
   return isViolation(error, UNIQUE_VIOLATION, constraint);
 }
 
+/**
+ * Whether `error` (or an error it wraps) is a refusal by a row-level security policy or a
+ * missing privilege (42501).
+ */
+export function isPolicyViolation(error: unknown): boolean {
+  for (let current = error, depth = 0; current instanceof Error && depth < 5; depth++) {
+    if ((current as Error & PgErrorFields).code === '42501') return true;
+    current = current.cause;
+  }
+  return false;
+}
+
+/** Whether `error` (or an error it wraps) is a foreign key violation of `constraint`. */
+export function isForeignKeyViolation(error: unknown, constraint: string): boolean {
+  return isViolation(error, '23503', constraint);
+}
+
 /** Whether `error` (or an error it wraps) is an exclusion violation of `constraint`. */
 export function isExclusionViolation(error: unknown, constraint: string): boolean {
   return isViolation(error, EXCLUSION_VIOLATION, constraint);
@@ -94,5 +111,16 @@ export class BookingIdempotencyKeyTakenError extends Error {
   constructor(options?: ErrorOptions) {
     super('Another booking already has this idempotency key', options);
     this.name = 'BookingIdempotencyKeyTakenError';
+  }
+}
+
+/**
+ * A memory fact's subject is not one the transaction may reach: no such client, staff member,
+ * service or booking in the business, or (staff) not one of theirs.
+ */
+export class MemorySubjectUnreachableError extends Error {
+  constructor() {
+    super('No such subject to remember a fact about');
+    this.name = 'MemorySubjectUnreachableError';
   }
 }

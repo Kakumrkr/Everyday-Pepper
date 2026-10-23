@@ -236,3 +236,36 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - web addresses are removed from the AI's text in code (M3), and one instruction line says claimed authority grants nothing (L5); everything else was fixed in tool descriptions;
   - eval cases were corrected only where they contradicted the world, the dial or the tools' privacy rules (listed in ADR-0033); holdout misses were left as they are;
   - the reserve (about $4.26 left under the $4.50 stop) was not spent: every gate was met without it.
+- **S28 Session Brief (user, 2026-10-23):**
+  - The user asked for the Phase 7 playbook with one recommendation per decision.
+  - Then: "You are also my technical advisor… we need better features and more features and efficient features than our competitors. Review your plan, if you can build a better plan you can, and start."
+  - Recorded as approval of the reviewed playbook and PCR-005. Any decision can still be adjusted at the S29 brief.
+- **S28 decisions (Claude, Phase 7 playbook §10, approved with it):**
+  - five sessions, S29–S33;
+  - facts recalled deterministically with their entity, plus a business-facts block;
+  - episodes recalled on demand through `search_memory`;
+  - exact vector search in V1, with HNSW past ~20k episodes a business;
+  - embeddings with `text-embedding-3-small` at 1536 dimensions;
+  - the AI saves explicit statements under `client_note.save`; inferences and untrusted sources are proposals;
+  - sensitive facts are sent only for members allowed to read them;
+  - one current value per fact, with the previous one kept 7 days for Undo;
+  - episodes: a per-conversation summary after 30 minutes, own-only, kept 365 days;
+  - learned rules through `rule.change`, always "ask";
+  - deleting on "What I know" is final and works everywhere;
+  - Phase 7 cap $1.00, enforced by `--phase-cap`;
+  - values live only in the memory tables, with ids everywhere else;
+  - visit notes are facts on a booking;
+  - a business pause switch;
+  - a "Remembered" chip.
+- **S29 Session Brief (user, 2026-10-23):** "Go ahead with your recommendations, start S29":
+  - embedding tests on fixtures shaped like OpenAI's documented answers, at $0;
+  - real embeddings recorded in S31, when the retrieval set exists.
+- **S29 decisions (Claude, in ADR-0034, within the approved playbook):**
+  - `embed` is a port of its own (`Embedder`), not a method on `LlmProvider`;
+  - forget scrubs every member's stored chats and episodes, but only text written since the fact existed plus its source turn (closes an erase-a-word attack);
+  - cards that held a forgotten value are dropped, and reasoning items in those turns too;
+  - values under 3 characters are not matched;
+  - staff read the business's, staff's and services' non-sensitive facts, change only their clients' and visits' facts, and get `ForbiddenError` on what they read but may not change;
+  - caps: 50 facts per subject, 20,000 per business, 5,000 episodes per member;
+  - the pause switch blocks saves from the chat and AI actions, and new episodes; people on screens still save, and everything can still be deleted;
+  - `--phase` is required to record, with the Phase 7 cap enforced in the runner.

@@ -1,7 +1,7 @@
 // `pnpm --filter @pepper/ai eval [--provider scripted|openai] [--record] [--set <set>]...
 //   [--case <id>]... [--chunk <n>] [--chunk-size <n>] [--trials <k>] [--max-cost <usd>] [--routine <model>]
 //   [--strong <model>] [--routine-effort <e>] [--strong-effort <e>] [--label <text>]
-//   [--cassettes <dir>]` (ADR-0027, ADR-0030, S27). Replays cassettes by
+//   [--cassettes <dir>] [--phase <n>]` (ADR-0027, ADR-0030, S27; `--phase`, S29). Replays cassettes by
 // default, at no cost: every case (the files and those generated from the tool guides) runs
 // through the real agent loop and tools in a seeded world on Postgres: `EVAL_DATABASE_URL` (a
 // migrated database, the services' login), or a throwaway one in Docker. Only `--provider
@@ -45,6 +45,10 @@ import {
 import {
   guardedProvider,
   refuseCumulative,
+  PHASE_CAPS_USD,
+  phaseLabel,
+  phaseSpentUsd,
+  refusePhase,
   spentUsd,
   SpendTracker,
   type LedgerEntry,
@@ -73,6 +77,7 @@ async function main(): Promise<number> {
       'strong-effort': { type: 'string' },
       label: { type: 'string' },
       cassettes: { type: 'string' },
+      phase: { type: 'string' },
     },
   });
   const here = new URL('../../evals/', import.meta.url);
@@ -87,6 +92,12 @@ async function main(): Promise<number> {
   }
   if (values.record && provider !== 'openai') {
     print('--record is only for --provider openai');
+    return 2;
+  }
+  // From Phase 7 every real run names its phase, which has its own cap (playbook §4).
+  const phase = values.phase === undefined ? null : Number(values.phase);
+  if (values.record && (phase === null || !Number.isInteger(phase) || phase < 7)) {
+    print('--record needs --phase <n> (7 or later): each phase has its own OpenAI cap');
     return 2;
   }
   const cassettes = values.cassettes ?? provider;
@@ -168,17 +179,37 @@ async function main(): Promise<number> {
       print(`Refused: ${overall}`);
       return 2;
     }
+    // Checked above: recording always has a phase.
+    const runPhase = phase ?? 0;
+    const phaseSpent = phaseSpentUsd(ledger, runPhase);
+    const phaseRefusal = refusePhase({
+      phase: runPhase,
+      spentUsd: phaseSpent,
+      estimateUsd: estimate,
+    });
+    if (phaseRefusal !== null) {
+      print(`Refused: ${phaseRefusal}`);
+      return 2;
+    }
     const effort = (route: 'routine' | 'strong') => config.reasoning?.[route] ?? 'default';
     print(
       `Estimated at most $${estimate.toFixed(2)} for ${String(cases.length)} cases × ${String(trials)} on ${config.models.routine} (${effort('routine')}) / ${config.models.strong} (${effort('strong')}); spent so far $${spent.toFixed(4)}.`,
     );
-    const tracker = new SpendTracker({ prices, spentBeforeUsd: spent, capUsd });
+    const tracker = new SpendTracker({
+      prices,
+      spentBeforeUsd: spent,
+      capUsd,
+      phase: { spentBeforeUsd: phaseSpent, capUsd: PHASE_CAPS_USD[runPhase] ?? 0 },
+    });
     recording = {
       tracker,
       ledgerEntry: {
         id: ledger.entries.length + 1,
         at: new Date().toISOString(),
-        label: values.label ?? `${sets.join('+') || 'all'} pass^${String(trials)}`,
+        label: phaseLabel(
+          runPhase,
+          values.label ?? `${sets.join('+') || 'all'} pass^${String(trials)}`,
+        ),
         cases: cases.length,
         trials,
         estimateUsd: estimate,

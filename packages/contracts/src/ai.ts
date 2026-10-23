@@ -174,3 +174,24 @@ export const RETRYABLE_LLM_ERRORS: ReadonlySet<LlmErrorCode> = new Set([
   'rate_limited',
   'unavailable',
 ]);
+
+/** At most this many texts in one embedding request, each at most `LLM_EMBED_TEXT_MAX` chars. */
+export const LLM_EMBED_BATCH_MAX = 64;
+export const LLM_EMBED_TEXT_MAX = 8_000;
+
+/**
+ * Texts to embed (Phase 7, ADR-0034): episode summaries when stored, a member's question when
+ * searched. Like every request, without contacts (the callers redact them).
+ */
+export const LlmEmbeddingRequestSchema = z.strictObject({
+  input: z.array(z.string().min(1).max(LLM_EMBED_TEXT_MAX)).min(1).max(LLM_EMBED_BATCH_MAX),
+});
+export type LlmEmbeddingRequest = z.infer<typeof LlmEmbeddingRequestSchema>;
+
+/** One embedding per input, in order, with the tokens billed (no output tokens). */
+export const LlmEmbeddingResponseSchema = z.strictObject({
+  embeddings: z.array(z.array(z.number()).min(1)).min(1).max(LLM_EMBED_BATCH_MAX),
+  usage: LlmUsageSchema,
+  model: z.string().min(1).max(200),
+});
+export type LlmEmbeddingResponse = z.infer<typeof LlmEmbeddingResponseSchema>;

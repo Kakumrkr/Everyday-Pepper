@@ -1,6 +1,6 @@
 {
-  "checkedOn": "2026-10-22",
-  "source": "https://developers.openai.com/api/docs/pricing (Standard, short context ≤272K) and each model's page; cache writes (30-minute default) apply to GPT-5.6 and later only (https://developers.openai.com/api/docs/guides/prompt-caching).",
+  "checkedOn": "2026-10-23",
+  "source": "https://developers.openai.com/api/docs/pricing (Standard, short context \u2264272K) and each model's page; cache writes (30-minute default) apply to GPT-5.6 and later only (https://developers.openai.com/api/docs/guides/prompt-caching). Embeddings (S29): text-embedding-3-small, input only.",
   "models": {
     "gpt-6-luna": {
       "inputPerMillionUsd": 0.1,
@@ -41,6 +41,11 @@
       "cachedInputPerMillionUsd": 0.1,
       "cacheWritePerMillionUsd": 2.5,
       "outputPerMillionUsd": 10
+    },
+    "text-embedding-3-small": {
+      "inputPerMillionUsd": 0.02,
+      "cachedInputPerMillionUsd": 0.02,
+      "outputPerMillionUsd": 0
     }
   }
 }

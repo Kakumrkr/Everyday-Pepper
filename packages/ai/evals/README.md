@@ -17,7 +17,9 @@ node dist/evals/eval-db.js /tmp/evaldb.url &   # a shared throwaway Postgres (se
 EVAL_DATABASE_URL=$(cat /tmp/evaldb.url) NODE_USE_ENV_PROXY=1 node dist/evals/cli.js \
   --provider openai --record --set safety --chunk 1 --chunk-size 7 \
   --routine <model> [--routine-effort low] --strong <model> [--strong-effort low] \
-  --cassettes openai --label "what this run is for"
+  --cassettes openai --phase 7 --label "what this run is for"
 ```
+
+From Phase 7 a recording names its phase (`--phase 7`): its ledger label starts with `P7 `, and the runner refuses a run (and stops the next call) that would take the phase past its cap (Phase 7: $1.00, Phase 7 playbook §4), on top of the run's cap and the $4.50 stop.
 
 `OPENAI_API_KEY` comes from the environment only. Record against `EVAL_DATABASE_URL`: loading Testcontainers inside the recorder replaces Node's fetch dispatcher, so behind a proxy the model cannot be reached. `NODE_USE_ENV_PROXY=1` makes Node's fetch use `HTTPS_PROXY` (Node ≥ 22.21).

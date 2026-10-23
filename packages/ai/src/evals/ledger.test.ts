@@ -9,8 +9,11 @@ import {
   emptyLedger,
   guardedProvider,
   LedgerSchema,
+  phaseLabel,
+  phaseSpentUsd,
   priceOf,
   refuseCumulative,
+  refusePhase,
   spentUsd,
   SpendTracker,
   type LedgerEntry,
@@ -85,6 +88,27 @@ describe('the budget ledger (playbook §4)', () => {
       'Spent $3.50 so far; this run could take the total to $4.51, past the $4.50 stop.',
     );
     expect(refuseCumulative({ spentUsd: 4.5, estimateUsd: 0 })).toMatch(/past the \$4\.50 stop/);
+  });
+
+  it('keeps each later phase within its cap (Phase 7: $1, playbook §4)', () => {
+    const ledger = LedgerSchema.parse({
+      ...emptyLedger(),
+      entries: [
+        entry(0.7),
+        entry(0.3, { id: 2, label: phaseLabel(7, 'memory_write pass^1') }),
+        entry(0.2, { id: 3, label: 'P7 memory_delete pass^3', status: 'stopped' }),
+        entry(0.9, { id: 4, label: 'P70 not phase 7' }),
+      ],
+    });
+    expect(phaseLabel(7, 'smoke')).toBe('P7 smoke');
+    expect(phaseSpentUsd(ledger, 7)).toBeCloseTo(0.5, 10);
+    expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 0.5 })).toBeNull();
+    expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 0.51 })).toBe(
+      'Phase 7 spent $0.50; this run could take it to $1.01, past its $1.00 cap.',
+    );
+    expect(refusePhase({ phase: 8, spentUsd: 0, estimateUsd: 0.01 })).toBe(
+      'Phase 8 has no OpenAI budget.',
+    );
   });
 
   it('renders the ledger as the Markdown table of docs/plan/ai-budget.md', () => {
@@ -167,6 +191,17 @@ describe('guardedProvider (the stop while a run is going)', () => {
       guardedProvider(new ScriptedProvider([]), total).respond(request),
     ).rejects.toBeInstanceOf(BudgetStopError);
     expect(total.stopReason()).toMatch(/\$4\.50 stop/);
+
+    const phase = new SpendTracker({
+      prices: PRICES,
+      spentBeforeUsd: 0,
+      capUsd: 1.5,
+      phase: { spentBeforeUsd: 1, capUsd: 1 },
+    });
+    await expect(
+      guardedProvider(new ScriptedProvider([]), phase).respond(request),
+    ).rejects.toBeInstanceOf(BudgetStopError);
+    expect(phase.stopReason()).toBe('The phase reached its $1.00 cap.');
   });
 
   it('stops a stream before it starts, and counts the streamed answer', async () => {

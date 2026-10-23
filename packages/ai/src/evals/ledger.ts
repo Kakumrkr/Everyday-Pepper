@@ -15,6 +15,41 @@ import { costOfUsage, type ModelPrice, type PriceTable } from './cost.js';
 export const CUMULATIVE_STOP_USD = 4.5;
 export const BUDGET_USD = 5;
 
+/**
+ * Each later phase's share of what is left (Phase 7 playbook §4, S28): a real run names its
+ * phase, its ledger label starts with `P<phase> `, and the runner refuses a run (and stops the
+ * next call) that would take the phase past its cap.
+ */
+export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1 };
+
+/** The ledger label of a run for `phase`: `P7 <label>`. */
+export function phaseLabel(phase: number, label: string): string {
+  return `P${String(phase)} ${label}`;
+}
+
+/** What the runs labelled for `phase` spent. */
+export function phaseSpentUsd(ledger: Ledger, phase: number): number {
+  const prefix = phaseLabel(phase, '');
+  return ledger.entries
+    .filter((entry) => entry.label.startsWith(prefix))
+    .reduce((total, entry) => total + entry.actualUsd, 0);
+}
+
+/** Why a run for `phase` may not start, or `null` when it may. */
+export function refusePhase(options: {
+  phase: number;
+  spentUsd: number;
+  estimateUsd: number;
+}): string | null {
+  const cap = PHASE_CAPS_USD[options.phase];
+  if (cap === undefined) return `Phase ${String(options.phase)} has no OpenAI budget.`;
+  const total = options.spentUsd + options.estimateUsd;
+  if (options.spentUsd >= cap || total > cap) {
+    return `Phase ${String(options.phase)} spent ${usd(options.spentUsd)}; this run could take it to ${usd(total)}, past its ${usd(cap)} cap.`;
+  }
+  return null;
+}
+
 const UsdSchema = z.number().min(0).max(100);
 
 export const ModelSpendSchema = z.strictObject({
@@ -118,13 +153,23 @@ export class SpendTracker {
   private tokensCounted = 0;
 
   constructor(
-    private readonly options: { prices: PriceTable; spentBeforeUsd: number; capUsd: number },
+    private readonly options: {
+      prices: PriceTable;
+      spentBeforeUsd: number;
+      capUsd: number;
+      /** The run's phase: what it spent before and its cap. */
+      phase?: { spentBeforeUsd: number; capUsd: number };
+    },
   ) {}
 
   /** Why the next call may not go out, or `null`. */
   stopReason(): string | null {
     if (this.runUsd >= this.options.capUsd) {
       return `Spent ${usd(this.runUsd, 4)}, this run's ${usd(this.options.capUsd)} cap.`;
+    }
+    const phase = this.options.phase;
+    if (phase !== undefined && phase.spentBeforeUsd + this.runUsd >= phase.capUsd) {
+      return `The phase reached its ${usd(phase.capUsd)} cap.`;
     }
     if (this.options.spentBeforeUsd + this.runUsd >= CUMULATIVE_STOP_USD) {
       return `The total reached the ${usd(CUMULATIVE_STOP_USD)} stop.`;

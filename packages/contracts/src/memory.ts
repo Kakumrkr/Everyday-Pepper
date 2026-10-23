@@ -1,0 +1,208 @@
+import { z } from 'zod';
+import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
+import { BookingIdSchema } from './bookings.js';
+import { ConversationIdSchema, ConversationTurnIdSchema } from './chat.js';
+import { ClientIdSchema } from './clients.js';
+import { UserIdSchema } from './tenancy.js';
+import { UtcDateTimeSchema } from './time.js';
+import { looksLikeContact } from './trust.js';
+
+// What Pepper remembers (Phase 7, ADR-0034, the Phase 7 playbook): facts about the business,
+// its clients, staff, services and single visits (visit notes), and short summaries of past
+// conversations (episodes) embedded for semantic recall. A fact has one current value per
+// subject and key; the previous value is kept only for the 7-day Undo window. Values live only
+// in the memory tables: deleting a fact removes it everywhere (playbook principle 7).
+
+export const MemoryFactIdSchema = z.uuid().toLowerCase().brand<'MemoryFactId'>();
+export type MemoryFactId = z.infer<typeof MemoryFactIdSchema>;
+
+export const MemoryEpisodeIdSchema = z.uuid().toLowerCase().brand<'MemoryEpisodeId'>();
+export type MemoryEpisodeId = z.infer<typeof MemoryEpisodeIdSchema>;
+
+export const MemorySubjectTypeSchema = z.enum([
+  'business',
+  'client',
+  'staff',
+  'service',
+  'booking',
+]);
+export type MemorySubjectType = z.infer<typeof MemorySubjectTypeSchema>;
+
+/** Whom or what a fact is about. A fact on a booking is a visit note ("Oct 12: 6N + 20 vol"). */
+export const MemorySubjectSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('business') }).strict(),
+  z.object({ type: z.literal('client'), id: ClientIdSchema }).strict(),
+  z.object({ type: z.literal('staff'), id: StaffMemberIdSchema }).strict(),
+  z.object({ type: z.literal('service'), id: ServiceIdSchema }).strict(),
+  z.object({ type: z.literal('booking'), id: BookingIdSchema }).strict(),
+]);
+export type MemorySubject = z.infer<typeof MemorySubjectSchema>;
+
+/**
+ * A fact's key: a short lowercase name ("allergy", "usual_service", "formula"). Templates
+ * suggest their own (Phase 7 S30); any key of this shape is accepted.
+ */
+export const MemoryFactKeySchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z][a-z0-9_]{0,39}$/, 'A key is a short lowercase name: letters, digits and _');
+export type MemoryFactKey = z.infer<typeof MemoryFactKeySchema>;
+
+/**
+ * Keys whose facts are sensitive unless said otherwise (health and personal circumstances,
+ * memory.md): shown only to members who may read that client's notes.
+ */
+export const SENSITIVE_MEMORY_KEYS: readonly string[] = [
+  'allergy',
+  'health',
+  'medication',
+  'pregnancy',
+  'injury',
+  'personal',
+];
+
+export const MEMORY_LIMITS = {
+  valueMax: 500,
+  factsPerSubject: 50,
+  factsPerBusiness: 20_000,
+  episodeSummaryMax: 1_000,
+  episodeClientsMax: 20,
+  episodesPerMember: 5_000,
+  searchResultsMax: 10,
+  /** How long a replaced value stays for Undo (the `client_note.save` window, ADR-0028). */
+  previousValueDays: 7,
+  /** How long an episode is kept (playbook D-9). */
+  episodeRetentionDays: 365,
+} as const;
+
+/** The size of every stored embedding (`text-embedding-3-small`, playbook D-5). */
+export const EMBEDDING_DIMENSIONS = 1536;
+
+/**
+ * A fact's value: what a member said, in a sentence at most. Never an email address or a phone
+ * number: contacts live on the client record (playbook principle 11).
+ */
+export const MemoryFactValueSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(MEMORY_LIMITS.valueMax)
+  .refine((value) => !looksLikeContact(value), {
+    message: 'Keep contact details on the client record, not in memory',
+  });
+
+/** Where a fact came from: a member on a screen, a member in the chat, or an AI action. */
+export const MemorySourceSchema = z.enum(['screen', 'chat', 'ai_action']);
+export type MemorySource = z.infer<typeof MemorySourceSchema>;
+
+/** `active` facts are used; `proposed` ones wait for a person's OK (from untrusted text). */
+export const MemoryFactStatusSchema = z.enum(['active', 'proposed']);
+export type MemoryFactStatus = z.infer<typeof MemoryFactStatusSchema>;
+
+/**
+ * A fact to save. `sensitive` defaults from the key (`SENSITIVE_MEMORY_KEYS`). Saving a key
+ * the subject already has replaces its value (one current value per subject and key).
+ */
+export const MemoryFactInputSchema = z
+  .object({
+    subject: MemorySubjectSchema,
+    key: MemoryFactKeySchema,
+    value: MemoryFactValueSchema,
+    sensitive: z.boolean().optional(),
+  })
+  .strict();
+export type MemoryFactInput = z.input<typeof MemoryFactInputSchema>;
+
+/** Where a fact being saved came from: the chat turn, when it came from one. */
+export const MemoryFactOriginSchema = z
+  .object({
+    source: MemorySourceSchema,
+    turnId: ConversationTurnIdSchema.nullable().default(null),
+    status: MemoryFactStatusSchema.default('active'),
+  })
+  .strict();
+export type MemoryFactOrigin = z.input<typeof MemoryFactOriginSchema>;
+
+/** A change to one fact: its value, its sensitivity, or both. */
+export const MemoryFactChangeSchema = z
+  .object({
+    value: MemoryFactValueSchema.optional(),
+    sensitive: z.boolean().optional(),
+  })
+  .strict()
+  .refine((change) => change.value !== undefined || change.sensitive !== undefined, {
+    message: 'Change the value or the sensitivity',
+  });
+export type MemoryFactChange = z.input<typeof MemoryFactChangeSchema>;
+
+/** A fact as the services return it. The previous value is internal (Undo only). */
+export const MemoryFactSchema = z.object({
+  id: MemoryFactIdSchema,
+  subject: MemorySubjectSchema,
+  key: MemoryFactKeySchema,
+  value: z.string(),
+  sensitive: z.boolean(),
+  status: MemoryFactStatusSchema,
+  source: MemorySourceSchema,
+  sourceTurnId: ConversationTurnIdSchema.nullable(),
+  createdByUserId: UserIdSchema.nullable(),
+  createdAt: UtcDateTimeSchema,
+  updatedAt: UtcDateTimeSchema,
+});
+export type MemoryFact = z.infer<typeof MemoryFactSchema>;
+
+/** Which facts to list: by subject type, one subject, status, and sensitivity. */
+export const MemoryFactQuerySchema = z
+  .object({
+    subjectType: MemorySubjectTypeSchema.optional(),
+    subject: MemorySubjectSchema.optional(),
+    status: MemoryFactStatusSchema.default('active'),
+    sensitive: z.boolean().optional(),
+    limit: z.number().int().min(1).max(500).default(200),
+  })
+  .strict();
+export type MemoryFactQuery = z.input<typeof MemoryFactQuerySchema>;
+
+/** An embedding: `EMBEDDING_DIMENSIONS` finite numbers. */
+export const EmbeddingSchema = z.array(z.number()).length(EMBEDDING_DIMENSIONS);
+export type Embedding = z.infer<typeof EmbeddingSchema>;
+
+/** An embedding model's id, as the provider names it. */
+export const EmbeddingModelSchema = z
+  .string()
+  .regex(/^[a-z0-9][a-z0-9._-]{0,79}$/, 'An embedding model id');
+
+/**
+ * A summary of one past conversation (written by the episode job, S31), with the clients it
+ * names (so it goes with them) and its embedding. Own-only: a member recalls their own.
+ */
+export const MemoryEpisodeInputSchema = z
+  .object({
+    conversationId: ConversationIdSchema.nullable(),
+    summary: z.string().trim().min(1).max(MEMORY_LIMITS.episodeSummaryMax),
+    clientIds: z.array(ClientIdSchema).max(MEMORY_LIMITS.episodeClientsMax).default([]),
+    embedding: EmbeddingSchema,
+    embeddingModel: EmbeddingModelSchema,
+  })
+  .strict();
+export type MemoryEpisodeInput = z.input<typeof MemoryEpisodeInputSchema>;
+
+export const MemoryEpisodeSchema = z.object({
+  id: MemoryEpisodeIdSchema,
+  conversationId: ConversationIdSchema.nullable(),
+  summary: z.string(),
+  clientIds: z.array(ClientIdSchema),
+  createdAt: UtcDateTimeSchema,
+});
+export type MemoryEpisode = z.infer<typeof MemoryEpisodeSchema>;
+
+/** An episode found by similarity: `similarity` is the cosine similarity, -1 to 1. */
+export const MemoryEpisodeMatchSchema = MemoryEpisodeSchema.extend({
+  similarity: z.number().min(-1.0001).max(1.0001),
+});
+export type MemoryEpisodeMatch = z.infer<typeof MemoryEpisodeMatchSchema>;
+
+/** The business's memory settings: whether Pepper learns new things (playbook D-15). */
+export const MemorySettingsSchema = z.object({ paused: z.boolean() }).strict();
+export type MemorySettings = z.infer<typeof MemorySettingsSchema>;

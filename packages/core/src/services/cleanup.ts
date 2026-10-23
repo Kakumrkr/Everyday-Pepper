@@ -1,11 +1,13 @@
 import {
+  clearExpiredMemoryPreviousValues,
   deleteExpiredBookingVerifications,
   deleteFinishedOutboxMessages,
+  deleteOldMemoryEpisodes,
   listTenantIdsForCleanup,
   withTenant,
   type Database,
 } from '@pepper/db';
-import type { TenantId } from '@pepper/contracts';
+import { MEMORY_LIMITS, type TenantId } from '@pepper/contracts';
 import type { Clock } from '../clock.js';
 import { expireProposals } from './ai-actions.js';
 import { deleteIdleConversationsIn } from './conversations.js';
@@ -14,7 +16,9 @@ import { deleteIdleConversationsIn } from './conversations.js';
 // less personal data is kept. It lists the businesses and then deletes, under each business's
 // tenant and in small batches (short transactions), what is past its retention. It also marks
 // the AI's proposals whose time ran out as expired (ADR-0028), so nothing offers them again, and
-// deletes conversations with the AI 90 days after their last message (ADR-0030).
+// deletes conversations with the AI 90 days after their last message (ADR-0030). From Phase 7
+// (ADR-0034) it clears memory facts' replaced values once their Undo window ends and deletes
+// episodes after a year.
 
 /** How long an expired booking request (name, email, phone) is kept after it expires. */
 export const BOOKING_REQUEST_RETENTION_MS = 24 * 60 * 60_000;
@@ -33,6 +37,8 @@ export interface CleanupResult {
   outboxMessages: number;
   expiredProposals: number;
   conversations: number;
+  memoryPreviousValues: number;
+  memoryEpisodes: number;
 }
 
 /** One clean-up pass over every business, as of `clock.now()`. */
@@ -46,7 +52,10 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
     outboxMessages: 0,
     expiredProposals: 0,
     conversations: 0,
+    memoryPreviousValues: 0,
+    memoryEpisodes: 0,
   };
+  const episodesBefore = new Date(now - MEMORY_LIMITS.episodeRetentionDays * 86_400_000);
   let after: TenantId | null = null;
   for (;;) {
     const page: TenantId[] = await listTenantIdsForCleanup(db, after, TENANT_PAGE);
@@ -68,6 +77,12 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
         tenantId,
         (tx) => deleteIdleConversationsIn(tx, new Date(now), CONVERSATION_BATCH),
         CONVERSATION_BATCH,
+      );
+      result.memoryPreviousValues += await inBatches(db, tenantId, (tx) =>
+        clearExpiredMemoryPreviousValues(tx, new Date(now), DELETE_BATCH),
+      );
+      result.memoryEpisodes += await inBatches(db, tenantId, (tx) =>
+        deleteOldMemoryEpisodes(tx, episodesBefore, DELETE_BATCH),
       );
     }
     result.businesses += page.length;

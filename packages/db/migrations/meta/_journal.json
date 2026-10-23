@@ -260,6 +260,27 @@
       "when": 1792596193960,
       "tag": "0036_s26_trust_views",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792720858458,
+      "tag": "0037_vector_extension",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792720859383,
+      "tag": "0038_memory",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1792720874485,
+      "tag": "0039_memory_hardening",
+      "breakpoints": true
     }
   ]
 }
