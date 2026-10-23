@@ -450,7 +450,9 @@ test('Stop ends a running turn, and leaving the chat cancels it', async ({ page 
             headers: { origin: new URL(page.url()).origin },
           })
         ).status(),
-      { timeout: 6_000, intervals: [250] },
+      // Every attempt counts towards the 20-turns-in-5-minutes limit (ADR-0030): at 250 ms a
+      // slow runner used it up and got 429 (S31 CI); at 500 ms it takes at most 12.
+      { timeout: 6_000, intervals: [500] },
     )
     .toBe(200);
 });

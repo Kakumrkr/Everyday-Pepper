@@ -1007,7 +1007,7 @@ Everything each session did, oldest first: what was built, the checks run and th
     - Playwright 76/76 (the Autonomy journey checks the ask-only booking-rule row) against a local stack without Docker images, with CI's headless shell.
     - Found while checking:
       - the real-model replay must use the recorded embeddings;
-      - two waits needed CI-sized limits: the hostile loop (6 s alone, 60 s missed next to the replay) and the two-factor redirect in the onboarding helper.
+      - two waits needed CI-sized limits: the hostile loop (6 s alone, 60 s missed next to the replay) and the two-factor redirect in the onboarding helper; on CI, the Stop/leave chat journey's poll used up the 20-turns limit (each refused attempt counts) and got 429, so it polls every 500 ms instead of 250 ms.
   - **Not done / for later (S32):**
     - narrow `remember_fact`'s wording, re-record, and empty the known misses;
     - S33's pass^3 (about $0.57) does not fit the $0.32 left in Phase 7: a decision at its brief.
