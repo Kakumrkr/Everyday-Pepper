@@ -1,31 +1,17 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-23 · **Plan version:** 0.29 · **Current phase:** 7 — Memory ([Phase 7 playbook](phase-7-playbook.md), [PCR-005](changes/PCR-005.md)); **S31 done** (episodes and learned rules, recorded on Luna + Sol, [ADR-0037](../adr/0037-episodes-and-learned-rules.md)); **M2 done** (a leaner workflow) → next: **S32a** ("What I know", profile memory, visit notes; built on the fakes)
+**Last updated:** 2026-10-23 · **Plan version:** 0.29 · **Current phase:** 7 — Memory ([Phase 7 playbook](phase-7-playbook.md), [PCR-005](changes/PCR-005.md)); **S31 done** (episodes and learned rules, recorded on Luna + Sol, [ADR-0037](../adr/0037-episodes-and-learned-rules.md)); **S32a done** on branch `claude/kind-euler-4ts3n5`, pushed, no PR ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md)) → next: **S32b** (merge it, probe, re-record once, PR)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S32a** ("a" half: scripted model only; push the branch `claude/kind-euler-4ts3n5`, no PR, then give the S32b prompt). Brief approved (user, 2026-10-23): "Go ahead with your recommendations, ADR is pre-approved" → D-11 wins over the mockup (final confirm, no Undo on "What I know"); ADR-0038 pre-approved; if the session runs long, tasks 1–5 done cleanly and the chip polish moves to S32b.
-Tasks (each ends with tier 2 + commit + this section updated):
-1. [x] Contracts views + `/v1/memory` API (facts list/add/edit/delete, `facts/shown` for the chip, own episodes, pause), `no-store`, permissions; db test that the named list reaches no further and not across businesses.
-2. [x] Narrow `remember_fact` (closed days and hours are the business's; staff off/away/busy without "note"/"remember" → `block_time`); scripted cassettes green; the real-model replay is stale on all 192 cases until S32b records (expected).
-3. [x] `factIds` on `message.completed` and assistant history items (default `[]`; `memory-ids.ts` breaks the contracts cycle; history and expired turns re-derive them with `answerFacts`) + `Remembered` chip in `@pepper/ui` (fix/forget in place, confirm, axe) + web `RememberedFacts` (reads live via `facts/shown` on each open).
-4. [x] `/memory` "What I know" (the prototype's view is the mock-up, with D-11's final delete instead of its Undo): filters, groups (learned rules apart, linked to their screen), source and date, Edit/Delete where the role may, own episodes, pause switch (`settings.manage`); reached from the chat header (no new tab: the bottom bar is full). Playwright for tasks 4–6 runs once in task 6.
-5. [x] Client profile "What Pepper knows" (add by hand, edit, delete) + "Visit notes" (edit, delete; added from the visit) + visit notes on the booking sheet (read fresh on open, add/edit/delete); `readsNotes`/`managesNotes` abilities.
-6. [x] `e2e/tests/memory.spec.ts` (3 journeys × mobile/desktop, 6/6): AC-W3-1 (chat → "What I know" + profile, sensitive), the chip → forget → same chat no longer knows (AC-W7-2), visit note from the booking sheet, staff view, pause. Scripted model learned "What do you know about <client>?". Chat journeys' helpers moved to `chat-helpers.ts`; chat + accessibility specs 20/20. `Remembered` is `'use client'` (the web build caught it).
-7. [x] ADR-0038 (accepted, pre-approved), traceability (AC-W3-1, AC-W7-2), memory.md, dependency map, mockups README (no Undo).
-Next step: `/session-close` as an "a" half (end checks, push, no PR, S32b prompt).
+**S32b next** (the "b" half of S32): `git fetch origin claude/kind-euler-4ts3n5 && git merge origin/claude/kind-euler-4ts3n5` into the S32b branch. Then `/eval-record`: probe memory_write, learned_rules, scheduling (`tool-block-time-2`) and memory_recall (`mr-same-as-last-time`) on Luna + Sol; record the whole suite once (every cassette is stale: `remember_fact`'s guide changed, and the tool catalog is in every request); empty `KNOWN_REAL_MODEL_MISSES` in `packages/ai/src/evals/evals.int.test.ts`; `/session-close` (end checks, ai-budget, one PR, merge). Phase 7 budget left: about $0.32 of $1.00.
 
 ## Last sessions
-- **S31 Phase 7d (2026-10-23): episodes and learned rules, recorded on Luna + Sol, merged** ([ADR-0037](../adr/0037-episodes-and-learned-rules.md), pre-approved). Full entry in [session-log.md](session-log.md).
-  - **Built:**
-    - the episode job: through the outbox, 30 minutes after a chat's last turn; the routine model writes at most three sentences, which are scrubbed, embedded and stored, one episode per chat. Forgetting a fact deletes the episodes that named it (migration 0042, `fact_ids`); a racing forget makes the job reread;
-    - `search_memory`: the member's own top 5, by reference, untrusted;
-    - `propose_rule`: the dial action `rule.change`, locked to "ask"; owners and managers only; cuts hours or sets a rule, remembers it as a fact; Undo puts both back;
-    - evals: sets `episodic` and `learned_rules`, six more memory_safety cases, `episode_retrieval` (recall@5); every case fails if a rule changed during a member turn; recorded embeddings; cases run four at a time.
-  - **Recorded:** all 192 cases, twice (the user's choice after the first pass), **$0.38**; Phase 7 **$0.68 of $1.00**. Fixed from the recordings: "Note that…" went to `propose_rule` (guides), `closed: null` refused (code). `--phase-estimate-ok` for multi-turn cases near the cap (the user's choice).
-  - **Gates:** all met but memory_recall 16/17 (`mr-same-as-last-time`, carried by the user's choice, named in the replay test until S32). Episode recall@5 25/25; learned_rules 10/10 with 0 rules without an OK; memory_safety 14/14.
-  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,077 green; Playwright 76/76.
+- **S32a Phase 7e "a" half (2026-10-23): "What I know", the Remembered chip, visit notes on screens; pushed, no PR** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md), pre-approved). Full entry in [session-log.md](session-log.md).
+  - **Built:** `/v1/memory` (facts with names and visits, add, edit, final delete, `facts/shown`, own episodes, pause; answers parsed and `no-store`); `factIds` on `message.completed` and assistant history (default none); the `Remembered` chip (fix and forget in place); `/memory` (filters, groups, source lines, learned-rule links, own episodes, the pause switch for owners and managers); "What Pepper knows" and visit notes on the client profile and the booking sheet; `remember_fact` narrowed (a staff member off or away is `block_time`).
+  - **Checks:** `pnpm check` green; `pnpm test:integration` green but the real-model replay (192 stale cassettes, as planned for S32b); Playwright 82/82 (`memory.spec.ts`: AC-W3-1, AC-W7-2, visit note, staff view, pause); `/code-review` 8 fixes; `/security-review` no findings.
+  - **Also fixed:** ui card tests' timeout under coverage; e2e `unique()` collisions across workers.
 - **M2 maintenance (2026-10-23): a leaner workflow, merged** (the user's plan, after S31 ran long). No product code changed. Full entry in [session-log.md](session-log.md).
   - **Tests in tiers** (CLAUDE.md "Running tests"): while building, the changed package's tests and the touched integration files; at each checkpoint, typecheck and lint of what changed; at the end, `pnpm check`, `pnpm test:integration` and Playwright in full, once, one at a time. Same tests, run once instead of three or four times.
   - **Sessions that record the real model are split:** "a" builds on the fakes and pushes its branch, "b" merges it, probes the changed sets, records once and opens the PR. S32 is now S32a + S32b.
@@ -46,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S32a (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved": D-11 over the mock-up (final delete, no Undo); ADR-0038 pre-approved; scripted model only, branch pushed without a PR. **Claude (ADR-0038):** "What I know" from the chat header; 500 facts a page; the chip counts only active facts; `memory-ids.ts` for the chat contract.
 - **M2 (user, 2026-10-23, after S31):** asked how to make sessions take less time and fewer tokens without changing how the project runs; approved Claude's plan (test tiers, probe before recording, the three skills, the hook fix, fewer docs); chose the split rule **from S32** (not S33) and the **short** session-log entry. The S32 scope is unchanged, only cut in two.
 - **S31 (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved"; D-1 full re-record at the end and parallel eval runs; D-2 episodes linked to their facts by id; D-3 one per conversation; D-4 forgetting a rule's fact keeps the rule; D-5 rules only from stated preferences; D-6 no episode when nothing is worth remembering. **During the recording:** "Fix + re-record" (memory_write gate), "Estimate guard only" (`--phase-estimate-ok`), "Code fix only" (carry `mr-same-as-last-time`; narrow `remember_fact`'s wording in S32). **Claude (ADR-0037):** the worker imports `@pepper/ai`; a read tool may `prepare` outside the transaction; the remembered rule linked through the receipt; recorded int8 embeddings.
 - **S30b (user, 2026-10-23):** record S30 within the $1 cap, fix only what fails, PR and merge. Forget's reworded-value leak: the user chose **"Turn-level + verbatim"** (ADR-0036). **Claude:** runs packed by estimate (guards unchanged); three graders corrected where the model was right; stale S27 trials 2–3 dropped (pass^3 at S33).
@@ -75,11 +62,10 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S31 and M2 are done and merged (Phases 0–6; Phase 7 planning, store, facts in the AI, episodes and learned rules). Details in [session-log.md](session-log.md).
+S1–S31 and M2 are done and merged; S32a is pushed on `claude/kind-euler-4ts3n5` for S32b to merge (Phases 0–6; Phase 7 planning, store, facts in the AI, episodes and learned rules). Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S32a | "What I know", client profile memory and visit notes, "Remembered" chip, pause switch; narrow `remember_fact`'s wording ("Marco is off on Friday" is `block_time`); every eval green on the scripted cassettes; end checks; push the branch, no PR | 7e | AC-W3-1, AC-W7-2 in Playwright (scripted model); `pnpm check` green; integration green except the real-model replay, stale until S32b records |
 | S32b | Merge S32a's branch; probe memory_write, learned_rules, scheduling and memory_recall; re-record once; empty the replay test's known misses (`mr-same-as-last-time`); end checks; PR and merge | 7e | Every gate met on the re-record; one green CI run |
 | S33 | Full re-record, pass^3, security review, Phase 7 exit | 7f | Playbook §2 met |
 
