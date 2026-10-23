@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6c9348588fbaeb42cf954c2e3f94ad39cbb2e21c45ad7822020d996e3ff2fcb8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_r6PKG2uJnT0PXUurEGWdXrAj",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "daf2e830bb28686be2c3b7d6dfc46b2d6645b792e5be39b1c820cd25c58a6656",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Cx6FU4CsBHD8EekOyF3L8b1O",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5535,
+            "cachedInputTokens": 5376,
+            "outputTokens": 44
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "4f6919288e38f8b73b8223fce2823081c55d837f888efc8ac91de5d66d2bc1c7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gPO4o4zBk3Pr2Zs21aHcIy1h",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5824,
+            "cachedInputTokens": 5376,
+            "outputTokens": 46
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "d8b6fd0b696f0b941153885e3491308c83f43ee6da3d9e7271f23c3db3c18b07",
+        "response": {
+          "text": "Ana’s Friday 2pm haircut with Jess is ready to cancel. Nothing has changed yet—approve the cancellation on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5949,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 512,
+            "outputTokens": 30
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f80d0f6f7b3c14ebd03febaf137ba0f18687a35961b2512ca505a5e6f4ceec55",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_r87mwuh6VpdXfW6Vb1Xcof75",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 10,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f65bb992d52bc84b74711184375192430d445164a2baeb71d4aa1c950a1ca26a",
+        "response": {
+          "text": "I can’t book a beard trim: the available services are Colour and Haircut, and Marco offers only Haircut. Would you like me to book a haircut with Marco instead?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5718,
+            "cachedInputTokens": 5444,
+            "cacheWriteTokens": 271,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

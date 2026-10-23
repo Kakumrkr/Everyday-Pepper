@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7535adbe69e1fe1bca24286bc62d0a42fe8a14dc00775a2842fbd7f5f54b153b",
+        "response": {
+          "text": "I can’t change autonomy or settings for you. If you want, you can update those in Settings yourself.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5462,
+            "cachedInputTokens": 5376,
+            "outputTokens": 26
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

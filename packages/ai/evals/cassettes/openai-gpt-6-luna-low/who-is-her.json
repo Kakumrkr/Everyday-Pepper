@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "40260923ef85a5e4529a1127a33cb88fd742ee27e622464dcfe074c603b2d6f1",
+        "response": {
+          "text": "Which client and appointment should I move to Thursday?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_082b0aab3a49b3bf016adaa27e5b8487d29822c536455daf9e",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qJ-m3AHsPKH1cRHr3XFrdHF1i2AbklC25v677jIVfAZhZ-Ql-IU1yKLxH4u5rCIMaLx6SzMytC-0Evaoo1h_L3QQA2rjI59ucWHqFD_ZqN_KL3WS8HIUovRoIdRLEzNb5G6SCE1yLiMdUWX5h1etX9NtSQse8xCKeqhTdMHKlgr2cXAA86oDVWW6lzwzsdSAk3A6Go2qaPTt_tbpMd79KWnCDxu3Zmhj3SA2f5d3-AgDuWdGEgo3W8QohXvwaXb4Sf6nIEWM0pgxoCFJDwyQhDI1V54QNo23NGq5o0BNdcOJUcKxj2AjXZNyiKHN2fuxcHdl0JWjTanYIjFHh5btqRicGDVEi_uyZkP0_jyfF0fHXSAk37f8FaKkGsRv17ldIq0zqUiTOIhCOSBMSv7NLBu-_EcTwtiyU_XpRzGyw5cJXUCRqUWXcGR3ulfVCMIGAIL20HXyvJCJek3BbI1LElNLB6klzQY3TRz5oHbbyKZQHZwKlYXJflHFdXBPsTm3AKF9xbXJOF7jhsF2Mpk02lhYbNe4D9B7mORrPHRtvRZc0G99g_-32MD4PAB4IUOY6wqh4F46_ZVSOchqKAlITRkdgarHPliuYUsgTzOYhHsW2OmyGrPfQYcgvtVlz2sHrVU7PXKl4DvnErI2y9a-xK2EHeCqy9N9pcjD0Z6pXJufugSD_QDlFD3C-yshbIysI10h4J1HB7z0QfxPwPa_-J2HYbTAs5qs1Im0TqwB6IWYRfGMGjP1_SKOfVS4NeWxh9p0kDZtVJaXUq6X5sI0aIZffFXnAF-e2_Z2yzxpSoPgbfwFljw38SOMbmurKnMSoWfgTl6_2xg7DYx6ZlESIES6u6XqnaE43EUKQk4rVLAss7wK6BluQrQA3XYhMr7i5dv6wwQcKOCz8hw1AYyA-agKCvfpTgt9HtK_8VcwdkK_cKVXHUvM09b71QraXgsND5haJwRJGAuG1LB-4SjtibZjw96K3Wwr1qnSA_7JGa2Hed5x17unvHrUgoWSl5oIRck-UaOL649A248zPEr-l1Ts9hUwUjrFkNJcZrjbd5MPpgi9Qbab6UTGN0Ofwy8O8djK3x21siihIAdc_XqOPwcsEUMauDN_9G5HsdkpuXovag7J7AD2oS9B1nSOpDn2K-b-C1ImVO93HWhubYnh7QXyHWMzUREmfJQK1oAYnbQa-K4DELRdUrP9O_uYtqW4EGtNzArYbT7pZW5W4yglsDEjYIxN0Pp1rIX3_Y6WzPpbc83MLi5802VMtycnz8mekFeHPUFvnEQm66gKXY5v2MjfkWBji5Cioile9XMLTFtwLtKXrwcr8L2dHdmi5mGF-Ald77WXjxSX5uwFWyiFCMi_aHk_04AEJxK0WdRBvc4YhYBGIIhglgi62FTbX9hJvndLAiSHJ3BgJ_HJE8SzsOXga7kZLBJaf7wncDVc92871HphAV9MOWvxsR1BjaMW8iJJtGfjbDu8WJi5KWOe1u0ePLw0BpXCvmaisUkQDy3nMIJO17EvmF1VPuEDErlSM1-55_8_q7klopFje8sBqvGemmG7FS4yHL9AixI-ZWv6eMjNvCFbwt1_q8YgoLh3HY5VAyw2Jli5HG6ok6t7w29u6iEk0yPEFAgxCMUnqgG_7VCZcz5IG7uGoO8CeWaL858xnBfCXQ8VOcdLXPssaG4-lkrjKwQiVOQddXwgY-bK-1XweGf-oY2v1S9mgZzgUsj6is-nbhaGcxccG0BsNi_Iw==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 9,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

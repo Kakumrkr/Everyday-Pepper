@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "cd968bcca284b4a5c145bcb478ed80d7853f729e533fb0b6d6e1a0fa78187a09",
+        "response": {
+          "text": "Who should I move, and which appointment do you mean?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_05bced26059b09ef016adaa7c9a04487d296d823a1b00fc21a",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qfKHGcu_S_OGU-1YgANUpEQO9Ngma9HtLCmk_fBPP1UH5_66YVcPCUjRJ37cs6RyAnEwX5NAzdzgwc3xe94JVsIMFJoumXTkrbCn9aLErOWI-MK08F-quE4H8jJBLdYkKXShI_pw3tkB0gIE9dnUO1Jy4KdptqBYJW3dhbLXSLCtcJIB2NotBAGf7OmZfPaGb5lIP66_XkXulIxy6AqaBvG8FeXR3b6H8i17HhvomjqD8TSAJRrI6cqHpbtxinRlO_aT2_CG9SPdyjbjqPWCivIBiWwC0gBuswaT9RDp2_VcYLZRFgW97kqovRvjAsTqOVBMPvdCIN6DpOH6kHFKhLqOhMdQP0RueLmew-VpDfJh6x3ygBX4TnT2XjpRSBc3hQMeBd1HNMp6dBesfRJ3vxhucM0U2CabbU0go_Rl71ZJMMnuh375HD8h-j_AnB6mOP1ucbkQFzwPCMhI7-IShvtkvh8MlwCaYr1_VXb7T74aS5qMA_KXcYTOhzyS96E0MzNWSbz4HtnY3SZz5B0hZACAKKYeVaHzBeShQWwPWA-ocw12w5F-iappLIa7bKNYTerEYpKgLM6D_X55Rf4xiY4eoW_bVSGDmQACxvyyBjxn412vQY0MsXIjZR0cdrBT6wN343rDyU6b7mfi56qlTePhyHOJ2tjptoiSV5yAAMVS1SLEsp853fv1gBTDGgnDyD0pNZlXAt-8DC9uewAhFhS0ZKEPYnPBjHSNeKMIteUKMrrnGcJl241eUMtIeAF3JV_VRu7fDQXvzsr8VncOSqEsBXzGRSwwGX1zs7u1QRyPwCBSXZXDt2E1eN8I0_9g0b7ncp2IGsEJePV6yhS3g9F2ZEfl2i9a7xcTXL7bXuZ5MuzZRoNNo-sHv69_OEnj6kReOT9KyRabI03I1NckQPXmjacM8_J3RzTieiCyL1QRajtKwOXQJFtbZGTQxKInTHGqNvAR-6dDGm7AI2A13YcUoW8HS_adITdSwj1S4xM5F6T5nLm2s8Co9uNsIMSyLs--Xb_QtmXsrH6c0yKDYJaA41_FbhcEas-G7jmcAhqxRMlFrlhGW_5jo0A1WztVyEvI1vLzHKsn5QjXUBTaEUVt6zonBYtSxCSkYBJR_vjvTwUvW-dRQ_S-hWcFEWBe7ZndQD_ilhPSQC5jROiyUbWRjAFRzyFvNk3aV-FLR6s7u53HeuwBy3fGCYBNpuRwFnet0jo7vwfWUoWnP4diQA8ri_nTT4WDEM-BUz_0fppbcDU2iXkqMbqp-ZOWVYuEIgquZnsCWYGSnCeigvKvB-HNdFiYlCohzY6amXYZIrSuQg8aywDLcXV2TI0ER-IoUocvUX_Lfr4wv0vZaQ84mIHZZxJxDzFq173bcN5XKSeuOSHdDfSueGB60hVVPshm0c4N5IBov7RiP7cHv2CH0lQszpjRsR5_7hRkKx3bkB2i-gIQ0Yd4lWojbEPM48zYogTImuhA6cKzW3IJxVVlOlDt7gBEUNK_3uD6X76SQ-m-CivdMvTLBnt7G16Ej3ECOR-Ko3dW-ErH7-2_4W_8E6qNfRNPyp8m_mARLOJa9JVXyFCe1rGIs6T4D_tY01EBOvoHEAqBmrMJrU7AojPlLxJnfCMdFkYnwAtIfUpx8tiTum4aSTdn3PynJ7NKGQYn_11Rr1l2u62NK_oYcZ8J9FeQdQeq63crglcwGXuzQsJf1M=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5543,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 5540,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

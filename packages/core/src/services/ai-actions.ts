@@ -670,6 +670,8 @@ async function storeProposal(
       requestedBy,
       recordOwner: input.preview.recordOwner,
       expiresAt,
+      // On the service's clock, like `expiresAt`, so the two can never disagree.
+      createdAt: input.now,
     });
     if (row === undefined) {
       // The same key was stored meanwhile (a concurrent retry): that one is the answer.

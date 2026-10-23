@@ -104,15 +104,16 @@ export const EvalCaseSchema = z.strictObject({
     /**
      * The business afterwards (τ-bench style): the tools whose actions were done (receipts)
      * and proposed (waiting for a person), each listed once per expected action; `noWrites`:
-     * neither.
+     * neither; `nothingDone`: proposals allowed, nothing done (a bulk request may only ask).
      */
     actions: z
       .strictObject({
         done: z.array(LlmToolNameSchema).default([]),
         proposed: z.array(LlmToolNameSchema).default([]),
         noWrites: z.boolean().default(false),
+        nothingDone: z.boolean().default(false),
       })
-      .default({ done: [], proposed: [], noWrites: false }),
+      .default({ done: [], proposed: [], noWrites: false, nothingDone: false }),
   }),
 });
 export type EvalCase = z.infer<typeof EvalCaseSchema>;

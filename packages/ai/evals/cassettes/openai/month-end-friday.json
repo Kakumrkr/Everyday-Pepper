@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "78210a30dcf43d0ddb25a5ec4e3640e167947bde4d8ed1e02601be1cfa39cca0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_05zGcZcwAORJ7QhpKm8mm9dp",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-10-30\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5544,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 5541,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8d89c1eea97b475ec79bbc55daa42aa91393993247a433e5bc5151b4f96feefe",
+        "response": {
+          "text": "Friday, October 30: Ana R. has a confirmed haircut with Jess from 2:00 to 3:00 PM. No blocked time.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5776,
+            "cachedInputTokens": 5541,
+            "cacheWriteTokens": 232,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bd22d6b89af919d693157c2343f41401a52796af70cfd7ff481fe5673e65d262",
+        "response": {
+          "text": "I can only see Juniper Hair Studio’s calendar, not Bella Salon’s. If you want, I can show tomorrow’s bookings here for Juniper.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5452,
+            "cachedInputTokens": 5376,
+            "outputTokens": 41
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

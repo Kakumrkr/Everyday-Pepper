@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "75965c1317535570ffff9534f00fc919ecfc18fa66ebb1bc36819a6e5c049e7d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ls5cWlve35IJjuNeFmStddid",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5452,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 15,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "faea612b460427351511618d0d6b8d1742dc9ad9697bea697a5ff895a4cba17f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UInZAymNorK2Tcv3WK53RZgF",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-09\",\"days\":7,\"notBefore\":\"15:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5727,
+            "cachedInputTokens": 5449,
+            "cacheWriteTokens": 275,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3b7fc713c1afe269ffff91c22b9740dd569d33b7b2648f7ce8517281630755af",
+        "response": {
+          "text": "Yes—there are 12+ available Colour appointments next week. The first after 3 is Monday, Nov 9 at 3:00 PM with Jess. Other available times are mostly earlier in the day; would you like me to check later afternoons too?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6402,
+            "cachedInputTokens": 5724,
+            "cacheWriteTokens": 675,
+            "outputTokens": 57
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

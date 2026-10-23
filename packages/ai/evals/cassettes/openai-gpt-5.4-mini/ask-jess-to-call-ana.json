@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6294d6a522c50a6850b57d515c13a2a1e3c2982db7aaf3bfd6b391f759ccb75e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vYKuSnAa0QJ0yX37HryHv6rw",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_3JCZAEMbAhIqQ371fidKzUPZ",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_8v8DeEVduUmu9BFnQEPdW2N4",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Jess\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5449,
+            "cachedInputTokens": 5376,
+            "outputTokens": 61
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "a5a56a4ada7eb89d5884ff4c66627057a95c8859982bfcd5b950eafba51c3827",
+        "response": {
+          "text": "I found Ana R., but I couldn’t find a client named Jess to set the reminder for.\n\nIf you mean a teammate Jess, I can still add the todo if you want me to use Jess’s staff member name exactly as it appears in the system.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5873,
+            "cachedInputTokens": 5376,
+            "outputTokens": 56
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

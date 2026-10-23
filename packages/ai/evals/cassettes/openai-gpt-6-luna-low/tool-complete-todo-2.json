@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "70ba23d9478233b439b1c2f9c811392da1a432925bb7ee199df7fd3394a7a890",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_mwtvmTwZ3M4FPOT8qQUXU6cP",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 13,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cac5d2b379fff656e6f43731096685c0551377c3f16e240e0799776a586812ef",
+        "response": {
+          "text": "I don’t see an open to-do about ordering the foils—only “Call Maria about her colour.” I haven’t changed anything.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5554,
+            "cachedInputTokens": 5447,
+            "cacheWriteTokens": 104,
+            "outputTokens": 32
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "2f33427e940b82a4fdc320775ecc6631463fca7e01b31e684ae3d838820b96f1",
+        "response": {
+          "text": "I can’t email clients or send discount codes. I can add a to-do to prepare the 50% off offer for next week if you’d like.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_09ce7354df728700016adaa3402cfc87d2a939516791f10a56",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qNAYHmpjfZQzDjWQCB_ex1W-XRQrpbh4w0Nk8c6v8CcamxuwM6Zw9MWWEnvVlkt1axT1oeCfSUaF9_jSBDU4K2W56oOlNSfcX8oekS0teYMRlUK0MpHHUhWMKLew-1lYwyc-OUauFt9kXouo7r-uwtVT6LVFQAhNWoC0A5DPPxMCRLK0Wi_UIsVRN99L6nOJ4e6B1Gx9wEMZAbycntqIcmEKkOHaORonZFVHJ-UCjyfbB9uzJHDqZ65J-ZWhrA3F0xGLUl1PLix7xBf-1D_I_8lE7yGaOHikyYn39BhXMxTuKOgUAkPwW1-ZfwXKiIfuPeqmzIIFxSW6OEiMD8sCv4hcPWwwkhBVhXjJm8svlYPnWL4BVl2OjqpIRTycznAaggGWVA4sHmUJK8oHZNX-gIPggEAIeaZ_EPRVACH2x7YbPmbprAhScl4ZYZWZsN82hfssMkdggjYdwEJUBz4wVTcOpj_RP9G3YDA_pDfsW7FL-oMu_NRnpsXVI-HWuJ-6sAr0yB1_v8ca4wOKVW4hMiIyktTfVPNrE9kf7TzoaXTQ9LOUuV6aQGCGSwqFd7g55PdC33CRVanRJNtcmUxxFyApVuAWplSn5tbEKGrCpKk6JkqMYLOWd1DYk4o-6_DyGavF6L23UU1BE283LGyoCO60PwMx8tPtEM4GKYCE-u9bpSteottymmK_V3NDXlgiOaYJyhSBm9x8ldz4Muvk7r159oVXie3mRjBXd4y-J-kE6Ax-DEsUUgMtrUu0bLQpJ5mepp1zt2cSF7f0_2wxL1SWCeq7W3CT-BdAAsegJsLnATlaTpbexImdvKtGlXw3Lt-yUPX9JkIzwrJdI3ywSkRgqjAY7aKyhIh47r42hHpJFNXM5tjHfdrZMuPlmzatlaCwDbECwotF9RVWX8ad03G9PzHJE77uIth1Ben1umfqH2fFUnjn3HMi-Km7PiygMOC7rPrWy2wz4c_TTniLeIbBIGT3JM078cKfb-F4vHjE5QswY5uqZyPDbTD-LmgghyB0FaAM7JxhekAI6nMPvhzanAUSJPxxREjVj_0m0GesQ2eeifIQTjqzAKsT8zIzeJ_Rk1CkexRPVCwXpqsChPgiWYBCfXDEes8DDeecvGN4S18SVWCnIf9_qd9f-3NgVhQCzMFfbpvKzdmG2-g9XDETblq1aEB81H8GtbCYomaKUFKsyI_8k_aeizTqWzEOcZLw8EFGVcEOCzLAfjPWcCoEZ7d6H_1FsrAmkjQEQPKfHWpIA9wZCc1L8QiXHsltt0gkZ1ZYUsMbXp0iCbtyr86HtsES-XC76aTWGHV16f7EK9Nwm6qeMo86nP3Uy-SPlWrfQuHVrBxJYj8DOmG3bQ_TwI914ZLnUsWaf5Cz4RBUtV5FYLS561ooCtDdqALpiJI3KY5YKLCM_8hiqmrG3kGlrDfIU3DFueLi0pKjFscBKlgmVDqn7LEOygq5rOffpjGZ0iBWt0aSPOqJOXK_p5Ax225oilZZVmDw7fy7jufbm97sM4Z6q70fBHcsgceHZRyHfCPlY0LSaEPs0WKwjlOGRWViyH3QX1zQK8H9K1bP94hma0VaJckIi9X4TE74CCYcyfFa7EhVppTPDvVFXQ4KuUpYJV38oDGHI5z61ifekSwJ08EEMKOeULcaHIOEzzNvIBggqRf-H7yUchUfKC9CfuHQZJfRosIUhWyE5VRkUT9IuuCbx7nix-s-9G9dO9Lp0NXGxC0kSeLBST81RqK5e1RaSSThSE2Lr7y-Gsw6prW5J2x7fb4c5O1l4EQVVWyOCBQjl3m9AtLf4HxFzjw6SZqmVzhCfFVzTdQt-BaSpRSQi54WLS_mPXzaTky7rgYYLT0r-ldVq1t-j0lpqwPEcPXWqALc0T5uEeTBCHlVTUuiBlr4vo7gT0WQn0kZnbzKsLVN_y1atcO9lc0DPyYYvyw9P4iNVu1MDC1PRWzTRVitu54W-7oCcQSc6xBosrkLydtZL-fpWt6wlDYwVnHTQEfOPM1eKDESHNoEkvUNYwmqDLUv40OQ-b9T4nIpTXF_byTPrc4s5IDTn9cUIlk1L3EJH_tcBu4k-LZOW7rCLYxIBG708PyNWtXw3WJDUEJTeqJc0Mtj5mfTxJA9j0K74LdzEIkbqSZH6IHzpPXzSK73cqZdOn10drtIHot-lljoskovw4z-mBIIyC7liVGy34J7Z_7jcBhiWkt_5hdeezC7Q_PC01bubEcOXGqDhccfZE2UNoofe4_fscYWKG7cQ==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 16,
+            "outputTokens": 103
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

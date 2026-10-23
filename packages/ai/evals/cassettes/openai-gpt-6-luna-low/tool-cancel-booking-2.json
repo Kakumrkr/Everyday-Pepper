@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "49f9dd4aaa2d123f146b66c234b20904ff5475b0a54d5d744750a0abbe5ecfd0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GB3oTXkDiKqUcSKVHdV3gYIr",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9fae7485d86a9752022ff46177588d8afe0be3a767b4d77cea4c39ee74d10f25",
+        "response": {
+          "text": "I don’t see any bookings today, so I can’t identify Ana’s 2pm appointment to cancel. Which date is it?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5534,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 83,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

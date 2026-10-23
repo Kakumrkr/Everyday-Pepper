@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "06bd0fb01d33f7a8b177be139375a3866e735b3ba1e436fff21b1e051b19db4e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wFuVIyMoct9PdK596Rm7dEby",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5454,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 17,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "79e4b5cb2cef05e316c32432ed6ebc5731680dc76e2f9da1c3360e16dbd43578",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_9xyX0cd2FPHOHBYjWK2vj7Rw",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5537,
+            "cachedInputTokens": 5451,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2d965164c75c72c8fd0a0a47d08419e0efbeb36c8300ea557756775384a673f4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pfRgGx7YDQvmTz4j1nQkE86e",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"11:00\",\"staffMemberId\":null,\"emailClient\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5817,
+            "cachedInputTokens": 5534,
+            "cacheWriteTokens": 280,
+            "outputTokens": 65
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "436f911732830dddcc47aa904d3acd520db4305470ef00f79d2527c0ec342030",
+        "response": {
+          "text": "11am isn’t available with Jess tomorrow, so Maria’s appointment is still at 3pm. Jess has 10:45am, 10:30am or 10:15am free. Which works? I’ll keep email notifications off.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6075,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 638,
+            "outputTokens": 55
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

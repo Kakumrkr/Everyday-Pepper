@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5b36180f2902d2144f6e2cef030d1a51f1ff52940eb9662d3dc4d84e1fd031e3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4JZUZAWhFoZE3zLvCwBNEXW4",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5458,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 21,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8fb1759f5b463654637c160ff6bad92a26926fb0ede6880eba89fd66629eaf49",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_KZJSaDUrIQ1GvU7vQd0tcQT0",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5724,
+            "cachedInputTokens": 5455,
+            "cacheWriteTokens": 266,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d74dc482393c350af5946eb98214ad75dd65076619b03525e088d8cd1158e46d",
+        "response": {
+          "text": "What service would Ana like with Jess—haircut or colour?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0a97e8298fe53f88016adaa416002487d2a39eb347188fcf6f",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qQWXmVXM33ELJhjxLzAuWYTEb5S6HtLgunRPEOtU34T6FA5ByQrm04AWIJQPq9xxtrASYt0uJun1sPOErHkKjAkTRd9h9LPPNtFVCXVNDxO9rf4mRT7O1sknBvhthIwUpEu_IoZCUUN6boSmkMTkRbaHDdBjREfCxOrv11JtnqYVJIgXT6t7CFCHE39soxVe1pX8gPoR3gRC9N0KvLpI14fNSiQEtOiCC3KtfJCj5R-YgTZqwvoZU_z_3jqQ49OQ1aa-QZH4EcZZORLVwxh4vpwGnjENKBu-IMVQO2PbYdfe2yNkJxiJB--aaIlUnQgUBCHqXTs5nz017ijsBlvOF87Jla-5bPyIMNConCFIKRWTgBt_Y-Y6HcBjtC7zaYpuUdTych4EXBofUnfn0ZmiFrlnaceTUKOYK3HgyYfSAH8BI4AFhmvQmOLrNEhiJLmnew1_BWY2yye96fN_Nnl9Y6jd5eY5YS1_TJM3rNirWEK0KO3c9fXb-Sbws9MWXa3fjkv_x1oWLj9GO3u-NvvFCgMRzH7jNW0ohqG2jcjIyblylJNIwVHsNv_9FziOFxOrKTkLtFKYeAXfvj8ThRc-jzzkcBi-UcLZcDibmaGaIaqUtPgNlBrrSA_AUw4WvsPIAhWVgmON5L0Bqci8gSFu9vzeayWts9wo-o0teBloot_YasEWL7jXuCErKTC452dJy5yBA3hpbIR0ITiG43hLxFYbcpBfieuLVqCvvOwXxlrRKTDJUPA5tQ8lOon4U-JG8tWNitJZ8FWtbkrgVQb5ZtBFNOUac_i0d70z86psxntGmshDFbuPyz55X6ZMMCQyBW_-e8WBRIz6DLg0r6SEGR3_MGmnA4xbO_sQQh3aWAQKNCTsE8m6CrdQZ1KJMh3EPT2Xq5o2IgaQaEe-3oSHwPzYbbLFeuum2p5-yKJqtxe5Jl08k5wKPTWksAbsWef1SfYCypuFZX1Vmyt9SGJ4jgKEQ-ZbNIhcIrlX16DmWhBOQViyk_gahpZRDdQbCYbEPAycxet-P-uQc_nLtAZvNV6Ny55zc67INN6BPfgt87_nY7_0_GZVwL2cAv7IYEQSOlttO6uHLKA_Lao-UWDygVwVY_Yv9NH1yKHPjksYZBolqTj1SPiENMfCf4wFZrXesyIeWukANZG0Kas2OWXsqpVpawUv2z2RJ4lHVzVQmCe2C2taYEAOX6PqlqKpMAZdwu-KmEogTFUbu9PE0muaLsA4JNtZHuMSmFwzM6EBMnL40Dx97hA7u_0vfZOO3GNxKQ9V85-g7FvA7m92NebLaLWUr9EegRaMj9o_5U0OMebol8in1RAexSjOHvCVPwaRl2PDq_KKZswNjc6dMa5Fxddwc7fNFtsP39Y_xYpGE8ePrG7zfLzFff49BMSeehDHSDByfk0D6r0K0W7yzP6yjf7kMYZ3S7UNamtNoch7MHnmdP5V7cL0VOVOsop_yZSt9H6sd7Zxtj1KtvdjXcqboux22SsbekXGIHVjuyEEkuHLfyhZ33_S9dw8OOMM5vPrGvMUIe3WfYgLk_IQxHne_SyfKbIzQkPHvpqIdWdD2nsCOTM04NDkInc4Jp1pZlGyN3m",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5808,
+            "cachedInputTokens": 5721,
+            "cacheWriteTokens": 84,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

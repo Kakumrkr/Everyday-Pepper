@@ -242,7 +242,12 @@ describe('POST /v1/chat/turns', () => {
     const stream = frames(response.body as string);
     expect(stream.map((frame) => frame.id)).toEqual(stream.map((_frame, index) => index + 1));
     expect(stream.every((frame) => frame.event === frame.data.type)).toBe(true);
-    expect(stream.map((frame) => frame.event)).toEqual([
+    // The answer may stream in several deltas (the link scrubber holds back the last word, S27).
+    expect(
+      stream
+        .map((frame) => frame.event)
+        .filter((event, index, events) => event !== 'text.delta' || events[index - 1] !== event),
+    ).toEqual([
       'turn.started',
       'tool.started',
       'tool.finished',
@@ -250,6 +255,10 @@ describe('POST /v1/chat/turns', () => {
       'message.completed',
       'turn.completed',
     ]);
+    const streamed = stream.flatMap((frame) =>
+      frame.data.type === 'text.delta' ? [frame.data.delta] : [],
+    );
+    expect(streamed.join('')).toBe('You have no services yet.');
     expect(stream[2]?.data).toMatchObject({
       type: 'tool.finished',
       tool: 'list_services_and_staff',

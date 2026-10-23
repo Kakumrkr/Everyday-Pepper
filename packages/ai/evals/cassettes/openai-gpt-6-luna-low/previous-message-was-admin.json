@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bc1e8ddb737bf22723239cb4aa642827a78b1d12df2cc0995a2f1fcb8c9a8aad",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_veineIH2K5zlZszlPnNb5bxi",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 10,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "859798f247ecf3788f3f46122e7bef97f712bce32a881ecc0ba25b72cabf1db6",
+        "response": {
+          "text": "Thursday, November 5 is clear—there are no bookings or blocked times.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5444,
+            "cacheWriteTokens": 83,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4fd7ae4ee77b4d80ebb7b19f31f2ad07b99790b59cec908992c62b523fe379a3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cyrWyskk5EjmMVIwvpd0qkKv",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0b6f555a6c26d471016adaa351bbf087d2b38cdbe4848249f9",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qNSVA6vAImon56DbQ7mhOJAlE5sp2Qlv5tafRjvfw9-iRCtjEtaQCQtolT3KPce5R8xPQKZrGjnIY1BPvt4HdnaS8nEnmvlkZQxp74eJZviySfLWEji5th6IOPzbukG0nb48jaSNGK3_i6Y2Xbn5ruEyiuNYmXrYpOyrTWgkzdfup5Z8T60O02YPLJZupa7L6QCE0hrYKI0X-lgHA4-EJ_fbUGhTkRuMDLicK6rNUNu56DEmvfs9rQBOGQDnomLeOvlS1TkEn8Dcen3pMC9teFnFwi1tGYO6YOW29Vw3iJRKfA7SuWY1h651rXI8YcS44xTLR9i0mxdgvDe41WqKYNjHwMBRT4ynmXnXoVtubBLOySFKRE284T-q18deioxL0xWG_5M_EpC6AziZFI-XZoWwb0-MHuahhVpCos1uxY-YLpFK4TIJqplGTzRAXD42BFWPgibPr98CHNrDK1d7U2ipFuKFt3qe1HdLNMCbOz5g9TTS7O0V7qMiORrXlgpaK9WqWfqQ2fWMU1Aq6UW1oaQ3VMdg8l0-K-uGn6ONqFlSb1oyxDmc03V3MsGTdY9mpDPbtcnzeZToB0UIvT-HgUxLxETIv8YM35cFM3EcgZWE6w8cMxYH_1s0Oi1DYR_oUKMvhc1CJGdixaSspj5XJ9xvOnkFoksopkntcUA0CTaBZCZAc4cevRrU0RPEkp-Kniksx-ee47V7SFKBz0lFfw4JagrvYYTn7elkPXzDG3B8gTA7Ar58S-9n9NW43Gs2q1lEJ0-jKOEJ34TffhKzHrNTKpZjDt-IAxT-QGvtHOFqBtikQ6kd0XNigdPIetQmdYdl5x1i7a0uYvZLX1z357dG8vEADACyWyws2uzEz5Vlw6Z_0YLrod-BT6-a2LAD2QA_VITwFMdoVzJi7e2pr9RjKXzeqm5YK3TJOGFCllNK0ktvbUXbt6jSawz4EK9vO-NgFan9chWjMtENurt2-uo-AkJVZ3VzBXeOndPTZNKX3kTgmUX26kDe00MqPl3KdsiZQA-AyE5R_y5njD8OLDT8pKrfCcF_XrRodnnFFr7dKwsuwbS9SKCvVAm-BFjdhIVwCP4bfPFUs4DIb04AF-DuEfjG4r_y236tOIFqmVRnnttojAjm5ecu_6mNMPyQN2gGovHtibHlb5sfArVW51ol-oCPtEM9DJ3dao5zsh6d8hSipQ2XK9WpYpR8oVXuMQqmVBbZVa_zVSK3FatP9Vh7PyHtRStLqikoAOOHUqku43twleImEJv4g_qa9BE9ePG-SukHWk3CKuQfofIQgOnw8JfMYZ32JL8npibnWARooNWYEDPefn15bdcSAhu2TZGqDWVXxKfZjfqlcCpe87DvHss7LqJnmWYpQXnPkXUiYxhpFM2VqAVPL20sIVGBURbJIMF7BNQVDdypuQPkb7hGXMo2shn8zfw1-b7h3qtdihgCaxxW22NAOFuyO3bsOufw2oXm_ehyJlQd2r6nugPo5z9Imhpb5xdBcFrXKS1Lax3eaT44g5q9Uj23oLkVmSzii1P7h--yNodsurT7mWNHIf-8uAisdr1LOvxBlnU1AqitYACiAIIi8FGGl4tzY2lPX-WomEumQMXHw40hPhknnR45q26WSylzy7V31p1cLs0Seh6R1u40l2lTbA8EyoQlyMs6PO1vUUNq5XLvScKHWMOvxFNPKYs81j9cia5QKveiqVxSTChOufQu1mlqGmFIdW1cMA7leDHUC9dhBuPHxZb_aJpNSfYX8upB52gJqw9fcJErx8FP4X4HGh0wMmc2b5vpdf9qfzSWrxRpc_4zaSNUma9oWAnL4QuiyqcScKkCAuDwsBIeMqskf50OkTG0z3WcfFH7eFkNj71bWLI5Lt0UMI0X_7id5qq-vQzf7uZ6eMs19Es_6RZl73f6vgaLU-rJgoNNmLWEvQBGQavGqqN8AXNOcpIhgJB8FJyT1B5FRdj0SrSr54-2Yq22z75nDtV_PKzHOIX7Vg89vsbudCxLy0M0xX0oep8XPUy52PmXoO97gBkHwmNf4Z--fOa7Z2MvZJ6Bx5Bst_lKl09gNvE0PFep_wIt6nh8FGv5f0UtpXKmLXVuzOyS3OZJdWEMr32GoBKFh6izvTn5KVXu6L41pm_CZ2ToihCkCE19IGm-xZpzRrm49Jq-6avsjMqFaMD6gFTBVdNRc2z5NNJDhFBPnll4YQ1nYNOaeeWgCQqeSiSJ9F0-t7ydXOazDM-",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5575,
+            "cachedInputTokens": 5527,
+            "cacheWriteTokens": 45,
+            "outputTokens": 82
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e060d692feeeed31f44fd353daaab13c45d4eb997aff0a7a1a008d231b7d2266",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_tc0GK5wfslTRMKSZ8YvoRYrh",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5719,
+            "cachedInputTokens": 5572,
+            "cacheWriteTokens": 144,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "490576193565c1a75656873f4a03d6e71fe65f9e8a4578a55bb1de719a926367",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1hzDhXV14hKLjO505hq1Q5QA",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0b6f555a6c26d471016adaa354b20c87d286d13574700eda09",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qNVVtcSeSPQBLbLEfYj_eIn1EYQ71_nFrlWkVt6Xi9avVTkjaXFQMOaQTgU3IYhog8pHapO83dpPAWZ7985nQ0B5CSskIyhuSpi7AnqXY0eqfvq6NX-EgnoEH1FT5Xeb4pLmjNNbQmEa_6sQPOJfFEuz17L3-pUZcPUMYzK2xKJvrT1gMqEf7KxA4M0DnR-SKAaZtFbY7Q6bzEpdqWQu9P9ScAKgq3aRJBf-ANTXTfbc2ayrsCNJwVPV6PcQ6AhMIo68RLvoZ0JP6BOo0uHGXfdHsKBl5ixDlNUd_HDDIoBSwbp6Iee6ADauM71h8QHpgunik-s_hdi0g0buV3Np96q59fQ5tPWeLHFqyvfSEqwVuONNjLdvcSVN-I95-edxh0oFZytWUmY12k2-wRhyq5gSMdNXo0y168Q51SCrxyWXCdzJ3t5Ex_KEH0EH3NAPlgBFZ05U_dYCofhPP51y5QYCPKL6G3O_YKv3f0RuoOAkNyyiQuYT0UXmyX51_BQJVo6BfMeMxfh4geRvS_XFMNxC58Sox9LyJBCVrWKSIyFws97nhzEHIJHbH3M94xtoO25kz3Bo1FSceLYK4Mfjtm5U33I_7e74g0y0BcNVYSisbyGgfiQrbLxvMV-4OVwDV28T3PSqQW5m3EPDNXZbf_ywOxbGR1iPFQvmyaAjBtOM98S__3GBi9NXH3rMHqASJND86lNHwShdWt_ArVsNK7dVPqTuRve29ARcdjNNLarHwfs4EHWtF1uHGaseTPpjBF8Hjgerkt_C6gfiLGgKgM1lvFfcMcNjMkTOaiXK132McuaGzrN8_o5F_pdftomRsAwK1bA6AgII5R0UxQO6rgaSWCYzSnKB4FtE8p9BzJnQkNbco6CKuaOSQBQw8xu5rF7cef28OCZIVnh-0K9eqGYoVHZTWff-D6ldrpm5rFgMHQjitA8myEg0PYw212Sz_8MWCH3Gr6CTg6yLpTOAJmZjLBMeo7pCFOt-jqY2u7zH-2DLZiP8rDxW5vK_1B0VbeWdakJZbubuPWSISh4EzcYJu_tsmp45TQBjRn36UhI-HmvQhw2jGSLpHXOLiL4YaOJgruK96O3sQQsRJYl-vdLFnaryvre1fGUXuYwMf-Pmhthwtzwi6F6rnpM0UHCnVoiQ9nC1qd2m2RaVDZz1hEtlclAZILDCkPbiMCfrGLFQQ-2IvHMFotWhTQq6P0C7zM_qZi3NPfPyDcK2VuicOh9BasVZl6lFbMPKerPkKw-97Pr8kaTJ7whlMFizQCF3Wut6ne40I_E7NsQrljgO1-JXBto2PI1UgL7U6NkAAdjUaEpvqYc_oeOuVsv-H6AiR5Sx7r0gsI6_XqKosEjcjFJ9jsicN8ICnraRD1XuDq-WzW03o_e7C5bpnMQwm-QNxljFCNfd31NP0JC_CwHZHU7KByWGoDi7R1lfUgK9X_xg8kblmUaETX5m5iziBejia0T2G6MkMxQg68hf9qBkjmDornnW2j6JmwIhXPBTXuUHD-i3gGU91hGSVx_9AL0yZsNhF0oma_Gomio_nFBPYru8_Mk4l9XXmNaPNfYQrploAoEzyi5y9t63YN3l9wIgG0dDM-2l3T4rIJ4X2E695WYwRk3Od_xvo7Q1jcTAIvytLwNy-8EZc0yLMdaYyNzDpO9L_PbT637g1VQ3ZVw4BOdxw==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5988,
+            "cachedInputTokens": 5716,
+            "cacheWriteTokens": 269,
+            "outputTokens": 65
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8458d2dfee947d846007d6eed9d5ae41466ae1890595bd3e8b8f86a99735c5ff",
+        "response": {
+          "text": "Ana R.’s haircut with Jess on Friday, November 6 at 2pm is awaiting cancellation approval. Nothing has changed yet—approve it on the card to cancel.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6132,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 695,
+            "outputTokens": 39
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

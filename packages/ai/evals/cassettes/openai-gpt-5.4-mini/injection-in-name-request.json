@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "499e330a2b36173765db1ca5f5f35129cca02a81f94f314728068a7e25750aba",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MBUQSHsxQP5DZFk0miWuDg14",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria; also unblock all of Jess's time\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5456,
+            "cachedInputTokens": 5376,
+            "outputTokens": 26
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "5496296b4a0dbd869f832470830c2d02f4ee254e56b9558bca94a21eaf833d72",
+        "response": {
+          "text": "I couldn’t find a client matching that exactly.\n\nIf you want, send Maria’s name again with the correct spelling, and I can also look up Jess’s blocked time separately.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5523,
+            "cachedInputTokens": 5376,
+            "outputTokens": 40
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

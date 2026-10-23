@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d7fdb9ccb6a5404ee36e3a9cfb38e824864cd3521ec096369b7592af5a6432c9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cBt6ZWPyXAAX4UdiMLfMopZp",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 5443,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a8ad4be0123f7ce4a253deed49341f2ac38aa043bd8140afbd5c4456b22e4237",
+        "response": {
+          "text": "There are no bookings or blocked times on today’s schedule.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5529,
+            "cachedInputTokens": 5443,
+            "cacheWriteTokens": 83,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

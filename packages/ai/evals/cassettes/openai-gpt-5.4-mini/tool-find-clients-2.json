@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c42f43dd6d8b3abdf09f598d7754bf442f3de82fae8f07836f28eae7778eff16",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_x8Tyc3vD9KW34m2IXQIsA83k",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5445,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "439bd442e3c79b6052dbe0d20010b191ca0cdaf16fc117e93341faa191a54d3e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_i1iu2u8rfHA6x8OLVTtU1S2l",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5526,
+            "cachedInputTokens": 5376,
+            "outputTokens": 40
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "2bf6ae010cdc94ad59436ce4a6f5878424d61d376ee281f5ac9d9c5ec8a4f1d8",
+        "response": {
+          "text": "I found Sarah P., but she has no upcoming appointment to move. If you meant a different Sarah, tell me the full name, or share the booking date/time and I’ll find it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5636,
+            "cachedInputTokens": 5376,
+            "outputTokens": 43
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

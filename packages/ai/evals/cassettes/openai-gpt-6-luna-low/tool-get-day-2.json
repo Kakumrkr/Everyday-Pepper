@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3e1e7bb302499d990862b2a0da6595321fa772bf486da3f324e7f2f1b372abf7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IaS3YuP1wNNfNAGr97xaaHhc",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 11,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "19a5122a76f9a12fde8f8a98d0cf3193ad6e3f65b06d66e1d56187596bdf7740",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gKaLIpOOxLuYbjxQY1SjMg9p",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:marco}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5727,
+            "cachedInputTokens": 5445,
+            "cacheWriteTokens": 279,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8b0428478f363fb81c841259ca85d786364a66d08fc8a72e53bd294b85e06797",
+        "response": {
+          "text": "Marco has no bookings or blocked time on Thursday, November 5.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5832,
+            "cachedInputTokens": 5724,
+            "cacheWriteTokens": 105,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

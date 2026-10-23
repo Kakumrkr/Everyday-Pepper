@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c6628472cb7cdf11734731ac47fc81703c502ce91fcd3e63bb3ff6fd0baddbfe",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UIQjzpEzSjEHiI27RLnbTSjO",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Order more foils\",\"dueDate\":null,\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 40
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "5063597e51e5c5831c487e1bc089dd02943dde75a17a997c1c3f53eed4100c41",
+        "response": {
+          "text": "Done — I added “Order more foils” to your to-do list.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5535,
+            "cachedInputTokens": 5376,
+            "outputTokens": 20
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

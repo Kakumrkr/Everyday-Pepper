@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c78985c749b787d6d763e9f2bdc166ac84e9c9e3cac32d7b2456b3a7a9ad085d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cVvEB4lVm5fxcOf0y32RVZ9q",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5445,
+            "cachedInputTokens": 5376,
+            "outputTokens": 16
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "cedc63c5521403276ac54a249361929ec709fd6241d44275eadd6d9f9a295452",
+        "response": {
+          "text": "Jess does colour. Marco does not.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5715,
+            "cachedInputTokens": 5376,
+            "outputTokens": 12
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

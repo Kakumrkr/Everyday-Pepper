@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7535adbe69e1fe1bca24286bc62d0a42fe8a14dc00775a2842fbd7f5f54b153b",
+        "response": {
+          "text": "I can’t change autonomy settings. You can set them in Settings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0ba53c122e57256f016adaa3382ca487d2a16580b939cad522",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qM4xTE0SCS0LMoxrnuJjh0iFSw1w2U-neWvQpX9wMb9i7WFxlW5pErWKKuU2qqlaGcybtDPlThRgcdd4cJFfiKDhllo2l7YQI5O3HSlmr7jVQ_nx1khgWYLhCKP73C0bDbRCpIp55uwkrljCE22N5dW5c4_N78OqpGob6GPu7zrVCZ47kf58D1JPhQEUyOkCHdpMFt6e1-mosGLfMIGV4URdocjqf8g9SgDDhJG1FauexhQ7s0f-R_vge_LzSjjwRmMGb2mHwHrJeVegSWdZwwje6oU33_SXvunO0W5J6HE4BQyly42fjMKDOtKykPM9j9HaGSGSdPE7mzShohBYe_Vjlw1CyIji06dXnE4WsMlKP5efoPiYdqPmj42AWdBUmgdS4dDzW8BrsGBIIu1VTb6Jbd1URyRylyDlJ6LtaZume0boUzUOegWz6PQ25FZ4riHrQLjK_3oKM0980kyRKUnBlGPmEY7MojC-WG8ZS9MPe_9adEMVAsw54u2KK-onOiQVYNG_XRX_WFy-8kLSEBnRVjKigo4nVVDLsuHqaukUoaq_KDhXv8p_FY3lW3upyU12oB9oeBrWCezZZFkB22dDPwy6zm6HmS4Ub1Ls_FCmM0sHpjfGoRyXdmQI9iOpOWQoDP_BEl6dwlEDoNMmt-fx0XbWxjg7mFpLiHJHUaAvI1R1uxjG6ppa0J72yE61iyczFWXj7ZiWufxfA51q0TN3YhKU14A_jqEd4jf_C36mfxsOom-yMYlcfpzTFIyMdR75_EDoMs84EpAAdc03ySk0GkTRrcrS9HAPiWAoPpOeBBYR7BZY4oc5O3Qkl4Qab-oUnkX1P0vzJFYrfvIeSiyljYl5A0tOEYRDlg58W64cvRDKJV2kEJoqCwinMHwj9ZzySIXfPoeIJVy7lb0dtd0-fFK92oPO5EEs4NMX77P0itkLj0naRluHZpOg4UtMPWYMcNoDr4LNyFETqrkp9ptg3gW325BvG5rp0AxsCw2ZVYzH46u0ZZEjzC8cBRGxVsLgYSReOYD1IK2UJi9IOLujwpEniOJ20BMHLAdCSi-txSmOL9V-GddC0foefgXx_1EGIuXEL5dVBuL6yyIM1msBsigmeGkHd0jRbvVqBeqYylBcoGrHis3jMTIV_vMdqq8l_MpE1sohAuR5HkTN90FRFHtZk55Gx8g0tyhC6XJekahDxw2xg16iLI452y-ADa7ydb8xtJ4KnFJoCOvD5fDp2WN7O6P-7Yg0rYgxI_aiCQYVYBSrZvc19_mYXf_6NmaZMf4WZGzuMt7e-yN9kJLfQhFjd9tTFXL9hv3H3O2f9cX2iBfMTfFLMXOexDaQXeNyPXkJp0XbYpH-4haoHTIUBGnQF-jRsG7L0eay3sm0YO9KAlD_CnWdCI1KvutlRsCRmytcZbo_wQpXi-RQlKNCX3IGUMoSqSG4kTeMcH65TLJ83crnenY_mwuJz_2X97gzjO5f5m923YsQjtsLuFjqr8ys_ds5-iRGYGdHoA3E9_D29O-Ln7HRrO_VzCxjqwSoN35-wZiU_kKTmFWm7YnVYhQxX9tAgGaWFsu9BvVWMAbuFuX8hTwqVeOdmn_OKVc2G7LJY0iBSAdfbwLjVUDdo_MpHo5whfHwzKtNmGqwAxk6cWuB1gAkauyRF4pv6NhP7NyuiEu1K32kKYNAubBvWPUWdlXZnjxIE976xz_379KsbaNrfAjWXWD773FRJyaMR1TjiYTbVB3pk2SIxhoGkZsEevpzPf46QNmmL7rGSJ-7wAXvExB6MoEsrBPRELU",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5462,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 25,
+            "outputTokens": 47
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

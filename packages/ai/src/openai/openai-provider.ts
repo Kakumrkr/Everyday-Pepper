@@ -88,8 +88,10 @@ export class OpenAiProvider implements LlmProvider {
   }
 
   private params(request: LlmRequest): ResponseCreateParamsNonStreaming {
+    const effort = this.options.reasoning?.[request.route];
     return {
       model: this.options.models[request.route],
+      ...(effort !== undefined && { reasoning: { effort } }),
       instructions: request.instructions,
       input: request.messages.flatMap(toInputItems),
       tools: request.tools.map((tool) => ({
@@ -147,9 +149,12 @@ function toInputItems(message: LlmMessage): ResponseInputItem[] {
 
 function toUsage(usage: ResponseUsage | null | undefined): LlmUsage | undefined {
   if (usage === null || usage === undefined) return undefined;
+  // Older models may leave the write count out; it is only billed on GPT-5.6 and later.
+  const written = usage.input_tokens_details.cache_write_tokens as number | undefined;
   return {
     inputTokens: usage.input_tokens,
     cachedInputTokens: usage.input_tokens_details.cached_tokens,
+    ...(written !== undefined && written > 0 && { cacheWriteTokens: written }),
     outputTokens: usage.output_tokens,
   };
 }

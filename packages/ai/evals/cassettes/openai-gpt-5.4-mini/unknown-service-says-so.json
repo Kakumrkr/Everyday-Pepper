@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f6bb0201dee2addb607519df6ba8dc8b77d76d82a157f34bc72ab7db5f9a3892",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0ICoTpV4phdQ0ZPg5f8BhW9H",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_cPDTPvEblddhJYUKXD4IIH7M",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 48
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "7adee81920d986ff43487da34082fed83f76acdd00dc1b3241dde7eaa9ccb464",
+        "response": {
+          "text": "I found Ana R., but I can’t book a manicure because that service isn’t in the list here.\n\nThe active services are Colour and Haircut. If you meant one of those, tell me which one and I’ll book Thursday at 11:00.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5823,
+            "cachedInputTokens": 5376,
+            "outputTokens": 57
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

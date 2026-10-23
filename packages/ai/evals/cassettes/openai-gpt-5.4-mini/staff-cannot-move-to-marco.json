@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "dc39450fcee985f187d60a5ec10f4c9e089d15301ce499bc2fb2819fdc82b37c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_RuEVEHv3QyZBt42tzarNb0cG",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "be72ca0e5ffb1c8deb615afaf0ffc5404a7dea4afb87daacfa85c56fd63ca766",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xTuy30OAkmDYI6h2OTXrrbwY",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5376,
+            "outputTokens": 41
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "e9e536910a6e91061db251e6f3a56ab5ca7046aed71c48eee41f81cbcd1d3075",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_t87cpwki25ojxLmHPsmeKbgP",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5806,
+            "cachedInputTokens": 5376,
+            "outputTokens": 16
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "c78ee4704d8a57daaabe2771a4b8db608b7df3889228bc13e59ff1feb8453584",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ZbtOLdxX4ceENVP3jhUf8zeg",
+              "name": "get_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6079,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 642,
+            "outputTokens": 39
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "a70b9896d9bcb839101d789a04118b7187f5b54248bb7c108d6e9e2b3d9436f5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HvvPzrZxQC29LwePjYK1xLyy",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"staffMemberId\":\"{{staff:marco}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6310,
+            "cachedInputTokens": 6076,
+            "cacheWriteTokens": 231,
+            "outputTokens": 84
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "386e18095a730c8ff97ae38a7ab3e7977c65e8720ef4b7150008668ef12eac1f",
+        "response": {
+          "text": "Your staff permissions don’t allow moving Maria’s appointment to Marco. Nothing has changed—an owner or manager can make the move for tomorrow at 3pm.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6446,
+            "cachedInputTokens": 6307,
+            "cacheWriteTokens": 136,
+            "outputTokens": 36
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

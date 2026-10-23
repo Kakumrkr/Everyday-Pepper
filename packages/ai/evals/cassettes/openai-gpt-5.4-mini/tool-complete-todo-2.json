@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "70ba23d9478233b439b1c2f9c811392da1a432925bb7ee199df7fd3394a7a890",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qhTSYqC2CFlOyMvueHwwI4QJ",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 19
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "7f467264d0e4de683f5e30dd3f7f3d48887d9e2ed45e33039e0049374befc21f",
+        "response": {
+          "text": "I only see one open to-do on your list: “Call Maria about her colour.”\nI don’t see a foils task to tick off. If you meant that call, say so and I’ll mark it done.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5556,
+            "cachedInputTokens": 5376,
+            "outputTokens": 49
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

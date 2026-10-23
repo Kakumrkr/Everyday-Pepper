@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c8c53e028c6c1415aaaaab757fdf75d76e717dcd93127766575e143b11046927",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ma652dsiwY2CD2vjMKETC3RH",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-06\",\"dueTime\":\"09:00\",\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5449,
+            "cachedInputTokens": 5376,
+            "outputTokens": 45
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "1cc55c61317547f20ef419cf78adbfd4da06c5709684cfafbda436c87b39795f",
+        "response": {
+          "text": "Done — I added “Call Maria” for Friday at 9:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5551,
+            "cachedInputTokens": 5376,
+            "outputTokens": 21
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

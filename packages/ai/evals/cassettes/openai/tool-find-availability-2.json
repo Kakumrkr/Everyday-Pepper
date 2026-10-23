@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "4d71938997b0327526438fbc37b40c570fb588529210bc9a40722704f9d9980a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bwYE6Jri3r53P4M3miUgLxwg",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5549,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 15,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1caab23cac0b3a38635a1244dc1c3a2f1d81e5916bb68d6c7fa033fd13ec3130",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UvimaqyUSynciblZM2czgKkK",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-09\",\"days\":7,\"notBefore\":\"15:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5835,
+            "cachedInputTokens": 5546,
+            "cacheWriteTokens": 286,
+            "outputTokens": 70
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ca9825f40167d13f79ddc8e2a8a8ad006c91c3ca78b48c86f34dfda925a3a2f1",
+        "response": {
+          "text": "Yes—next week, Monday Nov 9 at 3:00 PM or 3:15 PM with Jess. There are more times available too.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6488,
+            "cachedInputTokens": 5832,
+            "cacheWriteTokens": 653,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4d71938997b0327526438fbc37b40c570fb588529210bc9a40722704f9d9980a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_O89scOjaDzETkKRWQOddxUXF",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5549,
+            "cachedInputTokens": 5546,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3b16a1b889e9b782fee991f0a3fdd2b81a0ab46b10a88192d2847c4a39180d5f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NDYwOMnQahpanEnObuLRW0g0",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-09\",\"days\":7,\"notBefore\":\"15:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5816,
+            "cachedInputTokens": 5546,
+            "cacheWriteTokens": 267,
+            "outputTokens": 65
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "eed1ace2225b4fa6e767bc3e58630fe4608e0cd5d55e2d3ca3fe7cc690101a2d",
+        "response": {
+          "text": "Yes—there are 12+ free Colour times next week. The first is Monday, Nov 9 at 3:00 PM with Jess. Would you like a later option?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6464,
+            "cachedInputTokens": 5813,
+            "cacheWriteTokens": 648,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4d71938997b0327526438fbc37b40c570fb588529210bc9a40722704f9d9980a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_VkJaigtPaW9VTwlgRIQ6FdxE",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5549,
+            "cachedInputTokens": 5546,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a200f3b4dc0cc2d7c9f670629e9218218882336343874490de1159b974616156",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2L5C6MW1NMOPXm6shZl5k9MR",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-09\",\"days\":7,\"notBefore\":\"15:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5815,
+            "cachedInputTokens": 5546,
+            "cacheWriteTokens": 266,
+            "outputTokens": 66
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "74f6107c1ce2a1e5fe58c8a9ff847ce0fba0b3544e08b187bccb4ba1050f9e91",
+        "response": {
+          "text": "Yes—next week, Monday Nov 9 at 3:00 PM with Jess is available. There are more openings too. Would you like another day or time?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6476,
+            "cachedInputTokens": 5812,
+            "cacheWriteTokens": 661,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

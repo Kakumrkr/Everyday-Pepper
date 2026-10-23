@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "77cf5641cb41c7ce4f88b6c5d22269e7be1feb2021c6285d06c0a4b2338d7912",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_w5HCzO9ko2Sw9kCEZkJVKDYk",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "62ba50c1cec6b0bace40a0047a9a6d9ac88d416ed67e903f4721f7c3ec1b20a3",
+        "response": {
+          "text": "You’re not off on Friday anymore, and I checked the schedule: there’s just one booking on Fri 2026-11-06, at 2:00 PM with Jess.\n\nIf you want, I can block out your Friday time now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5685,
+            "cachedInputTokens": 5376,
+            "outputTokens": 55
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

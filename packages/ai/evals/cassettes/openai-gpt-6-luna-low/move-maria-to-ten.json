@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "21aad8a3f7bbf8ad496ef933a0dfd6da53045d7d0832d21375fcbe3bdb3fd0b6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HBTqlefuIq5aPxg1p8owVthP",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 13,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ce481d04f1eb4805e3c6e9a3cdff5264038f1016b77dced52cf78a9e32e25a73",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5dJaEH2bQ7PhSZ1RrnbogEPF",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5533,
+            "cachedInputTokens": 5447,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f00c845cf2fa8e16bae552288142043f474da49795aa54e2b169e79e65573ee4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5G2U0T5wXUY5SkgLmeZ8kvKE",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5814,
+            "cachedInputTokens": 5530,
+            "cacheWriteTokens": 281,
+            "outputTokens": 85
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4644bf0eaa021f21061b15c6db6b100c891c17f00b99606e098830e7e436e666",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_87IpLEojTOfGeUGK3XDFiLbe",
+              "name": "get_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6494,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 1057,
+            "outputTokens": 43
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "c75425730d003a1b0cfeb7f7033359cae82ec1a2f18a65c5f8aafa2d70196360",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6ISOPCbNTr7uoTKFeMPsBBJo",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"10:00\",\"staffMemberId\":null,\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6732,
+            "cachedInputTokens": 6491,
+            "cacheWriteTokens": 238,
+            "outputTokens": 69
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "10da2658d7ebace99aa1a6f57b55c4b9bc68dc2285934774da3200925d64d15b",
+        "response": {
+          "text": "Moved Maria’s haircut with Jess to tomorrow, Tuesday November 3, at 10am.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6873,
+            "cachedInputTokens": 6729,
+            "cacheWriteTokens": 141,
+            "outputTokens": 23
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

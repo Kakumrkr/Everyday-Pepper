@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "797da1a7200d9ad76a0d2c7946c13d28373446a1182f19235468dcdcd57a9e50",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qS4xvVoEmQt2y3dTOxzGXXbu",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5541,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 5538,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9dd01aaecbbd260c7d37fa1b7b5617ffdbb4b671e4c37bba984ea79bbbb94371",
+        "response": {
+          "text": "Tomorrow, Tue Nov 3, Maria L. has a haircut with Jess from 3:00 to 4:00 PM. Jess also has blocked time from noon to 1:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5833,
+            "cachedInputTokens": 5538,
+            "cacheWriteTokens": 292,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

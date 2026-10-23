@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "fe08880c9fd2afbd6b7082bb4ad3004f70517bdb9c441a2770bb46f802f18818",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_DocFxByeYCfjndwfeCt6GGVl",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5546,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 12,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8b2686fdf022efa722a902527bf89584aab60d182db7143897179b0c29b15f79",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pUOy96AKFjIM2b8iTrpIKQVK",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Call Ana back\",\"dueDate\":\"2026-11-05\",\"dueTime\":null,\"assigneeStaffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5821,
+            "cachedInputTokens": 5543,
+            "cacheWriteTokens": 275,
+            "outputTokens": 67
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c2f98b6ade56c766c102a024858bad997a1f5d2f8953e7f975695c589dadb8a4",
+        "response": {
+          "text": "Added a to-do for Jess to call Ana back on Thursday, November 5, at 9:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5946,
+            "cachedInputTokens": 5818,
+            "cacheWriteTokens": 125,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

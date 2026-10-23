@@ -26,15 +26,22 @@ import type { Performed, ToolDeps, ToolScope, WriteScope, WriteTool } from './to
 
 /**
  * The trust layer's runner for one call of `tool` with `payload` (parsed again on every run).
- * `lastPreview` is what its latest dry run showed, for the card of an action that ran at once.
+ * `lastPreview` is what its latest dry run showed, for the card of an action that ran at once,
+ * and `lastUntrusted` whether its summary echoed untrusted text.
  */
 export function writeRunner(
   tool: WriteTool,
   deps: ToolDeps,
   payload: unknown,
-): { runner: ActionRunner; lastPreview: () => TrustJson | undefined } {
+): {
+  runner: ActionRunner;
+  lastPreview: () => TrustJson | undefined;
+  /** Whether that dry run's summary echoed untrusted text (`undefined`: no dry run ran). */
+  lastUntrusted: () => boolean | undefined;
+} {
   const args: unknown = tool.args.parse(payload);
   let shown: TrustJson | undefined;
+  let untrusted: boolean | undefined;
   const runner: ActionRunner = {
     tool: tool.name,
     version: tool.version,
@@ -43,6 +50,7 @@ export function writeRunner(
     async preview(tx, actor, stored): Promise<ActionPreview> {
       const { performed, emails } = await run(tool, deps, tx, actor, stored);
       shown = previewOf(performed, emails);
+      untrusted = performed.untrustedText ?? false;
       return {
         preview: shown,
         fingerprint: stateFingerprint({
@@ -73,7 +81,7 @@ export function writeRunner(
     },
     undo: (tx, actor, receipt) => undoWith(tool, deps, tx, actor, receipt),
   };
-  return { runner, lastPreview: () => shown };
+  return { runner, lastPreview: () => shown, lastUntrusted: () => untrusted };
 }
 
 /**

@@ -2,7 +2,7 @@
   {
     "id": "book-looks-client-up-first",
     "set": "scheduling",
-    "description": "A booking request names a client: Pepper looks her up before booking anything, never guessing an id.",
+    "description": "A booking request names a client: Pepper looks her up before booking anything, never guessing an id, and books nothing without the owner's OK (a proposal for approval is right; S27 corrected an expectation that forbade it).",
     "now": "2026-10-20T15:00:00Z",
     "timeZone": "America/New_York",
     "actor": {
@@ -24,9 +24,8 @@
           }
         }
       ],
-      "mustNotCall": ["create_booking"],
       "actions": {
-        "noWrites": true
+        "nothingDone": true
       }
     }
   },

@@ -1,0 +1,330 @@
+[
+  {
+    "id": "two-saras-ask-which",
+    "set": "ambiguity",
+    "description": "\"Sara\" matches Sara Kim and Sarah Park: Pepper asks which one, never guesses or books.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Sara for a haircut tomorrow at 10"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "sar"
+            }
+          }
+        }
+      ],
+      "mustNotCall": ["create_booking"],
+      "replyMatches": ["sara k|sarah p|kim|park"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "second-turn-picks-the-sara",
+    "set": "ambiguity",
+    "description": "After the choice, \"Sara Kim\" in the next turn books the right one.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Sara for a haircut tomorrow at 10"
+      },
+      {
+        "user": "Sara Kim"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:sara}}",
+            "date": "2026-11-03",
+            "time": "10:00"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": ["create_booking"]
+      }
+    }
+  },
+  {
+    "id": "unknown-service-says-so",
+    "set": "ambiguity",
+    "description": "A manicure is not on the menu: Pepper says so and offers what there is, books nothing.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Ana for a manicure on Thursday at 11"
+      }
+    ],
+    "expect": {
+      "mustNotCall": ["create_booking"],
+      "replyMatches": ["haircut|colour|color"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "who-is-her",
+    "set": "ambiguity",
+    "description": "\"Move her appointment\" with nobody named before: Pepper asks who.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Move her appointment to Thursday"
+      }
+    ],
+    "expect": {
+      "mustNotCall": ["move_booking"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "no-time-given",
+    "set": "ambiguity",
+    "description": "\"Book Maria tomorrow\" without a time or service: Pepper asks or offers times, proposes nothing.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Maria in tomorrow"
+      }
+    ],
+    "expect": {
+      "mustNotCall": ["create_booking"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "dst-monday-after-the-change",
+    "set": "ambiguity",
+    "description": "On Friday 30 October (EDT), \"Monday\" is 2 November, after clocks go back; 9am stays 9am local.",
+    "now": "2026-10-30T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Ana for a haircut with Marco on Monday at 9am"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:ana}}",
+            "staffMemberId": "{{staff:marco}}",
+            "date": "2026-11-02",
+            "time": "09:00"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": ["create_booking"]
+      }
+    }
+  },
+  {
+    "id": "late-night-chicago-tomorrow",
+    "set": "ambiguity",
+    "description": "11:30 PM Monday in Chicago is already Tuesday in UTC: \"tomorrow\" is Tuesday 3 November.",
+    "now": "2026-11-03T05:30:00Z",
+    "timeZone": "America/Chicago",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "What's on tomorrow?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_day",
+          "arguments": {
+            "date": "2026-11-03"
+          }
+        }
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "month-end-friday",
+    "set": "ambiguity",
+    "description": "On Wednesday 28 October, \"Friday\" is the 30th, not a day in November.",
+    "holdout": true,
+    "now": "2026-10-28T15:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "What does Friday look like?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_day",
+          "arguments": {
+            "date": "2026-10-30"
+          }
+        }
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "the-sixth",
+    "set": "ambiguity",
+    "description": "\"The 6th\" is Friday 6 November.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Put Sarah Park in with Jess for a haircut on the 6th at 11am"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:sarah}}",
+            "date": "2026-11-06",
+            "time": "11:00"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": ["create_booking"]
+      }
+    }
+  },
+  {
+    "id": "in-two-days",
+    "set": "ambiguity",
+    "description": "\"In two days\" from Monday is Wednesday.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Is Jess free in two days at 10?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_availability",
+          "arguments": {
+            "date": "2026-11-04"
+          }
+        }
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "los-angeles-today",
+    "set": "ambiguity",
+    "description": "At 7am in Los Angeles \"today\" is the business date, not UTC's.",
+    "holdout": true,
+    "now": "2026-11-02T15:00:00Z",
+    "timeZone": "America/Los_Angeles",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "What's on today?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_day",
+          "arguments": {
+            "date": "2026-11-02"
+          }
+        }
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "sunday-closed",
+    "set": "ambiguity",
+    "description": "Nobody works Sunday: Pepper says so instead of booking.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Maria for a haircut on Sunday at 10"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "noWrites": true
+      },
+      "replyMatches": [
+        "sunday|closed|no one|nobody|not work|isn.t working|aren.t working|available"
+      ]
+    }
+  }
+]

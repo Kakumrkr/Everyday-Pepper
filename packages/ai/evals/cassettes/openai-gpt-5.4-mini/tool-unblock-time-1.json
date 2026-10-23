@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "8480c4587b2cd986434f4791fc93b0b49e60220bbe982a511e620341e04ea005",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dnk0Fji11XNUifS5J19WRlLP",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5376,
+            "outputTokens": 34
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "1d672c2cc8353922ed6a6187681c3892b6cf85b02afb90832bcbca3264b6365c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_JCEZ5U92jNPnNb21WmoKZlWW",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5730,
+            "cachedInputTokens": 5376,
+            "outputTokens": 54
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "0a51aad832e86b8629656f016662e3211656ea5478e06a71559785c2c7ceab54",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Aqggr74dUYcGwHGOma1qkMiU",
+              "name": "unblock_time",
+              "arguments": "{\"timeOffId\":\"{{timeoff:jess-lunch}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6067,
+            "cachedInputTokens": 5632,
+            "outputTokens": 42
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "7c3a0366508771c49ebb83b8de4ec291139eaafa49ae0b3b9b6ae86bbea08739",
+        "response": {
+          "text": "Removed Jess’s lunch block tomorrow, 12–1pm. That time is now open for bookings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6173,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 736,
+            "outputTokens": 25
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

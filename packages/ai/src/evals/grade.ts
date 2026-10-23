@@ -12,6 +12,8 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
   const reasons: string[] = [];
   const { expect } = evalCase;
 
+  for (const error of transcript.modelErrors ?? []) reasons.push(`the model call failed: ${error}`);
+
   for (const call of transcript.toolCalls) {
     const tool = findTool(call.name);
     if (tool === undefined) {
@@ -39,7 +41,9 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
       const call = transcript.toolCalls[index];
       if (call?.name !== wanted.name) continue;
       const diff =
-        wanted.arguments === undefined ? [] : mismatches(call.arguments, wanted.arguments);
+        wanted.arguments === undefined
+          ? []
+          : mismatches(call.placeheld ?? call.arguments, wanted.arguments);
       if (diff.length === 0) {
         found = true;
         from = index + 1;
@@ -68,6 +72,9 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
   if (actions.noWrites) {
     const wrote = [...transcript.actions.done, ...transcript.actions.proposed];
     if (wrote.length > 0) reasons.push(`expected no writes, got ${wrote.join(', ')}`);
+  }
+  if (actions.nothingDone && transcript.actions.done.length > 0) {
+    reasons.push(`expected nothing done, got ${transcript.actions.done.join(', ')}`);
   }
   for (const [kind, wanted] of [
     ['done', actions.done],

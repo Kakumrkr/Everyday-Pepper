@@ -14,9 +14,9 @@ export type FakeOpenAiAnswer =
   | { kind: 'hang' }
   | { kind: 'network_error' };
 
-const USAGE = (input: number, cached: number, output: number) => ({
+const USAGE = (input: number, cached: number, output: number, written = 0) => ({
   input_tokens: input,
-  input_tokens_details: { cached_tokens: cached, cache_write_tokens: 0 },
+  input_tokens_details: { cached_tokens: cached, cache_write_tokens: written },
   output_tokens: output,
   output_tokens_details: { reasoning_tokens: 0 },
   total_tokens: input + output,

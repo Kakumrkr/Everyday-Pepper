@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b3fd3f38ac7f6bf2d2a9950298a6e50c581f7988c188c1f065657e661a6c1892",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SJd2tnc1DW8RdUCt2FPwvALY",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5548,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 14,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c14b23f07afd997a617b4fccbc25a95acfa833c7614c41b0f4710b2de984a17e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_DOPzR9H4GrYw3jZKDxuVNjH1",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5804,
+            "cachedInputTokens": 5545,
+            "cacheWriteTokens": 256,
+            "outputTokens": 60
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5bf3a1ea08618d68a955b9d74f250f666d4c6422006a14b74b66e32078103020",
+        "response": {
+          "text": "Marco’s Thursday, November 5, 9:00 AM–12:00 PM is blocked.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5919,
+            "cachedInputTokens": 5801,
+            "cacheWriteTokens": 115,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b3fd3f38ac7f6bf2d2a9950298a6e50c581f7988c188c1f065657e661a6c1892",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rhE3n8ofnIhsM7o2WeFtnag3",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5548,
+            "cachedInputTokens": 5545,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "271c6294df8bc52a15207b05b723aa5ed60788cea1fbd42180bcb19e2ad3e273",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_zuBLng8IJ35nDQF3Z4xPgYay",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5830,
+            "cachedInputTokens": 5545,
+            "cacheWriteTokens": 282,
+            "outputTokens": 63
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9bfa1dfe54477720313b1318ce20e80494ec6d829b97b8b33d4cf075b857cf91",
+        "response": {
+          "text": "Marco’s calendar is blocked Thursday, November 5, from 9:00 AM to 12:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5948,
+            "cachedInputTokens": 5827,
+            "cacheWriteTokens": 118,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b3fd3f38ac7f6bf2d2a9950298a6e50c581f7988c188c1f065657e661a6c1892",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_PujgGDr2LRVLmNr7QsErLdsB",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5548,
+            "cachedInputTokens": 5545,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9b4bf6e87a4cdf0dc2ab0b459e96db23df7ee9effb807b9f8e1efb99afdc773d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_mOtFkPPRNWMeOdYHm5zd3mZ2",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5813,
+            "cachedInputTokens": 5545,
+            "cacheWriteTokens": 265,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fc481561a6e6278e27776d303eaab2d8fc7f3df4f4300a63dcf3047b9e03f2af",
+        "response": {
+          "text": "Blocked Marco’s calendar Thursday, November 5, from 9:00 AM to 12:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5930,
+            "cachedInputTokens": 5810,
+            "cacheWriteTokens": 117,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

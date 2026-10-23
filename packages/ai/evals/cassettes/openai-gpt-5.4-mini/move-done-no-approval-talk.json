@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "1a37c7a8260092801d71dba0e927cef7bdcd4dcc37ba58ab71f9dab86b26569f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UyXdGK2IoX0yohpi4uAX1O26",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_w25F9J2bbcQBVtbk86kFgawE",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 59
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "96af294055ef7490b475d8ec80f77a9ad9cdec26e6ecdbdfafe54f5739c86994",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vK381N53WjZ2GSYcdil14I9Y",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"date\":\"2026-11-06\",\"time\":\"15:00\",\"staffMemberId\":null,\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5774,
+            "cachedInputTokens": 5376,
+            "outputTokens": 67
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "febf3ac1c2e518149d24ea5a7c4e4951148133162a327a92797b017fe316ec13",
+        "response": {
+          "text": "Done — Ana’s Friday appointment is now at 3:00 PM with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5913,
+            "cachedInputTokens": 5632,
+            "outputTokens": 21
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

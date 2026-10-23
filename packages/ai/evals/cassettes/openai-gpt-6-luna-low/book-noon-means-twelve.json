@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "73b037298e3b09f8a42838bcbaaa209d2fb84726fedd3cae1715ec2308c21dc8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3vavP25nZfDHBGnR98xZubi6",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5452,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 15,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "42240666f24348df193568aa75f5faea054bf4a1b89b4dba7f8d2f40af73bc17",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5zRgdPaIQkp8AHaZN7FjQHwC",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5739,
+            "cachedInputTokens": 5449,
+            "cacheWriteTokens": 287,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c9ecbe91e2e1284769a9cac63efba139f1d80a16bc6dc491b3847d2f2c98f7b6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_icHRnLQpNropTDBZVfTRbe9A",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5826,
+            "cachedInputTokens": 5736,
+            "cacheWriteTokens": 87,
+            "outputTokens": 91
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b0d1f6f2f200de13678713ace7e8004ebb3430d38aae189d2662e1ab41b8dd2c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ltqZF1AxXjwCqLVAlgGlVs6c",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"days\":1,\"notBefore\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6573,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 1136,
+            "outputTokens": 93
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "aa7884c2f795d0a0f66ac7050b905fd2f663bd293a3bc2e194a19d50f5aa9fbd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OaV737EMa8aRmK3JnyraqwUH",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"12:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7322,
+            "cachedInputTokens": 6570,
+            "cacheWriteTokens": 749,
+            "outputTokens": 122
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "1899fd3d7abfdca35eeb735b2072e452ca542301d86c5013cb6dd15167d34615",
+        "response": {
+          "text": "Ana R.’s haircut with Jess for Wednesday, November 4 at noon is ready for approval. Approve it on the card to complete the booking; nothing has been booked yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7524,
+            "cachedInputTokens": 7319,
+            "cacheWriteTokens": 202,
+            "outputTokens": 41
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

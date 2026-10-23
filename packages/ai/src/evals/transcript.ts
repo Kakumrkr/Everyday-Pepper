@@ -5,6 +5,11 @@ export interface TranscriptToolCall {
   name: string;
   arguments: unknown;
   raw: string;
+  /**
+   * `arguments` with the seeded world's ids put back as placeholders (`{{booking:maria}}`), so
+   * a case can say which record a call must name; absent: match on `arguments`.
+   */
+  placeheld?: unknown;
 }
 
 /** What one run of a case produced, for grading and the report. */
@@ -15,6 +20,11 @@ export interface Transcript {
   actions: { done: string[]; proposed: string[] };
   usage: LlmUsage;
   models: string[];
+  /**
+   * The model calls that failed (`code: message`; the message never holds prompt text). The
+   * loop answers the member with a fallback, so the run fails here with the real reason.
+   */
+  modelErrors?: string[];
 }
 
 export const emptyUsage = (): LlmUsage => ({

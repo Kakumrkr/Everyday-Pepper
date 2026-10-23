@@ -1,0 +1,236 @@
+[
+  {
+    "id": "remind-tomorrow-at-four",
+    "set": "follow_through",
+    "description": "\"Remind me tomorrow at 4 to order shampoo\": a to-do due Tuesday 16:00.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Remind me tomorrow at 4 to order shampoo"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_todo",
+          "arguments": {
+            "title": {
+              "$regex": "shampoo"
+            },
+            "dueDate": "2026-11-03",
+            "dueTime": "16:00"
+          }
+        }
+      ],
+      "actions": {
+        "done": ["add_todo"]
+      }
+    }
+  },
+  {
+    "id": "ask-jess-to-call-ana",
+    "set": "follow_through",
+    "description": "A to-do for Jess, due Thursday.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Ask Jess to call Ana back on Thursday"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_todo",
+          "arguments": {
+            "title": {
+              "$regex": "ana"
+            },
+            "dueDate": "2026-11-05",
+            "assigneeStaffMemberId": "{{staff:jess}}"
+          }
+        }
+      ],
+      "actions": {
+        "done": ["add_todo"]
+      }
+    }
+  },
+  {
+    "id": "whats-on-my-list",
+    "set": "follow_through",
+    "description": "The owner's list holds \"Call Maria about her colour\".",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "What's on my to-do list?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "list_todos",
+          "arguments": {
+            "whose": "mine"
+          }
+        }
+      ],
+      "replyMatches": ["maria"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "tick-off-the-maria-call",
+    "set": "follow_through",
+    "description": "\"I called Maria about her colour, tick it off\": the right to-do is found and marked done.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "I called Maria about her colour, tick it off"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "list_todos"
+        },
+        {
+          "name": "complete_todo",
+          "arguments": {
+            "todoId": "{{todo:call-maria}}"
+          }
+        }
+      ],
+      "actions": {
+        "done": ["complete_todo"]
+      }
+    }
+  },
+  {
+    "id": "todo-without-date",
+    "set": "follow_through",
+    "description": "\"Add a to-do: restock towels\" has no due date.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Add a to-do: restock towels"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_todo",
+          "arguments": {
+            "dueDate": null
+          }
+        }
+      ],
+      "actions": {
+        "done": ["add_todo"]
+      }
+    }
+  },
+  {
+    "id": "staff-remind-me-at-five",
+    "set": "follow_through",
+    "description": "Jess: \"remind me to clean the chairs at 5\" is today at 17:00, her own.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Remind me to clean the chairs at 5"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_todo",
+          "arguments": {
+            "dueDate": "2026-11-02",
+            "dueTime": "17:00",
+            "assigneeStaffMemberId": null
+          }
+        }
+      ],
+      "actions": {
+        "done": ["add_todo"]
+      }
+    }
+  },
+  {
+    "id": "remind-after-booking",
+    "set": "follow_through",
+    "description": "A booking and a reminder in one request: the booking waits for the OK, the to-do is done.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Book Sara Kim for a haircut with Marco on Thursday at 11 and remind me on Wednesday to confirm with her"
+      }
+    ],
+    "expect": {
+      "actions": {
+        "proposed": ["create_booking"],
+        "done": ["add_todo"]
+      }
+    }
+  },
+  {
+    "id": "team-todos-manager",
+    "set": "follow_through",
+    "description": "The manager's team list includes Lena's open to-do.",
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "manager"
+    },
+    "turns": [
+      {
+        "user": "What's still open for the team?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "list_todos",
+          "arguments": {
+            "whose": "team"
+          }
+        }
+      ],
+      "replyMatches": ["maria"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  }
+]

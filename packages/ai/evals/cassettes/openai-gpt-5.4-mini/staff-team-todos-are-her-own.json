@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f6041492dc884f6fcc39da57cc596fccff895e49370b6bedaeb2fefd6e77ae0c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5ZD4LobBdJudfsfFDiJ3jpUj",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 19
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "ab654944b3a66be8fe5e8a41e8915a74a7ac213e677cdfe952ffe359f8e1a2da",
+        "response": {
+          "text": "There aren’t any open team to-dos right now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5505,
+            "cachedInputTokens": 5376,
+            "outputTokens": 16
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

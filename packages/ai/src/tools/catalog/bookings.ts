@@ -91,8 +91,8 @@ export const createBooking: WriteTool = {
         args: { clientId: { $any: true }, serviceId: { $any: true }, time: '10:00' },
       },
       {
-        say: "Put Ana in with Jess on Friday at 2:30pm, don't email her",
-        args: { staffMemberId: { $any: true }, time: '14:30', emailClient: false },
+        say: "Put Sarah Park in for a haircut with Jess on Friday at 10:30am, don't email her",
+        args: { staffMemberId: { $any: true }, time: '10:30', emailClient: false },
       },
     ],
   },
@@ -237,7 +237,7 @@ export const moveBooking: WriteTool = {
   localTimes: true,
   tier: 'internal_write',
   guide: {
-    use: 'Move a booking (id from get_day or get_booking) to another date and time, optionally to another staff member who offers the service.',
+    use: 'Move a booking (its id from find_client_bookings when the member names the client, else from get_day) to another date and time, optionally to another staff member who offers the service.',
     avoid: [
       'to change the service or the client (cancel and book again)',
       'to pick the new time yourself (offer free times and let the member choose)',
@@ -329,7 +329,7 @@ export const cancelBooking: WriteTool = {
   localTimes: false,
   tier: 'internal_write',
   guide: {
-    use: 'Cancel a booking (id from get_day or get_booking) the member asked to cancel.',
+    use: 'Cancel a booking the member asked to cancel (its id from find_client_bookings when the member names the client, else from get_day).',
     avoid: [
       'to move a booking (use move_booking)',
       'for a no-show or a finished appointment (the calendar records those)',
@@ -337,7 +337,11 @@ export const cancelBooking: WriteTool = {
     ],
     returns: 'the cancellation, done or waiting for the member’s OK.',
     examples: [
-      { say: "Cancel Maria's appointment on Friday", args: { bookingId: { $any: true } } },
+      {
+        say: "Cancel Maria's appointment on Friday",
+        evalSay: "Cancel Maria's appointment tomorrow",
+        args: { bookingId: { $any: true } },
+      },
       {
         say: "Cancel Ana's 2pm but don't email her",
         args: { bookingId: { $any: true }, emailClient: false },

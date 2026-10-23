@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6c0734f56893a007e94290cd804a13d0c04f862702a8faf835966c8fe37e9014",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1b2nHZOk8Hfgns5OHWKXaCE0",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 9,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "29efd608215ea785bf371d0df23d9e3c50abeb5d0c3a49ea61da9fe45409f831",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_i9Q6dnTJ3MrrVSfwi9ppbDY7",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-06\",\"from\":null,\"to\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0ace47f2c9b8bd93016adaa434842487d29cc8780fecb771d4",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qQ1oZC3WIVdVUtlQBt5_ZXCbVBd-nk_7fv82hOqn6FJGym9qOiyc0nsYFfu2ppC6ENQ-WWLxzkh4fK37_N7coPL7_ZLk9C8tQ4xQ2j9rKcH37eyHbsLG1KMlCpGKqXrUKDM9TZm97WE9x93NKoLODa7KKuFmi8XtltlWgYIAQc7B4oE-KJ-mYS6i4t8lviG2sHTJ5-vRezJHgJnfhQp60iIQsyLTqrBC-KBNfsmviKYG3cME2qrZRC2YR_bWY79y0Ff5PHP5_PM4IPp-Cu8-4nmGmeH5B09tTn2BuMT02V0ifcNh8zEaDWywX6o0R_K46FRcU9Tt4gIf0YHtZ6ReVOR94wyHyG2QmhRb5eRW-84QaRmeaxqj2eKu4JifwaDkFSE1FrVyYLO7oGpGXVpj_00yv6DZ7IfGmfQGZ-fxJsiBq0e_j8gdAQ5Rw9KsIA_q4tc4uvVsdwvJrlE4ULXZeBnUQVKM-OHc3njNMqCTe13ytBaer7aeSi4mkTrmCRPsE9pe3-XOP3h67TdqxAC803gaC-4UnwnCLtokvpi1xQ23h9yRJhHSLHe4DWwPkNCsis8ustLFpzaf1nipewtK6ztj6ieaAFkAeIgGLwv6d9lUATgnfoZX087k9a3J7SWA54PE-5D0H8MHQMEMAU7jMwHbmLvGm5mBDhtBnKS3QNVy6wtjGsoxIasJoPhrjFSUlk0WgiA0AQ09-6RHuzt67LNrS8TULIpIiPCpioROdHbz7jKLSikInTpMQUF17FHd5fiXAnV07TXAG4XUIDW0JWoIlZB_5HGY3nPOOb8oLDbQdnLLXPU07TM-i_AZjP19SRI4uyrTrEc1OCiM3EsDWUx4aSJSs4a7wJEhpwPt-locjSohySRBD1gKN_geDoIV9lnG_c4E-4oIVpbdFrgjGmhteq5XZFcyAk8rwPOy_lDzdxbA3AUrBfZ6zKQYZ8bRVVOaSz7ECuskGUu2Ulh5GjiaJDr5UkCEu_EzqTQHBZ3XyJaKDYQp8MsuA1l7Qk3amLBKfS6L5_YHt86gpZJ1FZoHTvWtgocnPVUAv9UzAIb0L-PV8KDFHYZZYDQXa-Ivk6y7b-f0jKkKuQguivAWimJWJIJITwe6tz3ZFj_NJKGGHGy-CDMG9BIyalJs_Mya7leyxxBCKCZLChAmvJY4BDCsfhkOg-aI1lFTh0IYCP3Z0KtQRpeAkLjuili7aFM1JmH9oHotclpTAh_vI6emi62KqY9KnVuTZGDjIZRWB5lij5UmZnqJH13ZKuMPxgJABxx66Ung2AAxk6Qq2Yn7b5RqzIqOZvZ8NI7XXolzvrHbju-c5MCUebJ5dQzh2Ys4Egy6wILRMD1WcBiiefSDGHRb2JeGqtce3-mmS-aNEgea__ky2jXVrvk9qSdRdYpCoTlblL4lwMno_1gSED9vpoAa_0C80CO_lhqKHMhFd0PATgweP_7titu_h7m8gyfP7KmbqTZEB43WXgjBOG-p0fOoXyQiZ0FmHnCnILESWRxfOjcyR2g0JQVsVCqujInpmYvU2YiIKdZrrq4WIZr9Iu5YeUhDcuEYVsOKJbhdodL_gyjZPMBWihrKBTatMTzoyULyg3MGel4GuvsSwX8YcY1Wr_WqmX_vg1m_oPTccItVVDF9D886SWEPrRyDY3_VGqxujUMqsgR57IcTuRjwz7kxfDJTnW_-WBcOjrQuSwRGgiJw9nd1C8CCeApuMhYa1eS",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5714,
+            "cachedInputTokens": 5443,
+            "cacheWriteTokens": 268,
+            "outputTokens": 84
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e6034bdc74bcd8d14c997e3f97bc3d2f8647a46ccf11145f6f95b2483577a1fa",
+        "response": {
+          "text": "Marco’s calendar is blocked for all day Friday, November 6. Any existing bookings remain in place.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5846,
+            "cachedInputTokens": 5711,
+            "cacheWriteTokens": 132,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

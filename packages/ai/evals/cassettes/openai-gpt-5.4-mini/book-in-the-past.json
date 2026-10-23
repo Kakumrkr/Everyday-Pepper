@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a492f97b2ae87c336ec9a54b562f3480ebf5a6fb39145e41f472e6f08fa4b1ef",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dwDg4z8gHGa50TE6kNbmxtzn",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 3712,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "93c12e895c16e0a1de3171aeff0b3e5a52d3b7b96a9d6d2aca4eac43813699f7",
+        "response": {
+          "text": "I found Maria L., but I can’t book anything for yesterday. The date needs to be one of the listed business dates. If you want, tell me a valid date and time and I’ll book it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5532,
+            "cachedInputTokens": 5376,
+            "outputTokens": 47
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

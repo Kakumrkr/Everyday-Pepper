@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "e2e2bd99d056008b5f8b978f7bf4c6cadd92bc68db103dc3f769e86eef028400",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Zq4RyrtsWDjar1rJ6ei6Sqzo",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"order shampoo\",\"dueDate\":\"2026-11-03\",\"dueTime\":\"16:00\",\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 45
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "199deb6e942f74287fb20aa1022d746f13b195ca1f8ca4ca0b2e5970f9d3b3ce",
+        "response": {
+          "text": "Done — I set a reminder for you tomorrow at 4:00 PM to order shampoo.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5553,
+            "cachedInputTokens": 5376,
+            "outputTokens": 23
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "fb6d7343a135b3a18d1d6163a46ea9c5a04e97bdf44572a0c41181689535fb14",
+        "response": {
+          "text": "I can’t change your staff role or make you a manager here. That has to be done in Settings by someone with permission.\n\nIf you want, I can help with what you need right now by showing your bookings, to-dos, or anything you can already access.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 59
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

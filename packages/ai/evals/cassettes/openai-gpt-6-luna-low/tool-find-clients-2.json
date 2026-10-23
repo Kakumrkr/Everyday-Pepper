@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c42f43dd6d8b3abdf09f598d7754bf442f3de82fae8f07836f28eae7778eff16",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ASHcddMfZdAe69HBCjfiu352",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5445,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 8,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "af186df1411c8751388fa0a9042bd59ea6dbb563ec324932ff650f6ebc97c031",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sOIFvgb4R2iYCDUJN4FPo0kg",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5529,
+            "cachedInputTokens": 5442,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "763a68ca1006bb67292a747a434ef8e02784c377cb693f6af8fc2d0b6a8e4c7c",
+        "response": {
+          "text": "Sarah P. has no upcoming appointments to move.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5645,
+            "cachedInputTokens": 5526,
+            "cacheWriteTokens": 116,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

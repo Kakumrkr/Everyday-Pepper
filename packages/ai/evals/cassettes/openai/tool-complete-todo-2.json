@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "df974ed3fc2de29ef5ed96104540683050525b1bfc3ce7ab1a00d5430d61d18d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_npWlOqJyv17MVG1TPz77kbPr",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5550,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 16,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d8275e5e9f2b86f840c3da302ca7f2ee014f94b7872a157f1b59bee7ea4fa77f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_FjSpUW9DYRO5Vxv2Djyh5aLX",
+              "name": "complete_todo",
+              "arguments": "{\"todoId\":\"{{todo:call-maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5655,
+            "cachedInputTokens": 5547,
+            "cacheWriteTokens": 105,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "86320a3dde35e384172194410a34b4247389e880ed0a258a0d52a5840c95e27d",
+        "response": {
+          "text": "Done — I marked “Call Maria about her colour” as complete.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5741,
+            "cachedInputTokens": 5652,
+            "cacheWriteTokens": 86,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

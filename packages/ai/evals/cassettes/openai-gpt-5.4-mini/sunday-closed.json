@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "48ed66abf7f980b668955c40c644ebb281ed8660052f571ce3fa5f18d1533543",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kZDPnStYlK8TjVvRfUwHX32O",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_03JVjPrRh0E6z8dlIcRpo4Br",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 48
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "ef2961746738170e101956e749a112e2a0c58ef4a82d5b7fa5a41909ac9806c3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_K4aIrhcCoSlw0nbY7L3WHj2o",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"days\":1,\"notBefore\":\"10:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5824,
+            "cachedInputTokens": 5376,
+            "outputTokens": 68
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "6ac4ce31077ecb12b11877339a7f1d478fda4e22799c1316fadd7b05ba355f80",
+        "response": {
+          "text": "I couldn’t find a free haircut slot on Sunday at 10:00.\n\nIf you want, I can check other times on Sunday or another day.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5935,
+            "cachedInputTokens": 5760,
+            "outputTokens": 35
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

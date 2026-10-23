@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c8c85091a4d9451628e9fe4ed401e81dde21e11cf6a4943cf43beec5015f7c40",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_I0E0dtWx0KvwVurbg7WX36lC",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_DsbHQUHWBUWkHH6WqecK4df7",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5551,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 5548,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "12d93620da489c90832e7c6ff85cda5198407732602727b608658deda97de9d9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_VcLYFs496ndqUivvN0f8vhGB",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-02\",\"time\":\"09:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5909,
+            "cachedInputTokens": 5548,
+            "cacheWriteTokens": 358,
+            "outputTokens": 109
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b7ef51ebcf62a856f4d0cb6f5db11830890302f6804cb298bdc41224caae17d6",
+        "response": {
+          "text": "Ana’s haircut with Marco for Monday, November 2 at 9:00 AM is awaiting your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6098,
+            "cachedInputTokens": 5906,
+            "cacheWriteTokens": 189,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

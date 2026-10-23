@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c76fc3b22ba6c218c921af1c6bcba5c5342d08ec0d77167797a5338e7351ef2e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_oc5RF8gTphPiNIWvlEQIL2ty",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "9223e5152ce9f7ae3ed2a383fbda36d9bc92f5693dfc8e37058a40ffffcc7af1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cMc6KgLMHVealM8tFGbH3CvO",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5376,
+            "outputTokens": 41
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "609bb319ae54002945ccfa6d7bfe6e4e2cb682c9b784ec53b12885ebf1d9ba9f",
+        "response": {
+          "text": "Yes — Maria L.’s next booking is still on: Tue 2026-11-03 at 3:00 PM with Jess for a haircut.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5804,
+            "cachedInputTokens": 5376,
+            "outputTokens": 36
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

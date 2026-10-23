@@ -4,8 +4,12 @@ import type { LlmRoute } from '@pepper/contracts';
 // stronger one only by rule. The rules see only what the loop counted, never the model's
 // say-so, and a business past its soft budget stays on the routine model.
 
-/** A turn's step after which it counts as a multi-step plan. */
-export const STRONG_AFTER_STEP = 3;
+/**
+ * A turn's step after which it counts as a multi-step plan. 4 since S27: a real model's
+ * ordinary booking takes four steps (services, client, proposal, answer), and at 3 every
+ * booking's last sentence went to the stronger model (ADR-0033).
+ */
+export const STRONG_AFTER_STEP = 4;
 /** Refused calls for bad arguments or unknown tools after which the turn needs the stronger model. */
 export const STRONG_AFTER_INVALID_CALLS = 2;
 

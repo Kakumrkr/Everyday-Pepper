@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6502b2f6265a8205adac7eb467fc096c88b19efd8f232a62a10b8aee87d2ee3c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_K9SA9bWqlXl6JjCqZePZLBj1",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "569618d3e3e99ef224598281d8521d7f10401612504cb22dba341756e6240e1c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gA9MLAoJne7YOVIUIo3MBF6t",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "ce5c5ea483d628d5eb7cef57953ae347cf80eb945155b399b5eb657d48059585",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2FatY9C8mdVlucJFQ8JAsI7D",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            },
+            {
+              "id": "call_K4t3rqT5StM52CYagnZcCTvM",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5613,
+            "cachedInputTokens": 5376,
+            "outputTokens": 95
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "dd6e6806e5c9fa25bc1b6d36f806d189bf4e343ba27eb3ff8227bfe13aad5e0f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_FIP2RXtTfcvwRzlf6ZX2QTNY",
+              "name": "get_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\"}"
+            },
+            {
+              "id": "call_T0CuP8YCiYLDEQQfywpAveGG",
+              "name": "get_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6175,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 738,
+            "outputTokens": 91
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "f619b90023b4eff7b4cf80f85725300f408156867461692f7865bd6adc5e8751",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pa574xpWjLWCMYS7gMvD8aZz",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6646,
+            "cachedInputTokens": 6172,
+            "cacheWriteTokens": 471,
+            "outputTokens": 43
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "8e93993f511725181a50462642612ce69de01ab696f2d83327e675779254914d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0VWoTWEu2crxQm7Ey6zFKu9s",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6768,
+            "cachedInputTokens": 6643,
+            "cacheWriteTokens": 122,
+            "outputTokens": 46
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

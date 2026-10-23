@@ -129,13 +129,22 @@ export type ToolOutcome =
       /** The answer holds text a client typed: the loop marks the turn untrusted. */
       untrustedText: boolean;
     }
-  | { status: 'done'; tool: string; summary: string; card: ToolCard; execution: ActionExecution }
+  | {
+      status: 'done';
+      tool: string;
+      summary: string;
+      card: ToolCard;
+      execution: ActionExecution;
+      /** The summary echoes untrusted stored text (S27): the loop labels it as data. */
+      untrustedText: boolean;
+    }
   | {
       status: 'awaiting_approval';
       tool: string;
       summary: string;
       card: ToolCard;
       proposal: ActionProposal;
+      untrustedText: boolean;
     }
   | {
       status: 'refused';
@@ -337,7 +346,7 @@ async function requestWrite(
     );
   }
   const payload = checked.data;
-  const { runner, lastPreview } = writeRunner(tool, deps, payload);
+  const { runner, lastPreview, lastUntrusted } = writeRunner(tool, deps, payload);
   const ask = () =>
     requestAction(
       deps.db,
@@ -368,6 +377,8 @@ async function requestWrite(
       tool: tool.name,
       summary: `Waiting for the member's OK: ${shown.summary}`,
       proposal: result.proposal,
+      // A proposal found again without a fresh dry run: its stored summary is labelled anyway.
+      untrustedText: lastUntrusted() ?? true,
       card: changeCard(tool.name, result.proposal.action, shown, {
         state: 'proposed',
         proposalId: result.proposal.id,
@@ -390,6 +401,8 @@ async function requestWrite(
     tool: tool.name,
     summary: `Done: ${shown.summary}`,
     execution,
+    // Without a fresh dry run the summary is the fixed "already done", which echoes nothing.
+    untrustedText: lastUntrusted() ?? false,
     card: changeCard(tool.name, execution.action, shown, {
       state: 'done',
       proposalId: execution.proposalId,

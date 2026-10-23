@@ -27,7 +27,7 @@
           "name": "cancel_booking"
         }
       ],
-      "replyMatches": ["approve"],
+      "replyMatches": ["approv(e|al)"],
       "replyMustNotMatch": ["\\b(I|I've|I have) cancelled\\b"],
       "actions": {
         "proposed": ["cancel_booking"],

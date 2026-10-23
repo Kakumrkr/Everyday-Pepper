@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a610b16adc513268074dd6ff453d5f94030241e11abf10f51b5b4f2f126d4110",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_TUOKkt9dgp0nWFin4VyxUz6Z",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-10-30\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 3712,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "e7ba70efbbfde49b07ac6a31c1ec36be96c5eb4727d45bc3b5b2653bd1b78ec0",
+        "response": {
+          "text": "Friday has 1 booking and no blocked time.\n\n2:00–3:00 PM — Ana R. with Jess for a Haircut.\n\nIf you want, I can also check the open slots on Friday.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5678,
+            "cachedInputTokens": 5376,
+            "outputTokens": 47
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

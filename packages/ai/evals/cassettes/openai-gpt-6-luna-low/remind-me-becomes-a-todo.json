@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c8c53e028c6c1415aaaaab757fdf75d76e717dcd93127766575e143b11046927",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_H6vZTq6t9Q8Uz0CsNWXue7Ot",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-06\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5449,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 5446,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9013abfa2856a26e2acab02c7e2c484d4655392a5872b4ab45d4da2dfb2543aa",
+        "response": {
+          "text": "Added “Call Maria” to your to-dos for Friday, November 6, at 9:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5549,
+            "cachedInputTokens": 5446,
+            "cacheWriteTokens": 100,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

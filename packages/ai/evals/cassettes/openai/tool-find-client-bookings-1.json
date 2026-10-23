@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f34223b1f92599a386145baa221a2458c093f5ee1a72670425c6036e50ad672a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HQQrpRsdVRqike9y9G9W1QPO",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5545,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5e3b0937d14f7587d84ae445a19ea4cd7f15f940a08bcc28db8187096b038cbe",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2I706Y8rBBLwnwhp8gvo0Shf",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5625,
+            "cachedInputTokens": 5542,
+            "cacheWriteTokens": 80,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6c70c6b7f162de1baec78dca7e07e3fb13910561980a09c5253e3a7f8b36b6a5",
+        "response": {
+          "text": "Maria L.’s next appointment is Tuesday, November 3 at 3:00 PM for a haircut with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5887,
+            "cachedInputTokens": 5622,
+            "cacheWriteTokens": 262,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "f34223b1f92599a386145baa221a2458c093f5ee1a72670425c6036e50ad672a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_73jQqQ0VcqJe50EOnrFQKBcf",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5545,
+            "cachedInputTokens": 5542,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2f593b7d7472266f14f538fca1b8aabdb266e0837ec64a12c03ceb6075b45f4a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_QkBcBA3coy07zIAdpobKB7F6",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5628,
+            "cachedInputTokens": 5542,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "537363105f4fc5d69283fc90e61c810fd3f4cbf0145144f02715165f10de5412",
+        "response": {
+          "text": "Maria L.’s next appointment is Tuesday, November 3 at 3:00 PM for a haircut with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5910,
+            "cachedInputTokens": 5625,
+            "cacheWriteTokens": 282,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "f34223b1f92599a386145baa221a2458c093f5ee1a72670425c6036e50ad672a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bb4olCwKQXKfywKJ9DvQVAbE",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5545,
+            "cachedInputTokens": 5542,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "adaaab04dd28f72d31dd1d336ad503b75a1abd67f3252c1a3b6215c97b1fc2a8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ztqczp3hCEl9wIU4DZ0ChUJC",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5628,
+            "cachedInputTokens": 5542,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ffba450756d5ff553bbd31f9ffe165d2c5dc73cbb7e77948eb2f15514d4b9389",
+        "response": {
+          "text": "Maria L.’s next appointment is Tuesday, November 3 at 3:00 PM for a haircut with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5903,
+            "cachedInputTokens": 5625,
+            "cacheWriteTokens": 275,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

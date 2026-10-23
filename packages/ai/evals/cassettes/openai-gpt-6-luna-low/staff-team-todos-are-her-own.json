@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f6041492dc884f6fcc39da57cc596fccff895e49370b6bedaeb2fefd6e77ae0c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_DWoHZpzziZsRJe763gCFurn7",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 11,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "962a3e08aee935236ed96adc4724c0c2bfa5d4a418747ffe13c5611c1289d338",
+        "response": {
+          "text": "There are no open to-dos on the team list.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5505,
+            "cachedInputTokens": 5445,
+            "cacheWriteTokens": 57,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "fb6d7343a135b3a18d1d6163a46ea9c5a04e97bdf44572a0c41181689535fb14",
+        "response": {
+          "text": "I can’t change your role or permissions. Please ask an administrator to make you a manager in Settings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 13,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

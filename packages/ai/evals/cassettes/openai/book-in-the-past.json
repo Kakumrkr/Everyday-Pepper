@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "167fd23b2c2d94dfb2927ca6563aaf2a3899e6a5ca7d5f6d285dba7e9000f1c3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_tXJNy0ognUhzcq8THKZ71Voq",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5547,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 13,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d5a9d22ce2a1cd2acf62d4521a642e0e2698ee4c36c56f6f67efd6adbbcdccd8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2ph3mXjot5lWhi3uqdpU4tzW",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5819,
+            "cachedInputTokens": 5544,
+            "cacheWriteTokens": 272,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "077c0ff83df015081abcb957231bd881a084f82cf6c15b5e4598fef3abe532f9",
+        "response": {
+          "text": "I can’t book an appointment in the past. What future date and time would you like for Maria’s haircut?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_00fd6649e59d66e7016adaa8783ff487d2ac718725d7e84ec7",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qh4DVMhNZrBHB0PE9jxOL3_QBHKxJrqu8lhMKM-JUNpmGG5tKrX1KjBVj05bCBDLf7QGFxNOXLBQY-OacS3OQNxbuyiSPxnL3lNiZQO5do6_xweDvHF2CeXxamUe40eRH6HcIMeKnBz04HI-LwBQMphhJ4r1aljQCu3415A3OEhBzhoTsy3gfCrPm_SX9W_bFxPNEeeg3D8qBX6QNldiYdMFCMqvhhtELyX8h7HpP83qbV4xLMVIpjHsJvg_sp3nqacG6EHvP5g11H-BZWR-yqYl4up2e809iUMtFCmo7pWF0tMKz-OYiI4rLcaa2xoApT9LiyxDRbRCIvVG5WfPn8jNqv1XXd4Rs9yCncrvLhnHZwksxpVacHaK8v040wPUUJU03i8qEf2pK0JZ1EnMu31-a8YxyDWR-Ieza2IEZVDe5XO6ujCtaQTs1gh0Tsezu3xyGEJw_zFlRGcY_b5nisERuXea4TblYsdc1BV4dL3pqobllv38K7olrYHhmS60Cak6-cpubNs-Cp2Qtao7s4LZWx0To3dJshvemj5fuT-AS8TNmAdi-Q7qUWHMcaySmegJS1C3IasATEXAv4M2Ekg78Ej7WdQBVbHfGXTzOIiD0Mu7XYplL2dUPJoadyd48uKAG7u_JTQffFTiG8IUPS9cmP5n4tHPwCn0CRzCwjmaCqmmyF0Q-3ezOlMvqnGG1AbUb78lqvoMMEZiZcgNi2tVR_n73XbgIwZbdSInBQArvK5zrI044h9KK_ONXg93sivUXusSozENaZCnzsGWWrV68BiE374wl_XvS7AML8U-AF74JHoJmBf-ooQ1tk6F1smj4xjYbh5_HYwRxHKZLhCs9uPhjrimSTu_jAuo3OOu9O39NtJ8RTjI5ebUugVwmYvPPqZskoIZ9OP1jHmkRjmKDOtgkab40p-NgoUpqzeFlpz7bTtU5fbsyz-iplvkJorrfThaJsMKrAwKwetw6O_Jr3NgNLh9iGRby_BCtbY_p3mDoAWGOZk2wG6n7JaE9dbrQphnAgvSP_ZHwqHe9fIWhuUv11Dp3z02ZYJuUsMnWu7o4pQqoHr3hicFb1VFOSK0s0jrCK3wJVqFzZJEN88tLBXOTVR5Rlr7xx756lxdjP1k0ADARwSoVm1G08Zl85RUX7MUNUMu23i7VnhQJEOe-MGV3PHoS_wm29jSQIWfVWGj6ec3mzoqfLdjfQAdqLJp2zhCjDq5hKeJ_xtBVROshf0FYilitxz9HI1bEyrTSHGKvwEad5eYRkbxDUeFpKqbixGrAEu6_9ko0rsQW9PCkN8EqAicHrVF0267gCYpXPfycyC-W8EddjaNYs0r4gPJPKK9oLN_A9cAnW5-s853Lw4EBkJEvAxHDWzphd3BQF81bitv-hj1fPqPsf5gicP6hTL3CNdYx0VRaL3OxgZt4KsnfmRl0QBNzHFFYZHDSYs6JOmSuH5eN7zo7kTMOU4eX0hgIUlAzBgtOlNt8A_-iN4Uq4ooXqpn1gzAQSE-OIUEpdoQgMeSzNgtgAL3-C66pthud-JIG0TmnE8nJdsi8Vw_Lu9uS0ZnEn2izE1BJlQewxPeRJBTjmLyGEVyYj8nA0PFl14Wn6FP0_sXk1hM0MJl1Vgne7UMg8EZUptieWPNsq2mlxxRexoIS-g5f4w2xUprlujGLbB4UNd0Kyiwp7uQ5QSJHDVaaspCrN5mThJzGt_16-g0OxSYByikGHv0rnHJBDH_NZSnBpyVmob7BAMidvgtUiO2NOF-pl8CRK1d8X8RjQHT6Ld5dYFg1L_0k9r8DCOIfVO-BkAdTiIwpA82D7TXv5sm-ExCi6YslBUPs61LsGl1gX231Qpca3V8UFd34_i-jmqM1YnPsrqOQ==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5903,
+            "cachedInputTokens": 5816,
+            "cacheWriteTokens": 84,
+            "outputTokens": 65
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "06bd0fb01d33f7a8b177be139375a3866e735b3ba1e436fff21b1e051b19db4e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Oz1NfVtvKHPopZ3YHhrlSRN9",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5454,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "8798699f03ad5d4be903badbda16d7470bbba06a936187482f03adddbd337062",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Uop8MHt1HcsaMLpK9e32Glkt",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5535,
+            "cachedInputTokens": 5376,
+            "outputTokens": 40
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "8488bd8ab0489a189a465cbc2a2f17d296c1811c891151fb9155e17eedf5b271",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_liHtM86UVEc8Jp7ladiZdm4y",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"11:00\",\"staffMemberId\":null,\"emailClient\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5810,
+            "cachedInputTokens": 5376,
+            "outputTokens": 67
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "03f3084dad1c915046c43ef2fac2e6226e683f042db7aebc5482c924f94b87de",
+        "response": {
+          "text": "11am tomorrow isn’t available with Jess. The nearest free times are 10:45am, 10:30am or 10:15am. Which works?\n\nMaria’s appointment is unchanged, and no email was sent.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6073,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 636,
+            "outputTokens": 51
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "40260923ef85a5e4529a1127a33cb88fd742ee27e622464dcfe074c603b2d6f1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XHHguFc6TX18RxfBWzPWrj4i",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_MAMUWMxIEowyKXBz8Ze1fPuU",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 5376,
+            "outputTokens": 59
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "b62f5e67a293e76b04f570c7daca095a93af2494159d94545a1a7253cb6cd68e",
+        "response": {
+          "text": "I need a bit more info: I can’t tell which appointment “her” refers to from today’s schedule, since there are no bookings listed for today.\n\nIf you tell me her name, I can find the booking and move it to Thursday.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5810,
+            "cachedInputTokens": 5376,
+            "outputTokens": 54
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

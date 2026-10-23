@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f2f94b2b37b5bf54e8e7afb4a4e949754e2e7bcf192fd4d6bf89416f1d537b6e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HB7neuhSh0mFcVCHUGTHF3o9",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 10,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b7cf2d435d1d375b35852c8f245c91986fac8d94a28c5f9b884b72f9c62594d3",
+        "response": {
+          "text": "I don’t see any blocked time on Wednesday, November 4. There’s nothing to remove. Could you mean a different Wednesday?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5444,
+            "cacheWriteTokens": 83,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

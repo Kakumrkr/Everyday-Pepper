@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "9844323c3e8da3cdd21503831f87b02c13f36546ef54fa36d6e99e5803e7865f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GQ5sPglngCRIbo1G0SSGwxwZ",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"clean the chairs\",\"dueDate\":\"2026-11-02\",\"dueTime\":\"17:00\",\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 3712,
+            "outputTokens": 52
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "bbd7235810df4ce8d643a6ae7482fbf337943db84a8ab124def601c6147c8218",
+        "response": {
+          "text": "Done — I added a reminder for 5:00 PM today to clean the chairs.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5555,
+            "cachedInputTokens": 5376,
+            "outputTokens": 22
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

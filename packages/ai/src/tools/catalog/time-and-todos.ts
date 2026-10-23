@@ -13,6 +13,7 @@ import {
   TASK_TITLE_MAX,
   TimeOffIdSchema,
   UtcDateTimeSchema,
+  type StaffMemberId,
   type UserId,
 } from '@pepper/contracts';
 import {
@@ -22,6 +23,7 @@ import {
   memberFirstNamesIn,
   permissionScope,
   reopenTaskIn,
+  UndoRefusedError,
   withdrawTaskIn,
 } from '@pepper/core';
 import { createHash } from 'node:crypto';
@@ -165,7 +167,10 @@ export const unblockTime: WriteTool = {
       'the removed block with its whole span (a block over several days goes entirely: block the part that stays again), done or waiting for the member’s OK.',
     examples: [
       { say: "Remove Jess's lunch block tomorrow", args: { timeOffId: { $any: true } } },
-      { say: "I'm not off on Friday after all", args: { timeOffId: { $any: true } } },
+      {
+        say: 'Jess is working through lunch tomorrow after all, free that time',
+        args: { timeOffId: { $any: true } },
+      },
     ],
   },
   args: UnblockArgs,
@@ -175,6 +180,8 @@ export const unblockTime: WriteTool = {
     const directory = await directoryOf(scope);
     // Staff remove only their own (`forbidden` for a colleague's, which they can see).
     await removeTimeOffIn(scope.tx, scope.actor, entry.staffMemberId, entry.id);
+    // Bookings already inside it stay inside it again on Undo; only one made since stops it.
+    const inside = await bookingIdsIn(scope, entry.staffMemberId, entry.startsAt, entry.endsAt);
     const name = staffName(directory, entry.staffMemberId);
     const start = localOf(scope.timeZone, entry.startsAt);
     const end = localOf(scope.timeZone, entry.endsAt);
@@ -201,22 +208,45 @@ export const unblockTime: WriteTool = {
         staffMemberId: entry.staffMemberId,
         startsAt: entry.startsAt,
         endsAt: entry.endsAt,
+        bookingsInside: inside,
       },
       summary: `Unblock ${name}'s time, ${span}, so it can be booked again.`,
       facts: [{ kind: 'bookings_untouched', ref: null, value: null }],
     };
   },
   async undo(scope, inverse) {
-    const { staffMemberId, startsAt, endsAt } = z
+    const { staffMemberId, startsAt, endsAt, bookingsInside } = z
       .strictObject({
         staffMemberId: StaffMemberIdSchema,
         startsAt: UtcDateTimeSchema,
         endsAt: UtcDateTimeSchema,
+        // Receipts from before S27 have no list: any booking inside then stops the Undo.
+        bookingsInside: z.array(z.uuid()).default([]),
       })
       .parse(inverse);
+    // A client booked into the freed time since: blocking it again would hide their booking
+    // behind a break (S27 security review). The member sees "booked since"; nothing changes.
+    const now = await bookingIdsIn(scope, staffMemberId, startsAt, endsAt);
+    if (now.some((id) => !bookingsInside.includes(id))) throw new UndoRefusedError('slot_taken');
     await addTimeOffIn(scope.tx, scope.actor, staffMemberId, { startsAt, endsAt });
   },
 };
+
+/** The confirmed bookings of a staff member that overlap a span, by id. */
+async function bookingIdsIn(
+  scope: ToolScope,
+  staffMemberId: StaffMemberId,
+  from: string,
+  to: string,
+): Promise<string[]> {
+  const bookings = await listBookingsIn(scope.tx, scope.actor, {
+    from: UtcDateTimeSchema.parse(from),
+    to: UtcDateTimeSchema.parse(to),
+    staffMemberId,
+    status: 'confirmed',
+  });
+  return bookings.map((booking) => booking.id);
+}
 
 const TodoArgs = z.strictObject({
   title: z
@@ -230,7 +260,9 @@ const TodoArgs = z.strictObject({
   dueTime: TimeArg.nullable().describe('Time on the due date; null: 09:00'),
   assigneeStaffMemberId: IdArg('staff member')
     .nullable()
-    .describe('Whose to-do (a staff member with a login); null: the member themselves'),
+    .describe(
+      'Whose to-do: a staff member id from list_services_and_staff (one with a login); null: the member themselves',
+    ),
 });
 type TodoArgs = z.output<typeof TodoArgs>;
 
@@ -241,7 +273,7 @@ export const addTodo: WriteTool = {
   localTimes: true,
   tier: 'internal_write',
   guide: {
-    use: 'Add a to-do for the member or a teammate, with an optional due time that reminds them (follow-through).',
+    use: 'Add a to-do for the member or a teammate, with an optional due time that reminds them (follow-through). For a teammate, take their staff member id from list_services_and_staff first.',
     avoid: [
       'to book, move or cancel anything (use the booking tools)',
       'to message a client (Pepper can’t write to clients yet)',
@@ -430,7 +462,10 @@ export const completeTodo: WriteTool = {
     returns: 'the to-do marked done, done or waiting for the member’s OK.',
     examples: [
       { say: 'Mark the Maria call done', args: { todoId: { $any: true } } },
-      { say: 'I ordered the foils, tick that off', args: { todoId: { $any: true } } },
+      {
+        say: 'I called Maria about her colour, you can tick that off',
+        args: { todoId: { $any: true } },
+      },
     ],
   },
   args: CompleteArgs,
@@ -461,6 +496,8 @@ export const completeTodo: WriteTool = {
       inverse: { taskId: id, completedVersion: after.updatedAt },
       summary: `Mark ${possessive(whose)} to-do "${title}" done.`,
       facts: [{ kind: 'todo_was_open', ref: null, value: null }],
+      // The AI's own to-dos may carry a pasted message's words, as in list_todos.
+      untrustedText: before.source !== 'manual',
     };
   },
   async undo(scope, inverse) {

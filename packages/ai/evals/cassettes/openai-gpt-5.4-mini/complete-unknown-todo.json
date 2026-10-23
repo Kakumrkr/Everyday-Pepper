@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "142ab6756e9cc41825c9bf6e2f4c4f563c001848a06e21fe7470a9b3e22764db",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0nbJTFIutK6MLeCZ1DszFJgv",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 19
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "98f684bca13942139c4154bd0353a5b625a898567e762b631ff4a578d9cccf7a",
+        "response": {
+          "text": "I don’t see a to-do called “bank” on your list. The only open to-do I can see is “Call Maria about her colour.” If you want, tell me which to-do to mark done, or I can help with the Maria one.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5554,
+            "cachedInputTokens": 5376,
+            "outputTokens": 57
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

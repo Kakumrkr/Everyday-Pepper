@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "813989bcdd7b29e72fc68e29664d85bae5def3250b0a3a4828735635d8385747",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rjxKTepKNTdHXV4Cy2aJsVGi",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Lena\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 19
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "ef0c4c62e7e99bcdcbfee3c0c7fd61280bf36293818b6d31319596bfa4b76663",
+        "response": {
+          "text": "I couldn’t find a client named Lena in your clients.\n\nIf you meant someone else, send the spelling or a fuller name and I’ll look again.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5512,
+            "cachedInputTokens": 5376,
+            "outputTokens": 35
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

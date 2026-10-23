@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "10c0bc411c9bfc254f76698a4fa9945770cf91b3d90a6193432fc6d28d91815f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wrAvCa4Alf7e1PIV7rTcFSVw",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_lUkCA4ISMNwIbdYFvWIMA3Zj",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"my clients\"}"
+            },
+            {
+              "id": "call_yM342Of1XW8NyIvqFWi0C0nb",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"00000000-0000-0000-0000-000000000000\",\"staffMemberId\":\"00000000-0000-0000-0000-000000000000\",\"date\":\"2026-11-03\",\"days\":1,\"notBefore\":\"09:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5453,
+            "cachedInputTokens": 5376,
+            "outputTokens": 128
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "9d414272c5428595f734136a61d414bcb5176f8cb22b2aecb9598c8f587eb9af",
+        "response": {
+          "text": "I couldn’t find a client list for “my clients,” so I can’t book everyone yet.\n\nAlso, I need the service and each client’s name first. Jess can do Haircut or Colour, and 9:00 tomorrow may not fit every service length.\n\nSend me the client names, and I’ll check Jess’s 9am availability and book them one by one.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5917,
+            "cachedInputTokens": 5376,
+            "outputTokens": 81
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

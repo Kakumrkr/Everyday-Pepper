@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f2f94b2b37b5bf54e8e7afb4a4e949754e2e7bcf192fd4d6bf89416f1d537b6e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_i6q8teBib2DlRUKmJuj0gLKe",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_RvJ3ccSePnkS6RVGgsyRObHA",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5376,
+            "outputTokens": 58
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "a6b5f27c393f7a22dacc038260a6d9a5a53b66f81bd15edcad67671c9b405873",
+        "response": {
+          "text": "I checked Wednesday, and there isn’t any blocked time on Jess’s calendar that day to remove.\n\nIf you meant a different day, tell me which one and I’ll take a look.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5815,
+            "cachedInputTokens": 5376,
+            "outputTokens": 42
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

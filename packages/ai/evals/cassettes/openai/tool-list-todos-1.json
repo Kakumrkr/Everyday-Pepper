@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "0837f9537c5dfa11407ef84b7da7f7f37d656166d93f2585fd414a2640ef7086",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wxRtATsJiy72xYK3OiqvbGny",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5545,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 11,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ee95c699edd54b233e3cca1f05b53d35b790e37a6f2fcd7153e080077ecc16b0",
+        "response": {
+          "text": "You have one open to-do: Call Maria about her colour. No due date is set.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5652,
+            "cachedInputTokens": 5542,
+            "cacheWriteTokens": 107,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

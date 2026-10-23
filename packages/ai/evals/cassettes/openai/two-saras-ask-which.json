@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "cd3e2e5285e0c99a0ab756bdc0f507a3218e0f687589262b39162e21acbdccb6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4FrgEZru2RirHndVRsrhjnvv",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5547,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 13,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a692f9ced5ffac9ed8087f60fc0a26772f4c2c0cefb37c692233c52c94a9f8b4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cj0nvFFemkeLo5BnhdSOs4O7",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5835,
+            "cachedInputTokens": 5544,
+            "cacheWriteTokens": 288,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "99ca0856f4652714dff79a18405a84b3dfe792c50e92ba2000eec3e58807b694",
+        "response": {
+          "text": "I found two matches: Sarah P. and Sara K. Which one should I book for the haircut tomorrow at 10?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5964,
+            "cachedInputTokens": 5832,
+            "cacheWriteTokens": 129,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

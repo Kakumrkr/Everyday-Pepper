@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "38275816622f87acb58c6cc8e7d047e06550ee4d72d90c0a400a66da51e5da5d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xArzEhmOfgUaNDFTHmf3j7t6",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5551,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 17,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8f4b01caefcd65d4d0ac5dbd51aadd8db24600bc72419bffdc77567454fda12a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Pe3jKCj5jr2HaY61aAMpx6es",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5819,
+            "cachedInputTokens": 5548,
+            "cacheWriteTokens": 268,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2afd4579ba04b17508dccdf036d95e90690ce494fdcbd904a3cb14bda570223e",
+        "response": {
+          "text": "Marco doesn’t offer colour, so I can’t book that appointment with him. Jess does offer colour. Would you like me to book Sarah with Jess on Thursday at 10?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_05ffe90b9ebad921016adaa8b3980087d2b9a5abaf9a1f0b64",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qi0mdXYM225dQnU-rHKCshTyxESohaON0d1BWFZOlnFDOVuo3ctGd-HnmSaEcfjiGZBFGDXrFVpEKmkQWgT2X1Hdk6RkVjyQTAjvKNXk2Cmo8bQYZtr9_EBd-UprMyhh6HM-hUO1MLuHWalEtZgSk7Fj1kYvX5PdvPp0zcoEZT5gUhwUhLuzRxl_Ch9qRmcUQPQhon5Bscd_jvRo48g4Wv_LJDO88vjXAwVvsvt00S7OjAgby8Mo_0p6Am1Wf3PBrzvtT0C0_FjrAd5IwvAlJsDV6Zuo1TfP-YqPLCt30W2glVWF-ukS1iV37Z5YjNysMbkVhYD7XlWwbbafEJ3OfCluWK0J_ZdACnWQhc8zScCLbeyR1gngNHzVMNmtX3bP0g9apQ5K_ZEKPAuL_38QfaOgGIkuoqv2OXRDr6DU3EZn7xxl71kNaYNCFoOSas3_tvMb45cGPp2H-8O-0Xtp-TPDHtLHUL9jxe13h9tpOvUkIpIXptID1JcjTINBi6zn5P0OaRqbahK22j9-6P0bS3q-flwOeOzV9r4U_4huVtSsFi1VXSSLJzBrMGIU-gmTeJz90saxwfY4NZbY_SIoig4TzDK9GdNF4EJdcWh0b7eUb7dBrUkLnIty7Mb37varqn_IsufW1reEkMQYRApjZTG7QzhJvHxgj-5_zXztuqSrVltq7UZ2tr1aSL-AgLbAu3ZIK6eAdwhDmXSSRwWQezX1WbCGRZ8p0yyoc0CNGy_UzyUcXWMopJJ1Ud1UMkXE46koXU54Cbreaow5hI3OQEfr2VRIL_Q1NEP6d38RDQTQ_jQOXc4j7hB4y16x7KzcQL8gol9RBGoakoDzycbCZ6DtIzg09zdz2CXvaIo2P-E3qcojRkxZ_q8bDiXN7humDbgjSWdSI6MF_yE8DtJFgzm2bTUMclS7gxue85Albb0oHXpn__chxUS27ubpyRzkD7jEJ4bDCzgFo-ILdIev2ErB3OmjQFhU0U42MFlI6A0RqT8KdZy6i-vemp_Sim0okqJpzJcd94dGy_S_tMA3iwLaBXiGZVtuDL8bUYH68HAv4dle6sAe8wVysyuMCArXZ21Foc5-Tva8ZTyB6voa5QNacgfMkZv8nFYhayL44aiz_k8ub93t6zul-4gpBRBPTa8uefYsSnEaeutidn18yVVC9VDdTDk9eDPVSVt5I0GvjVdImOaG5zCOmCgplxEIKlmXBynxYsgTo6J41i0jCLurdBvELX9UgYAkyJ2YwTW7BT3x-x0NfQXWtGGsJKcLMqx0-CWQSkS1F_OfztzkpOEwmaEO1hQxodzUWUC4N3C_qSUDmQzuj8HRgBJ6mUl5bYFpiWsMZXKsjqrWo8he_2wU2Duu3OGrTE72PHlGlT8I-CqEKDZ35qTQdAoYOjFFCPJIRaUO2bZEc27BsPhDkZanMP8qZAZNBW8LYQis5kma_IbhtdRxDRhfagLjZXw76zmOErzRcqVSisvmXqe9kFajwjtyAitn2UAnVMHMmAn3v8L_AvbHvDB5tpDWK2JlaTaS4N98iqFuYTHig76RmN8yCHV884gkzjp1Fu2XqfW2GG_dDEDZ6qYs_EouL5kGdQdcd00dZjh9DeCmzHFMqQj7Q5wvNZ279iKBgq9qWrGA0V3oha9bcY0ZbOn6aEjwvv6bJptbwaQQ3QEW7-DdTAKT1iBzfQ_vjvPUw0P5letibeyWL2BBYaTCjq8q--2-vNj-ZDL6bIBhIwYhyMKAPEkmoEszN1Yan77nLL4IlJIgp7UHF8vprwKaGpJAS823YA7nd0q2S77ZPW-eeslogqe-w7azliqmwFPTKg_GyAtJLpweHZte9SUh2jyMIXoEReH",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5903,
+            "cachedInputTokens": 5816,
+            "cacheWriteTokens": 84,
+            "outputTokens": 75
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

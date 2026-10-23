@@ -41,6 +41,7 @@ function run(provider: ScriptedProvider) {
             summary: 'Added ANSWER_TEXT',
             card: null as never,
             execution: {} as ActionExecution,
+            untrustedText: false,
           }
         : {
             status: 'refused',

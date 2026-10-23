@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bd22d6b89af919d693157c2343f41401a52796af70cfd7ff481fe5673e65d262",
+        "response": {
+          "text": "I can only access Juniper Hair Studio’s schedule, not Bella Salon’s. Would you like to see Juniper’s bookings for tomorrow, November 3?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_01fe7a1950f5394e016adaa33e66f887d28d985f09869b4c17",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qM_m6YRHX1uec_tgv7t_GyzyqSo0A5K-082OEMHcwvadAXX0nWeS3__YBgv4Dw_zBsPPwcl3bUD8t8w9yNPlO02NUyeNMIYhtUbBjxJBaT_FhklbHGY49itkiDRUUdYCaK3ltBWTDgNW8-ZTHj9IK70ooO4m2GyHJBAoDHB9lLFyBBOfmSNr1DX6oN-6nSJ-e7QNuPmuB_OfLUtfj8KgopqhhvoHUc87ui6dWrTY-QJRpCIfOgfYVxkS01BHC6bnBrClIBmOQoVm6mes5EE35QhB1Luv7Br6gLnMsjPsN3QAre_mO-XF1KkyPxDD_FUSWPvAl4nzg7hLYSxQ4LYJaBfBMeYMewFZW-Q8HvVhvPMV8Km2XjjPuFJFmCD9XovHew04CfqMJBNnwLJB3itrVHCNg_d22HBtM6oaSkMdNHKwf6xu4Lzn2oqpi8T7YGyQFh1PoafZyPkcVnNxwxJSJgCwXEgte8nWd0yiBstryzUVvmFPR_X5aA7uihOiKogZe1Ip9fX3-0RRet1XOI3ZGNMTSHrIM5TZG69Pt9aZXRJykh5SHJryx7kgE8fh1Vv_PbPG0cF9Jsie5LOehxovTBCBOuKRnuhWzJFyPPGrOnwCkh4cSewK18Ss2F1oRlx5qAJuHcdqEcTWChEQQP-RhI-TODHhywNswAzH_SF0wWYS3EsJ2OFkOHLdSpPNVITLDA7Ujp2YM7k9Hs5CELvr86zCnRpn1g0c_cA2F19j9c5Fm0KLppIFOOSEK1LJMdMlWNYKlMkgYozbbt_olHamHi96DfbGzu3Jj_SaDkdYQD9hXaFOfhVpRT44fYWdVr9xCrgjEaetGQx1o2OmjAfN-cbODCq0WpEsiX5rABc_z8bUUNGQaosB83mS9-tpcl6G1wDvMRbL7hkWYm9s5SWrk_iIRUFz5nLuO2-2W_fkshyjxd8me-eWFW-BMGcxZ9nAhz6B4ONku24BIbTP88V-rc47KRDsd6XVLeFAQX4AFc598mMten3K2oJIt-iBjg_SdrAyBRg5l8x7mOFlHyCAitMtd7YXjp-Xh8tfkDAqWtlQIZDbYVI5gNOjsX7RsHgwe2XV4W9z_YXZwl2zRevGuqR_2Pu_KQEV7jsWBIvSKT0l-RUVoeqfh9WroLTdRWrPJQfCN1GTAqXUjwg6DqLKHhUZH88vhTk88h7ZTgBPcgvMUlPBEb593-tGCgeesEmZW9wfTgmFYGZ7TslFjihQ-aO6rUDDWl17k_hKUCDaMPS58gpiRvM3OFVAGOICeYPJXqZli1Zrv6yO-wcQbCBf_dJx8f-lhKkTSTKolIPg6McC7wRepBzHyRIw-fdXnHtthrOlRfHKSRtHDOz4RAXXm4WGBKyzSfyQWJPwyLTk0xpyU-SFXVE3HCUzeJ4wOYtVA9DGrOibjDIGLy5cNoTSLZvmoTZvg9NzG6LyTZpV4zd3k57U3-L-dQ6bsccNGikHPKrZWmERziY-V499qVcIDD0wVKQyVz7yHmqvK3sTvUp_Eg1xzlY0iTInLSYwbKOy_PWAJ_q_ESinzcHQoeeckrH88Oo2HS5tvzFYNY0a4-Phz38l9VlXZU8OA-Yk5p3giKTi_lvQJ8bCrUm0nq6HwGcig3soAu-AezW-jyOxmwxmvXBndKfm5hLwNOnY8Aq4HDXRwVjqAl5D--j_pzT1GN6jK2teFvJ43A2012KhZEYOdE8iA9GtUkPP2FWeOU_6cmFZEwYXcoHgtlPcYOlVpTstBYgLgN7mOjvExF6bvrlWDugNQTT1-TyiOr_p-Cj-4B5a-iynMy2PLKa_JpJxCb1ZQ8BfLGwk2Lbya9Pv-6GrMOj17ElrQz6R8bC3M7cblfm2QnS-mOCbczr4vai9C8fchyV4G6wmUh5hAUzuRrZQm6vR7y_krDQEsX_d0dokve5T6IEAs1amtXjP9yVbByNP766_NmxxiLO1HeHp09W5ZUm8MWvqtzap-EKGFQQBpt2-VrI7fvav1F1dfqt3kvZJWTlZWe687Vwg5vqKVM03TBBJsLSC3WLRcGQxlAajMt8nzi3OENKqZTbTfiYM5HUVUG45iyP6aLLKyWTQcuC2SVDi4xyJhsdPYXjtj6ZmTTX",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5452,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 15,
+            "outputTokens": 90
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

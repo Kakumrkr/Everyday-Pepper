@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c1e1a72abdea6807262b243047d7f5e26b36953c51f3556123c331be51f25102",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_BuSmNmlW9hV18Ux3GDLzt6nC",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-04\",\"from\":\"12:00\",\"to\":\"13:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5376,
+            "outputTokens": 41
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "6e5da13619cbd4cc446519a919743390d4856f30ff0805e01df6e2687a0984ba",
+        "response": {
+          "text": "Done — I blocked your lunch on Wednesday from 12:00 to 1:00.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5547,
+            "cachedInputTokens": 5376,
+            "outputTokens": 23
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

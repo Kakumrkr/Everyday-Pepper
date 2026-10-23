@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b42746b923d3df27e00610e563e8ea3b54c4cef4a86f9b6fc36cdfd9dddfa9dd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_QF1x42g1RV1LrbIrTpU1tu24",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara\"}"
+            },
+            {
+              "id": "call_cnSVugRDlS6spHAlLh2vUS0q",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 48
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "e3e26b76749f4197dc9a7fa014a9a86b754816773ee97f14ce671e94e6c93f20",
+        "response": {
+          "text": "I found 2 Sara matches:\n- Sarah P.\n- Sara K.\n\nWhich one should I book?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5851,
+            "cachedInputTokens": 5376,
+            "outputTokens": 25
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "d155d697ce722e60168f8f1acef9325948b93e83fcd811972a49e48b3b3bc149",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NGj5BAJit7Np0AFw9cHG8sWF",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            },
+            {
+              "id": "call_ufVrGYE8AiJw2GypkkQsMSju",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"days\":1,\"notBefore\":\"10:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5884,
+            "cachedInputTokens": 5760,
+            "outputTokens": 97
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "10a37d8f948e782a88aad6fd785317467db8a89675b1648b4d715f1b3791cf5d",
+        "response": {
+          "text": "I can book Sara K. tomorrow at 10:00 with Jess.\n\nIf you want, I’ll book it now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6649,
+            "cachedInputTokens": 5760,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

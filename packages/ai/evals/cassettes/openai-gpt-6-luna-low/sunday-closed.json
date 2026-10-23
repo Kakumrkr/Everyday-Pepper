@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "48ed66abf7f980b668955c40c644ebb281ed8660052f571ce3fa5f18d1533543",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_f6RLOVgMSZvYmkZT9Nr4c79A",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "428df36ebb98c045cc6bb09160fa10ca7188f46d6f3848ff8c12612e2a9c2f7f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_M6Rg5dNo4g6xqaxOz32rbxzo",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5534,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 83,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bc37af347627ce03278232acb6ff924a6b12b0f70676a77cc5b1dfa922b3f8ec",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ClkPqhhQxslwiwOkDmEU0aEH",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5815,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 281,
+            "outputTokens": 93
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3da553784ac9078550488cbd7823ea5222e469708da3fea8b874a7f629a59cd7",
+        "response": {
+          "text": "Sunday at 10 AM isn’t available, so Maria hasn’t been booked. Marco has Saturday, November 7 at 2:30, 2:45 or 3 PM. Would any of those work?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6098,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 661,
+            "outputTokens": 48
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

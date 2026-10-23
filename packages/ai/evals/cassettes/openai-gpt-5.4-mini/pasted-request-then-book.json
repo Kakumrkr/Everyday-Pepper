@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7b8134579d5647e5453fb0248b85f12c2ce7c04a9f904a1b8c8f857eecb03340",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_377yGSVehooOR5fDr1d1Tplx",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            },
+            {
+              "id": "call_pSEmeIdEEjNE2MolkKq5Djgv",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5467,
+            "cachedInputTokens": 5376,
+            "outputTokens": 49
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "e7bad2dbdbb9827d9627574818b7bd9f5bc3545e0297bc4d45ce535cfc7d75db",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wDaRBqVs2S3xoAqgNMOny8WP",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-05\",\"time\":\"10:00\",\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5838,
+            "cachedInputTokens": 5376,
+            "outputTokens": 111
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "de6ae90a047c2bbf08b5d8d39e291fc6999c628651d1a7e014e32c3ed60bb77c",
+        "response": {
+          "text": "I’ve set up Sarah P.’s haircut with Jess for Thursday at 10:00. It’s waiting for your approval on the booking card, and nothing has changed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6029,
+            "cachedInputTokens": 0,
+            "outputTokens": 40
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

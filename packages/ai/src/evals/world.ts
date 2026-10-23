@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import {
   addTimeOff,
   createBooking,
@@ -41,7 +42,25 @@ export interface EvalWorld {
   placeholders: ReadonlyMap<string, string>;
 }
 
+/** Every placeholder a seeded world fills in (cassettes and case expectations name them). */
+export const WORLD_PLACEHOLDERS = [
+  '{{service:haircut}}',
+  '{{service:colour}}',
+  '{{staff:jess}}',
+  '{{staff:marco}}',
+  '{{client:maria}}',
+  '{{client:sara}}',
+  '{{client:sarah}}',
+  '{{client:ana}}',
+  '{{booking:maria}}',
+  '{{booking:ana}}',
+  '{{todo:call-maria}}',
+  '{{timeoff:jess-lunch}}',
+] as const;
+
 let seeded = 0;
+/** Tells this process's worlds from an earlier run's in a database the runs share. */
+const RUN = randomBytes(3).toString('hex');
 
 /**
  * Juniper Hair Studio at `now` in `timeZone`: Lena (owner), Cara (manager), Jess (staff, her
@@ -57,12 +76,14 @@ export async function seedEvalWorld(
   name: EvalWorldName,
   at: { now: Date; timeZone: string },
 ): Promise<EvalWorld> {
+  // Numbered before the first await: worlds seeded at the same time must not share a slug.
   seeded += 1;
+  const number = seeded;
   const clock = new ManualClock(at.now);
   const ownerId = await insertSeedUser(db, 'Lena');
   const tenant = await createBusiness(db, ownerId, {
     name: 'Juniper Hair Studio',
-    slug: `eval-${name}-${String(seeded)}-${String(at.now.getTime() % 1_000_000)}`,
+    slug: `eval-${name}-${RUN}-${String(number)}-${String(at.now.getTime() % 1_000_000)}`,
     timeZone: at.timeZone,
   });
   const tenantId = TenantIdSchema.parse(tenant.id);
@@ -79,7 +100,7 @@ export async function seedEvalWorld(
   };
   const actorFor = (role: MembershipRole): Actor => ({
     context: { tenantId, userId: members[role].userId, role },
-    requestId: `eval-${role}-${String(seeded)}`,
+    requestId: `eval-${role}-${String(number)}`,
   });
   const owner = actorFor('owner');
 

@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b42746b923d3df27e00610e563e8ea3b54c4cef4a86f9b6fc36cdfd9dddfa9dd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_KIH6lrikvhTjArfQgTiaUCQN",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5447,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1b762f08b8bdc9f85763567292ccc93c544de16392bf96b02b4a992423520484",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6YPnbolLQ7JlKOsJGtTwGJEG",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5734,
+            "cachedInputTokens": 5447,
+            "cacheWriteTokens": 284,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b61f9f18a4dbef4c363dfb5dd9e057e49ca43c2db12e56d04d04c01f0d6bc0e8",
+        "response": {
+          "text": "I found two matches: Sarah P. and Sara K. Which one should I book for the haircut tomorrow at 10?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5861,
+            "cachedInputTokens": 5731,
+            "cacheWriteTokens": 127,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fc4a6cc13218f9472d3133696b78fee30143046b1ae8f499562d2587bbe753ee",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jcwFQqxj1RU5PO4szCaslmQo",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5898,
+            "cachedInputTokens": 5858,
+            "cacheWriteTokens": 37,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8b784e59fbbc0361731e12636cea2e647460cf75003ff6a1e9482dba254a1adf",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Cr2MfVuQcHlCIbIBidOOVOrL",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5982,
+            "cachedInputTokens": 5895,
+            "cacheWriteTokens": 84,
+            "outputTokens": 93
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e6866167572a10f258f0789144c670969016abb5ac4b146156095fa83a38793f",
+        "response": {
+          "text": "Sara K.’s haircut with Jess tomorrow at 10:00 is awaiting your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6155,
+            "cachedInputTokens": 5979,
+            "cacheWriteTokens": 173,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

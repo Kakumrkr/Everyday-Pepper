@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "71c8e0d1e23b83c90d2a97bbcc5021fcbf21742acb9024e1fd6c6fef5734942d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Z5jrN3wOzh49MfQnZM4bP5XV",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            },
+            {
+              "id": "call_Vh0OXBaFzEoRRwQBLtDJlSe9",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5454,
+            "cachedInputTokens": 5376,
+            "outputTokens": 49
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "5c8536c693e5cb7b742a4b4b35343411fa56eccd895cc82322a1c207fa083972",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ZdwHj3hKWoD37u6jVghWbJ1h",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5820,
+            "cachedInputTokens": 5376,
+            "outputTokens": 116
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "ad7b3f2f57087b2f84dfb082b181beb198d3c8285991500c7773c4b7b704fe16",
+        "response": {
+          "text": "Jess is not free at 3:00 PM tomorrow. The nearest free times are 1:15 PM, 1:30 PM, or 1:45 PM with Jess.\n\nIf you want, tell me which one to book.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6138,
+            "cachedInputTokens": 5760,
+            "outputTokens": 53
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

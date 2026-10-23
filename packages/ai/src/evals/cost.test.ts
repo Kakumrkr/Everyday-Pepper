@@ -3,7 +3,9 @@ import {
   costOfUsage,
   estimateRunCost,
   OUTPUT_ALLOWANCE_TOKENS,
+  MAX_CASES_PER_RUN,
   refuseRun,
+  selectCases,
   type PriceTable,
 } from './cost.js';
 import { evalCase } from './test-support.js';
@@ -27,6 +29,51 @@ describe('costOfUsage', () => {
         PRICE,
       ),
     ).toBeCloseTo(0.6 * 0.75 + 0.4 * 0.075 + 0.1 * 4.5, 10);
+  });
+});
+
+describe('costOfUsage with cache writes (GPT-5.6 and later, S27)', () => {
+  const LUNA = {
+    inputPerMillionUsd: 0.1,
+    cachedInputPerMillionUsd: 0.01,
+    cacheWritePerMillionUsd: 0.125,
+    outputPerMillionUsd: 0.5,
+  };
+
+  it('prices written tokens at the write rate instead of the input rate, not on top of it', () => {
+    expect(
+      costOfUsage(
+        {
+          inputTokens: 1_000_000,
+          cachedInputTokens: 200_000,
+          cacheWriteTokens: 700_000,
+          outputTokens: 100_000,
+        },
+        LUNA,
+      ),
+    ).toBeCloseTo(0.1 * 0.1 + 0.2 * 0.01 + 0.7 * 0.125 + 0.1 * 0.5, 10);
+  });
+
+  it('prices writes at the input rate for a model without a write price', () => {
+    expect(
+      costOfUsage(
+        {
+          inputTokens: 1_000_000,
+          cachedInputTokens: 0,
+          cacheWriteTokens: 1_000_000,
+          outputTokens: 0,
+        },
+        PRICE,
+      ),
+    ).toBeCloseTo(0.75, 10);
+  });
+
+  it('estimates every input token at the dearer of the input and write rates', () => {
+    const cases = [evalCase()];
+    const plain = estimateRunCost(cases, 1, { ...LUNA, cacheWritePerMillionUsd: undefined });
+    const written = estimateRunCost(cases, 1, LUNA);
+    const inputUsd = (plain.usage.inputTokens * 0.1) / 1_000_000;
+    expect(written.usd - plain.usd).toBeCloseTo(inputUsd * 0.25, 10);
   });
 });
 
@@ -80,5 +127,45 @@ describe('refuseRun', () => {
     expect(
       refuseRun({ model: 'model-a', prices: PRICES, estimateUsd: Number.NaN, capUsd: 1.5 }),
     ).toBe('The run could not be estimated.');
+  });
+});
+
+describe('selectCases (runs in chunks of at most 25, S27)', () => {
+  const cases = Array.from({ length: 60 }, (_, index) =>
+    evalCase({ id: `case-${String(index + 1)}`, set: index < 50 ? 'scheduling' : 'safety' }),
+  );
+
+  it('filters by set and id, then takes the chunk-th slice of 25', () => {
+    expect(MAX_CASES_PER_RUN).toBe(25);
+    expect(selectCases(cases, { sets: [], ids: [], chunk: null })).toHaveLength(60);
+    expect(selectCases(cases, { sets: ['safety'], ids: [], chunk: null })).toHaveLength(10);
+    const second = selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 2 });
+    expect(second.map((c) => c.id)).toEqual(
+      Array.from({ length: 25 }, (_, index) => `case-${String(index + 26)}`),
+    );
+    expect(selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 3 })).toEqual([]);
+    expect(
+      selectCases(cases, { sets: [], ids: ['case-3', 'case-55'], chunk: null }).map((c) => c.id),
+    ).toEqual(['case-3', 'case-55']);
+  });
+
+  it('takes smaller chunks with chunkSize (a dear strong model needs them under the cap)', () => {
+    const third = selectCases(cases, { sets: [], ids: [], chunk: 3, chunkSize: 8 });
+    expect(third.map((c) => c.id)).toEqual(
+      Array.from({ length: 8 }, (_, index) => `case-${String(index + 17)}`),
+    );
+    expect(() => selectCases(cases, { sets: [], ids: [], chunk: 1, chunkSize: 26 })).toThrow(
+      /--chunk-size/,
+    );
+    expect(() => selectCases(cases, { sets: [], ids: [], chunk: 1, chunkSize: 0 })).toThrow(
+      /--chunk-size/,
+    );
+  });
+
+  it('refuses an unknown id or a chunk that is not 1, 2, 3…', () => {
+    expect(() => selectCases(cases, { sets: [], ids: ['case-99'], chunk: null })).toThrow(
+      'No eval case case-99',
+    );
+    expect(() => selectCases(cases, { sets: [], ids: [], chunk: 0 })).toThrow(/--chunk/);
   });
 });

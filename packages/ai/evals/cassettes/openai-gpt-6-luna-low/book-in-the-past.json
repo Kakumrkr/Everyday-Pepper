@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a492f97b2ae87c336ec9a54b562f3480ebf5a6fb39145e41f472e6f08fa4b1ef",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GidCmlDHWy2HTBbii0JsBZj5",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 13,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d0175d5948c92169323735287cdfde31e0279b8cfaa7b4355ed5067459cd68ee",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_oIKnMtowAShtxWnENRNTgWk6",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5736,
+            "cachedInputTokens": 5447,
+            "cacheWriteTokens": 286,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "590fe56f7ffed7dc9a8a8c8af86e9cb7a161f4906676efe9c2d4eb88d84f98c5",
+        "response": {
+          "text": "I can’t book an appointment for yesterday (November 1). I found Maria L. and the haircut service; would you like to book her for another date and time?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5819,
+            "cachedInputTokens": 5733,
+            "cacheWriteTokens": 83,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

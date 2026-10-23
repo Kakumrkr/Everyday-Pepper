@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7a47edd002f7b6253a8e91da9d8cf993085d0ab5ffda2cdaabea27b4926c8dfc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nR2nZqb11HCfAInrlXEULJv8",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 10,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "931e3a7b47583d03963a023022cc534cd4d80da448dfbdf2520d6acbe01b132b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4LiDgpIl8pSuiLXKTsFSxFxh",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5682,
+            "cachedInputTokens": 5444,
+            "cacheWriteTokens": 235,
+            "outputTokens": 49
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d29c37084abeafc045bfaea1aaa3bdedff281e1fe6a600e96c8676c3d0567dc8",
+        "response": {
+          "text": "Ana R.’s Friday 2:00 PM haircut cancellation is waiting for your approval on the card. It hasn’t been cancelled yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5810,
+            "cachedInputTokens": 5679,
+            "cacheWriteTokens": 128,
+            "outputTokens": 32
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

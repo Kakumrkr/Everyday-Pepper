@@ -13,6 +13,7 @@ export default defineConfig({
         'src/index.ts',
         'src/provider-contract.ts',
         'src/openai/test-fixtures.ts',
+        'src/evals/eval-db.ts',
         'src/evals/test-support.ts',
         'src/evals/cli.ts',
         // The tools run domain services in database transactions; they are proven against

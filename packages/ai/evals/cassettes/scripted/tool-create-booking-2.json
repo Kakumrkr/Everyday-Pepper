@@ -9,7 +9,7 @@
             {
               "id": "call_1",
               "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"time\":\"14:30\",\"emailClient\":false}"
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"time\":\"10:30\",\"emailClient\":false}"
             }
           ],
           "replay": [],
@@ -24,7 +24,7 @@
       },
       {
         "response": {
-          "text": "That time is taken; here are the nearest ones.",
+          "text": "Approve it on the card and I'll book it, without emailing her.",
           "toolCalls": [],
           "replay": [],
           "finishReason": "stop",

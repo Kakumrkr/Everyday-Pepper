@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6c0734f56893a007e94290cd804a13d0c04f862702a8faf835966c8fe37e9014",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_7KTfn8SJOP0TgLdUJzU7nVtH",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            },
+            {
+              "id": "call_Wh0fQSQtDxXGJi3WbHMrQFhA",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 5376,
+            "outputTokens": 58
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "c7467887dcc16dfddd1f532f62a5e1d2f0d20e5c9ed9ebd0f1eef55790bab767",
+        "response": {
+          "text": "I’ve checked Friday’s schedule. Marco isn’t booked that day, and there’s one haircut booked with Jess at 2:00 PM.\n\nIf you want, I can block Marco off for the full day on Friday.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5953,
+            "cachedInputTokens": 5376,
+            "outputTokens": 49
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

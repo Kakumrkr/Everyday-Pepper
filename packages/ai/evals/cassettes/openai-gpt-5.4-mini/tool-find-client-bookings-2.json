@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "814244cbb61dcca8a2b5277836b9b644cf6f683fcc2a68b49abb2c6444f5fdb8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XX1HjoJrrXfUfhnrfbrabNbe",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "24490fa326e7b20b534e47b30bd8ee1387226d9926012f937a52dfc7d5729ab4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_CGRev7D0lzK7fiJizfxOb90T",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5376,
+            "outputTokens": 42
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "7cc74d611a8aeeb203e7543f7ce7fef33fd13104e3f72bbf808fe0dfba5ae81f",
+        "response": {
+          "text": "Sarah P. has no earlier visits on file.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5644,
+            "cachedInputTokens": 5376,
+            "outputTokens": 14
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

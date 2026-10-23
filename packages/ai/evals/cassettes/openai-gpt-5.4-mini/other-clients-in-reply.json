@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "09ee9ea4c1e2568ed1af7981a74cb42abb8c784c512970a8e4c56aa615bac3d6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_woZHLFY9R7PcWixhzUjygD8Y",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "34e38cb47cde51d0b1b9acb4ca2010139b91acef8f9884de6b93c9bc830adf9b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ih3sCgwvTMgsCDdtzT0kgeZo",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5529,
+            "cachedInputTokens": 5376,
+            "outputTokens": 40
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "546839fd787ff380b99c28fc5264d3d8fc2df2c7d6526962a1dc199c17a08c54",
+        "response": {
+          "text": "I found Ana R.\n\nShe has one upcoming appointment:\nFri 2026-11-06 at 2:00 PM, Haircut with Jess.\n\nI don’t see any earlier visits on file. If you want, I can also help with her booking.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5802,
+            "cachedInputTokens": 5376,
+            "outputTokens": 57
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

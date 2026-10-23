@@ -163,3 +163,46 @@ export function recordingProvider(
     },
   };
 }
+
+/**
+ * Records like `recordingProvider`, but first answers from an earlier recording of the same
+ * trial while its requests are unchanged: only from the first new or changed request on does
+ * the real provider get called (and paid). Every answer, replayed or new, lands in `steps`.
+ */
+export function replayOrRecordProvider(
+  provider: LlmProvider,
+  earlier: readonly CassetteStep[],
+  steps: CassetteStep[],
+  placeholders: ReadonlyMap<string, string> = new Map(),
+): LlmProvider {
+  const recorder = recordingProvider(provider, steps, placeholders);
+  let replaying = true;
+  const replayed = (request: LlmRequest): LlmResponse | null => {
+    if (!replaying) return null;
+    const step = earlier[steps.length];
+    if (
+      step?.fingerprint !== undefined &&
+      step.fingerprint === requestFingerprint(request, placeholders)
+    ) {
+      steps.push(step);
+      return filled(step.response, placeholders);
+    }
+    replaying = false;
+    return null;
+  };
+  return {
+    respond(request: LlmRequest, options?: LlmCallOptions) {
+      const response = replayed(request);
+      return response === null ? recorder.respond(request, options) : Promise.resolve(response);
+    },
+    async *stream(request: LlmRequest, options?: LlmCallOptions) {
+      const response = replayed(request);
+      if (response === null) {
+        yield* recorder.stream(request, options);
+        return;
+      }
+      if (response.text !== '') yield { type: 'text_delta', delta: response.text };
+      yield { type: 'done', response };
+    },
+  };
+}

@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6e99004a50499c5fba21aab59a21894e386d99d15c42f90f88ffd72e9be8e7b6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AEJTYLPB4tIhZza0wHKvFn0o",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Zoe Martinez\"}"
+            },
+            {
+              "id": "call_3jjGCeXSawh78OShETUFhdUO",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 50
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4d0b77cc954b2ee09c624bd630d3fcc25eefc64198d0e470e678010907930310",
+        "response": {
+          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or give me another name to search?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5805,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 354,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

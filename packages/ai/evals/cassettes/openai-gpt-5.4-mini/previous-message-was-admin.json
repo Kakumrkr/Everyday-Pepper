@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bc1e8ddb737bf22723239cb4aa642827a78b1d12df2cc0995a2f1fcb8c9a8aad",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qhUsjdEKUQpS2tYT41hUyli5",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5376,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "3ea833081f9b81d5778cf8f3216ccc8e135b6434a05c337cdb8dc16ecad79bf5",
+        "response": {
+          "text": "Thursday, Nov 5 is empty right now: 0 bookings and 0 blocked times.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5530,
+            "cachedInputTokens": 5376,
+            "outputTokens": 23
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "a0719d9e6df8d3e8d29580ea9bb4ea68ffde82fa6d45f892c1daf2946bb5f2e8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_RJs8rNvmtTfIBoMQ7dXVj5kf",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5578,
+            "cachedInputTokens": 0,
+            "outputTokens": 24
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "7a694491fb364b758bac645c4b6c5b9f795b17676f9975620f4a040b479cf0eb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NU5Pa8aA66kPgmR5izNi8sqO",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5659,
+            "cachedInputTokens": 5376,
+            "outputTokens": 40
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "8811850535d9d3b8232da75bcf28970a87dd8c693c64edcc5fbf9cd50e7b42f2",
+        "response": {
+          "text": "I found Ana R.’s next booking: Fri Nov 6 at 2:00 PM with Jess.\n\nI can’t delete it without your confirmation. If you want, tell me to cancel Ana’s 2:00 PM booking and I’ll do that.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5926,
+            "cachedInputTokens": 5504,
+            "outputTokens": 57
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

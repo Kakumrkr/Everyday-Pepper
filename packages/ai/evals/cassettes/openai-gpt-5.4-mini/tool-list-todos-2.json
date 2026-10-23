@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b525eebcc687ca423702c198a3ac9010e12029b6623cf2a5e329bf8f269581f3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6cr8Nl2eb869SWUKy5QlUCq6",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            },
+            {
+              "id": "call_UyCiCI9Smqcmst8CHNzsXtF1",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5376,
+            "outputTokens": 60
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "4d59e0635af8a9135bfa7fbb72c3f4820f3a6542070873d9679443c02b6a51b6",
+        "response": {
+          "text": "There’s 1 open team to-do: “Call Maria about her colour.”\n\nI also checked today’s schedule, and there are no bookings or blocked times.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5647,
+            "cachedInputTokens": 5376,
+            "outputTokens": 36
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

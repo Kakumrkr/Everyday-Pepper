@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5a7e52289211d355e0b78c16bc99e6311bb616cf1c4c680eac7e8995d89d9ecd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4vQdrbsA48E8Z0p4PpFsrS1n",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 5376,
+            "outputTokens": 19
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "f9c5d94e808e573f01951135df3cfd5a5c62588800678e3ca68cfcf6dc89d1ca",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IZPOAGwwMcXx0TEcGHuJ9hGM",
+              "name": "complete_todo",
+              "arguments": "{\"todoId\":\"{{todo:call-maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5553,
+            "cachedInputTokens": 5376,
+            "outputTokens": 42
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "03d13119d3d310f2a2979141c4d446c243c9c7f0dcb3d066344e626e2b7a35a6",
+        "response": {
+          "text": "Done — I marked “Call Maria about her colour” complete.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5641,
+            "cachedInputTokens": 5376,
+            "outputTokens": 17
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}

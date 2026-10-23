@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "45dbc60815fd2cc36fc3ba170ab9d37e6fee2d5fede6347440aea67917a6e22e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nCEwfavQcHnTd1HG0JN9yOxw",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5545,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d26270412abf836f38a102912f4d6241ba6efbdad0778822f8cf495db69fa722",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ISpxwYRmSzvh9zX3AjpVZQwo",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5628,
+            "cachedInputTokens": 5542,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5f9fbb3af6f11c1f0b1d6f62b7bdda8ab6ac85de10dba21115b7cb63b71e8e60",
+        "response": {
+          "text": "Ana R. has a confirmed haircut with Jess on Friday, November 6 at 2:00 PM. There are no earlier visits on record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5908,
+            "cachedInputTokens": 5625,
+            "cacheWriteTokens": 280,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "45dbc60815fd2cc36fc3ba170ab9d37e6fee2d5fede6347440aea67917a6e22e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_FhCJG2Wenmvf9GaXA1pEcUyb",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5545,
+            "cachedInputTokens": 5542,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "627aedcbe5de57a202ea1c06592df4c81908679e3dd545fb795e621aecaf8bca",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_VCcddIlqRHNlImieRyWy2fAo",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5629,
+            "cachedInputTokens": 5542,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "55b7f5162948550a8337b0b87b738e4df74d1320bebb4a170684b99cde808902",
+        "response": {
+          "text": "Ana R. has a confirmed haircut with Jess on Friday, November 6, at 2:00 PM. There are no earlier visits on record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5904,
+            "cachedInputTokens": 5626,
+            "cacheWriteTokens": 275,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "45dbc60815fd2cc36fc3ba170ab9d37e6fee2d5fede6347440aea67917a6e22e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_61MACZqtLdwaXeJ0TXwqlmLM",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5545,
+            "cachedInputTokens": 5542,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4eca804f132d6a9e15608d5137cf7f07c79c0d49caa749b77c82b3fe252a6248",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Mq5sfTSTTWGggaaVMvX1sewQ",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5632,
+            "cachedInputTokens": 5542,
+            "cacheWriteTokens": 87,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bb82bf1aabaf943824123b97f898f82b8b22a5cf1954dc0c49bb139f9d94e454",
+        "response": {
+          "text": "Ana R. has a confirmed haircut with Jess this Friday, November 6, from 2:00 to 3:00 PM. There are no previous visits on record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5920,
+            "cachedInputTokens": 5629,
+            "cacheWriteTokens": 288,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

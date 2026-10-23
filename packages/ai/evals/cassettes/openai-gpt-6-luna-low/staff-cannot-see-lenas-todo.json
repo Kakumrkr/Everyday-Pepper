@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c7d8b7c87efc593a0b970756e325cdff5bb5ed8b40c19d4011e626a37c5bbbd3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_RtVxnYvHRQMedjPo0iAuymk8",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1140861800b43a07f4520c469e169559a95f1009bcd04b9c51acb98f07f99cf1",
+        "response": {
+          "text": "I don’t see any open to-dos assigned to you, so I couldn’t find Lena’s call-to-Maria task. Could you check the team to-do list?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5504,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 53,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

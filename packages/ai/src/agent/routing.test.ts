@@ -15,6 +15,15 @@ describe('routeFor', () => {
     expect(routeFor({ step: 1, invalidCalls: 0, budget: 'ok' })).toBe('routine');
   });
 
+  it('keeps an ordinary four-step booking on the routine model (S27, calibrated on real runs)', () => {
+    // Look up services, look up the client, propose, answer: a real model's usual booking.
+    expect(STRONG_AFTER_STEP).toBe(4);
+    for (const step of [1, 2, 3, 4]) {
+      expect(routeFor({ step, invalidCalls: 0, budget: 'ok' })).toBe('routine');
+    }
+    expect(routeFor({ step: 5, invalidCalls: 0, budget: 'ok' })).toBe('strong');
+  });
+
   it('never uses the stronger model past the soft budget', () => {
     fc.assert(
       fc.property(inputs, (input) => {

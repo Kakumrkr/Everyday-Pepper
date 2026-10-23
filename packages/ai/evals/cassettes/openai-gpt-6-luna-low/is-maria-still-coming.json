@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "e66cc7388f96a60ec4a3ab5ed6c7a109e26bec434008059b8521f1891b87e502",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Pnf2bBEjsIalK0Y49l6PtjxP",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5448,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d6f9e10f0eede100585c8e41a636cd9ad0dc5bc0b3866ea901fdd5efd33132ad",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_asaEZ1hMt9VKOSEXc9bIo0e1",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5533,
+            "cachedInputTokens": 5445,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7f6b59daec8044136e7209b9764b00ece1e91021c82601d94b22f3b5f0d9f975",
+        "response": {
+          "text": "Yes—Maria L. has a confirmed haircut with Jess tomorrow, Tuesday, November 3, at 3:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5821,
+            "cachedInputTokens": 5530,
+            "cacheWriteTokens": 288,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

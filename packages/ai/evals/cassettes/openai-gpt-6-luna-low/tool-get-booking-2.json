@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f39ec99391616feedc3ee15b5141870dd2f4d53896a3c0923a2aa5c05f2a7f94",
+        "response": {
+          "text": "Which appointment do you mean? Tell me the client or the day, and I’ll check.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5447,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 10,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

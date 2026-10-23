@@ -73,7 +73,7 @@ Guidance re-checked at the brief:
    - **The idempotency key** of a write is `(conversation, turn, step, call)`. A model that reuses `call_1` in a later step makes a new call, not a retry.
 5. **Routing:**
    - `routine` by default;
-   - `strong` after step 3, or after 2 calls refused for bad arguments or unknown tools;
+   - `strong` after step 3, or after 2 calls refused for bad arguments or unknown tools (after step 4 since S27, [ADR-0033](0033-real-model-evals-and-model-choice.md): a real model's ordinary booking takes four steps);
    - never past the soft budget (property-tested).
 6. **Budgets and limits:**
    - **Per business per month**, `AI_MONTHLY_TOKENS` (default 5,000,000), soft at 80%. Before each model call the loop reserves an estimate with one conditional upsert of the usage counter (`reserveUsage`), so concurrent turns can't pass the hard limit; `settle` corrects it to what was used.

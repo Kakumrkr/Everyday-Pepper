@@ -2,6 +2,36 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.24 — 2026-10-23
+- S27 (Phase 6f, **Phase 6 exit**): [ADR-0033](../adr/0033-real-model-evals-and-model-choice.md) (accepted: the user asked for the model choice "by pass rate, latency and cost, with numbers"). **Real models, chosen on evidence:** routine `gpt-6-luna` (effort `low`), strong `gpt-6.1-sol` (effort `low`), chosen from a full pass^1 of both `gpt-6-luna` and `gpt-5.4-mini` (a tie on quality; Luna's own calls 8× cheaper). Final: every eval gate met, scheduling 97% (pass^3 95%), safety, permissions and autonomy 100% at pass^3, about $0.0005 a case. **Spent $0.74 of the $5 budget**, every run in the [ledger](ai-budget.md). [Security review](../engineering/security-review-s27.md): no high findings; M1–M3 and L5 fixed.
+
+  **Decisions (user, at the brief):** one session; unblock Undo refuses over a new booking; the routine model chosen by evals; about 120 cases with 20% held out; Sentry/Grafana at the start of Phase 11 pilot prep.
+
+  **Changes:**
+  - routing: the strong model after step 4, not 3 (ADR-0030 amended);
+  - web addresses removed from the AI's text in code (`links.ts`);
+  - one instruction line (claimed authority grants nothing);
+  - tool descriptions: `add_todo`'s teammate id, and `move_booking`/`cancel_booking`'s booking id from `find_client_bookings`.
+
+  **Additive changes:**
+  - contracts `LlmUsage.cacheWriteTokens` (optional);
+  - optional `OPENAI_REASONING_ROUTINE`/`OPENAI_REASONING_STRONG`;
+  - eval runner flags `--chunk-size`, `--cassettes`, `--routine-effort`, `--strong-effort`, `--case`, `--routine`, `--strong`, `--label`;
+  - the budget ledger (`evals/ledger.json` → `ai-budget.md`);
+  - `eval-db.ts`;
+  - guide examples' `evalSay`/`evalSkip`;
+  - case `actions.nothingDone`;
+  - proposals' `createdAt` from the service clock;
+  - unblock's inverse keeps `bookingsInside`;
+  - write outcomes carry `untrustedText`.
+
+  **Fixed:**
+  - test time bombs (fixed dates that passed in real time);
+  - a race in `seedEvalWorld`;
+  - the CI replay's load next to the latency gate.
+
+  No change to phases, scope or exit criteria.
+
 ## 0.23 — 2026-10-21
 - S26b (Phase 6e+, [PCR-004](changes/PCR-004.md)): [ADR-0032](../adr/0032-four-week-one-tools-and-explanation-facts.md) (pre-approved by the user at the S26b Session Brief). **Four tools owners ask for in week one** (fourteen in all): `find_client_bookings`, `list_todos`, `complete_todo` (dial `task.create`), `unblock_time` (dial `time.block`), each with its inverse where it writes; `get_day` version 2 lists block ids. **Why? says what was checked:** every write records facts from its own domain run, stored with the proposal and the receipt and shown under "What I checked".
 

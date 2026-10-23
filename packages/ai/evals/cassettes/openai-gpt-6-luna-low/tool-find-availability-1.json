@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5d7e1d07c5e192baf6dd9fd165f1c62afa9eb3b2fcb801c89449a67a2e5426d6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xsSciovarloajl4ABANjgsej",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5451,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 14,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8d59c724a2e8e2f03fd0e9d72b005a8bb67b4626cf04a50ae2f2dfad0d410e81",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_anftBy0jUu2odguX8FTBfAMA",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5718,
+            "cachedInputTokens": 5448,
+            "cacheWriteTokens": 267,
+            "outputTokens": 83
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3ca18a0111e30c5ca766fabce7d116aa0fb1c54f2343a69cc460beaa01166cd5",
+        "response": {
+          "text": "Jess has a haircut opening Friday, Nov 6, starting at 9:00 AM. Other available starts are every 15 minutes through 11:45 AM, with more times later.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6397,
+            "cachedInputTokens": 5715,
+            "cacheWriteTokens": 679,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

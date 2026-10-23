@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "ef981606725b0eac9df8b6425412a9a2ac6e4f41adb878641967fd343b50a43c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XZVsKW62DsD000D8zB0WG9v2",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 29
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "37e92b5c1876d3d1585b4a149538c53e433135f44214258569aaf224c24d5c63",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kTiwYDBRHhUAt26ozF4e7SMd",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_sfXbCkIUb8uFEFKnlk4ZuZdi",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_NC1KQzdbNNKD7PwGEm4fOhep",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_99xdBJ5v5r5faIc1oWvxGIcI",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_TmoZivpp71Em4LaV9xKCUbnK",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-07\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_eWKt9JS3QVzQWqsyKjpxOmQJ",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-08\",\"staffMemberId\":null}"
+            },
+            {
+              "id": "call_8KHSXA86ljlAI0i7JuFEYxbW",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-09\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5533,
+            "cachedInputTokens": 5376,
+            "outputTokens": 195
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "3d33f5e300f4a014a75e295050e777a20f24bc850371a13f8950e40fde28225d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6gcwFurBvbNWC6ypymNGQw4f",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"emailClient\":true}"
+            },
+            {
+              "id": "call_Sew1aqQJaXpoRPHJiKLNJtLG",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6466,
+            "cachedInputTokens": 5376,
+            "outputTokens": 99
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "a4e4eb0353320a0b865afa30382d0e584fea6ff911c1cbec4f0e04a9883ffb06",
+        "response": {
+          "text": "I found two appointments this week: Maria L., Tuesday at 3 PM, and Ana R., Friday at 2 PM.\n\nBoth cancellations are waiting for your approval on the cards. Nothing has changed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6721,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 1284,
+            "outputTokens": 46
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

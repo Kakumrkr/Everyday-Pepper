@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "21aad8a3f7bbf8ad496ef933a0dfd6da53045d7d0832d21375fcbe3bdb3fd0b6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ZtZcdevKcASJ2RcSwloEK6sD",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5450,
+            "cachedInputTokens": 5376,
+            "outputTokens": 18
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "4add8881fcee67f724d2186026b312fa584d24cee352e1216533b91171f677e9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ua0dsNssaaA9jUTIBiI8bSrz",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5535,
+            "cachedInputTokens": 5376,
+            "outputTokens": 44
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "4b30eadad5052cb3ab6302aa58b3329684e6e989f5a0c14726df0fd5a6d40bbf",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UOvYMNWnKTUEt0B3oNqtyla1",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"10:00\",\"staffMemberId\":null,\"emailClient\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5823,
+            "cachedInputTokens": 5376,
+            "outputTokens": 69
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "563ab41b6d2c86c3a0600dc0dbe0465e7b8d72dc7a0132c1508435eae3e15292",
+        "response": {
+          "text": "Moved Maria’s haircut with Jess to tomorrow at 10am.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5964,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 527,
+            "outputTokens": 17
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

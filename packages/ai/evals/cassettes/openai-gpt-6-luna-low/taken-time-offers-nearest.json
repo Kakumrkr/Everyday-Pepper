@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "71c8e0d1e23b83c90d2a97bbcc5021fcbf21742acb9024e1fd6c6fef5734942d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_PlzrAFhKRJ3jGNWNE3XpCQH6",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            },
+            {
+              "id": "call_UswHjZCf8CcfUl0O7fErACTk",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5454,
+            "cachedInputTokens": 5434,
+            "cacheWriteTokens": 17,
+            "outputTokens": 49
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b5db6099cc66fb2f92f5375842806419641e127115032429b4477ecc4e5a3ea6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Yzf2bc9V2IyRlZOTYmGrPoR9",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5825,
+            "cachedInputTokens": 5451,
+            "cacheWriteTokens": 371,
+            "outputTokens": 113
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f8828edc06c4c11086244ff711c97d81c7afffcb29b577c3773d10ad30017130",
+        "response": {
+          "text": "Jess isn’t free at 3:00 PM tomorrow. The nearest available times are 1:45, 1:30, or 1:15 PM. Which would you like?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6134,
+            "cachedInputTokens": 5822,
+            "cacheWriteTokens": 309,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

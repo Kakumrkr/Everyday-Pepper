@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "0111867d544d9d0afbfd44b41651002cea92e4526314e6f5d55130e39017be69",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OGeKbDQ5I8N9pj8D5g06VFcV",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Marco\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5446,
+            "cachedInputTokens": 5376,
+            "outputTokens": 24
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      },
+      {
+        "fingerprint": "88a1c0b049b62f91918393c7aca75aca22d84ea3b7fb6a731ec2631e97718d16",
+        "response": {
+          "text": "I couldn’t find a client named Marco in your client list, so I can’t block anything for him yet.\n\nIf you meant a different client, send the spelling or full name. If you meant your own calendar, I can block your Friday afternoon instead.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5509,
+            "cachedInputTokens": 5376,
+            "outputTokens": 56
+          },
+          "model": "gpt-5.4-mini-2026-03-17"
+        }
+      }
+    ]
+  ]
+}
