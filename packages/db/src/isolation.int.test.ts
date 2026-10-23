@@ -5,6 +5,7 @@ import { randomBytes } from 'node:crypto';
 import {
   BookingIdSchema,
   ClientIdSchema,
+  EMBEDDING_DIMENSIONS,
   OutboxMessageIdSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
@@ -38,6 +39,7 @@ import { insertClient } from './repositories/clients.js';
 import { insertConversation, insertMessage, insertTurn } from './repositories/conversations.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
+import { insertMemoryEpisode, insertMemoryFact } from './repositories/memory.js';
 import { listTenantIdsForCleanup } from './repositories/cleanup.js';
 import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbox.js';
 import { savePushSubscription } from './repositories/push-subscriptions.js';
@@ -83,6 +85,8 @@ interface TenantTable {
   appendOnly?: true;
   /** The services may insert, read and update, but not delete (receipts, ADR-0028). */
   noDelete?: true;
+  /** The services may insert, read and delete, but not update (episodes, ADR-0034). */
+  noUpdate?: true;
   /** A trigger refuses changes to the row's identity and content (ADR-0028): P0001. */
   guarded?: true;
   /**
@@ -101,6 +105,9 @@ interface TenantTable {
 const OWN_STAFF =
   '(( SELECT current_member_sees_all() AS current_member_sees_all) OR (staff_member_id IN ( SELECT current_member_staff_ids() AS current_member_staff_ids)))';
 const SEES_ALL = '( SELECT current_member_sees_all() AS current_member_sees_all)';
+/** A memory fact a staff member reaches through its subject, as Postgres prints it. */
+const MEMORY_REACHABLE =
+  "(((subject_type = 'client'::text) AND (client_id IN ( SELECT clients.id\n   FROM clients))) OR ((subject_type = 'booking'::text) AND (booking_id IN ( SELECT bookings.id\n   FROM bookings))) OR ((subject_type = 'staff'::text) AND (staff_member_id IN ( SELECT current_member_staff_ids() AS current_member_staff_ids))))";
 
 const TENANT_TABLES: Record<string, TenantTable> = {
   tenants: {
@@ -553,6 +560,80 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       },
     ],
   },
+  memory_facts: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) =>
+      (
+        await insertMemoryFact(tx, {
+          subject: { type: 'business' },
+          key: 'prefers',
+          value: 'No bookings before 10 on Mondays',
+          sensitive: false,
+          status: 'active',
+          source: 'screen',
+          sourceTurnId: null,
+          createdBy: null,
+        })
+      ).id,
+    touch: 'value = value',
+    guarded: true,
+    // Staff reach the facts of the clients and visits they reach, their own staff member's,
+    // and the business's non-sensitive ones (proven in memory.int.test.ts).
+    memberScope: [
+      {
+        policyname: 'member_scope_delete',
+        cmd: 'DELETE',
+        qual: `(${SEES_ALL} OR ${MEMORY_REACHABLE})`,
+        with_check: null,
+      },
+      {
+        policyname: 'member_scope_insert',
+        cmd: 'INSERT',
+        qual: null,
+        with_check: `(${SEES_ALL} OR ${MEMORY_REACHABLE})`,
+      },
+      {
+        policyname: 'member_scope_read',
+        cmd: 'SELECT',
+        qual: `(${SEES_ALL} OR ${MEMORY_REACHABLE} OR ((subject_type = ANY (ARRAY['business'::text, 'staff'::text, 'service'::text])) AND (NOT sensitive)))`,
+        with_check: null,
+      },
+      {
+        policyname: 'member_scope_update',
+        cmd: 'UPDATE',
+        qual: `(${SEES_ALL} OR ${MEMORY_REACHABLE})`,
+        with_check: `(${SEES_ALL} OR ${MEMORY_REACHABLE})`,
+      },
+    ],
+  },
+  memory_episodes: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const userId = await insertUser(db);
+      await addMembership(tx, { userId, role: 'staff' });
+      return (
+        await insertMemoryEpisode(tx, {
+          userId,
+          conversationId: null,
+          summary: 'Decided Jess keeps Saturdays free.',
+          clientIds: [],
+          embedding: Array.from({ length: EMBEDDING_DIMENSIONS }, (_, i) => (i === 0 ? 1 : 0)),
+          embeddingModel: 'text-embedding-3-small',
+        })
+      ).id;
+    },
+    touch: 'summary = summary',
+    noUpdate: true,
+    // Every role reaches only its own episodes, like conversations; work without a user all.
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+        with_check: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+      },
+    ],
+  },
 };
 
 /** A new conversation of a new member of the transaction's tenant, with a running turn. */
@@ -871,7 +952,9 @@ describe('the services role', () => {
           ? ['INSERT', 'SELECT']
           : spec.noDelete === true
             ? ['INSERT', 'SELECT', 'UPDATE']
-            : ['DELETE', 'INSERT', 'SELECT', 'UPDATE'],
+            : spec.noUpdate === true
+              ? ['DELETE', 'INSERT', 'SELECT']
+              : ['DELETE', 'INSERT', 'SELECT', 'UPDATE'],
       );
     }
   });
@@ -914,16 +997,17 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
 
   /** Runs a write probe: affected row count, or 'denied' on an append-only table. */
   async function write(tenant: TenantId, statement: string): Promise<number | null | 'denied'> {
-    if (spec.appendOnly === true) {
+    if (spec.appendOnly === true || spec.noUpdate === true) {
       const error = await inTenant(tenant, statement).catch((e: unknown) => e);
       expect(sqlState(error)).toBe('42501');
       return 'denied';
     }
     return (await inTenant(tenant, statement)).rowCount;
   }
-  const none = spec.appendOnly === true ? 'denied' : 0;
+  const none = spec.appendOnly === true || spec.noUpdate === true ? 'denied' : 0;
   const noDelete = spec.appendOnly === true || spec.noDelete === true ? 'denied' : 0;
   async function remove(tenant: TenantId, statement: string): Promise<number | null | 'denied'> {
+    if (spec.noUpdate === true) return (await inTenant(tenant, statement)).rowCount;
     if (spec.noDelete !== true) return write(tenant, statement);
     const error = await inTenant(tenant, statement).catch((e: unknown) => e);
     expect(sqlState(error)).toBe('42501');
@@ -981,7 +1065,8 @@ describe.each(Object.entries(TENANT_TABLES))('%s', (table, spec) => {
 
   it('nothing can be changed without a tenant', async () => {
     const probe = async (statement: string) => {
-      if (spec.appendOnly !== true) return (await db.execute(sql.raw(statement))).rowCount;
+      if (spec.appendOnly !== true && !(spec.noUpdate === true && statement.startsWith('UPDATE')))
+        return (await db.execute(sql.raw(statement))).rowCount;
       const error = await db.execute(sql.raw(statement)).catch((e: unknown) => e);
       return sqlState(error) === '42501' ? 'denied' : error;
     };

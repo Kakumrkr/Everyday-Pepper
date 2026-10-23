@@ -17,6 +17,7 @@ import {
   unique,
   uniqueIndex,
   uuid,
+  vector,
 } from 'drizzle-orm/pg-core';
 import type { TemplateId } from '@pepper/contracts';
 import { newId } from './ids.js';
@@ -94,6 +95,13 @@ function changesNeedSeesAll(options: { canDelete?: SQL } = {}) {
   ];
 }
 
+/**
+ * A memory fact a staff member reaches through its subject (ADR-0034): a client or visit they
+ * reach (the clients' and bookings' own member scope applies inside the sub-selects), or their
+ * own staff member.
+ */
+const memoryFactReachable = sql`((subject_type = 'client' AND client_id IN (SELECT id FROM clients)) OR (subject_type = 'booking' AND booking_id IN (SELECT id FROM bookings)) OR (subject_type = 'staff' AND staff_member_id IN (SELECT current_member_staff_ids())))`;
+
 function ownStaffMember(column: SQL): SQL {
   return sql`${memberSeesAll} OR ${column} IN (SELECT current_member_staff_ids())`;
 }
@@ -128,6 +136,8 @@ export const tenants = pgTable(
     templateId: text('template_id').$type<TemplateId>(),
     // The booking page's color (PCR-001); NULL: Pepper's neutral default.
     brandColor: text('brand_color'),
+    // Whether Pepper learns new things (Phase 7, ADR-0034); existing memory still helps.
+    memoryPaused: boolean('memory_paused').notNull().default(false),
     ...timestamps,
   },
   (table) => [
@@ -1632,6 +1642,186 @@ export const conversationMessages = pgTable(
   ],
 );
 
+/**
+ * What Pepper remembers about the business, a client, a staff member, a service or one visit
+ * (Phase 7, ADR-0034): one current value per subject and key; the replaced value stays only for
+ * the 7-day Undo window. Clients' and visits' facts reach the members who reach that client or
+ * booking (staff: their own); facts about the business, staff and services reach everyone,
+ * except sensitive ones (owners and managers, and a staff member for their own). Deleting a
+ * fact, directly or with its subject, scrubs its value from the business's stored
+ * conversations and episodes (trigger in migration 0039).
+ */
+export const memoryFacts = pgTable(
+  'memory_facts',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    subjectType: text('subject_type').notNull(),
+    clientId: uuid('client_id'),
+    staffMemberId: uuid('staff_member_id'),
+    serviceId: uuid('service_id'),
+    bookingId: uuid('booking_id'),
+    key: text('key').notNull(),
+    value: text('value').notNull(),
+    // The value before the last change, for Undo only; cleared when `previous_until` passes.
+    previousValue: text('previous_value'),
+    previousUntil: timestamp('previous_until', { withTimezone: true }),
+    sensitive: boolean('sensitive').notNull().default(false),
+    status: text('status').notNull().default('active'),
+    source: text('source').notNull(),
+    // The chat turn it came from; no key, as conversations are deleted after 90 days.
+    sourceTurnId: uuid('source_turn_id'),
+    // Who saved it; NULL once their account is deleted.
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('memory_facts_tenant_id_id_unique').on(table.tenantId, table.id),
+    uniqueIndex('memory_facts_one_active')
+      .on(
+        table.tenantId,
+        table.subjectType,
+        sql`coalesce(${table.clientId}, ${table.staffMemberId}, ${table.serviceId}, ${table.bookingId}, ${table.tenantId})`,
+        table.key,
+      )
+      .where(sql`${table.status} = 'active'`),
+    index('memory_facts_client_idx')
+      .on(table.tenantId, table.clientId)
+      .where(sql`${table.clientId} IS NOT NULL`),
+    index('memory_facts_staff_member_idx')
+      .on(table.tenantId, table.staffMemberId)
+      .where(sql`${table.staffMemberId} IS NOT NULL`),
+    index('memory_facts_service_idx')
+      .on(table.tenantId, table.serviceId)
+      .where(sql`${table.serviceId} IS NOT NULL`),
+    index('memory_facts_booking_idx')
+      .on(table.tenantId, table.bookingId)
+      .where(sql`${table.bookingId} IS NOT NULL`),
+    index('memory_facts_previous_until_idx')
+      .on(table.tenantId, table.previousUntil)
+      .where(sql`${table.previousUntil} IS NOT NULL`),
+    index('memory_facts_created_by_user_id_idx').on(table.createdByUserId),
+    foreignKey({
+      name: 'memory_facts_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'memory_facts_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'memory_facts_service_fk',
+      columns: [table.tenantId, table.serviceId],
+      foreignColumns: [services.tenantId, services.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'memory_facts_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }).onDelete('cascade'),
+    check(
+      'memory_facts_subject_type_known',
+      sql`${table.subjectType} IN ('business', 'client', 'staff', 'service', 'booking')`,
+    ),
+    // Exactly the key of its subject type is set (none for the business).
+    check(
+      'memory_facts_subject_shape',
+      sql`num_nonnulls(${table.clientId}, ${table.staffMemberId}, ${table.serviceId}, ${table.bookingId}) = (CASE WHEN ${table.subjectType} = 'business' THEN 0 ELSE 1 END) AND (${table.subjectType} <> 'client' OR ${table.clientId} IS NOT NULL) AND (${table.subjectType} <> 'staff' OR ${table.staffMemberId} IS NOT NULL) AND (${table.subjectType} <> 'service' OR ${table.serviceId} IS NOT NULL) AND (${table.subjectType} <> 'booking' OR ${table.bookingId} IS NOT NULL)`,
+    ),
+    check('memory_facts_key_format', sql`${table.key} ~ '^[a-z][a-z0-9_]{0,39}$'`),
+    check('memory_facts_value_length', sql`length(${table.value}) BETWEEN 1 AND 500`),
+    check(
+      'memory_facts_previous_value',
+      sql`(${table.previousValue} IS NULL) = (${table.previousUntil} IS NULL) AND length(${table.previousValue}) BETWEEN 1 AND 500`,
+    ),
+    check('memory_facts_status_known', sql`${table.status} IN ('active', 'proposed')`),
+    check('memory_facts_source_known', sql`${table.source} IN ('screen', 'chat', 'ai_action')`),
+    tenantIsolation(sql.raw('tenant_id')),
+    // Restrictive policies narrow `tenant_isolation`: what a member may read, and the narrower
+    // set they may change.
+    pgPolicy('member_scope_read', {
+      as: 'restrictive',
+      for: 'select',
+      using: sql`${memberSeesAll} OR ${memoryFactReachable} OR (subject_type IN ('business', 'staff', 'service') AND NOT sensitive)`,
+    }),
+    pgPolicy('member_scope_insert', {
+      as: 'restrictive',
+      for: 'insert',
+      withCheck: sql`${memberSeesAll} OR ${memoryFactReachable}`,
+    }),
+    pgPolicy('member_scope_update', {
+      as: 'restrictive',
+      for: 'update',
+      using: sql`${memberSeesAll} OR ${memoryFactReachable}`,
+      withCheck: sql`${memberSeesAll} OR ${memoryFactReachable}`,
+    }),
+    pgPolicy('member_scope_delete', {
+      as: 'restrictive',
+      for: 'delete',
+      using: sql`${memberSeesAll} OR ${memoryFactReachable}`,
+    }),
+  ],
+);
+
+/**
+ * A short summary of one past conversation (Phase 7, ADR-0034), with the clients it names and
+ * its embedding for semantic recall. Own-only, like conversations (ADR-0030): each member
+ * reaches only their own; work without a user reaches all. Goes with its member, and with any
+ * client it names (trigger in migration 0039); kept 365 days.
+ */
+export const memoryEpisodes = pgTable(
+  'memory_episodes',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    // The conversation it summarises; no key, as conversations are deleted after 90 days.
+    conversationId: uuid('conversation_id'),
+    summary: text('summary').notNull(),
+    clientIds: uuid('client_ids')
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
+    embedding: vector('embedding', { dimensions: 1536 }).notNull(),
+    embeddingModel: text('embedding_model').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('memory_episodes_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('memory_episodes_member_idx').on(table.tenantId, table.userId, table.createdAt),
+    index('memory_episodes_created_at_idx').on(table.tenantId, table.createdAt),
+    index('memory_episodes_client_ids_idx').using('gin', table.clientIds),
+    foreignKey({
+      name: 'memory_episodes_membership_fk',
+      columns: [table.tenantId, table.userId],
+      foreignColumns: [memberships.tenantId, memberships.userId],
+    }).onDelete('cascade'),
+    check('memory_episodes_summary_length', sql`length(${table.summary}) BETWEEN 1 AND 1000`),
+    check('memory_episodes_client_count', sql`cardinality(${table.clientIds}) <= 20`),
+    check(
+      'memory_episodes_embedding_model_format',
+      sql`${table.embeddingModel} ~ '^[a-z0-9][a-z0-9._-]{0,79}$'`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+      withCheck: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
@@ -1655,3 +1845,5 @@ export type AiActionExecutionRow = typeof aiActionExecutions.$inferSelect;
 export type ConversationRow = typeof conversations.$inferSelect;
 export type ConversationTurnRow = typeof conversationTurns.$inferSelect;
 export type ConversationMessageRow = typeof conversationMessages.$inferSelect;
+export type MemoryFactRow = typeof memoryFacts.$inferSelect;
+export type MemoryEpisodeRow = typeof memoryEpisodes.$inferSelect;

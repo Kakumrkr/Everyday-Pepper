@@ -11,6 +11,7 @@ import {
   TimeZoneSchema,
   UserIdSchema,
 } from './tenancy.js';
+import { MemoryFactStatusSchema, MemorySourceSchema, MemorySubjectTypeSchema } from './memory.js';
 import { RuleSchema } from './rules.js';
 import { TaskSourceSchema, TaskStatusSchema } from './tasks.js';
 import {
@@ -117,6 +118,18 @@ const TaskValuesSchema = z
     dueAt: UtcDateTimeSchema.nullable(),
     assigneeUserId: UserIdSchema.nullable(),
     source: TaskSourceSchema,
+  })
+  .strict();
+
+// What Pepper remembers (ADR-0034): a fact's subject type, key and flags, never its value or
+// whom it is about (the value is free text; deleting it must leave nothing behind).
+const MemoryFactValuesSchema = z
+  .object({
+    subjectType: MemorySubjectTypeSchema,
+    key: z.string(),
+    sensitive: z.boolean(),
+    status: MemoryFactStatusSchema,
+    source: MemorySourceSchema,
   })
   .strict();
 
@@ -353,6 +366,55 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('task'),
       before: TaskValuesSchema,
       after: z.null(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('memory_fact.created'),
+      entity: entity('memory_fact'),
+      before: z.null(),
+      after: MemoryFactValuesSchema,
+    })
+    .strict(),
+  // A new value is recorded as a change with equal fields (the values are never in an entry).
+  z
+    .object({
+      action: z.literal('memory_fact.updated'),
+      entity: entity('memory_fact'),
+      before: MemoryFactValuesSchema,
+      after: MemoryFactValuesSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('memory_fact.deleted'),
+      entity: entity('memory_fact'),
+      before: MemoryFactValuesSchema,
+      after: z.null(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('memory_episode.created'),
+      entity: entity('memory_episode'),
+      before: z.null(),
+      after: z.object({ clientCount: z.number().int().min(0) }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('memory_episode.deleted'),
+      entity: entity('memory_episode'),
+      before: z.object({ clientCount: z.number().int().min(0) }).strict(),
+      after: z.null(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('memory.settings_updated'),
+      entity: entity('tenant'),
+      before: z.object({ paused: z.boolean() }).strict(),
+      after: z.object({ paused: z.boolean() }).strict(),
     })
     .strict(),
   // The business's own autonomy choices (only the overrides; the rest are defaults).
