@@ -222,6 +222,7 @@ export async function storeEpisode(
   db: Database,
   member: { tenantId: TenantId; userId: UserId },
   input: MemoryEpisodeInput & { conversationId: ConversationId; lastTurnId: ConversationTurnId },
+  options: { now: Date },
 ): Promise<'stored' | 'written' | 'paused'> {
   const fields = MemoryEpisodeInputSchema.parse(input);
   const conversationId = ConversationIdSchema.parse(input.conversationId);
@@ -241,7 +242,12 @@ export async function storeEpisode(
     } else if ((await countMemoryEpisodesOf(tx, userId)) >= MEMORY_LIMITS.episodesPerMember) {
       throw new MemoryLimitError('episodes');
     }
-    const row = await insertMemoryEpisode(tx, { ...fields, conversationId, userId });
+    const row = await insertMemoryEpisode(tx, {
+      ...fields,
+      conversationId,
+      userId,
+      createdAt: options.now,
+    });
     const entity = { type: 'memory_episode', id: row.id } as const;
     const after = { clientCount: row.clientIds.length };
     await appendAuditEntry(tx, {

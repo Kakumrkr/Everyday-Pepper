@@ -19,3 +19,4 @@ export * from './services/staff.js';
 export * from './services/team-pushes.js';
 export * from './services/time-off.js';
 export * from './services/waitlist.js';
+export * from './services/learned-rules.js';

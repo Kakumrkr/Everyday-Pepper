@@ -1,7 +1,13 @@
 import { EMBEDDING_DIMENSIONS, type LlmUsage } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import { embedderContract } from './embedder-contract.js';
-import { checkedEmbeddings, hashEmbedder, meteredEmbedder, type Embedder } from './embedder.js';
+import {
+  budgetedEmbedder,
+  checkedEmbeddings,
+  hashEmbedder,
+  meteredEmbedder,
+  type Embedder,
+} from './embedder.js';
 import { LlmError } from './errors.js';
 
 embedderContract('hashEmbedder', { embedder: () => hashEmbedder() });
@@ -74,5 +80,51 @@ describe('meteredEmbedder', () => {
   it('gives no answer it could not meter', async () => {
     const embedder = meteredEmbedder(hashEmbedder(), () => Promise.reject(new Error('db down')));
     await expect(embedder.embed({ input: ['x'] })).rejects.toThrow('db down');
+  });
+});
+
+describe('budgetedEmbedder', () => {
+  it('holds every call against the budget and settles it with what was billed', async () => {
+    const settled: number[] = [];
+    const reserved: number[] = [];
+    const embedder = budgetedEmbedder(hashEmbedder(), (estimate) => {
+      reserved.push(estimate);
+      return Promise.resolve({
+        settle: (used: number) => {
+          settled.push(used);
+          return Promise.resolve();
+        },
+      });
+    });
+    await embedder.embed({ input: ['Jess Saturdays'] });
+    expect(reserved[0]).toBeGreaterThan(0);
+    expect(settled).toEqual([2]);
+  });
+
+  it('calls nothing without a reservation, and settles a failure at zero', async () => {
+    let calls = 0;
+    const counting: Embedder = {
+      model: 'm',
+      embed: () => {
+        calls += 1;
+        return Promise.reject(new Error('down'));
+      },
+    };
+    await expect(
+      budgetedEmbedder(counting, () => Promise.resolve(null)).embed({ input: ['x'] }),
+    ).rejects.toMatchObject({ code: 'budget_exceeded' });
+    expect(calls).toBe(0);
+    const settled: number[] = [];
+    await expect(
+      budgetedEmbedder(counting, () =>
+        Promise.resolve({
+          settle: (used: number) => {
+            settled.push(used);
+            return Promise.resolve();
+          },
+        }),
+      ).embed({ input: ['x'] }),
+    ).rejects.toThrow('down');
+    expect(settled).toEqual([0]);
   });
 });

@@ -1,5 +1,5 @@
 {
-  "id": "51a631ca-245e-46a6-bfab-be6248a3d493",
+  "id": "f5e95523-f372-4f1a-806c-10cbd54b1615",
   "prevId": "5f21d631-4fbb-4149-a02e-1d68d66f1547",
   "version": "7",
   "dialect": "postgresql",
@@ -468,7 +468,7 @@
         },
         "ai_action_executions_action_known": {
           "name": "ai_action_executions_action_known",
-          "value": "\"ai_action_executions\".\"action\" IN ('booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', 'client_note.save', 'task.create', 'message.confirmation', 'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk')"
+          "value": "\"ai_action_executions\".\"action\" IN ('booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', 'client_note.save', 'rule.change', 'task.create', 'message.confirmation', 'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk')"
         },
         "ai_action_executions_tool_format": {
           "name": "ai_action_executions_tool_format",
@@ -807,7 +807,7 @@
       "checkConstraints": {
         "ai_action_proposals_action_known": {
           "name": "ai_action_proposals_action_known",
-          "value": "\"ai_action_proposals\".\"action\" IN ('booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', 'client_note.save', 'task.create', 'message.confirmation', 'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk')"
+          "value": "\"ai_action_proposals\".\"action\" IN ('booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', 'client_note.save', 'rule.change', 'task.create', 'message.confirmation', 'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk')"
         },
         "ai_action_proposals_tool_format": {
           "name": "ai_action_proposals_tool_format",
@@ -1144,7 +1144,7 @@
       "checkConstraints": {
         "autonomy_settings_levels_known": {
           "name": "autonomy_settings_levels_known",
-          "value": "jsonb_typeof(\"autonomy_settings\".\"levels\") = 'object' AND \"autonomy_settings\".\"levels\" - ARRAY['booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', 'client_note.save', 'task.create', 'message.confirmation', 'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk'] = '{}'::jsonb AND NOT jsonb_path_exists(\"autonomy_settings\".\"levels\", '$.* ? (@ != \"ask\" && @ != \"notify\" && @ != \"auto\")')"
+          "value": "jsonb_typeof(\"autonomy_settings\".\"levels\") = 'object' AND \"autonomy_settings\".\"levels\" - ARRAY['booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', 'client_note.save', 'rule.change', 'task.create', 'message.confirmation', 'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk'] = '{}'::jsonb AND NOT jsonb_path_exists(\"autonomy_settings\".\"levels\", '$.* ? (@ != \"ask\" && @ != \"notify\" && @ != \"auto\")')"
         },
         "autonomy_settings_bulk_never_auto": {
           "name": "autonomy_settings_bulk_never_auto",

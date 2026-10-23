@@ -453,6 +453,14 @@ export function factLine(fact: AiWhyFact): string | null {
       return date === null || time === null ? null : `It reminds them ${formatWhen(date, time)}.`;
     case 'todo_was_open':
       return 'The to-do was still open.';
+    case 'rule_change': {
+      // `propose_rule` (S31): the rule it makes, which only an owner or manager approves.
+      const rule = str('rule');
+      const scope = str('scope');
+      return rule === null || scope === null
+        ? null
+        : `${rule}, for ${scope}. A booking rule always waits for an owner’s or manager’s OK.`;
+    }
     default:
       return null;
   }

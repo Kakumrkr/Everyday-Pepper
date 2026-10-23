@@ -1190,11 +1190,11 @@ export const pushSubscriptions = pgTable(
 // executions; owners and managers reach all. The services may not delete either (receipts);
 // once written, only a record's status fields may change (triggers in migration 0034).
 
-/** The eleven actions on the dial, for the checks (`AutonomyActionSchema`). */
+/** The twelve actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`). */
 const autonomyActionList = sql.raw(
   "'booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', " +
-    "'client_note.save', 'task.create', 'message.confirmation', 'message.rebooking_nudge', " +
-    "'message.waitlist_offer', 'message.bulk'",
+    "'client_note.save', 'rule.change', 'task.create', 'message.confirmation', " +
+    "'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk'",
 );
 const trustCode = (column: SQLWrapper) => sql`${column} ~ '^[a-z][a-z0-9_.:-]{0,63}$'`;
 const trustJsonSize = (column: SQLWrapper) => sql`octet_length(${column}::text) <= 8192`;

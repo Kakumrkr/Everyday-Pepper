@@ -302,15 +302,20 @@ describe('the episode job', () => {
     if (fact === undefined) throw new Error('no fact');
     await forgetFact(w.db, w.owner, fact);
     await expect(
-      storeEpisode(w.db, source.member, {
-        conversationId,
-        lastTurnId: turnId,
-        summary: 'Maria reacts to hair dye.',
-        clientIds: source.clientIds,
-        factIds: source.factIds,
-        embedding: (await hashEmbedder().embed({ input: ['x'] })).embeddings[0] ?? [],
-        embeddingModel: 'm',
-      }),
+      storeEpisode(
+        w.db,
+        source.member,
+        {
+          conversationId,
+          lastTurnId: turnId,
+          summary: 'Maria reacts to hair dye.',
+          clientIds: source.clientIds,
+          factIds: source.factIds,
+          embedding: (await hashEmbedder().embed({ input: ['x'] })).embeddings[0] ?? [],
+          embeddingModel: 'm',
+        },
+        { now: w.clock.now() },
+      ),
     ).rejects.toBeInstanceOf(EpisodeSourceChangedError);
 
     // Read again, the chat is scrubbed and names no forgotten fact.

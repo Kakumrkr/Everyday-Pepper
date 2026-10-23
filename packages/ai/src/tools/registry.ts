@@ -45,6 +45,8 @@ import {
 } from './catalog/reads.js';
 import { cancelBooking, createBooking, moveBooking } from './catalog/bookings.js';
 import { addVisitNote, forgetFact, rememberFact } from './catalog/memory.js';
+import { searchMemory } from './catalog/episodes.js';
+import { proposeRule } from './catalog/rules.js';
 import { directoryOf, localSlot } from './catalog/shared.js';
 import {
   addTodo,
@@ -64,7 +66,7 @@ import { scopeOf, storedSchema, undoWith, writeRunner } from './runner.js';
 import type { AnyTool, ToolDeps, WriteTool } from './tool.js';
 
 // The tool registry (ADR-0029, playbook S24; S26b's four, ADR-0032; S30's three memory tools,
-// ADR-0035): the seventeen tools,
+// ADR-0035; S31's `search_memory` and `propose_rule`, ADR-0037): the nineteen tools,
 // their definitions for the provider, and `dispatchToolCall`, the one way a model's tool call
 // reaches the business. It parses the arguments twice (the provider's strict schema, then Zod),
 // takes the business and the member from the session only, sends writes through the trust layer
@@ -80,6 +82,7 @@ export const TOOLS: readonly AnyTool[] = [
   getBooking,
   listServicesAndStaff,
   listTodos,
+  searchMemory,
   createBooking,
   moveBooking,
   cancelBooking,
@@ -90,6 +93,7 @@ export const TOOLS: readonly AnyTool[] = [
   rememberFact,
   addVisitNote,
   forgetFact,
+  proposeRule,
 ];
 
 const BY_NAME = new Map(TOOLS.map((tool) => [tool.name, tool]));
@@ -194,8 +198,9 @@ export async function dispatchToolCall(
     const member = memberOf(deps.actor);
     if (tool.kind === 'read') {
       const ai: Actor = { ...member, via: 'ai' };
+      const prepared = tool.prepare === undefined ? undefined : await tool.prepare(deps, args);
       const { untrustedText, ...answer } = await withMember(deps.db, member.context, async (tx) =>
-        tool.run(await scopeOf(tx, ai, deps), args),
+        tool.run(await scopeOf(tx, ai, deps), args, prepared),
       );
       return {
         status: 'answered',

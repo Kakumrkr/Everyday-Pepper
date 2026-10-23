@@ -1,5 +1,10 @@
-import { MemoryFactIdSchema, type MemoryFactId } from '@pepper/contracts';
-import { factsShownIn, listFacts } from '@pepper/core';
+import {
+  MemoryEpisodeIdSchema,
+  MemoryFactIdSchema,
+  type MemoryEpisodeId,
+  type MemoryFactId,
+} from '@pepper/contracts';
+import { episodesShownIn, factsShownIn, listFacts } from '@pepper/core';
 import { withMember } from '@pepper/db';
 import type { ToolDeps } from '../tools/tool.js';
 
@@ -18,11 +23,19 @@ export interface RecalledFact {
   sensitive: boolean;
 }
 
+/** A past conversation's summary as the model gets it (S31, `search_memory`). */
+export interface RecalledEpisode {
+  episodeId: string;
+  summary: string;
+}
+
 /** Reads remembered facts for the member: the ones gone or hidden are simply absent. */
 export interface MemoryReader {
   facts(ids: readonly string[]): Promise<Map<string, RecalledFact>>;
   /** The business's own facts the member may read, for the instructions. */
   businessFacts(): Promise<RecalledFact[]>;
+  /** The member's own episodes (S31); a deleted one is absent. */
+  episodes?(ids: readonly string[]): Promise<Map<string, RecalledEpisode>>;
 }
 
 /** The most characters of remembered values one tool answer or the business block carries. */
@@ -35,6 +48,16 @@ const REF = /"\$fact":"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 /** The ids of the facts a stored tool answer names. */
 export function factIdsIn(content: string): string[] {
   return [...content.matchAll(REF)].flatMap((match) => (match[1] === undefined ? [] : [match[1]]));
+}
+
+const EPISODE_REF =
+  /"\$episode":"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"/gi;
+
+/** The ids of the episodes a stored tool answer names (`search_memory`, S31). */
+export function episodeIdsIn(content: string): string[] {
+  return [...content.matchAll(EPISODE_REF)].flatMap((match) =>
+    match[1] === undefined ? [] : [match[1].toLowerCase()],
+  );
 }
 
 /** The member's facts, read in their own transaction (RLS: their scope, their business). */
@@ -65,6 +88,19 @@ export function memberMemory(tools: ToolDeps): MemoryReader {
               ]
             : [],
         ),
+      );
+    },
+    async episodes(ids) {
+      const valid = ids.flatMap((id) => {
+        const parsed = MemoryEpisodeIdSchema.safeParse(id);
+        return parsed.success ? [parsed.data] : [];
+      });
+      if (valid.length === 0) return new Map();
+      const shown = await withMember(tools.db, tools.actor.context, (tx) =>
+        episodesShownIn(tx, tools.actor, [...new Set<MemoryEpisodeId>(valid)]),
+      );
+      return new Map(
+        shown.map((episode) => [episode.id, { episodeId: episode.id, summary: episode.summary }]),
       );
     },
     async businessFacts() {
@@ -145,4 +181,52 @@ export function fillFactRefs(
   };
   const out = walk(json);
   return { content: JSON.stringify(out), filled };
+}
+
+function isEpisodeRef(value: unknown): value is { $episode: string } & Record<string, unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    typeof (value as { $episode?: unknown }).$episode === 'string'
+  );
+}
+
+/**
+ * A stored tool answer with its episode references (`{ "$episode": id, date }`) filled in with
+ * the summary, read live as the member (S31): a deleted episode is left out, so a summary that
+ * named a forgotten fact never reaches the model again, also in the same chat.
+ */
+export function fillEpisodeRefs(
+  content: string,
+  episodes: ReadonlyMap<string, RecalledEpisode>,
+): { content: string; filled: string[] } {
+  if (!content.includes('"$episode"')) return { content, filled: [] };
+  let json: unknown;
+  try {
+    json = JSON.parse(content);
+  } catch {
+    return { content, filled: [] };
+  }
+  const filled: string[] = [];
+  const walk = (value: unknown): unknown => {
+    if (isEpisodeRef(value)) {
+      const { $episode: id, ...rest } = value;
+      const episode = episodes.get(id.toLowerCase());
+      if (episode === undefined) return null;
+      filled.push(episode.episodeId);
+      return { ...rest, summary: episode.summary };
+    }
+    if (Array.isArray(value)) {
+      return value.flatMap((each) => {
+        const next = walk(each);
+        return isEpisodeRef(each) && next === null ? [] : [next];
+      });
+    }
+    if (typeof value === 'object' && value !== null) {
+      return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, walk(child)]));
+    }
+    return value;
+  };
+  return { content: JSON.stringify(walk(json)), filled };
 }

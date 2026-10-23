@@ -23,9 +23,10 @@ describe('eval cases generated from the tool guides', () => {
       );
     }
     // Skipping is the exception: a tool that needs earlier context (get_booking), and memory
-    // examples that need something the eval world lacks (a remembered fact, a past visit; the
-    // memory sets cover them, S30).
-    expect(cases.length).toBeGreaterThanOrEqual(TOOLS.length * 2 - 5);
+    // examples that need something the eval world lacks (a remembered fact, a past visit, an
+    // episode, a staff id looked up first; the memory and learned_rules sets cover them, S30,
+    // S31).
+    expect(cases.length).toBeGreaterThanOrEqual(TOOLS.length * 2 - 7);
   });
 
   it("asks in the eval world's words when the shown example names things that world lacks", () => {

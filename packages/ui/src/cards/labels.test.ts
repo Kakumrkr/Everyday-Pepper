@@ -5,6 +5,7 @@ import {
   changeRows,
   DIAL_LABEL,
   emailLine,
+  factLine,
   formatInstant,
   formatTime,
   formatWhen,
@@ -52,6 +53,29 @@ describe('changeRows', () => {
       { label: 'Service', before: null, after: 'Haircut' },
       { label: 'Client', before: null, after: 'Maria L.' },
     ]);
+  });
+
+  it('shows a learned rule: whom it is for, and the rule before and after (S31)', () => {
+    expect(
+      changeRows(
+        'rule.change',
+        { rule: 'Mondays: 09:00–17:00', scope: 'Jess' },
+        { rule: 'No bookings before 10:00 on Mondays', scope: 'Jess', kind: 'hours_limit' },
+      ),
+    ).toEqual([
+      { label: 'For', before: null, after: 'Jess' },
+      {
+        label: 'Rule',
+        before: 'Mondays: 09:00–17:00',
+        after: 'No bookings before 10:00 on Mondays',
+      },
+    ]);
+    expect(
+      factLine({ kind: 'rule_change', value: { rule: 'At most 6 bookings a day', scope: 'Jess' } }),
+    ).toBe(
+      'At most 6 bookings a day, for Jess. A booking rule always waits for an owner’s or manager’s OK.',
+    );
+    expect(factLine({ kind: 'rule_change', value: {} })).toBeNull();
   });
 
   it('shows a new booking, a cancellation, blocked time and a to-do', () => {

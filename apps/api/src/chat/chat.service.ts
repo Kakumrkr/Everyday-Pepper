@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
 import {
+  budgetedEmbedder,
   CircuitBreaker,
   fallbackFor,
+  OpenAiEmbedder,
   memberMemory,
   OpenAiProvider,
   otelTurnTracer,
@@ -9,6 +11,7 @@ import {
   startTurn,
   type AgentDeps,
   type BusinessContext,
+  type Embedder,
   type LlmProvider,
   type OpenAiConfig,
   type ToolDeps,
@@ -89,6 +92,8 @@ export class ChatService implements OnModuleDestroy {
   private readonly running = new Set<Promise<unknown>>();
   private readonly logger = new Logger(ChatService.name);
   private readonly tracer = otelTurnTracer();
+  /** Embeds `search_memory` questions (S31); `null` without an embedding model. */
+  private readonly embedder: Embedder | null;
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -99,6 +104,16 @@ export class ChatService implements OnModuleDestroy {
   ) {
     this.db = database.db;
     this.breaker = new CircuitBreaker(clock);
+    const openai = options.openai;
+    this.embedder =
+      openai?.embeddingModel === undefined
+        ? null
+        : new OpenAiEmbedder({
+            apiKey: openai.apiKey,
+            model: openai.embeddingModel,
+            timeoutMs: openai.timeoutMs,
+            ...(openai.baseUrl !== undefined && { baseUrl: openai.baseUrl }),
+          });
   }
 
   /** Starts the member's turn (or finds the one this client turn id started). */
@@ -292,6 +307,16 @@ export class ChatService implements OnModuleDestroy {
       autonomy: { templateDefaults: template?.defaultAutonomy ?? {} },
       memoryWarnings: template?.memory.warnings ?? [],
       emails: { baseUrl: this.options.baseUrl, outboxKey: this.options.outboxKey },
+      ...(this.embedder !== null && {
+        embedder: budgetedEmbedder(this.embedder, (estimate) =>
+          reserveLlmTokens(
+            this.db,
+            actor.context.tenantId,
+            { estimate, limits: llmTokenLimits(this.options.monthlyTokens) },
+            this.clock,
+          ),
+        ),
+      }),
     };
   }
 

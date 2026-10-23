@@ -490,6 +490,8 @@ export interface NewMemoryEpisode {
   lastTurnId?: ConversationTurnId | null;
   embedding: Embedding;
   embeddingModel: string;
+  /** When it was written, by the app's clock (default: the database's). */
+  createdAt?: Date;
 }
 
 export async function insertMemoryEpisode(
@@ -517,6 +519,7 @@ export async function insertMemoryEpisode(
           : ConversationTurnIdSchema.parse(input.lastTurnId),
       embedding: EmbeddingSchema.parse(input.embedding),
       embeddingModel: EmbeddingModelSchema.parse(input.embeddingModel),
+      ...(input.createdAt !== undefined && { createdAt: input.createdAt }),
     })
     .returning();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
@@ -591,6 +594,19 @@ export async function deleteMemoryEpisode(tx: TenantTx, id: MemoryEpisodeId): Pr
     .where(eq(memoryEpisodes.id, MemoryEpisodeIdSchema.parse(id)))
     .returning({ id: memoryEpisodes.id });
   return deleted.length > 0;
+}
+
+/** The episodes with these ids the transaction may read (a member: their own). */
+export async function findMemoryEpisodesByIds(
+  tx: TenantTx,
+  ids: readonly MemoryEpisodeId[],
+): Promise<MemoryEpisodeSummaryRow[]> {
+  const wanted = z
+    .array(MemoryEpisodeIdSchema)
+    .max(200)
+    .parse([...new Set(ids)]);
+  if (wanted.length === 0) return [];
+  return tx.select(episodeColumns).from(memoryEpisodes).where(inArray(memoryEpisodes.id, wanted));
 }
 
 /** The episode of a conversation the transaction may read, if it has one (one per conversation). */

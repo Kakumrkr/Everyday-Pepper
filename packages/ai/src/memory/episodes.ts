@@ -137,15 +137,20 @@ export async function writeEpisode(
   }
 
   try {
-    return await storeEpisode(deps.db, source.member, {
-      conversationId: source.conversationId,
-      lastTurnId: source.turnId,
-      summary,
-      clientIds: source.clientIds,
-      factIds: source.factIds,
-      embedding,
-      embeddingModel: deps.embedder.model,
-    });
+    return await storeEpisode(
+      deps.db,
+      source.member,
+      {
+        conversationId: source.conversationId,
+        lastTurnId: source.turnId,
+        summary,
+        clientIds: source.clientIds,
+        factIds: source.factIds,
+        embedding,
+        embeddingModel: deps.embedder.model,
+      },
+      { now: deps.clock.now() },
+    );
   } catch (error) {
     // The member keeps the most episodes there are: this one is not stored (no retry helps).
     if (error instanceof MemoryLimitError) return 'limit';
