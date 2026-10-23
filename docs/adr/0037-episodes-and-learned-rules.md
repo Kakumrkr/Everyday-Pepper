@@ -62,7 +62,35 @@ Both need care:
 ## Consequences
 - A business fact (in the instructions, not recalled by reference) that a summary rewords is caught only by the value scrub at forget time, which matches words exactly. It is not linked through `fact_ids` unless a tool answer named the fact. S33's pass^3 measures the deletion sets again.
 - Episodes cost one routine-model call and one embedding per quiet conversation, against the business's budget.
-- Changing the tools or instructions makes every cassette stale. S31 re-recorded all of them once, at the end.
+- Changing the tools or instructions makes every cassette stale. S31 re-recorded all of them twice: once at the end, and once more after the guide fix below (the user's choice).
+- `remember_fact` and `propose_rule` overlap on closed days and hours. "Note that…" or "remember…" is a fact; "no bookings…" is a rule. The wording that fixed this made one generated case ("Marco is off on Friday") remember a fact instead of blocking time. Scheduling still meets its gate; S32 narrows the wording when it re-records anyway.
 
-## Results (S31, pass^1, Luna + Sol at effort `low`)
-Filled in from the recording; costs are in [ai-budget.md](../plan/ai-budget.md).
+## Results (S31, pass^1, Luna + Sol at effort `low`, 192 cases)
+Costs are in [ai-budget.md](../plan/ai-budget.md) (S31 $0.38; Phase 7 $0.68 of $1.00).
+
+| Set | First pass | After the fixes | Gate |
+|---|---|---|---|
+| Scheduling | 42/42 | 41/42 | 90% ✅ |
+| Ambiguity | 11/12 | 11/12 | 90% ✅ |
+| Failure | 8/8 | 8/8 | 90% ✅ |
+| Follow-through | 15/15 | 14/15 | 90% ✅ |
+| Permissions | 9/9 | 9/9 | 100% ✅ |
+| Autonomy | 10/10 | 10/10 | 100% ✅ |
+| Safety | 19/19 | 19/19 | 100% ✅ |
+| Memory write | 13/15 ❌ | 15/15 | 90% ✅ |
+| Memory recall | 17/17 | 16/17 | 95% ❌ (carried, below) |
+| Memory delete | 12/12 | 12/12 | 100% ✅ |
+| Memory safety | 14/14 | 14/14 | 100% ✅ |
+| Episodic | 9/9 | 9/9 | 95% ✅ |
+| Learned rules | 9/10 | 10/10 | 90% ✅ |
+| Episode retrieval (recall@5) | 25/25 | 25/25 | 95% ✅ |
+
+- **0 rules enforced without an OK:** checked on every one of the 192 cases.
+- **Fixed from the recordings:**
+  - "Note that we're closed…" went to `propose_rule`. Both guides now say a note is `remember_fact`.
+  - `propose_rule` refused `closed: null` on an hours limit. Null now means not closed, found by a failing test first.
+  - The one-off case now names exact hours. The model rightly asked which hours "afternoon" meant.
+- **Carried by the user's choice:**
+  - `mr-same-as-last-time`: Luna booked Maria with any staff member while saying "with Jess". It passed in S30b and in S31's first pass. It is named in the replay test as a known miss until S32 re-records.
+  - Held out and not tuned: `in-two-days`, and `remind-after-booking` (Luna used an id it made up for Sara).
+  - `tool-block-time-2`: the wording drift above.

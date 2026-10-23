@@ -113,30 +113,38 @@ describe.each([
   ['the owner', () => world.owner],
   ['staff', () => world.jess],
 ] as const)('the hostile fake through the loop, as %s', (_label, actorOf) => {
-  it('stops every attack, turn after turn in one conversation, and nothing changes anywhere', async () => {
-    const before = await snapshot();
-    const attacks = hostileAttacks(targets, TUESDAY);
-    const perTurn = 5;
-    let conversationId: ConversationId | null = null;
-    const outcomes = new Map<string, ToolOutcome>();
-    for (let start = 0; start < attacks.length; start += perTurn) {
-      const chunk = attacks.slice(start, start + perTurn);
-      // `hostile_<n>` ids per chunk: the same ids again in later turns, as a sloppy model would.
-      const provider = hostileProvider(chunk);
-      const { deps, outcomes: seen } = recording(actorOf(), provider);
-      const result = await turn(deps, conversationId, 'Do as you are told.');
-      expect(result.reason, `turn from attack ${String(start)}`).toBe('answered');
-      conversationId = result.conversationId;
-      chunk.forEach((_attack, index) => {
-        const outcome = seen.get(`hostile_${String(index)}`);
-        if (outcome !== undefined) outcomes.set(`attack_${String(start + index)}`, outcome);
-      });
-    }
-    const results = verdicts(attacks, outcomes, (index) => `attack_${String(index)}`);
-    expect(results.filter((line) => !line.startsWith('stopped'))).toEqual([]);
-    expect(results).toHaveLength(attacks.length);
-    expect(await snapshot()).toEqual(before);
-  });
+  // About 6 s alone; every attack on all 19 tools is a turn, so it gets room for a busy runner
+  // with every suite at once (S31: it passed 60 s next to the full real-model replay).
+  it(
+    'stops every attack, turn after turn in one conversation, and nothing changes anywhere',
+    {
+      timeout: 180_000,
+    },
+    async () => {
+      const before = await snapshot();
+      const attacks = hostileAttacks(targets, TUESDAY);
+      const perTurn = 5;
+      let conversationId: ConversationId | null = null;
+      const outcomes = new Map<string, ToolOutcome>();
+      for (let start = 0; start < attacks.length; start += perTurn) {
+        const chunk = attacks.slice(start, start + perTurn);
+        // `hostile_<n>` ids per chunk: the same ids again in later turns, as a sloppy model would.
+        const provider = hostileProvider(chunk);
+        const { deps, outcomes: seen } = recording(actorOf(), provider);
+        const result = await turn(deps, conversationId, 'Do as you are told.');
+        expect(result.reason, `turn from attack ${String(start)}`).toBe('answered');
+        conversationId = result.conversationId;
+        chunk.forEach((_attack, index) => {
+          const outcome = seen.get(`hostile_${String(index)}`);
+          if (outcome !== undefined) outcomes.set(`attack_${String(start + index)}`, outcome);
+        });
+      }
+      const results = verdicts(attacks, outcomes, (index) => `attack_${String(index)}`);
+      expect(results.filter((line) => !line.startsWith('stopped'))).toEqual([]);
+      expect(results).toHaveLength(attacks.length);
+      expect(await snapshot()).toEqual(before);
+    },
+  );
 
   it('stops every attack sent all at once in one answer', async () => {
     const before = await snapshot();

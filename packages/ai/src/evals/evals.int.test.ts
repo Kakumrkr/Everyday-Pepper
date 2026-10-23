@@ -11,6 +11,7 @@ import {
   type CassetteStep,
 } from './cassette.js';
 import type { EvalCase } from './case.js';
+import { loadEmbeddingStore, storeEmbedder } from './embeddings.js';
 import { loadCases, loadCassette } from './files.js';
 import { runEvals, summarize, type CaseResult } from './runner.js';
 import { loopSubject } from './subject.js';
@@ -102,6 +103,8 @@ describe('the recorded real model, replayed (S27)', () => {
         (entry): entry is { evalCase: (typeof all)[number]; cassette: Cassette } =>
           entry.cassette !== null,
       );
+      // The embeddings the recording used (S31), so search_memory ranks as it did then.
+      const embedder = storeEmbedder(await loadEmbeddingStore(paths, 'text-embedding-3-small'));
       // One trial group at a time: running them together tripled the load next to the
       // per-tool latency gate (latency.int.test.ts) and made it miss on a busy machine.
       const results: CaseResult[] = [];
@@ -112,7 +115,7 @@ describe('the recorded real model, replayed (S27)', () => {
               .filter((entry) => Math.min(entry.cassette.trials.length, 3) === trials)
               .map((entry) => entry.evalCase),
             trials,
-            subject: loopSubject(db),
+            subject: loopSubject(db, { embedder }),
             providerFor: (evalCase, trial, world) =>
               new CassetteProvider(
                 recorded.find((entry) => entry.evalCase.id === evalCase.id)?.cassette.trials[

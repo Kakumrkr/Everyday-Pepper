@@ -303,3 +303,7 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - `rule.change` locked to "ask" through `levelAllowed` (contracts, service, screen); hours limits only cut hours;
   - the remembered rule's fact is linked through the receipt's inverse, not the explanation (the dry run's fact never exists);
   - evals: the episode job as a screen action on the case's model; every case fails if a rule or hours changed during a member turn; real embeddings recorded once into `evals/embeddings/` (int8) and replayed; `episode_retrieval` measured through the real search as each member.
+- **S31 during the recording (user, 2026-10-23):**
+  - memory_write missed its gate (13/15: "Note that we're closed…" went to `propose_rule`). The user chose **"Fix + re-record"** (about $0.19) over deferring to S32 or accepting the overlap;
+  - the phase guard refused 13 multi-turn cases (worst-case $0.48 each, more than the room left). The user chose **"Estimate guard only"**: `--phase-estimate-ok` skips the pre-run estimate check for the phase, and the in-run stop at the actual cap stays;
+  - after the second recording, the user chose **"Code fix only"**: the `closed: null` fix with a cheap partial re-record. The user also chose to carry `mr-same-as-last-time` (memory_recall 16/17) as a named known miss in the replay test until S32's re-record, and to narrow `remember_fact`'s wording in S32 ("Marco is off on Friday" drifted to a fact).

@@ -27,6 +27,13 @@ Runs labelled `P7`. The runner refuses a run whose worst-case estimate would tak
   - **Run size:** the worst-case estimate is up to $0.43 for a multi-turn memory case and about $0.19 for a one-turn case. So a 20-case run ($4.17) would break both the $1.50 run cap and the Phase 7 cap. Runs were packed to about $0.56 of estimate each (1–4 cases, `--case`). The estimate still runs 100–300× above actual spend.
   - The one refused run (estimate $1.28 with $0.05 spent) wrote no entry.
 
+- **S31 (2026-10-23): $0.3826 in 275 runs** (Phase 7 total: $0.6800; $0.32 left for S32–S33). Over the planned $0.25 because the first recording found two problems, and the user chose to fix them and record again.
+  - Embeddings for `episode_retrieval` (85 texts on `text-embedding-3-small`): **$0.00002**, run 286. Recall@5 25/25.
+  - First pass, all 192 cases, pass^1: **$0.1856**, runs 287–393. memory_write missed its gate: "Note that we're closed…" went to the new `propose_rule`.
+  - Re-record after the guide fix (the user's choice, ~$0.19): **$0.1967**, runs 394–559 (30 runs packed to $0.56; then, once the phase guard refused a packed run, 123 one-case runs and 13 multi-turn cases with `--phase-estimate-ok`); the `closed: null` fix, $0.0002, run 560.
+  - 1,081 Luna calls, 15 Sol calls and 32 embedding calls. Prompt caching kept the input about 93% cached.
+  - **The phase guard:** near the end of a phase, a multi-turn case's worst-case estimate ($0.48) is more than the room left, though it really costs about $0.001. The user chose `--phase-estimate-ok` for recordings. It skips only the pre-run estimate check; the in-run stop still refuses any call once actual Phase 7 spend reaches $1.00, and the run cap and the $4.50 stop stay. One run refused before the flag existed wrote no entry.
+
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
