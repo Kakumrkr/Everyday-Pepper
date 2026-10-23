@@ -69,6 +69,12 @@ export const MEMORY_LIMITS = {
   factsPerBusiness: 20_000,
   episodeSummaryMax: 1_000,
   episodeClientsMax: 20,
+  /** The facts an episode's conversation saved or recalled that it records (S31). */
+  episodeFactsMax: 100,
+  /** How long a conversation is quiet before its episode is written (playbook D-9). */
+  episodeDelayMinutes: 30,
+  /** How many episodes `search_memory` returns (playbook §7 S31). */
+  searchMemoryResults: 5,
   episodesPerMember: 5_000,
   searchResultsMax: 10,
   /** How long a replaced value stays for Undo (the `client_note.save` window, ADR-0028). */
@@ -183,6 +189,10 @@ export const MemoryEpisodeInputSchema = z
     conversationId: ConversationIdSchema.nullable(),
     summary: z.string().trim().min(1).max(MEMORY_LIMITS.episodeSummaryMax),
     clientIds: z.array(ClientIdSchema).max(MEMORY_LIMITS.episodeClientsMax).default([]),
+    /** The facts the conversation saved or recalled: forgetting one deletes the episode. */
+    factIds: z.array(MemoryFactIdSchema).max(MEMORY_LIMITS.episodeFactsMax).default([]),
+    /** The conversation's last turn it covers (the job's idempotency key). */
+    lastTurnId: ConversationTurnIdSchema.nullable().default(null),
     embedding: EmbeddingSchema,
     embeddingModel: EmbeddingModelSchema,
   })

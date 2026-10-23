@@ -9,8 +9,11 @@ import { z } from 'zod';
 export const OutboxMessageIdSchema = z.uuid().toLowerCase().brand<'OutboxMessageId'>();
 export type OutboxMessageId = z.infer<typeof OutboxMessageIdSchema>;
 
-/** What a message does when delivered: an email, or a push to one device (ADR-0026). SMS later. */
-export const OutboxMessageTypeSchema = z.enum(['email', 'push']);
+/**
+ * What a message does when delivered: an email, a push to one device (ADR-0026), or writing
+ * the summary of a conversation that went quiet (`episode`, S31, ADR-0037). SMS later.
+ */
+export const OutboxMessageTypeSchema = z.enum(['email', 'push', 'episode']);
 export type OutboxMessageType = z.infer<typeof OutboxMessageTypeSchema>;
 
 /**
@@ -62,6 +65,15 @@ export const OutboxPushSchema = z.object({
 });
 export type OutboxPush = z.infer<typeof OutboxPushSchema>;
 export type OutboxPushInput = z.input<typeof OutboxPushSchema>;
+
+/**
+ * An episode to write (S31, ADR-0037): queued with the turn that ended, due when the
+ * conversation has been quiet for `MEMORY_LIMITS.episodeDelayMinutes`. Ids only.
+ */
+export const OutboxEpisodeSchema = z
+  .object({ conversationId: z.uuid(), userId: z.uuid(), turnId: z.uuid() })
+  .strict();
+export type OutboxEpisode = z.infer<typeof OutboxEpisodeSchema>;
 
 /** Delivery attempts before a message is `dead`. */
 export const OUTBOX_MAX_ATTEMPTS = 8;

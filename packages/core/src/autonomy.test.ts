@@ -3,6 +3,7 @@ import {
   AutonomyActionSchema,
   AutonomyLevelSchema,
   BULK_RECIPIENT_LIMIT,
+  levelAllowed,
   RiskTierSchema,
   type AutonomyAction,
   type AutonomyLevel,
@@ -247,19 +248,18 @@ describe('decideAutonomy: properties', () => {
 
 describe('decideAutonomy: every action × level × tier × context', () => {
   const everyCase = ACTIONS.flatMap((action) =>
-    LEVELS.filter((level) => level !== 'auto' || AUTONOMY_ACTIONS[action].allowsAuto).flatMap(
-      (level) =>
-        TIERS.flatMap((tier) =>
-          [false, true].flatMap((untrustedContext) =>
-            [1, BULK_RECIPIENT_LIMIT, BULK_RECIPIENT_LIMIT + 1].map((recipients) => ({
-              action,
-              level,
-              tier,
-              untrustedContext,
-              recipients,
-            })),
-          ),
+    LEVELS.filter((level) => levelAllowed(action, level)).flatMap((level) =>
+      TIERS.flatMap((tier) =>
+        [false, true].flatMap((untrustedContext) =>
+          [1, BULK_RECIPIENT_LIMIT, BULK_RECIPIENT_LIMIT + 1].map((recipients) => ({
+            action,
+            level,
+            tier,
+            untrustedContext,
+            recipients,
+          })),
         ),
+      ),
     ),
   );
 
@@ -290,6 +290,24 @@ describe('decideAutonomy: every action × level × tier × context', () => {
 
 describe('decideAutonomy: rules', () => {
   const defaults = resolveAutonomy(undefined, {});
+
+  it('always asks before a learned rule, whatever is stored (S31, playbook D-10)', () => {
+    for (const level of LEVELS) {
+      const autonomy = resolveAutonomy({ askFirst: false, levels: { 'rule.change': level } }, {});
+      expect(autonomy.levels['rule.change']).toBe('ask');
+      expect(
+        decideAutonomy(
+          {
+            actions: ['rule.change'],
+            tier: 'internal_write',
+            recipients: 0,
+            untrustedContext: false,
+          },
+          { askFirst: false, levels: { ...autonomy.levels, 'rule.change': level } },
+        ).outcome,
+      ).toBe('propose');
+    }
+  });
 
   it('reads run without asking and say why', () => {
     expect(

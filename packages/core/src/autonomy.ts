@@ -4,6 +4,7 @@ import {
   AutonomyLevelSchema,
   AutonomyRequestSchema,
   BULK_RECIPIENT_LIMIT,
+  levelAllowed,
   type AutonomyAction,
   type AutonomyDecision,
   type AutonomyLevel,
@@ -93,7 +94,7 @@ function levelOf(autonomy: BusinessAutonomy, action: AutonomyAction): AutonomyLe
 }
 
 function allowed(action: AutonomyAction, level: AutonomyLevel): boolean {
-  return level !== 'auto' || AUTONOMY_ACTIONS[action].allowsAuto;
+  return levelAllowed(action, level);
 }
 
 /**

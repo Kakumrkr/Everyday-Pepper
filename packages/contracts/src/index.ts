@@ -8,6 +8,7 @@ export * from './bookings.js';
 export * from './clients.js';
 export * from './health.js';
 export * from './invites.js';
+export * from './learned-rules.js';
 export * from './memory.js';
 export * from './outbox.js';
 export * from './permissions.js';

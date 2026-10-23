@@ -10,6 +10,7 @@ import {
   AutonomyLevelSchema,
   AutonomySettingsSchema,
   BULK_RECIPIENT_LIMIT,
+  levelAllowed,
   RiskTierSchema,
   StateFingerprintSchema,
   TRUST_JSON_MAX_BYTES,
@@ -53,6 +54,7 @@ describe('AUTONOMY_ACTIONS', () => {
       'booking_request.accept': 'notify',
       'time.block': 'notify',
       'client_note.save': 'notify',
+      'rule.change': 'ask',
       'task.create': 'notify',
       'message.confirmation': 'auto',
       'message.rebooking_nudge': 'ask',
@@ -61,11 +63,24 @@ describe('AUTONOMY_ACTIONS', () => {
     });
   });
 
-  it('allows "just do it" for everything but bulk messages', () => {
+  it('allows "just do it" for everything but learned rules and bulk messages', () => {
     const locked = Object.entries(AUTONOMY_ACTIONS)
       .filter(([, { allowsAuto }]) => !allowsAuto)
       .map(([action]) => action);
-    expect(locked).toEqual(['message.bulk']);
+    expect(locked).toEqual(['rule.change', 'message.bulk']);
+  });
+
+  it('locks learned rules to "ask" (S31, playbook D-10)', () => {
+    expect(AutonomyActionSchema.options.filter((a) => levelAllowed(a, 'notify'))).not.toContain(
+      'rule.change',
+    );
+    expect(levelAllowed('rule.change', 'ask')).toBe(true);
+    expect(levelAllowed('rule.change', 'notify')).toBe(false);
+    expect(levelAllowed('rule.change', 'auto')).toBe(false);
+    expect(levelAllowed('message.bulk', 'notify')).toBe(true);
+    expect(levelAllowed('message.bulk', 'auto')).toBe(false);
+    expect(levelAllowed('booking.create', 'auto')).toBe(true);
+    expect(AUTONOMY_ACTIONS['rule.change'].permission).toBe('rules.manage');
   });
 
   it('gives every action a known permission and an undo window', () => {
@@ -91,8 +106,8 @@ describe('AUTONOMY_ACTIONS', () => {
   });
 
   it('never defaults to a level that is not allowed', () => {
-    for (const { defaultLevel, allowsAuto } of Object.values(AUTONOMY_ACTIONS)) {
-      expect(defaultLevel !== 'auto' || allowsAuto).toBe(true);
+    for (const action of AutonomyActionSchema.options) {
+      expect(levelAllowed(action, AUTONOMY_ACTIONS[action].defaultLevel)).toBe(true);
     }
   });
 });
@@ -105,8 +120,10 @@ describe('AutonomySettingsSchema', () => {
     expect(AutonomySettingsSchema.parse({})).toEqual({});
   });
 
-  it('refuses "just do it" for bulk messages', () => {
+  it('refuses "just do it" for bulk messages, and anything but "ask" for learned rules', () => {
     expect(AutonomySettingsSchema.safeParse({ 'message.bulk': 'auto' }).success).toBe(false);
+    expect(AutonomySettingsSchema.safeParse({ 'rule.change': 'notify' }).success).toBe(false);
+    expect(AutonomySettingsSchema.safeParse({ 'rule.change': 'ask' }).success).toBe(true);
   });
 
   it('rejects unknown actions and levels', () => {
@@ -127,6 +144,10 @@ describe('AutonomyChangeSchema', () => {
     expect(AutonomyChangeSchema.safeParse({ levels: { 'message.bulk': 'auto' } }).success).toBe(
       false,
     );
+    expect(AutonomyChangeSchema.safeParse({ levels: { 'rule.change': 'notify' } }).success).toBe(
+      false,
+    );
+    expect(AutonomyChangeSchema.safeParse({ levels: { 'rule.change': null } }).success).toBe(true);
     expect(AutonomyChangeSchema.safeParse({ tenantId: 'x' }).success).toBe(false);
   });
 });

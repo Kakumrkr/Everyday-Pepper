@@ -44,11 +44,13 @@ import {
   deleteMemoryFact,
   storedTextsOf,
   deleteOldMemoryEpisodes,
+  findEpisodeOfConversation,
   insertMemoryEpisode,
   insertMemoryFact,
   listMemoryEpisodes,
   listMemoryFacts,
   lockActiveMemoryFact,
+  lockRememberedFacts,
   memoryPaused,
   memorySubjectOf,
   searchMemoryEpisodes,
@@ -941,6 +943,125 @@ describe('episodes', () => {
     expect(
       (await inTenant((tx) => listMemoryEpisodes(tx, 10), t)).map((row) => row.summary),
     ).toEqual(['New']);
+  });
+});
+
+describe('episodes and their facts (S31)', () => {
+  it('forgetting a fact deletes every episode that names it, however worded', async () => {
+    const id = await save(fact({ type: 'client', id: maria }, 'dye_reaction', 'paraphenylenediamine'));
+    const other = await save(fact({ type: 'client', id: maria }, 'usual_colour', 'Full color'));
+    const add = (summary: string, factIds: MemoryFactId[], axis: number) =>
+      inTenant((tx) =>
+        insertMemoryEpisode(tx, {
+          userId: jess,
+          conversationId: null,
+          summary,
+          clientIds: [],
+          factIds,
+          embedding: unit(axis),
+          embeddingModel: 'm',
+        }),
+      );
+    // The summary rewords the value: only the fact id can find it.
+    const named = await add('Maria reacts to hair dye; patch test first.', [id, other], 20);
+    const unrelated = await add('Maria likes the usual.', [other], 21);
+    expect(await as(ana, (tx) => deleteMemoryFact(tx, id))).toBe(true);
+    const left = (await inTenant((tx) => listMemoryEpisodes(tx, 100))).map((row) => row.id);
+    expect(left).not.toContain(named.id);
+    expect(left).toContain(unrelated.id);
+    await as(ana, (tx) => deleteMemoryFact(tx, other));
+  });
+
+  it('one episode per conversation, and the fact ids are checked', async () => {
+    const conversationId = ConversationIdSchema.parse(
+      (await as(jess, (tx) => insertConversation(tx, { userId: jess, channel: 'chat' }))).id,
+    );
+    const add = () =>
+      inTenant((tx) =>
+        insertMemoryEpisode(tx, {
+          userId: jess,
+          conversationId,
+          summary: 'Jess blocked Friday.',
+          clientIds: [],
+          embedding: unit(22),
+          embeddingModel: 'm',
+        }),
+      );
+    const first = await add();
+    expect(sqlState(await add().catch((e: unknown) => e))).toBe('23505');
+    expect(await as(jess, (tx) => findEpisodeOfConversation(tx, conversationId))).toMatchObject({
+      id: first.id,
+      factIds: [],
+      lastTurnId: null,
+    });
+    // Another member doesn't see it.
+    expect(await as(marco, (tx) => findEpisodeOfConversation(tx, conversationId))).toBeUndefined();
+    const tooMany = Array.from({ length: 101 }, () => MemoryFactIdSchema.parse(newId()));
+    expect(
+      await inTenant((tx) =>
+        insertMemoryEpisode(tx, {
+          userId: jess,
+          conversationId: null,
+          summary: 'x',
+          clientIds: [],
+          factIds: tooMany,
+          embedding: unit(23),
+          embeddingModel: 'm',
+        }),
+      ).catch((e: unknown) => e),
+    ).toBeInstanceOf(Error);
+  });
+
+  it('a fact locked by the episode job can only be forgotten after the episode is stored', async () => {
+    const id = await save(fact({ type: 'staff', id: jessStaff }, 'saturdays', 'Never Saturdays'));
+    const proposed = await save(
+      fact({ type: 'staff', id: jessStaff }, 'sundays', 'Off Sundays', { status: 'proposed' }),
+    );
+    const order: string[] = [];
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let locked!: () => void;
+    const lockTaken = new Promise<void>((resolve) => {
+      locked = resolve;
+    });
+    const job = inTenant(async (tx) => {
+      // Proposed facts and unknown ids are not "remembered".
+      expect(
+        await lockRememberedFacts(tx, [id, proposed, MemoryFactIdSchema.parse(newId())]),
+      ).toEqual([id]);
+      locked();
+      await held;
+      const episode = await insertMemoryEpisode(tx, {
+        userId: jess,
+        conversationId: null,
+        summary: 'Jess never works weekends.',
+        clientIds: [],
+        factIds: [id],
+        embedding: unit(24),
+        embeddingModel: 'm',
+      });
+      order.push('stored');
+      return episode;
+    });
+    await lockTaken;
+    const forget = as(ana, async (tx) => {
+      const deleted = await deleteMemoryFact(tx, id);
+      order.push('forgotten');
+      return deleted;
+    });
+    // The forget waits on the lock; give it a moment to block, then let the job commit.
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    release();
+    const episode = await job;
+    expect(await forget).toBe(true);
+    expect(order).toEqual(['stored', 'forgotten']);
+    // The forget saw the committed episode and took it.
+    expect((await inTenant((tx) => listMemoryEpisodes(tx, 100))).map((r) => r.id)).not.toContain(
+      episode.id,
+    );
+    await inTenant((tx) => deleteMemoryFact(tx, proposed));
   });
 });
 

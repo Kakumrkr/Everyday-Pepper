@@ -27,6 +27,7 @@ export const ACTION_LABEL: Record<AutonomyAction, string> = {
   'booking_request.accept': 'Booking request',
   'time.block': 'Blocked time',
   'client_note.save': 'Client note',
+  'rule.change': 'Booking rule',
   'task.create': 'To-do',
   'message.confirmation': 'Confirmation email',
   'message.rebooking_nudge': 'Rebooking nudge',
@@ -42,6 +43,7 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
   'booking_request.accept': 'Accept requests from your booking page',
   'time.block': 'Block time on a calendar',
   'client_note.save': 'Save notes and preferences about clients',
+  'rule.change': 'Turn a preference into a booking rule or hours',
   'task.create': 'Add to-dos and reminders',
   'message.confirmation': 'Booking confirmations and reminders',
   'message.rebooking_nudge': 'Rebooking nudges to regulars who are due',
@@ -249,6 +251,12 @@ export function changeRows(
       add('About', null, text(side, 'about'));
       add('What', null, keyWords(text(side, 'key')));
       if (after?.['forgotten'] === true) add('Forget', null, 'Everywhere, for good');
+      return rows;
+    }
+    case 'rule.change': {
+      // `propose_rule` (S31): the rule in words, before and after, and whom it applies to.
+      add('For', null, text(after, 'scope'));
+      add('Rule', text(before, 'rule'), text(after, 'rule'));
       return rows;
     }
     case 'message.confirmation':

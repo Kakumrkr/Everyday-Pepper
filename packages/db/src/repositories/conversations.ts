@@ -150,6 +150,20 @@ export async function findTurn(
   return row;
 }
 
+/** The conversation's newest turn, if any (the episode job's check that the chat went quiet). */
+export async function findLatestTurn(
+  tx: TenantTx,
+  conversationId: ConversationId,
+): Promise<ConversationTurnRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(conversationTurns)
+    .where(eq(conversationTurns.conversationId, ConversationIdSchema.parse(conversationId)))
+    .orderBy(desc(conversationTurns.createdAt), desc(conversationTurns.id))
+    .limit(1);
+  return row;
+}
+
 /** The conversation's running turn, if any, locked until the transaction ends. */
 export async function lockRunningTurn(
   tx: TenantTx,
