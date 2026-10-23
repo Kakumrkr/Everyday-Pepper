@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "20da3c3d7e158d07ae41fcd63f7606c01e248eb2a4878b2eee3ba80119e31b4a",
+        "fingerprint": "ca6f89fc48c9bfd7fcedeb4bb4f41141a76891e378b36ab330bbf5188344b32d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_u4aGokfHqSihLfzeCWPYQ1Ev",
+              "id": "call_B7kDksLDTNfzyf3AnUBqlYlD",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8230,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8284,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,31 +25,31 @@
         }
       },
       {
-        "fingerprint": "55e207d259a246889d4d0aba308dfc039226d011c66e1ff379e6a93abe11a8fd",
+        "fingerprint": "adb6bd45bc29fbd7d3ef269c8b9b32983ff781be2a7c5dc1b5893a6abeb6f0f9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_5l4OisfDqxj2oWWpZQvSWdIk",
+              "id": "call_HIG9jbKP7kQGQQBJyTIWSaQ0",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"staff\",\"id\":\"{{staff:jess}}\",\"key\":\"schedule\",\"value\":\"Jess doesn't work Saturdays.\",\"sensitive\":false}"
+              "arguments": "{\"about\":\"staff\",\"id\":\"{{staff:jess}}\",\"key\":\"schedule\",\"value\":\"Doesn't work Saturdays.\",\"sensitive\":false}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8513,
-            "cachedInputTokens": 8227,
-            "cacheWriteTokens": 283,
-            "outputTokens": 61
+            "inputTokens": 8568,
+            "cachedInputTokens": 8281,
+            "cacheWriteTokens": 284,
+            "outputTokens": 59
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a1a518d92374bef41f71de852e5d23b034918e5f83962b2cd386e61068adc90b",
+        "fingerprint": "ecd72654108c72eaf3753cdcac69cd5fd193dcc6f136fcc34ca391018106d233",
         "response": {
-          "text": "Done — I’ll remember that Jess doesn’t work Saturdays.",
+          "text": "I’ve remembered that Jess doesn’t work Saturdays.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8612,
-            "cachedInputTokens": 8510,
-            "cacheWriteTokens": 99,
-            "outputTokens": 16
+            "inputTokens": 8665,
+            "cachedInputTokens": 8565,
+            "cacheWriteTokens": 97,
+            "outputTokens": 14
           },
           "model": "gpt-6-luna"
         }

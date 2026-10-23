@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "28bf89a4672d359954221350e078bac15f0110394aab014813e86b7e13357dcb",
+        "fingerprint": "d8500b190e7fd10131416c1dd77c4464b1d4b5056a1e1e8b27b2e44c21feba1f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_YRPgp3bdOSX93S6dFW85Kpf2",
+              "id": "call_BAhh6zXMsDqnqt86vb4rWW2q",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8236,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8290,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 17,
             "outputTokens": 18
           },
@@ -25,53 +25,31 @@
         }
       },
       {
-        "fingerprint": "3a7ae2245121fcb0dcd883eefa3c8d1b9ab52d527f0fea4d909668412c4004c3",
+        "fingerprint": "f0de6b178e0a4c62fffc7bbd47ff3119fb3a8fb5c09f51e680f632e481257c6a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_llYKqfiIGdZ1lmMI26fc35W4",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8320,
-            "cachedInputTokens": 8233,
-            "cacheWriteTokens": 84,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a35f520d066de00d78fa4f7d63ec274effa5bab89f8c1aee4a73566d13026e2d",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_ocbnweyu4EI8Ua9KyNPgElNO",
+              "id": "call_bzOpOOPBupgMG4H2dCJAm24r",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"usual_service\",\"value\":\"Colour with Jess\",\"sensitive\":false}"
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"usual_service\",\"value\":\"a colour with Jess\",\"sensitive\":false}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8602,
-            "cachedInputTokens": 8317,
-            "cacheWriteTokens": 282,
-            "outputTokens": 61
+            "inputTokens": 8376,
+            "cachedInputTokens": 8287,
+            "cacheWriteTokens": 86,
+            "outputTokens": 64
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "36e306dd632587e19ff1c254a4f9920f0cc5cf5f24dbb5cfb30c477d87cf9b8a",
+        "fingerprint": "30051ebf6940004864229ef8d8c8ade0bf67b21628fb6fa76c9080bf2011525e",
         "response": {
-          "text": "Maria L.’s usual is saved as “Colour with Jess.”",
+          "text": "Maria L.’s usual is now remembered as “a colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8704,
-            "cachedInputTokens": 8599,
-            "cacheWriteTokens": 102,
-            "outputTokens": 17
+            "inputTokens": 8481,
+            "cachedInputTokens": 8373,
+            "cacheWriteTokens": 105,
+            "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }

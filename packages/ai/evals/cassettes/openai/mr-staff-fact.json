@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "13f622892bfe9351ce943b36faffbb56ba2500028e79325eca6c3e8ab87c8cdd",
+        "fingerprint": "7e6741b0faea531bebf271b5b79c1f0f238216167764b96b28097dcbd79547ce",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xeQCYBIeA4He38aJ7coYzIF4",
+              "id": "call_rossO3NN1EDwDoFGSZks6Qw1",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8231,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "3808ce0561d5ae328e17931058dfaba39da216c7175cc0adc3e29dcb7b4c99e3",
+        "fingerprint": "96a3c31a6ad350e208cffd242c2366d2c9af1b42f29cf6bcc07ecbcd9b4ce7d6",
         "response": {
-          "text": "Jess’s schedule note says “Doesn't work Saturdays,” so she isn’t available to take a client this Saturday.",
+          "text": "Jess is noted as “Doesn't work Saturdays.” I can’t tell whether that’s changed—would you like me to check Jess’s schedule for this Saturday?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8578,
-            "cachedInputTokens": 8228,
-            "cacheWriteTokens": 347,
-            "outputTokens": 27
+            "inputTokens": 8645,
+            "cachedInputTokens": 8282,
+            "cacheWriteTokens": 360,
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }

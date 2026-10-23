@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "12e18d9c27740775902e846e4698ec262ecfab8addd54a7947f9bdb15e0b49a1",
+        "fingerprint": "4354f12d7f03181f9d3f2b2c8509946617d238a692ed6548cecc8e43965b22b9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_EyOZgqjCZggaM4VGoEcedrWe",
+              "id": "call_dQGZoo4pFx80nFf79NCC8EPh",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8233,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8287,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "90665df1b10b6ef61d6e476895a0d6238f282199508ab9355d24ee07402ebc2b",
+        "fingerprint": "9f18b5f84745db02278d0e8aa9d54db061be03fb591f8f4b6d89dbdd031cd454",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_YRS0nv6FDUU5SRinwt6DpEGx",
+              "id": "call_doP9WkkU9nROLm3c4VUuJhGc",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8317,
-            "cachedInputTokens": 8230,
-            "cacheWriteTokens": 84,
+            "inputTokens": 8375,
+            "cachedInputTokens": 8284,
+            "cacheWriteTokens": 88,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "93d8333089062d2a93e019cbdcb650c55e4149d24d69f4891d3b1a11c7f86bf5",
+        "fingerprint": "fb75b9891c9390b3f92134cbc80098c9addff68ef6c4d22e7fc102276e76703e",
         "response": {
-          "text": "I found Ana R., but Juniper Hair Studio doesn’t have a manicure service listed. The available services are Colour and Haircut. Would you like to book one of those instead?",
+          "text": "I couldn’t book it: Juniper Hair Studio doesn’t currently list a manicure service. The available services are colour and haircut.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8578,
-            "cachedInputTokens": 8314,
-            "cacheWriteTokens": 261,
-            "outputTokens": 41
+            "inputTokens": 8660,
+            "cachedInputTokens": 8372,
+            "cacheWriteTokens": 285,
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

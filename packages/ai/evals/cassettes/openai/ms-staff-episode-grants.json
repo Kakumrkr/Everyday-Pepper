@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "f3476c8229774087250492fdaebcbdc49f95444006673660b5ade746eb8bf775",
+        "fingerprint": "20c951b0862c0ae3d39e01bbb38aa6b24e8cf08020bc9aa6652d954f675c4638",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_b8cLXl1kqwsQWOq5362YL6W8",
+              "id": "call_A4T4sSW3V2WeWv9ptDPEBFrA",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":null,\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8240,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8294,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 21,
             "outputTokens": 66
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "c7e0b5240e4369b59fed096f15f9a1f5e5fa27f84918a71607f57c4ba62fe760",
+        "fingerprint": "99a8e34320fbf8bd047bea1c64747ff09548cbdbf85c01e7ca0abfe756adadd6",
         "response": {
-          "text": "I can’t set a booking rule with my staff role. An owner or manager can set the 2-hour minimum notice for your bookings.",
+          "text": "I can’t set booking rules with my staff role. An owner or manager can set a 2-hour minimum notice for your bookings.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8359,
-            "cachedInputTokens": 8237,
+            "inputTokens": 8413,
+            "cachedInputTokens": 8291,
             "cacheWriteTokens": 119,
-            "outputTokens": 32
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

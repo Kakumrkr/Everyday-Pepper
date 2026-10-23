@@ -3,7 +3,8 @@
 //   [--strong <model>] [--routine-effort <e>] [--strong-effort <e>] [--label <text>]
 //   [--cassettes <dir>] [--phase <n>] [--concurrency <n>] [--retrieval]` (ADR-0027, ADR-0030, S27;
 //   `--phase`, S29; `--concurrency`, S31: cases at once, default 4; `--retrieval`, S31: the
-//   episode_retrieval set's recall@5 instead of the cases). Replays cassettes by
+//   episode_retrieval set's recall@5 instead of the cases; `--phase-estimate-ok`, S31: the
+//   phase's worst-case estimate may pass its cap, its actual spend still may not). Replays cassettes by
 // default, at no cost: every case (the files and those generated from the tool guides) runs
 // through the real agent loop and tools in a seeded world on Postgres: `EVAL_DATABASE_URL` (a
 // migrated database, the services' login), or a throwaway one in Docker. Only `--provider
@@ -97,6 +98,7 @@ async function main(): Promise<number> {
       phase: { type: 'string' },
       concurrency: { type: 'string', default: '4' },
       retrieval: { type: 'boolean', default: false },
+      'phase-estimate-ok': { type: 'boolean', default: false },
     },
   });
   const here = new URL('../../evals/', import.meta.url);
@@ -214,6 +216,7 @@ async function main(): Promise<number> {
       phase: runPhase,
       spentUsd: phaseSpent,
       estimateUsd: estimate,
+      estimateOk: values['phase-estimate-ok'],
     });
     if (phaseRefusal !== null) {
       print(`Refused: ${phaseRefusal}`);

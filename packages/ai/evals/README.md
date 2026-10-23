@@ -20,6 +20,8 @@ EVAL_DATABASE_URL=$(cat /tmp/evaldb.url) NODE_USE_ENV_PROXY=1 node dist/evals/cl
   --cassettes openai --phase 7 --label "what this run is for"
 ```
 
-From Phase 7 a recording names its phase (`--phase 7`): its ledger label starts with `P7 `, and the runner refuses a run (and stops the next call) that would take the phase past its cap (Phase 7: $1.00, Phase 7 playbook §4), on top of the run's cap and the $4.50 stop.
+From Phase 7 a recording names its phase (`--phase 7`): its ledger label starts with `P7 `, and the runner refuses a run (and stops the next call) that would take the phase past its cap (Phase 7: $1.00, Phase 7 playbook §4), on top of the run's cap and the $4.50 stop. `--phase-estimate-ok` (user, S31) lets a run start although its worst-case estimate would pass the phase cap (a multi-turn case near a phase's end); the next call is still refused once actual spend reaches the cap.
+
+Embeddings (S31): scripted runs use the hash embedder; `--provider openai` replays `embeddings/text-embedding-3-small.json` (int8 vectors keyed by the text's hash) and a recording embeds what it lacks with the real model, under the same guards. `--retrieval` runs the `episode_retrieval` set (`retrieval/episodes.json`, recall@5, gate 95%) instead of the cases; with `--record --phase 7` it embeds the set's texts first.
 
 `OPENAI_API_KEY` comes from the environment only. Record against `EVAL_DATABASE_URL`: loading Testcontainers inside the recorder replaces Node's fetch dispatcher, so behind a proxy the model cannot be reached. `NODE_USE_ENV_PROXY=1` makes Node's fetch use `HTTPS_PROXY` (Node ≥ 22.21).

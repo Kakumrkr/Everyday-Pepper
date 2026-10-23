@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "029ee631d1c1928d274efd083a50c40647bbe9a9a8b6d392a0a6e660fad198fd",
+        "fingerprint": "168a3f39d5be7b14418925e5837141365cd7fb422a5a9b80e08f2c3e72b9b585",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wmN1YEF751UMz8Evt8y8N1Jz",
+              "id": "call_NizB7Uz3sJZP0ATdHarMAtRT",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8229,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8283,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 10,
             "outputTokens": 19
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "01c9b3e745dcdbdecb49623c08145a62e82b544e3f18cb6bdee040f3224554c9",
+        "fingerprint": "0e2272f4ae50182ffc76869e0a8e70dabf79cbcf92555dce4a109bfe7a83ff1e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BE4J38sjEBJ6sceQGszYhPWZ",
+              "id": "call_kP05YlhqnlIns0vFeGKUEePd",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sara}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8312,
-            "cachedInputTokens": 8226,
-            "cacheWriteTokens": 83,
-            "outputTokens": 41
+            "inputTokens": 8369,
+            "cachedInputTokens": 8280,
+            "cacheWriteTokens": 86,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c488337a1d091516fd0ff8b09a2772573888721b5a4321ef2bfce32cccece74c",
+        "fingerprint": "c9010b8c8701d109e6e5092deda02f430274451d316a3123c36d38ff812f8711",
         "response": {
-          "text": "I don’t know Sara’s usual; there’s no usual service or visit history noted.",
+          "text": "I don’t have Sara’s usual on record. There are no earlier visits or usual-service notes.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8424,
-            "cachedInputTokens": 8309,
-            "cacheWriteTokens": 112,
-            "outputTokens": 22
+            "inputTokens": 8487,
+            "cachedInputTokens": 8366,
+            "cacheWriteTokens": 118,
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }

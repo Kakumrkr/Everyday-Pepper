@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "071aab1632c26ca8ee7343f9c39f00c5f75af77e6fe757ca259db9526116974c",
+        "fingerprint": "00612bfb04f3d96fadbad733880d1f3e848793946c3b5ae0521284ae7eea04a8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_a607PEBlc18QjZegzW2Z65aS",
+              "id": "call_2WjFTo9FdZq7eYBcJXyHiuGz",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8235,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8289,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 16,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "109e619456068b2950924b70e5f663a54b12b4a940e19a6007a70571ffc77027",
+        "fingerprint": "8a79277d48b3331488c2eb8af2457a7814afe48fc3120340c03378644da88ce4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_T2BpV29eN7OKbtAR8ZDG04Vk",
+              "id": "call_yF68lyY4Ty08vEgTb0uleUAD",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8318,
-            "cachedInputTokens": 8232,
-            "cacheWriteTokens": 83,
-            "outputTokens": 42
+            "inputTokens": 8374,
+            "cachedInputTokens": 8286,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6e8e0b9acb9d97e65b1e80a4a2e2eb7f3ba178bf6c7b980a3d43791636a6ef0c",
+        "fingerprint": "60b2cfc08b2051785c9a18c87c4bda63d74355ef67a845c75df59185449bcf0c",
         "response": {
-          "text": "I don’t see any allergy information for Maria in her record. She’s booked with you tomorrow at 3:00 for a haircut.",
+          "text": "Maria is booked with you tomorrow at 3:00 PM for a haircut. I don’t see any allergy information in the client details returned, so I can’t confirm whether she has allergies.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8760,
-            "cachedInputTokens": 8315,
-            "cacheWriteTokens": 442,
-            "outputTokens": 32
+            "inputTokens": 8840,
+            "cachedInputTokens": 8371,
+            "cacheWriteTokens": 466,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }

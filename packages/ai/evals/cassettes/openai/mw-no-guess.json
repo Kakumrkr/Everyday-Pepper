@@ -3,11 +3,18 @@
   "trials": [
     [
       {
-        "fingerprint": "bb25cfc83c89c8a30e91e8e29a24843967c5239ee059f7ac0ef4a070fee3afce",
+        "fingerprint": "0b93fe03fa479b317d8b234ab87581ef97a9a7f38b4e65d08ab1b0363f360d10",
         "response": {
-          "text": "I’m sorry to hear that. I won’t assume why Maria seemed tired or save a guess about her.",
+          "text": "That’s thoughtful of you to notice. I won’t assume what’s behind it—she may just have been tired today.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0117790d684f8251016adbacbbd57087d283ccaea4a1b530e9",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq26y8NVn_Nz8RM2K_3Emj6wYmYDd--iZsCzrzA8DGdni6Gcp0mOKfpLGZmxq2W7nJcc8uZbrWWvA8VvZwz3WAGLxKuIbFMa12gurZRAGqa5sIsQ2IwXUMrfsWdgh496hn0wJmg5IHw7Qc65KfV4ZOaIY4kJmvFlZ8NB30HMwuJtOl51RMDQeW3QFRYzPaz9PFnpgilfo2lqRi7zkQvO-fr0LRgMWgIjPzOw8QETOX7DY5Fat3iTf9tOIi8ZYgrmdQ3dDiULHjNfZ_Cisuyu2w0qdcGs_Y7kplGeZNLM2vvIAD1AWYHbrE23ZalqGPWkexBIDLlfuNyzV9SKBWOo_tVjGV3SYDOtJfx7WTW1JngCYt-GvnLPLa1PH4VCJjvYBF6CzVEXxcaQQnkc8LrZPDCE_5Hm5XBKLVA45awXubOQIAW2UCjfmj70jMpabj_4eRYCDDgjT9BXwZk2uykAj8xKgkWsQQxiUQ7cj3BoQTro_bJ27rpI1fbgfvb6L4bGhTkCCckU8GGx2XFr7kRNJJjHqI93IJ86CsDZ79EeVDU0P1-k-iRbCxdG8D2E5ljZUAwQLxUDb1FXkaaPGvkv9wZWWUaf_onJJfiypRpHG2wkta-rg2eDxNbSmIn93gp7Ks978cF3qq2vLKWD8SZfytAuwkJx-pYt_xJRyIUfCBx3i2YMYGKsO6mlwWPbDyvPuThne3n9riHlrUsAeNkyq0YFiEm7vTQmv_XfodTneI-xutka8U7BQyOefrb1n-pSEryHXoOzIH1r0mJk0C0icDKSOTBQSSdHCeFeOVHfu5om5l0JESaLF-iQZKektaHg2Pjo1GU8_b04Iq9x2bPM1mLvTKcs4X4qETDHhx7tImVBFaRo7WB4P6SidFoOemMGGpyyuApaGnCaMY7EvIe6FKCdZGhu-u6uhZ-u3Va6xut5U9KS4bVmYy6L-fNyf60epNTrwRd91Nvsyky4L-DSSA7vPaImNwkrZ19XkRqw_Dmnu3i7s3jMCpSB9q3tHYZts5zWIpx99dvSodGjHZTW8ESqb582NN5kgMBR9ZcboRRoqX2Gk2wbrrWg1eGFuUJngABBEgmyNhR374tiPd1APO1WjIIFS-BN9GXjUV6ddc6ik_gXCjxRCMgHEhK-BmqwHqDUsnZWlFdTr1IbE6fz01jEQvg77Bw7CofsKJY8clHXqr5TqCNpS4vcwoALSQWIRWQ2PjLj9N964E70QEzjuuyKEigM_ZY8gyQd1eIUc4eBxrWFiRBmwNlGEKdLQN8FpnHVl5MPEan6SEHXl0WTduzJ2oviO3imy1aHfYJB6uPp0UlVehS1bKQ8oYevCYKr53pfUyRyQd8R15_ZlUZau6tA-LwQzGtIvH1kXWyo-NcmK8QM1w4vL_kiVoU_cr02t4TGyFN_2RONGktm3NnGuBCPtv0m0zqIZgmjX8OWt1zQMWHqXS6OHExgWwjK18HPUKramhjDkHstdzvql-tZyUzyP3IJWWf6Eomil8LkD7e6Ck9fHQnytnM3u0OWV7KSTMfprv7x5T1rcbXCjPQofhi2E3CMJoYgkAsKziUjcAuO1sHNsL6oC26gg1fE0cBmwvHk-DETTrq5vfrIgtayTT0scDNtIEh6txuXL6Kku6Z_6mLRVdf7PDxCJRG-xW7QyoJBswjCnoTa5QGfca72cDcEmVfUfop3pWjO0IdNEvLTWAzMMShxFCMs_eeIP3zsJ4ab03n35fJI_6kQkYoVnO0tMRUvVfgkqxC-B_T49jmXuWBKDwcfLMSFG5C_jTqtE8yG-S2svOTOhrn5LWGVp4BtG6upbk9lmWRfn7KRRTSZGdDKRx2vTYAT73RTvRHEY82SAcQ809tFAXlKcXC7LZT8AmuCmR4o_zTrjApQEsPjyjb4WerKayYKn5d152KPBzKUuX",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -15,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8235,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8289,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 16,
-            "outputTokens": 26
+            "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }

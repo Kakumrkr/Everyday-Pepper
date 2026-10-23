@@ -99,6 +99,8 @@ export function learnedRuleOf(args: ProposeArgs): LearnedRule {
     throw new InvalidToolArgumentsError(`For ${kind}, give null for ${stray.join(', ')}.`);
   }
   const picked = Object.fromEntries(used[kind].map((field) => [field, fields[field]]));
+  // An hours limit with a time and no `closed` is not a closed day (models send null for it).
+  if (kind === 'hours_limit' && fields.closed === null) picked['closed'] = false;
   const parsed = LearnedRuleSchema.safeParse({
     kind,
     staffMemberId: staffMemberId === null ? null : StaffMemberIdSchema.parse(staffMemberId),
@@ -173,7 +175,7 @@ export const proposeRule: WriteTool = {
           weekday: 1,
           notBefore: '10:00',
           notAfter: null,
-          closed: false,
+          // `closed`: false or null, both "not closed".
         },
       },
       {

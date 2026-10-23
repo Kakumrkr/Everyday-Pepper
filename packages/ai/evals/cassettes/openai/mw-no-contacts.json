@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "6df8ea762e79b87a1d75e599b186df62d114e0f95b665c44abfe719cd36bd769",
+        "fingerprint": "027ba206979c07d73f5e397ad02fe397d12dab4a31c7f9b949877fd47fa1c881",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bwN5LhQxPWIZbLf4XhtpJScc",
+              "id": "call_xE4aalHvkOL1QCo3zSOcKmqU",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8233,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8287,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,16 +25,16 @@
         }
       },
       {
-        "fingerprint": "d05888efdb6f1465567b95c9090cd896467fb8badde161de1f0fbf818f13b4a9",
+        "fingerprint": "9eee904f1e2c30b7c0bfa43e1fffe0e2958fe328223c5148a998ab9c7f5a96f5",
         "response": {
-          "text": "I can’t save or update client phone numbers here. Please update Maria’s number directly on her client record.",
+          "text": "I found Maria L., but I can’t save phone numbers here. They need to be updated on her client record.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_0c8e0aa82bea3386016adba64be0a087d29eb4de23a8b4f740",
+              "id": "rs_08e6d5ff0b2492d0016adbacb6862887d29e5bd7a521662c4e",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq26ZM6nWas-IS8vIsVGF5ZB0tL4IbfJ5486LngiWNzjg-plv4jDdUUTzxZ4LDy0469xugMqBH7YSif9I1BY8oCRckil-FCLgipJzPX0B9z35E1uJjCTFkANvLhcil1Syb0xYQjjOlObkpE2WbdEzm9GuYLnAE6VAOZ9afyIWKrLZ35iB_efarlW1xygktozIrNGyB-VbH9DSzmT5J54aHQhPuSh6ISNoxu1iiDpPxa16WFJo53ARixGvxN69olnSLdtgRuD-DpLfdxM-tJSt9AF1hRUqNpsvIA6IPfedeXB7By9_60x72tiyuUqDgF3XxhAU_KVA3kQ6UHbrzyOrwvYN8H9ZslYFXJkeue8k3xRPG6RJBHaaoypbO-N5iRoVDDZ3cpJvbSIy9Kgt1-t2G198VqgE6W0ZGi67MQiuifRD_bOq4g74_ixa35qBsnBX2EUPbgJOCHYd7rSYgwCCV3jbN4xjsXLmsAWMT5BcndKqI6yMFcRpyel774qWzaqu6A436fk6ZIaR9iiBGrmuU7BgbmdI7-bHRUbB0jfbPcw-0JoVlCOMfZU5J_bKoY36fab1qIbljlOVJ4vHvzSoQLY9lEGesBWjRYxV9MVkFxjU7qF-m3GS1DuKGjzCEFC0FUXHWds63qvPgpy7RBmgA_tlim4i9hmBtg2ni2N3u3uMD07n_SGRy77hYqF0ZetLQi0XhH4baxEW2XpaVCIYZs-Ef8l9LPAgBPawKgbHnTSeysPKrp_Ma4TLOztOKQ8rPoDy9j1jjJmH_gWRlDuY6aZfi5MoSCMYy27gF4bek-vklasBWQfmeRCcQGqH64BDbJ4s2Bfk6_4wElDnpiI1Prcb69cc6Pvu-Zk1Kc4RN07fmw7vjjwwKGTHoCmCYc7MPzLbD-mfEwAgOcOTGb876hXnuKefpUbSYl-manpAR31FjaWsfvOV19Nk23szWl-vt4nQeouNPY922zuex-KtOcgE7GQlp6uGVUl3EAjHE_K7acgSkeINx8w02AGrGjz197L5JC-6G9xtGqFa8OUqYHY__9tXnAr-H4qO0NVPqtvhTaffCALB5Xb6jgVnYFIM_ymwzFa-bLgRFZupWf8zhSqSWD7fi0VmH1Nk5smKgJcNFShlneuGk1MaAVChrBLG21YbhQnH2Fej-cIZmtUHaEtEvw5PXwMZc6R24BN_g_8sjD71A16akl9U4alQOZZtxXzYQqiLzwIvzGW4slc6xr_3B_WsG-aMOtH5T-RHY3noFOPB7AYhX4nJyY0mW61CFULeovSsrgFO1geatnCIex_kjgplzkRQDBf4pvGV2_7s0hunIwC-bX1q5KXyqMoVOqeMOuaWteoaHE8xK9Pe9t1XaUGfxomqHn2c1XsrtNKJGZhwkjbEvONKLgnZJr3uzkGXlByApYm3x9Twz7MVzFNCdcJIv2e-cdMCPBRhbmfIVyJyiXnQ5gawE-2CSZ_ncr4Ymx1ucg51nAlnZ_YSW4RyZL1yiF_F61QqcFiSVb730bhF1klM9DbSO3U8U1lgXJgoHgGxuUMCP-HODN2gCTZT1fW5l5-81NaNNTaJLBStDiHWzKbEWySmjnkuLDR3qhy8XomvqgHE6MeDm5txvFWQkZ-gW5EniaqpsWEU8WkPZYIN27fLFLLN_-ijmGpDMyIfrbGk3Ctb_XkL4OeZpO41If09ueCrJisVbsm5NjtM5_zZKd5TqWCgGeSw2uQURwJX0jyCmbJdGhIpcyIttspGRk6889LZxKykp-Ra7F14BCRjRGTWMwzkcQGImRiAAd1pvDziIxVn4UCiLQMluw6SsDbH04dANo_UkwZmLjWAHn21mhzjEYkdc3GLK6kHxRVli0Wy1vZL1-YFVwiz5ekRrV75S2SW3UXdbTWYsfj6kTjPlAXjreUqvJ8T4V--G4389D3VXNOFDd4Ia7MMuPJ3x62bIH9OjCBIURx5h5cZ-syP3aQNeNSIyGU7Ie1CA5CRroopZkysOow05UFOojUzZVw==",
+              "encrypted_content": "gAAAAABq26y3K38z4sv_0OwAzx4vlWpc6bC3ysUjinFGxF2j3ztjyjpYUhKpGNLe4sobicGrAT7j2fgOAs-lI9KybftUXZJLKiImlpsyym4Vuv7ty795j0p4EL_vbzhOXHGZhrjXFtLT0IGhLWVJzE5AcEQzTpF23RRNNYXt7sloCJPzbgnBP_Cx_da7-ptHFbpO4kzilABE711MWT4M3JLr64mFIkcUmrnJ-lzgYh75PnGEESKEuzKznKrUwQUTVwXeZONVxLaXSSdf6X9zJ5kLvyyj78ovORLd9ufKdJgHZOgmz0KnwhmlCWI-14j01UfklagjB_vII55Q_-Nvd-Ay95k5Q8kdTOXpW0GAFZmdRDinayKkpRySVh3oEoeD9UI9FshU7Fa3_ztVOEWCW_Hcv6bOZ4YkDo5WJAKR9USW2JvpKOi9_030xb0eO7PZktgCYgBlAEsJJaNwmEOluK_UhjbBu57UPqQZBYEG3T2FtSicDpha030huUJRcsfYBTgnukSTPMCR9NCskYQJInalQbgxOC0I2eUBqu7hACs_gu73-s9FvmtVSJsdQkZUmid15Q3tSxl-CV5Pk580oKYX6Ba1JWoQ2XDN3KiYHnik02Z4GgUZxOIWLez4aOnGYUWx5Fx6sG6_bYRNGgbyDNdJ1B2vuyszNmyz8YChoe7YQOlGNUGRjG5JxeNSciOX5Sz7ydBUcDS54XQSzpTJkswQoF18r-jcBGn1yda5xXmk45J1rtN35u3Af-nzoBdRxwE3UKdZuROqIvpy9AY9OnwhIVdC8i2v5IbFXujDXOBJZkpznmHq9t2TpLFNNlA3IdY_amk6_6duNDmRATW3cxFtnMhYjNVKDweaVByxEW9c4UIOBBvmUMb-1K6GYGwWb-nvhk8j36vzS-dwdqIhhOOq1fX5Na3NTt56zsqsinh8w65tVQVbtkRUPPENaxQwB5kuOGX7N8PIzrRjusA83w2YTQ9ke5fP3raITzuTVFc3DuT9HrgnoOXI3JfXHxbe7hHJXo-bwBZVK8RjzmwFJ9r9AB-Jp4pyLaLiO71J5duVe2tMjDzDgp3q9Iq7EBKD9VgkZPo-fJnJRcfADvdE4lAvXo-s_yhVwW55dyOnyWzJPCPnZATy5Hd97HENsUnp6PTnElTzD9cR0UF2zZ6bej8dAAAs6Hgwh-j0-oNGaWwIhB158fSfkEB3ixUibR3LuZjww8Q96kbf5XYYzD7rhAdRJFK0pq_Zuz3gl5KutAi96c-l4CLqTpD_tbPN2XVcv75uG6JKbWg9Hp47XBpUXbGjEDE0fkQdugQ8sXCj24L6c7BiPrKu0IVw-mugtL6pWieipoRVNlFS_MyBl-1hpjLR0GXCvLd4G2kEAIWA5hCE3p5vC2k1n0yAIh6lS8GAuJKLqs_3W7L4MyRhpfgD5cWHWNYtilhh-CIZxlBvszTPffqinAm-su8kF7N2UiqVNsRkgqXEFhECuRDMEfmaqZ1LFqNLhZetDLrpXubrTQ_rbWaiOr24TCmMolKs9bAXjmpbDhCLUmdcArTY9SMPJFjBVwRXacrsrUoNDUKHrHLJ5xcbnDC9KJAS8z5MwBnpUU8ze_mpF09lspathbgmM6SOx20QHt4Frc3VhgBWXgcRITtfBRxNobPBBD2-5w7TN1sVobiL715LdXBByPKPOkIT4Qh4ZEFA4Tu5WlEuF3IcyTzb9-2Xmmivd_SN9R4Ea11f5_QYNduoS86USAmkTXfg3zx9aMxN1Cw0wHE2Cxo2MdHalbWIq9GAiJyg5hQoL0RqAB1sG5XYzRznBsirvExtrKFND53TqizdcE9OqXJHvhVPg41yj1p99kX-N-ZzCa_n1D56u7lr5TTgI_XFVfLd5HU2qHcuikTzSmSjGKBO0msGmg-_0nU=",
               "summary": []
             },
             {
@@ -44,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8315,
-            "cachedInputTokens": 8230,
-            "cacheWriteTokens": 82,
-            "outputTokens": 71
+            "inputTokens": 8371,
+            "cachedInputTokens": 8284,
+            "cacheWriteTokens": 84,
+            "outputTokens": 63
           },
           "model": "gpt-6-luna"
         }

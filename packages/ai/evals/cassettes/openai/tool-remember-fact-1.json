@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9335a8e60bf9d9fc62364b1610ae9774db20f34c46703345f5ba339305761017",
+        "fingerprint": "2c28c449026caa43842572294304c15a659f8eabf6b343b1f6e73739180d2c41",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_vqGNTwsNTuxcz9i1u6xlr8LB",
+              "id": "call_K2ZLMMht3FhUTWsPIDQtGwgl",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8231,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "e9044210ec0613ef2e9acd47a8738495e3e7e72f38e40fab64002006440230f3",
+        "fingerprint": "3e7090a3ebe324d3901dabef4313bf2ecea7fe071193d180d61fd6f8ea5911f0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_NiUc9FRqH4vmTyiwx0Ngt9qf",
+              "id": "call_D1Qv0xXaMjVcuQmjZuM2x98n",
               "name": "remember_fact",
               "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"allergic to PPD\",\"sensitive\":true}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8316,
-            "cachedInputTokens": 8228,
-            "cacheWriteTokens": 85,
-            "outputTokens": 64
+            "inputTokens": 8367,
+            "cachedInputTokens": 8282,
+            "cacheWriteTokens": 82,
+            "outputTokens": 61
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "616ee5e2a4810d8e870ddc0df74fd9ea46d2223897c4d2708fbf2afec97d68bd",
+        "fingerprint": "8024fc7d1fee448b478f4ebd225f8f6b7a088157a3c7e6e1ba747c687894b558",
         "response": {
-          "text": "I’ll remember that Maria L. is allergic to PPD.",
+          "text": "I’ve remembered that Maria L. is allergic to PPD.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8420,
-            "cachedInputTokens": 8313,
-            "cacheWriteTokens": 104,
+            "inputTokens": 8468,
+            "cachedInputTokens": 8364,
+            "cacheWriteTokens": 101,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"

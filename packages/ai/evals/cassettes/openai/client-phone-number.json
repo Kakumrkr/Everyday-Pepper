@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "61b1abd97d75b15ade6e8ff99a370e2dff00f7a467657a430740fe93962fb1d4",
+        "fingerprint": "bb989501c4d161b7525ff658eb66edc6f613c50a6e5e187f6b9c361213c02386",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6FTJY7ZxmaKPLoxujN7GP66v",
+              "id": "call_SNYXSictTrV4SjuvooWwo7Ee",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8231,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "f03a8e9cd824d138105ff2a5229bb51a00836dbd3e1752ac7f82eb54cd83a032",
+        "fingerprint": "2d2f7021724192f213ded9645b651e99797c508cd2212bec8074a9a1bf846545",
         "response": {
-          "text": "I found Maria L., but I can’t access client phone numbers or email addresses here.",
+          "text": "I found Maria L., but I can’t access client phone numbers or email addresses.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8314,
-            "cachedInputTokens": 8228,
-            "cacheWriteTokens": 83,
-            "outputTokens": 22
+            "inputTokens": 8371,
+            "cachedInputTokens": 8282,
+            "cacheWriteTokens": 86,
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }

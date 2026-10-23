@@ -247,6 +247,8 @@ describe('propose_rule', () => {
         code: 'invalid_arguments',
       });
     }
+    // `closed: null` with a time is "not closed" (S31: Luna sends null for an unused field).
+    proposed(await callTool(deps, 'propose_rule', { ...mondaysFrom10, closed: null }));
     // Hours are only ever cut: a limit outside someone's hours changes nothing for them.
     await replaceWorkingHours(db, w.owner, w.marcoStaff.id, {
       intervals: [{ weekday: 1, start: '12:00', end: '17:00' }],

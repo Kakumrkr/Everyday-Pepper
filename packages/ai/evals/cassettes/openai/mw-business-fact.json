@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "5d1f57d96c41aff3d2c3b6aef104f4df10a695fa3c4a6ed4b56e6b05f0f276f4",
+        "fingerprint": "e085f5e2353bf3fb6852997660f67cc5cf9a2115d55efe9392c129ffe0f9c58f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_sK9trVqsaCSZAVTVS8ib8vI8",
-              "name": "propose_rule",
-              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-11-26\",\"endDate\":\"2026-11-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+              "id": "call_B7i7dABFxMYaHoy7jFuSw3yC",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We're closed on Thanksgiving Day.\",\"sensitive\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8231,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 12,
-            "outputTokens": 77
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "68d1afa4d6b632943c77f35559185b94d2580f8f0e2115ac18a355bdfef343e0",
+        "fingerprint": "03ee67b55dfe89d085727032fc2dcfa893413dc5c25360816d3f4b7d833ff62b",
         "response": {
-          "text": "I proposed closing the business to bookings on Thanksgiving Day, November 26. Nothing has changed yet; please approve it on the card.",
+          "text": "Noted: the business is closed on Thanksgiving Day.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8380,
-            "cachedInputTokens": 8228,
-            "cacheWriteTokens": 149,
-            "outputTokens": 31
+            "inputTokens": 8364,
+            "cachedInputTokens": 8282,
+            "cacheWriteTokens": 79,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

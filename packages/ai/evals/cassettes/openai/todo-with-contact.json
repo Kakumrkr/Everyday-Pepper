@@ -3,39 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "44d909ae5b3b9cb4f9b28c6f8f4c350efc4295f345ae833d7a007ef86a018611",
+        "fingerprint": "2ea9958144e01c81f1a28ec1b0d014cbab33b6df4ef3996f8170fb3c2be2c169",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_E4K2mBulfVEsQCZ5Tr1xHWrM",
+              "id": "call_J8bbKM4BfnnueeHEHD2bqUKo",
               "name": "add_todo",
               "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-03\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_0fabd5f3006ff661016adba8535bcc87d29cbb06e038c511b7",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq26hTB52G9ZLK4FQY4O8oHv8qucFapnM91JpB_bIEvVv44u_VptmSSq8kiZlIIEgSdEDT-EwVvDpFtAaDV_w3vKodP0t48lWVJvMDPh8UHSyU86K0_KIix53aoTpWFKqPLeZLQesx6JIIt-HMKzqeagkd9oD3sm5eBcDpqr0N-vGqknMseB913OGBlaidiNh4q-bV5TJbMTB30b5v4xj_4tS1Hht3H8ctMslpyyexohH_dDxCd3BUFz_IGM4tyGtx6fuQmwfaycvCgbWxI0FKBe3gEDncZtC7r8O6xn-EsLSz7rTrzjom0bGBkQcx8Hbfz6QH7m38l2d4C91zGOJWAuhjKPM_5hsRCG5gB8d72kj389Hj3Wi1ErvEMpzJt-nLe8_QHS61WWSfiEvCkh_V2Ph7Ei4DhJE5CmQ5-oo7bmm-8VP4FbondAOwZ0gsd5pV1Rny2dbSKoEXrphxYlbFA_iGRuTmvov8G1EhAbyU9cZdqrm5OeUTYmiaqJafVLE93UQ-e8h7d2kTbM0R71ZkXiL8PyMR_cmYtSGkPFsgOf-26xW98fi5gkVjKEWVEZdUnp6V74bJtslN_yy4PEJlYGdu-UNJA9RF-SKO4id2z7Kh3UsnbiKT1XWL15LUpZOas40icG1Ad6taXAKyLAP23uzqd1nZOGNhh58kTrm78XeY5JZn3MPIDrA9lLo9JTmULTLsCGa_Yy0NzuXShM5ELNTYIK1l6Lq6DlkwWUxppe8oWzsDhWECebD7lW8I_4wVJFz3-0UBk_whwrQpputvRMBLqXQqQjope-WNuM4Xe9vC-CdN2m--SVDlV24mzTaYFgg6oeZQ3L0FWi7Kt4A7_J-Z3LQYA_7QI4uMS8Cl9Kdog1R1Eiv-mKwseME8xQGyJxbPN8v0fCqKg7z8l9U9FiCei-JNWbo9HJwIa1xQgfiLO5riVviVFBxoIQLohOtf2gwHs4GjiVmz4kyc9WNXrBpxlnTQuntGcRdP-bfX1u40Ia17OxD6bHPtsxHyJmvrICd66X40zk7cdItMll4KmrP0EqBv_4mLKMDFasB8g9tLAQJDj7NvoI6vhRUWbPnDrcrnJglKmbRbL4PXQBJ2Q75nPX8koUQpkheFkZ2ROZLtSFQnZgvJ8CeDqB4HzGSWvIKuRu8nA7QRmJPbPV0bOU6zG5sBRf8tUbRlxXsgOGhT_QTFXPe1f2Alp9QwPhxovsmf4Hu7-mxZCzqUXdm9isdjhNqwTlomTDOSCdKJ6hreaJef0g6owflCLCHDAcaogj4ND36Xgi7a-9_W-SXnndmUZfygSliFTgsJcMj5P_HASbt0AxCcgLwwFEJtxpPDwPhtki522g40bfWcp-gaK7g9hBn1J4aO37GQ0drWl9MpQC5CXceAmJYNG8CUlAR9-7iCFuAIbsU30haVG92-6uSCoTU63wU7LXNilYPDXYWD9aWM85g-BgQIktbgYYrf2gb5mxj4UJ4x3RGZf4YD_K5XJBN0rHY637YTeP9GT8eTQEH32wKnKw9E2dMzl3sfPcXXJm1BnDmmVzATYX4SBMQ2trNNkvOzrmANcXg04gQ3G4f1d5L0Tmx_EsYud46rnMDyLvy5V2TrJ7QglM7WlagsBxJ7Ek5rVg84UBZMJtXo0jd76JYQ3jBbk5DPFEmUNcsO3sqa5JarZ0iJpCWBy0K41VfY3IVXVZco_gcqM1zsz7M=",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8235,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8289,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 16,
-            "outputTokens": 69
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "56c14509a82f38e2bfd63ad468224edf036b525c1a1d292f50ad75ae052b2821",
+        "fingerprint": "5146faad777cea487c2c3593199ce9b7ad172eec694c4aeb423a82f1468d27a8",
         "response": {
-          "text": "Done — I added “Call Maria” to your to-do list for tomorrow at 9:00 AM.",
+          "text": "Added a reminder for you to call Maria tomorrow, November 3, at 9:00 AM.",
           "toolCalls": [],
           "replay": [
             {
@@ -45,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8361,
-            "cachedInputTokens": 8232,
-            "cacheWriteTokens": 126,
-            "outputTokens": 26
+            "inputTokens": 8389,
+            "cachedInputTokens": 8286,
+            "cacheWriteTokens": 100,
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

@@ -3,21 +3,21 @@
   "trials": [
     [
       {
-        "fingerprint": "d3a3346d2dc1d21e1d3ffa574b2596e39488f8120021a08354842d3489a8f518",
+        "fingerprint": "b57563d378ea3d1aed1c0944cc6f6520ba954a71363505527b20ed247bc5007d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DFbd8FlpfSC4yzULFbMZPKoi",
+              "id": "call_ctcRrvkUwj7IQRnNkD7ps4nW",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":false}"
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8231,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 12,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "76027b897c49c15955548fc7d0c733f15172fd8c46c42cf3a016a54377c82468",
+        "fingerprint": "e65a8f23758f35aef07568624fd3a886e38531132c0e848eb57ec8f8c5d6d74e",
         "response": {
-          "text": "I can’t save business-wide facts with my staff permissions. An owner or manager can add that we close early on Fridays.",
+          "text": "I couldn’t save that because your role doesn’t allow changing business-wide memory. An owner or manager can save it.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8324,
-            "cachedInputTokens": 8228,
+            "inputTokens": 8378,
+            "cachedInputTokens": 8282,
             "cacheWriteTokens": 93,
-            "outputTokens": 29
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

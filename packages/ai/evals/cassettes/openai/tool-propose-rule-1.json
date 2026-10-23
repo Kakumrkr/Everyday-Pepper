@@ -3,21 +3,21 @@
   "trials": [
     [
       {
-        "fingerprint": "8e147c4f880d1043b3a038cecf185f228fbf3ff857aca5dd4a4688ab57cc51ce",
+        "fingerprint": "677bcde1ec8a9cda9c84bec89e5edb30fb384bce963d346c948b35ddd7ef0d5d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_7AucnvuvxQfJvEQKqIG4VnM7",
+              "id": "call_OfKfEy0Vix0wHiLbWwNlUs6t",
               "name": "propose_rule",
-              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":1,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":false}"
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":1,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8232,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8286,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 13,
             "outputTokens": 68
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "c05b8826ef505049f593a5347fb5c1ce63daf93dde476c8d655b9d62c29c8f42",
+        "fingerprint": "4fa7b9192790f64da3280d883a9e6d3574a5d491c3785327af96d5963a25faaf",
         "response": {
-          "text": "I’ve proposed no bookings before 10:00 on Mondays for the whole business. It won’t take effect until you approve it on the card.",
+          "text": "I’ve proposed no bookings before 10:00 on Mondays for the whole business. It won’t take effect unless you approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8371,
-            "cachedInputTokens": 8229,
+            "inputTokens": 8425,
+            "cachedInputTokens": 8283,
             "cacheWriteTokens": 139,
             "outputTokens": 34
           },

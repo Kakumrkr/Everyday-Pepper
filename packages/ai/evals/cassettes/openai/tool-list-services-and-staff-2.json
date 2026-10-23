@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "95fd18001605fd403fe5930f097d5c65267d9d58bc3a00e71b838b7e6c02410f",
+        "fingerprint": "0071091e6b72e5eed150d18f002377939890c1561a5dda29002f305e0713d582",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_V9OKdlKQub7t4i1lokIruo6D",
+              "id": "call_ViA6usInJHpr8YzUX42UOOMG",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8229,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8283,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 10,
             "outputTokens": 16
           },
@@ -25,33 +25,18 @@
         }
       },
       {
-        "fingerprint": "8f9bdd44133ce38a9706f9bddf4152cb8bf9843547221816e8aa7d79612e8801",
+        "fingerprint": "91e73e7311afd89fea330ff8cf8da548bf6aae9f0c3f101c159291f378b4ac06",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_fGJPNWGUS0HAAnVwP06E9mfH",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Marco\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8500,
-            "cachedInputTokens": 8226,
-            "cacheWriteTokens": 271,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "e2478413edf8d4ca0519a2ce329d0320b9f3a71b5273bb18309fa187c35f9cf0",
-        "response": {
-          "text": "I don’t see a client named Marco, and beard trim isn’t listed—Marco offers haircuts. Could you confirm the client’s name and whether you meant a haircut?",
+          "text": "I don’t see a beard trim in the available services—Marco offers haircuts. Would you like to book a haircut with him instead?",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_070c7d5c1bef090f016adbaf8fd20087d28918664ab8ce8dc3",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq26-QuvcB5F_ckcBBg1ctZXRvtZYu6h1Canth5o0ej4-jWQnAiLSlwOuMGywqD5C8PFO5nZLrJD-X28OMMqhl9JQq2bMTgTW5QPaO7iSuD2MyiS0heH7NSEJiJaVGO9YX0XAIH2RjvLP1CMgMTaSUNOAmtKsF-B-fHBIBiCORnh8BqKFmgYeeRwCLp6aRvHQQQ4BfsjmpdzYlhEDNvCDuU5ln7I0T-N_M2Qo2M8zpkywpBf307A_2-MS11bLYtJ47xTplac6v_Oc7RAFK_Hq_y2C4r8OaHRfRG2tSgu2CgINXtzjKoaLlNol65zdCiLGYhCsqYk9wP5SUvAOY_q1y-lKqedo-sIskGvptydCFwkLZzj5Dx_p0DuQ-L_22GXRrwMHv3HthnAvU1dhfgT-hojHXZHanrNrf_-WGpaudO9J-gq2xdtMzgO0dP2uFJjLirnlMcMz4JhfsFTcjFVpt48ipl2TQ9r7wm_UiNpK_ovPT6mrJiqFWW2EcoHM7XgCcO2lOWArg_NdGbPTG5vCiCUKAKRs1RvQkG_DMCFw-gLrZYUQ1uGz7unDbMOYFnZdOz7oeazwHiF-6p90ZhfarVjYsGUhoFK4On50nLDU2GPOgPOOklrWiuv3tYM6rw3ETeeXzxpdneysO9O8AX3vVrDUw3jZXqghpXru1gc3WOxq6uoFjZHf8SzyGar7A9hNP0KlQs__ZXnly9L2SWPPpnaLNmAYYJdqL4o9s169w0hTPPyNAMv8LUyWGk6nBjDYvYLjz-nRooUdAlNVPRiliBZrvISfJbGKinKZgtK1_QAFHouNIzN_S1I0HkX0YrXxnzhaGW717Wf3grfwdPrIl-QnmvhU_AauvxDma0Lass_anDrR8PI6rcihmS-zO8YZKZG0zmY3Xa15Xn5SXRjkN36fiIV9gRvjwLrxMtw4crzsa8K_HVFOS33g1gyKvgd1BRR0AncPmTz6dzTVt5I7Jj9HnTJrLFfmslOkCPoFwLul2cTpe_dKNSY9UH-vA3E_D15DaVJSJoGke4RdRP2-orX0O2jv8f0fdPCMettI07GRVue2jCVx3RWOcihJmBh6YBHMVF8jVU7LHpmA0Y59wOm23dRzccEJLkjMuljt2lZUDBsOCIz5cjnGZFPULqwHW9VsZ7Hdw9e68g1BzN1vKWaLtJiVl1Iv7f6zqmpua9Rj4qrOoqf7u-Hyb4NZRWnhWMZIO6NWg3S0368y6nuwjBmd8PXr5SW0gKv-O6cLm-yHfRb9fd8xR5lJI_HsTVU74mMj0V1BUBlAYMU_i7IQ8PEZZ1VuU8umJf1zbnImBxI4Ib82ByoILsoIQJXiiByapHh0C735MKJoZyTbU5K6qZ9HQBf9v9oTulGYbX44iSgakN_9RT76wRGqhBgiEi805GZA6m4NHYWZ9L_k81fpY8395WdGaEN2qNoJBrDSC1jZrJmobmei_cwn7ewFcu_us90LiRzSR8X1kGPYZoR55n7SFUHE45qQx8htuP1kA3NRqH91o8atzKQOit_euYPqUFVmQTDleUlHJy34XmQ-o2YvWS0u_8Ehzg8E8q0EGYrpz_590MyH-CHfpSieK2CE9dp0pB7RJQvEwodyE2XMjbX6Nxna8O4bRz7ZghqKrwbd62aeocwUDvcupJ9a987iQ2I5AMKtZ909RiKWcsLzYAC1pwgkcjhc6R1Own4S7T1g9T_0E0cLNL3aOYDsiruS7hJ7y9gjMZ_XJSSS8JYMGevhU-XjRffpeCrPNfIqBvFRq3dM=",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -59,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8559,
-            "cachedInputTokens": 8497,
-            "cacheWriteTokens": 59,
-            "outputTokens": 39
+            "inputTokens": 8565,
+            "cachedInputTokens": 8280,
+            "cacheWriteTokens": 282,
+            "outputTokens": 62
           },
           "model": "gpt-6-luna"
         }

@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "bc3c31bda145f8b9e5c9316eb343e855fce5119dae02bdd709ba42bd794e8207",
+        "fingerprint": "e51744bba3f45e4222f3f2e44f770c0abe55d8e65b951e8c2f0a58b640b8c8d4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GEzh6d5ExEyIJjA2yAfKdvfX",
+              "id": "call_SzWIpuywVLBetlQ8NsCoNdTf",
               "name": "search_memory",
-              "arguments": "{\"query\":\"Saturdays decision\"}"
+              "arguments": "{\"query\":\"Saturdays\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8230,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8284,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 11,
-            "outputTokens": 21
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ce27a8c9b93e7fae72c0ab00ad42e3f6ba696cf454aa2f500e575bcec8ef1472",
+        "fingerprint": "03a1af173c843e630c69fa6b25ca83fb603c84115a48515360642316edefe598",
         "response": {
-          "text": "We decided Marco covers Saturdays from 10 to 4, Jess stays off, and Saturday bookings are haircuts only.",
+          "text": "You decided Marco covers Saturdays from 10 to 4, Jess stays off, and Saturday bookings are haircuts only.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8452,
-            "cachedInputTokens": 8227,
-            "cacheWriteTokens": 222,
+            "inputTokens": 8505,
+            "cachedInputTokens": 8281,
+            "cacheWriteTokens": 221,
             "outputTokens": 28
           },
           "model": "gpt-6-luna"

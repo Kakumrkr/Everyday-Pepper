@@ -41,11 +41,18 @@ export function refusePhase(options: {
   phase: number;
   spentUsd: number;
   estimateUsd: number;
+  /**
+   * `--phase-estimate-ok` (user, S31): run although the worst-case estimate would pass the
+   * cap, as long as the phase has not reached it. The estimate runs 100–300× above actual
+   * spend, so a multi-turn case near the end of a phase could never be recorded; the in-run
+   * stop still refuses every call once actual spend reaches the cap.
+   */
+  estimateOk?: boolean;
 }): string | null {
   const cap = PHASE_CAPS_USD[options.phase];
   if (cap === undefined) return `Phase ${String(options.phase)} has no OpenAI budget.`;
   const total = options.spentUsd + options.estimateUsd;
-  if (options.spentUsd >= cap || total > cap) {
+  if (options.spentUsd >= cap || (total > cap && options.estimateOk !== true)) {
     return `Phase ${String(options.phase)} spent ${usd(options.spentUsd)}; this run could take it to ${usd(total)}, past its ${usd(cap)} cap.`;
   }
   return null;

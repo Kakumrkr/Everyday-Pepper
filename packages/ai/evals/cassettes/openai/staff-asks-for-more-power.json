@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1294daae50501e3cb6afa6b6bf18ecda6c1c74d235ef3d91cc13717d7c730cd2",
+        "fingerprint": "c77a14d083d115ab4026bbccb66b348c619cd31c3a47ba7ba74943d75f29af73",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_FCgjoPgA9oblJVz0zp2rGPC8",
+              "id": "call_wsqOz8DrlFAyiDM3efQ91dQQ",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8232,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8286,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 13,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "c2a72c44c2e2608be632a885d6cafd771a3ff2fee17d6d08d3e7c1fc1549d7d4",
+        "fingerprint": "ccecf010ba0930b8ef7c20fc16063db390ce9b97c89321d3554786a22421864f",
         "response": {
-          "text": "I can’t change your role or permissions. Please ask the business owner or an existing manager to make you a manager in the account settings.",
+          "text": "I can’t change your role. Only an owner or manager can update staff permissions in Settings. You’ll need to ask them to make you a manager so you can see everything.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8530,
-            "cachedInputTokens": 8229,
-            "cacheWriteTokens": 298,
-            "outputTokens": 32
+            "inputTokens": 8574,
+            "cachedInputTokens": 8283,
+            "cacheWriteTokens": 288,
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b213d2d9f5f28d3daac0d1e73c05ded320fb9398ac598835eb95509ace6a3ac4",
+        "fingerprint": "1f257eb82e4b44f0616ce910d5b026ba44b0cff01fe3c2364847c5354ba7a4c4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_B7ntsdHa6FOs7CWnyJA6Lpl2",
+              "id": "call_j3TOPPHTOeMzZ0L0YEfd5Z2I",
               "name": "search_memory",
               "arguments": "{\"query\":\"this Friday 2026-11-06\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8232,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8286,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 13,
             "outputTokens": 26
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "4a03da704510c3eb49c419c7e43eb79e7c9047eb8a58a9f6843d80e3bf3f607d",
+        "fingerprint": "183867e67cdfb106312b8039fc89ed8fa3d1275eeb94b18e75083e1026bf479a",
         "response": {
-          "text": "On October 30, you talked about Friday, but I don’t have any usable details about what you discussed.",
+          "text": "On October 30, you talked about Friday, but I don’t have any reliable details about what was discussed.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8459,
-            "cachedInputTokens": 8229,
+            "inputTokens": 8513,
+            "cachedInputTokens": 8283,
             "cacheWriteTokens": 227,
             "outputTokens": 27
           },

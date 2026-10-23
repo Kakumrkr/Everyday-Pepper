@@ -3,31 +3,53 @@
   "trials": [
     [
       {
-        "fingerprint": "01d75f94de3670c9167817dc07a98600a4a3e686131379fbf9d22ddf3b347645",
+        "fingerprint": "0872341c0890e80a577aaa39b21f40d4e283845b761e054961a0bb9118dd6336",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_jsFYzID2yMYJyK61Qs1pc0kq",
-              "name": "propose_rule",
-              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
+              "id": "call_NYk7LCDUD7TmMrdUelgwI1kt",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8237,
+            "inputTokens": 8291,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8234,
-            "outputTokens": 68
+            "cacheWriteTokens": 8288,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "452eb8f70c0bfd32703344cca288c63d0bfcb6082728bdf8abe1f3d8164fca21",
+        "fingerprint": "b293b727d6a621246d69043d7f6b286e44ed23491650585e5026297325432f76",
         "response": {
-          "text": "I can’t set that rule with my staff permissions. An owner or manager can set it so nobody books you before 11 on Tuesdays.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AiFNnfdCDJR5vIXyyUaWQUHr",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8566,
+            "cachedInputTokens": 8288,
+            "cacheWriteTokens": 275,
+            "outputTokens": 89
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "160c15e506ae3fedc605c50ceec0117827cf347f307eb31cb6e027c39f63e3b4",
+        "response": {
+          "text": "I couldn’t set that rule because your staff role doesn’t have permission. An owner or manager can set it for you.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8358,
-            "cachedInputTokens": 8234,
-            "cacheWriteTokens": 121,
-            "outputTokens": 32
+            "inputTokens": 8708,
+            "cachedInputTokens": 8563,
+            "cacheWriteTokens": 142,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

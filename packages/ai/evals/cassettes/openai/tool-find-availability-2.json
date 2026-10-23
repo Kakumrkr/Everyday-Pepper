@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e229322bc18beb51f0ad99619ad6355a5ab5dac8f4b723a713bbea30aed89699",
+        "fingerprint": "fa75c49730c2c636c58923d480dda0de50097f01172b96e1f7a30dbddbbd37b6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_CdM6RLDryrLTYay6EwIctKOc",
+              "id": "call_L2yMLWKBfbvE9YnDuHv6ifYv",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8234,
-            "cachedInputTokens": 8216,
+            "inputTokens": 8288,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 15,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "3dac83dc73416856dca46fe97c4e9bcce1e1dc77d19bac94557d59876567e6e4",
+        "fingerprint": "3761e0f040256e0f077e2aeeccec0f8a76bfa7c3820d7a9afe32bad09e70cd2e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_fC6XZaHvaz8LhZK2j4Qodqsz",
+              "id": "call_Jxm0POj5yEB3y5bBVV6LjJKQ",
               "name": "find_availability",
               "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-09\",\"days\":7,\"notBefore\":\"15:00\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8522,
-            "cachedInputTokens": 8231,
-            "cacheWriteTokens": 288,
-            "outputTokens": 71
+            "inputTokens": 8569,
+            "cachedInputTokens": 8285,
+            "cacheWriteTokens": 281,
+            "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0bf3d872b3d9821e2bae2bb9415e43467c38e99c26edffdda5b24d4ebe771531",
+        "fingerprint": "5696ae4d1b396689e925e3e2fa7a0729bd4e983c49aca04935636d21ec3323d8",
         "response": {
-          "text": "There are 12+ openings for a colour next week after 3. The first is Monday, Nov 9 at 3:00 PM with Jess. Would you like another option, or should I check a particular day?",
+          "text": "Yes—there are openings for a colour next week after 3. The first is Monday, Nov 9 at 3:00 PM with Jess. Would you like another option?",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9212,
-            "cachedInputTokens": 8519,
-            "cacheWriteTokens": 690,
-            "outputTokens": 50
+            "inputTokens": 9244,
+            "cachedInputTokens": 8566,
+            "cacheWriteTokens": 675,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
