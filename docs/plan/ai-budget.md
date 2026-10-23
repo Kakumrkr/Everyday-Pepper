@@ -20,7 +20,7 @@ The OpenAI dashboard's usage page is the final word on money; this ledger is com
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$0.7425** of $5.00 (the runner stops at $4.50).
+Total spent: **$0.7503** of $5.00 (the runner stops at $4.50).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|
@@ -176,6 +176,10 @@ Total spent: **$0.7425** of $5.00 (the runner stops at $4.50).
 | 150 | 2026-10-23 | pass^3 scheduling chunk 37 | completed | 1 × 3 | $0.47 | $0.0005 | $0.7410 |
 | 151 | 2026-10-23 | pass^3 scheduling chunk 38 | completed | 1 × 3 | $0.47 | $0.0008 | $0.7417 |
 | 152 | 2026-10-23 | pass^3 scheduling chunk 39 | completed | 1 × 3 | $0.47 | $0.0008 | $0.7425 |
+| 153 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 1/42 | completed | 4 × 1 | $0.98 | $0.0021 | $0.7446 |
+| 154 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 2/56 | completed | 3 × 1 | $0.55 | $0.0016 | $0.7461 |
+| 155 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 3/56 | completed | 3 × 1 | $0.55 | $0.0024 | $0.7486 |
+| 156 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 4/56 | completed | 3 × 1 | $0.55 | $0.0017 | $0.7503 |
 
 - Run 5, gpt-6-luna: 12 calls, 67483 in (38955 cached, 28492 written), 498 out, p50 1258 ms, p95 3286 ms; 3.61 chars a token
 - Run 5, gpt-6.1-sol: 4 calls, 24750 in (12287 cached, 12451 written), 224 out, p50 2023 ms, p95 2349 ms; 3.61 chars a token
@@ -347,4 +351,8 @@ Total spent: **$0.7425** of $5.00 (the runner stops at $4.50).
 - Run 150, gpt-6-luna: 6 calls, 34562 in (33785 cached, 759 written), 203 out, p50 1254 ms, p95 1520 ms; 3.52 chars a token
 - Run 151, gpt-6-luna: 8 calls, 47529 in (46087 cached, 1418 written), 283 out, p50 1082 ms, p95 1341 ms; 3.51 chars a token
 - Run 152, gpt-6-luna: 8 calls, 47680 in (46206 cached, 1450 written), 302 out, p50 1098 ms, p95 1519 ms; 3.63 chars a token
+- Run 153, gpt-6-luna: 12 calls, 86085 in (77735 cached, 8314 written), 467 out, p50 1939 ms, p95 2798 ms; 3.69 chars a token
+- Run 154, gpt-6-luna: 7 calls, 49922 in (42074 cached, 7827 written), 314 out, p50 2426 ms, p95 4249 ms; 3.71 chars a token
+- Run 155, gpt-6-luna: 8 calls, 56982 in (42042 cached, 14916 written), 322 out, p50 1481 ms, p95 2024 ms; 3.66 chars a token
+- Run 156, gpt-6-luna: 9 calls, 63947 in (55896 cached, 8024 written), 321 out, p50 1473 ms, p95 3323 ms; 3.66 chars a token
 <!-- ledger:end -->

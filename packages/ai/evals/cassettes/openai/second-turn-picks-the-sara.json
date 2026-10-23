@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "cd3e2e5285e0c99a0ab756bdc0f507a3218e0f687589262b39162e21acbdccb6",
+        "fingerprint": "8b2f106bfd612e1a6ee0152391bf8d6589657a99e82514011e8f0f0ac08dd8e3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wX5eU5lh3pII9L1gBEGgx2ya",
+              "id": "call_dSG87RKELIZx5WLJbzNslVy3",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,20 +16,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5544,
+            "inputTokens": 6904,
+            "cachedInputTokens": 6901,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "da66e940f894162a83b0cf77927a2f910941bc85b9f4a79e520f49cf8d0416f9",
+        "fingerprint": "4e18ee2af0bf279edb9ebd4e3343d927880d027cfb548fa90b3e493b041822f2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_s8BYFElK6GaxGjVCFyAYYiVO",
+              "id": "call_j9ujNR6saIZKni8Q9QgG0M7n",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara\"}"
             }
@@ -37,18 +37,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5818,
-            "cachedInputTokens": 5544,
-            "cacheWriteTokens": 271,
+            "inputTokens": 7170,
+            "cachedInputTokens": 6901,
+            "cacheWriteTokens": 266,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0c383239c95a560328fd19543fb7432c5063f9a460f378347dd0e3b994a8d85b",
+        "fingerprint": "2e69dd87bdaa88d9876bdb4459e773b653d643cbbf5860a0aaf4ef9aa1018f2c",
         "response": {
-          "text": "I found two matches: Sarah P. and Sara K. Which one should I book for tomorrow at 10?",
+          "text": "I found two matches: Sarah P. and Sara K. Which one should I book for the haircut tomorrow at 10?",
           "toolCalls": [],
           "replay": [
             {
@@ -58,78 +58,70 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5945,
-            "cachedInputTokens": 5815,
-            "cacheWriteTokens": 127,
-            "outputTokens": 27
+            "inputTokens": 7290,
+            "cachedInputTokens": 7167,
+            "cacheWriteTokens": 120,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ac6affba8b35db1d4823bf10572303c65b9f27cab9d46e92dc0737692fa5094d",
+        "fingerprint": "de8e06b640870b6d9d7c7e3f589fb27ea3d472818e7902f6252651896bf4fb50",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dCQWoFz8vycz32cGQPWejr5M",
+              "id": "call_sysQDxdOUexFuJtL3Qix7FJr",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_09ceedb21980f129016adaa80a057487d2957f0ca0c3187ceb",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq2qgKMSlgPkRZLpzcqFBaSR509uUCizo2hcubuaikOZ1ealN2Ae9SUDJUmZb6Gck7M4Ny-IcNv8OOecTw-7PbN3RDCCRT3YBdSoxskQnJ__K7QJG_qUvKZUKfppfsD8KpLjZdsrH4PL084JGeP1L5rl2sAxeWFkZxzH3ikULyMsI95-M5hZxXWjeTzxPSnxzC6yETY68nbxr7SFpBpGUBvarn5CrKrmUJUwMnIwnC9NK2C6boPeDVzajhYYS3DtxdDff_PQbNobYz75W_RucRcmJpjv2fdmBS4NXfM8x314ph78y-H51K-6qY1VuTj4e8z-HQnGl7RnT3EhBv1QZjI7UZCQgjrDqOIdoYPsD7oriCQ34F9YttPmLLZCtxmy9vtHQy69fmbYoJEd113z03M4uU_sZXgTEeKkRV0S-xbLczEtwBaLjS-h05ePCFRBrxAjQ5VZP3uNMm_Ok1u74WtUuXxEF7POry_Z9sDa2RnW7oDCJJ240fmxHavGCHzjgXVKFYW3eME2_ersgWlf_F5_X3mbCPoWdDPYAmSP1ZPL9cpY_VuJniLBZFlsmL2Y2IZekjJPXEPQXRhMoo-diZjQj9FgFptdgrumT00bKS2imqSF8Ogkfw841qkIrMj2e4tCz397cu13d-IQT84thVn_E4GPLZ56Up3wvWXRKR_gEZ1X-cPyRfJ_15q88Jj57kV5qn5X_wj-7xqLgxJzF6lBAXE2CPb-tYcwtZakI9wGNwyPn75aZev_sRqA-Axat7oUucUz0dZWJL1yu0zgQSBEHWgsqrmCjBLT-RwItXCwSQAr4HWOkZZtzwglOhO7HTx3Gk8XPaHfL-zrrKicssHydriY1TPpEGILD7YSMCuO9gGEA8NZM2zB0BrwFi5heVeQvBxS6lkaZTpqor7krS-bI0jMwcZsb-vStaRFkqX4vehdQGnNZtnzmuKqnJpoR0oDq1pvk740de3n8xLW7nW1On7-GD6E8N8_4dZm2lmLdY0QUJNmFfYvzB7YSaXOHwrpmnlZ_y7RQMvg-FWho2TMp61Mj24gDCCGJ8Q9QAYqujNkkfAncunxNyf_KpXOf9s9p-TJbAhCrHW9oO6-tVNs3Wnvp4F1P6tnDWbB7K0UMg4dAiAEsEr5-IuEYbnAzV9KJifJji_VB0pVqsI7iYLPEPRD48eXL0f9pT0UruEPUjfREun3jUdIhRy73Cyav-eibZAJY1TaJApmkVqTW7IgdLDl6EjjHyzSKtmCNKR_Ak7IkCTxkF1YK45lcSDFxdzKYECz-P-RU6Vy99ynL86bI5K9RShuZEZxhoagCCJ5w9eoIz0Fud5qtkyWf61M0ujVJrykNxpbPWYMilz-D5a4N5Fw5CRHttqUxuNcJJJSGUc-cWNpUxIx6F6VrFXeLx_4LiyAB_Owbt5J9Jd8rbVQQGuZeHRAEUz2NwKSV_lbVCaJIHBmjA8jLootrTYeIMH-wYuHgpJ4772b58-GpZF97WlS-FN11iLLmi6cr9PG_hSjsGN-Cw4ah4tWjd0clfUvw0gbFtPwSjLJJ9xLCGMMP_0aIfnuRdvmtzRQlZHanqz-NADI9ZfPWg0SYFcXNrz0qjxvFfiujbtkapWgLy5nXgRB9LgJV2r-mwJvrMZMEkcKQ=",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5980,
-            "cachedInputTokens": 5942,
-            "cacheWriteTokens": 35,
-            "outputTokens": 37
+            "inputTokens": 7327,
+            "cachedInputTokens": 7287,
+            "cacheWriteTokens": 37,
+            "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "879ad727efa4cf22fbcee13cd848a14f91ae6e9f7a5b184e576f46806e404c6b",
+        "fingerprint": "1ce453a4ee30be43ebbda11bd7bdca03394d83183b9afc52cd098dbf8b2cfe2e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OToUgYJlMsvDR3XH7WT4LPmf",
+              "id": "call_72NfdtL5r9jt7ZKtS5FPUUep",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
             }
           ],
           "replay": [
             {
-              "id": "rs_09ceedb21980f129016adaa80be4b487d2b9eff2584d950dbe",
+              "id": "rs_0a740b5047b71065016adb64fbd14887d2ad11ef96ba96ab41",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq2qgMZ86feivf_ncjJFgeQ4fbYOtaHKd8sDxRzWOOt8PZPy23g6w9ovJfDxN3axRqkhC7Swq2pkhW6MATCPlCGb9H-3FCIyHPbmpCL2ASDzb34Pc8DltHjSmDYz-tnWbevjZWgmZwkDMH4zM8Mb1B_476eSd1uu7Uh2yO1LtH0G5iEYY5irhAnDCfRb_4jvm0jLegEmFK6K9LwLvB-oWsC3Y3200RiS-iIL84J5bzqiN67Xog_bDmWirZVLv_61stXeivAsMjiboeybTyFqN3q5Kj6Jh_bByLVh8dOby60zA8LbLBt8mcA_sVONHuJdNFhU7p5XJJWyyoOUfR_wQvyjPOkDd3j3slBFwl0ijWCH2DWeLPjsguG5tKU4GJIvly5_a_IOD-3cjecGVpcAExsCs0DgStzVWGZKQEUSfkevTLTNUzLhm8KYZLDZ6NKi3cAqd0kv-B_a0I02bZvAiosu5C6gmHoqdHoSIBbHxdn-Yd_Z3J3OdAwAiYZzQkt33dRmUyMLBtoprh4Ou4isk96MXUfMrUmLg-zvsQrqvFPhNIkSNO2L5fnv7JWpSG7gfiIZx1oILOuCArC27lkNy70akvet5annat3mZr94fpZN-gGQRmB6ex9qhRK4htKbcBS7oBjlHOZtgbqvuYrkfsVs514AZ7rqKgJ6vKDCEvSOI6U14L04OdGZy1DQe8Y9AbER09hO7QFuNokdqg0ivlxSjRo0N6TPfnl5r6Q1iVHEqXqlBT14ceMWwJvwD1sELUnBh_FA5K9JOn4hpuEJI0vLFDIcuGyAi6HVdX5pckJX9UcDlgSKv9fO2FOwZq2Y3kU8CnDQQ1Z_JwZn-C0fs0V0iKQVWAt5CYyhZ8EZz1M8fltIqEukTGWI28d-ZE-t8DQWurEgMKwHvvCfjQItf3r63obsredSWb20wHy6mmBNI3QnIjzsiAFXAsr3y0pXTMU5Ye3H4sfdYjt80bJ4Vipt6uvPiMkcGbQBxJTcmuQeuT_2U-Qwnmb-UAm12h2l-mpMabvzzFkPILU-r2gT_oAlKb7Bw-i6wstsM9C-q2c3VZFhr8vrhAa8LI0SNRTeYmXl9fzAfHI23dLa6viqb8KP64K_Z8znbOy9ws1iF2790mP8TobAldXAx86YKJ6aupdNs-HgDxkWnH1RZr0NT4fAb0ycGf6UGdOhn_OJeyZnPChzuA0TIk5lzcjFmh3K-1oZeqUlokCJjcxN9OEaYjfG8Xtr0KlkMqVuTFE9pKZ1fg_vwOcDRWdCRIwNmPzu0AsVSuznKQtA0op16_n0bqykuLXYOQGUm-H8A-nfMjaOUSDHvpwARRMAHKtO9XR7HynIBL8IDa3pSgmpXcCZp_60geKemFKg4kvW3X25TU95m5wojW9R-Tr4cWMU50gnCKF6oTj9_4JlY7uhCxGbwlVgtW8vuyRo_QnzgJ1Htg5jwoTozzbSd_l6NHyFXYlwNN1UEN7rlKM8We5Ye1w5YLFBUddLVzyU3k8FSy4Jtr-Q-STnDSmtLgujegEfvuFYQt9JtBJiuyEfJRkFsMxU8dWcL53XnTprvyS_M4NQp1PROrnM9Nufl75O01SKEQuJgRC7a8poa_cNUIhCVE3GyTcAPVMPFc7wNMM8UTFcREjiG5GSo=",
+              "encrypted_content": "gAAAAABq22T8mnGWDTJi3ixXYh5ZKzhLdajTyw1stLlWToCZ509NptBM9GGTc6GBCXkw2ZVTpYJTiuH2pRB_7tlrEvXYXjnQGnvTDs49e9kP3QrjxNGTy0P_LhGg1SpMrv8NAMXK3mzie5NaDEqDaS4pHGoMIbaHiq661IwFdacUvri8AMYtiZy0S0i8DjDfcKgpiowO19KffiLpg_i_uktYaM6F3y2SsCMUtN3T1Wcc-FCel_NucLfGGdZAa_EgPjkko29NCvDXW5zNZut2k3BkbnwcipI8SVmD79AZQfdxhuXwqhwIvrs2bQo_xGgWE3VKB6_a2vDb7emNch1Xi6i36AJB6l8J8zdxlrXlIsf2MGpvB3wx-POWNJvnnEc3eDbZ-zJEgCP5HEHTsk4g2PHWtjhlAWcRPaSdndExKi6WeLnhzn6GZL0eHto_ObtEKpF4hQllwRN3l4dr382fT9u80YR0leR761lviW0XF-y2eU9hboL8lafTe45t-JwKLANM6-k0Grg5FrqOe-jNdeAIGcgD9bwBeNdv0fKKA1E-XyvkHn9kjGwW4hTfmKIrXX91Prvvs_9j9hhGYGBl0D511mPcN5ASvXrs27R4ZrtGa32eH9-xlJc0DPoEbChwTdiw5Fd1mdCRbJfPO_7BZr02A_6p8W7BSIb9bBuVmnAQxd63gkFQaJ67El88dAo4RZjSZQlK7klK5o5MTz5DLVuhS_hZb-gca8j74kTSbgDENnYp2eTZW29E_IQ4wmjm_4xX2UyLau0VMgHtPUgjvSy0OXHq0paVKvV9Rn3Uh-t0D1XApqBq-C0tzDDjnMt_3sJB69i2suph20hyx2ld0slrPN9xrXRtYriaM7GrjsdIl8WMJwFhtSVYfGUzDHEFB68xsjQ72B_MZ8wxrxBExvC9NoQ8QA6YQkaZ3z6dqZvivjWzAxpTXlnsP4Sph1IdsreRFwmhQrNFLI6ZG6DExX3dftZPTfC4AaQUjzw9rip3d1P8efgYinvNTLWO1TdkI5uwFBbdmi07oNtWHOUyCD6Z9riJG24NJVYchtR5_UkVii7Dc6IMB1Sz9RZ7-Puft1nkY6M-E0Y51vSWxvweOKvUlSY5_2VmV09V4jstaEkhIsK3rVI5tcmB0C-s8FB_9XFxJ-dDf3AZVFrI491uopqfOTFvedKB5UKfdhYbAHb7lJC4YPjWArkoUv7rCFnfFzijRt5SWanMEVnzjPd4uKdTQZ9aC8lPVM_WImI3CNUt2PppHggwR-fGkL5FXIwqWnq9SRfsoghUQFkG2JtDR2zOjKZXW_XmN4kUSd3ajaB006DxxwHp7pF_LSp0MlB0NqmDDZ3FEgxv3Wu_evtDkV1dmtiKhU-iObrDKF_uBJMJT4tRmJASWufsBUx3EomThpb83_DQRu0i84bPh9ImtVNQggbueFGbEwiL_3E0kpEq7QWQfQFge8ulwInDrUTbH9dPI-2FScJC9h9tj3AnToi-F1UFCrFOUAbSOUk-sqH-wvMwgQqwBVoliC9yHdAuhxebLlCaH39X6pmAyclN5uyR_HG8P6OIDZasGJZMtZsxrxw8XJAOsy1t9ydXM7BEBR36R_V6DaGJ6FrWYn5rlfGqzPIgsany5XBypwuqiIWK3kryr8W7vzVvIX3CYE1PAhfqYvQl-Ri59ZpmRoY74D2yXM5Q4zN6qEjt6anvYQ_5NvCuAxQytmFVWXSjpPw0DQNQhQlHuVogjN3X6XaRQbHMh5nCAwKFAl-Z9vsRuHDkuAC52t42zZNalYjCHUyUvqad-yZGEyZY-y3qXm5Zec86-guEFHugSM8UnGuBVdQBCWPlfsL2nKmgmlDIA736tAsjcUmcUerXZ3-wyhiea0bq96p-9o_az86P8nwjJ0oybDq50q0ynjsWbjMw06ELoWItSj2jFfVcQpTWlsm1Y4a4khEsnVUEmQ==",
               "summary": []
             }
           ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6082,
-            "cachedInputTokens": 5977,
-            "cacheWriteTokens": 102,
-            "outputTokens": 109
+            "inputTokens": 7408,
+            "cachedInputTokens": 7324,
+            "cacheWriteTokens": 81,
+            "outputTokens": 130
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8d0c7ff7a566cc031c3b32b969b4f3f0943756d592d828199d826bbafc677cea",
+        "fingerprint": "2b8c6e9ad462ae3048dbbf1196804f0f50fbfd65f4e1d200a3ba8a9175ada0ab",
         "response": {
-          "text": "Sara K.’s haircut with Jess tomorrow at 10:00 is awaiting your approval on the card. It isn’t booked yet.",
+          "text": "The booking for Sara K. is waiting for your approval on the card. It’s for a haircut with Jess tomorrow at 10:00.",
           "toolCalls": [],
           "replay": [
             {
@@ -139,10 +131,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6271,
-            "cachedInputTokens": 6079,
-            "cacheWriteTokens": 189,
-            "outputTokens": 31
+            "inputTokens": 7618,
+            "cachedInputTokens": 7405,
+            "cacheWriteTokens": 210,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

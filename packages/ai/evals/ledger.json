@@ -3657,6 +3657,98 @@
         }
       },
       "charsPerToken": 3.630453020134228
+    },
+    {
+      "id": 153,
+      "at": "2026-10-23T13:45:16.765Z",
+      "label": "P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 1/42",
+      "status": "completed",
+      "cases": 4,
+      "trials": 1,
+      "estimateUsd": 0.977955,
+      "actualUsd": 0.0020537000000000003,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 12,
+          "inputTokens": 86085,
+          "cachedInputTokens": 77735,
+          "cacheWriteTokens": 8314,
+          "outputTokens": 467,
+          "usd": 0.0020537000000000003,
+          "latencyMsP50": 1939.248246000001,
+          "latencyMsP95": 2798.1680430000006
+        }
+      },
+      "charsPerToken": 3.690131846430853
+    },
+    {
+      "id": 154,
+      "at": "2026-10-23T13:45:51.005Z",
+      "label": "P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 2/56",
+      "status": "completed",
+      "cases": 3,
+      "trials": 1,
+      "estimateUsd": 0.55431,
+      "actualUsd": 0.001558215,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 49922,
+          "cachedInputTokens": 42074,
+          "cacheWriteTokens": 7827,
+          "outputTokens": 314,
+          "usd": 0.001558215,
+          "latencyMsP50": 2426.040518,
+          "latencyMsP95": 4248.500329
+        }
+      },
+      "charsPerToken": 3.705160049677497
+    },
+    {
+      "id": 155,
+      "at": "2026-10-23T13:46:09.994Z",
+      "label": "P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 3/56",
+      "status": "completed",
+      "cases": 3,
+      "trials": 1,
+      "estimateUsd": 0.554325,
+      "actualUsd": 0.0024483200000000004,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 56982,
+          "cachedInputTokens": 42042,
+          "cacheWriteTokens": 14916,
+          "outputTokens": 322,
+          "usd": 0.0024483200000000004,
+          "latencyMsP50": 1481.4017199999998,
+          "latencyMsP95": 2024.4744069999997
+        }
+      },
+      "charsPerToken": 3.656751254782212
+    },
+    {
+      "id": 156,
+      "at": "2026-10-23T13:46:24.634Z",
+      "label": "P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 4/56",
+      "status": "completed",
+      "cases": 3,
+      "trials": 1,
+      "estimateUsd": 0.55425,
+      "actualUsd": 0.0017251599999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 9,
+          "inputTokens": 63947,
+          "cachedInputTokens": 55896,
+          "cacheWriteTokens": 8024,
+          "outputTokens": 321,
+          "usd": 0.0017251599999999999,
+          "latencyMsP50": 1473.1049569999996,
+          "latencyMsP95": 3323.4465549999995
+        }
+      },
+      "charsPerToken": 3.6628457941733
     }
   ]
 }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d0639cd6b5de09f39292bd34ea5c0c70a86769b93947a74bd14a3e10f27aa5f1",
+        "fingerprint": "c75e3ee609200f0b74bb18a1455f34f0f4003b394ebfe02f2979806d078abe9e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Um31bmzTHtExuRYGbgNCsyf6",
+              "id": "call_IPbfbOoQlLgQESrsUXaQ40q9",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6905,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,18 +25,33 @@
         }
       },
       {
-        "fingerprint": "f0e474494a2561bcafd6fc3a3043cb8a6953d519ffc8c8a8d7a381baf17ab1e2",
+        "fingerprint": "80c77067a6e32c185d804175b72c2b24a15300f661d7c9887397a15384f2edd7",
         "response": {
-          "text": "What service are you checking with Jess—colour or haircut? Appointment length affects whether 10 works.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SCVxVpzjgZl78ZoUFPa9vd5g",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7181,
+            "cachedInputTokens": 6902,
+            "cacheWriteTokens": 276,
+            "outputTokens": 50
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7c0b1c986f4e6561c7685c55b4297d0baa4d43895415fd1e33c2867f8d27ed06",
+        "response": {
+          "text": "Jess has no bookings or blocked time on Wednesday, November 4, so 10:00 looks free.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_05ef90740441d1e3016adaa829326487d2a8da308ce589e626",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq2qgpxtZt_9b2FtHmAAinIXWiuogFUgiXBuqRrCJP8fVemWtZR4bIvSbwdyQzjo4ATFe3p4Xa8XzlKapUkBKcGDRjjNGtuMeBTtdpqWrC2ac-MxU7BjF7htEUcu53LaVpuwTJALjofAZ87FpHM-1YVZOU-iw0lqSmMdYm03bv8i1asAOhetXpp9Z3hjGtGaDDimo9__gIEodczuUHhh6xiU-mzY5lvK-rdXk0XuXCW_hKNrsO0UvI8Of2ONAH7j8glInQUiLo3N7KoBysqoMn-oLQaDCRcyzGOzsroe3MoR1BDrZf-fw5F1D5Q3HtO6zLGicmmnAsKPU6KRyDiGDRSRh9ZFNlpLqPxAsiuJpLZTqBl4gGXl7LbJ5VlXTqNJoPHp6rp4OgThJe_ubLsLHnWkP7FUWWCxYdhodYP-3nd56j3WJQMdv6QUlOYYyB_edQzmWu-tF5E28rw9vSEiPBV79WyNTeLwsqnmy2qMy41oMKkpOFF4CPdc5t1EJnrNU7KMlZy_7uz5ICAb7gxBZ9XXi2vmC3ReSzGjTMoZZd2-eWjJMNy8oC0ckCulFOllFc7mj3LGmGe0jBqQETVt4HYES7mEN8_xRG8zB5rQ8Mn5QBIgGCZuR_hNmPbZere9vQdeV3q4HUjhh7tdLELtv2pidfXXFEhcBvB26zSja4rzUxXGupjZGDm7t8dfJa3gHPXT7P33qdI49Wtc-1lQEghWT9YPQJXDTTWRV2pm_Nqn8ib5xeaO6uGeFqynnpLXRsmLfSZsu-hjGAGAV57HKqd7eXZyNFrqIWzcpuMpxcghq8wX6FpGR1CI8v-w0zvPJB5GP7iiDe5mNqCJjlrdteVhR6MTeJrgg2z0Io4vD35fNRr7hkxT-m_4xAs7LJfq9Paq5FLHYCMkEwTo-I4nQlfitSut5N7h7A1OvUHVYICqaBrDXZgXAulWHU1aqfsFYBNWCbkCw3SPpMmBwYa1QKZ5TZ50YDjqKhV6dmRVKro5rTB9IVvZV2LW3HS6N4nqAAnf-bVnX_pTgZEZLhhsHmkK1Y2Qptc0xA-CCAHvwuvDhll2wWzu4WkeXDuMxTKNTe-hZx9nd2KrgtPGFvOJDadZbLlNmkUP4tm7mytgYqE2qdlMQki2qz8TAdnxAee9hHPDWzeAtleB-DZI1CsuY6LR72GPLqKSTin514Z054Iwzqav-C68YcStukShWiwuktoD26p883X1HLZ6LBd3gfJiaMnkVQRJ8lnOCt9qsPnnwE4ZXzCAiBXDb6zsgGI6l3PmN08xVAhWzy7AIYxTcz44nkXWAOMXg0zT8Z00VXQAQAMbjBf5gDmRx_GBY9HyzMIa8dhTJOz1Xy3RV2l8Qu3nti1u8EV78nloTb9mJezBFmn9cWQgCYZX85mE8ea4ZszOJR3G2UITurphwTtB8gkK22ojt87VxbZQcwb00ELtQ3pP4xHJUWcDOOQBYII4bypMZkWsqNluvmMnMR-Rc3Lkro-T0RKuWavXhOVRS9p8g7e4MhWcI6Yh_o3diKoFk4c9IgnU35ck1wcVk60E-AkaSL_9F_ivwieNx7EwoGTjQWaGBYYwbNXDR7pIxF7tvq_nE36_ke7HOQ-MTZKNynsO54y28qVko01woglIK19BiPmn7ZLWxOeon4qH71iBz3A_Qenox1wIWxluo2PjgIpGuxQieH_ZSFrE6d0zYYPjBsHpftCpF-_P-0pQ7m6jKuOlFAHA6y_ixPrFht9W8T8Yj9IoZmRNe5K0MCtktsRCUAXKxLk_EueWSLbi-NzVQ040vNMXe0hnsacwMHTltIVLmxvT7o7pBEn1cIl9qeKeVHv3FBdDlcC4AwTZXQCc7YX7YW",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -44,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5811,
-            "cachedInputTokens": 5545,
-            "cacheWriteTokens": 263,
-            "outputTokens": 59
+            "inputTokens": 7285,
+            "cachedInputTokens": 7178,
+            "cacheWriteTokens": 104,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }
