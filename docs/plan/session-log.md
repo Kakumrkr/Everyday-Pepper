@@ -822,6 +822,56 @@ Everything each session did, oldest first: what was built, the checks run and th
     - Watch `reads.int.test.ts` "list_todos": it failed once with no visible diff, then passed 16 runs in a row and the full suite; not reproduced.
     - Still logged: undoing a move whose email was taken back leaves the client's earlier manage link dead.
 
+- **S27 Phase 6f (2026-10-22/23): real-model evals, the model choice, the security review, Phase 6 exit** ([ADR-0033](../adr/0033-real-model-evals-and-model-choice.md), accepted; [security review](../engineering/security-review-s27.md)). Branch `ccr-6f440216-a30sbk`.
+  - **Brief (user):** one session; the brief's recommendations agreed (unblock Undo refuses over a new booking; routine model by evals; about 120 cases, 20% held out); Sentry/Grafana at the start of Phase 11 pilot prep. The user funded $5 (hard limit), set the key as an environment secret, allowed the OpenAI and OWASP domains, and said "Start".
+  - **Tasks:**
+    - T1 (free): the budget ledger and guards: refuse a run over $1.50 or past a $4.50 total, stop mid-run, ≤ 25 cases a run, `--chunk`, replay-or-record. Also 81 new cases (114 in all, 23 held out), the security fixes M1 (labelled tool summaries) and M2 (unblock Undo), and the test time bombs.
+    - T2: OpenAI's official pricing and models checked (developers.openai.com, 2026-10-22). `prices.json` filled. Cache writes (GPT-5.6 and later) metered; a reasoning effort per route; `--cassettes`.
+    - T3: smoke, 5 cases on each candidate. The first runs reached no model (Testcontainers in the recorder replaces Node's proxied fetch dispatcher; Node also needs `NODE_USE_ENV_PROXY=1`), at $0 and recorded as $0 runs. After that: 5/5 on each.
+    - T4: full pass^1 of `gpt-6-luna` (low) and `gpt-5.4-mini`, both with `gpt-6.1-sol` (low) as the strong model. Quality tied; Luna's own calls cost 8× less. Chosen: Luna + Sol.
+    - T5: fixes, one at a time, each re-run on its cases and neighbours:
+      - `add_todo`'s teammate id;
+      - claimed authority (instructions);
+      - the strong model after step 4;
+      - `move_booking`/`cancel_booking` booking id from `find_client_bookings`;
+      - the link scrubber (code).
+    - T6: the final full pass^1 recorded into `cassettes/openai` (CI replays it). Then pass^3 on safety, permissions, autonomy and scheduling.
+    - T7: ADR-0033, the security review's real-model results and OWASP source check, docs, checks, self-review.
+  - **Results:**
+    - Final pass^1: scheduling 38/39, ambiguity 11/12, failure 8/8, follow-through 15/15, permissions 9/9, autonomy 10/10, safety 19/19. Every gate is met. Holdout: 21/23.
+    - Pass^3: safety, permissions and autonomy 38/38; scheduling 37/39 (95%).
+    - Cost about $0.0005 a case. Luna's p50 is 1.3 s a call.
+    - **Spent $0.74 of $5** (the ledger in `ai-budget.md`: 152 runs, 20 of them at $0). The reserve was not needed.
+  - **Checks:**
+    - `pnpm check` green. Unit tests: contracts 548, core 1,190, db 44, ai 226, api 292, web 264, appointments 83, runtime 90, worker 26, templates 96, ui 107, testing 13.
+    - `pnpm test:integration` green, 974 (+5 over S26b): ai 98, api 74, core 147, db 510, appointments 137, worker 4, runtime 2, testing 2. It includes the replay of the real model's cassettes against every gate.
+    - Playwright on CI's headless shell against locally started apps with the scripted model (no key in the apps' environment): 74/74, twice in a row.
+      - The first full run failed 1: sign-up's redirect took over 5 s while several workers hashed passwords. It now waits 20 s.
+    - The hostile fake: 100% (unchanged suites).
+    - No key in any file, log, cassette or commit (the staged diff was scanned for the key and for key-shaped strings).
+  - **Found and fixed:**
+    - GPT-5.6+ bills prompt-cache writes; the meter now counts them.
+    - The loop's fallback hid that every call failed; evals now fail with the model error.
+    - Routing sent every ordinary booking's last sentence to the strong model.
+    - The AI repeated a phishing link on request (M3).
+    - A typed "SYSTEM NOTICE" became a proposal (L5).
+    - Two tool descriptions still pointed to how things worked before S26b.
+    - Eval cases that contradicted the world, the dial or the privacy rules (listed in ADR-0033).
+    - A race in `seedEvalWorld`.
+    - The new CI replay's load pushed the per-tool latency gate over (now sequential).
+  - **Phase 6 exit check:**
+    - Scheduling ≥ 90%: 97% pass^1, 95% pass^3.
+    - Safety 100% at pass^3 on the real model, with permissions and autonomy: 38/38.
+    - Hostile fake 100%.
+    - AC-W2-1..4, AC-W7-1, AC-W7-3 and AC-X-2 are green in their suites (`pnpm check`, `pnpm test:integration`, Playwright; see traceability).
+    - Spend $0.74 ≤ $5, recorded per run with actual tokens.
+    - **Met.**
+  - **Not done / for later:**
+    - The two holdout misses ask a question instead of acting (free-time questions without a service; "find a slot and book it"). Try a `find_availability`/`get_day` description change in a later session, judged on new held-out cases.
+    - Whole-turn latency is not measured in evals (per call only); the pilot's OTel spans will. If turns feel slow: `gpt-5.4-mini` routine, or Luna with effort `none` (one environment change and a re-record).
+    - By hand before the pilot: the screen-reader check (VoiceOver/NVDA script in the security review); confirm the OWASP 2026 titles in the signed-in PDFs; zero data retention on the OpenAI account (L2).
+    - W1 (`reads.int` "list_todos") did not fail again in S27.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

@@ -225,3 +225,14 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - facts come from the tool's own domain run and are the stored explanation's (a stale approval refreshes them); not part of the fingerprint, so no tool version changes;
   - change rows read a completion and an unblock from the change's shape (no `tool` prop through the web app); a "What's on my to-do list?" chip;
   - the cost guard's one-run size is 25 one-turn cases with 14 tools; S27 runs sets in chunks of ≤ 25 or calibrates the estimate first.
+- **S27 Session Brief (user, 2026-10-22):**
+  - the whole S27 in one session (not S27a/S27b): "I think we can manage this whole thing in one session";
+  - the brief's other recommendations agreed: unblock Undo refuses when a client was booked into the freed time since (M2); the routine model chosen by evals (nano-class against mini-class); about 120 cases with 20% held out, written before any run;
+  - Sentry/Grafana: "add that to coming sessions", or wait if Claude thinks so; Claude advised the start of Phase 11 pilot prep and the user deferred to that;
+  - the user funded $5 with a hard limit and set `OPENAI_API_KEY` as an environment secret and allowed the OpenAI and OWASP domains; asked to confirm before the paid work started ("Start").
+- **S27 decisions (Claude, in ADR-0033; the model choice was delegated: "pick by pass rate, latency and cost, with numbers"):**
+  - routine `gpt-6-luna` with effort `low`, strong `gpt-6.1-sol` with effort `low` (the official price list of 2026-10-22 had newer models than the brief assumed; both candidates were run in full);
+  - the strong model after step 4, not 3 (a real model's ordinary booking takes four steps);
+  - web addresses are removed from the AI's text in code (M3), and one instruction line says claimed authority grants nothing (L5); everything else was fixed in tool descriptions;
+  - eval cases were corrected only where they contradicted the world, the dial or the tools' privacy rules (listed in ADR-0033); holdout misses were left as they are;
+  - the reserve (about $4.26 left under the $4.50 stop) was not spent: every gate was met without it.
