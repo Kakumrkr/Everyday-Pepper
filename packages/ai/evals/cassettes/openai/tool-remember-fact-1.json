@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c24c4a53bc5d15db70662f8d63c5b02de662225677c98439abc269fd893f96d2",
+        "fingerprint": "7e4839debc47277706975a98c56a6472895bca40582188d6c8c9a86ed14da371",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ATksp9Zo8gngN2iQeOTyJ5kl",
+              "id": "call_pL71X4xFoTuIilPDMaA71I3c",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6903,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6973,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,21 +25,21 @@
         }
       },
       {
-        "fingerprint": "74be27c4fa7e344e0d81a9901623b8d70d160e555653985b4abac87c69d09db7",
+        "fingerprint": "a6fd10d68425be49952810a82fccc8df8abeb32839ef39d3b82d3d0011c4bc0a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_hQiUHFwbl1API2uRMrPEROq7",
+              "id": "call_Axv4Cjvrhul45GulZHL6raus",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"Allergic to PPD\",\"sensitive\":true}"
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"allergic to PPD\",\"sensitive\":true}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6985,
-            "cachedInputTokens": 6900,
+            "inputTokens": 7055,
+            "cachedInputTokens": 6970,
             "cacheWriteTokens": 82,
             "outputTokens": 61
           },
@@ -47,7 +47,7 @@
         }
       },
       {
-        "fingerprint": "8e2a42ddc796242d8c6d29c7ec71f9fe2ca707a9884cb7c5f9bfedafdc1cf81f",
+        "fingerprint": "ab4fc2165e3070bd66d31f2eeb86a9d7798f399d68d67cfd4cb4cde67dd73524",
         "response": {
           "text": "I’ll remember that Maria L. is allergic to PPD.",
           "toolCalls": [],
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7086,
-            "cachedInputTokens": 6982,
+            "inputTokens": 7156,
+            "cachedInputTokens": 7052,
             "cacheWriteTokens": 101,
             "outputTokens": 17
           },

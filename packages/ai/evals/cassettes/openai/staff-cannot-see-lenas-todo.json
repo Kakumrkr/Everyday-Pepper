@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "91ba15886408ddfa31f26fbb046d3d3decf3f9205e1a99425a12c85cb786d6b5",
+        "fingerprint": "f82ec04f3c657364f064a63683fe83917a6f1dcae2b0534220e8568793e19996",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_VWP9z8wCJXlGoOQazNJSDN1z",
+              "id": "call_Cf3BgrLwMfplnpn7dg76l3r3",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6905,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6975,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 14,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "92c4646b62bd40b8fdd39c2d07f7fba127dc3134af9674b5facc5ff3f8f85370",
+        "fingerprint": "ce3ed1bbae9fc2ebbdb01b778207b4fd144935a07a5846fa6491304fcf86090e",
         "response": {
-          "text": "I don’t see any open to-dos on your list, so I can’t mark that one done.",
+          "text": "I couldn’t find an open to-do on your list. Want me to check the team’s to-dos for Lena’s call to Maria?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,96 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6958,
-            "cachedInputTokens": 6902,
+            "inputTokens": 7028,
+            "cachedInputTokens": 6972,
             "cacheWriteTokens": 53,
-            "outputTokens": 26
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "90b4ad4abbb48c92f587dd12815eba22bc2bbdcf57d663f436b5921c73d4f847",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_2ZhRlfSQmRQuidxf3wmXDwfK",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"mine\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5545,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "068ee3911cfbd86b6019de6cff167db227d2106443fe9f38d7c92a40c4c5ff27",
-        "response": {
-          "text": "I don’t see any open to-dos on your list, so I can’t mark Lena’s call to Maria as done. Could you check the team list or confirm which to-do you mean?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5601,
-            "cachedInputTokens": 5598,
-            "outputTokens": 44
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "90b4ad4abbb48c92f587dd12815eba22bc2bbdcf57d663f436b5921c73d4f847",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_lTbdOYTK2jQ5IDBddkNB1ex8",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"mine\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5545,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a9d3b4ff2683d9d9ca7724a0f0b3bd70b550d2fcbc0bf7eb861ad3a8a449c2bf",
-        "response": {
-          "text": "I couldn’t find an open to-do about calling Maria in your list. I can only see your own to-dos.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5601,
-            "cachedInputTokens": 5598,
-            "outputTokens": 29
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

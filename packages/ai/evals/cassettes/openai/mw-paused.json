@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "919e5ab37473cbf95ab235e6116bae0eea1b4ef09e357816fd3503b68dc4ea78",
+        "fingerprint": "fc166d918e185755da30d9e82b7b890537a392a06f0e6ac66bf871903143f79d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_M1Rpv7y7ifqiIioq5CmgsbCk",
+              "id": "call_IAIyacUDTPCRpdPQP0v7MBmh",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6902,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,21 +25,21 @@
         }
       },
       {
-        "fingerprint": "1586c04f433bfc4965fd4e334467b739a7e7f03c12480233be2f45b71ad0a56a",
+        "fingerprint": "295209b8c21420fe14c7a05a91acee5285e6d4658b2598b931a0c6b03abf156a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ApjnDrG3mAwl30r7ZwLk3e53",
+              "id": "call_O7R2lReZ2ytRtbgTX9iOGN1X",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"preference\",\"value\":\"Prefers morning appointments.\",\"sensitive\":false}"
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"preference\",\"value\":\"prefers morning appointments\",\"sensitive\":false}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6986,
-            "cachedInputTokens": 6899,
+            "inputTokens": 7056,
+            "cachedInputTokens": 6969,
             "cacheWriteTokens": 84,
             "outputTokens": 62
           },
@@ -47,7 +47,7 @@
         }
       },
       {
-        "fingerprint": "23f4ae7aec2adef5364a69ebc899f649b3be1b7b85923327b363b728b661f9bc",
+        "fingerprint": "2113723dac4d27a5b3a1960c85525f20629db7ebe357e797d630c10476bb5a44",
         "response": {
           "text": "I couldn’t save that—remembering new things is paused. Lena can turn it back on in Settings.",
           "toolCalls": [],
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7098,
-            "cachedInputTokens": 6983,
+            "inputTokens": 7168,
+            "cachedInputTokens": 7053,
             "cacheWriteTokens": 112,
             "outputTokens": 26
           },

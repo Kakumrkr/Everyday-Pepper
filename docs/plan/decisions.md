@@ -285,3 +285,9 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - saves of one subject and key take turns (advisory lock); a memory save's record owner is the member who asked;
   - real eval runs take at most 20 cases;
   - the recording, PR and merge wait for a session with `OPENAI_API_KEY` (a secret reaches only a new session).
+- **S30b (user, 2026-10-23):** "do S30b from STATUS": record every set on Luna + Sol with `--phase 7` within the $1 cap, fix only what fails, then PR, merge and the S31 prompt. When forget leaked a reworded value (AC-W7-2), the user chose **"Turn-level + verbatim"** (ADR-0036) over "referencing turn only", "instruction only" and "stop and plan it in S31".
+- **S30b decisions (Claude, in ADR-0036 and ai-budget.md):**
+  - runs packed to about $0.56 of worst-case estimate (`--case`), since chunks of 20 can't pass the guards; the guards are unchanged;
+  - three graders corrected where the model was right; the holdout `in-two-days` left untuned;
+  - the S27 cassettes' second and third trials dropped (stale; D-5 is one trial), pass^3 at S33;
+  - `find_availability`'s first-day-only `notBefore` noted, not changed.

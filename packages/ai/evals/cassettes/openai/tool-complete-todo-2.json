@@ -3,34 +3,64 @@
   "trials": [
     [
       {
-        "fingerprint": "8dd84f15f1708104c6d05f0abf775835d9a6007d40c1a933b1e2e6aaddc4e700",
+        "fingerprint": "5cfcda14f44e33db7ad83c19dd87eec38f6ec60a93ab677dd53bcedb5a1b3319",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_SztetfpV60TQtWE7D84Llgs9",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"mine\"}"
+              "id": "call_3FuerH10lZXsRDXQ6k5CbwGX",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6907,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6977,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 16,
-            "outputTokens": 19
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b5a743e0509d0c466e6c41ff36da6feaee9e5e3e435e3951ca3a7e7311ad71d2",
+        "fingerprint": "da52f2e3ab8db26fb20eab211009a79daa7d4a88a908be8c88d27012e81c5695",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_smPF2HK0sjWrmJoXR8AtMupY",
+              "id": "call_4CdWzsEmL11YNrjSDQAReu2d",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0e780895025b15a0016adb711a2ccc87d2be09ae17adbf3be0",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq23EayYqN0Wx9KOi8yXlPeCL2IpPTsUrqin6cgFD35Iqcoeb_Kd0JaGicrWzq51nMEBwFFnCUweWUJIL69_IplBN6MZ0azPoyfijn6Chg4LOLF5ghUMo62Ha0uJU5ITpikr2IV9uW_fQ8b6dy4Rv3-5DP5VUpX1zSbqFp50Zzep-j9jcce1mlux7WAR7V35tRyuukAuyeZc5gTr1vAQoWBHWkiBalFGCyV-c1d-DSjGkMoI6sDRfw4Wf4lgdzVeN3wm0Wtf5LGYPFh0QOxZ83lxar6y_Q79Y6VVfzriTLxg4wH4ancSKI9ps2yKq_Y6MKq_iBCv8Io0JrS2Hl1CKfoiB6l48ikdXpLjwiLYlTSCet4VDNIex7Yyb0MS9ABTRPpdet36s-UFo-r_zkwl73Hl4PCeNkyESYbbPp9DOFxhabbKAjIQ--hSvuvCS2_uVUqB-6TWAhBC4lvm9BUjE94PqX94oFpAmvBN2RH5u456BtHNfN1WFHsYuuQ-WJJE3dg4eiM1jencV6EJ4SqwbiVeoe_FQbT0IZT2Tgt9gTk9NRDmszhvCYqZyaNfn5ktwC49LayOEnH6hLOByFXbz7GOIV_HOmKfz71gEpGVNwAlW_MgdDSznmbgAVCoY9XuaBS0aJEK_JxF2JxAClNRXDZO7M7NuWdgAorm4BS-XCq0u8OJNcQ7pi7t06jF8KS4xnsVrfR2NdSezKs-RFPQ_4bC1NWkUbo6_Gdi3RYThOoqK81_8J49D90j4bF8zI6Rs5G0stARVh-CFL3HAsuBAQ7IebHIUoG8aftZZtsLbJNagmetNE0H4wPbPtLbwSyFFZpJECy9lJogE728TfuqKoX9I9DOgf6KpP0FnDHtNDuGFG2PRuCyhSkpYJ6qQLOkDS3P1hsbP-sShTTt28NKJf-ClXSqNHBGRMUf1AvQg8NCuWznR1_7lDyqT5Djj67wrvVsVM_DmC3I9wxbLMQU56NZiR2dZfBITuXvPZv4IFh-iqgycyOfrFNKX-gNHKNoyNbbIag1JD8YqGknvxhcJUIYNiIZVhUJNkJ3hC39YBAgW6VyKJj5gbI6I-JOJ1UYsL4qzobFOda0U8ymp45UuUz-dA9JHU0gVt7YM8mCisbPuNW_Kg9KjeAc8ncbnDSEJ0o-X0t8zjbjQ4tH0HhVw7yXwf-ZlGrh4e7nmMmUQAVFxzUd6AUFSwxplSA3BdVnHNmiLbqGbu4P4Lw1KcjL9Oq-oGRQ0r7ahZ0kAi0s5ve7IWsVZhmdyZiiC25nZI9Pida3wuBigW9aRt7EyZqbilP3ZT31PqmcLc6shPTHCnzoBDRK6bKW_JzxXl4-dFuDlElPfF3vRo8xN3oObzlFtZZrRah3AHEIreiy2xwNA9f0qqFFq7VazXMKmiG0G-ViH1M-KFeRCXboIgFUM38kEV11bgQbtnDcRF4u804ZrhO9Uq6__lm9DapjNwI_IO7_gTf_K7ivjzu3eWM3A4ZRemrhzw9dj6PWtas0ie7YXnfVMbV1_Yzk-JYmLLkofVvuPT8Bar4kCtfBPr5VFV5oRFHpqkEn089hW2LLXjjlmuy1MKZ--hh2-YA4oObymcfres6FmL_lPFpRICLmrolUvnRYbtge5Zc2MM9ZnQ0M5SU-FKrbI=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7061,
+            "cachedInputTokens": 6974,
+            "cacheWriteTokens": 84,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8758fd9553975618079c8c0d6561137e64d005371f5249adfabdef009ca171d7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_txnP8eAidc6yfLWX960f5N4g",
               "name": "complete_todo",
               "arguments": "{\"todoId\":\"{{todo:call-maria}}\"}"
             }
@@ -38,18 +68,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7013,
-            "cachedInputTokens": 6904,
-            "cacheWriteTokens": 106,
+            "inputTokens": 7186,
+            "cachedInputTokens": 7058,
+            "cacheWriteTokens": 125,
             "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a0c0d91e77888ae4b29972606c4f55555e7ecb077cd83b0cfe029ebe3b8e20cc",
+        "fingerprint": "1978f73f1807f113c3d901f59c66e012eaf72ae2aa33ba3c48e4a47fc24d4b31",
         "response": {
-          "text": "Done — “Call Maria about her colour” is marked complete.",
+          "text": "Done — “Call Maria about her colour” is ticked off.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7100,
-            "cachedInputTokens": 7010,
+            "inputTokens": 7273,
+            "cachedInputTokens": 7183,
             "cacheWriteTokens": 87,
-            "outputTokens": 17
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }

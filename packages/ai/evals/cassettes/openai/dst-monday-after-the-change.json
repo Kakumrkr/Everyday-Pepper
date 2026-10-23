@@ -3,12 +3,17 @@
   "trials": [
     [
       {
-        "fingerprint": "a82fcfd4510a47a5ab25c68fc681b187964aef479fa6ed40c82b066caa01a7a1",
+        "fingerprint": "661c007a0d83e0e7f47f0a66c15bfa93b8ff168606133d1aee122e9cd300e689",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_cT9SDhxPeesJFHHHN9y44slf",
+              "id": "call_dT21uz8kRap3kwMeQJXoGtiG",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_WDDtjs1cf1RoyWEpBbaK4qrF",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,70 +21,40 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6908,
+            "inputTokens": 6978,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 6905,
-            "outputTokens": 16
+            "cacheWriteTokens": 6975,
+            "outputTokens": 48
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e3a12775786bab6c85dbc00cbe0068c1592b2376c25f23dcf76ce409a3dc242f",
+        "fingerprint": "36f4718dfbc39f20c709b6a0209594876970dce98eb72a688f005f32ff8e5622",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_17zkQb9uUcmdDHiCUqKcBShX",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Ana\"}"
+              "id": "call_wCWBaoMGW30GOuxJxmlgWeRO",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-02\",\"time\":\"09:00\",\"emailClient\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7166,
-            "cachedInputTokens": 6905,
-            "cacheWriteTokens": 258,
-            "outputTokens": 18
+            "inputTokens": 7336,
+            "cachedInputTokens": 6975,
+            "cacheWriteTokens": 358,
+            "outputTokens": 111
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5eba5f9bf9d6c9f1261782496c8eee305b47beafecf083754c41ad4350eff1d9",
+        "fingerprint": "f1ea74603a70504504c727ef3389b3ec9a0b5bf92088b9f52520dd45d1187c3b",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_rMbhWln3wPsQ6fpvQGEiJeP8",
-              "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-02\",\"time\":\"09:00\",\"emailClient\":null}"
-            }
-          ],
-          "replay": [
-            {
-              "id": "rs_0c532f53974454e2016adb651d88cc87d28affcc10c09d5854",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq22UfuDB6mtdb03355dQyGxuc8IAj2kmHc8VyEdocvgE8AA51B3l-6cQL0G-LPXJI0CqmUk-XX6M5H6UuO1rvK1usGPXhovzA7hz8ETdTA3N_NjCbkDcwBjAXYcVE2wih0_MUTR0-v_GgSjJ7yFDLulMvLRbfdbvNoZXjnixYamg1sHMYOhZ9lfZfiXKT43klnTO_4LdLmdnUnwaHuUCh5H_zVMR_5tV3AIvq7Q-TEO7TpFcRDuy1yzcbID089-giFAlCMyaktY5XFJs8JdT3cc5Gw_C3ZyB68iykY5tdkau1hOHD1C7q-mP0fZV1uISuMwj_k6tB9TRfET7MdJsQVv4BKhyMTH-Q14NRzdqEWjZbnWq1RyWUpYXjM-BmqI44QHq6I0tn0brvp1eefXzNNj3Yk9Ut9KsHKJwzN-JGpzgsNJrjVH7MGEEGRXaWtJxVjEP9YAUAt7gX4fXlc4295NxiKJZSPUNQZkLPPS-uuMjsS0a6FbGRkXrc8bjZbHHhIsJ1fBwOjMPydkAf_XQxr2ouji0lA6h3ycuw1tULEIq64G3HmIYmwoshWpgBDHv_7apatt85HihYz_dbXF34VZppx2npayzZLywHZv2KgeaHVeRGp6byKKE8ymaBMdBDhGSVcWLuj2SmDh-eefE_kZxmVaTvU047kVT0Qh9g1MndadVRtm849OaxRaaHtuApoS9i8kJC-7wE7MQG0c6EGhVG3eR52cDOAAG27GEDsC7FQVWw00nPNU3GYfr8QXvZP81MD5etIJp8fqy4TwW7S36fECOIhSyeEzDbpb86tN4IuvnGQnPCycIEEg24LOCDwBxI4uklRg3TFxine3AWP26Qq1Q99N8Jlgitwkbo6Qg6HFqbMCNz6oCFOt2b7qtJyFj-ZlstP9vgdcTN9_iBElm42dgknJgwXHRsb-HI_Zpxa_DVp9_TKVjFaBmTa0S3Zu_6h2Pl1oWka3G4lrak6QTF8ym_5_LyoDCiJ9ArfV09-pZ0JacRjRZuNIfDMYdVlzcpGDxSOfj2EU5_8AMY6Oyf31XGqY17nSNt_Y_ktJrbGXPSbVrDQ5yZaWQXTqjn6WXnrHzd9Ey408dbi1clksGUU4go1yGVDni4nzhZ8K2I0gLGv16VB1zzCe_NCBAHG9YXrRr0pfY24L8L9xm5oc-LvgI55qD-22FvVgwO5w2egpD1CMd-MR2S_HDvym7aA54P_Y5bH7vqvCDaoq2nljchijz6Jrtg3Nl2r41JSSf6TFNSSZfYDXk8oUp6U1cwcVSs2xDk7uUAMBQGxROmBg70-D2QP_AUFaXPGaDBLhfUseYQqqivNhaivFO91yRsLxpNvPRnyBSXZ8qcbF6tQ0n2BiSbPTRRJTmMtRM5HAJ4sexBrae6534fXhDFx8XCqhXBYbnSKa39iEBIKZ4S0jSkasFQd1b3_NQqYJi2R6D4ul-_ZI8Yyk5GA4Z1DacqRwBMtfuHpWxtLjkCK_L0vgWPH18JmDFz9ldfzOG5UuLORpL8Ijbxxq4vK-9vQMlfpyhB9z4LVdm1XQTDX6FS03PldQEmn5nNDXh6TjkwAJbWF-PwGzZeYqWtH_a4d0F07Y8gTnbdpFumwZkZHisLA6KWnkV2-LjKX1ajjgw6D8lCYjEbJXa0k6CrTA-hYNdjhiercSxaSYHOR8H1JRpnvVQlYg0bU8jIoOreBi-DkgNcCfh4j4V1LTjTGt9Sj8ndeUe0g9KhQva1Hone5elZu4T_GrE3OWtVHJRHztI0w66DRxseqqaHZ_XJNGoEipohbndthMIiqucacLPUiHJDiJrT3M99FVLnFlTcvHnqhR26vD5YvHtIG1G3aizR3rr7n8t1",
-              "summary": []
-            }
-          ],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 7246,
-            "cachedInputTokens": 7163,
-            "cacheWriteTokens": 80,
-            "outputTokens": 143
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "caf002d3167b72630bb137c731d44b4ca7b54a09f9957d27792098c40696262f",
-        "response": {
-          "text": "Ana R.’s haircut with Marco for Monday, November 2 at 9:00 AM is awaiting your approval on the card.",
+          "text": "The booking for Ana R. with Marco on Monday, November 2 at 9:00 AM is waiting for your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -89,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7469,
-            "cachedInputTokens": 7243,
-            "cacheWriteTokens": 223,
-            "outputTokens": 31
+            "inputTokens": 7527,
+            "cachedInputTokens": 7333,
+            "cacheWriteTokens": 191,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

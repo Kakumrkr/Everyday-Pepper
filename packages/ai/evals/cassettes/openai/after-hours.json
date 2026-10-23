@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "babf3087c3f79610892f8b5bec2b3cf5ee50775dd2cf7e7d79a17e2b5fcdded2",
+        "fingerprint": "4ab6d3ee6a4842920724b11bd54ae417e9107b937e86f4392d74de07df3df9cc",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_4sW9OfyuLH1K6Id1uoihc4lY",
+              "id": "call_jLIz9HxJwVpGK6gfCcLYhoWs",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6907,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6977,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 16,
             "outputTokens": 16
           },
@@ -25,36 +25,53 @@
         }
       },
       {
-        "fingerprint": "5157c447ebade84de8a0db33da26046e444d74b1ae34c58df8308b506279a43d",
+        "fingerprint": "a2e5ff984c0782d1d7d1d2e9a25a3ad2579f566b56aa88bf2cdb2d48f1116980",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HCX2UIAQK8SFknryIZiSKJkD",
+              "id": "call_AneORRoonvx7Ff6dKNQNSFcW",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
-            },
-            {
-              "id": "call_p3rToGkMOxu5xXyq8j4UFnMa",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"days\":1,\"notBefore\":\"19:00\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7187,
-            "cachedInputTokens": 6904,
-            "cacheWriteTokens": 280,
-            "outputTokens": 122
+            "inputTokens": 7252,
+            "cachedInputTokens": 6974,
+            "cacheWriteTokens": 275,
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e6b4b0ea1f6fd98ea68af67594629c5d97583e21fd594384ced9a092ec49f01f",
+        "fingerprint": "6f57cbb814623a1f973ff035dc73dd776e4aae8d904799c64cd22d06accc4cef",
         "response": {
-          "text": "Jess has no free haircut times tomorrow at 7pm, so I haven’t booked Ana. Would you like me to look for another time with Jess?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_WTbINQywBMyW7bu1bNR371S1",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"19:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7335,
+            "cachedInputTokens": 7249,
+            "cacheWriteTokens": 83,
+            "outputTokens": 112
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "34fa3cb7c76ecd268265f0c97537acf71d7248ff5dbb6f4241ffef26b5ba6541",
+        "response": {
+          "text": "Jess isn’t free tomorrow at 7pm. The nearest available times she has are 1:45pm, 1:30pm, or 1:15pm. Which would you like?",
           "toolCalls": [],
           "replay": [
             {
@@ -64,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7415,
-            "cachedInputTokens": 7184,
-            "cacheWriteTokens": 228,
-            "outputTokens": 35
+            "inputTokens": 7640,
+            "cachedInputTokens": 7332,
+            "cacheWriteTokens": 305,
+            "outputTokens": 45
           },
           "model": "gpt-6-luna"
         }

@@ -3,31 +3,36 @@
   "trials": [
     [
       {
-        "fingerprint": "eb847781a66ce18c782a396d85a7847ea8ecbf4fb4ade23bea16651621456a43",
+        "fingerprint": "75440e04ca29dc2e935c0d67bb03cdf61f2118506c80839bd544596cf7e977a3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Vj5xWopDuhAbkw6HXloduMP1",
+              "id": "call_w8DNiz0Vh0V0VfKpn7H2GQBj",
               "name": "find_clients",
               "arguments": "{\"name\":\"Zoe Martinez\"}"
+            },
+            {
+              "id": "call_8yYOBJVOIOJ8aK0fn5Wrzg7J",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6905,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6975,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 14,
-            "outputTokens": 20
+            "outputTokens": 50
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "096126803ef093080e9ad064678b667eef7736736b6f3d142e4725ab9da02a9d",
+        "fingerprint": "da67e9513d2ad7374ed39629faca2d4b16c421c9b210053d64ec3ffa00723d3e",
         "response": {
-          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or tell me another name to search?",
+          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or give me another part of her name?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +42,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6966,
-            "cachedInputTokens": 6902,
-            "cacheWriteTokens": 61,
-            "outputTokens": 27
+            "inputTokens": 7322,
+            "cachedInputTokens": 6972,
+            "cacheWriteTokens": 347,
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

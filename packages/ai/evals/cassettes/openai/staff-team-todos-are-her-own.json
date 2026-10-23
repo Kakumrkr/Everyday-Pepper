@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5e29fc7fbc99c84008df1234537debb7014f81f410d43beefd3607f7e7e35095",
+        "fingerprint": "169f49f00e50b86085339a14268d808b0d2e77abe5fcea36b8098737c56fb071",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bLROxXrVCnbC1aMJF0iadX4g",
+              "id": "call_24uRaLofpufpLddp6ed7euLl",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6902,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "be3aa1e2c1ba6d29fb5b733e23a9ef9ceec8a11d6e53d1725dbdc677d68a8094",
+        "fingerprint": "00b282e6ed94812345ce90add3cee60b032255763dd03c3146d940758519dd26",
         "response": {
-          "text": "There are no open to-dos on the list I can see.",
+          "text": "There are no open to-dos on the team list.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,95 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6959,
-            "cachedInputTokens": 6899,
+            "inputTokens": 7029,
+            "cachedInputTokens": 6969,
             "cacheWriteTokens": 57,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "c415cce7f76f817472ea9b1d5648ecacdd3ff63064c5b75b6bf16074762503ac",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_oWM1uRqxZnvQoMpp0k6PvhCG",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"team\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5545,
-            "cachedInputTokens": 5542,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "cb7a6d16bfca177e472b3fbb4431739c0f1c36a5942c8e69fd66afa7dde6c4c7",
-        "response": {
-          "text": "There are no open to-dos on the team list.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5602,
-            "cachedInputTokens": 5599,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "c415cce7f76f817472ea9b1d5648ecacdd3ff63064c5b75b6bf16074762503ac",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_WCLR4VJjPdZhrddlR5oWEF1X",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"team\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5545,
-            "cachedInputTokens": 5542,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "8f530c1c49a663d53ee5bb5eb2757d7b787001d9aaba07fbea7430e24df77086",
-        "response": {
-          "text": "There are no open to-dos on the team list.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5602,
-            "cachedInputTokens": 5599,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"

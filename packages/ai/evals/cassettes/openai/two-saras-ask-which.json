@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8b2f106bfd612e1a6ee0152391bf8d6589657a99e82514011e8f0f0ac08dd8e3",
+        "fingerprint": "e70e25b5acd71a2520b2dd71dcaf0576903cefe824f1510a988ffc0eeb0da4d7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_M8wst7C9SIjXYKamutNYShwK",
+              "id": "call_4PR8Vf8wDC46Su4Z7xLxyCyd",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,21 +16,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6904,
+            "inputTokens": 6974,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 6901,
+            "cacheWriteTokens": 6971,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "9234eeeea7d2c7ccad29e2496c80025d20408d9a471fbe2461012bd73806c87b",
+        "fingerprint": "3d30ef35fa3f2c1b41cd37581bdef81b7ce6b3124774f561ba00f49b5aab3839",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Jbfs4NeWi1M8uPDJlX1oiEei",
+              "id": "call_dBfLgbbdyUH49Xbd7RkrrWar",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7174,
-            "cachedInputTokens": 6901,
-            "cacheWriteTokens": 270,
+            "inputTokens": 7240,
+            "cachedInputTokens": 6971,
+            "cacheWriteTokens": 266,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a477fc388db81a36054c4a24c1d5f3b3ae1fde633ad3c39f70f549ca37d4920e",
+        "fingerprint": "caf47e870fe5659ea9cce44ae8ef56047f9c06b293a1d38834e40fb9fb3ead0d",
         "response": {
-          "text": "I found two matches: Sarah P. and Sara K. Which one should I book for the haircut tomorrow at 10?",
+          "text": "I found two matches: Sarah P. and Sara K. Which one should I book?",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7302,
-            "cachedInputTokens": 7171,
-            "cacheWriteTokens": 128,
-            "outputTokens": 29
+            "inputTokens": 7361,
+            "cachedInputTokens": 7237,
+            "cacheWriteTokens": 121,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

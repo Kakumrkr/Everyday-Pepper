@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "97b256223fcbacf5d35455683bcdffb0c746a701479109813932db1b23528fc7",
+        "fingerprint": "1481c2e6e72622f9eb4ddb9a87286906a7a108dbb1871f1a7e3cf4fc22b125da",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_upIv0NYnM3tY517ZnCnRLAud",
+              "id": "call_RnIlZsbGce2GLM5xJoCZj7oc",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-04\",\"from\":\"12:00\",\"to\":\"13:00\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6905,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6975,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 14,
             "outputTokens": 41
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "b2c40c8e2d3823e8715422fa1093ab1cb7eb661c208faeca4b6b883c02d0610b",
+        "fingerprint": "0a31fe01164cb0ece08348d100f3fb53661525b9a8badeba9d2f21370fbbc2be",
         "response": {
-          "text": "Your lunch is blocked on Wednesday, November 4, from 12:00 to 1:00.",
+          "text": "Your lunch is blocked Wednesday, November 4, from 12:00 to 1:00.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,96 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7001,
-            "cachedInputTokens": 6902,
+            "inputTokens": 7071,
+            "cachedInputTokens": 6972,
             "cacheWriteTokens": 96,
-            "outputTokens": 26
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "6b23c1de4462dedd8ac904e31353602ebbd1db8ed7cb525b7895b46cd6300da0",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_MWRpTI44hZ0qnlwZrNymlLU7",
-              "name": "block_time",
-              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-04\",\"from\":\"12:00\",\"to\":\"13:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5545,
-            "outputTokens": 41
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "54e443ed08ab58b8e9c59f6cd376f49d179d63c49c1ea134e7aa16c43b067d83",
-        "response": {
-          "text": "Done — I blocked your lunch on Wednesday, November 4, from 12:00 to 1:00.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5644,
-            "cachedInputTokens": 5641,
-            "outputTokens": 28
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "6b23c1de4462dedd8ac904e31353602ebbd1db8ed7cb525b7895b46cd6300da0",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_wuJqoCsJpYX59FgfC4fc4z5V",
-              "name": "block_time",
-              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-04\",\"from\":\"12:00\",\"to\":\"13:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5545,
-            "outputTokens": 41
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "cc48107d5161d53235674d0667973a0b751531d3e4ea28d72a0d8459e57c9ba0",
-        "response": {
-          "text": "Done — I blocked your calendar Wednesday, November 4, from 12:00 to 1:00.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5644,
-            "cachedInputTokens": 5641,
-            "outputTokens": 27
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

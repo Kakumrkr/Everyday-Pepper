@@ -2,6 +2,13 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.28 — 2026-10-23
+- S30b (Phase 7c, recording): [ADR-0036](../adr/0036-forget-takes-recalled-answers.md) (the user chose "Turn-level + verbatim" from four options). Every eval set was recorded on Luna + Sol, and all gates are met (pass^1, 167 cases, $0.30 of the $1 Phase 7 cap).
+  - **Forget takes the AI's answers that recalled a fact.** Migration 0041: in a conversation whose tool answer named the fact, every later AI answer is replaced and its reasoning items are dropped. A real model reworded a visit note past the word-for-word scrub (AC-W7-2).
+  - Instructions (prompt version 3): a remembered warning goes with the proposal, and values are quoted exactly. `forget_fact` explains `factId`.
+
+  **Additive changes:** migration 0041 (`memory_forget_recalled`, the forget trigger calls it). No contract change. Real-model cassettes are pass^1 until S33's pass^3.
+
 ## 0.27 — 2026-10-23
 - S30 (Phase 7c): [ADR-0035](../adr/0035-facts-in-the-ai.md) (pre-approved at the brief: "Go ahead with your recommendations, ADR is pre-approved"). **Facts in the AI:**
   - `remember_fact`, `add_visit_note`, `forget_fact` (always asks); a value is stashed as a proposed fact, so proposals, receipts and *Why?* hold its id;

@@ -3,12 +3,17 @@
   "trials": [
     [
       {
-        "fingerprint": "3d18275ea713bf001eeaa5ccd703a84ad5e7a62608c1b01fa34989f92a85b527",
+        "fingerprint": "35c9d6088ab243a9982daae194b4b21619f265a5160bdfdefdf003a5d13627f6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DEI2XXgeCs6KoAdezzsPJLSP",
+              "id": "call_CdqmFfbem4nJdkgcszhnnEyE",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_sSD1pxM19PXcWR7HhfCHgjpv",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,49 +21,42 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6909,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6979,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 18,
-            "outputTokens": 16
+            "outputTokens": 48
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "7cb2d036d6e2f0461b20ffda75d764b1a10913c7aa0b6130d43760b56c8b5e99",
+        "fingerprint": "edb7dfc354362390bc57a90a738d2b5c4dbd83c38c68e48aba5c8fcc7d5da4c1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6oI6zYIMXoqYiEbErdd9045t",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
+              "id": "call_7oumlf68jFUAQjWPdqkElwwT",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7180,
-            "cachedInputTokens": 6906,
-            "cacheWriteTokens": 271,
-            "outputTokens": 18
+            "inputTokens": 7414,
+            "cachedInputTokens": 6976,
+            "cacheWriteTokens": 435,
+            "outputTokens": 117
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c69e96fa6a1220d695cc6e9cdfaa40db047a1d15d882e87aa76d9cfc57d9cb14",
+        "fingerprint": "c19b2fbadd9b103f0cf72aa84ab33bced1cdb68f682b6e84f63c9260cbdcfb2e",
         "response": {
-          "text": "Maria L. has a recorded PPD allergy, which is relevant to a colour service. Would you like me to proceed with booking her with Jess for Wednesday, November 4 at 2:00 PM?",
+          "text": "Maria L.’s colour appointment with Jess for Wednesday, November 4 at 2:00 PM is awaiting your approval on the card. Maria has a remembered PPD allergy; it’s noted on the card.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_082e4eb1a80aaecd016adb6670ce3c87d2a6e3c99843d4b40b",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq22Zx0Y1UqhPZWOunAcjgspG0VsRD-R0i0db6UrNWEGoQHx1mcXCxW0_dctKTIDRT7iq1ETTjSEqDnzLb9_COclmtD4AGLrQjoFK0BZbxK0alo97RUPsJ8t-bl9rox3JlAvbf-Q51Vy9tYs-Jm53s_epag5lUbR0f1GfTDgmUTKq19IGdGacAafEFwgngIF2aEQ13vvrq-9tR0gm0xMY8Jm__20P81Bn-DaQPvVVUJ35v81n6-Pm2hYTNu7qjAU5nd3hVgVPpRW4O0FLtdp2zeAqo31jRsK2epg1opOFBTBHr5s1nehsYfszv9Z50GHy7GI6C9l8K6v0L6kXGMy4bizsUPmRMpKbFuUR7g_DCh8SZKuH2YsgePsFGVN_a7V-hhdvUNT4j7x5V7OvtYm_GFsaiKnIg3xV8z-Pn5JXATs59G0NvPkkDbyvGj8nvoSqxBHEPhafZ2FlVd9ergI_pMSNKkIoyXFVkriDn92pJ3w8-aLtZk5UNbPbA9s64xnjgkTxZ4XkyQ6bDWoqv73Z7UFMv9tkxQ08YMnpoTtJPVaJKBZlTQMEAk6fqfQTfjt8qfWrXkx-dzjFl0lAXZnZh4sOKwQxBz5MiYOk7cN4wX30PGX_TH6tLxizLDozZ3J-6J6Bib3UhP_3eIXa6Ijd3UTc5FtZwzcdFXJ4Q9K_ZnXQ4vUP-bSOL1FEBHI7Q2aqYjV7UpnC7cRV14BbmAD0vc3_NL8V6s_2zeI53yv1gVtTkHoXQ29Ofio8pzPx7AzwnN3OwQ1a8LOgZAfOHPGydYZEoSCtY2XYXCJ_P9va3iwPFtMLsVxPgP7GFntCOaYN37W-tYXMpdIjxDXfxkzK_H2586BKp39SnKGxcsa-3qPRR2eBrMcVwbWRxzi7IwwaCWnTkB-bA0DERaiUqg70J3rcuGWvLG9g6V-C0OUM3AsZLqWE8M0GSVc9y2XAJA0CZWfnQJ0NWRf4VlzjarMrxaNQWuACMu796-sYr1mwxvYnc06IgR48eceE3C-1H3B6QzvV093flI2oiezw3nZ-5dzSzS1ZMZXU5IJzVQVojH9iRIZQmS8dZtUhMi3-GBxSsFgC0r1gIYHkdOI4WQzw7OcrnE535BmRGU6M0VKHArEgiATGA36fJOzcAbtVBnLIagV9_f_DmKUj_BSDLWcZx_H0lsd4gaBdpR6lfHUYgsJx-yahEVQC55VebHRfIoT9LigsidN1MGJQ2vjpmoe0rEULGp_HM2CmZPaqmF6mZKDJRgewYY2CBeApFpk8yTGRmiqs-8saLegcSZPn3riyolAROL5yUrc_FdUOAYuZmaESQltHlru3YapP2vhgWWJV-nNBtP520LFm2ovNja1YkiYZh18nQwYu2b4LD22DNOoxeO-35-TCKCJMcdTVPeqgATU7SdKwCbI7hpBmuqPrl8D7gJhXWIwuyq6CY1xDE0WC1ZvC2xZ8MxCNcw0TdqQ89OnXMHwe-LdsGBwAAjpuD-jlyTzswdpscdefOLbQk8-gqjt-WtMmcd1p5kjH5G771ya4C6_83dqJGLRCmpmW-llysJRXwpBJm0xxsNBYyYSvJ--47r71NiKqhpvyiK0fQB8lwsVPouG8hjakRPi6FkyDwnZVT0Rdg13nidowV6gqApFG948iNW8m4L4J-8QZQeIRY1o4LUsmTiuW0Q2f8n3ajS8HPpGHaANwmYlMG9HRZKzTTlaxqA1yvZ4Vo1WosccsZ1rSmbhpAmk_h2zQNtIIifv9ZACkBn_Tsfu3f8nMLLwZgkMROG0fHTso1movUUPZcwcW2T-UZPDG-JNd6YgQyvFb_fi9NqPl6ViU7A6txK5JGQkIYR6Od9JU2ZWdq8CHtVFlH5lGkPMDWaL2UsRZtXnyBO4ffsi1l65C5eodan4c=",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -66,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7330,
-            "cachedInputTokens": 7177,
-            "cacheWriteTokens": 150,
-            "outputTokens": 82
+            "inputTokens": 7702,
+            "cachedInputTokens": 7411,
+            "cacheWriteTokens": 288,
+            "outputTokens": 47
           },
           "model": "gpt-6-luna"
         }

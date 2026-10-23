@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7d75c2dda74a1e981464f3f01ad7a5f0648f8ccf338d51873e4240faa93c7457",
+        "fingerprint": "b3cc5d3d84bea369835645790edf36c0d080aa869117d08e561d88435b6150a8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_holUSR9oGJucYjLF3FXlw1ZT",
+              "id": "call_GzJMNmKZaFzrsiM8jVztIvtd",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,21 +16,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6983,
+            "inputTokens": 7052,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 6980,
+            "cacheWriteTokens": 7049,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "1d0a7c0a49d87915ccda492044187749452f2b5330d909a24501e79a969bece2",
+        "fingerprint": "1e0d01ba276099b912996d8cbdcafd7e4ca8418d0a3ba02004a12a668dbc4a61",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_9Eb8wOAxhKhEFzvoFfC87jCR",
+              "id": "call_hTHbybrFwEMEjgTRhnF87ujq",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7068,
-            "cachedInputTokens": 6980,
-            "cacheWriteTokens": 85,
-            "outputTokens": 44
+            "inputTokens": 7135,
+            "cachedInputTokens": 7049,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "851830de5785a4890608670641ea0a6211bc90880a9a1573723d86b9d088da49",
+        "fingerprint": "11ea9492fe972474ed091d53b7115bbb163758cba837caa1e79bc2c9e4354c64",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_asmMSAWSHlAs4wc9swgU8wM3",
+              "id": "call_TG6mzTxX9sxAgQN23a6GveO1",
               "name": "move_booking",
               "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"16:00\",\"staffMemberId\":null,\"emailClient\":true}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7528,
-            "cachedInputTokens": 7065,
-            "cacheWriteTokens": 460,
-            "outputTokens": 66
+            "inputTokens": 7578,
+            "cachedInputTokens": 7132,
+            "cacheWriteTokens": 443,
+            "outputTokens": 65
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "24c37c7ac75cc314b1f8f86efa0ab67d1bdb7ba169258c332a516109661fd2a9",
+        "fingerprint": "f8c286ea83507fe1123ab7c36c5230c63d4590370c852832653e17420f2900a3",
         "response": {
-          "text": "Maria’s move to Tuesday, November 3 at 4:00 PM is awaiting your approval on the card. The change and email haven’t happened yet.",
+          "text": "Maria’s appointment move to Tuesday, November 3 at 4:00 PM, with Jess, is waiting for your approval on the card. Emailing her is included if you approve it.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7689,
-            "cachedInputTokens": 7525,
-            "cacheWriteTokens": 161,
-            "outputTokens": 36
+            "inputTokens": 7738,
+            "cachedInputTokens": 7575,
+            "cacheWriteTokens": 160,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }

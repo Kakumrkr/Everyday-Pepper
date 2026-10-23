@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b4ec7d444ec13fda743e5c80ce5a5296bd0db75f621550e072f3194ea7503ac7",
+        "fingerprint": "34d122fa1b635e0713e29ce0d51ce9cf6f694937872647fcc3ab64501850eaf0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_yJJ72jNGEm04pLqf7rb8eEj0",
+              "id": "call_jIcDEzUQUJRnOvML3OSNMxng",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6905,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6975,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "f35fc67730756150acc4c6034267256f548da3516f327932c7a0f79e9fc89fd2",
+        "fingerprint": "8f6814c1bb49c788fe21bd85bf503fbdfef115a04d9de388420c31fe64fadfd0",
         "response": {
-          "text": "Colour takes 90 minutes, and the service note says a patch test is needed 48 hours beforehand.",
+          "text": "Colour takes 90 minutes, and the service note says: “Needs a patch test 48 hours before.” Jess offers colour; Marco doesn’t.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7246,
-            "cachedInputTokens": 6902,
-            "cacheWriteTokens": 341,
-            "outputTokens": 25
+            "inputTokens": 7336,
+            "cachedInputTokens": 6972,
+            "cacheWriteTokens": 361,
+            "outputTokens": 34
           },
           "model": "gpt-6-luna"
         }

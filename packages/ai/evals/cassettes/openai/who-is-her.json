@@ -3,18 +3,33 @@
   "trials": [
     [
       {
-        "fingerprint": "adbb113269c3064b309200b8c5edcf6e533d8c45a5f8792ded6429a923a20edc",
+        "fingerprint": "d2ae8b4818d5fa34c5c9635d077f10a9eb6d661f44b5be524fb6cc1f11ce5330",
         "response": {
-          "text": "Who do you mean, and which appointment should I move to Thursday, November 5?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1GtcxFN2DxEuEit0q0DXmTND",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"her\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6970,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 9,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3853c9506930cbb86f417616647dae3a1ff6e1d7d41d9f386140e963717a4788",
+        "response": {
+          "text": "Who should I move, and which Thursday do you mean—November 5 or November 12? I couldn’t find a client named “her.”",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0ce50173c036f6a6016adb6504976887d28182394918ecda11",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq22UFlQsdWBAkSai3crRNWfTmBw-dDQZ5MlyLgHRmueFPFTRgU8hvhHthcTFi49rUg8gy78ZtsOHkYO_xmWl0VSQH52MbG3y41jDDIdCcC7bO6JHvDRUy785gdHw0z5gGnmYlsrDyK6T3-z3napzbUKlvmsFkrMWNWvcLXdml7SuvUGStfOSWg5BtmMQN4xCz0draVJbkLGVVI0mQ1J1jwbUrdf7pdQcWPQ4AvpwGI-7SbhcRvAAoFN7cHwPSbQ2BIKpUc-D076_Rlazh-QGCEcOBlLzSqNkfSi6zzUf8WdL9NGUvX4uLucJY2DzEvxpaRwEcInzeXL2AR9CWoc_iE8V8O7T1FsOQqyIJchyx9KzEA2R9DzcNTNetLqQJNC9rs_HmXxgOVzwW1sw88t_eC4O7SWxHQnJIUHXVA-b2OwVKEBYEzZet-4zkMCe8Xwl_X58camyyDeU1UTaVaUqMrr1MTkxYROyZ7849-3WjhQx5xSqm2REo0iQRgnB6ebi5mJnGGK7ERDws1bCplR25oaFwbVmYMF9kWvfuDBddS589KjGNFkQnkNK9Idk4DuVNPDTAo9kmVpF2KLzR_d69-O1B4UK20FTwWUhYg1FwN8nP4P6VdxmZXtJb3-eeXrQW7L3NrE1EeOSddqjnwrV_bHCQeolGLjt85VQMfP_eWdcvS_k1-tFc3JPdFEwNdFSY92H0NAc505qKhpt5RdFdYU4i-xbf7rfXZN7fFThcqsKHKEvLq29_G4QCiVp-KrD3GuLmT8cxo6oURI5zIZnaAzjLOUe4YmSKZxsqNQuSiKeWQXr01mSC8_Mzf9UaCfysIrgg-iqWyJ5-cPVz7zQf2NYbwhb2Uo47IfWUYYpE4MJko0SHrJJj7HW1sKQFE5O9eGTybKGqQktiMUt5K1ptzXoNxQe5EgGBXfRh-ypEldDN2z2rXkSEZXi7AF7TMoVCfVdPOvlPeT-DKJ99HAoWjqUGadDhudkwWJ2Ovs3w3cKmNdphQVYahJjh3yy7I0ltbPoM2WejB1wBGU9ZKOBs1LRBtx1Qev3Rl5FTFNOjEievnk4Q26uyq3MxIOkCcW8BxPqvdqc52M5-Qg-WqgmK6p4qsyWzGmCfJ6F-XTyN0TWyjRvsJZStpFRp-axpoN7aQWUFGfosWkqUTJzfVZuerRyXsQEGzl0-TCrgiC9rRdKNZBw0vEhEGeI_2MEbNigOsJzUOn0ZD5DlqScafd7KpholDGiEtPEtxaRk1Ln186tfhdc55jY2tfr6Yw2VEJJN8QKh3PFKgqxOUXX1WYjKFJB-_CexV81Nci_bOI7wIwEQmfoM0ztDvjkKgfoaPZL00ZgkhAUZpAs4nHShQggBe4GVy0FdfUFhxc_2lZoAQmpkxIyuqLiZdaMR0xc4AwtMJr0X9JMg-r43oTgIToh8n4wvH6XOsLfGcbctx_SDGvzKjXssWdqyu2Lzq5nIen3k-XAal2G6zoSSIxiW9qFJ7VOqGvoaN7_RZqRrJ-qL36eG8sI8ifGAvlXpB2CAuab9VYrDR8wZT5mgdZ-Tx-0wDfxAVJEpTzHz9a7jrUJmpld8BdLwgt2iBKBR-ACjIqmfUnws9Y_FbI4ZOvI9aj5-uT9ndkTClCgd5iHh_9gPQJmDUfZFYtd2wuAb8xfk4EflIoze_PYovB4UNX_15ZSGi9Li80CS9WW9P7QTvLNVr8QAcNF5iPZqIE6skN0CYWPxR-dkULHQ0taHpd0gBEZxSYKK2h_iZsSY1zyJcFSKm45_Dtql4IYOO5AUibsydekeNYf_XOROZSrWJxn6zkfXL75N9HSK9KCfxVq-i3bwBmqRczI=",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -22,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6900,
-            "cachedInputTokens": 6888,
-            "cacheWriteTokens": 9,
-            "outputTokens": 58
+            "inputTokens": 7029,
+            "cachedInputTokens": 6967,
+            "cacheWriteTokens": 59,
+            "outputTokens": 34
           },
           "model": "gpt-6-luna"
         }

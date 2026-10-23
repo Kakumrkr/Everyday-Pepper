@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "f9192d4fc5ba0d7827d8652bc4554a59976ca000b4a606f6c324fd4a100d932e",
+        "fingerprint": "fb07c5e51fbea72c68be81ab3706eb2f9b6b8a486238d4202d989cff6e92a03c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GgBDYKfWnJt5awafRc4nD7Xs",
+              "id": "call_Y1h9y8rbeXOCCmfRBg33j70v",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-03\",\"from\":\"12:00\",\"to\":\"13:00\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6904,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6974,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 13,
             "outputTokens": 41
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "37d79e64b3f5fa9093c91e2b3390304f128d9ea9da1bb906db5e36915be151db",
+        "fingerprint": "c004848869c81662ca884b54f8786f0311707d9b4f4b2d94a83b34231c19c09a",
         "response": {
-          "text": "I can’t block that yet because your account doesn’t have its own calendar. Whose lunch time should I block?",
+          "text": "I can’t block your lunch because you don’t have a personal calendar. Tell me which staff member’s calendar to block instead.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,96 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6989,
-            "cachedInputTokens": 6901,
+            "inputTokens": 7059,
+            "cachedInputTokens": 6971,
             "cacheWriteTokens": 85,
-            "outputTokens": 28
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "be7e22ccb79f94458c00b4ae6fcde605e7b3c1bac4ec166d5365bdef97ccbc4e",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_rsK1PRhDo5e5DPYUjkHxzhnI",
-              "name": "block_time",
-              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-03\",\"from\":\"12:00\",\"to\":\"13:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5544,
-            "outputTokens": 41
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "02313ceb589189ca8906e2990fdcf3766bef42a020a1928faf1a5fab187faaa0",
-        "response": {
-          "text": "I can’t block your lunch because you don’t have a calendar of your own. Whose calendar should I block instead?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5632,
-            "cachedInputTokens": 5629,
-            "outputTokens": 29
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "be7e22ccb79f94458c00b4ae6fcde605e7b3c1bac4ec166d5365bdef97ccbc4e",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_jWJub4yNLcPPGUxqgUQi7LSr",
-              "name": "block_time",
-              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-03\",\"from\":\"12:00\",\"to\":\"13:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5544,
-            "outputTokens": 41
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "215feb2e900849236df5054e3a6a02f29a93401e63ffd8c80d315e0d4fc03e17",
-        "response": {
-          "text": "I can’t block that yet because there’s no personal calendar for you. Whose calendar should I block for lunch tomorrow from 12 to 1?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5632,
-            "cachedInputTokens": 5629,
-            "outputTokens": 35
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

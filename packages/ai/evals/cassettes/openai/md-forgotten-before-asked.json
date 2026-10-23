@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "09fded549e100a90bf45c690cfdc9ee06499546ea20c906d72369b7da8249762",
+        "fingerprint": "80bae8704fd2cf085fcea3dfa1a7d937b69b04be90239f9f66424bad7bf4129d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DRAXBmHERKapQaOJQEhFMDU8",
+              "id": "call_YGmpXKyFdwEQTfKthuqy0luP",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,24 +16,46 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6901,
-            "cachedInputTokens": 6898,
+            "inputTokens": 6971,
+            "cachedInputTokens": 6968,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5c49e7dd933f554b21648ccb29b137a5dcb9d7f9290dec0579bc2ffc53f890c7",
+        "fingerprint": "19593d708477b7ba24f06f710a0ded96f9ec28077b8d99e9d91357a26ac5d6c4",
         "response": {
-          "text": "I don’t see an allergy recorded for Maria L. in the information available.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_e47X0L4qVkSTp46OhZygPXxT",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7052,
+            "cachedInputTokens": 6968,
+            "cacheWriteTokens": 81,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c76ae635442a2d1a2ccb643d90970484e2f9431c5c974adedf76a0df9d7032dc",
+        "response": {
+          "text": "I don’t know—Maria’s allergy information wasn’t included in the records I could access.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_0fc242ab3e633c88016adb6741f35487d294f3d74b7b3acd69",
+              "id": "rs_0f3baa7a5e5aa30e016adb6eee15d487d2b3d2e7a1ae8e0a1f",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq22dCVpGWfGkOeJMqJrUHYum_rNXhydxl6PVJ1lWdA-8lOzy6kcBgM0ehd0Bnr13hdK8LhRAzw9nVSqp88FP1Z327OL0ssyOMwuTXR1vt7mnKcBRpAVsYpGFPyjUHxMbGItbWhnyMIxKo1-CYyuvXk0u6NC47BeMlypiPzgPYL-uysu072NEh5qlUpAeSI1MAHHop92yPJwert3n8edXtqV1fuU2NUFUVnDpHjKRF2UHoekTxrNDII4suwNWL-TYGH76d097OXR-VFnuYBVmOfTwRzm4rIcw-RENtsucesVPtezjKQWJ_6ysABhJBnLTZaQlEg_GZthrCHhcIpNqYW6CHPKPqSJ2dssYO7I1byC_xXKRnxG0StNWTNtUtyfRwNXtSKYyUzZJphw2efw6tOGDo2SQjg-OZtHdheV3e3UwGnZMz7EYl92_edw2tqDBFkMroCWzkqK9maWptcydxtPRqcON6vDWfSK64XBVYj2i0qoVZdCPVmty5FMCsZ5M0rktkW1AXC52SRuQz1etF8TFjVjNJLTJsZmg2YBsGJSCQuXiHVOOBj4ljx1Vm7pRzOx75YNICTfv8t_1hd2VKFck7cgDGSz8zF00H3tMrFxC550TmgZKoHjbChkWlKt4QxjRFFSfkE0bmwEf-Q3kns3joZ6FRaVtxY0reGafW3N_Luy7ZZHVjln2rDuGF9kc1MoFAMOXg5j_53WM-CkknD-gMwlXl_1AUrIaU0W3e7PPhzUk-e4vx5HmChNv3v7o4cdxBM65mQdeN04QVq_ahcxrzbg4tLUBQMau9jk_c_4FI9HkYDt47UgBB-SHMzi5ytwtHJigoq56a_6DBsTIsuBCuSQTmEu7RiiQ7bGWwf1E5PXbKyoVsnFJhq_gPvDLdt-OmsYAB7vqlYUM-AmRxcnHYJZLzSPIo2Q3uqPayZowCHw9o3Kf9hFlnlBRcnaacfq-ulmXT-yuMIz9d9UJxZ1FvIQeYtuKEm8BARNAqKFbnG6996Y4g83CDe66wsXRyUsUKqlHkNL1jPl1EQ5hoslNtWDNfYURWW9G3wmXjel77vsFC5A0ZPIY9eAHUKrP0gH_ywxWU-dmRBfzU_qAo8LjJoC18O9udqNdJZlU_ywouiYlRS8CJipPk6UdNdgsPZAhRuzH-gKCaDxJjWvlmwXGcR4cOtF2uOiw7Y9Tf5jq3q2qNlD61o3M1b-t8JleR70tJb1S7-l8XfisP-2madZlh78LYWq4TlJYVeRmQDQWbA1lnNOIoqi-2i27ALBYsN-y7aoiwkA8PUnsGz2sSosdz9_2mQGLpFRRYq7DWBxJsJRR_9I7-OMziTx9IFEd0YXyH3Orilps1qqJmpmGyDcBsn1PO4bKKn1EvXD9O8U-Lx_54lZbmRujb8vAoXjbgwD1RXJ_1KpBCWZW8NZvGxacvOWZh-1C4JOKTUyeWVrho3fQDC4SBELesiKfoV1sc8Rl9d1l2cLmMUatV4Jnlmcjf5-sbJRTXOt-f3XmFcgoLXKAsUWjQ7tV19tjx07Rc0bsqdZvF-BbrBPPwaaLeZU4Z-iDmykXnMWkRkxinfCbtvESHQTlXQrJnVFPoxbdQYp1JKO47qIPR8qeOROqkLsDJS88Fq003ay4zXRaKcF_v3pqbY0N0n55cDT0d-w-SfZabUI5d584Cvh4lUvKCHbLUkG_oG70fQgcen_8e7syMSxCI8hUSEjlAPr574TGx-_op70XRq4uwqXATLon8ux5CT2KWFBBTF0t-vUN_zPh3ZENnnOBxyT6PV3pa2aF6WHhB",
+              "encrypted_content": "gAAAAABq227uXWbhEQeRkTw8bb7gHzZNIWlla2lwaw0FHLljqHX04UN3quNyiNLv3JK5tEUemfABrxNr7V3NZUGaNEZkXLOuMfieUeRxnqRs6YUTWBT0csOUcEoQJkHxXOsOmuPYA5seiq1dsDGjp87muzGF_3gdKnPL1VstnSgww2kchsNEJSEJ-FgBW_HOmv-f4SP0LuDTzQtdlpH0dO6ssqw6X3CTxgJx7oEBZPTuNgVx-VgeTODREYz8ns9X3vQiADWvp_QKI2I_bvcx21-zvXJv_yfX_kFxjdbe_S4jB9XiAubXWcAgwi-V8nWIIsXI1fow5rN7SZAvX7f_C5L9VhIj3ofDlVrQfQeTqg8Smbi-Cn2YPQ-b8MX0ZvPqLxVy-_2ruYK1HsO0oe047ux9CgfATaGZLRTOw0KLqLLcHUgXYywOdV4MRi_ENr78exiGMv_zvJDPvcVFjRnK_NkwevOl9AHGrnvl4EaV_qPMqxxlDUdnHKOH32v0WmFP0D0hADBLXCTg6lYcelfMg3hPE9BFyAXKIMoiQ6f7Cq49Z6R0O8GrJ8lRmI_gsdfDQFKk7zqNHiPvkkuzpe4IUlgRGmepCBj_hx29Uj2kOEws6N44qpKipTbAU_LrrPU7Kr0y9WuS50-rDqrOvRLRzDLqzNncbBQ3Xz_P2yBc7dk7U8WSTR-VTcbVgSxMgMoGYubeuvEFZhhp9vsi6USquyzY-goiD6N-9h7s0Z0vQcBkW5znY3IFacg673-fkl9xBLq2WWIAnzpiG6j2wi35ntXz8F5Hq-Gco0QIX-pOAxgWZRoBS7pTZuYtlvXl_1iQSZ5pWrf5yrY3XWNZO6rRP3JyDXX9UnY1ipmCk-zqZD2cc65sFUNCoFIL-ypLi2iWZpm5_Z2KmWSpSfnJf-gRFvuUfgq2Zy5ynrkoBwzFaIffYhU0yfy5BX8uDOs09aDISPkKekQsOlye_nbdpPjw9Hz67j3xUGwOtxsXwkDisw9zYkh9TjFVkQ-k7nHmaG7YfJYdaaJbYtop3ji1fHr8_gV4UftzHw-YbtPYVVL6K4BhaU5j3jE1Hb0hoqPG_ChScXu7k44qvaNms9qbcbjJdtSRFLTA4JtqZqBTywnfCq3W66vsPoqnbgngePrmefuJ8Dc8nS49eRn-K1t4MJLWEEF4a-kBCahti_khYNOW31ttGaYzwsPEpcs6b9E70UlGUexqVP-fbowWTPNGT3hC8_C1s_rkNAu9cBdhrGO3iEg730DLkFNg6IIBLrahR-l_Ii3-iJ6qQXazNfijC3auoPlN0i8kAd53BpOAwBww6-J6bQNP7KRmKzGDYSKg0BmCm__AOCjQ_HMyHLP7AHUYxLYWSCW6644r40Xqe6TtkV2dvr1VTbNRd_QGk8amF3OQAoeQVqiYH8K716n8CMKdTO35OS5mq8SQI680lI2aUHeU7SRRgkSQaFmFkffRQk4gkZxitVwSZJFAJ1lI21VhBtpy_ChO7U2Yu8vjLZMhJuC_rg9IVstPTDtj2mOGziEXiBtzuj7KOuLpw7mjdm9pDomsC44fynHVLoHftcdZX3IrVlC_gookVgV8w-Ost46EFS82ky_BdBQt",
               "summary": []
             },
             {
@@ -43,10 +65,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6984,
-            "cachedInputTokens": 6898,
-            "cacheWriteTokens": 83,
-            "outputTokens": 51
+            "inputTokens": 7486,
+            "cachedInputTokens": 7049,
+            "cacheWriteTokens": 434,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

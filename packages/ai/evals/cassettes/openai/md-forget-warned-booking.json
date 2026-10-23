@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3d18275ea713bf001eeaa5ccd703a84ad5e7a62608c1b01fa34989f92a85b527",
+        "fingerprint": "35c9d6088ab243a9982daae194b4b21619f265a5160bdfdefdf003a5d13627f6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0MQO2sWxX4UKH7mtCAXjHkM4",
+              "id": "call_DfwFII5WcBZcywUZOcDab5Za",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,20 +16,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6909,
-            "cachedInputTokens": 6906,
+            "inputTokens": 6979,
+            "cachedInputTokens": 6976,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "026cb844eb861768e4b951b201f63bfcc9c71203c9e88fc9eb18064cc374045d",
+        "fingerprint": "496233d4399710c1cff7a618a694f967eba941597f378f32360cd0018bcf33d9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gmGK8oKknCucTbR17T84RBR5",
+              "id": "call_wEbSDQUVbm6A5tpMumwTR0Bd",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -37,55 +37,42 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7187,
-            "cachedInputTokens": 6906,
-            "cacheWriteTokens": 278,
+            "inputTokens": 7269,
+            "cachedInputTokens": 6976,
+            "cacheWriteTokens": 290,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "9c5410b46e9686ce584eb76164c8117fbe9b21f28b9fdf3679011e1a4e42e626",
+        "fingerprint": "e2d620ef33f862c580c2548ed5855c46f988da48e2a09bb1b9586a9922b6a241",
         "response": {
-          "text": "Maria has a recorded hazelnut oil allergy. Should I proceed with booking her colour appointment with Jess for Wednesday, November 4 at 2:00 PM?",
-          "toolCalls": [],
-          "replay": [
+          "text": "",
+          "toolCalls": [
             {
-              "id": "rs_0f2179946f97fe5d016adb6749871087d2acf23854bbf4fe45",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq22dKZAY_lupiuL23i54OS4dck7CpMnzkQxKtCT_z3ZevWa466FAXggOrisQWOzRPqjY0Y5Y_RasNUW1NgN8GW1NdoBKovSUmUsMFKt_lHhDg29TFdvWhLEV-J8WxV--ngz8kyY7QWSN5-JQWABcUx-BQonllplpVNFAKkPbFU8b2GGORKctWm8jFQ7R_N7UKemcEYUfL8wTSw5C6HWi2nbWJ8Hx6yn9z4e-NUE3Vdt71wHQ1Dv_hKEzpcKPmWZtjidsuktI4DqsDvtuNCyNg4v2H6e56A2v-e_k2zwJReokyLtcbZw1dmJvr28Czfu1Vu82PKdeNw4FQo5pgSnhSBIyyG00H4cVxzFcVlj2SfGciFYY8iio2kJEq4xJDiGxb_WHvN03J7jd-sl-B2MMNQUqS5djkqjgmHwLm53vvj-0ltZRxHaw8xkiHECd9wqUvAHwJNR7WyTWbv47tlyqtFRHAoB2vURgsthelYRfQFvz9sX2oRQqPQQULBqmAqwQBJseTArnW44Kz-hx41f4OQVh1mn5G3hj9VtvBWKh8Scx84-E9wfZxg2bhNl1DoKwryhLEDtKk5XMkl_tk2Z9GfndcfKzSFUsz8yZaL3C1H9vq2FfTXC-_7xFfjBfsUjLURKwbPpJMvDeteb0XYFHyNOZJqRZ98_ZORrlq91hyjVvdRjjQ2xWrAYhDMFUuhBpzMn6IsADrDSRURVyO9WXfG-3aa7CVbvkzEXQUWcNCax3kzi6MXJol2zDFXWld1WjAsY1ld495v1gu_CCvSFEa9GLFSeeUdJbnwZmMbsaQIN3ElfHxh1zZ0we0BB9FamZXgJ1t2IHT3XIlJzHbd1JJRV7ffWU9d4wcSvW6PXRRCznNX9YlkjeeekSDzCwMT60P0HpUaaZjTglEOy32jxkcF29LLIhZjhGnFHGL2UhlkmnZj9dmI5TJChev1Gv4QivVjtbGvsroE562sXqJiAV67hNsNAcZH5MzzVoruj0hTE6rbWM_kT4bTWHnSSXSpfjsf9ZUTlgiOVcWNp5sywgoL8sQuAkEn-n3HzDFknt-6Al55MNJL9HpIXT6tHEfnpsfNf1WFE-lpMn4fzlA_DTiZvyOeqyUAgVZwS4R-1TleLpKObFK3kyslqnCTBjBwKp9fjY1x0IAJk80n6N4butouzXRCCRK-j19la69cdPP5fZCcX0lkNeFZsHPR2PQ--ZNOfGSU752X3xZlY3vdAi1FDf8apcwbWcTKiKrS88vTX5yQMzRSjRtp8dp0LoVojFNSO6QwXPHRGN6mwzzW3hvDPsL6DQqGhxF3djUgzLIJS0IUJhcw4Y8-LtLuEW_4EoN0S4N9PrSDjFKglbNpys5eqWBURZNzGqsh53x9JYScF2eGV6BhNFYaDx6qaW3gGZgXFW5m-im12mf0VhBvi5zCmLqInuPH74Ql0d0rCLqe_yDcaLZDKT5FsnWrMvUAOIOVmvUPmpk5XkY-9yr-7-R5RJp71VOgYRu9x7VJJ7EwlH3Ed7LY2TERTj6mktDXMpWwvLrhws0foyd8e0PRtcFFveXLcRZtsZHf5XAwK0fex3RSkuBlLvu8cWeK_O37wIqrXDPpeRustcC2rlt-3CAwLe_Lp64pZvQj-GX8HvrGnVA-Vj5HAQW2UabL3STs-WOY5dzs8pUSHmskE3M7be5SoPvdd8eFmYkC2i6hSJOEED1IXbCG0VN_zflY3J4M_qo8Xz0tzmdgeHyKD5aAJLPKDcOIhkxaKXbGOkGlR0tBRiguRuNs6BAsMV9jeDzn910VPTURE6iJHrPqQoABM1U0-rzMuZJHuMVLX__cUc5fHTN5L4OYHDnKrkCY9McTmly9J4TWRk6F2df0NoOIEh8luyx_bQxnhOROvQZ8TXFBJP0fUI7gWo10BEx6om19GvW7AZ4MiXHnqsTzQLWZ-qUpDt19206Fc1Kx_7YSpOMXn1zKfVZJT7Ci1eLOSLjzYV-vX0V72ObtflYp-l0t-DJNu-NjFrUgQpRqPzIFbYPSim_yBkBBDOKtg7RrtwhxpYH4DV2Dw-cpHZu13GIFC8zuS4E029aUeESu-vypY_D2rOrVz6durRgvVIOxQR1gAP-CAKG0mIxrBAJkTZwGrD0V88zqe8ZGxHPDJp6nu_00GVpUFT-r3P15YV3A0qcIESgm7ThC_PkjquaC4pfAeKI9szOmD6Q6hJoQJKr9fhj7m7fcmuYruWwCxiFuDZ5RX6JHwtJf4R8P9c_6PaliBoClPfnuA==",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
+              "id": "call_drxKTVF2vlmeYt7UsDSfJ4hT",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
             }
           ],
-          "finishReason": "stop",
+          "replay": [],
+          "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7344,
-            "cachedInputTokens": 7184,
-            "cacheWriteTokens": 157,
-            "outputTokens": 101
+            "inputTokens": 7425,
+            "cachedInputTokens": 7266,
+            "cacheWriteTokens": 156,
+            "outputTokens": 118
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e5ef6d0eba46f107899b20f3565c10f81128590c3002f849c429454a53817605",
+        "fingerprint": "1b9f0a5b9e5c734bf6ef87c078ced9a7e42304fed44bf4070481dd7d3a3ce7b9",
         "response": {
-          "text": "I don’t see any warnings in Maria’s record—there are no remembered notes listed. My previous message incorrectly mentioned an allergy; sorry about that.",
+          "text": "The booking for Maria L. to have a colour with Jess on Wednesday, November 4 at 2:00 PM is awaiting your approval on the card. Maria’s allergy note is “Hazelnut oil.”",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0c97693c1b21441e016adb674b7e7487d2adadbae7b61c170e",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq22dMAFUPQBnfS9gQ_o1gZrjq-_hmmiQXUNyGsvihB3JlWkECEuT64WcbJppRtPS-0zUw3nbgSXWsWfdCSDhr09rqZig54TEwkdt_HkzS5z5t9oog198wABkiC1XxghAkAVng-RI1RhbJB2QtTw8oBVtTC0h0UxajaNt_5CpLfDyaAJ-z9kir89Sxv9M7tmSfux-C13-MBhm51uwPop4RW8EzO-PTH3Aeo6r2G_5m0UbbSIJUsPXHiyMOcqWmgBt5TtPw7YDZ3SsK4-xgIIEmPwhQKf_LmSPPnthte9quSgBIUHLdgjnM7vOdn0XvNDw0ZCXTO_-qJMWkLMYLLWkSc2apn1tOFUD11Rl_NwmKAtDSBst1xtLcVIk4VbCnEUdFW8Jv7JxXR9BYYeRbqTHiMEmDPFyGl-CC5kI2HOP_HENPca8Zgs7LfWGpyVYklpijQPJxE1pMal4CiqR3Iz-tRLlESNJbzrlLOxGoeQECRUKOp0QprIeRVUr6dTKKY3y3TbHR6h4ZkYVl-xbDFtZfbg4HfWllFTPm0vL7xV6Z3Z7R4bK48Ys_1S5FLpBcC_nCDKUp_wCmTp0q14El6JFfjXzLGdPrUOqFzCyfz2vhLnhQ4LwHGO0ikiv6M4jRCvzkZ4Juu1ofeisbgrnKPokoteHRmUu7801bvurTcjs8POInlyBZFbvnZ9c-nEDJGmLZ34lnkGWakDPNKK54aCrEV_G3Cqj7oxgx9iEB3n6w-NvUdUUWuh_Ml0ytkUDZY_A7VWbjGzleXZRRmT2kypqu5XBYijpoaS-GPz4756p9yFw_tNc5xGn1JDSmpcQk61VYUbmZEYirUxXG6S11JqhRKmzAt3cvbx0nLPC1CruPF1mo_oWM5pODiK2gAL-lEzpXSHZSlayxLCsgsyAk6hSpQWoqA4WuTx_M0eVZhNFdY2ILO6gpro0mpklgjpbniS88hsBIeq9DxgoZmHNCa4pKoGmg7OWSWIectqCeVnKaRVK3Lq7Bz6Yb-fqwdmVAz1xs40airDTcRBpnrScTEvqhx_BoKCsH8vM8mSIl2Bj_LqJJD1I_Rwuog_GE5qvFWpH2oyCQahOwPLqFzy63Ri7ftK-PMFEXTBFCDZXm6mB1MYFK2USXDkTyrTgzBewckefgZxLS34no7E5L2MaYR9iHf9EOxaEXtQVV8cGZ1T6Efy1SpR4eZRj3ExOMIdKZcEJ_r0w5isrS_xz7_ypFhwdCj8qRwqBmjuBVJiwTo-CMKduZrjDspqYV-o4dlIQoK5iI2bQY8oTnQi7hBRBMMyr-Bkw8_4p0d5cfs3JZ0Z1jfvmA64Fv-U9tQWTJ53ERqiRL64sImVwUcx6QlIxnWhPowrXaETD1kgXOPjzPiFh3R8hudl011Gs1pzxiFXIfzTFbCkKB6yn6xr_t04BFinmwet2yHQdsH3SCFxIynzHJ6LK6KNdMd-QxtVWOqnL_yPFt8-g9Apr_vefnz4ISLOBjDb_-O71LKsWaNrUQaIYxKIWDCcHnipkEjyuxrGp63twRHMZSgxyRtvTcbCENt3CImLpykErfGKOHUBopOKHcHb4jLrGlywSfDlC6GWof6-UrpwgavJpNL-dNrbjTx0okmojb8QTxKB3x7AxiXmqBJNKuP-KxrbGmhaqDAeBOA3QT4Rl22QJ5xnuAE9knDL9ohhDaN7rLlKmbZvT-dTx_EXiSBITkmMYCwkhBQ94CGnEgAYHuZNtDb6Lu2pX7yKKTnEyCJ0ixDcKJWjmXfx_e23qTDSzxP_0s04578F65Gc2F7LqoIk79jPiRej6TOVuy__O7AFHDOFKh0RayPMIWfLG2Fg3QoPjDAK6qpihSpGHsLgsPSnDCYcIrRvtAiv6E4kMgvw==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -93,10 +80,31 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7325,
-            "cachedInputTokens": 7184,
-            "cacheWriteTokens": 138,
-            "outputTokens": 70
+            "inputTokens": 7717,
+            "cachedInputTokens": 7422,
+            "cacheWriteTokens": 292,
+            "outputTokens": 47
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9bce56869ef033ce4f4064dfd13bdc7e9fc635743fafaa288890dbdeaf9de262",
+        "response": {
+          "text": "I don’t know of any warnings for Maria’s booking. It’s still awaiting your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7608,
+            "cachedInputTokens": 7266,
+            "cacheWriteTokens": 339,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "2f5f8b5c524a3400ae3cfa9d9c31ab108837fc38c50947441135e0ef3cd1a518",
+        "fingerprint": "56872c2e3232b17f685b4c6e215a1f90a22435b64b9c2799a79477bfb1079524",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gRps7Bx0Hv97l9QkG197AvYh",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 6905,
-            "cachedInputTokens": 6888,
-            "cacheWriteTokens": 14,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "4acd2f9d8a84b0879cdb5ed3b9dd616c110c16ac9e8eb0eeb15187f59b88fa5b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_HrZ8AoJzu86wMt9y6k2UqBQH",
+              "id": "call_oMoCPctRuZY9m7swItcGbHfi",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,40 +16,70 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6990,
-            "cachedInputTokens": 6902,
-            "cacheWriteTokens": 85,
+            "inputTokens": 6975,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 14,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "edefbcad6b87b2ab6646e4d1177b218005e5a12ad579308617fc2c93fb10599d",
+        "fingerprint": "95e5dbb084904c002357b9b4745e3ec9bb422bba0f95cb183e40ebfe8503e699",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bKxJ7knO4lt0JbcxRUjiUHaO",
-              "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"time\":\"10:00\",\"emailClient\":null}"
+              "id": "call_NaY0yL2uuP00hY53G9QoEI5E",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7257,
-            "cachedInputTokens": 6987,
-            "cacheWriteTokens": 267,
-            "outputTokens": 94
+            "inputTokens": 7247,
+            "cachedInputTokens": 6972,
+            "cacheWriteTokens": 272,
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "59c0d1018aff675c52b02b043365f1f0b11dcedf0b1f291990f357523f83876a",
+        "fingerprint": "7851a13c1834283703e176951ff6c21ea4c5e49f3094e128f705b2c296600ede",
         "response": {
-          "text": "Maria’s Sunday, November 8 haircut at 10:00 isn’t available. The nearest openings offered are Saturday, November 7 at 2:30, 2:45, or 3:00 PM with Marco. Which would you prefer?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_e4RMadXlyIP9LVVE7TKFj5UC",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0483e237c03e228d016adb6ced29ec87d2bc72b1b9e14ef6ae",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq22zttLoTp3gFsgME7moPAlbLdkQAYXkimQgtjuPPk6WI_Uv1IVwQpPJvpBBIe9VUZY81fAx79We6rPd9AotwsUCuDz8zlX5KpUgpvkIe6mUXb4B1mYtXUwgswHDDI33IEpoT044asw19N4lLO20ccECS97O40juphjlr0Q_fQT_1sgOxFMuxiX1upiJdvN0H1KPwe2r4JOfi8SzQ853Y2L_AQoWzInp_PywBFsByhX5V4oVQjmvRHYR8q6PJoX60_6ua-S21Q_7KCLPwx_Qidn6D4mklcYMS-Ubyg4IEh8KW2NK6RNAxV4f-e8ACWnlX42fmg6zTeUEWpdmzq-m1zBioIKMdFPUSoo1tMh0mtEyQElSfhyR7LZG-o9YFglRt9A01jsXegg-heqJQAumSDv1-Wwxv5FgSn7f37ALEZumMILwuLTuaJJQ8llBR_FXLbIf7yMeIdiT3ytrHkGZ4_GQBA_J0jJWaUCoJ1iorgAj7k71qB6hAH6M1mbTZuaBgw6BVmItzlA_SYCkYoXX8r3-AwKriVZzFyvr7bukUgqoAnNOjXmGGRS42zGhumFvxCbXOoMc50_lpVDpBBVXu4JGp62c0K1nJTOSaHLC_sVjU432TJCpVSHO10eZFxCgKdAfJo_BNR02FN852RZi0HHwrTHdNM_CK0LbS83-vYEFxgfEz8hhTh16zCTuDS63I6V-vAWwJDxFd9TaNJ2DqVS1J_1trXn9wQGKa4yRLxAQwud2rVw3IZP02GbQYeOryMozwePUURhnigWxkUbSr45uBY9cuw0gtGlXO54rfKzw4Y43nOXoYHfFXbvYxK9y8VIo2ef5NbJzwILbw0dtNHiCncW7WVY7FG302DYqs4mw6JAr_2OTxRbfXiROXTF4Bf90o3GKF19OqcvRuy7InagC2KVKYsaVXMiNYLX_HSG70qcoGGNsdrP1lo0TbzWLDoEl0dwdYTMlFEGvZARtAuuKRvn9d1Kyyr9CjELeMuEebartjiqBQJoP9l-vdYWeGGdwBz2fgj24hWEpTCmD7RUXQtfk6E40EKncCfmMgHki_npfy1ai9olOf5IMnICEvnOb1kkT5-O5hSFw-rOhKrOQ4qo7S-HvpGMecueQTiePS0RVzNzheU4GsvAjLwqBH9iicJEcjlR1HLXi3cqhY8vyDmX2HJtLUvfmGCj0bG4vYIfYgOYcyq5dDfeasgDM8AqBtTSw2bpOIFFyDtwpNLFvmn0Bz-PNAow0eZU0-_KFtsdrOqMkp9orFokOFkKld2sLQxuYfmjeOTSXHx2vQHo7Ub9JIqxTwxxTavxqIaTEVkXQg_HAoA9GiROU6Ky44AvcYMwcWyOzOVYrwmpVyhcA3uUBygI8A9eAVsqHqDEsSBj9TrVRJDYOWrBZwh3zoJ4QGtC4EJzE9f-NXV2mDyCLDcw0e-xzz70CbYOQ4LgOmoBP_q6dzHhvSzbcQWI_z2OyVT-ZHcq8MIZBliKI1l5iJww4F1ccSpxHdER3SNTIYj0B0SKnRIFgpbWCzJ_8YzE6P4YTAJxQ2z6cG3FO3nyW9Wq412jR_5EVViv-iI7fApp0oHIyC9WYK07PEvaJ0oG9J_sTmU4oNL3bhEA26b2m_YmYMcvs1P1RYQoylDYPjQE7NCBFwKO_UTM17Ppr5CDKoNoesEveVcVFlIFzRxYTslw==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7329,
+            "cachedInputTokens": 7244,
+            "cacheWriteTokens": 82,
+            "outputTokens": 115
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8d9ccf2591148c99330ad193a76cd5f2268932c4de1398b49e421069d74015dc",
+        "response": {
+          "text": "Maria’s haircut isn’t available Sunday, November 8 at 10:00. The nearest openings are Saturday, November 7 at 3:00, 2:45, or 2:30 PM with Marco. Which would you like?",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7541,
-            "cachedInputTokens": 7254,
-            "cacheWriteTokens": 284,
-            "outputTokens": 56
+            "inputTokens": 7640,
+            "cachedInputTokens": 7326,
+            "cacheWriteTokens": 311,
+            "outputTokens": 55
           },
           "model": "gpt-6-luna"
         }

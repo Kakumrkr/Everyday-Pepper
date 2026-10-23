@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b8c9655648ba9d09f24f5317ce275fb6108acf8f83798573732f9ed32e62f529",
+        "fingerprint": "04fd625f634d3f62d84cfd4970bc391c2dbff87686f0d8f53d322791e00f51b1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_PpwQ3kZoaya83HuH3n7J2L2t",
+              "id": "call_QLFBecnwH28s9334J3im6pqD",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6907,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6977,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 16,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "5e00c8de7ed1b28e827f88a597d478195b7c39629b6ff8f2152a5862a887f739",
+        "fingerprint": "8518e187a2bcede104c82f82823cdbf45df74ee829072921746efda6a7045c98",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_grBGHMfk8A6s9IRFIoUPrgV0",
+              "id": "call_rTIA0p3hT3g1iCjaRvUkMmhY",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,21 +38,43 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6991,
-            "cachedInputTokens": 6904,
-            "cacheWriteTokens": 84,
-            "outputTokens": 43
+            "inputTokens": 7058,
+            "cachedInputTokens": 6974,
+            "cacheWriteTokens": 81,
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "783225c7e9612af09e22e7078fd9c401ea2e950d4e4f7dde2cf5f1059d6d6dba",
+        "fingerprint": "3fdb26f8c172ea0bad533700c288c4e1899b10c1d7a4223f2c8d24d821aa7cb7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wnIDP9TIh5p1uC5J5A1P7rXP",
+              "id": "call_nqCniHQXuY5UDNu9UPgjk7iY",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7328,
+            "cachedInputTokens": 7055,
+            "cacheWriteTokens": 270,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "278dd04c96984f12126c97da240db56de99d5fcf2b81e1e86bf7048f3e2a29e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_CNeGD1uiw25XPiMR7rVDVYto",
               "name": "move_booking",
               "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-06\",\"time\":\"14:00\",\"staffMemberId\":\"{{staff:jess}}\",\"emailClient\":null}"
             }
@@ -60,18 +82,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7274,
-            "cachedInputTokens": 6988,
-            "cacheWriteTokens": 283,
-            "outputTokens": 90
+            "inputTokens": 7594,
+            "cachedInputTokens": 7325,
+            "cacheWriteTokens": 266,
+            "outputTokens": 85
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "789a9883c86bbbffb9d47904f1371dfbcd93dc3960410efed917b96ccb5df2a8",
+        "fingerprint": "b59722f99aa7acb7f45a2bae843435282f6e59a00d4fa63397c960ba340f113d",
         "response": {
-          "text": "Friday at 2pm isn’t available with Jess. The nearest available times are 12:45pm, 3:15pm, or 12:30pm. Which would you like?",
+          "text": "Jess isn’t free Friday at 2pm, so Maria’s appointment hasn’t changed. Jess can do 12:30pm, 12:45pm or 3:15pm that day. Which works best?",
           "toolCalls": [],
           "replay": [
             {
@@ -81,12 +103,12 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7566,
-            "cachedInputTokens": 7271,
-            "cacheWriteTokens": 292,
-            "outputTokens": 44
+            "inputTokens": 7863,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 902,
+            "outputTokens": 49
           },
-          "model": "gpt-6-luna"
+          "model": "gpt-6.1-sol"
         }
       }
     ]

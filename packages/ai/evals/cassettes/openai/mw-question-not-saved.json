@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "09fded549e100a90bf45c690cfdc9ee06499546ea20c906d72369b7da8249762",
+        "fingerprint": "80bae8704fd2cf085fcea3dfa1a7d937b69b04be90239f9f66424bad7bf4129d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ocUWOw9Jq9HVIu3LnGTJ8v7w",
+              "id": "call_8LgUkXZuX5EyUt4t1BJhBoj1",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6901,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6971,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "4766972a859acf074854a0fa2e24b8a71997dd63c4ed82497d7f6de0bb43f006",
+        "fingerprint": "9a9f695c92d27ad513d0949957d46485521bf676ecf54274dd31da7fa161e72a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bReCV5kxi6Cfc1VIrbYP3zsj",
+              "id": "call_smQBK2yYNdNbp4EvNIm7ajEI",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,27 +38,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6985,
-            "cachedInputTokens": 6898,
-            "cacheWriteTokens": 84,
-            "outputTokens": 43
+            "inputTokens": 7058,
+            "cachedInputTokens": 6968,
+            "cacheWriteTokens": 87,
+            "outputTokens": 46
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "71bbb1d4c5b877e1f1926d88efe782fcd4adaed3831ba0b383a7430a1e36286d",
+        "fingerprint": "ab8f006ec87ff3766eb9424c062ea42418ab43f88f829fb0e9787b70192dec03",
         "response": {
-          "text": "I don’t see an allergy recorded for Maria.",
+          "text": "I don’t see an allergy noted for Maria L. in the information available to me.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0c1606319be7d840016adb663dffe487d28fa2a66f14fa45de",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq22Y-dCKYs0N16iH9PxetWQxdRzT02_ePcnJyCW1sBk1-i3QJeZHgoCVLD4SGqgM9UPK9ciLVHECjSD34-qkZ39QYFHdCVvfyGLPXwtNzp7Lvlnm2Oj_txteqNEmAIUqbE2604xrpTBeaIZyFwIxyO1tNoPcSbBZ4LTy9GvdMQwMXMb9G14axrwy-KX_BQldW2b_UgxBLAWUdbIMJbfzeuFIpbNQzIn6g7cQ8ulxph-PqREUG0s-hTSdklErMkKUJNpdk5ne48Khb1Ln7faMoZPXVO-v_k27KgLUt60pN2aALCaafXA79yrANkbbBqW0I342tKDAFhW9bKqOIilUbVFN1-5UzB-8bp3X3VJPTO2SiNvU2lvoVwbTZ9L03aaMWdFx0i838LKfgH1jSPFu4siYn2QVq2Q4epWo4M2YDNVc6jJUIFLQhqP0oQe6AkbCAJHOL8J5_9jTvuXoh3xnI_1LG0TWd4Ab4JtVAD_nKmIwokWUWBCLOaJrAWr7R879VMsc7WwODmJpQIt-IwzoSqf_qvcdtbP--_tX53kxg3sWq2Ij8KutrrKicE_gI8agrVabnQL18iAOrwGCX6om41Xpnl4HHTj5-AEEMx6MOESRlwsNS-ReQZiUCDuRe4z0kotvcj6eNgIurStMx_bGyNGI_cPh0mlmCf62mobUi5l17gc-lb5JEbDOIBALCVbSW1PYjjSSUe8jbTNnKzt84BwKtTZ9p8TEnRdgAtIdsSncjhGXQVTRtryC4XwzDvDNirmy9BK-KD2C6t6lTva4Gtd92gqIO_5QhalG7yphvis5T2EQrqkkh6RlFxRPuwbbveUI33Q7rLMuKlb4A2jk3HMCUPdFnc2jY0X42WS92KOedqRA-SRB_x4bxm7bFJ-E6bnsR22Ks0t_6xYAxEpn7oCkhskJdnw5Q_4HDRKSVAtZ58ftz32wbVUqEfExPCcWRM5mTQjseESXr-iULBcrZcykqddIpYwyW3TxgMdkqnxLHp96jDNSQX-GaXvqkDFINw8zryJ7C2eXMx2tpGtnQR-CO5LtF2BEc96RY2EB3RoyuNHOK7Vf0ulQStF6Fc80aR2vxlQWVStzyoVvXuG-3zeXl2oVqirYyjyfcVvByH8DiC-4yxx_s8bPh3247tAnRuE67a_gM983gsJxuc0pKjAYlpUqTvGNtJC2u7BxQApgRxYgr3ZH1oUS3vRjvmmbJ3MKUsUsJgw7cgxYHD3DsshU5aCFViwEGRnVNGWGEesYVzZl5LNu4U-shmgVI9czBTWYz7j4rUyclpXuj-z8wpwzfYe2jH1Jg_xk1HVFYjzDSuvRhlpBhJd0t7cY7aZujNi42BA1TSGMUNMJGuo0xeszfJUH2zw1po6bF-VUHbnDHma3Iq5GDBDpJV4u8tG831VqM6bYlMy9Uq-q4Rg9a4Ry267HmRfd3LUgqOJcgvtZ2ZZUWnGP770aDJOJKIkkCGsmg6YRqwNcbBGv5kHhwCDsdGVyYjI4aAwXR56fuUQHXpPgAVapMNs2AOaljeTzw199kEKlo2NO3DLj8BAl1lQriJZSgTU2o6sNZ-m5ycLstTv3vnbxArCJo97Mry1oNT73S6546unHTe2VDhE1dgozZOaA68RvZqCLLiaweM7Zb6glA1FjNRDC2AnUGDlaerXCpqUvuXbCp4cpCIf3QqfJABbcOR1eGGVbM7QyRLk6fdw_bPa_zX7R-tmmmdL0BM-A88qN2wxdtWEqioYI3BW2f-r9d0jGUis5tcvPyj3BiTxdnnnWZukBIK0T6tPB77XRXmXW764bOw3lHDMAxTBs1jp7rlCBo0SfoKcW7Ms5CmVJD7K13wDiwONGjTbelkoQLxHZstD67tJB0dGWSCqN9FyoojqO6pKorN2iPwhNG048RHTJiLojoXotHINyTHaplUFJbYroPAvfsMKR8C5uNkz8DW913hq71halVvNOfeh0yFA2jQF1bifhPEQ9gENt68YcfNNVhMicnjntPrky6UykX01bMi46NHZxvYG1XVY6l4wLUQTO6KbJQV9fsoAJhBsA484Be-2mZ5YxnObEbcFDkxLTCC2x2yd_x6ih0IkxYKC0HYegIuZn4C9atky8Hl3mCVELmF0zsbfcQRNnOc9SE7AX4v8qvLIVHvJlr9VaoC3n840zFRu084VRo0k_jxVlySmxe2e7upiw6AM5d8ZBQ81XYXLAzyHI49MKkpApOJuJpDtu51wUxXM5nYGYBPBnqn8WpmntJf8lCp2mi5Jm95te54OxueYeFtfc8ErP8g91d8aTEvq50JdHCvzxr5SeigZhg4vR39TWnMfAOog==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -66,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7423,
-            "cachedInputTokens": 6982,
-            "cacheWriteTokens": 438,
-            "outputTokens": 82
+            "inputTokens": 7521,
+            "cachedInputTokens": 7055,
+            "cacheWriteTokens": 463,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

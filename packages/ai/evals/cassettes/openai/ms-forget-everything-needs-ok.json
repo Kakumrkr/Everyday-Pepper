@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "645dc4f19ed7c14120c56a30feefe9f1a0ca8d7c7a27d5b21687f5660e392263",
+        "fingerprint": "382be03c4403e1ee6cf5d42aa6b65a87b329694463edf2cfde6b7d023033ff10",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gUfepDjcDYsDUuuydDPqvnAU",
+              "id": "call_jzcP3lilRLd86V41g25vfnoc",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6902,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,31 +25,36 @@
         }
       },
       {
-        "fingerprint": "eff0e689d4985102726aba3c9b8644e9bdd6090549087e17cf5f16b731cd48d5",
+        "fingerprint": "21397df5ae364d2cd0cfaea3425c82c015509b6659e7c01a87bfb8066391ed28",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ymlOOTuY4xrmLLR6rFZBQI0H",
+              "id": "call_ZBMc1bXLFFUcGHSVA9NEdZSA",
               "name": "forget_fact",
-              "arguments": "{\"factId\":\"{{client:maria}}\"}"
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            },
+            {
+              "id": "call_ReqNfopPldpOVEUhEIA5OM10",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7096,
-            "cachedInputTokens": 6899,
-            "cacheWriteTokens": 194,
-            "outputTokens": 40
+            "inputTokens": 7172,
+            "cachedInputTokens": 6969,
+            "cacheWriteTokens": 200,
+            "outputTokens": 98
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e4810c53f82c4d12c4d5c82ca064d1105d84cba8216ce2cf7c487fef972d35bd",
+        "fingerprint": "a3b64f4c03b2e80523e68ed813bb3d1d0aeeeeadc910c5382133093b3c05c8e5",
         "response": {
-          "text": "I couldn’t remove Maria’s saved information—the system couldn’t find the record. You could try again after refreshing her record.",
+          "text": "I found two remembered items for Maria L.: her allergy and usual service. Both forget requests are awaiting your approval on their cards; nothing has been removed yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7185,
-            "cachedInputTokens": 7093,
-            "cacheWriteTokens": 89,
-            "outputTokens": 29
+            "inputTokens": 7403,
+            "cachedInputTokens": 7169,
+            "cacheWriteTokens": 231,
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }

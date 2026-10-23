@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "048abc55141d058daed6ab161c59917cb2e8f68c3703622d12e7f113e40a68a0",
+        "fingerprint": "1778fd54103c8448935a773bf58909aa3524ee876e500b01f0c17925e751bff7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_iXp06bwEqUkK1YCBYDwmcsQb",
+              "id": "call_MQTV4ZD5LnSN61pPv2g3RCUh",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6903,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6973,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 12,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "adbc6b28a7d0a218839b72f41e15d5202826a819e2f202f1ea0775826f786dcc",
+        "fingerprint": "0b4f8c83cda9d830f7eba00c65c8091b31f4604eb4a79a572dda0a2a11eb8a71",
         "response": {
-          "text": "I can’t save business-wide details with my current permissions. An owner or manager can add that Fridays close early.",
+          "text": "I can’t save business-wide facts with my staff permissions. An owner or manager can add that Friday closing note.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6996,
-            "cachedInputTokens": 6900,
+            "inputTokens": 7066,
+            "cachedInputTokens": 6970,
             "cacheWriteTokens": 93,
             "outputTokens": 27
           },

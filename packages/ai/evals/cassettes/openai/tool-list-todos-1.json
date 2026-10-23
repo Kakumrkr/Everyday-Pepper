@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8fa926ebd598aecfa481687ee1a9a4b42288bd20fa8758946cdbb19c63f14dcb",
+        "fingerprint": "9d31e1b25b3ea8c429baeaf40b082fc839135e4a9c8e51de205703afa9c5ed0e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_l9kqYpVlS3V33WmAdtd0rSru",
+              "id": "call_njjFLBSTM88MAdO9KuPXRAc3",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6902,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "f644bb8dd23e789d50abe1c6d230836129bccc8c750b41b463436cd995d47d4a",
+        "fingerprint": "5cfc71eca5a1208e272c8f9d52ac9f96a98107358f8bdc2eb4fd4d70d03283f0",
         "response": {
-          "text": "You have one open to-do: Call Maria about her colour. No due date.",
+          "text": "You have one open to-do: Call Maria about her colour.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7005,
-            "cachedInputTokens": 6899,
-            "cacheWriteTokens": 103,
-            "outputTokens": 21
+            "inputTokens": 7076,
+            "cachedInputTokens": 6969,
+            "cacheWriteTokens": 104,
+            "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }

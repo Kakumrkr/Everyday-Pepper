@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1a74c420a3efd4b674d8ef0b388d88b000280478c303249b5b4ca2b4ce0495cd",
+        "fingerprint": "5424a216da56cc49f1d83a1768f65a4fcac6058872c6b01cb0e8da643c076490",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_rpKYsDF551zswryRdPLRPOPn",
+              "id": "call_NrlbTG4Z1pnSR97W3dVMRt5Y",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6902,
-            "cachedInputTokens": 6888,
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "2bdb5fc426a3e42e1f91c31d1785eae0772e569a8abebdc5f3abd6d6e0be9862",
+        "fingerprint": "ce130390406ff395bac58f608023bea53f4150092a68cc90781061f29da74a76",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0uCT7K4OC5JdMMKWg3A1vogV",
+              "id": "call_nG1OCKMU5RdOlCtnk50ch9Rs",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:ana}}\"}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6989,
-            "cachedInputTokens": 6899,
-            "cacheWriteTokens": 87,
-            "outputTokens": 46
+            "inputTokens": 7054,
+            "cachedInputTokens": 6969,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "56842ef01dd1ec8bf1449a61b389c7fffe576c4bf638c0314072ae5bdbffa979",
+        "fingerprint": "5ce0ed2b987882311d60526693ee6277495315380a6c47d8d0a7f9e0026fc02a",
         "response": {
           "text": "Ana R.’s next appointment is Friday, November 6 at 2:00 PM for a haircut with Jess.",
           "toolCalls": [],
@@ -59,142 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7285,
-            "cachedInputTokens": 6986,
-            "cacheWriteTokens": 296,
+            "inputTokens": 7332,
+            "cachedInputTokens": 7051,
+            "cacheWriteTokens": 278,
             "outputTokens": 28
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "d29748f490500f7d0f6b91bdef6b1cef0606d8618811cc19cf3abe2d965b3f55",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_pbWICB16PMVX4W7jqd7ZsBgu",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Ana\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5545,
-            "cachedInputTokens": 5542,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "00ae8fd75ac11624a3800aefa300aa76d761c3267c41a18632fd2e06005c0bdd",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_dEktDgxsToOOWUBy4VeRBplB",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5628,
-            "cachedInputTokens": 5542,
-            "cacheWriteTokens": 83,
-            "outputTokens": 42
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "779a350b11cddd651037501c24287839bde0030cceb5cbcc6f6ebac086258242",
-        "response": {
-          "text": "Ana’s next appointment is Friday, November 6 at 2:00 PM with Jess for a haircut.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5901,
-            "cachedInputTokens": 5625,
-            "cacheWriteTokens": 273,
-            "outputTokens": 26
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "d29748f490500f7d0f6b91bdef6b1cef0606d8618811cc19cf3abe2d965b3f55",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_EtfPs45KWRbNqsDSAfVDsbJj",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Ana\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5545,
-            "cachedInputTokens": 5542,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "4dcffa7ccd4e3ecf3363878f46615d02fd764e96c01e0e741b5e3edd374beb56",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_pcgj0huB8CDflhZdC2q7UBjt",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5628,
-            "cachedInputTokens": 5542,
-            "cacheWriteTokens": 83,
-            "outputTokens": 42
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "2ecdef3fd99a0f29ae4e8b5a36b225ab7f465c935dc2feb5af3d21f39f0ba953",
-        "response": {
-          "text": "Ana’s next appointment is Friday, November 6 at 2:00 PM for a haircut with Jess.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5910,
-            "cachedInputTokens": 5625,
-            "cacheWriteTokens": 282,
-            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }
