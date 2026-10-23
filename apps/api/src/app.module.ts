@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { BookingEmailsModule } from './booking-emails/booking-emails.js';
 import { ChatModule } from './chat/chat.module.js';
 import { ClientsModule } from './clients/clients.module.js';
+import { MemoryModule } from './memory/memory.module.js';
 import type { ApiConfig } from './config.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { PushModule } from './push/push.module.js';
@@ -23,6 +24,7 @@ export class AppModule {
         AuthModule.forRoot(config.auth),
         TeamModule,
         ClientsModule,
+        MemoryModule,
         TasksModule,
         AppointmentsModule,
         MailModule.forRoot(config.mail),

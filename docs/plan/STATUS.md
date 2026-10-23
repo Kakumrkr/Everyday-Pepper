@@ -7,14 +7,14 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S32a** ("a" half: scripted model only; push the branch `claude/kind-euler-4ts3n5`, no PR, then give the S32b prompt). Brief approved (user, 2026-10-23): "Go ahead with your recommendations, ADR is pre-approved" → D-11 wins over the mockup (final confirm, no Undo on "What I know"); ADR-0038 pre-approved; if the session runs long, tasks 1–5 done cleanly and the chip polish moves to S32b.
 Tasks (each ends with tier 2 + commit + this section updated):
-1. [ ] Contracts views + `/v1/memory` API (facts list/edit/delete, own episodes, pause), `no-store`, permissions, isolation case.
+1. [x] Contracts views + `/v1/memory` API (facts list/add/edit/delete, `facts/shown` for the chip, own episodes, pause), `no-store`, permissions; db test that the named list reaches no further and not across businesses.
 2. [ ] Narrow `remember_fact` (drop "closed days and hours too"; staff off/away → `block_time`); scripted cassettes green.
 3. [ ] "Memory used" on chat events/history (optional field) + "Remembered" chip in `@pepper/ui` (fix/forget in place).
 4. [ ] `/memory` "What I know" page + nav + owner pause switch (mock-up first).
 5. [ ] Client profile "What Pepper knows" + visit notes on profile and booking sheet.
 6. [ ] Playwright journey: AC-W3-1, AC-W7-2, staff view, pause.
 7. [ ] ADR-0038, traceability, memory/area docs.
-Next step: task 1.
+Next step: task 2.
 
 ## Last sessions
 - **S31 Phase 7d (2026-10-23): episodes and learned rules, recorded on Luna + Sol, merged** ([ADR-0037](../adr/0037-episodes-and-learned-rules.md), pre-approved). Full entry in [session-log.md](session-log.md).

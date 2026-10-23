@@ -71,6 +71,12 @@ export const ApiErrorCodeSchema = z.enum([
   'action_not_found',
   'undo_window_closed',
   'undo_refused',
+  // What Pepper remembers (ADR-0034, ADR-0038).
+  'memory_fact_not_found',
+  'memory_subject_not_found',
+  'memory_episode_not_found',
+  'memory_limit_reached',
+  'memory_paused',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

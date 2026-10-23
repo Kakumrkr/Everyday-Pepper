@@ -71,6 +71,11 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   action_not_found: 'No such action in this business',
   undo_window_closed: 'This can no longer be undone',
   undo_refused: 'This can no longer be undone as it was',
+  memory_fact_not_found: 'Pepper no longer remembers this',
+  memory_subject_not_found: 'No such client, team member, service or visit',
+  memory_episode_not_found: 'Pepper no longer remembers this conversation',
+  memory_limit_reached: 'Pepper remembers as much as it can here. Delete something first',
+  memory_paused: 'Remembering new things is paused for this business',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */
