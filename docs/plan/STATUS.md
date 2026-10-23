@@ -13,8 +13,8 @@ Tasks (each ends with tier 2 + commit + this section updated):
 4. [x] `/memory` "What I know" (the prototype's view is the mock-up, with D-11's final delete instead of its Undo): filters, groups (learned rules apart, linked to their screen), source and date, Edit/Delete where the role may, own episodes, pause switch (`settings.manage`); reached from the chat header (no new tab: the bottom bar is full). Playwright for tasks 4–6 runs once in task 6.
 5. [x] Client profile "What Pepper knows" (add by hand, edit, delete) + "Visit notes" (edit, delete; added from the visit) + visit notes on the booking sheet (read fresh on open, add/edit/delete); `readsNotes`/`managesNotes` abilities.
 6. [x] `e2e/tests/memory.spec.ts` (3 journeys × mobile/desktop, 6/6): AC-W3-1 (chat → "What I know" + profile, sensitive), the chip → forget → same chat no longer knows (AC-W7-2), visit note from the booking sheet, staff view, pause. Scripted model learned "What do you know about <client>?". Chat journeys' helpers moved to `chat-helpers.ts`; chat + accessibility specs 20/20. `Remembered` is `'use client'` (the web build caught it).
-7. [ ] ADR-0038, traceability, memory/area docs.
-Next step: task 7 (ADR-0038, traceability, docs), then `/session-close` as an "a" half.
+7. [x] ADR-0038 (accepted, pre-approved), traceability (AC-W3-1, AC-W7-2), memory.md, dependency map, mockups README (no Undo).
+Next step: `/session-close` as an "a" half (end checks, push, no PR, S32b prompt).
 
 ## Last sessions
 - **S31 Phase 7d (2026-10-23): episodes and learned rules, recorded on Luna + Sol, merged** ([ADR-0037](../adr/0037-episodes-and-learned-rules.md), pre-approved). Full entry in [session-log.md](session-log.md).
