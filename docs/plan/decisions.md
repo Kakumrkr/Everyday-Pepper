@@ -291,3 +291,15 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - three graders corrected where the model was right; the holdout `in-two-days` left untuned;
   - the S27 cassettes' second and third trials dropped (stale; D-5 is one trial), pass^3 at S33;
   - `find_availability`'s first-day-only `notBefore` noted, not changed.
+- **S31 Session Brief (user, 2026-10-23):** "Go ahead with your recommendations, ADR is pre-approved" (ADR-0037); PR and merge at the end, then the S32 prompt. Asked why re-record: Claude explained that new tools change every request's fingerprint; the user approved:
+  - D-1 one full pass^1 re-record at the end (≤ $0.25), and eval cases run four at a time to cut recording time;
+  - D-2 episodes store the fact ids their conversation saved or recalled; forget deletes them; a racing job refuses to store;
+  - D-3 one episode per conversation, replaced when it continues;
+  - D-4 forgetting a rule's fact keeps the rule;
+  - D-5 rules proposed only from a member's stated or repeated preference;
+  - D-6 no episode when nothing is worth remembering.
+- **S31 decisions (Claude, in ADR-0037):**
+  - the worker may import `@pepper/ai` (episode writer); a read tool may `prepare` outside the member's transaction (the embedding);
+  - `rule.change` locked to "ask" through `levelAllowed` (contracts, service, screen); hours limits only cut hours;
+  - the remembered rule's fact is linked through the receipt's inverse, not the explanation (the dry run's fact never exists);
+  - evals: the episode job as a screen action on the case's model; every case fails if a rule or hours changed during a member turn; real embeddings recorded once into `evals/embeddings/` (int8) and replayed; `episode_retrieval` measured through the real search as each member.

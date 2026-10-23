@@ -254,6 +254,13 @@ test('ask vs "do it and tell me": the Autonomy page changes what the chat does',
         name: 'Just do it',
       }),
   ).toBeDisabled();
+  // A learned booking rule always asks (S31): only "Ask me" can be chosen.
+  const rules = page.getByRole('radiogroup', {
+    name: 'Turn a preference into a booking rule or hours',
+  });
+  await expect(rules.getByRole('radio', { name: 'Do it and tell me' })).toBeDisabled();
+  await expect(rules.getByRole('radio', { name: 'Just do it' })).toBeDisabled();
+  await expect(page.getByText('Always needs your OK: a new rule changes')).toBeVisible();
   await expectAccessible(page, 'autonomy');
   await row.getByText('Do it and tell me').click();
   await expect(page.getByRole('status')).toHaveText('Saved. Create a booking: Do it and tell me.');

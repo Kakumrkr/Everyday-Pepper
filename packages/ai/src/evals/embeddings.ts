@@ -70,7 +70,7 @@ export async function saveEmbeddingStore(
   );
   await writeFile(
     join(dir, `${store.model}.json`),
-    `${JSON.stringify({ ...store, vectors }, null, 1)}\n`,
+    `${JSON.stringify({ ...store, vectors }, null, 2)}\n`,
   );
 }
 

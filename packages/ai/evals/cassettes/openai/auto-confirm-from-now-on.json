@@ -3,16 +3,16 @@
   "trials": [
     [
       {
-        "fingerprint": "bc422701fe35a00ac36578efa66c21333c583bab76cc94ca57d8955f6b29e759",
+        "fingerprint": "7ef171d67fe7a2496eddd97a5d67a4f7a4f173baf1717ff6dcfaba81595dda68",
         "response": {
-          "text": "I can’t change my booking approval settings. You can update them in Settings; until then, I’ll follow the current approval process.",
+          "text": "I can’t change my own approval settings. You can update that in Settings; until then, I’ll follow the current booking approval flow.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_01531269c1a77b86016adb6d18379887d281de45652fbd5142",
+              "id": "rs_099676b304e83c83016adba5a3ccd887d2901a1fee056234c1",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq220ZzLcN7_gKZ-Z8QPQMTlhaABqBXu3CYzWFa0rDauDOwwoJyUMwNeevO20Qi53VAb43N2YVVD3ZhR3iBfvjXZynpP1mvvdy4-G-E5Y18Kvovy18oZ-iyQO-waZ0bX1H9wEit4ihO1usNcReEBiKbuPmLlJYxx66R5gmDEVkzQzmhkoDYUUm1GnCn8tVvhMXjuHMZqTrdV74GufTKI6rGK026QzL9ilv6szcqMdBO0rCIhP_iHBYMdp8YT-mWzafRBFTm0R-IpZbHFlPQjacZP57gtxJm6rKvWx0UtWslKp2b5syHgx4Hdl7SLwOCL5r1PnXXriMdsScTY0RIKBkKf_5FbU0coBoEwVThKnkVZdo2DF2lPCFOOmpVvrx9CkGfaAiX5oFTNSs85Yeb8dLfpNKXjTZom6j5GYNuWLsvq-zhKuG5zAMF-rpcmookW-8I-DqVzZ4RkEhdbS58N9Nm2lBx3PKOIPav7scui7puVdrmJeGMPqN5XFIIAh35FWpwMDA4vPVq51J0K0PK1yCUmlpSb8Czn5CYzLPzKfjwHHZkko39mLw4JgaZaYkTIf8_CYqGJiO_ppco_A5rehbnnt7uAaUZnHgIRDmfzM0q7Yxd6HLw-JzUGyBjUQNmrVJSDiabTvO6CMmIzl5VMFLhPaCgeeEE9jJ5vVwQFb0t7D2gX6DurX7tnSq5KCZOpjIOI71lYLVR8oWP_6kWkTrmvE-eWMx74GruRTr_CKuz7nPw7s0y-Us7_RXAqID0pnXTrTW0WUAG0yqUcAFU21zz0rQH2LcyRcMHwhbrxY6XaSc80JLlKlXlbPgKx0crbn7GsA89CdBa-PoCb99lkAgkEbfd91ONodHZl0paMbD96xmYPcPl6LNe-3Ffp6Dk1OQ5zYxlUyQyLrR9NuGkTcoYyDPu6Tr93CP98NLzprO9mk0k0SBX_uo7DbMf_UJurdzPvWOG63pEDrw3Q801MtzQidCob-Eo8e6t8UTZh6hbxEkHG57XvPope1NFoK3R1TH4500LPJaAWZ0SwpAyG6B2Pomb_qPFEaprLzdFHwrbCLPrNI1rcmFvn6gIoubo_wRKvEDxv4lVIZv7UvzC6MIcpKl9FtCvRNyrUwdEA45pg-mTNibhemj4jiEa6ZhKGTr-2orOFC1-lILcG7kq_g1-rbS388fyJRbrsm8aBVHjhYEMJhyesJkWe728xRRMK2XpBxAI-o7SPgrDvLQm0W-CNIrhXMR180KJNS8nGhIrN2R49asO7ZQgDQmr79k7SidmPGplK6NwfYJicodedAcNoZgz1-GVNfn11WZuxU7tyVk0PJP8OkhAJVgSITpQTD7iXrCIjdm02AJXQ1QTl50wHikEJiCZWpqyEhzR9VsfpLmjMi6pKxtUu7mo0G3HlAniMllU8d2wW50mTK6v--65Jh1KoDjoSQJB0zJnpFGyOcmriO3piQ-UeBxSI2_cTHJjXVifgfWq8N7knTpoVPnQGJI0s-MnS1gnWPcvfUwyGJsxAFJwqKmYb1bwMyLHDO2xvcySUszdq6SEdIQ1_KS7ktXvblspUEX2fALPtTW6x5UyfQqzoBlrUj4jqh0Gl5PaNfrblRD_tV8yLUCj9xCo1pV1_8QxssGewDrJlMhtGPdZJfQFVLgxCymQPj4TLdnNOv-ZY2tx6rUIZarzvwM36qiuz6duMpLPjm0MnIF1E7PhHyTX-a4io_KhtWmg3U3GiCtc-vFBxp_lotAjLfkSULn79phy6MvgQYTmi8tuAfQ7_t-XkV-1jHQWZZ3Tfym66r9GOA-fFswPaUVmfYhfMw6TTwnbKM_PCLzz7A8lL63l0V6v51bepviNIGzDHU24ZqkOrlWaRjdaMcaSJkJPVzw1MoPSzZyuoGjG7thRjWup-0NpJhbQMQ-Oy1b_cW-aGDttnhoA1AfiK9uYG7atv-0TnEBVE0o7HWZj1CVpLOscMEN5CsCblo0PCoANZ6oggZL4hPvOZbfEuwaHI5CPsWw8g4igUnDbjmHdr2x8YEIsGCcV4V8v58hz3fYNh9I_ewEBtdwNyBpi_0hEJKgqDMPhv3-uCSUz-_laD9MqqPzukaRbW8LNc-TEtedEe_8xUVnCNwMUQqSXKVHfnpBlzue3-ZHthucP3yOt3QLutaZbC2baStNYwvSjJVXDdDIlDBi9MI4ziNy7SNeKH5zjEvsCY_4CczK6eH7dfw_78jJvsQ5P9XyS0GKKmr-YEMknwEAoaOw_uVJIkrlFusSWTXtQJBmPzScESlvV76_t-HII74QbD0otwJqFflNK8l9JvZxoQNxIF3LBaABXXdWDSvzLIdn3jyDMcwkUvyGrA9GbBy2BXJJngaZAGhWWOX6Atfu",
+              "encrypted_content": "gAAAAABq26WkxKsaNsolVd5AxAtTYG0ruDSWibNhKwiv1rXkxmtWJ-w3Er_eH9m6N-YIiawK73ckCTlOAW3Pniuekz55kO9w1NbpzG8xbUx-mkMMYCyHfqtFyKMyYLwp-uykiKI01mBtSOoy_pZaVuu8Bjc0Zl37TVzy-Fp1jNuZkpn9rcxuDsBUf_AF_pf1VnOrJ-yvC-QSOJDHQWMVrs6ypST8C_6505rj7c-zwqO2pR-DULjRB5SE_Pupty2g3BQSMxJPJP3hQPIqwoYT_2Jrj6kzTJXlpqh8hzHKGUPdwZtFXDv3W6t_gUL_DOAAbJTWQNzPgcyxsP09N2IzHsOoTPGgEb9jIVnGILDcJS2R6596EuNN2zpU2XDltCl0jZtR6oF94O8ZPwApP1YOYr5hGSxdZf78j0_1Z9DRwv1ud63cQu5-9bcEqfBbmY4Z1zVLSNP0xIk2S78DcXTr6d2v7tCL5oRCcDQafRy5eE_eIj0udsi_7qai5KOcuw-3UscUU87EWzZK5O5TL5Wgsj-UBO4ib-IJAN1x1C0mJSQUYvIgVyJouiq49APwQ3Vim89oofwbi50S7cbMAhVQgO2qP1TILxDWhGFLdOOebw3v8JYH9-lgyxLgJ-iIQ_f4jUouUJxEsaxbzoQa4DEGMKikaPTHXIZMSctbOpGRnv9jm3GhsmcAMVGVBfHYIoW1kiBpSnJptXcPiGBPPhseq27agppHWX8ADkUsQIq-I_qrXPULZRZ9acoLS06il5Qiq6aV_UM6SlISsJ8cJL7VEG5n-0o3BDM-zNGXGiV8GIahE-8d56AUmCaHquxfsegUdbVxjf67rGExO1b7QEs3dG5eXYuLdEBucqaB97r9qDgeD1x_3CjAa3nvbTQzeaYFLXKxmvnX6BZqZBag5OAHxeKvZo0cDBB_PEiGEfoWqUtIDJremMRrAin-GkziTLI_4NJzLQ-vNt2Gwt-3n_3G62-P55qjK9B2IAO701h04zrXZgQ4IidLseu5LDY_NChyjSSONuqmaiuggLOrqKt9Ov1h8seVfi8w6yXllUHr8-gal-VSSs_a0FiGyU0W3kWGzY2lQT18LT8knzefOudeHpg47qyd7nNIqazR0AqDEvjI4V6iWe8YYOs27Sw0HbRtYC1jPhj6T6zXLRi65XRXJjtlRRLJetFG2IYNYYNK_eOnL6kJlBjblr2spJU2usGv2Wx4x8t-jcYdm8T_mXU_AEg9E_RzhRioucjFwBkSYydiacI6_JrgUSDZHE9R6bVsMKPTy4WxJj7ixA_Rhre5jMa5rP0tdSy5I-FCy7s7xQ-T3jNyq9yG2DAZll8L3WDMMys9eduyuJAecawDLViWvMUSnYi2t3oXE4VOIYzJQI_b3DmarQlwg8olZCedLNqTseP8GvwzWXBW9SWR7YBEnAB29zAwX7MeVOcYfmYmT-z0wkH_RKl00-Poh90nMIAQTOwfoQ8LVHmyh8h0-VE_-X3PRSFnbjcKAm5FbpMwhyRdSuSSqij819BFGYvgQ_AwIueatkRdz0JOZAGVwSIuNf65hJpaoCwNsaom0twKydtp_8wCuAAOw43knh6V_EYUyEfhGyCa9K5dXYdvqOPsHxHmuFNICl06h4Iu26W44_j0qC5Yus4FocuEHYhxvJJxJgtRirfuLzhtgDUW-JxLOz-hkIMsvGpyF7kAA_narq9tqpC8CiSuC8YrJuhiXKooEqGbHN7dmNF8pSfB6OR-9o-SULF9U5C0li5bYnT4XLAf82qaXTZ1zlXHjSyOB72y41xpZuLY96lca74YOOy1yvmjxxGGUn-97Q==",
               "summary": []
             },
             {
@@ -22,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6974,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8232,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 13,
-            "outputTokens": 102
+            "outputTokens": 62
           },
           "model": "gpt-6-luna"
         }
