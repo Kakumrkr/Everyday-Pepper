@@ -83,7 +83,8 @@ export async function onboardOwner(page: Page): Promise<Owner> {
   const business = `Juniper ${unique('studio')}`;
   await signUp(page, email);
 
-  await expect(page).toHaveURL(/\/onboarding\/business$/);
+  // Sign-up hashes the password: with several workers at once it can take longer than 5 s.
+  await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
   await hydrated(page.getByRole('button', { name: 'Create business' }));
   await page.getByLabel('Business name').fill(business);
   await expect(page.getByLabel('Booking link')).toHaveValue(/^juniper-studio-/);

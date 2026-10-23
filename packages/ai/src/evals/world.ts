@@ -76,12 +76,14 @@ export async function seedEvalWorld(
   name: EvalWorldName,
   at: { now: Date; timeZone: string },
 ): Promise<EvalWorld> {
+  // Numbered before the first await: worlds seeded at the same time must not share a slug.
   seeded += 1;
+  const number = seeded;
   const clock = new ManualClock(at.now);
   const ownerId = await insertSeedUser(db, 'Lena');
   const tenant = await createBusiness(db, ownerId, {
     name: 'Juniper Hair Studio',
-    slug: `eval-${name}-${RUN}-${String(seeded)}-${String(at.now.getTime() % 1_000_000)}`,
+    slug: `eval-${name}-${RUN}-${String(number)}-${String(at.now.getTime() % 1_000_000)}`,
     timeZone: at.timeZone,
   });
   const tenantId = TenantIdSchema.parse(tenant.id);
@@ -98,7 +100,7 @@ export async function seedEvalWorld(
   };
   const actorFor = (role: MembershipRole): Actor => ({
     context: { tenantId, userId: members[role].userId, role },
-    requestId: `eval-${role}-${String(seeded)}`,
+    requestId: `eval-${role}-${String(number)}`,
   });
   const owner = actorFor('owner');
 

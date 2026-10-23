@@ -1,0 +1,292 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "49e3df88684b686a23d577e0f75a957463b0cdd02d4a8ceb0c37961798739760",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4hOC48cgndLHbw69JPOe26MF",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5550,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 16,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "34ee0870b67f965b93c1671c9bfdc96b6c7a70b57b767241453ff29460a2077d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LQSy8aSzTQ7LTG4cZQst0EOH",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5826,
+            "cachedInputTokens": 5547,
+            "cacheWriteTokens": 276,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5d4fdfec72a81f464ac23178119aa7be8f646f4a14c93dd237d8175c0f835176",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_z0SER31H7IE73dwHGiHxgZQp",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5910,
+            "cachedInputTokens": 5823,
+            "cacheWriteTokens": 84,
+            "outputTokens": 113
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "04c89ee4eefec318d4d1897ccfa063970367fb455caf0084df7e39c798daa6a8",
+        "response": {
+          "text": "I couldn’t book Ana with Marco because your staff role doesn’t allow it. An owner or manager can make the booking.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6075,
+            "cachedInputTokens": 5907,
+            "cacheWriteTokens": 165,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "49e3df88684b686a23d577e0f75a957463b0cdd02d4a8ceb0c37961798739760",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6RpuwC61IFEK8hnuWbiv4Vd1",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5550,
+            "cachedInputTokens": 5547,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8738629618660e919fd8f21cdec18d7aed934659176927253ed9a0d93378f179",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pzFtjNVSCdzff2YHGp0X5CU4",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5832,
+            "cachedInputTokens": 5547,
+            "cacheWriteTokens": 282,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f62bc91c298fee75be97f46ed582d805beafb2db48d5bfbf89739f9e5d488b2b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0aUlYeVNbH3RdHTD3ge2G3AY",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5919,
+            "cachedInputTokens": 5829,
+            "cacheWriteTokens": 87,
+            "outputTokens": 121
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1d8e6499a198099bdca7ba8a9645fd31d692bbab82fb72c7b824e5042cb33fbd",
+        "response": {
+          "text": "I couldn’t book Ana with Marco because your staff role doesn’t allow booking. An owner or manager can make the appointment.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6092,
+            "cachedInputTokens": 5916,
+            "cacheWriteTokens": 173,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "49e3df88684b686a23d577e0f75a957463b0cdd02d4a8ceb0c37961798739760",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2J2zrPMTNq6mNfZPemifvrH8",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5550,
+            "cachedInputTokens": 5547,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "946e2a7d89202a13ba172e09adbfb897cff95bdfb30fddd09a5c5fbbd788060e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_arP27AsSjuus4gv2dczpEisU",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5830,
+            "cachedInputTokens": 5547,
+            "cacheWriteTokens": 280,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "871d56d7ac2b760fd2beeea7584f03cf322728da47d81844b853604a899d9f0d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_7Rf1tQiRceZ8QSwdrlZdt8mL",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"days\":1,\"notBefore\":\"11:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5915,
+            "cachedInputTokens": 5827,
+            "cacheWriteTokens": 85,
+            "outputTokens": 86
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9bd48f5434ed8b36c30a29680d04c98425d93ae5345c43c70b52973de68a6f1c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ZT3edqn3kdobP2DIrPxnvh3b",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6609,
+            "cachedInputTokens": 5912,
+            "cacheWriteTokens": 694,
+            "outputTokens": 113
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a9c50df4020b04d17b9d3cc44416dbd6b788278b03e49d83061efb770a2005ee",
+        "response": {
+          "text": "I couldn’t book Ana with Marco because your staff role doesn’t allow it. An owner or manager can make the booking for Saturday, November 7 at 11 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6774,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 1240,
+            "outputTokens": 39
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

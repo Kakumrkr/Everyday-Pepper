@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "2abe679d64ce8113a704b124aa448f03f40251f32d6a094e9fcf6668f16c2acb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Xa9AB2ysHkzqOcAVyFQYAjNS",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5544,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 10,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "481415bd94302ab18ca1ce050bb5c0def95e1768728762b73bf8387508e6f838",
+        "response": {
+          "text": "I don’t see a beard trim among the available services. Marco offers haircuts. Did you mean a haircut? If so, who should I book, and for what day and time?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0f5e424763f064a0016adaa9c9926487d2a4cd696ff00a3776",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qnKuk-7D1iiPYN-txiSzDNixlm8pa8SJxEDrRjVeIhFUtMfp30mKNqI4wGJbDqXr91Q9l38V0dje6xl5eoIShYozzNMOfUgwkOw8a5OG7Et2ihrpA_poAzmaxrRXfhNXQCYdxo_HVFlyOpw3tC2pPkJnzeYA5nvhZxhsU0ycIIOY_Cvo4s_v4cs69NariOJQesO-yymKFFbSEeIw1LzxWwc3pfJU1NgbAJO51AxLOXlEn4F-u1iggMsH1f0SVo4LcAbdTs_QaNzU6_EAJAAIArHCg7olfkKyIufvrilYByUot1iWI_Us2i8KT5Z_kc30X4xJL8qDLX7_IOII_rrhP0wTdFH9NXP8IJofxhR0qfdwJQSQFoDwfiv91Bx-U6QG-HNGHDu4A_s9kiLsOqIc_SRAIfwte0OFBf3ha1IfJKmw0AQCzm_DcJTJvVU-8Nqp8t0zB8u92GpdWjVZXHgYn2BzPu-dpmKhey_6-BOTK-jTKl5Fp7aaOvr9Fk_rh0rmswVaPju_voe84wcpiB8ZTZhiRwQ5-yTuUVoWFO9GVWdLQOqkGx_HhKDGCM5gBgok_Zcy8JqKjKjWuBt2YJYZdg6gGHgMHnJe6jYrH68tU5vck57VJx8VkgsDdNeZX6xd_hfqIRpgVHpdRkiOk-iOPGdEsUb9UTlgXt4WBLKAbbaCWhrl-jcbJEmhG0782YhM2vqYZ9ZzTXmgqzFXsDl4KSERiJUeSIq0_wIQ-pdDz7vDYJI1856e37C11BWaT8qZt_RzEgrRTWzhVVsQGmIV0VHeL6P2POlSV_KgxwI8dVgOhQct8quWJ9oYvEGj7LM2QcpaZILbPzz4HtHud0vd5HjDqiAu-l6oxTRDa6tUB9YbcvGLpC7SWC_lIf_wB8FWDAupbP7aZKa4nfWkDUI6eMo5pDJqk3VnR7mSHHMVNRfoyI2gvRa1cRCQYAd8RqUTBItCbzLlZJD9kwB1pKLV41yWoLkivUx5n-43mTwTxjATF8hD9VlVbDMq4npQm6BXmriV6W-7PPWzthBW2owjYx5qmFgfxlKPBcqD2ARp9_Fan0dti08FdH_Td2t4gLfKpWWnzlfCfm0gOvFJNrkCeDI4ca0mBcQyTMRLxDc0c_bjYCQB-zyTCgxnHDsTUeOQCNUmET1pkN_bw1iR_0BzV5-yVnRSrdjPsD1Wn2ap0OpiToTwiRHeIe36TV6EbXqYiTe6wNhDumfB8aE05KHnNY2HqEMlwLltpKLqdK5l3dYMkXns_O4-Nt6UiyP_cvxclGv-svBFHYuxPlUmizujXz93TBNLdqbchlW385WkHY_nF3kSlNorq4ILvibU3aFzo68nhKm84AecJCpBassvGvITsc8LFDIThKiPpO4pI521sdD0NTl7HaVVHuDDl3J3UK38eVa4ind-5V3k7oc99cneUvIK4eUEJjzezSRtx8mQx9C3nIUmC5S5HhZnzi2Whj2oqpj4vrlKg5sN1sQVod-WyYA6yrCjiaUlNFTQ-fPy_-KBuDWi3MxeHiZkQOmYgZQzeugjea-DYz78zEXfM5bVyFVcyD_6CBmo4u0ih7l0KcVD-nm-Bp6b0uNneBiQkUUr165zk-WGwTbTFWWngmhM9R19QSrP1vf9MdKxJEIhm4qFDA2aG12RQl42JDF4s3TX5_MI9czmvO3BvS1VGVWA4JMSKUAxPSx_QP4hMdPnFFknUccPyk4b9QGXQ09EBU369FifAeksin2vsH8SPI5BEuHmzgcN64oawr_-cL9EKpXvyPahsJSUZiwQHlwqKCjgkzx_bNeqFdHe9X-k8mIrC277KyfbtGa_Yr9-SRlIWGYLjtYvkitRC-3X9Gc4d7a2nuY76HMoWEcwbaigReYAny3NY1SOdMXlD0ONzi3MdVhluuJ4p9TiKN3M2sNyeE8MuG_RhSTWnYp2d_0QkKZcwwSWjgDxbIo93dwT6iW_Yfrcp4dKCeaZnkhteEtwrvgka0xu5p1XmCLtYyPg92u5uWKBT_lQG1_4oiq_GjefqXtGoxtxJwgYFhAr2eJv9Ah_kqXHYgQctEYyaHN9aDaWnhi5GRyCMme-mpnyeZTuBg6_JXVp0WgaBHzdQQeK2ZG",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5816,
+            "cachedInputTokens": 5541,
+            "cacheWriteTokens": 272,
+            "outputTokens": 96
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "2abe679d64ce8113a704b124aa448f03f40251f32d6a094e9fcf6668f16c2acb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_CT4GHjbz51wNuRBs0IAy7FCE",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5544,
+            "cachedInputTokens": 5541,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f3afaaa0f597c217822a77efed4bccb9aa5007017525cfb9cbd606ddd74a8a8d",
+        "response": {
+          "text": "I don’t see a beard trim in the available services—only Haircut and Colour. Marco offers Haircut. Would you like to book that instead?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5811,
+            "cachedInputTokens": 5541,
+            "cacheWriteTokens": 267,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "2abe679d64ce8113a704b124aa448f03f40251f32d6a094e9fcf6668f16c2acb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ruq5xKXyGIam5Bn2nE3PHdhR",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5544,
+            "cachedInputTokens": 5541,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "af392f36a8a00c0bcc73ede68754cb8bb278be017e4c9dacad1bdcf0268d08c5",
+        "response": {
+          "text": "I don’t see a beard trim in the service list—only Colour and Haircut. Marco offers Haircut. Would you like me to book a haircut with him instead?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5816,
+            "cachedInputTokens": 5541,
+            "cacheWriteTokens": 272,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

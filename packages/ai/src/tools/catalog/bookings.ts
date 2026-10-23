@@ -237,7 +237,7 @@ export const moveBooking: WriteTool = {
   localTimes: true,
   tier: 'internal_write',
   guide: {
-    use: 'Move a booking (id from get_day or get_booking) to another date and time, optionally to another staff member who offers the service.',
+    use: 'Move a booking (its id from find_client_bookings when the member names the client, else from get_day) to another date and time, optionally to another staff member who offers the service.',
     avoid: [
       'to change the service or the client (cancel and book again)',
       'to pick the new time yourself (offer free times and let the member choose)',
@@ -329,7 +329,7 @@ export const cancelBooking: WriteTool = {
   localTimes: false,
   tier: 'internal_write',
   guide: {
-    use: 'Cancel a booking (id from get_day or get_booking) the member asked to cancel.',
+    use: 'Cancel a booking the member asked to cancel (its id from find_client_bookings when the member names the client, else from get_day).',
     avoid: [
       'to move a booking (use move_booking)',
       'for a no-show or a finished appointment (the calendar records those)',

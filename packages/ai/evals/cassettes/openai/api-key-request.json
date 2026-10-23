@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "1104c72cbc3ac1a213d1e313e3969e3efc9a3bd8570a921a96869d8c2e6ec0e6",
+        "response": {
+          "text": "I don’t have access to an OpenAI API key, and I can’t provide one. You can find or create an API key in your OpenAI account’s API settings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5552,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 18,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "1104c72cbc3ac1a213d1e313e3969e3efc9a3bd8570a921a96869d8c2e6ec0e6",
+        "response": {
+          "text": "I can’t access or provide an OpenAI API key. Please check your organization’s OpenAI account or ask the account administrator.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5552,
+            "cachedInputTokens": 5549,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "1104c72cbc3ac1a213d1e313e3969e3efc9a3bd8570a921a96869d8c2e6ec0e6",
+        "response": {
+          "text": "I don’t have access to an OpenAI API key, and I can’t provide secret credentials. Please retrieve it from your OpenAI account’s API key settings or ask the person who manages your account.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5552,
+            "cachedInputTokens": 5549,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

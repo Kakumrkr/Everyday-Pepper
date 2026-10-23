@@ -11,7 +11,7 @@ import {
   type CassetteStep,
 } from './cassette.js';
 import { loadCases, loadCassette } from './files.js';
-import { runEvals, summarize } from './runner.js';
+import { runEvals, summarize, type CaseResult } from './runner.js';
 import { loopSubject } from './subject.js';
 import { seedEvalWorld, WORLD_PLACEHOLDERS } from './world.js';
 
@@ -44,7 +44,8 @@ describe('every eval set on its scripted cassettes', () => {
     // Hand-written answers for the reference cases and every tool guide's examples (S22–S26b);
     // the cases written for S27 are answered by the recorded model below.
     const cases = all.filter((c) => cassettes.get(c.id) !== null);
-    expect(cases.length).toBeGreaterThanOrEqual(33);
+    // 31 since S27: get_booking's guide examples are not one-turn cases (`evalSkip`).
+    expect(cases.length).toBeGreaterThanOrEqual(31);
     const results = await runEvals({
       cases,
       trials: 1,
@@ -80,26 +81,27 @@ describe('the recorded real model, replayed (S27)', () => {
         (entry): entry is { evalCase: (typeof all)[number]; cassette: Cassette } =>
           entry.cassette !== null,
       );
-      const results = (
-        await Promise.all(
-          [1, 2, 3].map((trials) =>
-            runEvals({
-              cases: recorded
-                .filter((entry) => Math.min(entry.cassette.trials.length, 3) === trials)
-                .map((entry) => entry.evalCase),
-              trials,
-              subject: loopSubject(db),
-              providerFor: (evalCase, trial, world) =>
-                new CassetteProvider(
-                  recorded.find((entry) => entry.evalCase.id === evalCase.id)?.cassette.trials[
-                    trial
-                  ] ?? [],
-                  world.placeholders,
-                ),
-            }),
-          ),
-        )
-      ).flat();
+      // One trial group at a time: running them together tripled the load next to the
+      // per-tool latency gate (latency.int.test.ts) and made it miss on a busy machine.
+      const results: CaseResult[] = [];
+      for (const trials of [1, 2, 3]) {
+        results.push(
+          ...(await runEvals({
+            cases: recorded
+              .filter((entry) => Math.min(entry.cassette.trials.length, 3) === trials)
+              .map((entry) => entry.evalCase),
+            trials,
+            subject: loopSubject(db),
+            providerFor: (evalCase, trial, world) =>
+              new CassetteProvider(
+                recorded.find((entry) => entry.evalCase.id === evalCase.id)?.cassette.trials[
+                  trial
+                ] ?? [],
+                world.placeholders,
+              ),
+          })),
+        );
+      }
       expect(results).toHaveLength(recorded.length);
       // A stale cassette (a prompt or tool changed since it was recorded) fails here: record again.
       expect(
@@ -107,7 +109,17 @@ describe('the recorded real model, replayed (S27)', () => {
           .flatMap((r) => r.trials.flatMap((t) => t.reasons))
           .filter((reason) => reason.startsWith('cassette')),
       ).toEqual([]);
-      if (recorded.length > 0) expect(summarize(results).meetsGates).toBe(true);
+      // Named, so a miss says which set and which cases.
+      const missed = summarize(results)
+        .sets.filter((set) => !set.meetsGate)
+        .map((set) => ({
+          set: set.set,
+          passed: `${String(set.passed)}/${String(set.cases)}`,
+          failing: results
+            .filter((r) => r.set === set.set && !r.passed)
+            .map((r) => `${r.id}: ${r.trials.flatMap((t) => t.reasons).join('; ')}`),
+        }));
+      expect(missed).toEqual([]);
     },
   );
 });
@@ -119,6 +131,14 @@ describe('the seeded world', () => {
       timeZone: 'America/New_York',
     });
     expect([...world.placeholders.keys()].sort()).toEqual([...WORLD_PLACEHOLDERS].sort());
+  });
+
+  it('seeds worlds at the same time, at the same instant, without their businesses colliding', async () => {
+    const at = { now: new Date('2026-11-02T14:00:00Z'), timeZone: 'America/New_York' };
+    const worlds = await Promise.all(
+      Array.from({ length: 4 }, () => seedEvalWorld(db, 'juniper', at)),
+    );
+    expect(new Set(worlds.map((world) => world.tenantId)).size).toBe(4);
   });
 });
 

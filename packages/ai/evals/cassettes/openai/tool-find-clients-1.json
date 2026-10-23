@@ -1,0 +1,278 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "df4eaa1b0ba421e41a4e77c0c070c963834c73306cf7e0d08d4f7eab88e567f8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_04WzG4hImEOdiMuI9YDsE45M",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5547,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 13,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f38038b7498959f467f0b1303517659a99d83d409f9f8085c6e6ff09faa51269",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GY0UexNvrLeCEmqTCjNBBiP8",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5815,
+            "cachedInputTokens": 5544,
+            "cacheWriteTokens": 268,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c92a502da7c22cc3537d99189904ad0ff15511de8f326b5961421a05b1386039",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_waMAkDpfIyQuq56MIo27ILsZ",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5898,
+            "cachedInputTokens": 5812,
+            "cacheWriteTokens": 83,
+            "outputTokens": 92
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a68a1c84a40066bd09fc3aa271176e132c42d991c625350c63fea3e818e2e09c",
+        "response": {
+          "text": "Maria L.’s haircut with Jess tomorrow, November 3 at 10:00 is awaiting your approval on the card. It isn’t booked yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6070,
+            "cachedInputTokens": 5895,
+            "cacheWriteTokens": 172,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "df4eaa1b0ba421e41a4e77c0c070c963834c73306cf7e0d08d4f7eab88e567f8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_keUFwfHKzCCsmXi00RTiGUdj",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5547,
+            "cachedInputTokens": 5544,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "54a33d8d7c456fea0600de5f9c7238430a92ec4b92274d70d445c6b4a00fdcbd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_YUTiI8nYsITNrsqxRRZplrZH",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5817,
+            "cachedInputTokens": 5544,
+            "cacheWriteTokens": 270,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4e78092e23a051a1ba20d1077ffb5e86daff54983e9aa222dbac1f2ab7b9898f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_679dN4JxkwPSgyFwkzux8YXD",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5901,
+            "cachedInputTokens": 5814,
+            "cacheWriteTokens": 84,
+            "outputTokens": 92
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "99b5f39e5798caf8491e43cd3b8f55ae43da3b8813724bb943c18b72df3a0b57",
+        "response": {
+          "text": "Maria L.’s haircut with Jess for tomorrow, November 3 at 10:00 is waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6073,
+            "cachedInputTokens": 5898,
+            "cacheWriteTokens": 172,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "df4eaa1b0ba421e41a4e77c0c070c963834c73306cf7e0d08d4f7eab88e567f8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_koOP5cZUdaduu9YS9SGpYuVh",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5547,
+            "cachedInputTokens": 5544,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6111fc732d10391cca1f68188e0adc16a1846e05a58af60bfe29ab6115f77a36",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_alhxSy76Ag11Ytbyz3M1OdAh",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5811,
+            "cachedInputTokens": 5544,
+            "cacheWriteTokens": 264,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f41a6bfa82fb74e6ed2d27c227dca04ecd4c37fdab86c0b78f8b771c97296d57",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_yb7TorYKPMMqzomGlBL8d0og",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_038ade373a45908e016adaacc83e9887d29772d8a4a9640273",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qzJBsx3LazKZLKTSsOjYG2Uaw_DE9BoLJkUpEhypp-pV8mjaI8KmXKLEE4Aa9pUu3k1T5BWaJLOSBK5kf6JNNoRJO1UtI4RsJUMSxxfILeOZXBcfhM9HQZrpvzY3S-izD-B193VPHrpPwP5luCh4WkynPF0XUVQUP_d2uxCtkfb4Nc80gI4j7szrdibIHvj6E1-GzMB_9GgUGltzLipycc4IDXWQTTPs3IjUnFnYWHp3dnD9f_K03SIrV06vhRGiR3vpc5qHHnYohlkhsN5WdblZ9DF9B0Qjqf-2Ug9hH3i2anlGjf_qe3vQINj-voSyEG_n8Ura1a7cWoqoUmouX0w8VfP1A1cmXQYTnhgDaUMtiOZZTK4qIZ3ciphakhXlLcn09f3eBm3qiUDGhZ0yIWgeh5pjiuETuaziH5g6n0VhKsFwHQYL_ufvSqOZQurvidr88rn8zpyA6HBYv9OsdDcJMMc3vR0Ysl_gxG5onfu-yBLjc-6Sw8qHeVG3g0Zw75DJ1CBGPoiXA-lvOZmZEpNRU-EorEgSCTMdF4GIB8erPk4RMc_YvC2NRDs2I2zW2TaVfo3rmPH9KFAcvV917MVpfii12OS6Js5yKsJZVjUcY6gL4aPBNV_9W-Wx9HHVeTEXNkmaD4vHD-2wVzBuRi_RLKTGcFIxSIJVPcEqlM0qheVjT0YSmCDvXIz8UDfQuoPL_YqA_btM4kRk1O6gPcN4CfIzcox6nh3KdL4mEdIhzXctRjel9h7xmBlAQjZ-oxHM9PkYGl8j5-XGCdDSyLbnEuR0TflR6WtrTCMRmMP-7PZ0e3pD1c3Sd9pjstK837v4OBg7m5sK8N40XrlnV0qJMEwkiFV-fuX4f5ygjne7eNLa6o_djqfLK4DgI9hoL47nyR6i_I7gGioOvbGokKwPvPwX-sb3onmsypKtP8IuMKT_X838AEIx0rozHobzsFvOCLNJruuQ_LaIFCP4Rl0_qVAfxKyRn0HMXmZWevbnFvtnS8zeR-oBcpX9UJRPRnVcR4Vk_Hn1I2vxGi8bu0-jocTlqdJedpcn0zHTyL1gVVyPOQLoSK2Yxpm1k4sRRlRebYfo8x2K5Sn4kSilxX5cYSBeJLlRgNobrU6j1DaRJXV6u43lm344NsZwegVzoIvlPWNXPuTBU5SWNsWD450CaJ234pIocYnMqtai4z8-SIo8nZkLJSMxuS4n9u96tMHuAjjDes5olQFWdIw8Y3CA4rvkLFLIIvE6S-9PcBEiR9cOEpnGjQiT57N5It-HSKLTWkivMLOWPH9WCVtsN1xWcARNrUKxvHD6SabVvyF_fpLZDdDLouDLlz4ec_YOqX03yDPxNAi8Mccdyvs7_OiDG-S_-l1tB-UnB3-hpIe_0Cao1HX_JTPGK7YIn8x1t62MGVpCpTDmakk3uzyQOhoCvu9adXTpRDQ2AS6QHP10I6H1tNzeajMJansaQKv-gdm1pDsENYysQCOSk1FlVY7QIjl36i2iBZbU2xgn5iw5yToB5TrqvLxaYmwfVKqmFH4qyaQFwZAsqFz-JiUU_Zqk3694hLCvd9NrytnZ-LyHqmXZYx9zjslyZ0Dj0yAe_VY4pQ6PxpYYLPESGZoW_EZiC1vaQ1Za9s1mKjoKWtCog6s771gyanIE2YIZ9Bx4VN561RSgw7dqTE0AZgSBXnewIDwhUhB89lcBbmfhCCqpFO0q0MbUtgeNTI63N2WLHBIBXYczCloeH5lHkgFzHx7DngSA4BUW6Uo07Y_kbWjuWQShgGTlSSaCExb3GlL2zUK-prSW1AmE3KP3pn1vEbeu9lefxczI8wBf1cUpZyKQTSdNT6Q7gllA14o8V8bTEy-y92OBNNGlEvWD3VA4PFQ3HCGxx6TTevNBhbj30a1ZRS_cYntl5RByVIcGsUHi7p0BWtTyVkFtOblcSdNJdpzIdZ5ReH0vDDetA6zmLr2x3H6fyz8DJgphweHJx8rHnYAPrUAk5pOwQqrOVnYL8Ih0yEMVXvdqxY53q6ezA9SeZQ=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5893,
+            "cachedInputTokens": 5808,
+            "cacheWriteTokens": 82,
+            "outputTokens": 136
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "995d8c38c45477975b15c4254e3442ddff05f5d864a615fb3b3214321450144c",
+        "response": {
+          "text": "Maria L.’s haircut with Jess for tomorrow, November 3 at 10:00 is awaiting your approval on the card. Nothing’s booked yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6109,
+            "cachedInputTokens": 5890,
+            "cacheWriteTokens": 216,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

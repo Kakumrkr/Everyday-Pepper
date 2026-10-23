@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "ffcc3372e77581d6eae32eb692a4e30ae25ff6c86ba1f007318b5c37681e3dd7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kmC3s4QVZJqgKaSqP3GRzaEN",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5545,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 11,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7e2481efda8cdd8e649f2485eee206846041ee580062481b4088e8e2ba5f5598",
+        "response": {
+          "text": "I don’t see a bank to-do. The only open one is “Call Maria about her colour.” Could you clarify which to-do you mean?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5651,
+            "cachedInputTokens": 5542,
+            "cacheWriteTokens": 106,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

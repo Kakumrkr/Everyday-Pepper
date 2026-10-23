@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "51da925bcc1ae71c3f0ca7ab7e6508d4410f843c94d15be2552a41f1fe306ed9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Lurx3FkgejbzUr9kfScY98bM",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_s7VQt2KmUVJBa0qzfEHx5tWW",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0863cc22bef77894016adaa813a18087d280f83403ae56de15",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2qgUDlAyidLSDANHmnblqCNZrc9LTEHlyBd3K_cTR7oqcB-0ZQ4z5kmBZ0mV_DgvoLJ_8U7nt5czbI8xwx5fV5KPPndCP4-MZG8qBbVxB9v_zGiy7iSEvH847kR2ur3_NcMLIRmJTc5z9ZhmacLnhW74IxK6LES6DkWH_19VcjEuu6LVK9gXhozDiUwZcc_UFBPGsIPk9WNft9g810uQH4ZfPVQyzSZrNLIwLyiDQgJWDEIEiQ5WuB0xrqUODkeAgpUL7Ktms0bZbubJlXlEduSyJUkYXsS1jUVCgLyEW-RTmwGPW1eY1wBoXXGOXug-I630WsDAK-bZbA3UTzLrABrPDTzE569zx6LFsM2qbTW4LXcHeBiMyp9NBeY7GoWFYbXl39e6rmgDET4Zxf3JFGYUP-rjdvyA6ZVwtANKbrSVG_hosOe1_ZjQ6rmxvdD7AFKTihoCL_j9DGVgJV2kUs7u1484O8SAOwrg4-QZGxWa51LXDFFMLkEGJyOSCvBM4lChJYq97bjyxWPtAXYuTd2CTS8NfnC3RPNb2yXfYuKGJhq5KujnFKaYYd__AbO5l4jf73uiYiGgP4hMbUawiRI77BH3otZ5XDjOevKbzCHQVq2jwvtA9eko-EZCPaJx0opI4qVv2ffcucq1LL1E9Cy2kn9x4MPp0olWxr5c665TQIrMuRqug1KehOn8JU07nCHppFztQJfRtCHPyW3p84bGyFVESkWrmu_pio4h78J6PLQ0UBDZ4xATh8CmmpvUl_oZRKRZe2jwZbp3r0vls3n47igYkD6pyaP9lc_MuiEGp9tCkWwL4u8es8KudqTiQai7pSQt51HCPQUf2yIyxag11559dh5rWqSrgYlikgyqEuwbXpEY1JqnuxYY1rNtu6cOoANprP2BjLOu4Ap9fpupzYPQK4h9skQjGbbzC_xlk5X5RI5BC2p7mntL_MaV36RJu7zRyB9zaHbzrymw4Or5Lh2ezc3DuIQsu3KAJqhzUBOJViMMAeNSZJPCcDUQLlLY2tJv43T-r9vg2qVcMJrJfzkrH094-Z8INGxG6Qsdq8jZRI__iHiNxZCG2L9K7tC5KpJhOX7s4Vf6TkW6xe1rZ3yv7oQT0Xj_6FG4Tf65Ypw-I44Kk-_e-FUYKmu0snpWPGKhft6J1vm0isQ5x3QW68Nh6YutTkmtgOjXHX4p3mnvweTqzZbbzY8EyEwQDTIurx3L46-eXgyCOENYb9VGrykshlpAS5jm3GtNXqoVk1XmJinoGxMJuuucH0m1wOY74QnPgKb8fBopA7XiOvC8i4KlsIgSTULGUdSLpoq0ojM62daEfUaMDHrVuGT6hHUbnmaO0CahYV1VIF7K-K3qUk13oamNF6FL1tv8GOwE6p0eMEYHk8HX4g0_NiHHgl2DuPh_ii6AzQD8yqiDrxuF4uUNmwM1Mz6tM_CNbjGQAgc8sCUlh-P_Z8Mi0RMqgJOzHVGfIK1xCR_Gu_UVYH7E-k9pu8MNhuC0Y0rTRXdT4cabhcc21NPTddGkVTypM1iOwTaHe75gvj0u543stdG_lZXZhisjm5LwEXEEZLi3JJ5yk7V5PKjySgyhS-HaYXPf1xjNS9mNgNRew4vKRJur6nzRJfoPMmhicPMBjGAHpIL1-Czy7_ELAnY3g3NkcFcTEf0BSTqEA9uZ_slpZvrKrqqgtuZ_ygogZNlaz2b-8_L8Oj0eg63T7fw-5Jow6kUa4SsA5cuhJyHdciWX8fLwf21Or7jIRRKmb5hr7Kqfb56rr7ehI_XZBypqQKsResd4hXay3CSa1vMtPuiXOzZ5aO1e_q2hGeDjy_iJXQs4JCbIF1hIESfm1-hKSIW_y_JFvm0BqVRkWp15zaQVhaZj0A==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5542,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 8,
+            "outputTokens": 83
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "87fdceeac1cc07e59803991e97d0c7e7a33e156560543c26933ad5da5e9b2617",
+        "response": {
+          "text": "I found Maria L. What service would you like to book—colour or haircut—and what time tomorrow?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5961,
+            "cachedInputTokens": 5539,
+            "cacheWriteTokens": 419,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

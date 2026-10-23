@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "af53c4eb6674caa4c630c20819c696f606d0ed19ab1f34605cfa9730e4acb0ee",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HUpWQSNYe4m2QGg7lXgrRaHR",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 5544,
+            "cachedInputTokens": 5531,
+            "cacheWriteTokens": 10,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "47a4e297177aa7781935524f2b19f3bff084b52ff479704743a3a129b451dedd",
+        "response": {
+          "text": "There’s no block on Wednesday, November 4, for Jess. I can’t remove one from that day.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 5627,
+            "cachedInputTokens": 5541,
+            "cacheWriteTokens": 83,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

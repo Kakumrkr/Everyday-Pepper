@@ -3,21 +3,21 @@
   "trials": [
     [
       {
-        "fingerprint": "2a0876a296ad4c8fe64f3937771baa8866e2325216cf3cac5b5e5dfc8455ce88",
+        "fingerprint": "df974ed3fc2de29ef5ed96104540683050525b1bfc3ce7ab1a00d5430d61d18d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OvFZDFWkcbZXWLwhfIn094ka",
+              "id": "call_npWlOqJyv17MVG1TPz77kbPr",
               "name": "list_todos",
-              "arguments": "{\"whose\":\"team\"}"
+              "arguments": "{\"whose\":\"mine\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5476,
-            "cachedInputTokens": 5457,
+            "inputTokens": 5550,
+            "cachedInputTokens": 5531,
             "cacheWriteTokens": 16,
             "outputTokens": 19
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "efd0f9a200b8213d31df2bcf28d3c3e1832e687121ab8077329785365b7bb63b",
+        "fingerprint": "d8275e5e9f2b86f840c3da302ca7f2ee014f94b7872a157f1b59bee7ea4fa77f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ImidaM2QytT27eiCmGzec6yW",
+              "id": "call_FjSpUW9DYRO5Vxv2Djyh5aLX",
               "name": "complete_todo",
               "arguments": "{\"todoId\":\"{{todo:call-maria}}\"}"
             }
@@ -38,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5581,
-            "cachedInputTokens": 5473,
+            "inputTokens": 5655,
+            "cachedInputTokens": 5547,
             "cacheWriteTokens": 105,
             "outputTokens": 40
           },
@@ -47,9 +47,9 @@
         }
       },
       {
-        "fingerprint": "43bba3a99f09205690150efaf5fc6252d1dfcf959e8f6699fda7dc6199db03d9",
+        "fingerprint": "86320a3dde35e384172194410a34b4247389e880ed0a258a0d52a5840c95e27d",
         "response": {
-          "text": "Done — “Call Maria about her colour” is ticked off.",
+          "text": "Done — I marked “Call Maria about her colour” as complete.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5667,
-            "cachedInputTokens": 5578,
+            "inputTokens": 5741,
+            "cachedInputTokens": 5652,
             "cacheWriteTokens": 86,
             "outputTokens": 18
           },
