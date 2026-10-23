@@ -1,22 +1,33 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-23 · **Plan version:** 0.26 · **Current phase:** 7 — Memory ([Phase 7 playbook](phase-7-playbook.md), [PCR-005](changes/PCR-005.md)); **S29 done** (memory store, [ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md)) → next: **S30** (facts in the AI)
+**Last updated:** 2026-10-23 · **Plan version:** 0.27 · **Current phase:** 7 — Memory ([Phase 7 playbook](phase-7-playbook.md), [PCR-005](changes/PCR-005.md)); **S30 built and green on the fakes** ([ADR-0035](../adr/0035-facts-in-the-ai.md)) → next: **S30b** (record on Luna + Sol, then PR and merge), then S31
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S30 (Phase 7c): facts in the AI** on `claude/great-cori-t020a2` (S28 and S29 were merged to `main` in PR #37).
-- **Brief approved (user, 2026-10-23):** "Go ahead with your recommendations, ADR is pre-approved"; open the PR and merge to `main` when all is done, then give the prompt for the next session.
-  - D-1 `forget_fact` always asks without a new dial action (recorded as `client_note.save`, no dial action decides it); D-2 a memory save in an untrusted turn always becomes a card; D-3 no warning for a member who can't read the sensitive fact; D-4 the free-time description fix with its held-out cases now; D-5 one trial of every set on Luna + Sol; D-6 ADR-0035 pre-approved; D-7 build on the fakes first, record when the key is there.
-- **Blocker for recording:** `OPENAI_API_KEY` is not in this container (a new session picks up an environment secret). New tools change every request, so the 112 recorded cassettes go stale until re-recorded: recording, PR and merge wait for a session with the key.
-- **Done (committed):**
-  - T1 contracts, templates, migration 0040 (a proposed fact that goes scrubs nothing), core memory services;
-  - T2–T5 `remember_fact`, `add_visit_note`, `forget_fact` (values stashed as proposed facts, ids only in trust records), recall by reference in tool answers filled live per request, the business-facts block, booking warnings and last visit (AC-W3-2), eval tooling (memory world, seeded facts, new conversations, screen actions, graders on requests and storage);
-  - T8 the four memory sets: 49 cases, 10 held out, all green on the scripted fakes.
-  - **Found and decided while building (ADR-0035):** recalled facts make the turn untrusted, but only text from outside the team makes a memory save ask (else every save after a lookup became a card); concurrent saves of one key take turns (advisory lock); the default real-run chunk is 20 cases (the bigger prompt put 25 over $1.50 at worst).
-- **Next:** API views and web cards (warning, last visit, "Updated: was …", Why? remembered facts); the D-4 free-time description fix with its held-out cases; ADR-0035, docs, Playwright; then recording when the key is there.
+**S30 is built, committed and pushed on `claude/great-cori-t020a2`; no PR yet.** The container had no `OPENAI_API_KEY`, and every request changed, so CI's replay of the recorded real model fails as stale until it is re-recorded. A PR now would run CI red.
+- **Next (S30b), in order:**
+  1. check that `OPENAI_API_KEY` is set and `api.openai.com` is reachable;
+  2. record every set on Luna + Sol with `--phase 7`, in chunks of 20 (`--chunk 1, 2…`), against `EVAL_DATABASE_URL` from `eval-db.ts` (ADR-0033); expected about $0.10–0.15 of the $1 Phase 7 cap;
+  3. check the gates: memory_delete and memory_safety 100%, memory_recall ≥ 95%, memory_write ≥ 90%, the Phase 6 sets as in S27; fix what fails and record only those again;
+  4. `pnpm check`, `pnpm test:integration` (the replay is green again), the ledger in ai-budget.md and the eval report;
+  5. open the PR, merge after one green CI run; update STATUS, session log and decisions.
+- **Decisions made in chat:** none beyond the brief (decisions.md "S30").
 
 ## Last sessions
+- **S30 Phase 7c (2026-10-23): facts in the AI** ([ADR-0035](../adr/0035-facts-in-the-ai.md), pre-approved). Full entry in [session-log.md](session-log.md).
+  - **Built:**
+    - `remember_fact`, `add_visit_note`, `forget_fact` (always asks). A value is stashed as a proposed fact, so proposals, receipts and *Why?* hold its id (migration 0040);
+    - facts come with the records tools return, by reference, filled in for each request as the member; the business's own facts sit in the instructions;
+    - booking warnings and the last visit from template config (AC-W3-2); "the usual", "same as last time";
+    - memory on cards and in *Why?*, read live; a Playwright journey;
+    - eval sets memory_write/recall/delete/safety (49 cases, 10 held out), deletion graded on the requests sent; the free-time description fix (D-4).
+  - **Checks:**
+    - `pnpm check` green;
+    - integration 1,056 with one failure, the stale real-model replay (by design until re-recorded);
+    - Playwright 76/76;
+    - $0 spent.
+  - **Found while building:** recalled facts must not make every save ask (only outside text does); concurrent saves of one key now take turns.
 - **S29 Phase 7b (2026-10-23): memory store, forget everywhere, embedding port** ([ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md), accepted). Full entry in [session-log.md](session-log.md).
   - **Built:**
     - migrations 0037–0039: pgvector, `memory_facts` (one active value per subject and key, visit notes, sensitive, staff scope), `memory_episodes` (own-only, exact search), `tenants.memory_paused`;
@@ -30,12 +41,6 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
     - Playwright 74/74.
     - $0 spent.
   - **Self-review fixed:** an erase-a-word attack through save-then-forget (scrub limited to the fact's lifetime), quoted values in tool calls, cards that could outgrow their schema.
-- **S28 Phase 7a (2026-10-23): Phase 7 planning** ([Phase 7 playbook](phase-7-playbook.md), approved; [PCR-005](changes/PCR-005.md), approved). Docs only. Full entry in [session-log.md](session-log.md).
-  - **Plan:** S29 store → S30 facts in the AI → S31 episodes and learned rules → S32 "What I know" → S33 re-record, pass^3, security review, exit.
-  - **Bar:** recall ≥ 95% (pass^3 ≥ 90%); deletion 100% at pass^3, graded on provider requests and storage; memory safety 100%; AC-W3-1/2, AC-W7-2. Phase 7 OpenAI cap $1.00, recorded per session on Luna + Sol.
-  - **Review changes:** values live only in the memory tables, and one forget scrubs chat history, episodes and Undo values. Also visit notes ("same as last time"), the last visit on the booking card, the "Remembered" chip, a pause switch and `--phase-cap`.
-  - **Checks:** `pnpm check` green.
-
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
@@ -47,6 +52,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S30 (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved"; PR and merge at the end, then the next session's prompt. D-1 `forget_fact` always asks (no new dial action); D-2 a save after outside text asks; D-3 no warning without read access; D-4 free-time fix now; D-5 one trial of every set; D-7 record when the key is there. **Claude (ADR-0035):** stash values as proposed facts; references filled per request; only outside text makes saves ask; saves of a key take turns; real runs in chunks of 20.
 - **S29 (user, 2026-10-23):** "Go ahead with your recommendations, start S29". Embedding tests on fixtures shaped like OpenAI's documented answers ($0); real embeddings recorded in S31. **Claude (ADR-0034):** `embed` as a port of its own; the scrub limited to text since the fact existed plus its source turn; cards that held a forgotten value dropped; staff read the business's non-sensitive facts and change only their clients' and visits'; `--phase` required to record.
 - **S28 (user, 2026-10-23):** asked for the Phase 7 playbook, then "review your plan, if you can build a better plan you can, and start" (Claude as technical advisor: better, more and more efficient features than competitors). Approved: the reviewed playbook and PCR-005 (§10 D-1…D-16), adjustable at the S29 brief.
 - **S27 (user, 2026-10-22, Session Brief):** one session; unblock Undo refuses over a new booking; routine model by evals; about 120 cases with 20% held out; Sentry/Grafana at the start of Phase 11 pilot prep (Claude's advice). **Claude (ADR-0033, choice delegated "by pass rate, latency and cost"):** Luna + Sol at effort `low`; the strong model after step 4; the link scrubber; case corrections only where a case contradicted the world, the dial or the privacy rules; the reserve was not spent.
@@ -65,18 +71,19 @@ Full wording and the history in [decisions.md](decisions.md).
 - **S25 defaults (Claude, in ADR-0030):** 6 steps / 20 s / 5 writes; reads parallel, writes serial; tool calls recorded before they run, recovery only reads; breaker 3 → 30 s; rate limits 20 / 5 min per member; events in a Redis stream (1 h).
 
 ## Waiting on the user
-1. **Before the pilot, at the start of Phase 11 pilot prep (user, S27):** create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`). Claude raises it at that brief.
-2. **Before the pilot, by hand (S27 security review):** the 5-minute VoiceOver/NVDA check of the streamed chat; confirm the OWASP LLM/Agentic Top 10 2026 titles in the signed-in PDFs on genai.owasp.org; check zero data retention eligibility on the OpenAI account (L2).
-3. **Optional:** S27 spent $0.74 of the $5 credit. Phase 7 may use up to $1.00 of the rest (playbook §4); a full re-record costs about $0.06.
+1. **Now, for S30b:** add `OPENAI_API_KEY` in the environment settings (Network secrets or an environment variable; `api.openai.com` allowed). A new session picks it up.
+2. **Before the pilot, at the start of Phase 11 pilot prep (user, S27):** create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`). Claude raises it at that brief.
+3. **Before the pilot, by hand (S27 security review):** the 5-minute VoiceOver/NVDA check of the streamed chat; confirm the OWASP LLM/Agentic Top 10 2026 titles in the signed-in PDFs on genai.owasp.org; check zero data retention eligibility on the OpenAI account (L2).
+4. **Optional:** S27 spent $0.74 of the $5 credit. Phase 7 may use up to $1.00 of the rest (playbook §4); a full re-record costs about $0.06.
 
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S27 are done and merged (Phases 0–6). S28 (Phase 7 planning) and S29 (memory store) are done on their branch. Details in [session-log.md](session-log.md).
+S1–S29 are done and merged (Phases 0–6, Phase 7 planning and store). S30 is built on its branch; its recording, PR and merge are S30b. Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S30 | Facts in the AI: `remember_fact`, `add_visit_note`, `forget_fact`, recall with the entity, warnings and last visit on booking cards (AC-W3-2), "the usual"; evals recorded on Luna + Sol | 7c | Playbook §7 S30 |
+| S30b | Record S30 on Luna + Sol (`--phase 7`, chunks of 20), meet the memory gates, PR and merge | 7c | Replay green; memory_delete/safety 100%, recall ≥ 95% |
 | S31 | Episodes (`search_memory`) and learned rules (`rule.change`) | 7d | Playbook §7 S31 |
 | S32 | "What I know", client profile memory and visit notes, "Remembered" chip, pause switch | 7e | AC-W3-1, AC-W7-2 in Playwright |
 | S33 | Full re-record, pass^3, security review, Phase 7 exit | 7f | Playbook §2 met |

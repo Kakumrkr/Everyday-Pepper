@@ -921,6 +921,30 @@ Everything each session did, oldest first: what was built, the checks run and th
     - The forget path is tested with a superuser schema owner, as in Compose and CI. A non-superuser owner is handled in the functions but untested; check it in the Phase 11 deployment.
     - Forget performance (a regular-expression scan of the business's recent messages) belongs in the Phase 11 load test.
 
+- **S30 Phase 7c (2026-10-23): facts in the AI** ([ADR-0035](../adr/0035-facts-in-the-ai.md), pre-approved). Branch `claude/great-cori-t020a2`. No OpenAI spend: the container had no `OPENAI_API_KEY`, so the recording on Luna + Sol, the PR and the merge move to the next session.
+  - **Brief:** the user said "Go ahead with your recommendations, ADR is pre-approved", and asked for the PR and a merge to `main` at the end, then a prompt for the next session. Decisions D-1…D-7 are in decisions.md.
+  - **Tasks:**
+    - T1: contracts (`MemoryFactShown`, `AiMemoryView`, `TemplateSchema.memory` in all eight templates, memory explanation kinds by id only, `memory_paused`, `asksAfterUntrusted`); migration 0040; core `activateFactIn`, `restoreFactIn`, `forgetSavedFactIn`, `discardProposedFactIn`, `getFactIn`, `factsShownIn`, `recallIn`, `memoryOfAction`, the clean-up of proposed saves, `ActionRunner.alwaysAsks`.
+    - T2–T5: the three tools with `stash`/`unstash`; recall by reference in four read tools; the loop fills references for each request and adds the business-facts block; booking warnings and the last visit; eval tooling (`juniper_memory`, seeded facts, new conversations, screen actions, graders on requests, storage and cards); the hostile fake's memory attacks; latency budgets.
+    - T6–T7: the API views and `ChangeCard`/`WhyContent` show memory live; the e2e model's "Remember …" phrase and a Playwright journey.
+    - T8: the memory sets, 49 cases (10 held out), on hand-written scripted cassettes.
+    - D-4: the free-time description fix with 3 held-out scheduling cases.
+  - **Found while building (fixed, in ADR-0035):**
+    - recalled facts made every save after a lookup a card under D-2; now only text from outside the team does (`outsideText`);
+    - three copies of one save at once broke "one value per key"; saves of a key now take turns (advisory lock), and a stash the result didn't use is discarded;
+    - staff memory saves were refused (own-scoped permission with no record owner); the owner is now the member who asked;
+    - `remember_fact`'s own example holds "PPD", so a deletion pattern on "PPD" always failed; the case uses another value;
+    - a 25-case worst case passed $1.50 with the bigger prompt: chunks of 20.
+  - **Self-review:** references are filled only in tool messages our code wrote, as JSON objects, as the member (a to-do title holding `{"$fact": …}` is a string, never filled); staff get no sensitive fact of another's client in recall, the business block, cards or *Why?*; a staff member's `forget_fact` on a business fact is refused in the dry run, before any proposal; `storedTextsOf` lists the business's stored text for the deletion checks only.
+  - **Checks:**
+    - `pnpm check` green (contracts 559, db 48, core 1,192, ai 267, ui 111, api 293, web 264, templates 112).
+    - `pnpm test:integration`: 1,056, all green but one, the replay of the recorded real model, which is stale by design (every request changed; 266 "cassette stale" reasons) until it is re-recorded.
+    - Playwright 76/76 (the new memory journey on mobile and desktop) against a local stack started without Docker images.
+  - **Not done / for later:**
+    - **Next session first:** record every set on Luna + Sol with `--phase 7` (chunks of 20), check the memory gates, then open the PR and merge.
+    - No template is chosen at onboarding, so Playwright can't show the warning end to end yet (component and integration tests cover AC-W3-2); a template picker is Phase 9.
+    - AC-W3-1's profile and "What I know" halves are S32.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 
