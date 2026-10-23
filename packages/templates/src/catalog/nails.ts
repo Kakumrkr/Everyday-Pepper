@@ -108,6 +108,12 @@ export const nails: TemplateInput = {
     'Gel lasts about 2 to 3 weeks and acrylics need a fill every 2 to 3 weeks.',
     'A client with old gel or acrylic on needs time for removal before a new set.',
   ],
+  memory: {
+    warnings: [
+      { serviceCategories: ['Manicures', 'Pedicures', 'Enhancements'], keys: ['allergy'] },
+    ],
+    visitNoteKeys: ['color', 'shape'],
+  },
   onboardingHints: {
     lookFor: ['price list', 'nail tech names', 'opening hours', 'removal and fill prices'],
     serviceKeywords: ['manicure', 'pedicure', 'gel', 'acrylic', 'fill', 'dip', 'nail art'],

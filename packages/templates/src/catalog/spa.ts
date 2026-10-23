@@ -114,6 +114,13 @@ export const spa: TemplateInput = {
     'Guests often book treatments as gifts or for special occasions; regulars return about monthly.',
     'Ask about pregnancy and allergies before booking massage or body treatments, and record them on the guest profile.',
   ],
+  memory: {
+    warnings: [
+      { serviceCategories: ['Massage', 'Body'], keys: ['injury', 'pregnancy', 'health'] },
+      { serviceCategories: ['Facials', 'Waxing'], keys: ['allergy'] },
+    ],
+    visitNoteKeys: ['pressure', 'products'],
+  },
   onboardingHints: {
     lookFor: [
       'treatment menu with durations and prices',

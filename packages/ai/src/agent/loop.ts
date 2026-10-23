@@ -39,6 +39,7 @@ import {
   type BusinessContext,
 } from './context.js';
 import { fallbackFor, type DoneSoFar } from './fallback.js';
+import { factIdsIn, type MemoryReader, type RecalledFact } from './memory.js';
 import { LinkScrubber, withoutLinks } from './links.js';
 import { routeFor } from './routing.js';
 import type { ConversationStore } from './store.js';
@@ -105,6 +106,11 @@ export interface AgentDeps {
   tracer?: TurnTracer;
   /** For tests: the dispatcher (the registry's in the app). */
   dispatch?: typeof dispatchToolCall;
+  /**
+   * Reads remembered facts as the member (`memberMemory`, S30). Without it nothing remembered
+   * is sent: the references in tool answers are left out.
+   */
+  memory?: MemoryReader;
 }
 
 export interface TurnRequest {
@@ -217,8 +223,13 @@ async function runTurn(
       requestMessageId,
     });
     const history: StoredMessage[] = await deps.store.history(turn.conversationId, 80);
-    const instructions = instructionsFor(deps.business, turn.startedAt);
+    const businessFacts = (await deps.memory?.businessFacts()) ?? [];
+    const instructions = instructionsFor(deps.business, turn.startedAt, businessFacts);
+    // What the business remembers came from people's words: the turn is untrusted (principle
+    // 4), though not text from outside the team (that one also makes memory saves ask).
+    let remembered = businessFacts.length > 0;
     const tools = agentTools();
+    let recalled: string[] = [];
 
     for (;;) {
       if (signal?.aborted === true) throw new StopTurn('cancelled');
@@ -228,8 +239,23 @@ async function runTurn(
       progress.steps += 1;
       const step = progress.steps;
 
-      const context = trimHistory(history.map(contextMessageOf), turn.id, limits.historyTokens);
+      const facts = await recallFacts(deps.memory, history);
+      const context = trimHistory(
+        history.map((stored) => contextMessageOf(stored, facts)),
+        turn.id,
+        limits.historyTokens,
+      );
       progress.untrusted ||= context.untrusted;
+      remembered ||= context.remembered;
+      // The facts this turn's answers brought, for *Why?* (by id).
+      recalled = [
+        ...new Set(
+          history
+            .filter((stored) => stored.turnId === turn.id && stored.role === 'tool')
+            .flatMap((stored) => factIdsIn(stored.content))
+            .filter((id) => facts.has(id)),
+        ),
+      ];
       const request: LlmRequest = {
         route: 'routine',
         instructions,
@@ -288,7 +314,10 @@ async function runTurn(
         turnKey: turnKeyOf(turn),
         step,
         requestMessageId,
-        untrustedContext: progress.untrusted,
+        untrustedContext: progress.untrusted || remembered,
+        outsideText: progress.untrusted,
+        turnId: turn.id,
+        recalled,
       });
       const { outcomes } = await runCalls(
         { dispatch, deps, limits, deadline, toolTurn, send, span },
@@ -341,6 +370,20 @@ async function runTurn(
   }
   span.end({ reason, steps: progress.steps, untrusted: progress.untrusted, usage: progress });
   return reason;
+}
+
+/** The remembered facts the history's tool answers name, read live (none without a reader). */
+async function recallFacts(
+  memory: MemoryReader | undefined,
+  history: readonly StoredMessage[],
+): Promise<Map<string, RecalledFact>> {
+  if (memory === undefined) return new Map();
+  const ids = [
+    ...new Set(
+      history.flatMap((stored) => (stored.role === 'tool' ? factIdsIn(stored.content) : [])),
+    ),
+  ];
+  return ids.length === 0 ? new Map() : memory.facts(ids);
 }
 
 /** One tool result per call id: a model that repeats an id gets one answer for it. */

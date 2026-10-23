@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1",
+              "name": "find_clients",
+              "arguments": "{\"name\": \"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2",
+              "name": "remember_fact",
+              "arguments": "{\"about\": \"client\", \"id\": \"{{client:ana}}\", \"key\": \"pregnancy\", \"value\": \"Pregnant, due in March\", \"sensitive\": true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Saved for Ana R.: pregnant, due in March (kept private).",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

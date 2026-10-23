@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a7dd9dac548445b3f58d83cc5dd6727c7b469a2ace0011f78c333115fd8eadea",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Q0sqGa7J71Mbfe1W2icn9pK5",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 11,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8e2aecf16b1037699809265f8215e8849f5f747eb3d8006e9ba513ca49d9a26a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_TMN700O5ufmRpSSyqNfICa2w",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"staff\",\"id\":\"{{staff:jess}}\",\"key\":\"schedule\",\"value\":\"doesn't work Saturdays\",\"sensitive\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7239,
+            "cachedInputTokens": 6969,
+            "cacheWriteTokens": 267,
+            "outputTokens": 59
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5cdbee8c0ea9de5607ca6075919c42e4ec796095b414b52168defe9a72242a87",
+        "response": {
+          "text": "Done — I’ll remember that Jess doesn’t work Saturdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7336,
+            "cachedInputTokens": 7236,
+            "cacheWriteTokens": 97,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

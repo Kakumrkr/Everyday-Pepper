@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a2d187bf9eb6792c263c567a4fa3e941c41e1d0fa276c556cdd51ac25f52f9b1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nH5lpT8uSqBuf79nFdqZmSeJ",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6973,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 12,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "27281f114cc6a25b121800433e48eb440647570db2efb66cef47773980c4fb3a",
+        "response": {
+          "text": "Jess’s schedule says, “Doesn't work Saturdays,” so I can’t confirm she can take a client this Saturday.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7317,
+            "cachedInputTokens": 6970,
+            "cacheWriteTokens": 344,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

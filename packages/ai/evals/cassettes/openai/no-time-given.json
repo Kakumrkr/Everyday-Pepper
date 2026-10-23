@@ -3,46 +3,62 @@
   "trials": [
     [
       {
-        "fingerprint": "51da925bcc1ae71c3f0ca7ab7e6508d4410f843c94d15be2552a41f1fe306ed9",
+        "fingerprint": "7612dc56f29df9d4ad6f04c6f2fde3e3a058e8012ecc1643c5da43eed5dba3b9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Lurx3FkgejbzUr9kfScY98bM",
+              "id": "call_m57D9v2LEAVuBgkLfXnGn0Nq",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
-            },
-            {
-              "id": "call_s7VQt2KmUVJBa0qzfEHx5tWW",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_0863cc22bef77894016adaa813a18087d280f83403ae56de15",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq2qgUDlAyidLSDANHmnblqCNZrc9LTEHlyBd3K_cTR7oqcB-0ZQ4z5kmBZ0mV_DgvoLJ_8U7nt5czbI8xwx5fV5KPPndCP4-MZG8qBbVxB9v_zGiy7iSEvH847kR2ur3_NcMLIRmJTc5z9ZhmacLnhW74IxK6LES6DkWH_19VcjEuu6LVK9gXhozDiUwZcc_UFBPGsIPk9WNft9g810uQH4ZfPVQyzSZrNLIwLyiDQgJWDEIEiQ5WuB0xrqUODkeAgpUL7Ktms0bZbubJlXlEduSyJUkYXsS1jUVCgLyEW-RTmwGPW1eY1wBoXXGOXug-I630WsDAK-bZbA3UTzLrABrPDTzE569zx6LFsM2qbTW4LXcHeBiMyp9NBeY7GoWFYbXl39e6rmgDET4Zxf3JFGYUP-rjdvyA6ZVwtANKbrSVG_hosOe1_ZjQ6rmxvdD7AFKTihoCL_j9DGVgJV2kUs7u1484O8SAOwrg4-QZGxWa51LXDFFMLkEGJyOSCvBM4lChJYq97bjyxWPtAXYuTd2CTS8NfnC3RPNb2yXfYuKGJhq5KujnFKaYYd__AbO5l4jf73uiYiGgP4hMbUawiRI77BH3otZ5XDjOevKbzCHQVq2jwvtA9eko-EZCPaJx0opI4qVv2ffcucq1LL1E9Cy2kn9x4MPp0olWxr5c665TQIrMuRqug1KehOn8JU07nCHppFztQJfRtCHPyW3p84bGyFVESkWrmu_pio4h78J6PLQ0UBDZ4xATh8CmmpvUl_oZRKRZe2jwZbp3r0vls3n47igYkD6pyaP9lc_MuiEGp9tCkWwL4u8es8KudqTiQai7pSQt51HCPQUf2yIyxag11559dh5rWqSrgYlikgyqEuwbXpEY1JqnuxYY1rNtu6cOoANprP2BjLOu4Ap9fpupzYPQK4h9skQjGbbzC_xlk5X5RI5BC2p7mntL_MaV36RJu7zRyB9zaHbzrymw4Or5Lh2ezc3DuIQsu3KAJqhzUBOJViMMAeNSZJPCcDUQLlLY2tJv43T-r9vg2qVcMJrJfzkrH094-Z8INGxG6Qsdq8jZRI__iHiNxZCG2L9K7tC5KpJhOX7s4Vf6TkW6xe1rZ3yv7oQT0Xj_6FG4Tf65Ypw-I44Kk-_e-FUYKmu0snpWPGKhft6J1vm0isQ5x3QW68Nh6YutTkmtgOjXHX4p3mnvweTqzZbbzY8EyEwQDTIurx3L46-eXgyCOENYb9VGrykshlpAS5jm3GtNXqoVk1XmJinoGxMJuuucH0m1wOY74QnPgKb8fBopA7XiOvC8i4KlsIgSTULGUdSLpoq0ojM62daEfUaMDHrVuGT6hHUbnmaO0CahYV1VIF7K-K3qUk13oamNF6FL1tv8GOwE6p0eMEYHk8HX4g0_NiHHgl2DuPh_ii6AzQD8yqiDrxuF4uUNmwM1Mz6tM_CNbjGQAgc8sCUlh-P_Z8Mi0RMqgJOzHVGfIK1xCR_Gu_UVYH7E-k9pu8MNhuC0Y0rTRXdT4cabhcc21NPTddGkVTypM1iOwTaHe75gvj0u543stdG_lZXZhisjm5LwEXEEZLi3JJ5yk7V5PKjySgyhS-HaYXPf1xjNS9mNgNRew4vKRJur6nzRJfoPMmhicPMBjGAHpIL1-Czy7_ELAnY3g3NkcFcTEf0BSTqEA9uZ_slpZvrKrqqgtuZ_ygogZNlaz2b-8_L8Oj0eg63T7fw-5Jow6kUa4SsA5cuhJyHdciWX8fLwf21Or7jIRRKmb5hr7Kqfb56rr7ehI_XZBypqQKsResd4hXay3CSa1vMtPuiXOzZ5aO1e_q2hGeDjy_iJXQs4JCbIF1hIESfm1-hKSIW_y_JFvm0BqVRkWp15zaQVhaZj0A==",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5542,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6969,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 8,
-            "outputTokens": 83
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "87fdceeac1cc07e59803991e97d0c7e7a33e156560543c26933ad5da5e9b2617",
+        "fingerprint": "80e9bc063efc07dd40a6951ac3c680b895550055d6a1991bcfff1a80ba333b13",
         "response": {
-          "text": "I found Maria L. What service would you like to book—colour or haircut—and what time tomorrow?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_7H4e9iAwCE9OmjjYu19SCph9",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7051,
+            "cachedInputTokens": 6966,
+            "cacheWriteTokens": 82,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d1992b88fc439e351e2e1d9c5791519add6466efbb4e867000e73441fde84c28",
+        "response": {
+          "text": "What service would Maria like, and what time tomorrow? We offer Colour and Haircut.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0e8c87104b34e689016adb6cc22fdc87d2b214d58bad2c7f02",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq22zCqf9ZBjm3cdjhzWh_ZEDnWABwEHpx7V2YS8S3Asm1D-YDnZgHVs5b3RBk-kKO-H0pPEivmY6qiHRkdaZDfW9winLpsVcaVi1yjvpfVBWywTAKyN95LxLcf99aUf-6z4xsL5154dl-vIMHicK7j351nkZPy-1czvXBIGxRVm_AhDGNvqv0vRGDJlajsdFs3ebcqJ4o44AW_etDYd_Tt4D8yeyIL8NkJIIcQu-JJGVmBeVOUYwHc_QAWDV52yxaEsQeCEV1tT-wYmXhMr1x8eTvFTOsrba3KaRITf5AhKKdo4JuB9NvmxkpZcF8KK_RWwZdj2VzKhlFc-eqDPv58en5s4wpYUK1PmYo72S-D5WGw66R2Wnm7HAX_E8bwh828QO1gZboB6udjBF3drjQq6JTG5SqGsvI0fH-fpMgZp_ZzqJ7Rlx-Ycda3IpGH-uqukkuMit6zAv30mTzNrtuFXqlEqQZxu1nVcirdboOvPUrHyhYH0Iuu-wYBpI8RjvoC0dPVuv5-c-TIOlMTtzdWXFpVWgpT_L44CSGgn2OyfTQMDcaNVOZMt3sMAw93IZ9X-bCJB0d0ZGgVaztiHfitmPcEa8vgFZ5l2ihNL9HgzHkz7pNQ_0Mv3EfyaxX-jUtf0b56QPL-aIKuQ8xWzmWSDk-cUzGvvR5e6d19BtuaVp_ltCkwEmDIwoTrY6r2JuETLytRXBmvCfifvpO3X7PHSSPP-cUA2ULa8l9HJm4dBKDLDfeHUTMGBK4E3zNrt887p5HqXVxwuyjMYn1gpxa52gB5pnRqLdtkQVTjwCdJXkpQrc7aSFL11-uC5WMcpcFdPwpduG2WeTx6wkf7HKevJIOVSGYxGjjZtvvXe7ykQuocKbmbG9q7NB-GSBBH2-yCsqwUMSbWUo8C4GUG9NOSsRQIZFD0K6O3up-iK4LYIrMnPoG5EuEh2niqS5JFYU8U4EDNRv0UclxAt8TYI1hSdV2yiU4nq0qzUudsRrV9IjZ_jIrkJASLFYlFe9DaA3-Lr1CPZzSW283DAF2yLhmIfLMGdshNwtRJLNm1gazjXYLKbr55nQjJkhF24gOAdtch5o5dMmVxFMEWE11zuviiC7pmkOHx_9lTB9GyVfJhYtDbD3locDz_NGdxQTop_PVwnGNnfEHIAISF7xLwx3V3kbPlV2WVUlEOGyDjN-WyT2BMINN2rDooWbjMlQv8lycmH_53U_VDrTwOEuvgjsEKwgNyeHVMZR9G0zDQ3ejDhmrwNPD0oR-KDZxyqK31kIne7CZe9R6kmxGJ1-Nin6lHeb1ONj2mrf8ujOzYvu4kFexbVQWsOCVv7mrwb8kxFwu0JQ0GpfbIkCkD8MThBb-vPULmbq8lZjK6OxheqB7CLql8XxOhyVr7TDXC_nWuOGKT6O0M6Mkn0KlcZsR9k91PKuFlMBHzFoJ0MkRJALGxcGAyCKiVHbR_7JOHlUxpIaJmo6BD2UiWNi192b-S3RrlNBQwwU1nHTwsEXqu9MuH8WOB3p7LL1LmZIs7eqCaVH5_glW",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -50,10 +66,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5961,
-            "cachedInputTokens": 5539,
-            "cacheWriteTokens": 419,
-            "outputTokens": 25
+            "inputTokens": 7323,
+            "cachedInputTokens": 7048,
+            "cacheWriteTokens": 272,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

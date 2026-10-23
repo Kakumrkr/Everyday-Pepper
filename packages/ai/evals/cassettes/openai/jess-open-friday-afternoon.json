@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "acd7937381eb5f25ca326376699b6befdb2b415a02d5b7619f138ff467a7f875",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_X1yrS75vyJHz7Ab95iIYKifK",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6974,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 13,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "18029850211497b8b6b39ebb352931080a986fa0097dd0f64846fa107a83fadd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ujQIdKt5ba29Hs9EggR6RE00",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7240,
+            "cachedInputTokens": 6971,
+            "cacheWriteTokens": 266,
+            "outputTokens": 52
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "535288c2ae3ed49dae027786289aba451b5b0dc751d579a3af362ea50e1d9775",
+        "response": {
+          "text": "Jess has a 2–3 PM haircut booked this Friday, November 6. There are no other bookings or blocked times shown for her that day.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7494,
+            "cachedInputTokens": 7237,
+            "cacheWriteTokens": 254,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -24,9 +24,27 @@ import {
   type MemorySubjectType,
   type UserId,
 } from '@pepper/contracts';
-import { and, asc, count, desc, eq, inArray, isNotNull, lt, or, sql, type SQL } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  lt,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm';
 import { z } from 'zod';
 import {
+  aiActionExecutions,
+  aiActionProposals,
+  auditLog,
+  bookings,
+  conversationMessages,
   memoryEpisodes,
   memoryFacts,
   tenants,
@@ -199,6 +217,25 @@ export async function lockActiveMemoryFact(
   return row;
 }
 
+/**
+ * Holds, until the transaction ends, the right to change one subject's fact with this key
+ * (S30): two saves of the same key at once (a retried call, two members) take turns, so the
+ * second finds the first's fact instead of breaking "one current value per key".
+ */
+export async function lockMemorySubjectKey(
+  tx: TenantTx,
+  subject: MemorySubject,
+  key: string,
+): Promise<void> {
+  const columns = subjectColumns(subject);
+  const id =
+    columns.clientId ?? columns.staffMemberId ?? columns.serviceId ?? columns.bookingId ?? '';
+  const name = `memory:${columns.subjectType}:${id}:${MemoryFactKeySchema.parse(key)}`;
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtextextended(current_tenant_id()::text || ${name}, 0))`,
+  );
+}
+
 /** A change to a fact; `undefined` fields stay as they are. */
 export interface MemoryFactUpdate {
   value?: string;
@@ -285,6 +322,125 @@ export async function activeMemoryFactsOf(
     .where(and(eq(memoryFacts.status, 'active'), or(...subjects.map(subjectIs))))
     .orderBy(desc(memoryFacts.sensitive), desc(memoryFacts.updatedAt), asc(memoryFacts.id))
     .limit(LimitSchema.parse(limit));
+}
+
+/** The facts with these ids the transaction may read, any status (cards and *Why?*, S30). */
+export async function memoryFactsByIds(
+  tx: TenantTx,
+  ids: readonly MemoryFactId[],
+): Promise<MemoryFactRow[]> {
+  if (ids.length === 0) return [];
+  const unique = z
+    .array(MemoryFactIdSchema)
+    .max(500)
+    .parse([...new Set(ids)]);
+  return tx.select().from(memoryFacts).where(inArray(memoryFacts.id, unique));
+}
+
+/** A visit note with the visit it belongs to. */
+export interface VisitNoteRow {
+  fact: MemoryFactRow;
+  clientId: ClientId;
+  bookingId: string;
+  serviceId: string;
+  staffMemberId: string;
+  startsAt: Date;
+}
+
+/**
+ * The notes of each client's latest visit that has any, among visits that started by `now`
+ * (recall's "last time", S30): active notes the transaction may read, at most `limit` in all.
+ */
+export async function latestVisitNotesOf(
+  tx: TenantTx,
+  clientIds: readonly ClientId[],
+  now: Date,
+  limit: number,
+): Promise<VisitNoteRow[]> {
+  if (clientIds.length === 0) return [];
+  const clients = z
+    .array(ClientIdSchema)
+    .max(100)
+    .parse([...new Set(clientIds)]);
+  // The latest noted visit per client, then its notes.
+  const latest = tx
+    .selectDistinctOn([bookings.clientId], { id: bookings.id })
+    .from(bookings)
+    .innerJoin(
+      memoryFacts,
+      and(eq(memoryFacts.bookingId, bookings.id), eq(memoryFacts.status, 'active')),
+    )
+    .where(and(inArray(bookings.clientId, clients), lte(bookings.startsAt, now)))
+    .orderBy(bookings.clientId, desc(bookings.startsAt), desc(bookings.id));
+  const rows = await tx
+    .select({
+      fact: memoryFacts,
+      clientId: bookings.clientId,
+      bookingId: bookings.id,
+      serviceId: bookings.serviceId,
+      staffMemberId: bookings.staffMemberId,
+      startsAt: bookings.startsAt,
+    })
+    .from(memoryFacts)
+    .innerJoin(bookings, eq(memoryFacts.bookingId, bookings.id))
+    .where(and(eq(memoryFacts.status, 'active'), inArray(bookings.id, latest)))
+    .orderBy(desc(memoryFacts.sensitive), asc(memoryFacts.key), asc(memoryFacts.id))
+    .limit(LimitSchema.parse(limit));
+  return rows.map((row) => ({ ...row, clientId: ClientIdSchema.parse(row.clientId) }));
+}
+
+/**
+ * Deletes up to `limit` proposed facts written before `before` (the daily clean-up): a save
+ * whose proposal expired or was turned down. Never remembered, so nothing is scrubbed
+ * (migration 0040). Returns how many it deleted.
+ */
+export async function deleteStaleProposedMemoryFacts(
+  tx: TenantTx,
+  before: Date,
+  limit: number,
+): Promise<number> {
+  const batch = tx
+    .select({ id: memoryFacts.id })
+    .from(memoryFacts)
+    .where(and(eq(memoryFacts.status, 'proposed'), lt(memoryFacts.createdAt, before)))
+    .limit(LimitSchema.parse(limit));
+  const deleted = await tx
+    .delete(memoryFacts)
+    .where(inArray(memoryFacts.id, batch))
+    .returning({ id: memoryFacts.id });
+  return deleted.length;
+}
+
+/**
+ * Every text the business has stored where a remembered value could travel (deletion evals
+ * and tests, S30): its conversations (text, tool calls, cards, reasoning items), episodes, AI
+ * proposals and receipts, and audit entries. Run as the business (no member scope): a value
+ * must be gone from every member's records. Not for screens.
+ */
+export async function storedTextsOf(tx: TenantTx): Promise<string[]> {
+  // One after another: a transaction's queries share its connection.
+  const messages = await tx
+    .select({
+      text: sql<string>`${conversationMessages.content} || ' ' || ${conversationMessages.toolCalls}::text || ' ' || coalesce(${conversationMessages.card}::text, '') || ' ' || ${conversationMessages.replay}::text`,
+    })
+    .from(conversationMessages);
+  const episodes = await tx.select({ text: memoryEpisodes.summary }).from(memoryEpisodes);
+  const proposals = await tx
+    .select({
+      text: sql<string>`${aiActionProposals.payload}::text || ' ' || ${aiActionProposals.preview}::text || ' ' || ${aiActionProposals.explanation}::text || ' ' || ${aiActionProposals.targetKey}`,
+    })
+    .from(aiActionProposals);
+  const executions = await tx
+    .select({
+      text: sql<string>`coalesce(${aiActionExecutions.before}::text, '') || ' ' || coalesce(${aiActionExecutions.after}::text, '') || ' ' || coalesce(${aiActionExecutions.inverse}::text, '') || ' ' || ${aiActionExecutions.explanation}::text || ' ' || coalesce(${aiActionExecutions.summary}, '')`,
+    })
+    .from(aiActionExecutions);
+  const audit = await tx
+    .select({
+      text: sql<string>`coalesce(${auditLog.before}::text, '') || ' ' || coalesce(${auditLog.after}::text, '')`,
+    })
+    .from(auditLog);
+  return [...messages, ...episodes, ...proposals, ...executions, ...audit].map((row) => row.text);
 }
 
 /** How many facts (any status) a subject has, and the business in all. */

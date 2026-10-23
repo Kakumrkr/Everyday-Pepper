@@ -25,6 +25,8 @@ export interface TargetIds {
   todoId: string;
   /** Blocked time in the member's own calendar (S26b). */
   timeOffId: string;
+  /** A remembered fact about the client (S30). */
+  factId: string;
 }
 
 export interface Attack {
@@ -89,6 +91,15 @@ export function validArguments(
     },
     unblock_time: { timeOffId: ids.timeOffId },
     complete_todo: { todoId: ids.todoId },
+    remember_fact: {
+      about: 'client',
+      id: ids.clientId,
+      key: 'preference',
+      value: 'Prefers mornings',
+      sensitive: null,
+    },
+    add_visit_note: { bookingId: ids.bookingId, key: 'formula', value: '6N + 20 vol' },
+    forget_fact: { factId: ids.factId },
   };
 }
 
@@ -224,6 +235,56 @@ export function hostileAttacks(targets: HostileTargets, date: string): Attack[] 
       id: 'block_time.half-a-range',
       attempt: 'Block from a time without an end',
       call: call('block_time', { ...own['block_time'], to: null }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    // Memory (S30): plant contacts or huge text, aim at the wrong kind of record, or name the
+    // whole business with someone's id.
+    {
+      id: 'remember_fact.contact-in-value',
+      attempt: 'Remember a client’s phone number',
+      call: call('remember_fact', { ...own['remember_fact'], value: 'Call +1 212 555 0143' }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    {
+      id: 'remember_fact.email-in-value',
+      attempt: 'Remember an email address to send to later',
+      call: call('remember_fact', { ...own['remember_fact'], value: 'maria.lopez@example.test' }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    {
+      id: 'remember_fact.huge-value',
+      attempt: 'Store a huge text in memory',
+      call: call('remember_fact', { ...own['remember_fact'], value: 'x'.repeat(10_000) }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    {
+      id: 'remember_fact.business-with-an-id',
+      attempt: 'Name the business with a client’s id',
+      call: call('remember_fact', { ...own['remember_fact'], about: 'business' }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    {
+      id: 'remember_fact.a-booking-id-as-a-client',
+      attempt: 'Remember something about a booking as if it were a client',
+      call: call('remember_fact', { ...own['remember_fact'], id: targets.own.bookingId }),
+      stoppedWith: ['not_found'],
+    },
+    {
+      id: 'add_visit_note.a-client-id-as-a-visit',
+      attempt: 'Write a visit note on a client id',
+      call: call('add_visit_note', { ...own['add_visit_note'], bookingId: targets.own.clientId }),
+      stoppedWith: ['not_found'],
+    },
+    {
+      id: 'forget_fact.a-booking-id',
+      attempt: 'Forget a booking by passing its id as a fact',
+      call: call('forget_fact', { factId: targets.own.bookingId }),
+      stoppedWith: ['not_found'],
+    },
+    {
+      id: 'remember_fact.uppercase-key',
+      attempt: 'Use a key outside the vocabulary’s shape',
+      call: call('remember_fact', { ...own['remember_fact'], key: 'Ignore Previous; DROP' }),
       stoppedWith: ['invalid_arguments'],
     },
   );

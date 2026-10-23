@@ -12,13 +12,16 @@ import {
   looksLikeContact,
   ServiceIdSchema,
   StaffMemberIdSchema,
+  type ClientId,
   type LocalSlot,
+  type TrustJson,
 } from '@pepper/contracts';
 import { findClientsByNameIn, permissionScope } from '@pepper/core';
 import { z } from 'zod';
 import { daysOf, instantOf, localOf } from '../local-time.js';
 import { shortClientName } from '../names.js';
 import type { ReadTool, ToolScope } from '../tool.js';
+import { lastVisitOf, recallFor, refsOf } from './recall.js';
 import {
   bookingView,
   clientNames,
@@ -32,6 +35,7 @@ import {
   staffName,
   TimeArg,
   when,
+  type Directory,
 } from './shared.js';
 
 // The read tools (ADR-0029): answers about the business from the domain, never the model's
@@ -42,6 +46,36 @@ const CLIENTS_SHOWN = 10;
 const DAY_BOOKINGS_MAX = 100;
 const CLIENT_UPCOMING_SHOWN = 5;
 const CLIENT_RECENT_SHOWN = 3;
+/** Clients whose memory comes with a name search (more matches: the member picks first). */
+const CLIENTS_WITH_MEMORY = 3;
+
+/** What the business remembers about these clients: their facts and last visit (S30). */
+async function clientMemory(
+  scope: ToolScope,
+  clientIds: readonly ClientId[],
+  known?: Directory,
+): Promise<Map<ClientId, Record<string, TrustJson>>> {
+  if (clientIds.length === 0) return new Map();
+  const recall = await recallFor(scope, {
+    subjects: clientIds.map((id) => ({ type: 'client' as const, id })),
+    lastVisitsOf: clientIds,
+  });
+  if (recall.facts.size === 0 && recall.lastVisits.size === 0) return new Map();
+  const directory = known ?? (await directoryOf(scope));
+  return new Map(
+    clientIds.map((id) => {
+      const memory = refsOf(recall, { type: 'client', id });
+      const lastVisit = lastVisitOf(scope, directory, recall, id);
+      return [
+        id,
+        {
+          ...(memory !== undefined && { memory }),
+          ...(lastVisit !== undefined && { lastVisit }),
+        },
+      ];
+    }),
+  );
+}
 
 const ownOnly = (scope: ToolScope) =>
   permissionScope(scope.actor.context.role, 'bookings.read') !== 'all';
@@ -56,9 +90,10 @@ export const findAvailability: ReadTool = {
     avoid: [
       'to book (use create_booking with a time found here)',
       'to see what is already booked (use get_day)',
+      'to ask which service when the member only asks whether someone is free at a time (read their day with get_day and answer)',
     ],
     returns:
-      'free start times with the staff member, earliest first, and whether more exist. Offer them; never book one the member did not choose.',
+      'free start times with the staff member, earliest first, and whether more exist. Offer them; book one only when the member chose it or asked you to find a time and book it.',
     examples: [
       {
         say: 'When can Jess fit in a haircut on Friday?',
@@ -134,7 +169,8 @@ export const findAvailability: ReadTool = {
 export const findClients: ReadTool = {
   kind: 'read',
   name: 'find_clients',
-  version: 1,
+  // 2 (S30): what the business remembers comes with up to 3 matches.
+  version: 2,
   localTimes: false,
   guide: {
     use: "Find the business's clients by name, to get the id every client action needs.",
@@ -143,7 +179,7 @@ export const findClients: ReadTool = {
       'to pick one of several matches yourself (show them and ask the member which one)',
     ],
     returns:
-      'up to 10 matches as id and short name (first name, last initial). Staff find only clients they have bookings with.',
+      'up to 10 matches as id and short name (first name, last initial), and for up to 3 what the business remembers (memory) and their last noted visit (lastVisit). Staff find only clients they have bookings with.',
     examples: [
       { say: 'Book Maria for a cut tomorrow at 10', args: { name: { $regex: '^maria' } } },
       { say: "Move Sarah's appointment", args: { name: { $regex: 'sarah' } } },
@@ -163,9 +199,18 @@ export const findClients: ReadTool = {
       search: args.name,
       limit: CLIENTS_SHOWN + 1,
     });
-    const matches = found
-      .slice(0, CLIENTS_SHOWN)
-      .map((client) => ({ clientId: client.id, name: shortClientName(client.name) }));
+    const shown = found.slice(0, CLIENTS_SHOWN);
+    const memory =
+      shown.length <= CLIENTS_WITH_MEMORY
+        ? await clientMemory(
+            scope,
+            shown.map((client) => client.id),
+          )
+        : new Map<ClientId, Record<string, TrustJson>>();
+    const matches = shown.map((client) => ({
+      clientId: client.id,
+      name: shortClientName(client.name),
+    }));
     const more = found.length > CLIENTS_SHOWN;
     const summary =
       matches.length === 0
@@ -175,7 +220,10 @@ export const findClients: ReadTool = {
           : `${String(matches.length)}${more ? '+' : ''} clients match: ask the member which one; never pick for them.`;
     return {
       summary,
-      data: { matches, more },
+      data: {
+        matches: matches.map((match) => ({ ...match, ...memory.get(match.clientId) })),
+        more,
+      },
       card: matches.length > 1 ? { kind: 'client_choice', clients: matches } : null,
     };
   },
@@ -184,12 +232,13 @@ export const findClients: ReadTool = {
 export const getDay: ReadTool = {
   kind: 'read',
   name: 'get_day',
-  // 2 (S26b): blocked times carry their id, for unblock_time.
+  // 2 (S26b): blocked times carry their id, for unblock_time. The guide (S30): "is she free at
+  // 10?" without a service.
   version: 2,
   localTimes: true,
   guide: {
-    use: "Read one day's schedule: its bookings (time, client, service, staff) and blocked time.",
-    avoid: ['to find free times (use find_availability)'],
+    use: "Read one day's schedule: its bookings (time, client, service, staff) and blocked time. It also answers whether someone is free at a time, without knowing a service.",
+    avoid: ['to find free times for a service (use find_availability)'],
     returns:
       'the day’s bookings by time and the blocked times with their ids (for unblock_time). Staff see only their own bookings.',
     examples: [
@@ -266,12 +315,14 @@ export const getDay: ReadTool = {
 export const getBooking: ReadTool = {
   kind: 'read',
   name: 'get_booking',
-  version: 1,
+  // 2 (S30): the visit's notes and the client's memory come with it.
+  version: 2,
   localTimes: false,
   guide: {
     use: 'Read one booking by its id: when, which client, service and staff member, and its status.',
     avoid: ['to search for a booking (use get_day or find_clients first)'],
-    returns: 'the booking in the business’s local time.',
+    returns:
+      'the booking in the business’s local time, with its visit notes and what the business remembers about the client, service and staff member.',
     examples: [
       {
         say: "Is Maria's booking still on?",
@@ -296,9 +347,30 @@ export const getBooking: ReadTool = {
     const directory = await directoryOf(scope);
     const names = await clientNames(scope, [booking.clientId]);
     const view = bookingView(scope, directory, names, booking);
+    const subjects = {
+      visitNotes: { type: 'booking' as const, id: booking.id },
+      clientMemory: { type: 'client' as const, id: booking.clientId },
+      serviceMemory: { type: 'service' as const, id: booking.serviceId },
+      staffMemory: { type: 'staff' as const, id: booking.staffMemberId },
+    };
+    const recall = await recallFor(scope, {
+      subjects: Object.values(subjects),
+      lastVisitsOf: [booking.clientId],
+    });
+    const memory = Object.fromEntries(
+      Object.entries(subjects).flatMap(([name, subject]) => {
+        const refs = refsOf(recall, subject);
+        return refs === undefined ? [] : [[name, refs]];
+      }),
+    );
+    const lastVisit = lastVisitOf(scope, directory, recall, booking.clientId);
     return {
       summary: `${view.clientName}: ${view.serviceName} with ${view.staffName}, ${when(view.date, view.time)} (${view.status}).`,
-      data: view,
+      data: {
+        ...view,
+        ...memory,
+        ...(lastVisit !== undefined && { lastVisit }),
+      },
       card: { kind: 'booking', booking: view },
     };
   },
@@ -307,7 +379,8 @@ export const getBooking: ReadTool = {
 export const findClientBookings: ReadTool = {
   kind: 'read',
   name: 'find_client_bookings',
-  version: 1,
+  // 2 (S30): the client's memory and last noted visit come with it.
+  version: 2,
   localTimes: false,
   guide: {
     use: "Read one client's next appointments and last visits by the client's id: when they are next in, when they were last here.",
@@ -316,7 +389,7 @@ export const findClientBookings: ReadTool = {
       'to see everyone on a day (use get_day)',
     ],
     returns:
-      'up to 5 upcoming bookings (not cancelled), earliest first, and the last 3 (with their status: done, no-show, cancelled), latest first. Staff see only their own bookings with the client.',
+      'up to 5 upcoming bookings (not cancelled), earliest first, and the last 3 (with their status: done, no-show, cancelled), latest first, with what the business remembers about the client and their last noted visit. Staff see only their own bookings with the client.',
     examples: [
       { say: "When is Maria's next appointment?", args: { clientId: { $any: true } } },
       { say: 'When was Sarah last in?', args: { clientId: { $any: true } } },
@@ -348,9 +421,10 @@ export const findClientBookings: ReadTool = {
       latest === undefined
         ? 'no earlier visits'
         : `last ${when(latest.date, latest.time)} (${latest.status})`;
+    const memory = (await clientMemory(scope, [clientId], directory)).get(clientId);
     return {
       summary: `${name}: ${nextPart}; ${lastPart}.`,
-      data: { clientId, clientName: name, upcoming: next, recent: last },
+      data: { clientId, clientName: name, upcoming: next, recent: last, ...memory },
       card: first === undefined ? null : { kind: 'booking', booking: first },
     };
   },
@@ -359,13 +433,14 @@ export const findClientBookings: ReadTool = {
 export const listServicesAndStaff: ReadTool = {
   kind: 'read',
   name: 'list_services_and_staff',
-  version: 1,
+  // 2 (S30): what the business remembers about each comes with it.
+  version: 2,
   localTimes: false,
   guide: {
     use: "List the business's services (with their length) and its staff members (with what each offers), to get their ids.",
     avoid: ['to find free times (use find_availability)'],
     returns:
-      'active services and staff members with ids; `isYou` marks the member’s own staff member.',
+      'active services and staff members with ids and what the business remembers about each; `isYou` marks the member’s own staff member.',
     examples: [
       { say: 'Who does colour?', args: {} },
       { say: 'Book a beard trim with Marco', args: {} },
@@ -374,21 +449,35 @@ export const listServicesAndStaff: ReadTool = {
   args: z.strictObject({}),
   async run(scope) {
     const directory = await directoryOf(scope);
-    const services = [...directory.services.values()]
-      .filter((service) => service.active)
-      .map((service) => ({
+    const active = {
+      services: [...directory.services.values()].filter((service) => service.active),
+      staff: [...directory.staff.values()].filter((member) => member.active),
+    };
+    const recall = await recallFor(scope, {
+      subjects: [
+        ...active.services.map((service) => ({ type: 'service' as const, id: service.id })),
+        ...active.staff.map((member) => ({ type: 'staff' as const, id: member.id })),
+      ],
+    });
+    const services = active.services.map((service) => {
+      const memory = refsOf(recall, { type: 'service', id: service.id });
+      return {
         serviceId: service.id,
         name: service.name,
         durationMinutes: service.durationMinutes,
-      }));
-    const staff = [...directory.staff.values()]
-      .filter((member) => member.active)
-      .map((member) => ({
+        ...(memory !== undefined && { memory }),
+      };
+    });
+    const staff = active.staff.map((member) => {
+      const memory = refsOf(recall, { type: 'staff', id: member.id });
+      return {
         staffMemberId: member.id,
         name: member.displayName,
         serviceIds: member.serviceIds,
         isYou: member.userId === scope.actor.context.userId,
-      }));
+        ...(memory !== undefined && { memory }),
+      };
+    });
     return {
       summary: `${String(services.length)} services, ${String(staff.length)} staff members.`,
       data: { services, staff },

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c499a98b7d506a35ec9236ee355eebef3c35e615b3f5496806630611e186e78b",
+        "fingerprint": "727935bd3c666870ec91f9f7218dcfe9f9e934729d15bbe2332abeba451f69c0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2H0tvoFjNGdVoDQzjZqDyHqr",
+              "id": "call_Mk8ThhE16yq17iDQuCsvqcEh",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5543,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6970,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 9,
             "outputTokens": 16
           },
@@ -25,16 +25,16 @@
         }
       },
       {
-        "fingerprint": "9c1f75cb2a53304bf9b229c735928e8f13665f4dcc4a1e0d45cde06d9db7742d",
+        "fingerprint": "6020b8849e0fe42ceab6a8f3e2332798051b0e15853978e803be64226aeee7da",
         "response": {
           "text": "What hours should I block for Marco on Friday, November 6?",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_06f81d2a0b6ada94016adaa8f306f487d2bfb44232096feff9",
+              "id": "rs_06c487894bb32cd1016adb6f6fe04c87d290d52e86b38478f4",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq2qjzWFqKCfjg1OIRkFw9HfOP5aRQVF_MnU9H6iuzQa3y7NxenZbxA4R5HW0a5tLRiHQHaPRFdua9Xlu6oEhMxRbz-pV2b2S01MmyVKowf_m5TFNU3bacctOssMtPOe1nliAFzXCkH-R7sfowbA7SZeDMJtxTZwwb2a2OMABAJLNl_YeMPgmBC8d_SzYXCyaXf5IOjZC81TxMMzB01Lcag_N9crxSs2gRQr4lsYr_vuPyj6gt3kHV_tRnSTHJVfvjoGjo9lrZC2pnqqmCXgMx92Ju1CBdrsOWMz2_nDbkn_KSey95ebhIHckqN8VFB3bpLHCDfvmX46oESjsV-VHun8BRVCnGXRN4FDdwIVCIZxWNS2fRtbsbYC7wT5_PNdbAFkv7gmAMeSoHW8jmiVAMVECm7eSXuSDj82f1jz-N1u3yHhHgSOEssT2-ae6SXkrvYSAsxzVtDk9PsIITMS-foze4V-0FjSGnMk6JU6FVK4WZg0I7KX3EAv5ce87eS63DW5QdzX1orJIO954V_5XG4dg7q6CtGdp0PtHNrE6mef6CmDkYoAFy85SpILaJAzXarUXilPRkntVIucEhKFZgsM3Par87cUs2-cEEH9Eao2zWIZfMH5rYhkYciw7AiL0BzHyO8Xga173RWbql44vRZ9Lj4Dogz9xK-GXzyyUqS_T8eNMdXSANuQOCEEk0jSMUlx-9zDSy7gnC5TRfKLGozwKYjUaCm3tNhJeUqt_798QzpPfPUR9AkYHPcwdAJF6u524PF5bJN54-3FvrEqOlXQpNzVznSw7VKelF4bcIz_lXZ-Y8o3VzhF5epal30xoyEM_rX3YWR85YsMXBMpb-1J_jwY3r2H32mBzvl4UTJI3pAyg3d4QLeVSi8iDqQZ4fOp-b0vMHYS8sDddqnd81Gv1Wz8lWvpY0pxHoFe68-joIUMlOkCQkjvymi_2Ipvj1cBOo7MVJ5_1a08o9XyXT4OnRFuDaX850SVd-CGJVjwWfzqIOVUUZqJn3OU2qCtC2bu-xauc8kYTEqJZ_xgQtEAwTilgr_dBm4_hmcOdsi0lyJFAk2g-ixKAaAGKd4z30b83sXQEXxxkOmz9kc1G0qhKbp9LMbd0_VQyIpD1oVYkjLip-d5rU8JR2rh5xyqrzS_wF4q4ZJednpf_phH-sO-mzPDNW0MkrSwkqp5jQEYClq10u_s5HKzSAI-LNU3NRZ0Vlay4C8OiQH5Xn6DpuroM-L7Qd-o-P6WX-KSN3w17gDvNzpXQtvXIZQ4nW5TGKYrKm6fDxACLe-Y-yETzKfkNMxw5VJrvogVPcDFlladpmBMoIHOc39YzL4XxXQpkKbNmAofyrE6sgM5IbWbUgvJe724iy1gmBNWMlP5F1Try9D_a-7jp53mtJqTIMtex8E4e72pSb_wG_Ny_ymYLfwvl_q8hJ8iagrsToCEQGplaM4TWD6vWHB9E_Hgb6QdgY10n3vOsFPCFH-Z24cUQVU8sJyxmBwdbVgqp1C_FRAudTR5v3-oMnss4X-7VUPkQLEtjVs07G0CaSwHkRGbClvoKcFLp1_MqnKSEGIl1-RntlWGaSl-3DlHVM96JmxzgskyPf3NI_4AYVJ7zC5j9FHnHGsmq8Y5G1fCOlwCq1PDBmb666nVejUa-3fNbisCWAV3uYUAJxk9GElJar1OqWdDV73FGHkCjUqj1GLfWt0AmVugdO-ndVUulh0dsC60kNG0P2uPcr7DnPph-boEA7Ov5fVdcweq4qC9c65CCdvGbS5AMRyaSUfNX3nNwURvwbdz12CcffSLQjVX2RFw-7Zn_hPdq49UR9PegHc0yqDtk5nXZeOWBjnQ2xb-1PoYOEeIFF2Oy6tm0PLR3f-NZ7Ak4T1zZoIqQsmyW5d-FlUPmGGrdJ6vm8sgTIs5IOAv-C3W9MwF-VeQeuELE10tgvir442g==",
+              "encrypted_content": "gAAAAABq229wFXlOliogfeesH8BGvgRkYDsuN-AGUyJFH-TQQNNXyfBrlGod05AERUw_97jXa6wMQiYODUarWO8ycrQJ3uLuK9xytdrv27nXxJVhdlIBCfuaFMTu1-TSk-z1CpyC60YhS6yCNBCGmATS_8_auWYXEGAJBHT0HZ6bYIeCqwhadb00SpH8l1unhupcuxS6cOCXUio5nI37Nlny6dZqNtdEy8ZohhRvT159Y7ACRZsRLLwn_AolSzCYSV0tzRy5kQlmVUNrF4eUQX-Qfzdz5OPnpKdLZWvbYPtwx98UiNFtyw3HzE_bFsIzjYO56HU5TEayWNkndilSG_9JFPG2TGvZY1XTczoLOycOd2oXn7lkb8aFHpfLmNKTVCN0SLlaOaJvYjedaZHHhQaamrKkz3DaSwhrTxjJg3mR0n9iWixVddJGIJktk75REO2kDqQuY-B-ZD-LAsHkCXFpA1XO8IqO38R3rwMZnTqUHqoKtb5t9vVaplMMbDXlwLrhYZSgdSlsC-mslbADzHtg81n60ZjW3ba-GMQuYZWbsXvTSSJdnBZxq3Tp1L0vCGNjuzEp1iayjY5AroHzCJvvN2_J5PATkll7DjVpr-8s_vOhexjgQOKgxmyQIf-PsvxRx9XPpd3B_WHoH2qzjLE_3p2a5aJKe1Zy2RKsUSCjcNdmw-kWzxQXjfi5jhj4X_uCH-pHyio2kIFOqOE4aVQ1jxYKLqb-nN7B14TWGlJaiopIpp57Zrz7VEa8SfRmL4NUjRwEE0v8qBfxUEsUD72EARzlDfJ5bS5_W_Clu9vHEjyker3l_1koHZ4FSzYcmrLoEClk6DU9bBxUmHAmSmF4bNMYX6hS1N1K8UrfhNrU6hS7RJqWyZSlbWUu7-7Jxjsa17Jd05taR3H5Dn8NLzJTOSBHrHNOaZgfIDUbINIhPG8gjcP0XlJogmjWFGW8N5RottbaBIIgozpFC1Hh3nu6OVDV8WUm4BLEiU-iipq30QIk8D3shXl2vaca9XYUL1E37ZZJ_kplX4odPbCoayiPhr9xmZNr1MI2CN1YP98tq9yYtPEUk23pJRBBKCuNPai9dOqrM5B9Ao6D6DDJ8geQQqFb1xnX3GPfksB9Tv-62LjHrVPGwJ5WZ-ScjvMLVYfVwBSr14LkOBIqzBXsggAwzvJaMhe3d65-XQUeb_rnXHbscGTQ8L3ehA0_g9bvTMjvig26zlfSuK-tLWmQv9-hDcJ9Qxehud324mym0tYhDH7r4UKUB8rLJ3hZtW1oliyoKPeZX128iGfAmCWLfETihQ4IVxt5cbcqR2NwZYciZYYFyKn2rIZunzBJRaVnPTrbNmo8YgZYW1cWByCVMNqLXy-gIkOGvvECMiBV6S2sKgTbvP_T9_j-LG5TUstNsqc2ZeLflMpsKaIRHtwpemoxGCSYDQMw5CFm_pwFwxI7nrvpiz7V2rYzURGz9Ks5jV4NTIoGuRcCVtoTtxXQ1C6qRMYnj_oA1GPHI7nJlejKZaJVZG_7j9XH6JO648iGcwyYZI4_A_MZrbDzI9y-EZUGGJ7Bozxe8NXm_y4EZBEY9vKbVN3wj-FqZIYHu5kbp5xwRcOU3kIMUt7o7V5yJQt9392Zbyr80URCvxVIVm2VER7RpP-VRcr3mZtklQXBtPgbBwtFuNwtS6dzmwkOG4dsFRAk1i-EXw==",
               "summary": []
             },
             {
@@ -44,127 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5805,
-            "cachedInputTokens": 5540,
-            "cacheWriteTokens": 262,
-            "outputTokens": 59
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "c499a98b7d506a35ec9236ee355eebef3c35e615b3f5496806630611e186e78b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_0f9dRViUOlpiI05Ijk5KES1m",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5543,
-            "cachedInputTokens": 5540,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "ea7fae3f40aadde0313334744808b3bc20cc2e70c423b6cc9207a05213e18de3",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_S0D0IZQyJ295qhK9Wx7K7Az7",
-              "name": "block_time",
-              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-06\",\"from\":null,\"to\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5828,
-            "cachedInputTokens": 5540,
-            "cacheWriteTokens": 285,
-            "outputTokens": 61
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "2458fc44176187fea9e06bba98f9bf091f8e8d20f3daf8217d4451fa5b17907e",
-        "response": {
-          "text": "I can’t block Marco’s time with my staff permissions. An owner or manager can do it.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5941,
-            "cachedInputTokens": 5825,
-            "cacheWriteTokens": 113,
-            "outputTokens": 24
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "c499a98b7d506a35ec9236ee355eebef3c35e615b3f5496806630611e186e78b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_DaT4fHdgm9Qq8iomgRJ1lBeo",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5543,
-            "cachedInputTokens": 5540,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a7aaa9d51c8a9cc94e490165607bd86efe03eaba74434e973904c4c617541bfb",
-        "response": {
-          "text": "What hours should I block for Marco on Friday, Nov 6?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_00f441fbdf984da0016adaaae1d5d887d2b72b35903127d508",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq2qrigLHTyIgD4La16TaD3ZVQxnN9CnSucwt05C6Rt8MweQ_FaVfF-ggVySlgeLTAJFmmompu7QZtYvfu4pAqS8pyEyIdR5L2lI6q57iLg9kJoopLthZyUDdTbMtt1yLF3-VGI1iVr-2W75_7NRlVJs6xmnxAzo7OwjZoGVhXqrh5ILlLNlPF0BIDLCB-jL-pHbwh_6NQY7RUoPFTuXpE17XLUpQ-2llpXmymEz3PfqlKJzEmRxvtoidalUwEYShhQycX8j2whUQ0EGrak3nZlgzw4QvRxhgcCsOTCQpw8o2wso22N5TPMjdbU5DZUrXyzyhGwT-8MQ6ftiY1GKsSX-_Kua6GtmDyPgoLDKQ3ethI0twmXfUPM2ji3Yvzvtk3KgLysJwGmzDDTW2HE8kicvrhfsr31GcYGIqXeR4xy6Npe6x23nTpapCsHSjG4hiJfGR7ycf-5wNw25Uz8JaTx0f_dMGMQjC8W7WP3EBcZbUBKSSBVlIIFnPN0QMsOgTBLPWRPE5pjbh5BJNjWJLDXZxX4ptiNjoHMFqQBFuYhnFNOAS5FneuJA6lqt-FyBw0_FzrLqFQXdE2hOblJ9PFCLNOgQIqL1vdU-HbSCPh6Eu-uzh0Zm7mjSEjHdrvROQRCQ3MfH50EwyTYKWgSaaCVgDsYgWrUf8x_woTlhPDSJ_loOzEbrWZ_IaVjO-4NJJogkh7koWLwysi3fdFDqyO8Ye9_ovOlRGI6y9O40wUyVYCU9WQkKwvr8LpXdZy54tKtN_LHW4E0v4Qy3ArNECFAhkycpuXKOXXFsNLxWV_pn2O7hi7ZEFiRXBgfBHKhw0VjRx4zCobA3P30j6S8yvSY4-TJH2siZs6lUPsKUFnUSe8GdhiNAgAphFV8bSUxZNyAv6188eIGa2dQQNR9lq_zF-kMsseWDJIGv-WjOeTdvpPF7PBTV0I1TpTBtOSmPIBtP83I6WEPGRguDtAWAhB7tKonj69T5t1VX6Ga60SnqtPkag5C5KHnbsRYzn0YalzE_26cDbnIRGM2enVU1N3IkXcLvlIwoko-l0YkkQqk-X4u8C_exWwEJLIlMZ6mFzCq6fiD6FqyqnQxQwrvWyAMzDT1DQAdBDsw9Xw_JxZizcYzMGB9qoKByTslFLac4BBJEDNc5xnSo0oxpPAmRgqDxE3wdtOe4LFbs0-YeBw81YW2XqLcl1R9bL9VGwWQfCg9UDbl1UcJQDjZNztQcKVrV-G9LWCpEJ1Mv_DLwGhswlwuKaiVVflzCN-5mZFkS1tamyaWqM4n2AvtHaF8kKvjQ_o5HA3O7nLWUbPx19KF_LlT21bQBOovzfn3gcS1NJ8BW8T0XUV67FW1ypmt4L3DB9U5uIfqMq7AEvYfHSdHJYeeK91BKammNR7_ozKuHwW1XG7veA_C0Q1ZqE9SfEhawgl2twXlxe1zlb6ZBo9lPvQ66_H2QlrUSPQd0jKtul_guXwGkxPUqRUtCa5Fue4vQWOzhIVhx0pukasN-WI39zZW3oLx2J3zMyh_ts4ogRc-3UJ2bvrBhuBoLJEL6OUx67NDp5codJkhj8AlLauW5UnblqeW0t5fYXFlDBhxGJIQO1n",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5848,
-            "cachedInputTokens": 5540,
-            "cacheWriteTokens": 305,
-            "outputTokens": 33
+            "inputTokens": 7244,
+            "cachedInputTokens": 6967,
+            "cacheWriteTokens": 274,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }

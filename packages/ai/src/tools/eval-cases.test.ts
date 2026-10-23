@@ -22,13 +22,15 @@ describe('eval cases generated from the tool guides', () => {
         tool.guide.examples.length - skipped.length,
       );
     }
-    // Skipping is the exception: a tool that needs earlier context (get_booking) only.
-    expect(cases.length).toBeGreaterThanOrEqual(TOOLS.length * 2 - 2);
+    // Skipping is the exception: a tool that needs earlier context (get_booking), and memory
+    // examples that need something the eval world lacks (a remembered fact, a past visit; the
+    // memory sets cover them, S30).
+    expect(cases.length).toBeGreaterThanOrEqual(TOOLS.length * 2 - 5);
   });
 
   it("asks in the eval world's words when the shown example names things that world lacks", () => {
     const cancel = cases.find((c) => c.id === 'tool-cancel-booking-1');
-    expect(cancel?.turns[0]?.user).toBe("Cancel Maria's appointment tomorrow");
+    expect(cancel?.turns[0]).toMatchObject({ user: "Cancel Maria's appointment tomorrow" });
     expect(cases.some((c) => c.id.startsWith('tool-get-booking-'))).toBe(false);
   });
 

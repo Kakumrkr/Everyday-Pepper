@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a09a3471295a72fb18674d1ded5a5c91f2602879702a0df755739e6d578d83d1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pAH4x2m0j7A4fFt9VXEL4R4x",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6978,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 17,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "26c9750fa8e4dd080bccbe5ed8e68c1bf15516c2dc571305f9c7559561748518",
+        "response": {
+          "text": "Yes—Maria L. has a recorded allergy to PPD.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7129,
+            "cachedInputTokens": 6975,
+            "cacheWriteTokens": 151,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

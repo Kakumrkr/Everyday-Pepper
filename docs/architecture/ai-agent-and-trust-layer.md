@@ -7,9 +7,10 @@ The LLM selects tools and fills arguments. It never accesses the database, never
 
 ## Components (`packages/ai`)
 - **Provider adapter** (S22, [ADR-0027](../adr/0027-llm-provider-port-and-evals.md)) — `LlmProvider` (`respond`, `stream`; `embed` joins in Phase 7) over provider-neutral contracts (`contracts/ai.ts`). Default implementation: OpenAI's Responses API with `store: false` and encrypted reasoning replay. Model IDs are config per route (`routine`, `strong`), not code. A cheap/fast model handles routine turns; a stronger model is used for multi-step planning and onboarding extraction. Tool argument schemas are strict JSON Schema generated from Zod.
-- **Tool registry** (S24, [ADR-0029](../adr/0029-tool-registry-and-tools.md); S26b, [ADR-0032](../adr/0032-four-week-one-tools-and-explanation-facts.md); `packages/ai/src/tools`). Fourteen tools:
+- **Tool registry** (S24, [ADR-0029](../adr/0029-tool-registry-and-tools.md); S26b, [ADR-0032](../adr/0032-four-week-one-tools-and-explanation-facts.md); S30, [ADR-0035](../adr/0035-facts-in-the-ai.md); `packages/ai/src/tools`). Seventeen tools:
   - reads: `find_availability`, `find_clients`, `find_client_bookings`, `get_day`, `get_booking`, `list_services_and_staff`, `list_todos`;
-  - writes: `create_booking`, `move_booking`, `cancel_booking`, `block_time`, `unblock_time`, `add_todo`, `complete_todo` (`unblock_time` uses the dial's `time.block`, `complete_todo` its `task.create`, PCR-004).
+  - writes: `create_booking`, `move_booking`, `cancel_booking`, `block_time`, `unblock_time`, `add_todo`, `complete_todo` (`unblock_time` uses the dial's `time.block`, `complete_todo` its `task.create`, PCR-004);
+  - memory (S30): `remember_fact`, `add_visit_note` (dial `client_note.save`; the value is stashed as a proposed fact first, so the trust layer stores only its id) and `forget_fact` (always asks, no Undo). Read tools name remembered facts by id; the loop fills them in for each request as the member.
 
   Each tool has a name, a version, a guide (use, don't use, returns, examples → the description and generated eval cases), strict Zod arguments in the business's local time, a risk tier and its dial actions (a write that may email the client adds `message.confirmation`).
 

@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "35c9d6088ab243a9982daae194b4b21619f265a5160bdfdefdf003a5d13627f6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_CdqmFfbem4nJdkgcszhnnEyE",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_sSD1pxM19PXcWR7HhfCHgjpv",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6979,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 18,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "edb7dfc354362390bc57a90a738d2b5c4dbd83c38c68e48aba5c8fcc7d5da4c1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_7oumlf68jFUAQjWPdqkElwwT",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7414,
+            "cachedInputTokens": 6976,
+            "cacheWriteTokens": 435,
+            "outputTokens": 117
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c19b2fbadd9b103f0cf72aa84ab33bced1cdb68f682b6e84f63c9260cbdcfb2e",
+        "response": {
+          "text": "Maria L.’s colour appointment with Jess for Wednesday, November 4 at 2:00 PM is awaiting your approval on the card. Maria has a remembered PPD allergy; it’s noted on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7702,
+            "cachedInputTokens": 7411,
+            "cacheWriteTokens": 288,
+            "outputTokens": 47
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

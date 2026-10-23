@@ -38,19 +38,24 @@ export function writeRunner(
   lastPreview: () => TrustJson | undefined;
   /** Whether that dry run's summary echoed untrusted text (`undefined`: no dry run ran). */
   lastUntrusted: () => boolean | undefined;
+  /** The remembered facts its latest run gave the model, by reference (S30). */
+  lastMemory: () => TrustJson | undefined;
 } {
-  const args: unknown = tool.args.parse(payload);
+  const args: unknown = storedSchema(tool).parse(payload);
   let shown: TrustJson | undefined;
   let untrusted: boolean | undefined;
+  let memory: TrustJson | undefined;
   const runner: ActionRunner = {
     tool: tool.name,
     version: tool.version,
     actions: tool.actions(args),
     tier: tool.tier,
+    ...(tool.alwaysAsks === true && { alwaysAsks: true }),
     async preview(tx, actor, stored): Promise<ActionPreview> {
       const { performed, emails } = await run(tool, deps, tx, actor, stored);
       shown = previewOf(performed, emails);
       untrusted = performed.untrustedText ?? false;
+      memory = performed.memory;
       return {
         preview: shown,
         fingerprint: stateFingerprint({
@@ -69,6 +74,7 @@ export function writeRunner(
     },
     async execute(tx, actor, stored): Promise<ActionEffect> {
       const { performed, queued } = await run(tool, deps, tx, actor, stored);
+      memory = performed.memory ?? memory;
       return {
         entity: performed.entity,
         before: performed.before,
@@ -81,7 +87,17 @@ export function writeRunner(
     },
     undo: (tx, actor, receipt) => undoWith(tool, deps, tx, actor, receipt),
   };
-  return { runner, lastPreview: () => shown, lastUntrusted: () => untrusted };
+  return {
+    runner,
+    lastPreview: () => shown,
+    lastUntrusted: () => untrusted,
+    lastMemory: () => memory,
+  };
+}
+
+/** How a tool's stored payload parses: its arguments, or what `stash` stored instead. */
+export function storedSchema(tool: WriteTool) {
+  return tool.payload ?? tool.args;
 }
 
 /**
@@ -135,7 +151,7 @@ async function run(
   actor: Actor,
   stored: TrustJson,
 ): Promise<{ performed: Performed; emails: WouldBeEmail[]; queued: OutboxMessageId[] }> {
-  const args: unknown = tool.args.parse(stored);
+  const args: unknown = storedSchema(tool).parse(stored);
   const emails: WouldBeEmail[] = [];
   const queued: OutboxMessageId[] = [];
   const notifyClient =

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "49fbac018e9f2b4d22b6765de987b63a8008ea86c49724aad80d97170d7cb54b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_fCfBlnRWegqTrDNapO3eh981",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6975,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 14,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b4f6741881061f218f65677ffb33ba28158b55bf424a1e7e05a312297f1b50ca",
+        "response": {
+          "text": "We used 6N + 20 vol, 35 min.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7239,
+            "cachedInputTokens": 6972,
+            "cacheWriteTokens": 264,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

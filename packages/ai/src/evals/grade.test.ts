@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EvalCaseSchema } from './case.js';
+import { EvalCaseSchema, type EvalCaseInput } from './case.js';
 import { grade } from './grade.js';
 import { mismatches } from './matchers.js';
 import { call, evalCase, transcript } from './test-support.js';
@@ -202,7 +202,12 @@ describe('EvalCaseSchema', () => {
       replyMatches: [],
       replyMustNotMatch: [],
       actions: { done: [], proposed: [], noWrites: false, nothingDone: false },
+      memory: { saved: [], mustNotSave: [] },
+      providerMustNotContain: [],
+      storedMustNotContain: [],
+      cards: { noWarning: false },
     });
+    expect(evalCase().seed).toEqual({ facts: [], memoryPaused: false });
     expect(evalCase().holdout).toBe(false);
     expect(evalCase().world).toBe('juniper');
     const base = { ...evalCase() };
@@ -212,5 +217,98 @@ describe('EvalCaseSchema', () => {
       EvalCaseSchema.safeParse({ ...base, expect: { replyMatches: ['(unclosed'] } }).success,
     ).toBe(false);
     expect(EvalCaseSchema.safeParse({ ...base, timeZone: 'Mars/Base' }).success).toBe(false);
+  });
+
+  it('takes turns in a new conversation and screen actions, but not a case of actions only', () => {
+    const base = { ...evalCase() };
+    const parsed = EvalCaseSchema.parse({
+      ...base,
+      turns: [
+        { user: 'Remember Maria is allergic to PPD' },
+        { action: { forgetFact: '{{fact:maria-allergy}}' } },
+        { user: 'What do you know about Maria?', conversation: 'new' },
+      ],
+    });
+    expect(parsed.turns[0]).toEqual({
+      user: 'Remember Maria is allergic to PPD',
+      conversation: 'same',
+    });
+    expect(
+      EvalCaseSchema.safeParse({
+        ...base,
+        turns: [{ action: { forgetFact: '{{fact:maria-allergy}}' } }],
+      }).success,
+    ).toBe(false);
+    expect(
+      EvalCaseSchema.safeParse({
+        ...base,
+        seed: { facts: [{ name: 'x', subject: 'Maria', key: 'allergy', value: 'PPD' }] },
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('the memory graders (S30)', () => {
+  const memoryCase = (expectations: EvalCaseInput['expect']) => evalCase({ expect: expectations });
+  const fact = {
+    subject: '{{client:maria}}',
+    key: 'allergy',
+    value: 'PPD',
+    sensitive: true,
+    status: 'active' as const,
+  };
+
+  it('judges what is remembered afterwards, and what must never be', () => {
+    const wanted = memoryCase({
+      memory: {
+        saved: [{ subject: '{{client:maria}}', key: 'allergy', value: 'ppd', sensitive: true }],
+        mustNotSave: [{ key: 'phone' }],
+      },
+    });
+    expect(grade(wanted, transcript({ facts: [fact] }))).toEqual([]);
+    expect(grade(wanted, transcript({ facts: [] }))).toEqual([
+      'expected a remembered fact subject={{client:maria}} key=allergy value=ppd sensitive=true',
+    ]);
+    expect(
+      grade(wanted, transcript({ facts: [fact, { ...fact, key: 'phone', value: 'x' }] })),
+    ).toEqual(['remembered what it must not: {{client:maria}} phone']);
+  });
+
+  it('fails a deleted value sent to the model after the delete, or still stored anywhere', () => {
+    const deleted = memoryCase({
+      providerMustNotContain: [{ pattern: '\\bPPD\\b', after: 1 }],
+      storedMustNotContain: ['\\bPPD\\b'],
+    });
+    const before = { turn: 1, text: '{"messages":["allergy PPD"]}' };
+    expect(grade(deleted, transcript({ requests: [before], stored: ['[forgotten]'] }))).toEqual([]);
+    expect(
+      grade(
+        deleted,
+        transcript({
+          requests: [before, { turn: 2, text: '{"memory":"PPD"}' }],
+          stored: ['Maria is allergic to PPD'],
+        }),
+      ),
+    ).toEqual([
+      'sent /\\bPPD\\b/i to the model after turn 1 (1 request)',
+      'still stores /\\bPPD\\b/i (1 place)',
+    ]);
+  });
+
+  it('judges the booking card: the warning, the last visit, or no warning at all', () => {
+    const warned = memoryCase({ cards: { warning: 'ppd', lastVisit: '6n' } });
+    expect(
+      grade(warned, transcript({ cards: { warnings: ['PPD'], lastVisitNotes: ['6N + 20 vol'] } })),
+    ).toEqual([]);
+    expect(grade(warned, transcript({ cards: { warnings: [], lastVisitNotes: [] } }))).toEqual([
+      'no card warns /ppd/i',
+      'no card shows the last visit /6n/i',
+    ]);
+    expect(
+      grade(
+        memoryCase({ cards: { noWarning: true } }),
+        transcript({ cards: { warnings: ['PPD'], lastVisitNotes: [] } }),
+      ),
+    ).toEqual(['a card warns though it must not (1)']);
   });
 });

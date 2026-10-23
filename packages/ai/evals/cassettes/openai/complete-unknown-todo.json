@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ffcc3372e77581d6eae32eb692a4e30ae25ff6c86ba1f007318b5c37681e3dd7",
+        "fingerprint": "e4de0ff0f1591d57e71642f1c74ea70177b76df424245c16dc26b57f4e23471e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_kmC3s4QVZJqgKaSqP3GRzaEN",
+              "id": "call_KvE8TM43R8fq4EAM1WkSjlS6",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5545,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,39 @@
         }
       },
       {
-        "fingerprint": "7e2481efda8cdd8e649f2485eee206846041ee580062481b4088e8e2ba5f5598",
+        "fingerprint": "e245624c182042f418ae7721ccf1ca6e1ea8bec2c54a2fe5724832dc684a0266",
         "response": {
-          "text": "I don’t see a bank to-do. The only open one is “Call Maria about her colour.” Could you clarify which to-do you mean?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_YmBM2yR4nXz12XGQBwtxErrS",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_05928446c1c39834016adb6d73ee8087d2ac32474dd24bf9f9",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq22106ZD4WDXZOwCia-yPEnbJ4i2ZbXcA3itlvu9g_YjNEXYqOIwWI1n4LijhV4RmypLG1dWQgN5UYUqaOv5w-SIDkmJrZaDeRQzEm9Doy-KsWJA68Pk5cjSkxYLaJHs4hnpUu1HpGGbHOgeJbyzgi5QMv103u0PchmbNsqyZOnZc-87fumdFWioekvY7NkJBvKSQWZSAOS37bVkSFhHTB6oUcaGezF4I2AnhLK7henfAF0VGLdvELjtm7PWziFc0ZGmoybz3QfMVwpWNxJgqP-zdNCxgYlHhRR82B88YE2c32EdQ1GaF7Kp5o8ZSPl-4owX1Nq_Ajg1RdTnOt9oEdI5_TrPR4lceyW_Tl0SUQ3AUZue0sqsGSm_wd3h9nw0xvzgk1fLLsitBGw8eD67c6zy7fYF4yFCTmSHuy3x9aZHBS5THKvgcrZ81s5Qv_QdypEihfdECGASCod8hfxEjsNHxoMNNYhc7GHweqVRyl8dwxQOqWUB0LQQ2Xz4Z1iWzpYX48LWL17pXH1lTTk-MBux6182JpLaMcBM-2yhTEbtWpSgDfz6JqaYZFh50txL3DdSmooznjD1b3tflL29PLDd3PxGJiI2rCb7FECQlgj3r6pt_BM6e_seDjVNPwLhsQYavAWB3VA7RYUPoBwy0ol7NWKp3w9C8ChlFzPglvJdhUcejiKAVMILTCiJpPiLRJCUh4PUBkAJx52v5_TLVFpBfUYzKzBbOGN2GM3Q8azN3QYi4fhAsKT8USmh4o-1m71iSE2eSBUu4vFw-GvuORT1-8MVBtRu7ku7d4MJcT8MzfYB_oqC_x8cpjn4jgaA-IXbowUzWj78uYBI6tbw8BQ59l844EpFjO9zWIywrZlFA2Rr1QRn9a5osEq-UaDTJB8RiZkYdcFe0DX1aNF9UFIMaCZL1sq9zby9vKQQ1wn-zL6saAgvSD3CtD9xIxl8iQShuOF56pwIOXxkzuI9CrSdOicluoZW_f9i64xDvdW9QF2h46vGcYEHu8pcOxZyaPS36PfpAX96QeRDqdKLhPsNJ3ryA_eYAC-OtPWO61Uxu-MY-8KTK2EWOhu7NV58ceY3ZuqbrV3aUaRZXp7y5vQ65JepJDsGyjmdnXnEnffFFuP6ocmwDu8zrAOmQbzm4KVujqG0SqP7ynRL30xNNtfggheqcOKzc2c6vGx7mobGbElBUJLWdommI7ge8g4ExkmXgAXDXnwGKk3ZiRQ6sOlSCAyH60D8e6QBWlZ53-vNBp0QrXVioiF7WMJ5ASscwVkpjlXwoe2iBPEaY37Ena3h4i_cJhD7jW_cCrxYYTmitFMW0xcmSOSmnJNkaMwDdjJK7gZksIdHT8qvjTyBPOS954JWbPHDpxvFoXEMB74qIH2wRpkaM5-UFzuoWOePb4Awy0g1OgAs1o0820neFtlYtbnc4ZNbx-pGJhKKbC5qvSBlFjnSbXf70tPY2cze5vsaNYmtZ7Cwh4CF3Tdg1XTCFgzfqy2HMCEX27ca1lBYvMc3OTA20Ymjn8cV_Om08eF2MPB7PHbtsVlV1RCJuYspfqtjW6aQcgqMhQTiJTEO21zKw2NA_FraonMJR_eUnOG_xSqh8tSHT_slaGHE1VYPRGX8Pcsf4c8BmeQQhAm9Zl4h3JjO4ll24Jc8TABjM14ATFB5YlDFu5nYLjX-aUI6y8XJkdM7ND7rVUqmIQ30kqbBrbKSxqxqN-G8DvIch19tG2cd8WsupxPv_jCb2ykSBWmNJf7C6eErlIJ6nu7UnJeCJUzcTFwgBvLijCcggUmdmmASARO6h8gXALKtX3I0TKA==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7080,
+            "cachedInputTokens": 6969,
+            "cacheWriteTokens": 108,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7cd5349de6e59c4f1f678bcc2aaf6a47bcbbfbcbba80f090a33f2694834a39f5",
+        "response": {
+          "text": "I couldn’t find a “bank” to-do. The only open to-do is “Call Maria about her colour.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +67,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5651,
-            "cachedInputTokens": 5542,
-            "cacheWriteTokens": 106,
-            "outputTokens": 34
+            "inputTokens": 7220,
+            "cachedInputTokens": 7077,
+            "cacheWriteTokens": 140,
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3fa208c310383d7b4426c693701e13ea657e19f78d47efddf003b680ffad1984",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nW31ev1K4BgJSMg0eBGS76xI",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6976,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 15,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d4f442068b1f577120d9eb61c4d9fa8f3782dbfe2f2cdc3bba64a6738a9fc0db",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_s5ZEb0sww3DfvHPNLVs7vzQ1",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:ana}}\",\"key\":\"pregnancy\",\"value\":\"Pregnant, due in March.\",\"sensitive\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7056,
+            "cachedInputTokens": 6973,
+            "cacheWriteTokens": 80,
+            "outputTokens": 60
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "675b60b69405c487d9e0b0e3cca35cd81f9aee2ba75c0cf6d76dbae8c6676a91",
+        "response": {
+          "text": "I’ll remember that Ana R. is pregnant, due in March.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7156,
+            "cachedInputTokens": 7053,
+            "cacheWriteTokens": 100,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

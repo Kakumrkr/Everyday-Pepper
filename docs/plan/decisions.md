@@ -269,3 +269,25 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - caps: 50 facts per subject, 20,000 per business, 5,000 episodes per member;
   - the pause switch blocks saves from the chat and AI actions, and new episodes; people on screens still save, and everything can still be deleted;
   - `--phase` is required to record, with the Phase 7 cap enforced in the runner.
+- **S30 Session Brief (user, 2026-10-23):** "Go ahead with your recommendations, ADR is pre-approved"; open the PR and merge to `main` when all is done, then give the prompt for the next session:
+  - D-1 `forget_fact` always asks without a new dial action (recorded as `client_note.save`; `alwaysAsks`);
+  - D-2 a memory save after text from outside the team always becomes a card;
+  - D-3 no warning for a member who can't read the sensitive fact;
+  - D-4 the free-time description fix now, with new held-out cases;
+  - D-5 one trial of every set on Luna + Sol;
+  - D-6 ADR-0035 pre-approved;
+  - D-7 build on the fakes first; record when the key is in the environment.
+- **S30 decisions (Claude, in ADR-0035):**
+  - a remembered value is stashed as a proposed fact before the trust layer sees the call; deleting a proposed fact scrubs nothing (migration 0040); stale ones go after two days;
+  - recalled facts make the turn untrusted, but only outside text makes a memory save ask (`outsideText`);
+  - stored tool answers name facts by id, filled in for each request as the member, at most 1,200 characters of values an answer; the business's own facts (at most 30, 1,200 characters) in the instructions;
+  - warnings come from template config (`TemplateSchema.memory.warnings`); visit-note keys go in the template's part of the instructions;
+  - saves of one subject and key take turns (advisory lock); a memory save's record owner is the member who asked;
+  - real eval runs take at most 20 cases;
+  - the recording, PR and merge wait for a session with `OPENAI_API_KEY` (a secret reaches only a new session).
+- **S30b (user, 2026-10-23):** "do S30b from STATUS": record every set on Luna + Sol with `--phase 7` within the $1 cap, fix only what fails, then PR, merge and the S31 prompt. When forget leaked a reworded value (AC-W7-2), the user chose **"Turn-level + verbatim"** (ADR-0036) over "referencing turn only", "instruction only" and "stop and plan it in S31".
+- **S30b decisions (Claude, in ADR-0036 and ai-budget.md):**
+  - runs packed to about $0.56 of worst-case estimate (`--case`), since chunks of 20 can't pass the guards; the guards are unchanged;
+  - three graders corrected where the model was right; the holdout `in-two-days` left untuned;
+  - the S27 cassettes' second and third trials dropped (stale; D-5 is one trial), pass^3 at S33;
+  - `find_availability`'s first-day-only `notBefore` noted, not changed.

@@ -1,4 +1,4 @@
-import type { EvalCase } from './case.js';
+import type { EvalCase, FactMatcher } from './case.js';
 import { mismatches } from './matchers.js';
 import { findTool } from '../tools/registry.js';
 import type { Transcript } from './transcript.js';
@@ -88,6 +88,80 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
     }
     if (wanted.length > 0 && left.length > 0) {
       reasons.push(`also ${kind}: ${left.join(', ')}`);
+    }
+  }
+  reasons.push(...gradeMemory(evalCase, transcript));
+  return reasons;
+}
+
+type RememberedFact = NonNullable<Transcript['facts']>[number];
+
+function matchesFact(fact: RememberedFact, matcher: FactMatcher): boolean {
+  return (
+    (matcher.subject === undefined || fact.subject === matcher.subject) &&
+    (matcher.key === undefined || fact.key === matcher.key) &&
+    (matcher.value === undefined || new RegExp(matcher.value, 'i').test(fact.value)) &&
+    (matcher.sensitive === undefined || fact.sensitive === matcher.sensitive) &&
+    (matcher.status === undefined || fact.status === matcher.status)
+  );
+}
+
+function describeMatcher(matcher: FactMatcher): string {
+  return Object.entries(matcher)
+    .map(([key, value]) => `${key}=${String(value)}`)
+    .join(' ');
+}
+
+/**
+ * The memory graders (S30, playbook §5): what the business remembers afterwards, and — the
+ * deletion grader — what the model was sent and what is stored, never what the model said.
+ */
+function gradeMemory(evalCase: EvalCase, transcript: Transcript): string[] {
+  const reasons: string[] = [];
+  const { memory, providerMustNotContain, storedMustNotContain, cards } = evalCase.expect;
+  const facts = transcript.facts ?? [];
+  for (const wanted of memory.saved) {
+    if (!facts.some((fact) => matchesFact(fact, wanted))) {
+      reasons.push(`expected a remembered fact ${describeMatcher(wanted)}`);
+    }
+  }
+  for (const unwanted of memory.mustNotSave) {
+    const found = facts.find((fact) => matchesFact(fact, unwanted));
+    if (found !== undefined) {
+      reasons.push(`remembered what it must not: ${found.subject} ${found.key}`);
+    }
+  }
+  for (const { pattern, after } of providerMustNotContain) {
+    const regex = new RegExp(pattern, 'i');
+    const leaked = (transcript.requests ?? []).filter(
+      (request) => request.turn > after && regex.test(request.text),
+    );
+    if (leaked.length > 0) {
+      reasons.push(
+        `sent /${pattern}/i to the model after turn ${String(after)} (${String(leaked.length)} request${leaked.length === 1 ? '' : 's'})`,
+      );
+    }
+  }
+  for (const pattern of storedMustNotContain) {
+    const regex = new RegExp(pattern, 'i');
+    const count = (transcript.stored ?? []).filter((text) => regex.test(text)).length;
+    if (count > 0)
+      reasons.push(`still stores /${pattern}/i (${String(count)} place${count === 1 ? '' : 's'})`);
+  }
+  const shown = transcript.cards ?? { warnings: [], lastVisitNotes: [] };
+  if (cards.warning !== undefined) {
+    const regex = new RegExp(cards.warning, 'i');
+    if (!shown.warnings.some((value) => regex.test(value))) {
+      reasons.push(`no card warns /${cards.warning}/i`);
+    }
+  }
+  if (cards.noWarning && shown.warnings.length > 0) {
+    reasons.push(`a card warns though it must not (${String(shown.warnings.length)})`);
+  }
+  if (cards.lastVisit !== undefined) {
+    const regex = new RegExp(cards.lastVisit, 'i');
+    if (!shown.lastVisitNotes.some((value) => regex.test(value))) {
+      reasons.push(`no card shows the last visit /${cards.lastVisit}/i`);
     }
   }
   return reasons;

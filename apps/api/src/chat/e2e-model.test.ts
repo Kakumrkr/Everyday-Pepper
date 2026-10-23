@@ -144,6 +144,31 @@ describe('E2eModel (the journeys’ scripted model, never in production)', () =>
     });
   });
 
+  it('remembers a fact about a client found by name (S30), labelled answers included', async () => {
+    const said = user("Remember Maria's usual service is Haircut with Jess");
+    const first = await model.respond(request([said]));
+    expect(first.toolCalls[0]?.name).toBe('find_clients');
+    // A lookup that brought remembered facts arrives labelled untrusted.
+    const read = answered(first, {
+      find_clients: {
+        untrusted_data: JSON.stringify({
+          status: 'answered',
+          data: { matches: [{ clientId: 'cli-maria', name: 'Maria L.' }] },
+        }),
+      },
+    });
+    const saving = await model.respond(request([said, ...read]));
+    expect(JSON.parse(saving.toolCalls[0]?.arguments ?? '')).toEqual({
+      about: 'client',
+      id: 'cli-maria',
+      key: 'usual_service',
+      value: 'Haircut with Jess',
+      sensitive: null,
+    });
+    const saved = answered(saving, { remember_fact: { status: 'done' } });
+    expect((await model.respond(request([said, ...read, ...saved]))).text).toBe('Saved.');
+  });
+
   it('can be "down" without tripping the shared circuit breaker, and offers help otherwise', async () => {
     const down = await model
       .respond(request([user('Simulate an outage')]))

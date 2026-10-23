@@ -4,6 +4,7 @@ import type {
   AutonomyAction,
   ChangeSide,
   ClientId,
+  MemoryWarningRule,
   RiskTier,
   ToolCard,
   TrustJson,
@@ -30,6 +31,8 @@ export interface ToolDeps {
   templateRuleDefaults?: TemplateRuleDefaultsOf;
   /** The industry template's autonomy defaults. */
   autonomy: AutonomyDefaults;
+  /** Which remembered facts a booking warns about, by service category (the template's, S30). */
+  memoryWarnings?: readonly MemoryWarningRule[];
   /** For the client emails a write queues (held for the undo-send grace). */
   emails: { baseUrl: string; outboxKey: Buffer };
   /**
@@ -109,6 +112,17 @@ export interface Performed {
    * untrusted, as for a read's `untrustedText`.
    */
   untrustedText?: boolean;
+  /**
+   * Remembered facts for the model with the answer, by reference (`{ "$fact": id }`), filled in
+   * from the memory tables whenever the answer is sent (S30): a booking's warnings and the
+   * client's last visit. Never stored with the action.
+   */
+  memory?: TrustJson;
+}
+
+/** The conversation turn a call belongs to (where a remembered fact came from, S30). */
+export interface ToolCallOrigin {
+  turnId: string | null;
 }
 
 export interface WriteTool<S extends z.ZodType = z.ZodType> {
@@ -126,6 +140,19 @@ export interface WriteTool<S extends z.ZodType = z.ZodType> {
   perform(scope: WriteScope, args: z.output<S>): Promise<Performed>;
   /** Reverses it through the domain, as the member. */
   undo(scope: ToolScope, inverse: TrustJson): Promise<void>;
+  /**
+   * For a call whose arguments hold something that must not be stored with the action (a
+   * remembered value, S30, playbook principle 7): stores it where it belongs first (a proposed
+   * fact) and returns the payload to store instead, ids only. `perform` then gets that payload,
+   * parsed with `payload`.
+   */
+  stash?(scope: ToolScope, args: z.output<S>, origin: ToolCallOrigin): Promise<TrustJson>;
+  /** Removes what `stash` stored, when the call won't happen (refused, or a retry). */
+  unstash?(scope: ToolScope, payload: TrustJson): Promise<void>;
+  /** The stored payload's schema, when `stash` replaces the arguments. */
+  payload?: z.ZodType;
+  /** No dial setting decides it: it always waits for the member's OK (S30 D-1). */
+  alwaysAsks?: boolean;
 }
 
 export type AnyTool = ReadTool | WriteTool;

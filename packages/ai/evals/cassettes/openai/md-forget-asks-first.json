@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "248127ce3b924d457208a2efc815fa4efed962478e5c84e1862ae9716b6ebb5c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_w5FQxr1Fy2ocKgHjpZWPKBoQ",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6970,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 9,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f748592d0ef2140c6352d7bf879d9e69092c8d50d87df010608add776d7ec89d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_WGPBYjx5lL1H2lDNiLwuQRHr",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7122,
+            "cachedInputTokens": 6967,
+            "cacheWriteTokens": 152,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e678af22d596ea3edef7d9fa864c54bc76fed48cfa016267a7ad58b7ec9e3f9f",
+        "response": {
+          "text": "Forgetting Maria L.’s allergy is waiting for your approval on the card. Nothing has changed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7230,
+            "cachedInputTokens": 7119,
+            "cacheWriteTokens": 108,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f2240ff1325edb2228e8740a18cd8e8a49fdac6ab60ec8b6ceaa26b1e6b44aac",
+        "response": {
+          "text": "Free parking is in Lot B after 6pm.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7046,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 7043,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

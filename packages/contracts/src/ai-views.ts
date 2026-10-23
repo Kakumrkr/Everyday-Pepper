@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { ClientIdSchema } from './clients.js';
+import { MemoryFactShownSchema } from './memory.js';
+import { LocalDateSchema } from './rules.js';
 import {
   ChangeSideSchema,
   ToolCardSchema,
@@ -74,6 +76,11 @@ export const AiWhySchema = z.strictObject({
   untrustedContext: z.boolean(),
   /** What the domain checked (S26b). Optional: actions recorded before S26b have none. */
   facts: z.array(AiWhyFactSchema).max(20).optional(),
+  /**
+   * The remembered facts it used (S30), read live by id: "a fact you deleted" once gone.
+   * Optional: actions recorded before S30 have none.
+   */
+  remembered: z.array(MemoryFactShownSchema).max(20).optional(),
 });
 export type AiWhy = z.infer<typeof AiWhySchema>;
 
@@ -89,6 +96,24 @@ export const AiEmailViewSchema = z.strictObject({
   sendsAt: UtcDateTimeSchema.nullable(),
 });
 export type AiEmailView = z.infer<typeof AiEmailViewSchema>;
+
+/**
+ * What a card shows from memory (S30), read live by id: the fact a memory tool saves or
+ * forgets ("Updated: was …"), the booking's warnings (AC-W3-2: an allergy on a color service)
+ * and the client's last visit with its notes. Only what the viewer may read; nothing deleted.
+ */
+export const AiMemoryViewSchema = z.strictObject({
+  fact: MemoryFactShownSchema.nullable(),
+  warnings: z.array(MemoryFactShownSchema).max(10),
+  lastVisit: z
+    .strictObject({
+      date: LocalDateSchema,
+      serviceName: z.string().max(120),
+      notes: z.array(MemoryFactShownSchema).max(10),
+    })
+    .nullable(),
+});
+export type AiMemoryView = z.infer<typeof AiMemoryViewSchema>;
 
 /** `GET /v1/ai/proposals/:id`: a proposal as it stands now. */
 export const AiProposalViewSchema = z.strictObject({
@@ -113,6 +138,8 @@ export const AiProposalViewSchema = z.strictObject({
   /** The viewer may approve or reject it now (it is pending and theirs to decide). */
   canDecide: z.boolean(),
   why: AiWhySchema,
+  /** Memory on the card (S30); absent when there is none. */
+  memory: AiMemoryViewSchema.optional(),
 });
 export type AiProposalView = z.infer<typeof AiProposalViewSchema>;
 
@@ -140,6 +167,8 @@ export const AiActionViewSchema = z.strictObject({
   /** It was done for, or asked for by, the viewer. */
   forYou: z.boolean(),
   why: AiWhySchema,
+  /** Memory on the card (S30); absent when there is none. */
+  memory: AiMemoryViewSchema.optional(),
 });
 export type AiActionView = z.infer<typeof AiActionViewSchema>;
 

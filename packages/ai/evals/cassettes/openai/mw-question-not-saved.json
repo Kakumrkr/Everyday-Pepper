@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "80bae8704fd2cf085fcea3dfa1a7d937b69b04be90239f9f66424bad7bf4129d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8LgUkXZuX5EyUt4t1BJhBoj1",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6971,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 10,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9a9f695c92d27ad513d0949957d46485521bf676ecf54274dd31da7fa161e72a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_smQBK2yYNdNbp4EvNIm7ajEI",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7058,
+            "cachedInputTokens": 6968,
+            "cacheWriteTokens": 87,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ab8f006ec87ff3766eb9424c062ea42418ab43f88f829fb0e9787b70192dec03",
+        "response": {
+          "text": "I don’t see an allergy noted for Maria L. in the information available to me.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7521,
+            "cachedInputTokens": 7055,
+            "cacheWriteTokens": 463,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,4 +1,4 @@
-import { AutonomyActionSchema, type AiWhy } from '@pepper/contracts';
+import { AutonomyActionSchema, MemoryFactShownSchema, type AiWhy } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   AUTONOMY_GROUPS,
@@ -192,7 +192,33 @@ describe('whyModel (assembled from the record, never model prose)', () => {
       checked: [],
       didNot: ['I didn’t change anything until someone said OK.', 'I didn’t email the client.'],
       setting: 'Create a booking: Ask me',
+      remembered: [],
     });
+  });
+
+  it('lists the remembered facts it used, read live, and a deleted one as such (S30)', () => {
+    const model = whyModel(
+      why({
+        remembered: [
+          MemoryFactShownSchema.parse({
+            state: 'known',
+            factId: '0199f4b2-7c1e-7a00-8000-0000000000f1',
+            subjectType: 'client',
+            key: 'usual_service',
+            value: 'Colour with Jess',
+            previous: null,
+            sensitive: false,
+          }),
+          MemoryFactShownSchema.parse({
+            state: 'gone',
+            factId: '0199f4b2-7c1e-7a00-8000-0000000000f2',
+          }),
+        ],
+      }),
+      'booking.create',
+      0,
+    );
+    expect(model.remembered).toEqual(['Usual service: Colour with Jess', 'A fact you deleted']);
   });
 
   it('says what the domain checked, from the facts it recorded (S26b), skipping unknown ones', () => {

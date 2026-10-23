@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "563d69b3d6e1e4d0c5b05a683093889538f1bd5613d6ded348cefd37f24d27e2",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_g5ESls50h7VQo5TDEofYXmhJ",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6973,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 12,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "22d106664b7ae167e05ed5136e9331d22a4ffc6fdacc0a5d8a898b94c5d05f4e",
+        "response": {
+          "text": "I couldn’t find Sara Kim among your clients. Could the name be spelled differently?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7037,
+            "cachedInputTokens": 6970,
+            "cacheWriteTokens": 64,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

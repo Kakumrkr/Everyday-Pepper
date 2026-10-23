@@ -26,8 +26,11 @@ export type PriceTable = z.infer<typeof PriceTableSchema>;
 export const DEFAULT_RUN_CAP_USD = 1.5;
 /** No single run may plan to spend more than the whole Phase 6 budget's working part. */
 export const MAX_RUN_CAP_USD = 4.5;
-/** The most cases one real run may hold: sets run in chunks (S26b's worst case, ~$0.05 a case). */
-export const MAX_CASES_PER_RUN = 25;
+/**
+ * The most cases one real run may hold: sets run in chunks (S26b's worst case, ~$0.05 a case;
+ * S30's seventeen tools and memory instructions ~$0.06, so 20).
+ */
+export const MAX_CASES_PER_RUN = 20;
 /** Output tokens assumed per call when estimating. Generous on purpose. */
 export const OUTPUT_ALLOWANCE_TOKENS = 600;
 /** Characters per token when estimating input: low, so the estimate errs high. */
@@ -65,10 +68,18 @@ export function estimateRunCost(
   let outputTokens = 0;
   const tools = tokensOf(JSON.stringify(agentTools()));
   for (const evalCase of cases) {
+    // Seeded facts may all come along (the business's in the instructions, the rest with records).
+    const remembered = evalCase.seed.facts.reduce(
+      (sum, fact) => sum + tokensOf(fact.value) + 30,
+      0,
+    );
     const base =
-      tokensOf(instructionsFor(evalBusinessContext(evalCase), new Date(evalCase.now))) + tools;
+      tokensOf(instructionsFor(evalBusinessContext(evalCase), new Date(evalCase.now))) +
+      tools +
+      remembered;
     let conversation = 0;
     for (const turn of evalCase.turns) {
+      if (!('user' in turn)) continue;
       conversation += tokensOf(turn.user);
       // Every step of the loop sends the turn so far again (a tool result per step, at most).
       for (let call = 0; call < callsPerTurn; call += 1) {

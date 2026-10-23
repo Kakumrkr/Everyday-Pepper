@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "405f025b8c044cce531d300d57200d86091d22b63b20671fbc64b50234f5fdf5",
+        "fingerprint": "0beefc5b6081a08bcd98bb3604e038258f75b9bb2a5bea6405c9cea51cda07bf",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ON4bAu3zP9q7YshWohlb8YCZ",
+              "id": "call_Te2J0Yyxog0sU009I91G5uVQ",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5542,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6969,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 8,
             "outputTokens": 16
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "fac8521b0080ef44bb7f9985223f73c669a6043ceb23bee88038e0a1253073ad",
+        "fingerprint": "53580b775ee2f649ad21ebd0d86e73f6c95028bdc6bf55828be433ea9bac0381",
         "response": {
           "text": "Jess does colour.",
           "toolCalls": [],
@@ -37,98 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5810,
-            "cachedInputTokens": 5539,
-            "cacheWriteTokens": 268,
+            "inputTokens": 7244,
+            "cachedInputTokens": 6966,
+            "cacheWriteTokens": 275,
             "outputTokens": 8
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "405f025b8c044cce531d300d57200d86091d22b63b20671fbc64b50234f5fdf5",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_y6ae0CDaARVpGTqSxY5FkhPJ",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5542,
-            "cachedInputTokens": 5539,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "270a087a511df22232d0d46c22ba96e9a2735b68ba316398c00b2b5b7c201c05",
-        "response": {
-          "text": "Jess does colour. It’s a 90-minute service.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5803,
-            "cachedInputTokens": 5539,
-            "cacheWriteTokens": 261,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "405f025b8c044cce531d300d57200d86091d22b63b20671fbc64b50234f5fdf5",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_uuqIgXrbfppZWYm7W18uWAv6",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5542,
-            "cachedInputTokens": 5539,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a835a0ae2ecc0b382c1a335774eed95a4b7097b318f72b0e2f835d31fca3267a",
-        "response": {
-          "text": "Jess and Marco both offer colour.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5824,
-            "cachedInputTokens": 5539,
-            "cacheWriteTokens": 282,
-            "outputTokens": 11
           },
           "model": "gpt-6-luna"
         }

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "8a0103111b711ffc3149b6625c8beec98e9732f0e3f7903ac8144392d5f136cc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_BcvC373rqWFP04DCpHPvNgq4",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6976,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 15,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fa62d4701e94be08781691e69c8338aa81ec27f00aeb09d2df55bfeffcd8749f",
+        "response": {
+          "text": "Maria L. has a recorded PPD allergy, and her usual service is “Colour with Jess”.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7168,
+            "cachedInputTokens": 6973,
+            "cacheWriteTokens": 192,
+            "outputTokens": 24
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

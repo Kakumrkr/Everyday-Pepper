@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "dd60770a1bf8d45fc8486a3c833ac07ed089203019526772a671401ea767946b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_FLSz3fr3moRyNU1yiKrEBJEy",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6977,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 16,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cd4ab1564a861d6c3aea614a74fe526ea710774e6c5017054af35c6d5fa1693b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_TsJlKvbM1i5OpPjHoC3TThJL",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7061,
+            "cachedInputTokens": 6974,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "13e86a1ca976ab89540546816d6834a44559e7049a808b4086690abcfb2189f9",
+        "response": {
+          "text": "I don’t see any allergy information recorded for Maria L. She’s booked with you tomorrow, Tuesday, November 3, at 3:00 PM for a haircut.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7498,
+            "cachedInputTokens": 7058,
+            "cacheWriteTokens": 437,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

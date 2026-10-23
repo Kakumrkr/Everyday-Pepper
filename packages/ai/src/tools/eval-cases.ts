@@ -17,6 +17,7 @@ export const GENERATED_CASES_CLOCK = {
 } as const;
 
 const FOLLOW_THROUGH = new Set(['add_todo', 'list_todos', 'complete_todo']);
+const MEMORY = new Set(['remember_fact', 'add_visit_note', 'forget_fact']);
 
 /** One case per example in every tool's guide, on the business's clock. */
 export function toolEvalCases(
@@ -28,7 +29,11 @@ export function toolEvalCases(
         ? []
         : EvalCaseSchema.parse({
             id: `tool-${tool.name.replaceAll('_', '-')}-${String(index + 1)}`,
-            set: FOLLOW_THROUGH.has(tool.name) ? 'follow_through' : 'scheduling',
+            set: FOLLOW_THROUGH.has(tool.name)
+              ? 'follow_through'
+              : MEMORY.has(tool.name)
+                ? 'memory_write'
+                : 'scheduling',
             description: `Generated from ${tool.name}'s guide: "${example.say}"`,
             now: clock.now,
             timeZone: clock.timeZone,

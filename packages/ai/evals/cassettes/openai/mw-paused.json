@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "fc166d918e185755da30d9e82b7b890537a392a06f0e6ac66bf871903143f79d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IAIyacUDTPCRpdPQP0v7MBmh",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "295209b8c21420fe14c7a05a91acee5285e6d4658b2598b931a0c6b03abf156a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_O7R2lReZ2ytRtbgTX9iOGN1X",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"preference\",\"value\":\"prefers morning appointments\",\"sensitive\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7056,
+            "cachedInputTokens": 6969,
+            "cacheWriteTokens": 84,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2113723dac4d27a5b3a1960c85525f20629db7ebe357e797d630c10476bb5a44",
+        "response": {
+          "text": "I couldn’t save that—remembering new things is paused. Lena can turn it back on in Settings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7168,
+            "cachedInputTokens": 7053,
+            "cacheWriteTokens": 112,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

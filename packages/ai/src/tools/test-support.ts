@@ -24,6 +24,7 @@ import {
   createTask,
   ManualClock,
   outboxKeyFrom,
+  saveFact,
   type Actor,
 } from '@pepper/core';
 import {
@@ -131,7 +132,11 @@ export async function newWorld(db: Database): Promise<World> {
     durationMinutes: 60,
     bufferAfterMinutes: 10,
   });
-  const colour = await createService(db, owner, { name: 'Colour', durationMinutes: 90 });
+  const colour = await createService(db, owner, {
+    name: 'Colour',
+    category: 'Color',
+    durationMinutes: 90,
+  });
   const jessStaff = await createStaffMember(db, owner, {
     displayName: 'Jess',
     userId: jessId,
@@ -206,6 +211,8 @@ export function depsFor(world: World, actor: Actor): ToolDeps {
     actor,
     clock: world.clock,
     autonomy: { templateDefaults: {} },
+    // The hair salon template's: a color service warns about an allergy (S30).
+    memoryWarnings: [{ serviceCategories: ['Color'], keys: ['allergy'] }],
     emails: { baseUrl: 'http://localhost:3000', outboxKey: OUTBOX_KEY },
   };
 }
@@ -242,8 +249,8 @@ export function callTool(
 
 /**
  * Records of Jess's in `world` for the hostile fake to aim at (so staff reach them too): a
- * booking at 10:00 on Tuesday, an open to-do and her lunch blocked 12:00–13:00; and the same
- * in `other`, which must stay invisible.
+ * booking at 10:00 on Tuesday, an open to-do, her lunch blocked 12:00–13:00 and Maria's
+ * remembered allergy; and the same in `other`, which must stay invisible.
  */
 export async function hostileTargets(world: World, other: World): Promise<HostileTargets> {
   const of = async (w: World): Promise<TargetIds> => ({
@@ -263,6 +270,13 @@ export async function hostileTargets(world: World, other: World): Promise<Hostil
         endsAt: tuesdayAt('13:00'),
       })
     ).id,
+    factId: (
+      await saveFact(w.db, w.owner, {
+        subject: { type: 'client', id: w.maria.id },
+        key: 'allergy',
+        value: 'PPD',
+      })
+    ).fact.id,
   });
   return { own: await of(world), foreign: await of(other) };
 }

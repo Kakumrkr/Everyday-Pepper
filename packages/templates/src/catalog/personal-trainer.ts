@@ -92,6 +92,10 @@ export const personalTrainer: TemplateInput = {
     'A new client starts with a consultation or assessment before regular sessions.',
     'Never give medical advice; note injuries on the client profile and leave training decisions to the trainer.',
   ],
+  memory: {
+    warnings: [{ serviceCategories: ['Training', 'Getting started'], keys: ['injury', 'health'] }],
+    visitNoteKeys: ['workout', 'weights'],
+  },
   onboardingHints: {
     lookFor: [
       'session prices and packages',

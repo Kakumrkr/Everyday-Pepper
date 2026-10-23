@@ -93,10 +93,10 @@ describe('estimateRunCost (the budget guard, playbook §4)', () => {
     );
   });
 
-  it('keeps one run of 25 one-turn cases under the $1.50 cap even at every step', () => {
+  it('keeps one run of a full chunk of one-turn cases under the $1.50 cap even at every step', () => {
     // 30 fitted with ten tools; the fourteen of S26b put ~$0.05 a case on the worst case, so
-    // S27 runs a set in chunks of at most 25 cases (or calibrates the estimate first).
-    const cases = Array.from({ length: 25 }, () => evalCase());
+    // S27 ran sets in chunks of 25; S30's seventeen tools put ~$0.06 on it: chunks of 20.
+    const cases = Array.from({ length: MAX_CASES_PER_RUN }, () => evalCase());
     expect(estimateRunCost(cases, 1, PRICE).usd).toBeLessThan(1.5);
   });
 });
@@ -130,20 +130,20 @@ describe('refuseRun', () => {
   });
 });
 
-describe('selectCases (runs in chunks of at most 25, S27)', () => {
+describe('selectCases (runs in chunks of at most 20, S27, S30)', () => {
   const cases = Array.from({ length: 60 }, (_, index) =>
     evalCase({ id: `case-${String(index + 1)}`, set: index < 50 ? 'scheduling' : 'safety' }),
   );
 
-  it('filters by set and id, then takes the chunk-th slice of 25', () => {
-    expect(MAX_CASES_PER_RUN).toBe(25);
+  it('filters by set and id, then takes the chunk-th slice of 20', () => {
+    expect(MAX_CASES_PER_RUN).toBe(20);
     expect(selectCases(cases, { sets: [], ids: [], chunk: null })).toHaveLength(60);
     expect(selectCases(cases, { sets: ['safety'], ids: [], chunk: null })).toHaveLength(10);
     const second = selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 2 });
     expect(second.map((c) => c.id)).toEqual(
-      Array.from({ length: 25 }, (_, index) => `case-${String(index + 26)}`),
+      Array.from({ length: 20 }, (_, index) => `case-${String(index + 21)}`),
     );
-    expect(selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 3 })).toEqual([]);
+    expect(selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 4 })).toEqual([]);
     expect(
       selectCases(cases, { sets: [], ids: ['case-3', 'case-55'], chunk: null }).map((c) => c.id),
     ).toEqual(['case-3', 'case-55']);
@@ -154,7 +154,7 @@ describe('selectCases (runs in chunks of at most 25, S27)', () => {
     expect(third.map((c) => c.id)).toEqual(
       Array.from({ length: 8 }, (_, index) => `case-${String(index + 17)}`),
     );
-    expect(() => selectCases(cases, { sets: [], ids: [], chunk: 1, chunkSize: 26 })).toThrow(
+    expect(() => selectCases(cases, { sets: [], ids: [], chunk: 1, chunkSize: 21 })).toThrow(
       /--chunk-size/,
     );
     expect(() => selectCases(cases, { sets: [], ids: [], chunk: 1, chunkSize: 0 })).toThrow(

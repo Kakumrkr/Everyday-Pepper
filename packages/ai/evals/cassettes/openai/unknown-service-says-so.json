@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1434eab155d3bf7daa4b535a65b04ad0b75f6c6685bde92057f5d0d22eb20759",
+        "fingerprint": "981273f7b19de5b4f50e034c7f30a5b312f4b7c483c3262543f6158d554ecb8c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_78FGOF8EohMjky0UrKVpcagY",
+              "id": "call_gClj51X0dXlZmqeki3MQiKeK",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6975,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,33 +25,18 @@
         }
       },
       {
-        "fingerprint": "b5d445eb66c97b57f11de761e2de9dadac642c2bd0843bb229498afc9884f047",
+        "fingerprint": "fd551a5f7522081bb028947b99df3b64133b55f7c5095912c75a480eee9211a3",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_7jP3xCiRsazS12m29w2FhBJZ",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Ana\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5816,
-            "cachedInputTokens": 5545,
-            "cacheWriteTokens": 268,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "05166f6f2cd6d8112193ba09a351c06cd32d87f07c0de9757616102b7f0ecfc0",
-        "response": {
-          "text": "Juniper Hair Studio doesn’t currently list a manicure service, so I can’t book Ana for one. The available services are Colour and Haircut.",
+          "text": "I can’t book a manicure—Juniper Hair Studio currently lists Colour and Haircut only. Would you like to book one of those instead?",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_00335b5efca29890016adb6cb7509487d28bf1845561c690dc",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq22y3LoX3sf6ivFj2iCFw7GOvcL7ThqplzXDkXOtxyT9cbdUSRAoQRiLNIjYdlUEiczfrkVhLXGU_xE2YZ2rbypiFk1T30BALapVoj5jYgONA5lTeR6K9fGu60HnIh8_C8CYDHyaBMFNQ6CIN7_qoJEpZS9eGDdsf-7Q0CQkkQw2bHSEd8C9-KtGySF7Sl8S4_y_5MoQ_El5MI1iNYR-u3Xbb4XSiK5xqjr0mKu1q_RiDGutUsPDsYg4Boate50kPujJzKLDyP5G8jq5DR6zpj9r5zYOQ-7SuehtbOIqsBx-wrxRepmL-KyuttYbrPRaEMf0FbeaI6wRStNo-y8YFMpFCRI1UVbGT7nxtiiwz-eGib71R_OBbpd_sjFrC5yDD3exySm-Jr2umjWt-Gihl-R8w2Gf5WPeZJ7fNKJhi6eLi7vd7dEX7hTM03pIFHPYkg4o-cFGJmSf-A4CVnPkSTI9Dwc7Iz4Q8NZ6AwI31NfGOmT6PvBNLrr9qvT48a7j7yRAGqGMc09jMOO903T2iAhgmHqP0El5s0WyZd8KVosCNy1qpFlFLeh5acXS9vEnpbx4qhCT-cyPsu5O-TEBxPk_gWnrm-KQIvQBj0DjYS99yXMjT1qzbIEpubUB4Y8_OWgS_EoB_I64_5IaprC8_JGwrywR2tTil2o06_fN-rnecO4j2f7jT2PP-RYEVY9ScVShiVqaG1k-qSJT97zLkG0PMaoRkId91iaYfqH4Z61DR7aXsyh4BlZjG0KHAMmSKMNNtKCfpnucj926LHWvkzMT1pPsuejs1-6G14yeMH0ffv3X-uphXsykLxoJSlfTdqVqWCVtmGivTK-Z4TK1YSBCddYeu9oraO6DZmSmIVIwtcdPU1CpphfMnjIfdJ5bJ327zAtMJUNF23vu-JEtOjrRSKPCl6FbzTdjs-91hKbZdP_dBLL7AWVE3WM3vInhijubiMFr75PsdUbf1W3JaKOZqqSfxWtIOXYKbsOEH8A2kPo2WKLuKAPzsOOd-Lx2DTRn-LEiquPt7JkWAyYYEbBGMAuiWzPaKyMK8o_ycC6tgXTLv7xIfZwjwyCQaHqgXyaTh3_5kQapbveVt173D2OAbwT9LbohdBcNOZaYo_yxY5DiVMNJkt5KikHJBoMxvmYHA-DANC_USi6k0YzAxNVU3UsXZjpcLuuekR5GsY-AwSgzz1mh8CAQneXQWGzF_5kPMV1HXsKjqlCW9MuWZfAyt9MACX-QCeBeYKSgca0WnC__Ffihwg74HDbJ4_Spg1tWDwpW0o38EZ6z8wIOE7vGobSh6mquo9zoh7dirv2EsHz84I8Us51zRfbJi_z7P9X_x9qo3rHh6vEdMNvvpx6REzYjW-oMpufANoiD5LTZCp1ClZaPWM46DeXpY1oGbkQVCMzubcb8DCrADogm7RuZEGIzuZJc7-bYte8iWr0WmUmC-cZ9GnfYn8vIwfvxyerE633na8Nw4R_aftdQYKYsobtdqpyG7wP48i2rYkKRIXlTW1rArNMIR1EYwi2sk9QCMr8K03-KRWx5oBbk7qbSM9Fl52kBKc9ZLq6NFpyt5Cdq2UvoSjBmyI200DcyX1gLW_rb_3Jx9Vp8MCv9X_2DZIhRfYB5aHxZVIGgvbSvhdeT6bsZM-nLsPem0FdArJSMCYXYkNVBreYXGvd61j3UEP4uRdLNbm95VXzt9-izPyIbTxLipOl44mhOzyZYprATHiTE79UiS1azXuw4AMsRG0iDJ4Bi67s8UjQ4kp-r-mai0yDKfXhglla8wh5dE7GcoH3oydXWE2--P8Ty_dr_RbTXrLTU6ZKwT0F3wML7kv8yVnwRUgof6dA5xNysT9VVPquKyeNbO44qNckGaBsDMqw==",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -59,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5899,
-            "cachedInputTokens": 5813,
-            "cacheWriteTokens": 83,
-            "outputTokens": 34
+            "inputTokens": 7252,
+            "cachedInputTokens": 6972,
+            "cacheWriteTokens": 277,
+            "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }

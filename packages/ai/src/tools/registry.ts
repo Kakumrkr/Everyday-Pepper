@@ -44,6 +44,7 @@ import {
   listServicesAndStaff,
 } from './catalog/reads.js';
 import { cancelBooking, createBooking, moveBooking } from './catalog/bookings.js';
+import { addVisitNote, forgetFact, rememberFact } from './catalog/memory.js';
 import { directoryOf, localSlot } from './catalog/shared.js';
 import {
   addTodo,
@@ -59,10 +60,11 @@ import {
   type ToolRefusal,
 } from './errors.js';
 import { describeTool } from './guide.js';
-import { scopeOf, undoWith, writeRunner } from './runner.js';
+import { scopeOf, storedSchema, undoWith, writeRunner } from './runner.js';
 import type { AnyTool, ToolDeps, WriteTool } from './tool.js';
 
-// The tool registry (ADR-0029, playbook S24; S26b's four, ADR-0032): the fourteen V1 tools,
+// The tool registry (ADR-0029, playbook S24; S26b's four, ADR-0032; S30's three memory tools,
+// ADR-0035): the seventeen tools,
 // their definitions for the provider, and `dispatchToolCall`, the one way a model's tool call
 // reaches the business. It parses the arguments twice (the provider's strict schema, then Zod),
 // takes the business and the member from the session only, sends writes through the trust layer
@@ -85,6 +87,9 @@ export const TOOLS: readonly AnyTool[] = [
   unblockTime,
   addTodo,
   completeTodo,
+  rememberFact,
+  addVisitNote,
+  forgetFact,
 ];
 
 const BY_NAME = new Map(TOOLS.map((tool) => [tool.name, tool]));
@@ -116,6 +121,15 @@ export interface ToolTurn {
   requestMessageId: string | null;
   /** The turn's context held untrusted text (tracked by the loop, never by the model). */
   untrustedContext: boolean;
+  /**
+   * Some of it came from outside the team (a client's words), not only from memory (S30).
+   * Not given: all untrusted text counts as such.
+   */
+  outsideText?: boolean;
+  /** The conversation turn (where a remembered fact came from, S30); `null` outside a chat. */
+  turnId?: string | null;
+  /** The remembered facts the turn's tool answers brought (*Why?* names them by id, S30). */
+  recalled?: readonly string[];
 }
 
 /** What one tool call came to: for the member (card) and the model (`toolMessageContent`). */
@@ -137,6 +151,8 @@ export type ToolOutcome =
       execution: ActionExecution;
       /** The summary echoes untrusted stored text (S27): the loop labels it as data. */
       untrustedText: boolean;
+      /** Remembered facts for the model, by reference (S30): warnings, the last visit. */
+      memory?: TrustJson;
     }
   | {
       status: 'awaiting_approval';
@@ -145,6 +161,7 @@ export type ToolOutcome =
       card: ToolCard;
       proposal: ActionProposal;
       untrustedText: boolean;
+      memory?: TrustJson;
     }
   | {
       status: 'refused';
@@ -203,12 +220,14 @@ export function toolMessageContent(outcome: ToolOutcome): string {
         status: 'done',
         summary: outcome.summary,
         note: 'Done; the member sees it with Undo.',
+        ...(outcome.memory !== undefined && { memory: outcome.memory }),
       });
     case 'awaiting_approval':
       return JSON.stringify({
         status: 'awaiting_approval',
         summary: outcome.summary,
         note: 'Nothing has changed yet: the member approves or rejects it on the card. Say so; never claim it is done.',
+        ...(outcome.memory !== undefined && { memory: outcome.memory }),
       });
     case 'refused':
       return JSON.stringify({
@@ -345,8 +364,9 @@ async function requestWrite(
       'Leave email addresses and phone numbers out; refer to the client by their id.',
     );
   }
-  const payload = checked.data;
-  const { runner, lastPreview, lastUntrusted } = writeRunner(tool, deps, payload);
+  // A remembered value is stored where it belongs first; the action keeps only its id (S30).
+  const payload = tool.stash === undefined ? checked.data : await stashed(deps, tool, args, turn);
+  const { runner, lastPreview, lastUntrusted, lastMemory } = writeRunner(tool, deps, payload);
   const ask = () =>
     requestAction(
       deps.db,
@@ -358,18 +378,37 @@ async function requestWrite(
         explanation: {
           requestMessageId: turn.requestMessageId,
           steps: [{ tool: tool.name, input: payload }],
-          facts: [],
+          facts: (turn.recalled ?? [])
+            .slice(0, 10)
+            .map((ref) => ({ kind: 'memory_recalled', ref, value: null })),
           alternatives: [],
         },
         untrustedContext: turn.untrustedContext,
+        ...(turn.outsideText !== undefined && { outsideText: turn.outsideText }),
       },
       { templateDefaults: deps.autonomy.templateDefaults, clock: deps.clock },
     );
   // A copy of the same call racing this one recorded it first: asking again finds its result.
-  const result = await ask().catch((error: unknown) => {
-    if (error instanceof ConcurrentActionError) return ask();
+  let result: Awaited<ReturnType<typeof ask>>;
+  try {
+    result = await ask().catch((error: unknown) => {
+      if (error instanceof ConcurrentActionError) return ask();
+      throw error;
+    });
+  } catch (error) {
+    await unstash(deps, tool, payload);
     throw error;
-  });
+  }
+  // What `stash` stored stays only with this call's proposal: a retry or a racing copy found
+  // another's result, and a run made it current already (only a still-proposed fact goes).
+  if (
+    tool.unstash !== undefined &&
+    (result.kind === 'executed' ||
+      JSON.stringify(result.proposal.payload) !== JSON.stringify(payload))
+  ) {
+    await unstash(deps, tool, payload);
+  }
+  const memory = lastMemory();
   if (result.kind === 'proposed') {
     const shown = PreviewSchema.parse(result.proposal.preview);
     return {
@@ -379,6 +418,7 @@ async function requestWrite(
       proposal: result.proposal,
       // A proposal found again without a fresh dry run: its stored summary is labelled anyway.
       untrustedText: lastUntrusted() ?? true,
+      ...(memory !== undefined && { memory }),
       card: changeCard(tool.name, result.proposal.action, shown, {
         state: 'proposed',
         proposalId: result.proposal.id,
@@ -403,6 +443,7 @@ async function requestWrite(
     execution,
     // Without a fresh dry run the summary is the fixed "already done", which echoes nothing.
     untrustedText: lastUntrusted() ?? false,
+    ...(memory !== undefined && { memory }),
     card: changeCard(tool.name, execution.action, shown, {
       state: 'done',
       proposalId: execution.proposalId,
@@ -411,6 +452,34 @@ async function requestWrite(
       undoUntil: execution.undoUntil,
     }),
   };
+}
+
+/** Runs the tool's `stash` as the AI, in its own transaction: the payload to store instead. */
+async function stashed(
+  deps: ToolDeps,
+  tool: WriteTool,
+  args: unknown,
+  turn: ToolTurn,
+): Promise<TrustJson> {
+  if (tool.stash === undefined) throw new Error(`${tool.name} stores nothing first`);
+  const stash = tool.stash.bind(tool);
+  const member = memberOf(deps.actor);
+  const stored = await withMember(deps.db, member.context, async (tx) =>
+    stash(await scopeOf(tx, { ...member, via: 'ai' }, deps), args, {
+      turnId: turn.turnId ?? null,
+    }),
+  );
+  return TrustJsonSchema.parse(storedSchema(tool).parse(stored));
+}
+
+/** Removes what `stash` stored for a call that won't use it. Never fails the call. */
+async function unstash(deps: ToolDeps, tool: WriteTool, payload: TrustJson): Promise<void> {
+  if (tool.unstash === undefined) return;
+  const remove = tool.unstash.bind(tool);
+  const member = memberOf(deps.actor);
+  await withMember(deps.db, member.context, async (tx) =>
+    remove(await scopeOf(tx, { ...member, via: 'ai' }, deps), payload),
+  ).catch(() => undefined);
 }
 
 /**

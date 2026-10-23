@@ -31,6 +31,7 @@ const oneCallSubject: EvalSubject = async (evalCase, providerFor) => {
   const provider = providerFor({ placeholders: new Map() } as unknown as EvalWorld);
   const result = transcript();
   for (const turn of evalCase.turns) {
+    if (!('user' in turn)) continue;
     const response = await provider.respond({
       route: 'routine',
       instructions: 'test',

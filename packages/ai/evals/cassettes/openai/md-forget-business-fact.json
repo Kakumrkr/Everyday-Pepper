@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b3e1154c24e8ae571daac335e1a9ea2c52fb6bceabb34a89d29e3eb61fe0dced",
+        "response": {
+          "text": "The note says: “Side door code is 4471”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7046,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 7043,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8e62c884e79c223d0972f054f41fcccc7173762721d0616dbd7c19a1fa961351",
+        "response": {
+          "text": "I don’t know the side door code.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6997,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 36,
+            "outputTokens": 13
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

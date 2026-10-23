@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "2b82e4f3f2420e2c683e8bf01d65ba6f49a15d724a79688b39ea73d885dc9753",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3sh1qczZByLHBqxnJGpfY5xY",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6971,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 10,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a96b2e0c915393b0d405f4bacb37e0349973e228c4ddc8faeae03ecaf4eef3fa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_a0yuXgzHTYscgZzUzdNRVAKf",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sara}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7057,
+            "cachedInputTokens": 6968,
+            "cacheWriteTokens": 86,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8bcf321c6e19199eb2434b8b9e0cceee48118b24ee7c0111bbaecc9131f6e09b",
+        "response": {
+          "text": "I don’t know Sara’s usual service—there’s no usual service or past visit noted for her.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7175,
+            "cachedInputTokens": 7054,
+            "cacheWriteTokens": 118,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

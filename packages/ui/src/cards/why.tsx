@@ -41,6 +41,17 @@ export function WhyContent({
           </ul>
         </Block>
       )}
+      {why.remembered.length === 0 ? null : (
+        <Block title="What I remembered">
+          <ul className="m-0 flex flex-col gap-1 pl-5">
+            {why.remembered.map((line, index) => (
+              <li key={`${line}-${String(index)}`} className="whitespace-pre-wrap">
+                {line}
+              </li>
+            ))}
+          </ul>
+        </Block>
+      )}
       {why.checked.length === 0 ? null : (
         <Block title="What I checked">
           <ul className="m-0 flex flex-col gap-1 pl-5">

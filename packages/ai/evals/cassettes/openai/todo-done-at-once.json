@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7809f38674f50c554cfb124698e513c15ef26e0c49911983eaaae7532d1613f5",
+        "fingerprint": "41ceb0163c1b13c1acd436088e3cf5bccc3b6e206ed675640eb6e76dc5cbd1af",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_9lNnDCIGlLmYiNtf2JLKQObN",
+              "id": "call_DT0bdQqQ1q3wfq6wAnDperJ8",
               "name": "add_todo",
               "arguments": "{\"title\":\"Order more foils\",\"dueDate\":null,\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6974,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 13,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "26be489da28bd7da41357c50f239d722a31a6caddc564277c567a4524bbe38dc",
+        "fingerprint": "83f182d8f5cb11061a494ed7e93d3bfad1fab87c254e44fc54093740770953ab",
         "response": {
-          "text": "Added “Order more foils” to your to-do list.",
+          "text": "Added to your to-do list: “Order more foils.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,95 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5632,
-            "cachedInputTokens": 5544,
+            "inputTokens": 7059,
+            "cachedInputTokens": 6971,
             "cacheWriteTokens": 85,
-            "outputTokens": 17
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "7809f38674f50c554cfb124698e513c15ef26e0c49911983eaaae7532d1613f5",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_p6gpce98yTd1eiW4xnGD3LoM",
-              "name": "add_todo",
-              "arguments": "{\"title\":\"Order more foils\",\"dueDate\":null,\"dueTime\":null,\"assigneeStaffMemberId\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5544,
-            "outputTokens": 40
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "367507791b140341a08b28e9fc6fb6fde836c7ea8bac094cf73c182278a34652",
-        "response": {
-          "text": "Added “Order more foils” to your to-do list.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5632,
-            "cachedInputTokens": 5629,
-            "outputTokens": 17
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "7809f38674f50c554cfb124698e513c15ef26e0c49911983eaaae7532d1613f5",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_rTVxYzisNRVRMop6Sly1mhBX",
-              "name": "add_todo",
-              "arguments": "{\"title\":\"Order more foils\",\"dueDate\":null,\"dueTime\":null,\"assigneeStaffMemberId\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5544,
-            "outputTokens": 40
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "6aaa3227771ecca51c72c0c3cc32712e120456de9da068f85cd817c49f2a097a",
-        "response": {
-          "text": "Added “Order more foils” to your to-do list.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5632,
-            "cachedInputTokens": 5629,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"

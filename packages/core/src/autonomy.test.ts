@@ -168,6 +168,54 @@ describe('decideAutonomy: properties', () => {
     );
   });
 
+  it('saving to memory after untrusted text always asks, whatever the dial (S30)', () => {
+    fc.assert(
+      fc.property(requestArb, autonomyArb, (request, autonomy) => {
+        fc.pre(request.changesAutonomy !== true);
+        const decision = decideAutonomy(
+          {
+            ...request,
+            actions: ['client_note.save', ...request.actions],
+            tier: request.tier === 'read' ? 'internal_write' : request.tier,
+            untrustedContext: true,
+          },
+          autonomy,
+        );
+        expect(decision.outcome).toBe('propose');
+      }),
+    );
+  });
+
+  it('saving to memory in a trusted turn follows the dial (S30)', () => {
+    const save = {
+      actions: ['client_note.save' as const],
+      tier: 'internal_write' as const,
+      recipients: 0,
+      untrustedContext: false,
+    };
+    const levels = {
+      ...resolveAutonomy(undefined, {}).levels,
+      'client_note.save': 'auto' as const,
+    };
+    expect(decideAutonomy(save, { askFirst: false, levels })).toEqual({
+      outcome: 'execute',
+      reason: 'setting',
+    });
+    expect(
+      decideAutonomy({ ...save, untrustedContext: true }, { askFirst: false, levels }),
+    ).toEqual({
+      outcome: 'propose',
+      reason: 'untrusted_context',
+    });
+    // Untrusted only because of what the business remembers: the dial decides, never quietly.
+    expect(
+      decideAutonomy(
+        { ...save, untrustedContext: true, outsideText: false },
+        { askFirst: false, levels },
+      ),
+    ).toEqual({ outcome: 'execute_and_notify', reason: 'untrusted_context' });
+  });
+
   it('changing autonomy always asks', () => {
     fc.assert(
       fc.property(requestArb, autonomyArb, (request, autonomy) => {
@@ -226,8 +274,11 @@ describe('decideAutonomy: every action × level × tier × context', () => {
       const external =
         tier === 'external_or_irreversible' ||
         AUTONOMY_ACTIONS[action].riskTier === 'external_or_irreversible';
+      const remembers = 'asksAfterUntrusted' in AUTONOMY_ACTIONS[action];
       const expected: AutonomyOutcome =
-        level === 'ask' || (external && (recipients > BULK_RECIPIENT_LIMIT || untrustedContext))
+        level === 'ask' ||
+        (external && (recipients > BULK_RECIPIENT_LIMIT || untrustedContext)) ||
+        (remembers && untrustedContext)
           ? 'propose'
           : level === 'notify' || untrustedContext
             ? 'execute_and_notify'

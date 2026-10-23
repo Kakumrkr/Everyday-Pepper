@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "382be03c4403e1ee6cf5d42aa6b65a87b329694463edf2cfde6b7d023033ff10",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jzcP3lilRLd86V41g25vfnoc",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6972,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "21397df5ae364d2cd0cfaea3425c82c015509b6659e7c01a87bfb8066391ed28",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ZBMc1bXLFFUcGHSVA9NEdZSA",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            },
+            {
+              "id": "call_ReqNfopPldpOVEUhEIA5OM10",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7172,
+            "cachedInputTokens": 6969,
+            "cacheWriteTokens": 200,
+            "outputTokens": 98
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a3b64f4c03b2e80523e68ed813bb3d1d0aeeeeadc910c5382133093b3c05c8e5",
+        "response": {
+          "text": "I found two remembered items for Maria L.: her allergy and usual service. Both forget requests are awaiting your approval on their cards; nothing has been removed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7403,
+            "cachedInputTokens": 7169,
+            "cacheWriteTokens": 231,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "2262e1ad7143458e62399cd22fdbd6fbeaab332ad3aeca6ffbb12df6df522252",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_KVFRMIonGed9ZTT1KIkngClv",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6979,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 18,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6fc76d229bb1b073770d66b5851d88a53115c3707d9cd1089984e0d4b224bd4e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rUVAJtQ03WLBpUyoO9AYLnT1",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7134,
+            "cachedInputTokens": 6976,
+            "cacheWriteTokens": 155,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "37b93c4427fe48c1dff6dc754d1d46302a7cbb8924e76cf75f663a086d0b3610",
+        "response": {
+          "text": "Maria L.’s allergy record is waiting for your approval on the card. It hasn’t been removed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7240,
+            "cachedInputTokens": 7131,
+            "cacheWriteTokens": 106,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2dc8d047f45644c841714d4ffc37b29a7934cd7946e5790943f9d8b58c49311d",
+        "response": {
+          "text": "I can’t see Maria’s memory details here. The request to forget her allergy is still awaiting your approval on the card, so nothing has changed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7203,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 242,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

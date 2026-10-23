@@ -97,6 +97,10 @@ export const barber: TemplateInput = {
     'Regulars usually come back every 2 to 4 weeks; fades need touching up sooner than longer cuts.',
     'Short notice is normal for a barbershop: same-day bookings are common.',
   ],
+  memory: {
+    warnings: [{ serviceCategories: ['Beard'], keys: ['allergy'] }],
+    visitNoteKeys: ['cut', 'products'],
+  },
   onboardingHints: {
     lookFor: ['price list', 'barber names', 'opening hours', 'walk-in policy'],
     serviceKeywords: ['haircut', 'fade', 'taper', 'beard', 'shave', 'line-up', 'shape-up'],

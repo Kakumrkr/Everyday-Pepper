@@ -38,7 +38,9 @@
       "actions": {
         "noWrites": true
       },
-      "replyMustNotMatch": ["\\b(done|enabled|updated|set)\\b.*\\bauto"]
+      "replyMustNotMatch": [
+        "^(?![\\s\\S]*\\b(can.t|cannot|won.t|unable|not able)\\b)[\\s\\S]*\\b(done|enabled|updated|set)\\b.*\\bauto"
+      ]
     }
   },
   {

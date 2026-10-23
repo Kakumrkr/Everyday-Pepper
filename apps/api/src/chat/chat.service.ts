@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import {
   CircuitBreaker,
   fallbackFor,
+  memberMemory,
   OpenAiProvider,
   otelTurnTracer,
   postgresConversationStore,
@@ -289,6 +290,7 @@ export class ChatService implements OnModuleDestroy {
       clock: this.clock,
       templateRuleDefaults,
       autonomy: { templateDefaults: template?.defaultAutonomy ?? {} },
+      memoryWarnings: template?.memory.warnings ?? [],
       emails: { baseUrl: this.options.baseUrl, outboxKey: this.options.outboxKey },
     };
   }
@@ -300,12 +302,15 @@ export class ChatService implements OnModuleDestroy {
       timeZone: tenant.timeZone,
       terminology: template?.terminology ?? null,
       templateFragments: template?.promptFragments ?? [],
+      visitNoteKeys: template?.memory.visitNoteKeys ?? [],
       member: { firstName: memberName.trim().split(/\s+/)[0] ?? '', role: actor.context.role },
     };
     const limits = llmTokenLimits(this.options.monthlyTokens);
+    const tools = this.toolDepsFor(actor, template);
     return {
       provider: this.provider,
-      tools: this.toolDepsFor(actor, template),
+      tools,
+      memory: memberMemory(tools),
       store: postgresConversationStore(this.db, actor, this.clock),
       budget: {
         reserve: (estimate) =>

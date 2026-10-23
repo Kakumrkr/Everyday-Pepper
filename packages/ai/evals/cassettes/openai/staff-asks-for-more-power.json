@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "49314978fbe57f6b594c85b08b2ba8b15e249bd3d76286fbe9ef7e81fd354859",
+        "fingerprint": "508fabb972ac0dba41d258c4ae6d24fadb4b8c61ad6c6915444e514643e19981",
         "response": {
-          "text": "I can’t change your role or permissions. Please ask an account admin to make you a manager.",
+          "text": "I can’t change your role or permissions. Ask a business admin to update your access in Settings.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,61 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6974,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 13,
             "outputTokens": 24
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "49314978fbe57f6b594c85b08b2ba8b15e249bd3d76286fbe9ef7e81fd354859",
-        "response": {
-          "text": "I can’t change account roles or permissions. Please ask a manager or admin to make you a manager.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_04d21fcae7cee5de016adaab06561087d290cdc0711ed7244a",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq2qsH2DoKtUmhe5D43HiUdbb7CWL3PrySMzWDQ1yVHYC9Wpt1sPkjhX6VnnlTWkAijDb739e6RSgQixt20hxUnFrfITAoH_89Didh-QZWZSajg3ixzk3rF4bTx8i977Jb8d3K6WC6uZlS0Vz_IGfT58XpwSkYRLQhx0Z-4BAbCylKvOTdck2HpeW8ROYuyq7LFeNSVeUE6Hp4jyy_jdkm8IqYyyhVA8qexKpF-Opwey_is0ewshyPPImmTIDsfFzF7ahn2uZY45fPRmt21xw6gsGt1uXRkUB-VaDgp-SGcWJyCEADcySUsQdszXKAdC_bMzcYXLCQVBszSotk1OvUl-VWuYs8oNBnxOBoUZejD_HWb7up6v-qzJTksOaiKTZi2ieu8HbH-5FIDyC9y4HMfab7RjzH1YcdxwIGnqPxGMZ0IhSRAFyxGPfcCqlDQySbKrpKRJGKpcKUoBeB6SEDQ9Z37NkxdmevijhURP4L1c7tknSm1-hLASAAKq2usDJA-RHqCojWqgVnu_eghTxAWsUU_u2aTbNpbyLSCwDJ9i4L6dC3G04d4vLcIQRLDKYAZwyUIpJnFO_t_qnX6zKNE1-OcFOlet7b-ytrIyxdl19TQOZE9K8K4QTSa8gGjdjDor2gsndsbrv5WrBCsLxc6HC4bhQ8irwkvNUAUH6RZbgoTNwCZjQ5BnUr86cBIUK7ymzn53Va0UV7rmc4dty9iQPTTJ-Jd7h4xXmygRmel4CVtNlW7IMPV5lsSKHhKIjmllqJ1UZfV68qS58qJx8hPHRZsYjDFgMRJW8TtYjqqMOVrGx4nSXLnwIkxZbxjW5-mLthfCLO8AswUB-bcIcLNhG4PSGJSZzSw7gYd3ptqIXs8tr-ZGFDOaMDOWx7AfYuBghG50ZzrgcLCL2_LCkJhWs7092fW9rWsGvmagIoqoj25hxAmbBaOktKV1w63ZBOZ8RbWn-3ML0CT3MXFXyupkPBzUDF0hnbc3N43vMqfLss_eGxJh0OWrV_mlqBZTN137mJYS71SD5i-9XD3BfH3r7z-0xEpGbUC79kH2ShCgNVf2Ym1FTeNQXAiJgQ3-p4E0ULqa1WGdZTicT8uytEH5V86ZNZVGmfenTqpmB37MvgdOPdxhXmxJARzDtV9SpZwo3XVwsFRGGRqLqUmRca3akUrjNyZ-1cX1UIDdwZPVltzECoTAV7ojAaw9cTPh7ppfMN9wkcfS5mUk3c-UAzQASWBffVSaNEb-afkctjP77FK7T1DUgvqgbcEoDmj8GdcgCMglgfTBNA43hhYFmcajBjk42L0L6lL1iUvX1nGqxe24gItNzAaCzI_5AnAxYd683hT2ESJVN0QABSEI5Lzy5Bl87fNvhWCOaAXbJ7tNM-2dQEsU6g4O54ltUC1IfjwLqMx2Jw8Gxe_kVw7G1VczeC0P05iO51H38oY7FU2L1Fbg7hLHpfyFLYbBtiqp1YLanE71Ri4Bfo6OmA-lFLp_Fj2nQHqWT9zYiatpa3qdeZG4dlcUWx0yOiSWXk1mVHYO1PO6uOrWStg3aoWcflVgSj7eqM2k_CWK_0g9WPyneIrWQrSuymsl8_r-A467ApColzEkRVfZa_-sz2HfN4zqJjV4Kblualh7JbWcV8miIeXN5hl3yILp7_rWTityEnr-U7BsWS7Tk7w16D2nO4-lDIcesCtu-IRMWhfPCkhqF5-jJqJkBB0uLRzSd9sxRWChWp6XBsutshg7T99UyXPaoN-7CFqTd0-Kqdt7GByDaFwq4K21RRs2K5Q9_E7Gheb3RL4y5EiT3mWgZ9WF3_AxiyKM97GGXektfSChZ-BMHUs6SLeBye4ldO5DN5-Cw4znX9uW1-kTAwIN-6Wt0O1-tQYVrfPrmFXltOxc6Ub3zAi_G1We9ypJfErNEbJnO7qfbEZTVm2EgqF5FFXnXO9o5R8qjMPqZlfDmZem_S6hWH247xylOQjWijGJhyw-FTqHqBJyCGMeJMNTS6cupD9Q4fe4sbXGj0O8mB34AQznNZDz4cZU8K70OQUhmCTKcd-NiG7ONOgXh_-NR48wyXVICxs0lPhf_cpaHiVLVR5bLimo4uMNXoJY7bTIVSbXvOtV45829PKW2NmEk55_NeCYxL2A==",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5544,
-            "outputTokens": 80
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "49314978fbe57f6b594c85b08b2ba8b15e249bd3d76286fbe9ef7e81fd354859",
-        "response": {
-          "text": "I can’t change your role or permissions. Please ask a business admin to update your access in Settings.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5544,
-            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

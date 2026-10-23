@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "528787aa4efc93278657150c9cda7a54f2c01ec0409e9be708783e377ad4c7e8",
+        "fingerprint": "56c250e67fdb1f9c9d3b299b8db5d840ec5b647befbe8dafb040d5779dabb91c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_oKQbPxG1JQhW0RhZ159KksyG",
+              "id": "call_KRxFOX6qpd7YpAlCfosiNHQg",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5544,
+            "inputTokens": 6971,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 5541,
+            "cacheWriteTokens": 6968,
             "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6dda8c5b0c888da67d4aba49639e86c39818bf43414254bd90dee4922a9a3797",
+        "fingerprint": "8821441bde5c5bf111075a0c3e65078ffe4efe8213503ece67d858767dcd5e3f",
         "response": {
-          "text": "Tomorrow you have Maria L. booked for a haircut from 3:00 to 4:00 PM, and your calendar is blocked from 12:00 to 1:00 PM.",
+          "text": "Tomorrow, Wed Oct 21, you have Maria L. booked for a haircut from 3:00–4:00 PM, and your calendar is blocked from 12:00–1:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,98 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5847,
-            "cachedInputTokens": 5541,
-            "cacheWriteTokens": 303,
-            "outputTokens": 43
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "528787aa4efc93278657150c9cda7a54f2c01ec0409e9be708783e377ad4c7e8",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_CbcCfmOjVOMKlfzqLQ0x5HkD",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5544,
-            "cachedInputTokens": 5541,
-            "outputTokens": 29
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "80eb07510263969fe32c799c5d03ef02fe021687faeec047377d2cbab7689cad",
-        "response": {
-          "text": "Tomorrow, Wednesday, you have Maria L. booked for a haircut from 3–4 PM, and your calendar is blocked from 12–1 PM.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5857,
-            "cachedInputTokens": 5541,
-            "cacheWriteTokens": 313,
-            "outputTokens": 36
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "528787aa4efc93278657150c9cda7a54f2c01ec0409e9be708783e377ad4c7e8",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_EThR25w9d4KZ8uiqD2IBbcf6",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5544,
-            "cachedInputTokens": 5541,
-            "outputTokens": 29
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "d016a233fea73218afeb561ebca5d19709d8b27568ef49a07eb0562f820cc896",
-        "response": {
-          "text": "Tomorrow you have Maria L. booked for a haircut from 3:00 to 4:00 PM, and your calendar is blocked from noon to 1:00 PM.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5860,
-            "cachedInputTokens": 5541,
-            "cacheWriteTokens": 316,
-            "outputTokens": 40
+            "inputTokens": 7281,
+            "cachedInputTokens": 6968,
+            "cacheWriteTokens": 310,
+            "outputTokens": 47
           },
           "model": "gpt-6-luna"
         }

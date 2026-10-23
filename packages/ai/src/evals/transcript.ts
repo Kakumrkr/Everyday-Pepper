@@ -25,6 +25,20 @@ export interface Transcript {
    * loop answers the member with a fallback, so the run fails here with the real reason.
    */
   modelErrors?: string[];
+  /** Every request sent to the model, as JSON, with the member turn it was sent in (S30). */
+  requests?: { turn: number; text: string }[];
+  /** What the business remembers afterwards, subjects as placeholders (S30). */
+  facts?: {
+    subject: string;
+    key: string;
+    value: string;
+    sensitive: boolean;
+    status: 'active' | 'proposed';
+  }[];
+  /** Every text the business stores where a value could travel (S30, AC-W7-2). */
+  stored?: string[];
+  /** What the AI actions' cards show from memory, read live (S30, AC-W3-2). */
+  cards?: { warnings: string[]; lastVisitNotes: string[] };
 }
 
 export const emptyUsage = (): LlmUsage => ({

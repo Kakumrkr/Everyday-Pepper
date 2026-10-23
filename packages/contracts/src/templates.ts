@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PriceCentsSchema, SERVICE_LIMITS } from './appointments.js';
+import { TemplateMemorySchema } from './memory.js';
 import { RuleDefaultsSchema, type RuleDefaults } from './rules.js';
 import { TemplateIdSchema } from './tenancy.js';
 import { AutonomySettingsSchema } from './trust.js';
@@ -189,6 +190,8 @@ export const TemplateSchema = z
       .array(z.string().trim().min(1).max(TEMPLATE_LIMITS.maxPromptFragmentLength))
       .max(TEMPLATE_LIMITS.maxPromptFragments),
     onboardingHints: OnboardingHintsSchema,
+    /** What Pepper's memory warns about on a booking, and the visit notes it suggests (S30). */
+    memory: TemplateMemorySchema.default({ warnings: [], visitNoteKeys: [] }),
   })
   .strict();
 export type Template = z.output<typeof TemplateSchema>;

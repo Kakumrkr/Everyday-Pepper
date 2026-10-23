@@ -17,6 +17,7 @@ import type {
 //   "Book <Weekday> YYYY-MM-DD at HH:MM with <staff> instead"   (a time picked on a card)
 //   "Move <client>'s booking on YYYY-MM-DD to HH:MM"
 //   "Remind me to <something>"
+//   "Remember <client>'s <what> is <value>"                     (S30: a remembered fact)
 //   "Block YYYY-MM-DD HH:MM-HH:MM for <staff>"
 //   "What does YYYY-MM-DD look like?"
 //   "Simulate an outage"                                        (the model can't be reached)
@@ -26,6 +27,7 @@ const BOOK = /^Book (\S+) for (.+?) with (\S+) on (\d{4}-\d{2}-\d{2}) at (\d{2}:
 const PICKED = /^Book \w{3} (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) with (\S+) instead/i;
 const MOVE = /^Move (\S+)'s booking on (\d{4}-\d{2}-\d{2}) to (\d{2}:\d{2})/i;
 const REMIND = /^Remind me to (.+)$/i;
+const REMEMBER = /^Remember (\S+)'s (.+?) is (.+)$/i;
 const BLOCK = /^Block (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})-(\d{2}:\d{2}) for (\S+)/i;
 const DAY = /^What does (\d{4}-\d{2}-\d{2}) look like/i;
 
@@ -125,6 +127,28 @@ export class E2eModel implements LlmProvider {
         });
       }
       return reply(answerTo(done, 'Added.', 'Approve it and I’ll add it.'));
+    }
+    const remember = REMEMBER.exec(said);
+    if (remember !== null) {
+      const clients = results.get('find_clients');
+      if (clients === undefined) return call('find_clients', { name: at(remember, 1) });
+      const done = results.get('remember_fact');
+      if (done !== undefined) {
+        return reply(answerTo(done, 'Saved.', 'Approve it and I’ll remember it.'));
+      }
+      const matches = clients.data?.['matches'];
+      const clientId = Array.isArray(matches) ? idOf(matches[0], 'clientId') : null;
+      if (clientId === null) return reply(`I can't find a client called ${at(remember, 1)}.`);
+      return call('remember_fact', {
+        about: 'client',
+        id: clientId,
+        key: at(remember, 2)
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_'),
+        value: at(remember, 3).trim(),
+        sensitive: null,
+      });
     }
     const block = BLOCK.exec(said);
     if (block !== null) {

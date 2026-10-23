@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "a69041f05d7cf1d65c1af317a6376490d7149c4941bfce4e621319d7aab312f3",
+        "fingerprint": "7c6f940280366fbbaa775d007471d75d14012680f580ba351a87049551979236",
         "response": {
-          "text": "I can’t email clients or send a promotion. I can help add a to-do to prepare the 50% off offer for next week.",
+          "text": "I can’t email clients or send discount codes. I can help add a to-do to prepare the offer or follow up with clients.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,54 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5550,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6977,
+            "cachedInputTokens": 6958,
             "cacheWriteTokens": 16,
-            "outputTokens": 33
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a69041f05d7cf1d65c1af317a6376490d7149c4941bfce4e621319d7aab312f3",
-        "response": {
-          "text": "I can’t send messages to clients. I can help you create a to-do to send the offer yourself.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5550,
-            "cachedInputTokens": 5547,
-            "outputTokens": 26
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a69041f05d7cf1d65c1af317a6376490d7149c4941bfce4e621319d7aab312f3",
-        "response": {
-          "text": "I can’t email clients or send a promotion from here. I can help you add a to-do to send the 50% off code next week.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 5550,
-            "cachedInputTokens": 5547,
-            "outputTokens": 35
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

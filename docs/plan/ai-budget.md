@@ -17,10 +17,20 @@ Policy: [Phase 6 playbook §4](phase-6-playbook.md) (user, S22; confirmed for S2
 
 The OpenAI dashboard's usage page is the final word on money; this ledger is computed from the token counts the API reported, at the listed prices.
 
+## Phase 7 ($1.00 cap, [playbook §4](phase-7-playbook.md))
+
+Runs labelled `P7`. The runner refuses a run whose worst-case estimate would take Phase 7 past $1.00.
+
+- **S30b (2026-10-23): $0.2974 in 133 runs** (Phase 7 total: $0.2974; $0.70 left for S31–S33).
+  - First pass of all 167 cases on `gpt-6-luna` low / `gpt-6.1-sol` low, pass^1: **$0.1560**, runs 153–215.
+  - Re-record after the three fixes (ADR-0036; an instruction change makes every cassette stale): **$0.1415**, runs 216–285. 477 Luna calls and 8 Sol calls, about $0.0008 a case.
+  - **Run size:** the worst-case estimate is up to $0.43 for a multi-turn memory case and about $0.19 for a one-turn case. So a 20-case run ($4.17) would break both the $1.50 run cap and the Phase 7 cap. Runs were packed to about $0.56 of estimate each (1–4 cases, `--case`). The estimate still runs 100–300× above actual spend.
+  - The one refused run (estimate $1.28 with $0.05 spent) wrote no entry.
+
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$0.7425** of $5.00 (the runner stops at $4.50).
+Total spent: **$1.0400** of $5.00 (the runner stops at $4.50).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|
@@ -176,6 +186,139 @@ Total spent: **$0.7425** of $5.00 (the runner stops at $4.50).
 | 150 | 2026-10-23 | pass^3 scheduling chunk 37 | completed | 1 × 3 | $0.47 | $0.0005 | $0.7410 |
 | 151 | 2026-10-23 | pass^3 scheduling chunk 38 | completed | 1 × 3 | $0.47 | $0.0008 | $0.7417 |
 | 152 | 2026-10-23 | pass^3 scheduling chunk 39 | completed | 1 × 3 | $0.47 | $0.0008 | $0.7425 |
+| 153 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 1/42 | completed | 4 × 1 | $0.98 | $0.0021 | $0.7446 |
+| 154 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 2/56 | completed | 3 × 1 | $0.55 | $0.0016 | $0.7461 |
+| 155 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 3/56 | completed | 3 × 1 | $0.55 | $0.0024 | $0.7486 |
+| 156 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 4/56 | completed | 3 × 1 | $0.55 | $0.0017 | $0.7503 |
+| 157 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 5/56 | completed | 3 × 1 | $0.55 | $0.0012 | $0.7515 |
+| 158 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 6/56 | completed | 3 × 1 | $0.79 | $0.0212 | $0.7727 |
+| 159 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 7/56 | completed | 3 × 1 | $0.55 | $0.0010 | $0.7737 |
+| 160 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 8/56 | completed | 3 × 1 | $0.55 | $0.0017 | $0.7754 |
+| 161 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 9/56 | completed | 3 × 1 | $0.55 | $0.0011 | $0.7765 |
+| 162 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 10/56 | completed | 3 × 1 | $0.55 | $0.0008 | $0.7773 |
+| 163 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 11/56 | completed | 3 × 1 | $0.55 | $0.0007 | $0.7780 |
+| 164 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 12/56 | completed | 3 × 1 | $0.55 | $0.0038 | $0.7818 |
+| 165 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 13/56 | completed | 3 × 1 | $0.55 | $0.0016 | $0.7835 |
+| 166 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 14/56 | completed | 3 × 1 | $0.55 | $0.0015 | $0.7850 |
+| 167 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 15/56 | completed | 3 × 1 | $0.56 | $0.0012 | $0.7862 |
+| 168 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 16/56 | completed | 3 × 1 | $0.55 | $0.0007 | $0.7869 |
+| 169 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 17/56 | completed | 3 × 1 | $0.55 | $0.0016 | $0.7885 |
+| 170 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 18/56 | completed | 3 × 1 | $0.56 | $0.0011 | $0.7896 |
+| 171 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 19/56 | completed | 3 × 1 | $0.79 | $0.0014 | $0.7910 |
+| 172 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 20/56 | completed | 3 × 1 | $0.56 | $0.0006 | $0.7916 |
+| 173 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 21/56 | completed | 3 × 1 | $0.56 | $0.0013 | $0.7929 |
+| 174 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 22/56 | completed | 3 × 1 | $0.56 | $0.0009 | $0.7938 |
+| 175 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low chunk 23/56 | completed | 3 × 1 | $0.80 | $0.0016 | $0.7954 |
+| 176 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 1/40 | completed | 1 × 1 | $0.42 | $0.0006 | $0.7959 |
+| 177 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 2/40 | completed | 1 × 1 | $0.42 | $0.0005 | $0.7964 |
+| 178 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 3/40 | completed | 1 × 1 | $0.42 | $0.0003 | $0.7967 |
+| 179 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 4/40 | completed | 1 × 1 | $0.42 | $0.0010 | $0.7977 |
+| 180 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 5/40 | completed | 1 × 1 | $0.42 | $0.0004 | $0.7981 |
+| 181 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 6/40 | completed | 1 × 1 | $0.19 | $0.0002 | $0.7983 |
+| 182 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 7/40 | completed | 1 × 1 | $0.42 | $0.0005 | $0.7988 |
+| 183 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 8/40 | completed | 1 × 1 | $0.19 | $0.0004 | $0.7991 |
+| 184 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 9/40 | completed | 1 × 1 | $0.42 | $0.0006 | $0.7997 |
+| 185 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 10/40 | completed | 3 × 1 | $0.56 | $0.0006 | $0.8003 |
+| 186 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 11/40 | completed | 3 × 1 | $0.56 | $0.0024 | $0.8027 |
+| 187 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 12/40 | completed | 3 × 1 | $0.56 | $0.0007 | $0.8034 |
+| 188 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 13/40 | completed | 3 × 1 | $0.55 | $0.0008 | $0.8043 |
+| 189 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 14/40 | completed | 3 × 1 | $0.55 | $0.0205 | $0.8247 |
+| 190 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 15/40 | completed | 3 × 1 | $0.55 | $0.0007 | $0.8254 |
+| 191 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 16/40 | completed | 3 × 1 | $0.56 | $0.0006 | $0.8260 |
+| 192 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 17/40 | completed | 3 × 1 | $0.55 | $0.0004 | $0.8264 |
+| 193 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 18/40 | completed | 3 × 1 | $0.55 | $0.0009 | $0.8273 |
+| 194 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 19/40 | completed | 3 × 1 | $0.56 | $0.0003 | $0.8276 |
+| 195 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 20/40 | completed | 1 × 1 | $0.42 | $0.0003 | $0.8279 |
+| 196 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 21/40 | completed | 3 × 1 | $0.55 | $0.0009 | $0.8288 |
+| 197 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 22/40 | completed | 3 × 1 | $0.55 | $0.0009 | $0.8297 |
+| 198 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 23/40 | completed | 3 × 1 | $0.56 | $0.0018 | $0.8315 |
+| 199 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 24/40 | completed | 3 × 1 | $0.55 | $0.0011 | $0.8326 |
+| 200 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 25/40 | completed | 3 × 1 | $0.55 | $0.0009 | $0.8335 |
+| 201 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 26/40 | completed | 3 × 1 | $0.55 | $0.0041 | $0.8376 |
+| 202 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 27/40 | completed | 3 × 1 | $0.55 | $0.0059 | $0.8435 |
+| 203 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 28/40 | completed | 3 × 1 | $0.55 | $0.0013 | $0.8448 |
+| 204 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 29/40 | completed | 3 × 1 | $0.55 | $0.0011 | $0.8460 |
+| 205 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 30/40 | completed | 3 × 1 | $0.55 | $0.0222 | $0.8682 |
+| 206 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 31/40 | completed | 3 × 1 | $0.55 | $0.0015 | $0.8696 |
+| 207 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 32/40 | completed | 3 × 1 | $0.55 | $0.0007 | $0.8704 |
+| 208 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 33/40 | completed | 3 × 1 | $0.55 | $0.0007 | $0.8711 |
+| 209 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 34/40 | completed | 3 × 1 | $0.55 | $0.0008 | $0.8718 |
+| 210 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 35/40 | completed | 3 × 1 | $0.55 | $0.0225 | $0.8944 |
+| 211 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 36/40 | completed | 3 × 1 | $0.55 | $0.0010 | $0.8954 |
+| 212 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 37/40 | completed | 3 × 1 | $0.55 | $0.0012 | $0.8966 |
+| 213 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 38/40 | completed | 3 × 1 | $0.55 | $0.0008 | $0.8973 |
+| 214 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 39/40 | completed | 3 × 1 | $0.55 | $0.0007 | $0.8981 |
+| 215 | 2026-10-23 | P7 S30b pass^1 gpt-6-luna low / gpt-6.1-sol low part 40/40 | completed | 1 × 1 | $0.18 | $0.0004 | $0.8985 |
+| 216 | 2026-10-23 | P7 S30b re-record after fixes, part 1/70 | completed | 1 × 1 | $0.19 | $0.0011 | $0.8996 |
+| 217 | 2026-10-23 | P7 S30b re-record after fixes, part 2/70 | completed | 1 × 1 | $0.43 | $0.0006 | $0.9002 |
+| 218 | 2026-10-23 | P7 S30b re-record after fixes, part 3/70 | completed | 3 × 1 | $0.56 | $0.0007 | $0.9009 |
+| 219 | 2026-10-23 | P7 S30b re-record after fixes, part 4/70 | completed | 3 × 1 | $0.56 | $0.0032 | $0.9041 |
+| 220 | 2026-10-23 | P7 S30b re-record after fixes, part 5/70 | completed | 3 × 1 | $0.56 | $0.0017 | $0.9058 |
+| 221 | 2026-10-23 | P7 S30b re-record after fixes, part 6/70 | completed | 3 × 1 | $0.56 | $0.0013 | $0.9071 |
+| 222 | 2026-10-23 | P7 S30b re-record after fixes, part 7/70 | completed | 1 × 1 | $0.19 | $0.0004 | $0.9075 |
+| 223 | 2026-10-23 | P7 S30b re-record after fixes, part 8/70 | completed | 1 × 1 | $0.43 | $0.0005 | $0.9080 |
+| 224 | 2026-10-23 | P7 S30b re-record after fixes, part 9/70 | completed | 3 × 1 | $0.56 | $0.0213 | $0.9293 |
+| 225 | 2026-10-23 | P7 S30b re-record after fixes, part 10/70 | completed | 3 × 1 | $0.56 | $0.0020 | $0.9314 |
+| 226 | 2026-10-23 | P7 S30b re-record after fixes, part 11/70 | completed | 3 × 1 | $0.56 | $0.0044 | $0.9358 |
+| 227 | 2026-10-23 | P7 S30b re-record after fixes, part 12/70 | completed | 3 × 1 | $0.56 | $0.0011 | $0.9369 |
+| 228 | 2026-10-23 | P7 S30b re-record after fixes, part 13/70 | completed | 3 × 1 | $0.56 | $0.0008 | $0.9376 |
+| 229 | 2026-10-23 | P7 S30b re-record after fixes, part 14/70 | completed | 3 × 1 | $0.56 | $0.0032 | $0.9408 |
+| 230 | 2026-10-23 | P7 S30b re-record after fixes, part 15/70 | completed | 3 × 1 | $0.56 | $0.0044 | $0.9452 |
+| 231 | 2026-10-23 | P7 S30b re-record after fixes, part 16/70 | completed | 3 × 1 | $0.56 | $0.0023 | $0.9475 |
+| 232 | 2026-10-23 | P7 S30b re-record after fixes, part 17/70 | completed | 3 × 1 | $0.56 | $0.0008 | $0.9483 |
+| 233 | 2026-10-23 | P7 S30b re-record after fixes, part 18/70 | completed | 3 × 1 | $0.56 | $0.0011 | $0.9493 |
+| 234 | 2026-10-23 | P7 S30b re-record after fixes, part 19/70 | completed | 3 × 1 | $0.56 | $0.0007 | $0.9501 |
+| 235 | 2026-10-23 | P7 S30b re-record after fixes, part 20/70 | completed | 3 × 1 | $0.56 | $0.0016 | $0.9516 |
+| 236 | 2026-10-23 | P7 S30b re-record after fixes, part 21/70 | completed | 2 × 1 | $0.37 | $0.0009 | $0.9525 |
+| 237 | 2026-10-23 | P7 S30b re-record after fixes, part 22/70 | completed | 2 × 1 | $0.37 | $0.0008 | $0.9533 |
+| 238 | 2026-10-23 | P7 S30b re-record after fixes, part 23/70 | completed | 1 × 1 | $0.43 | $0.0005 | $0.9538 |
+| 239 | 2026-10-23 | P7 S30b re-record after fixes, part 24/70 | completed | 3 × 1 | $0.56 | $0.0007 | $0.9544 |
+| 240 | 2026-10-23 | P7 S30b re-record after fixes, part 25/70 | completed | 2 × 1 | $0.37 | $0.0011 | $0.9555 |
+| 241 | 2026-10-23 | P7 S30b re-record after fixes, part 26/70 | completed | 2 × 1 | $0.37 | $0.0004 | $0.9559 |
+| 242 | 2026-10-23 | P7 S30b re-record after fixes, part 27/70 | completed | 2 × 1 | $0.37 | $0.0007 | $0.9566 |
+| 243 | 2026-10-23 | P7 S30b re-record after fixes, part 28/70 | completed | 2 × 1 | $0.37 | $0.0012 | $0.9578 |
+| 244 | 2026-10-23 | P7 S30b re-record after fixes, part 29/70 | completed | 1 × 1 | $0.43 | $0.0004 | $0.9582 |
+| 245 | 2026-10-23 | P7 S30b re-record after fixes, part 30/70 | completed | 1 × 1 | $0.43 | $0.0005 | $0.9587 |
+| 246 | 2026-10-23 | P7 S30b re-record after fixes, part 31/70 | completed | 1 × 1 | $0.43 | $0.0005 | $0.9592 |
+| 247 | 2026-10-23 | P7 S30b re-record after fixes, part 32/70 | completed | 1 × 1 | $0.43 | $0.0003 | $0.9595 |
+| 248 | 2026-10-23 | P7 S30b re-record after fixes, part 33/70 | completed | 1 × 1 | $0.43 | $0.0010 | $0.9604 |
+| 249 | 2026-10-23 | P7 S30b re-record after fixes, part 34/70 | completed | 1 × 1 | $0.43 | $0.0003 | $0.9608 |
+| 250 | 2026-10-23 | P7 S30b re-record after fixes, part 35/70 | completed | 1 × 1 | $0.19 | $0.0003 | $0.9611 |
+| 251 | 2026-10-23 | P7 S30b re-record after fixes, part 36/70 | completed | 1 × 1 | $0.43 | $0.0006 | $0.9617 |
+| 252 | 2026-10-23 | P7 S30b re-record after fixes, part 37/70 | completed | 1 × 1 | $0.19 | $0.0004 | $0.9621 |
+| 253 | 2026-10-23 | P7 S30b re-record after fixes, part 38/70 | completed | 1 × 1 | $0.43 | $0.0005 | $0.9626 |
+| 254 | 2026-10-23 | P7 S30b re-record after fixes, part 39/70 | completed | 2 × 1 | $0.37 | $0.0006 | $0.9632 |
+| 255 | 2026-10-23 | P7 S30b re-record after fixes, part 40/70 | completed | 2 × 1 | $0.37 | $0.0012 | $0.9644 |
+| 256 | 2026-10-23 | P7 S30b re-record after fixes, part 41/70 | completed | 3 × 1 | $0.56 | $0.0016 | $0.9660 |
+| 257 | 2026-10-23 | P7 S30b re-record after fixes, part 42/70 | completed | 3 × 1 | $0.56 | $0.0006 | $0.9667 |
+| 258 | 2026-10-23 | P7 S30b re-record after fixes, part 43/70 | completed | 3 × 1 | $0.56 | $0.0212 | $0.9878 |
+| 259 | 2026-10-23 | P7 S30b re-record after fixes, part 44/70 | completed | 3 × 1 | $0.56 | $0.0005 | $0.9884 |
+| 260 | 2026-10-23 | P7 S30b re-record after fixes, part 45/70 | completed | 3 × 1 | $0.56 | $0.0009 | $0.9893 |
+| 261 | 2026-10-23 | P7 S30b re-record after fixes, part 46/70 | completed | 2 × 1 | $0.37 | $0.0002 | $0.9895 |
+| 262 | 2026-10-23 | P7 S30b re-record after fixes, part 47/70 | completed | 3 × 1 | $0.56 | $0.0004 | $0.9898 |
+| 263 | 2026-10-23 | P7 S30b re-record after fixes, part 48/70 | completed | 3 × 1 | $0.56 | $0.0009 | $0.9907 |
+| 264 | 2026-10-23 | P7 S30b re-record after fixes, part 49/70 | completed | 3 × 1 | $0.56 | $0.0003 | $0.9910 |
+| 265 | 2026-10-23 | P7 S30b re-record after fixes, part 50/70 | completed | 1 × 1 | $0.43 | $0.0003 | $0.9913 |
+| 266 | 2026-10-23 | P7 S30b re-record after fixes, part 51/70 | completed | 3 × 1 | $0.56 | $0.0005 | $0.9918 |
+| 267 | 2026-10-23 | P7 S30b re-record after fixes, part 52/70 | completed | 3 × 1 | $0.56 | $0.0008 | $0.9926 |
+| 268 | 2026-10-23 | P7 S30b re-record after fixes, part 53/70 | completed | 3 × 1 | $0.56 | $0.0018 | $0.9944 |
+| 269 | 2026-10-23 | P7 S30b re-record after fixes, part 54/70 | completed | 3 × 1 | $0.56 | $0.0011 | $0.9954 |
+| 270 | 2026-10-23 | P7 S30b re-record after fixes, part 55/70 | completed | 3 × 1 | $0.56 | $0.0010 | $0.9964 |
+| 271 | 2026-10-23 | P7 S30b re-record after fixes, part 56/70 | completed | 3 × 1 | $0.56 | $0.0041 | $1.0005 |
+| 272 | 2026-10-23 | P7 S30b re-record after fixes, part 57/70 | completed | 3 × 1 | $0.56 | $0.0017 | $1.0022 |
+| 273 | 2026-10-23 | P7 S30b re-record after fixes, part 58/70 | completed | 3 × 1 | $0.56 | $0.0014 | $1.0035 |
+| 274 | 2026-10-23 | P7 S30b re-record after fixes, part 59/70 | completed | 3 × 1 | $0.56 | $0.0054 | $1.0089 |
+| 275 | 2026-10-23 | P7 S30b re-record after fixes, part 60/70 | completed | 3 × 1 | $0.56 | $0.0026 | $1.0115 |
+| 276 | 2026-10-23 | P7 S30b re-record after fixes, part 61/70 | completed | 3 × 1 | $0.56 | $0.0011 | $1.0126 |
+| 277 | 2026-10-23 | P7 S30b re-record after fixes, part 62/70 | completed | 3 × 1 | $0.56 | $0.0008 | $1.0134 |
+| 278 | 2026-10-23 | P7 S30b re-record after fixes, part 63/70 | completed | 3 × 1 | $0.56 | $0.0008 | $1.0141 |
+| 279 | 2026-10-23 | P7 S30b re-record after fixes, part 64/70 | completed | 3 × 1 | $0.56 | $0.0008 | $1.0149 |
+| 280 | 2026-10-23 | P7 S30b re-record after fixes, part 65/70 | completed | 3 × 1 | $0.56 | $0.0209 | $1.0359 |
+| 281 | 2026-10-23 | P7 S30b re-record after fixes, part 66/70 | completed | 3 × 1 | $0.56 | $0.0010 | $1.0369 |
+| 282 | 2026-10-23 | P7 S30b re-record after fixes, part 67/70 | completed | 3 × 1 | $0.56 | $0.0011 | $1.0379 |
+| 283 | 2026-10-23 | P7 S30b re-record after fixes, part 68/70 | completed | 3 × 1 | $0.56 | $0.0008 | $1.0387 |
+| 284 | 2026-10-23 | P7 S30b re-record after fixes, part 69/70 | completed | 3 × 1 | $0.56 | $0.0008 | $1.0396 |
+| 285 | 2026-10-23 | P7 S30b re-record after fixes, part 70/70 | completed | 1 × 1 | $0.19 | $0.0004 | $1.0400 |
 
 - Run 5, gpt-6-luna: 12 calls, 67483 in (38955 cached, 28492 written), 498 out, p50 1258 ms, p95 3286 ms; 3.61 chars a token
 - Run 5, gpt-6.1-sol: 4 calls, 24750 in (12287 cached, 12451 written), 224 out, p50 2023 ms, p95 2349 ms; 3.61 chars a token
@@ -347,4 +490,152 @@ Total spent: **$0.7425** of $5.00 (the runner stops at $4.50).
 - Run 150, gpt-6-luna: 6 calls, 34562 in (33785 cached, 759 written), 203 out, p50 1254 ms, p95 1520 ms; 3.52 chars a token
 - Run 151, gpt-6-luna: 8 calls, 47529 in (46087 cached, 1418 written), 283 out, p50 1082 ms, p95 1341 ms; 3.51 chars a token
 - Run 152, gpt-6-luna: 8 calls, 47680 in (46206 cached, 1450 written), 302 out, p50 1098 ms, p95 1519 ms; 3.63 chars a token
+- Run 153, gpt-6-luna: 12 calls, 86085 in (77735 cached, 8314 written), 467 out, p50 1939 ms, p95 2798 ms; 3.69 chars a token
+- Run 154, gpt-6-luna: 7 calls, 49922 in (42074 cached, 7827 written), 314 out, p50 2426 ms, p95 4249 ms; 3.71 chars a token
+- Run 155, gpt-6-luna: 8 calls, 56982 in (42042 cached, 14916 written), 322 out, p50 1481 ms, p95 2024 ms; 3.66 chars a token
+- Run 156, gpt-6-luna: 9 calls, 63947 in (55896 cached, 8024 written), 321 out, p50 1473 ms, p95 3323 ms; 3.66 chars a token
+- Run 157, gpt-6-luna: 11 calls, 78764 in (77144 cached, 1587 written), 479 out, p50 1809 ms, p95 6870 ms; 3.67 chars a token
+- Run 158, gpt-6-luna: 10 calls, 71445 in (70126 cached, 1289 written), 500 out, p50 1667 ms, p95 3694 ms; 3.67 chars a token
+- Run 158, gpt-6.1-sol: 1 calls, 7888 in (0 cached, 7885 written), 35 out, p50 3450 ms, p95 3450 ms; 3.67 chars a token
+- Run 159, gpt-6-luna: 9 calls, 64098 in (62849 cached, 1222 written), 471 out, p50 2262 ms, p95 3586 ms; 3.70 chars a token
+- Run 160, gpt-6-luna: 9 calls, 63704 in (55869 cached, 7808 written), 281 out, p50 1467 ms, p95 2568 ms; 3.67 chars a token
+- Run 161, gpt-6-luna: 10 calls, 71427 in (69969 cached, 1428 written), 410 out, p50 1378 ms, p95 6627 ms; 3.66 chars a token
+- Run 162, gpt-6-luna: 8 calls, 56389 in (55526 cached, 839 written), 292 out, p50 1595 ms, p95 2277 ms; 3.67 chars a token
+- Run 163, gpt-6-luna: 7 calls, 49192 in (48535 cached, 636 written), 217 out, p50 1812 ms, p95 2664 ms; 3.66 chars a token
+- Run 164, gpt-6-luna: 8 calls, 56369 in (48719 cached, 7626 written), 292 out, p50 2556 ms, p95 3013 ms; 3.70 chars a token
+- Run 164, gpt-6.1-sol: 1 calls, 7454 in (6888 cached, 563 written), 14 out, p50 1923 ms, p95 1923 ms; 3.70 chars a token
+- Run 165, gpt-6-luna: 8 calls, 56749 in (48934 cached, 7791 written), 367 out, p50 1422 ms, p95 2809 ms; 3.67 chars a token
+- Run 166, gpt-6-luna: 8 calls, 55864 in (48456 cached, 7384 written), 253 out, p50 2651 ms, p95 2970 ms; 3.68 chars a token
+- Run 167, gpt-6-luna: 11 calls, 79003 in (76962 cached, 2008 written), 337 out, p50 1636 ms, p95 2628 ms; 3.67 chars a token
+- Run 168, gpt-6-luna: 6 calls, 42108 in (41446 cached, 644 written), 382 out, p50 1744 ms, p95 3891 ms; 3.67 chars a token
+- Run 169, gpt-6-luna: 9 calls, 62930 in (55423 cached, 7480 written), 289 out, p50 2072 ms, p95 2642 ms; 3.68 chars a token
+- Run 170, gpt-6-luna: 9 calls, 65024 in (63199 cached, 1798 written), 455 out, p50 2327 ms, p95 3163 ms; 3.70 chars a token
+- Run 171, gpt-6-luna: 13 calls, 92880 in (91090 cached, 1751 written), 468 out, p50 1891 ms, p95 2437 ms; 3.69 chars a token
+- Run 172, gpt-6-luna: 7 calls, 49013 in (48345 cached, 647 written), 161 out, p50 1644 ms, p95 2590 ms; 3.67 chars a token
+- Run 173, gpt-6-luna: 5 calls, 34993 in (27575 cached, 7403 written), 119 out, p50 1984 ms, p95 2349 ms; 3.67 chars a token
+- Run 174, gpt-6-luna: 8 calls, 58079 in (56323 cached, 1732 written), 241 out, p50 1313 ms, p95 1717 ms; 3.67 chars a token
+- Run 175, gpt-6-luna: 8 calls, 56393 in (48424 cached, 7945 written), 211 out, p50 1519 ms, p95 2442 ms; 3.68 chars a token
+- Run 176, gpt-6-luna: 5 calls, 35696 in (34812 cached, 869 written), 199 out, p50 2507 ms, p95 3088 ms; 3.74 chars a token
+- Run 177, gpt-6-luna: 5 calls, 35281 in (34568 cached, 698 written), 154 out, p50 1988 ms, p95 2321 ms; 3.67 chars a token
+- Run 178, gpt-6-luna: 3 calls, 21039 in (20691 cached, 339 written), 77 out, p50 1822 ms, p95 1863 ms; 3.68 chars a token
+- Run 179, gpt-6-luna: 2 calls, 13901 in (6888 cached, 7007 written), 38 out, p50 1652 ms, p95 1759 ms; 3.67 chars a token
+- Run 180, gpt-6-luna: 4 calls, 28511 in (27852 cached, 647 written), 131 out, p50 2438 ms, p95 2735 ms; 3.74 chars a token
+- Run 181, gpt-6-luna: 2 calls, 13885 in (13796 cached, 83 written), 69 out, p50 2187 ms, p95 2265 ms; 3.67 chars a token
+- Run 182, gpt-6-luna: 4 calls, 28765 in (28180 cached, 573 written), 205 out, p50 1848 ms, p95 2382 ms; 3.66 chars a token
+- Run 183, gpt-6-luna: 3 calls, 21527 in (20833 cached, 685 written), 115 out, p50 1667 ms, p95 3113 ms; 3.68 chars a token
+- Run 184, gpt-6-luna: 5 calls, 35333 in (34789 cached, 529 written), 298 out, p50 2205 ms, p95 3173 ms; 3.69 chars a token
+- Run 185, gpt-6-luna: 7 calls, 48966 in (48411 cached, 534 written), 165 out, p50 1987 ms, p95 4081 ms; 3.68 chars a token
+- Run 186, gpt-6-luna: 8 calls, 57414 in (42340 cached, 15050 written), 271 out, p50 1637 ms, p95 2284 ms; 3.66 chars a token
+- Run 187, gpt-6-luna: 7 calls, 48974 in (48457 cached, 496 written), 237 out, p50 1696 ms, p95 1824 ms; 3.68 chars a token
+- Run 188, gpt-6-luna: 8 calls, 56824 in (55814 cached, 986 written), 320 out, p50 1567 ms, p95 2826 ms; 3.66 chars a token
+- Run 189, gpt-6-luna: 8 calls, 56500 in (55602 cached, 874 written), 334 out, p50 1486 ms, p95 2180 ms; 3.73 chars a token
+- Run 189, gpt-6.1-sol: 1 calls, 7728 in (0 cached, 7725 written), 30 out, p50 2224 ms, p95 2224 ms; 3.73 chars a token
+- Run 190, gpt-6-luna: 7 calls, 49332 in (48719 cached, 592 written), 208 out, p50 1536 ms, p95 2003 ms; 3.67 chars a token
+- Run 191, gpt-6-luna: 6 calls, 42406 in (41815 cached, 573 written), 311 out, p50 1484 ms, p95 2411 ms; 3.67 chars a token
+- Run 192, gpt-6-luna: 4 calls, 27708 in (27564 cached, 132 written), 115 out, p50 1242 ms, p95 1845 ms; 3.67 chars a token
+- Run 193, gpt-6-luna: 6 calls, 42856 in (41452 cached, 1386 written), 572 out, p50 2208 ms, p95 2912 ms; 3.76 chars a token
+- Run 194, gpt-6-luna: 3 calls, 20759 in (20664 cached, 86 written), 247 out, p50 2166 ms, p95 3417 ms; 3.66 chars a token
+- Run 195, gpt-6-luna: 3 calls, 20912 in (20767 cached, 136 written), 105 out, p50 1913 ms, p95 2069 ms; 3.68 chars a token
+- Run 196, gpt-6-luna: 8 calls, 56822 in (55569 cached, 1229 written), 399 out, p50 2355 ms, p95 3656 ms; 3.71 chars a token
+- Run 197, gpt-6-luna: 8 calls, 56740 in (55659 cached, 1057 written), 400 out, p50 1875 ms, p95 3853 ms; 3.74 chars a token
+- Run 198, gpt-6-luna: 9 calls, 64826 in (56523 cached, 8276 written), 465 out, p50 2013 ms, p95 3176 ms; 3.68 chars a token
+- Run 199, gpt-6-luna: 10 calls, 71244 in (69871 cached, 1343 written), 365 out, p50 1600 ms, p95 2384 ms; 3.67 chars a token
+- Run 200, gpt-6-luna: 8 calls, 57252 in (55529 cached, 1699 written), 346 out, p50 1643 ms, p95 2345 ms; 3.65 chars a token
+- Run 201, gpt-6-luna: 11 calls, 78870 in (77222 cached, 1615 written), 459 out, p50 1571 ms, p95 3843 ms; 3.66 chars a token
+- Run 201, gpt-6.1-sol: 1 calls, 7682 in (6888 cached, 791 written), 25 out, p50 2595 ms, p95 2595 ms; 3.66 chars a token
+- Run 202, gpt-6-luna: 11 calls, 79881 in (76884 cached, 2964 written), 814 out, p50 1888 ms, p95 5088 ms; 3.72 chars a token
+- Run 202, gpt-6.1-sol: 1 calls, 8197 in (6888 cached, 1306 written), 37 out, p50 5955 ms, p95 5955 ms; 3.72 chars a token
+- Run 203, gpt-6-luna: 12 calls, 86260 in (84469 cached, 1755 written), 531 out, p50 2375 ms, p95 3379 ms; 3.67 chars a token
+- Run 204, gpt-6-luna: 9 calls, 65878 in (63707 cached, 2144 written), 448 out, p50 2004 ms, p95 2771 ms; 3.64 chars a token
+- Run 205, gpt-6-luna: 9 calls, 64821 in (49193 cached, 15601 written), 444 out, p50 1603 ms, p95 3071 ms; 3.65 chars a token
+- Run 205, gpt-6.1-sol: 1 calls, 7641 in (0 cached, 7638 written), 44 out, p50 2660 ms, p95 2660 ms; 3.65 chars a token
+- Run 206, gpt-6-luna: 10 calls, 72515 in (69929 cached, 2556 written), 880 out, p50 1735 ms, p95 5815 ms; 3.70 chars a token
+- Run 207, gpt-6-luna: 8 calls, 55990 in (55316 cached, 650 written), 211 out, p50 1761 ms, p95 2732 ms; 3.67 chars a token
+- Run 208, gpt-6-luna: 7 calls, 49524 in (48536 cached, 967 written), 157 out, p50 2442 ms, p95 3058 ms; 3.65 chars a token
+- Run 209, gpt-6-luna: 8 calls, 56557 in (55775 cached, 758 written), 237 out, p50 1258 ms, p95 2054 ms; 3.67 chars a token
+- Run 210, gpt-6-luna: 11 calls, 78578 in (76985 cached, 1560 written), 486 out, p50 1616 ms, p95 2084 ms; 3.77 chars a token
+- Run 210, gpt-6.1-sol: 2 calls, 15463 in (7651 cached, 7806 written), 104 out, p50 3672 ms, p95 3818 ms; 3.77 chars a token
+- Run 211, gpt-6-luna: 10 calls, 70982 in (69864 cached, 1088 written), 350 out, p50 1673 ms, p95 2705 ms; 3.67 chars a token
+- Run 212, gpt-6-luna: 11 calls, 79625 in (77813 cached, 1779 written), 356 out, p50 1382 ms, p95 2345 ms; 3.65 chars a token
+- Run 213, gpt-6-luna: 8 calls, 56274 in (55646 cached, 604 written), 251 out, p50 1728 ms, p95 2720 ms; 3.67 chars a token
+- Run 214, gpt-6-luna: 8 calls, 55886 in (55362 cached, 500 written), 236 out, p50 1520 ms, p95 2279 ms; 3.68 chars a token
+- Run 215, gpt-6-luna: 4 calls, 28560 in (28058 cached, 490 written), 149 out, p50 2630 ms, p95 2951 ms; 3.67 chars a token
+- Run 216, gpt-6-luna: 3 calls, 21575 in (14208 cached, 7358 written), 56 out, p50 2386 ms, p95 3274 ms; 3.67 chars a token
+- Run 217, gpt-6-luna: 6 calls, 44164 in (43454 cached, 692 written), 202 out, p50 1917 ms, p95 2814 ms; 3.68 chars a token
+- Run 218, gpt-6-luna: 7 calls, 49569 in (48827 cached, 721 written), 203 out, p50 2005 ms, p95 3061 ms; 3.67 chars a token
+- Run 219, gpt-6-luna: 7 calls, 50256 in (28241 cached, 21994 written), 316 out, p50 1928 ms, p95 3206 ms; 3.66 chars a token
+- Run 220, gpt-6-luna: 8 calls, 57483 in (49433 cached, 8026 written), 336 out, p50 1833 ms, p95 2705 ms; 3.66 chars a token
+- Run 221, gpt-6-luna: 12 calls, 87159 in (85351 cached, 1772 written), 542 out, p50 1772 ms, p95 2247 ms; 3.69 chars a token
+- Run 222, gpt-6-luna: 4 calls, 28828 in (28321 cached, 495 written), 134 out, p50 2234 ms, p95 3783 ms; 3.68 chars a token
+- Run 223, gpt-6-luna: 5 calls, 36293 in (35743 cached, 535 written), 166 out, p50 1311 ms, p95 1527 ms; 3.68 chars a token
+- Run 224, gpt-6-luna: 7 calls, 49898 in (48999 cached, 878 written), 445 out, p50 2331 ms, p95 7433 ms; 3.77 chars a token
+- Run 224, gpt-6.1-sol: 1 calls, 8024 in (0 cached, 8021 written), 41 out, p50 2937 ms, p95 2937 ms; 3.77 chars a token
+- Run 225, gpt-6-luna: 11 calls, 79621 in (71095 cached, 8493 written), 508 out, p50 1825 ms, p95 2396 ms; 3.75 chars a token
+- Run 226, gpt-6-luna: 9 calls, 64774 in (63399 cached, 1348 written), 373 out, p50 1985 ms, p95 3216 ms; 3.67 chars a token
+- Run 226, gpt-6.1-sol: 1 calls, 7863 in (6958 cached, 902 written), 49 out, p50 2872 ms, p95 2872 ms; 3.67 chars a token
+- Run 227, gpt-6-luna: 10 calls, 72323 in (70857 cached, 1436 written), 389 out, p50 1714 ms, p95 2227 ms; 3.66 chars a token
+- Run 228, gpt-6-luna: 8 calls, 56508 in (55908 cached, 576 written), 240 out, p50 1327 ms, p95 2076 ms; 3.71 chars a token
+- Run 229, gpt-6-luna: 9 calls, 64461 in (63407 cached, 1027 written), 298 out, p50 1738 ms, p95 2614 ms; 3.73 chars a token
+- Run 229, gpt-6.1-sol: 1 calls, 7543 in (6958 cached, 582 written), 14 out, p50 2449 ms, p95 2449 ms; 3.73 chars a token
+- Run 230, gpt-6-luna: 8 calls, 57020 in (49239 cached, 7757 written), 335 out, p50 1703 ms, p95 1934 ms; 3.71 chars a token
+- Run 230, gpt-6.1-sol: 1 calls, 7623 in (6958 cached, 662 written), 41 out, p50 3149 ms, p95 3149 ms; 3.71 chars a token
+- Run 231, gpt-6-luna: 7 calls, 49286 in (34921 cached, 14344 written), 212 out, p50 1707 ms, p95 2235 ms; 3.68 chars a token
+- Run 232, gpt-6-luna: 8 calls, 56768 in (56080 cached, 664 written), 243 out, p50 2097 ms, p95 3567 ms; 3.68 chars a token
+- Run 233, gpt-6-luna: 10 calls, 72248 in (70488 cached, 1730 written), 308 out, p50 2460 ms, p95 3384 ms; 3.68 chars a token
+- Run 234, gpt-6-luna: 7 calls, 49723 in (48919 cached, 783 written), 257 out, p50 2208 ms, p95 3568 ms; 3.67 chars a token
+- Run 235, gpt-6-luna: 8 calls, 56514 in (48936 cached, 7554 written), 229 out, p50 2475 ms, p95 3465 ms; 3.69 chars a token
+- Run 236, gpt-6-luna: 7 calls, 51677 in (50055 cached, 1601 written), 391 out, p50 1771 ms, p95 2490 ms; 3.67 chars a token
+- Run 237, gpt-6-luna: 6 calls, 44104 in (42695 cached, 1391 written), 414 out, p50 2774 ms, p95 3110 ms; 3.67 chars a token
+- Run 238, gpt-6-luna: 5 calls, 35278 in (34907 cached, 356 written), 117 out, p50 3141 ms, p95 3833 ms; 3.68 chars a token
+- Run 239, gpt-6-luna: 7 calls, 49511 in (48835 cached, 655 written), 157 out, p50 3360 ms, p95 4710 ms; 3.68 chars a token
+- Run 240, gpt-6-luna: 3 calls, 21336 in (13928 cached, 7399 written), 59 out, p50 2185 ms, p95 2350 ms; 3.67 chars a token
+- Run 241, gpt-6-luna: 4 calls, 28115 in (27860 cached, 243 written), 91 out, p50 2096 ms, p95 3155 ms; 3.68 chars a token
+- Run 242, gpt-6-luna: 6 calls, 44535 in (42943 cached, 1574 written), 204 out, p50 2162 ms, p95 3019 ms; 3.68 chars a token
+- Run 243, gpt-6-luna: 4 calls, 28375 in (20896 cached, 7467 written), 103 out, p50 1879 ms, p95 3945 ms; 3.68 chars a token
+- Run 244, gpt-6-luna: 4 calls, 28556 in (28023 cached, 521 written), 118 out, p50 3755 ms, p95 10007 ms; 3.70 chars a token
+- Run 245, gpt-6-luna: 4 calls, 28758 in (27982 cached, 764 written), 176 out, p50 3315 ms, p95 3573 ms; 3.75 chars a token
+- Run 246, gpt-6-luna: 5 calls, 35602 in (34915 cached, 672 written), 153 out, p50 3549 ms, p95 4137 ms; 3.67 chars a token
+- Run 247, gpt-6-luna: 3 calls, 21246 in (20901 cached, 336 written), 100 out, p50 2339 ms, p95 2683 ms; 3.69 chars a token
+- Run 248, gpt-6-luna: 2 calls, 14043 in (6958 cached, 7079 written), 30 out, p50 3118 ms, p95 4796 ms; 3.68 chars a token
+- Run 249, gpt-6-luna: 3 calls, 21413 in (20916 cached, 488 written), 106 out, p50 3510 ms, p95 3635 ms; 3.68 chars a token
+- Run 250, gpt-6-luna: 3 calls, 21509 in (20985 cached, 515 written), 97 out, p50 2643 ms, p95 2745 ms; 3.67 chars a token
+- Run 251, gpt-6-luna: 5 calls, 36998 in (35906 cached, 1077 written), 225 out, p50 2497 ms, p95 2971 ms; 3.67 chars a token
+- Run 252, gpt-6-luna: 3 calls, 21735 in (21045 cached, 681 written), 112 out, p50 3126 ms, p95 3664 ms; 3.68 chars a token
+- Run 253, gpt-6-luna: 5 calls, 35643 in (35124 cached, 504 written), 243 out, p50 3016 ms, p95 3438 ms; 3.70 chars a token
+- Run 254, gpt-6-luna: 6 calls, 42858 in (42034 cached, 806 written), 184 out, p50 2058 ms, p95 2412 ms; 3.68 chars a token
+- Run 255, gpt-6-luna: 4 calls, 28509 in (20976 cached, 7521 written), 128 out, p50 3469 ms, p95 6233 ms; 3.67 chars a token
+- Run 256, gpt-6-luna: 8 calls, 57552 in (49612 cached, 7916 written), 275 out, p50 1901 ms, p95 4377 ms; 3.67 chars a token
+- Run 257, gpt-6-luna: 6 calls, 42620 in (41988 cached, 614 written), 235 out, p50 2420 ms, p95 3011 ms; 3.68 chars a token
+- Run 258, gpt-6-luna: 10 calls, 72402 in (70771 cached, 1601 written), 516 out, p50 1944 ms, p95 3539 ms; 3.74 chars a token
+- Run 258, gpt-6.1-sol: 1 calls, 7855 in (0 cached, 7852 written), 38 out, p50 3610 ms, p95 3610 ms; 3.74 chars a token
+- Run 259, gpt-6-luna: 6 calls, 42050 in (41787 cached, 245 written), 153 out, p50 1104 ms, p95 1490 ms; 3.68 chars a token
+- Run 260, gpt-6-luna: 9 calls, 64646 in (63590 cached, 1029 written), 318 out, p50 1291 ms, p95 1803 ms; 3.67 chars a token
+- Run 261, gpt-6-luna: 2 calls, 13976 in (13916 cached, 54 written), 61 out, p50 2024 ms, p95 2451 ms; 3.67 chars a token
+- Run 262, gpt-6-luna: 4 calls, 27988 in (27844 cached, 132 written), 111 out, p50 1264 ms, p95 2097 ms; 3.67 chars a token
+- Run 263, gpt-6-luna: 6 calls, 44168 in (42847 cached, 1303 written), 521 out, p50 1986 ms, p95 2408 ms; 3.80 chars a token
+- Run 264, gpt-6-luna: 3 calls, 20969 in (20874 cached, 86 written), 175 out, p50 1952 ms, p95 2351 ms; 3.67 chars a token
+- Run 265, gpt-6-luna: 3 calls, 21122 in (20977 cached, 136 written), 122 out, p50 1821 ms, p95 1841 ms; 3.69 chars a token
+- Run 266, gpt-6-luna: 5 calls, 35061 in (34817 cached, 229 written), 249 out, p50 1983 ms, p95 2759 ms; 3.67 chars a token
+- Run 267, gpt-6-luna: 8 calls, 56965 in (56229 cached, 712 written), 253 out, p50 1563 ms, p95 1887 ms; 3.71 chars a token
+- Run 268, gpt-6-luna: 9 calls, 65361 in (57050 cached, 8284 written), 409 out, p50 1779 ms, p95 2684 ms; 3.66 chars a token
+- Run 269, gpt-6-luna: 10 calls, 71920 in (70553 cached, 1337 written), 365 out, p50 1425 ms, p95 2666 ms; 3.67 chars a token
+- Run 270, gpt-6-luna: 8 calls, 57815 in (56085 cached, 1706 written), 348 out, p50 1661 ms, p95 2313 ms; 3.65 chars a token
+- Run 271, gpt-6-luna: 11 calls, 79726 in (78025 cached, 1668 written), 489 out, p50 1438 ms, p95 2247 ms; 3.68 chars a token
+- Run 271, gpt-6.1-sol: 1 calls, 7772 in (6958 cached, 811 written), 18 out, p50 2303 ms, p95 2303 ms; 3.68 chars a token
+- Run 272, gpt-6-luna: 11 calls, 81848 in (78572 cached, 3243 written), 935 out, p50 1523 ms, p95 2936 ms; 3.72 chars a token
+- Run 273, gpt-6-luna: 12 calls, 87214 in (85390 cached, 1788 written), 539 out, p50 1606 ms, p95 2190 ms; 3.67 chars a token
+- Run 274, gpt-6-luna: 9 calls, 65530 in (63594 cached, 1909 written), 401 out, p50 1611 ms, p95 4159 ms; 3.68 chars a token
+- Run 274, gpt-6.1-sol: 1 calls, 8237 in (6958 cached, 1276 written), 39 out, p50 2324 ms, p95 2324 ms; 3.68 chars a token
+- Run 275, gpt-6-luna: 8 calls, 58337 in (42469 cached, 15844 written), 419 out, p50 2265 ms, p95 3688 ms; 3.65 chars a token
+- Run 276, gpt-6-luna: 10 calls, 72382 in (70646 cached, 1706 written), 361 out, p50 2184 ms, p95 3048 ms; 3.66 chars a token
+- Run 277, gpt-6-luna: 8 calls, 56577 in (55881 cached, 672 written), 210 out, p50 1653 ms, p95 2216 ms; 3.68 chars a token
+- Run 278, gpt-6-luna: 7 calls, 49998 in (49025 cached, 952 written), 300 out, p50 1556 ms, p95 2876 ms; 3.66 chars a token
+- Run 279, gpt-6-luna: 8 calls, 57200 in (56381 cached, 795 written), 249 out, p50 1836 ms, p95 2073 ms; 3.67 chars a token
+- Run 280, gpt-6-luna: 12 calls, 86930 in (85171 cached, 1723 written), 497 out, p50 1463 ms, p95 2498 ms; 3.67 chars a token
+- Run 280, gpt-6.1-sol: 1 calls, 7764 in (0 cached, 7761 written), 21 out, p50 3997 ms, p95 3997 ms; 3.67 chars a token
+- Run 281, gpt-6-luna: 10 calls, 71642 in (70545 cached, 1067 written), 354 out, p50 1595 ms, p95 2600 ms; 3.68 chars a token
+- Run 282, gpt-6-luna: 10 calls, 72626 in (71085 cached, 1511 written), 321 out, p50 1371 ms, p95 1723 ms; 3.66 chars a token
+- Run 283, gpt-6-luna: 8 calls, 56866 in (56221 cached, 621 written), 255 out, p50 1629 ms, p95 2219 ms; 3.67 chars a token
+- Run 284, gpt-6-luna: 9 calls, 63713 in (63083 cached, 603 written), 270 out, p50 1679 ms, p95 2384 ms; 3.74 chars a token
+- Run 285, gpt-6-luna: 4 calls, 28853 in (28344 cached, 497 written), 147 out, p50 1646 ms, p95 1817 ms; 3.67 chars a token
 <!-- ledger:end -->

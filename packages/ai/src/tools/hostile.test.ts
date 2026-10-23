@@ -10,6 +10,7 @@ const ids = (n: string) => ({
   bookingId: `0199f4b2-7c1e-7a00-8000-0000000000${n}4`,
   todoId: `0199f4b2-7c1e-7a00-8000-0000000000${n}5`,
   timeOffId: `0199f4b2-7c1e-7a00-8000-0000000000${n}6`,
+  factId: `0199f4b2-7c1e-7a00-8000-0000000000${n}7`,
 });
 const targets = { own: ids('a'), foreign: ids('b') };
 

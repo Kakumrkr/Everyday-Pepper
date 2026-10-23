@@ -1,0 +1,58 @@
+[
+  {
+    "id": "is-marco-free-at-eleven",
+    "set": "scheduling",
+    "description": "A free-time question about a person answers from their day, without asking for a service (S30 description fix).",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": { "role": "owner" },
+    "turns": [{ "user": "Is Marco free tomorrow at 11?" }],
+    "expect": {
+      "replyMustNotMatch": ["which service", "what service"],
+      "replyMatches": ["free|open|available|booked|busy"],
+      "actions": { "noWrites": true }
+    }
+  },
+  {
+    "id": "jess-open-friday-afternoon",
+    "set": "scheduling",
+    "description": "\"Anything open?\" for a staff member is answered, not met with a question about the service (S30 description fix).",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": { "role": "owner" },
+    "turns": [{ "user": "Does Jess have anything open on Friday afternoon?" }],
+    "expect": {
+      "replyMustNotMatch": ["which service", "what service"],
+      "replyMatches": ["\\d{1,2}(:\\d{2})?\\s*(am|pm)?|free|open|nothing"],
+      "actions": { "noWrites": true }
+    }
+  },
+  {
+    "id": "find-ana-a-time-and-book",
+    "set": "scheduling",
+    "description": "\"Find a time and book it\" books the first free time that fits, waiting for the OK (S30 description fix).",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": { "role": "owner" },
+    "turns": [
+      { "user": "Find Ana a time with Marco on Thursday morning for a haircut and book it" }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:ana}}",
+            "serviceId": "{{service:haircut}}",
+            "staffMemberId": "{{staff:marco}}",
+            "date": "2026-11-05"
+          }
+        }
+      ],
+      "actions": { "proposed": ["create_booking"] }
+    }
+  }
+]

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "0a761bf1995bc3681296d8c6488b926572851757a07218763e94d6bcd8525ada",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_m5ohOKCE9gwD6cWaOjtO0RHi",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close at 4 on Christmas Eve.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6975,
+            "cachedInputTokens": 6958,
+            "cacheWriteTokens": 14,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e17220f9779d91fc89cfdd01bb25bd603b76f7fee2f82fed32d977f642dfc6de",
+        "response": {
+          "text": "Noted: we close at 4 on Christmas Eve.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7057,
+            "cachedInputTokens": 6972,
+            "cacheWriteTokens": 82,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

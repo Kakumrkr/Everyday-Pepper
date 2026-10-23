@@ -43,6 +43,7 @@ export function decideAutonomy(
     tier: declared,
     recipients,
     untrustedContext,
+    outsideText,
     changesAutonomy,
   } = AutonomyRequestSchema.parse(request);
 
@@ -58,6 +59,15 @@ export function decideAutonomy(
   // A write that names no action on the dial has no setting to follow: it asks.
   if (actions.length === 0) return { outcome: 'propose', reason: 'setting' };
   if (autonomy.askFirst) return { outcome: 'propose', reason: 'ask_first' };
+  // What is remembered shapes later answers: after text from outside the team a person
+  // confirms it (playbook principle 5, S30). Remembered facts alone don't count: they were a
+  // member's words or a person's OK already.
+  if (
+    (outsideText ?? untrustedContext) &&
+    actions.some((action) => 'asksAfterUntrusted' in AUTONOMY_ACTIONS[action])
+  ) {
+    return { outcome: 'propose', reason: 'untrusted_context' };
+  }
 
   if (tier === 'external_or_irreversible') {
     if (recipients > BULK_RECIPIENT_LIMIT) return { outcome: 'propose', reason: 'bulk_lock' };

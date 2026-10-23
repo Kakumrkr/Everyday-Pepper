@@ -8,9 +8,13 @@ import {
   MemoryFactKeySchema,
   MemoryFactOriginSchema,
   MemoryFactQuerySchema,
+  MemoryFactShownSchema,
   MemoryFactValueSchema,
   MemorySubjectSchema,
+  MemoryWarningRuleSchema,
+  TemplateMemorySchema,
 } from './memory.js';
+import { ActionExplanationSchema } from './trust.js';
 
 const clientId = '0192f2c4-6a3b-7c1d-8e9f-0a1b2c3d4e5f';
 
@@ -93,5 +97,56 @@ describe('memory episodes', () => {
     expect(
       MemoryEpisodeInputSchema.safeParse({ ...parsed, embeddingModel: 'Bad Model' }).success,
     ).toBe(false);
+  });
+});
+
+describe('memory in the AI (S30)', () => {
+  const factId = '0192f2c4-6a3b-7c1d-8e9f-0a1b2c3d4e60';
+
+  it('a fact shown live is known with its value, or gone with its id only', () => {
+    expect(
+      MemoryFactShownSchema.parse({
+        state: 'known',
+        factId,
+        subjectType: 'client',
+        key: 'allergy',
+        value: 'PPD',
+        previous: null,
+        sensitive: true,
+      }),
+    ).toMatchObject({ value: 'PPD' });
+    expect(MemoryFactShownSchema.parse({ state: 'gone', factId })).toEqual({
+      state: 'gone',
+      factId,
+    });
+    expect(MemoryFactShownSchema.safeParse({ state: 'gone', factId, value: 'PPD' }).success).toBe(
+      false,
+    );
+  });
+
+  it('a template warns about keys by service category and suggests visit-note keys', () => {
+    expect(TemplateMemorySchema.parse({})).toEqual({ warnings: [], visitNoteKeys: [] });
+    expect(
+      MemoryWarningRuleSchema.parse({ serviceCategories: ['Color'], keys: ['Allergy'] }),
+    ).toEqual({ serviceCategories: ['Color'], keys: ['allergy'] });
+    expect(
+      MemoryWarningRuleSchema.safeParse({ serviceCategories: [], keys: ['allergy'] }).success,
+    ).toBe(false);
+  });
+
+  it('an AI action names a remembered fact by its id, never by its value', () => {
+    const why = (facts: unknown) =>
+      ActionExplanationSchema.safeParse({
+        requestMessageId: null,
+        steps: [],
+        facts,
+        alternatives: [],
+        untrustedContext: false,
+        decision: { outcome: 'propose', reason: 'setting' },
+      }).success;
+    expect(why([{ kind: 'memory_warning', ref: factId, value: null }])).toBe(true);
+    expect(why([{ kind: 'memory_warning', ref: factId, value: 'PPD' }])).toBe(false);
+    expect(why([{ kind: 'memory_recalled', ref: null, value: null }])).toBe(false);
+    expect(why([{ kind: 'slot_was_free', ref: null, value: { time: '10:00' } }])).toBe(true);
   });
 });

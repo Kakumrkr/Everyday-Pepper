@@ -3,6 +3,7 @@ import {
   deleteExpiredBookingVerifications,
   deleteFinishedOutboxMessages,
   deleteOldMemoryEpisodes,
+  deleteStaleProposedMemoryFacts,
   listTenantIdsForCleanup,
   withTenant,
   type Database,
@@ -18,7 +19,8 @@ import { deleteIdleConversationsIn } from './conversations.js';
 // the AI's proposals whose time ran out as expired (ADR-0028), so nothing offers them again, and
 // deletes conversations with the AI 90 days after their last message (ADR-0030). From Phase 7
 // (ADR-0034) it clears memory facts' replaced values once their Undo window ends and deletes
-// episodes after a year.
+// episodes after a year; from S30 (ADR-0035) it deletes the AI's proposed saves whose proposal
+// is over.
 
 /** How long an expired booking request (name, email, phone) is kept after it expires. */
 export const BOOKING_REQUEST_RETENTION_MS = 24 * 60 * 60_000;
@@ -39,6 +41,7 @@ export interface CleanupResult {
   conversations: number;
   memoryPreviousValues: number;
   memoryEpisodes: number;
+  memoryProposedFacts: number;
 }
 
 /** One clean-up pass over every business, as of `clock.now()`. */
@@ -54,8 +57,11 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
     conversations: 0,
     memoryPreviousValues: 0,
     memoryEpisodes: 0,
+    memoryProposedFacts: 0,
   };
   const episodesBefore = new Date(now - MEMORY_LIMITS.episodeRetentionDays * 86_400_000);
+  // A proposal waits at most a day; its proposed fact goes the day after (S30).
+  const proposedBefore = new Date(now - 2 * 86_400_000);
   let after: TenantId | null = null;
   for (;;) {
     const page: TenantId[] = await listTenantIdsForCleanup(db, after, TENANT_PAGE);
@@ -83,6 +89,9 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
       );
       result.memoryEpisodes += await inBatches(db, tenantId, (tx) =>
         deleteOldMemoryEpisodes(tx, episodesBefore, DELETE_BATCH),
+      );
+      result.memoryProposedFacts += await inBatches(db, tenantId, (tx) =>
+        deleteStaleProposedMemoryFacts(tx, proposedBefore, DELETE_BATCH),
       );
     }
     result.businesses += page.length;
