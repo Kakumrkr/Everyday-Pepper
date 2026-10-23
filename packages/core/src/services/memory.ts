@@ -55,6 +55,7 @@ import {
   setMemoryPaused,
   MemorySubjectUnreachableError,
   findMemoryEpisode,
+  findMemoryEpisodesByIds,
   findMemoryFact,
   latestVisitNotesOf,
   memoryFactsByIds,
@@ -670,6 +671,7 @@ export async function saveEpisode(
   db: Database,
   member: { tenantId: TenantId; userId: UserId },
   input: MemoryEpisodeInput,
+  options: { clock?: Clock } = {},
 ): Promise<MemoryEpisode> {
   const fields = MemoryEpisodeInputSchema.parse(input);
   const userId = UserIdSchema.parse(member.userId);
@@ -678,7 +680,11 @@ export async function saveEpisode(
     if ((await countMemoryEpisodesOf(tx, userId)) >= MEMORY_LIMITS.episodesPerMember) {
       throw new MemoryLimitError('episodes');
     }
-    const row = await insertMemoryEpisode(tx, { ...fields, userId });
+    const row = await insertMemoryEpisode(tx, {
+      ...fields,
+      userId,
+      ...(options.clock !== undefined && { createdAt: options.clock.now() }),
+    });
     await appendAuditEntry(tx, {
       actor: { kind: 'system' },
       change: {
@@ -719,6 +725,19 @@ export async function searchEpisodesIn(
   return rows.map(({ similarity, ...row }) =>
     MemoryEpisodeMatchSchema.parse({ ...toEpisode(row), similarity }),
   );
+}
+
+/**
+ * The member's own episodes with these ids, for the AI's answers that refer to them (S31):
+ * gone or not theirs, an episode is simply absent.
+ */
+export async function episodesShownIn(
+  tx: TenantTx,
+  actor: Actor,
+  ids: readonly MemoryEpisodeId[],
+): Promise<MemoryEpisode[]> {
+  requirePermission(actor, 'ai.chat');
+  return (await findMemoryEpisodesByIds(tx, ids)).map(toEpisode);
 }
 
 /** Deletes one of the member's own episodes. `MemoryEpisodeNotFoundError` otherwise. */

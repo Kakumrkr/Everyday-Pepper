@@ -7,7 +7,13 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
-import { systemClock, type Clock, type Mailer, type Pusher } from '@pepper/core';
+import {
+  systemClock,
+  type Clock,
+  type EpisodeWriter,
+  type Mailer,
+  type Pusher,
+} from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE, MAILER, raiseAlert } from '@pepper/runtime';
 import { Queue, Worker, type Job } from 'bullmq';
@@ -21,6 +27,8 @@ export interface OutboxOptions {
   pollMs: number;
   /** Sends pushes (ADR-0026); `null` or absent: no VAPID keys, queued pushes are not sent. */
   pusher?: Pusher | null;
+  /** Writes episodes (S31); `null` or absent: no OpenAI here, so the api queues none. */
+  episodes?: EpisodeWriter | null;
   /** Deliveries in flight per worker process. */
   concurrency?: number;
   clock?: Clock;
@@ -68,6 +76,7 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
       key: this.options.key,
       mailer,
       pusher: this.options.pusher ?? null,
+      episodes: this.options.episodes ?? null,
       clock: this.options.clock ?? systemClock,
     };
     this.worker = new Worker(

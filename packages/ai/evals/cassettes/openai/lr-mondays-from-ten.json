@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "722e51da641666f821427ddd6070a51f3b7bba3f07e0f7ebc005951df4dfa736",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_laflobqZwV7DPV6iWHYvpDuu",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":1,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8287,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8284,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a67743e0ef8b11da57c3b7c29b498713a6694ec5ccc736c251ce35eb3c0e1f39",
+        "response": {
+          "text": "The rule is awaiting your approval on the card. It won’t take effect until you approve it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8426,
+            "cachedInputTokens": 8284,
+            "cacheWriteTokens": 139,
+            "outputTokens": 24
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "41775202f28fcfd27aa92c7e1351a4f958fa49096be06a5c83efff247eec4414",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GhLvFZsfg1gJzKRc7ytkg3Ig",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8295,
+            "cachedInputTokens": 8270,
+            "cacheWriteTokens": 22,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f1d0b7c783b8ea8b8f7c544f7deeee9396b81ce080ba65c0455c720ca518fac4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MsBg82jR0DdhK6EdyymTifCC",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"from\":\"13:00\",\"to\":\"17:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8574,
+            "cachedInputTokens": 8292,
+            "cacheWriteTokens": 279,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1377e57aab13150ffb81655cdf5be72d13cb4899a243cedb68a655f30caac946",
+        "response": {
+          "text": "Jess is blocked Friday, November 6, from 1–5 pm. One booking remains within that time; it will need to be moved or cancelled separately.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8704,
+            "cachedInputTokens": 8571,
+            "cacheWriteTokens": 130,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

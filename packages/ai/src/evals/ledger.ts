@@ -1,6 +1,7 @@
 import type { LlmRequest, LlmResponse, LlmStreamEvent, LlmUsage } from '@pepper/contracts';
 import { z } from 'zod';
 import { isLlmError } from '../errors.js';
+import type { Embedder } from '../embedder.js';
 import type { LlmCallOptions, LlmProvider } from '../provider.js';
 import { costOfUsage, type ModelPrice, type PriceTable } from './cost.js';
 
@@ -40,11 +41,18 @@ export function refusePhase(options: {
   phase: number;
   spentUsd: number;
   estimateUsd: number;
+  /**
+   * `--phase-estimate-ok` (user, S31): run although the worst-case estimate would pass the
+   * cap, as long as the phase has not reached it. The estimate runs 100–300× above actual
+   * spend, so a multi-turn case near the end of a phase could never be recorded; the in-run
+   * stop still refuses every call once actual spend reaches the cap.
+   */
+  estimateOk?: boolean;
 }): string | null {
   const cap = PHASE_CAPS_USD[options.phase];
   if (cap === undefined) return `Phase ${String(options.phase)} has no OpenAI budget.`;
   const total = options.spentUsd + options.estimateUsd;
-  if (options.spentUsd >= cap || total > cap) {
+  if (options.spentUsd >= cap || (total > cap && options.estimateOk !== true)) {
     return `Phase ${String(options.phase)} spent ${usd(options.spentUsd)}; this run could take it to ${usd(total)}, past its ${usd(cap)} cap.`;
   }
   return null;
@@ -177,7 +185,8 @@ export class SpendTracker {
     return null;
   }
 
-  add(model: string, usage: LlmUsage, request: LlmRequest, ms: number | null): void {
+  /** `request`: the chat request answered (`null`: an embedding, not in the chars a token). */
+  add(model: string, usage: LlmUsage, request: LlmRequest | null, ms: number | null): void {
     const cost = costOfUsage(usage, priceOf(this.options.prices, model));
     this.runUsd += cost;
     const spend = this.models.get(model) ?? {
@@ -196,7 +205,7 @@ export class SpendTracker {
     };
     if (ms !== null) spend.ms.push(ms);
     this.models.set(model, spend);
-    if (usage.inputTokens > 0) {
+    if (usage.inputTokens > 0 && request !== null) {
       this.charsSent += requestChars(request);
       this.tokensCounted += usage.inputTokens;
     }
@@ -275,6 +284,26 @@ export function guardedProvider(provider: LlmProvider, tracker: SpendTracker): L
       } catch (error) {
         failed(request, error);
       }
+    },
+  };
+}
+
+/** `guardedProvider` for the embedding model (S31): counted, and refused past the caps. */
+export function guardedEmbedder(embedder: Embedder, tracker: SpendTracker): Embedder {
+  return {
+    model: embedder.model,
+    async embed(request, options) {
+      const reason = tracker.stopReason();
+      if (reason !== null) throw new BudgetStopError(reason);
+      const started = performance.now();
+      const response = await embedder.embed(request, options).catch((error: unknown) => {
+        if (isLlmError(error) && error.usage !== undefined) {
+          tracker.add(embedder.model, error.usage, null, null);
+        }
+        throw error;
+      });
+      tracker.add(response.model, response.usage, null, performance.now() - started);
+      return response;
     },
   };
 }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "cc2109fe6daaa7e9e9aebd9d31b198db61d9541482e7be1dc5f26e199c6cc9a3",
+        "fingerprint": "da72d38196238dc2b206dae0726f1d91cfa59f7a3bc31c7a92b97d2b1e1bff12",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_JSV9rZCUifSK5051m3t9zeH2",
+              "id": "call_M5JAxqO9wLYGgvTdR65NSRMk",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8284,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "f7f0611d1ab64efa89f7efb5587c0fe7ec4d1ac17d6db28adb0f336a84a807b1",
+        "fingerprint": "eec39cadb72609774f2e9e8e1f3b32913cbaa6f19c00635190fe9a1cd3a36a75",
         "response": {
-          "text": "There are no open to-dos visible to you.",
+          "text": "There are no open to-dos in the list I can access.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7029,
-            "cachedInputTokens": 6969,
+            "inputTokens": 8341,
+            "cachedInputTokens": 8281,
             "cacheWriteTokens": 57,
-            "outputTokens": 15
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }

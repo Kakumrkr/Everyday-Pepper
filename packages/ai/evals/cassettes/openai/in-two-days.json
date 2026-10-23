@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3c0e94980edaef8a3c1915c1206f97a793a1cb992eae3d42bb37122770d7b4df",
+        "fingerprint": "706b8fbfe813bfb119d53244d57024b431dafcd01eca9745ee98c27f6f87d1fa",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_raSeW9y1jjSpdNHfF4SajdaV",
+              "id": "call_vBfiiPAngo0DTBnfLlA5bTJE",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6975,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8287,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "09ef3f96970ad418a6363baedad861662fba8170e01749f18e040deedeb3c0ce",
+        "fingerprint": "0e85aef779650e83314fcbdb80d7b1a96d54aed3d89d8ada80a6d6f60f65548a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0WJmIfbn5Nf6QlpqLtMcAQ9L",
+              "id": "call_T4G9TUH1SkdUSfyB8j7uI0Cx",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7254,
-            "cachedInputTokens": 6972,
-            "cacheWriteTokens": 279,
+            "inputTokens": 8577,
+            "cachedInputTokens": 8284,
+            "cacheWriteTokens": 290,
             "outputTokens": 53
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4c210610d26c527749c3c4117f34b912858f4e24bfef42987de2588f44841818",
+        "fingerprint": "1a4b9517246db980a6e00dc1068c172dccd7ed2a869824aaf79128d7bee3939d",
         "response": {
-          "text": "Jess has no bookings or blocked time on Wednesday, November 4. The schedule shows 10:00 is clear.",
+          "text": "Jess has no bookings or blocked time on Wednesday, November 4, so 10:00 looks free.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7361,
-            "cachedInputTokens": 7251,
+            "inputTokens": 8684,
+            "cachedInputTokens": 8574,
             "cacheWriteTokens": 107,
-            "outputTokens": 28
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

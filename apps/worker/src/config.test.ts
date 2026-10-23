@@ -25,6 +25,27 @@ describe('loadWorkerConfig', () => {
     );
   });
 
+  it('writes episodes only with an OpenAI key and an embedding model (S31)', () => {
+    const openai = {
+      OPENAI_API_KEY: 'sk-test-not-a-real-key-000000',
+      OPENAI_MODEL_ROUTINE: 'gpt-6-luna',
+      OPENAI_MODEL_STRONG: 'gpt-6.1-sol',
+    };
+    expect(loadWorkerConfig(required).episodes).toBeNull();
+    expect(loadWorkerConfig({ ...required, ...openai }).episodes).toBeNull();
+    expect(
+      loadWorkerConfig({
+        ...required,
+        ...openai,
+        OPENAI_MODEL_EMBEDDING: 'text-embedding-3-small',
+        AI_MONTHLY_TOKENS: '1000000',
+      }).episodes,
+    ).toMatchObject({
+      openai: { models: { routine: 'gpt-6-luna' }, embeddingModel: 'text-embedding-3-small' },
+      monthlyTokens: 1_000_000,
+    });
+  });
+
   it('reads the mail settings and the relay interval', () => {
     expect(loadWorkerConfig(required)).toMatchObject({ mail: null, outboxPollMs: 1000 });
     expect(

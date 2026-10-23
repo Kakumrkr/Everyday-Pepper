@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b861def260380438f5d6cb3468669120fc1d73504604f7329c85be94b25f641a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_9Hkfu4C9mmpw8yXHskjgSOOR",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":5,\"notBefore\":null,\"notAfter\":\"16:00\",\"closed\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8372,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8369,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0cba874ea568a119b43859127bff76b1d6789e575602394520b8028c9adcbe97",
+        "response": {
+          "text": "The Friday cutoff rule—no bookings after 4:00 pm—is waiting for your approval on the card. Nothing has changed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8511,
+            "cachedInputTokens": 8369,
+            "cacheWriteTokens": 139,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

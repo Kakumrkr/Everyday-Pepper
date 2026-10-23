@@ -13,6 +13,7 @@ import type {
 import type { Actor, AutonomyDefaults, Clock } from '@pepper/core';
 import type { Database, TenantTx } from '@pepper/db';
 import type { z } from 'zod';
+import type { Embedder } from '../embedder.js';
 import type { ToolGuide } from './guide.js';
 
 // The AI's tools (ADR-0029, playbook principles 1–5): thin adapters over the same domain
@@ -33,6 +34,11 @@ export interface ToolDeps {
   autonomy: AutonomyDefaults;
   /** Which remembered facts a booking warns about, by service category (the template's, S30). */
   memoryWarnings?: readonly MemoryWarningRule[];
+  /**
+   * Embeds a `search_memory` question (S31), metered against the business's budget; absent
+   * when no embedding model is configured (memory search is then off; facts still recall).
+   */
+  embedder?: Embedder;
   /** For the client emails a write queues (held for the undo-send grace). */
   emails: { baseUrl: string; outboxKey: Buffer };
   /**
@@ -76,7 +82,12 @@ export interface ReadTool<S extends z.ZodType = z.ZodType> {
   args: S;
   /** Whether the arguments take local dates or times (the description says how). */
   localTimes: boolean;
-  run(scope: ToolScope, args: z.output<S>): Promise<ToolAnswer>;
+  /**
+   * Work outside the member's transaction, before it (S31): a call to a model, which never runs
+   * inside one. Its result is `run`'s third argument.
+   */
+  prepare?(deps: ToolDeps, args: z.output<S>): Promise<unknown>;
+  run(scope: ToolScope, args: z.output<S>, prepared?: unknown): Promise<ToolAnswer>;
 }
 
 /** A write's scope: `notifyClient(clientId)` queues (and records) that client's email. */

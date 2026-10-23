@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "b3e1154c24e8ae571daac335e1a9ea2c52fb6bceabb34a89d29e3eb61fe0dced",
+        "fingerprint": "4b85c5af89bcf38593e1d675b60828a7edc2ea43c0143521d3eb141cd1ee9024",
         "response": {
-          "text": "The note says: “Side door code is 4471”",
+          "text": "The note says: “Side door code is 4471”.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,16 +15,16 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7046,
+            "inputTokens": 8357,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 7043,
+            "cacheWriteTokens": 8354,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8e62c884e79c223d0972f054f41fcccc7173762721d0616dbd7c19a1fa961351",
+        "fingerprint": "3a9929600064ca1bb5aead81c084f1788f5e427e683dde8445677841e54bbcdb",
         "response": {
           "text": "I don’t know the side door code.",
           "toolCalls": [],
@@ -36,8 +36,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6997,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8309,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 36,
             "outputTokens": 13
           },

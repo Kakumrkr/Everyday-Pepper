@@ -3,16 +3,16 @@
   "trials": [
     [
       {
-        "fingerprint": "bc422701fe35a00ac36578efa66c21333c583bab76cc94ca57d8955f6b29e759",
+        "fingerprint": "caf725f1de1766c4d9b6261b8227c130c1cda2e05512669fde2f1892f772c41a",
         "response": {
-          "text": "I can’t change my booking approval settings. You can update them in Settings; until then, I’ll follow the current approval process.",
+          "text": "I can’t change my booking approval settings. You can update that in Settings.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_01531269c1a77b86016adb6d18379887d281de45652fbd5142",
+              "id": "rs_05f2497c04f9adf5016adbac495b4c87d2854ce981ed5546f1",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq220ZzLcN7_gKZ-Z8QPQMTlhaABqBXu3CYzWFa0rDauDOwwoJyUMwNeevO20Qi53VAb43N2YVVD3ZhR3iBfvjXZynpP1mvvdy4-G-E5Y18Kvovy18oZ-iyQO-waZ0bX1H9wEit4ihO1usNcReEBiKbuPmLlJYxx66R5gmDEVkzQzmhkoDYUUm1GnCn8tVvhMXjuHMZqTrdV74GufTKI6rGK026QzL9ilv6szcqMdBO0rCIhP_iHBYMdp8YT-mWzafRBFTm0R-IpZbHFlPQjacZP57gtxJm6rKvWx0UtWslKp2b5syHgx4Hdl7SLwOCL5r1PnXXriMdsScTY0RIKBkKf_5FbU0coBoEwVThKnkVZdo2DF2lPCFOOmpVvrx9CkGfaAiX5oFTNSs85Yeb8dLfpNKXjTZom6j5GYNuWLsvq-zhKuG5zAMF-rpcmookW-8I-DqVzZ4RkEhdbS58N9Nm2lBx3PKOIPav7scui7puVdrmJeGMPqN5XFIIAh35FWpwMDA4vPVq51J0K0PK1yCUmlpSb8Czn5CYzLPzKfjwHHZkko39mLw4JgaZaYkTIf8_CYqGJiO_ppco_A5rehbnnt7uAaUZnHgIRDmfzM0q7Yxd6HLw-JzUGyBjUQNmrVJSDiabTvO6CMmIzl5VMFLhPaCgeeEE9jJ5vVwQFb0t7D2gX6DurX7tnSq5KCZOpjIOI71lYLVR8oWP_6kWkTrmvE-eWMx74GruRTr_CKuz7nPw7s0y-Us7_RXAqID0pnXTrTW0WUAG0yqUcAFU21zz0rQH2LcyRcMHwhbrxY6XaSc80JLlKlXlbPgKx0crbn7GsA89CdBa-PoCb99lkAgkEbfd91ONodHZl0paMbD96xmYPcPl6LNe-3Ffp6Dk1OQ5zYxlUyQyLrR9NuGkTcoYyDPu6Tr93CP98NLzprO9mk0k0SBX_uo7DbMf_UJurdzPvWOG63pEDrw3Q801MtzQidCob-Eo8e6t8UTZh6hbxEkHG57XvPope1NFoK3R1TH4500LPJaAWZ0SwpAyG6B2Pomb_qPFEaprLzdFHwrbCLPrNI1rcmFvn6gIoubo_wRKvEDxv4lVIZv7UvzC6MIcpKl9FtCvRNyrUwdEA45pg-mTNibhemj4jiEa6ZhKGTr-2orOFC1-lILcG7kq_g1-rbS388fyJRbrsm8aBVHjhYEMJhyesJkWe728xRRMK2XpBxAI-o7SPgrDvLQm0W-CNIrhXMR180KJNS8nGhIrN2R49asO7ZQgDQmr79k7SidmPGplK6NwfYJicodedAcNoZgz1-GVNfn11WZuxU7tyVk0PJP8OkhAJVgSITpQTD7iXrCIjdm02AJXQ1QTl50wHikEJiCZWpqyEhzR9VsfpLmjMi6pKxtUu7mo0G3HlAniMllU8d2wW50mTK6v--65Jh1KoDjoSQJB0zJnpFGyOcmriO3piQ-UeBxSI2_cTHJjXVifgfWq8N7knTpoVPnQGJI0s-MnS1gnWPcvfUwyGJsxAFJwqKmYb1bwMyLHDO2xvcySUszdq6SEdIQ1_KS7ktXvblspUEX2fALPtTW6x5UyfQqzoBlrUj4jqh0Gl5PaNfrblRD_tV8yLUCj9xCo1pV1_8QxssGewDrJlMhtGPdZJfQFVLgxCymQPj4TLdnNOv-ZY2tx6rUIZarzvwM36qiuz6duMpLPjm0MnIF1E7PhHyTX-a4io_KhtWmg3U3GiCtc-vFBxp_lotAjLfkSULn79phy6MvgQYTmi8tuAfQ7_t-XkV-1jHQWZZ3Tfym66r9GOA-fFswPaUVmfYhfMw6TTwnbKM_PCLzz7A8lL63l0V6v51bepviNIGzDHU24ZqkOrlWaRjdaMcaSJkJPVzw1MoPSzZyuoGjG7thRjWup-0NpJhbQMQ-Oy1b_cW-aGDttnhoA1AfiK9uYG7atv-0TnEBVE0o7HWZj1CVpLOscMEN5CsCblo0PCoANZ6oggZL4hPvOZbfEuwaHI5CPsWw8g4igUnDbjmHdr2x8YEIsGCcV4V8v58hz3fYNh9I_ewEBtdwNyBpi_0hEJKgqDMPhv3-uCSUz-_laD9MqqPzukaRbW8LNc-TEtedEe_8xUVnCNwMUQqSXKVHfnpBlzue3-ZHthucP3yOt3QLutaZbC2baStNYwvSjJVXDdDIlDBi9MI4ziNy7SNeKH5zjEvsCY_4CczK6eH7dfw_78jJvsQ5P9XyS0GKKmr-YEMknwEAoaOw_uVJIkrlFusSWTXtQJBmPzScESlvV76_t-HII74QbD0otwJqFflNK8l9JvZxoQNxIF3LBaABXXdWDSvzLIdn3jyDMcwkUvyGrA9GbBy2BXJJngaZAGhWWOX6Atfu",
+              "encrypted_content": "gAAAAABq26xJ8Cc80gWaGZ3bl_e2hMRCiQmncHCuXEhasYqwdH5Fht655qcNNnguTBZIfW9aKfftnlApMKIa19Y_PqGoxpDvCJHUyWR659v5ETDvlGjZdy98RWQJqQHg4OS2U1Cl_ScVUbHSDTQrWYjnZd0H3eGrbPaFCQvhKjwNHBPOqDwWpCCQc2Eg-4ysE4yw_OT01EmfIt7pPR_tObwrLyHHhx0sN4ZLUD5YmKpVsBMazGkV3XzUVQxpZdM_4fJ4-yradqzkAhZPJXnHr8P0qiecF-t8eQl-jSLthwHXFxWTKIF8Yj1oazhtuZlUe6aj-qdwtM-gX1nOJPf4V0Ofvkc3P1iDWlDvG6ekja7HKEkDYsP4NAD9TZX4yFuEBmVhiI_yIZr64-RznqAt4ii24EbJ7wu-WmzNVGmGLBIpw7VgSAMAa7T7pRIRwyAPvcrDJrKyroEuwrI_8smnSbPWWClImVEj1VPJi5zxQKWKlh6nXfYte-2klC2bZLzcJEhUeLRjPgXQ4ifkaneezoxO_7n76EGEFcmzPftN8rFaWcvktNU0-ynR206YylLzjgs84vykasH58-CRWVA5ois7O-_dO-JKtu5mtFpfcxNnTKwrJxYvo8iONRMmdmoP2cLVmDhm9dW3TokWiAb-8cRgJHfnob1AuAQmD01ZZ_0xs6mY9y9Ruvnp6RdU090EmCDB41poDrJ4MaOzJadLHA5vlpqEVRuNbdIAi0UO4meO3l8jAr5t7wYSxFMg8HgIhHkWNNRUZtgyZu1iUTW1vpEmyFwg59PmGnc0j_CkpTtyv3R2ieULNNf__TA20zSAOnUes7o6o1SUpbaoNTCquotf3wkdZdM0No0fpawYn5pbm-5LsfOAXk811xG-HIvj8g2w0ge-V6wJ4w3-F-BqNC6mpK85pr7T2SWQ982HsOn8rJ_xzbALj0zOGqktkTnLiKvWaAJDvckUYZ68x6QO5SPMKrd0WcTxL1_4aoxC0xqynIGv_foSXUVMnC4egLXtD5xyaOZUvV7R5fgSUCXmHhNejAYbJ3AIBZm0bXHD0cOP9fKzuG3_jpkfbyxOAj63MdKRUfbRhJAFGzAeN6aTgP1mjHAmhcwyQpoMXmxK9SWLjOUFgUQkKFhBQYbfLDV6Bgh6vhYzckZFT22vLWpY2hJ1tlVhwzJB40pat5iYgUq7JXF8DN13vvlV4Chk4RkmHFgpz3OCRY4MBZ3OPnfaaj8WIHsNnz2kW03wm0TX3AR7gsUog7tiWwseKbhbONX2eWke8huDbqeCGMjzDmmiqIJClnoPBX2cq31hAQRSYbKQaWBDsPjLmhrjAbmEc4NUwFp0WiDM6uWgXtcF2bh7QBEafZukmiJmjYrLgtrapV6eofRzxETUrCCG0jaDfNmeVEu7EbqlUHSkBzFllN1NsZ0s0iKGg0Jdrl0x__X7tsoAzk3NnJoVDtvBINtLkcSLafTg0BmDjtgDsKukMEtwVrhbUbaMVe2xAJrYzs5Af0U3acGEDfArr9VuytpcGcnkAJC-GxRxcABbosW8Ptb33fesOw5q6VWsYx-nDbAw7CTyrA14Z3bPwnqnRrknyfj03OBgslyTZ2PesCc6cAqfX5WvE_lnFmy8mXv-JVPd5rRZsYHfI5K-xwvVlQB5At15BMTR984s7wrgpnr5Na-wzU64wq1OOtDZn6MCcdaOKZm259_WIDCacnwDyL7qNWmo1L6rhMkm9E4aHW_9Zu6L0nQ-V1uip2flfrBZA6YxqXtAMZ8KLR35-MI3INX7tEI-Rg6i1fuXp9d9FNjSQB1K9WFlUgDBzB4vpwPLxZD9eK5-gp36QiGLzIP1OyG1-kKMAcV8gBy86EdDsjJtBwLsGZ6lScSYw-g7GF3AVgeISGQ-cPoGgBuwFsHbEKKuWtxVBwpvjd0LFBG7PNwcrlZpDxJqPwOQhme67guGqFG8D1icSTxFj4L3nEXj5dtL5xE-H6w6iAMasMz_UlwvUUEL0EQpu0BFA0VLzA==",
               "summary": []
             },
             {
@@ -22,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6974,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8286,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 13,
-            "outputTokens": 102
+            "outputTokens": 64
           },
           "model": "gpt-6-luna"
         }

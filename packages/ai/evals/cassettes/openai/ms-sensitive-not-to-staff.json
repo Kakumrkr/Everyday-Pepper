@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "563d69b3d6e1e4d0c5b05a683093889538f1bd5613d6ded348cefd37f24d27e2",
+        "fingerprint": "e43283a06d5af424748e4319052b140386b62c8f271e535ef1b3ac92ca34bfb1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_g5ESls50h7VQo5TDEofYXmhJ",
+              "id": "call_vqIDfBVOr3O1E4pQybi8Wa8O",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6973,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 12,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "22d106664b7ae167e05ed5136e9331d22a4ffc6fdacc0a5d8a898b94c5d05f4e",
+        "fingerprint": "aa57bb4267ee4ae837d417aa999985cd2ab993f7ed034dd4eb88b4671ad2cbf4",
         "response": {
-          "text": "I couldn’t find Sara Kim among your clients. Could the name be spelled differently?",
+          "text": "I couldn’t find a Sara Kim among your clients. Could the name be spelled differently?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7037,
-            "cachedInputTokens": 6970,
+            "inputTokens": 8349,
+            "cachedInputTokens": 8282,
             "cacheWriteTokens": 64,
-            "outputTokens": 21
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

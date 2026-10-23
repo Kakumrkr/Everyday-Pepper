@@ -96,3 +96,38 @@ export function meteredEmbedder(embedder: Embedder, meter: LlmMeter): Embedder {
     },
   };
 }
+
+/** Tokens held for one call and settled with what it used (core's `LlmTokenReservation`). */
+export interface EmbeddingReservation {
+  settle(usedTokens: number): Promise<void>;
+}
+
+/**
+ * Wraps an embedder so every call is held against the business's monthly token budget first
+ * (S31, `search_memory`): no reservation, no call (`budget_exceeded`); the reservation is
+ * settled with the tokens billed, or with none when the call failed.
+ */
+export function budgetedEmbedder(
+  embedder: Embedder,
+  reserve: (estimate: number) => Promise<EmbeddingReservation | null>,
+): Embedder {
+  return {
+    model: embedder.model,
+    async embed(request, options) {
+      const input = embeddingInput(request);
+      const estimate = input.reduce((sum, text) => sum + Math.ceil(text.length / 3) + 1, 0);
+      const reservation = await reserve(estimate);
+      if (reservation === null) {
+        throw new LlmError('budget_exceeded', 'The monthly AI allowance is used up');
+      }
+      try {
+        const response = await embedder.embed(request, options);
+        await reservation.settle(response.usage.inputTokens);
+        return response;
+      } catch (error) {
+        await reservation.settle(0);
+        throw error;
+      }
+    },
+  };
+}

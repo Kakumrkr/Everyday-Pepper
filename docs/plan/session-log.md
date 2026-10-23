@@ -966,6 +966,52 @@ Everything each session did, oldest first: what was built, the checks run and th
     - The held-out `in-two-days` and the D-4 free-time behaviour stay measured at S33's pass^3.
     - Business facts (in the instructions, not by reference) rely on the word-for-word scrub and "quote exactly". S33 measures them.
 
+- **S31 Phase 7d (2026-10-23): episodes and learned rules, recorded on Luna + Sol, PR and merge** ([ADR-0037](../adr/0037-episodes-and-learned-rules.md), pre-approved at the brief). Branch `claude/amazing-turing-yfpq8e`.
+  - **Brief (user):** "Go ahead with your recommendations, ADR is pre-approved". D-1: one full re-record at the end, after the user asked why (new tools change every request's fingerprint), and eval cases run in parallel. D-2: episodes linked to facts by id. D-3: one episode per conversation. D-4: forgetting a rule's fact keeps the rule. D-5: rules only from stated preferences. D-6: no episode when nothing is worth remembering.
+  - **Built:**
+    - T0 `--concurrency` (default 4): the replay of 167 cases took 21 s.
+    - T1 contracts and migration 0042:
+      - `rule.change` locked to "ask" (`levelAllowed`);
+      - `LearnedRuleSchema`;
+      - episode `fact_ids` and `last_turn_id`, one episode per conversation;
+      - the forget trigger deletes the episodes that named the fact.
+    - T2+T3 the episode job:
+      - `endTurn` queues an outbox `episode` message 30 minutes ahead;
+      - `writeEpisode` in `@pepper/ai`, wired into the worker (which may now import `@pepper/ai`);
+      - a turn still running is not summarised;
+      - a retry is a no-op;
+      - a racing forget makes the job reread (`FOR KEY SHARE` locks).
+    - T4 `search_memory`: the question embedded in a new `prepare` step outside the transaction; own top 5, `{ "$episode": id }` references, untrusted.
+    - T5 `propose_rule`: always a card, owners and managers only, five kinds, hours only cut. It remembers the rule as a fact, and Undo puts both back. Prompt v4 and the hostile attacks.
+    - T6 eval sets:
+      - `episodic`, `learned_rules`, and six more `memory_safety` cases (23 cases, 5 held out);
+      - `episode_retrieval` (60 summaries, 25 questions);
+      - harness support for seeded episodes, the episode job as a screen action, rule and episode expectations, and a check on every case that no rule changed during a member turn;
+      - recorded int8 embeddings;
+      - negative int tests proving each grader catches what it guards.
+  - **Recording (T7), $0.3826 in 275 runs; Phase 7 $0.6800:**
+    - Retrieval embeddings cost $0.00002, recall@5 25/25.
+    - First pass, 192 cases: $0.1856. memory_write 13/15: "Note that we're closed…" went to `propose_rule`. The user chose "Fix + re-record".
+    - The guides now say a note is `remember_fact`. The one-off case now names exact hours.
+    - The second pass ($0.1967) was refused part-way by the phase guard: 13 multi-turn cases had a worst-case estimate of $0.48 against $0.45 of room. The user chose "Estimate guard only": `--phase-estimate-ok` skips only the pre-run check, the in-run stop stays.
+    - The second pass found `propose_rule` refusing `closed: null`. A failing test came first, then the fix and a re-record of the two cases ($0.0002).
+    - The user chose "Code fix only": carry `mr-same-as-last-time` and narrow `remember_fact` in S32.
+  - **Results:** every gate met except memory_recall 16/17.
+    - The miss, `mr-same-as-last-time`, is named in the replay test until S32.
+    - learned_rules 10/10; episodic 9/9; memory_safety 14/14; memory_write 15/15; recall@5 25/25.
+    - Held-out misses: `in-two-days`, `remind-after-booking`.
+    - `tool-block-time-2` drifted to `remember_fact`.
+  - **Checks:**
+    - `pnpm check` green (contracts 564, core 1,211, ai 285, api 293, web 264, ui 112, templates 112, runtime 90, appointments 85, db 48, worker 27, testing 13).
+    - `pnpm test:integration` 1,077 green, the real-model replay and `episode_retrieval` among them.
+    - Playwright 76/76 (the Autonomy journey checks the ask-only booking-rule row) against a local stack without Docker images, with CI's headless shell.
+    - Found while checking:
+      - the real-model replay must use the recorded embeddings;
+      - two waits needed CI-sized limits: the hostile loop (6 s alone, 60 s missed next to the replay) and the two-factor redirect in the onboarding helper; on CI, the Stop/leave chat journey's poll used up the 20-turns limit (each refused attempt counts) and got 429, so it polls every 500 ms instead of 250 ms.
+  - **Not done / for later (S32):**
+    - narrow `remember_fact`'s wording, re-record, and empty the known misses;
+    - S33's pass^3 (about $0.57) does not fit the $0.32 left in Phase 7: a decision at its brief.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

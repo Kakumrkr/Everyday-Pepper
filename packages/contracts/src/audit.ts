@@ -401,6 +401,15 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       after: z.object({ clientCount: z.number().int().min(0) }).strict(),
     })
     .strict(),
+  // A conversation that continued gets a new summary in place of its old one (S31).
+  z
+    .object({
+      action: z.literal('memory_episode.replaced'),
+      entity: entity('memory_episode'),
+      before: z.object({ clientCount: z.number().int().min(0) }).strict(),
+      after: z.object({ clientCount: z.number().int().min(0) }).strict(),
+    })
+    .strict(),
   z
     .object({
       action: z.literal('memory_episode.deleted'),

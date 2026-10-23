@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "9dba3137344038d67f36ab4d8d0d74d2667822a6540d790e87a1d0c89cb9a4de",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_c5G2wp2tTLXFI6VDJQBoRgg8",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":3,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8288,
+            "cachedInputTokens": 8270,
+            "cacheWriteTokens": 15,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c92b1ea34e1eb3bb16f1e8e590719e60eba46d3ca83425a34157911a2a7acfbc",
+        "response": {
+          "text": "I’ve proposed no bookings before 10:00 on Wednesdays for the whole business. Nothing changes until you approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8427,
+            "cachedInputTokens": 8285,
+            "cacheWriteTokens": 139,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "584576220df8355464ab71eced0d4f66120976c66889f5bd397effe791a92afb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gpsMS8tOx7lajmxEsvJ03AVw",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8559,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8556,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1911952a3bfa64602546edb3fc2e03ace05432338952f2c973194181a866e3c4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_aDxW8iNTE9jzbNIgEYT9sNRk",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8840,
+            "cachedInputTokens": 8556,
+            "cacheWriteTokens": 281,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "78e47ac64727752658d63dc93fff2e7f71cbb1b11326794df3acd9ad6f4ad8f3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UtC5J2zGELajYuUfIHVuihrV",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"days\":1,\"notBefore\":\"10:00\"}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0cbe84e0c6fa2fec016adbb0d78bb487d2b35bcb48a3c9be5b",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq27DZQ8vrxUnhRHq8KjyOovX4Yga0WP4jSndQmp6_t8zbQxGrX35mv87Lm-QY7gddZWpEcRfGtcBPBQ2JXjZ0cUqCQED_yL5D6BvjOYYyPKlpOTLfUI06ENmDkjNjr05iyILm91TMjxpPaO5Tqyk9Co3t9sFfNcmA0KZzL_ZCNSS4MgjN200Qq2KEOI2nSJeUeWijaiLpWa74Qie3Onc6S61zIzTNMHe91eoD-SQbTxOgFm-RUATkn5ZxvjJcvRvfXAszP1V1yndw5BAZDGie8iKzaZGDL7wAZAfTI0MPQso8coJnGmVM_MYbwTiFbWiSQ4mpDb86RFkj7eaRE8wHjgAz4rk-LF6cndyom6rupQv3U1Ld7VTFPsYoA7uKTCs28OOzinZFH5Ao062yufYNV61PhR64l0odaNq_2jLVUDIRq1Tlge8oTtsf8qtdJ8TVHFjW-2omerGC3HdC7AdueimFMvbzPz9sp0k5FBLzySM1PgvAiKkJognJpA2_tjT-yIqH3C1vpUbMtulivBZVLX1TR413euTHVVPrG5oBktZOkOKQNHzr5ToRYiy9cHaSSdQ23liKjMjyNJTBSILJT5gjByt3F3o6ng6bKot5EUZKAdznkTPpy0GA1HNztvXNcr4epvPPlFylmKkzWCdz-q-4cCK5NPc6TZ2H5Mrr4ZL1kZXJvqb4A8-MVw-96QzNH7OEAbw_G-v7pgJZghQYLKpcqtyv2u6X9Nd7-FAI7oLoLJ77zbwsTStOssSdzjVkqAyyQjQeBucMFJNc7qakw2KbrM7cOB0QNjVQ_-yMV8pXOttE6OK9nfq-q1LYEtZC63FKlNjXV7fR3Mwk-sgVcVmSp_GeZUD_8w0EFmSFoDK-XfDAA4UAsOyagay2N3gwwsknW8-R9WtjshRkvELYVNmv3wxBK23Rbqb1z9y3TzUIa4DOYYYFJpyZBGZj54AVHkAr6F-zwdpGdcjSarOClyAnP_6Saop2iNzouX27EKzAGuPYoVJpekq0kDNnCKF22XNTVe5XsCz0etXUEH1LqT9o1YopF2GRoeGmD4pWE6Kvj02UtU48k2wwHOEQ_4q8MxWbh_lqluqN8m2ZRm-jWhVFgI8dUJy4ws-od0OANAs09NJUzjNecTJWFJDHTfhvR9bwpwKwO7Z_JfRBw4UGsN7JAlsnJOnwRJv3m9I0lvH0J49qmqEjQu4MQJqNAS9_6kjoCmJfUnbbDTHJz7vVm_-YHGybr9h9j6b5J4Pr9J-TvFhisX6s-xmLlSNCwy-D6MDA6su-s_ZAt9fi-RYg8GQGtVF_QwFWKtQu1UzY9DiEjbEzq5l55-krs3ZT6agz1Tt8zkuNkBO4GQKloC3X3uq1G9twcdO3xKfbL1t8-U1rtyXUXXlsgx1HVgg-747Qao1ZCGkqR-qj6G3d0xdiZkm8eemdZKDdBrQgWNe3UmKcKHQb0LyfTRcZQUPedKOLypsmUHJaM5b9FY7ksK4DzYJvhBsc368-Rejuoma421nbktkktpDn3jAd_vZYjbk-yNS3zULonMr1z_ZQNX7PzOSCnIKvDGy2ps1fIBFOyVAb1yv7laH16gkixChMsk-xp1itdv4M-n6FhPZoxZk8Uj7eqtr07VucPo_UeRFy0Y0oKT659sfOu7yedyOaQab6rCQj-AIz5QP9psG8_3sv5zWSJgS0R2ohzD7x4WT6c3I6b0tp_NGHe7O-afVmRlZb2Dd_T2FWk16VXpAnSVX5CSeC1wHatpmQbBu0e_GcTrfgEii8M-dCIFdFlXEdwZqXCfticRa4d4phG1vjaDN2BBr15-gSlG31ttpM0rQXveb8OLiNVTEdzjZCrD0VyGsdpf1GGBnHeRZ5cq9lpOQw9679c91iUfUB9mfsWIbMKg5KYaK8Lsv4_fUKsykCQkZ5cb2q1YEsSL7-0EfjFm1djRmPJPCCzN1CF14RkFqsml2mEdC1GDfRZb3Kge9aWGuwhkZ7MlkaZZmDpGPhjGJtKVnU-X1R77eqpiqHgnwzy5m49un8GaY3apd0Y2SqSmmcGcG4buWofsak7OamfQF63jKpkTOdmy0py5rEQhaOFCDm57MCRxSmc77e9E5VPbZR84XmGrRS402FyXkq2BSpPQ0qw2F-jXo2uCKSFnwfb0boX3qH4iSbzSpQVh3CbigsZftRowoRTni2l-ixtO8Kqsj2pJkZRfLMGp6e1ssd9T2ZPYWyeVNEcvbDsH9mNl04vLLUYJQBf8ZySRJMISv1melDRghf6W63i8yl6GzxrsRRVa6r8NgL3Mjtb5RG-fIByUGE1MiNkEAyZ0TDjPUS7XLjt_eCoUFnnRBzwfh3zqe_8K8bV432Ltv7pl_6lURK9lizhEIBOqhadks_eKR8_iZECpx3mc-_ailN36n8MD-2g-GpOlWmZKSP4L8if3PSp-sCYU5HKDFHEDj7roaRL8lIMCZHYGtpMgV_IqauRCyVzDhpwQnH4Ute2oDUKxK7VNnEzUJEUNmr9XeO4AdVUvaB7Svt99GDl_1L-c0C6slC7Pbpc4seV9azQTktyxAqgZwE_WO7FXGGZNyNPChSygOl6IkIzFSbL5wmzEqloU-IS0i1rJLqWrrSpHSM02C2waJx-hBGXxqwhFSB0-7NhIwy4ydk0JsnQh-RfdsILVFSZNTib0Hqy98Ybt4FvEzsgPsW1D1TH8pgT20y_IhOtp1D2Pv7VxUAZMOAtx2lqgGY7BGp5YHj33zNpH-Nh3gmvsIpv5gQXvYn_qXktzeBTOF2XAGogjQ4E7fRyoy3FFmnPGjCX4ZGPGEI6EpIM2g1UE0AmbCkeJ8vcyB5kA479n6B04TewU9f77RdZpFZpL-D2QPPwqtOY0cq4wYRs7gVrS2F35uvaTKXysr_AF4Thz8Qq61zoGUPaUtyk7V73jNuQABvSSxy1hySDu_EZwLxLTI_847XuOqgv64b1H8frd27ek44oQMxYGccU-E09xHAeiw=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8924,
+            "cachedInputTokens": 8837,
+            "cacheWriteTokens": 84,
+            "outputTokens": 211
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c07eced93224365127c73561cee1329f97d8e5e73d958feaed41387f18a854fb",
+        "response": {
+          "text": "I couldn’t book Sara for 9:00 on Wednesday; the business’s Wednesday rule says no bookings before 10:00. Jess’s first available haircut slot that day is 10:00. Would you like that time?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9779,
+            "cachedInputTokens": 8921,
+            "cacheWriteTokens": 855,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

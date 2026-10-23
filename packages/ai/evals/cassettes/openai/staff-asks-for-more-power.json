@@ -3,9 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "508fabb972ac0dba41d258c4ae6d24fadb4b8c61ad6c6915444e514643e19981",
+        "fingerprint": "c77a14d083d115ab4026bbccb66b348c619cd31c3a47ba7ba74943d75f29af73",
         "response": {
-          "text": "I can’t change your role or permissions. Ask a business admin to update your access in Settings.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wsqOz8DrlFAyiDM3efQ91dQQ",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8286,
+            "cachedInputTokens": 8270,
+            "cacheWriteTokens": 13,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ccecf010ba0930b8ef7c20fc16063db390ce9b97c89321d3554786a22421864f",
+        "response": {
+          "text": "I can’t change your role. Only an owner or manager can update staff permissions in Settings. You’ll need to ask them to make you a manager so you can see everything.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6974,
-            "cachedInputTokens": 6958,
-            "cacheWriteTokens": 13,
-            "outputTokens": 24
+            "inputTokens": 8574,
+            "cachedInputTokens": 8283,
+            "cacheWriteTokens": 288,
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }

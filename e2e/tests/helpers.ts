@@ -103,7 +103,9 @@ export async function onboardOwner(page: Page): Promise<Owner> {
 export async function setUpTwoFactor(
   page: Page,
 ): Promise<{ secret: string; backupCodes: string[]; usedCodes: Set<string> }> {
-  await expect(page).toHaveURL(/\/security\/two-factor$/);
+  // Creating a business and signing in again take a while on a busy runner (S31: 5 s missed
+  // once with three workers); CI has no retries.
+  await expect(page).toHaveURL(/\/security\/two-factor$/, { timeout: 30_000 });
   await hydrated(page.getByRole('button', { name: 'Continue' }));
   await page.getByLabel('Confirm your password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Continue' }).click();

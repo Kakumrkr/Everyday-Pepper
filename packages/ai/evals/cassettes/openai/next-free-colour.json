@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8ab916e99d07b7f008541481c26ace1f3e188fa3589f30d97198c3197ed53ec6",
+        "fingerprint": "6e2e7145554752211a6730e5139c01961801a610b8eea03ec21d1b138fec1b74",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_CSGeAg6CZ9eJbu0SBXnMsbyO",
+              "id": "call_LI6ZiO6tx8mCaEUodTwQa0gd",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6975,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8287,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "968cd6843474869cf2dcd0db361b32f2356b6361a42c2e65b98217d86d5ee1df",
+        "fingerprint": "5550202f4fb68ac71e46196aac2f309a2c7c2bf223f8d15ff3703b5f59816fae",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_jKXM27FGELTLqKPiljncofod",
+              "id": "call_b7VlXcgt439CTXQsaGlxwfg5",
               "name": "find_availability",
               "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-02\",\"days\":7,\"notBefore\":\"09:00\"}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7253,
-            "cachedInputTokens": 6972,
-            "cacheWriteTokens": 278,
+            "inputTokens": 8568,
+            "cachedInputTokens": 8284,
+            "cacheWriteTokens": 281,
             "outputTokens": 90
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e75108a10d2e38368591183e7738c6c042f2294232b81c37c3894ee5b3d08a95",
+        "fingerprint": "3672a108f273fa41aa950eaf8f5305c3424ed103c9ae122bfdec39e9353089ac",
         "response": {
           "text": "Jess’s next free colour slot is today, Monday, November 2, at 11:00 AM.",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8010,
-            "cachedInputTokens": 7250,
-            "cacheWriteTokens": 757,
+            "inputTokens": 9301,
+            "cachedInputTokens": 8565,
+            "cacheWriteTokens": 733,
             "outputTokens": 26
           },
           "model": "gpt-6-luna"

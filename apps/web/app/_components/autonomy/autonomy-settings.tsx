@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  AUTONOMY_ACTIONS,
+  levelAllowed,
   AutonomyLevelSchema,
   BusinessAutonomySchema,
   type AutonomyAction,
@@ -140,7 +140,8 @@ function DialRow({
 }) {
   const labelId = useId();
   const helpId = useId();
-  const locked = !AUTONOMY_ACTIONS[action].allowsAuto;
+  const askOnly = !levelAllowed(action, 'notify');
+  const locked = askOnly || !levelAllowed(action, 'auto');
   return (
     <div className="flex flex-col gap-2 rounded-md border border-line bg-surface p-4">
       <div className="flex flex-col gap-0.5">
@@ -148,11 +149,13 @@ function DialRow({
           {DIAL_LABEL[action]}
         </span>
         <span id={helpId} className="text-sm text-ink-2">
-          {locked
-            ? 'Always needs your OK when more than 10 people would get it. This protects your clients from a costly mistake.'
-            : overridden
-              ? 'Waiting for your OK while “Ask me first for everything” is on.'
-              : LEVEL_HELP[level]}
+          {askOnly
+            ? 'Always needs your OK: a new rule changes when clients can book.'
+            : locked
+              ? 'Always needs your OK when more than 10 people would get it. This protects your clients from a costly mistake.'
+              : overridden
+                ? 'Waiting for your OK while “Ask me first for everything” is on.'
+                : LEVEL_HELP[level]}
         </span>
       </div>
       <div
@@ -162,7 +165,7 @@ function DialRow({
         className="grid grid-cols-3 gap-1 rounded-[14px] bg-surface-2 p-1"
       >
         {LEVELS.map((option) => {
-          const unavailable = locked && option === 'auto';
+          const unavailable = !levelAllowed(action, option);
           return (
             <label
               key={option}

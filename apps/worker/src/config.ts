@@ -8,6 +8,7 @@ import {
   type PushConfig,
   type ServiceConfig,
 } from '@pepper/runtime/instrument';
+import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
 import { z } from 'zod';
 
 const JobsEnvSchema = z.object({
@@ -22,6 +23,8 @@ const JobsEnvSchema = z.object({
     .min(60_000)
     .max(7 * 86_400_000)
     .default(86_400_000),
+  /** A business's monthly allowance of model tokens, as the api's (episodes count, S31). */
+  AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
 });
 
 /** The worker's configuration. Never log it: it carries credentials and the outbox secret. */
@@ -35,6 +38,11 @@ export interface WorkerConfig extends ServiceConfig {
   outboxPollMs: number;
   reminderPollMs: number;
   cleanupIntervalMs: number;
+  /**
+   * Writes episodes (S31, ADR-0037) with the routine model and the embedding model; `null`
+   * when OpenAI or its embedding model is not configured (then the api queues none).
+   */
+  episodes: { openai: OpenAiConfig & { embeddingModel: string }; monthlyTokens: number } | null;
 }
 
 /**
@@ -53,5 +61,15 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     outboxPollMs: jobs.OUTBOX_POLL_MS,
     reminderPollMs: jobs.REMINDER_POLL_MS,
     cleanupIntervalMs: jobs.CLEANUP_INTERVAL_MS,
+    episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
   };
+}
+
+function episodesConfig(
+  openai: OpenAiConfig | null,
+  monthlyTokens: number,
+): WorkerConfig['episodes'] {
+  const embeddingModel = openai?.embeddingModel;
+  if (openai === null || embeddingModel === undefined) return null;
+  return { openai: { ...openai, embeddingModel }, monthlyTokens };
 }

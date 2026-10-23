@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "99d79882a45babd44b872474cc187d79c2d999048e399a3d9ea57d27a6cb9271",
+        "fingerprint": "6dd67e28be1827807d76edcfcc3ca1ab7b2fdd7030bae6f6e40e574d4670d1b2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gPjVde2FNZCDUZX15Di2DMbJ",
+              "id": "call_sHuJocK1YM23YCUWtVBjawNf",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8284,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,18 +25,38 @@
         }
       },
       {
-        "fingerprint": "459b3e5bf5447b34d34353053dbcc32fe35d5125eba5fcf83e4e26ce64971a4a",
+        "fingerprint": "dd79111c30932fb26537eb64e52da6f87d9846cc591a5440ba19a34eb65c4164",
         "response": {
-          "text": "Jess offers both colour and haircuts; Marco offers haircuts. Which service are you looking to book for Saturday, November 7?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_lI1wdmxPUj4Gl6SjXYr8twFy",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-07\",\"days\":1,\"notBefore\":null}"
+            },
+            {
+              "id": "call_TqkDOYPANtpJx85skKRj18Pg",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-07\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8566,
+            "cachedInputTokens": 8281,
+            "cacheWriteTokens": 282,
+            "outputTokens": 145
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2c915a7bbfcdbdc38156825d25f06915c0cf77b4012c7091947e8432c2c360a2",
+        "response": {
+          "text": "On Saturday, November 7, Marco has haircut openings starting at 10:00 AM (more times available). There are no colour openings that day.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0842a37910cb48b6016adb700fa88487d2a0b4843b5abe7045",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq23AQn0sTd61Dr3XZrwCYVxMS5RLZKldCy9ue79jY-RGG_L4QIf1kHDFQ5RQkukx9URjDlKrMoNp1QGF2nQ06QLD36uxFNpPKsx5_TLO1i5wuzZs7sa1ggTITnhKcmnzMao6ZZrwlq-m7H7IqlH36sDshRuhS-dDeyLoIOJ-eYKFfIvc9IqKM0UnJoy9Rk5tSQ9xlRRJjpz-qp9rsMgAIVMvMS85QIzK1fCalnkN2y1ymQzLsEJPVaehKH-QQj_htxeST1xHnv-3xttWlqz8eB9e-QPnU7siV-6QzSNBPc_WotkWPrGA6hT4g0i21k-PoUSuWTcWef7-8VTsiXCB2ROtoW-uUR9VXNREgQDZliOAspw2P_z224W9X8-jSK3sMd5mszbqCEZYNdws5FXTLEG2OM2XttOKpSvxMnrmjnd9G_EWrp2kyV_gf606LoY64RY12S4_Ax9iK-GNnwSow0oMV2TCAdPuZ0lJWFpOQTIwWuYYz63BLU7vuVQgLuH-auzL12kVEXB5JGWhGzkbRzXkyxcULxQKiXz0FSl7iC0Z7u85ZdTBFCgbxwDB74-jShxK-obAB2nWdrUtLix-6o5XhMMMalbp2eN_LDSPeN_68WPAifLnpJdLqw15B-zftlsiWl5fnaRgWJB7gQ_OKxnwUB7-9Nce6FX_AWE9rgDISbvsVn1t9cczpmj_A-nwOF5wiT4kD4iQ2posNVooiSEb_bTyAETjvbUutqpTbJrPCMTV7DJnASoch4xGiJUxNpZyguswwE0dZ0PLCE551V0NGnkLJVRldjobctgrUv-mwHw2cyAYBJXgpQbPAn02P4-Yfcahq4-sENCPVg_RLLDFrE2NMBSEu4jMl7pAeBRETwHNC102oY8N35sstZSFpEZ4QIkA5C8Pnk7w0MIYDd-ZjgxUJxt6rfuCy6y7C99aEHYuaZ65VtebFMd7TuTfCdQau9yzWUb_0FZOC62cCz2KPuhS1_macSK0xbRwtIVU3QrulWzfb8OrCPSrNTh2GiscIrAhxZZV7bYK2p-UtItCInPdLFsd_4nlHNuTBOu4SE6SZigFRZF8oZKmoofNmRwCMxXc9DnODYA-5CMvP4YXQngvtLJjqhvEnAa6owZlZbJIDeQrbgJUg0s-VayTgeWFSUY8RoCLp7qOSwFY3p7vcXOWL0AJDkh6DdkuV97wga5W-6QkdysU8SxaOrhMMgQynbBlMUTYb5E9X3jjjvAjbyaEylCNF_npk5FsRDcHSz9hCS_I955SCM7aySSqdTmZ5kUNSOEO2z4Wd07sUl-xyZMvQjJXISGQxqhNem0QrVOI3NPPYrTnuUmbj1HUMkdbv80eWSYFkAukskkPvzQ3AsnXk3kPb5O8pUALHRjOTJO4m_EKF4c5_baj8M8qvHuI6CqjQk3vAPo5Iv21Ogh426xB9Nk0NPm-JqUDRn2JfeqcC3dIK4ufSF1NRQif_t5f6nk8Gbrsz8teCI58QQ9DofyfbCBfbtIjWGrvxwMqWbAC93KKbutG5BEugtO7fOs2kvKTybrcycu4lkK4OYMxAf9x7EehTjth2DOHBpNfkRq904l0rOKxQhfu6ZoWGUsrkyNy2Mx7AgQf0SfXYRTJxtOlv6pJlnn7E1U2nSUE_j6-wyEPTzvJ9InDu12CLE6Z6NRuOUFlIKpe8NJlZk9SudaQoH_-S_a9YzwP4EpmIWSLEh8nr2oUKDg9BogBbCNuBUl_M_5LWZG4ZJgYNWqZjEzuxjg18gglJNf4lKZAV15pGYSUtIY7vOdql3PtVBFo5BnxcKCTKm8tF52Xjc2RE3rrk22yfYc-biFT7Cq6vkpFxRhLdPEkOBDJqelye2Saf-DRTg9Dv8pl9FNLbLmQTr-gWKPVDE0dAUa1l0DtLvH4kQUtEGvWSW6FK4dpApuHdMDiGP7Wh_jgmmTlFqfzzBpJAS8A1dHtGVS5JGeAzM8Dyjg75vEU_ZSskVnM2hBQDC6VbI-id8Uyjc0S-Oly92sE2uhPhaPexy7hQ5LaIt2pqyGMYpocmPi8FHMXYTSocE98fi61kSMb__072LtBC0VdN7Wvund9-0V_wpR3KJw7uNNb79qjxt8fqXjG_6moHJp-nNNy7wBgC5bdA8Dp_w19bwRFe91pxo2sSlmIWhpyG-8Gl9EoZuaZGJz4BkUyGt1FEv0QTsUf7AKbazYU2r4xD_bpinaKXvlfsI7x15UXUxr7U_CNQuGZQT1cDFgAguY_6lPQhHtn6TsdYk6TgF36_H-aUMJMlCPG5F0mETthPsYLGmiz7XvoCbDKm3IEWTpZW2NygDwyrmwu_ObDOyCcOPab6dQwoRrZm8v10xIsCsYII1-4QJIKr6qy55TfmURCgw-GaAN3VYlsmKpHdQYj_AFHXib5EGoBrh_5BDCpxO7G35Oi-3zAlzY2eoJGMtg5pVLZy8ECfQqO0er9e0sByr_7WPHdN7VGTqPZtLV044WWMSnVDoHPk_5dvBy2uN1Zq5SPiQL9Psn4SOYvDkg==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -44,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7247,
-            "cachedInputTokens": 6969,
-            "cacheWriteTokens": 275,
-            "outputTokens": 113
+            "inputTokens": 9371,
+            "cachedInputTokens": 8563,
+            "cacheWriteTokens": 805,
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }

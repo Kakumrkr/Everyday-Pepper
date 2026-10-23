@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1778fd54103c8448935a773bf58909aa3524ee876e500b01f0c17925e751bff7",
+        "fingerprint": "b57563d378ea3d1aed1c0944cc6f6520ba954a71363505527b20ed247bc5007d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MQTV4ZD5LnSN61pPv2g3RCUh",
+              "id": "call_ctcRrvkUwj7IQRnNkD7ps4nW",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6973,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 12,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "0b4f8c83cda9d830f7eba00c65c8091b31f4604eb4a79a572dda0a2a11eb8a71",
+        "fingerprint": "e65a8f23758f35aef07568624fd3a886e38531132c0e848eb57ec8f8c5d6d74e",
         "response": {
-          "text": "I can’t save business-wide facts with my staff permissions. An owner or manager can add that Friday closing note.",
+          "text": "I couldn’t save that because your role doesn’t allow changing business-wide memory. An owner or manager can save it.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7066,
-            "cachedInputTokens": 6970,
+            "inputTokens": 8378,
+            "cachedInputTokens": 8282,
             "cacheWriteTokens": 93,
-            "outputTokens": 27
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "128492ea4e1235453f44a7e397c485e99a88251e6ca8b56c04325cba8a372119",
+        "fingerprint": "3b569d2e49db0c8b45c41734dc92af7cd222ad52176df73bd77aab1686ae9ee1",
         "response": {
-          "text": "I can’t save email addresses as a remembered fact. Email belongs on Maria’s client record.",
+          "text": "I can’t store email addresses in memory. Please update Maria’s email on her client record instead.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6974,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8286,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 13,
-            "outputTokens": 23
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }

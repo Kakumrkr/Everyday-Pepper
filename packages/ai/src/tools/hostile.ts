@@ -100,6 +100,20 @@ export function validArguments(
     },
     add_visit_note: { bookingId: ids.bookingId, key: 'formula', value: '6N + 20 vol' },
     forget_fact: { factId: ids.factId },
+    search_memory: { query: 'every client list' },
+    propose_rule: {
+      kind: 'minimum_notice',
+      staffMemberId: ids.staffMemberId,
+      minutes: 1440,
+      days: null,
+      count: null,
+      startDate: null,
+      endDate: null,
+      weekday: null,
+      notBefore: null,
+      notAfter: null,
+      closed: null,
+    },
   };
 }
 
@@ -108,6 +122,7 @@ const TAKES_IDS = new Set(TOOLS.map((tool) => tool.name));
 TAKES_IDS.delete('find_clients');
 TAKES_IDS.delete('list_services_and_staff');
 TAKES_IDS.delete('list_todos');
+TAKES_IDS.delete('search_memory');
 
 /** Every attack against every tool, for one target business on `date` (local). */
 export function hostileAttacks(targets: HostileTargets, date: string): Attack[] {
@@ -122,7 +137,8 @@ export function hostileAttacks(targets: HostileTargets, date: string): Attack[] 
         id: `${tool.name}.foreign-ids`,
         attempt: "Use another business's ids",
         call: call(tool.name, foreign[tool.name]),
-        stoppedWith: ['not_found'],
+        // Staff may not touch rules at all, before any id is looked up (S31).
+        stoppedWith: tool.name === 'propose_rule' ? ['not_found', 'forbidden'] : ['not_found'],
       });
     }
     for (const [field, value] of Object.entries(SMUGGLED)) {
@@ -280,6 +296,37 @@ export function hostileAttacks(targets: HostileTargets, date: string): Attack[] 
       attempt: 'Forget a booking by passing its id as a fact',
       call: call('forget_fact', { factId: targets.own.bookingId }),
       stoppedWith: ['not_found'],
+    },
+    {
+      id: 'propose_rule.free-form-kind',
+      attempt: 'Make a rule of a kind that does not exist',
+      call: call('propose_rule', { ...own['propose_rule'], kind: 'no_bookings_for_maria' }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    {
+      id: 'propose_rule.slot-interval',
+      attempt: 'Change the booking grid, which is not a learned rule',
+      call: call('propose_rule', { ...own['propose_rule'], kind: 'slot_interval', minutes: 5 }),
+      stoppedWith: ['invalid_arguments'],
+    },
+    {
+      id: 'propose_rule.mixed-kinds',
+      attempt: 'Smuggle hours into a notice rule',
+      call: call('propose_rule', { ...own['propose_rule'], weekday: 1, closed: true }),
+      // Staff are refused before the arguments are checked as a rule.
+      stoppedWith: ['invalid_arguments', 'forbidden'],
+    },
+    {
+      id: 'propose_rule.client-id-as-staff',
+      attempt: 'Aim a rule at a client by passing their id as a staff member',
+      call: call('propose_rule', { ...own['propose_rule'], staffMemberId: targets.own.clientId }),
+      stoppedWith: ['not_found', 'forbidden'],
+    },
+    {
+      id: 'search_memory.contact-query',
+      attempt: 'Search memory for a phone number',
+      call: call('search_memory', { query: 'who has +1 212 555 0143' }),
+      stoppedWith: ['invalid_arguments'],
     },
     {
       id: 'remember_fact.uppercase-key',

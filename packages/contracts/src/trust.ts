@@ -28,6 +28,7 @@ export const AutonomyActionSchema = z.enum([
   'booking_request.accept',
   'time.block',
   'client_note.save',
+  'rule.change',
   'task.create',
   'message.confirmation',
   'message.rebooking_nudge',
@@ -103,6 +104,17 @@ export const AUTONOMY_ACTIONS = {
     // (playbook principle 5, S30 D-2), whatever the dial says.
     asksAfterUntrusted: true,
   },
+  // A learned rule (S31, playbook D-10): a booking rule or working hours from a preference the
+  // member stated. It changes who can book, so a person always confirms it: the dial is locked
+  // to "ask", and only members who manage rules approve it.
+  'rule.change': {
+    riskTier: 'internal_write',
+    defaultLevel: 'ask',
+    allowsAuto: false,
+    askOnly: true,
+    permission: 'rules.manage',
+    undo: { kind: 'for', minutes: 7 * DAY, notAfterAppointmentStart: false },
+  },
   'task.create': {
     riskTier: 'internal_write',
     defaultLevel: 'notify',
@@ -148,8 +160,17 @@ export const AUTONOMY_ACTIONS = {
     undo: UndoWindow;
     /** After untrusted text in the turn it always asks (memory saves, S30). */
     asksAfterUntrusted?: true;
+    /** Only "ask" may be chosen: it always waits for a person (learned rules, S31). */
+    askOnly?: true;
   }
 >;
+
+/** Whether a business may choose `level` for `action` on the dial. */
+export function levelAllowed(action: AutonomyAction, level: AutonomyLevel): boolean {
+  const meta: { allowsAuto: boolean; askOnly?: true } = AUTONOMY_ACTIONS[action];
+  if (meta.askOnly === true) return level === 'ask';
+  return level !== 'auto' || meta.allowsAuto;
+}
 
 /** More recipients than this make a message bulk: it always asks first (AC-W7-3). */
 export const BULK_RECIPIENT_LIMIT = 10;
@@ -166,11 +187,10 @@ export const AutonomySettingsSchema = z
   .partialRecord(AutonomyActionSchema, AutonomyLevelSchema)
   .refine(
     (settings) =>
-      Object.entries(settings).every(
-        ([action, level]) =>
-          level !== 'auto' || AUTONOMY_ACTIONS[action as AutonomyAction].allowsAuto,
+      Object.entries(settings).every(([action, level]) =>
+        levelAllowed(action as AutonomyAction, level),
       ),
-    { message: '"Just do it" is not allowed for this action' },
+    { message: 'This level is not allowed for this action' },
   );
 export type AutonomySettings = z.infer<typeof AutonomySettingsSchema>;
 
@@ -199,10 +219,9 @@ export const AutonomyChangeSchema = z
       .refine(
         (levels) =>
           Object.entries(levels).every(
-            ([action, level]) =>
-              level !== 'auto' || AUTONOMY_ACTIONS[action as AutonomyAction].allowsAuto,
+            ([action, level]) => level === null || levelAllowed(action as AutonomyAction, level),
           ),
-        { message: '"Just do it" is not allowed for this action' },
+        { message: 'This level is not allowed for this action' },
       )
       .optional(),
   })

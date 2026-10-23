@@ -99,6 +99,50 @@ describe('runEvals', () => {
     ]);
   });
 
+  it('runs cases side by side, keeping their order, and starts none after a budget stop', async () => {
+    let running = 0;
+    let most = 0;
+    const delayed =
+      (ms: (n: number) => number): EvalSubject =>
+      async (c, providerFor) => {
+        running += 1;
+        most = Math.max(most, running);
+        await new Promise((resolve) => setTimeout(resolve, ms(Number(c.id.slice(1)))));
+        try {
+          return await oneCallSubject(c, providerFor);
+        } finally {
+          running -= 1;
+        }
+      };
+    const ids = ['c1', 'c2', 'c3', 'c4', 'c5'];
+    const results = await runEvals({
+      cases: ids.map((id) => evalCase({ id })),
+      trials: 1,
+      concurrency: 3,
+      // The later cases finish first, so the order of results is the cases', not the finishes'.
+      subject: delayed((n) => 40 - n * 5),
+      providerFor: () => new ScriptedProvider([scriptedResponse({ text: 'ok' })]),
+    });
+    expect(results.map((r) => [r.id, r.passed])).toEqual(ids.map((id) => [id, true]));
+    expect(most).toBe(3);
+
+    const stopped = await runEvals({
+      cases: ids.map((id) => evalCase({ id })),
+      trials: 1,
+      concurrency: 2,
+      subject: delayed((n) => n * 20),
+      providerFor: (c) =>
+        c.id === 'c1'
+          ? new ScriptedProvider([() => Promise.reject(new BudgetStopError('Phase cap reached.'))])
+          : new ScriptedProvider([scriptedResponse({ text: 'ok' })]),
+    });
+    // c1 stops the run; c2 was already running and finishes; nothing else starts.
+    expect(stopped.map((r) => [r.id, r.passed])).toEqual([
+      ['c1', false],
+      ['c2', true],
+    ]);
+  });
+
   it('reports cassette misses', async () => {
     const [result] = await runEvals({
       cases: [evalCase()],

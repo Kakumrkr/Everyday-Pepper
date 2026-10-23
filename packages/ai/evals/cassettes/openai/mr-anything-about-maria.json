@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8a0103111b711ffc3149b6625c8beec98e9732f0e3f7903ac8144392d5f136cc",
+        "fingerprint": "fe4924cd523ef4437aba2d9a7c766c3edd8b92a5b3c8d7eb1a304b9f756ab46e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BcvC373rqWFP04DCpHPvNgq4",
+              "id": "call_Z5Iqo1jXqKXyC9yu6SsDY3GL",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6976,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8288,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 15,
             "outputTokens": 18
           },
@@ -25,9 +25,31 @@
         }
       },
       {
-        "fingerprint": "fa62d4701e94be08781691e69c8338aa81ec27f00aeb09d2df55bfeffcd8749f",
+        "fingerprint": "08c05605cd12656ab83df5babc1be313988e80f56ecf64619b300f9d13c568af",
         "response": {
-          "text": "Maria L. has a recorded PPD allergy, and her usual service is “Colour with Jess”.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_tRaICXVjluFAy5fKYC2mmnAC",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8484,
+            "cachedInputTokens": 8285,
+            "cacheWriteTokens": 196,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "df40fc98ac0e894e1ed318bc4fa184a14534ef828755a6aa8b0fa18b6a6a08df",
+        "response": {
+          "text": "Maria L. is booked with Jess tomorrow, Tuesday, November 3 at 3:00 PM for a haircut. Her record notes an allergy: “PPD”.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7168,
-            "cachedInputTokens": 6973,
-            "cacheWriteTokens": 192,
-            "outputTokens": 24
+            "inputTokens": 9058,
+            "cachedInputTokens": 8481,
+            "cacheWriteTokens": 574,
+            "outputTokens": 38
           },
           "model": "gpt-6-luna"
         }

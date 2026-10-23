@@ -295,6 +295,13 @@
       "when": 1792764582542,
       "tag": "0041_memory_forget_recalled_answers",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1792771038376,
+      "tag": "0042_memory_episodes_and_learned_rules",
+      "breakpoints": true
     }
   ]
 }

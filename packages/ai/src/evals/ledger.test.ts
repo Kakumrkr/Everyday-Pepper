@@ -106,6 +106,13 @@ describe('the budget ledger (playbook §4)', () => {
     expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 0.51 })).toBe(
       'Phase 7 spent $0.50; this run could take it to $1.01, past its $1.00 cap.',
     );
+    // --phase-estimate-ok (S31): the estimate may pass the cap, the spend may not.
+    expect(
+      refusePhase({ phase: 7, spentUsd: 0.7, estimateUsd: 0.48, estimateOk: true }),
+    ).toBeNull();
+    expect(refusePhase({ phase: 7, spentUsd: 1, estimateUsd: 0.01, estimateOk: true })).toMatch(
+      /past its \$1\.00 cap/,
+    );
     expect(refusePhase({ phase: 8, spentUsd: 0, estimateUsd: 0.01 })).toBe(
       'Phase 8 has no OpenAI budget.',
     );

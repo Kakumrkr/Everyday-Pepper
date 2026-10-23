@@ -484,8 +484,14 @@ export interface NewMemoryEpisode {
   conversationId: ConversationId | null;
   summary: string;
   clientIds: readonly ClientId[];
+  /** The facts its conversation saved or recalled (S31): forgetting one deletes it. */
+  factIds?: readonly MemoryFactId[];
+  /** The conversation's last turn it covers. */
+  lastTurnId?: ConversationTurnId | null;
   embedding: Embedding;
   embeddingModel: string;
+  /** When it was written, by the app's clock (default: the database's). */
+  createdAt?: Date;
 }
 
 export async function insertMemoryEpisode(
@@ -503,8 +509,17 @@ export async function insertMemoryEpisode(
         .array(ClientIdSchema)
         .max(MEMORY_LIMITS.episodeClientsMax)
         .parse([...new Set(input.clientIds)]),
+      factIds: z
+        .array(MemoryFactIdSchema)
+        .max(MEMORY_LIMITS.episodeFactsMax)
+        .parse([...new Set(input.factIds ?? [])]),
+      lastTurnId:
+        input.lastTurnId === undefined || input.lastTurnId === null
+          ? null
+          : ConversationTurnIdSchema.parse(input.lastTurnId),
       embedding: EmbeddingSchema.parse(input.embedding),
       embeddingModel: EmbeddingModelSchema.parse(input.embeddingModel),
+      ...(input.createdAt !== undefined && { createdAt: input.createdAt }),
     })
     .returning();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
@@ -521,6 +536,8 @@ const episodeColumns = {
   conversationId: memoryEpisodes.conversationId,
   summary: memoryEpisodes.summary,
   clientIds: memoryEpisodes.clientIds,
+  factIds: memoryEpisodes.factIds,
+  lastTurnId: memoryEpisodes.lastTurnId,
   embeddingModel: memoryEpisodes.embeddingModel,
   createdAt: memoryEpisodes.createdAt,
 };
@@ -577,6 +594,53 @@ export async function deleteMemoryEpisode(tx: TenantTx, id: MemoryEpisodeId): Pr
     .where(eq(memoryEpisodes.id, MemoryEpisodeIdSchema.parse(id)))
     .returning({ id: memoryEpisodes.id });
   return deleted.length > 0;
+}
+
+/** The episodes with these ids the transaction may read (a member: their own). */
+export async function findMemoryEpisodesByIds(
+  tx: TenantTx,
+  ids: readonly MemoryEpisodeId[],
+): Promise<MemoryEpisodeSummaryRow[]> {
+  const wanted = z
+    .array(MemoryEpisodeIdSchema)
+    .max(200)
+    .parse([...new Set(ids)]);
+  if (wanted.length === 0) return [];
+  return tx.select(episodeColumns).from(memoryEpisodes).where(inArray(memoryEpisodes.id, wanted));
+}
+
+/** The episode of a conversation the transaction may read, if it has one (one per conversation). */
+export async function findEpisodeOfConversation(
+  tx: TenantTx,
+  conversationId: ConversationId,
+): Promise<MemoryEpisodeSummaryRow | undefined> {
+  const [row] = await tx
+    .select(episodeColumns)
+    .from(memoryEpisodes)
+    .where(eq(memoryEpisodes.conversationId, ConversationIdSchema.parse(conversationId)));
+  return row;
+}
+
+/**
+ * Of `ids`, the active facts that exist, locked against deletion until the transaction ends
+ * (`FOR KEY SHARE`): the episode job stores an episode only while every fact it names is still
+ * remembered, so a forget either finds the episode (and deletes it) or happened first (S31).
+ */
+export async function lockRememberedFacts(
+  tx: TenantTx,
+  ids: readonly MemoryFactId[],
+): Promise<MemoryFactId[]> {
+  const wanted = z
+    .array(MemoryFactIdSchema)
+    .max(1000)
+    .parse([...new Set(ids)]);
+  if (wanted.length === 0) return [];
+  const rows = await tx
+    .select({ id: memoryFacts.id })
+    .from(memoryFacts)
+    .where(and(inArray(memoryFacts.id, wanted), eq(memoryFacts.status, 'active')))
+    .for('key share');
+  return rows.map((row) => MemoryFactIdSchema.parse(row.id));
 }
 
 /** How many episodes a member has. */

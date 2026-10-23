@@ -97,6 +97,7 @@ services:
       OPENAI_MODEL_STRONG: ${OPENAI_MODEL_STRONG:-}
       OPENAI_REASONING_ROUTINE: ${OPENAI_REASONING_ROUTINE:-}
       OPENAI_REASONING_STRONG: ${OPENAI_REASONING_STRONG:-}
+      OPENAI_MODEL_EMBEDDING: ${OPENAI_MODEL_EMBEDDING:-}
       AI_SCRIPTED_PROVIDER: ${AI_SCRIPTED_PROVIDER:-}
     ports: ['127.0.0.1:4000:4000']
     depends_on:
@@ -117,6 +118,14 @@ services:
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-BOaUPqJhSDXmacBl4Z6i_HCIBlCN8COqIGiY2jpVS8WxSO0bs5v6zR4YigbzbnlF45tJsCNBHQaAle1oMU1q2Ic}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-80nrfo5XabVQkQ6ud0KhaU-laJ8PtGLU7qw7oHlFyac}
       VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:bookings@pepper.localhost}
+      # Episodes (S31, ADR-0037): summaries of quiet conversations, with the routine model and
+      # the embedding model. Off unless the key and OPENAI_MODEL_EMBEDDING are set (as for the api).
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL_ROUTINE: ${OPENAI_MODEL_ROUTINE:-}
+      OPENAI_MODEL_STRONG: ${OPENAI_MODEL_STRONG:-}
+      OPENAI_REASONING_ROUTINE: ${OPENAI_REASONING_ROUTINE:-}
+      OPENAI_MODEL_EMBEDDING: ${OPENAI_MODEL_EMBEDDING:-}
+      AI_MONTHLY_TOKENS: ${AI_MONTHLY_TOKENS:-}
     ports: ['127.0.0.1:4100:4100']
     depends_on:
       migrate: { condition: service_completed_successfully }

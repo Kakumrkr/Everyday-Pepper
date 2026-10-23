@@ -61,10 +61,24 @@ const VALID: Record<string, Record<string, unknown>> = {
     value: '6N + 20 vol, 35 min',
   },
   forget_fact: { factId: '0199f4b2-7c1e-7a00-8000-0000000000f1' },
+  search_memory: { query: 'Jess Saturdays' },
+  propose_rule: {
+    kind: 'hours_limit',
+    staffMemberId: null,
+    minutes: null,
+    days: null,
+    count: null,
+    startDate: null,
+    endDate: null,
+    weekday: 1,
+    notBefore: '10:00',
+    notAfter: null,
+    closed: false,
+  },
 };
 
 describe('the tool registry', () => {
-  it('has the seventeen tools, named verb_noun, reads first', () => {
+  it('has the nineteen tools, named verb_noun, reads first', () => {
     expect(TOOLS.map((tool) => tool.name)).toEqual([
       'find_availability',
       'find_clients',
@@ -73,6 +87,7 @@ describe('the tool registry', () => {
       'get_booking',
       'list_services_and_staff',
       'list_todos',
+      'search_memory',
       'create_booking',
       'move_booking',
       'cancel_booking',
@@ -83,18 +98,21 @@ describe('the tool registry', () => {
       'remember_fact',
       'add_visit_note',
       'forget_fact',
+      'propose_rule',
     ]);
     for (const tool of TOOLS) expect(tool.name).toMatch(/^[a-z]+(?:_[a-z]+)+$/);
-    // Forgetting is final: no Undo, and it always waits for the member's OK (S30 D-1).
+    // Forgetting is final: no Undo, and it always waits for the member's OK (S30 D-1). A
+    // learned rule always waits too (S31, `rule.change` locked to "ask").
     expect(TOOLS.filter((tool) => tool.kind === 'write').map((tool) => tool.tier)).toEqual([
       ...Array<string>(9).fill('internal_write'),
       'external_or_irreversible',
+      'internal_write',
     ]);
     expect(
       TOOLS.flatMap((tool) =>
         tool.kind === 'write' && tool.alwaysAsks === true ? [tool.name] : [],
       ),
-    ).toEqual(['forget_fact']);
+    ).toEqual(['forget_fact', 'propose_rule']);
   });
 
   it('gives the provider strict definitions within its limits', () => {

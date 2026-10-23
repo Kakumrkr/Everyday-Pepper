@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "41ceb0163c1b13c1acd436088e3cf5bccc3b6e206ed675640eb6e76dc5cbd1af",
+        "fingerprint": "0b8697749e661fe54c7f65052c253584feb52a1826354b10a7ba82cc62ced894",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DT0bdQqQ1q3wfq6wAnDperJ8",
+              "id": "call_Mi5MunUXmmaQj1TQNgbzs91m",
               "name": "add_todo",
               "arguments": "{\"title\":\"Order more foils\",\"dueDate\":null,\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6974,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8286,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 13,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "83f182d8f5cb11061a494ed7e93d3bfad1fab87c254e44fc54093740770953ab",
+        "fingerprint": "fd9f6cfb656b9a7e50c3ace1113c403857c05fb0df710b29b0247879f9ea96e0",
         "response": {
-          "text": "Added to your to-do list: “Order more foils.”",
+          "text": "Added “Order more foils” to your to-do list.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7059,
-            "cachedInputTokens": 6971,
+            "inputTokens": 8371,
+            "cachedInputTokens": 8283,
             "cacheWriteTokens": 85,
             "outputTokens": 17
           },

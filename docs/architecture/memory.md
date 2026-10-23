@@ -5,7 +5,7 @@
 ## Types
 1. **Structured facts** — `(subject_type, subject_id, key, value, sensitivity, source, created_by, status)`. Subjects: business, staff, customer, service, and booking (**visit notes**: "Oct 12: 6N + 20 vol"; PCR-005). One current value per subject + key; the previous value is kept only for the 7-day Undo window, in the same row. Examples: "Maria — allergy — PPD (sensitive)", "business — prefers — no bookings before 10 on Mondays".
 2. **Learned rules** — preferences that change behaviour. Proposed by the AI from conversation through the dial action `rule.change` (always "ask"), **become enforced rules only after an owner or manager confirms**, then live in the rules engine (existing rule types or working hours, deterministic), linked back to the originating fact.
-3. **Episodic memory** — a short summary per conversation (own-only, like conversations; kept 365 days), embedded (pgvector) for semantic recall.
+3. **Episodic memory** — a short summary per conversation (own-only, like conversations; kept 365 days), embedded (pgvector) for semantic recall. Written by the worker (S31, ADR-0037) through the outbox, 30 minutes after a conversation's last turn: the routine model writes at most three sentences (first names, decisions and preferences, no contacts), scrubbed of links and contacts, embedded with `text-embedding-3-small`. One episode per conversation, replaced when it continues; nothing stored when nothing is worth remembering. Each episode records the facts its conversation saved or recalled, and forgetting one deletes it (migration 0042); the job locks those facts while storing, so a racing forget makes it read the chat again. A turn still running is never summarised.
 
 ## Write policy
 - Save only explicit statements or confirmed inferences; never invent facts. Anything from untrusted text (booking-page messages, imports) arrives as a proposal.
@@ -16,7 +16,7 @@
 
 ## Recall policy
 1. Deterministic: facts attached to the entities a tool returns (client, staff member, service, booking with its latest visit note) plus a business-facts block in the context. Recalled memory is labelled untrusted every time. Stored tool answers name facts by id (`{ "$fact": id }`), filled in for each request as the member, so a forgotten fact never reaches the model again and a changed one is current (S30). A booking for a service the template warns about carries the client's matching facts as warnings on its card (`TemplateSchema.memory.warnings`).
-2. Semantic, on demand (PCR-005): the `search_memory` tool returns the member's own top-5 episodes by exact similarity search inside the tenant and member (HNSW later, past ~20k episodes a business).
+2. Semantic, on demand (PCR-005): the `search_memory` tool returns the member's own top-5 episodes by exact similarity search inside the tenant and member (HNSW later, past ~20k episodes a business). The question is embedded before the member's transaction; answers name episodes by reference (`{ "$episode": id }`), filled in per request, and are labelled untrusted. The `episode_retrieval` eval measures recall@5 on real embeddings (gate 95%).
 3. Token budget per turn (≤ 600 tokens); facts beat episodes when trimming.
 
 ## User control

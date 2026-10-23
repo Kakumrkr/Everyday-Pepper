@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7e4839debc47277706975a98c56a6472895bca40582188d6c8c9a86ed14da371",
+        "fingerprint": "2c28c449026caa43842572294304c15a659f8eabf6b343b1f6e73739180d2c41",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_pL71X4xFoTuIilPDMaA71I3c",
+              "id": "call_K2ZLMMht3FhUTWsPIDQtGwgl",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6973,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "a6fd10d68425be49952810a82fccc8df8abeb32839ef39d3b82d3d0011c4bc0a",
+        "fingerprint": "3e7090a3ebe324d3901dabef4313bf2ecea7fe071193d180d61fd6f8ea5911f0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Axv4Cjvrhul45GulZHL6raus",
+              "id": "call_D1Qv0xXaMjVcuQmjZuM2x98n",
               "name": "remember_fact",
               "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"allergic to PPD\",\"sensitive\":true}"
             }
@@ -38,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7055,
-            "cachedInputTokens": 6970,
+            "inputTokens": 8367,
+            "cachedInputTokens": 8282,
             "cacheWriteTokens": 82,
             "outputTokens": 61
           },
@@ -47,9 +47,9 @@
         }
       },
       {
-        "fingerprint": "ab4fc2165e3070bd66d31f2eeb86a9d7798f399d68d67cfd4cb4cde67dd73524",
+        "fingerprint": "8024fc7d1fee448b478f4ebd225f8f6b7a088157a3c7e6e1ba747c687894b558",
         "response": {
-          "text": "I’ll remember that Maria L. is allergic to PPD.",
+          "text": "I’ve remembered that Maria L. is allergic to PPD.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7156,
-            "cachedInputTokens": 7052,
+            "inputTokens": 8468,
+            "cachedInputTokens": 8364,
             "cacheWriteTokens": 101,
             "outputTokens": 17
           },

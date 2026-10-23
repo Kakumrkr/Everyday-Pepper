@@ -3,33 +3,18 @@
   "trials": [
     [
       {
-        "fingerprint": "d2ae8b4818d5fa34c5c9635d077f10a9eb6d661f44b5be524fb6cc1f11ce5330",
+        "fingerprint": "c5f727fde14d4a3a354451d2a7ea88a6d748e40abe8270409db0a34c53113f8a",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_1GtcxFN2DxEuEit0q0DXmTND",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"her\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 6970,
-            "cachedInputTokens": 6958,
-            "cacheWriteTokens": 9,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "3853c9506930cbb86f417616647dae3a1ff6e1d7d41d9f386140e963717a4788",
-        "response": {
-          "text": "Who should I move, and which Thursday do you mean—November 5 or November 12? I couldn’t find a client named “her.”",
+          "text": "Who should I move, and what appointment do you mean? Thursday is November 5.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_03e32a381ab0059f016adbac0d18f087d2849637f73a19f37a",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq26wNWG8sEmm_BM7pKPCcdzMnj2cn__RyHieOp024Cvqk9ZXqMetLaiDWT_hPC-cmb0MzLofdEqJYYm_v9bofqYA-gkQcKcw_gDbhhtgTh1zRx7p6B5pjWWHBJOx8prvbZIzgTGImw7bEPvRKPZJ8ylTsjX3TkbuD1Y4gXjJOhKQ-X3RlWhZA-S5k-7ZXl6GbzOSJc2PZC6BCAmqm0-F1DHScWjw1xylhPgayQHaeaE4mxv5dnVKibht3wpuYbHVvaJXoiCecaHqb2deQ85VGu2eZa_jcz687Tr8MvRYK8VHg8UTMogk94uq60f20ttq6cFMVHC8LYkLM-jTLPupnham5bE9j9lTQjtAY_yMj--_WNXUVw8JQD2s4Ol03FRtsiFHLwSOBINOSGbD2_RgM49SAFDOo0EZATVVpq7S3xCqihfL5YQuDznU_tJyp1vJjg8HpwL9_mnPfhOq19AstWneilPa7u3VXgTRCgpkKhAXI5HptX-ERpvPprb_29lP2YQb3B8TvuTBCm0IJEqYSAKBySlXxwpCHq0joETxF9Zej8GScbJshLKOgSOqpptPkvKbErX4ro2SX9C4D3EICWvOoMHAiI_RESBpiY-P1aWqxihFH62aTI0sTia8o0UJrFJ6LM312btVLM5P-RyvDtWgLPVZ2dQER3JmCaMKZTyhKbr-j3KykZ50354TUlmWU_CTCwdOED05Jq_eRI6Bryi6vylz3WFJQ7byXznAhmsVBAz566HxS_ZTJlfGvEz4Jcbba8i7x5Fh6-FjPfvo8qUMJVLa1VVnhvHUrJjA7kAHbzCk6VB8TnBXu-ausImTzyPhRy67zlFtilgbVwTdq-hu6QXshugyjnT6fwVDTL4m386KUComt4GimZo9Bb39fRUNhHL5u74rFRswHfaAOgszcbxr37EKOzdUldMaYsm94T1UZKqlDR3KD9Fzu7udCpcKl3xWjy9iZZVn9lIu18AOvGCn5kYkXjxNCaJ4GqV_LkmvFNbf32Xr-jGeNkd8Al0GnlI4xkfb8JTDMTv2k_CABltCWXsnPDsIIV5uvSHibSUaIzyy2H4BRlEBhBAuAgnAp28imvVWgHrCanRNK_7uvKrBeP5AIJXk0NbXWBMJlHwEOaLccvYF8H10K2jDLzt-AE0iSFagcXya7Gqlzi63q71JFikQU3nsLuFhDRU6md5JjgVujDNufLe7YbEX_BkrVYfnPtVhfRflKqT3Dlvvv6xbiLc7mnFIhGW9rUiBAd4K1fX4zwBGnOXWFZaGBsieUou5AcV1QVgyUMXBvtVGmW_YSuL5FxCxJhe3ZOO1DGmuh35l2m3Wop1W3cS9ySATmpjS-2jnstHOHHKhyZTq-NmUxiQ6U1SdruUW8bJi_OxmH8XRIHFRRiZdJD8fv7g6VOkdUe8z9r18hNHNRqLdr9HMINlGpcf4sLU8ILp1umjUacbgLcYDKkSIav2nOB25DgMk9SgOIU4T5kUVTosnkFLY-wsjNxLI_nOTnH_7B_oHAHlimaLCj6iKZi2orhHSjTRCtD4BkIGuWgIhFSNCyizJgtF6NGV8K_w7lCLujUnBT8-3sLyboyu1pVcL239WU6xRT6HzhYZCP2oIyHvgHPQ==",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -37,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7029,
-            "cachedInputTokens": 6967,
-            "cacheWriteTokens": 59,
-            "outputTokens": 34
+            "inputTokens": 8282,
+            "cachedInputTokens": 8270,
+            "cacheWriteTokens": 9,
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }

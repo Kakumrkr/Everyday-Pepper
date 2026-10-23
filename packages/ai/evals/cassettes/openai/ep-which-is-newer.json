@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f2ec32e311cf208ef961562f5b851f45d313602f7f5d8558b806ee61eaa4e8d7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2Xug9Ej4kBOWBBFMAT0RdrYc",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Saturday opening time hours\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8287,
+            "cachedInputTokens": 8270,
+            "cacheWriteTokens": 14,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5b3243ed9efef2a8ec9130242751e258582118bd975253f351645261c9c976ef",
+        "response": {
+          "text": "We said we open at 10 on Saturdays now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8525,
+            "cachedInputTokens": 8284,
+            "cacheWriteTokens": 238,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

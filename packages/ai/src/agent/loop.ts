@@ -39,7 +39,13 @@ import {
   type BusinessContext,
 } from './context.js';
 import { fallbackFor, type DoneSoFar } from './fallback.js';
-import { factIdsIn, type MemoryReader, type RecalledFact } from './memory.js';
+import {
+  episodeIdsIn,
+  factIdsIn,
+  type MemoryReader,
+  type RecalledEpisode,
+  type RecalledFact,
+} from './memory.js';
 import { LinkScrubber, withoutLinks } from './links.js';
 import { routeFor } from './routing.js';
 import type { ConversationStore } from './store.js';
@@ -240,8 +246,9 @@ async function runTurn(
       const step = progress.steps;
 
       const facts = await recallFacts(deps.memory, history);
+      const episodes = await recallEpisodes(deps.memory, history);
       const context = trimHistory(
-        history.map((stored) => contextMessageOf(stored, facts)),
+        history.map((stored) => contextMessageOf(stored, facts, episodes)),
         turn.id,
         limits.historyTokens,
       );
@@ -384,6 +391,20 @@ async function recallFacts(
     ),
   ];
   return ids.length === 0 ? new Map() : memory.facts(ids);
+}
+
+/** The member's episodes the history's tool answers name, read live (S31). */
+async function recallEpisodes(
+  memory: MemoryReader | undefined,
+  history: readonly StoredMessage[],
+): Promise<Map<string, RecalledEpisode>> {
+  if (memory?.episodes === undefined) return new Map();
+  const ids = [
+    ...new Set(
+      history.flatMap((stored) => (stored.role === 'tool' ? episodeIdsIn(stored.content) : [])),
+    ),
+  ];
+  return ids.length === 0 ? new Map() : memory.episodes(ids);
 }
 
 /** One tool result per call id: a model that repeats an id gets one answer for it. */

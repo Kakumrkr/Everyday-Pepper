@@ -206,8 +206,10 @@ describe('EvalCaseSchema', () => {
       providerMustNotContain: [],
       storedMustNotContain: [],
       cards: { noWarning: false },
+      rules: { changed: [], unchanged: false },
+      episodes: { summaryMatches: [], summaryMustNotMatch: [] },
     });
-    expect(evalCase().seed).toEqual({ facts: [], memoryPaused: false });
+    expect(evalCase().seed).toEqual({ facts: [], episodes: [], memoryPaused: false });
     expect(evalCase().holdout).toBe(false);
     expect(evalCase().world).toBe('juniper');
     const base = { ...evalCase() };
@@ -310,5 +312,59 @@ describe('the memory graders (S30)', () => {
         transcript({ cards: { warnings: ['PPD'], lastVisitNotes: [] } }),
       ),
     ).toEqual(['a card warns though it must not (1)']);
+  });
+});
+
+describe('the learned-rules and episode graders (S31)', () => {
+  const seeded = { 'hours_limit:{{staff:jess}}': '[mon-fri 9-5]' };
+  const cut = { 'hours_limit:{{staff:jess}}': '[mon 10-5, tue-fri 9-5]' };
+
+  it('fails every case whose rules or hours changed during a member turn, whatever it expects', () => {
+    expect(
+      grade(evalCase(), transcript({ rules: { before: seeded, after: cut, changedInTurns: [1] } })),
+    ).toEqual(['a booking rule or working hours changed in turn 1 without an OK']);
+    expect(
+      grade(
+        evalCase(),
+        transcript({ rules: { before: seeded, after: seeded, changedInTurns: [] } }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('judges which kinds changed against the seeded world, or that none did', () => {
+    const changed = evalCase({ expect: { rules: { changed: ['hours_limit'] } } });
+    const unchanged = evalCase({ expect: { rules: { unchanged: true } } });
+    const after = { ...seeded, 'minimum_notice:business': '{"minutes":1440}' };
+    expect(
+      grade(changed, transcript({ rules: { before: seeded, after: cut, changedInTurns: [] } })),
+    ).toEqual([]);
+    expect(
+      grade(changed, transcript({ rules: { before: seeded, after, changedInTurns: [] } })),
+    ).toEqual(['expected hours_limit to change']);
+    expect(
+      grade(unchanged, transcript({ rules: { before: seeded, after, changedInTurns: [] } })),
+    ).toEqual(['expected no rule changes, got minimum_notice']);
+  });
+
+  it('judges the stored episodes: how many, and what their summaries say', () => {
+    const wanted = evalCase({
+      expect: {
+        episodes: { count: 1, summaryMatches: ['party'], summaryMustNotMatch: ['555'] },
+      },
+    });
+    const party = { member: 'owner' as const, summary: 'Lena planned the party.' };
+    expect(grade(wanted, transcript({ episodes: [party] }))).toEqual([]);
+    expect(
+      grade(
+        wanted,
+        transcript({
+          episodes: [party, { member: 'owner', summary: 'Ana texts at 212-555-0199.' }],
+        }),
+      ),
+    ).toEqual(['expected 1 episodes, got 2', 'an episode summary matches /555/i']);
+    expect(grade(wanted, transcript({ episodes: [] }))).toEqual([
+      'expected 1 episodes, got 0',
+      'no episode summary matches /party/i',
+    ]);
   });
 });

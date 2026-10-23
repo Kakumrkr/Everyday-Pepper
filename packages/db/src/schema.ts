@@ -963,7 +963,7 @@ export const bookingVerifications = pgTable(
   ],
 );
 
-export const outboxMessageType = pgEnum('outbox_message_type', ['email', 'push']);
+export const outboxMessageType = pgEnum('outbox_message_type', ['email', 'push', 'episode']);
 export const outboxStatus = pgEnum('outbox_status', ['pending', 'sent', 'dead', 'cancelled']);
 
 /**
@@ -1190,11 +1190,11 @@ export const pushSubscriptions = pgTable(
 // executions; owners and managers reach all. The services may not delete either (receipts);
 // once written, only a record's status fields may change (triggers in migration 0034).
 
-/** The eleven actions on the dial, for the checks (`AutonomyActionSchema`). */
+/** The twelve actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`). */
 const autonomyActionList = sql.raw(
   "'booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', " +
-    "'client_note.save', 'task.create', 'message.confirmation', 'message.rebooking_nudge', " +
-    "'message.waitlist_offer', 'message.bulk'",
+    "'client_note.save', 'rule.change', 'task.create', 'message.confirmation', " +
+    "'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk'",
 );
 const trustCode = (column: SQLWrapper) => sql`${column} ~ '^[a-z][a-z0-9_.:-]{0,63}$'`;
 const trustJsonSize = (column: SQLWrapper) => sql`octet_length(${column}::text) <= 8192`;
@@ -1792,12 +1792,26 @@ export const memoryEpisodes = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'::uuid[]`),
+    // The facts its conversation saved or recalled (S31, ADR-0037): forgetting one of them
+    // deletes the episode, however the summary worded it.
+    factIds: uuid('fact_ids')
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
+    // The conversation's last turn it covers: the job's idempotency key (no key, like the
+    // conversation).
+    lastTurnId: uuid('last_turn_id'),
     embedding: vector('embedding', { dimensions: 1536 }).notNull(),
     embeddingModel: text('embedding_model').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     unique('memory_episodes_tenant_id_id_unique').on(table.tenantId, table.id),
+    // One episode per conversation, replaced when it continues (S31 D-3).
+    uniqueIndex('memory_episodes_conversation_unique')
+      .on(table.tenantId, table.conversationId)
+      .where(sql`${table.conversationId} IS NOT NULL`),
+    index('memory_episodes_fact_ids_idx').using('gin', table.factIds),
     index('memory_episodes_member_idx').on(table.tenantId, table.userId, table.createdAt),
     index('memory_episodes_created_at_idx').on(table.tenantId, table.createdAt),
     index('memory_episodes_client_ids_idx').using('gin', table.clientIds),
@@ -1808,6 +1822,7 @@ export const memoryEpisodes = pgTable(
     }).onDelete('cascade'),
     check('memory_episodes_summary_length', sql`length(${table.summary}) BETWEEN 1 AND 1000`),
     check('memory_episodes_client_count', sql`cardinality(${table.clientIds}) <= 20`),
+    check('memory_episodes_fact_count', sql`cardinality(${table.factIds}) <= 100`),
     check(
       'memory_episodes_embedding_model_format',
       sql`${table.embeddingModel} ~ '^[a-z0-9][a-z0-9._-]{0,79}$'`,

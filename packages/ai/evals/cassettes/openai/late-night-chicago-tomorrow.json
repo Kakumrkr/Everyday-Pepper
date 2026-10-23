@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "76e6e0ff4c03af2b1fd8e9a3d219df35f1fb6ec8cedd4ed981056abba471344f",
+        "fingerprint": "ad3174d865697dd7224aaa61e8548b0bd0da3b318d4f1c37821752a9acc08754",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_CMfR7MccVapK9NI4nujMlP2t",
+              "id": "call_GaL0ZlnWUSS1hU5e0BiOUjsT",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6968,
+            "inputTokens": 8280,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 6965,
+            "cacheWriteTokens": 8277,
             "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "995585cc53187182dc329fa4c3ea3e40620b67321de446ec103e43c53b1a0adb",
+        "fingerprint": "f0c5b0bff0738ac007e951ccc120b6ec95425b3ed868c55372c21d7fe6be08d7",
         "response": {
-          "text": "Tomorrow, Jess has a confirmed haircut with Maria L. from 3–4 PM, and a blocked time from noon to 1 PM.",
+          "text": "Tomorrow, Jess has a confirmed haircut with Maria L. from 3:00 to 4:00 PM, and blocked time from noon to 1:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7273,
-            "cachedInputTokens": 6965,
-            "cacheWriteTokens": 305,
-            "outputTokens": 33
+            "inputTokens": 8581,
+            "cachedInputTokens": 8277,
+            "cacheWriteTokens": 301,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

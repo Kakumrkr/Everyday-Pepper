@@ -4,6 +4,7 @@ import { toolEvalCases } from '../tools/eval-cases.js';
 import { findTool } from '../tools/registry.js';
 import { EvalSetSchema } from './case.js';
 import { loadCases } from './files.js';
+import { loadRetrievalSet, RetrievalSetSchema } from './retrieval.js';
 import { MEMORY_WORLD_PLACEHOLDERS, WORLD_PLACEHOLDERS } from './world.js';
 
 // The eval cases themselves (S27): written before any real run, about 120 across every set,
@@ -30,9 +31,11 @@ describe('the eval cases', () => {
         ...WORLD_PLACEHOLDERS,
         ...(evalCase.world === 'juniper_memory' ? MEMORY_WORLD_PLACEHOLDERS : []),
         ...evalCase.seed.facts.map((fact) => `{{fact:${fact.name}}}`),
+        ...evalCase.seed.episodes.map((episode) => `{{episode:${episode.name}}}`),
       ]);
       for (const ref of [
         ...evalCase.seed.facts.map((fact) => fact.subject),
+        ...evalCase.seed.episodes.flatMap((episode) => [...episode.facts, ...episode.clients]),
         ...(JSON.stringify(evalCase.turns).match(/\{\{[^}]+\}\}/g) ?? []),
       ]) {
         if (ref !== 'business') expect(known.has(ref), `${evalCase.id}: ${ref}`).toBe(true);
@@ -53,5 +56,28 @@ describe('the eval cases', () => {
         expect(known.has(placeholder), `${evalCase.id}: ${placeholder}`).toBe(true);
       }
     }
+  });
+});
+
+describe('the episode_retrieval set (S31)', () => {
+  it('has about 60 summaries of three members and 25 questions, a fifth held out', async () => {
+    const set = await loadRetrievalSet(paths);
+    expect(set.episodes.length).toBeGreaterThanOrEqual(60);
+    expect(new Set(set.episodes.map((episode) => episode.member)).size).toBe(3);
+    expect(set.queries.length).toBeGreaterThanOrEqual(25);
+    expect(set.queries.filter((q) => q.holdout).length / set.queries.length).toBeGreaterThanOrEqual(
+      0.2,
+    );
+  });
+
+  it("refuses a question whose expected episode is another member's", async () => {
+    const set = await loadRetrievalSet(paths);
+    const [first] = set.queries;
+    if (first === undefined) throw new Error('no queries');
+    const other = set.episodes.find((episode) => episode.member !== first.member);
+    expect(
+      RetrievalSetSchema.safeParse({ ...set, queries: [{ ...first, expected: other?.name }] })
+        .success,
+    ).toBe(false);
   });
 });

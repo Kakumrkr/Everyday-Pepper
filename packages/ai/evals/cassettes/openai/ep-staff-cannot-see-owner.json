@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7658bede751c7795865077e5f5a37b0014c2935b49117009c32961d6ca957113",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ne1uDcn0f9IEDyJHFC4sBNpH",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Lena raising prices\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8285,
+            "cachedInputTokens": 8270,
+            "cacheWriteTokens": 12,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "850eadd69f57389323626d9c3232af30303d3361c596bbc90854c090422bd243",
+        "response": {
+          "text": "I don’t remember a decision about raising prices. The only note I found was that Jess moved her lunch break to 12:30 on Thursdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8403,
+            "cachedInputTokens": 8282,
+            "cacheWriteTokens": 118,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

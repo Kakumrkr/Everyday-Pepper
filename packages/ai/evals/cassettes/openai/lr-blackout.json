@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "0394b57a66dfc5c7ee4b7a7c9f69916ddaf15e4bb1a220e3ad45db1b52641fe2",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_g5PnRcYAoE2AEtkyQUw5iFfv",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8293,
+            "cachedInputTokens": 8270,
+            "cacheWriteTokens": 20,
+            "outputTokens": 77
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c86bbf2e2eaf252e0fb6ac73896d6ae0190b1b7c2903a62bcead2df043a20627",
+        "response": {
+          "text": "I’ve proposed no bookings for the whole business from December 24 through 26, 2026. It hasn’t taken effect yet; you can approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8450,
+            "cachedInputTokens": 8290,
+            "cacheWriteTokens": 157,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

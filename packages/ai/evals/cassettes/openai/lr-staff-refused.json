@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "0872341c0890e80a577aaa39b21f40d4e283845b761e054961a0bb9118dd6336",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NYk7LCDUD7TmMrdUelgwI1kt",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8291,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8288,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b293b727d6a621246d69043d7f6b286e44ed23491650585e5026297325432f76",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AiFNnfdCDJR5vIXyyUaWQUHr",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8566,
+            "cachedInputTokens": 8288,
+            "cacheWriteTokens": 275,
+            "outputTokens": 89
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "160c15e506ae3fedc605c50ceec0117827cf347f307eb31cb6e027c39f63e3b4",
+        "response": {
+          "text": "I couldn’t set that rule because your staff role doesn’t have permission. An owner or manager can set it for you.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8708,
+            "cachedInputTokens": 8563,
+            "cacheWriteTokens": 142,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

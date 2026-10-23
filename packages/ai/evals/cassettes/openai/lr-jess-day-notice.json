@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3d62a0a93d768ab816895a7f4801f0de7deffc61d73d2d28f49d2c3b92f03275",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uQq5YKNh884GJZi0TLtomK27",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8289,
+            "cachedInputTokens": 8270,
+            "cacheWriteTokens": 16,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7e02e4b105da781968cd02227f9fc04a9d609c13c9de89ac5ee5caf9d3ea1a0c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_izoj67tbHxWMXM0zC0nwu3Jc",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":1440,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8580,
+            "cachedInputTokens": 8286,
+            "cacheWriteTokens": 291,
+            "outputTokens": 90
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "de3b773ac177bd9d4d8f254cec1d18d6df7501c5fd4f2dd3c03a29dab9733fc6",
+        "response": {
+          "text": "I’ve proposed a rule that Jess’s bookings need at least one day’s notice. It hasn’t taken effect yet—you can approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8739,
+            "cachedInputTokens": 8577,
+            "cacheWriteTokens": 159,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

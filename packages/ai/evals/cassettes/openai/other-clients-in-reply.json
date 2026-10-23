@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "892d702f8ecceacdd4a31c78b73afea19da5b88f67d2983d926438e7a836c509",
+        "fingerprint": "8ecbca17396b4529c2421be6bafb0762871bca615b5f48d310a5a0b863dfb17e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_zIIex5w1ohQHpTfZZ6gSdHFi",
+              "id": "call_7YTHItDp2JTb8s2eci2iEfPu",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8284,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,39 @@
         }
       },
       {
-        "fingerprint": "24f0f1e7bcca32052954e1b11eee09a2623e1eae3037a67651243246046686fe",
+        "fingerprint": "010835b4bb68ffb95189f21de583814eb1f64182696d64b28d135de1ed48004d",
         "response": {
-          "text": "I found Ana R. I don’t have any remembered details about her from this lookup.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OwPADgwMNtP9NSdCpQT3KPxA",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0280787a19e899b3016adbae8449a887d284aa6101ce252c3e",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq266FcJiIHYKNcDN2oSFNQg4WLI5XRafNCjzydnS6J5EgnqXOC0FHyC2Rhw7ghgePSqfYmQREj7uwhoZJ4dTjZnoD0tqq629FaTY932504ZHBgUjdtwQqBp2QSvSfR8692LqyEH8OKgpv5GXULo0ICetX_4D5Ek41ok5-L-COumzmTGD4HziQR1SPmRjQvEHm6OiXXHQBWqgBgpYnRZnYQNeq7q6jQAphK1I2bbl3GngCSqohKFW4HuHN5vdQz6k4VwR7qOUHGwspSc47tfOUhnC0ls11CRTR-_TAQ_WVbaoiyXH6g_QC50oEZeX2FrgDqimp3L1Nnq1-S_9U_u2TYBtAnt76c4uSvbs7hb4bee8tdanDWpWdhSNHKK_W1pHVk6ZJByFqpuMEqBUMQwSMK-R01_NGSfDSS2LWm7P9qE-35CVrij2eWpEdqPsKqtc-woX-n4shdTOJGyRu5TgottRr2J5zMwY6eEq67hDw-aFz5JiXXIYhkYIm547nI1vFQJ_lh8BQ1gencO_DdmqnjiSdXKuw7MbiFPQGt23YArnmKCz_lgwBRvJRIC7WmdtAZQzKOjk9UMm0AznfOoIvXs7jL5yl6OCS6mXE4t8e2PD23ZqmK4GO0SF8toEePIeNWOJYV7HwxdoDQ2UjzGN9BcyyO5aaPTg77Zk-XH1QQvMuCqgZQPyLvuW_w8arP4xB3krKkksG_l1l3W9ILa5DnW0hQwI9aORtpIq2t3lEdxDL1xLJZhME4lMrdDYWZeBa7GUg4o9vVY8tRaN8_41YPxQkinaWT6SAB4sf4lspiwL6smask8oEZYrt8AA9DmNkodX00zwLb_f9mXQl3UqPrXTu3rFQo7p_ctjMS2nsOaQ8j6SMSIOtabXrRE5CWx7SwkYGYou1Cpllf8Aax4P-2z6rENbYFEK191pLvNGbhBiPi2nRQBrWx1SXZGkrOBZkB2aTmrTTLqW0bV4z2KarYcuAk4dQe5LtJqPgDx92H9aZjWYiY_G8u9yzzQpp_ntKQSd1KujznKrrrz54pDNZoOBo8C_0MsHiQZ6n2z_5xrXndQw3EtKI2rlIrXjxiu2iHA_esavb3M-M123cmPzDFYG0pxMEUf6Fd6MtGR7UOPOKrCRLYLMG7jL6_0csJBNf6GAScMvE0M3bpleWx8_UOIQhzE-yZXipZjqyT8nHdB1wcwX-QVMz_tjNpeDmeEVSFOhJm4aPzohcCEcxpelUTCKYDgiVYWc7JFVUWhZNzlgKObBrlzWpm_X8U_inSGxkBOHIvbHezSSdDACCaG7MQh_H3xdLU4wlixtlIE95DlFcG7IHi-BA3B-jA_z3UyWxteQy6FT0ZApl18GbFMn28BbVwcT4d1FFnZ4RumdYO5o8CM2gyj1WeE69Fv6Ju15TEdQNlezo0ch-fw8mu3Arox_BtP1MlyO7KqzPgXP-hP1kQh48lUXnSJSpvR2kFoVaaFZuEaF086XIW_NOF--JVJFAuQbH1ahqrcLpLKzMGVljA4ydWG52_1gy77gY9R7nHV9hhx1t_MSbeslhSntS98wrScBpcC5E5SckNazU8XIqSd1dH3xUXVKfYXp2KmPBVodqdqrEeiXkgMP6Sk-dRQDJpmfD7OlYMmO5EiLDxinmQLgjGASvyaZgspzttcZAbX3qb0bzKU_ZHLQR-m2vPeZH3cMF0kHA_Msx9NPJhTQ3SMhtN0eTFdmQEye0Unf-n58hNnxssp3xo00dLAsGSjaNGQcmyO4MHKZRJNN9F8eD47G67vLJk0cvsCg3TbrchGKZktR17Bd9i8TFc9S71NzRiAep4UHdnnrGf3tFYEvMidWqVrlgC6E5VXHQEkY4O5VSwyR0n7wy6uAhLQHoXu7mvVU2ccc5a8D25E6Qpr2Z5sGpJkIdNQow7YK3jffXetEdWKb6L8Tmlb2GMwtQp_fGZWu8p4o0ogklZ7LuqTV6PdRmirGF_ZxX3fWKg6Tb8FOy8Xz0kzprvRzcQ9oOlm0JU4OpIL0kHSh3dfw7pLTo6zTnYndKSpPE9TxOBmsbxspN1EZDeFbYIVI_WnDEOJKg5Ok1wk6wUnJohJLzT3fqrykIRF3twhUQx9H737dL_nar6-ofvGQHWV419mzX3vcZg_36BX8P4uG2hrZdv_IA1wQ=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8364,
+            "cachedInputTokens": 8281,
+            "cacheWriteTokens": 80,
+            "outputTokens": 95
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "af7205bd501a42e4c6ccad6bd48ee7a1647eb2a9d514889f8d551421682e6456",
+        "response": {
+          "text": "Ana R. has a confirmed haircut with Jess on Friday, November 6, at 2:00 PM. There are no earlier visits or saved notes shown.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +67,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7058,
-            "cachedInputTokens": 6969,
-            "cacheWriteTokens": 86,
-            "outputTokens": 22
+            "inputTokens": 8687,
+            "cachedInputTokens": 8361,
+            "cacheWriteTokens": 323,
+            "outputTokens": 37
           },
           "model": "gpt-6-luna"
         }

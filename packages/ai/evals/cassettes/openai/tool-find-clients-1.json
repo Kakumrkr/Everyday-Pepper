@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ded796c37b7d106cd88f7b659424871f094d1fa15a1ce8c7105f9ab73f8c2b76",
+        "fingerprint": "1144b470c53548934550d4962b4caf8ae3a03cd186592ae1b992d15738df5d5d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MqgFgnFPBYvTatLTufarJFdO",
+              "id": "call_duAvP1SxbzEuvFZXvYraEHhE",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6974,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8286,
+            "cachedInputTokens": 8270,
             "cacheWriteTokens": 13,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "2b68b0f874dd568833490decd41ddec58a945fd583ea49c234208df9ec5af5b5",
+        "fingerprint": "0927f2e52ff20bc386eb8ca45da12a6b8ab3a0dc1fa5fcc05af8bc78e37f4561",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_3Rk6lZG1kjN4viIjMNQzbIHn",
+              "id": "call_7Cw7SYICJSY8Y1e3PsCQyQi4",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7251,
-            "cachedInputTokens": 6971,
-            "cacheWriteTokens": 277,
+            "inputTokens": 8561,
+            "cachedInputTokens": 8283,
+            "cacheWriteTokens": 275,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e6b5b70c144510d1d040a3f3bc801c7a2d6e09ae039f5abff173f45b3a183927",
+        "fingerprint": "0d0b5387a5523a273f30d39322b01c68217856ffde073b533b0b9311251ef6ce",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_yN9a7m607Ncj0AOGcnlz8Md0",
+              "id": "call_j4PpdvtmFZEcYciNw087osbh",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7334,
-            "cachedInputTokens": 7248,
-            "cacheWriteTokens": 83,
-            "outputTokens": 92
+            "inputTokens": 8646,
+            "cachedInputTokens": 8558,
+            "cacheWriteTokens": 85,
+            "outputTokens": 93
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "17f14ac1014ad21ca938287930ddbaf8bcf9bfc737254504db4de86f55bc8972",
+        "fingerprint": "006765ad267cfb288ee8616874d3ebe69e948194ef40312c1039af013867b0f6",
         "response": {
-          "text": "Maria L.’s haircut with Jess is proposed for tomorrow, November 3, at 10:00 AM. Please approve it on the card to confirm the booking.",
+          "text": "Maria L.’s haircut with Jess tomorrow, Nov 3 at 10:00 is awaiting your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7506,
-            "cachedInputTokens": 7331,
-            "cacheWriteTokens": 172,
-            "outputTokens": 38
+            "inputTokens": 8819,
+            "cachedInputTokens": 8643,
+            "cacheWriteTokens": 173,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
