@@ -948,7 +948,9 @@ describe('episodes', () => {
 
 describe('episodes and their facts (S31)', () => {
   it('forgetting a fact deletes every episode that names it, however worded', async () => {
-    const id = await save(fact({ type: 'client', id: maria }, 'dye_reaction', 'paraphenylenediamine'));
+    const id = await save(
+      fact({ type: 'client', id: maria }, 'dye_reaction', 'paraphenylenediamine'),
+    );
     const other = await save(fact({ type: 'client', id: maria }, 'usual_colour', 'Full color'));
     const add = (summary: string, factIds: MemoryFactId[], axis: number) =>
       inTenant((tx) =>

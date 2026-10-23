@@ -614,7 +614,10 @@ export async function lockRememberedFacts(
   tx: TenantTx,
   ids: readonly MemoryFactId[],
 ): Promise<MemoryFactId[]> {
-  const wanted = z.array(MemoryFactIdSchema).max(1000).parse([...new Set(ids)]);
+  const wanted = z
+    .array(MemoryFactIdSchema)
+    .max(1000)
+    .parse([...new Set(ids)]);
   if (wanted.length === 0) return [];
   const rows = await tx
     .select({ id: memoryFacts.id })
