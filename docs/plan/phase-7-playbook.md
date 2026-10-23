@@ -162,6 +162,7 @@ Also checked in S33: the isolation suite at 100% with the new tables, `pnpm audi
 - **Tests:** job idempotency (no duplicate episode on retry), retention, own-only search, retrieval recall@5, rule proposal → approval → booking refused → Undo, hostile attacks.
 
 ### S32 (7e) — "What I know", client profile, the "Remembered" chip
+Run as **S32a** (everything below on the fakes, branch pushed) and **S32b** (the re-record and the PR), M2.
 - **Build:** `/memory` in the PWA (mobile-first): facts grouped by subject with filters (clients, team, services, business; sensitive), edit, delete with a confirm (final), source and date, learned rules linked to the rule, own episodes with delete, the pause switch (owners); a "What Pepper knows" section and visit notes on the client profile and the booking sheet (add, edit, delete by hand — also the client notes deferred by PCR-004); a **"Remembered" chip** under answers that used memory, opening the facts with fix and forget in place; *Why?* lists memory used. Endpoints with views parsed on the way out. A quick mock-up in the prototype's style first.
 - **Think hard about:** deletion that feels final and safe; staff's view; empty states that teach ("Tell me things like 'Maria is allergic to PPD'").
 - **Pitfalls:** a sensitive fact shown to the wrong role; a deleted item lingering in a client-side cache or the service worker (answers are `no-store`).

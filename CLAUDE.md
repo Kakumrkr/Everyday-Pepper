@@ -22,9 +22,12 @@ Act as the project's **Principal Software Engineer, Software Architect, Product 
 
 ## Session protocol
 The user guides each feature session. **One session = one feature-sized goal** (one big feature, or a few small related tasks). Big phases are split across several sessions; unrelated small fixes are batched into a separate maintenance session. If a session's goal turns out larger than expected, finish a clean, tested sub-part, commit, and move the rest to the next planned session.
+**A session that records the real model is split in two** (user, M2): **"a"** builds the change and gets every eval green on the scripted cassettes, runs the end checks, pushes its branch (no PR: its recorded cassettes are stale until "b") and gives the "b" prompt naming that branch; **"b"** merges that branch into its own, probes, records once, fixes, re-runs the end checks and opens the one PR. Both halves are rows in "Planned sessions".
+
+Project skills (`.claude/skills/`) hold the routine steps: **`/session-brief`** to start, **`/eval-record`** to record, **`/session-close`** to finish. Use them instead of rebuilding the steps.
 
 For every session:
-1. **Read** `CLAUDE.md`, **`docs/plan/STATUS.md` (where the last session stopped, what is in progress, and the planned sessions list)**, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed. Open `docs/plan/session-log.md` (every past session in full) and `docs/plan/decisions.md` (every decision made in chat) only when the task needs that history.
+1. **Read** (through `/session-brief`, which sends the long docs to an Explore agent) `CLAUDE.md`, **`docs/plan/STATUS.md` (where the last session stopped, what is in progress, and the planned sessions list)**, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed. Open `docs/plan/session-log.md` (every past session in full) and `docs/plan/decisions.md` (every decision made in chat) only when the task needs that history.
 2. **Before doing any work, present a Session Brief** and wait for the user to confirm or adjust it:
    ```
    ## Session Brief
@@ -39,10 +42,10 @@ For every session:
    ```
    Take the target from the next entry in STATUS.md "Planned sessions" unless the user says otherwise.
 3. **Plan detail and get approval** before writing code.
-4. **Implement** task by task; run lint, typecheck and tests after each.
+4. **Implement** task by task; after each, run the tests of what it changed (tiers 1–2 in "Running tests").
 5. **Review** your own diff adversarially (security, tenancy, edge cases).
 6. **Summarize** (principle 10) and update docs/traceability.
-7. **Update `docs/plan/STATUS.md`** (done, decisions made in conversation, next steps) and commit it, so the next session can continue exactly where this one stopped. Decisions that exist only in chat are lost — always write them down. Keep `STATUS.md` short (under ~150 lines): move this session's summary into "Last sessions" (dropping the older one there), append the full entry to `docs/plan/session-log.md` and new decisions to `docs/plan/decisions.md`.
+7. **Update `docs/plan/STATUS.md`** (done, decisions made in conversation, next steps) and commit it, so the next session can continue exactly where this one stopped. Decisions that exist only in chat are lost — always write them down. Keep `STATUS.md` short (under ~150 lines): move this session's summary into "Last sessions" (dropping the older one there), append a short entry (5–10 lines, linking the ADR and PR) to `docs/plan/session-log.md` and the chat decisions no ADR holds to `docs/plan/decisions.md`. The other docs change only when their subject did (`/session-close` lists them).
 
 **Checkpoints.** After each finished task (code committed, checks green), commit and update the "In progress" section at the top of `STATUS.md`: what is done, the next step, open questions, and any decision made in chat. Then `/compact`, a worker restart or a usage limit loses nothing, and a new session can continue from the file alone. Clear "In progress" when the session ends.
 
@@ -71,6 +74,13 @@ Next.js + TypeScript (PWA, `apps/web`) · NestJS (`apps/api`, `apps/worker`) · 
 
 ## Testing standards
 See `docs/engineering/testing-strategy.md`. Minimum per change: unit tests for logic; integration tests (real Postgres via Testcontainers) for repositories/RLS; contract tests for module interfaces and integrations; Playwright for user-visible flows; LLM evals for any prompt/tool/model change. Coverage gate ≥ 80% on `packages/core` and modules. Cross-tenant isolation suite must stay at 100%.
+- **Running tests (tiers, user, M2).** The same tests, run when they tell you something:
+  1. **While building a task:** the unit tests of the package changed (`pnpm --filter <pkg> test`, or `vitest run <file>`), and the integration files touched (`pnpm --filter <pkg> test:integration <file>`).
+  2. **When a task is done (the checkpoint):** typecheck of the packages changed and what depends on them (`pnpm turbo run typecheck --filter=...<pkg>`) and lint of the files changed (`pnpm exec eslint <files>`), plus tier 1.
+  3. **Once, at the end (`/session-close`):** `pnpm check`, then `pnpm test:integration`, then Playwright if a screen or flow changed: **in full, one at a time**, never two suites side by side (they starve each other and time out). A fix re-runs that step, then the next.
+  - Playwright while building: only the spec of the screen changed (`test:e2e tests/<spec>.ts`).
+  - Long runs go in the background with their output in a file; read the summary lines, and the failure only if there is one.
+  - Real-model evals: probe the sets a change touches first, then record the whole suite once (`/eval-record`).
 - **Tests that pass here must pass on GitHub.** CI runners are slower and run every suite at once, so any test that waits on time (polling, property runs, start-up) uses generous limits (e.g. `expect.poll`/`vi.waitFor` with an explicit `timeout`, never the 1 s default). In cloud sessions run Playwright with CI's browser, the headless shell (the session-start hook sets `PLAYWRIGHT_CHROMIUM_EXECUTABLE`). CI has no retries: a failure is fixed, never retried away.
 
 ## Git

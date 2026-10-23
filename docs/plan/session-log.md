@@ -1012,6 +1012,11 @@ Everything each session did, oldest first: what was built, the checks run and th
     - narrow `remember_fact`'s wording, re-record, and empty the known misses;
     - S33's pass^3 (about $0.57) does not fit the $0.32 left in Phase 7: a decision at its brief.
 
+- **M2 maintenance (2026-10-23): a leaner workflow** (the user's plan after S31, which ran long and compacted). Branch `claude/amazing-turing-yfpq8e`. No product code changed.
+  - **Changed:** `CLAUDE.md` "Running tests" (tiers: package tests while building, typecheck and lint at checkpoints, full suites once at the end, one at a time), the split of real-model sessions into "a" and "b" (from S32, the user's choice), shorter end docs; skills `/session-brief`, `/eval-record` (with `pack.mjs`, `record.sh`), `/session-close` (with `e2e-stack.sh`); the session-start hook finds the new headless-shell path; ESLint ignores `.claude/**`.
+  - **Checks:** `pnpm lint`, `pnpm format:check` green; hook, `pack.mjs` and `e2e-stack.sh` run (18 Playwright tests green against it); tier-1 commands timed.
+  - **Estimate given to the user:** tiers save about 45–80 minutes a session (full integration once instead of 3–4 times, Playwright once instead of about 3, no failures from suites run side by side); probing before recording avoids a second full recording; with the Explore-agent brief, about 30–40% less time and tokens for a session like S31.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 
