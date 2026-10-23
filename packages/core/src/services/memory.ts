@@ -272,7 +272,8 @@ export async function changeFact(
   return withMember(db, actor.context, async (tx) => {
     const current = await lockReachableFact(tx, actor, id);
     const now = (options.clock ?? systemClock).now();
-    const value = fields.value !== undefined && fields.value !== current.value ? fields.value : null;
+    const value =
+      fields.value !== undefined && fields.value !== current.value ? fields.value : null;
     const changed = await updateMemoryFact(tx, id, {
       ...(fields.sensitive !== undefined && { sensitive: fields.sensitive }),
       ...(value !== null && {
@@ -308,7 +309,11 @@ export async function forgetFact(db: Database, actor: Actor, factId: MemoryFactI
 }
 
 /** `forgetFact` inside the caller's transaction (the AI's `forget_fact` and Undo, S30). */
-export async function forgetFactIn(tx: TenantTx, actor: Actor, factId: MemoryFactId): Promise<void> {
+export async function forgetFactIn(
+  tx: TenantTx,
+  actor: Actor,
+  factId: MemoryFactId,
+): Promise<void> {
   const id = MemoryFactIdSchema.parse(factId);
   const current = await lockReachableFact(tx, actor, id);
   if (!(await deleteMemoryFact(tx, id))) throw new MemoryFactNotFoundError();
