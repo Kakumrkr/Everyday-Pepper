@@ -147,3 +147,33 @@ export function canChange(subject: MemorySubject, permissions: readonly Permissi
       return permissions.includes('business.update');
   }
 }
+
+/** A name the member typed ("Usual service") as a fact key (`usual_service`); `null` if none. */
+export function toFactKey(label: string): string | null {
+  const key = label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^[^a-z]+/, '')
+    .replace(/_+$/, '')
+    .slice(0, 40)
+    .replace(/_+$/, '');
+  return key === '' ? null : key;
+}
+
+/** Names offered when adding a fact by hand (any other is fine). */
+export const SUGGESTED_KEYS = {
+  client: ['Allergy', 'Preference', 'Usual service', 'Notes'],
+  visit: ['Formula', 'Products', 'Notes'],
+} as const;
+
+/** A visit note's visit, on the client's own profile: "Nov 2 · Full color". */
+export function visitLine(fact: Pick<MemoryFactView, 'visit'>, timeZone: string): string | null {
+  if (fact.visit === null) return null;
+  const date = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(fact.visit.startsAt));
+  return fact.visit.serviceName === '' ? date : `${date} · ${fact.visit.serviceName}`;
+}

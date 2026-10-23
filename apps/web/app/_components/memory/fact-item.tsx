@@ -19,15 +19,15 @@ export function FactItem({
   fact,
   timeZone,
   canChange,
-  showAbout = true,
+  about: aboutGiven,
   onChanged,
   onForgotten,
 }: {
   fact: MemoryFactView;
   timeZone: string;
   canChange: boolean;
-  /** Whom it is about (off on a client's own profile, where it is clear). */
-  showAbout?: boolean;
+  /** Whom it is about, if not the usual line (on a client's own profile, just the visit). */
+  about?: string | null;
   onChanged: (fact: MemoryFactView) => void;
   onForgotten: (id: string) => void;
 }) {
@@ -37,7 +37,7 @@ export function FactItem({
   const [error, setError] = useState<string | null>(null);
   const inputId = useId();
   const label = factLabel(fact.key);
-  const about = showAbout ? aboutLine(fact, timeZone) : null;
+  const about = aboutGiven === undefined ? aboutLine(fact, timeZone) : aboutGiven;
   const rule = ruleLink(fact);
 
   async function save(event: SubmitEvent<HTMLFormElement>) {

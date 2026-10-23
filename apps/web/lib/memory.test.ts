@@ -9,6 +9,8 @@ import {
   matchesFilter,
   ruleLink,
   sourceLine,
+  toFactKey,
+  visitLine,
 } from './memory';
 
 const CLIENT = '0199f4b2-7c1e-7a00-8000-0000000000c1';
@@ -118,5 +120,15 @@ describe('"What I know" on the screen (S32)', () => {
     for (const each of [allergy, formula, jessRule, parking]) {
       expect(canChange(each.subject, owner)).toBe(true);
     }
+  });
+
+  it('turns a typed name into a fact key, and names a visit on the profile', () => {
+    expect(toFactKey('Usual service')).toBe('usual_service');
+    expect(toFactKey('  Allergy! ')).toBe('allergy');
+    expect(toFactKey('2nd colour')).toBe('nd_colour');
+    expect(toFactKey('!!!')).toBeNull();
+    expect(toFactKey('x'.repeat(60))).toHaveLength(40);
+    expect(visitLine(formula, TZ)).toBe('Nov 2 · Full color');
+    expect(visitLine(allergy, TZ)).toBeNull();
   });
 });

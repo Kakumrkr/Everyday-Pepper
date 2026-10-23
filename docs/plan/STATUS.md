@@ -11,10 +11,10 @@ Tasks (each ends with tier 2 + commit + this section updated):
 2. [x] Narrow `remember_fact` (closed days and hours are the business's; staff off/away/busy without "note"/"remember" → `block_time`); scripted cassettes green; the real-model replay is stale on all 192 cases until S32b records (expected).
 3. [x] `factIds` on `message.completed` and assistant history items (default `[]`; `memory-ids.ts` breaks the contracts cycle; history and expired turns re-derive them with `answerFacts`) + `Remembered` chip in `@pepper/ui` (fix/forget in place, confirm, axe) + web `RememberedFacts` (reads live via `facts/shown` on each open).
 4. [x] `/memory` "What I know" (the prototype's view is the mock-up, with D-11's final delete instead of its Undo): filters, groups (learned rules apart, linked to their screen), source and date, Edit/Delete where the role may, own episodes, pause switch (`settings.manage`); reached from the chat header (no new tab: the bottom bar is full). Playwright for tasks 4–6 runs once in task 6.
-5. [ ] Client profile "What Pepper knows" + visit notes on profile and booking sheet.
+5. [x] Client profile "What Pepper knows" (add by hand, edit, delete) + "Visit notes" (edit, delete; added from the visit) + visit notes on the booking sheet (read fresh on open, add/edit/delete); `readsNotes`/`managesNotes` abilities.
 6. [ ] Playwright journey: AC-W3-1, AC-W7-2, staff view, pause.
 7. [ ] ADR-0038, traceability, memory/area docs.
-Next step: task 5 (client profile + booking sheet).
+Next step: task 6 (Playwright: e2e scripted model, AC-W3-1, AC-W7-2, staff view, pause).
 
 ## Last sessions
 - **S31 Phase 7d (2026-10-23): episodes and learned rules, recorded on Luna + Sol, merged** ([ADR-0037](../adr/0037-episodes-and-learned-rules.md), pre-approved). Full entry in [session-log.md](session-log.md).

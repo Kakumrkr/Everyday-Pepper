@@ -1,6 +1,7 @@
 import {
   BookingsResponseSchema,
   ClientIdSchema,
+  MemoryFactsResponseSchema,
   ClientSchema,
   ServicesResponseSchema,
   StaffResponseSchema,
@@ -22,6 +23,7 @@ import {
 import { localDateIn, splitVisits, visitRanges } from '../../../../lib/setup';
 import { NewBooking } from '../../../_components/booking/new-booking';
 import { ClientEditor } from '../../../_components/clients/client-editor';
+import { ClientMemory } from '../../../_components/memory/client-memory';
 import { currentAccount, currentBusiness, currentJson } from '../../../_server/account';
 
 export const dynamic = 'force-dynamic';
@@ -35,8 +37,9 @@ const SOURCES: Record<RecordSource, string> = {
 };
 
 /**
- * A client's profile (S16): how to reach them, their coming and recent visits (62 days each
- * way), Book, and, for owners and managers, editing their details. Staff reach only their own
+ * A client's profile (S16): how to reach them, what Pepper knows about them and their visit
+ * notes (S32), their coming and recent visits (62 days each way), Book, and, for owners and
+ * managers, editing their details. Staff reach only their own
  * clients and see only their own visits with them (AC-W9-1, decided by the api).
  */
 export default async function ClientPage({ params }: { params: Promise<{ clientId: string }> }) {
@@ -54,12 +57,19 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
       `/v1/bookings?${new URLSearchParams({ ...range, clientId: id.data }).toString()}`,
       BookingsResponseSchema,
     );
-  const [client, past, upcoming, services, staff] = await Promise.all([
+  const readsNotes = current.permissions.includes('client_notes.read');
+  const [client, past, upcoming, services, staff, memory] = await Promise.all([
     currentJson(`/v1/clients/${id.data}`, ClientSchema),
     bookingsOf(ranges.past),
     bookingsOf(ranges.upcoming),
     currentJson('/v1/services', ServicesResponseSchema),
     currentJson('/v1/staff', StaffResponseSchema),
+    readsNotes
+      ? currentJson(
+          `/v1/memory/facts?${new URLSearchParams({ clientId: id.data }).toString()}`,
+          MemoryFactsResponseSchema,
+        )
+      : Promise.resolve(null),
   ]);
   // Unknown, another business's, or (staff) not theirs: the api answers 404 alike.
   if (client === null) notFound();
@@ -127,6 +137,20 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
             </ul>
           )}
         </Card>
+
+        {!readsNotes ? null : memory === null ? (
+          <p role="alert" className="m-0 rounded-md bg-wait-soft px-4 py-3 font-semibold text-wait">
+            I couldn’t read what I know about {client.name}. Try again in a moment.
+          </p>
+        ) : (
+          <ClientMemory
+            clientId={id.data}
+            clientName={client.name}
+            initialFacts={memory.facts}
+            timeZone={timeZone}
+            canChange={current.permissions.includes('client_notes.manage')}
+          />
+        )}
 
         {past === null || upcoming === null ? (
           <p role="alert" className="m-0 rounded-md bg-wait-soft px-4 py-3 font-semibold text-wait">

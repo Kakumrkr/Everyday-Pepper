@@ -35,18 +35,27 @@ function member(
 
 describe('bookingAbilities', () => {
   it('follows the permissions; only owners and managers correct outcomes', () => {
-    const owner: Permission[] = ['bookings.manage', 'clients.manage'];
+    const owner: Permission[] = [
+      'bookings.manage',
+      'clients.manage',
+      'client_notes.read',
+      'client_notes.manage',
+    ];
     expect(bookingAbilities(owner, 'owner')).toEqual({
       books: true,
       managesClients: true,
       correctsOutcomes: true,
       ownStaffOnly: false,
+      readsNotes: true,
+      managesNotes: true,
     });
-    expect(bookingAbilities(['bookings.manage'], 'staff')).toEqual({
+    expect(bookingAbilities(['bookings.manage', 'client_notes.read'], 'staff')).toEqual({
       books: true,
       managesClients: false,
       correctsOutcomes: false,
       ownStaffOnly: true,
+      readsNotes: true,
+      managesNotes: false,
     });
     expect(bookingAbilities([], 'manager').books).toBe(false);
   });
