@@ -81,7 +81,7 @@ export const createBooking: WriteTool = {
     use: 'Book a client (id from find_clients) for a service at a date and time the member chose.',
     avoid: [
       'without a client id from find_clients and a service id from list_services_and_staff',
-      'to pick a time yourself (find_availability, then let the member choose)',
+      'to pick a time yourself (find_availability, then let the member choose), unless they asked you to find a time and book it: then book the first one that fits what they said',
       'to book outside opening hours or the rules (only a person can, on the calendar)',
     ],
     returns:

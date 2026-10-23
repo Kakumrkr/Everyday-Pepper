@@ -90,9 +90,10 @@ export const findAvailability: ReadTool = {
     avoid: [
       'to book (use create_booking with a time found here)',
       'to see what is already booked (use get_day)',
+      'to ask which service when the member only asks whether someone is free at a time (read their day with get_day and answer)',
     ],
     returns:
-      'free start times with the staff member, earliest first, and whether more exist. Offer them; never book one the member did not choose.',
+      'free start times with the staff member, earliest first, and whether more exist. Offer them; book one only when the member chose it or asked you to find a time and book it.',
     examples: [
       {
         say: 'When can Jess fit in a haircut on Friday?',
@@ -231,12 +232,13 @@ export const findClients: ReadTool = {
 export const getDay: ReadTool = {
   kind: 'read',
   name: 'get_day',
-  // 2 (S26b): blocked times carry their id, for unblock_time.
+  // 2 (S26b): blocked times carry their id, for unblock_time. The guide (S30): "is she free at
+  // 10?" without a service.
   version: 2,
   localTimes: true,
   guide: {
-    use: "Read one day's schedule: its bookings (time, client, service, staff) and blocked time.",
-    avoid: ['to find free times (use find_availability)'],
+    use: "Read one day's schedule: its bookings (time, client, service, staff) and blocked time. It also answers whether someone is free at a time, without knowing a service.",
+    avoid: ['to find free times for a service (use find_availability)'],
     returns:
       'the day’s bookings by time and the blocked times with their ids (for unblock_time). Staff see only their own bookings.',
     examples: [

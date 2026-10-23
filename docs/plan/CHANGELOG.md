@@ -2,6 +2,16 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.27 — 2026-10-23
+- S30 (Phase 7c): [ADR-0035](../adr/0035-facts-in-the-ai.md) (pre-approved at the brief: "Go ahead with your recommendations, ADR is pre-approved"). **Facts in the AI:**
+  - `remember_fact`, `add_visit_note`, `forget_fact` (always asks); a value is stashed as a proposed fact, so proposals, receipts and *Why?* hold its id;
+  - facts with the records tools return, by reference, filled in for each request; the business's own facts in the instructions;
+  - booking warnings and the last visit by template config (AC-W3-2); "the usual" and "same as last time";
+  - memory on cards and in *Why?*, read live;
+  - eval sets `memory_write`, `memory_recall`, `memory_delete`, `memory_safety` (49 cases), deletion graded on the requests sent; the free-time description fix with 3 held-out cases.
+
+  **Additive changes:** migration 0040; contracts `MemoryFactShown`, `AiMemoryView`, `TemplateSchema.memory`, `AiWhy.remembered`, explanation memory kinds, tool error `memory_paused`, `AutonomyRequest.outsideText`, `AUTONOMY_ACTIONS[...].asksAfterUntrusted`; `CleanupResult.memoryProposedFacts`; real eval runs in chunks of 20. Prompt version 2: every real-model cassette is re-recorded (next session, with the key).
+
 ## 0.26 — 2026-10-23
 - S29 (Phase 7b): [ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md) (the user at the brief: "Go ahead with your recommendations, start S29"). **The memory store:**
   - `memory_facts` (one active value per subject and key, visit notes, sensitive facts, staff scope);

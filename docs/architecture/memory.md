@@ -9,12 +9,13 @@
 
 ## Write policy
 - Save only explicit statements or confirmed inferences; never invent facts. Anything from untrusted text (booking-page messages, imports) arrives as a proposal.
+- The AI saves through `remember_fact` and `add_visit_note` under the dial action `client_note.save` (S30, ADR-0035). The value is stored first as a `proposed` fact, so the trust layer's proposal and receipt hold only its id. The dial then runs it or asks; after text from outside the team it always asks. Undo forgets a new fact everywhere or brings back the replaced value. `forget_fact` always asks.
 - Owners can pause remembering for the business; existing memory still helps and can still be deleted.
 - Sensitive categories (health/allergy, personal circumstances) tagged; shown only to roles permitted to see customer notes.
 - Every fact records its source message/action for explanation and audit.
 
 ## Recall policy
-1. Deterministic: facts attached to the entities a tool returns (client, staff member, service, booking with its latest visit note) plus a business-facts block in the context. Recalled memory is labelled untrusted every time.
+1. Deterministic: facts attached to the entities a tool returns (client, staff member, service, booking with its latest visit note) plus a business-facts block in the context. Recalled memory is labelled untrusted every time. Stored tool answers name facts by id (`{ "$fact": id }`), filled in for each request as the member, so a forgotten fact never reaches the model again and a changed one is current (S30). A booking for a service the template warns about carries the client's matching facts as warnings on its card (`TemplateSchema.memory.warnings`).
 2. Semantic, on demand (PCR-005): the `search_memory` tool returns the member's own top-5 episodes by exact similarity search inside the tenant and member (HNSW later, past ~20k episodes a business).
 3. Token budget per turn (≤ 600 tokens); facts beat episodes when trimming.
 
