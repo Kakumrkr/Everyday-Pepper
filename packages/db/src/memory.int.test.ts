@@ -24,6 +24,7 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
 import { newId } from './ids.js';
+import { MemorySubjectUnreachableError } from './errors.js';
 import { insertService, insertStaffMember } from './repositories/appointments.js';
 import { insertBooking } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
@@ -279,15 +280,15 @@ describe('who reaches which facts', () => {
     const onLee = await as(jess, (tx) =>
       insertMemoryFact(tx, fact({ type: 'client', id: lee }, 'prefers', 'Quiet appointments')),
     ).catch((e: unknown) => e);
-    expect(sqlState(onLee)).toBe('42501');
+    expect(onLee).toBeInstanceOf(MemorySubjectUnreachableError);
     const onBusiness = await as(jess, (tx) =>
       insertMemoryFact(tx, fact({ type: 'business' }, 'parking', 'Behind the shop')),
     ).catch((e: unknown) => e);
-    expect(sqlState(onBusiness)).toBe('42501');
+    expect(onBusiness).toBeInstanceOf(MemorySubjectUnreachableError);
     const onMarco = await as(jess, (tx) =>
       insertMemoryFact(tx, fact({ type: 'staff', id: marcoStaff }, 'prefers', 'Mornings')),
     ).catch((e: unknown) => e);
-    expect(sqlState(onMarco)).toBe('42501');
+    expect(onMarco).toBeInstanceOf(MemorySubjectUnreachableError);
     const onMaria = await save(
       fact({ type: 'client', id: maria }, 'prefers', 'Quiet appointments'),
       jess,

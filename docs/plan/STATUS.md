@@ -5,7 +5,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing. S28 (planning, docs only) is finished and pushed to `claude/magical-knuth-ky75f5` (no PR yet).
+**S29 (7b) memory store**, branch `claude/magical-knuth-ky75f5`. User at the brief: "Go ahead with your recommendations, start S29" (embedding tests on doc-shaped fixtures, $0; real embeddings recorded in S31).
+- Done: T1 contracts `memory.ts`, audit actions, migrations 0037–0039 (pgvector, `memory_facts`, `memory_episodes`, `tenants.memory_paused`, forget-everywhere triggers), db repository `memory.ts`, isolation suite + `memory.int.test.ts` green.
+- Next: T2 core services (`saveFact`, `changeFact`, `forgetFact`, `listFacts`, `factsFor`, episodes, pause, clean-up); T3 `Embedder` port; T4 `--phase-cap`; T5 ADR-0034, docs, checks.
+- Note: no tenant export or account deletion exists yet; memory goes with its tenant, client, staff member, service, booking and member by keys (export is a Phase 11 item).
 
 ## Last sessions
 - **S28 Phase 7a (2026-10-23): Phase 7 planning** ([Phase 7 playbook](phase-7-playbook.md), approved; [PCR-005](changes/PCR-005.md), approved). Docs only. Full entry in [session-log.md](session-log.md).

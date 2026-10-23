@@ -1,5 +1,7 @@
 import {
   BookingRequestIdSchema,
+  EMBEDDING_DIMENSIONS,
+  MemoryFactIdSchema,
   OutboxDedupeKeySchema,
   ServiceIdSchema,
   TenantIdSchema,
@@ -8,14 +10,20 @@ import {
   type TenantId,
 } from '@pepper/contracts';
 import {
+  addMembership,
   createTenant,
   findOutboxMessage,
   insertBookingVerification,
+  insertMemoryEpisode,
+  insertMemoryFact,
   insertProposal,
   insertService,
   listAuditEntries,
+  listMemoryEpisodes,
   lockBookingVerification,
+  lockMemoryFact,
   newId,
+  updateMemoryFact,
   withTenant,
   type Database,
 } from '@pepper/db';
@@ -143,6 +151,8 @@ describe('cleanUp', () => {
       outboxMessages: 0,
       expiredProposals: 0,
       conversations: 0,
+      memoryPreviousValues: 0,
+      memoryEpisodes: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -159,6 +169,8 @@ describe('cleanUp', () => {
       outboxMessages: 3,
       expiredProposals: 0,
       conversations: 0,
+      memoryPreviousValues: 0,
+      memoryEpisodes: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -221,5 +233,47 @@ describe('cleanUp', () => {
         .expiredProposals,
     ).toBe(0);
     expect(proposals).toHaveLength(6);
+  });
+
+  it('clears replaced memory values after their Undo window and deletes year-old episodes (ADR-0034)', async () => {
+    const [tenantId] = businesses;
+    if (tenantId === undefined) throw new Error('no business');
+    const member = await insertUser(db, 'Ana');
+    const ids = await withTenant(db, tenantId, async (tx) => {
+      await addMembership(tx, { userId: member, role: 'owner' });
+      const fact = await insertMemoryFact(tx, {
+        subject: { type: 'business' },
+        key: 'opening',
+        value: 'Open at 10',
+        sensitive: false,
+        status: 'active',
+        source: 'screen',
+        sourceTurnId: null,
+        createdBy: null,
+      });
+      await updateMemoryFact(tx, MemoryFactIdSchema.parse(fact.id), {
+        value: 'Open at 9',
+        previousValue: 'Open at 10',
+        previousUntil: new Date(Date.now() + DAY),
+      });
+      const episode = await insertMemoryEpisode(tx, {
+        userId: member,
+        conversationId: null,
+        summary: 'Opening hours changed.',
+        clientIds: [],
+        embedding: Array.from({ length: EMBEDDING_DIMENSIONS }, (_, i) => (i === 0 ? 1 : 0)),
+        embeddingModel: 'text-embedding-3-small',
+      });
+      return { fact: MemoryFactIdSchema.parse(fact.id), episode: episode.id };
+    });
+    const tomorrow = await cleanUp(db, { clock: new ManualClock(new Date(Date.now() + 2 * DAY)) });
+    expect(tomorrow).toMatchObject({ memoryPreviousValues: 1, memoryEpisodes: 0 });
+    const fact = await withTenant(db, tenantId, (tx) => lockMemoryFact(tx, ids.fact));
+    expect(fact).toMatchObject({ value: 'Open at 9', previousValue: null, previousUntil: null });
+    const nextYear = await cleanUp(db, {
+      clock: new ManualClock(new Date(Date.now() + 366 * DAY)),
+    });
+    expect(nextYear.memoryEpisodes).toBe(1);
+    expect(await withTenant(db, tenantId, (tx) => listMemoryEpisodes(tx, 10))).toEqual([]);
   });
 });

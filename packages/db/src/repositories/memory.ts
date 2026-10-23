@@ -33,6 +33,11 @@ import {
   type MemoryEpisodeRow,
   type MemoryFactRow,
 } from '../schema.js';
+import {
+  isForeignKeyViolation,
+  isPolicyViolation,
+  MemorySubjectUnreachableError,
+} from '../errors.js';
 import type { TenantTx } from '../tenant.js';
 
 // What Pepper remembers, for the transaction's tenant (ADR-0034). Run inside `withMember` for a
@@ -105,7 +110,29 @@ export interface NewMemoryFact {
   createdBy: UserId | null;
 }
 
+/**
+ * Throws `MemorySubjectUnreachableError` when the subject is not one the transaction may reach
+ * (the insert runs in a savepoint, so the caller's transaction stays usable).
+ */
 export async function insertMemoryFact(tx: TenantTx, input: NewMemoryFact): Promise<MemoryFactRow> {
+  try {
+    return await tx.transaction((savepoint) => insertFact(savepoint, input));
+  } catch (error) {
+    if (isPolicyViolation(error) || SUBJECT_KEYS.some((key) => isForeignKeyViolation(error, key))) {
+      throw new MemorySubjectUnreachableError();
+    }
+    throw error;
+  }
+}
+
+const SUBJECT_KEYS = [
+  'memory_facts_client_fk',
+  'memory_facts_staff_member_fk',
+  'memory_facts_service_fk',
+  'memory_facts_booking_fk',
+];
+
+async function insertFact(tx: TenantTx, input: NewMemoryFact): Promise<MemoryFactRow> {
   const [row] = await tx
     .insert(memoryFacts)
     .values({
@@ -124,7 +151,22 @@ export async function insertMemoryFact(tx: TenantTx, input: NewMemoryFact): Prom
   return row!;
 }
 
-/** The fact with this id the transaction may read, locked until it ends (`FOR UPDATE`). */
+/** The fact with this id the transaction may read. */
+export async function findMemoryFact(
+  tx: TenantTx,
+  id: MemoryFactId,
+): Promise<MemoryFactRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(memoryFacts)
+    .where(eq(memoryFacts.id, MemoryFactIdSchema.parse(id)));
+  return row;
+}
+
+/**
+ * The fact with this id the transaction may change, locked until it ends (`FOR UPDATE`): a
+ * staff member may read the business's facts but not lock them.
+ */
 export async function lockMemoryFact(
   tx: TenantTx,
   id: MemoryFactId,
@@ -201,10 +243,10 @@ export async function deleteMemoryFact(tx: TenantTx, id: MemoryFactId): Promise<
 }
 
 export interface MemoryFactFilter {
-  subjectType?: MemorySubjectType;
-  subject?: MemorySubject;
+  subjectType?: MemorySubjectType | undefined;
+  subject?: MemorySubject | undefined;
   status: MemoryFactStatus;
-  sensitive?: boolean;
+  sensitive?: boolean | undefined;
   limit: number;
 }
 
@@ -358,6 +400,18 @@ export async function searchMemoryEpisodes(
     .orderBy(distance, asc(memoryEpisodes.id))
     .limit(max);
   return rows.map(({ distance: d, ...row }) => ({ ...row, similarity: 1 - Number(d) }));
+}
+
+/** The episode with this id the transaction may read (a member: their own). */
+export async function findMemoryEpisode(
+  tx: TenantTx,
+  id: MemoryEpisodeId,
+): Promise<MemoryEpisodeSummaryRow | undefined> {
+  const [row] = await tx
+    .select(episodeColumns)
+    .from(memoryEpisodes)
+    .where(eq(memoryEpisodes.id, MemoryEpisodeIdSchema.parse(id)));
+  return row;
 }
 
 /** Deletes an episode the transaction may delete (a member: their own). Returns whether it was there. */

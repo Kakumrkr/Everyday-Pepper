@@ -174,3 +174,52 @@ export class ConcurrentActionError extends Error {
     this.name = 'ConcurrentActionError';
   }
 }
+
+/** No such memory fact in the business, or not one the member may reach (ADR-0034). */
+export class MemoryFactNotFoundError extends Error {
+  constructor() {
+    super('No such fact in memory');
+    this.name = 'MemoryFactNotFoundError';
+  }
+}
+
+/**
+ * The fact's subject (a client, staff member, service or visit) is not in the business, or not
+ * one the member may reach.
+ */
+export class MemorySubjectNotFoundError extends Error {
+  constructor() {
+    super('No such client, staff member, service or visit to remember this about');
+    this.name = 'MemorySubjectNotFoundError';
+  }
+}
+
+/** The business paused remembering new things (playbook D-15). */
+export class MemoryPausedError extends Error {
+  constructor() {
+    super('Remembering new things is paused for this business');
+    this.name = 'MemoryPausedError';
+  }
+}
+
+/** Memory is full: per subject, for the business, or a member's episodes (ADR-0034). */
+export class MemoryLimitError extends Error {
+  constructor(readonly limit: 'subject' | 'business' | 'episodes') {
+    super(
+      limit === 'subject'
+        ? 'This has as many facts as it can keep; change or delete one first'
+        : limit === 'business'
+          ? 'Memory is full for this business; delete facts you no longer need'
+          : 'You have as many past conversations remembered as can be kept',
+    );
+    this.name = 'MemoryLimitError';
+  }
+}
+
+/** No such episode of the member's own (episodes are own-only, ADR-0034). */
+export class MemoryEpisodeNotFoundError extends Error {
+  constructor() {
+    super('No such past conversation in memory');
+    this.name = 'MemoryEpisodeNotFoundError';
+  }
+}
