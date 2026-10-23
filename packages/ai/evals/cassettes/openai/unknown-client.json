@@ -3,17 +3,17 @@
   "trials": [
     [
       {
-        "fingerprint": "75440e04ca29dc2e935c0d67bb03cdf61f2118506c80839bd544596cf7e977a3",
+        "fingerprint": "35eef27147ac5fae7bc57d1baa12d5271deaa792756fac91a78509ff9180d6dd",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_w8DNiz0Vh0V0VfKpn7H2GQBj",
+              "id": "call_j9WTGu70f7rQi5CkAG3HaiOp",
               "name": "find_clients",
               "arguments": "{\"name\":\"Zoe Martinez\"}"
             },
             {
-              "id": "call_8yYOBJVOIOJ8aK0fn5Wrzg7J",
+              "id": "call_sM8jwq9XEhMQDESRWGWlXWRj",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -21,8 +21,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6975,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8233,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 14,
             "outputTokens": 50
           },
@@ -30,9 +30,9 @@
         }
       },
       {
-        "fingerprint": "da67e9513d2ad7374ed39629faca2d4b16c421c9b210053d64ec3ffa00723d3e",
+        "fingerprint": "e162235e6a12bda597ca9757542d25063d15305ded551e2cd3adae1f5b81d174",
         "response": {
-          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or give me another part of her name?",
+          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or give me another name to search?",
           "toolCalls": [],
           "replay": [
             {
@@ -42,10 +42,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7322,
-            "cachedInputTokens": 6972,
+            "inputTokens": 8580,
+            "cachedInputTokens": 8230,
             "cacheWriteTokens": 347,
-            "outputTokens": 28
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }
