@@ -120,6 +120,10 @@ export const beautySalon: TemplateInput = {
     'A first color service needs a patch test at least 48 hours before; check the client profile before booking color.',
     'Color services take longer than the time in the chair suggests: keep the processing time and clean-up together.',
   ],
+  memory: {
+    warnings: [{ serviceCategories: ['Color', 'Treatments'], keys: ['allergy'] }],
+    visitNoteKeys: ['formula', 'developer', 'processing_time'],
+  },
   onboardingHints: {
     lookFor: [
       'service menu with prices',

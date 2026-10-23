@@ -58,6 +58,14 @@ export function decideAutonomy(
   // A write that names no action on the dial has no setting to follow: it asks.
   if (actions.length === 0) return { outcome: 'propose', reason: 'setting' };
   if (autonomy.askFirst) return { outcome: 'propose', reason: 'ask_first' };
+  // What is remembered shapes later answers: after untrusted text a person confirms it
+  // (playbook principle 5, S30).
+  if (
+    untrustedContext &&
+    actions.some((action) => 'asksAfterUntrusted' in AUTONOMY_ACTIONS[action])
+  ) {
+    return { outcome: 'propose', reason: 'untrusted_context' };
+  }
 
   if (tier === 'external_or_irreversible') {
     if (recipients > BULK_RECIPIENT_LIMIT) return { outcome: 'propose', reason: 'bulk_lock' };

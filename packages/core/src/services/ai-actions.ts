@@ -98,6 +98,11 @@ export interface ActionRunner {
   /** The tier it declares; the actions' own tiers apply if stricter. */
   tier: RiskTier;
   /**
+   * No dial setting decides it: it always waits for a person (forgetting a fact, S30 D-1).
+   * Its `actions` still name who may approve and undo it.
+   */
+  alwaysAsks?: boolean;
+  /**
    * A dry run: what would change, computed by the domain, and the fingerprint of it all. The
    * trust layer runs it in a savepoint it always rolls back, so a preview may make the real
    * change to see what it does (ADR-0029: preview = execution) and nothing of it stays.
@@ -204,7 +209,8 @@ export async function requestAction(
     checkRecordPermissions(member, runner, preview.recordOwner);
     const decision = decideAutonomy(
       {
-        actions: [...runner.actions],
+        // A write that names no dial action always asks (`decideAutonomy`).
+        actions: runner.alwaysAsks === true ? [] : [...runner.actions],
         tier: runner.tier,
         recipients: preview.recipients,
         untrustedContext: request.untrustedContext,
@@ -213,7 +219,7 @@ export async function requestAction(
     );
     const explanation = ActionExplanationSchema.parse({
       ...request.explanation,
-      facts: preview.facts ?? request.explanation.facts,
+      facts: explanationFacts(preview.facts, request.explanation.facts),
       untrustedContext: request.untrustedContext,
       decision,
     });
@@ -313,7 +319,13 @@ export async function approveProposal(
       const shownWhy = ActionExplanationSchema.parse(proposal.explanation);
       const explanation = ActionExplanationSchema.parse({
         ...shownWhy,
-        facts: fresh.facts ?? shownWhy.facts,
+        facts:
+          fresh.facts === undefined
+            ? shownWhy.facts
+            : explanationFacts(
+                fresh.facts,
+                shownWhy.facts.filter((fact) => fact.kind === 'memory_recalled'),
+              ),
       });
       const next = await storeProposal(tx, member, runner, {
         idempotencyKey: `${proposal.id}.refresh`,
@@ -613,6 +625,18 @@ function checkDecider(
   if (madeFor.includes(member.context.userId)) return;
   if (permissionScope(member.context.role, permissionFor(action)) === 'all') return;
   throw new ForbiddenError(permissionFor(action));
+}
+
+/**
+ * The explanation's facts: what the domain checked in the preview, when it said, then what the
+ * request brought (the facts recalled in the turn, S30), at most 20.
+ */
+function explanationFacts(
+  preview: ActionExplanation['facts'] | undefined,
+  requested: ActionExplanation['facts'],
+): ActionExplanation['facts'] {
+  if (preview === undefined) return requested;
+  return [...preview, ...requested].slice(0, 20);
 }
 
 function checkRunner(runner: ActionRunner, proposal: AiActionProposalRow): void {

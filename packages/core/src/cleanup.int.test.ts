@@ -153,6 +153,7 @@ describe('cleanUp', () => {
       conversations: 0,
       memoryPreviousValues: 0,
       memoryEpisodes: 0,
+      memoryProposedFacts: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -171,6 +172,7 @@ describe('cleanUp', () => {
       conversations: 0,
       memoryPreviousValues: 0,
       memoryEpisodes: 0,
+      memoryProposedFacts: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({

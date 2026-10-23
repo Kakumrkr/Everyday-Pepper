@@ -281,6 +281,13 @@
       "when": 1792720874485,
       "tag": "0039_memory_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792724846930,
+      "tag": "0040_memory_proposed_facts",
+      "breakpoints": true
     }
   ]
 }

@@ -41,6 +41,7 @@ import {
   countMemoryFacts,
   deleteMemoryEpisode,
   deleteMemoryFact,
+  storedTextsOf,
   deleteOldMemoryEpisodes,
   insertMemoryEpisode,
   insertMemoryFact,
@@ -678,6 +679,26 @@ describe('forget everywhere', () => {
       tx.execute(sql`UPDATE conversation_messages SET content = 'rewritten'`),
     ).catch((e: unknown) => e);
     expect(sqlState(update)).toBe('42501');
+  });
+
+  it('a proposed fact that goes scrubs nothing: it was never remembered (S30)', async () => {
+    const id = await save(
+      fact({ type: 'client', id: maria }, 'nut_allergy', 'Hazelnut oil', {
+        sensitive: true,
+        status: 'proposed',
+        source: 'chat',
+      }),
+      ana,
+    );
+    const told = await chat(ana, [{ role: 'user', content: 'Maria reacts to hazelnut oil.' }]);
+    expect(await as(ana, (tx) => deleteMemoryFact(tx, id))).toBe(true);
+    expect((await stored(told))[0]?.content).toBe('Maria reacts to hazelnut oil.');
+  });
+
+  it('every text where a value could travel is listed for the deletion checks (S30)', async () => {
+    await chat(ana, [{ role: 'user', content: 'Remember the Zanzibar code word.' }]);
+    const texts = await inTenant((tx) => storedTextsOf(tx));
+    expect(texts.some((text) => text.includes('Zanzibar code word'))).toBe(true);
   });
 
   it('a whole business can still be deleted', async () => {

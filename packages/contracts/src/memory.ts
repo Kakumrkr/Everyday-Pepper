@@ -4,6 +4,7 @@ import { BookingIdSchema } from './bookings.js';
 import { ConversationIdSchema, ConversationTurnIdSchema } from './chat.js';
 import { ClientIdSchema } from './clients.js';
 import { UserIdSchema } from './tenancy.js';
+import { LocalDateSchema } from './rules.js';
 import { UtcDateTimeSchema } from './time.js';
 import { looksLikeContact } from './trust.js';
 
@@ -206,3 +207,51 @@ export type MemoryEpisodeMatch = z.infer<typeof MemoryEpisodeMatchSchema>;
 /** The business's memory settings: whether Pepper learns new things (playbook D-15). */
 export const MemorySettingsSchema = z.object({ paused: z.boolean() }).strict();
 export type MemorySettings = z.infer<typeof MemorySettingsSchema>;
+
+/**
+ * A remembered fact as a screen shows it, read live by its id (S30, playbook principle 7):
+ * cards, receipts and *Why?* store only the id. `gone`: deleted, or not one the viewer may
+ * read (the two look the same, so a hidden fact's existence is not given away).
+ */
+export const MemoryFactShownSchema = z.discriminatedUnion('state', [
+  z.strictObject({
+    state: z.literal('known'),
+    factId: MemoryFactIdSchema,
+    subjectType: MemorySubjectTypeSchema,
+    key: MemoryFactKeySchema,
+    value: z.string().max(MEMORY_LIMITS.valueMax),
+    /** The value it replaced, while Undo can still bring it back; else `null`. */
+    previous: z.string().max(MEMORY_LIMITS.valueMax).nullable(),
+    sensitive: z.boolean(),
+  }),
+  z.strictObject({ state: z.literal('gone'), factId: MemoryFactIdSchema }),
+]);
+export type MemoryFactShown = z.infer<typeof MemoryFactShownSchema>;
+
+/**
+ * Which facts a booking warns about, by service category (template config, playbook principle
+ * 10): beauty `Color` → `allergy`; wellness `Massage` → `injury`, `pregnancy`. Categories match
+ * the service's own, ignoring case.
+ */
+export const MemoryWarningRuleSchema = z.strictObject({
+  serviceCategories: z.array(z.string().trim().min(1).max(60)).min(1).max(10),
+  keys: z.array(MemoryFactKeySchema).min(1).max(10),
+});
+export type MemoryWarningRule = z.infer<typeof MemoryWarningRuleSchema>;
+
+/** An industry template's memory: its booking warnings and the visit-note keys it suggests. */
+export const TemplateMemorySchema = z.strictObject({
+  warnings: z.array(MemoryWarningRuleSchema).max(10).default([]),
+  visitNoteKeys: z.array(MemoryFactKeySchema).max(10).default([]),
+});
+export type TemplateMemory = z.output<typeof TemplateMemorySchema>;
+
+/**
+ * The visit an AI action's explanation names as the client's last one (`last_visit`, S30):
+ * its local date and the service's name. Its notes are named apart, by fact id.
+ */
+export const LastVisitFactValueSchema = z.strictObject({
+  date: LocalDateSchema,
+  serviceName: z.string().max(120),
+});
+export type LastVisitFactValue = z.infer<typeof LastVisitFactValueSchema>;

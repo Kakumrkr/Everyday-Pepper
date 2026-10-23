@@ -28,7 +28,8 @@ import { UtcDateTimeSchema } from './time.js';
  * - `conflict`: the same request was already made differently;
  * - `internal`: something failed on our side; nothing changed;
  * - `turn_limit`: the turn already made as many changes as one turn may, or ran out of time
- *   (ADR-0030); the member can ask again.
+ *   (ADR-0030); the member can ask again;
+ * - `memory_paused`: the business paused remembering new things (S30); nothing was saved.
  */
 export const ToolErrorCodeSchema = z.enum([
   'invalid_arguments',
@@ -41,6 +42,7 @@ export const ToolErrorCodeSchema = z.enum([
   'conflict',
   'internal',
   'turn_limit',
+  'memory_paused',
 ]);
 export type ToolErrorCode = z.infer<typeof ToolErrorCodeSchema>;
 

@@ -2,6 +2,7 @@ import {
   AUTONOMY_ACTIONS,
   PLATFORM_RULE_DEFAULTS,
   RULE_LIMITS,
+  SENSITIVE_MEMORY_KEYS,
   TemplateIdSchema,
   TemplateSchema,
   TemplateSummarySchema,
@@ -98,6 +99,24 @@ describe.each(templates.map((t) => [t.id, t] as const))('template %s', (_id, tem
     for (const [action, level] of Object.entries(template.defaultAutonomy)) {
       const { allowsAuto } = AUTONOMY_ACTIONS[action as keyof typeof AUTONOMY_ACTIONS];
       expect(level !== 'auto' || allowsAuto, action).toBe(true);
+    }
+  });
+
+  it('warns about sensitive facts on services it has (S30, AC-W3-2)', () => {
+    const categories = new Set(template.serviceCatalog.map((s) => s.category?.toLowerCase()));
+    expect(template.memory.warnings.length).toBeGreaterThan(0);
+    for (const rule of template.memory.warnings) {
+      for (const category of rule.serviceCategories) {
+        expect(categories.has(category.toLowerCase()), category).toBe(true);
+      }
+      for (const key of rule.keys) expect(SENSITIVE_MEMORY_KEYS, key).toContain(key);
+    }
+  });
+
+  it('suggests visit-note keys that are not sensitive by default', () => {
+    expect(template.memory.visitNoteKeys.length).toBeGreaterThan(0);
+    for (const key of template.memory.visitNoteKeys) {
+      expect(SENSITIVE_MEMORY_KEYS).not.toContain(key);
     }
   });
 

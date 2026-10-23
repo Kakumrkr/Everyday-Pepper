@@ -27,8 +27,10 @@ import {
   type MemoryFactInput,
   type MemoryFactOrigin,
   type MemoryFactQuery,
+  type MemoryFactShown,
   type MemorySettings,
   type MemorySubject,
+  type ClientId,
   type Permission,
   type TenantId,
   type UserId,
@@ -53,6 +55,8 @@ import {
   MemorySubjectUnreachableError,
   findMemoryEpisode,
   findMemoryFact,
+  latestVisitNotesOf,
+  memoryFactsByIds,
   updateMemoryFact,
   withMember,
   type Database,
@@ -61,10 +65,12 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
+import { can } from '../permissions.js';
 import { systemClock, type Clock } from '../clock.js';
 import {
   MemoryEpisodeNotFoundError,
   MemoryFactNotFoundError,
+  UndoRefusedError,
   MemoryLimitError,
   MemoryPausedError,
   MemorySubjectNotFoundError,
@@ -327,6 +333,220 @@ export async function forgetFactIn(
     },
     requestId: actor.requestId,
   });
+}
+
+/** What activating a proposed save did to the subject's current fact. */
+export type FactActivation = 'created' | 'updated' | 'unchanged';
+
+/**
+ * Makes a save the AI proposed (a `proposed` fact, S30) the subject's current fact, once the
+ * member's dial allowed it or a person approved it: the subject's active fact with that key
+ * takes the new value (the old one kept for the Undo window) and the proposed row goes, or the
+ * proposed row itself becomes active. The proposed row going scrubs nothing (migration 0040).
+ * `MemoryFactNotFoundError` for one that is not a proposed fact the member may change.
+ */
+export async function activateFactIn(
+  tx: TenantTx,
+  actor: Actor,
+  proposedId: MemoryFactId,
+  options: { clock?: Clock } = {},
+): Promise<{ fact: MemoryFact; change: FactActivation }> {
+  const pending = await lockReachableFact(tx, actor, MemoryFactIdSchema.parse(proposedId));
+  if (pending.status !== 'proposed') throw new MemoryFactNotFoundError();
+  const subject = memorySubjectOf(pending);
+  const current = await lockActiveMemoryFact(tx, subject, pending.key);
+  if (current === undefined) {
+    const activated = await updateMemoryFact(tx, MemoryFactIdSchema.parse(pending.id), {
+      status: 'active',
+    });
+    if (activated === undefined) throw new MemoryFactNotFoundError();
+    await appendAuditEntry(tx, {
+      actor: auditActorOf(actor),
+      change: {
+        action: 'memory_fact.updated',
+        entity: { type: 'memory_fact', id: activated.id },
+        before: auditValues(pending),
+        after: auditValues(activated),
+      },
+      requestId: actor.requestId,
+    });
+    return { fact: toMemoryFact(activated), change: 'created' };
+  }
+  if (!(await deleteMemoryFact(tx, MemoryFactIdSchema.parse(pending.id)))) {
+    throw new MemoryFactNotFoundError();
+  }
+  if (current.value === pending.value && current.sensitive === pending.sensitive) {
+    return { fact: toMemoryFact(current), change: 'unchanged' };
+  }
+  const now = (options.clock ?? systemClock).now();
+  const changed = await updateMemoryFact(tx, MemoryFactIdSchema.parse(current.id), {
+    value: pending.value,
+    sensitive: pending.sensitive,
+    ...(current.value !== pending.value && {
+      previousValue: current.value,
+      previousUntil: new Date(now.getTime() + MEMORY_LIMITS.previousValueDays * DAY_MS),
+    }),
+  });
+  // The row is locked and reachable; the update can't miss it.
+  if (changed === undefined) throw new MemoryFactNotFoundError();
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'memory_fact.updated',
+      entity: { type: 'memory_fact', id: changed.id },
+      before: auditValues(current),
+      after: auditValues(changed),
+    },
+    requestId: actor.requestId,
+  });
+  return { fact: toMemoryFact(changed), change: 'updated' };
+}
+
+/**
+ * Undo of an AI save that replaced a value (S30): brings the replaced value back while its
+ * Undo window is open, if the fact is still as the save left it (`updatedAt`). Otherwise
+ * `UndoRefusedError('changed_since')`.
+ */
+export async function restoreFactIn(
+  tx: TenantTx,
+  actor: Actor,
+  factId: MemoryFactId,
+  savedAt: Date,
+  options: { clock?: Clock } = {},
+): Promise<void> {
+  const id = MemoryFactIdSchema.parse(factId);
+  const current = await lockReachableFact(tx, actor, id).catch((error: unknown) => {
+    if (error instanceof MemoryFactNotFoundError) throw new UndoRefusedError('changed_since');
+    throw error;
+  });
+  const now = (options.clock ?? systemClock).now();
+  if (
+    current.updatedAt.getTime() !== savedAt.getTime() ||
+    current.previousValue === null ||
+    current.previousUntil === null ||
+    current.previousUntil.getTime() <= now.getTime()
+  ) {
+    throw new UndoRefusedError('changed_since');
+  }
+  const restored = await updateMemoryFact(tx, id, {
+    value: current.previousValue,
+    previousValue: null,
+    previousUntil: null,
+  });
+  if (restored === undefined) throw new UndoRefusedError('changed_since');
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'memory_fact.updated',
+      entity: { type: 'memory_fact', id },
+      before: auditValues(current),
+      after: auditValues(restored),
+    },
+    requestId: actor.requestId,
+  });
+}
+
+/**
+ * Removes a save the AI proposed that will not happen (the call was refused, or a retry found
+ * the first one's proposal). Never remembered, so nothing is scrubbed. A fact that is not a
+ * proposed one the member may change is left alone.
+ */
+export async function discardProposedFactIn(
+  tx: TenantTx,
+  actor: Actor,
+  proposedId: MemoryFactId,
+): Promise<void> {
+  const id = MemoryFactIdSchema.parse(proposedId);
+  const seen = await findMemoryFact(tx, id);
+  if (seen?.status !== 'proposed') return;
+  requirePermission(actor, managePermission(memorySubjectOf(seen)));
+  await deleteMemoryFact(tx, id);
+}
+
+/**
+ * Facts as a card, a receipt or *Why?* shows them, read live by id (S30): `gone` for one that
+ * was deleted or that the member may not read; the replaced value only while Undo is open.
+ */
+export async function factsShownIn(
+  tx: TenantTx,
+  ids: readonly MemoryFactId[],
+  now: Date,
+): Promise<MemoryFactShown[]> {
+  const rows = new Map((await memoryFactsByIds(tx, ids)).map((row) => [row.id, row]));
+  return ids.map((id): MemoryFactShown => {
+    const row = rows.get(id);
+    if (row === undefined) return { state: 'gone', factId: id };
+    const undoOpen = row.previousUntil !== null && row.previousUntil.getTime() > now.getTime();
+    return {
+      state: 'known',
+      factId: id,
+      subjectType: memorySubjectOf(row).type,
+      key: row.key,
+      value: row.value,
+      previous: undoOpen ? row.previousValue : null,
+      sensitive: row.sensitive,
+    };
+  });
+}
+
+/** A visit's notes, for "same as last time" (S30). */
+export interface LastVisit {
+  bookingId: string;
+  serviceId: string;
+  staffMemberId: string;
+  startsAt: Date;
+  notes: MemoryFact[];
+}
+
+/** What travels with the records a tool answer returns (S30, playbook principle 2). */
+export interface Recall {
+  /** Active facts by subject (`client:<id>`, `booking:<id>`, ...), sensitive first. */
+  facts: Map<string, MemoryFact[]>;
+  /** Each client's latest visit that has notes. */
+  lastVisits: Map<ClientId, LastVisit>;
+}
+
+/** The key `Recall.facts` files a subject under. */
+export function subjectKey(subject: MemorySubject): string {
+  return subject.type === 'business' ? 'business' : `${subject.type}:${subject.id}`;
+}
+
+/**
+ * Recall for a tool answer (S30): the active facts of these subjects and the notes of these
+ * clients' latest visits, only what the member may read (subjects they may not read are
+ * skipped, never refused: recall must not break a lookup). At most `limit` facts.
+ */
+export async function recallIn(
+  tx: TenantTx,
+  actor: Actor,
+  request: { subjects: readonly MemorySubject[]; lastVisitsOf: readonly ClientId[] },
+  now: Date,
+  limit = 40,
+): Promise<Recall> {
+  const readable = request.subjects.filter((subject) =>
+    can(actor.context, readPermission(subject)),
+  );
+  const facts = new Map<string, MemoryFact[]>();
+  for (const row of await activeMemoryFactsOf(tx, readable, limit)) {
+    const fact = toMemoryFact(row);
+    const key = subjectKey(fact.subject);
+    facts.set(key, [...(facts.get(key) ?? []), fact]);
+  }
+  const lastVisits = new Map<ClientId, LastVisit>();
+  if (can(actor.context, 'client_notes.read') && request.lastVisitsOf.length > 0) {
+    for (const note of await latestVisitNotesOf(tx, request.lastVisitsOf, now, limit)) {
+      const visit = lastVisits.get(note.clientId) ?? {
+        bookingId: note.bookingId,
+        serviceId: note.serviceId,
+        staffMemberId: note.staffMemberId,
+        startsAt: note.startsAt,
+        notes: [],
+      };
+      visit.notes.push(toMemoryFact(note.fact));
+      lastVisits.set(note.clientId, visit);
+    }
+  }
+  return { facts, lastVisits };
 }
 
 /** The facts the member may read ("What I know", S32). */

@@ -90,6 +90,12 @@ export const yogaPilatesPrivate: TemplateInput = {
     'A duet session is one booking for two clients who train together.',
     'Never give medical advice; note injuries and pregnancy on the client profile for the instructor.',
   ],
+  memory: {
+    warnings: [
+      { serviceCategories: ['Yoga', 'Pilates', 'Getting started'], keys: ['injury', 'pregnancy'] },
+    ],
+    visitNoteKeys: ['focus', 'modifications'],
+  },
   onboardingHints: {
     lookFor: [
       'private session prices and packages',

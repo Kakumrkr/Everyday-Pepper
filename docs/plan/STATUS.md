@@ -5,7 +5,11 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing. S28 and S29 are finished and pushed to `claude/magical-knuth-ky75f5` (no PR yet).
+**S30 (Phase 7c): facts in the AI** on `claude/great-cori-t020a2` (S28 and S29 were merged to `main` in PR #37).
+- **Brief approved (user, 2026-10-23):** "Go ahead with your recommendations, ADR is pre-approved"; open the PR and merge to `main` when all is done, then give the prompt for the next session.
+  - D-1 `forget_fact` always asks without a new dial action (recorded as `client_note.save`, no dial action decides it); D-2 a memory save in an untrusted turn always becomes a card; D-3 no warning for a member who can't read the sensitive fact; D-4 the free-time description fix with its held-out cases now; D-5 one trial of every set on Luna + Sol; D-6 ADR-0035 pre-approved; D-7 build on the fakes first, record when the key is there.
+- **Blocker for recording:** `OPENAI_API_KEY` is not in this container (a new session picks up an environment secret). New tools change every request, so the 112 recorded cassettes go stale until re-recorded: recording, PR and merge wait for a session with the key.
+- **Done:** nothing yet. **Next:** task 1 (contracts, templates, migration 0040, core memory services).
 
 ## Last sessions
 - **S29 Phase 7b (2026-10-23): memory store, forget everywhere, embedding port** ([ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md), accepted). Full entry in [session-log.md](session-log.md).

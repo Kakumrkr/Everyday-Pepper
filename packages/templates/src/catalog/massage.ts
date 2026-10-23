@@ -114,6 +114,12 @@ export const massage: TemplateInput = {
     'Prenatal massage is for clients past the first trimester; record the pregnancy on the client profile.',
     'Never give medical advice; health details belong on the client profile for the therapist.',
   ],
+  memory: {
+    warnings: [
+      { serviceCategories: ['Massage', 'Short sessions'], keys: ['injury', 'pregnancy', 'health'] },
+    ],
+    visitNoteKeys: ['pressure', 'focus_areas'],
+  },
   onboardingHints: {
     lookFor: [
       'service menu with durations and prices',

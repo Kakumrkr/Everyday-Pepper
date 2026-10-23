@@ -99,6 +99,9 @@ export const AUTONOMY_ACTIONS = {
     allowsAuto: true,
     permission: 'client_notes.manage',
     undo: { kind: 'for', minutes: 7 * DAY, notAfterAppointmentStart: false },
+    // What is remembered shapes later answers: after untrusted text it waits for a person
+    // (playbook principle 5, S30 D-2), whatever the dial says.
+    asksAfterUntrusted: true,
   },
   'task.create': {
     riskTier: 'internal_write',
@@ -143,6 +146,8 @@ export const AUTONOMY_ACTIONS = {
     allowsAuto: boolean;
     permission: Permission;
     undo: UndoWindow;
+    /** After untrusted text in the turn it always asks (memory saves, S30). */
+    asksAfterUntrusted?: true;
   }
 >;
 
@@ -418,6 +423,22 @@ export const TrustJsonSchema = z.custom<Json>().superRefine((value, ctx) => {
 export type TrustJson = Json;
 
 /**
+ * Explanation facts that name a remembered fact (S30, playbook principle 7): by its id only,
+ * read live when *Why?* or a card shows it, so forgetting the fact forgets it here too.
+ * - `memory_fact`: the fact a memory tool saved, changed or forgets;
+ * - `memory_warning`: a fact the booking warns about (an allergy on a color service);
+ * - `memory_last_visit`: a note of the client's last visit;
+ * - `memory_recalled`: a fact that came with a record the turn read.
+ */
+export const MEMORY_FACT_KINDS = [
+  'memory_fact',
+  'memory_warning',
+  'memory_last_visit',
+  'memory_recalled',
+] as const;
+export type MemoryFactKind = (typeof MEMORY_FACT_KINDS)[number];
+
+/**
  * *Why?* (playbook principle 9), assembled from facts, never from model prose: the member's
  * message it answered (by id, S25), the tools called with their inputs, the rules and facts
  * used, the alternatives offered, whether untrusted text was in the turn, and the autonomy
@@ -431,7 +452,13 @@ export const ActionExplanationSchema = z
       .array(
         z
           .object({ kind: TrustCodeSchema, ref: z.uuid().nullable(), value: TrustJsonSchema })
-          .strict(),
+          .strict()
+          .refine(
+            (fact) =>
+              !(MEMORY_FACT_KINDS as readonly string[]).includes(fact.kind) ||
+              (fact.ref !== null && fact.value === null),
+            'A remembered fact is named by its id, never by its value',
+          ),
       )
       .max(20),
     alternatives: z.array(TrustJsonSchema).max(5),

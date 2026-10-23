@@ -1,9 +1,16 @@
 import {
   ActionProposalIdSchema,
   ConversationMessageIdSchema,
+  LastVisitFactValueSchema,
+  MEMORY_FACT_KINDS,
+  MemoryFactIdSchema,
   OutboxMessageIdSchema,
   type ActionExecution,
+  type ActionExplanation,
   type ActionProposalId,
+  type AiMemoryView,
+  type MemoryFactId,
+  type MemoryFactShown,
   type OutboxStatus,
 } from '@pepper/contracts';
 import {
@@ -17,7 +24,9 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { requirePermission, type Actor } from '../actor.js';
+import { systemClock, type Clock } from '../clock.js';
 import { toExecution } from './ai-actions.js';
+import { factsShownIn } from './memory.js';
 
 // What the chat cards and the *Why?* sheet need besides the proposal or receipt itself (S26,
 // ADR-0031): the member's own words, the first names of the people who decided, and where the
@@ -107,4 +116,83 @@ export async function getActionOfProposal(
   const id = ActionProposalIdSchema.parse(proposalId);
   const row = await withMember(db, actor.context, (tx) => findExecutionOfProposal(tx, id));
   return row === undefined ? null : toExecution(row);
+}
+
+/**
+ * Memory on an AI action's card and in its *Why?* (S30, playbook principle 7), read live as
+ * the member: the explanation names facts by id only. `remembered`: every fact it used, a
+ * deleted or hidden one as `gone` ("a fact you deleted"). `card`: the fact a memory tool saves
+ * or forgets (for a proposed save, `proposedFactId` holds the new value and the current fact
+ * the one it replaces), the booking's warnings and the client's last visit, only what is still
+ * there; `null` when there is none.
+ */
+export async function memoryOfAction(
+  db: Database,
+  actor: Actor,
+  explanation: ActionExplanation,
+  options: { proposedFactId?: MemoryFactId | null; clock?: Clock } = {},
+): Promise<{ remembered: MemoryFactShown[]; card: AiMemoryView | null }> {
+  requirePermission(actor, 'business.read');
+  const kinds: readonly string[] = MEMORY_FACT_KINDS;
+  const named = explanation.facts.filter((fact) => kinds.includes(fact.kind) && fact.ref !== null);
+  const proposed = options.proposedFactId ?? null;
+  if (named.length === 0 && proposed === null) return { remembered: [], card: null };
+  const ids = [
+    ...new Set([
+      ...named.map((fact) => MemoryFactIdSchema.parse(fact.ref)),
+      ...(proposed === null ? [] : [proposed]),
+    ]),
+  ];
+  const now = (options.clock ?? systemClock).now();
+  const shown = new Map(
+    (await withMember(db, actor.context, (tx) => factsShownIn(tx, ids, now))).map((fact) => [
+      fact.factId,
+      fact,
+    ]),
+  );
+  const of = (kind: string) =>
+    named
+      .filter((fact) => fact.kind === kind)
+      .flatMap((fact) => {
+        const found = shown.get(MemoryFactIdSchema.parse(fact.ref));
+        return found === undefined ? [] : [found];
+      });
+  const known = (facts: MemoryFactShown[]) => facts.filter((fact) => fact.state === 'known');
+
+  const [current] = of('memory_fact');
+  const pending = proposed === null ? undefined : shown.get(proposed);
+  let fact: MemoryFactShown | null = current ?? null;
+  if (pending?.state === 'known' && pending.factId !== current?.factId) {
+    // A proposed save over a current value: the new value, and the one it would replace.
+    fact = {
+      ...pending,
+      previous:
+        current?.state === 'known' && current.value !== pending.value ? current.value : null,
+    };
+  } else if (pending !== undefined && current === undefined) {
+    fact = pending;
+  }
+  const visit = explanation.facts.find((each) => each.kind === 'last_visit');
+  const visitValue = LastVisitFactValueSchema.safeParse(visit?.value);
+  const notes = known(of('memory_last_visit'));
+  const warnings = known(of('memory_warning'));
+  const card: AiMemoryView = {
+    fact,
+    warnings,
+    lastVisit:
+      visitValue.success && notes.length > 0
+        ? { date: visitValue.data.date, serviceName: visitValue.data.serviceName, notes }
+        : null,
+  };
+  return {
+    remembered: named
+      .flatMap((each) => {
+        const found = shown.get(MemoryFactIdSchema.parse(each.ref));
+        return found === undefined ? [] : [found];
+      })
+      .filter(
+        (each, index, all) => all.findIndex((other) => other.factId === each.factId) === index,
+      ),
+    card: card.fact === null && warnings.length === 0 && card.lastVisit === null ? null : card,
+  };
 }

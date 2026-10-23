@@ -104,6 +104,10 @@ export const lashBrow: TemplateInput = {
     'Lash extensions need a fill every 2 to 3 weeks; after about 4 weeks a fill may need to become a full set.',
     'Tints and lifts need a patch test at least 24 hours before a first treatment.',
   ],
+  memory: {
+    warnings: [{ serviceCategories: ['Lashes', 'Brows'], keys: ['allergy'] }],
+    visitNoteKeys: ['lash_map', 'adhesive'],
+  },
   onboardingHints: {
     lookFor: [
       'service menu with prices',
