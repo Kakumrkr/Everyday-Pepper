@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a1cee6dc35a11074d6a453cee6bb5b02c308746991374820758366d24463c86f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dC0mDW01OTGDw0OHmUak1Rrp",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6908,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 17,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cce515290290dde141c79c91b29013579257bfd13e4e9d5a42baa1abaec0f984",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2ridQWIfypYSc4F28be96LGN",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"usual_service\",\"value\":\"A colour with Jess\",\"sensitive\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6991,
+            "cachedInputTokens": 6905,
+            "cacheWriteTokens": 83,
+            "outputTokens": 61
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1d95f0a8ba75002259448478f348afeb7ce3812a1049befa4af18516800d7613",
+        "response": {
+          "text": "Done—I’ll remember that Maria’s usual is a colour with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7093,
+            "cachedInputTokens": 6988,
+            "cacheWriteTokens": 102,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

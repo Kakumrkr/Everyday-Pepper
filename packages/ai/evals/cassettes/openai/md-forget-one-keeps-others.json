@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "50094ddafbef3f828617b30b5d279cecf4265ba03fac0f26620e962ae92e17d0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Nt84IPh1kCuWdWIPDfdPTv5T",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6899,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 8,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fa32dbc3c7013253b14fd8b91b0f73542d58fdb4bf6558ef810d34f7c10dd8d4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_BWMZ6htad6tlQXmeweKcgBXA",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7052,
+            "cachedInputTokens": 6896,
+            "cacheWriteTokens": 153,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ef8610a8c50a7528fc8342fd776584e0ae33e9921059cf05228d28e729c67570",
+        "response": {
+          "text": "Maria L. usually has colour with Jess. Her next appointment is a haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour with Jess on Oct 23 at 10:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7576,
+            "cachedInputTokens": 7049,
+            "cacheWriteTokens": 524,
+            "outputTokens": 54
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

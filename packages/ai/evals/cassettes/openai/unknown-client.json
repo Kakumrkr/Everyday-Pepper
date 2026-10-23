@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c2b2b3a19bf7c358948346768906c74fb11a1a35e911906dd98b7f89d649a72e",
+        "fingerprint": "eb847781a66ce18c782a396d85a7847ea8ecbf4fb4ade23bea16651621456a43",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Aweml6oeVBZsIoOTI8h8OzKy",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5531,
-            "cacheWriteTokens": 14,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "1873f998611c57e156cf364bb17fa034c9ea5c1eb7581368d3f775625c840928",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_f1HIs1BJrhwetWKoDWAZwvbK",
+              "id": "call_Vj5xWopDuhAbkw6HXloduMP1",
               "name": "find_clients",
               "arguments": "{\"name\":\"Zoe Martinez\"}"
             }
@@ -38,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5816,
-            "cachedInputTokens": 5545,
-            "cacheWriteTokens": 268,
+            "inputTokens": 6905,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 14,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6c371cbccc08ca8b46921e20b31d10368ee1357a653f205f1b82d985f7d374fd",
+        "fingerprint": "096126803ef093080e9ad064678b667eef7736736b6f3d142e4725ab9da02a9d",
         "response": {
-          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or give me another name to search?",
+          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or tell me another name to search?",
           "toolCalls": [],
           "replay": [
             {
@@ -59,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5877,
-            "cachedInputTokens": 5813,
+            "inputTokens": 6966,
+            "cachedInputTokens": 6902,
             "cacheWriteTokens": 61,
             "outputTokens": 27
           },

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "49e3df88684b686a23d577e0f75a957463b0cdd02d4a8ceb0c37961798739760",
+        "fingerprint": "75dc99ad315276c70ec314f2a27f15a7404ae027386e6e75b3422e145fd7158b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_4hOC48cgndLHbw69JPOe26MF",
+              "id": "call_EA6l25qNMlKDkMQ7rHri5zwr",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5550,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6907,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 16,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "34ee0870b67f965b93c1671c9bfdc96b6c7a70b57b767241453ff29460a2077d",
+        "fingerprint": "08028c6813f2c05a90f9da85bfec289d30825c3db49508015160b655b316d7a8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_LQSy8aSzTQ7LTG4cZQst0EOH",
+              "id": "call_uqO8TgKapCyIrWNx5Gn5kkZu",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5826,
-            "cachedInputTokens": 5547,
-            "cacheWriteTokens": 276,
+            "inputTokens": 7182,
+            "cachedInputTokens": 6904,
+            "cacheWriteTokens": 275,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5d4fdfec72a81f464ac23178119aa7be8f646f4a14c93dd237d8175c0f835176",
+        "fingerprint": "e67f4c2a3844374791303ec35d6b7a8d7721d3d523e845db17e27dd06f169640",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_z0SER31H7IE73dwHGiHxgZQp",
+              "id": "call_mIdc2xzYkzSUsVxAXuJSnmvb",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"emailClient\":null}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5910,
-            "cachedInputTokens": 5823,
-            "cacheWriteTokens": 84,
-            "outputTokens": 113
+            "inputTokens": 7267,
+            "cachedInputTokens": 7179,
+            "cacheWriteTokens": 85,
+            "outputTokens": 114
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "04c89ee4eefec318d4d1897ccfa063970367fb455caf0084df7e39c798daa6a8",
+        "fingerprint": "040bb5c3f40841483ff72ac6557ded072efeaeae3d4cc16d3db88044be643706",
         "response": {
-          "text": "I couldn’t book Ana with Marco because your staff role doesn’t allow it. An owner or manager can make the booking.",
+          "text": "I couldn’t book Ana with Marco—your staff role doesn’t have permission to make that booking. An owner or manager can book it for Saturday, November 7 at 11:00.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6075,
-            "cachedInputTokens": 5907,
-            "cacheWriteTokens": 165,
-            "outputTokens": 29
+            "inputTokens": 7433,
+            "cachedInputTokens": 7264,
+            "cacheWriteTokens": 166,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }

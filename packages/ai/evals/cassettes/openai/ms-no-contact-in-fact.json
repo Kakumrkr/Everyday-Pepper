@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "543d53b588516671d19c40260081ddf52e1655ff10cf1a2f221e5dcc1832d1ea",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xaOePc0MBNYq4VQIpctRF264",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6904,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 13,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "800d668b12e5a0db03bac8296f98014c98488d9e1c6ea1707e2edd372328835f",
+        "response": {
+          "text": "I can’t save email addresses here; they belong on Maria’s client record. The email was removed from your message, so I don’t have it to enter.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_055115aa16bef68c016adb678dcc5087d2a7ab3086600c6182",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq22eOFMUb43qRTEwBMIcxXGrNb-psm1ErzNuzmGwHb_Guf6AC1KdIeagw_3v8Zl6_CsTL1DNzZR9-gxaWyymk2oRmbDIGglezlCW9u8a6sM-oSw3mspWPzvC2Avxi8SF82YtyyKeppNvVL8R9cakWxm5tbgYE2xM5i9cejVx_4j03kicw2q3n7z2Zk1_yN1fGh1kOYlYnAmXO0WnkGHSyjYX-vT2Nvg3K6VRarZCVfr7uuK69fPEXU0DJCv4naRpugcj_0DPWPPzL8nuXUQrjSHfXAkLxAKq3taTzVZs_8ereZ8Rua1-DNlsQ291RvOsIvvmB-w2V0Fyts1girfHajUmlF_9FSRLt3XrjIcAVNHinyGVW3v5DZ7_DN6BhpRCAmfVmcHXP7OC7DUwgO4JqZi46Pp-rnqmiVvYkvih8R_QGDHRYI4ZVPolVh6-Hhz8n4uZ_8Dj_IS-GvXlVdX38CXAa8zivTR0TKRrkC_0LWz4jmjFpI60p3e-p-pGtf5HyzNpN1lhTTtRxg6tkNQDGwhe8KL3hA1fZS_FInh9knAof_2HCDGZCAq-l0_zC5BFRMhsYotD6L6MbEKrhVxmtE1cSgoySf6Zz65reLj_8-SamORqD0FWNLCbBuI4zFW22nc7uvO7xp46S3HqeS7yx5xI4idpEx3Vf_43pW1G5jLXRaLwcV1W800fkr2G21_YOIUdMhAXlNEThyzqC1C7yJlG2D_YMFMXVPoZUufhDPncrLMywf_afk96Gp24OrTLrOAs8vSlFe4wpBUDFtFfO_4qusBzrz5KlwBI-HsU5p6v4t4NRyNq2famsRg4TM_lZFR-3INyJrSk3NTOm2eKlH0teYmmqtw_wklAb3CS08O4qBMisN2Wzdq-TIkVr37VbP78AjDo4bPT4z_o04Tj7oIEQRTSmAXDBsZm1AZVZSqWhFb4m-5zSOri8yOZI_SFRvSRejxrG0nBK7RUDplN69mwh-T2IZlwD58_Nit2aJfATUHIlkWe_QWbFa8eILf662nmISIb3ybPRrYYmepIo3tTGQ9ExNF9h0vGLwdhNPj3tpRU6MjTAEbiGQiIlbbaAcRT1SePaWKjAUQoyvr2U_nh_r0umw56UzrCTKudStINbycRYVpPpAATW_5SslonvmOtCVJ-fgCZOWdz5FWkvW0HzqPrt1SNeBVPFKJp1Hx7fFLwyxuU_B6DbmgQc7qgNAAVOkN6MdWWvmEoZolzWmnE03Rx2qCFPYV9uCiX1til01Lf93EUmWNOZ6m0IjP5SKQmB-N6s8kjCkEXaqPnF73jU0GI4nYtbi8UCkBsYxhUhvOISwqtjbTw6d1b7COay7bDp2EeC5act_Rq8rgzjNscHLyEnuimdQ-Ft2bwbNAwFfSPNn8M3kWc-qcfJxOhQ9qU1Ved0zA7NllQl17r30MSiyYApFkMzi5zxtXlGWeY1SBhBDiF38aic-1RxgoVNoIVntIObPJ4cnNjljm8Xx8Ke-BTbSw9Ue6xx4iNzc43SRSsGqyACDb5MRKBiY-EsK3TLUbXlrmg38MOs0wH6zvlEex-mZsIjl4a9qypgrl45xkwFIKTngrvDdOr0Uc_sPhqmss4fusZJh7QCZm3Kp0dK5oBVTVLWotmMPvk0ucnpP2d05fO0KIMr1kuD301rbbaEAMv7fxYOAA4N4qAZfJwxuXh2nxrJDv4oxVdIP-ai78s5tdEmEbWjaGY5WxwST-xqPspUN7g2L_mSHdrxe8y9sy_0BIPpCE3-Hs3x-jT0amo=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6988,
+            "cachedInputTokens": 6901,
+            "cacheWriteTokens": 84,
+            "outputTokens": 65
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

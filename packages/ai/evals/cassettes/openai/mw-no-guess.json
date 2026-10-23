@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "db8a1a502099abe8952ea7caeb2d3895c7ad584a8a7161045fda6e1da23e930b",
+        "response": {
+          "text": "I won’t assume Maria is stressed based on her seeming tired. If there’s a specific preference or visit detail you’d like me to remember, tell me what it is.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0571fc48ad60235a016adb6636abf487d2ae028a8ffe66d574",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq22Y4X2E0x3Zs1-yiDYGAE8qYg6bEm84Fo4gVfEOhEiiBf8yP21cPNT8h76jIR6bYWNacHQLHLp1BpI5eADgW2uvjdrpWUpjc66IYM3i3pbCWUtabaMqrki2hduqLwYnwYxwwn4VAcwj3hWBERorMiIyQKlDQB-0f5YFk_mOo-cQXBoTooN5y-mkP63ygmZn8fD5Oq80u4WIjWQrK4iAMPLncrpQm8vxLwBoLv7Mspes_uAshJI-RkLZd2klE-CYZgbTKEiUu5pQ99x-aWSFiJOu8lPMDxc9xXi8YSUXpr3ued24aLkxq07aYi17WcVV2WzrPPPqdZaTw6_-Ky-2wkhhaaQbl3Rfw7fbZZbcD-5oNGMRma7dhL0PAfNk1aPCoTeRhlZGIn_eVrZSSSJHywIUGO4c6ImpWOaxJdTO7RB3S510QkhW-FnPMJVfXCQYklnt4r1Gi_uZWawomdWXao4xpbQ2fux8XOSXJrKy5IyTl1InsbXR_jL4nBJGDAjjTFykFYBUTaIWPKy1QvBLJCErBH3lAVKWwXmppHHHoisez0IhctdR3VTn9zvVc2Ki1mZaN4wJ6Ggyeqwtzof4aljcnvJ8nscunyxx5fMlBbjCl_y8L3J5o9osxTNciaoJB55GCkcm8MCmzBUHTFSxKMD1CmlwKApP-1csKxBKoiEga5rQM_iFdGybo8TiNHAIZQKFvejBaU2Bzu1gLKD8RH4eDqpvmloDUDGf2neGfhj3L6Wzrr6w1-FZNk302IBmLyv5lDlpiqrk2lvVolxQ9qgSp7ttcqxQzUgVLbSK5l0mqTURiY2156AbPpaGFuN2RXlthOoG9GW1Yn6Opy-d7iaQiqLDeXZF3z4FUatNYP1Gh_I29ke82yM9B2eszATwMFC_vVls1eBAjv-adgp_o-p_-3x7HzRdFLXaQI567UnTHlqPfYUmgoQsur4zGUeJ4QjzbWx7x3VHmfh0bkOuybuxY3zpmPp_ypd0UjXH9Po0bu8WIxKm6Reb0jZmZWRQ2v6V7LSNLrRJM_tVhYg5I3Dk9ugmB35vFzcsZeGN19x6jKbhIEOX4Zw3VCL817_tMqMS921W6WRgYNuBvtmfiUO0j0G38YwImvBPwiMEU3PyiahCQY7v0-8MCK4l5FO4RXhcbaw50f8tnAmozbBJ0D616UErqWwNKjLr9vkBnMGuMShJ5mCQVG8UVvhLfLQVTUZONz-ybJlm530ZabF4goyaVjrzkIY-SWLTUw1ZtZ0LPJJkIDDbRK-QKQub0wyjWIc3GP0gXIj4ubQdFu9W9Da1e_ZGoLWgmnnQwl1Fi3sDAifm0mt9JfueAdnfR4CrdOCjBbUT0VLU7__vEEvCjyH4vHLhgx8T0_8TYkAPN2FApJoxf2YJLTVURMp1MxF0yBLzmWPXoeavylvraYVa3Hcisq76IWNgu1fOA2pz-hWoW414TzfxILXHrHCbnSLm3ohTiNutPhUenOscqwGaZyaT-DqoilrEHOq6Q11d4DAXj77WdMWLrapGq6jSETWjKt_cHAmiM5q6zcSQI-VAGXi8zK0Zxg3Q3GlrtZMoemNkmEkP41RSw-Ts3L_ifYSNE5rXYX7LYuKS7Tw-xXimyX8_5PZJUcZc9ifhb2l5yGbydSOysp75tFrbbGqq8ZCyjt1HoJ2OsUfmOFH8iYHpiAoXspCRlxZNIT1dDxj899lVYKSK_pdBK8OlQMHXVN72z0W49FiM7BPbj4XCaxdQZ0HELWfUYKarWkhhzFIyHbaXajK4BdAzBmtSXCj-uGbKDOQ1HqspL1OSdBYrKhgl1n4QIV6swVgTZiAZRnqp9VAoH56-uVcgY9snNiDtZsi33SvEJnZqAP-Vdq-fDfVhTcIfDIJmFITXtpudLfrAuexsR9X1CmVRI79x8ub86CJDneytVeh6pONtc-vwCeGreacLjm6frivYY3xBUyOm7cFq7Lpdpltj60N66wvhcEv7Qcw1AU-rIwDTbMf6CaUVdYP45XTFsEMbh3l5gsL4Cdxkpdox4ndm1pTNDjBmzs1Dy0mIjsWLa1ghGJ-BBl72Kvjb7k2YUk0-caPoPc-FFqzI8Waoh36abqbzFRlftyIJKW72OpiACiuNx4N7-_sbFxQzHGvHP_HsEb9q03K3CuA3klAm0QvoK79pqBuICfhnyVx8zNHfaBAnEr-I4Y_qvX5SZ1ebvnTurvVV7g2O8XDbOxnIjbqybhz_I1JNyt9e1av0MoMjJ9Ae7vndTOucfckeS57dnru_I3RO0OjBD709SlTpNRu97QiXtZ_-8oUxO28Lz3w83Qj0haG9D-NzvaiBzODTEUhpd9z7ZxeEoeSqa9lEFUViiNIAZnETKaQekMt5vZUa2PjL10GIoSVykU1JvcctpYNhl7_IXENKX5D_ArmQDy-Zxsz89N14Gnlbh_5_XdqQH6UbxBNCBorvvte90HiiGaV72I6KteUHEKm5edk8-V4JiRQCGd2qjtNzz_CnzZd10E827ldQOwZ8jpV9UPoffFu8SjDtN2gMb8ZtHdkcOVFlfdSY0ZmwtFIPI5Q4c3QXsVIzcMaPB6rmyxiH6t17ve0i2Uij7hz2Kk4uSM2xo0nFssq8bgjL8D-1hCs5szCGSnexkBbI7fg7o21wbWpICJGDapBYO5-ofaJifTF63ONCx-P_Zk9Bzp1YGbiYjakhrS9eF8CqsuV7NAO8Bl8angHu3sJxTkD-s-Dds_ORjUlyd302qPsegZBpQRt91JPy6gdiM7k6NJMUpmuQUozUb-Qm13YNOtzgmUeos8DY_0qgH3qRwyqWOnMMIos6KjzGR4y5lQdOB_k527aijsMvekGt1oxjL01zjht2FKPk6ESWSjaQnyogDS_Xnye_AFW3HHDg5cpyB4C9ICYdDyKZCzXq8QlWSbPx0_tCcs7O9SB9Wo63MVBYWS34N1AtN",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6907,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 16,
+            "outputTokens": 153
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

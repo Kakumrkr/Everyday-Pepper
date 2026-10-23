@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "215d4156df925683760e79a756516c2636965afa3b8e832aa410ed5bbe6cb338",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vRvXFZafjdQ46aKUVj1YhBF6",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6907,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 16,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "670e1717b7d475f4990b0eb383e101a5a9e47b45c4e618e31519dc96094ceec0",
+        "response": {
+          "text": "Maria L. has no allergy information recorded.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6990,
+            "cachedInputTokens": 6904,
+            "cacheWriteTokens": 83,
+            "outputTokens": 13
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

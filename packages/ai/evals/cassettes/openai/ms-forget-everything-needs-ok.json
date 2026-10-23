@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "645dc4f19ed7c14120c56a30feefe9f1a0ca8d7c7a27d5b21687f5660e392263",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gUfepDjcDYsDUuuydDPqvnAU",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6902,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "eff0e689d4985102726aba3c9b8644e9bdd6090549087e17cf5f16b731cd48d5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ymlOOTuY4xrmLLR6rFZBQI0H",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7096,
+            "cachedInputTokens": 6899,
+            "cacheWriteTokens": 194,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e4810c53f82c4d12c4d5c82ca064d1105d84cba8216ce2cf7c487fef972d35bd",
+        "response": {
+          "text": "I couldn’t remove Maria’s saved information—the system couldn’t find the record. You could try again after refreshing her record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7185,
+            "cachedInputTokens": 7093,
+            "cacheWriteTokens": 89,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

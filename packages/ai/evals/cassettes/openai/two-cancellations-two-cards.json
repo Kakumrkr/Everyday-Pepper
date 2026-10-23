@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "f6958ad8feb84ae64369657322a5ca76b41e98d75553ae8248d78a61943bd7c1",
+        "fingerprint": "563bffcf71de9ff0d5e3d14c97a11804521c51134f79c406eed314f439e38185",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_uR2xD925byJTeZYe78y6tcj8",
+              "id": "call_yVjCDL0VnQ4iXsS2yC6e8jxJ",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5545,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6902,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "316b44c1fea3474815a0128f8cde102ce79c2475ec0db3b0acfddf8583d56ba3",
+        "fingerprint": "c8a5d354fc599624f039d682cf85c88dbbe87996278fd28e815ca7ed4bb91771",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_CBr3CRHB9CJqb8fZc8e41kwT",
+              "id": "call_vJ8w591krWE8NCRdvquyClmU",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -38,26 +38,26 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5630,
-            "cachedInputTokens": 5542,
-            "cacheWriteTokens": 85,
+            "inputTokens": 6986,
+            "cachedInputTokens": 6899,
+            "cacheWriteTokens": 84,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8168bf48ca8fefa229e7b72285a7c4486263019d7ff7431d5e41ce2e23de0253",
+        "fingerprint": "66e9c8319da3b19cdc56cc818279cdca5c7cbee545a0325b3a7659e1ffd81c6b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dlfMnAfs3mmhRnsIiUaS8If6",
+              "id": "call_pbfQYFWbVVt5s73Xg6hjxxBG",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             },
             {
-              "id": "call_rk85e8hdFYDuGGQosw1iS0ia",
+              "id": "call_gf69ClXcY5NAafHbMrzU47S0",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:ana}}\"}"
             }
@@ -65,26 +65,26 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5713,
-            "cachedInputTokens": 5627,
-            "cacheWriteTokens": 83,
-            "outputTokens": 98
+            "inputTokens": 7068,
+            "cachedInputTokens": 6983,
+            "cacheWriteTokens": 82,
+            "outputTokens": 96
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0c7c0bb70e9015012c7b8154536c269be8beedb40b9e01da5405af1661b34e54",
+        "fingerprint": "b7754e5f84ca2b85fe74a4be2159f90c6e8ab68ab1e9cf4c86c3b6ebdf3869cf",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BYYFR46bVja8AeZYuREbAEhN",
+              "id": "call_6VAOimmz8QnvALe7RdQCYHVb",
               "name": "cancel_booking",
               "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"emailClient\":null}"
             },
             {
-              "id": "call_GdcDTEZPhMhWdo3D7cAAmNYc",
+              "id": "call_i9XuE4fcBNw9DxRx9ealENLx",
               "name": "cancel_booking",
               "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":null}"
             }
@@ -92,18 +92,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6275,
-            "cachedInputTokens": 5710,
-            "cacheWriteTokens": 562,
+            "inputTokens": 7632,
+            "cachedInputTokens": 7065,
+            "cacheWriteTokens": 564,
             "outputTokens": 100
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "1fb5c18d30335f2827ca1f510a2a76ca17e7eda2772088328490b258bcebb39b",
+        "fingerprint": "f841cf0579db4c21283a3b6251ad763176fcd74b867ebbdd7fad49fa3f287fdb",
         "response": {
-          "text": "Both cancellations are awaiting your approval: Maria tomorrow at 3pm and Ana Friday at 2pm, both with Jess. Nothing has changed yet—approve each on its card.",
+          "text": "Both cancellations are ready for your approval on the cards: Maria tomorrow at 3pm and Ana Friday at 2pm. Nothing has been cancelled yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -113,10 +113,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6531,
-            "cachedInputTokens": 5531,
-            "cacheWriteTokens": 997,
-            "outputTokens": 40
+            "inputTokens": 7888,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 7885,
+            "outputTokens": 35
           },
           "model": "gpt-6.1-sol"
         }

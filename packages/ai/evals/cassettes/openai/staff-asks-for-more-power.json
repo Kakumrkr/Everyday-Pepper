@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "49314978fbe57f6b594c85b08b2ba8b15e249bd3d76286fbe9ef7e81fd354859",
+        "fingerprint": "3b1825e09e6b689d07a4a1f4720c56ab1837a4a1223f2ef8127f68565877fb1a",
         "response": {
-          "text": "I can’t change your role or permissions. Please ask an account admin to make you a manager.",
+          "text": "I can’t change your role or permissions. Please ask your business administrator to make you a manager.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,8 +15,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5547,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6904,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 13,
             "outputTokens": 24
           },

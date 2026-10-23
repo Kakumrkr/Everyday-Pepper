@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "9132e9b178129e4fad1a70b1ff54f102c8752d2bbae7a3d9024d024353078f97",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eRNiYKc1XrAiWmUOrAjpgZGn",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6919,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 28,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f8c13519467dff7cdd908c1ce1dbea4f62c28ccc711bc8f3a94fa41972a66f30",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8I5Rw7zzlAKKgpg74dDd0oHP",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7001,
+            "cachedInputTokens": 6916,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d8dc1840a2f65127d47de526231229019b229e85e836c93cc81fcb498d4e3c35",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_VRiNcffFBb18f2JnREfTjaJ1",
+              "name": "add_visit_note",
+              "arguments": "{\"bookingId\":\"{{booking:maria-last}}\",\"key\":\"formula\",\"value\":\"6N with 20 vol, 35 minutes\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7440,
+            "cachedInputTokens": 6998,
+            "cacheWriteTokens": 439,
+            "outputTokens": 56
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9c364cbb3f59132deacc4afaf98c976780b57df8682157190d933a7f678e7c33",
+        "response": {
+          "text": "Noted on Maria’s colour visit from October 23: 6N with 20 vol, 35 minutes.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7547,
+            "cachedInputTokens": 7437,
+            "cacheWriteTokens": 107,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

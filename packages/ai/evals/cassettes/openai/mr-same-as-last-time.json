@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a4e033a11199fd1577e2efebd08f60320b2c23e778f1a50276b2d0e8bd05af02",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sbLXOVuGXoVZgDPZnkyDuWUn",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_pegElwOhwmo6le2hjkcqJ1ER",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6910,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 19,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ceef797eabbb9ad244c9bb936fa83e7c2f000ccc5ef37cf1631b935b2f3b4d4d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AWQQ2OfsFVHg3f4eOWjvmFMp",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-05\",\"time\":\"11:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7447,
+            "cachedInputTokens": 6907,
+            "cacheWriteTokens": 537,
+            "outputTokens": 109
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "30bff07d3010f731e1c772dd31e1c869a57b36e1e3024d41fb2555c9d431cf79",
+        "response": {
+          "text": "Maria’s Colour booking with Jess for Thursday, November 5 at 11:00 is awaiting your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7817,
+            "cachedInputTokens": 7444,
+            "cacheWriteTokens": 370,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

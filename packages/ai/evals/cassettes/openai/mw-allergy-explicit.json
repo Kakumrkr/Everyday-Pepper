@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "8470f353ba0fcc16e2b5cf34095e16e8d4b868cbc11c5b1284ac536e6f297225",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eL8TuAZ6dx4TGIxxRlXJ78MT",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6904,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 6901,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d4893d6014c39ec51078745f440079da15d48fa1cf99833748e8370d9cd281a7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Lr3M8Fx9uynoaBCgPIGGmYBe",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"allergic to PPD\",\"sensitive\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6989,
+            "cachedInputTokens": 6901,
+            "cacheWriteTokens": 85,
+            "outputTokens": 64
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4661a2fa7910b6e13cafed5e763bea2b3f02bbe66e052c2e9de4d8eb132ad731",
+        "response": {
+          "text": "I’ll remember that Maria L. is allergic to PPD.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7093,
+            "cachedInputTokens": 6986,
+            "cacheWriteTokens": 104,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

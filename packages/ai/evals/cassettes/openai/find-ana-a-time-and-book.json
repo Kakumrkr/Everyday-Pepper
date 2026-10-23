@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "90c80ceca09f00fc876d104f0e9f17faec28363b2d2e390cae82ad72019516c6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ffSzqXP6iVES9XJ2l46hHmDH",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6910,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 19,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "99ab48500ab60898878beffe55bc0dc1ad7ea57b1c1579fde0537c480d3c0f2e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Rkt3XlEn3dmONREMo1nbuFLH",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            },
+            {
+              "id": "call_GD8cU8Yuidne8vcDUZeNHKS2",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"days\":1,\"notBefore\":\"09:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7184,
+            "cachedInputTokens": 6907,
+            "cacheWriteTokens": 274,
+            "outputTokens": 118
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "717a484009c0e3b527cde19870a1c83935d6189e10572762c14be1b739ea279f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uahSEpjlSMz6I0QGNuRZ9y1F",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"09:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7985,
+            "cachedInputTokens": 7181,
+            "cacheWriteTokens": 801,
+            "outputTokens": 113
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "64005a02c7670d487281b05507abaa1f9b2df9a5e408fe1b3b93bd8e32670d32",
+        "response": {
+          "text": "Ana’s haircut with Marco is set for Thu, Nov 5 at 9:00 AM, pending your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8178,
+            "cachedInputTokens": 7982,
+            "cacheWriteTokens": 193,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

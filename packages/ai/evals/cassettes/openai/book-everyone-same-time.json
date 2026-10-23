@@ -3,18 +3,63 @@
   "trials": [
     [
       {
-        "fingerprint": "5ed339aff5ab1caab47bdd06bba5522c1f84c6611e43e85d4a0fef36f528271b",
+        "fingerprint": "710d3cc9bb96875c76f72ae5d6a3983925f06af05d03098dc2f02abc61d35ed8",
         "response": {
-          "text": "Which clients do you mean, and what service should each be booked for? I’ll also need to check whether Jess has 9am available tomorrow.",
-          "toolCalls": [],
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wOuwJXCcx5HBkTjbVE7kfbXT",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6907,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 16,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fb3e1eff5f36b9a46c46b10ea5a630adc78fa6872a2f74c7c21772e07f816d6a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_WIsxgSJ2tEgR7NPCXyYPemqZ",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
           "replay": [
             {
-              "id": "rs_08f3f0631a5b4223016adaa933b4c487d294453b8e98a5f0ad",
+              "id": "rs_03fd504da88c88a8016adb67ffb4e887d295c88cbb3cd943c5",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq2qk1zjs6GOhY-z1gsVSTEJNYMuTnhbWT9qS0me9s3Vu4d3396gx3wDHhF6_YcKWRzmgERPxZzqpKLbnddt7WqqsIgwqd6dZb-HDrIXVWd7pUwHHGeuqUCifPiinbvQjbqexrdWcHzMuqdLAIoC9puw5l2Ej95UOqwIthO1AuN2JQ27H3gSplSu2hgmdLpeT_X9-Re26odgTRMiu0UfTQ6pUjXRMrsJ5KnYAAKKtntPckuHFDLMgacsyviarMFGnaWN-uW83yhpaTsgQ-f4Cu8SNbdZYCTpCAIhoDcgC47FjIWWF97BCPztECjg3vOk6dofhps0TWj2M4u89FSe5H20EbRX7TDVa4fFd-EUNCoUr4vjarPPNzD4MkV66QMufMAtmkg2TJm80gfVBl8317TT2payfk-mktq0ZS2DXcfDZtXOk0PdUV70y3FShzwkgH0yDtnbhFQKGFTnKQtFI_h1dw_Ips1lOptOtTfcm7rw9UR5jTyaApV3q45sN4lhl4NaeSQyO5Z7B0ZvZhjeXLoIM_xwuKrVznIMuVqvgFxciPUFnreZBNSfamobcXZE2qjAKKhiXqq_opYSzw8SUrNDUjHXlRIVh8zUv8VrUaS1ewsBJJNoekBa9Box45oXT6PiPXaJ_0nBzKxw_x7UhOjvZGRt_ZgeeNy_WBwYqsN5-KXycHOOBm34ghwnNxEXDJbrHLGGpUhLGpBRd0BNuk8h2CRBuNSjPQ9uX2OI6nCQPXal-f0ZRP3N6sdRdbl8zHpPjZKRDPU4yKPbCDEubqeODuHSdDZiFiVHvRuHRDfmcOwoE2QvXdvCjGokEJu9oHkHjPAvydZFfz7w-7SmUA3hFfng1IQmUIMt0oGi968sIEzmd-IwZ5TQiqUwQEE9zoV8CmimaOVxAQ114jjlKFNcetVf5_kWv4MRrDDDX1L4sEx4jORbbYPQps_6gJid-xxyKiVan1zFod00S2QYRGfO3AXxnQ_Xv-DqKoAd7PMQcafK2uu1RTJymSc5MQCjt06Gg18ZVWgK2n5__r0EcW_gsmVTa3hY9Ki322fLsj9RAdwjkrk0xg4YY21I01KbYD5xB5IYh09tsuUdTu_SYxyEYUgpuPNwaGzAMvXEzXyFp8TBlGXRkomkhgqYFJc7Qno_UmljzMMhrZuZMbxtmodpyMLjmmb7-GK6-X2XYHks9AGqR836SzsJmP2-rLRBrvxc24_4zVRFXTxRDhEvpPrGpNswcAeVDVKc-ghPdGyLrF4c3CII8e7PRAXmK-nhS7bX8gFHVMu6Dxas7b_TuPGc05sO6vs7BkB20uP16dI389aQGgkP6FYchwMLQXgGVVsWqkUWxC3cTQrAC8WGW7E3GPwymDpJbbom6i4pzhtenDFvWDAeEBXkgHjBkoCxwlEKmoD1pxJzTd8jM0_rlDxkqNpryEVgjpz-f9ihrTH8_YsHo4l4fjY8a1xsXg3YDq5rxM7YvImx07zUMa4N4cUdbrf4NwPoo-zdmpZieI1jhIw6g0OctgkTFzViXKQD_KPlrNQhca4L_H66ltAjQ1qdq5_2fO0TyUngXzfG5aAABKoaS-5P3UKGQHRKbiCOTo3akQSBjAu1T2mGQti51M9onJ10scoVMrz0wyqAE3PUptjpHZwNDKi0_KyaA9OVvAVHwkmIMR1flycBT2dkiEN8024kEDO109J-rbwnLeVloLL1RHiUCE1oiFKLEO1Im94qgsTEIsya3NRpF1l_NBRJRixKphVBK-fK-hqtLMrD6BWcxc54e22JjYWHUnIX443VLdABg4JAI8GIC2M2c7DTBzfBKLEW1PXwHznXG7Cri2FrFYh8i8z2kJ30bS-81DCVOgEdMj553ovFqKIUTtwUS1DlTu7348vYUkjxrciNG74-kUF2qH_NyNfVh7hUh6hCCHDeexQpZr9nRMlqMj_Tl3aiKQTJzVQGqmT1C96JdiOr7tIiiXr62JgQV8YDQdvfOKdK5sAJFwZR8_b1Gs6vPIPeVWfkxS55EU1GoUJc-jC2x_OGuIUXIohySxrdeCKG-yCC4_EQDAH33fcHCAoko_Eju6NNReQWWEYyXLi3oPx3n7TJdTrYcry2siuUM4051cSy1tiCTyIMttDuVdni2zPa6VfpiFeiA5J3WCDtF-gQMnS1b5j1EUGrdDvXqhm44jPcmVFQGv4efWVxelcUNONLAQ0Tf9nLhS6b2xg2aZH4DIvWAY0KXyrnC-CBw07nsU0fFJqsxlM1QEnV1yLnfypHjzXS3wkkRN_cdjGWhaFoxJeURt5BXlRGeE1yY1p447dHij3MItdD8cgdWJhyPvXK8hPudoFgXxrECHO-lcFk6Ao0eGvEznPk9m9swVAGchJGl70lYIxUInfVNvnVFOzECo4SEBPeuQjsCgNNRY4kPtJwCOuzLc5CL5zyiX96Cjh2tvzWkB6mXeEdw7WrSTJxpVtY5AxwxSSdF2ZWM2V8wDyfasnpLc9ru__ZXUWWpTOo1BbwWxewOxUsCES5wBwLxmPf8pFFQtxfRMBibaWRwFmNFMCHZng1WaRcdtLBJ8IWulw_MpOHSm0LRHO19WR06OBDhbA-hzDyglRHHZZvgVDGd3V88UUSrKlXaImx86UD3ene0Wa8COwNfH1IzLE0H3C359QX7Azeq8gTx2k9v0JfVpafYbmEr45miiuXo3",
+              "encrypted_content": "gAAAAABq22gB5xc76iYgPhU5oPIscCCpxGHqgHbFrCVszeDRzQ1bDay0EcsqGVVtFmnDYtNl7sRgLisn-AyNEZaZ5j7Sq_bvFqPMXWBoOOsyzco5N5GlEaDELXp9phFIBOC5HoO1zPVSVad7IAaF5CUROP3UaTdweMFm4CuI8qMw7xPvgiae5gydFevvJMPb0Ecb_L8ASRdczH6N33gn7aNN6TPgWVw1mxDsg3ZqansoaO0HxG8zCsI0gl4OkdgtVTVDZRECzq4o4EPeHlJippaEQY5GmcF4MeXeeIHuzxHM4lankWgjIJo47kjvxWvN31AWnUWMEaPsa29cC2WDvB3dFZCsQDeSWtmutds3pFehh16SqXCmh3ImHSNPsY8HY-SGVwqtAEZ5hNwA6zWDyeczxBku4SNCtA6lMVIzvL_Y4db5tse6kO2R2jEnqLNw6MMZyMTO_VuLIbp3MnVE55VFniSfMksuUxG9GHfvYpBJdhrTV-hfqyQ172WOzgOsvDkVuHUNYYfn2_xzuG5S13j_CkkM3CXLNHSB_PQBwYayWNbrCJGiE6EHXVflUx3WTKYVdYz5jbhWuK0LqecL0ObWQHX4LYmYbrky1t0K1IpE-5bNnZ2KbpRWYg7AsB30YTDJQgVEREcxu3QqQbIIwRuwX8oW9U-IPo23tYlVqIbAWUGDLNCHY-mH5aSirsEk9Heo1XGbYG93xtzplFJYxLxS2lpTS9NRFmM_zO-Oow2JS1vtLEXLoW2WixJsR6L8-2InNFFv2-I3Cb6XFqYnJsKnj1qHNGxVtdF2xeWMddhBu1PVhHJcG5m6mLsALMtPy6OqxRYlZ5Aya75oCQX0K13HFxjJyAckUkyRajFK54yFjw-DKRjeL3mKMPHwGWEkaaexfevJkL0W_Yp48H_5L18RPeLxxW8JpL9P1h0_OCUzkNW1TaI9k7N-GYovYIQzFDbRFqCSIQgtaO5W54pDVvn0zzyTQMi7Ce7Q9am6tnPJ0B996fVUR3jbx560qRi5obfhRGTvMxPrdI-O81lMtlWIWd_oebaaF8gMNnYzsmp_K3qLff6r4E1Fi5TFHjMZnl-lcLSTtdc8p3ZXqXXcWG7zaKeJv9CgPk5e3pKC9YI8Rg7BQHnlySG53VX_zKmahXS_gXRrnPTsr5_CMALVxTY0gO4qeQz3bTcOGaAFbjzyNPAg_5BYs66WydDPOWrkFa9Fg8NoNa0PIaZjQZoDtN-O-couDadWH7IIqwMjX8OccqNdnZ1lEAK8seaqrmgvPEdRhJmfeT6ru3-KgTIkbEvwYVm6JdQyypdDbBpURAa16dQbSFnA7_AIAO0ayosdTxT6xpvSwdZRnCueCzfC2ujAdZ5XaT2JJ3oW-C0Y403JYwhpp7f0fcXTaGL_Cw6w24KvHZ1YanTjrSaiqI3cDE5PZKAi0xqvysTprxu6cv3TpTvU8nujkXDvEA_OOo6mj4O-noKtJANpilqAfprIFIal9DcKMv5gsyMLNSVzyl3momOSTbRsgLHCNJAkOkhvgi68SNcyWzqZxatFQNu1o69ab-lproqEZ6g9vTjc5knHtdztGbl_e4mC7QLPm056qYH_ULiNECVE7AGqwP8LDlz3Zr7BcD9_ki9ocZw4JZEBTqaaPH6YjFp3lufp9IP5pRMZtRkWcifJBxYHjwYkUX7p87I2gEX8Rq1fx13nCMkm8AxFyYWC1Esf1j5rLoL3rWm5OEKRSF7KKpDaaN1durnhEc-Q_4AfZON0l7WCzY0s00IAHS-Nad2yL9f60C-iYPzIyzD6LKc7LJNwVXL87fOo9Odo-zmSdO1-ZQmnd971KuahCmJO80ldm3Xho5DuTuhjKcJ5At9InZDy7cVgURvoC3pPs4U8dxilt_1izUzaysAglYUqY08CdPuuvVTLj-z2EYOXsrokpfo2gAI_0WR2BI8fMiUuR6SFo0LylO28-ixTqW3MCEnuCNXhSnOAfT8_EIe-Dpbm0TNggrZR3oz20aIu9Pr8w4sQ3C0_C9hmal85MKYGS-0yIJt3DtNJLxuFbEldtyqIWMtVBdjs-i-tDu1bK_byBfaBbD8jf-yih60HihTOxos3g1q4oN5-Sv4UN0wFyWQAm131t7NhZyAl18gbOcFWKf7mQDiFPmlwcKmkhTHHGKVQ6hXggzMN9t7CuRUGvBpjQ7Asa2lEwa6uBjS0vYfj0Lva_DfV_LkMCz8BvmcD_RH_OeBaNJTKbkSh-WODgVcBfdnulzONckrXxNjAJd-H3YjBcwuiG0JMLd5u42VZr9SZ0-gqbadQl8iirWf1cbQlIOPrj5HfVbHRTyxvSRP9ZhSmYj64DxBL9ssZDEPEmbA-MqDz3jzqZkypyNK3_5WH1daeTiMv-OXMG3-85_gYrwhhAoyb_J7XsNdHD4ygTU_XU26CCAZpY7ofsbS6xCljtil6jzH_lOWFPzMmnKaodpRZwPXJ0_DQZ0NuX-BQYSiF3aWISGxuDIoEFTu8cMDpeRDDSz7GbC4druMKfW__amagF51_TGIDJWuVCtq2P1_ucP0NuEM9NtictZUPVa2RX-GxLVWiXcjqLisa7PDH-1TTUyyYGfheRRf10gcX8vdcHKoqKGASXvkqelTv3O6fbcCB1OxGGyS5b_kaZLGC4fSxNgfd-bQ37uIWVa6l1EhdJ-hETaOZcpO3xWgnVyh2zJjRUMgqgSEHYvKdYUfAG83zL3zM3MN-ewhEDscjLg9jKX88X-dUCuo6g-V9lVepruqhk9l-TufO2sBVplhDkdHFqppDZS19c7UCXuFbGYcUiUMe43Gawlwl2js63CvwYg14T8hPmZ-aTUkGnqyV63V7XUVn4pwKTcL3nH5MoSzWHGadO2TrgmKzAZuQVw9d3-wcPpC6xc2uJWaHmo12QaFuG7R65JVrG9w76jjJ_YJALQwjk2im1uTLbJL0hiLuTT07zNxpNKgetDYsfFYgoEMPCAoDw7xwSQ2m_00GdXuObg5vjKnPpX6JwMzBlHauKw9AiG6tPeKtbZNN3Ln7pzKgb0-rtZqDltR2KBMayWm_fXq2hT41Izsl0vxuzEpKhXZOpOaIVHzDyIXGbH7sJD5jaLtlKDFSWc88I3_dWfY=",
               "summary": []
-            },
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7219,
+            "cachedInputTokens": 6904,
+            "cacheWriteTokens": 312,
+            "outputTokens": 147
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "81605097be2c8ec6597e78ddfbc9bbfec2594259e204606aa499caf345722142",
+        "response": {
+          "text": "I can’t book “all” clients without knowing which clients and what service each needs. Jess offers haircuts and colour, but there’s only one 9am slot, so I can’t book everyone for that time. Which client and service should I book?",
+          "toolCalls": [],
+          "replay": [
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -22,10 +67,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5550,
-            "cachedInputTokens": 5531,
-            "cacheWriteTokens": 16,
-            "outputTokens": 128
+            "inputTokens": 7629,
+            "cachedInputTokens": 7216,
+            "cacheWriteTokens": 410,
+            "outputTokens": 57
           },
           "model": "gpt-6-luna"
         }

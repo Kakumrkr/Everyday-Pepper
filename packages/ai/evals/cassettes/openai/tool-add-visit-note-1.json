@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "0a45a5a8f6ba43590266953c4f06f711cad6275ebcee241b46d4a4cf4ed43b18",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_x9pIND3D9qLcFkfj20bQr6dQ",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6913,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 22,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6ffa93e6aa12ec002ff956f3ad7fd4d850a282db23ac57c20fe0f65e4179db98",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dS96fanyNnkNp4smtyHnkYaM",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6995,
+            "cachedInputTokens": 6910,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b062072e3365c8612688987906909bdc0b62326148a871c9cd417c81e0960ba5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rp7EXjPDqxDT1STPMwjSefDW",
+              "name": "add_visit_note",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"key\":\"formula\",\"value\":\"6N with 20 vol, 35 minutes\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7271,
+            "cachedInputTokens": 6992,
+            "cacheWriteTokens": 276,
+            "outputTokens": 59
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "41a6439ede1ec5bc0e08572e21f4393a7ea8e99c7b1df8218bdc72699e9a8c25",
+        "response": {
+          "text": "Added the note to Maria’s next appointment on Tue, Nov 3: 6N with 20 vol, 35 minutes.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7381,
+            "cachedInputTokens": 7268,
+            "cacheWriteTokens": 110,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

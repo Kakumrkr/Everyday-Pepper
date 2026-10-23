@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e723ab673a19e47ec4b30ba938881efd7dadd761fce501a07845871f44b302f8",
+        "fingerprint": "5335db6d6f4705255427d6cedb52f9bd801b80beab6f3fc9cd00caa967dc8c8f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_r3JPArG5CXI2rbomSdq6rCuq",
+              "id": "call_Yx3BzPkC6k15AmgNQf3cqTHg",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5543,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6900,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 9,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "e98ec33daca6a026c5f6071a4aedf565f45c969e829282c411a45eb05ec890d4",
+        "fingerprint": "feda564817e5b16cd3e132ec3d9a3083fbee73df681195df4a81b2721e97255d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_UAr2JMYG5oM3iQQXYdj3RVMF",
+              "id": "call_MJCg7cubGa0Vg2fhXgMwL8yi",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-06\",\"from\":null,\"to\":null}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5816,
-            "cachedInputTokens": 5540,
-            "cacheWriteTokens": 273,
-            "outputTokens": 57
+            "inputTokens": 7164,
+            "cachedInputTokens": 6897,
+            "cacheWriteTokens": 264,
+            "outputTokens": 59
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a4b253af1aa41a75d6a16c526392fd0e8022e209739b3492a06a5b9b86c9419b",
+        "fingerprint": "3933eb2bc71692e7c092192e813da582919ebca7acfc7237e579cc11244ab412",
         "response": {
           "text": "Marco is blocked off all day Friday, November 6.",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5921,
-            "cachedInputTokens": 5813,
-            "cacheWriteTokens": 105,
+            "inputTokens": 7271,
+            "cachedInputTokens": 7161,
+            "cacheWriteTokens": 107,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"

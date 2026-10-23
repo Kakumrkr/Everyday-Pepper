@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "90b4ad4abbb48c92f587dd12815eba22bc2bbdcf57d663f436b5921c73d4f847",
+        "fingerprint": "91ba15886408ddfa31f26fbb046d3d3decf3f9205e1a99425a12c85cb786d6b5",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TUJIRI8oTJXlodq4Hzf3bnMB",
+              "id": "call_VWP9z8wCJXlGoOQazNJSDN1z",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6905,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 14,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "693e6ec521607d1b9095a9c62b983519a72e4cd62bfa92858a95f5f108a19b27",
+        "fingerprint": "92c4646b62bd40b8fdd39c2d07f7fba127dc3134af9674b5facc5ff3f8f85370",
         "response": {
-          "text": "I couldn’t find any open to-dos on your list, so I haven’t marked anything done.",
+          "text": "I don’t see any open to-dos on your list, so I can’t mark that one done.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5601,
-            "cachedInputTokens": 5545,
+            "inputTokens": 6958,
+            "cachedInputTokens": 6902,
             "cacheWriteTokens": 53,
-            "outputTokens": 25
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

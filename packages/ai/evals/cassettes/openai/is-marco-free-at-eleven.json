@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "8da5106325a7553fb26e5a89153ce10776fd21dedbaf077b47bf3aed2043fa35",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IBTmXR71Xk3EA8BulWSgPuX6",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6903,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 12,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "18333b54749109bb453c71e02517c972b583a718a84e98d2f64468408f7bb77f",
+        "response": {
+          "text": "No one is booked at 11 tomorrow, but I can’t tell whether Marco is free—the schedule doesn’t identify Marco.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7211,
+            "cachedInputTokens": 6900,
+            "cacheWriteTokens": 308,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

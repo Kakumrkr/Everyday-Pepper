@@ -1195,7 +1195,7 @@
         }
       ],
       "storedMustNotContain": ["4471"],
-      "replyMatches": ["don.t have"]
+      "replyMatches": ["don.t (have|know|see)"]
     },
     "seed": {
       "facts": [
@@ -1281,7 +1281,7 @@
         }
       ],
       "storedMustNotContain": ["hazelnut"],
-      "replyMatches": ["don.t have|no allerg|nothing"]
+      "replyMatches": ["don.t (have|know|see)|no allerg|nothing"]
     },
     "seed": {
       "facts": [

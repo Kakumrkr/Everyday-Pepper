@@ -3,12 +3,56 @@
   "trials": [
     [
       {
-        "fingerprint": "660e0ae66022a0b4e6856d82c09dfc6aa7932ed3a0e3e76d6283648bb71b942b",
+        "fingerprint": "2d4399de7657e9fbc0f26027f3603d431e5c8e709566f9eb8b1c9fc79638dc44",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_jjiGWTNm4TQjkKLnxsjAyZBn",
+              "id": "call_sCFRhjIYIICE6tYjSlGQjz6C",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6905,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 14,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e5d92335853d75db2905d7743c6934faa755ccb573205939c5944c0d01505c77",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_tEofZRBnPzYEXGBOn3D8dBIk",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6986,
+            "cachedInputTokens": 6902,
+            "cacheWriteTokens": 81,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "90d82f5101b897f2ffd0b1e37aa778873fce9f7c4d776fbd6d8539b7bef81484",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_THbgkUc1FgebO5xGZR4RfqlZ",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,21 +60,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5548,
-            "cachedInputTokens": 5531,
-            "cacheWriteTokens": 14,
+            "inputTokens": 7259,
+            "cachedInputTokens": 6983,
+            "cacheWriteTokens": 273,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d60379834bed7487bec82a9921f723d54d091569e8da70530df24b33ef64d132",
+        "fingerprint": "1ce56403d6b077d8d0aaa3576b87a56ecc23b13af063e479a219fa20476c6097",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_5t0c2sHt5sETGT959NpCgO2v",
+              "id": "call_ZWGrg3wzIBV7PBMzvi1wQPur",
               "name": "complete_todo",
               "arguments": "{\"todoId\":\"{{todo:call-maria}}\"}"
             }
@@ -38,18 +82,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5652,
-            "cachedInputTokens": 5545,
-            "cacheWriteTokens": 104,
-            "outputTokens": 39
+            "inputTokens": 7366,
+            "cachedInputTokens": 7256,
+            "cacheWriteTokens": 107,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "7bb36a1c554f5229f2be6d15baf5f172e57709ecd813fb84b2c7d9ed0212f10a",
+        "fingerprint": "ce05750b4a641c4bbed530f7212b190f4471cf7ca96a51d97801592838a68792",
         "response": {
-          "text": "Done — I marked “Call Maria about her colour” as done.",
+          "text": "Ticked off “Call Maria about her colour.”",
           "toolCalls": [],
           "replay": [
             {
@@ -59,12 +103,12 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5737,
-            "cachedInputTokens": 5649,
-            "cacheWriteTokens": 85,
-            "outputTokens": 18
+            "inputTokens": 7454,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 563,
+            "outputTokens": 14
           },
-          "model": "gpt-6-luna"
+          "model": "gpt-6.1-sol"
         }
       }
     ]

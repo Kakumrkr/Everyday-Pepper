@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "a69041f05d7cf1d65c1af317a6376490d7149c4941bfce4e621319d7aab312f3",
+        "fingerprint": "d65f03cba2f5b317bbf4fb2827c27aa777183abdc2760c0634800f857bd50a34",
         "response": {
-          "text": "I can’t email clients or send a promotion. I can help add a to-do to prepare the 50% off offer for next week.",
+          "text": "I can’t email clients or send promotional messages. I can help add a to-do to send the 50% off offer next week.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5550,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6907,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 16,
-            "outputTokens": 33
+            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

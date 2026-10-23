@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b4ec7d444ec13fda743e5c80ce5a5296bd0db75f621550e072f3194ea7503ac7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_yJJ72jNGEm04pLqf7rb8eEj0",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6905,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 14,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f35fc67730756150acc4c6034267256f548da3516f327932c7a0f79e9fc89fd2",
+        "response": {
+          "text": "Colour takes 90 minutes, and the service note says a patch test is needed 48 hours beforehand.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7246,
+            "cachedInputTokens": 6902,
+            "cacheWriteTokens": 341,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

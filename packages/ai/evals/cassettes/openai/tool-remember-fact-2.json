@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "263d10cad7ca41049d59c8f38e19e0b305d294488707b39b0feb1576050c37f7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_BL5HVSyxigZrvSsuVLT5Cv4K",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close at 4 on Christmas Eve.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6905,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 14,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ff35cba9eca8d3a7542455ccb8173cce9e417becaa01d6525d2b14f60c307e66",
+        "response": {
+          "text": "I’ll remember that Juniper Hair Studio closes at 4 on Christmas Eve.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6987,
+            "cachedInputTokens": 6902,
+            "cacheWriteTokens": 82,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

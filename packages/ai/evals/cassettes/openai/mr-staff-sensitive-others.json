@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "280672c00a7b581e8cd7077b1e6e5f2d9e3d16fac5bbebc259c56d5f6c53f2ac",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_z6Pg0YE2jXRLl8oyd9sthVZp",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6902,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 11,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d987e0d21c6fd2f9542e7a0c72c6083042a8345f7020f01abb419e63741abd20",
+        "response": {
+          "text": "I couldn’t find a Sara Kim among your clients, so I can’t check whether she has any allergies. Could the name be spelled differently?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6966,
+            "cachedInputTokens": 6899,
+            "cacheWriteTokens": 64,
+            "outputTokens": 33
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

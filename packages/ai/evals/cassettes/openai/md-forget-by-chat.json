@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b8c3d965c922d456cc62046cfa0c2e77683980b41b003b234fec3fe35ac9a9e3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bSBPF2XTfA06Abuvsgpft67s",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6909,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 18,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ff4c994ddf53c987c5b7dde2fb0c62dfcfdb4ca9db6c44c1e1ddb8305b97799e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vTmdedlOSZdMJJs8RPwkgnv2",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7059,
+            "cachedInputTokens": 6906,
+            "cacheWriteTokens": 150,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "adf11f4eb3ad6ebb5300027ec63c516d567aaff7cdf9f9de45fc40945b7d64e9",
+        "response": {
+          "text": "Maria L.’s hazelnut oil allergy is awaiting your approval to be forgotten. You can approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7166,
+            "cachedInputTokens": 7056,
+            "cacheWriteTokens": 107,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e92fd12c19e20c37dc658a67ed590680fef1e4d1b17e576b30c3bd3eec4687e2",
+        "response": {
+          "text": "I found Maria L., but her record currently shows no remembered facts. The request to forget the allergy is still awaiting your approval.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7141,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 250,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

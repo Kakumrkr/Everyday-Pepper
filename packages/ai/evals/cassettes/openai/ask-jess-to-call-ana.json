@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "fe08880c9fd2afbd6b7082bb4ad3004f70517bdb9c441a2770bb46f802f18818",
+        "fingerprint": "ea17be8546b3034b984a7071748fafa8536ee1d74fd025a77288ee9497fd2930",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DocFxByeYCfjndwfeCt6GGVl",
+              "id": "call_7ejmrwUSa9eCsusIto4EZMs0",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5546,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6903,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "8b2686fdf022efa722a902527bf89584aab60d182db7143897179b0c29b15f79",
+        "fingerprint": "736a7aad852773bf5cd5b24111b3f7952f8d62aede0cf7a3ef5ca47891358993",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_pUOy96AKFjIM2b8iTrpIKQVK",
+              "id": "call_yyAnpBeuXDhLONv5miWYPMha",
               "name": "add_todo",
               "arguments": "{\"title\":\"Call Ana back\",\"dueDate\":\"2026-11-05\",\"dueTime\":null,\"assigneeStaffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5821,
-            "cachedInputTokens": 5543,
-            "cacheWriteTokens": 275,
-            "outputTokens": 67
+            "inputTokens": 7173,
+            "cachedInputTokens": 6900,
+            "cacheWriteTokens": 270,
+            "outputTokens": 66
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c2f98b6ade56c766c102a024858bad997a1f5d2f8953e7f975695c589dadb8a4",
+        "fingerprint": "deab7c064ff1b3d17baa901536bce854e39b0e6b75093cc8b8ef3e0bb74ce3c6",
         "response": {
           "text": "Added a to-do for Jess to call Ana back on Thursday, November 5, at 9:00 AM.",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5946,
-            "cachedInputTokens": 5818,
-            "cacheWriteTokens": 125,
+            "inputTokens": 7297,
+            "cachedInputTokens": 7170,
+            "cacheWriteTokens": 124,
             "outputTokens": 28
           },
           "model": "gpt-6-luna"

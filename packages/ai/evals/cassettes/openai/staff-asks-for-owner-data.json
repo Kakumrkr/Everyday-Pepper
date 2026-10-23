@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "2eb522900503eced7e48b065ca9fc2405c6252b68bf34098b777536f83499dbb",
+        "fingerprint": "22da9fcfaf320842cbf43332cabfe4554d7f4181b4bda56dee7e6888ea80d7cf",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_8WvdmXeI2QKKU8OrmwC0Kw16",
+              "id": "call_PeWeK9xbdNOBJwTsufEirfJR",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5545,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6902,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "cbd854e9705ba666cb78f55bc8446143fd9807a47721d6b452796790912841c1",
+        "fingerprint": "763a156c78d571d363aba61ad07711a64c6de139107d698fc8e3fd20aa97e5c4",
         "response": {
-          "text": "I can’t see any open to-dos for Lena. The list shows no open to-dos I can access.",
+          "text": "There are no open to-dos visible to you.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5602,
-            "cachedInputTokens": 5542,
+            "inputTokens": 6959,
+            "cachedInputTokens": 6899,
             "cacheWriteTokens": 57,
-            "outputTokens": 28
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

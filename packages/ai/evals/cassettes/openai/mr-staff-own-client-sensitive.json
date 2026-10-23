@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7a34639e2ebaa3f3ba197a9f1f6278f58388c8892c0c20a2f98ece1b8adb1dca",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_aqGj4cdnyihAAix6o302AlJP",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6908,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 17,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "db165ad7ea2bbb056e0a7537bb11db7dadb4f6869853b521615a3023da2616b6",
+        "response": {
+          "text": "Yes—Maria L. is recorded as allergic to PPD. Please keep that in mind for her appointment tomorrow.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7058,
+            "cachedInputTokens": 6905,
+            "cacheWriteTokens": 150,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

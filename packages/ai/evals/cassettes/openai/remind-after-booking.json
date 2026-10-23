@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "22dfe4b54caec5739de35432d673ea82e8c3e0039a5d25943dae1ed5f359e87a",
+        "fingerprint": "d7f5bb009de8139676b8f5a101e3550d715ff8850f989479e1ecd3e6e7e7fed5",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_qrvjTjgS4u0AA8sTljzvd3FN",
+              "id": "call_IsVqdVbNxSb4ifQ6WqotPeNG",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5560,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6917,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 26,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "fc088fdb2f38b71576046356477e541e6807432fb06c9a4c4d981e2324d6970d",
+        "fingerprint": "f777cb513c1c4cda067ef9d8026a310cd8ba273a2d2dff43d5222eeeec543cee",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_QLZzglnMsVBi05QjO0PWBP1s",
+              "id": "call_I0dydJcFWe4IeSZ9jcOu8FkV",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -38,43 +38,26 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5840,
-            "cachedInputTokens": 5557,
-            "cacheWriteTokens": 280,
+            "inputTokens": 7185,
+            "cachedInputTokens": 6914,
+            "cacheWriteTokens": 268,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c89e89ea0c2c5f7a530487d12103a8288808b81a39579e6fffb3c8471298b4ee",
+        "fingerprint": "6db6a6e095d24b4fa49169ec83f510e2f56d9ea956cc9e0e728438ad85a9f807",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_CPaGUjnETdOMzN9En7cqxEr5",
+              "id": "call_6Nx962wApW6vm6tsPZ8wsOio",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"11:00\",\"emailClient\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 5924,
-            "cachedInputTokens": 5837,
-            "cacheWriteTokens": 84,
-            "outputTokens": 114
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "5f6f437f658364fd96083eff2d9e908511f12302fdef61dc0ac28fd3f26332a1",
-        "response": {
-          "text": "",
-          "toolCalls": [
+            },
             {
-              "id": "call_Bk31YJLh1tA9NinhLqRVQ0uW",
+              "id": "call_Lj9JIehB5dVkdT90kcFddVXj",
               "name": "add_todo",
               "arguments": "{\"title\":\"Confirm with Sara\",\"dueDate\":\"2026-11-04\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
@@ -82,18 +65,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6118,
-            "cachedInputTokens": 5921,
-            "cacheWriteTokens": 194,
-            "outputTokens": 44
+            "inputTokens": 7266,
+            "cachedInputTokens": 7182,
+            "cacheWriteTokens": 81,
+            "outputTokens": 163
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e04c6db2c06880c44733d6b7957501cc86e8b3a84ba426295ab5f5eb706dfef2",
+        "fingerprint": "c8de7b642cb3c0473f4b776f669e0981aab4bb1c587f299548865d9bb934beab",
         "response": {
-          "text": "Added your reminder to confirm with Sara on Wednesday at 9 AM.\n\nSara’s haircut with Marco on Thursday at 11 AM is awaiting your approval. Approve it on the card to complete the booking.",
+          "text": "Your reminder to confirm with Sara is set for Wednesday, November 4 at 9:00 AM. Sara’s haircut with Marco on Thursday, November 5 at 11:00 AM is waiting for your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -103,12 +86,12 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6220,
-            "cachedInputTokens": 5531,
-            "cacheWriteTokens": 686,
-            "outputTokens": 45
+            "inputTokens": 7565,
+            "cachedInputTokens": 7263,
+            "cacheWriteTokens": 299,
+            "outputTokens": 51
           },
-          "model": "gpt-6.1-sol"
+          "model": "gpt-6-luna"
         }
       }
     ]

@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "62348c4d33f750c42c3101447c060511b2309d126e13c2d825292b6475457c42",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8M0p8zrMyiqokQ2rjpAb049k",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6902,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 11,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b035f6ed9230934ea5db468a670161fa0ee6392d92f907cda577b6050ecb419d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AnDQmU26XCKi2Uw19u3yPSK2",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6988,
+            "cachedInputTokens": 6899,
+            "cacheWriteTokens": 86,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "45affdade5ba16086db6442a9685eb7c6fc3ccd7de6fb1596a25733a9a6763bf",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UeLJkyDsuySwLUGtTrevqEPp",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:sarah}}\",\"key\":\"preference\",\"value\":\"Prefers Marco.\",\"sensitive\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7261,
+            "cachedInputTokens": 6985,
+            "cacheWriteTokens": 273,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c74076745bd93bda6748f7de64034e722fc01efd8b38c5535f70d36c1a9c7f1b",
+        "response": {
+          "text": "I’ll remember that Sarah prefers Marco.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7363,
+            "cachedInputTokens": 7258,
+            "cacheWriteTokens": 102,
+            "outputTokens": 12
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "eb5b35b27c486e9a126dd1ab93517228a53e1848a42b19ad7bb03252ff82646d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NXqrbtbZ1d2ojeRRymj2lEl9",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6903,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 12,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "70319579365e2f484d1de6a057a2581b48a86d83d2ebac415931908c772d6eaa",
+        "response": {
+          "text": "Sarah prefers Marco.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7060,
+            "cachedInputTokens": 6900,
+            "cacheWriteTokens": 157,
+            "outputTokens": 8
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

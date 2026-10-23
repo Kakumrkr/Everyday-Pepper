@@ -3,31 +3,53 @@
   "trials": [
     [
       {
-        "fingerprint": "af53c4eb6674caa4c630c20819c696f606d0ed19ab1f34605cfa9730e4acb0ee",
+        "fingerprint": "4e6f8f1c47cfd3a72c48a2c0a57dc0ed16b0f3cfc7d6c4ceed5c1ed6941b5d70",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HUpWQSNYe4m2QGg7lXgrRaHR",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":null}"
+              "id": "call_kWewl3MddnGy4xLq6x5VvM8W",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 5544,
-            "cachedInputTokens": 5531,
+            "inputTokens": 6901,
+            "cachedInputTokens": 6888,
             "cacheWriteTokens": 10,
-            "outputTokens": 29
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "47a4e297177aa7781935524f2b19f3bff084b52ff479704743a3a129b451dedd",
+        "fingerprint": "c102f7ed9d266ad6ff0ad6d9a8bda9d1b2e63e37ecd779edeebcc5d0ca322f63",
         "response": {
-          "text": "There’s no block on Wednesday, November 4, for Jess. I can’t remove one from that day.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bUWOQ6rH73Kcn9VzZTK1tSNv",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7170,
+            "cachedInputTokens": 6898,
+            "cacheWriteTokens": 269,
+            "outputTokens": 52
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a9602cd416c3f0b3a10902d706a58a6926fe39411aaeaca0ced750ed4f2b4ad2",
+        "response": {
+          "text": "Jess has no block on Wednesday, November 4, so there’s nothing to remove.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 5627,
-            "cachedInputTokens": 5541,
-            "cacheWriteTokens": 83,
-            "outputTokens": 27
+            "inputTokens": 7276,
+            "cachedInputTokens": 7167,
+            "cacheWriteTokens": 106,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

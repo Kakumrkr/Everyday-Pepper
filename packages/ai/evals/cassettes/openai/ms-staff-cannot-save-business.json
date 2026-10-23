@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "048abc55141d058daed6ab161c59917cb2e8f68c3703622d12e7f113e40a68a0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_iXp06bwEqUkK1YCBYDwmcsQb",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6903,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 12,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "adbc6b28a7d0a218839b72f41e15d5202826a819e2f202f1ea0775826f786dcc",
+        "response": {
+          "text": "I can’t save business-wide details with my current permissions. An owner or manager can add that Fridays close early.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6996,
+            "cachedInputTokens": 6900,
+            "cacheWriteTokens": 93,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

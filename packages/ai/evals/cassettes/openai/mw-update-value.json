@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "647f0106cb135eb26b317ace61a1589cc546112b78c5fe5a029446609ee06e44",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_lV5YjALv5kHT1tmrFCbiTe9v",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6912,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 21,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "20ccc504a783cbcdc280b995d7ccb7679c6b3b34015fb5d5a380cc6752836c0c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_r2hEfj6fKZvX1knJqIoTstoP",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7068,
+            "cachedInputTokens": 6909,
+            "cacheWriteTokens": 156,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7fea26ac2ad5f11874f0c8526a903e408fba0de61574100968002edcf3729069",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Mg5chssybBqdfEl547cog0SX",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"usual_service\",\"value\":\"Colour with Jess\",\"sensitive\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7336,
+            "cachedInputTokens": 7065,
+            "cacheWriteTokens": 268,
+            "outputTokens": 61
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4ab9197cb26ee1321e7f6375228eacb8be4a44f2c0555344ace61ad600e6736f",
+        "response": {
+          "text": "Updated Maria’s usual service to colour with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7448,
+            "cachedInputTokens": 6909,
+            "cacheWriteTokens": 536,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

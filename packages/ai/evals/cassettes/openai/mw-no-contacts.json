@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7444565ff337a270577589173a79e44d951c5e2ec9b0771e98b940d805749ddb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vXkopslw8UIz7fJmYwXDQB6G",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6905,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 14,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "52a2e9a5be2ebcde8c9bbbcc36ffd1b7e3376ffd897f8a287d5a0a595972e2fc",
+        "response": {
+          "text": "I found Maria L., but I can’t save phone numbers here. Contact details need to be updated on her client record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_09de97ceab5e8171016adb66337f1c87d29a9306b3709bf56f",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq22Y0Gx7sgAOA4f2TtzSYoD0BGF0RT6l7-C7BkKwhZmGlFvFWVjc0qDmjn_g0ySovOXPGQyx1TGu0ajWfmC_UC-JWedbOoyjMXf4Iaq-_NFWVEZMdOAKnqMo8_tsxask5H5oEBRrafeo38GwqKHmwvHD_gTu8IEZNqw9G0Xx3NOSB-QqlyXpupy2Moj7LeDIbYOgQgo0Xl8xyMgpJOclqgpOcFr3dfgbTXM3fvCJZWkgJP3_99sLSttlhnzO-GjxpbgZ3qBTXwuEkxx27HeuZdOOFaQOV-Eiw8aqNYj7cho4SiA6t9TePzBLwtqznVN5tPaxJKfe-sawnYlEfyqu3wLZRLppbalzQnuvRsEQF-koutNTdyxyIPpjmie-Jn8a7eKSp523IC_kadCVY_yIuc0iLXe3qOTSJL0sFQV91dpQvP4bRFGbQMpiWfJZZJTYNQPodKzTfjEy8Q1YmZF1y3o_DZzijtGxIz9o0_ghkp_i7ZuQjkxItV4kaBQblbMU_99xzsHlDzPpaUvVyKmg5g9LTajSqnc_7Y6VA8X47N47PezmMO30C7WWyIR1PKKRdTP4iSsmGergvlGu3e7sB9cFeDl3ODiG_LChlUIqEFXWhSpfgLRjVpBCBtU3T3UkUcSN4sWsC08qNbEf0oTQgDSVuxCH5n5vPVxddot3alCIa-uiUXqJd7z6e61wStd9P9wfEpsvyOprvk5-aDhl9bqDUBZzyii9ONYmZ8E4CrY_YHjRKzJQtsp-fOfgE87atGyxLRK6zAlVF1Niv2GJvfFU6cuUQN_ow2znqr2yEyfg9Eaf138kC6t5eFkv49UZmTMM_mWQDwGt9WImMDmVFEdfIyMbiTFq-9tSfIJJQjeR5TzZmaZjOrEIDLmJrWh3goqruVYsefCcInPWbrdz7ca0Oh0uzWZDCDqNqfu_p11NYxNTf6pgBYS6nlh-OWJOPgtFQGf4B_XhjYaPoVqIRiJFscFYItNAQ7fa73KGafHPRYlYkRhyRbmusK32hM2Ycf-BFrVwnlkGwL5hSS0eOV1U8LaSy14N6IpElRPEWU_m9UjGHzqrOiq5duzrhMwENTn4VbFw0sc6UuCsIAO6LgRNFKxfZvhmbOdwG6rYlQbygL4XyeaMeHDLKcyOAqHEQoktGplLpLg6nsgwnCqec6jFPd5YL_Tt4sUGmX0du3WJ_oHT_Po15bsJd-mzn3f62q9-7hu1Jr1i0E0llF1N0Uyt8O0hOZjR2aS5LntRNheBWIQAL61s019qX9s4gG9NsUwzDqP9TETjTeblaKKLN2FIAyLJUOFGuZ2RLP3M7wkMYPCKTmsPGcZRNnuqVV8mYf4KP05xnbSO8evth3cM7hEwbclsXz4lJuxUBu44zsXVTYr9nhwFazZbb5cUbEpy2qXvnIXUMNHe5Xr87NQa_FbBSLlA6W641syuGXWHFE28c4OOt3QuqORrf3RF6ZPC_yX5vGKjROUAv0YpLg1NXq3mua8z_mpZOQc97i0fVTkUVfnDmfjkAgjD2wO84XXykffdyG4_q7BfiQZol_ogcObPnB1ID2xaJCYV2UgI9g43HfmudVf84JVg7XCHrrk7rqy04wK9yT0TTgwSZUA1mJjOR-6jTbLiGFMR6PMeunFRfuje2P-3qmR5bQV2kIZPiOLTga-NN5wAwVzvN9xN10skBesCgU43AzcAim5bgnoxIiHGXne0vw49QXSkVSPXJcr7YMVvr1A8R1WqjYs-YbLOs0MgAHu_Nk3j0_ad4Tt6Xu-Yj_d56I3YBznAnav6DMJXQZTw-i_ConkHjBmHlcW6Ndzicvg7cnkHes3yzhzn2NoJkDA2ZAMd84r_I1SLUxIeRuPr0aSdlPh6RRUBB6q3tsI-YJBaVvDcvslvK0jzfH9R3va_IGMbFNX7weD4iH__t",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 6987,
+            "cachedInputTokens": 6902,
+            "cacheWriteTokens": 82,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

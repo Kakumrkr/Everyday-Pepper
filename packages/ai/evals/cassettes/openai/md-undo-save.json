@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "8da38ae889fcbf15a5d727527f8b3dad159748b5503b31ed973af439e8f21354",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2T8yMnsldYpcmTcvuER0Y7BD",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6906,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 15,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "08a24fcd1806c4ea8055fd5ba2b6d24b9d5282b447cffbd219143a8060df6b1b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qWY1BnrhKr80QgmTclpaigst",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"Allergic to hazelnut oil.\",\"sensitive\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 6993,
+            "cachedInputTokens": 6903,
+            "cacheWriteTokens": 87,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9fc2dbff1c324242bbd1cb2128c97df82b0bf75bcc9042abc5eccf23e3a9565f",
+        "response": {
+          "text": "I’ll remember that Maria L. is allergic to hazelnut oil.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7101,
+            "cachedInputTokens": 6990,
+            "cacheWriteTokens": 108,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "87c15b36cff408998365226eb011142b78228279ca8d8ce53f8587f61be9788e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dY0a5GvowY22ZPWgEkbHbuVq",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 7123,
+            "cachedInputTokens": 6888,
+            "cacheWriteTokens": 232,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d8759b74007e88040293327ee09200accc323b1063915553f252806179a3fcaa",
+        "response": {
+          "text": "I don’t know what Maria is allergic to. The note I saved says “[forgotten],” which doesn’t identify an allergy.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0774efd758d6b99a016adb6760b72887d2af4c9d068822768d",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq22diAhqoLNXaY0jnZR14_3iMMoK72fMvo4TlC49d8gWbxiYnie428KdsAvlRlhxMTSibRr5Cop6VQMmOvLQ9QQUGjYQE4Tgf1sfy2JkwBujbNcqRQnGXNSuJP8Of7Xr7RnX8B3bnbo1PXFVZncW-cs-brmMmsrlMPB72G6nsu7BSnm9PqYDSuGc4z6zpU46p6j5nWqRGQU-FsD3QScMG5Y_AyiY54joksaiXRPhgVLAtGo8GOuiXkw5WLOaoKahMqrGdgErVJqc8XkzL64MBu7W-fGOghUrRjKBPcgUrE-26xkRF-T4Zovtn3IDKYerztplGkyf68mXTEBWdsvsFYY_Z-OHhV0M3nWWH_wnHJ4383U5s901InL3ui8pY_ZRyKqkHocLns9C4-5U3rRbEka6nVOmq0Bt7pKYzd147uDwWzbHToupuO0WoV4KoiOYOB3XU01DbwJotJIfFucwPaiitPmyjkdUI8bIGGXIl5xKjSrd63KkFNypkLC2nZ_oHzwFYJJpfsOU7AUGT5e1wOeTiWxWVs_A0QiIHFFugjlX3n9VNOqW5nGeVawxFApgApbvpVBrBRIyuo9qmPzqGTzDtXOHvtNfz1r6azbsP-GuquJLU_ew7YPbPM52xgJejbQeuFec_RvlkwJcZkzmx7tyGo3mGZVGBzgSIM7VXtWSpMAwYrf0Qi0pwoPUJJgOxemmC6X6iGjrsl_mNMl66RzkokeVI-o8ldwPFFHhHHG_-NC87cHLrtWCsokVCiE1HWilPJeBYSQGgPqiEhUc1rTBps9Rpjp3lTl7ipQ3xjbIargXEK5FROrjopkkp-p0DaRkNydl6zwuUEPTufE2XVgR4ebQIg-muioDN5_FBKfn2sVzNTMZgA1bDNdRU9JCXjgwYy7BeK71ZYmHFlML1PrB4bWnHJZWxFwGZM8n-A8CwVVDGr7I-HyMYhmFZcOifYwamMbM_VqYo2sH_V9PqL8RJ99XBZwv8f8Ss5_FR3GlmhaTdZU2LNuBPjFkbhfUgYEuiJwA6K_5bRJJhMUel7KlBNPSMG_VaiC_G82ynl1BmQ2kf5r9Uqtv__It9KqbjqpBFDtNbJVdtk_E6H_Meo6UPYuJLj2HLuTyL0qD4MAu6ZoH8yYRU421ho3sn5jjLVrj6QjBxbRqVQlSQ5TQMDAiGRVDq5jhAmKlw1QBGJzZaHMJtlTwX7IPYYA6EfTJOKUogqp64sSuFAqQIq9ER4g7Ggrq13Q1XZJvihn6cUqOt1-h7H2UC2qo-jKwtbnxfKL21Kwj6-xvW9f51uvCyI3fO5mm_H4ysS6lGYPAUq4v8voiwe17RlYBRXC0dvbKgQdEIdZZmwHC5MG0YvSJ0EnlXBeGiUhq-7LnbzR6rnqxxMFyxTX4LsbvBPXLeqzWrx-1BaYfh-7Neyu9q5Sepu-eGlRIMrbuI0JSKriYmeVbiXdXPi5jAmzod9EeJhwZCgNcocOgAnN4RgZ8krfuJAWBLNSsZhO25tkv-2qlEuy7pyWFJEeqDM9TxXMJQhogxyL7aUf2--b7fXZysA-mwucVEZbdtywifM8LRCPvoMa8UQkaqEibbhfPnhDBlC2buTw6V9KWrJ_I_mN3L-G1LUlh8HdjTOEPQRBTGylNCjGoiMyEcmfdvZMwhnkaSAdAqUxtBtNFIx-sml32CCJIAaES90w2j25_Zf1eYWx8GacVij3D-XlrXB0IK8P6svwF412QLa8UKE4gn95SUIWuBmEZzrAVSQoN1Pa5SA6XFGyUDLCM5zLCliw5qKO9OoAKhs44j1p0vLgmMRNr8vGCi_1oKN0Ia6V8CiVInoxa9sykECSolXVuAsWGUCAxH0mhot5YZ_Cb3dvMwnix3ZBBUhAv0pvNIOgqUj0YAGOhpAQgzUZnLnnmv1syvQElJw5iFw8CTo7NI9exMBzQVyk6gLhb0aeLk0OM7WNPI3NQd3WU-8yZdMYXDNHonaEKnNPiCn0LwC732z59X2IFxExHtq2wIgthSr6C50kfC7L0o8vQSTz3-MQpan_ewe78fAcDPeTG7pVJrz3acMXZkbpXiISYw1_x4QZviTROnNCanA8g7aQEewJHfDoQiC3mbDbFBI1TcxBTU_VWPITJhFNs6PhEYPJhdfwPAvtTbMdjvOsZn8WJWxjVoO-xJimeK4Ii5b1o1-raOlvF3GIGFkVz4YIU0YQt2Q98lPy2gHPxMHuQmfGOQbzfWJoOuHqWV5wdoNA7uKmojp_9ZUVG1uRMLVtAHAjSdXe5wDnfRaLVTu6-PwqiUNAf2sXld294cgAqqSzi_8Lc8nU_ScZAmclouaXBG-5n2xow2QsdmNNMp34Wl1RpoSvilkGwYeVqSlS95yRhkINCTkqX7xgXjIe-w42L3H0Pr_j4EylqgRcXuxyLUinAjigpQ3zxBkcOKmST4-P17zC87fGFhyHMorLxqATgd-NJgq6e85gB5P-XUr1VJM1TrDCYrTB8fD3-NNXNvvcbi8KG73Ju6kkj5aIZL1UhMEJx812OaueSTqHKuk6DfpdZ7l4iKmOZppQ0BRxPQn2AlBciSVZEBlichGjdFfmde2594xYB2MMiudyGhLSmiAw8jGrC3n8DWWSQccezayZ6MOIQb_AqGZXGGOLCZHDwZYnJPhtUn37PhNGODh4l2msUVA63hUPQOpQlOl4EuZR0-EdLteMi-PiVPk0TVzZEAp-UoZVQzjD5ZpJw8I6Bjz-SokGIxh7vZWpA0xoNTPk9aflmKLdoA5f2R3-3M65Z_d_GExqXEt2XCKUXYYTGKrR48vRr9x9hNrLs6wI90zchs8N58jZh_6kU6pHdko7wDgaEAtpWXdlj8mX8ql1b_dHhm3txf8cpoTlCB5V0kd9P-qNR5UtaVqDSJaiWRkkA0To-7Sc09zM8PwIF7LoAjSMaDjpreuY_mzkvBZd89zezF2KieuKK6QlPvH-DWnU-Xz3wuh6alyo6FX4ExBIA3oCDQVQjZ_DHlEGq4l0JCIhl_z9vjEVVb1bw7LvDoyqSP9yfoPLyVQm3WEuMKeOrJM9dtMciAPyw2ApxXDdUYInavyTp_sEFx11t7rcaHbt9ORxm9wu751JdypX4tRYtVpnMMLNOCnOw7C6bt4ifEvizznFUJ-RUtBf5B0-MnalEMcQURmY2CgC3wfnuV7YL2BNp5aO128eTR8fzS82o54SiJ7awQ7qa9uWJ_z0PuRBhp6saFHQQbeTgKEwTEKOMFSANJMrE7UKiTKRxLZ0UJII1a",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 7210,
+            "cachedInputTokens": 7120,
+            "cacheWriteTokens": 87,
+            "outputTokens": 175
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}
