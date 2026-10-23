@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0b6f16b216999646fc320db61c9eabba81f1235c0305ebb348b90f792e73f447",
+        "fingerprint": "418972fe2f7e672f51eaf441755fc5a9674319ee34233880b0af308f772548c0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_QrLbiH5Z0V3fnLOGQATYSIiO",
+              "id": "call_ZXNar4W7Xd2845VU2c3Z2jAt",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8230,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "6f7b8d928875adbc22b58d8e2bacc1b758581c857644a3e95c9e80b26b68161f",
+        "fingerprint": "3828e92a50b3c4645ee58c9e91759888ef52aab590f4c725176132e28081b256",
         "response": {
-          "text": "I couldn’t find a Sara Kim among your clients, so I can’t check her allergy notes. Could you confirm the spelling or give me another name to search?",
+          "text": "I couldn’t find a Sara Kim among your clients. Could you check the spelling?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7036,
-            "cachedInputTokens": 6969,
+            "inputTokens": 8294,
+            "cachedInputTokens": 8227,
             "cacheWriteTokens": 64,
-            "outputTokens": 37
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }

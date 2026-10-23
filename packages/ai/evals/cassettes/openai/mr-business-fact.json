@@ -3,7 +3,7 @@
   "trials": [
     [
       {
-        "fingerprint": "f2240ff1325edb2228e8740a18cd8e8a49fdac6ab60ec8b6ceaa26b1e6b44aac",
+        "fingerprint": "6cac65d6cb2e9ac55c16804e5729bf36ac6926631b2cebd34df8f52d91c1561f",
         "response": {
           "text": "Free parking is in Lot B after 6pm.",
           "toolCalls": [],
@@ -15,9 +15,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7046,
+            "inputTokens": 8304,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 7043,
+            "cacheWriteTokens": 8301,
             "outputTokens": 15
           },
           "model": "gpt-6-luna"

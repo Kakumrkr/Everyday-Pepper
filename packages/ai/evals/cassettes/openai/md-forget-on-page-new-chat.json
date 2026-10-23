@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "82275ddc61bfc54dda7bb3128119358c3c3f6d5d99b5a16e8654946e11bb6b0b",
+        "fingerprint": "dad16ab92fa292872fb898edc0502336704f00cec0425578343920b4eab3dbb8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GFvvC99iW2FVfyfZupxltGqG",
+              "id": "call_nBAOPfgxCYusyEL3SiJzWUgo",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6969,
+            "inputTokens": 8230,
+            "cachedInputTokens": 8227,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "cf013ab84bfad2f7fe3519da27d36b7782224ebbf50a3a798ee93e07d50b25ac",
+        "fingerprint": "da6ae20d3ee7f1c773287e0f6f2f181af139ca295f2fa9c9383ff5dd9326311a",
         "response": {
-          "text": "I found Maria L. The business remembers that she has an allergy: “Hazelnut oil”.",
+          "text": "I found one Maria L. The business remembers that she has an allergy: “Hazelnut oil”.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,21 +36,21 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7124,
-            "cachedInputTokens": 6969,
-            "cacheWriteTokens": 152,
-            "outputTokens": 24
+            "inputTokens": 8385,
+            "cachedInputTokens": 8227,
+            "cacheWriteTokens": 155,
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "dbd38a3224b3ecea78554029ecbe1bb2c88b54939ffdbdf25bfb6bc00e6b2213",
+        "fingerprint": "dd4f149307d8fd6f47e744014803b6f7dc7d44cf38126a8a5b6817a959c619e4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_NHzRfa3VI3uh4yZWm2fRD1Ib",
+              "id": "call_PdHldzXTfCL7z2wFCj6hVtFs",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -58,8 +58,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8230,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -67,31 +67,9 @@
         }
       },
       {
-        "fingerprint": "b6378e6750d583daf26503ffbd5fde0392cbe2fc269999e93414ce5e0c2ed41a",
+        "fingerprint": "5419dc59848e0f128d1e0ab6151a1fe0235368aabd4b1862c9557a9e9ec28569",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_ezBjAybq8gz9iIjfRlFpJkOf",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 7053,
-            "cachedInputTokens": 6969,
-            "cacheWriteTokens": 81,
-            "outputTokens": 40
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "b7cd07a92bae1f367aec0070c5b70741d3ec027fa821ab8a26f4ca98f6778be6",
-        "response": {
-          "text": "Maria L. has a confirmed haircut with Jess tomorrow, Tuesday, November 3, at 3:00 PM. Her last noted visit was a colour appointment with Jess on October 23. I don’t have any other notes about her.",
+          "text": "Maria L. is the only match. I don’t have any notes about her from the lookup.",
           "toolCalls": [],
           "replay": [
             {
@@ -101,10 +79,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7481,
-            "cachedInputTokens": 7050,
-            "cacheWriteTokens": 428,
-            "outputTokens": 53
+            "inputTokens": 8314,
+            "cachedInputTokens": 8227,
+            "cacheWriteTokens": 84,
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }
