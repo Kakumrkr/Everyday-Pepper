@@ -320,7 +320,7 @@ export const forgetFact: WriteTool = {
   tier: 'external_or_irreversible',
   alwaysAsks: true,
   guide: {
-    use: 'Forget one remembered fact or visit note when the member asks (it is removed everywhere, for good). Look the record up first to get the fact’s id.',
+    use: 'Forget one remembered fact or visit note when the member asks (it is removed everywhere, for good). Look the record up first: `factId` is the factId of a fact in its memory, never the client’s or booking’s id. To forget several ("everything about Maria"), call it once per fact.',
     avoid: [
       'to change a value (use remember_fact with the same key)',
       'unless the member asked to forget it',

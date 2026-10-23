@@ -29,6 +29,7 @@ import { insertService, insertStaffMember } from './repositories/appointments.js
 import { insertBooking } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
 import {
+  finishTurn,
   insertConversation,
   insertMessage,
   insertTurn,
@@ -377,6 +378,8 @@ describe('one current value per subject and key', () => {
   });
 });
 
+const REMOVED_ANSWER = '[Removed: this answer used a fact that was deleted]';
+
 describe('forget everywhere', () => {
   /** A conversation turn of `userId` with these messages; returns the turn id. */
   async function chat(
@@ -670,11 +673,125 @@ describe('forget everywhere', () => {
     expect(JSON.parse(tool?.content ?? '')).toEqual({ saved: '[forgotten]' });
   });
 
+  it('a forgotten fact takes the AI’s answers that recalled it, however worded (S30b)', async () => {
+    const note = await save(
+      fact({ type: 'booking', id: mariaVisit }, 'toner_formula', '6N + 20 vol, 35 min'),
+      ana,
+    );
+    const kept = await save(
+      fact({ type: 'client', id: maria }, 'favourite_drink', 'Oat latte'),
+      ana,
+    );
+    // One conversation, three turns: before the look-up, the look-up, and a repeat from history.
+    const turns = await as(ana, async (tx) => {
+      const conversationId = ConversationIdSchema.parse(
+        (await insertConversation(tx, { userId: ana, channel: 'chat' })).id,
+      );
+      const ids: ConversationTurnId[] = [];
+      for (const messages of [
+        [
+          { role: 'user', content: 'Hi' },
+          { role: 'assistant', content: 'Hello! How can I help?' },
+        ],
+        [
+          { role: 'user', content: 'What formula did we use on Maria last time?' },
+          { role: 'assistant', content: '', call: true },
+          { role: 'tool', content: JSON.stringify({ lastVisit: { notes: [{ $fact: note }] } }) },
+          { role: 'assistant', content: 'Her last formula was 6N with 20 volume, for 35 minutes.' },
+        ],
+        [
+          { role: 'user', content: 'Say that again?' },
+          { role: 'assistant', content: 'Six N, twenty volume, thirty-five minutes.' },
+        ],
+      ] as const) {
+        const turn = await insertTurn(tx, {
+          conversationId,
+          userId: ana,
+          clientTurnId: newId(),
+          deadlineAt: new Date(Date.now() + 60_000),
+        });
+        if (turn === undefined) throw new Error('no turn');
+        const turnId = ConversationTurnIdSchema.parse(turn.id);
+        for (const message of messages) {
+          const base = { conversationId, turnId, userId: ana, untrusted: false };
+          await insertMessage(
+            tx,
+            message.role === 'user'
+              ? { ...base, role: 'user', content: message.content }
+              : message.role === 'assistant'
+                ? {
+                    ...base,
+                    role: 'assistant',
+                    step: 1,
+                    content: message.content,
+                    toolCalls:
+                      'call' in message
+                        ? [{ id: 'call_1', name: 'find_client_bookings', arguments: '{}' }]
+                        : [],
+                    replay: [{ type: 'reasoning', encrypted_content: 'opaque' }],
+                  }
+                : {
+                    ...base,
+                    role: 'tool',
+                    step: 1,
+                    toolCallId: 'call_1',
+                    toolName: 'find_client_bookings',
+                    isError: false,
+                    content: message.content,
+                    card: null,
+                  },
+          );
+        }
+        await finishTurn(tx, turnId, {
+          status: 'completed',
+          stopReason: 'answered',
+          at: new Date(),
+          progress: null,
+        });
+        ids.push(turnId);
+      }
+      return ids;
+    });
+    // Another conversation recalled only the fact that stays.
+    const other = await chat(ana, [
+      { role: 'user', content: 'What does Maria like to drink?' },
+      { role: 'tool', content: JSON.stringify({ memory: [{ $fact: kept }] }) },
+      { role: 'assistant', content: 'An oat latte.' },
+    ]);
+
+    expect(await as(ana, (tx) => deleteMemoryFact(tx, note))).toBe(true);
+
+    const [before, lookUp, repeat] = await Promise.all(turns.map((turn) => stored(turn)));
+    // Before the look-up the model had not seen it: untouched.
+    expect(before?.map((row) => row.content)).toEqual(['Hi', 'Hello! How can I help?']);
+    expect(before?.[1]?.replay).toEqual([{ type: 'reasoning', encrypted_content: 'opaque' }]);
+    // From the look-up on, the AI's words in that conversation go, with its reasoning items;
+    // the member's words and the tool answer (a reference, no value) stay.
+    expect(lookUp?.map((row) => row.content)).toEqual([
+      'What formula did we use on Maria last time?',
+      '',
+      JSON.stringify({ lastVisit: { notes: [{ $fact: note }] } }),
+      REMOVED_ANSWER,
+    ]);
+    expect(lookUp?.[1]?.tool_calls).toEqual([
+      { id: 'call_1', name: 'find_client_bookings', arguments: '{}' },
+    ]);
+    expect(lookUp?.[3]?.replay).toEqual([]);
+    expect(repeat?.map((row) => row.content)).toEqual(['Say that again?', REMOVED_ANSWER]);
+    expect(await anywhere(/35 min|thirty-five/i)).toEqual([]);
+    // A conversation that recalled only other facts keeps its answers.
+    expect((await stored(other)).map((row) => row.content)).toContain('An oat latte.');
+  });
+
   it('the scrub can only be reached by deleting a fact', async () => {
     const direct = await inTenant((tx) =>
       tx.execute(sql`SELECT memory_scrub(${tenant}::uuid, 'Maria', now(), NULL)`),
     ).catch((e: unknown) => e);
     expect(sqlState(direct)).toBe('42501');
+    const recalled = await inTenant((tx) =>
+      tx.execute(sql`SELECT memory_forget_recalled(${tenant}::uuid, ${newId()}::uuid, now())`),
+    ).catch((e: unknown) => e);
+    expect(sqlState(recalled)).toBe('42501');
     const update = await as(ana, (tx) =>
       tx.execute(sql`UPDATE conversation_messages SET content = 'rewritten'`),
     ).catch((e: unknown) => e);
