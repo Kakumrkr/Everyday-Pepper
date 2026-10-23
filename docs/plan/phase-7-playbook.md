@@ -73,7 +73,7 @@ An employee remembers. After Phase 6 Pepper acts well inside one conversation an
 ## 4. OpenAI budget policy for Phase 7
 
 - **Remaining credit:** $4.26 of the $5 (S27 spent $0.74, [ai-budget.md](ai-budget.md)). The runner's guards stay as built in S27: ≤ 25 cases a run (`--chunk`), worst-case estimate ≤ $1.50 a run, nothing past $4.50 cumulative, every answer a cassette, CI only replays.
-- **Phase 7 cap: $1.00.** A full pass of today's cases cost $0.058; Phase 7 adds about 80 cases and a re-record of everything once the new tools exist, so the expected spend is about $0.30. The rest stays for Phases 8–9. S29 adds a `--phase-cap` guard (the runner sums the ledger rows labelled `P7` and refuses past $1.00).
+- **Phase 7 cap: $1.00.** A full pass of today's cases cost $0.058; Phase 7 adds about 80 cases and a re-record of everything once the new tools exist, so the expected spend is about $0.30. The rest stays for Phases 8–9. S29 added the guard: a recording needs `--phase 7`, its ledger label starts with `P7 `, and the runner refuses past $1.00.
 - **Recorded from the start, on the chosen models** (`gpt-6-luna` effort `low`, `gpt-6.1-sol` effort `low`, ADR-0033): every session that adds memory cases records them at its end on the real models, after they are green on the fakes. No separate real-model session at the end — S33 does the final re-record and pass^3.
 - **Embeddings:** `text-embedding-3-small` (S29 re-checks the official pricing and models pages first and records the price in `prices.json`). At about $0.02 per million tokens the whole Phase 7 corpus costs well under a cent. Embedding answers are recorded as cassettes and ledger rows like model answers.
 - **Batch description changes:** any tool description or instruction change re-records every cassette (ADR-0033), so S30–S32 change descriptions freely on the fakes and record once at each session's end.
@@ -130,14 +130,14 @@ Also checked in S33: the isolation suite at 100% with the new tables, `pnpm audi
 ### S28 (7a) — Phase 7 planning — done
 - This playbook, [PCR-005](changes/PCR-005.md), the roadmap and STATUS.
 
-### S29 (7b) — Memory store: tables, pgvector, embeddings, forget-everywhere
+### S29 (7b) — Memory store: tables, pgvector, embeddings, forget-everywhere — done ([ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md))
 - **Build:**
   - migration enabling `vector` (pgvector 0.8.7 in the Compose image);
   - `memory_facts`: subject (type + composite tenant key to client, staff member, service, booking or the business), key from a closed vocabulary plus `custom`, value ≤ 500 chars, `previous_value` (Undo window only), sensitivity, source kind + ids, author, status `active`/`proposed`, unique active per subject + key; visit notes are facts on a `booking` subject (several keys per visit);
   - `memory_episodes`: owner member, conversation id, summary ≤ 1,000 chars, subject ids, `embedding vector(1536)`, embedding model;
   - RLS, member scope (episodes own-only; sensitive via the `client_notes.read` scope), guard triggers, cascades from clients, staff, services, bookings, members;
   - core services `saveFact`, `changeFact`, `forgetFact` (the one-transaction forget of principle 7, incl. the conversation scrub through a narrow redaction function in the append-only guard), `listFacts`, `factsFor`, `saveEpisode`, `deleteEpisode`, `searchEpisodes`; audit without values; the memory pause setting;
-  - `embed` on the `LlmProvider` port, the OpenAI embeddings adapter, the fake embedder, the provider contract suite extended; embedding tokens metered; `prices.json`, the ledger and `--phase-cap`;
+  - an `Embedder` port (built as a port of its own, ADR-0034), the OpenAI embeddings adapter, the fake embedder, a contract suite on both; embedding tokens metered; `prices.json`, the ledger and the runner's `--phase` cap;
   - tenant export and account deletion include memory. ADR-0034.
 - **Think hard about:** the redaction path in the append-only conversation guard (narrow, audited, only through `forgetFact`); value matching for the scrub (case-insensitive, whole value, plus the key phrase); exact search (D-4); the subject keys across five tables.
 - **Pitfalls:** a similarity query that filters after `LIMIT`; a cascade that leaves embeddings or a previous value; values with contacts; logging a value or a vector.
@@ -189,6 +189,7 @@ Section 9 of the Phase 6 playbook applies as written: re-check the references an
 | Session | Learned / next try |
 |---|---|
 | S28 | Reviewing the plan against how general assistants handle memory showed that deleting the fact alone would not have met AC-W7-2: the value would live on in chat history, proposal payloads, execution records and episodes. Keeping values only in the memory tables and referring to them by id everywhere else makes deletion total by construction. Next (S29): build `forgetFact` and its storage test before any tool exists. |
+| S29 | Building `forgetFact` first, against real Postgres, paid off: the self-review of the trigger found that scrubbing *all* history let a staff member erase any word from the owner's older chats by saving and deleting a fact, so the scrub now covers only text written since the fact existed plus its source turn. Values with quotes hid inside tool-call arguments as JSON escapes, and a scrubbed card could outgrow its schema (now dropped). `embed` as its own port kept every chat fake and cassette untouched. Next (S30): keep fact values out of proposals, receipts and stored tool answers (ids, filled in when sent), and grade deletion on the provider requests, including the same chat continued. |
 
 ## 10. Decisions for this phase (Claude's recommendation for each, approved with the playbook)
 
@@ -205,7 +206,7 @@ Section 9 of the Phase 6 playbook applies as written: re-check the references an
 | D-9 | Episodes | **A summary per conversation 30 min after its last turn, routine model, own-only, kept 365 days** | Matches own-only conversations and outlives their 90-day deletion on purpose |
 | D-10 | Learned rules | **Only onto existing rule types and working hours, through a new dial action `rule.change` locked to "ask"; owners/managers approve** | Deterministic, explainable, never silent (PCR-005) |
 | D-11 | Deleting on "What I know" | **Immediate hard delete everywhere after a confirm; no Undo** (an AI save can be undone from its receipt within 7 days) | AC-W7-2, M-2 |
-| D-12 | Phase 7 OpenAI budget | **$1.00 cap of the remaining $4.26, recorded per session from S30, enforced by `--phase-cap`** | Expected ~$0.30; room for Phases 8–9 |
+| D-12 | Phase 7 OpenAI budget | **$1.00 cap of the remaining $4.26, recorded per session from S30, enforced by the runner's `--phase`** | Expected ~$0.30; room for Phases 8–9 |
 | D-13 | Where values live | **Only in the memory tables; ids everywhere else; one forget scrubs stored conversations and episodes** | Makes AC-W7-2 true by construction (PCR-005: an ADR-0028/ADR-0030 amendment) |
 | D-14 | Visit notes | **Facts on a `booking` subject; template-suggested keys (formula, pressure, products)** | Salons' most-used client knowledge; "same as last time" |
 | D-15 | Pause | **One business-level switch for owners, on by default** | Global control (HAX G17); cheap |
@@ -234,4 +235,4 @@ Section 9 of the Phase 6 playbook applies as written: re-check the references an
 3. **Visit notes and "same as last time" (D-14)** — the salon feature competitors keep as free text.
 4. **Last-visit note on the booking card** next to the allergy warning (M-1).
 5. **"Remembered" chip (D-16)** and the **pause switch (D-15)**.
-6. **`--phase-cap`** so the Phase 7 budget is enforced in code, not by discipline.
+6. **A phase cap in the runner** (`--phase`) so the Phase 7 budget is enforced in code, not by discipline.

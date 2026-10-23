@@ -898,6 +898,29 @@ Everything each session did, oldest first: what was built, the checks run and th
   - **Checks:** `pnpm check` green (docs only).
   - **Not done / for later:** S29 re-checks the embedding model and price on OpenAI's official pages before any spend.
 
+- **S29 Phase 7b (2026-10-23): the memory store, forget everywhere, the embedding port** ([ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md), accepted). Branch `claude/magical-knuth-ky75f5`. No OpenAI spend.
+  - **Brief:** the user said "Go ahead with your recommendations, start S29". Embeddings are tested on fixtures shaped like OpenAI's documented answers; real ones are recorded in S31.
+  - **Tasks:**
+    - T1: contracts `memory.ts` and audit actions; migrations 0037 (pgvector), 0038 (tables), 0039 (FORCE RLS, guards, the forget triggers); db repository `memory.ts`; the isolation suite gains both tables (a new `noUpdate` kind for episodes); `memory.int.test.ts` (db).
+    - T2: core `services/memory.ts`, the errors, the clean-up (Undo values, 365-day episodes); `memory.int.test.ts` (core), the clean-up test.
+    - T3: the `Embedder` port, `OpenAiEmbedder`, `hashEmbedder`, `meteredEmbedder`, a contract suite on both; `OPENAI_MODEL_EMBEDDING`. The price of `text-embedding-3-small` was checked on OpenAI's pricing page: $0.02 per million.
+    - T4: the eval runner's `--phase`, required with `--record`, with Phase 7's $1 cap before and during a run.
+    - T5: ADR-0034, docs, checks, self-review.
+  - **Self-review (fixed before the end):**
+    - Scrubbing all history let a staff member erase any word from the owner's older chats by saving and deleting a fact on their own client. The scrub now covers text written since the fact existed, plus its source turn.
+    - A value with quotes hid inside tool-call arguments as JSON escapes; both forms are now matched in every JSON string.
+    - A scrubbed card could outgrow its field limits; a card that held the value is now dropped.
+    - The scrub helpers can't be called by the services' role (tested).
+    - A staff member reading a business fact got "not found" on change (the lock needs the update policy); they now get `ForbiddenError`.
+  - **Checks:**
+    - `pnpm check` green: contracts 556, db 48 (coverage 88/88/83/88), core 1,190, ai 250, api 292, web 264.
+    - `pnpm test:integration` green, 1,015: db 541, core 157, ai 98, appointments 137, api 74, worker 4, runtime 2, testing 2.
+    - Playwright 74/74 against a local stack. The Compose image build could not reach npm through the session's proxy; the documented "without Docker images" path was used.
+  - **Not done / for later:**
+    - No tenant export or account deletion exists yet; memory goes with its business by key. Export comes with Phase 11's legal docs.
+    - The forget path is tested with a superuser schema owner, as in Compose and CI. A non-superuser owner is handled in the functions but untested; check it in the Phase 11 deployment.
+    - Forget performance (a regular-expression scan of the business's recent messages) belongs in the Phase 11 load test.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

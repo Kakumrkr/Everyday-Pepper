@@ -257,3 +257,15 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - visit notes are facts on a booking;
   - a business pause switch;
   - a "Remembered" chip.
+- **S29 Session Brief (user, 2026-10-23):** "Go ahead with your recommendations, start S29":
+  - embedding tests on fixtures shaped like OpenAI's documented answers, at $0;
+  - real embeddings recorded in S31, when the retrieval set exists.
+- **S29 decisions (Claude, in ADR-0034, within the approved playbook):**
+  - `embed` is a port of its own (`Embedder`), not a method on `LlmProvider`;
+  - forget scrubs every member's stored chats and episodes, but only text written since the fact existed plus its source turn (closes an erase-a-word attack);
+  - cards that held a forgotten value are dropped, and reasoning items in those turns too;
+  - values under 3 characters are not matched;
+  - staff read the business's, staff's and services' non-sensitive facts, change only their clients' and visits' facts, and get `ForbiddenError` on what they read but may not change;
+  - caps: 50 facts per subject, 20,000 per business, 5,000 episodes per member;
+  - the pause switch blocks saves from the chat and AI actions, and new episodes; people on screens still save, and everything can still be deleted;
+  - `--phase` is required to record, with the Phase 7 cap enforced in the runner.

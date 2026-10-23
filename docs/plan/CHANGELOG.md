@@ -2,6 +2,17 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.26 — 2026-10-23
+- S29 (Phase 7b): [ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md) (the user at the brief: "Go ahead with your recommendations, start S29"). **The memory store:**
+  - `memory_facts` (one active value per subject and key, visit notes, sensitive facts, staff scope);
+  - `memory_episodes` (own-only, pgvector, exact search);
+  - a pause switch;
+  - **forget everywhere:** a deleted fact's value leaves every member's stored chats and episodes in the same transaction, limited to what the fact could have reached;
+  - the `Embedder` port (OpenAI and a free hash fake, metered);
+  - a cap per phase for real eval runs (Phase 7: $1).
+
+  **Additive changes:** migrations 0037–0039, contracts `memory.ts` and embedding schemas, audit actions `memory_*`, optional `OPENAI_MODEL_EMBEDDING`, `CleanupResult.memoryPreviousValues`/`memoryEpisodes`, eval runner `--phase` (required with `--record`). No OpenAI spend.
+
 ## 0.25 — 2026-10-23
 - S28 (Phase 7a, planning): the [Phase 7 playbook](phase-7-playbook.md) and [PCR-005](changes/PCR-005.md), approved by the user ("review your plan, if you can build a better plan you can, and start"). Phase 7 runs as S29–S33:
   - S29: the memory store, pgvector, embeddings, forget everywhere;

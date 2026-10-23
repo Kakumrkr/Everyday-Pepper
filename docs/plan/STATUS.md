@@ -1,42 +1,44 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-23 · **Plan version:** 0.25 · **Current phase:** 7 — Memory, **planned in S28** ([Phase 7 playbook](phase-7-playbook.md), approved; [PCR-005](changes/PCR-005.md)) → next: **S29** (memory store)
+**Last updated:** 2026-10-23 · **Plan version:** 0.26 · **Current phase:** 7 — Memory ([Phase 7 playbook](phase-7-playbook.md), [PCR-005](changes/PCR-005.md)); **S29 done** (memory store, [ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md)) → next: **S30** (facts in the AI)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S29 (7b) memory store**, branch `claude/magical-knuth-ky75f5`. User at the brief: "Go ahead with your recommendations, start S29" (embedding tests on doc-shaped fixtures, $0; real embeddings recorded in S31).
-- Done: T1 contracts `memory.ts`, audit actions, migrations 0037–0039 (pgvector, `memory_facts`, `memory_episodes`, `tenants.memory_paused`, forget-everywhere triggers), db repository `memory.ts`, isolation suite + `memory.int.test.ts` green.
-- Next: T2 core services (`saveFact`, `changeFact`, `forgetFact`, `listFacts`, `factsFor`, episodes, pause, clean-up); T3 `Embedder` port; T4 `--phase-cap`; T5 ADR-0034, docs, checks.
-- Note: no tenant export or account deletion exists yet; memory goes with its tenant, client, staff member, service, booking and member by keys (export is a Phase 11 item).
+Nothing. S28 and S29 are finished and pushed to `claude/magical-knuth-ky75f5` (no PR yet).
 
 ## Last sessions
+- **S29 Phase 7b (2026-10-23): memory store, forget everywhere, embedding port** ([ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md), accepted). Full entry in [session-log.md](session-log.md).
+  - **Built:**
+    - migrations 0037–0039: pgvector, `memory_facts` (one active value per subject and key, visit notes, sensitive, staff scope), `memory_episodes` (own-only, exact search), `tenants.memory_paused`;
+    - **forget everywhere:** deleting a fact scrubs its value from every member's stored chats (text, tool calls, cards, reasoning items) and episodes written since it existed, plus its source turn;
+    - core memory services, the pause switch, the clean-up;
+    - the `Embedder` port (OpenAI, hash fake, metered; `OPENAI_MODEL_EMBEDDING` optional);
+    - the runner's `--phase` cap (Phase 7: $1).
+  - **Checks:**
+    - `pnpm check` green (contracts 556, db 48, core 1,190, ai 250).
+    - `pnpm test:integration` green, 1,015 (+41).
+    - Playwright 74/74.
+    - $0 spent.
+  - **Self-review fixed:** an erase-a-word attack through save-then-forget (scrub limited to the fact's lifetime), quoted values in tool calls, cards that could outgrow their schema.
 - **S28 Phase 7a (2026-10-23): Phase 7 planning** ([Phase 7 playbook](phase-7-playbook.md), approved; [PCR-005](changes/PCR-005.md), approved). Docs only. Full entry in [session-log.md](session-log.md).
   - **Plan:** S29 store → S30 facts in the AI → S31 episodes and learned rules → S32 "What I know" → S33 re-record, pass^3, security review, exit.
   - **Bar:** recall ≥ 95% (pass^3 ≥ 90%); deletion 100% at pass^3, graded on provider requests and storage; memory safety 100%; AC-W3-1/2, AC-W7-2. Phase 7 OpenAI cap $1.00, recorded per session on Luna + Sol.
   - **Review changes:** values live only in the memory tables, and one forget scrubs chat history, episodes and Undo values. Also visit notes ("same as last time"), the last visit on the booking card, the "Remembered" chip, a pause switch and `--phase-cap`.
   - **Checks:** `pnpm check` green.
-- **S27 Phase 6f (2026-10-22/23): real-model evals, model choice, security review, Phase 6 exit** ([ADR-0033](../adr/0033-real-model-evals-and-model-choice.md), accepted; [security review](../engineering/security-review-s27.md)). Full entry in [session-log.md](session-log.md).
-  - **Models:** routine `gpt-6-luna` (effort `low`), strong `gpt-6.1-sol` (effort `low`). Chosen from a full pass of Luna and `gpt-5.4-mini`: a tie on quality, and Luna's calls are 8× cheaper. Set them with `OPENAI_MODEL_*` and `OPENAI_REASONING_*` (`.env.example`).
-  - **Results:** every gate met. Scheduling 97% (pass^3 95%); safety, permissions and autonomy 100% at pass^3; about $0.0005 a case. **Spent $0.74 of $5**, every run in [ai-budget.md](ai-budget.md).
-  - **Changes:** four fixes (three tool descriptions, one instruction line), routing to the strong model after step 4, web addresses removed from the AI's text in code. Cache writes are metered. `cassettes/openai` is replayed in CI.
-  - **Checks:**
-    - `pnpm check` green (ai 226 unit tests).
-    - `pnpm test:integration` green, 974.
-    - Playwright 74/74, twice.
-  - **Phase 6 exit: met.**
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
 - **CI minutes:** one CI run per session: all checks locally first, every commit (docs, "ADR accepted", STATUS) in before the PR, pushes to an open PR only to fix CI; docs-only PRs skip the slow jobs; CI runs on PRs, weekly on `main` and by hand. **No retries in CI** (M1).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
-- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy.
+- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy. **Phase 7 (S28):** at most $1.00 of the rest, recorded per session from S30 on Luna + Sol; the runner enforces it (`--phase 7`).
 - **Skip domain, business email and LLC** until before the pilot (Phase 11); brand, trademark and domain checks then.
 - **Design:** Pepper green + chili accent (PCR-002), Bricolage Grotesque + Figtree, warm and friendly, mobile-first (`docs/mockups/README.md`).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S29 (user, 2026-10-23):** "Go ahead with your recommendations, start S29". Embedding tests on fixtures shaped like OpenAI's documented answers ($0); real embeddings recorded in S31. **Claude (ADR-0034):** `embed` as a port of its own; the scrub limited to text since the fact existed plus its source turn; cards that held a forgotten value dropped; staff read the business's non-sensitive facts and change only their clients' and visits'; `--phase` required to record.
 - **S28 (user, 2026-10-23):** asked for the Phase 7 playbook, then "review your plan, if you can build a better plan you can, and start" (Claude as technical advisor: better, more and more efficient features than competitors). Approved: the reviewed playbook and PCR-005 (§10 D-1…D-16), adjustable at the S29 brief.
 - **S27 (user, 2026-10-22, Session Brief):** one session; unblock Undo refuses over a new booking; routine model by evals; about 120 cases with 20% held out; Sentry/Grafana at the start of Phase 11 pilot prep (Claude's advice). **Claude (ADR-0033, choice delegated "by pass rate, latency and cost"):** Luna + Sol at effort `low`; the strong model after step 4; the link scrubber; case corrections only where a case contradicted the world, the dial or the privacy rules; the reserve was not spent.
 - **S26b (user, 2026-10-21, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved": a staff member unblocking a colleague's time is `forbidden` (they can see it); explanation facts this session; no new card kinds or Playwright journeys.
@@ -61,11 +63,10 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S27 are done and merged (Phases 0–6). S28 (Phase 7 planning) is done on its branch. Details in [session-log.md](session-log.md).
+S1–S27 are done and merged (Phases 0–6). S28 (Phase 7 planning) and S29 (memory store) are done on their branch. Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S29 | **Memory store** (playbook §7 S29): `memory_facts` (incl. visit notes) and `memory_episodes` with pgvector, RLS, member scope, cascades; `forgetFact` that leaves the value nowhere (history scrub, episodes, Undo value); `embed` on the provider port (fake + OpenAI, re-check price first); metering, `--phase-cap`; export and account deletion; ADR-0034 | 7b | Storage tests prove forget leaves nothing; isolation 100% incl. vectors; no chat model |
 | S30 | Facts in the AI: `remember_fact`, `add_visit_note`, `forget_fact`, recall with the entity, warnings and last visit on booking cards (AC-W3-2), "the usual"; evals recorded on Luna + Sol | 7c | Playbook §7 S30 |
 | S31 | Episodes (`search_memory`) and learned rules (`rule.change`) | 7d | Playbook §7 S31 |
 | S32 | "What I know", client profile memory and visit notes, "Remembered" chip, pause switch | 7e | AC-W3-1, AC-W7-2 in Playwright |
