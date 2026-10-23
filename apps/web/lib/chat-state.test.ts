@@ -1,4 +1,5 @@
 import {
+  ChatEventSchema,
   ChatHistoryItemSchema,
   type ChatEvent,
   type ChatEventEnvelope,
@@ -42,20 +43,23 @@ const started = {
   requestMessageId: ID,
 } as ChatEvent;
 
+const FACT = '0199f4b2-7c1e-7a00-8000-0000000000f1';
+
 describe('chatReducer', () => {
   it('streams the answer into one bubble, then completes it and ends the turn', () => {
     const state = run([
       started,
       { type: 'text.delta', delta: 'On ' },
       { type: 'text.delta', delta: 'it.' },
-      { type: 'message.completed', messageId: ID, text: 'On it.' } as ChatEvent,
+      { type: 'message.completed', messageId: ID, text: 'On it.', factIds: [FACT] } as ChatEvent,
       { type: 'turn.completed', reason: 'answered' },
     ]);
     expect(state.conversationId).toBe(ID);
     expect(state.turn).toBeNull();
     expect(state.items).toEqual([
       { kind: 'user', id: 'c1', text: 'Remind me' },
-      { kind: 'assistant', id: ID, text: 'On it.', streaming: false },
+      // The facts the answer used come with it (the "Remembered" chip, S32).
+      { kind: 'assistant', id: ID, text: 'On it.', streaming: false, factIds: [FACT] },
     ]);
   });
 
@@ -153,11 +157,13 @@ describe('itemsOfHistory and blocksOf', () => {
           kind: 'assistant',
           id: '0199f4b2-7c1e-7a00-8000-0000000000b3',
           text: 'Done.',
+          factIds: [FACT],
           createdAt: '2026-10-27T10:00:00.000Z',
         },
       ].map((item) => ChatHistoryItemSchema.parse(item)),
     );
     expect(items.map((item) => item.kind)).toEqual(['user', 'card', 'assistant']);
+    expect(items[2]).toMatchObject({ factIds: [FACT] });
     expect(items[1]).toMatchObject({ status: 'awaiting_approval' });
 
     const streamed = run([
@@ -178,7 +184,7 @@ describe('itemsOfHistory and blocksOf', () => {
         code: null,
         card: change('done'),
       },
-      { type: 'message.completed', messageId: ID, text: 'Two things.' } as ChatEvent,
+      ChatEventSchema.parse({ type: 'message.completed', messageId: ID, text: 'Two things.' }),
     ]);
     const blocks = blocksOf(streamed.items);
     expect(blocks.map((block) => block.kind)).toEqual(['item', 'plan', 'item']);

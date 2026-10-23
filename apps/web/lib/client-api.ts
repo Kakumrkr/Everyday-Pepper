@@ -64,6 +64,12 @@ const MESSAGES: Record<string, string> = {
   action_not_found: 'That action is gone, or it isn’t yours to undo.',
   undo_window_closed: 'This can no longer be undone.',
   undo_refused: 'This can’t be undone any more: things changed since. Nothing was changed.',
+  // What Pepper remembers (S32).
+  memory_fact_not_found: 'I no longer remember that.',
+  memory_subject_not_found: 'That client, team member, service or visit is gone.',
+  memory_episode_not_found: 'I no longer remember that conversation.',
+  memory_limit_reached: 'I remember as much as I can here. Delete something first.',
+  memory_paused: 'Remembering new things is paused for this business.',
 };
 
 const FALLBACK = 'Something went wrong. Try again.';

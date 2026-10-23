@@ -38,6 +38,7 @@ import {
   reserveLlmTokens,
   STALE_TURN_GRACE_MS,
   turnMessages,
+  answerFacts,
   type Actor,
   type Clock,
   type TenantContext,
@@ -245,9 +246,16 @@ export class ChatService implements OnModuleDestroy {
         requestMessageId: request.id,
       });
     }
+    const used = answerFacts();
     for (const message of messages) {
+      const factIds = used(message);
       if (message.role === 'assistant' && message.content.trim() !== '') {
-        events.push({ type: 'message.completed', messageId: message.id, text: message.content });
+        events.push({
+          type: 'message.completed',
+          messageId: message.id,
+          text: message.content,
+          factIds,
+        });
       }
       // The cards the member saw, so a resumed turn shows its proposals and receipts too (S26:
       // before, a turn read back after its event log expired lost them).

@@ -1,10 +1,13 @@
 import {
+  ANSWER_FACTS_MAX,
   ConversationIdSchema,
   ConversationMessageIdSchema,
   ConversationTurnIdSchema,
   LlmReplaySchema,
   ChatTurnRequestSchema,
   LlmAssistantMessageSchema,
+  MemoryFactIdSchema,
+  memoryFactRefsIn,
   ToolCardSchema,
   TurnStatusSchema,
   TurnStopReasonSchema,
@@ -17,6 +20,7 @@ import {
   type ConversationTurnId,
   type LlmReplay,
   type LlmToolCall,
+  type MemoryFactId,
   type ToolCard,
   type TurnStatus,
   type TurnStopReason,
@@ -347,13 +351,21 @@ export async function conversationHistory(
     return listRecentMessages(tx, conversationId, limit);
   });
   const items: ChatHistoryItem[] = [];
+  const used = answerFacts();
   for (const message of rows.map(toMessage)) {
     const createdAt = UtcDateTimeSchema.parse(message.createdAt.toISOString());
+    const factIds = used(message);
     if (message.role === 'user') {
       items.push({ kind: 'user', id: message.id, text: message.content, createdAt });
     } else if (message.role === 'assistant') {
       if (message.content !== '') {
-        items.push({ kind: 'assistant', id: message.id, text: message.content, createdAt });
+        items.push({
+          kind: 'assistant',
+          id: message.id,
+          text: message.content,
+          factIds,
+          createdAt,
+        });
       }
     } else {
       items.push({
@@ -366,6 +378,28 @@ export async function conversationHistory(
     }
   }
   return items;
+}
+
+/**
+ * Reads a turn's messages in order and gives, for each, the remembered facts that turn's tool
+ * answers brought so far (the "Remembered" chip under an answer, S32): what the loop sends
+ * with `message.completed`, read back for history and for a turn whose events expired.
+ */
+export function answerFacts(): (message: StoredMessage) => MemoryFactId[] {
+  let turnId: string | null = null;
+  let seen = new Set<MemoryFactId>();
+  return (message) => {
+    if (message.turnId !== turnId) {
+      turnId = message.turnId;
+      seen = new Set();
+    }
+    if (message.role === 'tool') {
+      for (const id of memoryFactRefsIn(message.content)) {
+        if (seen.size < ANSWER_FACTS_MAX) seen.add(MemoryFactIdSchema.parse(id));
+      }
+    }
+    return [...seen];
+  };
 }
 
 /** The clean-up's part (ADR-0030): idle conversations go after their retention. */

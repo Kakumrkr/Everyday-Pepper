@@ -23,6 +23,7 @@ import { blocksOf, chatReducer, type ChatItem, type ChatState } from '../../../l
 import { runTurn } from '../../../lib/chat-stream';
 import { messageFor } from '../../../lib/client-api';
 import { LiveChangeCard, type ApproveOutcome } from './live-change';
+import { RememberedFacts } from './remembered-facts';
 
 const renderLink: RenderLink = (link) => (
   <Link href={link.href} className="font-semibold text-brand underline underline-offset-2">
@@ -390,16 +391,21 @@ function ItemView({
       return (
         <div className="flex items-start gap-2.5">
           <Mark className="mt-0.5 size-7 shrink-0" />
-          <p
-            aria-busy={item.streaming}
-            className={cx(
-              'm-0 max-w-[62ch] min-w-0 whitespace-pre-wrap',
-              item.streaming && 'min-h-6',
+          <div className="flex min-w-0 flex-col gap-2">
+            <p
+              aria-busy={item.streaming}
+              className={cx(
+                'm-0 max-w-[62ch] min-w-0 whitespace-pre-wrap',
+                item.streaming && 'min-h-6',
+              )}
+            >
+              <span className="sr-only">Pepper: </span>
+              {item.text}
+            </p>
+            {item.streaming || item.factIds.length === 0 ? null : (
+              <RememberedFacts factIds={item.factIds} />
             )}
-          >
-            <span className="sr-only">Pepper: </span>
-            {item.text}
-          </p>
+          </div>
         </div>
       );
     case 'notice':

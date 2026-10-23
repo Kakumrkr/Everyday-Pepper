@@ -67,6 +67,12 @@ const PATHS = {
     </>
   ),
   stop: <rect x="7" y="7" width="10" height="10" rx="1.5" />,
+  memory: (
+    <>
+      <path d="M7 3.5h10a1.5 1.5 0 0 1 1.5 1.5v15.5L12 16.5l-6.5 4V5A1.5 1.5 0 0 1 7 3.5Z" />
+      <path d="M9.5 8.5h5M9.5 11.5h3" />
+    </>
+  ),
   alert: (
     <>
       <path d="M12 4 3 20h18L12 4Z" />

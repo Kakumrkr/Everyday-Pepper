@@ -6,6 +6,7 @@ import { ClientIdSchema } from './clients.js';
 import { UserIdSchema } from './tenancy.js';
 import { LocalDateSchema } from './rules.js';
 import { UtcDateTimeSchema } from './time.js';
+import { MemoryFactIdSchema } from './memory-ids.js';
 import { looksLikeContact } from './trust.js';
 
 // What Pepper remembers (Phase 7, ADR-0034, the Phase 7 playbook): facts about the business,
@@ -14,8 +15,7 @@ import { looksLikeContact } from './trust.js';
 // subject and key; the previous value is kept only for the 7-day Undo window. Values live only
 // in the memory tables: deleting a fact removes it everywhere (playbook principle 7).
 
-export const MemoryFactIdSchema = z.uuid().toLowerCase().brand<'MemoryFactId'>();
-export type MemoryFactId = z.infer<typeof MemoryFactIdSchema>;
+export { MemoryFactIdSchema, type MemoryFactId } from './memory-ids.js';
 
 export const MemoryEpisodeIdSchema = z.uuid().toLowerCase().brand<'MemoryEpisodeId'>();
 export type MemoryEpisodeId = z.infer<typeof MemoryEpisodeIdSchema>;

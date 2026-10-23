@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ANSWER_FACTS_MAX, MemoryFactIdSchema } from './memory-ids.js';
 import { UtcDateTimeSchema } from './time.js';
 import { ToolCardSchema, ToolErrorCodeSchema } from './tool-cards.js';
 
@@ -84,6 +85,13 @@ export type ChatFallback = z.infer<typeof ChatFallbackSchema>;
 export const ToolCallStatusSchema = z.enum(['answered', 'done', 'awaiting_approval', 'refused']);
 export type ToolCallStatus = z.infer<typeof ToolCallStatusSchema>;
 
+/**
+ * The remembered facts an answer used (the "Remembered" chip, S32, playbook D-16): those this
+ * turn's tool answers brought before it, by id only (screens read them live, so a forgotten
+ * one shows as gone). Missing in events and history written before S32: none.
+ */
+const AnswerFactIdsSchema = z.array(MemoryFactIdSchema).max(ANSWER_FACTS_MAX).default([]);
+
 /** One event of a turn. The SSE `event:` field is `type`; `data:` is the JSON of the event. */
 export const ChatEventSchema = z.discriminatedUnion('type', [
   z.strictObject({
@@ -112,6 +120,7 @@ export const ChatEventSchema = z.discriminatedUnion('type', [
     type: z.literal('message.completed'),
     messageId: ConversationMessageIdSchema,
     text: z.string().max(100_000),
+    factIds: AnswerFactIdsSchema,
   }),
   z.strictObject({ type: z.literal('turn.completed'), reason: z.literal('answered') }),
   z.strictObject({ type: z.literal('turn.failed'), fallback: ChatFallbackSchema }),
@@ -155,6 +164,7 @@ export const ChatHistoryItemSchema = z.discriminatedUnion('kind', [
     kind: z.literal('assistant'),
     id: ConversationMessageIdSchema,
     text: z.string(),
+    factIds: AnswerFactIdsSchema,
     createdAt: UtcDateTimeSchema,
   }),
   z.strictObject({

@@ -14,7 +14,14 @@ import type {
 
 export type ChatItem =
   | { kind: 'user'; id: string; text: string }
-  | { kind: 'assistant'; id: string; text: string; streaming: boolean }
+  | {
+      kind: 'assistant';
+      id: string;
+      text: string;
+      streaming: boolean;
+      /** The remembered facts the answer used (the "Remembered" chip, S32); live by id. */
+      factIds: string[];
+    }
   | {
       kind: 'card';
       id: string;
@@ -115,7 +122,10 @@ function applyEvent(state: ChatState, { seq, event }: ChatEventEnvelope): ChatSt
       }
       return {
         ...next,
-        items: [...next.items, { kind: 'assistant', id: key, text: event.delta, streaming: true }],
+        items: [
+          ...next.items,
+          { kind: 'assistant', id: key, text: event.delta, streaming: true, factIds: [] },
+        ],
         activity: null,
       };
     }
@@ -144,6 +154,7 @@ function applyEvent(state: ChatState, { seq, event }: ChatEventEnvelope): ChatSt
         id: event.messageId,
         text: event.text,
         streaming: false,
+        factIds: event.factIds,
       };
       if (last?.kind === 'assistant' && last.streaming) {
         return { ...next, items: [...next.items.slice(0, -1), done], activity: null };
@@ -180,7 +191,15 @@ export function itemsOfHistory(history: readonly ChatHistoryItem[]): ChatItem[] 
       case 'user':
         return [{ kind: 'user', id: item.id, text: item.text }];
       case 'assistant':
-        return [{ kind: 'assistant', id: item.id, text: item.text, streaming: false }];
+        return [
+          {
+            kind: 'assistant',
+            id: item.id,
+            text: item.text,
+            streaming: false,
+            factIds: item.factIds,
+          },
+        ];
       case 'tool':
         return item.card === null
           ? []

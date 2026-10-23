@@ -9,12 +9,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 Tasks (each ends with tier 2 + commit + this section updated):
 1. [x] Contracts views + `/v1/memory` API (facts list/add/edit/delete, `facts/shown` for the chip, own episodes, pause), `no-store`, permissions; db test that the named list reaches no further and not across businesses.
 2. [x] Narrow `remember_fact` (closed days and hours are the business's; staff off/away/busy without "note"/"remember" → `block_time`); scripted cassettes green; the real-model replay is stale on all 192 cases until S32b records (expected).
-3. [ ] "Memory used" on chat events/history (optional field) + "Remembered" chip in `@pepper/ui` (fix/forget in place).
+3. [x] `factIds` on `message.completed` and assistant history items (default `[]`; `memory-ids.ts` breaks the contracts cycle; history and expired turns re-derive them with `answerFacts`) + `Remembered` chip in `@pepper/ui` (fix/forget in place, confirm, axe) + web `RememberedFacts` (reads live via `facts/shown` on each open).
 4. [ ] `/memory` "What I know" page + nav + owner pause switch (mock-up first).
 5. [ ] Client profile "What Pepper knows" + visit notes on profile and booking sheet.
 6. [ ] Playwright journey: AC-W3-1, AC-W7-2, staff view, pause.
 7. [ ] ADR-0038, traceability, memory/area docs.
-Next step: task 3.
+Next step: task 4 (mock-up first, then `/memory`).
 
 ## Last sessions
 - **S31 Phase 7d (2026-10-23): episodes and learned rules, recorded on Luna + Sol, merged** ([ADR-0037](../adr/0037-episodes-and-learned-rules.md), pre-approved). Full entry in [session-log.md](session-log.md).
