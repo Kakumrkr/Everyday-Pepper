@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "595e6d94cbdcdfe0d570d03f79c0475da01ee3c9c707a64329fa63902df7b04d",
+        "fingerprint": "6df8ea762e79b87a1d75e599b186df62d114e0f95b665c44abfe719cd36bd769",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_5294A5I3K2kQK7WbXcuUFJ0Q",
+              "id": "call_bwN5LhQxPWIZbLf4XhtpJScc",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6975,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8233,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,16 +25,16 @@
         }
       },
       {
-        "fingerprint": "7ce27eb892fe217c8456647037c908f210858f73eaf907db15b3c7dde0dcf907",
+        "fingerprint": "d05888efdb6f1465567b95c9090cd896467fb8badde161de1f0fbf818f13b4a9",
         "response": {
-          "text": "I can’t update Maria’s phone number here. Please change it on her client record.",
+          "text": "I can’t save or update client phone numbers here. Please update Maria’s number directly on her client record.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_008e239d17dc3946016adb6de5074487d2a8956c14189323fc",
+              "id": "rs_0c8e0aa82bea3386016adba64be0a087d29eb4de23a8b4f740",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq223lDS8Gofeo8HY3ib6xPkPZkquPAgum_cO_42ltGV-4QaOyFozY6eubro1Sfw-9mpIpOlQOt5-EW9FcFTPLFM3BrkLnc9Ki6ReJyktiLbyhJs7_cf79EgszjtKdZbfme-U7e4J0AmacoGSpTUHOXDN96Zz6tI7bIsq5TtYmmoq1xg_I8JeYPdaLt16-_OrUH_nRRwS9dmOUKbZqjFNbw0_VmDjF3T7YZgzr4uy4hGRIq9pEiKlDp3vMbccnAAUpKIBSszLiBgss4vOTH3EyxnDbQnlOALG-j1ovdsgdETjs8BnczgXYcPCE0yDvff_PWKCO9Kf17kKptOT-Cx0E1u7_s1vdDgg2o2_BNN8N_5NMDsRDxBbGQ8vjkKcp-pPbS2yidyP-HdqNAzadt0oFx1vVHxbVfTpHTgJCxjI2H7tMnUjlSE9xyTuDnFuFewqrqfbkM2yxQ3XJs1CPfWdfqk8E7siKbqcl8Pk-yirNzfAsxlKJG6cBewdWMEWHB8QSG20f9T7_IG8jelEkxAZZl67NVt7ZIxTGzvVE_q6KNPmVHiQ6DznfBjdqa_4AQ3z5yE15MfxpCl3sxxg_adLIsdiXKhfk1rTKqQNWM8kYx-RRvfAnQNErPyUlwF2IVhVSRBUVqDdxeg7z_DDBNPK-t9sLp6SxDU6SADedpztwxV3PMsNCHnWKWQs_-2mqewpSdPgAekrRTqKLNBkH3u7hzAToA3dTfFkzw9Qlgn6HdHBZn-m3kIesHveiZDBA7p5WoHpSp_vKuE-3MnynU9zdcXmVLHCBwUSstuAtkA_cydr5uYGxL6G8Jl1FlJmLMqNMPdcap6O1RZ3cKooZhciZSEC-a__eAWd-qSl-C7i9wjDxenaHOXkT9vVFXMFsfm6OSvAdkhbgfF5xlnqWsi4U3eRl8T5nV5ot1UGBsvFXGciUdz8hZra0z5XfzBjBtKRSGcV3ddBPvMCa7vIA5Zz_Z4P0Us0JwCVqnSnAQ6SftY0jVkTHKjq0D-Rw3Q-AcV7CnLczAOAZdzDpBl7NCimtg4ZBdX4CjJNPuQXei2WK0km4v4eVq7xFEyTaU-oBHihPf55IA35N2aW2ipxkFG9kjb_H9w-FaEKGge1nzFMvDUiR7MvJGuSadsUDzd7Xqs4yMP1JeUhQB-ErkuG6CbaiZtGPuX3IprnF6tFaPYx8bMJu5e1zGl5e7aNkSEv-H8pX-YXfRp7q0DuXkRrU5sNzkMlnNZeDCpabNNiG3oq8WDeuxmXrJ1ldm4uWwXdTL8VZaDZXdqw1-D5GyUXoPwKotKrOWxLh8G1vlr4unLFWrkEscakKMsBv5CsLDmeMOaPb2veK0duGEeh7mQGQ1tMVPLcCUxsLtY24pzGcZQOkg3b6RCzGadajDbD73a-m3TVYq9X_oJKs0F8PsLKjEJAEdE1LrU_8AutvjDs6CowpMUnrKjbAGl-mBsa2AqXeIe07NAT7Bhw2tcAD7pUl2TBWjd9q7jJb0vpn69H2axlRTJgLRBeOo_fO4ZN7zg3g1kPMIqjY1t2E4Vv4K5BISRacNI4usg20kth5GCNvWR8kbruE1x_EXi7Uh0JfF6JgWwmAPs-7GrYMbj75pIBsNCVfYlHxhn4399Hy0enmWtxTGz8f_kQ=",
+              "encrypted_content": "gAAAAABq26ZM6nWas-IS8vIsVGF5ZB0tL4IbfJ5486LngiWNzjg-plv4jDdUUTzxZ4LDy0469xugMqBH7YSif9I1BY8oCRckil-FCLgipJzPX0B9z35E1uJjCTFkANvLhcil1Syb0xYQjjOlObkpE2WbdEzm9GuYLnAE6VAOZ9afyIWKrLZ35iB_efarlW1xygktozIrNGyB-VbH9DSzmT5J54aHQhPuSh6ISNoxu1iiDpPxa16WFJo53ARixGvxN69olnSLdtgRuD-DpLfdxM-tJSt9AF1hRUqNpsvIA6IPfedeXB7By9_60x72tiyuUqDgF3XxhAU_KVA3kQ6UHbrzyOrwvYN8H9ZslYFXJkeue8k3xRPG6RJBHaaoypbO-N5iRoVDDZ3cpJvbSIy9Kgt1-t2G198VqgE6W0ZGi67MQiuifRD_bOq4g74_ixa35qBsnBX2EUPbgJOCHYd7rSYgwCCV3jbN4xjsXLmsAWMT5BcndKqI6yMFcRpyel774qWzaqu6A436fk6ZIaR9iiBGrmuU7BgbmdI7-bHRUbB0jfbPcw-0JoVlCOMfZU5J_bKoY36fab1qIbljlOVJ4vHvzSoQLY9lEGesBWjRYxV9MVkFxjU7qF-m3GS1DuKGjzCEFC0FUXHWds63qvPgpy7RBmgA_tlim4i9hmBtg2ni2N3u3uMD07n_SGRy77hYqF0ZetLQi0XhH4baxEW2XpaVCIYZs-Ef8l9LPAgBPawKgbHnTSeysPKrp_Ma4TLOztOKQ8rPoDy9j1jjJmH_gWRlDuY6aZfi5MoSCMYy27gF4bek-vklasBWQfmeRCcQGqH64BDbJ4s2Bfk6_4wElDnpiI1Prcb69cc6Pvu-Zk1Kc4RN07fmw7vjjwwKGTHoCmCYc7MPzLbD-mfEwAgOcOTGb876hXnuKefpUbSYl-manpAR31FjaWsfvOV19Nk23szWl-vt4nQeouNPY922zuex-KtOcgE7GQlp6uGVUl3EAjHE_K7acgSkeINx8w02AGrGjz197L5JC-6G9xtGqFa8OUqYHY__9tXnAr-H4qO0NVPqtvhTaffCALB5Xb6jgVnYFIM_ymwzFa-bLgRFZupWf8zhSqSWD7fi0VmH1Nk5smKgJcNFShlneuGk1MaAVChrBLG21YbhQnH2Fej-cIZmtUHaEtEvw5PXwMZc6R24BN_g_8sjD71A16akl9U4alQOZZtxXzYQqiLzwIvzGW4slc6xr_3B_WsG-aMOtH5T-RHY3noFOPB7AYhX4nJyY0mW61CFULeovSsrgFO1geatnCIex_kjgplzkRQDBf4pvGV2_7s0hunIwC-bX1q5KXyqMoVOqeMOuaWteoaHE8xK9Pe9t1XaUGfxomqHn2c1XsrtNKJGZhwkjbEvONKLgnZJr3uzkGXlByApYm3x9Twz7MVzFNCdcJIv2e-cdMCPBRhbmfIVyJyiXnQ5gawE-2CSZ_ncr4Ymx1ucg51nAlnZ_YSW4RyZL1yiF_F61QqcFiSVb730bhF1klM9DbSO3U8U1lgXJgoHgGxuUMCP-HODN2gCTZT1fW5l5-81NaNNTaJLBStDiHWzKbEWySmjnkuLDR3qhy8XomvqgHE6MeDm5txvFWQkZ-gW5EniaqpsWEU8WkPZYIN27fLFLLN_-ijmGpDMyIfrbGk3Ctb_XkL4OeZpO41If09ueCrJisVbsm5NjtM5_zZKd5TqWCgGeSw2uQURwJX0jyCmbJdGhIpcyIttspGRk6889LZxKykp-Ra7F14BCRjRGTWMwzkcQGImRiAAd1pvDziIxVn4UCiLQMluw6SsDbH04dANo_UkwZmLjWAHn21mhzjEYkdc3GLK6kHxRVli0Wy1vZL1-YFVwiz5ekRrV75S2SW3UXdbTWYsfj6kTjPlAXjreUqvJ8T4V--G4389D3VXNOFDd4Ia7MMuPJ3x62bIH9OjCBIURx5h5cZ-syP3aQNeNSIyGU7Ie1CA5CRroopZkysOow05UFOojUzZVw==",
               "summary": []
             },
             {
@@ -44,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7057,
-            "cachedInputTokens": 6972,
+            "inputTokens": 8315,
+            "cachedInputTokens": 8230,
             "cacheWriteTokens": 82,
-            "outputTokens": 42
+            "outputTokens": 71
           },
           "model": "gpt-6-luna"
         }

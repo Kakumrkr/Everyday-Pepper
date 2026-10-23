@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8a0103111b711ffc3149b6625c8beec98e9732f0e3f7903ac8144392d5f136cc",
+        "fingerprint": "b5a76250dd71a8877728e140c45c7c1c6c82e6f56641df8388532d1130931421",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BcvC373rqWFP04DCpHPvNgq4",
+              "id": "call_IwPppsVWCXqQGzjiQLm8zl4e",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6976,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8234,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 15,
             "outputTokens": 18
           },
@@ -25,9 +25,31 @@
         }
       },
       {
-        "fingerprint": "fa62d4701e94be08781691e69c8338aa81ec27f00aeb09d2df55bfeffcd8749f",
+        "fingerprint": "d4699862e61f7ce50ad99d15519fe3cf2710c08e903f3b27842217a82027a8ad",
         "response": {
-          "text": "Maria L. has a recorded PPD allergy, and her usual service is “Colour with Jess”.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HtGBHvcwEveu52K03SUK7u1F",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8436,
+            "cachedInputTokens": 8231,
+            "cacheWriteTokens": 202,
+            "outputTokens": 47
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "690933abe57519315b6ea08f2da25ae08eb679bd2af02f606fb8c552e012234e",
+        "response": {
+          "text": "Maria L. has a remembered PPD allergy. She’s booked with Jess tomorrow, Nov 3, at 3:00 PM for a haircut. Her usual service is “Colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7168,
-            "cachedInputTokens": 6973,
-            "cacheWriteTokens": 192,
-            "outputTokens": 24
+            "inputTokens": 9022,
+            "cachedInputTokens": 8433,
+            "cacheWriteTokens": 586,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }

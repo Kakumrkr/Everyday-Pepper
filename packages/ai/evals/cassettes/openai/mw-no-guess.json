@@ -3,18 +3,11 @@
   "trials": [
     [
       {
-        "fingerprint": "01e5bd688b3ca2d15110e7b31450c5fcbeb93a700c2d1d58a3c7aa18ec6f7f79",
+        "fingerprint": "bb25cfc83c89c8a30e91e8e29a24843967c5239ee059f7ac0ef4a070fee3afce",
         "response": {
-          "text": "I won’t record that as a fact—whether Maria is stressed would just be a guess.",
+          "text": "I’m sorry to hear that. I won’t assume why Maria seemed tired or save a guess about her.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_043ea33622b2f6ec016adb6de9f69c87d2a4c9abdf083c9560",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq223qG4cjUBAqIXEsoKhUYTHUUbnE8MK0xhvQw8Jbb63XXyNTqYP3zHbthlr1_ig1zgx6Sbq5d-OeBu2qD_NF7LyF5FswVEOZxeWuHWqyWotkjGMpuWimepOPKMF6IOos65Xc0eks7BNZvz0VCKogBmCQIIgNvW_CQtQ-ZAsTWUX6x78jhvsp-HV2z-NuIEza2ZFSrw7GXTVifOswi0oJS6xqhlGV3JU7grIMSOcsENGjmkT6jr08LA8ndFepYzHJfvRiHh2jBKe6A6Kd14M5EUgE_Xfcio12ElqfnX7Kul9ujpCVLPL6GP5SvrfMyL5fZcKGSZArD6OWUm2ALOrNr9CuZtxkqNM4u_MXw0ETgwvUwQA9hQuHum4j2JS2e5fRUg2tFWHnE83A7oOlrtc6VwamoCw_AHpp4Y4joudxxzwETIkFjMDbMnRUbMsSUH5NhhRGSuhOVeGRHOsRwipKM3NZedBmJTdwCz1lsKM342zeEGF8p_7jKlj726G3uYfyryXcO2QgVwtNbx7rNv0cU2pXK5O6dWxk5Baxo4YYbHEHs9SMBdmrBXaM5pQp6829q_QZ28tQ7meGAUGqMAqN3tAzWkGbrhvMcbeH3QI1R3BCLdfkWjXsGV0ozKVIKuFcFZvhaozmPk9QLStgoLLlqR2NO9NmWK41g3x9Z1AVJbn-3gWBzZF-3Br2PnilL4ARUe8ZaEyDZAcybikfU0QYbm4ADT8r20JIZEn4TybwNUzRzwSjH2ML-jd8fiDdrhMjkCCtALQcnh0z4YSZB55SSR3Ke-eNXTqzwAhju3SVUmT9vBaBOpmN044UnbyBE5IAnw-seks6Kl-RSYyLOwxUp_vssZ61wC8_J0KeUPce70-H79W28uWYQSTMn_-QooqSzRAaGQ21V8qiRWBhd6kxjnG_Y_P89nFNBXuqkDC_vYj_0sKvDhqIDfEqC6Yw6h7acbTBF3mSKGVV2lUybI8B7i7Lkd_Png7pO6YOZ35STwl5-3k1AMrPBsMSztlydQAYIBqm3B1UbQWyfHWntynMFVQFmnGzfsBQR3u8fPKhosX4bOcB0a_qRMg_0L_aUy0FmxRu5MzTUsXz26pOgtTMB2k1M2e00WM8sK5Cv91f-bvqEbS8LvLFC1HwPPeQY6qDo7vT7GfssCy-RZwQM8hN5Wy5Dqi_MP5q9Q5ZLdeZlsXoR4n80AHd_aCR45rXftggzVRcJYpagZZ85em_dJWXkBrPhe_ZkpnIuzz0yJabQz-vxRLCo2RNmkJiXvDTmA5ODTGeWVEGtAoDRhoYusAahot9yKBsoogsg_I-wK-Tl7IqIbbsH2Jt-jta-FQA3Bn1JWDnLSOQxLCOz3fl1hUSNp67FTGARRb-XDyy18JkkK2tfnf3u5M-adS3sZUcsJa9rFVJnrELAtthMm6ZZZqhaaaV4GIS3JQ9Z-IH2nLujy94bKokEqq34CtlSr9bzzDW6UJ7i_faEq7pprgXzCZc9LNezH8j0ZVraAabeNKeRcMiGX7MaCdKD4FgaB12vYpJS31a_GwGl9OltX0wuaMjHmIRTK94ZNOoVnunZ6wb7g4OjZTDr-SQFOZtQj7JBcdP_5_C6pZCtHtFeTKIR96Aetj8Ralos7N8vojHl5LFFNDdc4Pu7ydbcznA07pwTYuxAd6LUM8lZKxDCGiglwrqu55eU1N50HatMpyqcbeAZVSDsrag_k4wUUvjkuAR6uVUCYAmYncDGBszq9AFK-ry3cUljVrSiuvKiLMWhku2z33Yz-_eKCT6J1u8WcwCZ_kndIYjC-n3mJXmKJhG49q3y5EPmTlPG49WCJqIAUdlLUDZYr2yVZhzqMxfLzpttJtMbFd7lkAoBcWksmNkJpZbk30s7UzRnriWPE_5HZ8a9Mui4adc2TxS_MzDmoPwqiz9e1sSLsVFolX8M9XZaR1xLV27NA==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -22,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6977,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8235,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 16,
-            "outputTokens": 65
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }
