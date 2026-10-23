@@ -37,7 +37,7 @@ Runs labelled `P7`. The runner refuses a run whose worst-case estimate would tak
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$1.4225** of $5.00 (the runner stops at $4.50).
+Total spent: **$1.4301** of $5.00 (the runner stops at $4.50).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|
@@ -601,6 +601,13 @@ Total spent: **$1.4225** of $5.00 (the runner stops at $4.50).
 | 558 | 2026-10-23 | P7 S31 re-record after guide fix (multi-turn), part 12/13 | completed | 1 × 1 | $0.48 | $0.0007 | $1.4220 |
 | 559 | 2026-10-23 | P7 S31 re-record after guide fix (multi-turn), part 13/13 | completed | 1 × 1 | $0.48 | $0.0003 | $1.4223 |
 | 560 | 2026-10-23 | P7 S31 propose_rule closed:null fix | completed | 2 × 1 | $0.42 | $0.0002 | $1.4225 |
+| 561 | 2026-10-23 | P7 S32b probe part 1/36 | completed | 2 × 1 | $0.43 | $0.0016 | $1.4241 |
+| 562 | 2026-10-23 | P7 S32b probe part 2/36 | completed | 2 × 1 | $0.43 | $0.0006 | $1.4247 |
+| 563 | 2026-10-23 | P7 S32b probe part 3/36 | completed | 2 × 1 | $0.43 | $0.0010 | $1.4257 |
+| 564 | 2026-10-23 | P7 S32b probe part 4/36 | completed | 2 × 1 | $0.43 | $0.0004 | $1.4261 |
+| 565 | 2026-10-23 | P7 S32b probe part 5/36 | completed | 2 × 1 | $0.43 | $0.0007 | $1.4268 |
+| 566 | 2026-10-23 | P7 S32b probe part 6/36 | completed | 2 × 1 | $0.43 | $0.0016 | $1.4284 |
+| 567 | 2026-10-23 | P7 S32b probe part 7/36 | completed | 2 × 1 | $0.43 | $0.0017 | $1.4301 |
 
 - Run 5, gpt-6-luna: 12 calls, 67483 in (38955 cached, 28492 written), 498 out, p50 1258 ms, p95 3286 ms; 3.61 chars a token
 - Run 5, gpt-6.1-sol: 4 calls, 24750 in (12287 cached, 12451 written), 224 out, p50 2023 ms, p95 2349 ms; 3.61 chars a token
@@ -1225,4 +1232,11 @@ Total spent: **$1.4225** of $5.00 (the runner stops at $4.50).
 - Run 558, gpt-6-luna: 5 calls, 43214 in (42475 cached, 724 written), 407 out, p50 1950 ms, p95 4321 ms; 3.87 chars a token
 - Run 559, gpt-6-luna: 3 calls, 25058 in (24913 cached, 136 written), 106 out, p50 1472 ms, p95 1525 ms; 3.73 chars a token
 - Run 560, gpt-6-luna: 2 calls, 16851 in (16567 cached, 278 written), 58 out, p50 2921 ms, p95 2948 ms; 3.74 chars a token
+- Run 561, gpt-6-luna: 6 calls, 50483 in (41760 cached, 8705 written), 193 out, p50 1475 ms, p95 3133 ms; 3.73 chars a token
+- Run 562, gpt-6-luna: 5 calls, 42346 in (41848 cached, 483 written), 148 out, p50 1663 ms, p95 1986 ms; 3.72 chars a token
+- Run 563, gpt-6-luna: 8 calls, 69036 in (67360 cached, 1652 written), 254 out, p50 1352 ms, p95 1931 ms; 3.72 chars a token
+- Run 564, gpt-6-luna: 3 calls, 25058 in (24935 cached, 114 written), 174 out, p50 2145 ms, p95 3039 ms; 3.73 chars a token
+- Run 565, gpt-6-luna: 6 calls, 50824 in (50052 cached, 754 written), 212 out, p50 1550 ms, p95 2468 ms; 3.73 chars a token
+- Run 566, gpt-6-luna: 6 calls, 50473 in (41753 cached, 8702 written), 190 out, p50 1400 ms, p95 1663 ms; 3.73 chars a token
+- Run 567, gpt-6-luna: 6 calls, 51833 in (42415 cached, 9400 written), 282 out, p50 1441 ms, p95 2007 ms; 3.72 chars a token
 <!-- ledger:end -->

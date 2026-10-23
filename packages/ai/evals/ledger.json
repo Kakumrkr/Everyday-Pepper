@@ -13491,6 +13491,167 @@
         }
       },
       "charsPerToken": 3.7387692125096432
+    },
+    {
+      "id": 561,
+      "at": "2026-10-23T23:46:34.738Z",
+      "label": "P7 S32b probe part 1/36",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.426465,
+      "actualUsd": 0.0016040249999999998,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 50483,
+          "cachedInputTokens": 41760,
+          "cacheWriteTokens": 8705,
+          "outputTokens": 193,
+          "usd": 0.0016040249999999998,
+          "latencyMsP50": 1474.660559,
+          "latencyMsP95": 3133.3587389999993
+        }
+      },
+      "charsPerToken": 3.7339698512370503
+    },
+    {
+      "id": 562,
+      "at": "2026-10-23T23:46:42.394Z",
+      "label": "P7 S32b probe part 2/36",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.426405,
+      "actualUsd": 0.0005543550000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 42346,
+          "cachedInputTokens": 41848,
+          "cacheWriteTokens": 483,
+          "outputTokens": 148,
+          "usd": 0.0005543550000000001,
+          "latencyMsP50": 1662.8761789999999,
+          "latencyMsP95": 1986.050408
+        }
+      },
+      "charsPerToken": 3.721579369952298
+    },
+    {
+      "id": 563,
+      "at": "2026-10-23T23:46:48.595Z",
+      "label": "P7 S32b probe part 3/36",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.42726,
+      "actualUsd": 0.0010095,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 69036,
+          "cachedInputTokens": 67360,
+          "cacheWriteTokens": 1652,
+          "outputTokens": 254,
+          "usd": 0.0010095,
+          "latencyMsP50": 1352.334132,
+          "latencyMsP95": 1931.409887
+        }
+      },
+      "charsPerToken": 3.7223187901964194
+    },
+    {
+      "id": 564,
+      "at": "2026-10-23T23:46:56.956Z",
+      "label": "P7 S32b probe part 4/36",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.426525,
+      "actualUsd": 0.00035150000000000003,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 25058,
+          "cachedInputTokens": 24935,
+          "cacheWriteTokens": 114,
+          "outputTokens": 174,
+          "usd": 0.00035150000000000003,
+          "latencyMsP50": 2145.2786069999997,
+          "latencyMsP95": 3038.667187
+        }
+      },
+      "charsPerToken": 3.725277356532844
+    },
+    {
+      "id": 565,
+      "at": "2026-10-23T23:47:02.671Z",
+      "label": "P7 S32b probe part 5/36",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.426375,
+      "actualUsd": 0.00070257,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 50824,
+          "cachedInputTokens": 50052,
+          "cacheWriteTokens": 754,
+          "outputTokens": 212,
+          "usd": 0.00070257,
+          "latencyMsP50": 1550.0109380000004,
+          "latencyMsP95": 2468.0952089999996
+        }
+      },
+      "charsPerToken": 3.7256807807335117
+    },
+    {
+      "id": 566,
+      "at": "2026-10-23T23:47:09.554Z",
+      "label": "P7 S32b probe part 6/36",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.42645,
+      "actualUsd": 0.0016020799999999997,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 50473,
+          "cachedInputTokens": 41753,
+          "cacheWriteTokens": 8702,
+          "outputTokens": 190,
+          "usd": 0.0016020799999999997,
+          "latencyMsP50": 1399.7920570000006,
+          "latencyMsP95": 1663.4888310000001
+        }
+      },
+      "charsPerToken": 3.7345907713034694
+    },
+    {
+      "id": 567,
+      "at": "2026-10-23T23:47:15.714Z",
+      "label": "P7 S32b probe part 7/36",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.42705,
+      "actualUsd": 0.00174195,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 51833,
+          "cachedInputTokens": 42415,
+          "cacheWriteTokens": 9400,
+          "outputTokens": 282,
+          "usd": 0.00174195,
+          "latencyMsP50": 1441.149708,
+          "latencyMsP95": 2006.6202509999994
+        }
+      },
+      "charsPerToken": 3.7220689522119113
     }
   ]
 }
