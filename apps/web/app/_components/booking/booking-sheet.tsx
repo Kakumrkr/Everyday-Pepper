@@ -210,7 +210,18 @@ function BookingDetails({
     <div className="grid gap-4">
       {summary}
       {abilities.readsNotes && booking.status !== 'cancelled' ? (
-        <VisitNotes bookingId={booking.id} timeZone={timeZone} canChange={abilities.managesNotes} />
+        <VisitNotes
+          bookingId={booking.id}
+          timeZone={timeZone}
+          // Staff change only their own visits' notes (the api decides; this hides the form).
+          canChange={
+            abilities.managesNotes &&
+            (!abilities.ownStaffOnly ||
+              setup.staff.some(
+                (member) => member.id === booking.staffMemberId && member.userId === setup.userId,
+              ))
+          }
+        />
       ) : null}
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       {none ? (

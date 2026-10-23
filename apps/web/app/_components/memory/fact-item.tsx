@@ -1,6 +1,6 @@
 'use client';
 
-import { MEMORY_LIMITS, UtcDateTimeSchema, type MemoryFactView } from '@pepper/contracts';
+import { MEMORY_LIMITS, MemoryFactSchema, type MemoryFactView } from '@pepper/contracts';
 import { buttonClass, cx, Icon } from '@pepper/ui';
 import Link from 'next/link';
 import { useId, useState, type SubmitEvent } from 'react';
@@ -56,7 +56,17 @@ export function FactItem({
       return;
     }
     setMode('view');
-    onChanged({ ...fact, value, updatedAt: UtcDateTimeSchema.parse(new Date().toISOString()) });
+    const changed = MemoryFactSchema.safeParse(answer.data);
+    onChanged(
+      changed.success
+        ? {
+            ...fact,
+            value: changed.data.value,
+            sensitive: changed.data.sensitive,
+            updatedAt: changed.data.updatedAt,
+          }
+        : { ...fact, value },
+    );
   }
 
   async function forget() {

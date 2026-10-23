@@ -427,6 +427,16 @@ describe('"What I know" and the client profile (S32)', () => {
     expect(jessSees.get(allergy)?.byYou).toBe(true);
     expect(await listFactViews(db, jessActor(), { clientId: lee })).toEqual([]);
 
+    // A proposal waiting for an OK was never remembered: the chip shows it as gone.
+    const proposed = (
+      await saveFact(
+        db,
+        ana(),
+        { subject: { type: 'client', id: maria }, key: 'drink_s32', value: 'Oat latte' },
+        { source: 'chat', status: 'proposed' },
+      )
+    ).fact.id;
+    expect(await factsShown(db, ana(), [proposed])).toEqual([{ state: 'gone', factId: proposed }]);
     // The chip reads them live: hidden and forgotten facts are the same `gone`.
     expect(await factsShown(db, jessActor(), [allergy, leeFact])).toEqual([
       expect.objectContaining({ state: 'known', factId: allergy, value: 'Sensitive scalp' }),

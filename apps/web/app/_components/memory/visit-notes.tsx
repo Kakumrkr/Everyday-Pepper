@@ -29,8 +29,10 @@ export function VisitNotes({
       `/v1/memory/facts?${new URLSearchParams({ bookingId }).toString()}`,
       MemoryFactsResponseSchema,
     );
-    if (answer.ok) setNotes(answer.data.facts);
-    else setError(answer.message);
+    if (answer.ok) {
+      setNotes(answer.data.facts);
+      setError(null);
+    } else setError(answer.message);
   }, [bookingId]);
 
   useEffect(() => {

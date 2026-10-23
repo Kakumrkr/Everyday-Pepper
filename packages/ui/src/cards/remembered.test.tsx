@@ -84,6 +84,9 @@ describe('Remembered (the chip, S32)', () => {
     await userEvent.type(input, 'Full color{Enter}');
     expect(onFix).toHaveBeenCalledWith(USUAL, 'Full color');
     expect(await screen.findByRole('status')).toHaveProperty('textContent', 'Saved.');
+    // The row shows what was saved, not what was read on opening.
+    expect(screen.getByText('Full color')).toBeTruthy();
+    expect(screen.queryByText('Balayage')).toBeNull();
   });
 
   it('forgets only after a confirm, and says what failed', async () => {

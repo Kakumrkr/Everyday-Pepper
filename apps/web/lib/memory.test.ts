@@ -127,6 +127,8 @@ describe('"What I know" on the screen (S32)', () => {
     expect(toFactKey('  Allergy! ')).toBe('allergy');
     expect(toFactKey('2nd colour')).toBe('nd_colour');
     expect(toFactKey('!!!')).toBeNull();
+    // Only a learned rule has a `rule_` key.
+    expect(toFactKey('Rule hours')).toBe('rules_hours');
     expect(toFactKey('x'.repeat(60))).toHaveLength(40);
     expect(visitLine(formula, TZ)).toBe('Nov 2 · Full color');
     expect(visitLine(allergy, TZ)).toBeNull();

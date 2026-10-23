@@ -2,7 +2,7 @@
 
 import { MemoryFactsShownResponseSchema, type MemoryFactShown } from '@pepper/contracts';
 import { Remembered } from '@pepper/ui';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 
 /**
@@ -14,10 +14,16 @@ export function RememberedFacts({ factIds }: { factIds: readonly string[] }) {
   const [open, setOpen] = useState(false);
   const [facts, setFacts] = useState<MemoryFactShown[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const reads = useRef(0);
 
   async function load() {
+    // Nothing from an earlier read is shown while this one runs, and only the latest counts.
+    reads.current += 1;
+    const read = reads.current;
+    setFacts(null);
     setError(null);
     const answer = await sendJson('POST', '/v1/memory/facts/shown', { factIds });
+    if (read !== reads.current) return;
     if (!answer.ok) {
       setError(answer.message);
       return;

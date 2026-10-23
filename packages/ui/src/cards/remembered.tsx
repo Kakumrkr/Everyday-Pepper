@@ -93,6 +93,8 @@ function FactRow({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [forgotten, setForgotten] = useState(false);
+  // The value as last saved here (the facts read on opening are not read again until reopened).
+  const [saved, setSaved] = useState<string | null>(null);
   const inputId = useId();
 
   if (fact.state === 'gone' || forgotten) {
@@ -103,7 +105,8 @@ function FactRow({
     );
   }
   const label = keyWords(fact.key) ?? 'Fact';
-  const { factId, value: current } = fact;
+  const { factId } = fact;
+  const current = saved ?? fact.value;
 
   async function run(work: () => MemoryChange, done: () => void) {
     setBusy(true);
@@ -124,6 +127,7 @@ function FactRow({
     void run(
       () => onFix(factId, value),
       () => {
+        setSaved(value);
         setMode('view');
         setMessage('Saved.');
       },
@@ -133,7 +137,7 @@ function FactRow({
   return (
     <div className="flex flex-col gap-2">
       <p className="m-0 whitespace-pre-wrap">
-        <b>{label}:</b> {fact.value}
+        <b>{label}:</b> {current}
         {fact.sensitive ? (
           <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 text-xs font-semibold text-ink-2">
             <Icon name="lock" className="size-3.5" />

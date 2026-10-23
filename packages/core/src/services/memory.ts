@@ -660,7 +660,10 @@ export async function listFactViews(
   );
 }
 
-/** Facts an answer used, read live (the "Remembered" chip, S32): `gone` once deleted. */
+/**
+ * Facts an answer used, read live (the "Remembered" chip, S32): `gone` once deleted, hidden,
+ * or still a proposal waiting for an OK (it was never remembered).
+ */
 export async function factsShown(
   db: Database,
   actor: Actor,
@@ -670,7 +673,16 @@ export async function factsShown(
   requirePermission(actor, 'ai.chat');
   const unique = [...new Set(ids.map((id) => MemoryFactIdSchema.parse(id)))];
   const now = (options.clock ?? systemClock).now();
-  return withMember(db, actor.context, (tx) => factsShownIn(tx, unique, now));
+  return withMember(db, actor.context, async (tx) => {
+    const active = new Set(
+      (await memoryFactsByIds(tx, unique))
+        .filter((row) => row.status === 'active')
+        .map((row) => row.id),
+    );
+    return (await factsShownIn(tx, unique, now)).map((fact): MemoryFactShown =>
+      active.has(fact.factId) ? fact : { state: 'gone', factId: fact.factId },
+    );
+  });
 }
 
 /**

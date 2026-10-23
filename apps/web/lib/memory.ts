@@ -158,7 +158,9 @@ export function toFactKey(label: string): string | null {
     .replace(/_+$/, '')
     .slice(0, 40)
     .replace(/_+$/, '');
-  return key === '' ? null : key;
+  if (key === '') return null;
+  // `rule_*` keys are learned rules' (ADR-0037): a typed "Rule …" is a plain fact.
+  return isLearnedRuleKey(key) ? key.replace(/^rule_/, 'rules_') : key;
 }
 
 /** Names offered when adding a fact by hand (any other is fine). */

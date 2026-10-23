@@ -1,6 +1,11 @@
 'use client';
 
-import type { MemoryEpisode, MemoryFactView, Permission } from '@pepper/contracts';
+import {
+  MEMORY_FACTS_PAGE,
+  type MemoryEpisode,
+  type MemoryFactView,
+  type Permission,
+} from '@pepper/contracts';
 import { buttonClass, chipClass } from '@pepper/ui';
 import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -40,6 +45,12 @@ export function MemoryScreen({
   return (
     <div className="flex flex-col gap-6">
       <PauseSwitch paused={initialPaused} canPause={permissions.includes('settings.manage')} />
+      {initialFacts.length >= MEMORY_FACTS_PAGE ? (
+        <p className="m-0 rounded-md bg-wait-soft px-4 py-3 text-sm text-wait">
+          I remember more than {MEMORY_FACTS_PAGE} things; these are the first {MEMORY_FACTS_PAGE}.
+          A client’s profile shows everything about them.
+        </p>
+      ) : null}
       <div role="group" aria-label="Show" className="flex flex-wrap gap-2">
         {MEMORY_FILTERS.map(({ key, label }) => (
           <button

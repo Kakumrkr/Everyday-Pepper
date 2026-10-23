@@ -36,8 +36,10 @@ export function ClientMemory({
       `/v1/memory/facts?${new URLSearchParams({ clientId }).toString()}`,
       MemoryFactsResponseSchema,
     );
-    if (answer.ok) setFacts(answer.data.facts);
-    else setError(answer.message);
+    if (answer.ok) {
+      setFacts(answer.data.facts);
+      setError(null);
+    } else setError(answer.message);
   }
   const item = (fact: MemoryFactView, about: string | null) => (
     <li key={fact.id}>
