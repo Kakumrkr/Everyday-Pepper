@@ -5,7 +5,8 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S32b next** (the "b" half of S32): `git fetch origin claude/kind-euler-4ts3n5 && git merge origin/claude/kind-euler-4ts3n5` into the S32b branch. Then `/eval-record`: probe memory_write, learned_rules, scheduling (`tool-block-time-2`) and memory_recall (`mr-same-as-last-time`) on Luna + Sol; record the whole suite once (every cassette is stale: `remember_fact`'s guide changed, and the tool catalog is in every request); empty `KNOWN_REAL_MODEL_MISSES` in `packages/ai/src/evals/evals.int.test.ts`; `/session-close` (end checks, ai-budget, one PR, merge). Phase 7 budget left: about $0.32 of $1.00.
+**S32b in progress** (branch `claude/optimistic-gauss-7jzi2d`; S32a merged in). Plan approved (user, 2026-10-23: "go ahead with your recommendation"): D-1 a gate still missing after one fix + re-probe → stop and ask the user; D-2 S33's pass^3 stays a cap decision at the S33 brief.
+1. [ ] Scripted eval ($0) green. 2. [ ] Probe memory_write, learned_rules, scheduling, `mr-same-as-last-time`; fix misses. 3. [ ] One full recording (Phase 7 left $0.32), replay. 4. [ ] Empty `KNOWN_REAL_MODEL_MISSES`. 5. [ ] `/session-close`, PR, merge, S33 prompt.
 
 ## Last sessions
 - **S32a Phase 7e "a" half (2026-10-23): "What I know", the Remembered chip, visit notes on screens; pushed, no PR** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md), pre-approved). Full entry in [session-log.md](session-log.md).
