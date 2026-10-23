@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.29 — 2026-10-23
+- M2 (maintenance, the user's decision in chat after S31, like M1): **a leaner workflow**. Tests run in tiers (the full suites once at the end, one at a time); a session that records the real model is split into "a" (build on the fakes) and "b" (probe, record once, PR); project skills `/session-brief`, `/eval-record`, `/session-close`; shorter end-of-session docs.
+
+  **Plan change:** S32 becomes **S32a** (build) and **S32b** (record, PR), same scope and acceptance criteria. No PCR: no scope, contract or architecture change. No product code changed.
+
 ## 0.28 — 2026-10-23
 - S30b (Phase 7c, recording): [ADR-0036](../adr/0036-forget-takes-recalled-answers.md) (the user chose "Turn-level + verbatim" from four options). Every eval set was recorded on Luna + Sol, and all gates are met (pass^1, 167 cases, $0.30 of the $1 Phase 7 cap).
   - **Forget takes the AI's answers that recalled a fact.** Migration 0041: in a conversation whose tool answer named the fact, every later AI answer is replaced and its reasoning items are dropped. A real model reworded a visit note past the word-for-word scrub (AC-W7-2).

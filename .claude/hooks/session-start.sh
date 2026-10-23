@@ -17,9 +17,14 @@ pnpm install
 
 # Playwright: use the browser CI uses (the headless shell), so a test that passes here passes
 # on GitHub too (S21: the full browser granted notifications, the headless shell did not).
-# Kept if already set; written to CLAUDE_ENV_FILE so every command of the session gets it.
+# Kept if already set; written to CLAUDE_ENV_FILE so every command of the session gets it
+# (the hook runs on start, resume and compaction, so a resumed session gets it too).
 if [ -z "${PLAYWRIGHT_CHROMIUM_EXECUTABLE:-}" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-  shell=$(ls -d /opt/pw-browsers/chromium_headless_shell-*/chrome-linux*/headless_shell 2>/dev/null | sort | tail -n 1 || true)
+  # Older images ship chrome-linux/headless_shell, newer ones (S31)
+  # chrome-headless-shell-linux64/chrome-headless-shell; take whichever this image has.
+  shell=$(ls -d /opt/pw-browsers/chromium_headless_shell-*/chrome-linux*/headless_shell \
+    /opt/pw-browsers/chromium_headless_shell-*/chrome-headless-shell-linux*/chrome-headless-shell \
+    2>/dev/null | sort | tail -n 1 || true)
   if [ -n "$shell" ] && [ -x "$shell" ]; then
     echo "export PLAYWRIGHT_CHROMIUM_EXECUTABLE=$shell" >>"$CLAUDE_ENV_FILE"
     echo "session-start: Playwright uses CI's headless shell ($shell)"

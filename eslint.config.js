@@ -86,6 +86,8 @@ export default defineConfig(
       'e2e/test-results/**',
       'e2e/playwright-report/**',
       'docs/**',
+      // Claude Code's session tooling (hooks, skills' helper scripts), not product code (M2).
+      '.claude/**',
     ],
   },
   eslint.configs.recommended,
