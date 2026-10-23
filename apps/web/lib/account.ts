@@ -114,6 +114,7 @@ export const ROUTES = {
   rules: '/services/rules',
   chat: '/chat',
   autonomy: '/autonomy',
+  memory: '/memory',
   home: '/',
 } as const;
 

@@ -226,9 +226,13 @@ export function ChatScreen({
   const statusLine = state.activity ?? said ?? '';
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="m-0 font-display text-2xl font-bold">Chat with Pepper</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href={ROUTES.memory} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+            <Icon name="memory" />
+            What I know
+          </Link>
           <Link href={ROUTES.autonomy} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
             <Icon name="dial" />
             Autonomy
