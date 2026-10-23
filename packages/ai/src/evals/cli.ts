@@ -1,7 +1,8 @@
 // `pnpm --filter @pepper/ai eval [--provider scripted|openai] [--record] [--set <set>]...
 //   [--case <id>]... [--chunk <n>] [--chunk-size <n>] [--trials <k>] [--max-cost <usd>] [--routine <model>]
 //   [--strong <model>] [--routine-effort <e>] [--strong-effort <e>] [--label <text>]
-//   [--cassettes <dir>] [--phase <n>]` (ADR-0027, ADR-0030, S27; `--phase`, S29). Replays cassettes by
+//   [--cassettes <dir>] [--phase <n>] [--concurrency <n>]` (ADR-0027, ADR-0030, S27; `--phase`, S29;
+//   `--concurrency`, S31: cases at once, default 4). Replays cassettes by
 // default, at no cost: every case (the files and those generated from the tool guides) runs
 // through the real agent loop and tools in a seeded world on Postgres: `EVAL_DATABASE_URL` (a
 // migrated database, the services' login), or a throwaway one in Docker. Only `--provider
@@ -78,6 +79,7 @@ async function main(): Promise<number> {
       label: { type: 'string' },
       cassettes: { type: 'string' },
       phase: { type: 'string' },
+      concurrency: { type: 'string', default: '4' },
     },
   });
   const here = new URL('../../evals/', import.meta.url);
@@ -108,6 +110,11 @@ async function main(): Promise<number> {
   const trials = Number(values.trials);
   if (!Number.isInteger(trials) || trials < 1 || trials > 10) {
     print('--trials is 1 to 10');
+    return 2;
+  }
+  const concurrency = Number(values.concurrency);
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 8) {
+    print('--concurrency is 1 to 8');
     return 2;
   }
   const sets = (values.set ?? []).map((set) => EvalSetSchema.parse(set));
@@ -242,6 +249,7 @@ async function main(): Promise<number> {
       results = await runEvals({
         cases,
         trials,
+        concurrency,
         subject: loopSubject(database.db),
         providerFor: (evalCase, trial, world) =>
           providerFor(evalCase.id, trial, world.placeholders),
@@ -329,14 +337,14 @@ function recordingConfig(flags: Record<string, string | undefined>): OpenAiConfi
 async function evalDatabase(): Promise<{ db: DatabaseHandle['db']; close(): Promise<void> }> {
   const url = process.env['EVAL_DATABASE_URL'];
   if (url !== undefined && url !== '') {
-    const handle = createDatabase({ url, maxConnections: 4 });
+    const handle = createDatabase({ url, maxConnections: 12 });
     return { db: handle.db, close: () => handle.close() };
   }
   const { postgresUrlAs, startPostgres } = await import('@pepper/testing');
   const postgres = await startPostgres();
   const appUrl = postgresUrlAs(postgres.url, 'pepper_service', 'eval-runner-password');
   await prepareDatabase(postgres.url, appUrl);
-  const handle = createDatabase({ url: appUrl, maxConnections: 4 });
+  const handle = createDatabase({ url: appUrl, maxConnections: 12 });
   return {
     db: handle.db,
     close: async () => {

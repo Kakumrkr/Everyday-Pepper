@@ -5,7 +5,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing. S30 and S30b are merged to `main` through the S30b PR (branch `claude/wonderful-gates-w9ky2g`).
+**S31 (7d) episodes and learned rules**, branch `claude/amazing-turing-yfpq8e`. Brief approved (user, 2026-10-23): "Go ahead with your recommendations, ADR is pre-approved" (ADR-0037).
+- **Decisions:** D-1 full pass^1 re-record at the end (new tools change every request's fingerprint; ~$0.20, ≤ $0.25); eval cases run in parallel (≈4) to cut recording time; D-2 episodes store the fact ids their conversation saved or recalled, forget deletes them, a racing job refuses to store; D-3 one episode per conversation, replaced when it continues; D-4 forgetting a rule's fact keeps the rule, clears the link; D-5 rules proposed only from a member's stated or repeated preference; D-6 no episode when nothing is worth remembering.
+- **Tasks:** T0 parallel runs · T1 contracts + migration · T2 episode job · T3 forget reaches episodes · T4 `search_memory` · T5 `propose_rule` · T6 eval sets on fakes · T7 record · T8 checks, docs, PR.
+- **Done:** T0 (`--concurrency`, default 4; replay of all 167 recorded cases unchanged, 21 s). **Next:** T1.
 
 ## Last sessions
 - **S30b Phase 7c (2026-10-23): S30 recorded on Luna + Sol, three fixes, merged** ([ADR-0036](../adr/0036-forget-takes-recalled-answers.md), the user's choice). Full entry in [session-log.md](session-log.md).

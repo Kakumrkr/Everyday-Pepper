@@ -33,6 +33,8 @@ export interface RunOptions {
   providerFor: (evalCase: EvalCase, trial: number, world: EvalWorld) => LlmProvider;
   /** Runs a case (`loopSubject`: the agent loop on Postgres). */
   subject: EvalSubject;
+  /** How many cases run at once (default 1). */
+  concurrency?: number;
 }
 
 function describeFailure(error: unknown): string {
@@ -43,14 +45,17 @@ function describeFailure(error: unknown): string {
 }
 
 /**
- * Runs every case `trials` times and grades each run with code. A budget stop ends the whole
- * run there: the results so far come back, the stopped trial failed with the reason.
+ * Runs every case `trials` times and grades each run with code. Up to `concurrency` cases run at
+ * once (each in its own seeded world, with its own cassette); a case's trials run in order, and
+ * the results come back in the cases' order. A budget stop ends the whole run there: no case
+ * starts after it, the cases already running finish, and the stopped trial failed with the
+ * reason.
  */
 export async function runEvals(options: RunOptions): Promise<CaseResult[]> {
-  const results: CaseResult[] = [];
+  const results: (CaseResult | undefined)[] = [];
   let stopped = false;
-  for (const evalCase of options.cases) {
-    if (stopped) break;
+
+  const runCase = async (evalCase: EvalCase): Promise<CaseResult> => {
     const trials: TrialResult[] = [];
     for (let trial = 0; trial < options.trials && !stopped; trial += 1) {
       try {
@@ -65,7 +70,7 @@ export async function runEvals(options: RunOptions): Promise<CaseResult[]> {
           models: transcript.models,
         });
       } catch (error) {
-        stopped = error instanceof BudgetStopError;
+        if (error instanceof BudgetStopError) stopped = true;
         trials.push({
           passed: false,
           reasons: [describeFailure(error)],
@@ -74,15 +79,26 @@ export async function runEvals(options: RunOptions): Promise<CaseResult[]> {
         });
       }
     }
-    results.push({
+    return {
       id: evalCase.id,
       set: evalCase.set,
       holdout: evalCase.holdout,
-      passed: trials.every((trial) => trial.passed),
+      passed: trials.length > 0 && trials.every((trial) => trial.passed),
       trials,
-    });
-  }
-  return results;
+    };
+  };
+
+  // One iterator shared by the workers: each case is taken once.
+  const queue = options.cases.entries();
+  const worker = async () => {
+    for (const [index, evalCase] of queue) {
+      if (stopped) return;
+      results[index] = await runCase(evalCase);
+    }
+  };
+  const concurrency = Math.max(1, Math.min(options.concurrency ?? 1, options.cases.length));
+  await Promise.all(Array.from({ length: concurrency }, worker));
+  return results.filter((result): result is CaseResult => result !== undefined);
 }
 
 export interface SetSummary {
