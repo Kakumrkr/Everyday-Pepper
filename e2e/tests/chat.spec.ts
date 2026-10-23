@@ -201,6 +201,41 @@ test('a taken time → the slot picker → Approve exactly as shown → Why? →
   expect(bookings.every((booking) => booking.status === 'cancelled')).toBe(true);
 });
 
+test('a fact said in the chat: the receipt shows it live, a new value shows the old one, Why? names it, Undo brings it back (S30)', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page);
+  await salon(page);
+
+  // Saving to memory is "do it and tell me" by default: a receipt with Undo.
+  await ask(page, "Remember Maria's usual service is Haircut with Jess");
+  const first = changeCard(page, 'Client note');
+  await expect(first.getByText('Done', { exact: true })).toBeVisible();
+  await expect(first.getByText('Haircut with Jess')).toBeVisible();
+  await expect(first.getByText('Maria L.', { exact: true })).toBeVisible();
+
+  await ask(page, "Remember Maria's usual service is Haircut with Marco");
+  const second = changeCard(page, 'Client note');
+  await expect(second.getByText('Haircut with Marco')).toBeVisible();
+  await expect(second.getByText('(was: Haircut with Jess)', { exact: false })).toBeVisible();
+  await expectAccessible(page, 'chat with a remembered fact');
+
+  // Why? reads the fact live from memory, by id.
+  await second.getByRole('button', { name: 'Why?' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Why I did this' });
+  await expect(sheet.getByText('What I remembered')).toBeVisible();
+  await expect(sheet.getByText('Usual service: Haircut with Marco')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(sheet).toBeHidden();
+
+  // Undo brings the old value back.
+  await second.getByRole('button', { name: 'Undo' }).click();
+  await expect(second.getByRole('status')).toHaveText('Undone.');
+  await page.reload();
+  await expect(changeCard(page, 'Client note').getByText('Haircut with Jess')).toBeVisible();
+});
+
 test('ask vs "do it and tell me": the Autonomy page changes what the chat does', async ({
   page,
 }) => {

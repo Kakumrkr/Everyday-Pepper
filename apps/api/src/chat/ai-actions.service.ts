@@ -4,6 +4,7 @@ import {
   AiWhyFactSchema,
   AUTONOMY_ACTIONS,
   ClientIdSchema,
+  MemoryFactIdSchema,
   type ActionExecution,
   type ActionExecutionId,
   type ActionExplanation,
@@ -12,6 +13,7 @@ import {
   type AiActionsResponse,
   type AiActionView,
   type AiEmailView,
+  type AiMemoryView,
   type AiProposalsResponse,
   type AiProposalView,
   type AiWhy,
@@ -20,6 +22,7 @@ import {
   type AutonomyChange,
   type BusinessAutonomy,
   type ChangeSide,
+  type MemoryFactId,
   type UndoActionResponse,
   type UndoReason,
   type WouldBeEmail,
@@ -34,6 +37,7 @@ import {
   listPendingProposals,
   listRecentActions,
   memberFirstNames,
+  memoryOfAction,
   ownMessageText,
   permissionScope,
   rejectProposal,
@@ -187,7 +191,7 @@ export class AiActionsService {
       forYou,
       canDecide:
         proposal.status === 'pending' && (forYou || this.reachesAll(actor, proposal.action)),
-      why: await this.why(actor, proposal.explanation),
+      ...(await this.withMemory(actor, proposal.explanation, proposedFactOf(proposal))),
     };
   }
 
@@ -228,7 +232,26 @@ export class AiActionsService {
           ? (names.get(execution.onBehalfOfUserId) ?? null)
           : null,
       forYou,
-      why: await this.why(actor, execution.explanation),
+      ...(await this.withMemory(actor, execution.explanation, null)),
+    };
+  }
+
+  /**
+   * *Why?* and what the card shows from memory (S30), read live by id: a fact deleted since is
+   * "gone" in *Why?* and left off the card.
+   */
+  private async withMemory(
+    actor: Actor,
+    explanation: ActionExplanation,
+    proposedFactId: MemoryFactId | null,
+  ): Promise<{ why: AiWhy; memory?: AiMemoryView }> {
+    const [why, remembered] = await Promise.all([
+      this.why(actor, explanation),
+      memoryOfAction(this.db, actor, explanation, { proposedFactId, clock: this.clock }),
+    ]);
+    return {
+      why: remembered.remembered.length > 0 ? { ...why, remembered: remembered.remembered } : why,
+      ...(remembered.card !== null && { memory: remembered.card }),
     };
   }
 
@@ -287,4 +310,13 @@ function emailsOf(execution: ActionExecution, messages: readonly ActionMessage[]
       sendsAt: message.status === 'pending' ? message.availableAt.toISOString() : null,
     }),
   );
+}
+
+/** The fact a memory save proposes (its payload holds only the id, S30), if it is one. */
+function proposedFactOf(proposal: ActionProposal): MemoryFactId | null {
+  if (proposal.tool !== 'remember_fact' && proposal.tool !== 'add_visit_note') return null;
+  const payload = proposal.payload;
+  if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) return null;
+  const id = MemoryFactIdSchema.safeParse(payload['factId']);
+  return id.success ? id.data : null;
 }

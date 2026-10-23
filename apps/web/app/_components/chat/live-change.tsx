@@ -284,6 +284,7 @@ function cardProps(
       undoUntil: null,
       canDecide: proposal.canDecide,
       canUndo: false,
+      memory: proposal.memory ?? null,
     };
   }
   if (live.kind === 'action') {
@@ -300,6 +301,7 @@ function cardProps(
       canDecide: false,
       canUndo: action.canUndo,
       approvedByName: action.approvedByName,
+      memory: action.memory ?? null,
     };
   }
   return {

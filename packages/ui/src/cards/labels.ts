@@ -9,6 +9,7 @@ import {
   type AutonomyLevel,
   type AutonomyOutcome,
   type ChangeSide,
+  type MemoryFactShown,
   type ScreenLink,
   type WouldBeEmail,
 } from '@pepper/contracts';
@@ -98,6 +99,9 @@ const STEP_LABEL: Record<string, string> = {
   list_todos: 'Read the to-dos',
   complete_todo: 'Marked the to-do done',
   unblock_time: 'Removed the blocked time',
+  remember_fact: 'Remembered it',
+  add_visit_note: 'Noted it on the visit',
+  forget_fact: 'Forgot it',
 };
 
 /** One step of the *Why?* trace, in words. */
@@ -238,12 +242,20 @@ export function changeRows(
       );
       return rows;
     }
-    case 'client_note.save':
+    case 'client_note.save': {
+      // The memory tools (S30): what it is about and its key; the value is read live by id
+      // (`memory` on the card), never stored with the action.
+      const side = after ?? before;
+      add('About', null, text(side, 'about'));
+      add('What', null, keyWords(text(side, 'key')));
+      if (after?.['forgotten'] === true) add('Forget', null, 'Everywhere, for good');
+      return rows;
+    }
     case 'message.confirmation':
     case 'message.rebooking_nudge':
     case 'message.waitlist_offer':
     case 'message.bulk':
-      // No tool makes these yet (notes: Phase 7, messages: Phase 8); the summary says it all.
+      // No tool makes these yet (messages: Phase 8); the summary says it all.
       return rows;
   }
 }
@@ -260,6 +272,20 @@ function blockSpan(side: ChangeSide | null): string | null {
   return fromDate === toDate
     ? `${formatWhen(fromDate, from)}–${formatTime(to)}`
     : `${formatWhen(fromDate, from)} – ${formatWhen(toDate, to)}`;
+}
+
+/** A remembered fact's key in words: `usual_service` → "Usual service". */
+export function keyWords(key: string | null): string | null {
+  if (key === null || key === '') return null;
+  const words = key.replaceAll('_', ' ');
+  return `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
+}
+
+/** A remembered fact as one line (S30): "Allergy: PPD", or "A fact you deleted". */
+export function memoryLine(fact: MemoryFactShown): string {
+  return fact.state === 'gone'
+    ? 'A fact you deleted'
+    : `${keyWords(fact.key) ?? ''}: ${fact.value}`;
 }
 
 /** The client's name a card can show for an email (its sides carry the short name). */
@@ -340,6 +366,8 @@ export interface WhyModel {
   checked: string[];
   didNot: string[];
   setting: string;
+  /** The remembered facts it used (S30), read live; a deleted one as "A fact you deleted". */
+  remembered: string[];
 }
 
 const LEVEL_OF: Record<AutonomyOutcome, AutonomyLevel> = {
@@ -382,6 +410,7 @@ export function whyModel(why: AiWhy, action: AutonomyAction, emails: number): Wh
     }),
     didNot,
     setting: settingLine(why.decision.reason, action, why.decision.outcome),
+    remembered: (why.remembered ?? []).map(memoryLine),
   };
 }
 

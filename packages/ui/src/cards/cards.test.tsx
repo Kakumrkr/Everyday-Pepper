@@ -2,7 +2,12 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import axe from 'axe-core';
-import { BookingViewSchema, LocalSlotSchema } from '@pepper/contracts';
+import {
+  BookingViewSchema,
+  LocalSlotSchema,
+  MemoryFactIdSchema,
+  MemoryFactShownSchema,
+} from '@pepper/contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ChangeCard, type ChangeCardProps } from './change-card.js';
 import { BookingCard, ClientChoice, DayCard, PlanCard, SlotPicker } from './choices.js';
@@ -177,6 +182,89 @@ describe('ChangeCard', () => {
   });
 });
 
+describe('ChangeCard with memory (S30)', () => {
+  const known = (key: string, value: string, previous: string | null = null) =>
+    MemoryFactShownSchema.parse({
+      state: 'known',
+      factId: `0199f4b2-7c1e-7a00-8000-0000000000${key.length > 5 ? 'f1' : 'f2'}`,
+      subjectType: 'client',
+      key,
+      value,
+      previous,
+      sensitive: key === 'allergy',
+    });
+
+  it('a booking warns about an allergy and shows the last visit, as plain text (AC-W3-2)', async () => {
+    const { container } = render(
+      <ChangeCard
+        {...change({
+          memory: {
+            fact: null,
+            warnings: [known('allergy', 'PPD <script>x</script>')],
+            lastVisit: {
+              date: '2026-10-13',
+              serviceName: 'Colour',
+              notes: [known('formula', '6N + 20 vol, 35 min')],
+            },
+          },
+        })}
+      />,
+    );
+    const note = screen.getByRole('note');
+    expect(within(note).getByText('Heads up')).toBeTruthy();
+    expect(within(note).getByText('Allergy: PPD <script>x</script>')).toBeTruthy();
+    expect(container.querySelector('script')).toBeNull();
+    expect(screen.getByText('Last time (Tue, Oct 13, Colour):')).toBeTruthy();
+    expect(screen.getByText('Formula: 6N + 20 vol, 35 min')).toBeTruthy();
+    expect((await axe.run(container)).violations).toEqual([]);
+  });
+
+  it('a saved fact shows its value and the one it replaced; a forgotten one says so', () => {
+    const saved = render(
+      <ChangeCard
+        {...change({
+          action: 'client_note.save',
+          status: 'done',
+          summary: "Update Maria L.'s usual service (the old one can be brought back with Undo).",
+          after: { factId: 'f1', about: 'Maria L.', key: 'usual_service', sensitive: false },
+          emails: [],
+          memory: {
+            fact: known('usual_service', 'Colour with Jess', 'Haircut with Marco'),
+            warnings: [],
+            lastVisit: null,
+          },
+        })}
+      />,
+    );
+    expect(screen.getByText('Colour with Jess')).toBeTruthy();
+    expect(screen.getByText('(was: Haircut with Marco)', { exact: false })).toBeTruthy();
+    expect(screen.getByText('Maria L.')).toBeTruthy();
+    expect(screen.queryByText('No email to the client.')).toBeNull();
+    saved.unmount();
+    render(
+      <ChangeCard
+        {...change({
+          action: 'client_note.save',
+          status: 'done',
+          summary: "Forget Maria L.'s allergy everywhere, for good.",
+          after: { factId: 'f1', about: 'Maria L.', key: 'allergy', forgotten: true },
+          emails: [],
+          memory: {
+            fact: {
+              state: 'gone',
+              factId: MemoryFactIdSchema.parse('0199f4b2-7c1e-7a00-8000-0000000000f1'),
+            },
+            warnings: [],
+            lastVisit: null,
+          },
+        })}
+      />,
+    );
+    expect(screen.getByText('A fact you deleted')).toBeTruthy();
+    expect(screen.getByText('Everywhere, for good')).toBeTruthy();
+  });
+});
+
 describe('SlotPicker and ClientChoice', () => {
   const slots = [
     { date: '2026-10-27', time: '12:30', staffMemberId: STAFF, staffName: 'Jess' },
@@ -278,6 +366,28 @@ describe('BookingCard, DayCard and PlanCard', () => {
 });
 
 describe('WhyContent and the chat notices', () => {
+  it('lists the remembered facts it used (S30)', () => {
+    render(
+      <WhyContent
+        why={{
+          ...whyModel(
+            {
+              asked: { kind: 'none' },
+              steps: [],
+              decision: { outcome: 'propose', reason: 'setting' },
+              untrustedContext: true,
+            },
+            'booking.create',
+            0,
+          ),
+          remembered: ['Allergy: PPD', 'A fact you deleted'],
+        }}
+      />,
+    );
+    expect(screen.getByText('What I remembered')).toBeTruthy();
+    expect(screen.getByText('A fact you deleted')).toBeTruthy();
+  });
+
   it('lists what was checked when the record has facts (S26b)', async () => {
     const why = whyModel(
       {

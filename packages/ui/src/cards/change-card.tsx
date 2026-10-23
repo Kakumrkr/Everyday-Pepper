@@ -1,4 +1,4 @@
-import type { AutonomyAction, ChangeSide } from '@pepper/contracts';
+import type { AiMemoryView, AutonomyAction, ChangeSide } from '@pepper/contracts';
 import { useId, type ReactNode } from 'react';
 import { buttonClass, cx } from '../class-names.js';
 import { Icon } from '../icons.js';
@@ -7,6 +7,9 @@ import {
   changeRows,
   clientNameFor,
   emailLine,
+  formatDate,
+  keyWords,
+  memoryLine,
   undoLine,
   type EmailItem,
 } from './labels.js';
@@ -71,6 +74,11 @@ export interface ChangeCardProps {
   onWhy?: () => void;
   /** A link to change the dial (the page's own link component). */
   settingsLink?: ReactNode;
+  /**
+   * What the card shows from memory (S30), read live: the fact a save or forget is about
+   * ("Updated: was …"), the booking's warnings (AC-W3-2) and the client's last visit.
+   */
+  memory?: AiMemoryView | null;
 }
 
 /**
@@ -130,6 +138,9 @@ export function ChangeCard(props: ChangeCardProps) {
             </div>
           ))}
         </dl>
+      )}
+      {props.memory === undefined || props.memory === null ? null : (
+        <MemoryLines memory={props.memory} />
       )}
       <EmailLines {...props} emails={emails} />
       {props.approvedByName === undefined || props.approvedByName === null ? null : (
@@ -206,5 +217,58 @@ function EmailLines({ action, emails, before, after, timeZone, now, status }: Ch
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Memory on a card, as plain text (values are people's words, never markup). */
+function MemoryLines({ memory }: { memory: AiMemoryView }) {
+  const { fact, warnings, lastVisit } = memory;
+  return (
+    <>
+      {warnings.length === 0 ? null : (
+        <div role="note" className="flex items-start gap-2 rounded-md bg-wait-soft p-3 text-sm">
+          <Icon name="alert" className="mt-0.5 text-wait" />
+          <div className="flex flex-col gap-1">
+            <p className="m-0 font-bold">Heads up</p>
+            <ul className="m-0 flex list-none flex-col gap-1 p-0">
+              {warnings.map((each) => (
+                <li key={each.factId} className="whitespace-pre-wrap">
+                  {memoryLine(each)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+      {fact === null ? null : (
+        <p className="m-0 text-sm whitespace-pre-wrap">
+          {fact.state === 'gone' ? (
+            'A fact you deleted'
+          ) : (
+            <>
+              <span className="text-ink-2">{keyWords(fact.key)}: </span>
+              <span className="font-semibold">{fact.value}</span>
+              {fact.previous === null ? null : (
+                <span className="text-ink-2"> (was: {fact.previous})</span>
+              )}
+            </>
+          )}
+        </p>
+      )}
+      {lastVisit === null ? null : (
+        <div className="flex flex-col gap-1 text-sm">
+          <p className="m-0 text-ink-2">
+            Last time ({formatDate(lastVisit.date)}, {lastVisit.serviceName}):
+          </p>
+          <ul className="m-0 flex list-none flex-col gap-1 p-0">
+            {lastVisit.notes.map((note) => (
+              <li key={note.factId} className="whitespace-pre-wrap">
+                {memoryLine(note)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
   );
 }
