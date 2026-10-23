@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "6384759035251060782101cd38579a6b4295545489be18073b1bcdf09da0ff82",
+        "fingerprint": "02091cff4feaf348e00b1f44ee132aa3a867197ae0b59fd743cc047ba1c4d8c2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bvWJYq1rS8dwrIJDKBAFAO0a",
+              "id": "call_gxqE1tqc1zZpMNEFD2h4KFZQ",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8281,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8318,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 8,
             "outputTokens": 16
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "32da33d326ba4c1f8fe956c3a9499b4014437ee29a340ea4f8917ee8b3f93e77",
+        "fingerprint": "d21f42777a82d80e1e5119e3fa29713e782ef20ad76452bfd7d959219123272c",
         "response": {
           "text": "Jess does colour.",
           "toolCalls": [],
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8552,
-            "cachedInputTokens": 8278,
-            "cacheWriteTokens": 271,
+            "inputTokens": 8599,
+            "cachedInputTokens": 8315,
+            "cacheWriteTokens": 281,
             "outputTokens": 8
           },
           "model": "gpt-6-luna"

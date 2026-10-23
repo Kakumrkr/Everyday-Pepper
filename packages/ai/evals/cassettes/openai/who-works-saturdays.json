@@ -3,58 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "6dd67e28be1827807d76edcfcc3ca1ab7b2fdd7030bae6f6e40e574d4670d1b2",
+        "fingerprint": "b17900f35062086b5b7da6b1009ebbfb87e93855a942425ec5ddbcd11cf7337e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_sHuJocK1YM23YCUWtVBjawNf",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
+              "id": "call_2axzjgzsEPKrkq6E5DiYmwrZ",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-07\",\"staffMemberId\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8284,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8321,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 11,
-            "outputTokens": 16
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "dd79111c30932fb26537eb64e52da6f87d9846cc591a5440ba19a34eb65c4164",
+        "fingerprint": "fa22ba05a2555560d8da5619a517ae1e8a2ea1bf11203405b9c8e880c694b597",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_lI1wdmxPUj4Gl6SjXYr8twFy",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-07\",\"days\":1,\"notBefore\":null}"
-            },
-            {
-              "id": "call_TqkDOYPANtpJx85skKRj18Pg",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-07\",\"days\":1,\"notBefore\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8566,
-            "cachedInputTokens": 8281,
-            "cacheWriteTokens": 282,
-            "outputTokens": 145
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "2c915a7bbfcdbdc38156825d25f06915c0cf77b4012c7091947e8432c2c360a2",
-        "response": {
-          "text": "On Saturday, November 7, Marco has haircut openings starting at 10:00 AM (more times available). There are no colour openings that day.",
+          "text": "There are no bookings or blocked times on Saturday, November 7. To find who’s available, tell me which service you want to book.",
           "toolCalls": [],
           "replay": [
             {
@@ -64,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9371,
-            "cachedInputTokens": 8563,
-            "cacheWriteTokens": 805,
-            "outputTokens": 35
+            "inputTokens": 8404,
+            "cachedInputTokens": 8318,
+            "cacheWriteTokens": 83,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

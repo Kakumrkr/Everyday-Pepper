@@ -3,31 +3,53 @@
   "trials": [
     [
       {
-        "fingerprint": "315db78447b209c5c85efab33e05a05cd921cdd2156541cc1eb1cfaeb07e9b94",
+        "fingerprint": "4bfb53b4aba4dd470cd4beb04f3d99ba15df1186e37c92c3aa86d80cd6a0e5c3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_CstYfSiIyignMHJKcP5UyXbb",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+              "id": "call_eYAWLYrDgppNOaZV5TlVwl66",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8285,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8322,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 12,
-            "outputTokens": 29
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4612cf529f9946e83564c1f140c9efe254bce718f9dd82fd69e0ed07690e01b3",
+        "fingerprint": "03ebd55f067f2796826fdc7af97fc7d288c3c43c4e1fe36e90ad0c968fbbfe24",
         "response": {
-          "text": "Yes, Marco is free tomorrow at 11:00.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rw6DaUdCU26NQq65QtMZgouY",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:marco}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8605,
+            "cachedInputTokens": 8319,
+            "cacheWriteTokens": 283,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6a2ada34b05f644ea67bc353018f469cc306d472de61ada79f7215d482a44326",
+        "response": {
+          "text": "Marco has no bookings or blocked time tomorrow, so he appears free at 11.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8597,
-            "cachedInputTokens": 8282,
-            "cacheWriteTokens": 312,
-            "outputTokens": 16
+            "inputTokens": 8707,
+            "cachedInputTokens": 8602,
+            "cacheWriteTokens": 102,
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }

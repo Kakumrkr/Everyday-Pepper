@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0394b57a66dfc5c7ee4b7a7c9f69916ddaf15e4bb1a220e3ad45db1b52641fe2",
+        "fingerprint": "353bce9d2bba0dd000c0dcd8e1fee5fa71ec9013dce65933e706927cf008f529",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_g5PnRcYAoE2AEtkyQUw5iFfv",
+              "id": "call_wks23EgdwGOqvTiFXRe5ILwF",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8293,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8330,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 20,
             "outputTokens": 77
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "c86bbf2e2eaf252e0fb6ac73896d6ae0190b1b7c2903a62bcead2df043a20627",
+        "fingerprint": "34f7e32c5458ccb421a68e50077965114543f854fe190427a4344f7788566271",
         "response": {
-          "text": "I’ve proposed no bookings for the whole business from December 24 through 26, 2026. It hasn’t taken effect yet; you can approve it on the card.",
+          "text": "I proposed no bookings for the whole business from December 24–26, 2026. It won’t take effect until you approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8450,
-            "cachedInputTokens": 8290,
+            "inputTokens": 8487,
+            "cachedInputTokens": 8327,
             "cacheWriteTokens": 157,
-            "outputTokens": 40
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }
