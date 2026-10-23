@@ -3,51 +3,29 @@
   "trials": [
     [
       {
-        "fingerprint": "7c3dc20fc4aedeac4afca56ee1c038f162afdcb17ed5e66ee36be91e3d5e3d66",
+        "fingerprint": "8dedc4c7ab7291b81978dbcbbc1de5e55296c828fb7b6da93ca37ddbf88a2fae",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ZYo6ciIqB1wB2mnYzSns7vlW",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
-            "cacheWriteTokens": 11,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "d33371bdf134f6c51674ba09f60b3e8fcf86f9ea8f24d655f2cc96f2a4cbe252",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_VtwnKjUgZmigDMJnDPRlctAq",
+              "id": "call_ZMDWPqTw51Kstlhyq8ta3dKQ",
               "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:marco}}\"}"
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7251,
-            "cachedInputTokens": 6969,
-            "cacheWriteTokens": 279,
-            "outputTokens": 48
+            "inputTokens": 8230,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 11,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "af1671147a5405146f6eda7fcf1ed6e08c6400da5bb77b5a70475754ad0edf7f",
+        "fingerprint": "ed2ed876967851251c1b43c75aebdf78805a75766d94b06487acf9fa06cd1b0f",
         "response": {
           "text": "Marco has no bookings or blocked time on Thursday, November 5.",
           "toolCalls": [],
@@ -59,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7353,
-            "cachedInputTokens": 7248,
-            "cacheWriteTokens": 102,
+            "inputTokens": 8313,
+            "cachedInputTokens": 8227,
+            "cacheWriteTokens": 83,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"

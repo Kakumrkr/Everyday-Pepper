@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b213d2d9f5f28d3daac0d1e73c05ded320fb9398ac598835eb95509ace6a3ac4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_B7ntsdHa6FOs7CWnyJA6Lpl2",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"this Friday 2026-11-06\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8232,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 13,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4a03da704510c3eb49c419c7e43eb79e7c9047eb8a58a9f6843d80e3bf3f607d",
+        "response": {
+          "text": "On October 30, you talked about Friday, but I don’t have any usable details about what you discussed.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8459,
+            "cachedInputTokens": 8229,
+            "cacheWriteTokens": 227,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

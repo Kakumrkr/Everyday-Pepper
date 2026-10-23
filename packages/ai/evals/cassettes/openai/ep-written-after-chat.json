@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "6ac79afa14788fe49ae10fa2963325b16eedf76579521c13ff26aafe4098b822",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vaYYiST2q6G2xQHejctmYWUC",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_party\",\"value\":\"Team holiday party on Friday December 18 at 6pm; Lena will bring the cake.\",\"sensitive\":false}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_06a5f9e7552c7d06016adba782bfa887d29f0e56fbc6343f87",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq26eDpIvfcmmLdUXAL2Tqg3JJWsYYiiHQQwtjhIXALNCEf3q3Edf8rAsUcJdYSEuJMmlT26K3Jghlvu4LnpmDb-NfKSx10aLi19j6TbByTPYBcWWXOmNjXrSEotQs6LfaJxTC4wGls6l4x1Ld27Sl-BiWa1044H_g8cBR0FOWTqv3e7vplKld5mMx6ssrZgnSx-VtstqaK4M67XzoOQt3rPM5wHNyBONzToCRzJ8PBJoIIBSclAchbAWRqtuy5muEGZ5yX-6kxT-VoxYcPDeJu6HISXeMsBXZmeUsTzEfyflHYTJEqWNSpZ4EbMfA4arWNQ-BN5yk7t_Dy81qdbGnFguRmVkHOdW-nTezxNwaecvMjUb4eb0gNT5NDtcSNXFkkBMMPxbh8mHzqKcHHFbRHjOjEF0ZJo7EJfN1oqwcRjNl95zXtwcd3A-pIEJ2v6oJtSQKhO9aonz-rUdc6G4TzfEkhGtpWtGWxf0qaxf-SDKrdKI7BoMvCBNodVu66fKY-B5nLoczj_DgfMmfCUiNW2q9W70H7_npyFtKpTOBhGvheTGGfuGxHONvwy3i1__jpo4ikT2MGWMSwo5BHZIUMTgFAZCPCGIqu_rJ6xpqczIJSkaOZXON_sOdZsGv8zcNB8p5EWjGEVOdbjlHava_gSjmTM-d-XRqBb247UVY9SBqYOwdh_DKsMxqwbS7y9SUyldxWvkm5MJVb94Wx01escA67f_VbsTXk-eelQ0j121-xvhRFtJMF0A3r_ieJDLT8D0W-cDBmDU73T1k3jYR7zQtVdZ6Kzn5OU0xGTOh3yf1H9bUvTNfIWR1JWn0LxODp0XP4tuKkqEIndigMyMt3J-PIv_iOoGDYrFJdSG4vDveopu1aWioRmSnV0zDs6rUkMpCfPfJYmSWf5ylzycSuroVBHmFnRuKzxqluZTUdRiL4zn-U8FwfcvT669s8m58q6G6j_xFwn7YfRRmAB2KwFkIM0laecpVTLh8vD5PNO1zmPXPRTZBEtPPpX2cr0f9tevwVVsquSTVcOZ454lqlgRcN4qK1iayrZ1CtPcxKlRbJGARi7VIvVjQN9BAbiMmH9CkmM29tv9brH1d4aLv_xjdNADr-zMTkF8pJTZ2Ay7x6FHsCnTQzzd1VtwiJhz2PwqfV_izDZLvfVmM4biGMezPjjvif3H4xhj6aC4UG5ISX78Em9zWoiHao-6FY7bU3tofYi0DK7TYEzsytcHK30BJtkpEr1yoMfrGxnATV0nN94i81wGLonR9MoK-0dfOb8MOAHMNg9cqfa2QtyM_GdDOhQ748F0kIgwhUDqbvTuLe4LM4Sy4xXjCpN6y77sNV-wYKy3rcJeX743RY7CbmUvU_ZjU9QrZM5dXwipIkWSmwrxAB37brP0ZrNvhjfkXDptmlGlRDS2Ktb64M4PDH1zrCxtraX-aEhRXsKptfERMCHtBoiNf8cWo9YDXEpBGE-pcpeCvow4wnHpfHZI19p51cmUABP403wGJ_W4DCZJkDkHxiaByZznTGW90y2TM3NjLhJYRpiEboe4z3AmwP_Xtf0WT7bkOmfx02ebbMNClDu4YXUN94svmoUOtT0uSTvrJcd4pXeivbMPeD5ZuwgkLBT3qaL0Q5lTo_2ozAWY7lWDgfFCVVP08OhzlGmungO_zTm3KV2CnN3NdbUVEMQTJsoiopKtFqm3H8KPH9qWizVC2OsvNYmT-BALmqcOr6cPFhDoNBFm22SiYrmtjNehHVMf4N7zqNF2cMrV8u7zPhGRPHZE3yiRCymNCXNv0a4gVDJFOqk-oeYxg9BVpVKQo86R1dV8VCv1Rv8T0NaVSN6Q5nZwn7pNOhhzAafIIuSrFaGzKtyeHdt9GAD-8L4UUUJdkmylJACMezp1HFIyS2iTFUGfOADB3l5jzqB4z4bdtszofQEivAmyBaKitxxvZ_sCoWzUCzHu5jXuSt9AoVvPlwPnRN0fqXxPF3IzEybTkbwrFeLp1Dux5at1K3hRHAReYrXjGduzu--A8Bb5P31wY8YR0jdzwidSGaiG2QpyEY8bLn8S291ZhMaotby9Rsjut4DbBhcdHkU_z3bvGbq81TQEeMuZaz4Ou-PurTQJ1ZEu37GbeBGVGdChEu-HR0XL6Hgzer0xkDWRjiznzsmOo_OSXRDBLA7X9ihUJ6n8xAIZh4hoXm_Y2iu43eviDlb6nZpdmOatc2b-crWv_1YGgdFMUa7dw-arg3coDTH0h",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8253,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 34,
+            "outputTokens": 115
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "87089fb29602be5303ed82e27bbb3bb317dea00409af12225d5eb84953017339",
+        "response": {
+          "text": "Got it—I’ll remember the team holiday party on Friday, December 18 at 6pm, and that you’re bringing the cake. No booking made.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8408,
+            "cachedInputTokens": 8250,
+            "cacheWriteTokens": 155,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ea17c7abca4b5092690e51c112320dc4c2287b66522df7ad4b2c6653c5d47dee",
+        "response": {
+          "text": "The team holiday party was planned for Friday December 18 at 6pm, and the member planned to bring the cake.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_09ec27b15b9ad667016adba78ac6c087d2bd55a2db97920c83",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq26eLZLwWaNIul2oKJ0AkMomZFJl47ETwlwZGdPh30lEvqJmyCou53_xKG9zLvPU9TSvauOF7Eg78mKojURfsc_dYzBH6LVd1LkVMMzha86O1W32PoSwxRplTc_bGzGTken3T7ESV8OOnrVV8TwVgi0gr9aD5gqvzB1CZgDDiQOIUN5hdx19vYlC58krN_Yi7GqnDmXhpldYvlFqiI9uDAWyZdaIh3e0RZa7Dw7qjbG_tGz6sJNL4dKHmq-Y67c7jrUTPuVg4ZHc38WBrAB-ET4Qf7JQqrpxs2ftDnmbtWaSG0I7XqBawcPM3b1ePlw0bSO0a5gqC6syoebwvOKOQ3WpT8t_1WcQempeBTyM2_lVGhDz3TQfdm_0Ap3SBoDIQQ1kKTS8jYUDHp4M9n-iTgFrtQHJnb69oFj1elPFF45-Q3E1tbjV40JP4OvnGZOC_XU3cRbo0M1ltqTBJCgmoNgu6qt-6tuJJBsFRVpt5xsyEOM4I5KTgoO8dwQNSN6kXOZ22o9PJe9665DWLkTloNmimFTzZpWpyiBkFXfc-NcPcmQfLei6Me2fPcj52K5o5y3kxFPx72tDwD54HbojHQJ9zsF9CYGtyaZIAnfP6W6JO01kTgRNsV-MjQ3Ajk_1SE4HGljaVkBsZSoDYyiWKPzUSgtiOF1JJvaAQoXf-qpbPbSJmqvnoOa7sAw0gru1AmILwmHC3y6y6T6VAndjdJ9Bvkaujg1SnmLayjYsvul3Y9my_-m4e1Cfu4M6ep8g9e2mMkM16Q6fzXUYp3EXqjgg9QCgQ9Uw4J40NnY8tkfWMrnO5i94TZCl_Mh0pUsQ5rl2duyLRPo1SpVZczaJO_hhYWJMFHh-13-HudInFfh2m1cl2fy-glg1Iscc4MQAlh04mE_Gf97IOUhtmRA9Nzixgkd5AO0Gigp8kWLHReH-bNLl4DMmq6nAcGpURSoszxvA4QiKemajVTcmpKymPqnhUFEUszCj4T7PsrkFkPvFERkAG8y7pbW1a6RaqZvkzfgtD_JPs_XK7m4wPPHhdoZaEJCBAoVm3xtZ7s7pZ3cGjDvVvyviks3LkccIOgLVDluKFGX3szqzgKqNMzXFdY1yQTRfAqUkh_8CJ2EDWH_57lflZhJkFGRmgpTYs-WF45o0Ts16LajRXr1BZ4kYdRmtvvJLmzQkNnaWnjgiXfXh62x9uq9OGrNZe2XoQeRP31lG_kdgCZMHJlyyhpsiDm9IA-bTSMhMhnSMnYmc5s9xzdRK1xho1kNMaFyJn03-MCpSvIbn4jabmVJEu20mOTl3qbx_jLDbLbSytvKijcp7vnSoSpS1exNRb7RqNvD7vOT9DVcsVOYq1k3Nqrug3vArKpUstcz6mPclhxou087wS7fsQym8oM__FMsQVLDyjnBNjKv5_N-LkmjzaftdN0TV3gLy_NHERwzORXm4ufsjwEs4k_DCPYZfBWBJ69he7xx0g5srjeresKUS2quPehDzTcFm3yZLe84MALMJdpGih73rwQDTExqjHj6RoA4sILvETorAR8ozE8W2jdJzpX5IUWw9_GxCn2QTuqOWEm1MTCSxgkHWQ4Ip8ikn_YmnCJ4J5RjfIbAiP7Sky6ZqZqtQ9hrAjGk3HsTMDr-lnm6CsWYkytlgS_3zPtHumZiCScCzO83KsxYo_KruapdeKqPMz6N_mx-3mxdhDRWyrF2nJLBOknfXxCFvC0RGcXYW8DAuipuY6czncttX09juraQoqiImiogFWtKf2VRgNox3bf7nTIWBOPkY0DUL-tczrAKBym4CdLoNR23AzQFWTIpA2Q7hWJ0HzN_Tl9Grpmw7TDFPk-e0Y6OwJP1Amcde15e-8jlC3-o_2WnFJ5tAg3Bjt9sTp6M1OofVrG8-9EYYzBXQ3k0XMEYLMBUSZKsH9z9LAY5BwwAMIz-LmoE8zY8dkEo745IfYbh_dniIXd-9jjcYGBjSq-r0-1CVimgdW0pJQanv70_zMIaK2gEKjPGrxgi4WPRF6TsAYs6tQYJo2fv9kx8cVXzrkBvwqz2dB31feJNLtT7p-yHbzoql0sJFgsBTamP50Y_uAuMDW7K1pxCnz2VWe4qaLIDCvOEYIjoaY",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 306,
+            "cachedInputTokens": 0,
+            "outputTokens": 90
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3d9dfdc4c1472157c7c615de745a615f25de9128e235a0413596452a2368d8e7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_zjCjo8auzz36knzLj5qUv03I",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"holiday party\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8321,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8318,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "665f019eb58040016327992a32ec31b9a7c5497bfb993222eb94c92fb4508964",
+        "response": {
+          "text": "We planned the team holiday party for Friday, December 18 at 6 pm, and you planned to bring the cake.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8449,
+            "cachedInputTokens": 8318,
+            "cacheWriteTokens": 128,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

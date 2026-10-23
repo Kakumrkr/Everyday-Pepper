@@ -3,94 +3,64 @@
   "trials": [
     [
       {
-        "fingerprint": "0302daf86ed9de795e46e48b37d3de1d5d1c7b5cb11a45fd9f6761fcfe24cfdf",
+        "fingerprint": "282ce5ea266cbaa2e66b32f59ca629eaa54f3863a76f661a38cac159a9a6007a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Ukz6NWJS4ufw7IKb4NywchhX",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+              "id": "call_WbPQk1CT4oHcruMWuB8AcmLE",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8230,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 11,
-            "outputTokens": 29
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "63f591efaa42142d7c5b953b35a4818249acab50275a8cfb41d71b5f9baffafd",
+        "fingerprint": "1d9be1e5e20e7cd36bae5443824af88bf7767f8f2aee08e2f5934410bca9ea9a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_QxEwoKEzUzkGoXljZJ3IDRT6",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [
-            {
-              "id": "rs_07c21517ad8060ad016adb70368ee487d2a817dd14489db48c",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq23A360dpDXI3NDaLWglJ-EvHsbAIEl5AAd5AKnwqla5A6scr6X4P_U1m-6IAULOXUF4QxCoQSGT0XyVa26cemUASD2OBdCRXA6DrTfQZVO-iul1EXqCIrjquCD9mpMPL9j2P8hLD1TRT4h-taV4kG9XI7oZTYFmtO61fCP7zCrwmA3KX3-Ubh3PQ0FEKvb7_rEBUhWumsMO68UYkrT8UVmWK0k3rxA6ulFUknnb_JTr8InCjCauk03VnkgVxoajT-Pun1hJYrlSExHCXnkSawry3PxVTtiWlBrnXpFJg5vhk6MTHd4ILzSx2ekXHyXtK2tqJ84ykD07-wCvS3ictUaSFuYSFnMz1JDEtqPxc98z9CM_ls3DyanHyUMwRMBMlWEJY5wNlAazN8YOtksDh0T-ayYQnv2NV4NlSuoZ2c_rNDj1xsa-1nD9d3Vx-GLPE7YV2kxe512O8YwfC6ZC1cB9NbRUFeYllrmD2588TNRbmoR6Z8ZtmvBDAlt3eKw5tfBgvOT_ssVgHX4uaWvfYXG4kF3fycXVCu0bjbx7QMltW7O6sTKJTzOols-LFQFq8i4_jFqhRwc3y1NzKHir6Fv1aM2RVoXZ7QnCpWGsd3kSCDqE4qgyoALT3lxoT9i-O07EA4OucQrQ34aJVPcKgXhm2HJCMV6iLspPAQwULCsS7UcV-RVAbgtdL-uGwdQIw2LS7J7doZq_m7HRatfYqtqcxaoyx6YYnaf4T9gHVrO6bl74hcrbRtSzaU1565HWcTKhpQQSqu3u70TK7pni7bl4k3Q5rA46VmiOoQE3eGO45BywKrsLqccHmSMRdVgiUsvFUFNVY3Nrv2Y1uNrpX7kn8VMwl-i5BsLwUJQ1Ae9T8Tmc3B1SYbtNyoirVwjXcJmKqixLfCsAtSvuLNz6y2_ndz28EFWY-wdVylackmPZdainXFHy6Db_oZi5ttPmCmnn8tBzgkWNlFd7VukxTrJnrHlAXE9gfm29QzxbpahPEfto8px5VPAHzASju357Hezsd1Tl9r8cW0BwZ9Mej0tlQ5DUY_qLaywnGwjZmowJ2VH01jp-e8CoLsxaPkJHDvgT7uXW1Hch9m9LlWfnHLUvV1Nn8w6kgUgkadd583uHuFsvyVfp5dPNYcGpmhOSlouTDajgM1GOY0xyRry44Gi6moEndU6Xfn24zL5hkAlUL7ruKp7ZOj6Vx9xYtMhS_28U23qPsNDB2Obz_NXFrZkgLbjk-Wl0cBMj345sY2udL-ujtZ43nxk-LCGimPLBSidhhgt0MqUyL1ZzggbPO5-IXZOe-I5W503Dk8oKFGKLom6INh7h3OEkWUSLZqW9PQ8Rqe1WAL5JFPUQ48YWFeDvuO3S3CEsXHbT5svOkN3xWI-Z8pKpOUNQxecYkKcvYM1ULyiFzqKKNS9nBLk7jWZRODwWgNz--V49uJKQcIHWb5tb5Pdn0zJdzD3FpOs0vGpTeIiqIWbs_XYdjUu2r9OqMATuApJEe9Jq8mTcDqHxiQH4qrBH6KubWmJmdZ27KGwbh6LVLl3QwPpEf6QC0o6sRsVaJSw9-ZKJJRLWmvzEy1ufWPz6vyedy0JlFK9VNmEO6zBp-fj9_qVkvgQNkPoQ2TdiYtH7Lrwq3B8vDz7aBEQnaNrWVFcH4BDK6z5EZBsRuHJ0lGFS7-NbDuCBWBQbZ2IOPRHnbvjhQHPiymDvzTlAfT1GNVHkQQ9wAlu4_RtJSwhvzSJkxi1GuQnCLLX_GdtHhAHuGctswb7lcAjV0_nmljxsqkN6Q3OcE2d2j5w0_",
-              "summary": []
-            }
-          ],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 7055,
-            "cachedInputTokens": 6969,
-            "cacheWriteTokens": 83,
-            "outputTokens": 52
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "1ca66db5b6821bccd403b4925eff2c9b4f887409ab8118bbd35965d17f0b5fca",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_8aWl23ckMOV5780BbEgxYgbJ",
+              "id": "call_Ywpwm0f9MDNq9RMFEVlYrggv",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_tgoQof1DphvyubsHMTvhEHl6",
+              "id": "call_WlJiwJVDDdBlx9TK9ufCli6i",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_abvq41JvRxOC9Sr1iuHicui6",
+              "id": "call_zg9E0b5DjrC7geyvE9D4GR4J",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_hZmBVyKIcWZaMqkjv8noODuB",
+              "id": "call_XFznhQhvHjAOQxrzETbGk5sN",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_67lWVfK2d6BZSWXkl4AUlsOX",
+              "id": "call_acIuK3oLmzsbPelngEJBdsEY",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_ZTt3Bkxt1hKRktNsDQUJ6fBR",
+              "id": "call_7SLRHYGo32aTfK1SbeB2wJ9V",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-07\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_eTFSDfNcrxgpWDGJJXGjNZlF",
+              "id": "call_j0fguCI1OzK7dnHeCa1pCzny",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-08\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -98,18 +68,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7369,
-            "cachedInputTokens": 7052,
-            "cacheWriteTokens": 314,
-            "outputTokens": 342
+            "inputTokens": 8519,
+            "cachedInputTokens": 8227,
+            "cacheWriteTokens": 289,
+            "outputTokens": 356
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2979c3a699bf23e09ef06cc1e79b3aedd5f938d3000abf56c7d22562e93f9fbe",
+        "fingerprint": "1f1408c4b4b354d98613637f37c54f3303d7c08324285c122a76eacf298c0acc",
         "response": {
-          "text": "Jess has 2 bookings this week: Tuesday at 3:00 PM (haircut) and Friday at 2:00 PM (haircut). She also has a blocked hour Tuesday from noon to 1:00 PM. No other bookings or blocked time this week.",
+          "text": "Jess has 2 bookings this week: a haircut Tuesday, Nov 3, at 3 PM, and another Friday, Nov 6, at 2 PM. She also has Tuesday blocked from noon to 1 PM. The other days are clear.",
           "toolCalls": [],
           "replay": [
             {
@@ -119,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8454,
-            "cachedInputTokens": 7366,
-            "cacheWriteTokens": 1085,
-            "outputTokens": 60
+            "inputTokens": 9633,
+            "cachedInputTokens": 8516,
+            "cacheWriteTokens": 1114,
+            "outputTokens": 56
           },
           "model": "gpt-6-luna"
         }

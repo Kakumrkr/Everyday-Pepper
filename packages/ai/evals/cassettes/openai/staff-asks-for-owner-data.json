@@ -3,21 +3,21 @@
   "trials": [
     [
       {
-        "fingerprint": "cc2109fe6daaa7e9e9aebd9d31b198db61d9541482e7be1dc5f26e199c6cc9a3",
+        "fingerprint": "b42db64784ab2080f00ea42576a17ea7d679f7c07f1c385355a579ad202859be",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_JSV9rZCUifSK5051m3t9zeH2",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"team\"}"
+              "id": "call_CRyqLCjniCQ1KIhFrO2OIwDy",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Lena\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8230,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,39 @@
         }
       },
       {
-        "fingerprint": "f7f0611d1ab64efa89f7efb5587c0fe7ec4d1ac17d6db28adb0f336a84a807b1",
+        "fingerprint": "5439c41d63ff837835dc638a6b4c5dcfc4305c78352f605476fdde6bcfbd43fc",
         "response": {
-          "text": "There are no open to-dos visible to you.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_c6OraXHd1XALdQD1tNRVor86",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_04205f7b6d80acfb016adba855a98c87d2a59bc07a50d040c5",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq26hW8figqEnHSbCmu_WWMKblPadaO2P6u_QanfuQTSoC9WEZNUUGBBpr71lGiG3aNjnRTfBSutnMSUFcWt8xYwaug7Y0oG97NCTztSb8J6uBo9XJ8FDDymhjU8Dl54sEQeldlM-JoHT26R3qbT-AZWbU0VIsXNu17SFmpbS-_tGXvmGPfVAWPFad336Ec89jYRrDihUZcN61494ibMbgFnDpGcEoPCD-0wgne3OixPmIuN6tfDWv16nWz_lFpcKPJO-IOC9Jasgm01QOIEmQit-ZmfuZNsDbrpvuVEU0WxvkpYFZF4kZrNwWs2EzHaZwmEQVI7CpkL-uZ7SS8Wvz9Xbbam3LzD_JuKFyuAXqgc64UGLc-4RDe9ro95MoumVZ_vpf3t8IjA3gG1Idl-neRVzw5vs4L3pvsxy3AgSvE9fgkN7EpKowuECd8nw8jXjKDV77NHg67MjsgRHTElXWonDy3-vtjUMI6YuAzucg4GOKD2JRMrMZXWnbCm_dGBJ_hLgCrAF_xbmNO4pATfj8y-u2YyveU7_fFt6M8kfYjoiFHa2I4NZDmQAU30LxJLUPLGlMg0-kvq8QmjMOwBEWIZPpD4PbAwmrbc99QnGbf2k6YVTEDP0dFIe5fPqe86FQqf4mwWXqk6xSwVrnU_RFALxJZ-wrkF59hdUFT-luesDUtaBSWqPoYBXkF8QVjT0F4VhGq2UUL02LNOxSVUa1GXZL_8Du9CoA25RrhdAW4D74dPcKVl6QFDloXKY22IRjad7ovn2YLHlHkV1DzlYobBdD_yJO-zSgp11rxJKgiSncMIEqyfMfnNQtb_3ft55f4hAZRhmk0lt6TEQhf8H6cxZPuH1Q8_njkLeHQiI0S-BqvM3VF9Vsd4XTGdQ8MkJkYISjYhSyzx2jcvsssJjV4EN8EI4JBdCIb_lBxhokUbO4lxLwe9oKcYNHauL1v09_BvOMY5CtmBI_2GTyjxmDD2_Xy7ZMMYYEV5HMabdwui8dHnJwEGGSWMhjzwCXlzqaFWOaIW7gtKbm2wgxIC0ZJ_kO1vHRoNEkosL2axTpbjjH2gs2IsHWY2msz0QYR6K9nTP8dyHmYjbxeyDazM62R2kmItu7xV9acA4NDiyAV8Xq6SkOG9zsiCKEg-pHeN1xYwnDDK5cDo9d2RDhlPCvVo4t3QMW1c6JzAy8GQtYJ-fOwa-TVQHclahR2yYsZYhf9kcctzOfpePXUBeDHMIkUNiDhvvDzik7wCJUMAsshvDbfAcciuWQuEDcEMdOUfVq3E_Sfm8F6G9iVyvGwyO2Q5dIAq-d4TlSHrqPUDD57q7SZLTlTmbqcLzPB0zi4c31D0slGhCOsDy6Zxfh1JutZ5QkCZD241eAAsCW1LD1d-tGxlvGhfuzZdSbDrePlKI0LQHnYY_DTEubuOTyqpkPSkqYfueRxQC-cie5vw9VuRzRqRQHRPCy4xWG58vzQBm_lpqazClLiNmvm6VV3mMHAzkvkwkcjJq6VrExOiy0cgcZ8JCW5yxc1-GfOwGNGKb_iKlwHwOTR_h5eeDx3SzuW4p0iVhMYC-3fz6LZ7NRNzgSfEwnyGcVjiaPEfei_MuTajIteSJAnATPisR0yzY2TlQRHy_B7RhJKsJ6FONSL5l3Annv2duJ6EZGNvWWmZxcDYq5DRIgM54cbiHrAGG4bdrL5ba7gZ-J7jHeSzq8nnlCm8bFjzQCc649zQvx9CavTZZZm4f7hIZjXmnH5YmmefRyN9kdh3O6TPMI0Vs6GJGBXBqnsflWdmOK9HXqWKMtL3a6U1lAZvfGYfeEuc0uO2EAkidg5WDF-9IxwFvMN9PPs0OHwqQpmhtLJYI9z5itIZ8zQ6jaEDlSHn7XoIltlGydpUmswFbguAMl3MDSZmNQn08DawnpJXTKV7NAzNDnFMH2b12Yd4avLca1G2FjS10O9Cs43QhOZ4cc--Ln2Qxe5kSLzaOTSc2WfpFrdrB0DnN03VcuV5MbCxCIVoNn5Zd-wU8T0YojdZY2OA0pwx7dNiiyjmUctmwMvSnso0CpPvsogGzEwXmbuQucAemSrA9hNcMXu7UyNLJ7ZbtMUW1JabpuAC8-oEaz0WxwrxNA54RG6E12O0QV8WLrXWrn0EFvZ6JitCDLlxKm1KblfCKhgCJ8DUxOXWos5MKGtydLMtzf9F-iztU2LUqulnmfhOrEgcX32kqYVcXxR5m6wBMk6b76iOBg_22N6ysyYsQNXHHSGiAOTlbVFgcj6izOi3GC4iMNX_XI_LFzyyHgXPBQVVnPTLDXISY09GpdboxzGY06",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8294,
+            "cachedInputTokens": 8227,
+            "cacheWriteTokens": 64,
+            "outputTokens": 87
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c5d7d7083409d1a390734dfce0ec62298cf3ad7828b8e14b717ff32dff27d45e",
+        "response": {
+          "text": "I don’t see a Lena on the team—only Jess and Marco. Did you mean one of them?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +67,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7029,
-            "cachedInputTokens": 6969,
-            "cacheWriteTokens": 57,
-            "outputTokens": 15
+            "inputTokens": 8645,
+            "cachedInputTokens": 8291,
+            "cacheWriteTokens": 351,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

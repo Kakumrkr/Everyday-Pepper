@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0beefc5b6081a08bcd98bb3604e038258f75b9bb2a5bea6405c9cea51cda07bf",
+        "fingerprint": "9588768253efe6a5cd75b243d8c37fb88797591fbf2f1dd56b581a0e7664209a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Te2J0Yyxog0sU009I91G5uVQ",
+              "id": "call_ZJTKVqUzWYsCjWRQmyLtQfGq",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6969,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8227,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 8,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "53580b775ee2f649ad21ebd0d86e73f6c95028bdc6bf55828be433ea9bac0381",
+        "fingerprint": "6e28340e213d2b113f985260d2cc54ee6c688e6978fe693f74fc039b60fc02e6",
         "response": {
-          "text": "Jess does colour.",
+          "text": "Jess does colour. Marco offers haircuts, but not colour.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7244,
-            "cachedInputTokens": 6966,
-            "cacheWriteTokens": 275,
-            "outputTokens": 8
+            "inputTokens": 8512,
+            "cachedInputTokens": 8224,
+            "cacheWriteTokens": 285,
+            "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "51c926396cf4a5d378953e3b7948d20968596ec4578acbc48a944ddb330f3aa1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6FzFnmOFKZ7xV1iZ6oQy9v8X",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":1,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8233,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8230,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "547dbeae49866e972e6ea85c43759277e06d7729bd68b2951a5b38ed7a7c743a",
+        "response": {
+          "text": "I’ve proposed no bookings before 10:00 on Mondays for the whole business. It hasn’t changed yet; you can approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8372,
+            "cachedInputTokens": 8230,
+            "cacheWriteTokens": 139,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

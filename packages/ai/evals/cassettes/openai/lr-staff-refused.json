@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "01d75f94de3670c9167817dc07a98600a4a3e686131379fbf9d22ddf3b347645",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jsFYzID2yMYJyK61Qs1pc0kq",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8237,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8234,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "452eb8f70c0bfd32703344cca288c63d0bfcb6082728bdf8abe1f3d8164fca21",
+        "response": {
+          "text": "I can’t set that rule with my staff permissions. An owner or manager can set it so nobody books you before 11 on Tuesdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8358,
+            "cachedInputTokens": 8234,
+            "cacheWriteTokens": 121,
+            "outputTokens": 32
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

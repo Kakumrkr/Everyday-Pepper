@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bc3c31bda145f8b9e5c9316eb343e855fce5119dae02bdd709ba42bd794e8207",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GEzh6d5ExEyIJjA2yAfKdvfX",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Saturdays decision\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8230,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 11,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ce27a8c9b93e7fae72c0ab00ad42e3f6ba696cf454aa2f500e575bcec8ef1472",
+        "response": {
+          "text": "We decided Marco covers Saturdays from 10 to 4, Jess stays off, and Saturday bookings are haircuts only.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8452,
+            "cachedInputTokens": 8227,
+            "cacheWriteTokens": 222,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

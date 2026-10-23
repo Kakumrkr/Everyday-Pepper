@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bfd3fedc6b4c32938e79f14a00bf8ebdab82bf77674bd334a220948f1c610591",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_EKxt7FasAuz5OFcKnw9uZ0zM",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":5,\"notBefore\":null,\"notAfter\":\"16:00\",\"closed\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8317,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8314,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b10dde4a42956086e71e23150c22a7f6e5bdc30430f94d597124bad134c3ef95",
+        "response": {
+          "text": "The Friday cutoff rule is waiting for your approval on the card. Nothing has changed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8456,
+            "cachedInputTokens": 8314,
+            "cacheWriteTokens": 139,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

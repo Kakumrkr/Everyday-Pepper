@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "30eafd58fe1239becfc85a2468ac4fc3fd1fb37de093e13e2b1f8773fe0d3c5d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_X5bJ4dPFMx3my9uqaMdPq9rU",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Maria patch test\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8233,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 14,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2df54d06c17812c19cadf58aab3fd771edc3c5db2f19122961a65358e2f6fe22",
+        "response": {
+          "text": "I don’t remember us discussing Maria’s patch test.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8414,
+            "cachedInputTokens": 8230,
+            "cacheWriteTokens": 181,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

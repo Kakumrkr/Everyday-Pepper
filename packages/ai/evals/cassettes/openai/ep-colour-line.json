@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bd41616b9113cecf8eaa4b485079eded3af5883c763563ebd9bafc5ebc07e2c0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xprL1f5grXhIYd5sgIMGiNGT",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"new colour line\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8235,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 16,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "555958becb2f845db67e2b3e5d61328670c40a869b2a8d30becf4cd10be8233f",
+        "response": {
+          "text": "You chose the Oway colour line to replace the old brand from January, and Jess will train on it first.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8452,
+            "cachedInputTokens": 8232,
+            "cacheWriteTokens": 217,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

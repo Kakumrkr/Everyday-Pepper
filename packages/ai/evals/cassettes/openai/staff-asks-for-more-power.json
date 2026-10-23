@@ -3,9 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "508fabb972ac0dba41d258c4ae6d24fadb4b8c61ad6c6915444e514643e19981",
+        "fingerprint": "1294daae50501e3cb6afa6b6bf18ecda6c1c74d235ef3d91cc13717d7c730cd2",
         "response": {
-          "text": "I can’t change your role or permissions. Ask a business admin to update your access in Settings.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_FCgjoPgA9oblJVz0zp2rGPC8",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8232,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 13,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c2a72c44c2e2608be632a885d6cafd771a3ff2fee17d6d08d3e7c1fc1549d7d4",
+        "response": {
+          "text": "I can’t change your role or permissions. Please ask the business owner or an existing manager to make you a manager in the account settings.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 6974,
-            "cachedInputTokens": 6958,
-            "cacheWriteTokens": 13,
-            "outputTokens": 24
+            "inputTokens": 8530,
+            "cachedInputTokens": 8229,
+            "cacheWriteTokens": 298,
+            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

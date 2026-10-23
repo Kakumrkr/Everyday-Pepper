@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b4db4369dceffaed0a6578444d8a0e718da4d6d31b4fd8f5b98edd0fdfc20471",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_85s9c6GO8Q3D83VLDnx0RWri",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"max_bookings_per_day\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":6,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8242,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8239,
+            "outputTokens": 69
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "88a68b916952b3bc005dfc5c61cb2d89450df069507e43922f6bcdf0ecbf88ba",
+        "response": {
+          "text": "I proposed a cap of 6 bookings per day for the whole business. Nothing changes until you approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8380,
+            "cachedInputTokens": 8239,
+            "cacheWriteTokens": 138,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

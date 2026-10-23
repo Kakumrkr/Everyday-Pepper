@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3a18bfacea349a18cee1805beb21d0b8ae8dc427cadafa2d72da5a5924ca6965",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LVcrd3cvkEUaAM8D3cgrxyrz",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Jess Saturdays\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8232,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 13,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7f689279568020882187146aeea1b1b5ba3834a86af421e7cc7126645479185f",
+        "response": {
+          "text": "I don’t remember any past decision about Jess and Saturdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8311,
+            "cachedInputTokens": 8229,
+            "cacheWriteTokens": 79,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

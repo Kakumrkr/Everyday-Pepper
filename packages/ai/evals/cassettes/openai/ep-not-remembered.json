@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "cee75c3818a68a63abb934e7056fa528db117d848ce0d00e4f622eedddbd7629",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1In0wF7VGW5AinnAu0nNkmAY",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"gift cards\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8231,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 12,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6e58cbdb5fe219b7cd733a4e829b33f9c234d1e5ecb30e822a4e43818a5bec9f",
+        "response": {
+          "text": "I don’t remember us deciding anything about gift cards.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8411,
+            "cachedInputTokens": 8228,
+            "cacheWriteTokens": 180,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

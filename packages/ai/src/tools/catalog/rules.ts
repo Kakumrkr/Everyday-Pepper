@@ -156,6 +156,7 @@ export const proposeRule: WriteTool = {
   guide: {
     use: 'Turn a lasting booking preference the member states or repeats into a rule every booking then follows: "no bookings before 10 on Mondays", "Jess needs 24 hours\' notice", "at most 6 a day", "closed Dec 24–26". It always waits for an owner\'s or manager\'s OK.',
     avoid: [
+      'when the member asks you to note or remember something, even closed days or hours ("note that we close at 4 on Christmas Eve" is remember_fact); only when they ask that bookings be limited',
       'for a one-off ("block Friday afternoon" is block_time)',
       'for a guess about what the member might want (only a preference they said)',
       'for anything the five kinds can’t say exactly (tell the member it needs the Rules screen)',

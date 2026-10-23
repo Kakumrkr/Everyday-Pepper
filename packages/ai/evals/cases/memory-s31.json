@@ -593,7 +593,7 @@
     },
     "turns": [
       {
-        "user": "Block Friday afternoon for Jess, she has a dentist appointment."
+        "user": "Block Jess this Friday from 1 to 5pm, she has a dentist appointment."
       }
     ],
     "expect": {

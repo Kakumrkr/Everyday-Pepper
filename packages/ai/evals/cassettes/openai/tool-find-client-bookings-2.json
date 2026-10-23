@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "15f4f807d9d6d56822cad976af5b832483208d010c7ceda3f08b581856180cda",
+        "fingerprint": "7516dd829972012608058cd906e3c60ff7ae1b40eb501b6b7688d9f6da3ec295",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ius1xYDCRy8YrSJ8fmyjCR7d",
+              "id": "call_jwTEkUjHnPxLu80ppqe4fco3",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6971,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8229,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "8662652e91c523d8d7aca934924734f562962930d4bf032d746052e11d3b4858",
+        "fingerprint": "99799d7a351b8f58f1311911aa87c3b63c27483229f3bcc4a61512ea196dc8de",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_yJJBhZ9YeGGZrUwzmjtfVxTA",
+              "id": "call_oS3Cgb42SL07Hv0za72SJUlk",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
             }
@@ -38,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7055,
-            "cachedInputTokens": 6968,
+            "inputTokens": 8313,
+            "cachedInputTokens": 8226,
             "cacheWriteTokens": 84,
             "outputTokens": 43
           },
@@ -47,9 +47,9 @@
         }
       },
       {
-        "fingerprint": "e5401e78e264db9bf0a39b4e84370c4d723c5ce1eac69caac935885841c2196b",
+        "fingerprint": "12bb7102a1555ec97e9928ee7e9fde685180ab11c6076c4b5e8e5b5f3d78bfb6",
         "response": {
-          "text": "I don’t see any past visits recorded for Sarah P.",
+          "text": "I don’t see any earlier visits recorded for Sarah P.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7171,
-            "cachedInputTokens": 7052,
+            "inputTokens": 8429,
+            "cachedInputTokens": 8310,
             "cacheWriteTokens": 116,
             "outputTokens": 16
           },

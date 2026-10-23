@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "cc18746dc59026f5bf87bf0e9a1ebea0d43bacdff77e944f031aee2f1b583bd7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_lkdqLPQgD2UDqBn8s3drlj6G",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Lena raising prices\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8231,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 12,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ede34f0debc72404be8f9e5681ecb2af7e826e212f95e5dd9c98b3b23d7d14b5",
+        "response": {
+          "text": "I don’t remember anything about Lena deciding to raise prices. The only related note I found was that you moved your lunch break to 12:30 on Thursdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8349,
+            "cachedInputTokens": 8228,
+            "cacheWriteTokens": 118,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

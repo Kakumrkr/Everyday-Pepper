@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "892d702f8ecceacdd4a31c78b73afea19da5b88f67d2983d926438e7a836c509",
+        "fingerprint": "a9435ee0565366b484cd1b2dc2c5dd3668290e8105556cc915e9935d8886d6eb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_zIIex5w1ohQHpTfZZ6gSdHFi",
+              "id": "call_sujIKGYFG4IMmVS9ke5jAdJ1",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6972,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8230,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,31 @@
         }
       },
       {
-        "fingerprint": "24f0f1e7bcca32052954e1b11eee09a2623e1eae3037a67651243246046686fe",
+        "fingerprint": "0981e0ccbf018ac7e1e3f59a73a04cc22afff92f3103cf6ba9dbeffc3dcd9a66",
         "response": {
-          "text": "I found Ana R. I don’t have any remembered details about her from this lookup.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eSaIDaeCeDYyCY1LGGwYwJNI",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8313,
+            "cachedInputTokens": 8227,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3e73ad28aab921f0a2fe1df6cd2e7fda45eebbcea70b8167fd37812ba3370a5a",
+        "response": {
+          "text": "Ana R. has a confirmed haircut with Jess this Friday, November 6, from 2–3 PM. The business has no earlier visits or notes on file for her.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7058,
-            "cachedInputTokens": 6969,
-            "cacheWriteTokens": 86,
-            "outputTokens": 22
+            "inputTokens": 8595,
+            "cachedInputTokens": 8310,
+            "cacheWriteTokens": 282,
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }

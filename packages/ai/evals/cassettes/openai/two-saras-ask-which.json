@@ -3,30 +3,36 @@
   "trials": [
     [
       {
-        "fingerprint": "821429fb20ed3eef390d26beacf6bd4416c792e1ff0739a8b25ffce40e6e0f52",
+        "fingerprint": "8db0a70589455aa5641aa14ae8d952aae66d75d03ba9170c045b3eaa52f5528e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_yBCwijwSAEMZxu7snaoczGiX",
+              "id": "call_3jB42GOjjQt4NuQznsIKEARm",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara\"}"
+            },
+            {
+              "id": "call_D5hokMD645WPCCWXdW9yTpsy",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8232,
-            "cachedInputTokens": 8229,
-            "outputTokens": 18
+            "inputTokens": 8286,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8283,
+            "outputTokens": 48
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "01a6ef37f9cfef42fe960995dd2364d16b70ae487258750fbd03dd4987ad5d7a",
+        "fingerprint": "1c361c17ed41a803bb56adb7374932a5aa2af26b0c35258f996248f036d0651a",
         "response": {
-          "text": "I found two matches: Sarah P. and Sara K. Which one should I book?",
+          "text": "Two clients match: Sarah P. and Sara K. Which one should I book for the haircut tomorrow at 10?",
           "toolCalls": [],
           "replay": [
             {
@@ -36,10 +42,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8361,
-            "cachedInputTokens": 8229,
-            "cacheWriteTokens": 129,
-            "outputTokens": 22
+            "inputTokens": 8697,
+            "cachedInputTokens": 8283,
+            "cacheWriteTokens": 411,
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

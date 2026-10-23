@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "4e395342a6a98374fb6c78454d487935220bcdcada138a678e6b1689654839df",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_raiHBVQpKW5VJWG3bZQtimbT",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Saturday opening time\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8233,
+            "cachedInputTokens": 8216,
+            "cacheWriteTokens": 14,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "11f0e52cb46955d82620f59af6d757d3260e2e4911a8cbe7471df2f6d7f98186",
+        "response": {
+          "text": "We said the studio opens at 10 on Saturdays, starting October 28.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8470,
+            "cachedInputTokens": 8230,
+            "cacheWriteTokens": 237,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}
