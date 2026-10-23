@@ -79,12 +79,10 @@ describe('every eval set on its scripted cassettes', () => {
 });
 
 /**
- * Real-model misses carried by the user's decision, by set (S31: memory_recall 16/17, Luna
- * booked Maria "with Jess" but with any staff member; passed in S30b and S31's first run).
+ * Real-model misses carried by the user's decision, by set (named case ids). Empty since S32b's
+ * re-record (S31 carried `mr-same-as-last-time`).
  */
-const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {
-  memory_recall: ['mr-same-as-last-time'],
-};
+const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {};
 
 describe('the recorded real model, replayed (S27)', () => {
   it(
@@ -133,8 +131,8 @@ describe('the recorded real model, replayed (S27)', () => {
           .flatMap((r) => r.trials.flatMap((t) => t.reasons))
           .filter((reason) => reason.startsWith('cassette')),
       ).toEqual([]);
-      // The known miss the user chose to carry (S31): judged without it, and named so it can't
-      // hide anything else. S32's re-record retries it and empties this list.
+      // Known misses the user chose to carry: judged without them, and named so they can't
+      // hide anything else.
       const known = new Set(Object.values(KNOWN_REAL_MODEL_MISSES).flat());
       expect([...known].filter((id) => !results.some((r) => r.id === id))).toEqual([]);
       const judged = results.filter((r) => !known.has(r.id));
