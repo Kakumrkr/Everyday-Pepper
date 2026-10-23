@@ -32,6 +32,22 @@ describe('loadOpenAiConfig (ADR-0027)', () => {
     ).toThrow('Set OPENAI_MODEL_ROUTINE and OPENAI_MODEL_STRONG with OPENAI_API_KEY');
   });
 
+  it('reads an optional embedding model (ADR-0034)', () => {
+    expect(
+      loadOpenAiConfig({
+        OPENAI_API_KEY: KEY,
+        ...MODELS,
+        OPENAI_MODEL_EMBEDDING: 'text-embedding-3-small',
+      }),
+    ).toMatchObject({ embeddingModel: 'text-embedding-3-small' });
+    expect(loadOpenAiConfig({ OPENAI_API_KEY: KEY, ...MODELS })).not.toHaveProperty(
+      'embeddingModel',
+    );
+    expect(() =>
+      loadOpenAiConfig({ OPENAI_API_KEY: KEY, ...MODELS, OPENAI_MODEL_EMBEDDING: 'bad model' }),
+    ).toThrow('Invalid OpenAI environment: OPENAI_MODEL_EMBEDDING');
+  });
+
   it('reads an optional reasoning effort per route (unset: the model default, S27)', () => {
     expect(
       loadOpenAiConfig({ OPENAI_API_KEY: KEY, ...MODELS, OPENAI_REASONING_ROUTINE: 'low' }),

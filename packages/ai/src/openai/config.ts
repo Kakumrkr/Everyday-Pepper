@@ -15,6 +15,8 @@ const OpenAiEnvSchema = z
     /** Each route's reasoning effort; unset: the model's default (chosen with the model, S27). */
     OPENAI_REASONING_ROUTINE: EffortSchema.optional(),
     OPENAI_REASONING_STRONG: EffortSchema.optional(),
+    /** The embedding model for the memory's recall (Phase 7, ADR-0034); unset: no embeddings. */
+    OPENAI_MODEL_EMBEDDING: ModelIdSchema.optional(),
     /** Another https endpoint for the same API (a proxy); unset: OpenAI's. */
     OPENAI_BASE_URL: z.url({ protocol: /^https$/ }).optional(),
     OPENAI_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(30_000),
@@ -30,6 +32,8 @@ export interface OpenAiConfig {
   apiKey: string;
   models: { routine: string; strong: string };
   reasoning?: { routine?: ReasoningEffort; strong?: ReasoningEffort };
+  /** The embedding model (ADR-0034); unset: memory search is off, facts still recall. */
+  embeddingModel?: string;
   baseUrl?: string;
   timeoutMs: number;
 }
@@ -73,6 +77,9 @@ export function loadOpenAiConfig(env: NodeJS.ProcessEnv): OpenAiConfig | null {
           strong: parsed.OPENAI_REASONING_STRONG,
         }),
       },
+    }),
+    ...(parsed.OPENAI_MODEL_EMBEDDING !== undefined && {
+      embeddingModel: parsed.OPENAI_MODEL_EMBEDDING,
     }),
     ...(parsed.OPENAI_BASE_URL !== undefined && { baseUrl: parsed.OPENAI_BASE_URL }),
     timeoutMs: parsed.OPENAI_TIMEOUT_MS,
