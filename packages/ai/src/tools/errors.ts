@@ -14,6 +14,10 @@ import {
   ActionTooLateError,
   ClientNotFoundError,
   ForbiddenError,
+  MemoryFactNotFoundError,
+  MemoryLimitError,
+  MemoryPausedError,
+  MemorySubjectNotFoundError,
   TaskAssigneeNotMemberError,
   TaskNotFoundError,
   TaskNotOpenError,
@@ -56,6 +60,8 @@ const NOT_FOUND = [
   ClientNotFoundError,
   TaskNotFoundError,
   TaskAssigneeNotMemberError,
+  MemoryFactNotFoundError,
+  MemorySubjectNotFoundError,
 ];
 
 /** The refusal to give the model, or `internal` for anything unexpected (nothing changed). */
@@ -106,6 +112,20 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
   }
   if (error instanceof BookingAlreadyStartedError || error instanceof ActionTooLateError) {
     return { code: 'too_late', message: 'The appointment has already started.' };
+  }
+  if (error instanceof MemoryPausedError) {
+    return {
+      code: 'memory_paused',
+      message:
+        'The owner paused remembering new things; nothing was saved. Say so; it can be turned back on in Settings.',
+    };
+  }
+  if (error instanceof MemoryLimitError) {
+    return {
+      code: 'not_changeable',
+      message:
+        'There is no room to remember more about this. The member can clear old items on the "What I know" page.',
+    };
   }
   if (error instanceof IdempotencyKeyReusedError) {
     return { code: 'conflict', message: 'This request was already made differently.' };

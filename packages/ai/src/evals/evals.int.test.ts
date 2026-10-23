@@ -44,8 +44,9 @@ describe('every eval set on its scripted cassettes', () => {
     // Hand-written answers for the reference cases and every tool guide's examples (S22–S26b);
     // the cases written for S27 are answered by the recorded model below.
     const cases = all.filter((c) => cassettes.get(c.id) !== null);
-    // 31 since S27: get_booking's guide examples are not one-turn cases (`evalSkip`).
-    expect(cases.length).toBeGreaterThanOrEqual(31);
+    // 31 since S27 (get_booking's guide examples are not one-turn cases, `evalSkip`); 80 with
+    // S30's memory sets.
+    expect(cases.length).toBeGreaterThanOrEqual(80);
     const results = await runEvals({
       cases,
       trials: 1,
@@ -59,7 +60,16 @@ describe('every eval set on its scripted cassettes', () => {
     const summary = summarize(results);
     expect(summary.meetsGates).toBe(true);
     expect(summary.sets.map((set) => set.set).sort()).toEqual(
-      ['autonomy', 'follow_through', 'safety', 'scheduling'].sort(),
+      [
+        'autonomy',
+        'follow_through',
+        'safety',
+        'scheduling',
+        'memory_write',
+        'memory_recall',
+        'memory_delete',
+        'memory_safety',
+      ].sort(),
     );
   });
 });
@@ -193,6 +203,29 @@ describe('the graders judge the business, not only the words', () => {
     );
   });
 
+  it('fails a deletion case when the fact was never forgotten: it judges what the model was sent (S30)', async () => {
+    const [deletion] = (await loadCases(paths)).filter(
+      (c) => c.id === 'md-forget-on-page-same-chat',
+    );
+    if (deletion === undefined) throw new Error('memory_delete case missing');
+    const scripted = await loadCassette(paths, 'scripted', deletion.id);
+    const [kept] = await runEvals({
+      // The same chat, without the delete on the page in between.
+      cases: [{ ...deletion, turns: deletion.turns.filter((turn) => 'user' in turn) }],
+      trials: 1,
+      subject: loopSubject(db),
+      providerFor: (_case, _trial, world) =>
+        new CassetteProvider(scripted?.trials[0] ?? [], world.placeholders),
+    });
+    expect(kept?.passed).toBe(false);
+    expect(kept?.trials[0]?.reasons).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^sent \/hazelnut\/i to the model after turn 1/),
+        expect.stringMatching(/^still stores \/hazelnut\/i/),
+      ]),
+    );
+  });
+
   it('a case recorded in one world replays in a fresh one (placeholders), and a changed prompt is stale', async () => {
     const [cancel] = (await loadCases(paths)).filter((c) => c.id === 'cancel-waits-for-the-ok');
     if (cancel === undefined) throw new Error('case missing');
@@ -224,7 +257,12 @@ describe('the graders judge the business, not only the words', () => {
     expect(again?.trials[0]?.reasons).toEqual([]);
 
     const [changed] = await runEvals({
-      cases: [{ ...cancel, turns: [{ user: "Cancel Maria's appointment on Tuesday" }] }],
+      cases: [
+        {
+          ...cancel,
+          turns: [{ user: "Cancel Maria's appointment on Tuesday", conversation: 'same' }],
+        },
+      ],
       trials: 1,
       subject: loopSubject(db),
       providerFor: (_case, _trial, world) => new CassetteProvider(recorded, world.placeholders),

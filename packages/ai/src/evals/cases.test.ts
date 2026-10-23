@@ -4,7 +4,7 @@ import { toolEvalCases } from '../tools/eval-cases.js';
 import { findTool } from '../tools/registry.js';
 import { EvalSetSchema } from './case.js';
 import { loadCases } from './files.js';
-import { WORLD_PLACEHOLDERS } from './world.js';
+import { MEMORY_WORLD_PLACEHOLDERS, WORLD_PLACEHOLDERS } from './world.js';
 
 // The eval cases themselves (S27): written before any real run, about 120 across every set,
 // a fifth held out (never tuned against, playbook §7 "S27"), and naming only tools and seeded
@@ -25,8 +25,18 @@ describe('the eval cases', () => {
   });
 
   it('name only real tools and seeded records', async () => {
-    const known = new Set<string>(WORLD_PLACEHOLDERS);
     for (const evalCase of await loadCases(paths)) {
+      const known = new Set<string>([
+        ...WORLD_PLACEHOLDERS,
+        ...(evalCase.world === 'juniper_memory' ? MEMORY_WORLD_PLACEHOLDERS : []),
+        ...evalCase.seed.facts.map((fact) => `{{fact:${fact.name}}}`),
+      ]);
+      for (const ref of [
+        ...evalCase.seed.facts.map((fact) => fact.subject),
+        ...(JSON.stringify(evalCase.turns).match(/\{\{[^}]+\}\}/g) ?? []),
+      ]) {
+        if (ref !== 'business') expect(known.has(ref), `${evalCase.id}: ${ref}`).toBe(true);
+      }
       const { expect: wanted } = evalCase;
       const tools = [
         ...wanted.toolCalls.map((call) => call.name),

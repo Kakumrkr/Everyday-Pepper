@@ -2,6 +2,7 @@ export * from './breaker.js';
 export * from './context.js';
 export * from './fallback.js';
 export * from './loop.js';
+export * from './memory.js';
 export * from './otel.js';
 export * from './routing.js';
 export * from './store.js';

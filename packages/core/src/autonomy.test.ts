@@ -207,6 +207,13 @@ describe('decideAutonomy: properties', () => {
       outcome: 'propose',
       reason: 'untrusted_context',
     });
+    // Untrusted only because of what the business remembers: the dial decides, never quietly.
+    expect(
+      decideAutonomy(
+        { ...save, untrustedContext: true, outsideText: false },
+        { askFirst: false, levels },
+      ),
+    ).toEqual({ outcome: 'execute_and_notify', reason: 'untrusted_context' });
   });
 
   it('changing autonomy always asks', () => {

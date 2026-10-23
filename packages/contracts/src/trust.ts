@@ -250,6 +250,12 @@ export const AutonomyRequestSchema = z
     tier: RiskTierSchema,
     recipients: z.number().int().min(0),
     untrustedContext: z.boolean(),
+    /**
+     * Whether that untrusted text came from outside the team (a client's message, an import),
+     * not only from what the business remembers (S30): saving to memory then always asks. When
+     * not given, any untrusted text counts.
+     */
+    outsideText: z.boolean().optional(),
     changesAutonomy: z.boolean().optional(),
   })
   .strict();

@@ -5,7 +5,7 @@ import {
   createStaffMember,
   replaceWorkingHours,
 } from '@pepper/appointments';
-import { changeAutonomy, createTask } from '@pepper/core';
+import { changeAutonomy, createTask, saveFact } from '@pepper/core';
 import { insertBooking, withTenant, type Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { validArguments } from './hostile.js';
@@ -29,10 +29,11 @@ import {
 
 const QUERY_BUDGET: Record<string, number> = {
   find_availability: 25,
-  find_clients: 10,
+  // S30: what the business remembers comes with a client (facts, then the last noted visit).
+  find_clients: 14,
   get_day: 20,
   get_booking: 15,
-  find_client_bookings: 15,
+  find_client_bookings: 18,
   list_services_and_staff: 12,
   list_todos: 15,
   create_booking: 60,
@@ -42,6 +43,9 @@ const QUERY_BUDGET: Record<string, number> = {
   unblock_time: 40,
   add_todo: 40,
   complete_todo: 40,
+  remember_fact: 50,
+  add_visit_note: 50,
+  forget_fact: 40,
 };
 const P95_TARGET_MS = 300;
 const P95_GATE_MS = 3 * P95_TARGET_MS;
@@ -54,6 +58,7 @@ let queries = 0;
 let bookingId = '';
 let todoId = '';
 let timeOffId = '';
+let factId = '';
 
 const STAFF = 10;
 const DAYS = 20;
@@ -112,6 +117,13 @@ beforeAll(async () => {
       endsAt: tuesdayAt('13:00'),
     })
   ).id;
+  factId = (
+    await saveFact(db, world.owner, {
+      subject: { type: 'client', id: world.maria.id },
+      key: 'allergy',
+      value: 'PPD',
+    })
+  ).fact.id;
   // Writes stop at a proposal, so every run measures the same dry run.
   await changeAutonomy(db, world.owner, { askFirst: true }, { templateDefaults: {} });
 }, 300_000);
@@ -142,6 +154,7 @@ describe('per-tool budgets on a busy business', () => {
         bookingId,
         todoId,
         timeOffId,
+        factId,
       },
       TUESDAY,
     )[name];

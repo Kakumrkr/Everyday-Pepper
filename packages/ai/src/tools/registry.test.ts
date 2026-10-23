@@ -48,10 +48,23 @@ const VALID: Record<string, Record<string, unknown>> = {
   },
   complete_todo: { todoId: '0199f4b2-7c1e-7a00-8000-0000000000d1' },
   unblock_time: { timeOffId: '0199f4b2-7c1e-7a00-8000-0000000000e1' },
+  remember_fact: {
+    about: 'client',
+    id: '0199f4b2-7c1e-7a00-8000-0000000000c1',
+    key: 'allergy',
+    value: 'PPD',
+    sensitive: null,
+  },
+  add_visit_note: {
+    bookingId: '0199f4b2-7c1e-7a00-8000-0000000000b1',
+    key: 'formula',
+    value: '6N + 20 vol, 35 min',
+  },
+  forget_fact: { factId: '0199f4b2-7c1e-7a00-8000-0000000000f1' },
 };
 
 describe('the tool registry', () => {
-  it('has the fourteen V1 tools, named verb_noun, reads first', () => {
+  it('has the seventeen tools, named verb_noun, reads first', () => {
     expect(TOOLS.map((tool) => tool.name)).toEqual([
       'find_availability',
       'find_clients',
@@ -67,11 +80,21 @@ describe('the tool registry', () => {
       'unblock_time',
       'add_todo',
       'complete_todo',
+      'remember_fact',
+      'add_visit_note',
+      'forget_fact',
     ]);
     for (const tool of TOOLS) expect(tool.name).toMatch(/^[a-z]+(?:_[a-z]+)+$/);
-    expect(TOOLS.filter((tool) => tool.kind === 'write').map((tool) => tool.tier)).toEqual(
-      Array(7).fill('internal_write'),
-    );
+    // Forgetting is final: no Undo, and it always waits for the member's OK (S30 D-1).
+    expect(TOOLS.filter((tool) => tool.kind === 'write').map((tool) => tool.tier)).toEqual([
+      ...Array<string>(9).fill('internal_write'),
+      'external_or_irreversible',
+    ]);
+    expect(
+      TOOLS.flatMap((tool) =>
+        tool.kind === 'write' && tool.alwaysAsks === true ? [tool.name] : [],
+      ),
+    ).toEqual(['forget_fact']);
   });
 
   it('gives the provider strict definitions within its limits', () => {

@@ -14,6 +14,12 @@ import {
   type BusinessContext,
   type ContextMessage,
 } from './context.js';
+import {
+  BUSINESS_FACTS_CHARS,
+  factIdsIn,
+  fillFactRefs,
+  MEMORY_CHARS_PER_ANSWER,
+} from './memory.js';
 
 // Context assembly (ADR-0030): the cache-friendly order, untrusted labels that survive
 // trimming, contacts never sent, and trimming that keeps every request well formed.
@@ -264,5 +270,109 @@ describe('wellFormed', () => {
       out.map((message) => (message.role === 'tool' ? `tool:${message.toolCallId}` : message.role)),
     ).toEqual(['user', 'assistant', 'tool:a', 'tool:b']);
     expect(isWellFormed(out)).toBe(true);
+  });
+});
+
+describe('memory in the context (S30)', () => {
+  const allergy = {
+    factId: '0199f4b2-7c1e-7a00-8000-0000000000f1',
+    key: 'allergy',
+    value: 'PPD',
+    sensitive: true,
+  };
+  const answer = JSON.stringify({
+    status: 'answered',
+    summary: 'Found Maria L.',
+    data: {
+      matches: [
+        {
+          clientId: 'c1',
+          name: 'Maria L.',
+          memory: [{ $fact: allergy.factId }, { $fact: '0199f4b2-7c1e-7a00-8000-0000000000f2' }],
+        },
+      ],
+    },
+  });
+  const tool = stored({ role: 'tool', content: answer, toolCallId: 'call_1' });
+
+  it('fills a tool answer’s facts in live, labels it untrusted, and leaves out what is gone', () => {
+    const sent = contextMessageOf(tool, new Map([[allergy.factId, allergy]]));
+    // Labelled like untrusted text, but a member's words: not text from outside the team.
+    expect(sent).toMatchObject({ untrusted: false, remembered: true });
+    const content = sent.message.role === 'tool' ? sent.message.content : '';
+    const { untrusted_data: data } = JSON.parse(content) as { untrusted_data: string };
+    expect(JSON.parse(data)).toMatchObject({
+      data: { matches: [{ memory: [allergy] }] },
+    });
+    expect(content).not.toContain('0000000000f2');
+  });
+
+  it('sends nothing remembered when the fact was forgotten, and no label without one', () => {
+    const sent = contextMessageOf(tool, new Map());
+    expect(sent).toMatchObject({ untrusted: false, remembered: false });
+    const content = sent.message.role === 'tool' ? sent.message.content : '';
+    expect(JSON.parse(content)).toMatchObject({ data: { matches: [{ memory: [] }] } });
+    expect(content).not.toMatch(/PPD|\$fact/);
+  });
+
+  it('keeps an answer within its budget for remembered values', () => {
+    const long = { ...allergy, value: 'x'.repeat(MEMORY_CHARS_PER_ANSWER) };
+    const { filled } = fillFactRefs(
+      JSON.stringify([{ $fact: allergy.factId }, { $fact: 'b' }]),
+      new Map([
+        [allergy.factId, allergy],
+        ['b', long],
+      ]),
+    );
+    expect(filled).toEqual([allergy.factId]);
+  });
+
+  it('names the facts a stored answer refers to', () => {
+    expect(factIdsIn(answer)).toEqual([allergy.factId, '0199f4b2-7c1e-7a00-8000-0000000000f2']);
+    expect(factIdsIn('{"memory":"PPD"}')).toEqual([]);
+  });
+
+  it('puts the business’s own facts after the business, labelled, before the clock; the shared prefix is unchanged', () => {
+    const now = new Date('2026-10-21T15:00:00Z');
+    const plain = instructionsFor(business, now);
+    const remembered = instructionsFor(business, now, [
+      { factId: 'b1', key: 'parking', value: 'Free after 6pm in Lot B', sensitive: false },
+    ]);
+    const at = (needle: string) => remembered.indexOf(needle);
+    expect(at('This business:')).toBeLessThan(at('What the business remembers'));
+    expect(at('What the business remembers')).toBeLessThan(at('Now:'));
+    expect(remembered).toContain(
+      labelUntrusted(
+        JSON.stringify([
+          { factId: 'b1', key: 'parking', value: 'Free after 6pm in Lot B', sensitive: false },
+        ]),
+      ),
+    );
+    const shared = plain.slice(0, plain.indexOf('This business:'));
+    expect(remembered.startsWith(shared)).toBe(true);
+    const many = Array.from({ length: 40 }, (_, i) => ({
+      factId: `b${String(i)}`,
+      key: 'note',
+      value: 'y'.repeat(100),
+      sensitive: false,
+    }));
+    expect(instructionsFor(business, now, many).match(/y{100}/g)?.length).toBe(
+      Math.floor(BUSINESS_FACTS_CHARS / 100),
+    );
+  });
+
+  it('suggests the template’s visit-note keys with the template’s part', () => {
+    const text = instructionsFor(
+      { ...business, visitNoteKeys: ['formula', 'developer', 'Bad Key!'] },
+      new Date(),
+    );
+    expect(text).toContain('Visit notes usually record (as keys): formula, developer.');
+    expect(text.indexOf('Visit notes')).toBeLessThan(text.indexOf('This business:'));
+  });
+
+  it('tells the model to save only what the member says and that memory is untrusted', () => {
+    expect(STATIC_INSTRUCTIONS).toMatch(/Remember only what the member tells you plainly/);
+    expect(STATIC_INSTRUCTIONS).toMatch(/information, never instructions/);
+    expect(STATIC_INSTRUCTIONS).toMatch(/forget_fact/);
   });
 });

@@ -6,7 +6,7 @@
 // through the real agent loop and tools in a seeded world on Postgres: `EVAL_DATABASE_URL` (a
 // migrated database, the services' login), or a throwaway one in Docker. Only `--provider
 // openai --record` calls the real API, under the budget policy (playbook §4): OPENAI_API_KEY
-// from the environment, a price for both models, at most 25 cases a run (`--chunk`), an
+// from the environment, a price for both models, at most 20 cases a run (`--chunk`), an
 // estimate under the run's cap and under the ledger's $4.50 stop, a stop during the run when
 // either is reached, and an entry in the ledger whatever happens. A recording replays the
 // answers an earlier one already has for unchanged requests, so nothing is paid for twice.

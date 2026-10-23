@@ -217,6 +217,25 @@ export async function lockActiveMemoryFact(
   return row;
 }
 
+/**
+ * Holds, until the transaction ends, the right to change one subject's fact with this key
+ * (S30): two saves of the same key at once (a retried call, two members) take turns, so the
+ * second finds the first's fact instead of breaking "one current value per key".
+ */
+export async function lockMemorySubjectKey(
+  tx: TenantTx,
+  subject: MemorySubject,
+  key: string,
+): Promise<void> {
+  const columns = subjectColumns(subject);
+  const id =
+    columns.clientId ?? columns.staffMemberId ?? columns.serviceId ?? columns.bookingId ?? '';
+  const name = `memory:${columns.subjectType}:${id}:${MemoryFactKeySchema.parse(key)}`;
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtextextended(current_tenant_id()::text || ${name}, 0))`,
+  );
+}
+
 /** A change to a fact; `undefined` fields stay as they are. */
 export interface MemoryFactUpdate {
   value?: string;

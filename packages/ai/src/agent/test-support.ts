@@ -10,6 +10,7 @@ import type { LlmProvider } from '../provider.js';
 import { depsFor, type World } from '../tools/test-support.js';
 import { CircuitBreaker } from './breaker.js';
 import type { AgentDeps } from './loop.js';
+import { memberMemory } from './memory.js';
 import { postgresConversationStore } from './store.js';
 
 export function agentDepsFor(
@@ -27,6 +28,7 @@ export function agentDepsFor(
   return {
     provider,
     tools,
+    memory: memberMemory(tools),
     store: postgresConversationStore(world.db, actor, world.clock),
     budget: {
       reserve: (estimate) =>

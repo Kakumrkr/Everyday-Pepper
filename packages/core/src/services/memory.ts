@@ -48,6 +48,7 @@ import {
   listMemoryFacts,
   lockActiveMemoryFact,
   lockMemoryFact,
+  lockMemorySubjectKey,
   memoryPaused,
   memorySubjectOf,
   searchMemoryEpisodes,
@@ -175,6 +176,7 @@ export async function saveFactIn(
   const now = (options.clock ?? systemClock).now();
 
   if (from.status === 'active') {
+    await lockMemorySubjectKey(tx, fields.subject, fields.key);
     const current = await lockActiveMemoryFact(tx, fields.subject, fields.key);
     if (current !== undefined) {
       if (current.value === fields.value && current.sensitive === sensitive) {
@@ -350,10 +352,11 @@ export async function activateFactIn(
   actor: Actor,
   proposedId: MemoryFactId,
   options: { clock?: Clock } = {},
-): Promise<{ fact: MemoryFact; change: FactActivation }> {
+): Promise<{ fact: MemoryFact; change: FactActivation; before: MemoryFact | null }> {
   const pending = await lockReachableFact(tx, actor, MemoryFactIdSchema.parse(proposedId));
   if (pending.status !== 'proposed') throw new MemoryFactNotFoundError();
   const subject = memorySubjectOf(pending);
+  await lockMemorySubjectKey(tx, subject, pending.key);
   const current = await lockActiveMemoryFact(tx, subject, pending.key);
   if (current === undefined) {
     const activated = await updateMemoryFact(tx, MemoryFactIdSchema.parse(pending.id), {
@@ -370,13 +373,13 @@ export async function activateFactIn(
       },
       requestId: actor.requestId,
     });
-    return { fact: toMemoryFact(activated), change: 'created' };
+    return { fact: toMemoryFact(activated), change: 'created', before: null };
   }
   if (!(await deleteMemoryFact(tx, MemoryFactIdSchema.parse(pending.id)))) {
     throw new MemoryFactNotFoundError();
   }
   if (current.value === pending.value && current.sensitive === pending.sensitive) {
-    return { fact: toMemoryFact(current), change: 'unchanged' };
+    return { fact: toMemoryFact(current), change: 'unchanged', before: toMemoryFact(current) };
   }
   const now = (options.clock ?? systemClock).now();
   const changed = await updateMemoryFact(tx, MemoryFactIdSchema.parse(current.id), {
@@ -399,7 +402,7 @@ export async function activateFactIn(
     },
     requestId: actor.requestId,
   });
-  return { fact: toMemoryFact(changed), change: 'updated' };
+  return { fact: toMemoryFact(changed), change: 'updated', before: toMemoryFact(current) };
 }
 
 /**
@@ -444,6 +447,43 @@ export async function restoreFactIn(
     },
     requestId: actor.requestId,
   });
+}
+
+/**
+ * Undo of an AI save that created a fact (S30): forgets it everywhere, as any delete does
+ * (ADR-0034), if it is still as the save left it (`updatedAt`); otherwise
+ * `UndoRefusedError('changed_since')`.
+ */
+export async function forgetSavedFactIn(
+  tx: TenantTx,
+  actor: Actor,
+  factId: MemoryFactId,
+  savedAt: Date,
+): Promise<void> {
+  const id = MemoryFactIdSchema.parse(factId);
+  const current = await lockReachableFact(tx, actor, id).catch((error: unknown) => {
+    if (error instanceof MemoryFactNotFoundError) throw new UndoRefusedError('changed_since');
+    throw error;
+  });
+  if (current.updatedAt.getTime() !== savedAt.getTime()) {
+    throw new UndoRefusedError('changed_since');
+  }
+  await forgetFactIn(tx, actor, id);
+}
+
+/**
+ * One fact the member may read, any status (the AI's `forget_fact`, S30).
+ * `MemoryFactNotFoundError` otherwise.
+ */
+export async function getFactIn(
+  tx: TenantTx,
+  actor: Actor,
+  factId: MemoryFactId,
+): Promise<MemoryFact> {
+  const row = await findMemoryFact(tx, MemoryFactIdSchema.parse(factId));
+  if (row === undefined) throw new MemoryFactNotFoundError();
+  requirePermission(actor, readPermission(memorySubjectOf(row)));
+  return toMemoryFact(row);
 }
 
 /**

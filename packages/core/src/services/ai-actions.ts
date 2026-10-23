@@ -167,6 +167,11 @@ export interface ActionRequest {
   explanation: Omit<ActionExplanation, 'decision' | 'untrustedContext'>;
   /** The turn's context held untrusted text (tracked by the agent loop, never the model). */
   untrustedContext: boolean;
+  /**
+   * That untrusted text came from outside the team, not only from memory (S30): a memory save
+   * then always asks. Not given: any untrusted text counts.
+   */
+  outsideText?: boolean;
 }
 
 export type ActionResult =
@@ -214,6 +219,7 @@ export async function requestAction(
         tier: runner.tier,
         recipients: preview.recipients,
         untrustedContext: request.untrustedContext,
+        ...(request.outsideText !== undefined && { outsideText: request.outsideText }),
       },
       await loadAutonomy(tx, options),
     );

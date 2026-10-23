@@ -38,6 +38,8 @@ import {
   discardProposedFactIn,
   factsShownIn,
   forgetFact,
+  forgetSavedFactIn,
+  getFactIn,
   recallIn,
   restoreFactIn,
   saveFact,
@@ -249,6 +251,31 @@ describe('a save the AI proposes', () => {
     const result = await cleanUp(db, { clock: new ManualClock(new Date(Date.now() + 3 * DAY)) });
     expect(result.memoryProposedFacts).toBeGreaterThanOrEqual(1);
     expect(await row(id)).toBeUndefined();
+  });
+});
+
+describe('Undo of a created fact', () => {
+  it('forgets it while it is as the save left it, and refuses once it changed', async () => {
+    const id = await propose({
+      subject: { type: 'business' },
+      key: 'door_code_note',
+      value: 'Side door after 7',
+    });
+    const { fact } = await withMember(db, ana().context, (tx) =>
+      activateFactIn(tx, ai(), id, { clock: clock() }),
+    );
+    await expect(
+      withMember(db, ana().context, (tx) =>
+        forgetSavedFactIn(tx, ana(), fact.id, new Date(Date.parse(fact.updatedAt) - 1)),
+      ),
+    ).rejects.toBeInstanceOf(UndoRefusedError);
+    await withMember(db, ana().context, (tx) =>
+      forgetSavedFactIn(tx, ana(), fact.id, new Date(fact.updatedAt)),
+    );
+    expect(await row(fact.id)).toBeUndefined();
+    await expect(
+      withMember(db, ana().context, (tx) => getFactIn(tx, ana(), fact.id)),
+    ).rejects.toBeInstanceOf(MemoryFactNotFoundError);
   });
 });
 

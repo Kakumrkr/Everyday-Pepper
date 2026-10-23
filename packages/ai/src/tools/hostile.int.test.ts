@@ -11,6 +11,7 @@ import {
   changeAutonomy,
   createClient,
   ForbiddenError,
+  listFacts,
   listRecentActions,
   listTasks,
   ProposalNotFoundError,
@@ -81,6 +82,10 @@ async function snapshot() {
     timeOff: await listTimeOff(db, w.owner, w.jessStaff.id, {}, { clock: w.clock }),
     tasks: (await listTasks(db, w.owner, { status: 'all' })).map((t) => [t.id, t.status, t.title]),
     actions: (await listRecentActions(db, w.owner)).map((a) => a.id),
+    facts: [
+      ...(await listFacts(db, w.owner, { status: 'active' })),
+      ...(await listFacts(db, w.owner, { status: 'proposed' })),
+    ].map((f) => [f.id, f.key, f.value, f.status]),
   });
   return { own: await of(world), other: await of(other) };
 }

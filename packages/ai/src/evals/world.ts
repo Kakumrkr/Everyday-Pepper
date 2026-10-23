@@ -10,13 +10,23 @@ import {
   addDays,
   fromZoned,
   isoWeekday,
+  MemorySubjectSchema,
   TenantIdSchema,
+  type MemorySubject,
   toZoned,
   type MembershipRole,
   type TenantId,
   type UserId,
 } from '@pepper/contracts';
-import { createBusiness, createClient, createTask, ManualClock, type Actor } from '@pepper/core';
+import {
+  changeMemorySettings,
+  createBusiness,
+  createClient,
+  createTask,
+  ManualClock,
+  saveFact,
+  type Actor,
+} from '@pepper/core';
 import { addMembership, insertSeedUser, withTenant, type Database } from '@pepper/db';
 import { z } from 'zod';
 
@@ -26,7 +36,7 @@ import { z } from 'zod';
 // filled in when a scripted answer is replayed and put back before a request is fingerprinted,
 // so a recorded cassette stays valid across runs.
 
-export const EvalWorldNameSchema = z.enum(['juniper']);
+export const EvalWorldNameSchema = z.enum(['juniper', 'juniper_memory']);
 export type EvalWorldName = z.infer<typeof EvalWorldNameSchema>;
 
 export interface EvalWorld {
@@ -58,12 +68,29 @@ export const WORLD_PLACEHOLDERS = [
   '{{timeoff:jess-lunch}}',
 ] as const;
 
+/** What `juniper_memory` adds (S30): Maria's last colour visit, two weeks back. */
+export const MEMORY_WORLD_PLACEHOLDERS = ['{{booking:maria-last}}'] as const;
+
+/** What a case seeds besides the world (S30): remembered facts, and the pause switch. */
+export interface WorldSeed {
+  facts: readonly {
+    name: string;
+    subject: string;
+    key: string;
+    value: string;
+    sensitive?: boolean | undefined;
+  }[];
+  memoryPaused: boolean;
+}
+
 let seeded = 0;
 /** Tells this process's worlds from an earlier run's in a database the runs share. */
 const RUN = randomBytes(3).toString('hex');
 
 /**
- * Juniper Hair Studio at `now` in `timeZone`: Lena (owner), Cara (manager), Jess (staff, her
+ * Juniper Hair Studio at `now` in `timeZone` (`juniper_memory`: Colour is in the Color
+ * category, and Maria had a colour with Jess on a weekday about two weeks back, S30; a case's
+ * seeded facts are remembered as the owner said them on a screen, named `{{fact:<name>}}`): Lena (owner), Cara (manager), Jess (staff, her
  * own staff member) and Marco (staff member, no login). Haircut (60 min + 10 clean-up) and
  * Colour (90 min); both cut, Jess also colours; both work Mon–Fri 09:00–17:00 and Marco
  * Saturdays 10:00–16:00. Clients Maria Lopez, Sara Kim, Sarah Park and Ana Ruiz. Maria is
@@ -75,6 +102,7 @@ export async function seedEvalWorld(
   db: Database,
   name: EvalWorldName,
   at: { now: Date; timeZone: string },
+  seed: WorldSeed = { facts: [], memoryPaused: false },
 ): Promise<EvalWorld> {
   // Numbered before the first await: worlds seeded at the same time must not share a slug.
   seeded += 1;
@@ -83,7 +111,7 @@ export async function seedEvalWorld(
   const ownerId = await insertSeedUser(db, 'Lena');
   const tenant = await createBusiness(db, ownerId, {
     name: 'Juniper Hair Studio',
-    slug: `eval-${name}-${RUN}-${String(number)}-${String(at.now.getTime() % 1_000_000)}`,
+    slug: `eval-${name.replaceAll('_', '-')}-${RUN}-${String(number)}-${String(at.now.getTime() % 1_000_000)}`,
     timeZone: at.timeZone,
   });
   const tenantId = TenantIdSchema.parse(tenant.id);
@@ -109,7 +137,11 @@ export async function seedEvalWorld(
     durationMinutes: 60,
     bufferAfterMinutes: 10,
   });
-  const colour = await createService(db, owner, { name: 'Colour', durationMinutes: 90 });
+  const colour = await createService(db, owner, {
+    name: 'Colour',
+    durationMinutes: 90,
+    ...(name === 'juniper_memory' && { category: 'Color' }),
+  });
   const jess = await createStaffMember(db, owner, {
     displayName: 'Jess',
     userId: jessId,
@@ -183,6 +215,51 @@ export async function seedEvalWorld(
     ),
   });
 
+  const placeholders = new Map<string, string>([
+    ['{{service:haircut}}', haircut.id],
+    ['{{service:colour}}', colour.id],
+    ['{{staff:jess}}', jess.id],
+    ['{{staff:marco}}', marco.id],
+    ['{{client:maria}}', maria.id],
+    ['{{client:sara}}', sara.id],
+    ['{{client:sarah}}', sarah.id],
+    ['{{client:ana}}', ana.id],
+    ['{{booking:maria}}', mariaBooking.id],
+    ['{{booking:ana}}', anaBooking.id],
+    ['{{todo:call-maria}}', todo.id],
+    ['{{timeoff:jess-lunch}}', lunch.id],
+  ]);
+
+  if (name === 'juniper_memory') {
+    // A weekday 10 to 16 days back, at 10:00, booked back then (bookings can't start in the past).
+    let past = addDays(today, -10);
+    while (isoWeekday(past) > 5) past = addDays(past, -1);
+    const then = new ManualClock(new Date(Date.parse(at_(past, 10)) - 7 * 86_400_000));
+    const last = await createBooking(
+      db,
+      owner,
+      {
+        clientId: maria.id,
+        serviceId: colour.id,
+        staffMemberId: jess.id,
+        startsAt: at_(past, 10),
+        notifyClient: false,
+      },
+      { clock: then },
+    );
+    placeholders.set('{{booking:maria-last}}', last.id);
+  }
+  for (const fact of seed.facts) {
+    const { fact: saved } = await saveFact(db, owner, {
+      subject: subjectOf(fact.subject, placeholders),
+      key: fact.key,
+      value: fact.value,
+      ...(fact.sensitive !== undefined && { sensitive: fact.sensitive }),
+    });
+    placeholders.set(`{{fact:${fact.name}}}`, saved.id);
+  }
+  if (seed.memoryPaused) await changeMemorySettings(db, owner, { paused: true });
+
   return {
     name,
     db,
@@ -191,21 +268,17 @@ export async function seedEvalWorld(
     clock,
     actorFor,
     firstNameOf: (role) => members[role].firstName,
-    placeholders: new Map<string, string>([
-      ['{{service:haircut}}', haircut.id],
-      ['{{service:colour}}', colour.id],
-      ['{{staff:jess}}', jess.id],
-      ['{{staff:marco}}', marco.id],
-      ['{{client:maria}}', maria.id],
-      ['{{client:sara}}', sara.id],
-      ['{{client:sarah}}', sarah.id],
-      ['{{client:ana}}', ana.id],
-      ['{{booking:maria}}', mariaBooking.id],
-      ['{{booking:ana}}', anaBooking.id],
-      ['{{todo:call-maria}}', todo.id],
-      ['{{timeoff:jess-lunch}}', lunch.id],
-    ]),
+    placeholders,
   };
+}
+
+/** A case's subject (`business`, `{{client:maria}}`…) as the memory services name it. */
+export function subjectOf(ref: string, placeholders: ReadonlyMap<string, string>): MemorySubject {
+  if (ref === 'business') return { type: 'business' };
+  const kind = /^\{\{(client|staff|service|booking):/.exec(ref)?.[1];
+  const id = placeholders.get(ref);
+  if (kind === undefined || id === undefined) throw new Error(`No seeded record ${ref}`);
+  return MemorySubjectSchema.parse({ type: kind, id });
 }
 
 /** `text` with every placeholder replaced by its id. */

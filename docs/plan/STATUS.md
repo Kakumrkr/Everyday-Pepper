@@ -9,7 +9,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - **Brief approved (user, 2026-10-23):** "Go ahead with your recommendations, ADR is pre-approved"; open the PR and merge to `main` when all is done, then give the prompt for the next session.
   - D-1 `forget_fact` always asks without a new dial action (recorded as `client_note.save`, no dial action decides it); D-2 a memory save in an untrusted turn always becomes a card; D-3 no warning for a member who can't read the sensitive fact; D-4 the free-time description fix with its held-out cases now; D-5 one trial of every set on Luna + Sol; D-6 ADR-0035 pre-approved; D-7 build on the fakes first, record when the key is there.
 - **Blocker for recording:** `OPENAI_API_KEY` is not in this container (a new session picks up an environment secret). New tools change every request, so the 112 recorded cassettes go stale until re-recorded: recording, PR and merge wait for a session with the key.
-- **Done:** nothing yet. **Next:** task 1 (contracts, templates, migration 0040, core memory services).
+- **Done (committed):**
+  - T1 contracts, templates, migration 0040 (a proposed fact that goes scrubs nothing), core memory services;
+  - T2–T5 `remember_fact`, `add_visit_note`, `forget_fact` (values stashed as proposed facts, ids only in trust records), recall by reference in tool answers filled live per request, the business-facts block, booking warnings and last visit (AC-W3-2), eval tooling (memory world, seeded facts, new conversations, screen actions, graders on requests and storage);
+  - T8 the four memory sets: 49 cases, 10 held out, all green on the scripted fakes.
+  - **Found and decided while building (ADR-0035):** recalled facts make the turn untrusted, but only text from outside the team makes a memory save ask (else every save after a lookup became a card); concurrent saves of one key take turns (advisory lock); the default real-run chunk is 20 cases (the bigger prompt put 25 over $1.50 at worst).
+- **Next:** API views and web cards (warning, last visit, "Updated: was …", Why? remembered facts); the D-4 free-time description fix with its held-out cases; ADR-0035, docs, Playwright; then recording when the key is there.
 
 ## Last sessions
 - **S29 Phase 7b (2026-10-23): memory store, forget everywhere, embedding port** ([ADR-0034](../adr/0034-memory-store-and-forget-everywhere.md), accepted). Full entry in [session-log.md](session-log.md).

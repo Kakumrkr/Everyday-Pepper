@@ -23,6 +23,7 @@ import { ForbiddenError, permissionScope, UndoRefusedError } from '@pepper/core'
 import { z } from 'zod';
 import { instantOf } from '../local-time.js';
 import type { Performed, ToolScope, WriteScope, WriteTool } from '../tool.js';
+import { bookingMemory } from './recall.js';
 import {
   bookingSide,
   bookingView,
@@ -120,6 +121,7 @@ export const createBooking: WriteTool = {
       { ...domainOptions(scope), source: 'ai', notify: scope.notifyClient(clientId) },
     );
     const view = await viewOf(scope, directory, booking);
+    const remembered = await bookingMemory(scope, directory, { clientId, serviceId });
     return {
       entity: { type: 'booking', id: booking.id },
       targetKey: `booking.new:${clientId}:${startsAt}`,
@@ -135,7 +137,9 @@ export const createBooking: WriteTool = {
         ...(args.staffMemberId === null
           ? [{ kind: 'staff_chosen', ref: null, value: { staffName: view.staffName } }]
           : []),
+        ...remembered.facts,
       ],
+      ...(remembered.memory !== undefined && { memory: remembered.memory }),
     };
   },
   async undo(scope, inverse) {
@@ -277,6 +281,10 @@ export const moveBooking: WriteTool = {
     );
     const from = await viewOf(scope, directory, before);
     const to = await viewOf(scope, directory, moved);
+    const remembered = await bookingMemory(scope, directory, {
+      clientId: moved.clientId,
+      serviceId: moved.serviceId,
+    });
     return {
       entity: { type: 'booking', id },
       targetKey: `booking:${id}`,
@@ -293,7 +301,8 @@ export const moveBooking: WriteTool = {
         to: { startsAt: moved.startsAt, staffMemberId: moved.staffMemberId },
       },
       summary: `Move ${to.clientName}'s ${to.serviceName} from ${when(from.date, from.time)} with ${from.staffName} to ${when(to.date, to.time)} with ${to.staffName}.`,
-      facts: [slotWasFree(to)],
+      facts: [slotWasFree(to), ...remembered.facts],
+      ...(remembered.memory !== undefined && { memory: remembered.memory }),
     };
   },
   async undo(scope, inverse) {
