@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "248127ce3b924d457208a2efc815fa4efed962478e5c84e1862ae9716b6ebb5c",
+        "fingerprint": "46d990c105886154d513f6c7c0309f61de38e62459d459176c61b5310ad5ac1d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_w5FQxr1Fy2ocKgHjpZWPKBoQ",
+              "id": "call_sSe0HWlbTvVTVsmAJx3kU1Ak",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 6970,
-            "cachedInputTokens": 6958,
+            "inputTokens": 8228,
+            "cachedInputTokens": 8216,
             "cacheWriteTokens": 9,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "f748592d0ef2140c6352d7bf879d9e69092c8d50d87df010608add776d7ec89d",
+        "fingerprint": "5618bd47401aa597ef8be4eacdac5662fb97cc9743898bee40c32da2358a12ea",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_WGPBYjx5lL1H2lDNiLwuQRHr",
+              "id": "call_YQsfAAgtmCsqwxDkCQeD7MFF",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 7122,
-            "cachedInputTokens": 6967,
-            "cacheWriteTokens": 152,
-            "outputTokens": 41
+            "inputTokens": 8379,
+            "cachedInputTokens": 8225,
+            "cacheWriteTokens": 151,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e678af22d596ea3edef7d9fa864c54bc76fed48cfa016267a7ad58b7ec9e3f9f",
+        "fingerprint": "1e93531d4231558f47218f1de0701e892bcedd8c6e9c640eafe1e54b2bf73a35",
         "response": {
-          "text": "Forgetting Maria L.’s allergy is waiting for your approval on the card. Nothing has changed yet.",
+          "text": "Maria L.’s allergy is waiting to be forgotten. Please approve it on the card; it hasn’t been removed yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 7230,
-            "cachedInputTokens": 7119,
-            "cacheWriteTokens": 108,
-            "outputTokens": 25
+            "inputTokens": 8485,
+            "cachedInputTokens": 8376,
+            "cacheWriteTokens": 106,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
