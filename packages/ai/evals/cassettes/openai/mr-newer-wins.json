@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c177863d3cd3606bc668a4ff8842dd41a2f501530dda5b3cd857528b2f7b77f7",
+        "fingerprint": "e92f9cea9a9c5facfe7676a820ccf78f35eff61c191563b229e3057a87268366",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_8Ae4fBONXrq4Wb6m5pE8eWAb",
+              "id": "call_waxipjinNrrB4CJaUf6fFz6J",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8348,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8789,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 9,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "171f20570a2d48a3babdcb2313c1a36e2e422edbb483d74fab30b5d12ffaab31",
+        "fingerprint": "109570bdd8917b9619831ddb214e596e934c5efadbadc297c20eb6304940af90",
         "response": {
-          "text": "Maria L.’s usual is Colour with Jess.",
+          "text": "Maria L.’s usual is “Colour with Jess”.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8503,
-            "cachedInputTokens": 8345,
-            "cacheWriteTokens": 155,
-            "outputTokens": 14
+            "inputTokens": 8940,
+            "cachedInputTokens": 8786,
+            "cacheWriteTokens": 151,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

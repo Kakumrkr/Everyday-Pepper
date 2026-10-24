@@ -3,31 +3,53 @@
   "trials": [
     [
       {
-        "fingerprint": "5b9c2a87ed1e38975d132e6f3b7d8a795450233d9ef84984b50c36d4db956410",
+        "fingerprint": "93059be91cbd8d0f1ac2c12a6f49d2568aeb4657d2192d6d63228238fc59f10d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6CPtZQisnd9bpYrZ8TkSyehn",
-              "name": "propose_rule",
-              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
+              "id": "call_F7Qgg6Gpi82SrTIQdvKyMUeS",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8787,
+            "inputTokens": 8798,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8784,
-            "outputTokens": 68
+            "cacheWriteTokens": 8795,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "af2536d52ed1a3793beee753e9cafb88afb13878b1e44eb32268c2a0bf3382d4",
+        "fingerprint": "9bb8458d396ba7a03580b0d2ba0dc210085bfd0a12ddc3c49fdb9adad3274d32",
         "response": {
-          "text": "I can’t set that rule with my staff permissions. An owner or manager can set it so no one can book you before 11 on Tuesdays.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ASHvjsGo5Bc1RIrbugqWbwgc",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9262,
+            "cachedInputTokens": 8795,
+            "cacheWriteTokens": 464,
+            "outputTokens": 89
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "995779f695ec5445448d1db7872e87e0cb4508b5e1f9472090128cfbd007ed65",
+        "response": {
+          "text": "I can’t set booking rules with my staff role. An owner or manager can set the Tuesday 11:00 AM start time for my bookings.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8908,
-            "cachedInputTokens": 8784,
-            "cacheWriteTokens": 121,
+            "inputTokens": 9404,
+            "cachedInputTokens": 9259,
+            "cacheWriteTokens": 142,
             "outputTokens": 34
           },
           "model": "gpt-6-luna"

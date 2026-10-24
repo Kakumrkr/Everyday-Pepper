@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "87d8acbea22cb30737b6d478c032c7542b456d564930c77e36d133f4c103f5aa",
+        "fingerprint": "7f4ba7981faed6705d9055a7cc7acf2bf70c21c2593b877a0cac88a33668b2e2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_8rWSR2TsQlX04gYcpxdfihyd",
+              "id": "call_YBh6BAMfcDlhElKmXfKzlo6z",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8791,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "ed771dd615cc72033a54107deef9f00f83b15b1ae1529f373eddfebfb97d36b4",
+        "fingerprint": "ef516efd226e9379e42193f175230c525ba853d7d7c829f7508ba2581b55cb32",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_klMGuHcG8Y6RZ7OCqJytLDlM",
+              "id": "call_1XIEL25IiRrZ0XNCfFLMAwnZ",
               "name": "remember_fact",
               "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"preference\",\"value\":\"prefers morning appointments\",\"sensitive\":false}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8435,
-            "cachedInputTokens": 8347,
-            "cacheWriteTokens": 85,
-            "outputTokens": 63
+            "inputTokens": 8880,
+            "cachedInputTokens": 8788,
+            "cacheWriteTokens": 89,
+            "outputTokens": 67
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4733c623242544a370ca9cfad604f9ce2c8c6c374daad70445022b71d4e899d7",
+        "fingerprint": "fe0c276f53874bd2fabcdef63c09fec153257f01e7fbe1656cbdf36f3504386d",
         "response": {
-          "text": "I couldn’t save that—remembering new things is paused. You can turn it back on in Settings.",
+          "text": "I couldn’t save that—remembering new things is paused. It can be turned back on in Settings.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8548,
-            "cachedInputTokens": 8432,
-            "cacheWriteTokens": 113,
+            "inputTokens": 8997,
+            "cachedInputTokens": 8877,
+            "cacheWriteTokens": 117,
             "outputTokens": 26
           },
           "model": "gpt-6-luna"

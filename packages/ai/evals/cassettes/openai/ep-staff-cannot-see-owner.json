@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "54c80d55493ef179eff148eaf51a6b1d3de60fe0eba5da231773a2e345c8ac66",
+        "fingerprint": "1cb12d4d1f5bb70f790115f5462647f241181b962561afd767efce5eca211fb1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xR5nsoSkatkYvKiVv9B38hSP",
+              "id": "call_ccshWIPnFRgB8tzwYYVAhv5j",
               "name": "search_memory",
               "arguments": "{\"query\":\"Lena raising prices\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8351,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8792,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 12,
             "outputTokens": 21
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "c645c1daf3bf9ac3f52df4503c7282fcd048927ccfc67af82f48945294979646",
+        "fingerprint": "d92bf9b65954c3b271dab749e13c5e3ebba4fd695390c92628dd2bddd113689a",
         "response": {
-          "text": "I don’t remember anything about Lena deciding to raise prices.",
+          "text": "I don’t remember us discussing Lena raising prices.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8469,
-            "cachedInputTokens": 8348,
+            "inputTokens": 8910,
+            "cachedInputTokens": 8789,
             "cacheWriteTokens": 118,
-            "outputTokens": 16
+            "outputTokens": 14
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d22a639c85fd9e4821620512db2fcfedd717bde964b2e765f7bc9b2fdca1b9dc",
+        "fingerprint": "e15df46d64962e45b62e7449644792c47be9626c6a9754a2e9b09e712aee3f67",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_J0KHES5Pa2z4ZiEWGdwehNUw",
+              "id": "call_RDIOJbwMALJkbIYPibcGOoZM",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8788,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 8,
             "outputTokens": 18
           },
@@ -25,9 +25,31 @@
         }
       },
       {
-        "fingerprint": "d7b9fb909f648476a225574b614f7d68379ed4a2a12eef7ffe000cc2dbe2893c",
+        "fingerprint": "d2f34c65c77866414bd2bfdf1309e6bf7a34eff3b61823725d245a60c7eae7ff",
         "response": {
-          "text": "Maria L.’s usual service is “Colour with Jess.”",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_JG0dcMpbnvf4l4gOkGK8i3WF",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8943,
+            "cachedInputTokens": 8785,
+            "cacheWriteTokens": 155,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4032bdca03ea90a225b316e8b879a7c03b084c28296a772036a60b094364768d",
+        "response": {
+          "text": "Maria L. has a haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her remembered usual service is “Colour with Jess,” and her last noted visit was a colour with Jess on Oct 23.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8503,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 156,
-            "outputTokens": 16
+            "inputTokens": 9467,
+            "cachedInputTokens": 8940,
+            "cacheWriteTokens": 524,
+            "outputTokens": 50
           },
           "model": "gpt-6-luna"
         }

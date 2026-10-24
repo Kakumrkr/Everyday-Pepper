@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "4e659ee693874be2395308282d9bfd7484d493485c05eb537810be25b8d68a16",
+        "fingerprint": "688e6e6283586c8820c223954844685d2702565916195f470977ec66f50a6a5d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_59ek8aL5qEClqMGdW5n2P4r8",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"team\"}"
+              "id": "call_TaIz6c330ksaDsUBYva2awei",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8791,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 11,
-            "outputTokens": 19
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "82ae339f144fda98be5d9bcca74d1d7bd0c1053091e2e847cc2368563fc036d8",
+        "fingerprint": "d6771d36749a652e82ed941ca6f3c911afbaf3963d3ea4cf42c243a296c924c6",
         "response": {
-          "text": "There’s 1 open team to-do: call Maria about her colour. It has no due date.",
+          "text": "There’s nothing currently flagged on the team feed.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8456,
-            "cachedInputTokens": 8347,
-            "cacheWriteTokens": 106,
-            "outputTokens": 25
+            "inputTokens": 8839,
+            "cachedInputTokens": 8788,
+            "cacheWriteTokens": 48,
+            "outputTokens": 14
           },
           "model": "gpt-6-luna"
         }

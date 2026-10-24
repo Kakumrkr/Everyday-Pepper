@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "232e08a6bd759ae0cf5c682e114c85644f14af6fbb5f568b988c0b9c468cf0fe",
+        "fingerprint": "637bed4c5ee16eed4d7081f8e92821306c4d6f406e36489df73c447dba0dccc8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gxmdNvlq4Bi1eMhSHlRBwVPd",
+              "id": "call_UITg1GvfQ6LiYmib9voUgNVL",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8354,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8795,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 15,
             "outputTokens": 18
           },
@@ -25,31 +25,9 @@
         }
       },
       {
-        "fingerprint": "faa9d6ce65a41f8d51e8005abba8ab955a1d41ae3ae341778880ef1ded0619c5",
+        "fingerprint": "0a444615b7bb49ffe2ea4134ae2e8ac9b7922e27761e939c056ac0c00fa4c8ea",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_QNMqOjeZPWIw0iR5OifAV530",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8551,
-            "cachedInputTokens": 8351,
-            "cacheWriteTokens": 197,
-            "outputTokens": 42
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "e81dbabfa7ac84262c6baa123db060e26761a574bac87f6ce5ae1faf0e9ba806",
-        "response": {
-          "text": "Maria L. is booked for a haircut with Jess tomorrow, Tuesday, November 3, at 3:00 PM. The record notes an allergy to “PPD.” Her usual service is “Colour with Jess.”",
+          "text": "Maria L. has a remembered PPD allergy and usually books colour with Jess.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9122,
-            "cachedInputTokens": 8548,
-            "cacheWriteTokens": 571,
-            "outputTokens": 48
+            "inputTokens": 8991,
+            "cachedInputTokens": 8792,
+            "cacheWriteTokens": 196,
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }

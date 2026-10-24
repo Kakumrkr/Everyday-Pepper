@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3a386e34c425b22c4c209d4b33fabc27a9bd5d4542bd4905a234b440adb16c18",
+        "fingerprint": "5f1fa3d277de1c3455387b81f99022a6bd2765aa66b1c1f66da0ee9727dbdd77",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_d9wXkqMAmqk4J2BWDLk2Wvt3",
+              "id": "call_QW7aWHVFdQ4LrK6ufm8GZazy",
               "name": "search_memory",
               "arguments": "{\"query\":\"this Friday\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8352,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8793,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 13,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "dfb4f5136c94c67a4367ce2502f5ddf1ec1f2fc45e8406f20477f73e08c916b9",
+        "fingerprint": "24afa00d5208b9558b65cd5891c175b84db406d7b22b4e327369793386b45931",
         "response": {
-          "text": "On October 30, you talked about Friday. I don’t have any other reliable details from that conversation.",
+          "text": "On October 24, you checked Ana’s Friday haircut with Jess and kept it at 2pm. I also found a note from October 30 mentioning Friday, but it doesn’t contain a reliable discussion detail.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8572,
-            "cachedInputTokens": 8349,
+            "inputTokens": 9013,
+            "cachedInputTokens": 8790,
             "cacheWriteTokens": 220,
-            "outputTokens": 26
+            "outputTokens": 47
           },
           "model": "gpt-6-luna"
         }

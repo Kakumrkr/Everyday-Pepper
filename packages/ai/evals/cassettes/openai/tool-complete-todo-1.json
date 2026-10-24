@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3ba0794c849f5c9b4636adfe274321ab28798a26c6b21325672d9b0992804c39",
+        "fingerprint": "1fc6c8f24afbe089f9c9cccf4adf7be27e96f27276864c3e3065d6b6824e3ea4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OsGY1NsymkMGW2nyHvptVcs2",
+              "id": "call_LxOgWZ7HzuR7PEyIx30y8s2K",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8348,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8789,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 9,
             "outputTokens": 19
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "caa562643d7aa509c7f04397ec8bdd3189a7ff63312f14d9a4b871ad7cba469a",
+        "fingerprint": "1bda1438be69e74d868eab6b96b99baf37333c5541eca61bad23b0e464469c32",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_x7o8yiVIoRZzAPAm74ATPXaP",
+              "id": "call_BJlhPtfXZu44f5z5aA0yWl3v",
               "name": "complete_todo",
               "arguments": "{\"todoId\":\"{{todo:call-maria}}\"}"
             }
@@ -38,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8455,
-            "cachedInputTokens": 8345,
+            "inputTokens": 8896,
+            "cachedInputTokens": 8786,
             "cacheWriteTokens": 107,
             "outputTokens": 42
           },
@@ -47,7 +47,7 @@
         }
       },
       {
-        "fingerprint": "e7660737e7f763c967829c82672c12b3e0fa7127044c8fc5a1b836b2b1975954",
+        "fingerprint": "1c04e6e037020fc3248537b27abe9bb192ccf936e93ada07c0691dcab4bfee87",
         "response": {
           "text": "Done — “Call Maria about her colour” is marked complete.",
           "toolCalls": [],
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8543,
-            "cachedInputTokens": 8452,
+            "inputTokens": 8984,
+            "cachedInputTokens": 8893,
             "cacheWriteTokens": 88,
             "outputTokens": 17
           },

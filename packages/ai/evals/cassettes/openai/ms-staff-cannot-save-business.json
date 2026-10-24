@@ -3,31 +3,39 @@
   "trials": [
     [
       {
-        "fingerprint": "ddffa0371c12fee5f64cf8686224a861510fb65af6c0e728c66387edc3397165",
+        "fingerprint": "c30b2ab2db473eade18f6c7c15c4553882975a7de0a2820709d1ce2ca9962f5a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_NyNMLoANi0NHngvNkvsVq9I2",
+              "id": "call_i0UY4VVKm98tQTks3mKDQH7z",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_05a1a9a16d3fe624016adce5635bb887d28e8ad3b1ce932c47",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3OVkXCzi4KXnZuQrIorYkoJ1dMpL6ChEEnmQgr_ALGMS_xkzbKbOlSjI6K2LDVTXIgsrOnsOJWBqz1ZtwDl26XjnHwOd8_poqLnm3Kq_d98hZpC7FnxtGAB8zJ_w9EgrhY_0U7PWM_GHyKinzrj5w5RQtNQQlYTfptBY_PAEwBfFN_A6mec5xHEdpD6thBw9GdNyGMWnXKAPPkswSbGXzuY2M2TYqU_cBvkRhsQ6W-jokrY9ZO-KoGSOwhvRi1o3X7yDNSPOCljIwmtaL-KsMob4pnQRqsO-dSfRFcCuUM-6duZcOkRo4LJmaYOapUV0WS7oANoXUamTwKMEjrh8N_yipXM0Rbvw3zgGY69gyQjf3KFSFTx5V1Rlao0r5byQpiOuwnTTEqG883ZHnw0EW6n6pnyQKKWmJDwVMfeWhDiI2wvBJfirb-AkSECEJRhOnlvzDYESFsaPAXy-L-08TC2gJllxlcKK8TV2EMU6--EGLH8hxttqcZdfSBwFr0MATUCnX8vQ23somIKyYf4gO4Iuulu-mEjJWg8ntbBq4f4JJ6s_zzw7D9HY7syRVGS3zPWOdW4p1hIDQQ1TbMx4OF5W89v5ipx_in2lUN9Urj8GNdp4MxkovxAUqNBEZu3q9mbx5Kjk6xsEWFA10vBE-I5g1E9vHwYHALGLz8QOERID3FBdFUnf9-TtIs20t6B65soG3b3ydA5q3JF9s3JM1qt49oudjlglSnzhFkFJ8RFfPElgK6f2gkB3G6j2Y6WwexHwof408i2rdfQsWWDUDtDoYTv31RXk95jzxZc4uD9c4v30heErga4H6v0SHTA0VTVxk_9rq7v4jQQckl5MFQNaLzEiEAxrVdLUsoYgO57hoIf1nXTQpfPZDAvmYIL1Pz7HPwIxg_XQ0oya4MVNl4XEPlTwvm_GPOTCs_dNbx31ueh-di5S9-rbA7E6SbcwDiYuWY571Sv-glr5BPsPwa3zmmfuJ6AMITZ4-6u6PkVuLc6wVvesIYkK2BUHq-Z0rhwX43oJ9FdERKyGu1WRl4DRSX9-C5739G3tRPoL86wFvuOfuQ5h4aeNrWBMwMsZmFoYLsm2QI_4X-AaJLSp96vwY4_pqQiIWFjPFs5LZj8Qd1ahv9rEzTew0mSsf-kuqrAM5NsYY6nbo3J47Qtxyt0_kNL2MxCqbMsTEijemQwfEzpgET4pamdKqFK9Rvf4CRyF7M516HVNu2IWjo8wyqsj9BDMnCs4nvEA5QAqkn2iNj7teREvA-0eMVM99bCC3cmdt2-lpR6El2DZLdjACI_e_xXHxvdye4Z9z45TiKkjtlitklVKObs9OChFwnv8S2X9aBE8Hl6KzSyViqk8rVGvSEwNulSIDIbb7siJvcTeiWeXzf_8QEy2CisxCNHIFhBMQI7XB8PDL9PgvhRaofpmZYPd718d2CeFqevgIT-IJZovYFvj1j_Hxlf1Z1OV_TQJvYphU7jja9FsiiWoNRCvkQyqH7oGlCpz4fPaZbmPoGd4EkxQJugiXHcOKzJRX8aKUAVeqnNUc_y5S_8OxL42HmDQC_HV93jjdVrQzJsIf3Qg3o006irRBYv2Wm3Qim8dp-y5v6ynEqUP5vMCYKAhGKvFnG7MH_4bzuwxHwxVPeqfUryD82Gcbgp-Pu-WqJlSeS87XLm1cLYSKyZijPjmRW0LTbv51pzW86ka2ZVltsScJxWYKwK6ZqdADEFyrEDD5__dbYyQeyp2A0Tz0ezHEeT1ZIiNu3Lb16tckYHRDV8=",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8351,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8792,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 12,
-            "outputTokens": 40
+            "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2639ee6e140eeea764d100dfdeecfaa841458d9b7542b9d1de56d656797b195b",
+        "fingerprint": "30864177f2ea22c1703f71a7ae44200b3c3b68bd9e1d06383fca56558d55b359",
         "response": {
-          "text": "I couldn’t save that because your role doesn’t allow business-wide notes. An owner or manager can add it.",
+          "text": "I can’t save business-wide notes with my staff permissions. An owner or manager can add this note.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +45,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8444,
-            "cachedInputTokens": 8348,
-            "cacheWriteTokens": 93,
-            "outputTokens": 27
+            "inputTokens": 8913,
+            "cachedInputTokens": 8789,
+            "cacheWriteTokens": 121,
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

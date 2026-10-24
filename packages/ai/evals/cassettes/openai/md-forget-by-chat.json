@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7f74b2cef6ecb5c75c952b8e9c8c00f8660b155dd2d23fe7f5c7797a568dce0e",
+        "fingerprint": "cd0970d16d4d04ee2f271e5b2fa8499f4f5d9591a3bc2f0441dc940cbc6c22c2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_vmfZXiEc9o2ZwBefYekv0EvG",
+              "id": "call_JkCvjKrmTO53uSIf7opEYWOE",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8357,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8798,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 18,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "53b259e69a91770245e815dd643ea37cc2c6dc279f981d3a24cabea5287508cc",
+        "fingerprint": "68de5b76b64e35769035efca0e6b5af6fe2738f683ceec644770aaa66ee9bb11",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ASYeOMQoqfEMbbs45bDmXg0s",
+              "id": "call_Rd0BnILZ5ll71bWImsojTyNS",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8511,
-            "cachedInputTokens": 8354,
-            "cacheWriteTokens": 154,
-            "outputTokens": 41
+            "inputTokens": 8953,
+            "cachedInputTokens": 8795,
+            "cacheWriteTokens": 155,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "cd43645802f9bc948d099e0514703faa953f3f092be0a768cb465787a3afd665",
+        "fingerprint": "70c6fbf3f6ecbff9072024f58f8701f08d3aedeb233c35755c100f3a79ed2a1e",
         "response": {
-          "text": "Maria L.’s hazelnut oil allergy is waiting for your approval to be forgotten everywhere. Nothing has changed yet; please approve it on the card.",
+          "text": "Maria L.’s hazelnut oil allergy is waiting to be forgotten. Please approve it on the card; it hasn’t been removed yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,20 +59,27 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8619,
-            "cachedInputTokens": 8508,
-            "cacheWriteTokens": 108,
-            "outputTokens": 35
+            "inputTokens": 9063,
+            "cachedInputTokens": 8950,
+            "cacheWriteTokens": 110,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ef413bd10da2c889f58e663825f08f39a9c87caddf72651717a2c4c45c5f21f5",
+        "fingerprint": "7de4bd53d96996a52d621645ad04532839e66e2f0053d8220731254e71d5572e",
         "response": {
-          "text": "I don’t have any remembered information about Maria now.",
+          "text": "The client lookup currently shows no remembered facts for Maria. The request to forget her allergy is still awaiting your approval on the card, so nothing has changed yet.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_06ab3d793e4aadfc016adce4f579ac87d2bc1f9ef4a1c0b3f7",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3OT22xCL39MHoKsknuuDYn0zrBzHuIXIvWmGbUKKr77wCkuns-1NsHldfhxFK5AF58Nzr6dpS1LaM8PDmOZCWXQKuLLSc-CE9BjD1JtcDNOYXLGR_VA4gG-oXE8yPuRtKu7krZmINk9QTgrroC96e5jkEK0HpXiyhCBrSH4C1vVWDHhvHbizw3AR1YFSaAOvzBToHJhylDcBLK4KYzCchvdp3gYNQelcvDMIfyEvbpTge0GjO1pkN0UdxJjuzQ2-t8gUisSXq4xAonyT2_ikWzFN98Te6ZW-WzyncUMCL7w195rpod0FP9FyDtMbKHydrCsLaJtR4CYXho8GllARK0wHKlCUpRJJEvmUtquuoKacomn2Elf_hnyWHSv3sBik3BwHdOf7UpOOWBgyp9wsNqk-FzSjMRhM_4ILp9TV55RoCcTbbbFPuSnZynldf5Id7ZABIBSH7t5sU_3vLYjQu8D1jV8xYl7crwbjWtxyNHTy28_f_R2kgnxa4S8-C6YYqAxpjJc3mzLpWHdfvjAkNDA8NGMGP33bN-vuiknqoKuUpjuV4-DxZf0cmFRFMnXSQeVSKLrBIQTZpCaGBc7m60oT_j_JZvn52gMbRfa1aXnSOZVHFn7wIAbElpMqbCZ84Enzok2wzv9GGbJ8e2DPctVBKtxoNwha5WAdkMPNRSb4JQ7wL_nub4sC4ccDi5rJcJimMXMc2-ELzgJf1rq1OGnFJaUfA59Fobr26C_RtXXhj_rWx1RYcIOhZB8si0zByHmnzsp3JKdF_i5jp0qawDgSXiyP2FOIeVFE77ZC-P6xG2AX4dmyuoMzw9PF43n8xgOoMN9p9ttGSFKGIJIuUD5aT-PANvZqu4EEbPMAM6Lmd_xAA5e5xGluC96Cc9vNwtgwe2M0cH_Wz-H977QQe3ny19e8TDl-dJaiKDQUxbjWAAdFQXOp27en6tPD969esCWtsp7rrCdUMsGkAKsxjSwE0uEEQ2x77Mf_jJbDEJgHY29PtCja-GLYnCTpBU_9NDeOd1vvLVaE5xhGf6bCa5Y1VAabaSLiBbk_R7x3ew2e7JLY6ihMFZssw-ZAQXV97ZOIGsGJyw9Z1jewUbFBxb5I8X_ddjX3XYXTrXZgl986P0WEfyNcjGEfd_i12agK-ZRd9EMmNmVQnRDMnPsaev83kMfd1s6j4KiH22bDLiU5rNupD8UMLIzshkkuS69YhFvpsbPCkWGg7G5eNNe9AW80IBcIPtD8rsiVbh0pflcEKBfPshTRDyfQx8Ixt7tfvZtHVw3CqnWVBmn2bQDRPau3za_1PoOnYpLdtGMpwbHysUlwjZJ2d76T4hhhf3i7u_f2jwSptXc7u1hsMN6iGYzaTNUUTHFgyXbX5w2ryzm82yeT98aUMNAmqK8XdwhVtjA3ToP3XCI2v25XAj7pWtq8HmWHsogWqjeNkXzuD34OySMVxQlVPc8LLoFhb5FYvlhkjM_ckTgpLJmOk9RUVy97puOtBMVxZRMJTo5RFB1MtFi4m5eyvK4Jf0YB9rHN5ZVNcF4cuFpNtCYpbNyECNS8mWQ1KxCaFSwKHU3SwoNxqhgJT5QHEZtAfXoWf4mmqYtJy4YiPxk393P7ke6uhSxrbCBCf5TqODIdAHstgIhAtj8kYs99OjzNHf0jRrn3emaPOj6FI6D4FJrIVvqOTn9DnU9bEuhxJd_kGFvFAjs45u9bkle-r2ziw9xUU64ftw2dPlT2a4CeU18KUCoZZjNb7FDp4lyQJ4X-FsYEV-44DQiwqSPeF5xm9jKGIiIgs_FKoQ-QoUhO-Js6eCsOfqoHLeaYzGHmK_-JcaRARlZs_cF88AGVgrXTCoo2EvsvzEnQ_VhGQ9f3NnLNtySniUq-m3XvebR2sPnLbqZO0aWoV8xgNx-mITl77PzktRUWCmei3cP671KPbO4jBzCSdYwG_XXYkJ3mcT6fLOW7434etyg02oOVpUMzasMF_7DMqhIJ9EppKL61RV0k5N80FjvZED7lTejrWmOvdpIIeG7tfffHC7_Hx22W6GeVlliiUEIDGtSeAyEdaUT6AzRktCQ0e5yoxJyn5E27AGJ5WaxG2tD4avMR2US775gXXMUlpGHrHEeKJ4XID0InUiMupZwoJvF2AAq1mD5lqNubl5POLlM_tYlPmzracPSVHm5paZosQKNV_7ZIPBID-8pHMqZr25deq0GOTT8pbSCwV09dmEXvKvdLYbnRElZvV4pz64yjLYgQpzQRP9_4GEtRAukSiZrk67OZjtJt2rzMh_W4wz9yA1oo0xh2pDbJS8GubAu0MJH8H8nJNyfh8NaBleA6FaaBOfCTu8KtYVYN5rl8Ov16VSrKe-MWhHnqLjDCprA_Eqhc3Seg3WX_nHbJbT3ay2wYmKwyQNfNSFjFjjRR21JXQ9lLc3FTkzm4lwjfJIkWdTytyzSJxeJ26rxbTGMM4tdetd0XHXiLjoCr7N0gDKbT-urC0iOrPr5ABIOHDq6zvb6uDp4e3DvjFRBBARgdOtuAJxHgmXsHvrlfWRhIj8Q=",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -80,10 +87,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8580,
-            "cachedInputTokens": 8336,
-            "cacheWriteTokens": 241,
-            "outputTokens": 15
+            "inputTokens": 9022,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 242,
+            "outputTokens": 120
           },
           "model": "gpt-6-luna"
         }

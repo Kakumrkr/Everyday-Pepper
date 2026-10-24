@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "92fcfe426da00df64c38a6f0b2242795d4d03cc3551ddce14dc1f8cea0724bf5",
+        "fingerprint": "b6a050300e1d62a40e11844ed0f42dd85d076821a30ec897df01a9a0a9685578",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HsnSd2PLpcscF9jD4nGpdPit",
+              "id": "call_0Fdi8f4woNN2CiV79M3E6RbU",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8794,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 14,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "8c9f95f4f7c55b482eab0ef04bc821bd7eebb97b0770a8de8377a733bf202dc8",
+        "fingerprint": "6917c01bc0d8bb1dcec99b05c8b963a935c301efe95cb5fbbb978cc84c8aa197",
         "response": {
-          "text": "I don’t see any open to-dos on your list, so I couldn’t mark that one done.",
+          "text": "I don’t see any open to-dos on your list, so I couldn’t mark that one done. Could you check whether it’s assigned to someone else?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8406,
-            "cachedInputTokens": 8350,
+            "inputTokens": 8847,
+            "cachedInputTokens": 8791,
             "cacheWriteTokens": 53,
-            "outputTokens": 26
+            "outputTokens": 37
           },
           "model": "gpt-6-luna"
         }

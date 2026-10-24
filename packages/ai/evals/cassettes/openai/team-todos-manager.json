@@ -3,31 +3,30 @@
   "trials": [
     [
       {
-        "fingerprint": "91a4bc8c84ca04b1152f09426930a01d6d170eaad40bf7889f795294c8fdd798",
+        "fingerprint": "d252d162b773fd2b706bde27cd42152bc74ddc89a0888d4b540156826b9b518e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_LalyYr8sNRdtvshQdg0cUO3C",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"team\"}"
+              "id": "call_eZJ5n4wL4xQuGZA1ZOX25Dq2",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8336,
-            "cacheWriteTokens": 11,
-            "outputTokens": 19
+            "inputTokens": 8791,
+            "cachedInputTokens": 8788,
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "89abf250538bd291d41d63d3469eaa48dba9baf02247c853141ba26ec86866cd",
+        "fingerprint": "c85fd7618a94be119aceb7d61111f19d21bc5871a3cd176ddbc1220d53bc3e62",
         "response": {
-          "text": "There’s one open team to-do: Lena needs to call Maria about her colour. No due date is set.",
+          "text": "There’s nothing open on the team feed right now.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +36,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8456,
-            "cachedInputTokens": 8347,
-            "cacheWriteTokens": 106,
-            "outputTokens": 27
+            "inputTokens": 8839,
+            "cachedInputTokens": 8788,
+            "cacheWriteTokens": 48,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

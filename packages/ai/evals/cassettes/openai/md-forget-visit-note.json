@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "6f1be2c16d9eec5e8292e29f3f26e64355652c96b5054e49eb6e57b90bc1aba6",
+        "fingerprint": "19b21ee36d19e7885bbd01425d0dae8b3cc23a81bc350ffaca3fac51f5c0b11f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_RWf8379Z5C7QmKROV0cKuKfw",
+              "id": "call_FXnjGRMaphSxQT6gC77pYwKO",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8350,
+            "inputTokens": 8794,
+            "cachedInputTokens": 8791,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "97b9868f36bde413344e0a47ca20e35e601e1dc6c1ce7f5225276034d053f8f7",
+        "fingerprint": "d76b14fac568d6aa2c2ad6b39befa5639136ef51f6b1652e1cb01c6f4388c4cf",
         "response": {
-          "text": "Maria’s last recorded formula was: 6N + 20 vol, 35 min.",
+          "text": "Maria’s last noted formula was: 6N + 20 vol, 35 min.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,25 +36,25 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8621,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 268,
+            "inputTokens": 9049,
+            "cachedInputTokens": 8791,
+            "cacheWriteTokens": 255,
             "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "24698fe177ab8172400ac778b47b78d38162941b3d46b3fb0262f9b4e53a0b77",
+        "fingerprint": "36ed7caa52a37f27775c8392d1e7c19d40200f4e86b7414fc61d8bf711873ef6",
         "response": {
-          "text": "I don’t know—Maria’s last visit has no formula note.",
+          "text": "I don’t see a formula noted for Maria’s last visit on October 23.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_04e928dfd2d022d4016adc061c4fa087d28353ecc50a3f00c5",
+              "id": "rs_0b3f2377755c7666016adce522f85887d2839d94f7661924e2",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3AYc-_YrzWGh3dH0sJwBbiyZ4AifCCvh__NrGDbmRG0lSs4tOReV2YCOWltl2nlxKGDjwFHK9cBAHhxiHjbTMc3F4QQHl1Qw8IFu17BScae8yvt4FJpJDQI87oWypuv9Ihn5wi6dHq84TY_-LZJHqO_xDgMck7V3p-6cDrmyBCB9MqnrfGhxZeDjQCAM-imb5LqOdyDoZm5dZf8pGL0-Sl2X2qnPCLy7IQ7WOcOnnyAO6Mtu-Uk466AQhvSh4k0tSvI0bPLEs4TURemSBPZxGN8Sgg_rpoacw4YNIlU8inmuQw7GVxbLaxb1bQAtGNcqw9Hv-cIy4374U1jK1-ONW7FrmjHibEX46KHF-fQQ14wobdpdQH40ASqrb1PLW4Dg6TR4pTMl4Rk48Ta6QoWEYFiavgcZ5SF8YgpYWsHRYrfqT5nGmVE7e3ASHQHPfGj9ZWqwjuRE6Uwo0B28WJsEMJPg8KBPzZJECLXTF_REhXCeujXYxZHoW2eEGXKIC2KzTGz26i4GxyIkAauyKHl4nayTdNlq0hD2eS0GeG4etRd5koOLEypi4IenFrAQDKLsG86Cl3tGSFEiOimYWL2J_IZu-3gFaA9eiwudR1C_pebR-dz1nrsjcGS0XCNBw7QAQNNaTeFmMUasCVKyK2C7_WWJpOktkdvb2WpVRf_0FsM68JOQK2g62ih1cSYcAommPOUlQuZ1j52AENb3fpix7DwMFk3K-OI82TcneY9JK1SBy-fkDuaZSeIr_txgxP67m8844bjY3TuVuXHAE-S55D-OaIjuvkGAAc4VyY2kLteZ0shgbMQIxGp8X1tEakS92KEt0MYOYI4RWpJNHfQkQuCSxVxGTlwO2N3AckHs3ciSgmy41_V0-04XGENdJ2rseWd5_FfpGpe8hXYWLZMmS1CE8GNaq7ahFbjQLozCRuYG7QU9Q7OLECb5suR-v4tAZqm21qvTZdeyKs5HIGZIr9TQvfMy5EczgjajjCIg8Rsq1FlkoY7BvEv3BaRij-2vAxTgaQUVm7gSTxTAdL2t_8qAlalm2plkDXEB48P-OTdqvTjHszqJ2W3t9oeTmIZW9TJtr0eqBN1TVugoLH8vXyR7xP81nbZSgf0LHg2eR8XEu6qArj6yG6k24aTx5drVk-4-ZaghmFc75x7x55mNtkQLmgfdIgfVYzKO-fz_ijDMpIRdYebE-p7eOsPtSeFszIUOdcWJJ0qNlSD3MG5u7MxXxoOAmWfCWLmACVChP0QIYh8kK9wy_fZzpm2wd43V1w1RwIbuU5WM5pHpFpWcpaIR32b-xY0dXZ9xfZTNQRgCLkgeWzK5em4qYVlPzAcFPbOKlaJhrM-smGuJl0qOlZ65Ojxgm3nbI4VXE5-TOuSOKoiZNF8Y83SZYW9kLMBHLNrdbkS4_pVbwlkWZSZbBTRmogL1cFl-lXna9lPYw749ZJlo1MpNdL7lehn8Ucky8ctpMDWMuFDC2kHE_oEAuAsyP_n-uT9e8e2OmA5gCz6gLspSB10Gzr_aY94Rd_L6XK9pt_clwwZ2K4gPemL-_xAwvSwhMOlIQ1aQanqyZ9M0qQvUi4CwhCpHCKP_2bbO--nVbwfN1lZ-0sP1tl6ZqgshwmXlxhFu91m3CUV16K8xSN_GPq4Lkkih83O1p9WT4rij98-WQl76UJtO2-XlKb7-u-_G23BqabGXvPOpChgw9Sj75tmldwYu5GSPsLQdrevV12t8uSjPD6Fz82yahTRdIIuOEQkWvj5E011W6cZJCxA=",
+              "encrypted_content": "gAAAAABq3OUjYMe1MhzyDwyL6Wrsslkzs2qj46eXqKdsZdasrAbDSnq7-ZD9JV4HLZWRiKKII39REY2UiRh1y1wMUNSg4JCztb_lxwMzN3ysWD-1mrXSUof0AIo_pbzNx1weijpQ1haeRW8yjiBvF8zIbbP2PdVuWEu93di1jxI4-bpmFOMMI4Otsjjm7jHDtiOQgUMdJM25yvQyIHbPhuU5TO9xQyoMOfJIsV-OjYq_Nla6Ytwob4UMBqfjW5oJx0gMY3cK7DyIIKq-mi1eSH_d3jCbFAr3JEGdSxzRewBf3aKdloMlwTR5A1f8ostwtHBe746X-AU7pxGVHVBLnDF-04OEX3V1x-m5SZILUsunmPZgXTzgfadqP5keaQaxZjhW07RDAqjGzM7qyZYtQKt6MD0fLShslb5dPVGvgRBEUw55-IX2wiOSNY2Gqpm9pEVUg4ZBai0G7TovriEK5HKrhes8ECQU_h8Gujv5abngr54jAlqlDu3qW5xySi8te_SxSnh-2LbNrH9ahdA55YRK3Ut5Jcd5EYoBj0UXBi3VApL8gFDfIf9Xu8v2ZZxo3-g3WGav0Y2c6cvjlN-iOtdohOUb5Dk-MlZy3n4CWHbks_GIad1jv8FiXCHxWMhIzLvYG3jhZJtSTUAQOW45GBqRkOOddZupwT3DLmqsJjh2-iGwhDYNMCfxM65rh9fEAhjExSa6wAJ1rTCoi7cZgc5PBJ4nHI55qxcg0t6uAHrtInfD5OQQxfFxAGZtDhRatXDHgUnrS5BukOao7tjSlWWngH-AXHvpsidpuUmL2wC7Q4fTGMeMHFLDhzzpPynYdrK-DIcArv-cpNKvuBbzkbHrZh9Z5EO8WihE76cETTrHNJRSfg9YAxE4BIMfxXCbz-wClShGWWbL-35GeurqMfmx8NsrofiuAHYNGl-l1WnIbKxnhqauqjHQFz6pjjkM24W600NwM-fUxTZvuJPaHEait2b46uYo7Jcgm9ZP3atZ74TgThMRckkTCiIhccMI0NxH3rvbsqRw2bT5RShmO4eUqoutyyYF4G9_thG5bgPwXFnEG5D1Yz9ZJOIIQUpQ4t2sTN3IvGCOKmagUGoe25oROnBiX2PInB7fgycJjIi2XUnfaj1-1BU_jL6kT31zq-UKKUjuMe6OyJVT8iYsbZIiNIkjWN6mjpYwaZQTFJaW-skvjZREj2-BIZOud7Eu7LAK6kLgo6x0qpxu741A-kZ6eLUHj8IU_LpyRpVZspx0dVmzOEARQOCrcOfWF6YMZUL6EslrLYVjn9XYt4p-ggyNQ0bNK_5X169P9s9F5-HOBSEj-7dLkmgzQBjBZ2QdtTBa6vMRpnxiNePJbO5qcOJqA5AEykGkwr29suzIe2IN854oScd_4YTu_eCauAQH89lTqGNJqrLcUAcdFuG2Mwr5XKZPcEhcWjOrMmKG-Zz6RvE0OaCn3S-SLlFDF5hvkbYmmDFKImPp-qvHfHf8ZoR2AaTXv4iXWYGwSlPlhXll3v9RiXwPkzzXIq5dXHhCb41XulJ3loK0rePxd0c3NH44iOqceARtZBBqLNuEyKw8v-lVYOq0P_LqhwAM2xzwkuzpEI4U6XWw_JJFhgFVjvcM2cE93qh3S1R-UW0hCjabUL_D_xTrKz9ixw4cqf1Sa0E81LDltS31CxdOGC2rds46lVUfkWea7m4qu3Rozc1tX6POeQKa6tPbXTH_Qjt-Qbkg8h8uw8t8SrfIS6366p4rPPInRn4zD9T2bzsAeulYYg9FxcvtzbBRmsucVmEDAfrXcs9WA1Hr4zb7wq4zgaCFDZvTfoH4g4ITGf-DioxAowvoUuCp5P5L5oBmu1-3sipiIABB5W8yDLZzX4jiSBKzORw3neV3gQ2F165etNYhR5J0QWwECBqlZtSEDKOvGXVqUWuJPRV9bzY7Odw9hFMwvbp8E_iDAXPDza25nVZufObf9Ky-G--cC1YDDZuNl0lKkrth8SZ-EeoOW4N7yHUbjFUauO4oernGNQqovqeolPtU1VCxCm7lUwLidFtwAj5qv_YV2xsgvctXMMU6pqHqg4YGVjNsMtHhdg_xUiiCoJ_0xYqeJAR6lW2bHzrKpLOwPTXijh2HxJMcaReN4iAqq2_GLyUZY_YPBivXzfi2l2QJLKH7A_dlheRS_uOMznkvgBg5Ed7uZ1Fw5Sre6PS-TQleovMXlvqQQqX6S76dircRbOnKag23ikIfm853Nr7Xevm7NLGx",
               "summary": []
             },
             {
@@ -64,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8578,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 225,
-            "outputTokens": 47
+            "inputTokens": 9009,
+            "cachedInputTokens": 8791,
+            "cacheWriteTokens": 215,
+            "outputTokens": 87
           },
           "model": "gpt-6-luna"
         }

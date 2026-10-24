@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7b8d225f003e4682af3f433f8382d1894046fe348363ef13289123fc758cbb53",
+        "fingerprint": "745302b2bafee424b56590047e0b03e29c220ef9d7b5887ac5728425de476e46",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_57CUrTglemjpvBmJgE7vALI3",
+              "id": "call_iec7TfNwMEDDhHU3nKLOuODX",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8351,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8792,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "a12a656c6e20a3519ab2e34cb5925734eea4a7229bde90724a7a86831cc64d08",
+        "fingerprint": "0ff5f70e91afc6b3c7c2bb498238eba30c138888b23a4319b017087c30a2e558",
         "response": {
-          "text": "Jess’s schedule note says, “Doesn't work Saturdays,” so she likely can’t. I can check her calendar for this Saturday, but which service should I check—Colour or Haircut?",
+          "text": "Jess doesn’t work Saturdays, so she can’t take a client this Saturday. Marco works 10:00 AM–4:00 PM and offers haircuts.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8713,
-            "cachedInputTokens": 8348,
-            "cacheWriteTokens": 362,
-            "outputTokens": 43
+            "inputTokens": 9345,
+            "cachedInputTokens": 8789,
+            "cacheWriteTokens": 553,
+            "outputTokens": 37
           },
           "model": "gpt-6-luna"
         }

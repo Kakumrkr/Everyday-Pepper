@@ -3,31 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "c484abaa59194a3d1aed708fce4c74bf7a8d2cce0771e3bd68dcc78eecb7b719",
+        "fingerprint": "8ed8ce10669cef09cb13318e6f8d3f60a74a123c57e95cf6712fe6e84499092f",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_Wpnk29LYUwoLbJ0PrEde0VOb",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8351,
-            "cachedInputTokens": 8336,
-            "cacheWriteTokens": 12,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "e8d9532b96a22be08c435400a68678ed753a706fb6e4a0385d278d97b84923ee",
-        "response": {
-          "text": "I found Maria L., but I can’t look up phone numbers or email addresses here.",
+          "text": "I can’t look up phone numbers or email addresses. I can find Maria by name and check her appointment details if that would help.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8434,
-            "cachedInputTokens": 8348,
-            "cacheWriteTokens": 83,
-            "outputTokens": 22
+            "inputTokens": 8792,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 12,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

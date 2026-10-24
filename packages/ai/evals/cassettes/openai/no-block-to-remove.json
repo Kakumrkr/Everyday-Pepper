@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "494757f5e444b1711ed8a931a15e03f7ea44899dd58cf54129df172a8251b7be",
+        "fingerprint": "d82f10fc20aaad8be3a786cdf4e806a082de85d6880125d93060df591fb0669d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Ry4RBzoTBClblMIF6WCTXSjL",
+              "id": "call_zQQYLpeeYYcvneXE8pU9Gn2A",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8349,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8790,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 10,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "735ff328ea135c24c58c2f3ff954541820f2483d81e1021419cb9f5184ff06e1",
+        "fingerprint": "79a3bd91006784b92b79387dfcc84a2df2397ea829b241b2d14182bc0bb88684",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_shWeHh8Gn55RKIS0Gx7ll49H",
+              "id": "call_H0DT7QFJjFDeeWkjpNr6D9z8",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8627,
-            "cachedInputTokens": 8346,
-            "cacheWriteTokens": 278,
-            "outputTokens": 50
+            "inputTokens": 9262,
+            "cachedInputTokens": 8787,
+            "cacheWriteTokens": 472,
+            "outputTokens": 48
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "482700d3eef68983a4ddba6eab49a56065965382a6a105ba93ffc43592fb5716",
+        "fingerprint": "7cea0a1890f86540e8a3b89f561dd48c7dac61d6f359b910dffcc28d02af32e2",
         "response": {
           "text": "Jess has no block on Wednesday, November 4, so there’s nothing to remove.",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8731,
-            "cachedInputTokens": 8624,
-            "cacheWriteTokens": 104,
+            "inputTokens": 9364,
+            "cachedInputTokens": 9259,
+            "cacheWriteTokens": 102,
             "outputTokens": 22
           },
           "model": "gpt-6-luna"

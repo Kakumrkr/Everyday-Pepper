@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0fe8c1eaa0c1448b42855acbc92719851f4614857a5cdcfab17deefb6075610e",
+        "fingerprint": "11ec9988148be76bc3c541206eaea2bfcd840d9701b9531475e52923493f65c1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_FSUNwEu4VXJB98hqSUH8NCOL",
+              "id": "call_peQx7NiczjaewZ1i3iquGp01",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"max_bookings_per_day\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":6,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8792,
+            "inputTokens": 8803,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8789,
+            "cacheWriteTokens": 8800,
             "outputTokens": 69
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3204a669c9ca04504169646fa32729f16a717b45201c5105fc6c9f17ff103972",
+        "fingerprint": "e9546bd442ad7dbc7e9347aad01d1241d87c8cb237edb81e3da4955afef908b9",
         "response": {
-          "text": "I’ve proposed a business-wide limit of 6 bookings per day. Nothing changes until you approve it on the card.",
+          "text": "I’ve proposed a limit of 6 bookings per day for the whole business. It won’t take effect until you approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8930,
-            "cachedInputTokens": 8789,
+            "inputTokens": 8941,
+            "cachedInputTokens": 8800,
             "cacheWriteTokens": 138,
-            "outputTokens": 28
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

@@ -3,38 +3,16 @@
   "trials": [
     [
       {
-        "fingerprint": "62910892b89fee76e23269495e1f8f52ef42b5b09272afda7eedea99c82156a9",
+        "fingerprint": "f9f3b5b27dc05d31a5d303350ad70d933588feee0abf40742a17ab04c5d7f0b0",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_J98gCMKPLL84zVmpRdmQ8suu",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8336,
-            "cacheWriteTokens": 14,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a84a66091d50ab5d066f154fd46fb133365222d3bf405cbb3aad9849cacc1cc0",
-        "response": {
-          "text": "I found Maria L., but I can’t save phone numbers here. Please update her number on her client record.",
+          "text": "I can’t save phone numbers as a remembered fact. Please update Maria’s number on her client record.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_09c769c0dc801507016adc0449b64c87d2a839e735a18b19f9",
+              "id": "rs_01e1158e5d38a32c016adce47f462487d28b4e1dec39277d3e",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3ARK0QQrZqmdP7_qlBI5t9yry0PyqneMV74Tx4JfN5ecwwSBxFqySmLSPYbko_4NZH5R9I2L00rSTeOjkob11JpfGXjUE-nHd0jn32ibR8w9WLFoUU5QFKsDmCzMqrILAjzFvFGFnvm47O6UKCiEg8zqFxZyTQEhCq9amBRBgKv23ub2ip0CWNPyZr9fD6IbTWOyY0E6b_3JcoNgH_-S8gfgJ6_mrlzmfDeHPxvBf_HLvZ12qYXbXMiuePyNKdhUmO5ekJHbZgP5Qfqkh-d3VtP1SEd1otrW16_rlTgghF5YqOJFx-leiqm5RDA-gehzLTvsH5vRHmTp8Or7Johjm0gC5pbeMb3V4MWjWNz9elv2k7knTPFcz5oH_R0fZJgYdg0fe74pwwuoqkBbR3vX-Ivyl5EVR6fAjcpm69frtnKVrXgMAmXRFEYI28gm4cngSDUxIjimuTFOQM0ptmpm_j1xqKX0Pv6W8cUCg79W15m3EW0YzndfFBwCx3sTHex19SF2DJ-XCKjD7DiyfNprWPbrIh2mGLawacltJEEPqo5OA1PNsX-A-VQVj-w8ypphzEapyoHbdP_fJoSGWLd5GTlMUI5Gl55C65gUN5zCmNZ0wptbu-ScCQQrCxkk2rZwtixbw3DEb6Z_g0AZH165q7sL6C6mi0CHSD77QqfWLimE_Sxd7MlNzCLSo62_sJ2M7phWT887jEqV4Q5J8F4_qN63ai5Kk1i41ZgxNWiMgY-xRuJ54tzf0D2zN_49r8Rq23ef9sKe3L8oavgtdQrDD5qMyyMr4SgbW4qUp0TTjmNJMWWFmD1-Ag9pPEFEtDZlp_rONn_QB_jvkDYZ48IjH4ohzOdvSy4C0XIfSE5D9A2B5PeUx6wZwdzmFCdEACDsj0gAOxW14lXLE1ac-s2ooVacT947p8XZZijs8OFKLZT1YRpPzRyxtVod-dlCKmucSmkf_UCjLKf1FPY6gYZhPjAuzOCWu5tGL0ns0fBLAMkKPfQN6-kDogvkTEyEiopetBQlqby9nhlsCFEmq9edqJoa0F_IJJopusqN1ZB7KaZ5k8gQQfzBH0oJCRnxiJ-muDekptuCRbmWrzIzgnrG7rAykewOSwAj9PncN-ntO4TZQlNvNqeDNnY8-SIpIFu7G2eryfc-oUSYCsX-maPYRq_nb9PGEuv2mqItJQE8bCS3RB3rURJwti1UzkOi3ylR7pqAbw-GZymHEA9Im4lM64YRHt3jHhO0DpNXQYPnbHT7_DMQfdxKMkUO2G2ZzgnLjM9qdA6pE9CDVzOkaXH7c2IzyTpoeY1YFnnPfpY8D7dk2RguRS0KmRywI6VE-votFM2SFhVu_TEYmAWhl2T3tTVH4wwsp-MQnvhan40bRdCUyn17Zlo5RKE_qlNkXPqttnZJrIPlI1J3C7LBwgD-_mzGj1f10-2fFg5VuZjsLFUyEAXnCgp2gD2KZn4Rcm6G45PrwtpbjvzttPvVJagcZcElFb6MsrXrMexfAEMjRhTv7AkeNsSMOzdEQ4hUWt-9cUguox3A0fQZ2ObDD5yXxLZo2LqpqcYgZ55ICz-pKVblhg6kP9knaCaCvqFMlMhdZ8R_r3XUjeA3fTK0OG2YNZWe_haLs_tJ7EWteqjdhGG8X5IfT8ubKwsNJJO_fMdqlZ8_6xjo38ryZd1kShG7iKKmPj3D0Sa9wXPYfP-QWKXyvgv8WGOpD0UhYOSoaUWwFAQ4rubYPPCO6EhSN16CbHcD3RLpiFUdXSZJaHVkSyNoavIEyKm_zqaBCXj3ogPwkIyj-eL9A8QcdIaSSc7SGtEzaN71Paepgi-1NX7jad0s6vAlJBQA8jn8tyOLf7aNGBPMRdisSaPCipNmpE2ufc1CUyIkomEcqZdJEpPyVivNISyWs6TN1B6aIl6WtkdYb90nCNUQyULluL11LuMNRReavc5wGItuJ8c3XfciFrQ7o7S6XkY1Bh17H3cUcPA6BM9ZQ06oVkynOU37H85IZirlF6RHDnXZKtE9MosmmBFQG_VhhC16DIIguC5Ovx7qMRy4cJ6J01V8FkCgLugRrZwQyA==",
+              "encrypted_content": "gAAAAABq3OSAIEzMFzvxX3kKueNSjHPnsV7IFWzKNos145MCcDrHPE-i8cKDGeI2ICtdFXwFxLwyvqDHTs2KsH0eC9HaTrDLH3baRg3QsMHbirhqpFoQcRPF3KcurGBlRoY-kH3XVi-h6ECOrn-zbhlPshyzfzNPpi62qBqzC8FpkdSyiba-rrIVj-4OIZF6vaAczsAr14vPKlKa6p3H91-GRVl0YH-rjiWsDWpjaqOQu18Sq5AwYgO37NAAYTB8_AMCvqenSRQqbKfpuo0zvAIFw5IYm2FjChQKA04wbRY_SwP2_MVuJSdNmQ78Ld2tt4zCaoNqTdFd91ncXGbkwjfzp5u66mciemBVyBPitmDThZeqWdNxEiIuISoijg1seP-W4RcL-zkRBjKFxP--IgUZEiyJQUeJDsV0SeyCJLcr8Rd4KtuDQ0ZTLxleCHTg6Yn3ZLxq2YlKR_TZQX0maAFx0TBKNswZ2itYUqzr9CBdSyn-gHj6Tq2A026-itnQtE35a8CWbrQBkhAK1xEKfgFkPVbFWDrCTcK5COCXfiHA_C7KfSrCP8LZhKbwrw5o54PdHws_VSLIeElTJsJWS8xsEXn9P5LGSCpiycg62erWS1CoQto7O4M3N_8AKfIoIMOy8PEmIX-8OgY1Q4f7PEmXT5qf1gE6z_WGBKu_mM0natU-dDCR97MxQ54BxUW6SC75EV7d40mx_1Cz3Rx_cpYcPE_pJegk3p-BJAjPpMCERGjy9axY_O3SeDp77BHgBiSIy5HeKJoqqIYy8vD1p-xz9dXAYRdkI1ayM-LzY0PSDf0gvd37b3PceacKv8PpKIm4SuVmOuGCe_R_Tp3Tdx4RORrpbi2E7Tkmw8cjBei_aSf5RIJyLl7krDmjMyscdY2ZEVDUkO8kxxrGcFAzmL_v14hceXOdJ57ycE6YN9P6PDV6-KNphrmV1wRFV5SoR2QbQJdMZ7akqneQ0YLIoZtMGdTAgTgxfT7gvjYJs9xniAXkUyJqeLWTV5K-B_unSoxmzFQb2OzKgDjAj7STJTxe9D2HuaBZ--55eq2f-hCsycqo6ruCUEnYF3JKQRI8xly-7eJbfAFTaGFVLOTV-jXpv_ABudlUuyP1DVbNE2mWUo7QtR3vxPskdyT1AQfGsYFGcXleI-1-OipwijdpR6wRmDliwRiIA8PevYoEwAfSKU6JFwE5tCt7-S6iCcPO0aMo7D9_Nq44H17rZx5fUOdxu1nIoluuZPU2rj2BiPOUqs6G0cng1JzGZwmyO1Bh5d9iBZ7Redt5TaucFjEJ6ld_ftMvpR_ThREQKfsWeO7j3SAUPMgG4bFR7P4taaGSFZ0YMXO9UPS9v0QGOm3rSlwjqAyqudKtVTl38inuOSCqGU7hmPrchTu-qi1rWedBKLI2PN-1HYyxDRRBzV87bvDw1sQDbb_dZkob8gC-eytyr01SQ8B80bBxX6-nZP9ICAA-9_YdH2hW4RHGrSOx2QEwMAcYADRilIb_wpB0Ld1b1kITT8sv63Renu2vjNVFAFUeNFVOGp8LxfVstxJjDIKHiaB1YcynC79R0cBrQf5W7tCGiyAJSr7Iplm6_z8x1U4oKbH_uIef5Xe_sBrf0L0Qz8RgAidgG3YRrZwrWnzP8e2FghW_9HyK_mED2qF2rK4uRW2fswFpvVcIkOu3y4AP4qk5t7A3uAQ3liumVYX0N6WETK_2M-PgFvKtbIpxSPDqk3ukAeyOaW3Bcy7-Sn8R30BSh_F7GqvvXAvDPAF9A4OikU3sYxU3RzyHkkwh951nBMITHLiYs1iNnvDy5mWAtQhtI0JbqCq9BC23Uo3RkVb-hpahEbAtsUMxQFR-gOpGKCZ0VgfNgkbHesvbD_6lQ80VnXbOJmrRdl6TxXv956uaAXp0u7q7U50aK756UkimaUE1opPZ1iExVXLsc9rWdUZQOAChUM5nfTVC_vH4OuR10WrxYPq2fr8AiWAq03fmboPQldf3aKwiYKMlXeRM-Gm5oB4SE8mkZ8I8rupZPRolCbB2eLw=",
               "summary": []
             },
             {
@@ -44,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8438,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 85,
-            "outputTokens": 76
+            "inputTokens": 8794,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 14,
+            "outputTokens": 73
           },
           "model": "gpt-6-luna"
         }

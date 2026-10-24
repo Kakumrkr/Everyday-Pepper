@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c85475b8fe10d2f623472ccd299e95b2d79c9ddf52b82d1a9e0e90fcf37a5bfa",
+        "fingerprint": "5b3dfdebda4c49be2f3d3409d20f38859dac195319d93d32a50a95700da9fcb7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_QJHyUYx0yUGdouT6Ej8MXHJH",
+              "id": "call_C9DWtUV0hzvW6OiVwxxCi4eW",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8780,
-            "cachedInputTokens": 8766,
+            "inputTokens": 8791,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "62038a2e449ae9188aff1e5a8bf04dea272bcfa81f015c5411138a2f3e392544",
+        "fingerprint": "8447aa5e821969420f98d89bb79890488608ce78d69a89c899db0ee501df4bc7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_fXSjrHTP6UAwRosaBnznmJ2e",
+              "id": "call_Jo4pTNlelEauqBYs4tG5cbrp",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8866,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 86,
-            "outputTokens": 45
+            "inputTokens": 8873,
+            "cachedInputTokens": 8788,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "cef8f87e5abf9180ae7a15eda7ab29af4d2863893f4e7ce9150f064781a11dcb",
+        "fingerprint": "8897ec67e46b9ec5ef7f03f9fef2470cbd88ec0def1ab556ae55604827492e39",
         "response": {
-          "text": "Maria L.’s next appointment is Tuesday, November 3 at 3:00 PM for a haircut with Jess.",
+          "text": "Maria L.’s next appointment is tomorrow, Tuesday, November 3, at 3:00 PM for a haircut with Jess.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9156,
-            "cachedInputTokens": 8863,
-            "cacheWriteTokens": 290,
-            "outputTokens": 28
+            "inputTokens": 9145,
+            "cachedInputTokens": 8870,
+            "cacheWriteTokens": 272,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

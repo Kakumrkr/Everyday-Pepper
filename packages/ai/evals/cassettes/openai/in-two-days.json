@@ -3,42 +3,34 @@
   "trials": [
     [
       {
-        "fingerprint": "f65e92097393207f00c15c3f0dd7bb055feb2a8b8470719799ba5392d1d421b0",
+        "fingerprint": "bae55a0314b0edc1c6ec1a9572d91c92d1904a4c9278ff1f82c67a697986de26",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_KMx2zaonPl9GxcJeUMypGhAQ",
+              "id": "call_y5CNDdmC1b17jzGiJp2Pdsnh",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_06be8154113fc68a016adc028921e487d2afe91dc30357f34f",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3AKJyKrU4pZXW-9TiVLpGIRTMbojbwSFDFHlh54ljALxbiOYvklLingMnunICUNjpXM4Ih_oKA5iy9Wh-9aWR6vf4FLUjHuYXT0xOtfpKR5DQ-PIT1JMkEkFJ1djaRjgHj0Ew48I2cM38lX1sjkAIn5oJnYxSN8FpVmXUWc9QMflujnNwRtKFw99a7H3Yzlet18C0Cu-Gp4W_3nB0BgNV9OrsAV6ceolFB0GUqkRwxaxx8L2pYoQxOoEXuT4fXcsawDolHeK0D_q83tby0fwLpO7LRwLdkyujREcOIKQY21pN0mhzx69-dQRowwAdnoxyursaS2vaLkYE7T4LTyIYU7J_A4dOWN3pMX1joRgzq4fRSM-xDeKu80oCIUTsnGt0_kuOhR4JC870rV1dRQHOWiL3i-rYm-I3vupX6QjSthg-Os4i6UgX5ZV8rnQB_qWtkL-26fOJ-9cYl8J1fU2gLNlRgEdiLgwlLoeZEyub_1PUj8km9yODPZNW29amm-pRyNW_obBMVYKHdScTadFfgppXBADbkzR6xaZMZqGCn1XbEv4FxdOlNC_hmKmuU6OMEb1KCZguyS2LIxTg1nH0hvq5WS6AUgI3H4pe0wJ_MZlKmvfVPbg0ZqEx62qHhgR8Lobo7HuR_imhPoIknbloOArD1H6Yc83AiJ_tBiDFTe5_9Hr0o-ri7Hwf3V-1UWZeOyo6a2jyCHMnLlVG66KJs-a4_zLPY0qwG5UpRtq4QcDmgnJph8QW2rfaQ-SYtk1P2X5k7wQxBkOmQlXr_WKGR17mSycspPPReZyNmZV6VtM-10piIBaQQJATu9bBObfCHeFH_W0iH_XT5rbjrDfY2TXhpEpoIHxDt2SMp0FRx3-PbtNR1HF7XG81PrKIKzoVmZ7VCajHN_uAM3yrYO23AEfEkL4DF8YAzxs0P6WBMghS4WmCOFsq2hBxdq5UUx2Pp4yGB09k9stG_VsmA4e-YegubIRmoSJJTyKgPyJmtiutOEvbpCr27VJjLO-WL9WxPnS1B8oxwJo5p7W2cZi8NcmTaEjysSzFr4Z32EKR4Qzy2w0ewHjpPYDFBmvcgl9zSS6XM-_sTcJNJEc-PDWCtUx0TZsQfwE7BhPgr3_eEeSgGoQnwBRbQxggpsKm77M-6KTuiG0IrRsIl2RY2AK0JxHoHSYXrI2Sxqn47UysE8LVMUR84k4xwXBvocQhT8OrPqcvvGEEIHTkCn8u_q6SVhdwzioiTysudzv0u2ccIuRrLXAd8C0yFFF3DZXei5sCKujgmVr5nEx3GuPfckCWmRobllzy1GEKNWg5SjU482hFDQ5CUg8AYlKylq_nNAX4io816txBo4qmajvXPJb1usU_wepyPtJl_8IzSJjnIxA9lclhBAqEOs7uV5XM99VcXFWYsHu_yCxLcdAGvK5HNHm-5O0HKraihnDBTUBevII_CjPIvzBMmAv5jGLWXkCP9jnar8Cwt6iNUcPvsd82RSdsrlNNt3z5Of31a_iwC88r1F8MfPbUoGkyKuHkY902q9oqd5ZNlWqjW9pCtPzaX6DYfBsXtLmOSa7muo_OcqmCdaKPhFJPVGXYml4AxDzGAXro29Y3przdPQFazipJJVE5aF1KZKD7McVGZthgHe6Hz6R5pKt6A-YK1bq94M-b7B1ZJXQemhqd5sOFGYN2R6CO4iBROgReXzMbPZaWR5_--HoINA02WZ6he_ztpNY5Jt6ybcK9rPpNBouHtNxpR11x5paA9DneZL4vgYI2FSpwMGcL24nTEL4nxb-_0qO04C0",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8794,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 14,
-            "outputTokens": 48
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "93cd354eaeea32cf34bb57cc0302a1f9cfc4a61342050e36ddf08f81d4a60f2c",
+        "fingerprint": "e92f6d7faccdbc55d903ff406ba8265ba5421fa77551b25be710fd96937a3025",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_AjXdZgwAkWD54tpZaHIODDSr",
+              "id": "call_D0s5ad1eDv3EF9vuHJYGfBac",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -46,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8651,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 298,
+            "inputTokens": 9260,
+            "cachedInputTokens": 8791,
+            "cacheWriteTokens": 466,
             "outputTokens": 50
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3e785dfb11e15ffbc3762c56ed23e7bc904cdc3f51aa5565d2ad850a42c890e3",
+        "fingerprint": "e20089fbf2f557f0cb84c96955849b9c37e6a576f9a6b22efcab52922b4b68d7",
         "response": {
-          "text": "Jess has no bookings or blocked time on Wednesday, November 4. The calendar shows her free at 10:00.",
+          "text": "Yes—Jess has nothing booked or blocked on Wednesday, November 4, so she’s free at 10.",
           "toolCalls": [],
           "replay": [
             {
@@ -67,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8755,
-            "cachedInputTokens": 8648,
+            "inputTokens": 9364,
+            "cachedInputTokens": 9257,
             "cacheWriteTokens": 104,
-            "outputTokens": 29
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }
