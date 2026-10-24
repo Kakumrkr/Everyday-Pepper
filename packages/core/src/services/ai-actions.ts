@@ -21,6 +21,7 @@ import {
   type ActionExplanation,
   type ActionProposal,
   type ActionProposalId,
+  type AuditActor,
   type AutonomyAction,
   type AutonomyDecision,
   type OutboxMessageId,
@@ -343,6 +344,8 @@ export async function approveProposal(
         explanation,
         now,
         requestedBy: proposal.requestedByUserId,
+        // A pass's proposal stays the system's when the world changed under it (S36).
+        ...(proposal.requestedByUserId === null && { auditActor: { kind: 'system' as const } }),
       });
       await repointFeedItems(tx, proposal.id, next.id);
       return { kind: 'stale', proposal: toProposal(next) };
@@ -503,7 +506,7 @@ export async function proposeForBusiness(
     explanation,
     now,
     requestedBy: null,
-    system: true,
+    auditActor: { kind: 'system' },
   });
   return toProposal(row);
 }
@@ -557,7 +560,8 @@ export async function reviseProposal(
       explanation: ActionExplanationSchema.parse(proposal.explanation),
       now,
       requestedBy: proposal.requestedByUserId,
-      system: proposal.requestedByUserId === null,
+      // The new words are the member's own.
+      auditActor: auditActorOf(member),
     });
     return { kind: 'revised', proposal: toProposal(next) };
   });
@@ -771,8 +775,11 @@ async function storeProposal(
     explanation: ActionExplanation;
     now: Date;
     requestedBy?: string | null;
-    /** Made by a pass of the business, not at a member's request (S36): audited as the system. */
-    system?: boolean;
+    /**
+     * Who the audit names for the new proposal: by default the AI for the member; the system for
+     * a pass of the business, the member themselves for their own edit (S36).
+     */
+    auditActor?: AuditActor;
   },
 ): Promise<AiActionProposalRow> {
   const startsAt = input.preview.appointmentStartsAt?.getTime() ?? Infinity;
@@ -810,7 +817,7 @@ async function storeProposal(
     }
     if (pending !== undefined) await repointFeedItems(tx, pending.id, row.id);
     await appendAuditEntry(tx, {
-      actor: input.system === true ? { kind: 'system' } : auditActorOf({ ...member, via: 'ai' }),
+      actor: input.auditActor ?? auditActorOf({ ...member, via: 'ai' }),
       change: {
         action: 'ai_proposal.created',
         entity: { type: 'ai_action_proposal', id: row.id },

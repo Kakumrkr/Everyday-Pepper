@@ -76,7 +76,22 @@ describe('changeRows', () => {
       'At most 6 bookings a day, for Jess. A booking rule always waits for an owner’s or manager’s OK.',
     );
     expect(factLine({ kind: 'rule_change', value: {} })).toBeNull();
-    // A rebooking email's reasons (S36).
+    // A rebooking email (S36): its rows, and its reasons.
+    expect(
+      changeRows('message.rebooking_nudge', null, {
+        email: 'rebooking',
+        clientName: 'Sara',
+        serviceName: 'Haircut',
+        staffName: 'Jess',
+        date: '2026-11-03',
+        time: '09:00',
+      }),
+    ).toEqual([
+      { label: 'To', before: null, after: 'Sara' },
+      { label: 'Service', before: null, after: 'Haircut' },
+      { label: 'Open time', before: null, after: 'Tue, Nov 3 · 9:00 am' },
+      { label: 'With', before: null, after: 'Jess' },
+    ]);
     expect(factLine({ kind: 'nudge_last_visit', value: { date: '2026-09-28' } })).toBe(
       'Their last visit was on Mon, Sep 28.',
     );

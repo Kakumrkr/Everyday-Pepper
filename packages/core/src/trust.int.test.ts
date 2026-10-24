@@ -1214,6 +1214,14 @@ describe('S36: proposals of the business, revisions and the feed (ADR-0040)', ()
     expect(revised.proposal.fingerprint).not.toBe(proposal.fingerprint);
     expect(revised.proposal.payload).toEqual(nudge('p2', 'Hi there'));
     expect(revised.proposal.requestedByUserId).toBeNull();
+    // The new words are the manager's own, in the audit.
+    const audit = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 50 }));
+    expect(
+      audit.find(
+        (entry) =>
+          entry.action === 'ai_proposal.created' && entry.entity.id === revised.proposal.id,
+      )?.actor,
+    ).toEqual({ kind: 'user', userId: manager });
     expect((await getProposal(db, ana(), proposal.id)).status).toBe('superseded');
     await expect(
       approveProposal(db, ana(), proposal.id, {

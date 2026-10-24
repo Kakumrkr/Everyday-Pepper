@@ -259,8 +259,14 @@ export function changeRows(
       add('Rule', text(before, 'rule'), text(after, 'rule'));
       return rows;
     }
-    case 'message.confirmation':
     case 'message.rebooking_nudge':
+      // A rebooking email (S36): to whom, about what, and the open time it offers.
+      add('To', null, text(after, 'clientName'));
+      add('Service', null, text(after, 'serviceName'));
+      add('Open time', null, span(after, 'time', 'endTime'));
+      add('With', null, text(after, 'staffName'));
+      return rows;
+    case 'message.confirmation':
     case 'message.waitlist_offer':
     case 'message.bulk':
       // No tool makes these yet (messages: Phase 8); the summary says it all.
