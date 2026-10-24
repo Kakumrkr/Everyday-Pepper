@@ -11,6 +11,8 @@ import {
   StaffMemberIdSchema,
   TenantIdSchema,
   UsagePeriodSchema,
+  WaitlistEntryIdSchema,
+  WaitlistMatchIdSchema,
   type ActionExplanation,
   type ConversationId,
   type ConversationTurnId,
@@ -49,6 +51,11 @@ import { listDueInsightRuns, requestInsightRun, syncFeedItems } from './reposito
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
 import { insertExecution, insertProposal, saveAutonomySettings } from './repositories/trust.js';
 import { addUsage } from './repositories/usage.js';
+import {
+  insertWaitlistMatch,
+  insertWaitlistOffer,
+  listDueWaitlistMatches,
+} from './repositories/waitlist.js';
 import { withTenant, withUser, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
@@ -323,6 +330,52 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     touch: "status = 'cancelled'",
     memberScope: [
       { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
+    ],
+  },
+  waitlist_matches: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => seedWaitlistMatch(tx),
+    touch: 'attempts = attempts',
+    memberScope: [
+      { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
+    ],
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('waitlist'::text))",
+  },
+  waitlist_offers: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const matchId = WaitlistMatchIdSchema.parse(await seedWaitlistMatch(tx));
+      const [match] = await tx.execute<{ staff: string }>(
+        sql`SELECT staff_member_id::text AS staff FROM waitlist_matches WHERE id = ${matchId}`,
+      ).then((result) => result.rows);
+      const service = await seedService(tx);
+      const clientId = await seedClient(tx);
+      const entry = await insertWaitlistEntry(tx, {
+        clientId,
+        serviceId: service,
+        staffMemberId: null,
+        windows: [{ date: '2026-10-23', start: '15:00', end: '18:00' }],
+        expiresAt: new Date('2026-10-23T22:00:00Z'),
+        createdBy: await insertUser(db),
+      });
+      return (
+        await insertWaitlistOffer(tx, {
+          matchId,
+          entryId: WaitlistEntryIdSchema.parse(entry.id),
+          clientId,
+          serviceId: service,
+          staffMemberId: StaffMemberIdSchema.parse(match?.staff),
+          startsAt: new Date('2026-10-23T15:00:00Z'),
+          rank: 1,
+          tokenHash: randomBytes(32).toString('hex'),
+          expiresAt: new Date('2026-10-23T14:00:00Z'),
+        })
+      ).id;
+    },
+    touch: 'rank = rank',
+    memberScope: [
+      { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
+      { policyname: 'member_scope_insert', cmd: 'INSERT', qual: null, with_check: SEES_ALL },
     ],
   },
   booking_verifications: {
@@ -778,6 +831,22 @@ async function seedBooking(tx: TenantTx): Promise<string> {
     createdBy: null,
   });
   return booking.id;
+}
+
+/** A freed slot to match: a booking's time, as a cancellation writes it. */
+async function seedWaitlistMatch(tx: TenantTx): Promise<string> {
+  const bookingId = BookingIdSchema.parse(await seedBooking(tx));
+  const [row] = await tx
+    .execute<{ staff: string }>(
+      sql`SELECT staff_member_id::text AS staff FROM bookings WHERE id = ${bookingId}`,
+    )
+    .then((result) => result.rows);
+  return insertWaitlistMatch(tx, {
+    bookingId,
+    staffMemberId: StaffMemberIdSchema.parse(row?.staff),
+    startsAt: new Date('2026-10-20T14:00:00Z'),
+    endsAt: new Date('2026-10-20T14:45:00Z'),
+  });
 }
 
 /** A new active staff member of the transaction's tenant. */
@@ -1483,6 +1552,7 @@ describe.each([
   ['cleanup', 'tenants'],
   ['tasks', 'tasks'],
   ['insights', 'insight_runs'],
+  ['waitlist', 'waitlist_matches'],
 ] as const)('job scan %s (withJobScan: the job finds work across businesses)', (job, table) => {
   /** Runs `statement` in a transaction with `app.job_scan` set to `name` (and a tenant). */
   async function scanning(statement: string, options: { name?: string; tenant?: TenantId } = {}) {
@@ -1509,7 +1579,9 @@ describe.each([
           ? (await listDueTasks(db, at, 1000)).map((due) => due.taskId)
           : job === 'insights'
             ? (await listDueInsightRuns(db, at, 3_600_000, 1000)).map((due) => due.runId)
-            : await listTenantIdsForCleanup(db, null, 1000);
+            : job === 'waitlist'
+              ? (await listDueWaitlistMatches(db, new Date(), 1000)).map((due) => due.matchId)
+              : await listTenantIdsForCleanup(db, null, 1000);
     expect(found).toEqual(expect.arrayContaining(seeded()));
   });
 
@@ -1520,6 +1592,9 @@ describe.each([
       'insight_runs',
       'insight_requests',
       'feed_items',
+      'waitlist_matches',
+      'waitlist_offers',
+      'waitlist_entries',
       'tenants',
       'bookings',
       'clients',
