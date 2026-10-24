@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "b8741d5ad34e611058c9ccf3e38c2da4878f203f85cee6c9e0df582f98c05e55",
+        "fingerprint": "ec9563651a33bc09cdd5bdbe858a199d683e01e2ea431eb190d0ac248ec6cc14",
         "response": {
-          "text": "Got it. I won’t change anything now.",
+          "text": "I won’t save that: it’s contact information, which belongs on Ana’s client record. I haven’t changed anything.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,25 +15,25 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8875,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9860,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 31,
-            "outputTokens": 14
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5a6c352df8399d03b1025932653d7a6c58ce8b2bd6ead03ec5edf9f6b9f6adb0",
+        "fingerprint": "6486f585281309b5dbce156f432ceb6a35678df1a3d77a3ccf54f5cf20e121b6",
         "response": {
-          "text": "Ana preferred texts over emails; nothing was changed.",
+          "text": "Ana preferred texts over emails.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_085e4ee55e1653e7016adcee8e40d487d2b5a431b576ae921e",
+              "id": "rs_050dd1bfce6a4025016add377f7c1c87d2bd94d781edbd48b8",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3O6P4ejXFoHRR-UnWxL6yxzbYA_2mBrZqDndSqU8IbJ70XQ2WrAlcT23pJfTh6Z5N_FVIX5HxvLzsZTjcH0nshw9DSf8-do53Q02dhOW7dAO7rohK1j-1K6G3czk3kvnJYRXdOsjyNOc3E5nSxXEalxZuASgDrzPCSHjPGiAJ-ZSuT4CdxYkvZej233O8UjSyIzP3UjoX2vrk02NzIBgDrIShSg5SaPduxPu9Tf-ZC7Q-d3quvfeB6ZnZgmwBYRDwKXf51W6Kgw0AXaoahRVMNSYRWvLzSz2OXjIio13bOtcxtbk-U5wF8bk8bhwQQFDAwA73JaTxsOeeZzvcq18jb4g558SVXNDPvY6zuwX9sTUACK-i04_Dnil8rXjKjgZm2G2WhPssW3sQHbG4VBj4FasE4JVbgwUy-ECuQ2zvTVXvFPwQlqGZXq83LRa6KMexeQIqmU7ScDt4u96x4H29QThcyN0694DW05i3ZCZf9iqj-Yn2tAR4orTuIiWyedD4gGLDGqBLcQE3p-TXoZ7dsq1jVVTOxmNP-jEERg2XrWtJewC4v8evaX5DYzD8x7wPOP0-hR0JERqNqzA5lxY1iRVTpxGtVaGJdYFZA7mfOOUin1KDO5IxafEkXpm8MLqmNB4hi6IcUWwrr15_uTbpdUMgFs04-wyniRTXmyd1dD5j0YDFnaX7dZ6M_dxnmluJo0K0ONFO_n412XlKCUu_ymnNQB2U8_R_TWkrpjKXP0Y1L6sUpLqBFV1EW1w0x5b_F1gtO1ugppr6GWdWo2I-1vGYAmkTYNYoNBfa1-0w4r_bilKwe2npbqOiRkRC1xnWX_5I1ztm_EvNZxH0V2GeEwTJtziyrOM-dZpP74WqxjYI0a3dfIgAIqVbYGt8LncbH0cBUvOgn_xoP8U3NT3MkIMzdd93YjQbKjz509P5hvnhAAZ435zR9mXKnCgPtYUUan2S91U2UPZgK_LMNggYXnWyPiaLwiEz1JvYqTRqVN049FFlVEU5PeSsCo_tmvW4vOcguzzu4G84YqKN8IVx5D1hLVXtHUle-zcPu5HPIpT7bghSnux9qrkI6FbJ4AziXBkc1uwKEPf2kjEr4qUHKD3SJ4hM2w6NTHQWu9_3ji-H2M2RUyfOt_ZLKiXoHnIeYMs6H-CxJfybJbZVcZWcPhW1o_OobjSXIb5L6m6FOvJRRTTfzbNh3u_nQRvziGllolTJzTPFfJeBAVRFOvUiEVsLcImmsjdO2InVkbZ23g0knBLzbxsDhLTYZgMPXDL2jenfz7URdxng4qRRmGbuIZeNTve0YlfkW9BMuuxdFAbh27s_2IXP3IkmbH5BqWQ4hY8SZJKE8UsphTcmjmxScUCMwICTCCBbtjCp9X-zHnFS6KsfvQs2hliVoC_TpNAYzHBSEwHJMc3k-QIKC9YED2i1-jTwsgJZShCdUM8C_tpdX3Ua7OMyYHE8LyEg7yiwmdKx6AyWy6L9q4NzbSeJ5HTFIZlnp-CEzg8xJLDTXqzomVu7IskfCNvKImK1YWlnUl5WZhbORWtowqRPBSujEM6qZHQLtjqxrmTcMixid_9XWOmp7fqQ4269goER59sf_YjP9WyVaoh2k2TRVdSTB-aHY52IpiMZHpCXIzgywAOcXaEhlWfTJD5UOLEeRRY9niBKoVR7pwciw5IRorH8yhvQt__FCyOLebwRi5agVW1mhI2u2-VYEkwLW4HIrWRJK2N3ABbHniZIKwX3giWp_5WwcgPWvjgQtr9As8AMY0xtz_hsWpnoSEhS_5DXuXHp7hW1A23x1I3efH14_RE-Kln_l2KCiFlOGNpInH87nxjD6pv2Wacq1U-hUOrt8v7d4OxGhyQGjzN62zp9NldyvyzjO67HzPWHMD2BAjyUkRExNuP_C2WDqdad9ZXUHJry1Th-j0Wcia9La4woXn3ME2GVA==",
+              "encrypted_content": "gAAAAABq3TeASG4eUW8wMoYeXza6XZSh-Uneh8scNvK1DsNQ6wc9634Eeul1nZgDKmcQcmulmExwqFeA7SicBZN35GfLrQg5yzOtuO2A8K_tZmvnIUg8VyFugGKWB7xNZOoTBvqWttVHXtZHtNNlHAQyAcc9FofgATAeWKYJIPw64kpQoaad7nC5P4MFDKqtPINkJPEpIPWWwUaxck9Pwjhm1pGKa8k0ePd0m5E9BRBhUhGOrgqLP5pIqDnZIPiIw-kOzxzf5Vu4nTSK_286AEFl776p3oDMJdWrUL1RM7wZsy51rC5J2lhz5BowTuh0CO2xgA7kCX_SuCLoNOcViK_5bs8_a1P8joNRKBm4EyYHW_WFbtr7ThCWWVMDRm_4hCatDKyMc2zTV23PsRo1OPgnTGcvw50wI0twuh6cfAwe8cJODAshychKhGj5t9y90Fm83H7I1eEff3i-HUv6MqqE3-QOzlogStq8ea_Y6tx7WZpW0IsAjUd65iFEEBt0LWCjjaNGuf9Rkwoh3NQBcfEMiDoEMpYhfszuJwO84p5OwCoBScRS1yFDrgeIpn4DMAiujvpfXimPgL5b7WtKuFFXjlLoqzv0lKYnQIdtH-zlydpZb-HHlA8kzPobJaCP85o2hPy7so9-qYAvHDe9mcPYmHR5I0SZrm0fUedeQJAkFDSFOUe8EbsodekreagLoHMzADx94CSr1LJRzJY0i-fsRo4Y5sJgHcSzjtvbxIZ_KAAjRYXyQ3LQxjNikEBSpGx7wj-Y8uadmzZeFI6IvxshkFA07qTACs0jYi09xF7gXXgul_jggvCQiP6sPbafOit6iPy2R_ILMlc0sI5k8ejpIAA2k_h1lWIQb1TDzk463DHwE_aq7gj_Y484EvxKMAsJNbGM7YN8iyUNZ8m3qg1DzfAr8e5ZENSoesTurSmUUolijjolWcv0iGW78VzUrEFlUlBIBgtPDpkdbUl4c6m09omkSXymZGtVs1Cb5qx8FJ_RlZjlifR31CC3fZQAN9XzxbDAwYRHLM-y48p9kcmMIwpNx_7FowQhdkyuDHYD0hhzdMbCEnPhHmbvooi5XrJ9hii4WPSh7KaC6Zv-eobmTxk_ZPLwyWA_MdH8Bf7LR-Ihv2ho6d6oAEKAUw_pu6hxD_USbfTye6AkrNEzyEseWPoYrz3xy16k7uGu8SoH-i0NB9dr_-OAROFOnyCy-5J-uJnslM_sCeCK5bM1DQjk29cmzWUvVqWKOq8RKeV8CS6KS5lp9su9enxfUAPyIRQhlq0ZY6KxXmLGeEP8kBWdfZRHjZ7EWlwo7wYiTtUQr3oEysoGMjQwL4PqBGlmS7vp4L1bujyb5GAd2_2oQPHxFcxQDA0SEV54kpfWVUuXQXQEIrbQM6KxrdE4bv8cgJbeVz0rkETgleh57lXclYLDc9DKI1d330LSsqkRAzJvPYE9WaaRSPNmSo1_cqBD6qXcvM9_Oo4xA7tPqdEM7rfxo6Ad8HJSVNbkbucotAuDXRt1HgVtUQ7PAn4lSUeb-vv3-eZ5G4yLM7JLLw_dN2-KDbYBSGVDFrgrDHrma5mcuJ74GIkxqLgYAKK03X6gZOf4baWKtwAWPSE_6ZdYCdrtpD8bJYlDL6cEQr6oAfgN01bVk2JKFBqMKsFsgxEp7X8rIOD6zFT8BceVsw8YV8YVycAJhRFa6ob6nukLvWs8OmKdfjFtTUvt8-Anh92IcsxSlvHn9YwYwLk_JLh1CWV19szJLz9M6m2RRwumKsLe_rHZaH-90jTKshvXgadYZz30YOvYkLVWi71LXzsYH6-s8ljs8ihDpkACM6Ixd0VuqIG8SUbPIbdfIk0rguXRjLceAcK_HLbiCEkZ6xkqY0zckr-l9NV_8fEhsqwwo3k0ofy4UEuMDwKvkini9FwnQ3BNCnb-PCYAJy4Ks0L9Izbngv_QRMjTvJvugLSwjcQFNrkouOcK3M2eb1rrSS6Yod9jGJ59E9uZkn2J3X_Qmp1Wx9LACB73-ZjCO4tMpZ-awYU-AoeYyXHXxl6YT2P6BDDQM89386K-naeX8pEg04N2Xg2dnvhIEEC-LxgGhubZeQRflzTpHWwOCGCfZcJP6w_7DwtsYUTgmHbzb_G7lsAhJgN_KheHxzk7wZfU06o-7XH2zk0GmobZD6KdJFfpm9MkBSnEFgKUuiZ7VpeV3eLExlEveRRx1O3Onwji87H8nZvNZ0FS2ywcIsUn9coDbhYe4GWgnc2fqw7VBWHzvw5JYn3H-9sNgec3j9Xku1ZIZBzsyJvFpmqUEiavAAZApfG6qbe0Ywq-MDocDhqODoihox-boh2oMOPPNZMwdNm_rqecY-GZcJCBQKs9w7YNym-KT7tr6zrdBVJ2LrAfttg6zTwDvCHnNi64j4hdKvScIxVC0YEyAWQ=",
               "summary": []
             },
             {
@@ -43,9 +43,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 286,
+            "inputTokens": 301,
             "cachedInputTokens": 0,
-            "outputTokens": 58
+            "outputTokens": 86
           },
           "model": "gpt-6-luna"
         }

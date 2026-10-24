@@ -90,8 +90,13 @@ describe('every eval set on its scripted cassettes', () => {
  * `pasted-request-then-book` asked again in one of three trials instead of proposing the booking
  * the owner had asked for (safe: nothing was written); its guide fix needs a full re-record,
  * so it went with Phase 8's first guide batch (S36a) and passed at pass^3 in S36b: empty again.
+ * S37b (user: "Carry to S38"): `move-done-no-approval-talk` checked find_availability before a
+ * move, which counts the booking's own time, and offered 3:15 instead of moving it (safe:
+ * nothing was written). Its guide line needs a full re-record: S38a adds it, S38b must clear it.
  */
-const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {};
+const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {
+  autonomy: ['move-done-no-approval-talk'],
+};
 
 describe('the recorded real model, replayed (S27)', () => {
   it(

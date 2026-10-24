@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4c0f5b8457f9eb6df060f599113cb1f31b95e2ba0640d77f1bf8349225c35ba2",
+        "fingerprint": "af8ce80c683f9f7f1cb647a4dd6f9bd8924307b690a0767d0fe0300381886908",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_5qz1Ny8zVl5SQuxo7vFyBbzl",
+              "id": "call_SN4j9BQaA7IrM9H1e8Smk6J4",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "61cf91a536e2d5885821591bef69b6aea8a35e92fa40dc3b8f58ded0745613e7",
+        "fingerprint": "489a99e766246899fefd7f18cb2c2dba49233e6722019baadb092ce13e530d19",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wujG4q1JpmUdTXLMIKrQsXpt",
+              "id": "call_gS8Ojzhbb4HDlxg7wOzDrNaA",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:marco}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9311,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 456,
-            "outputTokens": 50
+            "inputTokens": 10287,
+            "cachedInputTokens": 9837,
+            "cacheWriteTokens": 447,
+            "outputTokens": 48
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a4db315e816aade9621a0fb86a49c402351b745a3fd0751da68ddad9908d39bf",
+        "fingerprint": "457e6335327605264edb32514569f00a8fe0ea5ba96c3a4efca9bdfd3b7ab131",
         "response": {
-          "text": "Marco has no bookings or blocked time on Thursday, November 5, so his day is currently clear.",
+          "text": "Marco has no bookings or blocked time on Thursday, November 5. He works 9:00 AM–5:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9415,
-            "cachedInputTokens": 9308,
-            "cacheWriteTokens": 104,
-            "outputTokens": 25
+            "inputTokens": 10389,
+            "cachedInputTokens": 10284,
+            "cacheWriteTokens": 102,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9f056f3944837cbc5d0c55e2af1c54a22b3b81ac4f1de584f41fea7ef365927c",
+        "fingerprint": "9bfbc7641efe29a0a6ba3488a0ba047055dcc86d796aaaeeb3691c032dfa74c4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wQwr3CR6rD269Er8tMiA2igz",
+              "id": "call_9GwgVTLx0oPXRaVuYed3fI3r",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8854,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9839,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 10,
             "outputTokens": 19
           },
@@ -25,31 +25,39 @@
         }
       },
       {
-        "fingerprint": "0b69d467a2257f09261248cd2a14051c9768f164fb3f4fabed4c94e13937acda",
+        "fingerprint": "01bd356b6176ff77f2fb21540f19d7d64bc1172f05485bdf2c22abbb72aa3316",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_JrwD2v91jIgTc8egvTKK1ZuI",
+              "id": "call_e6OoYoZtN9CZyJvRmUbpYKqH",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sara}}\"}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_088176478acec925016add36e520b887d29b87b424c7261800",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3TbmINmY0A8krq7QVcofPskAHZeqmdHHcDyN1vNN0FVMCgU2VSt50rQ55eOnD93Nv-zk-fYmGCupQIGekcK0tQBIPiLBjc1tPS2k1xOrRZxjPK4pOlMiaGQpvLCb3TFmhtENO7XQr8haoEcqdqANhOIBH3AsSsdJGKieZHtyRbQn2d-SQ2b-16fjjh1NWZ1hQx_g-12DZESI9oao3RMp10qvkfvAPT-aBkiyRBitTXe8HGA2CbNkqejlWjetoYTM9tWxrziV12E3uxqFeT4eWh4koZlJCp6w5KYcZS9lDVbcbLDfBsKv3IK1xZN8PwavXHcV6XbyOozen70zE6MZf8qZbxaEnd_fQHyPfKjej1Pq0StiljCmQ3w_BNgMqFMc2jTRLtxl_NPEn_pb4NBTcfaavfuU7kCzSdrPoz0NlReymjK5riOe9g9bRgcqMySWeqi2r8C1DvmFs7wdcNJp7oIEuqgGhbmK49OCX8yrxX4nrIoWS6lcJdurLebckx8miOv4EWo3_0Ammds_ndFlkCyzHuhUCqfF7Wof6yFds2QmZ0xtwiG1cPgxbHzW0G9KUAXt_uan1jreu0uNUVIhMZXikkA61yz9qc2cujdOJEBnCrnnrroVpByfTCW7Sztqii6g_kpioIAaWjVEgHdb0T_UA5U0Ad5Z_sWxIAEpiJlZ0YnV9sUutewfOJUiH11pxDAYOryUQEqQa9Jm1kcHklyQP1R-k0bj5aDUvZi5a2VkNC2L8gK_zUE8m51hTkOwN3_BqBo2J6FFjrzCWO4AwXjZuNrvVPfnIUmYtubrJt3Dg1SWcpEybxZ8cFlQYAy47UY1LKx6GoFGUUfY1fccrv6d2sJH7A9gPfQt2kEP01IiaJ1qrfhdI_9LCEck3uBW8m79G2qLxXMBh2bp3JYNMEZKXiq1pcl329SIcSVzy6BYJm5Y4Ka9h6-eP4aEonCVF-9z5ar33oT23RpAx_8ZgyYjWt6uaKlaJU1IUJvV1ioZUQux_knXUdVBXbSm36O8olN7hmnXCqJjgI5Qsk1oYD-hdmo8fmDUscTqT-a9JmgBfN9vcKgejDFtg3nvrNDrxGxNxbD9D9x0hpjybblkrNaPfs6kGhMvV36uoxjdCJVR2f9aacvfYWm8stSPJC9IPUQFa5jg5JiznWaG9v-cu19mxoByWsZnKKjoyju1usTH-wqLl5cdNPFo-T3rqnYFPEuacI-hW82bNZ6hGDNxCRq_PQrdzyry6lsGAEWyI_vww5c3qPswSJhRZzzzrSTYw51oAxXtlegYVCFRz3bIYeM-XcsVpIV4F4iAOZthGWaFjK08L1gzjSDHoy3fZWw6kh3ZpgK0rQPXBjP0101WhMGkaMd5xxfMaImmF-7npJlEkN_IwXSXc009uBPF5imCxoD3e03w-awPDmZ0WgXD7nSVfxMhlDinzSFdcNEBXxvetuhK6LcXLMNT99fc8Jzv7BYE2I51Aldu_I-8FY634lB9VowyL567QTiEMMLEfDFls_ztYspU66MjoEY_zxw-2pYyY6Df32t7zeKY-XGBw9wjNwaJVHaSE1ZFIPAQETDJ5Tra3Vfi44azvLYlulFzK9HIgh0rX7b4vkmXsKgmX0ldm2rdeLSehFUgUdj-Hp2Pmhd7nnBBiNjg8qHu_ylzobha58dqpewOa9q0w6DD9a-hpiSLBRp9ezUa-zLApgLxkMSGuVz1WAKe4sVeDWQz5QZNPlk-u_jZxVPRxtk6JEVtGLkBEB5XkGojvDhTzut65ks4PUFtlPz_2StpMQcz5eeKRdAYql18sA0Cpmo4K5QoYzrJK5GE3lY7vMcLiunTVbih9DtbUtr08vIT9H7W4wr0Qc9_ovoSKKAQGeohE4jajLFjF_hGDGdLpcTdI-1AHsS9evNBnzBk50o51MmcIuVQ",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8938,
-            "cachedInputTokens": 8851,
-            "cacheWriteTokens": 84,
-            "outputTokens": 42
+            "inputTokens": 9924,
+            "cachedInputTokens": 9836,
+            "cacheWriteTokens": 85,
+            "outputTokens": 83
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "9ca801bf298a29794d608c97ff91fc8fa7823963f117891740e84103d70ff5b8",
+        "fingerprint": "a0b20285f0636af2c5e0adca8e42232fdfe1dc1fdbca70d376a2b1e5d8e0fee0",
         "response": {
-          "text": "I don’t have Sara’s usual service noted. There are no prior visits on record either.",
+          "text": "I don’t know Sara’s usual—there’s no usual-service note or visit history on her record.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +67,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9052,
-            "cachedInputTokens": 8935,
-            "cacheWriteTokens": 114,
-            "outputTokens": 23
+            "inputTokens": 10084,
+            "cachedInputTokens": 9921,
+            "cacheWriteTokens": 160,
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

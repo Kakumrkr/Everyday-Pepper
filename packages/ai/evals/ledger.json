@@ -29738,6 +29738,2078 @@
         }
       },
       "charsPerToken": 3.727460863179679
+    },
+    {
+      "id": 1286,
+      "at": "2026-10-24T22:52:46.108Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 7/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48306,
+      "actualUsd": 0.0018686649999999996,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 59590,
+          "cachedInputTokens": 49349,
+          "cacheWriteTokens": 10223,
+          "outputTokens": 191,
+          "usd": 0.0018686649999999996,
+          "latencyMsP50": 1348.6494020000002,
+          "latencyMsP95": 2388.2445180000004
+        }
+      },
+      "charsPerToken": 3.7333109582144655
+    },
+    {
+      "id": 1287,
+      "at": "2026-10-24T22:52:52.462Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 8/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48462,
+      "actualUsd": 0.0008592299999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60883,
+          "cachedInputTokens": 59793,
+          "cacheWriteTokens": 1072,
+          "outputTokens": 251,
+          "usd": 0.0008592299999999999,
+          "latencyMsP50": 1282.431292,
+          "latencyMsP95": 2027.0218719999998
+        }
+      },
+      "charsPerToken": 3.7556953500977284
+    },
+    {
+      "id": 1288,
+      "at": "2026-10-24T22:52:59.835Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 9/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484155,
+      "actualUsd": 0.001087215,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 71848,
+          "cachedInputTokens": 70224,
+          "cacheWriteTokens": 1603,
+          "outputTokens": 365,
+          "usd": 0.001087215,
+          "latencyMsP50": 1345.102431,
+          "latencyMsP95": 2466.771586
+        }
+      },
+      "charsPerToken": 3.7196720855138627
+    },
+    {
+      "id": 1289,
+      "at": "2026-10-24T22:53:07.328Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 10/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.24204,
+      "actualUsd": 0.0005095200000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 30980,
+          "cachedInputTokens": 30137,
+          "cacheWriteTokens": 834,
+          "outputTokens": 206,
+          "usd": 0.0005095200000000001,
+          "latencyMsP50": 1730.9573,
+          "latencyMsP95": 1749.7242139999998
+        }
+      },
+      "charsPerToken": 3.714848289218851
+    },
+    {
+      "id": 1290,
+      "at": "2026-10-24T22:53:13.839Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 11/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.537135,
+      "actualUsd": 0.0005988650000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 49627,
+          "cachedInputTokens": 49249,
+          "cacheWriteTokens": 363,
+          "outputTokens": 119,
+          "usd": 0.0005988650000000001,
+          "latencyMsP50": 1163.8424159999995,
+          "latencyMsP95": 2259.9723739999995
+        }
+      },
+      "charsPerToken": 3.7316178693050155
+    },
+    {
+      "id": 1291,
+      "at": "2026-10-24T22:53:22.330Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 12/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483345,
+      "actualUsd": 0.000626065,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 49676,
+          "cachedInputTokens": 49244,
+          "cacheWriteTokens": 417,
+          "outputTokens": 160,
+          "usd": 0.000626065,
+          "latencyMsP50": 1181.953801,
+          "latencyMsP95": 1913.5223079999996
+        }
+      },
+      "charsPerToken": 3.7684797487720427
+    },
+    {
+      "id": 1292,
+      "at": "2026-10-24T22:53:28.660Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 13/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48405,
+      "actualUsd": 0.0015000600000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 29871,
+          "cachedInputTokens": 19666,
+          "cacheWriteTokens": 10196,
+          "outputTokens": 56,
+          "usd": 0.0015000600000000001,
+          "latencyMsP50": 1296.427442,
+          "latencyMsP95": 1737.5305190000004
+        }
+      },
+      "charsPerToken": 3.722875029292625
+    },
+    {
+      "id": 1293,
+      "at": "2026-10-24T22:53:33.360Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 14/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48399,
+      "actualUsd": 0.00051722,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40001,
+          "cachedInputTokens": 39327,
+          "cacheWriteTokens": 662,
+          "outputTokens": 80,
+          "usd": 0.00051722,
+          "latencyMsP50": 1557.552521,
+          "latencyMsP95": 1641.5418270000002
+        }
+      },
+      "charsPerToken": 3.728281792955176
+    },
+    {
+      "id": 1294,
+      "at": "2026-10-24T22:53:38.095Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 15/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484245,
+      "actualUsd": 0.000531675,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40108,
+          "cachedInputTokens": 39335,
+          "cacheWriteTokens": 761,
+          "outputTokens": 84,
+          "usd": 0.000531675,
+          "latencyMsP50": 1498.3522790000002,
+          "latencyMsP95": 2173.030828
+        }
+      },
+      "charsPerToken": 3.7282836341876933
+    },
+    {
+      "id": 1295,
+      "at": "2026-10-24T22:53:43.379Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 16/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484155,
+      "actualUsd": 0.00201029,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61689,
+          "cachedInputTokens": 50399,
+          "cacheWriteTokens": 11272,
+          "outputTokens": 191,
+          "usd": 0.00201029,
+          "latencyMsP50": 1259.156484,
+          "latencyMsP95": 1434.9943039999998
+        }
+      },
+      "charsPerToken": 3.7182479858645787
+    },
+    {
+      "id": 1296,
+      "at": "2026-10-24T22:53:50.394Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 17/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.243045,
+      "actualUsd": 0.00028099,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 2,
+          "inputTokens": 20040,
+          "cachedInputTokens": 19664,
+          "cacheWriteTokens": 370,
+          "outputTokens": 75,
+          "usd": 0.00028099,
+          "latencyMsP50": 1211.281582,
+          "latencyMsP95": 1472.7841589999998
+        }
+      },
+      "charsPerToken": 3.724301397205589
+    },
+    {
+      "id": 1297,
+      "at": "2026-10-24T22:53:54.891Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 18/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.538305,
+      "actualUsd": 0.0006891300000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50254,
+          "cachedInputTokens": 49563,
+          "cacheWriteTokens": 676,
+          "outputTokens": 215,
+          "usd": 0.0006891300000000001,
+          "latencyMsP50": 1403.294930000001,
+          "latencyMsP95": 1580.3197810000001
+        }
+      },
+      "charsPerToken": 3.7894296971385364
+    },
+    {
+      "id": 1298,
+      "at": "2026-10-24T22:54:03.946Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 19/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.53811,
+      "actualUsd": 0.00055147,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40194,
+          "cachedInputTokens": 39452,
+          "cacheWriteTokens": 730,
+          "outputTokens": 129,
+          "usd": 0.00055147,
+          "latencyMsP50": 1199.8475820000003,
+          "latencyMsP95": 1430.0968840000005
+        }
+      },
+      "charsPerToken": 3.7289894014031946
+    },
+    {
+      "id": 1299,
+      "at": "2026-10-24T22:54:11.187Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 20/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.53808,
+      "actualUsd": 0.00066059,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 49982,
+          "cachedInputTokens": 49259,
+          "cacheWriteTokens": 708,
+          "outputTokens": 156,
+          "usd": 0.00066059,
+          "latencyMsP50": 1164.793404,
+          "latencyMsP95": 1281.4149869999999
+        }
+      },
+      "charsPerToken": 3.7216397903245166
+    },
+    {
+      "id": 1300,
+      "at": "2026-10-24T22:54:18.811Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 21/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.538005,
+      "actualUsd": 0.00048813999999999997,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40017,
+          "cachedInputTokens": 39519,
+          "cacheWriteTokens": 486,
+          "outputTokens": 62,
+          "usd": 0.00048813999999999997,
+          "latencyMsP50": 919.5865330000006,
+          "latencyMsP95": 1596.569972
+        }
+      },
+      "charsPerToken": 3.7433590723942323
+    },
+    {
+      "id": 1301,
+      "at": "2026-10-24T22:54:25.420Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 22/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.538185,
+      "actualUsd": 0.0013571100000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 2,
+          "inputTokens": 19778,
+          "cachedInputTokens": 9826,
+          "cacheWriteTokens": 9946,
+          "outputTokens": 30,
+          "usd": 0.0013571100000000001,
+          "latencyMsP50": 1086.078153,
+          "latencyMsP95": 1148.18838
+        }
+      },
+      "charsPerToken": 3.7263626251390436
+    },
+    {
+      "id": 1302,
+      "at": "2026-10-24T22:54:29.340Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 23/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.538335,
+      "actualUsd": 0.00041722499999999996,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 30038,
+          "cachedInputTokens": 29520,
+          "cacheWriteTokens": 509,
+          "outputTokens": 115,
+          "usd": 0.00041722499999999996,
+          "latencyMsP50": 1290.1265859999999,
+          "latencyMsP95": 1686.069027
+        }
+      },
+      "charsPerToken": 3.7253811838338105
+    },
+    {
+      "id": 1303,
+      "at": "2026-10-24T22:54:35.228Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 24/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.24195,
+      "actualUsd": 0.000579865,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40763,
+          "cachedInputTokens": 39954,
+          "cacheWriteTokens": 797,
+          "outputTokens": 159,
+          "usd": 0.000579865,
+          "latencyMsP50": 1265.320614,
+          "latencyMsP95": 1719.2728670000001
+        }
+      },
+      "charsPerToken": 3.761548463066997
+    },
+    {
+      "id": 1304,
+      "at": "2026-10-24T22:54:42.369Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 25/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.538395,
+      "actualUsd": 0.000738485,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 41789,
+          "cachedInputTokens": 40016,
+          "cacheWriteTokens": 1761,
+          "outputTokens": 234,
+          "usd": 0.000738485,
+          "latencyMsP50": 1261.6286550000004,
+          "latencyMsP95": 1883.894179
+        }
+      },
+      "charsPerToken": 3.7135370552059155
+    },
+    {
+      "id": 1305,
+      "at": "2026-10-24T22:54:49.887Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 26/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.242445,
+      "actualUsd": 0.00043788,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 30345,
+          "cachedInputTokens": 29648,
+          "cacheWriteTokens": 688,
+          "outputTokens": 109,
+          "usd": 0.00043788,
+          "latencyMsP50": 1293.6135239999999,
+          "latencyMsP95": 1815.05256
+        }
+      },
+      "charsPerToken": 3.7288844949744604
+    },
+    {
+      "id": 1306,
+      "at": "2026-10-24T22:54:56.004Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 27/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.53721,
+      "actualUsd": 0.000816145,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60625,
+          "cachedInputTokens": 59622,
+          "cacheWriteTokens": 985,
+          "outputTokens": 190,
+          "usd": 0.000816145,
+          "latencyMsP50": 1084.4032149999994,
+          "latencyMsP95": 1444.49894
+        }
+      },
+      "charsPerToken": 3.7391340206185566
+    },
+    {
+      "id": 1307,
+      "at": "2026-10-24T22:55:05.015Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 28/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484005,
+      "actualUsd": 0.000789635,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60087,
+          "cachedInputTokens": 59246,
+          "cacheWriteTokens": 823,
+          "outputTokens": 185,
+          "usd": 0.000789635,
+          "latencyMsP50": 1283.5718120000001,
+          "latencyMsP95": 1652.676351
+        }
+      },
+      "charsPerToken": 3.7266297202389866
+    },
+    {
+      "id": 1308,
+      "at": "2026-10-24T22:55:11.010Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 29/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484425,
+      "actualUsd": 0.0016627500000000002,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39990,
+          "cachedInputTokens": 29580,
+          "cacheWriteTokens": 10398,
+          "outputTokens": 132,
+          "usd": 0.0016627500000000002,
+          "latencyMsP50": 1441.4865409999998,
+          "latencyMsP95": 1536.3745280000003
+        }
+      },
+      "charsPerToken": 3.721930482620655
+    },
+    {
+      "id": 1309,
+      "at": "2026-10-24T22:55:15.797Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 30/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.4842,
+      "actualUsd": 0.0019392950000000002,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60697,
+          "cachedInputTokens": 50012,
+          "cacheWriteTokens": 10667,
+          "outputTokens": 208,
+          "usd": 0.0019392950000000002,
+          "latencyMsP50": 1459.3674900000003,
+          "latencyMsP95": 1900.7297200000003
+        }
+      },
+      "charsPerToken": 3.7236930985056924
+    },
+    {
+      "id": 1310,
+      "at": "2026-10-24T22:55:23.672Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 31/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483045,
+      "actualUsd": 0.00035455,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 29617,
+          "cachedInputTokens": 29490,
+          "cacheWriteTokens": 118,
+          "outputTokens": 88,
+          "usd": 0.00035455,
+          "latencyMsP50": 1397.2982399999996,
+          "latencyMsP95": 1404.8974810000002
+        }
+      },
+      "charsPerToken": 3.7276901779383462
+    },
+    {
+      "id": 1311,
+      "at": "2026-10-24T22:55:28.151Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 32/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48459,
+      "actualUsd": 0.000676035,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 49968,
+          "cachedInputTokens": 49366,
+          "cacheWriteTokens": 587,
+          "outputTokens": 215,
+          "usd": 0.000676035,
+          "latencyMsP50": 1280.848128,
+          "latencyMsP95": 1485.5237170000003
+        }
+      },
+      "charsPerToken": 3.7346701889209095
+    },
+    {
+      "id": 1312,
+      "at": "2026-10-24T22:55:34.031Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 33/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483,
+      "actualUsd": 0.000500135,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39808,
+          "cachedInputTokens": 39331,
+          "cacheWriteTokens": 465,
+          "outputTokens": 95,
+          "usd": 0.000500135,
+          "latencyMsP50": 1261.4147110000001,
+          "latencyMsP95": 1367.8869079999995
+        }
+      },
+      "charsPerToken": 3.737163384244373
+    },
+    {
+      "id": 1313,
+      "at": "2026-10-24T22:55:38.596Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 34/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483,
+      "actualUsd": 0.00047823000000000006,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39662,
+          "cachedInputTokens": 39328,
+          "cacheWriteTokens": 322,
+          "outputTokens": 87,
+          "usd": 0.00047823000000000006,
+          "latencyMsP50": 1301.9020419999997,
+          "latencyMsP95": 1325.99402
+        }
+      },
+      "charsPerToken": 3.735061267712168
+    },
+    {
+      "id": 1314,
+      "at": "2026-10-24T22:55:42.946Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 35/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.24201,
+      "actualUsd": 0.00023913500000000002,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 2,
+          "inputTokens": 19867,
+          "cachedInputTokens": 19666,
+          "cacheWriteTokens": 195,
+          "outputTokens": 35,
+          "usd": 0.00023913500000000002,
+          "latencyMsP50": 1094.4554170000001,
+          "latencyMsP95": 1153.6819180000002
+        }
+      },
+      "charsPerToken": 3.735742688881059
+    },
+    {
+      "id": 1315,
+      "at": "2026-10-24T22:55:46.979Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 36/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.537975,
+      "actualUsd": 0.00173577,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 40116,
+          "cachedInputTokens": 29613,
+          "cacheWriteTokens": 10188,
+          "outputTokens": 268,
+          "usd": 0.0017351299999999999,
+          "latencyMsP50": 1394.9504110000003,
+          "latencyMsP95": 2296.9649820000004
+        },
+        "text-embedding-3-small": {
+          "calls": 2,
+          "inputTokens": 32,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 0,
+          "usd": 6.399999999999999e-7,
+          "latencyMsP50": 187.93663600000127,
+          "latencyMsP95": 403.6528330000001
+        }
+      },
+      "charsPerToken": 3.738059627081464
+    },
+    {
+      "id": 1316,
+      "at": "2026-10-24T22:55:56.723Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 37/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48342,
+      "actualUsd": 0.00043917,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 30084,
+          "cachedInputTokens": 29492,
+          "cacheWriteTokens": 282,
+          "outputTokens": 156,
+          "usd": 0.00043917,
+          "latencyMsP50": 1263.3144109999998,
+          "latencyMsP95": 2135.5404099999996
+        }
+      },
+      "charsPerToken": 3.741257811461242
+    },
+    {
+      "id": 1317,
+      "at": "2026-10-24T22:56:01.722Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 38/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48309,
+      "actualUsd": 0.000707355,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50411,
+          "cachedInputTokens": 49623,
+          "cacheWriteTokens": 773,
+          "outputTokens": 226,
+          "usd": 0.000707355,
+          "latencyMsP50": 1533.2532089999997,
+          "latencyMsP95": 2434.648711
+        }
+      },
+      "charsPerToken": 3.723274682113031
+    },
+    {
+      "id": 1318,
+      "at": "2026-10-24T22:56:08.550Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 39/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48324,
+      "actualUsd": 0.00166991,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39697,
+          "cachedInputTokens": 29521,
+          "cacheWriteTokens": 10164,
+          "outputTokens": 206,
+          "usd": 0.00166991,
+          "latencyMsP50": 1498.5121060000001,
+          "latencyMsP95": 2385.393457
+        }
+      },
+      "charsPerToken": 3.7279139481572914
+    },
+    {
+      "id": 1319,
+      "at": "2026-10-24T22:56:14.106Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 40/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483225,
+      "actualUsd": 0.0020131100000000002,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61205,
+          "cachedInputTokens": 50131,
+          "cacheWriteTokens": 11056,
+          "outputTokens": 256,
+          "usd": 0.0020131100000000002,
+          "latencyMsP50": 1254.182475,
+          "latencyMsP95": 1651.8229460000002
+        }
+      },
+      "charsPerToken": 3.7141736786210275
+    },
+    {
+      "id": 1320,
+      "at": "2026-10-24T22:56:19.884Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 41/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.53736,
+      "actualUsd": 0.00180975,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40650,
+          "cachedInputTokens": 29780,
+          "cacheWriteTokens": 10858,
+          "outputTokens": 307,
+          "usd": 0.00180975,
+          "latencyMsP50": 1253.184718,
+          "latencyMsP95": 1922.4196570000004
+        }
+      },
+      "charsPerToken": 3.779483394833948
+    },
+    {
+      "id": 1321,
+      "at": "2026-10-24T22:56:27.642Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 42/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.53736,
+      "actualUsd": 0.000881775,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61736,
+          "cachedInputTokens": 60885,
+          "cacheWriteTokens": 833,
+          "outputTokens": 334,
+          "usd": 0.000881775,
+          "latencyMsP50": 1306.021202,
+          "latencyMsP95": 2282.3838290000003
+        }
+      },
+      "charsPerToken": 3.7740216405338862
+    },
+    {
+      "id": 1322,
+      "at": "2026-10-24T22:56:38.494Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 43/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48303,
+      "actualUsd": 0.00042393499999999996,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 29757,
+          "cachedInputTokens": 29491,
+          "cacheWriteTokens": 257,
+          "outputTokens": 192,
+          "usd": 0.00042393499999999996,
+          "latencyMsP50": 1350.531234,
+          "latencyMsP95": 2794.210698
+        }
+      },
+      "charsPerToken": 3.731458144302181
+    },
+    {
+      "id": 1323,
+      "at": "2026-10-24T22:56:42.856Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 44/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48387,
+      "actualUsd": 0.001630715,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39758,
+          "cachedInputTokens": 29589,
+          "cacheWriteTokens": 10157,
+          "outputTokens": 128,
+          "usd": 0.001630715,
+          "latencyMsP50": 1325.777915,
+          "latencyMsP95": 1558.6068759999998
+        }
+      },
+      "charsPerToken": 3.7313999698173954
+    },
+    {
+      "id": 1324,
+      "at": "2026-10-24T22:56:47.466Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 45/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48372,
+      "actualUsd": 0.0275739,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60309,
+          "cachedInputTokens": 59473,
+          "cacheWriteTokens": 818,
+          "outputTokens": 168,
+          "usd": 0.00078278,
+          "latencyMsP50": 1261.6366000000003,
+          "latencyMsP95": 1868.3557930000006
+        },
+        "text-embedding-3-small": {
+          "calls": 1,
+          "inputTokens": 6,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 0,
+          "usd": 1.2e-7,
+          "latencyMsP50": 199.77212899999995,
+          "latencyMsP95": 199.77212899999995
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 10549,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 10546,
+          "outputTokens": 42,
+          "usd": 0.026791,
+          "latencyMsP50": 2941.774459,
+          "latencyMsP95": 2941.774459
+        }
+      },
+      "charsPerToken": 3.7404809619238475
+    },
+    {
+      "id": 1325,
+      "at": "2026-10-24T22:56:58.023Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 46/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483195,
+      "actualUsd": 0.001029505,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 71654,
+          "cachedInputTokens": 70312,
+          "cacheWriteTokens": 1321,
+          "outputTokens": 318,
+          "usd": 0.001029345,
+          "latencyMsP50": 1310.5427639999998,
+          "latencyMsP95": 2173.8992
+        },
+        "text-embedding-3-small": {
+          "calls": 1,
+          "inputTokens": 8,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 0,
+          "usd": 1.6e-7,
+          "latencyMsP50": 173.41825600000038,
+          "latencyMsP95": 173.41825600000038
+        }
+      },
+      "charsPerToken": 3.7428754849694363
+    },
+    {
+      "id": 1326,
+      "at": "2026-10-24T22:57:04.806Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 47/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48294,
+      "actualUsd": 0.03266168,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 71197,
+          "cachedInputTokens": 69728,
+          "cacheWriteTokens": 1448,
+          "outputTokens": 319,
+          "usd": 0.0010398800000000002,
+          "latencyMsP50": 1522.2110590000002,
+          "latencyMsP95": 8999.685608
+        },
+        "gpt-6.1-sol": {
+          "calls": 2,
+          "inputTokens": 23012,
+          "cachedInputTokens": 11423,
+          "cacheWriteTokens": 11583,
+          "outputTokens": 151,
+          "usd": 0.0316218,
+          "latencyMsP50": 1962.2895129999997,
+          "latencyMsP95": 2154.099768000002
+        }
+      },
+      "charsPerToken": 3.792079313016803
+    },
+    {
+      "id": 1327,
+      "at": "2026-10-24T22:57:24.118Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 48/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482985,
+      "actualUsd": 0.00047764500000000007,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39521,
+          "cachedInputTokens": 39332,
+          "cacheWriteTokens": 177,
+          "outputTokens": 122,
+          "usd": 0.00047764500000000007,
+          "latencyMsP50": 1152.946175,
+          "latencyMsP95": 1671.1821969999999
+        }
+      },
+      "charsPerToken": 3.726778168568609
+    },
+    {
+      "id": 1328,
+      "at": "2026-10-24T22:57:28.764Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 49/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482955,
+      "actualUsd": 0.00050098,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39872,
+          "cachedInputTokens": 39328,
+          "cacheWriteTokens": 532,
+          "outputTokens": 80,
+          "usd": 0.00050098,
+          "latencyMsP50": 1242.2243259999998,
+          "latencyMsP95": 1298.352608
+        }
+      },
+      "charsPerToken": 3.7217345505617976
+    },
+    {
+      "id": 1329,
+      "at": "2026-10-24T22:57:32.935Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 50/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48297,
+      "actualUsd": 0.001070585,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 80624,
+          "cachedInputTokens": 79581,
+          "cacheWriteTokens": 1019,
+          "outputTokens": 290,
+          "usd": 0.001070585,
+          "latencyMsP50": 1188.247719,
+          "latencyMsP95": 2890.865774
+        }
+      },
+      "charsPerToken": 3.7254787656281008
+    },
+    {
+      "id": 1330,
+      "at": "2026-10-24T22:57:41.162Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 51/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483705,
+      "actualUsd": 0.00023337,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 2,
+          "inputTokens": 19712,
+          "cachedInputTokens": 19652,
+          "cacheWriteTokens": 54,
+          "outputTokens": 59,
+          "usd": 0.00023337,
+          "latencyMsP50": 1355.5566500000002,
+          "latencyMsP95": 1696.107703
+        }
+      },
+      "charsPerToken": 3.7232142857142856
+    },
+    {
+      "id": 1331,
+      "at": "2026-10-24T22:57:44.479Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 52/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483285,
+      "actualUsd": 0.00023562,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 2,
+          "inputTokens": 19694,
+          "cachedInputTokens": 19652,
+          "cacheWriteTokens": 36,
+          "outputTokens": 68,
+          "usd": 0.00023562,
+          "latencyMsP50": 1427.542861,
+          "latencyMsP95": 1570.7816789999997
+        }
+      },
+      "charsPerToken": 3.7223012084898954
+    },
+    {
+      "id": 1332,
+      "at": "2026-10-24T22:57:47.705Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 53/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483075,
+      "actualUsd": 0.00036142499999999996,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 29608,
+          "cachedInputTokens": 29490,
+          "cacheWriteTokens": 109,
+          "outputTokens": 104,
+          "usd": 0.00036142499999999996,
+          "latencyMsP50": 1522.6973179999998,
+          "latencyMsP95": 1531.254993
+        }
+      },
+      "charsPerToken": 3.7255809240745745
+    },
+    {
+      "id": 1333,
+      "at": "2026-10-24T22:57:52.294Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 54/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483075,
+      "actualUsd": 0.0005380599999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 29906,
+          "cachedInputTokens": 29491,
+          "cacheWriteTokens": 406,
+          "outputTokens": 383,
+          "usd": 0.0005380599999999999,
+          "latencyMsP50": 1501.1805209999998,
+          "latencyMsP95": 3967.168657
+        }
+      },
+      "charsPerToken": 3.8503310372500503
+    },
+    {
+      "id": 1334,
+      "at": "2026-10-24T22:57:59.407Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 55/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483585,
+      "actualUsd": 0.00023637000000000002,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 2,
+          "inputTokens": 19720,
+          "cachedInputTokens": 19652,
+          "cacheWriteTokens": 62,
+          "outputTokens": 63,
+          "usd": 0.00023637000000000002,
+          "latencyMsP50": 1467.4356720000003,
+          "latencyMsP95": 1989.967547
+        }
+      },
+      "charsPerToken": 3.720689655172414
+    },
+    {
+      "id": 1335,
+      "at": "2026-10-24T22:58:03.178Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 56/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.24168,
+      "actualUsd": 0.00010856,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 1,
+          "inputTokens": 9853,
+          "cachedInputTokens": 9826,
+          "cacheWriteTokens": 24,
+          "outputTokens": 14,
+          "usd": 0.00010856,
+          "latencyMsP50": 1272.4026159999999,
+          "latencyMsP95": 1272.4026159999999
+        }
+      },
+      "charsPerToken": 3.720795696742109
+    },
+    {
+      "id": 1336,
+      "at": "2026-10-24T22:58:06.077Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 57/95",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.537345,
+      "actualUsd": 0.00037271000000000006,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 29726,
+          "cachedInputTokens": 29581,
+          "cacheWriteTokens": 136,
+          "outputTokens": 118,
+          "usd": 0.00037271000000000006,
+          "latencyMsP50": 1525.0544259999997,
+          "latencyMsP95": 2039.933483
+        }
+      },
+      "charsPerToken": 3.733297450043733
+    },
+    {
+      "id": 1337,
+      "at": "2026-10-24T22:58:12.664Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 58/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48297,
+      "actualUsd": 0.000720865,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50135,
+          "cachedInputTokens": 49249,
+          "cacheWriteTokens": 871,
+          "outputTokens": 236,
+          "usd": 0.000720865,
+          "latencyMsP50": 1167.589898,
+          "latencyMsP95": 2286.3170509999995
+        }
+      },
+      "charsPerToken": 3.757514710282238
+    },
+    {
+      "id": 1338,
+      "at": "2026-10-24T22:58:18.138Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 59/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482925,
+      "actualUsd": 0.00047651000000000003,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39527,
+          "cachedInputTokens": 39331,
+          "cacheWriteTokens": 184,
+          "outputTokens": 118,
+          "usd": 0.00047651000000000003,
+          "latencyMsP50": 1268.773727,
+          "latencyMsP95": 1614.3698900000002
+        }
+      },
+      "charsPerToken": 3.7268196422698407
+    },
+    {
+      "id": 1339,
+      "at": "2026-10-24T22:58:22.579Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 60/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483435,
+      "actualUsd": 0.0008386899999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60266,
+          "cachedInputTokens": 59514,
+          "cacheWriteTokens": 734,
+          "outputTokens": 300,
+          "usd": 0.0008386899999999999,
+          "latencyMsP50": 1204.9498039999999,
+          "latencyMsP95": 2381.00864
+        }
+      },
+      "charsPerToken": 3.769837055719643
+    },
+    {
+      "id": 1340,
+      "at": "2026-10-24T22:58:29.945Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 61/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483915,
+      "actualUsd": 0.0018418249999999998,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50983,
+          "cachedInputTokens": 40345,
+          "cacheWriteTokens": 10623,
+          "outputTokens": 218,
+          "usd": 0.0018418249999999998,
+          "latencyMsP50": 1077.213796,
+          "latencyMsP95": 1983.112535
+        }
+      },
+      "charsPerToken": 3.719043602769551
+    },
+    {
+      "id": 1341,
+      "at": "2026-10-24T22:58:36.386Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 62/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483075,
+      "actualUsd": 0.0011563200000000002,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 81597,
+          "cachedInputTokens": 80167,
+          "cacheWriteTokens": 1406,
+          "outputTokens": 353,
+          "usd": 0.0011563200000000002,
+          "latencyMsP50": 1186.2959839999999,
+          "latencyMsP95": 2146.9348969999996
+        }
+      },
+      "charsPerToken": 3.7174038261210582
+    },
+    {
+      "id": 1342,
+      "at": "2026-10-24T22:58:43.829Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 63/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482895,
+      "actualUsd": 0.00080434,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60296,
+          "cachedInputTokens": 59454,
+          "cacheWriteTokens": 824,
+          "outputTokens": 210,
+          "usd": 0.00080434,
+          "latencyMsP50": 1090.7524909999997,
+          "latencyMsP95": 1386.304536
+        }
+      },
+      "charsPerToken": 3.7214740612975987
+    },
+    {
+      "id": 1343,
+      "at": "2026-10-24T22:58:50.093Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 64/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48297,
+      "actualUsd": 0.000899405,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61127,
+          "cachedInputTokens": 59548,
+          "cacheWriteTokens": 1561,
+          "outputTokens": 214,
+          "usd": 0.000899405,
+          "latencyMsP50": 1512.134883,
+          "latencyMsP95": 2335.0041249999995
+        }
+      },
+      "charsPerToken": 3.708508515058812
+    },
+    {
+      "id": 1344,
+      "at": "2026-10-24T22:58:57.158Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 65/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482925,
+      "actualUsd": 0.000715385,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50710,
+          "cachedInputTokens": 49626,
+          "cacheWriteTokens": 1069,
+          "outputTokens": 168,
+          "usd": 0.000715385,
+          "latencyMsP50": 1344.489617,
+          "latencyMsP95": 1393.8506610000004
+        }
+      },
+      "charsPerToken": 3.713744823506212
+    },
+    {
+      "id": 1345,
+      "at": "2026-10-24T22:59:02.596Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 66/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483105,
+      "actualUsd": 0.004848185,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 81769,
+          "cachedInputTokens": 80156,
+          "cacheWriteTokens": 1589,
+          "outputTokens": 339,
+          "usd": 0.0011720850000000002,
+          "latencyMsP50": 1177.1219480000002,
+          "latencyMsP95": 2557.771535
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 10820,
+          "cachedInputTokens": 9826,
+          "cacheWriteTokens": 991,
+          "outputTokens": 21,
+          "usd": 0.0036761,
+          "latencyMsP50": 1806.0157819999995,
+          "latencyMsP95": 1806.0157819999995
+        }
+      },
+      "charsPerToken": 3.717072222402229
+    },
+    {
+      "id": 1346,
+      "at": "2026-10-24T22:59:11.326Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 67/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483195,
+      "actualUsd": 0.00114692,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 72501,
+          "cachedInputTokens": 70632,
+          "cacheWriteTokens": 1848,
+          "outputTokens": 415,
+          "usd": 0.00114692,
+          "latencyMsP50": 1289.03625,
+          "latencyMsP95": 2719.905944
+        }
+      },
+      "charsPerToken": 3.7340726334809173
+    },
+    {
+      "id": 1347,
+      "at": "2026-10-24T22:59:20.370Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 68/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482985,
+      "actualUsd": 0.00119419,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 72300,
+          "cachedInputTokens": 70259,
+          "cacheWriteTokens": 2020,
+          "outputTokens": 474,
+          "usd": 0.00119419,
+          "latencyMsP50": 1240.4894889999998,
+          "latencyMsP95": 4320.339465999999
+        }
+      },
+      "charsPerToken": 3.716984785615491
+    },
+    {
+      "id": 1348,
+      "at": "2026-10-24T22:59:28.844Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 69/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483285,
+      "actualUsd": 0.00116086,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 81628,
+          "cachedInputTokens": 80196,
+          "cacheWriteTokens": 1408,
+          "outputTokens": 361,
+          "usd": 0.00116086,
+          "latencyMsP50": 1166.255501,
+          "latencyMsP95": 1709.950405
+        }
+      },
+      "charsPerToken": 3.718932229137061
+    },
+    {
+      "id": 1349,
+      "at": "2026-10-24T22:59:35.659Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 70/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482985,
+      "actualUsd": 0.0008596349999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61232,
+          "cachedInputTokens": 59921,
+          "cacheWriteTokens": 1293,
+          "outputTokens": 194,
+          "usd": 0.0008596349999999999,
+          "latencyMsP50": 1111.760805,
+          "latencyMsP95": 1464.3108039999997
+        }
+      },
+      "charsPerToken": 3.711882675725111
+    },
+    {
+      "id": 1350,
+      "at": "2026-10-24T22:59:41.064Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 71/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483195,
+      "actualUsd": 0.00742615,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 72484,
+          "cachedInputTokens": 60595,
+          "cacheWriteTokens": 11868,
+          "outputTokens": 452,
+          "usd": 0.00231755,
+          "latencyMsP50": 1344.2547349999995,
+          "latencyMsP95": 1880.6575659999999
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 11321,
+          "cachedInputTokens": 9826,
+          "cacheWriteTokens": 1492,
+          "outputTokens": 39,
+          "usd": 0.0051086000000000005,
+          "latencyMsP50": 2532.7988779999996,
+          "latencyMsP95": 2532.7988779999996
+        }
+      },
+      "charsPerToken": 3.722391265437623
+    },
+    {
+      "id": 1351,
+      "at": "2026-10-24T22:59:51.126Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 72/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48309,
+      "actualUsd": 0.0013992100000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 2,
+          "inputTokens": 19984,
+          "cachedInputTokens": 9836,
+          "cacheWriteTokens": 10142,
+          "outputTokens": 65,
+          "usd": 0.0013992100000000001,
+          "latencyMsP50": 1503.3678439999999,
+          "latencyMsP95": 1521.588169
+        }
+      },
+      "charsPerToken": 3.714771817453963
+    },
+    {
+      "id": 1352,
+      "at": "2026-10-24T22:59:55.853Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 73/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48351,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
+    },
+    {
+      "id": 1353,
+      "at": "2026-10-24T22:59:58.644Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 74/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48315,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
+    },
+    {
+      "id": 1354,
+      "at": "2026-10-24T23:00:01.266Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 75/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482925,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
+    },
+    {
+      "id": 1355,
+      "at": "2026-10-24T23:00:02.910Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 76/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483165,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
+    },
+    {
+      "id": 1356,
+      "at": "2026-10-24T23:00:04.982Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 77/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48306,
+      "actualUsd": 0.00051769,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 31141,
+          "cachedInputTokens": 29954,
+          "cacheWriteTokens": 1178,
+          "outputTokens": 140,
+          "usd": 0.00051769,
+          "latencyMsP50": 1535.779744,
+          "latencyMsP95": 1807.245953
+        }
+      },
+      "charsPerToken": 3.695289168620147
+    },
+    {
+      "id": 1357,
+      "at": "2026-10-24T23:00:11.177Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 78/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48297,
+      "actualUsd": 0.001018095,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 71709,
+          "cachedInputTokens": 70287,
+          "cacheWriteTokens": 1401,
+          "outputTokens": 276,
+          "usd": 0.001018095,
+          "latencyMsP50": 1731.6794200000004,
+          "latencyMsP95": 2790.51073
+        }
+      },
+      "charsPerToken": 3.7158236762470542
+    },
+    {
+      "id": 1358,
+      "at": "2026-10-24T23:00:20.036Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 79/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482865,
+      "actualUsd": 0.000754505,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 59749,
+          "cachedInputTokens": 59158,
+          "cacheWriteTokens": 573,
+          "outputTokens": 179,
+          "usd": 0.000754505,
+          "latencyMsP50": 1337.933083,
+          "latencyMsP95": 1680.1041530000002
+        }
+      },
+      "charsPerToken": 3.72926743543825
+    },
+    {
+      "id": 1359,
+      "at": "2026-10-24T23:00:26.005Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 80/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48279,
+      "actualUsd": 0.00059362,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 49542,
+          "cachedInputTokens": 49237,
+          "cacheWriteTokens": 290,
+          "outputTokens": 127,
+          "usd": 0.00059362,
+          "latencyMsP50": 1331.7720290000002,
+          "latencyMsP95": 1772.710806
+        }
+      },
+      "charsPerToken": 3.73024908158734
+    },
+    {
+      "id": 1360,
+      "at": "2026-10-24T23:00:31.304Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 81/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48282,
+      "actualUsd": 0.00068932,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50648,
+          "cachedInputTokens": 49607,
+          "cacheWriteTokens": 1026,
+          "outputTokens": 127,
+          "usd": 0.00068932,
+          "latencyMsP50": 1905.4661680000002,
+          "latencyMsP95": 2028.6083989999997
+        }
+      },
+      "charsPerToken": 3.7154872847891327
+    },
+    {
+      "id": 1361,
+      "at": "2026-10-24T23:00:37.683Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 82/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482835,
+      "actualUsd": 0.00052545,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39917,
+          "cachedInputTokens": 39325,
+          "cacheWriteTokens": 580,
+          "outputTokens": 117,
+          "usd": 0.00052545,
+          "latencyMsP50": 1573.2151120000003,
+          "latencyMsP95": 2727.9643349999997
+        }
+      },
+      "charsPerToken": 3.720069143472706
+    },
+    {
+      "id": 1362,
+      "at": "2026-10-24T23:00:43.793Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 83/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48297,
+      "actualUsd": 0.00046198,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39548,
+          "cachedInputTokens": 39328,
+          "cacheWriteTokens": 208,
+          "outputTokens": 83,
+          "usd": 0.00046198,
+          "latencyMsP50": 1320.806744,
+          "latencyMsP95": 1597.320966
+        }
+      },
+      "charsPerToken": 3.729796702740973
+    },
+    {
+      "id": 1363,
+      "at": "2026-10-24T23:00:48.385Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 84/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482895,
+      "actualUsd": 0.00044595999999999997,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39466,
+          "cachedInputTokens": 39326,
+          "cacheWriteTokens": 128,
+          "outputTokens": 71,
+          "usd": 0.00044595999999999997,
+          "latencyMsP50": 1423.8921149999996,
+          "latencyMsP95": 1594.514203
+        }
+      },
+      "charsPerToken": 3.729007246744033
+    },
+    {
+      "id": 1364,
+      "at": "2026-10-24T23:00:52.867Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 85/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48288,
+      "actualUsd": 0.00100926,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61314,
+          "cachedInputTokens": 59996,
+          "cacheWriteTokens": 1300,
+          "outputTokens": 490,
+          "usd": 0.00100926,
+          "latencyMsP50": 1352.052757,
+          "latencyMsP95": 3789.35466
+        }
+      },
+      "charsPerToken": 3.7567113546661446
+    },
+    {
+      "id": 1365,
+      "at": "2026-10-24T23:01:02.958Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 86/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48318,
+      "actualUsd": 0.001168775,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 82242,
+          "cachedInputTokens": 80725,
+          "cacheWriteTokens": 1493,
+          "outputTokens": 345,
+          "usd": 0.001168775,
+          "latencyMsP50": 1275.0480270000003,
+          "latencyMsP95": 2118.9423749999996
+        }
+      },
+      "charsPerToken": 3.7160696481116706
+    },
+    {
+      "id": 1366,
+      "at": "2026-10-24T23:01:10.590Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 87/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482955,
+      "actualUsd": 0.028545455,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 81005,
+          "cachedInputTokens": 79618,
+          "cacheWriteTokens": 1363,
+          "outputTokens": 346,
+          "usd": 0.001141955,
+          "latencyMsP50": 1598.8955850000002,
+          "latencyMsP95": 2861.570949
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 10854,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 10851,
+          "outputTokens": 27,
+          "usd": 0.0274035,
+          "latencyMsP50": 2097.830200999999,
+          "latencyMsP95": 2097.830200999999
+        }
+      },
+      "charsPerToken": 3.7384251951360237
+    },
+    {
+      "id": 1367,
+      "at": "2026-10-24T23:01:22.405Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 88/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48294,
+      "actualUsd": 0.001048815,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 80537,
+          "cachedInputTokens": 79554,
+          "cacheWriteTokens": 959,
+          "outputTokens": 262,
+          "usd": 0.001048815,
+          "latencyMsP50": 1249.4904640000004,
+          "latencyMsP95": 1941.5161170000006
+        }
+      },
+      "charsPerToken": 3.7292300433341197
+    },
+    {
+      "id": 1368,
+      "at": "2026-10-24T23:01:29.803Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 89/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482865,
+      "actualUsd": 0.0006710399999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50326,
+          "cachedInputTokens": 49629,
+          "cacheWriteTokens": 682,
+          "outputTokens": 176,
+          "usd": 0.0006710399999999999,
+          "latencyMsP50": 1446.993181,
+          "latencyMsP95": 2269.5434029999997
+        }
+      },
+      "charsPerToken": 3.717760203473354
+    },
+    {
+      "id": 1369,
+      "at": "2026-10-24T23:01:35.727Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 90/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48309,
+      "actualUsd": 0.001172555,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 82966,
+          "cachedInputTokens": 81153,
+          "cacheWriteTokens": 1789,
+          "outputTokens": 270,
+          "usd": 0.001172555,
+          "latencyMsP50": 1206.1260980000002,
+          "latencyMsP95": 1627.2808870000008
+        }
+      },
+      "charsPerToken": 3.705421497963021
+    },
+    {
+      "id": 1370,
+      "at": "2026-10-24T23:01:43.182Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 91/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.483,
+      "actualUsd": 0.0006662650000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50349,
+          "cachedInputTokens": 49739,
+          "cacheWriteTokens": 595,
+          "outputTokens": 186,
+          "usd": 0.0006662650000000001,
+          "latencyMsP50": 1473.2826020000002,
+          "latencyMsP95": 1546.074774
+        }
+      },
+      "charsPerToken": 3.719458181890405
+    },
+    {
+      "id": 1371,
+      "at": "2026-10-24T23:01:49.140Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 92/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48297,
+      "actualUsd": 0.0007228550000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 59647,
+          "cachedInputTokens": 59218,
+          "cacheWriteTokens": 411,
+          "outputTokens": 155,
+          "usd": 0.0007228550000000001,
+          "latencyMsP50": 1407.675451,
+          "latencyMsP95": 1453.5721709999998
+        }
+      },
+      "charsPerToken": 3.7321239961775112
+    },
+    {
+      "id": 1372,
+      "at": "2026-10-24T23:01:55.388Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 93/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.482985,
+      "actualUsd": 0.0006060950000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 49547,
+          "cachedInputTokens": 49247,
+          "cacheWriteTokens": 285,
+          "outputTokens": 153,
+          "usd": 0.0006060950000000001,
+          "latencyMsP50": 1163.0083470000002,
+          "latencyMsP95": 2107.2712330000004
+        }
+      },
+      "charsPerToken": 3.7321734918360345
+    },
+    {
+      "id": 1373,
+      "at": "2026-10-24T23:02:01.505Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 94/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48312,
+      "actualUsd": 0.000795135,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60126,
+          "cachedInputTokens": 59471,
+          "cacheWriteTokens": 637,
+          "outputTokens": 238,
+          "usd": 0.000795135,
+          "latencyMsP50": 1228.6706160000003,
+          "latencyMsP95": 1743.449135
+        }
+      },
+      "charsPerToken": 3.7281043142733594
+    },
+    {
+      "id": 1374,
+      "at": "2026-10-24T23:02:08.467Z",
+      "label": "P8 P8 S37b pass^1 (rest) part 95/95",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48327,
+      "actualUsd": 0,
+      "byModel": {},
+      "charsPerToken": null
     }
   ]
 }

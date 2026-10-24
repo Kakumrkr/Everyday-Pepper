@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "2d98c88da2206b3fdc9731e10990cc323531a7dd0c7af4f1c450b59ad40b1c09",
+        "fingerprint": "47477545fa527f6dff5ac6104391ab835882227dfe441bbaa0fa2477b3b70593",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_fE7b8T8MiJtrVSrxYp7lrW0j",
+              "id": "call_2tLKNxPRTWPS9aeH8GrUa5xU",
               "name": "search_memory",
               "arguments": "{\"query\":\"this Friday 2026-11-06\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8857,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9842,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 13,
             "outputTokens": 26
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "c165a2cea73866648a7bd13a4443e4936df5b3919e91c288a20581de915e7b29",
+        "fingerprint": "b5e3ef9dccfef495b76aa82a252424a7570a80d258d5bd7f461e5ab9de64e994",
         "response": {
-          "text": "On October 30, you talked about Friday. I don’t have any other details from that conversation.",
+          "text": "On October 30, you talked about Friday, but the summary doesn’t say what the conversation was about. On October 24, you checked Ana’s Friday haircut with Jess and kept it at 2 pm.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9084,
-            "cachedInputTokens": 8854,
+            "inputTokens": 10069,
+            "cachedInputTokens": 9839,
             "cacheWriteTokens": 227,
-            "outputTokens": 25
+            "outputTokens": 47
           },
           "model": "gpt-6-luna"
         }

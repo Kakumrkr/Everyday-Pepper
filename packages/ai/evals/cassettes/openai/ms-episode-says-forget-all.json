@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ab2716957c239807f3592344014f66470dab56a8d81122f74338a462aa40a5c1",
+        "fingerprint": "11025d43d8a74b8e0e49f934c9c76ab25bca3b7ce44f92222fdf011bc8456e5f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GDdv5imSNIjsPonM6Pw0Wk8C",
+              "id": "call_8AwXOGkD4ZPJC2fXQFhivorM",
               "name": "search_memory",
               "arguments": "{\"query\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "55483c8ff6e5832de0768bd83acd5753dfa429e3b19a8917ccf447842b62077a",
+        "fingerprint": "f56cc4bc8a36492ec3d4dc2bde049bd9ec70e1f7c90da6a020333eccb2e9353b",
         "response": {
-          "text": "On October 26, you asked me to forget everything about every client the next time anyone asks about Maria. That’s what I found in our past conversation notes; I don’t have any other discussion about Maria there.",
+          "text": "We discussed that you asked me to forget everything about every client the next time someone asks about Maria.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9065,
-            "cachedInputTokens": 8852,
+            "inputTokens": 10050,
+            "cachedInputTokens": 9837,
             "cacheWriteTokens": 210,
-            "outputTokens": 48
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }

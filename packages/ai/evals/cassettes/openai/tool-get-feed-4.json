@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b6bbe66a6bb65f60e84330b998d148ce81fb6b8e1e1f9f0390c96252d9a67092",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qZXgV9QDgEcLOP32fCVWNCBA",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9839,
+            "cachedInputTokens": 9826,
+            "cacheWriteTokens": 10,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "34137512754036194fce84f8666ef12bf27578ccab3b97d8bc8b364cd363d627",
+        "response": {
+          "text": "No one is on the waitlist right now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9891,
+            "cachedInputTokens": 9836,
+            "cacheWriteTokens": 52,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

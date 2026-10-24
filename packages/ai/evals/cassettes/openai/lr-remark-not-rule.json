@@ -3,11 +3,18 @@
   "trials": [
     [
       {
-        "fingerprint": "90bb8a59ff4681ed6f7a8a685bb70fcdacfdff37076df81857a4c58b2b0a70f2",
+        "fingerprint": "761d0c358117d21e2d818a70189a20d7e05422a5e9b177f51bd4225be9f63e93",
         "response": {
-          "text": "Sounds like you’re noticing a pattern. Would you like to make a lasting rule to stop bookings before 10 on Mondays, or just note that Monday mornings are slow?",
+          "text": "Would you like me to propose a rule to stop Monday bookings before 10? It would wait for approval on a card.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_03a3f83fdb5284e8016add37a85bd087d2b82bb68eb21d0b5b",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3TepE8Wv-blK2KuJHXJS3qlkHlNDUQNKiJqIVobEV8yE-UoZzBGXrvAszoWhZEMPaRb5iar-X5uoGCojQjK3qpYVuFWdcOMq-i0cK6-OMKTCUAY6RBUFwImijZwbj4epSABv4orNV9D7wUW8DIDrGCPShSxG2t4eszLCq-DLeuDgkvOjGYBeIwlFFPHX53Oz50NN_XPLKMVfrDDzM-Kfc674LP0JEb039ZujCpLlASGmwg-pR-6qViNtyF7h0_ygFA0bZ-QW10DGO7OvDSbFw0cJBHgEq9s8O9FEHJ1a6y7TuHSwd-cZIjTOXld3IKCf0LZErBBflpT15KGetWIWvijERJwysSZ94FFcahP4IfYRJYDxXkrU3LC-0kx4Y8LfGUPfONRgQuDgpTKhz5DU_RZ7mpPrap7sBpJKcpFoGn7N5faahhB3d0jdGug6844X_PjfGpkJJI-v4WuJSPUWN6w1VnfnUMmoIkhhnlXGOIzO53Z4TuEOnxJvH-nMqU9BoHfqhX4Hdyd0o61ApotigKB4viBWYzTkamGufudodUntYtupqLPM500LHZMRKy8SyvgHq0z8pikii2oSBOfIy9qT6U1YrEjlYr3u_3QbvqivLpoEiawVP3Rjqx6PSzB5v7--0hTEiqTSPY_qU_iSkWHchA9ZTOr9lGEEX_xgJTeR9Yy8VzDgtJ0RMH6yt3tD7PpVsal_FOXKoAGgJLGKOCoM93WA3iB9Wt5mPhBWoqUC6fiZmODiAH0UPjxfQoIJ9IZGTp_h_R1iuuxXw-eLLPWFPT5GlFsph5uD7LxqIqyY12HPfsJZoELkj_dNnlcRW1HwJZgtCAjXdp5kworpdIFmaD8sabM1Ty42cIoK_Jwl1Nr2MclU3q4Iem8K5wwrjtIdKkOqzyKc_krfJCzhPAvqLkevI-myqCtVzGAf0GB9rH5vdCEwucY35g_FSSq0Kve7Hh-d-BWBh1PVLp7Gfo_7EPeLqCOQ-A6ZdKYMOWGUzT-6sc98p7SG85moXJ_khqMM0q83t917LpPxW3hdYSv_mGFteZUbCI2lzwgE1X8rzzE7csmTMN44FXOGaUA2BRuj_v5Rwxd2O0flRm0foMs3Utn2AUbaYJyl5yf7EQ-RAEILIg3KQHy7E2c-yWGSkrG7Ahp-c-2L6tYglevaS2ybqrabMSpkEFzmXw0ELYGKte9j6EQp6ANT4Sry7VNnoXHuQCEgdtjJ6-q92gLFkTiXNJM6lHGJ1g8E43jyJ7sd3d8ymyuwF1X2Urdi0-Y3iPFZKNcHcPLo6MHOenMmihHkwMeF8nuCRhQEIzQVhO8l_xK_Zk_j3KEMQqOsDk3bVnIMTprbTlrY5OVlcYQZ82k8_Q6-_JF5zOhbKBDX_oAbr2pBpDFdHPzxDD3FGIWYlr2X7HsDE9jZHFT-hdpd4kGilyuK9t9Dc92kJj23_vxRgR07nM2LCTebdVWWBd5G6m5Hh7WMmg09GHPoFWvW7jAFy0TT-N6gifzX267vRVtDUpdSnVBw4NWvKLlH8SJk9D3KUHFO86_bwj4we-0_4qB1FzxUd4g6px1HEUJrenq-gJ9-hc_S0YZMVBn6rcIm3bvGXN6Q583DWu5_YgmJ36x1u4N9rh7gfmZL7N_TznG9S6L3wjXRF--fzzf-5WjSEdIurGSKA2_NyNyPVJGHLE3iawEJhlYiiNl1eFwOsQ7QVvHb2ME8AXmxDyCkHLc9BXPQSLch9sdsIsHHD-z0MH0G4X21PRRaRgO7wDkGDHmffytpsw-TC8_EHrNBQ4RPUBMm1EhcjhY3FfeB7xftvES-JD8_fltKTAQuC6LcztqvHYJCZ9QZt8taUzvL3OzcedflCXsfDKs2jkuQ02D8HqRUdh6BjVeUUAzBbgCIMpKxqCQmoMuonZXVvrnp6RRMqw6C0LHxo6pQ_q2CAu3YXM1125Q2RHa0JIZwnJM4qYdLHnRJfo1t1Qaj5I6V9offEHc-xppoAcweUPe_c0CioA1p2cA41ZHbsSM8LTv7C4eg8ZBeFJdejqRrul5T9pEiCrnhGdg9EG21cs9XdbFL4rLJFwL3fhVXRdx5xrQE-ebco464rfCy8aPS0a9zzSdtUeXRXsVdLBPcEbYlHJyqX2gK-KTcp_nyyCmQVFSKxToWnRcgGenPbuG9r-vXCwn1bi1pMZElxNfjrP33O3cSDuVkw5mPrjtOq44OHa2lUvljYV7EfFDbNuTsDcXqegqJIrOIJ9Mbtx0K7xWyA16MntShXQ5diHDUQUykTjD1bJolcdAps7RHfbUIleMKOblFMRKIkj0AJy1cnCQ_Am_sf0WpmOaAvefpbeXm5iznx2n6cBC4qLoSJeIdnPjhHDF3CUFFKJ0qgCjH854vED1abK-Lha5OkrQKuJXrBUvhH09DuwS8oAE9-dmXluP3vkPdi1qB88TdIenqubuvkT0nROFS4BSKhlpsRp9eYIXdwGwdmwlvecs_vW8ojpfMrWTdmdHNGVXGpBRUpjEXz2UOIolqZ-5EjycnTJTRqEijxvetw2BdiSdgLppzAFaP4DdgpVws",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -15,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8861,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9846,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 17,
-            "outputTokens": 38
+            "outputTokens": 119
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "cca4cbc136c1a03aa48f5639adeabbdedf30c18e22d682c45f6bdab93889fa2d",
+        "fingerprint": "678217dc6a54c3bcaf5eb55737f1a74555caf0f4bac23b77d05d1a6f1c643e54",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_q1zvucavvIE9mP9JlZHBo7Ob",
+              "id": "call_VV2P05kk4fgSvxttsQTPzSXm",
               "name": "search_memory",
               "arguments": "{\"query\":\"Maria patch test\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8858,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9843,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 14,
             "outputTokens": 20
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "6fda947059d8a14c31c03fd5714a07f2ef82bbf490585cc909301d8dc4af7a53",
+        "fingerprint": "73bdb23e310ddfe8be282cde860d35296ee6ad263eb44e9d04a08aa1a199aab0",
         "response": {
-          "text": "I don’t remember what we said about Maria’s patch test.",
+          "text": "I don’t remember us discussing Maria’s patch test.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9039,
-            "cachedInputTokens": 8855,
+            "inputTokens": 10024,
+            "cachedInputTokens": 9840,
             "cacheWriteTokens": 181,
-            "outputTokens": 17
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

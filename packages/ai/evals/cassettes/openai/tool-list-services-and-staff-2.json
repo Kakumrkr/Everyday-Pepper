@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "fc8192e0c2d39cc697f360808a1dd967adbe5221b66cd7f240eafd6fe48289d3",
+        "fingerprint": "638fb70d4c83591e9ff9430eade9aaea00d0be5ef452fd02ecf216e22d5628ea",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_YaRMZTFVKYO8LPYJJAam10yu",
+              "id": "call_OrYzTXY4SQlqNJufbGd4FXLK",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8854,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9839,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 10,
             "outputTokens": 16
           },
@@ -25,16 +25,16 @@
         }
       },
       {
-        "fingerprint": "d1c2a8742833134d962729ba02eda4af0f80d3c92b56c19d4b2a70bfe97702e1",
+        "fingerprint": "e8c256395cd73dd9026e58893a05d770392a317b804b8c1370ea74ee52669b51",
         "response": {
-          "text": "I don’t see a beard trim in the service list, and Marco offers haircuts. Would you like a haircut with Marco instead? I’ll also need the client’s name and preferred date and time.",
+          "text": "I don’t see a beard trim in the service list; Marco offers haircuts. Did you mean a haircut, and who should I book it for?",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_02f00dab7c497c9e016adcef9ef5ec87d2b6cec9df6e73783a",
+              "id": "rs_0f40dec6d45bdbad016add3899c15487d29cb95c4b9573eb78",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3O-fgNNBQj1putk2h1_lyFqHdhRoS58AG-MZMrR0PlH1icF2l6-H6wXptWyMyAmmJRvir-J0j-qHAYAh_Bzrnbm4Zh7SxhUrREMqXpq9myEbgYGxi8vJbaT6J2b5rmmGfHLMvNKTjBu5EPbKur0qkn0_oBW7YQf_DfM6HqZX3t_idV0C8fTUtMY1bYP60aQw8BFzEnJkBIJoiAI86V9kRStFMKIjpUawYmMBjHDY_XeJ9rnUfCNV3Wf3dfa3dWulrkMQafJq2ExLoYerN1_6cVcy8qdglkuq6A6dbzMNmkYfqRn6dyJBxFY1nldVyeObBzvTwrTLIbe8ldJe_oyeXPAaa64AVfIySDM3zFXBqyhlfWw0g_tj52jPxs-AjXmtLu-khy11Vwyj4PnRf3vKd9pqcWlbXEd3fP1ZKOG1Dgd7SM--Y8YNFxlU2-YVM1VA4n-rBrpvgubZ0jk0zFSyTicfgtfwAJETXfP0bTg9zY1X9NtsLzL6YcCEuHrIgsxpL7KcYEsYvfD9X0vgXyg93bOQzXrMKv2Ihuyqh4v1traCFbBSnBjP_uH4uiBVg3Rfg50MhUUwl6rXemwbq6mfAwm9iQ48yoTIE4gdj3ch31PDwl4n0Tuhn4rocfd72Dq8kIGJZy3SdLsxMFMf0BTCkBGB06oSq8oj4WSDSIlYnNdZUKsDMCUYP56PzDiY9xv7rRGd5bGnKG9K7MFcMMvemWuZXUplTqm2BMCKv74PtC7Z9nF0fgiURN-XNHG-7cLEkTa-pJ_tms5yMqRwl2qNqaXjnyFpw1KvStlUWg62QrvzBgyL-VFzjJ_amJOQI0m9GeEjDcrytgdSLJJ71frdPDENltiuS6gulyHLU6b9a_9v2_a6o607ONj8EJo2i1g_83RgjXiUhOjef3GEB_7zSLjtjteY9lI5ZTL2kOlfOEytG-mfUvFSIiySZk9YIZaavL6AA9YD6eZtq6e8Jc6yaAsSphO8IYkEhZz5P0RZOx7f1Z52Dh2_bh2BEG1lmqZW8m5iJq0c3pRzPBruMXQ2i9XuYx95NLKhrInKcte9veFvXBFWxQ0kFDky4xZR1Pwpx-oabMWzqA33DMOi8Zg855av52Krd6XMpPhZC0l9EerT6Q5GCCW0k7mObJQgTQRc3HQIbdOddrONMDZ4diRplanidVZAAh0fvMcwlzzPIO8HOKjXVYwPVdv6VhOnzl3uNkyUybjRahB7-FARwMpsHLZ2JrZS8Yo28BnaFaIg538RsJD6CLF5SErUYnyO1q1GXW6MDjJWZzJpXpD6gWhb7U6Us1RJ6kDRMmFnwgiSyYrAp62fBeOXj4zcW0WmEMGA58yFSl-t-_7KM0HB8_4qPNiyzh3Jw-EwvFWBMCFvcYr0vEcezjI1i3totHq9mw_m7uElW6iIragKZ1wfy_5RDsHpxwOz0MQuNUqlkw_rSOUv2w6-07Bjhbj81Xq0a16rV59HlfrYnaOE-sb5aoHQz6PEHRnBv6oc65jLQh7JMhV01vVeVk7EIh7hkZmpBBv_GdzfX-Jrt9p9nuibtsytQyYcXtTKF57Rp0G2m9XQvTRXak7q4M6ybeWYzycVHFZBlWvR4zepV31HT8hxRZGeH7528agbNYoQggTGLk2WTCXdrYZsGQe71SZNH9gcZpfGQC79xwtRFJpEcMBMS_Lx_b7ypxhhHG0buXRByN9ajLfhhpBGw-VXgwTh1hwK02XnGvlAQzQRth6qn0OLYmen1M2Qy1d3HWREPDuzFEa3raznjqtFIVmr8Da-Fk_Wj9FMgCLsAepvv6HcB4OelYxyKEtJPdV0jXuetYOzo23e22OtGDonJuZmk0dQFxCZqkmkTz6kt6Vb72Up0YWrrhtf9qHVRNQMMpOuP_JfiJ3KTPkNQ0OutGHDYA2svZAwL2PRlhoB",
+              "encrypted_content": "gAAAAABq3Tiarc6QhOMgHTakWs24bywVPd8DjUmjJBil-ofKHOnZaG7ivHYJ2A60K8AnOOByoIaWi61DtG916olqUqRjOqSfskJpBisbjPvXD2BBdrYr68DdxdoTITf1dtTqmKRC3HO4TosujQf6AxA-kwQzsJf333x-tNuENcQIZJ1JkVEBQLcvPN_n0lcHZPfcMobl8GbBTZC3LE9N0_cyyhZKwhqbpd4mmj2x6MXemsD2OHy4v29XA8i4JZOlXMOt3SX1fFz11DzyMulRP31aZo-WOeHK1AYpwZUl9Ner3xdETslItvAEb9-sPaozb9RYYdBcbJXvXeRRYy4l5iPe4vGNZnxrJmhRKui9Veq5-vxXfCbXO68zM6ObK5bE6xz635psVe-75HuCoWiJSZ4-VylVQ6zS81D2HMzCzwtJkGo65jKuMMdX1MMKefWNhoskB8BGcWcfmP4avW49V19scPCgaZijTkKCEpgzXqc9vpzE1On6wHvWpmfBuJOpGxe2AwoiPVQxyrHLGTtcWTmX9qVM-oqiW1QG9eC2FSRtsxIdfz4MmJJ2LjRgSW88opz9ose1hQiLepFdCnl5KJhdQBCIqIiQxIGNCy8rCIAnATsJUooxDzRyv2I5VnRK-nTEi6bAbdw003cclEKVf2uq4u081z_AQQz85quU1ApA8lcLROyuDY5iKrCnV4EAnf7NTt_afZ6LKs9O2eDmQOoPwTgtj1CF4PmO9-GagAdxUm1aYUVj3Tb-JmFv-HfBzdBHGdvU6mM0-KPv9V6_ckDqBDuzwUeigM6Wkn67EwI7pC-fwMtGgnq9f7-_LloSs59jJ55EJNi76kCNE52Uuh6LubUd0L6O3VmL_Gwkt9KgbA618fEcX5C0AYQqDNqMuAmaIcq1raCkqGt_FTLbFttuwnOlwrfM5XOiRxJfwGEkQhUxKZvp_xi6eBHThH6kgZR0feL790WCY068e_WrucXcgOiaWcfX2BtZdsM6gCtzu-Bi8vVRlHDxiqKEfXfIkrX47HsxEi3EisTxsVDgVQ51kEJxgB4GywHsCjJYhACLtc2MuMUFub8R2d7vyRXnQWodFtzPp1rAIW8pWWBCY0Juph0yJzIf_BjisoyRokCPYA-BRECTrgD_tm4ewgTc0dkTvBcDH9gEd9KE_KKw-6sDrDOxGy_DIW5Q3HsWeJLSAx9R36KSM-csAKGlmX4krzkZUngwNxc5EyK54tf9KPz_43WeUxaMZsSlee6jWoP7YESA81S1URBkPLzqtgMW0YBzK57fFitjDNy44ZLWckUAkrB62ak3dtqeskg2Zs2g2bopXHDF-sNfWqdPBAvrYPckd9Ue3F49XaMJQQX-woPA8G-LOWVnU7UBgwwv3sBdc8m9pupjb2z4qfeAdODbV6r0SWZJctuIR8o4eqaykA9386u4Gcw4fwHulhJkIebq1lUtm3DN7KDt3ifKWXg8AbnZucQIMgw6YakZz3JDn6kjZoVSSQkPKDCr9z-BTz88KNW43uGZsMylo1ozualOTKO9HkTCeqQlG44k1J0E3MPtDMctSw2MKT6_p6sWTg4eilVH-Z4yAoofWOu1iUOUNrhrPQ8JrcGKLYF5hbsGf-x4uALsk4-qeIPSNx4SSuXdFU0q2v_eGTnDqqhvUFMigZsWy6PIS9VnaKnSUHbUorgGKmQuRUkx52_l8IeMJZmjzRiAtgi9uNZnliLh6Xd5rFWj1Q6GiOWF",
               "summary": []
             },
             {
@@ -44,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9314,
-            "cachedInputTokens": 8851,
-            "cacheWriteTokens": 460,
-            "outputTokens": 85
+            "inputTokens": 10290,
+            "cachedInputTokens": 9836,
+            "cacheWriteTokens": 451,
+            "outputTokens": 59
           },
           "model": "gpt-6-luna"
         }
