@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "9a4fdf7e357f60f57c190735a7c1bc077759a6d19e3620ed82708c0dfd5fb01e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_yCnRqN8EUHFnInKPlwsKrTKF",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8355,
+            "cachedInputTokens": 8336,
+            "cacheWriteTokens": 16,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bd99b44e9ddbb9bc61fc04b92c8925eb1e0163a3f72ba4f9154a0f72e5854057",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ohIE4v0CK0t7RlDayhWTW7Gg",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:marco}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8634,
+            "cachedInputTokens": 8352,
+            "cacheWriteTokens": 279,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a3e7460d07f3659adb1af04a44ef870a0cb78aec2dfa25aad1a4c7de2d3dc163",
+        "response": {
+          "text": "Marco has no bookings or blocked time on Thursday, November 5. So 2pm looks free.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8739,
+            "cachedInputTokens": 8631,
+            "cacheWriteTokens": 105,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

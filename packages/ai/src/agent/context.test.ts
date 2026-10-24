@@ -358,9 +358,13 @@ describe('memory in the context (S30)', () => {
       value: 'y'.repeat(100),
       sensitive: false,
     }));
-    const kept = instructionsFor(business, now, many).match(/y{100}/g)?.length ?? 0;
-    expect(kept).toBeGreaterThan(0);
-    expect(kept).toBeLessThanOrEqual(Math.floor(BUSINESS_FACTS_CHARS / 100));
+    // Forty values of 100: the token budget as sent stops at 9, before the value budget's 12.
+    expect(instructionsFor(business, now, many).match(/y{100}/g)?.length).toBe(9);
+    // Long values: the value budget decides (1,200 / 500 = 2), well within the tokens.
+    const long = many.map((fact, i) => ({ ...fact, value: `${String(i)}${'z'.repeat(499)}` }));
+    expect(instructionsFor(business, now, long).match(/z{499}/g)?.length).toBe(
+      Math.floor(BUSINESS_FACTS_CHARS / 500),
+    );
   });
 
   it('keeps the business block within its token budget as sent, ids and label included (S33)', () => {

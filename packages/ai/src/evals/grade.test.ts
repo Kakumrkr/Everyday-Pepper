@@ -164,7 +164,7 @@ describe('grade (ADR-0027: deterministic graders)', () => {
     const day = (date: string) => call('get_day', { date, staffMemberId: null });
     expect(grade(either, transcript({ toolCalls: [day('2026-11-04')] }))).toEqual([]);
     expect(grade(either, transcript({ toolCalls: [day('2026-11-03')] }))).toEqual([
-      'expected find_availability with other arguments: $.date is "2026-11-03", not "2026-11-04"',
+      'expected get_day with other arguments: $.date is "2026-11-03", not "2026-11-04"',
     ]);
     expect(
       grade(either, transcript({ toolCalls: [call('find_clients', { name: 'Jess' })] })),

@@ -36,7 +36,7 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
   let from = 0;
   for (const wanted of expect.toolCalls) {
     let found = false;
-    let closest: string[] | undefined;
+    let closest: { name: string; diff: string[] } | undefined;
     for (let index = from; index < transcript.toolCalls.length; index += 1) {
       const call = transcript.toolCalls[index];
       if (call === undefined) continue;
@@ -50,13 +50,13 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
         from = index + 1;
         break;
       }
-      closest ??= diff;
+      closest ??= { name: call.name, diff };
     }
     if (!found) {
       reasons.push(
         closest === undefined
           ? `expected a call to ${[wanted.name, ...wanted.alsoAccept].join(' or ')}`
-          : `expected ${wanted.name} with other arguments: ${closest.join('; ')}`,
+          : `expected ${closest.name} with other arguments: ${closest.diff.join('; ')}`,
       );
     }
   }

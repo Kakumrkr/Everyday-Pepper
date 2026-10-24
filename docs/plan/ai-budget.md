@@ -17,9 +17,9 @@ Policy: [Phase 6 playbook §4](phase-6-playbook.md) (user, S22; confirmed for S2
 
 The OpenAI dashboard's usage page is the final word on money; this ledger is computed from the token counts the API reported, at the listed prices.
 
-## Phase 7 ($1.00 cap, [playbook §4](phase-7-playbook.md))
+## Phase 7 ($1.00 cap, raised to $1.55 in S33; [playbook §4](phase-7-playbook.md))
 
-Runs labelled `P7`. The runner refuses a run whose worst-case estimate would take Phase 7 past $1.00.
+Runs labelled `P7`. The runner refuses a run whose worst-case estimate would take Phase 7 past its cap ($1.00 until S33, then $1.55).
 
 - **S30b (2026-10-23): $0.2974 in 133 runs** (Phase 7 total: $0.2974; $0.70 left for S31–S33).
   - First pass of all 167 cases on `gpt-6-luna` low / `gpt-6.1-sol` low, pass^1: **$0.1560**, runs 153–215.
@@ -39,10 +39,17 @@ Runs labelled `P7`. The runner refuses a run whose worst-case estimate would tak
   - Full recording, all 192 cases, pass^1 (the probe's 68 replayed free): **$0.1079**, runs 597–703. Every gate met after one case grader was corrected (`just-do-it-still-asks`: "Nothing has been cancelled yet" matched "has been cancelled"; ADR-0038).
   - 544 Luna calls, 9 Sol calls, 3 embedding calls. The probe cost more than its ~$0.07 guess: multi-turn scheduling cases on cold caches.
 
+- **S33 (2026-10-24): $0.3702 in 132 runs** (Phase 7 total: **$1.2697 of $1.55**; Phase 7 closed). The user raised the cap at the brief ($1.40, option A: pass^3 on every set a §2 pass^3 gate names) and again once one whole-suite run was measured from the cassettes at about $0.197 ($1.55; the brief had assumed about $0.11). `--phase-estimate-ok` allowed (user).
+  - Probe of scheduling + ambiguity after the guide batch, 54 cases: **$0.0822**, runs 704–731. 53/54; the miss was `who-works-saturdays` (held out, left untuned).
+  - pass^1 on failure, follow_through, memory_write and learned_rules, 48 cases: **$0.0216**, runs 732–757.
+  - pass^3 on scheduling, memory_delete, memory_safety, memory_recall, episodic, safety, permissions and autonomy, 132 cases (scheduling's first trial from the probe): **$0.2661**, runs 758–832; one case re-run after an OpenAI 503 replayed free (833).
+  - The new held-out case `in-three-days` (after the review): **$0.0004**, run 835 (834 failed before the database was ready, $0).
+  - A typical member turn cost **$0.00085** on average (p95 $0.0014); the three moves that hand over to Sol after step 4 cost about $0.024 a turn.
+
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$2.0119** of $5.00 (the runner stops at $4.50).
+Total spent: **$2.0122** of $5.00 (the runner stops at $4.50).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|
@@ -879,6 +886,8 @@ Total spent: **$2.0119** of $5.00 (the runner stops at $4.50).
 | 831 | 2026-10-24 | P7 S33 pass^3 part 74/75 | completed | 2 × 3 | $1.28 | $0.0011 | $2.0098 |
 | 832 | 2026-10-24 | P7 S33 pass^3 part 75/75 | completed | 2 × 3 | $1.28 | $0.0020 | $2.0119 |
 | 833 | 2026-10-24 | P7 S33 pass^3 503 retry | completed | 1 × 3 | $0.64 | $0.0000 | $2.0119 |
+| 834 | 2026-10-24 | P7 S33 new holdout in-three-days | completed | 1 × 1 | $0.21 | $0.0000 | $2.0119 |
+| 835 | 2026-10-24 | P7 S33 new holdout in-three-days | completed | 1 × 1 | $0.21 | $0.0004 | $2.0122 |
 
 - Run 5, gpt-6-luna: 12 calls, 67483 in (38955 cached, 28492 written), 498 out, p50 1258 ms, p95 3286 ms; 3.61 chars a token
 - Run 5, gpt-6.1-sol: 4 calls, 24750 in (12287 cached, 12451 written), 224 out, p50 2023 ms, p95 2349 ms; 3.61 chars a token
@@ -1770,4 +1779,5 @@ Total spent: **$2.0119** of $5.00 (the runner stops at $4.50).
 - Run 830, gpt-6-luna: 16 calls, 137329 in (135339 cached, 1942 written), 550 out, p50 1270 ms, p95 1606 ms; 3.73 chars a token
 - Run 831, gpt-6-luna: 10 calls, 84997 in (84196 cached, 771 written), 345 out, p50 1139 ms, p95 2018 ms; 3.72 chars a token
 - Run 832, gpt-6-luna: 16 calls, 140193 in (137215 cached, 2930 written), 602 out, p50 1246 ms, p95 2933 ms; 3.72 chars a token
+- Run 835, gpt-6-luna: 3 calls, 25728 in (25319 cached, 400 written), 92 out, p50 3189 ms, p95 3714 ms; 3.71 chars a token
 <!-- ledger:end -->

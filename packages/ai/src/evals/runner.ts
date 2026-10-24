@@ -125,10 +125,13 @@ export function summarize(results: readonly CaseResult[]): {
     if (inSet.length === 0) continue;
     const passed = inSet.filter((result) => result.passed).length;
     const rate = passed / inSet.length;
-    // A set whose every case ran at least three times is judged at pass^3.
+    // A set whose every case ran at least three times is judged at pass^3 by its pass^3 gate,
+    // and its first trials still by its pass^1 gate (playbook §2 asks for both).
     const pass3 = inSet.every((result) => result.trials.length >= 3);
     const gate = (pass3 ? EVAL_SET_PASS3_GATES[set] : undefined) ?? EVAL_SET_GATES[set];
-    sets.push({ set, cases: inSet.length, passed, rate, gate, meetsGate: rate >= gate });
+    const firstPassed = inSet.filter((result) => result.trials[0]?.passed === true).length;
+    const meetsGate = rate >= gate && firstPassed / inSet.length >= EVAL_SET_GATES[set];
+    sets.push({ set, cases: inSet.length, passed, rate, gate, meetsGate });
   }
   const usage = results
     .flatMap((result) => result.trials)
