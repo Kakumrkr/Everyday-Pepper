@@ -5,7 +5,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S36a** (first row of "Planned sessions").
+**S36a** (Phase 8c "a" half, scripted model only; branch `claude/s36a-suggestions-drafts`, pushed without a PR). User at the brief (2026-10-24): "Go ahead, start with the recommendation and complete the tasks": D-1 A (a morning drafts pass, once per business at the template's local hour, folded into S38's briefing); D-2 A (business postal address in settings; no nudge drafted until it is set); D-3 owners/managers approve nudges; D-4 ADR-0040 pre-approved.
+Tasks (tier in brackets): 1 ADR-0040 + contracts [1] · 2 migration 0045 (`clients.email_opt_out_at`, business address) [1→2] · 3 unsubscribe (signed token, public GET/POST, RFC 8058 headers, footer) [1→2] · 4 draft writer (port, checks, cap, metering) [1→2] · 5 morning nudge pass → `message.rebooking_nudge` proposal → feed `needs_ok` (AC-W4-1/2) [1→2] · 6 editable draft card + API [1, spec] · 7 `get_feed` [1→2] · 8 guide batch (instructions v6, `list_services_and_staff` v3, `find_availability` v3, rule/fact wording) [1→2] · 9 eval sets/graders/`EvalWorld`, `PHASE_CAPS_USD[8]` [1→2] · 10 end checks, push, S36b prompt.
+Done: none yet. Next: task 1.
 
 ## Last sessions
 - **S35 Phase 8b (2026-10-24): the feed and insights, no model, merged** ([ADR-0039](../adr/0039-operator-feed-and-insights.md)). Full entry in [session-log.md](session-log.md).
