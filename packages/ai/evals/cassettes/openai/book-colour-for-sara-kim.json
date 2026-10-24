@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "89ef676f4ef0e129671717e9d81065ab40f8db2192488f65c9b905dd75343653",
+        "fingerprint": "e51a402697f4e6a4330f0078640f24dffad588c66b26ab7490d5ac5d6f6174a0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Ar0jYQwjPpREKt4CaGSXyVt0",
+              "id": "call_NoK2iN2DjfNzQlTOTj123SFw",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8357,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8787,
+            "cachedInputTokens": 8766,
             "cacheWriteTokens": 18,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "c4b67748115ed64ddeae9c3827444bee6da0f94086c3633fc5cabe709dc9bf47",
+        "fingerprint": "2cc808f25eb4332e3f0b857c043ab4ca242617939fb96a0569c59533ab56a1a7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Heb6rj1jhimhGX3ps7kpys5S",
+              "id": "call_ovcunZgNuxN6P4fGKphLyiIM",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8648,
-            "cachedInputTokens": 8354,
-            "cacheWriteTokens": 291,
+            "inputTokens": 9245,
+            "cachedInputTokens": 8784,
+            "cacheWriteTokens": 458,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "65a746e70d300284873f3e0731860fd2925ca222a72187dd798138a2c34fd1a3",
+        "fingerprint": "1af4bbfa159abebb5b467813b8191612f166c9c1a76f9f76d385e5897b512bdb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_sYys5FqPKtKuOG1AXfQG2qtc",
+              "id": "call_wajm5mwhMdjQ6UEjvfKIuQqP",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8732,
-            "cachedInputTokens": 8645,
-            "cacheWriteTokens": 84,
-            "outputTokens": 118
+            "inputTokens": 9328,
+            "cachedInputTokens": 9242,
+            "cacheWriteTokens": 83,
+            "outputTokens": 110
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ccfda0e90dbe44a5429d293a693f13664cea287faafb2b57e3cc0fb32f1ec2b8",
+        "fingerprint": "2d78d24f33dbe929403183288d40e1fc61379b5cca9cfd59c00bebeddb5040dd",
         "response": {
-          "text": "The booking request for Sara K. to have a colour with Jess on Wednesday, November 4 at 10:00 is waiting for your approval on the card. It isn’t booked yet.",
+          "text": "The booking for Sara K. — Colour with Jess on Wednesday, November 4 at 10:00 AM — is waiting for your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8929,
-            "cachedInputTokens": 8729,
-            "cacheWriteTokens": 197,
-            "outputTokens": 43
+            "inputTokens": 9517,
+            "cachedInputTokens": 9325,
+            "cacheWriteTokens": 189,
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }

@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "4c24468b2d944183ca9563a8a3aa1a38362a6eadcba4901354fe4c723429d6f9",
+        "response": {
+          "text": "I can’t email clients yet. I can help you add a reminder to contact Sara about being due and the 20% offer.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_04879d415c79f461016adce126820087d2a636f18095bb9a2e",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3OEnAS7xwnzM8OxFYQx-S4eNbCedj36fjCnSb0cBx0mbzMdkMTv9Aw4VZ97SABUoIsddbCtQgxTm0MqAyQDaZuwS0npexXZOWWIeF1xINvici-wyHsUVuvzZfVJ_dpPVQ7Y0zLU35d8GdpEPQniGQEhA-9Loys8i_O4-x5re1NvmLhnNaeJzQyXSsCEIsNHqKL7KaT8gZJtX5imLq_Ab2GABS6tRz6GpopHCzFDGPUSNrA-WX1qfOcS5FHfiHKauc8Y22JLzrvLqTdq-D3w9z2OiO1u2YwDp9vkpZlbLfrSeIyujH62WwR60VtUiF_qxLvAAZnPeubVfKyOjvQVQyYdt4cjQ8s1ud4Ff4zAYlzjNBPZgJr9fDMdoVJXZquj_989VSEQDbJ_PW0QQicnIqtp5jGDmeElnM2QcCAtUDfgaolgB-EmV4eJHE7nXxkiPzQYZIO5XTv1xjnyr-hDV4FkkwI6J9FsU4e8yILZPmlPggWw_dmxleuyqu0q6OKuNQQDiz0IL37S8Z6CImI0HX1beCGMBWLChwS97OQO1bbywCRrW4VtYpdBx4JhQkKlgWO5WN5q1WPr11JbyN4mX-V-I5wMNM3v_2EZ_sh6yacm_UkPdVtMP4WwnvhtyaPH0u4aRM4gQ9QoxgaUPHZCLh1oICOVDhbHnQjHL2Rj5ZN3dmmHOY97dZGXpT6LezJv9ZvBp0IPKJ9Wg8gk4MNTMN4-pwDcH5x8tcqusKN4GpFxZDBuGthNdVDCXG0tM9PtbWd1lu8PD8vG_oBV5MV05cYl0jdVNhN6gEanNla_9jiZG4wfsBOqhd8FTysdkXVb6t-AvJ9IZdcW7tYxrCVPiH281v6o6brgIU7xtNgFtXAW26nPcCaj_U50Hjsff-OjZ6F53wF3Zbxn3p-Rkvz6cJnKsRBA_TXfcCqJmnY1tyX1jZqU6YmyizDZ4wgj4KVfvbxygJl-pXuLVbL1H1M4KBfA9qDNjmZTRK9VbB-oeHcAMU1CJlwBJM5I2oehxXuEfggWk3TWNkdil86HIBrm1CVUSg0LZNYm5UwNDGDH7umKRsY6NCm97UtmHBdEIx1FuvfxT-IZtf3ZuFgTClo1R324RxC8Ou45KB9WNvDLKxTt63NxJApbX4u5DdrhpNIRRxHoTAkTzDMH_UcLwUHv1xeZwGufdtjc3f0JtPl6s0SXJONSUk4q8U-4LQgNutOJqz6zXHU7XUn01ild9n3BrwlMoTYHcCsbk8mFeEc-IYtNXGe2Br9AUGQ8KiVxxLY6mJFThqbqmgfeU5ly6rGz_XjpvFuSRZV-9JYy0CHV4fWn6JZFCdWAQagmkJ3k8ZaO-DCmUkeKEwmqFyhwYWjh-H5j1tw2Jroa0kfMu5RfJCqtkefNd2s7oVeDmX9LPZGjgIdUItrxwFXNJ5xt7A4sb7pIsIdVp-GAlnBLiQ68pO_WflwXAIIxGD2asS1Ik0fvS4SDv7KTKb_RpiDxerX26iAA1VM2N-uGcY5bUD-bJIaurGi6xYvhpcsI_3EVbEkX0FMyUDmGJGXdLHvO7-_z8sLdnk_jSimClEhkbwX8t5cV-WkONakfBTcJ-2OapRM9tn1pUyPd26N4sCHnRWsqScZe1tzlOZwjYFCC2nL44Dtr02l49mzarSxvQ7OT30j6NdWD_cynl6cCWAXnw8Nf2MkELCB5YbjcVfcKCWA5cdWMivL54csMYJh7eEXiDhb1Leu0B8WhZDvKm7loYQ5ummjJYLvztfh44-q07BzNJWVAeoK96USDHj4c84ZO_IC7hWZZsBC_peX8pb17ZKWSe3UOxybAK0EPXsaWsgjHHolwhOMc3hPFePpWI7MpF39tsUNwKSK_IGb9OA9Z6EB16bJBSwpbXAm9mpSzTlWPRTm3IgduHSLerv3HDSRgNcX078Phl-NMqVgwNuwidhWe5vAWX1w==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8786,
+            "cachedInputTokens": 8766,
+            "cacheWriteTokens": 17,
+            "outputTokens": 73
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

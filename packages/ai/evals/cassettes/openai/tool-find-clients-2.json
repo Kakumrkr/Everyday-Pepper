@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8ea896292cd8c0963fc6313bc4fbf3b8dfee0ee779a33b0f1bef7c955b605bfb",
+        "fingerprint": "12aa61518c7c45bb61e33d28a9923c37b40e62d893fb0608ef10f128a53d91ef",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_RI7kTC1FvQKPtpAnHMbaZz6V",
+              "id": "call_nwTHx9yEAUa5v4QxVzaVHXce",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8777,
+            "cachedInputTokens": 8766,
             "cacheWriteTokens": 8,
             "outputTokens": 18
           },
@@ -25,39 +25,31 @@
         }
       },
       {
-        "fingerprint": "9297078761e76e405fbd1ca516284f87f71d430455a43e28d1cf05593b242202",
+        "fingerprint": "aa2b0751605650c333f3a67dacd6a5a8bf301c25b9e0a6c5c9188b3c0fe71cc9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Exi3CgUEQG8pBYP84tO5bkQi",
+              "id": "call_l3pVDvDrxg94wtyzdXyDAjgd",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_00a4142074434af4016adc02f94f2c87d295ec68c981e5dbad",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3AL5pDg_4qqBC407TJ8QI0KLlm_WJgXBCAvUs3Y1CuqS5Z9AOPaIkyMr8inZMtpj_kfA2LmCb5puc8d1tSlYYc-YxW19sbE7kuD2ud3aWZ3bDZnzrOh67CKlzXY3biFsVU-uoh94GhTCPVeEpoyINrVGWw13QV1QmK5SJSHoKtswQavuBRLlv_dLWYuT8S4zgwJgHTKdtdepyS_-Ig75SObava09OQeBysvfEN09qmWuJDS33vQiYKTDfd-VVfEaZAqunARuJVaL84PnuyTBjCIS7Hia2NrvDgX4gqdNPG7Xzc-rP2Uk6baNslyJo9JRCQ58NnIto1SqA1_3gCbjYCyZr0R6HYN2vw94EnJqm4eqNt35f4wCgWFfNSrDcreQ6VDDmMu-Dsu8Za3aiqiloG_ythakc3mnjUvH8aAbz2V11bOU2jYpoYsq5ECFeKzJkmtX-sYNhh9NsE4GlrL8EkVHleffmOQ4bSIpfku0zoUUy31F2novwmCFyNmKqwre6RZ_vrQVCES6Ctf6x2oTofM8nOCTiJuWKfsw9PkxSxq9j8sp8TghLM5fiv04XRI7bgmuMoG1qdUlIX3JtuWUK4gIlguzpbir9ZmAAIMNd7oQy3Q26ZadY108KSWU-9-U6fMaHZRS5HXqUiaQYAVZ1EHh0HIGVJwbj8b2J1sXXdJPKnaa7cXUrmP_1qV78gVV7wU7RaLBhe8Q6chVsjRWrvHtUk1hPGdkrQTlTIXflY9TfkQv4u6PN44kGVAjAl5Wvz0-KV0T_FwEEpYt-ij-S0dbpQ3gBSjjMAtsDCsZSG47e037OAOeO3MXOSpoFTuOHZTu8n6wR-wYLfLZBGkpiYlioFKiZNb8M4xL9v9nfnrbMWvSuVkxcifiV_Yy8UU3S1N59ve72mcNsu8PCsc0krLvQoyM9PxmDOVZ3cGMO496-V4mlJghTTK6l6vdLGiBUeIa9VuU94uFYQTlhtBw0Rir4bStv3cfi33KlZstjB5LDikgfwOfNNuZ3IcwFpqStP8THCqsuluL_x4e7NyWVMQO3MHECIvZj4Wo0FBHVLEv0y6x-Emz83yK0-wmlXkqCOh9_7BWlgKWT3utJgrg8lvrcFTLKQ0NrZAejZsEoRFPUvzJpZ2OhDBx7iejJpHRh1iuu2R26tcoAAzJNbjLeXu9pO8oACJEOqsYkjQExvOkjJJt2nxo5aOZp37HPu2CWkmS87fRnott0V8KbAxSIGArQdOb7ljUwy4EpI9wlUpr7J3HpaOF_gk9Kz8fa5T5raqHv4tSJtL-5uF7ILRX_NCe0tRD5YjWKl6EI-CD7UUlzxkX8xfptVEnfxHZA7QoMWa2mQmft6ph1YrRwTpeT0y5dstWleQKzXydXGxeKsWPCWaMWhLRZN1xh_rVXEnkQwCUHOiLjErm7LlaVGP-DwNI_DlAMh3eHVJFSy0SWmTMBgJslk068eg9EUHItcpEhZkfhxqpmU2skJVctwwODI61sqlA978h91nMgi-GjaW8MHtvsbdOw4xMNi22az0F6PRCxS-xOLOPxgDyB4fpvDKqV4eQEpGgoRtqEXA5TP7uW3w=",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8435,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 88,
-            "outputTokens": 60
+            "inputTokens": 8858,
+            "cachedInputTokens": 8774,
+            "cacheWriteTokens": 81,
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "94d356caef7a76e4c6e6dc10730fd11e50b8d9fa190c5c3641be3cd286aef7d4",
+        "fingerprint": "bdf492cc0e5041fbffd4f6a1752857a894569e236b8d1fbb20d00560e262569b",
         "response": {
-          "text": "Sarah P. has no upcoming appointments to move.",
+          "text": "Sarah P. has no upcoming appointment to move.",
           "toolCalls": [],
           "replay": [
             {
@@ -67,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8572,
-            "cachedInputTokens": 8432,
-            "cacheWriteTokens": 137,
+            "inputTokens": 8968,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 110,
             "outputTokens": 14
           },
           "model": "gpt-6-luna"

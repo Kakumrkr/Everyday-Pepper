@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "09e72ebf87ece4619f255a1f3b7a38afdc8751cc7af02580f84a004868ee223c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ksk4p1dqOH6nf5KmaX9HRjEe",
+              "name": "write_draft",
+              "arguments": "{\"subject\":\"Time for your next haircut?\",\"body\":\"Hi Sara,\\n\\nIt’s been about four weeks since your last haircut, and Jess would love to see you back at Juniper Hair Studio. There’s an opening below if you’re ready to book your next visit.\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 425,
+            "cachedInputTokens": 0,
+            "outputTokens": 72
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

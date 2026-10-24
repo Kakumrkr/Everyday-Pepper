@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "44287f4f727d688161039f35c4b43ca91bd9dcc5e282b5045a01d4d68ba1190f",
+        "fingerprint": "5efe5089da1ecf7813426632ca4ccee90a60bc22231331e37f80f5e194cd83a8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Fw7d9puOqutN8UPc5q40W9F2",
+              "id": "call_7ELbdYXGjAn8EKOUDvF8UTTz",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8349,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8779,
+            "cachedInputTokens": 8766,
             "cacheWriteTokens": 10,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "001ade590da2018e913a9de73098a88768531d9af31df79ccf289afd96e90491",
+        "fingerprint": "8c688774860be70de0a9c3a80e100a816f6f264932ed4533275a898702496352",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_nwYlnLjKhDMYnWHIKxWa1jiP",
+              "id": "call_FSjvf6bPGVP5huCURBqxqnmy",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8641,
-            "cachedInputTokens": 8346,
-            "cacheWriteTokens": 292,
-            "outputTokens": 52
+            "inputTokens": 9246,
+            "cachedInputTokens": 8776,
+            "cacheWriteTokens": 467,
+            "outputTokens": 50
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ed091edb4e60216a930c5fa5d92a560aeaad61e8b9ca1cb09f4c8822d0594f72",
+        "fingerprint": "866f6bd961d2a105ba9f15272fbc97cb6ac594ed72450dfb764832788aa6ff05",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_S6USC1ZEAGdfGbkAB5JTnhWj",
+              "id": "call_D4hdSo2QrGUD0fmqWD3Lwaze",
               "name": "unblock_time",
               "arguments": "{\"timeOffId\":\"{{timeoff:jess-lunch}}\"}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8984,
-            "cachedInputTokens": 8638,
-            "cacheWriteTokens": 343,
-            "outputTokens": 44
+            "inputTokens": 9573,
+            "cachedInputTokens": 9243,
+            "cacheWriteTokens": 327,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b06e3588b9e7eb615a0aa1781fad10146340966d2bf0567765f7c2e15a207eb6",
+        "fingerprint": "40fc8480201fdb8cd5a2cfe965908a4f85ef6961de673c794779e854abb2acd7",
         "response": {
-          "text": "Jess’s lunch block tomorrow, 12:00–13:00, has been removed. That time can be booked again.",
+          "text": "Jess’s lunch block tomorrow, Tuesday, Nov 3, from 12–1 is removed and can be booked again.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9092,
-            "cachedInputTokens": 8981,
-            "cacheWriteTokens": 108,
-            "outputTokens": 30
+            "inputTokens": 9679,
+            "cachedInputTokens": 9570,
+            "cacheWriteTokens": 106,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

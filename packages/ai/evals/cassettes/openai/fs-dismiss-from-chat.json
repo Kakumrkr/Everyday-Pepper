@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "59ace2081c8c707584679f314c16550cfb1e9eb47bd692d2ba007c858b31107c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ehYNBzK1cGvAb06ht0LFUDKY",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8780,
+            "cachedInputTokens": 8766,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f890039bfafca4dbd0161ede106e14614c94a0eef107bbbf3d28141923347bc4",
+        "response": {
+          "text": "I can’t dismiss Sara’s suggestion from here; it isn’t waiting for approval. You can dismiss it on its card on Home.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10472,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 1692,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

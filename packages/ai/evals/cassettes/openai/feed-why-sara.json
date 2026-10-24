@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c8be7290366bf2df9bcfb62fb6efe8fe1ae8dd6072810bb6310d50a7dc0fd67b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ys9F80QkZgAvXcxaI3zVYoAK",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"rebooking_due\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8780,
+            "cachedInputTokens": 8766,
+            "cacheWriteTokens": 11,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4f4cf1d569ea42f4a275e1548f487d7cc64e6fc218c34abb4deccccbc4cd0067",
+        "response": {
+          "text": "Sara K. is suggested because her last haircut was September 28, and her usual 28-day return interval made her due on October 26. The suggestion is for a haircut with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9119,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 339,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

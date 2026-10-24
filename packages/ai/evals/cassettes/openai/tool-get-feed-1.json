@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d1e71fc6002a1a308936301621ec18b710ad0407bfdafe145c2de8760be91c85",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_KBhNMUMEkZ7Sgr0ZauM2KK2f",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8780,
+            "cachedInputTokens": 8766,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e2f1e02ff094afc86be711f24c11d0843b6e931982852409444123ff062a6309",
+        "response": {
+          "text": "Nothing flagged for today.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8828,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 48,
+            "outputTokens": 9
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

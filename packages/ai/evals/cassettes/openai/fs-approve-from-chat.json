@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "09e72ebf87ece4619f255a1f3b7a38afdc8751cc7af02580f84a004868ee223c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_aG7qhxDMokrn9xDmVU0qdCFz",
+              "name": "write_draft",
+              "arguments": "{\"subject\":\"Ready for Your Next Haircut?\",\"body\":\"Hi Sara,\\n\\nIt’s been about four weeks since your last haircut, and Jess would love to see you back at Juniper Hair Studio. There’s an opening below if you’re ready to book your next visit.\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 425,
+            "cachedInputTokens": 0,
+            "outputTokens": 73
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "177a8439441c8baf2ae8ceecd2bfbb32d7e4254d341585e76f732dc907382ef8",
+        "response": {
+          "text": "I can’t approve or send rebooking emails. Please review Sara’s email on its Home card and approve it there.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8785,
+            "cachedInputTokens": 8766,
+            "cacheWriteTokens": 16,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "45a9d02216b1a510b4d2cfbd61030ca600d857fb63b92ef952c428b3429b6fa9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_yJ8xgIFei8qVn7rvnpNhbfiP",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8780,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8777,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ca9d4333ee173941729192b9fa40e7f0eb233e3e3e044774313aa17ddbdeba7b",
+        "response": {
+          "text": "Yes—Jess and Marco each have a 9–5 open gap today. There are also two rebooking reminders past due: Sara K. and Sarah P. are due for haircuts with Jess. No emails are waiting for approval.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10382,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 1602,
+            "outputTokens": 52
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

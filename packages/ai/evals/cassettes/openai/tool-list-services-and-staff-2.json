@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a7f49be140824f2de3b275f1d053ea11bcc1e2941c1fb796e2c753d1cc541d31",
+        "fingerprint": "f324101fca0226157a2ac234bc80560beb4d44d9bb386316178fdfd99bcf8298",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_P2z8OgI3zF9D2hBsQycMrBjS",
+              "id": "call_KjYGbL4gAQcZ4CaB7rPvX8mU",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8349,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8779,
+            "cachedInputTokens": 8766,
             "cacheWriteTokens": 10,
             "outputTokens": 16
           },
@@ -25,11 +25,18 @@
         }
       },
       {
-        "fingerprint": "302b24877ceeb2f6e368c5e28f9233b91fb18050d42185af117713d98921482e",
+        "fingerprint": "00cde4b5255a8656b02fe049faa60f944edcefbf20e51c948ab8da35a3987afa",
         "response": {
-          "text": "I don’t see a beard trim in the available services—only Colour and Haircut. Marco offers Haircut. Would you like to book a haircut with him instead?",
+          "text": "I don’t see a beard trim in the service list—only Haircut and Colour. Who should I book, and would you like a Haircut with Marco instead?",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0850e8724a5773a1016adce20aa73887d28b19486b46786d51",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3OILq956lvcNuhNRXEALj2wcrbjzYdAivrZjPgQ2-tyF43BjyCS5hqxDwYu11-4QZZ7lu7swkL6ZsT-l4w2hSvEXPU9iQuOsjB_X6GIP_cL3IIq7g_mt4t1ZPhh219mRNDhbJhvUFtFKIDAnhocTwZKS04dyjkhXqmRhWYZYtgZvgNRu1tT0PrQpB6-VXwW_i5Bbv5k03SWdRo82G_frgIA_Sk37hYks7yhLd7Qqz8oitYMPyP-3CHM2o4rxP-tlcx9dh9UnIKTSbLft56LJZXAWvixZYkcCBl4RQSkV1AZuQvB8PiQ6F83TeNiwLrYBJyvxk91jJWN4fScxm-3h5eBViInbPl24-lNBv055-xIGP0p0SBgAYKdM0SF_UPTIiW5JiBzvG3o9K_MpC6sEvStOr14KyyEQDcnVJSQzj2YHkwVbYNhRRkDiLDcHqlofAgqwC9XagKzNV3uMvB2PhAO2VJ-fPzhPleP1ii7i5_LnnYs5zlBSoWG9-meZSv9vUhgS477Xg9HlWs2vTEU7TNz9UuVX7MNtapq7AVUUv-lTN4PpVivsmcKyBuhbh1kO2xohz68dInN2tQpIfbIjIH_iGnP2gtfOntikRyJhQbWYGmO0_ZVAF-Yz4UIaQTqwUU0ctVWOu0IJBF8OhPAcsYChx9t-V5jGiYapxJMrtuKI3jose7DeApqwmXEHrK2OwOndfihzsyPFDeNlY7iq97ALJvQX6I_3_HpJel--EyFoRm5GSfSxUyUNNck9_qx-UzuQBGErAck32gUqXGUV9ntB_GI4GS2cDihPLY-iSNCbzb3m0YXk2KrClekFuzBxpQZ9YPnrXkPiIgGR9EyKJa9yS2YoRSrFECIsLfJWwl8M5jKGRBwj3Pc80kjcN3Y4M0MPz04Xky5aA2IwBenEGakUZ2HcjGTkk6BSJ1jGS480WLQc7Y8aFsNy-6dQJT33l-SGpLBsHfUjwDViH71YYyyd1g6VWjdBTB-q5-U19yUCgTJRLwBnP3y6HA08NGNf-isZzyPCvbmaybDe_iaIVorfYo33jeJA6OFFuPjFmPZqjGEzyz5447SBnR6kkDFnZh7IBsVC5tIJymEfMnFA6iIQ0ikDfUPoP56QsCC_GVVvdP0kjo2R1iOLQNq1UusEWjPOHB8NGRjOVNIwOKHccllK_vYQWjSqStJqsIdTVlhKGcbWSH50AxG3cPysBmuHlQ9_dfVE8PRuHoHdef1tN_ZHpBlsLqt-FNQQLb6g_JXYDYqAud8wyHYCIf-gs-ZvvVokA47DabBB3Eshf2FHbVEru9_ISHdlUcoCHwsdLY6G9jpAhIju-I6NlHeM56ZosdDVMUeRqoMktEWYahBQ2X1xY2TQVyUqP-85JPlyP8bjBTZoj-L7Aro1MpsrdVykDdR12w9PfsEnh323dp6NxOpYQlMsavX-P7AtR3HqUBSS9ZVqyXoU69dBY_S2fsLart9jgVBXojZOaOM6e6NVlFq8E4WI_IUH8Svg0cEa_3Wp_A9t9pWDQ-p3HUHI2ba7G4Eyw11zJ1v-TzLwOfFphtr4VfYm--EjAn5nkQPu1l88MtNDMKHSnWx0oFU9RZW9vlxiMiXwEwsTw1qRYldZas08PATZlJ7i9yUvDUmtWU_3fTqy3MJPZPyJ0oM2eWXKG9NesGDCyGrpQj5S1VOyn3ckWuONLzfmuJ86IQcW3_jKJY2lOw94Kn_fqBHfTuDpsPiy4hOjW9JW8HxhREqniMLH28VxttPgTb95H_YBrjPuB39V7e0X9i1KJjCI8cbLhqyJill86ziUDtOEJF-0fYpxQKgLWC6ZvBjQCLLwWgAC0zTwSXR7pTZCfK7UWqiJ8YE_YMEQjPdHdlFN2n7ijnQJcvwfBTkJKPrVyHI_d9VF3P0V6kSETnZvAH9fPlLTpE4pojFx2M7EAqk3ApLr1lYF48pLqwFk5yQvnM82aDN1jr1Fnp9Z3pf17CICavd5ThAOzItq--lwoShHU8dz4n6b3LujRUAxcrC2GPHqc5G0gM2_RlLfrn16TSoLgT5A6ejCKJ2e1IGEnqDdlDajd4m0J6Jx8o9iU5d4bRPOI1-79MxN4OBd1_WtkyNoSDDBzzGzWZobicClbTSddOgpTmMiHg==",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -37,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8635,
-            "cachedInputTokens": 8346,
-            "cacheWriteTokens": 286,
-            "outputTokens": 38
+            "inputTokens": 9253,
+            "cachedInputTokens": 8776,
+            "cacheWriteTokens": 474,
+            "outputTokens": 92
           },
           "model": "gpt-6-luna"
         }

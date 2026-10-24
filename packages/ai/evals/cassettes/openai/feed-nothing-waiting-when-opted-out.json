@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3c2ef225b312c09ea406f1726cc7a80de09bcedea40a4a17bcf10a3a4aeb7003",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_82SkmR7OorGhrynQFdvfC89z",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8780,
+            "cachedInputTokens": 8777,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d0bf56324025937f601694866afefb48fe22a7b70e2879a57a0d9818177aaa1a",
+        "response": {
+          "text": "There’s nothing waiting for your OK right now. There are 13 feed suggestions: schedule gaps for Jess and Marco this week, and two clients due for rebooking.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10430,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 1650,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

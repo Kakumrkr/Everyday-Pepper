@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "bf34a5c5264b05bea158754dd8073e9c26c57304b4f3b5b47bd338295b57f2dd",
+        "fingerprint": "2fd599eb593221ce65355ba3f7abd008d13ec5f0754e7ffd5a801f1a6b8a19ee",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HHDWSinOsUB3EeMJPXI1VYCk",
+              "id": "call_KZGKw4tdiW0mNa7wbaJ9cafM",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8349,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8779,
+            "cachedInputTokens": 8766,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "cd382710311bbe9c889a6dc9854764f7ddf19fd6e30e558384286e8ec64e108f",
+        "fingerprint": "8801b01b5fa829ccb6810c11535df16737709053e6ee431732f7f32e7ca2af69",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OIWElmZAbPq927EXIbEEGSKY",
+              "id": "call_ojEka6fHxyaY7iiE5d19If4p",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8431,
-            "cachedInputTokens": 8346,
-            "cacheWriteTokens": 82,
-            "outputTokens": 41
+            "inputTokens": 8863,
+            "cachedInputTokens": 8776,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a2f71c33ac426ca7883344e950ddc890af9193af6bd0bd04833e4be7e4552f81",
+        "fingerprint": "ae0f2b601ff6a6a1a64acb54b35d985ec7bbddd9fb8b3b36945042c0a3c31e12",
         "response": {
-          "text": "Sarah P. has no earlier visits recorded, so I can’t tell when she was last in.",
+          "text": "I don’t have a last visit on record for Sarah P.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8543,
-            "cachedInputTokens": 8428,
-            "cacheWriteTokens": 112,
-            "outputTokens": 24
+            "inputTokens": 8979,
+            "cachedInputTokens": 8860,
+            "cacheWriteTokens": 116,
+            "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }

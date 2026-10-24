@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "6630d845e86ec1eaee2b3a46edbd23281e70ce3763dd38ea3030d9895fcf2ad3",
+        "fingerprint": "41c5ea26b0d7ee790c7953ed894c0c2c46b6673ac927a40ef81955efed568c41",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_pdAaZEbIhrB6qrNfwGltkh58",
+              "id": "call_BDLxW7F6myOnP2nxtgVCFJ5a",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8352,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8782,
+            "cachedInputTokens": 8766,
             "cacheWriteTokens": 13,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "23f84e61c6243269eaa2f0440cc82b5e08959f942e7e01cd4fc66acef1a49491",
+        "fingerprint": "a517ce9c6315c4ee0ee7476c8f0e68fb2feb1f774ef111cda3d39e59209dc72d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_yRuSyz1fVVfRe97d4ThbsEEp",
+              "id": "call_YXSk4cXzXvd9HWYRD6FcDHoz",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8639,
-            "cachedInputTokens": 8349,
-            "cacheWriteTokens": 287,
-            "outputTokens": 54
+            "inputTokens": 9242,
+            "cachedInputTokens": 8779,
+            "cacheWriteTokens": 460,
+            "outputTokens": 50
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "30d160e5a24e2563e0cca2224d22f5698f61744f8128c30e4a1f98bd6fbddefb",
+        "fingerprint": "83637d8e17bd3883d3eca6dbbe4752890dabaca99980872f2cd516e43bd46631",
         "response": {
-          "text": "Jess has one booking Friday at 2 PM, ending at 3 PM. I can’t tell from the schedule what time she finishes for the day, so I don’t know whether she has anything open after that.",
+          "text": "Jess has one haircut booked Friday from 2–3 PM. The rest of her afternoon, 3–5 PM, appears open.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8910,
-            "cachedInputTokens": 8636,
-            "cacheWriteTokens": 271,
-            "outputTokens": 48
+            "inputTokens": 9494,
+            "cachedInputTokens": 9239,
+            "cacheWriteTokens": 252,
+            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

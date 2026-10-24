@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "09e72ebf87ece4619f255a1f3b7a38afdc8751cc7af02580f84a004868ee223c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6RRb5GcyqfJ7ucCeemHFXQUq",
+              "name": "write_draft",
+              "arguments": "{\"subject\":\"Ready for Your Next Haircut?\",\"body\":\"Hi Sara,\\n\\nIt’s been about four weeks since your last haircut, and Jess would love to see you back at Juniper. There’s an opening below if you’d like to book your next visit.\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 425,
+            "cachedInputTokens": 0,
+            "outputTokens": 71
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3c2ef225b312c09ea406f1726cc7a80de09bcedea40a4a17bcf10a3a4aeb7003",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jI0VhBKuJ4WfCXHoi5wFobGm",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8780,
+            "cachedInputTokens": 8766,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "242d4342956d0b28ba0610b1798daaacd1ad9a3e82a2caaa1f0d909819b785a8",
+        "response": {
+          "text": "Yes—there’s one item waiting for your OK on Home: a rebooking email for Sara K. with Jess for a haircut. You can review it on its card there.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10422,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 1642,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

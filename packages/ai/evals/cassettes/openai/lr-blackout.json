@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "f3df6b0f8940abf198cc92fedd02eb16cbf63a7e34ff16682530f6ff79454097",
+        "fingerprint": "528cfae74522241a2fa89c6f920037612196ddb7289ecdba459a1bc2373418fb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_B4o6I5xWL2foFGwrgW0L34AO",
-              "name": "remember_fact",
-              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"closed_days\",\"value\":\"Closed December 24 to 26, 2026.\",\"sensitive\":null}"
+              "id": "call_49wek1lw3WFqpwQeRq6Nm9To",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8359,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8789,
+            "cachedInputTokens": 8766,
             "cacheWriteTokens": 20,
-            "outputTokens": 47
+            "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "61366d6b0198c459bba4bf958a6e82ddd3d1e347f14851bfcb8e75feb6da462a",
+        "fingerprint": "db33e3105876e1a8e7c149ac2477eb34f25e34fca238bf62b71c73fd6a11104a",
         "response": {
-          "text": "I’ve noted that Juniper Hair Studio is closed December 24–26, 2026.",
+          "text": "I’ve proposed no bookings for December 24–26, 2026. Nothing has changed yet; please approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8446,
-            "cachedInputTokens": 8356,
-            "cacheWriteTokens": 87,
-            "outputTokens": 24
+            "inputTokens": 8946,
+            "cachedInputTokens": 8786,
+            "cacheWriteTokens": 157,
+            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d513311518702f57338d36b27cc1fcb8731d4a7fc4a06414e92ff32e4d1e1097",
+        "fingerprint": "31ae5ec7dba153067bb79f503a91ee035e59a831eab2b8cacb4db8f8a0308de6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TQzk8fSm1rlpMHj1hGGFnVK1",
+              "id": "call_dLebIoloS61UciCW9cPHwMLX",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8356,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8786,
+            "cachedInputTokens": 8766,
             "cacheWriteTokens": 17,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "046e72eba0ab0bcfe0474292bedacc894d4684815056aa35f4a3a106834de79c",
+        "fingerprint": "37c1187ec49b26961ba9dee31baefa9ec89eba4c1f537bbea8e6122e5a4ef02c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_tEScvMiUdaWsZlc7nwt2TLgo",
+              "id": "call_51S1tXsMWtgLHWNonyrId0kl",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah Park\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8642,
-            "cachedInputTokens": 8353,
-            "cacheWriteTokens": 286,
+            "inputTokens": 9246,
+            "cachedInputTokens": 8783,
+            "cacheWriteTokens": 460,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "37603320c6de7422374f51a8a74945364802d1ee62a22b44509036e41e02d96c",
+        "fingerprint": "3dcde43aaf145f20209116b8add66534fff1362f7d6a16cebf4d2daa1a66be95",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Sds897IDVY0wTo6Py6lhLezs",
+              "id": "call_YovXXVgdibCLrXGKnprgBeNy",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"emailClient\":null}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8726,
-            "cachedInputTokens": 8639,
-            "cacheWriteTokens": 84,
-            "outputTokens": 116
+            "inputTokens": 9331,
+            "cachedInputTokens": 9243,
+            "cacheWriteTokens": 85,
+            "outputTokens": 113
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b25fc5875bc96832a3200029d548202ca0062ad1931c4136741cb0aad50a9b68",
+        "fingerprint": "d307001b2e35029cc8f0a9d85ee1d4a252b716e75f05363267550e5b662aa117",
         "response": {
-          "text": "Jess isn’t free tomorrow at 3:00. The nearest available times with Jess are 1:45, 1:30, or 1:15. Which would you like?",
+          "text": "Jess isn’t free tomorrow at 3pm. The nearest available times with Jess are 1:45, 1:30, and 1:15pm. Which would you like?",
           "toolCalls": [],
           "replay": [
             {
@@ -81,9 +81,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9035,
-            "cachedInputTokens": 8723,
-            "cacheWriteTokens": 309,
+            "inputTokens": 9634,
+            "cachedInputTokens": 9328,
+            "cacheWriteTokens": 303,
             "outputTokens": 43
           },
           "model": "gpt-6-luna"

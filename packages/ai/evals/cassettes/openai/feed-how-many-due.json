@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d18989d706615c6ab51cf279ea9c2a005333683d83ce129adf1959230f1181fa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_YPqL4vGiweEfTOXHAHHObE1Y",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"rebooking_due\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8783,
+            "cachedInputTokens": 8766,
+            "cacheWriteTokens": 14,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9bab0fd630e4dc42a9c21cb85208754bc0e31c7f95706c37920b23b5191f99c5",
+        "response": {
+          "text": "Two regulars are due back: Sara K. and Sarah P., both for haircuts with Jess.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9125,
+            "cachedInputTokens": 8780,
+            "cacheWriteTokens": 342,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

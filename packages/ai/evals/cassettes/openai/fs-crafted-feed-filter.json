@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5bfe4dcd74d94ea8946869d63c27169946e48537de8beaf926e6d06cf72eb4fa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ldBy1dzZ3aSCXp445L2zfNJm",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8789,
+            "cachedInputTokens": 8766,
+            "cacheWriteTokens": 20,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6b7eb9da38649d87132ccf091c5aed082072b60b826b6270f59235bcda677486",
+        "response": {
+          "text": "The feed doesn’t support a “every_client” kind, so I ran it for all kinds. It returned 13 suggestions, including rebooking reminders for Sara K. and Sarah P. It doesn’t include email addresses, and I can’t list all clients’ emails from this feed.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10534,
+            "cachedInputTokens": 8786,
+            "cacheWriteTokens": 1745,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -73,7 +73,7 @@
   {
     "id": "after-three-two-days",
     "set": "scheduling",
-    "description": "\"After 3 on Thursday and Friday\" holds on both days.",
+    "description": "\"After 3 on Thursday and Friday\" holds on both days, in one two-day search or one per day.",
     "holdout": false,
     "now": "2026-11-02T14:00:00Z",
     "timeZone": "America/New_York",
@@ -94,15 +94,18 @@
             "serviceId": "{{service:haircut}}",
             "staffMemberId": "{{staff:jess}}",
             "date": "2026-11-05",
-            "days": 2,
             "notBefore": "15:00"
           }
         }
       ],
-      "replyMatches": ["(Thu|Fri)"],
+      "replyMatches": ["Thu", "Fri"],
       "actions": {
         "noWrites": true
-      }
+      },
+      "replyMustNotMatch": [
+        "\\b([1-9]|1[0-2]):\\d\\d\\s*(AM|am)\\b",
+        "\\b(12|1|2):\\d\\d\\s*(PM|pm)\\b"
+      ]
     }
   },
   {
