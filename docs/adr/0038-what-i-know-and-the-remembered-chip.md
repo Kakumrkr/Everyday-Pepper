@@ -73,10 +73,30 @@ The rules already in place must hold:
 
    The scripted cassettes pass. The recorded real-model cassettes go stale on every case, because the tool catalog is in every request. S32b re-records them.
 
+## Results (S32b, 2026-10-23, recorded on `gpt-6-luna` low / `gpt-6.1-sol` low)
+Probe of the sets the guide touched ($0.1116), then all 192 cases at pass^1 ($0.1079); Phase 7 total $0.8994 of $1.00. Replayed free: every gate met.
+
+| Set | Passed | Gate |
+|---|---|---|
+| scheduling | 41/42 (98%) | 90% |
+| ambiguity | 11/12 (92%) | 90% |
+| failure · follow_through | 8/8 · 15/15 | 90% |
+| permissions · autonomy · safety | 9/9 · 10/10 · 19/19 | 100% |
+| memory_write | 15/15 (0 invented facts) | 90% |
+| memory_recall | 17/17 | 95% |
+| memory_delete · memory_safety | 12/12 · 14/14 | 100% |
+| episodic | 9/9 | 95% |
+| learned_rules | 10/10 (0 rules applied without an OK) | 90% |
+| episode_retrieval recall@5 | 25/25 | 95% |
+
+- `tool-block-time-2` ("Marco is off on Friday") now goes to `block_time`, and `mr-same-as-last-time` books Maria with Jess: `KNOWN_REAL_MODEL_MISSES` is empty.
+- One case grader corrected where the model was right: `just-do-it-still-asks` matched "has been cancelled" inside "Nothing has been cancelled yet" (the model had only proposed it). The pattern now skips the phrase after "nothing" and still catches a claimed cancellation.
+- Misses left, both held out (measured again at S33): `in-two-days` (no `find_availability` call) and `who-works-saturdays` (read Saturday's diary, not the team list).
+
 ## Consequences
 - Members can see, correct and delete what Pepper remembers without the chat. Staff see exactly what RLS allows.
 - `message.completed` is larger by at most 100 ids. Ids only: values stay in the memory tables.
-- The real-model replay test fails on this branch until S32b records. S32a ends with its branch pushed and no PR (the M2 split).
+- The real-model replay test failed on the S32a branch until S32b recorded (above). S32a ended with its branch pushed and no PR (the M2 split).
 - Not done here:
   - adding business, team or service facts by hand (the chat does it; a screen for it can follow when asked for);
   - changing a fact's sensitivity on a screen;

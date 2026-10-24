@@ -1,25 +1,22 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-23 · **Plan version:** 0.29 · **Current phase:** 7 — Memory ([Phase 7 playbook](phase-7-playbook.md), [PCR-005](changes/PCR-005.md)); **S31 done** (episodes and learned rules, recorded on Luna + Sol, [ADR-0037](../adr/0037-episodes-and-learned-rules.md)); **S32a done** on branch `claude/kind-euler-4ts3n5`, pushed, no PR ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md)) → next: **S32b** (merge it, probe, re-record once, PR)
+**Last updated:** 2026-10-23 · **Plan version:** 0.29 · **Current phase:** 7 — Memory ([Phase 7 playbook](phase-7-playbook.md), [PCR-005](changes/PCR-005.md)); **S31 done** (episodes and learned rules, recorded on Luna + Sol, [ADR-0037](../adr/0037-episodes-and-learned-rules.md)); **S32 done** (S32a screens + S32b re-record, every gate met on Luna + Sol, [ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md)) → next: **S33** (Phase 7 exit)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S32b in progress** (branch `claude/optimistic-gauss-7jzi2d`; S32a merged in). Plan approved (user, 2026-10-23: "go ahead with your recommendation"): D-1 a gate still missing after one fix + re-probe → stop and ask the user; D-2 S33's pass^3 stays a cap decision at the S33 brief.
-1. [x] Scripted eval ($0) green (every case with a scripted cassette). 2. [x] Probe ($0.1116, `--phase-estimate-ok` allowed by the user this session): every gate met. 3. [x] Full recording ($0.1079): every gate met after the `just-do-it-still-asks` grader fix (negation); Phase 7 $0.8994, $0.10 left. 4. [x] `KNOWN_REAL_MODEL_MISSES` empty; replay test green. 5. [ ] `/session-close`, PR, merge, S33 prompt.
+Nothing in progress. Next: **S33** (first row of "Planned sessions"). Its brief must settle the Phase 7 cap first: $0.10 is left and pass^3 costs about $0.57.
 
 ## Last sessions
+- **S32b Phase 7e "b" half (2026-10-23): the re-record, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "Results"). Full entry in [session-log.md](session-log.md).
+  - **Recorded on Luna + Sol:** probe of memory_write, learned_rules, scheduling and `mr-same-as-last-time` ($0.1116), then all 192 cases at pass^1 ($0.1079), with `--phase-estimate-ok` (user). Every gate met; recall@5 25/25. Phase 7 $0.8994 of $1.00.
+  - **Fixed:** the `just-do-it-still-asks` grader (matched "Nothing has been cancelled yet"); `KNOWN_REAL_MODEL_MISSES` empty.
+  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,080/1,080; Playwright not re-run (no screen changed since S32a's 82/82).
+  - **Left for S33:** held-out misses `in-two-days`, `who-works-saturdays`; the Phase 7 cap for pass^3.
 - **S32a Phase 7e "a" half (2026-10-23): "What I know", the Remembered chip, visit notes on screens; pushed, no PR** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md), pre-approved). Full entry in [session-log.md](session-log.md).
   - **Built:** `/v1/memory` (facts with names and visits, add, edit, final delete, `facts/shown`, own episodes, pause; answers parsed and `no-store`); `factIds` on `message.completed` and assistant history (default none); the `Remembered` chip (fix and forget in place); `/memory` (filters, groups, source lines, learned-rule links, own episodes, the pause switch for owners and managers); "What Pepper knows" and visit notes on the client profile and the booking sheet; `remember_fact` narrowed (a staff member off or away is `block_time`).
   - **Checks:** `pnpm check` green; `pnpm test:integration` green but the real-model replay (192 stale cassettes, as planned for S32b); Playwright 82/82 (`memory.spec.ts`: AC-W3-1, AC-W7-2, visit note, staff view, pause); `/code-review` 8 fixes; `/security-review` no findings.
   - **Also fixed:** ui card tests' timeout under coverage; e2e `unique()` collisions across workers.
-- **M2 maintenance (2026-10-23): a leaner workflow, merged** (the user's plan, after S31 ran long). No product code changed. Full entry in [session-log.md](session-log.md).
-  - **Tests in tiers** (CLAUDE.md "Running tests"): while building, the changed package's tests and the touched integration files; at each checkpoint, typecheck and lint of what changed; at the end, `pnpm check`, `pnpm test:integration` and Playwright in full, once, one at a time. Same tests, run once instead of three or four times.
-  - **Sessions that record the real model are split:** "a" builds on the fakes and pushes its branch, "b" merges it, probes the changed sets, records once and opens the PR. S32 is now S32a + S32b.
-  - **Project skills:** `/session-brief` (long docs read by an Explore agent), `/eval-record` (probe, then one full recording; the packing and recording scripts), `/session-close` (the end checks in order, `/code-review`, the docs, one PR; a script for the local Playwright stack).
-  - **Docs at the end:** STATUS, plus the ADR, ai-budget, traceability and area docs only when their subject changed; a 5–10 line session-log entry.
-  - **Fixed:** the session-start hook now finds this image's headless shell (`chrome-headless-shell-linux64/chrome-headless-shell`), so Playwright gets CI's browser without setting it by hand. ESLint ignores `.claude/**` (session tooling, like `docs/**`).
-  - **Checks:** `pnpm lint` and `pnpm format:check` green; the hook run in a clean environment; `pack.mjs` on all, one set and an unknown case; `e2e-stack.sh` up in 8 s, 18 Playwright tests (smoke, auth) green, stopped cleanly; tier-1 commands timed (one integration file 10 s against 245 s for the package).
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -33,6 +30,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S32b (user, 2026-10-23, Session Brief):** "go ahead with your recommendation": a gate still missing after one fix → ask; S33's pass^3 is a cap decision at its brief; **"Allow, as in S31"** `--phase-estimate-ok` for this session's recordings. **Claude:** the `just-do-it-still-asks` grader corrected where the model was right.
 - **S32a (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved": D-11 over the mock-up (final delete, no Undo); ADR-0038 pre-approved; scripted model only, branch pushed without a PR. **Claude (ADR-0038):** "What I know" from the chat header; 500 facts a page; the chip counts only active facts; `memory-ids.ts` for the chat contract.
 - **M2 (user, 2026-10-23, after S31):** asked how to make sessions take less time and fewer tokens without changing how the project runs; approved Claude's plan (test tiers, probe before recording, the three skills, the hook fix, fewer docs); chose the split rule **from S32** (not S33) and the **short** session-log entry. The S32 scope is unchanged, only cut in two.
 - **S31 (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved"; D-1 full re-record at the end and parallel eval runs; D-2 episodes linked to their facts by id; D-3 one per conversation; D-4 forgetting a rule's fact keeps the rule; D-5 rules only from stated preferences; D-6 no episode when nothing is worth remembering. **During the recording:** "Fix + re-record" (memory_write gate), "Estimate guard only" (`--phase-estimate-ok`), "Code fix only" (carry `mr-same-as-last-time`; narrow `remember_fact`'s wording in S32). **Claude (ADR-0037):** the worker imports `@pepper/ai`; a read tool may `prepare` outside the transaction; the remembered rule linked through the receipt; recorded int8 embeddings.
@@ -58,16 +56,15 @@ Full wording and the history in [decisions.md](decisions.md).
 ## Waiting on the user
 1. **Before the pilot, at the start of Phase 11 pilot prep (user, S27):** create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`). Claude raises it at that brief.
 2. **Before the pilot, by hand (S27 security review):** the 5-minute VoiceOver/NVDA check of the streamed chat; confirm the OWASP LLM/Agentic Top 10 2026 titles in the signed-in PDFs on genai.owasp.org; check zero data retention eligibility on the OpenAI account (L2).
-3. **Optional:** OpenAI spend so far $1.42 of the $5 credit (S27 $0.74, Phase 7 $0.68 of its $1.00). A full pass^1 re-record now costs about $0.19, so S33's pass^3 (about $0.57) will need a decision on the Phase 7 cap at its brief.
+3. **At the S33 brief:** OpenAI spend so far $1.64 of the $5 credit (S27 $0.74, Phase 7 $0.90 of its $1.00). S33's pass^3 (about $0.57) plus a full re-record (about $0.20) does not fit the $0.10 left: raise the Phase 7 cap, or measure pass^3 on fewer sets.
 
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S31 and M2 are done and merged; S32a is pushed on `claude/kind-euler-4ts3n5` for S32b to merge (Phases 0–6; Phase 7 planning, store, facts in the AI, episodes and learned rules). Details in [session-log.md](session-log.md).
+S1–S32 and M2 are done and merged (Phases 0–6; Phase 7 planning, store, facts in the AI, episodes and learned rules, the memory screens). Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S32b | Merge S32a's branch; probe memory_write, learned_rules, scheduling and memory_recall; re-record once; empty the replay test's known misses (`mr-same-as-last-time`); end checks; PR and merge | 7e | Every gate met on the re-record; one green CI run |
 | S33 | Full re-record, pass^3, security review, Phase 7 exit | 7f | Playbook §2 met |
 
 ## How to resume in a new session

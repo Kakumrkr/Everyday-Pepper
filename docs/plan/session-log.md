@@ -1023,6 +1023,12 @@ Everything each session did, oldest first: what was built, the checks run and th
   - **Found while checking:** the ui card tests needed a 30 s timeout under coverage; e2e `unique()` collided across workers in one millisecond (two owners, one booking link): the process id now keeps them apart.
   - **For S32b:** merge this branch, probe memory_write, learned_rules, scheduling and memory_recall, re-record once, empty `KNOWN_REAL_MODEL_MISSES`, end checks, one PR.
 
+- **S32b Phase 7e, "b" half (2026-10-23): the re-record after S32a, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "Results"). Branch `claude/optimistic-gauss-7jzi2d` (S32a's branch merged in); one PR.
+  - **Recorded:** probe of memory_write, learned_rules, scheduling and `mr-same-as-last-time` ($0.1116, every gate met), then all 192 cases at pass^1 ($0.1079), with `--phase-estimate-ok` (user, this session). Phase 7 $0.8994 of $1.00.
+  - **Fixed:** the `just-do-it-still-asks` grader matched a negation ("Nothing has been cancelled yet"). `KNOWN_REAL_MODEL_MISSES` emptied (`mr-same-as-last-time` and `tool-block-time-2` pass).
+  - **Checks:** scripted eval green on every case with a scripted cassette; free replay all gates met, recall@5 25/25; `pnpm check` green; `pnpm test:integration` 1,080/1,080 (ai 138); Playwright not re-run (no screen changed since S32a's 82/82; CI runs it).
+  - **Not done / for S33:** held-out misses `in-two-days` and `who-works-saturdays`; Phase 7 has $0.10 left, so S33's pass^3 (about $0.57) needs the user's cap decision at its brief. `/eval-record` step 0 reworded: the scripted CLI report also fails the 87 cases with only a recorded cassette (expected).
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 
