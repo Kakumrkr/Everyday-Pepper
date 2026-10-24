@@ -76,10 +76,16 @@ const VALID: Record<string, Record<string, unknown>> = {
     notAfter: null,
     closed: false,
   },
+  add_to_waitlist: {
+    clientId: '0199f4b2-7c1e-7a00-8000-0000000000c1',
+    serviceId: '0199f4b2-7c1e-7a00-8000-0000000000a1',
+    staffMemberId: null,
+    windows: [{ date: '2026-11-07', start: '09:00', end: '12:00' }],
+  },
 };
 
 describe('the tool registry', () => {
-  it('has the twenty tools, named verb_noun, reads first', () => {
+  it('has the twenty-one tools, named verb_noun, reads first', () => {
     expect(TOOLS.map((tool) => tool.name)).toEqual([
       'find_availability',
       'find_clients',
@@ -101,6 +107,7 @@ describe('the tool registry', () => {
       'add_visit_note',
       'forget_fact',
       'propose_rule',
+      'add_to_waitlist',
     ]);
     for (const tool of TOOLS) expect(tool.name).toMatch(/^[a-z]+(?:_[a-z]+)+$/);
     // Forgetting is final: no Undo, and it always waits for the member's OK (S30 D-1). A
@@ -108,6 +115,7 @@ describe('the tool registry', () => {
     expect(TOOLS.filter((tool) => tool.kind === 'write').map((tool) => tool.tier)).toEqual([
       ...Array<string>(9).fill('internal_write'),
       'external_or_irreversible',
+      'internal_write',
       'internal_write',
     ]);
     expect(

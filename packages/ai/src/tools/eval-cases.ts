@@ -22,6 +22,7 @@ const MEMORY = new Set(['remember_fact', 'add_visit_note', 'forget_fact']);
 const SET_OF: Readonly<Record<string, EvalCase['set']>> = {
   search_memory: 'episodic',
   propose_rule: 'learned_rules',
+  add_to_waitlist: 'waitlist',
 };
 
 /** One case per example in every tool's guide, on the business's clock. */

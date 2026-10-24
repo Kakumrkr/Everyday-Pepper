@@ -54,6 +54,8 @@ export interface Transcript {
   drafts?: { subject: string; body: string }[];
   /** Rebooking emails queued to clients afterwards (S36). */
   nudgeEmails?: number;
+  /** Open waitlist entries afterwards (S37). */
+  waitlistOpen?: number;
   /** The feed afterwards, as the owner sees it (S36). */
   feed?: { waiting: number; suggestions: number };
 }

@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import {
   addTimeOff,
+  addToWaitlist,
   createBooking,
   createService,
   createStaffMember,
@@ -14,6 +15,8 @@ import {
   LLM_EMBED_BATCH_MAX,
   MemoryFactIdSchema,
   MemorySubjectSchema,
+  ServiceIdSchema,
+  StaffMemberIdSchema,
   TenantIdSchema,
   type MemorySubject,
   toZoned,
@@ -123,6 +126,13 @@ export interface WorldSeed {
         clientNames?: Readonly<Record<string, string>>;
       }
     | undefined;
+  /** Clients waiting before the case starts (S37). */
+  waitlist?: readonly {
+    client: string;
+    service: string;
+    staff: string | null;
+    windows: readonly { date: string; start: string; end: string }[];
+  }[];
 }
 
 /** Where `juniper_feed`'s rebooking emails say the business is. */
@@ -337,6 +347,25 @@ export async function seedEvalWorld(
     if (seed.feed?.paused === true) {
       await changeFeedSettings(db, owner, { suggestionsPaused: true });
     }
+  }
+  for (const waiting of seed.waitlist ?? []) {
+    const ref = (key: string) => {
+      const value = placeholders.get(key);
+      if (value === undefined) throw new Error(`No seeded record ${key}`);
+      return value;
+    };
+    await addToWaitlist(
+      db,
+      owner,
+      {
+        clientId: ClientIdSchema.parse(ref(waiting.client)),
+        serviceId: ServiceIdSchema.parse(ref(waiting.service)),
+        staffMemberId:
+          waiting.staff === null ? null : StaffMemberIdSchema.parse(ref(waiting.staff)),
+        windows: waiting.windows.map((w) => ({ ...w })),
+      },
+      { clock },
+    );
   }
   for (const fact of seed.facts) {
     const { fact: saved } = await saveFact(db, owner, {

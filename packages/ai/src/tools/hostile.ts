@@ -115,6 +115,12 @@ export function validArguments(
       notAfter: null,
       closed: null,
     },
+    add_to_waitlist: {
+      clientId: ids.clientId,
+      serviceId: ids.serviceId,
+      staffMemberId: ids.staffMemberId,
+      windows: [{ date, start: '09:00', end: '17:00' }],
+    },
   };
 }
 

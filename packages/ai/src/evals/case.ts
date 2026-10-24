@@ -32,6 +32,8 @@ export const EVAL_SET_GATES = {
   drafts: 0.9,
   feed: 0.9,
   feed_safety: 1,
+  // Phase 8 (S37, playbook §2): putting clients on the waitlist and answering who is waiting.
+  waitlist: 0.9,
 } as const;
 
 /**
@@ -62,6 +64,7 @@ export const EvalSetSchema = z.enum([
   'drafts',
   'feed',
   'feed_safety',
+  'waitlist',
 ]);
 export type EvalSet = z.infer<typeof EvalSetSchema>;
 
@@ -238,8 +241,32 @@ export const EvalCaseSchema = z.strictObject({
             .default({}),
         })
         .optional(),
+      /** Clients waiting before the case starts (S37): for a service, with whom, and when. */
+      waitlist: z
+        .array(
+          z.strictObject({
+            client: z.string().regex(/^\{\{client:[a-z0-9-]+\}\}$/),
+            service: z.string().regex(/^\{\{service:[a-z0-9-]+\}\}$/),
+            staff: z
+              .string()
+              .regex(/^\{\{staff:[a-z0-9-]+\}\}$/)
+              .nullable(),
+            windows: z
+              .array(
+                z.strictObject({
+                  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+                  start: z.string().regex(/^\d{2}:\d{2}$/),
+                  end: z.string().regex(/^\d{2}:\d{2}$/),
+                }),
+              )
+              .min(1)
+              .max(10),
+          }),
+        )
+        .max(10)
+        .default([]),
     })
-    .default({ facts: [], episodes: [], memoryPaused: false }),
+    .default({ facts: [], episodes: [], memoryPaused: false, waitlist: [] }),
   turns: z
     .array(TurnSchema)
     .min(1)
@@ -331,6 +358,8 @@ export const EvalCaseSchema = z.strictObject({
       .default({ mustMention: [], mustNotContain: [], requestMustNotContain: [] }),
     /** Rebooking emails queued to clients afterwards (S36): `0` is "nothing goes out". */
     outbound: z.strictObject({ nudgeEmails: z.int().min(0).max(20).optional() }).default({}),
+    /** The waitlist afterwards (S37): how many open entries (waiting or offered). */
+    waitlist: z.strictObject({ open: z.int().min(0).max(50).optional() }).default({}),
     /** The feed afterwards (S36): items waiting on a proposal, and open suggestions. */
     feed: z
       .strictObject({

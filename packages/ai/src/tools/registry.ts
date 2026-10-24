@@ -51,7 +51,7 @@ import { addVisitNote, forgetFact, rememberFact } from './catalog/memory.js';
 import { searchMemory } from './catalog/episodes.js';
 import { getFeed } from './catalog/feed.js';
 import { sendRebookingNudge } from './catalog/nudges.js';
-import { sendWaitlistOffers } from './catalog/waitlist.js';
+import { addToWaitlist, sendWaitlistOffers } from './catalog/waitlist.js';
 import { proposeRule } from './catalog/rules.js';
 import { directoryOf, localSlot } from './catalog/shared.js';
 import {
@@ -102,6 +102,7 @@ export const TOOLS: readonly AnyTool[] = [
   addVisitNote,
   forgetFact,
   proposeRule,
+  addToWaitlist,
 ];
 
 /**

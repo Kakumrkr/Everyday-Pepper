@@ -1,4 +1,6 @@
 import {
+  addToWaitlistIn,
+  changeWaitlistEntryIn,
   makeWaitlistOffersIn,
   offerEmailDetails,
   offerUrl,
@@ -8,6 +10,8 @@ import {
 } from '@pepper/appointments';
 import {
   ClientIdSchema,
+  MAX_WAITLIST_WINDOWS,
+  ServiceIdSchema,
   StaffMemberIdSchema,
   UtcDateTimeSchema,
   WAITLIST_OFFER_LIMITS,
@@ -16,12 +20,29 @@ import {
   WaitlistOfferIdSchema,
 } from '@pepper/contracts';
 import { findCurrentTenant } from '@pepper/db';
+import type { TrustJson, WaitlistEntry } from '@pepper/contracts';
 import { z } from 'zod';
 import { localOf } from '../local-time.js';
 import { shortClientName } from '../names.js';
-import type { Performed, WriteTool } from '../tool.js';
-import { directoryOf, serviceName, staffName, when } from './shared.js';
+import type { Performed, ToolScope, WriteScope, WriteTool } from '../tool.js';
+import {
+  clientNames,
+  DateArg,
+  day,
+  directoryOf,
+  domainOptions,
+  IdArg,
+  serviceName,
+  staffLogin,
+  staffName,
+  when,
+} from './shared.js';
 
+// The smart waitlist in the chat and the worker (S37, ADR-0041). `add_to_waitlist` puts a
+// client on the list for times that are full (internal write, dial action `waitlist.change`,
+// "do it and tell me" by default, Undo takes the entry off). `send_waitlist_offers` is the
+// worker's.
+//
 // The smart waitlist's offer (S37, ADR-0041, AC-W5-1): a freed time offered to the ranking's
 // best few at once, each by email with their own claim link; whoever claims first books it.
 // The worker's matcher calls it through the trust layer, so the dial for
@@ -51,7 +72,9 @@ const OfferArgs = z.strictObject({
 });
 export type WaitlistOfferArgs = z.infer<typeof OfferArgs>;
 
-const Inverse = z.strictObject({ offerIds: z.array(z.uuid()).max(WAITLIST_OFFER_LIMITS.maxFanOut) });
+const Inverse = z.strictObject({
+  offerIds: z.array(z.uuid()).max(WAITLIST_OFFER_LIMITS.maxFanOut),
+});
 
 /** "Maria L., Sara K. and Ana R." */
 function names(list: readonly string[]): string {
@@ -193,3 +216,139 @@ export const sendWaitlistOffers: WriteTool = {
     );
   },
 };
+
+const HHMM = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM, e.g. 09:30');
+
+const WaitArgs = z.strictObject({
+  clientId: IdArg('client'),
+  serviceId: IdArg('service'),
+  staffMemberId: IdArg('staff member')
+    .nullable()
+    .describe('Only with this staff member, if the member said so; null: anyone who offers it'),
+  windows: z
+    .array(
+      z.strictObject({
+        date: DateArg,
+        start: HHMM.describe("From, 24-hour HH:MM in the business's time zone"),
+        end: z
+          .string()
+          .regex(/^(([01]\d|2[0-3]):[0-5]\d|24:00)$/, 'Use HH:MM, e.g. 17:00')
+          .describe('Until, 24-hour HH:MM; 24:00 for the end of the day'),
+      }),
+    )
+    .min(1)
+    .max(MAX_WAITLIST_WINDOWS)
+    .describe(
+      'When the client could come: one window per day, e.g. Saturday mornings = each Saturday asked about, 09:00 to 12:00 (or opening to noon)',
+    ),
+});
+type WaitArgs = z.output<typeof WaitArgs>;
+
+/** "Sat 2026-11-07 09:00–12:00, Sat 2026-11-14 09:00–12:00". */
+function windowsText(windows: WaitArgs['windows']): string {
+  const shown = windows.slice(0, 3).map((w) => `${day(w.date)} ${w.start}–${w.end}`);
+  const more = windows.length - shown.length;
+  return `${shown.join(', ')}${more > 0 ? ` and ${String(more)} more` : ''}`;
+}
+
+export const addToWaitlist: WriteTool = {
+  kind: 'write',
+  name: 'add_to_waitlist',
+  version: 1,
+  localTimes: true,
+  tier: 'internal_write',
+  guide: {
+    use: 'Put a client (id from find_clients) on the waitlist for a service at times that are full, so Pepper offers them a time that frees up. Windows are local dates with from and until times.',
+    avoid: [
+      'when a time they want is free (book it, or offer the free times from find_availability)',
+      'to offer or send a time to someone waiting: Pepper does that by itself when a time frees up',
+    ],
+    returns:
+      'the entry, done or waiting for the member’s OK. When a matching time frees up, Pepper offers it to the best matches first.',
+    examples: [
+      {
+        say: 'Put Maria on the waitlist for a haircut with Marco on Saturday morning',
+        args: {
+          clientId: { $any: true },
+          serviceId: { $any: true },
+          staffMemberId: { $any: true },
+          windows: { $any: true },
+        },
+      },
+      {
+        say: 'Sara wants a haircut on Friday afternoon if anything opens up',
+        args: { clientId: { $any: true }, staffMemberId: null, windows: { $any: true } },
+      },
+    ],
+  },
+  args: WaitArgs,
+  actions: () => ['waitlist.change'],
+  async perform(scope: WriteScope, args: WaitArgs): Promise<Performed> {
+    const directory = await directoryOf(scope);
+    const clientId = ClientIdSchema.parse(args.clientId);
+    const serviceId = ServiceIdSchema.parse(args.serviceId);
+    const staffMemberId =
+      args.staffMemberId === null ? null : StaffMemberIdSchema.parse(args.staffMemberId);
+    const entry = await addToWaitlistIn(
+      scope.tx,
+      scope.actor,
+      { clientId, serviceId, staffMemberId, windows: args.windows },
+      domainOptions(scope),
+    );
+    const names = await clientNames(scope, [clientId]);
+    const client = names.get(clientId) ?? 'the client';
+    const staff = staffMemberId === null ? 'anyone' : staffName(directory, staffMemberId);
+    const service = serviceName(directory, serviceId);
+    const windows = windowsText(entry.windows);
+    return {
+      entity: { type: 'waitlist_entry', id: entry.id },
+      targetKey: `waitlist:${clientId}:${serviceId}`,
+      // A staff member's own entry is theirs to decide; "anyone" is the business's.
+      recordOwner: staffMemberId === null ? null : staffLogin(directory, staffMemberId),
+      appointmentStartsAt: null,
+      before: null,
+      after: { clientName: client, serviceName: service, staffName: staff, windows },
+      touched: null,
+      inverse: { entryId: entry.id },
+      summary: `${client} is on the waitlist for a ${service.toLowerCase()} with ${staff}: ${windows}.`,
+      facts: [],
+    };
+  },
+  async undo(scope, inverse) {
+    const { entryId } = z.strictObject({ entryId: WaitlistEntryIdSchema }).parse(inverse);
+    await changeWaitlistEntryIn(
+      scope.tx,
+      scope.actor,
+      entryId,
+      { status: 'cancelled' },
+      domainOptions(scope),
+    );
+  },
+};
+
+/** Waitlist entries a read shows (S37): open ones, longest waiting first. */
+export const WAITLIST_SHOWN = 20;
+
+/**
+ * Open waitlist entries as the AI reads them: ids, the client's short name, the service, with
+ * whom ("anyone") and the windows as local dates and times. `offered`: a freed time was offered
+ * and the answer is pending. Never a contact.
+ */
+export async function waitlistViews(
+  scope: ToolScope,
+  entries: readonly WaitlistEntry[],
+): Promise<TrustJson[]> {
+  if (entries.length === 0) return [];
+  const directory = await directoryOf(scope);
+  const names = await clientNames(scope, [...new Set(entries.map((e) => e.clientId))]);
+  return entries.map((entry) => ({
+    entryId: entry.id,
+    clientId: entry.clientId,
+    client: names.get(entry.clientId) ?? 'a client',
+    service: serviceName(directory, entry.serviceId),
+    staffMemberId: entry.staffMemberId,
+    staff: entry.staffMemberId === null ? 'anyone' : staffName(directory, entry.staffMemberId),
+    windows: entry.windows.map((w) => ({ date: w.date, from: w.start, to: w.end })),
+    offered: entry.status === 'offered',
+  }));
+}

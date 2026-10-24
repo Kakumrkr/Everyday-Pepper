@@ -1,0 +1,527 @@
+[
+  {
+    "id": "wl-add-marco-saturday",
+    "set": "waitlist",
+    "description": "Puts Maria on the waitlist with Marco for Saturday morning, in local time.",
+    "holdout": false,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Put Maria on the waitlist for a haircut with Marco on Saturday morning"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_to_waitlist",
+          "arguments": {
+            "clientId": "{{client:maria}}",
+            "serviceId": "{{service:haircut}}",
+            "staffMemberId": "{{staff:marco}}",
+            "windows": [
+              {
+                "date": "2026-11-07",
+                "start": {
+                  "$regex": "^(0[89]|10):"
+                },
+                "end": {
+                  "$regex": "^(1[12]):"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "replyMatches": [
+        "waitlist"
+      ],
+      "actions": {
+        "done": [
+          "add_to_waitlist"
+        ]
+      },
+      "waitlist": {
+        "open": 1
+      }
+    }
+  },
+  {
+    "id": "wl-add-anyone-friday",
+    "set": "waitlist",
+    "description": "Anyone will do: the entry names no staff member.",
+    "holdout": false,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Sara wants a haircut on Friday afternoon if anything opens up, with anyone"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_to_waitlist",
+          "arguments": {
+            "clientId": "{{client:sara}}",
+            "staffMemberId": null,
+            "windows": [
+              {
+                "date": "2026-11-06",
+                "start": {
+                  "$regex": "^1[2-4]:"
+                },
+                "end": {
+                  "$any": true
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "add_to_waitlist"
+        ]
+      },
+      "waitlist": {
+        "open": 1
+      }
+    }
+  },
+  {
+    "id": "wl-add-two-saturdays",
+    "set": "waitlist",
+    "description": "Two Saturdays are two windows, one per day.",
+    "holdout": false,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Ana would take any haircut slot with Marco on the next two Saturdays before noon. Add her to the waitlist."
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_to_waitlist",
+          "arguments": {
+            "clientId": "{{client:ana}}",
+            "staffMemberId": "{{staff:marco}}",
+            "windows": [
+              {
+                "date": "2026-11-07",
+                "start": {
+                  "$any": true
+                },
+                "end": "12:00"
+              },
+              {
+                "date": "2026-11-14",
+                "start": {
+                  "$any": true
+                },
+                "end": "12:00"
+              }
+            ]
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "add_to_waitlist"
+        ]
+      },
+      "waitlist": {
+        "open": 1
+      }
+    }
+  },
+  {
+    "id": "wl-colour-service",
+    "set": "waitlist",
+    "description": "The service named is the one on the entry.",
+    "holdout": true,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Can you put Maria on the waitlist for a colour with Jess, Wednesday or Thursday afternoon?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_to_waitlist",
+          "arguments": {
+            "clientId": "{{client:maria}}",
+            "serviceId": "{{service:colour}}",
+            "staffMemberId": "{{staff:jess}}",
+            "windows": [
+              {
+                "date": "2026-11-04",
+                "start": {
+                  "$any": true
+                },
+                "end": {
+                  "$any": true
+                }
+              },
+              {
+                "date": "2026-11-05",
+                "start": {
+                  "$any": true
+                },
+                "end": {
+                  "$any": true
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "add_to_waitlist"
+        ]
+      },
+      "waitlist": {
+        "open": 1
+      }
+    }
+  },
+  {
+    "id": "wl-who-is-waiting",
+    "set": "waitlist",
+    "description": "Who is on the waitlist is read with get_feed, not guessed.",
+    "holdout": false,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Who's on the waitlist?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": [
+        "Sara",
+        "Ana"
+      ],
+      "actions": {
+        "noWrites": true
+      },
+      "waitlist": {
+        "open": 2
+      }
+    },
+    "seed": {
+      "waitlist": [
+        {
+          "client": "{{client:sara}}",
+          "service": "{{service:haircut}}",
+          "staff": null,
+          "windows": [
+            {
+              "date": "2026-11-07",
+              "start": "10:00",
+              "end": "13:00"
+            }
+          ]
+        },
+        {
+          "client": "{{client:ana}}",
+          "service": "{{service:haircut}}",
+          "staff": "{{staff:jess}}",
+          "windows": [
+            {
+              "date": "2026-11-06",
+              "start": "09:00",
+              "end": "12:00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "wl-who-waiting-saturday",
+    "set": "waitlist",
+    "description": "Only the Saturday entry answers \"who's waiting for Saturday?\".",
+    "holdout": true,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Who's waiting for a spot on Saturday?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": [
+        "Sara"
+      ],
+      "replyMustNotMatch": [
+        "Ana"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    },
+    "seed": {
+      "waitlist": [
+        {
+          "client": "{{client:sara}}",
+          "service": "{{service:haircut}}",
+          "staff": null,
+          "windows": [
+            {
+              "date": "2026-11-07",
+              "start": "10:00",
+              "end": "13:00"
+            }
+          ]
+        },
+        {
+          "client": "{{client:ana}}",
+          "service": "{{service:haircut}}",
+          "staff": "{{staff:jess}}",
+          "windows": [
+            {
+              "date": "2026-11-06",
+              "start": "09:00",
+              "end": "12:00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "wl-client-on-list",
+    "set": "waitlist",
+    "description": "A client's waitlist comes with their bookings.",
+    "holdout": false,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Is Ana waiting for anything?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_client_bookings",
+          "alsoAccept": [
+            "get_feed"
+          ]
+        }
+      ],
+      "replyMatches": [
+        "Friday|waitlist"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    },
+    "seed": {
+      "waitlist": [
+        {
+          "client": "{{client:sara}}",
+          "service": "{{service:haircut}}",
+          "staff": null,
+          "windows": [
+            {
+              "date": "2026-11-07",
+              "start": "10:00",
+              "end": "13:00"
+            }
+          ]
+        },
+        {
+          "client": "{{client:ana}}",
+          "service": "{{service:haircut}}",
+          "staff": "{{staff:jess}}",
+          "windows": [
+            {
+              "date": "2026-11-06",
+              "start": "09:00",
+              "end": "12:00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "wl-staff-own-client",
+    "set": "waitlist",
+    "description": "Jess puts her own client on her own waitlist.",
+    "holdout": false,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Put Maria on my waitlist for Thursday morning, she wants an earlier haircut"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "add_to_waitlist",
+          "arguments": {
+            "clientId": "{{client:maria}}",
+            "staffMemberId": "{{staff:jess}}",
+            "windows": [
+              {
+                "date": "2026-11-05",
+                "start": {
+                  "$any": true
+                },
+                "end": {
+                  "$any": true
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "actions": {
+        "done": [
+          "add_to_waitlist"
+        ]
+      },
+      "waitlist": {
+        "open": 1
+      }
+    }
+  },
+  {
+    "id": "wl-staff-colleague-refused",
+    "set": "waitlist",
+    "description": "Jess can't put a client on Marco's list: she says so, nothing is added.",
+    "holdout": false,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "user": "Put Maria on Marco's waitlist for Saturday"
+      }
+    ],
+    "expect": {
+      "replyMatches": [
+        "owner|manager|can.?t|cannot|not able|only"
+      ],
+      "actions": {
+        "noWrites": true
+      },
+      "waitlist": {
+        "open": 0
+      }
+    }
+  },
+  {
+    "id": "wl-never-sends-offers",
+    "set": "waitlist",
+    "description": "Asked to offer a time to who is waiting, Pepper says it does that by itself and sends nothing.",
+    "holdout": false,
+    "now": "2026-11-02T12:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Text everyone on the waitlist that Friday at 9 is free"
+      }
+    ],
+    "expect": {
+      "mustNotCall": [
+        "add_to_waitlist"
+      ],
+      "replyMatches": [
+        "waitlist|offer|automatic|by itself|frees"
+      ],
+      "actions": {
+        "noWrites": true
+      },
+      "waitlist": {
+        "open": 2
+      }
+    },
+    "seed": {
+      "waitlist": [
+        {
+          "client": "{{client:sara}}",
+          "service": "{{service:haircut}}",
+          "staff": null,
+          "windows": [
+            {
+              "date": "2026-11-07",
+              "start": "10:00",
+              "end": "13:00"
+            }
+          ]
+        },
+        {
+          "client": "{{client:ana}}",
+          "service": "{{service:haircut}}",
+          "staff": "{{staff:jess}}",
+          "windows": [
+            {
+              "date": "2026-11-06",
+              "start": "09:00",
+              "end": "12:00"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

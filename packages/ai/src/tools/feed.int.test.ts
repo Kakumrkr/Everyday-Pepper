@@ -155,7 +155,8 @@ describe('get_feed', () => {
     const outcome = answered(
       await callTool(depsFor(other, other.owner), 'get_feed', { kind: null }),
     );
-    expect(outcome.data).toEqual({ paused: true, items: [] });
+    // The waitlist is not a suggestion: it is listed while paused too (S37).
+    expect(outcome.data).toEqual({ paused: true, items: [], waitlist: [] });
     expect(outcome.summary).toBe('Suggestions are paused for this business.');
   });
 });
