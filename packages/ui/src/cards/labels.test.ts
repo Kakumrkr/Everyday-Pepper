@@ -76,6 +76,19 @@ describe('changeRows', () => {
       'At most 6 bookings a day, for Jess. A booking rule always waits for an owner’s or manager’s OK.',
     );
     expect(factLine({ kind: 'rule_change', value: {} })).toBeNull();
+    // A rebooking email's reasons (S36).
+    expect(factLine({ kind: 'nudge_last_visit', value: { date: '2026-09-28' } })).toBe(
+      'Their last visit was on Mon, Sep 28.',
+    );
+    expect(
+      factLine({
+        kind: 'rebooking_due',
+        value: { intervalDays: 28, dueOn: '2026-10-26', basis: 'client_median' },
+      }),
+    ).toBe(
+      'They usually come back every 28 days, so they were due on Mon, Oct 26, and nothing is booked.',
+    );
+    expect(factLine({ kind: 'rebooking_due', value: { dueOn: '2026-10-26' } })).toBeNull();
   });
 
   it('shows a new booking, a cancellation, blocked time and a to-do', () => {

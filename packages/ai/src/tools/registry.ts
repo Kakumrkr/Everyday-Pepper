@@ -301,13 +301,19 @@ export async function approvalRefusal(
   proposal: Pick<ActionProposal, 'tool' | 'payload'>,
   error: unknown,
 ): Promise<{ code: ToolErrorCode; message: string; card: ToolCard | null }> {
-  const outcome = await refused(
-    deps,
-    proposal.tool,
-    toolRefusalOf(error),
-    error,
-    serviceIdIn(proposal.payload),
-  );
+  const refusal = toolRefusalOf(error);
+  // A rebooking email offers its own time (S36): there is nothing to pick instead.
+  if (proposal.tool === sendRebookingNudge.name) {
+    return {
+      code: refusal.code,
+      message:
+        refusal.code === 'slot_unavailable'
+          ? 'That time was booked meanwhile, so I didn’t send the email. I’ll look for a new time tomorrow morning.'
+          : refusal.message,
+      card: null,
+    };
+  }
+  const outcome = await refused(deps, proposal.tool, refusal, error, serviceIdIn(proposal.payload));
   if (outcome.status !== 'refused') throw new Error('A refusal is always refused');
   return { code: outcome.code, message: outcome.message, card: outcome.card };
 }

@@ -456,6 +456,16 @@ export function factLine(fact: AiWhyFact): string | null {
       return date === null || time === null ? null : `It reminds them ${formatWhen(date, time)}.`;
     case 'todo_was_open':
       return 'The to-do was still open.';
+    case 'nudge_last_visit':
+      // A rebooking email (S36): the client's last visit, and why they are due.
+      return date === null ? null : `Their last visit was on ${formatDate(date)}.`;
+    case 'rebooking_due': {
+      const interval = value?.['intervalDays'];
+      const dueOn = str('dueOn');
+      return typeof interval !== 'number' || dueOn === null
+        ? null
+        : `They usually come back every ${String(interval)} days, so they were due on ${formatDate(dueOn)}, and nothing is booked.`;
+    }
     case 'rule_change': {
       // `propose_rule` (S31): the rule it makes, which only an owner or manager approves.
       const rule = str('rule');

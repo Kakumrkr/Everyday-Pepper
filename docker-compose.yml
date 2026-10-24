@@ -129,6 +129,10 @@ services:
       # How often the insights job looks for businesses whose feed is due (ADR-0039); 60 s
       # unless set. CI's journeys use 10 s so a new business's suggestions appear quickly.
       INSIGHTS_POLL_MS: ${INSIGHTS_POLL_MS:-}
+      # The morning drafts pass (S36, ADR-0040): rebooking emails for owners to approve, with
+      # the routine model; off unless OPENAI_API_KEY is set. Links in them use the web origin.
+      AUTH_BASE_URL: ${AUTH_BASE_URL:-http://localhost:3000}
+      DRAFTS_POLL_MS: ${DRAFTS_POLL_MS:-}
     ports: ['127.0.0.1:4100:4100']
     depends_on:
       migrate: { condition: service_completed_successfully }

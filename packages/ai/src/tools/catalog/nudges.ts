@@ -229,7 +229,7 @@ export const sendRebookingNudge: WriteTool = {
       facts: [
         { kind: 'nudge_last_visit', ref: null, value: { date: last.date } },
         {
-          kind: 'slot_free',
+          kind: 'slot_was_free',
           ref: null,
           value: { date: offered.date, time: offered.time, staffName: staff },
         },
