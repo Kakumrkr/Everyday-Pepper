@@ -209,6 +209,8 @@ export const EvalCaseSchema = z.strictObject({
       .array(
         z.strictObject({
           name: LlmToolNameSchema,
+          /** Other tools that answer the step as well (S33): a call to one of them counts. */
+          alsoAccept: z.array(LlmToolNameSchema).max(3).default([]),
           arguments: z.record(z.string(), ArgMatcherSchema).optional(),
         }),
       )

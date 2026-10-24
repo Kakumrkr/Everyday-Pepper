@@ -83,14 +83,15 @@ const ownOnly = (scope: ToolScope) =>
 export const findAvailability: ReadTool = {
   kind: 'read',
   name: 'find_availability',
-  version: 1,
+  // 2 (S33): "is she free at 10?" goes to get_day; the example's `notBefore` is one day's.
+  version: 2,
   localTimes: true,
   guide: {
     use: 'Find free start times for a service, with one staff member or anyone who offers it, on a day or a few days.',
     avoid: [
       'to book (use create_booking with a time found here)',
       'to see what is already booked (use get_day)',
-      'to ask which service when the member only asks whether someone is free at a time (read their day with get_day and answer)',
+      'to check whether someone is free at one time on one day, without a service (read that day with get_day and answer; never ask which service)',
     ],
     returns:
       'free start times with the staff member, earliest first, and whether more exist. Offer them; book one only when the member chose it or asked you to find a time and book it.',
@@ -100,8 +101,8 @@ export const findAvailability: ReadTool = {
         args: { serviceId: { $any: true }, staffMemberId: { $any: true }, date: { $any: true } },
       },
       {
-        say: 'Any time for a colour next week after 3?',
-        args: { serviceId: { $any: true }, days: 7, notBefore: '15:00' },
+        say: 'Any time for a colour on Friday after 3?',
+        args: { serviceId: { $any: true }, date: { $any: true }, notBefore: '15:00' },
       },
     ],
   },
@@ -110,7 +111,9 @@ export const findAvailability: ReadTool = {
     staffMemberId: IdArg('staff member').nullable().describe('null: anyone who offers it'),
     date: DateArg,
     days: z.number().int().min(1).max(7).nullable().describe('Days from `date`, 1–7; null: 1'),
-    notBefore: TimeArg.nullable().describe('Earliest start on the first day; null: any'),
+    notBefore: TimeArg.nullable().describe(
+      'Earliest start on the first day only (later days start at opening); null: any',
+    ),
   }),
   async run(
     scope,

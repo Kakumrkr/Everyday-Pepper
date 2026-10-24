@@ -9,7 +9,7 @@
             {
               "id": "call_1",
               "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-09\",\"days\":7,\"notBefore\":\"15:00\"}"
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-06\",\"days\":null,\"notBefore\":\"15:00\"}"
             }
           ],
           "replay": [],
@@ -24,7 +24,7 @@
       },
       {
         "response": {
-          "text": "Here are the colour times next week after 3.",
+          "text": "Here are the colour times on Friday after 3.",
           "toolCalls": [],
           "replay": [],
           "finishReason": "stop",

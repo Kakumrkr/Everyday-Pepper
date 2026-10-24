@@ -249,7 +249,7 @@
   {
     "id": "in-two-days",
     "set": "ambiguity",
-    "description": "\"In two days\" from Monday is Wednesday.",
+    "description": "\"In two days\" from Monday is Wednesday. Either read answers it: get_day is what both guides name for \"free at a time\" without a service (S33 accepted it).",
     "holdout": true,
     "now": "2026-11-02T14:00:00Z",
     "timeZone": "America/New_York",
@@ -265,6 +265,7 @@
       "toolCalls": [
         {
           "name": "find_availability",
+          "alsoAccept": ["get_day"],
           "arguments": {
             "date": "2026-11-04"
           }

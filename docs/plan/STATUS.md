@@ -5,7 +5,12 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S33** (first row of "Planned sessions"). Its brief must settle the Phase 7 cap first: $0.10 is left and pass^3 costs about $0.57.
+**S33 (Phase 7f, Phase 7 exit), one session, branch `claude/s33-phase7-exit`.** Brief approved 2026-10-24 (user: "Go ahead, start with your recommendation"):
+- **Cap (option A):** Phase 7 cap raised $1.00 → **$1.40**; probe + one full re-record + pass^3 (trials 2–3) on every set a §2 pass^3 gate names: memory_delete, memory_safety, memory_recall, episodic, safety, permissions, autonomy, scheduling (138 cases); expected ≈ $0.30; `--phase-estimate-ok` allowed (as S31/S32b); ledger label `P7 S33`.
+- **Held-out (a):** `in-two-days` — make find_availability/get_day guides agree (one-day "free at <time>" → `get_day`), grader accepts either read, relative "in N days" line in `context.ts`; `who-works-saturdays` left untuned (needs a tool-output change); fix find_availability's `notBefore` example (first day only).
+- **Tasks:** 1 guide batch (tier 1–2, scripted evals green) → 2 probe scheduling+ambiguity → 3 full record + pass^3 → 4 security review `docs/engineering/security-review-s33.md` → 5 check every playbook §2 gate → 6 `/session-close`.
+- **Rule (S32b):** a gate still missing after one fix → ask the user.
+- **Checkpoint:** none done yet. Next: task 1.
 
 ## Last sessions
 - **S32b Phase 7e "b" half (2026-10-23): the re-record, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "Results"). Full entry in [session-log.md](session-log.md).

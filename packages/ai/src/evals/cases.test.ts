@@ -42,7 +42,7 @@ describe('the eval cases', () => {
       }
       const { expect: wanted } = evalCase;
       const tools = [
-        ...wanted.toolCalls.map((call) => call.name),
+        ...wanted.toolCalls.flatMap((call) => [call.name, ...call.alsoAccept]),
         ...wanted.mustNotCall,
         ...wanted.actions.done,
         ...wanted.actions.proposed,

@@ -21,7 +21,8 @@ export const BUDGET_USD = 5;
  * phase, its ledger label starts with `P<phase> `, and the runner refuses a run (and stops the
  * next call) that would take the phase past its cap.
  */
-export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1 };
+// Phase 7: $1.00, raised to $1.40 at the S33 brief (user) for the full re-record and pass^3.
+export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1.4 };
 
 /** The ledger label of a run for `phase`: `P7 <label>`. */
 export function phaseLabel(phase: number, label: string): string {
