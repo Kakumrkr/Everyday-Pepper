@@ -330,3 +330,57 @@ export async function listRecentWaitlistOffers(
     .orderBy(desc(waitlistOffers.createdAt), asc(waitlistOffers.rank))
     .limit(z.number().int().min(1).max(200).parse(limit));
 }
+
+/**
+ * Closes this business's open offers past their time, at most `limit`: `expired`, and entries
+ * left waiting on them wait again. Returns how many closed. The offer rows record the change;
+ * the entries' audit records only what a person or a claim did.
+ */
+export async function expireWaitlistOffers(
+  tx: TenantTx,
+  now: Date,
+  limit: number,
+): Promise<number> {
+  const due = await listExpiredOpenOffers(tx, now, limit);
+  if (due.length === 0) return 0;
+  const closed = await tx
+    .update(waitlistOffers)
+    .set({ status: 'expired' })
+    .where(
+      and(
+        inArray(
+          waitlistOffers.id,
+          due.map((offer) => offer.id),
+        ),
+        eq(waitlistOffers.status, 'offered'),
+      ),
+    )
+    .returning({ entryId: waitlistOffers.entryId });
+  if (closed.length > 0) {
+    await tx
+      .update(waitlistEntries)
+      .set({ status: 'waiting' })
+      .where(
+        and(
+          inArray(
+            waitlistEntries.id,
+            closed.map((offer) => offer.entryId),
+          ),
+          eq(waitlistEntries.status, 'offered'),
+        ),
+      );
+  }
+  return closed.length;
+}
+
+/** This business's freed times asked to be matched, oldest first. */
+export async function listWaitlistMatches(
+  tx: TenantTx,
+  limit: number,
+): Promise<WaitlistMatchRow[]> {
+  return tx
+    .select()
+    .from(waitlistMatches)
+    .orderBy(asc(waitlistMatches.createdAt), asc(waitlistMatches.id))
+    .limit(Limit.parse(limit));
+}

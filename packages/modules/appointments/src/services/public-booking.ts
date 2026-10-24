@@ -10,6 +10,8 @@ import {
   ClientIdSchema,
   ManageTokenSchema,
   MAX_VERIFICATION_ATTEMPTS,
+  OfferTokenSchema,
+  PublicOfferSchema,
   PublicBusinessSchema,
   PublicBookingSchema,
   ServiceIdSchema,
@@ -18,13 +20,18 @@ import {
   UtcDateTimeSchema,
   VERIFICATION_CODE_TTL_MINUTES,
   VerificationCodeSchema,
+  WaitlistEntryIdSchema,
+  WaitlistMatchIdSchema,
+  WaitlistOfferIdSchema,
   type AvailabilityQueryInput,
   type AvailableSlot,
   type BookingConfirmInput,
   type BookingRequestId,
   type BookingRequestInput,
   type ManageToken,
+  type OfferToken,
   type PublicBooking,
+  type PublicOffer,
   type PublicBusiness,
   type StaffMemberId,
   type TenantSlug,
@@ -38,20 +45,27 @@ import {
   BookingOverlapError,
   countBookingVerificationsExpiringAfter,
   findBookingByManageTokenHash,
+  findClient,
   findClientsByContact,
+  findWaitlistOfferByTokenHash,
   findService,
   findStaffMember,
   insertBooking,
   insertBookingVerification,
   insertClient,
+  listOffersOfMatch,
   listServices,
   listStaffMembers,
   lockBookingByManageTokenHash,
   lockBookingVerification,
   lockStaffMember,
+  lockWaitlistEntry,
+  lockWaitlistMatch,
+  markOfferClaimed,
   moveBooking,
   setBookingStatus,
   setVerificationBooking,
+  settleOpenOffers,
   withPublicTenant,
   type BookingRow,
   type ClientRow,
@@ -59,6 +73,7 @@ import {
   type ServiceRow,
   type Tenant,
   type TenantTx,
+  type WaitlistOfferRow,
 } from '@pepper/db';
 import type { ServiceToBook } from '../availability/engine.js';
 import { toAvailableSlot } from '../bookings/planning.js';
@@ -73,8 +88,19 @@ import {
   SlotUnavailableError,
   StaffMemberNotFoundError,
   TooManyBookingRequestsError,
+  WaitlistOfferExpiredError,
+  WaitlistOfferNotFoundError,
+  WaitlistOfferTakenError,
+  WaitlistOfferUsedError,
   WrongVerificationCodeError,
 } from '../errors.js';
+import type { WaitlistTakenNotify } from './booking-emails.js';
+import {
+  changeEntryStatus,
+  offerTokenHash,
+  releaseEntry,
+  requestWaitlistMatch,
+} from './smart-waitlist.js';
 import { bookingAuditValues } from '../mapping.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import {
@@ -438,6 +464,7 @@ export async function cancelManagedBooking(
     await auditUpdate(tx, row, cancelled);
     await keepReminderInStep(tx, cancelled, now);
     await requestInsights(tx);
+    await requestWaitlistMatch(tx, row, now);
     const result = await withEmail(tx, tenant, cancelled, now);
     await options.notify?.(tx, {
       kind: 'cancelled',
@@ -496,6 +523,7 @@ export async function rescheduleManagedBooking(
       await auditUpdate(tx, row, moved);
       await keepReminderInStep(tx, moved, now);
       await requestInsights(tx);
+      await requestWaitlistMatch(tx, row, now);
       const result = await withEmail(tx, tenant, moved, now);
       await options.notify?.(tx, {
         kind: 'rescheduled',
@@ -687,4 +715,239 @@ async function withEmail(
     // The address the link was sent to, or the one the business has on file now.
     email: await emailDetailsOf(tx, tenant, row),
   };
+}
+
+// Waitlist offers (S37, ADR-0041, AC-W5-1) -----------------------------------------------------
+
+export interface ClaimOptions extends PublicOptions {
+  /** Told, inside the claim's transaction, about each other client whose offer is now taken. */
+  tellTaken?: WaitlistTakenNotify;
+}
+
+/**
+ * The offer behind a claim link, as its client sees it (`WaitlistOfferNotFoundError` for an
+ * unknown one). Reading changes nothing: mail scanners open links.
+ */
+export async function getWaitlistOffer(
+  db: Database,
+  slug: TenantSlug,
+  token: OfferToken,
+  options: PublicOptions = {},
+): Promise<PublicOffer> {
+  const hash = offerTokenHash(OfferTokenSchema.parse(token));
+  const now = nowOf(options);
+  return inPage(
+    db,
+    slug,
+    async (tx) => {
+      const offer = await findWaitlistOfferByTokenHash(tx, hash);
+      if (offer === undefined) throw new WaitlistOfferNotFoundError();
+      return toPublicOffer(tx, offer, now);
+    },
+    { readOnly: true },
+  );
+}
+
+type ClaimOutcome =
+  | { kind: 'not_found' | 'used' | 'taken' | 'expired' }
+  | { kind: 'booked'; booking: PublicBooking; manageToken: ManageToken; email: BookingEmailDetails };
+
+/**
+ * Claims the offer behind a link: the first claim of a freed time books it, through the
+ * availability engine, in one transaction with closing the time's other offers (`taken`, their
+ * clients told and back on the list). Claims of one time take turns on its match row, so N
+ * concurrent claims make exactly one booking. A time booked meanwhile, or no longer whole, is
+ * "taken" for everyone (`WaitlistOfferTakenError`); a link used already is
+ * `WaitlistOfferUsedError`, one past its time `WaitlistOfferExpiredError`. Neither says who
+ * holds the time now.
+ */
+export async function claimWaitlistOffer(
+  db: Database,
+  slug: TenantSlug,
+  token: OfferToken,
+  options: ClaimOptions = {},
+): Promise<{ booking: PublicBooking; manageToken: ManageToken; email: BookingEmailDetails }> {
+  const hash = offerTokenHash(OfferTokenSchema.parse(token));
+  const now = nowOf(options);
+  const { token: pendingManageToken, hash: pendingManageHash } = newManageToken();
+  // The other offers' closing must commit when this claim fails too, so failures are returned
+  // from the transaction and thrown after it.
+  const outcome = await inPage(db, slug, async (tx, tenant): Promise<ClaimOutcome> => {
+    const found = await findWaitlistOfferByTokenHash(tx, hash);
+    if (found === undefined) return { kind: 'not_found' };
+    const matchId = WaitlistMatchIdSchema.parse(found.matchId);
+    // Claims of one freed time take turns here.
+    if ((await lockWaitlistMatch(tx, matchId)) === undefined) return { kind: 'not_found' };
+    const offers = await listOffersOfMatch(tx, matchId);
+    const offer = offers.find((o) => o.id === found.id);
+    if (offer === undefined) return { kind: 'not_found' };
+    if (offer.status === 'claimed') return { kind: 'used' };
+    if (offer.status === 'taken') return { kind: 'taken' };
+    if (offer.status === 'expired' || offer.expiresAt.getTime() <= now) return { kind: 'expired' };
+
+    const others = offers.filter((o) => o.id !== offer.id);
+    const serviceRow = await findService(tx, ServiceIdSchema.parse(offer.serviceId));
+    const staffMemberId = StaffMemberIdSchema.parse(offer.staffMemberId);
+    const start = offer.startsAt.getTime();
+    let booked: BookingRow | undefined;
+    if (serviceRow?.active === true && (await lockStaffMember(tx, staffMemberId)) !== undefined) {
+      const service = serviceToBook(serviceRow);
+      const search = {
+        service,
+        staffMemberId,
+        start,
+        now,
+        templateRuleDefaults: options.templateRuleDefaults,
+      };
+      if (await isBookable(tx, search)) {
+        const entry = await lockWaitlistEntry(tx, WaitlistEntryIdSchema.parse(offer.entryId));
+        if (entry !== undefined) {
+          try {
+            booked = await tx.transaction((sp) =>
+              insertBooking(sp, {
+                clientId: ClientIdSchema.parse(offer.clientId),
+                serviceId: service.id,
+                staffMemberId,
+                startsAt: new Date(start),
+                endsAt: new Date(start + service.durationMinutes * MINUTE_MS),
+                bufferBeforeMinutes: service.bufferBeforeMinutes,
+                bufferAfterMinutes: service.bufferAfterMinutes,
+                priceFromCents: serviceRow.priceFromCents,
+                priceToCents: serviceRow.priceToCents,
+                source: 'booking_page',
+                overridden: false,
+                idempotencyKey: null,
+                createdBy: null,
+                manageTokenHash: pendingManageHash,
+              }),
+            );
+          } catch (error) {
+            if (!(error instanceof BookingOverlapError)) throw error;
+          }
+          if (booked !== undefined) {
+            await markOfferClaimed(
+              tx,
+              WaitlistOfferIdSchema.parse(offer.id),
+              BookingIdSchema.parse(booked.id),
+            );
+            await changeEntryStatus(tx, entry, 'booked', booked.id);
+          }
+        }
+      }
+    }
+
+    // Whatever happened, the time's other open offers close: someone has it now.
+    const closing = booked === undefined ? offers : others;
+    await closeAsTaken(tx, tenant, closing, offer.id, options);
+    if (booked === undefined) return { kind: 'taken' };
+
+    await keepReminderInStep(tx, booked, now);
+    await requestInsights(tx);
+    await appendAuditEntry(tx, {
+      actor: { kind: 'system' },
+      change: {
+        action: 'booking.created',
+        entity: { type: 'booking', id: booked.id },
+        before: null,
+        after: bookingAuditValues(booked),
+      },
+    });
+    const result = await withEmail(tx, tenant, booked, now);
+    await options.notify?.(tx, {
+      kind: 'confirmed',
+      email: result.email,
+      manageToken: pendingManageToken,
+      change: changeOf(booked),
+    });
+    return { kind: 'booked', ...result, manageToken: pendingManageToken };
+  });
+  switch (outcome.kind) {
+    case 'not_found':
+      throw new WaitlistOfferNotFoundError();
+    case 'used':
+      throw new WaitlistOfferUsedError();
+    case 'taken':
+      throw new WaitlistOfferTakenError();
+    case 'expired':
+      throw new WaitlistOfferExpiredError();
+    case 'booked':
+      return { booking: outcome.booking, manageToken: outcome.manageToken, email: outcome.email };
+  }
+}
+
+/**
+ * Closes a time's open offers as `taken`: each other client is told (the claimant isn't, they
+ * see it on the page) and waits on the list again.
+ */
+async function closeAsTaken(
+  tx: TenantTx,
+  tenant: Tenant,
+  offers: readonly WaitlistOfferRow[],
+  claimantOfferId: string,
+  options: ClaimOptions,
+): Promise<void> {
+  const closed = await settleOpenOffers(
+    tx,
+    offers.map((o) => WaitlistOfferIdSchema.parse(o.id)),
+    'taken',
+  );
+  for (const offer of closed) {
+    await releaseEntry(tx, offer);
+    if (offer.id === claimantOfferId || options.tellTaken === undefined) continue;
+    const details = await offerEmailDetails(tx, tenant, offer);
+    if (details !== undefined) {
+      await options.tellTaken(tx, {
+        email: details,
+        offerId: WaitlistOfferIdSchema.parse(offer.id),
+      });
+    }
+  }
+}
+
+/** The email details of an offer's client, or `undefined` without an address. */
+export async function offerEmailDetails(
+  tx: TenantTx,
+  tenant: Pick<Tenant, 'name' | 'slug' | 'timeZone'>,
+  offer: Pick<WaitlistOfferRow, 'clientId' | 'serviceId' | 'staffMemberId' | 'startsAt'>,
+): Promise<BookingEmailDetails | undefined> {
+  const client = await findClient(tx, ClientIdSchema.parse(offer.clientId));
+  if (client === undefined || client.email === null) return undefined;
+  const service = await findService(tx, ServiceIdSchema.parse(offer.serviceId));
+  const staff = await findStaffMember(tx, StaffMemberIdSchema.parse(offer.staffMemberId));
+  return {
+    businessName: tenant.name,
+    slug: tenant.slug,
+    timeZone: tenant.timeZone,
+    serviceName: service?.name ?? 'Appointment',
+    staffName: staff?.displayName ?? null,
+    startsAt: offer.startsAt.toISOString(),
+    email: client.email,
+    clientName: client.name,
+  };
+}
+
+/** An offer as its client sees it; one past its time reads as expired. */
+async function toPublicOffer(
+  tx: TenantTx,
+  offer: WaitlistOfferRow,
+  now: number,
+): Promise<PublicOffer> {
+  const service = await findService(tx, ServiceIdSchema.parse(offer.serviceId));
+  const staff = await findStaffMember(tx, StaffMemberIdSchema.parse(offer.staffMemberId));
+  // Offers reference both with foreign keys, and neither is ever deleted.
+  if (service === undefined || staff === undefined) throw new WaitlistOfferNotFoundError();
+  const status =
+    offer.status === 'offered'
+      ? offer.expiresAt.getTime() <= now
+        ? 'expired'
+        : 'open'
+      : offer.status;
+  return PublicOfferSchema.parse({
+    status,
+    startsAt: offer.startsAt.toISOString(),
+    endsAt: new Date(offer.startsAt.getTime() + service.durationMinutes * MINUTE_MS).toISOString(),
+    service: { id: service.id, name: service.name },
+    staff: { id: staff.id, displayName: staff.displayName },
+    expiresAt: offer.expiresAt.toISOString(),
+  });
 }

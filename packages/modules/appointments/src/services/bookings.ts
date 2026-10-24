@@ -76,6 +76,7 @@ import { findClientToBook } from './clients.js';
 import { changeOf, emailDetailsOf, newManageToken, type BookingNotify } from './notices.js';
 import { requestInsights } from './insights.js';
 import { keepReminderInStep } from './reminders.js';
+import { requestWaitlistMatch } from './smart-waitlist.js';
 
 // Bookings (ADR-0017). `bookings.manage` lets owners and managers book anyone and staff only
 // their own staff member (AC-W9-1); the database's member scope enforces the same, so staff
@@ -382,6 +383,8 @@ export async function changeBookingIn(
     if (changed === undefined) throw new BookingNotFoundError();
     await keepReminderInStep(tx, changed, now);
     await requestInsights(tx);
+    // A cancelled time is offered to the waitlist (S37, AC-W5-1).
+    if (parsed.status === 'cancelled') await requestWaitlistMatch(tx, row, now);
     if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
       await tellClient(tx, changed, 'cancelled', options.notify);
     }
@@ -420,6 +423,8 @@ export async function changeBookingIn(
   if (moved === undefined) throw new BookingNotFoundError();
   await keepReminderInStep(tx, moved, now);
   await requestInsights(tx);
+  // The old time is free now (S37): offered to the waitlist.
+  await requestWaitlistMatch(tx, row, now);
   if (parsed.notifyClient && options.notify) {
     await tellClient(tx, moved, 'rescheduled', options.notify);
   }
