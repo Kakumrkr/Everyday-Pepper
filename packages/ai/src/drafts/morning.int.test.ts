@@ -34,7 +34,7 @@ import { createBooking } from '@pepper/appointments';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { seedEvalWorld, type EvalWorld, type WorldSeed } from '../evals/world.js';
 import { ScriptedProvider, scriptedResponse } from '../scripted-provider.js';
-import { approveToolProposal, reviseNudgeDraft } from '../tools/registry.js';
+import { approveToolProposal, dispatchToolCall, reviseNudgeDraft } from '../tools/registry.js';
 import { OUTBOX_KEY, startTestDatabase, type TestDatabase } from '../tools/test-support.js';
 import type { ToolDeps } from '../tools/tool.js';
 import { runMorningDraftsFor, type MorningDraftsOptions } from './morning.js';
@@ -125,9 +125,7 @@ async function queuedEmails(w: EvalWorld, at: Date) {
     if (row?.type !== 'email' || row.payload === null) continue;
     emails.push(
       OutboxEmailSchema.parse(
-        JSON.parse(
-          openOutboxContent(OUTBOX_KEY, message.messageId, row.payload).toString('utf8'),
-        ),
+        JSON.parse(openOutboxContent(OUTBOX_KEY, message.messageId, row.payload).toString('utf8')),
       ),
     );
   }
@@ -187,6 +185,24 @@ describe('AC-W4-1: the morning pass drafts a nudge under "Needs your OK"', () =>
       },
     ]);
     expect((await queuedEmails(w, later(w, 10))).due).toEqual([]);
+
+    // The chat reads it as waiting for an OK, without the words or any contact.
+    const read = await dispatchToolCall(
+      depsAs(w, 'owner'),
+      { turnKey: 'conv.feed.turn.1', step: 1, requestMessageId: null, untrustedContext: false },
+      { id: 'c1', name: 'get_feed', arguments: '{"kind":"rebooking_due"}' },
+    );
+    expect(read.status).toBe('answered');
+    if (read.status === 'answered') {
+      // Sarah (no email address) stays a suggestion.
+      expect(read.data).toMatchObject({
+        items: [
+          { waitingForOk: true, client: 'Sara K.' },
+          { waitingForOk: false, client: 'Sarah P.' },
+        ],
+      });
+      expect(JSON.stringify(read.data)).not.toMatch(/trim|sara@/i);
+    }
 
     // The same morning again: nothing more, and no model call.
     expect(await runMorningDraftsFor(db, w.tenantId, optionsFor(w, provider))).toEqual({
