@@ -167,6 +167,18 @@ export const PLATFORM_DRAFTS: TemplateDrafts = {
   morningHour: 7,
 };
 
+/**
+ * How the business's smart waitlist offers a freed slot (S37, ADR-0041): to how many of the
+ * best-ranked clients at once (1–5).
+ */
+export const TemplateWaitlistSchema = z
+  .object({ offerFanOut: z.number().int().min(1).max(5) })
+  .strict();
+export type TemplateWaitlist = z.infer<typeof TemplateWaitlistSchema>;
+
+/** Without a template (or before one says otherwise): the top 3 at once (playbook D-6). */
+export const PLATFORM_WAITLIST: TemplateWaitlist = { offerFanOut: 3 };
+
 const Hint = z.string().trim().min(1).max(TEMPLATE_LIMITS.maxHintLength);
 
 /** What onboarding looks for on a website, price list or photo (Phase 9). */
@@ -207,6 +219,8 @@ export const TemplateSchema = z
     insights: TemplateInsightsSchema,
     /** The rebooking emails' voice and the morning pass's hour (S36). */
     drafts: TemplateDraftsSchema.default(PLATFORM_DRAFTS),
+    /** How many waiting clients a freed slot is offered to at once (S37). */
+    waitlist: TemplateWaitlistSchema.default(PLATFORM_WAITLIST),
     /** Domain hints added to the AI's instructions (Phase 6); never client data. */
     promptFragments: z
       .array(z.string().trim().min(1).max(TEMPLATE_LIMITS.maxPromptFragmentLength))

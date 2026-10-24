@@ -5,6 +5,7 @@ import {
   BookingRequestInputSchema,
   ManageBookingInputSchema,
   MAX_LIST_ITEMS,
+  OfferTokenInputSchema,
   PublicRescheduleInputSchema,
   TenantSlugSchema,
   type AvailabilityResponse,
@@ -12,6 +13,7 @@ import {
   type BookingRequestResponse,
   type PublicBookingResponse,
   type PublicBusiness,
+  type PublicOfferResponse,
 } from '@pepper/contracts';
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Req } from '@nestjs/common';
 import { z } from 'zod';
@@ -29,6 +31,8 @@ const REQUESTS_PER_ADDRESS: RateLimit = { name: 'request-ip', max: 10, windowSec
 const REQUESTS_PER_BUSINESS: RateLimit = { name: 'request-biz', max: 100, windowSeconds: 3600 };
 const CODE_CHECKS: RateLimit = { name: 'confirm-ip', max: 30, windowSeconds: 600 };
 const LINK_USES: RateLimit = { name: 'link-ip', max: 30, windowSeconds: 600 };
+// Waitlist claims (S37): a person claims once or twice; a script trying secrets is stopped.
+const OFFER_CLAIMS: RateLimit = { name: 'claim-ip', max: 10, windowSeconds: 600 };
 
 const SlugParamsSchema = z.object({ slug: z.string() });
 const RequestParamsSchema = z.object({ slug: z.string(), requestId: BookingRequestIdSchema });
@@ -141,6 +145,42 @@ export class PublicBookingController {
     const { token, startsAt } = parseBody(PublicRescheduleInputSchema, body);
     await this.limits.hit(LINK_USES, clientAddress(request));
     return { booking: await answering(() => this.booking.reschedule(slug, token, startsAt)) };
+  }
+
+  /**
+   * The waitlist offer behind a claim link (S37): its time and whether it is still open. 404
+   * `waitlist_offer_not_found` for an unknown secret. Reading changes nothing.
+   */
+  @Post('waitlist-offer/lookup')
+  @HttpCode(200)
+  async offer(
+    @Param() params: unknown,
+    @Body() body: unknown,
+    @Req() request: IncomingRequest,
+  ): Promise<PublicOfferResponse> {
+    const { slug } = parseBody(SlugParamsSchema, params);
+    const { token } = parseBody(OfferTokenInputSchema, body);
+    await this.limits.hit(LINK_USES, clientAddress(request));
+    return { offer: await answering(() => this.booking.offer(slug, token)) };
+  }
+
+  /**
+   * Claims the offer: the first claim books the time (200, the booking and its own
+   * reschedule/cancel secret). 409 `waitlist_offer_taken` when someone else claimed it first or
+   * it was booked meanwhile, 409 `waitlist_offer_used` for a link already used, 410
+   * `waitlist_offer_expired` past its time. None says who holds the time.
+   */
+  @Post('waitlist-offer/claim')
+  @HttpCode(200)
+  async claim(
+    @Param() params: unknown,
+    @Body() body: unknown,
+    @Req() request: IncomingRequest,
+  ): Promise<BookingConfirmResponse> {
+    const { slug } = parseBody(SlugParamsSchema, params);
+    const { token } = parseBody(OfferTokenInputSchema, body);
+    await this.limits.hit(OFFER_CLAIMS, clientAddress(request));
+    return answering(() => this.booking.claim(slug, token));
   }
 
   /** Cancels the booking; 409 `booking_not_changeable` once it has started or was cancelled. */

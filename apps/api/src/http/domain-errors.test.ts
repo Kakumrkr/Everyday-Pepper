@@ -15,6 +15,10 @@ import {
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
   WaitlistExpiredError,
+  WaitlistOfferExpiredError,
+  WaitlistOfferNotFoundError,
+  WaitlistOfferTakenError,
+  WaitlistOfferUsedError,
   WrongVerificationCodeError,
 } from '@pepper/appointments';
 import {
@@ -76,6 +80,10 @@ describe('toHttpError', () => {
     [new WaitlistEntryNotFoundError(), 404, 'waitlist_entry_not_found'],
     [new WaitlistEntryNotChangeableError(), 409, 'waitlist_entry_not_changeable'],
     [new WaitlistExpiredError(), 400, 'waitlist_expired'],
+    [new WaitlistOfferNotFoundError(), 404, 'waitlist_offer_not_found'],
+    [new WaitlistOfferUsedError(), 409, 'waitlist_offer_used'],
+    [new WaitlistOfferTakenError(), 409, 'waitlist_offer_taken'],
+    [new WaitlistOfferExpiredError(), 410, 'waitlist_offer_expired'],
     [new BookingPageNotFoundError(), 404, 'booking_page_not_found'],
     [new BookingRequestNotFoundError(), 404, 'booking_request_not_found'],
     [new BookingRequestExpiredError(), 410, 'booking_request_expired'],

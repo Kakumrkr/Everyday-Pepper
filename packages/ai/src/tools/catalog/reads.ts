@@ -4,6 +4,7 @@ import {
   listBookingsIn,
   listClientBookingsIn,
   listTimeOffBetweenIn,
+  listWaitlistIn,
   listWeeklyHoursIn,
   StaffMemberNotFoundError,
 } from '@pepper/appointments';
@@ -27,6 +28,7 @@ import { daysOf, instantOf, localOf } from '../local-time.js';
 import { shortClientName } from '../names.js';
 import type { ReadTool, ToolScope } from '../tool.js';
 import { lastVisitOf, recallFor, refsOf } from './recall.js';
+import { WAITLIST_SHOWN, waitlistViews } from './waitlist.js';
 import {
   bookingView,
   clientNames,
@@ -412,8 +414,8 @@ export const getBooking: ReadTool = {
 export const findClientBookings: ReadTool = {
   kind: 'read',
   name: 'find_client_bookings',
-  // 2 (S30): the client's memory and last noted visit come with it.
-  version: 2,
+  // 2 (S30): the client's memory and last noted visit come with it; 3 (S37): their waitlist.
+  version: 3,
   localTimes: false,
   guide: {
     use: "Read one client's next appointments and last visits by the client's id: when they are next in, when they were last here.",
@@ -422,7 +424,7 @@ export const findClientBookings: ReadTool = {
       'to see everyone on a day (use get_day)',
     ],
     returns:
-      'up to 5 upcoming bookings (not cancelled), earliest first, and the last 3 (with their status: done, no-show, cancelled), latest first, with what the business remembers about the client and their last noted visit. Staff see only their own bookings with the client.',
+      'up to 5 upcoming bookings (not cancelled), earliest first, and the last 3 (with their status: done, no-show, cancelled), latest first, with what the business remembers about the client, their last noted visit and their waitlist entries. Staff see only their own bookings with the client.',
     examples: [
       { say: "When is Maria's next appointment?", args: { clientId: { $any: true } } },
       { say: 'When was Sarah last in?', args: { clientId: { $any: true } } },
@@ -455,9 +457,20 @@ export const findClientBookings: ReadTool = {
         ? 'no earlier visits'
         : `last ${when(latest.date, latest.time)} (${latest.status})`;
     const memory = (await clientMemory(scope, [clientId], directory)).get(clientId);
+    const waitlist = await waitlistViews(
+      scope,
+      await listWaitlistIn(
+        scope.tx,
+        scope.actor,
+        { clientId, limit: WAITLIST_SHOWN },
+        { clock: scope.deps.clock },
+      ),
+    );
+    const waitingPart =
+      waitlist.length === 0 ? '' : `; on the waitlist (${String(waitlist.length)})`;
     return {
-      summary: `${name}: ${nextPart}; ${lastPart}.`,
-      data: { clientId, clientName: name, upcoming: next, recent: last, ...memory },
+      summary: `${name}: ${nextPart}; ${lastPart}${waitingPart}.`,
+      data: { clientId, clientName: name, upcoming: next, recent: last, waitlist, ...memory },
       card: first === undefined ? null : { kind: 'booking', booking: first },
     };
   },

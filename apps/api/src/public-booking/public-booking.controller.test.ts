@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import type { Server } from 'node:http';
 import {
   BookingPageNotFoundError,
+  WaitlistOfferTakenError,
   SlotUnavailableError,
   WrongVerificationCodeError,
 } from '@pepper/appointments';
@@ -12,10 +13,12 @@ import {
   BookingRequestResponseSchema,
   PublicBookingResponseSchema,
   PublicBusinessSchema,
+  PublicOfferResponseSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
   type PublicBooking,
   type PublicBusiness,
+  type PublicOffer,
 } from '@pepper/contracts';
 import { DATABASE, REDIS } from '@pepper/runtime';
 import { Global, HttpException, HttpStatus, Module, type INestApplication } from '@nestjs/common';
@@ -57,6 +60,14 @@ const BOOKING = {
   staff: { id: STAFF_ID, displayName: 'Jess' },
   changeable: true,
 } as PublicBooking;
+const OFFER = {
+  status: 'open',
+  startsAt: SLOT.startsAt,
+  endsAt: SLOT.endsAt,
+  service: { id: SERVICE_ID, name: 'Haircut' },
+  staff: { id: STAFF_ID, displayName: 'Jess' },
+  expiresAt: '2026-11-03T13:00:00.000Z',
+} as PublicOffer;
 const ASK = {
   serviceId: SERVICE_ID,
   staffMemberId: STAFF_ID,
@@ -75,6 +86,8 @@ const service = {
   managed: vi.fn(() => Promise.resolve(BOOKING)),
   reschedule: vi.fn(() => Promise.resolve(BOOKING)),
   cancel: vi.fn(() => Promise.resolve({ ...BOOKING, status: 'cancelled', changeable: false })),
+  offer: vi.fn(() => Promise.resolve(OFFER)),
+  claim: vi.fn(() => Promise.resolve({ booking: BOOKING, manageToken: TOKEN })),
 };
 const hits: { limit: string; key: string }[] = [];
 let overLimit: string | null = null;
@@ -253,5 +266,29 @@ describe('the public booking page api (no session)', () => {
   it('400 for a malformed link secret', async () => {
     await post('/booking/lookup', { token: 'short' }).expect(400);
     expect(service.managed).not.toHaveBeenCalled();
+  });
+
+  it('reads and claims a waitlist offer by the secret in the body (S37)', async () => {
+    const seen = await post('/waitlist-offer/lookup', { token: TOKEN }).expect(200);
+    expect(PublicOfferResponseSchema.parse(seen.body).offer).toEqual(OFFER);
+    const claimed = await post('/waitlist-offer/claim', { token: TOKEN }).expect(200);
+    expect(BookingConfirmResponseSchema.parse(claimed.body)).toEqual({
+      booking: BOOKING,
+      manageToken: TOKEN,
+    });
+    expect(service.claim).toHaveBeenCalledWith('juniper', TOKEN);
+    // Claims have their own tighter limit per address.
+    expect(hits.map((h) => h.limit)).toEqual(['link-ip', 'claim-ip']);
+  });
+
+  it('409 waitlist_offer_taken without saying who has it; 400 for a malformed secret', async () => {
+    service.claim.mockRejectedValueOnce(new WaitlistOfferTakenError());
+    const taken = await post('/waitlist-offer/claim', { token: TOKEN }).expect(409);
+    expect(ApiErrorSchema.parse(taken.body)).toEqual({
+      code: 'waitlist_offer_taken',
+      message: 'Sorry, this time has been taken',
+    });
+    await post('/waitlist-offer/claim', { token: 'short' }).expect(400);
+    expect(service.claim).toHaveBeenCalledTimes(1);
   });
 });

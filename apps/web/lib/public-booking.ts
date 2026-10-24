@@ -2,14 +2,18 @@ import {
   addDays,
   formatDate,
   ManageTokenSchema,
+  OfferTokenSchema,
   PhoneSchema,
   type CivilDate,
+  type PublicOffer,
   type PublicBusiness,
   type PublicService,
   type PublicStaffMember,
 } from '@pepper/contracts';
 import { dayRange, todayIn } from './calendar';
 import { normalizeContact } from './booking';
+import type { CallResult } from './client-api';
+import { z } from 'zod';
 
 // The public booking page (S17, ADR-0022): pure helpers for the client's screens. The api
 // decides everything; these shape what the page asks and shows.
@@ -131,6 +135,44 @@ export function checkDetails(form: { name: string; email: string; phone: string 
 export function readManageToken(hash: string): string | null {
   const token = hash.startsWith('#') ? hash.slice(1) : hash;
   return ManageTokenSchema.safeParse(token).success ? token : null;
+}
+
+/** The claim secret from a waitlist offer link's fragment, or `null` when it is broken (S37). */
+export function readOfferToken(hash: string): string | null {
+  const token = hash.startsWith('#') ? hash.slice(1) : hash;
+  return OfferTokenSchema.safeParse(token).success ? token : null;
+}
+
+/**
+ * What an offer's state means for the client (S37). A used or taken offer never says who has
+ * the time; only an open one can be claimed.
+ */
+export function offerStateText(status: PublicOffer['status']): string | null {
+  switch (status) {
+    case 'open':
+      return null;
+    case 'claimed':
+      return 'You already claimed this time. Check your email for your booking.';
+    case 'taken':
+      return 'Sorry, someone else claimed this time first. You’re still on the waitlist.';
+    case 'expired':
+      return 'Sorry, this offer has expired. You’re still on the waitlist.';
+  }
+}
+
+/**
+ * What a refused claim says about the offer now (S37): 409 `waitlist_offer_used` is this
+ * client's own claim, any other 409 someone else's (or the time went), 410 past its time.
+ * `null`: not about the offer (a network error, a rate limit), so the page says try again.
+ */
+export function refusedClaimStatus(
+  result: CallResult<unknown>,
+): Exclude<PublicOffer['status'], 'open'> | null {
+  if (result.ok) return null;
+  if (result.status === 410) return 'expired';
+  if (result.status !== 409) return null;
+  const code = z.object({ code: z.string() }).safeParse(result.body);
+  return code.success && code.data.code === 'waitlist_offer_used' ? 'claimed' : 'taken';
 }
 
 /** The client's page for their booking, with the secret in the fragment. */

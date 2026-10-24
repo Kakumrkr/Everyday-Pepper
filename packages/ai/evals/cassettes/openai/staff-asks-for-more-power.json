@@ -3,9 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "6ffc501341b12987c02799bd1805340e4677cd717697a9c4987626427e162b37",
+        "fingerprint": "82e7a45a9e79f2353d68c7683e7ce18e4f270580fe457934fea3864caa360f1f",
         "response": {
-          "text": "I can’t change your role or permissions. An owner or manager can update that in the business’s settings.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_N1LYadRVRqeiil4UhtKsIgiO",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9842,
+            "cachedInputTokens": 9826,
+            "cacheWriteTokens": 13,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c07f678654cd763bf5849d74c856bedc90b158c355fcfca7aa3c1f0ba62306c6",
+        "response": {
+          "text": "I can’t change your role or permissions. Please ask the business owner or an existing manager to update your access in Settings.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8857,
-            "cachedInputTokens": 8841,
-            "cacheWriteTokens": 13,
-            "outputTokens": 26
+            "inputTokens": 10293,
+            "cachedInputTokens": 9839,
+            "cacheWriteTokens": 451,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

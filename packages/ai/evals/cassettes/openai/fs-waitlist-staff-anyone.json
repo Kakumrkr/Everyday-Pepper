@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "54269fffacfa6ee5dad804f4ccbd3930c6d5688b43106496d22505e8e833f63f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2sV0SnS2lsvKZVnSOr6ri4Lr",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9848,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9845,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4bf3a669fe1c0f07bee7f53adf16b69e17a1aa3e22964d638352b08493ee2e5a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_D4wP7xHYLxlCjOuXzaYvrKZH",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_uPvbdvKOvpgtjleUdVQjyrIO",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10303,
+            "cachedInputTokens": 9845,
+            "cacheWriteTokens": 455,
+            "outputTokens": 97
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cb84203f708b3b81dde5524541ca1cf6bc495e8cef888f43e2de6a768f9e7c4a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_VDOl5JU5wz8HjUwPsHez4b6V",
+              "name": "add_to_waitlist",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"windows\":[{\"date\":\"2026-11-06\",\"start\":\"12:00\",\"end\":\"17:00\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10502,
+            "cachedInputTokens": 10300,
+            "cacheWriteTokens": 199,
+            "outputTokens": 95
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "152c06c7b67535a7dcf5efe3ba005c5ae790b6e81c12dc897ef5553428e09e04",
+        "response": {
+          "text": "I couldn’t add Maria to the waitlist because your role doesn’t allow it. An owner or manager can add her for a haircut with any stylist on Friday afternoon.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10651,
+            "cachedInputTokens": 10499,
+            "cacheWriteTokens": 149,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -6,6 +6,7 @@ import {
   findAvailability,
   getBooking,
   listBookings,
+  listWaitlistOffers,
   listBusyTimes,
   listWaitlist,
 } from '@pepper/appointments';
@@ -23,6 +24,7 @@ import type {
   WaitlistEntry,
   WaitlistEntryId,
   WaitlistEntryInput,
+  WaitlistOffer,
   WaitlistQuery,
 } from '@pepper/contracts';
 import type { Actor, TenantContext } from '@pepper/core';
@@ -81,6 +83,11 @@ export class BookingsService {
     limit: number,
   ): Promise<AvailableSlot[]> {
     return findAvailability(this.db, actorOf(tenant), query, { templateRuleDefaults, limit });
+  }
+
+  /** The latest waitlist offers and their state (S37). */
+  waitlistOffers(tenant: TenantContext): Promise<WaitlistOffer[]> {
+    return listWaitlistOffers(this.db, actorOf(tenant));
   }
 
   waitlist(tenant: TenantContext, query: WaitlistQuery): Promise<WaitlistEntry[]> {

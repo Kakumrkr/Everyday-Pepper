@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "51e25e4d86a2afb157a39c1afd60a98cbab5a027bc214007d05ba57b6a1716b6",
+        "fingerprint": "2fca1cd97d6c6186a4f16fb93ed14dd589c456a8b1b81a1cf3e7052d586b13cb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_1YDOQa4kWncQ7fQ1EEFMDbnH",
+              "id": "call_YgjVlBXKXfuwPILExmLIdfrp",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,21 +16,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8863,
-            "cachedInputTokens": 8841,
-            "cacheWriteTokens": 19,
+            "inputTokens": 9848,
+            "cachedInputTokens": 9845,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4d3b98f66ce0ffa718873adffcb987af00e67aaf900c4101d7a2c648cb20060d",
+        "fingerprint": "bfb3c8089febd753a1deb3dd82f1781c7e2f9d7683aa5b9b23f9ca2d0bcb40ed",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_33aWBaxi5vl0QTdd4VKcp5z2",
+              "id": "call_qdPEJZzSq3O3wD683yTqokSJ",
               "name": "find_availability",
               "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-09\",\"days\":7,\"notBefore\":\"14:00\"}"
             }
@@ -38,18 +37,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9309,
-            "cachedInputTokens": 8860,
-            "cacheWriteTokens": 446,
-            "outputTokens": 87
+            "inputTokens": 10304,
+            "cachedInputTokens": 9845,
+            "cacheWriteTokens": 456,
+            "outputTokens": 107
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e2f0750b20915c8077838c09aa2348c711cdc0dc99bcbdaf9ace75e07caa476d",
+        "fingerprint": "77c4365b1cf39b56cdbcea9182dedd2d02d18abad0626180e252d4130becc7f0",
         "response": {
-          "text": "Jess has colour openings after 2pm next week, starting Monday, November 9 at 2:00pm. Other options include 2:15, 2:30, 2:45, 3:00, and 3:15pm Monday, and from 2:00pm Tuesday, November 10. There are more openings too. Which time works for you?",
+          "text": "Jess has colour openings after 2pm next week, starting Monday, November 9 at 2:00pm. There are 12+ available times; would you like one of these, or should I show more?",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +58,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10003,
-            "cachedInputTokens": 9306,
-            "cacheWriteTokens": 694,
-            "outputTokens": 84
+            "inputTokens": 11050,
+            "cachedInputTokens": 10301,
+            "cacheWriteTokens": 746,
+            "outputTokens": 49
           },
           "model": "gpt-6-luna"
         }

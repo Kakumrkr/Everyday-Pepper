@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7980422427c702a83d34c469a79477234c6dfddb25ca818646af8362b6a37e2a",
+        "fingerprint": "25bf790391ff56fccb1ae92f2801e19f045207b37dd440c19394ad098fa43917",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_d3GGTAGMZ4Js1SjwgaBDYJvR",
+              "id": "call_BT1vYcZftrwf8TRBUk2HmKOl",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,31 +25,31 @@
         }
       },
       {
-        "fingerprint": "09eb43bdf9f69daa40a0278ebf9e774a68b0ad3100422b97f6b65fabc3c96f8e",
+        "fingerprint": "098619c662976249e9ae19b5459ea4ce881ec29725086e4c2b3b9452471ad023",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_cDXxbk9G5FGdqLQFqKQksiul",
+              "id": "call_sGoK2bggKfkD5ojlAGZ9nW3s",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"preference\",\"value\":\"prefers morning appointments\",\"sensitive\":null}"
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"preference\",\"value\":\"prefers morning appointments\",\"sensitive\":false}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8939,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 84,
-            "outputTokens": 62
+            "inputTokens": 9925,
+            "cachedInputTokens": 9837,
+            "cacheWriteTokens": 85,
+            "outputTokens": 63
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d94880f0b4a4046851700ee4b979b50f1925de2d46845dfe8166015574e9f440",
+        "fingerprint": "9be2c6df0289e9535685cca61b10ca0f5ed4f9f49eee58241f266f9c0c5f287d",
         "response": {
-          "text": "I couldn’t save that—remembering new things is paused. You can turn it back on in Settings and ask me again.",
+          "text": "I couldn’t save that—remembering new things is paused. You can turn it back on in Settings.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9051,
-            "cachedInputTokens": 8936,
-            "cacheWriteTokens": 112,
-            "outputTokens": 30
+            "inputTokens": 10038,
+            "cachedInputTokens": 9922,
+            "cacheWriteTokens": 113,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

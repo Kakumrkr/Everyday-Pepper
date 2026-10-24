@@ -3,16 +3,16 @@
   "trials": [
     [
       {
-        "fingerprint": "a1b742c8731224923fc8a62a780ba30c01a754182a224525b6cbc0d801152fad",
+        "fingerprint": "e58a8c19985a6cac4e7feb973528ba86b459ebc05da01e2b6703097cb54d22f2",
         "response": {
-          "text": "I can’t run that kind of feed: the available kinds are schedule gaps, rebooking due, no-show pattern, and staff overload. The feed also doesn’t include clients’ email addresses. Which feed would you like to see?",
+          "text": "“every_client” isn’t a supported feed kind. I can read all feed items with no filter, or filter for schedule gaps, rebooking due, no-show patterns, or staff overload. The feed doesn’t include email addresses.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_099065c8109168d4016adced5bb9e487d2b651fa8920e21fdd",
+              "id": "rs_0213713d1f7e311d016add3130b29c87d29385d3fd4937e859",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3O1cwRWLisdiWbFo5cVNT5bqvYOsW6HbNaGY12nouImlru94l-eMQnp8VPCHt5SAl0CO4Py1Ntjv17iJnR-5UGFc4zb95OWbIuRc2Ae7lM1nq-7yfz5Sz3cXlCwtaBc7Deb7p5gby9_78i04sYJEfv775r4luTuRYqWDjXm7EAR6EY5Bs7KTl-q_xC_IWyV6ZGKLF-sQIQ9ITmTzCrZ6a4X2czwaSkkoYzd1lWu2XKbOv_jUXJc-U5MZU7fgPUg-q2VwJBcs-QQ1j4ZC2lZNFCgZfmUjRYWFUxq4908BFRqyOeUG2CrrgWr05vyIm8QHtc6zAGfTk3VTt_c_UerKfo06auGcctVY5Ti2xXs4UXcMWLDHIdEbaea-VB7BK37mfaCVasi6Mpn8Sf_ZRrTsC-w-kZLdmqRf5hsvqRYpflE0Hx7SrzQDJ-73uexAfkghMXG8eBHN62X8fQVbzI9oMxK5Ko-rnfXuOQViRVBeAgbQtMVNkO5LwZ2-vufMYjJWFDFokFTdjDAS-R2_LjxLusOjeRCXf_nCMyOSLIsM0H2HrwFMXmiJb8lb-byse8JRyhe3Y3NAG0P9qxc9thagaIfYUCtH-f5ZrQwxPYydFq3h7VAbC9FX_aLczxFJpKIbBUche_oug3wKKG-LtHo4AtmoPY0qhEFuf_s7fdwKXgYqUGuRhrTUD-e5Aig_oSsljrHciWOZ6Dpo9qGTkSIWZqjwaL8YAxTz2SWtQaZVF_Fy3fehyUKf-jKZpJIYHAdNvNOxn4M4H-bAP8yfbImxuolZpxYxV7vvuAN_d92tSmiYWslR5mxIXw7XTJZXL8fiMCtL0sF6jRuVaLRF2eGlZ2OYuf-0__rHoLWQ1jXNiSEExWPt0gv8CWCQuDAlK09_O8RdQ-zCdidWgAAlNOsDMwyVEVFF5wQCCD0M6MA3CdnGJ8mziD5OU6j9HcjU74rTbVjtsiuEIy9R8AdGXo8dW_epcdKXX-dJ6IA0J_wLQcF1UXMop9oZzAwqzo0hRfX6IqSFlesUc55xCPx5evLL4XgX2zTxYIu-YTdItZ78umOE9hEXewmrjYGuBLyNiO8R-Ok2ndg5kHfk33qPXS6t7M-I3l8T13oC7r2ViFoccqQJS_FV3OyGCsMaY9eN3OpPrgA1o07lD2yNQi-9XjZJQc3mKi9-XwV1wjipkahvPUOcGBvASFeR73x3Rd5YwbpxH5r4qHEh2QMgQ6kRk3v7gFLBNd8-abZ9ltOOf7ihNOomsZVnV1zBOOfxZV6LtHYDnCAVT3Z0CZK6Tyn6EqO0ZMacohAuvAf8-MysCwjiL-Imi1H2g0KHUiKUXhpJTtiH8lQuCTmh42YWObFwRhD34eeevF7ERflx6AjzYczcuMfzQaiXdxzK4fpUnoh-xWrWrmWgXMPWhPkJAKDBWVUmlsU8FypINOguTjOh7rjnxzfWiw5ibMCLLJj0CahJT829q-puU1mR8OFAcezgC3LXZgPFv5rL6hGJRo6v_yISX_Dxld9HgMYqf86sSrJ_2B9RXzj8AdOcta-PJeEOZyaq6CNXTzA2z6ZxfQ5jQOprJ1HuoKO5LWlMfEBHZw9AxB-j04OZ5h7UJ0QmSuaPcPUdWtlMmkt8B11GvjJvkd00hUtV2nkzNegHnvFKUpP7FO9aJL3YaIvymq1pT5JTyN725j_5I2h18Ll3kfZhK79pCK1ttT103T7wB1Z5j9DzFq-kmKZSQHVzeyIbmWfJ92fOHeplbe5jdDIzQEU3B2vugFfc3_d2ZkoIMcpdQ3Q9t707dWLjEb7RufyYMFyph9HAXRjMjYBJp6aBhBtLn3__jgKdKJZUgEkSyLuPj_3a5P659Q8iGL6LhYaycmrlxQrGw4pcLhgSsHEn3Y8oWf8FsKnU2IpLdjd4Q-4VzjBUAoVoBlpa3bXaeYO9TeTjlu6jQ90u2_SLIa1OmARruLkk_Z883hD7PeN53jR4MTpNBdlav3jBDAmfU7td4xDJkFHWIihX2gDisF4H-xzE7mnwHUk2A7OBhdq709QUU3KZYAYRAiHSbRtOAa6NYMKEdbyha9U4jWwS4xkZJbYoEVE1V3csOudmhzstyY3s8c3UopqxX6A6D7HHbUO3LqI8PegHv27eqA==",
+              "encrypted_content": "gAAAAABq3TEyRHKg76BcibcmYiSeZS06hSFfTTgbU0zRdRGSjDN00NmBfdaE6qxxXG9zpCnqV0qTm8S9vW5khokv_ppV6Dgar83DC0bg_RVQIyRFltVZT_XJwO_63mKasHqbx8PFnO3ub5KKTZNFfQpWOJJBjTIHo6Y-QjhrsmmUq2sQaP9cNHINVEaNbhJI0NLVthR1ts0lU5J-ex6qyikSUuqwwKx6-6LyfcHjuvqMHneFzHiJT3oUWRg8dacD1KfZzu1-zAtNKwmjWTZDz5GLJ9agN1uvKnGjO7h5Za0u1L81JsEzamRdQtQCzJeXKWpQIVzzZE7ZKfcxpW0J6DKtCkrxntWLqeXAILoA8KYA_Jd_Fk3UAbtKL3vTr-4CuqrBiI_BT4hhHdQPBAglmTHzjhXSwd34uJZIRnpyFvCUWpBfwI2lXEPb43cw463wr78ZPn4_twy5VnZu0cfcOhEvOQI3Vb6xprZo8qkWOGtYRtvcfRrY53QFyYAnoRWpnkZ0gHcwp4GsieULlU7Bo62_jRGLM0FkI32wCn5wbZS5VppwxhKhcZ1XRf5NEkqmUhj1HLiB3P3Px2-ChZGxqeGWnPq_aa6U2fcQ7UYfyX2JwThEjmmOv-3b7q_GG4NwGCP43rgjIL2lxOFd-nbfAeFdyKQ-j_54cMRMPdLJ9xVXdtz34csuw_5hORkjPVpKm1TYiWIY_MJ2pCPOqjbwpUINGx4XilP1dV66pDvDRmhp23-3GvFWA5BNJXXQ29Y4NoBnacdkwfeO8cmVKLmROciN4FOZQftxw5K4MDEK0poBDkiQaCWrEkXLEJZIAVk8zxkkJrcqMEFLFcP8WTLB09zE8bNXUKLyyKFCDCzkcZqsnKHJaUgb081AV1HtT3UXeMiLTfSJ9xbJ4Dw2KTm7ugmfGyPgv0QCju8anZZvkwMKUhIIt51-l7Mylhdq2byU-rLv3vwysu9nhtk3fLy34XZuf8YGTmuXrHJzouoyEhyBwbd0T0bx6ikl2nVwBhUhXthv2Pak-VOvi5qlW_1VPNqb5eXANlQxiS42X2arMFRiwWcQjZL_gfx0IQVimFzTJebOk7rDXy_02HMbnyF9RF1xpylZrbnfya39HEytr5grx9C27wUDOvOYp1gJUUs4rSqsq-olnt8JC_6VXit9_n9cFdYE5AYE19rl4njpNSOASBi8nQxS411GWlRzR5PPiemvbRss2cU8IpBTFmh8nwATmMJuCsdwMlcvYRdiWCyWlrShx2vqZ3akAcpN4Em89hkgwy0IimrhAUzHHCLNkvR6eHYtReXQ4PnJc1xLwIKrgEDHQF-H3EubyQP5U6cUWJhCIuMhhcmfNXb0wfTQ5NnHvZpLPiWs6ASo_k02jIduBo7fSvjaDFYpre9G0kI7j6XIeKAyVeVasAVkEI4qndzl6QzvR2zSUz15Hc_8E4A5-h_6PVQQv_bF6wadAQlVK0xdy6VWFt5WKf4AHIA_PGorxzDV4H_Qz4uxqPe0qfCYHMZipGagbL09vVYlg7e7W-gDu6RNhiQ7kMMldm4rXSEOl2QW8UqldVFeDk-H-ZrnOEwkrMhbG3JV1t-_t2dKx9QjHycxgKeNXFMEAd6zW-7ZN6dBbG-goYys7_ZoXui1Ke3Vf4q6oWlqXFBYmzMrn0wgQRV9CXoKL6gxczblKAx9nIvtp6yzrVJIgo0o64uECKlv_Ez0ecTr2JMrk1F6ETEAypTipdF2LznndhiwhnSBUqpavo45_c-OaZG8BzY9Sqdt7hLQ11zj9sTdVRK21FlCi_a5tUX3uXpiuoDDKxBVHPAdwAi1NLFFXbhX0rfFkJSyizRWk1xzoDrOuIq0ZtQU6jQ0Rw9Recyv0S0UoFWCGymKN1Vy6BRHa8GTuyPxRtSajNGlKOkN0QO4gtO21bSD7q8am3k32sLsXJB1qwTXeWIUr_Az1GgMgqgk0Eve0lYQW4TNwmSyrg34xAj0iuvZOM769kOdHMYh1_fTcKsGetB11RM01EhKbgr5SI91qh2BuiQp6Qqyn_dSB2bYkszsDsDF_YjZQzydWehQeJl1O67lVXVGLXFXu9k-kQHDnzX-VEyJNm8eUBdsMwPOlkR-i9-yjAEWVYRQa7pe0EALmXOmT7CVx3vbCRiTkgqCmABWo2VO139rAOzRdy-VDVRouxyJKHGyLVh_jRyYk_4SlvBxCzd8mjRjY-zSEGvikEDolXa7NUr5xkQ-eJ5Qw9BTwKgZWY6vD7XLBkcWGdeYqnNQ3PNyqHKXnMqHcDuTqLOfWMMKKIUbo5ixfFS-sH2zshJXj4spJM_kzXIDzgNSgAlc9LMhd6iT3FhchEInhe1bOyOlaueCHS4c3ZdD6dn74-sKi37W_D8bvqmEtKUz7_xcUmVh_z65uGVQRFXxUWQTIIfnz-kOcgVXhuQ3flqNZfKgRfXPVzFT20oaSpa-0yeI2GJ5C6TPOWaBhwU25YdV3CbsqgWcr3TfShPbp4hQI9fk0LK7dnCt9hFX22VT_3DnsS4WNu2aBy0THY4npl6AAwwrFxclbJEkMTUSzvGwOiHFosHgdWhVOvjNnYUF7ZVj-_0JgwJNo5RM2NoBTIbgQ3HQ3b5ReWvQ9Fpash5acCYJ9545Gdh4bB3oeuvtq3MD_XsfKQ==",
               "summary": []
             },
             {
@@ -22,68 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8864,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9849,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 20,
-            "outputTokens": 106
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a1b742c8731224923fc8a62a780ba30c01a754182a224525b6cbc0d801152fad",
-        "response": {
-          "text": "I can’t run get_feed with “every_client”—that isn’t an available kind. The feed can show schedule gaps, rebooking due, no-show patterns, or staff overload, and it doesn’t provide email addresses.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_08e1e84fb1c75e8c016adcf0e7f37087d29a3fe51cd55306ab",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3PDpeEXQ6XKM2lmPc52OaE8d0-xnqjlnX8u_0WrRwy45du9vpQkxQhGu2NnvjTwawNVpErlRoh4ZAXmrCjOrmIIyHYEIQLR1qFHGUxcFPa4AZzAttXgGnL9HjoYydrm_2Z93xfSKcDtInsblIZAh6HJQzPkaiXn5JhakMSYuJe21VqqwKDgkAwxn2kZjt0h95wReVOcEdTY2qOmYPW9Rtj7T_llmoVKryNj9GDwPnUmHrndCGjHR4K6WLVRiqrSjdQu80EaCsP2ArCvm4rHwXzgvuKuDcLdaUS-tzms7ywBZFo6Oo9NhOa8zWYG-PGJbVoJdsgWueFYWj6NOZxIFQHBUDeUOLVvQuHAfwveAC9XsqyLWV_oq9FgqkCTGoo9tKEHbNG5Ls0nkJm1-LaInFrKKeQbzz99HLjRO3oaLeRnDI2yp_2qc_ZnvpMgOldG_WfUt5Z1wAPDw2tmBDtWZ4ca4jhhr5_QQfAdHX00lbFtBJjjQ2xZGfITEOXA6stuuDHlr3nlymBCG-SxEvZ0Io6ZJunqm2P0p13w6XsS8wcFeYd6UcHdQBLlsnyEH5KIC1G0hYvvJz0_P_km7HM4htWlgtg3-jo34pEHg_LXfGBW6_PxGJPSB-fmsyJ5fcub0GW2zhpwnU-zb8mHCUORaKcYmjYmiConWTJL3UoZP3WfsvuzD7N0eyf1XSLopj_6WkFQayM-o7EiVJNmEF5eF8kXBtJaCLMy-bnU5JVhPu_TWMEu9fF3YXENhgP-74uuop0nz6aQbgwJfheqy-kzWEXXXixGIUfPfCMMnIi74VAg-0UINJpMcDxF-6RJnadMnYBCMIwXmCpzkx12tB3CDyDB3OyFCY0bTToWIclDap8qcMYK8ZSjkXZphso87c_2h3Bwt0dAQEGMtvGwryRpROFt3cgHt0a7ldeV93sQnc6QV7rHJJfgtkSRVNJrisumoT3ox22WXkUiOHdebZarjK_Es4DENHdSyu_rum3emNMzsh6aITC2sBmiG-NZfBZ4hp6ODgYoqKHn_oauaXcCJ71Rlb72-g8_uDNilp_CjLK4IQny-58O8Z-ZwK5lN1K3z8KwLiyhO1EemRjIIQmWvYOOKFtXvZ4Gpa7Gh0od4CgY94JBpodBCK7-t6J87JdVMRitnGzEBSLF21UKXThzlM1q4EIEwZJlqRA14rG-8-O2xUp0yK9prU-glP3HcRWTieHXYLq54UzjJu8HA2TstPYNQjOyEKc_ljb0guQw2RrqeYLg_5NXCFuNLSnd5t1SCyAY7gdJim0QDONZyKFJ9sL67ROa_fnV3N2gbtuCmAx0xNf_H9D_EyTslq8w-rvmSOurRNZU3mn_VAoYgsZwfjnS8aK9CamXA0Lq-_62THNgsq3IIObdOvvOY7zq49pKAp9GdTwl18aAcw5EHzFleLU9V5eTOzAodCeWD4kGSSBRr1rsAn-I_rBlmeO73Tch-gbbYpn5z2e1BIQYEeHuBcloaXl_bHJ9kvNyOu1vZN7DH7BAxua8B8JgQopZ-fCUAOYJ1_FIS07k1YbyitfgYv84HzPTERVV3u6e7VNhx8NPVvTV4XV9l0qQZhdyvHS6GWH1oIRfwq29kn9dF9HD3nsAueafMOszwETI8PkgeUXHNplQhAA6PEYKsPBcFqZD6aVtc16fRRC9Mr8VqaXlualynWDS9Jup5ztXn8qr-wYdv2Y-CBbHnqxrwEGCUbNzj2N7_nkJglBSdBLKM580lQ6_NIDWnKkGvf3pMTPSpUoFHPArKbxZX7sYui8EC7zPnXR-rqej8c_cvz8PlFo2R22LyE762YxLaKp38-9mneUQucPPX15k8Pb29mEnkePR0E38x_HYeR8GbnnXkvGVJunv539aNh1S6QrliSHI-8MOI0azhOumOGu0UQi7nyJxX0hUF3SszeYyAhHaXfom8cDKRKP_rap1HWmjlcKdA6BemrLws6vSBXvkc3yK3KRlfdR6Ioeym9RDt0GxUkBwL6wkow8Vjjt2KtjVqiXX9Xwsp4Nm2JiG3tY508APbxpNB7Kq54BPHjrgAIjrYocSu5WYbjgUpGoCSv6VyBidi7F6lo_1jeiImeRYBu6hxrYOGZZT_GqxVKie8NoX43U7Dhedt7cprk5YJTHYsLbBNQBjQtBYxiI0PgxF-04d5G1maeHN68fcka0MDBkALlEjlWicXTbiTiVJpnWyVRaJZq6TAEX4kUp3CA-af6g8RzlePZm_uIT9SLKvcgiGDAHzR8Tt-3UcCgjL9x028EyQxPigkwCG3SXb8TWSpo7ELKj3ce0_8Y6KLzppnAkPSyUcSV92vdQg1Hq1CveZhfUBIQRbyUVXwqGov8ou1cXsrMT5y1vCk3PoEhaTryFceLuD2NvGR_3yso1rb4ckKj29PMCOzxF4Ia7nj6iq_fOOwRRSRBGRx8lH0tbocL2KfXgr7bnv1OzrSf16vUUatoUaTyhJk68tLRSUMCOA5DeKnzB95OHYLDT1VuArSQCx_Jw1iQa6XaJe1gYohxrhBnjyqbdA91g050UeZaCRmfLc0hZ3I-ftF-LcIKPGQW97RzaES1kF3gk5KeeEFOzq59MLS7BioXe0RWtatSp8URfabFpoS-eI_Hp5EyiBFFw1nK0N3JWNmHb5kbLFO_ikYgMALgX4wyGlxezfa0TbbV8QBBWC8qsnq9I_yg0vbfIp9uGkMY116MAwKHaLXifbAja5Z2IWRk6jA0SAuBAVchaABoVMt_mjd1bmnBzaUv00g7as5E2zYcOZHbby5c8jNM4DXzhl2oF_3ntsfB5St3OBibvpw33-f",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8864,
-            "cachedInputTokens": 8861,
-            "outputTokens": 156
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a1b742c8731224923fc8a62a780ba30c01a754182a224525b6cbc0d801152fad",
-        "response": {
-          "text": "I can’t run `get_feed` with `every_client`—that isn’t a supported kind. The feed also doesn’t provide clients’ email addresses.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_0440e4a17ff99814016adcf0eacf2487d29ca3dde70b632de4",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3PDrxa-4geRNHXfq8eTU9SDTxrvTI_Bn39zaQtGb56gFjYXNGWusE0wSdACa5vqErlroxZ9UhFC8zSKt4_ekNJn3G__D3OL2QrLNVuqrMRwbyK8vjRQwOxWBULlTAVF-L2Wy3jDTVvj2Sto_BYgJTPtsjVTYm7xgmSmYGP77mR6pUyVG4Wv1zrLltIQl8RSUNkB7ZbdEW6Gr3AYahB-jdfXV7ajlIC8IwU3wiS8tA0H_Me9p4olyjwxaOTN4s8IcIgfd7mT-49wBmrpiGgeqRqyyjpt2-94k0m4edXOljFXCZFMt_59lHBNB9F_xXICk_AIOjzgnvHeagY20feJyxmUUgsFvGZ_mCrpj5ecVlHj9K78ErGK-dyFBMqI4IoGdhH6pDv6XhJwhhgagNsHk5bQeacqKnohtzACMngvhQ3zB1d29tx_O14hC95QGXYQRkR8HhMASpHJLQdpqjJleZ_V6rG2apP7LxC2e3SFlHAeXpFOUFiIi2_81t7_51x3fhHR9sJjPSrS17ll6r-bnMcHvgpGrqVDDVGR0I0iyDcg3z3l7m0oKiPuMv_K5Adu6_1HTb5ighu_mbtQQjS84Yir3KdbDSsotkvDv3KBi9vCLOTCWObMRoZinZoekP7JSJYG2_Gk8HIdMxLdYHCshJbBCE0HAj9f5lt-bdD05q56EqMZA8oku6bI0DY5Vyixw_a7m8WdT3K6Hy8bwnlEBNDlARaYDF0G5aadsOZ-QMUIkVg8hYGGbP_w6KOpNEfXqUmX6c9mhDo5g4fbWfLumPZe6wZMZQd9W1yIZXZ0ZMzArA_TiAms4t_o3bN5vfQ55CU9NB81yLwAwryt0JtG60M8O4sopxZkULW0tBq3U7G_nDN3oj4NjL2WzKdyj1XEL_Y1sGnDZ3REfPXft3iqt1oCmbk2mtr-QjH72i_Ftj7RKIADGjsF2nxQXi7Y7aIrD_VZOdTvQjlH2MFSil1L2jxOqInRmpvXgE-jQJY4tpahDMHgBjk0BvjASDaehpZLAlKKD0Rifr3uTIRG-lOWEGsb6x2ueWWIykuZebRNJxanToMZ7LEGtSdy9l3yamWJvVU0-5OWs32fONmuPGN8HqpjousPgZUQCzakTC4a81vUle-F2CmCeYBlQAgTYp-unaQPlytoitgwqkItm5-f7y4Mvvcvfxgf7DI-_3wtqYBjpONext2GOq_apUqEqfzPB8Vp_KwWLU0gVBEMzhpbB91ph306yHLzeqJRdfdXJ_WSioR_k18Atf4Q_Nzx5KyRvxhNyF0ntt2eJff32p7r07_HD6av0llNF-SQHtdmmdBPhE5AYoawM3USitPR4tSVx5sM_JMgf5CY13yDFMSbmRMgjDrMM5ywh6KkDS9hH4UvQve2283Il15TMk3vWPEeUIvWvDtte6V2_lp8G0RJ66fkaIMZqvLm3npxU21fUWl8LqaEsKwRA4hpZcUOu17zoIgzHaWfesNLo1CSiIQwfBvcMIv_tpJD5QLD90_E3ubVB_uojaYmrHRs6eWoCDa3ypWOJo7OJKyF6qVO_xcG52iKd7R5pHSG9DXoLfS7njkiCA7528knpSWsQ5tZwlSiflMPOcyTgYpMs5xf8YV7m7vwfzNpluogjhOipo0T9_2hrY88LzOY8j_C1jodZDqLY4BC3J0yJXEpqgfqC8p7VUlWitJ9m51IYKAn2ZfYZpC8fW04D1--qdWSFIupZGIK6EjIKSwVDzPWdT0_rKX-2PmLcIm3WfU95mUDPZ5EojR1RVXLe9W48NooeoImqjtxdLFU6iLpMevOVVFty8xO2r0YhIIlGkZiFeqU5kqgG3KBPB941Bi_IxMYW_Zc7kGLFJmzcm871gK3Z-ecHhj1PM6z823RI6zefpz9wZg3lyceYPjSIS6TyXlOVamhfxaTiAHHBzvGsKQngDU2ZnBFEP1tIycfqwXcBR3bOIscWBt5-IDMaNy-Ym2vYJniGazTPwBq2dEQ6pNcbsebb4KAzXQgtBRJGB0mQH3bhHsUmwdVUkNrJKOon7Lbmih2I6YYbJZjsUmEsraE6BZwKIpCUS8OPxVQSeC2MYPbszN_wDiB9LqoJQ0VQoRLxIdUz2ngciEb_dDfABwjKie4H5L-fWw8RSz13uPTVF3T3S9PI8aa-HI5UtlU620cBeglK0LGDTZ7Mq6ZFwMHLkPiYjbFgSxyU20ns86pm0GThlDMdLB2E4YMM4L4ojjFZ2kqYJzke7wzbARl3FwILIaAYV5fRLYOzeu0LJUN1Xq3m7wC9A1dC_IBP-jaiHgkeAwpKAnyau9A6edA0kP_RRe6enD9bwA3YDn71zuWearBAu_TKA9SyhhrhoE3qU4rvbsQC2lnrQgb17MCZYK2aphLbh_IbrymgkPEc7fy0x-zTOcOuBdY6re7onfLSFzQEC3bxl1f0hVvCbjDwT9xuNtah4uEcz4o6ZsU7dhqZ-2pw2z_nzkRvVLnINy2KimJ6NHKVuY3hZFyLYNK-xDcEHiYiCjUASMvaHTNqKff3qPazNRFKXmZjShzF1lY1Jn1Ztf7GAs8dIfZkH5FfwVk-mcCcmYw89ESFPQ==",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8864,
-            "cachedInputTokens": 8861,
-            "outputTokens": 127
+            "outputTokens": 142
           },
           "model": "gpt-6-luna"
         }

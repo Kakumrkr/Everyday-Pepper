@@ -1,5 +1,6 @@
 import {
   PLATFORM_DRAFTS,
+  PLATFORM_WAITLIST,
   ruleDefaultsOf,
   TemplateIdSchema,
   TemplateSchema,
@@ -10,6 +11,7 @@ import {
   type TemplateInput,
   type TemplateInsights,
   type TemplateSummary,
+  type TemplateWaitlist,
 } from '@pepper/contracts';
 import { barber } from './catalog/barber.js';
 import { beautySalon } from './catalog/beauty-salon.js';
@@ -102,4 +104,9 @@ function deepFreeze<T>(value: T): T {
 /** The voice of the business's rebooking emails and the morning pass's hour (S36). */
 export function templateDrafts(id: TemplateId | null): TemplateDrafts {
   return id === null ? PLATFORM_DRAFTS : getTemplate(id).drafts;
+}
+
+/** How many waiting clients a freed slot is offered to at once (S37, ADR-0041). */
+export function templateWaitlist(id: TemplateId | null): TemplateWaitlist {
+  return id === null ? PLATFORM_WAITLIST : getTemplate(id).waitlist;
 }

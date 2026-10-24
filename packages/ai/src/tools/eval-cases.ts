@@ -8,7 +8,8 @@ import { TOOLS } from './registry.js';
 // failing generated case in S27 instead of in the pilot; until then the cases are checked for
 // shape here and run end to end on the scripted fake in a seeded world (S25, `evals.int.test.ts`).
 // An example the model is shown may name things the eval world lacks: `evalSay` words the case
-// for that world, and `evalSkip` says why an example can't be one turn (S27).
+// for that world, `evalSkip` says why an example can't be one turn (S27), and `evalFull` books
+// the times it asks about solid (S37b).
 
 /** The clock the generated cases run on: Monday 2 November 2026, 07:00 in New York. */
 export const GENERATED_CASES_CLOCK = {
@@ -22,6 +23,7 @@ const MEMORY = new Set(['remember_fact', 'add_visit_note', 'forget_fact']);
 const SET_OF: Readonly<Record<string, EvalCase['set']>> = {
   search_memory: 'episodic',
   propose_rule: 'learned_rules',
+  add_to_waitlist: 'waitlist',
 };
 
 /** One case per example in every tool's guide, on the business's clock. */
@@ -45,6 +47,7 @@ export function toolEvalCases(
             now: clock.now,
             timeZone: clock.timeZone,
             actor: { role: 'owner' },
+            ...(example.evalFull !== undefined && { seed: { full: example.evalFull } }),
             turns: [{ user: example.evalSay ?? example.say }],
             expect: {
               toolCalls: [{ name: tool.name, arguments: example.args }],

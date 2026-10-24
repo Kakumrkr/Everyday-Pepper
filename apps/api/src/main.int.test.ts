@@ -92,7 +92,10 @@ describe('api process: logs and traces', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('x-request-id')).toBe('int-test-1');
     await expect
-      .poll(() => logLines().find((line) => line['request_id'] === 'int-test-1'))
+      // Generous: with every suite running at once the line came after the 1 s default (S37b).
+      .poll(() => logLines().find((line) => line['request_id'] === 'int-test-1'), {
+        timeout: 15_000,
+      })
       .toMatchObject({
         level: 'debug',
         msg: 'request completed',

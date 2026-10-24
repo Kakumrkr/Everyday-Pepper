@@ -4,6 +4,7 @@ import {
   deleteFinishedOutboxMessages,
   deleteOldMemoryEpisodes,
   deleteStaleProposedMemoryFacts,
+  expireWaitlistOffers,
   listTenantIdsForCleanup,
   withTenant,
   type Database,
@@ -20,7 +21,7 @@ import { deleteIdleConversationsIn } from './conversations.js';
 // deletes conversations with the AI 90 days after their last message (ADR-0030). From Phase 7
 // (ADR-0034) it clears memory facts' replaced values once their Undo window ends and deletes
 // episodes after a year; from S30 (ADR-0035) it deletes the AI's proposed saves whose proposal
-// is over.
+// is over; from S37 (ADR-0041) it closes waitlist offers past their time.
 
 /** How long an expired booking request (name, email, phone) is kept after it expires. */
 export const BOOKING_REQUEST_RETENTION_MS = 24 * 60 * 60_000;
@@ -42,6 +43,7 @@ export interface CleanupResult {
   memoryPreviousValues: number;
   memoryEpisodes: number;
   memoryProposedFacts: number;
+  waitlistOffers: number;
 }
 
 /** One clean-up pass over every business, as of `clock.now()`. */
@@ -58,6 +60,7 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
     memoryPreviousValues: 0,
     memoryEpisodes: 0,
     memoryProposedFacts: 0,
+    waitlistOffers: 0,
   };
   const episodesBefore = new Date(now - MEMORY_LIMITS.episodeRetentionDays * 86_400_000);
   // A proposal waits at most a day; its proposed fact goes the day after (S30).
@@ -92,6 +95,13 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
       );
       result.memoryProposedFacts += await inBatches(db, tenantId, (tx) =>
         deleteStaleProposedMemoryFacts(tx, proposedBefore, DELETE_BATCH),
+      );
+      // The matcher closes them too, before each match (S37); this catches quiet businesses.
+      result.waitlistOffers += await inBatches(
+        db,
+        tenantId,
+        (tx) => expireWaitlistOffers(tx, new Date(now), EXPIRE_BATCH),
+        EXPIRE_BATCH,
       );
     }
     result.businesses += page.length;

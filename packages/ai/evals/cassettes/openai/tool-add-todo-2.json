@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1883720757f9ed360774d19c1ad5b78ac3fc4c608769943bf267ad1289552442",
+        "fingerprint": "385149d761bc0f4b2f5fa88abcf0b0ce3ad2a363b6eb7513a1976b63390430ca",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_tSZ0m9kW6xgTXzBiXrTFF9dw",
+              "id": "call_CuNIUOvMd3ff8Xwp4FlpvSj1",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8861,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9846,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 17,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "292e0f85b2bcd9429452595cab92cdf6a3bd5aed6708586589ef6a0708d4452f",
+        "fingerprint": "f87573534146f9c333c4122e0a5087d19e0779b4302087b3598a524663090232",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GEiPxiTHJnRUmG1Rf578WuSJ",
+              "id": "call_FQWn0iT7LpqdT959HAmzLwge",
               "name": "add_todo",
               "arguments": "{\"title\":\"Restock the towels\",\"dueDate\":\"2026-11-05\",\"dueTime\":\"17:00\",\"assigneeStaffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9320,
-            "cachedInputTokens": 8858,
-            "cacheWriteTokens": 459,
-            "outputTokens": 72
+            "inputTokens": 10297,
+            "cachedInputTokens": 9843,
+            "cacheWriteTokens": 451,
+            "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "15539915200da902c7f28fc129aabc79ca5ea76ff7eb826793ab39a5f6e4d999",
+        "fingerprint": "e146385c113568d438666d47bce4b61880a1c8e0a193623fab1060dd4dab4012",
         "response": {
-          "text": "Jess’s to-do to restock the towels is set for Thursday, November 5 at 5:00 PM.",
+          "text": "Added a to-do for Jess to restock the towels by Thursday, November 5 at 5:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9451,
-            "cachedInputTokens": 9317,
-            "cacheWriteTokens": 131,
+            "inputTokens": 10424,
+            "cachedInputTokens": 10294,
+            "cacheWriteTokens": 127,
             "outputTokens": 28
           },
           "model": "gpt-6-luna"

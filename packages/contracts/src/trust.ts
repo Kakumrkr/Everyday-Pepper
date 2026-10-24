@@ -30,6 +30,7 @@ export const AutonomyActionSchema = z.enum([
   'client_note.save',
   'rule.change',
   'task.create',
+  'waitlist.change',
   'message.confirmation',
   'message.rebooking_nudge',
   'message.waitlist_offer',
@@ -120,6 +121,14 @@ export const AUTONOMY_ACTIONS = {
     defaultLevel: 'notify',
     allowsAuto: true,
     permission: 'tasks.manage',
+    undo: { kind: 'for', minutes: 7 * DAY, notAfterAppointmentStart: false },
+  },
+  // Adding a client to the waitlist (S37, playbook D-11): Undo takes the entry off the list.
+  'waitlist.change': {
+    riskTier: 'internal_write',
+    defaultLevel: 'notify',
+    allowsAuto: true,
+    permission: 'bookings.manage',
     undo: { kind: 'for', minutes: 7 * DAY, notAfterAppointmentStart: false },
   },
   'message.confirmation': {

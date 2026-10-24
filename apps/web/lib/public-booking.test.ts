@@ -6,7 +6,10 @@ import {
   managePath,
   publicApiPath,
   publicAvailabilityPath,
+  offerStateText,
   readManageToken,
+  readOfferToken,
+  refusedClaimStatus,
   serviceOf,
   staffFor,
   upcomingDays,
@@ -134,5 +137,41 @@ describe('confirmProblem', () => {
     [429, 'Too many', 'other'],
   ])('%d %j → %s', (status, body, problem) => {
     expect(confirmProblem(status, body)).toBe(problem);
+  });
+});
+
+describe('waitlist offers (S37)', () => {
+  it('reads the claim secret from the fragment, or nothing for a broken link', () => {
+    expect(readOfferToken(`#${TOKEN}`)).toBe(TOKEN);
+    expect(readOfferToken('#short')).toBeNull();
+    expect(readOfferToken('')).toBeNull();
+  });
+
+  it('explains every state but an open one, never naming who has the time', () => {
+    expect(offerStateText('open')).toBeNull();
+    for (const status of ['claimed', 'taken', 'expired'] as const) {
+      expect(offerStateText(status)).toMatch(/\w/);
+    }
+    expect(offerStateText('taken')).toContain('still on the waitlist');
+  });
+});
+
+describe('refusedClaimStatus (S37)', () => {
+  const refused = (status: number, code: string) => ({
+    ok: false as const,
+    status,
+    message: 'x',
+    body: { code, message: 'x' },
+  });
+
+  it('reads a refused claim as the offer it now is', () => {
+    expect(refusedClaimStatus(refused(409, 'waitlist_offer_taken'))).toBe('taken');
+    expect(refusedClaimStatus(refused(409, 'waitlist_offer_used'))).toBe('claimed');
+    expect(refusedClaimStatus(refused(410, 'waitlist_offer_expired'))).toBe('expired');
+  });
+
+  it('leaves anything else to "try again"', () => {
+    expect(refusedClaimStatus(refused(429, 'too_many_requests'))).toBeNull();
+    expect(refusedClaimStatus({ ok: true, data: {} })).toBeNull();
   });
 });

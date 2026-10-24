@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3a99e62e2ec2f9c95317558d3949eecae4ce44f567f7abcfc0baf00251765c6a",
+        "fingerprint": "b086da4409f39f2e81f5bcec32543ffa360c4f2d846b4f0b1da1bf00e0786a29",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_qZ2FZf0wD6pUVSjEoQsZGES2",
+              "id": "call_5rn10sxRLqbc4e0hwXQivKAk",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "9dc7e82408fb08697b13cfe2c808e29c81d958189f3cca47c611797026c6e67d",
+        "fingerprint": "889d53592096745f962f19a3f2598594cb0363501b510c34f78936f02837a266",
         "response": {
-          "text": "Marco works Saturdays from 10 AM to 4 PM and offers haircuts. Jess doesn’t work Saturdays, and colour isn’t available that day.",
+          "text": "Marco works Saturdays, 10 AM–4 PM, and offers haircuts. Jess doesn’t work Saturdays, and colour isn’t available that day.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,98 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9329,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 474,
+            "inputTokens": 10298,
+            "cachedInputTokens": 9837,
+            "cacheWriteTokens": 458,
             "outputTokens": 34
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "3a99e62e2ec2f9c95317558d3949eecae4ce44f567f7abcfc0baf00251765c6a",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_Wk9Hy9G8qMPi2lrhm0DYXy1O",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8852,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "3217c0d206888940e2cc6d65ff864a5368aaba879f7252f6750a2eb86893a1d1",
-        "response": {
-          "text": "On Saturday, Marco is available to take haircut bookings, 10:00–16:00. Jess doesn’t work Saturdays, and Marco doesn’t offer colour.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9326,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 471,
-            "outputTokens": 37
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "3a99e62e2ec2f9c95317558d3949eecae4ce44f567f7abcfc0baf00251765c6a",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_DPoLysGnHKvJD6rXydEL4Vgp",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8852,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "93cbd93e81725b2bee877c882cfd3042eb89a7e3e43ec57d48bd899efb8a5971",
-        "response": {
-          "text": "Marco works this Saturday, November 7, from 10 AM to 4 PM and offers haircuts. Jess doesn’t work Saturdays.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9323,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 468,
-            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

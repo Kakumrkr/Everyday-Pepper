@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "ac058962b166a559520b149ace97dd5450013ea162ee65a5dc2bb6640caf00c5",
+        "response": {
+          "text": "I can’t text clients directly. When a matching time opens up, Pepper offers it automatically to the best-matching people on the waitlist.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0b386cc5e74d61ed016add3166fe1087d29c7540786c2ec4fa",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3TFo6J8L1XK0BqLw_ooM-JZmYVwaAAlVQbI4DpUb-DiE5nUSD589GQEIsYtZvfgdfwwkjt9wXld2-d9oGJGJ0VJb-I1bsEtWzi08Ud5Y7BEOacvG3uh4hqb6NlzF6AqMGtk8YeXveD_3bUeiri-CVptjavuOaHpLlLdmmGKBvul5oNL6GD9RWxvqkVR-2ySG7pxMcDqBPNzuptZ4ijQGuqyCV3kSrxdKAiO21_9QV1Nwy68t2Q86LO0exFu05dh8geITMFPyJ6c0BGS6PaC-pBHGzKX2hH6DD3CWS8IQg65DjgBp3ySlvvHyNq1ypKprvDETHBLffsg0YskwLg4MWyfW_W0nenBtKWZPJtZtY99HBdIX1HRK0BXU28ISFSylQdKsnpAu7v7sy8Ko0tJUNWeiH8hXqXHxvqvaWprwMj-dd3RQnyC4fnm7CP6eXEKY9yVnc1p4c56-e8Mpe-zbZjUAN07GgrzC_z09yeFFm42UTMIy2IUcwGybJbeOep9f3HBIrBKAtduLYHR0R1-_mW3LDGKgNvsZfzs5j-CUMlVse9fGrbabrWYRgeDz7M8G1EZm3SFDoI_UfLQ8YM6NiAyBQnCDomi4mItj1zs1kCLI_9PeISM5xNGXhlwSMk1yvOqFDqJYLUWXPgIryqLx_sMNVyGuiTxUweHJ0iVfLrx4B1KtXwmSht9DjDIoSH8VzXhtaW6h_hvihZPJ5oBBTtvDGSpIeDn2gWj7ClBeAOIM4tgQdi2gQHHD5vJTvFFYmjSSL39K83-kTQKg9fTIII2yoN62Rm2-gv54WSej_pwLE6P3rlF_DA-kEinUFGqq04r8YlnGq7jFEwXwXHQK_9O9QY4d_uT_LzZ59_cMZAQUzW_B08_pJ0QmJOJjmzzdgSQRBp5WkuqlyIjmnpqgd9k8kcOh6maf2J9142ot6vxPfv3HPikSKqnLC2rZzg4EeamyGjmpA6mY5OPrY3qAiqgfwCZ5aXif8Z8Mv3Oj6BHPo-ukG7CxQ4O217tTTeMWkgZyFY3MpMLYemnp6use9rdsoDGCXCg6xbqMHsnDgcs3g11MeGLb4iXNGQ7HTqYXooI7J5qRU9k4VmNT2y_OnnMxdvP5ah2oj9vmX3xQUOiQ1MP6u0WDUn5biGfc7PmpI39OLKQBKZzXC5uCLPmRmLgJVXFpXFl85wVLYCebtknSIWyjEZw6wnLryd5LeZsmmkOWrhikPoE03nT348uoaaurWQNmwE8I2ZN8BG1dfAV-CpRdPgq6PlChfbvAHm6fzzTtySRgCCDv2ioZanxz9ukT_XZRk-n1mvOl7d-QAUUxTrHtw5gj2LLgkPId6xZSe0MolbUfCaOH6my3bWB0IZ289kaUqfZ27dJ6Dd9zadniVU49LVML_z7x1b9aQ1oeguR6iAtVCjXoaOW2xASRUS3mpgzQyB8axAUgqTnD4FAxYAP7qQjxUom8lMnqLZsc7nPRET9hMujabSyu53IGFH-jw6qpaO9tJYFuZORxUSbpX0gLRUzx_Gk6aS3To4yBGOxhoLzb_0zm2Cp8bhHe4sRtWDv9M6gc6HCoo4c608C17Juqsw9zjgDcehgj7185xnVid92ETrCQl8cbtO2PhRekedCHC79ijEXd2mDWDsPZrCCTCnrTXeSpFzWC64DEMYd11zrejmr8LC5H5l8QumJUCCFOD8qAWCI1V3wsVq-E3dtCV_pCoDDkMZcysa_P9XGUI0l-TN9zI3Z281aJY4LHuhIP-bGbsqXhuVy_f4u9kkcbJlC3VsW2NQyN4od8Sn_gc0XZDThYny5jYcmnd9RD1o6qWso86ZNW_ggryQxK-uPwhHs3t7yEHGBYEOOPShmtdNvzXmGaP3yoNq9oZXXJ-kA4Ubm1Wf5PzAbD5rey1UJgiu1lDhn2i7qJhrR-xIDJ4zZkq5IMmvmkPYJlD-K_WdSaLVt33UN0jWkP4i_qOzJnuHG9iKiA7LI7CUvVNhs_ptXBRerGfwelDJWsD0754gM1MYPMzSy2BnlmwPy-KYJLQR3NPbq4Mgt9MPFUo7jYcO1yFbMHTukVwv6m6voM3pMFYfOJQdeSm1z5fSqWJzai-KA1u_Ck8XNyyKmq4NSz5WHC0JzyB3IW-BRD84oW0wRggR75DPVOk73f8jD9lcJqw1midejfJaJsetmCns1CnDBqekdL3CdoRMiU_RqrHoMIuZd7iebKDO2Rniu8imdjq-byRkNAlnQQh60h6adooogXMjrGggrZw8FkezRhoXaLJJekXmZtI8kpX22C6LaMGldUkxPqfDgRXeveiT0FKjM0PtlQMy5yxjdnp0tf2LMGNg_7JuS_VNWcIKwTWR0B50DqIYT5kCBFkLoj3K8CMCew0TBLorzB5Cc8aHRDO-p2Ztt9LWhC3p83X4_9i9D0uzgajr9vceo5Lr6iBmyveT49ia3GEnZiEwP9gcDFExJ47xXi7tUNRCdLlZxl255z9EvJ2KCZh3RNUjiOLPewC2ZIRrLouo4Z-qT4eexqm8EAJSSJifwQSbvd_e03TahbC229y5JCM8srfDsU55G-HvpH51ResY89t15nfeLYRoqh3kfyH_BIs4hs6y5Z15YOSAnKVaJdpscMvdIvM-6qWYkmd_qKfJQlZhdNFfasuCVGpEort-cZHpf-jU19EJ4aee8GeEyImAUcV31Z108GybtMuoajdaX7sZQ7UrTj1kEPJDmGYNejKN3oLvgYseKjaVLsDhPKr33RHdLxUWDwFg19HhnZq1N0BCcH3fMufRAwe00xK7KoJbdTvMiEftIY6LJTlhXjwbMqnqvc8fh-5ahATr0BoEiqe7-MQxtRGlBsUnt7q3FAn4t9MunwNAzip5qXc1GSt8wcCSmxjjezrW1TP92v-NCjH4ptI5P-I9ZPTcih86lbyZUikglu44U7LgVlH_vhdKxAoSKibSUNbWizdvqHvCVuP7ufn-8qDKu6eublSJiESSgSSVu8HO82GUNJTf2nLIx-A-gkuNZaq-JdEA4a_9OmAnohOA7IkkOs951Cd-9Ta-soZoH90w_z_B2vRvO32qGk6X1AMB73klSI2XO7XEXt5owvbr9bG8wAlhTYLLdC6EUuLGuC4LFo2yarlc4v2gmQ-3ix5S31m-kq90m-aqafQlLTIuhExGU2zqlPe2uZv7Ll_RyQHwRQ3Jo9tHW_-l328j3uXk79b4HgO-Xh8klHN4K4sjSNEMq-Xn5cqYYZZHueRjfhorK9Ifki2joMvDgYMB-K7mIGqBfhALxfUgO2Iz-CIxjbB_xGY8jKaNjhjaNq3SRbGbyqxqXYn5CUFQnSlmWR6zKdZcw5e1vvBHqpPGna5C5_hkKgCPyHVW9pgUNkn3QJYKIcsOlDp2EoLv3VZ1gEcPLZNLmfuSFtpFyn4XxU-V4A2YXG3b6yv8z9zFrX96lOpuQ=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9846,
+            "cachedInputTokens": 9826,
+            "cacheWriteTokens": 17,
+            "outputTokens": 189
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

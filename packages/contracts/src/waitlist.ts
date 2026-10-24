@@ -97,6 +97,8 @@ export type WaitlistEntry = z.infer<typeof WaitlistEntrySchema>;
 export const WaitlistQuerySchema = z
   .object({
     serviceId: ServiceIdSchema.optional(),
+    /** One client's entries (S37b: what the AI reads about a client). */
+    clientId: ClientIdSchema.optional(),
     // A query string carries "true" or "false"; code may pass a boolean.
     all: z
       .union([z.boolean(), z.enum(['true', 'false']).transform((v) => v === 'true')])
@@ -112,3 +114,62 @@ export type WaitlistChange = z.infer<typeof WaitlistChangeSchema>;
 
 export const WaitlistResponseSchema = z.object({ entries: z.array(WaitlistEntrySchema) });
 export type WaitlistResponse = z.infer<typeof WaitlistResponseSchema>;
+
+// ---------------------------------------------------------------------------------------------
+// The smart waitlist (S37, ADR-0041, AC-W5-1): a cancelled or moved booking frees a slot; the
+// worker ranks who is waiting for it and offers it to the best few at once, per the dial for
+// `message.waitlist_offer`. The first client to claim books it; the others are told it's taken.
+
+/**
+ * - `offered`: the email went (or waits for its Undo grace); the client may claim it.
+ * - `claimed`: this client booked it.
+ * - `taken`: another client claimed it first, or the time was booked meanwhile.
+ * - `expired`: not claimed in time, or taken back (Undo) before it left.
+ */
+export const WaitlistOfferStatusSchema = z.enum(['offered', 'claimed', 'taken', 'expired']);
+export type WaitlistOfferStatus = z.infer<typeof WaitlistOfferStatusSchema>;
+
+export const WaitlistOfferIdSchema = z.uuid().toLowerCase().brand<'WaitlistOfferId'>();
+export type WaitlistOfferId = z.infer<typeof WaitlistOfferIdSchema>;
+
+export const WaitlistMatchIdSchema = z.uuid().toLowerCase().brand<'WaitlistMatchId'>();
+export type WaitlistMatchId = z.infer<typeof WaitlistMatchIdSchema>;
+
+/**
+ * The offer rules (playbook principle 10): an offer may be claimed for 2 hours, and never later
+ * than an hour before the slot; a slot whose offers would close within 15 minutes is not
+ * offered (no one could reasonably answer in time). The fan-out is the template's (1–5).
+ */
+export const WAITLIST_OFFER_LIMITS = {
+  claimWindowMinutes: 120,
+  closesBeforeStartMinutes: 60,
+  minClaimMinutes: 15,
+  defaultFanOut: 3,
+  maxFanOut: 5,
+  /** Open entries the matcher ranks per freed slot (longest waiting first). */
+  maxCandidates: 200,
+} as const;
+
+/** When the offers of a slot close: 2 hours from now, at the latest an hour before it starts. */
+export function offerExpiry(now: number, slotStart: number): number {
+  const { claimWindowMinutes, closesBeforeStartMinutes } = WAITLIST_OFFER_LIMITS;
+  return Math.min(now + claimWindowMinutes * 60_000, slotStart - closesBeforeStartMinutes * 60_000);
+}
+
+/** A waitlist offer as the team sees it on the waitlist screen. */
+export const WaitlistOfferSchema = z.object({
+  id: WaitlistOfferIdSchema,
+  entryId: WaitlistEntryIdSchema,
+  clientId: ClientIdSchema,
+  staffMemberId: StaffMemberIdSchema,
+  startsAt: UtcDateTimeSchema,
+  status: WaitlistOfferStatusSchema,
+  expiresAt: UtcDateTimeSchema,
+  /** 1 for the best match; the order the ranking gave. */
+  rank: z.number().int().min(1).max(WAITLIST_OFFER_LIMITS.maxFanOut),
+  createdAt: UtcDateTimeSchema,
+});
+export type WaitlistOffer = z.infer<typeof WaitlistOfferSchema>;
+
+export const WaitlistOffersResponseSchema = z.object({ offers: z.array(WaitlistOfferSchema) });
+export type WaitlistOffersResponse = z.infer<typeof WaitlistOffersResponseSchema>;

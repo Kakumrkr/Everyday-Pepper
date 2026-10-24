@@ -1,10 +1,12 @@
 import { randomBytes } from 'node:crypto';
 import {
   addTimeOff,
+  addToWaitlist,
   createBooking,
   createService,
   createStaffMember,
   replaceWorkingHours,
+  SlotUnavailableError,
 } from '@pepper/appointments';
 import {
   addDays,
@@ -14,6 +16,8 @@ import {
   LLM_EMBED_BATCH_MAX,
   MemoryFactIdSchema,
   MemorySubjectSchema,
+  ServiceIdSchema,
+  StaffMemberIdSchema,
   TenantIdSchema,
   type MemorySubject,
   toZoned,
@@ -123,6 +127,15 @@ export interface WorldSeed {
         clientNames?: Readonly<Record<string, string>>;
       }
     | undefined;
+  /** Clients waiting before the case starts (S37). */
+  waitlist?: readonly {
+    client: string;
+    service: string;
+    staff: string | null;
+    windows: readonly { date: string; start: string; end: string }[];
+  }[];
+  /** Times booked solid before the case starts (S37b), by staff member and local window. */
+  full?: readonly { staff: string; date: string; start: string; end: string }[];
 }
 
 /** Where `juniper_feed`'s rebooking emails say the business is. */
@@ -337,6 +350,59 @@ export async function seedEvalWorld(
     if (seed.feed?.paused === true) {
       await changeFeedSettings(db, owner, { suggestionsPaused: true });
     }
+  }
+  // Full times (S37b): a walk-in's haircuts from the window's start, every 15 minutes a free
+  // one fits, so no haircut or colour fits in what is left. Only cases that ask for it get the
+  // client, so the other cases' worlds are unchanged.
+  const full = seed.full ?? [];
+  if (full.length > 0) {
+    const walkIn = await createClient(db, owner, { name: 'Lee Chen' });
+    for (const window of full) {
+      const staffMemberId = StaffMemberIdSchema.parse(placeholders.get(window.staff));
+      const [year, month, dayOfMonth] = window.date.split('-').map(Number);
+      const date = { year: year ?? 0, month: month ?? 0, day: dayOfMonth ?? 0 };
+      const minutes = (time: string) => {
+        const [hours, mins] = time.split(':').map(Number);
+        return (hours ?? 0) * 60 + (mins ?? 0);
+      };
+      for (let minute = minutes(window.start); minute < minutes(window.end); minute += 15) {
+        try {
+          await createBooking(
+            db,
+            owner,
+            {
+              clientId: walkIn.id,
+              serviceId: haircut.id,
+              staffMemberId,
+              startsAt: new Date(fromZoned(at.timeZone, date, minute)).toISOString(),
+              notifyClient: false,
+            },
+            { clock },
+          );
+        } catch (error) {
+          if (!(error instanceof SlotUnavailableError)) throw error;
+        }
+      }
+    }
+  }
+  for (const waiting of seed.waitlist ?? []) {
+    const ref = (key: string) => {
+      const value = placeholders.get(key);
+      if (value === undefined) throw new Error(`No seeded record ${key}`);
+      return value;
+    };
+    await addToWaitlist(
+      db,
+      owner,
+      {
+        clientId: ClientIdSchema.parse(ref(waiting.client)),
+        serviceId: ServiceIdSchema.parse(ref(waiting.service)),
+        staffMemberId:
+          waiting.staff === null ? null : StaffMemberIdSchema.parse(ref(waiting.staff)),
+        windows: waiting.windows.map((w) => ({ ...w })),
+      },
+      { clock },
+    );
   }
   for (const fact of seed.facts) {
     const { fact: saved } = await saveFact(db, owner, {

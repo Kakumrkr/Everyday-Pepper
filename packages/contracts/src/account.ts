@@ -49,6 +49,11 @@ export const ApiErrorCodeSchema = z.enum([
   'waitlist_entry_not_found',
   'waitlist_entry_not_changeable',
   'waitlist_expired',
+  // Waitlist offers (S37, ADR-0041).
+  'waitlist_offer_not_found',
+  'waitlist_offer_used',
+  'waitlist_offer_taken',
+  'waitlist_offer_expired',
   // To-dos (ADR-0026).
   'task_not_found',
   'task_assignee_not_member',

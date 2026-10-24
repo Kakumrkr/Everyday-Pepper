@@ -8,6 +8,9 @@ import {
   SlotUnavailableError,
   StaffMemberNotFoundError,
   TimeOffNotFoundError,
+  WaitlistEntryNotChangeableError,
+  WaitlistEntryNotFoundError,
+  WaitlistExpiredError,
 } from '@pepper/appointments';
 import type { AvailableSlot, ToolErrorCode } from '@pepper/contracts';
 import {
@@ -70,6 +73,7 @@ const NOT_FOUND = [
   TaskAssigneeNotMemberError,
   MemoryFactNotFoundError,
   MemorySubjectNotFoundError,
+  WaitlistEntryNotFoundError,
 ];
 
 /** The refusal to give the model, or `internal` for anything unexpected (nothing changed). */
@@ -145,6 +149,18 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
         'The email’s words break a rule: no links, contact details or sensitive notes, and at most 120 words.',
     };
   }
+  if (error instanceof WaitlistExpiredError) {
+    return {
+      code: 'too_late',
+      message: 'Every one of those times has already passed. Ask the member for later days.',
+    };
+  }
+  if (error instanceof WaitlistEntryNotChangeableError) {
+    return {
+      code: 'not_changeable',
+      message: 'That waitlist entry was already booked or removed.',
+    };
+  }
   if (error instanceof IdempotencyKeyReusedError) {
     return { code: 'conflict', message: 'This request was already made differently.' };
   }
@@ -165,6 +181,8 @@ export function undoRefusalOf(error: unknown): unknown {
   if (error instanceof BookingAlreadyStartedError) return new UndoRefusedError('already_started');
   if (
     error instanceof BookingNotChangeableError ||
+    // An entry booked from an offer since (S37) can't be taken off the list.
+    error instanceof WaitlistEntryNotChangeableError ||
     NOT_FOUND.some((kind) => error instanceof kind)
   ) {
     return new UndoRefusedError('changed_since');

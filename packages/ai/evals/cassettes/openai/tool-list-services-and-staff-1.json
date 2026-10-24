@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c12079ea071787d659968db362a62c8f4ac2425d0621215ea0ed9b777189ad2b",
+        "fingerprint": "e5e226e2ef88fbf2c621e0dfaf33ae7918b12b268b8341dadd3cc2545ff55805",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gWvICBhV8YJvYMtJCgUkNO2D",
+              "id": "call_yPh7qwNuZLpJ12rrqGjsVgPT",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8852,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9837,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 8,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "b5834d14b7399f3ce0ac5a0cff439d7ec6565916847001b2db63e6033a40b5dd",
+        "fingerprint": "301284834f41c550a9ecacfbf02a5f24fc71d13b95dcdb4bdb78fa4f14c3eab5",
         "response": {
-          "text": "Jess does colour. Colour appointments are 90 minutes.",
+          "text": "Jess does colour. It’s a 90-minute service.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9313,
-            "cachedInputTokens": 8849,
-            "cacheWriteTokens": 461,
-            "outputTokens": 15
+            "inputTokens": 10295,
+            "cachedInputTokens": 9834,
+            "cacheWriteTokens": 458,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }

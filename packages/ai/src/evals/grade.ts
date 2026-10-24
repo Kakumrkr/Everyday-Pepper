@@ -137,6 +137,12 @@ function gradeDraftsAndFeed(evalCase: EvalCase, transcript: Transcript): string[
       `expected ${String(outbound.nudgeEmails)} rebooking emails queued, got ${String(transcript.nudgeEmails ?? 0)}`,
     );
   }
+  const open = evalCase.expect.waitlist.open;
+  if (open !== undefined && transcript.waitlistOpen !== open) {
+    reasons.push(
+      `expected ${String(open)} open waitlist entries, got ${String(transcript.waitlistOpen ?? 0)}`,
+    );
+  }
   for (const key of ['waiting', 'suggestions'] as const) {
     const expected = feed[key];
     const actual = transcript.feed?.[key] ?? 0;

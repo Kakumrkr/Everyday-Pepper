@@ -1,4 +1,9 @@
-import { getBookingRules, getWorkingHours, runInsightsFor } from '@pepper/appointments';
+import {
+  getBookingRules,
+  getWorkingHours,
+  listWaitlist,
+  runInsightsFor,
+} from '@pepper/appointments';
 import {
   OutboxEpisodeSchema,
   StaffMemberIdSchema,
@@ -318,6 +323,7 @@ export function loopSubject(
     transcript.nudgeEmails = await withTenant(db, world.tenantId, (tx) =>
       countOutboxMessagesByKey(tx, 'nudge.rebooking:'),
     );
+    transcript.waitlistOpen = (await listWaitlist(db, owner, {}, { clock: world.clock })).length;
     const feed = await getFeed(db, owner, { clock: world.clock });
     transcript.feed = {
       waiting: (await withTenant(db, world.tenantId, (tx) => listWaitingFeedItems(tx))).length,

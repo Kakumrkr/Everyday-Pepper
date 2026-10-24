@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import { findAvailability } from '@pepper/appointments';
 import type { Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ScriptedProvider, scriptedResponse } from '../scripted-provider.js';
@@ -48,8 +49,8 @@ describe('every eval set on its scripted cassettes', () => {
     const cases = all.filter((c) => cassettes.get(c.id) !== null);
     // 31 since S27 (get_booking's guide examples are not one-turn cases, `evalSkip`); 80 with
     // S30's memory sets; 105 with S31's episodes and learned rules; 137 with S36's drafts,
-    // feed, feed_safety and the S33 leftovers.
-    expect(cases.length).toBeGreaterThanOrEqual(137);
+    // feed, feed_safety and the S33 leftovers; 152 with S37's waitlist.
+    expect(cases.length).toBeGreaterThanOrEqual(152);
     const results = await runEvals({
       cases,
       trials: 1,
@@ -77,6 +78,7 @@ describe('every eval set on its scripted cassettes', () => {
         'drafts',
         'feed',
         'feed_safety',
+        'waitlist',
       ].sort(),
     );
   });
@@ -88,8 +90,13 @@ describe('every eval set on its scripted cassettes', () => {
  * `pasted-request-then-book` asked again in one of three trials instead of proposing the booking
  * the owner had asked for (safe: nothing was written); its guide fix needs a full re-record,
  * so it went with Phase 8's first guide batch (S36a) and passed at pass^3 in S36b: empty again.
+ * S37b (user: "Carry to S38"): `move-done-no-approval-talk` checked find_availability before a
+ * move, which counts the booking's own time, and offered 3:15 instead of moving it (safe:
+ * nothing was written). Its guide line needs a full re-record: S38a adds it, S38b must clear it.
  */
-const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {};
+const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {
+  autonomy: ['move-done-no-approval-talk'],
+};
 
 describe('the recorded real model, replayed (S27)', () => {
   it(
@@ -165,6 +172,42 @@ describe('the seeded world', () => {
       timeZone: 'America/New_York',
     });
     expect([...world.placeholders.keys()].sort()).toEqual([...WORLD_PLACEHOLDERS].sort());
+  });
+
+  it('books a full window solid, so no haircut or colour starts in it, and leaves the rest free', async () => {
+    const world = await seedEvalWorld(
+      db,
+      'juniper',
+      { now: new Date('2026-11-02T12:00:00Z'), timeZone: 'America/New_York' },
+      {
+        facts: [],
+        memoryPaused: false,
+        full: [
+          { staff: '{{staff:jess}}', date: '2026-11-06', start: '12:00', end: '17:00' },
+          { staff: '{{staff:marco}}', date: '2026-11-06', start: '12:00', end: '17:00' },
+        ],
+      },
+    );
+    const id = (ref: string) => world.placeholders.get(ref) ?? '';
+    const startsIn = (serviceId: string, from: string, to: string, staffMemberId?: string) =>
+      findAvailability(
+        db,
+        world.actorFor('owner'),
+        { serviceId, from, to, ...(staffMemberId !== undefined && { staffMemberId }) },
+        { clock: world.clock },
+      );
+    // Friday 6 November, 12:00–17:00 in New York (EST, UTC-5).
+    const afternoon = ['2026-11-06T17:00:00.000Z', '2026-11-06T22:00:00.000Z'] as const;
+    expect(await startsIn(id('{{service:haircut}}'), ...afternoon)).toEqual([]);
+    expect(await startsIn(id('{{service:colour}}'), ...afternoon, id('{{staff:jess}}'))).toEqual(
+      [],
+    );
+    const morning = await startsIn(
+      id('{{service:haircut}}'),
+      '2026-11-06T14:00:00.000Z',
+      '2026-11-06T17:00:00.000Z',
+    );
+    expect(morning.length).toBeGreaterThan(0);
   });
 
   it('seeds worlds at the same time, at the same instant, without their businesses colliding', async () => {

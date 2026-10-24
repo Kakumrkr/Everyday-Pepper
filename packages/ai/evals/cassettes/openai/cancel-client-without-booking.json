@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a13a0020ea01db18c4e696557eb7afb605f9c5dc4b1ced5c937a55030cd2ead8",
+        "fingerprint": "5df86ebf32699ce39961fd2d3aff31ff40a327998510320639575e6a90a44b9a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_7ChmiDSwUSoq4WEBBH3BNGf6",
+              "id": "call_ERr97Gw7fdLULkMt14MEMW1C",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah Park\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8853,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9838,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 9,
             "outputTokens": 19
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "98489766d6ecae0cf568c8b42341378fcdac371bf5ccedaea47860de3147197a",
+        "fingerprint": "b7bf3b5629cc928f7f4143dc38c0fcbc07fae1bd10cf07a32e64ea05a6786fe5",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_EMXIL9u7xDz9JEtVfTmXqPjX",
+              "id": "call_PqYI9QWohpu81VNJ41hSEpf1",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8934,
-            "cachedInputTokens": 8850,
-            "cacheWriteTokens": 81,
-            "outputTokens": 39
+            "inputTokens": 9921,
+            "cachedInputTokens": 9835,
+            "cacheWriteTokens": 83,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "337faf3fca146829a59a974007d44b8d3faf4cd9e370b5a25dce2c6d4ea5e342",
+        "fingerprint": "e5885497a2d1781a03a7f2404ba69a64551669430e7d75a6c123df322a7fd3c0",
         "response": {
-          "text": "Sarah P. has no upcoming appointments to cancel.",
+          "text": "Sarah Park has no upcoming appointments to cancel.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9042,
-            "cachedInputTokens": 8931,
-            "cacheWriteTokens": 108,
-            "outputTokens": 14
+            "inputTokens": 10037,
+            "cachedInputTokens": 9918,
+            "cacheWriteTokens": 116,
+            "outputTokens": 13
           },
           "model": "gpt-6-luna"
         }

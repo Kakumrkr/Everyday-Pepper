@@ -56,6 +56,7 @@ describe('AUTONOMY_ACTIONS', () => {
       'client_note.save': 'notify',
       'rule.change': 'ask',
       'task.create': 'notify',
+      'waitlist.change': 'notify',
       'message.confirmation': 'auto',
       'message.rebooking_nudge': 'ask',
       'message.waitlist_offer': 'ask',

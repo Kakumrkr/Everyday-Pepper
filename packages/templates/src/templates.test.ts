@@ -2,6 +2,7 @@ import {
   AUTONOMY_ACTIONS,
   PLATFORM_DRAFTS,
   PLATFORM_RULE_DEFAULTS,
+  PLATFORM_WAITLIST,
   RULE_LIMITS,
   SENSITIVE_MEMORY_KEYS,
   TemplateIdSchema,
@@ -18,6 +19,7 @@ import {
   templateInsights,
   templateRuleDefaults,
   templateSummaries,
+  templateWaitlist,
 } from './templates.js';
 
 // The schema validation test every template needs (modules-and-templates.md): each V1 template
@@ -199,6 +201,18 @@ describe('templateDrafts (S36)', () => {
     for (const template of listTemplates()) {
       expect(templateDrafts(template.id), template.id).toBe(template.drafts);
       expect(template.drafts.voice.length, template.id).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('templateWaitlist (S37)', () => {
+  it('offers to the top 3 without a template, else as the template says (1-5)', () => {
+    expect(templateWaitlist(null)).toBe(PLATFORM_WAITLIST);
+    expect(PLATFORM_WAITLIST.offerFanOut).toBe(3);
+    for (const template of listTemplates()) {
+      expect(templateWaitlist(template.id), template.id).toBe(template.waitlist);
+      expect(template.waitlist.offerFanOut, template.id).toBeGreaterThanOrEqual(1);
+      expect(template.waitlist.offerFanOut, template.id).toBeLessThanOrEqual(5);
     }
   });
 });

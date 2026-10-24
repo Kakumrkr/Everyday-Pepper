@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   MAX_WAITLIST_WINDOWS,
+  offerExpiry,
+  WAITLIST_OFFER_LIMITS,
+  WaitlistOfferStatusSchema,
   WaitlistChangeSchema,
   WaitlistEntryInputSchema,
   WaitlistQuerySchema,
@@ -101,5 +104,26 @@ describe('WaitlistChangeSchema', () => {
   it('only cancels', () => {
     expect(WaitlistChangeSchema.parse({ status: 'cancelled' })).toEqual({ status: 'cancelled' });
     expect(WaitlistChangeSchema.safeParse({ status: 'booked' }).success).toBe(false);
+  });
+});
+
+describe('waitlist offers (S37, ADR-0041)', () => {
+  const HOUR = 3_600_000;
+  const now = Date.parse('2026-11-03T09:00:00Z');
+
+  it('closes offers after 2 hours, or an hour before the slot when that is sooner', () => {
+    expect(offerExpiry(now, now + 6 * HOUR)).toBe(now + 2 * HOUR);
+    expect(offerExpiry(now, now + 3 * HOUR)).toBe(now + 2 * HOUR);
+    expect(offerExpiry(now, now + 2.5 * HOUR)).toBe(now + 1.5 * HOUR);
+    expect(offerExpiry(now, now + HOUR)).toBe(now);
+  });
+
+  it('fans out to 3 by default, at most 5', () => {
+    expect(WAITLIST_OFFER_LIMITS.defaultFanOut).toBe(3);
+    expect(WAITLIST_OFFER_LIMITS.maxFanOut).toBe(5);
+  });
+
+  it('has the four offer states of the playbook', () => {
+    expect(WaitlistOfferStatusSchema.options).toEqual(['offered', 'claimed', 'taken', 'expired']);
   });
 });

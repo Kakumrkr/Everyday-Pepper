@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c579794acc340eb4250157d632df43d38e6619db473253c61c71dd0d03bf8e22",
+        "fingerprint": "5c24b6970edf1bbc9b285296096885230391c69098241ad0252aadc4abe5b833",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_IEHJGFd8xog62hHmav98u090",
+              "id": "call_goADDvqMFnJotXqDWI8qUhzg",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8856,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9841,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "acfde7fbc7264a3af5546a0d52f38a9c7e11da3604fe6835954b2ffcdc4102d6",
+        "fingerprint": "a7ee234b5f2c9538fae5a8e5d2e33789643fd34a7f2fd1a0c279f1bf0be833f5",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_8JoDAiYYyUS43oVmV1eRhAho",
+              "id": "call_hALnPV1QJ29Ma5zePyn3HXUM",
               "name": "get_feed",
               "arguments": "{\"kind\":\"schedule_gaps\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9320,
-            "cachedInputTokens": 8853,
-            "cacheWriteTokens": 464,
+            "inputTokens": 10301,
+            "cachedInputTokens": 9838,
+            "cacheWriteTokens": 460,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "74220c37e2ac06f4f6d031515edc71ae0e5893375e851066be14f0afe6a7122a",
+        "fingerprint": "e01fe257640dbab2333b265139f59c416fb26cf3c8efd8f84f189f00bfa4844f",
         "response": {
-          "text": "Yes. The schedule-gap feed shows Jess has open time Monday through Friday this week, including full 9–5 gaps on Monday, Wednesday, and Thursday. Tuesday and Friday have some openings too.",
+          "text": "Yes. Jess has open time this week: Monday 9–5, Tuesday 9–12, Wednesday and Thursday 9–5, and Friday 9–2. These are open stretches, not specific service start times.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10687,
-            "cachedInputTokens": 9317,
-            "cacheWriteTokens": 1367,
-            "outputTokens": 44
+            "inputTokens": 11667,
+            "cachedInputTokens": 10298,
+            "cacheWriteTokens": 1366,
+            "outputTokens": 51
           },
           "model": "gpt-6-luna"
         }

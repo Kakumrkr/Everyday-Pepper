@@ -228,9 +228,16 @@ describe('EvalCaseSchema', () => {
       episodes: { summaryMatches: [], summaryMustNotMatch: [] },
       drafts: { mustMention: [], mustNotContain: [], requestMustNotContain: [] },
       outbound: {},
+      waitlist: {},
       feed: {},
     });
-    expect(evalCase().seed).toEqual({ facts: [], episodes: [], memoryPaused: false });
+    expect(evalCase().seed).toEqual({
+      facts: [],
+      episodes: [],
+      memoryPaused: false,
+      waitlist: [],
+      full: [],
+    });
     expect(evalCase().holdout).toBe(false);
     expect(evalCase().world).toBe('juniper');
     const base = { ...evalCase() };

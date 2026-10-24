@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "204767c3ebc5ce799316817ae68a8478bd5e781e64e9fc52aa62c629f69f8617",
+        "fingerprint": "1a85842b6d008d18025585ad39a239a82ff37f2677ec94d2b7241f144df00370",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gW3laN8YTQzFpKrfffTtbx6j",
+              "id": "call_JH9PU6gv5pSGD8T8TudcbJOm",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8856,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9841,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 12,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "9adee9ed9d9f5dd4fb6d3975e7a1df40f5942602073a1f5b8705ac7bb35aa08d",
+        "fingerprint": "35211ea82bc5c4a98ff10117561051d0c2153b9df8ec85b0f82823dbd780fa40",
         "response": {
-          "text": "I couldn’t save that because your staff role doesn’t have permission. An owner or manager can add the Friday early closing note.",
+          "text": "I can’t save business-wide notes with my current role. An owner or manager can add that note.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8949,
-            "cachedInputTokens": 8853,
+            "inputTokens": 9934,
+            "cachedInputTokens": 9838,
             "cacheWriteTokens": 93,
-            "outputTokens": 30
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

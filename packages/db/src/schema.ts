@@ -48,7 +48,9 @@ function tenantIsolation(column: SQL): ReturnType<typeof pgPolicy> {
  * Read-only access, across businesses, for one worker job's scan (`withJobScan`, ADR-0025):
  * only in a transaction without a tenant whose `app.job_scan` setting names `job`.
  */
-function jobScan(job: 'reminders' | 'cleanup' | 'tasks' | 'insights'): ReturnType<typeof pgPolicy> {
+function jobScan(
+  job: 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist',
+): ReturnType<typeof pgPolicy> {
   return pgPolicy('job_scan', {
     for: 'select',
     using: sql`${currentTenantId} IS NULL AND current_job_scan(${sql.raw(`'${job}'`)})`,
@@ -866,6 +868,8 @@ export const waitlistEntries = pgTable(
     ...timestamps,
   },
   (table) => [
+    // For the offers' composite key (S37).
+    unique('waitlist_entries_tenant_id_id_unique').on(table.tenantId, table.id),
     index('waitlist_entries_open_idx')
       .on(table.tenantId, table.createdAt)
       .where(sql`${table.status} IN ('waiting', 'offered')`),
@@ -1210,10 +1214,13 @@ export const pushSubscriptions = pgTable(
 // executions; owners and managers reach all. The services may not delete either (receipts);
 // once written, only a record's status fields may change (triggers in migration 0034).
 
-/** The twelve actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`). */
+/**
+ * The thirteen actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`;
+ * S37: `waitlist.change`).
+ */
 const autonomyActionList = sql.raw(
   "'booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', " +
-    "'client_note.save', 'rule.change', 'task.create', 'message.confirmation', " +
+    "'client_note.save', 'rule.change', 'task.create', 'waitlist.change', 'message.confirmation', " +
     "'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk'",
 );
 const trustCode = (column: SQLWrapper) => sql`${column} ~ '^[a-z][a-z0-9_.:-]{0,63}$'`;
@@ -2027,6 +2034,164 @@ export const insightRequests = pgTable(
   ],
 );
 
+/**
+ * A freed slot to match against the waitlist (S37, ADR-0041, AC-W5-1): one row per cancelled
+ * booking, or per moved booking's old time, inserted in that change's transaction, so a slot
+ * is matched if and only if the change commits. The worker finds pending rows across
+ * businesses (`job_scan('waitlist')`, ids and times only), queues one BullMQ job per row (the
+ * row id is the job id) and, inside the business, claims the row for a lease, matches and
+ * records the outcome. A failed match is due again after a back-off, at most 5 attempts.
+ */
+export const waitlistMatches = pgTable(
+  'waitlist_matches',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    // The booking that freed it (cancelled, or moved away from this time).
+    bookingId: uuid('booking_id').notNull(),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+    status: text('status').notNull().default('pending'),
+    // What the match did: `offered`, `proposed`, `no_match`, `too_soon`, `failed`.
+    outcome: text('outcome'),
+    availableAt: timestamp('available_at', { withTimezone: true }).notNull().defaultNow(),
+    leaseUntil: timestamp('lease_until', { withTimezone: true }),
+    attempts: smallint('attempts').notNull().default(0),
+    ...timestamps,
+  },
+  (table) => [
+    unique('waitlist_matches_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('waitlist_matches_due_idx')
+      .on(table.availableAt)
+      .where(sql`${table.status} = 'pending'`),
+    index('waitlist_matches_booking_idx').on(table.tenantId, table.bookingId),
+    index('waitlist_matches_staff_member_idx').on(table.tenantId, table.staffMemberId),
+    check('waitlist_matches_status_known', sql`${table.status} IN ('pending', 'done')`),
+    check(
+      'waitlist_matches_outcome_known',
+      sql`${table.outcome} IS NULL OR ${table.outcome} IN ('offered', 'proposed', 'no_match', 'too_soon', 'failed')`,
+    ),
+    check(
+      'waitlist_matches_done_has_outcome',
+      sql`(${table.status} = 'done') = (${table.outcome} IS NOT NULL)`,
+    ),
+    check('waitlist_matches_slot_order', sql`${table.endsAt} > ${table.startsAt}`),
+    foreignKey({
+      name: 'waitlist_matches_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'waitlist_matches_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    // Staff free slots only by changing their own bookings, and see only their own.
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: ownStaffMember(sql.raw('staff_member_id')),
+      withCheck: ownStaffMember(sql.raw('staff_member_id')),
+    }),
+    jobScan('waitlist'),
+  ],
+);
+
+/**
+ * A freed slot offered to one waiting client (S37, ADR-0041): the claim link's secret is stored
+ * only as its SHA-256 (`token_hash`). The first claim of a match books the slot (`claimed`, with
+ * `booking_id`); the match's other offers become `taken`. Offers close at `expires_at` (the
+ * clean-up pass marks them `expired`). Staff reach only offers for their own staff member.
+ */
+export const waitlistOffers = pgTable(
+  'waitlist_offers',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    matchId: uuid('match_id').notNull(),
+    entryId: uuid('entry_id').notNull(),
+    clientId: uuid('client_id').notNull(),
+    serviceId: uuid('service_id').notNull(),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    rank: smallint('rank').notNull(),
+    tokenHash: text('token_hash').notNull(),
+    status: text('status').notNull().default('offered'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    bookingId: uuid('booking_id'),
+    ...timestamps,
+  },
+  (table) => [
+    unique('waitlist_offers_token_hash_unique').on(table.tokenHash),
+    unique('waitlist_offers_match_entry_unique').on(table.tenantId, table.matchId, table.entryId),
+    index('waitlist_offers_open_idx')
+      .on(table.expiresAt)
+      .where(sql`${table.status} = 'offered'`),
+    index('waitlist_offers_entry_idx').on(table.tenantId, table.entryId),
+    index('waitlist_offers_client_idx').on(table.tenantId, table.clientId),
+    index('waitlist_offers_service_idx').on(table.tenantId, table.serviceId),
+    index('waitlist_offers_staff_member_idx').on(table.tenantId, table.staffMemberId),
+    index('waitlist_offers_booking_idx').on(table.tenantId, table.bookingId),
+    check(
+      'waitlist_offers_status_known',
+      sql`${table.status} IN ('offered', 'claimed', 'taken', 'expired')`,
+    ),
+    check(
+      'waitlist_offers_claimed_has_booking',
+      sql`(${table.status} = 'claimed') = (${table.bookingId} IS NOT NULL)`,
+    ),
+    check('waitlist_offers_rank_range', sql`${table.rank} BETWEEN 1 AND 5`),
+    check('waitlist_offers_token_hash_format', sql`${table.tokenHash} ~ '^[0-9a-f]{64}$'`),
+    foreignKey({
+      name: 'waitlist_offers_match_fk',
+      columns: [table.tenantId, table.matchId],
+      foreignColumns: [waitlistMatches.tenantId, waitlistMatches.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'waitlist_offers_entry_fk',
+      columns: [table.tenantId, table.entryId],
+      foreignColumns: [waitlistEntries.tenantId, waitlistEntries.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'waitlist_offers_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'waitlist_offers_service_fk',
+      columns: [table.tenantId, table.serviceId],
+      foreignColumns: [services.tenantId, services.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'waitlist_offers_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'waitlist_offers_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: ownStaffMember(sql.raw('staff_member_id')),
+      withCheck: ownStaffMember(sql.raw('staff_member_id')),
+    }),
+    // Offers are made by the business (the worker or an owner's approval), never by staff.
+    pgPolicy('member_scope_insert', { as: 'restrictive', for: 'insert', withCheck: memberSeesAll }),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
@@ -2055,3 +2220,5 @@ export type MemoryEpisodeRow = typeof memoryEpisodes.$inferSelect;
 export type FeedItemRow = typeof feedItems.$inferSelect;
 export type InsightRunRow = typeof insightRuns.$inferSelect;
 export type InsightRequestRow = typeof insightRequests.$inferSelect;
+export type WaitlistMatchRow = typeof waitlistMatches.$inferSelect;
+export type WaitlistOfferRow = typeof waitlistOffers.$inferSelect;

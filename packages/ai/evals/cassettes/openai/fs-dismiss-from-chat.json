@@ -3,96 +3,22 @@
   "trials": [
     [
       {
-        "fingerprint": "239a0394e2a26b7454031fb107a14a0d2d60b644a55d4444e6847e797b0b5408",
+        "fingerprint": "ef1c0e8ff97bb46906e51442d28e4629a0ff489bdbbe53f0028a6ba42e4d2ca6",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_ZnhTyIm8SCWhuoDTH0p7t4U5",
-              "name": "get_feed",
-              "arguments": "{\"kind\":null}"
-            }
-          ],
+          "text": "I can’t dismiss a suggestion for you. Please dismiss Sara’s suggestion on its card on Home.",
+          "toolCalls": [],
           "replay": [
             {
-              "id": "rs_0f8fc378ab74b942016adced5b993c87d2a4c02a14cdedd6e1",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3O1c0hHyFvAoWUwOSvaCxy796bVYeg5whlnJjSJu9jMA1gG8PITYESgjW6NJY0gB_L5vY8OztyqiyAg1iJMWqJh5zAEgLPb8ITD0suhbcpkvPPuR2bqcU-XjK8C9QtXM7d1yiSRzwtdiyRx-LkZTZr0j6oYRrmP1ulRZvrjt67jbNXtQjDUDNc1uRNgYPVBz7Bp-wXe-ycUnhFPUI5ilEO80WCEBk_NcMUJKKY3OF2wacjZDjdzSecXfvHAKd8pub-0o_n1aOO6jqxe7tCbYVq1raJ6RUbZaX6cjkog9o0ssqkE9UjcNRY5uezJLSZXhx6FM8guOkW1AiekWU4vprHd5r9-U_egdZ8LXuJEkyC9gYiNj_d_yr9T1py7StayfqdBzSghGmhxi1kkAuLIi_q5Guv8q4hTdcYLmDRu8ZgL4JTwuXRAh1qCGPt3i-zcYLvZD2jfyRIiAkPq7OohFSbBQmvs54BU8wj9Ch-cq8V973HSMzBTZ5oS7hjha-EgL5Z6ufG9dHxCa3YlkAj4njrPSpTYf7ZAV-CV_DAMzwpdfoJb1ig7i0GiFTqARoOtKSB3vXMM4UFuzkXhpbJds2iufDanmLlFUCsosInl9WNutN2zAvuX_Vr8Z0UWsclF3cP8llitosE9TYAZbIasqAnntUIE_h8ZexzMHCA4XUZkJimhoN8JAJGGkIJ7SqfBmE46Q8-meY0kjboQ2fHlUn8HHxMxttqGUgDwZzzdWEKhI_jw8aRZ7Zk-ASfJyUQ7_dC1HP3mAdm_vLVQFZxXXpXTx9TpQg_o7zxTLjMPFf-FMCd6HyA_kbGG6tK6B_fxThwokwd3r0b0dXrFMeliXhj1E8NKtousNwPcyQzwncrgHETPv5wKzvIB0q35J17t86TAX7AeCGppc-YISouFx53_ixDHaQYXUVnie5GfdEQcEN-SYAJ3TPfuvv3KBUycEUF5x6couNXjh8LIlxTgfIvxqUVTqbaL3dg4qg6-IK3F7A7OBg69dfMQcLdwWO2VKByr1-HTvv_SRfpqHR9LHP_8eSShJruF0Og1ggL5xIxWyA4TpBI7Bv3DQO-P3vPd6CCRby1mGEzGFi_IV2esyifOPFx16Jx0wTc8M8uWJIqPsvl4377ZIwpK3EUXp7ftTSAGjvcsesQjyiUIWU_hQ9yyo5aIWi8aOXCr4Vn6ZS_pYnBIjpkswD-HLpBDVc9i19aEbty33ocM4T_5luyrjKZmcAIZ_g6Ere8mwI6OaPdgu6_pjpE55vmLRUiGhVWyQikBuK6zTYYPIPEdvTCe3cTk6mi30cde1qGIEbFuLPnIEBpJQ6_U9tZs53ePSkqTBwcZE56uFJ84_A2wL23EzSIzsbiSMctZc9M09EXMLsxXf15RLWPuCPsj8RBA4cgiRT1UvRv595X7ZOr3h_hcnBvEef1StsZ3njIN2ZJ0bbRbekg-PW9eTgL8JutmQOy1mw026VlX6Sdfq1RfruyImN2KceVl4MUQiZ0svXTRZeMY83VCETaJTO20rC_IOXdUq3jZMCMhYYNR_9XpRbVmb8pl9F5gquuaY6Sjd229vC3mEER-mCyn57AqZo_60US_xzoXOh_qnbUsEzE5RW7nVEQ0fZWtjerFWJnapoCkxqpO5dXSVbOAcbsjRJcM5qZcCwTbt-DWvXu8P79HCOZRMBZhEAewDu1a_eG-eq0WZLciukFCFvaLI-jaMWWO3pPXpQg1yfF1bsizjrt7pNcY1psnoFfNAtAfIrneBm1kitXTMMHQNfFdC78cIBUGOO9uzOom_qOJfQ1V7EWt_o36g7ZkeFyAXOdg9KNmh_-MT0mF-D8qI_jNomRGFd-uZfHuv7MlJBe5ocLF6VQas1AZTtwf7cZuI8C1J4y2VkbuvWOjLN1KOZEELVh64Mp5iqzG3oSk67eoIHdUdztq5JpzRCj7vz4osXekw_KsKXH8fSvTSfPUNOo6JbYGbX95KDUKyaEYMHFzJWA9TEtZ5RO3BqTAbsIEB3dQYFLAnnuweusWL788aeKgK2NA1cc3taMsBXgaXv_Zkbsa_RXnJ0InXH0KMXYp8nVSWrRurbmAAucu2-JVUb487k4CBqI2NRyyVpeWCnW6l9MskbF1Tz6SdQxTGI4I_dBslc0Ym0L6z8OnBZ7ILRosdKJdHlI6jhsElTmoC2iNT3jU0Uo3nAqdlHPWA0IuDlVgHB-QwDYSKgtZ36EaVjxhpaXd8VvUHmeCE7jFmSDqXon4aeqh0h4rUKNKZFCqhu5LEow0ru-ETZOa7Rd2TguiPUAMZGJ2T_pUpaP-GyF0gMgvYI77mPweae1dYdJjKps3nUSyug8vtyNc5IBLmYfThcN5xk-ByKCshDaN6bKlMA_lq028A77_8EBaKwVt1eQVIrpGW-N2qF2e_sqPvleU10fau2TbvR9vzEgZNvzmmNO4aZuNkUbU4I50NldhrE9nuuWUVpQY8m1V61rP8er4KPfIq4qSheVa725Q50-OJCnkP3DhQlqQJCyMZe2u78NZ-PODcGJWYBSS22KxdEFMZAFvT-19fYp4xUHmQ6bD67HeEq1Q5XRpR8DEYIKhzSgYDyEBBtKnDaxaZvKct5NfYaQnHeZu-ghAZxeZsf6YoJmsIvH_-poT09cr6Sg==",
-              "summary": []
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
             }
           ],
-          "finishReason": "tool_calls",
+          "finishReason": "stop",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 11,
-            "outputTokens": 112
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "9cbd133e3c1a5dfc136b0e4e41b1ef655b6fff15393322e804b20928db33c756",
-        "response": {
-          "text": "I can’t dismiss suggestions myself. Please dismiss Sara K.’s rebooking suggestion on its card on Home.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 10555,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 1700,
-            "outputTokens": 26
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "239a0394e2a26b7454031fb107a14a0d2d60b644a55d4444e6847e797b0b5408",
-        "response": {
-          "text": "I can’t dismiss suggestions from here. Please dismiss Sara’s suggestion on its card on Home.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8852,
-            "outputTokens": 23
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "239a0394e2a26b7454031fb107a14a0d2d60b644a55d4444e6847e797b0b5408",
-        "response": {
-          "text": "I can’t dismiss the suggestion for you. Please dismiss it on its card on Home.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8852,
-            "outputTokens": 22
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }

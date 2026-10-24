@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e6691ec9b508545f391eb755a402f2cf651be1f21144fa4ca2fd22699baecaba",
+        "fingerprint": "1d1f611475b2436b0e46da7d5e272061bd3a4105c1770821121ab15b76c30a6a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DAWM2S04RBLMtd4SJCoPvrC3",
+              "id": "call_c2vMgM4c7fWEvsLUbcFYNvwd",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2027-01-01\",\"endDate\":\"2027-01-01\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,18 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8861,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8858,
+            "inputTokens": 9846,
+            "cachedInputTokens": 9843,
             "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0a1a593ad7d0d2aa683b45eb1401ecdcac9728362f7db8e3d3ac3d1befc2ad45",
+        "fingerprint": "2e7ac2ecfc1fc8beb268377416b458e4fe51d3dfda7095e5a116f6266830d534",
         "response": {
-          "text": "The no-bookings rule for January 1, 2027 is waiting for your approval on the card. Nothing has changed yet.",
+          "text": "I’ve proposed no bookings for January 1, 2027. Nothing has changed yet; please approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +36,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9010,
-            "cachedInputTokens": 8858,
-            "cacheWriteTokens": 149,
-            "outputTokens": 31
+            "inputTokens": 9995,
+            "cachedInputTokens": 9992,
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

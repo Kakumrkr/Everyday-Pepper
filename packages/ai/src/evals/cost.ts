@@ -28,9 +28,9 @@ export const DEFAULT_RUN_CAP_USD = 1.5;
 export const MAX_RUN_CAP_USD = 4.5;
 /**
  * The most cases one real run may hold: sets run in chunks (S26b's worst case, ~$0.05 a case;
- * S30's seventeen tools and memory instructions ~$0.06, so 20).
+ * S30's seventeen tools and memory instructions ~$0.06, so 20; S37's twenty-one ~$0.077, so 18).
  */
-export const MAX_CASES_PER_RUN = 20;
+export const MAX_CASES_PER_RUN = 18;
 /** Output tokens assumed per call when estimating. Generous on purpose. */
 export const OUTPUT_ALLOWANCE_TOKENS = 600;
 /** Characters per token when estimating input: low, so the estimate errs high. */

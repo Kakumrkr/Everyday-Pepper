@@ -512,6 +512,69 @@ export async function proposeForBusiness(
 }
 
 /**
+ * The business acts on its own, per its dial (S37: offering a freed time to the waitlist, which
+ * the clients asked for), in the caller's tenant transaction: like `proposeForBusiness`, the
+ * tool's dry run runs as `ai` and nobody requested it, but the autonomy dial decides (ask →
+ * a proposal for owners and managers; notify or auto → it runs now, audited as the AI for the
+ * owner, with the usual undo). "Ask me first for everything" and the bulk lock still hold.
+ * Idempotent by key: a retry returns the first result.
+ */
+export async function actForBusiness(
+  tx: TenantTx,
+  ai: Actor,
+  runner: ActionRunner,
+  request: Omit<ActionRequest, 'outsideText'>,
+  options: ServiceOptions,
+): Promise<ActionResult> {
+  const idempotencyKey = ActionIdempotencyKeySchema.parse(request.idempotencyKey);
+  const now = (options.clock ?? systemClock).now();
+  const executed = await findExecutionByKey(tx, idempotencyKey);
+  if (executed !== undefined) return { kind: 'executed', execution: toExecution(executed) };
+  const proposed = await findProposalByKey(tx, idempotencyKey);
+  if (proposed !== undefined) return { kind: 'proposed', proposal: toProposal(proposed) };
+  const asAi: Actor = { ...ai, via: 'ai' };
+  const preview = await dryRun(tx, asAi, runner, request.payload);
+  const decision = decideAutonomy(
+    {
+      actions: runner.alwaysAsks === true ? [] : [...runner.actions],
+      tier: runner.tier,
+      recipients: preview.recipients,
+      untrustedContext: request.untrustedContext,
+    },
+    await loadAutonomy(tx, options),
+  );
+  const explanation = ActionExplanationSchema.parse({
+    ...request.explanation,
+    facts: explanationFacts(preview.facts, request.explanation.facts),
+    untrustedContext: request.untrustedContext,
+    decision,
+  });
+  if (decision.outcome === 'propose') {
+    const row = await storeProposal(tx, memberOf(ai), runner, {
+      idempotencyKey,
+      payload: request.payload,
+      preview,
+      explanation,
+      now,
+      requestedBy: null,
+      auditActor: { kind: 'system' },
+    });
+    return { kind: 'proposed', proposal: toProposal(row) };
+  }
+  const execution = await runAndRecord(tx, asAi, runner, {
+    proposalId: null,
+    requestedBy: null,
+    outcome: decision.outcome,
+    idempotencyKey,
+    payload: request.payload,
+    explanation,
+    recordOwner: preview.recordOwner,
+    now,
+  });
+  return { kind: 'executed', execution: toExecution(execution) };
+}
+
+/**
  * A member who may decide a proposal changes what it would do before approving (S36: a
  * nudge's words), on the card whose fingerprint they saw: the tool's dry run runs on the new
  * payload and replaces the proposal (same target, new fingerprint), with its explanation and

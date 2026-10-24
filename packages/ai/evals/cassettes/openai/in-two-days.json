@@ -3,31 +3,53 @@
   "trials": [
     [
       {
-        "fingerprint": "3827e4391d226efceb1e1b9f71aba94769125a6368caf2b26df42c32c0f3e84c",
+        "fingerprint": "34214f77a35b22acb04752f5a8725572fb0678b0507f12871a45eb4b080df8c4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xjpeAxY5I4LwDTfWyF8zb8Ej",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":null}"
+              "id": "call_JXwnOEb0durnBPU74l4twkC3",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8858,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9843,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 14,
-            "outputTokens": 29
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "70d10c2d89a7171fb4956d8e39a6c1bcfdc747e1c55c704be2ee3ea68dca083b",
+        "fingerprint": "b47a4bf4ebdf1c647a0c0721968b24da3f474cc6ac8f7a136d134d6409cb82ab",
         "response": {
-          "text": "Jess’s calendar is clear on Wednesday, November 4, at 10:00.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6iQJPeFkOfOpVHX4QS1XRWFt",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10302,
+            "cachedInputTokens": 9840,
+            "cacheWriteTokens": 459,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d799a8241a43a1fede5eabf59c7a35adfb1ccc37e3262a344b2ee6c94af38cab",
+        "response": {
+          "text": "Jess has no bookings or blocked time on Wednesday, November 4. Her schedule shows she works then, so 10:00 appears free.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8941,
-            "cachedInputTokens": 8855,
-            "cacheWriteTokens": 83,
-            "outputTokens": 22
+            "inputTokens": 10404,
+            "cachedInputTokens": 10299,
+            "cacheWriteTokens": 102,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

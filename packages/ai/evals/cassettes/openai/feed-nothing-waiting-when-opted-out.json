@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "80e6eb41c95862be04d7f48f3564c47f94b450082d8881915fc2a77015ddd6c9",
+        "fingerprint": "31fa7130ffea38fe423093ddd9dce8cf71206806ddd2bbeb07fbc9d81b300a4d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0Yh6hTPj10OQXpxInG5ZrguB",
+              "id": "call_Lk99SbElYoijeirsw2S7KETK",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8852,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9837,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b08128e1441779ccc97fc494950262ffa85d340b4d49a6116e1d909a87a25ea8",
+        "fingerprint": "078c760eaa288d3030ef96d6f6fe6f1bc696860136590f4097c3962220bb7e76",
         "response": {
-          "text": "There are no items waiting for your OK. The feed shows 13 other suggestions: schedule gaps for Jess and Marco this week, and two clients due for a haircut rebooking.",
+          "text": "Nothing is waiting for your OK right now. There are 13 other feed suggestions, mostly schedule gaps, plus two clients due for rebooking.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,10 +36,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10530,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 1675,
-            "outputTokens": 40
+            "inputTokens": 11526,
+            "cachedInputTokens": 9837,
+            "cacheWriteTokens": 1686,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

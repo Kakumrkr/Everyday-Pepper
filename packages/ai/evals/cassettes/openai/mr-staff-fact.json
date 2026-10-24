@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "58b5d434fe87d15897a57ae7bdc197a8fe3388fb182eb529d913423761f68d84",
+        "fingerprint": "c399416ec02335915da0913bd2e12e2d189a429104b22905c4bdd74df3662d7a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_IfRq6bnuwMZa6oVkGlmHN5PA",
+              "id": "call_oGiOtR8UoDd9Lfh8DkDqxELz",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8856,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8853,
+            "inputTokens": 9841,
+            "cachedInputTokens": 9826,
+            "cacheWriteTokens": 12,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "31996e50138fcd96683e02c4600fd1ea436bb720ab0c8d076aee29c0df25b16a",
+        "fingerprint": "d26d9e81d47add72fcb04a1d113db1d65d40d919693687720f5b2667e6785777",
         "response": {
-          "text": "Jess isn’t scheduled on Saturdays; the business also has a note that she doesn’t work Saturdays. Marco works this Saturday from 10:00 AM to 4:00 PM and can take haircuts.",
+          "text": "Jess doesn’t usually work Saturdays. Her listed schedule is Monday–Friday, 9–5.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9422,
-            "cachedInputTokens": 8853,
-            "cacheWriteTokens": 566,
-            "outputTokens": 46
+            "inputTokens": 10416,
+            "cachedInputTokens": 9838,
+            "cacheWriteTokens": 575,
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }

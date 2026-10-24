@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "933d0198dfb9f136a3785441bb535933c7b7c4bff8b82134f18da410dd6d08e0",
+        "fingerprint": "ab31b14e88f228e26e2be06abff44af61779bdadf60633da2ef56718f86fcfb6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2gKUSEmXmi9T62q2luKMUyu0",
+              "id": "call_GrIXLy7uHI1mIWNCWIGQPXje",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,44 +25,36 @@
         }
       },
       {
-        "fingerprint": "490bf1c46d3327dabfcea569eef2535dc8555039255b9131ea26f30f1b5a33cc",
+        "fingerprint": "815744df6d15b91724cf6679cdcc0c1e4e4a53c612e7667143d2ed3a038ab259",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_iCCQCx4BjmqKNtUPEdfjKDTl",
+              "id": "call_gWU5nJseyAhIQ3SP8lH5Wxqv",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
             },
             {
-              "id": "call_7FwzMkt8VhwF44jwGIKalU7s",
+              "id": "call_GESfmmPlQTLm1G0FAACn0Ysc",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_0defffd17d235d07016adcee6f3cb887d297cd00fc0b0a8676",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3O5w_qSZp97Ke2Sl_Tj7Dng5HIfjpkZbq3q7svlQ4ROIUt6aBusHp2y5kLLhsbpY4vPWEIXqQiMkB4bMsAqXOthP2AuVNCOucK0WMCCFZuOIXf3fqdgk60VuN5EIw7kJz2aeH063hsfKrA0P0z8aPyRSpqTIZPHeU2jz9VNbLHzjmvwjjWYz3VtzJeig4YssF8sWO2beyXeO2L--uEmrTS2zI9ZWh3RQpGjUnK4gdOaNOm8VMQzkBr4z-kdx3xrM9lVdWPZ8mIaMaBUe-w9MYZfgxoJ9NZ6CTsbKvrnL2fiB9yUaP68LKvIvALBrY-QAs9ulKHfJ6h3DYWDV7KTbJ2Iw77QRNU5wqJDPjydIyNEI09WGCQ6WI59Wg7jxZaftSOlk-d38oCgRjwp7ODKrhWe_ZLpy61NivsqwsTGGA0Fb45iyL6rIMeTX2uwI7xvX53jlurfkbT6oBHuEX7PBjGHtKLPhig_5Ag1QDKEnH_Ra7TaSvtIiEiYHi4Se7No2FBaP3uGdOGQ1yxONhimd_NoaTm3KR3xGnNRxtOpFPsX2QkU1uAZP-S7NsOG2N319cVqJWVVTnlCduKbc1YnjG32TgcUbMB5748d13ZV1a4akUY4LDnv_dHAk7VcKQy5LkGVY48Q386Hf2roWrynajHOaxSbLcg-PQGkI8I-GDrEA-3andp8X1ydrwuLgE6Vyh-iaw_lgXoYEGQZPsZIMjJrOWRQT59KxqS1mn-5UA08gWehTJ6HgGXiuySbWGriz0b5A6TwM5Gua5YFD1beh1vy1uHh3FyFU8OD_Znl6nUp16Ikk1a3Dk0jLB44DTAQRvK9yfLlZKWht7k-xhRf1O5whzV56VQKSZ-OmIPFO_yyjqOFr-H2vrZ518fVksOphZR_Y5eaq0Re0AIqv95_YAH8hhZNTVqMwnZuqZLZan9t-SSk9_y5rJOhrUClL02ValMZbVqvEH1w9b7Nlg7_A2_u3aZo88qlewXdQLBx4Yv7BkdKr69Fzzs7XTLNRkwp7ByoL0QfxuEFEvnqXazhXdvOoBzRFJYJy1P5YEnLqkaeXekvK9ebGnp2oc5koxBrzNBiOz7m3o9QZ-qwtLgvVUYwNjVWoYn05qQroqZDlqmR3MjDlyLZCirFCjoNcgHjacxBxK53XUe1SMJCJHhd1mMbFlRn3vnvcILDMP1udgQW1BpiW6nqOf1KLWJDmTvRoSFXPzGCkhpCLi1oMkBu6ZdIZRk74b5SVkQmshkpXXkNXFgqrmoYDAaBqnNbPCx1k_yUXD9p6HJ5_A3wilxBMT4Ms_rC_p-zpimtdVKQgCBO4jie44WburCG5pqN3JFRnjgY6vaXNQ3tN06d4yUcZhkWZJud2I6k-dqn084AEah_ZZ-lCVvk4K53hiaQzVL9I8-On_1tKFyxnjl1tLv1FE0kSDUQofPSsb-4FvlCTnc376dMrblVF8fZ5mjvCk9qn3VBHZp2CETdz_m9O85lJUNK7KJxNq9iWhQHQNiz2ILuUvhPWxLR4Nl5AgX_46Z2nK4RWC6FN_Lgvae2623OlB3i9nQYNjCzDcDxBCLrtKaLe7rti6akXbLkfNnGHH3fwg5Mj8Twjoc7raXlFMjhBex7J2imE393UK8Zplxrlt5AfAyhUHW4Cr2ak2RasPNs6x5rAN0SA64h3-iluEmxF9Yn-A0YlwVlLLdSLv4JJBES8I88=",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9057,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 202,
-            "outputTokens": 120
+            "inputTokens": 10036,
+            "cachedInputTokens": 9837,
+            "cacheWriteTokens": 196,
+            "outputTokens": 92
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "779dd608b8627ad39ebbabc32ca6dfc5a18386addbd1d24704e6009ef4f9ea89",
+        "fingerprint": "29c765077830aeda814ab8811331a0488f2b7b444d5b47340b94730cb3d13dfe",
         "response": {
-          "text": "I found two things remembered about Maria L.: “Hazelnut oil” and “Colour with Jess.” Both forget requests are waiting for your approval on their cards; nothing has been removed yet.",
+          "text": "I found two things remembered about Maria L.: an allergy to “Hazelnut oil” and a usual service of “Colour with Jess.” I’ve requested to forget both; they’ll be removed only after you approve each request on its card.",
           "toolCalls": [],
           "replay": [
             {
@@ -72,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9310,
-            "cachedInputTokens": 9054,
-            "cacheWriteTokens": 253,
-            "outputTokens": 43
+            "inputTokens": 10261,
+            "cachedInputTokens": 10033,
+            "cacheWriteTokens": 225,
+            "outputTokens": 53
           },
           "model": "gpt-6-luna"
         }

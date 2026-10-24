@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b6bbe66a6bb65f60e84330b998d148ce81fb6b8e1e1f9f0390c96252d9a67092",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_aDA3RF3oYm8TeiOIB11dsr4Y",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9839,
+            "cachedInputTokens": 9836,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e351381ac78ea67527a711be7ffe6c495c8c00fa4b1a70ddc27d3938b0d14731",
+        "response": {
+          "text": "Two clients are on the waitlist:\n\nSara K. — haircut with anyone, Saturday, November 7, 10:00 AM–1:00 PM.\nAna R. — haircut with Jess, Friday, November 6, 9:00 AM–12:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10129,
+            "cachedInputTokens": 9836,
+            "cacheWriteTokens": 290,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

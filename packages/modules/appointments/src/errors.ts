@@ -149,3 +149,35 @@ export class TooManyBookingRequestsError extends Error {
     this.name = 'TooManyBookingRequestsError';
   }
 }
+
+/** No waitlist offer behind this link (or not at this business). */
+export class WaitlistOfferNotFoundError extends Error {
+  constructor() {
+    super('This offer link is not valid');
+    this.name = 'WaitlistOfferNotFoundError';
+  }
+}
+
+/** This client already claimed the offer: the booking exists. */
+export class WaitlistOfferUsedError extends Error {
+  constructor() {
+    super('This offer has already been claimed');
+    this.name = 'WaitlistOfferUsedError';
+  }
+}
+
+/** Someone else claimed the time first, or it was booked meanwhile (never says who). */
+export class WaitlistOfferTakenError extends Error {
+  constructor() {
+    super('Sorry, this time has been taken');
+    this.name = 'WaitlistOfferTakenError';
+  }
+}
+
+/** The offer was not claimed in time, or was taken back. */
+export class WaitlistOfferExpiredError extends Error {
+  constructor() {
+    super('This offer has expired');
+    this.name = 'WaitlistOfferExpiredError';
+  }
+}

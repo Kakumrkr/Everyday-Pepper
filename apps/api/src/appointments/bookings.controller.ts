@@ -15,6 +15,7 @@ import {
   type BookingsResponse,
   type BusyResponse,
   type WaitlistEntry,
+  type WaitlistOffersResponse,
   type WaitlistResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
@@ -136,6 +137,13 @@ export class BookingsController {
   ): Promise<WaitlistResponse> {
     const parsed = parseBody(WaitlistQuerySchema, query);
     return { entries: await answering(() => this.bookings.waitlist(tenant, parsed)) };
+  }
+
+  /** The latest offers of freed times to the waitlist, newest first, with their state (S37). */
+  @Get('waitlist/offers')
+  @RequirePermission('bookings.read')
+  async waitlistOffers(@CurrentTenant() tenant: TenantContext): Promise<WaitlistOffersResponse> {
+    return { offers: await answering(() => this.bookings.waitlistOffers(tenant)) };
   }
 
   /** 201 the entry; 400 `waitlist_expired` when every window has passed. */

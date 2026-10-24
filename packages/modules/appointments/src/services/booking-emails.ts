@@ -1,8 +1,18 @@
-import { OutboxDedupeKeySchema, type OutboxMessageId } from '@pepper/contracts';
+import {
+  OutboxDedupeKeySchema,
+  type OutboxMessageId,
+  type WaitlistOfferId,
+} from '@pepper/contracts';
 import { queueEmail, systemClock, type Clock, type EmailMessage } from '@pepper/core';
 import type { TenantTx } from '@pepper/db';
-import { cancelledEmail, confirmationEmail, manageUrl, rescheduledEmail } from '../emails.js';
-import type { BookingNotice } from './notices.js';
+import {
+  cancelledEmail,
+  confirmationEmail,
+  manageUrl,
+  rescheduledEmail,
+  waitlistTakenEmail,
+} from '../emails.js';
+import type { BookingEmailDetails, BookingNotice } from './notices.js';
 
 // The emails a booking's client gets when it is confirmed, moved or cancelled, from the booking
 // page, the team or the AI (ADR-0024, ADR-0025, ADR-0029): queued in the outbox inside the
@@ -46,5 +56,28 @@ export async function queueBookingEmail(
       `booking.${notice.kind}:${bookingId}:${String(at.getTime())}`,
     ),
     now: new Date(now + (options.holdSeconds ?? 0) * 1000),
+  });
+}
+
+/** A client whose waitlist offer someone else claimed first (or whose time went meanwhile). */
+export interface WaitlistTakenNotice {
+  email: BookingEmailDetails;
+  offerId: WaitlistOfferId;
+}
+
+/** Receives a "taken" notice inside the claim's transaction. */
+export type WaitlistTakenNotify = (tx: TenantTx, notice: WaitlistTakenNotice) => Promise<void>;
+
+/** Queues the "taken" email: one per offer, whatever retries. */
+export async function queueWaitlistTakenEmail(
+  tx: TenantTx,
+  notice: WaitlistTakenNotice,
+  options: BookingEmailOptions,
+): Promise<OutboxMessageId | undefined> {
+  if (notice.email.email === '') return undefined;
+  return queueEmail(tx, waitlistTakenEmail(notice.email), {
+    key: options.outboxKey,
+    dedupeKey: OutboxDedupeKeySchema.parse(`waitlist.taken:${notice.offerId}`),
+    now: (options.clock ?? systemClock).now(),
   });
 }

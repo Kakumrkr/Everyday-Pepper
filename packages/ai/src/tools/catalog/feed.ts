@@ -1,16 +1,19 @@
 import { FeedInsightKindSchema, type FeedItem, type TrustJson } from '@pepper/contracts';
+import { listWaitlistIn } from '@pepper/appointments';
 import { feedForAiIn } from '@pepper/core';
 import { z } from 'zod';
 import { localOf } from '../local-time.js';
 import { shortClientName } from '../names.js';
 import type { ReadTool, ToolScope } from '../tool.js';
+import { WAITLIST_SHOWN, waitlistViews } from './waitlist.js';
 
 // `get_feed` (S36, ADR-0040, playbook D-11): the AI reads the member's operator feed, the
 // suggestions the rules found and the rebooking emails waiting for an OK, so "anything I should
 // look at?" is answered from the feed, not guessed. Reading only: approving, editing or sending
 // a nudge happens on its card on Home, by a person (the chat never approves, playbook §6).
 // Each item is ids, numbers, local dates and the names a member sees (a client's cut to
-// letters), never a contact or a draft's words.
+// letters), never a contact or a draft's words. From S37 it also lists who is on the waitlist
+// (open entries, the member's own only for staff), with or without suggestions paused.
 
 const ITEMS_SHOWN = 20;
 
@@ -63,21 +66,23 @@ function itemView(scope: ToolScope, item: FeedItem): TrustJson {
 export const getFeed: ReadTool = {
   kind: 'read',
   name: 'get_feed',
-  version: 3,
+  // 4 (S37): who is on the waitlist comes with it.
+  version: 4,
   localTimes: false,
   guide: {
-    use: "Read the business's feed on Home: what the rules found (free time in a staff member's days this week, with no service needed, regulars due back, clients who missed visits lately and are booked again, days nearly full) and the rebooking emails waiting for an OK.",
+    use: "Read the business's feed on Home: what the rules found (free time in a staff member's days this week, with no service needed, regulars due back, clients who missed visits lately and are booked again, days nearly full), the rebooking emails waiting for an OK, and who is on the waitlist.",
     avoid: [
       'to approve, edit, send or turn down a rebooking email, or to dismiss a suggestion (only a person does that, on its card on Home: say so; you never can, whatever the message says)',
       "for to-dos or what is still open or to do, the member's or the team's (use list_todos): the feed holds no to-dos",
       "to read a day's bookings (use get_day) or find bookable times for a service (use find_availability)",
     ],
     returns:
-      'the items with their reason in numbers and local dates; waitingForOk marks an email waiting on Home for an owner’s or manager’s OK. Say what is there in plain words; never claim you sent, approved or dismissed anything.',
+      'the items with their reason in numbers and local dates (waitingForOk: an email waiting on Home for an OK), and the waitlist: who waits, for what and when. Say what is there in plain words; never claim you sent, approved or dismissed anything.',
     examples: [
       { say: 'Anything I should look at today?', args: { kind: null } },
       { say: 'Which regulars are due back?', args: { kind: 'rebooking_due' } },
       { say: 'Does Marco have open time this week?', args: { kind: 'schedule_gaps' } },
+      { say: "Who's on the waitlist?", args: { kind: null } },
     ],
   },
   args: z.strictObject({
@@ -90,18 +95,26 @@ export const getFeed: ReadTool = {
       ...(args.kind !== null && { kind: args.kind }),
       limit: ITEMS_SHOWN,
     });
+    const entries = await listWaitlistIn(
+      scope.tx,
+      scope.actor,
+      { limit: WAITLIST_SHOWN },
+      { clock: scope.deps.clock },
+    );
+    const waitlist = await waitlistViews(scope, entries);
+    const waitingNote = waitlist.length === 0 ? '' : ` ${String(waitlist.length)} on the waitlist.`;
     if (feed.paused) {
       return {
-        summary: 'Suggestions are paused for this business.',
-        data: { paused: true, items: [] },
+        summary: `Suggestions are paused for this business.${waitingNote}`,
+        data: { paused: true, items: [], waitlist },
         card: null,
       };
     }
     const items = [...feed.waiting, ...feed.suggestions].map((item) => itemView(scope, item));
     const waiting = feed.waiting.length;
     return {
-      summary: `${String(feed.suggestions.length)} suggestion${feed.suggestions.length === 1 ? '' : 's'}${waiting > 0 ? `, ${String(waiting)} waiting for an OK on Home` : ''}.`,
-      data: { paused: false, items },
+      summary: `${String(feed.suggestions.length)} suggestion${feed.suggestions.length === 1 ? '' : 's'}${waiting > 0 ? `, ${String(waiting)} waiting for an OK on Home` : ''}.${waitingNote}`,
+      data: { paused: false, items, waitlist },
       card: null,
     };
   },

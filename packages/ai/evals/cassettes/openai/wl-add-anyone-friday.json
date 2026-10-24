@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bed2df61710c2f9cc39aa457ee7669eceaa6c3e82b0bc2fcf144bb902ccfd6d0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4F7K2McPDSmqfXusVOrgDjQc",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9848,
+            "cachedInputTokens": 9826,
+            "cacheWriteTokens": 19,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a59c6c814719ef22c423934b2fe5913413a8d80778e7c1c3223b7a383520dd9a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_JAdJwd1oxXGWb4jLH0aJEVkf",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10299,
+            "cachedInputTokens": 9845,
+            "cacheWriteTokens": 451,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "973517bba31c2802be861efad9b3f5ce7a3e87d529b20433293cf5e1407aedfa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rJJIGEMCXo4eMGb5gB7LF2j4",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10381,
+            "cachedInputTokens": 10296,
+            "cacheWriteTokens": 82,
+            "outputTokens": 64
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ee7169fc584a8286120f6010e009937e5c0a083aa7496e2007ef4a461d36d5d7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_iEvbP0y0IpsdRPKVjGKeoVqN",
+              "name": "add_to_waitlist",
+              "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"windows\":[{\"date\":\"2026-11-06\",\"start\":\"12:00\",\"end\":\"17:00\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10488,
+            "cachedInputTokens": 10378,
+            "cacheWriteTokens": 107,
+            "outputTokens": 94
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "302e9e42faec11d0b0e2a9c5f37f80a29b560530fc6a0aed65451b868a9ed1a3",
+        "response": {
+          "text": "Sara is on the waitlist for a haircut with anyone this Friday, November 6, noon–5pm. That afternoon is full; Pepper will offer her a matching time if one opens up.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10647,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10644,
+            "outputTokens": 44
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ]
+  ]
+}

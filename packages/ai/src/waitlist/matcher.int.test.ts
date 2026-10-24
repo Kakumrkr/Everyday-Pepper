@@ -1,0 +1,288 @@
+import { addToWaitlist, changeBooking, claimWaitlistOffer } from '@pepper/appointments';
+import {
+  BookingIdSchema,
+  ClientIdSchema,
+  OfferTokenSchema,
+  OutboxEmailSchema,
+  OutboxMessageIdSchema,
+  ServiceIdSchema,
+  StaffMemberIdSchema,
+  TenantSlugSchema,
+  type MembershipRole,
+} from '@pepper/contracts';
+import {
+  changeAutonomy,
+  listPendingProposals,
+  listRecentActions,
+  openOutboxContent,
+  type Actor,
+} from '@pepper/core';
+import {
+  findOutboxMessage,
+  listDueOutboxMessages,
+  listDueWaitlistMatches,
+  listWaitlistMatches,
+  updateClient,
+  withTenant,
+  type Database,
+} from '@pepper/db';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { seedEvalWorld, type EvalWorld } from '../evals/world.js';
+import { approveToolProposal, undoToolAction } from '../tools/registry.js';
+import { OUTBOX_KEY, startTestDatabase, type TestDatabase } from '../tools/test-support.js';
+import type { ToolDeps } from '../tools/tool.js';
+import { runWaitlistMatch, type MatcherOptions } from './matcher.js';
+
+// The smart waitlist's matcher end to end on Postgres (S37, ADR-0041, AC-W5-1), without a
+// worker: Maria's Tuesday 15:00 with Jess is cancelled; Sara (anyone) and Ana (Jess) wait for
+// Tuesday afternoon. With the dial at "ask" (the default) the offer waits under "Needs your
+// OK" for an owner or manager; at "auto" it goes at once, with Undo until the emails leave.
+
+let database: TestDatabase;
+let db: Database;
+
+beforeAll(async () => {
+  database = await startTestDatabase();
+  db = database.app.db;
+});
+
+afterAll(async () => {
+  await database.stop();
+});
+
+// Monday 2 November 2026, 07:00 in New York.
+const NOW = '2026-11-02T12:00:00.000Z';
+const BASE_URL = 'https://app.pepper.test';
+
+const world = () =>
+  seedEvalWorld(
+    db,
+    'juniper',
+    { now: new Date(NOW), timeZone: 'America/New_York' },
+    { facts: [], memoryPaused: false },
+  );
+
+const id = (w: EvalWorld, key: string): string => {
+  const value = w.placeholders.get(key);
+  if (value === undefined) throw new Error(`no ${key}`);
+  return value;
+};
+
+function optionsFor(w: EvalWorld): MatcherOptions {
+  return {
+    clock: w.clock,
+    waitlistOf: () => ({ offerFanOut: 3 }),
+    autonomyOf: () => ({}),
+    emails: { baseUrl: BASE_URL, outboxKey: OUTBOX_KEY },
+  };
+}
+
+const depsAs = (w: EvalWorld, role: MembershipRole): ToolDeps => ({
+  db,
+  actor: w.actorFor(role),
+  clock: w.clock,
+  autonomy: { templateDefaults: {} },
+  emails: { baseUrl: BASE_URL, outboxKey: OUTBOX_KEY },
+});
+
+/** Sara (anyone) and Ana (Jess) wait for Tuesday afternoon; Maria's 15:00 is cancelled. */
+async function cancelWithTwoWaiting(w: EvalWorld) {
+  const owner = w.actorFor('owner');
+  const window = [{ date: '2026-11-03', start: '13:00', end: '17:00' }];
+  const haircut = ServiceIdSchema.parse(id(w, '{{service:haircut}}'));
+  await addToWaitlist(
+    db,
+    owner,
+    {
+      clientId: ClientIdSchema.parse(id(w, '{{client:sara}}')),
+      serviceId: haircut,
+      windows: window,
+    },
+    { clock: w.clock },
+  );
+  await addToWaitlist(
+    db,
+    owner,
+    {
+      clientId: ClientIdSchema.parse(id(w, '{{client:ana}}')),
+      serviceId: haircut,
+      staffMemberId: StaffMemberIdSchema.parse(id(w, '{{staff:jess}}')),
+      windows: window,
+    },
+    { clock: w.clock },
+  );
+  await changeBooking(
+    db,
+    owner,
+    BookingIdSchema.parse(id(w, '{{booking:maria}}')),
+    { status: 'cancelled', notifyClient: false },
+    { clock: w.clock },
+  );
+}
+
+async function dueMatch(w: EvalWorld) {
+  const due = (await listDueWaitlistMatches(db, w.clock.now(), 100)).filter(
+    (m) => m.tenantId === w.tenantId,
+  );
+  expect(due).toHaveLength(1);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- checked just above
+  return due[0]!;
+}
+
+/** The offer emails queued in the business, opened, once their Undo grace has passed. */
+async function offerEmails(w: EvalWorld) {
+  const at = new Date(w.clock.now().getTime() + 5 * 60_000);
+  const due = (await listDueOutboxMessages(db, at, 100)).filter((m) => m.tenantId === w.tenantId);
+  const emails = [];
+  for (const message of due) {
+    const row = await withTenant(db, w.tenantId, (tx) =>
+      findOutboxMessage(tx, OutboxMessageIdSchema.parse(message.messageId)),
+    );
+    if (row?.type !== 'email' || row.payload === null || row.status !== 'pending') continue;
+    emails.push(
+      OutboxEmailSchema.parse(
+        JSON.parse(openOutboxContent(OUTBOX_KEY, message.messageId, row.payload).toString('utf8')),
+      ),
+    );
+  }
+  return emails.filter((email) => email.subject.startsWith('A time opened up'));
+}
+
+function tokenOf(text: string) {
+  const match = /\/book\/[^/]+\/offer#([A-Za-z0-9_-]{43})/.exec(text);
+  if (match?.[1] === undefined) throw new Error('no claim link');
+  return OfferTokenSchema.parse(match[1]);
+}
+
+const offerProposals = async (w: EvalWorld, actor: Actor) =>
+  (await listPendingProposals(db, actor, { clock: w.clock })).filter(
+    (p) => p.tool === 'send_waitlist_offers',
+  );
+
+describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
+  it('at "ask" (the default): one proposal for owners and managers, ranked, nothing sent', async () => {
+    const w = await world();
+    await cancelWithTwoWaiting(w);
+    const result = await runWaitlistMatch(db, await dueMatch(w), optionsFor(w));
+    expect(result).toBe('proposed');
+    const [proposal] = await offerProposals(w, w.actorFor('owner'));
+    expect(proposal).toMatchObject({
+      action: 'message.waitlist_offer',
+      requestedByUserId: null,
+      recordOwnerUserId: null,
+      preview: {
+        after: {
+          date: '2026-11-03',
+          time: '15:00',
+          staffName: 'Jess',
+          serviceName: 'Haircut',
+          // Ana asked for Jess, so she ranks first.
+          offeredTo: 'Ana R. and Sara K.',
+          offers: 2,
+        },
+        emails: [
+          { template: 'waitlist_offer', clientId: id(w, '{{client:ana}}') },
+          { template: 'waitlist_offer', clientId: id(w, '{{client:sara}}') },
+        ],
+      },
+    });
+    // *Why?* names the ranking.
+    const ranks = proposal?.explanation.facts
+      .filter((f) => f.kind === 'waitlist_rank')
+      .map((f) => f.value as { rank: number; fit: string; clientName: string });
+    expect(ranks?.map((r) => [r.rank, r.fit, r.clientName])).toEqual([
+      [1, 'asked_for_staff', 'Ana R.'],
+      [2, 'anyone', 'Sara K.'],
+    ]);
+    expect((await offerProposals(w, w.actorFor('manager'))).map((p) => p.id)).toEqual([
+      proposal?.id,
+    ]);
+    expect(await offerProposals(w, w.actorFor('staff'))).toEqual([]);
+    expect(await offerEmails(w)).toEqual([]);
+    const [match] = await withTenant(db, w.tenantId, (tx) => listWaitlistMatches(tx, 10));
+    expect(match).toMatchObject({ status: 'done', outcome: 'proposed' });
+
+    // Approved by the manager: one email each, with its own claim link; the first claim books.
+    if (proposal === undefined) throw new Error('no proposal');
+    const approved = await approveToolProposal(
+      depsAs(w, 'manager'),
+      proposal.id,
+      proposal.fingerprint,
+    );
+    expect(approved.kind).toBe('executed');
+    const emails = await offerEmails(w);
+    expect(emails.map((e) => e.to).sort()).toEqual(['ana@example.test', 'sara@example.test']);
+    const sara = emails.find((e) => e.to === 'sara@example.test');
+    if (sara === undefined) throw new Error('no email to Sara');
+    expect(sara.text).toContain('Haircut with Jess, Tuesday, November 3 at 3:00 PM');
+    const slug = TenantSlugSchema.parse(/\/book\/([^/]+)\/offer#/.exec(sara.text)?.[1]);
+    const claimed = await claimWaitlistOffer(db, slug, tokenOf(sara.text), { clock: w.clock });
+    expect(claimed.booking).toMatchObject({
+      status: 'confirmed',
+      startsAt: '2026-11-03T20:00:00.000Z',
+    });
+  });
+
+  it('a client whose address went before the approval: the offer is stale, nothing is sent', async () => {
+    const w = await world();
+    await cancelWithTwoWaiting(w);
+    expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('proposed');
+    const [proposal] = await offerProposals(w, w.actorFor('owner'));
+    if (proposal === undefined) throw new Error('no proposal');
+    // Ana (rank 1) has no address any more: the emails shown are no longer the ones that would go.
+    const ana = ClientIdSchema.parse(id(w, '{{client:ana}}'));
+    await withTenant(db, w.tenantId, (tx) =>
+      updateClient(tx, ana, { name: 'Ana Ruiz', email: null, phone: null }),
+    );
+    const approved = await approveToolProposal(
+      depsAs(w, 'owner'),
+      proposal.id,
+      proposal.fingerprint,
+    );
+    expect(approved.kind).toBe('stale');
+    expect(await offerEmails(w)).toEqual([]);
+  });
+
+  it('a match runs once: a second job for it is skipped', async () => {
+    const w = await world();
+    await cancelWithTwoWaiting(w);
+    const due = await dueMatch(w);
+    expect(await runWaitlistMatch(db, due, optionsFor(w))).toBe('proposed');
+    expect(await runWaitlistMatch(db, due, optionsFor(w))).toBe('skipped');
+    expect(await offerProposals(w, w.actorFor('owner'))).toHaveLength(1);
+  });
+
+  it('at "auto": the offers go at once (after the Undo grace), and Undo takes them back', async () => {
+    const w = await world();
+    await changeAutonomy(
+      db,
+      w.actorFor('owner'),
+      { levels: { 'message.waitlist_offer': 'auto' } },
+      { templateDefaults: {} },
+    );
+    await cancelWithTwoWaiting(w);
+    expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('offered');
+    expect(await offerProposals(w, w.actorFor('owner'))).toEqual([]);
+    expect(await offerEmails(w)).toHaveLength(2);
+    const [action] = (await listRecentActions(db, w.actorFor('owner'))).filter(
+      (a) => a.tool === 'send_waitlist_offers',
+    );
+    if (action === undefined) throw new Error('no action');
+    const undone = await undoToolAction(depsAs(w, 'owner'), action.id, null);
+    expect(undone).toMatchObject({ execution: { status: 'undone' } });
+    expect(await offerEmails(w)).toEqual([]);
+  });
+
+  it('nobody waiting for that time: no proposal, the match is done', async () => {
+    const w = await world();
+    await changeBooking(
+      db,
+      w.actorFor('owner'),
+      BookingIdSchema.parse(id(w, '{{booking:maria}}')),
+      { status: 'cancelled', notifyClient: false },
+      { clock: w.clock },
+    );
+    expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('no_match');
+    expect(await offerProposals(w, w.actorFor('owner'))).toEqual([]);
+  });
+});

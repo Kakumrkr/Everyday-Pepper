@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9ac66c1827e6680955e948641e06b72867f67a5fa5763d95ccb9487a1c32d7a6",
+        "fingerprint": "9410ab263a78a847084e6c450b42e22f29715aeb0bf4d284eec9a6cfc0875921",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ZYY5s8elCkHPocwkTb9oM0BA",
+              "id": "call_fk2RZaZgETHd1D4axSM8ZUxS",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"max_bookings_per_day\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":6,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8867,
+            "inputTokens": 9852,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8864,
+            "cacheWriteTokens": 9849,
             "outputTokens": 69
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "cc8471d0ddc12f1d09da8050b4216dc981cd62edc46f26a82c9f19f6b5d53acf",
+        "fingerprint": "c7d8265438135423ba28557c3ffa444aec350a31334465622d4787f041528fee",
         "response": {
-          "text": "I’ve proposed a limit of 6 bookings per day for the whole business. It hasn’t taken effect yet; you can approve it on the card.",
+          "text": "I’ve proposed a cap of 6 bookings per day for the whole business. It won’t take effect unless you approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9005,
-            "cachedInputTokens": 8864,
+            "inputTokens": 9990,
+            "cachedInputTokens": 9849,
             "cacheWriteTokens": 138,
-            "outputTokens": 35
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }
