@@ -1,8 +1,10 @@
 import {
   queueBookingEmail,
+  queueWaitlistTakenEmail,
   type BookingEmailOptions,
   type BookingNotice,
   type BookingNotify,
+  type WaitlistTakenNotify,
 } from '@pepper/appointments';
 import type { TenantTx } from '@pepper/db';
 import { Inject, Injectable, Module, type DynamicModule } from '@nestjs/common';
@@ -23,6 +25,11 @@ export class BookingEmails {
   /** Queues the email about a change. Clients without an email address get none. */
   readonly notify: BookingNotify = async (tx: TenantTx, notice: BookingNotice) => {
     await queueBookingEmail(tx, notice, this.options);
+  };
+
+  /** Queues the "that time has been taken" email to a waitlist client (S37). */
+  readonly waitlistTaken: WaitlistTakenNotify = async (tx, notice) => {
+    await queueWaitlistTakenEmail(tx, notice, this.options);
   };
 }
 

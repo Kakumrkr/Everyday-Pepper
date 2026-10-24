@@ -120,6 +120,7 @@ const bookings = {
   waitlist: vi.fn(() => Promise.resolve([ENTRY])),
   addToWaitlist: vi.fn((): Promise<WaitlistEntry> => Promise.resolve(ENTRY)),
   changeWaitlistEntry: vi.fn((): Promise<WaitlistEntry> => Promise.resolve(ENTRY)),
+  waitlistOffers: vi.fn(() => Promise.resolve([])),
 };
 
 @Global()
@@ -201,6 +202,8 @@ describe('reading: every role', () => {
         entries: [ENTRY],
       });
       expect(bookings.waitlist).toHaveBeenCalledWith(context(), { all: true, limit: 5 });
+      // The offers of freed times (S37), as the domain scopes them.
+      expect((await get('/v1/waitlist/offers').expect(200)).body).toEqual({ offers: [] });
     },
   );
 

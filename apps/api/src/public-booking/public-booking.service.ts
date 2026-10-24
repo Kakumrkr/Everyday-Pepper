@@ -1,9 +1,11 @@
 import {
   cancelManagedBooking,
+  claimWaitlistOffer,
   confirmBookingRequest,
   findPublicAvailability,
   getManagedBooking,
   getPublicBusiness,
+  getWaitlistOffer,
   rescheduleManagedBooking,
   requestBooking,
   codeEmail,
@@ -19,7 +21,9 @@ import {
   type BookingRequestId,
   type BookingRequestResponse,
   type ManageToken,
+  type OfferToken,
   type PublicBooking,
+  type PublicOffer,
   type PublicBusiness,
   type TenantSlug,
 } from '@pepper/contracts';
@@ -125,6 +129,24 @@ export class PublicBookingService {
       notify: this.notify,
     });
     return cancelled.booking;
+  }
+
+  /** The waitlist offer behind a claim link (S37); reading it changes nothing. */
+  offer(slug: TenantSlug, token: OfferToken): Promise<PublicOffer> {
+    return getWaitlistOffer(this.db, slug, token);
+  }
+
+  /**
+   * Claims the offer: the first claim books the time (with its confirmation email and the
+   * team's push); the other clients offered it are emailed that it's taken (S37).
+   */
+  async claim(slug: TenantSlug, token: OfferToken): Promise<BookingConfirmResponse> {
+    const claimed = await claimWaitlistOffer(this.db, slug, token, {
+      templateRuleDefaults,
+      notify: this.notify,
+      tellTaken: this.emails.waitlistTaken,
+    });
+    return { booking: claimed.booking, manageToken: claimed.manageToken };
   }
 
   /** The mailer; 503 `email_unavailable` when none is configured. */

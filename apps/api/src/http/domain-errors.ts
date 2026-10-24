@@ -15,6 +15,10 @@ import {
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
   WaitlistExpiredError,
+  WaitlistOfferExpiredError,
+  WaitlistOfferNotFoundError,
+  WaitlistOfferTakenError,
+  WaitlistOfferUsedError,
   WrongVerificationCodeError,
 } from '@pepper/appointments';
 import type { ApiErrorCode, SlotUnavailable, UndoRefusedBody, WrongCode } from '@pepper/contracts';
@@ -101,6 +105,10 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [WaitlistEntryNotFoundError, NotFoundException, 'waitlist_entry_not_found'],
   [WaitlistEntryNotChangeableError, ConflictException, 'waitlist_entry_not_changeable'],
   [WaitlistExpiredError, BadRequestException, 'waitlist_expired'],
+  [WaitlistOfferNotFoundError, NotFoundException, 'waitlist_offer_not_found'],
+  [WaitlistOfferUsedError, ConflictException, 'waitlist_offer_used'],
+  [WaitlistOfferTakenError, ConflictException, 'waitlist_offer_taken'],
+  [WaitlistOfferExpiredError, GoneException, 'waitlist_offer_expired'],
   [TaskNotFoundError, NotFoundException, 'task_not_found'],
   [FeedItemNotFoundError, NotFoundException, 'feed_item_not_found'],
   [DraftRefusedError, UnprocessableEntityException, 'draft_refused'],

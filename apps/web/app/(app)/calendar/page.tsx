@@ -97,6 +97,12 @@ export default async function CalendarPage({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {books ? <NewBooking setup={setup} date={formatDate(date)} /> : null}
+          <Link
+            href={ROUTES.waitlist}
+            className={buttonClass({ variant: 'secondary', size: 'sm' })}
+          >
+            Waitlist
+          </Link>
           <nav aria-label="Day" className="flex items-center gap-1">
             <Link
               href={calendarHref(addDays(date, -1), staffMemberId)}
