@@ -166,6 +166,24 @@ describe('FeedSuggestions', () => {
     );
   });
 
+  it('keeps both gone when two dismissals overlap', async () => {
+    const pending: ((value: string | null) => void)[] = [];
+    setup({
+      onClose: () =>
+        new Promise<string | null>((resolve) => {
+          pending.push(resolve);
+        }),
+    });
+    const [first, second] = screen.getAllByRole('button', { name: 'Dismiss' });
+    if (first === undefined || second === undefined) throw new Error('no Dismiss');
+    await userEvent.click(first);
+    await userEvent.click(second);
+    for (const resolve of pending) resolve(null);
+    await vi.waitFor(() => {
+      expect(screen.getAllByTestId('feed-suggestion')).toHaveLength(2);
+    });
+  });
+
   it('records following an action as done, and shows a failure', async () => {
     const { onClose, follow } = setup();
     await userEvent.click(screen.getByRole('link', { name: 'Show on calendar' }));

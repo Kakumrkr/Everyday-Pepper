@@ -647,7 +647,18 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       const { rows } = await tx.execute<{ id: string }>(sql`SELECT current_tenant_id() AS id`);
       return idWhere(tx, 'insight_runs', 'tenant_id', String(rows[0]?.id));
     },
-    touch: 'request_count = request_count',
+    touch: 'last_run_at = last_run_at',
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('insights'::text))",
+  },
+  insight_requests: {
+    tenantColumn: 'tenant_id',
+    // A booking change asks for a run; the run deletes what it covered.
+    seed: async (tx) => {
+      await requestInsightRun(tx);
+      const { rows } = await tx.execute<{ id: string }>(sql`SELECT current_tenant_id() AS id`);
+      return idWhere(tx, 'insight_requests', 'tenant_id', String(rows[0]?.id));
+    },
+    touch: 'created_at = created_at',
     jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('insights'::text))",
   },
   memory_episodes: {
@@ -1507,13 +1518,15 @@ describe.each([
       'booking_reminders',
       'tasks',
       'insight_runs',
+      'insight_requests',
       'feed_items',
       'tenants',
       'bookings',
       'clients',
       'outbox_dispatch',
     ]) {
-      if (other === table) continue;
+      // The insights job reads its two tables: runs, and the requests that make one due.
+      if (other === table || (job === 'insights' && other === 'insight_requests')) continue;
       const { rows: seen } = await scanning(`SELECT * FROM ${other}`);
       expect(seen, other).toEqual([]);
     }

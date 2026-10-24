@@ -80,10 +80,3 @@ export interface InsightProvider {
   kind: FeedInsightKind;
   find(snapshot: InsightSnapshot): InsightCandidate[];
 }
-
-/** The dedupe key: one item per (kind, subject, day); the business comes from the row. */
-export function dedupeKey(
-  candidate: Pick<InsightCandidate, 'kind' | 'subjectKey' | 'day'>,
-): string {
-  return `${candidate.kind}:${candidate.subjectKey}:${candidate.day}`;
-}

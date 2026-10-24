@@ -14,6 +14,7 @@ import {
   type WeeklyHours,
   type WeeklyHoursInput,
 } from '@pepper/contracts';
+import { formatDuration } from '@pepper/ui';
 
 // The setup screens (S16): services, staff hours and time off, booking rules and a client's
 // visits. Everything here is pure; the screens call the api, which validates and decides.
@@ -61,10 +62,8 @@ export function priceLabel(
 
 /** `45 min`, `1 h`, `1 h 30 min`. */
 export function durationLabel(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  if (hours === 0) return `${String(rest)} min`;
-  return rest === 0 ? `${String(hours)} h` : `${String(hours)} h ${String(rest)} min`;
+  // One wording for durations across the app; the feed's suggestions use it too (S35).
+  return formatDuration(minutes);
 }
 
 /** Services grouped by category (by name, case-insensitive); those without one last. */

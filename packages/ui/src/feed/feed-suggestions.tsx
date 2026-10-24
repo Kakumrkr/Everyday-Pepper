@@ -68,7 +68,7 @@ export function FeedSuggestions({
       setError(failed);
       return;
     }
-    setClosed(new Set([...closed, item.id]));
+    setClosed((previous) => new Set([...previous, item.id]));
     if (outcome === 'dismissed') {
       setNotice(
         `Snoozed for 30 days. I won't suggest ${FEED_KIND_NOUN[item.kind]} for this again until then.`,

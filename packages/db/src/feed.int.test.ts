@@ -216,8 +216,14 @@ describe('dismiss and snooze', () => {
     };
     expect(await sync([first, nextDue])).toMatchObject({ created: 0, updated: 0, snoozed: 2 });
     expect(await open()).not.toContain(`rebooking_due:client:${maria}:2026-12-08`);
-    // After the snooze it may come back.
-    expect(await sync([nextDue], later(31))).toMatchObject({ created: 1, snoozed: 0 });
+    // After the snooze both may come back: the same key (the same due date) too.
+    const again = { ...first, expiresAt: later(60) };
+    expect(await sync([again, nextDue], later(31))).toMatchObject({
+      created: 1,
+      updated: 1,
+      snoozed: 0,
+    });
+    expect(await open(undefined, later(31))).toContain(`rebooking_due:client:${maria}:2026-10-27`);
   });
 
   it('records done, and closes an item only once', async () => {

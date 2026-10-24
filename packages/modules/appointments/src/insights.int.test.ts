@@ -5,7 +5,13 @@ import {
   type StaffMember,
   type TenantId,
 } from '@pepper/contracts';
-import { createBusiness, createClient, ManualClock, type Actor } from '@pepper/core';
+import {
+  changeFeedSettings,
+  createBusiness,
+  createClient,
+  ManualClock,
+  type Actor,
+} from '@pepper/core';
 import {
   addMembership,
   listOpenFeedItems,
@@ -184,6 +190,9 @@ describe('the insights pass', () => {
     );
     expect(await runInsightsFor(db, b.tenantId, b.options)).toEqual({ outcome: 'paused' });
     expect(await feed(b)).toHaveLength(before);
+    // Turning it back on (through the service) asks for a run at once.
+    await changeFeedSettings(db, b.owner, { suggestionsPaused: false });
+    expect(await runDueInsights(db, b.options)).toMatchObject({ businesses: 1 });
 
     await withTenant(db, b.tenantId, (tx) =>
       writeFeedSettings(tx, {

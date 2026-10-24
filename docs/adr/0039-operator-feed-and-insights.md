@@ -20,7 +20,7 @@ S35 had to decide the thresholds, the storage, how a booking change triggers a n
    - **`rebooking_due`:** the client's last visit (completed, or confirmed and past; no-shows and cancellations don't count). The interval is the visit's service `rebook_after_days`. If that is not set, it is the client's median interval between visits, from at least 3 visits, rounded and kept within 7–365 days. With fewer visits, nothing. The client must have nothing booked ahead. The item exists from the due date until twice the interval. Audience: the last visit's staff member.
    - **`no_show_pattern`:** at least 2 no-shows in the last 180 days, and a confirmed booking in the next 7 days (the earliest is picked). The item expires when that booking starts. Audience: owners and managers only.
    - **`staff_overload`:** booked at least 90% of working time (net of time off) on at least 3 of the next 7 days. Audience: owners and managers only.
-2. **`feed_items`** (migrations 0043–0044):
+2. **`feed_items`** (migrations 0043–0044, with `insight_runs` and `insight_requests`):
    - **What a row holds:** ids (staff member, client, booking, service, proposal) and a kind-specific payload of numbers and dates only, checked by the contracts on the way out. Never names or free text (LLM02).
    - **Dedupe:** `dedupe_key = kind:subject:day` is unique per business, and a check ties it to its columns.
    - **Status:** `suggestion` / `dismissed` / `done` / `expired` (`needs_ok` is kept for S36's drafts). `acted_at` is set exactly when an item closes. `snoozed_until` is set only on dismissed items.
@@ -28,7 +28,7 @@ S35 had to decide the thresholds, the storage, how a booking change triggers a n
    - **Foreign keys:** subject FKs cascade, so a deleted client takes their items with them. The proposal FK sets only its own column to NULL.
 3. **`syncFeedItems`** is the only writer for the pass:
    - It leaves out candidates whose kind and subject are snoozed.
-   - It upserts by key. It updates an open item, or opens again one that expired because its reason went away for a while. It never touches dismissed or done items.
+   - It upserts by key. It updates an open item, or opens again one that expired because its reason went away for a while. A dismissed item comes back only once its snooze is over: a rebooking keeps its key, its due date, for the whole window. Done items are never touched.
    - It expires every open item of the pass's kinds whose key it did not see, or whose time has passed.
    - A second run with the same data writes nothing.
 4. **The insights pass is a `Periodic` worker job, not a queue** (D-4). Every `INSIGHTS_POLL_MS` (60 s by default), `runDueInsights` scans `insight_runs` (`job_scan('insights')`, ids and numbers only) for businesses that:
@@ -37,12 +37,14 @@ S35 had to decide the thresholds, the storage, how a booking change triggers a n
    - or were last run an hour ago.
 
    Each business runs under its own tenant. A queue would add Redis state for work that is "recompute this business": idempotent and coalescing (ten booking changes in a minute are one run). One row per business is all the state it needs, and a restart loses nothing. BullMQ stays for the waitlist's per-offer timers (S37).
-5. **Re-runs after changes count, they don't compare times:**
-   - Every booking write (team and booking page, 7 sites), working-hours change and time-off change calls `requestInsights(tx)` in its own transaction. This adds 1 to `insight_runs.request_count`.
-   - A run first takes a per-business advisory lock (`pg_try_advisory_xact_lock`; a second worker skips the business). It then reads the count before reading anything else, and at the end records it as `run_count`.
-   - A change committed during a run leaves `request_count > run_count`, so the business is due again on the next pass. Booking writes never wait on a run.
+5. **Re-runs after changes are requests, not times:**
+   - Every booking write (team and booking page, 7 sites), working-hours change and time-off change calls `requestInsights(tx)` in its own transaction. This inserts one row into `insight_requests`, which is append-only for writers, so concurrent changes never wait on each other or on a run.
+   - A run first takes a per-business advisory lock (`pg_try_advisory_xact_lock`; a second worker skips the business). It then reads the highest request id it can see, before reading anything else, and at the end deletes the requests up to that id.
+   - A change committed during a run keeps its row (a higher id, or one not visible when the run began), so the business is due again on the next pass. Turning suggestions or a kind back on also asks for a run.
 
-   The first version compared timestamps. Its own test caught a lost request: a booking in the same millisecond as a run, which also stands for one that commits while a run is going.
+   Two earlier designs fell in this session:
+   - Comparing timestamps lost a request in the same millisecond as a run (its own test caught it).
+   - A per-business counter row made every schedule write in a business queue on one row lock, and could deadlock a transaction that writes several bookings (code review).
 6. **The business's switches** live in `tenants.feed_settings`:
    - `suggestionsPaused` (D-16): the pass skips the business and the feed hides its suggestions. Proposals stay.
    - `disabledKinds`: over the template's `insights.enabled`.
@@ -50,7 +52,7 @@ S35 had to decide the thresholds, the storage, how a booking change triggers a n
 
    Owners and managers change them (`settings.manage`), with an audit entry `feed.settings_updated`. The question appears for owners and managers when one kind was dismissed 3 times in 14 days.
 7. **The api and Home:**
-   - `GET /v1/feed` returns suggestions with the names the member may see (joined at read time, under RLS), the switches, whether they may change them, and the question. It needs the new permission `feed.read` (everyone; staff their own).
+   - `GET /v1/feed` returns up to 50 suggestions with the names the member may see (joined at read time, under RLS; kinds turned off are left out in the query), the switches, whether they may change them, and the question. It needs the new permission `feed.read` (everyone; staff their own).
    - `POST /v1/feed/:id/close` takes `dismissed` or `done`; following a suggestion's action records `done`. `PATCH /v1/feed/settings` changes the switches.
    - "Needs your OK" and "Done for you" stay the trust layer's `/v1/ai/proposals` and `/v1/ai/actions`, so each has one source of truth. Home shows the three sections in the mock-up's order, each with an empty state that says what will appear.
    - The sentences are written by code (`feedLine` in `@pepper/ui`) from ids, numbers and names.
@@ -63,10 +65,11 @@ S35 had to decide the thresholds, the storage, how a booking change triggers a n
 - **Insight fixtures:** 28 cases, all passing. They cover New York with both 2026 DST days, Phoenix, and Kolkata (UTC+5:30), with every expected instant written in UTC.
 - **Insights pass:** p50 267 ms, **p95 328 ms** on one business with 15,918 bookings over a year, 2,000 clients and 6 staff (gate ≤ 2 s).
 - **Feed:** **p95 17 ms** with 150 open items (gate ≤ 300 ms).
-- **Isolation suite:** 100%, including `feed_items`, `insight_runs` and the `insights` scan.
+- **Isolation suite:** 100%, including `feed_items`, `insight_runs`, `insight_requests` and the `insights` scan.
 
 ## Consequences
 - The feed is cheap and explainable: no model call. S36 adds drafts to items through the trust layer (`action_proposal_id`, status `needs_ok`).
 - **Dismiss is broad by design:** dismissing one of Jess's gap days snoozes gap suggestions for Jess for 30 days, and her other open gap items expire on the next run.
 - **Acted-on rates** are counted per kind and outcome (`feedOutcomeCounts`) for the §2 gate; a screen for them is out of scope (§8).
 - **Changes outside the hooks** (a new staff member, a service's interval) show within the hour, not the minute.
+- **Each run reads two years of bookings** (the longest rebooking window is twice 365 days). That is within the gate (p95 328 ms), so a narrower loader (the horizon plus each client's last visits) waits until a business outgrows it.

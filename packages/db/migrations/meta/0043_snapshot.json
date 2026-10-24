@@ -1,5 +1,5 @@
 {
-  "id": "e669bac0-985a-4eb5-9487-5f1d462c4572",
+  "id": "dbd445a8-32a3-48d0-91ec-ab8934c3da4d",
   "prevId": "f5e95523-f372-4f1a-806c-10cbd54b1615",
   "version": "7",
   "dialect": "postgresql",
@@ -3354,6 +3354,98 @@
       },
       "isRLSEnabled": false
     },
+    "public.insight_requests": {
+      "name": "insight_requests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "insight_requests_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_tenant_id()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "insight_requests_tenant_idx": {
+          "name": "insight_requests_tenant_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "insight_requests_tenant_id_tenants_id_fk": {
+          "name": "insight_requests_tenant_id_tenants_id_fk",
+          "tableFrom": "insight_requests",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "tenant_isolation": {
+          "name": "tenant_isolation",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": ["public"],
+          "using": "tenant_id = current_tenant_id()",
+          "withCheck": "tenant_id = current_tenant_id()"
+        },
+        "job_scan": {
+          "name": "job_scan",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": ["public"],
+          "using": "current_tenant_id() IS NULL AND current_job_scan('insights')"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.insight_runs": {
       "name": "insight_runs",
       "schema": "",
@@ -3370,20 +3462,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "current_tenant_id()"
-        },
-        "request_count": {
-          "name": "request_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "run_count": {
-          "name": "run_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
         },
         "last_run_at": {
           "name": "last_run_at",
@@ -3459,12 +3537,7 @@
           "using": "current_tenant_id() IS NULL AND current_job_scan('insights')"
         }
       },
-      "checkConstraints": {
-        "insight_runs_counts": {
-          "name": "insight_runs_counts",
-          "value": "\"insight_runs\".\"request_count\" >= 0 AND \"insight_runs\".\"run_count\" >= 0 AND \"insight_runs\".\"run_count\" <= \"insight_runs\".\"request_count\""
-        }
-      },
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.invites": {

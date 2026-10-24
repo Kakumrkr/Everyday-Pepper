@@ -83,15 +83,15 @@ export async function runDueInsights(
   const totals = { businesses: 0, created: 0, updated: 0, expired: 0 };
   const seen = new Set<TenantId>();
   for (let batch = 0; batch < INSIGHT_BATCHES_PER_PASS; batch += 1) {
-    const due = (
-      await listDueInsightRuns(
-        db,
-        new Date(options.clock.now()),
-        INSIGHT_RUN_EVERY_MS,
-        INSIGHT_BATCH,
-      )
-    ).filter((run) => !seen.has(run.tenantId));
-    for (const { tenantId } of due) {
+    const listed = await listDueInsightRuns(
+      db,
+      new Date(options.clock.now()),
+      INSIGHT_RUN_EVERY_MS,
+      INSIGHT_BATCH,
+    );
+    for (const { tenantId } of listed) {
+      // A business another worker held ("busy") is listed again; it runs on the next pass.
+      if (seen.has(tenantId)) continue;
       seen.add(tenantId);
       const result = await runInsightsFor(db, tenantId, options);
       if (result.outcome !== 'ran') continue;
@@ -100,7 +100,7 @@ export async function runDueInsights(
       totals.updated += result.updated;
       totals.expired += result.expired;
     }
-    if (due.length < INSIGHT_BATCH) break;
+    if (listed.length < INSIGHT_BATCH) break;
   }
   return totals;
 }

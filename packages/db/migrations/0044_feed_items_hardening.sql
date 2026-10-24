@@ -10,6 +10,8 @@ ALTER TABLE "feed_items" FORCE ROW LEVEL SECURITY;
 --> statement-breakpoint
 ALTER TABLE "insight_runs" FORCE ROW LEVEL SECURITY;
 --> statement-breakpoint
+ALTER TABLE "insight_requests" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE TRIGGER "feed_items_set_updated_at" BEFORE UPDATE ON "feed_items"
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 --> statement-breakpoint

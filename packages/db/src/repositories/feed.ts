@@ -30,6 +30,7 @@ import {
   bookings,
   clients,
   feedItems,
+  insightRequests,
   insightRuns,
   services,
   staffMembers,
@@ -129,6 +130,7 @@ export async function syncFeedItems(
         set: {
           status: 'suggestion',
           actedAt: null,
+          snoozedUntil: null,
           audienceStaffId: sql`excluded.audience_staff_id`,
           staffMemberId: sql`excluded.staff_member_id`,
           clientId: sql`excluded.client_id`,
@@ -138,7 +140,9 @@ export async function syncFeedItems(
           expiresAt: sql`excluded.expires_at`,
         },
         // Only an open item, or one that expired, follows its reason; a member's choice stays.
-        setWhere: sql`${feedItems.status} IN ('suggestion', 'expired') AND (${feedItems.status} <> 'suggestion' OR ${feedItems.payload} IS DISTINCT FROM excluded.payload OR ${feedItems.expiresAt} IS DISTINCT FROM excluded.expires_at OR ${feedItems.audienceStaffId} IS DISTINCT FROM excluded.audience_staff_id OR ${feedItems.bookingId} IS DISTINCT FROM excluded.booking_id)`,
+        // An open or expired item follows its reason, and a dismissed one comes back once its
+        // snooze is over (its key may be the same: a rebooking's due date); done stays done.
+        setWhere: sql`(${feedItems.status} IN ('suggestion', 'expired') AND (${feedItems.status} <> 'suggestion' OR ${feedItems.payload} IS DISTINCT FROM excluded.payload OR ${feedItems.expiresAt} IS DISTINCT FROM excluded.expires_at OR ${feedItems.audienceStaffId} IS DISTINCT FROM excluded.audience_staff_id OR ${feedItems.bookingId} IS DISTINCT FROM excluded.booking_id)) OR (${feedItems.status} = 'dismissed' AND ${feedItems.snoozedUntil} <= ${now})`,
       })
       .returning({ inserted: sql<boolean>`(xmax = 0)` });
     for (const row of written) {
@@ -179,7 +183,9 @@ export async function listOpenFeedItems(
   tx: TenantTx,
   now: Date,
   limit = 50,
+  options: { excludeKinds?: readonly FeedInsightKind[] } = {},
 ): Promise<FeedItemWithNames[]> {
+  const excluded = (options.excludeKinds ?? []).map((kind) => FeedInsightKindSchema.parse(kind));
   const max = z.number().int().min(1).max(200).parse(limit);
   const rows = await tx
     .select({
@@ -192,7 +198,13 @@ export async function listOpenFeedItems(
     .leftJoin(staffMembers, eq(staffMembers.id, feedItems.staffMemberId))
     .leftJoin(clients, eq(clients.id, feedItems.clientId))
     .leftJoin(services, eq(services.id, feedItems.serviceId))
-    .where(and(eq(feedItems.status, 'suggestion'), gt(feedItems.expiresAt, now)))
+    .where(
+      and(
+        eq(feedItems.status, 'suggestion'),
+        gt(feedItems.expiresAt, now),
+        excluded.length === 0 ? undefined : notInArray(feedItems.kind, excluded),
+      ),
+    )
     .orderBy(desc(feedItems.createdAt), asc(feedItems.id))
     .limit(max);
   return rows.map((row) => ({
@@ -300,24 +312,19 @@ export async function writeFeedSettings(
 }
 
 /**
- * Asks the worker to run the business's insights again soon (after a booking change). Cheap
- * and safe inside the change's transaction: one row per business, its count raised by one.
+ * Asks the worker to run the business's insights again soon (after a booking, hours or time-off
+ * change). Safe and cheap inside the change's transaction: an insert that never waits on
+ * another change.
  */
 export async function requestInsightRun(tx: TenantTx): Promise<void> {
-  await tx
-    .insert(insightRuns)
-    .values({ requestCount: 1 })
-    .onConflictDoUpdate({
-      target: insightRuns.tenantId,
-      set: { requestCount: sql`${insightRuns.requestCount} + 1` },
-    });
+  await tx.insert(insightRequests).values({});
 }
 
 /**
  * Starts a run of the business's insights: takes the business's run lock for this transaction
- * (an advisory lock, so booking changes asking for runs never wait on it) and returns the
- * request count the run covers, or `undefined` when another worker is running it right now.
- * Call it before reading anything the run uses.
+ * (an advisory lock: a second worker skips the business) and returns the highest request it
+ * covers, or `undefined` when another worker is running it right now. Call it before reading
+ * anything the run uses.
  */
 export async function startInsightRun(tx: TenantTx): Promise<number | undefined> {
   const { rows } = await tx.execute<{ locked: boolean }>(
@@ -326,16 +333,22 @@ export async function startInsightRun(tx: TenantTx): Promise<number | undefined>
   if (rows[0]?.locked !== true) return undefined;
   // A business without its row (it missed the backfill) gets one now.
   await tx.insert(insightRuns).values({}).onConflictDoNothing({ target: insightRuns.tenantId });
-  const [row] = await tx.select({ requestCount: insightRuns.requestCount }).from(insightRuns);
-  return row?.requestCount ?? 0;
+  const [row] = await tx
+    // node-postgres reads a bigint as a string.
+    .select({ seen: sql<string>`coalesce(max(${insightRequests.id}), 0)::text` })
+    .from(insightRequests);
+  return Number(row?.seen ?? '0');
 }
 
-/** Records a finished run that started at `startedAt` and covered requests up to `seen`. */
+/**
+ * Records a finished run that started at `startedAt`: the requests up to `seen` are done; one
+ * committed since (a higher id, or one not visible when the run began) stays.
+ */
 export async function markInsightRun(tx: TenantTx, startedAt: Date, seen: number): Promise<void> {
-  await tx.update(insightRuns).set({
-    lastRunAt: startedAt,
-    runCount: sql`GREATEST(${insightRuns.runCount}, LEAST(${seen}::bigint, ${insightRuns.requestCount}))`,
-  });
+  await tx.update(insightRuns).set({ lastRunAt: startedAt });
+  await tx
+    .delete(insightRequests)
+    .where(lte(insightRequests.id, z.number().int().min(0).parse(seen)));
 }
 
 export interface DueInsightRun {
@@ -362,7 +375,7 @@ export async function listDueInsightRuns(
       .where(
         or(
           isNull(insightRuns.lastRunAt),
-          gt(insightRuns.requestCount, insightRuns.runCount),
+          sql`${insightRuns.tenantId} IN (SELECT ${insightRequests.tenantId} FROM ${insightRequests})`,
           lte(insightRuns.lastRunAt, staleBefore),
         ),
       )

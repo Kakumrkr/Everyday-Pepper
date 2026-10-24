@@ -22,7 +22,8 @@ import {
   scheduleGaps,
   staffOverload,
 } from './providers.js';
-import { dedupeKey, type InsightCandidate } from './types.js';
+import { feedDedupeKey as dedupeKey } from '@pepper/db';
+import type { InsightCandidate } from './types.js';
 
 // The insight fixtures (S35, playbook §2 "insight correctness 100% on the fixtures, across time
 // zones and a DST change"). Every expected instant is written out in UTC on purpose: the

@@ -1967,12 +1967,9 @@ export const feedItems = pgTable(
 );
 
 /**
- * When each business's insights last ran and whether something asked for a new run
- * (ADR-0039). A booking change adds one to `request_count` in its own transaction; a run notes
- * the count it saw before reading anything (`run_count`), so a change that commits during a
- * run is never lost: its count is higher, and the business is due again. The worker's insights
- * pass scans this table across businesses (`job_scan`, ids and numbers only) every minute and
- * runs a business never run, asked for since its last run, or an hour old.
+ * When each business's insights last ran (ADR-0039). The worker's insights pass scans this
+ * table and `insight_requests` across businesses (`job_scan`, ids and times only) every minute
+ * and runs a business never run, asked for since its last run, or an hour old.
  */
 export const insightRuns = pgTable(
   'insight_runs',
@@ -1982,18 +1979,36 @@ export const insightRuns = pgTable(
       .notNull()
       .default(currentTenantId)
       .references(() => tenants.id, { onDelete: 'cascade' }),
-    requestCount: bigint('request_count', { mode: 'number' }).notNull().default(0),
-    runCount: bigint('run_count', { mode: 'number' }).notNull().default(0),
     lastRunAt: timestamp('last_run_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
     unique('insight_runs_tenant_unique').on(table.tenantId),
     index('insight_runs_last_run_at_idx').on(table.lastRunAt),
-    check(
-      'insight_runs_counts',
-      sql`${table.requestCount} >= 0 AND ${table.runCount} >= 0 AND ${table.runCount} <= ${table.requestCount}`,
-    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    jobScan('insights'),
+  ],
+);
+
+/**
+ * Asks for a business's insights to run again (ADR-0039): one row per booking, working-hours
+ * or time-off change, inserted in that change's transaction. Append-only for the writers, so
+ * concurrent changes never wait on each other; a run deletes the rows it saw before reading
+ * anything (ids up to the highest it saw), so a change committed during a run stays and makes
+ * the business due again.
+ */
+export const insightRequests = pgTable(
+  'insight_requests',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('insight_requests_tenant_idx').on(table.tenantId, table.id),
     tenantIsolation(sql.raw('tenant_id')),
     jobScan('insights'),
   ],
@@ -2026,3 +2041,4 @@ export type MemoryFactRow = typeof memoryFacts.$inferSelect;
 export type MemoryEpisodeRow = typeof memoryEpisodes.$inferSelect;
 export type FeedItemRow = typeof feedItems.$inferSelect;
 export type InsightRunRow = typeof insightRuns.$inferSelect;
+export type InsightRequestRow = typeof insightRequests.$inferSelect;

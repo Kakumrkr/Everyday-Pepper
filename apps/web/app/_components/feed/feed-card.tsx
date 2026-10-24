@@ -2,6 +2,7 @@
 
 import {
   FeedSettingsSchema,
+  parseDate,
   type FeedItem,
   type FeedResponse,
   type FeedSettingsChange,
@@ -10,13 +11,12 @@ import { buttonClass, FeedSuggestions, type FeedAction } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
+import { calendarHref } from '../../../lib/calendar';
 import { sendJson } from '../../../lib/client-api';
 
 /** Where a suggestion leads: the day on the calendar, or the client. */
 function actionFor(item: FeedItem): FeedAction | null {
-  const staff = item.subjects.staffMemberId;
-  const day = (date: string) =>
-    `${ROUTES.calendar}?date=${date}${staff === null ? '' : `&staffMemberId=${staff}`}`;
+  const day = (date: string) => calendarHref(parseDate(date), item.subjects.staffMemberId);
   switch (item.kind) {
     case 'schedule_gaps':
       return { label: 'Show on calendar', href: day(item.day) };

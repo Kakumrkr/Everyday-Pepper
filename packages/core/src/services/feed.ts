@@ -19,6 +19,7 @@ import {
   countDismissals,
   listOpenFeedItems,
   readFeedSettings,
+  requestInsightRun,
   withMember,
   writeFeedSettings,
   type Database,
@@ -54,12 +55,12 @@ export async function getFeed(
   const canChangeSettings = can(actor.context, 'settings.manage');
   return withMember(db, actor.context, async (tx) => {
     const stored = await readFeedSettings(tx);
-    const rows = stored.suggestionsPaused ? [] : await listOpenFeedItems(tx, now);
-    const off = new Set(stored.disabledKinds);
+    // Kinds turned off are left out by the query, so they never take the feed's places.
+    const rows = stored.suggestionsPaused
+      ? []
+      : await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds });
     return {
-      suggestions: rows
-        .filter((row) => !off.has(row.kind as FeedInsightKind))
-        .flatMap((row) => toFeedItem(row) ?? []),
+      suggestions: rows.flatMap((row) => toFeedItem(row) ?? []),
       settings: publicSettings(stored),
       canChangeSettings,
       askToTurnOff: canChangeSettings ? await kindToAskAbout(tx, stored, now) : null,
@@ -106,6 +107,8 @@ export async function changeFeedSettings(
     await writeFeedSettings(tx, after);
     const [was, is] = [publicSettings(before), publicSettings(after)];
     if (JSON.stringify(was) !== JSON.stringify(is)) {
+      // On again, or a kind back on: the feed is computed again at once, not within the hour.
+      await requestInsightRun(tx);
       await appendAuditEntry(tx, {
         actor: auditActorOf(actor),
         change: {
