@@ -1,32 +1,20 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-24 · **Plan version:** 0.31 · **Current phase:** 8 — Operator feed, in progress (8a–8c done: the feed, insights and suggestions with drafts, recorded) → next: **S37a** (the smart waitlist)
+**Last updated:** 2026-10-24 · **Plan version:** 0.31 · **Current phase:** 8 — Operator feed, in progress (8a–8c done: the feed, insights and suggestions with drafts, recorded) → next: **S37b** (record the smart waitlist; S37a done, branch pushed)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S37a (Phase 8d "a", 2026-10-24): the smart waitlist on the scripted model; branch pushed without a PR.** User at the brief: "Just go with your recommendations and complete the job"; keep S37b's recording small ($0.63 left for S37b + S38b).
-- Decisions (Claude's recommendations, taken): D-1 waitlist offers follow the dial (default ask; ask → proposal, notify/auto → offers to the top N); D-2 AC-W5-1's clock ends at the offer made (proposal stored or emails queued), the email leaves after the 120 s Undo grace; D-3 a `waitlist_match_requests` table written in the cancellation's transaction (not an outbox type: no sealing key on every path); D-4 no existing tool's guide changes in S37a (S37b records once); D-5 ADR-0041 pre-approved.
-- Tasks: 1 contracts · 2 migration 0046 + repositories + isolation · 3 domain (match rows, ranking, claim, expiry) · 4 `actForBusiness` + `send_waitlist_offers` · 5 worker relay + BullMQ, AC-W5-1, concurrent claims · 6 `add_to_waitlist` + `waitlist.change` · 7 api claim routes + web claim page · 8 evals `waitlist` + `feed_safety` · 9 ADR-0041, docs, end checks, push.
-- Done (all committed, unit tests green): tasks 1–6, 8 and most of 7.
-  - 1 contracts; 2 migrations 0046–0048 (`waitlist_matches`, `waitlist_offers`, `waitlist.change` in the action checks) + isolation suite.
-  - 3 domain: match rows on cancel/move (team and link), ranking (property tests), offers, claim (match-row lock: N claims → 1 booking), expiry (matcher + clean-up).
-  - 4 `actForBusiness` + `send_waitlist_offers` + matcher; 5 worker `WaitlistModule` (BullMQ `waitlist`, `WAITLIST_POLL_MS`), AC-W5-1 on the real worker, OTel span `waitlist.match`.
-  - 6 `add_to_waitlist` (21 tools), waitlist in `get_feed` v4 / `find_client_bookings` v3, instructions v7, `MAX_CASES_PER_RUN` 18; 8 sets `waitlist` (10 + 2 generated) and `feed_safety` +2, scripted all green.
-  - 7 api `POST …/waitlist-offer/lookup|claim` (`claim-ip` limit 10/10 min), `GET /v1/waitlist/offers`, "taken" emails (`BookingEmails.waitlistTaken`); web `/book/<slug>/offer#<token>` (`ClaimOffer`), `/waitlist` screen (linked from Calendar).
-- Next steps (S37a, in order):
-  1. Playwright spec: cancel → offer → claim on the booking page → booked; second claimant sees "taken" (run `test:e2e tests/<spec>.ts`).
-  2. ADR-0041 (D-1…D-5 above, plus: a match row per freed time, not an outbox type; offers' entry status flips not audited by the expiry pass; ranking lexicographic, no template weights; `waitlist_match` feed item and "Join the waitlist" on the booking page deferred to S38a; clients without an email are not offered).
-  3. Docs: data-model, jobs-messaging, traceability (AC-W5-1), dependency map; then `/session-close` checks (`pnpm check`, `pnpm test:integration`: the OpenAI replay is stale as planned, 229 cases; Playwright), push branch, no PR, give the S37b prompt.
-- S37b scope (keep the recording small): one full recording is unavoidable (a new tool stales every cassette, ≈ $0.20–0.25); probe `waitlist` and `feed_safety` first, no pass^3 (S38b does it).
+**S37b is next (Phase 8d "b"):** merge `claude/elegant-rubin-kltm4o` (S37a, pushed without a PR) into the S37b branch, probe `waitlist` and `feed_safety`, record the whole suite once (a new tool stales every cassette: about $0.20–0.25 of the $0.63 Phase 8 has left for S37b and S38b), no pass^3 (S38b does it), fix, re-run the end checks, `/code-review` and `/security-review` over both halves, open the one PR.
 
 ## Last sessions
+- **S37a Phase 8d "a" (2026-10-24): the smart waitlist on the scripted model, branch `claude/elegant-rubin-kltm4o` pushed without a PR** ([ADR-0041](../adr/0041-smart-waitlist.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:** migrations 0046–0048 (`waitlist_matches`, `waitlist_offers`, `waitlist.change`); a match row in every cancel/move transaction; the worker's relay + BullMQ `waitlist` matcher (lease, back-off); ranking (asked-for staff, waiting longest, visits); offers to the top 3 through `actForBusiness` (ask by default); single-use claim links, first claim books (match-row lock), the others emailed "taken"; `add_to_waitlist` (21 tools); waitlist in `get_feed` v4 / `find_client_bookings` v3; the claim page and `/waitlist`; sets `waitlist` (12) and `feed_safety` +2; `MAX_CASES_PER_RUN` 18.
+  - **Checks:** AC-W5-1 on the real worker 2/2 and in Playwright; `pnpm check` green (after unit tests for the matcher and the worker's runner lifted two coverage gates); `pnpm test:integration` 1,210/1,211 (only the planned stale replay, 229 cassettes); Playwright 90/90. No model called ($0).
 - **S36b Phase 8c "b" (2026-10-24): suggestions with drafts recorded on Luna + Sol; one PR for S36a + S36b** ([ADR-0040](../adr/0040-rebooking-nudges-with-drafts-and-get-feed.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** 7 more cases; guide fixes from the recordings (`get_feed` v3, `list_todos` v2, "same as last time"); two graders corrected where the model was right; the code review's 10 findings fixed with tests; `KNOWN_REAL_MODEL_MISSES` empty.
   - **Gates:** `drafts` 14/14 pass^1 and pass^3; `feed` 10/10; `feed_safety` 8/8 pass^3; the S33 leftovers 3/3; every other set at or above its gate (pass^1); a draft ≤ 506 tokens; AC-W4-1/2 8/8; `pnpm check` green, `pnpm test:integration` 1,169/1,169, Playwright 88/88. Spend $0.6237 (Phase 8 $0.62 of $1.25). Security review: no findings.
-- **S36a Phase 8c "a" (2026-10-24): suggestions with drafts, scripted model, branch pushed without a PR** ([ADR-0040](../adr/0040-rebooking-nudges-with-drafts-and-get-feed.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** migration 0045; the morning drafts pass (worker, template hour) → `send_rebooking_nudge` (system tool) proposals via `proposeForBusiness`, feed items `needs_ok` settled with their proposal; the draft writer (routine model, metered, `NudgeDraftSchema`); editable draft card (`reviseProposal`); one-click unsubscribe (HMAC link, RFC 8058, `/unsubscribe/<token>`); the mailing address on Home; `get_feed` (20 tools); guide batch (instructions v6, `list_services_and_staff` v3, `find_availability` v3, `propose_rule`/`remember_fact` v2); sets `drafts`/`feed`/`feed_safety` + leftovers (30 cases); `PHASE_CAPS_USD[8] = 1.25`.
-  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,166/1,167 (the planned stale replay; appointments' concurrency property test timed out in the parallel run as in S34/S35 and passed alone); Playwright 88/88. No model called ($0).
+
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Workflow (user, M2):** tests in tiers (full suites once at the end, one at a time); real-model sessions split into "a" (build on the fakes) and "b" (probe, record once, PR); the skills `/session-brief`, `/eval-record`, `/session-close`; short session-log entries.
@@ -39,6 +27,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S37a (user, 2026-10-24):** at the brief "Just go with your recommendations and complete the job. Don't wait for me"; keep S37b's recording small. Taken: D-1 offers follow the dial (default ask), D-2 the 2-minute clock ends at the offer made, D-3 a `waitlist_matches` table, D-4 no guide changes (moot), D-5 ADR-0041 pre-approved. **Claude (ADR-0041):** lexicographic ranking, no template weights; clients without an email not offered; `MAX_CASES_PER_RUN` 20 → 18 (21 tools broke the $1.50 run cap's worst case); the `waitlist_match` feed item and "Join the waitlist" on the booking page deferred to S38a.
 - **S36b (user, 2026-10-24):** at the brief "Go ahead with your recommendations" (D-1 A pass^3 only where §2 names it for S36; D-2 A seven more cases; D-3 ask after one failed fix). During the recording: "Record again" (second full recording), "Second fix, then record" (team to-dos), "Allow, these 7 only" (`--phase-estimate-ok` for 7 chat cases' pass^3). **Claude:** graders corrected where the model was right; transport failures re-run; the code review's findings fixed in this PR.
 - **S36a (user, 2026-10-24):** at the brief "Go ahead, start with the recommendation and complete the tasks": D-1 A (a morning drafts pass once a day per business at the template's hour, which S38's briefing will call); D-2 A (the postal address in settings, no nudge until it is set); D-3 owners and managers approve nudges; D-4 ADR-0040 pre-approved. **Claude (ADR-0040):** a pass's proposals belong to the business (`requestedBy` null, audited as system) and always ask; edits re-fingerprint through `reviseProposal`; any earlier nudge in the interval (sent, refused or expired) blocks another; opt-out stops nudges only.
 - **S35 (user, 2026-10-24):** at the brief "Go ahead with your recommendations, ADR is pre-approved" (D-1 re-run via a request row + 1-minute `Periodic` pass; D-2 thresholds; D-3 audience; D-4 Needs your OK / Done from proposals and receipts; D-5 `feed_settings` with ask-once; D-6 ADR-0039). Later "complete all tasks don't have to ask, go with recommendation". **Claude (ADR-0039):** `services.rebook_after_days`; `apps/worker` may import templates; append-only `insight_requests` + advisory lock (after a timestamp version lost a request and a counter row was a hot lock); hours/time-off changes also re-run; dismissed items come back after the snooze.
@@ -74,11 +63,11 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S36b and M2 are done and merged (Phases 0–7, Phase 8 through 8c). Details in [session-log.md](session-log.md).
+S1–S36b and M2 are done and merged (Phases 0–7, Phase 8 through 8c); S37a is done on `claude/elegant-rubin-kltm4o` (not merged). Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S37a/b | Phase 8d: the smart waitlist (AC-W5-1): queue from the cancellation, ranking, offers to the top 3, the claim page, `add_to_waitlist`; "b" records once | 8d | AC-W5-1 within 2 min; concurrent claims book once |
+| S37b | Phase 8d "b": merge S37a's branch, probe `waitlist` + `feed_safety`, record once (≈ $0.20–0.25), fix, reviews, one PR for S37a + S37b | 8d | AC-W5-1 within 2 min; concurrent claims book once |
 | S38a/b | Phase 8e: the daily briefing; "b" re-records everything, pass^3, security review, Phase 8 exit | 8e | Every playbook §2 gate; spend ≤ $1.25 |
 
 ## How to resume in a new session
