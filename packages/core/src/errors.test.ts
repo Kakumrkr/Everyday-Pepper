@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   AlreadyAMemberError,
   ClientNotFoundError,
+  DraftRefusedError,
+  FeedItemNotFoundError,
   ForbiddenError,
   InviteInvalidError,
   InviteLimitReachedError,
@@ -11,6 +13,8 @@ import {
   TaskAssigneeNotMemberError,
   TaskNotFoundError,
   MemberNotFoundError,
+  NudgeNotSendableError,
+  UnsubscribeLinkInvalidError,
 } from './errors.js';
 
 describe('domain errors', () => {
@@ -39,6 +43,14 @@ describe('domain errors', () => {
       'TaskAssigneeNotMemberError',
       'The assignee is not a member of this business',
     ],
+    [new FeedItemNotFoundError(), 'FeedItemNotFoundError', 'No such open feed item'],
+    [new UnsubscribeLinkInvalidError(), 'UnsubscribeLinkInvalidError', 'No such unsubscribe link'],
+    [new DraftRefusedError('invalid'), 'DraftRefusedError', 'This draft cannot be used'],
+    [
+      new NudgeNotSendableError('opted_out'),
+      'NudgeNotSendableError',
+      "A rebooking email can't be sent (opted_out)",
+    ],
   ])('%s', (error, name, message) => {
     expect(error).toBeInstanceOf(Error);
     expect([error.name, error.message]).toEqual([name, message]);
@@ -47,5 +59,8 @@ describe('domain errors', () => {
   it('carries the limit and the permission', () => {
     expect(new InviteLimitReachedError(20).limit).toBe(20);
     expect(new ForbiddenError('audit.read').permission).toBe('audit.read');
+    // S36: the api maps each reason to its own message.
+    expect(new DraftRefusedError('sensitive', 'Mentions a private note').reason).toBe('sensitive');
+    expect(new NudgeNotSendableError('no_email').reason).toBe('no_email');
   });
 });
