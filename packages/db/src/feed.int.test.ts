@@ -13,6 +13,7 @@ import type { Database } from './client.js';
 import { insertStaffMember } from './repositories/appointments.js';
 import { insertClient, optOutClientEmail } from './repositories/clients.js';
 import {
+  claimDraftsRun,
   closeFeedItem,
   linkFeedItemToProposal,
   listDraftableRebookings,
@@ -501,6 +502,13 @@ describe('rebooking nudges (S36)', () => {
     expect(await listDueDraftRuns(db, NOW, 1000)).not.toContain(other);
     expect(await listDueDraftRuns(db, later(1), 1000)).toContain(other);
     expect(await withTenant(db, other, readDraftsDueAt)).toEqual(later(1));
+    // Claimed once: of two workers, one moves it on.
+    const claims = await Promise.all([
+      withTenant(db, other, (tx) => claimDraftsRun(tx, later(1), later(2))),
+      withTenant(db, other, (tx) => claimDraftsRun(tx, later(1), later(2))),
+    ]);
+    expect(claims.filter(Boolean)).toHaveLength(1);
+    expect(await withTenant(db, other, (tx) => claimDraftsRun(tx, later(1), later(2)))).toBe(false);
   });
 
   it('keeps a mailing address within its bounds', async () => {

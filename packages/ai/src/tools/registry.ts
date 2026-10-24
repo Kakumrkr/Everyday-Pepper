@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   ActionIdempotencyKeySchema,
+  NudgeDraftSchema,
   ServiceIdSchema,
   TrustJsonSchema,
   type ActionExecution,
@@ -25,7 +26,9 @@ import {
   ConcurrentActionError,
   getAction,
   getProposal,
+  DraftRefusedError,
   requestAction,
+  reviseProposal,
   undoAction,
   type ActionRunner,
   type Actor,
@@ -46,6 +49,7 @@ import {
 import { cancelBooking, createBooking, moveBooking } from './catalog/bookings.js';
 import { addVisitNote, forgetFact, rememberFact } from './catalog/memory.js';
 import { searchMemory } from './catalog/episodes.js';
+import { sendRebookingNudge } from './catalog/nudges.js';
 import { proposeRule } from './catalog/rules.js';
 import { directoryOf, localSlot } from './catalog/shared.js';
 import {
@@ -96,7 +100,15 @@ export const TOOLS: readonly AnyTool[] = [
   proposeRule,
 ];
 
+/**
+ * Writes the business's own passes propose (S36: the morning pass's rebooking nudge). Never
+ * offered to the model; known here so their proposals are approved, edited and undone like any
+ * other.
+ */
+export const SYSTEM_TOOLS: readonly WriteTool[] = [sendRebookingNudge];
+
 const BY_NAME = new Map(TOOLS.map((tool) => [tool.name, tool]));
+const SYSTEM_BY_NAME = new Map(SYSTEM_TOOLS.map((tool) => [tool.name, tool]));
 
 export function findTool(name: string): AnyTool | undefined {
   return BY_NAME.get(name);
@@ -306,6 +318,8 @@ export function shownPreview(preview: unknown): {
   before: ChangeSide | null;
   after: ChangeSide | null;
   emails: WouldBeEmail[];
+  /** A nudge's words (S36). */
+  draft?: { subject: string; body: string };
 } | null {
   const shown = PreviewSchema.safeParse(preview);
   if (!shown.success) return null;
@@ -314,7 +328,40 @@ export function shownPreview(preview: unknown): {
     before: shown.data.before as ChangeSide | null,
     after: shown.data.after as ChangeSide | null,
     emails: shown.data.emails as WouldBeEmail[],
+    ...(shown.data.draft !== undefined && { draft: shown.data.draft }),
   };
+}
+
+/**
+ * A member who may decide a nudge proposal edits its words on the card (S36), whose fingerprint
+ * they saw: the words are checked as a draft (no link, contact or sensitive value, the word
+ * limit), and the proposal is replaced by one with the new words, which the card then shows and
+ * approves. Only drafts can be edited this way; nothing is sent here.
+ */
+export async function reviseNudgeDraft(
+  deps: ToolDeps,
+  proposalId: ActionProposalId,
+  shownFingerprint: string,
+  words: { subject: string; body: string },
+): Promise<{ kind: 'revised' | 'stale' | 'expired'; proposal: ActionProposal }> {
+  const proposal = await getProposal(deps.db, deps.actor, proposalId);
+  if (proposal.tool !== sendRebookingNudge.name) throw new DraftRefusedError('not_a_draft');
+  const draft = NudgeDraftSchema.safeParse(words);
+  if (!draft.success) {
+    throw new DraftRefusedError('invalid', draft.error.issues[0]?.message ?? 'Check the words');
+  }
+  const payload = TrustJsonSchema.parse({
+    ...(proposal.payload as Record<string, TrustJson>),
+    draft: draft.data,
+  });
+  const { runner } = writeRunner(sendRebookingNudge, deps, payload);
+  return reviseProposal(
+    deps.db,
+    deps.actor,
+    proposal.id,
+    { shownFingerprint, payload, runner },
+    { clock: deps.clock },
+  );
 }
 
 /** A member undoes an AI action within its window (S26), by its id. People only. */
@@ -505,6 +552,7 @@ const PreviewSchema = z.object({
   after: z.record(z.string(), z.unknown()).nullable(),
   emails: z.array(z.object({ template: z.string(), clientId: z.string() })),
   summary: z.string(),
+  draft: z.object({ subject: z.string(), body: z.string() }).optional(),
 });
 
 function changeCard(
@@ -571,7 +619,7 @@ async function localAlternatives(
 }
 
 function writeToolNamed(name: string): WriteTool {
-  const tool = findTool(name);
+  const tool = findTool(name) ?? SYSTEM_BY_NAME.get(name);
   if (tool?.kind !== 'write') throw new UnknownToolError();
   return tool;
 }

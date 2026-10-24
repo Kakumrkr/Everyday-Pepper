@@ -16,6 +16,8 @@ vi.mock('@pepper/core', async (original) => ({
   sendDueTaskPushes: core.sendDueTaskPushes,
 }));
 vi.mock('@pepper/runtime', () => ({ DATABASE: Symbol('DATABASE') }));
+const drafts = vi.hoisted(() => ({ run: vi.fn(), morningDraftsJob: vi.fn() }));
+vi.mock('./drafts.js', () => ({ morningDraftsJob: drafts.morningDraftsJob }));
 
 const DB = { db: true };
 const clock = { now: () => new Date('2026-11-02T15:00:00Z') };
@@ -43,6 +45,8 @@ beforeEach(() => {
     conversations: 6,
   });
   core.sendDueTaskPushes.mockResolvedValue(1);
+  drafts.run.mockResolvedValue({ businesses: 1, drafted: 3 });
+  drafts.morningDraftsJob.mockReturnValue(drafts.run);
 });
 
 describe('JobsRunner', () => {
@@ -62,6 +66,26 @@ describe('JobsRunner', () => {
       clock,
       insightsOf: templateInsights,
     });
+  });
+
+  it('runs the morning drafts only when configured, built once with the outbox key and clock', async () => {
+    expect(new JobsRunner(DB as never, OPTIONS).drafts).toBeNull();
+    const config = {
+      openai: {} as never,
+      monthlyTokens: 1000,
+      baseUrl: 'https://app.example',
+      pollMs: 60_000,
+    };
+    const runner = new JobsRunner(DB as never, { ...OPTIONS, drafts: config });
+    expect(drafts.morningDraftsJob).toHaveBeenCalledTimes(1);
+    expect(drafts.morningDraftsJob).toHaveBeenCalledWith(DB.db, config, {
+      outboxKey: OPTIONS.key,
+      clock,
+    });
+    await runner.drafts?.runOnce();
+    await runner.drafts?.runOnce();
+    expect(drafts.run).toHaveBeenCalledTimes(2);
+    expect(drafts.morningDraftsJob).toHaveBeenCalledTimes(1);
   });
 
   it('runs the insights every minute by default, or on its own interval', async () => {

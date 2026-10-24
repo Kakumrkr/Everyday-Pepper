@@ -13,11 +13,13 @@ import type { AvailableSlot, ToolErrorCode } from '@pepper/contracts';
 import {
   ActionTooLateError,
   ClientNotFoundError,
+  DraftRefusedError,
   ForbiddenError,
   MemoryFactNotFoundError,
   MemoryLimitError,
   MemoryPausedError,
   MemorySubjectNotFoundError,
+  NudgeNotSendableError,
   TaskAssigneeNotMemberError,
   TaskNotFoundError,
   TaskNotOpenError,
@@ -51,6 +53,12 @@ export class InvalidToolArgumentsError extends Error {
     this.name = 'InvalidToolArgumentsError';
   }
 }
+
+const NUDGE_NOT_SENDABLE = {
+  no_address: 'Add the business’s mailing address first: rebooking emails must carry it.',
+  no_email: 'This client has no email address.',
+  opted_out: 'This client unsubscribed from these emails.',
+} as const;
 
 const NOT_FOUND = [
   BookingNotFoundError,
@@ -125,6 +133,16 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
       code: 'not_changeable',
       message:
         'There is no room to remember more about this. The member can clear old items on the "What I know" page.',
+    };
+  }
+  if (error instanceof NudgeNotSendableError) {
+    return { code: 'not_changeable', message: NUDGE_NOT_SENDABLE[error.reason] };
+  }
+  if (error instanceof DraftRefusedError) {
+    return {
+      code: 'invalid_arguments',
+      message:
+        'The email’s words break a rule: no links, contact details or sensitive notes, and at most 120 words.',
     };
   }
   if (error instanceof IdempotencyKeyReusedError) {

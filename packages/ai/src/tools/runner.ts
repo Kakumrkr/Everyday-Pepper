@@ -1,12 +1,14 @@
 import { queueBookingEmail, type BookingNotify } from '@pepper/appointments';
 import {
   AI_EMAIL_GRACE_SECONDS,
+  OutboxDedupeKeySchema,
   type ClientId,
   type OutboxMessageId,
   type TrustJson,
   type WouldBeEmail,
 } from '@pepper/contracts';
 import {
+  queueEmail,
   stateFingerprint,
   type ActionEffect,
   type ActionPreview,
@@ -16,7 +18,7 @@ import {
 } from '@pepper/core';
 import { findCurrentTenant, type TenantTx } from '@pepper/db';
 import { undoRefusalOf } from './errors.js';
-import type { Performed, ToolDeps, ToolScope, WriteScope, WriteTool } from './tool.js';
+import type { ClientEmail, Performed, ToolDeps, ToolScope, WriteScope, WriteTool } from './tool.js';
 
 // A write tool as the trust layer's `ActionRunner` (ADR-0028 §9, ADR-0029). Preview and execute
 // run the very same `perform` through the domain: the trust layer runs the preview in a savepoint
@@ -126,6 +128,7 @@ export function previewOf(performed: Performed, emails: readonly WouldBeEmail[])
     after: performed.after,
     emails: emails.map((email) => ({ template: email.template, clientId: email.clientId })),
     summary: performed.summary,
+    ...(performed.draft !== undefined && { draft: performed.draft }),
   };
 }
 
@@ -166,7 +169,17 @@ async function run(
       emails.push({ template: notice.kind, clientId });
       queued.push(id);
     };
-  const scope: WriteScope = { ...(await scopeOf(tx, actor, deps)), notifyClient };
+  const emailClient = async (email: ClientEmail) => {
+    const id = await queueEmail(tx, email.message, {
+      key: deps.emails.outboxKey,
+      dedupeKey: OutboxDedupeKeySchema.parse(email.dedupeKey),
+      now: new Date(deps.clock.now().getTime() + AI_EMAIL_GRACE_SECONDS * 1000),
+    });
+    if (id === undefined) return;
+    emails.push({ template: email.template, clientId: email.clientId });
+    queued.push(id);
+  };
+  const scope: WriteScope = { ...(await scopeOf(tx, actor, deps)), notifyClient, emailClient };
   const performed = await tool.perform(scope, args);
   return { performed, emails, queued };
 }

@@ -121,6 +121,17 @@ export class DraftRefusedError extends Error {
   }
 }
 
+/**
+ * A rebooking email can't go to this client now (S36): the business has no mailing address
+ * yet, the client has no email address, or they unsubscribed from marketing email.
+ */
+export class NudgeNotSendableError extends Error {
+  constructor(readonly reason: 'no_address' | 'no_email' | 'opted_out') {
+    super(`A rebooking email can't be sent (${reason})`);
+    this.name = 'NudgeNotSendableError';
+  }
+}
+
 /** The task is already done: there is nothing to complete (S26b). */
 export class TaskNotOpenError extends Error {
   constructor() {

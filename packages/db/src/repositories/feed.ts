@@ -605,6 +605,20 @@ export async function setDraftsDueAt(tx: TenantTx, at: Date): Promise<void> {
   await tx.update(insightRuns).set({ draftsDueAt: at });
 }
 
+/**
+ * Claims the business's morning drafts pass when it is due at `now` (never run, or due), by
+ * moving its due time to `next`: of two workers, only one gets `true`.
+ */
+export async function claimDraftsRun(tx: TenantTx, now: Date, next: Date): Promise<boolean> {
+  await tx.insert(insightRuns).values({}).onConflictDoNothing({ target: insightRuns.tenantId });
+  const rows = await tx
+    .update(insightRuns)
+    .set({ draftsDueAt: next })
+    .where(or(isNull(insightRuns.draftsDueAt), lte(insightRuns.draftsDueAt, now)))
+    .returning({ id: insightRuns.id });
+  return rows.length > 0;
+}
+
 /** When the business's morning drafts pass is due (`null`: never run). */
 export async function readDraftsDueAt(tx: TenantTx): Promise<Date | null> {
   const [row] = await tx.select({ at: insightRuns.draftsDueAt }).from(insightRuns);

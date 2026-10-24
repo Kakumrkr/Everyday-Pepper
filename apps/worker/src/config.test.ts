@@ -46,6 +46,30 @@ describe('loadWorkerConfig', () => {
     });
   });
 
+  it('drafts rebooking emails only with an OpenAI key and the web origin (S36)', () => {
+    const openai = {
+      OPENAI_API_KEY: 'sk-test-not-a-real-key-000000',
+      OPENAI_MODEL_ROUTINE: 'gpt-6-luna',
+      OPENAI_MODEL_STRONG: 'gpt-6.1-sol',
+    };
+    expect(loadWorkerConfig({ ...required, ...openai }).drafts).toBeNull();
+    expect(
+      loadWorkerConfig({ ...required, AUTH_BASE_URL: 'https://app.example' }).drafts,
+    ).toBeNull();
+    expect(
+      loadWorkerConfig({ ...required, ...openai, AUTH_BASE_URL: 'https://app.example/path' })
+        .drafts,
+    ).toMatchObject({
+      openai: { models: { routine: 'gpt-6-luna' } },
+      baseUrl: 'https://app.example',
+      pollMs: 60_000,
+      monthlyTokens: 5_000_000,
+    });
+    expect(() =>
+      loadWorkerConfig({ ...required, ...openai, AUTH_BASE_URL: 'javascript:alert(1)' }),
+    ).toThrow(/AUTH_BASE_URL/);
+  });
+
   it('reads the mail settings and the relay interval', () => {
     expect(loadWorkerConfig(required)).toMatchObject({ mail: null, outboxPollMs: 1000 });
     expect(

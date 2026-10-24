@@ -48,6 +48,27 @@ describe('SmtpMailer', () => {
     ]);
   });
 
+  it('sends commercial mail with RFC 8058 one-click unsubscribe headers, others without', async () => {
+    const sendMail = vi.fn(() => Promise.resolve({}));
+    const transport = { sendMail, close: vi.fn() } as unknown as Transporter;
+    const mailer = new SmtpMailer({ smtpUrl: 'smtp://localhost:1025', from: 'a@b.example' }, transport);
+    await mailer.send({
+      to: 'sara@example.test',
+      subject: 'S',
+      text: 'T',
+      unsubscribeUrl: 'https://app.example/v1/public/unsubscribe/abc',
+    });
+    await mailer.send({ to: 'sara@example.test', subject: 'S', text: 'T' });
+    const [nudge, booking] = sendMail.mock.calls.map((call) => (call as unknown[])[0]);
+    expect(nudge).toMatchObject({
+      headers: {
+        'List-Unsubscribe': '<https://app.example/v1/public/unsubscribe/abc>',
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
+    });
+    expect(booking).not.toHaveProperty('headers');
+  });
+
   it('builds an SMTP transport from the URL', () => {
     expect(
       () => new SmtpMailer({ smtpUrl: 'smtp://localhost:1025', from: 'Pepper <a@b.c>' }),

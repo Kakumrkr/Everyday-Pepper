@@ -5,10 +5,12 @@ import type {
   ChangeSide,
   ClientId,
   MemoryWarningRule,
+  OutboxEmailInput,
   RiskTier,
   ToolCard,
   TrustJson,
   UserId,
+  WouldBeEmail,
 } from '@pepper/contracts';
 import type { Actor, AutonomyDefaults, Clock } from '@pepper/core';
 import type { Database, TenantTx } from '@pepper/db';
@@ -90,9 +92,22 @@ export interface ReadTool<S extends z.ZodType = z.ZodType> {
   run(scope: ToolScope, args: z.output<S>, prepared?: unknown): Promise<ToolAnswer>;
 }
 
-/** A write's scope: `notifyClient(clientId)` queues (and records) that client's email. */
+/** An email a write sends one client itself (S36: a rebooking nudge), built by the domain. */
+export interface ClientEmail {
+  clientId: ClientId;
+  template: WouldBeEmail['template'];
+  message: OutboxEmailInput;
+  /** One email per thing it is about, whatever retries (AC-W4-2). */
+  dedupeKey: string;
+}
+
+/**
+ * A write's scope: `notifyClient(clientId)` queues (and records) that client's booking email;
+ * `emailClient` queues another email to one client. Both hold it for the undo-send grace.
+ */
 export interface WriteScope extends ToolScope {
   notifyClient(clientId: ClientId): BookingNotify;
+  emailClient(email: ClientEmail): Promise<void>;
 }
 
 /** What a write did (or, in the dry run, would do), as the domain computed it. */
@@ -129,6 +144,8 @@ export interface Performed {
    * client's last visit. Never stored with the action.
    */
   memory?: TrustJson;
+  /** A nudge's words (S36): stored with the preview, so the card shows and edits them. */
+  draft?: { subject: string; body: string };
 }
 
 /** The conversation turn a call belongs to (where a remembered fact came from, S30). */

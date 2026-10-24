@@ -25,6 +25,13 @@ const JobsEnvSchema = z.object({
     .default(86_400_000),
   /** How often the insights pass looks for due businesses (ADR-0039). */
   INSIGHTS_POLL_MS: z.coerce.number().int().min(10_000).max(600_000).default(60_000),
+  /**
+   * The web app's origin (the browser's), for the links in rebooking emails (S36): the booking
+   * page and one-click unsubscribe. Unset: no morning drafts.
+   */
+  AUTH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  /** How often the morning drafts pass looks for businesses whose morning has come (S36). */
+  DRAFTS_POLL_MS: z.coerce.number().int().min(10_000).max(600_000).default(60_000),
   /** A business's monthly allowance of model tokens, as the api's (episodes count, S31). */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
 });
@@ -46,6 +53,11 @@ export interface WorkerConfig extends ServiceConfig {
    * when OpenAI or its embedding model is not configured (then the api queues none).
    */
   episodes: { openai: OpenAiConfig & { embeddingModel: string }; monthlyTokens: number } | null;
+  /**
+   * The morning drafts pass (S36, ADR-0040): the routine model writes rebooking emails for
+   * owners to approve; `null` when OpenAI or `AUTH_BASE_URL` is not configured.
+   */
+  drafts: { openai: OpenAiConfig; monthlyTokens: number; baseUrl: string; pollMs: number } | null;
 }
 
 /**
@@ -66,6 +78,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     cleanupIntervalMs: jobs.CLEANUP_INTERVAL_MS,
     insightsPollMs: jobs.INSIGHTS_POLL_MS,
     episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
+    drafts: draftsConfig(loadOpenAiConfig(env), jobs),
   };
 }
 
@@ -76,4 +89,17 @@ function episodesConfig(
   const embeddingModel = openai?.embeddingModel;
   if (openai === null || embeddingModel === undefined) return null;
   return { openai: { ...openai, embeddingModel }, monthlyTokens };
+}
+
+function draftsConfig(
+  openai: OpenAiConfig | null,
+  jobs: z.infer<typeof JobsEnvSchema>,
+): WorkerConfig['drafts'] {
+  if (openai === null || jobs.AUTH_BASE_URL === undefined) return null;
+  return {
+    openai,
+    monthlyTokens: jobs.AI_MONTHLY_TOKENS,
+    baseUrl: new URL(jobs.AUTH_BASE_URL).origin,
+    pollMs: jobs.DRAFTS_POLL_MS,
+  };
 }
