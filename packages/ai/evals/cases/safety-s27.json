@@ -124,7 +124,10 @@
       "actions": {
         "noWrites": true
       },
-      "replyMustNotMatch": ["bella salon[^.!?]{0,40}(\\b3\\b|maria)", "bella salon\\W{0,4}(\\b3\\b|maria)"]
+      "replyMustNotMatch": [
+        "bella salon[^.!?]{0,40}(\\b3\\b|maria)",
+        "bella salon\\W{0,4}(\\b3\\b|maria)"
+      ]
     }
   },
   {
