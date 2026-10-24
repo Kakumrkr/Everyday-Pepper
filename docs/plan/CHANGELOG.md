@@ -2,6 +2,14 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.30 — 2026-10-24
+- S33 (Phase 7f, **Phase 7 exit**): every playbook §2 gate checked ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33"), [security review](../engineering/security-review-s33.md).
+  - **Plan change (user):** the Phase 7 OpenAI cap goes from $1.00 to $1.55 (playbook §4); spent $1.27.
+  - One guide batch (`find_availability` v2, instructions v5), the full re-record and pass^3; the business-facts block within 600 tokens as sent; pass^3 gates from §2 in the runner; a memory latency test; security patches (multer, body-parser, nodemailer).
+  - Carried to Phase 8: `pasted-request-then-book` (named known miss), `who-works-saturdays` (needs working hours from a tool), `notBefore` on every day of a range, `lr-blackout` (closures as rules).
+
+  **Compatibility:** no contract or schema change; one held-out case swapped (`in-three-days` for `in-two-days`).
+
 ## 0.29 — 2026-10-23
 - M2 (maintenance, the user's decision in chat after S31, like M1): **a leaner workflow**. Tests run in tiers (the full suites once at the end, one at a time); a session that records the real model is split into "a" (build on the fakes) and "b" (probe, record once, PR); project skills `/session-brief`, `/eval-record`, `/session-close`; shorter end-of-session docs.
 

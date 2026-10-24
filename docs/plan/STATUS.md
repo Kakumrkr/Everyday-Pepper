@@ -1,31 +1,23 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-23 · **Plan version:** 0.29 · **Current phase:** 7 — Memory ([Phase 7 playbook](phase-7-playbook.md), [PCR-005](changes/PCR-005.md)); **S31 done** (episodes and learned rules, recorded on Luna + Sol, [ADR-0037](../adr/0037-episodes-and-learned-rules.md)); **S32 done** (S32a screens + S32b re-record, every gate met on Luna + Sol, [ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md)) → next: **S33** (Phase 7 exit)
+**Last updated:** 2026-10-24 · **Plan version:** 0.30 · **Current phase:** 7 — Memory, **done** (S33: every playbook §2 gate checked on Luna + Sol, [ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33", [security review](../engineering/security-review-s33.md)) → next: **S34** (Phase 8 planning)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S33 (Phase 7f, Phase 7 exit), one session, branch `claude/s33-phase7-exit`.** Brief approved 2026-10-24 (user: "Go ahead, start with your recommendation"):
-- **Cap (option A):** Phase 7 cap raised $1.00 → **$1.40**; probe + one full re-record + pass^3 (trials 2–3) on every set a §2 pass^3 gate names: memory_delete, memory_safety, memory_recall, episodic, safety, permissions, autonomy, scheduling (138 cases); expected ≈ $0.30; `--phase-estimate-ok` allowed (as S31/S32b); ledger label `P7 S33`.
-- **Held-out (a):** `in-two-days` — make find_availability/get_day guides agree (one-day "free at <time>" → `get_day`), grader accepts either read, relative "in N days" line in `context.ts`; `who-works-saturdays` left untuned (needs a tool-output change); fix find_availability's `notBefore` example (first day only).
-- **Tasks:** 1 guide batch (tier 1–2, scripted evals green) → 2 probe scheduling+ambiguity → 3 full record + pass^3 → 4 security review `docs/engineering/security-review-s33.md` → 5 check every playbook §2 gate → 6 `/session-close`.
-- **Rule (S32b):** a gate still missing after one fix → ask the user.
-- **Cap raised again (user, during S33):** one whole-suite run measured at ≈ $0.197 from the cassettes (the brief assumed ≈ $0.11), so the plan would end near $1.43: cap **$1.55** ("Raise the cap to $1.55").
-- **Done:** task 1 (commit bdb1c1b: find_availability v2, instructions v5, `alsoAccept` grader option, `in-two-days` accepts get_day); probe scheduling + ambiguity $0.0826, 53/54, the miss is `who-works-saturdays` (untuned, as agreed); `memory-latency.int.test.ts` (recall p95 10 ms, search 69 ms, delete+scrub 17 ms).
-- **Running:** pass^1 on failure, follow_through, memory_write, learned_rules; then pass^3 on scheduling, memory_delete, memory_safety, memory_recall, episodic, safety, permissions, autonomy (labels `P7 S33 pass^1` / `P7 S33 pass^3`).
-- **Found for the security review:** `pnpm audit --prod` 2 high (body-parser 2.3.0, multer 2.4.0 via @nestjs/platform-express) and 3 moderate (nodemailer 10.0.15): patch after the recording (lockfile change).
-- **Next:** gates check, security review, the dependency patch, `/session-close`.
+Nothing in progress. Next: **S34** (first row of "Planned sessions").
 
 ## Last sessions
+- **S33 Phase 7f (2026-10-24): Phase 7 exit, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33", [security review](../engineering/security-review-s33.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:** guide batch (`find_availability` v2, instructions v5); `alsoAccept` in the grader; pass^3 gates from §2 (with the pass^1 gate on first trials); the business-facts block ≤ 600 tokens as sent; `memory-latency.int.test.ts`; multer, body-parser and nodemailer patched.
+  - **Recorded on Luna + Sol:** probe, pass^1 on the rest, pass^3 on 132 cases; $0.3702, Phase 7 $1.2697 of $1.55 (cap raised by the user). Every §2 gate met; one named known miss (`pasted-request-then-book`).
+  - **Checks:** `pnpm check` green; `pnpm test:integration` see the session log; Playwright not re-run (no screen changed); `/code-review` (5 fixed, 4 answered), `/security-review` no findings.
+  - **Left for Phase 8:** `pasted-request-then-book` guide fix; `who-works-saturdays` (working hours from a tool); `notBefore` on every day; `lr-blackout` (closures as rules); tenant export (L6), backup retention (L7).
 - **S32b Phase 7e "b" half (2026-10-23): the re-record, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "Results"). Full entry in [session-log.md](session-log.md).
   - **Recorded on Luna + Sol:** probe of memory_write, learned_rules, scheduling and `mr-same-as-last-time` ($0.1116), then all 192 cases at pass^1 ($0.1079), with `--phase-estimate-ok` (user). Every gate met; recall@5 25/25. Phase 7 $0.8994 of $1.00.
   - **Fixed:** the `just-do-it-still-asks` grader (matched "Nothing has been cancelled yet"); `KNOWN_REAL_MODEL_MISSES` empty.
   - **Checks:** `pnpm check` green; `pnpm test:integration` 1,080/1,080; Playwright not re-run (no screen changed since S32a's 82/82).
   - **Left for S33:** held-out misses `in-two-days`, `who-works-saturdays`; the Phase 7 cap for pass^3.
-- **S32a Phase 7e "a" half (2026-10-23): "What I know", the Remembered chip, visit notes on screens; pushed, no PR** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md), pre-approved). Full entry in [session-log.md](session-log.md).
-  - **Built:** `/v1/memory` (facts with names and visits, add, edit, final delete, `facts/shown`, own episodes, pause; answers parsed and `no-store`); `factIds` on `message.completed` and assistant history (default none); the `Remembered` chip (fix and forget in place); `/memory` (filters, groups, source lines, learned-rule links, own episodes, the pause switch for owners and managers); "What Pepper knows" and visit notes on the client profile and the booking sheet; `remember_fact` narrowed (a staff member off or away is `block_time`).
-  - **Checks:** `pnpm check` green; `pnpm test:integration` green but the real-model replay (192 stale cassettes, as planned for S32b); Playwright 82/82 (`memory.spec.ts`: AC-W3-1, AC-W7-2, visit note, staff view, pause); `/code-review` 8 fixes; `/security-review` no findings.
-  - **Also fixed:** ui card tests' timeout under coverage; e2e `unique()` collisions across workers.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -39,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S33 (user, 2026-10-24):** at the brief "Go ahead, start with your recommendation": one session; cap option A ($1.40; pass^3 on every set a §2 pass^3 gate names); held-out (a) (`in-two-days` accepts `get_day`, `who-works-saturdays` untuned); `--phase-estimate-ok`. **During the recording:** "Raise the cap to $1.55" (one whole-suite run measured at ≈ $0.197). **After it:** "go with your recommendation": carry `pasted-request-then-book` as a named known miss (its guide fix in Phase 8's first batch) and cap the business block at 600 tokens. **Claude:** the `other-business-bookings` grader corrected; pass^3 gates from §2; `in-three-days` held out in place of `in-two-days` (code review); dependency patches (security review D1–D2).
 - **S32b (user, 2026-10-23, Session Brief):** "go ahead with your recommendation": a gate still missing after one fix → ask; S33's pass^3 is a cap decision at its brief; **"Allow, as in S31"** `--phase-estimate-ok` for this session's recordings. **Claude:** the `just-do-it-still-asks` grader corrected where the model was right.
 - **S32a (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved": D-11 over the mock-up (final delete, no Undo); ADR-0038 pre-approved; scripted model only, branch pushed without a PR. **Claude (ADR-0038):** "What I know" from the chat header; 500 facts a page; the chip counts only active facts; `memory-ids.ts` for the chat contract.
 - **M2 (user, 2026-10-23, after S31):** asked how to make sessions take less time and fewer tokens without changing how the project runs; approved Claude's plan (test tiers, probe before recording, the three skills, the hook fix, fewer docs); chose the split rule **from S32** (not S33) and the **short** session-log entry. The S32 scope is unchanged, only cut in two.
@@ -64,17 +57,16 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Waiting on the user
 1. **Before the pilot, at the start of Phase 11 pilot prep (user, S27):** create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`). Claude raises it at that brief.
-2. **Before the pilot, by hand (S27 security review):** the 5-minute VoiceOver/NVDA check of the streamed chat; confirm the OWASP LLM/Agentic Top 10 2026 titles in the signed-in PDFs on genai.owasp.org; check zero data retention eligibility on the OpenAI account (L2).
-3. **At the S33 brief:** OpenAI spend so far $1.64 of the $5 credit (S27 $0.74, Phase 7 $0.90 of its $1.00). S33's pass^3 (about $0.57) plus a full re-record (about $0.20) does not fit the $0.10 left: raise the Phase 7 cap, or measure pass^3 on fewer sets.
+2. **Before the pilot, by hand (S27 security review):** the 5-minute VoiceOver/NVDA check of the streamed chat; confirm the OWASP LLM/Agentic Top 10 2026 titles in the signed-in PDFs on genai.owasp.org; check zero data retention eligibility on the OpenAI account (L2), now also for episodes (S33 review L8); state the backup retention for deleted memory (L7).
 
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S32 and M2 are done and merged (Phases 0–6; Phase 7 planning, store, facts in the AI, episodes and learned rules, the memory screens). Details in [session-log.md](session-log.md).
+S1–S33 and M2 are done and merged (Phases 0–7). Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S33 | Full re-record, pass^3, security review, Phase 7 exit | 7f | Playbook §2 met |
+| S34 | Phase 8 planning (operator feed: insights, daily briefing, suggestions with drafts, smart waitlist): the Phase 8 playbook and PCR, as S28 did for Phase 7; carry the S33 leftovers into its first guide batch | 8a | Playbook and PCR approved by the user |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"/session-brief"* (or *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."*). A "b" half's prompt names the "a" branch to merge first. During the session Claude keeps "In progress" current after each finished task; at the end (`/session-close`) it moves that session's summary into "Last sessions", appends a short entry to `session-log.md` and new chat decisions to `decisions.md`, and commits them.
