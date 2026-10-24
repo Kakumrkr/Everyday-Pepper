@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "32c53c71dbc7518b7d643d1c81b719eea415c999ff82016476597213e537a54c",
+        "fingerprint": "15ea3e6b0087f958abe022e0477751689ffe144c8856ed2c3adfe94ddc2f1f7e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_g2lxkm9ROi4OZZvsOPuO8F92",
+              "id": "call_gky57uaIiXuPiiaW8Vt4ZXjM",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8357,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8862,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 18,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "a7f6c2d545357f03044c46e5155d9fa72f3848daa8283a0611503e8884c7ad0b",
+        "fingerprint": "841985d40fed2396ae6e290e37a5abd686f31bef633fc4ecbba0b9a70c21ef8a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Pvl7C54iJQKGKefvR3Hf21he",
+              "id": "call_34aLW3SXgJHa2tGSnkTm5Bml",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8639,
-            "cachedInputTokens": 8354,
-            "cacheWriteTokens": 282,
+            "inputTokens": 9324,
+            "cachedInputTokens": 8859,
+            "cacheWriteTokens": 462,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a7d8670c4d25a5ccf36366ebba14784c5fd7046a481fe75b89a5b0b14c6f531c",
+        "fingerprint": "9f6c88d9845d1194c79be0fd1e7412d84748241ecdc2131f82c6d8a2ff89a05a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ZWpD584e7gxWce1MLuEk6szv",
+              "id": "call_MQPx63kmLQHQJQKqtNhHcx2N",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8793,
-            "cachedInputTokens": 8636,
-            "cacheWriteTokens": 154,
-            "outputTokens": 116
+            "inputTokens": 9480,
+            "cachedInputTokens": 9321,
+            "cacheWriteTokens": 156,
+            "outputTokens": 117
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d8575c963a39cb1abe8cfe42f40099d941295171081994e304a6f793a5614ba3",
+        "fingerprint": "a3166263c5299f8969bc1bffd2865344c08cb64889b631dd9c5644acb2039775",
         "response": {
-          "text": "Maria’s colour with Jess on Wednesday, November 4 at 2:00 PM is awaiting your approval on the card. Maria’s remembered allergy is “PPD”; it’s also noted on the card.",
+          "text": "Maria’s colour with Jess for Wednesday, November 4 at 2:00 PM is waiting for your approval on the card. Maria’s record notes a PPD allergy.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,186 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9082,
-            "cachedInputTokens": 8790,
-            "cacheWriteTokens": 289,
-            "outputTokens": 46
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "32c53c71dbc7518b7d643d1c81b719eea415c999ff82016476597213e537a54c",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_G8oxgl5NjdUASUuRfAXGGhqO",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8357,
-            "cachedInputTokens": 8354,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "5c88253c421f55676656c50d29b2f277a5a53c9bdce1a2eb47631c3c1d01c15a",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_oxVzqMM3wDAPL8XlcWJaiIYt",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8643,
-            "cachedInputTokens": 8354,
-            "cacheWriteTokens": 286,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "fefba3b9030172da46d9fc3f9ef42e9ac2f4ee0e98ef3a212896508e80796fca",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_p8lz9yD73AxDcztPDRM70xQy",
-              "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8798,
-            "cachedInputTokens": 8640,
-            "cacheWriteTokens": 155,
-            "outputTokens": 115
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "7562dc7edd20eb4bdf1f05fe1bab83118b141cdae065d8da69b58c583e83309c",
-        "response": {
-          "text": "The booking is awaiting your approval on the card: Maria L. for Colour with Jess on Wednesday, November 4 at 2:00 PM. Maria has a recorded PPD allergy; please take that into account before the appointment.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9086,
-            "cachedInputTokens": 8795,
-            "cacheWriteTokens": 288,
-            "outputTokens": 51
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "32c53c71dbc7518b7d643d1c81b719eea415c999ff82016476597213e537a54c",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_CuykUYgDS8jPEdOYVQAWPmUR",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8357,
-            "cachedInputTokens": 8354,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "36502c899ac876e2d58a6759f572147e1c42598c50dc21a557427a6ca93d1062",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_8hSVq9Eyi2CdbynC5Ihaikcq",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8629,
-            "cachedInputTokens": 8354,
-            "cacheWriteTokens": 272,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "5f9dfdc6c45d92f277db4501ea06eae7cb7a34ae9801aa60b2c87db3501298ba",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_rZHRiQgUxMcThPQpTY9VlS9Q",
-              "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8782,
-            "cachedInputTokens": 8626,
-            "cacheWriteTokens": 153,
-            "outputTokens": 112
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "8c9403b7ba8613d70220c6ef03eb6837803726dd0407bde01013a76c2cd1365d",
-        "response": {
-          "text": "Maria’s colour with Jess for Wed, Nov 4 at 2:00 PM is awaiting your approval on the card. Maria has a PPD allergy, which is noted on the card too.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9066,
-            "cachedInputTokens": 8779,
-            "cacheWriteTokens": 284,
-            "outputTokens": 44
+            "inputTokens": 9770,
+            "cachedInputTokens": 9477,
+            "cacheWriteTokens": 290,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

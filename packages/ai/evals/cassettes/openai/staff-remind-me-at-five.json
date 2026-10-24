@@ -3,37 +3,37 @@
   "trials": [
     [
       {
-        "fingerprint": "3d3af364612e4ab71d1d7c72e91327e3889629555e0e02db73b1c851fa585e86",
+        "fingerprint": "5f7dc2f3d2a9380378abb74eb53d3390f1b6885b1fb0dbb7233794cd9dea8ba8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wqLpnRVvbLjszsrF1UREIOgG",
+              "id": "call_aUxsfLeBfJpH520Zr0mj7Ehg",
               "name": "add_todo",
               "arguments": "{\"title\":\"Clean the chairs\",\"dueDate\":\"2026-11-02\",\"dueTime\":\"17:00\",\"assigneeStaffMemberId\":null}"
             }
           ],
           "replay": [
             {
-              "id": "rs_0bc9fbadc26c6aa0016adc04280d9487d2b8bb750cadf878f5",
+              "id": "rs_02c9e6f9b25332dd016adcec8cb2b887d2aeebf02ab3e44827",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3AQoqtZ74vzWeqFb5BbTff1qGeEDDBjzn3bNSb_q7tX8BSxCLaXxkVXHDE4DCZAKqLwL8o6Mzj71IAgkZDSJOgIhacOXD8TSrseIP-TJ3Ac_owhlNtsAVyFKJ9iKqwYl28cznZ81HroVlG-kewHfSZrmZ-mgz4d_LRbfLfdUvHubOQYEEyU9lyGen5m4lfB06I-3kwW3UQCzehPRSoru-R_Vt4kjO3U7GWkLOuDo2-XgUUaMQfH9dcVZZ7-lNpitHyYkYkqXECvwApm4rn98CPJllf6FnEmznAcHZSsNgc4qGutvNhuU96ImPWAXztI12l6GpSNw7qodAnNRlqJeg6NtyDlOMhHspVuNC8azxWHDfxtT1h32FXBf7M6vVvYZcLAZpVI62B8AHXyclp8P26XHU_RyPLdgN2kws6B3L_i3ivxYrmMiexjPraCJiqmIdD8H9OfoFubcTl0opcx0wKCQu0DK2B4TKB_0Gqjwi7KuFCLxUmexyO8nxMhcGIrWKz-GTzmxNUK7Ow9lTdZfUbHG4VdVvVjHWFzx33_dE4KVNmyVlB_GD2ET9Hx3n6pw-6XawFNLFZU9Epr9SRAImrzG_oA9s6EvdHO5ShuV-FMW9gewN_pqT-_-zAWK9fLi2VKrUA8L75uvfS2wR-LqA8u95tLS48GXUbpse7ZjXnD4O68jeU62uWAU5k3a1gPuhpAHgMJSX06bajuGKatF84rGLAx9UKOWV_NqdtgP3UXTxonW3HxHLVV33K8L-sFeFo0dEeEgk4CoL0GjGdrSQv27Jp09HdWXocDMzb7ttPr_FfuVnMrKcgq7eUyWMkyk9H3wyWqB-jtPLSEpFd2aLrJPgBjvGOMV1VNalKLR9YDkDIYO-TiFxw14OUOMcK5ZH5Z5iXRXFKcW3DRn9gBLIjSs_uuNBHyNUgwqviJB3yRX2b6Q9788GAluOY_l_PCs_eWWfLuo70IQfAnI8XaFVLxJLBYl2_Oz-pFJWUcjFGsXzDj_200fOiTPXECx6YYgSMh0Xzhj5X-u008kOxFlMLjpIyesFomx_wEEbkmwWGf9JpV0cZtP7pPV0InrY7rdgYbAkpkSrXUd7IrralifaCfeTSvkZW4Ls4QFhHPQSos5FLI0WMyg0VX6hbWEZ1OdTRY1UYlfKCIu42esFc4ode9R3qWWhD2xhdZH1yiCjr7OKeEpwgEHNp1d-xakYn1HN7flwGlU96N8Sk4S6Lw2hc0X5cq2DH5rDJpuNosiC-gpWBXp3ilqHaBEV_hj76Fav42iTepEwDwKjHyFnM0JVLHgAdp0R0LntnMAR_Mtu1-3GIQK3GMwfxRy69ck1E6Ic4lGKkjuPaCX7JfMV3KkdEWktvwuDCCRsspA7PQ9tiOLd_vo_TB2_RevLCgBM_jSfk2j3-Hg0ODbLU-3OVxHFgZgeth7nIEvG0ZfuH-FKS7bhda842L4mbz2_xoi7ippdiEr2iV_in-cQaYYJhb0mERhl19xfpFBWPnk0dPHlPvbPGzBWL719_gPhQNhl_MB1creN_EwTjLM-vnKEpfuZc6U6x06fhh9Lp-nBKGlscWGdvZcsQLzUSwCPNpvn7DsLs8crt5SsvFJg4VZDt6yHCXOWWtIM5EXtn3pP51uNdvsZTQ=",
+              "encrypted_content": "gAAAAABq3OyN78lCS3huWcCU3O7IntsWApqrp4lQQ-fnG45ztqYMJEnVcZ-CMswLL_qmgo44oYsGan4fduZaACcXOuRGVOtZaSbSLLUCHU12XKFSRDYiXhTskmgnqZ-nxoeNvqQCa1uDviBlkDeqKstAY1e0dThUT0fII8bLoVsUR6Om8sbBA-1ObZ1jPPsWUXZciP0Z27W9JtDZ-pQ20xtyIG0suq7Vq3-JthMEs99q_XfiKSM3n2kJCMw6Zz83c_14DhFXLV9xXRCxu3KKTUNDgp_WDPy6ZgG2mTx3jhazZIPtoShH9UBTku2e5y_zBSabPrgWmx6nUgj3YA5TntJCOBwWi7U5UUAZv1opHhyrTuuHbsmHCwiIYvIGueNan5YRL4rBWuLD6hOp46ULBtHmDCqi29Nr7lVEaWggkAA68gt5XOSdY0xDAQdlBWirUrSevQFxr3NfZh1nSeQQPi41dNh9pT3fUsb8njSmSuvdzQQgec2FMkRcXIDykyVz9YKkz6L04S9MpmlQiOTWDZKmaZHZNfbq-9njyHrzO5KJjh9HE6H-q1hw-hHvHKsqrjGRgKxWNM8q6QzkccrU76zTvxw1DrTC2IdvH9YCNHoNeyHEQRO4QUPNB0G7r7ykW0yuGYUOa4xj0JTWxdWPzu1Z7PPxM3dvAI2mJKbqmcQls5AcFGG70gsRbKrU0iiR7IClJxpx2_0I7BdahcuZl6QK5r_PXKZ5wC2QG79jNu87g__wzM2CikoSNYUcPFPaFWzJ3cAOYl2zRWPkpmXz39y1qcP1t4h2bb7Pka1Lta_Wo7nKrzDbTiwa2INeIhNPQHUPfYAHGbj5cZz3qNrq3RSVyFferkq0KQj5kyjndiATvRGQ7sVn9WkKAlREkFPnFuGz8ZO5YByTPUlxC7h1FhHL1aSpo1detzKOSaJxL4xGpsxEjHcLpIJYx7lsb264eAjKa4Rt7oYT3lfRVyuIXfvCEm-ZzEfi5JeUbq25sazlqgEhx3vwObRWhNgE54AGXxM9UY5pRiQcMzjkajR6NtGtIBiyb82_MBVz4WpRyHjAW-WDWh4Hv1ARQNO8Uq3JaI6LUYfh9KMRKuLjFssn3_Vq17qRE8COcSx2Cl12Wfak8HtoSLgqTMp5lS4deSfNjQ3VzTMbR4WEBOa68AvWDEZM_IuxXu899H8m2lK-r6HdpSojOZFHpwsRztryn3ewXHSojD5v60mo3cEdKHM93wNLZNjMKdxeAtQdPwNnsErm9EBaZdk_tghPGTwY0UPQL5bgiTotpQMSqw5hS6WClIZH7hf8HdAZh8w6rvDYhjJKmJ44YAeiyohLSetiRkeed6q1-aNxvmYZ8djmt5MzgkyyovkxcZt51oFpv4s4GV45sep8SSwjHpEDK6G89oGTZGy-cjZBTPtgwsHy2wWkQH5M0nVpO2D04RAh6NsKBkXB1s1GlDquaQe2aE0GJmh2a-zEA4VniMVmqXw-73ETWIntDRTBQIGbcv8DK9cVwCdi3SC-78iirMC709QpkiPZeSFBTAzQhNDCu2KGGaAG5N6smFSN4VklOKARpls7g6lvUl2GJqykwOCXc7N9ulM3RHjgEIAFPLEN-PnI3r3vGYNltWRa7A8onhlihQ8tfnHwAAjXKZqnecrgiD-XAG7-CBZY0ejeygFHJA8gkMQodmD5yDzVxZFXGSiaIiSKwHs1M8fER7xQ4IkcTqAn96ptN2G0MTpTFxBjsrtfPQrh7GJ6wCq3EeGaXdD7lifOOl3z7WUHqtLEYIF7shoPcnEbECCnD5sHkXQe7GDBmU33ok5Q_PnzpQqC98bj12wjLJKs1io9WXKH5SW5-sU-HORX9F0UYiZ5YIuN3qnUw6BvInL18eP96o2CErFfpI4YYNjRU_JAGDpxzmk=",
               "summary": []
             }
           ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8336,
-            "cacheWriteTokens": 14,
-            "outputTokens": 70
+            "inputTokens": 8858,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8855,
+            "outputTokens": 92
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c8b4644e45a2a56d950549c9938063f51ad16bf0948f2cb38e4c53a12b02f42e",
+        "fingerprint": "17fd7947bf885fe0fc35754e4f9c3da13f47544c5f8b68770cf4d481660389c0",
         "response": {
           "text": "Done — I’ll remind you to clean the chairs today at 5:00 PM.",
           "toolCalls": [],
@@ -45,9 +45,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8481,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 128,
+            "inputTokens": 9008,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 150,
             "outputTokens": 22
           },
           "model": "gpt-6-luna"

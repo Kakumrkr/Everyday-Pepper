@@ -15,6 +15,11 @@ export interface EmailMessage {
   subject: string;
   text: string;
   /**
+   * Commercial mail's one-click unsubscribe address (S36, RFC 8058): the mailer sends it as
+   * `List-Unsubscribe` with `List-Unsubscribe-Post: List-Unsubscribe=One-Click`.
+   */
+  unsubscribeUrl?: string | undefined;
+  /**
    * A stable id for the email (the outbox message's), sent as its `Message-ID`, so a mail
    * server or provider that dedupes on it drops a resend after a crash.
    */

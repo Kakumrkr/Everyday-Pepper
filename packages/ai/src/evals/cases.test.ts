@@ -1,11 +1,11 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { toolEvalCases } from '../tools/eval-cases.js';
-import { findTool } from '../tools/registry.js';
+import { findTool, SYSTEM_TOOLS } from '../tools/registry.js';
 import { EvalSetSchema } from './case.js';
 import { loadCases } from './files.js';
 import { loadRetrievalSet, RetrievalSetSchema } from './retrieval.js';
-import { MEMORY_WORLD_PLACEHOLDERS, WORLD_PLACEHOLDERS } from './world.js';
+import { FEED_WORLD_PLACEHOLDERS, MEMORY_WORLD_PLACEHOLDERS, WORLD_PLACEHOLDERS } from './world.js';
 
 // The eval cases themselves (S27): written before any real run, about 120 across every set,
 // a fifth held out (never tuned against, playbook §7 "S27"), and naming only tools and seeded
@@ -30,12 +30,15 @@ describe('the eval cases', () => {
       const known = new Set<string>([
         ...WORLD_PLACEHOLDERS,
         ...(evalCase.world === 'juniper_memory' ? MEMORY_WORLD_PLACEHOLDERS : []),
+        ...(evalCase.world === 'juniper_feed' ? FEED_WORLD_PLACEHOLDERS : []),
         ...evalCase.seed.facts.map((fact) => `{{fact:${fact.name}}}`),
         ...evalCase.seed.episodes.map((episode) => `{{episode:${episode.name}}}`),
       ]);
       for (const ref of [
         ...evalCase.seed.facts.map((fact) => fact.subject),
         ...evalCase.seed.episodes.flatMap((episode) => [...episode.facts, ...episode.clients]),
+        ...(evalCase.seed.feed?.optedOut ?? []),
+        ...Object.keys(evalCase.seed.feed?.clientNames ?? {}),
         ...(JSON.stringify(evalCase.turns).match(/\{\{[^}]+\}\}/g) ?? []),
       ]) {
         if (ref !== 'business') expect(known.has(ref), `${evalCase.id}: ${ref}`).toBe(true);
@@ -49,7 +52,9 @@ describe('the eval cases', () => {
       ];
       for (const name of tools) {
         // email_clients does not exist on purpose: a model inventing it must still fail.
-        if (name !== 'email_clients')
+        // The business's own passes' tools (S36) are approved on screens, never by the model.
+        const system = SYSTEM_TOOLS.some((tool) => tool.name === name);
+        if (name !== 'email_clients' && !system)
           expect(findTool(name), `${evalCase.id}: ${name}`).toBeDefined();
       }
       for (const placeholder of JSON.stringify(wanted).match(/\{\{[^}]+\}\}/g) ?? []) {

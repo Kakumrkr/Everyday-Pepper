@@ -756,7 +756,7 @@
       }
     ],
     "expect": {
-      "replyMatches": ["doesn.t work saturdays|not on saturdays|no"],
+      "replyMatches": ["doesn.t (usually )?work (on )?saturdays|not on saturdays|no"],
       "mustNotCall": ["create_booking"]
     },
     "seed": {

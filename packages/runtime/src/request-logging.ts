@@ -22,18 +22,28 @@ type Middleware = (
   next: () => void,
 ) => void;
 
+// Paths that carry a secret (S36: a one-click unsubscribe link's token); the rest is kept.
+const SECRET_PATHS = [/^(\/v1\/public\/unsubscribe\/)[^/]+/];
+
+/** The path as logged: a secret in it is replaced by `:token`. */
+export function withoutSecrets(path: string): string {
+  return SECRET_PATHS.reduce((logged, pattern) => logged.replace(pattern, '$1:token'), path);
+}
+
 /**
  * Express middleware: gives every request an id (echoed in `x-request-id`), runs the rest of
  * the request inside its log context, and writes one line when the response finishes or the
- * client goes away. Only method, path (no query string: it can carry personal data), status
- * and duration are logged. Health probes log at debug so they do not drown everything else.
+ * client goes away. Only method, path (no query string: it can carry personal data; no link
+ * secret, `withoutSecrets`), status and duration are logged. Health probes log at debug so they do not drown everything else.
  */
 export function requestLogging(logger: Logger): Middleware {
   return (request, response, next) => {
     const requestId = resolveRequestId(request.headers[REQUEST_ID_HEADER]);
     response.setHeader(REQUEST_ID_HEADER, requestId);
     const started = performance.now();
-    const path = (request.originalUrl ?? request.url ?? '/').split('?', 1)[0] ?? '/';
+    const path = withoutSecrets(
+      (request.originalUrl ?? request.url ?? '/').split('?', 1)[0] ?? '/',
+    );
     const method = request.method ?? 'GET';
 
     runWithRequestContext({ requestId }, () => {

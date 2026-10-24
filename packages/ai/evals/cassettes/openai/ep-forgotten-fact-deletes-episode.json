@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a34cad5cdecf43ee5a16582e2e06c52a02d07df064144e46ac53fadd9f10f752",
+        "fingerprint": "cca4cbc136c1a03aa48f5639adeabbdedf30c18e22d682c45f6bdab93889fa2d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_kHPkoXozERKuRm3E3HseLXe9",
+              "id": "call_q1zvucavvIE9mP9JlZHBo7Ob",
               "name": "search_memory",
               "arguments": "{\"query\":\"Maria patch test\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 14,
             "outputTokens": 20
           },
@@ -25,51 +25,7 @@
         }
       },
       {
-        "fingerprint": "60888e27605d458d069066d0ab0cb7115f4ea341337cee77e0c3b647e14202af",
-        "response": {
-          "text": "I don’t remember us discussing Maria’s patch test.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8534,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 181,
-            "outputTokens": 15
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a34cad5cdecf43ee5a16582e2e06c52a02d07df064144e46ac53fadd9f10f752",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_dbdnZ41jv460X8u1BImC1mX5",
-              "name": "search_memory",
-              "arguments": "{\"query\":\"Maria patch test\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8350,
-            "outputTokens": 20
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "28792976a5a863217b580f082af615e42460c8706ee8fd3dca0b4e34b2ede5ec",
+        "fingerprint": "6fda947059d8a14c31c03fd5714a07f2ef82bbf490585cc909301d8dc4af7a53",
         "response": {
           "text": "I don’t remember what we said about Maria’s patch test.",
           "toolCalls": [],
@@ -81,52 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8534,
-            "cachedInputTokens": 8531,
+            "inputTokens": 9039,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 181,
             "outputTokens": 17
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a34cad5cdecf43ee5a16582e2e06c52a02d07df064144e46ac53fadd9f10f752",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_8HOg6IKzHFi5pghTAkYm2XT2",
-              "name": "search_memory",
-              "arguments": "{\"query\":\"Maria patch test\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8350,
-            "outputTokens": 20
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "5a33cf7c861c70275b9306c700a4e51eac731101f785e5c4f87c002c92955a6f",
-        "response": {
-          "text": "I don’t remember us discussing Maria’s patch test.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8534,
-            "cachedInputTokens": 8531,
-            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

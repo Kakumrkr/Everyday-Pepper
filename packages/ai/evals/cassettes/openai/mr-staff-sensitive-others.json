@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "74259f951ce789dfaa5c315dcd1daeca2a7a86709a9c69b39e0aa304747cfc76",
+        "fingerprint": "900ecf671723bba07e3e38aba28046916a46f88aeb86f895216089e94a80c386",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_W5Q1UnhYQKr1yMIr7h68p76Z",
+              "id": "call_qirYPptcx5XgOcFIuPdkwGJz",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "5ebccb16ae5788430c4ddfd8358dca6878cf34d47fbd263277085a95a2ce0ae1",
+        "fingerprint": "aa674ebc03ed1db7f0c4b37cdad37ec9dd15005e1f0e879a9e9cfc0e4133ec64",
         "response": {
-          "text": "I couldn’t find Sara Kim among your clients, so I can’t check whether she has any allergies. Could you confirm the spelling of her name?",
+          "text": "I couldn’t find a Sara Kim among your clients. Could you check the spelling or give me another name to search?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,96 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8414,
-            "cachedInputTokens": 8347,
+            "inputTokens": 8919,
+            "cachedInputTokens": 8852,
             "cacheWriteTokens": 64,
-            "outputTokens": 34
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "74259f951ce789dfaa5c315dcd1daeca2a7a86709a9c69b39e0aa304747cfc76",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_2AjQgLyXJFSffrcPu7GxqN1P",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sara Kim\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8347,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "9c02dc950ef8dc49ee31c258804a1a3b69d88bffe91a4de0f559fc84e1306314",
-        "response": {
-          "text": "I couldn’t find a Sara Kim among your clients, so I can’t check whether she has any allergies. Could you check the spelling of her name?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8414,
-            "cachedInputTokens": 8411,
-            "outputTokens": 35
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "74259f951ce789dfaa5c315dcd1daeca2a7a86709a9c69b39e0aa304747cfc76",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_VEYeQwe6JK2c3tuTK3Vopywu",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sara Kim\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8347,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "132404f9790d1b92199a0fe9d56d0fc5304a54611602a44ad2c55230a15b6202",
-        "response": {
-          "text": "I couldn’t find Sara Kim among your clients, so I can’t check whether she has any allergies. Could you check the spelling of her name?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8414,
-            "cachedInputTokens": 8411,
-            "outputTokens": 34
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

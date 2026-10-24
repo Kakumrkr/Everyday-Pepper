@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "2976e5650a2a027b3a8282827359846fc6a467ac69512d48c5eba611bb0d87fa",
+        "fingerprint": "68bdcd954a1cb3134aba14acd18dededa1c647f8e9d4745db81e99c75e3e6ef4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_9mQMO5fZGNQ2xvkT6rodd2LS",
+              "id": "call_IMjRhnItb68ktoxeVMJTX0A8",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,21 +16,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8354,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8351,
+            "inputTokens": 8859,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 15,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "734c58404abde7b576ed2cb1f41e08ebc62eec5e51901b33c5f20916159f94e0",
+        "fingerprint": "62a543abc96ca98199dd3db12601aaca7fd7e12063562e263261d47d35c0788b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_V2434hcfWBeJYUoObvrwDUgy",
+              "id": "call_lRVxStfgIImSAXuazQj6Ybbo",
               "name": "find_availability",
               "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"15:00\"}"
             }
@@ -38,84 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8642,
-            "cachedInputTokens": 8351,
-            "cacheWriteTokens": 288,
-            "outputTokens": 69
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "99024aac87ba5226f16e2e2902fd273a15e72d5926561f0cdb68b6469acf7f55",
-        "response": {
-          "text": "Yes—Friday, November 6, there’s a colour opening at 3:15 or 3:30 with Jess.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8867,
-            "cachedInputTokens": 8639,
-            "cacheWriteTokens": 225,
-            "outputTokens": 30
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "2976e5650a2a027b3a8282827359846fc6a467ac69512d48c5eba611bb0d87fa",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_4AgdkuC4rSpV0KK5JA3w4swZ",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8354,
-            "cachedInputTokens": 8351,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "8e8d312ff7cdab6435f211d83695ef7e1c825418a8b7e0bc8134cd18c44b2704",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_iUBz60ufGngH8eCAin9buxRz",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"15:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8620,
-            "cachedInputTokens": 8351,
-            "cacheWriteTokens": 266,
+            "inputTokens": 9331,
+            "cachedInputTokens": 8856,
+            "cacheWriteTokens": 472,
             "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c0d691d2e3a8ae2810cfb2969d990bb4aef9fb86a15104ef7a8f23a68283c54b",
+        "fingerprint": "9a98ab1b26de3336339c1acb42bedcaff0b5c21afb3ca36d9c6e3184032aeb49",
         "response": {
-          "text": "Yes—Friday, November 6, at 3:15 or 3:30 with Jess. Which would you prefer?",
+          "text": "Yes—Jess has Colour available Friday, Nov 6 at 3:15 or 3:30 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -125,76 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8832,
-            "cachedInputTokens": 8617,
-            "cacheWriteTokens": 212,
-            "outputTokens": 30
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "2976e5650a2a027b3a8282827359846fc6a467ac69512d48c5eba611bb0d87fa",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_vC5YYW12WoU2RxI4gydJ4Cis",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8354,
-            "cachedInputTokens": 8351,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "d7adbecfb02c7b4b0b792857e7ea04874a83fc5094667fdac86464084cd58c2c",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_Pc78jWu46fRBMV1GH9azzWqs",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":null,\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"15:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8635,
-            "cachedInputTokens": 8351,
-            "cacheWriteTokens": 281,
-            "outputTokens": 65
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a3157798d7a3ee77dff2da20fa571c2606b95b114b7a850758d6f230ad1a79ba",
-        "response": {
-          "text": "Yes—Friday, November 6, there’s a colour opening at 3:15 or 3:30 with Jess.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8852,
-            "cachedInputTokens": 8632,
-            "cacheWriteTokens": 217,
-            "outputTokens": 30
+            "inputTokens": 9549,
+            "cachedInputTokens": 9328,
+            "cacheWriteTokens": 218,
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

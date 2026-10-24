@@ -1,7 +1,7 @@
 import { looksLikeContact } from '@pepper/contracts';
-import { changeTask, createTask, createTaskIn, type Actor } from '@pepper/core';
+import { changeTask, createTask, createTaskIn, ManualClock, type Actor } from '@pepper/core';
 import { withMember, type Database } from '@pepper/db';
-import { addTimeOff } from '@pepper/appointments';
+import { addTimeOff, replaceWorkingHours } from '@pepper/appointments';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { toolMessageContent, type ToolOutcome } from './registry.js';
 import {
@@ -46,6 +46,35 @@ function answered(outcome: ToolOutcome) {
   }
   return outcome;
 }
+
+describe('list_services_and_staff: weekly hours (S36)', () => {
+  it('says who works which days, in the business’s local hours', async () => {
+    await replaceWorkingHours(db, world.owner, world.marcoStaff.id, {
+      intervals: [
+        { weekday: 2, start: '09:00', end: '17:00' },
+        { weekday: 6, start: '10:00', end: '16:00' },
+      ],
+    });
+    const answer = answered(
+      await callTool(depsFor(world, world.owner), 'list_services_and_staff', {}),
+    );
+    const staff = (answer.data as { staff: { name: string; works: unknown[] }[] }).staff;
+    expect(staff.find((member) => member.name === 'Marco')?.works).toEqual([
+      { day: 'Tuesday', from: '09:00', to: '17:00' },
+      { day: 'Saturday', from: '10:00', to: '16:00' },
+    ]);
+    expect(staff.find((member) => member.name === 'Jess')?.works).toHaveLength(5);
+    // Staff read the team's hours too, as on their screens.
+    const asStaff = answered(
+      await callTool(depsFor(world, world.jess), 'list_services_and_staff', {}),
+    );
+    expect(JSON.stringify(asStaff.data)).toContain('Saturday');
+    // Back to the world's week for the other tests.
+    await replaceWorkingHours(db, world.owner, world.marcoStaff.id, {
+      intervals: [1, 2, 3, 4, 5].map((weekday) => ({ weekday, start: '09:00', end: '17:00' })),
+    });
+  });
+});
 
 describe('list_services_and_staff', () => {
   it('lists active services and staff with ids, marking the member’s own staff member', async () => {
@@ -139,6 +168,31 @@ describe('find_availability', () => {
     });
     expect(slots.map((slot) => slot.time)).not.toContain('10:00');
     expect(answer.card).toMatchObject({ kind: 'slot_picker', reason: 'availability' });
+  });
+
+  it('keeps notBefore on every day of a range, across a clock change (S36)', async () => {
+    // Fri 12 March 2027 to Mon 15 March: New York springs forward on Sunday the 14th.
+    const deps = { ...depsFor(world, world.owner), clock: new ManualClock('2027-03-10T12:00:00Z') };
+    const answer = answered(
+      await callTool(deps, 'find_availability', {
+        serviceId: world.haircut.id,
+        staffMemberId: world.jessStaff.id,
+        date: '2027-03-12',
+        days: 4,
+        notBefore: '15:00',
+      }),
+    );
+    const slots = (answer.data as { slots: { date: string; time: string }[] }).slots;
+    // Jess works weekdays only: Friday and Monday, each from 15:00 on its own clock.
+    expect([...new Set(slots.map((slot) => slot.date))]).toEqual(['2027-03-12', '2027-03-15']);
+    for (const date of ['2027-03-12', '2027-03-15']) {
+      const times = slots.filter((slot) => slot.date === date).map((slot) => slot.time);
+      expect(times[0], date).toBe('15:00');
+      expect(
+        times.every((time) => time >= '15:00'),
+        date,
+      ).toBe(true);
+    }
   });
 
   it("finds another business's service not found", async () => {

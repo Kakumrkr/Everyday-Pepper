@@ -4,7 +4,8 @@ import { callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js'
 
 // Home as the operator feed through the real stack (S35, ADR-0039): the worker's insights job
 // finds Jess's open time and Home shows it under Suggestions; Dismiss snoozes it (it does not
-// come back), and "Pause suggestions" hides the rest. The stack runs the job every 10 s
+// come back), and "Pause suggestions" hides the rest; S36 adds the mailing address rebooking
+// emails carry and the public unsubscribe page. The stack runs the job every 10 s
 // (`INSIGHTS_POLL_MS` in CI).
 
 test.beforeEach(async ({ context }) => {
@@ -70,4 +71,38 @@ test('Home shows a gap suggestion; Dismiss snoozes it and Pause hides the rest',
   await expect(gaps).toHaveCount(0);
   await pause.click();
   await expect(pause).toHaveAttribute('aria-checked', 'false');
+});
+
+test('the owner gives rebooking emails their mailing address, and changes it (S36)', async ({
+  page,
+}) => {
+  await onboardOwner(page);
+  const suggestions = page.getByRole('region', { name: 'Suggestions' });
+  const form = suggestions.getByRole('form', { name: 'Mailing address for rebooking emails' });
+  await expect(form).toBeVisible();
+  const field = form.getByLabel('Your business’s mailing address');
+  await (await hydrated(field)).fill('12 Juniper Lane\nPortland, OR 97201');
+  await form.getByRole('button', { name: 'Save address' }).click();
+  await expect(suggestions.getByTestId('mailing-address')).toContainText(
+    'Rebooking emails carry your address: 12 Juniper Lane, Portland, OR 97201.',
+  );
+  await page.reload();
+  await expect(suggestions.getByTestId('mailing-address')).toContainText('12 Juniper Lane');
+
+  // Something that is not an address is refused, and the old one stays.
+  await (await hydrated(suggestions.getByRole('button', { name: 'Change it' }))).click();
+  await form.getByLabel('Your business’s mailing address').fill('owner@example.test');
+  await form.getByRole('button', { name: 'Save address' }).click();
+  await expect(form.getByRole('alert')).toBeVisible();
+  await page.reload();
+  await expect(suggestions.getByTestId('mailing-address')).toContainText('12 Juniper Lane');
+});
+
+test('an unsubscribe link that is not valid says so, without signing in (S36)', async ({
+  page,
+}) => {
+  await page.goto(`/unsubscribe/${'A'.repeat(66)}`);
+  await expect(page.getByRole('heading', { name: 'Unsubscribe' })).toBeVisible();
+  await expect(page.getByText('This unsubscribe link isn’t valid.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Unsubscribe' })).toHaveCount(0);
 });

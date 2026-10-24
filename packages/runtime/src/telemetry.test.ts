@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/node';
 import { afterEach, describe, expect, it } from 'vitest';
 import { REDACTED } from './redact.js';
 import {
+  httpSpanOverrides,
   scrubSentryEvent,
   shutdownObservability,
   startObservability,
@@ -99,5 +100,29 @@ describe('tracesUrl', () => {
     ['https://otlp.example.com/otlp', 'https://otlp.example.com/otlp/v1/traces'],
   ])('%s → %s', (endpoint, expected) => {
     expect(tracesUrl(endpoint)).toBe(expected);
+  });
+});
+
+describe('httpSpanOverrides', () => {
+  it('keeps a plain path as it is', () => {
+    expect(httpSpanOverrides('/v1/feed')).toEqual({});
+  });
+
+  it('never exports a query string', () => {
+    expect(httpSpanOverrides('/v1/clients?email=a@b.example')).toEqual({
+      'url.query': REDACTED,
+      'http.target': '/v1/clients',
+      'http.url': '/v1/clients',
+      'url.full': '/v1/clients',
+    });
+  });
+
+  it('never exports an unsubscribe link’s token (S36)', () => {
+    expect(httpSpanOverrides('/v1/public/unsubscribe/abc.def-ghi')).toEqual({
+      'url.path': '/v1/public/unsubscribe/:token',
+      'http.target': '/v1/public/unsubscribe/:token',
+      'http.url': '/v1/public/unsubscribe/:token',
+      'url.full': '/v1/public/unsubscribe/:token',
+    });
   });
 });

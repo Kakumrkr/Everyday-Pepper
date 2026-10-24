@@ -210,12 +210,14 @@ function subjectOf(args: RememberArgs): MemorySubject {
 export const rememberFact: WriteTool = {
   kind: 'write',
   name: 'remember_fact',
-  version: 1,
+  // 2 (S36): closed days that stop bookings are propose_rule (lr-blackout).
+  version: 2,
   localTimes: false,
   tier: 'internal_write',
   guide: {
-    use: 'Remember what the member tells you plainly about a client, staff member, service or the business (an allergy, a preference, "the usual", a rule of thumb); a new value for a key replaces the old one. "Note that…" and "remember…" are this tool, the business\'s closed days and hours too.',
+    use: 'Remember what the member tells you plainly about a client, staff member, service or the business (an allergy, a preference, "the usual", a rule of thumb); a new value for a key replaces the old one. "Note that…" and "remember…" are this tool.',
     avoid: [
+      'for a closure that stops bookings ("we\'re closed Dec 24–26" is propose_rule)',
       'for a staff member being off, away or busy at a time, said without "note" or "remember" ("Marco is off on Friday" is block_time)',
       'for a guess, a question, or something you worked out yourself (only what the member said)',
       'for text from outside the team (a client message): ask the member first',

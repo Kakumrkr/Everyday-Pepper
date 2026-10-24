@@ -27,6 +27,7 @@ import {
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import {
+  aiActionProposals,
   bookings,
   clients,
   feedItems,
@@ -387,25 +388,35 @@ export async function listDueInsightRuns(
 
 /** What the insights pass needs about the business itself. */
 export interface InsightTenant {
+  name: string;
+  slug: string;
   timeZone: string;
   templateId: string | null;
   settings: StoredFeedSettings;
+  /** Where commercial mail says the business is (S36); `null`: no nudges are drafted. */
+  mailingAddress: string | null;
 }
 
 export async function readInsightTenant(tx: TenantTx): Promise<InsightTenant | undefined> {
   const [row] = await tx
     .select({
+      name: tenants.name,
+      slug: tenants.slug,
       timeZone: tenants.timeZone,
       templateId: tenants.templateId,
       settings: tenants.feedSettings,
+      mailingAddress: tenants.mailingAddress,
     })
     .from(tenants);
   if (row === undefined) return undefined;
   const parsed = StoredFeedSettingsSchema.safeParse(row.settings);
   return {
+    name: row.name,
+    slug: row.slug,
     timeZone: row.timeZone,
     templateId: row.templateId,
     settings: parsed.success ? parsed.data : STORED_DEFAULT,
+    mailingAddress: row.mailingAddress,
   };
 }
 
@@ -439,4 +450,201 @@ export async function listInsightBookings(tx: TenantTx, since: Date): Promise<In
     .from(bookings)
     .where(gte(bookings.startsAt, since))
     .orderBy(asc(bookings.startsAt), asc(bookings.id));
+}
+
+// ---------------------------------------------------------------------------------------------
+// Rebooking nudges (S36, ADR-0040): the morning drafts pass turns open `rebooking_due` items
+// into proposals; the item then waits as `needs_ok`, linked to its proposal, until a person
+// decides (the trust layer settles it through `settleFeedItemsOf`).
+
+/** The dial action and target of a client's nudge: one pending nudge per client. */
+export const NUDGE_ACTION = 'message.rebooking_nudge';
+export const nudgeTargetKey = (clientId: string) => `nudge:client:${Id.parse(clientId)}`;
+
+/** An open `rebooking_due` item of a client who can be emailed, as the morning pass reads it. */
+export interface DraftableRebooking {
+  itemId: FeedItemId;
+  clientId: string;
+  serviceId: string | null;
+  staffMemberId: string | null;
+  day: string;
+  payload: unknown;
+}
+
+/**
+ * Up to `limit` open rebooking suggestions whose client has an email address, has not opted out
+ * of marketing email, and got no nudge proposal within their interval (a pending, sent, turned
+ * down or expired one all count: at most one nudge per client per interval, playbook D-9).
+ * Most overdue first.
+ */
+export async function listDraftableRebookings(
+  tx: TenantTx,
+  now: Date,
+  limit: number,
+): Promise<DraftableRebooking[]> {
+  const max = z.number().int().min(1).max(200).parse(limit);
+  const rows = await tx
+    .select({
+      itemId: feedItems.id,
+      clientId: feedItems.clientId,
+      serviceId: feedItems.serviceId,
+      staffMemberId: feedItems.staffMemberId,
+      day: feedItems.day,
+      payload: feedItems.payload,
+    })
+    .from(feedItems)
+    .innerJoin(clients, eq(clients.id, feedItems.clientId))
+    .where(
+      and(
+        eq(feedItems.kind, 'rebooking_due'),
+        eq(feedItems.status, 'suggestion'),
+        gt(feedItems.expiresAt, now),
+        sql`${clients.email} IS NOT NULL`,
+        isNull(clients.emailOptOutAt),
+        // A superseded nudge reached no one: its replacement (an edit, a refresh) counts on its
+        // own, and one refused at approval (the time was booked meanwhile) blocks nothing.
+        sql`NOT EXISTS (SELECT 1 FROM ${aiActionProposals} WHERE ${aiActionProposals.action} = ${NUDGE_ACTION} AND ${aiActionProposals.targetKey} = 'nudge:client:' || ${feedItems.clientId}::text AND ${aiActionProposals.status} <> 'superseded' AND ${aiActionProposals.createdAt} > ${now}::timestamptz - make_interval(days => coalesce((${feedItems.payload}->>'intervalDays')::int, 28)))`,
+      ),
+    )
+    .orderBy(asc(feedItems.day), asc(feedItems.id))
+    .limit(max);
+  return rows.flatMap((row) =>
+    row.clientId === null
+      ? []
+      : [{ ...row, itemId: FeedItemIdSchema.parse(row.itemId), clientId: row.clientId }],
+  );
+}
+
+/** One item the transaction may see, any status. */
+export async function findFeedItem(tx: TenantTx, id: FeedItemId): Promise<FeedItemRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(feedItems)
+    .where(eq(feedItems.id, FeedItemIdSchema.parse(id)));
+  return row;
+}
+
+/** Links an open suggestion to the proposal that carries it out: it now needs an OK. */
+export async function linkFeedItemToProposal(
+  tx: TenantTx,
+  itemId: FeedItemId,
+  proposalId: string,
+): Promise<boolean> {
+  const rows = await tx
+    .update(feedItems)
+    .set({ status: 'needs_ok', actionProposalId: Id.parse(proposalId) })
+    .where(
+      and(eq(feedItems.id, FeedItemIdSchema.parse(itemId)), eq(feedItems.status, 'suggestion')),
+    )
+    .returning({ id: feedItems.id });
+  return rows.length > 0;
+}
+
+/** A proposal was replaced (an edit, or a fresh preview): its items wait for the new one. */
+export async function repointFeedItems(tx: TenantTx, from: string, to: string): Promise<number> {
+  const rows = await tx
+    .update(feedItems)
+    .set({ actionProposalId: Id.parse(to) })
+    .where(and(eq(feedItems.actionProposalId, Id.parse(from)), eq(feedItems.status, 'needs_ok')))
+    .returning({ id: feedItems.id });
+  return rows.length;
+}
+
+/**
+ * Closes the items waiting on a decided proposal: approved → `done`; turned down → `dismissed`
+ * (snoozed 30 days, as a dismissal); expired or refused → `expired` (the next pass opens it
+ * again while the client is still due; the interval keeps a second nudge away).
+ */
+export async function settleFeedItemsOf(
+  tx: TenantTx,
+  proposalId: string,
+  outcome: 'done' | 'dismissed' | 'expired',
+  now: Date,
+): Promise<number> {
+  const rows = await tx
+    .update(feedItems)
+    .set({
+      status: outcome,
+      actedAt: now,
+      snoozedUntil:
+        outcome === 'dismissed' ? new Date(now.getTime() + FEED_SNOOZE_DAYS * DAY_MS) : null,
+    })
+    .where(
+      and(eq(feedItems.actionProposalId, Id.parse(proposalId)), eq(feedItems.status, 'needs_ok')),
+    )
+    .returning({ id: feedItems.id });
+  return rows.length;
+}
+
+/** The items the transaction's member may see that wait on a proposal (`get_feed`). */
+export async function listWaitingFeedItems(tx: TenantTx, limit = 50): Promise<FeedItemWithNames[]> {
+  const max = z.number().int().min(1).max(200).parse(limit);
+  const rows = await tx
+    .select({
+      item: feedItems,
+      staffName: staffMembers.displayName,
+      clientName: clients.name,
+      serviceName: services.name,
+    })
+    .from(feedItems)
+    .leftJoin(staffMembers, eq(staffMembers.id, feedItems.staffMemberId))
+    .leftJoin(clients, eq(clients.id, feedItems.clientId))
+    .leftJoin(services, eq(services.id, feedItems.serviceId))
+    .where(eq(feedItems.status, 'needs_ok'))
+    .orderBy(desc(feedItems.updatedAt), asc(feedItems.id))
+    .limit(max);
+  return rows.map((row) => ({
+    ...row.item,
+    staffName: row.staffName,
+    clientName: row.clientName,
+    serviceName: row.serviceName,
+  }));
+}
+
+/** Records when the business's morning drafts pass is due next. */
+export async function setDraftsDueAt(tx: TenantTx, at: Date): Promise<void> {
+  await tx.insert(insightRuns).values({}).onConflictDoNothing({ target: insightRuns.tenantId });
+  await tx.update(insightRuns).set({ draftsDueAt: at });
+}
+
+/**
+ * Claims the business's morning drafts pass when it is due at `now` (never run, or due), by
+ * moving its due time to `next`: of two workers, only one gets `true`.
+ */
+export async function claimDraftsRun(tx: TenantTx, now: Date, next: Date): Promise<boolean> {
+  await tx.insert(insightRuns).values({}).onConflictDoNothing({ target: insightRuns.tenantId });
+  const rows = await tx
+    .update(insightRuns)
+    .set({ draftsDueAt: next })
+    .where(or(isNull(insightRuns.draftsDueAt), lte(insightRuns.draftsDueAt, now)))
+    .returning({ id: insightRuns.id });
+  return rows.length > 0;
+}
+
+/** When the business's morning drafts pass is due (`null`: never run). */
+export async function readDraftsDueAt(tx: TenantTx): Promise<Date | null> {
+  const [row] = await tx.select({ at: insightRuns.draftsDueAt }).from(insightRuns);
+  return row?.at ?? null;
+}
+
+/**
+ * Up to `limit` businesses whose morning drafts pass is due at `now`, across businesses (ids
+ * only): never run, or due. The pass itself decides, in the business's time zone, whether its
+ * morning hour has come.
+ */
+export async function listDueDraftRuns(
+  db: Database,
+  now: Date,
+  limit: number,
+): Promise<TenantId[]> {
+  const max = z.number().int().min(1).max(1000).parse(limit);
+  const rows = await withJobScan(db, 'insights', (tx) =>
+    tx
+      .select({ tenantId: insightRuns.tenantId })
+      .from(insightRuns)
+      .where(or(isNull(insightRuns.draftsDueAt), lte(insightRuns.draftsDueAt, now)))
+      .orderBy(sql`${insightRuns.draftsDueAt} ASC NULLS FIRST`, asc(insightRuns.tenantId))
+      .limit(max),
+  );
+  return rows.map((row) => TenantIdSchema.parse(row.tenantId));
 }

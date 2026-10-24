@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "79990559a4b7afd96df69836439a0bbbe6fd2ea21f2be3c6cb8f6ee35d5eb339",
+        "fingerprint": "933d0198dfb9f136a3785441bb535933c7b7c4bff8b82134f18da410dd6d08e0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_WHQDztLtLj5HaSB4nkoPB0Rq",
+              "id": "call_2gKUSEmXmi9T62q2luKMUyu0",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,44 +25,44 @@
         }
       },
       {
-        "fingerprint": "002d55b2e6c27180caee03a025ec0e6b92dab783d7eac613fe271503f5380aed",
+        "fingerprint": "490bf1c46d3327dabfcea569eef2535dc8555039255b9131ea26f30f1b5a33cc",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Os0ozFDFlbgT4eCrZVsXkT4X",
+              "id": "call_iCCQCx4BjmqKNtUPEdfjKDTl",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
             },
             {
-              "id": "call_c5PhmO6URGzOJusr6xFfdUnz",
+              "id": "call_7FwzMkt8VhwF44jwGIKalU7s",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
             }
           ],
           "replay": [
             {
-              "id": "rs_0f30f1d3bc296f9e016adc06bb77c887d2840af8b6f7393fc6",
+              "id": "rs_0defffd17d235d07016adcee6f3cb887d297cd00fc0b0a8676",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3Aa8Qw3J0Y1Nh3y1o88uWSuwsdEPzwchW5RAxGN7wTra5G9vlvYpArBkWSHjiWGHbX57-DxFIw-eEOtSjUhKUjFzolkhguoSm12hd19lypzc_OmaiUOMt_it_IP_6WYmk_VKCGZeX5mLZtgaTNJd3RdnWMVOMr8MdKVph6QIFKd2cav0t7U_13Stcz8o0xmC3_IU3Kq8BgozqLR3kbvQaaxPx1c6tCmvezdS7jYdVs5guSkQ8_spEORNyzBteWrY5YBI2Bbxj9FD1xi_wPt-LWkv-3hLZI9xdtyUKFvGyarHt6mYTXz8W6SjdUJYwwfnI3wTtrPo3AmURhcw52xbc3VcLSAH7NyVyhKu55Ya9EcMqH5-CsaIb-oufofhSw4WhYKI3UCK9BZlvd12VznquJfto1ibrvz-NXQHFmE_3OeKkKG7nBC0zmFUQGpudEmXRg6bsmbG8J6uIUYgWM6o9x-Oo_XPF85NS3V3vbQd0Yp6NS5n_FSETqHwf0MbwG6mTmZNmPfr-rG365qMB_BDy4mW4btWt5N3tihHcD87WmORCt3CqatDT-zWlZ14ObHG1OzoS5Ac0AZgjJOx4eJ-NE0IMqZbNfTwN_Gg_JhDSuTkJUToZTzDSO4qFGlfIyOQybln_McQmVQBgSf0gLek3C1Yj0Xdc9keofedITcxDsF49Gga5kJy3XOCoVXWY66cL_gos-EHHce7zYREFF7tr89r98peTkIjMzh-gieZdEyWVrOn4oS83GNmoZ749l8GxnJrj_LvLZdxn49q6_VDDaA4uF0xLVtFmJ7xJ69nrrjrGNlYByMC3VWwDrRkkIPb51SlBBxPcs5oniJlnBvdPXNnPSSm6SKpfml7aWYBXNa_O6ai6EaVf0gsOA0ByzcDzPx6WjOqMoxEP6Hr-elAqAgZf4BbBrWHxwzcY-6C9ea6NIO2PZsl6ZUnxFspl4mu-JDI8gDWI6i7aoGkAo4U2xM_UEqK69Y0N9FD4xgkcKxnrsFKpPT0L19X4GdNHvpHGfTAx5wfhKXZMJqCPGmSiG9qBpYsMeaURdzC9rx85-XVSeo26dJ-Pbz0yZESgEgEe0C8c3WtXzD-whd_atqw-9bq2tvAjYx37dT8q-_NUFlS3zSvo4RtK71Q74AsFPcpCMG8yvIWUi6DNBnijeTKWdju6-p9qTt08CNmUbPtZdH07PHLfDbBMncC4bCEc8UtjkxT8NdD1RGLGODKQzw6_F1LVZNtSBKTkklCJA_uFkhRxy0feZkb4vh-allftzUw1cwQfKyICKAOICgnpKOJBq3s5jw3sInwnj4bhfSwIvMGTTEHW8MvMxqIQCBcajvwieMT1TeSnpKT3EJQZkxAy_UCXUHKK4KHDAFI8walM0shg8jlnWjuGZ62OtBot7lv3emDycYq3aTc96nqEoeg0M5QFV8ILMqy7NtGa37u_lgqIquiZVe2tcG9G4B71mzasWPwfodpsK5bOUMNtqHDxkM4UtrIxIN9qp5y7ExvkKgPuSm6tyj_NLKIFKcIWFqzgvmVkQWaGvYyD75nMvGUiiJpYsrdS9Yi9yYZbbjOo2-aC_QiimSxk96n3pgIF5Y3oQ6UTIldOb-CWUuOTyGb19Mo8R5scjdFqtYwwtk1cra0MlgS90sbSelpC9UuwcOhDKUl4qRIUEs4BFnd-H6JcV5PHA8tCO2qJylA1jTqYo9yXnw=",
+              "encrypted_content": "gAAAAABq3O5w_qSZp97Ke2Sl_Tj7Dng5HIfjpkZbq3q7svlQ4ROIUt6aBusHp2y5kLLhsbpY4vPWEIXqQiMkB4bMsAqXOthP2AuVNCOucK0WMCCFZuOIXf3fqdgk60VuN5EIw7kJz2aeH063hsfKrA0P0z8aPyRSpqTIZPHeU2jz9VNbLHzjmvwjjWYz3VtzJeig4YssF8sWO2beyXeO2L--uEmrTS2zI9ZWh3RQpGjUnK4gdOaNOm8VMQzkBr4z-kdx3xrM9lVdWPZ8mIaMaBUe-w9MYZfgxoJ9NZ6CTsbKvrnL2fiB9yUaP68LKvIvALBrY-QAs9ulKHfJ6h3DYWDV7KTbJ2Iw77QRNU5wqJDPjydIyNEI09WGCQ6WI59Wg7jxZaftSOlk-d38oCgRjwp7ODKrhWe_ZLpy61NivsqwsTGGA0Fb45iyL6rIMeTX2uwI7xvX53jlurfkbT6oBHuEX7PBjGHtKLPhig_5Ag1QDKEnH_Ra7TaSvtIiEiYHi4Se7No2FBaP3uGdOGQ1yxONhimd_NoaTm3KR3xGnNRxtOpFPsX2QkU1uAZP-S7NsOG2N319cVqJWVVTnlCduKbc1YnjG32TgcUbMB5748d13ZV1a4akUY4LDnv_dHAk7VcKQy5LkGVY48Q386Hf2roWrynajHOaxSbLcg-PQGkI8I-GDrEA-3andp8X1ydrwuLgE6Vyh-iaw_lgXoYEGQZPsZIMjJrOWRQT59KxqS1mn-5UA08gWehTJ6HgGXiuySbWGriz0b5A6TwM5Gua5YFD1beh1vy1uHh3FyFU8OD_Znl6nUp16Ikk1a3Dk0jLB44DTAQRvK9yfLlZKWht7k-xhRf1O5whzV56VQKSZ-OmIPFO_yyjqOFr-H2vrZ518fVksOphZR_Y5eaq0Re0AIqv95_YAH8hhZNTVqMwnZuqZLZan9t-SSk9_y5rJOhrUClL02ValMZbVqvEH1w9b7Nlg7_A2_u3aZo88qlewXdQLBx4Yv7BkdKr69Fzzs7XTLNRkwp7ByoL0QfxuEFEvnqXazhXdvOoBzRFJYJy1P5YEnLqkaeXekvK9ebGnp2oc5koxBrzNBiOz7m3o9QZ-qwtLgvVUYwNjVWoYn05qQroqZDlqmR3MjDlyLZCirFCjoNcgHjacxBxK53XUe1SMJCJHhd1mMbFlRn3vnvcILDMP1udgQW1BpiW6nqOf1KLWJDmTvRoSFXPzGCkhpCLi1oMkBu6ZdIZRk74b5SVkQmshkpXXkNXFgqrmoYDAaBqnNbPCx1k_yUXD9p6HJ5_A3wilxBMT4Ms_rC_p-zpimtdVKQgCBO4jie44WburCG5pqN3JFRnjgY6vaXNQ3tN06d4yUcZhkWZJud2I6k-dqn084AEah_ZZ-lCVvk4K53hiaQzVL9I8-On_1tKFyxnjl1tLv1FE0kSDUQofPSsb-4FvlCTnc376dMrblVF8fZ5mjvCk9qn3VBHZp2CETdz_m9O85lJUNK7KJxNq9iWhQHQNiz2ILuUvhPWxLR4Nl5AgX_46Z2nK4RWC6FN_Lgvae2623OlB3i9nQYNjCzDcDxBCLrtKaLe7rti6akXbLkfNnGHH3fwg5Mj8Twjoc7raXlFMjhBex7J2imE393UK8Zplxrlt5AfAyhUHW4Cr2ak2RasPNs6x5rAN0SA64h3-iluEmxF9Yn-A0YlwVlLLdSLv4JJBES8I88=",
               "summary": []
             }
           ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8551,
-            "cachedInputTokens": 8347,
-            "cacheWriteTokens": 201,
-            "outputTokens": 121
+            "inputTokens": 9057,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 202,
+            "outputTokens": 120
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6c14f6812bbc43ce1bb7016d7f5fe3ce0c2aeb8f02fb5f00f98bf8af779ccbfc",
+        "fingerprint": "779dd608b8627ad39ebbabc32ca6dfc5a18386addbd1d24704e6009ef4f9ea89",
         "response": {
-          "text": "Maria L.’s allergy and usual service are both waiting for your approval to be forgotten. You can approve each on its card.",
+          "text": "I found two things remembered about Maria L.: “Hazelnut oil” and “Colour with Jess.” Both forget requests are waiting for your approval on their cards; nothing has been removed yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -72,169 +72,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8805,
-            "cachedInputTokens": 8548,
-            "cacheWriteTokens": 254,
-            "outputTokens": 30
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "79990559a4b7afd96df69836439a0bbbe6fd2ea21f2be3c6cb8f6ee35d5eb339",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_sZpUo0kAnRdAWk9MXm1XOroG",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8347,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "bb6edbcdbfbb21c7466406b6d5fa03ba10cec83f34effcf2dcdd3ff7a5f82c53",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_MRibzF8l3WIwce009kdcBNd6",
-              "name": "forget_fact",
-              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8553,
-            "cachedInputTokens": 8347,
-            "cacheWriteTokens": 203,
-            "outputTokens": 44
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "49dffe56d18b4de0ba58404520baf33feae37243895a218f2a7602ed60fd8263",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_VflJPKvfoM5jMwNWgaVZmSAY",
-              "name": "forget_fact",
-              "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8664,
-            "cachedInputTokens": 8550,
-            "cacheWriteTokens": 111,
-            "outputTokens": 45
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "caac8de9ac02eca77fdaeda283757e2381da4a7a5c37f3fdacbe8c695ef5c13d",
-        "response": {
-          "text": "I found two things remembered about Maria L.: her allergy (“Hazelnut oil”) and usual service (“Colour with Jess”). Both forget requests are waiting for your approval on their cards; nothing has been removed yet.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8777,
-            "cachedInputTokens": 8661,
-            "cacheWriteTokens": 113,
-            "outputTokens": 47
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "79990559a4b7afd96df69836439a0bbbe6fd2ea21f2be3c6cb8f6ee35d5eb339",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_QXKiWAhTGNOfwwQlnaW0xZ9g",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8347,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "25a79325c48aa489df3fa738c4424751916ac2a2fb06d1536a0590920d724544",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_1tq79tG1BKHRLy9cT6rd4pIi",
-              "name": "forget_fact",
-              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
-            },
-            {
-              "id": "call_O4yxCeg1JAEouq4yFe9qNlXV",
-              "name": "forget_fact",
-              "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8554,
-            "cachedInputTokens": 8347,
-            "cacheWriteTokens": 204,
-            "outputTokens": 96
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "3505f68522271e2f4057d9ad54b8c1b07008a22f472bf2a33e2ceccc93dc0a2b",
-        "response": {
-          "text": "I found two things remembered about Maria L. Both forget requests are waiting for your OK on their cards: her hazelnut oil allergy and her usual service, “Colour with Jess.” Nothing has been removed yet.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8783,
-            "cachedInputTokens": 8551,
-            "cacheWriteTokens": 229,
-            "outputTokens": 47
+            "inputTokens": 9310,
+            "cachedInputTokens": 9054,
+            "cacheWriteTokens": 253,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }

@@ -44,6 +44,14 @@ export const OutboxEmailSchema = z.object({
     .transform((value) => value.replace(/\s+/g, ' ').trim())
     .pipe(z.string().min(1)),
   text: z.string().min(1).max(50_000),
+  /**
+   * Commercial mail's one-click unsubscribe address (S36, RFC 8058): sent as `List-Unsubscribe`
+   * with `List-Unsubscribe-Post`. Transactional mail has none.
+   */
+  unsubscribeUrl: z
+    .url({ protocol: /^https?$/ })
+    .max(500)
+    .optional(),
 });
 export type OutboxEmail = z.infer<typeof OutboxEmailSchema>;
 export type OutboxEmailInput = z.input<typeof OutboxEmailSchema>;

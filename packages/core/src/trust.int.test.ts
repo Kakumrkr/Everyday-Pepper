@@ -1,5 +1,7 @@
 import {
   ActionProposalIdSchema,
+  FeedItemIdSchema,
+  type FeedItemId,
   OutboxMessageIdSchema,
   TaskIdSchema,
   TenantIdSchema,
@@ -14,6 +16,12 @@ import {
 import {
   addMembership,
   appendAuditEntry,
+  findFeedItem,
+  insertStaffMember,
+  linkFeedItemToProposal,
+  listOpenFeedItems,
+  listWaitingFeedItems,
+  syncFeedItems,
   claimOutboxMessage,
   deleteTask,
   findOutboxMessage,
@@ -42,12 +50,15 @@ import { stateFingerprint } from './fingerprint.js';
 import { outboxKeyFrom } from './outbox.js';
 import {
   approveProposal,
+  expireProposals,
   getAction,
   getProposal,
   listPendingProposals,
   listRecentActions,
+  proposeForBusiness,
   rejectProposal,
   requestAction,
+  reviseProposal,
   undoAction,
   type ActionRunner,
 } from './services/ai-actions.js';
@@ -1145,3 +1156,228 @@ describe('S26: receipts of approved proposals, tool versions and summaries (ADR-
 async function updateTaskDone(tx: TenantTx, id: string) {
   await updateTask(tx, TaskIdSchema.parse(id), { status: 'done', completedAt: new Date() });
 }
+
+describe('S36: proposals of the business, revisions and the feed (ADR-0040)', () => {
+  const nudge = (ref: string, text = 'Hello'): TrustJson => ({ clients: 1, ref, text });
+  const business = () => ({ ...ana(), via: 'ai' as const });
+  const passRequest = (ref: string, payload = nudge(ref)) => ({
+    payload,
+    idempotencyKey: `nudge.pass.${ref}`,
+    explanation: { ...explanation, steps: [] },
+    untrustedContext: true,
+  });
+  const propose = (ref: string, payload?: TrustJson) =>
+    withTenant(db, tenantId, (tx) =>
+      proposeForBusiness(tx, business(), noteRunner, passRequest(ref, payload), {
+        clock: clockAt(NOW),
+      }),
+    );
+
+  it('waits for an owner or manager, whatever the dial, once per key, audited as the system', async () => {
+    await changeAutonomy(db, ana(), { levels: { 'message.confirmation': 'auto' } }, defaults);
+    const proposal = await propose('p1');
+    expect(proposal).toMatchObject({
+      status: 'pending',
+      requestedByUserId: null,
+      recordOwnerUserId: null,
+    });
+    expect(proposal.explanation.decision).toEqual({ outcome: 'propose', reason: 'setting' });
+    expect((await propose('p1')).id).toBe(proposal.id);
+    const entries = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 50 }));
+    expect(
+      entries.find(
+        (entry) => entry.action === 'ai_proposal.created' && entry.entity.id === proposal.id,
+      )?.actor,
+    ).toEqual({ kind: 'system', userId: null });
+    // Staff neither see nor decide it; a manager does.
+    expect((await listPendingProposals(db, jessActor())).map((p) => p.id)).not.toContain(
+      proposal.id,
+    );
+    await expect(rejectProposal(db, jessActor(), proposal.id)).rejects.toThrow();
+    await changeAutonomy(db, ana(), { levels: { 'message.confirmation': null } }, defaults);
+  });
+
+  it('a revision replaces the proposal with a new fingerprint; the old card can no longer run', async () => {
+    const proposal = await propose('p2');
+    const revised = await reviseProposal(
+      db,
+      marco(),
+      proposal.id,
+      {
+        shownFingerprint: proposal.fingerprint,
+        payload: nudge('p2', 'Hi there'),
+        runner: noteRunner,
+      },
+      { clock: clockAt(after(0, 1)) },
+    );
+    expect(revised.kind).toBe('revised');
+    expect(revised.proposal.fingerprint).not.toBe(proposal.fingerprint);
+    expect(revised.proposal.payload).toEqual(nudge('p2', 'Hi there'));
+    expect(revised.proposal.requestedByUserId).toBeNull();
+    // The new words are the manager's own, in the audit.
+    const audit = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 50 }));
+    expect(
+      audit.find(
+        (entry) =>
+          entry.action === 'ai_proposal.created' && entry.entity.id === revised.proposal.id,
+      )?.actor,
+    ).toEqual({ kind: 'user', userId: manager });
+    expect((await getProposal(db, ana(), proposal.id)).status).toBe('superseded');
+    await expect(
+      approveProposal(db, ana(), proposal.id, {
+        shownFingerprint: proposal.fingerprint,
+        runner: noteRunner,
+      }),
+    ).rejects.toThrow(ProposalNotPendingError);
+    // An out-of-date card changes nothing.
+    const stale = await reviseProposal(
+      db,
+      ana(),
+      revised.proposal.id,
+      {
+        shownFingerprint: proposal.fingerprint,
+        payload: nudge('p2', 'Other'),
+        runner: noteRunner,
+      },
+      { clock: clockAt(after(0, 1)) },
+    );
+    expect(stale).toMatchObject({ kind: 'stale', proposal: { id: revised.proposal.id } });
+    // Staff may not revise it (they can't even see it); the AI may not either.
+    await expect(
+      reviseProposal(db, jessActor(), revised.proposal.id, {
+        shownFingerprint: revised.proposal.fingerprint,
+        payload: nudge('p2', 'x'),
+        runner: noteRunner,
+      }),
+    ).rejects.toThrow(ProposalNotFoundError);
+    await expect(
+      reviseProposal(db, { ...ana(), via: 'ai' }, revised.proposal.id, {
+        shownFingerprint: revised.proposal.fingerprint,
+        payload: nudge('p2', 'x'),
+        runner: noteRunner,
+      }),
+    ).rejects.toThrow(ForbiddenError);
+    // A revision must keep its target.
+    await expect(
+      reviseProposal(
+        db,
+        ana(),
+        revised.proposal.id,
+        {
+          shownFingerprint: revised.proposal.fingerprint,
+          payload: nudge('other-target'),
+          runner: noteRunner,
+        },
+        { clock: clockAt(after(0, 1)) },
+      ),
+    ).rejects.toThrow(/keep its target/);
+  });
+
+  it('a revision past its time expires the proposal instead', async () => {
+    const proposal = await propose('p3');
+    const result = await reviseProposal(
+      db,
+      ana(),
+      proposal.id,
+      { shownFingerprint: proposal.fingerprint, payload: nudge('p3', 'Late'), runner: noteRunner },
+      { clock: clockAt(after(2)) },
+    );
+    expect(result).toMatchObject({ kind: 'expired', proposal: { status: 'expired' } });
+  });
+
+  it('the feed item waiting on it follows edits and closes with the decision', async () => {
+    const staffId = await withTenant(db, tenantId, async (tx) => {
+      const staff = await insertStaffMember(tx, {
+        displayName: 'Jess',
+        color: '#2a7230',
+        active: true,
+        membershipId: null,
+      });
+      await syncFeedItems(
+        tx,
+        ['2030-01-07', '2030-01-08', '2030-01-09'].map((day) => ({
+          kind: 'schedule_gaps' as const,
+          subjectKey: `staff:${staff.id}`,
+          day,
+          audienceStaffId: null,
+          subjects: { staffMemberId: staff.id, clientId: null, bookingId: null, serviceId: null },
+          payload: {
+            gapCount: 1,
+            openMinutes: 60,
+            longestStartsAt: `${day}T15:00:00.000Z`,
+            longestEndsAt: `${day}T16:00:00.000Z`,
+          },
+          expiresAt: new Date('2030-01-10T00:00:00Z'),
+        })),
+        new Date(NOW),
+      );
+      return staff.id;
+    });
+    const itemFor = async (day: string) => {
+      const items = await withTenant(db, tenantId, (tx) =>
+        listOpenFeedItems(tx, new Date(NOW), 200),
+      );
+      const item = items.find((each) => each.dedupeKey === `schedule_gaps:staff:${staffId}:${day}`);
+      if (item === undefined) throw new Error('no item');
+      return FeedItemIdSchema.parse(item.id);
+    };
+    const items = new Map<string, FeedItemId>();
+    const statusOf = async (day: string) => {
+      const id = items.get(day);
+      if (id === undefined) throw new Error('not linked');
+      return (await withTenant(db, tenantId, (tx) => findFeedItem(tx, id)))?.status;
+    };
+    const linked = async (day: string, ref: string) => {
+      const item = await itemFor(day);
+      items.set(day, item);
+      const proposal = await propose(ref);
+      await withTenant(db, tenantId, (tx) => linkFeedItemToProposal(tx, item, proposal.id));
+      return proposal;
+    };
+
+    // Edited, then approved: done.
+    const first = await linked('2030-01-07', 'f1');
+    const edited = await reviseProposal(
+      db,
+      ana(),
+      first.id,
+      {
+        shownFingerprint: first.fingerprint,
+        payload: nudge('f1', 'Edited'),
+        runner: noteRunner,
+      },
+      { clock: clockAt(NOW) },
+    );
+    const waiting = await withTenant(db, tenantId, (tx) => listWaitingFeedItems(tx));
+    expect(waiting.find((each) => each.day === '2030-01-07')?.actionProposalId).toBe(
+      edited.proposal.id,
+    );
+    const approved = await approveProposal(
+      db,
+      ana(),
+      edited.proposal.id,
+      {
+        shownFingerprint: edited.proposal.fingerprint,
+        runner: noteRunner,
+      },
+      // The fake tool queues its email on the real clock, after the undo-send grace.
+      { clock: realTime },
+    );
+    expect(approved.kind).toBe('executed');
+    expect(await statusOf('2030-01-07')).toBe('done');
+
+    // Turned down: dismissed.
+    const second = await linked('2030-01-08', 'f2');
+    await rejectProposal(db, marco(), second.id, { clock: clockAt(NOW) });
+    expect(await statusOf('2030-01-08')).toBe('dismissed');
+
+    // Expired by the clean-up: expired, so the pass may open it again.
+    const third = await linked('2030-01-09', 'f3');
+    const expired = await withTenant(db, tenantId, (tx) =>
+      expireProposals(tx, new Date(after(3)), 100),
+    );
+    expect(expired).toBeGreaterThanOrEqual(1);
+    expect((await getProposal(db, ana(), third.id)).status).toBe('expired');
+    expect(await statusOf('2030-01-09')).toBe('expired');
+  });
+});

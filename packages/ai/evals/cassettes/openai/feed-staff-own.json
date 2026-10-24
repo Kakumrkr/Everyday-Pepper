@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "a13611a226d59d1cb30f551f496547f2c472d1efcdfe1d8f3473e752ee73da8b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6XLeL4ty51pSlbEeeyXGlnaI",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8853,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8850,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "abfed42540ff3c7be9db3a6bd85dfda7f805cd727bb3532ece202a8595d21dad",
+        "response": {
+          "text": "Your feed has 7 suggestions:\n\n• Schedule gaps with you: today, 9–5 (8 hours open); Tuesday, 9–12 (3 hours); Wednesday and Thursday, 9–5 (8 hours each); Friday, 9–2 (5 hours).\n• Two clients are due to rebook for haircuts: Sara K. was due October 26, and Sarah P. October 27.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9811,
+            "cachedInputTokens": 8850,
+            "cacheWriteTokens": 958,
+            "outputTokens": 90
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

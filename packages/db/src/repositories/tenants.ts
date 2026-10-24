@@ -1,5 +1,6 @@
 import {
   BrandColorSchema,
+  MailingAddressSchema,
   NewTenantSchema,
   TenantIdSchema,
   TenantSlugSchema,
@@ -108,6 +109,21 @@ export async function updateCurrentTenantBrandColor(
   const [tenant] = await tx
     .update(tenants)
     .set({ brandColor: brandColor === null ? null : BrandColorSchema.parse(brandColor) })
+    .where(eq(tenants.id, sql`current_tenant_id()`))
+    .returning();
+  return tenant;
+}
+
+/** Sets (or, with `null`, clears) the business's mailing address for commercial mail (S36). */
+export async function updateCurrentTenantMailingAddress(
+  tx: TenantTx,
+  mailingAddress: string | null,
+): Promise<Tenant | undefined> {
+  const [tenant] = await tx
+    .update(tenants)
+    .set({
+      mailingAddress: mailingAddress === null ? null : MailingAddressSchema.parse(mailingAddress),
+    })
     .where(eq(tenants.id, sql`current_tenant_id()`))
     .returning();
   return tenant;

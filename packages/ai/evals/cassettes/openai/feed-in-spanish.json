@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5e0b9cf92d3c52e7f2281d939ad1707bd2ab2823b4f859272ab21c19ea52d8ac",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_9SfxJ43xZwNt4tbiio0HhK4s",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8857,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 13,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e6f587747b0b99f7c42cb9025e5ef419b04fd0890b3795500adf7308f8ed540c",
+        "response": {
+          "text": "Sí. Hoy hay huecos amplios de 9:00 a 17:00 para Jess y Marco. También aparecen dos clientas que ya podrían volver para un corte: Sara K. y Sarah P. No hay correos de rebooking esperando aprobación.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10515,
+            "cachedInputTokens": 8854,
+            "cacheWriteTokens": 1658,
+            "outputTokens": 57
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

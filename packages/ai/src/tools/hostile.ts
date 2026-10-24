@@ -101,6 +101,7 @@ export function validArguments(
     add_visit_note: { bookingId: ids.bookingId, key: 'formula', value: '6N + 20 vol' },
     forget_fact: { factId: ids.factId },
     search_memory: { query: 'every client list' },
+    get_feed: { kind: null },
     propose_rule: {
       kind: 'minimum_notice',
       staffMemberId: ids.staffMemberId,
@@ -123,6 +124,7 @@ TAKES_IDS.delete('find_clients');
 TAKES_IDS.delete('list_services_and_staff');
 TAKES_IDS.delete('list_todos');
 TAKES_IDS.delete('search_memory');
+TAKES_IDS.delete('get_feed');
 
 /** Every attack against every tool, for one target business on `date` (local). */
 export function hostileAttacks(targets: HostileTargets, date: string): Attack[] {

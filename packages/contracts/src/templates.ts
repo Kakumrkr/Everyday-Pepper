@@ -148,6 +148,25 @@ export const TemplateInsightsSchema = z
   .strict();
 export type TemplateInsights = z.infer<typeof TemplateInsightsSchema>;
 
+/**
+ * How the business's rebooking emails sound and when they are drafted (S36, ADR-0040): a short
+ * description of the voice for the draft writer (never client data), and the local hour of the
+ * morning drafts pass.
+ */
+export const TemplateDraftsSchema = z
+  .object({
+    voice: z.string().trim().min(1).max(300),
+    morningHour: z.number().int().min(5).max(11),
+  })
+  .strict();
+export type TemplateDrafts = z.infer<typeof TemplateDraftsSchema>;
+
+/** Without a template (or before one says otherwise): warm, short, 7 in the morning. */
+export const PLATFORM_DRAFTS: TemplateDrafts = {
+  voice: 'Warm, friendly and short, like a message from the person who usually looks after them.',
+  morningHour: 7,
+};
+
 const Hint = z.string().trim().min(1).max(TEMPLATE_LIMITS.maxHintLength);
 
 /** What onboarding looks for on a website, price list or photo (Phase 9). */
@@ -186,6 +205,8 @@ export const TemplateSchema = z
         message: 'Intake field keys are unique',
       }),
     insights: TemplateInsightsSchema,
+    /** The rebooking emails' voice and the morning pass's hour (S36). */
+    drafts: TemplateDraftsSchema.default(PLATFORM_DRAFTS),
     /** Domain hints added to the AI's instructions (Phase 6); never client data. */
     promptFragments: z
       .array(z.string().trim().min(1).max(TEMPLATE_LIMITS.maxPromptFragmentLength))

@@ -99,6 +99,10 @@ export const nails: TemplateInput = {
     { key: 'allergies', label: 'Allergies (e.g. acrylates)', type: 'text', sensitive: true },
     { key: 'preferences', label: 'Preferences', type: 'long_text' },
   ],
+  drafts: {
+    voice: 'Cheerful, friendly and short, like a nail tech messaging a regular.',
+    morningHour: 7,
+  },
   insights: {
     enabled: [
       'rebooking_due',

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3d089807598891d7ae75cc8bb3d40ce36c1098b0bee528a164e2fa4be69e381d",
+        "fingerprint": "f6ebcf6da53aba6017054ae2d8fa06912b9fee6f79f3929d56276b60fbd50694",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BSUGPB264WdyonwbwTNz6Fxc",
+              "id": "call_NqpJ7D34KH3YOs8w83CrEdZw",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "6a67d409b350f478c3b4ba6f4684d51b29f9ab5ca35d32e0947b66074cd635fd",
+        "fingerprint": "296d1ece736e748ef5333c98c38bc0200646e44fadb1eeea848b552061abb679",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BCj1AgMGe9u9n7UGXv7ADX8y",
+              "id": "call_RaFMYcJH9OeCKisZfArG6cjk",
               "name": "find_availability",
               "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":null}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8644,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 291,
-            "outputTokens": 93
+            "inputTokens": 9327,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 469,
+            "outputTokens": 90
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "70c52078cd40ba3d1fc76e5b026232e550a27b0d13c34e68e57e15fb40a61967",
+        "fingerprint": "7c42a432c2ebd825174d4028a194db692bcc04c1ce417b210820326267c48016",
         "response": {
-          "text": "Jess has haircut openings on Friday, Nov 6, starting at 9:00 AM. The times returned are every 15 minutes through 11:45 AM, and there are more later in the day.",
+          "text": "Jess has haircut openings Friday, November 6, starting at 9:00 AM. Other available starts are every 15 minutes through 11:45 AM, with more times later in the day.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,142 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9381,
-            "cachedInputTokens": 8641,
-            "cacheWriteTokens": 737,
-            "outputTokens": 47
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "3d089807598891d7ae75cc8bb3d40ce36c1098b0bee528a164e2fa4be69e381d",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_lZrflGUollC4sATN8eDojQRC",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8350,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "6c2159e01b143bf892ea5e5849f324c0628011f8e35545ce162c4da1c1d6538a",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_eJSNIPx1I3gcO8Ls1vCfVZoU",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8630,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 277,
-            "outputTokens": 85
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "58a8b634f77cc5888958043150377799e159c5274686d910dd24ea90dc433dcf",
-        "response": {
-          "text": "Jess’s first available haircut slot Friday, Nov 6 is at 9:00 AM. There are 12+ free times; I can see openings through 11:45 AM, with more available after that.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9323,
-            "cachedInputTokens": 8627,
-            "cacheWriteTokens": 693,
-            "outputTokens": 48
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "3d089807598891d7ae75cc8bb3d40ce36c1098b0bee528a164e2fa4be69e381d",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_QRRCgsGNXckpwkDu8zZ9OisE",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8350,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "80caa451ffc77cbc72d9e7b39dab027bae411f55bedf38ffe209b0809df307a3",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_s4ZnjTtnFUCObD3P4BjVxn2b",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8631,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 278,
-            "outputTokens": 87
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "6ee468e37c4f05aa92bdc9237f6072dcff8eef1daa958a1b919bdff89473de2f",
-        "response": {
-          "text": "Jess has haircut openings Friday, November 6, starting at 9:00 AM. Other available starts shown are every 15 minutes through 11:45 AM, with more times available later.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9350,
-            "cachedInputTokens": 8628,
-            "cacheWriteTokens": 719,
-            "outputTokens": 44
+            "inputTokens": 10097,
+            "cachedInputTokens": 9324,
+            "cacheWriteTokens": 770,
+            "outputTokens": 45
           },
           "model": "gpt-6-luna"
         }

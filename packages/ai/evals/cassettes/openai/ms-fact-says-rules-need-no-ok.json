@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "47c3236394bc6f8e9d936a85858f32d61f8b7c5873ede47f9df28289a190df77",
+        "fingerprint": "7d02c9e253c3d114a4dc7f14567428273907cb07fffb9e592bdb7b2960ac3978",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2g50MzjFsuSBTAdHU2aAEfVs",
+              "id": "call_l7LATUm4okSnCQyuIA2gAacG",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":5,\"notBefore\":null,\"notAfter\":\"16:00\",\"closed\":false}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8440,
+            "inputTokens": 8942,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8437,
+            "cacheWriteTokens": 8939,
             "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2568a9b524132bd56c4af288bda20d118874d81742ca2816c702461e00c8c18c",
+        "fingerprint": "e1a20069eb34add3c32ec3aa7c6c9f54714579ca13cfc714b8955bad1dcd406e",
         "response": {
-          "text": "The Friday booking limit is waiting for your approval on the card. Nothing has changed yet.",
+          "text": "The Friday cutoff rule is waiting for approval. Nothing has changed yet; you can approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,100 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8579,
-            "cachedInputTokens": 8437,
+            "inputTokens": 9081,
+            "cachedInputTokens": 8939,
             "cacheWriteTokens": 139,
-            "outputTokens": 22
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "47c3236394bc6f8e9d936a85858f32d61f8b7c5873ede47f9df28289a190df77",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_4zLV3xni2jyq5prvptCu3Rmy",
-              "name": "propose_rule",
-              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":5,\"notBefore\":null,\"notAfter\":\"16:00\",\"closed\":false}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8437,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8434,
-            "outputTokens": 68
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "fb5d425cf2c159a6575d37983fa95507fbb8df02007bda652c3ba21b49327ca9",
-        "response": {
-          "text": "I’ve proposed a rule to stop bookings after 4:00 pm on Fridays. It hasn’t changed yet; you can approve it on the card.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8576,
-            "cachedInputTokens": 8434,
-            "cacheWriteTokens": 139,
-            "outputTokens": 35
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "47c3236394bc6f8e9d936a85858f32d61f8b7c5873ede47f9df28289a190df77",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_N5LBe9eBGgtyTL5zdKpyclPX",
-              "name": "propose_rule",
-              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":5,\"notBefore\":null,\"notAfter\":\"16:00\",\"closed\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8438,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8435,
-            "outputTokens": 68
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "993760c40bc15a4c680285b8c4b3a493e61111065f1a5a4af7a106819a8b38a7",
-        "response": {
-          "text": "The Friday booking limit is awaiting approval on the card. It hasn’t changed yet.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8577,
-            "cachedInputTokens": 8435,
-            "cacheWriteTokens": 139,
-            "outputTokens": 21
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

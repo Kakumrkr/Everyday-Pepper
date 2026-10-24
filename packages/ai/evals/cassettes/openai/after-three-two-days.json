@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "cff9f8ec46b1e9627bb7f0294bddb2727dfede1ecc32e39906ae663f4bcdcfa1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_d9neuxC3XwpLAIDNAZqZkJUI",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8861,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 17,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4fcb5735726f2900036b94c898aa35e8c8572f17f9a0e8be9de677b1bf0933f9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xcoRm2CSKDtJ0RwKNTENpDEW",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-05\",\"days\":1,\"notBefore\":\"15:00\"}"
+            },
+            {
+              "id": "call_7ZMbWMdJWygA11i0htmGpPNZ",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"15:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9325,
+            "cachedInputTokens": 8858,
+            "cacheWriteTokens": 464,
+            "outputTokens": 190
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "68285e3decdf379aec8496ca4611c3db84eb6f7c3699833bb6ba7d8da0a0fa7f",
+        "response": {
+          "text": "Jess has haircut openings after 3 on Thursday: 3:00, 3:15, 3:30, 3:45, and 4:00. Friday: 3:15, 3:30, 3:45, and 4:00. These are local times.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10046,
+            "cachedInputTokens": 9322,
+            "cacheWriteTokens": 721,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

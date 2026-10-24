@@ -71,6 +71,11 @@ const MESSAGES: Record<string, string> = {
   memory_episode_not_found: 'I no longer remember that conversation.',
   memory_limit_reached: 'I remember as much as I can here. Delete something first.',
   memory_paused: 'Remembering new things is paused for this business.',
+  // Rebooking emails (S36).
+  draft_refused:
+    'Leave out links, email addresses, phone numbers and anything sensitive, and keep it to 120 words.',
+  nudge_not_sendable: 'This email can’t go to this client any more. Nothing was sent.',
+  unsubscribe_link_invalid: 'This unsubscribe link doesn’t work. Contact the business instead.',
 };
 
 const FALLBACK = 'Something went wrong. Try again.';

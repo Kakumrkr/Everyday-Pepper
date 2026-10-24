@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "f3df6b0f8940abf198cc92fedd02eb16cbf63a7e34ff16682530f6ff79454097",
+        "fingerprint": "208a67984c9bc7f2778afa5f2adf630a487aa1ec6b1f2c03b98890e461b332e4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_B4o6I5xWL2foFGwrgW0L34AO",
-              "name": "remember_fact",
-              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"closed_days\",\"value\":\"Closed December 24 to 26, 2026.\",\"sensitive\":null}"
+              "id": "call_vF2KOL3ypn72NBX8rH3pjSHo",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8359,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8864,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 20,
-            "outputTokens": 47
+            "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "61366d6b0198c459bba4bf958a6e82ddd3d1e347f14851bfcb8e75feb6da462a",
+        "fingerprint": "0053ce4d79474295bd44007821888f2f804f51d5f91e602490b7138dd2aa5f32",
         "response": {
-          "text": "I’ve noted that Juniper Hair Studio is closed December 24–26, 2026.",
+          "text": "The no-bookings rule for December 24–26 is waiting for your approval on the card. Nothing has changed yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,96 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8446,
-            "cachedInputTokens": 8356,
-            "cacheWriteTokens": 87,
-            "outputTokens": 24
+            "inputTokens": 9021,
+            "cachedInputTokens": 8861,
+            "cacheWriteTokens": 157,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "208a67984c9bc7f2778afa5f2adf630a487aa1ec6b1f2c03b98890e461b332e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_szxPoirEgO7fN0Gtqj9Req9m",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8864,
+            "cachedInputTokens": 8861,
+            "outputTokens": 77
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a7bf0556af6b189ad68da5c01ebf93e59d6001ce8608cee7b49aeae0c3b133d2",
+        "response": {
+          "text": "I’ve proposed blocking bookings across the whole business from December 24–26, 2026. Nothing has changed yet; an owner or manager can approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9021,
+            "cachedInputTokens": 9018,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "208a67984c9bc7f2778afa5f2adf630a487aa1ec6b1f2c03b98890e461b332e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gg7t259cIu9NIsqbKrBz6UOo",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8864,
+            "cachedInputTokens": 8861,
+            "outputTokens": 77
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "58f67e19b2d1de3928b64604eca48a6a7bca58d951c8291a8146b3aee834f574",
+        "response": {
+          "text": "I’ve proposed blocking bookings across the business from December 24–26, 2026. It’s waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9021,
+            "cachedInputTokens": 9018,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

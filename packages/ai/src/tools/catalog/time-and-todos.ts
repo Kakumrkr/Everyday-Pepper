@@ -377,10 +377,10 @@ async function assigneeNamesOf(
 export const listTodos: ReadTool = {
   kind: 'read',
   name: 'list_todos',
-  version: 1,
+  version: 2,
   localTimes: false,
   guide: {
-    use: 'List open to-dos with their ids: the member’s own, or everyone’s they may see. Use it for "what’s on my list?" and to find the to-do to mark done.',
+    use: 'List open to-dos with their ids: the member’s own, or everyone’s they may see. Use it whenever the member asks what is on their list or still open, to do or pending for them or the team, and to find the to-do to mark done.',
     avoid: [
       'to add a to-do (use add_todo)',
       'for appointments (use get_day or find_client_bookings)',

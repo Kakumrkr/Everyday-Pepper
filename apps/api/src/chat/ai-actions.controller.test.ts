@@ -9,7 +9,7 @@ import {
   type AiProposalView,
   type MembershipRole,
 } from '@pepper/contracts';
-import { ProposalNotFoundError, UndoRefusedError } from '@pepper/core';
+import { DraftRefusedError, ProposalNotFoundError, UndoRefusedError } from '@pepper/core';
 import { DATABASE, REDIS } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -107,6 +107,9 @@ const ai = {
   proposals: vi.fn(() => Promise.resolve({ proposals: [proposal] })),
   approve: vi.fn((): Promise<unknown> => Promise.resolve({ kind: 'executed', action })),
   reject: vi.fn(() => Promise.resolve({ ...proposal, status: 'rejected', canDecide: false })),
+  editDraft: vi.fn((): Promise<unknown> =>
+    Promise.resolve({ ...proposal, draft: { subject: 'Hi', body: 'See you soon.' } }),
+  ),
   action: vi.fn(() => Promise.resolve(action)),
   actions: vi.fn(() => Promise.resolve({ actions: [action] })),
   undo: vi.fn((): Promise<unknown> =>
@@ -205,6 +208,23 @@ describe('/v1/ai proposals', () => {
   it('turns one down', async () => {
     const rejected = await send('post', `/v1/ai/proposals/${ID}/reject`).expect(200);
     expect(rejected.body).toMatchObject({ status: 'rejected', canDecide: false });
+  });
+
+  it('edits a nudge’s words with the shown fingerprint only (S36)', async () => {
+    const edit = { fingerprint: FP, subject: 'Hi', body: 'See you soon.' };
+    const edited = await send('post', `/v1/ai/proposals/${ID}/draft`, edit).expect(200);
+    expect(edited.body).toMatchObject({ draft: { subject: 'Hi', body: 'See you soon.' } });
+    expect(ai.editDraft).toHaveBeenCalledWith(tenant, ID, edit);
+    await send('post', `/v1/ai/proposals/${ID}/draft`, { ...edit, clientId: ID }).expect(400);
+    await send('post', `/v1/ai/proposals/${ID}/draft`, { subject: 'Hi', body: 'x' }).expect(400);
+    ai.editDraft.mockRejectedValueOnce(new DraftRefusedError('invalid'));
+    const refused = await send('post', `/v1/ai/proposals/${ID}/draft`, edit).expect(422);
+    expect(code(refused.body)).toBe('draft_refused');
+    await request(server)
+      .post(`/v1/ai/proposals/${ID}/draft`)
+      .set('cookie', 'signed-in')
+      .send(edit)
+      .expect(403);
   });
 
   it('never sends an answer that breaks the contract (OWASP LLM10)', async () => {

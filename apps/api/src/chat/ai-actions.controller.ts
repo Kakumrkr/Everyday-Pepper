@@ -9,6 +9,7 @@ import {
   ApproveProposalResponseSchema,
   AutonomyChangeSchema,
   BusinessAutonomySchema,
+  EditDraftRequestSchema,
   UndoActionRequestSchema,
   UndoActionResponseSchema,
   type AiActionsResponse,
@@ -73,6 +74,26 @@ export class AiActionsController {
     const { fingerprint } = parseBody(ApproveProposalRequestSchema, body);
     return ApproveProposalResponseSchema.parse(
       await answering(() => this.ai.approve(tenant, proposalId, fingerprint)),
+    );
+  }
+
+  /**
+   * A rebooking email's words, edited on the card (S36): the proposal is replaced by one with
+   * the new words and a new fingerprint (or, from an out-of-date card, the current one comes
+   * back). 404; 409 `proposal_not_pending`; 422 `draft_refused`.
+   */
+  @Post('proposals/:proposalId/draft')
+  @HttpCode(200)
+  @RequirePermission('ai.chat')
+  async editDraft(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+    @Body() body: unknown,
+  ): Promise<AiProposalView> {
+    const { proposalId } = parseBody(ProposalParamsSchema, params);
+    const edit = parseBody(EditDraftRequestSchema, body);
+    return AiProposalViewSchema.parse(
+      await answering(() => this.ai.editDraft(tenant, proposalId, edit)),
     );
   }
 

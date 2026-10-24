@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "13bf7f40764a4cc5b64120b0b04428363e62c568176c7dc91af4fbbda7cb0a0f",
+        "fingerprint": "3590de49babfdf8b139801681c3b591d12e04937e775882f6801291f3b49830b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_JQatIQ08v42n33qxtbSZCVod",
+              "id": "call_qG8mE8pmEBpWkZpUZBX9w9oo",
               "name": "propose_rule",
-              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":1,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":false}"
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":1,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8350,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 14,
             "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "055e82a6d871367ac0f2bcc6d7df0c333e5f288629df9d8b50ff912ecf5a847d",
+        "fingerprint": "68dede8a1eb139f8b0d0fb05ed21736d0d2a8f8160c7f6730b51bfcdaf88013d",
         "response": {
-          "text": "The rule is waiting for approval: no bookings before 10:00 on Mondays for the whole business. You can approve it on the card.",
+          "text": "The rule is waiting for your approval on the card. It won’t take effect until you approve it.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8492,
-            "cachedInputTokens": 8350,
+            "inputTokens": 8997,
+            "cachedInputTokens": 8855,
             "cacheWriteTokens": 139,
-            "outputTokens": 33
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

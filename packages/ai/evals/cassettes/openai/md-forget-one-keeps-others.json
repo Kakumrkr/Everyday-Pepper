@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d22a639c85fd9e4821620512db2fcfedd717bde964b2e765f7bc9b2fdca1b9dc",
+        "fingerprint": "f853f499ba50ad42d5a90750d43703d579071b382ee7c4e77f1068bc7198503d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_J0KHES5Pa2z4ZiEWGdwehNUw",
+              "id": "call_o0DbpaaSb9hptQLpsZsfWyQT",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8852,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 8,
             "outputTokens": 18
           },
@@ -25,56 +25,12 @@
         }
       },
       {
-        "fingerprint": "d7b9fb909f648476a225574b614f7d68379ed4a2a12eef7ffe000cc2dbe2893c",
-        "response": {
-          "text": "Maria L.’s usual service is “Colour with Jess.”",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8503,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 156,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "d22a639c85fd9e4821620512db2fcfedd717bde964b2e765f7bc9b2fdca1b9dc",
+        "fingerprint": "dcfdbd6d8e3a457a3f49c4fc16a19b8a4d3f97836b6e8ffb1760ea470b708b26",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Xr0mML25bZFJZdQdLajXrbMr",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8344,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "98ea0dae9fa42e9ecceba0161ac27518aa7af0da8105afc06ad52f47f7093c60",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_8GnfBrX21ExGEHpt2ZgxaV3c",
+              "id": "call_BAADDS9k2A4OmwyG3UiZClLn",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -82,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8497,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 150,
-            "outputTokens": 41
+            "inputTokens": 9009,
+            "cachedInputTokens": 8849,
+            "cacheWriteTokens": 157,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3bb10c180d1198c811a6037bcffe1c682fb578ec697c9d376103322e236a2f22",
+        "fingerprint": "124a1e33380a33d6850a86dafc863a15309a695d15be1acfbf6dd907dd07d271",
         "response": {
-          "text": "Maria L.’s usual service is “Colour with Jess.” She has a confirmed haircut with Jess tomorrow, Nov 3, at 3 PM. Her last noted visit was a colour with Jess on Oct 23.",
+          "text": "Maria L. usually has “Colour with Jess.” She’s booked for a haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour appointment with Jess on Oct 23.",
           "toolCalls": [],
           "replay": [
             {
@@ -103,76 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9011,
-            "cachedInputTokens": 8494,
-            "cacheWriteTokens": 514,
-            "outputTokens": 48
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "d22a639c85fd9e4821620512db2fcfedd717bde964b2e765f7bc9b2fdca1b9dc",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_udWuMeLRUMumJ4Iv7eJKhbn8",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8344,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "29c659dab937cfaed3b1beb4df55b0fa3b56e7ca4b7eb0244b3186bce5a8a22b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_QY6JW4ztQyToVZnDTyaURK7F",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8503,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 156,
-            "outputTokens": 43
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "6d9833cec496ef7419e1c90d3b0538bf771d0d4ab533b3b7893b7b57ba1a0db7",
-        "response": {
-          "text": "Maria L.’s usual service is “Colour with Jess.” She has a confirmed haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour with Jess on Oct 23 at 10:00 AM.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9029,
-            "cachedInputTokens": 8500,
-            "cacheWriteTokens": 526,
-            "outputTokens": 56
+            "inputTokens": 9549,
+            "cachedInputTokens": 9006,
+            "cacheWriteTokens": 540,
+            "outputTokens": 50
           },
           "model": "gpt-6-luna"
         }

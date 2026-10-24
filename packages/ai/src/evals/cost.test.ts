@@ -1,6 +1,8 @@
+import { DRAFT_LIMITS } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   costOfUsage,
+  DRAFTS_PER_PASS_ESTIMATE,
   estimateRunCost,
   OUTPUT_ALLOWANCE_TOKENS,
   MAX_CASES_PER_RUN,
@@ -91,6 +93,15 @@ describe('estimateRunCost (the budget guard, playbook §4)', () => {
     expect(estimateRunCost([twoTurns], 1, PRICE).usage.outputTokens).toBe(
       2 * 6 * OUTPUT_ALLOWANCE_TOKENS,
     );
+  });
+
+  it('counts a morning drafts pass as its drafts’ whole allowance (S36)', () => {
+    const drafts = evalCase({ turns: [{ action: { morningDrafts: true } }], set: 'drafts' });
+    expect(estimateRunCost([drafts], 1, PRICE).usage).toEqual({
+      inputTokens: DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxTokens,
+      cachedInputTokens: 0,
+      outputTokens: DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxOutputTokens,
+    });
   });
 
   it('keeps one run of a full chunk of one-turn cases under the $1.50 cap even at every step', () => {

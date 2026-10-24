@@ -1,16 +1,29 @@
 import {
+  ActionProposalIdSchema,
+  ClientIdSchema,
   FeedItemIdSchema,
   TenantIdSchema,
   type FeedItemId,
   type TenantId,
   type UserId,
 } from '@pepper/contracts';
+import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
 import { insertStaffMember } from './repositories/appointments.js';
-import { insertClient } from './repositories/clients.js';
+import { insertClient, optOutClientEmail } from './repositories/clients.js';
 import {
+  claimDraftsRun,
   closeFeedItem,
+  linkFeedItemToProposal,
+  listDraftableRebookings,
+  listDueDraftRuns,
+  listWaitingFeedItems,
+  nudgeTargetKey,
+  readDraftsDueAt,
+  repointFeedItems,
+  setDraftsDueAt,
+  settleFeedItemsOf,
   countDismissals,
   feedOutcomeCounts,
   listDueInsightRuns,
@@ -24,7 +37,8 @@ import {
   type FeedCandidate,
 } from './repositories/feed.js';
 import { addMembership } from './repositories/memberships.js';
-import { createTenant } from './repositories/tenants.js';
+import { decideProposal, insertProposal } from './repositories/trust.js';
+import { createTenant, updateCurrentTenantMailingAddress } from './repositories/tenants.js';
 import { withMember, withTenant, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
@@ -350,5 +364,167 @@ describe('insight runs', () => {
 
   it('lets a staff member ask for a run (a booking change in their request)', async () => {
     await expect(as(jess, requestInsightRun)).resolves.toBeUndefined();
+  });
+});
+
+describe('rebooking nudges (S36)', () => {
+  let sara: string;
+  let kim: string;
+  let lee: string;
+  const explanation = {
+    requestMessageId: null,
+    steps: [],
+    facts: [],
+    alternatives: [],
+    untrustedContext: true,
+    decision: { outcome: 'propose' as const, reason: 'setting' as const },
+  };
+  const propose = (clientId: string, key: string, createdAt = NOW) =>
+    asWorker(async (tx) => {
+      const row = await insertProposal(tx, {
+        action: 'message.rebooking_nudge',
+        tool: 'send_rebooking_nudge',
+        targetKey: nudgeTargetKey(clientId),
+        idempotencyKey: `nudge.${key}`,
+        payload: { clientId },
+        preview: {},
+        fingerprint: 'a'.repeat(64),
+        explanation,
+        requestedBy: null,
+        recordOwner: null,
+        expiresAt: new Date(createdAt.getTime() + DAY_MS),
+        createdAt,
+      });
+      if (row === undefined) throw new Error('not stored');
+      return row.id;
+    });
+  const settle = (id: string, status: 'expired' | 'superseded') =>
+    asWorker((tx) =>
+      decideProposal(tx, ActionProposalIdSchema.parse(id), { status, by: null, at: NOW }),
+    );
+  const draftable = async () =>
+    (await asWorker((tx) => listDraftableRebookings(tx, NOW, 50))).map((item) => item.clientId);
+
+  beforeAll(async () => {
+    await asWorker(async (tx) => {
+      sara = (
+        await insertClient(tx, {
+          name: 'Sara Kim',
+          email: 'sara@example.test',
+          phone: null,
+          source: 'team',
+        })
+      ).id;
+      kim = (
+        await insertClient(tx, {
+          name: 'Kim Lee',
+          email: 'kim@example.test',
+          phone: null,
+          source: 'team',
+        })
+      ).id;
+      lee = (
+        await insertClient(tx, {
+          name: 'Lee Park',
+          email: 'lee@example.test',
+          phone: null,
+          source: 'team',
+        })
+      ).id;
+    });
+    await sync([
+      rebooking(maria, jessStaff),
+      rebooking(sara, jessStaff),
+      rebooking(kim, benStaff),
+      rebooking(lee, jessStaff),
+    ]);
+  });
+
+  it('drafts only for clients with an email who did not opt out', async () => {
+    expect(await draftable()).toEqual(expect.arrayContaining([sara, kim, lee]));
+    expect(await draftable()).not.toContain(maria);
+    const first = await asWorker((tx) => optOutClientEmail(tx, ClientIdSchema.parse(lee), NOW));
+    expect(first).toEqual({ at: NOW, changed: true });
+    // The first opt-out stays, and the second changed nothing (one audit entry, S36b).
+    expect(
+      await asWorker((tx) => optOutClientEmail(tx, ClientIdSchema.parse(lee), later(1))),
+    ).toEqual({ at: NOW, changed: false });
+    expect(await draftable()).not.toContain(lee);
+  });
+
+  it('keeps a client with a nudge in their interval away, whatever came of it', async () => {
+    const old = await propose(kim, 'kim-old', new Date(NOW.getTime() - 50 * DAY_MS));
+    await settle(old, 'expired');
+    expect(await draftable()).toContain(kim);
+    // Superseded reached no one (S36b): refused at approval, it keeps nobody away.
+    const refused = await propose(kim, 'kim-refused', new Date(NOW.getTime() - 5 * DAY_MS));
+    await settle(refused, 'superseded');
+    expect(await draftable()).toContain(kim);
+    await propose(kim, 'kim-new', new Date(NOW.getTime() - 10 * DAY_MS));
+    expect(await draftable()).not.toContain(kim);
+  });
+
+  it('links an item to its proposal, follows a replacement, and settles it once', async () => {
+    const [item] = (await asWorker((tx) => listDraftableRebookings(tx, NOW, 50))).filter(
+      (each) => each.clientId === sara,
+    );
+    if (item === undefined) throw new Error('no item for Sara');
+    const first = await propose(sara, 'sara-1');
+    expect(await asWorker((tx) => linkFeedItemToProposal(tx, item.itemId, first))).toBe(true);
+    // Linked once: no longer a suggestion, so neither linked again nor drafted again.
+    expect(await asWorker((tx) => linkFeedItemToProposal(tx, item.itemId, first))).toBe(false);
+    expect(await open()).not.toContain(`rebooking_due:client:${sara}:2026-10-27`);
+    // The pass leaves a waiting item alone.
+    await sync([rebooking(maria, jessStaff), rebooking(kim, benStaff)]);
+    expect((await asWorker((tx) => listWaitingFeedItems(tx))).map((each) => each.id)).toContain(
+      item.itemId,
+    );
+    // Staff see waiting items addressed to them only.
+    expect((await as(ben, (tx) => listWaitingFeedItems(tx))).map((each) => each.id)).not.toContain(
+      item.itemId,
+    );
+
+    // The first was superseded (an edit): its replacement takes the same target.
+    await settle(first, 'superseded');
+    const second = await propose(sara, 'sara-2');
+    expect(await asWorker((tx) => repointFeedItems(tx, first, second))).toBe(1);
+    expect(await asWorker((tx) => settleFeedItemsOf(tx, first, 'done', NOW))).toBe(0);
+    expect(await asWorker((tx) => settleFeedItemsOf(tx, second, 'dismissed', NOW))).toBe(1);
+    expect(await asWorker((tx) => settleFeedItemsOf(tx, second, 'done', NOW))).toBe(0);
+    // Turned down reads as a dismissal: snoozed 30 days, so the pass leaves it out.
+    const result = await sync([rebooking(sara, jessStaff)]);
+    expect(result.snoozed).toBe(1);
+  });
+
+  it('lists a business for the morning pass until its next morning, then again', async () => {
+    const other = TenantIdSchema.parse(
+      (await createTenant(db, { name: 'Elm', slug: 'elm-feed', timeZone: 'America/Chicago' })).id,
+    );
+    expect(await listDueDraftRuns(db, NOW, 1000)).toContain(other);
+    expect(await withTenant(db, other, readDraftsDueAt)).toBeNull();
+    await withTenant(db, other, (tx) => setDraftsDueAt(tx, later(1)));
+    expect(await listDueDraftRuns(db, NOW, 1000)).not.toContain(other);
+    expect(await listDueDraftRuns(db, later(1), 1000)).toContain(other);
+    expect(await withTenant(db, other, readDraftsDueAt)).toEqual(later(1));
+    // Claimed once: of two workers, one moves it on.
+    const claims = await Promise.all([
+      withTenant(db, other, (tx) => claimDraftsRun(tx, later(1), later(2))),
+      withTenant(db, other, (tx) => claimDraftsRun(tx, later(1), later(2))),
+    ]);
+    expect(claims.filter(Boolean)).toHaveLength(1);
+    expect(await withTenant(db, other, (tx) => claimDraftsRun(tx, later(1), later(2)))).toBe(false);
+  });
+
+  it('keeps a mailing address within its bounds', async () => {
+    const tenantRow = await asWorker((tx) =>
+      updateCurrentTenantMailingAddress(tx, '12 Main St\nSpringfield, IL 62701'),
+    );
+    expect(tenantRow?.mailingAddress).toBe('12 Main St\nSpringfield, IL 62701');
+    await expect(
+      asWorker((tx) => tx.execute(sql`UPDATE tenants SET mailing_address = 'x'`)),
+    ).rejects.toSatisfy((error: unknown) => sqlState(error) === '23514');
+    expect(
+      (await asWorker((tx) => updateCurrentTenantMailingAddress(tx, null)))?.mailingAddress,
+    ).toBeNull();
   });
 });

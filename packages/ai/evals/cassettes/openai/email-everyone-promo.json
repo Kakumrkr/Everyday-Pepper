@@ -3,11 +3,18 @@
   "trials": [
     [
       {
-        "fingerprint": "fe28c9dfb9fee186b4e59b9b3359fe9aff2659df294ce5716a1160bc7c1b37eb",
+        "fingerprint": "e65a693e4904296ff02afcca44d96e09643e079e692768336ccc5988ac872d26",
         "response": {
-          "text": "I can’t email clients or send promo codes. I can help add a to-do to prepare the offer or follow up with clients.",
+          "text": "I can’t email clients or send discount codes. I can’t create or distribute the code either.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_04be69d1eafdb519016adceefea13487d29aabbfea3a8f550e",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3O7_I2Bqjqyt3CVDYjm4VJ_vsyvjjwZY3B6K2ZZBZXIczLIHgbwZ-OHhel_Q8qeUSkLOLqkPa5KFZEeWgoyoqzCkj5SO2F-RRkNrqcdNjERvFe3Qce34LGXod_-iq4b3_vXaSjRuO1CHWTFCcBzazANp_2RgbyXGZTLaF1OkqHyIx0uj5pL5kp1s82kicFf0ayiScT3JBN9Coay6dNePoERpNgtart3uPWmanTCj4yUntQvEBk038mXUhYd9ydw8MeVX4k-MHN5RLNk50Q38KP9YmuRt9WSSvqnQLcqlF0u41awDAcB42I2pBSU4KcBu-esb6Ef84NTkfhwNWklE4t5CKLYzVAedQoxn_5m9zL_EE0x2AYxR4SaY74t1h57d4dyBn5brnuOfCRiJ5lG8W8Pbdt3ET9I0YsEj8OuB6WdaTZ6ShAdlZuG90aZ8Zy30WrBov8FCvmVRTbGZuGy3UFDoBNc6gfLXeif48GfTpFkd8JWogDu4YpW9b2Ny3ENEuCbOT2usbgVb0u2Svb_DnqAGLyJVQi1AMoFwMCeu1UTR7_onfIz9U1qk_o7vnuu0dB63eReWxVNzWguggultIXf3yOi4L_lao2e-C5MulN_rkCDvJx5hANPTV8gtZJNU08MSXDYTTkiy3AZbNuQhiMkZl8LURZ_moH7kv7m8yoiYBf8ol_WmRHPwb5TitwlA7_08UFD79INSUI3O-xT3LJ4G3vFmS07pg27XCnC6-S3T45YuETPfnolC-crx8Pclf8qZFF7S_13Ixt1M61-CK4HPCmRiBgpZnlz8haJuvIKRQP00rbsT1VP3525mvxFGNL34G4XiQkZO81Vt47cqCRpVrhYl1LAW4HScY5qXBAyJ1ZeNTe-lcsMywXw2IeGcO-l3iRxhafk7ZqJX9MwsbwQZzjEk2pSPsRT1lBso0nN-hGqgaLE-bE5x7hWE0pI4MVc_CAFFnhUaTCi-6MpatJaZLyhyKAs810MhbmGuRXu6Alyp_4fYMOAWZPDqAIxIz3gL7gAkkCulDk-qRM0tRD48-EPb3JTV74mgFwalmv5aIINaD-c_u23tr91j14BJw28-jXK9VdBUzF_GxTRhVB5y33jKtDcuYj0iTkdQ2F6COfyWIAHpaQakCwNz9qhV8texdcOyHlT4bgIXk3AAHVtnyRYmUxrpTjdaCSAK4z72GJIrop7l8Ta15IN4Rhif0RHagC18sX3ad7NlzPVNbMWqg-cDB2MXao9LTD4gWkqutgb38SKQy3AlCDoEq-PQWHIBihVpGVc4jsW3MwP-Z2OXkZi_lDVuai13WlJI0tNJZLvS0pOnz3CmcuHZFH2lvD1NZMEsxPMBpT5n7rzrnsqSjeMALp5H3xeG9Ioh6nVSl2UZvVrkuuW_Yl60X_Qsst7gsMQpT-nThDZO9RjGGq8B0mlZ5frLQhq1TrjGlWSGHAOvM7x_SYHLjgbU3Ub3C0ujbdtoaZj_ehQ4JsEjUu8zEluCcFlB00rl5h7zH_8ZY1eFwLL33MaXJh_lCeXyx7ruy-O4gwj5cqY4hci-hZs_VwJY4LEIkUoNCe3m7j8jLqwsT_JG_Wt3g4EK5byztj5R63PFErB4JhklsokXBqN4luq419JhYbLjBzM3qSxRdImegCsihgowFCmLnS7SV7yR8MUKqlwTQTK2-ASEZcxVSC-JLZ4MzImmd7bQTr2zbDLRb3UGDFEa3MDmiXKI2SeiXvO6d3YdCmtxFiCJhmVdYITu5XTEYVjHTz_ujERQVPMZmYiNY2mIMoMxaACl_BP6hCceMilDvxGfY3uNREJ1FnAYyhBJuCPgno4SCz9dfsuGT6S3DiuxoTWhMgfL44klyOhCplw8Cl7ZyvnKNty2zMz_A5rPOG3klH75gI-XclMmD7tR6J-JUvCoKVRYuQpZqLM5xMiJb-b9YCjBOsBCmOOzeyJ7t4MQOIrhK7Fj1yfksX4yEOHvOwbvC1zWdVI5IA0lj9fwrr0SfkSiodSi33rkTZ8yOVj4wi4rn4BKALp0SnZvODPm77KxK3qyQNk4j0IRvC0sF0J_2iPOT_jPCb_UMafaM5MNJ1Fs7R1RCrspGnwyncBuF3z1Xo4iad6JLoGkl6ioomd4jRDBGHsO5x9cOlCRiAR6QMM6t8OaVoOHe_x-SsGAMjVMLS9JT7BJ",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -15,54 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8355,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8860,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 16,
-            "outputTokens": 31
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "fe28c9dfb9fee186b4e59b9b3359fe9aff2659df294ce5716a1160bc7c1b37eb",
-        "response": {
-          "text": "I can’t email clients or send discount codes. I can help you add a to-do to send the 50% off offer next week.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8355,
-            "cachedInputTokens": 8352,
-            "outputTokens": 33
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "fe28c9dfb9fee186b4e59b9b3359fe9aff2659df294ce5716a1160bc7c1b37eb",
-        "response": {
-          "text": "I can’t email clients or send discount codes. I can help add a to-do to prepare the 50% off offer for next week.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8355,
-            "cachedInputTokens": 8352,
-            "outputTokens": 33
+            "outputTokens": 83
           },
           "model": "gpt-6-luna"
         }

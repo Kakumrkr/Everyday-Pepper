@@ -3,18 +3,11 @@
   "trials": [
     [
       {
-        "fingerprint": "fbce637c6b9aba34f96ae4e28b68b77062f2558acb6fe469878f6569210c06d2",
+        "fingerprint": "597987cb5082025768587795abb1feba0d2680023b2b6ea513a9a39ce92cb906",
         "response": {
-          "text": "I wouldn’t assume Maria is stressed based on seeming tired, so I haven’t recorded that.",
+          "text": "I won’t assume or record a reason for Maria seeming tired. If there’s something you want me to remember, tell me what you know for sure.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0b7b376ded76222a016adc044f764487d2bb29b5ba6641d156",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3ARQl7HlIQNmCNuEIVpUpFZb3Tjr8Tkj1w4Gi3v9VsXECfjQXtlTb7yDpVmqrNsBTbCxmDPMy6U4KPHWpDLc47-BSeK0KNgBZQdbSBXRKhK6_46MfSfXpbRRLybgZWXdPBxFSYm-Do2f9dlX9x3C3yQ6jsm4M5ci27EdaHpua2WLMKy7VD65RYPGuOtB1TxR_lTdDuC6AxglPx9NrgHSHhZZkPwuEqsV3xF4STcHYRJOKrIYjk93SBWad19TSJJxDMDNjMbAfq3D-cETs_rcul_zSA61T24o07O1s16mnU3bMhnTorb7DHCgi_0ac0QC-3ouCRyXEvK0dMtGciaD09RwR3ZdAr4b_G8-hkXsKs-FMjDeYB_FITP0j-Q9_6r7TDYu_18tRdHkrT5ASeWEAckLd1lwm4sRxeuPDxJJWocUENFVNrxZlNqZCp5db0EU9lPVY-UN-6VpTFgtMkf9_Wq4YFmxoDVBMPBi2FoiJ1PD_--mg0cMkUuukuku38W9P1gGfWC9AQF-D7AwdXaXw7Fn4_XwwL4L3HCtwKkTsxvio1FHG_Hu0jUPEsJ5TZKRBTk6r6bfBUKzzJRG1MRq8HUDdUUFY5yF9mmAntte4eYCxoqg5w_veW-TYGnslZO40RknIz9y0PhL4lKPzmdR5VbObvZZ6MJq-P0GbadwyhdRrNjcD7xCsNCaPbaaIn3fiLJMeF5pJZ4Zic07kNzQjJjug5WTgZpEne2bt_5gFpnrQ0y7_ZP7nONV6_oaCQJmP4AVLN8bTIrTOn3a9QThfy8tpJU_oGcmSGWo2SrnIyKmdSkom8s6v_Uy1Vum3MuBZqUOFAeSeFVKSvJIj0-q-50uEmUJQVUFPIuWe30fzXG7srhOmh9g-OhgoYE8BvKxXdSDiCYoVrbKd8rTcqC5Eq_swMT47026GffSxWNaATp0mr_VhaN6zm-m95NeiC9bGiIeLvxhneTJrDhKLvWVBg5YVLduHSOJvY2BfLO4DCR5drhyQCV6CRXYY-3Phw2L6j46JbGUOkrgMqfm76hBRjWa3ni6pi0xUkkHEEF_QpyKg4pv0-SvP1jbgHcTtAdMUTrci4jUbVDNjHloKufpPuuskk1M7Jz6k9CgunCyGooDjlTVw2u4w7ODchuiVC2H96JK_kiK_PkbEg0ShK4JJAMLjrlJRjB-jFg6ri7qVuR5NdnmP5RjkER3Zed_cRneDeVxC7gokUSwCsyg_H2XtJGwDC6Mavbjiw-zx34aZRqB9vJ_tltF6VWGt27OoQFZZcoVEfriTqFhxUctFzDkyOwXd3yVZ8Oskkbfj3hkCYLOQD1EqMMGzRRWpXC64JCnXfwFAESuI7O0lCHyEpItXKpojuS7yJkvdFw12kxld3lDfJtmoXhRk3r6aOICC3Wr_kG1DwwJJR2e09Zf4eol_z7t47GDkfxZ2GWMUBhkGLrlNrvlCnUwG6H5PJ4ZVP1wdR0PBqv4S3Vwj3dzzN43nMdWxga-csg2M2p3CNu9gLw704gS13qaeigJitefSBXVvppj4RNbI6BiGVwKv56h7P-3Or-MLGrgaK6Xanzq-G4Sv7LJsMYOHbZ3v7qPCS2JMdxbjdKvmxkE3AXo8h767nrNGzbyDoxCDvBfTAWc3st03n1ZNQGy9KuHQdpGryP7qkdNgvk2dSNr4EcJY4M_J3wk93tOnJ3YOPDf2bD7nesqqHjxAGMDCi09rN3DoZOjAfclLCqd6PGWAaW8ra-N7wcNixLg80YzV8vG5qjV9Vte8Wm1FIbDJZZYpvRLk7xiAVX2PqE9qgB9Q8duyo8Z-48qzs8kHd9fcP26V_juD4fKYDPdLzfdNkJajBWKWjUGL2rPDeChKpAyC_htjoq0GuBRbWrQqVXN7n3fYuSEq_s0td7rQqLNUM1E4reBMTp0WKlf8j-jP0gnvH3INCKKs4p8RasQz5s-SRGXlh89mk0Q40-3kM-Kp1kDwpKN12O2dWaC27E1LBSX6KxK3878zeWimL7Wgu3MU-CiWZ_Ny-NHR1qm9T_f2sS_sZ1ycNDR918Jcs8jQJbbXnHeZUUXW4w13jAPWGbPj4DO4eUmMoQ-bIvOIjGikYKwkLXs4NO6nh_6zu55yAK4p0Gu0Wj3lSue61awEsliLLT4m-O9iV8CpSgDfGKreEMuBIiJUwK6q20gtVCG6-iRTTnkk117Emyj68Cn2nb2wwDY5FyIY_r6-PtKR2ZfGWSrd2hfth7rLoT5A_YMtutJ8bst5MkqrtO5ZrqMThtX01wE9Geem42cFDZSi2hDxvjyLb2vt1Hive3GkX_46l8WTK9ALY9XG_wKVyrOzNsJpaYck2SejonGYHKo5C15Rp9Sn6kwt3PvcztbvDRiHZw7U3StK_yyqr1M6E6XJiB3eGciqJgspFFyTN0ZvA8mrbuxsUGV6tgtUItIfXJZC6PxuleM5Vmczc4kKXRtvcQZMrG4d3m0eKu-nnja8wQswa0-UpXu36Og8b4O4TDW3QN3bHUmmgyIckQO4s8wxxev7D47EPuugA45celMYGJaV-y6_YJUwBjY64RKLYy1nYUMuwYW7g1kJlPg333V0WaPr13IyLYiMgscOwjB66aU5N91GGHB9LxRYyOl-IVEks5O3mC41RUHH0j6j1joRn9DoEGRkXUH_HRw2xo=",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -22,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8355,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8860,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 16,
-            "outputTokens": 117
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }

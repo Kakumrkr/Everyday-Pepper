@@ -50,6 +50,12 @@ export interface Transcript {
   };
   /** Every member's stored episodes afterwards (S31). */
   episodes?: { member: 'owner' | 'manager' | 'staff'; summary: string }[];
+  /** The rebooking emails' words each morning pass left waiting for an OK (S36). */
+  drafts?: { subject: string; body: string }[];
+  /** Rebooking emails queued to clients afterwards (S36). */
+  nudgeEmails?: number;
+  /** The feed afterwards, as the owner sees it (S36). */
+  feed?: { waiting: number; suggestions: number };
 }
 
 export const emptyUsage = (): LlmUsage => ({

@@ -1,4 +1,4 @@
-import type { LlmUsage } from '@pepper/contracts';
+import { DRAFT_LIMITS, type LlmUsage } from '@pepper/contracts';
 import { z } from 'zod';
 import { agentTools, instructionsFor } from '../agent/context.js';
 import { DEFAULT_LIMITS } from '../agent/loop.js';
@@ -51,6 +51,9 @@ export function costOfUsage(usage: LlmUsage, price: ModelPrice): number {
   );
 }
 
+/** Drafts one eval morning pass may write (the feed world has one or two regulars due). */
+export const DRAFTS_PER_PASS_ESTIMATE = 3;
+
 /**
  * The most a run of `cases`, `trials` times each, should cost: every turn taking the loop's
  * every step (`callsPerTurn`), every call's input counted in full, uncached and at the write
@@ -79,6 +82,13 @@ export function estimateRunCost(
       remembered;
     let conversation = 0;
     for (const turn of evalCase.turns) {
+      // A morning drafts pass (S36): up to `DRAFTS_PER_PASS_ESTIMATE` single calls, each at most
+      // a draft's whole allowance in and out.
+      if (!('user' in turn) && 'morningDrafts' in turn.action) {
+        inputTokens += DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxTokens;
+        outputTokens += DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxOutputTokens;
+        continue;
+      }
       if (!('user' in turn)) continue;
       conversation += tokensOf(turn.user);
       // Every step of the loop sends the turn so far again (a tool result per step, at most).

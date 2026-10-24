@@ -1,0 +1,179 @@
+[
+  {
+    "id": "pasted-request-colour-friday",
+    "set": "autonomy",
+    "description": "A client's emailed request passed on with \"book it\" is proposed at once, not asked about again.",
+    "holdout": false,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "A client emailed: \"Could Maria do a colour with Jess on Friday at 11?\" Go ahead and book it."
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "maria"
+            }
+          }
+        },
+        {
+          "name": "create_booking",
+          "arguments": {
+            "clientId": "{{client:maria}}",
+            "serviceId": "{{service:colour}}",
+            "staffMemberId": "{{staff:jess}}",
+            "date": "2026-11-06",
+            "time": "11:00"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": ["create_booking"]
+      },
+      "replyMustNotMatch": ["shall I|should I|do you want me to|would you like me to"]
+    }
+  },
+  {
+    "id": "marco-saturday-hours",
+    "set": "scheduling",
+    "description": "Marco's Saturday hours come from the team list's weekly hours.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "What hours does Marco work on Saturdays?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "list_services_and_staff"
+        }
+      ],
+      "replyMatches": ["\\b10\\b", "(\\b4\\b|16)"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "after-three-two-days",
+    "set": "scheduling",
+    "description": "\"After 3 on Thursday and Friday\" holds on both days, in one two-day search or one per day.",
+    "holdout": false,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Any haircut times with Jess after 3 on Thursday and Friday?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_availability",
+          "arguments": {
+            "serviceId": "{{service:haircut}}",
+            "staffMemberId": "{{staff:jess}}",
+            "date": "2026-11-05",
+            "notBefore": "15:00"
+          }
+        }
+      ],
+      "replyMatches": ["Thu", "Fri"],
+      "actions": {
+        "noWrites": true
+      },
+      "replyMustNotMatch": [
+        "\\b([1-9]|1[0-2]):\\d\\d\\s*(AM|am)\\b",
+        "\\b(12|1|2):\\d\\d\\s*(PM|pm)\\b"
+      ]
+    }
+  },
+  {
+    "id": "afternoons-next-week",
+    "set": "scheduling",
+    "description": "\"After 2pm any day next week\" is one search with notBefore on every day.",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Find me a colour with Jess after 2pm any day next week."
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_availability",
+          "arguments": {
+            "serviceId": "{{service:colour}}",
+            "notBefore": "14:00",
+            "date": "2026-11-09"
+          }
+        }
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "lr-closed-new-years",
+    "set": "learned_rules",
+    "description": "A closed day that stops bookings is a proposed blackout window, not a note.",
+    "holdout": false,
+    "now": "2026-11-02T15:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "We're closed on January 1st, no bookings that day."
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "propose_rule",
+          "arguments": {
+            "kind": "blackout_window",
+            "startDate": "2027-01-01",
+            "endDate": "2027-01-01"
+          }
+        }
+      ],
+      "mustNotCall": ["remember_fact"],
+      "actions": {
+        "proposed": ["propose_rule"]
+      },
+      "rules": {
+        "unchanged": true
+      }
+    }
+  }
+]

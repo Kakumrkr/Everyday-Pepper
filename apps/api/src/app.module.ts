@@ -9,6 +9,7 @@ import { ClientsModule } from './clients/clients.module.js';
 import { MemoryModule } from './memory/memory.module.js';
 import type { ApiConfig } from './config.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
+import { UnsubscribeModule } from './unsubscribe/unsubscribe.controller.js';
 import { PushModule } from './push/push.module.js';
 import { FeedModule } from './feed/feed.module.js';
 import { TasksModule } from './tasks/tasks.module.js';
@@ -39,6 +40,7 @@ export class AppModule {
           outboxKey: outboxKeyFrom(config.outboxSecret),
         }),
         PublicBookingModule.forRoot({ codeKey: config.bookingCodeKey }),
+        UnsubscribeModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
         ChatModule.forRoot({
           openai: config.ai.openai,
           scripted: config.ai.scripted,

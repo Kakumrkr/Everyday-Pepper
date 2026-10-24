@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "40eebfd1ecb2f6186198edd99060d2903145e356756407543248b02e28b09290",
+        "fingerprint": "c12079ea071787d659968db362a62c8f4ac2425d0621215ea0ed9b777189ad2b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_7K0Ntm2jmY6OKxy4XkLzqUrX",
+              "id": "call_gWvICBhV8YJvYMtJCgUkNO2D",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8852,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 8,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "48c99405d45d6536015d7c9b0241987b73e0e955f7e96121babf11647832b386",
+        "fingerprint": "b5834d14b7399f3ce0ac5a0cff439d7ec6565916847001b2db63e6033a40b5dd",
         "response": {
-          "text": "Jess does colour. Marco offers haircuts, but not colour.",
+          "text": "Jess does colour. Colour appointments are 90 minutes.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,98 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8630,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 283,
-            "outputTokens": 17
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "40eebfd1ecb2f6186198edd99060d2903145e356756407543248b02e28b09290",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_DTXIKUpyVK3O37g1gm8sT9gh",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8344,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "b8f9f2fcc9aa9787123afd479f4c58a0826c8269c5e29576292d17254c5e1832",
-        "response": {
-          "text": "Jess does colour.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8625,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 278,
-            "outputTokens": 8
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "40eebfd1ecb2f6186198edd99060d2903145e356756407543248b02e28b09290",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_VCP26An07axoogxjsfeI59ZK",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8344,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "3e0ab509c5d6d375087c41a72fc0bca35c0ef583ce4284bae9c5cb7804b39083",
-        "response": {
-          "text": "Jess does colour. Marco offers haircuts only.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8626,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 279,
-            "outputTokens": 14
+            "inputTokens": 9313,
+            "cachedInputTokens": 8849,
+            "cacheWriteTokens": 461,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f5d78ee3b6f8dca0e308576cfc84f0598e95f14355429200feb99e50fd494fe9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_CYxGw7EVGeQhFIetDDNgCVrL",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"rebooking_due\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8855,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8852,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bcbda2d9225babe773fd9e08dc3cc6955b0f5be8001f49680a05a3ede9409958",
+        "response": {
+          "text": "Sara K. and Sarah P. are due back for haircuts with Jess. Their suggested return dates were October 26 and 27, respectively.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9186,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 331,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

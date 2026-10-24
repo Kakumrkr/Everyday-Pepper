@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8b56cf807917cdd0eb23a0c2ddf02ef8ea4dd3bae516b8e33558e99d4163399b",
+        "fingerprint": "7664788d382fdeb4cdacd6b524ff537866f3cf2c6432ef38e6f79d8e1edf2304",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bdgaiqt4p3pm6z7Y01u3AXdQ",
+              "id": "call_Df1k2ONMwIzl4g3pRBT8glVG",
               "name": "search_memory",
               "arguments": "{\"query\":\"Saturdays\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 11,
             "outputTokens": 20
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "9aa9bbcd6ca906b840d1d7c0f4a0a88a525a6d69abe0189992b37f6157e3c858",
+        "fingerprint": "d05cad405c630a4a70fa80d07f420c8cf5cd0a8397de39505725181754044f58",
         "response": {
           "text": "You decided Marco covers Saturdays from 10 to 4, Jess stays off, and Saturday bookings are for haircuts only.",
           "toolCalls": [],
@@ -37,95 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8571,
-            "cachedInputTokens": 8347,
+            "inputTokens": 9076,
+            "cachedInputTokens": 8852,
             "cacheWriteTokens": 221,
-            "outputTokens": 29
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "8b56cf807917cdd0eb23a0c2ddf02ef8ea4dd3bae516b8e33558e99d4163399b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_MtJ2vXwapft5WNruKKczPjLb",
-              "name": "search_memory",
-              "arguments": "{\"query\":\"Saturdays\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8347,
-            "outputTokens": 20
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "327fea11f2e83753757c8ff22bfbe23cfa3cc52d0515cc0be93a1b9819c40ae9",
-        "response": {
-          "text": "We decided Marco covers Saturdays from 10 to 4, Jess stays off, and Saturday bookings are for haircuts only.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8571,
-            "cachedInputTokens": 8568,
-            "outputTokens": 29
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "8b56cf807917cdd0eb23a0c2ddf02ef8ea4dd3bae516b8e33558e99d4163399b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_zVhaxgKrIWlbTNy3A4LNrdhe",
-              "name": "search_memory",
-              "arguments": "{\"query\":\"Saturdays\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8350,
-            "cachedInputTokens": 8347,
-            "outputTokens": 20
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "047b5fd2abfda97502dd2af5c3a32f6328944710eaa1449917ed2cf5888748b7",
-        "response": {
-          "text": "We decided Marco covers Saturdays from 10 to 4, Jess stays off, and Saturday bookings are for haircuts only.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8571,
-            "cachedInputTokens": 8568,
             "outputTokens": 29
           },
           "model": "gpt-6-luna"

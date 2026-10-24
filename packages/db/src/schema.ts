@@ -147,9 +147,13 @@ export const tenants = pgTable(
       .default(
         sql`'{"suggestionsPaused": false, "disabledKinds": [], "answeredKinds": []}'::jsonb`,
       ),
+    // The postal address commercial mail carries (S36, CAN-SPAM); NULL: no rebooking emails
+    // are drafted. Owners and managers set it with the feed's switches.
+    mailingAddress: text('mailing_address'),
     ...timestamps,
   },
   (table) => [
+    check('tenants_mailing_address_length', sql`length(${table.mailingAddress}) BETWEEN 5 AND 300`),
     check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
     check('tenants_brand_color_format', sql`${table.brandColor} ~ '^#[0-9a-f]{6}$'`),
     tenantIsolation(sql.raw('id')),
@@ -655,6 +659,9 @@ export const clients = pgTable(
     email: text('email'),
     phone: text('phone'),
     source: text('source').notNull(),
+    // When the client unsubscribed from marketing email (S36, RFC 8058 one-click): no rebooking
+    // nudge reaches them; booking emails still do. NULL: subscribed.
+    emailOptOutAt: timestamp('email_opt_out_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
@@ -1980,11 +1987,15 @@ export const insightRuns = pgTable(
       .default(currentTenantId)
       .references(() => tenants.id, { onDelete: 'cascade' }),
     lastRunAt: timestamp('last_run_at', { withTimezone: true }),
+    // When the morning drafts pass is due next (S36): the business's next local morning hour.
+    // NULL: never run (due now, once the morning hour has passed today).
+    draftsDueAt: timestamp('drafts_due_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
     unique('insight_runs_tenant_unique').on(table.tenantId),
     index('insight_runs_last_run_at_idx').on(table.lastRunAt),
+    index('insight_runs_drafts_due_at_idx').on(table.draftsDueAt),
     tenantIsolation(sql.raw('tenant_id')),
     jobScan('insights'),
   ],

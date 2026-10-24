@@ -226,6 +226,9 @@ describe('EvalCaseSchema', () => {
       cards: { noWarning: false },
       rules: { changed: [], unchanged: false },
       episodes: { summaryMatches: [], summaryMustNotMatch: [] },
+      drafts: { mustMention: [], mustNotContain: [], requestMustNotContain: [] },
+      outbound: {},
+      feed: {},
     });
     expect(evalCase().seed).toEqual({ facts: [], episodes: [], memoryPaused: false });
     expect(evalCase().holdout).toBe(false);
@@ -384,5 +387,75 @@ describe('the learned-rules and episode graders (S31)', () => {
       'expected 1 episodes, got 0',
       'no episode summary matches /party/i',
     ]);
+  });
+
+  it('judges the drafts: how many, what each says, the draft rules and the writer’s requests (S36)', () => {
+    const wanted = evalCase({
+      turns: [{ action: { morningDrafts: true } }],
+      expect: {
+        drafts: {
+          count: 1,
+          mustMention: ['sara', 'haircut'],
+          mustNotContain: ['\\bAI\\b'],
+          requestMustNotContain: ['PPD'],
+        },
+      },
+    });
+    const good = { subject: 'Time for a haircut, Sara?', body: 'Hi Sara, it has been a while.' };
+    const writer = { turn: 0, text: '{"tools":[{"name":"write_draft"}],"messages":["Sara"]}' };
+    expect(grade(wanted, transcript({ drafts: [good], requests: [writer] }))).toEqual([]);
+    expect(
+      grade(
+        wanted,
+        transcript({
+          drafts: [{ subject: 'Hi', body: 'As an AI I say book at www.evil.example' }],
+          requests: [{ turn: 0, text: `${writer.text} PPD` }],
+        }),
+      ),
+    ).toEqual([
+      'draft 1 breaks a draft rule',
+      'draft 1 does not say /sara/i',
+      'draft 1 does not say /haircut/i',
+      'draft 1 says /\\bAI\\b/i',
+      'sent /PPD/i to the draft writer',
+    ]);
+    expect(grade(wanted, transcript({ drafts: [] }))).toEqual(['expected 1 drafts, got 0']);
+    // A chat request that only mentions the value is not the draft writer's.
+    expect(
+      grade(wanted, transcript({ drafts: [good], requests: [{ turn: 1, text: 'PPD' }] })),
+    ).toEqual([]);
+  });
+
+  it('judges the rebooking emails queued and the feed afterwards (S36)', () => {
+    const wanted = evalCase({
+      expect: { outbound: { nudgeEmails: 0 }, feed: { waiting: 1, suggestions: 2 } },
+    });
+    expect(
+      grade(wanted, transcript({ nudgeEmails: 0, feed: { waiting: 1, suggestions: 2 } })),
+    ).toEqual([]);
+    expect(
+      grade(wanted, transcript({ nudgeEmails: 1, feed: { waiting: 0, suggestions: 2 } })),
+    ).toEqual([
+      'expected 0 rebooking emails queued, got 1',
+      'expected 1 feed items waiting, got 0',
+    ]);
+  });
+
+  it('lets a drafts case run the morning pass without a member turn, and nothing else', () => {
+    const base = {
+      id: 'x',
+      set: 'drafts',
+      description: 'd',
+      now: '2026-11-02T12:30:00Z',
+      timeZone: 'America/New_York',
+      actor: { role: 'owner' },
+      expect: {},
+    };
+    expect(
+      EvalCaseSchema.safeParse({ ...base, turns: [{ action: { morningDrafts: true } }] }).success,
+    ).toBe(true);
+    expect(
+      EvalCaseSchema.safeParse({ ...base, turns: [{ action: { runInsights: true } }] }).success,
+    ).toBe(false);
   });
 });

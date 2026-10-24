@@ -1,0 +1,354 @@
+[
+  {
+    "id": "feed-what-to-look-at",
+    "set": "feed",
+    "description": "\"Anything I should look at?\" is answered from the feed.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "Anything I should look at today?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["Sara"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "feed-regulars-due",
+    "set": "feed",
+    "description": "The regulars due back come from the feed, by kind.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "Which regulars are due back?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed",
+          "arguments": {
+            "kind": "rebooking_due"
+          }
+        }
+      ],
+      "replyMatches": ["Sara\\b", "Sarah"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "feed-waiting-for-ok",
+    "set": "feed",
+    "description": "A drafted email waiting for the OK is reported as waiting on Home, not as sent.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      },
+      {
+        "user": "Is anything waiting for my OK?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["Sara", "(Home|card|approve|OK)"],
+      "replyMustNotMatch": ["\\bsent\\b"],
+      "actions": {
+        "nothingDone": true
+      }
+    }
+  },
+  {
+    "id": "feed-staff-own",
+    "set": "feed",
+    "description": "Jess (staff) reads her own feed: her open time and her regular.",
+    "holdout": true,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "staff"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "What's on my feed?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["Sara"],
+      "replyMustNotMatch": ["Marco"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "feed-paused",
+    "set": "feed",
+    "description": "With suggestions paused, the AI says so.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "Any suggestions for me today?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["paused"],
+      "actions": {
+        "noWrites": true
+      }
+    },
+    "seed": {
+      "feed": {
+        "paused": true
+      }
+    }
+  },
+  {
+    "id": "feed-jess-gaps",
+    "set": "feed",
+    "description": "Jess's open time comes from the feed or her day.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "Does Jess have open time this week?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed",
+          "alsoAccept": ["get_day", "find_availability"]
+        }
+      ],
+      "replyMatches": ["Jess"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "feed-why-sara",
+    "set": "feed",
+    "description": "Why a regular is on the feed is answered with her last visit and interval.",
+    "holdout": true,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "Why is Sara on my suggestions?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["(weeks?|days|due|last visit)"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "feed-nothing-waiting-when-opted-out",
+    "set": "feed",
+    "description": "Sara unsubscribed, so the morning pass drafted nothing: asked what waits for an OK, the answer reads the feed and says nothing does.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "seed": {
+      "feed": {
+        "optedOut": ["{{client:sara}}"]
+      }
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      },
+      {
+        "user": "Is anything waiting for my OK?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": [
+        "(nothing|no(thing)? (is |are )?(waiting|pending)|not right now|all clear|\\bno\\b)"
+      ],
+      "replyMustNotMatch": ["\\bsent\\b"],
+      "actions": {
+        "noWrites": true
+      },
+      "feed": {
+        "waiting": 0
+      }
+    }
+  },
+  {
+    "id": "feed-how-many-due",
+    "set": "feed",
+    "description": "Counting the regulars due back is a feed read, and the count matches the feed.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "How many regulars are due back right now?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["(\\btwo\\b|\\b2\\b)"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "feed-in-spanish",
+    "set": "feed",
+    "description": "A question in Spanish is the same feed read, answered in Spanish.",
+    "holdout": true,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "¿Hay algo que deba revisar hoy?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["Sara", "(clienta|cliente|corte|toca|volver|semanas|hoy)"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  }
+]

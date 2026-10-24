@@ -12,6 +12,7 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 import * as Sentry from '@sentry/node';
 import type { ServiceConfig } from './config.js';
 import { redact, REDACTED } from './redact.js';
+import { withoutSecrets } from './request-logging.js';
 
 type ObservabilityConfig = Pick<
   ServiceConfig,
@@ -111,10 +112,9 @@ function startTracing(config: ObservabilityConfig, endpoint: string): () => Prom
       new HttpInstrumentation({
         // Liveness is polled constantly and touches nothing; readiness stays traced.
         ignoreIncomingRequestHook: (request) => request.url === '/health/live',
-        // Query strings can carry personal data (an email in a lookup): never export them.
         requestHook: (span, request) => {
-          if ('url' in request && request.url?.includes('?')) {
-            span.setAttribute('url.query', REDACTED);
+          if ('url' in request && request.url !== undefined) {
+            span.setAttributes(httpSpanOverrides(request.url));
           }
         },
       }),
@@ -126,6 +126,25 @@ function startTracing(config: ObservabilityConfig, endpoint: string): () => Prom
     ],
   });
   return () => provider.shutdown();
+}
+
+/**
+ * What an incoming request's span must not export, overridden: a query string can carry
+ * personal data (an email in a lookup), and a path can carry a secret (S36: an unsubscribe
+ * link's token, `withoutSecrets`). Both the old and the stable HTTP attributes are covered.
+ */
+export function httpSpanOverrides(url: string): Record<string, string> {
+  const at = url.indexOf('?');
+  const path = at === -1 ? url : url.slice(0, at);
+  const safe = withoutSecrets(path);
+  if (at === -1 && safe === path) return {};
+  return {
+    ...(at !== -1 && { 'url.query': REDACTED }),
+    ...(safe !== path && { 'url.path': safe }),
+    'http.target': safe,
+    'http.url': safe,
+    'url.full': safe,
+  };
 }
 
 /** The OTLP/HTTP traces URL for a collector base URL (`<base>/v1/traces`). */

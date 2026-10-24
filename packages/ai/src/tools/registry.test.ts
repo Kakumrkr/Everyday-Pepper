@@ -62,6 +62,7 @@ const VALID: Record<string, Record<string, unknown>> = {
   },
   forget_fact: { factId: '0199f4b2-7c1e-7a00-8000-0000000000f1' },
   search_memory: { query: 'Jess Saturdays' },
+  get_feed: { kind: 'rebooking_due' },
   propose_rule: {
     kind: 'hours_limit',
     staffMemberId: null,
@@ -78,7 +79,7 @@ const VALID: Record<string, Record<string, unknown>> = {
 };
 
 describe('the tool registry', () => {
-  it('has the nineteen tools, named verb_noun, reads first', () => {
+  it('has the twenty tools, named verb_noun, reads first', () => {
     expect(TOOLS.map((tool) => tool.name)).toEqual([
       'find_availability',
       'find_clients',
@@ -88,6 +89,7 @@ describe('the tool registry', () => {
       'list_services_and_staff',
       'list_todos',
       'search_memory',
+      'get_feed',
       'create_booking',
       'move_booking',
       'cancel_booking',

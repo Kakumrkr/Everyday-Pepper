@@ -43,6 +43,13 @@ export class SmtpMailer implements Mailer {
       subject: message.subject.replace(/\s+/g, ' ').trim(),
       text: message.text,
       ...(message.id !== undefined && { messageId: `<${message.id}@${this.domain}>` }),
+      // RFC 8058 one-click unsubscribe (S36): mail providers POST to the address themselves.
+      ...(message.unsubscribeUrl !== undefined && {
+        headers: {
+          'List-Unsubscribe': `<${message.unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
+      }),
     });
   }
 

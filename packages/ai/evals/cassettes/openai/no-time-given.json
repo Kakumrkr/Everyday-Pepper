@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ea946a19910b994fb32c417848e4a8f904151d836affef9d012de8ce279382d1",
+        "fingerprint": "4da2d3e4003a7d478b7b0be95ce76b271672e82fe880442276bfab58e60ddcd4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_vZFzX7dHQJPZ1fLfQB4tl5U7",
+              "id": "call_DAwHTn7B8GSt3K2vrv6qjpmh",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8852,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 8,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "fdb57cc81b7e1b0860557b9976e591416896ebd2be177c1e8c60b4f283c517f2",
+        "fingerprint": "c74dedc405993d4fb3a58285dca650e101f2290ec8e8ee7d14342ca7a3605d82",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TxLx5qx3nLX9qHSO8MWQ8ACz",
+              "id": "call_UlY9iQGQqxPVeX6EIwgw7sNe",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,20 +38,27 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8434,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 87,
+            "inputTokens": 8933,
+            "cachedInputTokens": 8849,
+            "cacheWriteTokens": 81,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e5ff1e4967c6118b049e2be0a494cab3da14a147abb2ea9c97e52b8b793ce563",
+        "fingerprint": "d123e8c3ed8e2d65bd35f1fb323edd7329ea7ea1cdf7b28b893d389fa249d2d7",
         "response": {
-          "text": "What service would you like to book Maria for—colour or a haircut?",
+          "text": "What service would Maria like tomorrow—Colour or Haircut? I can then find available times.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0241dcd66076e62f016adcecd8d63887d295152f4371af35a6",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3OzZearVKAsmZuLl916Ml-iq4pxkIlkcfIFSjgvjTFH-Fhtd7h40FbSiuWtXyEYgZ7A-APiHjINfbH-UG-ha_0yu05JpKotgOXce_IYITlHTMybxRtme4TmqoVpLEPvh7SLsEr131hypzsIoC6hJfj8N3c2zfOD5ntt8reyu3bnEabmYQM4DKtwArkHkHSlpFU3jDdOXNi4OatdQyPxS7HDvwgw_mvfq-jDzcMWj53helRAVLYfPnD5XS7ebwuQj6zw5Vd78ezQsF7O1alXsPtNzhTqr9b345k8dQDFcQ4CdJi3qRh_xOSRLOLUQmoLocn0RTNkKTYbqpVYQpVmdJieyLRgplgvWNWmb5GGVLG94aOyFAglr_wb0t5-8nWKWmClmPMkC9ixPq3HfusxWftp5E7SvylXVcSz-e-WRO7AGMNKgdryXkWinREDPje7Aj43ZV4fgRrjIBpWy3FGQ5HJ3kdQhVuB4dYlVpucD8vNaYXBt1dqSkkevr4qGv0014WWM_RN_ARTwLodzYWmKHLsyXxIowLeuZ6xyAuxGjrjNuHcz_Hxun8x5j-TqZweKdB9HA2JGBcqCUE51atzmB2iB-pso1SAYiLpTCskdI-gfr_tWycxdSbNLutyRi6ouDiVSbCjm5LUJcM9RgrBXhCBgiJTgjeLIkP1f4hZZURf-9sGU8HRu_w7oHIz-AdrB3DlTU3z83iPXwtRArUWyWIHHzAn00vKFXOf4wtWqc8duUJx_egNTtZU9mY4HTln0_NjZwUSgrQ_Lu-sr0YAOaC7z1j3G-HK-TesllABCxFpqiwqzzfaz-uDRGNL-EPCsVRfNojlI4Ak_gti6Bq1_G9cA1k1fs5t1nlOq8aEnurgC2FGGhPl8QEIjkq2CEKspHqTn0t3feQcjgvgJWUlleNrYOz9OGgrt395OQDN6HL7k5O4J1il6EOo2Ky5m4KGO9ER3MEDmr8kQA3NqHAIEdPi3regexdIyxXil6RTlsNiC-732I-BBjYurHn6NsHCSoXNQtSOvb0vOYTXYbB8YX6FKnUl6t-Yp0AsdCMJEeFE2c2zFUaFr7Y9-tcdXsagflUgBy1Y9ReUGYX5BranednlCYv6O1Ivy_vQcWzx4pj_CZVk-y7wA7nF0QjTf2VaNymoPM0T_lbncgoT0zNMzFrNtCPcyzHb-wne0cyJ4VJ5yOZw7aPz82NQEv-9r7NWMuWtMBRlE6YsHzyrkDRltMPV-Utl5s0eN3BVrAYArOSgFcFjdHIYBx9AiJljuTGTFl208-_OyIPmotP4bfP1jnkVlwo43iCgWau5--YUKadWjY6nmk46zdX0cyI4XEo1Ygg6n7G0Hb4vqEga-g2TjDInOHTdVbTQazT62D7of5O7TIKpQKQKwaJcJPKXma_0YzP90J7QLmxKJXyNc6Xc3jrfnaOO-VbVXF0o73g8uZhRJqL2rBJknAAj9rXcWONfHmIJHFMvWjA_CAWQBUk4HFmjuG5NpK23yuWzdJOutd1Dn9nDlcP7eJX9b0eD-T7tFotWNKrBsIiEBfwxApYqYtXLZ90mdUunuwyNrnWVHSO2lQyYPhyv-7DMwziFf29xodJJWx2Wic-1w-8p1inumZnxwRtRoiPSE1lAVlmDWl2XVmVZQfpDJYSCL_ajecvrA36ok0BDkNW-L9pVcnTSTvTLhjSq4jaBsDddacAZBu056ZUmWoNxa7O_y2UnbD2H_i4I1Sd0QzsToB_-xBOkIrZIhfVnTrObICifXyVCa7QoWSFbnO_jJtEIWu5swftPAbKAfB7kKEuGiYGpeEC6lFC6bx-fw1BZhJnm4ipSpMOUMeP44aqc8ad_DQJ7z00_3lOwHCmkpf4hSZNtCI-LcH4PaJA==",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -59,10 +66,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8710,
-            "cachedInputTokens": 8431,
-            "cacheWriteTokens": 276,
-            "outputTokens": 19
+            "inputTokens": 9389,
+            "cachedInputTokens": 8930,
+            "cacheWriteTokens": 456,
+            "outputTokens": 60
           },
           "model": "gpt-6-luna"
         }

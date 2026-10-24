@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "39b7de497fbe982823583724c312c40ebee547ba5305e9647242f08e8a986470",
+        "fingerprint": "8f7f852cea9cbb2b8db4358277a81a1211b006a385cf3e04a016b07d5f5cfdea",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_cWNzvI1lVC1UAcA4OpH3US1w",
+              "id": "call_Q43uj8Z7o28CWcSQmY7r9t0y",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8356,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8861,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 17,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "b95c3576453e2b2fba84a1aef203bec7a07dcac2d4ad427935b6b15c4b4211ec",
+        "fingerprint": "4dbe8771d748109b988803642d139e39229b5a16c4c78ed229b7620da9d6a13f",
         "response": {
-          "text": "Yes—Maria L. has a remembered allergy listed as “PPD.”",
+          "text": "Yes—Maria L.’s record says she’s allergic to PPD.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,97 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8504,
-            "cachedInputTokens": 8353,
-            "cacheWriteTokens": 148,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "39b7de497fbe982823583724c312c40ebee547ba5305e9647242f08e8a986470",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_0KwZLN6Z7hSxZgCpTKoHr0tq",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8356,
-            "cachedInputTokens": 8353,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "b404483d6997e119454bf4e3f3562664828707e77995cb92825ccde97fcc8600",
-        "response": {
-          "text": "Yes—Maria L.’s record says her allergy is “PPD”.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8512,
-            "cachedInputTokens": 8353,
-            "cacheWriteTokens": 156,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "39b7de497fbe982823583724c312c40ebee547ba5305e9647242f08e8a986470",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_rUdxWsqUTW1v9HMdD4aKIuwB",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8356,
-            "cachedInputTokens": 8353,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "4d27f7815687cd531869146926c41333d1e55a8aa748c27b463a9fb9806b207a",
-        "response": {
-          "text": "Yes—Maria L.’s record says her allergy is “PPD”.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8507,
-            "cachedInputTokens": 8353,
-            "cacheWriteTokens": 151,
+            "inputTokens": 9011,
+            "cachedInputTokens": 8858,
+            "cacheWriteTokens": 150,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"

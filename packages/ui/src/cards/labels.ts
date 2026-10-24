@@ -259,8 +259,14 @@ export function changeRows(
       add('Rule', text(before, 'rule'), text(after, 'rule'));
       return rows;
     }
-    case 'message.confirmation':
     case 'message.rebooking_nudge':
+      // A rebooking email (S36): to whom, about what, and the open time it offers.
+      add('To', null, text(after, 'clientName'));
+      add('Service', null, text(after, 'serviceName'));
+      add('Open time', null, span(after, 'time', 'endTime'));
+      add('With', null, text(after, 'staffName'));
+      return rows;
+    case 'message.confirmation':
     case 'message.waitlist_offer':
     case 'message.bulk':
       // No tool makes these yet (messages: Phase 8); the summary says it all.
@@ -322,18 +328,21 @@ const EMAIL_NAME: Record<WouldBeEmail['template'], string> = {
   confirmed: 'confirmation',
   rescheduled: 'new-time email',
   cancelled: 'cancellation email',
+  rebooking_nudge: 'rebooking email',
 };
 
 const WOULD_SEND: Record<WouldBeEmail['template'], (name: string) => string> = {
   confirmed: (name) => `Emails ${name} a confirmation.`,
   rescheduled: (name) => `Emails ${name} the new time.`,
   cancelled: (name) => `Emails ${name} that it’s cancelled.`,
+  rebooking_nudge: (name) => `Emails ${name} the rebooking note below.`,
 };
 
 const ALREADY: Record<WouldBeEmail['template'], (name: string) => string> = {
   confirmed: (name) => `${name} was already emailed a confirmation.`,
   rescheduled: (name) => `${name} was already emailed the new time.`,
   cancelled: (name) => `${name} was already emailed that it’s cancelled.`,
+  rebooking_nudge: (name) => `${name} was already emailed about rebooking.`,
 };
 
 /** What happens, or happened, to one email the action involves. */
@@ -453,6 +462,16 @@ export function factLine(fact: AiWhyFact): string | null {
       return date === null || time === null ? null : `It reminds them ${formatWhen(date, time)}.`;
     case 'todo_was_open':
       return 'The to-do was still open.';
+    case 'nudge_last_visit':
+      // A rebooking email (S36): the client's last visit, and why they are due.
+      return date === null ? null : `Their last visit was on ${formatDate(date)}.`;
+    case 'rebooking_due': {
+      const interval = value?.['intervalDays'];
+      const dueOn = str('dueOn');
+      return typeof interval !== 'number' || dueOn === null
+        ? null
+        : `They usually come back every ${String(interval)} days, so they were due on ${formatDate(dueOn)}, and nothing is booked.`;
+    }
     case 'rule_change': {
       // `propose_rule` (S31): the rule it makes, which only an owner or manager approves.
       const rule = str('rule');

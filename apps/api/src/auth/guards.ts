@@ -57,6 +57,10 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   task_assignee_not_member: 'Tasks can only be given to members of this business',
   push_unavailable: 'Notifications are not available here',
   feed_item_not_found: 'This suggestion is no longer open',
+  draft_refused:
+    'Leave out links, email addresses, phone numbers and sensitive notes, and keep it to 120 words',
+  nudge_not_sendable: 'This email can no longer be sent to this client',
+  unsubscribe_link_invalid: 'This unsubscribe link is not valid',
   booking_page_not_found: 'There is no booking page at this address',
   booking_request_not_found: 'This booking request was not found. Start again',
   booking_request_expired: 'This code has expired. Ask for a new one',

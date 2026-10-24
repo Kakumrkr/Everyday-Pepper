@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "54c80d55493ef179eff148eaf51a6b1d3de60fe0eba5da231773a2e345c8ac66",
+        "fingerprint": "0bbf25da2fe6db4ac864c2b35d13f0550d0a6fb0858a2a7d5ee37686aa4c946c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xR5nsoSkatkYvKiVv9B38hSP",
+              "id": "call_MwmdnDfGx9YLRhZeWgmlTSNq",
               "name": "search_memory",
               "arguments": "{\"query\":\"Lena raising prices\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8351,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8856,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 12,
             "outputTokens": 21
           },
@@ -25,94 +25,7 @@
         }
       },
       {
-        "fingerprint": "c645c1daf3bf9ac3f52df4503c7282fcd048927ccfc67af82f48945294979646",
-        "response": {
-          "text": "I don’t remember anything about Lena deciding to raise prices.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8469,
-            "cachedInputTokens": 8348,
-            "cacheWriteTokens": 118,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "54c80d55493ef179eff148eaf51a6b1d3de60fe0eba5da231773a2e345c8ac66",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_03zYDyluuREzvOa0lVq5Z0h5",
-              "name": "search_memory",
-              "arguments": "{\"query\":\"Lena raising prices\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8351,
-            "cachedInputTokens": 8348,
-            "outputTokens": 21
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "b7c0c9dbbc475d4b9ac9ada355c37f4370674f1ce538d022dc44e422018efd13",
-        "response": {
-          "text": "I don’t remember Lena deciding anything about raising prices. The conversation I found was about moving your Thursday lunch break.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8469,
-            "cachedInputTokens": 8466,
-            "outputTokens": 27
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "54c80d55493ef179eff148eaf51a6b1d3de60fe0eba5da231773a2e345c8ac66",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_lMnQf8REdUZrMSSWl7AE2bgD",
-              "name": "search_memory",
-              "arguments": "{\"query\":\"Lena raising prices\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8351,
-            "cachedInputTokens": 8348,
-            "outputTokens": 21
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "55de740e3de61c35f62865d31665c644d2f5a66cfffcba9061aa4fc97e1ead10",
+        "fingerprint": "af79ba67532f1b5ef64670261ada21bb67d04fe2315624db6d747777f29ffb6a",
         "response": {
           "text": "I don’t remember any decision about raising prices. The earlier note I found was about moving your lunch break to 12:30 on Thursdays.",
           "toolCalls": [],
@@ -124,8 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8469,
-            "cachedInputTokens": 8466,
+            "inputTokens": 8974,
+            "cachedInputTokens": 8853,
+            "cacheWriteTokens": 118,
             "outputTokens": 33
           },
           "model": "gpt-6-luna"

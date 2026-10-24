@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "c579794acc340eb4250157d632df43d38e6619db473253c61c71dd0d03bf8e22",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IEHJGFd8xog62hHmav98u090",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8856,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 12,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "acfde7fbc7264a3af5546a0d52f38a9c7e11da3604fe6835954b2ffcdc4102d6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8JoDAiYYyUS43oVmV1eRhAho",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"schedule_gaps\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9320,
+            "cachedInputTokens": 8853,
+            "cacheWriteTokens": 464,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "74220c37e2ac06f4f6d031515edc71ae0e5893375e851066be14f0afe6a7122a",
+        "response": {
+          "text": "Yes. The schedule-gap feed shows Jess has open time Monday through Friday this week, including full 9–5 gaps on Monday, Wednesday, and Thursday. Tuesday and Friday have some openings too.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10687,
+            "cachedInputTokens": 9317,
+            "cacheWriteTokens": 1367,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

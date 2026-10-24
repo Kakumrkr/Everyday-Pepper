@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8ea896292cd8c0963fc6313bc4fbf3b8dfee0ee779a33b0f1bef7c955b605bfb",
+        "fingerprint": "78d40435676ec29d19dcc6abd944e2bd5742debbec72e81213835771c667fc45",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_RI7kTC1FvQKPtpAnHMbaZz6V",
+              "id": "call_tH9Am22U4TS3XAkn1KsQV1zV",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8852,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 8,
             "outputTokens": 18
           },
@@ -25,86 +25,12 @@
         }
       },
       {
-        "fingerprint": "9297078761e76e405fbd1ca516284f87f71d430455a43e28d1cf05593b242202",
+        "fingerprint": "cca21b35968c13734666b1a269cb7b489f06ec133a33ddd1eb8c37d77421b04b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Exi3CgUEQG8pBYP84tO5bkQi",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
-            }
-          ],
-          "replay": [
-            {
-              "id": "rs_00a4142074434af4016adc02f94f2c87d295ec68c981e5dbad",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3AL5pDg_4qqBC407TJ8QI0KLlm_WJgXBCAvUs3Y1CuqS5Z9AOPaIkyMr8inZMtpj_kfA2LmCb5puc8d1tSlYYc-YxW19sbE7kuD2ud3aWZ3bDZnzrOh67CKlzXY3biFsVU-uoh94GhTCPVeEpoyINrVGWw13QV1QmK5SJSHoKtswQavuBRLlv_dLWYuT8S4zgwJgHTKdtdepyS_-Ig75SObava09OQeBysvfEN09qmWuJDS33vQiYKTDfd-VVfEaZAqunARuJVaL84PnuyTBjCIS7Hia2NrvDgX4gqdNPG7Xzc-rP2Uk6baNslyJo9JRCQ58NnIto1SqA1_3gCbjYCyZr0R6HYN2vw94EnJqm4eqNt35f4wCgWFfNSrDcreQ6VDDmMu-Dsu8Za3aiqiloG_ythakc3mnjUvH8aAbz2V11bOU2jYpoYsq5ECFeKzJkmtX-sYNhh9NsE4GlrL8EkVHleffmOQ4bSIpfku0zoUUy31F2novwmCFyNmKqwre6RZ_vrQVCES6Ctf6x2oTofM8nOCTiJuWKfsw9PkxSxq9j8sp8TghLM5fiv04XRI7bgmuMoG1qdUlIX3JtuWUK4gIlguzpbir9ZmAAIMNd7oQy3Q26ZadY108KSWU-9-U6fMaHZRS5HXqUiaQYAVZ1EHh0HIGVJwbj8b2J1sXXdJPKnaa7cXUrmP_1qV78gVV7wU7RaLBhe8Q6chVsjRWrvHtUk1hPGdkrQTlTIXflY9TfkQv4u6PN44kGVAjAl5Wvz0-KV0T_FwEEpYt-ij-S0dbpQ3gBSjjMAtsDCsZSG47e037OAOeO3MXOSpoFTuOHZTu8n6wR-wYLfLZBGkpiYlioFKiZNb8M4xL9v9nfnrbMWvSuVkxcifiV_Yy8UU3S1N59ve72mcNsu8PCsc0krLvQoyM9PxmDOVZ3cGMO496-V4mlJghTTK6l6vdLGiBUeIa9VuU94uFYQTlhtBw0Rir4bStv3cfi33KlZstjB5LDikgfwOfNNuZ3IcwFpqStP8THCqsuluL_x4e7NyWVMQO3MHECIvZj4Wo0FBHVLEv0y6x-Emz83yK0-wmlXkqCOh9_7BWlgKWT3utJgrg8lvrcFTLKQ0NrZAejZsEoRFPUvzJpZ2OhDBx7iejJpHRh1iuu2R26tcoAAzJNbjLeXu9pO8oACJEOqsYkjQExvOkjJJt2nxo5aOZp37HPu2CWkmS87fRnott0V8KbAxSIGArQdOb7ljUwy4EpI9wlUpr7J3HpaOF_gk9Kz8fa5T5raqHv4tSJtL-5uF7ILRX_NCe0tRD5YjWKl6EI-CD7UUlzxkX8xfptVEnfxHZA7QoMWa2mQmft6ph1YrRwTpeT0y5dstWleQKzXydXGxeKsWPCWaMWhLRZN1xh_rVXEnkQwCUHOiLjErm7LlaVGP-DwNI_DlAMh3eHVJFSy0SWmTMBgJslk068eg9EUHItcpEhZkfhxqpmU2skJVctwwODI61sqlA978h91nMgi-GjaW8MHtvsbdOw4xMNi22az0F6PRCxS-xOLOPxgDyB4fpvDKqV4eQEpGgoRtqEXA5TP7uW3w=",
-              "summary": []
-            }
-          ],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8435,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 88,
-            "outputTokens": 60
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "94d356caef7a76e4c6e6dc10730fd11e50b8d9fa190c5c3641be3cd286aef7d4",
-        "response": {
-          "text": "Sarah P. has no upcoming appointments to move.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8572,
-            "cachedInputTokens": 8432,
-            "cacheWriteTokens": 137,
-            "outputTokens": 14
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "8ea896292cd8c0963fc6313bc4fbf3b8dfee0ee779a33b0f1bef7c955b605bfb",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_H6hNfIfzPPjXvIdorQKuFmAb",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sarah\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8344,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "247e82aed215a2ab5f1df8303f9cd61cd60aa27d913eb13898c8204074700c2b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_o5ZzsbOD1O7AacwUvHAWfBFX",
+              "id": "call_dq2JSPk9APqE9XVCihLsfldL",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
             }
@@ -112,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8432,
-            "cachedInputTokens": 8344,
+            "inputTokens": 8937,
+            "cachedInputTokens": 8849,
             "cacheWriteTokens": 85,
             "outputTokens": 44
           },
@@ -121,9 +47,9 @@
         }
       },
       {
-        "fingerprint": "761b41110860fc4a6fe7d5589e5786f4c5bef4b38855376204571b9a75c1dc2c",
+        "fingerprint": "7da8491a03f438ea7a24942905d9134bd9c0d154c36d92fc53853a74081f9442",
         "response": {
-          "text": "Sarah P. has no upcoming appointments to move. What appointment are you referring to?",
+          "text": "Sarah P. has no upcoming appointments to move, and there are no earlier visits listed. Which appointment did you mean?",
           "toolCalls": [],
           "replay": [
             {
@@ -133,76 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8550,
-            "cachedInputTokens": 8429,
+            "inputTokens": 9055,
+            "cachedInputTokens": 8934,
             "cacheWriteTokens": 118,
-            "outputTokens": 21
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "8ea896292cd8c0963fc6313bc4fbf3b8dfee0ee779a33b0f1bef7c955b605bfb",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_BO0aENnlMLj5Co2WGgjNWW6L",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sarah\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8347,
-            "cachedInputTokens": 8344,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "bfd0180a820599cd0cd5a993680167e60c9081dde5ea6e2ded182f10dd15a87f",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_PxvPP0MQHEdZa8920imaz4dn",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8427,
-            "cachedInputTokens": 8344,
-            "cacheWriteTokens": 80,
-            "outputTokens": 39
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "f066f467476986c701c304e01231659bae6b7688f7b9a962f19e198d9e7f6a22",
-        "response": {
-          "text": "Sarah P. doesn’t have any upcoming appointments to move. Did you mean someone else named Sarah?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8535,
-            "cachedInputTokens": 8424,
-            "cacheWriteTokens": 108,
-            "outputTokens": 24
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

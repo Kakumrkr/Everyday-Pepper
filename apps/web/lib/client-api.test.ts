@@ -20,6 +20,9 @@ describe('messageFor', () => {
     [409, { code: 'booking_not_started', message: 'x' }, 'once it has started'],
     [404, { code: 'client_not_found', message: 'x' }, 'couldn’t find that client'],
     [409, { code: 'client_email_taken', message: 'x' }, 'Search for them instead'],
+    [422, { code: 'draft_refused', message: 'x' }, 'Leave out links'],
+    [409, { code: 'nudge_not_sendable', message: 'x' }, 'can’t go to this client'],
+    [404, { code: 'unsubscribe_link_invalid', message: 'x' }, 'link doesn’t work'],
   ])('explains %i %j', (status, body, expected) => {
     expect(messageFor(status, body)).toContain(expected);
   });

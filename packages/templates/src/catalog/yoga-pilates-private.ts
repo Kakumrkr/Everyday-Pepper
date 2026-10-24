@@ -80,6 +80,11 @@ export const yogaPilatesPrivate: TemplateInput = {
     { key: 'injuries', label: 'Injuries or limitations', type: 'long_text', sensitive: true },
     { key: 'pregnant', label: 'Pregnant', type: 'boolean', sensitive: true },
   ],
+  drafts: {
+    voice:
+      'Calm, warm and encouraging, like an instructor checking in; never about health or the body.',
+    morningHour: 7,
+  },
   insights: {
     enabled: [
       'rebooking_due',

@@ -4,14 +4,19 @@ import {
   listBookingsIn,
   listClientBookingsIn,
   listTimeOffBetweenIn,
+  listWeeklyHoursIn,
   StaffMemberNotFoundError,
 } from '@pepper/appointments';
 import {
+  addDays,
   BookingIdSchema,
   ClientIdSchema,
+  formatDate,
+  parseDate,
   looksLikeContact,
   ServiceIdSchema,
   StaffMemberIdSchema,
+  type AvailableSlot,
   type ClientId,
   type LocalSlot,
   type TrustJson,
@@ -42,6 +47,15 @@ import {
 // memory (LLM09). Each runs as the member, so staff get exactly what their screens show.
 
 const SLOTS_SHOWN = 12;
+const WEEKDAY_NAMES = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
 const CLIENTS_SHOWN = 10;
 const DAY_BOOKINGS_MAX = 100;
 const CLIENT_UPCOMING_SHOWN = 5;
@@ -84,7 +98,8 @@ export const findAvailability: ReadTool = {
   kind: 'read',
   name: 'find_availability',
   // 2 (S33): "is she free at 10?" goes to get_day; the example's `notBefore` is one day's.
-  version: 2,
+  // 3 (S36): `notBefore` holds on every day of the range ("mornings off next week").
+  version: 3,
   localTimes: true,
   guide: {
     use: 'Find free start times for a service, with one staff member or anyone who offers it, on a day or a few days.',
@@ -112,7 +127,7 @@ export const findAvailability: ReadTool = {
     date: DateArg,
     days: z.number().int().min(1).max(7).nullable().describe('Days from `date`, 1–7; null: 1'),
     notBefore: TimeArg.nullable().describe(
-      'Earliest start on the first day only (later days start at opening); null: any',
+      'Earliest start on each day of the range, e.g. 15:00 for "after 3"; null: any',
     ),
   }),
   async run(
@@ -125,24 +140,39 @@ export const findAvailability: ReadTool = {
       notBefore: string | null;
     },
   ) {
-    const range = daysOf(scope.timeZone, args.date, args.days ?? 1);
-    const from =
-      args.notBefore === null ? range.from : instantOf(scope.timeZone, args.date, args.notBefore);
+    const days = args.days ?? 1;
     const directory = await directoryOf(scope);
     const serviceId = ServiceIdSchema.parse(args.serviceId);
-    const slots = await findAvailabilityIn(
-      scope.tx,
-      scope.actor,
-      {
-        serviceId,
-        ...(args.staffMemberId !== null && {
-          staffMemberId: StaffMemberIdSchema.parse(args.staffMemberId),
-        }),
-        from,
-        to: range.to,
-      },
-      domainOptions(scope),
-    );
+    const find = (window: { from: string; to: string }) =>
+      findAvailabilityIn(
+        scope.tx,
+        scope.actor,
+        {
+          serviceId,
+          ...(args.staffMemberId !== null && {
+            staffMemberId: StaffMemberIdSchema.parse(args.staffMemberId),
+          }),
+          ...window,
+        },
+        domainOptions(scope),
+      );
+    // `notBefore` holds on each local day (S36): one search per day, each from that day's
+    // wall-clock time, so a day of a clock change still means the same "after 3".
+    const { notBefore } = args;
+    const slots: AvailableSlot[] = [];
+    if (notBefore === null) slots.push(...(await find(daysOf(scope.timeZone, args.date, days))));
+    else {
+      // One query at a time: they share the member's transaction.
+      for (let offset = 0; offset < days; offset += 1) {
+        const date = formatDate(addDays(parseDate(args.date), offset));
+        slots.push(
+          ...(await find({
+            from: instantOf(scope.timeZone, date, notBefore),
+            to: daysOf(scope.timeZone, date).to,
+          })),
+        );
+      }
+    }
     // With anyone: one per start time, so the list spreads over the day.
     const starts = new Set<string>();
     const shown: LocalSlot[] = [];
@@ -436,14 +466,18 @@ export const findClientBookings: ReadTool = {
 export const listServicesAndStaff: ReadTool = {
   kind: 'read',
   name: 'list_services_and_staff',
-  // 2 (S30): what the business remembers about each comes with it.
-  version: 2,
+  // 2 (S30): what the business remembers about each comes with it. 3 (S36): each staff
+  // member's weekly working hours ("who works Saturdays?").
+  version: 3,
   localTimes: false,
   guide: {
-    use: "List the business's services (with their length) and its staff members (with what each offers), to get their ids.",
-    avoid: ['to find free times (use find_availability)'],
+    use: "List the business's services (with their length) and its staff members (with what each offers and the days and hours each works), to get their ids or answer who works when.",
+    avoid: [
+      'to find free times (use find_availability)',
+      "to see one day's bookings or time off (use get_day)",
+    ],
     returns:
-      'active services and staff members with ids and what the business remembers about each; `isYou` marks the member’s own staff member.',
+      'active services and staff members with ids, each staff member’s usual week as weekday and local hours (no entry for a day: they don’t work it), and what the business remembers about each; `isYou` marks the member’s own staff member.',
     examples: [
       { say: 'Who does colour?', args: {} },
       { say: 'Book a beard trim with Marco', args: {} },
@@ -471,6 +505,11 @@ export const listServicesAndStaff: ReadTool = {
         ...(memory !== undefined && { memory }),
       };
     });
+    const hours = await listWeeklyHoursIn(
+      scope.tx,
+      scope.actor,
+      active.staff.map((member) => member.id),
+    );
     const staff = active.staff.map((member) => {
       const memory = refsOf(recall, { type: 'staff', id: member.id });
       return {
@@ -478,6 +517,12 @@ export const listServicesAndStaff: ReadTool = {
         name: member.displayName,
         serviceIds: member.serviceIds,
         isYou: member.userId === scope.actor.context.userId,
+        // Wall-clock hours in the business's time zone, Monday first (ISO weekdays).
+        works: (hours.get(member.id)?.intervals ?? []).map((interval) => ({
+          day: WEEKDAY_NAMES[interval.weekday - 1] ?? String(interval.weekday),
+          from: interval.start,
+          to: interval.end,
+        })),
         ...(memory !== undefined && { memory }),
       };
     });

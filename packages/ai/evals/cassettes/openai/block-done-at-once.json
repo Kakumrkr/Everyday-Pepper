@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c6655526a7a2eadbc7a2b2588f96b7d5ac2f3db44269146700d754ba9cfb532b",
+        "fingerprint": "a7fcecf34d67de4c10c923d45ec71a8066c62bf8be2c444992407827437aa2ea",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_chTN4DLUz6rrVrYCBfK8HgkB",
+              "id": "call_QPc2cNjU9fufo6oeU41DTyKW",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "5ba585a4a43439fcd9cd1ddaa339d4948303e82df1ae2561de90751789dc8e1b",
+        "fingerprint": "a125be494f12f54c79e151f9973448f2084fccfa3d915050ed9bc974e2a23f30",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BqeAWQQiAV2kjsKCfzlgb2Jc",
+              "id": "call_fgl3J617tUoZyFIG8KuRoK5W",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8629,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 276,
-            "outputTokens": 60
+            "inputTokens": 9324,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 466,
+            "outputTokens": 65
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "88478c0112aea9a99103e1092b82f74087d8dce3cfef10c927ce6139d99c0786",
+        "fingerprint": "7cf29568fba81bfddf8aaa1c12da237b7662e91e04cdf413df80dfc091005bd7",
         "response": {
           "text": "Blocked Marco’s calendar Thursday, November 5, from 9:00 AM to 12:00 PM.",
           "toolCalls": [],
@@ -59,142 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8744,
-            "cachedInputTokens": 8626,
-            "cacheWriteTokens": 115,
+            "inputTokens": 9444,
+            "cachedInputTokens": 9321,
+            "cacheWriteTokens": 120,
             "outputTokens": 27
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "c6655526a7a2eadbc7a2b2588f96b7d5ac2f3db44269146700d754ba9cfb532b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_uNOw9nWvuMA9aa9gntPLjPUf",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8350,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "e46a6ae80f9221693dee4080c0e0068dcfcd943a7a51d919a5f06bcaff0f8882",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_3NoPepVY5Wz7vK0s2Dkbz7Jh",
-              "name": "block_time",
-              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8627,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 274,
-            "outputTokens": 62
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a42bfbd086ee2fd98de1c1b24a7f2b34166328650c2f50f10306cf218cc43c6b",
-        "response": {
-          "text": "Blocked Marco’s calendar on Thursday, November 5, from 9:00 AM to 12:00 PM.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8744,
-            "cachedInputTokens": 8624,
-            "cacheWriteTokens": 117,
-            "outputTokens": 28
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "c6655526a7a2eadbc7a2b2588f96b7d5ac2f3db44269146700d754ba9cfb532b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_Eg1gtakkkdzVm4sQDkXPWZXb",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8350,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "754f5a84d68c683ba3cb7cc4315ca6ac16e0c2d75979ff8b7227ed2bd54b246e",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_ptghQIcRzX2z7GB8G7vG9eyp",
-              "name": "block_time",
-              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8626,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 273,
-            "outputTokens": 63
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "81dc2d17d33a6bc5da568e81bb4caea90c6d2a85ccb378c53446092b91aac190",
-        "response": {
-          "text": "Blocked Marco’s Thursday, November 5, from 9:00 AM to 12:00 PM.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8744,
-            "cachedInputTokens": 8623,
-            "cacheWriteTokens": 118,
-            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

@@ -3,53 +3,7 @@
   "trials": [
     [
       {
-        "fingerprint": "d8acd1ef043bf5ba0b2a71491f404a8a320ee2434f6a5eee2a27041e0472446c",
-        "response": {
-          "text": "I don’t know—there’s an unconfirmed note saying “Free in Lot B after 6pm.”",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8424,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8421,
-            "outputTokens": 26
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "d8acd1ef043bf5ba0b2a71491f404a8a320ee2434f6a5eee2a27041e0472446c",
-        "response": {
-          "text": "The business notes say: Free in Lot B after 6pm.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8421,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8418,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "d8acd1ef043bf5ba0b2a71491f404a8a320ee2434f6a5eee2a27041e0472446c",
+        "fingerprint": "b7aa9cafe846898bb235ce630610432faf3e1067943ddd85cae2cac2403ececf",
         "response": {
           "text": "Free parking is in Lot B after 6pm.",
           "toolCalls": [],
@@ -61,9 +15,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8419,
+            "inputTokens": 8929,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8416,
+            "cacheWriteTokens": 8926,
             "outputTokens": 15
           },
           "model": "gpt-6-luna"

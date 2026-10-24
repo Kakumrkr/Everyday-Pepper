@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9e35717f84dbfccdc0e7a35fb4eb91fe582f86f609607783712d6436aab4f525",
+        "fingerprint": "27cee999cf0e9297e6215b3f432f8ecd01e83a9f14fa5fe68553c7478619680a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_7N7llRUwd0xAjWWai6LHA8yP",
+              "id": "call_0mXuaA47El3KJLRItJpxcvol",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8353,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,36 +25,61 @@
         }
       },
       {
-        "fingerprint": "47a2431d4ad15c2db1f4957689e6cb25adfa356bd20c3499004f1ab1c7fdecaa",
+        "fingerprint": "c0820f109161c75dc846f30dd657980f0fdbbbe79f461c02e4fae6dd0ad5467d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GnbfPBvupvbSr3YeqNzO5x5m",
+              "id": "call_SHFaeAgrbDXISIQHp9CSThvw",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
-            },
-            {
-              "id": "call_8BvwpHmdVxmTl1oGrP3qPG2J",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"days\":1,\"notBefore\":\"10:00\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8629,
-            "cachedInputTokens": 8350,
-            "cacheWriteTokens": 276,
-            "outputTokens": 97
+            "inputTokens": 9307,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 449,
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6aacf3cbf6e1a36a6eded88bf35450bb2420fbac3a36961e4401e6ecfe933ca4",
+        "fingerprint": "6d91b652fe5d2bd51d0334f68233538fd4e89f1d83de8175478e1c2dac6ffdde",
         "response": {
-          "text": "Maria L. is the only match, but there are no haircut openings this Sunday at or after 10. Would you like me to look for another day?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_WMvG7pgTJInUfArZHiraPOCM",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0714f4213907cd9d016adcecf5fae087d2bd5d269dca303bc7",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3Oz39cVor2EXMWimpaSzMKm-vTUswc57YoIFvZna1wKapbsi7f4O5B97BV-ERof6j-9wp7UShORcWCfWA4KPVnF0QtIvQxQM_6ZYrFcmB55BTK6l1aeGafV0Fe9xMZHjlYEAG8qBlAxZVJ59HdWhOKwcROUwx_5tnluoOWKewgDkbl32rGNk00l5WiLFob0x4ECyPd6RgI3Dev-b_vTPMGpyZWdH0hJRfeoOx-i7pLHvUPwAw7KnDanhBsJHu-7Pmf6JjW3azIurh7fcovHNqo6Zj8o8RrvRpVSZY29HDkDEJqH51rqSxhRCPuIvgP-fVTwjouiQ3sjsCot4m2h0mMHS-HtQYrwn04E3a9k9q5pgkUpc7A3_8eCl2LaPl3wibTJskLnJdG5U91mvYgKxB-GAc8sFGogKa715-_SYfNWSrAjy1V8OPqvJb3Bab5Hu9HoHEI6v5uvX1bcJqUaY9CsCO0JqDafc7nIghCpLLLhq3YRn1YUYlwkY-v_tHAP2422e4IOWGnmlzgl0ymbfnWNV7tO2h1-wKUhNm6gRucNyD6Dj9-mO_16-EFTErbfeY9DAU06qJW8JsndyezBsKaGNfJXqjwePUdTem5nw4zZk3T5Vixzea_uP9W5yeLrZdl5NBvvzbs5kngn3e-ugrHNG1XzLPbzhb7rkU_lNzs_x-nYljEbn5sk2NInvgcUGkyCEFvz4HTa_INBDyZmuh-eGWaEwD2aDcceamOGisVComjNy6acslmivejt7_sbNPy7MgXrFi01rsEA2ZEnQfzGuig6kcH8wmVoAfIVdcNS-wWxmSHHsCdfWMuPY1hlDmshHUQW697utMS0aM7-aY0sh_7Gn2n5KtrKoBt3aVdgEaym2RDYT8X1Cv-8a-xg6KqgRkrJmbLSvDKtg6YRlby0n6jqc9ZSih2qsQODXAy1bQEX8Pg88Q3RLqSK2yMT59vKUZBLyIWxCEMKLTYfku5ItQksJAoZ9SsqWwLDxDfQnOLNtrHE2QawCHK5ggKIt40tSgFyyWaueFSeJKIAEkplKBtXNv6E75xmDcTp4Dk3Gpk_gBkaiq39SeGfRAo5LeGXoM3U3nAMCaM6WuViMtajgZePYGnEbG9EEuQAUA-OYHZb6CH5yOzJzZId16ccVSWVmO_P0kCMPcPc82fEC_ElU-OZt4FXkHGaCxVy5IpDBwC5vEf0MNhdiVHw4Ud3uK5PLZ4FhPFhl--l-6UYYEV2MqV4xAMHXf6K4y8jfAGX3ikKaYAFvemSIjbEiGp-0P8zWj7w5qW1ugEuLlB65wJYJF-v4yYwxkzmMMeoOuYZ7al7fiWsj0FVdTX1uas-LqVelxpuHsnDAD-Qw1G-8_jZ9fmRS37Yb02SJmZs7iFogezvez9rHXsD4138p-n0Ww-9VhmaTeUxZtiBWbn5y-00jO1FEh7opm-uqTnVKOSJB0AzQ8-xAaVPmgaeQNNkjE2u9MCf5gElZgyuKVl0JTlK34TmKnUJ0jwn6747KHqEASQXAVL2HjPoz37trcuJOFQqgtH4WSDlKUIVKYNUDyqXyGtDH0A-QnDaA1GHE0afPFHrIRyUn6NnHY0_F068yyXncjN_4S2IdOkTJy62fbYEHz0g67CkVwLU2jquFDC-SN9pL5YI8FtW7kKtV6_1qO3hQ03CUUKm9jMJaYp6W1VvEq-3Cwbr8LktlxY077PUTOoZ8FasGh07_rng-2wVp8ksF6I6kT_qxFY_hfYo67qK5QTIqvqGO2eU4nHX5h9i2EksDeDTRhi_Yu9E8F9Cly8xLseEsHk-A-m_VaVsEabowhbUz3xyH3yfY93p_TK1uGXrJeV9odrP99p2jA9SaK3WpK8o13bvuY0wAstXRvI9Ot7-d_HJ1p9Y8hxvm8CE39qofj1CRZgzpa3rc1uVaWBnmxoGIfdDvRJNDW5kGojm9G6LrkfD-I7IG180cuaP828yhoSAbB5Ruy0hGgZHgktVhXyuJTMpNQy234JYCuzzgJsswN2K2ksrhEAqDxiLDMRL5ecJl9Dh3kuUKSBuqyslCkER5BKGcT5bSQiMHR6dY-yIMOSD3gMWl6Bh-g7yyRpLehLkZW_1pyRzk_2tZZ4xAvhVEjrp2u7eq96FCitkKBZyJrXzSXsgtI1lE_Ci56H_ZJEtaf1sXG44jwn29bpzyGnamBBqTHQT3bo5s1HN2XZ5iwbx87eqTR1pQDXtUO1M=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9391,
+            "cachedInputTokens": 9304,
+            "cacheWriteTokens": 84,
+            "outputTokens": 153
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "eeb28ffa4520174ae254d28bae164035dc97076d3048234ff86588e7e22283f4",
+        "response": {
+          "text": "I couldn’t book Maria for Sunday at 10; that time isn’t available. The nearest alternatives are Saturday, November 7 at 3:00, 2:45, or 2:30 PM with Marco. Which would you like?",
           "toolCalls": [],
           "replay": [
             {
@@ -64,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8831,
-            "cachedInputTokens": 8626,
-            "cacheWriteTokens": 202,
-            "outputTokens": 36
+            "inputTokens": 9731,
+            "cachedInputTokens": 9388,
+            "cacheWriteTokens": 340,
+            "outputTokens": 55
           },
           "model": "gpt-6-luna"
         }

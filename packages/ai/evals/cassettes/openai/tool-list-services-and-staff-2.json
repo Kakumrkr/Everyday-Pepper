@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a7f49be140824f2de3b275f1d053ea11bcc1e2941c1fb796e2c753d1cc541d31",
+        "fingerprint": "fc8192e0c2d39cc697f360808a1dd967adbe5221b66cd7f240eafd6fe48289d3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_P2z8OgI3zF9D2hBsQycMrBjS",
+              "id": "call_YaRMZTFVKYO8LPYJJAam10yu",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8349,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8854,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 10,
             "outputTokens": 16
           },
@@ -25,60 +25,16 @@
         }
       },
       {
-        "fingerprint": "302b24877ceeb2f6e368c5e28f9233b91fb18050d42185af117713d98921482e",
+        "fingerprint": "d1c2a8742833134d962729ba02eda4af0f80d3c92b56c19d4b2a70bfe97702e1",
         "response": {
-          "text": "I don’t see a beard trim in the available services—only Colour and Haircut. Marco offers Haircut. Would you like to book a haircut with him instead?",
+          "text": "I don’t see a beard trim in the service list, and Marco offers haircuts. Would you like a haircut with Marco instead? I’ll also need the client’s name and preferred date and time.",
           "toolCalls": [],
           "replay": [
             {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8635,
-            "cachedInputTokens": 8346,
-            "cacheWriteTokens": 286,
-            "outputTokens": 38
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a7f49be140824f2de3b275f1d053ea11bcc1e2941c1fb796e2c753d1cc541d31",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_Swj8Bs7p6eiqAoabGYEL3KDR",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8349,
-            "cachedInputTokens": 8346,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "78e4c26a2ed1d7e1f8148862659687b3b6c14221bf00e52527218eba5083af1d",
-        "response": {
-          "text": "I don’t see a beard trim in the service list—only Colour and Haircut. Would you like to book a haircut with Marco instead?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_0bc891490dc34905016adc0912d44c87d2b7658c1550b1f7e5",
+              "id": "rs_02f00dab7c497c9e016adcef9ef5ec87d2b6cec9df6e73783a",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3AkTsI-bmcfBbZKfLS7eLtVi6wtLpQLA04zmEM3XZkY-nlu7hSxpn6leF8hDVX3vlUvT6BT3M6fJ7HMOLQmVycHEHAmewST9-7WdoUHmbIqO_MOeyjpEpHgSIQGZ0AXctGVGa9aJ7xNeQSuvb8EudjpUuW19ZPc3NG1SZAwCgQdbOGCD7zoYbXJ_OQpbO4jpYXFINPhkghpzIXl5MoVJsRwsO3Usq-CVuE91hBy-tSp2BNw25t7XLYxsSzdejlKtjVd1mSDHdxqB8FoxXdwugN4_B3lSrGgI8tHtlGdPHH0gaIqXFh4g-VGp7q27m6WHxN_3K01S-TdZRalp963xgd46Y1_9f4sWhgDFIOm2bYA4-UnqWcoahfvhr1VGcJEsxDtX3VwmwKnKowK7h5SDjqzCt9bR1TSdTFeR9tlIZ4lB_9Pc10W2p4IYxWMoywvF3fdsfieMPl4n5GSrvmV47v4LltAoAn2I1cjFaB9S0P9-IKfX8Qj4V8coPceDwiXJm9RSaRZRkUcquhQIo2FIqVK1BB2ZdaK0C6uTHqdt2PCGqKVhmv_gt3uJ7aU90QWT3OmY2wbYS67nIAKdmyprTIfl4Dw5gx5mGsYxA91aFR3QOhedaO5-CF_0bHogoRzjZG5CWxn4ZILErct4JiSmU2S-MYc72Y-eEHiKbtDy1lcvV4ZM3KaqNTz-Njz5AV2udU3cembO3Q68dlFOLifCd_5RSEbL_nYaGxCEg7JyX-ZCLy-GJO15weFFYO6tgyNDDq1EgfJpGJAnxPacDXbYMr5xSZLxPClk_7YfkH4Wn5UMY5cafBYbJhJDSxiO3dCl6HFEFQuyfsmk3s9zs0ZAaKoq_y34HkKaaJdukkaMnMHxSQPgE3z6IfxqLZnQOFQXvIK_Zun-DTEk9Zce5w0xfYXIap-qCwDuD2GXoEKU3kcqYNBasvoZGejQs_Sjc7rBrRFUO_7XJwUCtyLmrOMLgbUtw2VrGI15UzECLC3LTu3sdnBtT_9Fg6ZjFtk7ZkntsU28lWQic9GHfRwjlvhRrlv5mIjoYslzYZ4fMnBgt1q6VyabK96kPwS_AGAN2ipdrTbNNz23h-89bGg0kqa6oJdaHzrKofmEc-JtczkpnUINwti1GzZabXPaMCWQkn_-auKqKsxa-ltdXS2wdWfku9uq3jmFi1MOoidryK4CUAsVJZZSnbhfxKGNKHLzlU92h2y8tRQv32wXh6kwZSVd4pDzDxDbOw68uBHtTpSVuP3SsSu3hcquMHzdflV7Kk1cCfeBCiZd15zDfS0pw87BDXl8IkHdJBa2NRhFzEuPojFzXaRc-kekwhuTkWWnJMjRtcx2KDDf9cj4V0ehTzJis8jDaOg0hz5Gxaa_u2RtceWPrv4ZF3ShQJgYtrkWPreCPU-bMl0F5cZX3PiHy-yPy_AIBrKcMThE_0XIRALb6N7fhg2ZSGGCKBlKQ1pr__Ml1mcLdxlVO1oagjEeNVEjnlfCGwdHPCX6Te2aXZ4ykaEsPYi9twJqLJqJNwpbFDxqs1mZd_feLS5AaKvKOX8Pl5f9ghhDhdC3z8cZ22NHzqK-SRzA_7uufT5HqCLtKZY__n26QJLtiXPT0Bahq-5kbSxf-rWjj4xgscyh4iWnViy0VMI0AfV0gFL1eJCMuypYOc0NQb5JkoCAr1cd6YIm80oB-2sx2X-eP_tpYSCkWfFacwxqk6NI9_ZiXDbZKFfGHvU7P4Y7OFmbg4VuT0T5-7eM15tQwGALlIpCPZhQkCH8g1u2C2Wxp0EAxo0JUDGKlwHAz8hU3V18CaFngn6zz_o9LQru4cbeBXc_bnBKZuItWgY=",
+              "encrypted_content": "gAAAAABq3O-fgNNBQj1putk2h1_lyFqHdhRoS58AG-MZMrR0PlH1icF2l6-H6wXptWyMyAmmJRvir-J0j-qHAYAh_Bzrnbm4Zh7SxhUrREMqXpq9myEbgYGxi8vJbaT6J2b5rmmGfHLMvNKTjBu5EPbKur0qkn0_oBW7YQf_DfM6HqZX3t_idV0C8fTUtMY1bYP60aQw8BFzEnJkBIJoiAI86V9kRStFMKIjpUawYmMBjHDY_XeJ9rnUfCNV3Wf3dfa3dWulrkMQafJq2ExLoYerN1_6cVcy8qdglkuq6A6dbzMNmkYfqRn6dyJBxFY1nldVyeObBzvTwrTLIbe8ldJe_oyeXPAaa64AVfIySDM3zFXBqyhlfWw0g_tj52jPxs-AjXmtLu-khy11Vwyj4PnRf3vKd9pqcWlbXEd3fP1ZKOG1Dgd7SM--Y8YNFxlU2-YVM1VA4n-rBrpvgubZ0jk0zFSyTicfgtfwAJETXfP0bTg9zY1X9NtsLzL6YcCEuHrIgsxpL7KcYEsYvfD9X0vgXyg93bOQzXrMKv2Ihuyqh4v1traCFbBSnBjP_uH4uiBVg3Rfg50MhUUwl6rXemwbq6mfAwm9iQ48yoTIE4gdj3ch31PDwl4n0Tuhn4rocfd72Dq8kIGJZy3SdLsxMFMf0BTCkBGB06oSq8oj4WSDSIlYnNdZUKsDMCUYP56PzDiY9xv7rRGd5bGnKG9K7MFcMMvemWuZXUplTqm2BMCKv74PtC7Z9nF0fgiURN-XNHG-7cLEkTa-pJ_tms5yMqRwl2qNqaXjnyFpw1KvStlUWg62QrvzBgyL-VFzjJ_amJOQI0m9GeEjDcrytgdSLJJ71frdPDENltiuS6gulyHLU6b9a_9v2_a6o607ONj8EJo2i1g_83RgjXiUhOjef3GEB_7zSLjtjteY9lI5ZTL2kOlfOEytG-mfUvFSIiySZk9YIZaavL6AA9YD6eZtq6e8Jc6yaAsSphO8IYkEhZz5P0RZOx7f1Z52Dh2_bh2BEG1lmqZW8m5iJq0c3pRzPBruMXQ2i9XuYx95NLKhrInKcte9veFvXBFWxQ0kFDky4xZR1Pwpx-oabMWzqA33DMOi8Zg855av52Krd6XMpPhZC0l9EerT6Q5GCCW0k7mObJQgTQRc3HQIbdOddrONMDZ4diRplanidVZAAh0fvMcwlzzPIO8HOKjXVYwPVdv6VhOnzl3uNkyUybjRahB7-FARwMpsHLZ2JrZS8Yo28BnaFaIg538RsJD6CLF5SErUYnyO1q1GXW6MDjJWZzJpXpD6gWhb7U6Us1RJ6kDRMmFnwgiSyYrAp62fBeOXj4zcW0WmEMGA58yFSl-t-_7KM0HB8_4qPNiyzh3Jw-EwvFWBMCFvcYr0vEcezjI1i3totHq9mw_m7uElW6iIragKZ1wfy_5RDsHpxwOz0MQuNUqlkw_rSOUv2w6-07Bjhbj81Xq0a16rV59HlfrYnaOE-sb5aoHQz6PEHRnBv6oc65jLQh7JMhV01vVeVk7EIh7hkZmpBBv_GdzfX-Jrt9p9nuibtsytQyYcXtTKF57Rp0G2m9XQvTRXak7q4M6ybeWYzycVHFZBlWvR4zepV31HT8hxRZGeH7528agbNYoQggTGLk2WTCXdrYZsGQe71SZNH9gcZpfGQC79xwtRFJpEcMBMS_Lx_b7ypxhhHG0buXRByN9ajLfhhpBGw-VXgwTh1hwK02XnGvlAQzQRth6qn0OLYmen1M2Qy1d3HWREPDuzFEa3raznjqtFIVmr8Da-Fk_Wj9FMgCLsAepvv6HcB4OelYxyKEtJPdV0jXuetYOzo23e22OtGDonJuZmk0dQFxCZqkmkTz6kt6Vb72Up0YWrrhtf9qHVRNQMMpOuP_JfiJ3KTPkNQ0OutGHDYA2svZAwL2PRlhoB",
               "summary": []
             },
             {
@@ -88,54 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8631,
-            "cachedInputTokens": 8346,
-            "cacheWriteTokens": 282,
-            "outputTokens": 65
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a7f49be140824f2de3b275f1d053ea11bcc1e2941c1fb796e2c753d1cc541d31",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_aGpHbF29m4cCdQDXJ8vjzexW",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8349,
-            "cachedInputTokens": 8346,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "8f2ed4f1774e217aa112c4b7466155377c97bef3c1fba2a5365ba617b595688b",
-        "response": {
-          "text": "I don’t see a beard trim in the services—only Colour and Haircut. Marco offers Haircut. Would you like me to book a haircut with him?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8616,
-            "cachedInputTokens": 8346,
-            "cacheWriteTokens": 267,
-            "outputTokens": 37
+            "inputTokens": 9314,
+            "cachedInputTokens": 8851,
+            "cacheWriteTokens": 460,
+            "outputTokens": 85
           },
           "model": "gpt-6-luna"
         }

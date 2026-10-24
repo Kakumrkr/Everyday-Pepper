@@ -17,9 +17,12 @@ import {
   appendAuditEntry,
   closeFeedItem as closeFeedItemRow,
   countDismissals,
+  findCurrentTenant,
   listOpenFeedItems,
+  listWaitingFeedItems,
   readFeedSettings,
   requestInsightRun,
+  updateCurrentTenantMailingAddress,
   withMember,
   writeFeedSettings,
   type Database,
@@ -64,8 +67,41 @@ export async function getFeed(
       settings: publicSettings(stored),
       canChangeSettings,
       askToTurnOff: canChangeSettings ? await kindToAskAbout(tx, stored, now) : null,
+      mailingAddress: canChangeSettings
+        ? ((await findCurrentTenant(tx))?.mailingAddress ?? null)
+        : null,
     };
   });
+}
+
+/**
+ * The feed as the AI reads it for the member (S36, `get_feed`), in the tool's transaction: the
+ * open suggestions and the items waiting on a proposal ("Needs your OK"), each limited by the
+ * database's member scope, none while suggestions are paused, kinds turned off left out.
+ */
+export async function feedForAiIn(
+  tx: TenantTx,
+  actor: Actor,
+  now: Date,
+  options: { kind?: FeedInsightKind; limit?: number } = {},
+): Promise<{ paused: boolean; suggestions: FeedItem[]; waiting: FeedItem[] }> {
+  requirePermission(actor, 'feed.read');
+  const stored = await readFeedSettings(tx);
+  if (stored.suggestionsPaused) return { paused: true, suggestions: [], waiting: [] };
+  const limit = options.limit ?? 20;
+  const wanted = (row: FeedItemWithNames) =>
+    !(stored.disabledKinds as readonly string[]).includes(row.kind) &&
+    (options.kind === undefined || row.kind === options.kind);
+  const [open, waiting] = [
+    await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds }),
+    await listWaitingFeedItems(tx, 50),
+  ];
+  const items = (rows: FeedItemWithNames[]) =>
+    rows
+      .filter(wanted)
+      .slice(0, limit)
+      .flatMap((row) => toFeedItem(row) ?? []);
+  return { paused: false, suggestions: items(open), waiting: items(waiting) };
 }
 
 /** Dismisses (snoozing that kind for that subject for 30 days) or marks done an open item. */
@@ -86,7 +122,11 @@ export async function closeFeedItem(
   });
 }
 
-/** Changes the business's feed switches (owners and managers), with an audit entry. */
+/**
+ * Changes the business's feed switches and the mailing address its rebooking emails carry
+ * (owners and managers), with an audit entry (the address only as set or not: it may be a
+ * home address).
+ */
 export async function changeFeedSettings(
   db: Database,
   actor: Actor,
@@ -95,6 +135,23 @@ export async function changeFeedSettings(
   requirePermission(actor, 'settings.manage');
   const parsed = FeedSettingsChangeSchema.parse(change);
   return withMember(db, actor.context, async (tx) => {
+    if (parsed.mailingAddress !== undefined) {
+      const tenant = await findCurrentTenant(tx);
+      const before = tenant?.mailingAddress ?? null;
+      if (before !== parsed.mailingAddress) {
+        await updateCurrentTenantMailingAddress(tx, parsed.mailingAddress);
+        await appendAuditEntry(tx, {
+          actor: auditActorOf(actor),
+          change: {
+            action: 'tenant.updated',
+            entity: { type: 'tenant', id: actor.context.tenantId },
+            before: { mailingAddressSet: before !== null },
+            after: { mailingAddressSet: parsed.mailingAddress !== null },
+          },
+          requestId: actor.requestId,
+        });
+      }
+    }
     const before = await readFeedSettings(tx);
     const after: StoredFeedSettings = {
       suggestionsPaused: parsed.suggestionsPaused ?? before.suggestionsPaused,

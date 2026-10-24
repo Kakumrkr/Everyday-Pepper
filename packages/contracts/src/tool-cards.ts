@@ -87,7 +87,8 @@ export type ChangeSide = z.infer<typeof ChangeSideSchema>;
 
 /** An email the change sends (or would send) a client: which template, to whom (by id). */
 export const WouldBeEmailSchema = z.strictObject({
-  template: z.enum(['confirmed', 'rescheduled', 'cancelled']),
+  // `rebooking_nudge`: the email a nudge proposal sends (S36).
+  template: z.enum(['confirmed', 'rescheduled', 'cancelled', 'rebooking_nudge']),
   clientId: ClientIdSchema,
 });
 export type WouldBeEmail = z.infer<typeof WouldBeEmailSchema>;

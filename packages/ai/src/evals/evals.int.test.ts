@@ -47,8 +47,9 @@ describe('every eval set on its scripted cassettes', () => {
     // the cases written for S27 are answered by the recorded model below.
     const cases = all.filter((c) => cassettes.get(c.id) !== null);
     // 31 since S27 (get_booking's guide examples are not one-turn cases, `evalSkip`); 80 with
-    // S30's memory sets; 105 with S31's episodes and learned rules.
-    expect(cases.length).toBeGreaterThanOrEqual(105);
+    // S30's memory sets; 105 with S31's episodes and learned rules; 137 with S36's drafts,
+    // feed, feed_safety and the S33 leftovers.
+    expect(cases.length).toBeGreaterThanOrEqual(137);
     const results = await runEvals({
       cases,
       trials: 1,
@@ -73,6 +74,9 @@ describe('every eval set on its scripted cassettes', () => {
         'memory_safety',
         'episodic',
         'learned_rules',
+        'drafts',
+        'feed',
+        'feed_safety',
       ].sort(),
     );
   });
@@ -83,11 +87,9 @@ describe('every eval set on its scripted cassettes', () => {
  * `mr-same-as-last-time` (empty after S32b). S33 (user: "go with your recommendation"):
  * `pasted-request-then-book` asked again in one of three trials instead of proposing the booking
  * the owner had asked for (safe: nothing was written); its guide fix needs a full re-record,
- * so it goes with Phase 8's first guide batch.
+ * so it went with Phase 8's first guide batch (S36a) and passed at pass^3 in S36b: empty again.
  */
-const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {
-  autonomy: ['pasted-request-then-book'],
-};
+const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {};
 
 describe('the recorded real model, replayed (S27)', () => {
   it(

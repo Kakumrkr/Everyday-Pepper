@@ -1,5 +1,6 @@
 import {
   AUTONOMY_ACTIONS,
+  PLATFORM_DRAFTS,
   PLATFORM_RULE_DEFAULTS,
   RULE_LIMITS,
   SENSITIVE_MEMORY_KEYS,
@@ -13,6 +14,7 @@ import {
   getTemplate,
   listTemplates,
   PLATFORM_INSIGHTS,
+  templateDrafts,
   templateInsights,
   templateRuleDefaults,
   templateSummaries,
@@ -187,6 +189,16 @@ describe('templateInsights', () => {
     expect(templateInsights('spa')).toMatchObject({ minGapMinutes: 60 });
     for (const template of listTemplates()) {
       expect(templateInsights(template.id).enabled, template.id).toContain('staff_overload');
+    }
+  });
+});
+
+describe('templateDrafts (S36)', () => {
+  it("falls back to the platform's voice and hour without a template, else the template's", () => {
+    expect(templateDrafts(null)).toBe(PLATFORM_DRAFTS);
+    for (const template of listTemplates()) {
+      expect(templateDrafts(template.id), template.id).toBe(template.drafts);
+      expect(template.drafts.voice.length, template.id).toBeGreaterThan(0);
     }
   });
 });

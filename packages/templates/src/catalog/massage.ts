@@ -104,6 +104,10 @@ export const massage: TemplateInput = {
       sensitive: true,
     },
   ],
+  drafts: {
+    voice: 'Calm, caring and unhurried; never pushy, and nothing about health or the body.',
+    morningHour: 8,
+  },
   insights: {
     enabled: [
       'rebooking_due',

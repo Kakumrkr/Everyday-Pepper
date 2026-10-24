@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e176b8caa1a4c9ec5ef24130b5289b43d8e79c853c3a8322b12235ec9b774ca6",
+        "fingerprint": "da397d347791128d46e6db15ba0c82ac8dadbff4be7ff1abbe540a795733298e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Dpu30j2fd6w1e2XwsEFc8Xwb",
+              "id": "call_8EhJPzQRwxw2T7YWT1rX0S7s",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8365,
-            "cachedInputTokens": 8336,
+            "inputTokens": 8870,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 26,
             "outputTokens": 16
           },
@@ -25,58 +25,63 @@
         }
       },
       {
-        "fingerprint": "7c36640795dd613211974646d92f77b0439c5826d1eb97ddec09f699830e0b94",
+        "fingerprint": "b0ee126846895e9d1bd709e4e184153255709d8b5fd86d779b411aa804762e23",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DRYn2mawBP3ccqNvWsJhNJIf",
+              "id": "call_IcPXKU4HcbBXwL4ODBWTI1Sa",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
+            },
+            {
+              "id": "call_NHk4WOoqa8W1fKo9PhivedF0",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"days\":1,\"notBefore\":\"11:00\"}"
+            },
+            {
+              "id": "call_wAtIhHRIET8yuQH6p0D0xhht",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Confirm with Sara\",\"dueDate\":\"2026-11-04\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8648,
-            "cachedInputTokens": 8362,
-            "cacheWriteTokens": 283,
-            "outputTokens": 19
+            "inputTokens": 9343,
+            "cachedInputTokens": 8867,
+            "cacheWriteTokens": 473,
+            "outputTokens": 162
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "60748a08f74b40deb2c25a6776cb03207b66c71ed8508e41146d23b48b2e09e2",
+        "fingerprint": "23bc11b7a4baeff7b133c6ba4f86146ce4c5670a17907a0185ddfdec9feb38bb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_uJxN2tAV7pAh79xn5kmJQwDx",
+              "id": "call_n939fjvYgYX5sRpejcgskw8L",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"11:00\",\"emailClient\":null}"
-            },
-            {
-              "id": "call_5hnyiG8y8K2Cij3ByoxkmBWg",
-              "name": "add_todo",
-              "arguments": "{\"title\":\"Confirm with Sara Kim\",\"dueDate\":\"2026-11-04\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8732,
-            "cachedInputTokens": 8645,
-            "cacheWriteTokens": 84,
-            "outputTokens": 169
+            "inputTokens": 10257,
+            "cachedInputTokens": 9340,
+            "cacheWriteTokens": 914,
+            "outputTokens": 117
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "756f46254958d0237642be7fac3667e7a5542e6a5c1899d8f9d84b65d161c2ce",
+        "fingerprint": "0022d3c370a31ac5a6d3b4749bb8cb55954a5da6bd3ce3f37ef2610b1c098e4f",
         "response": {
-          "text": "Your reminder is set for Wednesday at 9:00 AM to confirm with Sara Kim. The haircut booking with Marco for Thursday at 11:00 AM is awaiting your approval on the card.",
+          "text": "The haircut with Marco for Sara K. on Thu, Nov 5 at 11:00 is awaiting your approval on the card. I’ve added a reminder for Wed, Nov 4 at 9:00 to confirm with Sara.",
           "toolCalls": [],
           "replay": [
             {
@@ -86,10 +91,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9038,
-            "cachedInputTokens": 8729,
-            "cacheWriteTokens": 306,
-            "outputTokens": 43
+            "inputTokens": 10454,
+            "cachedInputTokens": 10254,
+            "cacheWriteTokens": 197,
+            "outputTokens": 52
           },
           "model": "gpt-6-luna"
         }

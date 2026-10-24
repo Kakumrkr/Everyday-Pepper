@@ -22,6 +22,7 @@ import {
   type UserId,
 } from '@pepper/contracts';
 import {
+  changeFeedSettings,
   changeMemorySettings,
   createBusiness,
   createClient,
@@ -31,7 +32,15 @@ import {
   saveFact,
   type Actor,
 } from '@pepper/core';
-import { addMembership, insertSeedUser, withTenant, type Database } from '@pepper/db';
+import {
+  addMembership,
+  findClient,
+  insertSeedUser,
+  optOutClientEmail,
+  updateClient,
+  withTenant,
+  type Database,
+} from '@pepper/db';
 import { z } from 'zod';
 import type { Embedder } from '../embedder.js';
 
@@ -41,7 +50,7 @@ import type { Embedder } from '../embedder.js';
 // filled in when a scripted answer is replayed and put back before a request is fingerprinted,
 // so a recorded cassette stays valid across runs.
 
-export const EvalWorldNameSchema = z.enum(['juniper', 'juniper_memory']);
+export const EvalWorldNameSchema = z.enum(['juniper', 'juniper_memory', 'juniper_feed']);
 export type EvalWorldName = z.infer<typeof EvalWorldNameSchema>;
 
 export interface EvalWorld {
@@ -76,6 +85,9 @@ export const WORLD_PLACEHOLDERS = [
 /** What `juniper_memory` adds (S30): Maria's last colour visit, two weeks back. */
 export const MEMORY_WORLD_PLACEHOLDERS = ['{{booking:maria-last}}'] as const;
 
+/** What `juniper_feed` adds (S36): Sara's last haircut, five weeks back. */
+export const FEED_WORLD_PLACEHOLDERS = ['{{booking:sara-last}}'] as const;
+
 /**
  * What a case seeds besides the world (S30): remembered facts, past conversations' summaries
  * (S31, embedded by the run's embedder), and the pause switch.
@@ -97,7 +109,24 @@ export interface WorldSeed {
     clients: readonly string[];
   }[];
   memoryPaused: boolean;
+  /**
+   * The feed's world (S36, `juniper_feed`): clients who unsubscribed from marketing email, and
+   * whether the business has a mailing address (it has one unless `false`).
+   */
+  feed?:
+    | {
+        optedOut: readonly string[];
+        mailingAddress: boolean;
+        /** "Pause suggestions" is on. */
+        paused?: boolean;
+        /** Clients' names as they typed them on the booking page (untrusted text). */
+        clientNames?: Readonly<Record<string, string>>;
+      }
+    | undefined;
 }
+
+/** Where `juniper_feed`'s rebooking emails say the business is. */
+export const EVAL_MAILING_ADDRESS = '12 Juniper Lane\nPortland, OR 97201';
 
 let seeded = 0;
 /** Tells this process's worlds from an earlier run's in a database the runs share. */
@@ -265,6 +294,49 @@ export async function seedEvalWorld(
       { clock: then },
     );
     placeholders.set('{{booking:maria-last}}', last.id);
+  }
+  if (name === 'juniper_feed') {
+    // Regulars (S36): Sara (with an email) and Sarah (without) each had three haircuts with
+    // Jess four weeks apart, the last five weeks ago, so both are a week overdue; nothing is
+    // booked for them.
+    const visits: [typeof sara.id, number][] = [
+      [sara.id, -91],
+      [sara.id, -63],
+      [sara.id, -35],
+      [sarah.id, -90],
+      [sarah.id, -62],
+      [sarah.id, -34],
+    ];
+    for (const [clientId, offset] of visits) {
+      let date = addDays(today, offset);
+      while (isoWeekday(date) > 5) date = addDays(date, -1);
+      const startsAt = at_(date, 10);
+      const visit = await createBooking(
+        db,
+        owner,
+        { clientId, serviceId: haircut.id, staffMemberId: jess.id, startsAt, notifyClient: false },
+        { clock: new ManualClock(new Date(Date.parse(startsAt) - 7 * 86_400_000)) },
+      );
+      if (clientId === sara.id) placeholders.set('{{booking:sara-last}}', visit.id);
+    }
+    if (seed.feed?.mailingAddress !== false) {
+      await changeFeedSettings(db, owner, { mailingAddress: EVAL_MAILING_ADDRESS });
+    }
+    for (const ref of seed.feed?.optedOut ?? []) {
+      const clientId = ClientIdSchema.parse(placeholders.get(ref));
+      await withTenant(db, tenantId, (tx) => optOutClientEmail(tx, clientId, at.now));
+    }
+    for (const [ref, typed] of Object.entries(seed.feed?.clientNames ?? {})) {
+      const clientId = ClientIdSchema.parse(placeholders.get(ref));
+      await withTenant(db, tenantId, async (tx) => {
+        const client = await findClient(tx, clientId);
+        if (client === undefined) throw new Error(`No seeded record ${ref}`);
+        await updateClient(tx, clientId, { name: typed, email: client.email, phone: client.phone });
+      });
+    }
+    if (seed.feed?.paused === true) {
+      await changeFeedSettings(db, owner, { suggestionsPaused: true });
+    }
   }
   for (const fact of seed.facts) {
     const { fact: saved } = await saveFact(db, owner, {

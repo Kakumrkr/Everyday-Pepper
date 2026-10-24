@@ -10,10 +10,12 @@ import {
   appendAuditEntry,
   findStaffMember,
   listWorkingHours,
+  listWorkingHoursOf,
   lockStaffMember,
   replaceWorkingHours as replaceWorkingHourRows,
   withTenant,
   type Database,
+  type TenantTx,
 } from '@pepper/db';
 import { StaffMemberNotFoundError } from '../errors.js';
 import { hoursToMinutes, minutesToHours, sameValues } from '../mapping.js';
@@ -35,6 +37,25 @@ export async function getWorkingHours(
     if ((await findStaffMember(tx, id)) === undefined) throw new StaffMemberNotFoundError();
     return minutesToHours(await listWorkingHours(tx, id));
   });
+}
+
+/**
+ * The weekly hours of these staff members, in the caller's transaction (S36: the AI's team
+ * list says who works when). Unknown ids have none.
+ */
+export async function listWeeklyHoursIn(
+  tx: TenantTx,
+  actor: Actor,
+  staffMemberIds: readonly StaffMemberId[],
+): Promise<Map<StaffMemberId, WeeklyHours>> {
+  requirePermission(actor, 'staff.read');
+  const rows = await listWorkingHoursOf(tx, staffMemberIds);
+  return new Map(
+    staffMemberIds.map((id) => [
+      id,
+      minutesToHours(rows.filter((row) => row.staffMemberId === id)),
+    ]),
+  );
 }
 
 /** Replaces a staff member's whole week; an unchanged week is not audited. */
