@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e939c13c680bde7166ebd2514932377e793730f08627cb51c8ee155599c89f88",
+        "fingerprint": "232e08a6bd759ae0cf5c682e114c85644f14af6fbb5f568b988c0b9c468cf0fe",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_zUlPza7Iosfxf4VwtUUiREKz",
+              "id": "call_gxmdNvlq4Bi1eMhSHlRBwVPd",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8325,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8354,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 15,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "2e0eeb34114576b67057d4fda1a0e142f7fb6ee5ed13b6870e044325ff2c097f",
+        "fingerprint": "faa9d6ce65a41f8d51e8005abba8ab955a1d41ae3ae341778880ef1ded0619c5",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2unPnDaUgWTjVgtdy0kQiGau",
+              "id": "call_QNMqOjeZPWIw0iR5OifAV530",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8525,
-            "cachedInputTokens": 8322,
-            "cacheWriteTokens": 200,
-            "outputTokens": 46
+            "inputTokens": 8551,
+            "cachedInputTokens": 8351,
+            "cacheWriteTokens": 197,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a3aa37380ce1a4206e37efe41bd1e0019c336e70bdb1e380d0a1178bf59e2dba",
+        "fingerprint": "e81dbabfa7ac84262c6baa123db060e26761a574bac87f6ce5ae1faf0e9ba806",
         "response": {
-          "text": "Maria L. has a remembered allergy: “PPD.” She’s booked for a haircut with Jess tomorrow, Tue Nov 3 at 3:00 PM. Her usual service is “Colour with Jess.”",
+          "text": "Maria L. is booked for a haircut with Jess tomorrow, Tuesday, November 3, at 3:00 PM. The record notes an allergy to “PPD.” Her usual service is “Colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,120 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9111,
-            "cachedInputTokens": 8522,
-            "cacheWriteTokens": 586,
-            "outputTokens": 46
+            "inputTokens": 9122,
+            "cachedInputTokens": 8548,
+            "cacheWriteTokens": 571,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "232e08a6bd759ae0cf5c682e114c85644f14af6fbb5f568b988c0b9c468cf0fe",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_QTJ1n0XLED0pttzA76yhmZ4E",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8354,
+            "cachedInputTokens": 8351,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6e4a8cd6f3e7ba68c16f65a5952e434f664c03cdf8e97e98e58f11497bd2dc7a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_I40hXIa1MrY1ckVkIyY8ytIA",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8552,
+            "cachedInputTokens": 8351,
+            "cacheWriteTokens": 198,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c02b42201c762a5e85ec681f98d5e75a783c7a72775c759013059d9527dddd86",
+        "response": {
+          "text": "Maria L. has a PPD allergy. She’s booked for a haircut with Jess tomorrow, Tuesday, November 3, at 3:00 PM. Her usual service is “Colour with Jess.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9119,
+            "cachedInputTokens": 8549,
+            "cacheWriteTokens": 567,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "232e08a6bd759ae0cf5c682e114c85644f14af6fbb5f568b988c0b9c468cf0fe",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ifm5z0Rvin4XMcqBrpgQTVbg",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8354,
+            "cachedInputTokens": 8351,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "71b43028824b4c60cf47479a21f67a0d8952067a082b705b4233c5da983603de",
+        "response": {
+          "text": "Maria L. has a remembered allergy: “PPD.” Her usual service is “Colour with Jess.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8556,
+            "cachedInputTokens": 8351,
+            "cacheWriteTokens": 202,
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

@@ -3,7 +3,7 @@
   "trials": [
     [
       {
-        "fingerprint": "ecc18d8f072bbe9b1c7059cc8a5e0a1c3c2ba7bb97f16def453f1dec128a1c9a",
+        "fingerprint": "925da297907547625811d3b63d1d73e8600c713fc76316591026597d57b9f74b",
         "response": {
           "text": "The note says: “Side door code is 4471.”",
           "toolCalls": [],
@@ -15,18 +15,18 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8396,
+            "inputTokens": 8425,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8393,
+            "cacheWriteTokens": 8422,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4bb9eb5394c91dc05a83afe474f51a0f488bd82980b4f5113a305f6a50c4c35e",
+        "fingerprint": "7e83630cf8de61572e264bf47d768fa73f67557baa770016099de6baa35b0f5b",
         "response": {
-          "text": "I don’t know—the note only says “[forgotten].”",
+          "text": "I don’t know—the note I can see only says “[forgotten].”",
           "toolCalls": [],
           "replay": [
             {
@@ -36,9 +36,95 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8346,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8375,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 36,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "925da297907547625811d3b63d1d73e8600c713fc76316591026597d57b9f74b",
+        "response": {
+          "text": "The note says: “Side door code is 4471.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8424,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8421,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7e83630cf8de61572e264bf47d768fa73f67557baa770016099de6baa35b0f5b",
+        "response": {
+          "text": "I don’t know the side door code.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8375,
+            "cachedInputTokens": 8372,
+            "outputTokens": 13
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "925da297907547625811d3b63d1d73e8600c713fc76316591026597d57b9f74b",
+        "response": {
+          "text": "The note says: “Side door code is 4471.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8426,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8423,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7e83630cf8de61572e264bf47d768fa73f67557baa770016099de6baa35b0f5b",
+        "response": {
+          "text": "I don’t know—the note only shows “[forgotten].”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8375,
+            "cachedInputTokens": 8372,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"

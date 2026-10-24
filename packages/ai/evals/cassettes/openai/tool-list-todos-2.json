@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d1d5a6c9093ebb65dc08e27f43ff581394a7611232913bd5d7487389de466c90",
+        "fingerprint": "4e659ee693874be2395308282d9bfd7484d493485c05eb537810be25b8d68a16",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GS08VRmskvmaHG3uhtGVjV9R",
+              "id": "call_59ek8aL5qEClqMGdW5n2P4r8",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8321,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8350,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "727da1cdbe3d7e82b77b58e5708f55529ab2b553573a1b9015b5265cfe43ea8c",
+        "fingerprint": "82ae339f144fda98be5d9bcca74d1d7bd0c1053091e2e847cc2368563fc036d8",
         "response": {
-          "text": "There’s 1 open team to-do: Call Maria about her colour. It has no due date.",
+          "text": "There’s 1 open team to-do: call Maria about her colour. It has no due date.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8427,
-            "cachedInputTokens": 8318,
+            "inputTokens": 8456,
+            "cachedInputTokens": 8347,
             "cacheWriteTokens": 106,
             "outputTokens": 25
           },

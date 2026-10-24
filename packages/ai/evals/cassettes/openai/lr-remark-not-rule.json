@@ -3,16 +3,16 @@
   "trials": [
     [
       {
-        "fingerprint": "6c7623fe3db4a1e93e4c59e8311fbe04e7c47c8cffbb3406f85c382a278b4340",
+        "fingerprint": "b999db3874bef1c5a0982c5cdadf06d0187baee8eb800d4442d83705a1315dd9",
         "response": {
-          "text": "That sounds frustrating. Would you like to limit bookings before 10 on Mondays, or were you just venting?",
+          "text": "Would you like me to suggest a rule to prevent bookings before 10 on Mondays?",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_0c42673f93ba6596016adbf2399c3887d2b0c5d03b46cd2a6d",
+              "id": "rs_063209077d9be0e9016adc048fc0d887d2b0520ac8bafe1275",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq2_I6_t8IJ_qxV5h9Rx2cCK4_EX-EyZLKKOVCg1SGM0rb5MdaMnPtxgVadMhKmLzfT8HulqJNALvz-s93ontNYVInrQOksPdg5jTDdAUX6Oosk2WOWxgmiNzqM43tjvWhArv_tBjGlmP-V68SHVjisaL9EPCwtgoG9shEBrptKLVORnAY8IM9O4jTQCzl9Y9t_1Pf8ZsFmaGpiWz2fVX96WC-w7Whyj4yZ9dBT5IDegz1vhRT8C_9NOq6Wmun7nqUUxHJR59vhu7AzLWlpXvQidmbfSJRa541vTguPRsKB7f_YrODHM6gx80zya7r5P3b1Jgj-SgGRIxmDBU75myT2g4kuLMIrAwhMcLmydCqHVzLcHWtFjYYwqIxbWv8B0x13EW8NhLyWcJKAXBs4lw9-v0PmKDtfLVOAx-XbVKb0LJ9dSmDMHQUW4-JDC7Ae8_5gKj_EzKtJGaItMPGyFbyZ7NxIx7Ba9nlsh7W6912XjeWd7HeMqLb3C4zPeBU9kYYA-QVJKuo33TrvTCv2FeQYf9EuM8W3fK0DP0RD8aLZ9ALc9nSiRHApfrNYwSpjreekNNMWxGvQFm3q8lLLsEpWq9osvH_vwYwZ0S-7cmPUQyS_LQpU5j-kCD9izi_Ye4warvZzQx5pzqesfME1WmGe9h_m4VxJQ0ZIjvblbGnHX8hizRJIxgmhQvJgYqxwIy1FRjZKu63hkyylDeo1-j53zU_ONFC1vC0_5XNbBa8_16Ayzu1yK2rN7hIkQ2iwWWjta8UAN0NDYhmojJHWxa4UGdSaxbu8anJeQ5JND56ZEJRqQYsU0yL7_laEQjyVTnEfvGdSx87w3j5T7Kg5d06eSWtNoF1ZG548Jr5z_GZ4easEzoskRlVze8OO8wHbNp1Ygh-odiOGeBoxCZtew3GKy_PCdH6wCd06APYr8ZeZGi2IflT51vnkbqk3ddJ_lOitNPNMAypZmIgIIeWt7wC52Ys8pOMckT3WW76AmFYWf4lGREdA-lZIwA_jfFUGXgCNPrsijbB6gZ6ltTnIhhSkjXl7N9MOP_aFdy5PWzwtoYAh7g_rgi6HwouaAfNGsD0eGnTZFo4P3m0HRhgrj83LW-_mNScaZRzFQiUAYKr0NRq1aF5GLQH-sQcZLzR3V_ivgSC5xTpLqL4VuNu10o4toUrDSZRMzzQ1I7bKi42ysj-of_oK5B8mlof1Ls-0lSvzpB1LCaNmN4i6ygUg3kUdVDe5dMdPBhTEWVxxK_38wfsBDWu5ayrnVl4fM3GaizBiXvEj4GPpmpyzQ-jbR1Sw2aZA0klwYTLi8BsZ2h_JkQtayUp_HOC4eXyoDw-J1T6y3pE_ATxdb7vd-XzvN-s3WYrNiCI50WogM4fqWLqrQQ15GgfXjBzDQgCuO6B9p09MutcpvJ-wHMjibgxocOkcEGDAgDkxo-9f2LYwyeQKrVrZPmZlFhTxUiarBKkFrsGkB6HtgaQm7Nn5k4F93662jyAVOEIB_OHmU2LL4ZydVOUzKSC8TcdTAx9SfW0he7DG-gx1nkB3wnFeYEpYmkqkxpJLgdEcwxbk71eHSy1UizROoUIEPZwjaLsICkP6JhKsJ7WsnLyoZbKzOyP9k59bzUR0qtCJ6Yut_NzNqFuo276EGYU5VmYqEafzHUtImFuMdefYGpYwEFNXeInsqJwhjHLsOH4WY16zSiMEPJXi-dp_S0D2QaN7IiDttLyO36koK0pMtGAwhOT9MRWzsBCdZo1ebt_bsVIlP0YgeSsEtzyl0r_93T01Cj5OFH6vJaKiAnKucImkWP68pgOyB-vrcVVhyizysGVNKk2_uZwGgXVOFStPuST9yD76S7eV8LRsZgF28bK7U_vYds_qqJU0SghBnkVu8koBp-4j6OhTMdKcrVNu1LgBKmC6dtT6G-M5YOCXDz2LkHTLRMizx5QfHHg-KvnAMD33TjTfvuu-KoJWlIyNKbNbQyYOpWUx7H45PtTf4Q7sPE7nEUp228cg66bW5vI_y2Up2v3MK7QIerQ19QCBuneC2Ic1zZhW_5EZIrOCQxZipatSCQKeQbUuV6KuYDc9JZDkOIGYQck5Pc7SyQctnjaNaE7DxDzch8LwNxgsiLPkTyDMzMfsYaVbuL2LaJvA49EWU5ZE6CRgK6g0yfxBwHlfyDOFutnZIe9EdGbtAGKRt9IKL8y89TGUh2uDhNfJl1ReoZAKwrrj8zXLUdVP5l7t3Nxjc6b9-NoP5cc",
+              "encrypted_content": "gAAAAABq3ASQ6cI24QBD_wjPV6nkssyNpOzNRG962dpZv1OacfBDzlAJwLZGogprai6g4Lle2fsm-lau3aGKtDtqdBwDEbzJKAJLSGYJRPjDImMbvuIs4jaKIto4HOpLrdcHl_xm9TvtlNR4I7t7nO_eo8FGmTkdsWV4jT56brqBBh8n0seymlH_e2qHlbhlRs_ZRLSmam3IgR-WlmaG6RYHoxMN58qOJ2MxTLyhlZOZxbH9COw8Bd1V6HOv8cx3LLXzK6GmSfneXepCBx9zhr5Z5cCs0ElmMZksEkxIN2Ev0QKgmIo7kL7MmgaKyc-KYgJSj01om_wOu6INVIHxLEWm78_NkLfYzQ6N7tysUKgkPGpjdboQ2_AIfiwD6WgTHFuTcgBqv6O5YMW6dRj8qdFYG60OX8wZ0CLdfYNwMEjNL-LV-qzbuiGBhjHPuSNJrQULGRaWr03rgvE5U516kv_AUOfSYEaU4yROyyRKJ9gzs_XVgn_0AVafT6KRnoTJWcbTY8GJoHB70QVME2Hfzu0QqNqepiaEv1LkgVY4_sSbJjQrXIa_1mlVDNdkYMJgD2dFbG90Pr6xGkEIoivZdprDNii3TsfhwlCri0xuKjRkD2mLMUjyUiMCXQaIYiTO_pUiHW_VHsWa9mBuaxT5pOC6PVwhpp7o7pytAkdzyVAZR1bML0BON9jUsCmlbntb7fPTvWgN72sF2wp1e98qLpNQlZrdLLhUlctRqEZ-wqE5WYJdtbmx-gdvExyCfWrI2rD4XWrF2RKhTULAX7YYaT3_hz9Ejdna7RAbkHjoMa4IP-z4Wrm1KbbZjY4g3DhbHrqmajBxyHdxdUGk9ZCPG2_TjpsCXXoi4OOFfKQNkKBe-s2CGZqmbVsp2NjCZLGJpzr51d9qox4ju6j-o9pG4WeKY73ghCVprrBSSKcHszZFH6heN8RWEtXdnDYBKl5TDWYOJXr9ghuVtO2NO_GcqVv4xgbQoTSj3vbLvFSxcVOC9xIwnWZWIO1-neXft-Dj-6jIOMQPyndutxoPqsxdIPsRruiywtHJwWF2W6biDuvF_1qvRxEHohhK9PyzlM5SCl74ArdH08yBoLMMRgRH8gxvPRFayiWud9BzIT-kVRk8GdAB9od8URd3D32qTu0aKdUuzSKbupXzzlSRLceJF3kZLANwJNjnGoCxB75QEsTQsVLRW7_3KgQ3Teb2KIwStPwHw7jBs1yPg3e87bg1J3g8tBdF2s245As6jsoN6kFLnZFp0lupDhjZIgNmZ2kOBJoUYAEgB4qwyXhpoj1pJmBaV8FTMHYaQKHVWJ_I2IFXyZO_tvu-yla2p6PFtYWN_N14TBeeLK-HlQbWDzwVrCPd8i2cI0diftt9U1vVXNLZ9zpYjYlUjnNTXG2Vx0kjyesd2k7xWbF1VsN5jDqjvTQiPAPgZBrOofNFTTET6Zm-m2ULhAc4C_itTiXCRTwD0PBDu28ZUcfcAbyNaNliA36KMbbVFC6lLxVQ-7Y-sNFjycSPAwO8g-oO13SvHZLbUw7PpDSql3Z-_M9QKA7zFEIKaTbALksabC1GIqoeRmJbBzi5mmR5SGhfJrCT46Y3Wt7G_EfOPsCqIM1Rr5f4YoAnc-8XcObX2TwlERJ9Jk-2nUTlGeU-hEm1Im5RoQuj88WT_9scRkd9nsUEPMFak6g1efTfYBRC68VRhZi8m1nPY1Ep4MI1iEt35ODEkfoUeNY-djg8JjBlnF8EL3970I9WUWQ_skxLZt83RUTeWl5OSY-jZooWkWZcf_5eGAvo1MBN8M3Px0Cw3Ubty2QZz7rfzZ_G42Sk3URDvHj3pbBjkTWD7eqWXi2AUNli2ka3dCpN5XtLnfZnpneziZCy6jtNRo-FGPzCk_CJTxlOPk0jCcu35FIPnxDjp0xCLimmiZU8Dkr0xJ6Rkr5sD-Luc-XV0gick9S9hRPdIc8JjW3cse1xez7hv-gFrlp_pRNNkc8-38m30-ca4y4UgpBOpXv1fVUCDywop52Ils5g96f5odisVrLcDIoa0w4P7YtTBQxaUeCTHee9HL37TeFN0Tprna1jitLprKNUkliq60lUaGpBtprt8Kgwdktcusz-_4xoX9GyIBV68uB__w7URK_81ZyltQ_Ld9_7ArAwan5qzLDiAPnS6E1AhchYJH6UPiJFgJ19YHZKaMjDF7TSWwIRUTPKtkP0Gg==",
               "summary": []
             },
             {
@@ -22,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8327,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8356,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 17,
-            "outputTokens": 90
+            "outputTokens": 80
           },
           "model": "gpt-6-luna"
         }

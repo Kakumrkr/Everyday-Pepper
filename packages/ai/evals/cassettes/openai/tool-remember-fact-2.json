@@ -3,21 +3,21 @@
   "trials": [
     [
       {
-        "fingerprint": "817a50984affcfa44c8f645c5b504d7ffb0b872027d8d2e1a24e17cec03ecc0d",
+        "fingerprint": "e56ef53a793d9331df46ef4d40892399ce936640ef3a291de1f8cf1e9719687f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_4SOBRDH5gQ7OmkFA5CTINcHB",
+              "id": "call_9G9td08fkMl41ZVhMiWUHEAf",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close at 4 on Christmas Eve.\",\"sensitive\":null}"
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close at 4 on Christmas Eve.\",\"sensitive\":false}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8324,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8353,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 14,
             "outputTokens": 43
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "50cbb433b265e4917d35c3f1fa2d7f5cdfdb39c93ecbdd97272fe58f4ca55911",
+        "fingerprint": "4e41ae4df0a8bb87bbbbf5c21b572a6138538400b4ad725f85f7f5ba98cd40dd",
         "response": {
           "text": "Noted: Juniper Hair Studio closes at 4 on Christmas Eve.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8406,
-            "cachedInputTokens": 8321,
+            "inputTokens": 8435,
+            "cachedInputTokens": 8350,
             "cacheWriteTokens": 82,
             "outputTokens": 19
           },

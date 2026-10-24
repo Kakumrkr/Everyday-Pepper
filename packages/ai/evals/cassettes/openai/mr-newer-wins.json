@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d30e9666c581fa74010f4ca17c9220205cfa0c8373267279255ec742d64cea0a",
+        "fingerprint": "c177863d3cd3606bc668a4ff8842dd41a2f501530dda5b3cd857528b2f7b77f7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_kJgpT1YkhVt2jrshWCKTfLLH",
+              "id": "call_8Ae4fBONXrq4Wb6m5pE8eWAb",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8319,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8348,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 9,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "d6e97e5f65081116e0eecedde2b2b12f6a6e1613584795a82f1f18fc2b29ea74",
+        "fingerprint": "171f20570a2d48a3babdcb2313c1a36e2e422edbb483d74fab30b5d12ffaab31",
         "response": {
-          "text": "Maria L.’s usual is “Colour with Jess”.",
+          "text": "Maria L.’s usual is Colour with Jess.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,9 +37,97 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8476,
-            "cachedInputTokens": 8316,
-            "cacheWriteTokens": 157,
+            "inputTokens": 8503,
+            "cachedInputTokens": 8345,
+            "cacheWriteTokens": 155,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "c177863d3cd3606bc668a4ff8842dd41a2f501530dda5b3cd857528b2f7b77f7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HFJgyzr16syW6smFrCu5ia6E",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8348,
+            "cachedInputTokens": 8345,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2f7b9983b9c4b58326b6b2497ddd1dea079aa16be106525843e1aa2a90b94808",
+        "response": {
+          "text": "Maria’s usual is “Colour with Jess”.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8504,
+            "cachedInputTokens": 8345,
+            "cacheWriteTokens": 156,
+            "outputTokens": 13
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "c177863d3cd3606bc668a4ff8842dd41a2f501530dda5b3cd857528b2f7b77f7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5WKgSjapepMQigmqR0xWDP1P",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8348,
+            "cachedInputTokens": 8345,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fd3b127efb6b0631c9b16c4988f125e2b28a558373c85b1d46c63d1552bcdbb8",
+        "response": {
+          "text": "Maria L.’s usual is “Colour with Jess.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8507,
+            "cachedInputTokens": 8345,
+            "cacheWriteTokens": 159,
             "outputTokens": 15
           },
           "model": "gpt-6-luna"

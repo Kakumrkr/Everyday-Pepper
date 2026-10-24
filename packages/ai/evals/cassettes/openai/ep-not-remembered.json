@@ -3,29 +3,29 @@
   "trials": [
     [
       {
-        "fingerprint": "f1ee409a624e7323f82eb8f1a0ee6fd3eb9f4e22315b940c70639206b12ea40e",
+        "fingerprint": "a2130d2b80e8934840ccba80a4abc0bf154586ad17f6559124399d3c6a439bfc",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_qAy2YMBZrCP5edDhaARdQezz",
+              "id": "call_zqTPX0KNoQQEa6gKSq1CHomd",
               "name": "search_memory",
-              "arguments": "{\"query\":\"gift cards\"}"
+              "arguments": "{\"query\":\"gift cards decision\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8322,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8351,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 12,
-            "outputTokens": 19
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "32cba76f6aca72e1a18af4007eb40c7fdcd3843e22a0110a0a28d2830fd8c43b",
+        "fingerprint": "19ae573e9e90b1161180ecc8fd05c699737031499f2548c0bdbede081c87e3ee",
         "response": {
           "text": "I don’t remember us deciding anything about gift cards.",
           "toolCalls": [],
@@ -37,10 +37,97 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8502,
-            "cachedInputTokens": 8319,
-            "cacheWriteTokens": 180,
+            "inputTokens": 8532,
+            "cachedInputTokens": 8348,
+            "cacheWriteTokens": 181,
             "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "a2130d2b80e8934840ccba80a4abc0bf154586ad17f6559124399d3c6a439bfc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Vo1AY3JYoX4UqVnlklPtZxhP",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"gift cards\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8351,
+            "cachedInputTokens": 8348,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ec966bb310cfd44bbb4547f45cb47ce19e9ccdee1ad6122557f1bb81ff88aed8",
+        "response": {
+          "text": "I don’t remember a decision about gift cards.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8531,
+            "cachedInputTokens": 8348,
+            "cacheWriteTokens": 180,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "a2130d2b80e8934840ccba80a4abc0bf154586ad17f6559124399d3c6a439bfc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LteazaUielUCdVb8WJLXPxp1",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"gift cards decision\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8351,
+            "cachedInputTokens": 8348,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7c5d49a4e3aa5b9119c03bf58033da94252ccabc03377d50da3084f278c15007",
+        "response": {
+          "text": "I don’t remember a decision about gift cards.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8532,
+            "cachedInputTokens": 8529,
+            "outputTokens": 14
           },
           "model": "gpt-6-luna"
         }

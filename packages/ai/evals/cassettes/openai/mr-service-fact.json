@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c7ff392dcc2c599fc2679022658b91a4364b0d2fc50b96ad215c39a0f7631daf",
+        "fingerprint": "b0f18a7b284badbe1638e076306f5dba083c037082be613847f4cde1d2551ef6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_cGe9PfaHeT88Ai1ElaZf44uE",
+              "id": "call_J4rAUzIPLUjBJHPNYTMDPzFz",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8324,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8353,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "d5f4f11ef5b66453115810d53a63948b5500a867f2048793bd5ddfe31f88e54b",
+        "fingerprint": "16f88883a81a475221d6c63484ac511eec67d3c5c601f08ab163ff9bedeb0ca1",
         "response": {
-          "text": "Colour takes 90 minutes, and it needs a patch test 48 hours beforehand. Jess offers colour; Marco doesn’t.",
+          "text": "Colour takes 90 minutes, and Jess is the only one listed who offers it. The service note says: “Needs a patch test 48 hours before.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,98 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8696,
-            "cachedInputTokens": 8321,
-            "cacheWriteTokens": 372,
-            "outputTokens": 29
+            "inputTokens": 8704,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 351,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b0f18a7b284badbe1638e076306f5dba083c037082be613847f4cde1d2551ef6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0zcZhuW5Hnpbr99nqEfMa3Y0",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cde6fa2046720d112fffcab6a6ce23b2edb2a1d71aaaff435393b9fbcb8ca6ae",
+        "response": {
+          "text": "Yes—colour requires a patch test 48 hours beforehand. It takes 90 minutes, and Jess is the only staff member listed as offering it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8713,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 360,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b0f18a7b284badbe1638e076306f5dba083c037082be613847f4cde1d2551ef6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6BTSWaXy2F25RI6l1YEjexsx",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d3f65b4a44e1e9b1e27dbb5edc70bc49ed957d32d2f4363d59b6470381883a39",
+        "response": {
+          "text": "Yes—Colour requires a patch test 48 hours beforehand. Only Jess offers the colour service.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8722,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 369,
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "6624a67c30a1ecb9f9752911c8740741aefc4133ae3e1298d1f70d30d0c2a328",
+        "fingerprint": "f00e0897bee00cd4539f973c4adb6538fb6eeffbbdda962c4b670397976b0d8a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_49pXcuAFbgR26u9dophSryxu",
+              "id": "call_DOUZEMJcfmWykZCZbzqkFQny",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8324,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8353,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 14,
             "outputTokens": 19
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "f270f6a12e07ef36c1042017097309eace772656e8fef2fc70a7062ac0d73032",
+        "fingerprint": "bf42d7b80b0b3df4e7bab3cf4d8bcbc5fc2ab528235993b43e17b5d7978a536f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TXdgFCKd2AJuKe8UnW2schGp",
+              "id": "call_9R88jrXKwVeCWWj1Bl1Ze8A1",
               "name": "complete_todo",
               "arguments": "{\"todoId\":\"{{todo:call-maria}}\"}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8431,
-            "cachedInputTokens": 8321,
-            "cacheWriteTokens": 107,
-            "outputTokens": 42
+            "inputTokens": 8461,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 108,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "24018e357822da358246259e4683ccc9116ac6f00de9fb6aeb8a40050648e5bf",
+        "fingerprint": "88fe26923d1a02dc8ad75bb5934a875d8121ef25ed33f92c8014b7d7695aacf4",
         "response": {
           "text": "Done — “Call Maria about her colour” is ticked off.",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8519,
-            "cachedInputTokens": 8428,
-            "cacheWriteTokens": 88,
+            "inputTokens": 8550,
+            "cachedInputTokens": 8458,
+            "cacheWriteTokens": 89,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"

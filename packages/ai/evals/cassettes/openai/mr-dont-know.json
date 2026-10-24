@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "6aa5487ee3a30e371c0e5950ec81f194bbd059cc4272603dccaf42f874a73ff9",
+        "fingerprint": "5540ef133c7f846a496cecf771b33b443f803d8d2d26dd6fa29300328c3cf272",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_q3nVMjUBdPH5uANSk2H8s69V",
+              "id": "call_FxIMntn0dspU9IHMtyVyO1ie",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8320,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8349,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 10,
             "outputTokens": 19
           },
@@ -25,39 +25,31 @@
         }
       },
       {
-        "fingerprint": "e54352c37a12f8627376065da1e79a6c4a3fcb94829746d4ba849feba2a1c0f5",
+        "fingerprint": "82a3bd871cf886f8a765a0b3e942e1e6566928939c39582772bd8a1a1dc4ebe1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ri6zLzHLdwHPKRWq46XbTn3T",
+              "id": "call_XkM5v2jm5lIJDp8GWJGYwhZN",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sara}}\"}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_09e4c6773faa4028016adbf3b568c887d2b89f74891f7f9bfe",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq2_O2fTTSqiDW8wFnyoSoCFNE_7t9xFZQCKrphtbOPY6bD2vIN8INqXI4_kwGI1w-amibbJ0nVx6YbQTugSvdfGyEs0Iik7sWwszrPhHcj7YjI2UgVgxbXC6fjjQiqpL8KtVrmErEsFcXlpm2oInJuBV72QfHKFoq5Ax8_T0_bMij0Q5fiY3kd6byb4PtejaGbcA_5oHjQEOBF3bdL_afdJbgMqPWgwQ0hR-LncoTJ43X8YQhozZibPZfIz9jDh_14zoYJhURm3mmK-DrG8fh2aBdK5ltzQP0AidWBTOZ4SI3cs0pHuQBRFwLimcS-1zofoWp5T3otEvQ85n9jXnuLK8j2W98bsDO0zY-JDuuxL8gXdmtlkn93_eGvBYCDHeHDRlL8xB_srV3co_iZffybWX_tmCCq5zkuAEDzokyhyjCfatcFpCIiWs86MaYMsWsvN8a_WT6tStySnE8Who08EppZZhlvF5bd6HMk0UdcMM43q_YDmwAvFwmR4F_kibb8Nly9SPIG6O_rKbUZ_twC1vNar3B6IXTh1wD-4toMv25itLbR_R0JeLOYelybv-0tkJf-dLtj-QGDG-mQTwzIT2w6OKVxHohCXcmcSUuhHF7aPi4kHTEqhy0nCozPEma_R9wNoS-DpAyxwLONl8vJ-XOTD_lTTt0NHJLAxhiS4GzkVADqCMjpO7QK0xAGV8e0_KVriqG50OH_g1Goa85Q-lSFBROFl9zgfue4igHnNiji-BAtgingTSgtsI9UWirFjR3ZmjcztaByRFPikshrTxv3rWDhPzYddbjOvtTnL6tpYM53P8eevI1Vkn8tJKDJNxR58lsrqvBW0CxW-YzSn8RCw_cmClE419Ltv8mUDp82gdR9JIDBAApr23bSQCOJq2fr1Xe3R281d2Rs_1ZOGgWfWDvNPYIy9l3IsUfKJUsE3uY24GqaPHGDMfVKIXt1GCjeFeIlN6kzNYoWOSd49M_Ai9d6kIM3d9pU2wTgnH4CZtaGELU5tNXtfhAnYE-QtRdKpoz_4b6EirkkwmweB8mHw6FH4e3aEKvQSKGfWqDk298-plebbMNFgjrCzN1P1NNHkC-V65_c7GcQ00_H-nVEprgGyybO5pgN38ZZzcTgywPofhd-GSKCXbq4AgtZ-7XSmTOpyBOorSkz-FWwAiSY7mdgbwszsuNhqVSXG4BvPShwp9OyhqdxoQFcdLj6JZQ1qByDibRRWo5_SutUH67BlcLNapLJEAdKJHcGumgAvZRVX8aNpzuiOQI942rZLtL-s0FwE6RXuQtPqseLPKz85eegE_4tzoFhqQ6AvopQ9lttXyHcBNEyK-EWY0gHUjN6hsU5_biaQfNUGPHezWvsS2tAT-3vshT3KIyPxYnu_XtXbYAMBU2CfLkxCkRQYu2z6OqcBowI1XDkBwPD21Q4ozV0fu7mt5pPgAPn__ll6dd3JdNPbPHnBUi4zESclPKXJnVYc-CNdti3_Iw7OEOizrTCY_eLiOg1fzwfQgGhQsMb-9cHbuzWzVnYQYCYC2VkVsyME5jG0KiO-LPsIzeRhCsludmTD7OxDs0WdiWzn0fPTj73XalqXjSSxVG6oCfxH2KnBdz92zUx6TzjyFlIRWXUUYZdd1--IYcL6OGPoK4qOfx7-k4qJx_DzPIQe00ZhhyxE8PsXnPSosglUr-yDPorL4qD4YaABCnrpx-JFOycUbRlNNVgVJEmGvBDrAJXIKCDcVZKduMQeA-Iv8ZzRvd8fIWqwmqLcDSiB0mEScQNLkRkU7TcnICFrHrNeXORNA9iifJk_13xJIKREg2iKO9U0VL56QQtaZs96AweXpsu51zfBBJkpx6HTdTxu4A_5FvQgYRNeF8szrbXFfKhya-zujy9OgFFE7yZ6MEQig6amk4ztQbck2W4_KfbIZycFiYP26KITArhcwB4Bs-_Jq0V3UDZXXKA_YZKKkdgWVK4MKDMPXQeEaamwu28JTpnitRCXTQ0150NeiN6E4vHg==",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8407,
-            "cachedInputTokens": 8317,
-            "cacheWriteTokens": 87,
-            "outputTokens": 90
+            "inputTokens": 8430,
+            "cachedInputTokens": 8346,
+            "cacheWriteTokens": 81,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "451b6c9b41843594d0a96108284b1d10342382ac52240ec20db341a5e32221b3",
+        "fingerprint": "bf7103635d5c16094c89a3d540996d555791f2b3240972b2cf7f9bbdcb45d868",
         "response": {
-          "text": "I don’t have Sara’s usual service recorded.",
+          "text": "I don’t have Sara’s usual on record. There are no visit notes or earlier appointments to refer to.",
           "toolCalls": [],
           "replay": [
             {
@@ -67,10 +59,142 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8572,
-            "cachedInputTokens": 8404,
-            "cacheWriteTokens": 165,
-            "outputTokens": 14
+            "inputTokens": 8538,
+            "cachedInputTokens": 8427,
+            "cacheWriteTokens": 108,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "5540ef133c7f846a496cecf771b33b443f803d8d2d26dd6fa29300328c3cf272",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AhYf4SVkWeRUbuLj5O5a4EPB",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8349,
+            "cachedInputTokens": 8346,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "98ccaac25666ac9f3a16da3c9872287748352acaf658f7ebf97ec3af74656d6d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Jyo3SvljXaJHsmOeRjDT0yu2",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sara}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8437,
+            "cachedInputTokens": 8346,
+            "cacheWriteTokens": 88,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e1c5bf62ea8d24a46e62ca367c200a632f5ffaa48b7cd841023e521f4f0d8772",
+        "response": {
+          "text": "I don’t know Sara’s usual; there’s no usual service or visit history recorded for her.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8559,
+            "cachedInputTokens": 8434,
+            "cacheWriteTokens": 122,
+            "outputTokens": 24
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "5540ef133c7f846a496cecf771b33b443f803d8d2d26dd6fa29300328c3cf272",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0QHItGFsB1YXKguTuEhyzZGa",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8349,
+            "cachedInputTokens": 8346,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f7e9d471ce0db4833ea0b00c398e07a001de197ee6ebde3fdbb26a2c510985bb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Io5uisVWBCUwo21nUgGDy2Jh",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sara}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8434,
+            "cachedInputTokens": 8346,
+            "cacheWriteTokens": 85,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3143fb2964b7c7b3b776f3660da7e83054d22df7af77f2936287696a1da36b37",
+        "response": {
+          "text": "I don’t know Sara’s usual. There’s no usual-service note or recorded visit history for Sara K.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8550,
+            "cachedInputTokens": 8431,
+            "cacheWriteTokens": 116,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }
