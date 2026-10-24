@@ -6,8 +6,10 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 
 ## In progress
 **S36b** (Phase 8c "b" half), branch `claude/zealous-rubin-ufs9z1` (S36a merged). User at the brief: "Go ahead with your recommendations": D-1 A (pass^3 only on `drafts`, `feed_safety` and the three S33 leftovers), D-2 A (add 4 `drafts` + 3 `feed` cases before recording), D-3 a gate still missing after one fix → ask; no cap raise or `--phase-estimate-ok`.
-Plan: 1 add the 7 cases (scripted) → 2 probe the six changed sets → 3 fix → 4 one full recording + pass^3 trials 2–3 → 5 empty `KNOWN_REAL_MODEL_MISSES`, replay → 6 AC-W4-1/2 → 7 /code-review + /security-review → 8 end checks → 9 docs, PR, merge.
-Next step: task 1.
+Plan: 1 add the 7 cases → 2 probe the six changed sets → 3 fix → 4 one full recording + pass^3 trials 2–3 → 5 empty `KNOWN_REAL_MODEL_MISSES`, replay → 6 AC-W4-1/2 → 7 /code-review + /security-review → 8 end checks → 9 docs, PR, merge.
+Done: 1–3 (probe $0.13: `get_feed` v2, `after-three-two-days` grader); 6 (AC-W4-1/2 8/8); 7 (code review: 10 findings fixed with tests; security review: none); first full recording $0.20 → 4 misses, guide fixes (`get_feed` v3/v4, instructions "same as last time", `list_todos` v2; `mr-staff-fact` grader), probes 3–4 green. Phase 8 ≈ $0.40.
+**User during the session:** "Record again" (a second full recording, ≈ $0.27 more, Phase 8 ≈ $0.61); then "Second fix, then record" (the team to-dos miss after one fix).
+Next step: second full recording (running), pass^3 trials 2–3 on `drafts`, `feed_safety` and the three S33 leftovers, then 5, 8, 9.
 
 ## Last sessions
 - **S36a Phase 8c "a" (2026-10-24): suggestions with drafts, scripted model, branch pushed without a PR** ([ADR-0040](../adr/0040-rebooking-nudges-with-drafts-and-get-feed.md)). Full entry in [session-log.md](session-log.md).
