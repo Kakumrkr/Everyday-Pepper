@@ -24,12 +24,12 @@
         }
       },
       {
-        "fingerprint": "3c2ef225b312c09ea406f1726cc7a80de09bcedea40a4a17bcf10a3a4aeb7003",
+        "fingerprint": "9413167adac3e4b0da50aa2ee3f9ca66bf26775396f15f8c8cfd64d5866891be",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_jI0VhBKuJ4WfCXHoi5wFobGm",
+              "id": "call_cpGYwyzxx15Q5agUyqvItS61",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -37,8 +37,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8780,
-            "cachedInputTokens": 8766,
+            "inputTokens": 8791,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -46,9 +46,9 @@
         }
       },
       {
-        "fingerprint": "242d4342956d0b28ba0610b1798daaacd1ad9a3e82a2caaa1f0d909819b785a8",
+        "fingerprint": "80b1df43ca68c7c8420019a656e8aa45fdca84257923e3c7237d3796cbe94d3f",
         "response": {
-          "text": "Yes—there’s one item waiting for your OK on Home: a rebooking email for Sara K. with Jess for a haircut. You can review it on its card there.",
+          "text": "Yes—one rebooking email for Sara K. (a haircut with Jess) is waiting for your OK on Home. You’ll need to review it there; I can’t approve it for you.",
           "toolCalls": [],
           "replay": [
             {
@@ -58,10 +58,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10422,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 1642,
-            "outputTokens": 40
+            "inputTokens": 10503,
+            "cachedInputTokens": 8788,
+            "cacheWriteTokens": 1712,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }

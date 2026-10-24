@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5181f0f69d1ca2093f4c324378a31a6353f0ac1343690ad0e3cbc105090310c4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_JaEgc5j6SGYXQbMXI2ALPQ8M",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8792,
+            "cachedInputTokens": 8777,
+            "cacheWriteTokens": 12,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1af14d1ef7ff3117c5b47208dd307df5e8e010ed0126174565b0961aeae9b49c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_l1XAaj9bVeoPfkjb5RJCsIUV",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"schedule_gaps\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9264,
+            "cachedInputTokens": 8789,
+            "cacheWriteTokens": 472,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1a15958a2dc5ab7c63d2dc25c83714557479ec77d60ed259fbd8d51038622d53",
+        "response": {
+          "text": "Marco works Monday through Saturday this week, but I don’t have a service-independent view of his open time here. What service are you looking to book?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9314,
+            "cachedInputTokens": 9261,
+            "cacheWriteTokens": 50,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ce5d56702eb1379e60abd2a856f398cc3ef10c8c6dcc3bdce5379b253a1b6537",
+        "fingerprint": "c0b9cf39c4cb74ff403dea660ea9125e94f529f4083de983a411590690ce9e9d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TyvCXxTQXwwfvZWpz3I1qZku",
+              "id": "call_neZAeTVqt1flhOoi96DGyaj3",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8781,
-            "cachedInputTokens": 8766,
+            "inputTokens": 8792,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,18 +25,33 @@
         }
       },
       {
-        "fingerprint": "0cc980326b2dbf8c092f4c2d6d4bf058d684ac5ab3d011903a87aeefd0733489",
+        "fingerprint": "d9f07ad67f126451f96d8ad0ede810416248b80a1fab1aa9f4a2a600b6c9e2bf",
         "response": {
-          "text": "Jess offers haircuts and colour. Which service should I check her availability for?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_u0harUAxQ2gUx0LG3kzpqgcD",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"schedule_gaps\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9254,
+            "cachedInputTokens": 8789,
+            "cacheWriteTokens": 462,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1608fd00896fbd85b32b9e3bd21a0b51357dde126c1e2aed5b8126fcdd068103",
+        "response": {
+          "text": "Yes. The schedule-gaps feed shows Jess has open time Monday through Friday this week (Nov 2–6). It lists a full 9–5 opening Monday, Wednesday, and Thursday; Tuesday and Friday have openings too. For exact bookable times, tell me which service you’re checking.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0dc0787c7e44568c016adce118e38487d28392bb7585abca23",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3OEZWYNzFe7QYb8HQx-CDAAuwkRedGCHJUO1XIGMIe-QvNW8iJnM_BorE6ng5Hkny7j0vbwPy1QcHo9nG4TiS_8oUauSAqPpMcuWshE6c8udGkz8H_GiXLmEw-jSFouLCpEEyeCNhOpfvxmJ0P3l7hUQtqKooSg4_ENfyy26d-26nArEDwNZCJAVKG-JneZ4Zs_dJpZ5pZgNwEOVfyQeFSGI6erJn-mG8WtVmfx4ZInHAscPFopXuZn9jKpZkbaRRtJ7vifpoJw9ysYmc6zafJeSpK7lNkrkfz1QPmbyeCk6tGSwAqLIJIUxhk4lw6bQc6rYI0XleBBMzpoj_6Rj_YPj5RtqUlCdHjng6ZG6lNCISojQQ0ZxyfDj_C0j5Vdfecl-pYhc8ETX8qcQ5jRuz1G3s1qqMtxHijg6A4CgQyx4KebWnpzgDOw_O0qLE3D0ZxBDrqQR8OvjaMzyoMHImEfkGCB6SL1S6Qj6mrURMRfR3-cHuoYm8NVxM2M74ObfENOMkl3_K8PezWrt1TbWCOFlmLw1WletFpwxk37JmACkzsshiSmIoVepBMmG7pzXx1oqXSv67Mz8hpIDjqE2vgzuSOYBVqZu-FIB9dZv-4SXxTN6Onzg6vRY7H85-1hAoVlbuKYgmEpKiZlCgZ7G1p5YgeqwdEiHjm0VKlbPCatCElxDs_xhlyF_s-5KD89OoU_YZTcXbuFQTD2O0Vf15PjsgFH3e9nHC2ZPgHkyVM2gQbdzhwy96WlwjCzX0HDB-Uouw6ePOluYmfQeRI94y4Mi6nDn7cFcKWkAiJYOWzJHy-Wl_CdBM6mYAaltdEb-xBw99fNMN7vkd5C1brWqDbHa2pqiqYW-g-lCATC_3mV07V6uCoJksCYDJ0l9SQnuCND1c0dgyyyw1g85LzsVzxj7wIcY7NRdgBlxL7ed8PBwYxNU4MqAwT9Y9qsf2W_yYQ1LVqXfpxuCA-orpSC-eYtInbE4yBIN2MtDjdzVG2_tzPGnCUfg_fdV19jbLGGZL2LEk6swW7tR8RHdAU6jAdSVulCEXGdGRSu5BD80MJfFOg_hAsZLZjaTdZVRAHTKcE_tax3qawPZzLGuWHWftzMp4aouRIA6XN6d-mvldCZhbnNevl_-vbEejflcBRVD_gZ_1aouydHwDZXk2DJlhU0t_AxNCLggS38pDPprwFsD-eLjNTWNVZCLP0t11gNBJsG9CUbw60V1hAy8S_a1qz8F1a1IEYjDJsIxwdKDalXo15IuJF4Serramb7af0qOqcptH0BENWDBDFmRy8hsn-O-HYQf1rDpmar9z1fmICE5OQgjCqA2PhBbGYK4L8U4puXcqQJZAWKtjX7LtffzD1IJz-IcrGjPtgZvPd6pKVG8xWOyiXY8BWlCDyVHzTDdMenRbdq1LE4gVjj4CtX7vmYNQw0nCWb2T6bdEA4Grv--WOhDbaMnbQJ-pxA3Nj6j-qQxzU-QfumY2Y-YFKFmN-458wQafdl80ejqya6iMS_Kk8oBY_WM0hArB1E-_m_NEHGQAdGi88MefZ0nzfmbkGKS7hwFkWbHdFRkTuQ-HhTS38eLjsGTNujhJvzOsO2pWOknacUWIEa71dvgwpgQ8SorSiP_U-fW242TJ_-9HNyBmSv1VXDa_GaQB_PC7cbBXFx1hpz97-Oa8PPC5defUt-rSmbJHPERYYi9ycmtvICVglKK5NN3uGDXFEngbyjQyP82HvIJ23vg8Bcsr24Eu6aEsQ==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -44,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9248,
-            "cachedInputTokens": 8778,
-            "cacheWriteTokens": 467,
-            "outputTokens": 46
+            "inputTokens": 10612,
+            "cachedInputTokens": 9251,
+            "cacheWriteTokens": 1358,
+            "outputTokens": 65
           },
           "model": "gpt-6-luna"
         }

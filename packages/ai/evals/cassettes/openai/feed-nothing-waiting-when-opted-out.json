@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3c2ef225b312c09ea406f1726cc7a80de09bcedea40a4a17bcf10a3a4aeb7003",
+        "fingerprint": "9413167adac3e4b0da50aa2ee3f9ca66bf26775396f15f8c8cfd64d5866891be",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_82SkmR7OorGhrynQFdvfC89z",
+              "id": "call_ziC3boH8abgFqsfjDoybRDNH",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8780,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8791,
+            "cachedInputTokens": 8788,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d0bf56324025937f601694866afefb48fe22a7b70e2879a57a0d9818177aaa1a",
+        "fingerprint": "6ac6b9772f7b47548f5674df0712ee98bf3617aaa35da8bda25e5514164961d9",
         "response": {
-          "text": "There’s nothing waiting for your OK right now. There are 13 feed suggestions: schedule gaps for Jess and Marco this week, and two clients due for rebooking.",
+          "text": "Nothing is waiting for your OK on Home right now. There are 13 other suggestions, including schedule gaps and two clients due for rebooking.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,10 +36,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10430,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 1650,
-            "outputTokens": 38
+            "inputTokens": 10434,
+            "cachedInputTokens": 8788,
+            "cacheWriteTokens": 1643,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

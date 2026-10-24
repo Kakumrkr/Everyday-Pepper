@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "86d8c35e521b2cae0de6751d60bfb8f25407e962566cbe2da9afce97b8e04341",
+        "fingerprint": "1c13fc59d8660928dd5de3e034b96eeca07e48324ac33f5580090e4a7deb46ff",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_kvSFxAuRcH0Fp6azoyATo3NC",
+              "id": "call_vAV4fIgfTJFemcqVw9JNOC9c",
               "name": "get_feed",
               "arguments": "{\"kind\":\"rebooking_due\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8780,
-            "cachedInputTokens": 8766,
+            "inputTokens": 8791,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 11,
             "outputTokens": 20
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "9f6b606099b3efc3b415606e7b850ffc0797507fdd945eef48af974e26c86367",
+        "fingerprint": "05438a862c315ca3b0f98bbad86eac638c896ad7a102be7df9717fe23a4feb30",
         "response": {
-          "text": "Sara K. and Sarah P. are due back for haircuts with Jess. Their suggested rebooking dates were Oct 26 and Oct 27, respectively.",
+          "text": "Two regulars are due back for haircuts with Jess: Sara K., due October 26, and Sarah P., due October 27. Both are already past due.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9113,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 333,
-            "outputTokens": 36
+            "inputTokens": 9130,
+            "cachedInputTokens": 8788,
+            "cacheWriteTokens": 339,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

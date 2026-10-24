@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d1e71fc6002a1a308936301621ec18b710ad0407bfdafe145c2de8760be91c85",
+        "fingerprint": "35b33be44dc50fc973a8d596907a777ee18d0229d7746236de42ae97bd99a9e7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_KBhNMUMEkZ7Sgr0ZauM2KK2f",
+              "id": "call_yOkK9B9OA1Y1uXUekZjjYKqk",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8780,
-            "cachedInputTokens": 8766,
-            "cacheWriteTokens": 11,
+            "inputTokens": 8791,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8788,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e2f1e02ff094afc86be711f24c11d0843b6e931982852409444123ff062a6309",
+        "fingerprint": "16d19fd529524daeba8a285bb48799782351ac862b19d827484a17345f2b6ae8",
         "response": {
-          "text": "Nothing flagged for today.",
+          "text": "Nothing flagged for today—there are no suggestions on your Home feed.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8828,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8839,
+            "cachedInputTokens": 8788,
             "cacheWriteTokens": 48,
-            "outputTokens": 9
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }

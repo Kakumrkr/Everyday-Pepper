@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "94b34c47e1a48060e9bc2356a1c3117a2e3031a479b64c8864e031846fd73d03",
+        "fingerprint": "75d6a42c906f0e0a6ead419b7b3b0ef71cf1fc69718275190da8c95057bc90a0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_mXp3NcsrCY12uWipMDRXJoPy",
+              "id": "call_g2sVnJblWg3ysthwRdPOtB6D",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8778,
+            "inputTokens": 8789,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8775,
+            "cacheWriteTokens": 8786,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "26b6dba14c44212d32a855b73829d6c48bf1e4b7835b141b8fb763908a737a0e",
+        "fingerprint": "7770b69f854f1f89111dc6a360a1faecd5993f29bde76a06134fdf485dce11b5",
         "response": {
-          "text": "Your feed has 7 suggestions:\n\nThere are schedule gaps in your day today, Monday (9:00–5:00), and Wednesday and Thursday (9:00–5:00). Tomorrow has two gaps, with the longest from 9:00–12:00; Friday has two gaps, with the longest from 9:00–2:00.\n\nSara K. is due for a haircut rebooking, and Sarah P. is also due for a haircut rebooking. No items are marked as waiting for approval.",
+          "text": "Your feed has 7 suggestions:\n\n- Schedule gaps for you: today, Nov 2 (9–5); Tue, Nov 3 (two gaps, longest 9–12); Wed–Thu, Nov 4–5 (9–5 each); and Fri, Nov 6 (two gaps, longest 9–2).\n- Sara K. is due for a haircut rebooking (due Oct 26).\n- Sarah P. is due for a haircut rebooking (due Oct 27).\n\nNo rebooking emails are waiting for approval.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9700,
-            "cachedInputTokens": 8775,
-            "cacheWriteTokens": 922,
-            "outputTokens": 112
+            "inputTokens": 9725,
+            "cachedInputTokens": 8786,
+            "cacheWriteTokens": 936,
+            "outputTokens": 116
           },
           "model": "gpt-6-luna"
         }

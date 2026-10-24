@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "45a9d02216b1a510b4d2cfbd61030ca600d857fb63b92ef952c428b3429b6fa9",
+        "fingerprint": "ce09c0410ceeb17a2261af57af34099abde8cc303c3e89aff128f57a453e0af0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_yJ8xgIFei8qVn7rvnpNhbfiP",
+              "id": "call_HqYTuejLNdkDYVHkjhgUdjWX",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8780,
+            "inputTokens": 8791,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8777,
+            "cacheWriteTokens": 8788,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ca9d4333ee173941729192b9fa40e7f0eb233e3e3e044774313aa17ddbdeba7b",
+        "fingerprint": "727612aee51194f1f7495221d8ea346745dff72ce31e53ab589c1c0282753760",
         "response": {
-          "text": "Yes—Jess and Marco each have a 9–5 open gap today. There are also two rebooking reminders past due: Sara K. and Sarah P. are due for haircuts with Jess. No emails are waiting for approval.",
+          "text": "Yes. Today, Jess and Marco each have a long open stretch from 9 AM to 5 PM. The feed also flags two haircut regulars who are overdue to rebook: Sara K. (due Oct 26) and Sarah P. (due Oct 27).",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10382,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 1602,
-            "outputTokens": 52
+            "inputTokens": 10510,
+            "cachedInputTokens": 8788,
+            "cacheWriteTokens": 1719,
+            "outputTokens": 60
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "32c55ae253fd4b49eccb882c5384652adf88cf95e751c255717c9890d2bacccb",
+        "fingerprint": "336138dec9ef7b13c46219305403c5110f16497ef8747121491998e14cf062c2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_k6fdjw6j5eBDnMrYFPadLD9E",
+              "id": "call_qs3KLzOeN2f4USq1aEZAq2Va",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8779,
-            "cachedInputTokens": 8766,
+            "inputTokens": 8790,
+            "cachedInputTokens": 8777,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "4b511dbf67e71627d805a8410ee6e305fd9e47f3773450ae93b45200b4a7b179",
+        "fingerprint": "0e858d0579027a48d621858da953ad165d6ccbb5287762922e4f0e2636fcbc65",
         "response": {
-          "text": "Suggestions are paused for the business today, so there aren’t any to show.",
+          "text": "Suggestions are paused for the business today, so I don’t have any to share.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8831,
-            "cachedInputTokens": 8776,
+            "inputTokens": 8842,
+            "cachedInputTokens": 8787,
             "cacheWriteTokens": 52,
-            "outputTokens": 20
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }
