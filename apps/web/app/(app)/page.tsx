@@ -1,6 +1,7 @@
 import {
   AiActionsResponseSchema,
   AiProposalsResponseSchema,
+  FeedResponseSchema,
   TasksResponseSchema,
 } from '@pepper/contracts';
 import { redirect } from 'next/navigation';
@@ -8,6 +9,7 @@ import { requiredStep } from '../../lib/account';
 import { currentAccount, currentBusiness, currentJson, currentMembers } from '../_server/account';
 import { BusinessSwitcher, SignOutButton } from '../_components/account-actions';
 import { AiActivity } from '../_components/chat/ai-activity';
+import { FeedCard } from '../_components/feed/feed-card';
 import { NotificationsCard } from '../_components/push/notifications-card';
 import { TaskCard } from '../_components/tasks/task-card';
 import { Unavailable } from '../_components/unavailable';
@@ -15,7 +17,11 @@ import { Unavailable } from '../_components/unavailable';
 // Per request: the page depends on the session cookie.
 export const dynamic = 'force-dynamic';
 
-/** Signed-in home, inside the app shell. Phase 8 replaces the body with the operator feed. */
+/**
+ * Signed-in home, inside the app shell: the operator feed (S35, ADR-0039). Needs your OK (the
+ * AI's proposals), Suggestions (what the rules found, `/v1/feed`) and Done for you (receipts),
+ * then the to-dos and notifications.
+ */
 export default async function HomePage() {
   const account = await currentAccount();
   const step = requiredStep(account);
@@ -41,10 +47,13 @@ export default async function HomePage() {
         currentJson('/v1/ai/actions', AiActionsResponseSchema),
       ])
     : [null, null];
+  const feed =
+    current?.permissions.includes('feed.read') === true
+      ? await currentJson('/v1/feed', FeedResponseSchema)
+      : null;
   return (
     <div className="mx-auto max-w-xl">
       <h1>Hi {me.user.name}</h1>
-      <p className="tagline">Your AI employee is getting ready.</p>
       {current === null ? (
         <p className="status">Choose a business below.</p>
       ) : (
@@ -56,6 +65,22 @@ export default async function HomePage() {
       {current !== null && proposals !== null && actions !== null ? (
         <div className="mt-6">
           <AiActivity
+            section="needs"
+            proposals={proposals.proposals}
+            actions={actions.actions}
+            timeZone={current.business.timeZone}
+          />
+        </div>
+      ) : null}
+      {current !== null && feed !== null ? (
+        <div className="mt-6">
+          <FeedCard feed={feed} timeZone={current.business.timeZone} />
+        </div>
+      ) : null}
+      {current !== null && proposals !== null && actions !== null ? (
+        <div className="mt-6">
+          <AiActivity
+            section="done"
             proposals={proposals.proposals}
             actions={actions.actions}
             timeZone={current.business.timeZone}

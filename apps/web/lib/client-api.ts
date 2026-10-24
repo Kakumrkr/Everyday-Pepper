@@ -36,6 +36,7 @@ const MESSAGES: Record<string, string> = {
     'This invite is for a different email. Sign in with the email it was sent to.',
   invite_not_found: 'That invite was already used or cancelled.',
   invite_limit_reached: 'You have 20 open invites. Cancel some before inviting more.',
+  feed_item_not_found: 'That suggestion is no longer open.',
   service_not_found: 'That service is no longer on the menu.',
   service_name_taken: 'You already have a service with this name.',
   staff_member_link_taken: 'That login is already linked to another staff member.',

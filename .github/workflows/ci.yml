@@ -143,6 +143,7 @@ jobs:
         env:
           AI_SCRIPTED_PROVIDER: e2e
           DEPLOYMENT_ENVIRONMENT: ci
+          INSIGHTS_POLL_MS: '10000'
 
       - name: Smoke test
         run: pnpm test:e2e

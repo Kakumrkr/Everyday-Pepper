@@ -18,6 +18,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { changeBooking, createBooking } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
+import { addTimeOff } from './services/time-off.js';
 import { runDueInsights, runInsightsFor, type InsightsOptions } from './services/insights.js';
 import { createService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
@@ -156,6 +157,22 @@ describe('the insights pass', () => {
     b.clock.set(new Date(Date.parse(NOW) + 2 * MINUTE).toISOString());
     await runDueInsights(db, b.options);
     expect((await gapOn(b, '2026-11-03'))?.payload).toMatchObject({ openMinutes: 480 });
+  });
+
+  it('runs again after new working hours or time off, which open or close gaps', async () => {
+    const b = await newBusiness();
+    await runInsightsFor(db, b.tenantId, b.options);
+    await replaceWorkingHours(db, b.owner, b.jess.id, {
+      intervals: [{ weekday: 2, start: '09:00', end: '17:00' }],
+    });
+    expect(await runDueInsights(db, b.options)).toMatchObject({ businesses: 1, expired: 4 });
+    expect((await feed(b)).map((item) => item.day)).toEqual(['2026-11-03']);
+    await addTimeOff(db, b.owner, b.jess.id, {
+      startsAt: '2026-11-03T14:00:00.000Z',
+      endsAt: '2026-11-03T22:00:00.000Z',
+    });
+    expect(await runDueInsights(db, b.options)).toMatchObject({ businesses: 1, expired: 1 });
+    expect(await feed(b)).toEqual([]);
   });
 
   it('honours "Pause suggestions" and a kind turned off', async () => {

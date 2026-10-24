@@ -12,64 +12,88 @@ import { LiveChangeCard } from './live-change';
 const SHOWN = 5;
 
 /**
- * Pepper's work on Home (S26; the Phase 8 feed takes it over): what waits for the member's OK,
- * and "Done for you" with Undo and Why?. Staff see their own, including what a lead approved
- * for them (S23 log). Each card reads its live state and approves exactly what it shows.
+ * Pepper's work on Home's feed (S26; S35 makes Home the feed): "Needs your OK" (proposals
+ * waiting for the member) or "Done for you" (receipts with Undo and Why?), one section each,
+ * with an empty state that says what will appear. Staff see their own, including what a lead
+ * approved for them (S23 log). Each card reads its live state and approves exactly what it
+ * shows.
  */
 export function AiActivity({
+  section,
   proposals,
   actions,
   timeZone,
 }: {
+  section: 'needs' | 'done';
   proposals: AiProposalView[];
   actions: AiActionView[];
   timeZone: string;
 }) {
   const router = useRouter();
-  const needsId = useId();
-  const doneId = useId();
+  const headingId = useId();
   const toChat = () => {
     router.push(ROUTES.chat);
   };
-  if (proposals.length === 0 && actions.length === 0) return null;
-  return (
-    <div className="flex flex-col gap-6">
-      {proposals.length === 0 ? null : (
-        <Card labelledBy={needsId} className="flex flex-col gap-3">
-          <h2 id={needsId} className="m-0 text-lg font-bold">
-            Needs your OK
-          </h2>
-          {proposals.map((proposal) => (
+  if (section === 'needs') {
+    return (
+      <Card labelledBy={headingId} className="flex flex-col gap-3">
+        <h2 id={headingId} className="m-0 text-lg font-bold">
+          Needs your OK
+        </h2>
+        {proposals.length === 0 ? (
+          <EmptyState
+            title="Nothing waiting."
+            text="When I need your OK before I change something or message a client, it shows here."
+          />
+        ) : (
+          proposals.map((proposal) => (
             <LiveChangeCard
               key={proposal.id}
               card={snapshotOfProposal(proposal)}
               timeZone={timeZone}
               onPickSlot={toChat}
             />
-          ))}
-        </Card>
-      )}
-      {actions.length === 0 ? null : (
-        <Card labelledBy={doneId} className="flex flex-col gap-3">
-          <h2 id={doneId} className="m-0 text-lg font-bold">
-            Done for you
-          </h2>
-          {actions.slice(0, SHOWN).map((action) => (
+          ))
+        )}
+      </Card>
+    );
+  }
+  return (
+    <Card labelledBy={headingId} className="flex flex-col gap-3">
+      <h2 id={headingId} className="m-0 text-lg font-bold">
+        Done for you
+      </h2>
+      {actions.length === 0 ? (
+        <EmptyState
+          title="Nothing done yet."
+          text="What I do for you, like bookings and to-dos, lands here with an Undo."
+        />
+      ) : (
+        actions
+          .slice(0, SHOWN)
+          .map((action) => (
             <LiveChangeCard
               key={action.id}
               card={snapshotOfAction(action)}
               timeZone={timeZone}
               onPickSlot={toChat}
             />
-          ))}
-          <p className="m-0 text-sm">
-            <Link href={ROUTES.autonomy} className="font-semibold text-brand underline">
-              Change what I do on my own
-            </Link>
-          </p>
-        </Card>
+          ))
       )}
-    </div>
+      <p className="m-0 text-sm">
+        <Link href={ROUTES.autonomy} className="font-semibold text-brand underline">
+          Change what I do on my own
+        </Link>
+      </p>
+    </Card>
+  );
+}
+
+function EmptyState({ title, text }: { title: string; text: string }) {
+  return (
+    <p className="m-0 rounded-md bg-surface-2 p-3 text-sm text-ink-2">
+      <strong className="text-ink">{title}</strong> {text}
+    </p>
   );
 }
 
