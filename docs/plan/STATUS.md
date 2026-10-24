@@ -10,7 +10,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - **Tasks:** 0 mock-up · 1 fixtures (DST) · 2 contracts · 3 providers · 4 migration 0043 + repository + isolation · 5 insights pass + re-run + latency · 6 `/v1/feed` · 7 web home + Playwright · 8 ADR-0039, docs, `/session-close`.
 - **Done:** task 0 mock-up (`docs/mockups/home-feed.html`, published); tasks 1–3: 28 insight fixtures (NY with both DST days, Phoenix, Kolkata) green, `contracts/feed.ts` (+ tests), `staff_overload` in `InsightTypeSchema`, the providers in `appointments/src/insights/` (thresholds as constants: horizon 7 days, no-show 2 in 180 days, overload 90% on 3 days, median from 3 visits clamped 7–365).
 - **Plan note (Claude):** services have no rebooking interval in the database yet; migration 0043 adds a nullable `services.rebook_after_days` (no edit screen in S35; Phase 9 onboarding fills it from the catalog).
-- **Next:** task 4, migration 0043 + feed repository + isolation.
+- **Done (task 4):** migrations 0043 (`feed_items` with `member_scope` on `audience_staff_id` + insert/delete only for owners/managers/worker; `insight_runs` with `job_scan('insights')`; `services.rebook_after_days`; `tenants.feed_settings`) and 0044 (FORCE RLS, triggers, proposal FK `ON DELETE SET NULL`, an `insight_runs` row per existing business); `repositories/feed.ts` (sync with dedupe/expiry/snooze, list with names, close, counts, settings, run bookkeeping); `createTenant` adds the run row; `feed.int.test.ts` 14/14 and the isolation suite green with both tables and the scan.
+- **Next:** task 5, the insights pass (snapshot loader, worker `Periodic` every minute, requests from booking changes, latency test).
 
 ## Last sessions
 - **S34 Phase 8a (2026-10-24): Phase 8 planning, merged** ([Phase 8 playbook](phase-8-playbook.md), [PCR-006](changes/PCR-006.md)). Full entry in [session-log.md](session-log.md).

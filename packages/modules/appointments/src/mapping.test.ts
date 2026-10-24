@@ -44,6 +44,7 @@ const serviceRow: ServiceRow = {
   bufferAfterMinutes: 10,
   priceFromCents: 4000,
   priceToCents: 6000,
+  rebookAfterDays: null,
   active: true,
   createdAt: CREATED,
   updatedAt: UPDATED,

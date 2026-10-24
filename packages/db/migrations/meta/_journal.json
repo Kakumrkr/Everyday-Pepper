@@ -302,6 +302,20 @@
       "when": 1792771038376,
       "tag": "0042_memory_episodes_and_learned_rules",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1792811457538,
+      "tag": "0043_feed_items",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1792811458678,
+      "tag": "0044_feed_items_hardening",
+      "breakpoints": true
     }
   ]
 }

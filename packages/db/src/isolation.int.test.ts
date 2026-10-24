@@ -45,6 +45,7 @@ import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbo
 import { savePushSubscription } from './repositories/push-subscriptions.js';
 import { listDueBookingReminders, planBookingReminder } from './repositories/reminders.js';
 import { insertTask, listDueTasks } from './repositories/tasks.js';
+import { listDueInsightRuns, requestInsightRun, syncFeedItems } from './repositories/feed.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
 import { insertExecution, insertProposal, saveAutonomySettings } from './repositories/trust.js';
 import { addUsage } from './repositories/usage.js';
@@ -108,6 +109,10 @@ const SEES_ALL = '( SELECT current_member_sees_all() AS current_member_sees_all)
 /** A memory fact a staff member reaches through its subject, as Postgres prints it. */
 const MEMORY_REACHABLE =
   "(((subject_type = 'client'::text) AND (client_id IN ( SELECT clients.id\n   FROM clients))) OR ((subject_type = 'booking'::text) AND (booking_id IN ( SELECT bookings.id\n   FROM bookings))) OR ((subject_type = 'staff'::text) AND (staff_member_id IN ( SELECT current_member_staff_ids() AS current_member_staff_ids))))";
+
+/** The feed's member scope: staff reach the items addressed to their staff member. */
+const OWN_AUDIENCE =
+  '(( SELECT current_member_sees_all() AS current_member_sees_all) OR (audience_staff_id IN ( SELECT current_member_staff_ids() AS current_member_staff_ids)))';
 
 const TENANT_TABLES: Record<string, TenantTable> = {
   tenants: {
@@ -605,6 +610,45 @@ const TENANT_TABLES: Record<string, TenantTable> = {
         with_check: `(${SEES_ALL} OR ${MEMORY_REACHABLE})`,
       },
     ],
+  },
+  feed_items: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const staff = await seedStaff(tx);
+      await syncFeedItems(
+        tx,
+        [
+          {
+            kind: 'schedule_gaps',
+            subjectKey: `staff:${staff}`,
+            day: '2026-10-20',
+            audienceStaffId: staff,
+            subjects: { staffMemberId: staff, clientId: null, bookingId: null, serviceId: null },
+            payload: { gapCount: 1, openMinutes: 60 },
+            expiresAt: new Date('2026-10-20T22:00:00Z'),
+          },
+        ],
+        new Date('2026-10-20T12:00:00Z'),
+      );
+      return idWhere(tx, 'feed_items', 'dedupe_key', `schedule_gaps:staff:${staff}:2026-10-20`);
+    },
+    touch: 'payload = payload',
+    memberScope: [
+      { policyname: 'member_scope', cmd: 'ALL', qual: OWN_AUDIENCE, with_check: OWN_AUDIENCE },
+      { policyname: 'member_scope_delete', cmd: 'DELETE', qual: SEES_ALL, with_check: null },
+      { policyname: 'member_scope_insert', cmd: 'INSERT', qual: null, with_check: SEES_ALL },
+    ],
+  },
+  insight_runs: {
+    tenantColumn: 'tenant_id',
+    // createTenant made the row; asking for a run keeps it the only one.
+    seed: async (tx) => {
+      await requestInsightRun(tx, new Date('2026-10-20T12:00:00Z'));
+      const { rows } = await tx.execute<{ id: string }>(sql`SELECT current_tenant_id() AS id`);
+      return idWhere(tx, 'insight_runs', 'tenant_id', String(rows[0]?.id));
+    },
+    touch: 'requested_at = requested_at',
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('insights'::text))",
   },
   memory_episodes: {
     tenantColumn: 'tenant_id',
@@ -1427,6 +1471,7 @@ describe.each([
   ['reminders', 'booking_reminders'],
   ['cleanup', 'tenants'],
   ['tasks', 'tasks'],
+  ['insights', 'insight_runs'],
 ] as const)('job scan %s (withJobScan: the job finds work across businesses)', (job, table) => {
   /** Runs `statement` in a transaction with `app.job_scan` set to `name` (and a tenant). */
   async function scanning(statement: string, options: { name?: string; tenant?: TenantId } = {}) {
@@ -1451,7 +1496,9 @@ describe.each([
         ? (await listDueBookingReminders(db, at, 1000)).map((due) => due.bookingId)
         : job === 'tasks'
           ? (await listDueTasks(db, at, 1000)).map((due) => due.taskId)
-          : await listTenantIdsForCleanup(db, null, 1000);
+          : job === 'insights'
+            ? (await listDueInsightRuns(db, at, 3_600_000, 1000)).map((due) => due.runId)
+            : await listTenantIdsForCleanup(db, null, 1000);
     expect(found).toEqual(expect.arrayContaining(seeded()));
   });
 
@@ -1459,6 +1506,8 @@ describe.each([
     for (const other of [
       'booking_reminders',
       'tasks',
+      'insight_runs',
+      'feed_items',
       'tenants',
       'bookings',
       'clients',
