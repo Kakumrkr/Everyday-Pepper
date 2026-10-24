@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_11",
+              "name": "write_draft",
+              "arguments": "{\"subject\": \"Time for your next haircut, Sara?\", \"body\": \"Hi Sara,\\n\\nIt has been about five weeks since your last haircut with Jess, so we wanted to check in. There is an opening just below if you would like to come in.\\n\\nWe would love to see you again!\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

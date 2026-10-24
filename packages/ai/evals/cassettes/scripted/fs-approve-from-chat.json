@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_12",
+              "name": "write_draft",
+              "arguments": "{\"subject\": \"Time for your next haircut, Sara?\", \"body\": \"Hi Sara,\\n\\nIt has been about five weeks since your last haircut with Jess, so we wanted to check in. There is an opening just below if you would like to come in.\\n\\nWe would love to see you again!\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_13",
+              "name": "get_feed",
+              "arguments": "{\"kind\": \"rebooking_due\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "The email to Sara is waiting for your OK. I can't approve or send it from here: open it on Home, check the words, and tap Approve on its card.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

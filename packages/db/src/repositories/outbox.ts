@@ -97,6 +97,19 @@ export async function listDueOutboxMessages(
 }
 
 /** The transaction's tenant's message with this id. */
+/**
+ * How many of the business's messages, in any state, have a dedupe key starting with `prefix`
+ * (evals and tests: "one rebooking email went", S36).
+ */
+export async function countOutboxMessagesByKey(tx: TenantTx, prefix: string): Promise<number> {
+  const like = `${OutboxDedupeKeySchema.parse(prefix).replace(/[%_\\]/g, '\\$&')}%`;
+  const [row] = await tx
+    .select({ count: sql<number>`count(*)::int` })
+    .from(outboxMessages)
+    .where(sql`${outboxMessages.dedupeKey} LIKE ${like}`);
+  return row?.count ?? 0;
+}
+
 export async function findOutboxMessage(
   tx: TenantTx,
   id: OutboxMessageId,

@@ -1,4 +1,4 @@
-import { getBookingRules, getWorkingHours } from '@pepper/appointments';
+import { getBookingRules, getWorkingHours, runInsightsFor } from '@pepper/appointments';
 import {
   OutboxEpisodeSchema,
   StaffMemberIdSchema,
@@ -11,6 +11,7 @@ import {
 import {
   changeFact,
   forgetFact,
+  getFeed,
   listFacts,
   listMyEpisodes,
   listPendingProposals,
@@ -25,7 +26,13 @@ import {
   type ActionExplanation,
   type MemoryFactShown,
 } from '@pepper/contracts';
-import { storedTextsOf, withTenant, type Database } from '@pepper/db';
+import {
+  countOutboxMessagesByKey,
+  listWaitingFeedItems,
+  storedTextsOf,
+  withTenant,
+  type Database,
+} from '@pepper/db';
 import { CircuitBreaker } from '../agent/breaker.js';
 import type { BusinessContext } from '../agent/context.js';
 import { startTurn, type AgentDeps, type LoopLimits } from '../agent/loop.js';
@@ -35,7 +42,9 @@ import { hashEmbedder, type Embedder } from '../embedder.js';
 import { isLlmError } from '../errors.js';
 import { writeEpisode } from '../memory/episodes.js';
 import type { LlmCallOptions, LlmProvider } from '../provider.js';
-import { approveToolProposal, undoToolAction } from '../tools/registry.js';
+import { runMorningDraftsFor } from '../drafts/morning.js';
+import { WRITE_DRAFT_TOOL } from '../drafts/writer.js';
+import { approveToolProposal, shownPreview, undoToolAction } from '../tools/registry.js';
 import type { ToolDeps } from '../tools/tool.js';
 import type { EvalCase, EvalTurn } from './case.js';
 import { seedEvalWorld, unfillPlaceholders, type EvalWorld } from './world.js';
@@ -53,6 +62,18 @@ export type EvalSubject = (
 ) => Promise<Transcript>;
 
 const EVAL_OUTBOX_KEY = outboxKeyFrom('pepper-eval-runner-outbox-key-not-a-secret');
+
+/** The insights every eval world runs (all four kinds, an hour as the shortest gap). */
+export const EVAL_INSIGHTS = {
+  enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'staff_overload'] as const,
+  minGapMinutes: 60,
+};
+
+/** Juniper's voice for rebooking emails (the hair salon template's, S36). */
+export const EVAL_DRAFTS = {
+  voice: 'Warm, upbeat and personal, like a stylist reaching out to a regular.',
+  morningHour: 7,
+};
 
 /** The hair salon template's booking warnings (Juniper is a salon): color warns about allergies. */
 export const EVAL_MEMORY_WARNINGS: readonly MemoryWarningRule[] = [
@@ -97,9 +118,12 @@ function observed(
     }
     throw error;
   };
-  const seen = (response: Awaited<ReturnType<LlmProvider['respond']>>) => {
+  const seen = (response: Awaited<ReturnType<LlmProvider['respond']>>, request: LlmRequest) => {
     transcript.usage = addUsage(transcript.usage, response.usage);
     transcript.models.push(response.model);
+    // The draft writer's forced answer (S36) is its words, judged by the drafts grader; its
+    // refusal is not a reply to the member either.
+    if (request.tools.some((tool) => tool.name === WRITE_DRAFT_TOOL.name)) return;
     if (response.refusal !== undefined) transcript.replies.push(response.refusal);
     for (const call of response.toolCalls) {
       let parsed: unknown = null;
@@ -122,14 +146,14 @@ function observed(
     async respond(request: LlmRequest, options?: LlmCallOptions) {
       sent(request);
       const response = await provider.respond(request, options).catch(kept);
-      seen(response);
+      seen(response, request);
       return response;
     },
     async *stream(request: LlmRequest, options?: LlmCallOptions): AsyncIterable<LlmStreamEvent> {
       sent(request);
       try {
         for await (const event of provider.stream(request, options)) {
-          if (event.type === 'done') seen(event.response);
+          if (event.type === 'done') seen(event.response, request);
           yield event;
         }
       } catch (error) {
@@ -227,6 +251,27 @@ export function loopSubject(
           world.clock.advanceBy(EPISODE_WAIT_MS);
           await writeEpisodes(world, provider, embedder, actor, latestTurns);
           latestTurns.clear();
+        } else if ('runInsights' in turn.action) {
+          await runInsightsFor(db, world.tenantId, {
+            clock: world.clock,
+            insightsOf: () => EVAL_INSIGHTS,
+          });
+        } else if ('morningDrafts' in turn.action) {
+          await runMorningDraftsFor(db, world.tenantId, {
+            provider,
+            clock: world.clock,
+            // The run's own cost guard covers real calls; a business budget is not metered.
+            reserve: () => Promise.resolve({ state: 'ok', settle: () => Promise.resolve() }),
+            emails: tools.emails,
+            draftsOf: () => EVAL_DRAFTS,
+            insightsOf: () => EVAL_INSIGHTS,
+          });
+          const waiting = await listPendingProposals(db, owner, { clock: world.clock });
+          // What waits after the latest pass (a second pass the same morning adds nothing).
+          transcript.drafts = waiting.flatMap((proposal) => {
+            const draft = shownPreview(proposal.preview)?.draft;
+            return proposal.tool === 'send_rebooking_nudge' && draft !== undefined ? [draft] : [];
+          });
         } else {
           await screenAction({ ...tools, actor: owner }, world, turn);
         }
@@ -270,6 +315,14 @@ export function loopSubject(
         ),
       )
     ).flat();
+    transcript.nudgeEmails = await withTenant(db, world.tenantId, (tx) =>
+      countOutboxMessagesByKey(tx, 'nudge.rebooking:'),
+    );
+    const feed = await getFeed(db, owner, { clock: world.clock });
+    transcript.feed = {
+      waiting: (await withTenant(db, world.tenantId, (tx) => listWaitingFeedItems(tx))).length,
+      suggestions: feed.suggestions.length,
+    };
     const executions = await listRecentActions(db, owner);
     const proposals = await listPendingProposals(db, owner, { clock: world.clock });
     transcript.actions = {

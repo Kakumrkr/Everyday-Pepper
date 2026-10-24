@@ -1,0 +1,330 @@
+[
+  {
+    "id": "drafts-sara-due",
+    "set": "drafts",
+    "description": "The overdue regular with an email gets one draft in the business's voice, naming her and the service, waiting for an OK; nothing is sent.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1,
+        "mustMention": [
+          "Sara",
+          "haircut"
+        ],
+        "mustNotContain": [
+          "(https?://|www\\.|\\.com\\b)",
+          "\\b\\d{1,2}(:\\d\\d)?\\s*(am|pm)\\b",
+          "(\\$|%|discount|free of charge)",
+          "\\bKim\\b",
+          "(\\bAI\\b|assistant|Pepper|automated)"
+        ]
+      },
+      "outbound": {
+        "nudgeEmails": 0
+      },
+      "feed": {
+        "waiting": 1
+      }
+    }
+  },
+  {
+    "id": "drafts-says-how-long",
+    "set": "drafts",
+    "description": "The draft says, naturally, that it has been a while since the last visit.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1,
+        "mustMention": [
+          "(weeks|a while|since|last)"
+        ]
+      }
+    }
+  },
+  {
+    "id": "drafts-sounds-like-the-business",
+    "set": "drafts",
+    "description": "The draft speaks as the business, never as an AI or an assistant.",
+    "holdout": true,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1,
+        "mustNotContain": [
+          "(\\bAI\\b|assistant|Pepper|automated)",
+          "as an? (AI|language model)"
+        ]
+      }
+    }
+  },
+  {
+    "id": "drafts-no-times-prices-links",
+    "set": "drafts",
+    "description": "The model writes no time, price or link: the domain adds the open time and the booking link.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1,
+        "mustNotContain": [
+          "(https?://|www\\.|\\.com\\b)",
+          "\\b\\d{1,2}(:\\d\\d)?\\s*(am|pm)\\b",
+          "(\\$|%|discount|free of charge)",
+          "tomorrow at",
+          "\\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\\b"
+        ]
+      }
+    }
+  },
+  {
+    "id": "drafts-only-due-regulars",
+    "set": "drafts",
+    "description": "Only Sara is drafted for: Sarah has no email address, Maria and Ana are booked.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1,
+        "mustMention": [
+          "Sara"
+        ],
+        "mustNotContain": [
+          "Sarah",
+          "Maria",
+          "Ana\\b"
+        ]
+      },
+      "feed": {
+        "waiting": 1
+      }
+    }
+  },
+  {
+    "id": "drafts-first-name-only",
+    "set": "drafts",
+    "description": "The draft uses the first name only, never the surname.",
+    "holdout": true,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1,
+        "mustMention": [
+          "\\bSara\\b"
+        ],
+        "mustNotContain": [
+          "\\bKim\\b"
+        ]
+      }
+    }
+  },
+  {
+    "id": "drafts-names-who-looks-after-her",
+    "set": "drafts",
+    "description": "The draft may name who usually looks after her (Jess), never another staff member.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1,
+        "mustNotContain": [
+          "Marco"
+        ]
+      }
+    }
+  },
+  {
+    "id": "drafts-once-a-morning",
+    "set": "drafts",
+    "description": "A second pass the same morning drafts nothing more and calls no model.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      },
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1
+      },
+      "feed": {
+        "waiting": 1
+      }
+    }
+  },
+  {
+    "id": "drafts-paused",
+    "set": "drafts",
+    "description": "With suggestions paused, nothing is drafted and no model is called.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 0
+      },
+      "outbound": {
+        "nudgeEmails": 0
+      }
+    },
+    "seed": {
+      "feed": {
+        "paused": true
+      }
+    }
+  },
+  {
+    "id": "drafts-approved-sends-one",
+    "set": "drafts",
+    "description": "An owner's OK sends exactly one email to Sara, and approving again sends nothing more.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      },
+      {
+        "action": {
+          "approve": "send_rebooking_nudge"
+        }
+      },
+      {
+        "action": {
+          "approve": "send_rebooking_nudge"
+        }
+      }
+    ],
+    "expect": {
+      "drafts": {
+        "count": 1
+      },
+      "outbound": {
+        "nudgeEmails": 1
+      },
+      "actions": {
+        "done": [
+          "send_rebooking_nudge"
+        ]
+      },
+      "feed": {
+        "waiting": 0
+      }
+    }
+  }
+]

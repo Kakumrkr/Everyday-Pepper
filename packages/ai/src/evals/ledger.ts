@@ -22,8 +22,9 @@ export const BUDGET_USD = 5;
  * next call) that would take the phase past its cap.
  */
 // Phase 7: $1.00, raised at S33 (user) for the full re-record and pass^3: $1.40 at the brief,
-// then $1.55 once one whole-suite run was measured at about $0.20.
-export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1.55 };
+// then $1.55 once one whole-suite run was measured at about $0.20. Phase 8 (S34, playbook D-13):
+// $1.25 of the $2.99 left, about $1.10 of it planned.
+export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1.55, 8: 1.25 };
 
 /** The ledger label of a run for `phase`: `P7 <label>`. */
 export function phaseLabel(phase: number, label: string): string {

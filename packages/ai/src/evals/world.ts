@@ -34,8 +34,10 @@ import {
 } from '@pepper/core';
 import {
   addMembership,
+  findClient,
   insertSeedUser,
   optOutClientEmail,
+  updateClient,
   withTenant,
   type Database,
 } from '@pepper/db';
@@ -111,7 +113,16 @@ export interface WorldSeed {
    * The feed's world (S36, `juniper_feed`): clients who unsubscribed from marketing email, and
    * whether the business has a mailing address (it has one unless `false`).
    */
-  feed?: { optedOut: readonly string[]; mailingAddress: boolean };
+  feed?:
+    | {
+        optedOut: readonly string[];
+        mailingAddress: boolean;
+        /** "Pause suggestions" is on. */
+        paused?: boolean;
+        /** Clients' names as they typed them on the booking page (untrusted text). */
+        clientNames?: Readonly<Record<string, string>>;
+      }
+    | undefined;
 }
 
 /** Where `juniper_feed`'s rebooking emails say the business is. */
@@ -314,6 +325,17 @@ export async function seedEvalWorld(
     for (const ref of seed.feed?.optedOut ?? []) {
       const clientId = ClientIdSchema.parse(placeholders.get(ref));
       await withTenant(db, tenantId, (tx) => optOutClientEmail(tx, clientId, at.now));
+    }
+    for (const [ref, typed] of Object.entries(seed.feed?.clientNames ?? {})) {
+      const clientId = ClientIdSchema.parse(placeholders.get(ref));
+      await withTenant(db, tenantId, async (tx) => {
+        const client = await findClient(tx, clientId);
+        if (client === undefined) throw new Error(`No seeded record ${ref}`);
+        await updateClient(tx, clientId, { name: typed, email: client.email, phone: client.phone });
+      });
+    }
+    if (seed.feed?.paused === true) {
+      await changeFeedSettings(db, owner, { suggestionsPaused: true });
     }
   }
   for (const fact of seed.facts) {

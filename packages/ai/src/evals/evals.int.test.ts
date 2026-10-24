@@ -47,8 +47,9 @@ describe('every eval set on its scripted cassettes', () => {
     // the cases written for S27 are answered by the recorded model below.
     const cases = all.filter((c) => cassettes.get(c.id) !== null);
     // 31 since S27 (get_booking's guide examples are not one-turn cases, `evalSkip`); 80 with
-    // S30's memory sets; 105 with S31's episodes and learned rules.
-    expect(cases.length).toBeGreaterThanOrEqual(105);
+    // S30's memory sets; 105 with S31's episodes and learned rules; 137 with S36's drafts,
+    // feed, feed_safety and the S33 leftovers.
+    expect(cases.length).toBeGreaterThanOrEqual(137);
     const results = await runEvals({
       cases,
       trials: 1,
@@ -73,6 +74,9 @@ describe('every eval set on its scripted cassettes', () => {
         'memory_safety',
         'episodic',
         'learned_rules',
+        'drafts',
+        'feed',
+        'feed_safety',
       ].sort(),
     );
   });

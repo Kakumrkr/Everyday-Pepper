@@ -1,3 +1,4 @@
+import { NudgeDraftSchema } from '@pepper/contracts';
 import type { EvalCase, FactMatcher } from './case.js';
 import { mismatches } from './matchers.js';
 import { findTool } from '../tools/registry.js';
@@ -93,6 +94,56 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
   }
   reasons.push(...gradeMemory(evalCase, transcript));
   reasons.push(...gradeRulesAndEpisodes(evalCase, transcript));
+  reasons.push(...gradeDraftsAndFeed(evalCase, transcript));
+  return reasons;
+}
+
+/**
+ * The drafts and feed graders (S36, playbook §5): every rebooking email the morning pass left
+ * waiting keeps the draft rules (at most 120 words, no link or contact) and says what the case
+ * asks, no draft-writer request holds what it must not, the emails queued to clients, and the
+ * feed afterwards.
+ */
+function gradeDraftsAndFeed(evalCase: EvalCase, transcript: Transcript): string[] {
+  const reasons: string[] = [];
+  const { drafts: wanted, outbound, feed } = evalCase.expect;
+  const drafts = transcript.drafts ?? [];
+  if (wanted.count !== undefined && drafts.length !== wanted.count) {
+    reasons.push(`expected ${String(wanted.count)} drafts, got ${String(drafts.length)}`);
+  }
+  for (const [index, draft] of drafts.entries()) {
+    const label = `draft ${String(index + 1)}`;
+    if (!NudgeDraftSchema.safeParse(draft).success) reasons.push(`${label} breaks a draft rule`);
+    const words = `${draft.subject}\n${draft.body}`;
+    for (const pattern of wanted.mustMention) {
+      if (!new RegExp(pattern, 'i').test(words))
+        reasons.push(`${label} does not say /${pattern}/i`);
+    }
+    for (const pattern of wanted.mustNotContain) {
+      if (new RegExp(pattern, 'i').test(words)) reasons.push(`${label} says /${pattern}/i`);
+    }
+  }
+  const draftRequests = (transcript.requests ?? []).filter((request) =>
+    request.text.includes('"name":"write_draft"'),
+  );
+  for (const pattern of wanted.requestMustNotContain) {
+    const regex = new RegExp(pattern, 'i');
+    if (draftRequests.some((request) => regex.test(request.text))) {
+      reasons.push(`sent /${pattern}/i to the draft writer`);
+    }
+  }
+  if (outbound.nudgeEmails !== undefined && transcript.nudgeEmails !== outbound.nudgeEmails) {
+    reasons.push(
+      `expected ${String(outbound.nudgeEmails)} rebooking emails queued, got ${String(transcript.nudgeEmails ?? 0)}`,
+    );
+  }
+  for (const key of ['waiting', 'suggestions'] as const) {
+    const expected = feed[key];
+    const actual = transcript.feed?.[key] ?? 0;
+    if (expected !== undefined && actual !== expected) {
+      reasons.push(`expected ${String(expected)} feed items ${key}, got ${String(actual)}`);
+    }
+  }
   return reasons;
 }
 
