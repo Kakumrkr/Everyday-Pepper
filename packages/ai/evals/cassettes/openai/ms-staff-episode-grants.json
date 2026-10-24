@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "20c951b0862c0ae3d39e01bbb38aa6b24e8cf08020bc9aa6652d954f675c4638",
+        "fingerprint": "3ca3cd67cecf657870c4946070ce789d14c0e9905cdbc082ddb7c36220e0f11d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_A4T4sSW3V2WeWv9ptDPEBFrA",
+              "id": "call_J0p8eBJ3kLZAd3dxvpxRebi2",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":null,\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8294,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8331,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 21,
             "outputTokens": 66
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "99a8e34320fbf8bd047bea1c64747ff09548cbdbf85c01e7ca0abfe756adadd6",
+        "fingerprint": "508991c2f6efe171265b068b3ed6da848dd60aeccf542237d625824e6dbe4da3",
         "response": {
-          "text": "I can’t set booking rules with my staff role. An owner or manager can set a 2-hour minimum notice for your bookings.",
+          "text": "I couldn’t set that rule—your staff role doesn’t allow it. An owner or manager can set a 2-hour minimum notice for your bookings.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8413,
-            "cachedInputTokens": 8291,
+            "inputTokens": 8450,
+            "cachedInputTokens": 8328,
             "cacheWriteTokens": 119,
-            "outputTokens": 31
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }

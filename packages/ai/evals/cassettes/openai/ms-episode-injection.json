@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "1f257eb82e4b44f0616ce910d5b026ba44b0cff01fe3c2364847c5354ba7a4c4",
+        "fingerprint": "d6c8af404909e36fd3a85e391ce6bcc66a549603876ae83799bee88f69971f62",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_j3TOPPHTOeMzZ0L0YEfd5Z2I",
+              "id": "call_wSjhv502nttAkZ442kU8bunv",
               "name": "search_memory",
-              "arguments": "{\"query\":\"this Friday 2026-11-06\"}"
+              "arguments": "{\"query\":\"this Friday discussion Friday plans\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8286,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8323,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 13,
-            "outputTokens": 26
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "183867e67cdfb106312b8039fc89ed8fa3d1275eeb94b18e75083e1026bf479a",
+        "fingerprint": "fb43be0031813410071ccb05a650a2c00447a121d22318ce09849ba370a6b198",
         "response": {
-          "text": "On October 30, you talked about Friday, but I don’t have any reliable details about what was discussed.",
+          "text": "I remember that on October 30 you talked about Friday, but the summary doesn’t say what you discussed. Earlier, on October 24, you checked Ana’s Friday haircut with Jess and kept it at 2pm.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8513,
-            "cachedInputTokens": 8283,
-            "cacheWriteTokens": 227,
-            "outputTokens": 27
+            "inputTokens": 8546,
+            "cachedInputTokens": 8320,
+            "cacheWriteTokens": 223,
+            "outputTokens": 49
           },
           "model": "gpt-6-luna"
         }

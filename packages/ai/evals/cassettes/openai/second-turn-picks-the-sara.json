@@ -3,17 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8db0a70589455aa5641aa14ae8d952aae66d75d03ba9170c045b3eaa52f5528e",
+        "fingerprint": "918d3e2d6d55262b89ca51d2e341ea939af2479f296633efa2745ac3af8d71d3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_hgXEV675ayoy1kRTjbAaX5qE",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sara\"}"
-            },
-            {
-              "id": "call_ZNsMF42CYNJOpGfuACXMYSlj",
+              "id": "call_3WAcZb1CMKn9HVt4nHHMiOxQ",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -21,17 +16,39 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8286,
-            "cachedInputTokens": 8283,
-            "outputTokens": 48
+            "inputTokens": 8323,
+            "cachedInputTokens": 8320,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "418463dc3d121a033ff652dcdefd829cebc80166d4fa7dd43e094fa804a38e88",
+        "fingerprint": "7a45ff7b3ce0d28727b886e60be3675c142e0550aa279ac5fa871c97c6853ed6",
         "response": {
-          "text": "I found two matches: Sarah P. and Sara K. Which one should I book for the haircut tomorrow at 10?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pjZ0N7erznBsbRh1MmGchdp2",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8601,
+            "cachedInputTokens": 8320,
+            "cacheWriteTokens": 278,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "606e2ce62393b14747fb0645e780f141093004612153e9db0ebe319af084928d",
+        "response": {
+          "text": "I found two matches: Sarah P. and Sara K. Which one should I book?",
           "toolCalls": [],
           "replay": [
             {
@@ -41,84 +58,48 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8712,
-            "cachedInputTokens": 8283,
-            "cacheWriteTokens": 426,
-            "outputTokens": 29
+            "inputTokens": 8727,
+            "cachedInputTokens": 8598,
+            "cacheWriteTokens": 126,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2741e0fe68d49ef6b93d39f4d6baa98dbc4936c1b4a98a3c98e065548ebd02ff",
+        "fingerprint": "9805e9b04aeb761e8f0c950fddfc64f920c61d31b15b69781478ba39a7b8aa8e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_XR3AtlNvzHYQH7Ljlq2sbKbc",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sara Kim\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8749,
-            "cachedInputTokens": 8709,
-            "cacheWriteTokens": 37,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "23493a797b0db8ad73d729409016394eda56cb36b4df83ef4b2228abc42041ea",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_oSZL0qpKinz5iPvyJpIJBw2X",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:sara}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8832,
-            "cachedInputTokens": 8746,
-            "cacheWriteTokens": 83,
-            "outputTokens": 41
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "ea6e4f1dac3f9e14da86c9ac554b3a87f9b22ad9ca3f00a21b141afc054beb2b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_O0bcU0CMlVyOuM5nrJi2e13h",
+              "id": "call_o0djg2PwI1A9mUt5Gl1Vtv0l",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_0c6d3cba26c5f88c016adbf30112f087d2bad3324d6ad56290",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2_MC9wWJN-zg69G1LhBLfox8nQwr-EIRsfWGaFrsB1aBGqGrqJjDGHVpS2B9nuxUXFleiCfvxrJyXOAt0xbGl0daOj-AUZ793BLP4mNTEtiZthW3IasGrRcKSu6-gWcHq2g_5U_Y4oFVD_OEq7K_drPfjaxcmbpHFaTwLBdwiHPPhbnRmKKXn7AX9MdY7nb1suz4Uz6cpmuwwiro5PTIaO6vrVguIH4XbJCl2rniClYhrn5lI-l7475PH4Xek4k_Iz1_8aTkgbPyAQ-sLQ-2iFUw8ZMxvsSTfN_toeYQz96W0C0_SNUBwpxOmIcb1JdoG7QCgXiHlg3MMqfTxgy4CvfMA4FHBgZbnzQXMqbZiMkt_Yp_MGqa0syUbHN7hwrYPExJznwaeo4mGwKSaVxFAAeHhyvtfjAPc72E4ys_DF3GpimX96YYV47nCZsuM45JZdN8AZXk8LI_80lvF5rfBw5Y4YUNPoOOgqpyytO3AqbBiQGSQp443e9tjl8Y4vLoxlU9QV5AKuQhzpNdDpNt5DyFAWYOHGKr--m2Nk-0rrArCxuOlaquSJjDpGw__DE19f12a5MQH2xQngVpWsF20OOb7FyO4u5WX_D7D44SUuGZ0wn167kt2sjfhUa9D9m569SJT1anCzbHA2BuFFB8dydTQf0boZveYlNhC9Y2GFd7jX3hqM7i0agGs3JbWh2yoJ7yIrPsIjnqEPkSajXUgF-7Mx5RhAMoQMDGh1KNYF7W4FJh_I7r9KhCvbiyFYQzQC3ts1rX_VT3jxmetxjb_KTwR7IJdW007IYqWlDZNeroOS-mf1pZww-12LXEONbLlqiJ9qPNu6UtMaEWsOhM5EJlKfa63dnPwFSi5yuQ02liRteWTrTiQ2R0EBZpOYbp11qJEx1dK78lUlxtsjhsOrcYylpgoNjGWYNHqJigGps9TjLfeZRghcBwW6NkZPWfqBmhcClgHDl8t-P7g4ie2g15KvVCV2wAXfQGD6fawdF2d49YyvfFq3dXUjQiIw5jCptxZ66DeB_vgpUoGZlP8iPenUs_5nXQSHFTmld4VMHUiCqy596TuKU-TnrJ18DnrXHp97ein1DjP1_egaxID1y_269YO96tLAPcQSQUsK76H1FqIkCpJNIGZ-_vOCVOWRwkaVDurTLqy6GnVuDKou4tWp6QYL3K67zVON9gdZkfkoq2oVaJNUDQpqi6nwZK0RIrCnqaqGx5tuUKeyipi_Gz7gRlTHBmV0SIZOpRlTZPcqdc5gwRmoy0tR_ES1iIOH8hPIY-z3_rdC3SMqkieNEG1Y9EcM9xZz6gHFHElHc1gwvUzLFnMr257C1QLDPkXdmlFGfPilaA6SeSiXaUGMtAmgmK-Ys8HOICUtGqvYyXnhWHo44uS74Ux-UokND4LinNi0rOKQH5exnOCtGOkF9Iijyh11BeF4erxT2pxGKDoFrJGZ3jTpDWji4g071W1-BYzlneOIJhVMS16C8ECWcd9-bSIR-mCDXQgj51hy_w498sn4dXTOM3Q9yocfmsR2SKqJxM07lAVm9J7qnrooudEAP0zBZHOijJGdQ2a2dsTV9QYLdjJvv6MhksEqTJO77ybbay98sItwdt3JTyISOWsih5A3mzoLVrXbAwh2TeywPKL8NXpC3VORDVXwwqi4uI1rSizAO_L5GXDY9bnpGVupAa4aJsxmcj12bCdGrXhipq7DgSjAfOaJs5yV7zcFoqiEPcd5bJnCok6i6vfZeeob81ufq4jEQziMUX5cD7WQkcAjdKcnhQ8C6Fq6ULKn2mEub49FVA9avRbWK8XeQR4Lh612JeR73qPgIRnqvZAywengl6FEC877LufA9t3zlFvsBUIi7BmKg4jyHCKXohG4FxsZzk3jyJqVpJJrtZuQyYDDNzI-xb6by58fVVplt6ACnIceJcoYRPCryaJ-NhUALxqBmjBaM1OFNyn520IzBP7glmk_QartBrRUhrdLVFuQvsTY7xPaHtEbBM9lXVxlw_QbT5xaECf04h_v0eqb4-DD4mRkavGSZ9zPUzJEbx_7BDbAbRQLWiq9VGD4hh5h6X8RwIZITqi2sfallvwYznGtmLlqLg9Ns7U4uoBZ1CrYkdM-uEbn-afFOeiC5OVRBXHGtICdfrLNXk_hg7wP-f9_-wO0ct6jiakS-MND721agU0waXOUCcfe8-gf3-xccxy4UFIbpOevLmG7uIpf8=",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8944,
-            "cachedInputTokens": 8829,
-            "cacheWriteTokens": 112,
-            "outputTokens": 94
+            "inputTokens": 8757,
+            "cachedInputTokens": 8724,
+            "cacheWriteTokens": 30,
+            "outputTokens": 155
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "77f01ac241e073598473fd5e51025cfb4a7d3a9546ac91cb767194023d434336",
+        "fingerprint": "9262994c590f2fd2bef173d30c9663d9e9fb58129766504bd624b6d12c19ece3",
         "response": {
-          "text": "The booking for Sara K.’s haircut tomorrow at 10:00 with Jess is waiting for your approval on the card.",
+          "text": "The booking request for Sara K. is ready: haircut with Jess tomorrow, November 3 at 10:00 AM. Please approve it on the card to confirm.",
           "toolCalls": [],
           "replay": [
             {
@@ -128,10 +109,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9118,
-            "cachedInputTokens": 8941,
-            "cacheWriteTokens": 174,
-            "outputTokens": 29
+            "inputTokens": 8992,
+            "cachedInputTokens": 8754,
+            "cacheWriteTokens": 235,
+            "outputTokens": 38
           },
           "model": "gpt-6-luna"
         }

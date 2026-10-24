@@ -3,17 +3,17 @@
   "trials": [
     [
       {
-        "fingerprint": "f2ad0531ee82826c243a7ba1d60fad4f1243e688479ce3089303587eeb290d96",
+        "fingerprint": "cbd1bc018dd61199153a7021b0c4ae86ca7f111176bec4db43c5c632bf3caffc",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_QLqy0A1Z5o9ayl672X25WVSk",
+              "id": "call_xXLNwAyXPzSHFLvhEfJDGajs",
               "name": "find_clients",
               "arguments": "{\"name\":\"Zoe Martinez\"}"
             },
             {
-              "id": "call_QjS6fBE1pyGlC4z5znH9u5vx",
+              "id": "call_HYX52hUtSovGfYj1P6BjOEx5",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -21,8 +21,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8287,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8324,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 14,
             "outputTokens": 50
           },
@@ -30,9 +30,9 @@
         }
       },
       {
-        "fingerprint": "7f4ba04a03eb2c6c9d28f9bb53654ede9d508cd86dbfab51114042b41673671e",
+        "fingerprint": "b46a899192e927ce4326fe265724e4333b2eda592b56d6915a22ffbed6755e66",
         "response": {
-          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or tell me what name she may be booked under?",
+          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or give me another name to search?",
           "toolCalls": [],
           "replay": [
             {
@@ -42,10 +42,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8637,
-            "cachedInputTokens": 8284,
-            "cacheWriteTokens": 350,
-            "outputTokens": 30
+            "inputTokens": 8684,
+            "cachedInputTokens": 8321,
+            "cacheWriteTokens": 360,
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

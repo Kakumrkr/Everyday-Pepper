@@ -3,16 +3,16 @@
   "trials": [
     [
       {
-        "fingerprint": "c5f727fde14d4a3a354451d2a7ea88a6d748e40abe8270409db0a34c53113f8a",
+        "fingerprint": "a047463e295bd2d66ba5335229d8d2bd494945bb1ebf3f6e4e0a0d44c686ba2c",
         "response": {
-          "text": "Who should I move, and what appointment do you mean? Thursday is November 5.",
+          "text": "Which client and appointment do you mean? I’ll need her name and which appointment to move to Thursday.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_03e32a381ab0059f016adbac0d18f087d2849637f73a19f37a",
+              "id": "rs_0efc75bc5929601e016adbf306b5f487d29ea2aed40b7ceb3b",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq26wNWG8sEmm_BM7pKPCcdzMnj2cn__RyHieOp024Cvqk9ZXqMetLaiDWT_hPC-cmb0MzLofdEqJYYm_v9bofqYA-gkQcKcw_gDbhhtgTh1zRx7p6B5pjWWHBJOx8prvbZIzgTGImw7bEPvRKPZJ8ylTsjX3TkbuD1Y4gXjJOhKQ-X3RlWhZA-S5k-7ZXl6GbzOSJc2PZC6BCAmqm0-F1DHScWjw1xylhPgayQHaeaE4mxv5dnVKibht3wpuYbHVvaJXoiCecaHqb2deQ85VGu2eZa_jcz687Tr8MvRYK8VHg8UTMogk94uq60f20ttq6cFMVHC8LYkLM-jTLPupnham5bE9j9lTQjtAY_yMj--_WNXUVw8JQD2s4Ol03FRtsiFHLwSOBINOSGbD2_RgM49SAFDOo0EZATVVpq7S3xCqihfL5YQuDznU_tJyp1vJjg8HpwL9_mnPfhOq19AstWneilPa7u3VXgTRCgpkKhAXI5HptX-ERpvPprb_29lP2YQb3B8TvuTBCm0IJEqYSAKBySlXxwpCHq0joETxF9Zej8GScbJshLKOgSOqpptPkvKbErX4ro2SX9C4D3EICWvOoMHAiI_RESBpiY-P1aWqxihFH62aTI0sTia8o0UJrFJ6LM312btVLM5P-RyvDtWgLPVZ2dQER3JmCaMKZTyhKbr-j3KykZ50354TUlmWU_CTCwdOED05Jq_eRI6Bryi6vylz3WFJQ7byXznAhmsVBAz566HxS_ZTJlfGvEz4Jcbba8i7x5Fh6-FjPfvo8qUMJVLa1VVnhvHUrJjA7kAHbzCk6VB8TnBXu-ausImTzyPhRy67zlFtilgbVwTdq-hu6QXshugyjnT6fwVDTL4m386KUComt4GimZo9Bb39fRUNhHL5u74rFRswHfaAOgszcbxr37EKOzdUldMaYsm94T1UZKqlDR3KD9Fzu7udCpcKl3xWjy9iZZVn9lIu18AOvGCn5kYkXjxNCaJ4GqV_LkmvFNbf32Xr-jGeNkd8Al0GnlI4xkfb8JTDMTv2k_CABltCWXsnPDsIIV5uvSHibSUaIzyy2H4BRlEBhBAuAgnAp28imvVWgHrCanRNK_7uvKrBeP5AIJXk0NbXWBMJlHwEOaLccvYF8H10K2jDLzt-AE0iSFagcXya7Gqlzi63q71JFikQU3nsLuFhDRU6md5JjgVujDNufLe7YbEX_BkrVYfnPtVhfRflKqT3Dlvvv6xbiLc7mnFIhGW9rUiBAd4K1fX4zwBGnOXWFZaGBsieUou5AcV1QVgyUMXBvtVGmW_YSuL5FxCxJhe3ZOO1DGmuh35l2m3Wop1W3cS9ySATmpjS-2jnstHOHHKhyZTq-NmUxiQ6U1SdruUW8bJi_OxmH8XRIHFRRiZdJD8fv7g6VOkdUe8z9r18hNHNRqLdr9HMINlGpcf4sLU8ILp1umjUacbgLcYDKkSIav2nOB25DgMk9SgOIU4T5kUVTosnkFLY-wsjNxLI_nOTnH_7B_oHAHlimaLCj6iKZi2orhHSjTRCtD4BkIGuWgIhFSNCyizJgtF6NGV8K_w7lCLujUnBT8-3sLyboyu1pVcL239WU6xRT6HzhYZCP2oIyHvgHPQ==",
+              "encrypted_content": "gAAAAABq2_MHiGYltaf_i2Xl3YtV18IGVL2KdMgAny_Jlj3yIWGKw5bQxsLcJ5rY8FY-_SpyQl7eKDKlRzeHVfxZ4V5S4_Mb49pBNPlaXtMC9Ft8dZOprKwWb4G5bc0dDjibeonUCb3fSgFtZHp9nC2I9VAzyR8BrYhekMb0WA_TCWMJZDFOsOKFjgR6uDRW8ggs5TAfl5_l0lf_sHnwabe4u8abHi3zmysJangqFu7oQTLgZjN8RH0FreithwH5SUv3dpb8nsrhqskRldDNC0YPH3Rv_PWSLeUvsKd0BlqP8bQKwF83EJQYcO8GFbeg_LDdwfEmHcz-0cxm5sIJxzG1LIskxiptFxbkE1LCjcz5KEP6fjjbx6lgxMSt2awTZeDmpqllcB0x1c7X5qch2Wa5FxfrYbb-fgfiV-dXrnYgLxBy7Imfrjq8gV7yK6YXnrl1Ev2j32mOMIXrdex6Ab2AYfuDWPIX-NhtX7UQSY1fE-7CBa0IgQ91haxY1dxTK34teyPRx7EY_Zd3k2rOT3YFqK1V5I1xNt09c9iUdsrYfrgAGrCFQ03JH5Cs7qbvEqTSqZhtP6vdU77F8Iu2pRizF8UaJp4NNhg7_yO0L_wYkPreHDOPxhbqwt5A9RUWAqUBg_vuDAwspTLdBDiV5Z_WUZ3RzNpJV39XcMW7s4Csh91ZrK3-93IFQB54xUhVAH-YHxqWf1-JISEATYAq7-JOOHCCQfNOI5c3_49fdGb6LmwQRE3JnP5cIugch2BZn7NJ7HTNprQtlfMm_NkKWRLiyndmg7FTpn47ayy2fKo3xUhRxiO2gXULGYnXHW2dyRmccZBrAdNw6aSrlIx1Ocn0UlU-SkuBSXJv-7zGysGIbiAec3pP-dRA44kNbuEsAPZ8zZ56kgM1TtWRByprNJHJUpT5r7RO_eOavB80kMFPHHlOXcuMSdAr1gSZ_hWZtSDKMU--mjHMpZF-f8CmHh5XsRYTJjlu00cJPSiszYDoBLo8Ja-fqIxEMAdtn5DxBvI8Z5LKQ5vHdtacH3z_SfNg0VjfDFomSSd_wy_xu8E7CtASzLOY0oVB2ZK8wgxDmPDZMgmKA1gjcsfEQinBmLnD9vuCtSd87s_gXKkXFlLQ_5awnlO_RjzuYkBROde8-EILvOJAmCgYkzgVnGWew5qDQJ9xC_04W7xhHB_5RwU7j1CPFRtYdarz_Num_MwqpV0Z8fAGixjiW-v9qSZLt8O-G1xmDDx0bzrt8SYroiR_Z0R8gmpqf65j-uYhJF-ze_HapySttgseWnlzz36WHMlMF-pRRH_1Yt2DCiZVdBtVf3blxBsBDMiF2NCpqjTrEhSmPWi4oIJK6Q8aHDywVXBx3Jtw358F1wv33bx_b8kcU5pbXDLTct8cENYpHzgLmOA35rZkyFa783Zq86Dd_KCjdnNNnttOpgtG5RRLpxKd_3iBmYBDryw0iA3lyB9TYJeNG4vFLJYNQChz8WlgXU6LbXFJP3C8GhheCZVGhSX9DtA0QAW3S53zNzJYHH-LFF-H918pLTQM93ltSDqk699o_G1H9bIDPWu5FY-vo5O86dZ8QtCqzpnilYxrcm90xA-y7NFNDrDtRdl3-qFHuYMPQnDJb7I5rwdUE1LckVsgiPf3Vs7dn9stGjoYpc6M4LSplus9LYXRLXLKnOqxuRXwlXx7yjK07onHOS5429MGt6WNViY-GR-NWpBVgDmLqYLPy7Y7lU-d",
               "summary": []
             },
             {
@@ -22,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8282,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8319,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 9,
-            "outputTokens": 40
+            "outputTokens": 50
           },
           "model": "gpt-6-luna"
         }

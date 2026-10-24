@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3adb30af94592ed33d116ebad21d06a445b4a457dc7c3743fef1a2ecfa46470b",
+        "fingerprint": "0bf6908a0a00e9ce5f35ec6bad2e2e9df114469ea56d0a95d4488cb6be2baea6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_PrT05sUj9LKiIHFryIHd4oxt",
+              "id": "call_fINGKGHckvGwpE6fD7Je8wqP",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8288,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8325,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 15,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "6e55bbcd4810e8238e34fae941d0e818b1711d141ab0db4a71899eb9af2d8297",
+        "fingerprint": "6c3b2504775fd389d24acffc84afa9acf83f627df4f456d151142e20d8d56f58",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GoYy43xdqQMGN7gIe3GYdkjf",
+              "id": "call_ylN4d20MkqR9rPkXyl2ifRas",
               "name": "remember_fact",
               "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"allergic to hazelnut oil\",\"sensitive\":true}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8373,
-            "cachedInputTokens": 8285,
-            "cacheWriteTokens": 85,
-            "outputTokens": 66
+            "inputTokens": 8407,
+            "cachedInputTokens": 8322,
+            "cacheWriteTokens": 82,
+            "outputTokens": 63
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "13e89a501afd5b7a469ac8d87d1958f932cfe2ee1f9426d80c92a182b9ec6401",
+        "fingerprint": "1dc968e03df0762542abb74078a2d2114c67d7df4d8c493cf7f0a889d57e87c9",
         "response": {
           "text": "I’ll remember that Maria L. is allergic to hazelnut oil.",
           "toolCalls": [],
@@ -59,21 +59,21 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8479,
-            "cachedInputTokens": 8370,
-            "cacheWriteTokens": 106,
+            "inputTokens": 8510,
+            "cachedInputTokens": 8404,
+            "cacheWriteTokens": 103,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3b79d55f3cc30dda2ca08b977568ce587efe6c1cc45085fc79f29b8f3e0ebac2",
+        "fingerprint": "3eec2a5bf13087aec305dbc20199f880dca58b4919a1365cd09625581dfd84ac",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_v2JaqKJFeIUG0dk4RapAfgpz",
+              "id": "call_sxPrebKfmGsbgllGIjmpFbBz",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -81,18 +81,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8501,
-            "cachedInputTokens": 8270,
-            "cacheWriteTokens": 228,
+            "inputTokens": 8532,
+            "cachedInputTokens": 8307,
+            "cacheWriteTokens": 222,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2a9a6690dfc21182e61ecee99ec5be49d073d906f62031baa0f4dbaaa3901bf5",
+        "fingerprint": "c23efd354c14acabf1f336637786b9f94958d619a00a3405e0647c73583ddfc3",
         "response": {
-          "text": "I don’t know. I have no allergy details for Maria.",
+          "text": "Maria L.’s allergy note says “[forgotten]”.",
           "toolCalls": [],
           "replay": [
             {
@@ -102,10 +102,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8586,
-            "cachedInputTokens": 8498,
-            "cacheWriteTokens": 85,
-            "outputTokens": 17
+            "inputTokens": 8614,
+            "cachedInputTokens": 8529,
+            "cacheWriteTokens": 82,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }

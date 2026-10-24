@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "072384473fedc2ea0137d7d568fa3dff722b3e6059eff5e1d77f5f65528f5e45",
+        "fingerprint": "d9c4b2d75c04d7cde28e27050435b0fc746572f3d12dd4fefc07fd689a50c2b2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_eF2xN4ZIqALIYk9ircp4Jwpj",
+              "id": "call_XYlsQHD8wektmtR6VTTdcPaj",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8282,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8319,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 9,
             "outputTokens": 19
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "d103528128818729cc40e1001c881a5a94e3bf4326f4cff3d844b80af518719f",
+        "fingerprint": "2d4747e7cbd4ed17f8ed22d91e10babe2bb68ca2257ee9113de828036d508213",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_kEogWUVWhMMuorLDOFeDYD4x",
+              "id": "call_Exe0mPLbPQp22TFFddP5zOdJ",
               "name": "complete_todo",
               "arguments": "{\"todoId\":\"{{todo:call-maria}}\"}"
             }
@@ -38,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8390,
-            "cachedInputTokens": 8279,
+            "inputTokens": 8427,
+            "cachedInputTokens": 8316,
             "cacheWriteTokens": 108,
             "outputTokens": 43
           },
@@ -47,7 +47,7 @@
         }
       },
       {
-        "fingerprint": "3ba782e4e6017158422123c55b4b1245f042d090d4a08ce625ddef0433039972",
+        "fingerprint": "e32b06783047495bb7819c7497b1660abc619a1dd082b42eaef3a37aac50f4cd",
         "response": {
           "text": "Marked “Call Maria about her colour” done.",
           "toolCalls": [],
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8479,
-            "cachedInputTokens": 8387,
+            "inputTokens": 8516,
+            "cachedInputTokens": 8424,
             "cacheWriteTokens": 89,
             "outputTokens": 14
           },

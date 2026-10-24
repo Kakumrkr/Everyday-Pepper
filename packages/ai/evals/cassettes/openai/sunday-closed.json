@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "82e54f66d8a921fbf9ee5efeed225654583bd4caedf829c563575c09efe587d2",
+        "fingerprint": "860533e64678717177fa08c10057bbc42042725ce4a777b4559c6d3534dc919a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wwaMua7pCaD5IWJ0WzPElcPh",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8287,
-            "cachedInputTokens": 8270,
-            "cacheWriteTokens": 14,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "f78d3d1fc256edb9b895d2f51c34b8af2bce7e25c484345d412d52586b1d27ff",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_2SJqhQMydx27TjoARBNyyxBd",
+              "id": "call_XVHuEk8MNGcJmS0tjlnDO9t9",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,40 +16,70 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8372,
-            "cachedInputTokens": 8284,
-            "cacheWriteTokens": 85,
+            "inputTokens": 8324,
+            "cachedInputTokens": 8307,
+            "cacheWriteTokens": 14,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e83c7d1cd8ca9513cef0580449974515d067820a394a10c9270b04d3afc913f7",
+        "fingerprint": "804c8259e66b4eeffcbe2189fb3852192a53b2acafeef93d8d0c9e0c6f2a1206",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bHasCKiHnQ7PFxLgTpL1pXUG",
-              "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"time\":\"10:00\",\"emailClient\":null}"
+              "id": "call_ZyYJYqRwIBisQzKmEjCGvkt6",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8658,
-            "cachedInputTokens": 8369,
-            "cacheWriteTokens": 286,
-            "outputTokens": 97
+            "inputTokens": 8595,
+            "cachedInputTokens": 8321,
+            "cacheWriteTokens": 271,
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "1f9af7ac8f1ff57359b6f0ea5f0453dd67c010a7943e105c890cb71f35a8a2b8",
+        "fingerprint": "e1c7592da873d8081bb6c3460990185c5e751907db57770adbdef39d842a6df2",
         "response": {
-          "text": "Maria’s haircut isn’t available Sunday at 10. The nearest openings offered are Saturday, Nov 7 at 2:30, 2:45, or 3:00 PM with Marco. Which would you like?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vFWhVz4KCMDprOqT3jv0QlXt",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_00271a3e5dbeb281016adbf323274887d29e52f453206e46aa",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq2_Mk-aSCzsZMU7kWeXbOyR8NO9Z2a8SgQfEyFi-XL3xEpJOaQ_78PBIiIvTlTU4c7mlRjiEUrEgsAFKw5Hy7_pkQeIHIeAR5W008N_ILmNbJkC1fa-VKFKXHFabM2R7amhVqXcL6HGhA3to6sg4pM8U2UgSHl7_AhTc9tiOeB1htNUBrfLMP7fBNv7kYkJJ8Kwk9KsQEZzT2mlyguSgDc6RLByyxi-eEJfrTz6aSJ_dVm8ZChjQKPTGNY5n2ZjsQ_qfnTcj8ZUYweo9Q2InP9n0PAwXIU7A65m8LRy5WFemk3QaOtcKxKLmO5Gxk9SuB55wlbXKpufIqcr97j3QC0cd8ayPkRVYsDwA0Sa_0AF9AOawrWjB-EdcQehvBAkB6VUIAWgjK-o7sppoxhLhn6W2aJQP661D_hTfFvDqhHChXrkGmGLhS4z5CY3kr3_Rv9wk06gYt_EjUGDQu2rw72voFjNpgTfig2ww59o-gPxMjIqLybbIqhbC8aMRS8EwSjIBAFNQccixsMAASN9XoODg5ku0TaAn14ZeISwEEwfMfxxldBEy39ayVnx24vpP2SBypWcK-QYeK9vQLdMAYAwXUvzHBiH9sfGL9goRzheFk43smSQ-NOt3TqYNYBm_0PIDhNAWKsFcK7XcFWPR02F8ZhlKNcHADk-clNhkPQiZhMwqBc3JqiJXB_-fRCyBtsCBa82cjRbZzu-tOrh3NS0Nc5MobQVwmEqhoyseP79uQz8a0fCbQ9_WHpxYvhpFh1zV5TeehPpgTd3nCuKZsxZKil4aEunvUoLw4PXFrJ7VdauEDnrLeKoV5UyOXeIc92okda0S5lyAKVX4Nz6ugAk8owhBRm5AEn7Mhs6Zwp-51b9AfYsxCuKUIgcWelrXtwfJMBKIB0j24qXRZxs8-2sQPQFgZ6SByzHCYzMwncN3AfJk8RZl-pm0IZuGVfk_OqbRWJOb64gqVmDq3riP8u16V04FFRZuQQ15UcPXMGSX0BKK3aw_81GXw223alBsoHruStWg-GO9HsfCOlB0SLQeG5j5tgfPuusBfCi0k1Vy2SKHQGPkRvAyDteksfngIV2Hrp7XZuQlDIx8xEQ2y1s7_23ASwFmrvnf2zojyKEH8tjlMD6NOxnP0Sy3JL3AWIzw0mPLF8mSCIFDhB-lArpxFYcv7SHihGFgKqp7REnCULoSK_T7zF31XXgaZKMlSfW0oXjY_BD7geeYuulR0iO0mc-icm_sJ-ZRjp7J16yTABl7Z9tF_UxQDu7t-CoMM4gSvyJu07fPk2AxW_0N2if-8Re_O3TKjSJTKXYKIBmIkjPeXyCcdq7wJYtUVCxOpNbqdQT_I0kumjXP6uknzjlqNjDqL_LJj6IsHvGlh4FMq--XXyzB0s77GfYoezyQ_GkKwD_8YxdaPvNT0KqCy5xQeCEBd8RRhyRM_OeHQ_oII2pIBj2p5Cb2e6A2vaxs2idn-nJBDol3J6M78OeB3mDJqCvV5Jop7S9gyX4a2cyCmvR-hd9immN0urb-xlFDl6LE15ssjhLWIdIGIV94qY1TUQRvP1Xl9Lg0ijGHu_283LDg6gFtNSJgIOO9nNS0Htz2iRMdNjv68eSCvImXH4zEgqUxjIGy0WS6seJjyrMnHOQk4ZEd41ZVnM9gjVDjyYPB9w_NPEFmq7DZBM34z2dtkB7NHUUfprhVmfXo_ykxfNLTdXxb5xsLkPjArvsLpccTcKAhsUH5D_J7HOB8ZLMKBQGsVJX4uaflU20fQoVUk2r1TjrtoW2YVsrx-uOna1Q_D1Lwew-EyIIDXxZzQCw2vW9wKP76EYPOl12K3IJWEr28cs8Pv2Z2GsgZgPYdodVutNbhZeMwUUdjGg0fFS5a0VadQap-LqjK2PvfK-mE9afkov2IhZ2Qr8j5agtH-KFhS",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8681,
+            "cachedInputTokens": 8592,
+            "cacheWriteTokens": 86,
+            "outputTokens": 137
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "72d8c8c6429ffeb24057c5f9324739104a1924c850847ff5a7a644ace07ae539",
+        "response": {
+          "text": "Maria’s haircut at 10:00 on Sunday, November 8 isn’t available, so I couldn’t book it. The nearest available times are Saturday, November 7 at 2:30, 2:45, or 3:00 PM with Marco. Which would you like?",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8951,
-            "cachedInputTokens": 8655,
-            "cacheWriteTokens": 293,
-            "outputTokens": 50
+            "inputTokens": 9008,
+            "cachedInputTokens": 8678,
+            "cacheWriteTokens": 327,
+            "outputTokens": 64
           },
           "model": "gpt-6-luna"
         }
