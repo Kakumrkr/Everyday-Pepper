@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "745302b2bafee424b56590047e0b03e29c220ef9d7b5887ac5728425de476e46",
+        "fingerprint": "58b5d434fe87d15897a57ae7bdc197a8fe3388fb182eb529d913423761f68d84",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_iec7TfNwMEDDhHU3nKLOuODX",
+              "id": "call_IfRq6bnuwMZa6oVkGlmHN5PA",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8792,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 12,
+            "inputTokens": 8856,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8853,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0ff5f70e91afc6b3c7c2bb498238eba30c138888b23a4319b017087c30a2e558",
+        "fingerprint": "31996e50138fcd96683e02c4600fd1ea436bb720ab0c8d076aee29c0df25b16a",
         "response": {
-          "text": "Jess doesn’t work Saturdays, so she can’t take a client this Saturday. Marco works 10:00 AM–4:00 PM and offers haircuts.",
+          "text": "Jess isn’t scheduled on Saturdays; the business also has a note that she doesn’t work Saturdays. Marco works this Saturday from 10:00 AM to 4:00 PM and can take haircuts.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9345,
-            "cachedInputTokens": 8789,
-            "cacheWriteTokens": 553,
-            "outputTokens": 37
+            "inputTokens": 9422,
+            "cachedInputTokens": 8853,
+            "cacheWriteTokens": 566,
+            "outputTokens": 46
           },
           "model": "gpt-6-luna"
         }

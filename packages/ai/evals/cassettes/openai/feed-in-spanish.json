@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "f5bdba805b6c3e9747b8406f01e235f6a0224a2ef229320faf7db5924480edb2",
+        "fingerprint": "5e0b9cf92d3c52e7f2281d939ad1707bd2ab2823b4f859272ab21c19ea52d8ac",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GK0mXEaC6ZLsNdfBtBA3dn1k",
+              "id": "call_9SfxJ43xZwNt4tbiio0HhK4s",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8793,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8857,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 13,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "95f060af74073b608a818ea36208f88525749555e87cdd1da236993c955b0953",
+        "fingerprint": "e6f587747b0b99f7c42cb9025e5ef419b04fd0890b3795500adf7308f8ed540c",
         "response": {
-          "text": "Sí. Para hoy, Jess y Marco tienen cada uno un hueco abierto de 9:00 a 17:00. También aparecen dos clientas que ya podrían re reservar su corte: Sara K. y Sarah P. No hay correos esperando aprobación.",
+          "text": "Sí. Hoy hay huecos amplios de 9:00 a 17:00 para Jess y Marco. También aparecen dos clientas que ya podrían volver para un corte: Sara K. y Sarah P. No hay correos de rebooking esperando aprobación.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10416,
-            "cachedInputTokens": 8790,
-            "cacheWriteTokens": 1623,
+            "inputTokens": 10515,
+            "cachedInputTokens": 8854,
+            "cacheWriteTokens": 1658,
             "outputTokens": 57
           },
           "model": "gpt-6-luna"

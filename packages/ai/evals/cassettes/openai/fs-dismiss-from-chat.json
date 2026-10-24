@@ -3,39 +3,11 @@
   "trials": [
     [
       {
-        "fingerprint": "c2d1509d1cf2a5b508d5017e82d03b97cdaac394ec34ad25350501ecd67ed4a1",
+        "fingerprint": "fd0d5cb2a5fd191c68f2be3f3bb0b7fe87a2b07067cc036e2fcbca7fc5944e01",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_x0pUsFWADlvVxYEy176UwPon",
-              "name": "get_feed",
-              "arguments": "{\"kind\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 8788,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "e04872ab3b072c4b3e3eb5a8f5656ac09311129a092f1eb6c5db35e0e065b923",
-        "response": {
-          "text": "Sara K. is listed as due for a haircut rebooking, but that suggestion isn’t waiting for approval, and I can’t dismiss feed suggestions.",
+          "text": "I can’t dismiss a feed suggestion. Please dismiss Sara’s card on Home.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_04ebd311c6065360016adce7c9d54487d2830e449cb3cbe7b4",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3OfLg2Ir9R90fEnalZ-xTrT2a11GdHeM6F6e-ydSCday1Y56gQfvXLjwgyHQQz0f90OcElRzDaz4mSw0zZnnbyVrbIP_LfpP3YmAbaKXUBRTyINorU8j7hTQIg8TfDlE09bvIKktsOZVUrTeNwtrRrv_dC8dRPZS6nYUmqXIHeVXqwxLwu_7ED2hvpfEVwrRkEhnxVousT1ad1UP7Qn_3nClYF-WxP8GZ2WeBw3RWYPuP1T14v5wnqusdKMxIQN3DdJajl4Bg50zpx_ig-JWH-HAjxEYyk_GvHCgGhtwhuLNRw7ojqqXBW0LneruMnIydlweFaWu25RpKi2xKZMxMsWDQOE-ijqj9DNuOYZ7wOhon47xspZsFNBBH8rpshyntVHYa6PZw3pv6Mj8fWT8rwbYsvBmrgz1oRBg3d8LtJMIMhjwUm-qaD8rVIIQ1nRqODOskpWPmQtn0mBXo93HF-Yp9qWJeZdEgTNR4Iljvl8tNB7T1w05gL060uiOREThN5OiacJVmPgbcujLiZfa_lm0mfK2imN8p0VeLJ5QfzerNmx1OsNlb1wpgjnkTX-87zsxylw2QXQE1KpieuKh_ZSThSFfByc5cZ1pIsDZk9h7hGl0-vtTmO4PcAR9S1yJZnR8IupC0jxmDhVaUly_h8iwGA1RQZ37V564kkAI8hzm-N7ZT9-Ryf3bMKQREtwMJAH2-TKSUYk4wo0KxHsLFJAnamXBBXDookzxFzko92vlVMaoQHDYM06kx_qSUEw5WhE1lH4Wq5EDi5PS6idbw4-ug3n_x5f3IJQqeNzMDgbBu4ORZFY-7Ts7APKjfuiKPXpmdoGppUHNMomC9--h6hksw9YQ7k_gvYU6pOokEXrksyfs-gCrVqmkqlW7no2JxwyWmSXk_vphsTnfPL3lH57QKLd_BIumZiGUkM1G_Db2QIy0AehZOlD8BvMjK2NfhQDC9kZfJSPvYpQ32B6zFaw7dsvcKQgS8RRr97WDggORaCSIFon7G_zUxosQEqUePECtSRGn7pRmp6o7a_9-VIjPB2eWzgLAl063zFBAzz9EKHkx5BFdtNXZbkVGfz5FX-eJ4FEcv9qNsesVA7ok72qXT7FBDmu4vyQgtaZny_jMddU4PkdkTQnfD-rLx-ceeDKDoz93s7fVIR_-_lvhjQZV66PYT0fzyaiAD3qWRzTmspa-ug3EQXT7rQXru7FaOssvLb-WQkkfUJPKcBkpZooNkMvLARJ_TOcZgTd5ZB1T8ZNbLyDsM8Cy8INS-S0_kkZvm32BOMjO9b4Mgn5ZbTOT7QL4uNB__LQ7dD4ptByE9qisk2ztdMMpzKHBfgwSjI-61rH-ru-DYEL02Ymp121hNqhc8UsqxIFxVp_GrL0FLpNDuthC_M-sSw1KObVeqeSg-eXXffBsAqfOFvKeuOgoYbQAh3TelSetBrjGB_Z--6u6jGv25mCYb4wdP8N_fnmxt3dzBITaL1Y1TgBuG7E5-9dvXnFyhzHtvhoejLQti86AKwRyZcsKnleV8vCEkK0v00YN5tbQgmUqhrxdc0u3O-2nAPUXX1wsx9zEw9GsS_oIDgamQoKc8a52oAdZLrw0jTCCihAITbtJNFQHA9dv7onFnKSOAWVKQbaIZMHSBklZZBc3abmcm6ysp4dkGrvkOMHnfzraO22jCcSncXWIjc185H_JI7GusiZ_A49CrINuuh2zVNwpfoqyVYxHRdkpuZ_1EIl07oZLj3Hs3d6yCDx3kQAGjGo0meZA_qa1J_-i3_eBzfQmDYVYLn92tQf_SyLiVIT89BqgiK8ol9FmkfW51KpWynX--zleR3jK82MsAtZbTtyyzwWY-iTXLTGUHu4uOdd-fo4qUBtIfFiUqz3sOBO0846qWsBGEBkOIJ8q_ALuAtg1fHvoJhsn4TLRJyuRFAADOpWvdHaWc5xIW_WKS9x-2yWK4DL7S_tsMnR9J7VZobXDnq8mX4verkZoRq8gFC1Q4L92AhjMW4mHPOOFvnBMuIo_mhUfOqjxUquG10jPiRZtt43k16PjekSqO_cnIEswCBnFg9OLWDqu9e80NTmPUKTzz_Ztils1ygRfMKfkXW7lGzICx32cYp_OU874cWum31DNfJtesB_qidVIzNy83-AgTFc6SMcD3-rhC5q-Tb-N7ipveEe0h2aj4HCZhj00q6NXossZGlHVGs8fVBlPgtxZr-ffOurOQxEsPBrfVjr7uPpyZYnmo_IWbKSJzFeBq7JCQD_gPRUXBOiPKhRvzWF6vdFvfZVbx1OMkPAHXXJolNNmU_CkqPstJBqegMpQpo92MGe2e6WXZAOo11IP7gCTXfOcfxLn8q_fY9BxqDaOPCbQygJ2-EJfZP0nGJrZnA_dDIFVG80eM30CidzegFMB0Gij0f0kIm8wZkme2f9doO219AfUoVta2AqruDqHaSAkzdNnfXChlU_BWByrBu9klkTL7g5pdEWq6FudgBXVkI-aaIgTgz9P_aJX6KO572QKJGCToB87RQ==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -43,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10456,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 1665,
-            "outputTokens": 119
+            "inputTokens": 8824,
+            "cachedInputTokens": 8810,
+            "cacheWriteTokens": 11,
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }

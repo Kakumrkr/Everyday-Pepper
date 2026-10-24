@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "090771b0cd139e4b9a562b8a9da995148f4a2c3faca56a9961706a371de63e72",
+        "fingerprint": "5548ddb59e6d2e97e4ad5695ba743be99655ec150f10260673b088b0c4c83ec7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_lhCU15p43nME9G9FCP2V9wZz",
+              "id": "call_3AhmqCCBtqik79TuVHMXOogK",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 11,
+            "inputTokens": 8824,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8821,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "32a157adf45b4d0e220654a3f77ac17622af80adfaf875f32d4fe1199f653865",
+        "fingerprint": "db02181624f524322434c6b4d9768776c4b046548905d155bc5489a46c91e27b",
         "response": {
-          "text": "I couldn’t find Sara Kim among your clients, so I can’t check her allergy notes. Could you confirm the spelling or try another name?",
+          "text": "I couldn’t find Sara Kim among your clients, so I can’t check her allergy notes. Could the name be spelled differently?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8788,
+            "inputTokens": 8888,
+            "cachedInputTokens": 8821,
             "cacheWriteTokens": 64,
-            "outputTokens": 33
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

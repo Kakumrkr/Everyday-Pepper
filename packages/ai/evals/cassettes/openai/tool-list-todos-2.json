@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "688e6e6283586c8820c223954844685d2702565916195f470977ec66f50a6a5d",
+        "fingerprint": "67b9ba6c45ef5c8b566f8ab6c8b2349192bf0f213c526ea175f6ed11fc680c8a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TaIz6c330ksaDsUBYva2awei",
-              "name": "get_feed",
-              "arguments": "{\"kind\":null}"
+              "id": "call_NIoscPSjTwFFMWV1v0YWPsZe",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 11,
-            "outputTokens": 18
+            "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d6771d36749a652e82ed941ca6f3c911afbaf3963d3ea4cf42c243a296c924c6",
+        "fingerprint": "6e4aa93cadbe5b2badc20581a9592ffed3f81c14b3c46c8c9e245858a636c992",
         "response": {
-          "text": "There’s nothing currently flagged on the team feed.",
+          "text": "There’s one open team to-do: call Maria about her colour. It has no due date.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8839,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 48,
-            "outputTokens": 14
+            "inputTokens": 8964,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 109,
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ce09c0410ceeb17a2261af57af34099abde8cc303c3e89aff128f57a453e0af0",
+        "fingerprint": "55fde25955a030c67982418015f133669f3fd486a967c911221957978df1d280",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HqYTuejLNdkDYVHkjhgUdjWX",
+              "id": "call_xREJJEhDnprBurqG9CtdghO4",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8788,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 11,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "727612aee51194f1f7495221d8ea346745dff72ce31e53ab589c1c0282753760",
+        "fingerprint": "9df08606d4aea74273d9213c30a0cb048c39a4074334e86e7392c88deb65b5e0",
         "response": {
-          "text": "Yes. Today, Jess and Marco each have a long open stretch from 9 AM to 5 PM. The feed also flags two haircut regulars who are overdue to rebook: Sara K. (due Oct 26) and Sarah P. (due Oct 27).",
+          "text": "Yes—today, Jess and Marco each have one open 9 AM–5 PM gap. The feed also flags Sara K. and Sarah P. as due to rebook for haircuts with Jess.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10510,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 1719,
-            "outputTokens": 60
+            "inputTokens": 10501,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 1646,
+            "outputTokens": 45
           },
           "model": "gpt-6-luna"
         }

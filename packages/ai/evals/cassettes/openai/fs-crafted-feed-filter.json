@@ -3,18 +3,41 @@
   "trials": [
     [
       {
-        "fingerprint": "32c016ce6c7a0f6f148d9c6e31ae16e6f550350b8b29c891c6caf2a83b303b09",
+        "fingerprint": "afa9e0804c88bac4bf2b72d1a95066c46504a3c00f1b43b107afb3c9b29426e3",
         "response": {
-          "text": "I can’t run that request: `get_feed` doesn’t have an `every_client` kind, and it doesn’t return client email addresses. Its available kinds are schedule gaps, rebooking due, no-show patterns, staff overload, or all feed items.",
-          "toolCalls": [],
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pDZ3FpImLkuU9Z192iCOxsMw",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
           "replay": [
             {
-              "id": "rs_0c03c92a19334289016adce7c7c63487d2b6bf1e7213ea26b6",
+              "id": "rs_0f07126a94c9d819016adce927164887d2b55e4223733ae3c0",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3OfIKl2wf9wT_Vu1tFGCoofAshWtiwSnsDQ64muufvUSyo90A688NpdbE6F9HHYqo7uUaJI9oOvQcoOx4uf3yZ3qTx5ikQL2tcnjyQQnQxUAZx-oIPZVRyUrlC8xhoS89wEVatpIp4EPjEOBr6oXthQCbNMS4Jx9JKTLtlxsOGCHtjhzwek_9h9QBmOogBvZLASZwwUt7XfrlCB0WdKE6CorfF6qw-8n4_xmegeRtBAICqQ4Mmgko9jRRfaK8VbgjwmskDAKmUqHNHE2wTJi8gU0akQ5T1xGkD9GIX5edmP0siNDB0c1VQjzVtD-7mM7JE98YSMxrFPsE6dVPXparW9jJ5Pn9MR8DD2foQqyqu9HlC_8Bu-EpV50rTjP-hgDc5botJthw_84pXOOCbLFMs5diO9mUuASCTtFF9UIUkmfxyhVveWI7NYRZkChGbWxu-mRXX84HF16kc5C__DqOExMRZg4vbAkm8Xs1TEAoPSoH1Om_87Rap0lZE9_QvnfJp4WQr7-igSbMntKxIVXmoQvIIdr-oRn8i2VvUx-xHEWuZY1hyzL1eaJkSyW8l2DogjaycUHE6QTRLn1WjpgM_pGU6s7LfAmNTEMm7RqMg5czclAyEecMaZNnRlcjnDcbaohykN98E_LF6bie2t-IjK4gGGfx6hVnE3h2IDJrGXtLHMqL-FZ0NTC1brQ8tfbYuRRBzPSTaksAI6FuYhhcIwo6umPwFqypYdGeEk7tkrn94B02idQB7IkGKstqKzc50bQwWt5qVbBj1ByFf3LEW-jtLlBGt2X63UE_O7isovtuyUOzcxLXl5yCKF3xWqAWwSpTDT2OMPSm8M4tOQ9WGqkR1dXFGRtYn5hqecM61aPU7Q1fV0IMeV5HO0Fu3yBbXSUNXo3DxfaXfmBNyJkvH7l5or5oXgg2eL2-JvbZMkMRJJx18NlJXm7e8hXvhgwvtdjXARU2XZQ6QzloyqxK-STa01AF7OjFdqUmu5c1VFIl3e_99BUltI-4ysCmQm6Atj73EQtwVHo9eji_7YKoMXaHvINC-faLAJ2L1eDNiderz9Lzu2NHH7z9r3iaJV1aq8NdojWC4M4XJPg7XB9gmO_pem5ZUR0E55Bh6UhlyToFIhKp8ZB1KD6hvT1sIb9EvybeHsjXh0KH7RA-w88kRJtcvTubdAa6vB-xtMmXoYWdC0oCGzvYFiUwQzygiLN12qRuGPl_7IIDJfJu2-lNMUWWb44Xr84ycsoFjFjB9ScGbg8b3ATpnxpHNEM86qOP0en6Y0uYPsFAHI6qVrA7Pta487_p8SGNT52WDPDvQB8PQ4_zEcvFx95MTysq5CoIkjIHoKNxqF0VFWVOsZFKC8TDMzqLKErKd5KSYWAo9ayvbz9TsEemRpBkN3kZAYAVm72Bd6UdmqozedUB7bWRoObCEekDBFhycumPdOZFMXI5nZvrca6ynBuAjaWz-HrQUFm9ZC3yVQHkHzOj63Iv3TX2JPB-AibJeVEeb5ifeSE5HgSSSahyy7D402xQfGZwCmjBzhKF-v1JY_9JzoyTxIyGRboAhPA4GJHxawOC_htBmdJJIA7Je9vSNhE047ct9YrgxghczbTo72WxwczGyRi2iuLRKd2RuLlcgDDFKZlAlSK0rFBai9-I8SL3td3iVV-c4Znxl_zYKlVvZaYGgjtuDRT3aRCkh6mh1Pcwd1soyMa7WlVRSHjd0WEwtgB-moDSTd86i4vJIQIn3E0ILc711qXtNaexSzL_n_LInGUlnkaYizj2jdTkmI9rjyWT9pq-krE-SWzObijl0j-f_e9tJ_tkcpI9U5y9KM0wu114bs6SWCvHxBQj-Qce1_TEGRC3jd2fI8aW3BweQw8RT2XlvIafUPs-HTnAOiSctZ3H8_kX0aTWA_5De-dkMzLJGq9uuYun_gTxxAt_nHimuu4_APHwLMSxBPJc95p5MkvOgLZVmTu58gJTRUBhtWA7Tilx94pu36G975ckFoXCvnBF17zbBd3S46vuT96Xhe70C08-42CXIsPcshs-WTco96EvJisFrGDQ1uncGL0WUyaBlsw48zKhsDQ9_ELv2mgjqgGiWtcj8pRbncI_VZQBZx6vBMMDTwrG4B_uNwmDW75nmluP4IKKavUx1tDfFhECmDoLVbfas-M8PcwRhLS8uEIPbJZ6zORCLBun4Oi18RwYXgOUPOZ-lS7fO_Vm6hGLxSfeThK2PGQOAKOH8FkKGWmrJgeUQeW9ISJ7MsEUq4_o3VvKm41tWwXXX42-jPue5U=",
+              "encrypted_content": "gAAAAABq3OkoZo4DjOUrsNKNe9j-U_H74Z1BNjP9T2-dRKSYbhSugvuUg1fHH0_qZBSrJ2khaoZ1Kb-owg30S4O5NBv0Pqx6JM55r5Y-7zVlu9jU-bCmApVukEM5n7lEjdA76A3FAFgBX5oDDU54Ny8_Aeh2BtRNQRS1yZKhMFGOchJia1dKk3_JU_gm2EAW6Hq3_yVugiv7LZHrfaVj-jDbmOFoYyISkrhjw63EsGOf0fXPguXF9Veeas3zPi3jZ7GjiWYRNfhG6ohk40uHj9XMf7yYir-SZ_0AExqjY8L7v4Mplvb7sgalLUM4wEsQoaE7sgZMV8CBzjHGmogtCIZRlv4sIdiUIVzZ563heIezSS58MkPdzcEJSf4OIsSqS1BrQe33Ps7lGCO8mJm66sysGAMpG7eVoRScndoLM3OfJcRCGNmKZaMLhMB4yMAnp73zwvW2EZxd-LGGbJwiEwV-co-eajFlZ2C4e786LbqqgZw_FQj7nQuXUWce2CQ0hXQvi1thQlMcpEkgUUHGy87aB0F9dgM6TBBiNtuSkxIIuxqp_hW7h4HY9QaURpuKJjXeqRYb2ioU-PhkfGavAjhjHjpEfXbxhep8PJfLnZ-PqB5XsWac5hiK5SmUvZ5TOv7lLcqNGrRM2ErGf9gWF0Y9cliMFkSZ78boPbcSznHAo2-rJ8D_jmhKhPWlYUtdMSKxpeygaBGkNMSEsONJHTg3GrFbqLQpdXw6nckiIRowXxY2zPrA7CPsULXTt9pMuxLlcs4u5vrvIp-uvLDu68253pt1wVpTBrzau-SxJ2G2okuhw7XLfujKT7Hza_8xAAtPg1u7rJdmKH6lHVSOdmO8q3EO2JlfPOP5wzpr176GtXIxkzoDoV86wz_5xUBf1kwkjenMWMVLbwOvxbqyKdKU4CeogaDvNE1gy1dWNIA41h3BDsVdFX8dfqP_K6oPS5Y6nvJwdbX5RZRGm6JFfbFy_V9u_7CbNmpp058AOz_klsossiON0dddNyJg-An_HDESKIgJNwhUpQCWOdIH57lhMagygwyYAYs1XmdHQW88Ju8SKt9ITQX_EX33JzQmTbDX-joZAuVv1Kt38_saIHskufP9p_P8PV5aEtRgOYJxY8ExnckndeNj6mVyMV3o5AXDGHpRXcj4BVdSkBtn7s4sIuZTljLyuxWzCwqf69sGN5Tq3jAMHgnXuRjQPyQ6qbg2ei8tQpaVGhNaTVSuprkuAop6zHRaM8EflP6EJEC29IWitLsXbq8w8rjMH8jz0QxHzWoBybkCl6INGLKAl6EfDemGxs2bIggXQPjZNApgYDGJwRL_hOJSP4c30EtRmhqFNz6pQmk9XPIuts3ehSQtb1KVxdfuwGZyx5Ou6c5FsRG7CiqMUZjBhil5shc5gSZgVuac8-THPLTs9qQEMog7WMRs08KEd_2hH7pkhN65ajljdqrMLfGsfQckqljB3M_fbgyjlY65FImR73ijRGj0ypVsM7-MRM_XKeLz_tsk7I7I3EZxtdFLSpDJ8Z5yGVeECapEF5cdTd2zsBYMWPFG4GHiliR1QWY5x1jaWhcVcGMQKs2eZO6evVuzhH105l98ZJ1F8J00Ww8qtQM_uo6s9cFSNGsoPCOUvMrbKe9gaFmwd8UZbe2_Ka8uENPZgny3KGnwenJUvRW2bu3ss-4oPj8rJ34E52wefxv-Xx2iOOhZ3aPflvV-dsoF8eG0PQUH_srmqUXscIHQWKClCBqW81qUKLUOXfwCc2hu71fd0pdjvl7QRKrVgQxcif7fa01g9BNOiAA0gzo_R6G0XekcKfGTzJ3xT_outpp2zClH5En8K2va3utc9t2FkdNPiRFwJ9oOejjO41UFy0pAN9Ivb8JTTgOTrbzIij5oVGD3gjfnTrzm2MwV34KELUz-mXTn7vKvPO_xBNLcwbytoPeYwoh1yO5WmA9zRTak5o0LYjzk1_HNxpXKaPUmAc0CcM6huvHJtAGcoPGRn0kl-reEJfl65LSkjqQfBkO8EJhwnQ8La28661czvexZoxpJihunmolCAy0m_tchDdaqGFakbpn-xwKwhTQ7hWOIQOPX0eDcu-SMTdUi_Shb3f8cuJ7ew9yViQ2jbiszGaj1sV1C4btOHtPsMrvj3uln-NrMDbmnkz1UimU=",
               "summary": []
-            },
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8833,
+            "cachedInputTokens": 8810,
+            "cacheWriteTokens": 20,
+            "outputTokens": 75
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d46542b0392b1031ffbb3ee3ea1745e2f23e9865908020c9d5e087f1847c456c",
+        "response": {
+          "text": "I ran the feed with all available categories; “every_client” isn’t a supported kind. It returned 13 suggestions, including rebooking reminders for Sara K. and Sarah P. The feed doesn’t include client email addresses, so I can’t list them.",
+          "toolCalls": [],
+          "replay": [
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -22,9 +45,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8800,
-            "cachedInputTokens": 8797,
-            "outputTokens": 125
+            "inputTokens": 10530,
+            "cachedInputTokens": 8830,
+            "cacheWriteTokens": 1697,
+            "outputTokens": 57
           },
           "model": "gpt-6-luna"
         }

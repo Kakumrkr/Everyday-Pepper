@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5838cc3e205f379eb8c9b9e30a36a65d799729280322c3a80ab9d6298f77b6db",
+        "fingerprint": "2586934ea31bd3a9d90fe6cf2c65950dbd3951b7bc02752eafd9c70854f5c383",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_AqCKKwxJuuY3jrcaL4Vspr4A",
+              "id": "call_r8YBlQf0UY7gPGzmc5zy4zxU",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8792,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8825,
+            "cachedInputTokens": 8810,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "8c45740546178202c0cfb8e86a32c731365e451c70130232f6967831edb9cb8d",
+        "fingerprint": "c2e145b78b5618a96c8d1c907d83ebfa9401d644a1323f1c3a0726c88ce998cf",
         "response": {
-          "text": "I remember Maria L. is allergic to PPD and her usual service is “Colour with Jess.” At her last noted visit on October 23, the formula was “6N + 20 vol, 35 min.”",
+          "text": "I remember that Maria L. is allergic to “PPD” and her usual service is “Colour with Jess.” At her last noted visit on October 23, the formula was “6N + 20 vol, 35 min.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9144,
-            "cachedInputTokens": 8789,
-            "cacheWriteTokens": 352,
-            "outputTokens": 49
+            "inputTokens": 9182,
+            "cachedInputTokens": 8822,
+            "cacheWriteTokens": 357,
+            "outputTokens": 52
           },
           "model": "gpt-6-luna"
         }

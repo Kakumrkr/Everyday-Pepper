@@ -3,30 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "d252d162b773fd2b706bde27cd42152bc74ddc89a0888d4b540156826b9b518e",
+        "fingerprint": "af7e14df246b84f51ee98676353dc1289da74defaa06d3fd4cf5fdbccd560673",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_eZJ5n4wL4xQuGZA1ZOX25Dq2",
-              "name": "get_feed",
-              "arguments": "{\"kind\":null}"
+              "id": "call_oJz3Oxpp3B4q2BdG2K7xDcUr",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 8788,
-            "outputTokens": 18
+            "inputTokens": 8855,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8852,
+            "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c85fd7618a94be119aceb7d61111f19d21bc5871a3cd176ddbc1220d53bc3e62",
+        "fingerprint": "dc42822858519c292500dc86a5be06c150aa5259ad303624478eebc29d437d80",
         "response": {
-          "text": "There’s nothing open on the team feed right now.",
+          "text": "There’s one open team to-do: Lena needs to call Maria about her colour. No due date is set.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8839,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 48,
-            "outputTokens": 15
+            "inputTokens": 8961,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 106,
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b86e3d6cb69b1ac3e0861e8c0661705e7114d3f7981e3f4baa2729c88f978b75",
+        "fingerprint": "47d09dc519f6f720a4893dad2eab4e5ab9484635bdf1f08730f357da927bbc9e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_r3QdgKQVvl4yLUTFoY7ERHNP",
+              "id": "call_Y8enYNkSqwyFaMLp5JAckhEN",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8794,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8827,
+            "cachedInputTokens": 8810,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "6c240ebaa5d46bdadc6110d49293ede68d138b6b2589b5e6a34d8ad900d90433",
+        "fingerprint": "f42cfc02e786b527f2799963bb6ae1d66a3c0c496cff11fab114bf7db4c45505",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MYR75mbwpaj80xHLvzW92DTE",
+              "id": "call_I5liE6wzMq3QQFtyMq1NED5i",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,48 +38,62 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8947,
-            "cachedInputTokens": 8791,
-            "cacheWriteTokens": 153,
+            "inputTokens": 8976,
+            "cachedInputTokens": 8824,
+            "cacheWriteTokens": 149,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8447342b800adbbf4a1cd8a0ee7cd054ffd4f56632b4a1f069a608fc29da4f11",
+        "fingerprint": "e900121695ec09f6297c72988bf47b6729cfdf6e6ed6324361a68bba5fa191f9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6qly6BExcgKif6d97meGDhwF",
-              "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+              "id": "call_wMrMiTGg8rHB0g0LBJlLiwtv",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"days\":1,\"notBefore\":\"10:00\"}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_0d2ec4445f3d4306016adce49e78d887d29c56dc2cfb0cd0cc",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3OSfMqEOHiGnr2T8NrQnnGcZHjYBTKI_v3pFSJrgvj0KK3SwlX6eiVIHDxTYHF4v443T-tG0KDkCfM00XU8LqasQ-sH0shNpUHosiIxDl9w4D5WgeHo3X5lqqS1rvPhp4wbx_pVbqfMy6WnAaB32FT4VV9DYisrZt6Ujk_RwsXLqTL7ChApb1FymuOKlTuTi6WQnY8LVJzIikJaQtUqr09wZiJi1z95wwGUixrRVGNbxBIGaduiltB-w5pvjwuNRlv_0YgJJQ86VdMoSwY6_JaFT_iE30bdNv07CLAvK5D5tfEwBKBWmdJRxfjT9pE52_LtM4FIyKcOTmMsLflTuFm5K4Bhvvg6r8XBye0O9fuoVOCz_j1bOBV2vWprNpE5c6wJfvKFb9P0sYBwGvq9lsYoqr6ntJHKMzB_lhfkuYmIXJQibro5smDB4pIep-czxJySUWiw2FK7DCo_MBaLiyL_PpwmbU0gdLWYhJQ0icJi4RnxrH70ELOcn8VO0XMy3QFxRT-TWcYH12832nLhPUWAaXSYws9sUE_Utdu6j3sRuxufDZFo_0ss0wO08V6YkUnaGJrxDoLj8mzKdvKitK-cGacM1ABonErKLvjjJrgDR5ay9qjzTuseWmzf-nt0rPRzM1gdN4Ta1j-Dd0iPkPFRVT-cfMDoe5fPGL-Y_GZoWyrySXpnjOj27_TV1sNv2n8K7DBQbylueKQ_KHVAQKgmkA8EN4DfuFXzdWh24K4GTpvsIk8DsKWU5oo7NgyZ_lD7fKIWMnVC0XKTQSMDqJ8SSVml_Ag8UM94eTkBA_EBd7F-KEjeC1ENq1cNg5S4P9Inbd1A10jKEcmUpUGB9c6u5YNqWuNDjhlP9pkjHVCARr8S5GKp1RmpueQlWYi0RC3Ky2MpzX3kQ8YL0v7etu2KHXF-dZB-gK3uHwkgSwbK0tdMp_b5-4zSCpyC238rXSawN-Wi-gq6auDxGKlXqoWkVLuJEV-a8aERojNsIbL3PnS7O7Q2CgFL9IeVpunOPaU-SLn0gbB8Pv95TvDv--JDG_EfC5ZksCHsGQb1mzardEWiNGwAiwjr2ARyazAp54AciZuyTC0g8PD5gJQ2Fqa8s1aMGg6K9ePvb0ewLaqHBNwxtaGLl7sjDV2atDtncayaI-mqP0UPshEY5y8es5LSYW5SGqYv2wRyGkHzm60s-zHWzPdyy3SULmx87y6iejKiPXANlRelTmh0_hWUpuaQ_nZVuZ51AsSiOUQdSNCz4UMXA2T7OMNlPe4ofbNscp6dmhPjycywcApoKVWu7LX6mgke8mqwPAJLPrz5rrUHH-oEJlRrHikIXHqWmKKjjlGFjoG4eJCfGXQP3ff_kI-KDNoy6WSoy1eFr-rKfmxMB1HNMthEAuuPbSyEDeYJLMKS1MGzbBncRjk_bKy3RHqevLFfCd6QdW38HnqVY2xMjEu3vePh9FNUji8KtX717ZALUcpoY_1TlL0HBb_JbAbG15ZROOD028TpBTbwCcgm2Y_VEIp4VAEvZp_j8tl7XtYZP4f0BMGhJKQm2Ywtur73UdAuKGnleGeVV1vuqCmDZ53KLdjI9A5EAjiEYL9hojAs8ootFS9NcAPW9-QR-DyO-5eCVBTiA2HdR84kHpBgjy1plbMQ8HE8uiwXgCMdMi_M9_pmSf10Cr1Ea2ynb-XIQYgqn1XaEL7Z98hk1TJASUfPMqce5biPkvPZK5yka4LlklsA7lvxM2DS82VxJ5uRa4z9yBvxtjdFNCsn7CmpScEiY1bilNqWVJSuo8SmhSvmZOECI_dAPDf4X8BVQWWbP5YFUq-nFtXiqw-e4-psSi9hv3AY6AVL183SqeGZIH7zDll-5GoLqa3PMMn71eETHag==",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9401,
-            "cachedInputTokens": 8944,
-            "cacheWriteTokens": 454,
-            "outputTokens": 148
+            "inputTokens": 9434,
+            "cachedInputTokens": 8973,
+            "cacheWriteTokens": 458,
+            "outputTokens": 86
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c34f9a7d7baefe11b89a9110c25d982b99db97ea67d85830f4af746ceb481a0e",
+        "fingerprint": "fc38fa394b598996969b47805a851838c28dc65af12060d5455befca13b1d005",
         "response": {
-          "text": "Maria L.’s Colour appointment with Jess for Wednesday, November 4 at 10:00 is waiting for your approval on the card.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SE0rVogS5Kb2K1uIY4JrAXlK",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10127,
+            "cachedInputTokens": 9431,
+            "cacheWriteTokens": 693,
+            "outputTokens": 109
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b59f382ff4de4465776b6c3304851183778b67cda4548a7706b309d5ba24ef7f",
+        "response": {
+          "text": "Maria’s usual, “Colour with Jess,” is ready for Wednesday, November 4 at 10am. Approve it on the card to confirm the booking; nothing is booked yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -89,12 +103,12 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9628,
-            "cachedInputTokens": 9398,
-            "cacheWriteTokens": 227,
-            "outputTokens": 32
+            "inputTokens": 10315,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10312,
+            "outputTokens": 42
           },
-          "model": "gpt-6-luna"
+          "model": "gpt-6.1-sol"
         }
       }
     ],

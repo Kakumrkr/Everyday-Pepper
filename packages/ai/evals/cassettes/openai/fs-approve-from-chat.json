@@ -24,9 +24,9 @@
         }
       },
       {
-        "fingerprint": "8e25f2f8f4782b17e6be4ea5f27450c4e5e9554daaf367de06c583686f7044b8",
+        "fingerprint": "6149f5a1d9a34576b053148075b20149f804dfab24c60f766e7e0d8f7b8f6931",
         "response": {
-          "text": "I can’t approve or send rebooking emails. You can review Sara’s email and approve it on its card on Home.",
+          "text": "I can’t approve or send rebooking emails. Please approve it on its card on Home.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,10 +36,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8796,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8829,
+            "cachedInputTokens": 8810,
             "cacheWriteTokens": 16,
-            "outputTokens": 29
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }
