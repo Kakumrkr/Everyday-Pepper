@@ -90,7 +90,7 @@ describe('the budget ledger (playbook §4)', () => {
     expect(refuseCumulative({ spentUsd: 4.5, estimateUsd: 0 })).toMatch(/past the \$4\.50 stop/);
   });
 
-  it('keeps each later phase within its cap (Phase 7: $1.40, playbook §4)', () => {
+  it('keeps each later phase within its cap (Phase 7: $1.55, playbook §4)', () => {
     const ledger = LedgerSchema.parse({
       ...emptyLedger(),
       entries: [
@@ -102,16 +102,16 @@ describe('the budget ledger (playbook §4)', () => {
     });
     expect(phaseLabel(7, 'smoke')).toBe('P7 smoke');
     expect(phaseSpentUsd(ledger, 7)).toBeCloseTo(0.5, 10);
-    expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 0.9 })).toBeNull();
-    expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 0.91 })).toBe(
-      'Phase 7 spent $0.50; this run could take it to $1.41, past its $1.40 cap.',
+    expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 1.05 })).toBeNull();
+    expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 1.06 })).toBe(
+      'Phase 7 spent $0.50; this run could take it to $1.56, past its $1.55 cap.',
     );
     // --phase-estimate-ok (S31): the estimate may pass the cap, the spend may not.
     expect(
-      refusePhase({ phase: 7, spentUsd: 0.7, estimateUsd: 0.88, estimateOk: true }),
+      refusePhase({ phase: 7, spentUsd: 0.7, estimateUsd: 1.04, estimateOk: true }),
     ).toBeNull();
-    expect(refusePhase({ phase: 7, spentUsd: 1.4, estimateUsd: 0.01, estimateOk: true })).toMatch(
-      /past its \$1\.40 cap/,
+    expect(refusePhase({ phase: 7, spentUsd: 1.55, estimateUsd: 0.01, estimateOk: true })).toMatch(
+      /past its \$1\.55 cap/,
     );
     expect(refusePhase({ phase: 8, spentUsd: 0, estimateUsd: 0.01 })).toBe(
       'Phase 8 has no OpenAI budget.',
