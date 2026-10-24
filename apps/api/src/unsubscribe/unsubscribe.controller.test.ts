@@ -106,7 +106,10 @@ describe('/v1/public/unsubscribe/:token', () => {
   it('gives the mail provider’s one-click POSTs a wider limit than the page (S36b review)', async () => {
     await request(server).get(`/v1/public/unsubscribe/${TOKEN}`).expect(200);
     await request(server).post(`/v1/public/unsubscribe/${TOKEN}`).expect(200);
-    const [[read], [post]] = limits.hit.mock.calls as [[{ max: number }], [{ max: number }]];
+    const [[read], [post]] = limits.hit.mock.calls as unknown as [
+      [{ max: number }],
+      [{ max: number }],
+    ];
     expect(read.max).toBe(30);
     expect(post.max).toBeGreaterThanOrEqual(300);
   });

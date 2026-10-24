@@ -15,7 +15,7 @@ vi.mock('@pepper/ai', async (original) => ({
 
 describe('morningDraftsJob', () => {
   it('runs the pass with the templates, the emails and the clock', async () => {
-    ai.runDueMorningDrafts.mockResolvedValue({ businesses: 2, drafted: 5 });
+    ai.runDueMorningDrafts.mockResolvedValue({ businesses: 2, drafted: 5, failed: 0 });
     const clock = { now: () => new Date('2026-11-02T12:30:00Z') };
     const key = Buffer.alloc(32, 1);
     const job = morningDraftsJob(
@@ -28,7 +28,7 @@ describe('morningDraftsJob', () => {
       { outboxKey: key, clock },
     );
     expect(ai.OpenAiProvider).toHaveBeenCalledTimes(1);
-    expect(await job()).toEqual({ businesses: 2, drafted: 5 });
+    expect(await job()).toEqual({ businesses: 2, drafted: 5, failed: 0 });
     expect(ai.runDueMorningDrafts).toHaveBeenCalledWith(
       { db: true },
       expect.objectContaining({

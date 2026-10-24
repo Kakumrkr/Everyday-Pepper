@@ -18,7 +18,7 @@ export function morningDraftsJob(
   db: Database,
   config: DraftsJobConfig,
   options: { outboxKey: Buffer; clock: Clock },
-): () => Promise<{ businesses: number; drafted: number }> {
+): () => Promise<{ businesses: number; drafted: number; failed: number }> {
   const provider = new OpenAiProvider(config.openai);
   const limits = llmTokenLimits(config.monthlyTokens);
   return () =>
