@@ -39,8 +39,8 @@ S35 had to decide the thresholds, the storage, how a booking change triggers a n
    Each business runs under its own tenant. A queue would add Redis state for work that is "recompute this business": idempotent and coalescing (ten booking changes in a minute are one run). One row per business is all the state it needs, and a restart loses nothing. BullMQ stays for the waitlist's per-offer timers (S37).
 5. **Re-runs after changes are requests, not times:**
    - Every booking write (team and booking page, 7 sites), working-hours change and time-off change calls `requestInsights(tx)` in its own transaction. This inserts one row into `insight_requests`, which is append-only for writers, so concurrent changes never wait on each other or on a run.
-   - A run first takes a per-business advisory lock (`pg_try_advisory_xact_lock`; a second worker skips the business). It then reads the highest request id it can see, before reading anything else, and at the end deletes the requests up to that id.
-   - A change committed during a run keeps its row (a higher id, or one not visible when the run began), so the business is due again on the next pass. Turning suggestions or a kind back on also asks for a run.
+   - A run first takes a per-business advisory lock (`pg_try_advisory_xact_lock`; a second worker skips the business). It then reads the highest request `seq` it can see, before reading anything else, and at the end deletes the requests up to that `seq`.
+   - A change committed during a run keeps its row (a higher `seq`, or one not visible when the run began), so the business is due again on the next pass. Turning suggestions or a kind back on also asks for a run.
 
    Two earlier designs fell in this session:
    - Comparing timestamps lost a request in the same millisecond as a run (its own test caught it).

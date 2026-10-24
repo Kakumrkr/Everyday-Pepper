@@ -224,6 +224,9 @@ describe('dismiss and snooze', () => {
       snoozed: 0,
     });
     expect(await open(undefined, later(31))).toContain(`rebooking_due:client:${maria}:2026-10-27`);
+    // Dismissed again (the counts below read it).
+    const back = await idOf(`rebooking_due:client:${maria}:2026-10-27`);
+    expect(await as(jess, (tx) => closeFeedItem(tx, back, 'dismissed', NOW))).toBeDefined();
   });
 
   it('records done, and closes an item only once', async () => {

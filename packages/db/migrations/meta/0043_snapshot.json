@@ -1,5 +1,5 @@
 {
-  "id": "dbd445a8-32a3-48d0-91ec-ab8934c3da4d",
+  "id": "97e6e976-c7ac-4263-b9ff-a9bdfc723fb4",
   "prevId": "f5e95523-f372-4f1a-806c-10cbd54b1615",
   "version": "7",
   "dialect": "postgresql",
@@ -3360,12 +3360,18 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigint",
+          "type": "uuid",
           "primaryKey": true,
+          "notNull": true
+        },
+        "seq": {
+          "name": "seq",
+          "type": "bigint",
+          "primaryKey": false,
           "notNull": true,
           "identity": {
-            "type": "always",
-            "name": "insight_requests_id_seq",
+            "type": "byDefault",
+            "name": "insight_requests_seq_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -3401,7 +3407,7 @@
               "nulls": "last"
             },
             {
-              "expression": "id",
+              "expression": "seq",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

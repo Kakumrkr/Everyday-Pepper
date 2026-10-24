@@ -1994,13 +1994,15 @@ export const insightRuns = pgTable(
  * Asks for a business's insights to run again (ADR-0039): one row per booking, working-hours
  * or time-off change, inserted in that change's transaction. Append-only for the writers, so
  * concurrent changes never wait on each other; a run deletes the rows it saw before reading
- * anything (ids up to the highest it saw), so a change committed during a run stays and makes
+ * anything (`seq` up to the highest it saw), so a change committed during a run stays and makes
  * the business due again.
  */
 export const insightRequests = pgTable(
   'insight_requests',
   {
-    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    // Rises with every request: a run deletes the ones up to the highest it saw.
+    seq: bigint('seq', { mode: 'number' }).notNull().generatedByDefaultAsIdentity(),
     tenantId: uuid('tenant_id')
       .notNull()
       .default(currentTenantId)
@@ -2008,7 +2010,7 @@ export const insightRequests = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
-    index('insight_requests_tenant_idx').on(table.tenantId, table.id),
+    index('insight_requests_tenant_idx').on(table.tenantId, table.seq),
     tenantIsolation(sql.raw('tenant_id')),
     jobScan('insights'),
   ],

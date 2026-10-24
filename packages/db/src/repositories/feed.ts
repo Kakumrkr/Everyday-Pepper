@@ -335,7 +335,7 @@ export async function startInsightRun(tx: TenantTx): Promise<number | undefined>
   await tx.insert(insightRuns).values({}).onConflictDoNothing({ target: insightRuns.tenantId });
   const [row] = await tx
     // node-postgres reads a bigint as a string.
-    .select({ seen: sql<string>`coalesce(max(${insightRequests.id}), 0)::text` })
+    .select({ seen: sql<string>`coalesce(max(${insightRequests.seq}), 0)::text` })
     .from(insightRequests);
   return Number(row?.seen ?? '0');
 }
@@ -348,7 +348,7 @@ export async function markInsightRun(tx: TenantTx, startedAt: Date, seen: number
   await tx.update(insightRuns).set({ lastRunAt: startedAt });
   await tx
     .delete(insightRequests)
-    .where(lte(insightRequests.id, z.number().int().min(0).parse(seen)));
+    .where(lte(insightRequests.seq, z.number().int().min(0).parse(seen)));
 }
 
 export interface DueInsightRun {
