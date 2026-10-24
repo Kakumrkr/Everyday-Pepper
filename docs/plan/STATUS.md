@@ -5,7 +5,7 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S37b is next (Phase 8d "b"):** merge `claude/elegant-rubin-kltm4o` (S37a, pushed without a PR) into the S37b branch, probe `waitlist` and `feed_safety`, record the whole suite once (a new tool stales every cassette: about $0.20–0.25 of the $0.63 Phase 8 has left for S37b and S38b), no pass^3 (S38b does it), fix, re-run the end checks, `/code-review` and `/security-review` over both halves, open the one PR.
+**S37b (Phase 8d "b") in progress** on `ccr-af161109-xdwa6z` (S37a's branch merged in, pushed). Brief approved (user: "Go with your recommendations"). Tasks: 1 scripted eval green → 2 probe `waitlist`, `feed_safety`, `scheduling` (`EVAL_PHASE=8`) → 3 one full recording (≈ $0.20–0.25, no pass^3), free replay → 4 `pnpm check`, `pnpm test:integration`, Playwright → 5 `/code-review` + `/security-review` (public claim routes) → 6 docs, one PR, merge. Ask before `--phase-estimate-ok` or after a gate misses twice. **Done so far:** merge; next: task 1.
 
 ## Last sessions
 - **S37a Phase 8d "a" (2026-10-24): the smart waitlist on the scripted model, branch `claude/elegant-rubin-kltm4o` pushed without a PR** ([ADR-0041](../adr/0041-smart-waitlist.md)). Full entry in [session-log.md](session-log.md).
