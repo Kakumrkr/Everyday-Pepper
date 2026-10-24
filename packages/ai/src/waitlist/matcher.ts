@@ -1,3 +1,4 @@
+import { SpanStatusCode, trace } from '@opentelemetry/api';
 import {
   SlotUnavailableError,
   stillOfferable,
@@ -71,13 +72,24 @@ export async function runWaitlistMatch(
     claimWaitlistMatch(tx, matchId, now, new Date(now.getTime() + MATCH_LEASE_MS)),
   );
   if (claimed === undefined) return 'skipped';
+  // The offer latency (playbook §2, ≤ 2 min p95): from the freeing commit to the offer made.
+  // Codes and numbers only.
+  const span = trace.getTracer('pepper.waitlist').startSpan('waitlist.match', {
+    attributes: { 'pepper.waitlist.attempt': claimed.attempts },
+  });
   try {
-    return await withTenant(db, due.tenantId, async (tx) => {
-      const outcome = await matchIn(db, tx, due.tenantId, claimed, options);
-      await finishWaitlistMatch(tx, matchId, outcome);
-      return outcome;
+    const outcome = await withTenant(db, due.tenantId, async (tx) => {
+      const result = await matchIn(db, tx, due.tenantId, claimed, options);
+      await finishWaitlistMatch(tx, matchId, result);
+      return result;
     });
+    span.setAttributes({
+      'pepper.waitlist.outcome': outcome,
+      'pepper.waitlist.latency_ms': options.clock.now().getTime() - claimed.createdAt.getTime(),
+    });
+    return outcome;
   } catch (error) {
+    span.setStatus({ code: SpanStatusCode.ERROR });
     const giveUp = claimed.attempts >= WAITLIST_MATCH_MAX_ATTEMPTS;
     await withTenant(db, due.tenantId, (tx) =>
       giveUp
@@ -90,6 +102,8 @@ export async function runWaitlistMatch(
     );
     if (giveUp) throw error;
     return 'retry';
+  } finally {
+    span.end();
   }
 }
 

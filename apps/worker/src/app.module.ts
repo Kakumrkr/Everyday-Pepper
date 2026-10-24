@@ -6,6 +6,7 @@ import { JobsModule } from './jobs/jobs.module.js';
 import { OutboxModule } from './outbox/outbox.module.js';
 import { episodeWriterFor } from './outbox/episodes.js';
 import { WebPusher } from './push/web-pusher.js';
+import { WaitlistModule } from './waitlist/waitlist.module.js';
 
 @Module({})
 export class AppModule {
@@ -31,6 +32,16 @@ export class AppModule {
           drafts: config.drafts,
           pushes: config.push !== null,
         }),
+        ...(config.waitlist === null
+          ? []
+          : [
+              WaitlistModule.forRoot({
+                redisUrl: config.redisUrl,
+                key: outboxKeyFrom(config.outboxSecret),
+                baseUrl: config.waitlist.baseUrl,
+                pollMs: config.waitlist.pollMs,
+              }),
+            ]),
       ],
     };
   }

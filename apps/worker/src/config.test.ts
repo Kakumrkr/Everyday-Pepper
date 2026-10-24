@@ -70,6 +70,23 @@ describe('loadWorkerConfig', () => {
     ).toThrow(/AUTH_BASE_URL/);
   });
 
+  it('runs the smart waitlist only with the web origin, for the claim links (S37)', () => {
+    expect(loadWorkerConfig(required).waitlist).toBeNull();
+    expect(
+      loadWorkerConfig({ ...required, AUTH_BASE_URL: 'https://app.example/path' }).waitlist,
+    ).toEqual({ baseUrl: 'https://app.example', pollMs: 5000 });
+    expect(
+      loadWorkerConfig({
+        ...required,
+        AUTH_BASE_URL: 'https://app.example',
+        WAITLIST_POLL_MS: '2000',
+      }).waitlist?.pollMs,
+    ).toBe(2000);
+    expect(() =>
+      loadWorkerConfig({ ...required, AUTH_BASE_URL: 'https://app.example', WAITLIST_POLL_MS: '0' }),
+    ).toThrow(/WAITLIST_POLL_MS/);
+  });
+
   it('reads the mail settings and the relay interval', () => {
     expect(loadWorkerConfig(required)).toMatchObject({ mail: null, outboxPollMs: 1000 });
     expect(

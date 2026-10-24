@@ -32,6 +32,11 @@ const JobsEnvSchema = z.object({
   AUTH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   /** How often the morning drafts pass looks for businesses whose morning has come (S36). */
   DRAFTS_POLL_MS: z.coerce.number().int().min(10_000).max(600_000).default(60_000),
+  /**
+   * How often the smart waitlist's relay looks for freed times (S37); AC-W5-1 allows 2 minutes
+   * from the cancellation to the offer.
+   */
+  WAITLIST_POLL_MS: z.coerce.number().int().min(500).max(60_000).default(5000),
   /** A business's monthly allowance of model tokens, as the api's (episodes count, S31). */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
 });
@@ -58,6 +63,11 @@ export interface WorkerConfig extends ServiceConfig {
    * owners to approve; `null` when OpenAI or `AUTH_BASE_URL` is not configured.
    */
   drafts: { openai: OpenAiConfig; monthlyTokens: number; baseUrl: string; pollMs: number } | null;
+  /**
+   * The smart waitlist (S37, ADR-0041): freed times offered to who is waiting, with claim links
+   * to the web app; `null` when `AUTH_BASE_URL` is not configured (no offers are made then).
+   */
+  waitlist: { baseUrl: string; pollMs: number } | null;
 }
 
 /**
@@ -79,6 +89,10 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     insightsPollMs: jobs.INSIGHTS_POLL_MS,
     episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
     drafts: draftsConfig(loadOpenAiConfig(env), jobs),
+    waitlist:
+      jobs.AUTH_BASE_URL === undefined
+        ? null
+        : { baseUrl: new URL(jobs.AUTH_BASE_URL).origin, pollMs: jobs.WAITLIST_POLL_MS },
   };
 }
 
