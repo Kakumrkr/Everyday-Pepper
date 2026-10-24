@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3e91ae203d2a921138fe2a2017e4cb7b3db67c2f358097f68f1ef8934b4e9ed4",
+        "fingerprint": "76521a9ad62cc8eb68f04c0ebbf129cf8dac8764ed83ef770f6b5c343d61ee02",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0EC8oH9Wc5YbU9G8uINMtMkH",
+              "id": "call_xfP9bvnKjZ0OmIZbPvVR3McN",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8796,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8860,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 16,
             "outputTokens": 16
           },
@@ -25,31 +25,39 @@
         }
       },
       {
-        "fingerprint": "7c77fcbe274f22dc9e627347036fbdf85222ecdf2ad8054cc158bb8e651ad495",
+        "fingerprint": "eb521a415d7e286bafe7fd9d4f2e3b3ba4537f611bd4eb0ae4a7531890078a56",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0TFwEsGBqSTYTDoM9WwgoCAz",
+              "id": "call_j6jSLJQDQVCd7apbaF4pplCU",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:marco}}\"}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_077b56ed744115fb016adcecedaed887d2ab158e2fb183d60b",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3OzuB3ZVxmvgTTYgTHVlELYMEqcBxECYvWizMMyfa06RTGsjZdR1NWKeAsz7ieXwCLpLgmHMwy5BC7quJLnbh3XbotjvBpX2daUXEz7q61fpsG9san_5AR7wm6qTOnqRO7_mckqIlrGiMj1X-MDZMIVTZcLJG6G6wunb9so2V8tZMPpvFEjLr0pH6XY8vIwPXmSigfIrQK9mBjPRVKN2dPym5lRd3KQFOBSnGdpS8wW9jlpGESTzkw_DP1V5HasyVfnfzp343JR1X-TXQG-XyLH-OIp2m2-QQmfyLogKshRwWrWvqSxq1l97-toTy2sQMgI0A8LsTK9eiaQe5nJPWYzNFmLadUIc89OhTQXY-4DLTue3-kpEqfm_5iFsSIEsa3HjPyq4LC2TNdwF30lJkcVCc14Wef6zaX_15-SkxtLLGLdjLmf3JzEUsiTDeBy6Htzoa0rK__aMlTZbDEtb7pvddRBduJgIKqJKGVjdx6NtHW18gafzAf6HUV5pNiz4RqKwT_OAmtXBadauM405xz-QNMWFpF8ITKpTtmcNbDmiIJEV4sWzQ_dVGSNU7AOe87YuxkR0Qy1E7Q0MPule7Tj3LtEPVEb99FjGc1f8EHFhF95015oMaaTjtkQdG-NgNgAxDUwPDhxRm2CqhXlFDtMpXWvXIQdKHubwq6WOeuyx8SJhW0ZU_O4Gkps8qVuGmP6zrA5QD_aefFNlGDEP72mYiass5cbwS_uJj1bs8fT5Tcc0ikKOrkLFs3PbOIh05c7jfXedbJyJ-KasHgzByDILTJgK-5PPbi4Bm-YROIseYqGSqJG8V92c4Pc4ylUuF8FTu8XKtF5zTZw_lYM1XERCFTHhkTsePsSnOaFfJ1JKUFBITUC4Uk0vEAFPxW1KN0qlM7uex2aLjbdw_K0aE1i7tLH2QM3Lh_VFy6k48-EkpIoD-2HZZ4VAjoLgutBSKppQ62pLbfiH8piXVXUZDT7rWVd40lO0tkb_XU0RCb5XnfGpDJUAnykj33XfNHC13iU5NmoWjFaNrvhgddxmIufMJQPYH1bSF9EYvYYNwnxkKZnA5H5NiyDKFnc50PM70aLem9qnTzVjzMm1HejnULwwgLfELXDIq-Pk2nF9CmKZPG2JLgMkbcaf0JA9wSiEpdREyYTZKzpkx6Xg6FLVMX2T9shM1Ks2bmkFw-MZUmN6QMe5GWQRWiWexm6Zh2sGnZFkg0FVwgo02RYrk85Ub2BNInEEKoBOdgGIAd82Akxouva_k9CgTx0cS4iqvoLKcLZ6oVTBud6ZTjaZ3_gUxAby95q9Wf4tlj5QeHLOc-bSeSiE50OIjJRGd5N_dO0yW1BsEr5LVZBri2AlDu7FsnI8zVElMdHx4CSm_wncOc1O8TRPb6ZU4Gg2VepCOofvxIUBhTeaJf3vplKb-fCHGyApUCK2KRKa7Yd3kNnBjiqSSVkJjfErtUnlqKvqbQagtcEEk8XuYE1aRfUrmkC6seicEKtLHaX6kd25Z3KihkUCoGiCYu2Gq8pmThpcA-3Pazi7-Sqvc50jmqOWbZAQhkJUY68DiBLKJXc0E4uuFeMY2bU4M43dKab6ZEdB08kQgRMEt2nY3KCIoz2PoxcDNFIECmZt1z2GRwysYQGJ1MItLVsslTTY3WFXZxTsX1fEBxRuNNCH4YdIO-df73NhGk5gYXQdT7kRsWiP65UglBCBz59LmHPYHi_1onxDuQd38kCJLTKV2lO1ZOHcgBxAw0sePb-fyuPCi6kSJnpVzvxANdhqxmo0C_DWIYj5KSWv5LGx80CWeb7g4PQviL3_1QfBqA==",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9255,
-            "cachedInputTokens": 8793,
-            "cacheWriteTokens": 459,
-            "outputTokens": 49
+            "inputTokens": 9310,
+            "cachedInputTokens": 8857,
+            "cacheWriteTokens": 450,
+            "outputTokens": 83
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "823c974ec87617c6b2c380229e90b7d89e49a820d0f69b80530607fa31dd0091",
+        "fingerprint": "a8b6be2e564ce6bc4e459935fbad42a767f6950f7c718a9714c6feb5988d57e4",
         "response": {
-          "text": "Yes—Marco is scheduled Thursday, November 5, until 5pm, and he has no bookings or blocked time that day. Is there a particular service you’re checking?",
+          "text": "Marco has no bookings or blocked time at 2pm on Thursday, November 5, so he appears free then.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +67,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9358,
-            "cachedInputTokens": 9252,
-            "cacheWriteTokens": 103,
-            "outputTokens": 40
+            "inputTokens": 9447,
+            "cachedInputTokens": 9307,
+            "cacheWriteTokens": 137,
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

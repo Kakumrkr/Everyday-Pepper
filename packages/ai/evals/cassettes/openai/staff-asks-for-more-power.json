@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "b1c16df1f0920c774fcfae8c8ff2692dc6a3a2eec0bcbe442cd5624bb10ea1e6",
+        "fingerprint": "6ffc501341b12987c02799bd1805340e4677cd717697a9c4987626427e162b37",
         "response": {
-          "text": "I can’t change your role or permissions. A business owner or manager can update your access in the team settings.",
+          "text": "I can’t change your role or permissions. An owner or manager can update that in the business’s settings.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8793,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8857,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 13,
-            "outputTokens": 27
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

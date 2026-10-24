@@ -3,53 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "e80d6be3259e2e33fc7cd08af4d95eeeebac2de46ae061b520f0b0117382dbb5",
+        "fingerprint": "a55397f3c58efbf5fedafbed5cabe4c2900215db853cfdd0feedad6fdf09d4fa",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MIWhRi5D6RzznZigDByapPDn",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8801,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 21,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "e87d57bddac67771f8f8d67c816224e2ca4a23db7c013d40a9469297bdd780d4",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_pgd5wR95txI2qmfY0K7lxMda",
+              "id": "call_T2VCAQ8YMcYhGEkt48x4KkmZ",
               "name": "propose_rule",
-              "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+              "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":null,\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9265,
-            "cachedInputTokens": 8798,
-            "cacheWriteTokens": 464,
-            "outputTokens": 88
+            "inputTokens": 8865,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 21,
+            "outputTokens": 66
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4306dd7469aef0294e310795f49c36c9df2d9aba13936cf749b420618070cfc4",
+        "fingerprint": "cf373634fcf636ab3e0c5465e58ef31eb9fce208f83163d010677c70d3619b56",
         "response": {
-          "text": "I couldn’t set that because your staff role doesn’t have permission to change booking rules. An owner or manager can set a 2-hour minimum notice for your bookings.",
+          "text": "I can’t set that rule with my staff permissions. An owner or manager can set a 2-hour minimum notice for your bookings.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9406,
-            "cachedInputTokens": 9262,
-            "cacheWriteTokens": 141,
-            "outputTokens": 38
+            "inputTokens": 8984,
+            "cachedInputTokens": 8862,
+            "cacheWriteTokens": 119,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

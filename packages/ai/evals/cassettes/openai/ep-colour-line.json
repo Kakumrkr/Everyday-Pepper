@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8eec491c69753c9569301e41db495edf328b90628ac95ac9c20bc1cdefb1ab6d",
+        "fingerprint": "0dfb97692deb937ff0422724f574f000c56d0cb25aa1404f3a6894a71ff47891",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_YNkZTkigzacxXMOqUHvGYp0F",
+              "id": "call_D77I2hg8rLVj0T26EDhgsN1Y",
               "name": "search_memory",
               "arguments": "{\"query\":\"new colour line\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8796,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8860,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 16,
             "outputTokens": 20
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "a72242d468f948d59bb65d405479ad40d7b418ac69abe47d826bbd179b9160ce",
+        "fingerprint": "688415569c0f1c913f78821d6f53723ae3ab2be4a853c5a56332115b6ea18403",
         "response": {
-          "text": "You chose the Oway colour line to replace the old brand from January, and Jess will train on it first.",
+          "text": "You chose Oway to replace the old colour line starting in January, and Jess will train on it first.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9013,
-            "cachedInputTokens": 8793,
+            "inputTokens": 9077,
+            "cachedInputTokens": 8857,
             "cacheWriteTokens": 217,
-            "outputTokens": 27
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

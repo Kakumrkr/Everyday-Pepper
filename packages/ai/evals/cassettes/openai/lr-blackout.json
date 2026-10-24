@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5757de2d4818d8a4ae6b3324608974c45b8ffdb4d4549e6e67995636123b142b",
+        "fingerprint": "208a67984c9bc7f2778afa5f2adf630a487aa1ec6b1f2c03b98890e461b332e4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_zPcUIOEXiRCcdfgbPo9kun9w",
+              "id": "call_vF2KOL3ypn72NBX8rH3pjSHo",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8800,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8864,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 20,
             "outputTokens": 77
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "9f8bed5ad5796ffdca851e2438c273d286db7138e0edbb92199ed09864a88139",
+        "fingerprint": "0053ce4d79474295bd44007821888f2f804f51d5f91e602490b7138dd2aa5f32",
         "response": {
-          "text": "I proposed a no-bookings rule for December 24–26, 2026. It’s waiting for your approval on the card.",
+          "text": "The no-bookings rule for December 24–26 is waiting for your approval on the card. Nothing has changed yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,96 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8957,
-            "cachedInputTokens": 8797,
+            "inputTokens": 9021,
+            "cachedInputTokens": 8861,
             "cacheWriteTokens": 157,
-            "outputTokens": 32
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "208a67984c9bc7f2778afa5f2adf630a487aa1ec6b1f2c03b98890e461b332e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_szxPoirEgO7fN0Gtqj9Req9m",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8864,
+            "cachedInputTokens": 8861,
+            "outputTokens": 77
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a7bf0556af6b189ad68da5c01ebf93e59d6001ce8608cee7b49aeae0c3b133d2",
+        "response": {
+          "text": "I’ve proposed blocking bookings across the whole business from December 24–26, 2026. Nothing has changed yet; an owner or manager can approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9021,
+            "cachedInputTokens": 9018,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "208a67984c9bc7f2778afa5f2adf630a487aa1ec6b1f2c03b98890e461b332e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gg7t259cIu9NIsqbKrBz6UOo",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8864,
+            "cachedInputTokens": 8861,
+            "outputTokens": 77
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "58f67e19b2d1de3928b64604eca48a6a7bca58d951c8291a8146b3aee834f574",
+        "response": {
+          "text": "I’ve proposed blocking bookings across the business from December 24–26, 2026. It’s waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9021,
+            "cachedInputTokens": 9018,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

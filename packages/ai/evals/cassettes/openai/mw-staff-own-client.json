@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "22bf3673bffeb1606f9fee258e7ce734b5cb19d372a9a02249947c5201b98d44",
+        "fingerprint": "7134b73692db0b1742242bae811cac5c54907013c735ad3d45e36afb6f5a174f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_e3xyAx9RQuGkTiXjkP3SBasE",
+              "id": "call_3hm2sHrL7T3V59om05z17f3l",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,21 +16,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
+            "inputTokens": 8855,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8788,
+            "cacheWriteTokens": 8852,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "9c33aefc1c3d62d730164360e2b746b45684929ad43b9a4de1a6af065c489f50",
+        "fingerprint": "9ad072669746ed626899bb511f567f8a2ff0013cf71f5502d1c32396c4c6b2f4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0qmf63Y5YRVbvxI7GLo0CiuU",
+              "id": "call_R0n4mupavGlqWy3bmL4knn7n",
               "name": "remember_fact",
               "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"preference\",\"value\":\"likes quiet appointments\",\"sensitive\":false}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8876,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 85,
-            "outputTokens": 62
+            "inputTokens": 8936,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 81,
+            "outputTokens": 58
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "281fc4678a82afaee266b164a08c8f7dffce1d29f6dce9611ff5b0393a10d90c",
+        "fingerprint": "6f17a69d618d330288f5f43fec8eb882eddf254e453ea2bfaf813301ac39c8ab",
         "response": {
           "text": "Done—I’ll remember that Maria likes quiet appointments.",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8978,
-            "cachedInputTokens": 8873,
-            "cacheWriteTokens": 102,
+            "inputTokens": 9034,
+            "cachedInputTokens": 8933,
+            "cacheWriteTokens": 98,
             "outputTokens": 14
           },
           "model": "gpt-6-luna"

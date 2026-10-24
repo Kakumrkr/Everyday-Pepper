@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5b15311e4c93a400133ff1ba3b808218334455bc3c5659c0f3e7eba6f20985a4",
+        "fingerprint": "0e5fa6b6b268dd1720c08de7c1a6521a51489940927f5db169bd597015eb6e9f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gYgNkaVZjuHIndy1lC6Bjvz0",
+              "id": "call_Q0cKJhwQH8tOQBa29tU2RBHk",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8802,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8866,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 22,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "a21bb624976b652861d79875702793f017ca385b5a8a1042ab482b64b0197aee",
+        "fingerprint": "2aea93eb286ba3a9ce00a43de8675d5ed2c2af48f58a9f7aaab2add38a3b25f9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2MI0fsDrlpqOhrKQt42dK5EG",
+              "id": "call_zPP2jYYubzSUBAsgFfZkNSXc",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"from\":\"13:00\",\"to\":\"17:00\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9259,
-            "cachedInputTokens": 8799,
-            "cacheWriteTokens": 457,
-            "outputTokens": 62
+            "inputTokens": 9328,
+            "cachedInputTokens": 8863,
+            "cacheWriteTokens": 462,
+            "outputTokens": 63
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d00a0882ab71c89c6a1d0195d01f06674d5f4edf6d2f464333a86d1527de46fa",
+        "fingerprint": "5dc8c5af832f11b2fc29bf4f5365b8251614a8ac6342335758ccb629212454cf",
         "response": {
-          "text": "Jess’s time is blocked this Friday, November 6, from 1–5pm for her dentist appointment. One booking falls within that block and remains on the calendar, so it will need to be moved or cancelled separately.",
+          "text": "Jess is blocked Friday, November 6, from 1–5 PM. One booking remains inside that time; it wasn’t moved or cancelled.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9389,
-            "cachedInputTokens": 9256,
-            "cacheWriteTokens": 130,
-            "outputTokens": 50
+            "inputTokens": 9459,
+            "cachedInputTokens": 9325,
+            "cacheWriteTokens": 131,
+            "outputTokens": 34
           },
           "model": "gpt-6-luna"
         }

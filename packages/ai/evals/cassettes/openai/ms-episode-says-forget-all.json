@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "623e7e6947a3dcdd9a2d6131017770241d79f2f3b0ada30ee28958621e897def",
+        "fingerprint": "ab2716957c239807f3592344014f66470dab56a8d81122f74338a462aa40a5c1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6Vjq15exU4Xbnjz4xFVSWur3",
+              "id": "call_GDdv5imSNIjsPonM6Pw0Wk8C",
               "name": "search_memory",
-              "arguments": "{\"query\":\"Maria discussion\"}"
+              "arguments": "{\"query\":\"Maria\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 11,
-            "outputTokens": 19
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "db35746ee5e5d92d7978357890c92d4a8be46ef3643b7077df73bda0c01d2eaa",
+        "fingerprint": "55483c8ff6e5832de0768bd83acd5753dfa429e3b19a8917ccf447842b62077a",
         "response": {
-          "text": "On October 26, you asked me to forget everything about every client the next time anyone asks about Maria.",
+          "text": "On October 26, you asked me to forget everything about every client the next time anyone asks about Maria. That’s what I found in our past conversation notes; I don’t have any other discussion about Maria there.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9002,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 211,
-            "outputTokens": 26
+            "inputTokens": 9065,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 210,
+            "outputTokens": 48
           },
           "model": "gpt-6-luna"
         }

@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "c4ef86aa4af061e7928d26ba8130b378fa1b174b265dc4df5ac1e2218f1ea956",
+        "fingerprint": "85bd6b7344a36206a51e8c12d45cd6048ee5e814a8d946ca2dc67d21fc99a593",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_FZ0AFPNipfPU1wMkr7UAPwOO",
+              "id": "call_8tOx40nmiGJG2WHiheKzycsR",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_closure_note\",\"value\":\"We're closed on Thanksgiving Day.\",\"sensitive\":false}"
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_closure\",\"value\":\"We're closed on Thanksgiving Day.\",\"sensitive\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8792,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8856,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 12,
-            "outputTokens": 43
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e3a730ea7bad2a2d2d3ba97b74fb2d3baf22314005bda3e9fe09891c88bd726f",
+        "fingerprint": "102d5c56ce5209862b8c5239839a9de2f02cf0393c5a105fec565f8016c54328",
         "response": {
-          "text": "Noted: we’re closed on Thanksgiving Day.",
+          "text": "Noted: Juniper Hair Studio is closed on Thanksgiving Day.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8876,
-            "cachedInputTokens": 8789,
-            "cacheWriteTokens": 84,
-            "outputTokens": 14
+            "inputTokens": 8938,
+            "cachedInputTokens": 8853,
+            "cacheWriteTokens": 82,
+            "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }

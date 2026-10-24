@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "450a488f8cefcb8cf9ab2ec9583998fbc2640d387bc9d5fef63f0e5aecc9548b",
+        "fingerprint": "24926d570ddcf4f799fba831b20ed05b871fe045dea5fa7bfcb3eeedca6963af",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_irKtna3grk3V10uN477OJ8Yy",
+              "id": "call_fNE6UI1b03KubcDOiyaNir5w",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8790,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8854,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,9 +25,61 @@
         }
       },
       {
-        "fingerprint": "93ccde4ae01f09cb2778cd7711d8adbf0faeacec29a72d556d474a35abb05861",
+        "fingerprint": "36a7655b5dfdab8f532b96a406b086b2b2900dcd5be8298b55e4ca4127638633",
         "response": {
-          "text": "I found Maria L., but I don’t have any allergy information recorded for her.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xmPmJapjDVMNAAlKWVsTlhei",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8937,
+            "cachedInputTokens": 8851,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2e4247ffaf4f5f6f2a92e27991f10301afb8d18b76b43b41ee2fd22c4dfa30f1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ayaZDdX6tb3EpdAIbafph2Pe",
+              "name": "get_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria-last}}\"}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0906dddd1b3024a6016adceda0b47487d294c2059237b81beb",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3O2iY-W-4h5NC1bFCq5IGGjo-I-ySrwypnZAObI8-w--88gbHP1CyUdhoq-kXcXtfnKdKCOFRT599zkLV4hR_DZVVM8E1yOU6HY7918J7wor_Wd8o2gZYuflUMMCXKNjWxHpWmfaoLdQYlBoCMmlTovs9nM9uhChfC5UbEQIi23lE-tA5qgjvHS2BjrtruHOe38xBDBumIf1R6w72RIQai-IK5TE2uUvT3jfjpJrLwdmKcp_MinMFrXA3iKNbx1nAgTvqZzIS3nvGeqbmeLSpJEnhmhDqthYqL2mEG2nj0jnde2dl7eywQ7hXpkHPdgJUbW0QbOTrLm4BLZ22jY4TuG4WAhfcM1-lyTkrBHoHy3cl8sjUu4Dyqcr7Zbjka7lUQQCuhzFOlnsk8SZSBGVV0AsVLtxPLp_EpgPUoUmJ0CNHnnL6CaVAopfUEssxb6o4k1q_e27u24jklNxuiJyElewMdgRE-iPh2LI1XTgMbi7KDN_QmTQzjSOiNOgMp4vVPd01BheY8QMKKB655DEsMPs06u3XmEfBpSowN3PwLyO9Y1SctxlvY_SJMQkx3LKoOP0bxjZ-Vsxsz3b3ZUIQUrGPMmav_ERPeeZ44u6fV_yWtFD-Dq0UrHngAtl8nWSx6XxrrhGcfzLQZWKWyyHLZ0eQmZixvIqAw0MLbzqyiZ7deZzr7UVjdUngjEfymFokBXlAIW79_0FT1pFCxVgGm5Vb_PdaJhJLw3blHgT6ehifanE86mpx-uCe_k7-6hPzV8H1TByRSKGgz6RmAfS-d1fuJ1EMQCCwBR1VV592gc16SXobsg7lEk-KiBawln6sfNiyZUJtirFShdO8CpytV-nkDH2NojYL7Cpf8OYANBTheE7OcDtR0xUjDQzZOCAkCMPUX6ZMPVdVO8ISFE728jvMNFReZVXUwIKnmX6yApxcfHBxHQ6fb-RB3s1qajfCc0klD_vOcquAhK98h8ApENjbH-ghOmA82JZb7ii0-jv24sNVGpLe3ZDZB5mKQvCWDY9dFsDGpVr2Ak_P6mPaeBEmm0iHE7BiHmqJo7qH3QQO6qPpJitMPBWSD1n8aJdrNCIpIYCTXvxyt3BTWIzceViHdPY2QCvFpMwQ4ThKqR83b1ER-ZjPZg7FEw7L7eydWYtxuuueH8cjESeQpWIMsAUr1macg6kExzzlWILoKTLGv0Pm6N8omiMoxgrrOYsthyt-YW6riD1s5Fgcxqst4xw9-lBy6uubEX46du2yWKpvKq61QLF-EIQ6PiJb3M79OA1GRkc3ev-u_529k5QHN0EESz0PYaxMR8luwds6o5cqssAPMh3CfPbm2HehvAgURb5Pbm1D9qqi0KSwRWZOczoiqHHRKQA4ZtLAHusGVBJOnS0VvPH2iNq9aRHBbhef0OABSFBq60KjxwjoNqkVtfdtDmlptGsghrdTRnfRzog_YmuCLSf9YmE6FNeWiJsG40XlEbdWzwkQo0Bq92_y6KqpkE2ax_8d84wE_0Rx7OZzsxeFnmdsUwRN1Vpj3x72DR9P4K2fE0FbJ0drj5EvCRyYfsbUQNECf92oHayk5lAZ11tg9Cl8caN5l80Pib26bOklayjoR1VwA-xL2i3SZDA1LNE_3XbK00hHggV0bWRXKPt7vd4WIRph1ozJlcPjYHeIiCQToGn5OQpj1TPl_VpB1XfyBmWZcV_Rfi1g3qbXHhPbrWI4lK4iW3UBdPJqQ83HZ4oC6CZMRwiRptjXmcPniUc_mTcsOO30ffWlumgyw2nlsCZdvTZhk6C1i1h2SzSBoYERvgh8ReFvcx1G54xrtU6OeCpBxO6ij2_MZ7EnGurmkKvHnGQNaNwALBXZ7sVUEU1-kyFlWQSUSWhlMAQzBvitILFiAjNqDE44XhlOHn20EsxFrE3v9gDBaNGibDtuFGp2klO07AtHvY3Wwx7W3vb_Eui64WshTJx9W1m46QvUcmKPpJWJDF72rfNXSOswsiQ0TnE3ZnUsyaDoJWr9RZ_8Ql52CnCFQ6wNHi2GKXyNAaMNYpq-XsQ-MsqdRnA-dWPp0LI7IZ34KMZRNb0_Li6WboaP2wD36yYYQGhzlLkM0E4zeKsuGnLvk0REXHVijnh62lGjbEFcsJ6kY8jqL_8f8_aHxnJf9WRYs---0TM6hpoSfMzz--f5bnYl97Jgjgi-pOQpL_GbMzuZelor4ypAM8pIzqQUoxNx9yj_-rngIc0l432bISb0W8VBA8PalbVuMAGmjKEqBoRzIdwoxiPLo8UwJ4vqQNYMI3MxmSTYl8iHO6FFlIUBl6IgTFCJEuHMzK6_4xsV_6XGtuS1suxNG963Lam58z4nvRZaPcDyLoSzBCRupFLiTCs_AZuQ4Vz3t_vSkoJJzB10ex0KnmQwCWhijWy3DXycm8p6c8j_3veHdx-2qbheu4Bp59IqXxT23QUr9kKZusaoeJ8xBSrL4huiCBb0O7NQL-emVhCIlQpBPXdULJC7JoCsEXcQYbVCP23XzBS72VR3GChWDLSA256XbQR8HbTVu5HMR8SY-ICJp-LO5OfSS7vRsFBp752c4qRYh4IhXIsK_qXAlWpJzXLdZpG8-ordmW73vCkDX-2Zq_vj7c38BdkUhJaFACWfRPSg1zCJuTMr0_B5A==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9382,
+            "cachedInputTokens": 8934,
+            "cacheWriteTokens": 445,
+            "outputTokens": 132
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "981f9d7e80806408a85620c36c326f8de10abf491786cd2cfaef06b6440a57af",
+        "response": {
+          "text": "I don’t know whether Maria has any allergies; her record doesn’t show an allergy note.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8877,
-            "cachedInputTokens": 8787,
-            "cacheWriteTokens": 87,
-            "outputTokens": 21
+            "inputTokens": 9705,
+            "cachedInputTokens": 9379,
+            "cacheWriteTokens": 323,
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }

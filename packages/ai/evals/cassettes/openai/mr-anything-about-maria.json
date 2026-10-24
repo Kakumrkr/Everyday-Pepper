@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1f20ab55cc1ecb0c3d92db5a4f61e983b3235406f06b90b2e0f5e717f37fcc28",
+        "fingerprint": "dad0d7fbead7203722ee3737e278274fb7c5ee31caaed60846a17d79634724ff",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_AR8i9ual1bwN3t4Oul8AQ0XP",
+              "id": "call_1J0fiiBG3YIA1vIyFV39Hb5y",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,40 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8828,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8825,
+            "inputTokens": 8859,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 15,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "42a60596b4bdd14c5ca50b239160c63c6f9a5176a8da8af9fc691a6d942d5d4c",
+        "fingerprint": "698c693b33161e908f075ecf7e96b9ab8cb8fb5e0702c5615d804e8820f26d57",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_13O5F4dnCQrEpBAaQfZ8xmPq",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9024,
-            "cachedInputTokens": 8825,
-            "cacheWriteTokens": 196,
-            "outputTokens": 43
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "ca7fea55920191667bed64be1be1809f69e009bc85195350a2898691015eac4d",
-        "response": {
-          "text": "Maria L. is booked tomorrow, Nov 3, at 3:00 PM for a haircut with Jess. Her record notes an allergy: “PPD”. Her usual service is “Colour with Jess.”",
+          "text": "Maria L. has a recorded allergy to “PPD” and her usual service is “Colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9583,
-            "cachedInputTokens": 9021,
-            "cacheWriteTokens": 559,
-            "outputTokens": 46
+            "inputTokens": 9058,
+            "cachedInputTokens": 8856,
+            "cacheWriteTokens": 199,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

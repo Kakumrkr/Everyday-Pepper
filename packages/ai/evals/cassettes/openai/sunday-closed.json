@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9ba1cfb0f6a6050030a8ac85d0de84657d58ef4bd81a1e96201fcf1d296eeae3",
+        "fingerprint": "27cee999cf0e9297e6215b3f432f8ecd01e83a9f14fa5fe68553c7478619680a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_3jrsztWf221TshSvI1TjKGG9",
+              "id": "call_0mXuaA47El3KJLRItJpxcvol",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8794,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "c948d318f90b9bfc3f9a5c63b60d4a52d1d7c8e6857979d82b5035cf695b2fd5",
+        "fingerprint": "c0820f109161c75dc846f30dd657980f0fdbbbe79f461c02e4fae6dd0ad5467d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Bb0PRfr9THctCJ7PjqAnztzA",
+              "id": "call_SHFaeAgrbDXISIQHp9CSThvw",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -38,27 +38,50 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9257,
-            "cachedInputTokens": 8791,
-            "cacheWriteTokens": 463,
+            "inputTokens": 9307,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 449,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e756fea61868b099046b60ea6157bc8c1aaddab9eb44bf8e984523bdbfb8dda1",
+        "fingerprint": "6d91b652fe5d2bd51d0334f68233538fd4e89f1d83de8175478e1c2dac6ffdde",
         "response": {
-          "text": "I can’t book Sunday, November 8: no haircut staff are scheduled that day. Would you like to choose another day?",
-          "toolCalls": [],
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_WMvG7pgTJInUfArZHiraPOCM",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
           "replay": [
             {
-              "id": "rs_01c04f3b658898cb016adce36ffcb087d2805b8aff8dada628",
+              "id": "rs_0714f4213907cd9d016adcecf5fae087d2bd5d269dca303bc7",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3ONxUjeXPalnCeFiS8IITkifPO4ut8eHdNH404coDW8ajAjUFYwOmysR2l_RP8roUyOAt0mqsCTP5fayQLEea7b39Czy9VTixlLoKYPJo8D9VnAWgITfj6P_LhEGqvx89TfjZQ2SVkMISXwkIJ61TZ9QRE3SfwpkEmui5aean7RPCRxT_cK_yZ9vBo1S21soLcMd6Qt3DMhcxmmaQR2RxVRWYTEpjvXg1_CH2oxPH5MtUx2Rv163UsS5RN5MG6XyP5ylBXnbcoFMncjzSfkvHR782_-NDkds40H0mer8PRPhSOVSFsGuVxiF5N3GlRzq9p-v5KgXroeDZ_8IfKM1BfZjJaMxgEzb5zQVqtMk75byOQOaMC0l95ii4cCp1mZwrz0_I6mQNdJmlkO9BhAMXzZrPVIUwHuowOz-djDgLz6W27v7-w5RRYKiU0PWHpsREEt98kfDl8o6LY-VJkFQkIgGYDLsB4fZy9x2Pr1FRmEyNALLyy6ArAMadML9CVeddiqDPeucETGUQigzfpg9QOy0IsM8PwXIg6lQ9BrTEPote8UFHl1ClIdrAlJCTz-194HpxLn9vTSjT9GNELAxr8j7qj-pSt-Uue9Ln9rvhmos1ti8w3mmI0rKOzJvNv10VI33Fj4aFtI50Grl5TonSLkbDEdr8yTTj2P5Nan4lvXxj2Opo0POprw2jv6t7UxnzjIDyHyF_iBNCnSHk34PE7bWMmwucyUgvmL2TNKaAqoGZFKJVnBOKsVyYG9UDctQzEEXS_XLDFbyiKNHl8VdRZlY_ABxrJodcyrKbGwgvDdEE5VK6X2OU7iCXS-k3H4EFs6CKZOTsKhh44wlz0i0VX8VvR9kK_0vKD76bYPpLAZ3x-xOi1A1oRfW1YHBdai6pOWD-kSSdH8mUZmZYz3DVBvJvNhZlfTYeC-9rmOEn2180YH95bjJ7ZtBxAYHakg6FyXVXL4YsnavJin8YBNcS4SwjNK5pvKc5SrVc0NOUlQ20R27_P85r-zqxar7S55mhiA1iEVZUeau4M4oT9iRJ1UZtrxw4LMH2aaMebJOl4l9dhCQ2U6JwYCTTyJEp1B8mIcP3oW7wHrt8UgKd8cmmBivEVXB38DNHRJcLyjzSwa6bBQouhT4zqL0yA5xH11U8gXYsSTxgPVdn_a0lcH6wmGIDPaRXaeoWFYlsx3AedhrUIpHBT64es29ikzd4IwzIIQ2Vm2yKa4s1KSGHmIibaBuD8MOCPicCoG_Lgm6ZxQpX2vGTRBWcl8K9KWRRszG7Yg73mK-Q55x439BrApo6v6k_-MtUKKZPyqlSW23PwJCFYt8TOkNslJhYaCpPsoAvt_rescFLiKPQcKvIjWhrs21F6N4NmNc4XwdhE7xX0HrvYDuUSYwIW_AW6Tom0Ch-aPcOU4jrnMWO3-__fv8yvQYM1zeIign5lHTMjKKC1Ga5ZrPWq7GcWxX6oN-iJmO96Cs9-heX1Fa7RrUhp8uaZi27QOmKnnXuEnAhkME_QVcgohZZOn2ked10eYUmLc3oHco8hE6wfSdMMRbkNH2Mju1c3WSq2lOCV0ATtJ0zzCOwUVLBthhbsdA-mWtSyTFFCd-Agh48VpKnnN3TyCAm20D0JUKm9LyMmH7uFIWW_P5B7RV2jREoaUmsJxXEkm1Niv9Dt089vu6FAswQVBDrAro0LPygdYxLbZ2IKNx7ZDNHMH_NydeEJs5xsYk4fDeX32sXSGUbNgZDSVdhkuoF3q_abAcoqEh19vffXY7kBy15iwqLm1OEQjU537jZutQXZ4FzhB4L1QdpmE7d28UDfOaTsy2cU_sunFS8_rucCUKujTCUG6JpXpJmmWnlQCpgVt_l_EzbgcvWwnR8G3oMCk5mltksvnLt6aBzSSJZYqk4tdyZMbCYYdYo8xP4Iqd1EY2WMq8Ovwu2X6RZ7gQXNjbp00Q3OWwJKyckEv-8NNi-QtTj5Pk6bV7ZkK8TFqt1Znyt-Lqgjv-fyDZcYzq12N-KR1E_iy_Yd-40qbxSIB2VbkGVPl4aJg8aLn32urpMiaeiWB6B282XBh61Hs1wL9N3Gjm19dRZwU4dJsI7kR7dOA=",
+              "encrypted_content": "gAAAAABq3Oz39cVor2EXMWimpaSzMKm-vTUswc57YoIFvZna1wKapbsi7f4O5B97BV-ERof6j-9wp7UShORcWCfWA4KPVnF0QtIvQxQM_6ZYrFcmB55BTK6l1aeGafV0Fe9xMZHjlYEAG8qBlAxZVJ59HdWhOKwcROUwx_5tnluoOWKewgDkbl32rGNk00l5WiLFob0x4ECyPd6RgI3Dev-b_vTPMGpyZWdH0hJRfeoOx-i7pLHvUPwAw7KnDanhBsJHu-7Pmf6JjW3azIurh7fcovHNqo6Zj8o8RrvRpVSZY29HDkDEJqH51rqSxhRCPuIvgP-fVTwjouiQ3sjsCot4m2h0mMHS-HtQYrwn04E3a9k9q5pgkUpc7A3_8eCl2LaPl3wibTJskLnJdG5U91mvYgKxB-GAc8sFGogKa715-_SYfNWSrAjy1V8OPqvJb3Bab5Hu9HoHEI6v5uvX1bcJqUaY9CsCO0JqDafc7nIghCpLLLhq3YRn1YUYlwkY-v_tHAP2422e4IOWGnmlzgl0ymbfnWNV7tO2h1-wKUhNm6gRucNyD6Dj9-mO_16-EFTErbfeY9DAU06qJW8JsndyezBsKaGNfJXqjwePUdTem5nw4zZk3T5Vixzea_uP9W5yeLrZdl5NBvvzbs5kngn3e-ugrHNG1XzLPbzhb7rkU_lNzs_x-nYljEbn5sk2NInvgcUGkyCEFvz4HTa_INBDyZmuh-eGWaEwD2aDcceamOGisVComjNy6acslmivejt7_sbNPy7MgXrFi01rsEA2ZEnQfzGuig6kcH8wmVoAfIVdcNS-wWxmSHHsCdfWMuPY1hlDmshHUQW697utMS0aM7-aY0sh_7Gn2n5KtrKoBt3aVdgEaym2RDYT8X1Cv-8a-xg6KqgRkrJmbLSvDKtg6YRlby0n6jqc9ZSih2qsQODXAy1bQEX8Pg88Q3RLqSK2yMT59vKUZBLyIWxCEMKLTYfku5ItQksJAoZ9SsqWwLDxDfQnOLNtrHE2QawCHK5ggKIt40tSgFyyWaueFSeJKIAEkplKBtXNv6E75xmDcTp4Dk3Gpk_gBkaiq39SeGfRAo5LeGXoM3U3nAMCaM6WuViMtajgZePYGnEbG9EEuQAUA-OYHZb6CH5yOzJzZId16ccVSWVmO_P0kCMPcPc82fEC_ElU-OZt4FXkHGaCxVy5IpDBwC5vEf0MNhdiVHw4Ud3uK5PLZ4FhPFhl--l-6UYYEV2MqV4xAMHXf6K4y8jfAGX3ikKaYAFvemSIjbEiGp-0P8zWj7w5qW1ugEuLlB65wJYJF-v4yYwxkzmMMeoOuYZ7al7fiWsj0FVdTX1uas-LqVelxpuHsnDAD-Qw1G-8_jZ9fmRS37Yb02SJmZs7iFogezvez9rHXsD4138p-n0Ww-9VhmaTeUxZtiBWbn5y-00jO1FEh7opm-uqTnVKOSJB0AzQ8-xAaVPmgaeQNNkjE2u9MCf5gElZgyuKVl0JTlK34TmKnUJ0jwn6747KHqEASQXAVL2HjPoz37trcuJOFQqgtH4WSDlKUIVKYNUDyqXyGtDH0A-QnDaA1GHE0afPFHrIRyUn6NnHY0_F068yyXncjN_4S2IdOkTJy62fbYEHz0g67CkVwLU2jquFDC-SN9pL5YI8FtW7kKtV6_1qO3hQ03CUUKm9jMJaYp6W1VvEq-3Cwbr8LktlxY077PUTOoZ8FasGh07_rng-2wVp8ksF6I6kT_qxFY_hfYo67qK5QTIqvqGO2eU4nHX5h9i2EksDeDTRhi_Yu9E8F9Cly8xLseEsHk-A-m_VaVsEabowhbUz3xyH3yfY93p_TK1uGXrJeV9odrP99p2jA9SaK3WpK8o13bvuY0wAstXRvI9Ot7-d_HJ1p9Y8hxvm8CE39qofj1CRZgzpa3rc1uVaWBnmxoGIfdDvRJNDW5kGojm9G6LrkfD-I7IG180cuaP828yhoSAbB5Ruy0hGgZHgktVhXyuJTMpNQy234JYCuzzgJsswN2K2ksrhEAqDxiLDMRL5ecJl9Dh3kuUKSBuqyslCkER5BKGcT5bSQiMHR6dY-yIMOSD3gMWl6Bh-g7yyRpLehLkZW_1pyRzk_2tZZ4xAvhVEjrp2u7eq96FCitkKBZyJrXzSXsgtI1lE_Ci56H_ZJEtaf1sXG44jwn29bpzyGnamBBqTHQT3bo5s1HN2XZ5iwbx87eqTR1pQDXtUO1M=",
               "summary": []
-            },
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9391,
+            "cachedInputTokens": 9304,
+            "cacheWriteTokens": 84,
+            "outputTokens": 153
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "eeb28ffa4520174ae254d28bae164035dc97076d3048234ff86588e7e22283f4",
+        "response": {
+          "text": "I couldn’t book Maria for Sunday at 10; that time isn’t available. The nearest alternatives are Saturday, November 7 at 3:00, 2:45, or 2:30 PM with Marco. Which would you like?",
+          "toolCalls": [],
+          "replay": [
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -66,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9342,
-            "cachedInputTokens": 9254,
-            "cacheWriteTokens": 85,
-            "outputTokens": 85
+            "inputTokens": 9731,
+            "cachedInputTokens": 9388,
+            "cacheWriteTokens": 340,
+            "outputTokens": 55
           },
           "model": "gpt-6-luna"
         }

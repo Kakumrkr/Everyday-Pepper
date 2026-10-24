@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b03fbe888e751941446040745d83a2515164b14a9c38027cda3ed8d4760e1592",
+        "fingerprint": "9fb7f704ed0b93edf9519c2192c3ac179cc9e6a12d75a9b3c0009b89136c4f6e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_eeiPAsW8zRNFDznfOqk1u1oH",
+              "id": "call_tTWz6DGTrehhRVfIOxGEFzjq",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8796,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8860,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 16,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "511a74396a90bdc4e01cd0d6b92ae8aa17852df3e4008529ef6e755638d1a57a",
+        "fingerprint": "8dba170e3030a7b09623ff908610d9933db805a7d5239642c61328679c16faa6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Z5rWJCb4K72iTiYnDGi9ovE0",
+              "id": "call_wsd18Kwa7XSEhz5zrB0J6bif",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8877,
-            "cachedInputTokens": 8793,
-            "cacheWriteTokens": 81,
-            "outputTokens": 40
+            "inputTokens": 8945,
+            "cachedInputTokens": 8857,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5a4c81bc3d4000560b85840c6c807ca19cb784b2b688638d515e0c3deb2d762e",
+        "fingerprint": "69973645d7c6b240c04e3cb6b442a88b4b5f2cc567246bfca56f631b73dc7888",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_rcMS3cMRiEPS2oAWLQD9FA2D",
+              "id": "call_7L4aRWlr3OSYzUTYugszTK9z",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -60,21 +60,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9147,
-            "cachedInputTokens": 8874,
-            "cacheWriteTokens": 270,
+            "inputTokens": 9234,
+            "cachedInputTokens": 8942,
+            "cacheWriteTokens": 289,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a12ef5f0d1f05b871d36beb6598a1a8576bdd64a016e8bcd612cdb3a02918c4d",
+        "fingerprint": "856b63724df48df2537215cc2eb065756932401463c85ce765a0bcb0c01eb306",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2Wm9VP99DM7IufoWOZRVdJKH",
+              "id": "call_c0o2E9FvWb16mYVlYoS3aDhs",
               "name": "move_booking",
               "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-06\",\"time\":\"14:00\",\"staffMemberId\":\"{{staff:jess}}\",\"emailClient\":null}"
             }
@@ -82,18 +82,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9599,
-            "cachedInputTokens": 9144,
-            "cacheWriteTokens": 452,
-            "outputTokens": 85
+            "inputTokens": 9704,
+            "cachedInputTokens": 9231,
+            "cacheWriteTokens": 470,
+            "outputTokens": 89
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "1fe71f9c6cb5c31c483ad2fbf091d25dec7111b9ef616d03e482042f600bbeb3",
+        "fingerprint": "54167442cb44ad5636a602d4249d3e1a2594d69aec67112dfce7b3b8b8701203",
         "response": {
-          "text": "Jess isn’t free Friday at 2pm, so Maria’s appointment hasn’t changed. Jess can do 12:30pm, 12:45pm or 3:15pm that Friday, November 6. Which works best?",
+          "text": "Jess isn’t free Friday at 2pm. She has 12:30pm, 12:45pm or 3:15pm available. Which works best? Maria’s appointment hasn’t changed.",
           "toolCalls": [],
           "replay": [
             {
@@ -103,10 +103,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9871,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 1091,
-            "outputTokens": 53
+            "inputTokens": 9995,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 1151,
+            "outputTokens": 46
           },
           "model": "gpt-6.1-sol"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4bae5cae60baa4515fba9e86b985cad74291e67a43ef076b87a1f55a3b056b2c",
+        "fingerprint": "8f7f852cea9cbb2b8db4358277a81a1211b006a385cf3e04a016b07d5f5cfdea",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_KuFZbAymkLSJTvB7McbC8qj9",
+              "id": "call_Q43uj8Z7o28CWcSQmY7r9t0y",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8830,
-            "cachedInputTokens": 8810,
+            "inputTokens": 8861,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 17,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "3ee0dbc3a9b2792f44a03208bb99528f3091c2d7082d20feb7081275c96fb3b0",
+        "fingerprint": "4dbe8771d748109b988803642d139e39229b5a16c4c78ed229b7620da9d6a13f",
         "response": {
-          "text": "Maria L. is allergic to PPD.",
+          "text": "Yes—Maria L.’s record says she’s allergic to PPD.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8982,
-            "cachedInputTokens": 8827,
-            "cacheWriteTokens": 152,
-            "outputTokens": 13
+            "inputTokens": 9011,
+            "cachedInputTokens": 8858,
+            "cacheWriteTokens": 150,
+            "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }

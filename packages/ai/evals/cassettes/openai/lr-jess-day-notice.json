@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ed6b4fcc335869832a4a9578ff1037c16cad124dd1b398c3b0316183f2601470",
+        "fingerprint": "6836f3dfe9161ea5e78328e291a6301077f702ce8458f1ca6789ccee7a4b0659",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_lZhoFpx5mX6qdNIe8a4hUvD8",
+              "id": "call_Ufzkgg3ow1iCABAxrXKc5h7t",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8796,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8860,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 16,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "fe638956076ca202ec424ab15630ca16a91755c2ab6b85a85ecd26db2e10029e",
+        "fingerprint": "80edaf391b4d398b83052129de0fcdfa2485062fb3caa268c818ac3069301d1f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Ok5Zi6p4aONSRV3xYZL1OKM5",
+              "id": "call_ibXgzz8pndiKheIhWcZS7JoY",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":1440,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9267,
-            "cachedInputTokens": 8793,
+            "inputTokens": 9331,
+            "cachedInputTokens": 8857,
             "cacheWriteTokens": 471,
-            "outputTokens": 86
+            "outputTokens": 89
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a4379447a7e269db8c8c1a40ec71617fd2ff80ed3d3bd04f5f6484b03d559515",
+        "fingerprint": "6d87d2d4ebc1dce778b14e48811f870c355824c7613fac5cf28ed650a1eaff25",
         "response": {
-          "text": "I’ve proposed a rule requiring at least one day’s notice for Jess’s bookings. It’s waiting for your approval on the card; it won’t apply until approved.",
+          "text": "Jess’s one-day notice rule is waiting for your approval on the card. It hasn’t taken effect yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9422,
-            "cachedInputTokens": 9264,
-            "cacheWriteTokens": 155,
-            "outputTokens": 38
+            "inputTokens": 9489,
+            "cachedInputTokens": 9328,
+            "cacheWriteTokens": 158,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

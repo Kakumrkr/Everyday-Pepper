@@ -3,40 +3,41 @@
   "trials": [
     [
       {
-        "fingerprint": "21f38dde65c37a2f85a627c955dd6a09d28345215e8904c639ef7efbfaed357c",
+        "fingerprint": "2ded5ec61ebda95e268cefc816786185b7761955f155a5a00806b6135466e392",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_fm0aXn3kRzywrg2rABiJZBdV",
+              "id": "call_87sHSCZFicMfNCylU2VgbzXp",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_03d5c919aa87394d016adcef142e2487d292478a046ef52768",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3O8VGuV_NqHyoKRz_YdvduD0Pa_guiduQ4KKrsaXKjdR5ACxOX0eWgBFwLm-f2CeE5qfdM6RD1cytD9qEioCP6HmPdkWKxCgeZAp35kErl8ZdZ8HEwE1wEc1d2DNMaHd8Pmvxw-G8sB23taCDyk2oWe-6zW5YxvOnfgfgczBzardyosWeYfiKjBVNyj2xBjT1aNjwDEktTymC7dX-QV9aesfuqonTGKO59mcd-w-iKgig9DhXWZxXQWp5Jesk4YdGwlLy63DByI0TkP_ZybdDEBsHncTLH-gBosiaZXn--HNQ226uz4DZUYzmZ9wABz67eCrzFJUJmfJhKRfYo3UYUtKovnoI2B2Nyph8yhXypflCFSMmDVyjwqGv2Wu4tO6oyxX1FjNKa7iOZ_UIWryGcrFLs1McoE-pvUNgHQlZ8jQMHHBAtLx4vSRlvVsKd5a_1jyck_cT4_gRanc2JuIwdX3_BBzW5gkCZVFVK1lFCuNA-hRorGsfBpNQrJSJ6dbkydVD__3C57xSibc3G6F5O-TVQaVcS_rSVlWVrsQ9xBzrp5IOfFqAaYqSUJDcasei0XEjYlX3vSbXXsMKGEJZqLNVZDpvvSDMWEAtPwXz8wk_im8czTJBCKMt1VT63rh2tsh8bVxjaZlgfAaPQTJDPVrtJNOsk7UtcReqTgOyl5ZNsNguF70DX0bgaCqVH7n4a8l-FqaMR7oF4BjSHK9CtoCnnTBMwluxmx9qj0QN3mPuuc3kM55c_gu9ZfrRF7_maBnB-K2LmD1eFWC85itnbscU-sL2moCVTg_HnsQ4Fta_5e86E4LKSBAQFvWINS1HdcID02R5q4mCHpniKhpFjJB0xSmkPkWkCId8jUq-0V1timJzm9sUxhrU-b0GSTXQNFiNg6MGOG9fzuCVgPpQ5B-yXhZEj-SstetrpKhOf8Zs7UEyeVe7tU-yv6wvDUxgD9T-AIoiP-cnofVB-jv2SWFjwhJhE6IiQCK6_Ym2R_FPD_MUEvVa7C-kHF2YGitPoMpS1R3OpZ0lrIOGIwopLGDXv7IjwClDmfgfDI-FCV9IiOP5hOCI5vzsVWuAwYCJv5T-pjjz-6J15pyaMVAl49NCGj-l6bC1MsgODTHXb6jhcp5tSJoqe5ISj69_JFEtYCXRQk7U3wFaJf9EXznuZZ9C93JqcP64QLM10e0xiyjl9n0o_pXvulU-mn5i-UBwTcY5DJzJs712MtBhv_g9KOPXy3a-ivQlSuuQxZlXn_wL5Nstjwm-w2sh6mShyFAXkAFcxx8_GhSdQJlK9hA5s4PHlyv-HlU9-ZgAVw7ze_5D7NsoZ7C1tWuJEVlKUoH6LYAjhzWGaj52CiuNE2oI-vBKGMhe4YX8JF86VGkTP7y-mggpXmgJXpDuwcAikrk4xw0sSH6AbUNag7myyr04ni65ppjvfrNssgahspNmUblw8TkleEHN0Gw0s8AekN0roa4QvqdONQkwv4qxMrycuSG_E98vkWWsiq2rcmXc2PBApuo6nSB1nuUCo0iWXpnVxozaE2lnxQXSIeX6JimaR1-LT-Vq90VPcndAVg0SxJxICoTUBtI3kdugTTE_T7lxH8o5UAL2a_33CZYiJeImhYLpYT8qZdzdYf7hZsNCYz-pqpTbHuQgHcxWmp6Een9xnfLfVcf67GD1D1bK9UeVvZrp9MvPJ3MpBwZnI6PJ2uTVGaklQzzJUOK4dEUPvo4UrEFZk9kUQtJpa-MYdcGZe5KVRdgy6lQW6zlAMvcYDI9pN-U9ZY5qGgBkAHrpZqv9oW2qCQzeUnHbA6UE0iopXYeV1fvkMNO5fO7dyGSlr9AwPpKr5-ZACUme7tVBqsea7GSL1VnLUGJ8YrZxriOOPtitYhSikvUYSfa8KZdDy2Z5WcYjEPwcDc7u65BRW2W2zTg27Y_NtUV18wVP05hlXH74Y-i6Hi8ie8AcqmSX42AnXsyUK2ZB6u25nBFFRzzkfCM3SW9audyI5yhNT3xP8Al-sTEcvMtho0l8aayXgBwGWaxOcjD8H3Kj2GBP8Zo-ufCjaLhPum-YjwJlWKxXvf12_5-chZ0ucbB2R-rHvaYCspfSEdlvO9Ec00Q6tYF47gQxzisWPK-3W6IVQIzah4RoaLVwCNTHWsFvqmYJmHH6VuiYOluCncgLM1RaW7ghbJpraeoJQXu8GG3HMj2zQ6XfzG5VSCk3U-_bb1-flTuHrIrdh8mAXSD51ABckKfY4QcbSgzn_hgavIQlKFnv0BPEjIrFa2aWTTeHny_5RQz8wg3Xs75RfkIxMOO38QUhqT7YO_7JGJkKs0iuVprv7aVjkVqR9o_FZNjwsiYcaGAUkn87VxLlU8mkWt8JekU2QjRsKqAtfz6HdTLFiPzoB0OW13mZ15ZbBgJRRiSlJY8eoCcUHtLsBKuERFTwtOrq3fEczMNQFM7aRuFoevLx4zQB5HWQjdFM0tj0Rg2TsMRkuaYK4K3anE2xGWBtWGZL8wMCc4D3b7A5KDp_N3Ks_3Ucg==",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8796,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8860,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 16,
-            "outputTokens": 16
+            "outputTokens": 105
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "f6f911d5f94e716c9f0692926bf38dea7a788faba4705ad29ce4e178374b41e2",
+        "fingerprint": "49800b60c85de4ca30163ba5418a3bd23e6bfd2933eaec20a0d77c093f71399c",
         "response": {
-          "text": "Jess can’t see multiple clients at the same 9am slot. Which client and service should I book for tomorrow at 9?",
+          "text": "Jess offers haircuts and colour, but I need the client names and service for each booking. “All my clients” isn’t a specific list I can act on, and I can only book one client at a time. Which clients and services should I book for 9am tomorrow?",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0f9fc822d4ecb766016adce65573dc87d297c33acde11f4939",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3OZWWgXQExlPwhSsb29s8o2ArrzhQPkR_j2sFNChiC8CodHaNHszqMZMA41Si6ehulQc-HNCR7ruDIvGzI6QTmtku01LupASjLUGIRJdgAH0OxyViFa0Wkt5LwkjIQkYBnU_SICw-A_7XSbiJAf_s5YSUFRaQeyfD5KUo-mGedNyClPiBjn0DNwW311TDBvlyAzJZ_YlWIKcDaD936FfU38Hc50606zbkRq01lAwaxWhzQbZvSINCX9dS7oOI81ttQwQZCZXc2nENTvL9v6gv4wp7HC-IKhfdrCKjBUu2bvzusvmkrqijMuNiRRaSLHykYtPZ9rbCzLi5dSLYWnpvVQI7_Y95vepZ_sSOwlz3wIlxZhB0rSPWmvPya28i3QSnUeE5gRP--aWq7j8DUt2dvwo6AZDx-FXwUHSVfELo60cPlJgJxVbBtrEVI1Oz0vdmp6GR6OJt-jknS5nWfXsSYxEGFZGXcRlLhoYRt35PpTz_UWn2TsNe0ddx0H7WSJaFKlClB2r9dzLGiAqpoJRbz723nbY664bcKvnEVVle_Er7HXrs3iNTQJZfUWQ6YWr01FhIzaTh8OVC92vra8DG0ao-jSggKKtIU1I5JY4dNv_MW7eNQvPy8w6087OhWQv6lEb-9vYFyEFdTr1xOaunAJXzwR-2Jmv8nTstarBjh7MdvvvrSX8BbVdTrOK1_yYEhRAtMvU-L6X8_hF42gtke9fqb7Pd2cr5E_ldtctWNECereusBERi_tTMg_3uHMng3s0HIVjjPd9xqFm2E5on_6fK4v7clSjh1DyMIVTz81HswgKS6YKksmxIzNIZoKO82XZQ3AfdR9E-7XCaaj7jQ0fwu77hNWIe9YtrB7s4tezbAV5jPGsm-_7agYosoeFkIPS-zDZyC8nP-m5ovsp_7iZHFVMnVQhng1YsSNGcb0QhjUCEE4fxSO7QLOGBZjGrWxKIX7aF0ePUIbjackdpM5HH4RbkzBaoze11fYIfmpVJn4FyomU02ZOLC2wiz7bccUJF7lK13TofYM604P9lqR7nuL99ZLSSMBlGadw3T7QK4clzxTMVpCTqsTUM3UemiieY-1Pq-dLlMDhonj2Z4x7TlcEs9K_jBmXRXluNUbuz2S2bTb0XQ9a-BOPhwI96-Je15Nrj_rFGPT3czNoFHTuOXkIMO19X1YB0X1V_AwgYjzVqAKniK8AmtWz0vV6uKFR9q90EyNIAMjP_W_xkK2M50dADktPzD39jXmPh9nO8hwP2FmF1NRkBfzQfztXwkyl0WS_Iv_TZrJ82aenszn-maJfsasoLRWIv81mAkx3RnmFKY48UpLMNFvTrp0d_EMFCH3abTv21BnywHH3km-fiu_CytGgX5nXtc7QFd9LlpfFKt16cr_ezpzLfguOIhpQ8LfOd2KVeLsPVqE4-q3guGY7XDvZgffjkeOAkyGt_O2ALpv-TobybDestUutwImU3NsNtHcU8s92Cry4ebfMiDD41VRDMcpC-77cE9KDklGx6v2UdCn2rmEp1kNNCI6qOrthtOElayFIfr9VeKLoJRNE94ZP_Fz9m9S4ljNUi0wOPZ-2-kcT-UkXBSFMAXm9PaansyIyTVp85CcEKKsFkIErQtBRVN_Cx58V05_AWVApQunQ7bUMzWI9Ve8rchjPS9PS85ZrwmCpBQ10F41hcmzy5_eCISNlkD575MyqKZ97D_ZAEomihnFy3TGatRkEi7mC-vvS2BdS-f2fRTOPVkAr6a_eQkdHxTgiQRWViTcAqhwmkPix_SGmCDJNp_VqRn8nrCQK1ta50Ux69yQ8zubLUZnhQli_0Br5ulnRS0r6CrpGkrptQoXzCQ_8D4Xgq72yl0PG88tF3b7zjuseCmvthmPEvZQMKEkeuRmO-ym154zBnSCL3qN6BIc1wan8fbDfe0mzG2yTye8epuKrU620caugWUUPJgDyuINaOWughFdj6W5QQceEOSVAZvPIHDeAObjlADBUJ1VovsofmDlsAh65tbTxOMKeh2xe3V2VpEJmdOeBzijHme84Gxv_dlTbcRsb54oReitqbuMnDMYDNCJVjNnXzFcVvzVO2SkJSUluNWmRyxQWBZ2e7cyM6HV2D1vzmr6ltGwi8qqcvzoKomfl-lvYW4nPPuBknEI4GqDbp4I2_PrmVVr_F39CEcr9KkVHTz6kUDws63XKgcsVO6Mxmp4zpHE7decRorUO_sCrxHEXxRz5LSSJhlFy_KWSy9FqWY7K3fRVOuvyvy_JDJjCQONE1_BUujN1_aCLkKvUa3-gFAXTXuBUWyqd",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -44,10 +45,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9264,
-            "cachedInputTokens": 8793,
-            "cacheWriteTokens": 468,
-            "outputTokens": 102
+            "inputTokens": 9410,
+            "cachedInputTokens": 8857,
+            "cacheWriteTokens": 550,
+            "outputTokens": 62
           },
           "model": "gpt-6-luna"
         }

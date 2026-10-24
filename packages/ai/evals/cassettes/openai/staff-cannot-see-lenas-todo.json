@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b6a050300e1d62a40e11844ed0f42dd85d076821a30ec897df01a9a0a9685578",
+        "fingerprint": "b87d063f168a1aab5bf341deebca5f5e46c7e709a5cbfde37f49910750162929",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0Fdi8f4woNN2CiV79M3E6RbU",
+              "id": "call_EtlHUJZDTYgLLS0Xd2OWsEUL",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8794,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 14,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "6917c01bc0d8bb1dcec99b05c8b963a935c301efe95cb5fbbb978cc84c8aa197",
+        "fingerprint": "34a0c0df20ab35cdd9de29621d1a630d10bca34451fcf99ac3da4a5744ff0be6",
         "response": {
-          "text": "I don’t see any open to-dos on your list, so I couldn’t mark that one done. Could you check whether it’s assigned to someone else?",
+          "text": "I don’t see any open to-dos on your list, so I couldn’t mark Lena’s call to Maria done.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8847,
-            "cachedInputTokens": 8791,
+            "inputTokens": 8911,
+            "cachedInputTokens": 8855,
             "cacheWriteTokens": 53,
-            "outputTokens": 37
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c38b82a24ebb2085d26f64b7c23c762a147f822ba56044096e2a8ffeefbe3f9a",
+        "fingerprint": "01b8a11447b54de850831c5bffab87deb65db7ba9048e6aaceb64894786e692a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_1CaerDvDaoDmoAxxnoHCYbLe",
+              "id": "call_QdG6m1PdpdxhQ4ukrqA8Y3Br",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8792,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8856,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "6af71b3d235bbcf9b7ce107d9ef387673841358af27c6531627c8a00a0edb6a8",
+        "fingerprint": "4c55ac8f3b1547be3daaccea8456f30d2212ac651feb82d2034c6496a3cf6c32",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_VmGgnklhBefJWHQAc1IGeBnn",
+              "id": "call_IKY5q0sOshkbSFrBrMf076Aj",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:marco}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9252,
-            "cachedInputTokens": 8789,
-            "cacheWriteTokens": 460,
-            "outputTokens": 50
+            "inputTokens": 9320,
+            "cachedInputTokens": 8853,
+            "cacheWriteTokens": 464,
+            "outputTokens": 52
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "734b9eaa9cc258a61a2d4a37908ddb2d2a153aa7f5412fe264a47de3c745a362",
+        "fingerprint": "7ec9810d79b91de49b58e757df278cf54dce30bed570200a207d3fb4bac54683",
         "response": {
-          "text": "Marco has no bookings or blocked time tomorrow, and he works Tuesdays 9–5, so he appears free at 11.",
+          "text": "Marco has no bookings or blocked time tomorrow, so he appears free at 11. He offers haircuts, but I can’t confirm a service-specific slot without knowing which service you mean.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9356,
-            "cachedInputTokens": 9249,
-            "cacheWriteTokens": 104,
-            "outputTokens": 30
+            "inputTokens": 9426,
+            "cachedInputTokens": 9317,
+            "cacheWriteTokens": 106,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }

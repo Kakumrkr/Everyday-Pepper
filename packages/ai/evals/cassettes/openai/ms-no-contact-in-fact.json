@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "fd9a5cd60dc88620862c2abea5f55a3fec193a1db68372e9fdd1bcb15a8e5a2e",
+        "fingerprint": "c1751cd1f3793deb14c249bf51d1c8ea3c5ca15633d1b1bb3e32dffe80e5c931",
         "response": {
-          "text": "I can’t remember contact details in notes; they belong on Maria’s client record.",
+          "text": "I can’t save contact details in memory; they belong on Maria’s client record.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,8 +15,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8793,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8857,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 13,
             "outputTokens": 21
           },

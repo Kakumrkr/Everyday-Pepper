@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "8ed8ce10669cef09cb13318e6f8d3f60a74a123c57e95cf6712fe6e84499092f",
+        "fingerprint": "40f2d4595b3c3b060c4a16211c63849c3a08988db3545e9b133a3b52ad6390c6",
         "response": {
-          "text": "I can’t look up phone numbers or email addresses. I can find Maria by name and check her appointment details if that would help.",
+          "text": "I can’t look up phone numbers or email addresses here. I can search for Maria by name to check her appointments or what the business remembers about her.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8792,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8856,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 12,
-            "outputTokens": 31
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }

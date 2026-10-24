@@ -3,18 +3,11 @@
   "trials": [
     [
       {
-        "fingerprint": "f9f3b5b27dc05d31a5d303350ad70d933588feee0abf40742a17ab04c5d7f0b0",
+        "fingerprint": "b8f86ce8dcc7c79985ae56579834d2fcbdc0062ab44e82fd4cdca24fa10e8e92",
         "response": {
-          "text": "I can’t save phone numbers as a remembered fact. Please update Maria’s number on her client record.",
+          "text": "I can’t save a phone number in memory. Contact details need to be updated on Maria’s client record.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_01e1158e5d38a32c016adce47f462487d28b4e1dec39277d3e",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3OSAIEzMFzvxX3kKueNSjHPnsV7IFWzKNos145MCcDrHPE-i8cKDGeI2ICtdFXwFxLwyvqDHTs2KsH0eC9HaTrDLH3baRg3QsMHbirhqpFoQcRPF3KcurGBlRoY-kH3XVi-h6ECOrn-zbhlPshyzfzNPpi62qBqzC8FpkdSyiba-rrIVj-4OIZF6vaAczsAr14vPKlKa6p3H91-GRVl0YH-rjiWsDWpjaqOQu18Sq5AwYgO37NAAYTB8_AMCvqenSRQqbKfpuo0zvAIFw5IYm2FjChQKA04wbRY_SwP2_MVuJSdNmQ78Ld2tt4zCaoNqTdFd91ncXGbkwjfzp5u66mciemBVyBPitmDThZeqWdNxEiIuISoijg1seP-W4RcL-zkRBjKFxP--IgUZEiyJQUeJDsV0SeyCJLcr8Rd4KtuDQ0ZTLxleCHTg6Yn3ZLxq2YlKR_TZQX0maAFx0TBKNswZ2itYUqzr9CBdSyn-gHj6Tq2A026-itnQtE35a8CWbrQBkhAK1xEKfgFkPVbFWDrCTcK5COCXfiHA_C7KfSrCP8LZhKbwrw5o54PdHws_VSLIeElTJsJWS8xsEXn9P5LGSCpiycg62erWS1CoQto7O4M3N_8AKfIoIMOy8PEmIX-8OgY1Q4f7PEmXT5qf1gE6z_WGBKu_mM0natU-dDCR97MxQ54BxUW6SC75EV7d40mx_1Cz3Rx_cpYcPE_pJegk3p-BJAjPpMCERGjy9axY_O3SeDp77BHgBiSIy5HeKJoqqIYy8vD1p-xz9dXAYRdkI1ayM-LzY0PSDf0gvd37b3PceacKv8PpKIm4SuVmOuGCe_R_Tp3Tdx4RORrpbi2E7Tkmw8cjBei_aSf5RIJyLl7krDmjMyscdY2ZEVDUkO8kxxrGcFAzmL_v14hceXOdJ57ycE6YN9P6PDV6-KNphrmV1wRFV5SoR2QbQJdMZ7akqneQ0YLIoZtMGdTAgTgxfT7gvjYJs9xniAXkUyJqeLWTV5K-B_unSoxmzFQb2OzKgDjAj7STJTxe9D2HuaBZ--55eq2f-hCsycqo6ruCUEnYF3JKQRI8xly-7eJbfAFTaGFVLOTV-jXpv_ABudlUuyP1DVbNE2mWUo7QtR3vxPskdyT1AQfGsYFGcXleI-1-OipwijdpR6wRmDliwRiIA8PevYoEwAfSKU6JFwE5tCt7-S6iCcPO0aMo7D9_Nq44H17rZx5fUOdxu1nIoluuZPU2rj2BiPOUqs6G0cng1JzGZwmyO1Bh5d9iBZ7Redt5TaucFjEJ6ld_ftMvpR_ThREQKfsWeO7j3SAUPMgG4bFR7P4taaGSFZ0YMXO9UPS9v0QGOm3rSlwjqAyqudKtVTl38inuOSCqGU7hmPrchTu-qi1rWedBKLI2PN-1HYyxDRRBzV87bvDw1sQDbb_dZkob8gC-eytyr01SQ8B80bBxX6-nZP9ICAA-9_YdH2hW4RHGrSOx2QEwMAcYADRilIb_wpB0Ld1b1kITT8sv63Renu2vjNVFAFUeNFVOGp8LxfVstxJjDIKHiaB1YcynC79R0cBrQf5W7tCGiyAJSr7Iplm6_z8x1U4oKbH_uIef5Xe_sBrf0L0Qz8RgAidgG3YRrZwrWnzP8e2FghW_9HyK_mED2qF2rK4uRW2fswFpvVcIkOu3y4AP4qk5t7A3uAQ3liumVYX0N6WETK_2M-PgFvKtbIpxSPDqk3ukAeyOaW3Bcy7-Sn8R30BSh_F7GqvvXAvDPAF9A4OikU3sYxU3RzyHkkwh951nBMITHLiYs1iNnvDy5mWAtQhtI0JbqCq9BC23Uo3RkVb-hpahEbAtsUMxQFR-gOpGKCZ0VgfNgkbHesvbD_6lQ80VnXbOJmrRdl6TxXv956uaAXp0u7q7U50aK756UkimaUE1opPZ1iExVXLsc9rWdUZQOAChUM5nfTVC_vH4OuR10WrxYPq2fr8AiWAq03fmboPQldf3aKwiYKMlXeRM-Gm5oB4SE8mkZ8I8rupZPRolCbB2eLw=",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -22,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8794,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 14,
-            "outputTokens": 73
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

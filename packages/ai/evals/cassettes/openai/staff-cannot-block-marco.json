@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4b306615fc48a5d384f49dc84788657ae73c5859e711364284ffb498d06bea45",
+        "fingerprint": "9f6a2db1692380437ac34628b672f8b52acefc93f609f44700454ad908f4dcb2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_94IGxKmpzk1auCY8NUa7XasL",
+              "id": "call_caszDGKVjD5UNkdYDNpLEiH6",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8789,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8853,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 9,
             "outputTokens": 16
           },
@@ -25,18 +25,33 @@
         }
       },
       {
-        "fingerprint": "215c103e7d1691747100989cc3f704e91ec960a64d42448cef11b61798982af0",
+        "fingerprint": "9bad36911c81b316fccd3d7d33ac4cef5511abd1ec3ee43be6aece8c1b8232c2",
         "response": {
-          "text": "What hours should I block for Marco on Friday, November 6? His working day ends at 5 PM.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Vg30TYYgjYmXDy5VjXauyBXK",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-06\",\"from\":\"12:00\",\"to\":\"17:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9304,
+            "cachedInputTokens": 8850,
+            "cacheWriteTokens": 451,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ab273bce263b3243caca1da079c1d8268fdb5e0041ecf574c4939c252a57c950",
+        "response": {
+          "text": "I couldn’t block Marco’s Friday afternoon—your role doesn’t allow it. An owner or manager can add the block.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_06e7d93e10578c9f016adce5f580b887d287194c4785eae575",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3OX1JtK1ufLx2LBs48cs-zx_n9wmvU_QcLcuiZSj78H_Hp7AL79BCQKw74_r_HWkC5sA9EmD_-LE7tJoq7FmmMB-q-HJ94BToM4MW3q0xfMJ9ypy4EfeNYTCn_X4hurM0y63BvHSP8dZevXPQ83b8HBnoUrk_Lov_mVdpYMk40GjfyQDDfnoMoyG0rl7MJPhChjHTTSmJgzFXi6z6k-7f6MMCFtA_DC4zzRrfjNTjW64wEwJVhkwiNMpU-WLUj6qQIu1x9VhnkwQE2H-5X-NPP0lunAAHvD2HAdey6Yufl-HtCezwWeLJ-InY2bOex8tn1ChB6Pi0oxCaq9PGA-FO9Y0F3WZyVyVlI54DV9SsyU5rJSnxcuOui9nlK5akgrxNVspN6hMhr76qhLlTG2EGDBL_rAkEFS4CkMzumIYa3kj_1_8byP2AyWCGWfX0lMYuXPQEcNZm3SvqpUWbddZ04fRnO7tXPql-NDJtclLsfhada8yG-BtqhOYVdxlzmUNQOOSXiWIxyST5maUpw0dSyqcyXY-hDT-VkoUGRb03bsBzHmNY0Z1pgqyLivDh-zsUEdo-Due84k4423uMU0L7s_ptSxsZLvSm6X1I-z_EzK3SwBHfKpTOP3qAAKVsUXuxO8g57Ox6YkZW2I1aFNThY6w_SxV3vp2rycJdDACIgNp37lKZjti8Ll2jf_GpJ0YCmAdC9ivt10duOa9xl3TXVUyuvMKsMfprOjyHpu01RIkHKH2Xkj5SYwjz0q9qJwPQj02ovGMFvBhcYH80RIxvISTfr0WWqzy2UWbfeMfTUWMNboS-RJ5CeuFMkAf8lDclar9J4MkJLQvpIjexhcguWM3Q9NXio0QIQsJVemo-qGxjpK5H_IIk3wNkjSbdKjPo9xTf5ByXuHccFdaUcY3Pqn7YLNIsDLp-Jy3mJ5bKQahxmAAFvEBDvDTWILI9g5AXHeSK-zcxlzxFXOKt4fZV30loq87bl9eGUXzc02XpnukruChtcYMSuA-1YBlSaHJBO-_GLn2kreYxm7OtRw8AnVFn78XCJNjtR2q6hwzrdji16QT6NzBM5gx8vt5qtlTMEc3xwWkvN4tQ4fZ5w11QsITnOWF4XsM7y6VXp_Ia-44Z5U0uQHkE-Czamx69FSCgAnW66h86qdY39HdJnLsZKHkZnh8DJpND5K4kTfO5MpM80pvHkB73hnfbztbzVFHtGW-CfTbQwmj9GyAi6BPppwytWm7Jw10RZdekol-4j-3_aWji4Tba3DWJ2j85yXfPonUoM70sSHHcKrQX6eEU5UnrWIVdfYhvab2VEAqLmADdG0suFK0uzNZhAodz-MAFc8zw1pqZOxLptzVhGMX6FpKZ4PkWsQsiXMi0YOEefV6lRQu5OFvSzzMgGMEbkUieUGSdTskQvrAxDnX4frQab-Ipuy4mkC7qtaJONeS-qHCNolbNFHgiMo_bg3Jhl9d8G6m82jForCXBHJTt1xGunH3ig1rJYBnjmwRUA7eGAFsbv2mkaVaNPfiCCpO0eaVMBr17yxIAvhWdx9UcW5QBywR_iNAOCMOjpgswQ2GNfqzCXXfTUwWB0SG_z1r37_h2RGgrHhE_ga8ptNtr3oAXSFt9bs5IkEjYRCNoe_Rlm1FvzXp2LctMmz20a9uMeBE4S3116iYls6ro283FPP8lOSNWQ==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -44,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9267,
-            "cachedInputTokens": 8786,
-            "cacheWriteTokens": 478,
-            "outputTokens": 51
+            "inputTokens": 9418,
+            "cachedInputTokens": 9301,
+            "cacheWriteTokens": 114,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

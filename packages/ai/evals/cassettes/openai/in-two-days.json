@@ -3,53 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "bae55a0314b0edc1c6ec1a9572d91c92d1904a4c9278ff1f82c67a697986de26",
+        "fingerprint": "3827e4391d226efceb1e1b9f71aba94769125a6368caf2b26df42c32c0f3e84c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_y5CNDdmC1b17jzGiJp2Pdsnh",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8794,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 14,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "e92f6d7faccdbc55d903ff406ba8265ba5421fa77551b25be710fd96937a3025",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_D0s5ad1eDv3EF9vuHJYGfBac",
+              "id": "call_xjpeAxY5I4LwDTfWyF8zb8Ej",
               "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9260,
-            "cachedInputTokens": 8791,
-            "cacheWriteTokens": 466,
-            "outputTokens": 50
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 14,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e20089fbf2f557f0cb84c96955849b9c37e6a576f9a6b22efcab52922b4b68d7",
+        "fingerprint": "70d10c2d89a7171fb4956d8e39a6c1bcfdc747e1c55c704be2ee3ea68dca083b",
         "response": {
-          "text": "Yes—Jess has nothing booked or blocked on Wednesday, November 4, so she’s free at 10.",
+          "text": "Jess’s calendar is clear on Wednesday, November 4, at 10:00.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9364,
-            "cachedInputTokens": 9257,
-            "cacheWriteTokens": 104,
-            "outputTokens": 27
+            "inputTokens": 8941,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 83,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

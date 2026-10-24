@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e18ef523ffff52ee1a455f0128822d9555ccabe8045d80f8035284bf58d8af14",
+        "fingerprint": "66dab1e3539cfab61ad78576f98ceb0664221968537bbba63c91bd6d84178759",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_hNWUwjWv6cBBJZvjQSS1H25Z",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8793,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 13,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "fb97ca211370660176ca868af36e9117935d5b87103becec4c3f1229abc61173",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_3D58WfPBDmeZWVokWgoU2835",
+              "id": "call_XFt6AyU3k5e9YjnsKrwX27Nd",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara\"}"
             }
@@ -38,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9255,
-            "cachedInputTokens": 8790,
-            "cacheWriteTokens": 462,
+            "inputTokens": 8857,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 13,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "01d6611cfbaadefd619368ed0b9da94de55febb286d59bde5d1bf0183e25b78c",
+        "fingerprint": "70acf72aaf8aa001ebe0b8e3a8dbe6734edc52944175a731fed1caa36c363311",
         "response": {
-          "text": "Two clients match: Sarah P. and Sara K. Which one should I book?",
+          "text": "I found two matches: Sarah P. and Sara K. Which one should I book?",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9386,
-            "cachedInputTokens": 9252,
-            "cacheWriteTokens": 131,
-            "outputTokens": 21
+            "inputTokens": 8981,
+            "cachedInputTokens": 8854,
+            "cacheWriteTokens": 124,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

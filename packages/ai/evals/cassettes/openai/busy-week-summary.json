@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "574b4844051781ef895abd6619fcbf069420974f6b2a15b87355483e11cd31b0",
+        "fingerprint": "9602f14bb5221459dac6be7b9a8a77c70ff1b94869a00558cf7eaa81dd94142b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_lzi1lp7zDkymR8KLS6hZXEAb",
+              "id": "call_Bnprgv79paq17hCrL6RyfXzV",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,32 +25,32 @@
         }
       },
       {
-        "fingerprint": "8a8b3ef5ebb5bf7a133c552b43ac6854a990a7c4b25cd30c50a89b3896657903",
+        "fingerprint": "7ab614b8def1265d91a3ab9c5cd0717aa4e8c5521bd80401aca6d216aeaf201a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_d559BrxGtwCL6iQl7ID6t4k4",
+              "id": "call_6MNMjCAUryhuQhkD8qszTAI4",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_ZsHkEInLyapNe8Z9KoF0ARIb",
+              "id": "call_cMEDPal05c2ePZxTuvlu9lju",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_fUoPRFoopU7tZ2OVtygBdNDI",
+              "id": "call_HHuKsYskhdkM1BAvDyTYii3f",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_342rcWz7zhoIrpzNFef1HF7j",
+              "id": "call_vE8xFsyrT3UOvLkRpkIm4pBm",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_1MlBYD5SYYXYyOkDpiMp1YUY",
+              "id": "call_O4H0NbXCfCSpKN611pkMsfAq",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -58,18 +58,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9252,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 461,
-            "outputTokens": 250
+            "inputTokens": 9324,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 469,
+            "outputTokens": 245
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8f2106f445d6c83bb8345d129ac35b23347277b3db04dcda9f87b91e4aa49f1a",
+        "fingerprint": "a86d0cd650144b63da0c68e926e3247617535ec817341d9e253763b66efa25ba",
         "response": {
-          "text": "Jess has 2 bookings this week: Tuesday at 3–4 pm and Friday at 2–3 pm. She’s otherwise clear Monday through Friday, with a 12–1 pm block on Tuesday.",
+          "text": "Jess has 2 bookings this week: a haircut Tuesday at 3 pm and another Friday at 2 pm. She’s otherwise clear Monday and Wednesday through Friday; Tuesday has a blocked hour from noon to 1 pm.",
           "toolCalls": [],
           "replay": [
             {
@@ -79,10 +79,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10145,
-            "cachedInputTokens": 9249,
-            "cacheWriteTokens": 893,
-            "outputTokens": 47
+            "inputTokens": 10196,
+            "cachedInputTokens": 9321,
+            "cacheWriteTokens": 872,
+            "outputTokens": 49
           },
           "model": "gpt-6-luna"
         }

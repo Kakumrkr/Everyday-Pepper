@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b1294eb905a563f4877d42e3e9fbec188a612e47d235185ee545635653d089e9",
+        "fingerprint": "0c0e56f9c7e6386efd26a69c9a9f6557875ece1506dc26d246fd2df4085692d5",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ouyW1OXYQMh80uDNnbf9sZoG",
+              "id": "call_lWAYuPAmwCK9XXd0iuX5Id4q",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "1195ae9717705a214860fdcd945bb0b7a59ab450732ff3803a17cbea6b6d5288",
+        "fingerprint": "4e4536b14456bccfafda9f6bfb8be493d8af32a57ba78404c0a43fa9cc79df5b",
         "response": {
-          "text": "I found Maria L. The business has a note that she’s allergic to “Hazelnut oil”.",
+          "text": "I found Maria L. The business has noted that she has an allergy: “Hazelnut oil.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,48 +37,40 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8947,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 156,
+            "inputTokens": 9009,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 154,
             "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e72b643806051f56215fc9d1f6c998fb1f621c42bfdd58e4a7134350238b10c3",
+        "fingerprint": "d2a68b9b718dc1970fd0817b28074071d94c9d1d6a36e69b67e1ba0053aaf8bd",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ZSil12YzPhSi1Dtn6LjFZ5O9",
+              "id": "call_yZyFHsz0NS4eSQEsDeFSen4j",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_0b54c587e8de2ac1016adce4fd5e4c87d289e11885ada75ace",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3OT-ME2B9-HfzKGtjhwgjuEiyGOV9N_yHBMLVdUvb0u447SdvnuHgrPrB_KOYlwseT4vY9lkROXY_JwXuvBGPbMWzL6IKHciLT1rRhowoABh1GnVipmsw5Lx04qsVEDCEYku2BeKMUE7atucI6s2z-Yyu7_S_Bmug_PqG7NjhPFFhA-RUjFg1_zyxpgeunYuoLuqo7MK-QAPowM8R97VYMVCy19xtTqg4gPUXXFDIDj35uOhbjLCuCN4NXl30OrtgMBtzzuQaA3lgCm8cyGmBLvvyRE0lUMiAcK7QR8-bm_-3VMAejtta4oaua5yQQ-yql5DA2p5syL5ZFzSBBaqaYRYJ5NMmsKzpYvAniiw9hfi4RD6gGMLxNy0Bh6ztUAJs-sZYeDvm7xN8EBT67x0QG-Za1WsD4lb7rHePEsSlH4HZqw8A2XPTJcKdU4ylpRxsrj7SVyrXcouyfrh2MVca3E5eNeZpJ7ku-OWqkHYH_ue4lXjvE6iB-2_X9I0TogLXiTTcPwrebL-bH30EVVxsS5e2QuGwCVuat503xcSsUjVWO4CNxtEk73BabQDPEV9H8OxPp62kDz18vBhZer6vkSAJcYaHpeljKnjbki4j8qGiBw22ORQvQbQlT4VJD0Oq75figD2fkaqLPNK6lfznb_K0K4XqbscVRc0ed3fRGyUADt08R9B6NGqEn9QCY3kLdK46kZpN5Gz-ri4S3Txq6nHClGYrcXKpdjEhvikqDlhydCLWzAsBatJpyKsrGerfKRKzaXXA9GLewAkfVXx-hEiTVH2cJhBDiatIxL5SLIFxEkTZio8O1glR44oELhi2_JOL6Kiab6KbH54TaErV5sLndTvCyrGgvdiEafepIBG8kd7DzISqHyHEedGrHmXklLejUVkzLPTJL7PSSvAVhEl4D2ZjIrNonCTO_ivh_NOeOA1sx092QrXUGwu08CNywPD1xxwAp57c0vfkO_X4Dq2aFYpXpQlxyea6YluRMXjRVXhLAZJ_NgFaThEO64KOIp1AxwVDAys4Teitq0ohCAWpJxrX4hFFrsF2lTnTyQwFpgxwmhtuysvLeOoA4n31jF5t60g4avtPUYipF6T69J6stiRP9KTI83DW2DYCCw44BGNpCyzymtoxOdx3goOkLIaWwxFtA5wyaSir05xEAlPwxBXg3WALleEN3Ihag2fSO2FZouC4poBrswO6bf7S5SkvYcdCJI23loqlU7XaBGJG4Ty1-t3z4McftfH64Xaol7a60OGeFfdMjsFMGnnw0xRqxpGn8bD8-I6bBXyO7xFHGDZD_QFJUeujgwpa_1sbo6UkXf7RVdmgh28-cgBjBw8QtWX6KEJ5IlCpJXq14kaJ-Hh5K6HGMpxJJci9VWXDiQ9IddaClTsswzCXqGS3LYMI6fLzdWOBu9HcuWSphWXGSAEzUKqqvvwSsR9avmTx8MbIniHpMM91L_06lp_xFq4iwWlZywb8DZny45QEi0Yxj2Gff3W9ylTjCw5j3k5PR3Mtm6PQzmuWbVzKRi7ytQNAwMsKHDdA0qWURLz7uRsfxviNlpQBFAk36nVF76wnSoBPPXbi25cYMIL0-dWxU4GPuBMd2Nc08aL66jvPZ9hTlOu1Sv0Wnjtt8YbnBl7eb3ed-6v4bGX7iKvRocCobBPB5tetPKyN69BGTm9GoKpqQwp-AqZcLjIbt-TUul4SIXX-8aC66TD0t4NI1JSXzM8CeRE9tTuR-5DAAhTkFlXS0sgjvGN1F7R2D-Ymjq0MEe0v5i-wjBrf4YSYcwibZ-OnMnyCoQYyyw6wW6ssUj9w2lneK5IOH5sMFGnTe-a_WGpYcaXFBH4CIJGX-U6wXCp9qGH4ZkN7E2MsH-CUqlW9XpgaQUNIbGI5VkyY2_dRMuKWXwYWciPd31wOUBoCrmMzqUCbYqBrT-Eqs9makHtuQ==",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8910,
-            "cachedInputTokens": 8788,
-            "cacheWriteTokens": 119,
-            "outputTokens": 87
+            "inputTokens": 8972,
+            "cachedInputTokens": 8852,
+            "cacheWriteTokens": 117,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a1384be21c1d38000659840f12e51386ad32bcd99cc8fd7ccd8e245cf84b6855",
+        "fingerprint": "5e033318055d482d285a4b76a0f774e710fce7a003f7bac28453c3ad00892e3c",
         "response": {
-          "text": "Maria L. has a haircut booked with Jess tomorrow, Tuesday, November 3, at 3:00 PM. Her last noted visit was a colour appointment with Jess on October 23. There are no remembered notes about her.",
+          "text": "Maria L. has a confirmed haircut with Jess tomorrow, November 3, at 3:00 PM. Her last noted visit was a colour appointment with Jess on October 23. I don’t see any other remembered details.",
           "toolCalls": [],
           "replay": [
             {
@@ -88,10 +80,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9404,
-            "cachedInputTokens": 8907,
-            "cacheWriteTokens": 494,
-            "outputTokens": 51
+            "inputTokens": 9420,
+            "cachedInputTokens": 8969,
+            "cacheWriteTokens": 448,
+            "outputTokens": 50
           },
           "model": "gpt-6-luna"
         }

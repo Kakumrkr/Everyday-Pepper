@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "47d09dc519f6f720a4893dad2eab4e5ab9484635bdf1f08730f357da927bbc9e",
+        "fingerprint": "be530050ead43baf56ec314867df55b91bd3a041a1a9e157f655849ed4d508ee",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Y8enYNkSqwyFaMLp5JAckhEN",
+              "id": "call_WZV9XKOX2fBZqrPM3XaNOfpl",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8827,
-            "cachedInputTokens": 8810,
+            "inputTokens": 8858,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "f42cfc02e786b527f2799963bb6ae1d66a3c0c496cff11fab114bf7db4c45505",
+        "fingerprint": "1cc322c631a4ea9d3ca509cf67b4707115aaa7d44efc399d86b4b9b3da13e01e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_I5liE6wzMq3QQFtyMq1NED5i",
+              "id": "call_mbZvdiR1grz4r5bfG2U5ATJS",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,43 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8976,
-            "cachedInputTokens": 8824,
-            "cacheWriteTokens": 149,
+            "inputTokens": 9016,
+            "cachedInputTokens": 8855,
+            "cacheWriteTokens": 158,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e900121695ec09f6297c72988bf47b6729cfdf6e6ed6324361a68bba5fa191f9",
+        "fingerprint": "9f2a00012b58398b2a9bc3e06c85c88f7f3202a00504383e4dc03b84a6a4c61a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wMrMiTGg8rHB0g0LBJlLiwtv",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"days\":1,\"notBefore\":\"10:00\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9434,
-            "cachedInputTokens": 8973,
-            "cacheWriteTokens": 458,
-            "outputTokens": 86
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "fc38fa394b598996969b47805a851838c28dc65af12060d5455befca13b1d005",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_SE0rVogS5Kb2K1uIY4JrAXlK",
+              "id": "call_Ru2IWFkEny35XG4k6XqGg2DN",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
             }
@@ -82,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10127,
-            "cachedInputTokens": 9431,
-            "cacheWriteTokens": 693,
-            "outputTokens": 109
+            "inputTokens": 9478,
+            "cachedInputTokens": 9013,
+            "cacheWriteTokens": 462,
+            "outputTokens": 117
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b59f382ff4de4465776b6c3304851183778b67cda4548a7706b309d5ba24ef7f",
+        "fingerprint": "97b360fe244815d39739412be8339a060453ef6cffe41164db71a2758bb20188",
         "response": {
-          "text": "Maria’s usual, “Colour with Jess,” is ready for Wednesday, November 4 at 10am. Approve it on the card to confirm the booking; nothing is booked yet.",
+          "text": "Maria’s usual is Colour with Jess. The booking for Wednesday, Nov 4 at 10:00 is waiting for your OK on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -103,12 +81,12 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10315,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 10312,
-            "outputTokens": 42
+            "inputTokens": 9674,
+            "cachedInputTokens": 9475,
+            "cacheWriteTokens": 196,
+            "outputTokens": 34
           },
-          "model": "gpt-6.1-sol"
+          "model": "gpt-6-luna"
         }
       }
     ],

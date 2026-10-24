@@ -3,29 +3,29 @@
   "trials": [
     [
       {
-        "fingerprint": "5c18e98aff995151a3cb75a7f3c076a6081474539d811a95f4c7fa5bed0155c9",
+        "fingerprint": "1b4c7344bf58b9510d2a81946d4bac9726c9cce12aae8ff7fdc63ffc5808494e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DNNmaZXSeo6z4VduiW1XYJxq",
+              "id": "call_9UkqojipbD6gkCdB4GMNsXh3",
               "name": "search_memory",
-              "arguments": "{\"query\":\"Lena my job\"}"
+              "arguments": "{\"query\":\"Lena job\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8792,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8856,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 12,
-            "outputTokens": 21
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a09a36b5f4c334d4966ee2b7a09e218b3a967cfae02645cbeff573828e79a589",
+        "fingerprint": "84f669b63fd6f0695f07480a082d72a5ae6dcbc5d9f326935a05bc5d677bc771",
         "response": {
           "text": "I don’t remember any earlier conversation about what Lena said about your job.",
           "toolCalls": [],
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8873,
-            "cachedInputTokens": 8789,
-            "cacheWriteTokens": 81,
+            "inputTokens": 8936,
+            "cachedInputTokens": 8853,
+            "cacheWriteTokens": 80,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"

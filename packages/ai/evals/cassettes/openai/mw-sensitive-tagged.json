@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9a68fce41176f6bcf68d8613215a5049159e8fd8c95549e1ec0afd833df547d9",
+        "fingerprint": "73e7ae7e3b19537d0a35e1c3abf4c78a9d20d9a4379a7618ebb051c26ffea00f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Zif45u10ZE6bRg8qOXLa5frf",
+              "id": "call_mRFShb0HJVnMjJcHatZau9Ot",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8795,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8859,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 15,
             "outputTokens": 18
           },
@@ -25,31 +25,31 @@
         }
       },
       {
-        "fingerprint": "1d9ae681cafad11f929d735c4af2c3d915217652e7759b87f5056bde394a9f00",
+        "fingerprint": "3a04891f9b8abbb389e5eaf046420f3e828f23f877b535f69807c0163a8f2807",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dpazpqADQEP2hZ8fsIeH1yhC",
+              "id": "call_sw9ZVSct5B9AD24gzAlGJdGN",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"client\",\"id\":\"{{client:ana}}\",\"key\":\"pregnancy\",\"value\":\"Pregnant, due in March.\",\"sensitive\":true}"
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:ana}}\",\"key\":\"pregnancy\",\"value\":\"pregnant, due in March\",\"sensitive\":true}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8879,
-            "cachedInputTokens": 8792,
-            "cacheWriteTokens": 84,
-            "outputTokens": 64
+            "inputTokens": 8942,
+            "cachedInputTokens": 8856,
+            "cacheWriteTokens": 83,
+            "outputTokens": 63
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "7d6e1cb9a6f44e9b55d91d4ccf2cce2201a672826ee1714bf426f584286f082d",
+        "fingerprint": "a1e8507ea2e9c6f552504427d6366240e4e58646effb9734a5172424dfd39de2",
         "response": {
-          "text": "Remembered for Ana R.: “Pregnant, due in March.”",
+          "text": "Remembered that Ana R. is pregnant, due in March.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8983,
-            "cachedInputTokens": 8876,
-            "cacheWriteTokens": 104,
-            "outputTokens": 18
+            "inputTokens": 9045,
+            "cachedInputTokens": 8939,
+            "cacheWriteTokens": 103,
+            "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }

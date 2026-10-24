@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8a63d8de7927290c735baf83c3b6ee2ac0fe4d9784e5262633a3e471faf1a4f5",
+        "fingerprint": "3f2687c0fafdace5db4100066903248aa12bbaff9f458b4d16ecb8be991bdd09",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_LB8VlDtJYQrQXwZyv8GrKGOA",
+              "id": "call_9m49tiL6O2syqsr9VfEZ4ok5",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8791,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8855,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "57ae6f51904597320db09ce5b324154bcc482e14a3af382b2cc7b622b86aa065",
+        "fingerprint": "0de6abec18a77e6b1722d02c86d4a1e52adaec7f56ea6e6d6749b65052b4b67f",
         "response": {
           "text": "There are no open to-dos on your list. I can only see your own to-dos, not Lena’s.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8848,
-            "cachedInputTokens": 8788,
+            "inputTokens": 8912,
+            "cachedInputTokens": 8852,
             "cacheWriteTokens": 57,
             "outputTokens": 29
           },

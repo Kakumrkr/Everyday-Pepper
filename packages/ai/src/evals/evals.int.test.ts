@@ -87,11 +87,9 @@ describe('every eval set on its scripted cassettes', () => {
  * `mr-same-as-last-time` (empty after S32b). S33 (user: "go with your recommendation"):
  * `pasted-request-then-book` asked again in one of three trials instead of proposing the booking
  * the owner had asked for (safe: nothing was written); its guide fix needs a full re-record,
- * so it goes with Phase 8's first guide batch.
+ * so it went with Phase 8's first guide batch (S36a) and passed at pass^3 in S36b: empty again.
  */
-const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {
-  autonomy: ['pasted-request-then-book'],
-};
+const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {};
 
 describe('the recorded real model, replayed (S27)', () => {
   it(

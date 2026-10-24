@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "cd0970d16d4d04ee2f271e5b2fa8499f4f5d9591a3bc2f0441dc940cbc6c22c2",
+        "fingerprint": "34b95736c370b3050606c9aea32b5c843a29c232a9dfa480d5cd4fa6231fb3e8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_JkCvjKrmTO53uSIf7opEYWOE",
+              "id": "call_ftkLj7YS04HVIlEUK5kdUHVF",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8798,
-            "cachedInputTokens": 8777,
+            "inputTokens": 8862,
+            "cachedInputTokens": 8841,
             "cacheWriteTokens": 18,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "68de5b76b64e35769035efca0e6b5af6fe2738f683ceec644770aaa66ee9bb11",
+        "fingerprint": "db5f46068d49fa3f48374d2be365079e52c8b01387d4762b12e442d16bc5944f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Rd0BnILZ5ll71bWImsojTyNS",
+              "id": "call_asehxfba8Muf1rskKBBeq8bT",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8953,
-            "cachedInputTokens": 8795,
-            "cacheWriteTokens": 155,
-            "outputTokens": 43
+            "inputTokens": 9013,
+            "cachedInputTokens": 8859,
+            "cacheWriteTokens": 151,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "70c6fbf3f6ecbff9072024f58f8701f08d3aedeb233c35755c100f3a79ed2a1e",
+        "fingerprint": "123bcd5a308869d9af3a5808e2f38cb605999e9c387a70a6c5788da89937bdc7",
         "response": {
           "text": "Maria L.’s hazelnut oil allergy is waiting to be forgotten. Please approve it on the card; it hasn’t been removed yet.",
           "toolCalls": [],
@@ -59,25 +59,25 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9063,
-            "cachedInputTokens": 8950,
-            "cacheWriteTokens": 110,
+            "inputTokens": 9119,
+            "cachedInputTokens": 9010,
+            "cacheWriteTokens": 106,
             "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "7de4bd53d96996a52d621645ad04532839e66e2f0053d8220731254e71d5572e",
+        "fingerprint": "a24763193577fc218604a9005220d65c425ca09285aa47366a2829b2c88cc2af",
         "response": {
-          "text": "The client lookup currently shows no remembered facts for Maria. The request to forget her allergy is still awaiting your approval on the card, so nothing has changed yet.",
+          "text": "Maria L.’s record currently shows no remembered facts. The request to forget her allergy is still waiting for your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_06ab3d793e4aadfc016adce4f579ac87d2bc1f9ef4a1c0b3f7",
+              "id": "rs_028f3a875d2a4211016adcee04e21087d297c42b4d213b44b6",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3OT22xCL39MHoKsknuuDYn0zrBzHuIXIvWmGbUKKr77wCkuns-1NsHldfhxFK5AF58Nzr6dpS1LaM8PDmOZCWXQKuLLSc-CE9BjD1JtcDNOYXLGR_VA4gG-oXE8yPuRtKu7krZmINk9QTgrroC96e5jkEK0HpXiyhCBrSH4C1vVWDHhvHbizw3AR1YFSaAOvzBToHJhylDcBLK4KYzCchvdp3gYNQelcvDMIfyEvbpTge0GjO1pkN0UdxJjuzQ2-t8gUisSXq4xAonyT2_ikWzFN98Te6ZW-WzyncUMCL7w195rpod0FP9FyDtMbKHydrCsLaJtR4CYXho8GllARK0wHKlCUpRJJEvmUtquuoKacomn2Elf_hnyWHSv3sBik3BwHdOf7UpOOWBgyp9wsNqk-FzSjMRhM_4ILp9TV55RoCcTbbbFPuSnZynldf5Id7ZABIBSH7t5sU_3vLYjQu8D1jV8xYl7crwbjWtxyNHTy28_f_R2kgnxa4S8-C6YYqAxpjJc3mzLpWHdfvjAkNDA8NGMGP33bN-vuiknqoKuUpjuV4-DxZf0cmFRFMnXSQeVSKLrBIQTZpCaGBc7m60oT_j_JZvn52gMbRfa1aXnSOZVHFn7wIAbElpMqbCZ84Enzok2wzv9GGbJ8e2DPctVBKtxoNwha5WAdkMPNRSb4JQ7wL_nub4sC4ccDi5rJcJimMXMc2-ELzgJf1rq1OGnFJaUfA59Fobr26C_RtXXhj_rWx1RYcIOhZB8si0zByHmnzsp3JKdF_i5jp0qawDgSXiyP2FOIeVFE77ZC-P6xG2AX4dmyuoMzw9PF43n8xgOoMN9p9ttGSFKGIJIuUD5aT-PANvZqu4EEbPMAM6Lmd_xAA5e5xGluC96Cc9vNwtgwe2M0cH_Wz-H977QQe3ny19e8TDl-dJaiKDQUxbjWAAdFQXOp27en6tPD969esCWtsp7rrCdUMsGkAKsxjSwE0uEEQ2x77Mf_jJbDEJgHY29PtCja-GLYnCTpBU_9NDeOd1vvLVaE5xhGf6bCa5Y1VAabaSLiBbk_R7x3ew2e7JLY6ihMFZssw-ZAQXV97ZOIGsGJyw9Z1jewUbFBxb5I8X_ddjX3XYXTrXZgl986P0WEfyNcjGEfd_i12agK-ZRd9EMmNmVQnRDMnPsaev83kMfd1s6j4KiH22bDLiU5rNupD8UMLIzshkkuS69YhFvpsbPCkWGg7G5eNNe9AW80IBcIPtD8rsiVbh0pflcEKBfPshTRDyfQx8Ixt7tfvZtHVw3CqnWVBmn2bQDRPau3za_1PoOnYpLdtGMpwbHysUlwjZJ2d76T4hhhf3i7u_f2jwSptXc7u1hsMN6iGYzaTNUUTHFgyXbX5w2ryzm82yeT98aUMNAmqK8XdwhVtjA3ToP3XCI2v25XAj7pWtq8HmWHsogWqjeNkXzuD34OySMVxQlVPc8LLoFhb5FYvlhkjM_ckTgpLJmOk9RUVy97puOtBMVxZRMJTo5RFB1MtFi4m5eyvK4Jf0YB9rHN5ZVNcF4cuFpNtCYpbNyECNS8mWQ1KxCaFSwKHU3SwoNxqhgJT5QHEZtAfXoWf4mmqYtJy4YiPxk393P7ke6uhSxrbCBCf5TqODIdAHstgIhAtj8kYs99OjzNHf0jRrn3emaPOj6FI6D4FJrIVvqOTn9DnU9bEuhxJd_kGFvFAjs45u9bkle-r2ziw9xUU64ftw2dPlT2a4CeU18KUCoZZjNb7FDp4lyQJ4X-FsYEV-44DQiwqSPeF5xm9jKGIiIgs_FKoQ-QoUhO-Js6eCsOfqoHLeaYzGHmK_-JcaRARlZs_cF88AGVgrXTCoo2EvsvzEnQ_VhGQ9f3NnLNtySniUq-m3XvebR2sPnLbqZO0aWoV8xgNx-mITl77PzktRUWCmei3cP671KPbO4jBzCSdYwG_XXYkJ3mcT6fLOW7434etyg02oOVpUMzasMF_7DMqhIJ9EppKL61RV0k5N80FjvZED7lTejrWmOvdpIIeG7tfffHC7_Hx22W6GeVlliiUEIDGtSeAyEdaUT6AzRktCQ0e5yoxJyn5E27AGJ5WaxG2tD4avMR2US775gXXMUlpGHrHEeKJ4XID0InUiMupZwoJvF2AAq1mD5lqNubl5POLlM_tYlPmzracPSVHm5paZosQKNV_7ZIPBID-8pHMqZr25deq0GOTT8pbSCwV09dmEXvKvdLYbnRElZvV4pz64yjLYgQpzQRP9_4GEtRAukSiZrk67OZjtJt2rzMh_W4wz9yA1oo0xh2pDbJS8GubAu0MJH8H8nJNyfh8NaBleA6FaaBOfCTu8KtYVYN5rl8Ov16VSrKe-MWhHnqLjDCprA_Eqhc3Seg3WX_nHbJbT3ay2wYmKwyQNfNSFjFjjRR21JXQ9lLc3FTkzm4lwjfJIkWdTytyzSJxeJ26rxbTGMM4tdetd0XHXiLjoCr7N0gDKbT-urC0iOrPr5ABIOHDq6zvb6uDp4e3DvjFRBBARgdOtuAJxHgmXsHvrlfWRhIj8Q=",
+              "encrypted_content": "gAAAAABq3O4GlWvq0WmiCbViOMmgrMpd8LPXvSMYlrUki9yCoaGFKWd_VcDMKlzyGPy9aBscAYo8rOKmnNSe3zztfa5KSOJsMXZLYCUK6Lw7SLEsfZ5l8vBrEZ-gBm3V9y8KBOdXi4YPVk8Zc9Cjs9K3AzqhG6WgYsE668ThjyIGlcw2tj2bJV8NEVYELeTshrPMpiUcTkB1DjqHRBPLtmJVmimCHbHTU45_E39SMA6MmVqeyZ_JHFoX8pZarTiKx6vohO1iYTJGIMSJUCdtOwiYa0Uv0oDFY7BBz_2lEwE3qi2FNK4ub7HEOfwbNkl-b-c9Vm7exE5QCvpoaQOY_oyjg0J1V1smzzvUcB4u5Aw26Lq3iydVT84WjfMD8f6c6Yy0UKB6QzjghOpOOPu99iPLKFmUj-LAUY_qSLbzTadSm3rEBrlzRNynp5kRayWXd8FMj5cAVWjLjNFQuR9YYPrbJwpf-5EravO4VjmBw4H9WIbL63PSat1EGO4EN2s-lmMh8snrWmBK8H_sOgB1v9C3_9BU2kL7mRfZMX1w5n7VF5RL1mmiTvI2bQ1Tk9z8TuCoSPY_Rl_v0uldYFX_Q_EaeVj6rDznPvtKXFAVFiltDiCTHh1MlCQDlqA4ev-Cn2TYAuuAvV0NjT5AkG4Dj_J0ekm1YkywCuzdkSIQEdLKLxkRm3kmAfTumYzXIMXb56vRbqgqiHvmvFH7WWgeqK8mzxnCzXAn_SyxjQSuon6lLX70qdSoQHhac7ZaqeqdXAoSBBPeruvwF9pHvLrn0bzooFYm9TvlLsyb08ZReyP4qqFrvcZgujbEJx2cgvcMJin_MH_n2f5N-izH8rFdi-DpD7NH9Xw0wRYpM3U6oA0FDrfw9azTS6-UQ49rD8ZEHsloGFAg9KymtPjX0mhLxxCfyFx-AwUsQh4yKruka_j38zj2MCQb6_3W8_M9LmLY49tHDp9p-PRzoZhAr6D5OOwlC5ZvtpRZyTE_bzUcY_BdO_Asd5hEjxbwBERYzdllayB_ccxkXN71MRxdznoBmng6kTf4uzaq0x_--Ph-0Cql66jwCLCG5ZsiNHy7zrsw9aHKcZhPjATIKCjmFaomNsx2TPr0ojDJ5myiuCQfcEOunERAI_5hccvaq4UyF_NWD9bykmvgf7fmNKvO1g8xLlr4onPge4xMVBL1h5sfv7-gcmBqybn1zdlHIJE55ftIRy0O7axUlyoKF3wzHQjkrT5HjZTe-TKcacjuTGoIYXAvMAQigI8DjvujEMtFw6s-3Iq4TTwhT5kWBe03cA4L9oevVGWZCDfvQUfaB9jHkY6DhoWzIkaNpRUn-f6NqjxixJ9NjtYttSpkrU0YNoDnkUSWml1Hr5iIYPbwFwrR98rx4wJXzRqcxHyaRz-1th28LV22qU9pNi2lTq9hG05wgHSUkmofX0cxs8o0czlJ6Yf2o9ArNrUKQSShFhHmNYH9NjKJV2yKKLaXJiVGx2iKfyNng6I5p71kXGYlJA1RsF2hEKp8f3JieARpt3d3URw0Ky3apnUD_jXpQuHLaahvxlbhjmKcodxwhX6YGPq9asAE0FuImC2dxHZ5OksjVkJ-LEv090c2exzy0zQ2rN2Khnqu0PUc5BwhWBZV4STr03wxUt45BJMxeAT3QFwRtQFx8bbhOVGh_i21IEncRlyA9F5zws2P3C4EOqhOBIL-E5n9WE7iDiHDae5ir_LZxzRTh6Yiob6UOnnQS1g-TNjbwaOpiruruQAKR83K-u2-gPa3qVJt7jjqYqagoKEpndtdXl3tGE7b8zKvoiDVgUr5IHyWxdBsH4VCsIfsmz4-DZtmdMoKx9YaAJBz4P6eRA9055k7UTKdJYWo4JA8S_vFIolriKuHVlvePgsMf6PuihpJUo2IWFoa-QfXGQcAR8vzxx3wds2aVLjttScZz3xiewXT42BWy26Fs2qRDGDUN642HtE4s4DR2D_3GsqROXEwUdS8Olq5usa-IR_uUDeO6s7KAVWzQZey6sg5pXufw1wubuSJKlpDe1NWXaqfiUN3fVL7MpnPGhij_lIwUWS5t7BXn1Ugbrpw00K8MtK8q0WJ-Hu8jtaohiMgXIbR0p7hzJRhnyRw7HJU-NuvqLvMp36K7irBWdwnbpfVdXCjfyQZRQGlMZ4rN6pCxECFs-aA_yvGJvjcm9YtguFfg8UImbEDzVrOWuIy6lb-XxVJmKNwtwdg2xDSEkL3stQCaa252J5H38SI-3G0YPwiqPviRL6gHhEx7ZoLr6IUi6vojl-J4EAz35L_IwA2Az3cjunlxxK2W5GPsE0cyYxEhbT1878H76m1lcJAtXgv3rzYXv05Ry0hQORt4xFolHmL8SFAyZluEa2NVK2XVWLqQVFe9IWMOKwPjg9V2k9sL5JLJ9Ln_B-X4p99k3yVSSZl6-6nfMhyfz-Xwsvxr2An2CeH6icPS7lMFFxjLAloQZMV-DESSBoXj59pewd1Kv_rFQpq2h8ccfFIyEG4_x4kjay3QWQnObUmWc7Q_piRODLhJptKcwakrm6Wua1saS45kV1nbwG63T5OgU1Krfucd4I1FhtLyC9ROC0xK0nc0QHogbzog8DhsEJeCptRY-E8EyqtuwRSaqN2pa2C-CPrW4EXa1WwkEKkvVosXeAAsk1SzdA7uZS0opFmZic=",
               "summary": []
             },
             {
@@ -87,10 +87,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9022,
-            "cachedInputTokens": 8777,
-            "cacheWriteTokens": 242,
-            "outputTokens": 120
+            "inputTokens": 9082,
+            "cachedInputTokens": 8841,
+            "cacheWriteTokens": 238,
+            "outputTokens": 125
           },
           "model": "gpt-6-luna"
         }
