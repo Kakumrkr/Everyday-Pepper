@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9fb7f704ed0b93edf9519c2192c3ac179cc9e6a12d75a9b3c0009b89136c4f6e",
+        "fingerprint": "6e463f91dc9c564ab4dc8c3eb3fb34210fcb95567b8006616988088bd2134887",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_tTWz6DGTrehhRVfIOxGEFzjq",
+              "id": "call_TwOJppMdjRBopVYltWWcOAX8",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8860,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9845,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 16,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "8dba170e3030a7b09623ff908610d9933db805a7d5239642c61328679c16faa6",
+        "fingerprint": "f0f00f5d886ba2e36732cf619b956b27c607689aac82adfc7d4532152acc566b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wsd18Kwa7XSEhz5zrB0J6bif",
+              "id": "call_69WnCH7MUTjQsMMd8XS6EQIZ",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,62 +38,48 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8945,
-            "cachedInputTokens": 8857,
-            "cacheWriteTokens": 85,
-            "outputTokens": 44
+            "inputTokens": 9931,
+            "cachedInputTokens": 9842,
+            "cacheWriteTokens": 86,
+            "outputTokens": 45
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "69973645d7c6b240c04e3cb6b442a88b4b5f2cc567246bfca56f631b73dc7888",
+        "fingerprint": "a19ce3b2b9af6afef3ce377a9af681d48745843af2e61670d8c94dd2c1ea5c89",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_7L4aRWlr3OSYzUTYugszTK9z",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9234,
-            "cachedInputTokens": 8942,
-            "cacheWriteTokens": 289,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "856b63724df48df2537215cc2eb065756932401463c85ce765a0bcb0c01eb306",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_c0o2E9FvWb16mYVlYoS3aDhs",
+              "id": "call_EPDf7Ip0aJvyg5N95sld20ww",
               "name": "move_booking",
               "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-06\",\"time\":\"14:00\",\"staffMemberId\":\"{{staff:jess}}\",\"emailClient\":null}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_0edc7dabbacc6e77016add35f9014c87d2b75045335dae8b03",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3TX59zrNOxNfBj36504PVCiErsjC_3qUrT78Cm8SqJsODaj97PgxbKWtVVo79vklBwlAjjMohdv6QOzZTC21NPwNzUjiq5LcCI3K7jOuuLB4TXfNAoWKT9gg9itpJWiW9IUo8c84_G3tIvnugWh9u7Lxbl9cCG3fJOgdh8BVTTnZuNuqgVP9kbcxuy4LvDhePAsrzOcdkbybJ7tQ0FfQC7dAl09_3FIf5yNsWQkAK4wA_AxXCVimOwAkcy7iwxk2Rglwa6BEvq1yTxoppY5KzjE_aprk89An6ny9YNi8NFjkOgE3HXhfBJ4-wVaDFngpgoXvOeRJa9VeTooR51N_yFvzgzlz1EBHjJQgpVAEHIh316s124_uiw4immOgmcgT9iC5i-NXBBCJY986kBIHtjXntT07YzFlxBiiSvwrMqJgM3LiH8ZKdYboHlfv4hR2CXN6hkVbsVpCthr5507-EPbeh7lKbx-Qs6z0kthNJ-hQIwP2SRRrJ0HcDk50WZwlceuXdwTeNst6_jctITzzj5kV_imWbiw8H5-k2hrFK0R3lxLZcoCb1JZKZlJawXR1z3ENSjIohSTBuL_kWszl9lppC-VLyxfpTLz1al038RJlIbQl8CMYspPjDYpf5QSD2zyPrFlupWFVlTKqWMVX2BMGs06dKy4y9ZDUnHRg5Jb23KGKfCAZ53eu-TzeGIk94PSzaRUdRQLH75Q3ylQOMKOH1LIsNh8h_kF9udbbzmK-fUzxInf4gJOTTu7dRtfvwoaEme3u31F-2uPM407toZIMShSDEhvVntzNTpAtSR5o-cUUzlztCmv3N6W7IwtTroqhEHnS1BcJAcU5MJcorD_dE38qTqp8oV868KQ5nlgyLyMBx4kBfoWEIcX-rl1QWVfzxepkhbMpkBJB1SV3lK7yfbZDKXzymuT_RW0ZCmo7nycy8s6nrkmpLg3Env4WRwYUu5n1YX_hf_kOGErVgZZ8JqCjupR4JcOrnZEu67xI-7QFYk0OOHc9UARKRaQHIXQElzc1kHd7Ga-9lUmXl41pIX-MIVQKgDqNbRcc3DLMsTqLDQL50ThG5gCsXTSLtJ9tFqFhJTutq47Fy4UrEhbnHFFl035o7LFmXvhg_t3oKhrfpItUeMeorT6v6kgU9rhX3GeibXL0lLhVXcDaeoowFOhXe41zH7_2kX_U_9UZfBX3dsrIyWBL7AD9YjjKHJOYyycX1GusZDsshPXv6p8RgYQrtX9h4a5vn4gnCG-ifrzxjoijx37qfOXqoB4m29mC3-uqkXbEclP4PrpeqK4cD0EpkqSLI93hm2SUWRgcszvItcHzM1ngzf9KfGg9l2VHrAbuU3sM7x3zG9QZ-6AK16b1Nj68YomPmJxhkVS70C0PVrEUaBoFec2ev0mHjTaQRwSmOustU0dIH7lThQF6DGhAHTgrMQw8n_UGqAq5IMeVkvaWIAFW2spVlogFxCKcmp_c8qWGmBoqQjM1fhfc6GuQkkSS2dOgAzXPqGf1R3DVXHVn9mP46-ildEOkbaF0uk7ihQYrc7pDf1T2XDQ91etuM4M3mdhjLXNccEm68OllGZ_hFAe7Kv51LXJWgxWo8TvI3HMt3ktekfz8uuUoRaYwNtr3PJdts5Y8Pnv4yFxuByJbMRzOlOzumYyVmlIzTI9sC8qV6A4LaVXzrA4PYZIRIdIIWr5837xsz9VYCpXIIULYVtbDdrp1xOFAoRYj",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9704,
-            "cachedInputTokens": 9231,
-            "cacheWriteTokens": 470,
-            "outputTokens": 89
+            "inputTokens": 10222,
+            "cachedInputTokens": 9928,
+            "cacheWriteTokens": 291,
+            "outputTokens": 116
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "54167442cb44ad5636a602d4249d3e1a2594d69aec67112dfce7b3b8b8701203",
+        "fingerprint": "aa8e739220fd3a51ade821e446be33fa6b059debba86c3140e18cef93a984249",
         "response": {
-          "text": "Jess isn’t free Friday at 2pm. She has 12:30pm, 12:45pm or 3:15pm available. Which works best? Maria’s appointment hasn’t changed.",
+          "text": "Maria’s appointment is still scheduled for Tuesday, November 3 at 3pm. Jess isn’t free Friday at 2pm; the nearest options Friday are 12:45pm, 3:15pm, or 12:30pm. Which would you prefer?",
           "toolCalls": [],
           "replay": [
             {
@@ -103,12 +89,12 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9995,
-            "cachedInputTokens": 8841,
-            "cacheWriteTokens": 1151,
-            "outputTokens": 46
+            "inputTokens": 10534,
+            "cachedInputTokens": 10219,
+            "cacheWriteTokens": 312,
+            "outputTokens": 60
           },
-          "model": "gpt-6.1-sol"
+          "model": "gpt-6-luna"
         }
       }
     ]

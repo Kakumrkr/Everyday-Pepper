@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "597987cb5082025768587795abb1feba0d2680023b2b6ea513a9a39ce92cb906",
+        "fingerprint": "e5d0b328c1b4f1db9f6a226ee0f5351de6204797c7f104a68c04d279a310bdf9",
         "response": {
-          "text": "I won’t assume or record a reason for Maria seeming tired. If there’s something you want me to remember, tell me what you know for sure.",
+          "text": "I won’t record a guess about Maria’s stress. If you noticed something specific you’d like noted about today’s visit, tell me what you’d like recorded.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8860,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9845,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 16,
-            "outputTokens": 35
+            "outputTokens": 37
           },
           "model": "gpt-6-luna"
         }

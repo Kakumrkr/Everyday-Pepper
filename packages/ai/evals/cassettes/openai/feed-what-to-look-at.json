@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "55fde25955a030c67982418015f133669f3fd486a967c911221957978df1d280",
+        "fingerprint": "9c8e1406787f173701b2323563e38785da1b4d227b47861cc16930ed5042741f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xREJJEhDnprBurqG9CtdghO4",
+              "id": "call_Djq3Unqd9NWxtU2z1hEE8j3t",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8855,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "9df08606d4aea74273d9213c30a0cb048c39a4074334e86e7392c88deb65b5e0",
+        "fingerprint": "9f48ad1e5c042e34a1b5ff442294b579dad2c8055905da4d36c09f1870d0f667",
         "response": {
-          "text": "Yes—today, Jess and Marco each have one open 9 AM–5 PM gap. The feed also flags Sara K. and Sarah P. as due to rebook for haircuts with Jess.",
+          "text": "Today, Jess and Marco each have one open 9:00–5:00 gap. Two haircut regulars are also due for rebooking: Sara K. (overdue since Oct 26) and Sarah P. (overdue since Oct 27). No one is on the waitlist.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10501,
-            "cachedInputTokens": 8852,
-            "cacheWriteTokens": 1646,
-            "outputTokens": 45
+            "inputTokens": 11524,
+            "cachedInputTokens": 9837,
+            "cacheWriteTokens": 1684,
+            "outputTokens": 65
           },
           "model": "gpt-6-luna"
         }

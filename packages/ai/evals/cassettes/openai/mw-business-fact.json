@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "85bd6b7344a36206a51e8c12d45cd6048ee5e814a8d946ca2dc67d21fc99a593",
+        "fingerprint": "9cc83efeab97d43c6c5f70e564d86f48f844d0c3e50f5aeba5c14f3647933611",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_8tOx40nmiGJG2WHiheKzycsR",
+              "id": "call_QTkiKwKSYcaG6318iYHcetC6",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_closure\",\"value\":\"We're closed on Thanksgiving Day.\",\"sensitive\":null}"
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We're closed on Thanksgiving Day.\",\"sensitive\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8856,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9841,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 12,
-            "outputTokens": 42
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "102d5c56ce5209862b8c5239839a9de2f02cf0393c5a105fec565f8016c54328",
+        "fingerprint": "e0fa3a21988441d1568e0d76e28e7579e1770079c4e56cb86a240253840a2ec6",
         "response": {
-          "text": "Noted: Juniper Hair Studio is closed on Thanksgiving Day.",
+          "text": "Noted: we’re closed on Thanksgiving Day.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8938,
-            "cachedInputTokens": 8853,
-            "cacheWriteTokens": 82,
-            "outputTokens": 17
+            "inputTokens": 9920,
+            "cachedInputTokens": 9838,
+            "cacheWriteTokens": 79,
+            "outputTokens": 14
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "93b10021ea71d9d5b807b3dedf867e2f3c4a648bf351493719616da3b4191c03",
+        "fingerprint": "5186f21f757fc39e1e2668f67ebc1e9d2f47df207ae8684337c8840b8147ead1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_FM7LqY9Y4kuzj5J3m8Lri9md",
+              "id": "call_B8r8IG0RNtr7qbVdzP6Z8coN",
               "name": "get_feed",
               "arguments": "{\"kind\":\"rebooking_due\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8858,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9843,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 14,
             "outputTokens": 20
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "1a6a93b0b0ae5d401f77ec00b576f332b2206e2385c624a3685496b0286fb788",
+        "fingerprint": "0b39cc20a25f28ddd89f3c6dfe6f59879ffa596b6127844a4de429130430061e",
         "response": {
-          "text": "There are 2 regulars due back: Sara K. and Sarah P.",
+          "text": "There are 2 regulars due back: Sara K. and Sarah P. Both are due for a haircut with Jess.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9194,
-            "cachedInputTokens": 8855,
+            "inputTokens": 10179,
+            "cachedInputTokens": 9840,
             "cacheWriteTokens": 336,
-            "outputTokens": 20
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

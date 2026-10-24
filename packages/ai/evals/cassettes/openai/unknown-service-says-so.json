@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "cc8d42e47dd44b61cfeb058f458d7c37a0c922f1dd80a7159d742a05815d0df3",
+        "fingerprint": "ed6d644ab43e2aea1504edeec90a49c1283b2895eb76be9920338414727ea5bb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_UW39MRmtYAcFPNFRwXxPxLzM",
+              "id": "call_YuFeNprdeoppmpNv81zNrRzg",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8858,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9843,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,18 +25,33 @@
         }
       },
       {
-        "fingerprint": "17ba6bb053ac96351b34f70c2eaf1d0ddbf432d3266368bd0e4b5508e4d56e69",
+        "fingerprint": "1b46d03a04e2f7b2db9437bf9dc245ad56ad048c58f2f9f68740a1505a2aae89",
         "response": {
-          "text": "I can’t book a manicure—Juniper’s listed services are Colour and Haircut. Would you like me to book Ana for one of those instead?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gXR7JOc3BxPlus4mOpLWFVQf",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10305,
+            "cachedInputTokens": 9840,
+            "cacheWriteTokens": 462,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ddde846978fab65579a02ccebd39d2e215306ee134c50306ff82985914a38591",
+        "response": {
+          "text": "Juniper Hair Studio doesn’t offer manicures, so I can’t book that service. The available services are colour and haircut.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0c430659f69c407a016adcecd2928087d2b8ff103f0e1bbb13",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3OzT_IST78cj87x2XB06Bm6dkWq2orJc_DRiAkxVakvXNwY7MB8bPqVAWEUPef1qBYAt81JVtOVUL6unBKkqGvZ0uvmBDGiJ_3bcgs15n_zAsRdBJYUrv0vQcVy86hLNwwATtJbQIADH_MFb-3lroSIT6qJ8_isWmGjShePOoTTVnKTHXrHta3n1EqTfpYEeGtTRG1XV-03qtI_MdgAERTbJQqBHw-4Mp6Rx_IxXkJ8KZZ_PNzLcfA7p8pixtgQ5_JlO_jNRqgfSWU3R2EZRGmrK5QpxPywQj177OR3tveaR8F2JKiKrXd6ZEdvnvu9FnGE71EmlMLJXy8M5LkRlkkcXWzZTKs08THI3fXNYYZZ-DyCpcv_2gZcv_pNVsDJ25jvnx0mFOtlCcng1DUiTWhk8e_Xi8PqMg7ElWtx9TgMrTGJJsjm4YBqkFD65GpkWlwYUuKj2aKcvaG3C5G3K6fy8TIbIEa_wgqpHRzC07NYIuReU9iUD_K3AiCku4ku-GXHdgCyU-_gXQepVfsKrvhduiE3ec3_p0Wsknkrb2HG-3nI83WuAfFLafnfT2ZuogZRyN6sPNvFTUtQJsNrJEvgGIlU5xGPMayl8zfJimpQxReRyzXSaQsRQfVQv1xfW2HOOolbUsVjgZdYSZRIOPwWDMQyOG9KT-Cmt2vhh5GQ5B-wo0X6IIAnR6m0DvdqcaxYMUssnNl3jtIjxYvNob9sWoryXn73Niu3zqA2FhOxRkW01rvXVJpN97ccOZNIrWnPL4Wy6dg0uysBeuMke1qPy9u7iDL8PFmtv2QZmU8qGRIkRXWGkASDcVNRpkVT4lgakJy46l4YNHUFPfz-za3zlbiRHr3KdY82kqBRNbTazZ4nzvF9N2T_QXSnoUZCjpf9_QWDDOk_Sc7KUFYSWKsQ6l7UmH-g3jFh12_vCE3RXoRJenZWgR7TYe29up4weu4INhdEQ8GJvQOEki8rnhV_G1rPMP_OLeC92C90wMjgihHoIU9NnoYtK0fYzJlBdMbMVyZiPJxHjdSXA1YxwzbbQewg4n7ZW6Iqf7USbElUNS965gF2uXwWkSz1qM-r7WU3xXodMMEaiw6LarHJcZ46ErjiGmlDgTXROXOi88i62AqVZptrLI-YQdQtCWAO8PU4mAokUZIaxrpNo_OQBDNowDu1L-KY46aavC3cDr1tISGE7a-ckGjgSfOO7uI7IVOiPuJ5iRTzAL5m4YcPenn7TwCJt8t6d-3S34tS57Y_9G14N_mpxFt1vbdVmmLnyITQ63AzKBPNw4eEVLN4VdiqkGcHcaedHrMldHNCTir4-Y8E6uUXj2icQ50VVOT4c0HJq_BHxBTYQz-RWoGR-T9fCr-2RUEz1RLscKiUiKrqQlskVahQF9yS2WnsQMZtGqx3httMxoI7CH5zq8Fce4WCxszD5JjjbUKu7f4-j1yzG2FiBHzbKnvVBX45p1PUrTpFKXf0jYesBZaV_vfxNsZCjrmNOLEH-7P_pm9z07miYKa1fJRevtECWuXztb9_PuQK0mMGwegbCrgn3jX8Zh3lg-Zggry5eOX9DztFGzDK4T4O7PZ_OFan7N0AqjhYp4CH3j7HPHaYVT8Y5fC9Dj83MnOm5iXnXI3dN15hYxlcKm4GkvjlYRruaykm1D2EYjCMv-3VRCFFikEgOea2B0VYJ_enJwEih1VJ4rYvLQAfMRs0Bw7au5lPN-uPS-bexzawXJ-lS81Aa2EstUVkL1W12mFBQ9Uv1RMrZ9i-dD76za80UBjMutoC2qv7brSZNXUkQQUq3g-mOof32MPVJEF1zw0Tq3BC1LJ8wvDUpUQrvlr8vxVobr3o3aAOdQM_ftNizDAL7FBcLOjeHiuQZcwSfnQ==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -44,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9317,
-            "cachedInputTokens": 8855,
-            "cacheWriteTokens": 459,
-            "outputTokens": 72
+            "inputTokens": 10390,
+            "cachedInputTokens": 10302,
+            "cacheWriteTokens": 85,
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

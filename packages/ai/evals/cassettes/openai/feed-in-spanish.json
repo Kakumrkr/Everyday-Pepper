@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5e0b9cf92d3c52e7f2281d939ad1707bd2ab2823b4f859272ab21c19ea52d8ac",
+        "fingerprint": "d82182189fb426feff9c97bbb6d5639f75d8f851404b8e2cd6ce678cc5d23a2e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_9SfxJ43xZwNt4tbiio0HhK4s",
+              "id": "call_llpUHyGdNfXoj53VtYbGafIV",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8857,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9842,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 13,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "e6f587747b0b99f7c42cb9025e5ef419b04fd0890b3795500adf7308f8ed540c",
+        "fingerprint": "06dc6ca5921e5fe66e0a1a466f59bfaf25f79f865097fa553b648cf79890bbbe",
         "response": {
-          "text": "Sí. Hoy hay huecos amplios de 9:00 a 17:00 para Jess y Marco. También aparecen dos clientas que ya podrían volver para un corte: Sara K. y Sarah P. No hay correos de rebooking esperando aprobación.",
+          "text": "Sí. Hay espacios libres hoy, lunes 2 de noviembre: Jess tiene un bloque abierto de 9:00 a 17:00 y Marco también de 9:00 a 17:00. Además, Sara K. y Sarah P. ya tienen pendiente volver para un corte. No hay nadie en lista de espera ni correos pendientes de aprobación.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10515,
-            "cachedInputTokens": 8854,
-            "cacheWriteTokens": 1658,
-            "outputTokens": 57
+            "inputTokens": 11522,
+            "cachedInputTokens": 9839,
+            "cacheWriteTokens": 1680,
+            "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }

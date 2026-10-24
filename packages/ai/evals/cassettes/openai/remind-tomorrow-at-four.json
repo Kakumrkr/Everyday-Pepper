@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "fe020e6eeb2b7c1eca8e5f79f75c587112b660bbf65af6f421a914b5156cdb9e",
+        "fingerprint": "9bae2935f4418e00f3e3c4c8a012bb7f4568f9d4e359477d0d72276e8ae8b404",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_3qIw9G2Kl36tnruqeQTpb3lM",
+              "id": "call_NZE7UjGDsHCqAaJwcWSjuQqP",
               "name": "add_todo",
               "arguments": "{\"title\":\"Order shampoo\",\"dueDate\":\"2026-11-03\",\"dueTime\":\"16:00\",\"assigneeStaffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8858,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9843,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 14,
             "outputTokens": 45
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "89b0c5bb2cac55e53e63cb58923ae66dc6f0c7e2a4368d786ee9aa7741101af3",
+        "fingerprint": "cf36c7c1850ddb6877ca83287cb41471bc00886e02a55c5ca602745b57567cdd",
         "response": {
-          "text": "Done — I’ll remind you tomorrow, November 3, at 4:00 PM to order shampoo.",
+          "text": "Done—I’ll remind you to order shampoo tomorrow, November 3, at 4:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8960,
-            "cachedInputTokens": 8855,
+            "inputTokens": 9945,
+            "cachedInputTokens": 9840,
             "cacheWriteTokens": 102,
-            "outputTokens": 26
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

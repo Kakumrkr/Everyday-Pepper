@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a7491b0fda1e056043f329eeef7ca41b9b7cbdefb9ddd1730ed82ceff4e1d1c4",
+        "fingerprint": "9f09cfe10a7b20263097eea0df81664ffa68dd6321e67336901356614e6f9a11",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_phTEtip3MrJPdatA6YpA6Plu",
+              "id": "call_8MZCR16Z54sqy1CRoARV17IV",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8858,
-            "cachedInputTokens": 8841,
+            "inputTokens": 9843,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "45944ff1d0e69f6d87c873cad7f3f3e80931fa3433b1991a9821f1c8c5e3da5b",
+        "fingerprint": "bdbd5ca346d7211fe2742e5fa00236904fb0e74fcccba615a98f2d5ec756c240",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MDqbD1rZa9Oa78edC4tOVidU",
+              "id": "call_RH81JTep9vcMMhakjCdZYh51",
               "name": "find_clients",
               "arguments": "{\"name\":\"Zoe Martinez\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9323,
-            "cachedInputTokens": 8855,
-            "cacheWriteTokens": 465,
+            "inputTokens": 10299,
+            "cachedInputTokens": 9840,
+            "cacheWriteTokens": 456,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "83a99e0072b137e1b952490c59c3a86c3dd7fb301a34ce5f5dd083e81f853ef2",
+        "fingerprint": "7cb0c90423e771cec36daebfbb8751f5211cc7546b6cd11c946ea8b0d6ba0e02",
         "response": {
-          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or tell me the name she’s listed under?",
+          "text": "I couldn’t find a client matching Zoe Martinez. Could you check the spelling or tell me another name to search?",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9384,
-            "cachedInputTokens": 9320,
+            "inputTokens": 10360,
+            "cachedInputTokens": 10296,
             "cacheWriteTokens": 61,
-            "outputTokens": 29
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }
