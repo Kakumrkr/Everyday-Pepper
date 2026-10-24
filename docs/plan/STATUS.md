@@ -10,7 +10,11 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - **Held-out (a):** `in-two-days` — make find_availability/get_day guides agree (one-day "free at <time>" → `get_day`), grader accepts either read, relative "in N days" line in `context.ts`; `who-works-saturdays` left untuned (needs a tool-output change); fix find_availability's `notBefore` example (first day only).
 - **Tasks:** 1 guide batch (tier 1–2, scripted evals green) → 2 probe scheduling+ambiguity → 3 full record + pass^3 → 4 security review `docs/engineering/security-review-s33.md` → 5 check every playbook §2 gate → 6 `/session-close`.
 - **Rule (S32b):** a gate still missing after one fix → ask the user.
-- **Checkpoint:** none done yet. Next: task 1.
+- **Cap raised again (user, during S33):** one whole-suite run measured at ≈ $0.197 from the cassettes (the brief assumed ≈ $0.11), so the plan would end near $1.43: cap **$1.55** ("Raise the cap to $1.55").
+- **Done:** task 1 (commit bdb1c1b: find_availability v2, instructions v5, `alsoAccept` grader option, `in-two-days` accepts get_day); probe scheduling + ambiguity $0.0826, 53/54, the miss is `who-works-saturdays` (untuned, as agreed); `memory-latency.int.test.ts` (recall p95 10 ms, search 69 ms, delete+scrub 17 ms).
+- **Running:** pass^1 on failure, follow_through, memory_write, learned_rules; then pass^3 on scheduling, memory_delete, memory_safety, memory_recall, episodic, safety, permissions, autonomy (labels `P7 S33 pass^1` / `P7 S33 pass^3`).
+- **Found for the security review:** `pnpm audit --prod` 2 high (body-parser 2.3.0, multer 2.4.0 via @nestjs/platform-express) and 3 moderate (nodemailer 10.0.15): patch after the recording (lockfile change).
+- **Next:** gates check, security review, the dependency patch, `/session-close`.
 
 ## Last sessions
 - **S32b Phase 7e "b" half (2026-10-23): the re-record, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "Results"). Full entry in [session-log.md](session-log.md).
