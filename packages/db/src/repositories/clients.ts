@@ -7,7 +7,7 @@ import {
   type ClientId,
   type RecordSource,
 } from '@pepper/contracts';
-import { asc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
+import { and, asc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { ClientEmailTakenError, isUniqueViolation } from '../errors.js';
 import { clients, type ClientRow } from '../schema.js';
@@ -67,6 +67,27 @@ export async function updateClient(
     }
     throw error;
   }
+}
+
+/**
+ * Records that the client unsubscribed from marketing email (S36, one-click): the first time
+ * stays. Returns the time it holds, or `undefined` for no such client.
+ */
+export async function optOutClientEmail(
+  tx: TenantTx,
+  id: ClientId,
+  at: Date,
+): Promise<Date | undefined> {
+  const clientId = Id.parse(id);
+  await tx
+    .update(clients)
+    .set({ emailOptOutAt: at })
+    .where(and(eq(clients.id, clientId), isNull(clients.emailOptOutAt)));
+  const [row] = await tx
+    .select({ at: clients.emailOptOutAt })
+    .from(clients)
+    .where(eq(clients.id, clientId));
+  return row?.at ?? undefined;
 }
 
 /** The client with this id, if the transaction may see them. */

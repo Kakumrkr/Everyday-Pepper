@@ -322,18 +322,21 @@ const EMAIL_NAME: Record<WouldBeEmail['template'], string> = {
   confirmed: 'confirmation',
   rescheduled: 'new-time email',
   cancelled: 'cancellation email',
+  rebooking_nudge: 'rebooking email',
 };
 
 const WOULD_SEND: Record<WouldBeEmail['template'], (name: string) => string> = {
   confirmed: (name) => `Emails ${name} a confirmation.`,
   rescheduled: (name) => `Emails ${name} the new time.`,
   cancelled: (name) => `Emails ${name} that it’s cancelled.`,
+  rebooking_nudge: (name) => `Emails ${name} the rebooking note below.`,
 };
 
 const ALREADY: Record<WouldBeEmail['template'], (name: string) => string> = {
   confirmed: (name) => `${name} was already emailed a confirmation.`,
   rescheduled: (name) => `${name} was already emailed the new time.`,
   cancelled: (name) => `${name} was already emailed that it’s cancelled.`,
+  rebooking_nudge: (name) => `${name} was already emailed about rebooking.`,
 };
 
 /** What happens, or happened, to one email the action involves. */

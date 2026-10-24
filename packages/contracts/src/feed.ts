@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingIdSchema } from './bookings.js';
 import { ClientIdSchema } from './clients.js';
+import { MailingAddressSchema } from './drafts.js';
 import { LocalDateSchema } from './rules.js';
 import { InsightTypeSchema } from './templates.js';
 import { UtcDateTimeSchema } from './time.js';
@@ -153,6 +154,8 @@ export const FeedSettingsChangeSchema = z
       .refine((kinds) => new Set(kinds).size === kinds.length, 'Each kind once')
       .optional(),
     askAnswered: FeedInsightKindSchema.optional(),
+    /** The postal address rebooking emails carry (S36); `null` takes it away. */
+    mailingAddress: MailingAddressSchema.nullable().optional(),
   })
   .strict()
   .refine((change) => Object.values(change).some((value) => value !== undefined), {
@@ -173,6 +176,11 @@ export const FeedResponseSchema = z
      * once, of owners and managers only.
      */
     askToTurnOff: FeedInsightKindSchema.nullable(),
+    /**
+     * The business's postal address for rebooking emails (S36, CAN-SPAM); `null` until set, and
+     * no nudge is drafted until then. Shown only to owners and managers (`null` for staff).
+     */
+    mailingAddress: z.string().max(300).nullable(),
   })
   .strict();
 export type FeedResponse = z.infer<typeof FeedResponseSchema>;

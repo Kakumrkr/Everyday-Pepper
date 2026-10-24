@@ -254,3 +254,31 @@ describe('feed latency', () => {
     expect(p95).toBeLessThan(900);
   });
 });
+
+describe('the mailing address for rebooking emails (S36)', () => {
+  it('owners and managers set and clear it; staff never see it; the audit holds no address', async () => {
+    expect((await getFeed(db, ana(), { clock })).mailingAddress).toBeNull();
+    await changeFeedSettings(db, marco(), {
+      mailingAddress: ' 12 Main St \n Springfield, IL 62701',
+    });
+    expect((await getFeed(db, ana(), { clock })).mailingAddress).toBe(
+      '12 Main St\nSpringfield, IL 62701',
+    );
+    expect((await getFeed(db, jessActor(), { clock })).mailingAddress).toBeNull();
+    await expect(
+      changeFeedSettings(db, jessActor(), { mailingAddress: '1 Other Rd, Town' }),
+    ).rejects.toThrow(ForbiddenError);
+    // The same address again changes nothing and writes no second entry.
+    await changeFeedSettings(db, ana(), { mailingAddress: '12 Main St\nSpringfield, IL 62701' });
+    await changeFeedSettings(db, ana(), { mailingAddress: null });
+    expect((await getFeed(db, ana(), { clock })).mailingAddress).toBeNull();
+    const entries = (
+      await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 50 }))
+    ).filter((entry) => entry.action === 'tenant.updated');
+    expect(entries.map((entry) => entry.after)).toEqual([
+      { mailingAddressSet: false },
+      { mailingAddressSet: true },
+    ]);
+    expect(JSON.stringify(entries)).not.toContain('Main St');
+  });
+});

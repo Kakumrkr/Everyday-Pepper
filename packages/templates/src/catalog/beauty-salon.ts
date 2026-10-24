@@ -110,6 +110,10 @@ export const beautySalon: TemplateInput = {
     { key: 'allergies', label: 'Allergies or sensitivities', type: 'text', sensitive: true },
     { key: 'preferences', label: 'Preferences', type: 'long_text' },
   ],
+  drafts: {
+    voice: 'Warm, upbeat and personal, like a stylist reaching out to a regular.',
+    morningHour: 7,
+  },
   insights: {
     enabled: [
       'rebooking_due',

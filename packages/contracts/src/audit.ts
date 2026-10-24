@@ -80,6 +80,15 @@ const RulesValuesSchema = z.object({ rules: z.array(RuleSchema) }).strict();
 
 // Clients, bookings and the waitlist (ADR-0017): ids, times and statuses only. A client's name,
 // email and phone are personal data and never in an entry.
+/**
+ * A business's settings change: the booking page's color (ADR-0022), or whether rebooking
+ * emails have a mailing address (S36; never the address itself, which may be a home).
+ */
+const TenantChangeSchema = z.union([
+  z.object({ brandColor: BrandColorSchema.nullable() }).strict(),
+  z.object({ mailingAddressSet: z.boolean() }).strict(),
+]);
+
 const ClientValuesSchema = z.object({ source: RecordSourceSchema }).strict();
 /** Which of a client's details an edit changed (never the values). */
 const ClientEditSchema = z
@@ -183,8 +192,8 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
     .object({
       action: z.literal('tenant.updated'),
       entity: entity('tenant'),
-      before: z.object({ brandColor: BrandColorSchema.nullable() }).strict(),
-      after: z.object({ brandColor: BrandColorSchema.nullable() }).strict(),
+      before: TenantChangeSchema,
+      after: TenantChangeSchema,
     })
     .strict(),
   z
@@ -307,6 +316,15 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('client'),
       before: z.null(),
       after: ClientEditSchema,
+    })
+    .strict(),
+  // The client unsubscribed from marketing email with the one-click link (S36): no address.
+  z
+    .object({
+      action: z.literal('client.email_opted_out'),
+      entity: entity('client'),
+      before: z.object({ emailOptedOut: z.literal(false) }).strict(),
+      after: z.object({ emailOptedOut: z.literal(true) }).strict(),
     })
     .strict(),
   z

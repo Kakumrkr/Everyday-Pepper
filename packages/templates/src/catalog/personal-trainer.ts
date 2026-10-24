@@ -82,6 +82,10 @@ export const personalTrainer: TemplateInput = {
     },
     { key: 'emergency_contact', label: 'Emergency contact', type: 'text' },
   ],
+  drafts: {
+    voice: 'Encouraging, friendly and direct, like a coach checking in; never about weight, health or the body.',
+    morningHour: 6,
+  },
   insights: {
     enabled: [
       'rebooking_due',

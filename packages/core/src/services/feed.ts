@@ -17,9 +17,11 @@ import {
   appendAuditEntry,
   closeFeedItem as closeFeedItemRow,
   countDismissals,
+  findCurrentTenant,
   listOpenFeedItems,
   readFeedSettings,
   requestInsightRun,
+  updateCurrentTenantMailingAddress,
   withMember,
   writeFeedSettings,
   type Database,
@@ -64,6 +66,9 @@ export async function getFeed(
       settings: publicSettings(stored),
       canChangeSettings,
       askToTurnOff: canChangeSettings ? await kindToAskAbout(tx, stored, now) : null,
+      mailingAddress: canChangeSettings
+        ? ((await findCurrentTenant(tx))?.mailingAddress ?? null)
+        : null,
     };
   });
 }
@@ -86,7 +91,11 @@ export async function closeFeedItem(
   });
 }
 
-/** Changes the business's feed switches (owners and managers), with an audit entry. */
+/**
+ * Changes the business's feed switches and the mailing address its rebooking emails carry
+ * (owners and managers), with an audit entry (the address only as set or not: it may be a
+ * home address).
+ */
 export async function changeFeedSettings(
   db: Database,
   actor: Actor,
@@ -95,6 +104,23 @@ export async function changeFeedSettings(
   requirePermission(actor, 'settings.manage');
   const parsed = FeedSettingsChangeSchema.parse(change);
   return withMember(db, actor.context, async (tx) => {
+    if (parsed.mailingAddress !== undefined) {
+      const tenant = await findCurrentTenant(tx);
+      const before = tenant?.mailingAddress ?? null;
+      if (before !== parsed.mailingAddress) {
+        await updateCurrentTenantMailingAddress(tx, parsed.mailingAddress);
+        await appendAuditEntry(tx, {
+          actor: auditActorOf(actor),
+          change: {
+            action: 'tenant.updated',
+            entity: { type: 'tenant', id: actor.context.tenantId },
+            before: { mailingAddressSet: before !== null },
+            after: { mailingAddressSet: parsed.mailingAddress !== null },
+          },
+          requestId: actor.requestId,
+        });
+      }
+    }
     const before = await readFeedSettings(tx);
     const after: StoredFeedSettings = {
       suggestionsPaused: parsed.suggestionsPaused ?? before.suggestionsPaused,

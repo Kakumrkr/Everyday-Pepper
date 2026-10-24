@@ -88,6 +88,10 @@ export const barber: TemplateInput = {
     { key: 'skin_sensitivity', label: 'Skin sensitivity', type: 'text', sensitive: true },
     { key: 'preferences', label: 'Preferences', type: 'long_text' },
   ],
+  drafts: {
+    voice: 'Relaxed, friendly and brief, like a barber texting a regular.',
+    morningHour: 8,
+  },
   insights: {
     enabled: [
       'rebooking_due',

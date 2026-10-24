@@ -1,9 +1,11 @@
 import {
+  PLATFORM_DRAFTS,
   ruleDefaultsOf,
   TemplateIdSchema,
   TemplateSchema,
   type RuleDefaults,
   type Template,
+  type TemplateDrafts,
   type TemplateId,
   type TemplateInput,
   type TemplateInsights,
@@ -95,4 +97,9 @@ function deepFreeze<T>(value: T): T {
     Object.freeze(value);
   }
   return value;
+}
+
+/** The voice of the business's rebooking emails and the morning pass's hour (S36). */
+export function templateDrafts(id: TemplateId | null): TemplateDrafts {
+  return id === null ? PLATFORM_DRAFTS : getTemplate(id).drafts;
 }

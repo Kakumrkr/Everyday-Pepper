@@ -99,6 +99,28 @@ export class FeedItemNotFoundError extends Error {
   }
 }
 
+/** An unsubscribe link this server did not sign, or for a business that is gone (S36). */
+export class UnsubscribeLinkInvalidError extends Error {
+  constructor() {
+    super('No such unsubscribe link');
+    this.name = 'UnsubscribeLinkInvalidError';
+  }
+}
+
+/**
+ * A rebooking email can't be drafted or edited as asked (S36): the words break a draft rule (a
+ * link, a contact, a remembered sensitive value, too long), or the proposal is not a draft.
+ */
+export class DraftRefusedError extends Error {
+  constructor(
+    readonly reason: 'invalid' | 'sensitive' | 'not_a_draft',
+    message = 'This draft cannot be used',
+  ) {
+    super(message);
+    this.name = 'DraftRefusedError';
+  }
+}
+
 /** The task is already done: there is nothing to complete (S26b). */
 export class TaskNotOpenError extends Error {
   constructor() {

@@ -6,6 +6,7 @@ export * from './audit.js';
 export * from './chat.js';
 export * from './bookings.js';
 export * from './clients.js';
+export * from './drafts.js';
 export * from './feed.js';
 export * from './health.js';
 export * from './invites.js';

@@ -50,6 +50,8 @@ import {
   lockPendingProposalFor,
   lockProposal,
   markExecutionUndone,
+  repointFeedItems,
+  settleFeedItemsOf,
   withMember,
   type AiActionExecutionRow,
   type AiActionProposalRow,
@@ -317,6 +319,7 @@ export async function approveProposal(
     } catch (error) {
       // The dry run rolled back to its savepoint, so the transaction can still record this.
       await decide(tx, member, proposal, 'superseded', now);
+      await settleFeedItemsOf(tx, proposal.id, 'expired', now);
       return { kind: 'refused', error };
     }
     if (shown !== proposal.fingerprint || fresh.fingerprint !== proposal.fingerprint) {
@@ -341,6 +344,7 @@ export async function approveProposal(
         now,
         requestedBy: proposal.requestedByUserId,
       });
+      await repointFeedItems(tx, proposal.id, next.id);
       return { kind: 'stale', proposal: toProposal(next) };
     }
     checkRecordPermissions(member, runner, fresh.recordOwner);
@@ -467,6 +471,98 @@ export async function undoAction(
   });
 }
 
+/**
+ * The business proposes an action no member asked for (S36: the morning pass's rebooking
+ * nudges), in the caller's tenant transaction: the tool's dry run runs as `ai` (the business's
+ * AI acting for an owner, so the domain's checks pass), and the proposal waits for whoever may
+ * decide it (`requestedBy` and `recordOwner` none: owners and managers). It never runs without
+ * a person: whatever the dial says, a pass's action is a proposal. Idempotent by key.
+ */
+export async function proposeForBusiness(
+  tx: TenantTx,
+  ai: Actor,
+  runner: ActionRunner,
+  request: Omit<ActionRequest, 'outsideText'>,
+  options: { clock?: Clock } = {},
+): Promise<ActionProposal> {
+  const idempotencyKey = ActionIdempotencyKeySchema.parse(request.idempotencyKey);
+  const now = (options.clock ?? systemClock).now();
+  const proposed = await findProposalByKey(tx, idempotencyKey);
+  if (proposed !== undefined) return toProposal(proposed);
+  const preview = await dryRun(tx, { ...ai, via: 'ai' }, runner, request.payload);
+  const explanation = ActionExplanationSchema.parse({
+    ...request.explanation,
+    facts: explanationFacts(preview.facts, request.explanation.facts),
+    untrustedContext: request.untrustedContext,
+    decision: { outcome: 'propose', reason: 'setting' },
+  });
+  const row = await storeProposal(tx, memberOf(ai), runner, {
+    idempotencyKey,
+    payload: request.payload,
+    preview,
+    explanation,
+    now,
+    requestedBy: null,
+    system: true,
+  });
+  return toProposal(row);
+}
+
+/**
+ * A member who may decide a proposal changes what it would do before approving (S36: a
+ * nudge's words), on the card whose fingerprint they saw: the tool's dry run runs on the new
+ * payload and replaces the proposal (same target, new fingerprint), with its explanation and
+ * whom it was for. Nothing runs; the member then approves the new card. A card out of date
+ * (`shownFingerprint` differs) changes nothing and gets the current proposal back (`stale`);
+ * one past its time or from an older tool version expires.
+ */
+export async function reviseProposal(
+  db: Database,
+  actor: Actor,
+  proposalId: ActionProposalId,
+  revision: { shownFingerprint: string; payload: TrustJson; runner: ActionRunner },
+  options: { clock?: Clock } = {},
+): Promise<{ kind: 'revised' | 'stale' | 'expired'; proposal: ActionProposal }> {
+  const id = ActionProposalIdSchema.parse(proposalId);
+  const shown = StateFingerprintSchema.parse(revision.shownFingerprint);
+  const { runner } = revision;
+  const now = (options.clock ?? systemClock).now();
+  if (actor.via === 'ai') throw new ForbiddenError();
+  const member = memberOf(actor);
+  const ai: Actor = { ...member, via: 'ai' };
+  return withMember(db, actor.context, async (tx) => {
+    const proposal = await lockProposal(tx, id);
+    if (proposal === undefined) throw new ProposalNotFoundError();
+    const action = AutonomyActionSchema.parse(proposal.action);
+    checkDecider(member, action, proposal.requestedByUserId);
+    if (proposal.status !== 'pending') throw new ProposalNotPendingError(settled(proposal.status));
+    checkRunner(runner, proposal);
+    requirePermission(member, permissionFor(action), { ownerUserId: proposalOwner(proposal) });
+    if (proposal.toolVersion !== runner.version || proposal.expiresAt.getTime() <= now.getTime()) {
+      return {
+        kind: 'expired',
+        proposal: toProposal(await decide(tx, member, proposal, 'expired', now)),
+      };
+    }
+    if (shown !== proposal.fingerprint) return { kind: 'stale', proposal: toProposal(proposal) };
+    const preview = await dryRun(tx, ai, runner, revision.payload);
+    checkRecordPermissions(member, runner, preview.recordOwner);
+    if (preview.targetKey !== proposal.targetKey) {
+      throw new Error(`${runner.tool}: a revision must keep its target`);
+    }
+    const next = await storeProposal(tx, member, runner, {
+      idempotencyKey: `${proposal.id}.edit`,
+      payload: revision.payload,
+      preview,
+      explanation: ActionExplanationSchema.parse(proposal.explanation),
+      now,
+      requestedBy: proposal.requestedByUserId,
+      system: proposal.requestedByUserId === null,
+    });
+    return { kind: 'revised', proposal: toProposal(next) };
+  });
+}
+
 /** Proposals waiting for the member (staff: theirs; owners and managers: all), oldest first. */
 export async function listPendingProposals(
   db: Database,
@@ -554,6 +650,7 @@ export async function expireProposals(tx: TenantTx, now: Date, limit: number): P
   const expired = await expirePendingProposals(tx, now, limit);
   for (const row of expired) {
     const action = AutonomyActionSchema.parse(row.action);
+    await settleFeedItemsOf(tx, row.id, 'expired', now);
     await appendAuditEntry(tx, {
       actor: { kind: 'system' },
       change: {
@@ -674,6 +771,8 @@ async function storeProposal(
     explanation: ActionExplanation;
     now: Date;
     requestedBy?: string | null;
+    /** Made by a pass of the business, not at a member's request (S36): audited as the system. */
+    system?: boolean;
   },
 ): Promise<AiActionProposalRow> {
   const startsAt = input.preview.appointmentStartsAt?.getTime() ?? Infinity;
@@ -709,8 +808,9 @@ async function storeProposal(
       if (same !== undefined) return same;
       continue;
     }
+    if (pending !== undefined) await repointFeedItems(tx, pending.id, row.id);
     await appendAuditEntry(tx, {
-      actor: auditActorOf({ ...member, via: 'ai' }),
+      actor: input.system === true ? { kind: 'system' } : auditActorOf({ ...member, via: 'ai' }),
       change: {
         action: 'ai_proposal.created',
         entity: { type: 'ai_action_proposal', id: row.id },
@@ -728,6 +828,11 @@ async function storeProposal(
   throw new Error('Could not store the proposal: its target kept changing');
 }
 
+/** What a decided proposal makes of the feed item waiting on it (S36). */
+const FEED_OUTCOME: Partial<
+  Record<Exclude<ProposalStatus, 'pending'>, 'done' | 'dismissed' | 'expired'>
+> = { approved: 'done', rejected: 'dismissed', expired: 'expired' };
+
 async function decide(
   tx: TenantTx,
   member: Actor,
@@ -744,6 +849,10 @@ async function decide(
   // Callers hold the row lock on a pending proposal.
   if (decided === undefined) throw new ProposalNotPendingError(settled(proposal.status));
   const action = AutonomyActionSchema.parse(proposal.action);
+  // A feed item waiting on it (S36) closes with it; a superseded one's item follows its
+  // replacement (the callers repoint it) or, refused, expires.
+  const itemOutcome = FEED_OUTCOME[status];
+  if (itemOutcome !== undefined) await settleFeedItemsOf(tx, proposal.id, itemOutcome, now);
   await appendAuditEntry(tx, {
     actor: by === null ? { kind: 'system' } : auditActorOf(member),
     change: {

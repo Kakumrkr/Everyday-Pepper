@@ -105,6 +105,10 @@ export const spa: TemplateInput = {
     },
     { key: 'allergies', label: 'Allergies (oils, nuts, products)', type: 'text', sensitive: true },
   ],
+  drafts: {
+    voice: 'Calm, warm and welcoming, inviting them back to unwind; never about health or the body.',
+    morningHour: 8,
+  },
   insights: {
     enabled: [
       'rebooking_due',

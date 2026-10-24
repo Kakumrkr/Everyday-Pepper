@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ClientIdSchema } from './clients.js';
+import { DRAFT_LIMITS } from './drafts.js';
 import { MemoryFactShownSchema } from './memory.js';
 import { LocalDateSchema } from './rules.js';
 import {
@@ -140,6 +141,13 @@ export const AiProposalViewSchema = z.strictObject({
   why: AiWhySchema,
   /** Memory on the card (S30); absent when there is none. */
   memory: AiMemoryViewSchema.optional(),
+  /**
+   * A rebooking nudge's words (S36), shown as plain text and editable by whoever may decide;
+   * the footer and booking link the domain adds are in `summary`'s email, not here.
+   */
+  draft: z
+    .strictObject({ subject: z.string().max(DRAFT_LIMITS.subjectMax), body: z.string().max(DRAFT_LIMITS.bodyMax) })
+    .optional(),
 });
 export type AiProposalView = z.infer<typeof AiProposalViewSchema>;
 
