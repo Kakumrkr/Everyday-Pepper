@@ -91,6 +91,14 @@ export class TaskNotFoundError extends Error {
   }
 }
 
+/** No open feed item with this id that the member may see (closed, expired or not theirs). */
+export class FeedItemNotFoundError extends Error {
+  constructor() {
+    super('No such open feed item');
+    this.name = 'FeedItemNotFoundError';
+  }
+}
+
 /** The task is already done: there is nothing to complete (S26b). */
 export class TaskNotOpenError extends Error {
   constructor() {

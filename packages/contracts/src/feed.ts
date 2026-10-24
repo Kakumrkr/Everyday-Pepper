@@ -159,3 +159,24 @@ export const FeedSettingsChangeSchema = z
     message: 'Change at least one setting',
   });
 export type FeedSettingsChange = z.input<typeof FeedSettingsChangeSchema>;
+
+/** `GET /v1/feed`: the open suggestions the member may see, and the business's switches. */
+export const FeedResponseSchema = z
+  .object({
+    /** Empty while suggestions are paused. */
+    suggestions: z.array(FeedItemSchema),
+    settings: FeedSettingsSchema,
+    /** Whether this member may change the switches (owners and managers). */
+    canChangeSettings: z.boolean(),
+    /**
+     * A kind dismissed 3 times in 14 days whose "turn this off?" was not answered yet: asked
+     * once, of owners and managers only.
+     */
+    askToTurnOff: FeedInsightKindSchema.nullable(),
+  })
+  .strict();
+export type FeedResponse = z.infer<typeof FeedResponseSchema>;
+
+/** `POST /v1/feed/:id/close`: dismiss (snoozed 30 days) or done (acted on). */
+export const FeedCloseSchema = z.object({ outcome: z.enum(['dismissed', 'done']) }).strict();
+export type FeedClose = z.infer<typeof FeedCloseSchema>;

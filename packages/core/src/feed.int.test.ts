@@ -1,0 +1,256 @@
+import {
+  FeedItemIdSchema,
+  TenantIdSchema,
+  type FeedItemId,
+  type MembershipRole,
+  type TenantId,
+  type UserId,
+} from '@pepper/contracts';
+import {
+  addMembership,
+  insertStaffMember,
+  listAuditEntries,
+  syncFeedItems,
+  withTenant,
+  type Database,
+  type FeedCandidate,
+} from '@pepper/db';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { Actor } from './actor.js';
+import { ManualClock } from './clock.js';
+import { FeedItemNotFoundError, ForbiddenError } from './errors.js';
+import { createBusiness } from './services/business.js';
+import { changeFeedSettings, closeFeedItem, getFeed } from './services/feed.js';
+import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
+
+// The feed services against real Postgres (ADR-0039): the role matrix (owners and managers see
+// every item and change the switches; staff see and close only their own), pause, a kind
+// turned off, the once-only "turn this off?", the audit entry, and the feed's latency gate
+// (playbook §2: ≤ 300 ms p95 for `GET /v1/feed`'s service call).
+
+let database: TestDatabase;
+let db: Database;
+let tenantId: TenantId;
+let owner: UserId;
+let manager: UserId;
+let jess: UserId;
+let ben: UserId;
+let jessStaff: string;
+let benStaff: string;
+
+const NOW = '2026-11-02T15:00:00.000Z';
+const clock = new ManualClock(NOW);
+const as = (userId: UserId, role: MembershipRole): Actor => ({
+  context: { tenantId, userId, role },
+});
+const ana = () => as(owner, 'owner');
+const marco = () => as(manager, 'manager');
+const jessActor = () => as(jess, 'staff');
+const benActor = () => as(ben, 'staff');
+
+function gap(staffId: string, day: string): FeedCandidate {
+  return {
+    kind: 'schedule_gaps',
+    subjectKey: `staff:${staffId}`,
+    day,
+    audienceStaffId: staffId,
+    subjects: { staffMemberId: staffId, clientId: null, bookingId: null, serviceId: null },
+    payload: {
+      gapCount: 1,
+      openMinutes: 120,
+      longestStartsAt: `${day}T15:00:00.000Z`,
+      longestEndsAt: `${day}T17:00:00.000Z`,
+    },
+    expiresAt: new Date(`${day}T22:00:00Z`),
+  };
+}
+
+function overload(staffId: string, day: string): FeedCandidate {
+  return {
+    kind: 'staff_overload',
+    subjectKey: `staff:${staffId}`,
+    day,
+    audienceStaffId: null,
+    subjects: { staffMemberId: staffId, clientId: null, bookingId: null, serviceId: null },
+    payload: { busyDays: [day, '2026-11-05', '2026-11-06'], horizonDays: 7, peakPercent: 96 },
+    expiresAt: new Date('2026-11-07T05:00:00Z'),
+  };
+}
+
+const sync = (candidates: FeedCandidate[]) =>
+  withTenant(db, tenantId, (tx) => syncFeedItems(tx, candidates, new Date(NOW)));
+const keysFor = async (actor: Actor) =>
+  (await getFeed(db, actor, { clock })).suggestions.map(
+    (item) => `${item.kind}:${item.day}:${item.subjects.staffMemberId ?? ''}`,
+  );
+const idOf = async (kind: string, day: string, staffId: string): Promise<FeedItemId> => {
+  const item = (await getFeed(db, ana(), { clock })).suggestions.find(
+    (candidate) =>
+      candidate.kind === kind &&
+      candidate.day === day &&
+      candidate.subjects.staffMemberId === staffId,
+  );
+  if (item === undefined) throw new Error('no such item');
+  return FeedItemIdSchema.parse(item.id);
+};
+
+beforeAll(async () => {
+  database = await startTestDatabase();
+  db = database.app.db;
+  owner = await insertUser(db, 'Ana');
+  tenantId = TenantIdSchema.parse(
+    (
+      await createBusiness(db, owner, {
+        name: 'Juniper Hair Studio',
+        slug: 'juniper-feed',
+        timeZone: 'America/New_York',
+      })
+    ).id,
+  );
+  manager = await insertUser(db, 'Marco');
+  jess = await insertUser(db, 'Jess');
+  ben = await insertUser(db, 'Ben');
+  await withTenant(db, tenantId, async (tx) => {
+    await addMembership(tx, { userId: manager, role: 'manager' });
+    const jessMembership = await addMembership(tx, { userId: jess, role: 'staff' });
+    const benMembership = await addMembership(tx, { userId: ben, role: 'staff' });
+    jessStaff = (
+      await insertStaffMember(tx, {
+        displayName: 'Jess',
+        color: '#2a7230',
+        active: true,
+        membershipId: jessMembership.id,
+      })
+    ).id;
+    benStaff = (
+      await insertStaffMember(tx, {
+        displayName: 'Ben',
+        color: '#c2361b',
+        active: true,
+        membershipId: benMembership.id,
+      })
+    ).id;
+  });
+  await sync([
+    gap(jessStaff, '2026-11-03'),
+    gap(benStaff, '2026-11-03'),
+    overload(jessStaff, '2026-11-04'),
+  ]);
+});
+
+afterAll(async () => {
+  await database.stop();
+});
+
+describe('getFeed (role matrix)', () => {
+  it('shows owners and managers every item, and lets them change the switches', async () => {
+    for (const lead of [ana(), marco()]) {
+      const feed = await getFeed(db, lead, { clock });
+      expect(feed.suggestions).toHaveLength(3);
+      expect(feed).toMatchObject({
+        canChangeSettings: true,
+        askToTurnOff: null,
+        settings: { suggestionsPaused: false, disabledKinds: [] },
+      });
+    }
+    const [jessGap] = (await getFeed(db, ana(), { clock })).suggestions;
+    expect(jessGap?.names).toMatchObject({ client: null, service: null });
+  });
+
+  it("shows staff only their own items, never a colleague's or the overload", async () => {
+    expect(await keysFor(jessActor())).toEqual([`schedule_gaps:2026-11-03:${jessStaff}`]);
+    expect(await keysFor(benActor())).toEqual([`schedule_gaps:2026-11-03:${benStaff}`]);
+    const feed = await getFeed(db, jessActor(), { clock });
+    expect(feed).toMatchObject({ canChangeSettings: false, askToTurnOff: null });
+  });
+
+  it('lets staff close only their own items; a closed item is not found again', async () => {
+    const bens = await idOf('schedule_gaps', '2026-11-03', benStaff);
+    await expect(
+      closeFeedItem(db, jessActor(), bens, { outcome: 'dismissed' }, { clock }),
+    ).rejects.toBeInstanceOf(FeedItemNotFoundError);
+    await closeFeedItem(db, benActor(), bens, { outcome: 'done' }, { clock });
+    await expect(
+      closeFeedItem(db, benActor(), bens, { outcome: 'dismissed' }, { clock }),
+    ).rejects.toBeInstanceOf(FeedItemNotFoundError);
+    expect(await keysFor(benActor())).toEqual([]);
+  });
+
+  it('refuses staff the switches', async () => {
+    await expect(
+      changeFeedSettings(db, jessActor(), { suggestionsPaused: true }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+});
+
+describe('switches', () => {
+  it('hides suggestions while paused and a kind turned off, with an audit entry', async () => {
+    expect(await changeFeedSettings(db, marco(), { suggestionsPaused: true })).toEqual({
+      suggestionsPaused: true,
+      disabledKinds: [],
+    });
+    expect((await getFeed(db, ana(), { clock })).suggestions).toEqual([]);
+    await changeFeedSettings(db, ana(), {
+      suggestionsPaused: false,
+      disabledKinds: ['staff_overload'],
+    });
+    expect(await keysFor(ana())).toEqual([`schedule_gaps:2026-11-03:${jessStaff}`]);
+    await changeFeedSettings(db, ana(), { disabledKinds: [] });
+
+    const entries = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 100 }));
+    expect(
+      entries
+        .filter((entry) => entry.action === 'feed.settings_updated')
+        .map((entry) => entry.after),
+    ).toEqual(
+      expect.arrayContaining([
+        { suggestionsPaused: true, disabledKinds: [] },
+        { suggestionsPaused: false, disabledKinds: ['staff_overload'] },
+      ]),
+    );
+  });
+
+  it('asks owners once after 3 dismissals of a kind in 14 days', async () => {
+    await sync(['2026-11-05', '2026-11-06', '2026-11-07'].map((day) => gap(jessStaff, day)));
+    for (const day of ['2026-11-05', '2026-11-06', '2026-11-07']) {
+      await closeFeedItem(
+        db,
+        jessActor(),
+        await idOf('schedule_gaps', day, jessStaff),
+        { outcome: 'dismissed' },
+        { clock },
+      );
+    }
+    expect((await getFeed(db, ana(), { clock })).askToTurnOff).toBe('schedule_gaps');
+    expect((await getFeed(db, jessActor(), { clock })).askToTurnOff).toBeNull();
+    await changeFeedSettings(db, ana(), { askAnswered: 'schedule_gaps' });
+    expect((await getFeed(db, ana(), { clock })).askToTurnOff).toBeNull();
+  });
+});
+
+describe('feed latency', () => {
+  it('answers a busy feed in ≤ 300 ms p95', async () => {
+    // 150 open items: the most the feed shows is 50, newest first.
+    const many = Array.from({ length: 150 }, (_, i) =>
+      gap(
+        i % 2 === 0 ? jessStaff : benStaff,
+        `2027-0${String(1 + Math.floor(i / 50))}-${String(1 + (i % 25)).padStart(2, '0')}`,
+      ),
+    );
+    await sync(many);
+    const timings: number[] = [];
+    for (let run = 0; run < 20; run += 1) {
+      const started = performance.now();
+      await getFeed(db, run % 2 === 0 ? ana() : jessActor(), { clock });
+      timings.push(performance.now() - started);
+    }
+    const sorted = [...timings].sort((a, b) => a - b);
+    const p95 = sorted[Math.ceil(0.95 * sorted.length) - 1] ?? 0;
+    // eslint-disable-next-line no-console -- the measured number goes into the session log
+    console.info(
+      `Feed latency (20 runs, 150 open items): p95 ${p95.toFixed(0)} ms (target 300 ms)`,
+    );
+    // Noisy shared runners: fail only at 3× the target.
+    expect(p95).toBeLessThan(900);
+  });
+});

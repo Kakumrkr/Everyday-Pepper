@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
 import { BookingSourceSchema, BookingStatusSchema } from './bookings.js';
 import { ClientIdSchema, RecordSourceSchema } from './clients.js';
+import { FeedSettingsSchema } from './feed.js';
 import {
   BrandColorSchema,
   LocaleSchema,
@@ -424,6 +425,15 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('tenant'),
       before: z.object({ paused: z.boolean() }).strict(),
       after: z.object({ paused: z.boolean() }).strict(),
+    })
+    .strict(),
+  // The operator feed's switches (ADR-0039).
+  z
+    .object({
+      action: z.literal('feed.settings_updated'),
+      entity: entity('tenant'),
+      before: FeedSettingsSchema,
+      after: FeedSettingsSchema,
     })
     .strict(),
   // The business's own autonomy choices (only the overrides; the rest are defaults).
