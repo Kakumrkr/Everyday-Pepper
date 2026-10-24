@@ -93,7 +93,7 @@
     },
     "turns": [
       {
-        "user": "Put Maria on the waitlist for any stylist on Friday afternoon"
+        "user": "Put Maria on the waitlist for a haircut with any stylist on Friday afternoon"
       }
     ],
     "expect": {

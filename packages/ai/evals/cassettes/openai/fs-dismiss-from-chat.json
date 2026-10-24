@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "c0236fbacda6a64c8ce49519e3c5c823bc9d650b223a66b0a01ceb02e3507335",
+        "fingerprint": "ef1c0e8ff97bb46906e51442d28e4629a0ff489bdbbe53f0028a6ba42e4d2ca6",
         "response": {
-          "text": "I can’t dismiss a suggestion for you. You can dismiss Sara’s suggestion on its card on Home.",
+          "text": "I can’t dismiss a suggestion for you. Please dismiss Sara’s suggestion on its card on Home.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9793,
-            "cachedInputTokens": 9779,
+            "inputTokens": 9840,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 11,
-            "outputTokens": 25
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }

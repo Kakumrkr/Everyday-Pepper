@@ -438,6 +438,16 @@
     "actor": {
       "role": "staff"
     },
+    "seed": {
+      "full": [
+        {
+          "staff": "{{staff:jess}}",
+          "date": "2026-11-05",
+          "start": "09:00",
+          "end": "12:00"
+        }
+      ]
+    },
     "turns": [
       {
         "user": "Put Maria on my waitlist for Thursday morning, she wants an earlier haircut"

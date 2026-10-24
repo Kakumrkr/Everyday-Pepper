@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "f84255b188798b1381abce6f09db92bd35b4640d0aaf20ec1b3e8d4bd017e2ae",
+        "fingerprint": "62b894915f6d603602ea76b9d240b86a54ce4908750972686912141a4694b761",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bxqtiy6TjcmHXGdmI6o7g5qQ",
+              "id": "call_5joONBfjpUxdLSnuV3mgwyxK",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9792,
-            "cachedInputTokens": 9779,
+            "inputTokens": 9839,
+            "cachedInputTokens": 9826,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "505ef110427722c9393d83cced72035ccbed5c060fe4f2c04241465a85a8116b",
+        "fingerprint": "acf3c890776c29ba4e80df97f15344f472294b32b3806801e0886b15b1559a46",
         "response": {
-          "text": "Yes. Ana R. is on the waitlist for a haircut with Jess on Friday, November 6, from 9:00 AM to noon. She hasn’t been offered a time yet.",
+          "text": "Yes—Ana R. is waiting for a haircut with Jess on Friday, November 6, between 9 a.m. and noon. No time has been offered yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10073,
-            "cachedInputTokens": 9789,
-            "cacheWriteTokens": 281,
-            "outputTokens": 44
+            "inputTokens": 10124,
+            "cachedInputTokens": 9836,
+            "cacheWriteTokens": 285,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

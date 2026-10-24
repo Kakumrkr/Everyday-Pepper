@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d3ad7b0a048048d8367ab7e6b1c866b48f81e0d552e6b6967a0b6f2ce1383df2",
+        "fingerprint": "b6bbe66a6bb65f60e84330b998d148ce81fb6b8e1e1f9f0390c96252d9a67092",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ePVTSVglbuWcHFxCewoTW0jn",
+              "id": "call_wpxErOrw2son36ZK5eDxUZU0",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9792,
+            "inputTokens": 9839,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9789,
+            "cacheWriteTokens": 9836,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5891b089dd90179ce334f0ebb376fce7d2be3243ef94efc40cc76e1eab0aa28a",
+        "fingerprint": "56f27d76c6ef659b7ac6878c473f4a890e0a31a4297a4786deb6526fae69ecfb",
         "response": {
-          "text": "Sara K. is waiting for a haircut with anyone on Saturday, November 7, from 10:00 AM to 1:00 PM.\n\nAna R. is waiting for a haircut with Jess on Friday, November 6, from 9:00 AM to noon.",
+          "text": "Two clients are on the waitlist:\n\nSara K. — Haircut with anyone, Saturday, Nov 7, 10:00 AM–1:00 PM.\nAna R. — Haircut with Jess, Friday, Nov 6, 9:00 AM–12:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10082,
-            "cachedInputTokens": 9789,
-            "cacheWriteTokens": 290,
-            "outputTokens": 60
+            "inputTokens": 10122,
+            "cachedInputTokens": 9836,
+            "cacheWriteTokens": 283,
+            "outputTokens": 64
           },
           "model": "gpt-6-luna"
         }
