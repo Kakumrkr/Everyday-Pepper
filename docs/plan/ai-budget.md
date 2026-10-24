@@ -46,6 +46,18 @@ Runs labelled `P7`. The runner refuses a run whose worst-case estimate would tak
   - The new held-out case `in-three-days` (after the review): **$0.0004**, run 835 (834 failed before the database was ready, $0).
   - A typical member turn cost **$0.00085** on average (p95 $0.0014); the three moves that hand over to Sol after step 4 cost about $0.024 a turn.
 
+## Phase 8 ($1.25 cap; [playbook §4](phase-8-playbook.md))
+
+Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b probe`; it counts the same). The runner refuses a run whose worst-case estimate would take Phase 8 past $1.25.
+
+- **S36b (2026-10-24): $0.6237 in 358 runs** (Phase 8 total: **$0.6237 of $1.25**; $0.63 left for S37b and S38b). Planned about $0.32; the first full recording found four guide misses and the user chose to fix them and record again ("Record again"; then "Second fix, then record").
+  - Probe of the six sets S36a changed (drafts, feed, feed_safety, scheduling, learned_rules, autonomy), 101 cases: **$0.1315**, runs 836–880. Two misses (`feed-jess-gaps`: guide fix; `after-three-two-days`: grader corrected, the model was right). Re-probe, 14 cases: **$0.0089**, runs 881–887.
+  - First full recording, 233 cases, pass^1: **$0.2037**, runs 888–1007. Three answers lost to "the stream ended without a response" (re-run, **$0.0008**, runs 1008–1011) and four real misses: `mr-same-as-last-time`, `tool-list-todos-2`, `team-todos-manager`, `fs-dismiss-from-chat`.
+  - Probes of the guide fixes: **$0.0517** (runs 1012–1035, 50 cases; the team to-dos still missed) and **$0.0156** (runs 1036–1048, 26 cases, all pass).
+  - Second full recording, 233 cases, pass^1: **$0.2059**, runs 1049–1168. 230/231 scored cases (the held-out `is-marco-free-at-eleven` asked which service); every gate met.
+  - pass^3 trials 2–3 on `drafts`, `feed_safety` and the three S33 leftovers, 25 cases: **$0.0057**, runs 1169–1193; all 3/3. The 7 chat cases needed `--phase-estimate-ok` (user: "these 7 only"): one multi-turn case's worst-case estimate for 3 trials ($0.65–0.74) was more than the $0.63 left.
+  - A draft is at most 506 tokens (gate 1,500).
+
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->

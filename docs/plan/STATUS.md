@@ -1,35 +1,32 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-24 · **Plan version:** 0.31 · **Current phase:** 8 — Operator feed, in progress (S36a: suggestions with drafts on the scripted model, branch pushed) → next: **S36b** (probe and record)
+**Last updated:** 2026-10-24 · **Plan version:** 0.31 · **Current phase:** 8 — Operator feed, in progress (8a–8c done: the feed, insights and suggestions with drafts, recorded) → next: **S37a** (the smart waitlist)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S36b** (Phase 8c "b" half), branch `claude/zealous-rubin-ufs9z1` (S36a merged). User at the brief: "Go ahead with your recommendations": D-1 A (pass^3 only on `drafts`, `feed_safety` and the three S33 leftovers), D-2 A (add 4 `drafts` + 3 `feed` cases before recording), D-3 a gate still missing after one fix → ask; no cap raise or `--phase-estimate-ok`.
-Plan: 1 add the 7 cases → 2 probe the six changed sets → 3 fix → 4 one full recording + pass^3 trials 2–3 → 5 empty `KNOWN_REAL_MODEL_MISSES`, replay → 6 AC-W4-1/2 → 7 /code-review + /security-review → 8 end checks → 9 docs, PR, merge.
-Done: 1–3 (probe $0.13: `get_feed` v2, `after-three-two-days` grader); 6 (AC-W4-1/2 8/8); 7 (code review: 10 findings fixed with tests; security review: none); first full recording $0.20 → 4 misses, guide fixes (`get_feed` v3/v4, instructions "same as last time", `list_todos` v2; `mr-staff-fact` grader), probes 3–4 green. Phase 8 ≈ $0.40.
-**User during the session:** "Record again" (a second full recording, ≈ $0.27 more, Phase 8 ≈ $0.61); then "Second fix, then record" (the team to-dos miss after one fix).
-Next step: second full recording (running), pass^3 trials 2–3 on `drafts`, `feed_safety` and the three S33 leftovers, then 5, 8, 9.
+(empty: S36b is done.)
 
 ## Last sessions
+- **S36b Phase 8c "b" (2026-10-24): suggestions with drafts recorded on Luna + Sol; one PR for S36a + S36b** ([ADR-0040](../adr/0040-rebooking-nudges-with-drafts-and-get-feed.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:** 7 more cases; guide fixes from the recordings (`get_feed` v3, `list_todos` v2, "same as last time"); two graders corrected where the model was right; the code review's 10 findings fixed with tests; `KNOWN_REAL_MODEL_MISSES` empty.
+  - **Gates:** `drafts` 14/14 pass^1 and pass^3; `feed` 10/10; `feed_safety` 8/8 pass^3; the S33 leftovers 3/3; every other set at or above its gate (pass^1); a draft ≤ 506 tokens; AC-W4-1/2 8/8. Spend $0.6237 (Phase 8 $0.62 of $1.25). Security review: no findings.
 - **S36a Phase 8c "a" (2026-10-24): suggestions with drafts, scripted model, branch pushed without a PR** ([ADR-0040](../adr/0040-rebooking-nudges-with-drafts-and-get-feed.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0045; the morning drafts pass (worker, template hour) → `send_rebooking_nudge` (system tool) proposals via `proposeForBusiness`, feed items `needs_ok` settled with their proposal; the draft writer (routine model, metered, `NudgeDraftSchema`); editable draft card (`reviseProposal`); one-click unsubscribe (HMAC link, RFC 8058, `/unsubscribe/<token>`); the mailing address on Home; `get_feed` (20 tools); guide batch (instructions v6, `list_services_and_staff` v3, `find_availability` v3, `propose_rule`/`remember_fact` v2); sets `drafts`/`feed`/`feed_safety` + leftovers (30 cases); `PHASE_CAPS_USD[8] = 1.25`.
   - **Checks:** `pnpm check` green; `pnpm test:integration` 1,166/1,167 (the planned stale replay; appointments' concurrency property test timed out in the parallel run as in S34/S35 and passed alone); Playwright 88/88. No model called ($0).
-- **S35 Phase 8b (2026-10-24): the feed and insights, no model, merged** ([ADR-0039](../adr/0039-operator-feed-and-insights.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** `feed_items`, `insight_runs`, `insight_requests` (RLS, staff scope, `job_scan('insights')`); four rule-based providers (28 fixtures incl. both DST days); the insights pass (worker, every minute; re-run on booking, hours and time-off changes); `/v1/feed` (`feed.read`); Home as the feed (Needs your OK · Suggestions · Done for you), snooze on dismiss, "Pause suggestions", ask-once.
-  - **Gates:** fixtures 100%; pass p95 328 ms (gate 2 s); feed p95 17 ms (gate 300 ms); isolation 100%; Playwright `feed.spec.ts` 2/2.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Workflow (user, M2):** tests in tiers (full suites once at the end, one at a time); real-model sessions split into "a" (build on the fakes) and "b" (probe, record once, PR); the skills `/session-brief`, `/eval-record`, `/session-close`; short session-log entries.
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
 - **CI minutes:** one CI run per session: all checks locally first, every commit (docs, "ADR accepted", STATUS) in before the PR, pushes to an open PR only to fix CI; docs-only PRs skip the slow jobs; CI runs on PRs, weekly on `main` and by hand. **No retries in CI** (M1).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
-- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy. **Phase 7 (S28):** at most $1.00 of the rest, recorded per session from S30 on Luna + Sol; the runner enforces it (`--phase 7`). **Phase 8 (S34):** at most $1.25 of the remaining $2.99 (about $1.10 planned), enforced by `--phase 8` from S36a.
+- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy. **Phase 7 (S28):** at most $1.00 of the rest, recorded per session from S30 on Luna + Sol; the runner enforces it (`--phase 7`). **Phase 8 (S34):** at most $1.25 of the remaining $2.99 (about $1.10 planned), enforced by `--phase 8` from S36a; S36b spent $0.62, so S37b and S38b share $0.63.
 - **Skip domain, business email and LLC** until before the pilot (Phase 11); brand, trademark and domain checks then.
 - **Design:** Pepper green + chili accent (PCR-002), Bricolage Grotesque + Figtree, warm and friendly, mobile-first (`docs/mockups/README.md`).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S36b (user, 2026-10-24):** at the brief "Go ahead with your recommendations" (D-1 A pass^3 only where §2 names it for S36; D-2 A seven more cases; D-3 ask after one failed fix). During the recording: "Record again" (second full recording), "Second fix, then record" (team to-dos), "Allow, these 7 only" (`--phase-estimate-ok` for 7 chat cases' pass^3). **Claude:** graders corrected where the model was right; transport failures re-run; the code review's findings fixed in this PR.
 - **S36a (user, 2026-10-24):** at the brief "Go ahead, start with the recommendation and complete the tasks": D-1 A (a morning drafts pass once a day per business at the template's hour, which S38's briefing will call); D-2 A (the postal address in settings, no nudge until it is set); D-3 owners and managers approve nudges; D-4 ADR-0040 pre-approved. **Claude (ADR-0040):** a pass's proposals belong to the business (`requestedBy` null, audited as system) and always ask; edits re-fingerprint through `reviseProposal`; any earlier nudge in the interval (sent, refused or expired) blocks another; opt-out stops nudges only.
 - **S35 (user, 2026-10-24):** at the brief "Go ahead with your recommendations, ADR is pre-approved" (D-1 re-run via a request row + 1-minute `Periodic` pass; D-2 thresholds; D-3 audience; D-4 Needs your OK / Done from proposals and receipts; D-5 `feed_settings` with ask-once; D-6 ADR-0039). Later "complete all tasks don't have to ask, go with recommendation". **Claude (ADR-0039):** `services.rebook_after_days`; `apps/worker` may import templates; append-only `insight_requests` + advisory lock (after a timestamp version lost a request and a counter row was a hot lock); hours/time-off changes also re-run; dismissed items come back after the snooze.
 - **S34 (user, 2026-10-24):** at the brief "Go ahead with your recommendations": layout A (S35; S36a/b; S37a/b; S38a/b), Phase 8 cap $1.25, BullMQ only for the waitlist with `Periodic` passes for insights and the morning run, insights by rules and only drafts by the model, waitlist offers start at "ask". Then "approved, go ahead with /session-close": the playbook and PCR-006 with the review's additions (one-click unsubscribe for nudges, `add_to_waitlist` + dial action `waitlist.change`, offers to the top 3, a template-written briefing without email, `staff_overload`, snooze and "Pause suggestions").
@@ -64,11 +61,10 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S35 and M2 are done and merged (Phases 0–7, Phase 8 through 8b); S36a is built on `claude/s36a-suggestions-drafts` (pushed, no PR). Details in [session-log.md](session-log.md).
+S1–S36b and M2 are done and merged (Phases 0–7, Phase 8 through 8c). Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S36b | Phase 8c "b": merge `claude/s36a-suggestions-drafts`, probe the changed sets, record once with `--phase 8`, fix, PR (S36a built the rest) | 8c | §2 draft gates; AC-W4-1/2 green; the leftovers pass |
 | S37a/b | Phase 8d: the smart waitlist (AC-W5-1): queue from the cancellation, ranking, offers to the top 3, the claim page, `add_to_waitlist`; "b" records once | 8d | AC-W5-1 within 2 min; concurrent claims book once |
 | S38a/b | Phase 8e: the daily briefing; "b" re-records everything, pass^3, security review, Phase 8 exit | 8e | Every playbook §2 gate; spend ≤ $1.25 |
 

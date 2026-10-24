@@ -36,7 +36,7 @@ The brief settled four questions:
    - Paused suggestions, `rebooking_due` turned off, or no mailing address: the pass claims the day and drafts nothing.
    - **Order of work:**
      1. It runs the business's insights first, so the feed is this morning's.
-     2. It lists open `rebooking_due` items (`listDraftableRebookings`) whose client has an email address, has not opted out, and had no nudge proposal within their interval (pending, sent, refused or expired all count). The list is most overdue first, at most `DRAFT_LIMITS.perBusinessPerDay` (20).
+     2. It lists open `rebooking_due` items (`listDraftableRebookings`) whose client has an email address, has not opted out, and had no nudge proposal within their interval (pending, sent, refused or expired all count; a superseded one, which reached no one, does not: S36b). The list is most overdue first, at most `DRAFT_LIMITS.perBusinessPerDay` (20).
      3. It looks for a free time tomorrow for the last visit's service: with their usual staff member first, else anyone who offers it (`findAvailabilityIn`). No time means no draft.
    - S38's daily briefing will call this same pass.
 2. **The draft writer (D-3).** One call to the routine model (`write_draft`, a forced tool call, so the answer is always a subject and a body), metered against the business's monthly budget with a reservation of `DRAFT_LIMITS.maxTokens` (1,500).
@@ -115,8 +115,33 @@ The brief settled four questions:
 - **Scripted evals:** every case with a scripted cassette passes, the new sets included.
 - **Recorded cassettes:** all stale, as planned (instructions and tools changed). S36b records them once.
 
+## Results (S36b, real model: `gpt-6-luna` low / `gpt-6.1-sol` low)
+| Gate (playbook §2) | Result |
+|---|---|
+| `drafts` ≥ 90% pass^1, ≥ 80% pass^3 | 14/14 pass^1, 14/14 pass^3 |
+| Draft safety and `feed_safety` 100% pass^3 | 8/8 pass^3 (drafts' safety graders 14/14 pass^3) |
+| `feed` ≥ 90% pass^1 | 10/10 |
+| S33 leftovers at pass^3, `KNOWN_REAL_MODEL_MISSES` empty | `who-works-saturdays`, `lr-blackout`, `pasted-request-then-book` 3/3; empty |
+| No regression in Phase 6–7 sets (pass^1; pass^3 at S38b) | every set at or above its gate; scheduling 47/48 (held-out `is-marco-free-at-eleven`) |
+| A draft ≤ 1,500 tokens | at most 506 |
+| AC-W4-1 / AC-W4-2 | `morning.int.test.ts` 8/8 |
+
+- **Guide changes from the recordings:** `get_feed` v3 (free time in a staff member's days, without asking for a service; to-dos go to `list_todos`; dismissing a suggestion happens on Home); `list_todos` v2 (what is still open or to do, for the member or the team); the instructions' "same as last time" is the last visit's service and staff member.
+- **Graders corrected where the model was right:** `after-three-two-days` (one search per day is right too; the reply must cover both days with no time before 3) and `mr-staff-fact` ("doesn't usually work Saturdays").
+- **Code review over both halves (S36b):**
+  - A superseded nudge (refused at approval because the time was booked meanwhile) no longer blocks the next morning's draft.
+  - The writer is told the usual staff member only when the time offered is theirs.
+  - The client's first name reaches the writer and the card as letters only (`clientFirstName`).
+  - A proposal that breaks for another reason than a refusal counts as `failed`, and the worker warns.
+  - Trace spans never export an unsubscribe token.
+  - One-click POSTs get a per-address limit of 600 in 10 minutes (the page keeps 30).
+  - Two unsubscribes at once audit once.
+  - The web explains the three new error codes.
+- **Security review:** no findings.
+- **Spend:** $0.6237 of Phase 8's $1.25 ([ai-budget.md](../plan/ai-budget.md)).
+
 ## Consequences
-- **One email per client per interval, by construction:** a turned-down or expired nudge also keeps the client from being nudged again within their interval.
+- **One email per client per interval, by construction:** a turned-down or expired nudge also keeps the client from being nudged again within their interval. A superseded one does not (it reached no one; its replacement counts on its own, S36b).
 - **Clients without an email address** stay plain suggestions.
 - **The worker needs more configuration:** OpenAI (routine model) and `AUTH_BASE_URL` (the web origin for links) to draft. Without either, drafts are off and the feed works as in S35.
 - **What waits for later sessions:**
