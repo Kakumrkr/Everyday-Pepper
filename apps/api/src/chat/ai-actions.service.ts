@@ -1,4 +1,10 @@
-import { approvalRefusal, approveToolProposal, shownPreview, undoToolAction } from '@pepper/ai';
+import {
+  approvalRefusal,
+  approveToolProposal,
+  reviseNudgeDraft,
+  shownPreview,
+  undoToolAction,
+} from '@pepper/ai';
 import {
   AiEmailViewSchema,
   AiWhyFactSchema,
@@ -22,6 +28,7 @@ import {
   type AutonomyChange,
   type BusinessAutonomy,
   type ChangeSide,
+  type EditDraftRequest,
   type MemoryFactId,
   type UndoActionResponse,
   type UndoReason,
@@ -40,6 +47,7 @@ import {
   memoryOfAction,
   ownMessageText,
   permissionScope,
+  ProposalNotPendingError,
   rejectProposal,
   type ActionMessage,
   type Actor,
@@ -124,6 +132,21 @@ export class AiActionsService {
     }
   }
 
+  /** Replaces a nudge's words (S36); an expired proposal answers `proposal_not_pending`. */
+  async editDraft(
+    tenant: TenantContext,
+    id: ActionProposalId,
+    edit: EditDraftRequest,
+  ): Promise<AiProposalView> {
+    const actor = actorOf(tenant);
+    const result = await reviseNudgeDraft(await this.chat.toolDeps(tenant), id, edit.fingerprint, {
+      subject: edit.subject,
+      body: edit.body,
+    });
+    if (result.kind === 'expired') throw new ProposalNotPendingError('expired');
+    return this.proposalView(actor, result.proposal);
+  }
+
   async reject(tenant: TenantContext, id: ActionProposalId): Promise<AiProposalView> {
     const actor = actorOf(tenant);
     return this.proposalView(
@@ -192,6 +215,7 @@ export class AiActionsService {
       canDecide:
         proposal.status === 'pending' && (forYou || this.reachesAll(actor, proposal.action)),
       ...(await this.withMemory(actor, proposal.explanation, proposedFactOf(proposal))),
+      ...(shown?.draft !== undefined && { draft: shown.draft }),
     };
   }
 

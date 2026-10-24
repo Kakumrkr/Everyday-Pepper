@@ -55,6 +55,10 @@ export const ApiErrorCodeSchema = z.enum([
   'push_unavailable',
   // The operator feed (ADR-0039).
   'feed_item_not_found',
+  // Rebooking emails (S36, ADR-0040).
+  'draft_refused',
+  'nudge_not_sendable',
+  'unsubscribe_link_invalid',
   // The public booking page (ADR-0022).
   'booking_page_not_found',
   'booking_request_not_found',

@@ -33,6 +33,8 @@ export interface FeedSuggestionsProps {
   renderAction: (action: FeedAction, onFollow: () => void) => ReactNode;
   onClose: (id: string, outcome: 'dismissed' | 'done') => FeedChange;
   onSettings: (change: FeedSettingsChange) => FeedChange;
+  /** Shown at the card's end (S36: the mailing address rebooking emails carry). */
+  footer?: ReactNode;
 }
 
 /**
@@ -52,6 +54,7 @@ export function FeedSuggestions({
   renderAction,
   onClose,
   onSettings,
+  footer,
 }: FeedSuggestionsProps) {
   const headingId = useId();
   const pauseId = useId();
@@ -191,6 +194,7 @@ export function FeedSuggestions({
           })}
         </ul>
       )}
+      {footer}
     </Card>
   );
 }

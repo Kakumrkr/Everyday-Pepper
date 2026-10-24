@@ -7,7 +7,7 @@ import {
   type FeedResponse,
   type FeedSettingsChange,
 } from '@pepper/contracts';
-import { buttonClass, FeedSuggestions, type FeedAction } from '@pepper/ui';
+import { buttonClass, FeedSuggestions, MailingAddress, type FeedAction } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
@@ -35,10 +35,18 @@ function actionFor(item: FeedItem): FeedAction | null {
 
 /**
  * Home's "Suggestions" (S35, ADR-0039) on `/v1/feed`: dismiss and acting on a suggestion close
- * it; the switches refresh the page so the server reads the feed again.
+ * it; the switches, and the mailing address rebooking emails carry (S36, owners and managers),
+ * refresh the page so the server reads the feed again.
  */
 export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: string }) {
   const router = useRouter();
+  const changeSettings = async (change: FeedSettingsChange): Promise<string | null> => {
+    const answer = await sendJson('PATCH', '/v1/feed/settings', change);
+    if (!answer.ok) return answer.message;
+    if (!FeedSettingsSchema.safeParse(answer.data).success) return 'Something went wrong.';
+    router.refresh();
+    return null;
+  };
   return (
     <FeedSuggestions
       items={feed.suggestions}
@@ -61,13 +69,15 @@ export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: str
         const answer = await sendJson('POST', `/v1/feed/${id}/close`, { outcome });
         return answer.ok ? null : answer.message;
       }}
-      onSettings={async (change: FeedSettingsChange) => {
-        const answer = await sendJson('PATCH', '/v1/feed/settings', change);
-        if (!answer.ok) return answer.message;
-        if (!FeedSettingsSchema.safeParse(answer.data).success) return 'Something went wrong.';
-        router.refresh();
-        return null;
-      }}
+      onSettings={changeSettings}
+      footer={
+        feed.canChangeSettings ? (
+          <MailingAddress
+            address={feed.mailingAddress}
+            onSave={(mailingAddress) => changeSettings({ mailingAddress })}
+          />
+        ) : null
+      }
     />
   );
 }

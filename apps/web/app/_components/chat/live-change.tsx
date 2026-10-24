@@ -11,7 +11,14 @@ import {
   type LocalSlot,
   type ToolCard,
 } from '@pepper/contracts';
-import { ChangeCard, SlotPicker, whyModel, type ChangeCardProps } from '@pepper/ui';
+import {
+  ChangeCard,
+  DraftEditor,
+  SlotPicker,
+  whyModel,
+  type ChangeCardProps,
+  type DraftWords,
+} from '@pepper/ui';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ROUTES } from '../../../lib/account';
@@ -156,6 +163,25 @@ export function LiveChangeCard({
     }
   }
 
+  /** A nudge's new words (S36): the proposal is replaced, and the card shows the new one. */
+  async function saveDraft(words: DraftWords): Promise<string | null> {
+    if (live.kind !== 'proposal') return 'Something went wrong.';
+    const answer = await sendJson('POST', `/v1/ai/proposals/${live.proposal.id}/draft`, {
+      fingerprint: live.proposal.fingerprint,
+      ...words,
+    });
+    if (!answer.ok) return answer.message;
+    const view = AiProposalViewSchema.safeParse(answer.data);
+    if (!view.success) return 'Something went wrong.';
+    setLive({ kind: 'proposal', proposal: view.data });
+    setNotice(
+      view.data.id === live.proposal.id
+        ? 'This changed since you opened it. Here is the up-to-date version.'
+        : 'Saved. Approve sends these words.',
+    );
+    return null;
+  }
+
   async function undo(): Promise<void> {
     const id = live.kind === 'action' ? live.action.id : card.executionId;
     if (id === null) return;
@@ -215,6 +241,15 @@ export function LiveChangeCard({
           </Link>
         }
       />
+      {live.kind === 'proposal' && live.proposal.draft !== undefined ? (
+        <DraftEditor
+          // A new proposal (after an edit) starts the editor afresh.
+          key={live.proposal.id}
+          draft={live.proposal.draft}
+          canEdit={live.proposal.status === 'pending' && live.proposal.canDecide}
+          onSave={saveDraft}
+        />
+      ) : null}
       {slots === null ? null : (
         <SlotPicker
           slots={slots}
