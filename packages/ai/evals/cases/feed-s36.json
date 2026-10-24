@@ -240,5 +240,115 @@
         "noWrites": true
       }
     }
+  },
+  {
+    "id": "feed-nothing-waiting-when-opted-out",
+    "set": "feed",
+    "description": "Sara unsubscribed, so the morning pass drafted nothing: asked what waits for an OK, the answer reads the feed and says nothing does.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "seed": {
+      "feed": {
+        "optedOut": ["{{client:sara}}"]
+      }
+    },
+    "turns": [
+      {
+        "action": {
+          "morningDrafts": true
+        }
+      },
+      {
+        "user": "Is anything waiting for my OK?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": [
+        "(nothing|no(thing)? (is |are )?(waiting|pending)|not right now|all clear|\\bno\\b)"
+      ],
+      "replyMustNotMatch": ["\\bsent\\b"],
+      "actions": {
+        "noWrites": true
+      },
+      "feed": {
+        "waiting": 0
+      }
+    }
+  },
+  {
+    "id": "feed-how-many-due",
+    "set": "feed",
+    "description": "Counting the regulars due back is a feed read, and the count matches the feed.",
+    "holdout": false,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "How many regulars are due back right now?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["(\\btwo\\b|\\b2\\b)"],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "feed-in-spanish",
+    "set": "feed",
+    "description": "A question in Spanish is the same feed read, answered in Spanish.",
+    "holdout": true,
+    "now": "2026-11-02T12:30:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper_feed",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "runInsights": true
+        }
+      },
+      {
+        "user": "¿Hay algo que deba revisar hoy?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_feed"
+        }
+      ],
+      "replyMatches": ["Sara", "(clienta|cliente|corte|toca|volver|semanas|hoy)"],
+      "actions": {
+        "noWrites": true
+      }
+    }
   }
 ]
