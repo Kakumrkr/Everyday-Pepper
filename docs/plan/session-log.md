@@ -1039,6 +1039,11 @@ Everything each session did, oldest first: what was built, the checks run and th
   - **Checks:** `pnpm check` green; `pnpm test:integration` 1,083/1,083 on the second run (the first timed out the `appointments` concurrency property test at 60 s while the package suites ran side by side; that file alone passed 44/44 in 19 s; no code changed); Playwright not run (no screen changed). No model called ($0).
   - **Carried:** the four S33 leftovers into S36's guide batch (playbook D-12); tenant export (L6) and backup retention (L7) stay in Phase 11.
 
+- **S35 Phase 8b (2026-10-24): the feed and insights, no model, merged** ([ADR-0039](../adr/0039-operator-feed-and-insights.md), [mock-up](../mockups/home-feed.html)). Branch `claude/keen-cori-syny9m`; one session (no model).
+  - **Built:** migrations 0043–0044 (`feed_items`, `insight_runs`, `insight_requests`, `tenants.feed_settings`, `services.rebook_after_days`); providers `schedule_gaps`, `rebooking_due`, `no_show_pattern`, `staff_overload` (pure, local-midnight days); `syncFeedItems` (dedupe, expiry, 30-day snooze, revive after snooze); `runDueInsights` in the worker (`INSIGHTS_POLL_MS`, advisory lock, request rows from booking/hours/time-off writes); `templateInsights`; core feed services and `/v1/feed`; `@pepper/ui` `FeedSuggestions`; Home as the feed.
+  - **Checks:** fixtures 28/28; pass latency p95 328 ms (15,918 bookings, 2,000 clients); feed p95 17 ms; `pnpm check` green; `pnpm test:integration` 1,140/1,140 package by package (the full parallel run timed out load-bound tests: the `appointments` concurrency property test, as in S34, 4.1 s alone; the api process start; the pass latency at p95 8.9 s, so its failure line is now 10× the target); Playwright `feed.spec.ts` 2/2 locally (the stack via `e2e-stack.sh`; Docker image builds fail in the sandbox's TLS proxy), the full suite in CI; `/code-review` 10 findings (9 fixed, 1 answered in ADR-0039), `/security-review` no findings.
+  - **Carried:** none for S36 beyond the plan; a narrower snapshot loader if a business outgrows the 2-year read (ADR-0039).
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 

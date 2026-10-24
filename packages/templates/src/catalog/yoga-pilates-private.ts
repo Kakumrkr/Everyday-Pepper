@@ -81,7 +81,13 @@ export const yogaPilatesPrivate: TemplateInput = {
     { key: 'pregnant', label: 'Pregnant', type: 'boolean', sensitive: true },
   ],
   insights: {
-    enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'waitlist_match'],
+    enabled: [
+      'rebooking_due',
+      'schedule_gaps',
+      'no_show_pattern',
+      'waitlist_match',
+      'staff_overload',
+    ],
     rebookingIntervalDays: 7,
     minGapMinutes: 60,
   },

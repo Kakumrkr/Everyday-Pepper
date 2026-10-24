@@ -74,6 +74,7 @@ import { bookingAuditValues, sameValues, staffOwner, toBooking, toBusyTime } fro
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import { findClientToBook } from './clients.js';
 import { changeOf, emailDetailsOf, newManageToken, type BookingNotify } from './notices.js';
+import { requestInsights } from './insights.js';
 import { keepReminderInStep } from './reminders.js';
 
 // Bookings (ADR-0017). `bookings.manage` lets owners and managers book anyone and staff only
@@ -199,6 +200,7 @@ export async function createBookingIn(
     requestId: actor.requestId,
   });
   await keepReminderInStep(tx, row, now);
+  await requestInsights(tx);
   if (request.notifyClient && options.notify) {
     await tellClient(tx, row, 'confirmed', options.notify);
   }
@@ -379,6 +381,7 @@ export async function changeBookingIn(
     // The row is locked, so it is still there.
     if (changed === undefined) throw new BookingNotFoundError();
     await keepReminderInStep(tx, changed, now);
+    await requestInsights(tx);
     if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
       await tellClient(tx, changed, 'cancelled', options.notify);
     }
@@ -416,6 +419,7 @@ export async function changeBookingIn(
   }
   if (moved === undefined) throw new BookingNotFoundError();
   await keepReminderInStep(tx, moved, now);
+  await requestInsights(tx);
   if (parsed.notifyClient && options.notify) {
     await tellClient(tx, moved, 'rescheduled', options.notify);
   }
@@ -460,6 +464,7 @@ export async function reinstateBookingIn(
   }
   if (restored === undefined) throw new BookingNotFoundError();
   await keepReminderInStep(tx, restored, now);
+  await requestInsights(tx);
   return audited(tx, actor, row, restored);
 }
 

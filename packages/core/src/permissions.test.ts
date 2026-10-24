@@ -48,6 +48,7 @@ const EXPECTED: Record<Permission, [PermissionScope, PermissionScope, Permission
   'tasks.read': ['all', 'all', 'own'],
   'tasks.manage': ['all', 'all', 'own'],
   'ai.chat': ['all', 'all', 'own'],
+  'feed.read': ['all', 'all', 'own'],
 };
 
 const ROLES = MembershipRoleSchema.options;

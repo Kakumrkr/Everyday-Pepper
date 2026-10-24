@@ -3,6 +3,7 @@ import {
   boolean,
   check,
   customType,
+  date,
   index,
   bigint,
   foreignKey,
@@ -47,7 +48,7 @@ function tenantIsolation(column: SQL): ReturnType<typeof pgPolicy> {
  * Read-only access, across businesses, for one worker job's scan (`withJobScan`, ADR-0025):
  * only in a transaction without a tenant whose `app.job_scan` setting names `job`.
  */
-function jobScan(job: 'reminders' | 'cleanup' | 'tasks'): ReturnType<typeof pgPolicy> {
+function jobScan(job: 'reminders' | 'cleanup' | 'tasks' | 'insights'): ReturnType<typeof pgPolicy> {
   return pgPolicy('job_scan', {
     for: 'select',
     using: sql`${currentTenantId} IS NULL AND current_job_scan(${sql.raw(`'${job}'`)})`,
@@ -138,6 +139,14 @@ export const tenants = pgTable(
     brandColor: text('brand_color'),
     // Whether Pepper learns new things (Phase 7, ADR-0034); existing memory still helps.
     memoryPaused: boolean('memory_paused').notNull().default(false),
+    // The operator feed's switches (Phase 8, ADR-0039): "Pause suggestions", the kinds turned
+    // off over the template's, and the kinds whose "turn this off?" question was answered.
+    // Validated by the feed repository; owners and managers change it.
+    feedSettings: jsonb('feed_settings')
+      .notNull()
+      .default(
+        sql`'{"suggestionsPaused": false, "disabledKinds": [], "answeredKinds": []}'::jsonb`,
+      ),
     ...timestamps,
   },
   (table) => [
@@ -427,10 +436,14 @@ export const services = pgTable(
     bufferAfterMinutes: integer('buffer_after_minutes').notNull().default(0),
     priceFromCents: integer('price_from_cents'),
     priceToCents: integer('price_to_cents'),
+    // When a regular of this service is usually due again (the rebooking insight, ADR-0039);
+    // NULL: not a repeat service, or not set.
+    rebookAfterDays: integer('rebook_after_days'),
     active: boolean('active').notNull().default(true),
     ...timestamps,
   },
   (table) => [
+    check('services_rebook_after_days_range', sql`${table.rebookAfterDays} BETWEEN 7 AND 365`),
     unique('services_tenant_id_id_unique').on(table.tenantId, table.id),
     uniqueIndex('services_tenant_name_unique').on(table.tenantId, sql`lower(${table.name})`),
     check('services_name_length', sql`length(${table.name}) BETWEEN 1 AND 120`),
@@ -1837,6 +1850,172 @@ export const memoryEpisodes = pgTable(
   ],
 );
 
+/**
+ * The operator feed's suggestions (Phase 8, ADR-0039), written by the worker's insights pass
+ * from the rule-based providers. One row per (business, kind, subject, day): `dedupe_key` is
+ * unique, so an hourly re-run updates the row instead of adding another. A row holds ids and
+ * numbers only, never names or free text (playbook §6, LLM02). `audience_staff_id` NULL: owners
+ * and managers only; a staff member: them too, and no other staff (the `member_scope` policy).
+ * Dismissing sets `snoozed_until`, which keeps the same kind for the same subject away.
+ */
+export const feedItems = pgTable(
+  'feed_items',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    status: text('status').notNull().default('suggestion'),
+    subjectKey: text('subject_key').notNull(),
+    day: date('day', { mode: 'string' }).notNull(),
+    dedupeKey: text('dedupe_key').notNull(),
+    audienceStaffId: uuid('audience_staff_id'),
+    staffMemberId: uuid('staff_member_id'),
+    clientId: uuid('client_id'),
+    bookingId: uuid('booking_id'),
+    serviceId: uuid('service_id'),
+    payload: jsonb('payload').notNull(),
+    // The draft or action that carries it out (S36); set to NULL if the proposal goes.
+    actionProposalId: uuid('action_proposal_id'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    // When it was acted on, dismissed or expired.
+    actedAt: timestamp('acted_at', { withTimezone: true }),
+    snoozedUntil: timestamp('snoozed_until', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('feed_items_tenant_id_id_unique').on(table.tenantId, table.id),
+    unique('feed_items_dedupe_key_unique').on(table.tenantId, table.dedupeKey),
+    // The feed: open suggestions, newest first.
+    index('feed_items_open_idx')
+      .on(table.tenantId, table.expiresAt)
+      .where(sql`${table.status} = 'suggestion'`),
+    // The snooze check and the "turn this off?" count.
+    index('feed_items_dismissed_idx')
+      .on(table.tenantId, table.kind, table.subjectKey, table.snoozedUntil)
+      .where(sql`${table.status} = 'dismissed'`),
+    index('feed_items_audience_idx').on(table.tenantId, table.audienceStaffId),
+    index('feed_items_client_idx').on(table.tenantId, table.clientId),
+    index('feed_items_booking_idx').on(table.tenantId, table.bookingId),
+    index('feed_items_staff_member_idx').on(table.tenantId, table.staffMemberId),
+    index('feed_items_service_idx').on(table.tenantId, table.serviceId),
+    index('feed_items_action_proposal_idx').on(table.tenantId, table.actionProposalId),
+    check(
+      'feed_items_kind_known',
+      sql`${table.kind} IN ('schedule_gaps', 'rebooking_due', 'no_show_pattern', 'staff_overload', 'waitlist_match')`,
+    ),
+    check(
+      'feed_items_status_known',
+      sql`${table.status} IN ('needs_ok', 'suggestion', 'done', 'dismissed', 'expired')`,
+    ),
+    check(
+      'feed_items_subject_key_format',
+      sql`${table.subjectKey} ~ '^(staff|client|booking):[0-9a-f-]{36}$'`,
+    ),
+    check(
+      'feed_items_dedupe_key_format',
+      sql`${table.dedupeKey} = ${table.kind} || ':' || ${table.subjectKey} || ':' || ${table.day}::text`,
+    ),
+    check('feed_items_payload_object', sql`jsonb_typeof(${table.payload}) = 'object'`),
+    check('feed_items_payload_size', sql`octet_length(${table.payload}::text) <= 2048`),
+    check(
+      'feed_items_acted_when_closed',
+      sql`(${table.status} IN ('done', 'dismissed', 'expired')) = (${table.actedAt} IS NOT NULL)`,
+    ),
+    check(
+      'feed_items_snoozed_when_dismissed',
+      sql`${table.snoozedUntil} IS NULL OR ${table.status} = 'dismissed'`,
+    ),
+    foreignKey({
+      name: 'feed_items_audience_staff_fk',
+      columns: [table.tenantId, table.audienceStaffId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'feed_items_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'feed_items_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'feed_items_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'feed_items_service_fk',
+      columns: [table.tenantId, table.serviceId],
+      foreignColumns: [services.tenantId, services.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: ownStaffMember(sql.raw('audience_staff_id')),
+      withCheck: ownStaffMember(sql.raw('audience_staff_id')),
+    }),
+    // Only owners, managers and the worker add or remove items; staff only dismiss their own.
+    pgPolicy('member_scope_insert', { as: 'restrictive', for: 'insert', withCheck: memberSeesAll }),
+    pgPolicy('member_scope_delete', { as: 'restrictive', for: 'delete', using: memberSeesAll }),
+  ],
+);
+
+/**
+ * When each business's insights last ran (ADR-0039). The worker's insights pass scans this
+ * table and `insight_requests` across businesses (`job_scan`, ids and times only) every minute
+ * and runs a business never run, asked for since its last run, or an hour old.
+ */
+export const insightRuns = pgTable(
+  'insight_runs',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    lastRunAt: timestamp('last_run_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('insight_runs_tenant_unique').on(table.tenantId),
+    index('insight_runs_last_run_at_idx').on(table.lastRunAt),
+    tenantIsolation(sql.raw('tenant_id')),
+    jobScan('insights'),
+  ],
+);
+
+/**
+ * Asks for a business's insights to run again (ADR-0039): one row per booking, working-hours
+ * or time-off change, inserted in that change's transaction. Append-only for the writers, so
+ * concurrent changes never wait on each other; a run deletes the rows it saw before reading
+ * anything (`seq` up to the highest it saw), so a change committed during a run stays and makes
+ * the business due again.
+ */
+export const insightRequests = pgTable(
+  'insight_requests',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    // Rises with every request: a run deletes the ones up to the highest it saw.
+    seq: bigint('seq', { mode: 'number' }).notNull().generatedByDefaultAsIdentity(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('insight_requests_tenant_idx').on(table.tenantId, table.seq),
+    tenantIsolation(sql.raw('tenant_id')),
+    jobScan('insights'),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
@@ -1862,3 +2041,6 @@ export type ConversationTurnRow = typeof conversationTurns.$inferSelect;
 export type ConversationMessageRow = typeof conversationMessages.$inferSelect;
 export type MemoryFactRow = typeof memoryFacts.$inferSelect;
 export type MemoryEpisodeRow = typeof memoryEpisodes.$inferSelect;
+export type FeedItemRow = typeof feedItems.$inferSelect;
+export type InsightRunRow = typeof insightRuns.$inferSelect;
+export type InsightRequestRow = typeof insightRequests.$inferSelect;

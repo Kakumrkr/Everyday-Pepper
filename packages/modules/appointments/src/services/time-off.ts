@@ -27,6 +27,7 @@ import {
 } from '@pepper/db';
 import { StaffMemberNotFoundError, TimeOffNotFoundError } from '../errors.js';
 import { staffOwner, timeOffAuditValues, toTimeOff } from '../mapping.js';
+import { requestInsights } from './insights.js';
 
 // Time off (ADR-0015). Everyone in the business may see it (`staff.read`); `time_off.manage`
 // lets owners and managers change anyone's and a staff member only their own, i.e. the staff
@@ -82,6 +83,7 @@ export async function addTimeOffIn(
     endsAt: new Date(endsAt),
     createdBy: actor.context.userId,
   });
+  await requestInsights(tx);
   await appendAuditEntry(tx, {
     actor: auditActorOf(actor),
     change: {
@@ -121,6 +123,7 @@ export async function removeTimeOffIn(
   await authorise(tx, actor, id);
   const row = await deleteTimeOff(tx, id, entryId);
   if (row === undefined) throw new TimeOffNotFoundError();
+  await requestInsights(tx);
   await appendAuditEntry(tx, {
     actor: auditActorOf(actor),
     change: {

@@ -10,7 +10,7 @@
 | Due-task job (S21, no queue) | Push a to-do's assignee (or the owners and managers for a team task) when it comes due | Every `REMINDER_POLL_MS` with the reminders, when the worker has VAPID keys; each task once per due time (ADR-0026) |
 | Clean-up job (S20, no queue) | Delete expired booking requests (24 h) and sent/dead outbox rows (30 days) | At worker start-up and every `CLEANUP_INTERVAL_MS` (one day) |
 | Morning run (Phase 8, no queue) | The daily briefing and the morning's suggestions with drafts, per business at its local hour | A `Periodic` pass through `job_scan`, like reminders (PCR-006, [Phase 8 playbook](../plan/phase-8-playbook.md) D-4) |
-| Insights pass (Phase 8, no queue) | Rule-based insights: open time, overdue regulars, no-show patterns, staff overload; feed items upserted by dedupe key | A `Periodic` pass hourly per business, plus a re-run after a booking change (PCR-006) |
+| Insights pass (S35, no queue) | Rule-based insights: open time, overdue regulars, no-show patterns, staff overload; feed items upserted by dedupe key, expired when their reason goes | A `Periodic` pass every `INSIGHTS_POLL_MS` (60 s) over `insight_runs`: a business runs when never run, an hour after its last run, or after a booking, working-hours or time-off change added a row to `insight_requests`; one worker per business (advisory lock) ([ADR-0039](../adr/0039-operator-feed-and-insights.md)) |
 | `waitlist` | Match and offer on cancellation (AC-W5-1, within 2 min) | A work row written in the cancellation's transaction; the relay queues one BullMQ job per row (PCR-006) |
 | `calendar-sync` | Google Calendar push/incremental sync | Webhook + every 15 min |
 | `imports` | CSV import, onboarding extraction | User action |

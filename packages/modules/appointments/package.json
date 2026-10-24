@@ -29,8 +29,10 @@
   "devDependencies": {
     "@pepper/config": "workspace:*",
     "@pepper/testing": "workspace:*",
+    "@types/pg": "^8.23.1",
     "@vitest/coverage-v8": "^5.0.5",
     "fast-check": "^4.10.2",
+    "pg": "^8.23.1",
     "vitest": "^5.0.5",
     "zod": "^4.6.7"
   }

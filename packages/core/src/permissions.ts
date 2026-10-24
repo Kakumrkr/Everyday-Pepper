@@ -78,6 +78,8 @@ export const PERMISSION_MATRIX: Readonly<
   'tasks.manage': STAFF_OWN,
   // ADR-0030: every member chats with the AI in their own conversations.
   'ai.chat': STAFF_OWN,
+  // ADR-0039: staff see and close only the feed items addressed to them.
+  'feed.read': STAFF_OWN,
 };
 
 /** How far `role`'s `permission` reaches. */

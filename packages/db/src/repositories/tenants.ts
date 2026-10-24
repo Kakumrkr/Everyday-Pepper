@@ -14,7 +14,7 @@ import { z } from 'zod';
 import type { Database } from '../client.js';
 import { BusinessLimitReachedError, isUniqueViolation, TenantSlugTakenError } from '../errors.js';
 import { newId } from '../ids.js';
-import { memberships, tenants, type Tenant } from '../schema.js';
+import { insightRuns, memberships, tenants, type Tenant } from '../schema.js';
 import { setTransactionTenant, setTransactionUser, type TenantTx } from '../tenant.js';
 import { countOwnedBusinesses } from './memberships.js';
 
@@ -63,6 +63,8 @@ export async function createTenant(
       if (owner !== undefined) {
         await tx.insert(memberships).values({ userId: owner, role: 'owner' });
       }
+      // The worker's insights pass finds the business by this row (ADR-0039).
+      await tx.insert(insightRuns).values({});
       await afterInsert?.(tx, created);
       return created;
     });

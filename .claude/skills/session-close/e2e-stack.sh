@@ -2,7 +2,8 @@
 # Starts the stack Playwright runs against, the way S31 ran it in a cloud session: Postgres,
 # Redis and Mailpit in Docker; the built api, worker and web as plain Node processes (building
 # the app images takes far longer). Chat answers come from the journeys' scripted model, as in
-# CI (ADR-0031): OPENAI_API_KEY is removed from the services, so no model is ever called.
+# CI (ADR-0031): OPENAI_API_KEY is removed from the services, so no model is ever called. The
+# worker runs the insights job every 10 s, as in CI (S35).
 #   .claude/skills/session-close/e2e-stack.sh start <log dir>   # then: pnpm test:e2e [spec]
 #   .claude/skills/session-close/e2e-stack.sh stop
 set -euo pipefail
@@ -24,7 +25,7 @@ case "${1:-}" in
       DEPLOYMENT_ENVIRONMENT=ci node --env-file=../../.env --import ./dist/instrument.js \
       dist/main.js) </dev/null >"$logs/api.log" 2>&1 &
     api=$!
-    (cd apps/worker && exec setsid env -u OPENAI_API_KEY DEPLOYMENT_ENVIRONMENT=ci \
+    (cd apps/worker && exec setsid env -u OPENAI_API_KEY DEPLOYMENT_ENVIRONMENT=ci INSIGHTS_POLL_MS=10000 \
       node --env-file=../../.env --import ./dist/instrument.js dist/main.js) \
       </dev/null >"$logs/worker.log" 2>&1 &
     worker=$!

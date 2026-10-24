@@ -89,7 +89,13 @@ export const barber: TemplateInput = {
     { key: 'preferences', label: 'Preferences', type: 'long_text' },
   ],
   insights: {
-    enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'waitlist_match'],
+    enabled: [
+      'rebooking_due',
+      'schedule_gaps',
+      'no_show_pattern',
+      'waitlist_match',
+      'staff_overload',
+    ],
     rebookingIntervalDays: 21,
     minGapMinutes: 15,
   },

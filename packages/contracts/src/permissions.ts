@@ -51,6 +51,9 @@ export const PermissionSchema = z.enum([
   // Chat with the AI (S25, ADR-0030): everyone, in their own conversations only. What the AI
   // may do is still each tool's own permission.
   'ai.chat',
+  // The operator feed (Phase 8, ADR-0039): every member, staff only the items addressed to
+  // them. Its switches ("Pause suggestions", kinds turned off) are `settings.manage`.
+  'feed.read',
 ]);
 export type Permission = z.infer<typeof PermissionSchema>;
 

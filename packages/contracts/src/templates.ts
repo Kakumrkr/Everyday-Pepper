@@ -25,6 +25,7 @@ export const InsightTypeSchema = z.enum([
   'schedule_gaps',
   'no_show_pattern',
   'waitlist_match',
+  'staff_overload',
 ]);
 export type InsightType = z.infer<typeof InsightTypeSchema>;
 

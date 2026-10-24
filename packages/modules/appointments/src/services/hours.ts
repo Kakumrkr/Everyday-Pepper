@@ -17,6 +17,7 @@ import {
 } from '@pepper/db';
 import { StaffMemberNotFoundError } from '../errors.js';
 import { hoursToMinutes, minutesToHours, sameValues } from '../mapping.js';
+import { requestInsights } from './insights.js';
 
 // A staff member's weekly working hours, in the business's local time (ADR-0015). Everyone in
 // the business may read them (`staff.read`); changing them needs `hours.manage` (owners and
@@ -53,6 +54,8 @@ export async function replaceWorkingHours(
     await replaceWorkingHourRows(tx, id, hoursToMinutes(hours));
     const after = minutesToHours(await listWorkingHours(tx, id));
     if (!sameValues(before, after)) {
+      // New hours open or close gaps: the feed is computed again soon (ADR-0039).
+      await requestInsights(tx);
       await appendAuditEntry(tx, {
         actor: auditActorOf(actor),
         change: {

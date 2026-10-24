@@ -85,6 +85,7 @@ import {
   type BookingEmailDetails,
   type BookingNotify,
 } from './notices.js';
+import { requestInsights } from './insights.js';
 import { keepReminderInStep } from './reminders.js';
 import {
   isBookable,
@@ -368,6 +369,7 @@ export async function confirmBookingRequest(
       });
       await setVerificationBooking(tx, id, BookingIdSchema.parse(row.id));
       await keepReminderInStep(tx, row, now);
+      await requestInsights(tx);
       await appendAuditEntry(tx, {
         actor: { kind: 'system' },
         change: {
@@ -435,6 +437,7 @@ export async function cancelManagedBooking(
     if (cancelled === undefined) throw new BookingNotFoundError();
     await auditUpdate(tx, row, cancelled);
     await keepReminderInStep(tx, cancelled, now);
+    await requestInsights(tx);
     const result = await withEmail(tx, tenant, cancelled, now);
     await options.notify?.(tx, {
       kind: 'cancelled',
@@ -492,6 +495,7 @@ export async function rescheduleManagedBooking(
       if (moved === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, moved);
       await keepReminderInStep(tx, moved, now);
+      await requestInsights(tx);
       const result = await withEmail(tx, tenant, moved, now);
       await options.notify?.(tx, {
         kind: 'rescheduled',

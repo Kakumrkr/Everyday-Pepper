@@ -56,6 +56,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   task_not_found: 'No such task in this business',
   task_assignee_not_member: 'Tasks can only be given to members of this business',
   push_unavailable: 'Notifications are not available here',
+  feed_item_not_found: 'This suggestion is no longer open',
   booking_page_not_found: 'There is no booking page at this address',
   booking_request_not_found: 'This booking request was not found. Start again',
   booking_request_expired: 'This code has expired. Ask for a new one',

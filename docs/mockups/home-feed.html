@@ -1,0 +1,174 @@
+<title>Pepper Home Feed</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="S35 mock-up: Pepper's home screen as the operator feed, filled by rule-based insights, with dismiss-to-snooze, Pause suggestions, the staff view and empty states.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one phone-width column (the PWA home), a role switch and a state switch above it.
+   Tokens are the prototype's (docs/mockups/README.md), Pepper green + chili accent. */
+:root {
+  --bg: #F7FAF5; --surface: #FFFFFF; --surface-2: #EDF3EA; --line: #DCE6D8;
+  --ink: #1B2A1E; --ink-2: #536257;
+  --brand: #2A7230; --brand-strong: #23652A; --brand-soft: #E2F0E0; --on-brand: #FFFFFF;
+  --accent: #C2361B; --accent-soft: #FDE6DF;
+  --ok: #0B6B63; --ok-soft: #DDF1EE; --wait: #8F4C00; --wait-soft: #FFEFD6;
+  --shadow: 0 1px 2px rgba(27,42,30,.06), 0 10px 28px rgba(27,42,30,.08);
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r-md: 16px; --r-lg: 24px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1510; --surface: #172019; --surface-2: #202A22; --line: #2F3B31; --ink: #EAF3EA; --ink-2: #A7B7AA;
+    --brand: #86D28E; --brand-strong: #97DB9E; --brand-soft: #1B3320; --on-brand: #0A1F0D;
+    --accent: #FF8C70; --accent-soft: #3D1E16; --ok: #6BD5C6; --ok-soft: #13322E; --wait: #FFC274; --wait-soft: #3A2A12;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1510; --surface: #172019; --surface-2: #202A22; --line: #2F3B31; --ink: #EAF3EA; --ink-2: #A7B7AA;
+  --brand: #86D28E; --brand-strong: #97DB9E; --brand-soft: #1B3320; --on-brand: #0A1F0D;
+  --accent: #FF8C70; --accent-soft: #3D1E16; --ok: #6BD5C6; --ok-soft: #13322E; --wait: #FFC274; --wait-soft: #3A2A12;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+h1, h2 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
+.wrap { max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.mock-note { font-size: 13px; color: var(--ink-2); }
+.switches { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: none; color: var(--ink-2); font: 600 13px var(--font-body); padding: 7px 12px; border-radius: 999px; min-height: 36px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.top h1 { font-size: 28px; font-weight: 800; }
+.top .date { color: var(--ink-2); font-size: 14px; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.section > header { display: flex; align-items: center; gap: 8px; }
+.section h2 { font-size: 19px; font-weight: 700; }
+.count { font: 700 12px var(--font-body); padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.card { background: var(--surface); border-radius: var(--r-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line); }
+.card .title { font-weight: 650; line-height: 1.35; }
+.card .why { font-size: 13px; color: var(--ink-2); }
+.tag { align-self: flex-start; font: 700 11px var(--font-body); letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+.tag.sugg { background: var(--accent-soft); color: var(--accent); }
+.tag.wait { background: var(--wait-soft); color: var(--wait); }
+.tag.done { background: var(--ok-soft); color: var(--ok); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { border: 0; border-radius: 999px; min-height: 40px; padding: 0 14px; font: 600 14px var(--font-body); cursor: pointer; }
+.btn-primary { background: var(--brand-strong); color: var(--on-brand); }
+.btn-ghost { background: var(--surface-2); color: var(--ink); }
+.empty { background: var(--surface-2); border-radius: var(--r-md); padding: 14px 16px; color: var(--ink-2); font-size: 14px; }
+.empty b { color: var(--ink); }
+.pause { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--brand-soft); border-radius: var(--r-md); padding: 12px 16px; }
+.pause p { margin: 0; font-size: 14px; }
+.switch { position: relative; width: 48px; height: 28px; border-radius: 999px; border: 0; background: var(--line); cursor: pointer; flex: none; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); transition: left .15s; }
+.switch[aria-checked="true"] { background: var(--brand-strong); }
+.switch[aria-checked="true"]::after { left: 23px; }
+.ask { border: 1px dashed var(--accent); border-radius: var(--r-md); padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 14px; box-shadow: var(--shadow); display: flex; gap: 12px; align-items: center; max-width: calc(100% - 32px); }
+.toast button { background: none; border: 0; color: var(--bg); font: 700 14px var(--font-body); text-decoration: underline; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .switch::after { transition: none; } }
+</style>
+
+<div class="wrap">
+  <p class="mock-note">S35 mock-up · sample data · the real home reads <code>/v1/feed</code>. Items name ids and numbers; the screen fills in names.</p>
+  <div class="switches">
+    <div class="seg" role="group" aria-label="Signed in as">
+      <button id="r-owner" aria-pressed="true" data-role="owner">Owner (Dana)</button>
+      <button id="r-staff" aria-pressed="false" data-role="staff">Staff (Jess)</button>
+    </div>
+    <div class="seg" role="group" aria-label="State">
+      <button id="s-full" aria-pressed="true" data-state="full">Busy day</button>
+      <button id="s-empty" aria-pressed="false" data-state="empty">New business</button>
+    </div>
+  </div>
+
+  <div class="top"><h1>Good morning, <span id="who">Dana</span></h1><span class="date">Tue Nov 3</span></div>
+
+  <div id="pause-row" class="pause">
+    <p><b>Suggestions</b><br><span id="pause-text">On. I look for gaps, regulars who are due and busy weeks every hour.</span></p>
+    <button id="pause" class="switch" role="switch" aria-checked="false" aria-label="Pause suggestions"></button>
+  </div>
+
+  <section class="section" aria-labelledby="needs-h">
+    <header><h2 id="needs-h">Needs your OK</h2><span class="count" id="needs-c">1</span></header>
+    <div id="needs"></div>
+  </section>
+
+  <section class="section" aria-labelledby="sugg-h">
+    <header><h2 id="sugg-h">Suggestions</h2><span class="count" id="sugg-c">4</span></header>
+    <div id="sugg" class="section"></div>
+  </section>
+
+  <section class="section" aria-labelledby="done-h">
+    <header><h2 id="done-h">Done for you</h2><span class="count" id="done-c">2</span></header>
+    <div id="done" class="section"></div>
+  </section>
+</div>
+<div id="toast" class="toast" hidden role="status"><span id="toast-t"></span><button id="toast-undo">Undo</button></div>
+
+<script>
+const ITEMS = [
+  { id: "gap", kind: "schedule_gaps", staff: "jess", title: "Jess has 2 h 15 min free on Thursday, 1:30–3:45 pm", why: "Inside her working hours and longer than your 45-minute minimum. It goes away when it's booked or the day ends.", act: "Show on calendar" },
+  { id: "rebook", kind: "rebooking_due", staff: "jess", title: "Maria Lopez is due for a color touch-up", why: "Last visit 9 weeks ago (Color touch-up rebooks after 6 weeks). No visit booked.", act: "Open Maria" },
+  { id: "noshow", kind: "no_show_pattern", staff: null, title: "Sam Reed missed 2 visits since June and is booked Friday 10 am", why: "2 no-shows in the last 180 days. A confirmation the day before often helps.", act: "Open booking" },
+  { id: "overload", kind: "staff_overload", staff: null, title: "Ana is 90% booked or more on 4 of the next 7 days", why: "Wed, Thu, Fri and Sat. Jess has room on Thursday.", act: "Open week" },
+];
+const NEEDS = [{ title: "Move Ruth Kim to Friday 2 pm?", why: "Asked by chat 10 min ago. I'll email Ruth once you approve.", staff: null }];
+const DONE = [
+  { title: "Booked Lena Ortiz, Wed 11 am with Jess", why: "From the booking page · 8:12 am", staff: "jess" },
+  { title: "Sent tomorrow's reminders to 6 clients", why: "Reminders · 7:00 am", staff: null },
+];
+const st = { role: "owner", state: "full", paused: false, dismissed: new Set(), dismissCount: 0, asked: false };
+const $ = (id) => document.getElementById(id);
+const sees = (it) => st.role === "owner" || it.staff === "jess";
+const KIND_NAME = { schedule_gaps: "open gaps", rebooking_due: "regulars who are due", no_show_pattern: "no-show patterns", staff_overload: "busy weeks" };
+
+function render() {
+  const empty = st.state === "empty";
+  $("who").textContent = st.role === "owner" ? "Dana" : "Jess";
+  $("pause-row").hidden = st.role !== "owner";
+  $("pause").setAttribute("aria-checked", String(st.paused));
+  $("pause-text").textContent = st.paused ? "Paused. I won't add new suggestions. Requests that need your OK still show." : "On. I look for gaps, regulars who are due and busy weeks every hour.";
+
+  const needs = empty ? [] : NEEDS.filter(sees);
+  $("needs-c").textContent = needs.length;
+  $("needs").innerHTML = needs.length ? needs.map((n) => `<article class="card"><span class="tag wait">Needs your OK</span><div class="title">${n.title}</div><div class="why">${n.why}</div><div class="actions"><button class="btn btn-primary">Approve</button><button class="btn btn-ghost">Not now</button></div></article>`).join("")
+    : `<div class="empty"><b>Nothing waiting.</b> When I need your OK before I change something or message a client, it shows here.</div>`;
+
+  const sugg = empty || st.paused ? [] : ITEMS.filter((i) => sees(i) && !st.dismissed.has(i.id));
+  $("sugg-c").textContent = sugg.length;
+  let html = sugg.map((i) => `<article class="card"><span class="tag sugg">Suggestion</span><div class="title">${i.title}</div><div class="why">${i.why}</div><div class="actions"><button class="btn btn-primary">${i.act}</button><button class="btn btn-ghost" data-dismiss="${i.id}">Dismiss</button></div></article>`).join("");
+  if (st.dismissCount >= 3 && !st.asked && st.role === "owner") html = `<div class="ask"><span>You've dismissed 3 gap suggestions in 2 weeks. Should I stop looking for open gaps?</span><div class="actions"><button class="btn btn-primary" data-ask="off">Turn off open gaps</button><button class="btn btn-ghost" data-ask="keep">Keep them</button></div></div>` + html;
+  if (!sugg.length) html += st.paused ? `<div class="empty"><b>Suggestions are paused.</b> Turn them back on above when you want me to look again.</div>`
+    : empty ? `<div class="empty"><b>No suggestions yet.</b> Once you have a few weeks of bookings, I'll point out open gaps, regulars who are due back and days that are too full.</div>`
+    : `<div class="empty"><b>All clear.</b> I check again every hour and after every booking change.</div>`;
+  $("sugg").innerHTML = html;
+
+  const done = empty ? [] : DONE.filter(sees);
+  $("done-c").textContent = done.length;
+  $("done").innerHTML = done.length ? done.map((d) => `<article class="card"><span class="tag done">Done</span><div class="title">${d.title}</div><div class="why">${d.why}</div><div class="actions"><button class="btn btn-ghost">Why?</button><button class="btn btn-ghost">Undo</button></div></article>`).join("")
+    : `<div class="empty"><b>Nothing done yet today.</b> What I do for you, like bookings and reminders, lands here with an Undo.</div>`;
+}
+let last = null;
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.role) { st.role = b.dataset.role; document.querySelectorAll("[data-role]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); }
+  if (b.dataset.state) { st.state = b.dataset.state; document.querySelectorAll("[data-state]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); }
+  if (b.id === "pause") st.paused = !st.paused;
+  if (b.dataset.dismiss) {
+    const it = ITEMS.find((i) => i.id === b.dataset.dismiss); st.dismissed.add(it.id); st.dismissCount = it.kind === "schedule_gaps" ? 3 : st.dismissCount; last = it.id;
+    $("toast-t").textContent = `Snoozed for 30 days. I won't suggest ${KIND_NAME[it.kind]} for this again until then.`; $("toast").hidden = false;
+    clearTimeout(window._t); window._t = setTimeout(() => ($("toast").hidden = true), 5000);
+  }
+  if (b.id === "toast-undo" && last) { st.dismissed.delete(last); $("toast").hidden = true; }
+  if (b.dataset.ask) st.asked = true;
+  render();
+});
+render();
+</script>

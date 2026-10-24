@@ -18,6 +18,7 @@ export * from './services/clients.js';
 export * from './services/conversations.js';
 export * from './services/episodes.js';
 export * from './services/invites.js';
+export * from './services/feed.js';
 export * from './services/memory.js';
 export * from './services/outbox.js';
 export * from './services/push.js';

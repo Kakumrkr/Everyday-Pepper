@@ -7,10 +7,11 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
-import { sendDueReminders } from '@pepper/appointments';
+import { runDueInsights, sendDueReminders } from '@pepper/appointments';
 import { cleanUp, sendDueTaskPushes, systemClock, type Clock } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
+import { templateInsights } from '@pepper/templates';
 import { Periodic } from './periodic.js';
 
 export interface JobsOptions {
@@ -20,6 +21,11 @@ export interface JobsOptions {
   reminderPollMs: number;
   /** How often the clean-up runs; it also runs at start-up. */
   cleanupIntervalMs: number;
+  /**
+   * How often the insights pass looks for businesses whose feed is due (ADR-0039): an hour
+   * after their last run, or after a booking change. Default: every minute.
+   */
+  insightsPollMs?: number;
   /**
    * Whether this worker sends pushes (VAPID keys set, ADR-0026); the due-task job runs, on
    * the reminders' interval, only then.
@@ -35,7 +41,9 @@ export const JOBS_OPTIONS = Symbol('JOBS_OPTIONS');
  * either loses nothing: every `reminderPollMs` due reminders are queued in the outbox (which
  * sends them), and so are the pushes of to-dos coming due (ADR-0026, when pushes are on); every
  * `cleanupIntervalMs` old rows are deleted. Several worker processes may run them at once: a
- * reminder or due task is taken under a row lock, and deleting is idempotent.
+ * reminder or due task is taken under a row lock, and deleting is idempotent. Every
+ * `insightsPollMs` the feed of each business that is due is computed again (ADR-0039); a
+ * business is taken under an advisory lock, and the feed is written by dedupe key.
  */
 @Injectable()
 export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -43,6 +51,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   readonly reminders: Periodic;
   readonly dueTasks: Periodic | null;
   readonly cleanup: Periodic;
+  readonly insights: Periodic;
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -65,6 +74,20 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
             this.logger,
           )
         : null;
+    this.insights = new Periodic(
+      'Insights job',
+      options.insightsPollMs ?? 60_000,
+      async () => {
+        const result = await runDueInsights(db, { clock, insightsOf: templateInsights });
+        // Counts only.
+        if (result.businesses > 0) {
+          this.logger.log(
+            `Insights: ${String(result.businesses)} businesses, ${String(result.created)} new, ${String(result.updated)} updated, ${String(result.expired)} expired`,
+          );
+        }
+      },
+      this.logger,
+    );
     this.cleanup = new Periodic(
       'Clean-up job',
       options.cleanupIntervalMs,
@@ -82,15 +105,21 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   onApplicationBootstrap(): void {
     this.reminders.start();
     this.dueTasks?.start();
+    this.insights.start();
     this.cleanup.start({ immediately: true });
   }
 
   async onApplicationShutdown(): Promise<void> {
-    await Promise.all([this.reminders.stop(), this.dueTasks?.stop(), this.cleanup.stop()]);
+    await Promise.all([
+      this.reminders.stop(),
+      this.dueTasks?.stop(),
+      this.insights.stop(),
+      this.cleanup.stop(),
+    ]);
   }
 }
 
-/** The reminder, due-task and clean-up jobs. Needs `ConnectionsModule`. */
+/** The reminder, due-task, insights and clean-up jobs. Needs `ConnectionsModule`. */
 @Module({})
 export class JobsModule {
   static forRoot(options: JobsOptions): DynamicModule {

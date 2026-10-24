@@ -126,6 +126,9 @@ services:
       OPENAI_REASONING_ROUTINE: ${OPENAI_REASONING_ROUTINE:-}
       OPENAI_MODEL_EMBEDDING: ${OPENAI_MODEL_EMBEDDING:-}
       AI_MONTHLY_TOKENS: ${AI_MONTHLY_TOKENS:-}
+      # How often the insights job looks for businesses whose feed is due (ADR-0039); 60 s
+      # unless set. CI's journeys use 10 s so a new business's suggestions appear quickly.
+      INSIGHTS_POLL_MS: ${INSIGHTS_POLL_MS:-}
     ports: ['127.0.0.1:4100:4100']
     depends_on:
       migrate: { condition: service_completed_successfully }

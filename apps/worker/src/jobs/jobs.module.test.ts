@@ -1,12 +1,13 @@
 import 'reflect-metadata';
 import type * as Core from '@pepper/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { templateInsights } from '@pepper/templates';
 import { JobsRunner, type JobsOptions } from './jobs.module.js';
 
 // The runner's wiring with the domain passes replaced; the real ones run against Postgres in
 // jobs.int.test.ts.
 
-const appointments = vi.hoisted(() => ({ sendDueReminders: vi.fn() }));
+const appointments = vi.hoisted(() => ({ sendDueReminders: vi.fn(), runDueInsights: vi.fn() }));
 vi.mock('@pepper/appointments', () => appointments);
 const core = vi.hoisted(() => ({ cleanUp: vi.fn(), sendDueTaskPushes: vi.fn() }));
 vi.mock('@pepper/core', async (original) => ({
@@ -28,6 +29,12 @@ const OPTIONS: JobsOptions = {
 beforeEach(() => {
   vi.clearAllMocks();
   appointments.sendDueReminders.mockResolvedValue({ queued: 1, skipped: 0 });
+  appointments.runDueInsights.mockResolvedValue({
+    businesses: 1,
+    created: 2,
+    updated: 0,
+    expired: 1,
+  });
   core.cleanUp.mockResolvedValue({
     businesses: 2,
     bookingRequests: 3,
@@ -46,6 +53,36 @@ describe('JobsRunner', () => {
       key: OPTIONS.key,
       clock,
     });
+  });
+
+  it("runs due insights with the clock and the templates' thresholds", async () => {
+    const runner = new JobsRunner(DB as never, OPTIONS);
+    await runner.insights.runOnce();
+    expect(appointments.runDueInsights).toHaveBeenCalledWith(DB.db, {
+      clock,
+      insightsOf: templateInsights,
+    });
+  });
+
+  it('runs the insights every minute by default, or on its own interval', async () => {
+    vi.useFakeTimers();
+    try {
+      const runner = new JobsRunner(DB as never, OPTIONS);
+      runner.onApplicationBootstrap();
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(appointments.runDueInsights).toHaveBeenCalledTimes(1);
+      await runner.onApplicationShutdown();
+      appointments.runDueInsights.mockClear();
+      const slower = new JobsRunner(DB as never, { ...OPTIONS, insightsPollMs: 300_000 });
+      slower.onApplicationBootstrap();
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(appointments.runDueInsights).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(240_000);
+      expect(appointments.runDueInsights).toHaveBeenCalledTimes(1);
+      await slower.onApplicationShutdown();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('cleans up with the clock', async () => {

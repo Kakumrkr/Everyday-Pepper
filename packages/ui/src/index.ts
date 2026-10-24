@@ -14,3 +14,10 @@ export { BookingCard, ClientChoice, DayCard, PlanCard, SlotPicker } from './card
 export { ChatNotice, FallbackNotice, WhyContent, type RenderLink } from './cards/why.js';
 export { Remembered, type MemoryChange, type RememberedProps } from './cards/remembered.js';
 export * from './cards/labels.js';
+export {
+  FeedSuggestions,
+  type FeedAction,
+  type FeedChange,
+  type FeedSuggestionsProps,
+} from './feed/feed-suggestions.js';
+export { FEED_KIND_NOUN, feedLine, formatDuration, type FeedLine } from './feed/feed-lines.js';

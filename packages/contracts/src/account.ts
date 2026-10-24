@@ -53,6 +53,8 @@ export const ApiErrorCodeSchema = z.enum([
   'task_not_found',
   'task_assignee_not_member',
   'push_unavailable',
+  // The operator feed (ADR-0039).
+  'feed_item_not_found',
   // The public booking page (ADR-0022).
   'booking_page_not_found',
   'booking_request_not_found',

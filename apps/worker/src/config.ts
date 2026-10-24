@@ -23,6 +23,8 @@ const JobsEnvSchema = z.object({
     .min(60_000)
     .max(7 * 86_400_000)
     .default(86_400_000),
+  /** How often the insights pass looks for due businesses (ADR-0039). */
+  INSIGHTS_POLL_MS: z.coerce.number().int().min(10_000).max(600_000).default(60_000),
   /** A business's monthly allowance of model tokens, as the api's (episodes count, S31). */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
 });
@@ -38,6 +40,7 @@ export interface WorkerConfig extends ServiceConfig {
   outboxPollMs: number;
   reminderPollMs: number;
   cleanupIntervalMs: number;
+  insightsPollMs: number;
   /**
    * Writes episodes (S31, ADR-0037) with the routine model and the embedding model; `null`
    * when OpenAI or its embedding model is not configured (then the api queues none).
@@ -61,6 +64,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     outboxPollMs: jobs.OUTBOX_POLL_MS,
     reminderPollMs: jobs.REMINDER_POLL_MS,
     cleanupIntervalMs: jobs.CLEANUP_INTERVAL_MS,
+    insightsPollMs: jobs.INSIGHTS_POLL_MS,
     episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
   };
 }

@@ -10,6 +10,7 @@ import { MemoryModule } from './memory/memory.module.js';
 import type { ApiConfig } from './config.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { PushModule } from './push/push.module.js';
+import { FeedModule } from './feed/feed.module.js';
 import { TasksModule } from './tasks/tasks.module.js';
 import { TeamModule } from './team/team.module.js';
 
@@ -26,6 +27,7 @@ export class AppModule {
         ClientsModule,
         MemoryModule,
         TasksModule,
+        FeedModule,
         AppointmentsModule,
         MailModule.forRoot(config.mail),
         BookingEmailsModule.forRoot({

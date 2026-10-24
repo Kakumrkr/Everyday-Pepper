@@ -3,6 +3,7 @@
 Clickable HTML prototype of the key V1 screens. It is a **design artefact, not product code**: sample data, no backend, nothing saved or sent. The production design system will be rebuilt in `packages/ui` (React + Tailwind) in Phase 4, using the tokens below once you approve them.
 
 - **Prototype:** [`pepper-prototype.html`](pepper-prototype.html) (published preview: https://claude.ai/artifact/WNTU3YyQgBjJvCC9hxHqS1, private to the owner)
+- **S35 home feed:** [`home-feed.html`](home-feed.html) (published preview: https://claude.ai/artifact/RrsMHeVs4rKGrG42XNvQZk, private to the owner): Home as the operator feed with rule-based suggestions, dismiss-to-snooze, "Pause suggestions", the staff view and empty states (ADR-0039).
 - **Status:** Part 1 (S1) built and approved 2026-10-16. Part 2 (S2) built and approved 2026-10-16. **All key screens signed off.** Tokens are recorded in `docs/product/ux-principles.md`.
 
 ## What the prototype covers
