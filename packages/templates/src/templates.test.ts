@@ -12,6 +12,8 @@ import { describe, expect, it } from 'vitest';
 import {
   getTemplate,
   listTemplates,
+  PLATFORM_INSIGHTS,
+  templateInsights,
   templateRuleDefaults,
   templateSummaries,
 } from './templates.js';
@@ -167,5 +169,24 @@ describe('templateRuleDefaults', () => {
       minimumNoticeMinutes: 720,
       maximumAdvanceDays: 60,
     });
+  });
+});
+
+describe('templateInsights', () => {
+  it('turns every rule-based insight on without a template', () => {
+    expect(templateInsights(null)).toBe(PLATFORM_INSIGHTS);
+    expect(PLATFORM_INSIGHTS.enabled).toEqual([
+      'rebooking_due',
+      'schedule_gaps',
+      'no_show_pattern',
+      'staff_overload',
+    ]);
+  });
+
+  it("returns the template's insights, with staff overload on in every template (S35)", () => {
+    expect(templateInsights('spa')).toMatchObject({ minGapMinutes: 60 });
+    for (const template of listTemplates()) {
+      expect(templateInsights(template.id).enabled, template.id).toContain('staff_overload');
+    }
   });
 });

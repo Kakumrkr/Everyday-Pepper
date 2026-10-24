@@ -18,6 +18,7 @@ import {
   markInsightRun,
   readFeedSettings,
   requestInsightRun,
+  startInsightRun,
   syncFeedItems,
   writeFeedSettings,
   type FeedCandidate,
@@ -304,19 +305,41 @@ describe('insight runs', () => {
     const other = TenantIdSchema.parse(
       (await createTenant(db, { name: 'Fig', slug: 'fig-feed', timeZone: 'Asia/Kolkata' })).id,
     );
+    const run = (at: Date) =>
+      withTenant(db, other, async (tx) => {
+        const seen = await startInsightRun(tx);
+        if (seen === undefined) throw new Error('locked');
+        await markInsightRun(tx, at, seen);
+        return seen;
+      });
     expect(await due(NOW)).toContain(other);
-    await withTenant(db, other, (tx) => markInsightRun(tx, NOW));
+    expect(await run(NOW)).toBe(0);
     expect(await due(NOW)).not.toContain(other);
 
-    await withTenant(db, other, (tx) => requestInsightRun(tx, new Date(NOW.getTime() + 1000)));
+    await withTenant(db, other, requestInsightRun);
     expect(await due(NOW)).toContain(other);
-    await withTenant(db, other, (tx) => markInsightRun(tx, new Date(NOW.getTime() + 2000)));
+    expect(await run(NOW)).toBe(1);
     expect(await due(NOW)).not.toContain(other);
 
-    expect(await due(new Date(NOW.getTime() + EVERY_HOUR + 2000))).toContain(other);
+    expect(await due(new Date(NOW.getTime() + EVERY_HOUR))).toContain(other);
+  });
+
+  it('never loses a request made while a run is going', async () => {
+    const other = TenantIdSchema.parse(
+      (await createTenant(db, { name: 'Oak', slug: 'oak-feed', timeZone: 'America/Phoenix' })).id,
+    );
+    await withTenant(db, other, async (tx) => {
+      const seen = await startInsightRun(tx);
+      // A second worker skips the business while the lock is held.
+      expect(await withTenant(db, other, startInsightRun)).toBeUndefined();
+      // A booking change commits during the run, without waiting for it.
+      await withTenant(db, other, requestInsightRun);
+      await markInsightRun(tx, NOW, seen ?? 0);
+    });
+    expect(await due(NOW)).toContain(other);
   });
 
   it('lets a staff member ask for a run (a booking change in their request)', async () => {
-    await expect(as(jess, (tx) => requestInsightRun(tx, NOW))).resolves.toBeUndefined();
+    await expect(as(jess, requestInsightRun)).resolves.toBeUndefined();
   });
 });

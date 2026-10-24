@@ -106,7 +106,13 @@ export const spa: TemplateInput = {
     { key: 'allergies', label: 'Allergies (oils, nuts, products)', type: 'text', sensitive: true },
   ],
   insights: {
-    enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'waitlist_match'],
+    enabled: [
+      'rebooking_due',
+      'schedule_gaps',
+      'no_show_pattern',
+      'waitlist_match',
+      'staff_overload',
+    ],
     rebookingIntervalDays: 28,
     minGapMinutes: 60,
   },

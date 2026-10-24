@@ -1967,9 +1967,12 @@ export const feedItems = pgTable(
 );
 
 /**
- * When each business's insights last ran and whether a booking change asked for a new run
- * (ADR-0039). The worker's insights pass scans this table across businesses (`job_scan`, ids
- * and times only) every minute and runs a business whose run is asked for or an hour old.
+ * When each business's insights last ran and whether something asked for a new run
+ * (ADR-0039). A booking change adds one to `request_count` in its own transaction; a run notes
+ * the count it saw before reading anything (`run_count`), so a change that commits during a
+ * run is never lost: its count is higher, and the business is due again. The worker's insights
+ * pass scans this table across businesses (`job_scan`, ids and numbers only) every minute and
+ * runs a business never run, asked for since its last run, or an hour old.
  */
 export const insightRuns = pgTable(
   'insight_runs',
@@ -1979,13 +1982,18 @@ export const insightRuns = pgTable(
       .notNull()
       .default(currentTenantId)
       .references(() => tenants.id, { onDelete: 'cascade' }),
-    requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow(),
+    requestCount: bigint('request_count', { mode: 'number' }).notNull().default(0),
+    runCount: bigint('run_count', { mode: 'number' }).notNull().default(0),
     lastRunAt: timestamp('last_run_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
     unique('insight_runs_tenant_unique').on(table.tenantId),
-    index('insight_runs_due_idx').on(table.lastRunAt, table.requestedAt),
+    index('insight_runs_last_run_at_idx').on(table.lastRunAt),
+    check(
+      'insight_runs_counts',
+      sql`${table.requestCount} >= 0 AND ${table.runCount} >= 0 AND ${table.runCount} <= ${table.requestCount}`,
+    ),
     tenantIsolation(sql.raw('tenant_id')),
     jobScan('insights'),
   ],

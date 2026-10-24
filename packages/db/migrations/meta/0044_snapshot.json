@@ -1,6 +1,6 @@
 {
-  "id": "8cb8d15d-1f64-40ac-be99-ad4834e0c17b",
-  "prevId": "54f70fa7-0ade-4338-bf53-fe7e77534522",
+  "id": "9b3cfc8e-da85-4d37-b50c-9c033a97532b",
+  "prevId": "e669bac0-985a-4eb5-9487-5f1d462c4572",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -3696,12 +3696,19 @@
           "notNull": true,
           "default": "current_tenant_id()"
         },
-        "requested_at": {
-          "name": "requested_at",
-          "type": "timestamp with time zone",
+        "request_count": {
+          "name": "request_count",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "default": 0
+        },
+        "run_count": {
+          "name": "run_count",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "last_run_at": {
           "name": "last_run_at",
@@ -3725,17 +3732,11 @@
         }
       },
       "indexes": {
-        "insight_runs_due_idx": {
-          "name": "insight_runs_due_idx",
+        "insight_runs_last_run_at_idx": {
+          "name": "insight_runs_last_run_at_idx",
           "columns": [
             {
               "expression": "last_run_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "requested_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3793,7 +3794,12 @@
           "using": "current_tenant_id() IS NULL AND current_job_scan('insights')"
         }
       },
-      "checkConstraints": {},
+      "checkConstraints": {
+        "insight_runs_counts": {
+          "name": "insight_runs_counts",
+          "value": "\"insight_runs\".\"request_count\" >= 0 AND \"insight_runs\".\"run_count\" >= 0 AND \"insight_runs\".\"run_count\" <= \"insight_runs\".\"request_count\""
+        }
+      },
       "isRLSEnabled": false
     },
     "public.invites": {

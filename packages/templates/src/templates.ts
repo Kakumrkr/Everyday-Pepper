@@ -6,6 +6,7 @@ import {
   type Template,
   type TemplateId,
   type TemplateInput,
+  type TemplateInsights,
   type TemplateSummary,
 } from '@pepper/contracts';
 import { barber } from './catalog/barber.js';
@@ -65,6 +66,21 @@ export function templateSummaries(): TemplateSummary[] {
  */
 export function templateRuleDefaults(id: TemplateId | null): Partial<RuleDefaults> {
   return id === null ? {} : ruleDefaultsOf(getTemplate(id).defaultRules);
+}
+
+/**
+ * Without a template, every rule-based insight is on with an hour as the shortest gap (the
+ * platform default, ADR-0039); the waitlist match follows its own feature (S37).
+ */
+export const PLATFORM_INSIGHTS: TemplateInsights = deepFreeze<TemplateInsights>({
+  enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'staff_overload'],
+  rebookingIntervalDays: 28,
+  minGapMinutes: 60,
+});
+
+/** The insights a business's template turns on, and their thresholds. */
+export function templateInsights(id: TemplateId | null): TemplateInsights {
+  return id === null ? PLATFORM_INSIGHTS : getTemplate(id).insights;
 }
 
 function parseTemplate(id: TemplateId, source: TemplateInput): Template {

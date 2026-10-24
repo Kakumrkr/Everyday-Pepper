@@ -27,6 +27,7 @@ import {
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import {
+  bookings,
   clients,
   feedItems,
   insightRuns,
@@ -300,21 +301,41 @@ export async function writeFeedSettings(
 
 /**
  * Asks the worker to run the business's insights again soon (after a booking change). Cheap
- * and safe inside the change's transaction: one row per business, upserted.
+ * and safe inside the change's transaction: one row per business, its count raised by one.
  */
-export async function requestInsightRun(tx: TenantTx, at: Date = new Date()): Promise<void> {
+export async function requestInsightRun(tx: TenantTx): Promise<void> {
   await tx
     .insert(insightRuns)
-    .values({ requestedAt: at })
-    .onConflictDoUpdate({ target: insightRuns.tenantId, set: { requestedAt: at } });
+    .values({ requestCount: 1 })
+    .onConflictDoUpdate({
+      target: insightRuns.tenantId,
+      set: { requestCount: sql`${insightRuns.requestCount} + 1` },
+    });
 }
 
-/** Records a finished run that started at `startedAt` (requests after it stay pending). */
-export async function markInsightRun(tx: TenantTx, startedAt: Date): Promise<void> {
-  await tx
-    .insert(insightRuns)
-    .values({ requestedAt: startedAt, lastRunAt: startedAt })
-    .onConflictDoUpdate({ target: insightRuns.tenantId, set: { lastRunAt: startedAt } });
+/**
+ * Starts a run of the business's insights: takes the business's run lock for this transaction
+ * (an advisory lock, so booking changes asking for runs never wait on it) and returns the
+ * request count the run covers, or `undefined` when another worker is running it right now.
+ * Call it before reading anything the run uses.
+ */
+export async function startInsightRun(tx: TenantTx): Promise<number | undefined> {
+  const { rows } = await tx.execute<{ locked: boolean }>(
+    sql`SELECT pg_try_advisory_xact_lock(hashtextextended('insights:' || current_tenant_id()::text, 0)) AS locked`,
+  );
+  if (rows[0]?.locked !== true) return undefined;
+  // A business without its row (it missed the backfill) gets one now.
+  await tx.insert(insightRuns).values({}).onConflictDoNothing({ target: insightRuns.tenantId });
+  const [row] = await tx.select({ requestCount: insightRuns.requestCount }).from(insightRuns);
+  return row?.requestCount ?? 0;
+}
+
+/** Records a finished run that started at `startedAt` and covered requests up to `seen`. */
+export async function markInsightRun(tx: TenantTx, startedAt: Date, seen: number): Promise<void> {
+  await tx.update(insightRuns).set({
+    lastRunAt: startedAt,
+    runCount: sql`GREATEST(${insightRuns.runCount}, LEAST(${seen}::bigint, ${insightRuns.requestCount}))`,
+  });
 }
 
 export interface DueInsightRun {
@@ -341,7 +362,7 @@ export async function listDueInsightRuns(
       .where(
         or(
           isNull(insightRuns.lastRunAt),
-          gt(insightRuns.requestedAt, insightRuns.lastRunAt),
+          gt(insightRuns.requestCount, insightRuns.runCount),
           lte(insightRuns.lastRunAt, staleBefore),
         ),
       )
@@ -349,4 +370,60 @@ export async function listDueInsightRuns(
       .limit(max),
   );
   return rows.map((row) => ({ runId: row.id, tenantId: TenantIdSchema.parse(row.tenantId) }));
+}
+
+/** What the insights pass needs about the business itself. */
+export interface InsightTenant {
+  timeZone: string;
+  templateId: string | null;
+  settings: StoredFeedSettings;
+}
+
+export async function readInsightTenant(tx: TenantTx): Promise<InsightTenant | undefined> {
+  const [row] = await tx
+    .select({
+      timeZone: tenants.timeZone,
+      templateId: tenants.templateId,
+      settings: tenants.feedSettings,
+    })
+    .from(tenants);
+  if (row === undefined) return undefined;
+  const parsed = StoredFeedSettingsSchema.safeParse(row.settings);
+  return {
+    timeZone: row.timeZone,
+    templateId: row.templateId,
+    settings: parsed.success ? parsed.data : STORED_DEFAULT,
+  };
+}
+
+/** A booking as the insight providers read it. */
+export interface InsightBookingRow {
+  id: string;
+  clientId: string;
+  serviceId: string;
+  staffMemberId: string;
+  startsAt: Date;
+  endsAt: Date;
+  bufferBeforeMinutes: number;
+  bufferAfterMinutes: number;
+  status: string;
+}
+
+/** Every booking of the business (any status) starting at or after `since`, by start. */
+export async function listInsightBookings(tx: TenantTx, since: Date): Promise<InsightBookingRow[]> {
+  return tx
+    .select({
+      id: bookings.id,
+      clientId: bookings.clientId,
+      serviceId: bookings.serviceId,
+      staffMemberId: bookings.staffMemberId,
+      startsAt: bookings.startsAt,
+      endsAt: bookings.endsAt,
+      bufferBeforeMinutes: bookings.bufferBeforeMinutes,
+      bufferAfterMinutes: bookings.bufferAfterMinutes,
+      status: bookings.status,
+    })
+    .from(bookings)
+    .where(gte(bookings.startsAt, since))
+    .orderBy(asc(bookings.startsAt), asc(bookings.id));
 }

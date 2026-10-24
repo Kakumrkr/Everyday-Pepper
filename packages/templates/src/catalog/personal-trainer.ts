@@ -83,7 +83,13 @@ export const personalTrainer: TemplateInput = {
     { key: 'emergency_contact', label: 'Emergency contact', type: 'text' },
   ],
   insights: {
-    enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'waitlist_match'],
+    enabled: [
+      'rebooking_due',
+      'schedule_gaps',
+      'no_show_pattern',
+      'waitlist_match',
+      'staff_overload',
+    ],
     rebookingIntervalDays: 7,
     minGapMinutes: 30,
   },

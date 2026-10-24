@@ -643,11 +643,11 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     tenantColumn: 'tenant_id',
     // createTenant made the row; asking for a run keeps it the only one.
     seed: async (tx) => {
-      await requestInsightRun(tx, new Date('2026-10-20T12:00:00Z'));
+      await requestInsightRun(tx);
       const { rows } = await tx.execute<{ id: string }>(sql`SELECT current_tenant_id() AS id`);
       return idWhere(tx, 'insight_runs', 'tenant_id', String(rows[0]?.id));
     },
-    touch: 'requested_at = requested_at',
+    touch: 'request_count = request_count',
     jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('insights'::text))",
   },
   memory_episodes: {

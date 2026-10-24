@@ -105,7 +105,13 @@ export const massage: TemplateInput = {
     },
   ],
   insights: {
-    enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'waitlist_match'],
+    enabled: [
+      'rebooking_due',
+      'schedule_gaps',
+      'no_show_pattern',
+      'waitlist_match',
+      'staff_overload',
+    ],
     rebookingIntervalDays: 28,
     minGapMinutes: 60,
   },

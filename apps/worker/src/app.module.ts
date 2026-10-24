@@ -27,6 +27,7 @@ export class AppModule {
           key: outboxKeyFrom(config.outboxSecret),
           reminderPollMs: config.reminderPollMs,
           cleanupIntervalMs: config.cleanupIntervalMs,
+          insightsPollMs: config.insightsPollMs,
           pushes: config.push !== null,
         }),
       ],

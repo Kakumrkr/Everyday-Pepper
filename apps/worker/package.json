@@ -23,6 +23,7 @@
     "@pepper/core": "workspace:*",
     "@pepper/db": "workspace:*",
     "@pepper/runtime": "workspace:*",
+    "@pepper/templates": "workspace:*",
     "bullmq": "6.3.11",
     "ioredis": "^6.0.0",
     "reflect-metadata": "^0.2.2",

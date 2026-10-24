@@ -59,6 +59,18 @@ describe('loadWorkerConfig', () => {
     );
   });
 
+  it('reads the insights interval: every minute by default, 10 s to 10 min', () => {
+    expect(loadWorkerConfig(required)).toMatchObject({ insightsPollMs: 60_000 });
+    expect(loadWorkerConfig({ ...required, INSIGHTS_POLL_MS: '30000' })).toMatchObject({
+      insightsPollMs: 30_000,
+    });
+    for (const value of ['5000', '3600000']) {
+      expect(() => loadWorkerConfig({ ...required, INSIGHTS_POLL_MS: value })).toThrow(
+        /^Invalid worker environment: INSIGHTS_POLL_MS$/,
+      );
+    }
+  });
+
   it('reads the reminder and clean-up intervals, within their limits', () => {
     expect(loadWorkerConfig(required)).toMatchObject({
       reminderPollMs: 60_000,

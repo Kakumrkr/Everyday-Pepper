@@ -30,6 +30,7 @@ const allowedInternalImports = {
   // Apps also get each modules/* package as it is created.
   'apps/api': ['contracts', 'core', 'db', 'ai', 'runtime', 'testing', 'appointments', 'templates'],
   // S31 (ADR-0037): the episode job summarises and embeds through the AI package's ports.
+  // S35 (ADR-0039): the insights job passes the templates' thresholds to the appointments pass.
   'apps/worker': [
     'contracts',
     'core',
@@ -39,6 +40,7 @@ const allowedInternalImports = {
     'runtime',
     'testing',
     'appointments',
+    'templates',
   ],
   'apps/web': ['contracts', 'ui'],
   e2e: ['contracts', 'testing'],
