@@ -5,7 +5,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S34** (first row of "Planned sessions").
+**S34 (Phase 8a, planning)**, brief approved (user, 2026-10-24: "Go ahead with your recommendations"): layout A (S35 feed + insights; S36a/b suggestions with drafts + the first guide batch with the four S33 leftovers; S37a/b smart waitlist; S38a/b daily briefing + Phase 8 exit); Phase 8 cap $1.25; BullMQ only for the waitlist, `Periodic` passes for insights and briefing (ADR in S35); insights by deterministic rules, the model writes only drafts, offers start at "ask".
+- Tasks: (1) `phase-8-playbook.md` (2) PCR-006 + CHANGELOG 0.31 + roadmap, traceability, dependency-map, jobs and data-model rows (3) user approval (4) `/session-close` (docs-only PR).
+- Done: tasks 1–2 (playbook, PCR-006, CHANGELOG 0.31, roadmap/traceability/dependency-map/jobs/data-model rows) · Next: task 3, the user's approval of the playbook and PCR-006; then `/session-close`.
 
 ## Last sessions
 - **S33 Phase 7f (2026-10-24): Phase 7 exit, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33", [security review](../engineering/security-review-s33.md)). Full entry in [session-log.md](session-log.md).

@@ -2,6 +2,12 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.31 — 2026-10-24
+- S34 (Phase 8a, **Phase 8 planning**): the [Phase 8 playbook](phase-8-playbook.md) (operator feed: rule-based insights, suggestions with drafts, the smart waitlist, the daily briefing; gates, sessions S35–S38, eval sets, security checks).
+  - **Plan change ([PCR-006](changes/PCR-006.md), user):** insights and the morning run as `Periodic` passes, the waitlist through a queue fed from the cancellation's transaction; the model writes only drafts; `clients.email_opt_out_at` and one-click unsubscribe for rebooking nudges; `WaitlistOffer` (top 3 at once, first claim wins); tools `get_feed` and `add_to_waitlist` with a new dial action `waitlist.change`; the S33 leftovers in S36's guide batch. Phase 8 OpenAI cap $1.25.
+
+  **Compatibility:** docs only in S34; every planned change is additive (new tables, nullable columns, enum values, optional template fields).
+
 ## 0.30 — 2026-10-24
 - S33 (Phase 7f, **Phase 7 exit**): every playbook §2 gate checked ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33"), [security review](../engineering/security-review-s33.md).
   - **Plan change (user):** the Phase 7 OpenAI cap goes from $1.00 to $1.55 (playbook §4); spent $1.27.
