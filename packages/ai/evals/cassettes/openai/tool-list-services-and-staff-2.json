@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4f4b32d67371a303aefac32ed0d9039924d71e7e18a70611ea164be640f617a0",
+        "fingerprint": "a7f49be140824f2de3b275f1d053ea11bcc1e2941c1fb796e2c753d1cc541d31",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_cSXx01QztOLxLBluIqe75Jrn",
+              "id": "call_P2z8OgI3zF9D2hBsQycMrBjS",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8320,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8349,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 10,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "2fc135f06d9edfaa288bc067a16d5c961dcef96629e7c2c5f0cf32eaa3d013cd",
+        "fingerprint": "302b24877ceeb2f6e368c5e28f9233b91fb18050d42185af117713d98921482e",
         "response": {
-          "text": "Marco offers haircuts, but beard trims aren’t listed as a service. Would you like me to book a haircut with him instead?",
+          "text": "I don’t see a beard trim in the available services—only Colour and Haircut. Marco offers Haircut. Would you like to book a haircut with him instead?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8599,
-            "cachedInputTokens": 8317,
-            "cacheWriteTokens": 279,
-            "outputTokens": 31
+            "inputTokens": 8635,
+            "cachedInputTokens": 8346,
+            "cacheWriteTokens": 286,
+            "outputTokens": 38
           },
           "model": "gpt-6-luna"
         }

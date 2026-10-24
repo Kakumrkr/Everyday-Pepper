@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3954268083b73d7283572ed2600e5aba7eb3c3f6730fd27e1934d318f4899f8d",
+        "fingerprint": "f7f4ad96526a6e3e422e1e9efcf6332d763449839ac7ede43b239a12d5a3592b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_cPhby2eWF7bZenAEvGrwSXrv",
+              "id": "call_ekL2s7DRkhlMjn2l7ePxTSjV",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8320,
+            "inputTokens": 8349,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8317,
+            "cacheWriteTokens": 8346,
             "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e1725eebeb11e75f9a70ffb66d8594cfd57c4a5f6a7c30009c21e00d6b64b463",
+        "fingerprint": "e216fef527f76fa964507cc0e80bfbea2a35c7334144399db095847249551c1a",
         "response": {
-          "text": "Tomorrow, you have a haircut with Maria L. from 3:00 to 4:00 PM, and your calendar is blocked from noon to 1:00 PM.",
+          "text": "Tomorrow you have Maria L. for a haircut from 3:00 to 4:00 PM, and blocked time from 12:00 to 1:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8639,
-            "cachedInputTokens": 8317,
-            "cacheWriteTokens": 319,
+            "inputTokens": 8664,
+            "cachedInputTokens": 8346,
+            "cacheWriteTokens": 315,
             "outputTokens": 40
           },
           "model": "gpt-6-luna"

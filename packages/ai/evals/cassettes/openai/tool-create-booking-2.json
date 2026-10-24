@@ -3,17 +3,17 @@
   "trials": [
     [
       {
-        "fingerprint": "7ef9f4fe81072c369a8fd7aa2527c58e579a2a727209f5579fdbc23bbbba8eb4",
+        "fingerprint": "4599baeda9d19c797107d2207b89fd10277a191c7124817b753a84afcc8e085e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_t9UZeBAm0XhFhUKOeiSmhvzB",
+              "id": "call_Oxe4dBkjr0Bjj4DP820Q5tBl",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah Park\"}"
             },
             {
-              "id": "call_98SZxZdSTyQ5YWozObUwhpn4",
+              "id": "call_GRzMMGUu9DODXzOr6jXkT2p7",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -21,8 +21,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8335,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8364,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 25,
             "outputTokens": 49
           },
@@ -30,12 +30,12 @@
         }
       },
       {
-        "fingerprint": "6615d0e3a6c67f0b8649c90358c4ac671428ca9a8996d9d0c0322a7ed373f96d",
+        "fingerprint": "ed35f8aeff155eb7b8c7c73840318d645e3714c220b96aecccdccc8f5427f6c6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_nz9EMMp7rOEHiwHD5L6SP3Jy",
+              "id": "call_RsPnxo04eSxv61bbTX2gJSH8",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"time\":\"10:30\",\"emailClient\":false}"
             }
@@ -43,18 +43,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8718,
-            "cachedInputTokens": 8332,
-            "cacheWriteTokens": 383,
-            "outputTokens": 117
+            "inputTokens": 8730,
+            "cachedInputTokens": 8361,
+            "cacheWriteTokens": 366,
+            "outputTokens": 112
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d057538650754dfba00c0df23560ccc0c252eb8b572338e87a705e989a9d4041",
+        "fingerprint": "86612a5a5c019c58f515b8177ac1614713cb2391c0a7b14a045a1395373efab0",
         "response": {
-          "text": "The booking request for Sarah P. is awaiting your approval on the card. No email will be sent.",
+          "text": "The booking request for Sarah P. is waiting for your approval on the card. No email will be sent.",
           "toolCalls": [],
           "replay": [
             {
@@ -64,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8915,
-            "cachedInputTokens": 8715,
-            "cacheWriteTokens": 197,
-            "outputTokens": 25
+            "inputTokens": 8922,
+            "cachedInputTokens": 8727,
+            "cacheWriteTokens": 192,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }
