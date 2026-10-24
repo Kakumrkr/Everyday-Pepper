@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { WaitlistMatchGivenUpError } from '@pepper/ai';
 import { WaitlistModule, WaitlistRunner, type WaitlistOptions } from './waitlist.module.js';
 
 // The waitlist runner's wiring with BullMQ, Redis and the matcher replaced; the real queue,
@@ -42,7 +43,10 @@ vi.mock('./relay.js', async (actual) => ({
   relayDueMatches: relay.relayDueMatches,
 }));
 const ai = vi.hoisted(() => ({ runWaitlistMatch: vi.fn() }));
-vi.mock('@pepper/ai', () => ai);
+vi.mock('@pepper/ai', async (actual) => ({
+  ...(await actual<{ WaitlistMatchGivenUpError: typeof WaitlistMatchGivenUpError }>()),
+  runWaitlistMatch: ai.runWaitlistMatch,
+}));
 const runtime = vi.hoisted(() => ({ raiseAlert: vi.fn() }));
 vi.mock('@pepper/runtime', () => ({
   DATABASE: Symbol('DATABASE'),
@@ -142,9 +146,12 @@ describe('WaitlistRunner', () => {
     // A job without a valid match is refused before any match runs.
     await expect(fakes.processor?.({ data: { matchId: 'x' } })).rejects.toThrow();
 
+    // A failure the relay retries (the database down) is not alerted; a match given up is.
     fakes.failed?.(JOB, new Error('database down'));
+    expect(runtime.raiseAlert).not.toHaveBeenCalled();
+    fakes.failed?.(JOB, new WaitlistMatchGivenUpError(new Error('database down')));
     expect(runtime.raiseAlert).toHaveBeenCalledWith('Waitlist match failed', JOB.data);
-    fakes.failed?.(undefined, new Error('database down'));
+    fakes.failed?.(undefined, new WaitlistMatchGivenUpError(new Error('database down')));
     expect(runtime.raiseAlert).toHaveBeenLastCalledWith('Waitlist match failed', {
       matchId: 'undefined',
       tenantId: 'undefined',

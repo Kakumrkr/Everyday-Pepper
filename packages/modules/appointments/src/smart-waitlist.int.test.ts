@@ -25,7 +25,12 @@ import {
   WaitlistOfferUsedError,
 } from './errors.js';
 import type { WaitlistTakenNotice } from './services/booking-emails.js';
-import { changeBooking, createBooking, listBookings } from './services/bookings.js';
+import {
+  changeBooking,
+  createBooking,
+  listBookings,
+  reinstateBookingIn,
+} from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
 import {
   cancelManagedBooking,
@@ -39,8 +44,8 @@ import {
   waitlistCandidatesIn,
   type MadeOffer,
 } from './services/smart-waitlist.js';
-import { createStaffMember } from './services/staff.js';
-import { addToWaitlist, listWaitlist } from './services/waitlist.js';
+import { createStaffMember, updateStaffMember } from './services/staff.js';
+import { addToWaitlist, changeWaitlistEntry, listWaitlist } from './services/waitlist.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // The smart waitlist through the domain services, against real Postgres (S37, ADR-0041,
@@ -246,6 +251,20 @@ describe('freed times ask for a match (in the freeing transaction)', () => {
   });
 });
 
+describe("one client's entries", () => {
+  it('are read by client, however many joined before them', async () => {
+    const w = await newWorld();
+    for (const i of [1, 2, 3]) await wait(w, i, null);
+    const theirs = await listWaitlist(
+      db,
+      w.owner,
+      { clientId: client(w, 3).id, limit: 1 },
+      { clock: w.clock },
+    );
+    expect(theirs.map((e) => e.clientId)).toEqual([client(w, 3).id]);
+  });
+});
+
 describe('ranking who is waiting (published formula)', () => {
   it('asked-for-Jess first, then the longest waiting; Marco-only and misfits left out', async () => {
     const w = await newWorld();
@@ -400,6 +419,100 @@ describe('offers and claims (AC-W5-1)', () => {
     await expect(claim(w, first)).rejects.toBeInstanceOf(WaitlistOfferExpiredError);
     const entries = await listWaitlist(db, w.owner, {}, { clock: w.clock });
     expect(entries.every((e) => e.status === 'waiting')).toBe(true);
+  });
+
+  it('a claim inside the offer window books, though the time is now within minimum notice', async () => {
+    const w = await newWorld();
+    await wait(w, 1, null);
+    // Tuesday 07:30: 10:00 is outside the default 2-hour notice, so it is offered until 09:00.
+    w.clock.set(tue('07:30'));
+    const [made] = await cancelAndOffer(w);
+    if (made === undefined) throw new Error('offer');
+    expect(made.offer.expiresAt.toISOString()).toBe(tue('09:00'));
+    // 08:15: inside the offer's window, though 10:00 is less than 2 hours away now.
+    w.clock.set(tue('08:15'));
+    const won = await claim(w, made);
+    expect(won.booking).toMatchObject({ status: 'confirmed', startsAt: tue('10:00') });
+  });
+
+  it('a client taken off the list cannot claim; their offer closes and the others stay open', async () => {
+    const w = await newWorld();
+    for (const i of [1, 2]) await wait(w, i, null);
+    const [first, second] = await cancelAndOffer(w);
+    if (first === undefined || second === undefined) throw new Error('2 offers');
+    await changeWaitlistEntry(db, w.owner, first.offer.entryId as never, { status: 'cancelled' });
+    const told: WaitlistTakenNotice[] = [];
+    await expect(claim(w, first, told)).rejects.toBeInstanceOf(WaitlistOfferExpiredError);
+    expect(told).toEqual([]);
+    expect(await activeBookingsAt(w, '10:00')).toHaveLength(0);
+    const entries = await listWaitlist(db, w.owner, { all: true }, { clock: w.clock });
+    expect(entries.find((e) => e.id === first.offer.entryId)?.status).toBe('cancelled');
+    expect((await claim(w, second)).booking.startsAt).toBe(tue('10:00'));
+  });
+
+  it("a claimant whose own service no longer fits loses only their offer; another's still books", async () => {
+    const w = await newWorld();
+    const colour = await createService(db, w.owner, { name: 'Colour', durationMinutes: 90 });
+    await updateStaffMember(db, w.owner, w.jess.id, {
+      displayName: 'Jess',
+      serviceIds: [w.haircut.id, colour.id],
+    });
+    // Sara waits for a colour (90 minutes fit while 11:00–11:30 is free), Ana for a haircut.
+    await addToWaitlist(
+      db,
+      w.owner,
+      {
+        clientId: client(w, 1).id,
+        serviceId: colour.id,
+        staffMemberId: null,
+        windows: [{ date: '2026-11-03', start: '09:00', end: '12:00' }],
+      },
+      { clock: w.clock },
+    );
+    await wait(w, 2, null);
+    const made = await cancelAndOffer(w);
+    const sara = made.find((m) => m.offer.clientId === client(w, 1).id);
+    const ana = made.find((m) => m.offer.clientId === client(w, 2).id);
+    if (sara === undefined || ana === undefined) throw new Error('2 offers');
+    // 11:00 is booked meanwhile: a colour at 10:00 no longer fits, a haircut still does.
+    await bookJess(w, '11:00', 0);
+    const told: WaitlistTakenNotice[] = [];
+    await expect(claim(w, sara, told)).rejects.toBeInstanceOf(WaitlistOfferTakenError);
+    expect(told).toEqual([]);
+    expect((await claim(w, ana)).booking.startsAt).toBe(tue('10:00'));
+  });
+
+  it('undoing the cancellation closes the offers made for its time', async () => {
+    const w = await newWorld();
+    for (const i of [1, 2]) await wait(w, i, null);
+    const booking = await bookJess(w);
+    await changeBooking(db, w.owner, booking.id, { status: 'cancelled', notifyClient: false });
+    const [match] = await matches(w);
+    if (match === undefined) throw new Error('no match row');
+    const made = await withTenant(db, w.tenantId, async (tx) =>
+      makeWaitlistOffersIn(
+        tx,
+        w.owner,
+        {
+          matchId: WaitlistMatchIdSchema.parse(match.id),
+          staffMemberId: w.jess.id,
+          startsAt: match.startsAt,
+          entries: await waitlistCandidatesIn(tx, match, { now: w.clock.now(), fanOut: 3 }),
+        },
+        { now: w.clock.now() },
+      ),
+    );
+    expect(made).toHaveLength(2);
+    await withTenant(db, w.tenantId, (tx) =>
+      reinstateBookingIn(tx, w.owner, booking.id, { clock: w.clock }),
+    );
+    const told: WaitlistTakenNotice[] = [];
+    for (const m of made) {
+      await expect(claim(w, m, told)).rejects.toBeInstanceOf(WaitlistOfferExpiredError);
+    }
+    expect(told).toEqual([]);
+    const entries = await listWaitlist(db, w.owner, {}, { clock: w.clock });
+    expect(entries.map((e) => e.status)).toEqual(['waiting', 'waiting']);
   });
 
   it("an unknown link, or another business's slug, finds nothing", async () => {

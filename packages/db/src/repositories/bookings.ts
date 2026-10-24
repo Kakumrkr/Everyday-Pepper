@@ -390,7 +390,7 @@ export async function cancelWaitlistEntry(
  */
 export async function listWaitlistEntries(
   tx: TenantTx,
-  options: { now: Date; all: boolean; serviceId?: ServiceId; limit: number },
+  options: { now: Date; all: boolean; serviceId?: ServiceId; clientId?: ClientId; limit: number },
 ): Promise<WaitlistEntryRow[]> {
   const conditions: (SQL | undefined)[] = [];
   if (!options.all) {
@@ -401,6 +401,9 @@ export async function listWaitlistEntries(
   }
   if (options.serviceId !== undefined) {
     conditions.push(eq(waitlistEntries.serviceId, Id.parse(options.serviceId)));
+  }
+  if (options.clientId !== undefined) {
+    conditions.push(eq(waitlistEntries.clientId, Id.parse(options.clientId)));
   }
   return tx
     .select()

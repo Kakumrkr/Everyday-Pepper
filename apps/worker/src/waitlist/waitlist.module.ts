@@ -7,7 +7,7 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
-import { runWaitlistMatch, type MatchResult } from '@pepper/ai';
+import { runWaitlistMatch, WaitlistMatchGivenUpError, type MatchResult } from '@pepper/ai';
 import type { TemplateId } from '@pepper/contracts';
 import { systemClock, type Clock } from '@pepper/core';
 import type { Database } from '@pepper/db';
@@ -76,8 +76,10 @@ export class WaitlistRunner implements OnApplicationBootstrap, OnApplicationShut
       { connection, concurrency: this.options.concurrency ?? 5 },
     );
     this.worker.on('failed', (job, error) => {
-      // Given up after its attempts (the match row says `failed`), or the database is down.
       this.logger.warn(`Waitlist match failed: ${error.name}`);
+      // Alerted only when given up after its attempts (the match row says `failed`): a failure
+      // before that (the database down) leaves the match due, and the relay queues it again.
+      if (!(error instanceof WaitlistMatchGivenUpError)) return;
       const data = job?.data as { matchId?: unknown; tenantId?: unknown } | undefined;
       raiseAlert('Waitlist match failed', {
         matchId: String(data?.matchId),

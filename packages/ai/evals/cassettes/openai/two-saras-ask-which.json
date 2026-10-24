@@ -3,12 +3,34 @@
   "trials": [
     [
       {
-        "fingerprint": "66dab1e3539cfab61ad78576f98ceb0664221968537bbba63c91bd6d84178759",
+        "fingerprint": "35c062441b6e4606d1dcfff0e6b1eeb62bd003c8f49708de11d1886065834366",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_XFt6AyU3k5e9YjnsKrwX27Nd",
+              "id": "call_Jgm9HBye6QLFKsQIDS3toiqE",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9842,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9839,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b9c1f2c3de11f0b51972ed8b716177d033d26ea17be87e91469a1629b4b615b5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_EjxzB1DA1u3lxHdkgYsU3gm9",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara\"}"
             }
@@ -16,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8857,
-            "cachedInputTokens": 8841,
-            "cacheWriteTokens": 13,
+            "inputTokens": 10304,
+            "cachedInputTokens": 9839,
+            "cacheWriteTokens": 462,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "70acf72aaf8aa001ebe0b8e3a8dbe6734edc52944175a731fed1caa36c363311",
+        "fingerprint": "e240a2053dd588dabe5c58c4aede35bee180f5b385d96358f8a2ca8af6aa3d4d",
         "response": {
           "text": "I found two matches: Sarah P. and Sara K. Which one should I book?",
           "toolCalls": [],
@@ -37,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8981,
-            "cachedInputTokens": 8854,
-            "cacheWriteTokens": 124,
+            "inputTokens": 10431,
+            "cachedInputTokens": 10301,
+            "cacheWriteTokens": 127,
             "outputTokens": 22
           },
           "model": "gpt-6-luna"

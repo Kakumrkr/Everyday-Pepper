@@ -76,7 +76,7 @@ import { findClientToBook } from './clients.js';
 import { changeOf, emailDetailsOf, newManageToken, type BookingNotify } from './notices.js';
 import { requestInsights } from './insights.js';
 import { keepReminderInStep } from './reminders.js';
-import { requestWaitlistMatch } from './smart-waitlist.js';
+import { requestWaitlistMatch, withdrawOffersOfFreedBooking } from './smart-waitlist.js';
 
 // Bookings (ADR-0017). `bookings.manage` lets owners and managers book anyone and staff only
 // their own staff member (AC-W9-1); the database's member scope enforces the same, so staff
@@ -470,6 +470,9 @@ export async function reinstateBookingIn(
   if (restored === undefined) throw new BookingNotFoundError();
   await keepReminderInStep(tx, restored, now);
   await requestInsights(tx);
+  // The time was never really free: offers made for it close (a match still pending finds no
+  // one, the time being booked again).
+  await withdrawOffersOfFreedBooking(tx, id);
   return audited(tx, actor, row, restored);
 }
 

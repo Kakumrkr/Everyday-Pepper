@@ -9,7 +9,9 @@ import {
   WAITLIST_OFFER_LIMITS,
   WaitlistEntryIdSchema,
   WaitlistEntryInputSchema,
+  WaitlistOfferIdSchema,
   WaitlistOfferSchema,
+  type BookingId,
   type ClientId,
   type OfferToken,
   type ServiceId,
@@ -28,6 +30,8 @@ import {
   findService,
   insertWaitlistMatch,
   insertWaitlistOffer,
+  listOpenOffersOfEntry,
+  listOpenOffersOfFreedBooking,
   listRecentWaitlistOffers,
   listWaitingEntries,
   lockWaitlistEntry,
@@ -107,11 +111,17 @@ export async function waitlistCandidatesIn(
   const staffMemberId = StaffMemberIdSchema.parse(match.staffMemberId);
   const start = match.startsAt.getTime();
   const now = options.now.getTime();
-  const entries = await listWaitingEntries(tx, options.now, WAITLIST_OFFER_LIMITS.maxCandidates);
+  const entries = await listWaitingEntries(
+    tx,
+    options.now,
+    staffMemberId,
+    WAITLIST_OFFER_LIMITS.maxCandidates,
+  );
   const services = new Map<string, Awaited<ReturnType<typeof findService>>>();
+  // The staff member and the time are fixed, so whether a service fits is asked once.
+  const fits = new Map<string, boolean>();
   const fitting: WaitlistEntryRow[] = [];
   for (const entry of entries) {
-    if (entry.staffMemberId !== null && entry.staffMemberId !== staffMemberId) continue;
     if (!services.has(entry.serviceId)) {
       services.set(entry.serviceId, await findService(tx, ServiceIdSchema.parse(entry.serviceId)));
     }
@@ -122,14 +132,19 @@ export async function waitlistCandidatesIn(
     // Offers go by email (V1): a client without an address can't be offered one.
     const client = await findClient(tx, ClientIdSchema.parse(entry.clientId));
     if (client === undefined || client.email === null) continue;
-    const bookable = await isBookable(tx, {
-      service: serviceToBook(service),
-      staffMemberId,
-      start,
-      now,
-      templateRuleDefaults: options.templateRuleDefaults,
-    });
-    if (bookable) fitting.push(entry);
+    if (!fits.has(service.id)) {
+      fits.set(
+        service.id,
+        await isBookable(tx, {
+          service: serviceToBook(service),
+          staffMemberId,
+          start,
+          now,
+          templateRuleDefaults: options.templateRuleDefaults,
+        }),
+      );
+    }
+    if (fits.get(service.id) === true) fitting.push(entry);
   }
   const visits = await countCompletedVisits(
     tx,
@@ -244,6 +259,34 @@ export async function takeBackWaitlistOffersIn(
   const closed = await settleOpenOffers(tx, offerIds, 'expired');
   for (const offer of closed) await releaseEntry(tx, offer);
   return closed.length;
+}
+
+/** Closes an entry's open offers (the entry is taken off the list): its links read as expired. */
+export async function withdrawOffersOfEntry(
+  tx: TenantTx,
+  entryId: WaitlistEntryId,
+): Promise<number> {
+  const open = await listOpenOffersOfEntry(tx, entryId);
+  return takeBackWaitlistOffersIn(
+    tx,
+    open.map((offer) => WaitlistOfferIdSchema.parse(offer.id)),
+  );
+}
+
+/**
+ * Closes the open offers for the time a booking freed, when the booking comes back (its
+ * cancellation undone): the time was never really free, so its links read as expired and the
+ * entries wait again.
+ */
+export async function withdrawOffersOfFreedBooking(
+  tx: TenantTx,
+  bookingId: BookingId,
+): Promise<number> {
+  const open = await listOpenOffersOfFreedBooking(tx, bookingId);
+  return takeBackWaitlistOffersIn(
+    tx,
+    open.map((offer) => WaitlistOfferIdSchema.parse(offer.id)),
+  );
 }
 
 /** The latest offers for the waitlist screen; staff see their own staff member's only. */

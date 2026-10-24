@@ -158,16 +158,29 @@ export async function retryWaitlistMatch(
 
 // Candidates --------------------------------------------------------------------------------
 
-/** Entries that may be offered a slot now: waiting (not offered elsewhere) and not expired. */
+/**
+ * Entries that may be offered a slot with this staff member now: waiting (not offered
+ * elsewhere), not expired, and for them or anyone.
+ */
 export async function listWaitingEntries(
   tx: TenantTx,
   now: Date,
+  staffMemberId: StaffMemberId,
   limit: number,
 ): Promise<WaitlistEntryRow[]> {
   return tx
     .select()
     .from(waitlistEntries)
-    .where(and(eq(waitlistEntries.status, 'waiting'), gt(waitlistEntries.expiresAt, now)))
+    .where(
+      and(
+        eq(waitlistEntries.status, 'waiting'),
+        gt(waitlistEntries.expiresAt, now),
+        or(
+          isNull(waitlistEntries.staffMemberId),
+          eq(waitlistEntries.staffMemberId, Id.parse(staffMemberId)),
+        ),
+      ),
+    )
     .orderBy(asc(waitlistEntries.createdAt), asc(waitlistEntries.id))
     .limit(Limit.parse(limit));
 }
@@ -267,6 +280,34 @@ export async function listOffersOfMatch(
     .from(waitlistOffers)
     .where(eq(waitlistOffers.matchId, Id.parse(matchId)))
     .orderBy(asc(waitlistOffers.rank));
+}
+
+/** An entry's offers still open (the entry is being taken off the list). */
+export async function listOpenOffersOfEntry(
+  tx: TenantTx,
+  entryId: WaitlistEntryId,
+): Promise<WaitlistOfferRow[]> {
+  return tx
+    .select()
+    .from(waitlistOffers)
+    .where(
+      and(eq(waitlistOffers.entryId, Id.parse(entryId)), eq(waitlistOffers.status, 'offered')),
+    );
+}
+
+/** The offers still open for the time a booking freed (its cancellation is being undone). */
+export async function listOpenOffersOfFreedBooking(
+  tx: TenantTx,
+  bookingId: BookingId,
+): Promise<WaitlistOfferRow[]> {
+  const rows = await tx
+    .select({ offer: waitlistOffers })
+    .from(waitlistOffers)
+    .innerJoin(waitlistMatches, eq(waitlistMatches.id, waitlistOffers.matchId))
+    .where(
+      and(eq(waitlistMatches.bookingId, Id.parse(bookingId)), eq(waitlistOffers.status, 'offered')),
+    );
+  return rows.map((row) => row.offer);
 }
 
 /** Moves offers that are still `offered` to `status`; returns the ones it changed. */

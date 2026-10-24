@@ -60,6 +60,14 @@ export interface MatcherOptions {
 
 export type MatchResult = WaitlistMatchOutcome | 'skipped' | 'retry';
 
+/** A match failed its last attempt and was given up (`failed`): the one failure to alert on. */
+export class WaitlistMatchGivenUpError extends Error {
+  constructor(cause: unknown) {
+    super('Waitlist match given up', { cause });
+    this.name = 'WaitlistMatchGivenUpError';
+  }
+}
+
 /** Runs the match a job names, at most once per lease; returns what it did. */
 export async function runWaitlistMatch(
   db: Database,
@@ -100,7 +108,7 @@ export async function runWaitlistMatch(
             new Date(options.clock.now().getTime() + matchRetryDelayMs(claimed.attempts)),
           ),
     );
-    if (giveUp) throw error;
+    if (giveUp) throw new WaitlistMatchGivenUpError(error);
     return 'retry';
   } finally {
     span.end();

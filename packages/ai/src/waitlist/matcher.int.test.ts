@@ -22,6 +22,7 @@ import {
   listDueOutboxMessages,
   listDueWaitlistMatches,
   listWaitlistMatches,
+  updateClient,
   withTenant,
   type Database,
 } from '@pepper/db';
@@ -220,6 +221,26 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
       status: 'confirmed',
       startsAt: '2026-11-03T20:00:00.000Z',
     });
+  });
+
+  it('a client whose address went before the approval: the offer is stale, nothing is sent', async () => {
+    const w = await world();
+    await cancelWithTwoWaiting(w);
+    expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('proposed');
+    const [proposal] = await offerProposals(w, w.actorFor('owner'));
+    if (proposal === undefined) throw new Error('no proposal');
+    // Ana (rank 1) has no address any more: the emails shown are no longer the ones that would go.
+    const ana = ClientIdSchema.parse(id(w, '{{client:ana}}'));
+    await withTenant(db, w.tenantId, (tx) =>
+      updateClient(tx, ana, { name: 'Ana Ruiz', email: null, phone: null }),
+    );
+    const approved = await approveToolProposal(
+      depsAs(w, 'owner'),
+      proposal.id,
+      proposal.fingerprint,
+    );
+    expect(approved.kind).toBe('stale');
+    expect(await offerEmails(w)).toEqual([]);
   });
 
   it('a match runs once: a second job for it is skipped', async () => {

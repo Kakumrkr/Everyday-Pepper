@@ -100,6 +100,7 @@ import {
   offerTokenHash,
   releaseEntry,
   requestWaitlistMatch,
+  takeBackWaitlistOffersIn,
 } from './smart-waitlist.js';
 import { bookingAuditValues } from '../mapping.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
@@ -790,61 +791,70 @@ export async function claimWaitlistOffer(
     if (offer.status === 'taken') return { kind: 'taken' };
     if (offer.status === 'expired' || offer.expiresAt.getTime() <= now) return { kind: 'expired' };
 
+    // Taken off the list meanwhile: the link is withdrawn, the others' offers stay open.
+    const entry = await lockWaitlistEntry(tx, WaitlistEntryIdSchema.parse(offer.entryId));
+    if (entry?.status !== 'offered') {
+      await takeBackWaitlistOffersIn(tx, [WaitlistOfferIdSchema.parse(offer.id)]);
+      return { kind: 'expired' };
+    }
+
     const others = offers.filter((o) => o.id !== offer.id);
-    const serviceRow = await findService(tx, ServiceIdSchema.parse(offer.serviceId));
     const staffMemberId = StaffMemberIdSchema.parse(offer.staffMemberId);
     const start = offer.startsAt.getTime();
     let booked: BookingRow | undefined;
-    if (serviceRow?.active === true && (await lockStaffMember(tx, staffMemberId)) !== undefined) {
+    const serviceRow = await findService(tx, ServiceIdSchema.parse(offer.serviceId));
+    if (
+      serviceRow !== undefined &&
+      (await lockStaffMember(tx, staffMemberId)) !== undefined &&
+      (await offerFits(tx, offer, options))
+    ) {
       const service = serviceToBook(serviceRow);
-      const search = {
-        service,
-        staffMemberId,
-        start,
-        now,
-        templateRuleDefaults: options.templateRuleDefaults,
-      };
-      if (await isBookable(tx, search)) {
-        const entry = await lockWaitlistEntry(tx, WaitlistEntryIdSchema.parse(offer.entryId));
-        if (entry !== undefined) {
-          try {
-            booked = await tx.transaction((sp) =>
-              insertBooking(sp, {
-                clientId: ClientIdSchema.parse(offer.clientId),
-                serviceId: service.id,
-                staffMemberId,
-                startsAt: new Date(start),
-                endsAt: new Date(start + service.durationMinutes * MINUTE_MS),
-                bufferBeforeMinutes: service.bufferBeforeMinutes,
-                bufferAfterMinutes: service.bufferAfterMinutes,
-                priceFromCents: serviceRow.priceFromCents,
-                priceToCents: serviceRow.priceToCents,
-                source: 'booking_page',
-                overridden: false,
-                idempotencyKey: null,
-                createdBy: null,
-                manageTokenHash: pendingManageHash,
-              }),
-            );
-          } catch (error) {
-            if (!(error instanceof BookingOverlapError)) throw error;
-          }
-          if (booked !== undefined) {
-            await markOfferClaimed(
-              tx,
-              WaitlistOfferIdSchema.parse(offer.id),
-              BookingIdSchema.parse(booked.id),
-            );
-            await changeEntryStatus(tx, entry, 'booked', booked.id);
-          }
-        }
+      try {
+        booked = await tx.transaction((sp) =>
+          insertBooking(sp, {
+            clientId: ClientIdSchema.parse(offer.clientId),
+            serviceId: service.id,
+            staffMemberId,
+            startsAt: new Date(start),
+            endsAt: new Date(start + service.durationMinutes * MINUTE_MS),
+            bufferBeforeMinutes: service.bufferBeforeMinutes,
+            bufferAfterMinutes: service.bufferAfterMinutes,
+            priceFromCents: serviceRow.priceFromCents,
+            priceToCents: serviceRow.priceToCents,
+            source: 'booking_page',
+            overridden: false,
+            idempotencyKey: null,
+            createdBy: null,
+            manageTokenHash: pendingManageHash,
+          }),
+        );
+      } catch (error) {
+        if (!(error instanceof BookingOverlapError)) throw error;
+      }
+      if (booked !== undefined) {
+        await markOfferClaimed(
+          tx,
+          WaitlistOfferIdSchema.parse(offer.id),
+          BookingIdSchema.parse(booked.id),
+        );
+        await changeEntryStatus(tx, entry, 'booked', booked.id);
       }
     }
 
-    // Whatever happened, the time's other open offers close: someone has it now.
-    const closing = booked === undefined ? offers : others;
-    await closeAsTaken(tx, tenant, closing, offer.id, options);
-    if (booked === undefined) return { kind: 'taken' };
+    if (booked === undefined) {
+      // Not this client's: theirs closes, and so does every other offer whose own service no
+      // longer fits; a shorter service may still fit the time, so its offer stays open.
+      const closing = [offer];
+      for (const other of others) {
+        if (other.status === 'offered' && !(await offerFits(tx, other, options))) {
+          closing.push(other);
+        }
+      }
+      await closeAsTaken(tx, tenant, closing, offer.id, options);
+      return { kind: 'taken' };
+    }
+    // Someone has it now: the time's other open offers close.
+    await closeAsTaken(tx, tenant, others, offer.id, options);
 
     await keepReminderInStep(tx, booked, now);
     await requestInsights(tx);
@@ -878,6 +888,27 @@ export async function claimWaitlistOffer(
     case 'booked':
       return { booking: outcome.booking, manageToken: outcome.manageToken, email: outcome.email };
   }
+}
+
+/**
+ * Whether an offer's service can still be booked at its time, by the availability engine. The
+ * minimum notice is judged as when the time was offered: the business offered it until the
+ * offer closes, so a claim inside that window isn't refused for coming late.
+ */
+async function offerFits(
+  tx: TenantTx,
+  offer: WaitlistOfferRow,
+  options: ClaimOptions,
+): Promise<boolean> {
+  const service = await findService(tx, ServiceIdSchema.parse(offer.serviceId));
+  if (service?.active !== true) return false;
+  return isBookable(tx, {
+    service: serviceToBook(service),
+    staffMemberId: StaffMemberIdSchema.parse(offer.staffMemberId),
+    start: offer.startsAt.getTime(),
+    now: offer.createdAt.getTime(),
+    templateRuleDefaults: options.templateRuleDefaults,
+  });
 }
 
 /**

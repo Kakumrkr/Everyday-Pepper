@@ -29,6 +29,7 @@ import {
 import { waitlistExpiry } from '../bookings/planning.js';
 import { ownStaffMemberId } from './bookings.js';
 import { findClientToBook } from './clients.js';
+import { withdrawOffersOfEntry } from './smart-waitlist.js';
 import {
   ServiceNotFoundError,
   StaffMemberNotFoundError,
@@ -120,7 +121,7 @@ export async function listWaitlistIn(
   options: { clock?: Clock } = {},
 ): Promise<WaitlistEntry[]> {
   requirePermission(actor, 'bookings.read');
-  const { all, serviceId, limit } = WaitlistQuerySchema.parse(query);
+  const { all, serviceId, clientId, limit } = WaitlistQuerySchema.parse(query);
   const now = (options.clock ?? systemClock).now();
   const own = await ownStaffMemberId(tx, actor, 'bookings.read');
   const entries = await listWaitlistEntries(tx, {
@@ -128,6 +129,7 @@ export async function listWaitlistIn(
     all,
     limit,
     ...(serviceId !== undefined && { serviceId }),
+    ...(clientId !== undefined && { clientId }),
   });
   // Staff reach only entries for their own staff member (RLS enforces the same).
   const rows =
@@ -178,6 +180,8 @@ export async function changeWaitlistEntryIn(
   const updated = await cancelWaitlistEntryRow(tx, id);
   // The row is locked, so it is still there.
   if (updated === undefined) throw new WaitlistEntryNotFoundError();
+  // Off the list means off any time offered meanwhile: their link reads as expired.
+  await withdrawOffersOfEntry(tx, id);
   await appendAuditEntry(tx, {
     actor: auditActorOf(actor),
     change: {

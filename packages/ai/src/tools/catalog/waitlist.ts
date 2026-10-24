@@ -137,13 +137,14 @@ export const sendWaitlistOffers: WriteTool = {
     if (made.length === 0) throw new SlotUnavailableError([]);
 
     const directory = await directoryOf(scope);
-    const offeredTo: string[] = [];
+    // By offer: a client skipped below must not shift the later names onto the wrong rank.
+    const nameOf = new Map<string, string>();
     const services = new Set<string>();
     for (const { offer, token } of made) {
       const details = await offerEmailDetails(scope.tx, tenant, offer);
       // Candidates have an address; one removed meanwhile is simply not emailed.
       if (details === undefined) continue;
-      offeredTo.push(shortClientName(details.clientName));
+      nameOf.set(offer.id, shortClientName(details.clientName));
       services.add(serviceName(directory, offer.serviceId));
       await scope.emailClient({
         clientId: ClientIdSchema.parse(offer.clientId),
@@ -160,6 +161,7 @@ export const sendWaitlistOffers: WriteTool = {
     const staff = staffName(directory, staffMemberId);
     const local = localOf(scope.timeZone, start);
     const service = [...services].join(' / ');
+    const offeredTo = [...nameOf.values()];
     const ranked = new Map(args.entries.map((e) => [e.entryId, e]));
     return {
       entity: { type: 'waitlist_match', id: matchId },
@@ -188,14 +190,14 @@ export const sendWaitlistOffers: WriteTool = {
           ref: null,
           value: { date: local.date, time: local.time, staffName: staff },
         },
-        ...made.map(({ offer }, i) => {
+        ...made.map(({ offer }) => {
           const why = ranked.get(offer.entryId);
           return {
             kind: 'waitlist_rank',
             ref: offer.entryId,
             value: {
               rank: offer.rank,
-              clientName: offeredTo[i] ?? 'a client',
+              clientName: nameOf.get(offer.id) ?? 'a client',
               fit: why?.fit ?? 'anyone',
               waitingSince: localOf(scope.timeZone, why?.waitingSince ?? args.startsAt).date,
               visits: why?.visits ?? 0,

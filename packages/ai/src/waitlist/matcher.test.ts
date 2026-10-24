@@ -3,6 +3,7 @@ import {
   MATCH_LEASE_MS,
   matchRetryDelayMs,
   runWaitlistMatch,
+  WaitlistMatchGivenUpError,
   type MatcherOptions,
 } from './matcher.js';
 
@@ -133,7 +134,11 @@ describe('runWaitlistMatch', () => {
       new Date(NOW.getTime() + matchRetryDelayMs(1)),
     );
     db.claimWaitlistMatch.mockResolvedValue(claimed(5));
-    await expect(run()).rejects.toThrow('No business in this transaction');
+    const givenUp = run();
+    await expect(givenUp).rejects.toBeInstanceOf(WaitlistMatchGivenUpError);
+    await expect(givenUp).rejects.toMatchObject({
+      cause: new Error('No business in this transaction'),
+    });
     expect(db.finishWaitlistMatch).toHaveBeenLastCalledWith({}, MATCH, 'failed');
   });
 

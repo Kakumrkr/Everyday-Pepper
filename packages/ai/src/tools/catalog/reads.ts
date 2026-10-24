@@ -459,9 +459,12 @@ export const findClientBookings: ReadTool = {
     const memory = (await clientMemory(scope, [clientId], directory)).get(clientId);
     const waitlist = await waitlistViews(
       scope,
-      (await listWaitlistIn(scope.tx, scope.actor, { limit: 200 }, { clock: scope.deps.clock }))
-        .filter((entry) => entry.clientId === clientId)
-        .slice(0, WAITLIST_SHOWN),
+      await listWaitlistIn(
+        scope.tx,
+        scope.actor,
+        { clientId, limit: WAITLIST_SHOWN },
+        { clock: scope.deps.clock },
+      ),
     );
     const waitingPart =
       waitlist.length === 0 ? '' : `; on the waitlist (${String(waitlist.length)})`;

@@ -28539,6 +28539,29 @@
         }
       },
       "charsPerToken": 3.9232717256086724
+    },
+    {
+      "id": 1219,
+      "at": "2026-10-24T22:31:24.391Z",
+      "label": "P8 P8 S37b pass^1 part 1/127",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.241485,
+      "actualUsd": 0.0015338,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 3,
+          "inputTokens": 30577,
+          "cachedInputTokens": 20140,
+          "cacheWriteTokens": 10428,
+          "outputTokens": 56,
+          "usd": 0.0015338,
+          "latencyMsP50": 1251.916729,
+          "latencyMsP95": 1332.342009
+        }
+      },
+      "charsPerToken": 3.713019589887824
     }
   ]
 }

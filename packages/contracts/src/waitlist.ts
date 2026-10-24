@@ -97,6 +97,8 @@ export type WaitlistEntry = z.infer<typeof WaitlistEntrySchema>;
 export const WaitlistQuerySchema = z
   .object({
     serviceId: ServiceIdSchema.optional(),
+    /** One client's entries (S37b: what the AI reads about a client). */
+    clientId: ClientIdSchema.optional(),
     // A query string carries "true" or "false"; code may pass a boolean.
     all: z
       .union([z.boolean(), z.enum(['true', 'false']).transform((v) => v === 'true')])
