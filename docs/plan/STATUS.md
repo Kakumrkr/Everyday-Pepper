@@ -1,23 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-24 · **Plan version:** 0.30 · **Current phase:** 7 — Memory, **done** (S33: every playbook §2 gate checked on Luna + Sol, [ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33", [security review](../engineering/security-review-s33.md)) → next: **S34** (Phase 8 planning)
+**Last updated:** 2026-10-24 · **Plan version:** 0.31 · **Current phase:** 8 — Operator feed, **planned** (S34: [Phase 8 playbook](phase-8-playbook.md) and [PCR-006](changes/PCR-006.md) approved) → next: **S35** (the feed and insights)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S34** (first row of "Planned sessions").
+Nothing in progress. Next: **S35** (first row of "Planned sessions").
 
 ## Last sessions
+- **S34 Phase 8a (2026-10-24): Phase 8 planning, merged** ([Phase 8 playbook](phase-8-playbook.md), [PCR-006](changes/PCR-006.md)). Full entry in [session-log.md](session-log.md).
+  - **Wrote:** the playbook (rule-based insights, suggestions with drafts through the trust layer, the smart waitlist, the daily briefing; §2 gates, sessions S35–S38, ~60 eval cases, §6 security table, the $1.25 cap) and PCR-006 (plan 0.31); the roadmap, traceability, dependency-map, jobs and data-model rows. The four S33 leftovers ride S36's guide batch.
+  - **Checks:** docs only; `pnpm check` green; `pnpm test:integration` 1,083/1,083 (second run, after one timeout under load); no model called.
 - **S33 Phase 7f (2026-10-24): Phase 7 exit, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33", [security review](../engineering/security-review-s33.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** guide batch (`find_availability` v2, instructions v5); `alsoAccept` in the grader; pass^3 gates from §2 (with the pass^1 gate on first trials); the business-facts block ≤ 600 tokens as sent; `memory-latency.int.test.ts`; multer, body-parser and nodemailer patched.
   - **Recorded on Luna + Sol:** probe, pass^1 on the rest, pass^3 on 132 cases; $0.3702, Phase 7 $1.2697 of $1.55 (cap raised by the user). Every §2 gate met; one named known miss (`pasted-request-then-book`).
   - **Checks:** `pnpm check` green; `pnpm test:integration` 1,083/1,083; Playwright not re-run (no screen changed); `/code-review` (5 fixed, 4 answered), `/security-review` no findings.
   - **Left for Phase 8:** `pasted-request-then-book` guide fix; `who-works-saturdays` (working hours from a tool); `notBefore` on every day; `lr-blackout` (closures as rules); tenant export (L6), backup retention (L7).
-- **S32b Phase 7e "b" half (2026-10-23): the re-record, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "Results"). Full entry in [session-log.md](session-log.md).
-  - **Recorded on Luna + Sol:** probe of memory_write, learned_rules, scheduling and `mr-same-as-last-time` ($0.1116), then all 192 cases at pass^1 ($0.1079), with `--phase-estimate-ok` (user). Every gate met; recall@5 25/25. Phase 7 $0.8994 of $1.00.
-  - **Fixed:** the `just-do-it-still-asks` grader (matched "Nothing has been cancelled yet"); `KNOWN_REAL_MODEL_MISSES` empty.
-  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,080/1,080; Playwright not re-run (no screen changed since S32a's 82/82).
-  - **Left for S33:** held-out misses `in-two-days`, `who-works-saturdays`; the Phase 7 cap for pass^3.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -25,12 +23,13 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
 - **CI minutes:** one CI run per session: all checks locally first, every commit (docs, "ADR accepted", STATUS) in before the PR, pushes to an open PR only to fix CI; docs-only PRs skip the slow jobs; CI runs on PRs, weekly on `main` and by hand. **No retries in CI** (M1).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
-- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy. **Phase 7 (S28):** at most $1.00 of the rest, recorded per session from S30 on Luna + Sol; the runner enforces it (`--phase 7`).
+- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy. **Phase 7 (S28):** at most $1.00 of the rest, recorded per session from S30 on Luna + Sol; the runner enforces it (`--phase 7`). **Phase 8 (S34):** at most $1.25 of the remaining $2.99 (about $1.10 planned), enforced by `--phase 8` from S36a.
 - **Skip domain, business email and LLC** until before the pilot (Phase 11); brand, trademark and domain checks then.
 - **Design:** Pepper green + chili accent (PCR-002), Bricolage Grotesque + Figtree, warm and friendly, mobile-first (`docs/mockups/README.md`).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S34 (user, 2026-10-24):** at the brief "Go ahead with your recommendations": layout A (S35; S36a/b; S37a/b; S38a/b), Phase 8 cap $1.25, BullMQ only for the waitlist with `Periodic` passes for insights and the morning run, insights by rules and only drafts by the model, waitlist offers start at "ask". Then "approved, go ahead with /session-close": the playbook and PCR-006 with the review's additions (one-click unsubscribe for nudges, `add_to_waitlist` + dial action `waitlist.change`, offers to the top 3, a template-written briefing without email, `staff_overload`, snooze and "Pause suggestions").
 - **S33 (user, 2026-10-24):** at the brief "Go ahead, start with your recommendation": one session; cap option A ($1.40; pass^3 on every set a §2 pass^3 gate names); held-out (a) (`in-two-days` accepts `get_day`, `who-works-saturdays` untuned); `--phase-estimate-ok`. **During the recording:** "Raise the cap to $1.55" (one whole-suite run measured at ≈ $0.197). **After it:** "go with your recommendation": carry `pasted-request-then-book` as a named known miss (its guide fix in Phase 8's first batch) and cap the business block at 600 tokens. **Claude:** the `other-business-bookings` grader corrected; pass^3 gates from §2; `in-three-days` held out in place of `in-two-days` (code review); dependency patches (security review D1–D2).
 - **S32b (user, 2026-10-23, Session Brief):** "go ahead with your recommendation": a gate still missing after one fix → ask; S33's pass^3 is a cap decision at its brief; **"Allow, as in S31"** `--phase-estimate-ok` for this session's recordings. **Claude:** the `just-do-it-still-asks` grader corrected where the model was right.
 - **S32a (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved": D-11 over the mock-up (final delete, no Undo); ADR-0038 pre-approved; scripted model only, branch pushed without a PR. **Claude (ADR-0038):** "What I know" from the chat header; 500 facts a page; the chip counts only active facts; `memory-ids.ts` for the chat contract.
@@ -62,11 +61,14 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S33 and M2 are done and merged (Phases 0–7). Details in [session-log.md](session-log.md).
+S1–S34 and M2 are done and merged (Phases 0–7, Phase 8 planned). Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S34 | Phase 8 planning (operator feed: insights, daily briefing, suggestions with drafts, smart waitlist): the Phase 8 playbook and PCR, as S28 did for Phase 7; carry the S33 leftovers into its first guide batch | 8a | Playbook and PCR approved by the user |
+| S35 | Phase 8b: the feed and insights, no model ([playbook](phase-8-playbook.md) §7): `feed_items`, rule-based providers (`schedule_gaps`, `rebooking_due`, `no_show_pattern`, `staff_overload`), the insights pass, `/v1/feed`, the home screen as the feed, snooze and "Pause suggestions"; ADR-0039 | 8b | Insight fixtures 100% (incl. DST); dedupe, expiry, RLS + isolation; Playwright: a gap suggestion shown and dismissed |
+| S36a/b | Phase 8c: suggestions with drafts (AC-W4-1/2), unsubscribe, `get_feed`, the first guide batch with the four S33 leftovers, `PHASE_CAPS_USD[8]`; "b" probes and records once | 8c | §2 draft gates; AC-W4-1/2 green; the leftovers pass |
+| S37a/b | Phase 8d: the smart waitlist (AC-W5-1): queue from the cancellation, ranking, offers to the top 3, the claim page, `add_to_waitlist`; "b" records once | 8d | AC-W5-1 within 2 min; concurrent claims book once |
+| S38a/b | Phase 8e: the daily briefing; "b" re-records everything, pass^3, security review, Phase 8 exit | 8e | Every playbook §2 gate; spend ≤ $1.25 |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"/session-brief"* (or *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."*). A "b" half's prompt names the "a" branch to merge first. During the session Claude keeps "In progress" current after each finished task; at the end (`/session-close`) it moves that session's summary into "Last sessions", appends a short entry to `session-log.md` and new chat decisions to `decisions.md`, and commits them.

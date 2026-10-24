@@ -1,6 +1,6 @@
 # Roadmap & Implementation Phases
 
-Plan version: **0.25** (see `CHANGELOG.md`). Builder: solo + Claude Code. Each phase is approved by the user before it starts; each ends with CI green and its exit criteria proven by automated tests.
+Plan version: **0.31** (see `CHANGELOG.md`). Builder: solo + Claude Code. Each phase is approved by the user before it starts; each ends with CI green and its exit criteria proven by automated tests.
 
 | # | Phase | Deliverables | Exit criteria | Est. |
 |---|---|---|---|---|
@@ -12,7 +12,7 @@ Plan version: **0.25** (see `CHANGELOG.md`). Builder: solo + Claude Code. Each p
 | 5 | Messaging + jobs | Outbox, BullMQ worker, email channel, confirmations/reminders, tasks | No duplicate sends on retry (AC-W4-2); reminder timing (AC-W6-1) | 2 wks |
 | 6 | AI agent + trust layer | Provider adapter (OpenAI), tool registry, agent loop, cards, autonomy dial, proposals, undo, explanations, eval runner | Evals ≥ 90% scheduling, 100% safety; AC-W2-*, AC-W7-1/3 | 4–5 wks |
 | 7 | Memory | Facts and visit notes, learned rules, episodic recall (pgvector), "What I know" page; sessions S29–S33 in the [Phase 7 playbook](phase-7-playbook.md) (PCR-005) | Recall eval ≥ 95%; deletion eval 100% (AC-W7-2); AC-W3-* | 2 wks |
-| 8 | Operator feed | Insights, daily briefing, suggestions with drafts, smart waitlist | AC-W4-1, AC-W5-1; insight fixtures tested | 3 wks |
+| 8 | Operator feed | Insights, daily briefing, suggestions with drafts, smart waitlist; sessions S34–S38 in the [Phase 8 playbook](phase-8-playbook.md) (PCR-006) | AC-W4-1, AC-W5-1; insight fixtures tested | 3 wks |
 | 9 | Zero-setup onboarding | Website/Google profile/photo extraction, review card, competitor CSV import | AC-W1-*; extraction ≥ 90% on fixture set | 2–3 wks |
 | 10 | Google Calendar sync | OAuth, push + incremental sync, busy blocks, outbound events | Contract tests; conflict + token-expiry scenarios | 2 wks |
 | 11 | Hardening + pilot | Security review, load test, backups + restore drill, runbooks, VPS deploy, legal docs | SLOs met under load; no open high-severity findings; restore drill passed; user approves prod deploy | 2–3 wks |
