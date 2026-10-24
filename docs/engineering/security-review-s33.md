@@ -54,8 +54,8 @@ The other agentic rows are unchanged from [S27](security-review-s27.md#owasp-top
 
 ## Isolation and dependencies
 
-- **Isolation suite:** `packages/db/src/isolation.int.test.ts` covers every table with a `tenant_id` column (the catalog test fails on a new one that is missing), including `memory_facts` and `memory_episodes` (learned rules are booking rules, already in the suite); vector search is covered by the member-scope tests above. Result in this session's `pnpm test:integration`: see the session log.
-- **Dependencies:** see D1 and D2. `pnpm audit` (all, dev included) is in the session log.
+- **Isolation suite:** `packages/db/src/isolation.int.test.ts` covers every table with a `tenant_id` column (the catalog test fails on a new one that is missing), including `memory_facts` and `memory_episodes` (learned rules are booking rules, already in the suite); vector search is covered by the member-scope tests above. Result in this session's `pnpm test:integration`: 1,083/1,083 (db 554).
+- **Dependencies:** see D1 and D2. `pnpm audit` (all, dev included): one moderate left, `esbuild` through drizzle-kit (dev only, S27's L4).
 
 ## Real-model results (S33)
 

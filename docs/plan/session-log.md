@@ -1029,6 +1029,12 @@ Everything each session did, oldest first: what was built, the checks run and th
   - **Checks:** scripted eval green on every case with a scripted cassette; free replay all gates met, recall@5 25/25; `pnpm check` green; `pnpm test:integration` 1,080/1,080 (ai 138); Playwright not re-run (no screen changed since S32a's 82/82; CI runs it).
   - **Not done / for S33:** held-out misses `in-two-days` and `who-works-saturdays`; Phase 7 has $0.10 left, so S33's pass^3 (about $0.57) needs the user's cap decision at its brief. `/eval-record` step 0 reworded: the scripted CLI report also fails the 87 cases with only a recorded cassette (expected).
 
+- **S33 Phase 7f (2026-10-24): Phase 7 exit, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33", [security review](../engineering/security-review-s33.md)). Branch `claude/s33-phase7-exit`; one session (no a/b split, user).
+  - **Built:** `find_availability` v2 and instructions v5 (one guide batch); `alsoAccept` in the grader; pass^3 gates from §2 with the pass^1 gate on first trials; the business-facts block ≤ 600 tokens as sent; `db/memory-latency.int.test.ts` (recall p95 10 ms, search 69 ms, delete + scrub 17 ms at the caps); multer 2.5.0, body-parser 2.4.0, nodemailer 10.1.7 (`pnpm audit --prod` clean).
+  - **Recorded on Luna + Sol:** probe (scheduling + ambiguity, $0.0822), pass^1 on four sets ($0.0216), pass^3 on 132 cases ($0.2661), the new held-out `in-three-days` ($0.0004): $0.3702; Phase 7 $1.2697 of $1.55 (the user raised the cap twice). Every §2 gate met, recall@5 25/25; known miss `pasted-request-then-book`.
+  - **Checks:** `pnpm check` green (twice, after the review fixes); `pnpm test:integration` 1,083/1,083 (ai 138, db 554); Playwright not re-run (no screen changed); `/code-review` 9 findings (5 fixed, 4 answered in ADR-0038), `/security-review` no findings.
+  - **For Phase 8:** the `pasted-request-then-book` guide fix; `who-works-saturdays` needs working hours from a tool; `notBefore` on every day of a range; `lr-blackout` (closures as rules); tenant export (L6) and backup retention (L7) in Phase 11.
+
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 
