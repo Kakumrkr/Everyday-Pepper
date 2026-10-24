@@ -42,7 +42,8 @@ export type MailingAddress = z.infer<typeof MailingAddressSchema>;
 
 // A web address or a bare domain the client could click: the domain adds the one link a nudge
 // carries (the booking page), so words with any other are refused.
-const LINK_LIKE = /(?:\bhttps?:\/\/|\bwww\.|\b[a-z0-9-]{2,63}\.(?:com|net|org|io|co|us|app|link|ly|me|info|biz)\b)/i;
+const LINK_LIKE =
+  /(?:\bhttps?:\/\/|\bwww\.|\b[a-z0-9-]{2,63}\.(?:com|net|org|io|co|us|app|link|ly|me|info|biz)\b)/i;
 
 /** Whether `text` holds a web address or a bare domain. */
 export function looksLikeLink(text: string): boolean {
@@ -68,7 +69,12 @@ export const NudgeDraftSchema = z
       .pipe(z.string().min(1).max(DRAFT_LIMITS.subjectMax)),
     body: z
       .string()
-      .transform((value) => value.replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n').trim())
+      .transform((value) =>
+        value
+          .replace(/\r\n?/g, '\n')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim(),
+      )
       .pipe(z.string().min(1).max(DRAFT_LIMITS.bodyMax)),
   })
   .superRefine((draft, ctx) => {

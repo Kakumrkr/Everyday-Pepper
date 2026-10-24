@@ -96,7 +96,8 @@ export const lashBrow: TemplateInput = {
     { key: 'allergies', label: 'Allergies or eye sensitivities', type: 'text', sensitive: true },
   ],
   drafts: {
-    voice: 'Friendly, light and brief, like an artist reminding a regular it is time for a refresh.',
+    voice:
+      'Friendly, light and brief, like an artist reminding a regular it is time for a refresh.',
     morningHour: 7,
   },
   insights: {

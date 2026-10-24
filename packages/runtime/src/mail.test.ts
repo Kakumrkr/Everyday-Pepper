@@ -51,7 +51,10 @@ describe('SmtpMailer', () => {
   it('sends commercial mail with RFC 8058 one-click unsubscribe headers, others without', async () => {
     const sendMail = vi.fn(() => Promise.resolve({}));
     const transport = { sendMail, close: vi.fn() } as unknown as Transporter;
-    const mailer = new SmtpMailer({ smtpUrl: 'smtp://localhost:1025', from: 'a@b.example' }, transport);
+    const mailer = new SmtpMailer(
+      { smtpUrl: 'smtp://localhost:1025', from: 'a@b.example' },
+      transport,
+    );
     await mailer.send({
       to: 'sara@example.test',
       subject: 'S',

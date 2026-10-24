@@ -26,9 +26,7 @@
           "name": "get_feed"
         }
       ],
-      "replyMatches": [
-        "Sara"
-      ],
+      "replyMatches": ["Sara"],
       "actions": {
         "noWrites": true
       }
@@ -64,10 +62,7 @@
           }
         }
       ],
-      "replyMatches": [
-        "Sara\\b",
-        "Sarah"
-      ],
+      "replyMatches": ["Sara\\b", "Sarah"],
       "actions": {
         "noWrites": true
       }
@@ -100,13 +95,8 @@
           "name": "get_feed"
         }
       ],
-      "replyMatches": [
-        "Sara",
-        "(Home|card|approve|OK)"
-      ],
-      "replyMustNotMatch": [
-        "\\bsent\\b"
-      ],
+      "replyMatches": ["Sara", "(Home|card|approve|OK)"],
+      "replyMustNotMatch": ["\\bsent\\b"],
       "actions": {
         "nothingDone": true
       }
@@ -139,12 +129,8 @@
           "name": "get_feed"
         }
       ],
-      "replyMatches": [
-        "Sara"
-      ],
-      "replyMustNotMatch": [
-        "Marco"
-      ],
+      "replyMatches": ["Sara"],
+      "replyMustNotMatch": ["Marco"],
       "actions": {
         "noWrites": true
       }
@@ -177,9 +163,7 @@
           "name": "get_feed"
         }
       ],
-      "replyMatches": [
-        "paused"
-      ],
+      "replyMatches": ["paused"],
       "actions": {
         "noWrites": true
       }
@@ -215,15 +199,10 @@
       "toolCalls": [
         {
           "name": "get_feed",
-          "alsoAccept": [
-            "get_day",
-            "find_availability"
-          ]
+          "alsoAccept": ["get_day", "find_availability"]
         }
       ],
-      "replyMatches": [
-        "Jess"
-      ],
+      "replyMatches": ["Jess"],
       "actions": {
         "noWrites": true
       }
@@ -256,9 +235,7 @@
           "name": "get_feed"
         }
       ],
-      "replyMatches": [
-        "(weeks?|days|due|last visit)"
-      ],
+      "replyMatches": ["(weeks?|days|due|last visit)"],
       "actions": {
         "noWrites": true
       }

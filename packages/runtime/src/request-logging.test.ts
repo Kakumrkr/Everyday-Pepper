@@ -2,7 +2,12 @@ import { createServer, type Server } from 'node:http';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { createLogger, currentRequestContext } from './logger.js';
-import { REQUEST_ID_HEADER, requestLogging, resolveRequestId } from './request-logging.js';
+import {
+  REQUEST_ID_HEADER,
+  requestLogging,
+  resolveRequestId,
+  withoutSecrets,
+} from './request-logging.js';
 import { memoryDestination } from './test-support.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -114,5 +119,12 @@ describe('requestLogging', () => {
       expect.objectContaining({ msg: 'request aborted', req: { method: 'GET', path: '/slow' } }),
     ]);
     server.close();
+  });
+
+  it('logs an unsubscribe link without its secret (S36)', () => {
+    expect(withoutSecrets('/v1/public/unsubscribe/AbC-123_xyz')).toBe(
+      '/v1/public/unsubscribe/:token',
+    );
+    expect(withoutSecrets('/v1/feed/settings')).toBe('/v1/feed/settings');
   });
 });

@@ -146,7 +146,10 @@ export const AiProposalViewSchema = z.strictObject({
    * the footer and booking link the domain adds are in `summary`'s email, not here.
    */
   draft: z
-    .strictObject({ subject: z.string().max(DRAFT_LIMITS.subjectMax), body: z.string().max(DRAFT_LIMITS.bodyMax) })
+    .strictObject({
+      subject: z.string().max(DRAFT_LIMITS.subjectMax),
+      body: z.string().max(DRAFT_LIMITS.bodyMax),
+    })
     .optional(),
 });
 export type AiProposalView = z.infer<typeof AiProposalViewSchema>;

@@ -81,7 +81,8 @@ export const yogaPilatesPrivate: TemplateInput = {
     { key: 'pregnant', label: 'Pregnant', type: 'boolean', sensitive: true },
   ],
   drafts: {
-    voice: 'Calm, warm and encouraging, like an instructor checking in; never about health or the body.',
+    voice:
+      'Calm, warm and encouraging, like an instructor checking in; never about health or the body.',
     morningHour: 7,
   },
   insights: {

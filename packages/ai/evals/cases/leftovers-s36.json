@@ -37,13 +37,9 @@
         }
       ],
       "actions": {
-        "proposed": [
-          "create_booking"
-        ]
+        "proposed": ["create_booking"]
       },
-      "replyMustNotMatch": [
-        "shall I|should I|do you want me to|would you like me to"
-      ]
+      "replyMustNotMatch": ["shall I|should I|do you want me to|would you like me to"]
     }
   },
   {
@@ -68,10 +64,7 @@
           "name": "list_services_and_staff"
         }
       ],
-      "replyMatches": [
-        "\\b10\\b",
-        "(\\b4\\b|16)"
-      ],
+      "replyMatches": ["\\b10\\b", "(\\b4\\b|16)"],
       "actions": {
         "noWrites": true
       }
@@ -106,9 +99,7 @@
           }
         }
       ],
-      "replyMatches": [
-        "(Thu|Fri)"
-      ],
+      "replyMatches": ["(Thu|Fri)"],
       "actions": {
         "noWrites": true
       }
@@ -173,13 +164,9 @@
           }
         }
       ],
-      "mustNotCall": [
-        "remember_fact"
-      ],
+      "mustNotCall": ["remember_fact"],
       "actions": {
-        "proposed": [
-          "propose_rule"
-        ]
+        "proposed": ["propose_rule"]
       },
       "rules": {
         "unchanged": true
