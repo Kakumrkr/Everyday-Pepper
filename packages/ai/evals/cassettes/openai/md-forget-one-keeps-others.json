@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "75347464dba6f0181c80cba6e4f86c8ef2da2c3934a6eb840b58a4f055fc508b",
+        "fingerprint": "d22a639c85fd9e4821620512db2fcfedd717bde964b2e765f7bc9b2fdca1b9dc",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_qKvKhHAjtdNzE4sl5XAYNORl",
+              "id": "call_J0KHES5Pa2z4ZiEWGdwehNUw",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8318,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8347,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 8,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "ec657fe8fd66387dd9260a5ff296a946c6f22696617eead2e94f16ea52831e2b",
+        "fingerprint": "d7b9fb909f648476a225574b614f7d68379ed4a2a12eef7ffe000cc2dbe2893c",
         "response": {
-          "text": "I found Maria L. The business remembers her usual service as “Colour with Jess.”",
+          "text": "Maria L.’s usual service is “Colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,142 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8472,
-            "cachedInputTokens": 8315,
-            "cacheWriteTokens": 154,
-            "outputTokens": 21
+            "inputTokens": 8503,
+            "cachedInputTokens": 8344,
+            "cacheWriteTokens": 156,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "d22a639c85fd9e4821620512db2fcfedd717bde964b2e765f7bc9b2fdca1b9dc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Xr0mML25bZFJZdQdLajXrbMr",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8347,
+            "cachedInputTokens": 8344,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "98ea0dae9fa42e9ecceba0161ac27518aa7af0da8105afc06ad52f47f7093c60",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8GnfBrX21ExGEHpt2ZgxaV3c",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8497,
+            "cachedInputTokens": 8344,
+            "cacheWriteTokens": 150,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3bb10c180d1198c811a6037bcffe1c682fb578ec697c9d376103322e236a2f22",
+        "response": {
+          "text": "Maria L.’s usual service is “Colour with Jess.” She has a confirmed haircut with Jess tomorrow, Nov 3, at 3 PM. Her last noted visit was a colour with Jess on Oct 23.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9011,
+            "cachedInputTokens": 8494,
+            "cacheWriteTokens": 514,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "d22a639c85fd9e4821620512db2fcfedd717bde964b2e765f7bc9b2fdca1b9dc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_udWuMeLRUMumJ4Iv7eJKhbn8",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8347,
+            "cachedInputTokens": 8344,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "29c659dab937cfaed3b1beb4df55b0fa3b56e7ca4b7eb0244b3186bce5a8a22b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_QY6JW4ztQyToVZnDTyaURK7F",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8503,
+            "cachedInputTokens": 8344,
+            "cacheWriteTokens": 156,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6d9833cec496ef7419e1c90d3b0538bf771d0d4ab533b3b7893b7b57ba1a0db7",
+        "response": {
+          "text": "Maria L.’s usual service is “Colour with Jess.” She has a confirmed haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour with Jess on Oct 23 at 10:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9029,
+            "cachedInputTokens": 8500,
+            "cacheWriteTokens": 526,
+            "outputTokens": 56
           },
           "model": "gpt-6-luna"
         }

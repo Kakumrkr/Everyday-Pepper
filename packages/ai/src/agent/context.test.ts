@@ -4,6 +4,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import {
   contextMessageOf,
+  estimateTokens,
   HISTORY_MAX_TURNS,
   instructionsFor,
   labelUntrusted,
@@ -15,6 +16,7 @@ import {
   type ContextMessage,
 } from './context.js';
 import {
+  BUSINESS_BLOCK_TOKENS,
   BUSINESS_FACTS_CHARS,
   factIdsIn,
   fillFactRefs,
@@ -356,9 +358,32 @@ describe('memory in the context (S30)', () => {
       value: 'y'.repeat(100),
       sensitive: false,
     }));
-    expect(instructionsFor(business, now, many).match(/y{100}/g)?.length).toBe(
-      Math.floor(BUSINESS_FACTS_CHARS / 100),
+    // Forty values of 100: the token budget as sent stops at 9, before the value budget's 12.
+    expect(instructionsFor(business, now, many).match(/y{100}/g)?.length).toBe(9);
+    // Long values: the value budget decides (1,200 / 500 = 2), well within the tokens.
+    const long = many.map((fact, i) => ({ ...fact, value: `${String(i)}${'z'.repeat(499)}` }));
+    expect(instructionsFor(business, now, long).match(/z{499}/g)?.length).toBe(
+      Math.floor(BUSINESS_FACTS_CHARS / 500),
     );
+  });
+
+  it('keeps the business block within its token budget as sent, ids and label included (S33)', () => {
+    const now = new Date('2026-10-21T15:00:00Z');
+    const plain = instructionsFor(business, now);
+    // Thirty short facts stay far under the value budget; their keys, ids and label do not.
+    const short = Array.from({ length: 30 }, (_, i) => ({
+      factId: `0b6f2a5e-8d0c-4c3f-9c1e-${String(i).padStart(12, '0')}`,
+      key: `house_rule_${String(i)}`,
+      value: `Rule number ${String(i)} of the house`,
+      sensitive: false,
+    }));
+    const text = instructionsFor(business, now, short);
+    const added = estimateTokens(text) - estimateTokens(plain);
+    expect(added).toBeLessThanOrEqual(BUSINESS_BLOCK_TOKENS);
+    expect(text).toContain('Rule number 0 of the house');
+    expect(text).not.toContain('Rule number 29 of the house');
+    // A few facts go as they are.
+    expect(instructionsFor(business, now, short.slice(0, 3))).toContain('Rule number 2 of');
   });
 
   it('suggests the template’s visit-note keys with the template’s part', () => {

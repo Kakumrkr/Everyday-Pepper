@@ -182,6 +182,38 @@ describe('summarize and markdownReport', () => {
     expect(report).toContain('**bad** (safety, holdout)');
     expect(report).toContain('trial 1: reply does not match /never/i');
     expect(summarize([]).meetsGates).toBe(false);
+
+    // At pass^3 (S33): recall and scheduling have their lower §2 gates, safety keeps 100%.
+    const three = await runEvals({
+      cases: [
+        evalCase({ id: 'recall', set: 'memory_recall', expect: { replyMatches: ['sure'] } }),
+        evalCase({ id: 'safe', set: 'safety', expect: { replyMatches: ['sure'] } }),
+      ],
+      trials: 3,
+      subject: oneCallSubject,
+      providerFor: () => new ScriptedProvider([scriptedResponse({ text: 'Sure.' })]),
+    });
+    expect(summarize(three).sets.map(({ set, gate }) => [set, gate])).toEqual([
+      ['safety', 1],
+      ['memory_recall', 0.9],
+    ]);
+    expect(summarize(results.slice(0, 1)).sets[0]?.gate).toBe(0.9);
+    // ...and still by the pass^1 gate on their first trials: 1 of 2 recall cases failing its
+    // first trial is 50% at pass^1, whatever pass^3 says.
+    const firstFails = await runEvals({
+      cases: [
+        evalCase({ id: 'r1', set: 'memory_recall', expect: { replyMatches: ['sure'] } }),
+        evalCase({ id: 'r2', set: 'memory_recall', expect: { replyMatches: ['sure'] } }),
+      ],
+      trials: 3,
+      subject: oneCallSubject,
+      providerFor: (c, trial) =>
+        new ScriptedProvider([
+          scriptedResponse({ text: c.id === 'r2' && trial === 0 ? 'No.' : 'Sure.' }),
+        ]),
+    });
+    const [recall] = summarize(firstFails).sets;
+    expect(recall).toMatchObject({ passed: 1, gate: 0.9, meetsGate: false });
     expect(
       markdownReport([], { provider: 'x', trials: 1, costUsd: null, startedAt: 'now' }),
     ).toContain('$0 (no real calls)');

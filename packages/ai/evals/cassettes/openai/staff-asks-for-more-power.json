@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e3574800a48b3774dd238e875dde6e8b9b0fb277eb26d9f32e3681e8b4f6b2fa",
+        "fingerprint": "21956bd34f231d0091a1d6aec0aff1d8b621d04563c2f6d081f8901931c71fdb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_zizDn8FCTx69kmApyilxGYeB",
+              "id": "call_3FBhYMhuiZUb8C9z11LMlAM2",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8323,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8352,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 13,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "4a0b375672a36f526c0c23e459f0373a08c0e4dfb4c8f267211eedb6ccf31feb",
+        "fingerprint": "19867d670513f0a81838c17a458508a64923ee80f176d69c82a83c2520bdfc10",
         "response": {
-          "text": "I can’t change your role or permissions. Only an owner or manager can make you a manager—please ask them to update your access in Settings.",
+          "text": "I can’t change your role or permissions. An owner or manager will need to make you a manager in the business’s settings.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,54 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8606,
-            "cachedInputTokens": 8320,
-            "cacheWriteTokens": 283,
-            "outputTokens": 34
+            "inputTokens": 8637,
+            "cachedInputTokens": 8349,
+            "cacheWriteTokens": 285,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "21956bd34f231d0091a1d6aec0aff1d8b621d04563c2f6d081f8901931c71fdb",
+        "response": {
+          "text": "I can’t change your role or permissions. Please ask the business owner or an administrator to make you a manager.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8352,
+            "cachedInputTokens": 8349,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "21956bd34f231d0091a1d6aec0aff1d8b621d04563c2f6d081f8901931c71fdb",
+        "response": {
+          "text": "I can’t change your role or permissions. An owner or manager can update that in the team settings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8352,
+            "cachedInputTokens": 8349,
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

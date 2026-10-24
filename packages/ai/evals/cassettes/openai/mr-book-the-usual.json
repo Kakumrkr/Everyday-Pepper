@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "863139d1f83ab9b2be9ad40ba0ba8f1386011eb8311f41452e01d8616849cbf6",
+        "fingerprint": "8fadb04bddd90daf1bb9e43b3b867c8b11a281f88461dea85bca868e9eb16abd",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_QcHtzkbzEX3xqqUL4cCHyWjs",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8324,
-            "cachedInputTokens": 8307,
-            "cacheWriteTokens": 14,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "55b9959c4d09092db553f582c7f931b91c58fa73f2ff681937d60be9a30c5b06",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_QOuLUZKW33i8Nc9VttdR0xiK",
+              "id": "call_I1ILsm755t4mVZecWQvUyKoU",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -38,38 +16,68 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8622,
-            "cachedInputTokens": 8321,
-            "cacheWriteTokens": 298,
+            "inputTokens": 8353,
+            "cachedInputTokens": 8336,
+            "cacheWriteTokens": 14,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "942d2929acebe885cb8ae8e5d52ee33d35321d8e0bcabbf6399756a4536408ad",
+        "fingerprint": "8bec8c9c79927fbd1811bcd15bbe9852c53923f872b309ab89a4a8c5cf57c5b7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_V6r6DbYsqTdAaXBDKrQyj9nJ",
-              "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+              "id": "call_2zK0wxyOoxbOGt5VdUIUpWoG",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8782,
-            "cachedInputTokens": 8619,
-            "cacheWriteTokens": 160,
-            "outputTokens": 123
+            "inputTokens": 8505,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 152,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3147b9ef35a89d3e8ca4b91add0cfea4a320fd3407116740615709d7c158a14f",
+        "fingerprint": "546541e354e156a67a9abaa8cf82ca22a36b26c712a442ec27e82f4b265d4397",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_F0MP81nAUMeeVLGPCUId65uH",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0d78739506f187a5016adc052f118887d28d0816591682eafc",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3AUwcFvLyoelstE__DZ5W0drBz4oS_4v5z0ZdGfInBFhK85_f-Y12o9JTfftyco7gdVGCbulx_GhdyW0J4J0dJ-0iDmhKVpooqpmJx4Au4YrRswDOFQRx8JqNqzd76IZ2Dw04wEx4fxzi4lmpcotXlG8fjx8gRyxOahvj9A6aG3A71S46cqSZXtmiqx9kP4DdrP1KDNJNWN1PaZrFJlyvLfJEecdMad2Hst-HK9MsNJyrbOGxCdtt_usIKnBD2W2HMQxENB4pX0CKi1edEaoY8IwUnfJAL805aj6or1gYrOiolzZAMt93B21-BKjgpVL_t5gKlyo9kdSgHtCiMnXrB-QZKY03DtIrE9iFNCZXsdVIN9pe8EYGpfKDgMjhAjQKcr_9sTgp-7FcmtZjjV-GAJVmLfREgSoj5YZrZODoOROVaKWMtRy7PaeyaYWZuHn-PZOooaCp5UIhzVc3hnODsQ1P62uNlJJ5h8ZMuKhx_RRGjf-9l99DiRINUzJ-vdFXqd0kfHbA6pHv7QNqlJqpDgsn9t57SMqsuSDnbMCuN8cx5cbsOPfTQF5cEp4xSfzY4Z_zZi7efYRsnX9BMSl8dExYwW7qcZklGCkb4jFr8DjjUEHfcfJPlVJdMkywxXSxOd8bOc35VDFLyRgqGOZc8r4pyJa_OHobRHOhU8AmYsWlN3LufxmavPA_l7kGUygxZOhc7P6sQ_bzj80olo0zsc55vFyz4e08P7ZPNFiiqsdEDrg6Q9inhBYeiWRPlelS4had56UOLITo9pM03hb7W54GBZBpyf2aEBvxPXg3HlZHeAVM4yu4XQ0a1d8s369LLx3NZXECty8tBetmTTWMIZ65cKzzXH6KU3zXM1n2BH_S8YhOu9WbY2PQmlHPlqdoezugdtDJdDrP7_XNDGh5jSuYo3lf3YvyEiFW_DX8YeSFO5ux7jtUivBMsiF74XeJtFLloF8qv-FfTb7OO1ziGMMg87CAircwr4TUiZHtRRqzqZquoZXVhldkqHYEmFhGMLcPP-SblD4RHDoyK7gI6beuB83FZYxIKJoJ31bz1vh_59avdKIl2K4YtCuNt7CF2kw4DtTWtDtv-5X1AVXdsDosBsgdVRlJJ-UQ9LwM9jru63ckDp_QzoYdLtVClZ0a6rRn5lMMP6AIneGG-ystCYatYTRNr1WvYOl_bKI00du2L1xFHaVeNi9FpOm-Nhhhtu70Cn-fnCYjhxqNUACHYFyeWPi7sMf8UyebDnMCMEiQzCKD_bRv1kBIAsmKdBzsyXDqO1j1XLPLVVRetK-4VYTk3uCeHntH8JuegAkMm-p4-Yz-ZaHN8jYg8XBYsfc6rOpIFdM_XHeuzPMc80EmPTZh1wfqRRCoaBTL-ZhuWCnRJjjwGOfBm3JgJs9biMZuJlLeapO67FnXj3I8uNa08myi5QyIcxbP-Lich2IkRvLZhNEMVWB4-FkHgo5wGHVyCC2ourkt1VLAn0db3IhkY9yzQ18_nI76P1w7maiCh0GcSXKFPBitJLVCmgYek6SNhSiLKOWO3KUrzIq08O7MPmGtOHnXr6KVPcUHnqvcxQvsSC6jOQTXGJiTnrrTdiXgHNSam8VtMqrc5ahV8ape6U-dLMdKKVp4q21ynGsa-DcWkN17YDkBd6tiG6UGx6cfp0deAazAC_IxTQbWhG9POQMJWZ7aDfsJ7Gp8rOFQV2LProW2v2nx8ZTv8sj1LYPhe58WpfIpo6lh6geW9ld3EdX7rUXJtmy60Tq8HyydlpEvYM=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8787,
+            "cachedInputTokens": 8502,
+            "cacheWriteTokens": 282,
+            "outputTokens": 143
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "03ee4bc70199e2af58d2a88f1645cc620647fbe7571283ea0ea65dee0491a2dc",
         "response": {
           "text": "Maria’s usual is Colour with Jess. The booking for Wednesday, November 4 at 10:00 is waiting for your approval on the card.",
           "toolCalls": [],
@@ -81,10 +89,202 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8984,
-            "cachedInputTokens": 8779,
-            "cacheWriteTokens": 202,
+            "inputTokens": 9009,
+            "cachedInputTokens": 8784,
+            "cacheWriteTokens": 222,
             "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "8fadb04bddd90daf1bb9e43b3b867c8b11a281f88461dea85bca868e9eb16abd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MgLnA7CDZnjuPytyQCt4NE7X",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4ebff5807b2e33fc2c75ad904ff3ab00ae4fb84a1646d3b8dd2d6b8a5c72a2d4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Nj3yqrwWevIoZYWZku5pBAkh",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8509,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 156,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cf692aa252b5725cc3bcec4ba8f76f4168c59e47e91597d73feb9b90ffdaeb16",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MUCFjDDF5FuCLh9zGsYg2Ras",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_05bb601f799ef8c0016adc05349bc487d2ab1f9e7a70cbddb0",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3AU12vurFIhCG4JO0BnsSwkklggTflxwBbq1XE25QoqOMgioWW6T97fuCyVVGPvQ1lJOi6G-1Voa_kvaxw-PyKZjdPBXUTesBIqrG7sY1_yrMdp0wAiQ0rFYIpeLzoMRh5uXqwN1VPu8IJVdSZmJ2O5nzBR3wFcVQzPOZC59R5NQS4xiktswJ6-f1RK_mfo3pFfl5dctqyjKnFqLCRgZDvlY0SV02UhKC7WW106CtwDSvZptHoZMHx_P_UvJsZe4gMbNdt7pRnjdurGAWlGXBXBEQOwD4ITF-NVDxd8ZsqwlD1rj_Aq0ew9zS5IfafL-ECg0EbmysXMWO066xSI5VrmpOMkOK6jI_kLSyq-4ZpX83z-YALQ6AzWK24eOXdtdvYqIKtooZnPEEPjpc-S-C0wcFjlJKGK2Aug3hVtlcAs_AMzOOfaAhnPjj_Y8nKHxPh1LvAMHt_A93p4jODrlka6g1mfLrNsChpNOsYTykBMT3MFvSLjmPyHfAtlb0NEg1qF--X_x8C3rWZ9hZ6YhzhOMedLAHGr2M60Wuai4gUqUk7pFDXDrTNoOBU6Sp6IB0lxv9Fmm5ae4Zd6OmvqRlmTWqm3tbrwYDAjqgXEGpUC-ABE3Tnpfo38kRuv2gb_rbmVgVpByDnx-eAP5dk1ssK0IjW7zqg1RNC9p7xzFHbZByGjYV1jdgEQI9g41vPMdil4jp9DmNXkLTmYYNQv2yruVnH3yi-nDKBHai_4ZZj_-gjnuMfKGeEHGhJmOm5JZTBpAgOvIh39km5Pt-g2iI6kRie8FyrKKemLACWJyW3NaOrwTp_xnJdTdXVU0uVAzPk8UbBv3eCR5D96_TON60B0x-lLSoFD7xyRpSLTlqBgA3QP0rZ8btF05Ehw5FBrhHd0VOmXb9owajvSkK6RObLWtLcGim2FCl7vY6jGlsh9zHXkuUhaPjg9sT9WsXgNm2MxuhVzxuexkWzkxR7MSu98smQNfwGlvfo2aBpp1CKhfpEjiQ-sKdmotgaix-Q6Dup3dYVdoUhKoS1k-S38FVWFZyDjfXjeBohOVvKmbfJRZgzTcXdjZ1G338aFvIoB62XrRfReLO4P1IoXAMMuvXCAgyo-GKDhzKbQFitW9M8xSuAploUK9ke_xWvAL1X5w74JgkvdURhv4sxyq1DHnL9qLMToh3m-rIUgr7n0AZNZ6RpDWV8TSQx94mq0gqhQbxUteRnZUW3nuvhyJzM2YH21l7UoPDMSYrvHlhUrvirzbQiFBhGnHl6h4lipVChOUepAiVCbQYiO4NyqHSH1QFPiJK-CqPct4vFafYePz_AIv3S516qaN8KoYcFusyRYReQODDy7UXuMJafTmiw7Ozonh48HKQ7F_bXRzDTxuDpv2Cod5KsMhScz3IKaK9DrpWuvbEdPRj6fEflzbE-ZllzZpqiYT8YTGXmKrq4tXXGYvGS6ocorOg3D0ML-XH6dDicDcb7Zf5Jj7ME91BPhKF1dcN0KpIU2PtIONj7zSa6R8zDe8DrFPTlNrgcwezovpgN-q5k0dXNE4kDmO3ixVSDPruTcfXomxAuyiud8HuH6JAJTvLAlXr68dkrJZutrqePHfZyz3NsruEpUm518WfbOFMRrqXSJvKt7PEAqSqcTtsGhikcnSxM7MUDS9-K-JYw1e",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8806,
+            "cachedInputTokens": 8506,
+            "cacheWriteTokens": 297,
+            "outputTokens": 139
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "45ed08c93986f53fb0206cdede7bd659113b9012361864dc91881fc9b296ca42",
+        "response": {
+          "text": "Maria’s usual is Colour with Jess. The booking for Wednesday, November 4 at 10:00 is awaiting your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9024,
+            "cachedInputTokens": 8803,
+            "cacheWriteTokens": 218,
+            "outputTokens": 33
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "8fadb04bddd90daf1bb9e43b3b867c8b11a281f88461dea85bca868e9eb16abd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XH210szbB8OSfCuw6TYrUyAF",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1e544959a64a07c0107abf4afd93884f0482a94f4d866882aff33f89136ec8e9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_8BpQKbFpAK9YeTfJ2mfzgYQb",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8510,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 157,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4f938201ecf2e2db607a8ec4415baa81028f2d4774211c9a95a80fc30027d21c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_F2Y2KJzWsv4Yw7nv12lBaAIv",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0c2d3244f70cf933016adc053a49fc87d2b2c94ac1bafdd96f",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3AU8pUa0-mnx2Pirk4HhyJkPG0w8MVPDgytuYDEyJ6UL2xOKTi6t7sXT0UgNPR7NrHOPTfVmjai6md_xsKeZEIVSUP5U2OXwRciUraqkQh-mEgw3OmdsmkgEiOGDZVOAf6Bwcpd8HYCY0-8MEUAdSsut-lwiwvjKXOC1xiysa2wX7MLHexAsD2IHMP2hmY8UVIQcRGIWDg6nnHkpGLrp49mWzpkLcOlLXAAWS1-ULfUlNrvS_0ppX2LdCztKxUvJbHFb7e5AHuR-yyUxJKcWbOA9hd4DwS87KbMc57h5-9r21xcYv5-dUU5ddp9he0JvLJ5q1zQJq6ET3FpDg2m_iM2ZI1RlfiJFbTI2YAdXdSLVmixE54EZwkK8-Y-_FftXhwZQQMVb7CKI9AmYwMzPKGGRO_S0Mh55AhvOqbGAPe-cBmvRb029x1mH8YHjXsjI3RGiPEcknFtoJTf36Z0mfgMKyERezoTA-q50aYQ2f9jcCLcsJ9P4fL-BaZ3yIEafuTEML-9OfmX2P5dwS181GRZpTuu7BrwPy286oF89_JgxtaCKPcczj848ix7mausI_85U6nxX-z0-kPBt9BQ6hMscytiT9kxzpVcwmdyJ4aAmR14A0HZaZ4lNzrdMEya143g7B_hN8jSsIJjbLwcLozw5pXYIUBsups1JRpBnGTigxRfMpEC_Lt0x-whITaO8uvRpRKqG-hGPVe0rxV0Ts3cmYKGygUaSoCP5cscCpRDCLt1qOnUZKuh2TieGgtee8FbImkx1sF1yrSw5QcmwukCqn1KXFjxFJK8UJVab5v05yIOsejryhX0z6EeGMkhtUn2I3FRDkLh9yyXVRMNdWfzAq_sDLZPBGXnZFkYkZ-GKkyJ52fgetXS0Wkxx2lpYbOu8YLTemTeohkIw8W-WqRwYO77-iNPxBjTP0OVOB1VLKZWhvuCE4Hn88AYj69AEvguElgo6i9iiz_LyUuKHd1FhNC9dIUM3-TD7qtDdJfGf_ofZb0A1PzNAQEfJJteV5UYdqbbKUWpZNq8bN7AJJcAd8nJj_7P6TVev3Gysl6QL_MTeTpL1KxT17P1Iwomo1FxX0_vupfv_QmUwnK__R9hDsNXuzGSYmVp1zWuNqLI5TwdmHYGwYtFvpZZZKe1pgVaCg267VoHvp9MKRMv9XWNmsvJuLmKPSma3NL6Qi0YFjqBPKp4zIHsO-iAQ4H2y0aHLWoXbTRKtns65HysRU0SLNHbaXayIlgDSgRyiEUqxw_yk46VJeo_MiA3bm7Mf6TzTC_j7lESv25j4nQMZATN-7WgM9VWMbji9IhqVZvtrSffF3hbt7ryLV4OD6C9ML6ZZfZvVtnQ9xr0zzZr0MYbQK2EYj2MUL_30l2Aujf7a4NLDiRbfwldhY6GyivZxHmP6fAlq5ZzxUJHrYBhnkjrbG2mcnjNqjxHALxzyVRpt25R6Uikyjes0yOKlVLX9oAQYzTPuI_bipBG8lLVYeH3BxXhdjMFFs39MGG1zkwudHK9FEmaBQpzCbpP3UgIoixt9KKbfzjhP_uP12UKqZdSnUVd2sf4GvhYN2yr_tMq-_8DOLgO2ZV1vNQSFFD_M0tQusd8VHfSfqYKJqhAv4qwN0-pmhCaSjN79xRAGxXlYMwb55VDupFK2z6fWemQE1OLmEABBRGgt1kgqG1qUwjUobQjirmsmvRYkhvUAtucZznI=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8792,
+            "cachedInputTokens": 8507,
+            "cacheWriteTokens": 282,
+            "outputTokens": 139
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "41eb92a4c2cae95de17df11174cb522094b47e5c7e4cb71665495b6b006e5e53",
+        "response": {
+          "text": "Maria’s usual is “Colour with Jess.” The booking for Wednesday, November 4 at 10:00 is waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9010,
+            "cachedInputTokens": 8789,
+            "cacheWriteTokens": 218,
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }

@@ -3,17 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8460034f317b3d0073ec082fd1cefacac99506301eed0c935bc6c5b1fec79313",
+        "fingerprint": "89ef676f4ef0e129671717e9d81065ab40f8db2192488f65c9b905dd75343653",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_FVGTdCDd32YbKAvvE2ZAhN7l",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sara Kim\"}"
-            },
-            {
-              "id": "call_cW8t27cKpetAfW4a7BYbmelw",
+              "id": "call_Ar0jYQwjPpREKt4CaGSXyVt0",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -21,21 +16,43 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8328,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 8325,
-            "outputTokens": 49
+            "inputTokens": 8357,
+            "cachedInputTokens": 8336,
+            "cacheWriteTokens": 18,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "94f4c9eb90db2bf8e8da7be9f2563aa67430bdf0796e1d7be0add6dab6c04599",
+        "fingerprint": "c4b67748115ed64ddeae9c3827444bee6da0f94086c3633fc5cabe709dc9bf47",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0gMIYIaSzj13OK88pyS8z5vo",
+              "id": "call_Heb6rj1jhimhGX3ps7kpys5S",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8648,
+            "cachedInputTokens": 8354,
+            "cacheWriteTokens": 291,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "65a746e70d300284873f3e0731860fd2925ca222a72187dd798138a2c34fd1a3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sYys5FqPKtKuOG1AXfQG2qtc",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
             }
@@ -43,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8723,
-            "cachedInputTokens": 8325,
-            "cacheWriteTokens": 395,
-            "outputTokens": 125
+            "inputTokens": 8732,
+            "cachedInputTokens": 8645,
+            "cacheWriteTokens": 84,
+            "outputTokens": 118
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b1fe2ea0e32d664fc57aa97b37da91fbda0488d4a9933109b9178e111aee29ca",
+        "fingerprint": "ccfda0e90dbe44a5429d293a693f13664cea287faafb2b57e3cc0fb32f1ec2b8",
         "response": {
-          "text": "The booking request for Sara K.’s colour with Jess on Wednesday, Nov 4 at 10:00 AM is waiting for your approval on the card.",
+          "text": "The booking request for Sara K. to have a colour with Jess on Wednesday, November 4 at 10:00 is waiting for your approval on the card. It isn’t booked yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -64,9 +81,168 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8927,
-            "cachedInputTokens": 8720,
-            "cacheWriteTokens": 204,
+            "inputTokens": 8929,
+            "cachedInputTokens": 8729,
+            "cacheWriteTokens": 197,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "89ef676f4ef0e129671717e9d81065ab40f8db2192488f65c9b905dd75343653",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_7nfIYbVObtPBwYAc4QK8FIKG",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            },
+            {
+              "id": "call_TgBimgDnk67fePMa8grB3GiC",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8357,
+            "cachedInputTokens": 8354,
+            "outputTokens": 49
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "483e0699be84763b208fb9d0bd471ec63979214b62db0f57a37a256937c0b5d2",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Pt7pm3iADH8mg0AtGPxjNEAQ",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8735,
+            "cachedInputTokens": 8354,
+            "cacheWriteTokens": 378,
+            "outputTokens": 119
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fe217548f925c6c96650bf9c3c964c9550a0d2d96fc015a3dee253f203494d2d",
+        "response": {
+          "text": "The booking for Sara K. with Jess for Colour on Wednesday, November 4 at 10:00 AM is awaiting your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8933,
+            "cachedInputTokens": 8732,
+            "cacheWriteTokens": 198,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "89ef676f4ef0e129671717e9d81065ab40f8db2192488f65c9b905dd75343653",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IIroCoIG21AssKhG8uYhneNw",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8357,
+            "cachedInputTokens": 8354,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "766dd2ade6d1a1e9caddea43959573efb65d1f203c2681fe1078f25486046e5e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nCjjRazIAoP7ardLK2zcR4cq",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8631,
+            "cachedInputTokens": 8354,
+            "cacheWriteTokens": 274,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "86d446c5e99f50a99215a6aad45244dd0b216c5b48111600d975a93d67dfdb52",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_czseGK8WuIWRie1L5wYnlHG8",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8718,
+            "cachedInputTokens": 8628,
+            "cacheWriteTokens": 87,
+            "outputTokens": 117
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "99e7e16af7f2d8bfe242822391a60ff0f93efb6b0a79bfc06a0afc31874e5f32",
+        "response": {
+          "text": "The booking request for Sara K.’s colour with Jess on Wednesday, November 4 at 10:00 AM is waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8914,
+            "cachedInputTokens": 8715,
+            "cacheWriteTokens": 196,
             "outputTokens": 36
           },
           "model": "gpt-6-luna"

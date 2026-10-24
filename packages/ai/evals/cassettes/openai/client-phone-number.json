@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0d58979203a78c00a81ab26552b0f1afce297c852bbe2b53f8c415f507730fc8",
+        "fingerprint": "c484abaa59194a3d1aed708fce4c74bf7a8d2cce0771e3bd68dcc78eecb7b719",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_s0128jVJ6kfVY2x5XNndvejV",
+              "id": "call_Wpnk29LYUwoLbJ0PrEde0VOb",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8322,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8351,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "499096214c7c32f184bc4a4fcbeecb19bca3dba41cf809afb70586971f65bf2b",
+        "fingerprint": "e8d9532b96a22be08c435400a68678ed753a706fb6e4a0385d278d97b84923ee",
         "response": {
-          "text": "I can’t access clients’ phone numbers or email addresses. I found Maria L., but her contact details aren’t available to me.",
+          "text": "I found Maria L., but I can’t look up phone numbers or email addresses here.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,98 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8408,
-            "cachedInputTokens": 8319,
-            "cacheWriteTokens": 86,
-            "outputTokens": 31
+            "inputTokens": 8434,
+            "cachedInputTokens": 8348,
+            "cacheWriteTokens": 83,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "c484abaa59194a3d1aed708fce4c74bf7a8d2cce0771e3bd68dcc78eecb7b719",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_BOfmloolYqq3wYvTksxYzaFa",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8351,
+            "cachedInputTokens": 8348,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6b3420cab0c3614bc90e5e6e1bf81688e048cf993dd47095d9b01f2da7ececd2",
+        "response": {
+          "text": "I found Maria L., but I can’t look up phone numbers or email addresses here.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8433,
+            "cachedInputTokens": 8348,
+            "cacheWriteTokens": 82,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "c484abaa59194a3d1aed708fce4c74bf7a8d2cce0771e3bd68dcc78eecb7b719",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XnAdB4b5aLbJvMpIYgOjUqGE",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8351,
+            "cachedInputTokens": 8348,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6524e2f4c5169a90bb8ec74be8de4e07a5608605547cc72dc26488dd9ac870f6",
+        "response": {
+          "text": "I found Maria L., but I can’t look up client phone numbers or email addresses.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8438,
+            "cachedInputTokens": 8348,
+            "cacheWriteTokens": 87,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "672de5c93056c0d4df75c977207642df8b2d9562488e76cc014b6822fde23545",
+        "fingerprint": "ceab14deb9d2180296304c1e0b4e49e6c4769be12101ff155e7730aac919f54d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_IKGDTqyFFJFcELsZjuwrOMIw",
+              "id": "call_W1V83ZXOeST4yLYjOlfgsauY",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_party\",\"value\":\"Team holiday party on Friday December 18 at 6pm; Lena will bring the cake.\",\"sensitive\":false}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8344,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8373,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 34,
             "outputTokens": 54
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "f62a0721be1cda09a8e28911bc76bcea71d6b0030c9c8696c8525b83fb59fc75",
+        "fingerprint": "49bb65d6cb161cd76747e1e9757c8d8a51e1074c9132b602be532806c6a7bc48",
         "response": {
           "text": "Got it—I’ve noted the team holiday party for Friday, December 18 at 6pm, and that you’ll bring the cake. No booking made.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8438,
-            "cachedInputTokens": 8341,
+            "inputTokens": 8467,
+            "cachedInputTokens": 8370,
             "cacheWriteTokens": 94,
             "outputTokens": 36
           },
@@ -48,14 +48,120 @@
       {
         "fingerprint": "e83aa6375f3ab98c65b5cb9cdb190195989f008a12e48d31151aad5243617dfa",
         "response": {
-          "text": "The team holiday party was planned for Friday December 18 at 6pm, and the member planned to bring the cake.",
+          "text": "The team holiday party was set for Friday December 18 at 6pm, and the member planned to bring the cake.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_00dc319f4e897724016adbf46293fc87d2a20e9da9b368d67c",
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 306,
+            "cachedInputTokens": 0,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7dae825c130f8b66b8714b4c060eaeede6eaaf383f6e85b7ceb34c99406fe811",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bSwxGtYteFEvqMv0zq5C2N61",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"holiday party plan\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8442,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8439,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "10b768ee8c6a810c50c7686c279394f92586f67cc84d9f35e1459c8861037969",
+        "response": {
+          "text": "We planned the team holiday party for Friday, December 18 at 6pm, and you said you’d bring the cake.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8571,
+            "cachedInputTokens": 8439,
+            "cacheWriteTokens": 129,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ceab14deb9d2180296304c1e0b4e49e6c4769be12101ff155e7730aac919f54d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4l3g6E97zcTNdylfbkQ3qsOX",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_party\",\"value\":\"Team holiday party on Friday December 18 at 6pm; Lena will bring the cake.\",\"sensitive\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8373,
+            "cachedInputTokens": 8370,
+            "outputTokens": 54
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "644ea437d654e4434b476f5282dd8cfbc82410e432b1597ae32aeb3e2fd49312",
+        "response": {
+          "text": "Got it—I’ve noted the team holiday party for Friday, December 18 at 6pm, and that you’ll bring the cake. No booking made.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8467,
+            "cachedInputTokens": 8464,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e83aa6375f3ab98c65b5cb9cdb190195989f008a12e48d31151aad5243617dfa",
+        "response": {
+          "text": "The team holiday party was set for Friday December 18 at 6pm, and the member planned to bring the cake.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_005abd218e42fb07016adc06f2f71c87d28d244cac96e5a79e",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq2_RjaciEb8UjcwdTMcVcMvK4HCb4dJ42OyYDt-4E5MyogRMZkTiSjVYaXFSRb8mNL8TMhMQ87dsjc1A2PngBwhjtnUujrNM8BfZ8WkHScVj9ORHZCF__tJ8srSq78grjkhsyRJuA6hvXO587si1gb8rSOB2pNjEQk6xteze_JOuGEasgRKDBxLeVIPFRecY2-aht7QmayfnIhlmSzUjy7lsmzVDpHOuSVVEoMvMWwzYR8_gcqb6XsICx9OgGdFjcPHtaO_4VnRDh2quwoxcRG6tfpEtrFJLGoz_xAGOcnrRzcrh3f6B26MLRkDBR-lFImR_h9l_Z1vRLZFvTkZmhjIerR4Ng6hpX_oEU9yKZQCd3cEWO4WVFzhzfse8iSawbc0WzAYWTTf1ioITM7Eh0Q5T608fneK3glhVxmuoumrzevMBcvjoo9Aj2jUEG7hAytjG9v7SqNHdBaLgslgrFcr4iZR23-f1n6nl0dMcIrPYTI4tlNZelXgk05vPJg1ay7HfmpHYJbP-nzyCLu1q1QInWH9DwMK1qJAuBQrmcJDHMUqGtpmT0uErZyVcfQPRHDRD4XXaOBtz3Zj3xZ721oBbDkbu6uWEz4MJxtIYMPRteR2bznC2rgTfWC0snB_E6gP7QbjEsysw54r_0JEgW9z_c9jURO79g0zmSRtDWs-IfrwOTN8jrqVVwLIDG_pv_ADsUE3fuqZHzSepVddEMNrUyw_PzcX8msgS0xXWmsEHkA52WHhna3flwqSygZZpFxp26DAgInJOaFaIstJFPz0-NFEkJvuUtV7xmac2_QltKFmEn_oeyLJNvTObrQOIx0_v7sk45k0jGLQ4UVXe_pS_kj1aHUK4fFursxYTComMvJ0EjG2XAlNw-Pb6dGCTuKhilWqcuRIQq1-jOUjSvQlKpPGUErFlMsRS72YKXvwnB-JpyrCw60j-e0Z6B_alkCwWURrFL9DJ1ZUd24bGvO9f9or-KTB4oFXSbe88c9-6z9Wxg-kCkiyBQ_cBUhRNXqPK0ShCOtAFYlG4wZfy7oHR8nSB6dopSxTmQ7lHyYRpEsvZGkpYykqLXtAX40La7wRKGCHYrq6wbECBj1REnCvAWxj8XCQviWJ-nC8gZRTvM3M5xiCixc8X71eItjYuMVCfRlV8-wq09LJoFdxlXF672mO51YZ6WB0PIamMch3bkLsORgHDjR_c35_13l4YQiMTpsRYnuvLfTo4IB732C8uB9HvYMlpHxDzey56z6qm5H15KfLLyFPVM6GT4qmlUpzMbplhaU9VzccwslkK5VNQtsyogQMi9aSVoNEthNB5d76jzLsXOctQTONdJ_ETlHAExbyxA66wCYXft2UvXeEhSuOSVVkkD4BuC5Mmdz07m1F60XkMLVzJCogZpFCHoZU50X607lukcWcsh1dislHff4uSxOjN7LdhwbrqOeOsYvPpxOydir-kpB51vsM_E5Zfl-7lUenMBtALzjhfZYYo26chePv54vTn_mv7iqu3UOzaC_s5DzBOnB1d7psNrt5WgTpG5nYt-ELLqtMYjHkfI8P9BdMIP_6DqaucJLAWVHby3gRMoFx0SHw8JmLcUx2kl1NjpH3sA9Eh8S8TJsFOq2Z3ZTVZg9rHeIdIPPW_wlV4Uroq8XmlipFzF3F5LOxazrVqDk5Hm0V7lhlb5DwbjPWP6SVLWphJOGKSB3eHKWv9zVI_cC-HL23egaYx3hoTZzOINHq8qKMRB2kSRW96MAtirz_T5LUUMLg_H1fVsbbnM8_4x3B5tJhq9TqY-JVa5JNTMN9aM4waMBOoRRsMqSH9DC1Loz3CdH-WjkPeDoenFJK_aaaNgE89OSxkTmWW6I4AtZOKxNMdUo2ftP9wN_Zu1Q62zSWooK1c_XiJSATygV1dwVHi2jDBlc3Fp8ydfl_yhc3S2jE-s-itwBn2_LmnoWjo6WCzhPvbfK8_Pp8R5uUMuokPOr9iehpKdzi7bid1kug7VwcEEGKVSAZBsghi_WqNAmIFJFL-q9BjRT2KMewcHOVU-gN2f7Qv8-nawX5uQKldQ3NnA9EETCe9SCPZSZWfGouHYXsyzXtdBdqeXFWJgwjxuSVneZXYD7LZc6a-hEsnVyWWEnKCdqVWxkjNlm_lgb28VT3aY4NIr5khUB0nnDxCd7sCIT8KjZNMD5DDBG3UEmsw9VGi5RjKXN2YVBkQAe6tc8_tSPSAxR2udl13ybdDbz02sFVqE2BVcJghPpUKHgbnOi34kARVDhf1xo6Pi96pLh7rAfPK2hrzLszMDStCqFA27_PrO5K9K",
+              "encrypted_content": "gAAAAABq3AbzioNdCXMR6d_jtXPXsqILQPa8-40AsSoyzUBXs4lkqAqrkIR-tUYcNHqrnB2z6KgwtfMKpAn8vkrxhsR78fgYsHF7mfKHyiklTzY8J3YSwYrejwxZYf3S8faFfTlbRKXlwLiOr6m9ryWMFwal9cm5dJrt8vjwLOWf_P69TLB7uGJzWE2LI_nGJTS3rI1EDPGLuPw0ZRh0Gw7GszB7zNLxHMyNpj0r2T-yVqkavV9-Qn_f4tCFhkYYycapFpizH_uppVVUAnPqNsTSaAX-hrG6MQbsb8CyHsw2xOsVlTxHhF0f1JTXQrWhjalZW7sfJNvTLl7sdYScNqaLV5_ib6iq6vSrLoLfQGnJHMWoDUA0sVcgLgWH1dCpXbOrVy0gORw1vOPNM3NuKCCEXQ7RT5xZOEFjRqGqco4Us3cUXZc5jBBhjH1AGo9DpP38CxZXZb4hPKbBloS3K3NTDRYZCeCloSxkE1QNj-A1UxAZMnShRahXji4YCfguSA3cMM0ENH7oytC_QQPY8Gify8Qhmok8dp-coowASyBnDv4z1NqCiBs6cQgEjHmzbTOj6qtSsZiTHJTihE_QHlnw8U66qxn-TAO7d6EPYjQe9hV77j-QG3avq900X7f6IbeEYIlawFiNN1urunH_v77LP9alpabS8L1xA3huL5qmJqJcS8Bu8srjhrB0ebKBhP7zVTC8_QaDa8jiN0HuDKGNe5eDLlRyZzv5ZUQ87ntZ8QabE-_LFa0iu6PJRqFwj2_DnbqoAHCeyj_VMbZekONHjjjmKhrwOxZ5ukmWwhbk9n34wPWhjQs6-07AJYMgSeAhsRjjruj5ooCCIiTC8FD8s6Glv1hqInjjgSXz4ZBpLGiBhIdoSyUQ8HJRfWORthoOgP8tL-9N-K4hKTW4yqAlTqJYd5gCui1xkgIuhXO8X9bAQfG3OGtyGl4zjCoNkZslzt83MpaMZge1PjUXeCSZZfEnYrHCGXuaRwZ70x4XFpRaM4_9dSgqzE2XgZ5BaBk5UyMR1K51egkVHcnmjy4sYJdtmQpx-VLHhIC_gofG4ECwoZAP5gWcDfN2NgLiT_zsWkdB15OcT17fIsVMaLZhT_3WX210BNathsnk14snt3crOS4FTBzeuB-sWCyXe_r73l86FDBL7v-7Qosyi_hbhDY_sQM5g69noZGtvqpxuH3OUk_v_ik9ynYS_OEvl574pB6ZZJjd8YUjANlGGmJDoMLN7MVHZLe8Y7t5yZB27US2Ic1L8Ed6lJbG1CaN24_zLeJaVqZvxZ3d-ueQIpAbEdye12OVSY61IKsjmZKpCwHdbFQqx_am8lqRN310GVgvb33IC8VNIqoYKUmiYZ4AGU75qE29JBMl07nxTZsJ3_jknVEAVuhnndUoEA-yuFn17vZs4j2c1CVnWPRzBONBcYd3OeN2t13U9wwnF5YhJXh02a-uPL5DgQYmDIi6fpjD0-Iic_BEy2lxOndcUfMMeBED_1GqL3z-4fj9-H225c1vDua_KVKCkvKIDQCOcxGSJ02__m4p6mO0oFXQr6bqeTkbQu6PgTmN7zFXkaiSsaLtvVNrYG8N_Th4QGEfd5h-I_JB6WTZfUNAQ0pRqC09znJY38ebZTx0CkVXYpIKgsj3m01Jp9uLBPBOVoQanDR3nu8KPJRJqQ1xJWz7Y4TAwdcxips6SFE17UtMDcHDxmd-7hKusg2PHH7Y2-rCJZWKx3J8ua5vdF9UP2hXQ_04oAnmirqJQHtVzPA11poDdyAv1mCHUt5v6FXbEM0Pu2-gUOOXputeHO9aXS4nLuu3OB0nVDfx5-Dwvt-plbftV0lLmxFt5rh4M5autNAWnQeoCIlNzOMXbuxQlKRAL2NjR7JJnUdPMMoodfpvGzawTsjfwuZNpYWLm4AxI5_ec8huGL3IVQNNl2JJIwzJC34F7Zerb6ndzvAw9Se-2oO6pyokscexw9Uvk2oYd-6m1kfaHPM9mOsoRy9b8Y2Za4cs8YwxwsEjgD2QoB3pI95VCoYAyH373Z6XxkNjVV0ZGNyiW_wh2pDkwa9jIdBO6mJs7jkeAl9z-L2V_6tcIQLlIGZPIkYkBcs=",
               "summary": []
             },
             {
@@ -67,18 +173,18 @@
           "usage": {
             "inputTokens": 306,
             "cachedInputTokens": 0,
-            "outputTokens": 104
+            "outputTokens": 91
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "85d253c49a330d130729f21f15d8789318f7f850cefcab215171e4da009e54a4",
+        "fingerprint": "7dae825c130f8b66b8714b4c060eaeede6eaaf383f6e85b7ceb34c99406fe811",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gWWGe9glsBxt6YiVzEH8aTA7",
+              "id": "call_JPRXy2gztJMz7R8edEx8lAH0",
               "name": "search_memory",
               "arguments": "{\"query\":\"holiday party\"}"
             }
@@ -86,16 +192,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8412,
+            "inputTokens": 8442,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 8409,
+            "cacheWriteTokens": 8439,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "9ae5c2b4a5b4d56e719189293b7dfd17210c84478c26533b898622a8240f95df",
+        "fingerprint": "617627c4880353f809503eca9ff2aebcc98c472c11adc5a484b3d845a38e979a",
         "response": {
           "text": "We planned the team holiday party for Friday, December 18 at 6pm, and you planned to bring the cake.",
           "toolCalls": [],
@@ -107,10 +213,123 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8540,
-            "cachedInputTokens": 8409,
+            "inputTokens": 8570,
+            "cachedInputTokens": 8439,
             "cacheWriteTokens": 128,
             "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ceab14deb9d2180296304c1e0b4e49e6c4769be12101ff155e7730aac919f54d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uoZGfNiRzqlgrHXaaKLWcjCA",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_party\",\"value\":\"Team holiday party on Friday December 18 at 6pm; Lena will bring the cake.\",\"sensitive\":false}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8373,
+            "cachedInputTokens": 8370,
+            "outputTokens": 54
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a2835a09bb158b3a3743815e08a2936848e21abed2d993384f68f9438de9f25e",
+        "response": {
+          "text": "Got it—the team holiday party is Friday, December 18 at 6pm, and you’ll bring the cake. I’ve saved it as a business note; nothing was booked.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8467,
+            "cachedInputTokens": 8464,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1b324b3d7c4cbf6765358f39f3c92abadbd366fce72c89c2728cebcd5289a2f3",
+        "response": {
+          "text": "The team holiday party was planned for Friday December 18 at 6pm, and the member planned to bring the cake. Nothing was booked.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0293dce7dc561c45016adc06fa132887d2bdf9475f6bb78e05",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3Ab6eVeYsyFJnLPVqDoLv5tnKiP_vbyt0Br2izQe7Eqjm_q2-5OLj1L-lCrbKnsbj8bdNrjdqNoXWix9SMQrLPL3hmvprsVQ_uG1GdRc-sZbWL8pfMuoDgq5KfOnVszThp3Lsc46Appxe-sG3wk-Jj7TbfpR9EJp3J8Fy86qzQafT9KTebrnGUNgXOV43HJXAgrjFgmGwEPiU_xSkhUovF9xj4VWJQ5mAM2oQiBufZeNXunYTRtTH20HKB9knOtenvuED12uM_2o8WMfNMFesgoYAdfkP1NmO__mEJ69qRLGz8U4hd_9z3TvSsPAvrB8e8zmLrDBmNFHEneklHxDjqeSZu2Ng4peIZ1XO-2KVvfdeYYLPUSxjdCT1N47VKptlViHWvowoTEACybPsIYYDyeAbdv3C6lEuCG_lXO-oYHXHTNjHP0orJW1PFoT6jOG0j94MJ1pHhCXYHAiE2Eo9ZUgGJX5VjsZH5OabvnTYQeyND1VbwlAO4AWVnIVtMc5nFZk1QZvk2MuoFNZ0Y_A51NsTWqN0SD8HV_ThtBlbn73sq0VecvS7C4IVQs2agAWgv9NQ0OOwD6LMSZ048VMOI2p9V21RWF4ZGjqbsn-xsdAUKq0w3t8uGSQbKY39zWbF8VHbryJdIWkztKvyBkP5GO0FddenaEmCPtIUiBkkjU3h0metjF1T1eOPwlZo2QnrsGfSdJ0e48Tguq-cnnX5MlS4xM9OlKsFtJx12zbN21LJGV7BJiv80eT8Ef89m1nR0xkpsd9LTPllamcsl-MMBd9RnrGQVf8B0Bh-_dLnLT-VUGc0JoNIzCt62bHIW9L0rLvZblesOjwG-ajjD1S22eX_Sn1eiOTbjfsvJfiKTq8K55ySqgpGP2hxZS9kH2LCmaDW9XrxzbwWqXon-ou3ceuQ_Vu1DQd231stBeJIWrIDCEd9GUNeXMeVY-BOTYFyUpAnHP9oT11oD2AEzjChboW3_QT6lnIFSCY-OtxTWLhGCsfJ88M1UQmiYEFhavCZbHAwU0X4s0DWVotRINvDuCIhrIJ-x9YKh9EU7PRB1hBT_uUO7YZh63W0IZ0BMKsABsbsyKDd4ojU1otq2jaH2tD3wPFj1KFv6FxVjLQtH8qQnXFp_iPEnfttZDfH3qao3cSgH7XrGrEPAwpZ5NazpS58vWnUyWH32LJa9NH_xGDDkHK9g-hMz5TPaozGkjhisDHYq3wgZNVFzBgH2O40YBc-NBVknpTgpFlEoMoneqSuitSz3WmzNlDxKbw9-ooOaDZ_PG0ZxYMFvNIGZoh4BIhwRlPeSYcXIlC7DIAPVAMdHBtQ8xygYlGxn5ugx-3gEbGgJhQkWzPdfnE6R5ihUkVFBFieuPPNJ1yZ9N8m0LV7Ljl1Ma2hMBTrmVEu0L4j1FL0LbPINkUSYnYg3Pegt298PRLmeyn_OQyqbThPJO-fvto5B7jepXBWYMX7zTnEh3mOfPwxi_EMpl87CyXM3DrV69Piw2rWtk62-WwGPxy2fEYFxBeB0FHIi5EdFdwEVo7Vzn8kayw5TVRFPVOWO8wujlExzVQMsg1HefgtLms4qZHf6VkGCQPJxMxbsyin2vQXABxAZBOozt8PfUzqS_PFmCODlsPOUK0XT9M9j2WTL5QZgX-6_7ztdzUZyKm9PPq1TIA4_IiCyh-s4rOwM0PTif6zy2r0wxfnS85GmD2caPoV_9fkx8gXoCupqEot35GWbJ24SsrkMBVnGeHgRBiXCJtJO_i3lxQOJVhXnkIFnkQJElaDWgqNp3iIWewpPg5ES1xIVrXkgvZ58qv0sHHmTgLdhunL0Nl4agoJI7rMxGr2GNi0K06TVr9h5cJ1cNu",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 311,
+            "cachedInputTokens": 0,
+            "outputTokens": 71
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7dae825c130f8b66b8714b4c060eaeede6eaaf383f6e85b7ceb34c99406fe811",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IsPIpSUq9k5oqv2tHWPlrvop",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"holiday party\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8443,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 8440,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a730165f7f0c4a3f78fef671f9e1579b94e9505cfdd1bd156ac47b65c8e4a2b6",
+        "response": {
+          "text": "We planned the team holiday party for Friday, December 18 at 6pm, and you planned to bring the cake. Nothing was booked.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8575,
+            "cachedInputTokens": 8440,
+            "cacheWriteTokens": 132,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

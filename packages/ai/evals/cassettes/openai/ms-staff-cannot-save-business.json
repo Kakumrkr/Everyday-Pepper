@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "870596191b3d32d25331b68542c16b8986e4e800071fef25c8b2f87a6a4015ff",
+        "fingerprint": "ddffa0371c12fee5f64cf8686224a861510fb65af6c0e728c66387edc3397165",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_VFvJJ6lcVN6Xm2CFmQrl2AKl",
+              "id": "call_NyNMLoANi0NHngvNkvsVq9I2",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8322,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8351,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 12,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "2296d20e8b73e5e1987fe5c6a2a934e50cd44de7a710e51a4c6a40d66ff4e19c",
+        "fingerprint": "2639ee6e140eeea764d100dfdeecfaa841458d9b7542b9d1de56d656797b195b",
         "response": {
-          "text": "I can’t save business-wide schedule notes with my staff role. An owner or manager can add that note.",
+          "text": "I couldn’t save that because your role doesn’t allow business-wide notes. An owner or manager can add it.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,96 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8415,
-            "cachedInputTokens": 8319,
+            "inputTokens": 8444,
+            "cachedInputTokens": 8348,
             "cacheWriteTokens": 93,
-            "outputTokens": 26
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ddffa0371c12fee5f64cf8686224a861510fb65af6c0e728c66387edc3397165",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XX9LSAGFwj13DHJIG7V5aOFs",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8351,
+            "cachedInputTokens": 8348,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "748523486c96e9ef5efd6c6e48e8b6db4072911c7ca5bba909680612f48196e0",
+        "response": {
+          "text": "I couldn’t save that because your role doesn’t have permission. An owner or manager can add the Friday closing note.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8444,
+            "cachedInputTokens": 8441,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ddffa0371c12fee5f64cf8686224a861510fb65af6c0e728c66387edc3397165",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Gi6tKdkQD8STybTwKfLVdZp6",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8351,
+            "cachedInputTokens": 8348,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "252d5eba2427dbeb6e469a67b92560cffe55c923c4169974350774fb05a9c00a",
+        "response": {
+          "text": "I can’t save business-wide notes with my staff permissions. An owner or manager can add that we close early on Fridays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8444,
+            "cachedInputTokens": 8441,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

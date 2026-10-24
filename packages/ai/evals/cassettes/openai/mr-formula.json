@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "22d1c6a6019564dacdbbb0d1d2256a52c355d8359f3e01b2752ce9f3d391a73b",
+        "fingerprint": "6f1be2c16d9eec5e8292e29f3f26e64355652c96b5054e49eb6e57b90bc1aba6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_fRpMxldhRasTl5k0rCTBRMM4",
+              "id": "call_olFMtPmyygKZHAn5iL46wV8N",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8324,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8353,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "2799ac2b2683c84aac479a089c8b74f5a6cb2a9c1cf931dd84dfdbf340ae8fe7",
+        "fingerprint": "490fa8e6e339ff4c7d7b07d0eb4d303ddf7eeea9e7e8811591fade7f1daf4d06",
         "response": {
           "text": "Maria’s last noted formula was “6N + 20 vol, 35 min.”",
           "toolCalls": [],
@@ -37,9 +37,97 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8607,
-            "cachedInputTokens": 8321,
-            "cacheWriteTokens": 283,
+            "inputTokens": 8625,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 272,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6f1be2c16d9eec5e8292e29f3f26e64355652c96b5054e49eb6e57b90bc1aba6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NMSMVxQVLGAvH5w46z7b8bYX",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ca16b197ae545cef85e9e4e1a0c332af50c63ee4f51eae6eb3887ed68893099d",
+        "response": {
+          "text": "Maria’s last noted formula was 6N + 20 vol, 35 min.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8622,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 269,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6f1be2c16d9eec5e8292e29f3f26e64355652c96b5054e49eb6e57b90bc1aba6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ed2k9d7DET5dVs9ej022Hryj",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "09d37fdcecec0111d0835d01a5676d8b436a61942d68a44b5a9f7b947424e65e",
+        "response": {
+          "text": "Maria’s last noted formula was “6N + 20 vol, 35 min”.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8623,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 270,
             "outputTokens": 22
           },
           "model": "gpt-6-luna"

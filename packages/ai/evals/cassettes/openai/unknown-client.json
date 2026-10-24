@@ -3,17 +3,17 @@
   "trials": [
     [
       {
-        "fingerprint": "cbd1bc018dd61199153a7021b0c4ae86ca7f111176bec4db43c5c632bf3caffc",
+        "fingerprint": "d6d8c2ccdd564f0846c436ffee5cfffb48b985edbd735f521467dfe45d574fb0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xXLNwAyXPzSHFLvhEfJDGajs",
+              "id": "call_yq4ZluTXGTlFW0VF8LAvXnW2",
               "name": "find_clients",
               "arguments": "{\"name\":\"Zoe Martinez\"}"
             },
             {
-              "id": "call_HYX52hUtSovGfYj1P6BjOEx5",
+              "id": "call_kyx4htZicnGai0HT9r0RjwPF",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -21,8 +21,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8324,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8353,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 14,
             "outputTokens": 50
           },
@@ -30,7 +30,7 @@
         }
       },
       {
-        "fingerprint": "b46a899192e927ce4326fe265724e4333b2eda592b56d6915a22ffbed6755e66",
+        "fingerprint": "ce83004a1018161b585e4fa1764e7fbb9be44484ae34c53608492ddc13d3d35a",
         "response": {
           "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or give me another name to search?",
           "toolCalls": [],
@@ -42,9 +42,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8684,
-            "cachedInputTokens": 8321,
-            "cacheWriteTokens": 360,
+            "inputTokens": 8716,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 363,
             "outputTokens": 27
           },
           "model": "gpt-6-luna"

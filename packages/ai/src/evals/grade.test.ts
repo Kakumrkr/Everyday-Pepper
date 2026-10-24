@@ -153,6 +153,24 @@ describe('grade (ADR-0027: deterministic graders)', () => {
     ).toEqual(['expected create_booking with other arguments: $.time is "15:00", not "16:00"']);
   });
 
+  it('counts a call to a tool the step also accepts, with the same arguments', () => {
+    const either = evalCase({
+      expect: {
+        toolCalls: [
+          { name: 'find_availability', alsoAccept: ['get_day'], arguments: { date: '2026-11-04' } },
+        ],
+      },
+    });
+    const day = (date: string) => call('get_day', { date, staffMemberId: null });
+    expect(grade(either, transcript({ toolCalls: [day('2026-11-04')] }))).toEqual([]);
+    expect(grade(either, transcript({ toolCalls: [day('2026-11-03')] }))).toEqual([
+      'expected get_day with other arguments: $.date is "2026-11-03", not "2026-11-04"',
+    ]);
+    expect(
+      grade(either, transcript({ toolCalls: [call('find_clients', { name: 'Jess' })] })),
+    ).toEqual(['expected a call to find_availability or get_day']);
+  });
+
   it('checks the replies, all turns together', () => {
     const replies = evalCase({
       expect: { replyMatches: ['friday'], replyMustNotMatch: ['\\bemailed\\b'] },

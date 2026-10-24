@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c2282c8c1125bbf9711cc9e68d195c805aee7372d6d11e3cf0adcab3a3e4b9ea",
+        "fingerprint": "7a7e72a4bcf041ddaa0e5ed5b5aed2fb08dd8568ead1e06003094b6c7ecd131c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ANaf3H0KSN59dTzPNjyUMQ6V",
+              "id": "call_SYJ1vCsHcQ1c8XlwZ9lnDkUr",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8321,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8350,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "ef17c1099cf521182dbb1c616a8c98b9a0f8edb2219501cd19e997798bec4df9",
+        "fingerprint": "e967f4a507030c69b8a6300cc468812dc33bc70ebebf6e1c2557d89134c7ef5c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_lieL0PzprTwO2DGoBEKRyWHz",
+              "id": "call_uknWutggXqOsXLnesylRjDPl",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:ana}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8404,
-            "cachedInputTokens": 8318,
-            "cacheWriteTokens": 83,
-            "outputTokens": 42
+            "inputTokens": 8435,
+            "cachedInputTokens": 8347,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "98618568eb05f5576437bce3a53a746920a7b7d78896e4736c39ea9cd0decd6e",
+        "fingerprint": "131e005d0f2c566bacc197ca5ec4f8aaeaf6efff7a41b58147b95484d17082b4",
         "response": {
-          "text": "Ana R. has a confirmed Haircut with Jess on Friday, November 6 at 2:00 PM. There are no earlier visits or visit notes on record.",
+          "text": "Ana R. has a confirmed haircut with Jess on Friday, November 6 at 2:00 PM. There are no earlier visits or remembered notes on file.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,142 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8680,
-            "cachedInputTokens": 8401,
-            "cacheWriteTokens": 276,
-            "outputTokens": 38
+            "inputTokens": 8726,
+            "cachedInputTokens": 8432,
+            "cacheWriteTokens": 291,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "7a7e72a4bcf041ddaa0e5ed5b5aed2fb08dd8568ead1e06003094b6c7ecd131c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_KjURAA2FH6mdrwFVMylFfuSd",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8350,
+            "cachedInputTokens": 8347,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "16d008f7175b69e93aa3dec214dc9a36bd320300dfdcfd4ed95c3f4bb765b1e0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_awdAjD8IhnG7bsIJ2Xsc4dCQ",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8433,
+            "cachedInputTokens": 8347,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "daf6cdc6a4d267519dda41d15adf40b50cdbdffa4b72040280cb1eda23ad1ccc",
+        "response": {
+          "text": "Ana R. has a confirmed haircut with Jess this Friday, November 6, at 2:00 PM. There are no earlier visits on record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8719,
+            "cachedInputTokens": 8430,
+            "cacheWriteTokens": 286,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "7a7e72a4bcf041ddaa0e5ed5b5aed2fb08dd8568ead1e06003094b6c7ecd131c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_L4dNNB5fKBn5AfssmftvuoYI",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8350,
+            "cachedInputTokens": 8347,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e1648609c3db0425fcd2145cadb255b1f258c11a56875b9ac8ee4f1245684f0d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qIZW7glDNllhvcfpEBo9uy1k",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8434,
+            "cachedInputTokens": 8347,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2ff81e94049c6fe336c4677fbc0a0fba9a3a825dc842273343912ff5d1ac8537",
+        "response": {
+          "text": "Ana R. has a confirmed haircut with Jess on Friday, November 6 at 2:00 PM. There are no earlier visits on record, and I don’t have any remembered notes about her.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8721,
+            "cachedInputTokens": 8431,
+            "cacheWriteTokens": 287,
+            "outputTokens": 45
           },
           "model": "gpt-6-luna"
         }

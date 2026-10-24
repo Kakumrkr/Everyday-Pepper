@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "e3a8740fc7b631fd98472034c8fb8a113c13f063e6d00d431572ef8c28254892",
+        "fingerprint": "7fe894c8b4ae5b0d3fc31a2c1139572e2f53c69a281fb9023d1534bf7be8691a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_W1stXiAWGJ35d02IyximJD5x",
+              "id": "call_n4Uj8RIeOEAtSqE5pUikPH8R",
               "name": "search_memory",
-              "arguments": "{\"query\":\"Lena my job\"}"
+              "arguments": "{\"query\":\"Lena job\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8322,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8351,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 12,
-            "outputTokens": 21
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "f03a6a95985500268746371bf0ad34e4a6e2aeb955ba00bc161f46d28e6470bb",
+        "fingerprint": "6169b1226be3e34c8ad072ff479d944eeb95b2f5e5b8b6e29be07435ec136f91",
         "response": {
-          "text": "I don’t remember Lena saying anything about your job.",
+          "text": "I don’t remember anything about Lena saying something about your job.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,97 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8403,
-            "cachedInputTokens": 8319,
+            "inputTokens": 8431,
+            "cachedInputTokens": 8348,
+            "cacheWriteTokens": 80,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "7fe894c8b4ae5b0d3fc31a2c1139572e2f53c69a281fb9023d1534bf7be8691a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nRJqJbk04H49c7pj8pa3nzBl",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Lena my job\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8351,
+            "cachedInputTokens": 8348,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "13687c7c02f42aab84b24ea1157a7729b2cf6c59df7eb9742df14031cb9e23ff",
+        "response": {
+          "text": "I don’t remember any earlier conversation about Lena and your job.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8432,
+            "cachedInputTokens": 8348,
             "cacheWriteTokens": 81,
-            "outputTokens": 15
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "7fe894c8b4ae5b0d3fc31a2c1139572e2f53c69a281fb9023d1534bf7be8691a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_WLJnEIocAQaBclJgyk4U5lKY",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Lena my job\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8351,
+            "cachedInputTokens": 8348,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "99a73fe4389112c746af4e3929d0a44e08717cba366ca681684ca05e3a2abae5",
+        "response": {
+          "text": "I don’t remember anything about Lena saying something about your job.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8432,
+            "cachedInputTokens": 8429,
+            "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }

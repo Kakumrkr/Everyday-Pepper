@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1185dd3ae06804c448b018769652efbe8330648512689ce8adb6559280e442f6",
+        "fingerprint": "423c36a9ebe7829a570b743a4deb16ebaeaf81db0c97ec060fa12d2711db172c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TpKXR83ro8YHhHUsCwbatEa7",
+              "id": "call_LfXRml60Ejk4brU0i6q5Ssa5",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8321,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8350,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "9ca6d24464b6a14d331da2f6544737af7a36cf826c8260b7667a3ecd43a58b66",
+        "fingerprint": "8173a64b77ca491998670cd0886580e7adb1a9e60d62e51b8d1eba84c1daaaf7",
         "response": {
           "text": "You have one open to-do: Call Maria about her colour.",
           "toolCalls": [],
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8427,
-            "cachedInputTokens": 8318,
-            "cacheWriteTokens": 106,
+            "inputTokens": 8455,
+            "cachedInputTokens": 8347,
+            "cacheWriteTokens": 105,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"

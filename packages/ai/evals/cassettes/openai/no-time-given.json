@@ -3,44 +3,53 @@
   "trials": [
     [
       {
-        "fingerprint": "1a5fdfca96dbad767953db61b7ea15d8ed404860504e429a88fe0a2588aa2ba9",
+        "fingerprint": "ea946a19910b994fb32c417848e4a8f904151d836affef9d012de8ce279382d1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6TZdVXj4t3o3gr2r0oMtyqxZ",
+              "id": "call_vZFzX7dHQJPZ1fLfQB4tl5U7",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
-            },
-            {
-              "id": "call_d04BQMKkU0m7HuSp58cor5GA",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_062be50ac43795d8016adbf30ac34c87d2af1a2ad10d9bf8a0",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq2_MLPuQSk6aiUTiIt9MfJMNE4ekQxGFiGQalRXfrzlmgZ0z1OYG1IigQq3_E5Eiyl6NxMSCInhQkrqrdLSyIWBtFRcBmrMF2A3OAbFpwndnwzL1ZH6zy-xJp-8627lgSbl6FE2CxrbSLrhgbx0Y1O5yQUfrZdw35In940bkAga3q0xZV9F3Cn_l93VfNw22aHPVSXk4f1KNrOsO5AHR0Twoi2caE1xbr85Lgcb_FZRAbV8lG3AEJCBubu_0F1WvK8N2smVs-weeMgHX6F9WQCKXYa0CmjjwxeNts5KjX66m0ws5WyQ5JK6k2TxOVmTm9JyXj-NXMCZsBnoulbgUgp-MGxTnVMXqh7VJkGrOdi167Wq9VKYPnmeYA7072kAqpwD9aPGkc8C8FMjaZlKbRpxSqiVApvnSiPVVckqT7rTneVn5v3nrhXk3v6FTN6WEhU7TwQFayLV_KBquPZhg3U0abwDP6u9oRV79H0BID0efVplTfphUTSUqK7eTmQh9QJtUFm7ywnBHk44EQHqNe2Mmwl8Cb89JFMn38rtO8ZRYNI5XCZS31uRVg88VS1Erytx-Bgpqe0E6xr8q2Xw3-igl4Dr8RRXEmsKBRkHZFcBdWsaNJ2YFbuEIspeZSn2sbR6oXKYfLD6zRtVG7YGXMfBgiE2Mxce0GQyY6HAx_lZR3yY-Lrxswjnd2vR2yEjTgMHVjiwZW2SJrsFMzv5qldYraW28ePme-lyrsBTse2PpP05LOXPzvf9WToodiCseqFTzzLNd5o7CeZdVN5kK5vFFa-7rdiSayRMLO90n63Y1qqXDJvDzD0lT29xL2Fy9CEfzY8WdrlS_k53wIXpG7UR-VifSGHvOlXNwIWMOUVT13C4kcHGI3ZFmWVMRo3nWxfgEqfja9uexwcRtFF6f2u0cKlDR380kzWrwUksRZb4GkoU_NK-JaXCKQVsv1ffQgZRo_IsROGKxTfuehJOrZBDbBvOicYJgoHuWHZUdccU4zdUT-lmh7wHnEOUBIye3oQYDgP6hhF1hurSJnPVzVo44R0oEgEv3mLLExlppAt4TEBRFmNbcQbKua6J4Kddq5_4DS2ZaRwABiEeqwP8BbHbq3faak52WYu1h9esckRsBomw4OWIGF9ZdEdmzs9PYvt6cp1O7KEdQxJzJ0OyD7ddCaqDW7irlN90ecYYp3CRPBT7CJ79L6pcKXjcAptNZRtJy7mi7gR-6Cq5VY45vnc1WElpJgWHy73J5K-Nk23hzk8aNCDRC0nXhSPO-X8xIU3GBUBiTn-4XBF91aSEhHvaBECDSFzPVvZV0hm_mEMPtQeZykzuEwaeOPY2KyuJd4yhNjJ269WUcRN__4BPMn_fylIMfQu-jxQ18p1e-E9VT1NtyDaAFl0oZYzamhFTKo-KuesJQnr-ZxGZF7ncPPu2FwEC4gUUF9sYevVkx5UwH0ww5BD4vgh0fw721lRkDCXSpxAwIfpwf-jy0NkgCGLl20qMcSG_sfUNW16yesAecYI3CEmhMlTkvVXX30_OUpxwaL9xPLQehB4U0RELDXBfE2PYt3SgQIH3KpIhgozqcS_1SRIMyrjR38T83NzebRmATHbonkJ4I_JpgRvKqGcOf2YAVZQTd9Q8n42sflq1oUjQRGqYGrz9HKtY4MmQv0vd-A7xgGX80L76qGto8enFr6M9Lyfps6XeKFG5kxZmsptgc=",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8318,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8347,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 8,
-            "outputTokens": 70
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "7360d6e165020d48995be516f11e8bb520a1ea176ed1377e73ae030a53a6ff28",
+        "fingerprint": "fdb57cc81b7e1b0860557b9976e591416896ebd2be177c1e8c60b4f283c517f2",
         "response": {
-          "text": "What service would you like Maria booked for tomorrow—colour or haircut?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_TxLx5qx3nLX9qHSO8MWQ8ACz",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8434,
+            "cachedInputTokens": 8344,
+            "cacheWriteTokens": 87,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e5ff1e4967c6118b049e2be0a494cab3da14a147abb2ea9c97e52b8b793ce563",
+        "response": {
+          "text": "What service would you like to book Maria for—colour or a haircut?",
           "toolCalls": [],
           "replay": [
             {
@@ -50,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8730,
-            "cachedInputTokens": 8315,
-            "cacheWriteTokens": 412,
-            "outputTokens": 18
+            "inputTokens": 8710,
+            "cachedInputTokens": 8431,
+            "cacheWriteTokens": 276,
+            "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }

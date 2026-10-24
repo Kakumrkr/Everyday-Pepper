@@ -43,7 +43,7 @@
     "@pepper/db": "workspace:*",
     "@sentry/node": "^11.8.0",
     "ioredis": "^6.0.0",
-    "nodemailer": "10.0.15",
+    "nodemailer": "10.1.7",
     "pino": "^10.4.0",
     "zod": "^4.6.7"
   },

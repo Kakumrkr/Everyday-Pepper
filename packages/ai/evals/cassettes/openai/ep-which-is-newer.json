@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "2504bc029a0f0ad55139bcac71ab9589c8fe46a5ee399d8e4c3515e4a4d07b3e",
+        "fingerprint": "5b39fbe723e560b42bc2b767030577a588045fee61ced6ef2f7ca0c079c14f36",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HNuM9OaT5WczSS9KlxdjKd9O",
+              "id": "call_VuoLPir5QqetXViFs0LZCDfh",
               "name": "search_memory",
               "arguments": "{\"query\":\"Saturday opening time\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8324,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8353,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 14,
             "outputTokens": 20
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "5d97d144ec6913e53e8786b973e5beada8c09a942cf84e8be406a139d4c125f8",
+        "fingerprint": "4e2ab901c065f551ff3e2cbcde1c4820129a993673b65679a7d3b9bf2aac12ec",
         "response": {
-          "text": "We said the studio opens at 10 on Saturdays from now on.",
+          "text": "We said the studio opens at 10 on Saturdays, starting October 28.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,96 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8561,
-            "cachedInputTokens": 8321,
+            "inputTokens": 8590,
+            "cachedInputTokens": 8350,
             "cacheWriteTokens": 237,
-            "outputTokens": 18
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "5b39fbe723e560b42bc2b767030577a588045fee61ced6ef2f7ca0c079c14f36",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OdmJSGrxhMNFpnCbIhrBKdV8",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Saturday opening time\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7e2f5e732ecd09ded18273f7e95b828ce433cfc8bd7b334b0c173ac78c0556e2",
+        "response": {
+          "text": "We said the studio opens at 10 on Saturdays, starting October 28.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8590,
+            "cachedInputTokens": 8587,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "5b39fbe723e560b42bc2b767030577a588045fee61ced6ef2f7ca0c079c14f36",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Qy34cIX1Q7YzB0toz2PeSp7y",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Saturday opening time\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0b9b74d748dcb1e2c17657ddc1fb76ef79261a2b41611681c5e7ea01f8869b58",
+        "response": {
+          "text": "We said the studio opens at 10 on Saturdays, changed on October 28.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8590,
+            "cachedInputTokens": 8587,
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }

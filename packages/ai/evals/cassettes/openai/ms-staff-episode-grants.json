@@ -3,31 +3,104 @@
   "trials": [
     [
       {
-        "fingerprint": "3ca3cd67cecf657870c4946070ce789d14c0e9905cdbc082ddb7c36220e0f11d",
+        "fingerprint": "b2480410c4e223a9397602713e995a1510eaf1c672091403737d7bc71f9d7266",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_J0p8eBJ3kLZAd3dxvpxRebi2",
-              "name": "propose_rule",
-              "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":null,\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+              "id": "call_bW88QrO3mSpkHJzN2jGXLFV0",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8331,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8360,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 21,
-            "outputTokens": 66
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "508991c2f6efe171265b068b3ed6da848dd60aeccf542237d625824e6dbe4da3",
+        "fingerprint": "e2ee1a25ca99fd01e4d0fff72b0f790f5b06fdf7dfa7de88e2bc0ac6f8d0d4c4",
         "response": {
-          "text": "I couldn’t set that rule—your staff role doesn’t allow it. An owner or manager can set a 2-hour minimum notice for your bookings.",
+          "text": "I can’t set booking rules as staff; an owner or manager needs to do that in the Rules screen. Please ask them to set a 2-hour minimum notice for your bookings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_03272ad9dd4a6b38016adc073635c887d2b72506f55cb994b7",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3Ac3_YBRsLXCJdor1MdJqdOkoKJA5RKh6kC6XAQkgHMUjZHVDhh0MklsHLerfICN7Cg3_gOflnN_sETc-Z3iwxIk8l_O11fsREcjxizdWq3g5iY2gO21KP5Ir36InteHKEwsW8habtWn57CB3NvHI7_cOp2QQKZlFwsyHTe3IF3AefPn8Qx7IVqjGrCEs42kg9yu07aPXhDUJSNQCc65l1rhLxWaf6r3B8edRNaxO8wXberpKL0sTrGyAA5tZ_-dVoLLyocEdn10CiT8L4n9CopKgy-TYLbm6ciur_gwkeY1h7NkC9SGdirgcVBPuT0ij2S0h-aZTd7iWsLDTZ-X0yGUUtw8rdgScwXPvks6WrXiUUjmXYusJQrnXCzN9DaN7WB6DqtqlwftQlcMrUwG_7u7hr4KB3zaPWkrSPRsGnbRIRfjKU6GvcAilg_YLHbY5tKNldOLUlLz8gSkmG0In4STH9zQoQELS0GVwaM6GXqaPi1TyWXTFdn0_VyBAdgtVTFbiSri-LpL7z-QNx3dMUal-uaPNnz3BXpEYj1AtcdTWOTCuXaldnJGuv-yfOol1qQN6NJrfnQwFMvsn16I_pZBw-YsM7il0dlYU5UNihreAVPANgEQu5bfoPFQ0UOUy5MKHWL7BSk14Nz23ewz3B_AIe7f7Z1sDdo7v5UAseNIY7WHyP7_QrDCE3kq6Jl2n9bw0SlV0KLccg0541w3ncKf5gwvtNW3mQdAstZDzYkRtcxT3pLRnu9gaOYvORN-ESiOTrKB3gOOkR0b5ktBet925EwYfUhtogteCaDb0ihCNplOJfgLLU1q-P4IUPb48jEUlwPaVM_vu9yUd7j2IPyLGmMeoq7l2_CLE7-0hdfYrszRh4wMF1vHKE1e4Ot7wOwayNyPhfEVry0U1TnS0fJ-tkq_5-mrsHDT4VTERgQwsrD-D8al_4xCNFilAjhfU35DGml3gNPRprO77Mcn79UdudnbzWepdCYoqUFwX2QMyDAhoHp-EFHK2A5gr9D_qsRSqVvAI8TiILA2FtuV3Y7jo1N5-dnGLl5athjiobnB3jLax1lhUyNx9OmYW20LzROQq5jBUDOsN6KR6vESl4r2_ywQWxV7Iai8JFkD6rixvxHcNeuLlvmHl818RyDh3BNN9gtzW8FLrOCsyJecU4yT-UxKZRRBiajTeF8Ss1esXLxf1prWIMulAbmpNFh4IHNK5E1weRVdzX7NSXrRcnWVjr85A8dprXtrYQK32XLg8NEqxNICou75eEGhy7C3cFUy2Ma9iKiCavfeqSHw9SlfVMVRSTybHBlMz7GVKm4leLaHElshoimC45xfKD8FoZ4s_ECs-z7WaFTrGoSSto3stDTVx29DcDr1IEm-AwuNO-RlfjX4CFWG279eJTjQsSb5axPhNcnpeJ6HKZF6qoIu7otv1s4tJJKgoreJm1cUyOgnMHTKlQ3FZTv7dUBW7LUPR9NxyIsCmqnHAt6KHxXpG1oMOwUcqbsTiZx-9snnmmHaEuJEROFyZsi9nP3JH8wzsA1SnLuv5wGEDLFDwxpukotf7R8y4egPuoXZX5hpiI3BTheyqKb06lP3SfCCulawFXrzUxAbzkdcah8_ysNSdjuQNbEp5NarEeAqwQ52YEcK4mRs_J9Ruvcy18-t4PcsDhU6KJygrA54Y_kkHcX51_JFZfaGG0A4Z4_wX7p6Ieqx9rQC1zGQTPSWiPuXcVbIZ3C1bA5Lufnw_uqBlC8Fq3yqkjL-kEOiCasHvfK-td7XvnAfevHYMLnMNqnoCOvlllqsNaq63Nyh0Vf43z0VHWbtle2ALUZdt4wUa7Ojg5Ozx3CAOVRF042kTGcmHsvxOn5uEJ2n86O7VVPJyMdVdtE1Lwv2LPMCH-h0-FUmUM4r685SzUVL4UqP5qLenEuaZikTEIx62MewkiQSY3We4Fuw7AIyWZdfp-OKHEOkYLKslA0DLLaTJXG-A6HO8yeA25m80RyPoFlrUFAKBEZKRw==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8654,
+            "cachedInputTokens": 8357,
+            "cacheWriteTokens": 294,
+            "outputTokens": 87
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b2480410c4e223a9397602713e995a1510eaf1c672091403737d7bc71f9d7266",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kYSRZbAY9I6pfLbHvvJHifUr",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8360,
+            "cachedInputTokens": 8357,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "93a64d8bd33ecf426bd90b6ab8f81ca2861b23be9bc9da1756d3c20075cfaaa2",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_lHyidB3yTkv9ad6kV2XslSkI",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8640,
+            "cachedInputTokens": 8357,
+            "cacheWriteTokens": 280,
+            "outputTokens": 90
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6bd7d2ee69e8f25ce243b140520293575c4348a6fb85fc7ccd83f82332f78877",
+        "response": {
+          "text": "I can’t set this rule because my staff role doesn’t allow it. An owner or manager can set the 2-hour minimum notice for your bookings.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +110,39 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8450,
-            "cachedInputTokens": 8328,
-            "cacheWriteTokens": 119,
+            "inputTokens": 8783,
+            "cachedInputTokens": 8637,
+            "cacheWriteTokens": 143,
             "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b2480410c4e223a9397602713e995a1510eaf1c672091403737d7bc71f9d7266",
+        "response": {
+          "text": "I can’t set booking rules as staff. An owner or manager can set a 2-hour minimum notice in the Rules screen.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_06bb89606c5f8bfd016adc073cd28887d285a972db9ca8d7c6",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3Ac9Qres-CZngdhGd7VkxSu2aM4SxZRONOIjHl_Eh3TIOtuKlrflCsKnE99_cgHCxnVMylscXjkwib_KWQlES2-1CwdnYEibwRmgOekxMfdizYn51ztZA_9b1yIIY9OfOVye1ntpDQS6IR7kUvlScKzzrxTInxRDae4T4X8500zR_9Jza75M2OEgl5xSL8L78MoxD4GR4gAZFvHBeY7z4bIATdoDGc5jFF2WNevF-vnxhGCCurznfxo96TZqKIttQhDmBKwny11UKCk5-kmlVtNMKkG7LWeysP-_Q_ys5jrBHLTbgCpTeMrBoFJLK7t94FzSxIuljPZyzmSGruEiUe47gNb3Suekzf9YfYJIdjFJ1wJqHY2gIgCusTWgGViteMhDHeipUFDvgu-yxnEwWNAGVpnD2gtHRPrxRBfDec-mbnipyPV_WXZUhPKNuiea2EArmaBqaFb0Je86LZtDu184gvv-uFn8rO268Kr450McBxR2mzG7HtRJGlrnRCkQjxyUYzAOPTHu8GEg6SN_Y0rK5n_9wMV77M8YwtbtJUtRImJEMSg6PXauV1TINPoD4vB0ZBV3OsE4IVNPf02tpw50w9tZZSEhGHgeZsUj9wjxaQcJJFmx27ejdDLjy67I3xr2n2y8k5ybnlA064cr3G1_OMhah2LQoS_wwQjOFPVKaBqJ0bBqasvkZJOVKHw89d3NBl5ZV338P4DuUkFSd3pHzcgXhTnizxyuakUoOLNzei6D9dvD1PzVw7S2Uz6ixYMuMFOSOWn6v7Vb3QB8TnNsfQd5pxD1yDpkDMqB8kgCTiVXG_dEfRqsTJMAKfzLqscU4SDovpVhbCgq2YYsjT3DP7KXU5MJ8qg8_ckpOIt1kvIWc4o2NwTCSs6LNGc99aAZBWuCRTNnrw_BDdPpyu-GXOddHYozubdgIP2TbSoaazL3o7Zy4JxXO9Asyt-jd-hpueBtHPnW-9pWe_RBbPBCpI21BghMmiTal_fdAdYiOKwwiNMIvFxZuBY6fNOfga0tN22hGWAMMkz-rJ23EQ35WbV11u6UPFKQ8AvXTFkR6Gh1CxOYJtgB91x_cS5dimP6diHAM0cOdkK7RoppFi8u_gvKjFlxRnJYZEc53Mup6B_xhdjH7nYF0iML_bDS_dBQDU3BfJ2PlaPHf653zToutnCVyRySokMtpMUP2pxCmvWGITFtH16gZ_8mmcHpRuHqRZ4a8yggbvzHAGoozp5rFBDfBQwAAd_pfhDsZR_PMgPwNYxdMz8pHbCA6JfQrIUAo9OXujNF9rHlLwiZRVQdCOVwGNGNRhsbOn2WTL3iZXCCpm7-d9XS8f3UpAA_7FecaOygUnJxb1Hc4Pc2Dy-4a6e7kIm_ebNYqJHEpWveo9OJfsvGbzGX8w5qgKSLFbvenB6DjN-FSdVGstZMNsQ22-SBIsEY36nGtYwMwNvk1PbFDQriThLgezyb8llgTNSC_72nhZ6mUfGbcI6DIkMt2zOpL1kpKWQIeSvyH1lJZbYaU19DezOXmhE5eTN_V0S60Yv4N7-qAZmru_m4tGBEU1_2_JXGmiGg7DOnVCp9PYK0PQAQHhnvWMSYm1V3xMO936pH-dulua3e3UU3N3TSHeKzSlkQXTy-kDG-l5f4RqctDVqil8bdIdvnaGZN_BEkvWOFtkUIExj8_T7wLViRaiKP4A8m1lBSu5HNxmNaGWTvgPO5znjwRV_dD9McRdgI5271VcSv1Gt01gOISyxPKUxx5hOouw7EWBojQaniMuAYk6-s33e8PMpER2EChVtNt0HQyQd_iBc0OShi41aWzhNcEd8ppkg2oBvyNd_UFAZd35BQxeKqqK8TkjMh6yzloo450AReSX8sEQk7ZWBY0vfMfyK7ibwXCSmkrDLaRaZJItCuy8Y-trsVbcDaEao9",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8360,
+            "cachedInputTokens": 8357,
+            "outputTokens": 70
           },
           "model": "gpt-6-luna"
         }

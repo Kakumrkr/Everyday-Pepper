@@ -249,8 +249,8 @@
   {
     "id": "in-two-days",
     "set": "ambiguity",
-    "description": "\"In two days\" from Monday is Wednesday.",
-    "holdout": true,
+    "description": "\"In two days\" from Monday is Wednesday. Either read answers it: get_day is what both guides name for \"free at a time\" without a service (S33 accepted it). No longer held out: S33's instructions name \"in two days\"; `in-three-days` is held out in its place.",
+    "holdout": false,
     "now": "2026-11-02T14:00:00Z",
     "timeZone": "America/New_York",
     "actor": {
@@ -265,8 +265,39 @@
       "toolCalls": [
         {
           "name": "find_availability",
+          "alsoAccept": ["get_day"],
           "arguments": {
             "date": "2026-11-04"
+          }
+        }
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "in-three-days",
+    "set": "ambiguity",
+    "description": "\"In three days\" from Monday is Thursday, read off the date table without asking (S33, held out in place of in-two-days).",
+    "holdout": true,
+    "now": "2026-11-02T14:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Can Marco take someone in three days at 2pm?"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "get_day",
+          "alsoAccept": ["find_availability"],
+          "arguments": {
+            "date": "2026-11-05"
           }
         }
       ],

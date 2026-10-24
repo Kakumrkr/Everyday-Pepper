@@ -3,16 +3,16 @@
   "trials": [
     [
       {
-        "fingerprint": "782189edba52d18f64798709f78505bfef9927c577e5f364173a23d98fc15daa",
+        "fingerprint": "ffe2eed9fc4b0fbdf48cf5842d9c9f48f71bfc9ebb0b397bf4d58fe6c4e3d519",
         "response": {
-          "text": "I can’t change my booking approval settings from here. You can turn that on in Settings. Until then, I’ll follow the current approval process for bookings.",
+          "text": "I can’t change my booking approval settings. You can update them in Settings. I can still book when you give me the client, service, and time—or ask me to find a time and book the first suitable one.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_00ef43a6921b50e2016adbf33e3cd887d28c85d724cd44cb11",
+              "id": "rs_0312c75e89bbaed2016adc04ed261087d2b9f6f0f88ceba6a7",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq2_M-V2T-mkCQq9Obnvu6_W3cpa5bNanqdM7xGQwjT2GY8uD-kI8_ZqFzWfddafrv93vRxLA8Wb3sXgq2dT0eAqNowcwtwHJcD5jkYQh-rhuh8ksveyKuyuk0mNzZiU1XulMfZeChhZ6EEGY71y9zFvn-mIj0YXd5qD3PTdKtlzlyVh9rsi17loiLa4tTNDaG7j4ifCCk8hDifwPm8P9JmajJfVboxIvYbLlY6b8cq-nDFUJw7jDLoxFbRRi1fK0NZzd17hLKanWb_gA6G8iH0k9Tg0xlFyoIm9biUSigWB2qgljmcpifB_yihUINjrYHljOAU2ySdW4lwPPla8mPVgql6ChwmR4RvzlFa9J4Vjy1TBUsr8NNSPmFGbVeWy0ZRAvTFXlXD8vt3WXncHUAoB1uefKRujIoQ244BI143BMYSb0cS0E6V7tPO4zkoe_NOYvj_-FQ7QEYadti-w7BznJq4ZoR_2E6UPH2xPKjTCLyaMHJJcHPlODMeH1ayIecCWbNwjFciHVVbRt9nKgZPrmR3DfLMhOAVC0nzHZiVi8265jdPKHfvTNBh9bIHo5Skf4lLxQmuJvyqZqCHDOvTtLFpn9dledF7WbvyWBpLjnumfxop_Oad0SJOfDNIGa7yzU4Ffi9zbbiMTIW2q7G-dJgk-2h6N7U2RPNcIRKiic8Hrghq2xxqslaObK7nl3GvQ8XhlsAttr3TBDVbuMPMFnugLGLgGHw6YZrVcuwsmyQjuIHvJkRscKW96Z81f4TgAmXQT4lyLGile_9vrX8xGzaF0qkSZY6ig_v805dvrDCrRDUkBfaCiLUsdIT6iCOY8N-CVUS6yEfsAWu8PLk_qVGdoJupvvhIzMwrwHICkwj2voppfrHe7LFjtcWNcxznus50_igypJLiaBUjeHtHiPsF7YhFW7XhMV0v0fD5Qk-K3BILawRt7uWkVgHI3_dcnh9RoFqjbFAJhWAkFLfAf1ouO-8O99mkBSKnlgfkHT0MWnjJf-lDLvE9FG9gWZx9ndUm87NXt3qdcAxHmmqRA4KmPt9Gp231J5Yi6XSeLwiPBUDFAoajDyqqrcWK3SHG7n2uMv_oCdyko16s_EEkU8fxA53LN4re4_3oZsB4oRKR2hU4rqMIT0UsoxrXoyIcyuox4HYaWY0O28wGK1Zy9p0bKUyRK0CmdgNHWqE9EeikzUVlNmZvFdXw0OcHAbqnYX63AA2FBTUEDkH3xsyAxJhGE7e_4oJtg_8qLFYgtgQtqRzesGfgX9aq2DfubFVJScN91mWM2j4-k7rjoNYzRokvbGd8KPXHAHLr4tk8oPMcbF3lXVJt-TdiSt3YaqWLiXPhbF91eMYNFO-LmNQaqDue8HAORvRoP0BtzAtEXEom0L8zwzaeOBVMqT1dZ_wOVIEefetjmhxXCPLSAYo4Ue5YxiYNxv-GOM5wJrY5muL6lA3uZjTLToQ6xgvRafLiP7Gk7ahTGUXW7wcetmDWdvw6n4n3DIdLZQ9A66negsh5u3H1uAnMj23SJHcgHvNgHjkN3i_EBiz9zdbNasXuHAW6NfJipDttXGhxLNLJsvVGQot8qLwpPvGTfap6_LIoMzkp6SynqqzAZn0rAQ31LZR24qSAw_nS2hxKMDdz9x-Q_Np70gsx4KM2W3otnLFJ6QTegt7aNnjSBksXNQwJSoFim4U9hVf5ox01e56-ikabyMLNDpIizquGuwQA6hv5GNnHDTdqll8vHTq0Pwy1Vrok8DrMyV_x9euKj33txL2PBe8FfXh-EZAMmAR0UlHaHs-hc35WORgd8JT8wNK2tOs60nQMADDqo1lpY_3OqBx6zbV6_99I1Cqzl_tsWgFBjrz",
+              "encrypted_content": "gAAAAABq3ATuLGOHQoUWlnxa9Gb5KXUzJwhCzeFKbMH3STvvjWWmXc-MfYbgvFyoSreIBfKQ0XhFysD93qXmXXhDNNyJHy6v8xxD79XlXwCKgS02BdNPs20ODxh7QBOuuEOgjcuqyQDbVAAHyF0OoCLtrE16fXOZtWjv3KHC3qfBgIqyKkI3AyYHfEcNEVDJ7uXWJ_AoCOAhMdhdBA3l23CP3JD7qi2ld7E3rmCvCqJQ9MrZypVHyrgaE2DV7YctT7WBVfXlPVzELj0od_IyJoxpT8zoqy9Q8yTLsI0l1LFmyIm8Pu4mPncEib2osmPykNPrHN-Uen_BQ0_BiQul0dNBPpeDOVw55gHQMXW6WMXcz6gUc6QD33_VDuaidDG8dGw1of975tF90c5FuSvPWuNvYB4MDjg_o_ltcY2LaC9TOZNx9Dc-7lXcUARzwh3Ia644lOtLOEmaNpn5v7VF6qaGbn09UiuR01rb7eXD-_bB2rp3qGU81MAdWW_VQ7OMvem-GEigopCZMQ3hH6xTwwgnhWx5tNbr76qDJWqZgrXYOI27aOiqwiTSznq7Xs_ldYsnIA_vJ5oHlCAP5NOWx60mVruy16GC1P9-TW_xJLGW3Wsbx6664vdPJIaayxnUMzePEFfVCrGLI7cXTaJ0j1EvJVkIN7DZzxtLZ7mYCngj4ycumRk4tVh119DuoqOpntHffjRbBt5Cu4YblleGSUE2XIc2dTfRAiQE7lZcdae75bxZWoHj86Pt0Y2heqbBzl_SleyGTrRqI7U8uR2MUw4qnxSM-ufsGiU-UwPQYNf6xQhls2HGmqKY-Oo7uQ3d429m3ucksc7-MVwx5YGDL-TU6kUomcPJnWRS4ZcZRSs6Ktr0vx2GByxdGDrkDd_wh_ViNccuF1BYEzcn0NXsXaZNPWLGUCDRRQ7mCSifsYUjp_ANZa2ZWj-p0EYMitR_HvsOA_Huh_U5ibtGfHUzBB2ChfSs-EWyAF1og66Ynp84PasdE2gM_UMkCHvjbZM-PPNGueLdm06A5y5KS6QletrwrDqXIFYGVVwxaF_4yXRcApbXwEIb1ZXdnKuK7bgmDrfLNij5NpfcpMLOIcrUDLQHNXvtH14Ookk8kfe71hOxFLSTmHiWFH_31rel3OpUAP1x7YCOIytUtAVlynAWkXvkEV_JpjPPqN3cQ8zVCk1nkiXu5dpj5Y12giI6R1jOD-uW9bURA5_y7JNGx8q4aZNFnig2vmIDpKD3kVclN1a-IGOWobHnbtPYaLZh0Bksrh1ciPzg03XPR7jitT8N6z1Cggqi3fDy1oXE84TWo8jJvW52LO215HrUOqwdgyvYMOytgPAQqL7lG0paApylAeVXPIlZvqFpFw1VKdM-WHOpkVj18PJ-ALTy_bmeqPQBcJaEyyWE4Hxl27LRmJhkgCGKFY1zFus92bCx7nA7aZJ8Mflpq5ocgIuy6Z_YpneCGV4Pj4mohfvLE__Ya5OI_kwADMPh_qrc2iMhzvXrebM4lMv8wuFbh3VrkWBPAoX7DocRyGxDI_QhjMgWm1-2D6UQYlHWCoZqYAL1IxgqxsLlCY-2RDzVfULsfNGiTvXpqz0X_LahL3u9uyEabMoDHm2B6TBQe9d4zoXiJuIHesRrB-NNDvELgK-mXkV49eK2f000ppH40FpJ3CAK3cC-VfRhUCs8oIWtr2pX2nvAUX2jNPWjIjd3KGOYQrbsC1pSLgsZjlWhd41d_KEZR56RDq51f-7jbKnXsQlo7BYlUQxzmf92xKzgdjdu1GtIzJzVNKl9k45ocI1rPdyDZ_z6GPLrbaZ8FYq9nZkL68yR5V4a0bjAclCRQc8JN8dd2mxlm9CXR3WhtilqBNLR-kMAU4Pe8rE-ugUnQfXzMYicFzQWrllZcuPE0wrKp5_uJaE3kWJ_eyF6qEuNODpk-KGJzAMFWOv1WcxsBoXJzV1OnscB55pY5tUqpHEuG42mrbRhtsEb6qgn1-DJhQ20PyNHsBQWCxDs4nE-UWT0kTHCDCd5HTe8SKFWDJBUNbb7rJTk7P4Ohmz7ShvKAM-fBA_n7D29Kd3vnI8RQmE_jAKFdesU0B1WA726wSjoY2j59J5r-TwSSZtZWeCbM2BGwPvkylNQerca0kxTubdOXaHjFiYkut_E0d5S7HDdHV3_eo2RyCtIt0a7qV7JtL2kpwgYnYOSC9Va0sgKilMzqiOl_EMVxxPtgj6eg63rcV9LPOD4NeXHWbJnYqymny36hKCqPFTFVmGJ2zd9_2xjJ8i5SKCPc9LT4qS9rL8g7AQLdUt3Nl3_zJnL9VNDLcZDVTG39i7X71ZyKsGCRRkcI8zzfGhQrtvU0fJb3hyBEAG1XPJmL-hfGQku4TTRlH5R7QV4PH3kzjxrtz0r8PBPOznXsg0tvayFmMLiIWB2QS45FrWhnk9-3zNUBHSMEV3UGyTcmkYEiEo-ENxx0jD39ochsPiq0vUcK-lLeXRTsTbKA-KO760IMTU9zIE3fWrwKWIx4Kw16zKIVv_5MVflUaopU5kSKhNEMHS_ZxXcnUJseosJqnd7BTK5asPJF-KYg_xrEGbkDksQUSAga8kq72f1ycNEsU-PPt6N9kQAvChnoGMxvzwdP9kXqbRqpZAdkiX1gIph_HqV7y2csINfEqZvU1l8G1BmaD7fnt7xb2mdqVxW_c5dD86hYy4uidqWrptSaCIflF5k0BZVfOtArJSdN7kfG6IBUiQ9qqXK6mGSJSGasTkwhu3OoxZO1hxKQF4FO8WzN1E8ec98WU3LiLt8umElANVbOjck-niwJYfSMhjgwIvCWyfrkBQo",
               "summary": []
             },
             {
@@ -22,10 +22,68 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8323,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8352,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 13,
-            "outputTokens": 68
+            "outputTokens": 153
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ffe2eed9fc4b0fbdf48cf5842d9c9f48f71bfc9ebb0b397bf4d58fe6c4e3d519",
+        "response": {
+          "text": "I can’t change my own booking permissions. You can update that in Settings; until then, I’ll handle bookings as your current permissions allow.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_05529a050e944976016adc04f071b487d2a8b9983ca8b8ef6c",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3ATxRpGfSrCAb-_nSRxGgnPy2EH2WLN2RxseUXLlfkF8dnBWSYA9RBSe_SXl_3TMVHfJInMlNHqZw1bSHuE3aqhU2P5Y8Y4lzwc31zfTd4uM5HrutKNHs7iFWRjzIoULQlUHAb8qUeMcv0bbum0vMVlwqKL5_bdjKGyvbdwnOX9MzC_7EqUvqorI9CZtCD3rJ3EHuchK0Mkp4hM5uTI0yjZbXGyfWiC4zxE9elRV7fXdb6IndwPwqYjSG9cr7mwgjnOBrUtDULtSjBgMaPMXtyLkk4vEPM1csJay4Hk2qfAKd2NJjAC8DMSoNSk5RbXZF_undpcgUsUNhO9zvrE_odH9ZaoYftWZqDaK1C8hss8NFNfvX6GxBOtKHTURaXL7hxcjvfBgu-RMls_tHwCa92lEKGXcnxq48Ai_jKEAp3G_zMgriVGqqlQFnJtlmUEQd-sqn2uI61H-jBb61rGvNxluq_bN2z-OyaZvf2gFEzDeUnBxQXrWwX6fG06lLzRLZM1HbkosWdwDbJlazN6vN3WXu7Vo41NaSESN5eSL5VrRe36nSBSdweenX9t8hunsy2U_eAAlBK2_iA94LTVkxYJXvGpCwwYq13YO4qPnJo66yhdL_a-WgSYiFdJUdIgxmvv6HQUXR8ClQhIkKGLlhwj60MGv6XiVJyPOGcQKZePpkZtw9gJx8Y3DCeDwxHz6QQ4bCzHsD-cAYyjjuePt5gu752rJHWH5YN9GGv3aYt-A_gdhk_J_Mkhet-c1nRTWZ3cR0llG2ROuafnse2JWwf1X88In-FcNT7crQB5sgpKmYIPwZt1FeKpfSa3UWytCGs1SDgJdX2D-SWAXQRkoRQmHcB0IWcfuU-uhG7yh0lmGnyfm2SmvirDfSI6bjGiuPwd3Qb0RjZz7IXDt1qGrzgfX0cZHyeCL0pnmjxIDfkN7SMBgDWZeYVvYMAjtQV9mh36eJ65ESWsCl9Vu8h_WucFW_OkySHYXLmfDI3ZG81848gZlw0kEgYzUQq1kEm3zclBocwrX1mWUOY-ydtwSmmm9-yk_oL4wKh2lwrLWAihMkUUA-1_YdHi7lKKy4X2cPW71gYha8eQDjERKeM2zvwLU4JaS_rfmxdd8tYV74Vyl4s9h7ZLJfOraf_NfgJKJleO__2-oPZu1N6GT0GEIHe_cyFt0sWkjMQMuvVOZ1GLF_ZCLmSmGO7476-KPSmc4GU2gcN4bdbGOaL9wRK4T784Yxq3-uim-qOmJJNjQveqihodZJtf0Nv-ac7jBXhMjwRifzDwUJw9I0iN5q5Ajbk3vwu43b2SZ8s-Vtkq34GB-jNuyC-cinF7S5mpRCnLXTYMG8wISVPaKVAK759YD5PyjcnafmXbaMNjxz-QILFBp07_c6Ybr32BAzRycIxEnmtPltmbYdQDvDd-0JB--Dv0X7jGKlRq5jT-FwcfExH2HtYWdQUyqgcIhj3KoV9nMmWi0JjyobfQMCnkemb4ctlW-32uOQnikltq-_CK2bA4D6zd6NFCdsBlQqPUkVOGl31qwCg59pFc0IIEsQJAyfCuUV1UcIe0I2rLzfi6F5gmrHgbpPXSvIhCGiWaUOjVzTuNuZpjPvVDx9WGrbXWEqr_heiVbEst-xaolHm-qIsiMgh6hLSlNsUvWBVjANb9oSRwtlmbY-EABc_jteNWfqjI2bGa8uHo3QXtd3seleEwequC7OYXjVCIjF8aY-cd3Wd2K5E_x084vdlrLSGS6vCgpZL9uhoeItfqw4nij6Ll5EmUH1fJX224doRtz7oKhIZWLjJhJ_svM9ikoMmaXCBPOElg_LC0DmrzKkwihCs8s_LNoi_AH3zyLaF9i3agDJGvHORvyDGJ4VFml1n-UjS0Psbxa4kKMT_jPfkbXscgCRHrFuDHMK-ruBPVd-lWzLLJlQWyKiMTpOSeXn9tbyL6tOGLCRLrrndHYoNxK_RhA48R3npccNqtpOgCBqAkqXuVkdsYdyIiowAMuWMiCQpqHG45-hiVioxSwODdNl8F12Jo392xyiFkkJXLTdLE4BjQOxb3KH2CTBdM_bBGC9tKmb1zND52KBzE_CbvS7Fecj5fbi0jhpbD8EtYtmudQM-bHtmwNh9JYvL7TxVozCkccGjdSbgPN9hkFAY9nbuCS7Y5hNfF19zDXYKq8txeJL5e3_waULQVSJf22hPiUjUc0y8bKUTX9S78UjdwpgMbHhRI=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8352,
+            "cachedInputTokens": 8349,
+            "outputTokens": 95
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ffe2eed9fc4b0fbdf48cf5842d9c9f48f71bfc9ebb0b397bf4d58fe6c4e3d519",
+        "response": {
+          "text": "I can’t change my booking approval settings. You can update them in Settings; meanwhile, I’ll book when you ask me to book a specific appointment, and you can approve any booking that waits for approval on its card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0544f2dd5db815ce016adc04f3580087d2b8ad5cd52ec0eb97",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3AT0I4a9buBACoyU1MGcGIHOl3elfKsKwHX1nC4T0CSMV15WvcXpXcatgLY1wKPO9z9smmIPyAWmGhDw1rbr7-rWXeCYZYWTlNZKlOd7DcCmxoIoejMNF-tHM2T3Bmkf72Sln6d4FAz0CUv45PBGcVctX6TZDga5GtV8DPF40ZcCkfJ-gw6nu-NLqj5PmSqp6bYHHeHc8O4fTEpSDKD6-R3B_tknNfLzTZL8aWA2lM0sHcXSO6DJrE338AfPOA_dmqKVBMQd8E__BUcf0vPoXsEP-bAHXrnCyQcTlmOVh0fNgUwXpRoMWrD2UNTc_EeF3DosPspUykKzVyhoJ95wBIcknWO8fqIg5rs68m8hHX0ChB3qb2k7zxhOC1Bm5-tygSOE9L1yb8rrRbcX8d3k8gYNnTGNluflT4tBtEWtdkW60G1OicC6sYYCmVNpETNwZk-S2bQvh2Skr4Px4YI6JUGqfgOkqJlzujI9sfcJ7u0IzZbE8hjyr7sKLMmbqs9eIorVLLGlbmMDZoiafBaOEUBKHGSjdKHiyW5yvowA2DpZmfsOxIpbvJcvjNSj_UmQss52Dbm9Ez4nx9TQt6sjx6jZfLNRnlwe_dUNPvS81ufJ9msYHstmxXBgP6LXJjXJP5lYu7p4RGFkXk96HTSaSuAsJzsmFTNcZcXNbJjCY8sSbvXrti7z7GF0AMLZ8MigzjVfO4qwJvGXxQF-5JwiNdNg_EBfToP1PJB_vz5Kc3QC0zrO9qumV07cxWQaOds_cyfGPxSM7r_E_Dc8gckRCp8qxYkJDYS4S7UOTC7FOuxnuLj9XdVHnEdt4fS36xNBhb0RHv_KFl4NabO4WUGgdt6_B2S-kFvASizkL0yWdeBmqVfphEohZ5eOXrfqNYpXsjf-y71KxNHaT2dU3i4m0zIxqfFQ2me68j4W4RfmZHRfL3ZPEl2PgHBnKRYg6oMKQ-GniY4fPLLXPiR0TOvT0HEqG1GkWJcw9dlGntaWjjdJzOZumtntcwJXQ1IgLIAbdullwSi496Kx-_DEu__cS-UaVMzXf2tzxHSNhuc-ox_ZzuJzsvHukL6SfO9EJ400Fr1Wr3aXQAQV1E0BIpuVNcQ72FXMSldqvV4J-qYzDW__yxqoxVVTrD-u7mvGyxhpEPt2ZTwUogbuTC80OJs-rziVKk56wCYhk0UDo4AanFsI3Jllu9ALP_cG5eKPAOaDWDAjllk4Bv73Oymwlp1UtUKT5_5xBtjm08wQG-DEc-qdQShVB-VudodGmGMNNut5z7Le1f9xoRdcr_-rYoaTkFguIPOqh2a705C1NxkqDKHhbJaJTxTzsAE4erBFTAiqtZYIN3JT7hgW6XZS5ZRD8KmTLavosWlSVl7EMSFrNM6DEB5hS-7N_3Uy1I_Lf-VDzA38l0ena1K7sF3tFmYkvhGPB3qXcJkBp8M_Fh0iUUukgsCxvIgHkmfL9TxYjtCdicgsr-ecY3SztMXhGAiJ6NPh2etY4MHm2w6Qz51lRiuPxf4mJEs73xwhg3SpLfOSr2IJNhLv413yPQXW4Xa7jdDGEsEUGPPsATugfKK0xD0Dycg4nC1Nx8n_wpKmt1II88v6l_Ttvu7heC3D_KO0MWgpZBbsLtY74X20tlqI7i2msvG5cTpITyV7CzyQ91a0NWrSPoSu9Ae91MeIWDLx0O66rbTclnRbA85vbGuMJrFWJr1bYGoR2dJtXmNrJR2HVQTWvCPedmGyplydJMgKwfiQz-RxDBQF5Plb5ZrLFd3WooMmmaZiensrQwN4j_41ENfsva2VOjvwUDPGHlbjzTSywbkwsOQ32tbzxj7CeCPRoVSrL-7lNZJZzKgwoeua_CJg2qSEA-uAoQw8ZOgReZgTh4x3SNbqp5Eb_izOdsOoRqdCj7zx7_XMmOdEtn7iPHuu9IFpkwf4XUvgLl11ovfxb9q5IX6Qo8gCfgWZpT9K1wwDzzyuWdNZK0NXNUZd1irBcLdQ9bfbySdKWp_pSNfsVZ8qYmXgtxaYTv2Rm_kaRObprHV6liFfs3ToAGeKiZFhEMCXKMCYhEp4Nkz_9S1RIVloXcsgO2flawOEK6KxGmgrExMyVErPNGkotRuj-MZnuG7cCRKP7Wyw5VzhbE_V7zxcFIQdI4WT2hrwpgazR0E_QCjLC91xtA5OTbHJBw8iB-9cbS6V0JQRBRNuE2ZXpRpN24500gdWQMkGuhfhRNKB090AtpmrRrySzjJ19PrGo3e6aXuP291xyBi1n_KqlnEoS89YKZ-bS1TAYao5dNObxLgAR-KLyR448Em2VzqJCjM9fGKb18JCBAD2iHPG0GZpVgr5g8eW6feH4BU1oDrGTfRmXyKBYjF66Ktp44PQwx7UpfSOzNyCs0aYoalyPaOEuOe5pBW-RMD0mFWZ762TPjvwI3K52_RvXsKF2Ya6aTEtjmO3gw1joQCYq8KRrueuVsUNQow-qy-EoxHzqM_dcD8Z8QiX8ueFXiOxLifT",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8352,
+            "cachedInputTokens": 8349,
+            "outputTokens": 129
           },
           "model": "gpt-6-luna"
         }
