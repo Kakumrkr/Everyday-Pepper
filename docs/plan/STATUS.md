@@ -10,7 +10,7 @@ Nothing in progress. Next: **S35** (first row of "Planned sessions").
 ## Last sessions
 - **S34 Phase 8a (2026-10-24): Phase 8 planning, merged** ([Phase 8 playbook](phase-8-playbook.md), [PCR-006](changes/PCR-006.md)). Full entry in [session-log.md](session-log.md).
   - **Wrote:** the playbook (rule-based insights, suggestions with drafts through the trust layer, the smart waitlist, the daily briefing; §2 gates, sessions S35–S38, ~60 eval cases, §6 security table, the $1.25 cap) and PCR-006 (plan 0.31); the roadmap, traceability, dependency-map, jobs and data-model rows. The four S33 leftovers ride S36's guide batch.
-  - **Checks:** docs only; `pnpm check` and `pnpm test:integration` as in the session-log entry. No model called.
+  - **Checks:** docs only; `pnpm check` green; `pnpm test:integration` 1,083/1,083 (second run, after one timeout under load); no model called.
 - **S33 Phase 7f (2026-10-24): Phase 7 exit, merged** ([ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33", [security review](../engineering/security-review-s33.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** guide batch (`find_availability` v2, instructions v5); `alsoAccept` in the grader; pass^3 gates from §2 (with the pass^1 gate on first trials); the business-facts block ≤ 600 tokens as sent; `memory-latency.int.test.ts`; multer, body-parser and nodemailer patched.
   - **Recorded on Luna + Sol:** probe, pass^1 on the rest, pass^3 on 132 cases; $0.3702, Phase 7 $1.2697 of $1.55 (cap raised by the user). Every §2 gate met; one named known miss (`pasted-request-then-book`).

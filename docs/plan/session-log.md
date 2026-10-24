@@ -1036,7 +1036,7 @@ Everything each session did, oldest first: what was built, the checks run and th
   - **For Phase 8:** the `pasted-request-then-book` guide fix; `who-works-saturdays` needs working hours from a tool; `notBefore` on every day of a range; `lr-blackout` (closures as rules); tenant export (L6) and backup retention (L7) in Phase 11.
 - **S34 Phase 8a (2026-10-24): Phase 8 planning, merged** ([Phase 8 playbook](phase-8-playbook.md), [PCR-006](changes/PCR-006.md)). Branch `claude/sweet-galileo-uiblb1`; docs only.
   - **Wrote:** the playbook (§1 market scan and differentiators F-1…F-6, §2 gates, §3 principles, §4 the $1.25 cap with ~$1.10 planned, §5 sets `drafts`, `feed`, `waitlist`, `feed_safety` + 8 leftover cases, §6 security table, §7 S35–S38, §10 D-1…D-16, §13 the review's additions) and PCR-006 (0.30 → 0.31); roadmap, traceability, dependency-map, jobs and data-model rows.
-  - **Checks:** `pnpm check` green; `pnpm test:integration` CHECKS_INT; Playwright not run (no screen changed). No model called ($0).
+  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,083/1,083 on the second run (the first timed out the `appointments` concurrency property test at 60 s while the package suites ran side by side; that file alone passed 44/44 in 19 s; no code changed); Playwright not run (no screen changed). No model called ($0).
   - **Carried:** the four S33 leftovers into S36's guide batch (playbook D-12); tenant export (L6) and backup retention (L7) stay in Phase 11.
 
 ## Planned sessions as they stood at M1 (finished rows)
