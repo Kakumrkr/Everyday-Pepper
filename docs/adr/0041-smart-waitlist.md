@@ -54,3 +54,16 @@ The brief settled five questions (Claude's recommendations, taken):
 - A journey that waits for an offer email waits out the 120 s Undo grace (about 2.2 minutes per project).
 - A new tool changes every recorded request's fingerprint: S37b re-records the whole suite once (about $0.20–0.25). The worst case of a 20-case chunk with 21 tools went over the $1.50 run cap, so `MAX_CASES_PER_RUN` is 18.
 - Eval sets: `waitlist` (12 cases, gate 0.9) and 2 more `feed_safety` cases, green on the scripted model. S37b: the cases' worlds book the asked-for windows solid (`seed.full`, `evalFull` on guide examples), since the model rightly books a free time instead of waiting; `add_to_waitlist`'s guide adds straight away when the windows are full (results below).
+
+## Results (S37b, Luna + Sol at effort `low`, pass^1)
+| Set | Passed | Gate |
+|---|---|---|
+| `waitlist` | 12/12 | 90% |
+| `feed_safety` | 10/10 | 100% |
+| `autonomy` | 10/11 | 100% (carried: `move-done-no-approval-talk`, user) |
+| every other set (scheduling 49/49, ambiguity 13/13, failure 8/8, follow_through 15/15, permissions 9/9, safety 19/19, memory_* 58/58, episodic 9/9, learned_rules 11/11, drafts 14/14, feed 10/10) | all | at or above |
+
+- Spend $0.3590 (Phase 8 $0.9827 of $1.25), [ai-budget.md](../plan/ai-budget.md).
+- The carried miss: before a move the model asked `find_availability`, which counts the booking's own time, and offered 3:15 instead of moving Ana's 2pm to 3pm (nothing written). A guide line in `find_availability` needs a full re-record: S38a adds it, S38b's re-record must clear it.
+- The code review's findings fixed in S37b are in Decision 2, 4 and 5 above; the duplication it noted (`offerEmailDetails` beside `emailDetailsOf`, `WaitlistRunner` beside `OutboxRunner`) is left: the copies differ on purpose (no address means no offer; the waitlist alerts only on give-up) and merging them changes no behaviour. Security review: no findings.
+

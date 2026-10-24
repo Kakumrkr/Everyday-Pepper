@@ -58,6 +58,11 @@ Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b prob
   - pass^3 trials 2–3 on `drafts`, `feed_safety` and the three S33 leftovers, 25 cases: **$0.0057**, runs 1169–1193; all 3/3. The 7 chat cases needed `--phase-estimate-ok` (user: "these 7 only"): one multi-turn case's worst-case estimate for 3 trials ($0.65–0.74) was more than the $0.63 left.
   - A draft is at most 506 tokens (gate 1,500).
 
+- **S37b (2026-10-24): $0.3590 in 181 runs** (Phase 8 total: **$0.9827 of $1.25**; $0.27 left for S38b). Planned $0.20–0.25: the waitlist cases needed three probes, and the full pass costs more than S36b's ($0.23 against $0.21; 248 cases and a 21st tool). `--phase-estimate-ok` for the full recording (user: "Allow for S37b"; the guard refused part 2 at a $1.29 worst case).
+  - Probes of `waitlist` and `feed_safety`: **$0.1276** in 25 runs (1194–1218; 22, 7, 22 and 1 cases). The first found case errors (free times in the world, two Saras, a client staff can't see); the third found the guide's ask-again (`add_to_waitlist` fixed); the fourth one more full window.
+  - Full recording, 248 cases, pass^1: **$0.2315** in 156 runs (1219–1374). The eval database stopped at its background time limit after part 32; parts 33–60 failed before any model call ($0) and parts 33–127 were run again. Every gate met but `autonomy` 10/11 (`move-done-no-approval-talk`, carried to S38, user).
+  - Waitlist cases that hand over to Sol cost about $0.03 a case; the rest about $0.001.
+
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
