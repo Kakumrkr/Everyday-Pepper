@@ -30,7 +30,7 @@ import {
   withTenant,
   type Database,
 } from '@pepper/db';
-import { createBooking } from '@pepper/appointments';
+import { addTimeOff, createBooking } from '@pepper/appointments';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { seedEvalWorld, type EvalWorld, type WorldSeed } from '../evals/world.js';
 import { ScriptedProvider, scriptedResponse } from '../scripted-provider.js';
@@ -415,6 +415,14 @@ describe('AC-W4-2: approved, exactly one email per recipient', () => {
     expect((await getProposal(db, taken.actorFor('owner'), first.id)).status).toBe('superseded');
     expect((await queuedEmails(taken, later(taken, 3))).emails).toEqual([]);
     expect(await withTenant(db, taken.tenantId, (tx) => listWaitingFeedItems(tx))).toEqual([]);
+    // Nothing reached Sara, so the next morning looks for a new time, as the refusal said.
+    taken.clock.advanceBy(24 * 60 * 60_000);
+    await runMorningDraftsFor(
+      db,
+      taken.tenantId,
+      optionsFor(taken, new ScriptedProvider([draftAnswer()])),
+    );
+    expect(await nudges(taken)).toHaveLength(1);
 
     const out = await world();
     await runMorningDraftsFor(
@@ -450,5 +458,23 @@ describe('the writer never sees what it must not write', () => {
     const provider = new ScriptedProvider([draftAnswer()]);
     await runMorningDraftsFor(db, w.tenantId, optionsFor(w, provider));
     expect(JSON.stringify(provider.requests)).not.toContain('nickel');
+  });
+
+  it('names the staff member only when the time offered is theirs (S36b code review)', async () => {
+    const w = await world();
+    // Jess is off tomorrow (Tuesday), so the time offered is Marco's, whom Sara never saw.
+    await addTimeOff(
+      db,
+      w.actorFor('owner'),
+      StaffMemberIdSchema.parse(w.placeholders.get('{{staff:jess}}')),
+      { startsAt: '2026-11-03T05:00:00.000Z', endsAt: '2026-11-04T05:00:00.000Z' },
+    );
+    const provider = new ScriptedProvider([draftAnswer()]);
+    await runMorningDraftsFor(db, w.tenantId, optionsFor(w, provider));
+    const [nudge] = await nudges(w);
+    expect(JSON.stringify(nudge)).toContain('Marco');
+    const request = JSON.stringify(provider.requests);
+    expect(request).not.toContain('Jess');
+    expect(request).not.toContain('Marco');
   });
 });

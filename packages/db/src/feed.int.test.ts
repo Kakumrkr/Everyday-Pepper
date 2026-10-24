@@ -443,18 +443,22 @@ describe('rebooking nudges (S36)', () => {
   it('drafts only for clients with an email who did not opt out', async () => {
     expect(await draftable()).toEqual(expect.arrayContaining([sara, kim, lee]));
     expect(await draftable()).not.toContain(maria);
-    const at = await asWorker((tx) => optOutClientEmail(tx, ClientIdSchema.parse(lee), NOW));
-    expect(at).toEqual(NOW);
-    // The first opt-out stays.
+    const first = await asWorker((tx) => optOutClientEmail(tx, ClientIdSchema.parse(lee), NOW));
+    expect(first).toEqual({ at: NOW, changed: true });
+    // The first opt-out stays, and the second changed nothing (one audit entry, S36b).
     expect(
       await asWorker((tx) => optOutClientEmail(tx, ClientIdSchema.parse(lee), later(1))),
-    ).toEqual(NOW);
+    ).toEqual({ at: NOW, changed: false });
     expect(await draftable()).not.toContain(lee);
   });
 
   it('keeps a client with a nudge in their interval away, whatever came of it', async () => {
     const old = await propose(kim, 'kim-old', new Date(NOW.getTime() - 50 * DAY_MS));
     await settle(old, 'expired');
+    expect(await draftable()).toContain(kim);
+    // Superseded reached no one (S36b): refused at approval, it keeps nobody away.
+    const refused = await propose(kim, 'kim-refused', new Date(NOW.getTime() - 5 * DAY_MS));
+    await settle(refused, 'superseded');
     expect(await draftable()).toContain(kim);
     await propose(kim, 'kim-new', new Date(NOW.getTime() - 10 * DAY_MS));
     expect(await draftable()).not.toContain(kim);

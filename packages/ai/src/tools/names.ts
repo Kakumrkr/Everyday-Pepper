@@ -6,16 +6,25 @@
 const FIRST_NAME_MAX = 20;
 const LETTERS = /[^\p{L}\p{M}'’-]/gu;
 
-/** "Maria Lopez" → "Maria L."; letters only, the first word at most 20 of them. */
-export function shortClientName(name: string): string {
-  const words = name
+const wordsOf = (name: string) =>
+  name
     .split(/\s+/)
     .map((word) => word.replace(LETTERS, ''))
     .filter((word) => /\p{L}/u.test(word));
-  const first = Array.from(words[0] ?? '')
-    .slice(0, FIRST_NAME_MAX)
-    .join('');
-  if (first === '') return 'Client';
+
+/** "Maria Lopez" → "Maria L."; letters only, the first word at most 20 of them. */
+export function shortClientName(name: string): string {
+  const words = wordsOf(name);
+  const first = clientFirstName(name);
+  if (first === null) return 'Client';
   const last = words.length > 1 ? Array.from(words[words.length - 1] ?? '')[0] : undefined;
   return last === undefined ? first : `${first} ${last.toUpperCase()}.`;
+}
+
+/** "Maria Lopez" → "Maria" (a rebooking email's greeting, S36b); null without a letter. */
+export function clientFirstName(name: string): string | null {
+  const first = Array.from(wordsOf(name)[0] ?? '')
+    .slice(0, FIRST_NAME_MAX)
+    .join('');
+  return first === '' ? null : first;
 }

@@ -40,6 +40,8 @@ import {
 } from '@pepper/db';
 import { daysOf } from '../tools/local-time.js';
 import { sendRebookingNudge } from '../tools/catalog/nudges.js';
+import { toolRefusalOf } from '../tools/errors.js';
+import { clientFirstName } from '../tools/names.js';
 import { writeRunner } from '../tools/runner.js';
 import type { ToolDeps } from '../tools/tool.js';
 import { writeDraft, type DraftFacts, type DraftWriterDeps } from './writer.js';
@@ -88,8 +90,8 @@ export type MorningDraftsResult =
 export async function runDueMorningDrafts(
   db: Database,
   options: MorningDraftsOptions,
-): Promise<{ businesses: number; drafted: number }> {
-  const totals = { businesses: 0, drafted: 0 };
+): Promise<{ businesses: number; drafted: number; failed: number }> {
+  const totals = { businesses: 0, drafted: 0, failed: 0 };
   const seen = new Set<TenantId>();
   for (let batch = 0; batch < DRAFTS_BATCHES_PER_PASS; batch += 1) {
     const due = await listDueDraftRuns(db, options.clock.now(), DRAFTS_BATCH);
@@ -100,10 +102,20 @@ export async function runDueMorningDrafts(
       if (result.outcome !== 'ran') continue;
       totals.businesses += 1;
       totals.drafted += result.drafted;
+      totals.failed += result.failed;
     }
     if (due.length < DRAFTS_BATCH) break;
   }
   return totals;
+}
+
+/**
+ * Why a nudge's proposal was not made: the domain refused it (the time was booked meanwhile,
+ * a sensitive word, the client opted out), or something broke (a bug, the database), which
+ * the worker reports instead of counting it as a refusal.
+ */
+export function proposalFailureOf(error: unknown): 'refused' | 'failed' {
+  return toolRefusalOf(error).code === 'internal' ? 'failed' : 'refused';
 }
 
 /** A due regular with what the writer and the nudge need. */
@@ -234,9 +246,8 @@ export async function runMorningDraftsFor(
         await linkFeedItemToProposal(tx, candidate.item.itemId, proposal.id);
       });
       result.drafted += 1;
-    } catch {
-      // The domain refused it (the time was booked meanwhile, a sensitive word): no proposal.
-      result.refused += 1;
+    } catch (error) {
+      result[proposalFailureOf(error)] += 1;
     }
   }
   return { outcome: 'ran', ...result };
@@ -295,8 +306,9 @@ async function candidatesFor(
         },
         options,
       );
-    const [slot] =
-      usual === undefined ? await find() : [...(await find(usual.id)), ...(await find())];
+    // Their staff member first; anyone who offers the service only when they have no time.
+    let [slot] = usual === undefined ? [] : await find(usual.id);
+    slot ??= (await find())[0];
     if (slot === undefined) {
       context.result.noTime += 1;
       continue;
@@ -311,15 +323,15 @@ async function candidatesFor(
       lastVisitAt,
       facts: {
         business: context.business,
-        clientFirstName: client.name.trim().split(/\s+/)[0] ?? '',
+        // Typed by the client on the booking page: letters only, as the tools show it.
+        clientFirstName: clientFirstName(client.name) ?? '',
         serviceName: service.name,
+        // Only the staff member the client usually sees, and only when the time offered is
+        // theirs: the email must not name one person and offer another's time.
         staffFirstName:
-          usual?.displayName.trim().split(/\s+/)[0] ??
-          staff
-            .find((each) => each.id === slot.staffMemberId)
-            ?.displayName.trim()
-            .split(/\s+/)[0] ??
-          null,
+          usual?.id === slot.staffMemberId
+            ? (usual.displayName.trim().split(/\s+/)[0] ?? null)
+            : null,
         lastVisit: new Date(lastVisitAt).toLocaleDateString('en-US', {
           month: 'long',
           day: 'numeric',

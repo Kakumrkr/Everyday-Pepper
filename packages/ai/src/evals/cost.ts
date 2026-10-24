@@ -51,6 +51,9 @@ export function costOfUsage(usage: LlmUsage, price: ModelPrice): number {
   );
 }
 
+/** Drafts one eval morning pass may write (the feed world has one or two regulars due). */
+export const DRAFTS_PER_PASS_ESTIMATE = 3;
+
 /**
  * The most a run of `cases`, `trials` times each, should cost: every turn taking the loop's
  * every step (`callsPerTurn`), every call's input counted in full, uncached and at the write
@@ -58,9 +61,6 @@ export function costOfUsage(usage: LlmUsage, price: ModelPrice): number {
  * tools, the conversation so far with an allowance for each earlier answer or tool result)
  * and the full output allowance per call.
  */
-/** Drafts one eval morning pass may write (the feed world has one or two regulars due). */
-export const DRAFTS_PER_PASS_ESTIMATE = 3;
-
 export function estimateRunCost(
   cases: readonly EvalCase[],
   trials: number,

@@ -26,6 +26,10 @@ import { parseBody } from '../http/zod-body.js';
 // authority, and the only thing it can do is stop marketing email to that one client.
 
 const LINK_USES: RateLimit = { name: 'unsubscribe-ip', max: 30, windowSeconds: 600 };
+// A mail provider sends every recipient's one-click POST from a few shared addresses, and a
+// refused one may never be retried (CAN-SPAM): its limit only stops a flood. The secret is
+// checked before anything is read, so a wrong one costs an HMAC.
+const ONE_CLICKS: RateLimit = { name: 'unsubscribe-post-ip', max: 600, windowSeconds: 600 };
 const TokenParamsSchema = z.object({ token: z.string().max(400) });
 
 export interface UnsubscribeOptions {
@@ -74,7 +78,7 @@ export class UnsubscribeController {
     @Req() request: IncomingRequest,
   ): Promise<UnsubscribeResponse> {
     const { token } = parseBody(TokenParamsSchema, params);
-    await this.limits.hit(LINK_USES, clientAddress(request));
+    await this.limits.hit(ONE_CLICKS, clientAddress(request));
     return UnsubscribeResponseSchema.parse(
       await answering(() =>
         unsubscribe(this.db, this.key, token, {

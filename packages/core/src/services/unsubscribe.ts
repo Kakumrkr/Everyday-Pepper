@@ -50,9 +50,9 @@ export async function unsubscribe(
   return withTenant(db, subject.tenantId, async (tx) => {
     const tenant = await findCurrentTenant(tx);
     if (tenant === undefined) throw new UnsubscribeLinkInvalidError();
-    const client = await findClient(tx, subject.clientId);
-    if (client?.emailOptOutAt === null) {
-      await optOutClientEmail(tx, subject.clientId, now);
+    // The guarded write says whether this click changed anything: two at once audit once.
+    const optedOut = await optOutClientEmail(tx, subject.clientId, now);
+    if (optedOut?.changed === true) {
       await appendAuditEntry(tx, {
         actor: { kind: 'system' },
         change: {

@@ -96,7 +96,6 @@ export async function listDueOutboxMessages(
   }));
 }
 
-/** The transaction's tenant's message with this id. */
 /**
  * How many of the business's messages, in any state, have a dedupe key starting with `prefix`
  * (evals and tests: "one rebooking email went", S36).
@@ -110,6 +109,7 @@ export async function countOutboxMessagesByKey(tx: TenantTx, prefix: string): Pr
   return row?.count ?? 0;
 }
 
+/** The transaction's tenant's message with this id. */
 export async function findOutboxMessage(
   tx: TenantTx,
   id: OutboxMessageId,

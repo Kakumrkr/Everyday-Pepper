@@ -84,6 +84,27 @@ describe('unsubscribe', () => {
     expect(JSON.stringify(entries)).not.toContain('sara@');
   });
 
+  it('audits two clicks at once once (S36b code review)', async () => {
+    const kim = ClientIdSchema.parse(
+      (
+        await withTenant(db, tenantId, (tx) =>
+          insertClient(tx, {
+            name: 'Kim Lee',
+            email: 'kim@example.test',
+            phone: null,
+            source: 'team',
+          }),
+        )
+      ).id,
+    );
+    const token = unsubscribeToken(key, { tenantId, clientId: kim });
+    await Promise.all(Array.from({ length: 6 }, () => unsubscribe(db, key, token, { clock })));
+    const entries = (
+      await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 50 }))
+    ).filter((entry) => entry.action === 'client.email_opted_out' && entry.entity.id === kim);
+    expect(entries).toHaveLength(1);
+  });
+
   it('refuses a link it did not sign, and one for a business that is gone', async () => {
     const forged = unsubscribeToken(unsubscribeKeyFrom(outboxKeyFrom('x'.repeat(40))), {
       tenantId,

@@ -20,6 +20,7 @@ import { activeMemoryFactsOf, findClient, findCurrentTenant, nudgeTargetKey } fr
 import { SlotUnavailableError } from '@pepper/appointments';
 import { z } from 'zod';
 import { localOf } from '../local-time.js';
+import { clientFirstName } from '../names.js';
 import type { Performed, ToolScope, WriteTool } from '../tool.js';
 import { directoryOf, domainOptions, serviceName, staffName, when } from './shared.js';
 
@@ -175,7 +176,7 @@ export const sendRebookingNudge: WriteTool = {
     const directory = await directoryOf(scope);
     const staff = staffName(directory, staffMemberId);
     const service = serviceName(directory, serviceId);
-    const firstName = client.name.trim().split(/\s+/)[0] ?? 'the client';
+    const firstName = clientFirstName(client.name) ?? 'the client';
     const { baseUrl, outboxKey } = scope.deps.emails;
     const token = unsubscribeToken(unsubscribeKeyFrom(outboxKey), {
       tenantId: scope.actor.context.tenantId,

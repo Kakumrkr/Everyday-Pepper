@@ -501,7 +501,9 @@ export async function listDraftableRebookings(
         gt(feedItems.expiresAt, now),
         sql`${clients.email} IS NOT NULL`,
         isNull(clients.emailOptOutAt),
-        sql`NOT EXISTS (SELECT 1 FROM ${aiActionProposals} WHERE ${aiActionProposals.action} = ${NUDGE_ACTION} AND ${aiActionProposals.targetKey} = 'nudge:client:' || ${feedItems.clientId}::text AND ${aiActionProposals.createdAt} > ${now}::timestamptz - make_interval(days => coalesce((${feedItems.payload}->>'intervalDays')::int, 28)))`,
+        // A superseded nudge reached no one: its replacement (an edit, a refresh) counts on its
+        // own, and one refused at approval (the time was booked meanwhile) blocks nothing.
+        sql`NOT EXISTS (SELECT 1 FROM ${aiActionProposals} WHERE ${aiActionProposals.action} = ${NUDGE_ACTION} AND ${aiActionProposals.targetKey} = 'nudge:client:' || ${feedItems.clientId}::text AND ${aiActionProposals.status} <> 'superseded' AND ${aiActionProposals.createdAt} > ${now}::timestamptz - make_interval(days => coalesce((${feedItems.payload}->>'intervalDays')::int, 28)))`,
       ),
     )
     .orderBy(asc(feedItems.day), asc(feedItems.id))

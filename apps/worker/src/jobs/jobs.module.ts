@@ -112,6 +112,10 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
                   `Morning drafts: ${String(result.businesses)} businesses, ${String(result.drafted)} drafted`,
                 );
               }
+              // Not a refusal: a model call or a proposal broke (the next morning tries again).
+              if (result.failed > 0) {
+                this.logger.warn(`Morning drafts: ${String(result.failed)} failed`);
+              }
             },
             this.logger,
           );
