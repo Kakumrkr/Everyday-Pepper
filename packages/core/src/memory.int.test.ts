@@ -5,6 +5,8 @@ import {
   ServiceIdSchema,
   StaffMemberIdSchema,
   TenantIdSchema,
+  type BookingId,
+  BookingIdSchema,
   type ClientId,
   type Embedding,
   type MembershipRole,
@@ -40,8 +42,10 @@ import {
   changeMemorySettings,
   deleteEpisode,
   factsForIn,
+  factsShown,
   forgetFact,
   getMemorySettings,
+  listFactViews,
   listFacts,
   listMyEpisodes,
   saveEpisode,
@@ -63,6 +67,7 @@ let jess: UserId;
 let jessStaff: StaffMemberId;
 let maria: ClientId;
 let lee: ClientId;
+let mariaVisit: BookingId;
 
 const as = (userId: UserId, role: MembershipRole): Actor => ({
   context: { tenantId, userId, role },
@@ -118,7 +123,7 @@ beforeAll(async () => {
       );
     maria = await client('Maria Lopez');
     lee = await client('Lee Park');
-    await insertBooking(tx, {
+    const visit = await insertBooking(tx, {
       clientId: maria,
       serviceId: ServiceIdSchema.parse(service.id),
       staffMemberId: jessStaff,
@@ -133,6 +138,7 @@ beforeAll(async () => {
       idempotencyKey: null,
       createdBy: null,
     });
+    mariaVisit = BookingIdSchema.parse(visit.id);
   });
 });
 
@@ -344,5 +350,104 @@ describe('episodes', () => {
       ['memory_episode.deleted', 'user'],
       ['memory_episode.created', 'system'],
     ]);
+  });
+});
+
+describe('"What I know" and the client profile (S32)', () => {
+  it('lists facts with whom they are about, visit notes with their visit, by member', async () => {
+    const save = async (actor: Actor, input: Parameters<typeof saveFact>[2]) =>
+      (await saveFact(db, actor, input)).fact.id;
+    const business = await save(ana(), {
+      subject: { type: 'business' },
+      key: 'parking_s32',
+      value: 'Free parking behind the shop',
+    });
+    const secret = await save(ana(), {
+      subject: { type: 'business' },
+      key: 'personal_s32',
+      value: 'The owner is moving in spring',
+      sensitive: true,
+    });
+    const allergy = await save(jessActor(), {
+      subject: { type: 'client', id: maria },
+      key: 'skin_s32',
+      value: 'Sensitive scalp',
+      sensitive: true,
+    });
+    const formula = await save(ana(), {
+      subject: { type: 'booking', id: mariaVisit },
+      key: 'formula',
+      value: '6N + 20 vol',
+    });
+    const leeFact = await save(ana(), {
+      subject: { type: 'client', id: lee },
+      key: 'drink_s32',
+      value: 'Oat latte',
+    });
+    const jessFact = await save(ana(), {
+      subject: { type: 'staff', id: jessStaff },
+      key: 'specialty_s32',
+      value: 'Balayage',
+    });
+
+    const owners = new Map((await listFactViews(db, ana())).map((view) => [view.id, view]));
+    expect(owners.get(business)).toMatchObject({ subjectName: null, visit: null, byYou: true });
+    expect(owners.get(allergy)).toMatchObject({
+      subjectName: 'Maria Lopez',
+      sensitive: true,
+      source: 'screen',
+      byYou: false,
+    });
+    expect(owners.get(formula)).toMatchObject({
+      subject: { type: 'booking', id: mariaVisit },
+      subjectName: 'Maria Lopez',
+      visit: { startsAt: '2026-11-02T14:00:00.000Z', serviceName: 'Full color' },
+    });
+    expect(owners.get(jessFact)?.subjectName).toBe('Jess');
+    expect(owners.has(secret) && owners.has(leeFact)).toBe(true);
+
+    // The profile: the client's own facts and their visit notes, nobody else's.
+    const profile = (await listFactViews(db, ana(), { clientId: maria })).map((view) => view.id);
+    expect(profile).toEqual(expect.arrayContaining([allergy, formula]));
+    expect(profile).not.toContain(leeFact);
+    expect(profile).not.toContain(business);
+    expect(
+      (await listFactViews(db, ana(), { bookingId: mariaVisit })).map((view) => view.id),
+    ).toEqual([formula]);
+    const sensitive = await listFactViews(db, ana(), { sensitive: true });
+    expect(sensitive.every((view) => view.sensitive)).toBe(true);
+
+    // Staff: their clients and visits, and only the business's non-sensitive facts.
+    const jessSees = new Map((await listFactViews(db, jessActor())).map((view) => [view.id, view]));
+    expect([...jessSees.keys()]).toEqual(
+      expect.arrayContaining([business, allergy, formula, jessFact]),
+    );
+    expect(jessSees.has(secret)).toBe(false);
+    expect(jessSees.has(leeFact)).toBe(false);
+    expect(jessSees.get(allergy)?.byYou).toBe(true);
+    expect(await listFactViews(db, jessActor(), { clientId: lee })).toEqual([]);
+
+    // A proposal waiting for an OK was never remembered: the chip shows it as gone.
+    const proposed = (
+      await saveFact(
+        db,
+        ana(),
+        { subject: { type: 'client', id: maria }, key: 'drink_s32', value: 'Oat latte' },
+        { source: 'chat', status: 'proposed' },
+      )
+    ).fact.id;
+    expect(await factsShown(db, ana(), [proposed])).toEqual([{ state: 'gone', factId: proposed }]);
+    // The chip reads them live: hidden and forgotten facts are the same `gone`.
+    expect(await factsShown(db, jessActor(), [allergy, leeFact])).toEqual([
+      expect.objectContaining({ state: 'known', factId: allergy, value: 'Sensitive scalp' }),
+      { state: 'gone', factId: leeFact },
+    ]);
+    await forgetFact(db, ana(), allergy);
+    expect(await factsShown(db, jessActor(), [allergy])).toEqual([
+      { state: 'gone', factId: allergy },
+    ]);
+    expect((await listFactViews(db, ana(), { clientId: maria })).map((v) => v.id)).not.toContain(
+      allergy,
+    );
   });
 });

@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "f2ec32e311cf208ef961562f5b851f45d313602f7f5d8558b806ee61eaa4e8d7",
+        "fingerprint": "2504bc029a0f0ad55139bcac71ab9589c8fe46a5ee399d8e4c3515e4a4d07b3e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2Xug9Ej4kBOWBBFMAT0RdrYc",
+              "id": "call_HNuM9OaT5WczSS9KlxdjKd9O",
               "name": "search_memory",
-              "arguments": "{\"query\":\"Saturday opening time hours\"}"
+              "arguments": "{\"query\":\"Saturday opening time\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8287,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8324,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 14,
-            "outputTokens": 21
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5b3243ed9efef2a8ec9130242751e258582118bd975253f351645261c9c976ef",
+        "fingerprint": "5d97d144ec6913e53e8786b973e5beada8c09a942cf84e8be406a139d4c125f8",
         "response": {
-          "text": "We said we open at 10 on Saturdays now.",
+          "text": "We said the studio opens at 10 on Saturdays from now on.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8525,
-            "cachedInputTokens": 8284,
-            "cacheWriteTokens": 238,
-            "outputTokens": 15
+            "inputTokens": 8561,
+            "cachedInputTokens": 8321,
+            "cacheWriteTokens": 237,
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }

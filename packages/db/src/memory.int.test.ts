@@ -49,6 +49,7 @@ import {
   insertMemoryFact,
   listMemoryEpisodes,
   listMemoryFacts,
+  listMemoryFactsWithNames,
   lockActiveMemoryFact,
   lockRememberedFacts,
   memoryPaused,
@@ -304,6 +305,34 @@ describe('who reaches which facts', () => {
     ).toBeUndefined();
     expect(await as(jess, (tx) => deleteMemoryFact(tx, ids.opening))).toBe(false);
     expect(await as(jess, (tx) => deleteMemoryFact(tx, ids.leeAllergy))).toBe(false);
+  });
+
+  it('the named list ("What I know", S32) reaches no further than the plain one', async () => {
+    const named = (userId: UserId, clientId?: ClientId) =>
+      as(userId, (tx) => listMemoryFactsWithNames(tx, { status: 'active', limit: 500, clientId }));
+    for (const userId of [ana, jess]) {
+      expect(new Set((await named(userId)).map((row) => row.fact.id))).toEqual(await seen(userId));
+    }
+    const mariaProfile = await named(ana, maria);
+    expect(mariaProfile.map((row) => row.fact.id).sort()).toEqual(
+      [ids.mariaAllergy, ids.mariaVisit].sort(),
+    );
+    const visitNote = mariaProfile.find((row) => row.fact.id === ids.mariaVisit);
+    expect(visitNote?.subjectName).toBe('Maria Lopez');
+    expect(visitNote?.visitStartsAt).toBeInstanceOf(Date);
+    expect(await named(jess, lee)).toEqual([]);
+    // Another business sees none of them, by any filter.
+    const elsewhere = await inTenant(
+      (tx) => listMemoryFactsWithNames(tx, { status: 'active', limit: 500, clientId: maria }),
+      other,
+    );
+    expect(elsewhere).toEqual([]);
+    const all = await inTenant(
+      (tx) => listMemoryFactsWithNames(tx, { status: 'active', limit: 500 }),
+      other,
+    );
+    const known = new Set<string>(Object.values(ids));
+    expect(all.some((row) => known.has(row.fact.id))).toBe(false);
   });
 
   it('recall returns the subjects’ active facts the member reaches, sensitive first', async () => {

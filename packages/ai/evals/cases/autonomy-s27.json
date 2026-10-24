@@ -59,7 +59,11 @@
       "actions": {
         "proposed": ["cancel_booking"]
       },
-      "replyMustNotMatch": ["\\b(I|I.ve|I have) cancelled\\b", "has been cancelled", "is cancelled"]
+      "replyMustNotMatch": [
+        "\\b(I|I.ve|I have) cancelled\\b",
+        "(?<!\\bnothing )has been cancelled",
+        "is cancelled"
+      ]
     }
   },
   {

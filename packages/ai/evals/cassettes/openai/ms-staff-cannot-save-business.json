@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b57563d378ea3d1aed1c0944cc6f6520ba954a71363505527b20ed247bc5007d",
+        "fingerprint": "870596191b3d32d25331b68542c16b8986e4e800071fef25c8b2f87a6a4015ff",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ctcRrvkUwj7IQRnNkD7ps4nW",
+              "id": "call_VFvJJ6lcVN6Xm2CFmQrl2AKl",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8285,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8322,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 12,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "e65a8f23758f35aef07568624fd3a886e38531132c0e848eb57ec8f8c5d6d74e",
+        "fingerprint": "2296d20e8b73e5e1987fe5c6a2a934e50cd44de7a710e51a4c6a40d66ff4e19c",
         "response": {
-          "text": "I couldn’t save that because your role doesn’t allow changing business-wide memory. An owner or manager can save it.",
+          "text": "I can’t save business-wide schedule notes with my staff role. An owner or manager can add that note.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8378,
-            "cachedInputTokens": 8282,
+            "inputTokens": 8415,
+            "cachedInputTokens": 8319,
             "cacheWriteTokens": 93,
-            "outputTokens": 28
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

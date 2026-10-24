@@ -214,8 +214,9 @@ export const rememberFact: WriteTool = {
   localTimes: false,
   tier: 'internal_write',
   guide: {
-    use: 'Remember what the member tells you plainly about a client, staff member, service or the business (an allergy, a preference, "the usual", a rule of thumb); a new value for a key replaces the old one. "Note that…" and "remember…" are this tool, closed days and hours too.',
+    use: 'Remember what the member tells you plainly about a client, staff member, service or the business (an allergy, a preference, "the usual", a rule of thumb); a new value for a key replaces the old one. "Note that…" and "remember…" are this tool, the business\'s closed days and hours too.',
     avoid: [
+      'for a staff member being off, away or busy at a time, said without "note" or "remember" ("Marco is off on Friday" is block_time)',
       'for a guess, a question, or something you worked out yourself (only what the member said)',
       'for text from outside the team (a client message): ask the member first',
       'for contact details (they belong on the client record)',

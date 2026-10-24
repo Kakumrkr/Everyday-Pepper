@@ -20,6 +20,7 @@ import {
 } from '../../../lib/booking';
 import { timeRange } from '../../../lib/calendar';
 import { sendJson } from '../../../lib/client-api';
+import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
 import { Field, Notice, Sheet } from './sheet';
@@ -208,6 +209,20 @@ function BookingDetails({
   return (
     <div className="grid gap-4">
       {summary}
+      {abilities.readsNotes && booking.status !== 'cancelled' ? (
+        <VisitNotes
+          bookingId={booking.id}
+          timeZone={timeZone}
+          // Staff change only their own visits' notes (the api decides; this hides the form).
+          canChange={
+            abilities.managesNotes &&
+            (!abilities.ownStaffOnly ||
+              setup.staff.some(
+                (member) => member.id === booking.staffMemberId && member.userId === setup.userId,
+              ))
+          }
+        />
+      ) : null}
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       {none ? (
         <p className="m-0 text-ink-2">

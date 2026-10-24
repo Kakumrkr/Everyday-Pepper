@@ -72,7 +72,15 @@ const envelopes: ChatEventEnvelope[] = [
       requestMessageId: MESSAGE,
     },
   },
-  { seq: 2, event: { type: 'message.completed', messageId: MESSAGE, text: 'Line one\nline two' } },
+  {
+    seq: 2,
+    event: {
+      type: 'message.completed',
+      messageId: MESSAGE,
+      text: 'Line one\nline two',
+      factIds: [],
+    },
+  },
   { seq: 3, event: { type: 'turn.completed', reason: 'answered' } },
 ];
 const chat = {

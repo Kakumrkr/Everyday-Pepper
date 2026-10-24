@@ -16,9 +16,13 @@ import {
 export const PASSWORD = 'correct horse battery';
 let counter = 0;
 
+/**
+ * A name no other test uses. The counter is per worker process, so the process id keeps two
+ * workers apart within the same millisecond (S32: two owners got the same booking link).
+ */
 export function unique(prefix: string): string {
   counter += 1;
-  return `${prefix}-${String(Date.now())}-${String(counter)}`;
+  return `${prefix}-${String(Date.now())}-${String(process.pid)}-${String(counter)}`;
 }
 
 /**

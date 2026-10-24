@@ -38,15 +38,19 @@ import {
   sql,
   type SQL,
 } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import {
   aiActionExecutions,
   aiActionProposals,
   auditLog,
   bookings,
+  clients,
   conversationMessages,
   memoryEpisodes,
   memoryFacts,
+  services,
+  staffMembers,
   tenants,
   type MemoryEpisodeRow,
   type MemoryFactRow,
@@ -304,6 +308,78 @@ export async function listMemoryFacts(
     .where(and(...conditions))
     .orderBy(asc(memoryFacts.subjectType), desc(memoryFacts.updatedAt), asc(memoryFacts.id))
     .limit(LimitSchema.parse(filter.limit));
+}
+
+/** A fact with the names a screen shows it under ("What I know", S32). */
+export interface MemoryFactListRow {
+  fact: MemoryFactRow;
+  /** The client, staff member or service it is about; a visit note's client. */
+  subjectName: string | null;
+  /** A visit note's visit; `null` for any other fact. */
+  visitStartsAt: Date | null;
+  visitServiceName: string | null;
+}
+
+export interface MemoryFactListFilter extends MemoryFactFilter {
+  /** Only this client's facts and the notes of their visits (the client profile). */
+  clientId?: ClientId | undefined;
+}
+
+const visitClients = alias(clients, 'visit_clients');
+const visitServices = alias(services, 'visit_services');
+
+/**
+ * Facts the transaction may read, with their subject's name and a visit note's visit, by
+ * subject type, then visits newest first, then newest first. A name the member may not read
+ * (a client who is not theirs) is `null`.
+ */
+export async function listMemoryFactsWithNames(
+  tx: TenantTx,
+  filter: MemoryFactListFilter,
+): Promise<MemoryFactListRow[]> {
+  const conditions: SQL[] = [eq(memoryFacts.status, MemoryFactStatusSchema.parse(filter.status))];
+  if (filter.subjectType !== undefined) {
+    conditions.push(eq(memoryFacts.subjectType, MemorySubjectTypeSchema.parse(filter.subjectType)));
+  }
+  if (filter.subject !== undefined) conditions.push(subjectIs(filter.subject));
+  if (filter.sensitive !== undefined) conditions.push(eq(memoryFacts.sensitive, filter.sensitive));
+  if (filter.clientId !== undefined) {
+    const clientId = ClientIdSchema.parse(filter.clientId);
+    conditions.push(
+      sql`((${eq(memoryFacts.subjectType, 'client')} AND ${eq(memoryFacts.clientId, clientId)}) OR (${eq(memoryFacts.subjectType, 'booking')} AND ${eq(bookings.clientId, clientId)}))`,
+    );
+  }
+  const rows = await tx
+    .select({
+      fact: memoryFacts,
+      clientName: clients.name,
+      staffName: staffMembers.displayName,
+      serviceName: services.name,
+      visitClientName: visitClients.name,
+      visitStartsAt: bookings.startsAt,
+      visitServiceName: visitServices.name,
+    })
+    .from(memoryFacts)
+    .leftJoin(clients, eq(clients.id, memoryFacts.clientId))
+    .leftJoin(staffMembers, eq(staffMembers.id, memoryFacts.staffMemberId))
+    .leftJoin(services, eq(services.id, memoryFacts.serviceId))
+    .leftJoin(bookings, eq(bookings.id, memoryFacts.bookingId))
+    .leftJoin(visitClients, eq(visitClients.id, bookings.clientId))
+    .leftJoin(visitServices, eq(visitServices.id, bookings.serviceId))
+    .where(and(...conditions))
+    .orderBy(
+      asc(memoryFacts.subjectType),
+      sql`${bookings.startsAt} DESC NULLS LAST`,
+      desc(memoryFacts.updatedAt),
+      asc(memoryFacts.id),
+    )
+    .limit(LimitSchema.parse(filter.limit));
+  return rows.map((row) => ({
+    fact: row.fact,
+    subjectName: row.clientName ?? row.staffName ?? row.serviceName ?? row.visitClientName,
+    visitStartsAt: row.visitStartsAt,
+    visitServiceName: row.visitServiceName,
+  }));
 }
 
 /**

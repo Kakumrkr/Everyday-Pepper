@@ -9,6 +9,9 @@ import {
   MemoryFactOriginSchema,
   MemoryFactQuerySchema,
   MemoryFactSchema,
+  MemoryFactViewSchema,
+  MemoryFactListQuerySchema,
+  MEMORY_FACTS_PAGE,
   MemorySettingsSchema,
   MemorySourceSchema,
   MemoryEpisodeSchema,
@@ -28,6 +31,8 @@ import {
   type MemoryFactOrigin,
   type MemoryFactQuery,
   type MemoryFactShown,
+  type MemoryFactView,
+  type MemoryFactListQuery,
   type MemorySettings,
   type MemorySubject,
   type ClientId,
@@ -46,6 +51,7 @@ import {
   insertMemoryFact,
   listMemoryEpisodes,
   listMemoryFacts,
+  listMemoryFactsWithNames,
   lockActiveMemoryFact,
   lockMemoryFact,
   lockMemorySubjectKey,
@@ -604,6 +610,79 @@ export async function listFacts(
   return withMember(db, actor.context, async (tx) =>
     (await listMemoryFacts(tx, filter)).map(toMemoryFact),
   );
+}
+
+/**
+ * The active facts the member may read, as "What I know" and the client profile show them
+ * (S32): by subject type, a client's (with their visit notes) or one visit's. Staff see only
+ * what the member-scope policies let them read (ADR-0034).
+ */
+export async function listFactViews(
+  db: Database,
+  actor: Actor,
+  query: MemoryFactListQuery = {},
+): Promise<MemoryFactView[]> {
+  const filter = MemoryFactListQuerySchema.parse(query);
+  const aboutClients =
+    filter.clientId !== undefined ||
+    filter.bookingId !== undefined ||
+    filter.subjectType === 'client' ||
+    filter.subjectType === 'booking';
+  requirePermission(actor, aboutClients ? 'client_notes.read' : 'business.read');
+  const rows = await withMember(db, actor.context, (tx) =>
+    listMemoryFactsWithNames(tx, {
+      status: 'active',
+      subjectType: filter.subjectType,
+      subject:
+        filter.bookingId === undefined ? undefined : { type: 'booking', id: filter.bookingId },
+      clientId: filter.clientId,
+      sensitive: filter.sensitive,
+      limit: MEMORY_FACTS_PAGE,
+    }),
+  );
+  return rows.map(({ fact, subjectName, visitStartsAt, visitServiceName }) =>
+    MemoryFactViewSchema.parse({
+      id: fact.id,
+      subject: memorySubjectOf(fact),
+      subjectName,
+      visit:
+        visitStartsAt === null
+          ? null
+          : { startsAt: visitStartsAt.toISOString(), serviceName: visitServiceName ?? '' },
+      key: fact.key,
+      value: fact.value,
+      sensitive: fact.sensitive,
+      source: fact.source,
+      byYou: fact.createdByUserId === actor.context.userId,
+      createdAt: fact.createdAt.toISOString(),
+      updatedAt: fact.updatedAt.toISOString(),
+    }),
+  );
+}
+
+/**
+ * Facts an answer used, read live (the "Remembered" chip, S32): `gone` once deleted, hidden,
+ * or still a proposal waiting for an OK (it was never remembered).
+ */
+export async function factsShown(
+  db: Database,
+  actor: Actor,
+  ids: readonly MemoryFactId[],
+  options: { clock?: Clock } = {},
+): Promise<MemoryFactShown[]> {
+  requirePermission(actor, 'ai.chat');
+  const unique = [...new Set(ids.map((id) => MemoryFactIdSchema.parse(id)))];
+  const now = (options.clock ?? systemClock).now();
+  return withMember(db, actor.context, async (tx) => {
+    const active = new Set(
+      (await memoryFactsByIds(tx, unique))
+        .filter((row) => row.status === 'active')
+        .map((row) => row.id),
+    );
+    return (await factsShownIn(tx, unique, now)).map((fact): MemoryFactShown =>
+      active.has(fact.factId) ? fact : { state: 'gone', factId: fact.factId },
+    );
+  });
 }
 
 /**

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4ac1ffd01f800feb34a49c5afea3a802924784495aa6e4937b6a073beb6af6f3",
+        "fingerprint": "0602ed9e2d2ce2b95f265df23ee26632d2e91f9efb2f0815c578927adce67bb9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GTpKahyU5elbEaeGIks1B7it",
+              "id": "call_ipp3Iv5DuHljvfLbhtPWfo50",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8285,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8322,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "f29fe00ae6a604df227dfc3547e5257175b2dfb833c359ffc890eee14b90db21",
+        "fingerprint": "d8342278e352a76d8bae3da0f07699915394c425c3482a754cb4757f2b7ebe72",
         "response": {
-          "text": "I remember that Maria L. has a PPD allergy and her usual service is “Colour with Jess.” Her last noted visit was colour with Jess on October 23; the formula recorded was “6N + 20 vol, 35 min.”",
+          "text": "I found Maria L. I remember her allergy is “PPD” and her usual service is “Colour with Jess.” Her last noted visit was a colour with Jess on October 23, with the formula “6N + 20 vol, 35 min.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8647,
-            "cachedInputTokens": 8282,
-            "cacheWriteTokens": 362,
-            "outputTokens": 54
+            "inputTokens": 8687,
+            "cachedInputTokens": 8319,
+            "cacheWriteTokens": 365,
+            "outputTokens": 57
           },
           "model": "gpt-6-luna"
         }

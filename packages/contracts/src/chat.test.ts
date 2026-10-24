@@ -3,10 +3,12 @@ import {
   ChatEventEnvelopeSchema,
   ChatEventSchema,
   ChatFallbackSchema,
+  ChatHistoryItemSchema,
   ChatTurnRequestSchema,
   isFinalChatEvent,
   ScreenLinkSchema,
 } from './chat.js';
+import { memoryFactRefsIn } from './memory-ids.js';
 
 const ID = '0199f4b2-7c1e-7a00-8000-0000000000a1';
 
@@ -43,7 +45,7 @@ describe('ChatEventSchema', () => {
         code: 'not_found',
         card: null,
       },
-      { type: 'message.completed', messageId: ID, text: 'Done.' },
+      { type: 'message.completed', messageId: ID, text: 'Done.', factIds: [ID] },
       { type: 'turn.completed', reason: 'answered' },
       {
         type: 'turn.failed',
@@ -84,5 +86,57 @@ describe('ChatEventSchema', () => {
     );
     expect(ScreenLinkSchema.safeParse({ label: 'x', href: '//evil.test' }).success).toBe(false);
     expect(ScreenLinkSchema.safeParse({ label: 'x', href: '/clients' }).success).toBe(true);
+  });
+});
+
+describe('the facts an answer used (S32)', () => {
+  const messageId = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708190';
+  const factId = '0199F0A4-7C1E-7D2A-9B3C-4D5E6F708191';
+
+  it('are none in events and history written before S32', () => {
+    expect(
+      ChatEventSchema.parse({ type: 'message.completed', messageId, text: 'Hi' }),
+    ).toMatchObject({ factIds: [] });
+    expect(
+      ChatHistoryItemSchema.parse({
+        kind: 'assistant',
+        id: messageId,
+        text: 'Hi',
+        createdAt: '2026-10-23T12:00:00.000Z',
+      }),
+    ).toMatchObject({ factIds: [] });
+  });
+
+  it('are fact ids only, at most 100', () => {
+    expect(
+      ChatEventSchema.parse({
+        type: 'message.completed',
+        messageId,
+        text: 'Hi',
+        factIds: [factId],
+      }),
+    ).toMatchObject({ factIds: [factId.toLowerCase()] });
+    expect(
+      ChatEventSchema.safeParse({
+        type: 'message.completed',
+        messageId,
+        text: 'Hi',
+        factIds: ['PPD'],
+      }).success,
+    ).toBe(false);
+    expect(
+      ChatEventSchema.safeParse({
+        type: 'message.completed',
+        messageId,
+        text: 'Hi',
+        factIds: Array.from({ length: 101 }, () => factId),
+      }).success,
+    ).toBe(false);
+  });
+
+  it('are read from the references a stored tool answer holds', () => {
+    expect(
+      memoryFactRefsIn(`{"memory":[{"$fact":"${factId}"},{"$fact":"not-an-id"}],"x":"$fact"}`),
+    ).toEqual([factId]);
   });
 });

@@ -1,6 +1,7 @@
 import {
   MemoryEpisodeIdSchema,
   MemoryFactIdSchema,
+  memoryFactRefsIn,
   type MemoryEpisodeId,
   type MemoryFactId,
 } from '@pepper/contracts';
@@ -43,12 +44,8 @@ export const MEMORY_CHARS_PER_ANSWER = 1_200;
 export const BUSINESS_FACTS_CHARS = 1_200;
 const BUSINESS_FACTS_MAX = 30;
 
-const REF = /"\$fact":"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"/gi;
-
 /** The ids of the facts a stored tool answer names. */
-export function factIdsIn(content: string): string[] {
-  return [...content.matchAll(REF)].flatMap((match) => (match[1] === undefined ? [] : [match[1]]));
-}
+export const factIdsIn = memoryFactRefsIn;
 
 const EPISODE_REF =
   /"\$episode":"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"/gi;

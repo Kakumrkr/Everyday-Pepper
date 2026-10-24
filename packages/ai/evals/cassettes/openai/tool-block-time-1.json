@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a0736c12774413250a4a2ed41457cec87f1d8d839ff1c3045b9b08976cf7bedc",
+        "fingerprint": "2a41a4adbf6e4480eadf1e2e648a415655e4e1bdf2247a75d6f2458a9db9c55a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xk7giCCi293AVnAGQsUl49ld",
+              "id": "call_pGEpZE8MKY15kxhhP3MqGY9b",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-03\",\"from\":\"12:00\",\"to\":\"13:00\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8286,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8323,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 13,
             "outputTokens": 41
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "af25ed2e9ee5fe10a4f479435e1f2b6d240b89192f3dd254bc952fb074c49ab1",
+        "fingerprint": "86c12265b7b8a009c393a6f754533bd38b6c3229108856bffcf54935de4fb2e8",
         "response": {
-          "text": "I can’t block lunch because I don’t have a calendar of my own. Whose calendar should I block tomorrow from 12 to 1?",
+          "text": "I can’t block “my” lunch because your account doesn’t have its own calendar. Whose calendar should I block for tomorrow, 12–1?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8371,
-            "cachedInputTokens": 8283,
+            "inputTokens": 8408,
+            "cachedInputTokens": 8320,
             "cacheWriteTokens": 85,
-            "outputTokens": 34
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }

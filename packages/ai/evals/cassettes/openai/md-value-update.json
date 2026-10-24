@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0d1aa6694a80d5a98781d806dac587bd6d14df9887af4ac7627777957d78f9f2",
+        "fingerprint": "d30e9666c581fa74010f4ca17c9220205cfa0c8373267279255ec742d64cea0a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GwA6Q5k9Qnyw98ZWCAqs0gjh",
+              "id": "call_krUpDwukaGMHACAb3PSxH4iC",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8282,
-            "cachedInputTokens": 8279,
+            "inputTokens": 8319,
+            "cachedInputTokens": 8316,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "82cf79da0a77b23f40e3872f641916d695f86ef4f6a0e5ce12ef7c25e3aef1da",
+        "fingerprint": "5669634f5935646a79c7e8ac420e08a4cd9adbc0ea3ddbd2b8dbaf2b8f24c12f",
         "response": {
-          "text": "Maria’s usual is “Haircut with Marco”.",
+          "text": "Maria L.’s usual is “Haircut with Marco”.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,27 +36,50 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8442,
-            "cachedInputTokens": 8279,
-            "cacheWriteTokens": 160,
-            "outputTokens": 14
+            "inputTokens": 8471,
+            "cachedInputTokens": 8316,
+            "cacheWriteTokens": 152,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "589d5b5c5cafd5ab04d9dc73d5437c977776d0992af3fb0473cb2af29b1efa1f",
+        "fingerprint": "2f82a587a464a6ca459eda2427ad28abced47acde5cc571ef13c8b2699ffe0f4",
         "response": {
-          "text": "Maria’s usual is “Colour with Jess”.",
-          "toolCalls": [],
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ym2ZQHvo0cTa96ej77CltBTP",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
           "replay": [
             {
-              "id": "rs_0513871925f73054016adbb094902087d2a7f217eb870ff9d0",
+              "id": "rs_0e2b57c643861279016adbf3f9159887d2afec2dae59527897",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq27CVtBHOJcTYtbLEPu7tNwD3ps3QAHnJ6x0T2TOOSg5hAB8n6eD3J1ekm4WU_TYLyrHba8omRCXanqfUJOkHeq27KTnTD-RhPSTrIL1YVh6woZIZwKbOaup-MxZ1rFxZE-rgwtGD0moeB6DBvJ7_30cXl5NEj8IfwzBHBzu78GlKhgCY_WCmigLsNhwhVZ8m_4kHWg6ysKEY8YKD9Jjqfa2N5KxKrNgQL88-_IenNT_zRjc9UIQdOD3nWpDTy0qYhDJ1BBZTRaXZrsD4pQjQjfVyQtxlVlk3v0HESsPVK0YDP4IJBUENobSP3MCJoQupkzsjymPts6XHdwdCETt3zVVbH1aRb3mqnROBxOHFO8shtgyVi90__s23IsZ7RqlL7dcNAxw6vf2HGNhMVMTKqiPRYmOCgfK7Cvc84E2giTDLK8EhPLxxV4GfKwr86G9bSA-27aXMMtuIZnJerzJV3Xzh-Th5U41UOj7r4ijJZoTf4uBUmuKI5-frazi8AzSpaukLVZcEj5fy58L0c1_yJUvn04mz6aGwAIsh-l0EpSRmTwft3I24eUzKDlGOw61SZ8lguCH7fbKqeZHjpsytbdcouOyYyoNfnfj5p7N31T6J5LdNBLdD717RYOEE8epuRgdRXpcO6fc46Vivgg7-DzJ_Mmm3xSY09dWMsAYVbW_0hTErDxxrm4NWSqwuu8sPmenyNV68CwcwnGMkPj4V37EpjU9w2yNYKeh3zymYbP4h6gXXixmORc5HoDfJEJXegl1DmCmfT9Q3FJLUGE6xZxnqDW1H3Q1R-WR7o9uD--tyKe6EbVLmM5gTXwXBxg6qIyYOCMyhh_nXFXNdJrc1OSwxirxNGiqUqI5Pvlru9qh7sTVbSLG8oMJgMUnUfQBfwtcy0YgvmmuNL9vlhPkpnE4HfVZWfnqIJuAm7OfGcTh8JY2yStbspZ7Aroe2NbZPBvuedQUHaT0f6UcwL5zd4MS1rq8E2TTACN-LXkQFNGzMaBqNXwttV0XirRtpwWrnfIj5cKIsNjs5fWQ0k0n4bcqZlygisnDNlv-b3xwBHFUWjV-Iq4qNWKrSXYO7eTFPDbhcG6DUmW9rHGsBCSzHbDW3Q4KGW_pCcTdobnq6Xw_lwBB1K9DPDMHmGN577vxs8PRuhrCtD4u4BH1J1K2eHD-jPh0ci8rju1I7jDpB7kwM-flAlFka3nEFrCIGFwihCUrHk_R3ujm8Va5pmUeiE8DmQeop0R1C91y5O_qMsx8bd0VJadHbUSsOzstxY9GcMd2jU84_4qZ0IZ7ELamQemEcp3O1-0aJbQxmd4kSQKRAs_XD4TQsZexvwLnch0U5LnTO0Zkavy6ATWR42Zjn2zERuf4zqH0FUimjZDOSDxpwRmTfpDs3nqAZpneqqoN2I6k7df1uwzY8RrgBu3SScJVRwwmRR1tMa3nRpC9PtOHdy-KPnBk_pJMETxAyLqGK7iH5w5PXKztN9O9Eqy26-Z6YlGj6sgiY8yUjvIzOT8lLsmzB17wet8JuyZSuWwNkX3XoIvjNsgbYAeHU9LSlz934PH5tj9ya7FUgBkHUisfMUUrZFaqYdcPY3gxccC4f6xi80QvBi1E4voCuG8-daAeS5xA6Uf2eyfTqXfP4-shUdRBcCpiIZyVX7PBfGuGxCVPhNK3vFpYaWzsDnS_Jtb3WkkdhiKfC7pq11N8nEvX00lw=",
+              "encrypted_content": "gAAAAABq2_P5UHmb6Q54by4wtzGVtCu7ws6uhizljTjU9YK224M7XO1Yioj3jKAgpJm6-BQpQL5jTfLICZ5aFwUb9FeL_fEPbPw_secLDUC84Miegl1jhjka6dj083vDAzau5bAwcx-qMmvTqcRQeaOU0i0k6Qw_tKUii-OQ7PFyMAqq8sYFd4pzauwrirYvUEKtWiABd72vcHFNY04v-FCaRYMRUUkgrtF_GNEy7AkgX51Du8cH67mw7LG26S_owga-pfK--GT3S77-2sQDrQX-eIgu5fQ8EtL05q9kdyeImFi_Q7qLqF4UeoavLBynNSzwB7kA4cO8_ePeOzljBD4uvMQfU7ieardG0Tujy_i8m81RlNBOaUPBb3dLTkpzKwb93t8N2rJQlIpocq7y5pp-v8WPK5rQWanhpfSJtq6bByJiRSzsgnb2cGFEgMW-KM3txXdKgON_ePRLdgPc-i281Vow7U64Liw67k6SVU7snx2TvW8ycKBN8-GUBzWYw0rE7EhJvEeQAWDPjBOxlUu-Cfcigc6XI14LO5uKbupbSsDzXd67zuLRWozUiKKWLEoneuFIOto7YPfJ3benTKszb14YZJFO-K77zAZZ5dW77loNN2HTB3dDfmuqaJjZJvHkftLQbU6ze94u1lDnJij-Bsm4r9H-2V2lQkDwB3ZU4TCA9kAf7LnyeCcwffG6Fkk-AbCY_e_aKovGbNgQmwQ_ee-ZC6tO6l6LR49CAoXOdf_gmhny89D81eCy-juQC94OJvgA_MkR40nVhcveZuJpgG_oHRqisT5SYRNAGFnslMDITwEKBc6yemNOfXkvpYDsxYLNPyN2FhEP07RUuzWIK5wGRyWVZBTXDIIne9Nr8Y_TvH1dmv1iCcDFjxIzQ__FJQMoEyvZuzgbQKC-6DLw1k1mujRLrifslrIvCSSw3kHwqJdl0tyZVNIOoVZ2-CvjbaFpcYcF8X2dJ4ul8WtUmHes_jpuqyw-PRyrjpQN1b8kXa954niOLA_bB8heThNYq4fKnHe1ztvylGVuqLju2BfkbBnrLgamVtEBGRar4jWgQ4vEDWyLSz-KKUKWHUDChm40FdglVet1NaXyxKNmD7s_SNZ0OqWcwpoOZ7fOx1YLqhRiTKk4XjioWr5zFVOMjnDUTAcwnMkj7wbe0PE6DUPQbp_dGT6HzqXKRPurjz7xiY5AGqAxnwui3lDTJ_7EhHWqLC-ZnH8REQEif1y_a6e4uH2OcrNo8FRFTTDqb8mBwIKChoaPx0QDc-Q09Ur8iF2v-0g3qA145XVMeiNqhEnjNRO9DKpZ3mCHaHydxNeYRQpDowyn1v51skSG0Iw2oZEvMD9KEv6vDo2id82zflaPgCr_NllyNPaITosL0zV6LqiAEXXoQF7tSUo-ut1RfmFk3xt8O4yj5upfTUolPJJsVux27PcXAFl7vKXTCjd4_U5xNtDQgKXmthJF-q5D2oW7bgYfVsFtEI1iT7P0sESBH9wXRc306Y5GdG6u0cuNdlV-b4sW9NIusGb8uUcekG8qBkc2KqcvhWi_lzNGel52aklm4cdN8W8EBjF6gwv5Ro0lYO7YmJvS-A5n0O2mXv7EIV4kTEEzY3o6dOVFPvMn2drhiYvXhUxc7AqMZAcIWwfikZeJXk0wMV6gZozXm-PbvrzU0TrwYMQtXRLCLxJly3zvYxShrAuRn4Vmn1VlLcejaM0viGWl42Yph8s9QEl4DOo6utRAfTTRQyFtsCs5luat46aEGuJ22DomOaRQch1RYRQ9WUBUUvjvuJZ9ma8rMm5pYFQBlxejZaZ5yCQgO4VwJScNQKwsI4TPpdKsdeVK6JoN859_uMXE6L4JU6VRUA51WiMZuLz88jr0Pwyu2SYDUYepFVSIY_ChsYCHyB-q7Ceupc4FXiUNEIZdKCmIWycE6hgwHGLNdrEE7i_rYLUcOcqCZcbjj_9v_7FTowG4fz5WWzhXYJfKJBk9-sHH0pzaW4oi11ynARmjzDsUUOeREvIkQbf7UudNVVVBjg7_bm4=",
               "summary": []
-            },
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8499,
+            "cachedInputTokens": 8316,
+            "cacheWriteTokens": 180,
+            "outputTokens": 66
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "17ea945884fccd81b38aaa3fb97f48f07938a83dad2be995eba1cb04ea7b0a72",
+        "response": {
+          "text": "Maria L.’s usual is “Colour with Jess.” I gave you the wrong answer before—sorry about that.",
+          "toolCalls": [],
+          "replay": [
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -64,10 +87,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8468,
-            "cachedInputTokens": 8279,
-            "cacheWriteTokens": 186,
-            "outputTokens": 36
+            "inputTokens": 8698,
+            "cachedInputTokens": 8496,
+            "cacheWriteTokens": 199,
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

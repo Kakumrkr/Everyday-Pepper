@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e605309c9ee5a5694fc3f75397c28c943062712cfa49221e52179e989c4524d2",
+        "fingerprint": "332b7b848960ca95931d0c11b376887ca765bd8b6e52c78ae133d17fb898ecc5",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_IhIUU3ppcSshfWovIyv0l2kV",
+              "id": "call_D8JwyrVQJn7hqvV7KlU0cyIL",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8284,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8321,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,42 +25,42 @@
         }
       },
       {
-        "fingerprint": "513662b5d7d574fbfca7de55ff978ef5a2604e75546ba25e369c5f4cacd23c28",
+        "fingerprint": "eba075d137aded2b73ec5cb3fcf25afe5062a3903abd2e43b1ef3618c87146ed",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dMmXiGPTBuuhV6pQzh9euDab",
+              "id": "call_1UW4zoIJhV979jzWbQquaGLZ",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_hrn2PFzRVD8bHSPtMjZCpBpw",
+              "id": "call_hIm7AmJqoHfPioLDhBaJB6ks",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_jaFfocZujpPvsepfoWzPLDxG",
+              "id": "call_jLdXNsAcWBOILdHz1bEqv5GT",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_3luazQ1CJJze2Y2kBXlHSOo4",
+              "id": "call_yHDpBePkwmKi0G9EpUJRQHCS",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_9UpbvllrpFaL9JUGwIiIPkFN",
+              "id": "call_o1CTyk9FtF4Tx8gIF4XtPfEc",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_GLWIDT5WKETGJS3PxHNIxER4",
+              "id": "call_IOyLBvosRYu8RycOwMlcyI7b",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-07\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_PeKBquOWRNQNTaG6qsAJXZjG",
+              "id": "call_KvG003zlduxCVuL3JnN87R5K",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-08\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -68,18 +68,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8558,
-            "cachedInputTokens": 8281,
-            "cacheWriteTokens": 274,
-            "outputTokens": 335
+            "inputTokens": 8607,
+            "cachedInputTokens": 8318,
+            "cacheWriteTokens": 286,
+            "outputTokens": 370
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "414ee00fb9aa7ed929b753426a7963783ee246d1d9bd116665141063c9ac1e9f",
+        "fingerprint": "15d9ff71b0c7c8d43c59ff6bb4134a3eca51913550126666ea0416173c0b1e22",
         "response": {
-          "text": "Jess has 2 appointments this week: Tuesday at 3:00 PM and Friday at 2:00 PM, both haircuts. She also has a blocked hour Tuesday from noon to 1:00 PM. No other bookings or blocked time this week.",
+          "text": "Jess has 2 bookings this week: Tuesday, Nov 3 at 3 PM (haircut) and Friday, Nov 6 at 2 PM (haircut). She also has Tuesday blocked from noon to 1 PM. No other bookings or blocked time show on her schedule this week.",
           "toolCalls": [],
           "replay": [
             {
@@ -89,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9621,
-            "cachedInputTokens": 8555,
-            "cacheWriteTokens": 1063,
-            "outputTokens": 57
+            "inputTokens": 9742,
+            "cachedInputTokens": 8604,
+            "cacheWriteTokens": 1135,
+            "outputTokens": 64
           },
           "model": "gpt-6-luna"
         }

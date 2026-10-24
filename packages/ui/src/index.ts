@@ -12,4 +12,5 @@ export {
 } from './cards/change-card.js';
 export { BookingCard, ClientChoice, DayCard, PlanCard, SlotPicker } from './cards/choices.js';
 export { ChatNotice, FallbackNotice, WhyContent, type RenderLink } from './cards/why.js';
+export { Remembered, type MemoryChange, type RememberedProps } from './cards/remembered.js';
 export * from './cards/labels.js';

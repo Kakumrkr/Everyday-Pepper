@@ -11,7 +11,7 @@ Any change to a tool, a guide or the instructions makes **every** recorded casse
 
 ## 0. Ready
 
-- Every case green on the scripted cassettes: `pnpm --filter @pepper/ai build && pnpm --filter @pepper/ai eval` ($0).
+- Every case that has a scripted cassette green: `pnpm --filter @pepper/ai build && pnpm --filter @pepper/ai eval` ($0). The report also fails the cases with only a recorded cassette ("cassette miss … call 1"); that is expected, the replay test in `evals.int.test.ts` leaves them out. In a fresh container build the dependencies first: `pnpm turbo run build --filter=@pepper/ai...`.
 - `S=<scratchpad>`. Start the shared eval database in the background and keep it running:
   `cd packages/ai && node dist/evals/eval-db.js $S/evaldb.url` (run_in_background).
 

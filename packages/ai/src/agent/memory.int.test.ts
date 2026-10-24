@@ -1,5 +1,12 @@
 import type { ChatEvent, LlmRequest } from '@pepper/contracts';
-import { changeAutonomy, forgetFact, listFacts, listRecentActions, saveFact } from '@pepper/core';
+import {
+  changeAutonomy,
+  conversationHistory,
+  forgetFact,
+  listFacts,
+  listRecentActions,
+  saveFact,
+} from '@pepper/core';
 import { storedTextsOf, withTenant, type Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ScriptedProvider, scriptedResponse } from '../scripted-provider.js';
@@ -29,7 +36,12 @@ afterAll(async () => {
   await database.stop();
 });
 
-async function say(deps: AgentDeps, message: string, conversationId: string | null = null) {
+async function say(
+  deps: AgentDeps,
+  message: string,
+  conversationId: string | null = null,
+  events: ChatEvent[] = [],
+) {
   const started = await startTurn(deps, {
     clientTurnId: clientTurnId(),
     conversationId: conversationId as never,
@@ -37,7 +49,6 @@ async function say(deps: AgentDeps, message: string, conversationId: string | nu
     channel: 'chat',
   });
   if (started.kind !== 'started') throw new Error(started.kind);
-  const events: ChatEvent[] = [];
   const reason = await started.run((event) => {
     events.push(event);
   });
@@ -106,6 +117,44 @@ describe('memory through the loop', () => {
     expect(text(after)).not.toMatch(/hazelnut/i);
     const stored = await withTenant(db, w.tenantId, (tx) => storedTextsOf(tx));
     expect(stored.filter((each) => /hazelnut/i.test(each))).toEqual([]);
+  });
+
+  it('an answer names the facts its turn recalled, live and in history (the chip, S32)', async () => {
+    const w = await newWorld(db);
+    const { fact } = await saveFact(db, w.owner, {
+      subject: { type: 'client', id: w.maria.id },
+      key: 'allergy',
+      value: 'Hazelnut oil',
+    });
+    const provider = new ScriptedProvider([
+      scriptedResponse({
+        text: 'Let me look.',
+        toolCalls: [call('c1', 'find_clients', { name: 'Maria' })],
+      }),
+      scriptedResponse({ text: 'Careful: Maria is allergic to hazelnut oil.' }),
+      scriptedResponse({ text: 'Hello!' }),
+    ]);
+    const deps = agentDepsFor(w, w.owner, provider);
+    const events: ChatEvent[] = [];
+    const chat = await say(deps, 'Anything about Maria?', null, events);
+    const answers = events.flatMap((event) =>
+      event.type === 'message.completed' ? [event.factIds] : [],
+    );
+    // Before the lookup, nothing; after it, the fact it brought.
+    expect(answers).toEqual([[], [fact.id]]);
+    const later: ChatEvent[] = [];
+    await say(deps, 'Hi', chat, later);
+    expect(later.find((event) => event.type === 'message.completed')).toMatchObject({
+      factIds: [],
+    });
+    const history = await conversationHistory(db, w.owner, chat);
+    expect(
+      history.flatMap((item) => (item.kind === 'assistant' ? [[item.text, item.factIds]] : [])),
+    ).toEqual([
+      ['Let me look.', []],
+      ['Careful: Maria is allergic to hazelnut oil.', [fact.id]],
+      ['Hello!', []],
+    ]);
   });
 
   it('the business’s own facts come with the instructions and make the turn untrusted', async () => {

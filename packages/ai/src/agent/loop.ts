@@ -1,5 +1,7 @@
 import {
+  ANSWER_FACTS_MAX,
   ChatEventSchema,
+  MemoryFactIdSchema,
   type ChatChannel,
   type ChatEvent,
   type ConversationId,
@@ -307,7 +309,12 @@ async function runTurn(
       if (answer !== undefined) {
         history.push(answer);
         if (response.text.trim() !== '') {
-          await send({ type: 'message.completed', messageId: answer.id, text: response.text });
+          await send({
+            type: 'message.completed',
+            messageId: answer.id,
+            text: response.text,
+            factIds: recalled.slice(0, ANSWER_FACTS_MAX).map((id) => MemoryFactIdSchema.parse(id)),
+          });
         }
       }
 

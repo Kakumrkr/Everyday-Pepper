@@ -6,6 +6,7 @@ import { ClientIdSchema } from './clients.js';
 import { UserIdSchema } from './tenancy.js';
 import { LocalDateSchema } from './rules.js';
 import { UtcDateTimeSchema } from './time.js';
+import { MemoryFactIdSchema } from './memory-ids.js';
 import { looksLikeContact } from './trust.js';
 
 // What Pepper remembers (Phase 7, ADR-0034, the Phase 7 playbook): facts about the business,
@@ -14,8 +15,7 @@ import { looksLikeContact } from './trust.js';
 // subject and key; the previous value is kept only for the 7-day Undo window. Values live only
 // in the memory tables: deleting a fact removes it everywhere (playbook principle 7).
 
-export const MemoryFactIdSchema = z.uuid().toLowerCase().brand<'MemoryFactId'>();
-export type MemoryFactId = z.infer<typeof MemoryFactIdSchema>;
+export { MemoryFactIdSchema, type MemoryFactId } from './memory-ids.js';
 
 export const MemoryEpisodeIdSchema = z.uuid().toLowerCase().brand<'MemoryEpisodeId'>();
 export type MemoryEpisodeId = z.infer<typeof MemoryEpisodeIdSchema>;
@@ -265,3 +265,85 @@ export const LastVisitFactValueSchema = z.strictObject({
   serviceName: z.string().max(120),
 });
 export type LastVisitFactValue = z.infer<typeof LastVisitFactValueSchema>;
+
+/** A learned rule's fact (`propose_rule`, S31): its key starts `rule_`. */
+export function isLearnedRuleKey(key: string): boolean {
+  return key.startsWith('rule_');
+}
+
+/**
+ * A remembered fact as "What I know" and the client profile show it (S32, playbook M-5): with
+ * whom it is about by name, a visit note's visit, and where it came from ("You said in chat").
+ */
+export const MemoryFactViewSchema = z.strictObject({
+  id: MemoryFactIdSchema,
+  subject: MemorySubjectSchema,
+  /** The client, staff member or service; a visit note's client. `null` for the business. */
+  subjectName: z.string().max(120).nullable(),
+  /** A visit note's visit: when it started and the service; `null` for any other fact. */
+  visit: z
+    .strictObject({ startsAt: UtcDateTimeSchema, serviceName: z.string().max(120) })
+    .nullable(),
+  key: MemoryFactKeySchema,
+  value: z.string().max(MEMORY_LIMITS.valueMax),
+  sensitive: z.boolean(),
+  source: MemorySourceSchema,
+  /** Whether the viewer saved it (or the AI did, in the viewer's chat). */
+  byYou: z.boolean(),
+  createdAt: UtcDateTimeSchema,
+  updatedAt: UtcDateTimeSchema,
+});
+export type MemoryFactView = z.infer<typeof MemoryFactViewSchema>;
+
+/** How many facts a screen lists at once. */
+export const MEMORY_FACTS_PAGE = 500;
+
+const MemoryFactListFields = {
+  subjectType: MemorySubjectTypeSchema.optional(),
+  clientId: ClientIdSchema.optional(),
+  bookingId: BookingIdSchema.optional(),
+};
+const oneClientOrVisit = (query: { clientId?: unknown; bookingId?: unknown }) =>
+  query.clientId === undefined || query.bookingId === undefined;
+const ONE_CLIENT_OR_VISIT = { message: 'Ask for a client or a visit, not both' };
+
+/**
+ * Which facts a screen lists (S32): active ones the member may read. `clientId`: that client's
+ * facts and the notes of their visits (the client profile); `bookingId`: one visit's notes.
+ */
+export const MemoryFactListQuerySchema = z
+  .strictObject({ ...MemoryFactListFields, sensitive: z.boolean().optional() })
+  .refine(oneClientOrVisit, ONE_CLIENT_OR_VISIT);
+export type MemoryFactListQuery = z.input<typeof MemoryFactListQuerySchema>;
+
+/** `GET /v1/memory/facts`: `MemoryFactListQuerySchema` from a query string. */
+export const MemoryFactsHttpQuerySchema = z
+  .strictObject({
+    ...MemoryFactListFields,
+    sensitive: z
+      .enum(['true', 'false'])
+      .transform((value) => value === 'true')
+      .optional(),
+  })
+  .refine(oneClientOrVisit, ONE_CLIENT_OR_VISIT);
+
+export const MemoryFactsResponseSchema = z.strictObject({
+  facts: z.array(MemoryFactViewSchema).max(MEMORY_FACTS_PAGE),
+});
+export type MemoryFactsResponse = z.infer<typeof MemoryFactsResponseSchema>;
+
+/** `POST /v1/memory/facts/shown`: the live state of facts an answer used (the chip, S32). */
+export const MemoryFactsShownRequestSchema = z.strictObject({
+  factIds: z.array(MemoryFactIdSchema).min(1).max(MEMORY_LIMITS.episodeFactsMax),
+});
+export type MemoryFactsShownRequest = z.infer<typeof MemoryFactsShownRequestSchema>;
+
+export const MemoryFactsShownResponseSchema = z.strictObject({
+  facts: z.array(MemoryFactShownSchema).max(MEMORY_LIMITS.episodeFactsMax),
+});
+export type MemoryFactsShownResponse = z.infer<typeof MemoryFactsShownResponseSchema>;
+
+export const MemoryEpisodesResponseSchema = z.strictObject({
+  episodes: z.array(MemoryEpisodeSchema.strict()),
+});
+export type MemoryEpisodesResponse = z.infer<typeof MemoryEpisodesResponseSchema>;

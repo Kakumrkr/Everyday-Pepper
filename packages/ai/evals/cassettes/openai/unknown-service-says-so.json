@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4354f12d7f03181f9d3f2b2c8509946617d238a692ed6548cecc8e43965b22b9",
+        "fingerprint": "6e244c857c9b08a838f6c6209dc883f614829794f2a7866eb9913a86a0e80661",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dQGZoo4pFx80nFf79NCC8EPh",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Ana\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 8287,
-            "cachedInputTokens": 8270,
-            "cacheWriteTokens": 14,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "9f18b5f84745db02278d0e8aa9d54db061be03fb591f8f4b6d89dbdd031cd454",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_doP9WkkU9nROLm3c4VUuJhGc",
+              "id": "call_MYuca4JFXAGjo57E9AGLmhnA",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8375,
-            "cachedInputTokens": 8284,
-            "cacheWriteTokens": 88,
+            "inputTokens": 8324,
+            "cachedInputTokens": 8307,
+            "cacheWriteTokens": 14,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "fb75b9891c9390b3f92134cbc80098c9addff68ef6c4d22e7fc102276e76703e",
+        "fingerprint": "330a1e2612978ce7aea56bd87a1ab8669ec826f743a734acc4b4c4ed501352fc",
         "response": {
-          "text": "I couldn’t book it: Juniper Hair Studio doesn’t currently list a manicure service. The available services are colour and haircut.",
+          "text": "Juniper Hair Studio doesn’t list manicures—only colour and haircuts. What service would you like me to book instead?",
           "toolCalls": [],
           "replay": [
             {
@@ -59,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8660,
-            "cachedInputTokens": 8372,
-            "cacheWriteTokens": 285,
+            "inputTokens": 8611,
+            "cachedInputTokens": 8321,
+            "cacheWriteTokens": 287,
             "outputTokens": 30
           },
           "model": "gpt-6-luna"

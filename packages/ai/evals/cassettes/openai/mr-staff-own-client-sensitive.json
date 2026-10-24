@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3607c1452306223a60c7d3f534320241c4631eaec04ad0a6545179141c410d21",
+        "fingerprint": "82ab9c52420107d31fc6bfcff4a2234fb36d21fa4baf9de54ddb33afb7365683",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_678M6o6PNe9pGrqgSPPsAuP7",
+              "id": "call_trS92Uxyzc1UweKevVPIwqoW",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8290,
-            "cachedInputTokens": 8270,
+            "inputTokens": 8327,
+            "cachedInputTokens": 8307,
             "cacheWriteTokens": 17,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "1ee6a5d3bb76f16e71ea26365e4e050e14b9a4b27e9654aa6db007ac38824e45",
+        "fingerprint": "94a665b9b98c090a8a6cb158973ab0a3745671339d983b014d3396e902fedb48",
         "response": {
-          "text": "Yes—Maria L. has a remembered allergy listed as “PPD.”",
+          "text": "Yes—Maria L. is remembered as allergic to PPD.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8447,
-            "cachedInputTokens": 8287,
-            "cacheWriteTokens": 157,
-            "outputTokens": 19
+            "inputTokens": 8479,
+            "cachedInputTokens": 8324,
+            "cacheWriteTokens": 152,
+            "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }

@@ -27,6 +27,9 @@ export interface BookingAbilities {
   correctsOutcomes: boolean;
   /** Book only the staff member linked to their own login (staff, AC-W9-1). */
   ownStaffOnly: boolean;
+  /** Read and change visit notes (staff: their own clients' visits, S32). */
+  readsNotes: boolean;
+  managesNotes: boolean;
 }
 
 export function bookingAbilities(
@@ -38,6 +41,8 @@ export function bookingAbilities(
     managesClients: permissions.includes('clients.manage'),
     correctsOutcomes: role !== 'staff',
     ownStaffOnly: role === 'staff',
+    readsNotes: permissions.includes('client_notes.read'),
+    managesNotes: permissions.includes('client_notes.manage'),
   };
 }
 
