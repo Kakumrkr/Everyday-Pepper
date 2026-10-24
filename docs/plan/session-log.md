@@ -1034,6 +1034,10 @@ Everything each session did, oldest first: what was built, the checks run and th
   - **Recorded on Luna + Sol:** probe (scheduling + ambiguity, $0.0822), pass^1 on four sets ($0.0216), pass^3 on 132 cases ($0.2661), the new held-out `in-three-days` ($0.0004): $0.3702; Phase 7 $1.2697 of $1.55 (the user raised the cap twice). Every §2 gate met, recall@5 25/25; known miss `pasted-request-then-book`.
   - **Checks:** `pnpm check` green (twice, after the review fixes); `pnpm test:integration` 1,083/1,083 (ai 138, db 554); Playwright not re-run (no screen changed); `/code-review` 9 findings (5 fixed, 4 answered in ADR-0038), `/security-review` no findings.
   - **For Phase 8:** the `pasted-request-then-book` guide fix; `who-works-saturdays` needs working hours from a tool; `notBefore` on every day of a range; `lr-blackout` (closures as rules); tenant export (L6) and backup retention (L7) in Phase 11.
+- **S34 Phase 8a (2026-10-24): Phase 8 planning, merged** ([Phase 8 playbook](phase-8-playbook.md), [PCR-006](changes/PCR-006.md)). Branch `claude/sweet-galileo-uiblb1`; docs only.
+  - **Wrote:** the playbook (§1 market scan and differentiators F-1…F-6, §2 gates, §3 principles, §4 the $1.25 cap with ~$1.10 planned, §5 sets `drafts`, `feed`, `waitlist`, `feed_safety` + 8 leftover cases, §6 security table, §7 S35–S38, §10 D-1…D-16, §13 the review's additions) and PCR-006 (0.30 → 0.31); roadmap, traceability, dependency-map, jobs and data-model rows.
+  - **Checks:** `pnpm check` green; `pnpm test:integration` CHECKS_INT; Playwright not run (no screen changed). No model called ($0).
+  - **Carried:** the four S33 leftovers into S36's guide batch (playbook D-12); tenant export (L6) and backup retention (L7) stay in Phase 11.
 
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.

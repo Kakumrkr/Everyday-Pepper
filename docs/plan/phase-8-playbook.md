@@ -1,6 +1,6 @@
 # Phase 8 Playbook — Operator feed
 
-> **Status: Draft for the user's approval (S34, 2026-10-24).** Brief approved: "Go ahead with your recommendations" (layout A, a $1.25 cap, BullMQ only for the waitlist, insights by rules and drafts by the model). Every Phase 8 session (S35–S38) reads this file with `CLAUDE.md` and `STATUS.md`: the cross-cutting parts (1–6, 8–10) always, and its own section in 7. Changes after approval follow the PCR process. Plan changes it implies: [PCR-006](changes/PCR-006.md).
+> **Status: Approved by the user (S34, 2026-10-24)** — "approved, go ahead with /session-close", after the brief's "Go ahead with your recommendations" (layout A, a $1.25 cap, BullMQ only for the waitlist, insights by rules and drafts by the model). Section 13's review additions are approved with it; the user can still adjust any decision at the S35 Session Brief. Every Phase 8 session (S35–S38) reads this file with `CLAUDE.md` and `STATUS.md`: the cross-cutting parts (1–6, 8–10) always, and its own section in 7. Changes after this follow the PCR process. Plan changes it implies: [PCR-006](changes/PCR-006.md).
 >
 > Builds on [jobs-messaging-integrations.md](../architecture/jobs-messaging-integrations.md), [modules-and-templates.md](../architecture/modules-and-templates.md) (insight providers, waitlist ranking), [ai-agent-and-trust-layer.md](../architecture/ai-agent-and-trust-layer.md), the [Phase 6](phase-6-playbook.md) and [Phase 7](phase-7-playbook.md) playbooks (their principles still hold), [ADR-0017](../adr/0017-bookings-clients-and-waitlist.md) (waitlist model), [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md)–[ADR-0026](../adr/0026-tasks-and-web-push.md) (outbox, jobs, push), [ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md) (trust layer), [ADR-0033](../adr/0033-real-model-evals-and-model-choice.md) (models, runner), [ADR-0038](../adr/0038-what-i-know-and-the-remembered-chip.md) "S33" (the leftovers) and the acceptance criteria W4 and W5. Roadmap: Phase 8, "AC-W4-1, AC-W5-1; insight fixtures tested".
 
@@ -123,7 +123,7 @@ Also checked in S38b: the isolation suite at 100%, `pnpm audit --prod`, and the 
 
 ## 7. Session guides
 
-### S34 (8a) — Phase 8 planning — this session
+### S34 (8a) — Phase 8 planning — done
 - This playbook, [PCR-006](changes/PCR-006.md), the roadmap, traceability, dependency map, the jobs and data-model rows, and STATUS.
 
 ### S35 (8b) — The feed and insights (no model)
@@ -188,7 +188,7 @@ Section 9 of the Phase 6 playbook applies as written: re-check the references an
 |---|---|
 | S34 | Reviewing the draft against the law and the market changed three things: rebooking nudges are commercial email, so they need an unsubscribe before the first one is sent (principle 11); competitors' waitlists offer no middle ground between off and automatic, which the dial gives for free; and insight "dashboards" are what owners don't read, so every item must already be work. Next (S35): build the insight fixtures before the feed screen. |
 
-## 10. Decisions for this phase (Claude's recommendation for each; approved with the playbook)
+## 10. Decisions for this phase (Claude's recommendation for each, approved with the playbook)
 
 | # | Decision | Choice | Why |
 |---|---|---|---|
