@@ -144,3 +144,39 @@ export type PublicRescheduleInput = z.input<typeof PublicRescheduleInputSchema>;
 /** The answer of the manage endpoints: the booking as it is now. */
 export const PublicBookingResponseSchema = z.object({ booking: PublicBookingSchema });
 export type PublicBookingResponse = z.infer<typeof PublicBookingResponseSchema>;
+
+// ---------------------------------------------------------------------------------------------
+// Waitlist offers (S37, ADR-0041): a freed slot offered to a client who was waiting for it. The
+// offer email links to the booking page's offer page with the claim secret in the fragment;
+// the page posts it like a reschedule/cancel link's. Only the secret's hash is stored, and the
+// first client to claim books the slot.
+
+/** The secret of a waitlist offer's claim link: 256 random bits, base64url (as `ManageToken`). */
+export const OfferTokenSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{43}$/, 'This link is not valid')
+  .brand<'OfferToken'>();
+export type OfferToken = z.infer<typeof OfferTokenSchema>;
+
+/** `POST /v1/public/businesses/:slug/waitlist-offer/lookup` and `/claim`: the link's secret. */
+export const OfferTokenInputSchema = z.object({ token: OfferTokenSchema }).strict();
+export type OfferTokenInput = z.input<typeof OfferTokenInputSchema>;
+
+/**
+ * A waitlist offer as its client sees it behind their link. `open`: it may be claimed now;
+ * `claimed`: this client booked it; `taken`: someone else did, or the time is gone; `expired`:
+ * it was not claimed in time. A used or expired link never says who holds the slot now.
+ */
+export const PublicOfferSchema = z.object({
+  status: z.enum(['open', 'claimed', 'taken', 'expired']),
+  startsAt: UtcDateTimeSchema,
+  endsAt: UtcDateTimeSchema,
+  service: z.object({ id: ServiceIdSchema, name: z.string() }),
+  staff: z.object({ id: StaffMemberIdSchema, displayName: z.string() }),
+  /** Until when it may be claimed. */
+  expiresAt: UtcDateTimeSchema,
+});
+export type PublicOffer = z.infer<typeof PublicOfferSchema>;
+
+export const PublicOfferResponseSchema = z.object({ offer: PublicOfferSchema });
+export type PublicOfferResponse = z.infer<typeof PublicOfferResponseSchema>;

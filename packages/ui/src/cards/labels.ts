@@ -29,6 +29,7 @@ export const ACTION_LABEL: Record<AutonomyAction, string> = {
   'client_note.save': 'Client note',
   'rule.change': 'Booking rule',
   'task.create': 'To-do',
+  'waitlist.change': 'Waitlist',
   'message.confirmation': 'Confirmation email',
   'message.rebooking_nudge': 'Rebooking nudge',
   'message.waitlist_offer': 'Waitlist offer',
@@ -45,6 +46,7 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
   'client_note.save': 'Save notes and preferences about clients',
   'rule.change': 'Turn a preference into a booking rule or hours',
   'task.create': 'Add to-dos and reminders',
+  'waitlist.change': 'Put clients on the waitlist',
   'message.confirmation': 'Booking confirmations and reminders',
   'message.rebooking_nudge': 'Rebooking nudges to regulars who are due',
   'message.waitlist_offer': 'Offering open slots to the waitlist',
@@ -266,8 +268,21 @@ export function changeRows(
       add('Open time', null, span(after, 'time', 'endTime'));
       add('With', null, text(after, 'staffName'));
       return rows;
-    case 'message.confirmation':
+    case 'waitlist.change':
+      // `add_to_waitlist` (S37): who waits, for what, with whom and when they could come.
+      add('Client', null, text(after, 'clientName'));
+      add('Service', null, text(after, 'serviceName'));
+      add('With', null, text(after, 'staffName'));
+      add('When', null, text(after, 'windows'));
+      return rows;
     case 'message.waitlist_offer':
+      // A freed slot offered to the best matches (S37): the time and to whom.
+      add('Open time', null, span(after, 'time', 'endTime'));
+      add('With', null, text(after, 'staffName'));
+      add('Service', null, text(after, 'serviceName'));
+      add('Offered to', null, text(after, 'offeredTo'));
+      return rows;
+    case 'message.confirmation':
     case 'message.bulk':
       // No tool makes these yet (messages: Phase 8); the summary says it all.
       return rows;
@@ -329,6 +344,7 @@ const EMAIL_NAME: Record<WouldBeEmail['template'], string> = {
   rescheduled: 'new-time email',
   cancelled: 'cancellation email',
   rebooking_nudge: 'rebooking email',
+  waitlist_offer: 'waitlist offer',
 };
 
 const WOULD_SEND: Record<WouldBeEmail['template'], (name: string) => string> = {
@@ -336,6 +352,7 @@ const WOULD_SEND: Record<WouldBeEmail['template'], (name: string) => string> = {
   rescheduled: (name) => `Emails ${name} the new time.`,
   cancelled: (name) => `Emails ${name} that it’s cancelled.`,
   rebooking_nudge: (name) => `Emails ${name} the rebooking note below.`,
+  waitlist_offer: (name) => `Emails ${name} the open time, first to claim it books it.`,
 };
 
 const ALREADY: Record<WouldBeEmail['template'], (name: string) => string> = {
@@ -343,6 +360,7 @@ const ALREADY: Record<WouldBeEmail['template'], (name: string) => string> = {
   rescheduled: (name) => `${name} was already emailed the new time.`,
   cancelled: (name) => `${name} was already emailed that it’s cancelled.`,
   rebooking_nudge: (name) => `${name} was already emailed about rebooking.`,
+  waitlist_offer: (name) => `${name} was already offered this time.`,
 };
 
 /** What happens, or happened, to one email the action involves. */
