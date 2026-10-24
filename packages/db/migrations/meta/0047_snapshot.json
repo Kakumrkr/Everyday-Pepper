@@ -110,13 +110,9 @@
         "accounts_user_id_users_id_fk": {
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -386,67 +382,45 @@
         "ai_action_executions_tenant_id_tenants_id_fk": {
           "name": "ai_action_executions_tenant_id_tenants_id_fk",
           "tableFrom": "ai_action_executions",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "ai_action_executions_on_behalf_of_user_id_users_id_fk": {
           "name": "ai_action_executions_on_behalf_of_user_id_users_id_fk",
           "tableFrom": "ai_action_executions",
-          "columnsFrom": [
-            "on_behalf_of_user_id"
-          ],
+          "columnsFrom": ["on_behalf_of_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "ai_action_executions_requested_by_user_id_users_id_fk": {
           "name": "ai_action_executions_requested_by_user_id_users_id_fk",
           "tableFrom": "ai_action_executions",
-          "columnsFrom": [
-            "requested_by_user_id"
-          ],
+          "columnsFrom": ["requested_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "ai_action_executions_undone_by_user_id_users_id_fk": {
           "name": "ai_action_executions_undone_by_user_id_users_id_fk",
           "tableFrom": "ai_action_executions",
-          "columnsFrom": [
-            "undone_by_user_id"
-          ],
+          "columnsFrom": ["undone_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "ai_action_executions_proposal_fk": {
           "name": "ai_action_executions_proposal_fk",
           "tableFrom": "ai_action_executions",
-          "columnsFrom": [
-            "tenant_id",
-            "proposal_id"
-          ],
+          "columnsFrom": ["tenant_id", "proposal_id"],
           "tableTo": "ai_action_proposals",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -455,26 +429,17 @@
       "uniqueConstraints": {
         "ai_action_executions_tenant_id_id_unique": {
           "name": "ai_action_executions_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         },
         "ai_action_executions_idempotency_key_unique": {
           "name": "ai_action_executions_idempotency_key_unique",
-          "columns": [
-            "tenant_id",
-            "idempotency_key"
-          ],
+          "columns": ["tenant_id", "idempotency_key"],
           "nullsNotDistinct": false
         },
         "ai_action_executions_proposal_unique": {
           "name": "ai_action_executions_proposal_unique",
-          "columns": [
-            "tenant_id",
-            "proposal_id"
-          ],
+          "columns": ["tenant_id", "proposal_id"],
           "nullsNotDistinct": false
         }
       },
@@ -483,9 +448,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -493,9 +456,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR on_behalf_of_user_id = current_user_id() OR requested_by_user_id = current_user_id()",
           "withCheck": "(SELECT current_member_sees_all()) OR on_behalf_of_user_id = current_user_id() OR requested_by_user_id = current_user_id()"
         }
@@ -787,39 +748,27 @@
         "ai_action_proposals_tenant_id_tenants_id_fk": {
           "name": "ai_action_proposals_tenant_id_tenants_id_fk",
           "tableFrom": "ai_action_proposals",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "ai_action_proposals_requested_by_user_id_users_id_fk": {
           "name": "ai_action_proposals_requested_by_user_id_users_id_fk",
           "tableFrom": "ai_action_proposals",
-          "columnsFrom": [
-            "requested_by_user_id"
-          ],
+          "columnsFrom": ["requested_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "ai_action_proposals_decided_by_user_id_users_id_fk": {
           "name": "ai_action_proposals_decided_by_user_id_users_id_fk",
           "tableFrom": "ai_action_proposals",
-          "columnsFrom": [
-            "decided_by_user_id"
-          ],
+          "columnsFrom": ["decided_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -828,18 +777,12 @@
       "uniqueConstraints": {
         "ai_action_proposals_tenant_id_id_unique": {
           "name": "ai_action_proposals_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         },
         "ai_action_proposals_idempotency_key_unique": {
           "name": "ai_action_proposals_idempotency_key_unique",
-          "columns": [
-            "tenant_id",
-            "idempotency_key"
-          ],
+          "columns": ["tenant_id", "idempotency_key"],
           "nullsNotDistinct": false
         }
       },
@@ -848,9 +791,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -858,9 +799,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR requested_by_user_id = current_user_id()",
           "withCheck": "(SELECT current_member_sees_all()) OR requested_by_user_id = current_user_id()"
         }
@@ -1033,26 +972,18 @@
         "audit_log_tenant_id_tenants_id_fk": {
           "name": "audit_log_tenant_id_tenants_id_fk",
           "tableFrom": "audit_log",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "audit_log_actor_user_id_users_id_fk": {
           "name": "audit_log_actor_user_id_users_id_fk",
           "tableFrom": "audit_log",
-          "columnsFrom": [
-            "actor_user_id"
-          ],
+          "columnsFrom": ["actor_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -1064,9 +995,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         }
@@ -1156,26 +1085,18 @@
         "autonomy_settings_tenant_id_tenants_id_fk": {
           "name": "autonomy_settings_tenant_id_tenants_id_fk",
           "tableFrom": "autonomy_settings",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "autonomy_settings_updated_by_user_id_users_id_fk": {
           "name": "autonomy_settings_updated_by_user_id_users_id_fk",
           "tableFrom": "autonomy_settings",
-          "columnsFrom": [
-            "updated_by_user_id"
-          ],
+          "columnsFrom": ["updated_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -1184,9 +1105,7 @@
       "uniqueConstraints": {
         "autonomy_settings_tenant_unique": {
           "name": "autonomy_settings_tenant_unique",
-          "columns": [
-            "tenant_id"
-          ],
+          "columns": ["tenant_id"],
           "nullsNotDistinct": false
         }
       },
@@ -1195,9 +1114,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -1205,18 +1122,14 @@
           "name": "member_scope_insert",
           "as": "RESTRICTIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(SELECT current_member_sees_all())"
         },
         "member_scope_update": {
           "name": "member_scope_update",
           "as": "RESTRICTIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "true",
           "withCheck": "(SELECT current_member_sees_all())"
         },
@@ -1224,9 +1137,7 @@
           "name": "member_scope_delete",
           "as": "RESTRICTIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all())"
         }
       },
@@ -1289,43 +1200,27 @@
         "booking_occupancy_tenant_id_tenants_id_fk": {
           "name": "booking_occupancy_tenant_id_tenants_id_fk",
           "tableFrom": "booking_occupancy",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "booking_occupancy_booking_fk": {
           "name": "booking_occupancy_booking_fk",
           "tableFrom": "booking_occupancy",
-          "columnsFrom": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsFrom": ["tenant_id", "id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "booking_occupancy_staff_member_fk": {
           "name": "booking_occupancy_staff_member_fk",
           "tableFrom": "booking_occupancy",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1337,9 +1232,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -1347,18 +1240,14 @@
           "name": "member_scope_insert",
           "as": "RESTRICTIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())"
         },
         "member_scope_update": {
           "name": "member_scope_update",
           "as": "RESTRICTIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())",
           "withCheck": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())"
         },
@@ -1366,9 +1255,7 @@
           "name": "member_scope_delete",
           "as": "RESTRICTIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())"
         }
       },
@@ -1431,15 +1318,9 @@
         "booking_reminders_booking_fk": {
           "name": "booking_reminders_booking_fk",
           "tableFrom": "booking_reminders",
-          "columnsFrom": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsFrom": ["tenant_id", "id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -1451,9 +1332,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -1461,9 +1340,7 @@
           "name": "job_scan",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND current_job_scan('reminders')"
         }
       },
@@ -1551,28 +1428,18 @@
         "booking_rules_tenant_id_tenants_id_fk": {
           "name": "booking_rules_tenant_id_tenants_id_fk",
           "tableFrom": "booking_rules",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "booking_rules_staff_member_fk": {
           "name": "booking_rules_staff_member_fk",
           "tableFrom": "booking_rules",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -1584,9 +1451,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         }
@@ -1796,58 +1661,36 @@
         "booking_verifications_tenant_id_tenants_id_fk": {
           "name": "booking_verifications_tenant_id_tenants_id_fk",
           "tableFrom": "booking_verifications",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "booking_verifications_service_fk": {
           "name": "booking_verifications_service_fk",
           "tableFrom": "booking_verifications",
-          "columnsFrom": [
-            "tenant_id",
-            "service_id"
-          ],
+          "columnsFrom": ["tenant_id", "service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "booking_verifications_staff_member_fk": {
           "name": "booking_verifications_staff_member_fk",
           "tableFrom": "booking_verifications",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "booking_verifications_booking_fk": {
           "name": "booking_verifications_booking_fk",
           "tableFrom": "booking_verifications",
-          "columnsFrom": [
-            "tenant_id",
-            "booking_id"
-          ],
+          "columnsFrom": ["tenant_id", "booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1859,9 +1702,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -1869,9 +1710,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_user_id() IS NULL",
           "withCheck": "current_user_id() IS NULL"
         }
@@ -2171,71 +2010,45 @@
         "bookings_tenant_id_tenants_id_fk": {
           "name": "bookings_tenant_id_tenants_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "bookings_created_by_user_id_users_id_fk": {
           "name": "bookings_created_by_user_id_users_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "created_by_user_id"
-          ],
+          "columnsFrom": ["created_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "bookings_client_fk": {
           "name": "bookings_client_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "tenant_id",
-            "client_id"
-          ],
+          "columnsFrom": ["tenant_id", "client_id"],
           "tableTo": "clients",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "bookings_service_fk": {
           "name": "bookings_service_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "tenant_id",
-            "service_id"
-          ],
+          "columnsFrom": ["tenant_id", "service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "bookings_staff_member_fk": {
           "name": "bookings_staff_member_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -2244,10 +2057,7 @@
       "uniqueConstraints": {
         "bookings_tenant_id_id_unique": {
           "name": "bookings_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -2256,9 +2066,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -2266,9 +2074,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())",
           "withCheck": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())"
         }
@@ -2415,13 +2221,9 @@
         "clients_tenant_id_tenants_id_fk": {
           "name": "clients_tenant_id_tenants_id_fk",
           "tableFrom": "clients",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -2430,10 +2232,7 @@
       "uniqueConstraints": {
         "clients_tenant_id_id_unique": {
           "name": "clients_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -2442,9 +2241,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -2452,9 +2249,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR id IN (SELECT client_id FROM bookings) OR id IN (SELECT client_id FROM waitlist_entries) OR (SELECT current_client_contact()) IN (email, phone)",
           "withCheck": "(SELECT current_member_sees_all())"
         },
@@ -2462,9 +2257,7 @@
           "name": "member_scope_delete",
           "as": "RESTRICTIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all())"
         }
       },
@@ -2628,43 +2421,27 @@
         "conversation_messages_tenant_id_tenants_id_fk": {
           "name": "conversation_messages_tenant_id_tenants_id_fk",
           "tableFrom": "conversation_messages",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "conversation_messages_conversation_fk": {
           "name": "conversation_messages_conversation_fk",
           "tableFrom": "conversation_messages",
-          "columnsFrom": [
-            "tenant_id",
-            "conversation_id"
-          ],
+          "columnsFrom": ["tenant_id", "conversation_id"],
           "tableTo": "conversations",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "conversation_messages_turn_fk": {
           "name": "conversation_messages_turn_fk",
           "tableFrom": "conversation_messages",
-          "columnsFrom": [
-            "tenant_id",
-            "turn_id"
-          ],
+          "columnsFrom": ["tenant_id", "turn_id"],
           "tableTo": "conversation_turns",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -2673,29 +2450,17 @@
       "uniqueConstraints": {
         "conversation_messages_tenant_id_id_unique": {
           "name": "conversation_messages_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         },
         "conversation_messages_seq_unique": {
           "name": "conversation_messages_seq_unique",
-          "columns": [
-            "tenant_id",
-            "conversation_id",
-            "seq"
-          ],
+          "columns": ["tenant_id", "conversation_id", "seq"],
           "nullsNotDistinct": false
         },
         "conversation_messages_tool_result_unique": {
           "name": "conversation_messages_tool_result_unique",
-          "columns": [
-            "tenant_id",
-            "turn_id",
-            "step",
-            "tool_call_id"
-          ],
+          "columns": ["tenant_id", "turn_id", "step", "tool_call_id"],
           "nullsNotDistinct": false
         }
       },
@@ -2704,9 +2469,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -2714,9 +2477,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_user_id() IS NULL OR user_id = current_user_id()",
           "withCheck": "current_user_id() IS NULL OR user_id = current_user_id()"
         }
@@ -2928,28 +2689,18 @@
         "conversation_turns_tenant_id_tenants_id_fk": {
           "name": "conversation_turns_tenant_id_tenants_id_fk",
           "tableFrom": "conversation_turns",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "conversation_turns_conversation_fk": {
           "name": "conversation_turns_conversation_fk",
           "tableFrom": "conversation_turns",
-          "columnsFrom": [
-            "tenant_id",
-            "conversation_id"
-          ],
+          "columnsFrom": ["tenant_id", "conversation_id"],
           "tableTo": "conversations",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -2958,19 +2709,12 @@
       "uniqueConstraints": {
         "conversation_turns_tenant_id_id_unique": {
           "name": "conversation_turns_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         },
         "conversation_turns_client_turn_unique": {
           "name": "conversation_turns_client_turn_unique",
-          "columns": [
-            "tenant_id",
-            "user_id",
-            "client_turn_id"
-          ],
+          "columns": ["tenant_id", "user_id", "client_turn_id"],
           "nullsNotDistinct": false
         }
       },
@@ -2979,9 +2723,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -2989,9 +2731,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_user_id() IS NULL OR user_id = current_user_id()",
           "withCheck": "current_user_id() IS NULL OR user_id = current_user_id()"
         }
@@ -3126,28 +2866,18 @@
         "conversations_tenant_id_tenants_id_fk": {
           "name": "conversations_tenant_id_tenants_id_fk",
           "tableFrom": "conversations",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "conversations_membership_fk": {
           "name": "conversations_membership_fk",
           "tableFrom": "conversations",
-          "columnsFrom": [
-            "tenant_id",
-            "user_id"
-          ],
+          "columnsFrom": ["tenant_id", "user_id"],
           "tableTo": "memberships",
-          "columnsTo": [
-            "tenant_id",
-            "user_id"
-          ],
+          "columnsTo": ["tenant_id", "user_id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -3156,10 +2886,7 @@
       "uniqueConstraints": {
         "conversations_tenant_id_id_unique": {
           "name": "conversations_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -3168,9 +2895,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -3178,9 +2903,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_user_id() IS NULL OR user_id = current_user_id()",
           "withCheck": "current_user_id() IS NULL OR user_id = current_user_id()"
         }
@@ -3504,88 +3227,54 @@
         "feed_items_tenant_id_tenants_id_fk": {
           "name": "feed_items_tenant_id_tenants_id_fk",
           "tableFrom": "feed_items",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "feed_items_audience_staff_fk": {
           "name": "feed_items_audience_staff_fk",
           "tableFrom": "feed_items",
-          "columnsFrom": [
-            "tenant_id",
-            "audience_staff_id"
-          ],
+          "columnsFrom": ["tenant_id", "audience_staff_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "feed_items_staff_member_fk": {
           "name": "feed_items_staff_member_fk",
           "tableFrom": "feed_items",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "feed_items_client_fk": {
           "name": "feed_items_client_fk",
           "tableFrom": "feed_items",
-          "columnsFrom": [
-            "tenant_id",
-            "client_id"
-          ],
+          "columnsFrom": ["tenant_id", "client_id"],
           "tableTo": "clients",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "feed_items_booking_fk": {
           "name": "feed_items_booking_fk",
           "tableFrom": "feed_items",
-          "columnsFrom": [
-            "tenant_id",
-            "booking_id"
-          ],
+          "columnsFrom": ["tenant_id", "booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "feed_items_service_fk": {
           "name": "feed_items_service_fk",
           "tableFrom": "feed_items",
-          "columnsFrom": [
-            "tenant_id",
-            "service_id"
-          ],
+          "columnsFrom": ["tenant_id", "service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -3594,18 +3283,12 @@
       "uniqueConstraints": {
         "feed_items_tenant_id_id_unique": {
           "name": "feed_items_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         },
         "feed_items_dedupe_key_unique": {
           "name": "feed_items_dedupe_key_unique",
-          "columns": [
-            "tenant_id",
-            "dedupe_key"
-          ],
+          "columns": ["tenant_id", "dedupe_key"],
           "nullsNotDistinct": false
         }
       },
@@ -3614,9 +3297,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -3624,9 +3305,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR audience_staff_id IN (SELECT current_member_staff_ids())",
           "withCheck": "(SELECT current_member_sees_all()) OR audience_staff_id IN (SELECT current_member_staff_ids())"
         },
@@ -3634,18 +3313,14 @@
           "name": "member_scope_insert",
           "as": "RESTRICTIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(SELECT current_member_sees_all())"
         },
         "member_scope_delete": {
           "name": "member_scope_delete",
           "as": "RESTRICTIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all())"
         }
       },
@@ -3754,13 +3429,9 @@
         "insight_requests_tenant_id_tenants_id_fk": {
           "name": "insight_requests_tenant_id_tenants_id_fk",
           "tableFrom": "insight_requests",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -3772,9 +3443,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -3782,9 +3451,7 @@
           "name": "job_scan",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND current_job_scan('insights')"
         }
       },
@@ -3871,13 +3538,9 @@
         "insight_runs_tenant_id_tenants_id_fk": {
           "name": "insight_runs_tenant_id_tenants_id_fk",
           "tableFrom": "insight_runs",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -3886,9 +3549,7 @@
       "uniqueConstraints": {
         "insight_runs_tenant_unique": {
           "name": "insight_runs_tenant_unique",
-          "columns": [
-            "tenant_id"
-          ],
+          "columns": ["tenant_id"],
           "nullsNotDistinct": false
         }
       },
@@ -3897,9 +3558,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -3907,9 +3566,7 @@
           "name": "job_scan",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND current_job_scan('insights')"
         }
       },
@@ -4055,39 +3712,27 @@
         "invites_tenant_id_tenants_id_fk": {
           "name": "invites_tenant_id_tenants_id_fk",
           "tableFrom": "invites",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "invites_invited_by_user_id_users_id_fk": {
           "name": "invites_invited_by_user_id_users_id_fk",
           "tableFrom": "invites",
-          "columnsFrom": [
-            "invited_by_user_id"
-          ],
+          "columnsFrom": ["invited_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "invites_accepted_by_user_id_users_id_fk": {
           "name": "invites_accepted_by_user_id_users_id_fk",
           "tableFrom": "invites",
-          "columnsFrom": [
-            "accepted_by_user_id"
-          ],
+          "columnsFrom": ["accepted_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -4096,9 +3741,7 @@
       "uniqueConstraints": {
         "invites_token_hash_unique": {
           "name": "invites_token_hash_unique",
-          "columns": [
-            "token_hash"
-          ],
+          "columns": ["token_hash"],
           "nullsNotDistinct": false
         }
       },
@@ -4107,9 +3750,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -4117,9 +3758,7 @@
           "name": "invite_lookup",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND token_hash = current_invite_token_hash()"
         }
       },
@@ -4205,26 +3844,18 @@
         "memberships_tenant_id_tenants_id_fk": {
           "name": "memberships_tenant_id_tenants_id_fk",
           "tableFrom": "memberships",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "memberships_user_id_users_id_fk": {
           "name": "memberships_user_id_users_id_fk",
           "tableFrom": "memberships",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -4233,18 +3864,12 @@
       "uniqueConstraints": {
         "memberships_tenant_user_unique": {
           "name": "memberships_tenant_user_unique",
-          "columns": [
-            "tenant_id",
-            "user_id"
-          ],
+          "columns": ["tenant_id", "user_id"],
           "nullsNotDistinct": false
         },
         "memberships_tenant_id_id_unique": {
           "name": "memberships_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -4253,9 +3878,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -4263,18 +3886,14 @@
           "name": "member_read",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND user_id = current_user_id()"
         },
         "member_scope_update": {
           "name": "member_scope_update",
           "as": "RESTRICTIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "true",
           "withCheck": "(SELECT current_member_sees_all())"
         },
@@ -4282,9 +3901,7 @@
           "name": "member_scope_delete",
           "as": "RESTRICTIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR user_id = current_user_id()"
         }
       },
@@ -4472,28 +4089,18 @@
         "memory_episodes_tenant_id_tenants_id_fk": {
           "name": "memory_episodes_tenant_id_tenants_id_fk",
           "tableFrom": "memory_episodes",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "memory_episodes_membership_fk": {
           "name": "memory_episodes_membership_fk",
           "tableFrom": "memory_episodes",
-          "columnsFrom": [
-            "tenant_id",
-            "user_id"
-          ],
+          "columnsFrom": ["tenant_id", "user_id"],
           "tableTo": "memberships",
-          "columnsTo": [
-            "tenant_id",
-            "user_id"
-          ],
+          "columnsTo": ["tenant_id", "user_id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -4502,10 +4109,7 @@
       "uniqueConstraints": {
         "memory_episodes_tenant_id_id_unique": {
           "name": "memory_episodes_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -4514,9 +4118,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -4524,9 +4126,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_user_id() IS NULL OR user_id = current_user_id()",
           "withCheck": "current_user_id() IS NULL OR user_id = current_user_id()"
         }
@@ -4834,86 +4434,54 @@
         "memory_facts_tenant_id_tenants_id_fk": {
           "name": "memory_facts_tenant_id_tenants_id_fk",
           "tableFrom": "memory_facts",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "memory_facts_created_by_user_id_users_id_fk": {
           "name": "memory_facts_created_by_user_id_users_id_fk",
           "tableFrom": "memory_facts",
-          "columnsFrom": [
-            "created_by_user_id"
-          ],
+          "columnsFrom": ["created_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "memory_facts_client_fk": {
           "name": "memory_facts_client_fk",
           "tableFrom": "memory_facts",
-          "columnsFrom": [
-            "tenant_id",
-            "client_id"
-          ],
+          "columnsFrom": ["tenant_id", "client_id"],
           "tableTo": "clients",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "memory_facts_staff_member_fk": {
           "name": "memory_facts_staff_member_fk",
           "tableFrom": "memory_facts",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "memory_facts_service_fk": {
           "name": "memory_facts_service_fk",
           "tableFrom": "memory_facts",
-          "columnsFrom": [
-            "tenant_id",
-            "service_id"
-          ],
+          "columnsFrom": ["tenant_id", "service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "memory_facts_booking_fk": {
           "name": "memory_facts_booking_fk",
           "tableFrom": "memory_facts",
-          "columnsFrom": [
-            "tenant_id",
-            "booking_id"
-          ],
+          "columnsFrom": ["tenant_id", "booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -4922,10 +4490,7 @@
       "uniqueConstraints": {
         "memory_facts_tenant_id_id_unique": {
           "name": "memory_facts_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -4934,9 +4499,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -4944,27 +4507,21 @@
           "name": "member_scope_read",
           "as": "RESTRICTIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR ((subject_type = 'client' AND client_id IN (SELECT id FROM clients)) OR (subject_type = 'booking' AND booking_id IN (SELECT id FROM bookings)) OR (subject_type = 'staff' AND staff_member_id IN (SELECT current_member_staff_ids()))) OR (subject_type IN ('business', 'staff', 'service') AND NOT sensitive)"
         },
         "member_scope_insert": {
           "name": "member_scope_insert",
           "as": "RESTRICTIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(SELECT current_member_sees_all()) OR ((subject_type = 'client' AND client_id IN (SELECT id FROM clients)) OR (subject_type = 'booking' AND booking_id IN (SELECT id FROM bookings)) OR (subject_type = 'staff' AND staff_member_id IN (SELECT current_member_staff_ids())))"
         },
         "member_scope_update": {
           "name": "member_scope_update",
           "as": "RESTRICTIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR ((subject_type = 'client' AND client_id IN (SELECT id FROM clients)) OR (subject_type = 'booking' AND booking_id IN (SELECT id FROM bookings)) OR (subject_type = 'staff' AND staff_member_id IN (SELECT current_member_staff_ids())))",
           "withCheck": "(SELECT current_member_sees_all()) OR ((subject_type = 'client' AND client_id IN (SELECT id FROM clients)) OR (subject_type = 'booking' AND booking_id IN (SELECT id FROM bookings)) OR (subject_type = 'staff' AND staff_member_id IN (SELECT current_member_staff_ids())))"
         },
@@ -4972,9 +4529,7 @@
           "name": "member_scope_delete",
           "as": "RESTRICTIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR ((subject_type = 'client' AND client_id IN (SELECT id FROM clients)) OR (subject_type = 'booking' AND booking_id IN (SELECT id FROM bookings)) OR (subject_type = 'staff' AND staff_member_id IN (SELECT current_member_staff_ids())))"
         }
       },
@@ -5055,15 +4610,9 @@
         "outbox_dispatch_message_fk": {
           "name": "outbox_dispatch_message_fk",
           "tableFrom": "outbox_dispatch",
-          "columnsFrom": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsFrom": ["tenant_id", "id"],
           "tableTo": "outbox_messages",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -5075,9 +4624,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -5085,9 +4632,7 @@
           "name": "outbox_scan",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND current_outbox_scan()"
         }
       },
@@ -5190,13 +4735,9 @@
         "outbox_messages_tenant_id_tenants_id_fk": {
           "name": "outbox_messages_tenant_id_tenants_id_fk",
           "tableFrom": "outbox_messages",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -5205,18 +4746,12 @@
       "uniqueConstraints": {
         "outbox_messages_tenant_id_unique": {
           "name": "outbox_messages_tenant_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         },
         "outbox_messages_dedupe_key_unique": {
           "name": "outbox_messages_dedupe_key_unique",
-          "columns": [
-            "tenant_id",
-            "dedupe_key"
-          ],
+          "columns": ["tenant_id", "dedupe_key"],
           "nullsNotDistinct": false
         }
       },
@@ -5225,9 +4760,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         }
@@ -5339,28 +4872,18 @@
         "push_subscriptions_tenant_id_tenants_id_fk": {
           "name": "push_subscriptions_tenant_id_tenants_id_fk",
           "tableFrom": "push_subscriptions",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "push_subscriptions_membership_fk": {
           "name": "push_subscriptions_membership_fk",
           "tableFrom": "push_subscriptions",
-          "columnsFrom": [
-            "tenant_id",
-            "user_id"
-          ],
+          "columnsFrom": ["tenant_id", "user_id"],
           "tableTo": "memberships",
-          "columnsTo": [
-            "tenant_id",
-            "user_id"
-          ],
+          "columnsTo": ["tenant_id", "user_id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -5369,10 +4892,7 @@
       "uniqueConstraints": {
         "push_subscriptions_endpoint_unique": {
           "name": "push_subscriptions_endpoint_unique",
-          "columns": [
-            "tenant_id",
-            "endpoint"
-          ],
+          "columns": ["tenant_id", "endpoint"],
           "nullsNotDistinct": false
         }
       },
@@ -5381,9 +4901,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -5391,9 +4909,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_user_id() IS NULL OR user_id = current_user_id()",
           "withCheck": "current_user_id() IS NULL OR user_id = current_user_id()"
         }
@@ -5530,13 +5046,9 @@
         "services_tenant_id_tenants_id_fk": {
           "name": "services_tenant_id_tenants_id_fk",
           "tableFrom": "services",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -5545,10 +5057,7 @@
       "uniqueConstraints": {
         "services_tenant_id_id_unique": {
           "name": "services_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -5557,9 +5066,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         }
@@ -5678,26 +5185,18 @@
         "sessions_user_id_users_id_fk": {
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "sessions_active_tenant_id_tenants_id_fk": {
           "name": "sessions_active_tenant_id_tenants_id_fk",
           "tableFrom": "sessions",
-          "columnsFrom": [
-            "active_tenant_id"
-          ],
+          "columnsFrom": ["active_tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -5706,9 +5205,7 @@
       "uniqueConstraints": {
         "sessions_token_unique": {
           "name": "sessions_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "nullsNotDistinct": false
         }
       },
@@ -5778,13 +5275,9 @@
         "staff_members_tenant_id_tenants_id_fk": {
           "name": "staff_members_tenant_id_tenants_id_fk",
           "tableFrom": "staff_members",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -5793,17 +5286,12 @@
       "uniqueConstraints": {
         "staff_members_tenant_id_id_unique": {
           "name": "staff_members_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         },
         "staff_members_membership_id_unique": {
           "name": "staff_members_membership_id_unique",
-          "columns": [
-            "membership_id"
-          ],
+          "columns": ["membership_id"],
           "nullsNotDistinct": false
         }
       },
@@ -5812,9 +5300,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -5822,18 +5308,14 @@
           "name": "member_scope_insert",
           "as": "RESTRICTIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(SELECT current_member_sees_all())"
         },
         "member_scope_update": {
           "name": "member_scope_update",
           "as": "RESTRICTIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "true",
           "withCheck": "(SELECT current_member_sees_all())"
         },
@@ -5841,9 +5323,7 @@
           "name": "member_scope_delete",
           "as": "RESTRICTIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all())"
         }
       },
@@ -5923,43 +5403,27 @@
         "staff_services_tenant_id_tenants_id_fk": {
           "name": "staff_services_tenant_id_tenants_id_fk",
           "tableFrom": "staff_services",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "staff_services_staff_member_fk": {
           "name": "staff_services_staff_member_fk",
           "tableFrom": "staff_services",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "staff_services_service_fk": {
           "name": "staff_services_service_fk",
           "tableFrom": "staff_services",
-          "columnsFrom": [
-            "tenant_id",
-            "service_id"
-          ],
+          "columnsFrom": ["tenant_id", "service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -5968,10 +5432,7 @@
       "uniqueConstraints": {
         "staff_services_staff_service_unique": {
           "name": "staff_services_staff_service_unique",
-          "columns": [
-            "staff_member_id",
-            "service_id"
-          ],
+          "columns": ["staff_member_id", "service_id"],
           "nullsNotDistinct": false
         }
       },
@@ -5980,9 +5441,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         }
@@ -6152,26 +5611,18 @@
         "tasks_tenant_id_tenants_id_fk": {
           "name": "tasks_tenant_id_tenants_id_fk",
           "tableFrom": "tasks",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "tasks_created_by_user_id_users_id_fk": {
           "name": "tasks_created_by_user_id_users_id_fk",
           "tableFrom": "tasks",
-          "columnsFrom": [
-            "created_by_user_id"
-          ],
+          "columnsFrom": ["created_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -6180,10 +5631,7 @@
       "uniqueConstraints": {
         "tasks_tenant_id_id_unique": {
           "name": "tasks_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -6192,9 +5640,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -6202,9 +5648,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR assignee_user_id = current_user_id() OR created_by_user_id = current_user_id()",
           "withCheck": "(SELECT current_member_sees_all()) OR assignee_user_id = current_user_id() OR created_by_user_id = current_user_id()"
         },
@@ -6212,9 +5656,7 @@
           "name": "job_scan",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND current_job_scan('tasks')"
         }
       },
@@ -6325,9 +5767,7 @@
       "uniqueConstraints": {
         "tenants_slug_unique": {
           "name": "tenants_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "nullsNotDistinct": false
         }
       },
@@ -6336,9 +5776,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "id = current_tenant_id()",
           "withCheck": "id = current_tenant_id()"
         },
@@ -6346,27 +5784,21 @@
           "name": "member_read",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND id IN (SELECT tenant_id FROM memberships WHERE user_id = current_user_id())"
         },
         "public_lookup": {
           "name": "public_lookup",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND slug = current_public_slug()"
         },
         "job_scan": {
           "name": "job_scan",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND current_job_scan('cleanup')"
         }
       },
@@ -6483,41 +5915,27 @@
         "time_off_tenant_id_tenants_id_fk": {
           "name": "time_off_tenant_id_tenants_id_fk",
           "tableFrom": "time_off",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "time_off_created_by_user_id_users_id_fk": {
           "name": "time_off_created_by_user_id_users_id_fk",
           "tableFrom": "time_off",
-          "columnsFrom": [
-            "created_by_user_id"
-          ],
+          "columnsFrom": ["created_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "time_off_staff_member_fk": {
           "name": "time_off_staff_member_fk",
           "tableFrom": "time_off",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -6529,9 +5947,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         }
@@ -6632,13 +6048,9 @@
         "two_factors_user_id_users_id_fk": {
           "name": "two_factors_user_id_users_id_fk",
           "tableFrom": "two_factors",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -6706,13 +6118,9 @@
         "usage_meters_tenant_id_tenants_id_fk": {
           "name": "usage_meters_tenant_id_tenants_id_fk",
           "tableFrom": "usage_meters",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -6721,11 +6129,7 @@
       "uniqueConstraints": {
         "usage_meters_tenant_metric_period_unique": {
           "name": "usage_meters_tenant_metric_period_unique",
-          "columns": [
-            "tenant_id",
-            "metric",
-            "period"
-          ],
+          "columns": ["tenant_id", "metric", "period"],
           "nullsNotDistinct": false
         }
       },
@@ -6734,9 +6138,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         }
@@ -6816,9 +6218,7 @@
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "nullsNotDistinct": false
         }
       },
@@ -7106,86 +6506,54 @@
         "waitlist_entries_tenant_id_tenants_id_fk": {
           "name": "waitlist_entries_tenant_id_tenants_id_fk",
           "tableFrom": "waitlist_entries",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_entries_created_by_user_id_users_id_fk": {
           "name": "waitlist_entries_created_by_user_id_users_id_fk",
           "tableFrom": "waitlist_entries",
-          "columnsFrom": [
-            "created_by_user_id"
-          ],
+          "columnsFrom": ["created_by_user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "waitlist_entries_client_fk": {
           "name": "waitlist_entries_client_fk",
           "tableFrom": "waitlist_entries",
-          "columnsFrom": [
-            "tenant_id",
-            "client_id"
-          ],
+          "columnsFrom": ["tenant_id", "client_id"],
           "tableTo": "clients",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "waitlist_entries_service_fk": {
           "name": "waitlist_entries_service_fk",
           "tableFrom": "waitlist_entries",
-          "columnsFrom": [
-            "tenant_id",
-            "service_id"
-          ],
+          "columnsFrom": ["tenant_id", "service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "waitlist_entries_staff_member_fk": {
           "name": "waitlist_entries_staff_member_fk",
           "tableFrom": "waitlist_entries",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "waitlist_entries_booking_fk": {
           "name": "waitlist_entries_booking_fk",
           "tableFrom": "waitlist_entries",
-          "columnsFrom": [
-            "tenant_id",
-            "booking_id"
-          ],
+          "columnsFrom": ["tenant_id", "booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -7194,10 +6562,7 @@
       "uniqueConstraints": {
         "waitlist_entries_tenant_id_id_unique": {
           "name": "waitlist_entries_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -7206,9 +6571,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -7216,9 +6579,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())",
           "withCheck": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())"
         }
@@ -7392,43 +6753,27 @@
         "waitlist_matches_tenant_id_tenants_id_fk": {
           "name": "waitlist_matches_tenant_id_tenants_id_fk",
           "tableFrom": "waitlist_matches",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_matches_booking_fk": {
           "name": "waitlist_matches_booking_fk",
           "tableFrom": "waitlist_matches",
-          "columnsFrom": [
-            "tenant_id",
-            "booking_id"
-          ],
+          "columnsFrom": ["tenant_id", "booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_matches_staff_member_fk": {
           "name": "waitlist_matches_staff_member_fk",
           "tableFrom": "waitlist_matches",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -7437,10 +6782,7 @@
       "uniqueConstraints": {
         "waitlist_matches_tenant_id_id_unique": {
           "name": "waitlist_matches_tenant_id_id_unique",
-          "columns": [
-            "tenant_id",
-            "id"
-          ],
+          "columns": ["tenant_id", "id"],
           "nullsNotDistinct": false
         }
       },
@@ -7449,9 +6791,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -7459,9 +6799,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())",
           "withCheck": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())"
         },
@@ -7469,9 +6807,7 @@
           "name": "job_scan",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "current_tenant_id() IS NULL AND current_job_scan('waitlist')"
         }
       },
@@ -7721,103 +7057,63 @@
         "waitlist_offers_tenant_id_tenants_id_fk": {
           "name": "waitlist_offers_tenant_id_tenants_id_fk",
           "tableFrom": "waitlist_offers",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_offers_match_fk": {
           "name": "waitlist_offers_match_fk",
           "tableFrom": "waitlist_offers",
-          "columnsFrom": [
-            "tenant_id",
-            "match_id"
-          ],
+          "columnsFrom": ["tenant_id", "match_id"],
           "tableTo": "waitlist_matches",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_offers_entry_fk": {
           "name": "waitlist_offers_entry_fk",
           "tableFrom": "waitlist_offers",
-          "columnsFrom": [
-            "tenant_id",
-            "entry_id"
-          ],
+          "columnsFrom": ["tenant_id", "entry_id"],
           "tableTo": "waitlist_entries",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_offers_client_fk": {
           "name": "waitlist_offers_client_fk",
           "tableFrom": "waitlist_offers",
-          "columnsFrom": [
-            "tenant_id",
-            "client_id"
-          ],
+          "columnsFrom": ["tenant_id", "client_id"],
           "tableTo": "clients",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_offers_service_fk": {
           "name": "waitlist_offers_service_fk",
           "tableFrom": "waitlist_offers",
-          "columnsFrom": [
-            "tenant_id",
-            "service_id"
-          ],
+          "columnsFrom": ["tenant_id", "service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_offers_staff_member_fk": {
           "name": "waitlist_offers_staff_member_fk",
           "tableFrom": "waitlist_offers",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "waitlist_offers_booking_fk": {
           "name": "waitlist_offers_booking_fk",
           "tableFrom": "waitlist_offers",
-          "columnsFrom": [
-            "tenant_id",
-            "booking_id"
-          ],
+          "columnsFrom": ["tenant_id", "booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -7826,18 +7122,12 @@
       "uniqueConstraints": {
         "waitlist_offers_token_hash_unique": {
           "name": "waitlist_offers_token_hash_unique",
-          "columns": [
-            "token_hash"
-          ],
+          "columns": ["token_hash"],
           "nullsNotDistinct": false
         },
         "waitlist_offers_match_entry_unique": {
           "name": "waitlist_offers_match_entry_unique",
-          "columns": [
-            "tenant_id",
-            "match_id",
-            "entry_id"
-          ],
+          "columns": ["tenant_id", "match_id", "entry_id"],
           "nullsNotDistinct": false
         }
       },
@@ -7846,9 +7136,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         },
@@ -7856,9 +7144,7 @@
           "name": "member_scope",
           "as": "RESTRICTIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())",
           "withCheck": "(SELECT current_member_sees_all()) OR staff_member_id IN (SELECT current_member_staff_ids())"
         },
@@ -7866,9 +7152,7 @@
           "name": "member_scope_insert",
           "as": "RESTRICTIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(SELECT current_member_sees_all())"
         }
       },
@@ -7946,28 +7230,18 @@
         "working_hours_tenant_id_tenants_id_fk": {
           "name": "working_hours_tenant_id_tenants_id_fk",
           "tableFrom": "working_hours",
-          "columnsFrom": [
-            "tenant_id"
-          ],
+          "columnsFrom": ["tenant_id"],
           "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "working_hours_staff_member_fk": {
           "name": "working_hours_staff_member_fk",
           "tableFrom": "working_hours",
-          "columnsFrom": [
-            "tenant_id",
-            "staff_member_id"
-          ],
+          "columnsFrom": ["tenant_id", "staff_member_id"],
           "tableTo": "staff_members",
-          "columnsTo": [
-            "tenant_id",
-            "id"
-          ],
+          "columnsTo": ["tenant_id", "id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -7979,9 +7253,7 @@
           "name": "tenant_isolation",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "tenant_id = current_tenant_id()",
           "withCheck": "tenant_id = current_tenant_id()"
         }
@@ -8003,47 +7275,27 @@
     "public.audit_actor_kind": {
       "name": "audit_actor_kind",
       "schema": "public",
-      "values": [
-        "user",
-        "system",
-        "ai_on_behalf_of"
-      ]
+      "values": ["user", "system", "ai_on_behalf_of"]
     },
     "public.membership_role": {
       "name": "membership_role",
       "schema": "public",
-      "values": [
-        "owner",
-        "manager",
-        "staff"
-      ]
+      "values": ["owner", "manager", "staff"]
     },
     "public.outbox_message_type": {
       "name": "outbox_message_type",
       "schema": "public",
-      "values": [
-        "email",
-        "push",
-        "episode"
-      ]
+      "values": ["email", "push", "episode"]
     },
     "public.outbox_status": {
       "name": "outbox_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "sent",
-        "dead",
-        "cancelled"
-      ]
+      "values": ["pending", "sent", "dead", "cancelled"]
     },
     "public.usage_metric": {
       "name": "usage_metric",
       "schema": "public",
-      "values": [
-        "llm_tokens",
-        "emails_sent"
-      ]
+      "values": ["llm_tokens", "emails_sent"]
     }
   },
   "schemas": {},

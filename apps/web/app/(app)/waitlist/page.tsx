@@ -114,8 +114,7 @@ export default async function WaitlistPage() {
               offersBySlot(offers.offers, timeZone).map((group) => (
                 <Card key={group.key} className="flex flex-col gap-2 p-3">
                   <span className="font-semibold">
-                    {group.label} with{' '}
-                    {staffName.get(group.staffMemberId) ?? 'a staff member'}
+                    {group.label} with {staffName.get(group.staffMemberId) ?? 'a staff member'}
                   </span>
                   <ul className="m-0 flex list-none flex-col gap-1 p-0">
                     {group.offers.map((offer) => (

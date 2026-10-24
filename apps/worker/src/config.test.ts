@@ -83,7 +83,11 @@ describe('loadWorkerConfig', () => {
       }).waitlist?.pollMs,
     ).toBe(2000);
     expect(() =>
-      loadWorkerConfig({ ...required, AUTH_BASE_URL: 'https://app.example', WAITLIST_POLL_MS: '0' }),
+      loadWorkerConfig({
+        ...required,
+        AUTH_BASE_URL: 'https://app.example',
+        WAITLIST_POLL_MS: '0',
+      }),
     ).toThrow(/WAITLIST_POLL_MS/);
   });
 

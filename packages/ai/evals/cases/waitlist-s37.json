@@ -37,13 +37,9 @@
           }
         }
       ],
-      "replyMatches": [
-        "waitlist"
-      ],
+      "replyMatches": ["waitlist"],
       "actions": {
-        "done": [
-          "add_to_waitlist"
-        ]
+        "done": ["add_to_waitlist"]
       },
       "waitlist": {
         "open": 1
@@ -88,9 +84,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "add_to_waitlist"
-        ]
+        "done": ["add_to_waitlist"]
       },
       "waitlist": {
         "open": 1
@@ -140,9 +134,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "add_to_waitlist"
-        ]
+        "done": ["add_to_waitlist"]
       },
       "waitlist": {
         "open": 1
@@ -197,9 +189,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "add_to_waitlist"
-        ]
+        "done": ["add_to_waitlist"]
       },
       "waitlist": {
         "open": 1
@@ -228,10 +218,7 @@
           "name": "get_feed"
         }
       ],
-      "replyMatches": [
-        "Sara",
-        "Ana"
-      ],
+      "replyMatches": ["Sara", "Ana"],
       "actions": {
         "noWrites": true
       },
@@ -290,12 +277,8 @@
           "name": "get_feed"
         }
       ],
-      "replyMatches": [
-        "Sara"
-      ],
-      "replyMustNotMatch": [
-        "Ana"
-      ],
+      "replyMatches": ["Sara"],
+      "replyMustNotMatch": ["Ana"],
       "actions": {
         "noWrites": true
       }
@@ -349,14 +332,10 @@
       "toolCalls": [
         {
           "name": "find_client_bookings",
-          "alsoAccept": [
-            "get_feed"
-          ]
+          "alsoAccept": ["get_feed"]
         }
       ],
-      "replyMatches": [
-        "Friday|waitlist"
-      ],
+      "replyMatches": ["Friday|waitlist"],
       "actions": {
         "noWrites": true
       }
@@ -428,9 +407,7 @@
         }
       ],
       "actions": {
-        "done": [
-          "add_to_waitlist"
-        ]
+        "done": ["add_to_waitlist"]
       },
       "waitlist": {
         "open": 1
@@ -454,9 +431,7 @@
       }
     ],
     "expect": {
-      "replyMatches": [
-        "owner|manager|can.?t|cannot|not able|only"
-      ],
+      "replyMatches": ["owner|manager|can.?t|cannot|not able|only"],
       "actions": {
         "noWrites": true
       },
@@ -482,12 +457,8 @@
       }
     ],
     "expect": {
-      "mustNotCall": [
-        "add_to_waitlist"
-      ],
-      "replyMatches": [
-        "waitlist|offer|automatic|by itself|frees"
-      ],
+      "mustNotCall": ["add_to_waitlist"],
+      "replyMatches": ["waitlist|offer|automatic|by itself|frees"],
       "actions": {
         "noWrites": true
       },

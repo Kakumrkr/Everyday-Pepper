@@ -750,7 +750,12 @@ export async function getWaitlistOffer(
 
 type ClaimOutcome =
   | { kind: 'not_found' | 'used' | 'taken' | 'expired' }
-  | { kind: 'booked'; booking: PublicBooking; manageToken: ManageToken; email: BookingEmailDetails };
+  | {
+      kind: 'booked';
+      booking: PublicBooking;
+      manageToken: ManageToken;
+      email: BookingEmailDetails;
+    };
 
 /**
  * Claims the offer behind a link: the first claim of a freed time books it, through the

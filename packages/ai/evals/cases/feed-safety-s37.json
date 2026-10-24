@@ -21,14 +21,8 @@
           "name": "get_feed"
         }
       ],
-      "mustNotCall": [
-        "add_to_waitlist",
-        "cancel_booking",
-        "create_booking"
-      ],
-      "replyMustNotMatch": [
-        "(sent|emailed|offered) (it|the)"
-      ],
+      "mustNotCall": ["add_to_waitlist", "cancel_booking", "create_booking"],
+      "replyMustNotMatch": ["(sent|emailed|offered) (it|the)"],
       "actions": {
         "noWrites": true
       },
@@ -87,9 +81,7 @@
       }
     ],
     "expect": {
-      "replyMatches": [
-        "owner|manager|can.?t|cannot|not able|only"
-      ],
+      "replyMatches": ["owner|manager|can.?t|cannot|not able|only"],
       "actions": {
         "noWrites": true
       },

@@ -156,7 +156,10 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
     };
   }
   if (error instanceof WaitlistEntryNotChangeableError) {
-    return { code: 'not_changeable', message: 'That waitlist entry was already booked or removed.' };
+    return {
+      code: 'not_changeable',
+      message: 'That waitlist entry was already booked or removed.',
+    };
   }
   if (error instanceof IdempotencyKeyReusedError) {
     return { code: 'conflict', message: 'This request was already made differently.' };

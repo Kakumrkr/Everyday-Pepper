@@ -92,7 +92,11 @@ async function cancelWithTwoWaiting(w: EvalWorld) {
   await addToWaitlist(
     db,
     owner,
-    { clientId: ClientIdSchema.parse(id(w, '{{client:sara}}')), serviceId: haircut, windows: window },
+    {
+      clientId: ClientIdSchema.parse(id(w, '{{client:sara}}')),
+      serviceId: haircut,
+      windows: window,
+    },
     { clock: w.clock },
   );
   await addToWaitlist(
@@ -212,7 +216,10 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
     expect(sara.text).toContain('Haircut with Jess, Tuesday, November 3 at 3:00 PM');
     const slug = TenantSlugSchema.parse(/\/book\/([^/]+)\/offer#/.exec(sara.text)?.[1]);
     const claimed = await claimWaitlistOffer(db, slug, tokenOf(sara.text), { clock: w.clock });
-    expect(claimed.booking).toMatchObject({ status: 'confirmed', startsAt: '2026-11-03T20:00:00.000Z' });
+    expect(claimed.booking).toMatchObject({
+      status: 'confirmed',
+      startsAt: '2026-11-03T20:00:00.000Z',
+    });
   });
 
   it('a match runs once: a second job for it is skipped', async () => {

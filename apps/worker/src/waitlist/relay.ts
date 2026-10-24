@@ -32,11 +32,7 @@ export interface MatchQueue {
 }
 
 /** Queues a job for each match due at `now`; returns how many were due. */
-export async function relayDueMatches(
-  db: Database,
-  queue: MatchQueue,
-  now: Date,
-): Promise<number> {
+export async function relayDueMatches(db: Database, queue: MatchQueue, now: Date): Promise<number> {
   const due = await listDueWaitlistMatches(db, now, WAITLIST_RELAY_BATCH);
   if (due.length === 0) return 0;
   await queue.addBulk(

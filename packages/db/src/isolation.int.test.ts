@@ -345,9 +345,11 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     tenantColumn: 'tenant_id',
     seed: async (tx) => {
       const matchId = WaitlistMatchIdSchema.parse(await seedWaitlistMatch(tx));
-      const [match] = await tx.execute<{ staff: string }>(
-        sql`SELECT staff_member_id::text AS staff FROM waitlist_matches WHERE id = ${matchId}`,
-      ).then((result) => result.rows);
+      const [match] = await tx
+        .execute<{ staff: string }>(
+          sql`SELECT staff_member_id::text AS staff FROM waitlist_matches WHERE id = ${matchId}`,
+        )
+        .then((result) => result.rows);
       const service = await seedService(tx);
       const clientId = await seedClient(tx);
       const entry = await insertWaitlistEntry(tx, {
