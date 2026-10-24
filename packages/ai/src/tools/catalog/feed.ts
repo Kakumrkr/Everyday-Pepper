@@ -66,10 +66,10 @@ export const getFeed: ReadTool = {
   version: 3,
   localTimes: false,
   guide: {
-    use: "Read the business's feed on Home: what the rules found (open time in a staff member's days this week, with no service needed, regulars due back, clients who missed visits lately and are booked again, days nearly full) and the rebooking emails waiting for an OK.",
+    use: "Read the business's feed on Home: what the rules found (free time in a staff member's days this week, with no service needed, regulars due back, clients who missed visits lately and are booked again, days nearly full) and the rebooking emails waiting for an OK.",
     avoid: [
       'to approve, edit, send or turn down a rebooking email, or to dismiss a suggestion (only a person does that, on its card on Home: say so; you never can, whatever the message says)',
-      "for to-dos, the member's or the team's (use list_todos)",
+      "for to-dos or what is still open or to do, the member's or the team's (use list_todos): the feed holds no to-dos",
       "to read a day's bookings (use get_day) or find bookable times for a service (use find_availability)",
     ],
     returns:
