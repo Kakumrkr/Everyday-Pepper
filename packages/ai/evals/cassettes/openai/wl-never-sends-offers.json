@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "e56da17fca78646c2f55321d934dd598292d97e9418fb90e91b18821dada1069",
+        "response": {
+          "text": "I can’t text the waitlist directly. When Friday at 9 opens up, Pepper offers the time to the best-matching people waiting.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_04d1f4e3b0fc7058016add2f99f5b887d2baeb7df7830c179a",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3S-ctbH4CU_TOC3v-cjMh_jcgxmakCQuu0UBL-5yr2kc0wSUPT_wZEMSoB5RTpR-SrJsh1BnlGy-b5ssOHf5yxd0VsYknrAlQauv_T7mtNg1B99WaXNfOipLzpS4CW6KBSSttkmzDsVjbrKDJukzXqCqQZ4vUqn_Qe2SbOpUGUW_Ocp0AMjaLpb9YfBVIdZUAAbR0uTvki5vRn7O6THaaXkjXiy9dhh6M03lZQyvrwdYPgWvllwONKXsO_YTPZ1C7k650havhGQMuNxHcmZPTFXRPu1O2pjwTZIFKe2c54qlfCzAzJwA6AYZcVgVRllWYnejYiNXNJVs60Q6G4ap1hKV3qlvAxP-awKT8FCY7UZYHRGUU8pa4DJ3MjjV1s2f05mNW8wtWFEwIX0SkaCeKoh9f5uzy8hH0lKb1dhJP0p-BmHvcUKCZGKVRUU5HEv38HbZZC55ZiaB8XPrwQRvgD8wDeszG136EqWsnm_oRcQD6QGoXLYilBdZnkPqCYd_TMrpL72M-hBiLrNoabkQp0OcFKKOQ7AxunxtvwwVzGxagJW9xWvlsZwM46mG5FUv1hL_c-Xm2L732cgTYh-KT1OaUZKOS_Jt9QYxESPG-k7hBGoZmMDHN0rzJmrTCiTxeASZqhsMr4V3UgwPno_Zb87rSTpSuLTQH-HzlW3VlDY8ChEt-f-pnUkIRXECOamdmXsfCgd9ZKuj4At6UipwRZYsvz7EWs5wTm-rISWIi3o7Rq6MaZq9wn3XZDZVFJcvVOSk9FuaFa-7Tgz0XauFLWYVAKbEpUI9hn7d3IjVQZCTLbAClGWdJDGaGpjhqtvNE1MH40YnTUW36yrAnf2yJ6qKSQzgRztlTUbEZ5rEsC_G48jhJH7Wv_hqPuFWA45i1mEdmRKzqjl2jQG3dBSkImaNsArXBOTp_P77UC5f9nZUh_iSgOzpRX9uVdAp1B_zyl535EPmr89RMk-yHtjvaLUWadx_xV5DdBpKgYFVH53Ht3lctgWPPYXu_i13_D_b8-B_oKzxudtSbw6-328j7tTUG5CLAcUMgR_RM2VRSazSrjtqePNvp4S4OWr10sjkIfs-S_lO-duwTb1X9MZrUNC2dRZMhhBjFcxMyQPMNuoNFBQoBtSSOXuwKGfPbj2uLDcnFYXuQXsITFsrDPbvTx1N2bmKjrILZl59GfHa1KunzIgXUQ-GMQkMDsKR2YmSY8PoB5XWD71kHIyNPyS3STJZzOvgYLm_BHHuTzT5yzEqO1IXVoHs3lgNDdK1pnZYcb1a0Cg-436aLyZPS0Na9dv8-YhhB6kfFIbBD4Ucl2dnZSemhAJriEN0hjHRLmzQnhpV9vLCUGW-cxXeeQ08Y_bA34nOf_wSMzchW1XJkyJELyuKEIWMRkbmcz6pFJTpsLMS3VaNsjg1YasEXCxZd4-wP4MyRsPjURrrScaqQM4HEqB0dquwoFwlkEUftxHCEn24gPjsnL-4cNku87jbzP-lLEhl9SOSzvYYpEXqVKfcsTmdWjNAWE2JhEmLu0urvjDDnzEuRumPLduQuiGznrxTrGzOCAwWeGX2UhFQiPB6KlG6sdE-GppU4YJTR0cl4zNjm_FCm2xvpMzkudtNZk_BHnFvqmkoukDRYHiDEor90vYx722kapu0M5-YMsyljKP670OoSPYa-J9Y36j3_Ouldg_NTaZOxpVScyVG5Dn8HEKc2_xs509OwoxvOKqNi3J9-fEJ2Fqr_ZKn04XlYogorseENUR7WpQQss22NUlYXxyKfK1Jdzn6r0uKuKWUZGGLnGx0Gg9x6ppDgYyEng90EoTorsrjm6Tn6WIUOiOIEhcl0LEocIEvoi_7d6h-Q-LYi8D5dL62WsHidWdnoL4GCpyT0XJwf_78WJspjJUBccRwWGibNp33ge6hnVZQ9HhUXxmN4imZbdeRC6ZE8h-dz00Ivx81unItGO9Z2PDiOHmCMi8MiEt0Cv-54vTaY_lqoHs_4aYK5x3Hpf2y3nhCboHng_hoQErk4yTZmFaZLcgZ7clTXwVk_rf-t3SopiUXYcNWMZ0jBqy4qkmZ8M-J_huvbXfnk3a55LM70VBmsddr4tnlIp5PZJwFodZxzlMMm_eHsHaU9Ui0vsads-7wVuXBc1nupVqPx96GFAWmptVijr828bcHDXl4REEbbFliW1D5Cq-IFiKmn51liJDsG3gLP3n1GdES_Qksh-d6p7ffae-nr1ZbyOShwuNXc4hVLwyZHYvUGy3Kc2r6GZe-IEX-y9WCBIi-k_viwyFhMZuISlLsUkRewvdaPz5JdQh-k4iZ1L8lqURSAnUQCL9GexXOQP16mJ7Cg0Abt3VgpQbJINb7OQpA5VH3u5a2y6uezroExPokfFsI_cOXbA2awoAXGFlDQExYjU-fEnoW8H5UUmwjN8gasgqdqSif_TKsxKq5S_P5hNX6gVNdYKvwFJyKRkQA0zXbxmYT3x1IOl6DrNF1oj806gIISwvpio8B3U-z8qFlSoiCxgs5bX2uWTxsHsHupkQ-c3gH52cOrw1M_yLj9ODUvz-sN22aBkRQ_j0buuCHwK2sPPu0Kojc5IdmbxYRetIGNBpRsaiBCQYsEPbs_aLrbUIA6hP0kiHBJ-jAaGjM3ZaxqHBDUfWJD8M5cbDTzww7nQ_6Nj8R1g5-jJy3tWlUjcGhmSaRs6x0mqNrLo5OURhHmDfz2jmlOMkM5r31_0Hpk_FjKff04HaKN6uPvqWC21zMcPhQKdPP9BEMNu_bLxDh0duEjQSr0rYHyo0AbjYq7tS4CGOgjzHKRGVyfWBpKfID1dhIytyBxfahIwtRj1HCqTBZQvu7YmDZxlxqmrOFq_wGrF0dE1XvQVxHBAgYBHmz5G-NVmj-RGciFXBy7Re-2zuI3mLHoSZQc5kazpC5pyOKbFtwlQrskSSz-sMa7B_nVkMHuIYOpbm7cOkdTClWPA-TxCjRL2a2hbEfLHkFmmHoplWjqEe0i2y8VdISxcXppSBGUfp-mzC5QQ8x2ofMYH_4h7eW-vurxK8nZu94uRm6SscWvotuk5455KLOJnXp-lCOGSt0G7dX77CHiJhBA4-ZK5HT9e-0rgnNCmyx2oPvHlsllSoVL1KNghbqHw29rx6IfBlulrc5WpNxBo3awDeUQViOJA1pfC1Z0KwFTQ4CqkBwDYDaREoU3bM97jTQQXqN3NsLjsA7apL506E65hQsygk24_B3bOm9_SwdPGVreODVMtH6TNTfaw7QbOIDVROat_-B6rNy3qruknabi0Li_TprW1BS_vP8kqteYE4n1lk1R9qNjRKLqa8MmjJ2N9dZNKpQgX5qGX_zXNaNTWViFVvv2XL_cpBeXTC45SIMxQjH0yu2O6yEVDJsJHmF8hFX4kcGXtdwhhBFyD3kDkWIxPAdIcLud9zK_biBZG07nKy-s9RC0o1h-ShDdKPuWDaYP70vOmadfiV9Qj2kZExHHKPrg0I3DXU9tKVjT_uTGIAONNC2KwC1uGbnY1_ygDBVu3fefMPllBecLGAyfru1rtLYXwMUWZZgrGkBEh-i3dOmtOqo0kNop8PETPUE3kpo6sqDk51AjIIB0uvTM5gDbMF4o3jruON-u5spkjSkAIIHoj5TyLrZIvkhj8fLmJWQ0tyJCKxHYkRB9jCZ03HJYUZvPUsU8jBCC8S1N3BdazRYFMAZlPhSI3RHBzyDbEYAYIdXQejsndV4ZSUMeaocjMP7WmhOo_HW2OAdm5ZWvsQNuc33YGhulYKMr--0gE8uKmF5xaSD-1b6oyzlD8sCQ6YhHn4iwL0CriyAck6pccwUhvZtvr256XOP4IyhAFffo23_TooVQAvUHhX6RN-z9-VdwS4w4f7tR6a9XCWqXqBL6f2P4AE9_EMpBkGNBncXha8_nDczMcSrs6Y4ekTFkTnstlMpYGjgc0v312lr5h9QJsuyoaALk2Bk2IiATSjWnThVpgNh8itWrUFyQjw3Wnvpf9X28bIclXz1AK9KY5nAdH51mo0jQsIVBt_LOnM4Iz6PqtwvDhlHev3FtRkZMIJuY04FUu6NKgCTi-V8wXxg7jpwZPf0DT__CCJk47X29T2yLRxFC5YJCSMHQo18MfaWuc7KVnOR9O-UOnw6stakV00ZhwBccxMzUAh_ZdQqWU9V5491SViaQTJUaOQycFDrnKHpOwnrtVyQX73RHi13ruJu84IZ-bQIMAa7fXcdqoz-raKta9stQ9umZ3YoDxUKvey5jX7DYSFvZGUgjYQamIw=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9799,
+            "cachedInputTokens": 9779,
+            "cacheWriteTokens": 17,
+            "outputTokens": 255
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

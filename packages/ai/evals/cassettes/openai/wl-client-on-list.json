@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "f84255b188798b1381abce6f09db92bd35b4640d0aaf20ec1b3e8d4bd017e2ae",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bxqtiy6TjcmHXGdmI6o7g5qQ",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9792,
+            "cachedInputTokens": 9779,
+            "cacheWriteTokens": 10,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "505ef110427722c9393d83cced72035ccbed5c060fe4f2c04241465a85a8116b",
+        "response": {
+          "text": "Yes. Ana R. is on the waitlist for a haircut with Jess on Friday, November 6, from 9:00 AM to noon. She hasn’t been offered a time yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10073,
+            "cachedInputTokens": 9789,
+            "cacheWriteTokens": 281,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

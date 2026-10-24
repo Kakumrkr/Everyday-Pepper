@@ -10,6 +10,16 @@
     "actor": {
       "role": "owner"
     },
+    "seed": {
+      "full": [
+        {
+          "staff": "{{staff:marco}}",
+          "date": "2026-11-07",
+          "start": "10:00",
+          "end": "13:00"
+        }
+      ]
+    },
     "turns": [
       {
         "user": "Put Maria on the waitlist for a haircut with Marco on Saturday morning"
@@ -57,9 +67,25 @@
     "actor": {
       "role": "owner"
     },
+    "seed": {
+      "full": [
+        {
+          "staff": "{{staff:jess}}",
+          "date": "2026-11-06",
+          "start": "12:00",
+          "end": "17:00"
+        },
+        {
+          "staff": "{{staff:marco}}",
+          "date": "2026-11-06",
+          "start": "12:00",
+          "end": "17:00"
+        }
+      ]
+    },
     "turns": [
       {
-        "user": "Sara wants a haircut on Friday afternoon if anything opens up, with anyone"
+        "user": "Sara Kim wants a haircut on Friday afternoon if anything opens up, with anyone"
       }
     ],
     "expect": {
@@ -101,6 +127,22 @@
     "world": "juniper",
     "actor": {
       "role": "owner"
+    },
+    "seed": {
+      "full": [
+        {
+          "staff": "{{staff:marco}}",
+          "date": "2026-11-07",
+          "start": "10:00",
+          "end": "13:00"
+        },
+        {
+          "staff": "{{staff:marco}}",
+          "date": "2026-11-14",
+          "start": "10:00",
+          "end": "13:00"
+        }
+      ]
     },
     "turns": [
       {
@@ -151,6 +193,22 @@
     "world": "juniper",
     "actor": {
       "role": "owner"
+    },
+    "seed": {
+      "full": [
+        {
+          "staff": "{{staff:jess}}",
+          "date": "2026-11-04",
+          "start": "12:00",
+          "end": "17:00"
+        },
+        {
+          "staff": "{{staff:jess}}",
+          "date": "2026-11-05",
+          "start": "12:00",
+          "end": "17:00"
+        }
+      ]
     },
     "turns": [
       {

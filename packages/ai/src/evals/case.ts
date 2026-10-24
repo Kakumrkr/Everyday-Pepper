@@ -265,8 +265,23 @@ export const EvalCaseSchema = z.strictObject({
         )
         .max(10)
         .default([]),
+      /**
+       * Times that are full before the case starts (S37b): each window is booked solid for a
+       * walk-in client with that staff member, so the waitlist is the answer, not a free time.
+       */
+      full: z
+        .array(
+          z.strictObject({
+            staff: z.string().regex(/^\{\{staff:[a-z0-9-]+\}\}$/),
+            date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            start: z.string().regex(/^\d{2}:\d{2}$/),
+            end: z.string().regex(/^\d{2}:\d{2}$/),
+          }),
+        )
+        .max(10)
+        .default([]),
     })
-    .default({ facts: [], episodes: [], memoryPaused: false, waitlist: [] }),
+    .default({ facts: [], episodes: [], memoryPaused: false, waitlist: [], full: [] }),
   turns: z
     .array(TurnSchema)
     .min(1)

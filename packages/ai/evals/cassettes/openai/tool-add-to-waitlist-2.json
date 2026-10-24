@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "55d1d1d39f0cccc939c6323a1962a79caac4e008383fc8ea1c345123d0b183ba",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_aFwVq8YBF0kAjRhXu4Qjlq1E",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9797,
+            "cachedInputTokens": 9779,
+            "cacheWriteTokens": 15,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b5357faa844b9d605a0e4e1bd55da07689cbc13c38f8135f04d259fef2cd514d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_9FO9TxqJdyZvguEFWpTYxyBO",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara\"}"
+            },
+            {
+              "id": "call_J47jtk0AERt58OYXyPsYUiTJ",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"12:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10270,
+            "cachedInputTokens": 9794,
+            "cacheWriteTokens": 473,
+            "outputTokens": 99
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "aca166390161e18a73065e594c02795e0ff0fe100428bcb9870d10c0aefd827d",
+        "response": {
+          "text": "I found Friday afternoon openings for a haircut, but two clients match: Sarah P. and Sara K. Which Sara do you mean? Also, would she like me to put her on the waitlist for Friday afternoon?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11120,
+            "cachedInputTokens": 10267,
+            "cacheWriteTokens": 850,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

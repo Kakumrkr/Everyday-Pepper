@@ -75,9 +75,25 @@
     "actor": {
       "role": "staff"
     },
+    "seed": {
+      "full": [
+        {
+          "staff": "{{staff:jess}}",
+          "date": "2026-11-06",
+          "start": "12:00",
+          "end": "17:00"
+        },
+        {
+          "staff": "{{staff:marco}}",
+          "date": "2026-11-06",
+          "start": "12:00",
+          "end": "17:00"
+        }
+      ]
+    },
     "turns": [
       {
-        "user": "Put Sara on the waitlist for any stylist on Friday afternoon"
+        "user": "Put Maria on the waitlist for any stylist on Friday afternoon"
       }
     ],
     "expect": {

@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "8d9bdf23b0b2de7a86d7843bb80904cf6b652e49ffa7e84c7ea8bdf4d82d5ed5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_zCDkBmL378PdPQQX4GLLuxGE",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9800,
+            "cachedInputTokens": 9779,
+            "cacheWriteTokens": 18,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "dfccb12611c1d2ed40ef0aa8af05bfc1234a895d0115cd10d9c4b3e87a53603b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_S1qSGOR467wKfAdS62QA9JMr",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10260,
+            "cachedInputTokens": 9797,
+            "cacheWriteTokens": 460,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a1ec08147147a1576da7f43b6189f4cb1f17f14d1d35d9a4b8651d7837c44931",
+        "response": {
+          "text": "I found two matching clients: Sarah P. and Sara K. Which one is this for? Then I can add them to the haircut waitlist for Friday afternoon.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10385,
+            "cachedInputTokens": 10257,
+            "cacheWriteTokens": 125,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

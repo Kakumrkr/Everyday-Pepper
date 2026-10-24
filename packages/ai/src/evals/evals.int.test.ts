@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import { findAvailability } from '@pepper/appointments';
 import type { Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ScriptedProvider, scriptedResponse } from '../scripted-provider.js';
@@ -166,6 +167,42 @@ describe('the seeded world', () => {
       timeZone: 'America/New_York',
     });
     expect([...world.placeholders.keys()].sort()).toEqual([...WORLD_PLACEHOLDERS].sort());
+  });
+
+  it('books a full window solid, so no haircut or colour starts in it, and leaves the rest free', async () => {
+    const world = await seedEvalWorld(
+      db,
+      'juniper',
+      { now: new Date('2026-11-02T12:00:00Z'), timeZone: 'America/New_York' },
+      {
+        facts: [],
+        memoryPaused: false,
+        full: [
+          { staff: '{{staff:jess}}', date: '2026-11-06', start: '12:00', end: '17:00' },
+          { staff: '{{staff:marco}}', date: '2026-11-06', start: '12:00', end: '17:00' },
+        ],
+      },
+    );
+    const id = (ref: string) => world.placeholders.get(ref) ?? '';
+    const startsIn = (serviceId: string, from: string, to: string, staffMemberId?: string) =>
+      findAvailability(
+        db,
+        world.actorFor('owner'),
+        { serviceId, from, to, ...(staffMemberId !== undefined && { staffMemberId }) },
+        { clock: world.clock },
+      );
+    // Friday 6 November, 12:00–17:00 in New York (EST, UTC-5).
+    const afternoon = ['2026-11-06T17:00:00.000Z', '2026-11-06T22:00:00.000Z'] as const;
+    expect(await startsIn(id('{{service:haircut}}'), ...afternoon)).toEqual([]);
+    expect(await startsIn(id('{{service:colour}}'), ...afternoon, id('{{staff:jess}}'))).toEqual(
+      [],
+    );
+    const morning = await startsIn(
+      id('{{service:haircut}}'),
+      '2026-11-06T14:00:00.000Z',
+      '2026-11-06T17:00:00.000Z',
+    );
+    expect(morning.length).toBeGreaterThan(0);
   });
 
   it('seeds worlds at the same time, at the same instant, without their businesses colliding', async () => {

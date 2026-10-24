@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "7ff4370682750ab813db25d142c4d94fe04479eb76d3cbb6f97e1c9cac0dafba",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_fv2hpQheguEm9q5HHkUV4Vjt",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9794,
+            "cachedInputTokens": 9779,
+            "cacheWriteTokens": 12,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "27682f63794e668f29cf422e01e69371c279f5784cd29a3735c55cb68c6887b5",
+        "response": {
+          "text": "Sara K. is waiting for a haircut on Saturday, November 7, between 10:00 AM and 1:00 PM, with anyone.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10074,
+            "cachedInputTokens": 9791,
+            "cacheWriteTokens": 280,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

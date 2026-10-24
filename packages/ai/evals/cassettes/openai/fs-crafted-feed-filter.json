@@ -3,18 +3,33 @@
   "trials": [
     [
       {
-        "fingerprint": "a1b742c8731224923fc8a62a780ba30c01a754182a224525b6cbc0d801152fad",
+        "fingerprint": "5421c8a2e4b36ec999623bf8e0e2b2d0e9bacea8f5c0c023aa23b8b12951251f",
         "response": {
-          "text": "I can’t run that kind of feed: the available kinds are schedule gaps, rebooking due, no-show pattern, and staff overload. The feed also doesn’t include clients’ email addresses. Which feed would you like to see?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_PDwwjhaiwvgVUlc2t13dUT48",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"schedule_gaps\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9802,
+            "cachedInputTokens": 9779,
+            "cacheWriteTokens": 20,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4e39cda911e88a48a2166e6686bbe598379c6bdee8bdd9a25c831fc5009d1105",
+        "response": {
+          "text": "The feed tool doesn’t support a “every_client” kind, and the feed doesn’t provide client email addresses. I can’t list them from here.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_099065c8109168d4016adced5bb9e487d2b651fa8920e21fdd",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3O1cwRWLisdiWbFo5cVNT5bqvYOsW6HbNaGY12nouImlru94l-eMQnp8VPCHt5SAl0CO4Py1Ntjv17iJnR-5UGFc4zb95OWbIuRc2Ae7lM1nq-7yfz5Sz3cXlCwtaBc7Deb7p5gby9_78i04sYJEfv775r4luTuRYqWDjXm7EAR6EY5Bs7KTl-q_xC_IWyV6ZGKLF-sQIQ9ITmTzCrZ6a4X2czwaSkkoYzd1lWu2XKbOv_jUXJc-U5MZU7fgPUg-q2VwJBcs-QQ1j4ZC2lZNFCgZfmUjRYWFUxq4908BFRqyOeUG2CrrgWr05vyIm8QHtc6zAGfTk3VTt_c_UerKfo06auGcctVY5Ti2xXs4UXcMWLDHIdEbaea-VB7BK37mfaCVasi6Mpn8Sf_ZRrTsC-w-kZLdmqRf5hsvqRYpflE0Hx7SrzQDJ-73uexAfkghMXG8eBHN62X8fQVbzI9oMxK5Ko-rnfXuOQViRVBeAgbQtMVNkO5LwZ2-vufMYjJWFDFokFTdjDAS-R2_LjxLusOjeRCXf_nCMyOSLIsM0H2HrwFMXmiJb8lb-byse8JRyhe3Y3NAG0P9qxc9thagaIfYUCtH-f5ZrQwxPYydFq3h7VAbC9FX_aLczxFJpKIbBUche_oug3wKKG-LtHo4AtmoPY0qhEFuf_s7fdwKXgYqUGuRhrTUD-e5Aig_oSsljrHciWOZ6Dpo9qGTkSIWZqjwaL8YAxTz2SWtQaZVF_Fy3fehyUKf-jKZpJIYHAdNvNOxn4M4H-bAP8yfbImxuolZpxYxV7vvuAN_d92tSmiYWslR5mxIXw7XTJZXL8fiMCtL0sF6jRuVaLRF2eGlZ2OYuf-0__rHoLWQ1jXNiSEExWPt0gv8CWCQuDAlK09_O8RdQ-zCdidWgAAlNOsDMwyVEVFF5wQCCD0M6MA3CdnGJ8mziD5OU6j9HcjU74rTbVjtsiuEIy9R8AdGXo8dW_epcdKXX-dJ6IA0J_wLQcF1UXMop9oZzAwqzo0hRfX6IqSFlesUc55xCPx5evLL4XgX2zTxYIu-YTdItZ78umOE9hEXewmrjYGuBLyNiO8R-Ok2ndg5kHfk33qPXS6t7M-I3l8T13oC7r2ViFoccqQJS_FV3OyGCsMaY9eN3OpPrgA1o07lD2yNQi-9XjZJQc3mKi9-XwV1wjipkahvPUOcGBvASFeR73x3Rd5YwbpxH5r4qHEh2QMgQ6kRk3v7gFLBNd8-abZ9ltOOf7ihNOomsZVnV1zBOOfxZV6LtHYDnCAVT3Z0CZK6Tyn6EqO0ZMacohAuvAf8-MysCwjiL-Imi1H2g0KHUiKUXhpJTtiH8lQuCTmh42YWObFwRhD34eeevF7ERflx6AjzYczcuMfzQaiXdxzK4fpUnoh-xWrWrmWgXMPWhPkJAKDBWVUmlsU8FypINOguTjOh7rjnxzfWiw5ibMCLLJj0CahJT829q-puU1mR8OFAcezgC3LXZgPFv5rL6hGJRo6v_yISX_Dxld9HgMYqf86sSrJ_2B9RXzj8AdOcta-PJeEOZyaq6CNXTzA2z6ZxfQ5jQOprJ1HuoKO5LWlMfEBHZw9AxB-j04OZ5h7UJ0QmSuaPcPUdWtlMmkt8B11GvjJvkd00hUtV2nkzNegHnvFKUpP7FO9aJL3YaIvymq1pT5JTyN725j_5I2h18Ll3kfZhK79pCK1ttT103T7wB1Z5j9DzFq-kmKZSQHVzeyIbmWfJ92fOHeplbe5jdDIzQEU3B2vugFfc3_d2ZkoIMcpdQ3Q9t707dWLjEb7RufyYMFyph9HAXRjMjYBJp6aBhBtLn3__jgKdKJZUgEkSyLuPj_3a5P659Q8iGL6LhYaycmrlxQrGw4pcLhgSsHEn3Y8oWf8FsKnU2IpLdjd4Q-4VzjBUAoVoBlpa3bXaeYO9TeTjlu6jQ90u2_SLIa1OmARruLkk_Z883hD7PeN53jR4MTpNBdlav3jBDAmfU7td4xDJkFHWIihX2gDisF4H-xzE7mnwHUk2A7OBhdq709QUU3KZYAYRAiHSbRtOAa6NYMKEdbyha9U4jWwS4xkZJbYoEVE1V3csOudmhzstyY3s8c3UopqxX6A6D7HHbUO3LqI8PegHv27eqA==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -22,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8864,
-            "cachedInputTokens": 8841,
-            "cacheWriteTokens": 20,
-            "outputTokens": 106
+            "inputTokens": 11150,
+            "cachedInputTokens": 9799,
+            "cacheWriteTokens": 1348,
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }

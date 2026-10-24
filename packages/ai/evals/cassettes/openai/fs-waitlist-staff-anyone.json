@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3a65386d7ab5901d45912334520000f18f823c0ce5cd82df47da4c9d930566d9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_zayaNDohxIGB8gpbCT5ZqmMp",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9798,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9795,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ef0368c9347e076fb106de0d1aa4af76e1c221517935ca32a105805d35ef46bc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SnTmKEdtay5ihEPK7oLfd2qD",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10252,
+            "cachedInputTokens": 9795,
+            "cacheWriteTokens": 454,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9b6ff2eb050a9e384a415775a919b4626276dd7e4ea215dc40160d2dc49e2241",
+        "response": {
+          "text": "I couldn’t find a Sara among your clients. Could you check the spelling or give me another name to search? Also, what service should I put her on the waitlist for?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10315,
+            "cachedInputTokens": 10249,
+            "cacheWriteTokens": 63,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

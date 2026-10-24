@@ -18,6 +18,8 @@ export interface ToolExample {
   evalSay?: string;
   /** Why the example can't be a one-turn eval case (it needs earlier context); none: it is one. */
   evalSkip?: string;
+  /** Times the eval world books solid for the case (S37b): the waitlist is for full times. */
+  evalFull?: readonly { staff: string; date: string; start: string; end: string }[];
 }
 
 export interface ToolGuide {

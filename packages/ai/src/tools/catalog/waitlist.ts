@@ -268,6 +268,7 @@ export const addToWaitlist: WriteTool = {
     examples: [
       {
         say: 'Put Maria on the waitlist for a haircut with Marco on Saturday morning',
+        evalFull: [{ staff: '{{staff:marco}}', date: '2026-11-07', start: '10:00', end: '13:00' }],
         args: {
           clientId: { $any: true },
           serviceId: { $any: true },
@@ -277,6 +278,11 @@ export const addToWaitlist: WriteTool = {
       },
       {
         say: 'Sara wants a haircut on Friday afternoon if anything opens up',
+        evalSay: 'Sara Kim wants a haircut on Friday afternoon if anything opens up',
+        evalFull: [
+          { staff: '{{staff:jess}}', date: '2026-11-06', start: '12:00', end: '17:00' },
+          { staff: '{{staff:marco}}', date: '2026-11-06', start: '12:00', end: '17:00' },
+        ],
         args: { clientId: { $any: true }, staffMemberId: null, windows: { $any: true } },
       },
     ],
