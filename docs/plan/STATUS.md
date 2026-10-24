@@ -5,7 +5,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S36b next** (Phase 8c "b" half). Merge `origin/claude/s36a-suggestions-drafts` first: S36a is built, its end checks are green and its recorded cassettes are stale as planned (457 "cassette stale" in the replay test, nothing else). S36b probes `drafts`, `feed`, `feed_safety`, `scheduling`, `learned_rules` and `autonomy`, records the whole suite once with `--phase 8`, empties `KNOWN_REAL_MODEL_MISSES`, re-runs the end checks and opens the one PR for both halves.
+**S36b** (Phase 8c "b" half), branch `claude/zealous-rubin-ufs9z1` (S36a merged). User at the brief: "Go ahead with your recommendations": D-1 A (pass^3 only on `drafts`, `feed_safety` and the three S33 leftovers), D-2 A (add 4 `drafts` + 3 `feed` cases before recording), D-3 a gate still missing after one fix → ask; no cap raise or `--phase-estimate-ok`.
+Plan: 1 add the 7 cases (scripted) → 2 probe the six changed sets → 3 fix → 4 one full recording + pass^3 trials 2–3 → 5 empty `KNOWN_REAL_MODEL_MISSES`, replay → 6 AC-W4-1/2 → 7 /code-review + /security-review → 8 end checks → 9 docs, PR, merge.
+Next step: task 1.
 
 ## Last sessions
 - **S36a Phase 8c "a" (2026-10-24): suggestions with drafts, scripted model, branch pushed without a PR** ([ADR-0040](../adr/0040-rebooking-nudges-with-drafts-and-get-feed.md)). Full entry in [session-log.md](session-log.md).
