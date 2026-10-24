@@ -16,3 +16,9 @@ ignoredBuiltDependencies:
   - esbuild
   - protobufjs
   - ssh2
+
+# Security patches (S33 review, D1): @nestjs/platform-express 12.x pins multer 2.4.0 and
+# express 5.2 resolves body-parser 2.3.0; both have denial-of-service advisories fixed in these.
+overrides:
+  'multer@<2.5.0': ^2.5.0
+  'body-parser@<2.4.0': ^2.4.0

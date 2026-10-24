@@ -28,6 +28,16 @@ export const EVAL_SET_GATES = {
   learned_rules: 0.9,
 } as const;
 
+/**
+ * The lower gates a set has at pass^3 (playbook §2, S33): scheduling 80%, recall (memory_recall
+ * and episodic) 90%. Every other set keeps its gate when each case runs three times.
+ */
+export const EVAL_SET_PASS3_GATES: Partial<Record<keyof typeof EVAL_SET_GATES, number>> = {
+  scheduling: 0.8,
+  memory_recall: 0.9,
+  episodic: 0.9,
+};
+
 export const EvalSetSchema = z.enum([
   'scheduling',
   'ambiguity',

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1085e2582d34d9e921de05c5197c65c8b15bbb58e11e444665b2a465eed399a8",
+        "fingerprint": "771e53967c8116fb2f22a065be660d6e5be879d900b9b4260c9902b6c396106f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_1rpL65xRgUfZFNpCiHIbStcW",
+              "id": "call_oPWYmsPRibW38I7MWLBozq12",
               "name": "add_todo",
               "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-03\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 8326,
-            "cachedInputTokens": 8307,
+            "inputTokens": 8355,
+            "cachedInputTokens": 8336,
             "cacheWriteTokens": 16,
             "outputTokens": 43
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "13562e5b95248c1db5ad87d262ddfb9711641f2de62f0d4bf2a379e91cb41e75",
+        "fingerprint": "c3b7f82cd25f6baadead29bb44b86ef00573d9fa222c70fb4a628b7f447eb433",
         "response": {
-          "text": "Added a reminder for you to call Maria tomorrow, Tuesday, November 3, at 9:00 AM.",
+          "text": "Done — I added “Call Maria” to your to-do list for tomorrow at 9:00 AM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,105 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 8426,
-            "cachedInputTokens": 8323,
+            "inputTokens": 8455,
+            "cachedInputTokens": 8352,
             "cacheWriteTokens": 100,
-            "outputTokens": 27
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "771e53967c8116fb2f22a065be660d6e5be879d900b9b4260c9902b6c396106f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5pLnTpBv6FUNTWmZMDi8o9bt",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-03\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0bcfdf5cb7d0b9a1016adc081a342c87d2911f0a689543bbbe",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3Agam3kYFtgTYsb7--eZsM0ogQTzRy8bk59p_t9VwcexMnDj95lpL6Jd8s2QaaFJ97_rvg_kb2SMujbbu5j4dE3ZPrL62r4rVtjpVH5Eu5VkqAtBjQHV8SYjh9aG7weVrH0LU7oAMrOEHxENXh_D_pyYO9J5b2ZRPJ0fhXuSD7bCu1Fmtgqdu4tAqRmL5PYi5f0nugMhgkka62jeckjFkaDatmHfR58mIFaXu-DFY1mqzbNnnFLzYPq4DCO3TyM-ccDl5xE4pJMWOmdQRs_TYdStnUu2NNbA8XPoWyoOSZ58zcm_X6Om2acfBQBSA_Fz8LZbuuthyj_GlnIq1C0UgRNpmzZw0eERnUzxD0N3SVgnGtNdEIUAdEzNKqQgCd6Gfg-QqR15inwh06cM4jqyGdzeNRHBJOY9QD5gnbK-AAtul5S4lhzzfJDGfsZrbyxF8p0lw6rG4qvq98fpBv5iQVhdqNuvctmN20SYATuFrnRASw-PXwb1K4vaCC0E9WTTCY-M-MZaimVEkYYrABCHL4fH44BX6v4EUfPuo7QehEnUgt-SgFeD60_aPrrptlpfMg5uZZYr4Oqi36obF5YGmLDzmFpapX_QxzfUih5AXqYh4Qne0lchxwdMdWqyVrYb90d923WJnBlI4GgwOL7xtC8NGUfgagRswlzQwyVQ5POcPoWQp4_RaAF0vStkiUT_jfe9Wu943wZFroFCDADG27zbn9BWY5-3TtomSq-cPGfcJv3Jcx003SItFiAuC1g2JB_rql3U9HbU0hdZrGomp0PS7xAQJCM1Vsy4qMFwR1VqUKv2EpayKjiTLh63CNWS-Ya1JwjxM4FQrLdCqgRc5zb5xM11apXgxD7TIFlignOMmnb1MjA6l6OpRDTnSrOnFexd-lSXHdZCfMYWEGz700dCqXqingpITr_ZSuD0Lu3JZVArSsI5hnlqZrfM7aXNbebEsb3Cm6eU16WvnQKAQdgig3G8VplFa7vWnRaoO31NlMXXri2b0QE90JaHpPUAkPNq3am-uwn9WKtJEVTtUhFPXkc69aNVq7Bw3IeTaLWo9rTM3h0RMClSwkIy4WpSkXseXPDo508rToPVvVRUICqxJajvnRf1Y184E_2qVeXuN9NKqmGZBZGQxu5_nhDvuQEEkDIzIM3Tp2lCLLredUr7UYhUYNMXOU43pG7G_AgKD1sWUD62rOG7wEai7FG0JBfT4zhVH00wLp2tVujxg5f4M9TLmZ2c53IfA2NdSLKBCq0g83yfbZubh-g8vxCd2RZERTEsT2SlvaziSdAU-kBLE_LTEaWNaXaAVfdfti4koTVVNILMPeTXO1VDpqG_poHPsHemLqicWxkOENZQP_ixxupUA-G-tX6oNKXW_hFRt5oXVPnjN6aN2JOdjCpHjyd7fwWaLkQsGy2yTf42t9p2G0JnJROtNAXFC2rOyqFACG7BVIhdwsTgjK98sO_hcWC3P6AXovqxp9lM9fJEVvsBjwEkWG7X5Mg9S0Qrys4UAbtXqBI__dCzAU5ky8itPr83uflckuBnMHDpBK4fgurGEP25cnl5TqgmbiLhI4JQ0Ap8qETdrt_9IMGXX4I6lHXaaAdEvmE8EttmN_gcy_mM87gyl_jyqd-J_XkelLOuhBQnq5-_a8tN8rCGV_D9D7tA",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8355,
+            "cachedInputTokens": 8352,
+            "outputTokens": 63
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0382e274392419c735c141e0feedfba587851e8e7ba58971c2eff6da0bd600b8",
+        "response": {
+          "text": "Done — I added “Call Maria” to your to-do list for tomorrow at 9:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8475,
+            "cachedInputTokens": 8352,
+            "cacheWriteTokens": 120,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "771e53967c8116fb2f22a065be660d6e5be879d900b9b4260c9902b6c396106f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eD2eL0ARmJM117L1qJklKAz5",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-03\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8355,
+            "cachedInputTokens": 8352,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7668899949da3cd69da515a70e2745eb52b33a7f5795a83f55cb93a0909da3d7",
+        "response": {
+          "text": "Done — I’ll remind you to call Maria tomorrow, Tuesday, November 3, at 9:00 AM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8455,
+            "cachedInputTokens": 8452,
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

@@ -89,6 +89,212 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "48e17d76aa3e6199a5115a96cb93e259051964fb1f04b28a9bf906d9104afe36",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OnkSlpTthg4njSDCDjJVTNVu",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8361,
+            "cachedInputTokens": 8358,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ec49595c6f90fcf09f4e7729721cc518df64e9c6516f8ff39f63cc7025499a7d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5yBf83fzKKPtyUN4FRpIzO2n",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8632,
+            "cachedInputTokens": 8358,
+            "cacheWriteTokens": 271,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "779f0c02291dc5f872dfa4cd1a9be5ae3cc8e3885aebbd59a7a3386bfd699ac6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_BjuhAx32i1wd551tcAQwC0UB",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8714,
+            "cachedInputTokens": 8629,
+            "cacheWriteTokens": 82,
+            "outputTokens": 86
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "88ad5372c524b98ab23496ab28c3fed506859257ad68a55544634684e5df092d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cUaJgQUX3iWO96sV2Oe236Gj",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"14:30\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_09ea1bab291c8e57016adc08b1988c87d29e9e6a97cbb4d1e8",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3AiyETrSswDEfA4vQk8zs7qosnydXuvJ-vJBVywHRE7_DCRNLkgjwFBrXPQY4IboOTfv5EFpBJVHYwyfUoioslgdxltm2D7wyg3L17MvnJJhxIXiOQSwZwtMWIuoMJUuSQ9qMDXTCTyq4l0Ecg7JW0IfBBpei1wLNp0GwzEHpFNc0LUBKQXskAx0vBU1Au2_Vc0Oq4A-VsduE979JbGn4IGVNhvAQWlmIGiyYAoI47m2_Nx8ybC8YFpKzIFMs6Yz8nM8CxugtSinTgNBCkUM2ysLC2IsjN6kIeIFZsEFPRV1qdryjyNnJGJHrPsgirkNUTw6qkj7Or6F0wBdIuD0Z4qcNmkfYFFxk1PNgZuUS8jcJHdMI2_TtTLd_PgeM-0Ehp7J5lG7U8Okznf7_NFrnvnTrrPKpjKmE2MP1Gtjli3z58mtsn1PxRMISZatIwDvHZxJ5gnQurMwFcAnrilyI0I-MLtgQ0uTS0QKB9eTB-RNHyI9JbkS91NyPIo7AyRy1PC9al26AomHZzdypWSH3fyPjUc9wxZ0H1fcxFd84d_I4rfTBJlA97QTb8lk0qDtb95CuT9NUnZCcBdCGvoBxphCVIf16llHXDSJZuKiNaugnZzYZGFFet1E0RUyMFTzPqDAqgLdcxsxXQvWMsWRaqovNvKWsnR2b5I4B24LSMJ1hIiuzW7haRC7HWuMk4uy9H7q3vsMp6_7QKmB15eKp7XwFaLSm-pyzR7gYeR8NV8KgFAAJTVvN1Ijs2HQJVyMG4Pm9qP3BHbihV_9JrrDoh3rXYC0RKvEkQX15TLuOfn4NF0N1vc3oPOKZ2tE3BM5bKUcREs-dTNZOlKSt57pWMzNH17x4HrLbaIXi-HYhgGgOi3ATwSVJxU3mDOs7XTIZrMZTyV7AfNj7iN9T4CpBMzldHBhuGNe89OVmm5_n4pYi0twaijJ3ejeUu4FUmgOMVAL4N70zIfUOJOZHkYSNAxqy3AacdVzDVpBXKRqcukexce0KHewVwvK1CJrs5UTM7EGNq4xa4TZ26if_uZuJa8kT9b4bjnOVbHDvcZKw7EzDBGRVEoVp6BXh1llpUrM8cRz6wbUwXMnRe8_lbe08FmMKe3LTjasu2RcqZTakaELO17TTzqZMbs8vdi80L0FOakWzOHaJOVwi-pPBxi8rk2fOuOqqbZAU8Zcd52i7LXJmf9h1YKQRZbt6tHFOEZjR9UyFguB-LIhKbuL5pFoBlFwizHOUuK8FFjzyiMVGtBY6kctFf_4CJF8MyUjHATPiUPWRdvVsfZzPcPXrXdGhP4SOZWPLtKVAjCUASaXzqgdoYClOiz7TaQjIFU5qE-OBfQ-F1pwOawzQ9MIjJzWHuJj3Bz8Sd0Com1prO5BLzXmnFrYYWlSZvBODVcNCnDqqvuUnb2cMW7N5_y-SZr58Kdsq2aJopddkh7Z2HLFBFzfuKqXFkXGESGenrDVSTzoAlrINBbr_t3ep_5_QlJ0VDWLA0HZM-HcjKUrj6ujLwIZPqN2zhPwuIbG7oeznutIH7dH-U0ihsejpo4T4pJJGq8wFKhTT0pYni0zvuTCOoIg2WToFXnmW6kKg_i4eKQuK12ZFuE7fcUeXZR87P2_xlJ-5-iQglde2LouS1vIJW97KKo0MX9RX-pZ2aQ2WCjzYCi3xvz9U8WEKICL3E1RaHjpqgoQUBcIETZUPX4L6DlNIVnN2Nb1LxGXvSRxXzidKw9sZn2UtiZEqAjOzki6pksJ7cM0AexaQ_mVNaS8aPq5wTtZVi5WIrZI6v2NKpmiH_AJig9efNf2lGB5-WJDWAe3Og-KE0TsJYz9wcirE33y5-rRPrQv52AeGFJITXTR6l9gfiZ5KcdPNX_Auo0UVgkPoaY0l9ohCdgPYvETOl7L6Yhv8hIQVMiq9fZklXF8DRJmxh-GLnEJfjKt4TITt4nldvajyWdi77PMmVN-rk7DNy0INOtnaeUhag2PKVrGaADXX6IYIYL3aFXpD4P07Hy8Jw==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9444,
+            "cachedInputTokens": 8711,
+            "cacheWriteTokens": 730,
+            "outputTokens": 154
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "10488e61be0d49ecae0857f279850f22f76cd3a9bfc7a07e4a6a40cc37c81728",
+        "response": {
+          "text": "Sarah’s haircut with Marco for Thursday, November 5 at 2:30 pm is ready for your approval. Approve it on the card to confirm the booking.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9678,
+            "cachedInputTokens": 8336,
+            "cacheWriteTokens": 1339,
+            "outputTokens": 38
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "48e17d76aa3e6199a5115a96cb93e259051964fb1f04b28a9bf906d9104afe36",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_fAp9Vk38Jd84h6coOz1KAlPB",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8361,
+            "cachedInputTokens": 8358,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a75f57298a35f2e2a9968d8a91ccc56550d4b1121e3102cae32ccbd1174b61c7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_oGLEA2aP2uIy4kTMF9dACyMf",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8646,
+            "cachedInputTokens": 8358,
+            "cacheWriteTokens": 285,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "eebd329633ef3d84512b42900719a6ceb63071e6f11dd0543e0521e13b2b52e7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dP6FnUWHd2WUhVEVHukpA3S4",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"14:30\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8732,
+            "cachedInputTokens": 8643,
+            "cacheWriteTokens": 86,
+            "outputTokens": 117
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "34aaa3ec56db8b00effd3ea953234202ca3598c6d67cb2b87ee17ea5935ed0be",
+        "response": {
+          "text": "Sarah P.’s haircut with Marco for Thursday, November 5 at 2:30 PM is awaiting your approval on the card. It isn’t booked yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8929,
+            "cachedInputTokens": 8729,
+            "cacheWriteTokens": 197,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

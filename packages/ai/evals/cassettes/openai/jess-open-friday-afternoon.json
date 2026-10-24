@@ -67,6 +67,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "6630d845e86ec1eaee2b3a46edbd23281e70ce3763dd38ea3030d9895fcf2ad3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_oVXc9IYbtAEqEgo5m7QAL4rF",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8352,
+            "cachedInputTokens": 8349,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1cb2a9fd2df3c5b68fb21913dbcd49c8c0aa4cec5e9ad12cd8be7ac607061bd3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_adSHH9XZG38hHbMFn5ARooeW",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8629,
+            "cachedInputTokens": 8349,
+            "cacheWriteTokens": 277,
+            "outputTokens": 49
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "dca663f53e90edc5687be8d7eaa4b13c93a846bc359567260c127f9ed4e27a42",
+        "response": {
+          "text": "Jess has a haircut booked from 2–3 PM on Friday, November 6. There are no blocked times, but I can’t tell which other afternoon times are open without a service and its duration.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8880,
+            "cachedInputTokens": 8626,
+            "cacheWriteTokens": 251,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6630d845e86ec1eaee2b3a46edbd23281e70ce3763dd38ea3030d9895fcf2ad3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NlPAA16H6Wp1o1R8RFmksl11",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8352,
+            "cachedInputTokens": 8349,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "48c856a4d86b922f8b63034ac19d02c5e9fec78e7f6f8108dbcea27fc178d6e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1bZr96pcl8bBnVjKnb2Y7slL",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8635,
+            "cachedInputTokens": 8349,
+            "cacheWriteTokens": 283,
+            "outputTokens": 54
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9c7dcf1d396ad5bc0366615b666fa4ce303bc0f6684d29454fa382a61a3d6117",
+        "response": {
+          "text": "Jess has one booking Friday at 2:00–3:00 PM, and no blocked time. I can’t tell which other times are open without checking a specific service.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8903,
+            "cachedInputTokens": 8632,
+            "cacheWriteTokens": 268,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

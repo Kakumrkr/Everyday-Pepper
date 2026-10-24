@@ -42,6 +42,11 @@ export interface MemoryReader {
 /** The most characters of remembered values one tool answer or the business block carries. */
 export const MEMORY_CHARS_PER_ANSWER = 1_200;
 export const BUSINESS_FACTS_CHARS = 1_200;
+/**
+ * The business block's size as sent, in estimated tokens (playbook §2's ≤ 600, S33): keys, ids
+ * and the untrusted label count too, so many short facts stop before the value budget does.
+ */
+export const BUSINESS_BLOCK_TOKENS = 600;
 const BUSINESS_FACTS_MAX = 30;
 
 /** The ids of the facts a stored tool answer names. */

@@ -1,7 +1,7 @@
 import type { LlmUsage } from '@pepper/contracts';
 import { isLlmError } from '../errors.js';
 import type { LlmProvider } from '../provider.js';
-import { EVAL_SET_GATES, type EvalCase, type EvalSet } from './case.js';
+import { EVAL_SET_GATES, EVAL_SET_PASS3_GATES, type EvalCase, type EvalSet } from './case.js';
 import { CassetteError } from './cassette.js';
 import { grade } from './grade.js';
 import { BudgetStopError } from './ledger.js';
@@ -110,7 +110,10 @@ export interface SetSummary {
   meetsGate: boolean;
 }
 
-/** Pass rate per set against its gate (playbook §2), only for the sets that were run. */
+/**
+ * Pass rate per set against its gate (playbook §2; at pass^3 its pass^3 gate), only for the sets
+ * that were run.
+ */
 export function summarize(results: readonly CaseResult[]): {
   sets: SetSummary[];
   usage: LlmUsage;
@@ -122,7 +125,9 @@ export function summarize(results: readonly CaseResult[]): {
     if (inSet.length === 0) continue;
     const passed = inSet.filter((result) => result.passed).length;
     const rate = passed / inSet.length;
-    const gate = EVAL_SET_GATES[set];
+    // A set whose every case ran at least three times is judged at pass^3.
+    const pass3 = inSet.every((result) => result.trials.length >= 3);
+    const gate = (pass3 ? EVAL_SET_PASS3_GATES[set] : undefined) ?? EVAL_SET_GATES[set];
     sets.push({ set, cases: inSet.length, passed, rate, gate, meetsGate: rate >= gate });
   }
   const usage = results

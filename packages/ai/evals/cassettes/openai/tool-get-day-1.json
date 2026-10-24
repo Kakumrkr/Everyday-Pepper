@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "ff71a0be6738b19ca81641685710a527872156d116f797ca1066969d1a58103c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_JoZA7HNjyUAJZbuHlVL8283W",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8347,
+            "cachedInputTokens": 8344,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3c29ca7f94df912cb8ba3eb8a71abba2c2500a38393a032ebbb21500d65a9079",
+        "response": {
+          "text": "There are no bookings or blocked times on today’s schedule.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8430,
+            "cachedInputTokens": 8427,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ff71a0be6738b19ca81641685710a527872156d116f797ca1066969d1a58103c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LpSgWxsayBxCJAljy5XfzPs2",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8347,
+            "cachedInputTokens": 8344,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a975038099e05fa71c81bab1d0b3ac8261f163293e74b6600883f5a009a61e1b",
+        "response": {
+          "text": "There are no bookings or blocked times on the calendar today.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8430,
+            "cachedInputTokens": 8427,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

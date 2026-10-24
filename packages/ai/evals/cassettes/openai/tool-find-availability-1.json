@@ -67,6 +67,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "3d089807598891d7ae75cc8bb3d40ce36c1098b0bee528a164e2fa4be69e381d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_lZrflGUollC4sATN8eDojQRC",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6c2159e01b143bf892ea5e5849f324c0628011f8e35545ce162c4da1c1d6538a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eJSNIPx1I3gcO8Ls1vCfVZoU",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8630,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 277,
+            "outputTokens": 85
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "58a8b634f77cc5888958043150377799e159c5274686d910dd24ea90dc433dcf",
+        "response": {
+          "text": "Jess’s first available haircut slot Friday, Nov 6 is at 9:00 AM. There are 12+ free times; I can see openings through 11:45 AM, with more available after that.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9323,
+            "cachedInputTokens": 8627,
+            "cacheWriteTokens": 693,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "3d089807598891d7ae75cc8bb3d40ce36c1098b0bee528a164e2fa4be69e381d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_QRRCgsGNXckpwkDu8zZ9OisE",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8353,
+            "cachedInputTokens": 8350,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "80caa451ffc77cbc72d9e7b39dab027bae411f55bedf38ffe209b0809df307a3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_s4ZnjTtnFUCObD3P4BjVxn2b",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8631,
+            "cachedInputTokens": 8350,
+            "cacheWriteTokens": 278,
+            "outputTokens": 87
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6ee468e37c4f05aa92bdc9237f6072dcff8eef1daa958a1b919bdff89473de2f",
+        "response": {
+          "text": "Jess has haircut openings Friday, November 6, starting at 9:00 AM. Other available starts shown are every 15 minutes through 11:45 AM, with more times available later.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9350,
+            "cachedInputTokens": 8628,
+            "cacheWriteTokens": 719,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

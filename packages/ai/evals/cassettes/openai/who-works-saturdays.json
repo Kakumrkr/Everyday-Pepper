@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "5fb01aaf11a434d7b7d6638d73e2be9a9f9bc5c95b82ba847c41266460a87e07",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ntHBBCfrtTWan92BNMeN5dze",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-07\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8350,
+            "cachedInputTokens": 8347,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4b8b24a026d5495b88710c92fd610a3575807fe8cf5f6ab4e57f9c984a63b88d",
+        "response": {
+          "text": "Saturday, November 7 is currently clear—there are no bookings or blocked times. Who you can book depends on the service; tell me which service you’re looking for.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8433,
+            "cachedInputTokens": 8430,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "5fb01aaf11a434d7b7d6638d73e2be9a9f9bc5c95b82ba847c41266460a87e07",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dgRGgMgmJiQ0TcSL1ukAkapv",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-07\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 8350,
+            "cachedInputTokens": 8347,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "495545d254efa27b9e31ea3cb47edd947aa89a28f2cb50ea71ba254abd162927",
+        "response": {
+          "text": "Saturday, Nov 7 is clear—there are no bookings or blocked times. Who’s bookable depends on the service; tell me what service you have in mind and I can check availability.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 8433,
+            "cachedInputTokens": 8430,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

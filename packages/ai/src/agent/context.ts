@@ -9,6 +9,7 @@ import type { StoredMessage } from '@pepper/core';
 import { businessClock } from '../prompt/business-clock.js';
 import { toolDefinitions } from '../tools/registry.js';
 import {
+  BUSINESS_BLOCK_TOKENS,
   BUSINESS_FACTS_CHARS,
   fillEpisodeRefs,
   fillFactRefs,
@@ -117,15 +118,13 @@ export function instructionsFor(
       `- You are helping ${oneLine(business.member.firstName, 20) || 'a team member'}, who has the ${business.member.role} role.`,
     ].join('\n'),
   );
-  const remembered = withinBudget(businessFacts, BUSINESS_FACTS_CHARS);
-  if (remembered.length > 0) {
-    parts.push(
-      [
-        'What the business remembers about itself:',
-        labelUntrusted(JSON.stringify(remembered)),
-      ].join('\n'),
-    );
+  const block = (facts: readonly RecalledFact[]) =>
+    ['What the business remembers about itself:', labelUntrusted(JSON.stringify(facts))].join('\n');
+  let remembered = withinBudget(businessFacts, BUSINESS_FACTS_CHARS);
+  while (remembered.length > 0 && estimateTokens(block(remembered)) > BUSINESS_BLOCK_TOKENS) {
+    remembered = remembered.slice(0, -1);
   }
+  if (remembered.length > 0) parts.push(block(remembered));
   parts.push(businessClock(turnStartedAt, business.timeZone));
   return parts.join('\n\n');
 }
