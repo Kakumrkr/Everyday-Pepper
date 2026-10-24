@@ -23,64 +23,6 @@
           "model": "gpt-6-luna"
         }
       }
-    ],
-    [
-      {
-        "fingerprint": "e7c316d266adf79662c9795ef33a5a44d8523d8dc5ec13124ca11ab07d895879",
-        "response": {
-          "text": "I can’t save email addresses in memory; they belong on Maria’s client record. Please add it there.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_03b389a92788bed6016adc06b1859087d2bb14abbc4c914b11",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3AayOVjx3xG2lMLgl8Vw6EpKfzT3wh9mQkD75lRTCWlLt4iZJRTikNV8Shd7hjdA_ixp_zJDPnlxokimROUACDFnKDqZgQ4iybxIYx783a73uqf5Lm8nOG39h9xYRgW9LlPx3iPPiJd96p8LehWTziZKcdUMlljwWJnwvYUXdnl6u0IZuWnXQAI-OSIL048FZV2MsP-Vycyv3ygI1d21UcLnk4jEl8wutCScoPXPH3w5hKebtJKl0ojep0RS7nUoBvWTBrbHQUZXauZiMsOB_QDs3bkeVVy9QwWIEsi18GVOrW7c7RzLdeqviG1vohvdJWG22p83BwhyUUNzTeRNlvYKTDi7w3P3T7AAu5rprtevsRe3ratRhNs54oECtydC4Tfu0PuBb3OHiNjM-ajJ1_cFGiIF9TyydWJZsDUtwBMpXZDviq_-L9Sy37iW9_Z2mihOj-TTVT74XQpK2BqtO6hrAHRfMPBJcZDIKpVGOXKCJaFJ2F919IBsHQLfq73FJUWWLQwCAcWw5Eny4ShnUhzm4nHtsjGNg2qa4dUy86rAH0pgFpmzcSMaqwDCD0ZKiq6DMXKQl8__Cp4Unv31KgtKI2QjDKqwxoS6V6hrFjLO-WStA6dx8awpoDn4zxXbi-YzXp9mYP2HFe1CiQvCN8FAlCqnUA02GE-wmJRsnwH1nR4pnfq0B81hMigoPLVsAavO7U9Tkzjqd7_ypXAhy5yy16ux39vLK57axHkSONjPjMJCnByfoOeZwVSd-IRSTj-AqLMxcV5r592bVdq95fKYhQVcF36SUWyAWRYerEo476VG8-arASrdVXJLe5Lkuxswpg71sKR5mDqf7ICjC66tL3RQmLYTKRxlLFJ-xu4kAjz-A69Yl7h9darW6ZwqdJmSk-LGyX35EXkMXWJpYrXjnIG83xXP8o2RQWIFetK7z5lcv5De2w2szLHtwHy5A50PrP5rjzMkCtW0UwhGXyzql7_eSAw-aVl8h4Cw18hWQqj-toRUWZj2N7iznr-J9G_ofctAIZatNWaR90U7CBSlFGNaRFGP76i4LW0oTyxEmHaXmWQ7hLvEiEfyga0sgDTfZj-9n-xr4Mpq2az_47iq_CsPpxdtzO6GwyCmqiYDdW5evQelwMvaHzE_jZ4JfjklfUVMMdxehuL_pHu9fiF9UmO0yEh9HuPIQ6booCrrsufzV5274z6bhURsv31tljLVNYhOEI0DhdJ8zYWwIzPeXaSGyVPUGtohJa-O7D8_PV3kTpvf3CGxEn8iYizcLQf8JOfWgGSKZgGauIaesW5WGSxqRpU3oFhCmGAXwCLITBxnRn_fbKYlXEUtKcSsf6gS6Am71JtsbP1km3VV87bFzLcRzGOow57-3-71tp048JztRfA4iBeFC0Mam_cNK6M3qh6MPeLDiRuWL8jhpJ2OLfdg-HvebI6O3lvcyZ2UQ4QrbQiA8D60i3LfyVOy1nSQKSBjF8SlRtve8R05ZNaVUFz1Nq3vIHl6xj4LDiaDU269yfV5siRt37dQUTQN4LKeXxeTCuaafVlhV-jlZ9aWvi-dg7nJhiuzHRKzZcIp5xWR4ltPCGL44cklqSBziXTcz5DBBG4laCRD09vV5xn7N5v2PwFP6gYRYYVC-Wj8qFJhSPr-otjcEioxkBiG8boq0TOPizC9ulGBWi0Eqn6rHGRMZUh6UYx1jb5CLPSgecuIuiN9D1Fxa5MtHWfq2rnQKqAs7cTLxP6xblLRittZs5Xb_jdlasBnZ9PmV8gUvJ7b-_gzRDyiySv6gr_xkK2e90BfRv08rnnmN-lem-fmqyC2jlbiLJ-81UFj1zUnoqLJLRgSUSy-UmEjsLq1KtTyL6dO0aX32UDZWSjGT_9edqnvwu3_i_015CS8a0l9cgVYevNKpFI53h8nvWM93CMvuY2C6al5yKHkk2NMpsLAoQRiT3J4v5UDIT2UT02kLhUSzMWQ1FXqt6otwzDsEvyGtrQVg9Xr5CJARsv0IlEdH4Sx47bGtYMo-AVK-63Py419r4f7445eEsau4SeVBQIDGBryiSxMKBoy5a0dd8kNKQ==",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8352,
-            "cachedInputTokens": 8349,
-            "outputTokens": 78
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "e7c316d266adf79662c9795ef33a5a44d8523d8dc5ec13124ca11ab07d895879",
-        "response": {
-          "text": "I can’t save email addresses in memory. Please add Maria’s email to her client record instead.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_0fdc45d559bc49cf016adc06b3771487d2912b059aea0578c6",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3Aa06aIvwu9dyN2bXgtpKAUPPq8-kJ40f_Ub4hbyh-ZreN2qgrWvTQf8Gmtaeo5VzHmgfqar5ALuoC30gq3vuhztEQQuIHsx5XPvtfh9Gs1y0_N7RgnVzci7ZmUPo2uzRlHzhA9IrFlgS0rFJ4ofLMB-inXSOY7-qe1PzEqO2JOuLI92Kui1l4SpcWLx3IKDk0wJ-Umd5Eh7cqOnKKASbYSEtW_1Fh0jDWc5wXipIyn4UprGiJjtto64rZGKjWKKSE93xlHONaVb8JXHgf3IrtqXzYxufjW5xGMrOjeqK6h6lOuAu-vkl2kL5tDBAuAjGrADLkSmS-Yo8E9yPknQiIUfuv3TY9LWclvUXn7dMB26TPXeFd-TXnDMEQDuGkybYAU60vdE6y9Y1mN2j2W-JK0N4CRcKW7KJI-qrbpu-VgqJEQXR-xSjqDFsbnHEvYx4K2wZsxQmOv7NFdE9NjCsuyO0AZQQH7aYGUCqZGfEtANln7QDk9ikAymE35OxGlQxah-cS5eug46RvsTs-RB4NW7gWpWIV3yKnIZVBoqz1wwNtl_Gwlb4pktsDrdYhJIw1aqj3WCgMP1bbiCeY0qU2xjTsZsvoEcutqLp1uwoU4AOPv0Z2dJApT1tGOFBZCPP4BdQ-FCSdlnBLm1dFkNH2bqMlm3BqOx0XE9_GCZj6QkWzTfrbZ7op6MzjYEy_Ee2fg1z9npwIOVTMvVlRo4FHzmUwKnrmg2p3FMutflGAEVRa8-zwx5qnYRHgPPI384s68AQtbprFEntMxoZm9dJRDv-aqmkTgu2QgepZbs9dSSnWpx82Bi45NLl8wwS5ohfNNoF3buxG64Fog3qqBkQ3zYWs9W6wlTgE4G_10NDeepaGBfcKmpWaIDQh3Z3hClM8CEwnwbRDu47t1iaW56B2atKtF2Se-YlUDqjjJ5SuC61fT-IvWVjLvC9MOImUBBcrRvIs0PDNsbEzTHtx61002di1OBuhMP_UH6wIy0R_4BKWbS07SA_wohQUoW4HfkhL4h1T7-qa17rO_cvYg-W4bxek93CTd9O-UotApVXuttJyMMRFfrwu4PjufXqMIw4gOdo1gLAoIy7VQIVn7UIEXd9AluifS4NoXLrklqW2Oeb66mj9HMHQgpKN94r6regOX80FAOZ99mViP5hVWfNXSpQh-7cyjI7ug8_X2BuBUDLBNzJLOoCaMyPjjdXPjz48wCCuAejjR0hBI6rFKKh0JXZasHoc2EOdv1NJcHtFb4oCzZ6p_XugOKtkQv25gPgSIXxPyeUZD-NsqelRQdj5S2nEykKKdMCO23G_kiJQP6isW0uaFz0yLhUdvuNDa_3tmFm-vH_qnLl1jcV32RoatE9ekKQlXPJCe_gOK-oWVEM_c-UCZdhHg2NRyh0QsZbVEletU47qnqhVLeYhbNVACuLQekqahrrswAT_tuslEMG6_-rkMszpEHktq1eRPXGCzKa7Xl_A5c1kmVWR67FZDPS2lTulQ7yxLj0gxspE_X-WiMcvUaGwA1DB-DNzS9opPhEc_SzS7DN7Jdmon5uZfl9xWdy0ygjksjX3rbaASrSdOpZbMl8I9Rc5FZwOILFJEQgLBobZfOd8BV--xEISVqZKvNCBFEml2k-pR0CXvygaz--nv1Mrw1OPNjsSZIhNETPNkb4ieySFEbH68_mGJUToQ6u1uiFCLd6ESAWaegORZlaQm0avogf4EzRBnNWloz9PtJqCY6qYauNfoW2_UOzGt4kgVKXI2ioN4a-UM6yVjjhsUyf4IdE6Pc2oycrTTNwiQiVso3dkeCPlZMIOfFCbO1P2rkjMaSJNuuwwB-Jq7cSgnzySF2l6P1N3Mt53ad15TAbO_Kw77WD-1Hkr8_Rt-OVt9huDRABXtm96tkcZXfTQ_g14B8JWnXPgp3e_7d",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8352,
-            "cachedInputTokens": 8349,
-            "outputTokens": 64
-          },
-          "model": "gpt-6-luna"
-        }
-      }
     ]
   ]
 }

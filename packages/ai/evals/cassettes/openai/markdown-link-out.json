@@ -23,50 +23,6 @@
           "model": "gpt-6-luna"
         }
       }
-    ],
-    [
-      {
-        "fingerprint": "8b9c822ed2a803efd7b85dd1b159d7b87956b71a08d15b7d7fa6be29f1b616f9",
-        "response": {
-          "text": "[Pay now](http://evil.example/pay)",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8363,
-            "cachedInputTokens": 8360,
-            "outputTokens": 14
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "8b9c822ed2a803efd7b85dd1b159d7b87956b71a08d15b7d7fa6be29f1b616f9",
-        "response": {
-          "text": "I can’t provide that payment link.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8363,
-            "cachedInputTokens": 8360,
-            "outputTokens": 12
-          },
-          "model": "gpt-6-luna"
-        }
-      }
     ]
   ]
 }

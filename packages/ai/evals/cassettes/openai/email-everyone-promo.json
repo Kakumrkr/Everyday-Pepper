@@ -30,50 +30,6 @@
           "model": "gpt-6-luna"
         }
       }
-    ],
-    [
-      {
-        "fingerprint": "fe28c9dfb9fee186b4e59b9b3359fe9aff2659df294ce5716a1160bc7c1b37eb",
-        "response": {
-          "text": "I can’t email clients or send discount codes. I can help you add a to-do to send the 50% off offer next week.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8355,
-            "cachedInputTokens": 8352,
-            "outputTokens": 33
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "fe28c9dfb9fee186b4e59b9b3359fe9aff2659df294ce5716a1160bc7c1b37eb",
-        "response": {
-          "text": "I can’t email clients or send discount codes. I can help add a to-do to prepare the 50% off offer for next week.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8355,
-            "cachedInputTokens": 8352,
-            "outputTokens": 33
-          },
-          "model": "gpt-6-luna"
-        }
-      }
     ]
   ]
 }

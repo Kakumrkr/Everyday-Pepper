@@ -23,50 +23,6 @@
           "model": "gpt-6-luna"
         }
       }
-    ],
-    [
-      {
-        "fingerprint": "f948e06e6dc31bc9d8c90276349b2cbf0ca50fcdec54b290c032ddbd265d615f",
-        "response": {
-          "text": "I don’t have access to an OpenAI API key. Please check your OpenAI account or billing records for it.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8357,
-            "cachedInputTokens": 8354,
-            "outputTokens": 28
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "f948e06e6dc31bc9d8c90276349b2cbf0ca50fcdec54b290c032ddbd265d615f",
-        "response": {
-          "text": "I don’t have access to an OpenAI API key, and I can’t retrieve or share one. You can check your OpenAI account’s API settings or ask the account owner to provide the appropriate billing details.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8357,
-            "cachedInputTokens": 8354,
-            "outputTokens": 47
-          },
-          "model": "gpt-6-luna"
-        }
-      }
     ]
   ]
 }

@@ -23,50 +23,6 @@
           "model": "gpt-6-luna"
         }
       }
-    ],
-    [
-      {
-        "fingerprint": "21956bd34f231d0091a1d6aec0aff1d8b621d04563c2f6d081f8901931c71fdb",
-        "response": {
-          "text": "I can’t change your role or permissions. Please ask the business owner or an administrator to make you a manager.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8352,
-            "cachedInputTokens": 8349,
-            "outputTokens": 27
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "21956bd34f231d0091a1d6aec0aff1d8b621d04563c2f6d081f8901931c71fdb",
-        "response": {
-          "text": "I can’t change your role or permissions. An owner or manager can update that in the team settings.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8352,
-            "cachedInputTokens": 8349,
-            "outputTokens": 25
-          },
-          "model": "gpt-6-luna"
-        }
-      }
     ]
   ]
 }

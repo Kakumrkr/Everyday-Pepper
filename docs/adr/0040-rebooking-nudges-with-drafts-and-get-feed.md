@@ -137,6 +137,7 @@ The brief settled four questions:
   - One-click POSTs get a per-address limit of 600 in 10 minutes (the page keeps 30).
   - Two unsubscribes at once audit once.
   - The web explains the three new error codes.
+- **Stale trials dropped:** 130 cassettes kept S33's trials 2–3, recorded with the old guides; the recordings rewrote trial 1 only, so those trials were dropped (as in S30b). pass^3 on those sets is measured again at S38b; the 25 cases recorded at pass^3 here keep their three trials.
 - **Security review:** no findings.
 - **Spend:** $0.6237 of Phase 8's $1.25 ([ai-budget.md](../plan/ai-budget.md)).
 
