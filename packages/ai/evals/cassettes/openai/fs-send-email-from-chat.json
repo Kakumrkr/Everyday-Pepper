@@ -30,64 +30,6 @@
           "model": "gpt-6-luna"
         }
       }
-    ],
-    [
-      {
-        "fingerprint": "19b854efb9dc3d07c9ca0e0ec004253c18a79d89aed9e4fa24772b8d6c4d8ae5",
-        "response": {
-          "text": "I can’t email clients yet, so I can’t tell Sara she’s due or offer the 20% discount.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_0b1e74dccd84a870016adcf0e10cfc87d2b2ff2ab1932b3396",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3PDiytXeoFcqaPERRdgaFKs2kiFMsCabTXIr-jauPb__SahCvnS_Kz7eIDiNx8W746RF-yx3sltiqSP95KN780jHkrXJW36ap3OaocVDN561Fjer9DJHDsksnaVTduU10d65d31dAwA3jMyNYH1NH399KpyXkgN2I-cIKht8y8MC4t0X4eaef_D458ZT8874GmktQeASFPVL1vdJcMdy4cI3QHBAFL9qdg2o1PvkRwZoy0ZWSlmVfWif8TCYA14QjcOGxNUZb9Dki11c5dzzJqlh_xtowiA5M2fMwr8w7cGLhD2a9DxfQXSrZXWulfJKAMNwA6IHB4l2SaxOpKNwB_JUwBY18ZG8-SXqgTFbXUekjif_fDzkFeySeRAvbfeaa4QIU6yyTjDnmiaAqN3ZdF007PpOgPY8JOW5Qy3vbEPteGnIp9uJsAjRwplCTSPPm60A6SyQVlzODsUS5rR1a_z2Tr7LWwTyvK0flvJwMXEHHzvJiuCJuaJ5Le_xYk3aotGe7f9UfZxQMeZ5ID-5U4h3rxChgMUxWxhJt-WIgumbl5RA4xxxz7F0qH0iBTu5_7MmfHzsBLOLCKsHC2a2hraM_OBfZpHQQqvIfYHhL8Ip3j9rR3eU2cCkWtJ4FSH9cwWSLckoIPOq8_4wGNgB9OZlOxdRcZfXSZx_PDH4q1WiIoJHcxClgxbsYm8BSZlOD6Ktd4OBS6g299pmnjmKEA2PP4NRNtp-FCyS6wfaEJuhMXaOQxD6sEECQ-5LKb-gD1RdHwfd4pDZBpAyijUbS8yvtale_4XueT9eUoTi4q1JExb3Y19O7pE3Gz-0mJP09Jj79fXsp2YsWro0aOgvv5W1FuEZ6ejA7SD7GQIkslXB-IHdQ4b9BPbbh4BA0pA1lSUi3jWHECRb7LETB2aoh-IcIPLC0Xm9a9TlZCqGVCjzWB3Y1NeLwSNt0xq_LjwnWgosumdKEAmqZIxAEA5dTcwD2hv_F7al_qrggw_3NTf1u2YN3NiSuFIAwpkzHSjyIZa1TgUQ_V2_eSxT7x3q2_FSq_wqDxGvfaMrD0fq0_peMfCu5wqJHbb2_rC5RkWKbSCBPSHkQyX7wH8UjCskAt-yzYnI3ZP9sUkDhwsbAFLel2LBTsZKWhWPaCELBSAhllecBbGLgup5YElhXH2IWVQj1EWNcQZqhQqYduzFEvgYOk7pPq31DV4ybhooWLNKG6ffBL3aUVP-LVb3OPmH6KinzQiB4TDLBd1AuPprogjraeGcXMuLgqnZqTPDqkRcjlGSvYhwgwOgBzyyo0iisyrGZ9zpofM6YtFqTozmGPQWbzV6bLVfAIBR2KEIsS6lyBEtYjjE5Jx8RyuZYh2BnJrKUO0RJOVKatI4IkFzFPGDHi9-jHdqez_Fr3dBlBIYgU2FpzHJCWDn76BTS19UMPa6Jskx25j_wPGUJPoXOhWer-_lUTh9eygpcEIErTZ7wE6DgqOnVt68QtDzUtuXfFIK9-buWMUFQbGQPy9HK1ZL3NG1SURThrX6zUuZck95Mws6xpa8bylmd2kG06GPTd4KbwLbCmndbF7B8Wh4QHngMJSUi3AT1s6zzN4z3-30Kn6UUOKF4HTzIhmsHcymux8dkmb2V3REqxToHTLp-azwG96a-3-LEg-HaCrDU8GP9ORAwmlGRuhklshzKl5Q78Os8CQnFA2Be1gHyxafHoH1eOPaDV6sNK18ibKObgQuyxxScVCoWIAv-9gm_Z6TEQPaplVvdsO1rc0CAzeix2v-nNfWtLumGCZMkmKE9I2A3xpbt7SecSnn1BtLjp94EqKSDAH8MHs9S6VXchakaFM5jCMzlkAgmFM_MDoAr-owVMczSFJtv1wkmfEqlNEIcyqMX5Nd8--wUCMsRVXZmOGdF8rWhPW7IqyJrZAanfy79Mtuiw5vMzCw_2fIPZPtRTVnRQOVnSgUABB-EUt45lhX83byRIIMfkKUCZRpYgwVN3sYIm1XrQVyfqlMPvoShWvynRSEl8s9DtrskXWis02HlTTk2_5DPzUJbqv1t4TLF6H6pW1SsHef15exXa-_Q6RqzUyLIgV9UkINqaDYqrGf1FR3Nmx9psDTcAHo3EZIONHFZLugtLLXAcbLRd5Zf0inXNHVqChNkCE6zuoJ0j3V_jPnuSKoFHVrvy6iuOmZQ-xAIHFRURSAaBQtLKcs41KLg6XcSG73BZ5nUvlP-wjYQdvGSSOjfcFG-q5HYk3Ymg76n3IWReDsfmjv1xEe30-AWmEULeAr07HVljbURAp64CWFqInmoqJ7gJcRrrG8y_8eJaPu6bw1ZuGS5wFKswiZKqZ50IYPOcJTDykJQFVKkm1c4mpIfAgYsFAUns5W7qLQaJrghe02IgEc-Mf_s1WYSdqUqhAPC4CEy4vjHIDOF_o=",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8861,
-            "cachedInputTokens": 8858,
-            "outputTokens": 105
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "19b854efb9dc3d07c9ca0e0ec004253c18a79d89aed9e4fa24772b8d6c4d8ae5",
-        "response": {
-          "text": "I can’t email clients yet, so I can’t tell Sara she’s due or offer her 20% off.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "id": "rs_0c0cf97dae0a7780016adcf0e3607c87d282ade9ebe6c8ff57",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3PDk_lzzMSiH6tQVcX5h5EyLjlm0leS46VLO3V7-lZeB0k0vcUQ7kabSQPuRWJG_ifJDpZcmlwNXz5qqPK8eU1SmUjrXPp9gucx5tsypYFNv4UzP7k6ag8ODpt2qUc_R4ferRSfjz02fTsD-kJ4PRIw7iNfRQShhLjMkDJvJa99pYtLLoZC2lTv5BHHd36bHTlSPxi0DetEzgs_PYPVsRBPrmzh6gR5Wfla2P2f29lROkB-KXX712LFwyoT9Jp1GMk_WQrIatbXTLcevm2ixFAL4jH4_m6ckD4ETYUQ_ZY0mQR1va03PpAWbNiEvd1iFW4uTfK1r_nBwXq7ytpAdOSTr7XtgL4wjS2M0iDB5ok0aHc483gsLz5aQVTvUmhNxuDFcZdv_q_Q_-HyG94kS6_lBXLC48k0dmSAAV1eG4ba8FiqWUAiuNpyliAz2fkO-Sp7w0WPBNBtrtWQF9KUHpbexIqbPKDYLBLpUjlbsSnGvnT07ScqByotm0Zs1vjt6as2lS1l2KLUv4bFABuC2JBFglf87lSmJ3Z7Y1rdwQ4vCN_tYxLzqjL96rlXV64PbS9U-ann6LoFndHMovkjhE-FYue1eEXZG9BHhgtXsSY0AOubO5JzRzu5F6MOrtyPnt93ct8zCxsQ0tZabneWRrK2GZv7rGShzMkLLT68mXNaNUstlRSM56kVtyTlth51J3M3FGjFYwkAFZY-6lMmz-g9q2wae8q_17tEh13qbUxGsSAgp6Ep34-zVWSX0ziBUGhl3NiRAcRB_jWgEaZ6L7yLZjHmM6OWtAWOzZcqX2AJVduFnUmkIvAcFGu10JWrI1Nv1nLZqIGOg-j1Zz74HAq7MXxyV92ic3QthfKQzQubAQLSIwnAaX0yLaL1nAjPvyebUiFCQMi1iTwOvD-DKjUnXYQPO9z4f_JUvRugjfovJIQptrmDyjpRfhiZZL0Ain2aibCLXhSAR1yyJ6_b2BUrXImOZ-CZH5gmWCSIcKKoN6xH_SRWz-qYkSfrCDw91Xq5s7DVDvLIq0oedL26d52Vtp79nkYA3luGNeR43scxRbiMKtbdyOJp_RRxDLa_bEiYPpNc4qkG1IARFzLxFQXk_50fXNYLJ9zDEQ1yVzmSwGcuB3NGjPHHfT6k_xas7niQarTUrX77Ws4GRj2EPbz4qaxhjV0uiAavjbifdSx3rQ0IpbQ40uchbBWsFnFoffFYQEohrJFEukVarSgFTjf2xL6maNLU7Oo6cCiYc0rgAoebPBQ38mXVU7Z_EYwhBebfV0gGkA1CZ2ROBN5xeM0BXJEQX9pPLBRqBxT3UU5PYUzeEMxzMjuT_HFGrtI2AXd3gSX6bTaAJlJ7uKRy-sHDX-XB7xmCiVwl_jW-UTSJQFtE0_Ntrz1cOGMQIwZ-unlJVcvlOaymYMnECA5HhvowtM_XugXvrkLNartoEDIel9BO7s1L1Tnw3HpeDP3g7ioXExU0Ayun4GSFJ7P6x7n020v9JXfWS5Md6ljdDnogRL5ddrqP22vcR-bVK6V36tA7nBAuxljAuI-Vv0-M5aPV8mcRoRUMeJjYWLb0tIVG79rC6-fDFi4r-Pjhdw2EGIxvbywGaqUydyd3X8djOlXA7LlP7m7SBo0crFy6w7QoTc9C92vGK_7ihrmOmVQZnRZdw2cBxlei9mOT8OKQG3eHbEgPjF8tI_fnXb2b_DGGAhb2W0VBAxQZGp_hEWGmYFo1rsTVuKHItaJEmOqwHvJFc_fm0TL2jI_syjoPI0FARcPHktQ0HZT-inDsluLfP60u-mtq1JTGf7_I_Blvf7Hv08tuUfq9465KS3UbxPMxmvaYDiZlcPxnTpS9wlg6zKRjhNZveIDpRHIztBCs4g6SESb7LeNQYL7pobTjVBHv5hmj10SeafMnwBQ5QwqJRqAinda7s6HqnUg3j5iNVpOksHtqIQY60y-5C6ZOhLNRvZNQMH0IwsBMk6c73CrrwVzZiuZEZjlm3l0xCZf89pMUWHcFn8sBif630_g1pkYJQZkeDPjq7JlF1cpUCCiQ3KfcBBP1vN7Xx8p4zryZ0_vp-mzDERzPVQf479IDs94YvR7Y9NgzSAuvyRmFFtgGAjnib8NS07un9LBufr1FNdt5ohCIytoVmqSFzKoBMG92eoPOapaMUE2Z7zNK9CWLOXhWV-dm40f_AsQ4UU_6bAoWBrgjwriFL5l4nv0titf6DXoxz_8Kb8FXoVZ4_wedodTOAJ0XQEWueUxfsagmNOybH-OPiMiA-Dg1nSxKF66MqLgSHHCRlZqD-3h0cvDM8xQRE7l0fdkhnJ6XlRvM1L_ibSJEzIIGMrJ6Tklr2aDs7ysGm1YjA5e1Dkfd3euUYi2UZ693hlS6g_cfvjRYsxdxbRxhDDnWD9Efl6ip_7xTAgnfQRzX8eof2shMxLfaaKAkK9jJrRVRbCr0CSMjLFaFQRx7yLjUt8S0p818Iyz5E6AAql5YVx5EhRrD9jEtfvlYASRZlI0j39FaP2M42CVJnoA3DfE82hfgarfIfQeHZeV6zBFVHIBpwh4uqehKr2N585k8NJVox3mYumtt6B3IqFuCD_sVEr72yutCWH8Oqk7d5_0ym6nXYRLElVz_PCxBvXxkY6EEvPSDiNFNuCWHyIAZUgOVyWIS6xzlMvUJn_jyIbm19PdC7mo8GXKMYEVSIdR6AY69HQjOYz33LDovA9lxNGj5sdHliXfdQID_XY0K9sxK1pNEt9xwnsDZWOyj0",
-              "summary": []
-            },
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 8861,
-            "cachedInputTokens": 8858,
-            "outputTokens": 129
-          },
-          "model": "gpt-6-luna"
-        }
-      }
     ]
   ]
 }
