@@ -51,6 +51,7 @@ import { addVisitNote, forgetFact, rememberFact } from './catalog/memory.js';
 import { searchMemory } from './catalog/episodes.js';
 import { getFeed } from './catalog/feed.js';
 import { sendRebookingNudge } from './catalog/nudges.js';
+import { sendWaitlistOffers } from './catalog/waitlist.js';
 import { proposeRule } from './catalog/rules.js';
 import { directoryOf, localSlot } from './catalog/shared.js';
 import {
@@ -108,7 +109,7 @@ export const TOOLS: readonly AnyTool[] = [
  * offered to the model; known here so their proposals are approved, edited and undone like any
  * other.
  */
-export const SYSTEM_TOOLS: readonly WriteTool[] = [sendRebookingNudge];
+export const SYSTEM_TOOLS: readonly WriteTool[] = [sendRebookingNudge, sendWaitlistOffers];
 
 const BY_NAME = new Map(TOOLS.map((tool) => [tool.name, tool]));
 const SYSTEM_BY_NAME = new Map(SYSTEM_TOOLS.map((tool) => [tool.name, tool]));

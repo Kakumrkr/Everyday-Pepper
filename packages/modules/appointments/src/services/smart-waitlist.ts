@@ -23,6 +23,7 @@ import { requirePermission, systemClock, type Actor, type Clock } from '@pepper/
 import {
   appendAuditEntry,
   countCompletedVisits,
+  findClient,
   findCurrentTenant,
   findService,
   insertWaitlistMatch,
@@ -92,7 +93,7 @@ export interface CandidateOptions {
 /**
  * The best entries to offer a freed time to, best first (the published ranking): waiting,
  * not expired, for this staff member or anyone, with a window that holds the whole
- * appointment of their service, and that service bookable with this staff member at exactly
+ * appointment of their service, a client with an email address, and that service bookable with this staff member at exactly
  * that time now (hours, rules, notice, buffers, other bookings: the availability engine). A
  * time partly re-booked meanwhile fits no one.
  */
@@ -118,6 +119,9 @@ export async function waitlistCandidatesIn(
     if (!service?.active) continue;
     const windows = WaitlistEntryInputSchema.shape.windows.parse(entry.windows);
     if (!windowsHold(windows, tenant.timeZone, start, service.durationMinutes)) continue;
+    // Offers go by email (V1): a client without an address can't be offered one.
+    const client = await findClient(tx, ClientIdSchema.parse(entry.clientId));
+    if (client === undefined || client.email === null) continue;
     const bookable = await isBookable(tx, {
       service: serviceToBook(service),
       staffMemberId,
