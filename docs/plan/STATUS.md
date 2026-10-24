@@ -5,7 +5,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S35** (first row of "Planned sessions").
+**S35 (Phase 8b, the feed and insights, no model)** — brief approved 2026-10-24 (user: "Go ahead with your recommendations, ADR is pre-approved").
+- **Decisions:** D-1 re-run via an "insights dirty" mark set in the booking transaction + a 1-minute `Periodic` pass; D-2 thresholds: gaps next 7 days per staff/day inside working hours, not blocked, ≥ `minGapMinutes`; rebooking from `rebookAfterDays` else the client's median interval (≥ 3 visits), past due with no future booking, expires at 2× interval, audience the last stylist; no-show ≥ 2 in 180 days with an upcoming booking (owners/managers); overload ≥ 90% booked on ≥ 3 of the next 7 days (owners/managers); D-3 `audience_staff_id` null = owners+managers, set = that staff member + owners/managers; D-4 Done / Needs your OK built at read time from receipts and proposals; D-5 `feed_settings` on the tenant (`suggestionsPaused`, `disabledKinds`), "ask once" after 3 dismissals of a kind in 14 days; D-6 ADR-0039 pre-approved.
+- **Tasks:** 0 mock-up · 1 fixtures (DST) · 2 contracts · 3 providers · 4 migration 0043 + repository + isolation · 5 insights pass + re-run + latency · 6 `/v1/feed` · 7 web home + Playwright · 8 ADR-0039, docs, `/session-close`.
+- **Done:** nothing yet. **Next:** task 0, the mock-up.
 
 ## Last sessions
 - **S34 Phase 8a (2026-10-24): Phase 8 planning, merged** ([Phase 8 playbook](phase-8-playbook.md), [PCR-006](changes/PCR-006.md)). Full entry in [session-log.md](session-log.md).
