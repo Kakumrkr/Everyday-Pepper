@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "606c9d2996224c09049366e9340890570cafbbb45cafbfad5eecdd3c2b83355f",
+        "fingerprint": "88f28af44e460c86e540e2eebbec56a578b62b13414ec6159f65a4e4ee7e3edd",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Vp40UkWDg84tr1A0NBGWgJ9X",
+              "id": "call_A211DLR0YmgcMZwyf72tf4Ze",
               "name": "search_memory",
-              "arguments": "{\"query\":\"this Friday 2026-11-06\"}"
+              "arguments": "{\"query\":\"this Friday November 6 2026\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9888,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9902,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 13,
-            "outputTokens": 26
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4231d947eece3f6b0c100e31f124c5bb01274a77fd6cd1f7031e3d516873a75f",
+        "fingerprint": "7d48dbd0f97ec62d8a04788838d9e9314bacc77a36933a969fd92955b3055f87",
         "response": {
-          "text": "On October 30, we talked about Friday, but I don’t have a clear note of what was discussed.",
+          "text": "On October 30, you talked about Friday, but the summary doesn’t include any details I can use. On October 24, you checked Ana’s Friday haircut with Jess and kept it at 2pm.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10115,
-            "cachedInputTokens": 9885,
-            "cacheWriteTokens": 227,
-            "outputTokens": 27
+            "inputTokens": 10128,
+            "cachedInputTokens": 9899,
+            "cacheWriteTokens": 226,
+            "outputTokens": 47
           },
           "model": "gpt-6-luna"
         }

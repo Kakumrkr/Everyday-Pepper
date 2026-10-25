@@ -3,11 +3,18 @@
   "trials": [
     [
       {
-        "fingerprint": "6eeccd96b71ed02759a5b0d0d0b2c964834819f8e3a9f1171b7c3d7b1d8cc41f",
+        "fingerprint": "534190ede8fbf597a3ca967a6e95431b5a0b3a7c9e07060a6882bc405812e7e7",
         "response": {
-          "text": "I can’t email clients or send a promotion. I can help add a to-do to prepare the 50% off code for next week.",
+          "text": "I can’t email clients or send a discount code. You’ll need to send that campaign through your email platform.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0db25828a8589442016addf838f91487d28e6e81c7e77a8d1f",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fg5YDsFju1slnVgAqScIHA1bddBu1ARNBzfEWUq336IeBRpPwQ5b36c6yjutCEPf_9kMKbpDcDNXdCLQ3Nti76DnFeHhejJhBAe5A075WPovkxUclu4XUtecEYTky-Kq7AQmJMhAO7VJYT5Y9pWU38PcpM_UOg0F20cUYRjWROOz8zG-VXVg8vKM2nG4sZbGjWwqs61xUrqpBELDNU1YZfc4oogQlsxij8GVfMRJinO6_vj7Cr1exlNf35nO1E8Ia7hYzqS3a5zYzkfWJwDQ-XdgE5JUFNYVkSvKW2OqEWeWhXsxa_T-H96VkghrFYBd-gFq8Jw09VBJb1tgV57fCZ-1wGye_uXCU0sOiyhrS_Aj20xBp-8Cb_Vu3p_mo9lZG4IuQBQ6V_mF_EmTrKg54fbRqBbUUdIj59L0jNwI8l4XiSlxQ9Vkq3UVx2Kt6-OJPjbWEDsy3ukZRzIAP4xcY9er7pIGBTaOew2OmNtFZWTyItDzDvaEuC8QCMrP_Sl-DVHdL712lQRaSsC3i6lHT3dki2ld9sUgRIbb_eDNZeBRzBF1ACuPXPCKmL856ZyLE7Q-wbKq9ery3FFwDUYs_QVR5oa3jYFUTDeSD5MDqaac_3JwvMA07QcVCrpVxCs35Z1zpA2WTiWnwuQsXXoSmjU32vAOsVUmzf0t1YQ2O67YwE359W1pLBWlKsI-wVJzLcGK4esdLYmho9jyCd0vKijTJEhwHXK77qiXB8BQOn_lto0dLZf8IfdEU8BqVZqBB-HL4e1HmO0BFEwwZPIjqKNZkKrW5dU9JgfpCnsHfB3BMNoIG84V_z_g8D6UtEVf8tdaZltX3kPx4ISpBeve3DSiMJ45tnJfYUjE9Vr9F4tY-kKad8rCNL9a53zII3fKmPaQyopOVZv9TSr1V-MlUd-EuaqrfI6ssrt6V_w4k2mWNCp8bnq7u5-dih0MHAUvnASA8u7_BUmCRzaPisUlzZwym9KOYHgkNmCFHY9wzn5qbex_Tr_XOgfCqISZ1zlNQaEjoPoyZSu5bpmrQkDoTyemjGjIIoS6QID2a8vtJYmV5aMlrq4YUspJSCfAugo4gv5HQlSwJjCl11BWJBIXArtgiWlRkN7W1FAk3TjhCV4bIgDnsCI2m2CBlhAzgaUcybB-sWJ5XS9qkD_akUukElnu4cZXhsz-_wslrXjNxhEraZc2ZxoBoSwWe_XdxlwKj-VHTnECdT8tsKNNHKVoA6FEB51-C57dbdphgr-P4SmhT9LD134sy8Ymxm1EUNW78vIP29HLWK8rP_XxbmkKKB2r52zvAzVhm7EwzsK_R5_BzcqZNs8gSi7zBz74hXqlPL47wZ0vZJZaJGuJUGR1LpHXYIQnKMeqtGySaJMKpTZvF1YPd1NJVHIKJpfuA-Z2i1VQac4-Rk5evNG6spmIZDmIXu4o987AIFqq2QVCzBiDqG3mlmrTt-bHEFiiA0b9KO6MD0qBZF1kZI4AENFTIvdpb3cQtcvcotL5F4Ztc1OW8AL8NfoB8FI8h3yCTUjVhxBwti3oHAJ8DhzvId32LAU-A1qvL7lLTKtEcW0gIXAfg3GPoqF9JX8feS2CxTj2tts0MDBX5T_lHaUEejeqt35ZQUrKt4HhKgL-B3PIqHysijcR1NE1wrM98vjSvSNCXJmwiyA3h6vLn40P2ZMTRk0zKskjDQMPzHxkCjKHygIx6MEcnNfKPvjtvCc0up5_lcBzJyXRMM0Aaru359JMb12k7F8KCuyc3R79UdYz2zNKGAThooR5AdjId9nG15vrN5dzXUza4qsWtu7NZIZdz9arCtSjXP3HQCZHR89alJ4H_eJiDwamE50dBjn6crgY5-FDtmWfhuH7M0CG3CiAU87Mt4HXy0KbdqWLBvfSr3Rt617MEFWtPvT44YBXNYKg_lOaxO7bELC1ikVsubrymHQgQhugDDuwjzLkC1Bqu8FVTHuMjR9HcLylZgb8OQcTh5U3d7Tz6KWzMI9Q5WsJvbXVowqy8ZjZhLOU9Id4P_qTfC72lAwvPWWk2YkRkt99zP9AUXgFm2gLyqcObWN0TZL_gzXsidVFhypiwRcgS832C7SFUa5eK_BZmQFf1H7LRJOXcyA_q4ATjOZc3QoUO03cBxDcnJJmkzuBrc2gb1MeqjPz9nJ7rhC5ypoRkEh4lqP",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -15,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9891,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9905,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 16,
-            "outputTokens": 33
+            "outputTokens": 88
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9734ede5b300c03af802b0277492e1db35a71cc83ad4778d28026e4aea74eef1",
+        "fingerprint": "30b64153d48c2e0a8672c8ef3a6b0f5cfa0d93ad9f13567d52e8e9b0989d0ee5",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_YwQjsFTit7KT4VSic9z4eKGp",
+              "id": "call_xpc1WFWr7Xd8aCmESkbIQXFD",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9885,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9899,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "40c4b28df42c6b14b694285c7923c844af3a82620e4d8ec61f756a15488e1556",
+        "fingerprint": "6ef0b9e0cfc90422611363b849896abc4977e1082db3ede9d0bf061fb3fd5e74",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_EDZrx9NFA9pWM9z4vzQJElmD",
+              "id": "call_MUoMEZYOfuzTKA4z2lE9KVsL",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,20 +38,27 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9966,
-            "cachedInputTokens": 9882,
-            "cacheWriteTokens": 81,
-            "outputTokens": 40
+            "inputTokens": 9982,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c976c445b3a202ed691dc70968ae9ef81b0052c83a637a98e6f8c63138fc6fad",
+        "fingerprint": "9b10ac2d3af4479020b136c0aa2c0039a7a10a31029454632003f54d984fd0e6",
         "response": {
-          "text": "I don’t have Maria’s allergy information in the record, so I can’t tell whether she has any allergies.",
+          "text": "I don’t know—Maria’s record didn’t include any allergy information.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0d98dadfdf4fc088016addf696e13887d2b068e6fab64ba42e",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3faX4aTtYAfCmMCGXLIuYKFXVcR9KfI6VlrEmrJyJrMRC1I4bnbr4ohJdWGtiAC65QchvDkxTBVt2kgOm6ieZuoKuXl34UkDeUzjD6HzIoxwLf62PHHIJbSZkZmuwjWMKwoV9wX-rCGK5RTxbM6V8mH4DkLJdxOZs6eLzjJyAQmyzU7UygzXv6EPSHL6RW1Vh2ZGauAPiPJspmaHaz0SM0yJldNNqeZwlf9HiJoAdvDzEyhUlRKzaI72OWRu7tafA_36YgL37H5aSq6M3v3hq87AY8o3lFn_PfUzRdNncstsIP3aS6TJBVzJK1rNTyinwLuDmnSjYpZ8SSP3Ry8cdNpL3h8mCIe6y5G3JG1mykUF4m__3WYbN6MKWVNbru-IH_hnvEZC_np4kx4xjECZIxpmXsNEl12QtIQhsIsCg5JPRvZmZ9ui0SZZM_CmwfurKogIT8E0wDrUsZwOP_uxbM7Ebr93UYaIUcynT1XVLIRaI3EG-SgNjyMj3TEns00FSD0veut0XuSZmfHl0ohu-YHTEzWCGs6baBI4NUOAJ04V3hUfC13ZHHy1Yj0uG2DmapIACT8nIHnXpM3Ts38W9dkepNFAD1eLRMPE3qlLauXT_RZe7DffIgzZ6bv_U0TvFYcUrNH5CRarF6w8FsrVcWa-YFLQDhvPD04q2-XB8X_kRFdC1jaEIOsVp5KRKYvkNlS-Ln9OmL4en2Bd_w7fVj5wD1pwdCwOhJBJVCCpiuqIGDNpSZEsGoriBQsRaT3skmX8qVqslPQbJ4SH31X5EHFl_1EfOR5yz4mCWe8cSIX9jx2z2bGGUfqGfoC0wQ8UFdzhnxafO0aKVH7t4J6GMA1BhS5uN49NEeX5pL0o68xiLWPkpsty9RGSmW7ojBTEpRjJAgZzdTeEp2Jd_wvCeMzqD9CC5ynu9SS0l2gU_0YAtfiDNL4eie8_ILfh__QZEvps5xVq3EZyWe1tey_YzQwo8HwifFNaMxdrG-fS-v4nqWddfnhwDKSNk8F41_3QsAjVbTnjC_kLYxUEv7MWRthM5mq9ypYOs1kKM-YImq75iIkRLFz64RPPS5NYcyzvl-loImkjMXj1D8IZyC8SJFpQGkJm3WzzhQDrUzyMVnK7x_0M2JeyIIhRAjjrQ-9TPlZUW7LTh98-ONX5YRFCGOtWhvrScNqftOBsPnfQU6K3y7xVaAyfEJiNGXjxacvhnL22it3EbhqkKeZ-EI-os01bH7sPvDnyGD1Zhx4xh-qdTGJ6NQ3ALYOxt4XBJx1Ff12FEePM5Fg2y2Hh7zZX83lDI7ETEYhWfIwaOj0_RFYIvtUIrpgG_7Sk_W_V2Dkoe6xI64k1VwdfHwZGIpQCbwoDL-JgJP5IUssyRwQqTxbn9yowUxIJZOzVwQUeH9aT4sCgFGWSaH79apHRhwx-mz4tERYgPQMp_wvQxxUI6WGOQLAO84Tnq31JEAvv7vDJvSy5hcnCxqbTu9BAouqEkJjETBFEzy3npHgT2x9cRFT6IMbgVKGr6pXDR_GogoM1XKeCjHDPRU3m9B7octXIrVTU0QEcKtzUNjF0TLVB9-q4FMb7U8De2zR54OFOW3y-5mV-l4cJ6LHmYX-5m4i3cU70KlMMH-NWVhRubCaNrs49p1LBMNzb-kC6Gn9zW_dNvlwPU-cqECIBwhz6VH1a8a3IiWRsN5OglZO8UtL9gfKcq4q94meorMuzK1gdosyzaVnEkS7s0yxnNiz-XTzc_HHgSXDGN0nPezru-WNPUXQOvnUIV8HzYZp-uIbRRalbCBQ3-EDRNaN9fgx9SOi9B7GORPYZo8QjfM82-keOpwjS0TI3jcH2EcOVtNKCEgh6fmTF",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -59,10 +66,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10401,
-            "cachedInputTokens": 9963,
-            "cacheWriteTokens": 435,
-            "outputTokens": 27
+            "inputTokens": 10431,
+            "cachedInputTokens": 9979,
+            "cacheWriteTokens": 449,
+            "outputTokens": 58
           },
           "model": "gpt-6-luna"
         }

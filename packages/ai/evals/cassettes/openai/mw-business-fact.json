@@ -3,29 +3,29 @@
   "trials": [
     [
       {
-        "fingerprint": "0614aee82598c0c40e648b63d20490e1c534cac56541bf34bd79f2f7901d9915",
+        "fingerprint": "aa92ce18ba49c51ec90c8b99d363dd218bbf22785fa3a25eb47291ae7aa57880",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ECTb7XQGG7r9JNm4RyYgHHZm",
+              "id": "call_lyYIrU6jRrUd5etwBHw7qOo2",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_closure_note\",\"value\":\"We're closed on Thanksgiving Day.\",\"sensitive\":null}"
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"holiday_closure\",\"value\":\"We're closed on Thanksgiving Day.\",\"sensitive\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9887,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
-            "outputTokens": 43
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "376e1133703a502413831c4cc47c2a54f5956369d20ed779c1e9c454d5f11006",
+        "fingerprint": "c8545181781d8996de312a09d49718434232d1c1812ff3146e8b9d601712c53c",
         "response": {
           "text": "Noted: Juniper Hair Studio is closed on Thanksgiving Day.",
           "toolCalls": [],
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9971,
-            "cachedInputTokens": 9884,
-            "cacheWriteTokens": 84,
+            "inputTokens": 9983,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 82,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"

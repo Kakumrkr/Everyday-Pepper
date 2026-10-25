@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0e611b1d1e2ca6ce439772ef178aea1d6b3dc8a935af8b227c54712205429b5b",
+        "fingerprint": "ad53eb99cf02d270285d5a4e1feef2fe88bd8d94613ac384387a79cfc6918ff6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_huOFF5PHV2Hmwdpbmfh906Rp",
+              "id": "call_cm5JUmxouqpY9MrNSCoe9e6t",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9885,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9899,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "19eaad0de6346d18dfbd0c64b8352a6f56d48773e447dca31a628a42181ff13c",
+        "fingerprint": "cd8e39baba5f6048a0caa6cd99b629ee5f45241a805b3a5f8485c34ee0184c2a",
         "response": {
           "text": "Suggestions are paused for the business today, so there aren’t any to review.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9946,
-            "cachedInputTokens": 9882,
+            "inputTokens": 9960,
+            "cachedInputTokens": 9896,
             "cacheWriteTokens": 61,
             "outputTokens": 20
           },

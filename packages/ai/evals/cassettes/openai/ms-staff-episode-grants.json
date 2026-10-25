@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d29e10a6d98bc07d7135b3ce3d86332affc527ddca3cef5776ff686a67ced74e",
+        "fingerprint": "fb027fe544a84c5eb29bf369d1f24371dd4838b6101f68942bcc3d4e4f4fa801",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_hiDwuuo7hjnN1yhTNV1fNFUG",
+              "id": "call_U9wDtTLahi6UalrBvNDqVK3L",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9896,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9910,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 21,
             "outputTokens": 16
           },
@@ -25,33 +25,18 @@
         }
       },
       {
-        "fingerprint": "74fb37c14c2bfee475419a1ec37fa60fd20b0087bb6c9804666b06514f6ef65d",
+        "fingerprint": "409004e74e182540c088f6e65661fbd07ab130c0594275f0291d0df81c743368",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_iaoPWACWlGGwtmIMtRT8e6Ll",
-              "name": "propose_rule",
-              "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 10353,
-            "cachedInputTokens": 9893,
-            "cacheWriteTokens": 457,
-            "outputTokens": 88
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "54270c415ccfc8d0c3bca8cf4570f9204c14912404ce32a8a7403095ecb00fad",
-        "response": {
-          "text": "I can’t set this rule with my staff permissions. An owner or manager can set a 2-hour minimum notice for your bookings.",
+          "text": "I can’t set booking rules as staff; an owner or manager needs to set the 2-hour notice minimum.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0b3ecafdcabd9c2e016addf80c2d0c87d2807c15737b6b018d",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fgNQ-4Ucw6F4-rLWByGday3VHX_8YI4f-FqSLl8p-ducOMwfX3NCPXrMY3E77nPjIaQU2miPdzJt15B-J2f4u0AWZKPUdfdasfbXXx4AV7MNZlzvzGq9VonuVcLKGsoyD28cEvoDgTXTg4wZIsFCrVSVf6UAZ98I_B4bwCfjkJeeEKWrXXWfvG5TRY_JsrEJ_YxYpx3qGy10zkxmwwlAi-i4Sz0bm00zhl6W1p12VsASMErm67A7I1fd4jmPC09r9sjAM4Ni0H8wgOd694xdw3SM107d79HjLf-SIK0fppw495yCwvxzz4Pt8xewmt7xnSzqcu4c7TpsiPWFKSx09EkANGJB0q_Ca3BW9CnQEBsbB2B4rgUWOxK4fHUpB5OMOYcywoVi_mKSSc-dLbsgsmDld0c3Z1alYOGO-uRoSCcJRBq8eTJ9oIjiX4d5sclEML2crTbUIIyut4EQAkPY6cqQqS0mMYXF7-wUJkVekWLQYbBRCj7lUQoLHlwOLtVx8rQSSmXpIwRPTB4T9Lw306JyP14bqxFtjRcw3CO_6eSvgoNNREWjQy3tkT0n780ZxhJwj2Xz-fz8V7DGclGsRnl36tFRyqFDF8l6QO1tzGC0xaJoOh01U8Zw-qu0d1MLF7DPvrZIX7vI87SYhvgbL6tvVBmm9qVxbjc4DS5w7isl0bdVcYdB7GdxX8oDfDzStB1m4LeiOECDMCUIiwG0RSGLWmRgVpezdAIWn7FSUomZwBjySAMOSMCDGscvi0D_uKNQXs7r_ZRkFGUBkDLwwac3IXr0Vxhpv_O642UzmQpniFCZOeaghzAPmCBEe7S5UY8qGbvxZweayEQbYqaQBDvZSGKQ5ey_sWuf6_sxfdmPBWcBqe-e6jok8KL8I92bMkwNriAngqss0kcpFStLflUMEZCFZTYemJlPjlwtkf2ehTGdjV-g9ZJQX-XHQzgUDicRalKTwihpcexTb_PvozHAxZNUxCtMDN0jYNfFVQZ9NaV8LDtHm3eth5Q6hhZRzjxKmFi4kaq6fvqkoAaoLIbY8JPg-I-6xldEmownmY-8yjU7PCiW-8coXwf1oHw9I4Y3eLMmLmqs1_JjvLfBD40zv3lc1DSo0LLqg4VDwlVd_demS4FwgPdloRvg3xBdPZHC3bF7Lj2wGZymnFkDsOgCdhr69GzVbMwaA5AAikSkvqo6dJqH7UT14nvVbi-aPDZvv2YOAPN0VqAP9spkS12SC_DfJFBaIFob_ZA1A6dQNvMmPzYLQCOfN_oLYRtHjVezTxEQoa4_9xM8XZ1wCnpHyF8wOvRwU-kdqpaRD2sy2OgDtqLjV4iD_3xEFu5U8AOmR7dokkOHyhBR_edIr6LCIBEnRWl0aKA5ERiMUCaVOw7fVVeHpwxRQirNnUYQxJtUA61zB-VoBYZZwP_alKLBrNlvkIkkusVIJnZ2bdszNlE2VWOYs4EYjIUBBNXtIOHxUYSAgpkEdq2M8-FMKCaG1ZQfJoDySOOQI8NNdn8FVf6YUDqRujuSBW9iCbexaxhV8uf_S3LMLtWDC1buPu8gTUs7N796T_SLdOsKQamhX3U_sphxMc-8pUpNUfftT-7UyTqsI88L8bOET2QPBrfg4j3qV7yAzWFc_4MnZM24ag0oSANVws451B8DSX6tvFoWi3AdH_PbUVFazA83EJeGUvoNkc_ZjjWfPUyljn-iSVDV-3prqsqG3afst0Gj0_0miibGL504KHe2AkHX2zdWTppSqo9GgAIT0ZGYbO0Fupm_kQvqrWmYBBut_V8v7TIjFUJAlm9iv1IC11nzMEaKb6_Z8LxZGgTSPNy8zy6mz12wI6fAFCBAhFf_rFLfYL4BJmyTgElMLr0lBYIAWWoX5faAnmwJvCdWVuBxdPTiYgMgI0wPk5_-zcMkVQxsvXWC4507VFS8kQdDFiV4wVDO5X-3EoseVrNIKAkgaZeZx1TgZC619MNj0Z67p9pgG1ux2BsL-Z9a34rgD9QcoKy-PoNv7bURnBU042YCjoAsH4YlKANe_FUe7aOwAy5TKi6vJIs9brAeLU7H1BRnyvc2vtdJFyK34vJEDK75HF3NW1CPAu_c7GR1SKtYIQClg-v8Xsx9i_Co9oKhJmjvxvM8gBn9_piOp2EbHt08kwppQZ927mbh_Epf3oJGtn3kD-9mROhrf08kwvrFfjF17sV6qCNvCN16lhd0RgoxcLxyVMMABv1xPPMy78eeFpDXTwW3R4WGAUvKIAD-GXqig8RvTYVuXL6TIs1UkuWOoySPoGAQeMPlBBp3CD89Aa6WCL1k7Pp3-n0AKAx5s7J5xabHxOjdybZwSC_7emsW5Ga9ZHgbRjwWCkBSfR5vQFiUyFti5xgK7RhiQIdyWFQcObRVNdfskOkrVvfEuwzkNoJ_jJHa0wR6cwhBknrIbjoq8qGmb3T2U5vBbExSq7f--ywnREMHD3C39Vvck4kN67-JGyach2otNQE0flu4NFR_M_HdHEau_eWh89_2Cd5z8jSJrQEXBghNEuONf65n0P0N50qotnMG0QSINEvlI-7VeQZ1vIL0BmeFHyTEBaOcP4eiO7247qzmuJTyOx0dOBJiPf3MnmRk4dDe7OMXqxq_1OR-JJ3on0PJBOzRArUJ5UkoY2hXuIeP0r9FLFHLWGLRXkkvDCeD7vayEYvK4gqtKI5G5bihy8sgYBfiEWLjl1Fe-e7H4zf8V0RbY22FhsZkNh2acW7jOiYT99975TbIFYN_FUx2D3zKJQs1p1OKDykeZ8Gn1Ti7dOwpqVqUlC_35rSNcqZn6vyqT3Fwz9Ljlq3ci-xB0uwmio07uZbAySieqtHOLqN7hVPj_PHeVpyGRuNc83aqFb8pbp23Ki5iOGxniqH8UVuUU_3M1KEBH5i-IGn1tV9bpPQrUoB9JaG6LB_iS3yCZZeK4h9EE-Bw-4VPQanWS7XxTnxZ-MVoKp5Tu9o6Gh4AdsOTcws6Bu-fj84cQVG5qgb_NIfqHylfZQtqaqpIAjHhE7WJmuiukqSTDJBmBzoEu9EOzc03cWM_og-SvTicOnLpzUl-tAHFlxRn13cpRJ2YAJXzgAoIWf4XRCHZum4LI_iQS2AnIpsHCQVSTIxSxd-BU0VRQXWDKaN1wFlacoruM5StwcILL2H9xPPsv_FEZO6qbjP1PACxNk6X3SWgKZEQ4prUYfFxoyjh7Qg3NLiCYnwq7aJu8omkXNEo8fm_1B1Xy5gtoNhRcp4VI6XogyCcLPVOdiNmTrHsDaqnjRa3PYpLN2sAWy8uX3aLeM3gZMvsMCgxiJeJOiR6fgrbCBg9isZbF8ZFanJ",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -59,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10494,
-            "cachedInputTokens": 10350,
-            "cacheWriteTokens": 141,
-            "outputTokens": 31
+            "inputTokens": 10359,
+            "cachedInputTokens": 9907,
+            "cacheWriteTokens": 449,
+            "outputTokens": 173
           },
           "model": "gpt-6-luna"
         }

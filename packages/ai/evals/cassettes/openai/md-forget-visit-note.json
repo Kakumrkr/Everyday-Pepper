@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "65e31e57c1615f9986a014f424892cbcd6d6b1ed175c6f3ba3aaa603e213f7b4",
+        "fingerprint": "0e7e55b16ac8335797d989509d645a578e768a85722cd419429751aa61d679e9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6obGd8LHk0eYH1SsqofYxh5m",
+              "id": "call_65NFWEwHHH2Lp74y70AdXNti",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9889,
-            "cachedInputTokens": 9886,
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5fcf37a7320edf711bbc1e11f43b15bac8c961995830f2fbba4184e2691c8da6",
+        "fingerprint": "395a02e2f65184112afcf6cc1aacec0871edef8ca22cdf2daef7895d9283bb7d",
         "response": {
-          "text": "Maria’s last noted formula was: 6N + 20 vol, 35 min.",
+          "text": "Maria’s last formula was “6N + 20 vol, 35 min.”",
           "toolCalls": [],
           "replay": [
             {
@@ -36,20 +36,27 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10144,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 255,
-            "outputTokens": 23
+            "inputTokens": 10173,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 270,
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8e7c45e1323e1b02c0827062462e9da169bf64d1eedac85a3fa98ca2b623a855",
+        "fingerprint": "21456da2402e1d1cd5484409567589d82b07e37124b122b7f226dcb662190576",
         "response": {
           "text": "I don’t have a formula noted for Maria’s last visit.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_04ebe0167fe3ca3b016addf75c784087d28d8d543b8f8b4cfa",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fdcUfaWpsIqwvdzn32e4JZQZhikDybJEV9x0i5nOVGsG0Nkof_9TX52pHJPz-YR-xf1d1QXb-dj_aAHwu2tAQCk1XQk8ix3Qavyi5Iuee_IRQJHomPCat7CnuXg5XU_3Cent3ZH5uvN7Dq3iRwAfDwom4_UNTgyTUEqzwqOvk2Nntse9unC2KiumdtWvpLAp5seNX5bCGRv1LjsaS4VDMCFKcoRlKlVhOe7ZhEuyuflyyrTpJLu1ANV3Lq-k8ri9MH6igyIpuRehMFfynZSefmNlbazXB3l76y0YS-iFBYESMr2sMbuZbzt8NNLN9qfPEIDxKHpITrj7MkUqvPaIv2okBaV5H0k3JSnDjeyS7GmcRLnwNhjx5OYT8-uV7ulwu-0CUDV7O5vrj10RwfGKkqu3FvRPgsR2Lp_tcUdkXtZIk-4piEgKGhscssM8_L5zXXJlOwFXR9LPPYhyU7EE-I-uk1ejBlFPxwvDmyHcHkRhPLSo3jtF6sOvUmn-ZWhFwaUSvMVOU_O3M3fcwtDH4azEFkFlSLOt0GhlmdCS4L6vHHpvR4PxF85iuOGZNGnHh4Iuq6lxgEMYmEbTqYoLBmXdXOh-aHlVbCV_xRqRC5jLRZCXkAUQuc1MWTesQsuYTls-gACppWXxQxHW8r4WVunj3zt3zi_EbCKpfV8x5asHQ9xRwh492MHEJ8XaWORg9sjNOhaIwxGbKBfA0kwRgA9mRBXf30pDfjUkzD4x7-1dXvGqs2-H5FgR_VCfuA-2p_5mDE5fd6d1nQNqxwmaq1wrmUsdrMvsY_4ZPxuwip7KxndauHv3N73LVGi2IUAQZ0jtIS_zrtwG1HeplfU0SLrbckVYJ7D6XZMgqt-Q1MKDB5Z7fUaPcCXwEKYZEZN1JOdarj9dOvzyc-IKVNp0o-wl51Hi8Zm4Me6SzB0KoPTXb0ljLVEJy9aMBph5aLqe7T19q6dKoAlSe1_D3WypHhpmlnWkf2GgIvQz28nJ8vUIjjnrgGDmVHymUh0OCgkxu9fClFP9o_3F6SgZ-GcLBIGJGpCnEJWwzkTGXhLlvboIEWYWgv-OLyd6wtpJ6c9064qKFqX-WkUMr-7hFu_SYw-nQihSPvCP8nNItisegeFC2Gyl4AQ4QK-iwxZfy6_wmMW2oNjqT82n8AgUxrrVG_W28b_bJ_5l1T72KarW_imVVV6yb7uplLI9DCojBAw2qwdLEUuroyhV4Q0en3dONxApxNNLAUJgiWETjOOF3nS0K5bUjjHpUU5ZxN7bjLbfkCgkBoOJCKCzxIB5RI1eqM4CMplTvuzj-3B1g2Wk3Y_LkxoI2R09sSBXXSG4uiZny734PYfJCIE0hRkWg_MIuQ-ATkslD9MJTGq4F9KS8qZoG3HzdHkxeeU_YjAQQxPbZV77yy-sqKzK7zRNAnDTqlhgA1Jw_YaQYbWV3eCA8DNT5sjDUkkhuNEowIasP6uArxZp5wcOgaz7M-PJwPsNKgAQnnoh9wcwNCW6A8cqG9IoymZXOhFFAlB2o3CcLlhvWD4DneNz5t3S-ds1XRH8_pMjZs-5sWzIhqlSqLiLkFeR-skWFpvwXrY4UeDf2_Jw69l4z5lvS_-vlWlzIbBEgPwD3R9PDJwkhRAL1MofCbeJuk=",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -57,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10106,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 217,
-            "outputTokens": 17
+            "inputTokens": 10132,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 229,
+            "outputTokens": 37
           },
           "model": "gpt-6-luna"
         }

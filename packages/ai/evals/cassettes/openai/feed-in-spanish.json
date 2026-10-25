@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7829df86ca97b889e600b461c331a7f97465ea80785e7f80ccdd7678767de0ed",
+        "fingerprint": "54623f9eb1e6d41d7cbd1714176e2dcf71954ecb73555b2ee2c34c081d7bde65",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_FtuI7CuFZjzrL23jHuN03R7v",
+              "id": "call_1UaqxjRRx8uhLdO2QSBJLvS6",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9888,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9902,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 13,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "b5ae7dc4a46ca606220f178b5558f59992993a79d91fc6eee9c55fb04a2bfae1",
+        "fingerprint": "7af5413b48a278037215d7c53844d78393324a13c6c4d40bfb6bbc3c9dfddaeb",
         "response": {
-          "text": "Sí. Hoy, Jess y Marco tienen cada uno un bloque libre de 9:00 a 17:00.\n\nTambién aparecen dos clientas que ya podrían volver por un corte: Sara K. y Sarah P., ambas con Jess. No hay nadie en lista de espera.",
+          "text": "Sí. Hoy (2 de noviembre) hay bloques de tiempo libres de 9:00 a 17:00 para Jess y Marco. También hay dos clientas con corte atrasado: Sara K. desde el 26 de octubre y Sarah P. desde el 27 de octubre. No hay nadie en la lista de espera.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11549,
-            "cachedInputTokens": 9885,
-            "cacheWriteTokens": 1661,
-            "outputTokens": 60
+            "inputTokens": 11533,
+            "cachedInputTokens": 9899,
+            "cacheWriteTokens": 1631,
+            "outputTokens": 71
           },
           "model": "gpt-6-luna"
         }

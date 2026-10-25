@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "041a596c700506513bca0e61f76beac59852877a9607bd209554c042278846a3",
+        "fingerprint": "f0b7633be6277b5177d06ac13025a7bfb6ede8ad1bd386451da7daaa96e1d89a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MieIdRKrykGxzInAIJiw71Z6",
+              "id": "call_V7kL4VsVQqRGTXipt9rJFkGj",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9886,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "b95f93b956d29e386465eaca041efb8a338f844f62afd9a90bc15c79853b2b9d",
+        "fingerprint": "1a96124f99716a8008dfd612e56f7a15d3c165b0ba733d54102eff8b08869f11",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_00zMIdy8ILYSODoLAA0FicPi",
+              "id": "call_fg6ERbg4pzNSAQeeq5D4GJHm",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9970,
-            "cachedInputTokens": 9883,
+            "inputTokens": 9984,
+            "cachedInputTokens": 9897,
             "cacheWriteTokens": 84,
             "outputTokens": 43
           },
@@ -47,7 +47,7 @@
         }
       },
       {
-        "fingerprint": "19a1c7bc7e2c561ad8c6f179327ce6891205b04869c89163efb7f0336da3dc70",
+        "fingerprint": "d898fbcb01bdb9fc5acda54e6d9db01afda51087aa5fffc10402b39a40a72882",
         "response": {
           "text": "Maria L.’s next appointment is Tuesday, November 3 at 3:00 PM for a haircut with Jess.",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10257,
-            "cachedInputTokens": 9967,
-            "cacheWriteTokens": 287,
+            "inputTokens": 10270,
+            "cachedInputTokens": 9981,
+            "cacheWriteTokens": 286,
             "outputTokens": 28
           },
           "model": "gpt-6-luna"

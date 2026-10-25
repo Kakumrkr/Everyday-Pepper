@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "1674c1b75c7988e6a82fc8f9b5d0f1eb7b3c9d395de387a2619cb505beda1a01",
+        "fingerprint": "29b4c6bd1f3685b49cd250bdd84d3ab8b27bf383cb7ab6adcbc622f774724a69",
         "response": {
-          "text": "Got it. I won’t change anything now.",
+          "text": "Got it. I won’t save the client’s contact details or make any changes.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,25 +15,25 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9906,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9920,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 31,
-            "outputTokens": 14
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5a6c352df8399d03b1025932653d7a6c58ce8b2bd6ead03ec5edf9f6b9f6adb0",
+        "fingerprint": "a385fe96006000e5b5118d7cfd3c733faf3fbc4ad40618ecd6b609090cb4f380",
         "response": {
           "text": "Ana preferred texts over emails.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_0dc0fda7e3764a7e016addef458b7887d28721043b5840a390",
+              "id": "rs_09ba44e3cf63e8b0016addf7bfa50487d2a45b8989b8984d1e",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3e9G8Sz5c6fJWo-FS8InGjR68JFbWbBhsXn4VB7KlyFccIWGCaJVzoc2FHn3AGR4cGyP90-dphS1JLSmnHW1ttYxTDv6EIDT69s5mbpl82-3TWBKUpghbXv3qephO2CEJcZmRqFy7Cs1L3nrKtp8VXajTYjJKcAnpZNBC5G283rkGClstn4K1hF6Zb0V51HTgfxXl-_CAbsKqLKQTJuHMrL5WX856KzAOO2zNZxnO6OfhkgIVYgPOYXZex2c-X2w-nIfXIEPp3ywRHYvNOYvtMOv4IKN1IqcaNHizzIcWKHSfUFlbEN_Vd-GSF1ZM4b43rlvu_zz2qwcY946wX6FHi2fY3n1dJ2vtnX-fT1vZDNrPwI8DIwY_lyYE0N97Xs7LdCHXPtRE4c0-yOKjZkUiBH2Iq6227n34SSA19zcP2l9SN9wW7JcLCqyWvN2EFXjjJ9dHsLhbR9C1GOdfBGiw7-jFanzroiJBZn2K7lP6Ck8aAzj8BEhZ4RbYlfXCnkZQt0Zl8-ARa6wowwNme1KD0cVMNmd2vor60bjJ3KITM-0M--HvDNOB0cHL_GolcZRHVN6QwbqJTQL_ce024DubAALoBWGDvDOnIzydVUsx48bs0hOzklAHpI8NoIWtkX9tOsQiq-kcyES4UGhqUazRV1MEOWL-xuDsDOW0hjmW3AoCkln8HdGqZPbVSOg-Ef73x3yGQyRUc2BDELq_o-zshJgc14QbXWuhsQrfXX_3BQelk87yR5mXAca1XnbteA05RyVPkuox5VnXk9INEU4WLRElQ6IUoglXHsfUShy1Ox7hy75dmKjNPJZb0MLNkB4kKGc9D4vQQKTGYXPhLl6Q-7a_ldhM_cRXKu6bO6mMW-45qMTt4NuBWwT-fWJKf2hGSdyzHOcUnW-y1g1AJ-SJHPcsbkgqWbB1j25_56MxRFEKkvhj7CORCaxG0kHm2nXOrrNsLe7dAHVAVkjzNr3GlxwYDUZXzJCAtNAMCZl6aHoCighuwAGQPAv0N23KsD0jRRoibPynFSPZP0aaf6PyKfbpMFOxBHTKbjUYf9QwDDfDEkYKdUIUp_MZCkRzbaE-xw8lUttYsJNAGBKgJ9WOo9bo-TSbmaLR36QuCmz4Z-yKBHsowhEeTuR2hs0P42EF8wksWELyzdQE7qRZ_jKp2bUj8hkX5YKA28T4lRwWRzYMhiiwBvBqJX412C-xK9Z3UvkARRu9FnMvNDnvXl_Hg7nJKXtItdz-TSp2rXfOsXlM1sg8VbsqCWhyCmsYHJWBQmIDKP0htOWL1XYnXS0OxgFBDW5oX6j0MCQ6qWGDbnK7iqbbrcg4ilZNE8voDLLRaolSQxdF_bJmTYVEZikyjTNm32OjZD4Y91mHLW6kPMwz6hemT22FfXM7dFZtLn1Cwh1iw1wBydSZ6qvxkNM5wKhl72xMfVhoMCFn2XC38EjdKHaim3-wSfulgWN8zlOgGP8ugqtHJjb-8fraQbk88JcLNDGcx_LpAw3PdOVS7cDS66bgRDG_sW3jZo62gWmv1mJ4wGkv--bHi1SVplr_2zT9BIuGahZu4SEP2ZxxfRpCU3T9gm4dE7DSNmA-3sAzVrZqFK7OjgnstAt8OFcDQBXyl-Ig9ieVurY6W8U82YOYgWJauQTOjSSZhPJoJv8wfhRhBfBpNTC2XOy74zYEH2mitfN_27NRqHQMWonvlilcS9O-A4UP4RDbJmqcOJsGHepcf58PlKBotO2lUQwhq6uNvQ78KMclghVYITzqKsutxNQ_9P3bdoFaX5ovX3BKHSc5siWHrYmmJIW7vFxmKh6xgsXyQJD6kRqHFvCYOJh8d63z_3p7nmcl6KMqLNN49C2Lw-hh79cJdlISgjtIoahlv76x4g1O0izajtpd9oBz3vo6gDc6vAC_waYjQ_9PJjAylXzwt30nKUSTGTDnM3nxUYCV_rhlf2SKO1QTTvSfL6pJrYx4ywlvVs3JE4eaZS3UXfyJMULLxmBrxJs3yHEzTVTRJGGY93IZvDRpPdxQajqSDd_ZnlFZ1nD8RwQxjVvfnsSANH7eP1n1qZ3flgVLMlfhqzCEEP5SI9NTv7rGsS0TuO1B9Mol3mx2yliPO9RXoCNzagW8PS_QFZjqGFOCmZUZM52vTcUZLds2LOYmXwwdN-_qs_gPKzoDhzpbRUn",
+              "encrypted_content": "gAAAAABq3ffA7B8mi7mzfJoq53FFmBrENRw9PCFGaclCmtHoAze5bNC-Y7kJGlmbz2TDLERXsMZvk9mFUpn__pibUGrqh1gd2ppcGo5hEx2BqRmAIR_hAcjtVBsJF2PGEhxgZXM9Ty8MBuxxnWsMM4nCbPY3ybKza1g7UJsMXv0D-x4LCiFhSP31hQTmYxrfQviPMCSrCRoVp8H6gBuOzWW0p4IhbDMYFoJ-AEsFhbvyl_fEdqkGVpozsdTvnAMaIwj4ZGoJJ6PsWpVxqDVVpxP4BgPLlwUE9z0ILXi9UZLycTeLlJxq0ZGW2ngxB_EAwDiUFytyCryuzapLX4ClBLTXN2zcZNhU2sniTXn9vEGZVtKy8PDW-VtykAKhNs60laQujDWC-n1vSkpCRokuqFz-OXqW1AuZL8lgrNXM2JGbawHkLJMS1YkH2voZEh553rlP_LXTZVJZkWh6KLNdMQvE6Y9PzRFKW6fq2a4Yetuh2Bjj1sBdZRTvEYUJd2dTPxt5-qTdzTUaXE3rqsqyNY-h5-NOxu-selaVNtGcK-LvayCNe4B5NjNZ3_8oty6K1ssAaeNn2AOuctAI9bxeHvSKNy2ggWTfOUATKAe1WcSdnsAOU2LGFBwparnDLMNZGbUcoT-SShuOvahttdXvMheW9TWcNRQ7N0oY2sQTi-UMwhZWSA9xLdV9Sdhw1Iu4Ui2IlS8WVZKisXS0hcxKb0OW2uPtkYMgYNHgwChcNpG3FyYKcQVpx9BTzfMO-bQ0C6ZfGrJcXxNIRbj4a7XSSuJ8gAnnRpgG9y7lOBZ9ITM6duOu6teRnDOq9jwJM8jTh7B8ilDx5-IKbz2mZ9XZdKTcsosuj33RjzlzT1OjBUGNnmY4sYQGbQlfgVRm0ddvvmDS7lh1d_qb3F2VIDbXHaCfbnSph3Y9CeozUk6woARVq_tz9_8yuO_fMM4tOdcH-N14Kk5-LalhakTGOQjJ0xwRmfI8ULbv4fxm1UxJlty0vFkcfPTwDEILr1NpCG41RD-RrS6jRlZp6t2GuKbHRNNF6Oqctr67fe19CjiLckLdcm7CLHJ2tLJOzauLb252h-xrQE3Bkv6VzW4vVx6y413v_7to1I7Kff5mPTJM8S5quaRtvQ3__LRtqg73bLnm3yy2iDobPTDmky-Lc7t8nLHp8bdw59v8M7-aKNRaZwcNU7pE63e4ngqvWhE-jgyrE2a8wjbZ4KM4gCd-hff_rnzdOhAKh83r2nZErktmKhvSghXgtnjqP4GFtPow3QgIR4mUphfToL2qgU6zgIMAjAMTwOK9795IbxzvTxruTogq6W_n_bEI5gIOwh_JZGKuKGHCfuDtdJKq7AaVu0781b_Aam9OUh976FpfpQLiGSRE0hC08JbrjRyHahKMGGy6w-jTrz3vzEXapYCfdSWkh9Q_rvbzVA9udnt5XcmPzRHH8gO8_4KbsjtK491fVwEdXSSDLH_ccxlJsR9Q6WpHJlptx9UwzlYMu9-NgK7hiugrxRcQuxT9xR2met4l2-M0BSM9kd3d0r8C8ehyuA6FVDQrQnbqyPpVZDkWQAtNKt9NbFKy0tmEhCLl3ANIKaGGSXHgq6hZNKwxUMDOWHanoKCZSd7P9kFctyrJYMAvBn-H_buWAlz3XwZFA293o79kVJHs9X2eWiTwjz5QGZu75zJmPz49phUqYMnQWneHtc8G1yDe_yhxYdv0OU9RWnZ8WH0UfiDKbxkYHKAkUQF63vsGFLXNZzD1hxbfQJ6ZELtoAIsPdiDvdH3DGu7nzUr3jpqbZcCVDTMCcnyQ-DvYng8Q0e2mb3DgQUXgAEpBCQJhHs1Jwllzy8Q1vNwgHBdbIaT9JXSM0MdK9mPccnuJCx9bKaNnDWN7lhHChWqraKoeIPjKBTEnepV9LwG2QZolObf5pozgrcRSFduqCQi9xjwIPdOrwqizFIi7oFLGgmMHdLUW1UwsIf9JTN8Pt3SHrW4YUqodMvvkoCFwMzwyUcpaPcPb1x_u2k4-yEZdr693kpGlDX-_Qr4kGsdruap27BrBVk1zjnyBU1EQvmUJSJU-4plT_FeK6ZMntLed_pEZ4TJjWYd865QF1HUgjNtCnpnoAfc6B0UVOoW42rz9pPjJAIwHhNMqYTdDJ9meRDvPw6ycloFTOuHhWqaegEaaVS4Nh0q6_g0f",
               "summary": []
             },
             {
@@ -43,7 +43,7 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 286,
+            "inputTokens": 293,
             "cachedInputTokens": 0,
             "outputTokens": 69
           },

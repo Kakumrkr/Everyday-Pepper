@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a66836ba35d99e44569d39ffb49c5e73e2cbc73320c8d34296e1277f3f508aca",
+        "fingerprint": "18ffdad88664180ca49a639f3db5e02ddecb89d3820ea861bec3951b6a220625",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_kRsZ5h7dNnAGxOVvfLkw3Uq2",
+              "id": "call_OvkwSh2MMcuOXw3gO2JkQGvR",
               "name": "get_feed",
               "arguments": "{\"kind\":\"rebooking_due\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9889,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9903,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 14,
             "outputTokens": 20
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "da86c404aa23a65d3bb28f1b0e6a0968931f0a6af4c5f2fe6082a08ed5c3d2e4",
+        "fingerprint": "212430302fc703c239eb05624a0d8e769076b6a1facaedda115617a8c00974c4",
         "response": {
-          "text": "Two regulars are due back: Sara K. and Sarah P.",
+          "text": "There are 2 regulars due back right now.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10234,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 345,
-            "outputTokens": 18
+            "inputTokens": 10245,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 342,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

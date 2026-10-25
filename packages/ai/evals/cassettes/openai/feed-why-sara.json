@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "ccb4f841af21cbd74b99e65a4ed439e63e39b07c5880040ef9af7b26a1c9f262",
+        "fingerprint": "a5d751434bb432a8b5b5afdee47054ced134d0f97f246c206615634fc61dd5d3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_YkXkjsJmkDmgFs2XJaXIzrZd",
+              "id": "call_wPUL82khMwjuKJSLgmEL6TmR",
               "name": "get_feed",
-              "arguments": "{\"kind\":\"rebooking_due\"}"
+              "arguments": "{\"kind\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9886,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 11,
-            "outputTokens": 20
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "f0c98ab3825cc73e161d219fe01656110b4b2527699197bb295ccda0339bcbad",
+        "fingerprint": "ad4ddf17d5c375568d00042fe8c5d2545a6dbefb89651efe3d8b02102e1465a0",
         "response": {
-          "text": "Sara K. is suggested for a haircut with Jess because her last visit was September 28, and the system’s 28-day rebooking interval marked her due on October 26. It’s just a suggestion—not a booking.",
+          "text": "Sara K. is on your suggestions because her last haircut was with Jess on September 28, and her usual 28-day rebooking interval made her due on October 26. The suggestion is to rebook her; it hasn’t been acted on.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10234,
-            "cachedInputTokens": 9883,
-            "cacheWriteTokens": 348,
-            "outputTokens": 50
+            "inputTokens": 11537,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 1637,
+            "outputTokens": 55
           },
           "model": "gpt-6-luna"
         }

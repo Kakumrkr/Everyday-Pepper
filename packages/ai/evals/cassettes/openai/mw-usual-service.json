@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4490815a21e2879d50bd5b53ba04a7f335c636bdc32a986d6feb76d9cf0cabf2",
+        "fingerprint": "9f8e3c08cfc972698f5517a666e949898886cee3d5b5426f5e83299b4de6da70",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_8rWWESPpbFEVKZqGrePD5yOc",
+              "id": "call_OMk7kvmBAG0k3DOYmwulIzCO",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9892,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9906,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 17,
             "outputTokens": 18
           },
@@ -25,61 +25,31 @@
         }
       },
       {
-        "fingerprint": "6a64e8e0f7ec40a1263826ecba785471e806504d080fa8d06658375a870ac868",
+        "fingerprint": "d1c370d5b626510c6e217b3c9b6162c45d18fe9c304d9a8c9d758f2b458ca973",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_1ktKKPy7gpprZ789I19XCy0W",
+              "id": "call_zXozuVN5zLZWoUnT88V6IrYg",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"client\",\"id\":\"01a172ea-c4ac-76bd-a8a8-db6716fd0000\",\"key\":\"usual_service\",\"value\":\"a colour with Jess\",\"sensitive\":false}"
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"usual_service\",\"value\":\"a colour with Jess\",\"sensitive\":null}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9975,
-            "cachedInputTokens": 9889,
-            "cacheWriteTokens": 83,
-            "outputTokens": 59
+            "inputTokens": 9990,
+            "cachedInputTokens": 9903,
+            "cacheWriteTokens": 84,
+            "outputTokens": 62
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b34a2d265e9c9507d64f498774cfadd9e39421053e97c6bf523f5ccc0b9120e3",
+        "fingerprint": "9ec2bd7ed8c567991cc1a47ce59ec0b999ebbfc0d1ce68eec7d040248a68afa6",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_8PZGqq69pFOJ2ZekEhIW0s6u",
-              "name": "remember_fact",
-              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"usual_service\",\"value\":\"a colour with Jess\",\"sensitive\":false}"
-            }
-          ],
-          "replay": [
-            {
-              "id": "rs_0a79021f0c24f8e8016addee4beff487d2bae27235ceff279a",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3e5MRfZ6Kf6LxpxIKJJ-ssibl7ztXPnMgv1cNJtfbk-utMWQyw2pb-CMnJDILcCAPNtJI8Y_nXm_NyefWZHpdei1W8UPCGYnJRXTNADBkIll9Ru7QR5NrU2pFSbnBUZRcEBD576WTIMxJq740OPS9GSQVDMFto4wVy1JiIdggteToAk4ms2om38luuYPBSjtEIy80fgaeWGFAvYjNpQm1E0-5An9ba_odQUnOn796veep989MTT1TngCzJvsbUmbIWlt4rCmh9IHkwi-u7aIevy6uoYOxPXh-L_31CXEoLZr3uDnUPv_e9oDaZP5-RBiKo8D5BZr7qoYzfbG2EaEWwHGZp-PQtrUUnzaUVl7-9RHDw9mKy2G7SaRSXP4nf5W70w1K5IMzZuO-Vl9eb20n4FEts-oymtIF47YVqTTbMjB9Jaz5gfB71JkvKzQvYgfVFrweZy7arfcqDnjicN3SAK-P0Ue7nstE_a6EXgBXO8_cGJMfQXzJgk9JftCZ2z3hbBErUhT3kemhvidqSvWiz_V3SK2fH5oXVfyjllOPe-mi-gCOTlvN--lz6o0bIW26n5OaBEBieFMF3T9bYtiqH1Om8ewjjHSrlKsNip52gCY8603fMPoYlKaJytWNL_TczGupLU9CJ7A2rAqMud06MCnYaVcWDDqHEC16zxeKrjItlG0E5uWt2Wmz3G60OCaLhR2SfWPId-O9Yr5vs5V_VnFwkhYXyzTnmO3oI7UTYD91GG6Aea9xJQIRKGkiTXjGYHmoyeiL2sxwKefsHOEqFcihR7nb0cDegI-MOEk-1SR5yoTt5ERdbgvVHXsd66i8AT6fbqP7ptWS5pplME-2sA4r16myZwkmrtXJ2IhDj06YPuKJNB-pRyllxN4j1U0fwQsTi5faOKwjhzg-pmLEW0u6tHlyyO0rkzukqZVDZrLAErpg_joF7Y8KTm5pCdvbgufquj8eMAJCt00JD6jW4SPmnfJrnzZSsP4bJa2hDFtRMs7DvAI0AfunjT5AeYBK4G4aSUNfLSHOEc2ObAQ8p82YlYR9dTRv-cpwdQUCzfGPOQBSUterRNx3iUqo231UmIsEWC7tig6-QBh2aiDbcjIlQdM2vv7relr1FhnoTkQ9oMYe4lYlCt_tVOD_qj8Kvb0S6HY404icIHvzKWQDBtvfFB0uCzUJudyltRuzMpK9fzCUikIm_rzSSLWbZNq_msT2li0_q8TvAp9vkfUvpyfxaBsEao0od7KFCXDYu1B48jcDtdgbT2TVWCZoN5iiha_ViQkMvB_46icN23oE7kCecBksgD3vdhHT8JudqkSqI1IulKVP-A5U592JX5Iauhd2htUYqbOtUiSAvJMeQAXj-S3Idv8E0N6UeK3rFbDyLwYE4-6V3prC2jq4OPCfaeh-er6qUVzbDqTbOmW5CujJLRXbMHeOfynADKQQp5pl_CQjfk8gaDp5z85JTYqZizJoIj3FRUvb2RzhAus32iXQvw7KABxXLd2icfgGSZ-hK7QumCXpgU6oZ91QsV3o8Imx3WaFlylh4nmuSOJHbYp4Te6-9O9BwsGzeDWr7YZdM0RwgAR_iit5mW0u6H700ZX",
-              "summary": []
-            }
-          ],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 10083,
-            "cachedInputTokens": 9972,
-            "cacheWriteTokens": 108,
-            "outputTokens": 78
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "bddc018d902d319cc7405f9de0087cd86539d56c4c7194b0ffe5a5a3ef785825",
-        "response": {
-          "text": "Done—I’ll remember Maria’s usual is “a colour with Jess.”",
+          "text": "Done — I’ll remember that Maria’s usual is “a colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -89,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10202,
-            "cachedInputTokens": 10080,
-            "cacheWriteTokens": 119,
-            "outputTokens": 18
+            "inputTokens": 10093,
+            "cachedInputTokens": 9987,
+            "cacheWriteTokens": 103,
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0e463d1d8d4fe000eab741b774a673291a91d3ef0f8831a7792ed9b80866c982",
+        "fingerprint": "876e93b0f558600584f712d65b6712981941abb121e866038f0bc09fab58c76a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0Erbbvszsl73UpthO7EOEqyy",
+              "id": "call_Bc4WJh4z2Z8MAUYpu6CpLSxF",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9895,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9909,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 20,
             "outputTokens": 77
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "b355a4c6ee37b70e1ba2a42157e3e6b4c608ee42c735517a3dc7474863feb1b9",
+        "fingerprint": "52ddfbede8e520ea18e98dc7e700f83b617b00fa6499e2199d46b14726d8a11f",
         "response": {
-          "text": "I proposed no bookings December 24–26, 2026 for the whole business. It’s waiting for your approval on the card.",
+          "text": "I proposed blocking bookings for the whole business from December 24–26, 2026. It’s waiting for your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10052,
-            "cachedInputTokens": 9892,
+            "inputTokens": 10066,
+            "cachedInputTokens": 9906,
             "cacheWriteTokens": 157,
-            "outputTokens": 32
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

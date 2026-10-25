@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3b392ea18cb7efd85dd0582ffec28b0931cd39199cf085ad1af42cff02d1074d",
+        "fingerprint": "968f8c8ce135f4d2b1825311d34d2fd38bd829f2e2dbcf2e27379ef4e894014b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_QBOC4D3gX0l9a7HBXvMOH4AU",
+              "id": "call_cX7Jq8J01cMc3jKFYwk7dxrl",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9887,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "bddbcdc3a17ed8598683f5bebb11a35cf2c25d2cc8a9c7f3e2d6d6da25448d83",
+        "fingerprint": "1afb51c4a82a1849405adbdaaadbb9f5ab161c311b1b4f64cb9cabc6f841274f",
         "response": {
-          "text": "I don’t see a Sara Kim among the clients you work with. Could the name be spelled differently?",
+          "text": "I don’t have a Sara Kim in the clients I can see. Could the name be spelled differently?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9951,
-            "cachedInputTokens": 9884,
+            "inputTokens": 9965,
+            "cachedInputTokens": 9898,
             "cacheWriteTokens": 64,
             "outputTokens": 25
           },

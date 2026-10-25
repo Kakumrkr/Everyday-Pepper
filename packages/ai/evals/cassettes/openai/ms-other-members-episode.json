@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4f091a1b4dfa48465dc550d4b226d55cf64c2ea381d16f8f01157838cd6c115c",
+        "fingerprint": "12c6b9d0124b2ca700eae3f38ec8d88155c93743957abdc9026371a5e0f21987",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_es5ewezq2zkvlLE3EE030Uvy",
+              "id": "call_EszbiPWPRzEl5q9z6rdYgCE5",
               "name": "search_memory",
               "arguments": "{\"query\":\"Lena my job\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9887,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
             "outputTokens": 21
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "27d3fc767bd0acfdc5c1bdb782dfb44176866538ae0299011488a1e5a01ec8de",
+        "fingerprint": "06d727a44b9fcbeae7cb8e94ff7f6e1cfff7d78f29296604ef48c0ea6373e8ee",
         "response": {
-          "text": "I don’t remember any past conversations about Lena or your job.",
+          "text": "I don’t remember Lena saying anything about your job.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9968,
-            "cachedInputTokens": 9884,
+            "inputTokens": 9982,
+            "cachedInputTokens": 9898,
             "cacheWriteTokens": 81,
-            "outputTokens": 17
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

@@ -3,11 +3,40 @@
   "trials": [
     [
       {
-        "fingerprint": "78d21118bca54656a34906df582d48bf4840a3c9bbe40c64759028dd28daaadf",
+        "fingerprint": "0fabf96d027cfa4185ab205ff694fbebbbf51185c36a978119969fd2bc61ba5e",
         "response": {
-          "text": "I can’t save phone numbers as a remembered fact. They belong on Maria’s client record.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_y37VaAVy5Yr8DtVi56G2MpeV",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 14,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "45b333d61adba4c3d911abc9716a7c2d4a339e9ad2aa85c84aefc4cedddecab5",
+        "response": {
+          "text": "I found Maria L., but I can’t save or change phone numbers here. Please update her number directly on her client record.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_06544c6b01241fe8016addf67a71d087d292f7375bc3625d65",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fZ7kcn8e6t55pllThyzXJBnzlg7EIFUb55CtRfhdy2mWKRgucJXHnaML1vnyZqUuIWS39SkHvNEouIiCr00s-x-WWwmA38cCwCs0u_fJgXTWdoKuizFXIt_4PdTXnfJ6_7S8hMpkZAeX6dc6fLisl6E0ThjSXKnJ8yovQISPGUsF1v7BaCfa8cpeGvz_9zyPd78eE5I0MoVhX11SVyeBQk3JniSF6KctY548HueYSM5E5dt3NCzuqbAlmRo2vcIyXXb74GFWPn7wwzMV15uJhqqOFAQDo6XLICirTyq3GSzYrEktfixsIIAjxzzLapdytoJ2JpCKuydShHWa77mFXka2GAOaWPC8eV1ZdbIPl4dI_QPrUCcizaq1XC76l0u9vg7P37qJpYQZ-872h8zNzd6kdmEiF5rAz7PQ6XbQOSBE4RbFFy1m8foyQQTJm3G9uAnP99bPPWT-IHBfDiXQQtuhUg7-ovesqP5fk4bXrhWOF8xOl7gYACC-8vujOdDzYNXOaIKADXUchC7iHAoDA3MfaEk5VcsJRmavuURqQwMPKQPm2-nvpTGvSrkrcjMNNWP27M4DjkUwxBLXPnQXELiRUAI_oIInvVAGpOr6H__c-zBpyX6RTfbXyCzrsYBOmEgUVQXmSgRL85xV2ebM4Tln28vqRQGGWBnhp5Ea2_XPGaGVDaCq0Ld3RjQXPSACe1s3BvZySucvqWfR8mjngNxh76a4cXmaowA-V7xUK1iBFcSkBEgZQ_lSkm_EVE0vGVt_2Afiizs6lSjw_kfKY2428PVmY65iVCl1ngc_vboDIJtb0hb0g6SpfCUDDiF7HiBcQWYkFkk6LNnqDFcV97pSG4ete_Ao3gcL01sT-lPv7we2TKXXTPnryL3DgqYZ4ri399t26FdFEyaeJMdzs-8rAUpVTt2g4u0OwnEB2tvh0DsInvHFDxOn1ZDFlhf56akxbhW6r2ZxDWAY0c1P2Lcqh-V9Q7gd_Emmx6PDXuxydtkiZ3QHhFZO34PUn91hRBnQ6YfvU-NvgB96eGAefD6cW5wl94r37JG0Led6f2dU6_JFUpq0oy_oQ_Y2xB4GdJIXx2aO1OoBTSiR0XVvp2pNKZtOEzQQUyQgOwGXKezkIhqMMvJUwkzmYui_Y1Ljzz0S8NMtysm38pwe2m153_rySHWZQVuxHUuQj9zozhOi60_gbwWp9-9tgbAPayB1xhCefoMbCZgzW3AxHBEbNB4vesaB3_EI6N3SxgB-5mACc5Cr7eb_kIWAjYg-GygM8jV066kjsXgcg-mxMb5l_d7RNOfpk6Z0_S-R9nY6H0ZsdbsB3kYBREGW5rws8wrlriZ4jj_JTJ4UxM22K2YAEKN5rfH-FnnlVDGf0-uGSXeipi84gM_2whWAAtm13Eh8v3T6EeJb9Pnu0eUZzbSsJnJiojqiVaavWvx4861qhrMx5SJjB6-Wjz_txYPqXuXAziLOVaghmMOu1p-rl61XEVKSDSm3LWqpRUZOkPHlyexQRs7DF-Wq5UH7RdQ3jqw2zS-pgHj78G7rhR4Vj7tR3dnhQS2OQtoMYi-S8P9yNONIw8CBEftry947uQsKxc6qQMkyFJaUdEdnFY1KhtnbO8EvnXCfRhWLCy6caQi98wWEk_HZdl6tPm-VUNPD93pOusjw8BWqG58cUf_FGK4-cy8gPW22MepskuMbmyB-SLzILHekDFBl55hQ_jTXO9QTlBehK343mbT04T0yYy9Y8L-VzhPfab8L5e7okvPPTzWqVGnkqs2IZXU6yPcPUomfFzqKEl0YnpdFyVNg1VObwK2vhcB4gmbcuI74MHFVhp986TPdvTAazp0gpbKvfBo_hmxntFPlST_euzwqmqqJQlPGw==",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -15,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9889,
-            "cachedInputTokens": 9872,
-            "cacheWriteTokens": 14,
-            "outputTokens": 23
+            "inputTokens": 9987,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 84,
+            "outputTokens": 66
           },
           "model": "gpt-6-luna"
         }

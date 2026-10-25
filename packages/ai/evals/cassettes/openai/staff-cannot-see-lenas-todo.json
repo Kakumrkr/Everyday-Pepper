@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d233959ea4c7600880cf74e1cda6ff22cb07b821fc17d940fc51473aedb08b2e",
+        "fingerprint": "6111572f8400afc32d330485cbe33a61b8c3d7f17b1153125b0e6d9be2d1274f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_aV0aofi2AP5y6zz6b1uuSPG9",
+              "id": "call_gfr1mZVurWRaVz64cLMMxcuL",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9889,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9903,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 14,
             "outputTokens": 19
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "e12683c837050650ed7eba405300ac6056c7739e07b3676bb8bf0daaae3ba23e",
+        "fingerprint": "bfda53bae542c7c6cbd240f32e80f9a1917c27779b8a36780922d4e4d5b4a219",
         "response": {
           "text": "I don’t see any open to-dos on your list, so I couldn’t find Lena’s call to Maria.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9942,
-            "cachedInputTokens": 9886,
+            "inputTokens": 9956,
+            "cachedInputTokens": 9900,
             "cacheWriteTokens": 53,
             "outputTokens": 28
           },

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d33a1420da7e2c1cb7cad80f019f64aa6c5a4d4556ba103a0e0b7b1e4f189642",
+        "fingerprint": "f580088c5b5a68fdadd7435c244ba1e051d2ac47abc7c256504aa50fe63b3549",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ABskeRNxQI8OIXv3V9k4CqBc",
+              "id": "call_BYnQULGdULD3OODuq2EyIL9m",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9884,
-            "cachedInputTokens": 9881,
+            "inputTokens": 9898,
+            "cachedInputTokens": 9895,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d68594c70536dde3b177ccaa7112c9e56b29e93948c9bc8acd6df1a531ff0d68",
+        "fingerprint": "2619a3ead93cc3e76f74ad772aeb299efd740e96c3ba92e797d7f7526ae3cdb4",
         "response": {
-          "text": "Maria’s usual is “Haircut with Marco.”",
+          "text": "Maria L.’s usual is “Haircut with Marco.”",
           "toolCalls": [],
           "replay": [
             {
@@ -36,27 +36,42 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10038,
-            "cachedInputTokens": 9881,
-            "cacheWriteTokens": 154,
-            "outputTokens": 14
+            "inputTokens": 10053,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 155,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "21c541018487e4c8fa38850b2421d9ba8d237cae616570f7e2ed2119910e3478",
+        "fingerprint": "53f74fd6199241cc3fbbe1553b1a085d75df9671fda47c6a68f03eb05698e6e6",
         "response": {
-          "text": "Maria’s usual is “Colour with Jess.”",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_K8Liivns51wTUhWr6XtpuToU",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10081,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 183,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cb20b23d5e9e4ed67673d39867d594ac3654aa69ca59f01f7a58b41a819bd443",
+        "response": {
+          "text": "Maria L.’s usual is “Colour with Jess.”",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0ac0116783a7f7a9016addeed44a3487d2bf9910a5dc65800a",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3e7UU8STFmzXsvbKAtGQ-8v83fkB6PcUULfD2I1NnWIA_Rp5iZpJ4_1hgwEwxn6h8QEmfOqm2aB0tnkL0CQXSOLaUG82CXnFSJ2602VkSgQWU3P6grvRr0oh-saUEAlOR7gn-DjeKqDGssy8GFQCoe5_hSf-yb4qTZdqOWliJGzytz61lzKSubObKD_f0eqFtiGsoMesEmNajoVlcohcxhwXiZ6hz2HZB5nCUYYgUfmCs6LaFrwsF_pDFQPE9xMrK124nzkRqAwDRelMAOU0zIwsM9UlHI9pRtILq9-hrfC-y30eoEgrkuIBO8PU1lRW0cD4ArAru4yBIdhGFU8lpswMZ6vBYOG7HwUNWh7vDqAzXxog4AEoTuRZK2ynMm35BwLA9cYpU7SCerfYmyB2yfrmCjMFO_dYtrLZkgqmhkg4S7-0zV8d4stWiWzAvn9Ux-WgieKTG81_NL1DBry1FoN7H7awwATaORiEw6UDqe9j6lS9YgtmlUA6Lqq32sdKw8w-xapcJlbQxisLHWx5OmmXHiqCdsj15HncX4MFpoL5OuPf6P8MQv-ei9RztxEgdZVtVQWIe6_TccFKg10JTgzJeAfuTvckfOtQfN3uQA_bZ_-58up5cmINNh-Uo8NdP8u8OsjdtTA-t6JHoptg8tzuOvJMJtYYnjZrrgJtvh3DCSmT-DOcu5W7_JCVP315_5mryQduXdXYKlG6xYdb0P0QpJJEEenf6vCPTXx7Ed4fJkWLzfXyhHvgElpgCFIm6NJyKOHvRo_ECWVEpsvRwjDd0-vNFIqLq6wfc9BpSccTdHUO-hp81jtk2bcPq5O0JpDLJHAO6eq-mvvTfuoq4IQyEAmZ_0htETDjus_T_Uwo7KrfNn8eYnQ8sXz2hF1OJnCxNgkORDd_kMBRFLK_72XcfXBC6TEQFwrPxTNU4SbedZWILvyAoWT60CrW_UKFV-1LlPsjkL66H7Dj8ITGeOygOom4Syd32fKWTUaFg-q1dlPnf2XHde-vMfMaa5QmwrbuvuToDdUHYEYKY_hTa69tnaw6ZgTzI2gMc5OLkoX51p28QwjWq-CTkc3XISE9uXnoR2RsW8k52F0-WwKnm1vHXqymzEIO9jjz4EK7cjS8mX8IWhuC-tu0aAg0A0rl9RzIm6Iji4IudoMI_dsG_cvgRbBVoLwxgcmjdP66P7HymznCFBjXitSfl-jI_4DIKEjs0HrVrIBw5N9RwK51qVN35f1ldPBfMR1BVPN7Qf6Hl98AKTD1vM0liaAJ_EQcNFaG6bD0Ckq4ndLIABYPBOgpwT3H3UpjkldIU0zzOXah4pheFlfioQq4UA2HAF7tH43KdMtr0ygbBGEEA42k9wrygtp-8xZk19p_skSytwqQyDEtWFw1dpeGms-VKM6nVku7gRD5O6xB3YdKgEXbNp6DChV5_sC0Sruqu5SxdDFK918-kUfTF0A6AO_kUuRGqr2XPHqRiYSRN1sx0Jd0kHLjeHteF0lpNQCPCEBm2rZ52XIau3Xidncvti8W-xC83tQhDjS5YKK_mRsql1Yab7RAPa3LCWbNFNoLU5soJXj6tKjKOZC46xORKrNdmyT5NWU1hIQsXKx13Y9LPD6R8zCD6utaTkxEQSnbVJ6MxrRQyCPQrSYy3M1-cYoX60G86AOPATG7T510hF1P_Vk6uXuOz-h5kNDrRxvhkoKM58hDWUk_lt6tKDaZpPr0lWxktsgd",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -64,10 +79,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10064,
-            "cachedInputTokens": 9881,
-            "cacheWriteTokens": 180,
-            "outputTokens": 38
+            "inputTokens": 10235,
+            "cachedInputTokens": 10078,
+            "cacheWriteTokens": 154,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

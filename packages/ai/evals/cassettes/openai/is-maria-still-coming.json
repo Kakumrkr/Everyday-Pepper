@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1650e245ad1b6afcbaf37651933a63173780f5eb3ef32eda42de6bbaab6c598e",
+        "fingerprint": "cf3e28748ce01affcd2dfcded5c06637d74fcaf4bad22b50330f64ff24423d55",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gpYG08VWhGVgQojo1uXm7NuD",
+              "id": "call_CpAdgIkgtYL7Mhl54ATcs2c9",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9886,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "533c7dbbe2f2c2e56af4f317259c048158feb29777ff4a9d65afa8011c61b2fb",
+        "fingerprint": "78a3e17b8ab5e33f210275d6b19d000dddcb850fd06f63a9d78ed570b9f9fc96",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2qLqZsIz4G4tXgSgHK7LYyoR",
+              "id": "call_51PgOb5JrS6lKDol32tI2ffx",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9967,
-            "cachedInputTokens": 9883,
-            "cacheWriteTokens": 81,
-            "outputTokens": 40
+            "inputTokens": 9984,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "fb8701ee5fb9506f1cd21c7d8dd3ddbe2ff85c283fe9750bcd1a04a634e35276",
+        "fingerprint": "99883f7159f2c6d7221336fa7eebb74125b94203b92db3846105ba5df44069f2",
         "response": {
-          "text": "Yes, Maria L. has a confirmed haircut with Jess tomorrow, Tuesday, November 3 at 3:00 PM.",
+          "text": "Yes—Maria L. is confirmed for a haircut with Jess tomorrow, Tuesday, November 3 at 3:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10246,
-            "cachedInputTokens": 9964,
-            "cacheWriteTokens": 279,
-            "outputTokens": 29
+            "inputTokens": 10264,
+            "cachedInputTokens": 9981,
+            "cacheWriteTokens": 280,
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

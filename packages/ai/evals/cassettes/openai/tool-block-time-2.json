@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "30af8ba6d29b37fbee06efa6a9e95b7452aeed3644838347a3c2d0cc37cec817",
+        "fingerprint": "4e84d266adfad54ebe60b162357bb1cf9513dca525775b20d3279fedd7336703",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_msMYvOlw2SGUyRo94TfjP80z",
+              "id": "call_mQqdvhSGrSQSvKcZ0nQgYRe4",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9884,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9898,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 9,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "d4f184b6beed7d7c1585bdb2afbce3828b33f2fb4a0316497aae2a16b146944e",
+        "fingerprint": "4451d8b5146a157330e27652be80ad8bb4d3c5d2c4ce4804b4ef77bee75ed44a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_SbUWQamtlLLm3GNdb8cVVkNv",
+              "id": "call_3t5aQBacZEzQJPCbaET4gI15",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-06\",\"from\":null,\"to\":null}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10337,
-            "cachedInputTokens": 9881,
-            "cacheWriteTokens": 453,
-            "outputTokens": 58
+            "inputTokens": 10356,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 458,
+            "outputTokens": 56
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "871ab628b58e1a871045c5b638c8538692de49db0ba24fc12be2bcf2c0f1148a",
+        "fingerprint": "2d693c05df1447f2321ab078c1d3001acafb8e1ab2178d8e4a47390eec435220",
         "response": {
           "text": "Marco’s calendar is blocked for all day Friday, November 6. Any existing bookings remain in place.",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10443,
-            "cachedInputTokens": 10334,
-            "cacheWriteTokens": 106,
+            "inputTokens": 10460,
+            "cachedInputTokens": 10353,
+            "cacheWriteTokens": 104,
             "outputTokens": 25
           },
           "model": "gpt-6-luna"

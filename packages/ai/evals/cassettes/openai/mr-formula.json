@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "65e31e57c1615f9986a014f424892cbcd6d6b1ed175c6f3ba3aaa603e213f7b4",
+        "fingerprint": "0e7e55b16ac8335797d989509d645a578e768a85722cd419429751aa61d679e9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_PC9rZd3JzOCiah7p3Qn5XTwE",
+              "id": "call_02NiCXboxkbdG6XbvXevAZWx",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9889,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9903,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "810607758aac8f01c70da13369b767bc8712c5a0613bd8622029ee1941b4984c",
+        "fingerprint": "5027c40f3f979494a6b6a09a89e5981b14574f19422a8c723ba1fcfd89be4176",
         "response": {
           "text": "Maria’s last noted formula was: 6N + 20 vol, 35 min.",
           "toolCalls": [],
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10145,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 256,
+            "inputTokens": 10175,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 272,
             "outputTokens": 23
           },
           "model": "gpt-6-luna"

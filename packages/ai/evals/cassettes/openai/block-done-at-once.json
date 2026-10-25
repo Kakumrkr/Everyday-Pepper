@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "38120a993ad39cefabce74b81ffd9b784e90f276fbd3f62e417655c601a8c113",
+        "fingerprint": "7eeb2c7f18f8f43e148e42b2772a19e7e53205d02085073ec1043db512c01234",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bm2nC71YAX9Icxm1fNDutvR5",
+              "id": "call_ynNRNen70Q3jO8p6UsWJuXQQ",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9889,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9903,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "82e52e31c604c38a99e02c6c28d11c6a598048cb497eb0c3c5def0e53649bf7c",
+        "fingerprint": "59c8bbd93ba88d5ae739cb5456ff4dce1a4c43b53505b79d75f070deb6d67f3c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dDbuB3fNigiNkiy8bwnTAbJz",
+              "id": "call_92Y2DWVtiMplMH9By4YI5ioH",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"from\":\"09:00\",\"to\":\"12:00\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10344,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 455,
+            "inputTokens": 10360,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 457,
             "outputTokens": 60
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3a143563cbd0bce4efa4407d0623da6eb6cdaa438aeecb424fb6a22b76c957d2",
+        "fingerprint": "67b7a1600aacc07c083ebec865aef0892563f15d09c59dca9a63e458deada665",
         "response": {
-          "text": "Marco’s calendar is blocked Thursday, November 5, from 9:00 AM to noon.",
+          "text": "Blocked Marco’s calendar Thursday, November 5, from 9:00 AM to 12:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10459,
-            "cachedInputTokens": 10341,
+            "inputTokens": 10475,
+            "cachedInputTokens": 10357,
             "cacheWriteTokens": 115,
-            "outputTokens": 24
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

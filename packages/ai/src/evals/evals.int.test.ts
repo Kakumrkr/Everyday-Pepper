@@ -92,10 +92,14 @@ describe('every eval set on its scripted cassettes', () => {
  * so it went with Phase 8's first guide batch (S36a) and passed at pass^3 in S36b: empty again.
  * S37b (user: "Carry to S38"): `move-done-no-approval-talk` checked find_availability before a
  * move, which counts the booking's own time, and offered 3:15 instead of moving it (safe:
- * nothing was written). Its guide line needs a full re-record: S38a adds it, S38b must clear it.
+ * nothing was written). Its guide line needs a full re-record: S38a adds it, and S38b cleared it.
+ * S38b (user: "Carry to Phase 9"): after `add_to_waitlist` v2, `wl-add-marco-saturday` and
+ * `wl-staff-own-client` still read free times later that day as "not full" and refused, or
+ * asked again (safe: nothing was written). Phase 9's first session moves that check into the
+ * domain (`add_to_waitlist` refuses with the free times), so the model calls it directly.
  */
 const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {
-  autonomy: ['move-done-no-approval-talk'],
+  waitlist: ['wl-add-marco-saturday', 'wl-staff-own-client'],
 };
 
 describe('the recorded real model, replayed (S27)', () => {

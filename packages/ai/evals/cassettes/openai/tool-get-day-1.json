@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "975da1c5839ff5fc832bdf7e3924833e3e298997874466a8de8c8978eb3d93fa",
+        "fingerprint": "467857a7c3496ef1cc5254e267a360fe520ab744db5d76f51417949a4b8fb14b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_o0icZ68BNrWkKuoAzSDXQ0Yg",
+              "id": "call_uYhfLFjARqyuxPlOfsKdE5zV",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9883,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9897,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 8,
             "outputTokens": 29
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "428787822bc714a2813957b37281247325b4f8fdacda489f821a7eec9b2823c1",
+        "fingerprint": "0a49f0497f0811e9469facc26e0af4457eb2df46f8aa6496dda3b777c0bdc5c5",
         "response": {
-          "text": "There’s nothing on today—no bookings or blocked time.",
+          "text": "There are no bookings or blocked times on today’s schedule.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9966,
-            "cachedInputTokens": 9880,
+            "inputTokens": 9980,
+            "cachedInputTokens": 9894,
             "cacheWriteTokens": 83,
             "outputTokens": 16
           },

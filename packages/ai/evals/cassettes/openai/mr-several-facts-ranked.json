@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1ddffbe3af92d3a17219614830c8bd257f2a78f1741b435ed1cb8974b64ef273",
+        "fingerprint": "0f241baca2b5fa5f5923d4ff003ff760d9a1864841aa905a795bdc55d377692c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ukyn4WlbRGUwzLvLK8dC7NSA",
+              "id": "call_ysGYvWpUzgRpc7XDUiXhIMlG",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9887,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "688864cfc4283d82375c6fe8b07591ff95f5fa73edb868469906e5eef35c21da",
+        "fingerprint": "19f572c1f668b7858a3c259b178b5765385f9f7b7cb3ff455a605eaa6f252bbc",
         "response": {
-          "text": "Maria L. has a remembered PPD allergy and her usual service is “Colour with Jess.” Her last noted visit was Colour with Jess on October 23, 2026; the formula noted was “6N + 20 vol, 35 min.”",
+          "text": "For Maria L., I have:\n- Allergy: “PPD”\n- Usual service: “Colour with Jess”\n- Last visit: Colour with Jess on October 23, 2026. The note says “6N + 20 vol, 35 min.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10235,
-            "cachedInputTokens": 9884,
-            "cacheWriteTokens": 348,
-            "outputTokens": 56
+            "inputTokens": 10265,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 364,
+            "outputTokens": 59
           },
           "model": "gpt-6-luna"
         }

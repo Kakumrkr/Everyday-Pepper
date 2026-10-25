@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "fa2ae946b3d055afa505ad4d5514358ffbf220f32b85f8593f1739f38aefd0b9",
+        "fingerprint": "32f6645137017ee4469ca252d57144f6dd92b88fca64aaec710a96e8c8137a64",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_EqRsEoRdNxEaNBg0BdrAzJoN",
+              "id": "call_3cDct9iMXLVUU116jUEUBtld",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9884,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9898,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 9,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "078ea9c3447f504025a9a2d36e238cbbd34c027c529718133f8356401b112950",
+        "fingerprint": "3241fa967858e9396e03330a07d5de72fd7999c8628c09e73fada615b7c2bdd7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_WYzAiYsxkqO16TyWuIuh5x6S",
+              "id": "call_1KGAPpnS2ViO1TLsX139Ao8u",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-06\",\"from\":\"12:00\",\"to\":\"17:00\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10354,
-            "cachedInputTokens": 9881,
-            "cacheWriteTokens": 470,
-            "outputTokens": 65
+            "inputTokens": 10351,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 453,
+            "outputTokens": 63
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8411d4a73b874c1cf79cb9128cab44e0f23dc17be77f9c560a6c7e35f39e05f6",
+        "fingerprint": "5cb17505e96af3b28804f56d2c4c7053b06019cf2accd55e8386102602fcb742",
         "response": {
-          "text": "I can’t block Marco’s time with my current permissions. An owner or manager can do it.",
+          "text": "I can’t block Marco’s time with my current permissions. An owner or manager can do it for Friday afternoon.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10471,
-            "cachedInputTokens": 10351,
-            "cacheWriteTokens": 117,
-            "outputTokens": 24
+            "inputTokens": 10466,
+            "cachedInputTokens": 10348,
+            "cacheWriteTokens": 115,
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

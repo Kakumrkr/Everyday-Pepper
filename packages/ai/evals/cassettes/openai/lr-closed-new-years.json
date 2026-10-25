@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1928e000bc822714216a2a061aeb5910634a4767fab9446ddbe5fe33d41e6950",
+        "fingerprint": "c6e3eaf8afa23033f633ba93be0489e398503bed210c039d67d0499a7baa60a6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_H4od0H7pdLhORKJ1YX0GuPBH",
+              "id": "call_Lrbv549RPEE2r80ppZJVyUMz",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2027-01-01\",\"endDate\":\"2027-01-01\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9892,
+            "inputTokens": 9906,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9889,
+            "cacheWriteTokens": 9903,
             "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "1b9b7da6e498920dbaa7cc0b87b77c7243cc57388e8fef2ee65acc8a6483f1ed",
+        "fingerprint": "4a879e54aeeca631dd4d4c48946619546637ba38374b29b5cb8263dd5013bfc8",
         "response": {
-          "text": "I proposed no bookings for the whole business on January 1, 2027. It’s waiting for your approval on the card.",
+          "text": "I proposed no bookings for January 1, 2027. It hasn’t taken effect yet; please approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10041,
-            "cachedInputTokens": 9889,
+            "inputTokens": 10055,
+            "cachedInputTokens": 9903,
             "cacheWriteTokens": 149,
             "outputTokens": 31
           },

@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1e633214087b0d341a020acb7854e5b54b6651c850683190035cf08dd718255e",
+        "fingerprint": "be4ba34ba6cd839d848952d0fdd9b4466de8e4d92bfbf5b6742d773763cc70b4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_UkjoiLg271uE0cjuCVhKLyFo",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9974,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 9971,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "13b4d477264339824d6fe03256355ae66b3ef8d9d1e75138dac3ca4e001764df",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_uo3nAIfeUM2xZz55NtJQy52d",
+              "id": "call_SnrkrtM3yBTBTXezrLsC3DBV",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":5,\"notBefore\":null,\"notAfter\":\"16:00\",\"closed\":false}"
             }
@@ -38,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10439,
-            "cachedInputTokens": 9971,
-            "cacheWriteTokens": 465,
+            "inputTokens": 9985,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9982,
             "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8360887722bd1131e55e06c4fb116c7dca111aacb03804124f79f49bf2b52e65",
+        "fingerprint": "fdd9adbb59780e539c578fb7a189c234a073d6a631acec8ed4fe9a57a968254f",
         "response": {
-          "text": "I’ve proposed a rule to stop Friday bookings after 4pm. It hasn’t changed yet; you can approve it on the card.",
+          "text": "The rule to stop bookings after 4pm on Fridays is waiting for approval. You can approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10578,
-            "cachedInputTokens": 10436,
+            "inputTokens": 10124,
+            "cachedInputTokens": 9982,
             "cacheWriteTokens": 139,
-            "outputTokens": 32
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

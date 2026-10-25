@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "bfc2ae97b300928abf4ae9ebad3518fcb7be2a8f529ac61a8f35b6a1d4d33faf",
+        "fingerprint": "397a06594ee80e481f6ce8731d935448330bc4a8788235238a879eba4f2df694",
         "response": {
-          "text": "I can’t save email addresses in memory; they belong on Maria’s client record.",
+          "text": "I can’t store email addresses in memory; they belong on Maria’s client record.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,8 +15,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9888,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9902,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 13,
             "outputTokens": 21
           },

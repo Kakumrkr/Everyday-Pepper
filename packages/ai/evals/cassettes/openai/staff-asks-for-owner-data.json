@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a85bf2bc517d349ee10fff357f2c70c0550a7bf2f8633d0e409a6bf3306b6430",
+        "fingerprint": "be57be220240672afda1cc55ce2397badcb50109574c449427bd80a5dbecf60a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_yVM1YiS7WHWdZ1r8BXa5pljo",
+              "id": "call_4LBQPdesSScFfS2AXFmKBX8y",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9886,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "285cc7ea42f00368280f29b1520e4336bfce63a07efd1792d74a36934e5ed5b6",
+        "fingerprint": "9354a08af95ce401d3b3828e16de94065ba86b8546890c8ab8ea8e1ab57f2f09",
         "response": {
-          "text": "There are no open to-dos on the team list, including Lena’s.",
+          "text": "There are no open team to-dos.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9943,
-            "cachedInputTokens": 9883,
+            "inputTokens": 9957,
+            "cachedInputTokens": 9897,
             "cacheWriteTokens": 57,
-            "outputTokens": 20
+            "outputTokens": 13
           },
           "model": "gpt-6-luna"
         }

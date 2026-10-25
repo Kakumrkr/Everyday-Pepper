@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b2e02169fd0ace148400b9ebdacceaaf448aff95fea9615dff5c50c09ef37e49",
+        "fingerprint": "c9cd9881f5d6a64bc3d5206b6a19cb2159c4f45ba4d78e860e1783a55b464f60",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_geWEJGi6Hahyw8JKoSfJg9I7",
+              "id": "call_leAfZ7NlwkOB2fshvOh18gXu",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9889,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9903,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "3cd8ad154ba84fb2b5b43216ab09ed1364b42011018d7d097944c6dc78a1e994",
+        "fingerprint": "1c8f62b25b2525dab2598fe47f331cc2ea0298fd4bf97bd2acf0b6c096326734",
         "response": {
-          "text": "Yes—colour takes 90 minutes, and the salon’s note says: “Needs a patch test 48 hours before.” Jess offers colour; Marco doesn’t.",
+          "text": "Colour takes 90 minutes, and the studio’s note says: “Needs a patch test 48 hours before”. Jess offers colour; Marco doesn’t.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10454,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 565,
-            "outputTokens": 37
+            "inputTokens": 10470,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 567,
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }

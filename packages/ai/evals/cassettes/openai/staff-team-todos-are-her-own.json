@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "933a7dd6dc7168f7a8e39dcf6e609e2fa289e8d080abf61f28df002d06c3ef55",
+        "fingerprint": "20910b02c6eaec9f11e9f3fac9d3d409fccddc01e3accf2174889721dbbc23b3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ybnH1W8RODcRUq0ZPeh9YE1H",
+              "id": "call_TzXkDdknBj4Bh4V2N6AWypLf",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9886,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "f59d705012a0564c2ef7adff6401d32f040202d0a5048a72625ccc7b13d81de4",
+        "fingerprint": "1d211f469c7d9f662ce0a942693bcf5554231dab8ae57a0e21e5e2a3872901ee",
         "response": {
           "text": "There are no open to-dos on the team list.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9943,
-            "cachedInputTokens": 9883,
+            "inputTokens": 9957,
+            "cachedInputTokens": 9897,
             "cacheWriteTokens": 57,
             "outputTokens": 16
           },
