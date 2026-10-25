@@ -1105,7 +1105,7 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
     - `--phase-estimate-ok` passes the $4.50 stop's estimate;
     - Phase 8 cap $2.00.
   - **Recording:** a probe ($0.142); a first full pass found `waitlist` under its gate (Luna claimed an add it never made); one fix and a second full pass ($0.251); pass^3 on 167 cases ($0.204). Every §2 gate met. `move-done-no-approval-talk` passes. S38b spend $0.808 in total (Phase 8 $1.79 of $2.00).
-  - **Checks:** `pnpm check` green; `pnpm test:integration` INTEGRATION; Playwright not re-run (no screen changed since S38a's 94/94). Security review: three medium proof gaps fixed with tests, six low findings logged (L9–L14).
+  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,239/1,239 (two load misses under the parallel run, each passing alone and untouched by S38b: an appointments concurrency property test at its 60 s limit, about 8 s alone, and the `memory-latency` episode search p95, as in S38a); Playwright not re-run (no screen changed since S38a's 94/94). Security review: three medium proof gaps fixed with tests, six low findings logged (L9–L14).
   - **For later:**
     - `wl-add-marco-saturday` and `wl-staff-own-client` are named known misses: the domain check in Phase 9's first build session, then re-record;
     - the cost estimate runs about 150× actual with 21 tools (a better estimator would spare the flags);

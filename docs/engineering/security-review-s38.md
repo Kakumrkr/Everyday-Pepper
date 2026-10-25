@@ -48,7 +48,7 @@ The open low findings of S18, S21, S27 and S33 stay as recorded there.
 
 ## Isolation and dependencies
 
-- **Isolation suite:** `packages/db/src/isolation.int.test.ts` covers every table with a `tenant_id` column (the catalog test fails on a new one), including the five Phase 8 tables and both new job scans. Result in this session's `pnpm test:integration`: see [Real-model results](#real-model-results-s38b) for the run.
+- **Isolation suite:** `packages/db/src/isolation.int.test.ts` covers every table with a `tenant_id` column (the catalog test fails on a new one), including the five Phase 8 tables and both new job scans. Result in this session's `pnpm test:integration`: 1,239/1,239 (db 630).
 - **Dependencies:** `pnpm audit --prod`: no known vulnerabilities. `pnpm audit` (dev included): one moderate, `esbuild` through drizzle-kit (dev only, S27's L4).
 
 ## Real-model results (S38b)
