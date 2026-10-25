@@ -3,40 +3,11 @@
   "trials": [
     [
       {
-        "fingerprint": "ec67da4c2cc36fc91aeeb33d93bf2dabbba546d097bdd2e1de3a1c0348e04d83",
+        "fingerprint": "78d21118bca54656a34906df582d48bf4840a3c9bbe40c64759028dd28daaadf",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_TYNfTzq55jssgcwlnckFoeTk",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9843,
-            "cachedInputTokens": 9826,
-            "cacheWriteTokens": 14,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "8f1fd170ceed0606d49b09f30dc961ff1015d7370d2ce91220f28f017748df60",
-        "response": {
-          "text": "I can’t save phone numbers as a remembered fact. Please update Maria’s number on her client record.",
+          "text": "I can’t save phone numbers as a remembered fact. They belong on Maria’s client record.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_052efca70fdc71d4016add36b58e3887d28e40bf33659fd03c",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3Ta2Hb4yHnwJJnDMBxZMQ-5GGfsjmAKTruWGhw6ioHWwXbo_YcfLZ27QWum-2anj1BZWRpqduSsGFCbpKFIiEkamXMb1yizPeRQmweEkPz_EQRFmvP2Em7_mCOiQazrT1p_GZ7GdLoGs63HOzR7Mmbp4SRyLyF6uEQO9ZedUiubgCP2stGCKThu6REOgZ7v-J5QBCRFqnBjGgR08GZlqatNvRGO0mDp51JHK4wZwqjjtG0kT_r1bRw5AS6FJAO1YjCs1nblJ3-I0vOeNRcdd1isR7WJR2ofzEFTK4gnfqhxi_cdSyYGbv7BqBTvLn7HUObYaEcy2TrPTZf4-pkTOr6Pjn-0GugZg3nSHbAZkQiTR2JvANUdUxeikCFyIk3e06PHZJz5pbdBa0c1h4B0rNQ5ltKAOJ7h5fqrGWJcBJ3NurpePVOaVqLY2IwxSvM2Kh9nqKe1TsvWueRM0VZiUueoVzrf2pco0tEl-2NKiLxw6lU6jELEZljgo9NIzOl40xb8ASPs3PFQFoSebV4cSDWec9DnIxPbSxEvdZ4WVvqU57kZB2j0blHexZotHKuhvryAzSNY93ef1uRpWXwx-eAI0QZSrviwmnxTBSUHZFl6-5BGIN-aJ5ANgj5_JFEe1Qp-guCD_5HkInkwsGEiif_bHplkE3ES-v-A1ATJSeiDESVE86nZh-RRuXxsFUaJ0pxHgWBQXNd7mfcduUd_2NCV2JTMMOCSxIF2wy9QY2O5uq8ZOqy7rgPzxUyL21HYBu-1PEC8cDoYbk85OhuVLNsSkYA9-GKnJbAxc3XSkFMacmbda4oMf5-0ngNtpAgIyK0LfYCgREhfhnz2rk8IBwRwrT7pa2-Yji0kNOi4ydgytliCFsccM5oGFBH3yjEQOcKDbQHDpafuANtIhN3FgdzMn94h1DIOx-57AtCGwW4WbFH8LDRNOL67n9qsp-cB0h5Zqw1lyTP_Q7CmxZXXRHB2JJ4sBG9a09dvA-0OXxXPJlbj2kdShXBVzFffm7FDtTslaD-loC916d0p3aEZYdXMyL9emu6ocCURzsFPjR3t0JKmdI8YDz3EVZ3_gMlwL-v04AsOol8a1Enbie9-pX99KOODD7X59nj9R_KrTSl4GgUjpeOonizYHThPOX-DqCzubxxffMua0W8EBi57oNO4Qj1-UXc_slqcD5z30WLuDV8M4rUvEHURXmt6X3gjmzZN5N9tO65jkZBXz6f2HSPnDKzQ_BohPTXxN4rf2aYOk_ukDp99Usto6mpEPIQ-fgxGj6UeXYO4G9HYMMziN0EXgkGd1vC19I9gH1UrRPvp_pPeVUbW5gPmAkOHCOCJnV6ezciiVQt6uLBrCK7BKsmiDXNOPG_WO8ZIOOEykEa0DKurfyQaRXlzNTsiH3StNC-8_kn1giVjsUX81KlXgTBbBs5-wvrqgI_PmaMqnw_yDXRDdwhB63YjZ15QUKBno9ViwvbWiQwXmkWA23oDSZq89xwtpU6rr5dMh_3m3BcC-bCWx4U97q2n0oq6qynFmbS4agL649o0qc1U6_Ww8CAZ-c6IgnryPfdQ4KacvgAu3WrsyixheaENdoU2g9I3DmRHLg2BXba_-ceNXrQ658M0AMsu-hmTZIau0qZo-fwaV3KURP_p0FJZk9_tWTCIv8MhI71AxU3Q8fbNxe56jntbYCUXR0ySf4k4Pb8tUXHh5wmv3hohZYClIRvYHa_YBpvsG9jZPwrRplnGXzHNssvqRyglJP8IQY3wkRj65XaKKjMLPKRipPur987zrh11hmtUk8suaypxdZFtSRNDJeXaiVOzPLP2XT7YgG1I2lbakUzX2UUbuW9KVD_uSLwBCUkUXmtoaKUd1ygHa3EgSGpFgm7y9yLgcJGA5VMYI3ebDE58WNeYRAXlWqyOEvyYmA_2agW2edvKcTCx3WDjCLXBeSKYnY0LDTCHd1nERzpqhqAjpTpFu343tZmdLa8kx9jxcSvRE39iINrdHorvQxgleLWUs0M30SZSI-krc4s1wmj8dSGbrJr6uFbeOA1UgBYwQWJqE-U9GiDa2YGvQuOFt0Y66f9zJNhsdrBJ4cIYg3hb0LP4FSDSLe--mczxtUm9_-6laKm79oxoL9HJcX7_Dgpppk57fH7RwjkxjJXdWiN-8KBHLZUsUhtJvuudAtvRJ",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -44,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9924,
-            "cachedInputTokens": 9840,
-            "cacheWriteTokens": 81,
-            "outputTokens": 82
+            "inputTokens": 9889,
+            "cachedInputTokens": 9872,
+            "cacheWriteTokens": 14,
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }

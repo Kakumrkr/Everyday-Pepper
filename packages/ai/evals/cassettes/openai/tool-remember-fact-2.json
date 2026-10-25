@@ -3,21 +3,21 @@
   "trials": [
     [
       {
-        "fingerprint": "ba694002590d44589bd5b9cd2b5bd26d3e81e7a9ab2c8c17efee5cceb729a867",
+        "fingerprint": "11f5bf687663ca30071a5b4cca16d9ee9515c6f25b3421f3f9b5021a6dab2b3a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_lnRXCJju37xeTeeZ1ovAhqmg",
+              "id": "call_5yl1L8vnGAxMVOzQbkY6zIsC",
               "name": "remember_fact",
-              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close at 4 on Christmas Eve.\",\"sensitive\":null}"
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close at 4 on Christmas Eve\",\"sensitive\":false}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9843,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9889,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 14,
             "outputTokens": 43
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "0cf232039d19a5e3f4f1bc9fe4b4c927d01fd5de95660a3ea4a40e6946730941",
+        "fingerprint": "2b72edac4c7eb9bbb9e2ed262b374ad41a9548d24b895ae061406d39cbcf53c3",
         "response": {
           "text": "Noted: we close at 4 on Christmas Eve.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9925,
-            "cachedInputTokens": 9840,
+            "inputTokens": 9971,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 82,
             "outputTokens": 16
           },

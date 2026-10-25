@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "291ebebaf26048f8898a9e5fbdba1fd252fa6d00bcce9837d12b86bbb3480b28",
+        "fingerprint": "6a49e5437d7771885dd895bb81e0d13bc6ab9eb96bb2e78ff842b5020931b979",
         "response": {
-          "text": "La clienta pide cancelar la cita de Maria de mañana. La cita es a nombre de Maria; no he hecho ningún cambio.",
+          "text": "La clienta pide cancelar la cita de Maria mañana. La cita de la cliente no confirma que quiera cancelar su propia cita; antes de actuar, necesitaría que me lo indiques tú con tus propias palabras.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9856,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9902,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 27,
-            "outputTokens": 30
+            "outputTokens": 46
           },
           "model": "gpt-6-luna"
         }

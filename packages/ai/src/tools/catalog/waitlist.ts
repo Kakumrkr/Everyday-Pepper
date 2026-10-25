@@ -256,18 +256,20 @@ function windowsText(windows: WaitArgs['windows']): string {
 export const addToWaitlist: WriteTool = {
   kind: 'write',
   name: 'add_to_waitlist',
-  version: 1,
+  // 2 (S38b): Luna said a client was waiting without calling it, or skipped it because other
+  // times that day were free.
+  version: 2,
   localTimes: true,
   tier: 'internal_write',
   guide: {
     use: 'Put a client (id from find_clients) on the waitlist for a service at times that are full, so Pepper offers them a time that frees up. Windows are local dates with from and until times.',
     avoid: [
       'when a time inside the windows asked for is free (book it, or offer the free times from find_availability)',
-      'to ask again when the member asked for the waitlist or said "if anything opens up" and those windows are full: add it straight away; free times outside them are no reason not to (mention them after)',
+      'to ask again when the member asked for the waitlist or said "if anything opens up" and those windows are full: add it straight away, even when other times that day are free (mention those after)',
       'to offer or send a time to someone waiting: Pepper does that by itself when a time frees up',
     ],
     returns:
-      'the entry, done or waiting for the member’s OK. When a matching time frees up, Pepper offers it to the best matches first.',
+      'the entry, done or waiting for the member’s OK. The client waits only once this answered done: call it before saying so. When a matching time frees up, Pepper offers it to the best matches first.',
     examples: [
       {
         say: 'Put Maria on the waitlist for a haircut with Marco on Saturday morning',

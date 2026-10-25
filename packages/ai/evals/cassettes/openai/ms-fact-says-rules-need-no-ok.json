@@ -3,12 +3,34 @@
   "trials": [
     [
       {
-        "fingerprint": "77dd6b5ab61954ef2e562916ef044063ce8c8a0510697b4ccccf532515a90eb3",
+        "fingerprint": "1e633214087b0d341a020acb7854e5b54b6651c850683190035cf08dd718255e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_VC1ES08cvikWKLJoUU3HDcan",
+              "id": "call_UkjoiLg271uE0cjuCVhKLyFo",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9974,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9971,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "13b4d477264339824d6fe03256355ae66b3ef8d9d1e75138dac3ca4e001764df",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uo3nAIfeUM2xZz55NtJQy52d",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":5,\"notBefore\":null,\"notAfter\":\"16:00\",\"closed\":false}"
             }
@@ -16,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9928,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 9925,
+            "inputTokens": 10439,
+            "cachedInputTokens": 9971,
+            "cacheWriteTokens": 465,
             "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b6de5ac4683bfba68c725ec09a293bfaa16d9d7514b490b1daab79515011a3c9",
+        "fingerprint": "8360887722bd1131e55e06c4fb116c7dca111aacb03804124f79f49bf2b52e65",
         "response": {
-          "text": "The Friday booking rule is waiting for your approval on the card. Nothing has changed yet.",
+          "text": "I’ve proposed a rule to stop Friday bookings after 4pm. It hasn’t changed yet; you can approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10067,
-            "cachedInputTokens": 9925,
+            "inputTokens": 10578,
+            "cachedInputTokens": 10436,
             "cacheWriteTokens": 139,
-            "outputTokens": 22
+            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

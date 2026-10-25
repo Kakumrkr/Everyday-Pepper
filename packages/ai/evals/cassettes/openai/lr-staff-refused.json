@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "82152e76f74297a2c5da2072e0c83dd2795a30cccc2d955ae3ad5c88b80fe14c",
+        "fingerprint": "629e2ab9cbd806fd6653cd28941201c656c0284e4c5256074e16f18e83363fb4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_tpryfWPprEIlpDuToUc4yQl3",
+              "id": "call_kULglZefSKefRY5W4dPxdIhO",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,21 +16,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9847,
+            "inputTokens": 9893,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9844,
+            "cacheWriteTokens": 9890,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "97b393362af96568bcd4d411365c442765a6e614213c4680c6a3206003b6cf86",
+        "fingerprint": "84634764035da29aecddfd05b7082be3c68628cfe92a15987441d9be14372758",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2JV9jD7Ihykn5yLtAGAkf1Ng",
+              "id": "call_JRur6lPSri25VE22mTiUToCR",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10309,
-            "cachedInputTokens": 9844,
-            "cacheWriteTokens": 462,
+            "inputTokens": 10356,
+            "cachedInputTokens": 9890,
+            "cacheWriteTokens": 463,
             "outputTokens": 89
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c8a35a6b2bbd1359faa020056b23656c14fb4d0c3a60b6268ada8bdb6e305bc1",
+        "fingerprint": "86a7e9c8a3d9657a35d3e71166829cf0949c7686124cab6e244795059d35d107",
         "response": {
-          "text": "I can’t set that rule with my current permissions. An owner or manager can set it so bookings with you don’t start before 11 on Tuesdays.",
+          "text": "I can’t set that rule with my staff permissions. An owner or manager can set it so Tuesdays have no bookings for you before 11.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10451,
-            "cachedInputTokens": 10306,
+            "inputTokens": 10498,
+            "cachedInputTokens": 10353,
             "cacheWriteTokens": 142,
-            "outputTokens": 35
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

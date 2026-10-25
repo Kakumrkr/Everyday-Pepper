@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1a85842b6d008d18025585ad39a239a82ff37f2677ec94d2b7241f144df00370",
+        "fingerprint": "9847593c3a99bae5f51b21fd6db3d986657839318b4d38c25ac8a69031e721c3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_JH9PU6gv5pSGD8T8TudcbJOm",
+              "id": "call_XBsrsiU836LTytPk71YAtS3c",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9887,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 12,
             "outputTokens": 40
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "35211ea82bc5c4a98ff10117561051d0c2153b9df8ec85b0f82823dbd780fa40",
+        "fingerprint": "09224e70351c8c376d698c8ac0321b11e148caef20f8bcf41cc9c1b9bc4e482c",
         "response": {
-          "text": "I can’t save business-wide notes with my current role. An owner or manager can add that note.",
+          "text": "I couldn’t save that because your role doesn’t allow business-wide changes. An owner or manager can add it.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9934,
-            "cachedInputTokens": 9838,
+            "inputTokens": 9980,
+            "cachedInputTokens": 9884,
             "cacheWriteTokens": 93,
-            "outputTokens": 25
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

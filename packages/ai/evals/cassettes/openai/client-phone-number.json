@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3fe4270929789e58b9899efe85a4d09e4695f1347323ad5d6969ff549fc42306",
+        "fingerprint": "687d14d16526c3ae18be570c6d5c74fac110ad95e9ff70964d3a76ff99655d95",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_suu46hK0wvSklWY5jYih8QwX",
+              "id": "call_tZRMxYEa9E1LFM1P2p7ZvdfZ",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9887,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "22b704216148f7dff9642cf02fd185a8fd4269be711b1f18ec74981abf4e3eea",
+        "fingerprint": "b9664511091c4405bc4cfa6e8356031df57c14ce7560da04391b96e441a4c975",
         "response": {
-          "text": "I can’t see Maria’s phone number or email here. I found Maria L., but the client lookup doesn’t provide contact details.",
+          "text": "I can’t see Maria’s phone number or email here. I can look up her appointments or what the business remembers about her.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9923,
-            "cachedInputTokens": 9838,
+            "inputTokens": 9969,
+            "cachedInputTokens": 9884,
             "cacheWriteTokens": 82,
-            "outputTokens": 31
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

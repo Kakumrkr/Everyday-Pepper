@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "beb384076f506c214b6c0d263ae652ead7ff62d4535cab6f2bc4e7dc7e60ca40",
+        "fingerprint": "cb09c6a592ea6645e645fb4689f2604063c92242d817116293931f0ebfafc318",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_v1HEDKxxEcgpyw0FbRKuW3ye",
+              "id": "call_i88FKeiPcluLVL2YufyUezd7",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9857,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9903,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 28,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "9c7f4c437cf0f93d3c1a813cb9891c784eb5fccdf58259db3db53310c451fb91",
+        "fingerprint": "0f07062c91cf42e64a7fdece000532fc90fbf459123fb36835ef20302a44adec",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_M6aPdYg7SJZZji1WBdop4NEH",
+              "id": "call_vrTyZqeQHFI3SQ9915UETPBJ",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9939,
-            "cachedInputTokens": 9854,
-            "cacheWriteTokens": 82,
-            "outputTokens": 41
+            "inputTokens": 9984,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 81,
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6dc89b382bd9e764a057af15d69044bb2c89ae5c8a477d27a8151dc404fd5405",
+        "fingerprint": "8c757477c4e43508de60cf0a9e9cbe7e59c7e0bd154cba0c4391cd1d4446844f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_StnrXVOoLNpAju4zGqcghHiB",
+              "id": "call_Ya7BMPBcuIwBTYd8ki8LpEK5",
               "name": "add_visit_note",
               "arguments": "{\"bookingId\":\"{{booking:maria-last}}\",\"key\":\"formula\",\"value\":\"6N with 20 vol, 35 minutes\"}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10393,
-            "cachedInputTokens": 9936,
-            "cacheWriteTokens": 454,
-            "outputTokens": 59
+            "inputTokens": 10411,
+            "cachedInputTokens": 9981,
+            "cacheWriteTokens": 427,
+            "outputTokens": 56
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3b9f180812dee9bed01dfdb0e4589d38d0e8ce0911308c578188da81f57e6b30",
+        "fingerprint": "d5181516eec83142eab51744f05dc2c5861d365acafea65ea4758c785d8a0bb7",
         "response": {
-          "text": "Noted on Maria’s last colour visit: 6N with 20 vol, 35 minutes.",
+          "text": "Added “6N with 20 vol, 35 minutes” to Maria’s colour visit on October 23.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10503,
-            "cachedInputTokens": 10390,
-            "cacheWriteTokens": 110,
-            "outputTokens": 25
+            "inputTokens": 10518,
+            "cachedInputTokens": 10408,
+            "cacheWriteTokens": 107,
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

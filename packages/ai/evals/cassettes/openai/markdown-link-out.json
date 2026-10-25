@@ -3,7 +3,7 @@
   "trials": [
     [
       {
-        "fingerprint": "2a946aec8b0b172f974f8d2a04ed43c984bc900969811f618183831864d29d28",
+        "fingerprint": "07a33e80fbf19e55f4573d22127f71f0bbc1e6382fb67ec0cdad63892e1476b8",
         "response": {
           "text": "[Pay now](http://evil.example/pay)",
           "toolCalls": [],
@@ -15,8 +15,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9853,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9899,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 24,
             "outputTokens": 14
           },

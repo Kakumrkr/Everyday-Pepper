@@ -24,8 +24,9 @@ export const BUDGET_USD = 5;
 // Phase 7: $1.00, raised at S33 (user) for the full re-record and pass^3: $1.40 at the brief,
 // then $1.55 once one whole-suite run was measured at about $0.20. Phase 8 (S34, playbook D-13):
 // $1.25 of the $2.99 left, about $1.10 of it planned; raised to $1.75 at the S38a brief (user:
-// "Go with your recommendations") for S38b's full re-record and pass^3, planned about $0.75.
-export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1.55, 8: 1.75 };
+// "Go with your recommendations") for S38b's full re-record and pass^3, planned about $0.75;
+// raised to $2.00 in S38b (user: "Fix, cap $2.00") for the waitlist guide fix's second re-record.
+export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1.55, 8: 2 };
 
 /** The ledger label of a run for `phase`: `P7 <label>`. */
 export function phaseLabel(phase: number, label: string): string {

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a74aa51d029f2391701a5abcee57277bde2c44f77c4179102104b851edc2663b",
+        "fingerprint": "d233959ea4c7600880cf74e1cda6ff22cb07b821fc17d940fc51473aedb08b2e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_WPpsQvpGowRijsY3ugCFJ1SI",
+              "id": "call_aV0aofi2AP5y6zz6b1uuSPG9",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9843,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9889,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 14,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "607d8d4e66f402c8caf1161586384f46065a2ec1f8cc8a4bb069dafe09d081b8",
+        "fingerprint": "e12683c837050650ed7eba405300ac6056c7739e07b3676bb8bf0daaae3ba23e",
         "response": {
-          "text": "I don’t see any open to-dos on your list, so I couldn’t find Lena’s call-Maria task to mark done.",
+          "text": "I don’t see any open to-dos on your list, so I couldn’t find Lena’s call to Maria.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9896,
-            "cachedInputTokens": 9840,
+            "inputTokens": 9942,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 53,
-            "outputTokens": 32
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

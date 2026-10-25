@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "85ad3b8d332fe18da3c6389350c87b1f091bac602b4c325aae0435d275ac0702",
+        "fingerprint": "5d48b04be9da1a06d8cdbb5a6c8842f3c500f5616481fcd601778aab60106243",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OxlwO1SrjoSMVShqnqF79P4W",
+              "id": "call_wJ4n9i4CqSRhFLBubxTIPeVs",
               "name": "block_time",
               "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-04\",\"from\":\"12:00\",\"to\":\"13:00\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9843,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9889,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 14,
             "outputTokens": 41
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "4f0dac49eafa6ec84d3aeeb3b4a437366b8c64ec15b48a69f5c7d1440a0e3de8",
+        "fingerprint": "db90b1df6eb5c85eb41cd63a239a53cf486919531437d2c02a037480c9294ec1",
         "response": {
-          "text": "Done — I blocked your calendar for lunch on Wednesday, November 4, from 12:00 to 1:00.",
+          "text": "Blocked your lunch on Wednesday, November 4, from 12 to 1.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9939,
-            "cachedInputTokens": 9840,
+            "inputTokens": 9985,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 96,
-            "outputTokens": 30
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }

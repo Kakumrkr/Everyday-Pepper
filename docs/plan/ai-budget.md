@@ -66,7 +66,7 @@ Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b prob
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$3.1617** of $5.00 (the runner stops at $4.50).
+Total spent: **$3.3033** of $5.00 (the runner stops at $4.50).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|
@@ -1523,6 +1523,103 @@ Total spent: **$3.1617** of $5.00 (the runner stops at $4.50).
 | 1451 | 2026-10-25 | P8 S38b pass^1 part 34/129 | completed | 2 × 1 | $0.49 | $0.0000 | $3.1580 |
 | 1452 | 2026-10-25 | P8 S38b pass^1 part 35/129 | completed | 2 × 1 | $0.49 | $0.0029 | $3.1609 |
 | 1453 | 2026-10-25 | P8 S38b pass^1 part 36/129 | completed | 2 × 1 | $0.49 | $0.0008 | $3.1617 |
+| 1454 | 2026-10-25 | P8 S38b pass^1 part 37/129 | completed | 2 × 1 | $0.49 | $0.0010 | $3.1626 |
+| 1455 | 2026-10-25 | P8 S38b pass^1 part 38/129 | completed | 2 × 1 | $0.49 | $0.0007 | $3.1634 |
+| 1456 | 2026-10-25 | P8 S38b pass^1 part 39/129 | completed | 2 × 1 | $0.49 | $0.0005 | $3.1639 |
+| 1457 | 2026-10-25 | P8 S38b pass^1 part 40/129 | completed | 2 × 1 | $0.49 | $0.0019 | $3.1658 |
+| 1458 | 2026-10-25 | P8 S38b pass^1 part 41/129 | completed | 2 × 1 | $0.49 | $0.0008 | $3.1666 |
+| 1459 | 2026-10-25 | P8 S38b pass^1 part 42/129 | completed | 2 × 1 | $0.49 | $0.0011 | $3.1677 |
+| 1460 | 2026-10-25 | P8 S38b pass^1 part 43/129 | completed | 2 × 1 | $0.49 | $0.0010 | $3.1688 |
+| 1461 | 2026-10-25 | P8 S38b pass^1 part 44/129 | completed | 1 × 1 | $0.54 | $0.0008 | $3.1695 |
+| 1462 | 2026-10-25 | P8 S38b pass^1 part 45/129 | completed | 2 × 1 | $0.49 | $0.0006 | $3.1701 |
+| 1463 | 2026-10-25 | P8 S38b pass^1 part 46/129 | completed | 2 × 1 | $0.49 | $0.0015 | $3.1716 |
+| 1464 | 2026-10-25 | P8 S38b pass^1 part 47/129 | completed | 2 × 1 | $0.49 | $0.0005 | $3.1722 |
+| 1465 | 2026-10-25 | P8 S38b pass^1 part 48/129 | completed | 2 × 1 | $0.49 | $0.0005 | $3.1727 |
+| 1466 | 2026-10-25 | P8 S38b pass^1 part 49/129 | completed | 2 × 1 | $0.49 | $0.0020 | $3.1747 |
+| 1467 | 2026-10-25 | P8 S38b pass^1 part 50/129 | completed | 1 × 1 | $0.24 | $0.0003 | $3.1750 |
+| 1468 | 2026-10-25 | P8 S38b pass^1 part 51/129 | completed | 1 × 1 | $0.54 | $0.0005 | $3.1755 |
+| 1469 | 2026-10-25 | P8 S38b pass^1 part 52/129 | completed | 1 × 1 | $0.54 | $0.0007 | $3.1762 |
+| 1470 | 2026-10-25 | P8 S38b pass^1 part 53/129 | completed | 1 × 1 | $0.54 | $0.0007 | $3.1769 |
+| 1471 | 2026-10-25 | P8 S38b pass^1 part 54/129 | completed | 1 × 1 | $0.54 | $0.0004 | $3.1773 |
+| 1472 | 2026-10-25 | P8 S38b pass^1 part 55/129 | completed | 1 × 1 | $0.54 | $0.0014 | $3.1786 |
+| 1473 | 2026-10-25 | P8 S38b pass^1 part 56/129 | completed | 1 × 1 | $0.54 | $0.0004 | $3.1790 |
+| 1474 | 2026-10-25 | P8 S38b pass^1 part 57/129 | completed | 1 × 1 | $0.24 | $0.0006 | $3.1796 |
+| 1475 | 2026-10-25 | P8 S38b pass^1 part 58/129 | completed | 1 × 1 | $0.54 | $0.0007 | $3.1803 |
+| 1476 | 2026-10-25 | P8 S38b pass^1 part 59/129 | completed | 1 × 1 | $0.24 | $0.0004 | $3.1808 |
+| 1477 | 2026-10-25 | P8 S38b pass^1 part 60/129 | completed | 1 × 1 | $0.54 | $0.0009 | $3.1816 |
+| 1478 | 2026-10-25 | P8 S38b pass^1 part 61/129 | completed | 2 × 1 | $0.49 | $0.0008 | $3.1824 |
+| 1479 | 2026-10-25 | P8 S38b pass^1 part 62/129 | completed | 2 × 1 | $0.49 | $0.0017 | $3.1841 |
+| 1480 | 2026-10-25 | P8 S38b pass^1 part 63/129 | completed | 2 × 1 | $0.49 | $0.0019 | $3.1860 |
+| 1481 | 2026-10-25 | P8 S38b pass^1 part 64/129 | completed | 2 × 1 | $0.49 | $0.0004 | $3.1864 |
+| 1482 | 2026-10-25 | P8 S38b pass^1 part 65/129 | completed | 2 × 1 | $0.49 | $0.0007 | $3.1871 |
+| 1483 | 2026-10-25 | P8 S38b pass^1 part 66/129 | completed | 2 × 1 | $0.48 | $0.0005 | $3.1876 |
+| 1484 | 2026-10-25 | P8 S38b pass^1 part 67/129 | completed | 2 × 1 | $0.48 | $0.0005 | $3.1880 |
+| 1485 | 2026-10-25 | P8 S38b pass^1 part 68/129 | completed | 1 × 1 | $0.24 | $0.0002 | $3.1883 |
+| 1486 | 2026-10-25 | P8 S38b pass^1 part 69/129 | completed | 1 × 1 | $0.54 | $0.0017 | $3.1900 |
+| 1487 | 2026-10-25 | P8 S38b pass^1 part 70/129 | completed | 2 × 1 | $0.49 | $0.0004 | $3.1904 |
+| 1488 | 2026-10-25 | P8 S38b pass^1 part 71/129 | completed | 2 × 1 | $0.49 | $0.0007 | $3.1911 |
+| 1489 | 2026-10-25 | P8 S38b pass^1 part 72/129 | completed | 2 × 1 | $0.49 | $0.0017 | $3.1928 |
+| 1490 | 2026-10-25 | P8 S38b pass^1 part 73/129 | completed | 2 × 1 | $0.49 | $0.0020 | $3.1948 |
+| 1491 | 2026-10-25 | P8 S38b pass^1 part 74/129 | completed | 1 × 1 | $0.54 | $0.0019 | $3.1967 |
+| 1492 | 2026-10-25 | P8 S38b pass^1 part 75/129 | completed | 1 × 1 | $0.54 | $0.0009 | $3.1976 |
+| 1493 | 2026-10-25 | P8 S38b pass^1 part 76/129 | completed | 2 × 1 | $0.49 | $0.0004 | $3.1980 |
+| 1494 | 2026-10-25 | P8 S38b pass^1 part 77/129 | completed | 2 × 1 | $0.49 | $0.0018 | $3.1998 |
+| 1495 | 2026-10-25 | P8 S38b pass^1 part 78/129 | completed | 2 × 1 | $0.49 | $0.0277 | $3.2275 |
+| 1496 | 2026-10-25 | P8 S38b pass^1 part 79/129 | completed | 2 × 1 | $0.49 | $0.0010 | $3.2285 |
+| 1497 | 2026-10-25 | P8 S38b pass^1 part 80/129 | completed | 2 × 1 | $0.48 | $0.0287 | $3.2572 |
+| 1498 | 2026-10-25 | P8 S38b pass^1 part 81/129 | completed | 2 × 1 | $0.48 | $0.0005 | $3.2577 |
+| 1499 | 2026-10-25 | P8 S38b pass^1 part 82/129 | completed | 2 × 1 | $0.48 | $0.0003 | $3.2581 |
+| 1500 | 2026-10-25 | P8 S38b pass^1 part 83/129 | completed | 2 × 1 | $0.48 | $0.0011 | $3.2591 |
+| 1501 | 2026-10-25 | P8 S38b pass^1 part 84/129 | completed | 2 × 1 | $0.49 | $0.0002 | $3.2594 |
+| 1502 | 2026-10-25 | P8 S38b pass^1 part 85/129 | completed | 2 × 1 | $0.49 | $0.0002 | $3.2596 |
+| 1503 | 2026-10-25 | P8 S38b pass^1 part 86/129 | completed | 2 × 1 | $0.49 | $0.0004 | $3.2600 |
+| 1504 | 2026-10-25 | P8 S38b pass^1 part 87/129 | completed | 2 × 1 | $0.49 | $0.0009 | $3.2609 |
+| 1505 | 2026-10-25 | P8 S38b pass^1 part 88/129 | completed | 2 × 1 | $0.49 | $0.0003 | $3.2612 |
+| 1506 | 2026-10-25 | P8 S38b pass^1 part 89/129 | completed | 1 × 1 | $0.24 | $0.0001 | $3.2613 |
+| 1507 | 2026-10-25 | P8 S38b pass^1 rest part 1/40 | completed | 1 × 1 | $0.54 | $0.0004 | $3.2617 |
+| 1508 | 2026-10-25 | P8 S38b pass^1 rest part 2/40 | completed | 2 × 1 | $0.48 | $0.0007 | $3.2624 |
+| 1509 | 2026-10-25 | P8 S38b pass^1 rest part 3/40 | completed | 2 × 1 | $0.48 | $0.0005 | $3.2629 |
+| 1510 | 2026-10-25 | P8 S38b pass^1 rest part 4/40 | completed | 2 × 1 | $0.49 | $0.0008 | $3.2636 |
+| 1511 | 2026-10-25 | P8 S38b pass^1 rest part 5/40 | completed | 2 × 1 | $0.49 | $0.0013 | $3.2649 |
+| 1512 | 2026-10-25 | P8 S38b pass^1 rest part 6/40 | completed | 2 × 1 | $0.49 | $0.0000 | $3.2649 |
+| 1513 | 2026-10-25 | P8 S38b pass^1 rest part 7/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2649 |
+| 1514 | 2026-10-25 | P8 S38b pass^1 rest part 8/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2649 |
+| 1515 | 2026-10-25 | P8 S38b pass^1 rest part 9/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2649 |
+| 1516 | 2026-10-25 | P8 S38b pass^1 rest part 10/40 | completed | 2 × 1 | $0.49 | $0.0000 | $3.2649 |
+| 1517 | 2026-10-25 | P8 S38b pass^1 rest part 11/40 | completed | 2 × 1 | $0.49 | $0.0000 | $3.2649 |
+| 1518 | 2026-10-25 | P8 S38b pass^1 rest part 12/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2649 |
+| 1519 | 2026-10-25 | P8 S38b pass^1 rest part 13/40 | completed | 2 × 1 | $0.49 | $0.0000 | $3.2649 |
+| 1520 | 2026-10-25 | P8 S38b pass^1 rest part 14/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2649 |
+| 1521 | 2026-10-25 | P8 S38b pass^1 rest part 15/40 | completed | 2 × 1 | $0.49 | $0.0000 | $3.2649 |
+| 1522 | 2026-10-25 | P8 S38b pass^1 rest part 16/40 | completed | 2 × 1 | $0.49 | $0.0052 | $3.2701 |
+| 1523 | 2026-10-25 | P8 S38b pass^1 rest part 17/40 | completed | 2 × 1 | $0.49 | $0.0101 | $3.2802 |
+| 1524 | 2026-10-25 | P8 S38b pass^1 rest part 18/40 | completed | 2 × 1 | $0.49 | $0.0010 | $3.2812 |
+| 1525 | 2026-10-25 | P8 S38b pass^1 rest part 19/40 | completed | 2 × 1 | $0.48 | $0.0005 | $3.2817 |
+| 1526 | 2026-10-25 | P8 S38b pass^1 rest part 20/40 | completed | 2 × 1 | $0.49 | $0.0014 | $3.2831 |
+| 1527 | 2026-10-25 | P8 S38b pass^1 rest part 21/40 | completed | 2 × 1 | $0.49 | $0.0002 | $3.2833 |
+| 1528 | 2026-10-25 | P8 S38b pass^1 rest part 22/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2833 |
+| 1529 | 2026-10-25 | P8 S38b pass^1 rest part 23/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2833 |
+| 1530 | 2026-10-25 | P8 S38b pass^1 rest part 24/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2833 |
+| 1531 | 2026-10-25 | P8 S38b pass^1 rest part 25/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2833 |
+| 1532 | 2026-10-25 | P8 S38b pass^1 rest part 26/40 | completed | 2 × 1 | $0.48 | $0.0002 | $3.2835 |
+| 1533 | 2026-10-25 | P8 S38b pass^1 rest part 27/40 | completed | 2 × 1 | $0.48 | $0.0005 | $3.2840 |
+| 1534 | 2026-10-25 | P8 S38b pass^1 rest part 28/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2840 |
+| 1535 | 2026-10-25 | P8 S38b pass^1 rest part 29/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2840 |
+| 1536 | 2026-10-25 | P8 S38b pass^1 rest part 30/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2840 |
+| 1537 | 2026-10-25 | P8 S38b pass^1 rest part 31/40 | completed | 2 × 1 | $0.49 | $0.0000 | $3.2840 |
+| 1538 | 2026-10-25 | P8 S38b pass^1 rest part 32/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2840 |
+| 1539 | 2026-10-25 | P8 S38b pass^1 rest part 33/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2840 |
+| 1540 | 2026-10-25 | P8 S38b pass^1 rest part 34/40 | completed | 2 × 1 | $0.48 | $0.0000 | $3.2840 |
+| 1541 | 2026-10-25 | P8 S38b pass^1 rest part 35/40 | completed | 2 × 1 | $0.49 | $0.0002 | $3.2842 |
+| 1542 | 2026-10-25 | P8 S38b pass^1 rest part 36/40 | completed | 2 × 1 | $0.48 | $0.0008 | $3.2850 |
+| 1543 | 2026-10-25 | P8 S38b pass^1 rest part 37/40 | completed | 2 × 1 | $0.49 | $0.0007 | $3.2858 |
+| 1544 | 2026-10-25 | P8 S38b pass^1 rest part 38/40 | completed | 2 × 1 | $0.49 | $0.0008 | $3.2865 |
+| 1545 | 2026-10-25 | P8 S38b pass^1 rest part 39/40 | completed | 2 × 1 | $0.49 | $0.0009 | $3.2875 |
+| 1546 | 2026-10-25 | P8 S38b pass^1 rest part 40/40 | completed | 1 × 1 | $0.24 | $0.0007 | $3.2881 |
+| 1547 | 2026-10-25 | P8 S38b waitlist trials part 1/4 | completed | 1 × 3 | $0.73 | $0.0013 | $3.2894 |
+| 1548 | 2026-10-25 | P8 S38b waitlist trials part 2/4 | completed | 1 × 3 | $0.73 | $0.0069 | $3.2964 |
+| 1549 | 2026-10-25 | P8 S38b waitlist trials part 3/4 | completed | 1 × 3 | $0.73 | $0.0011 | $3.2975 |
+| 1550 | 2026-10-25 | P8 S38b waitlist trials part 4/4 | completed | 1 × 3 | $0.73 | $0.0058 | $3.3033 |
 
 - Run 5, gpt-6-luna: 12 calls, 67483 in (38955 cached, 28492 written), 498 out, p50 1258 ms, p95 3286 ms; 3.61 chars a token
 - Run 5, gpt-6.1-sol: 4 calls, 24750 in (12287 cached, 12451 written), 224 out, p50 2023 ms, p95 2349 ms; 3.61 chars a token
@@ -3000,4 +3097,89 @@ Total spent: **$3.1617** of $5.00 (the runner stops at $4.50).
 - Run 1449, gpt-6-luna: 5 calls, 49843 in (49480 cached, 348 written), 169 out, p50 1363 ms, p95 1933 ms; 3.77 chars a token
 - Run 1452, gpt-6-luna: 5 calls, 49865 in (29742 cached, 20108 written), 204 out, p50 1813 ms, p95 3184 ms; 3.73 chars a token
 - Run 1453, gpt-6-luna: 6 calls, 60010 in (59569 cached, 423 written), 233 out, p50 1823 ms, p95 2196 ms; 3.77 chars a token
+- Run 1454, gpt-6-luna: 7 calls, 71476 in (70252 cached, 1203 written), 228 out, p50 1419 ms, p95 1697 ms; 3.72 chars a token
+- Run 1455, gpt-6-luna: 5 calls, 50963 in (49578 cached, 1370 written), 134 out, p50 1352 ms, p95 1811 ms; 3.73 chars a token
+- Run 1456, gpt-6-luna: 4 calls, 40143 in (39589 cached, 542 written), 131 out, p50 1613 ms, p95 1757 ms; 3.72 chars a token
+- Run 1457, gpt-6-luna: 6 calls, 59859 in (49570 cached, 10271 written), 195 out, p50 1261 ms, p95 1811 ms; 3.74 chars a token
+- Run 1458, gpt-6-luna: 6 calls, 60562 in (59570 cached, 974 written), 203 out, p50 1525 ms, p95 1701 ms; 3.73 chars a token
+- Run 1459, gpt-6-luna: 7 calls, 71856 in (70233 cached, 1602 written), 476 out, p50 1650 ms, p95 2520 ms; 3.83 chars a token
+- Run 1460, gpt-6-luna: 6 calls, 62331 in (60551 cached, 1762 written), 402 out, p50 1589 ms, p95 2711 ms; 3.72 chars a token
+- Run 1461, gpt-6-luna: 6 calls, 60704 in (59886 cached, 800 written), 131 out, p50 1348 ms, p95 2302 ms; 3.73 chars a token
+- Run 1462, gpt-6-luna: 5 calls, 49869 in (49474 cached, 380 written), 122 out, p50 1324 ms, p95 1602 ms; 3.73 chars a token
+- Run 1463, gpt-6-luna: 3 calls, 29990 in (19758 cached, 10223 written), 56 out, p50 1227 ms, p95 2317 ms; 3.73 chars a token
+- Run 1464, gpt-6-luna: 4 calls, 40183 in (39511 cached, 660 written), 109 out, p50 1472 ms, p95 2935 ms; 3.73 chars a token
+- Run 1465, gpt-6-luna: 4 calls, 40277 in (39519 cached, 746 written), 90 out, p50 1296 ms, p95 2037 ms; 3.73 chars a token
+- Run 1466, gpt-6-luna: 6 calls, 61951 in (50620 cached, 11313 written), 195 out, p50 1135 ms, p95 1720 ms; 3.72 chars a token
+- Run 1467, gpt-6-luna: 2 calls, 20122 in (19756 cached, 360 written), 74 out, p50 1283 ms, p95 1430 ms; 3.73 chars a token
+- Run 1468, gpt-6-luna: 4 calls, 40221 in (39681 cached, 528 written), 103 out, p50 1323 ms, p95 2185 ms; 3.74 chars a token
+- Run 1469, gpt-6-luna: 4 calls, 40967 in (39680 cached, 1275 written), 302 out, p50 1769 ms, p95 2710 ms; 3.72 chars a token
+- Run 1470, gpt-6-luna: 5 calls, 50205 in (49489 cached, 701 written), 155 out, p50 1399 ms, p95 1540 ms; 3.73 chars a token
+- Run 1471, gpt-6-luna: 3 calls, 29986 in (29643 cached, 334 written), 70 out, p50 1400 ms, p95 3160 ms; 3.74 chars a token
+- Run 1472, gpt-6-luna: 2 calls, 19872 in (9872 cached, 9994 written), 30 out, p50 1411 ms, p95 1531 ms; 3.73 chars a token
+- Run 1473, gpt-6-luna: 3 calls, 30139 in (29658 cached, 472 written), 58 out, p50 1328 ms, p95 1498 ms; 3.73 chars a token
+- Run 1474, gpt-6-luna: 4 calls, 40985 in (40152 cached, 821 written), 164 out, p50 1424 ms, p95 1988 ms; 3.76 chars a token
+- Run 1475, gpt-6-luna: 4 calls, 41914 in (40185 cached, 1717 written), 229 out, p50 1772 ms, p95 1827 ms; 3.72 chars a token
+- Run 1476, gpt-6-luna: 3 calls, 30470 in (29786 cached, 675 written), 108 out, p50 1562 ms, p95 1660 ms; 3.73 chars a token
+- Run 1477, gpt-6-luna: 6 calls, 60973 in (59894 cached, 1061 written), 249 out, p50 1531 ms, p95 1924 ms; 3.78 chars a token
+- Run 1478, gpt-6-luna: 6 calls, 60352 in (59519 cached, 815 written), 184 out, p50 1333 ms, p95 1732 ms; 3.73 chars a token
+- Run 1479, gpt-6-luna: 4 calls, 40153 in (29715 cached, 10426 written), 132 out, p50 1281 ms, p95 1940 ms; 3.73 chars a token
+- Run 1480, gpt-6-luna: 6 calls, 60977 in (50244 cached, 10715 written), 199 out, p50 1306 ms, p95 2735 ms; 3.73 chars a token
+- Run 1481, gpt-6-luna: 3 calls, 29755 in (29628 cached, 118 written), 88 out, p50 1338 ms, p95 2475 ms; 3.73 chars a token
+- Run 1482, gpt-6-luna: 5 calls, 50196 in (49593 cached, 588 written), 190 out, p50 1486 ms, p95 1933 ms; 3.74 chars a token
+- Run 1483, gpt-6-luna: 4 calls, 39992 in (39515 cached, 465 written), 95 out, p50 1272 ms, p95 1588 ms; 3.74 chars a token
+- Run 1484, gpt-6-luna: 4 calls, 39846 in (39512 cached, 322 written), 81 out, p50 1416 ms, p95 2176 ms; 3.74 chars a token
+- Run 1485, gpt-6-luna: 2 calls, 19959 in (19758 cached, 195 written), 35 out, p50 1328 ms, p95 1874 ms; 3.74 chars a token
+- Run 1486, gpt-6-luna: 5 calls, 40301 in (29750 cached, 10233 written), 233 out, p50 1846 ms, p95 2724 ms; 3.74 chars a token
+- Run 1486, text-embedding-3-small: 1 calls, 29 in (0 cached, 0 written), 0 out, p50 337 ms, p95 337 ms; 3.74 chars a token
+- Run 1487, gpt-6-luna: 4 calls, 30209 in (29630 cached, 284 written), 125 out, p50 2477 ms, p95 3292 ms; 3.74 chars a token
+- Run 1487, text-embedding-3-small: 1 calls, 5 in (0 cached, 0 written), 0 out, p50 490 ms, p95 490 ms; 3.74 chars a token
+- Run 1488, gpt-6-luna: 5 calls, 50683 in (49873 cached, 795 written), 245 out, p50 3727 ms, p95 5713 ms; 3.72 chars a token
+- Run 1489, gpt-6-luna: 4 calls, 39881 in (29659 cached, 10210 written), 210 out, p50 1700 ms, p95 3983 ms; 3.73 chars a token
+- Run 1490, gpt-6-luna: 6 calls, 61494 in (50366 cached, 11110 written), 256 out, p50 2072 ms, p95 2896 ms; 3.72 chars a token
+- Run 1491, gpt-6-luna: 5 calls, 51349 in (40500 cached, 10834 written), 247 out, p50 3132 ms, p95 3608 ms; 3.74 chars a token
+- Run 1492, gpt-6-luna: 6 calls, 62006 in (61160 cached, 828 written), 314 out, p50 3750 ms, p95 8373 ms; 3.77 chars a token
+- Run 1493, gpt-6-luna: 3 calls, 29895 in (29629 cached, 257 written), 164 out, p50 4239 ms, p95 4361 ms; 3.73 chars a token
+- Run 1494, gpt-6-luna: 5 calls, 50846 in (40163 cached, 10668 written), 154 out, p50 1416 ms, p95 1926 ms; 3.73 chars a token
+- Run 1495, gpt-6-luna: 6 calls, 60610 in (59762 cached, 830 written), 171 out, p50 1936 ms, p95 2922 ms; 3.74 chars a token
+- Run 1495, text-embedding-3-small: 1 calls, 7 in (0 cached, 0 written), 0 out, p50 309 ms, p95 309 ms; 3.74 chars a token
+- Run 1495, gpt-6.1-sol: 1 calls, 10607 in (0 cached, 10604 written), 36 out, p50 1718 ms, p95 1718 ms; 3.74 chars a token
+- Run 1496, gpt-6-luna: 7 calls, 72016 in (70652 cached, 1343 written), 312 out, p50 2146 ms, p95 3020 ms; 3.72 chars a token
+- Run 1497, gpt-6-luna: 7 calls, 71545 in (70079 cached, 1445 written), 308 out, p50 3235 ms, p95 5427 ms; 3.74 chars a token
+- Run 1497, gpt-6.1-sol: 1 calls, 10902 in (0 cached, 10899 written), 43 out, p50 2522 ms, p95 2522 ms; 3.74 chars a token
+- Run 1498, gpt-6-luna: 4 calls, 39705 in (39516 cached, 177 written), 109 out, p50 2845 ms, p95 3078 ms; 3.73 chars a token
+- Run 1499, gpt-6-luna: 3 calls, 29717 in (29627 cached, 81 written), 60 out, p50 2624 ms, p95 2679 ms; 3.73 chars a token
+- Run 1500, gpt-6-luna: 8 calls, 80986 in (79945 cached, 1017 written), 293 out, p50 2026 ms, p95 3225 ms; 3.73 chars a token
+- Run 1501, gpt-6-luna: 2 calls, 19804 in (19744 cached, 54 written), 61 out, p50 2145 ms, p95 2298 ms; 3.73 chars a token
+- Run 1502, gpt-6-luna: 2 calls, 19786 in (19744 cached, 36 written), 73 out, p50 1535 ms, p95 1599 ms; 3.73 chars a token
+- Run 1503, gpt-6-luna: 3 calls, 29746 in (29628 cached, 109 written), 142 out, p50 2021 ms, p95 2093 ms; 3.73 chars a token
+- Run 1504, gpt-6-luna: 5 calls, 51830 in (50493 cached, 1322 written), 475 out, p50 1619 ms, p95 2920 ms; 3.85 chars a token
+- Run 1505, gpt-6-luna: 2 calls, 19812 in (19744 cached, 62 written), 154 out, p50 1819 ms, p95 2173 ms; 3.72 chars a token
+- Run 1506, gpt-6-luna: 1 calls, 9899 in (9872 cached, 24 written), 14 out, p50 1389 ms, p95 1389 ms; 3.72 chars a token
+- Run 1507, gpt-6-luna: 3 calls, 29864 in (29719 cached, 136 written), 107 out, p50 1644 ms, p95 2786 ms; 3.74 chars a token
+- Run 1508, gpt-6-luna: 5 calls, 50348 in (49478 cached, 855 written), 201 out, p50 1328 ms, p95 2910 ms; 3.72 chars a token
+- Run 1509, gpt-6-luna: 4 calls, 39741 in (39515 cached, 214 written), 137 out, p50 1491 ms, p95 2551 ms; 3.77 chars a token
+- Run 1510, gpt-6-luna: 6 calls, 60427 in (59787 cached, 622 written), 201 out, p50 1354 ms, p95 2009 ms; 3.73 chars a token
+- Run 1511, gpt-6-luna: 1 calls, 9932 in (0 cached, 9929 written), 39 out, p50 2072 ms, p95 2072 ms; 3.72 chars a token
+- Run 1522, gpt-6-luna: 4 calls, 41515 in (40531 cached, 972 written), 287 out, p50 3126 ms, p95 3762 ms; 3.75 chars a token
+- Run 1522, gpt-6.1-sol: 1 calls, 11078 in (9872 cached, 1203 written), 55 out, p50 2334 ms, p95 2334 ms; 3.75 chars a token
+- Run 1523, gpt-6-luna: 7 calls, 72663 in (70686 cached, 1956 written), 349 out, p50 1449 ms, p95 1785 ms; 3.70 chars a token
+- Run 1523, gpt-6.1-sol: 2 calls, 23384 in (21449 cached, 1929 written), 200 out, p50 2461 ms, p95 2723 ms; 3.70 chars a token
+- Run 1524, gpt-6-luna: 6 calls, 61716 in (60471 cached, 1227 written), 394 out, p50 1360 ms, p95 1950 ms; 3.72 chars a token
+- Run 1525, gpt-6-luna: 4 calls, 40131 in (39510 cached, 609 written), 114 out, p50 1518 ms, p95 2426 ms; 3.72 chars a token
+- Run 1526, gpt-6-luna: 8 calls, 83164 in (80343 cached, 2797 written), 520 out, p50 1740 ms, p95 2749 ms; 3.76 chars a token
+- Run 1527, gpt-6-luna: 1 calls, 9892 in (9872 cached, 17 written), 163 out, p50 3158 ms, p95 3158 ms; 3.72 chars a token
+- Run 1532, gpt-6-luna: 2 calls, 19879 in (19755 cached, 118 written), 42 out, p50 1146 ms, p95 1283 ms; 3.73 chars a token
+- Run 1533, gpt-6-luna: 4 calls, 39731 in (39512 cached, 207 written), 82 out, p50 1485 ms, p95 1869 ms; 3.73 chars a token
+- Run 1541, gpt-6-luna: 2 calls, 19874 in (19768 cached, 100 written), 67 out, p50 1265 ms, p95 1579 ms; 3.73 chars a token
+- Run 1542, gpt-6-luna: 6 calls, 60654 in (59840 cached, 796 written), 185 out, p50 2197 ms, p95 3554 ms; 3.73 chars a token
+- Run 1543, gpt-6-luna: 6 calls, 59895 in (59475 cached, 402 written), 172 out, p50 1984 ms, p95 2211 ms; 3.74 chars a token
+- Run 1544, gpt-6-luna: 6 calls, 60384 in (59768 cached, 598 written), 204 out, p50 3593 ms, p95 4836 ms; 3.73 chars a token
+- Run 1545, gpt-6-luna: 6 calls, 61525 in (60336 cached, 1171 written), 322 out, p50 1663 ms, p95 2105 ms; 3.75 chars a token
+- Run 1546, gpt-6-luna: 4 calls, 41573 in (40666 cached, 895 written), 304 out, p50 1875 ms, p95 2235 ms; 3.77 chars a token
+- Run 1547, gpt-6-luna: 8 calls, 83145 in (81401 cached, 1720 written), 561 out, p50 1329 ms, p95 2954 ms; 3.74 chars a token
+- Run 1548, gpt-6-luna: 8 calls, 84847 in (81923 cached, 2900 written), 732 out, p50 1382 ms, p95 2570 ms; 3.78 chars a token
+- Run 1548, gpt-6.1-sol: 1 calls, 11437 in (9872 cached, 1562 written), 50 out, p50 2236 ms, p95 2236 ms; 3.78 chars a token
+- Run 1549, gpt-6-luna: 7 calls, 71833 in (69912 cached, 1900 written), 363 out, p50 1286 ms, p95 2590 ms; 3.75 chars a token
+- Run 1550, gpt-6-luna: 7 calls, 72699 in (70702 cached, 1976 written), 493 out, p50 1831 ms, p95 3006 ms; 3.73 chars a token
+- Run 1550, gpt-6.1-sol: 1 calls, 11104 in (9872 cached, 1229 written), 56 out, p50 2484 ms, p95 2484 ms; 3.73 chars a token
 <!-- ledger:end -->

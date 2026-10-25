@@ -3,30 +3,30 @@
   "trials": [
     [
       {
-        "fingerprint": "b6bbe66a6bb65f60e84330b998d148ce81fb6b8e1e1f9f0390c96252d9a67092",
+        "fingerprint": "e3f4a8f925e6ffce4c33203c127d8a8bf65c81b829152a59e7a8d0ca8ff62467",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_aDA3RF3oYm8TeiOIB11dsr4Y",
+              "id": "call_6r1EWJMXV8V3WxvgC92Jdux7",
               "name": "get_feed",
-              "arguments": "{\"kind\":null}"
+              "arguments": "{\"kind\":\"waitlist_match\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9839,
-            "cachedInputTokens": 9836,
-            "outputTokens": 18
+            "inputTokens": 9885,
+            "cachedInputTokens": 9882,
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e351381ac78ea67527a711be7ffe6c495c8c00fa4b1a70ddc27d3938b0d14731",
+        "fingerprint": "b8c29c993ff22ad173eceed7e4303a6c5673a39271bf07834974ccce4e2e63ab",
         "response": {
-          "text": "Two clients are on the waitlist:\n\nSara K. — haircut with anyone, Saturday, November 7, 10:00 AM–1:00 PM.\nAna R. — haircut with Jess, Friday, November 6, 9:00 AM–12:00 PM.",
+          "text": "Sara K. is waiting for a haircut with anyone on Saturday, Nov 7, from 10 AM to 1 PM. Ana R. is waiting for a haircut with Jess on Friday, Nov 6, from 9 AM to noon. Neither has been offered a time yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,9 +36,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10129,
-            "cachedInputTokens": 9836,
-            "cacheWriteTokens": 290,
+            "inputTokens": 10181,
+            "cachedInputTokens": 9882,
+            "cacheWriteTokens": 296,
             "outputTokens": 62
           },
           "model": "gpt-6-luna"

@@ -3,38 +3,38 @@
   "trials": [
     [
       {
-        "fingerprint": "ff8fd95dd9eab6bf783760a9fffdec7cef4321433e8be919e54c101fd840f914",
+        "fingerprint": "0a686e62560763343e6daf6e7b3a4588eb99de13c5112b5a3e88c816ecd1a7c7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_il5i2ENUnBYJO3OZBqlORaq2",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            },
-            {
-              "id": "call_f2GoMBd09akpqXuhLM5nhV3f",
+              "id": "call_FcEC5ca0wJngw5oGFPQf0F3l",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_RsAXov33SYyM1GBSzdXq85ZD",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9847,
-            "cachedInputTokens": 9844,
-            "outputTokens": 47
+            "inputTokens": 9893,
+            "cachedInputTokens": 9890,
+            "outputTokens": 48
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ca4e8be0a071a11a44bd6620b5aa5119b5cab458eee6be154c0ebac5c5bb4b33",
+        "fingerprint": "fba47118c7e728ffbbe7da9a3b72705a6d80598c6986c676aeb10bc4ece06b9c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Oc325946ZeYXPtmAgKPwj7Wt",
+              "id": "call_KHb1stz9rG4d5XMfB5gHOL19",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
             }
@@ -42,18 +42,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10487,
-            "cachedInputTokens": 9844,
-            "cacheWriteTokens": 640,
-            "outputTokens": 121
+            "inputTokens": 10518,
+            "cachedInputTokens": 9890,
+            "cacheWriteTokens": 625,
+            "outputTokens": 114
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "65dd155c24db563c2d00a16b92ce321ec021248ad2f8e8d1f140efc451de0d25",
+        "fingerprint": "934a4c4e792a0398b6d32fc06458835c5534d4cb28ca94213f6270a6eee9b3b9",
         "response": {
-          "text": "Maria’s colour with Jess on Wednesday, November 4 at 2:00 PM is waiting for your approval on the card. Maria has a recorded allergy: “Hazelnut oil”.",
+          "text": "Maria L.’s colour with Jess for Wednesday, November 4 at 2:00 PM is waiting for your approval on the card. Her record notes an allergy: “Hazelnut oil”.",
           "toolCalls": [],
           "replay": [
             {
@@ -63,18 +63,18 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10784,
-            "cachedInputTokens": 10484,
-            "cacheWriteTokens": 297,
-            "outputTokens": 42
+            "inputTokens": 10805,
+            "cachedInputTokens": 10515,
+            "cacheWriteTokens": 287,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "10735d4af54d743ebea58ce4a980db253ef5bc8be5b7be0e7f67254b8e013194",
+        "fingerprint": "bcfdc1cc04c0a8084cb349d37aff726b35f79ddedc1f9edfd211b33c0e7dcde7",
         "response": {
-          "text": "No warnings were flagged for Maria’s booking. It’s still waiting for your approval on the card.",
+          "text": "No warnings were flagged for Maria’s booking. It’s still awaiting your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -84,10 +84,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10671,
-            "cachedInputTokens": 9844,
-            "cacheWriteTokens": 824,
-            "outputTokens": 24
+            "inputTokens": 10698,
+            "cachedInputTokens": 9890,
+            "cacheWriteTokens": 805,
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }

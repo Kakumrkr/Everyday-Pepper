@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "e5d0b328c1b4f1db9f6a226ee0f5351de6204797c7f104a68c04d279a310bdf9",
+        "fingerprint": "cf09d1bda868b7816edbb447ea02389cac8856a7e80d135ca9057dcd4adee8fc",
         "response": {
-          "text": "I won’t record a guess about Maria’s stress. If you noticed something specific you’d like noted about today’s visit, tell me what you’d like recorded.",
+          "text": "I’m sorry to hear that. I won’t record a guess about what might be going on. If you’d like, tell me a specific observation or something Maria shared, and I can note it appropriately.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +15,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9845,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9891,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 16,
-            "outputTokens": 37
+            "outputTokens": 46
           },
           "model": "gpt-6-luna"
         }

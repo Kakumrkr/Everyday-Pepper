@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "47477545fa527f6dff5ac6104391ab835882227dfe441bbaa0fa2477b3b70593",
+        "fingerprint": "606c9d2996224c09049366e9340890570cafbbb45cafbfad5eecdd3c2b83355f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2tLKNxPRTWPS9aeH8GrUa5xU",
+              "id": "call_Vp40UkWDg84tr1A0NBGWgJ9X",
               "name": "search_memory",
               "arguments": "{\"query\":\"this Friday 2026-11-06\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9842,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9888,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 13,
             "outputTokens": 26
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "b5e3ef9dccfef495b76aa82a252424a7570a80d258d5bd7f461e5ab9de64e994",
+        "fingerprint": "4231d947eece3f6b0c100e31f124c5bb01274a77fd6cd1f7031e3d516873a75f",
         "response": {
-          "text": "On October 30, you talked about Friday, but the summary doesn’t say what the conversation was about. On October 24, you checked Ana’s Friday haircut with Jess and kept it at 2 pm.",
+          "text": "On October 30, we talked about Friday, but I don’t have a clear note of what was discussed.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10069,
-            "cachedInputTokens": 9839,
+            "inputTokens": 10115,
+            "cachedInputTokens": 9885,
             "cacheWriteTokens": 227,
-            "outputTokens": 47
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

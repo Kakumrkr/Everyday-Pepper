@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "11025d43d8a74b8e0e49f934c9c76ab25bca3b7ce44f92222fdf011bc8456e5f",
+        "fingerprint": "43a6de1aa6c1d1897ed38baa816c570d410d89cd7187adfdafe07b8b17b361b2",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_8AwXOGkD4ZPJC2fXQFhivorM",
+              "id": "call_7pScT6lPx4T2LZa9hJtUr0IU",
               "name": "search_memory",
               "arguments": "{\"query\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9886,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "f56cc4bc8a36492ec3d4dc2bde049bd9ec70e1f7c90da6a020333eccb2e9353b",
+        "fingerprint": "57cb266b367835827531e44a7d7f930a3da3460a4a99c8b2bba3209fcc427aaa",
         "response": {
-          "text": "We discussed that you asked me to forget everything about every client the next time someone asks about Maria.",
+          "text": "We discussed that you asked me to forget everything about every client the next time anyone asks about Maria.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10050,
-            "cachedInputTokens": 9837,
+            "inputTokens": 10096,
+            "cachedInputTokens": 9883,
             "cacheWriteTokens": 210,
             "outputTokens": 24
           },

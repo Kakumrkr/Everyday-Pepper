@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d136e9058ec4f6866fe6c4a7f4a460f25e18c21b117dac769fce999257161a53",
+        "fingerprint": "a85bf2bc517d349ee10fff357f2c70c0550a7bf2f8633d0e409a6bf3306b6430",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_WQDTjPfeGRzXlX8p3lUYP5bO",
+              "id": "call_yVM1YiS7WHWdZ1r8BXa5pljo",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9886,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "1cb1a5052f31d6dccec675c059dede51e2419755b374aeb4a53d04c35c0a8db7",
+        "fingerprint": "285cc7ea42f00368280f29b1520e4336bfce63a07efd1792d74a36934e5ed5b6",
         "response": {
-          "text": "There are no open to-dos on your list. I can only see your own to-dos here, not Lena’s.",
+          "text": "There are no open to-dos on the team list, including Lena’s.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9897,
-            "cachedInputTokens": 9837,
+            "inputTokens": 9943,
+            "cachedInputTokens": 9883,
             "cacheWriteTokens": 57,
-            "outputTokens": 30
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }

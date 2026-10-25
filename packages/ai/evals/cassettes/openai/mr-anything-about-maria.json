@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "2ee709d1701bac9a17be4bfac3eda31908c40a188f27bb19b18c91131644d4a5",
+        "fingerprint": "7be2defdf8a4bf27f6fede60148e9ed17b1522779f793465ddcd205a25a37c8d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OAuGCTTopXT02Z1H2s9lkaoq",
+              "id": "call_U4AWzsIoljZg0oDiug7cZ9fL",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9844,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9890,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 15,
             "outputTokens": 18
           },
@@ -25,9 +25,31 @@
         }
       },
       {
-        "fingerprint": "6954ad9c7fa4222a2d1df1d4a9aba729bc38dfbd021183270a067550e20d168c",
+        "fingerprint": "3bf99c859462c514187c7cfadcb5117b66d8ce8d6ed33f42d993754640c89bb1",
         "response": {
-          "text": "Maria L. has a remembered PPD allergy and usually books colour with Jess.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_L0YJbmSpAWxeFFuxKDI4xFEE",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10085,
+            "cachedInputTokens": 9887,
+            "cacheWriteTokens": 195,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2b07cf01a80c62bf8bb680a23edd0a2dc6975705d72e1417696fcee7e3a50418",
+        "response": {
+          "text": "Maria L. has a PPD allergy noted. She’s booked for a haircut with Jess tomorrow, Tuesday, Nov 3 at 3:00 PM. Her usual service is “Colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10036,
-            "cachedInputTokens": 9841,
-            "cacheWriteTokens": 192,
-            "outputTokens": 20
+            "inputTokens": 10648,
+            "cachedInputTokens": 10082,
+            "cacheWriteTokens": 563,
+            "outputTokens": 45
           },
           "model": "gpt-6-luna"
         }

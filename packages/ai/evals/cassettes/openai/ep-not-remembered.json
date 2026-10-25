@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ef3ba14dc4524642e368ef2e0d5e6bc39759bc2901c0bd88e954a763d1b097ff",
+        "fingerprint": "3d718b770b1976e3216f5c7fcfaf8f2c06d9b61b935bb7d842f6d45ccff6a154",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_7kjhCWIY6q934aPcftLZVKk4",
+              "id": "call_4HOEuYNXOqUz5aeGqvOcYud7",
               "name": "search_memory",
               "arguments": "{\"query\":\"gift cards\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9887,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 12,
             "outputTokens": 19
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "4c7878e68f051d0acd9ff206321f056938a0657dcc30da4cc0058cf4fde0a89a",
+        "fingerprint": "cea69e0424b725ac653ccab271b6e5843124814c895cbae762c72b6d5d957d69",
         "response": {
           "text": "I don’t remember us deciding anything about gift cards.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10021,
-            "cachedInputTokens": 9838,
+            "inputTokens": 10067,
+            "cachedInputTokens": 9884,
             "cacheWriteTokens": 180,
             "outputTokens": 15
           },

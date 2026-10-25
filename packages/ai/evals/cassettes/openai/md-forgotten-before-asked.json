@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c6d62a7d3ebf155d34f6bf9bfe5f0f931789edd2cef500e224a0d995f4ad855b",
+        "fingerprint": "9734ede5b300c03af802b0277492e1db35a71cc83ad4778d28026e4aea74eef1",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_9DX0bKJgUDnHfY87lT0NMYUG",
+              "id": "call_30dWNgocXkd1p8ZKVRNBuyfg",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,20 +16,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9839,
-            "cachedInputTokens": 9836,
+            "inputTokens": 9885,
+            "cachedInputTokens": 9882,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "34b9cdd43ca1eb7cb9e34bb1f0d245a94b977bf7aaa2f7c3b2a04fb9f17406cf",
+        "fingerprint": "918f2627f7ae03faf49f2c73cabec96b6410da7b3310e0f4889c7cefa3913a88",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0q4TIn9p68W66mXtr2diYptf",
+              "id": "call_JXZmOI28pvJtWkC29dArOsFe",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -37,48 +37,48 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9922,
-            "cachedInputTokens": 9836,
-            "cacheWriteTokens": 83,
-            "outputTokens": 42
+            "inputTokens": 9970,
+            "cachedInputTokens": 9882,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ace10a3b7f640f1e154de05ff471de59f87f861875fb6f97170a88301f64cf18",
+        "fingerprint": "5a2e9ccff4f91e28d1d0a4c9792e6673eb9f6dfe8b9317379512e7bd0c7ff846",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_07XwejY0rm5G0ZIbExos7KOs",
+              "id": "call_HGdZYf8pdgQP3WEuLfO4shFo",
               "name": "get_booking",
               "arguments": "{\"bookingId\":\"{{booking:maria}}\"}"
             }
           ],
           "replay": [
             {
-              "id": "rs_050939cff8df0040016add372f5b5487d2becd7afd1a9abe91",
+              "id": "rs_02a14d837165b523016addeee5f6b487d2ab015c3fe684ad4f",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3TcwwO2dDT67rPclg-ctw11liDRe7WgBe5yRLe-d-tWbZwglrJr2uFPP618zMF_dNdpkp1CKZydEbAQRv19svjVTMStioJ0sAiGikShlMFuo1B-ugZYVfJbooOlpNMPmUdlqFvOaL-8VCzeqG5Cxchi0bgURdMBaSzkNsRjca2PzamnEGLyCgWjgc-2RjmUj60yZYodroDHSCP78lCy9vJeEt4idJyNKZh4djwjCGQqqHOobJGrW-gNZzduISA4rsowIFtq6UyWUFvxYI-L3Y_NvVD-al59mJj_U7CaxDxbN5GiJAscZS_MzTlzSArGa75-A--Q4JsY7rrk-ExZYYUeLgIwlJdqjWETsCNMisfpGfAMreacAg4hsd-5OrakYebyaelklrGLZrpi-NNYBPax8rWi7DAwpjfPcvkYYUlyC22pmwcOmk9H4m-4fy_sce0PMR8SJixcW3sjihCfTgXuXOC1-sB3vPDFYbZLnfSXIeG9sr8af3KjgybYZj_WgIIcdcLy0EyUJJC9QjZ6FLDfHeRKuFNkzQB9EKsiCynupJHIl08SDtmOK_0twXQPQjJAZV42wCCrlIV8mbi6K9WNIi2A2mKSXkq5zB_HB1adHf7_4DHIM0Qh4m5j06wXcvqVqNakaaAtIIWbyY0xu0ySR2-5g_1qpQL1i57XbqFk0dXRhhOmKq4EJXinx291QPMB1HldESJmlnBo_bSgtgIFbP4WEhyyqRLSwS7pfCVXeu_XvjkZ4OlueSSYPAXCwRR7lNjUSbH9tyl2DVu1JZjRpRvPWbI1w9TlCkbuJCzU0FKI41nxwpfrsZ33KRsAxK7ryc9dESgHzAkQk0sGM4IFwjSXUX7ousS9qZii3xqUa5-M7SK8bxHgvyM6GUECy03yYB2APhZwUNntlz9ZZZ3ULn32q4g61VI8qiOBfepDOo3Zoh-WKUsLOpkgZ3nfOBKfM6UJBYvlyB-CnurXn3nLI18yNxjdimR58UzaUTdM9FOXFdL8pEjXqSa9lmytuZjLaSUqQ0JLfRuGrfrf_d5tKR81W4lcSi9DNxWSrl7nIhB96mpiKtfnTlObQbJJ8blliKErj-HaTr_o4EEaWWjZH-X-VIPQA8h7uE2Qe9oSrSHpqmL-q3uQvnS5MIt023hUfH9a4Ptsm3FRFGl_jf1e29tliTV7ni4qzdfcQyzmd385tJ2FDKGBFngnl745dosICCgqPwb8PM-VP0Z3aKrUNCRT1RdjzXnDQ7uT0bOKx5EmxSADrMCB1Ew8jK7zofzKSysQ-TkGaQjIKIS7zribcj26ANW17r4LF0BcAeEd1B8WimeAgZToIyRBgQ_jtx9e8aMHy1NsYLT9_LgdgetwItfAKcwuPmx9c6E-HX701fmdc6VHUTb9i1WNrnGSwnT0MRZkuSiFj1hDRDjmgQrpCr-zzcZ3HuobfBT-iy6ViNrDuBtnuJPu4HpmuXVv_3v6z-UQzgnjPG7SFdYorJk1Vg7g5HGRsgV4IzPWj96meWrySU-uxS-_sqig7ernlR9xtsAOCauEEeEEvqg0GnL1RoJPuwSy4OVCXslG6WUm_3XmPQFa3HjZAjDhhnPrGfs3553k-aygIYPy7_uK7MN7IPp75dmOZKM2t3YX6kMnx7Nl32NRUS9NnjMzwzf7URqT8vIrmVey_lgXBRO4LDEjoZSo8SLievmQHE1ZTqpM6zG3E3uhvjCzmknluXVk5VXWGKeWyo3ytaKtdb5yE-ni5cDFuJcuw72KMAIadN-v746fzfhHVLBLiRa49i3Ez1hProQN0rmztbqKN6WI6d-PtmLDAiqBkR9cE6_bNhTds8vDyW4WgodcDspOrALBrFi8qGHcnmXYPTpgzeSXg1PgpWkouP6hKQktwHOt8-X3fQL7uFbZF2hf6EUjxr6Ikve4EB91HXF7Bs5XmJoZv9J3YtW8ta5RzpKivhsjMGDJJ5i0=",
+              "encrypted_content": "gAAAAABq3e7mlrvcpRmFyTThaODbpFsKkbe7LeRuVZApCYpGKaWhjrtOd7d3BKwwXQ6SPNcD4Aw9hGP7-RDyxe6azeYwma1SkUE5KV8Oeppg9H8NxIKPn36KebLQeWsmMcIvKFKJM4blDZJD3yGV4syEqTSw9m4jCYKM_9k1xuvUWGcBCn7BR6jC9vR8RDnJ8Nb4eT3tV8ydnoVEwrj81Z5QDK-n_XLFeelMbFRnDdU2hMyeFbHdq4SZ8B6zqj6PGuUHPqtbjNQA7RjfhUi79k1ojoqxjRH-WXAg-Oq8Ez5xd1HQbFWSskGMuOTDIhVpg6Dtw-Vk368GhnrAH3hKwR4ITYBVv6XqBRLbhy_ul_5pB6V1q9LwRjI8tO_NT4NGOOyDae_IzCeealrPZjI-oHC0zKrMo9Ij76KILibGOzzk__D1FdtbC039WWqLLR1UTyDBUy19Xfw7qMarS8wEv32ihZW5OGZXmlM9zPqI2cIHCRnLPmBJexgfkFcMUGi95aYXP0Nve1-Y6xMzISDMzK5CuNsBYH8nvvlrJ1oXiWonM7gLyJum3TVyXm_UIstbHGVQAwNrf_-eySMUQKD4vzzRo24JEYhU7myAN2l6qfEJH_c-KrUUo_MwK9O4PJwSWctDLiXA9ccfhSWJ4tFrdTTkZXM6p2TUKHChoOHPNsGMcGSQqiZlB0SFejt6hCWteDf6J6N30BHU65GlNbV2Qa62908X6nTOrdxmyh2a8AhqV0uf1p1oLX4CY_KlFYc5gmsrCQnDnNaQgD6PxBGqAOL9ISV_uZclyWEAfmHfnIRwMMvDYMYw_GZF0r8ImEc8zKwlhirFycNpyzsSqrTepjgq73C4LyvnorxNQfl6eSKgzMjVTB1jpMD-FtEfKBP7SZVvJki4gE6-SanhJJ5jPKbYON64jy2rjtbT2SigKkzbAyNQN3TVzYIGkrarkEeMbHetDFYwlQYkCohOCWxg3uZsgtzzQFLfg6e58L7qUKBqeFq81-B7v6aFGmGvDaZoXXhmsZLON3UtSlcQZTw27XeQBbAVcapO2qSqn5MB5Of3KJBafDBrXQF7wlu8iUCU6gYTp16yJx43rXigRrBOgzSeOI6LedVOjmQ1R110NdIkTrXD98xGygtDW2iytxWv_o0qx6D7V3LX9XeWJZGMQ32q3dGMj7E2j76EjrFB_jWlRufyVSZi7fMBhkJP3X1dYqlkFqRYXKbp3KrLWXjiFa4H7s6O0iYakNFf5kybJJt3y8bKxQfHJHQjNP06C382b9UEb4DmxamPhmVOGzHQy4DIHkO1mxmoHuDdImRFxbTTo3WFHqsB25xdCThZ_JrUmte9HJcETqYtyKuH50bA3EgmCh5jns_fod70yzn8GoYg7hoEy0iaarDyDpVfdoM5YzSpwHFiqhQ8PVB8gEn5qRiVSY1fjZUy-7AaerfmdHlXtRtJ9HrNT3c26EhmEdAWsMR8_pmcQKNWW0j4PFCmcE7zjgANB5WP8kZy17W8rEG_NmS78LD9ZDGiX7EyutcHywlheDZinEoFWwHRoHi7ykKxb-q6QYNa7rzYeIL-3fjzLbXTX1-eKezELhGwDagupwDtayEF2zXFwJTrXiU0mluMZUuD4D5EFBWB5lvdtKaKS3aTMeoK2vh7rJ6FyoB-WPSgE_eWqqFOywdoflrDeAenQxUsGt1McgWoIu8cxErurP2YD8aJjz2uTpsOcLMnRKOhMh5K0IGdpnQKq0J5x_tHN6_lUjFyyzkYrzKtf7-IPFJDxmn2NcbL5Kuaf6aLrnJELBjKqys-2VaB137oJ2sfD15qBOP_LX-Tlc1BFpYEtt6rH-37SA0pR38eplXB-7Ina-LheYXZZ2vPWiioykUJNQcmBFYOhUTOa7xfCC079jVvI5_95B3Dr8KQw38PgVnkpBjQscqZLxWlEyaeXg2oLMKen7JgEFmjK11yJ-kX34gBHnCFnTf6K0wddxWymLgpNotqB5CSvTqTHd-Fh9DdSiYQAk2xeGJ3aAQRJvTqDK1isCQx90U=",
               "summary": []
             }
           ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10366,
-            "cachedInputTokens": 9919,
-            "cacheWriteTokens": 444,
-            "outputTokens": 80
+            "inputTokens": 10424,
+            "cachedInputTokens": 9967,
+            "cacheWriteTokens": 454,
+            "outputTokens": 87
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5416de1b5b9586d4b17830019ada0a4481860477f8d5d804af222a45f9da2c2a",
+        "fingerprint": "6c8e2b04df45c4b5be863c1bdae5f65e242153cf0048412cc0d479e39d702b15",
         "response": {
-          "text": "I don’t have any allergy information for Maria L. in the records.",
+          "text": "I don’t have an allergy noted for Maria L.",
           "toolCalls": [],
           "replay": [
             {
@@ -88,10 +88,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10636,
-            "cachedInputTokens": 10363,
-            "cacheWriteTokens": 270,
-            "outputTokens": 19
+            "inputTokens": 10706,
+            "cachedInputTokens": 10421,
+            "cacheWriteTokens": 282,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

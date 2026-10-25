@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a593fac0514e2ba8cb2e8f03bf3c7083177bc3ece201faec01b96f39a8f5df85",
+        "fingerprint": "f0c142a0137760e81a69c9a995fb4f66cb1ca1f59343ea0faaee082bdaeb9026",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_mnv0vWW5ClBtqeR7T9mHj3aC",
+              "id": "call_tBFd8vRboDxyjju3byDecrYF",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":3,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":false}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9844,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9890,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 15,
             "outputTokens": 68
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "7d3746a80d071ff86882a4f3f0fee44dc5fe5480082e732857845f793de9cc35",
+        "fingerprint": "2ed92000fc998026b3d5cd1fa2eb50acba5bc825356aa672788bc2dbc1718b47",
         "response": {
-          "text": "The rule to allow bookings from 10:00 onward on Wednesdays is waiting for your approval on the card. Nothing has changed yet.",
+          "text": "The rule is waiting for your approval on the card. No bookings have changed yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,60 +37,69 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9983,
-            "cachedInputTokens": 9841,
+            "inputTokens": 10029,
+            "cachedInputTokens": 9887,
             "cacheWriteTokens": 139,
-            "outputTokens": 31
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6fcc2d8b4a54caf4ac0bac2e0c465450e4a58309321e7910819f6877c3dbf21f",
+        "fingerprint": "77cde256244d913b03e5f22748b6001603da6609565c0c035b984eafef0f6f63",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_qv3lIWHLY5qYRGTzL7eEbXdg",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sara Kim\"}"
-            },
-            {
-              "id": "call_qb9cCjhvbBrqXbnBqSrCZrgu",
+              "id": "call_exBTZr1rad5WlzNoy10DYoO8",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_0fb6eae956f9fea6016add3797af6487d29a272957c1a48230",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3TeYJfygxF5NHgVZWEdcqNIklJiam7Ngjonpa9dNcOGyI-Nd1a9QuNT8gavv6fdFnc_1bcu_HXm1SKiacNjeoKFFoZv-yFP_0LpMmxxrkuwPw0DZHo52wuRfNEyPHVQZpEUfgi1nyUKcA4GS_mwD2WlN-0-wkgM7z87D9PeO8M8HX5LlY0X1HMKY502UomnmUkZbBuvwT9Ms4ikgxDp_Pp7j_g12w7ldq_gwLsRVTUBp2NV4c-lOhWZ0Z5kfvsUqLC3Wnq-yKOGWkjh8E037PW0DxAU8EHAHb9Vtc-fEOoyUxIM8PQ6512lWc_-U4J17_JYqURE1NashKcz2SytJ__LEbcIeIF795Bje1AYHe9yrjIcR-W11T9KVBoBd10DJz5lgzdVE0W1FajKYhCo8v0GGEVTOCG-6W7yKrKhlBDhbMSweXLZ7hzzR2_RwM4j7FBePq1olncvtE2AToh8EUtk-O2qSZhNRhcULubShUYfVTn-2Y4Pqk13mgF1EO1_lCMkA2VFhrOpQJI3ae7y5U1M5ccyiRCgMtXpPMPbVfMhvjKSkJztBxCNQrRJojDpbtXqmKFJPLHWdCm3MUtTr6SS2SDw-pM1zFv-aD5k6HxJtbekNF0Zt46kmuGiyIiEnyqr8nJPq3n8_TkvZqf3RhTH3rKEPlwQhgPQw1V8G25D91zRiP1Kxpj89jI4bfZV5EqbRWKnip01lxuzfswY6dREVRug2OVzAPangmT5xYySiiRww8a333fL1UffsegLG0cDHR0qhr_xptDg3BBPPnnkYvU9RNN7V5-CrUFVw3i3vKyjemg6Qt88qoXPZZ6e82B0LVK8abghq9Pqx00ClaVYCicyXH-F8pM7eH9RgS7ToEgjbWogvwgjHmLXPplgeM_Mk3EzLXbICsboobQi-rj84jp7XRLKQr2FsKYaV-fAEHM6pIaQqGnxLAZ1NJUmuqzBujTY8AcdY_askUfZpbLjKPB_Rdz39HbDfm2bRvPJSJsDwlCWZVVjs_K4OmlDo0SOzLSsk8DDgmy7mhik5KvNeiyEg0a_UhG-I9SjUFgRogPJjVWZWX6fp9WVkebIm_ypJ8MehlEzzq4DnDQoNHdfoV5Hkb3eH3FNj6tpjd6w0KL2SRYUCdEJDO-2l1ocG40_Qfv8HhdH3a9y19AniqFu0pZJv1XZ3RdV3WBCrL3g8m75gDvxnriyelUrIWT671uiVdyyv3tsO4OhB0LmLCp8uJEjs6GOsMY7BJYBUurx5s-dywMOIj6EV9GzU5BI6jikD4CYt5oAWqdEIlrShJnaIFjDwNf1BXaBSrz7rUeZm9ZoyVBHwAdjvZlb4ooWlyrIryxYXmPR7OUV0BXKvo4c-vmNrI9g4mjyGKsNYq8WU7UTAim3_E8PD9gINlPmxi-ZnNmI7LXzSLq236iG1PtMDvRxVIRoRc9aG0BP-DRrbFSW4PTzuaELxTSgqXnf9TEWn4PWcOhSZFnDTOU9IOF06GakYh0qbTqZavPT3RcXaGek8GAUk92teuB0wSivGH3BrCSRv3uSqUdXqsma3bb0Coz2lSHuG40w2Cu_8Ejd_pKBhhsM5DBJrdgY1cjFL0FQl7a2F1KtlItMa7I9tzQzEJAEME9ocVANzqmtFWbd2HstwhOfcU_7HFpl7KQqzmYOBlxr1z3fNWW-jJS2dDMeM5n8Q-Fl9En8RLAsc7pTDyIpRG4m24XY9iWNb-H6ZtygU",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10116,
+            "inputTokens": 10146,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 10113,
-            "outputTokens": 77
+            "cacheWriteTokens": 10143,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "908a0e8ae126f99e8e6d3311978b6bb1ae05783d807dde077f2017c01ed331b1",
+        "fingerprint": "ec150599b18376b4230fc85208edd392254c4cda4022fa73972fdf240868c4eb",
         "response": {
-          "text": "I can’t book Sara with Jess at 9:00 on Wednesday, November 4: Jess’s Wednesday hours start at 10:00. The 10:00 Wednesday rule is also still awaiting approval. Would you like a time at or after 10:00 instead?",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_M5lFnAhIRfcPiFYIrUcxuepc",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10601,
+            "cachedInputTokens": 10143,
+            "cacheWriteTokens": 455,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "41fe352ba6b4c5c35d8080643abdc5abebef5cae93a402b34e5bc7174a0e2b2d",
+        "response": {
+          "text": "I can’t book 9am: Jess’s Wednesday hours start at 10am. What time from 10am onward would you like?",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_0fb6eae956f9fea6016add3799148087d29407392c28958e7c",
+              "id": "rs_00882da045605fe1016addef7480d487d288027f9972ab442c",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3TeaolRhzQIQiJx83NScQCGbBvrdNdoVAIMN2qaRKHnoTtNQFp9Jy7URPPDyjyC1A2xmpgUhJxM6xGAosYEejjyTl4YHSfc-AzcDtEygUmYv2XJr_ehQKDkVfHxPSrefG4NvzRGvYn3eTMlHE2hZfap8kPLkcUs1bARHOFiy6zHL1aMfPCnHeNiIaLiUB-7JG5cO5fYCLnVNnVwISYNEOaGYwRXFTrYqU9stm6-1aIfYhawAjV669qstoBPiaekRxv_8RwbPoD_vLtvX_ClbJvtsCgVmr6DrAizkBQmG_sVGrnfUWJgt6lw1xrDkAAVctVBnq7wtEoHx_lmhPpoMBPHtYfA-DVaioMOfUOUtAvDkHrT5TuEjwtzDoq-L-koDRBMLH-jrSMEmlkqp2EbxJ8VRRJMqsCn1T6gIFK50CNuCqtUg0l9E07cGr71MxaFOZ8I4RSM2zSY47oKTObjjuPiEH9xyxeNBGZdv0TA5zLVyZktEWizAbNDSa5PADVxHHGcZWmzldzO-lmUyJcLHPVDmKvCLG_isax5_2rj7Gz2FM4Obv6lSa2A8sSqHdzLt02DdNQXN5FXPh5qSbVBql5tg48mqEMlZbYij01nnboUo2uNPZqEZQiNr5pBuT91WhtpQOT7NWN82-6isv3joHRwSUwmHcBpIqKjzewyi1rA4_7Ev9KB6BoloFDXSG_qofJ-x3iCeAQOFcSSHfJlVv-TJMQ3eWWRjozyIO3g8e0IhagFvKGpjJyS0x9gLgI0vz7XEvaDR41MhZNFgzR-trbhc2XeOZyUEc161EssTjBhkNbJIe8R9GktbIsOJwnLFKd_YJ5VKiiFUUlx_Ykb-U3-kDNnlI8o4QVPuaMAKc7PMfGZMCe72T8XOMNJLcwk817JIR6Sr-RQE7l0cpaRGSUcGjxl2ZuwqT3qDsfpjhOillVOa0bPRlgIiUogcj-z4ET4v1tMfEqp4VGEJlwyBjL-w8_8Vxe8hHrVilMT3SzqT2FMCyhGq3mQuLgeOXIXpWiwBjXHpoh_Qk5BmdYxMY4Sci4D_NKQC-L52l4h-uC-X5uDbSVf2d_Gsjv4i2tK_4rFQw0jETYxTAVtxfiZFywG-1TbKWd9nJIAsWUfAHkzFRo8es5-Yn35A3_aqDpH0osshTJ44_Rklu1NfRSzwiVyKEnoD2EQFR6tDwyNQ3SostgdAPco0LCg_ghIoYVPLPedsv9XDQCv1fbZY5wVzNubA3H8W89gVCbLTynqY959ARrQmYhur_DfWFwVR4SC2nQjzPWguoDuydiYwHzG4kmn-wVj_65MJPqwL0CwyFvE09SVg4Jpwtx4QeanCR3l31vj31g_I7M7HWLRHQufs4yM3vXrawwCPlD6ydZE2R8Gl__xFk0A2NP6yc_7XD2wEPH-vosc17MDTlBmpd9eyVn3RSnb3P-qbrxH8jcU92czdTAOiSd993KSXFJPgZgJKNx7dm2SAMkHHnS2DC2RAChNVTPX006bmWq08n3Sg-9_tOL_x28ekaqxXAgMHcKZgofidVSk_9Fgl3PTZLlN7vB3hMfrhjFLWQMNAFWF94j_TsWysiKs6kMNvxkM6CJXWz-VwlbxqgswxqKRIsLcId-vXgJnKJZHO6C-kVNuPM33vbBDs9_OwNMwKKwxpsT1tiLYvnGuYOIVxz_9Ds1OlPWgH1xy0WexE39h5Au9tQpSdi6uTr6Pp-ecaVHotbrXUS8KJJlzd838Jo_sAwjHCR67hHABYxRMBi-N2A3Tgzjeon4YWdbpVgVtFahi9WeavqtaRfRtIWWXak_JimY7yvzGaw-o0noDbY8BWBFLJFpqdSAwruuuW3VVDNoUGTzz8JkGcyGV1PPMGCcs471iSs4KxJxIOn84owISayuYUNzaPqI2VWK3u4FJ2yXrYPgc8m2asDQzaxlWTTWZnpz3wJ4k-Ku2S6m5LR3jZdDM3FkUUx_tQuYIjx64LgrRyNzifJMUto6gQKzOEiSikWBDJXiEgu-4GhibaSYxigORwEekAy4oqDUac6Ee8ejyOv8MMof7NWHxVl_qjoy4J4VSNbmPtNONnqmanUqcqk4R0sIYkZ9imqpgaHYdnfxbT6oavgMAMnTdnbR3VEbTeWR9b_slMTHqXKClZMjroE7GZJZ4UhOWSzf2Em56bC2PgMBOfjW8qf0IX8Uo03E8Pgkq9i_Kx_i9QPB-vYeEtT8Ag45FGVOyRD0cn_qZktTuRo7SpJaICHsOhlpL654GjhfApzDFosg==",
+              "encrypted_content": "gAAAAABq3e92fEyk9oZVJqCvLq7pGAnpB6vmysUGGSDB4Mk0maEKg351yFyKATw4JTDr2n4vrSzAJzrHeS62wU9AgP85JqJdIOWkP2sQSQZ7cTAaRoMRjE2STY3jvG5nAxB-hAB7pyTJwy_IFNX7iGC03jgq-DQFMRBpmGJ-fY4Ajt5NMqE6Swx24Q1B7GynsltPFat4Iwor2Pw-ST4xadsejYrD5HJmf7xTjsVDXT5gobWwj4rZy2D-3A-coU--TpoyGzXH82wfm2jWiKnSWNNA9-vi_jVuk1jXbRsWM2dkG6hor5tBEp3kluD9u3A7Zoso5uDBqApkwvlaiByfF4XjHPqJTmcyM4UIYdvxgSikpRZzEM5Q3N1USHpoAQjD89nF1dhgKQwp26KD4bZ5kCwjDNSIeor-XYEDBAnyPs2IMoF6N8C7eCiI4phLP_PNNJ_vpmHE4qFhK_aVavECzUDJRTogtQQbPJvB5OTzsxx23wRFYO3Xs2Q88XCbq1myeq8rzTVGUR7kbF_bwE-Exnj2a4x6BSCkQaAB29hmlcLzBDCigebPlQJH_TCCnXo6Tun2QM35fLz_32M6V7ZbtIcuH2hxp8cPiNcxIqtSWbndDqytTTxrOLmArtjYqdpDt4iVNAp0DXhbUW7YV3JQMxTPj_qUWMnW37NcY7y0t1YMLyP3--afKv1WG0DAyLbXcdergRmnz5MstiO866-snJ10bDweihgxi7MZI-Oxmh45nRzhx3xReKYu-ffZeF8vLjxWjVxumus1h5VvMEn81mWF_ipbIGiRozA8x_ju_6o9BtHZiAiHe5dAb-a5psCKFP3SmxuJ1KBPNh-BhqZEoPTExJGj9UUuom2wHQXGCOH-Zf0hHaMrBFi6hLKMBHHR9-t8pqeVR3yNRZ6WxtCtwOhLiuZs5k9L0O2Tyvv2wv1csvmorN5gIMnZVCqepFIb2nIyGlCO5BfUrTnq1PdtoFFhhzQ9iB5k-TgDmLawdiiPB0TL5QKMVqW72s21DWPVaDgb_NtUTHVvXzDHJ2BxfqV9-MovEEYCqU20spTWiQTNikzEL2d5_Iejkh5jh3KaIBEh6-lGvWojfoIDCST7i-aaH0iBMrndABmxcPFZoy6uB2vcraz-hw7nTS152k146JoopjO-nI_JQEIXSw2faU-O3keaSohMPDz-JIHMlATFRVPc8NozfEGpACNkanUHMrOhXVLCFPhC8tU3YqDa8oDZEFDv6i1F9_0cW7Yv-Jxj1xYxgASla3RxdhZIjUdpxKOxS1NEW-UYY-5qMykJIa8Ywh9tFRGKjgQpdveN2kWhtU294IKpi7g_XJLyDm2aM9C0agQPy-Br3gq2MFZhBrmqfBHyZbJmvamR_6ZWoXY3SN0uOXnHW2G5XlaKNgTQZBm99Rkecd2nq4l_8PO0P-z7Jv5IUo2ViefAQUczuWcd55N-M451b17MdBX3Et33w22SYPZNy5pYhnCAwc66U12Wtha2AaXH12_z5aehWfK0cxx25SE9-GiY_LqljckKJhPMVSSlGUwVMryqydwACUZJtO0a3Ruds397cOYXIV1lJFCl-3ZNMyEeOCwThlBiifH_Q64KTfNdTYb_ZP8GDKcUbBi9GzWtLgG-_wrmJaQXg19DdRYfoOyUmaoTcLNBeHSNT7leRd9y8gWVPm8Udq44RWAWRT6x8ZWlH36jbG-R8fMVUPYTq8ASBd_4E3tNR4LryqNk32TYrOFjRCQCO83q3kGYAG58yTXCPo3wVnrWI0zAwSvj66F0ZsnRpmY64PKnGFfn2qQQ8Pj02ruuiTks4a-nbZUBXOu_4yLAUMK9t1TBTwbAEjR1W5osSfxdPqTLEOLeW8SM6NMhUqsjsh-Zu09HQrfIViO7STXv9DP3Tj7kVlL59_-VqurlNnmfZYJi1pAXcnWUYCiCQIsqvATrSQszMXl-J1b6OD39IddTAWXaBx7iLlM6moIY0iF-w_DwAtWXdDEisU5-N5NY9WEVrWPOqRLWUfM8zzVytbeIFTWzEEgkFJ09HWMOgpiB2_lZ1huHU51hyaMq7Xgv1Z5o9syB_R8bY5P7WxaPBFmvF7DVYxjGKMc7tSTYsIkqHV6g2t-sRFdXdKebkvfBu4NVdrwaqgT2Qh10TuqYKMcasGsQgormgaNK0I4LvOGsHHEgGsmq3cfx8xbJjObTIWyjoEJSmLIuYxUs472qcYXgIPHc1Ne-B8ASCjLe2RVqRNUdMHvPq3h8UMralaVA-mb4XaZzLAycl-h3K8QzZ-d-MBrOh0xLsRcPBzBjft1lqXg_0wvzJr4qWGJpPlc4RnZJYKGWgA5PhK7ysCLpHL_jbeJkl4aezX95CTp9qbDJo2Bw90z_of_pMFPBJbWPjwvreuPndiZSUnUxCKkZl-e0MwUHAlZNqx9QNXbi7meQ_7fE1aRqO1sbUwMZOfQb4BPXoqu4bgwov0Tk-T3ySybxl6Sp4D0Bz9gIf-cZvpR8xXF6jbwrSRQw",
               "summary": []
             },
             {
@@ -100,10 +109,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10707,
-            "cachedInputTokens": 10113,
-            "cacheWriteTokens": 591,
-            "outputTokens": 131
+            "inputTokens": 10683,
+            "cachedInputTokens": 10598,
+            "cacheWriteTokens": 82,
+            "outputTokens": 123
           },
           "model": "gpt-6-luna"
         }

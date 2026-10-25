@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ab31b14e88f228e26e2be06abff44af61779bdadf60633da2ef56718f86fcfb6",
+        "fingerprint": "723cd5711a31656657f1ff3e297ce2fa8234c0b3b35baa57312a90fad64ce5fb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GrIXLy7uHI1mIWNCWIGQPXje",
+              "id": "call_SVtGLePWwJ1b9tojRHTBWWrv",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9886,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,17 +25,17 @@
         }
       },
       {
-        "fingerprint": "815744df6d15b91724cf6679cdcc0c1e4e4a53c612e7667143d2ed3a038ab259",
+        "fingerprint": "15e357e91744e71fa8dc965b8a547234015889438b5e0a94606e5e4378fdeae0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gWU5nJseyAhIQ3SP8lH5Wxqv",
+              "id": "call_madUFZs3vzpgPxOFMMySYA7Y",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
             },
             {
-              "id": "call_GESfmmPlQTLm1G0FAACn0Ysc",
+              "id": "call_LLLIunDfnizWjarxRg7DkN6T",
               "name": "forget_fact",
               "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
             }
@@ -43,18 +43,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10036,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 196,
+            "inputTokens": 10079,
+            "cachedInputTokens": 9883,
+            "cacheWriteTokens": 193,
             "outputTokens": 92
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "29c765077830aeda814ab8811331a0488f2b7b444d5b47340b94730cb3d13dfe",
+        "fingerprint": "b3a5ec9b40939228f4d40e9d320331b465ee094eb1371bcd84d2c64e172b8f5b",
         "response": {
-          "text": "I found two things remembered about Maria L.: an allergy to “Hazelnut oil” and a usual service of “Colour with Jess.” I’ve requested to forget both; they’ll be removed only after you approve each request on its card.",
+          "text": "Maria’s allergy and usual service are both waiting for your approval to be forgotten on their cards. Nothing has been removed yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -64,10 +64,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10261,
-            "cachedInputTokens": 10033,
+            "inputTokens": 10304,
+            "cachedInputTokens": 10076,
             "cacheWriteTokens": 225,
-            "outputTokens": 53
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
