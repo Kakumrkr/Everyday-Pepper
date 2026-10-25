@@ -96,3 +96,18 @@ S37b carried one real-model miss, `move-done-no-approval-talk`. Before a move, t
   - a way to turn the briefing off (pushes follow the device setting);
   - a morning email (D-8).
 - When a client claims an offer, the `waitlist_match` item shows `claimed` until the slot starts. When an owner turns offers down, the item disappears at the next hourly run.
+
+## Results (S38a)
+- **Checks:** scripted evals pass; the real-model replay is stale as planned. Integration 1,233/1,234 before the review fixes; the one failure was that stale replay.
+- **Code review findings fixed:**
+  - A business whose briefing fails no longer stops the others, and its claim is released (due again now).
+  - A failing drafts pass no longer skips the briefing.
+  - A new morning hour moves each pass's next due time to that hour on the same local day.
+  - A staff member on time off all day gets no own-day briefing.
+  - A whole-day request no longer reuses a narrower entry the team made.
+  - The public waitlist takes days up to 62 ahead (`waitlist_day_too_far`).
+  - A freed time whose offers all closed unclaimed leaves the feed.
+  - The drafts pass and the briefing share `claimMorning`.
+- **Left as is:**
+  - The snapshot is read twice each morning, once per business a day: cheap, and the insights pass keeps its own transaction.
+  - The waitlist code email is sent at once rather than through the outbox, like the booking code (ADR-0022: the client waits for it; a failure answers 503).

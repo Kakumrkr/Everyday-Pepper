@@ -40,7 +40,9 @@ export class FeedService {
   }
 
   changeSettings(tenant: TenantContext, change: FeedSettingsChange): Promise<FeedSettings> {
-    return changeFeedSettings(this.db, actorOf(tenant), change);
+    return changeFeedSettings(this.db, actorOf(tenant), change, {
+      morningHourOf: (templateId) => templateDrafts(templateId).morningHour,
+    });
   }
 }
 

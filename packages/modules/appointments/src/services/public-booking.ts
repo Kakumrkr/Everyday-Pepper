@@ -87,7 +87,7 @@ import {
   type WaitlistOfferRow,
 } from '@pepper/db';
 import type { ServiceToBook } from '../availability/engine.js';
-import { formatDate, fromZoned, parseDate, toZoned } from '../availability/zoned-time.js';
+import { addDays, formatDate, fromZoned, parseDate, toZoned } from '../availability/zoned-time.js';
 import { toAvailableSlot, waitlistExpiry } from '../bookings/planning.js';
 import {
   BookingNotChangeableError,
@@ -100,6 +100,7 @@ import {
   SlotUnavailableError,
   StaffMemberNotFoundError,
   TooManyBookingRequestsError,
+  WaitlistDayTooFarError,
   WaitlistExpiredError,
   WaitlistOfferExpiredError,
   WaitlistOfferNotFoundError,
@@ -143,6 +144,9 @@ import {
 // function here returns only what a visitor may see, and audits as the system.
 
 const MINUTE_MS = 60_000;
+
+/** How many local days ahead (today counting) the booking page's waitlist takes (S38a). */
+export const PUBLIC_WAITLIST_DAYS = 62;
 
 /** Booking requests one email address may make per business per hour. */
 export const MAX_REQUESTS_PER_EMAIL_PER_HOUR = 5;
@@ -455,6 +459,8 @@ export async function requestWaitlistJoin(
     if (offering.length === 0) throw new ServiceNotFoundError();
     const window = wholeDay(request.date);
     if (waitlistExpiry([window], tenant.timeZone) <= now) throw new WaitlistExpiredError();
+    const last = addDays(toZoned(tenant.timeZone, now), PUBLIC_WAITLIST_DAYS - 1);
+    if (request.date > formatDate(last)) throw new WaitlistDayTooFarError();
     const dayStart = fromZoned(tenant.timeZone, parseDate(request.date), 0);
     const expiresAt = new Date(now + VERIFICATION_CODE_TTL_MINUTES * MINUTE_MS);
     const row = await insertBookingVerification(tx, {
@@ -525,9 +531,11 @@ export async function confirmWaitlistJoin(
       (entry) =>
         entry.serviceId === serviceRow.id &&
         entry.staffMemberId === staffMemberId &&
+        // Only an entry already waiting for the whole of that day: a narrower one stays as the
+        // team set it, and this one is added beside it.
         WaitlistEntryInputSchema.shape.windows
           .parse(entry.windows)
-          .some((each) => each.date === date),
+          .some((each) => each.date === date && each.start === '00:00' && each.end === '24:00'),
     );
     const row =
       waiting ??

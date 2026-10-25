@@ -98,6 +98,21 @@ describe('buildBriefings', () => {
     expect(inactive.map((briefing) => briefing.staffMemberId)).toEqual([null]);
   });
 
+  it('skips a staff member on time off all day (code review)', () => {
+    const briefings = buildBriefings(
+      snapshot({
+        now: MORNING,
+        staff: [
+          staffMember(JESS, {
+            timeOff: [{ start: at('2026-11-02T05:00:00Z'), end: at('2026-11-03T05:00:00Z') }],
+          }),
+        ],
+      }),
+      context,
+    );
+    expect(briefings.map((briefing) => briefing.staffMemberId)).toEqual([null]);
+  });
+
   it('still briefs a staff member booked on a day without hours', () => {
     const briefings = buildBriefings(
       snapshot({

@@ -32,6 +32,7 @@ import {
   ServiceNotFoundError,
   SlotUnavailableError,
   TooManyBookingRequestsError,
+  WaitlistDayTooFarError,
   WaitlistExpiredError,
   WrongVerificationCodeError,
 } from './errors.js';
@@ -50,7 +51,7 @@ import {
   requestWaitlistJoin,
   rescheduleManagedBooking,
 } from './services/public-booking.js';
-import { listWaitlist } from './services/waitlist.js';
+import { addToWaitlist, listWaitlist } from './services/waitlist.js';
 import type { BookingNotice, BookingNotify } from './services/notices.js';
 import { createService, updateService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
@@ -654,6 +655,35 @@ describe('"Join the waitlist" on the booking page (S38a)', () => {
     const anyone = await join(p, { staffMemberId: null, date: '2026-11-04' });
     await confirmJoin(p, anyone.requestId, anyone.code);
     expect(await listWaitlist(db, p.owner, {}, { clock: p.clock })).toHaveLength(2);
+  });
+
+  it('adds a whole-day entry beside a narrower one the team made (code review)', async () => {
+    const p = await newPage();
+    const first = await join(p);
+    await confirmJoin(p, first.requestId, first.code);
+    const [client] = await listClients(db, p.owner, {});
+    if (client === undefined) throw new Error('no client');
+    await addToWaitlist(
+      db,
+      p.owner,
+      {
+        clientId: client.id,
+        serviceId: p.service.id,
+        staffMemberId: p.marco.id,
+        windows: [{ date: '2026-11-05', start: '15:00', end: '18:00' }],
+      },
+      { clock: p.clock },
+    );
+    const asked = await join(p, { staffMemberId: p.marco.id, date: '2026-11-05' });
+    await confirmJoin(p, asked.requestId, asked.code);
+    expect(await listWaitlist(db, p.owner, {}, { clock: p.clock })).toHaveLength(3);
+  });
+
+  it('refuses a day further ahead than the page shows waitlist days for', async () => {
+    const p = await newPage();
+    // Today is 2 November: day 62 is 2 January 2027.
+    await expect(join(p, { date: '2027-01-02' })).resolves.toMatchObject({});
+    await expect(join(p, { date: '2027-01-03' })).rejects.toBeInstanceOf(WaitlistDayTooFarError);
   });
 
   it("never lets a booking's code add an entry, nor a waitlist code book a time", async () => {

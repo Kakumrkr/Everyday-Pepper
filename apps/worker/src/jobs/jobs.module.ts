@@ -111,8 +111,17 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       'Morning job',
       options.morningPollMs ?? drafts?.pollMs ?? 60_000,
       async () => {
-        if (runDrafts !== null) {
-          const result = await runDrafts();
+        // A failing drafts pass never holds back the briefing, which needs no model.
+        const result =
+          runDrafts === null
+            ? null
+            : await runDrafts().catch((error: unknown) => {
+                this.logger.warn(
+                  `Morning drafts failed: ${error instanceof Error ? error.name : 'Error'}`,
+                );
+                return null;
+              });
+        if (result !== null) {
           // Counts only.
           if (result.businesses > 0) {
             this.logger.log(
@@ -134,6 +143,9 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
           this.logger.log(
             `Daily briefing: ${String(briefed.businesses)} businesses, ${String(briefed.pushes)} pushes`,
           );
+        }
+        if (briefed.failed > 0) {
+          this.logger.warn(`Daily briefing: ${String(briefed.failed)} failed`);
         }
       },
       this.logger,

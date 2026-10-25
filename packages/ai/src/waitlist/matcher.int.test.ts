@@ -298,6 +298,8 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
     const undone = await undoToolAction(depsAs(w, 'owner'), action.id, null);
     expect(undone).toMatchObject({ execution: { status: 'undone' } });
     expect(await offerEmails(w)).toEqual([]);
+    // Offers taken back: the feed no longer says they are out (code review).
+    expect(await matchItems(w)).toEqual([]);
   });
 
   it('nobody waiting for that time: no proposal, the match is done', async () => {

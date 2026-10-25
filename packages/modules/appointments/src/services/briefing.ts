@@ -1,9 +1,6 @@
 import {
-  addDays,
-  fromZoned,
   StaffMemberIdSchema,
   TemplateIdSchema,
-  toZoned,
   UserIdSchema,
   type StaffMemberId,
   type TemplateId,
@@ -12,17 +9,18 @@ import {
 import { leadUserIds, queuePushToMembers } from '@pepper/core';
 import {
   briefingCounts,
-  claimMorningRun,
   listDueMorningRuns,
   listMemberships,
   listStaffMembers,
   readInsightTenant,
+  setMorningDueAt,
   waitlistActivity,
   withTenant,
   writeBriefings,
   type Database,
 } from '@pepper/db';
 import { buildBriefings } from '../insights/briefing.js';
+import { claimMorning, morningHourOf } from './morning.js';
 import { briefingPush } from '../pushes.js';
 import { loadSnapshot, runInsightsFor, type InsightsOptions } from './insights.js';
 
@@ -53,8 +51,8 @@ export type BriefingResult =
 export async function runDueBriefings(
   db: Database,
   options: BriefingOptions,
-): Promise<{ businesses: number; written: number; pushes: number }> {
-  const totals = { businesses: 0, written: 0, pushes: 0 };
+): Promise<{ businesses: number; written: number; pushes: number; failed: number }> {
+  const totals = { businesses: 0, written: 0, pushes: 0, failed: 0 };
   const seen = new Set<TenantId>();
   for (let batch = 0; batch < BRIEFING_BATCHES_PER_PASS; batch += 1) {
     const due = await listDueMorningRuns(
@@ -66,7 +64,14 @@ export async function runDueBriefings(
     for (const tenantId of due) {
       if (seen.has(tenantId)) continue;
       seen.add(tenantId);
-      const result = await runBriefingFor(db, tenantId, options);
+      let result: BriefingResult;
+      try {
+        result = await runBriefingFor(db, tenantId, options);
+      } catch {
+        // One business's failure never holds back the others; it is due again (below).
+        totals.failed += 1;
+        continue;
+      }
       if (result.outcome !== 'ran') continue;
       totals.businesses += 1;
       totals.written += result.written;
@@ -88,22 +93,30 @@ export async function runBriefingFor(
     const tenant = await readInsightTenant(tx);
     if (tenant === undefined) return { outcome: 'gone' as const };
     const templateId = TemplateIdSchema.nullable().catch(null).parse(tenant.templateId);
-    const hour = tenant.settings.morningHour ?? options.morningHourOf(templateId);
-    const today = toZoned(tenant.timeZone, now.getTime());
-    const morningOf = (offset: number) =>
-      new Date(fromZoned(tenant.timeZone, addDays(today, offset), hour * 60));
-    // Before this morning's hour: wait for it (a business's first day included).
-    if (now < morningOf(0)) {
-      await claimMorningRun(tx, 'briefing', now, morningOf(0));
-      return { outcome: 'waiting' as const };
-    }
-    if (!(await claimMorningRun(tx, 'briefing', now, morningOf(1)))) {
-      return { outcome: 'not_due' as const };
-    }
+    const hour = morningHourOf(tenant.settings.morningHour, options.morningHourOf(templateId));
+    const claimed = await claimMorning(tx, 'briefing', { timeZone: tenant.timeZone, hour }, now);
+    if (claimed !== 'claimed') return { outcome: claimed };
     return { outcome: 'claimed' as const, timeZone: tenant.timeZone, templateId };
   });
   if (claim.outcome !== 'claimed') return { outcome: claim.outcome };
 
+  try {
+    return await briefClaimed(db, tenantId, claim, now, options);
+  } catch (error) {
+    // Claimed but not written: due again now, so the next pass tries again this morning.
+    await withTenant(db, tenantId, (tx) => setMorningDueAt(tx, 'briefing', now));
+    throw error;
+  }
+}
+
+/** The work after the claim: insights, the briefings, their pushes. */
+async function briefClaimed(
+  db: Database,
+  tenantId: TenantId,
+  claim: { timeZone: string; templateId: TemplateId | null },
+  now: Date,
+  options: BriefingOptions,
+): Promise<BriefingResult> {
   // The insights first, so the gaps, the regulars due and the waitlist are this morning's.
   await runInsightsFor(db, tenantId, options);
 

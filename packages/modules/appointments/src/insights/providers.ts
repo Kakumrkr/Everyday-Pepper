@@ -114,7 +114,7 @@ export function openGaps(
   return open.filter((gap) => gap.end - gap.start >= snapshot.minGapMinutes * MINUTE_MS);
 }
 
-export { bookingsByStaff, localDate, minutes, occupies, startOfDay };
+export { bookingsByStaff, localDate, minutes, occupies, startOfDay, workingIntervals };
 
 const NO_SUBJECTS = { staffMemberId: null, clientId: null, bookingId: null, serviceId: null };
 

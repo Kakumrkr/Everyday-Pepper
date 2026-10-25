@@ -445,8 +445,9 @@ export interface ActiveWaitlistMatch {
 
 /**
  * This business's freed times starting after `now` that the matcher offered or proposed: with
- * how many clients were offered each and whether one claimed it. A proposal no longer pending
- * with no offers made (turned down, expired) is left out. Staff see their own only (RLS).
+ * how many clients hold an open offer for each and whether one claimed it. Left out: a
+ * proposal no longer pending with no offers made (turned down, expired), and offers that all
+ * closed unclaimed (expired, taken back). Staff see their own only (RLS).
  */
 export async function listActiveWaitlistMatches(
   tx: TenantTx,
@@ -460,7 +461,9 @@ export async function listActiveWaitlistMatches(
       staffMemberId: waitlistMatches.staffMemberId,
       startsAt: waitlistMatches.startsAt,
       endsAt: waitlistMatches.endsAt,
-      offered: sql<number>`(SELECT count(*)::int FROM waitlist_offers o WHERE o.match_id = ${MATCH_ID})`,
+      // Offers still open or claimed: expired, taken back or "taken" ones no longer count.
+      offered: sql<number>`(SELECT count(*)::int FROM waitlist_offers o WHERE o.match_id = ${MATCH_ID} AND o.status IN ('offered', 'claimed'))`,
+      made: sql<number>`(SELECT count(*)::int FROM waitlist_offers o WHERE o.match_id = ${MATCH_ID})`,
       claimed: sql<boolean>`EXISTS (SELECT 1 FROM waitlist_offers o WHERE o.match_id = ${MATCH_ID} AND o.status = 'claimed')`,
       pending: sql<boolean>`EXISTS (SELECT 1 FROM ai_action_proposals p WHERE p.idempotency_key = 'waitlist.' || ${MATCH_ID}::text AND p.status = 'pending' AND p.expires_at > ${now}::timestamptz)`,
     })
@@ -479,7 +482,7 @@ export async function listActiveWaitlistMatches(
       ? 'claimed'
       : row.offered > 0
         ? 'offered'
-        : row.pending
+        : row.pending && row.made === 0
           ? 'needs_ok'
           : undefined;
     if (state === undefined) return [];
@@ -491,7 +494,7 @@ export async function listActiveWaitlistMatches(
         startsAt: row.startsAt,
         endsAt: row.endsAt,
         state,
-        offered: row.offered,
+        offered: row.claimed ? row.made : row.offered,
       },
     ];
   });

@@ -1,6 +1,6 @@
 import type { DailyBriefingPayload, StaffMemberId, UtcDateTime } from '@pepper/contracts';
 import type { Interval } from '../availability/engine.js';
-import { addDays, formatDate, isoWeekday } from '../availability/zoned-time.js';
+import { addDays, formatDate } from '../availability/zoned-time.js';
 import {
   bookingsByStaff,
   localDate,
@@ -8,6 +8,7 @@ import {
   occupies,
   openGaps,
   startOfDay,
+  workingIntervals,
 } from './providers.js';
 import type { InsightSnapshot } from './types.js';
 
@@ -85,13 +86,12 @@ export function buildBriefings(
       expiresAt: to,
     },
   ];
-  const weekday = isoWeekday(today);
   const own = new Set(context.ownDayStaff);
   for (const staff of snapshot.staff) {
     if (!staff.active || !own.has(staff.id)) continue;
     const numbers = dayOf(staff.id);
-    // A day off (no hours today and nothing booked) gets no briefing.
-    const works = staff.hours.some((window) => window.weekday === weekday);
+    // A day off (no working time today, net of time off, and nothing booked) gets no briefing.
+    const works = workingIntervals(snapshot.timeZone, staff, today).length > 0;
     if (!works && numbers.bookingCount === 0) continue;
     briefings.push({
       staffMemberId: staff.id,

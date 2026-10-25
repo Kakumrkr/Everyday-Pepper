@@ -5,8 +5,10 @@ import {
   FeedItemIdSchema,
   FeedItemSchema,
   FeedSettingsChangeSchema,
+  fromZoned,
   PLATFORM_DRAFTS,
   TemplateIdSchema,
+  toZoned,
   type FeedClose,
   type FeedInsightKind,
   type FeedItem,
@@ -25,6 +27,8 @@ import {
   listWaitingFeedItems,
   readBriefing,
   readFeedSettings,
+  readMorningDueAt,
+  setMorningDueAt,
   requestInsightRun,
   updateCurrentTenantMailingAddress,
   withMember,
@@ -157,6 +161,7 @@ export async function changeFeedSettings(
   db: Database,
   actor: Actor,
   change: FeedSettingsChange,
+  options: Pick<FeedOptions, 'morningHourOf'> = {},
 ): Promise<FeedSettings> {
   requirePermission(actor, 'settings.manage');
   const parsed = FeedSettingsChangeSchema.parse(change);
@@ -189,6 +194,9 @@ export async function changeFeedSettings(
           : [...before.answeredKinds, parsed.askAnswered],
     };
     await writeFeedSettings(tx, after);
+    if (after.morningHour !== before.morningHour) {
+      await moveMorningRuns(tx, after.morningHour, options.morningHourOf);
+    }
     const [was, is] = [publicSettings(before), publicSettings(after)];
     if (JSON.stringify(was) !== JSON.stringify(is)) {
       // On again, or a kind back on: the feed is computed again at once, not within the hour.
@@ -206,6 +214,28 @@ export async function changeFeedSettings(
     }
     return is;
   });
+}
+
+/**
+ * A new morning hour takes effect at once (S38a code review): each pass's next due time keeps
+ * its local day and takes the new hour, so a pass not yet run today runs at the new hour, and
+ * one already run today still waits for tomorrow.
+ */
+async function moveMorningRuns(
+  tx: TenantTx,
+  own: number | null,
+  morningHourOf: FeedOptions['morningHourOf'],
+): Promise<void> {
+  const tenant = await findCurrentTenant(tx);
+  if (tenant === undefined) return;
+  const templateId = TemplateIdSchema.nullable().catch(null).parse(tenant.templateId);
+  const hour = own ?? (morningHourOf ?? (() => PLATFORM_DRAFTS.morningHour))(templateId);
+  for (const pass of ['drafts', 'briefing'] as const) {
+    const due = await readMorningDueAt(tx, pass);
+    if (due === null) continue;
+    const day = toZoned(tenant.timeZone, due.getTime());
+    await setMorningDueAt(tx, pass, new Date(fromZoned(tenant.timeZone, day, hour * 60)));
+  }
 }
 
 function publicSettings(stored: StoredFeedSettings): FeedSettings {

@@ -1,7 +1,9 @@
 import {
+  claimMorning,
   findAvailabilityIn,
   listServicesIn,
   listStaffIn,
+  morningHourOf,
   runInsightsFor,
   type InsightsOptions,
   type TemplateRuleDefaultsOf,
@@ -11,7 +13,6 @@ import {
   ClientIdSchema,
   DRAFT_LIMITS,
   formatDate,
-  fromZoned,
   RebookingDuePayloadSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
@@ -26,7 +27,6 @@ import {
 } from '@pepper/contracts';
 import { proposeForBusiness, type Actor, type Clock } from '@pepper/core';
 import {
-  claimDraftsRun,
   findClient,
   linkFeedItemToProposal,
   listDraftableRebookings,
@@ -140,15 +140,9 @@ export async function runMorningDraftsFor(
     const drafts = options.draftsOf(TemplateIdSchema.nullable().parse(tenant.templateId));
     const today = toZoned(tenant.timeZone, now.getTime());
     // The business's own hour (S38a), else its template's: the briefing's hour too.
-    const hour = tenant.settings.morningHour ?? drafts.morningHour;
-    const morningOf = (offset: number) =>
-      new Date(fromZoned(tenant.timeZone, addDays(today, offset), hour * 60));
-    // Before this morning's hour: wait for it (a business's first day included).
-    if (now < morningOf(0)) {
-      await claimDraftsRun(tx, now, morningOf(0));
-      return { outcome: 'waiting' as const };
-    }
-    if (!(await claimDraftsRun(tx, now, morningOf(1)))) return { outcome: 'not_due' as const };
+    const hour = morningHourOf(tenant.settings.morningHour, drafts.morningHour);
+    const claimed = await claimMorning(tx, 'drafts', { timeZone: tenant.timeZone, hour }, now);
+    if (claimed !== 'claimed') return { outcome: claimed };
     if (tenant.settings.suggestionsPaused) return { outcome: 'paused' as const };
     if (tenant.settings.disabledKinds.includes('rebooking_due')) {
       return { outcome: 'paused' as const };

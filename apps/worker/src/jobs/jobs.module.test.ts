@@ -121,6 +121,24 @@ describe('JobsRunner', () => {
     expect(drafts.morningDraftsJob).toHaveBeenCalledTimes(1);
   });
 
+  it('still briefs when the drafts pass throws (S38a code review)', async () => {
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    drafts.run.mockRejectedValueOnce(new Error('database down'));
+    const runner = new JobsRunner(DB as never, {
+      ...OPTIONS,
+      drafts: {
+        openai: {} as never,
+        monthlyTokens: 1000,
+        baseUrl: 'https://a.example',
+        pollMs: 60_000,
+      },
+    });
+    await runner.morning.runOnce();
+    expect(appointments.runDueBriefings).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith('Morning drafts failed: Error');
+    warn.mockRestore();
+  });
+
   it('warns when a morning draft broke, not only refused (S36b code review)', async () => {
     const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
     drafts.run.mockResolvedValueOnce({ businesses: 1, drafted: 0, failed: 2 });

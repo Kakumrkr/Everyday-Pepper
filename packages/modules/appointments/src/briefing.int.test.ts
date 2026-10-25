@@ -168,6 +168,25 @@ describe('the daily briefing', () => {
     expect((await getFeed(db, b.owner, { clock: b.clock })).settings.morningHour).toBe(9);
   });
 
+  it('moves the next run when the hour changes: an earlier hour applies today (code review)', async () => {
+    const b = await newBusiness();
+    await changeFeedSettings(db, b.owner, { morningHour: 9 });
+    b.clock.set('2026-11-02T11:30:00.000Z');
+    expect(await runBriefingFor(db, b.tenantId, b.options)).toEqual({ outcome: 'waiting' });
+    // 6:30: back to 7:00, not yet run today, so it runs at 7:00.
+    await changeFeedSettings(db, b.owner, { morningHour: 7 }, { morningHourOf: () => 7 });
+    expect(await withTenant(db, b.tenantId, (tx) => readMorningDueAt(tx, 'briefing'))).toEqual(
+      new Date(SEVEN),
+    );
+    b.clock.set(SEVEN);
+    expect(await runBriefingFor(db, b.tenantId, b.options)).toMatchObject({ outcome: 'ran' });
+    // Run today: a later hour waits for tomorrow, never runs twice today.
+    await changeFeedSettings(db, b.owner, { morningHour: null }, { morningHourOf: () => 10 });
+    expect(await withTenant(db, b.tenantId, (tx) => readMorningDueAt(tx, 'briefing'))).toEqual(
+      new Date('2026-11-03T15:00:00.000Z'),
+    );
+  });
+
   it('still briefs while suggestions are paused: it only informs', async () => {
     const b = await newBusiness();
     await changeFeedSettings(db, b.owner, { suggestionsPaused: true });
