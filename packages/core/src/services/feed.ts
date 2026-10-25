@@ -70,7 +70,9 @@ export async function getFeed(
       : await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds });
     const tenant = await findCurrentTenant(tx);
     const briefing = await readBriefing(tx, canChangeSettings ? 'business' : 'own', now);
-    const templateId = TemplateIdSchema.nullable().catch(null).parse(tenant?.templateId ?? null);
+    const templateId = TemplateIdSchema.nullable()
+      .catch(null)
+      .parse(tenant?.templateId ?? null);
     return {
       suggestions: rows.flatMap((row) => toFeedItem(row) ?? []),
       briefing: briefing === undefined ? null : (toFeedItem(briefing) ?? null),

@@ -40,7 +40,9 @@ describe('feed kinds', () => {
       'staff_overload',
       'waitlist_match',
     ]);
-    expect([...FeedInsightKindSchema.options].sort()).toEqual([...InsightTypeSchema.options].sort());
+    expect([...FeedInsightKindSchema.options].sort()).toEqual(
+      [...InsightTypeSchema.options].sort(),
+    );
     expect(FeedKindSchema.options).toEqual([...FeedInsightKindSchema.options, 'daily_briefing']);
   });
 });
