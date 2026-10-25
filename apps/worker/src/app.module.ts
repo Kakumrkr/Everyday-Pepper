@@ -29,6 +29,7 @@ export class AppModule {
           reminderPollMs: config.reminderPollMs,
           cleanupIntervalMs: config.cleanupIntervalMs,
           insightsPollMs: config.insightsPollMs,
+          morningPollMs: config.morningPollMs,
           drafts: config.drafts,
           pushes: config.push !== null,
         }),
