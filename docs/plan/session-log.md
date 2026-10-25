@@ -1097,3 +1097,16 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
     - Playwright 94/94: the briefing on both sides of the morning hour, and the waitlist journey.
     - Code review: 8 of 10 findings fixed (ADR-0042 results). Security review: no findings. No model called ($0).
   - **For S38b:** merge this branch, probe the changed sets (`feed`, `feed_safety`, `autonomy`, scheduling), record every set once, then pass^3 on the gated sets within the $1.75 cap. `move-done-no-approval-talk` must pass and `KNOWN_REAL_MODEL_MISSES` end empty. Then the security review against playbook §6 (`security-review-s38.md`), the Phase 8 exit, and one PR for both halves.
+- **S38b Phase 8e "b" (2026-10-25): every set recorded on Luna + Sol, pass^3 on the gated sets, the security review and the Phase 8 exit** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md) "Results (S38b)", [security review](../engineering/security-review-s38.md)). Merged `claude/s38a-daily-briefing`; one PR for S38a + S38b.
+  - **Built:**
+    - `add_to_waitlist` v2;
+    - three cases fitted to the eval world (`tool-create-booking-1`, `tool-get-feed-4`, `wl-staff-colleague-refused`);
+    - security tests for the daily draft cap, the system tools from the chat, and an expired or used waitlist code;
+    - `--phase-estimate-ok` passes the $4.50 stop's estimate;
+    - Phase 8 cap $2.00.
+  - **Recording:** a probe ($0.142); a first full pass found `waitlist` under its gate (Luna claimed an add it never made); one fix and a second full pass ($0.251); pass^3 on 167 cases ($0.204). Every §2 gate met. `move-done-no-approval-talk` passes. S38b spend $0.808 in total (Phase 8 $1.79 of $2.00).
+  - **Checks:** `pnpm check` green; `pnpm test:integration` INTEGRATION; Playwright not re-run (no screen changed since S38a's 94/94). Security review: three medium proof gaps fixed with tests, six low findings logged (L9–L14).
+  - **For later:**
+    - `wl-add-marco-saturday` and `wl-staff-own-client` are named known misses: the domain check in Phase 9's first build session, then re-record;
+    - the cost estimate runs about 150× actual with 21 tools (a better estimator would spare the flags);
+    - L9–L14 for Phase 11.
