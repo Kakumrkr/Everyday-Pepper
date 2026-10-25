@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1d1f611475b2436b0e46da7d5e272061bd3a4105c1770821121ab15b76c30a6a",
+        "fingerprint": "1928e000bc822714216a2a061aeb5910634a4767fab9446ddbe5fe33d41e6950",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_c2vMgM4c7fWEvsLUbcFYNvwd",
+              "id": "call_H4od0H7pdLhORKJ1YX0GuPBH",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2027-01-01\",\"endDate\":\"2027-01-01\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,17 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9846,
-            "cachedInputTokens": 9843,
+            "inputTokens": 9892,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9889,
             "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2e7ac2ecfc1fc8beb268377416b458e4fe51d3dfda7095e5a116f6266830d534",
+        "fingerprint": "1b9b7da6e498920dbaa7cc0b87b77c7243cc57388e8fef2ee65acc8a6483f1ed",
         "response": {
-          "text": "I’ve proposed no bookings for January 1, 2027. Nothing has changed yet; please approve it on the card.",
+          "text": "I proposed no bookings for the whole business on January 1, 2027. It’s waiting for your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,9 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9995,
-            "cachedInputTokens": 9992,
-            "outputTokens": 30
+            "inputTokens": 10041,
+            "cachedInputTokens": 9889,
+            "cacheWriteTokens": 149,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

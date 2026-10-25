@@ -3,31 +3,61 @@
   "trials": [
     [
       {
-        "fingerprint": "386ebe14ecc54c5b54998297104933fd9e739124c0f05621431d834ff05aca48",
+        "fingerprint": "2958ec7704f45eb632742227b3813a335b47bc3317c48c11dca5522fbc2dc938",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_oUjqH7h6STYjQEohhX1fc8xl",
-              "name": "add_todo",
-              "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-06\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+              "id": "call_A9zRNu00teEeQSOqI29PLfWV",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9887,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 12,
-            "outputTokens": 43
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "286c4f935491a3e1191743dc0cc7a58141320f2cb1a5341b1877b64586c22dfb",
+        "fingerprint": "b282c4d7ea9194acc5a50d9236329e6b22bcaca3eb6501e97d0fe71ed7f55150",
         "response": {
-          "text": "Done — I added “Call Maria” to your to-do list for Friday, November 6 at 9:00 AM.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rIynVymcZdHxCo9BtOW2x1G1",
+              "name": "add_todo",
+              "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-06\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_07f740eeae7005d7016addee365df087d2bd5493e2b77956c6",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3e43_yiX-GUCFDUYvGBHIK-6w2QoXi7yrJ7s5rzj38qQ9BDlxuK5GEPRq07hEn8TVOVengpZHJeF96UU8QMdlQOlrYAW7Ps3Tr-AGOgyz0suWKvwI8ImET-eZdwbgCqPjDrKiG4AXsfQYfQ7LEt7hXZQhCAVJMdkKkHFUNo6Q30WRC1K6lPS2Ncdga-cZv2mDgHzhG8ZG5pMSq0BJ_-5KBavcPryKzlRieJ83Ucuy7TpwDKuocEzIOlV4u5Th-53RsPIMSZx-6cNuv1bClqHZUqf1rgGwBCksiUr-Oi19nrFwobeKqBSzdXj2ANLQRXAEJ8-8Ob5YwIIS58Av_G9nkPzawTrbzLnBu641QwNjcmaFTyvFS9O9yigqJ0lwej6EJB8Lk9Ph5Prcri_Bx4UcrlPh8NJbMxJtlP0siHqxGHIRZccyfIw4EWcGnV77-07NJnhDPnsJguQNjA5hNGKLgYR3ja6RzhnxztFavya93z3sKmRjzxNnBGUD-cZKxjZ_5K0pxlUYn_oLfk8F2bjCSYEHqsRVPQEMoqqJ7kcqx7yzBHUFTpbCPJjUHnyAM8G5fwvFL413FLvp3onpiL65HrDIBzyBU9z-KtJlB-EoPHdhqEvZweDuFddhb0xc0cDHSeeWoDhBiXvEtjgNGP-DysmcmnCmLKAbTYCdwC16M0wCgns3DczPNvOzMqUuVSUtFQ6SqjXe31wjDwFeKs5WRqlCJi96UQqdrsIAf7D-k-xthHSTnwydnJi_srNfAgBetChzMnUnYxKjanMs0L56uLcIAHAthLK-YzaWEHhiWM0RlyBF3CcZEDJRvIpjI312wkJNskPUvpxUgjKA5lIQYN-nbpMi46dPPPOUpVymdoNYEtdLFQaZGvUC58YLODuzVLO6SmKBBYmUxbZWxzqS6xRvKCnIC6UYhBR-1B0f9ztQJEyeOh4TlybLLP-rFYbI7oojrGxj8DBtc9-V7f0gM5m2yETfndsU-Eff0VaIL79UqzPaL-hqjP2q1ffCkrnQHg7Diita54CrMghTEX9PPXcrDmoZhJkI0qYLTb8A81ZhzvTYIMyIdlpdZypzkm7HbI-Ma4w6LDlE1tLyxGYxZJPvYg6Pfoj0MknF7QeDvXzWO2JdnscmXdflt_9R2XeW_1QZykA78Dtu7MQ0P56J-2jQaatBg1i5DCWjwHr8eq0sPUTnE4-s0bzRqYX4stmizBHnMaAgGMYEvPcfXVXlC4D6FMoFbiEGT7h7Gvziy4NdlDmS23CJoXzGBQGX4aYhsVqwzR1-wbcHAe5H-irA1Y7nBYcvCiaX-KbJkxi2Qjj1RH_kGjIZuKlDIvPQaEkNIofkAY_WCXBQ7_hy1mqDxHZ3r-3tHG9fg30IexPWqq4B-SBiEKak8t_6AxzXzDpi8lakhpSE3ZlVak13fbZTE7QfP91QRU0GLomFmqZYHYphQQtPVs6bv-9gdGfwxSck2FlWO8fzCcd726LBWchQOokoSbZObhaGndiuF_CnIEtiQf4a0KXGFkpvLAYbMhYg6LA3qi4WCXmXhWHB_OikAChztOq4sTq70WAw-XbgFFG5Zd6yATmwQrm0D624qwSXD3PC0fUVPllLejjxyiedrC07t1sAQipt_Nx49_QUeEFD87OpbVQpjfmpjNRF1HvhouP2M-tTp_wK8Qhc8fX7JKYIprjlYz-0fYVyOwLWq4kAyOXKwJGO7c2IB052GaPN47dYJDKYTfDR82Iwmx2WYyKo7NNqdovhwuOQhSEDYrJu84VK-RfWjAjyP1CYC14-j57zbElfqGkNJKARsHRsPe0vw==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9972,
+            "cachedInputTokens": 9884,
+            "cacheWriteTokens": 85,
+            "outputTokens": 78
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a5ddbd96cdee209a025570b1a4110e8ce55825d885730fdab01b08e85f355f6e",
+        "response": {
+          "text": "Added “Call Maria” to your to-dos for Friday, November 6 at 9:00 AM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +67,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9941,
-            "cachedInputTokens": 9838,
-            "cacheWriteTokens": 100,
-            "outputTokens": 30
+            "inputTokens": 10107,
+            "cachedInputTokens": 9969,
+            "cacheWriteTokens": 135,
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

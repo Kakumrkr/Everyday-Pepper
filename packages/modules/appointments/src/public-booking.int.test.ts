@@ -606,6 +606,21 @@ describe('"Join the waitlist" on the booking page (S38a)', () => {
   const confirmJoin = (p: Page, requestId: string, code: VerificationCode) =>
     confirmWaitlistJoin(db, p.slug, requestId as never, { code }, { codeKey: KEY, clock: p.clock });
 
+  it('refuses an expired code and a used one, adding no second entry (S38b)', async () => {
+    const p = await newPage();
+    const late = await join(p);
+    p.clock.advanceBy(10 * 60_000);
+    await expect(confirmJoin(p, late.requestId, late.code)).rejects.toBeInstanceOf(
+      BookingRequestExpiredError,
+    );
+    const asked = await join(p);
+    await confirmJoin(p, asked.requestId, asked.code);
+    await expect(confirmJoin(p, asked.requestId, asked.code)).rejects.toBeInstanceOf(
+      BookingRequestUsedError,
+    );
+    expect(await listWaitlist(db, p.owner, {}, { clock: p.clock })).toHaveLength(1);
+  });
+
   it('adds nothing until the code is typed, then the client waits all that day, audited as the system', async () => {
     const p = await newPage();
     const asked = await join(p);

@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "63a4510014731cd80a4dbe2b4e81b86d24f27097f2ed201869f6cf0e69d1db6a",
+        "fingerprint": "3084c48d9c463b351090840903a212b67605e8582dbc7e6aa205ae704a7d8d3f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Z2XVfo4Jx0yDuK3jX4lrGSGG",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9843,
-            "cachedInputTokens": 9826,
-            "cacheWriteTokens": 14,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "38a6468c5533c529d10bd0737165e05e1bff4bced07f073638ee8fbfc52e0639",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_7hUfqrmRIt6eKhFjZFeuhCUH",
+              "id": "call_q3PsKSJuSIAt9BmztuUQ9pAX",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,25 +16,47 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9925,
-            "cachedInputTokens": 9840,
-            "cacheWriteTokens": 82,
+            "inputTokens": 9889,
+            "cachedInputTokens": 9872,
+            "cacheWriteTokens": 14,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "372faa5ca943860b5548884bfc724570989aa08a0f95b23a52e84b0c20edf05f",
+        "fingerprint": "73d9c2840160b83607a90b3627fd6d11ee280f1fb7963876534a69228858a934",
         "response": {
-          "text": "I can’t book Sunday, November 8 at 10:00: no staff are listed as working Sundays. You’ll need to add it directly on the calendar.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ml4ddz2u875CVrSy4iBs12yy",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10360,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 471,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cd429dfe78425f3b6be34887ce6d3255bc2f0d7b9f519bb660ba907eb28737bd",
+        "response": {
+          "text": "I can’t book Sunday at 10: neither Jess nor Marco works Sundays. Would you like a time on another day?",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_03b96edb7bd42c95016add35c3809887d295527dcf68bc6894",
+              "id": "rs_0e27758e489b3998016addedce14a087d2ba8cac7481245881",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3TXEYgJSpte_yolIhLR_gjI1Hr_ufEtmjrYoOdSbkXMGTlbkJIUJXCk-4raUprZml7yuKmKLxtZRW_iLVt8yTuvbw7cg27D8V5G2z_qchDlXqjg7QNSVGLVjmAfr2-z-m7F9_LNKPKbKBsji6fMqPmHHgvx8reQClktejpoZUBQ1S20W9TfkSsE4GVWpLp4nzow4t2ZtgyZfK9l9RvJZuLxoYuP4wDcPku9MwlZ93nWPQqP-Qi-ceA61tDbkg6YMiXjzsOF6B0g57_Uz-SBNRu2ZKueBvHcopZPYMZfzemn7BOyrcit0I_H-ricQS9sENRwxPemaMu8dzB50Cag3jT5CSh0blmQUNMoWV_zzQpvkYTUE2-s9SXE2-D7glO_QJJfCpe_bzesXQebffV8ODjf00NXbHpzJDdez-B-olsTGzn6Add9m4saWR1icwtC-bizag4GaLshRzlJ0xFqIf3uwGtSBdipgRXvYXANSk0bXde-Zhsy_Bc8en11gpX5gNQBekuP5Of2Rr18z-8kBYAJL6A4oRr7y21bib5nK1bjljRnegXxd6Wh96zr4_ejR-DfoRwnMFufx-kbnnptSFSd66FsLOfJD3fLWJ7xm7JEJBa3t6j2Y1Je-nAnlOP3e2BcN8SAeHbR7Qtt4OfAyrjXKsegSLLzUQV7B_FlAKmVoiSfCtSeuMALhocBLGODWeCoOzLN51IZ3O-X7VcOAZZPaNT9NYI3PtVE1dDu89LK1z5Ui7b5fZeklh2ysGI4ggfy7ljSmmXNpI7dV2K7hLGmXJDZycY5TVQxTDB14MCrrJVtBr1bFGqvFiywUGI4Q3-Zl0vhE7QlOsw9WuaC4U8B-Mr4HvHJ0V6eRs5WpNpy1TAzTUZiG79ZqVmbKRgpM09fe4rUvtU6VdTCoxEr05hwlvSdpfK1qC0A3Ar7Dj6scx9ZPDhKhywDPRJMrVWA5O7vCPai_0jAn5bz_i3PFshMP3_s41fcYAtSxjBlaEYp19Em8MtkY41ea3Kal7Ub7Z4dQh8ZXdu8muV68zCfLJPsy0mUnSLnzeCp4V106dr_IVvYowAPf7Ua8SkMd-rLApjpvEuVeLf6Gu326Vdsloqs0zZBIzpKQodxrVImK8iMH2IcmtF84QRBKszLGVAtHrDMOnIXTFQ41tmYgvCbr9LirTvjStnQV1DU8ga06Wd7aoYgqtNeqwbnBpKbGi0wDsBvEag56fHcH8qTFBnzmf4NsOe9qDjVWekEnIib5dqUbPXOlJ4BEkLGFHIdElGGhcZNKUPETcy2HCI3tBLAQPs7jDQABUgWdyBfsQUwiKo-6AoJMd2QQxynFnGzKaFWcm0ZlHMStour6kTWc-rwMT2QJSAfSqDIjkhPxJKQt7EqV-4SRrB9s2xyeSR4bxfG6_zI29-lSYt_pyMUfC-_Q1Kk4Xy--ayWVRWeRRR8Bwr0t4JzKy648Eb4obTdOn7croZ_JcHjMOUSaqtJL7qVlao_wEQzMQOFip68rh-wpwkLZeA8wFCWJFC_KF6qym96aA-8MyROK9gp1p_N1d_ero8odlTdHJXWu1aY6OH9o_jXRKTozVM9iHgF9e99tnbElsZOLHnjCzkKrFoEa_jCeBU6ZgNFLVbiu5ZJS0x0TbGlnV24Rxklmw0jpQRgyTUaCq_2ifqAG9TVmMNgt8eXlc449tK55HYQKuqxR6I2YuJ-4YZCneApZ1nsSnT6mcfLrNdHh8Vr9jmRNmSLV3tKkfCooTpmSUylLBVc69tRhoNUg5xOsbGIXMouprOEC9IpQWgU-tj55DR2EXXjYn75fzSOyCUQZzbOqFtsDEThNTVXKYgoTSfrZS2XV2SbaDFZMJnVPxO8aBPsxjyRGV4eg8uf32BJLr-qQk0529RxYtu_CTQgXPG5LfoA_m-AnidKAIniM00LCwC6WJ_MZ8ZYQ6jZtdu9qIZ0DvQbZXOjxBh9Z2szUtSdf-4npwQUvg35gjccKnCywhcKCB1xeA7jF_am0-RNE4MfagEbD6h_Zw6k8GR6DMLKeOZktHrN-vz017hlwPBvdCsnlTnYKNBsYfRQzNZ5ctSMzzmNOst2H09rUpDHFYbMQGcyNpXH8yG4iAHzm",
+              "encrypted_content": "gAAAAABq3e3P_ewsGgCSqrVKkSGHxplXXsW0IqtlKeMDIYTgeM33YoUnG_t0-OeB-Ew6d4cGejWwQvVdf_xMTgn7PMn4dfy4oJkpIG8B_k0pd64LcdvnRu4TSAHUuqxVp0sOotjFuTzD__MmeTd_NGZkR9u8DjXt4xfJonbggyix702pfkMIwt4e0XGptgg_9ckKnHZpNzYC3x9KRoaQBRE5lafNUaJQnZ8f8qUq0zyiXGSC8byVj7Gq-LViVkAknp-dfSyg6v8N5fphTgJmr2oqJe-41lFAxFFKOp5uqXCWD5bp45ba7zWFfyzD7e7rH1_41hF6sx6yerzF15-DFGmZX3ZVHRwPrqTGPAI3qzcM6iYikPL54UBz30oqk2VNvcr-BsRAfyuEIGASS6Cb3thoXorSCUBg-LdgSQauJZZE_WCQ20C-VAQcjRx6wknbGk9sR2z1xXwWssv6mctwyG_IcZHMwSmJxkwir77_ZfTVFKL1gTblK3d87lVP3WlmJTb-cgDavcC9wpScELEBylaGLRwt6huK9Hol4dw_Vv1De_Yalvhne-9tNyfXtpjUtbRo7oQ_M9Sljn12-uwMaMMRKhJaBzKFQkMGy9XRg1HtybsV-ASeyzPyMtI4GxI3UnymP6KBp_DsGyOg2SS7K9KlLbyZdy4K8OLWgB0RrwHvzpzX67pWmxaI2iIVkZDDjv_kdf_z5p9yQl1FeImV5fgcB0CJs2ToVhq-5WtKTyx1yf1-3MiHNvXwppVuqV_pgUvwfjAWJ4LIXguZAAU9hZL6mes7YX9O5DmnAzdjNYrr9zxiHWk9qweT4JccKLfSQM2T9Yi3B6kkzWwYsjN4uIyZ2o_F845VAOre8Y5FbwAy3XbspodLyeHu7Zk7ZTtkvCxnOX29zM5ve_0a3A6laHi4GhG6zLOncvBuciw52YY11Xu2Tq_LIZL50iR8RzhN7BvViycMz1G7CRtrh1hZBgNnMmCbbbsoH3haFrhuPcSZJvGtbkFXu4S6pPhCQpP5qeuG2feN_2U0UaOsAdEegN0GhVvZQ_ZU7jK2UIMdTtyXsYY9FlcfyGRqfrTg2W81LWp8AxK-iQSK2QyNEPnrcM_Q3GpPorYoXomHVeeeyUyDHLF4xNsD6XRRCQc816KjFlrwBh24gcy_Io5Y_PoAuo_l8ZlODBe970YPSSCwAB7u0tNuXYwoYEq_I32yOckkrRR8S75hgBjzOPCdl7iOiVoSfKVZAHWqTOnkt_ixKU0J1F9D2gamlN6zEj_t-1rHLVPO_-pYYAAJUpdBO2Q0PhzeLlXWGh60RjMsfCvtrtqCSxlrS9pkp9ywbKX-q4r5i5bcPylTBjA6z72yDenS01EhjTw01olpOW2U9uE9DBjyTrpKx0hTaHcFtRAI_QVb4P3qOrXYA9M5wnAh7J8hs8YX2SbQ1hf-WdqPZzN98K_pFYr2blCoX99YI8xgIO33YSVi7aaolPQfndq0U0TMS_mvchmMNyqJEBLX6Fdb0JStP-P8DEPoKewZh4_YZFc_8zk1k3NAdMJsErbdIb5ePLZt5p2tYRS7ofTPWHkexLBYFu4lBodzIB5HoJdCBgHGKfVZXo2WqpZFh-e127ec6-HfexuPfudliVDABn1sewXZ2iXkDoDcKJaRFUSkb1fVHCEvEtRl6UWplPwnH8-VG8oJAg8ASG3e_nfLKzUt6ZI67yEQYQI-roLWaEcCrttD9nUT3K3xu7TcWHvjoz6JKZubJCKEjTurBJALZ89T-uzwrWNkg009N-QEhHGQeHxjrN8ZXFT5ClsRr-yWMtUbc3xjFSRd6JkFbgQuNEFb8QFD_zm_yTQhFoqnkJseu2tktzaBy4x-w78vEvXExWhmKGWIi7ulEK5PUP1Birn7E8nD_JAwciX8QxIu6DoIdJT2tvTebA4VbUiNx3qFHNr6IpqPwPQOoApUz9xXzIlYYOW5QR7RY8UizvTMCUXXxUdBadV7viZOi3cik57T0bX9VYgdck4PoMrRhPQYMAUba4HHaXJmFfAoteqPjuDNxESXfdKp8TFrc3mZ4BTL9iLodPA0n_7aph7oFK5TA89FhNOUXpv350GWC1s4B_BkUjwotpJyAUj6PkjCAcY6Feu_skNbY9UbS-9U8Eie51SY1ohy9AGP6aqT-i_7YO-ybgTxnQchXiIApsM-KAmIVHT-s0I3zYEQqcnbPvj-Por0lrLq6w73dfQXC-eEsb7MrIAP2M2HUVAOtoy6_44TwOCRduJFlRic1OjJR_T6r5ti1wjcvpyhQhpzDkjn8lot1C5WCpvKCuezOeq4v-pRiEcFWdLTiviK5jJSSf54OqiqZYY20_noTP6EJYg=",
               "summary": []
             },
             {
@@ -66,10 +66,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10387,
-            "cachedInputTokens": 9922,
-            "cacheWriteTokens": 462,
-            "outputTokens": 94
+            "inputTokens": 10441,
+            "cachedInputTokens": 10357,
+            "cacheWriteTokens": 81,
+            "outputTokens": 101
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8559dd6dce17b0f67dd7d5439635ff20c19e804ff599e9201e6d9583d83f2294",
+        "fingerprint": "62cbb827c5786468524ff5755d551542208aa3e490c1cc7110f0f25e518ded1f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_yAOwPWC7IxUxN2b5Ry3Bex90",
+              "id": "call_qERwllmDcVP10lntZJWeGG8u",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-10-30\",\"staffMemberId\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9839,
+            "inputTokens": 9885,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9836,
+            "cacheWriteTokens": 9882,
             "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d935198b597d1325331ba012b45eef50df960d8c504116ad37d2679327e88d2e",
+        "fingerprint": "b6937202b29d4c232e436a68029a1038409035646e3c8651a0d862c5e568aeed",
         "response": {
-          "text": "Friday has one confirmed booking: Ana R. for a haircut with Jess, 2:00–3:00 PM. No blocked time.",
+          "text": "Friday, Oct 30: Ana R. has a confirmed haircut with Jess from 2:00 to 3:00 PM. No blocked time.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10066,
-            "cachedInputTokens": 9836,
-            "cacheWriteTokens": 227,
-            "outputTokens": 33
+            "inputTokens": 10124,
+            "cachedInputTokens": 9882,
+            "cacheWriteTokens": 239,
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }

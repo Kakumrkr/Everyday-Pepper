@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c88bd2acfab257b0205a3a6979b1354660848bbc14e731475f4cbfdfb2beb982",
+        "fingerprint": "ec17bc0fcf0aba34f7383b2634450b24101052dff1dbd62bca999133dd1638cc",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ZlDKtXHSpNdoNC9pDiqt2fLk",
+              "id": "call_JJeq5rsXpYgg7zicQhoMnV5J",
               "name": "add_todo",
               "arguments": "{\"title\":\"Restock towels\",\"dueDate\":null,\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9887,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 12,
             "outputTokens": 39
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "e26a56ec6b47217de782d24b70756eb42b6ecc08897c851009b11ddb9b54459e",
+        "fingerprint": "098579e7935b98daf8a031a46d0127130a822414519cf53f03798f8be4141690",
         "response": {
           "text": "Added “Restock towels” to your to-do list.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9924,
-            "cachedInputTokens": 9838,
+            "inputTokens": 9970,
+            "cachedInputTokens": 9884,
             "cacheWriteTokens": 83,
             "outputTokens": 16
           },
