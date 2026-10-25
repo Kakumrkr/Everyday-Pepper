@@ -462,6 +462,15 @@ describe('rebooking nudges (S36)', () => {
     expect(await draftable()).not.toContain(lee);
   });
 
+  it("keeps to the limit, most overdue first: the morning pass's daily draft cap (S38b)", async () => {
+    const all = await asWorker((tx) => listDraftableRebookings(tx, NOW, 50));
+    expect(all.length).toBeGreaterThan(1);
+    const capped = await asWorker((tx) => listDraftableRebookings(tx, NOW, 1));
+    expect(capped).toEqual(all.slice(0, 1));
+    await expect(asWorker((tx) => listDraftableRebookings(tx, NOW, 0))).rejects.toThrow();
+    await expect(asWorker((tx) => listDraftableRebookings(tx, NOW, 201))).rejects.toThrow();
+  });
+
   it('keeps a client with a nudge in their interval away, whatever came of it', async () => {
     const old = await propose(kim, 'kim-old', new Date(NOW.getTime() - 50 * DAY_MS));
     await settle(old, 'expired');
