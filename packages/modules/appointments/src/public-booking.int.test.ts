@@ -32,6 +32,7 @@ import {
   ServiceNotFoundError,
   SlotUnavailableError,
   TooManyBookingRequestsError,
+  WaitlistExpiredError,
   WrongVerificationCodeError,
 } from './errors.js';
 import { createBooking, listBookings } from './services/bookings.js';
@@ -44,9 +45,12 @@ import {
   getManagedBooking,
   getPublicBusiness,
   MAX_REQUESTS_PER_EMAIL_PER_HOUR,
+  confirmWaitlistJoin,
   requestBooking,
+  requestWaitlistJoin,
   rescheduleManagedBooking,
 } from './services/public-booking.js';
+import { listWaitlist } from './services/waitlist.js';
 import type { BookingNotice, BookingNotify } from './services/notices.js';
 import { createService, updateService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
@@ -578,6 +582,120 @@ describe('notices (ADR-0024: emails queued with the change)', () => {
       }),
     ).rejects.toThrow('could not queue');
     expect((await bookingsOf(p))[0]?.status).toBe('confirmed');
+  });
+});
+
+describe('"Join the waitlist" on the booking page (S38a)', () => {
+  const join = (
+    p: Page,
+    extra: { staffMemberId?: string | null; date?: string; email?: string } = {},
+  ) =>
+    requestWaitlistJoin(
+      db,
+      p.slug,
+      {
+        serviceId: p.service.id,
+        staffMemberId: (extra.staffMemberId ?? p.jess.id) as never,
+        date: extra.date ?? '2026-11-03',
+        name: 'Ana Ruiz',
+        email: extra.email ?? 'ana@example.test',
+      },
+      { codeKey: KEY, clock: p.clock },
+    );
+  const confirmJoin = (p: Page, requestId: string, code: VerificationCode) =>
+    confirmWaitlistJoin(db, p.slug, requestId as never, { code }, { codeKey: KEY, clock: p.clock });
+
+  it('adds nothing until the code is typed, then the client waits all that day, audited as the system', async () => {
+    const p = await newPage();
+    const asked = await join(p);
+    expect(asked.email).toMatchObject({
+      serviceName: 'Haircut',
+      staffName: 'Jess',
+      startsAt: tue('00:00'),
+    });
+    expect(await listWaitlist(db, p.owner, {}, { clock: p.clock })).toEqual([]);
+
+    const { entry } = await confirmJoin(p, asked.requestId, asked.code);
+    expect(entry).toEqual({
+      service: { id: p.service.id, name: 'Haircut' },
+      staff: { id: p.jess.id, displayName: 'Jess' },
+      date: '2026-11-03',
+      // The end of that day in New York.
+      expiresAt: '2026-11-04T05:00:00.000Z',
+    });
+    const [waiting] = await listWaitlist(db, p.owner, {}, { clock: p.clock });
+    expect(waiting).toMatchObject({
+      serviceId: p.service.id,
+      staffMemberId: p.jess.id,
+      windows: [{ date: '2026-11-03', start: '00:00', end: '24:00' }],
+      status: 'waiting',
+    });
+    const [client] = await listClients(db, p.owner, {});
+    expect(client).toMatchObject({ email: 'ana@example.test', source: 'booking_page' });
+    const audit = await auditOf(p.tenantId);
+    expect(audit.slice(0, 2).map((e) => [e.action, e.actor])).toEqual([
+      ['waitlist_entry.created', { kind: 'system', userId: null }],
+      ['client.created', { kind: 'system', userId: null }],
+    ]);
+    // Used once.
+    await expect(confirmJoin(p, asked.requestId, asked.code)).rejects.toBeInstanceOf(
+      BookingRequestUsedError,
+    );
+  });
+
+  it('keeps one entry when the client asks again for the same day and service', async () => {
+    const p = await newPage();
+    for (let i = 0; i < 2; i += 1) {
+      const asked = await join(p);
+      await confirmJoin(p, asked.requestId, asked.code);
+    }
+    expect(await listWaitlist(db, p.owner, {}, { clock: p.clock })).toHaveLength(1);
+    // Anyone, or another day: entries of their own.
+    const anyone = await join(p, { staffMemberId: null, date: '2026-11-04' });
+    await confirmJoin(p, anyone.requestId, anyone.code);
+    expect(await listWaitlist(db, p.owner, {}, { clock: p.clock })).toHaveLength(2);
+  });
+
+  it("never lets a booking's code add an entry, nor a waitlist code book a time", async () => {
+    const p = await newPage();
+    const joining = await join(p);
+    await expect(confirm(p, joining.requestId, joining.code)).rejects.toBeInstanceOf(
+      BookingRequestNotFoundError,
+    );
+    const booking = await request(p);
+    await expect(confirmJoin(p, booking.requestId, booking.code)).rejects.toBeInstanceOf(
+      BookingRequestNotFoundError,
+    );
+    expect(await bookingsOf(p)).toEqual([]);
+    expect(await listWaitlist(db, p.owner, {}, { clock: p.clock })).toEqual([]);
+  });
+
+  it('counts wrong codes, shares the hourly limit with bookings, and refuses a day that is over', async () => {
+    const p = await newPage();
+    const asked = await join(p);
+    await expect(confirmJoin(p, asked.requestId, wrong(asked.code))).rejects.toBeInstanceOf(
+      WrongVerificationCodeError,
+    );
+    await expect(join(p, { date: '2026-11-01' })).rejects.toBeInstanceOf(WaitlistExpiredError);
+    for (let i = 1; i < MAX_REQUESTS_PER_EMAIL_PER_HOUR; i += 1) await request(p);
+    await expect(join(p)).rejects.toBeInstanceOf(TooManyBookingRequestsError);
+    // Another business's page knows nothing of the request.
+    const other = await newPage();
+    await expect(confirmJoin(other, asked.requestId, asked.code)).rejects.toBeInstanceOf(
+      BookingRequestNotFoundError,
+    );
+  });
+
+  it('refuses a service nobody offers online', async () => {
+    const p = await newPage();
+    await expect(
+      requestWaitlistJoin(
+        db,
+        p.slug,
+        { serviceId: p.hidden.id, date: '2026-11-03', name: 'Ana', email: 'ana@example.test' },
+        { codeKey: KEY, clock: p.clock },
+      ),
+    ).rejects.toBeInstanceOf(ServiceNotFoundError);
   });
 });
 

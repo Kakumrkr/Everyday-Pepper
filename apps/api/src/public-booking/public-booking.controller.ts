@@ -8,12 +8,15 @@ import {
   OfferTokenInputSchema,
   PublicRescheduleInputSchema,
   TenantSlugSchema,
+  WaitlistConfirmInputSchema,
+  WaitlistRequestInputSchema,
   type AvailabilityResponse,
   type BookingConfirmResponse,
   type BookingRequestResponse,
   type PublicBookingResponse,
   type PublicBusiness,
   type PublicOfferResponse,
+  type WaitlistConfirmResponse,
 } from '@pepper/contracts';
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Req } from '@nestjs/common';
 import { z } from 'zod';
@@ -113,6 +116,40 @@ export class PublicBookingController {
     const input = parseBody(BookingConfirmInputSchema, body);
     await this.limits.hit(CODE_CHECKS, clientAddress(request));
     return answering(() => this.booking.confirm(slug, requestId, input));
+  }
+
+  /**
+   * "Join the waitlist" (S38a): 201, a code is on its way; nothing is added yet. The same
+   * limits as booking requests (their emails count together). 410 `waitlist_expired` for a day
+   * that is over; 429 `too_many_requests`; 503 `email_unavailable`.
+   */
+  @Post('waitlist-requests')
+  async waitlistRequest(
+    @Param() params: unknown,
+    @Body() body: unknown,
+    @Req() request: IncomingRequest,
+  ): Promise<BookingRequestResponse> {
+    const { slug } = parseBody(SlugParamsSchema, params);
+    const input = parseBody(WaitlistRequestInputSchema, body);
+    await this.limits.hit(REQUESTS_PER_ADDRESS, clientAddress(request));
+    await this.limits.hit(REQUESTS_PER_BUSINESS, pageKey(slug));
+    return answering(() => this.booking.waitlistRequest(slug, input));
+  }
+
+  /**
+   * 201: the client waits for that day. 422 `wrong_code` with `attemptsLeft`; 410
+   * `booking_request_expired`; 409 `booking_request_used`; 404 for a booking's request.
+   */
+  @Post('waitlist-requests/:requestId/confirm')
+  async waitlistConfirm(
+    @Param() params: unknown,
+    @Body() body: unknown,
+    @Req() request: IncomingRequest,
+  ): Promise<WaitlistConfirmResponse> {
+    const { slug, requestId } = parseBody(RequestParamsSchema, params);
+    const input = parseBody(WaitlistConfirmInputSchema, body);
+    await this.limits.hit(CODE_CHECKS, clientAddress(request));
+    return answering(() => this.booking.waitlistConfirm(slug, requestId, input));
   }
 
   /** The booking behind a link; 404 `booking_not_found` for an unknown token. */

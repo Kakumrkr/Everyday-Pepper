@@ -925,7 +925,9 @@ export const waitlistEntries = pgTable(
  * A booking the public booking page was asked for, waiting for the client to type the code
  * emailed to them (ADR-0022, AC-W8-2). Nothing is booked before that: the time is checked
  * again when the code is confirmed. Only the code's keyed hash is stored; attempts are capped.
- * No member reads these (only work without a user, i.e. the booking page itself).
+ * No member reads these (only work without a user, i.e. the booking page itself). From S38a a
+ * request may instead be to join the waitlist (`purpose` `waitlist`) for the local day that
+ * `starts_at` begins; its code adds the entry (`waitlist_entry_id`), never a booking.
  */
 export const bookingVerifications = pgTable(
   'booking_verifications',
@@ -946,10 +948,18 @@ export const bookingVerifications = pgTable(
     attempts: smallint('attempts').notNull().default(0),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     bookingId: uuid('booking_id'),
+    purpose: text('purpose').notNull().default('booking'),
+    waitlistEntryId: uuid('waitlist_entry_id'),
     ...timestamps,
   },
   (table) => [
     index('booking_verifications_email_idx').on(table.tenantId, table.email, table.expiresAt),
+    index('booking_verifications_waitlist_entry_idx').on(table.tenantId, table.waitlistEntryId),
+    check('booking_verifications_purpose_known', sql`${table.purpose} IN ('booking', 'waitlist')`),
+    check(
+      'booking_verifications_purpose_result',
+      sql`(${table.purpose} = 'booking' AND ${table.waitlistEntryId} IS NULL) OR (${table.purpose} = 'waitlist' AND ${table.bookingId} IS NULL)`,
+    ),
     index('booking_verifications_service_idx').on(table.tenantId, table.serviceId),
     index('booking_verifications_staff_member_idx').on(table.tenantId, table.staffMemberId),
     index('booking_verifications_booking_idx').on(table.tenantId, table.bookingId),
@@ -975,6 +985,11 @@ export const bookingVerifications = pgTable(
       name: 'booking_verifications_booking_fk',
       columns: [table.tenantId, table.bookingId],
       foreignColumns: [bookings.tenantId, bookings.id],
+    }),
+    foreignKey({
+      name: 'booking_verifications_waitlist_entry_fk',
+      columns: [table.tenantId, table.waitlistEntryId],
+      foreignColumns: [waitlistEntries.tenantId, waitlistEntries.id],
     }),
     tenantIsolation(sql.raw('tenant_id')),
     // Members never reach them; only work without a user (the booking page) does.

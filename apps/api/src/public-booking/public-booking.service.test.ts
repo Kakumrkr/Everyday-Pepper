@@ -12,6 +12,7 @@ const appointments = vi.hoisted(() => ({
   confirmBookingRequest: vi.fn(),
   rescheduleManagedBooking: vi.fn(),
   cancelManagedBooking: vi.fn(),
+  requestWaitlistJoin: vi.fn(),
 }));
 vi.mock('@pepper/appointments', async (original) => ({
   ...(await original<typeof Appointments>()),
@@ -90,6 +91,35 @@ describe('PublicBookingService', () => {
       {},
       expect.objectContaining({ codeKey: OPTIONS.codeKey }),
     );
+  });
+
+  it('emails the waitlist code (its own words) and answers without it (S38a)', async () => {
+    appointments.requestWaitlistJoin.mockResolvedValue({
+      requestId: 'r-2',
+      expiresAt: '2026-11-02T12:10:00.000Z',
+      code: '042917',
+      email: { ...DETAILS, startsAt: '2026-11-03T05:00:00.000Z' },
+    });
+    const send = vi.fn((message: { text: string }) => {
+      expect(message.text).toContain('join the waitlist');
+      return Promise.resolve();
+    });
+    const answer = await serviceWith({ send }).waitlistRequest('juniper', {} as never);
+    expect(answer).toEqual({ requestId: 'r-2', expiresAt: '2026-11-02T12:10:00.000Z' });
+    expect(JSON.stringify(answer)).not.toContain('042917');
+    expect(send).toHaveBeenCalledTimes(1);
+    const failing = vi.fn(() => Promise.reject(new Error('ECONNREFUSED')));
+    const error = await serviceWith({ send: failing })
+      .waitlistRequest('juniper', {} as never)
+      .catch((e: unknown) => e);
+    expect(status(error)).toBe(503);
+    expect(
+      status(
+        await serviceWith(null)
+          .waitlistRequest('juniper', {} as never)
+          .catch((e: unknown) => e),
+      ),
+    ).toBe(503);
   });
 
   it('503 email_unavailable without a mailer, before storing anything', async () => {

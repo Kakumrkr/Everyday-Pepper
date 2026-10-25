@@ -20,8 +20,12 @@ import {
   UtcDateTimeSchema,
   VERIFICATION_CODE_TTL_MINUTES,
   VerificationCodeSchema,
+  WaitlistConfirmInputSchema,
   WaitlistEntryIdSchema,
+  WaitlistEntryInputSchema,
   WaitlistMatchIdSchema,
+  WaitlistRequestInputSchema,
+  PublicWaitlistEntrySchema,
   WaitlistOfferIdSchema,
   type AvailabilityQueryInput,
   type AvailableSlot,
@@ -37,6 +41,10 @@ import {
   type TenantSlug,
   type UtcDateTime,
   type VerificationCode,
+  type PublicWaitlistEntry,
+  type WaitlistConfirmInput,
+  type WaitlistRequestInput,
+  type WaitlistWindow,
 } from '@pepper/contracts';
 import { systemClock, type Clock } from '@pepper/core';
 import {
@@ -53,7 +61,9 @@ import {
   insertBooking,
   insertBookingVerification,
   insertClient,
+  insertWaitlistEntry,
   listOffersOfMatch,
+  listWaitlistEntries,
   listServices,
   listStaffMembers,
   lockBookingByManageTokenHash,
@@ -65,6 +75,7 @@ import {
   moveBooking,
   setBookingStatus,
   setVerificationBooking,
+  setVerificationWaitlistEntry,
   settleOpenOffers,
   withPublicTenant,
   type BookingRow,
@@ -76,7 +87,8 @@ import {
   type WaitlistOfferRow,
 } from '@pepper/db';
 import type { ServiceToBook } from '../availability/engine.js';
-import { toAvailableSlot } from '../bookings/planning.js';
+import { formatDate, fromZoned, parseDate, toZoned } from '../availability/zoned-time.js';
+import { toAvailableSlot, waitlistExpiry } from '../bookings/planning.js';
 import {
   BookingNotChangeableError,
   BookingNotFoundError,
@@ -88,6 +100,7 @@ import {
   SlotUnavailableError,
   StaffMemberNotFoundError,
   TooManyBookingRequestsError,
+  WaitlistExpiredError,
   WaitlistOfferExpiredError,
   WaitlistOfferNotFoundError,
   WaitlistOfferTakenError,
@@ -102,7 +115,7 @@ import {
   requestWaitlistMatch,
   takeBackWaitlistOffersIn,
 } from './smart-waitlist.js';
-import { bookingAuditValues } from '../mapping.js';
+import { bookingAuditValues, waitlistAuditValues } from '../mapping.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import {
   changeOf,
@@ -325,34 +338,7 @@ export async function confirmBookingRequest(
   const id = BookingRequestIdSchema.parse(requestId);
   const { code, startsAt } = BookingConfirmInputSchema.parse(input);
   const now = nowOf(options);
-
-  // A wrong code must count even though the answer is an error, so checking commits first.
-  const checked = await inPage(db, slug, async (tx) => {
-    const request = await lockBookingVerification(tx, id);
-    if (request === undefined) return { outcome: 'not_found' } as const;
-    if (request.bookingId !== null) return { outcome: 'used' } as const;
-    if (request.expiresAt.getTime() <= now || request.attempts >= MAX_VERIFICATION_ATTEMPTS) {
-      return { outcome: 'expired' } as const;
-    }
-    if (!sameHash(request.codeHash, codeHash(options.codeKey, request.email, code))) {
-      const attempts = await addVerificationAttempt(tx, id);
-      return { outcome: 'wrong', attemptsLeft: MAX_VERIFICATION_ATTEMPTS - attempts } as const;
-    }
-    return { outcome: 'right' } as const;
-  });
-  switch (checked.outcome) {
-    case 'not_found':
-      throw new BookingRequestNotFoundError();
-    case 'used':
-      throw new BookingRequestUsedError();
-    case 'expired':
-      throw new BookingRequestExpiredError();
-    case 'wrong':
-      if (checked.attemptsLeft <= 0) throw new BookingRequestExpiredError();
-      throw new WrongVerificationCodeError(checked.attemptsLeft);
-    case 'right':
-      break;
-  }
+  await checkCode(db, slug, id, code, { now, codeKey: options.codeKey, purpose: 'booking' });
 
   const { token: manageToken, hash: newHash } = newManageToken();
   let search: AlternativesSearch | undefined;
@@ -360,7 +346,7 @@ export async function confirmBookingRequest(
     return await inPage(db, slug, async (tx, tenant) => {
       const request = await lockBookingVerification(tx, id);
       // Locked again: a concurrent confirmation with the same code may have won meanwhile.
-      if (request === undefined) throw new BookingRequestNotFoundError();
+      if (request?.purpose !== 'booking') throw new BookingRequestNotFoundError();
       if (request.bookingId !== null) throw new BookingRequestUsedError();
       const serviceRow = await activeServiceRow(tx, ServiceIdSchema.parse(request.serviceId));
       const service = serviceToBook(serviceRow);
@@ -426,6 +412,162 @@ export async function confirmBookingRequest(
     }
     throw error;
   }
+}
+
+/**
+ * Asks to join the waitlist for a local day on which nothing fits (S38a, ADR-0042): stores the
+ * request with the hash of a new code, which the caller emails, under the same per-address
+ * limit as booking requests (they share it). Nothing is added before the code is typed.
+ * `WaitlistExpiredError` for a day that is over.
+ */
+export async function requestWaitlistJoin(
+  db: Database,
+  slug: TenantSlug,
+  input: WaitlistRequestInput,
+  options: CodeOptions,
+): Promise<{
+  requestId: BookingRequestId;
+  expiresAt: UtcDateTime;
+  code: VerificationCode;
+  email: BookingEmailDetails;
+}> {
+  const request = WaitlistRequestInputSchema.parse(input);
+  const now = nowOf(options);
+  const code = VerificationCodeSchema.parse(String(randomInt(0, 1_000_000)).padStart(6, '0'));
+  return inPage(db, slug, async (tx, tenant) => {
+    const after = new Date(now - (60 - VERIFICATION_CODE_TTL_MINUTES) * MINUTE_MS);
+    if (
+      (await countBookingVerificationsExpiringAfter(tx, request.email, after)) >=
+      MAX_REQUESTS_PER_EMAIL_PER_HOUR
+    ) {
+      throw new TooManyBookingRequestsError();
+    }
+    const serviceRow = await activeServiceRow(tx, request.serviceId);
+    const staffName =
+      request.staffMemberId === null ? null : await activeStaffName(tx, request.staffMemberId);
+    // As the page shows it: a service only someone active offers, and only with them.
+    const offering = (await listStaffMembers(tx)).filter(
+      (staff) =>
+        staff.active &&
+        staff.serviceIds.includes(serviceRow.id) &&
+        (request.staffMemberId === null || staff.id === request.staffMemberId),
+    );
+    if (offering.length === 0) throw new ServiceNotFoundError();
+    const window = wholeDay(request.date);
+    if (waitlistExpiry([window], tenant.timeZone) <= now) throw new WaitlistExpiredError();
+    const dayStart = fromZoned(tenant.timeZone, parseDate(request.date), 0);
+    const expiresAt = new Date(now + VERIFICATION_CODE_TTL_MINUTES * MINUTE_MS);
+    const row = await insertBookingVerification(tx, {
+      serviceId: ServiceIdSchema.parse(serviceRow.id),
+      staffMemberId: request.staffMemberId,
+      // The local day asked for, as the instant it begins.
+      startsAt: new Date(dayStart),
+      name: request.name,
+      email: request.email,
+      phone: request.phone,
+      codeHash: codeHash(options.codeKey, request.email, code),
+      expiresAt,
+      purpose: 'waitlist',
+    });
+    return {
+      requestId: BookingRequestIdSchema.parse(row.id),
+      expiresAt: UtcDateTimeSchema.parse(expiresAt.toISOString()),
+      code,
+      email: {
+        businessName: tenant.name,
+        slug: tenant.slug,
+        timeZone: tenant.timeZone,
+        serviceName: serviceRow.name,
+        staffName,
+        startsAt: new Date(dayStart).toISOString(),
+        email: request.email,
+        clientName: request.name,
+      },
+    };
+  });
+}
+
+/**
+ * Confirms a waitlist request with its code (S38a): the client is found by the verified email
+ * address or added, and waits for that day, the whole of it, with the staff member asked for
+ * or anyone, audited as the system. Already waiting for that day and service: their entry is
+ * kept, not doubled. The code's errors are `confirmBookingRequest`'s.
+ */
+export async function confirmWaitlistJoin(
+  db: Database,
+  slug: TenantSlug,
+  requestId: BookingRequestId,
+  input: WaitlistConfirmInput,
+  options: CodeOptions,
+): Promise<{ entry: PublicWaitlistEntry }> {
+  const id = BookingRequestIdSchema.parse(requestId);
+  const { code } = WaitlistConfirmInputSchema.parse(input);
+  const now = nowOf(options);
+  await checkCode(db, slug, id, code, { now, codeKey: options.codeKey, purpose: 'waitlist' });
+  return inPage(db, slug, async (tx, tenant) => {
+    const request = await lockBookingVerification(tx, id);
+    // Locked again: a concurrent confirmation with the same code may have won meanwhile.
+    if (request?.purpose !== 'waitlist') throw new BookingRequestNotFoundError();
+    if (request.waitlistEntryId !== null) throw new BookingRequestUsedError();
+    const serviceRow = await activeServiceRow(tx, request.serviceId);
+    const staffMemberId =
+      request.staffMemberId === null ? null : StaffMemberIdSchema.parse(request.staffMemberId);
+    const staffName = staffMemberId === null ? null : await activeStaffName(tx, staffMemberId);
+    const date = formatDate(toZoned(tenant.timeZone, request.startsAt.getTime()));
+    const window = wholeDay(date);
+    const expiresAt = waitlistExpiry([window], tenant.timeZone);
+    if (expiresAt <= now) throw new WaitlistExpiredError();
+    const client = await clientFor(tx, request);
+    const clientId = ClientIdSchema.parse(client.id);
+    const waiting = (
+      await listWaitlistEntries(tx, { now: new Date(now), all: false, clientId, limit: 200 })
+    ).find(
+      (entry) =>
+        entry.serviceId === serviceRow.id &&
+        entry.staffMemberId === staffMemberId &&
+        WaitlistEntryInputSchema.shape.windows
+          .parse(entry.windows)
+          .some((each) => each.date === date),
+    );
+    const row =
+      waiting ??
+      (await insertWaitlistEntry(tx, {
+        clientId,
+        serviceId: ServiceIdSchema.parse(serviceRow.id),
+        staffMemberId,
+        windows: [window],
+        expiresAt: new Date(expiresAt),
+        createdBy: null,
+      }));
+    await setVerificationWaitlistEntry(tx, id, WaitlistEntryIdSchema.parse(row.id));
+    if (waiting === undefined) {
+      await appendAuditEntry(tx, {
+        actor: { kind: 'system' },
+        change: {
+          action: 'waitlist_entry.created',
+          entity: { type: 'waitlist_entry', id: row.id },
+          before: null,
+          after: waitlistAuditValues(row),
+        },
+      });
+    }
+    return {
+      entry: PublicWaitlistEntrySchema.parse({
+        service: { id: serviceRow.id, name: serviceRow.name },
+        staff:
+          staffMemberId === null || staffName === null
+            ? null
+            : { id: staffMemberId, displayName: staffName },
+        date,
+        expiresAt: row.expiresAt.toISOString(),
+      }),
+    };
+  });
+}
+
+/** A whole local day as a waitlist window. */
+function wholeDay(date: string): WaitlistWindow {
+  return { date, start: '00:00', end: '24:00' };
 }
 
 /** The booking behind a reschedule/cancel link (`BookingNotFoundError` for an unknown one). */
@@ -539,6 +681,52 @@ export async function rescheduleManagedBooking(
       throw new SlotUnavailableError(await nearestAlternatives(pageReader(db, slug), search));
     }
     throw error;
+  }
+}
+
+/**
+ * Checks the code typed for a request of this `purpose` (a booking's code never adds a waitlist
+ * entry, nor the other way round). A wrong code counts an attempt, and that count commits even
+ * though the answer is an error, so the check is its own transaction. Throws for a request
+ * that is unknown, of the other purpose, used, expired or out of attempts, or a wrong code.
+ */
+async function checkCode(
+  db: Database,
+  slug: TenantSlug,
+  id: BookingRequestId,
+  code: VerificationCode,
+  options: { now: number; codeKey: Buffer; purpose: 'booking' | 'waitlist' },
+): Promise<void> {
+  const checked = await inPage(db, slug, async (tx) => {
+    const request = await lockBookingVerification(tx, id);
+    if (request?.purpose !== options.purpose) return { outcome: 'not_found' } as const;
+    if (request.bookingId !== null || request.waitlistEntryId !== null) {
+      return { outcome: 'used' } as const;
+    }
+    if (
+      request.expiresAt.getTime() <= options.now ||
+      request.attempts >= MAX_VERIFICATION_ATTEMPTS
+    ) {
+      return { outcome: 'expired' } as const;
+    }
+    if (!sameHash(request.codeHash, codeHash(options.codeKey, request.email, code))) {
+      const attempts = await addVerificationAttempt(tx, id);
+      return { outcome: 'wrong', attemptsLeft: MAX_VERIFICATION_ATTEMPTS - attempts } as const;
+    }
+    return { outcome: 'right' } as const;
+  });
+  switch (checked.outcome) {
+    case 'not_found':
+      throw new BookingRequestNotFoundError();
+    case 'used':
+      throw new BookingRequestUsedError();
+    case 'expired':
+      throw new BookingRequestExpiredError();
+    case 'wrong':
+      if (checked.attemptsLeft <= 0) throw new BookingRequestExpiredError();
+      throw new WrongVerificationCodeError(checked.attemptsLeft);
+    case 'right':
+      return;
   }
 }
 

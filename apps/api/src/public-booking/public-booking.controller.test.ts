@@ -88,6 +88,19 @@ const service = {
   cancel: vi.fn(() => Promise.resolve({ ...BOOKING, status: 'cancelled', changeable: false })),
   offer: vi.fn(() => Promise.resolve(OFFER)),
   claim: vi.fn(() => Promise.resolve({ booking: BOOKING, manageToken: TOKEN })),
+  waitlistRequest: vi.fn(() =>
+    Promise.resolve({ requestId: REQUEST_ID, expiresAt: '2026-11-02T12:10:00.000Z' }),
+  ),
+  waitlistConfirm: vi.fn(() =>
+    Promise.resolve({
+      entry: {
+        service: { id: SERVICE_ID, name: 'Haircut' },
+        staff: { id: STAFF_ID, displayName: 'Jess' },
+        date: '2026-11-03',
+        expiresAt: '2026-11-04T05:00:00.000Z',
+      },
+    }),
+  ),
 };
 const hits: { limit: string; key: string }[] = [];
 let overLimit: string | null = null;
@@ -245,6 +258,48 @@ describe('the public booking page api (no session)', () => {
       code: '000000',
     }).expect(422);
     expect(response.body).toMatchObject({ code: 'wrong_code', attemptsLeft: 2 });
+  });
+
+  it("asks to join the waitlist for a day: 201, under the booking requests' limits (S38a)", async () => {
+    const join = {
+      serviceId: SERVICE_ID,
+      staffMemberId: null,
+      date: '2026-11-03',
+      name: 'Ana Ruiz',
+      email: 'Ana@Example.test',
+    };
+    const response = await post('/waitlist-requests', join).expect(201);
+    expect(BookingRequestResponseSchema.parse(response.body).requestId).toBe(REQUEST_ID);
+    expect(service.waitlistRequest).toHaveBeenCalledWith('juniper', {
+      ...join,
+      email: 'ana@example.test',
+      phone: null,
+    });
+    expect(hits).toEqual([
+      { limit: 'request-ip', key: '203.0.113.7' },
+      { limit: 'request-biz', key: 'juniper' },
+    ]);
+    await post('/waitlist-requests', { ...join, date: 'Tuesday' }).expect(400);
+    await post('/waitlist-requests', { ...join, tenantId: SERVICE_ID }).expect(400);
+    overLimit = 'request-ip';
+    await post('/waitlist-requests', join).expect(429);
+    expect(service.waitlistRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('confirms the waitlist code: 201 with the entry; a wrong code is 422', async () => {
+    const response = await post(`/waitlist-requests/${REQUEST_ID}/confirm`, {
+      code: '042917',
+    }).expect(201);
+    expect(response.body).toMatchObject({
+      entry: { date: '2026-11-03', staff: { displayName: 'Jess' } },
+    });
+    expect(service.waitlistConfirm).toHaveBeenCalledWith('juniper', REQUEST_ID, { code: '042917' });
+    expect(hits).toEqual([{ limit: 'confirm-ip', key: '203.0.113.7' }]);
+    service.waitlistConfirm.mockRejectedValueOnce(new WrongVerificationCodeError(4));
+    const wrong = await post(`/waitlist-requests/${REQUEST_ID}/confirm`, { code: '000000' }).expect(
+      422,
+    );
+    expect(wrong.body).toMatchObject({ code: 'wrong_code', attemptsLeft: 4 });
   });
 
   it('400 for a malformed request id or code', async () => {

@@ -4,6 +4,7 @@ import {
   ServiceSchema,
   StaffMemberSchema,
   StaffResponseSchema,
+  WaitlistResponseSchema,
 } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import {
@@ -235,4 +236,62 @@ test('AC-W8-1: two clients confirm the same last time at once; one is booked, th
   );
   expect(bookings).toHaveLength(2);
   expect(new Set(bookings.map((booking) => booking.startsAt)).size).toBe(2);
+});
+
+test('a client joins the waitlist for a full day with the emailed code (S38a)', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page);
+  // Jess offers haircuts but has no hours yet: no day has a free time.
+  const tenant = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  const service = await callApi(
+    page,
+    'POST',
+    '/v1/services',
+    { name: 'Haircut', durationMinutes: 60 },
+    ServiceSchema,
+  );
+  await callApi(
+    page,
+    'POST',
+    '/v1/staff',
+    { displayName: 'Jess', serviceIds: [service.id] },
+    StaffMemberSchema,
+  );
+
+  const client = await anotherPerson(browser, baseURL);
+  const email = `${unique('waiting')}@example.test`;
+  await client.goto(`/book/${tenant.business.slug}`);
+  await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
+  await client.getByRole('button', { name: /Jess/ }).click();
+  await client.getByRole('group', { name: 'Day' }).getByRole('button').nth(1).click();
+  await expect(client.getByText('Nothing free that day. Try another day.')).toBeVisible();
+  await client.getByRole('button', { name: /^Join the waitlist for / }).click();
+
+  await expect(client.getByRole('heading', { name: 'Join the waitlist' })).toBeVisible();
+  await client.getByLabel('Full name').fill('Ana Ruiz');
+  await client.getByLabel('Email').fill(email);
+  await client.getByRole('button', { name: 'Send my code' }).click();
+  await expect(client.getByRole('heading', { name: 'Check your email' })).toBeVisible();
+
+  // Nothing is added before the code.
+  const entries = async () =>
+    WaitlistResponseSchema.parse(await (await page.request.get('/v1/waitlist')).json()).entries;
+  expect(await entries()).toEqual([]);
+  const text = await emailTo(email, 'is your code for');
+  expect(text).toContain('join the waitlist');
+  const code = /^\s+(\d{6})$/m.exec(text)?.[1];
+  if (code === undefined) throw new Error('No code in the email');
+  await client.getByLabel('Code').fill(code);
+  await client.getByRole('button', { name: 'Join the waitlist' }).click();
+
+  await expect(client.getByRole('heading', { name: 'You’re on the waitlist, Ana' })).toBeVisible();
+  const [entry] = await entries();
+  expect(entry).toMatchObject({ serviceId: service.id, status: 'waiting' });
+  expect(entry?.windows).toEqual([expect.objectContaining({ start: '00:00', end: '24:00' })]);
 });

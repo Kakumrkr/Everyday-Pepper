@@ -50,6 +50,40 @@ export function codeEmail(
   };
 }
 
+/**
+ * The code to join the waitlist (S38a): for a day, not a time, and nothing is added until it is
+ * typed.
+ */
+export function waitlistCodeEmail(
+  details: BookingEmailDetails,
+  code: string,
+  minutes: number,
+): EmailMessage {
+  const day = new Intl.DateTimeFormat('en-US', {
+    timeZone: details.timeZone,
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(details.startsAt));
+  const staff = details.staffName === null ? '' : ` with ${details.staffName}`;
+  return {
+    to: details.email,
+    subject: `${code} is your code for ${details.businessName}`,
+    text: [
+      `Hi ${details.clientName},`,
+      '',
+      `Your code to join the waitlist at ${details.businessName} is:`,
+      '',
+      `    ${code}`,
+      '',
+      `${details.serviceName}${staff}, any time on ${day}.`,
+      '',
+      `The code works for ${String(minutes)} minutes. You're not on the waitlist until you enter it.`,
+      'If a time opens up, we email you a link to claim it. If you did not ask for this, you can ignore this email.',
+    ].join('\n'),
+  };
+}
+
 export function confirmationEmail(details: BookingEmailDetails, manageUrl: string): EmailMessage {
   return {
     to: details.email,

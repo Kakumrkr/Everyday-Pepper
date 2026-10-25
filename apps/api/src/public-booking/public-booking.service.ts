@@ -9,6 +9,9 @@ import {
   rescheduleManagedBooking,
   requestBooking,
   codeEmail,
+  confirmWaitlistJoin,
+  requestWaitlistJoin,
+  waitlistCodeEmail,
   type BookingNotify,
 } from '@pepper/appointments';
 import {
@@ -26,6 +29,9 @@ import {
   type PublicOffer,
   type PublicBusiness,
   type TenantSlug,
+  type WaitlistConfirmInput,
+  type WaitlistConfirmResponse,
+  type WaitlistRequest,
 } from '@pepper/contracts';
 import type { Mailer } from '@pepper/core';
 import type { Database } from '@pepper/db';
@@ -97,6 +103,29 @@ export class PublicBookingService {
       throw new ServiceUnavailableException(apiError('email_unavailable'));
     }
     return { requestId: asked.requestId, expiresAt: asked.expiresAt };
+  }
+
+  /** "Join the waitlist" (S38a): the code is emailed at once, like a booking's. */
+  async waitlistRequest(slug: TenantSlug, input: WaitlistRequest): Promise<BookingRequestResponse> {
+    const mailer = this.requireMailer();
+    const asked = await requestWaitlistJoin(this.db, slug, input, {
+      codeKey: this.options.codeKey,
+    });
+    try {
+      await mailer.send(waitlistCodeEmail(asked.email, asked.code, VERIFICATION_CODE_TTL_MINUTES));
+    } catch (error) {
+      this.logger.error(`Could not send a waitlist code: ${messageOf(error)}`);
+      throw new ServiceUnavailableException(apiError('email_unavailable'));
+    }
+    return { requestId: asked.requestId, expiresAt: asked.expiresAt };
+  }
+
+  waitlistConfirm(
+    slug: TenantSlug,
+    requestId: BookingRequestId,
+    input: WaitlistConfirmInput,
+  ): Promise<WaitlistConfirmResponse> {
+    return confirmWaitlistJoin(this.db, slug, requestId, input, { codeKey: this.options.codeKey });
   }
 
   async confirm(
