@@ -188,6 +188,7 @@ describe('switches', () => {
     expect(await changeFeedSettings(db, marco(), { suggestionsPaused: true })).toEqual({
       suggestionsPaused: true,
       disabledKinds: [],
+      morningHour: null,
     });
     expect((await getFeed(db, ana(), { clock })).suggestions).toEqual([]);
     await changeFeedSettings(db, ana(), {
@@ -204,8 +205,8 @@ describe('switches', () => {
         .map((entry) => entry.after),
     ).toEqual(
       expect.arrayContaining([
-        { suggestionsPaused: true, disabledKinds: [] },
-        { suggestionsPaused: false, disabledKinds: ['staff_overload'] },
+        { suggestionsPaused: true, disabledKinds: [], morningHour: null },
+        { suggestionsPaused: false, disabledKinds: ['staff_overload'], morningHour: null },
       ]),
     );
   });

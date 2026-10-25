@@ -5,7 +5,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: S38a (see Planned sessions).
+**S38a (Phase 8e "a", branch `claude/s38a-daily-briefing`, scripted model only, $0).** User at the brief: "Go with your recommendations" (no wait). Taken: a `daily_briefing` feed kind + `business:<uuid>` subject (migration 0049); the morning hour = template `drafts.morningHour`, overridable in `feed_settings`; its own morning `Periodic` (insights → drafts if configured → briefing → pushes with counts only); staff get their own day (`audience_staff_id`); `get_feed` v5 + "brief me"; `waitlist_match` feed item; public "Join the waitlist" with an email code; `find_availability` v4 line ("move to a named time → `move_booking` directly; it counts the booking's own time as taken"); **Phase 8 cap $1.25 → $1.75** for S38b (plan ≈ $0.75: probe $0.05, pass^1 $0.27, pass^3 trials 2–3 $0.35, margin $0.08); ADR-0042 pre-approved.
+- Tasks: 1 contracts + migration 0049 · 2 providers (waitlist_match, briefing) · 3 worker morning job · 4 UI (card, lines, hour) · 5 public Join the waitlist · 6 tool guides, descriptions, scripted eval cases · 7 cap + docs. If it runs long, Join the waitlist moves to S38b before the recording.
+- Done (checkpoint 1): contracts (`daily_briefing`, `waitlist_match` payloads, `morningHour`), migration 0049, briefing + morning-pass repos, `waitlist_match` provider, `buildBriefings` + `runBriefingFor` (claim, insights, write, pushes), worker "Morning job" (drafts then briefing), core/api feed with `briefing`, UI `DailyBriefing` + lines, Home card, `get_feed` v5, `find_availability` v4, eval action `morningBriefing` + 3 cases + `tool-get-feed-5` on scripted cassettes. Real-model replay stale as planned (S38b).
+- Next: Playwright for the briefing card (`feed.spec.ts`), then Task 5 (public Join the waitlist), then Task 7 (cap + docs, ADR-0042).
 
 ## Last sessions
 - **S37b Phase 8d "b" (2026-10-24): the smart waitlist recorded on Luna + Sol; one PR for S37a + S37b** ([ADR-0041](../adr/0041-smart-waitlist.md)). Full entry in [session-log.md](session-log.md).

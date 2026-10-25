@@ -9,6 +9,7 @@ import { requiredStep } from '../../lib/account';
 import { currentAccount, currentBusiness, currentJson, currentMembers } from '../_server/account';
 import { BusinessSwitcher, SignOutButton } from '../_components/account-actions';
 import { AiActivity } from '../_components/chat/ai-activity';
+import { BriefingCard } from '../_components/feed/briefing-card';
 import { FeedCard } from '../_components/feed/feed-card';
 import { NotificationsCard } from '../_components/push/notifications-card';
 import { TaskCard } from '../_components/tasks/task-card';
@@ -18,9 +19,9 @@ import { Unavailable } from '../_components/unavailable';
 export const dynamic = 'force-dynamic';
 
 /**
- * Signed-in home, inside the app shell: the operator feed (S35, ADR-0039). Needs your OK (the
- * AI's proposals), Suggestions (what the rules found, `/v1/feed`) and Done for you (receipts),
- * then the to-dos and notifications.
+ * Signed-in home, inside the app shell: the operator feed (S35, ADR-0039). Today's briefing
+ * (S38a), Needs your OK (the AI's proposals), Suggestions (what the rules found, `/v1/feed`)
+ * and Done for you (receipts), then the to-dos and notifications.
  */
 export default async function HomePage() {
   const account = await currentAccount();
@@ -62,6 +63,11 @@ export default async function HomePage() {
           <span data-testid="business-role">{current.role}</span>
         </p>
       )}
+      {current !== null && feed !== null ? (
+        <div className="mt-6 empty:hidden">
+          <BriefingCard feed={feed} timeZone={current.business.timeZone} />
+        </div>
+      ) : null}
       {current !== null && proposals !== null && actions !== null ? (
         <div className="mt-6">
           <AiActivity

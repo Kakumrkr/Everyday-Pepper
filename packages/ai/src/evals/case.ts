@@ -190,6 +190,8 @@ const TurnSchema = z.union([
       // The morning drafts pass runs (S36): the insights, then the case's model writes each
       // due regular's rebooking email, waiting for an OK.
       z.strictObject({ morningDrafts: z.literal(true) }),
+      // The morning briefing runs (S38a): the insights, then today's briefings, no model.
+      z.strictObject({ morningBriefing: z.literal(true) }),
     ]),
   }),
 ]);

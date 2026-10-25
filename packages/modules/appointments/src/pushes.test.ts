@@ -1,5 +1,6 @@
+import { DailyBriefingPayloadSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import { bookingPagePush, calendarUrl, shortWhen } from './pushes.js';
+import { bookingPagePush, briefingPush, calendarUrl, shortWhen } from './pushes.js';
 
 const NY = 'America/New_York';
 // Tuesday, November 3, 2026, 10:00 AM in New York.
@@ -30,5 +31,42 @@ describe('team pushes (ADR-0026)', () => {
     const late = '2026-11-04T04:30:00.000Z';
     expect(shortWhen(late, NY)).toBe('Tue, Nov 3, 11:30 PM');
     expect(calendarUrl(late, NY)).toBe('/calendar?date=2026-11-03');
+  });
+});
+
+describe('briefingPush (S38a)', () => {
+  const day = DailyBriefingPayloadSchema.parse({
+    scope: 'business',
+    bookingCount: 8,
+    firstStartsAt: '2026-11-03T14:00:00.000Z',
+    gapCount: 1,
+    openMinutes: 90,
+    needsOkCount: 2,
+    rebookingDueCount: 3,
+    waitlistWaiting: 0,
+    waitlistOffered: 0,
+    waitlistClaimed: 0,
+  });
+
+  it('puts the day in numbers, in the business time zone, and opens the home screen', () => {
+    expect(briefingPush(day, NY)).toEqual({
+      title: 'Good morning: your day',
+      body: '8 bookings, first at 9:00 AM. 1 open gap to fill. 2 things need your OK.',
+      url: '/',
+      tag: 'daily-briefing',
+    });
+  });
+
+  it('says so when nothing is booked, and leaves out what is zero', () => {
+    expect(
+      briefingPush(
+        { ...day, bookingCount: 0, firstStartsAt: null, gapCount: 0, needsOkCount: 1 },
+        NY,
+      ).body,
+    ).toBe('Nothing booked yet. 1 thing needs your OK.');
+    expect(
+      briefingPush({ ...day, scope: 'staff', bookingCount: 1, gapCount: 0, needsOkCount: null }, NY)
+        .body,
+    ).toBe('1 booking, first at 9:00 AM.');
   });
 });

@@ -53,8 +53,8 @@ import { writeDraft, type DraftFacts, type DraftWriterDeps } from './writer.js';
 // (their usual staff member first), the routine model writes the words, and the trust layer
 // stores the proposal with its exact email, linked to the feed item. Nothing is sent until an
 // owner or manager approves it. At most `DRAFT_LIMITS.perBusinessPerDay` drafts a business a
-// day, and no client gets a second nudge within their interval. S38's daily briefing will run
-// this same pass first.
+// day, and no client gets a second nudge within their interval. The worker's morning job runs
+// it just before the daily briefing (S38a), which counts what it drafted.
 
 const DAY_MS = 86_400_000;
 /** Businesses per scan, and scans per pass. */
@@ -139,8 +139,10 @@ export async function runMorningDraftsFor(
     if (tenant === undefined) return { outcome: 'gone' as const };
     const drafts = options.draftsOf(TemplateIdSchema.nullable().parse(tenant.templateId));
     const today = toZoned(tenant.timeZone, now.getTime());
+    // The business's own hour (S38a), else its template's: the briefing's hour too.
+    const hour = tenant.settings.morningHour ?? drafts.morningHour;
     const morningOf = (offset: number) =>
-      new Date(fromZoned(tenant.timeZone, addDays(today, offset), drafts.morningHour * 60));
+      new Date(fromZoned(tenant.timeZone, addDays(today, offset), hour * 60));
     // Before this morning's hour: wait for it (a business's first day included).
     if (now < morningOf(0)) {
       await claimDraftsRun(tx, now, morningOf(0));

@@ -1,4 +1,4 @@
-import type { FeedInsightKind, FeedItem } from '@pepper/contracts';
+import type { DailyBriefingPayload, FeedItem, FeedKind } from '@pepper/contracts';
 import { formatDate, formatInstant } from '../cards/labels.js';
 
 // The words of a feed suggestion (S35, ADR-0039), written by code from the item's ids, numbers
@@ -10,12 +10,54 @@ export interface FeedLine {
 }
 
 /** What a kind is called in a sentence ("open gaps", plural). */
-export const FEED_KIND_NOUN: Record<FeedInsightKind, string> = {
+export const FEED_KIND_NOUN: Record<FeedKind, string> = {
   schedule_gaps: 'open gaps',
   rebooking_due: 'regulars who are due',
   no_show_pattern: 'no-show patterns',
   staff_overload: 'busy weeks',
+  waitlist_match: 'freed times for the waitlist',
+  daily_briefing: 'daily briefings',
 };
+
+const count = (n: number, one: string, many = `${one}s`) => `${String(n)} ${n === 1 ? one : many}`;
+
+/**
+ * The daily briefing in words (S38a, ADR-0042): a headline and one line per thing worth
+ * knowing, from the numbers alone (zeros left out).
+ */
+export function briefingLines(
+  payload: DailyBriefingPayload,
+  timeZone: string,
+): { title: string; lines: string[] } {
+  const lead = payload.scope === 'business' ? 'Today' : 'Your day';
+  const title =
+    payload.bookingCount === 0 || payload.firstStartsAt === null
+      ? `${lead}: nothing booked yet`
+      : `${lead}: ${count(payload.bookingCount, 'booking')}, the first at ${clockTime(payload.firstStartsAt, timeZone)}`;
+  const lines: string[] = [];
+  if (payload.gapCount > 0) {
+    lines.push(
+      `${count(payload.gapCount, 'open gap')} to fill, ${formatDuration(payload.openMinutes)} in all.`,
+    );
+  }
+  const needsOk = payload.needsOkCount ?? 0;
+  if (needsOk > 0) {
+    lines.push(`${count(needsOk, 'thing')} ${needsOk === 1 ? 'waits' : 'wait'} for your OK.`);
+  }
+  const due = payload.rebookingDueCount ?? 0;
+  if (due > 0) lines.push(`${count(due, 'regular')} ${due === 1 ? 'is' : 'are'} due back.`);
+  const waiting = payload.waitlistWaiting ?? 0;
+  const offered = payload.waitlistOffered ?? 0;
+  if (waiting > 0 || offered > 0) {
+    const since =
+      offered === 0
+        ? ''
+        : `; ${count(offered, 'offer')} sent since yesterday, ${String(payload.waitlistClaimed ?? 0)} claimed`;
+    lines.push(`${String(waiting)} on the waitlist${since}.`);
+  }
+  if (lines.length === 0) lines.push('Nothing needs you this morning.');
+  return { title, lines };
+}
 
 /** "2 h 15 min", "45 min", "3 h". */
 export function formatDuration(minutes: number): string {
@@ -75,6 +117,28 @@ export function feedLine(item: FeedItem, timeZone: string, now: number): FeedLin
         title: `${staff} is 90% booked or more on ${String(busyDays.length)} of the next ${String(horizonDays)} days`,
         why: `${busyDays.map(formatDate).join(', ')}. The fullest is ${String(peakPercent)}% booked.`,
       };
+    }
+    case 'waitlist_match': {
+      const { startsAt, state, offered } = item.payload;
+      const when = formatInstant(startsAt, timeZone);
+      return {
+        title:
+          state === 'claimed'
+            ? `${staff}'s ${when} was rebooked from the waitlist`
+            : `${staff}'s ${when} opened up`,
+        why:
+          state === 'needs_ok'
+            ? 'People on the waitlist fit it. The offers wait for your OK above.'
+            : state === 'offered'
+              ? `Offered to ${count(offered, 'person', 'people')} on the waitlist. The first to claim it gets it.`
+              : offered === 1
+                ? 'Claimed by the person it was offered to.'
+                : `Claimed by one of the ${String(offered)} people it was offered to.`,
+      };
+    }
+    case 'daily_briefing': {
+      const { title, lines } = briefingLines(item.payload, timeZone);
+      return { title, why: lines.join(' ') };
     }
   }
 }

@@ -14,6 +14,7 @@ import {
 } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
+import { templateDrafts } from '@pepper/templates';
 import { Inject, Injectable } from '@nestjs/common';
 
 /**
@@ -29,7 +30,9 @@ export class FeedService {
   }
 
   get(tenant: TenantContext): Promise<FeedResponse> {
-    return getFeed(this.db, actorOf(tenant));
+    return getFeed(this.db, actorOf(tenant), {
+      morningHourOf: (templateId) => templateDrafts(templateId).morningHour,
+    });
   }
 
   close(tenant: TenantContext, id: FeedItemId, close: FeedClose): Promise<void> {

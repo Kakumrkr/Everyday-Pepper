@@ -20,7 +20,7 @@ import {
   type InsightStaff,
 } from './types.js';
 
-// The four rule-based insight providers (S35, ADR-0039). Rules find; the model only writes
+// The rule-based insight providers (S35, ADR-0039; `waitlist_match` from S38a). Rules find; the model only writes
 // drafts later (S36). Every day boundary is the business's local midnight, read through the
 // time-zone helpers, so a DST change lengthens or shortens a day in real time and a date
 // plus n days is a calendar date, not n × 24 hours.
@@ -97,6 +97,25 @@ function bookingsByStaff(snapshot: InsightSnapshot): Map<StaffMemberId, Interval
   return byStaff;
 }
 
+/**
+ * A staff member's open time on a local day, from now on, inside working hours and at least
+ * the business's shortest gap long (`taken`: their occupied intervals, buffers included).
+ */
+export function openGaps(
+  snapshot: InsightSnapshot,
+  staff: InsightStaff,
+  date: CivilDate,
+  taken: readonly Interval[],
+): Interval[] {
+  const open = subtract(workingIntervals(snapshot.timeZone, staff, date), [
+    ...taken,
+    { start: Number.MIN_SAFE_INTEGER, end: snapshot.now },
+  ]);
+  return open.filter((gap) => gap.end - gap.start >= snapshot.minGapMinutes * MINUTE_MS);
+}
+
+export { bookingsByStaff, localDate, minutes, occupies, startOfDay };
+
 const NO_SUBJECTS = { staffMemberId: null, clientId: null, bookingId: null, serviceId: null };
 
 /** Open time inside working hours, from now on, at least `minGapMinutes` long. */
@@ -108,13 +127,7 @@ export const scheduleGaps: InsightProvider = {
     for (const date of horizon(snapshot)) {
       for (const staff of snapshot.staff) {
         if (!staff.active) continue;
-        const open = subtract(workingIntervals(snapshot.timeZone, staff, date), [
-          ...(taken.get(staff.id) ?? []),
-          { start: Number.MIN_SAFE_INTEGER, end: snapshot.now },
-        ]);
-        const gaps = open.filter(
-          (gap) => gap.end - gap.start >= snapshot.minGapMinutes * MINUTE_MS,
-        );
+        const gaps = openGaps(snapshot, staff, date, taken.get(staff.id) ?? []);
         const last = gaps.at(-1);
         if (last === undefined) continue;
         const longest = gaps.reduce((a, b) => (b.end - b.start > a.end - a.start ? b : a));
@@ -304,11 +317,42 @@ export const staffOverload: InsightProvider = {
   },
 };
 
+/**
+ * A freed time the smart waitlist is working on (S38a): its offers waiting for an OK, out, or
+ * claimed. For owners and managers and the staff member whose time it is; gone at its start.
+ */
+export const waitlistMatch: InsightProvider = {
+  kind: 'waitlist_match',
+  find(snapshot) {
+    return snapshot.waitlistMatches
+      .filter((match) => match.start > snapshot.now)
+      .map((match) => ({
+        kind: 'waitlist_match' as const,
+        subjectKey: `booking:${match.bookingId}`,
+        day: formatDate(localDate(snapshot.timeZone, match.start)),
+        audienceStaffId: match.staffMemberId,
+        subjects: {
+          ...NO_SUBJECTS,
+          staffMemberId: match.staffMemberId,
+          bookingId: match.bookingId,
+        },
+        payload: {
+          startsAt: utc(match.start),
+          endsAt: utc(match.end),
+          state: match.state,
+          offered: match.offered,
+        },
+        expiresAt: match.start,
+      }));
+  },
+};
+
 export const INSIGHT_PROVIDERS: readonly InsightProvider[] = [
   scheduleGaps,
   rebookingDue,
   noShowPattern,
   staffOverload,
+  waitlistMatch,
 ];
 
 /** Every enabled provider's candidates, in provider order. */

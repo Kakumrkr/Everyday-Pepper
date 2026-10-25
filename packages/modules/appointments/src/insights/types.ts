@@ -49,6 +49,16 @@ export interface InsightService {
   rebookAfterDays: number | null;
 }
 
+/** A freed time the smart waitlist offered or proposed, still ahead (S38a). */
+export interface InsightWaitlistMatch {
+  bookingId: BookingId;
+  staffMemberId: StaffMemberId;
+  start: number;
+  end: number;
+  state: 'needs_ok' | 'offered' | 'claimed';
+  offered: number;
+}
+
 /**
  * One business at one instant. `bookings` holds every booking (any status) that starts from
  * `INSIGHT_HISTORY_DAYS` before `now` onwards, future ones included.
@@ -61,10 +71,12 @@ export interface InsightSnapshot {
   staff: readonly InsightStaff[];
   bookings: readonly InsightBooking[];
   services: readonly InsightService[];
+  /** The waitlist's freed times still ahead (`listActiveWaitlistMatches`). */
+  waitlistMatches: readonly InsightWaitlistMatch[];
 }
 
 /** A feed item a provider wants to exist now. */
-export type InsightCandidate = FeedInsight & {
+export type InsightCandidate = Extract<FeedInsight, { kind: FeedInsightKind }> & {
   /** The thing it is about, for the dedupe key and the 30-day snooze: `staff:<id>`, `client:<id>`. */
   subjectKey: string;
   /** The local day it is about (`YYYY-MM-DD`): part of the dedupe key. */

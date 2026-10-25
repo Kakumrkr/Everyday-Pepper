@@ -19,14 +19,25 @@ import { ActionProposalIdSchema } from './trust.js';
 export const FeedItemIdSchema = z.uuid().toLowerCase().brand<'FeedItemId'>();
 export type FeedItemId = z.infer<typeof FeedItemIdSchema>;
 
-/** The kinds the rule-based providers write in S35 (`waitlist_match` arrives with S37). */
+/**
+ * The kinds the insights pass writes (S35; `waitlist_match` from S38a): a kind the pass did not
+ * return in a run has no reason left. A business may turn each of them off.
+ */
 export const FeedInsightKindSchema = InsightTypeSchema.extract([
   'schedule_gaps',
   'rebooking_due',
   'no_show_pattern',
   'staff_overload',
+  'waitlist_match',
 ]);
 export type FeedInsightKind = z.infer<typeof FeedInsightKindSchema>;
+
+/**
+ * Every kind a feed item can be: the insights pass's, and the daily briefing (S38a, ADR-0042),
+ * which the morning pass writes once a day and which only informs.
+ */
+export const FeedKindSchema = z.enum([...FeedInsightKindSchema.options, 'daily_briefing']);
+export type FeedKind = z.infer<typeof FeedKindSchema>;
 
 /**
  * Where an item stands. `needs_ok` and `done` are for items that carry a proposal (S36's
@@ -86,12 +97,58 @@ export const StaffOverloadPayloadSchema = z
   })
   .strict();
 
-/** What an insight says, by kind. */
+/**
+ * A freed time the smart waitlist worked on (S37, ADR-0041), shown to owners and managers and
+ * to the staff member whose time it is: `needs_ok` while its offers wait for an OK, `offered`
+ * once they went out, `claimed` once a client booked it.
+ */
+export const WaitlistMatchPayloadSchema = z
+  .object({
+    startsAt: UtcDateTimeSchema,
+    endsAt: UtcDateTimeSchema,
+    state: z.enum(['needs_ok', 'offered', 'claimed']),
+    /** How many clients were offered it (0 while the offers wait for an OK). */
+    offered: z.number().int().min(0).max(10),
+  })
+  .strict();
+
+const count = z.number().int().min(0);
+
+/**
+ * The daily briefing (S38a, ADR-0042): the local day ahead in numbers, written by the morning
+ * pass and put into words by a template (`feedLine`), never by the model. `business` is for
+ * owners and managers (the business-only counts set); `staff` is one staff member's own day
+ * (those counts `null`).
+ */
+export const DailyBriefingPayloadSchema = z
+  .object({
+    scope: z.enum(['business', 'staff']),
+    bookingCount: count,
+    /** The first booking's start today; `null`: nothing booked. */
+    firstStartsAt: UtcDateTimeSchema.nullable(),
+    /** Open gaps today worth filling (the template's shortest gap), and their minutes. */
+    gapCount: count,
+    openMinutes: count,
+    /** Proposals waiting for an owner's or manager's OK. */
+    needsOkCount: count.nullable(),
+    /** Regulars past their usual return date (open `rebooking_due` items). */
+    rebookingDueCount: count.nullable(),
+    /** Clients on the waitlist now, and the last day's offers made and claimed. */
+    waitlistWaiting: count.nullable(),
+    waitlistOffered: count.nullable(),
+    waitlistClaimed: count.nullable(),
+  })
+  .strict();
+export type DailyBriefingPayload = z.infer<typeof DailyBriefingPayloadSchema>;
+
+/** What an item says, by kind. */
 export const FeedInsightSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('schedule_gaps'), payload: ScheduleGapsPayloadSchema }),
   z.object({ kind: z.literal('rebooking_due'), payload: RebookingDuePayloadSchema }),
   z.object({ kind: z.literal('no_show_pattern'), payload: NoShowPatternPayloadSchema }),
   z.object({ kind: z.literal('staff_overload'), payload: StaffOverloadPayloadSchema }),
+  z.object({ kind: z.literal('waitlist_match'), payload: WaitlistMatchPayloadSchema }),
+  z.object({ kind: z.literal('daily_briefing'), payload: DailyBriefingPayloadSchema }),
 ]);
 export type FeedInsight = z.infer<typeof FeedInsightSchema>;
 
@@ -131,6 +188,9 @@ export const FeedItemSchema = z
   .and(FeedInsightSchema);
 export type FeedItem = z.infer<typeof FeedItemSchema>;
 
+/** A morning pass hour, local: the same range as a template's `drafts.morningHour`. */
+export const MorningHourSchema = z.number().int().min(5).max(11);
+
 /** The business's feed switches: owners and managers change them. */
 export const FeedSettingsSchema = z
   .object({
@@ -138,11 +198,20 @@ export const FeedSettingsSchema = z
     suggestionsPaused: z.boolean(),
     /** Kinds the business turned off, over the template's `insights.enabled`. */
     disabledKinds: z.array(FeedInsightKindSchema),
+    /**
+     * The local hour of the morning pass (the briefing and the drafts, S38a); `null`: the
+     * template's `drafts.morningHour`. Missing in settings stored before S38a.
+     */
+    morningHour: MorningHourSchema.nullable().default(null),
   })
   .strict();
 export type FeedSettings = z.infer<typeof FeedSettingsSchema>;
 
-export const DEFAULT_FEED_SETTINGS: FeedSettings = { suggestionsPaused: false, disabledKinds: [] };
+export const DEFAULT_FEED_SETTINGS: FeedSettings = {
+  suggestionsPaused: false,
+  disabledKinds: [],
+  morningHour: null,
+};
 
 /** `PATCH /v1/feed/settings`: either switch; `askAnswered` records the once-only question. */
 export const FeedSettingsChangeSchema = z
@@ -154,6 +223,8 @@ export const FeedSettingsChangeSchema = z
       .refine((kinds) => new Set(kinds).size === kinds.length, 'Each kind once')
       .optional(),
     askAnswered: FeedInsightKindSchema.optional(),
+    /** The morning pass's hour; `null` goes back to the template's. */
+    morningHour: MorningHourSchema.nullable().optional(),
     /** The postal address rebooking emails carry (S36); `null` takes it away. */
     mailingAddress: MailingAddressSchema.nullable().optional(),
   })
@@ -166,8 +237,16 @@ export type FeedSettingsChange = z.input<typeof FeedSettingsChangeSchema>;
 /** `GET /v1/feed`: the open suggestions the member may see, and the business's switches. */
 export const FeedResponseSchema = z
   .object({
-    /** Empty while suggestions are paused. */
+    /** Empty while suggestions are paused. Never a briefing. */
     suggestions: z.array(FeedItemSchema),
+    /**
+     * Today's briefing for this member (S38a): the business's for owners and managers, their
+     * own day for staff; `null` before the morning pass or once marked read. Shown while
+     * suggestions are paused too: it only informs.
+     */
+    briefing: FeedItemSchema.nullable(),
+    /** The template's morning hour, for the setting's "default" choice. */
+    templateMorningHour: MorningHourSchema,
     settings: FeedSettingsSchema,
     /** Whether this member may change the switches (owners and managers). */
     canChangeSettings: z.boolean(),

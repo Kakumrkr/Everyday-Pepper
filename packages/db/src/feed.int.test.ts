@@ -1,5 +1,6 @@
 import {
   ActionProposalIdSchema,
+  DailyBriefingPayloadSchema,
   ClientIdSchema,
   FeedItemIdSchema,
   TenantIdSchema,
@@ -13,8 +14,14 @@ import type { Database } from './client.js';
 import { insertStaffMember } from './repositories/appointments.js';
 import { insertClient, optOutClientEmail } from './repositories/clients.js';
 import {
+  briefingCounts,
   claimDraftsRun,
+  claimMorningRun,
   closeFeedItem,
+  listDueMorningRuns,
+  readBriefing,
+  writeBriefings,
+  type BriefingCandidate,
   linkFeedItemToProposal,
   listDraftableRebookings,
   listDueDraftRuns,
@@ -304,15 +311,18 @@ describe('staff scope (RLS)', () => {
 
 describe('feed settings', () => {
   it('starts with suggestions on and nothing turned off, and stores a change', async () => {
+    // Stored before S38a (no morning hour): read as the template's hour.
     expect(await asWorker(readFeedSettings)).toEqual({
       suggestionsPaused: false,
       disabledKinds: [],
       answeredKinds: [],
+      morningHour: null,
     });
     const changed = {
       suggestionsPaused: true,
       disabledKinds: ['schedule_gaps' as const],
       answeredKinds: ['schedule_gaps' as const],
+      morningHour: 8,
     };
     await as(ana, (tx) => writeFeedSettings(tx, changed));
     expect(await asWorker(readFeedSettings)).toEqual(changed);
@@ -526,5 +536,111 @@ describe('rebooking nudges (S36)', () => {
     expect(
       (await asWorker((tx) => updateCurrentTenantMailingAddress(tx, null)))?.mailingAddress,
     ).toBeNull();
+  });
+});
+
+describe('the daily briefing (S38a)', () => {
+  const DAY = '2026-11-03';
+  const counts = {
+    bookingCount: 3,
+    firstStartsAt: '2026-11-03T14:00:00.000Z',
+    gapCount: 1,
+    openMinutes: 60,
+  };
+  const business = (bookingCount = 3): BriefingCandidate => ({
+    staffMemberId: null,
+    day: DAY,
+    payload: DailyBriefingPayloadSchema.parse({
+      scope: 'business',
+      ...counts,
+      bookingCount,
+      needsOkCount: 1,
+      rebookingDueCount: 2,
+      waitlistWaiting: 0,
+      waitlistOffered: 0,
+      waitlistClaimed: 0,
+    }),
+    expiresAt: new Date('2026-11-04T05:00:00Z'),
+  });
+  const own = (staffId: string): BriefingCandidate => ({
+    staffMemberId: staffId,
+    day: DAY,
+    payload: DailyBriefingPayloadSchema.parse({
+      scope: 'staff',
+      ...counts,
+      needsOkCount: null,
+      rebookingDueCount: null,
+      waitlistWaiting: null,
+      waitlistOffered: null,
+      waitlistClaimed: null,
+    }),
+    expiresAt: new Date('2026-11-04T05:00:00Z'),
+  });
+  const AT = new Date('2026-11-03T12:00:00Z');
+
+  it('writes one per subject a day: a second run updates it, a read one stays read', async () => {
+    expect(await asWorker((tx) => writeBriefings(tx, [business(), own(jessStaff)]))).toBe(2);
+    expect(await asWorker((tx) => writeBriefings(tx, [business(5), own(jessStaff)]))).toBe(0);
+    const owners = await as(ana, (tx) => readBriefing(tx, 'business', AT));
+    expect(owners?.payload).toMatchObject({ scope: 'business', bookingCount: 5 });
+    expect(owners?.subjectKey).toBe(`business:${tenant}`);
+    // Never among the suggestions.
+    expect(await open(ana, AT)).not.toContain(owners?.dedupeKey);
+
+    if (owners === undefined) throw new Error('no briefing');
+    expect(
+      await as(ana, (tx) => closeFeedItem(tx, FeedItemIdSchema.parse(owners.id), 'done', AT)),
+    ).toBeDefined();
+    expect(await as(ana, (tx) => readBriefing(tx, 'business', AT))).toBeUndefined();
+    await asWorker((tx) => writeBriefings(tx, [business(7)]));
+    expect(await as(ana, (tx) => readBriefing(tx, 'business', AT))).toBeUndefined();
+  });
+
+  it("shows a staff member only their own day, never the business's or a colleague's", async () => {
+    await asWorker((tx) => writeBriefings(tx, [own(benStaff)]));
+    expect((await as(jess, (tx) => readBriefing(tx, 'own', AT)))?.staffMemberId).toBe(jessStaff);
+    expect((await as(ben, (tx) => readBriefing(tx, 'own', AT)))?.staffMemberId).toBe(benStaff);
+    expect(await as(jess, (tx) => readBriefing(tx, 'business', AT))).toBeUndefined();
+    // Gone at the end of the local day.
+    expect(
+      await as(jess, (tx) => readBriefing(tx, 'own', new Date('2026-11-04T06:00:00Z'))),
+    ).toBeUndefined();
+  });
+
+  it('rejects names or free text in a briefing (the payload schema)', async () => {
+    const bad = { ...business(), payload: { ...business().payload, note: 'Maria at 9' } };
+    await expect(
+      asWorker((tx) => writeBriefings(tx, [bad as unknown as BriefingCandidate])),
+    ).rejects.toThrow();
+  });
+
+  it('counts the proposals waiting for an OK and the regulars due back', async () => {
+    const fresh = (
+      await asWorker((tx) =>
+        insertClient(tx, { name: 'Lena Park', email: null, phone: null, source: 'team' }),
+      )
+    ).id;
+    await sync([rebooking(fresh, jessStaff)], AT);
+    const withIt = await asWorker((tx) => briefingCounts(tx, AT));
+    await sync([], AT);
+    const without = await asWorker((tx) => briefingCounts(tx, AT));
+    expect(withIt.rebookingDue - without.rebookingDue).toBe(1);
+    expect(Number.isInteger(withIt.needsOk)).toBe(true);
+  });
+
+  it('claims the briefing on its own clock, apart from the drafts pass', async () => {
+    const other = TenantIdSchema.parse(
+      (await createTenant(db, { name: 'Ash', slug: 'ash-feed', timeZone: 'America/Denver' })).id,
+    );
+    expect(await listDueMorningRuns(db, 'briefing', NOW, 1000)).toContain(other);
+    expect(
+      await withTenant(db, other, (tx) => claimMorningRun(tx, 'briefing', NOW, later(1))),
+    ).toBe(true);
+    expect(await listDueMorningRuns(db, 'briefing', NOW, 1000)).not.toContain(other);
+    // The drafts pass is still due.
+    expect(await listDueMorningRuns(db, 'drafts', NOW, 1000)).toContain(other);
+    expect(
+      await withTenant(db, other, (tx) => claimMorningRun(tx, 'briefing', NOW, later(1))),
+    ).toBe(false);
   });
 });

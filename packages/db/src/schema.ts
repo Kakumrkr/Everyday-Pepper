@@ -1918,7 +1918,7 @@ export const feedItems = pgTable(
     index('feed_items_action_proposal_idx').on(table.tenantId, table.actionProposalId),
     check(
       'feed_items_kind_known',
-      sql`${table.kind} IN ('schedule_gaps', 'rebooking_due', 'no_show_pattern', 'staff_overload', 'waitlist_match')`,
+      sql`${table.kind} IN ('schedule_gaps', 'rebooking_due', 'no_show_pattern', 'staff_overload', 'waitlist_match', 'daily_briefing')`,
     ),
     check(
       'feed_items_status_known',
@@ -1926,7 +1926,7 @@ export const feedItems = pgTable(
     ),
     check(
       'feed_items_subject_key_format',
-      sql`${table.subjectKey} ~ '^(staff|client|booking):[0-9a-f-]{36}$'`,
+      sql`${table.subjectKey} ~ '^(staff|client|booking|business):[0-9a-f-]{36}$'`,
     ),
     check(
       'feed_items_dedupe_key_format',
@@ -1997,12 +1997,15 @@ export const insightRuns = pgTable(
     // When the morning drafts pass is due next (S36): the business's next local morning hour.
     // NULL: never run (due now, once the morning hour has passed today).
     draftsDueAt: timestamp('drafts_due_at', { withTimezone: true }),
+    // When the daily briefing is due next (S38a, ADR-0042), as `drafts_due_at`.
+    briefingDueAt: timestamp('briefing_due_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
     unique('insight_runs_tenant_unique').on(table.tenantId),
     index('insight_runs_last_run_at_idx').on(table.lastRunAt),
     index('insight_runs_drafts_due_at_idx').on(table.draftsDueAt),
+    index('insight_runs_briefing_due_at_idx').on(table.briefingDueAt),
     tenantIsolation(sql.raw('tenant_id')),
     jobScan('insights'),
   ],
