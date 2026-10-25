@@ -595,7 +595,7 @@ describe('"Join the waitlist" on the booking page (S38a)', () => {
       p.slug,
       {
         serviceId: p.service.id,
-        staffMemberId: (extra.staffMemberId ?? p.jess.id) as never,
+        staffMemberId: extra.staffMemberId ?? p.jess.id,
         date: extra.date ?? '2026-11-03',
         name: 'Ana Ruiz',
         email: extra.email ?? 'ana@example.test',
