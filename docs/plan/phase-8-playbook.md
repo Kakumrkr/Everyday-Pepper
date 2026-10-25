@@ -76,6 +76,7 @@ An employee doesn't wait to be asked. After Phase 7 Pepper acts, remembers and f
 - **Models unchanged** (`gpt-6-luna` and `gpt-6.1-sol`, effort `low`, ADR-0033); drafts use the routine model. S36a re-checks the official pricing page before the first recording.
 - **Batch description changes:** any tool description or instruction change re-records every cassette, so each "a" half changes descriptions freely on the fakes and its "b" half records once. The S33 leftovers ride S36's batch.
 - **A gate still missing after one fix → ask** (S32b rule); never raise the cap without the user.
+- **S38a (user, 2026-10-25, at the brief: "Go with your recommendations"):** the cap rises to **$1.75** for S38b's full re-record and pass^3 (planned about $0.75; $0.27 was left of $1.25, and a full pass^1 alone is about $0.27–0.36). About $0.76 stays for Phases 9–11 after S38b ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md) Decision 9).
 
 ## 5. Evaluation strategy
 
@@ -166,6 +167,7 @@ Run as **S37a** and **S37b**, M2.
 ### S38 (8e) — The daily briefing, re-record, pass^3, security review, Phase 8 exit
 Run as **S38a** and **S38b**, M2.
 - **Build (S38a):** the morning run per business at its local hour (default 7:00, a business setting): one briefing feed item (today's bookings and first start, the gaps, what needs the owner, overdue regulars, waitlist activity), deterministic text from a template (no model), and a push to owners and managers; each staff member's own day to them; "brief me" in the chat reads it through `get_feed`; a morning email is not built (push + home card are enough for the pilot); one batch of description fixes from S36–S37's transcripts.
+- **Built in S38a** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)): the briefing as above (its hour a business setting over the template's), the `waitlist_match` feed item and the public "Join the waitlist" (both deferred from S37a), and the `find_availability` v4 line for moves (S37b's carried miss). The description batch was that line and `get_feed`'s.
 - **S38b:** full re-record of every set on Luna + Sol; pass^3 on the gated sets (section 2 and S33's); the security review against section 6; Phase 8 exit.
 - **Done when:** section 2 met; AC-W4-1, AC-W4-2, AC-W5-1 green; insight fixtures green; isolation 100%; Phase 8 spend ≤ $1.25 recorded.
 

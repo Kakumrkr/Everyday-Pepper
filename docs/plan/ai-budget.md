@@ -46,9 +46,9 @@ Runs labelled `P7`. The runner refuses a run whose worst-case estimate would tak
   - The new held-out case `in-three-days` (after the review): **$0.0004**, run 835 (834 failed before the database was ready, $0).
   - A typical member turn cost **$0.00085** on average (p95 $0.0014); the three moves that hand over to Sol after step 4 cost about $0.024 a turn.
 
-## Phase 8 ($1.25 cap; [playbook §4](phase-8-playbook.md))
+## Phase 8 ($1.25 cap, $1.75 from S38a; [playbook §4](phase-8-playbook.md))
 
-Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b probe`; it counts the same). The runner refuses a run whose worst-case estimate would take Phase 8 past $1.25.
+Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b probe`; it counts the same). The runner refuses a run whose worst-case estimate would take Phase 8 past its cap: $1.25, raised to $1.75 at the S38a brief (user: "Go with your recommendations") for S38b's full re-record and pass^3, planned about $0.75 ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)).
 
 - **S36b (2026-10-24): $0.6237 in 358 runs** (Phase 8 total: **$0.6237 of $1.25**; $0.63 left for S37b and S38b). Planned about $0.32; the first full recording found four guide misses and the user chose to fix them and record again ("Record again"; then "Second fix, then record").
   - Probe of the six sets S36a changed (drafts, feed, feed_safety, scheduling, learned_rules, autonomy), 101 cases: **$0.1315**, runs 836–880. Two misses (`feed-jess-gaps`: guide fix; `after-three-two-days`: grader corrected, the model was right). Re-probe, 14 cases: **$0.0089**, runs 881–887.
