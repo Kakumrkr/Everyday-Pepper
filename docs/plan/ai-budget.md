@@ -46,7 +46,7 @@ Runs labelled `P7`. The runner refuses a run whose worst-case estimate would tak
   - The new held-out case `in-three-days` (after the review): **$0.0004**, run 835 (834 failed before the database was ready, $0).
   - A typical member turn cost **$0.00085** on average (p95 $0.0014); the three moves that hand over to Sol after step 4 cost about $0.024 a turn.
 
-## Phase 8 ($1.25 cap, $1.75 from S38a; [playbook §4](phase-8-playbook.md))
+## Phase 8 ($1.25 cap, $1.75 from S38a, $2.00 from S38b; [playbook §4](phase-8-playbook.md))
 
 Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b probe`; it counts the same). The runner refuses a run whose worst-case estimate would take Phase 8 past its cap: $1.25, raised to $1.75 at the S38a brief (user: "Go with your recommendations") for S38b's full re-record and pass^3, planned about $0.75 ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)).
 
@@ -62,6 +62,13 @@ Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b prob
   - Probes of `waitlist` and `feed_safety`: **$0.1276** in 25 runs (1194–1218; 22, 7, 22 and 1 cases). The first found case errors (free times in the world, two Saras, a client staff can't see); the third found the guide's ask-again (`add_to_waitlist` fixed); the fourth one more full window.
   - Full recording, 248 cases, pass^1: **$0.2315** in 156 runs (1219–1374). The eval database stopped at its background time limit after part 32; parts 33–60 failed before any model call ($0) and parts 33–127 were run again. Every gate met but `autonomy` 10/11 (`move-done-no-approval-talk`, carried to S38, user).
   - Waitlist cases that hand over to Sol cost about $0.03 a case; the rest about $0.001.
+
+- **S38b (2026-10-25): $0.8080 in 466 runs** (Phase 8 total: **$1.7907 of $2.00**; all phases $3.80 of $5.00). Planned about $0.75 within $1.75; the `add_to_waitlist` guide fix needed a second full recording and the user raised the cap to $2.00 ("Fix, cap $2.00"). `--phase-estimate-ok` for the recordings (user: "Allow for S38b"), extended to the $4.50 stop's estimate (user: "Extend the flag"); `--max-cost 2` for 12 single-case pass^3 runs whose 3-trial worst case was $1.62 (user: "Allow, these runs only").
+  - Probe of `feed`, `feed_safety`, `autonomy` and scheduling, 84 cases: **$0.1417**, runs 1375–1415; re-probe of 3 cases: **$0.0009** (1416–1417).
+  - First full recording, 252 cases: **$0.1507** (1418–1546; the phase guard refused part 90 until the flag). Every gate met but `waitlist`.
+  - Waitlist trials 2–3 of 4 cases: **$0.0152** (1547–1550); waitlist probe after the fix: **$0.0449** (1551–1556).
+  - Second full recording, 252 cases: **$0.2505** (1557–1685). Every gate met; `wl-add-marco-saturday` and `wl-staff-own-client` carried to Phase 9 (user).
+  - pass^3 trials 2–3 on drafts, feed_safety, safety, permissions, memory_delete, memory_safety, autonomy, memory_recall, episodic, scheduling and `lr-blackout`, 167 cases: **$0.2042** (1686–1840). Every pass^3 gate met.
 
 ## Ledger
 

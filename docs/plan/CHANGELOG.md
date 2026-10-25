@@ -2,6 +2,14 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.32 — 2026-10-25
+- S38a + S38b (Phase 8e, **Phase 8 exit**): the daily briefing, the `waitlist_match` feed item and the public "Join the waitlist" ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)); every set re-recorded on Luna + Sol and pass^3 on the gated sets ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md) "Results (S38b)"); [security review](../engineering/security-review-s38.md).
+  - **Plan change (user):** the Phase 8 OpenAI cap goes from $1.25 to $1.75 (S38a brief) and to $2.00 (S38b, for the waitlist guide fix's second recording); spent $1.79. `--phase-estimate-ok` also passes the $4.50 stop's estimate, never its actual spend.
+  - `add_to_waitlist` v2; three eval cases fitted to the eval world; three security tests (the daily draft cap, the system tools attacked from the chat, an expired or used waitlist code).
+  - Carried to Phase 9 (user): `wl-add-marco-saturday`, `wl-staff-own-client` (named known misses; the full-window check moves into `add_to_waitlist`'s domain).
+
+  **Compatibility:** migrations 0049–0050 are additive (a feed item kind and `business:` subject in widened checks, nullable columns, a verification `purpose` that defaults to `booking`); `get_feed` v5, `find_availability` v4 and `add_to_waitlist` v2 keep their arguments.
+
 ## 0.31 — 2026-10-24
 - S34 (Phase 8a, **Phase 8 planning**): the [Phase 8 playbook](phase-8-playbook.md) (operator feed: rule-based insights, suggestions with drafts, the smart waitlist, the daily briefing; gates, sessions S35–S38, eval sets, security checks).
   - **Plan change ([PCR-006](changes/PCR-006.md), user):** insights and the morning run as `Periodic` passes, the waitlist through a queue fed from the cancellation's transaction; the model writes only drafts; `clients.email_opt_out_at` and one-click unsubscribe for rebooking nudges; `WaitlistOffer` (top 3 at once, first claim wins); tools `get_feed` and `add_to_waitlist` with a new dial action `waitlist.change`; the S33 leftovers in S36's guide batch. Phase 8 OpenAI cap $1.25.

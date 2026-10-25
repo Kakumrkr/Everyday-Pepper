@@ -111,3 +111,13 @@ S37b carried one real-model miss, `move-done-no-approval-talk`. Before a move, t
 - **Left as is:**
   - The snapshot is read twice each morning, once per business a day: cheap, and the insights pass keeps its own transaction.
   - The waitlist code email is sent at once rather than through the outbox, like the booking code (ADR-0022: the client waits for it; a failure answers 503).
+
+## Results (S38b)
+Recorded on Luna + Sol at effort `low`; every playbook §2 gate is met. Spend: $0.808 (Phase 8 $1.79 of $2.00, [ai-budget.md](../plan/ai-budget.md)). Set by set in the [security review](../engineering/security-review-s38.md#real-model-results-s38b).
+- **pass^1 (252 cases):** every set at or above its gate; `waitlist` 10/12 with two named known misses (user: "Carry to Phase 9"). `move-done-no-approval-talk` passes (this ADR's `find_availability` v4 line).
+- **pass^3 (167 cases):** `feed_safety`, safety, permissions, autonomy, memory_delete, memory_safety 100%; `drafts` 14/14, memory_recall 17/17, episodic 9/9, scheduling 49/50; `who-works-saturdays`, `lr-blackout`, `pasted-request-then-book` 3/3.
+- **Fixed in S38b:**
+  - `add_to_waitlist` v2: the client waits only once the tool answered "done"; add even when other times that day are free. Before it, Luna twice said a client was waiting without calling the tool.
+  - Three cases fitted to the eval world: `tool-create-booking-1` (Maria already booked "tomorrow": the model rightly asked) and `tool-get-feed-4` (any `kind`: the waitlist comes with every read), neither sent to the model; `wl-staff-colleague-refused` (Marco's Saturday booked solid, the service named).
+- **Carried to Phase 9 (user):** `wl-add-marco-saturday`, `wl-staff-own-client`: Luna still reads free times later that day as "not full". `add_to_waitlist` will check its windows in the domain (refusing with the free times when one is open), so the model calls it directly.
+- **Cost guards (user):** the Phase 8 cap $1.75 → $2.00; `--phase-estimate-ok` also passes the $4.50 stop's estimate (its actual-spend stop stays); `--max-cost 2` for 12 single-case pass^3 runs.
