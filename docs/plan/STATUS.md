@@ -5,7 +5,7 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S38a done; next S38b** (the "b" half). Merge branch `claude/s38a-daily-briefing` first (`git fetch origin claude/s38a-daily-briefing && git merge origin/claude/s38a-daily-briefing`). Then probe `feed`, `feed_safety`, `autonomy` and scheduling; record every set once (`/eval-record`, `--phase 8`, cap $1.75); pass^3 on the gated sets (playbook §2 and S33's). `move-done-no-approval-talk` must pass and `KNOWN_REAL_MODEL_MISSES` end empty. Then `security-review-s38.md`, the Phase 8 exit and one PR for both halves.
+**S38b (branch `claude/s38b-record-phase8-exit`, S38a merged).** Plan: (1) scripted evals green → (2) probe feed, feed_safety, autonomy, scheduling → (3) one full recording `--phase 8` → (4) pass^3 on the gated sets → (5) `KNOWN_REAL_MODEL_MISSES` empty → (6) `security-review-s38.md` → (7) Phase 8 exit docs → (8) `/session-close`, one PR. Gate missing after one fix, or `--phase-estimate-ok` needed → ask the user. **Next checkpoint:** after the probe.
 
 ## Last sessions
 - **S38a Phase 8e "a" (2026-10-25): the daily briefing, `waitlist_match`, "Join the waitlist", scripted only; branch `claude/s38a-daily-briefing` pushed without a PR** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)). Full entry in [session-log.md](session-log.md).
