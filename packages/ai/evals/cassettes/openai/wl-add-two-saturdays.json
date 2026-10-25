@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "be5d5129258d1038734967b013b4fef26917404f00bdb0f800418238190760f0",
+        "fingerprint": "9bac0f9d6a6ebaeb595708d672dcdc676ad51fdfb4f7cec562073af891df2e86",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_KPigzQsEfr4MO2fxYH6xchMW",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9872,
-            "cacheWriteTokens": 27,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "c5924dbae474b0b75f78be1f6278db3449f6ab8489293a6cd0f4eb5b5552084c",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_yVZ2OOdKDs9SziETcdy52vuy",
+              "id": "call_rMJ6i4XUdxLnXciMCqgZoQlt",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -38,43 +16,65 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10366,
-            "cachedInputTokens": 9899,
-            "cacheWriteTokens": 464,
+            "inputTokens": 9916,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 27,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "31f78315fb75a14ea2984e1a048b6b48d95f2a463bc6076b823545a240425b9c",
+        "fingerprint": "c4b77f9fb2e916cdc8335b35a85da6febcfd7703860d42f9fd00b49a21786adb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_L0CXwU4T0B53q4P8qk1mlpqb",
-              "name": "find_availability",
-              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"days\":7,\"notBefore\":null}"
+              "id": "call_LIeQsvgj8jEGLPSER8Uj9Gxo",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10449,
-            "cachedInputTokens": 10363,
-            "cacheWriteTokens": 83,
-            "outputTokens": 87
+            "inputTokens": 10000,
+            "cachedInputTokens": 9913,
+            "cacheWriteTokens": 84,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "75020d020d38faf5efd970da1d0bbd009c522447ec424e5a47476d257172de05",
+        "fingerprint": "d1aa3f7536121a3d111c35493e3d1e1881edb0eaceb45b3c1310ae26a90ee47c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_3p7C8wM1wNPuSjorLShewepg",
+              "id": "call_QtnLfFznPKDpFB5im9cnIzwu",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-07\",\"days\":1,\"notBefore\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10456,
+            "cachedInputTokens": 9997,
+            "cacheWriteTokens": 456,
+            "outputTokens": 86
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cafa760543a5e1a2a957e8b374d8fd98dde37fa71e9e97ca20ed0ae80800dd37",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5icVAiuAgCVJEcBuD7uKBfbG",
               "name": "find_availability",
               "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-14\",\"days\":1,\"notBefore\":null}"
             }
@@ -82,21 +82,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 11156,
-            "cachedInputTokens": 10446,
-            "cacheWriteTokens": 707,
-            "outputTokens": 87
+            "inputTokens": 10879,
+            "cachedInputTokens": 10453,
+            "cacheWriteTokens": 423,
+            "outputTokens": 86
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "646e8ab357637348b0055171912384fee5606d31ce2fe73fbd9b833d2e2ccd92",
+        "fingerprint": "0f2bec3b4eb2d4fef308e6b070218bd349a173eef8cf5a43c5bfc55ec38e39ae",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_m9cKQJFqKxRyCwG8ogH7WcMr",
+              "id": "call_jVD0QBQc2Z9NdvQ7tf9RdVuK",
               "name": "add_to_waitlist",
               "arguments": "{\"clientId\":\"{{client:ana}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"windows\":[{\"date\":\"2026-11-07\",\"start\":\"10:00\",\"end\":\"12:00\"},{\"date\":\"2026-11-14\",\"start\":\"10:00\",\"end\":\"12:00\"}]}"
             }
@@ -104,18 +104,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 11580,
-            "cachedInputTokens": 9872,
-            "cacheWriteTokens": 1705,
+            "inputTokens": 11302,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 11299,
             "outputTokens": 142
           },
           "model": "gpt-6.1-sol"
         }
       },
       {
-        "fingerprint": "463e866b4b09d9b3f51af601d107e929284378649222751058c3662ccd61deae",
+        "fingerprint": "cccd3562bef405771e8b4f4a149266506f241caa48049adb87f1a82e8c9b7461",
         "response": {
-          "text": "Ana is on the waitlist for a haircut with Marco before noon on Saturdays November 7 and 14. Both mornings are full; Pepper will offer her a matching opening if one frees up.\n\nThere are afternoon slots available on both dates from 1:45 pm.",
+          "text": "Ana is on the waitlist for a haircut with Marco before noon on November 7 and 14. Both mornings are full; Pepper will offer her a matching opening if one frees up.\n\nIf afternoons work, both Saturdays have slots from 1:45 pm.",
           "toolCalls": [],
           "replay": [
             {
@@ -125,10 +125,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11804,
-            "cachedInputTokens": 11577,
+            "inputTokens": 11526,
+            "cachedInputTokens": 11299,
             "cacheWriteTokens": 224,
-            "outputTokens": 58
+            "outputTokens": 57
           },
           "model": "gpt-6.1-sol"
         }

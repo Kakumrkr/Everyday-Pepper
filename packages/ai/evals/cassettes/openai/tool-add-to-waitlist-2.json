@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "dd7a334e42249e020867dc33ed31fdfcfe5b34fdeaf9dc24b83ab970496dc3a0",
+        "fingerprint": "918ffe9c8ea601e63eb554fd4beed7ae54dd2da51d9fcb78b43697d3ab737d0e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_H44H4LYh7ngnRQaqrqGX99GV",
+              "id": "call_mGHzb3NAZpu2mKOSjpVi9l6O",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9891,
-            "cachedInputTokens": 9872,
+            "inputTokens": 9905,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 16,
             "outputTokens": 16
           },
@@ -25,17 +25,17 @@
         }
       },
       {
-        "fingerprint": "ac3b01cb5ea11d3f18fa5cf3ab515be1b6dbddbd4af05b498750ce59565d72bc",
+        "fingerprint": "5648bd199d27b2067e390980a4d2a7cac7607e1e5075c690fbde5a39f34020f4",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_RFBHbILuS34W2FSvH0RSyfs3",
+              "id": "call_2lCHFgaR8A3kDrfbPiup4pd3",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             },
             {
-              "id": "call_idIaZY9teHFKoCyU2gmpuuiC",
+              "id": "call_kxLo1bffxLcRURlHQlfUfPze",
               "name": "find_availability",
               "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"12:00\"}"
             }
@@ -43,48 +43,40 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10354,
-            "cachedInputTokens": 9888,
-            "cacheWriteTokens": 463,
-            "outputTokens": 98
+            "inputTokens": 10343,
+            "cachedInputTokens": 9902,
+            "cacheWriteTokens": 438,
+            "outputTokens": 94
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "54fb1166a741b776074254ab1224dd7dbc9a66aa2b0809239ad426cdbcae4630",
+        "fingerprint": "03d7e41e5cfd2062bad64d9aef24e2564aebe0f357c018d8ea5e7fccbbb2c122",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_04WGiEuXX6w0arQdKLVAS6dn",
+              "id": "call_M6KEryNqLPMhGXQt24gZoQEV",
               "name": "add_to_waitlist",
               "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"windows\":[{\"date\":\"2026-11-06\",\"start\":\"12:00\",\"end\":\"17:00\"}]}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_0b09fa92d4d6932d016addf0da62a087d2ba1dbc169079c545",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3fDbEg0JmKONprYJi3AwiP7M6Lg9VXzpnIwi0immEteqSTCKrfPmv0hTVMRqX0FajYV6uYm4n-5oUEJmUrtgErWtf987270YyEuUtFvlsbFMlkmMr9yAgU_f8GfaI10CibFkmrlJR3g3aJrxPbnn1mX56eowxblR5zRBhV9FZQmF3iwAKTCQVKGGFjcGBFBVbdzh4suoApB1w0ldgADIyCauc9VFAiNlIVj0U25K_ge_G3qruFnz9SuSqvluQDeeMwngHZ7wcGSiLB2vI4eQt4_XrgbkAUM1eLuKoomI4Rgxj2SAuhOTdY4yZVUT7HI5U4xvk-dlz-lGQb8-cqkiVTiDn1FtR5GO9KCbueQ9oAQdfEAB1wg-5N8ixpq4dKvlvCzj-5H7dVOJyMXJgkwJRTY6orOhgD1D0eo84z1ZfTSrT71B2-TCIkPCcJ_1XheiF-xiBnaO8Z4Dq-Zllfp1oy7uBGIzynQvUNjQGzGSHvyXyTqd-iv_AFQPlT3EJh3gLDuH117S1sQOJ4MAcabKGmvm-SKxMdesIlwD6_8Hyb0572mS9JYzMIKNAlvHJM4JyD5Wjn9rgWGqvJ6mmz4QXYjwS2uUnTNCYJ6DNiKIvyuN4GryuVkbVqwuY5ZVp2XcsvTyJApyyqFx4AiqKOCYwN2ic0wim9ZDt3HWvlewcirmtNh76Z73T_K8f1QS8zR4B5tNMhsOjHz_pkJ8jA_aaryT-1lpYyo7UH8VSg0364qVFmOMmG81Nc-6DpBtNuZtBQ4tIJjGyM782KJJU23QvSMrcFDqhsY802QA-067qTfO39Jki9z0zZSBxxF1luzgIY2OYJ3kvHygYGsP48Jg4P6Gp4VF1FEDxPhnGvP0uuwxjSY6vHRb_RCEpYIg23Xz8IH0o2wnnIhs1KSOQqhS8U0wp5DwFcZXG2TyrcZcTh1ARp6Jh0criUjuXNBvmV4RP4sr0AR35MAH-cGn2dnGVS4qEPx8ff1FhKKZu2ef1zLkztaCewMfJ2eT-Hl7ICs2EIomb1WtZJYTXp_hFnyw-LUlSW7THRbmnNubRKr2XyyrB6JgTlQcridKaV8H2HPs95_PWSg0Tfe3m9z6xTfW7sb7tcJvYwOWy5pHNRXszaixS0ILD9SQXNb7rzcRMqc707ZP5_jC_dWTbVgkEe21C-kcqLnPTHq0Go9ESFvIM5YMKWPzqMY7inDOZ7nYBPTOuXVkRcKH1kp_3a2-Q5ErX9vspsmyAydvE0_o2xF3HTzQVKnmQbRFSIbSDh8Dg47Brt0Dgr9w7CqrTwiJoWSRmcOHYIPSk3e7sIR1ry087-veKKAHlMYijpkUSolrB0RKvwFWnL66tdBj-TtlYyFv7H-dePWOXJi_MU1VAGM4q7qBZa4XbtaR5sZhQkzwCuyRwMdQ8rbhE0lXakDs9-e4q3DO1zVEwqla_6HI57LYDEt0KYMQrUZwaBzX6DnOpLiMSAuBgKrqEVAuz0lfm72Z1ycRVRrULOKnhjrbA3ghJQXc7UcP21GbFfRo8e9lJpN6vpaCYG1mXTsCfBMbLuYrNobBA438Co_IpKSDgIKds5RPOnyeqd-lpSV5bFlVMOJVVZQhrpHwlj_94FiPOf8uy5WcYaI8arzF4nJibdUKoxWMejL-WtvQbEBH4R61LT1CjXv5aCg-frsyjdi7XUvxBOYCY7r4M48rM218K0DIQwCfR-Fn1IHjfp4hYd8Rv0kwEXkNEfauDHT-4DWKratv1mhjmNhm_vgqHh2ijo4yO5VOtwV-qbU_4meeUsYDLzX8FG0GQ-Hh07aYuBF7JELqpULrxfRxvsNyyBBimF-wjzmx1DSUch85ADCdmxeC0-39qPFfoUa_CI9tn48gPXui27I7LhZ3xLmJTOyyuSGBm199woWhzNdVMTnLkbfNBOYouyFqRDkAncCgIxequUmzZNL9y4ffu-bSJZ5SnvcgqaBv85JtPxECOnybtjbGicv9hBUrz_NgtEsJ7sH4ckM5jXhYNQ==",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10558,
-            "cachedInputTokens": 10351,
-            "cacheWriteTokens": 204,
-            "outputTokens": 147
+            "inputTokens": 10545,
+            "cachedInputTokens": 10340,
+            "cacheWriteTokens": 202,
+            "outputTokens": 97
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "55783c0a5f63149f3b84c2d960b013f4d14d504f29a16b01d92e920fa4729301",
+        "fingerprint": "576d63291ccd86be6f72849e6abbd8faae20e3994fcc0899b8d587fff2bb3378",
         "response": {
-          "text": "Sara K. is on the waitlist for a haircut with anyone this Friday, Nov 6, from noon to 5 PM. If a matching time opens, Pepper will offer it automatically.",
+          "text": "Sara K. is on the waitlist for a haircut with anyone Friday, November 6, from noon to 5 PM. Pepper will offer her a matching time if one opens up.",
           "toolCalls": [],
           "replay": [
             {
@@ -94,10 +86,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10770,
-            "cachedInputTokens": 10555,
-            "cacheWriteTokens": 212,
-            "outputTokens": 43
+            "inputTokens": 10707,
+            "cachedInputTokens": 10542,
+            "cacheWriteTokens": 162,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }

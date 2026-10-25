@@ -35611,6 +35611,164 @@
         }
       },
       "charsPerToken": 3.7283987446750118
+    },
+    {
+      "id": 1551,
+      "at": "2026-10-25T12:23:31.089Z",
+      "label": "P8 S38b waitlist probe part 1/6",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.486,
+      "actualUsd": 0.00244031,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 83229,
+          "cachedInputTokens": 71441,
+          "cacheWriteTokens": 11764,
+          "outputTokens": 506,
+          "usd": 0.00244031,
+          "latencyMsP50": 1622.9448359999997,
+          "latencyMsP95": 2259.9705400000003
+        }
+      },
+      "charsPerToken": 3.7411839623208256
+    },
+    {
+      "id": 1552,
+      "at": "2026-10-25T12:23:40.812Z",
+      "label": "P8 S38b waitlist probe part 2/6",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48624,
+      "actualUsd": 0.033278049999999997,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 82994,
+          "cachedInputTokens": 81000,
+          "cacheWriteTokens": 1970,
+          "outputTokens": 560,
+          "usd": 0.00133865,
+          "latencyMsP50": 1505.4338939999998,
+          "latencyMsP95": 2229.450877
+        },
+        "gpt-6.1-sol": {
+          "calls": 2,
+          "inputTokens": 22828,
+          "cachedInputTokens": 11299,
+          "cacheWriteTokens": 11523,
+          "outputTokens": 199,
+          "usd": 0.0319394,
+          "latencyMsP50": 2674.6376009999985,
+          "latencyMsP95": 3658.1223609999997
+        }
+      },
+      "charsPerToken": 3.7281472661639357
+    },
+    {
+      "id": 1553,
+      "at": "2026-10-25T12:23:56.174Z",
+      "label": "P8 S38b waitlist probe part 3/6",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485565,
+      "actualUsd": 0.0005409849999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40195,
+          "cachedInputTokens": 39566,
+          "cacheWriteTokens": 617,
+          "outputTokens": 134,
+          "usd": 0.0005409849999999999,
+          "latencyMsP50": 1160.6831740000002,
+          "latencyMsP95": 1622.022813
+        }
+      },
+      "charsPerToken": 3.721159348177634
+    },
+    {
+      "id": 1554,
+      "at": "2026-10-25T12:24:00.739Z",
+      "label": "P8 S38b waitlist probe part 4/6",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485775,
+      "actualUsd": 0.00208661,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61701,
+          "cachedInputTokens": 50131,
+          "cacheWriteTokens": 11552,
+          "outputTokens": 279,
+          "usd": 0.00208661,
+          "latencyMsP50": 1480.4698859999999,
+          "latencyMsP95": 2302.2641060000005
+        }
+      },
+      "charsPerToken": 3.7463088118506995
+    },
+    {
+      "id": 1555,
+      "at": "2026-10-25T12:24:10.315Z",
+      "label": "P8 S38b waitlist probe part 5/6",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48573,
+      "actualUsd": 0.000579905,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40620,
+          "cachedInputTokens": 40033,
+          "cacheWriteTokens": 575,
+          "outputTokens": 213,
+          "usd": 0.000579905,
+          "latencyMsP50": 1506.725082,
+          "latencyMsP95": 2173.004897
+        }
+      },
+      "charsPerToken": 3.720654849827671
+    },
+    {
+      "id": 1556,
+      "at": "2026-10-25T12:24:17.944Z",
+      "label": "P8 S38b waitlist probe part 6/6",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48594,
+      "actualUsd": 0.005974595,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 83079,
+          "cachedInputTokens": 81272,
+          "cacheWriteTokens": 1783,
+          "outputTokens": 569,
+          "usd": 0.001322495,
+          "latencyMsP50": 1324.9513909999996,
+          "latencyMsP95": 3191.026301
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 11136,
+          "cachedInputTokens": 9886,
+          "cacheWriteTokens": 1247,
+          "outputTokens": 54,
+          "usd": 0.0046521,
+          "latencyMsP50": 2131.4689020000005,
+          "latencyMsP95": 2131.4689020000005
+        }
+      },
+      "charsPerToken": 3.7435334076314812
     }
   ]
 }
