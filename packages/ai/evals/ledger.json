@@ -31810,6 +31810,1055 @@
       "actualUsd": 0,
       "byModel": {},
       "charsPerToken": null
+    },
+    {
+      "id": 1375,
+      "at": "2026-10-25T11:43:07.763Z",
+      "label": "P8 S38b probe part 1/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48504,
+      "actualUsd": 0.0022599250000000003,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 81754,
+          "cachedInputTokens": 70615,
+          "cacheWriteTokens": 11115,
+          "outputTokens": 324,
+          "usd": 0.0022599250000000003,
+          "latencyMsP50": 1722.073625,
+          "latencyMsP95": 2354.253791
+        }
+      },
+      "charsPerToken": 3.725701494728087
+    },
+    {
+      "id": 1376,
+      "at": "2026-10-25T11:43:16.786Z",
+      "label": "P8 S38b probe part 2/41",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.24261,
+      "actualUsd": 0.000532745,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40509,
+          "cachedInputTokens": 39992,
+          "cacheWriteTokens": 505,
+          "outputTokens": 137,
+          "usd": 0.000532745,
+          "latencyMsP50": 1238.4990100000002,
+          "latencyMsP95": 1630.4194309999998
+        }
+      },
+      "charsPerToken": 3.730232787775556
+    },
+    {
+      "id": 1377,
+      "at": "2026-10-25T11:43:24.080Z",
+      "label": "P8 S38b probe part 3/41",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.539055,
+      "actualUsd": 0.000655035,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50905,
+          "cachedInputTokens": 50341,
+          "cacheWriteTokens": 549,
+          "outputTokens": 163,
+          "usd": 0.000655035,
+          "latencyMsP50": 1321.9504740000002,
+          "latencyMsP95": 1371.8530450000003
+        }
+      },
+      "charsPerToken": 3.7318534525095766
+    },
+    {
+      "id": 1378,
+      "at": "2026-10-25T11:43:32.722Z",
+      "label": "P8 S38b probe part 4/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484995,
+      "actualUsd": 0.0294808,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50334,
+          "cachedInputTokens": 49845,
+          "cacheWriteTokens": 474,
+          "outputTokens": 222,
+          "usd": 0.0006701999999999999,
+          "latencyMsP50": 1586.150435,
+          "latencyMsP95": 2099.368666
+        },
+        "gpt-6.1-sol": {
+          "calls": 2,
+          "inputTokens": 21352,
+          "cachedInputTokens": 10611,
+          "cacheWriteTokens": 10735,
+          "outputTokens": 90,
+          "usd": 0.028810600000000002,
+          "latencyMsP50": 1645.4992020000009,
+          "latencyMsP95": 2150.549853999999
+        }
+      },
+      "charsPerToken": 3.728998688725832
+    },
+    {
+      "id": 1379,
+      "at": "2026-10-25T11:43:44.158Z",
+      "label": "P8 S38b probe part 5/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48492,
+      "actualUsd": 0.0006638099999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50553,
+          "cachedInputTokens": 49856,
+          "cacheWriteTokens": 682,
+          "outputTokens": 157,
+          "usd": 0.0006638099999999999,
+          "latencyMsP50": 1228.13035,
+          "latencyMsP95": 1655.3735800000004
+        }
+      },
+      "charsPerToken": 3.7219749569758473
+    },
+    {
+      "id": 1380,
+      "at": "2026-10-25T11:43:49.907Z",
+      "label": "P8 S38b probe part 6/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485205,
+      "actualUsd": 0.00225616,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 81789,
+          "cachedInputTokens": 70651,
+          "cacheWriteTokens": 11114,
+          "outputTokens": 316,
+          "usd": 0.00225616,
+          "latencyMsP50": 1362.0566340000005,
+          "latencyMsP95": 3209.552611000001
+        }
+      },
+      "charsPerToken": 3.726161219723924
+    },
+    {
+      "id": 1381,
+      "at": "2026-10-25T11:43:59.849Z",
+      "label": "P8 S38b probe part 7/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484875,
+      "actualUsd": 0.00185633,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 41528,
+          "cachedInputTokens": 29638,
+          "cacheWriteTokens": 11878,
+          "outputTokens": 148,
+          "usd": 0.00185633,
+          "latencyMsP50": 1816.6331119999998,
+          "latencyMsP95": 2636.523893
+        }
+      },
+      "charsPerToken": 3.696132729724523
+    },
+    {
+      "id": 1382,
+      "at": "2026-10-25T11:44:06.297Z",
+      "label": "P8 S38b probe part 8/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.50805,
+      "actualUsd": 0.001943435,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 42171,
+          "cachedInputTokens": 29636,
+          "cacheWriteTokens": 12523,
+          "outputTokens": 161,
+          "usd": 0.001943435,
+          "latencyMsP50": 1386.6003440000002,
+          "latencyMsP95": 2884.6777210000005
+        }
+      },
+      "charsPerToken": 3.6816532688340327
+    },
+    {
+      "id": 1383,
+      "at": "2026-10-25T11:44:12.705Z",
+      "label": "P8 S38b probe part 9/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48489,
+      "actualUsd": 0.000981815,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 51617,
+          "cachedInputTokens": 49869,
+          "cacheWriteTokens": 1733,
+          "outputTokens": 530,
+          "usd": 0.000981815,
+          "latencyMsP50": 1545.0848549999996,
+          "latencyMsP95": 3891.940325
+        }
+      },
+      "charsPerToken": 3.750372939147955
+    },
+    {
+      "id": 1384,
+      "at": "2026-10-25T11:44:21.297Z",
+      "label": "P8 S38b probe part 10/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.50811,
+      "actualUsd": 0.00070091,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 41561,
+          "cachedInputTokens": 39521,
+          "cacheWriteTokens": 2028,
+          "outputTokens": 102,
+          "usd": 0.00070091,
+          "latencyMsP50": 1623.0520559999995,
+          "latencyMsP95": 1775.37137
+        }
+      },
+      "charsPerToken": 3.693197950001203
+    },
+    {
+      "id": 1385,
+      "at": "2026-10-25T11:44:27.137Z",
+      "label": "P8 S38b probe part 11/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484935,
+      "actualUsd": 0.000708475,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 41560,
+          "cachedInputTokens": 39515,
+          "cacheWriteTokens": 2033,
+          "outputTokens": 116,
+          "usd": 0.000708475,
+          "latencyMsP50": 1670.9029049999997,
+          "latencyMsP95": 3067.8643810000003
+        }
+      },
+      "charsPerToken": 3.6938642925890277
+    },
+    {
+      "id": 1386,
+      "at": "2026-10-25T11:44:33.900Z",
+      "label": "P8 S38b probe part 12/41",
+      "status": "completed",
+      "cases": 5,
+      "trials": 1,
+      "estimateUsd": 0.554445,
+      "actualUsd": 0.00082573,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 42275,
+          "cachedInputTokens": 39503,
+          "cacheWriteTokens": 2760,
+          "outputTokens": 169,
+          "usd": 0.00082573,
+          "latencyMsP50": 1751.3568809999997,
+          "latencyMsP95": 2143.541914
+        }
+      },
+      "charsPerToken": 3.68193968066233
+    },
+    {
+      "id": 1387,
+      "at": "2026-10-25T11:44:40.492Z",
+      "label": "P8 S38b probe part 13/41",
+      "status": "completed",
+      "cases": 3,
+      "trials": 1,
+      "estimateUsd": 0.53157,
+      "actualUsd": 0.00033716499999999995,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 2,
+          "inputTokens": 19783,
+          "cachedInputTokens": 19744,
+          "cacheWriteTokens": 33,
+          "outputTokens": 270,
+          "usd": 0.00033716499999999995,
+          "latencyMsP50": 1912.2570860000003,
+          "latencyMsP95": 3103.7797659999997
+        }
+      },
+      "charsPerToken": 3.7237527169792246
+    },
+    {
+      "id": 1388,
+      "at": "2026-10-25T11:44:45.790Z",
+      "label": "P8 S38b probe part 14/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485115,
+      "actualUsd": 0.00067264,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 41313,
+          "cachedInputTokens": 39519,
+          "cacheWriteTokens": 1782,
+          "outputTokens": 107,
+          "usd": 0.00067264,
+          "latencyMsP50": 1420.137032,
+          "latencyMsP95": 1621.0701869999998
+        }
+      },
+      "charsPerToken": 3.6987873066589207
+    },
+    {
+      "id": 1389,
+      "at": "2026-10-25T11:44:50.726Z",
+      "label": "P8 S38b probe part 15/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48507,
+      "actualUsd": 0.02932267,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60931,
+          "cachedInputTokens": 50037,
+          "cacheWriteTokens": 10876,
+          "outputTokens": 325,
+          "usd": 0.00202417,
+          "latencyMsP50": 1472.261535999999,
+          "latencyMsP95": 1792.6592410000003
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 10728,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 10725,
+          "outputTokens": 48,
+          "usd": 0.0272985,
+          "latencyMsP50": 1964.3860720000011,
+          "latencyMsP95": 1964.3860720000011
+        }
+      },
+      "charsPerToken": 3.785763128148593
+    },
+    {
+      "id": 1390,
+      "at": "2026-10-25T11:45:01.481Z",
+      "label": "P8 S38b probe part 16/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48525,
+      "actualUsd": 0.001078495,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 62520,
+          "cachedInputTokens": 59957,
+          "cacheWriteTokens": 2545,
+          "outputTokens": 318,
+          "usd": 0.001078495,
+          "latencyMsP50": 1344.7096520000002,
+          "latencyMsP95": 2294.1398779999995
+        }
+      },
+      "charsPerToken": 3.7039347408829175
+    },
+    {
+      "id": 1391,
+      "at": "2026-10-25T11:45:08.818Z",
+      "label": "P8 S38b probe part 17/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48507,
+      "actualUsd": 0.0008011450000000001,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 51443,
+          "cachedInputTokens": 49877,
+          "cacheWriteTokens": 1551,
+          "outputTokens": 214,
+          "usd": 0.0008011450000000001,
+          "latencyMsP50": 1331.4932790000003,
+          "latencyMsP95": 1681.2238909999996
+        }
+      },
+      "charsPerToken": 3.7043135120424546
+    },
+    {
+      "id": 1392,
+      "at": "2026-10-25T11:45:15.068Z",
+      "label": "P8 S38b probe part 18/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48513,
+      "actualUsd": 0.0011396999999999998,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 72665,
+          "cachedInputTokens": 70660,
+          "cacheWriteTokens": 1984,
+          "outputTokens": 366,
+          "usd": 0.0011396999999999998,
+          "latencyMsP50": 1554.8186799999999,
+          "latencyMsP95": 1907.163971
+        }
+      },
+      "charsPerToken": 3.706516204500103
+    },
+    {
+      "id": 1393,
+      "at": "2026-10-25T11:45:22.402Z",
+      "label": "P8 S38b probe part 19/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485055,
+      "actualUsd": 0.001064035,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 71654,
+          "cachedInputTokens": 70206,
+          "cacheWriteTokens": 1427,
+          "outputTokens": 363,
+          "usd": 0.001064035,
+          "latencyMsP50": 1492.6367699999998,
+          "latencyMsP95": 2398.690049
+        }
+      },
+      "charsPerToken": 3.7179920171937364
+    },
+    {
+      "id": 1394,
+      "at": "2026-10-25T11:45:30.045Z",
+      "label": "P8 S38b probe part 20/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484875,
+      "actualUsd": 0.0019466649999999998,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60605,
+          "cachedInputTokens": 49874,
+          "cacheWriteTokens": 10713,
+          "outputTokens": 214,
+          "usd": 0.0019466649999999998,
+          "latencyMsP50": 1475.2088189999995,
+          "latencyMsP95": 2279.78426
+        }
+      },
+      "charsPerToken": 3.7223001402524543
+    },
+    {
+      "id": 1395,
+      "at": "2026-10-25T11:45:39.006Z",
+      "label": "P8 S38b probe part 21/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48495,
+      "actualUsd": 0.000912615,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61485,
+          "cachedInputTokens": 59844,
+          "cacheWriteTokens": 1623,
+          "outputTokens": 219,
+          "usd": 0.000912615,
+          "latencyMsP50": 1520.008409,
+          "latencyMsP95": 1739.731884
+        }
+      },
+      "charsPerToken": 3.706432463202407
+    },
+    {
+      "id": 1396,
+      "at": "2026-10-25T11:45:45.056Z",
+      "label": "P8 S38b probe part 22/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484905,
+      "actualUsd": 0.0007250399999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 51008,
+          "cachedInputTokens": 49879,
+          "cacheWriteTokens": 1114,
+          "outputTokens": 171,
+          "usd": 0.0007250399999999999,
+          "latencyMsP50": 1369.8714409999998,
+          "latencyMsP95": 1611.4378469999997
+        }
+      },
+      "charsPerToken": 3.7116530740276037
+    },
+    {
+      "id": 1397,
+      "at": "2026-10-25T11:45:50.818Z",
+      "label": "P8 S38b probe part 23/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485085,
+      "actualUsd": 0.00606821,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 82208,
+          "cachedInputTokens": 70686,
+          "cacheWriteTokens": 11498,
+          "outputTokens": 352,
+          "usd": 0.00232251,
+          "latencyMsP50": 1271.2582180000009,
+          "latencyMsP95": 3306.693317
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 10892,
+          "cachedInputTokens": 9872,
+          "cacheWriteTokens": 1017,
+          "outputTokens": 21,
+          "usd": 0.0037457,
+          "latencyMsP50": 1560.316429999999,
+          "latencyMsP95": 1560.316429999999
+        }
+      },
+      "charsPerToken": 3.716004296455424
+    },
+    {
+      "id": 1398,
+      "at": "2026-10-25T11:45:59.904Z",
+      "label": "P8 S38b probe part 24/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485175,
+      "actualUsd": 0.001138205,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 72962,
+          "cachedInputTokens": 71048,
+          "cacheWriteTokens": 1893,
+          "outputTokens": 378,
+          "usd": 0.001138205,
+          "latencyMsP50": 1320.3003430000003,
+          "latencyMsP95": 2596.4150009999994
+        }
+      },
+      "charsPerToken": 3.700803157808174
+    },
+    {
+      "id": 1399,
+      "at": "2026-10-25T11:46:08.878Z",
+      "label": "P8 S38b probe part 25/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484965,
+      "actualUsd": 0.00123104,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 72817,
+          "cachedInputTokens": 70644,
+          "cacheWriteTokens": 2152,
+          "outputTokens": 507,
+          "usd": 0.00123104,
+          "latencyMsP50": 1328.4049380000001,
+          "latencyMsP95": 2905.5486789999995
+        }
+      },
+      "charsPerToken": 3.7098205089470864
+    },
+    {
+      "id": 1400,
+      "at": "2026-10-25T11:46:16.364Z",
+      "label": "P8 S38b probe part 26/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485265,
+      "actualUsd": 0.001164365,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 81633,
+          "cachedInputTokens": 80184,
+          "cacheWriteTokens": 1425,
+          "outputTokens": 364,
+          "usd": 0.001164365,
+          "latencyMsP50": 1287.425631,
+          "latencyMsP95": 1550.690043
+        }
+      },
+      "charsPerToken": 3.724400671297147
+    },
+    {
+      "id": 1401,
+      "at": "2026-10-25T11:46:23.644Z",
+      "label": "P8 S38b probe part 27/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484965,
+      "actualUsd": 0.00086685,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 61590,
+          "cachedInputTokens": 60230,
+          "cacheWriteTokens": 1342,
+          "outputTokens": 190,
+          "usd": 0.00086685,
+          "latencyMsP50": 1183.5176789999998,
+          "latencyMsP95": 1501.0854530000006
+        }
+      },
+      "charsPerToken": 3.709790550414028
+    },
+    {
+      "id": 1402,
+      "at": "2026-10-25T11:46:29.297Z",
+      "label": "P8 S38b probe part 28/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.485175,
+      "actualUsd": 0.007411725,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 72461,
+          "cachedInputTokens": 60505,
+          "cacheWriteTokens": 11935,
+          "outputTokens": 439,
+          "usd": 0.002318525,
+          "latencyMsP50": 1558.5405230000001,
+          "latencyMsP95": 3380.9641409999995
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 11363,
+          "cachedInputTokens": 9872,
+          "cacheWriteTokens": 1488,
+          "outputTokens": 38,
+          "usd": 0.0050932,
+          "latencyMsP50": 1904.2167249999993,
+          "latencyMsP95": 1904.2167249999993
+        }
+      },
+      "charsPerToken": 3.705585512502386
+    },
+    {
+      "id": 1403,
+      "at": "2026-10-25T11:46:38.811Z",
+      "label": "P8 S38b probe part 29/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48492,
+      "actualUsd": 0.0017168499999999998,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40330,
+          "cachedInputTokens": 29640,
+          "cacheWriteTokens": 10678,
+          "outputTokens": 169,
+          "usd": 0.0017168499999999998,
+          "latencyMsP50": 1291.045244,
+          "latencyMsP95": 2657.575957
+        }
+      },
+      "charsPerToken": 3.715521943962311
+    },
+    {
+      "id": 1404,
+      "at": "2026-10-25T11:47:00.675Z",
+      "label": "P8 S38b probe part 30/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48495,
+      "actualUsd": 0.0010237450000000002,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 7,
+          "inputTokens": 72106,
+          "cachedInputTokens": 70652,
+          "cacheWriteTokens": 1433,
+          "outputTokens": 272,
+          "usd": 0.0010237450000000002,
+          "latencyMsP50": 4943.29091,
+          "latencyMsP95": 5350.606162
+        }
+      },
+      "charsPerToken": 3.7147810168363242
+    },
+    {
+      "id": 1405,
+      "at": "2026-10-25T11:47:21.356Z",
+      "label": "P8 S38b probe part 31/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484845,
+      "actualUsd": 0.0007560449999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 6,
+          "inputTokens": 60046,
+          "cachedInputTokens": 59437,
+          "cacheWriteTokens": 591,
+          "outputTokens": 172,
+          "usd": 0.0007560449999999999,
+          "latencyMsP50": 2928.3665840000003,
+          "latencyMsP95": 3769.9618029999997
+        }
+      },
+      "charsPerToken": 3.730806381773973
+    },
+    {
+      "id": 1406,
+      "at": "2026-10-25T11:47:31.943Z",
+      "label": "P8 S38b probe part 32/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48477,
+      "actualUsd": 0.0005953449999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 49792,
+          "cachedInputTokens": 49472,
+          "cacheWriteTokens": 305,
+          "outputTokens": 122,
+          "usd": 0.0005953449999999999,
+          "latencyMsP50": 1417.237798,
+          "latencyMsP95": 1681.2885199999998
+        }
+      },
+      "charsPerToken": 3.731603470437018
+    },
+    {
+      "id": 1407,
+      "at": "2026-10-25T11:47:38.080Z",
+      "label": "P8 S38b probe part 33/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.4848,
+      "actualUsd": 0.000695895,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50918,
+          "cachedInputTokens": 49852,
+          "cacheWriteTokens": 1051,
+          "outputTokens": 129,
+          "usd": 0.000695895,
+          "latencyMsP50": 1254.400712,
+          "latencyMsP95": 1945.9105529999997
+        }
+      },
+      "charsPerToken": 3.7154248006598847
+    },
+    {
+      "id": 1408,
+      "at": "2026-10-25T11:47:44.300Z",
+      "label": "P8 S38b probe part 34/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484875,
+      "actualUsd": 0.00053179,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 40065,
+          "cachedInputTokens": 39509,
+          "cacheWriteTokens": 544,
+          "outputTokens": 135,
+          "usd": 0.00053179,
+          "latencyMsP50": 1654.1946490000005,
+          "latencyMsP95": 1732.448998
+        }
+      },
+      "charsPerToken": 3.7235741919381007
+    },
+    {
+      "id": 1409,
+      "at": "2026-10-25T11:47:49.301Z",
+      "label": "P8 S38b probe part 35/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48489,
+      "actualUsd": 0.00067562,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50573,
+          "cachedInputTokens": 49862,
+          "cacheWriteTokens": 696,
+          "outputTokens": 177,
+          "usd": 0.00067562,
+          "latencyMsP50": 1391.1636749999998,
+          "latencyMsP95": 2094.911663
+        }
+      },
+      "charsPerToken": 3.7694026456805014
+    },
+    {
+      "id": 1410,
+      "at": "2026-10-25T11:47:55.309Z",
+      "label": "P8 S38b probe part 36/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484725,
+      "actualUsd": 0.00044659,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 39648,
+          "cachedInputTokens": 39514,
+          "cacheWriteTokens": 122,
+          "outputTokens": 70,
+          "usd": 0.00044659,
+          "latencyMsP50": 1176.0918820000002,
+          "latencyMsP95": 1815.0620999999996
+        }
+      },
+      "charsPerToken": 3.7314870863599676
+    },
+    {
+      "id": 1411,
+      "at": "2026-10-25T11:47:59.928Z",
+      "label": "P8 S38b probe part 37/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48516,
+      "actualUsd": 0.00115921,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 82002,
+          "cachedInputTokens": 80356,
+          "cacheWriteTokens": 1622,
+          "outputTokens": 301,
+          "usd": 0.00115921,
+          "latencyMsP50": 1339.8976399999992,
+          "latencyMsP95": 1967.0085949999993
+        }
+      },
+      "charsPerToken": 3.721799468305651
+    },
+    {
+      "id": 1412,
+      "at": "2026-10-25T11:48:07.843Z",
+      "label": "P8 S38b probe part 38/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484935,
+      "actualUsd": 0.02859647,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 81891,
+          "cachedInputTokens": 80507,
+          "cacheWriteTokens": 1360,
+          "outputTokens": 321,
+          "usd": 0.00113797,
+          "latencyMsP50": 1383.2289339999998,
+          "latencyMsP95": 1724.0178099999998
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 10876,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 10873,
+          "outputTokens": 27,
+          "usd": 0.0274585,
+          "latencyMsP50": 1572.748874,
+          "latencyMsP95": 1572.748874
+        }
+      },
+      "charsPerToken": 3.7197063610982353
+    },
+    {
+      "id": 1413,
+      "at": "2026-10-25T11:48:17.095Z",
+      "label": "P8 S38b probe part 39/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48492,
+      "actualUsd": 0.001069435,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 80993,
+          "cachedInputTokens": 79966,
+          "cacheWriteTokens": 1003,
+          "outputTokens": 284,
+          "usd": 0.001069435,
+          "latencyMsP50": 1510.0413479999997,
+          "latencyMsP95": 1723.363379
+        }
+      },
+      "charsPerToken": 3.7279888385416022
+    },
+    {
+      "id": 1414,
+      "at": "2026-10-25T11:48:24.969Z",
+      "label": "P8 S38b probe part 40/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.484845,
+      "actualUsd": 0.00067219,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 5,
+          "inputTokens": 50525,
+          "cachedInputTokens": 49844,
+          "cacheWriteTokens": 666,
+          "outputTokens": 178,
+          "usd": 0.00067219,
+          "latencyMsP50": 1370.6443010000003,
+          "latencyMsP95": 1929.0973030000002
+        }
+      },
+      "charsPerToken": 3.722909450766947
+    },
+    {
+      "id": 1415,
+      "at": "2026-10-25T11:48:31.335Z",
+      "label": "P8 S38b probe part 41/41",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48507,
+      "actualUsd": 0.00500793,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 8,
+          "inputTokens": 83384,
+          "cachedInputTokens": 81558,
+          "cacheWriteTokens": 1802,
+          "outputTokens": 308,
+          "usd": 0.0011972299999999999,
+          "latencyMsP50": 1335.5369630000005,
+          "latencyMsP95": 4333.388756
+        },
+        "gpt-6.1-sol": {
+          "calls": 1,
+          "inputTokens": 10902,
+          "cachedInputTokens": 9872,
+          "cacheWriteTokens": 1027,
+          "outputTokens": 25,
+          "usd": 0.0038106999999999998,
+          "latencyMsP50": 2083.1707750000005,
+          "latencyMsP95": 2083.1707750000005
+        }
+      },
+      "charsPerToken": 3.723553868018582
+    },
+    {
+      "id": 1416,
+      "at": "2026-10-25T11:51:19.603Z",
+      "label": "P8 S38b re-probe part 1/2",
+      "status": "completed",
+      "cases": 2,
+      "trials": 1,
+      "estimateUsd": 0.48489,
+      "actualUsd": 0.000269785,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 1,
+          "inputTokens": 11070,
+          "cachedInputTokens": 9886,
+          "cacheWriteTokens": 1181,
+          "outputTokens": 46,
+          "usd": 0.000269785,
+          "latencyMsP50": 1692.361207,
+          "latencyMsP95": 1692.361207
+        }
+      },
+      "charsPerToken": 3.6552845528455284
+    },
+    {
+      "id": 1417,
+      "at": "2026-10-25T11:51:23.079Z",
+      "label": "P8 S38b re-probe part 2/2",
+      "status": "completed",
+      "cases": 1,
+      "trials": 1,
+      "estimateUsd": 0.24249,
+      "actualUsd": 0.0005820599999999999,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 4,
+          "inputTokens": 41284,
+          "cachedInputTokens": 40536,
+          "cacheWriteTokens": 736,
+          "outputTokens": 167,
+          "usd": 0.0005820599999999999,
+          "latencyMsP50": 1610.689045,
+          "latencyMsP95": 2959.1946530000005
+        }
+      },
+      "charsPerToken": 3.718559248134871
     }
   ]
 }

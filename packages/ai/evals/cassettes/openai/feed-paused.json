@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "28a442f38e701d538c1bdecf992d43b060e38a42424cbbcc16ba07e26387eec2",
+        "fingerprint": "0e611b1d1e2ca6ce439772ef178aea1d6b3dc8a935af8b227c54712205429b5b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_m6a2RcdksYFRC3tbGghrtzg8",
+              "id": "call_huOFF5PHV2Hmwdpbmfh906Rp",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9839,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9885,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 10,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "6c938c1ca38b51c1b59da8823bb5505fd681fb508cba93d2b9c2d31025676176",
+        "fingerprint": "19eaad0de6346d18dfbd0c64b8352a6f56d48773e447dca31a628a42181ff13c",
         "response": {
-          "text": "Suggestions are paused for the business, so there aren’t any to review today.",
+          "text": "Suggestions are paused for the business today, so there aren’t any to review.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9895,
-            "cachedInputTokens": 9836,
-            "cacheWriteTokens": 56,
+            "inputTokens": 9946,
+            "cachedInputTokens": 9882,
+            "cacheWriteTokens": 61,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"

@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "b6bbe66a6bb65f60e84330b998d148ce81fb6b8e1e1f9f0390c96252d9a67092",
+        "fingerprint": "e3f4a8f925e6ffce4c33203c127d8a8bf65c81b829152a59e7a8d0ca8ff62467",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wpxErOrw2son36ZK5eDxUZU0",
+              "id": "call_QD5acfh8cYldz2I1wxPCR2St",
               "name": "get_feed",
-              "arguments": "{\"kind\":null}"
+              "arguments": "{\"kind\":\"waitlist_match\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9839,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 9836,
-            "outputTokens": 18
+            "inputTokens": 9885,
+            "cachedInputTokens": 9872,
+            "cacheWriteTokens": 10,
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "56f27d76c6ef659b7ac6878c473f4a890e0a31a4297a4786deb6526fae69ecfb",
+        "fingerprint": "f7affde62d64ac621d7ccf441fb2ba69e8a0b6a9e8292b276d37a8f8fa20511f",
         "response": {
-          "text": "Two clients are on the waitlist:\n\nSara K. — Haircut with anyone, Saturday, Nov 7, 10:00 AM–1:00 PM.\nAna R. — Haircut with Jess, Friday, Nov 6, 9:00 AM–12:00 PM.",
+          "text": "Sara K. is waiting for a haircut with anyone on Saturday, November 7, from 10 AM to 1 PM. Ana R. is waiting for a haircut with Jess on Friday, November 6, from 9 AM to noon. Neither has been offered a time yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10122,
-            "cachedInputTokens": 9836,
-            "cacheWriteTokens": 283,
-            "outputTokens": 64
+            "inputTokens": 10175,
+            "cachedInputTokens": 9882,
+            "cacheWriteTokens": 290,
+            "outputTokens": 62
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "dda37ce28ffbcd04bc04855fc73e9adaec7a864b40a572d1a4618fefb117e667",
+        "fingerprint": "67d8e9eeca592ae6b2c799ca1b8c7a4b7f6ae9f7bf811caec18e5697099a1014",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_EhnmLkfJAz1pkptryH91lccn",
+              "id": "call_H88RaSafDZhTcpDkBrpKnOcO",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9886,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,32 +25,32 @@
         }
       },
       {
-        "fingerprint": "88ac5af553331334e7b1d752231b92b0bc0d2b6442a43448c91e3c28514897da",
+        "fingerprint": "cde8d6c039680134c5fb662e89d43b03dc583de71de45b68e22f4f39fc4505c0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6Tk5yIyoNmELAXrrakJkbafS",
+              "id": "call_bjA2z0iOZU3mK2emU7FIS6bg",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_gRG74YPMX7vi9gsARDaZq5hr",
+              "id": "call_eXPZ0RR5rKwQETIQkBX3eXFm",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_sFONnkmAxexU8X03oSKQ9rk4",
+              "id": "call_FoTItr4GzQ99P2VdX8FAKKmf",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_5sfCVG5pCzinrV9ZAj0i6kUr",
+              "id": "call_yxpVHPTQzwnYCgkP0st15OyX",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:jess}}\"}"
             },
             {
-              "id": "call_gkKbFu7miMCKeu8dH67812tP",
+              "id": "call_G7s6oUSEGEPSTVknwrOjrexx",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -58,18 +58,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10284,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 444,
-            "outputTokens": 230
+            "inputTokens": 10354,
+            "cachedInputTokens": 9883,
+            "cacheWriteTokens": 468,
+            "outputTokens": 270
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5c67e425e1f8a26ee62f530685c7a9e4e8752ba3a93a2914e9e2ffea1bff5992",
+        "fingerprint": "efa91a321a5b4684fda64cee2281f58885a044b4ad8c21d250739defbb94ec85",
         "response": {
-          "text": "Jess has 2 appointments this week: a haircut Tuesday at 3 PM and another Friday at 2 PM. She also has a blocked hour Tuesday from noon to 1 PM. No other bookings or blocked time Monday or Wednesday–Thursday.",
+          "text": "Jess has 2 appointments booked this week: Tuesday at 3 pm and Friday at 2 pm. She also has a blocked hour Tuesday from noon to 1 pm. Her other weekdays are currently clear.",
           "toolCalls": [],
           "replay": [
             {
@@ -79,10 +79,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11123,
-            "cachedInputTokens": 10281,
-            "cacheWriteTokens": 839,
-            "outputTokens": 53
+            "inputTokens": 11277,
+            "cachedInputTokens": 10351,
+            "cacheWriteTokens": 923,
+            "outputTokens": 46
           },
           "model": "gpt-6-luna"
         }

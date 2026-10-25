@@ -116,7 +116,8 @@ export const getFeed: ReadTool = {
       { say: 'Anything I should look at today?', args: { kind: null } },
       { say: 'Which regulars are due back?', args: { kind: 'rebooking_due' } },
       { say: 'Does Marco have open time this week?', args: { kind: 'schedule_gaps' } },
-      { say: "Who's on the waitlist?", args: { kind: null } },
+      // Any kind (S38b: the model chose waitlist_match): the waitlist comes with every read.
+      { say: "Who's on the waitlist?", args: { kind: { $any: true } } },
       { say: 'Brief me', args: { kind: null } },
     ],
   },

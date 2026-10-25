@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9c06e96ebb3633e12aded8434a933de58291a836936208d78086a6ee34390be4",
+        "fingerprint": "711e9d815bc3c72576ecfb924ae17f55cf72a56dcfb31f8a0b53a6cc33310084",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Bq8B7d1cbpnNOMxZAwMS5xMP",
+              "id": "call_DM96QtYR9Pbvf6NVPWqX7BWh",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9886,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,12 +25,34 @@
         }
       },
       {
-        "fingerprint": "806693f47f60a11015885947ec74f6129b09ca4c509fbb27c40d9a6948668533",
+        "fingerprint": "2c7611b30ca848231ca8519e5fc41a76d598d7b02ac4d0f641302ad0b3afce23",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_KcHGvG5mwDEDaFtK2IHyxAQd",
+              "id": "call_3sMJvxYctrXEyPozhZE7INqD",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9970,
+            "cachedInputTokens": 9883,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "14727394130e93d23dd7e9f9cb2e891e70dd3203d9c39654204a2e54fc2b731c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6IIdfBOfQZ7aLGWlB8xf7e1U",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -38,26 +60,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9923,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 83,
+            "inputTokens": 10254,
+            "cachedInputTokens": 9967,
+            "cacheWriteTokens": 284,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "88cd2f56a07db1e2225c6965ec105be6cf5615e6de920ab06a70825a1a748897",
+        "fingerprint": "09770c1fa8e9262c1561ed5969d466ac1daef805191ac8e5873fb2918593b1a3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OgUtNNmK8srlyiuqZCp98fcQ",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
-            },
-            {
-              "id": "call_86g2of3mUGUJXnoBDzK12W9I",
+              "id": "call_0dy0gYOclbEw6vNjrpGuLQxW",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:ana}}\"}"
             }
@@ -65,26 +82,43 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10007,
-            "cachedInputTokens": 9920,
-            "cacheWriteTokens": 84,
-            "outputTokens": 97
+            "inputTokens": 10336,
+            "cachedInputTokens": 10251,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "72dbc15644f3f492e17ea5a73c5e78ffa9431f3da38db6948d1d49181574a4ef",
+        "fingerprint": "0dd2d55731e66884a2c1bbe4a5b54ea1bda74e35885b571dc2c4738d4b1550a8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_IyaXuNPha2IccppzD423Actl",
+              "id": "call_UCwQsvuVVP5peZ1SS01XnPZM",
               "name": "cancel_booking",
               "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"emailClient\":null}"
-            },
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10614,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10611,
+            "outputTokens": 45
+          },
+          "model": "gpt-6.1-sol"
+        }
+      },
+      {
+        "fingerprint": "e81eca0415e752801669eadf1e00e0261f671d980cf51c80a8354b34160d232d",
+        "response": {
+          "text": "",
+          "toolCalls": [
             {
-              "id": "call_WM5cPLMCZjY94xWD80w7vRS3",
+              "id": "call_hc2ob7PQtcyu0AgJNojdxheG",
               "name": "cancel_booking",
               "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":null}"
             }
@@ -92,31 +126,10 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10591,
-            "cachedInputTokens": 10004,
-            "cacheWriteTokens": 584,
-            "outputTokens": 101
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "47c35cd2089e92a5f56859859202e4935a8c487265c50c9028273ff712a6650b",
-        "response": {
-          "text": "Both cancellations are ready for your approval: Maria tomorrow at 3pm and Ana Friday at 2pm, both with Jess. Nothing has changed yet—approve each card to cancel.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 10848,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 10845,
-            "outputTokens": 41
+            "inputTokens": 10738,
+            "cachedInputTokens": 10611,
+            "cacheWriteTokens": 124,
+            "outputTokens": 45
           },
           "model": "gpt-6.1-sol"
         }

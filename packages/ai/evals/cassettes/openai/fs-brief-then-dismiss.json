@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "74a2c6e6e5f5c94e7f413cdc91f37b59180c88ddd07a40e2a09996eec3074645",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HoDYd5QBM1aNN10iiNkfrX42",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9889,
+            "cachedInputTokens": 9872,
+            "cacheWriteTokens": 14,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a1df90756002ac3e8eab2163ed0b8a6c16d6ddeff0c453a3698682b71531380c",
+        "response": {
+          "text": "Today is Monday, November 2: there are no bookings, 2 open schedule gaps, and 2 regulars due back (Sara K. and Sarah P.). There are no items waiting for your OK and nobody on the waitlist. The feed shows 13 suggestions, mostly schedule gaps through Saturday.\n\nI can’t clear or dismiss feed items; you’ll need to dismiss suggestions on their cards on Home.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0194044cd446ac09016addebc0ae9487d297c471a57add7a0f",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3evBCA_RDXIhaLOpa0QcrT3UK4CRTshpsWU-rwFaYdO6JR4CbIxlB42jcnyrLxKGAhXv2V_aVHtjX-6UOGGUP7kUyYNYLRveaU8bnZXuTN0xhxkwEc0Y1RCEFMFPn9zF0fPNtPTaQptrjHCJY4KGlP9Ea3Y2vRpnNWJ3HAEu2cxcYZwk2QgD481tZ9vV_z06t-56pQqjRTWHIvXGTrADUosw_8OA90uvMmjqsUEzbM23AYFtd4Wdx6ZHu4aTozlA1RNNBm7lg8JrCduyprYJWmKje83QzHDitC_aeh6DVPN4pgm1bpXH1tJORfgkE3BDjMPpa6sSD05n_OhnEzyIx2Md2rXK0L2AnOb-51reba6Z7JSA3j2PhG4pPHe-HEF_wj3qV_41D1zJctUApj-_Ivmyk7oGM_KmTUguUVJ85ipJTmDJHszhXnFh_no5Ti2UhEBkH66GkBjmwetE56atIdKp6IlHulQkxsSlh0vt2kPxz1DeC6riSPddP0IzzmRDTphieB0HtQok04khVEPd9DVmQHnGNAOEN27mtcF_7oqIDLbxV-dcnAU1G_7aNvXbfQVAgdGYfsNoV67sTp72ktwAS3jNx4dx1iVERO3aIVnze-YsZEMyiiKzA1jvYWqSWVkPWQQI_xJOygCZSTwVLn9hMFpSDwzuh2AgkvOE6ewSPpmuwxD1JNPu7mACJWCnM72YiMrVQmJG2ayRboZgNYIy3xgN2sTi_UFEGLA41lxqb9afYx21z5bJ8H5K_6Ud3z4zWfwICbPXUUwpV0GmvZ8nB5fMgCwtlr7S4mTAae9DBBNbWuIB7avLWObw-_uGHNxgoPDjWik_Uc6c4JOvT04q8-4xPAsrr9BEMLcParxRNwpAAYgm2DTzuzHA7pD3nHeudEAQI18wHnTkaF0ID7YRqdoU6yUlctR6L4yxpL6sdWZ3SGZFXvBAxEhAryL4RyNpXFo5i68zxpQ3tqRUE3_DEjQd6QvfSHuZwAZaquQhxQplbcqvAddZnDRKVPzGE-RFinfDo4ssn19WKUri9aIZ67jip1cmMWYQia3D-qnO8Ig4fWU4dv9cQI04I9VYNdJVMdlZZ9Rbdv2f7QNNosjMXinexdiY8bcdGECjDENHbiq5Vy6phkDryotpTwqKbnZrmVB_2m349-nTUB8APdm7cZ6FbnsmJKwOpbU9R4SLyVLkC9svUs-6pvEk8O4K3ynA6T1E0ZRw09cdDszTApdybOaBzuCxYeFh5lYTx0rbyjkqj7bzx0nckVog0KsdgOvs_UIpqDHePWbOP6IdesxifuJaKhSsxx-jpTyZiyyYc7Hx9V4wQ2DSpwrR2fnVyEwo44DoDOvd3-tqLGSLRtxNTAYGzyhz9SzU__0MiRQWJY47FT4xBtoZi-NkhfTOPqqeKYciEOQNyUXv47x7X57Yd0UOZo49X0vAPwgsL0rMNtJtAPl7Rv-66OSesttP13emd_znW1WsZubKuaMF1kM0VUiqUvq41HPL4_ggDAjGjeUsTloSqt99bbDqU00-ysYzX6xE22e3i52UKBSjd1yfAGmk3DSTMOlkwePCkpJi3YF4YoHBb879BH5m6VYUsn0Jj9p6N-GrmvodLxBs433LJuXv1FLgE9OuXqM-7H5_zGtQoTyhtXVsfzkL2chTn5Ql3YgJfLEK5bGPON7bVvXkmNQ_DjdU9YAOtuBb-4iQwFOHWdeTmDLo79HSUo9SP9IMKz3CAbnvLEM0gtZ_TYyz1Z12X1GIAodU2VAd55LfVbxmeJ_y1iIhm70sKKYCtQOr",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11655,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 1766,
+            "outputTokens": 117
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

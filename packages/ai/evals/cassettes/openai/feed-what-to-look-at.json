@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9c8e1406787f173701b2323563e38785da1b4d227b47861cc16930ed5042741f",
+        "fingerprint": "aa00cb0fa376583b21ce21255cc5bbd4b4d8a4a4137bf35a8dad4632a84c407c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Djq3Unqd9NWxtU2z1hEE8j3t",
+              "id": "call_88stTb3FPskArricWaA2fDnL",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9886,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "9f48ad1e5c042e34a1b5ff442294b579dad2c8055905da4d36c09f1870d0f667",
+        "fingerprint": "513c76220d27b116cc0a506add3627402732b48f0a942e415b7e392c2ac80799",
         "response": {
-          "text": "Today, Jess and Marco each have one open 9:00–5:00 gap. Two haircut regulars are also due for rebooking: Sara K. (overdue since Oct 26) and Sarah P. (overdue since Oct 27). No one is on the waitlist.",
+          "text": "Today’s schedule has 9:00 AM–5:00 PM open for both Jess and Marco. The feed also flags two clients who are due to rebook: Sara K. and Sarah P., both for haircuts with Jess.\n\nThere are other open gaps later this week too, and no one is on the waitlist.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11524,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 1684,
-            "outputTokens": 65
+            "inputTokens": 11530,
+            "cachedInputTokens": 9883,
+            "cacheWriteTokens": 1644,
+            "outputTokens": 71
           },
           "model": "gpt-6-luna"
         }

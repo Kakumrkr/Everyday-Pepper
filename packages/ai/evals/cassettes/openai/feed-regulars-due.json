@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "f3e1a14b5e73ec8991ceade3f1fea4aef057e349b27dc057eb5557cb7a625996",
+        "fingerprint": "552357b78c236df263be301f7936791125f3d1b8e0203e5bcc54c17624b0a244",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_CihKVMsjco8ady24a4DnkPXR",
+              "id": "call_OwdRR0loLgK1JhQuz3aWYmbm",
               "name": "get_feed",
               "arguments": "{\"kind\":\"rebooking_due\"}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
-            "cacheWriteTokens": 11,
+            "inputTokens": 9886,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9883,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d48fa73288cf5bbd0d5eeb03ca18b79a6688141fcca104954b5036d601852c90",
+        "fingerprint": "d57e4b39bafcae94f2789d62fed9c7ce3406fd3ac57f76d58d999c7baacd3fde",
         "response": {
-          "text": "Sara K. is due back for a haircut with Jess; her suggested return date was October 26. Sarah P. is also due for a haircut with Jess; her suggested return date was October 27.",
+          "text": "Two regulars are due back:\n\nSara K. was due October 26 for a haircut with Jess.\nSarah P. was due October 27 for a haircut with Jess.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10191,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 351,
-            "outputTokens": 46
+            "inputTokens": 10226,
+            "cachedInputTokens": 9883,
+            "cacheWriteTokens": 340,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

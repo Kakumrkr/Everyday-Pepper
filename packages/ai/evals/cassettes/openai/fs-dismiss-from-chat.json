@@ -3,9 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "ef1c0e8ff97bb46906e51442d28e4629a0ff489bdbbe53f0028a6ba42e4d2ca6",
+        "fingerprint": "e1ad68579e42b4cb8af4752743c5bd261e28fa1a241110e3bcd6761fdc25f821",
         "response": {
-          "text": "I can’t dismiss a suggestion for you. Please dismiss Sara’s suggestion on its card on Home.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_U74uKgXUOptCeRCkasbpwwTH",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9886,
+            "cachedInputTokens": 9872,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b3c801df0c07d913de951f43ef18a6db4c7616e82fdc9b15ca4c84ebb63d470e",
+        "response": {
+          "text": "I can’t dismiss suggestions for you—please dismiss Sara K.’s suggestion on its card on Home.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
-            "cacheWriteTokens": 11,
-            "outputTokens": 24
+            "inputTokens": 11578,
+            "cachedInputTokens": 9883,
+            "cacheWriteTokens": 1692,
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }

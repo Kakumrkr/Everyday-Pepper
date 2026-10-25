@@ -3,18 +3,33 @@
   "trials": [
     [
       {
-        "fingerprint": "e58a8c19985a6cac4e7feb973528ba86b459ebc05da01e2b6703097cb54d22f2",
+        "fingerprint": "fedadfe799a71ca4843cd4e64be3704ab5636aa1bb4f509b8e0ba0d32ede3c0a",
         "response": {
-          "text": "“every_client” isn’t a supported feed kind. I can read all feed items with no filter, or filter for schedule gaps, rebooking due, no-show patterns, or staff overload. The feed doesn’t include email addresses.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gqrT5wUR8NpHFjy5DRwlXQeY",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"waitlist_match\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9895,
+            "cachedInputTokens": 9872,
+            "cacheWriteTokens": 20,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7dd289e510cb1e3c64b5df7901bdda02cabe2c973749173d20ebe3b0a912f496",
+        "response": {
+          "text": "There isn’t a “every_client” feed kind. I checked the waitlist matches, and there are no suggestions or waitlist entries. I can’t list clients’ email addresses from the feed.",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_0213713d1f7e311d016add3130b29c87d29385d3fd4937e859",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3TEyRHKg76BcibcmYiSeZS06hSFfTTgbU0zRdRGSjDN00NmBfdaE6qxxXG9zpCnqV0qTm8S9vW5khokv_ppV6Dgar83DC0bg_RVQIyRFltVZT_XJwO_63mKasHqbx8PFnO3ub5KKTZNFfQpWOJJBjTIHo6Y-QjhrsmmUq2sQaP9cNHINVEaNbhJI0NLVthR1ts0lU5J-ex6qyikSUuqwwKx6-6LyfcHjuvqMHneFzHiJT3oUWRg8dacD1KfZzu1-zAtNKwmjWTZDz5GLJ9agN1uvKnGjO7h5Za0u1L81JsEzamRdQtQCzJeXKWpQIVzzZE7ZKfcxpW0J6DKtCkrxntWLqeXAILoA8KYA_Jd_Fk3UAbtKL3vTr-4CuqrBiI_BT4hhHdQPBAglmTHzjhXSwd34uJZIRnpyFvCUWpBfwI2lXEPb43cw463wr78ZPn4_twy5VnZu0cfcOhEvOQI3Vb6xprZo8qkWOGtYRtvcfRrY53QFyYAnoRWpnkZ0gHcwp4GsieULlU7Bo62_jRGLM0FkI32wCn5wbZS5VppwxhKhcZ1XRf5NEkqmUhj1HLiB3P3Px2-ChZGxqeGWnPq_aa6U2fcQ7UYfyX2JwThEjmmOv-3b7q_GG4NwGCP43rgjIL2lxOFd-nbfAeFdyKQ-j_54cMRMPdLJ9xVXdtz34csuw_5hORkjPVpKm1TYiWIY_MJ2pCPOqjbwpUINGx4XilP1dV66pDvDRmhp23-3GvFWA5BNJXXQ29Y4NoBnacdkwfeO8cmVKLmROciN4FOZQftxw5K4MDEK0poBDkiQaCWrEkXLEJZIAVk8zxkkJrcqMEFLFcP8WTLB09zE8bNXUKLyyKFCDCzkcZqsnKHJaUgb081AV1HtT3UXeMiLTfSJ9xbJ4Dw2KTm7ugmfGyPgv0QCju8anZZvkwMKUhIIt51-l7Mylhdq2byU-rLv3vwysu9nhtk3fLy34XZuf8YGTmuXrHJzouoyEhyBwbd0T0bx6ikl2nVwBhUhXthv2Pak-VOvi5qlW_1VPNqb5eXANlQxiS42X2arMFRiwWcQjZL_gfx0IQVimFzTJebOk7rDXy_02HMbnyF9RF1xpylZrbnfya39HEytr5grx9C27wUDOvOYp1gJUUs4rSqsq-olnt8JC_6VXit9_n9cFdYE5AYE19rl4njpNSOASBi8nQxS411GWlRzR5PPiemvbRss2cU8IpBTFmh8nwATmMJuCsdwMlcvYRdiWCyWlrShx2vqZ3akAcpN4Em89hkgwy0IimrhAUzHHCLNkvR6eHYtReXQ4PnJc1xLwIKrgEDHQF-H3EubyQP5U6cUWJhCIuMhhcmfNXb0wfTQ5NnHvZpLPiWs6ASo_k02jIduBo7fSvjaDFYpre9G0kI7j6XIeKAyVeVasAVkEI4qndzl6QzvR2zSUz15Hc_8E4A5-h_6PVQQv_bF6wadAQlVK0xdy6VWFt5WKf4AHIA_PGorxzDV4H_Qz4uxqPe0qfCYHMZipGagbL09vVYlg7e7W-gDu6RNhiQ7kMMldm4rXSEOl2QW8UqldVFeDk-H-ZrnOEwkrMhbG3JV1t-_t2dKx9QjHycxgKeNXFMEAd6zW-7ZN6dBbG-goYys7_ZoXui1Ke3Vf4q6oWlqXFBYmzMrn0wgQRV9CXoKL6gxczblKAx9nIvtp6yzrVJIgo0o64uECKlv_Ez0ecTr2JMrk1F6ETEAypTipdF2LznndhiwhnSBUqpavo45_c-OaZG8BzY9Sqdt7hLQ11zj9sTdVRK21FlCi_a5tUX3uXpiuoDDKxBVHPAdwAi1NLFFXbhX0rfFkJSyizRWk1xzoDrOuIq0ZtQU6jQ0Rw9Recyv0S0UoFWCGymKN1Vy6BRHa8GTuyPxRtSajNGlKOkN0QO4gtO21bSD7q8am3k32sLsXJB1qwTXeWIUr_Az1GgMgqgk0Eve0lYQW4TNwmSyrg34xAj0iuvZOM769kOdHMYh1_fTcKsGetB11RM01EhKbgr5SI91qh2BuiQp6Qqyn_dSB2bYkszsDsDF_YjZQzydWehQeJl1O67lVXVGLXFXu9k-kQHDnzX-VEyJNm8eUBdsMwPOlkR-i9-yjAEWVYRQa7pe0EALmXOmT7CVx3vbCRiTkgqCmABWo2VO139rAOzRdy-VDVRouxyJKHGyLVh_jRyYk_4SlvBxCzd8mjRjY-zSEGvikEDolXa7NUr5xkQ-eJ5Qw9BTwKgZWY6vD7XLBkcWGdeYqnNQ3PNyqHKXnMqHcDuTqLOfWMMKKIUbo5ixfFS-sH2zshJXj4spJM_kzXIDzgNSgAlc9LMhd6iT3FhchEInhe1bOyOlaueCHS4c3ZdD6dn74-sKi37W_D8bvqmEtKUz7_xcUmVh_z65uGVQRFXxUWQTIIfnz-kOcgVXhuQ3flqNZfKgRfXPVzFT20oaSpa-0yeI2GJ5C6TPOWaBhwU25YdV3CbsqgWcr3TfShPbp4hQI9fk0LK7dnCt9hFX22VT_3DnsS4WNu2aBy0THY4npl6AAwwrFxclbJEkMTUSzvGwOiHFosHgdWhVOvjNnYUF7ZVj-_0JgwJNo5RM2NoBTIbgQ3HQ3b5ReWvQ9Fpash5acCYJ9545Gdh4bB3oeuvtq3MD_XsfKQ==",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -22,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9849,
-            "cachedInputTokens": 9826,
-            "cacheWriteTokens": 20,
-            "outputTokens": 142
+            "inputTokens": 9954,
+            "cachedInputTokens": 9892,
+            "cacheWriteTokens": 59,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }

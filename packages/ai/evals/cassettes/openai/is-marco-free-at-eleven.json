@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c88f9e9b660d953c5beb1b2c7b9dfde8184cfba232b37c6bb5ea12eacccd29e3",
+        "fingerprint": "2333f1cafeeb8d3d16f034e374499dc21255b4aca321d7a728cc079cf41c423c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_48cupsvkoB1armFXo9ZpoIVg",
+              "id": "call_bSmHd1ob9rdmTwHyNV9MTlFO",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9887,
+            "cachedInputTokens": 9872,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "c58aa261e527177965798d6142e8b39f87180398e0e8e8b1ae737629adae583a",
+        "fingerprint": "29aa466c728817108a5dfcfbcb4b83fcdbd5c793c338e857f63173d22194762d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GYzoxRnx24KuObrmRAsnFcZ3",
+              "id": "call_kLXdRep5HvfuTeFb3gmJI0aU",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:marco}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10305,
-            "cachedInputTokens": 9838,
-            "cacheWriteTokens": 464,
+            "inputTokens": 10354,
+            "cachedInputTokens": 9884,
+            "cacheWriteTokens": 467,
             "outputTokens": 51
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ce544eadfbad2c32791b0f5a0dee60e596f545114b6bf7336a17eb4714b2c82e",
+        "fingerprint": "c0f90e5ce3ffa7043e13ae216cad16bdfffc6f5d98f2efbe16461de3fb0346d5",
         "response": {
-          "text": "Marco has no bookings or blocked time tomorrow, so 11:00 appears free.",
+          "text": "Marco has no bookings or blocked time tomorrow, so he appears free at 11.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10410,
-            "cachedInputTokens": 10302,
+            "inputTokens": 10459,
+            "cachedInputTokens": 10351,
             "cacheWriteTokens": 105,
             "outputTokens": 21
           },
