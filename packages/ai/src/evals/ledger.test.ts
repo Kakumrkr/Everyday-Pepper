@@ -90,6 +90,14 @@ describe('the budget ledger (playbook §4)', () => {
     expect(refuseCumulative({ spentUsd: 4.5, estimateUsd: 0 })).toMatch(/past the \$4\.50 stop/);
   });
 
+  it('lets `--phase-estimate-ok` pass the estimate, never the $4.50 already spent (S38b, user)', () => {
+    expect(refuseCumulative({ spentUsd: 3.67, estimateUsd: 1.62, estimateOk: true })).toBeNull();
+    expect(refuseCumulative({ spentUsd: 3.67, estimateUsd: 1.62 })).toMatch(/past the \$4\.50/);
+    expect(refuseCumulative({ spentUsd: 4.5, estimateUsd: 0, estimateOk: true })).toMatch(
+      /past the \$4\.50 stop/,
+    );
+  });
+
   it('keeps each later phase within its cap (Phase 7: $1.55, Phase 8: $2.00 from S38b, playbook §4)', () => {
     const ledger = LedgerSchema.parse({
       ...emptyLedger(),

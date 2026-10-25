@@ -30,6 +30,79 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "121112c34cdfa32a25e2641628437a01ab9f2c115bba61e5b8c77a6c04aea793",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_iTNUPMQeAUMn3qYdxAmUNGcQ",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9909,
+            "cachedInputTokens": 9906,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7bfadf4bf2b98bc8bcafff61ae2a947ff5a8a692fa70bbecd418802321ccea03",
+        "response": {
+          "text": "get_feed has no “every_client” kind. I ran it with all kinds; it returned 13 suggestions, but no email addresses. I can’t retrieve client emails with the available tools.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11581,
+            "cachedInputTokens": 9906,
+            "cacheWriteTokens": 1672,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "121112c34cdfa32a25e2641628437a01ab9f2c115bba61e5b8c77a6c04aea793",
+        "response": {
+          "text": "get_feed doesn’t support “every_client”; its kinds are schedule gaps, rebooking due, no-show patterns, staff overload, and waitlist matches. It also doesn’t provide email addresses.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0bf8b3fe5e02079f016addfa5e238c87d281540ea04548c675",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fpfFDI9KkMXgfgR0bab5x1PfDP3i8sku3nrAAodYe95EFGhzZf25II53YOXYjYG5s34XtDRzpGZM4edoyPDCUFsFjisPZ-ucE9I-n5LRfHOax19eXd1WlJjY9QmftZ6v0XW7hPIyGb-b8lRLedRMU8OA6JbTANwfKUkR2hVbKD_WG2B9QZL1WqKWlHxETOpfbTohGhiaGhDuASNO6NHTftx2gickUPRlyGZhKKq5Z237fuVhh5sMQ3gEDhNGcgSXnVPSqfpjwPPSJB9EFl6wmA5EP6184_POuaefULGnUuR_JgyEpJiJI7g401pDqWHzQ9Tg5ppMOXqbMHvETE2cGYXapkNhl3LzjS1XD4ohc5GXcEVTYqrLm5Bc83Vrn2swcMn2KVxGw0l6IMH9K3sH6gk-9P9z762WrJypSo2JfNHUlEq0qfAcOpWHH_bdGkSt4UOrlZ5hGn6yewFgl_0OlURO6BbUKyWhwe80EO78KsiUjKL6K9dmbzyW5mmRgULUdzObq6Vlerh6XKl5OHi2w7jRJ0lsmKrbItE6nTtzLXSIQVsxMzyzYMJj1DrgcwTN9a00Nn22yHwy9G_jw1ZusqCQQm2k3A-6auExzXUluVXjwJQ7Eh3YHH87--9T8bJ0YNilIEofLlLzjeTTiivmwUlZG_JkvvkE0E7lZCtXUY5mcUcB8OIiugZ9mt6z-Ai6xGij8ygC1pDB0XHZX7k_FyQxKBkuCgf1Ai4gvhG4aEC1DooeJ1KKEWDC49_ClvR7DfZ5o_Yh16pwoa4XfpbUOc7jApzYSN_kx-P6WFYgExEpQNFdqAs7t948lFwAd44hOGIJRqOKO3sibvdFqjRIqPOIiWwN_TNTimTSYsmarulz6T01ayyLm-Ubny34XH5OAuHMpVu8KhMWmADrzd-ZH0NJwsmiFUcamlHkhz2o_V_3OehLiJMbWInxg4DEWnFhyr6KydpBrhyQ4nHFyQJCg5ku2DWp9-J2o0D5zGXsRG463HzSW1g7b7VAwoZ7t1vKRPNqQi2WFVMOndejLDSVSZ7hOyH2lfxAW-Sidrt_YETN4_PtOUESf3RXuRYRfocqzLwQZuQtc2bgrMHqohEmfEeO4SJag6IPAjtG2GUr_PfaKa_Pgkf3Hol6656VOVTxIWiKdZLIoGJrHuAcs7XcunmGrkNgjq-hOIvhS0r_nBQ4cYVRF8FD_4x7teIsFkl95xYBxd0JclkGXKW7AkehoEuv4zyiOi_CHSnCnz5V4wC9zMH1bBKn6aF1NV6hbYrlH0J3bJRHEYhoa62uXm9nO6c3mxGTAslmb4qkB70pyL3gOIFc4gi76GFrRtizHZml0gbKM0lzIMdVMoAIkNn-jULpm6Gih5IIcfhKMHxwlPKoLJQqwTfgDUMiW5KYrxljHvtSKDyhD2EQkpqDqW7BdNXEOucRUekfAxx2KBKuyNTJrHIaUvi83Tc1nc0N9qmqthnPTXpIIgvDxYnth8OEzygJcnVmSeXmq4BFH2DIZxNtKG85aEv5hzUrCTuC6SYVp7J7l0As9RrzYzsjsdv-435RjrXGoqUTWQec0m0yDwGKnlcsHT4C1P2sTkI5S9OIBuqYWvAAsimSr1ZIA7zOhe9Clno4JCswTQDhjioiDYU_sRgp9kkZVoAMrwuYJMEki6zZ8LIZGgl2YrbyzB1qCBheSBuGSMipcoW5ddxzmoJzaDv4wYQvW6ZuXvNYlIP3jBhl27kFPBm09H6n9CquaiYdA2X2lW6oHO4wS_QJ3jyqVwSE3IqsxWjKDh8RjnvKiXnWtvFIz1i80_JpzMdGXTscevhV3gDw184-aXllwbU17a7EL8bm902WUnawp9ru9r3n9aAU5IgOjnjp_5N6B3lBwfDkXFq4hlQ43O1D8bKApymdEojMLT5CMNHxFdRimWwXffjRwciGP1K2yU4IvVON-WEDt3X1vxKCuSe0TpuMaRC4jNGjBIg7_9-d_86E3lCzR4a6ZprbvK6rD4nwV4ghqZ31YqEYctqNIOBWKhrYKvEELwmHr9brmtlgJNscwYjVQSUx8ruc9MqI3_wtEd9oVoOZRamuTo-i26j9sAKS3By098IvWxzA12InZgtTJSi-v1lOhfear99gkvpoJ0JLjebjAwvRT64wkf8oEvFUIzI-zZVNRYDjJDYfP0dqmZQhA9zPfByRlQezJW8U6ffzhQg2LCzM9kwxrUyF469BB7zxKmLv3E70EHvRSaeM1BcFK-yWFKvun8nOirfeBuKJuwJWL3G6S86fYdw5Qo160GyXOT8xOeuwmN95hxNDmWjqQ9XtaKCzgDNfW8T__5yrnxaaA5UetfKH0uZC-O5pvw=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9909,
+            "cachedInputTokens": 9906,
+            "outputTokens": 114
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

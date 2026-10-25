@@ -52,6 +52,93 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "fb027fe544a84c5eb29bf369d1f24371dd4838b6101f68942bcc3d4e4f4fa801",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_DtXhlk0Ac2dh1aj5jK83gwk9",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":null,\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9910,
+            "cachedInputTokens": 9907,
+            "outputTokens": 66
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cab3bf6526148c64c0d05f6e9b1ec567ad16e48ebd478583a7ccf52be06e07f1",
+        "response": {
+          "text": "I can’t set booking rules with my staff role. An owner or manager can set a 2-hour minimum notice for your bookings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10029,
+            "cachedInputTokens": 9907,
+            "cacheWriteTokens": 119,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "fb027fe544a84c5eb29bf369d1f24371dd4838b6101f68942bcc3d4e4f4fa801",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Vb6YfrUYeyGqc51fi7rCylm4",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"minimum_notice\",\"staffMemberId\":null,\"minutes\":120,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9910,
+            "cachedInputTokens": 9907,
+            "outputTokens": 66
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "370347bfe874f5b5b88d59e340ab5d93e7663e92a17140c0f6b15085e1491583",
+        "response": {
+          "text": "I couldn’t set that rule because your role doesn’t allow it. An owner or manager can set a 2-hour minimum notice for your bookings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10029,
+            "cachedInputTokens": 10026,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

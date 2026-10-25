@@ -44,6 +44,94 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "65f04dd52ac9e7aeb77592b68ea369af8eadbe50803df21320336b1e3d910f0b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_97oVMdsfWCDcRtlPFjwfGIa9",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"waitlist_match\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7812b0dd1d694d1af48475069f0abd0d1907369eb6b98e46fd5c0db928a7bcc7",
+        "response": {
+          "text": "Sara K. is waiting for a haircut with anyone on Saturday, November 7, from 10 AM to 1 PM. Ana R. is waiting for a haircut with Jess on Friday, November 6, from 9 AM to noon. Neither has been offered a time yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10194,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 295,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "65f04dd52ac9e7aeb77592b68ea369af8eadbe50803df21320336b1e3d910f0b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jhe82GGqeuAkT68osRBQrGMM",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"waitlist_match\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ceb0250c2a865cf4a4499ec6320719632a72a7353aac4a7fd37527628ed8ca45",
+        "response": {
+          "text": "Sara K. is waiting for a haircut with anyone on Saturday, Nov 7, between 10 AM and 1 PM. Ana R. is waiting for a haircut with Jess on Friday, Nov 6, between 9 AM and noon. Neither has been offered a time yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10198,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 299,
+            "outputTokens": 62
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

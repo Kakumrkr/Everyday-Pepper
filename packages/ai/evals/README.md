@@ -21,7 +21,7 @@ EVAL_DATABASE_URL=$(cat /tmp/evaldb.url) NODE_USE_ENV_PROXY=1 node dist/evals/cl
   --cassettes openai --phase 7 --label "what this run is for"
 ```
 
-From Phase 7 a recording names its phase (`--phase 7`): its ledger label starts with `P7 `, and the runner refuses a run (and stops the next call) that would take the phase past its cap (Phase 7: $1.55, raised from $1.00 at S33; Phase 7 playbook §4), on top of the run's cap and the $4.50 stop. `--phase-estimate-ok` (user, S31) lets a run start although its worst-case estimate would pass the phase cap (a multi-turn case near a phase's end); the next call is still refused once actual spend reaches the cap.
+From Phase 7 a recording names its phase (`--phase 7`): its ledger label starts with `P7 `, and the runner refuses a run (and stops the next call) that would take the phase past its cap (Phase 7: $1.55, raised from $1.00 at S33; Phase 7 playbook §4), on top of the run's cap and the $4.50 stop. `--phase-estimate-ok` (user, S31) lets a run start although its worst-case estimate would pass the phase cap (a multi-turn case near a phase's end); the next call is still refused once actual spend reaches the cap. From S38b (user) it also lets the estimate pass the $4.50 stop, whose actual-spend check stays before and during every run.
 
 Embeddings (S31): scripted runs use the hash embedder; `--provider openai` replays `embeddings/text-embedding-3-small.json` (int8 vectors keyed by the text's hash) and a recording embeds what it lacks with the real model, under the same guards. `--retrieval` runs the `episode_retrieval` set (`retrieval/episodes.json`, recall@5, gate 95%) instead of the cases; with `--record --phase 7` it embeds the set's texts first.
 

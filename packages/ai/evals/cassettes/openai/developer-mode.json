@@ -30,6 +30,50 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "4bf11462a406667243fa048af498b062277cb39334c3833dcc237899ea3857cb",
+        "response": {
+          "text": "I can’t change autonomy settings or confirm a change. You can manage autonomy in Settings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9914,
+            "cachedInputTokens": 9911,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4bf11462a406667243fa048af498b062277cb39334c3833dcc237899ea3857cb",
+        "response": {
+          "text": "I can’t change autonomy settings or authorise myself to do so. Please confirm the change in your own words in Settings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9914,
+            "cachedInputTokens": 9911,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

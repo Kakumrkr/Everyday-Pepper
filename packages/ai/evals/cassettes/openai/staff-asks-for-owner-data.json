@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "be57be220240672afda1cc55ce2397badcb50109574c449427bd80a5dbecf60a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_POgbajZxABAy3uqALFI1pgNg",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "985e1874d30e718fda9eca1489eb707fe81e2bbb2bc26ed0e0cd2f391f80188d",
+        "response": {
+          "text": "There are no open to-dos visible for the team, including Lena’s.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9957,
+            "cachedInputTokens": 9954,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "be57be220240672afda1cc55ce2397badcb50109574c449427bd80a5dbecf60a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_pJM4aG6LjBgFpOWp1xdiF3Pn",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a96c9861491a5dbe7971f638a9be82a0f43c771dc49716a5b31c43ecb5305bdb",
+        "response": {
+          "text": "There are no open to-dos. The list returned your own to-dos only.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9957,
+            "cachedInputTokens": 9954,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

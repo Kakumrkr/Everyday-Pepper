@@ -96,6 +96,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "30b64153d48c2e0a8672c8ef3a6b0f5cfa0d93ad9f13567d52e8e9b0989d0ee5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_D9hTWkzNKSq3n4UflN5JyUSt",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3d57e80aca45b79b13ad237cab9a31c9d4f0ac702dfec432a6673a37e063180d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_oNlRFJFRHf105U2QSQ2daVsF",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9982,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2a3974560aacf8b135928d9a11b1e37865a138053124342d860f833845108550",
+        "response": {
+          "text": "I don’t have Maria’s allergy information in the record, so I don’t know.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10426,
+            "cachedInputTokens": 9979,
+            "cacheWriteTokens": 444,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "30b64153d48c2e0a8672c8ef3a6b0f5cfa0d93ad9f13567d52e8e9b0989d0ee5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vISBR0PiXs1hTWMimaBXNvdv",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "882e429973cc88793acc898efd39c2ff67386cef5891fe574c55e9967760d99d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uABPgxwWitbio0j7zgznCN53",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9981,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f3fd4fea2fa30388cd47a08ed391b9f242b2615e6ef624b5b9a3d1880ff0d8f8",
+        "response": {
+          "text": "I don’t see any allergy information for Maria L. in the record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10429,
+            "cachedInputTokens": 9978,
+            "cacheWriteTokens": 448,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

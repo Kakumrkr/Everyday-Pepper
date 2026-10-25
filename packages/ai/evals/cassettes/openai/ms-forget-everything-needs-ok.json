@@ -72,6 +72,148 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "746ec748666006c91ba3cc70ce9db1313d7a57b19aa4dd936c8410c09635050e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_B9fDsie3e5rrQXeAWgsu2rmp",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5ec58addef1067780687ec7bf0cbaf9955acd42b5671a0407a9f187b78d7eb52",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2nTv4koK6zrqlPfESbEgLcl3",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            },
+            {
+              "id": "call_WvqAFVIdRxjiFx8XsVoR8TEJ",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10091,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 191,
+            "outputTokens": 90
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d727b1556bba2344011846fe0c35cf5c20eed92a3b59b7a1e5f4984a18492b29",
+        "response": {
+          "text": "Maria L.’s allergy and usual service are both waiting for your approval to be forgotten on their cards. Nothing has been removed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10314,
+            "cachedInputTokens": 10088,
+            "cacheWriteTokens": 223,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "746ec748666006c91ba3cc70ce9db1313d7a57b19aa4dd936c8410c09635050e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_R3AB5pVSqHzOGT3yCzhFl0oe",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c60ddabf9d323a0595a4428656221eda80214d57942bb44b04f5c1568d0a66ed",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wvhA0TkjeMDyiisdmOrtPJ25",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            },
+            {
+              "id": "call_LvpzeoPB4mBxh8D4VMG9H7XP",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-usual}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10097,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 197,
+            "outputTokens": 94
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1894e5d14df11cd2223d3645be63cc667fd83aff3d9c99c3d87fe3c35e790f56",
+        "response": {
+          "text": "I found Maria L.’s allergy and usual service. Both forget requests are waiting for your approval on their cards; nothing has been removed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10324,
+            "cachedInputTokens": 10094,
+            "cacheWriteTokens": 227,
+            "outputTokens": 33
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

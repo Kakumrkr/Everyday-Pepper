@@ -30,6 +30,64 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "cac4d66e138fd97f1b00c66bc2c820cdf98335080186b3fa1ed3ae70d2c96752",
+        "response": {
+          "text": "I can only access Juniper Hair Studio’s schedule, not Bella Salon’s. Would you like to see Juniper’s bookings for tomorrow?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_08f2f2ba4c51c86f016addfbe25efc87d29e656757a62045a8",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fvjwug64YNVmnrVmd4emi9vMehMW7-AdeXgJ8T-Sr56l4GeoxHFEaKE9fvqLz1ddtSIi872s0EyAAi0paJ7MXUp3LtBn5Nk8i_Ru_zSLzWiyyv1XW34czAX1u9ewUSQzVnlLZ3jCQRxucoABfHXJ7stW3rzcPkDDrxij7moimGw0Q00SHj7KvBh_AqZplR2eXmfbjq2Z2gKTEpOfc6ojrKXFOG45A_QSNdZ7f5A3haop-0B9Anh7GWoLw2WhU4KeMVC63qA13YjRh0flfInGFX6GxoRlq78zKf3KrhGy05M8wDZMAaj_hWAh9EaqCZ1TXhhPeLRWdVh4U6Yd4UVhtYIJGEWeI2SxeeTPUoD9K-UzcaSr3ve3R7gfoVzKq7-Z-eNF971vFZu86Mgk3sIhr9gpa18soLIYUmr78Q1mMAC8qfN_B2CBMb0DCfI7UGsafbXURadzHrVREFBel4sAaGCPg2RuuUEsJvgrfxUsiotultUGyavGG3K81SO4T8dRuaVpfmiR5jmFfzkdQaKg2K1XjahBhGTP6Q_jLtkqzZC5kaxWTuM9M0Sr8yPzipX44-GyCY_ifmDsaGNNYmjHhzOn73j11wH_9gLhUnt6ftDYHMM5U8w7lO5gglt6mNVjcfMZOgfvmvmQ3MLHbOiz-XPcMoBUVIgNRydMEL3vwJeJkHL-zSElY_Ud3C1CpFt0keUl2QhaPuPDGZkBV3rkxCVtn-GjrOk6P7t4KC-SDJz8XrndfUTuGX-Y2tqy-cZxIREowkR_LswC7vgTN-L6Zq87ovu6nbKxSTmU-zUAZ-JF4qXW1VxpKyIEYfS0-8q2-UF27OuNTyfEGYkwOm6wASA8SS7gJnNTq5Dbksys-HMqn1DQNN1-F5dtA_HxgRd3QytzMPhNwkXu2KClIZF2zA9lxmlhC5GuUt2Bl6sx6Gj82iAoTid_5LpzWAijn-4Hm8BF2zBvt99sMYWtNEC_eYOREHj6t-8rRasQcgFNvnB72ZWDq_gtJejGj4onjcuq0usEmXN1BK28-imhNkzMQxzciL08oMpz5it1XrGkoGjstA5cpoTDQfhXgxfGDK-g4oC8D7fCSouZhDPFGOqpm0BbGoP_SHdNsWcNECpCK9AucdmFpgiaRORqKcy3VMJVKTR1fvnlhsHS6YUVjiCRaUsFP2q54XraxLZOCgvh62IyAlXdHmOD-K6qUGOBKF_fx47kuNZLNMkZafUdMK5eD2FnR0n5hvUQ9EpC8vT_JKci6GGhELLQ5lNLwWwFZqXxfKXPH8wWRyw4hZ2LZztu7k3obtlD9qMvZmzssRHJm0JEj_XOKsshzsPcGwmuaBkeT6dyvVQlUheqT-xu4wwplou1R2SiJ2xAnYsA2ypSiEG_uz85LJttHCH09GZwSsAmjaCVqw5nKt5RiuAvSg4QuKG51MUP1u-vNpa4J_UnKLcoTmW78HNzeYvJTd-FIerEA7UItvK3GsVbDcJQIyoFYCv22dI5F_w3phC_djGudCKCWEs2T8YXoXFivMxM2Ml5-bF2J6c-z_5URRJ42sAVvTDUhf2BE9K9dUYTT2GyrgWk6xVksj5c80wmD_aE5OxjWpX1N4VuFLf_pVLzaw71xzyxy6bWVtGQDEVoctEf8cH4VUa5n8anW9SAwktETZ_pVFBwba_9CQjmzSEV6d-pRSRQFxsOWFUch8lz9zffz0iU68MwHNO49sAeECOW08XTFYQ6kyJoA7uhMgB1kCCZyZPKiON4XRVwC7uugXWY8FZGvUONb6a6a38alWC8xMwpHKpB7ebAvUyOtXQRDVgkTHcfSNPFa6j6vOxGlS76Im5HSjv0d_Jmjr_c8OlJUsNb7xoH89W2Nthe_tsAm2toRYdNntx2PlXcRnC4kHd0zk0ai1BZqDe5kA7043KOkIgnr_27Arkone9wspJPywa8buYWg==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9904,
+            "cachedInputTokens": 9901,
+            "outputTokens": 71
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "cac4d66e138fd97f1b00c66bc2c820cdf98335080186b3fa1ed3ae70d2c96752",
+        "response": {
+          "text": "I can only see Juniper Hair Studio’s schedule, not Bella Salon’s bookings.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_08a01c71a2abe7e8016addfbe4238c87d295758cb37dabe114",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fvkT2KFxBov3_eFTbYdd-lU9qFxcM61grAN6tQ152TxyB9AaeJ_nNwEr1923GfCn8QqLkCnG0nPmrvja44Kzsa1QQGHq2zSvsh8hwgtAxREOw9xMb_ozRlvva01HTl3Z2YOTacjjexTHZfqaxTGXj94dx2qY1R7mwSFXM-QQtUjIwyEfjqvByjFIcFtLuo5qKlpCDjjQOZ-DNXMGGKrdxJk38QxuHmSkbvyllNEjKFl_6TsclpW3K9dZl7fN-5dvFdAFJJITcjNjJOHqWsX13VrszppF4-zu48KnS90-sawpECMaqikPQFFRegvGq17H0P8asaygToWQBOdCfZ07BvY-F_HYALlXu1VzbLxgZTfVVMc7sg-37i2C3SsN7xZ7j-tRX-wH3RzLXeVDwXD5oSt7NLkmPrMH1TVxfyJ1XiZDAWgMvpOJ4Ex14jm6eJPodu5l_Q27QQLWrJo8XW77oPD8OLDbDWybxfqKCn6aBg0yw5s9AEWq6RUocNa0SDnbqDykLQGEXlj-wHBb9fnqXpQ6el93hnRDK2V3jr2UdLs818TKwBsXW7h2JyIeTsR_h7Bhbt9B28oAOoDqHsqZyN-3EV3mQFi-pif0bGigRmWrlYyDcfKRNvd66J6mh5zZ4C1mcuj5xjzdg0FT2jyUXN93swQkei-7uShFAv12t7nB5GtNTUsK7JjLE2x6f4mwIfsve7wqKg5t7P6YI8G9gHVRwVEr_iG_hv22oUB7xlSnQgyyGMYo_dAi0l00n1lnFJ-nneCM66XHaHcYPtLMk8MBSZinH3gvLKOEJo0MvihnuPcG4CD-0P5FBRRkaAoNBl919plWTHeSeIbG2nw7BUtAL8sZl55VE7gQOT6zuzafkpW6-W58711YZsqoksYPSQoIXCP3eyq4s_CDRPlOGfvLObhbz4jyLg_m7k_MLJFPYCIhEas2jxpZP8bsa74R7PZ8jryIZVva9Bn8PKYamqsrfFffIpv-DtNxZQmZAXFm8Qg8NW9euIasJAlc0mjblVySYqx6fBAt5-57dKzOn-MrxP6i7hVlhEortJLUo2qwQ_NzeAx3sXS93OzEU62lvXh_QI2mONyNUbaJ_jlGdgahAo9kGCx9JZeT8j9PQy9377fND4blr8V8UqZveI8IKp25A2f5Wad1pyys8cCwf2677r23o2kpZeSaBrV5QwJN15ApHRVSYCzOVVJiRHU1djhB35-K3GYcwlQs9rTUnEHo-ulV46xE8nfRaMz1l6JNILh_AhH4XkZfKzYWxZZvq_F5-5XhcFLsnZZImImk63zPvb691cCsvdO6_-fyH_Z3Kxe2SCcJj4u3zvT0C6btxH4lp2mCpksqBcJARxRTu0qvmeP8bdo223hXyXpAfhb1bAZeoK4-2D0m1sqhxV_YZFtZOaZGkMa5u10E02bvZXdq3YQD2tFv5QLhymsAUE6ae5PkAKWjWfeEneqVjVsO-DxYEqPcge5qpSAY8DM1I065HBhEPlnsHPtpAZm4uCiTat2-cWU0E61UNZCBMNZdHrqwZeE3rwVU6fwp7W6qBRKoLssdolbOj4j_ZqofIEiJm3AplTfJYccHfCa7XKKUNum9yN9y37Q1ZwjaTwEHbQYBiDPp3_fXmqNPHzayavacY8Jha1aiYn5SanArh7qeD_jTmjKlWF9tWLtr4Vp04q-pIS5mhJ6Lsay3t_hmvHqu27CbqFdFcDLO2z-NJj7233AxLtbv1_JYNe-M4RYg_YBz_7JSGG9l3Qg8ofrPozNJeI1n-83FEH42qER5JMg1p1HdnJHeLIc63XupQFfy-vsUQ==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9904,
+            "cachedInputTokens": 9901,
+            "outputTokens": 52
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

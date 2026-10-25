@@ -45,6 +45,96 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "6920148b4312cca7e160585f5416e232961c3b48b2241b99a585fd9ac05da717",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_VqbjIJ1sCU9Qk4HOrYGiGrzm",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9979,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9976,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "95f214825495731f0a64e6ac43dfafbbcaf6c099bd6e7eab2f56d0d7c8886c7f",
+        "response": {
+          "text": "Tomorrow, Tuesday Nov 3: Maria L. has a haircut with Jess from 3:00–4:00 PM. Jess is blocked from 12:00–1:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10280,
+            "cachedInputTokens": 9976,
+            "cacheWriteTokens": 301,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6920148b4312cca7e160585f5416e232961c3b48b2241b99a585fd9ac05da717",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_P1viKKLXYScb5r5TI39Xnwt6",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9977,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9974,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fa7ccad4d0d49414527aba3ae66ae29b0e743956b3eb9b289236ab4f88f2292b",
+        "response": {
+          "text": "Tomorrow, Tue Nov 3, Maria L. has a confirmed haircut with Jess from 3–4 PM. Jess is blocked from 12–1 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10282,
+            "cachedInputTokens": 9974,
+            "cacheWriteTokens": 305,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

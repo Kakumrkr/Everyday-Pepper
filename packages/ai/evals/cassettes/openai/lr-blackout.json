@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "876e93b0f558600584f712d65b6712981941abb121e866038f0bc09fab58c76a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_q0HHKmYrqdxCYBigVGKTsKGQ",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9909,
+            "cachedInputTokens": 9906,
+            "outputTokens": 77
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "708971c6ffdb2925b3830dac02b8ed9af37e9843a7da915f096e6484ad6a742c",
+        "response": {
+          "text": "I’ve proposed a no-bookings rule for December 24–26, 2026. It isn’t in effect yet; please approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10066,
+            "cachedInputTokens": 10063,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "876e93b0f558600584f712d65b6712981941abb121e866038f0bc09fab58c76a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Glvaux6fJlNUMqAXc4tzFqKi",
+              "name": "propose_rule",
+              "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9909,
+            "cachedInputTokens": 9906,
+            "outputTokens": 77
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "df3a70932df773619bd6046a17d92656b31d379a3d18e3679135a8c13d0ef8ad",
+        "response": {
+          "text": "I’ve proposed a no-bookings rule for December 24–26, 2026. It hasn’t taken effect yet; please approve it on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10066,
+            "cachedInputTokens": 10063,
+            "outputTokens": 37
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

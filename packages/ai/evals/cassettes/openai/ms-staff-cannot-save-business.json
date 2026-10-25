@@ -53,6 +53,93 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "4d9363ab0b8c3e79d1ac4b6543cc96bde45209c96eafbfb5d1f06b86c3644480",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_POk7Zc80LgfgkLWhVzrrGk4l",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a6472f428f15ecf1fc9f4c2fbb07072df024ad3044eb14e3a395d137c4c1da43",
+        "response": {
+          "text": "I couldn’t save that because your role doesn’t allow it. An owner or manager can record the Friday closing note.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9994,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 93,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4d9363ab0b8c3e79d1ac4b6543cc96bde45209c96eafbfb5d1f06b86c3644480",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_guVuqIXi7I8e31NdwoS5WF1f",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8d92f5ff6aa1a0373c4893033280cc9d8704a17e74d4316ac8bd20cb0b1a11fc",
+        "response": {
+          "text": "I couldn’t save that because your staff role doesn’t have permission. An owner or manager can record it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9994,
+            "cachedInputTokens": 9991,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

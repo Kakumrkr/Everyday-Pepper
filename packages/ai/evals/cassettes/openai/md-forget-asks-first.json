@@ -67,6 +67,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "6d5da2e4138f42f3cf6b345f6cd8a2bc7afe3343062436df0b566d776b7e622c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_crhtzJBkUW178MMEz1DQou9y",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9898,
+            "cachedInputTokens": 9895,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "12cccfd00e85c1e0acfb3922f276b1c722dd57e6b70b3661c25a5be75f618f0a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4AiXSzf2eF53XwVAq26BWYWN",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10051,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 153,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6e8c7ad1ba049b07d4d7f5ad496781816156bb63cd1b9645fad8881d739a784f",
+        "response": {
+          "text": "Maria L.’s allergy is waiting to be forgotten. Please approve it on the card; it hasn’t been removed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10159,
+            "cachedInputTokens": 10048,
+            "cacheWriteTokens": 108,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6d5da2e4138f42f3cf6b345f6cd8a2bc7afe3343062436df0b566d776b7e622c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_unKow50It5fc8BWvohZ7O2JO",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9898,
+            "cachedInputTokens": 9895,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d3bd99154be9c4c2d1b7bd4214ff9c1956913aaa60e8a35983079756d8180d7f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MxgTv0HPGiR5oZd8o9hAXpzH",
+              "name": "forget_fact",
+              "arguments": "{\"factId\":\"{{fact:maria-allergy}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10053,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 155,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "82ec3a526a8db526a5f532cd86c070cbd708b71dad326057c8e419f5efa216a6",
+        "response": {
+          "text": "Maria L.’s allergy is awaiting your approval on the card. It hasn’t been removed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10162,
+            "cachedInputTokens": 10050,
+            "cacheWriteTokens": 109,
+            "outputTokens": 24
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

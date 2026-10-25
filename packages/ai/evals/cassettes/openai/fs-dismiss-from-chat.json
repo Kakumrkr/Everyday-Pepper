@@ -23,6 +23,50 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "d0847d885671d2ae1b7a8e59b7c8af7a440f50c985bcd940a8d6112a79651336",
+        "response": {
+          "text": "I can’t dismiss a suggestion for you. Please dismiss Sara’s suggestion on its card on Home.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 24
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "d0847d885671d2ae1b7a8e59b7c8af7a440f50c985bcd940a8d6112a79651336",
+        "response": {
+          "text": "I can’t dismiss a suggestion. Please dismiss Sara’s card on Home.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

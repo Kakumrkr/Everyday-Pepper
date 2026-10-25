@@ -30,6 +30,57 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "a6562cea04b973f00b37b540cb28279f7e0cfca2429890a5b78a929a497c443e",
+        "response": {
+          "text": "I can’t email clients or offer a discount for you. I can check who’s due for a return visit, or add a to-do to contact Sara.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9906,
+            "cachedInputTokens": 9903,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "a6562cea04b973f00b37b540cb28279f7e0cfca2429890a5b78a929a497c443e",
+        "response": {
+          "text": "I can’t email clients or apply discounts. You can contact Sara directly to let her know she’s due and offer 20% off.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0982d3a448c563ca016addfa56927887d2a7a450b1499ac9ad",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fpXhiV0h4g757O3oHikagVbrnrPigDbOyPGF92F6xiig1AmRk4lrz39ot4ynqWlvF2kpZco8TxDyFNajS5xZ5TWiUtzt8R0YcDCLTbnmpONtjpI6Vho7UFKtVWO-I9qxeQboG-nGoxRRAH8nAFz6QGqdwU-e_xRnwDZsFyNlZxVbaGM-MYcLqjTz3ltTvRVdzBSeMqNFxohIr88AHfrDjqVgB3myNE8KVvmu528iwYYI-_uD3IdnkAOk1algeNq3q96nJmM2rbeEeCcB3zKnL557jZUUR4QuL0D725w7mfnUPFsE0ILL6W7MDqWtGaHiCQH-nPbXcIKBBxllRzC4nsjnQMZ3IQvclyq_rn-bl-wRuUrspj10o3ryxq_aWYom-uMZQ7t8Pqnj6VEJl1vUItLBA7JL38ZM_5AnfezPGwztHTwlF-VhFEtB5JuGcwxfhMVSu3nqHMxn7sAq0bPJeMy4oTND-g7LoKJNwHz14eHl7xH6R5SeTetnNYMwTrg9O0teyAFD8IWeTKqYGoM3XTB6oNGbx-wpSHg3tXBPJbv_2PvTBUwZvvUQ8LX5NZ-wzyyy58oxw4fAudUIYCm9RkZxUtL64bSfKD_Y4jcDlTuOPeES1ecaxYW0ImihlwexZZvjEs_1uo_V377RrJ81INCQoHT5f0EsBgxR9yFKHlh37jd-hZgP6lumCLKN-3mZCmQ3E9e1v6pz5oqEp3T7xTkcW7ainsL_L_zXrn6OMv4c9mTndKOlHO3Vfr5FuOHI7R3XzDPaLPAmzIuEw7IbnD3rHRqUOC8WZ5A88_2EO5u_Jy0_SFA6dttxqw6eVtPsvv6Jzf75unmZJat3U6Cupfnx6qd0tGfaqxYwrhK9VrfCK7RaCKilCkX7ye69CPgut6HCfWhCBvbiGDisunzZrw_Sht9Gjp3QmR6ORmCHQ5VKfLHTjn2apb1vMQPQVr4uhautle6P9wS7aeSdMwze0kVAz92Mak4pZMwJaYYxbPOulYDGAdrlKYAAzehGrA_ED4K-T9B8kMfer341bNYRC-sxXL5Yp9xDER62-91VkfoT1YG6Kq9fxjOJcve4DUESFG49LUYRXGl4A5PK9lYPWq5q6SdZWkfzwOSGhagWGLY1gs6YR-6qFKTK37pXoNmlb7m6HJ248sICFjzOf60UXH2r6B9CavwyCuXBiN3L_4uSLe_QfwnKKX5mAntyxwhXCt6MmeXm0gYiDc6xtbL8cWZN03d6ZwDb2Rdbmwe_wsFloEFrcRiK__J6qFAaramzA7KUSsZDJpdSHV8kLy0nDAawwC8q6YyTNIz5fiyORuYvSLq38AcGRodip_3v88jUK9U-DeuVKZuWqklWRnRVzuuizohnxvMJyCMHmv-iWEkJa9NiuVPyFW1WB4V8r4r1D0C7XdvOdpgo9jWx98NJv9LHxZrsaFnteUk5zvgnZ_lH8wKlj0bKJZo4Y3MhNwTX-FE9cvohl32pTf_Pj_Rm9X8s3VlHo8VhyXub9iUt-y5kNE0_wyKnbOJO6Xi-rnBY1zEDD_8C2AAjKTb83zY-DaC2YwomoiEeucD0Bgaz6XLo4Z-gba5LRKUUEJ3QeQVE-b4oNiDFLe_KSwDftCjHex7P_LTytmtKhlBUTrtlWfEBTPH4K4_23Hcp0zXXE4LMpWE-ExKR61FM4jQSw7GdFFwT73OyX7S4hz5G7L1B0DqedAjAAdKJRa8uVnPmw11QcnBh-JVS9IfRdNPTT0ix-9BxSm-B8nU5TOas6DV4vO_jEGU6D8kxzJSKZoCc1P39__aUia9sPyZDfw8n4_2-rz68LELy3NucaoqB0goKJjaYf1u-ctE2bMIVqOuNdxoLmizeGVoa16SWy5q6CXXBisUXABVPith9K4FhFcm2wm2GE0k3cZcaPsue-fGeyNustvMNr3Ygpl-GlpUGuvxB7XPq0Lr29rHZx-3ffajVFweQH_MellS5mpZNXkvdDosv_W6C4RU7uYYZax05QekfDlSh9XK3eXUL4VdKt0zRcc6qWQAlNwBEywwDOdZ14H0efoSgAqa5txapHr-Fad3yTOKg3-EVjWWQdxMip6uIL4QP_Bww5aPkSh4iFrj5Gw-z88SPGw3ZTymiE1IV6WZuUxXDIJvZ2iBdLuqmzYqYm6dgd0PMIudHIn-gaBzCE54dd9WGc-INGb4FKb5mQjNjI6SjSXK0syJDc4qUsvfFux-PZrWzo8PXV1NzMspWexQWLWsHY-KaTQ4QMiGfZAGS9PIChBS3T36UvazoU22INFGXtpxOv57eZkX1tmH5HPxVhRLEWtkQANIESru4eoRWXwMB3ikQwJR0ofL-hl51NAO0tkEMFAg-SNToktvEnAUzLq4EmMnS9DKeJXYkMRYVW9eRo3HrulatyARHL0adLtLXbOqiEX1Fx0QRlcsFB9t3wu_umBNyp1D02PvtfLN8pksohncQIrwc_OhkRvYW-ikbla4r9nW3ZshFyPSTp7G84z3-Zem4NiBGfvcUgvmyVReiikTPFrROC509B58WDPF-Mxnsmi2BRzMRBZSLj69e7zzghLAiCT4DBkJA4pa9MrKn-m6hx9QQiHYtu6U7-fiLG0Y651fjJie84HL8Yyl_H2e",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9906,
+            "cachedInputTokens": 9903,
+            "outputTokens": 126
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

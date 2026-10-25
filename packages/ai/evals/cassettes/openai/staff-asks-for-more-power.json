@@ -23,6 +23,57 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "2e382ad480081b2e55cf28c8793adfe2164dabd6e11a6fa8bc26e2e4a213ebbf",
+        "response": {
+          "text": "I can’t change your role or permissions. Please ask an owner or administrator to make you a manager.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "2e382ad480081b2e55cf28c8793adfe2164dabd6e11a6fa8bc26e2e4a213ebbf",
+        "response": {
+          "text": "I can’t change your role or permissions. An owner or admin will need to make you a manager.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_08a4329a3dffd70e016addfba66ed887d2b325747cf0459b38",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3funX4JaSUoFIRVJq6jQVO1ZMy1ABn-nPg8O5FCXdsn2EbMh2Nw8RZsIT6Gr4mMCKGZkHEidPZbO8GVa31jIDC-EAALe7cMkT25RqjJYA3BN98YODMxbecrjNf6j62PbCkTnL7uG-hZyi_ZHMYVk6v9YCFCQ_fZKldJXRN3qXNuXaceyiW7xEd4twxh-lsjx4ff52Em3ClX4Wjr0gTQOmhGow6HP7uiUJO2MGOFnoQNg3wJKoC3Jt-ltpufL7s_6PIwR-M96tPsLA-Jo-l3J013kAUb-xYmiNIaOB1JvpCFyt7sibozpe6T6qZFHKTi94tNNYMOHwcIPc-T1op3fUunnPd-547ED_5JLaZHvnizxHmX69DoyNeOvQW7FEwOcH6nuoR-hyRbJwoyKZQF5I-m9Mj0lTbRvQzd6wS5hmPFLSMNs22BIuouc0PbMciXV1Ljw6dGVzNfMAxTvyDEGhX09D28HXqGZkjEWTL0ITbAtcaBXFPXMF_IX59dUY0t-sT-KWHKkC381ye6qSTLdV0PcGRY5D9tOnDZVkvKPgla1gWeEhCYgNeo_jsx9WoUZaUMrKcLWJtEepV4y_LzbSh3gJkATjmtEUdynWhipMN01l_QvxObErevkwNJx4_A3yp7MgZzcDATadlhshqzTa9kQjLEkRa8HA3FWZGOTsJEXDT48dqH0HwlklII27PUnCsTgHMt8PNF0agF8V8abf9vWyeq51Z2cd0gsA4cLGJXwQ7sOkQ-HFk9BjXHiiGMkKPBV6ZS1IDs50WE06SaRBYeSfDBg78zaJ_3HEGlD0yPrwUrimWlJFx1kNeyHmTkvMZu0Al6hCgbExVPQeJjCqAo10ztGaqrbsz1QZTcPWrNRpZ7OQbjKzJAk-fqXf9zxMktKfPKvVNzz6USi1RmrVMf7PXe123PuoQE-m3LrEerf3JL4ZJs9dfjskXn4qNQhgiLJWMSo3REK54eF9HW7T3wUgx75RDYiiHaMnF5xkP5kkC_XZuVe1aT7jiD8Yicnjt-TxUDB2zP2TlbAGGfZ_GD-QJSgX254VfvGwPMK-GVhnSydxY0AK6RRkwdqkXlkVah0RyoPIWC_whpW6iXdQwasyLzj5-V5d8PY_3visxlfbxoY7jJAMryedQhIZgznZWxf_uLU09rwWvJ4YNRSv_9rS02gosirHeLqXXqvp8Y9-o_JcZ7Vj2rs74n3DpB429dcLNmQjddGL_6PAW7ZkQOzW84AHZ72g0fukRFLpofob_BwsBZPZBzofZ05mdrxGlDqGOZoB1GTXCNh35JaidZPlI92DhQKCDdr5AahuVv5ZmVI_XpRNAVtzocRoNesZujqRyLPrQRhiQkU1pTU02r3bI3yfWUdYneiZ5cHhCLjH5Dj_s1tVgnAEfGtkVodqRUVbho3-Xwzu24UWMculBLAmNhDItpN0IICPYj_EWoAs5CRPE71JvPi31JRu0BvP42Mwf8dBh8FQWtcpDJvjc--N-jRn1lEWRwYOHjcqwTBKPnvsJCMFNec9co4uTr_s3n0KtoFJuA3Ua6jyjYWz4tLwM3BHy3g2jGf-y-JpkZJEhbHEynC6hJYBBTmLi6x0G8ELgdCXOaGSV0782rbCNMBDinZXkzwTTY6sdggANt7sDI0CbxbYrfvtZ6WSiuTYrpkiLFigHI5EtXp2p3sH0LrA3dPAoA6aOxinl23UNt9XdjgAz299qixcsQ60e6qwJClsyx7oEMEQQI0aHG6rPZ8DUSBgBVGWv1zbU7w5aIFubFdHQAqvbnUemp6Jyn37qciZ6O0jozSqFQexV9U1fyFZmWS42t1Y38L_FPUhSyNBp497winhEpnbDCXGYiAikqlnb5XfkR9JCh5SEikBDR4ew3zxlg9lO6c48flFqcmKVXPJWfW_9Nk9zif3zgqxIC9DZs9twRoC51Mso0v4HpBAnk9CA-BFvHLhvycdxk7CmynSLz9fCgvqCtpgUoaDxmrFJOdIUNFPGZG9xxjZI6bh3AbjYT7F36C9MvEVFZopnMs2CrnM0Wq-dQP9q-myVKIa6sbKe2JOtnl6qkSdG7c2Q==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 75
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

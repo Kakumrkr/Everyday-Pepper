@@ -45,6 +45,94 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "88f28af44e460c86e540e2eebbec56a578b62b13414ec6159f65a4e4ee7e3edd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nDkEKRjsXJQgVnFKfqDLduX7",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"this Friday discussion plans decisions\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2272f5b6d1a84e52793420421808f72234a071a161007d602388b57f45a8a118",
+        "response": {
+          "text": "On October 30, you talked about Friday, but the summary doesn’t say what you discussed. I don’t remember the details.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10125,
+            "cachedInputTokens": 9899,
+            "cacheWriteTokens": 223,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "88f28af44e460c86e540e2eebbec56a578b62b13414ec6159f65a4e4ee7e3edd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_6NydP4TgbwUyBzWtzxuFv5o5",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"this Friday\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "806cc8885c4453b002ac3dedd0e62698007acb0db833efe3b91687cc756576f4",
+        "response": {
+          "text": "On October 30, you talked about Friday. I don’t have any further details from that conversation.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10122,
+            "cachedInputTokens": 9899,
+            "cacheWriteTokens": 220,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

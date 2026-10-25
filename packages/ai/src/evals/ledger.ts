@@ -117,9 +117,17 @@ const usd = (amount: number, digits = 2) => `$${amount.toFixed(digits)}`;
 export function refuseCumulative(options: {
   spentUsd: number;
   estimateUsd: number;
+  /**
+   * `--phase-estimate-ok` (S38b, user): the worst-case estimate may pass the stop too, as it may
+   * the phase cap; the in-run stop still refuses every call once actual spend reaches it.
+   */
+  estimateOk?: boolean;
 }): string | null {
   const total = options.spentUsd + options.estimateUsd;
-  if (options.spentUsd >= CUMULATIVE_STOP_USD || total > CUMULATIVE_STOP_USD) {
+  if (
+    options.spentUsd >= CUMULATIVE_STOP_USD ||
+    (total > CUMULATIVE_STOP_USD && options.estimateOk !== true)
+  ) {
     return `Spent ${usd(options.spentUsd)} so far; this run could take the total to ${usd(total)}, past the ${usd(CUMULATIVE_STOP_USD)} stop.`;
   }
   return null;

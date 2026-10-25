@@ -23,6 +23,50 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "397a06594ee80e481f6ce8731d935448330bc4a8788235238a879eba4f2df694",
+        "response": {
+          "text": "I can’t save Maria’s email as a remembered fact; contact details belong on the client record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 24
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "397a06594ee80e481f6ce8731d935448330bc4a8788235238a879eba4f2df694",
+        "response": {
+          "text": "I can’t save email addresses in memory. They belong on Maria’s client record.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

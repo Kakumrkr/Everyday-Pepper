@@ -30,6 +30,64 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "1ed90acfe99ab215d0a3748fafe96ee3ce10365d1d629351393683458ee01ed6",
+        "response": {
+          "text": "I can’t change my booking approval settings. You can update them in Settings; until then, I’ll handle bookings under the current approval rules.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_082a0a23fb0dc83b016addf9f9f1b487d28ba6cb04361ea3f0",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fn6240KlKIJGLgDaZvtJCKCnfJnywDfF9KUI-rj6JL6geJDyr0NwmxBmcNEnNISAu2zTGsQWt_ivbCdj8PwfmqRJoLjik5Vsb6FmXDpjfbbeym4y5hCjz-hnP00OXcjc1xELwY-SQi0xkXc9ySptnRz-08JA_MwgUVn29OoE2ULBJhfoj8XpzhufwZ_NcmuyL-xv04mnp9iQiPZprzadfpwn3CcoMrgWTEuKgfJ-Fz0-N55HAOw8GYRS6fuL2A9w0djHIAphQBW5iZyF4kHFLhB5rh_x9jdLz7G7dXe-J9MCD3KpcJ5_VuQ6YzJtScPZDaiTfW1Gx76LUXBFca1h13ZWfJA4szBO1tV2v47r9mxmOleHwth0w0nkvCcBbl_-veL0LGmSE0ES4d-Azyjjk9O_kx7sa2MaOqbSG2B0dcFgM5AgCbNbBJM-UkYtArvlTXpplESJGy5vy_2p975wwY0tZYpzqsbs3sGZbZOo0by5LmduXG9EEvSvac6KHTIG15Ge1C1B_XclnC6ZTNKq4XysYv5x4iEqK3it4Va_hdVwkDJfK6vo3YsWZZg_4m3-RIm31rOcgleXnocPGSJE4p4XHuA3cIzs1PMFIjtPdOYezQ1mq7xqWd8V1MHS-I7u9nGUYZGfztCLGCA5GEsZGdeBMpuo3AInhftl0X4swX-YqABhmt6Wyq6dTievsxUdpX36Zq0ufv8rO6W4zluvEbINxCwlRh4J7-H0P8qWRQ2c9QeOQrTgE2kJTLfDMPCpRERbASpY3J6QMi-j35gJnV7G0F83zKKo4Eg-HsXQH9x1OaTau207X_SJmoMuDX8egAL2PHKULOF5iCyun4s75PJMxvI5VZY9bCZQNvWvVbXfSdCzlKmvyvbVfULw2p7mFj1AJdHlesUIG0j_mBCVghjBbVRdgW8JE9r7gWvuykEIUP_BM5o1PDd_v80004YGrVKVhg3kAsrceZM5HAJuzpW1kioj2ABwSUfxp_9y2cWTOSsxSXbb-51U9kmyvFLDj0PC8yrdUxBlfTq9tQNRlY2FRgeVs3DJfouyaGpiI7XXY-147lYD1P6_goZObUgNjQs9ijWrhDyN2HbabXaXZjC3QJxacW43yDMlvoHMpx2Gs7drCgutEeXIstuzSHuJXTx4ay1fnopK2Js4VLPWMsEmy7Pvl7Eek3abm2GrRwC1mhI-YaCHRaU_wuEf3txpdpbv5xPOJBTMA-nttSEDpglz07bYiq3My7sCjRo0XuQMfZ3uGvnJZ2xCxtjcg1aLmxEwB_0jDMSaRH5diiiZiDDQP8AsW5CPiM_WUNNxqqbd9R1-b6IK21zgrI37jqg14LD26Eiu1a0TrmDg83HgWk75bEle02eS1D692hM_uGPGoLGr4BTdlFFGXp_rnRvISaFtHFVutEKK781MFSxGQDvFY6O0rlv6J3Uevu9Q-rPurJiOjbdp6oumnZDvz1BT22uucU8gGQkmIMySwxifKNbbYqq3iPlEmp5qQj8z1AD3t5M2yEk248CoDXvbVtU-DfYdkvxL5KJI7FTaFbOdGX7ztpCcwqdgYj1_ZHTPtlRix1LZACGoPtPOAnwpNmnTmR6eIjgyuc1rH-MA8VGAWu6TzXjq0UcUUeEA1RA2WGucOzmb9JcjUh2AqqBOY_dATufYZ2K9h72lsSC8A7dHGE-8UaEQnoEvxPjO_9PcyleC9juLfQWKA44O5_0dAdf8PADZ9KwUI8j4Mu8EF_nSPFX4imCT9wk8f2Yr3mWiIBE_votj1dp_Hp3Fyli9OM5Iy9-RDuZEOSNxpUZ8gZ-WF_p3YTA00IpyzZNtRqVDLdODNA=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 66
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "1ed90acfe99ab215d0a3748fafe96ee3ce10365d1d629351393683458ee01ed6",
+        "response": {
+          "text": "I can’t change my booking approval settings. You can update that in Settings; until then, I’ll follow the current approval process.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_020590144cd97c2a016addf9fbc72487d28fbda681ddcdbe70",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fn8mcrOcVtRBBrzCZXSMIO1mgJb_ZcJgpsH49OjnMHWOjPQ7g0y0hH5mZpKTT9NKH3S9eyb4SkY-MzF2Yjv72C7BgSU-tUcPC02QoLiM5T4viGngkZ1KJLFLqDDVqFg22t-e8a5lPU9FDO0kccE1etdcNWtjfIb8IEWnbhDopMWAndFqnVLxCVOFeXRramigrmm9bfltLJKojdscyf4OHcl17XNobGQASWwyvn8HBVspjpnQqtwWbySKCI4QxM5Q9rBryEY_4WvLDFYvPJtdGeew-oebkriLLuwgWt6hyH32EM2zALA3R2XbvLN6xok4hR3EULmCwr0dwCZ2C3tsDjmAjwzYa46pwmthLlC15k89QdKBArzL1hHnWN4Ob5CxgnL8UTaL6ShLH2mMdNpD6lTOZVW2KHoVPZ7ZBvbPdATosuY-o4WXEclUdCMENPbtyH8iFUXoCKh7BHw1sqPg0yAlmwxKl6gyf_yEF-TRkzKbIQL8K6shyn6m-BXDmlppMO1zvQQQ-E3eUa7Oy7FcYHLUazEqURuvhMeWuNRIEAZaK2nZMP8Z6UiAARjCRiH0U_4xGWYoNokFVhZJwEmObbTWjgjgyIilStuS9u2HKH4ygMpZ1jDfjFcdalzuzRS3_Pk8Z68EQxmVkUMKj5caWx1--aZmj2YYIGXdMVae484lWwzEh11k7xKffe4HFY_9tf3ySp8t5voTUq8vzUPhrMl94eAwg9XN95MS5Rim5bIfhJ1guhf7t50pjgcy1NRK3HO3Jn5F5shm9GygoYMG6za5SFih-gfTIIy8--9efqPCPNC4JgEzEcKdrIeg9m8ta5a10-tB6Z6EYH7ShIBy0PbqIyrDqaXh4F1LusBHe7W6YURqF9YlZ8tNsdu2yDsozcJErx6OAAN5rkLlH46MboGEtnGjfUMsW3TEAZK9WMzOdESTo_S8OhTiKc3d-b_u4J0kngzw3UDLtOhLQuPJoX5_wLWYMbu1640Fdqn85WXsL1yh-MCtbOZrf-5eBGmHVNliMyWBkcJ-mY66rsPdrzyBVrLvebPRh3k1Ze7WqPGy4d8AhF4yvlxSZprwQlMOUQv7VMLY_JjiIB2CsJugQGKXzZdBHVHLUDhiC0W4rvxn_gfGhq9EaefCfBRn0kokHeoDHWOOPzGOA6ZuSzsKgiV-FnhuNwkjSzfBG7IhHuxEv1257FY8eua06ZcHFI8Sp-P1j9lKoNO3YEQYZq6RBxgPF_42_uCGxhAWKH8TmktxoM2GDXiWns97CZiEjfoTHkv5hONYDrnAbSqGOqbyVTsieX0haDMVrumlRh1Y4B8jNwmOL4K7Oe0RD1tQT6Q8riGd00Q3irYvHdmKQxeLDeYl6nUivziauBJPWtHoD_WIkDkkWQLwzkurmoL3uN8VQMTQ5H6_RJ2NUhWSVFVkiVHvvaWsS4BjHRgjptJhRFLHWuPeZ8Rif1OanIYmmef86OzP5CsSXDLC_m0VNqnB4td4tYK0n3FgrOAn9wZRwxpYhHbTaY2uMoJPgexDA41E9lHxWJxgpyb67lpGRdW5jIIydGk5EiXxtoMwOIMNDPhekNdvzvU745OJ3p3SuyrzbU1kw0nFHKxJo_W_nI5NeE5HUrAGnl90XSptplJHsQ-DMayEURPGLHMyZH20HzV3b4xjaX8_k3Et0dF7NsZ8kI_h0lmsllUOlmZFIidJCGDoA_uiTMcNrST1gDoosS1UBUCtZwSnr2Vdkk0Zq4x1coxgjweFpNpcpZzNn6p26GCi5NgnDov5uxbdGg82geixh0NdjFGdusdNmMU_0WY2nhtqPgHS_xXdkv_1XjGlyVI_aetCaKe7cL7WtDfAFqvm9Dl",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 66
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

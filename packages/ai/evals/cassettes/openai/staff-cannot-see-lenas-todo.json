@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "6111572f8400afc32d330485cbe33a61b8c3d7f17b1153125b0e6d9be2d1274f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_swotH2dUiy1HHXkXdxIdbVTQ",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "31f651ada8d6835061ca2d114334e6a0dfb5423a18c49d25ae0d585ea6b82527",
+        "response": {
+          "text": "I don’t see any open to-dos on your list, so I couldn’t mark Lena’s call to Maria done.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9956,
+            "cachedInputTokens": 9953,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6111572f8400afc32d330485cbe33a61b8c3d7f17b1153125b0e6d9be2d1274f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_afKnNuF1vQ1WG2kXfZ8UhEqn",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"mine\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4d403fcf76e4bba8196d93689bb7660f29a9e514bf822487d21da40c98d825a7",
+        "response": {
+          "text": "I don’t see any open to-dos on your list, so I couldn’t mark that one done.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9956,
+            "cachedInputTokens": 9953,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

@@ -53,6 +53,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "7688c1cc5687ae54060e185ac76d7009b2dcf9eb2c3b0daf43b13f4647eabf4a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_80pJ2V8THNpfD9xO3XtAnYHT",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9908,
+            "cachedInputTokens": 9905,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "01c9172811e5ec8c7ad3bf110e0cbd41cdf1944b798a29d3a22bdd1ef20a41c3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_BLfMzhaXudxyWNkAYK7FXUsK",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9989,
+            "cachedInputTokens": 9905,
+            "cacheWriteTokens": 81,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "298e7561e8a7466b22c784acca0fd885db2107c0edb76e575881285d5e4ac99d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XlZ7Ca9GiRODlFxvjvS6z5jj",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10450,
+            "cachedInputTokens": 9986,
+            "cacheWriteTokens": 461,
+            "outputTokens": 50
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b35c8b76f79f2aef2ba5945c333d9630ed3bbc684a52ed8814d8266061a631e1",
+        "response": {
+          "text": "Found Maria L. Jess has no blocked time today, November 2, to unblock. Tell me which day you meant for Jess’s time.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10554,
+            "cachedInputTokens": 10447,
+            "cacheWriteTokens": 104,
+            "outputTokens": 33
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "7688c1cc5687ae54060e185ac76d7009b2dcf9eb2c3b0daf43b13f4647eabf4a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_hWhlK6BrUzcW0WsHCIs6N0T9",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9908,
+            "cachedInputTokens": 9905,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "71908bd0001b1f9954dd8262adb06919ec41965f414214ce166f7d0e47102687",
+        "response": {
+          "text": "I found Maria L. Which of Jess’s blocked times would you like me to remove? I can check a day’s calendar to see the blocks.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9991,
+            "cachedInputTokens": 9905,
+            "cacheWriteTokens": 83,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

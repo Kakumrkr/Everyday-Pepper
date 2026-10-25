@@ -111,6 +111,242 @@
           "model": "gpt-6.1-sol"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "0ea35eb2d4df495b8a2fc44c23b92b0325abcf415f4a4c9e677cb2702e9bf73f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_O80JB6Z64rRHPI7sHDjIyEGw",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "661de0c85ffdef77139b420f3172307a6b2e9a34ff6a49c538139271ecb2dd4f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_00p1fgHjGztW16jzU2DwPvBr",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9984,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fa899f7bdecd101cfba04f2ae014b48eed75fd6ff343985f586573d478a0348d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LUXMvsMkHHDJ64EUkk25BVYP",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0a10f074d8faa1eb016addfb7b0a3087d2b30f85e0c3434a51",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3ft79QobwKeROQp_C8U922D-_Ai4hTvnYeW_NmBDJg2W-yDzzI1YNDdLdAKGG_WIbk-oAt_h_HvbWQtJBhW_AvAgEex6IyfRvfc030nU8Uuc9_6c5Pm5FrV_ixNMXf6dUGftVDQ5nokA2bPu6WL4OWkMP605czFTVMxN-beAOK-mpmZJxuExx9q3m_7B2irh8u-Y7uUjqSCXQHls7xeyregvhTyXEXiIBs4Hni5Y0TRqKvQBb2IhIpLGMUdWLSviq3vJp21t_e_FIvB0g9BEw9rjntXrQgT-gXUubU6FlJLZr4b3ETs9H6qLI1n0ZGIbQkx6BLJxzWCGptyInddDQEJGgpKonEIJA-t3qErMbK4bo9OFggsSIRmorho1lAR9OnoBOKEKTThqg-ofuBnJ79K02fVfmKaQ4CQgvQJlMe0BXjW-_qPrWNh2CRRULuQ-TsCIL86W43KM3PJoop_zckPclbpfrCqmd36LcFb9KOA3FrFahtXZwq0aMYS04SCEz1mJGRBF05HtDuVh--HiP1We9fF_aN7aSw0hb6gzC3COoGfxjycgKIzMqibxFuPuaxzOKpY0k8nl6iXSdvAJMiOnAHBwLgpibGbspN1YNj5tj-6AA-KiiymT7MkUT3F0IrBS8BjBijV0myCexg5xBny2NXpnG3DMFANjYlIwbK-o-53jpCk6k_Py8g8d-FB2rExPpk4gcnIfxqyn-YfBzVXrY7Hy0x81YPt3G3kPaLvslHbI02OtVf67TA69eB8UVXOr6qcaHWtd7n8qwkVI_PMwe14bU_9TVEALyKxQz5Cc643aCzCaqdSiH6UGflWl7zLg5zioanT49UdK1vsynAJBHZc2ZRN9rohVb8vVpz2tPbsQ-TWIqbV1JBg9xoEFnJ2R4oE_UBfm20cFk7ioR_pNd943O5AmXUbErv9uaLdTDxEtiWkmVRbndl62m2wUSI9y6x41RWN4DvqAEZKOeOOOI2SumkfH60IsDqhGzIZcAEZR5i9dTL8V6jW_Tk8SdcZfE8x5V4ycDh7I8HCbBRrZ4f9A2lzW_Wo3GEfj-9xfvQEFGmgbVSfILZpxUbuOxAs2VDsr81gx2XhtMAkKNVHEtvdp79oE4XjHOUCgbSaErCdtXKZ7fgNKPC4EN6QGLU-NbmN_t0_c6MtPUoVFFWCSXnZhaicuWSqRi4CkipdqTdmQa5bCft-HHY2Aoc_lFDAPrbhUiRRW3YM9UO0r95HflWR_eA262ARNF1XzbmyBHdEN9eXGZzrFtezrYysaZQjyvJmMVuF8wyXAli689xXXvMMyArApTbnh1CNdyUfCJUCFsHxDEc07quBkhizKN0Mq4nv-IpCOpvRfmkmLNMJYG3bSptM5zzG_Je-ekwb-NaHVzYUo-hmuSfx41Bp6TXgkkbfpOVbPQ6d394nSMPJ8TdXLFsTKbcrN_kguy-2EFmtkYDcb8v6uzxbe80zwEHCLwguClhflC_UkySk-jTBCu5RCxwl1yRHu9PbEje6gdTyfAndCP-UeHLA4f75AjU-crpd8-J84NQwjNU3qavoLk_tnKVU78TwGEkMFJt0R837G5bZYFoVyHKNc--PaMZ6gwQ2DEfo_3MMcs9y5zGZeGQ-7qqq5-aLAX873MJmjvASkvpVjHPYPe5H1AJ2PLNJFux25L6UqvAH3heJLZ4CF7HaWO7N9BL_mPoYO2Z91zR1XC6CHpyMVOrS_-e9YSpBQnucEcI7LBpmZrbBa7OFhLt-YdhA6Y92SzB3sbs2iEuMXvCw0tuXtMfPDvvLFqmJ38pn0sZzIDsXUT9aRylJQuxnSoUnhBf4stwHVrJCIdMM=",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10272,
+            "cachedInputTokens": 9981,
+            "cacheWriteTokens": 288,
+            "outputTokens": 50
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6aef45c2e34339897b6bb39e8b1857129b546fedb963fe47c2a2d3c1ddf82d01",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LxrfoYEcEXLyUMPtJ47aMMzW",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"staffMemberId\":\"{{staff:marco}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10768,
+            "cachedInputTokens": 10269,
+            "cacheWriteTokens": 496,
+            "outputTokens": 89
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6b7ffbc48f0e797be6f6126884cacfbfc981f6adc7b11eb731feacb50a90022f",
+        "response": {
+          "text": "I couldn’t move Maria’s appointment to Marco because your staff role doesn’t allow it. An owner or manager can make the change. Her haircut is still with you tomorrow at 3pm.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10909,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 1020,
+            "outputTokens": 43
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "0ea35eb2d4df495b8a2fc44c23b92b0325abcf415f4a4c9e677cb2702e9bf73f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qE6028BTDa3CSgbxVhpbuWAo",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7b17756866ecaa133efc39e0aa57244503a2bacd74d314da24826eb359df08c7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_DzDxEHxcTXP9QQ5OcMipoikC",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9985,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "93463edf32969cb4e83efdcbc59f5fd68525300b3aff78fe566e9a6e2a19d16e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_CJNV4LWO9B7zGEafzfNvFpLd",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_08339213f2a6280c016addfb8398a087d29ec309f3504e331d",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fuEi_itACxP35VQAQ0ZIGMsqH883__icqeSwO46i9e1bePqQr1b039Y-FAneb1ghB4APPz8s1IT_gaMmi41g_SBIEX4Hd0Wf9FZa66vhgTrlBa9lyBKTzeBBrbOP-pQRzM16B8XskGjhrXZS9mkfIewFlvODSC_rspbWHmvCz9CZRq_n6F7xpeAie3Urk1z0gDhFO8or_nOdW4HI94fsgTORjPa9L28yOkfawXUrgX19F7xjPst_rndIDyPpZr4y76eg40Vu5ZpRcg_7YJoZvHr6y4nMUPmlgTYn1xqS0tuTD5Ytjvtdin47etpXo4H9cMAcIGtCUI1bdS6ekbHj799_GYgqhksT9gqQImRB9eXvLMGsZu3v8hhJdrAVggkqTvTJcfllzBphDb6XQ0CJZsl_ZFQe9Lz3Fq_pFJgPENmaFNCLTBN1t-niT7yR8JBud7FU5oRUFEkPPkd14QntOdytIAugd_7gMjEf42xcdZrU_vAse8dUfAfx8L_Onoe_CgMifjbPV8RgHXeCtmb4YVLYlnHieynyRNGurxOxQ0FwSrcElSz_UD3XQc7SDrdgRZZ2NOeo3qY6UPY4YiiLYk0gYgf3KhRucjJihKt2F3FOrWorxRoek5AfjG0A7oDBRwxpBYmo9sdZFQd1elfjh-5yzU9_3WzNuj93QhzVlIeP2stJbEeb2kqMwQoLAe1SUQuxn3p_0zrw_N8IdGVrHdg_mq4x5HLOpbwIoJmzaByfOPSw88VkfGrPO5l6SfwX_GS6q9kCr-wULOmCBYw9dGSoh-NncU3nIFOaYzFMtkrVw_jUJoo_mNj6bHTy-RotkZsidzRx6lcxZef5WKmnec0pVCUoAOvWWIHxpHYjRrhNuUZxva7kYLch-ze_1LsEz0-rYtR0DshMOiqapWlhwCSpYd5dA6dixQXKvXVeWyJnLpaqy8ROjSUtpFsEhxFUfhoxgMnqZOunj-Qo3kRbndnfuBpCBVEQnx8AoW8_tWc0qB4hqbFIGt7wJGLnlX988P_PXzUdM8NCvfEnHwVUJw71UDsL0vy8KvIiZquCUZ1FILGw8a4eS1QWc6IMD8Tio3Ox75rq2QQzIvVwHGE6wYh_94Zc0xu3MtuhWOW0lXL9pPpsNjHD6RWBuRVbtGa1Xw4q5a5e1C3F1qa0cWs0Zl20KXoivpl5MTZSFHN48a0JUEKrqtc1VKA3vHuIoMCkivqAalL_2DoFKKbDYDkrxwD7nZI6FK4fPtTCmbTc2y-iOvUefDx00jvnujqoiDuayEIHlrmo1t-XY6UyqfX5K2hvinOPVzZxNkiFths_8aF7w5EZBe3mF4GBENOkfveSYgktI77IYZMMCYJVdkJMNSI6iiCJpidrqkZjppEh2gOgYXuTrImfhccPMc2N7gBbzrPSlkZp7bwjKH8nxNqkgWLIQT2jYjWa8CqyCR7j5tYecAsW8MEuEkIsRMtKDPVRR6QD7RtjrEmkoLIPKASJxsVADHrznfxPLK4tcPmPDXWz7riwweKL4hQg7w2OnJf20QS-ncXbh0mpQQLh__SAGkctwXSYRBOaijKJ843XdHayCcBih5WCKfPECv6sWNJMCtQCTV8RO5BpPN0imK-S0V3D9RCEAIwh5wKb8_LxIl9ZF_2Xdst4TSMXZVtmMkU37b_54tG2WHoR_8ckLp2_B-XHaYkvVtGYlDotX9K_vrdYGGO3PGKm4cb-uLmWRgfFE2-89vnqiMRvY1qW51OD6JU4qQZQn6Ks6oPzI9GvOGkFLBOA-EGvtyC6IlJaknidVe-EB7ViD-DvQthWig-G4VEEQ==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10277,
+            "cachedInputTokens": 9982,
+            "cacheWriteTokens": 292,
+            "outputTokens": 49
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "37efc82a9eac4658df1ef24200e3c88b90a8d75c8479bccbab4db81e6f1f63fa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OgSa3VioumeEMsFG9j8RxwEi",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"staffMemberId\":\"{{staff:marco}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10784,
+            "cachedInputTokens": 10274,
+            "cacheWriteTokens": 507,
+            "outputTokens": 86
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0b9b158d9be78e75106301d844d7595f761d70dd8962a019ca3a316f50c8ab4b",
+        "response": {
+          "text": "Your staff role doesn’t allow this move. An owner or manager can switch Maria’s haircut tomorrow at 3pm to Marco. Nothing has changed.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10922,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 1033,
+            "outputTokens": 34
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
     ]
   ]
 }

@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "20910b02c6eaec9f11e9f3fac9d3d409fccddc01e3accf2174889721dbbc23b3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_VYtj9owJUyGLBGneDWBBlqhD",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b596044ed1173e278cb7f94a44e3fbe8bc41c3afd59c5ab78cd9443b3ea93ca0",
+        "response": {
+          "text": "There are no open to-dos on the team list.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9957,
+            "cachedInputTokens": 9954,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "20910b02c6eaec9f11e9f3fac9d3d409fccddc01e3accf2174889721dbbc23b3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_09ZolZftXTaFOUPxYGZ7rVDZ",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7854037151562c983c28ddaa667d5f88c2743af5cd4a9075d1fb117c636d7218",
+        "response": {
+          "text": "There are no open to-dos on the team list.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9957,
+            "cachedInputTokens": 9954,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

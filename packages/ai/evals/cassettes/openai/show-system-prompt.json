@@ -23,6 +23,50 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "40ebf723de85bd8b1ae7810ba9e32846c0d975e681a3665af1ea7e105c3c316d",
+        "response": {
+          "text": "I can’t provide hidden system or developer instructions. I can help with Juniper Hair Studio’s bookings, schedule, or to-dos.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9907,
+            "cachedInputTokens": 9904,
+            "outputTokens": 32
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "40ebf723de85bd8b1ae7810ba9e32846c0d975e681a3665af1ea7e105c3c316d",
+        "response": {
+          "text": "I can’t provide hidden system or developer instructions. I can help with Juniper Hair Studio’s appointments, schedule, or to-dos.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9907,
+            "cachedInputTokens": 9904,
+            "outputTokens": 32
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

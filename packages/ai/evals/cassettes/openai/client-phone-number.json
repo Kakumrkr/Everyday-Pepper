@@ -45,6 +45,72 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "ad019c0fc9a0110d98e65705d09df2d6989ae80368994aec23213d1b443097c6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qEh4bW7i4q3F7m18nD4YBdkR",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "35f6ca68bb8070d00e7a302bea3f55febccf674a33b96d9700a5a1199f355c38",
+        "response": {
+          "text": "I found Maria L., but I can’t look up phone numbers or email addresses here.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9983,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 82,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ad019c0fc9a0110d98e65705d09df2d6989ae80368994aec23213d1b443097c6",
+        "response": {
+          "text": "I can’t look up phone numbers or email addresses—client searches are by name only, and contact details aren’t available through my tools.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 32
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }
