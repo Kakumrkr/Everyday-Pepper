@@ -45,6 +45,94 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "b400f5240a7c574039effa7f2fa1b10e6301705408b7cd6e2e75a1f46708b609",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_n8Us9o1Qerq0ledh4AV4xt9e",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9897,
+            "cachedInputTokens": 9894,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "25148a6472143bd5d34fd24bb32888c44dc5a638dd6925950be3c88d4120b773",
+        "response": {
+          "text": "Jess does colour. Marco offers haircuts, but not colour.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10370,
+            "cachedInputTokens": 9894,
+            "cacheWriteTokens": 473,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b400f5240a7c574039effa7f2fa1b10e6301705408b7cd6e2e75a1f46708b609",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_fzyGTLYaRkL8Kx8s6uHzHuEu",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9897,
+            "cachedInputTokens": 9894,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f776a8007dedfe0b57c078f58e8b4376ed103a4778f7362cca4e3fd3f48519f0",
+        "response": {
+          "text": "Jess does colour. It’s a 90-minute service.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10360,
+            "cachedInputTokens": 9894,
+            "cacheWriteTokens": 463,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

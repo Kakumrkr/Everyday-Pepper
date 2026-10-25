@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "4ba8a5d2ab4a6908568fd9e981d656aa50f2c30782968a30ad702c125c9483c0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_hKB55soLSKrQk2GsfLVaYUyw",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"rebooking_due\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "28969f9ca372e2b4b4f8b61c10ca9908d7c4fd7ac3de83267e581ed4022e578d",
+        "response": {
+          "text": "There are no regulars flagged as due back right now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9959,
+            "cachedInputTokens": 9956,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4ba8a5d2ab4a6908568fd9e981d656aa50f2c30782968a30ad702c125c9483c0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_57SuuRjKdIc3t8CFzwn7fGVD",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"rebooking_due\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bf97376a996b289bbc66d92e6b8d7d105fcdd2f7980d0a155781ba3b97c2338f",
+        "response": {
+          "text": "There are no regulars currently flagged as due back.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9959,
+            "cachedInputTokens": 9956,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

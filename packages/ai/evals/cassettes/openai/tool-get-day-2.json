@@ -67,6 +67,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "34d3acfa9befdeb4a3706b4331c22775aca4fdf58c23bb284ad6c8b32e1fc55c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jVBWvqI8Amp8a8ZeI3F3hDhL",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "75da396065ea5a2ed0d11d4ac1ed1400122ed46941fb32458fdb630210536deb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XPhvIO9j44hWqL12z4mXPgIQ",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:marco}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10360,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 460,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a956fa7787362d13efb96adeb9d45fc900bccd1b1c1bf01000bd0d987405e9c6",
+        "response": {
+          "text": "Marco has no bookings or blocked time this Thursday, November 5.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10465,
+            "cachedInputTokens": 10357,
+            "cacheWriteTokens": 105,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "34d3acfa9befdeb4a3706b4331c22775aca4fdf58c23bb284ad6c8b32e1fc55c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_FT2g9ViPDXcTaBwbgUsFuAn1",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bc5f4399090a28d6c4035b77f4a3bdb450636823ee4f39bd1c027bccd91627f0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OTHA3P0anrhyg2Y9Da9gJPp2",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:marco}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10366,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 466,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fe8dfddb39efa085815089e126b7ae493756e0b430d559bf42434a9f987497d8",
+        "response": {
+          "text": "Marco has no bookings or blocked time on Thursday, November 5. He works 9:00 AM–5:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10471,
+            "cachedInputTokens": 10363,
+            "cacheWriteTokens": 105,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

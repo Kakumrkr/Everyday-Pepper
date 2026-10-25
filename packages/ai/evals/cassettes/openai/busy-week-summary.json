@@ -117,6 +117,158 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "aec75cb2176a056f4258a768428c55b1d0d9819e1d34a95d6933db9ca1c7f25c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_iclpzmgRVt8fqr5eCVk2qnpJ",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "87e222cfe8b8b055c791b10b610d98a0c453a3ba87a22d9ec1732962a51fb14f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_V7U1t7XHMGwjDszOilDGgx1J",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"staff_overload\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10364,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 464,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "61d29d917636e5dce0b0e4963277bdb69a75d93859688c532b7ea700243db773",
+        "response": {
+          "text": "I don’t see any staff-overload alerts for Jess this week. Her regular hours are Monday–Friday, 9–5.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10423,
+            "cachedInputTokens": 10361,
+            "cacheWriteTokens": 59,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "aec75cb2176a056f4258a768428c55b1d0d9819e1d34a95d6933db9ca1c7f25c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_i21bESkMfZ1bFP2nHUM9fFFr",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "863636c990b01d8d06bc9fa299d22a1b66dd116a955cd7553a6939b4e82140af",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_22hB2YmKT22Y4cVe0USCM4CK",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            },
+            {
+              "id": "call_DNPN8FcZVCOJihW1lxZJ7Arn",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            },
+            {
+              "id": "call_T4mjnmbYeowkXAZtcZglu3JO",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            },
+            {
+              "id": "call_vwWcVsQSxamsxVHzpMVP09VV",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            },
+            {
+              "id": "call_TKs1p89nVaqh7ncmtqDiJJ6i",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10357,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 457,
+            "outputTokens": 250
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8bc5908764bfb1762808df04f1a7e689505e6bfdbebe7d7a1a122d9bfdca91b8",
+        "response": {
+          "text": "Jess has 2 bookings this week: a haircut Tuesday at 3 PM and another Friday at 2 PM. She also has Tuesday blocked from noon to 1 PM. The rest of her Monday–Friday schedule is currently open.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11237,
+            "cachedInputTokens": 10354,
+            "cacheWriteTokens": 880,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

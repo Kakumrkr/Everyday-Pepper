@@ -45,6 +45,94 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "8926e999cbd3471a13ca113c683ba2294c5acbe8234b7ec925a5ea9d6d3c51c3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_v6EocAVvEQU8PeNLYdqsZgRs",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "72b9fe06a42f4ca771ab4e3a240a3c28cbab875739b1e30cdb67683917df9e88",
+        "response": {
+          "text": "Marco works Saturdays, from 10 AM to 4 PM, and offers haircuts. No one is listed as offering colour on Saturdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10361,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 461,
+            "outputTokens": 32
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "8926e999cbd3471a13ca113c683ba2294c5acbe8234b7ec925a5ea9d6d3c51c3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rlphAauUNeMdTArZwSPR13dC",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2dc560e939d42b9176a54cec93c86a84f2070d239f44eec0efe0ee0c83cf1aae",
+        "response": {
+          "text": "Marco works this Saturday, November 7, from 10 AM to 4 PM and offers haircuts. Jess doesn’t work Saturdays, and Marco doesn’t offer colour.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10369,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 469,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

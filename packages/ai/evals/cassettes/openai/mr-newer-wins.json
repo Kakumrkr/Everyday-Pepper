@@ -45,6 +45,94 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "f580088c5b5a68fdadd7435c244ba1e051d2ac47abc7c256504aa50fe63b3549",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xCLU7qJKAwN9s7gRlCpkhAJr",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9898,
+            "cachedInputTokens": 9895,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a54e303edce68bd435508eae7c57640da8129e57d0a279c7cab3f608f33ce301",
+        "response": {
+          "text": "Maria L.’s usual is “Colour with Jess”.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10052,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 154,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "f580088c5b5a68fdadd7435c244ba1e051d2ac47abc7c256504aa50fe63b3549",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_erDKN0fGCulxTsWqssm0VdeA",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9898,
+            "cachedInputTokens": 9895,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "244bd45e44a8a144355007655b517954e87e9fe04f8117b649e8e4e5b08ce853",
+        "response": {
+          "text": "Maria L.’s usual is “Colour with Jess”.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10049,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 151,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

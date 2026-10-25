@@ -45,6 +45,93 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "a496fb0035f8a9e6ccf524881b5376de0387dfc3607fc3fb4dd9d5340c3b5cdd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eSZQA0E6YS8w0SPwYDBWktLh",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"gift cards\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "39d7ffc04ceb539d8a096ad59c5bb5dbc2964ac5325547d86957970872052497",
+        "response": {
+          "text": "I don’t remember a decision about gift cards.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10081,
+            "cachedInputTokens": 10078,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "a496fb0035f8a9e6ccf524881b5376de0387dfc3607fc3fb4dd9d5340c3b5cdd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3t4K7usfuVapCRFGRw5eVr5r",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"gift cards decision\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ab628b0fecec2b07e014c8a4c328001b25fa1db4cdcba721569f79a44b540376",
+        "response": {
+          "text": "I don’t remember a decision about gift cards.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10082,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 181,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

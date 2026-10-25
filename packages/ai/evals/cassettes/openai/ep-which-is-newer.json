@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "0c4ad03d2600c75bb24d5130bc8bf0bdb77fe56e317d54fafada630eb7379fb2",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_eWA9YsYWbSwpG0ayLz1IJO03",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Saturday opening time\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6e44e447da664b537e77a2e4c006cee882d9be55108a6951fb6b03f8b76e2b79",
+        "response": {
+          "text": "We said the studio opens at 10 on Saturdays, as of October 28.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10140,
+            "cachedInputTokens": 10137,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "0c4ad03d2600c75bb24d5130bc8bf0bdb77fe56e317d54fafada630eb7379fb2",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ZTbWGnHenE9p1aMuPAFf0GMG",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Saturday opening time\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f6565f5501b123f0248f24206502abc37bb0777e772b6f01aff552ed4cda190a",
+        "response": {
+          "text": "We said the studio opens at 10 on Saturdays now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10140,
+            "cachedInputTokens": 10137,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

@@ -67,6 +67,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "cf3e28748ce01affcd2dfcded5c06637d74fcaf4bad22b50330f64ff24423d55",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dZhugjWqNagyIUY5nJ6yhuP1",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b5061440a78a95f32f6d615dfebdf520a5dbc8e707cdddaa435f8c14a790529d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dHITkGkdNxM4jCnvNiGNKJxo",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9983,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bfa6338e580d83d38a87c572512237dd56c30babfe631dcf21a41d33829a4e5b",
+        "response": {
+          "text": "Yes—Maria L. is confirmed for a haircut with Jess tomorrow, Tuesday, November 3, at 3:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10269,
+            "cachedInputTokens": 9980,
+            "cacheWriteTokens": 286,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "cf3e28748ce01affcd2dfcded5c06637d74fcaf4bad22b50330f64ff24423d55",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GDTCtFa2lnrCT5qk0tBZpKjU",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4d5ea127899d28f1b17368ff79f7f9d380d35db45ce49a897d9da0613cce1baa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_R45NfFt0Nlfd1WkaXPyKUL6J",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9984,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f97f431ceed51974d03a3693ee9f308f8a3cb5801fa717d854c1880a6c70437f",
+        "response": {
+          "text": "Yes—Maria L. is confirmed for a haircut with Jess tomorrow, Tuesday, November 3, at 3:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10272,
+            "cachedInputTokens": 9981,
+            "cacheWriteTokens": 288,
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

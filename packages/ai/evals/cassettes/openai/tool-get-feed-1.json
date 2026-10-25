@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "9ecc62dfb0584f12dee5bb5b7041325b8b1a7746c009c6988b9b407e7ef88c72",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vNh1Crs96RFH2berWKdvLA8k",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bbdb7646191829fe9d31bb0619579d4cfa1c6334adb599a38ceb8ed732075b20",
+        "response": {
+          "text": "Nothing to look at today—there are no suggestions or waitlist entries.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9957,
+            "cachedInputTokens": 9954,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "9ecc62dfb0584f12dee5bb5b7041325b8b1a7746c009c6988b9b407e7ef88c72",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IuOz2Ts9JQjVWOw2yw6qLDYt",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6b49df9d4b4ada27743b7b512bc109c20f5fd5483458bded65770998ef7201c4",
+        "response": {
+          "text": "Nothing flagged for you to look at today—there are no suggestions or waitlist entries.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9957,
+            "cachedInputTokens": 9954,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

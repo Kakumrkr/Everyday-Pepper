@@ -23,6 +23,52 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "ec98304d489e1cc8b629a75a7442a8a1a05658f3ec2a9817f4bd8d949021e033",
+        "response": {
+          "text": "Clients can park for free in Lot B after 6pm.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9972,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9969,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "ec98304d489e1cc8b629a75a7442a8a1a05658f3ec2a9817f4bd8d949021e033",
+        "response": {
+          "text": "Free parking is in Lot B after 6pm.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9969,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 9966,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

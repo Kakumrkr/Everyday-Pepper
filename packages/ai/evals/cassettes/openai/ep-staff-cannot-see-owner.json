@@ -45,6 +45,93 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "7aa1ec15b40effd9f812bdda91febcf59b673d813f02670f8205a6b3e698180b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kUsYnGkpWmyQT1PKuj1vOAQy",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Lena raising prices decision\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2906c7148744eca6425d4e0fedb58b8164dddead32320969c711b70eeda248ae",
+        "response": {
+          "text": "I don’t remember a decision about raising prices. The only note I found was that you moved your lunch break to 12:30 on Thursdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10020,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 119,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "7aa1ec15b40effd9f812bdda91febcf59b673d813f02670f8205a6b3e698180b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ra3ae0IsEC6guthngYVOS1V2",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Lena raising prices\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "df6134fc736a4039a516c5853af348073ad058588e1482e0b11673d76c6a2225",
+        "response": {
+          "text": "I don’t remember any decision about raising prices. The only note I found was that you moved your lunch break to 12:30 on Thursdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10019,
+            "cachedInputTokens": 10016,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

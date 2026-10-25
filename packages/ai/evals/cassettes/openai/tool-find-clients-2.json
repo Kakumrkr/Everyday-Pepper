@@ -67,6 +67,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "11309bcf9d9dea589d01f238d2009a662031d0f43ef282fbc04a03789e25f4c9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_t2LeP4JnpkOy0pH44OruaIAJ",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9897,
+            "cachedInputTokens": 9894,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "61a3fc0b9c0d2d307a9f4a127ca4658a9f21dbb9236b1eb0797a45d89b8acf54",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kBhYu6za1L1B837rrPIcNmL0",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9978,
+            "cachedInputTokens": 9894,
+            "cacheWriteTokens": 81,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bd6a3d7a0579187da5c33b0c1a64d578b39fea8f350552523a54b4a2d8e967a4",
+        "response": {
+          "text": "Sarah P. has no upcoming appointments to move.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10092,
+            "cachedInputTokens": 9975,
+            "cacheWriteTokens": 114,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "11309bcf9d9dea589d01f238d2009a662031d0f43ef282fbc04a03789e25f4c9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bsEPOLO6zeDGx68grtIMUpOu",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9897,
+            "cachedInputTokens": 9894,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "92d212902fea4ad1df8f20bc71c25084af59c1276b4f6805a011325a160b08cd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_AFJUhM9E1TSOI8mqogQMxAV5",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9982,
+            "cachedInputTokens": 9894,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3e4d7e3e572c920673f7a823754b703169e33604a8771a11b8e9dc82bab0ebac",
+        "response": {
+          "text": "Sarah P. has no upcoming appointments to move. Is there another Sarah, or did you mean a different client?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10104,
+            "cachedInputTokens": 9979,
+            "cacheWriteTokens": 122,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

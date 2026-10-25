@@ -52,6 +52,101 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "febe56e75d34225a8ef06ff65290958a32e06c0cbec66f0bf99188dd65b1a619",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3wvgrJK4rQ9kYh66Iafzp9pD",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "32a1ec98a9eced2c7cb65a8b6d68743a06452cc898141b372f4e451b28b905d0",
+        "response": {
+          "text": "I don’t see a beard trim on the service list—only Haircut and Colour. What day and time would you like, and is Haircut what you meant?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10380,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 481,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "febe56e75d34225a8ef06ff65290958a32e06c0cbec66f0bf99188dd65b1a619",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3yHzFsvYf5r698ixdGFrpuba",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a395ef9674af44aaae72b3e818e4ffb1e86006495b498b4ea4c3cc667370733a",
+        "response": {
+          "text": "I don’t see a beard trim in the available services; Marco offers haircuts. Did you mean a haircut? If so, who should I book it for, and what day and time would you like?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_01495b2f1c0f3ee1016addffcfb40c87d28f75040722da146f",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3f_RFupTEaPCLvNWqbwKVkQ8LZTqNZKwfpmvObuReeSQNQvGW3M8iIKdlolNZeskcJKzgWoEgK82HInc8CtN-DURW7K4TZdNgENSyt35zjV2wbdcKFsxfw6t3-JfYMD_I75XqcYCozoIKLUTrNVLyu7tz7RdNTQxYDtTdUE-9_jnvYDpnZjJwlOvX2-YoLzZbLVCyv3xAaGKeIG9R0VUzGat3zNVoERl1n0cLK6LR9-c5KF9CV8DkpGGdIHWApAw9SFZWvF7PFd8KF2P8zEb4rRsIuXCcEInx0aTEiN_wcqSUExgoihwT3UaX8a6IScVsS_367upqDDONIgSxruCmlD7M6uEXzoQU5huSItg-IndmbtJ6SSohD6f9VQEV2A8KNVJ6XlKGdsmd8qSNXIYI1WDaDrWOjUN4gUYZv-B7f8c7Htc6mAMr6eUA_CPvlmhJLpMm4aJ-mGlV3HTKLiIFW_JCyynB5DOIoewx7yJNdLtUU5Ad6mCltXY9JaiQ-Lu1S0ayGF8mZo00UPoVnSs2iUdNmG2wbgmd56MiK0s23YOZNhxpqsU7hSvgrj3d4ZVrSIabLKDxUNhfN_tNIePVWbAU8hmFZzBOkI13S02iadLPEGp6ySF2LojLPhed64EfSPN_RqV8Iuf1jVRRoxBqBdb_GsRV-0pjlRZNFW4ajAuQeK2bmvywO3e2ZAa3fgYSo1Mve8gSy40IINWoCF4yDNMiEQydmN1M2BooYOVKIx97lG8aOPaZBvVfkdcyqXQJfLFP5KlxDbEpH7yWUr4gGnGCXXMcag4Khm0uFKN6vhd3Y4ZBNcafjFxXPO3Flpo8TOOu8AvtJNrSohIHPPeb6HAIK1DSrzMehcaRSBU0A0Ln4TcC1gGZ8GfrFKAdHkO7m1MEOIU1eEZp6TRJfAGSIjKXF5z0OY5ex2akteyq76KeQKh5eEsrKjtpQJCGB_63mxfNwoHifVAM3Yj56hwLtI87cNr-y5FfuC8UxeRdnybMukbugwOEt_ntPBZBLVNDOFKEpLpBkhriNnyoztCdQY7Q4FL0st8fSfRnwuH7a9W16ZGxjfJjvKLMMnsc_xu0Qj7ixQAxbpxdFCXXtfALQTpwOYCmd2sw_BeT9vybtnmDlUvEmzdvp17WlzKaKl-94cBLb-4uo9AoXR5VkbUlmlL3HYS1C1JMjGYcWrsOFucXGiD3xaTxosoanlUIQaS45YlJg739Rz0wEPPQSvGKAZWgJsTX9KEtOHbja_bCSeXcEeNF2LOqMkSkvczqLtgt1BCJa8ccJUbYUuGh2vlfYRk53NpbD8qVv53JRDlTNTK_2F3gUaCrXHJYbAXKXDz6ItVH8DNbbgD5fP3U_RnIejGBzWrIwys4_beCcV6sZDU801PDO-1BOfZSaim5YCxsGBU9eGocQGxHe_74vmnt2lR6EolQVewbRI9N_GcsC9SJv2P5PXAQ2yplo-v9Uo26Aowe11H9Zyppm5MhV0kEN3E6hZlzTbQaUUz--HsFM2onRmzDOFcbcHDhqUnrw9tm3YYCT6gCcuo4x7opP-KksEqq2-hY6W4CuHGlDt_WhQSbx-NIsEQzM4P9PPFM5IUHJVFSkM6ZA3tAjTW4VF7lzZSJ-2cDxbDchET9OZROb5y3OPZJhZm0sayU5vNnIzJjUxUPuvSM5a8kdYXMjfrm8PlPb9V5xSEsElTypKaJK_MFfR8pG0-MBa_zXpA7bpAkeS2tEk1pVzZobPY5kH6Gz_QGtSGwFukRb-2HytCEG4tJ5t9dHul-lWSQnWUvkLwIzJjbRMULclS4HGmmWd6_q14QPmOikIIAim8F3wYnBrUUBbfcE8LxB9_UpV12r_T5XLD2_ga2X1jK4lfbczyaaRbkdjvnVpyY3hl2885iqLu29436L8-0wCbdNBSnNi1t625nXIgEayahNZkwLCcp6ROFDSiVaguHjAwXff4e2SF5uOpZpkMMlhvuhxzl9D-S5dl4DqyLOvKlDKF34rU2z9GeFfK_vwX3TGhiqrNpZvihCgKTRjInRd3_O93-4F3Z98G5jD_-awq7U0U_KvM2P4Qf230aQhiqxKQgPtQNSx4Mo5k8yl57dTxSQEZyy1RDsdAV8-gybFn1-P4cGu34RWlZ_cVZv69djP9oT63H_xhRwnIlS4w246ISMKoNMc7GRzrdWHMmfef-9nv-aeQ9WHLBjI4Jb7f8iRZEgzsbsajweIJljmx5xXVB_VzO4n1AtjpQDhQm1XPuNG6e4wvnehg76oOQ_aD6CV7SiulDiCUpmVBxKktAhk8ypOLmgbq28KH239AQ4tY208xDReJVE2kzw4vcO_Tn-lkQLOlL0yjMHJtcdLj9Jj9Qcm8ankMsGz7yjxJGmWS8tsTJMgo2vaHkCWZmYQXW1oyiNMg9LcOamIPKjr8LHXQ-Kgsl9meVrsjPHSV-NfMZ5ggjN_J10hgh5av9IrVePzOpKzfP-IAY6kuEfJB6jWiV2IxHBmXVUJOHRg6uHVUeTrIqBM_HbPYln0gS_VWrPIPNrmmkSYlYJ5jP0aK2EiLk8wg6ZUYkbj7nv_Go3dON_8cbLLpTXmzOAtZBNS-lNjoR726rEqHFidTsA6NaL5mFj2VsOp73NTGaQX-AnyYfjp9xvKxZ_KtFg==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10367,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 468,
+            "outputTokens": 139
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

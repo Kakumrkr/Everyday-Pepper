@@ -45,6 +45,94 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "0f241baca2b5fa5f5923d4ff003ff760d9a1864841aa905a795bdc55d377692c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4PU6mTk0QdsJEi6YGzpBKZf1",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2ef42a6013c1208733efa112d4ef85a5e8ca502ae2dbd75c1a78d64d5595198c",
+        "response": {
+          "text": "I remember Maria L. is allergic to PPD and her usual service is “Colour with Jess.” At her last noted visit, she had Colour with Jess, and the formula recorded was “6N + 20 vol, 35 min.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10247,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 346,
+            "outputTokens": 53
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "0f241baca2b5fa5f5923d4ff003ff760d9a1864841aa905a795bdc55d377692c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_U5LMzqXPwV9d4GjujpjgVaQG",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4e3ca3d9158b41237be9055c97ccff4b51be4b6251fd7461ccd3ecc4a3298898",
+        "response": {
+          "text": "I remember Maria L. has a PPD allergy and her usual service is “Colour with Jess.” Her last noted visit was Colour with Jess on October 23, with the formula “6N + 20 vol, 35 min.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10248,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 347,
+            "outputTokens": 52
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

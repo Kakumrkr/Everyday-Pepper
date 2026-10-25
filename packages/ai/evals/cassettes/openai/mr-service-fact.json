@@ -45,6 +45,94 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "c9cd9881f5d6a64bc3d5206b6a19cb2159c4f45ba4d78e860e1783a55b464f60",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5CpLqrXuTLgqM2wyPLbbezIx",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "638d3a31e982dc634aa54303378545cb553f933b710a09ef1ac33361eefb9ba9",
+        "response": {
+          "text": "Colour takes 90 minutes, and the studio’s note says: “Needs a patch test 48 hours before”. Jess offers colour; Marco doesn’t.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10458,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 555,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "c9cd9881f5d6a64bc3d5206b6a19cb2159c4f45ba4d78e860e1783a55b464f60",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_KgK8SGqXUNGxvSIOGtO879rJ",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "dfd2f48e08a62ee19c4c2227a31b90d23ec30169f395acd9ce340049272f787d",
+        "response": {
+          "text": "Yes—Colour takes 90 minutes, Jess is the only one who offers it, and the service requires a patch test 48 hours beforehand.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10465,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 562,
+            "outputTokens": 33
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

@@ -45,6 +45,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "e3e6f517963874bdb6bd9a21d151dff2d229a306d8b1c21637460668b3f66de0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MxfyvdPZcIa7L61n1mkmxDAe",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Maria patch test\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b4c91ba10ffda64980a79cfe078aa7ec0a78b7cc06c012e559e788acfc38610d",
+        "response": {
+          "text": "I don’t remember us discussing Maria’s patch test.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10084,
+            "cachedInputTokens": 10081,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "e3e6f517963874bdb6bd9a21d151dff2d229a306d8b1c21637460668b3f66de0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UTv1b6N8I1rUGYRf42CZ0Nke",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Maria patch test\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b3b145cde0601f795dc913c567d2faa48509930dd1bb63c0d17e999dba872a75",
+        "response": {
+          "text": "I don’t remember us discussing Maria’s patch test.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10084,
+            "cachedInputTokens": 10081,
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

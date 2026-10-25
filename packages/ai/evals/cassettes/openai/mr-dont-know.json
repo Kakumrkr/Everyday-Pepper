@@ -67,6 +67,138 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "1ef7b390227cdaa955b4ab68309bf504ba3cda8430c52eb8f64bbad1cd077956",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_FTvj8mm2k9LWSbzS2pzBxUlN",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "01aaa0b67805bd77113554acdc2e1c021f1efdae77e3a3eaaa71df69bb0ac5dd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_CwowaGMC1IgBcdS5easWg1Qv",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sara}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9983,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 84,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0ef4047ce3db82b27eef121a273139fb38315bb16b5f2503399906ff08174367",
+        "response": {
+          "text": "I don’t have Sara’s usual on record, and there are no earlier visits noted.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10101,
+            "cachedInputTokens": 9980,
+            "cacheWriteTokens": 118,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "1ef7b390227cdaa955b4ab68309bf504ba3cda8430c52eb8f64bbad1cd077956",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bfFOAHqPIHsEmimtaH1Z3Dkz",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "25c77721b2dc76135b5ba250d38cc3a2b2f48308183f8fe68fa5f12f94d441f3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_X3GQWVh7pIoOh4bzG7UXL5qP",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:sara}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9984,
+            "cachedInputTokens": 9896,
+            "cacheWriteTokens": 85,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2acde120987a644f68fee4f8132def8b86218ec9cadb6c269fe1011ca3b1109b",
+        "response": {
+          "text": "I don’t have Sara’s usual on record. There are no earlier visits or usual-service notes available for Sara K.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10104,
+            "cachedInputTokens": 9981,
+            "cacheWriteTokens": 120,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

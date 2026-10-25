@@ -72,6 +72,195 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "0e7e55b16ac8335797d989509d645a578e768a85722cd419429751aa61d679e9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_7a7znfJqrjczweZ1XVKDWOqw",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3bd699127ccdf70153655f9cfc350d5b0609c9015eeed489d46e92f6336514d9",
+        "response": {
+          "text": "Maria’s last noted formula was: 6N + 20 vol, 35 min.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10164,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 261,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7d6620bd5e9ad0c25385ddfd3f0b826eeb1dcbd54656c2558fd1b9cdda248712",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_UN77l39rSvckZs9wu59w93xN",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_06cb9d5f24719a0c016ade010ad7c887d280501db892e7548c",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3gELgZqcFrzw4FF4LDifyJWzsfZUTzzS9W0nIdKrukSzthopclUWy5q2TFqCxH0v-NAfhlgJcyBBcdL9mnmsrAl3vTp95nmzeqxFfEFc-s5OykDzNDMfgkTYQ3nNPdFwolC0XvHUEilvdNjeBNWFMbwu7pTR6eo0E4ivETZ-49q-GF5j3pLNTcsAK7kAL0XbpeDSuzvV6wLkw_OCCoYFghWxVwhGUcBCBclYVtxcthLQhzY4r50WHi4jFXRs5ni7YfqitQcBP3i9wHEixPxNvlGMy680Oic_3kJA4pCsZZUURMsF-MgvXyb4mI0QYEREG2s30uMyA73V4Hh-eLTBG8LT1LwP3CQtLHik4be1t7vGgnTQ43pxiZ_bHwE9S1oGORDLNXQge1E5VeI9qVIebg8UTlbBddzSANxckZIsd5GBufnaXQpftUs3JTFx8oLeVp4iRAcRSSveooAqj0bzn256NIiJn_uQ9z3Z5axHAr97UA6CLMAyl19MVxE-P80AvoOIimN8EzbjzNW6UwZsIBc-vwFpBkKkPfw4kuOTUekOuiiURr9Bq_ZV-liexnKlt9zEEcUfy7BVBG5hplUf5Xq_tEwdQT5oSQ3XpcuURNrkoHoNsPd0KcWVeLCoAPl2iV6jJvinPnBPuXw8N2izPnKQDbWIwnAEfI8MhYxq78ibJUZx-6zxZH6eub0eTTwbBJiBDB1P3eBvo_UDwRMBiJM8uWEgBLvIHIv6nkWxqkYdVyHYRjVEz-TW1Y6djBVJOGfARTcYedSdHMOH0KnnCAs3xpQC4agVyO5eqnWiiP4xAskc3GmQs3c8MwrF4NiSVf5hTzNhG6Q-Q6D8oXjqHJyvdBv-s28VJqz8WeKm-HTcQmhdfC0nGdJL154tnxpDms9wAtBbL2k9lWTpwbyuTbATEtNG3NIN_BLXK1bh0G-6pM4tpOjphQ75d6gq6mUDDhjtFOGflIV-Ne5gsbs4hGNb5UNPwdGA1sMJD52zdbEuIIo8f-s-VWQQxn-9u2qZ1Lm0DPkFZzPartEZE0tz7dhFgclXHad78XNhIp3torhDlyIaRATL4qx366gEQwLPI94EP01IrK5cTNJjgCG0DJmI2OtrN_rjQtK8IpiekPq0Wy9rktFqQAjy0KurHCz6WGMxIhffb7VHGzZSgYtlysnB5GBQpJfoPbHtE8CGXscG5nkBZvwARxX6nO2knwvBQWUPYVyb6cfUzr3a99_fsvHsqb_SCDHlncAMOlpQRmM3speyo62Jc89fO0UhrwI1OINPD-Mi7PPKVzANX3qe6uRBI9co28zUsEO_ninPxXccsYkddcJnkgFrJH5DfzTMhO6WPFAQn6DMhY0qQRrsSkn3CLfI68n9AGwVCQ8BNFm-6-_rRKit7JafQ0b1PGrRgfyAnMOdRqefqZ8lNFHKzuLNwQ4K4J0KwDKMEQRNbJRbC-fRVllRWqwfsEHt52kEq3BCigoIbriKeNF9zdN63RroqjkLQxZ9OeFEdcG9_7rRyXTpERl2d4J5D6IAI_4KglCqhsrI5u9DQqcjtq0ZpaNTiJ_scMin-plEGEtcSzaH15uV48rtGcmvcw2wilT1rIi1R201-_espCG8IGF-B1eXuijOemJi-ROxLpLF3OinZ9K5gkRie35NwO_eCggNdBKU5jveFcbAKCeOXSECcdsaeWZYWwyUmmW2I5AajOfrCxCkH2ytLj3Or0CE4fBCWXCKaBO817_ExxOHZEXBySNvOeOz1g_8BKC842zpS1T8Kj01LeFHfpsQVjwF6NQgXGGqx5ntdNapuqDhDXPuAD0JV76Necv7JcHtGKUwhwpxhUK6vRVP09_Aqmd3OSwcwnPkMySCL6Ldr2S2jrkh4NMJ7JnrVQnJdEHXMtdZaHIznmSTjN_reMI7L9pfYhRNmOa4BNNPsfP-TE4QOwlMiOYsKac_CWTXbsGyjPBJ2nSlg0D-FD8abC_MJwXFFvy0xkBU6hR7d2wrP92W4t-vXtsk2hOhwLMYm4k6zUkj_Fhj4xohYAETY6ifUdjtSajYqIetXvpD1rSfIYkp-yut1dS7ww==",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10122,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 219,
+            "outputTokens": 88
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4403d3c9a11aa501078b346cc7745ddd20e7a10e4f5a232ce151eb4727476fb8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_TJHnJxiV4HAMh7C01qVtEzOE",
+              "name": "get_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria-last}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10598,
+            "cachedInputTokens": 10119,
+            "cacheWriteTokens": 476,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f801a9dc159ea76acd80a851824c69e6f5742748932e76934626ac70b34fdd17",
+        "response": {
+          "text": "I don’t have a formula noted for Maria’s last visit.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10824,
+            "cachedInputTokens": 10595,
+            "cacheWriteTokens": 226,
+            "outputTokens": 17
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "0e7e55b16ac8335797d989509d645a578e768a85722cd419429751aa61d679e9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_P5hWBl7JRTUvZOwR1VpSww0B",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9ef3fc061e628e91cb4fc278a6e2b3daa4414494172ad96507d6c60cb018b0a2",
+        "response": {
+          "text": "Maria’s last-visit formula was 6N + 20 vol, 35 min.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10169,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 266,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2bea3bece22e09313ee10929506ab99c18cc533ce90e1cdbbee4a034ace44cfe",
+        "response": {
+          "text": "I don’t know—Maria’s last visit has no formula noted.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_00830b83ccf5af82016ade011220f887d2a1194d583dc1199f",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3gES0rp4tUs70qaQ1ccpxYEua50f117GN1M6isWtiuToc5Z_VsvtpTvnbbTIfEw8SxQB3kSKOl_rSlT05gUBVOQ_UYKHrkDBVWaKObkYmAnnR2IdXruGf5XeHDIQpS8j5Yj0LKcyAj1bBDqPwqou48W3icZN8o7dQNWo0u6B1rIfuICbtmHVWdBzsX1XI9M0DR8jTqoo_ltYaZFzZXtCVDBKY5AETolZrJ9mDpCnAQ9Dn5UfzBYY3UqcatrOjQd2VfgHfWudRKwUGrsYVNLLRpyVg_s-bRb4eCX-z4Xkcl55S5fLo3MJ7zYqJqtzn9J8WPboVfANLQQIiTpAI6a3g_J62kaZ4wX2DCQBmjNtEj2iPTkXA5vmDwgpu9UzWiA_Bx_Fywt5HHh2VyKKTQ30ePh-MYUWVf9cwbdCOx75II1eNEjqC6Typz34pZ8HmQUx0VwYDmlVSmnAFUiFdZggtainpLJuHlDBxAVC4YucoK_cm0ziaYYKK3OG4ziFNEV-OYAV5Fc0ZbHLg18-kikkEex_IMSFnkGcc75LhoLr6FcEL7VbRWfeU2XaWtogNkQM9jNBK1kHhxdzuVTSVDhkMIzgWudh7nQs89pJK_w4VaJGxQC8lQ5-oxDOVjInZhTGXkyZHKKGn_ONDfslPfkAwcy8uFSJRK5yyudYhwtPwpXnQ4kkEtHeMJ4uIJQLULPzUeqedlpf4LQzODiCuTSCqdpn4okbkbTEtwrTm8lXyl2Qy0dIFEy85djYOHi3TmlYtuuGy16_XhTleB_81Ep_9x0JlkTaHVmRxSisP3G-LJlQOMbMKgAz4AU2fE9pWjEI05CHuNK98e39Jq2fj_YNUuVRoN7Etf2DfkH4jFiVh2DT3eFWolVr_Q_ME3f9RWsxNXxGbklPA7LIaJnBD_hQz5YjYOPwlPWpD5Afo-FZPj4D20zDyr8gDFi1m7JA87seqpxxi57nvougUZVsBo2obqC_ARUM8Aj1PmCxErKLT9ZPvXd0Km4K9Nq-_Z6zfEFD3j9plpfu1HFoPaj_XQs3Y7KeGTlnehK7v20f4bFifqtjhsKJ-Nvvhz4Q9f6QGWlQ_7eR_ez2Wn3LvnR79UZoqybK4N___qw38DcyFt18BgOiKk5BHNO5kq6Lbn2CEAmyw8ncCCjCVuCfOy5V5vZkthZKYXnxw6Ra_glvKHMfDxVv07pxsS7uJB2leny5pGyDXZCn3U-MRUlEMUxJ_lum1I5VYIHbLFkaJSPJIlxVNEfvLvRbMaFsPJxnJRzb43zplvSuZ5eqh5nFZxgmtDc0CjoUcprJLUPZ4hcQbtxa9gcPwua2eBfKrFwwIC6Er38aDIjvqlM629znYVLvcakhXXqSWGpeziGUznkdlvXyIK9jG5JOY1O84UhIKkgHOOcZbjDH_VZhjfy765j8Z0nkmdFHDzO-4Qt627Qy1JHlT40heq5npK7udPS2-l_I3GSPibIBTxLSF490XNaKqmB-6GKswArjbb03PbxojdwDDYRm09Kb_gmm9BC_fxJlyGpDVIxNUp5X4kp5DxTA5mv8OzFvA3FDjWHppECwQueX8cN4JH4rnh3EIDj5rL-1ZsNayaIEhnTO-hcRgSP5rrYv-jD-Mn-KYIRoBn0X5ZQw4Js2TKpJLYLorR73fKbpFGEBcQLPC47sNik1X_kpIR80B6rpMe24GutP6pGMrV1_AsJL2sA=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10127,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 224,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

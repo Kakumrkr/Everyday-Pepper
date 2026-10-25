@@ -67,6 +67,139 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "4e84d266adfad54ebe60b162357bb1cf9513dca525775b20d3279fedd7336703",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uAawIk8LorcDqaIOdggQaiMV",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9898,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 9,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "83a01017f5cfa0ee85157835ab8d55a2b5fe1165cdb61853ea1ca912a66ad732",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GWFM1uUVnN6bDpSHY2cnDXGS",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-06\",\"from\":null,\"to\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10361,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 463,
+            "outputTokens": 60
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fd5c0307ee77278039e75ede0fb923e0606042221be118b3b75d755a3e5da4e7",
+        "response": {
+          "text": "Marco’s calendar is blocked for all day Friday, November 6.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10469,
+            "cachedInputTokens": 10358,
+            "cacheWriteTokens": 108,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4e84d266adfad54ebe60b162357bb1cf9513dca525775b20d3279fedd7336703",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jLHOxDnNu20IjKdiEjsDV05b",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9898,
+            "cachedInputTokens": 9895,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "255c87cc912c17fd301154984886a3a8c603f6a4cf86359b2778a653698792a5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_cTPqhdxibL1msEhNoLvXcBH9",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-06\",\"from\":null,\"to\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10359,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 461,
+            "outputTokens": 55
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "42772888e5a888e5d1e916f51ce2fcd57baaba9e517da94855fa909d50f0273f",
+        "response": {
+          "text": "Marco’s calendar is blocked for all day Friday, November 6. Any existing bookings remain in place.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10462,
+            "cachedInputTokens": 10356,
+            "cacheWriteTokens": 103,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

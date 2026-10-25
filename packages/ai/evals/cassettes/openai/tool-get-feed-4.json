@@ -44,6 +44,92 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "65f04dd52ac9e7aeb77592b68ea369af8eadbe50803df21320336b1e3d910f0b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_VDRxwYca81airccYVQx589Ac",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"waitlist_match\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "56cb390e379a8623fe08ab780ad3314aac490033d6874d02ca019f93c810e1f8",
+        "response": {
+          "text": "No one is on the waitlist right now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9958,
+            "cachedInputTokens": 9955,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "65f04dd52ac9e7aeb77592b68ea369af8eadbe50803df21320336b1e3d910f0b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_JGtzooF981NhUODulTY0hV5q",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"waitlist_match\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9899,
+            "cachedInputTokens": 9896,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "56eba35c872ccaf7f4e945abb2b818fd6552d8b10edb0598cf4e7e68deda824c",
+        "response": {
+          "text": "No one is on the waitlist right now.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9958,
+            "cachedInputTokens": 9955,
+            "outputTokens": 14
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

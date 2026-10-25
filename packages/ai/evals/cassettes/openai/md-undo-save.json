@@ -140,6 +140,232 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "f1fdd38d8b22bf42b398eac67925cf7d935b4af3796bdfd2968709a205df426b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_KZRgS16biq5Fp2pLv6rTFpHc",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9904,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 15,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f484cab8d25c8c971c0e8223d30662d45fca3e3b3cdd3d3f8f80e2b71e776a60",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_WGmttgUHXaWY0DEoCaoMv25V",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"allergic to hazelnut oil\",\"sensitive\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9987,
+            "cachedInputTokens": 9901,
+            "cacheWriteTokens": 83,
+            "outputTokens": 64
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "83dcd7662343ac644ffed1de4b1a1a98b3fbf5a5f9c628042d18a2cd713126ce",
+        "response": {
+          "text": "I’ll remember that Maria L. is allergic to hazelnut oil.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10091,
+            "cachedInputTokens": 9984,
+            "cacheWriteTokens": 104,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ed4eadc507f861c03e51859602b7aa22b8ca731d4daa2d4ee9be9334bca0984f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_WLaYEQX7qlVPmUeS2GzgNSJB",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10113,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 224,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "cef4a2a1bb8054e9a64610fca85b4432bff90f681cea64abd4d27a4761563251",
+        "response": {
+          "text": "Maria L.’s record says her allergy is “[forgotten]”.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10196,
+            "cachedInputTokens": 10110,
+            "cacheWriteTokens": 83,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "f1fdd38d8b22bf42b398eac67925cf7d935b4af3796bdfd2968709a205df426b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_14XhgztstDBhe6eFkqCZf7dx",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9904,
+            "cachedInputTokens": 9901,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "559a5920c981b5d0f41c5c568998183400bf09e8bfe0ddaf5045f976d9bb41f1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_H7KZErqlc0Laf5JF36U0pFpb",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"client\",\"id\":\"{{client:maria}}\",\"key\":\"allergy\",\"value\":\"allergic to hazelnut oil\",\"sensitive\":true}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9987,
+            "cachedInputTokens": 9901,
+            "cacheWriteTokens": 83,
+            "outputTokens": 64
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "762c0a582ac0a259631f53c16090de4827361b077e63d282070864bc2490fd2c",
+        "response": {
+          "text": "I’ll remember that Maria L. is allergic to hazelnut oil.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10091,
+            "cachedInputTokens": 9984,
+            "cacheWriteTokens": 104,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "306ae9e4c82fa58c729d397050c5a13951600f952e80aef9c79f60e0f1663b2f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NfL7iA1Ep5GKeXy5D4N8Vlcd",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10113,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 224,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d45fc43eb4cad232e2cf9a619496aa317611d4687f9ab6bc40fb3168137e429c",
+        "response": {
+          "text": "Maria’s allergy note says “[forgotten],” so I don’t know what she’s allergic to.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0c5e559dc8dbca3d016ade01406cdc87d2bacf9809f28c16e6",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3gFCp1kKk5hWKgv_I576-SBlWgpz5MkZ5L0wcsZCNDLKhtC7LkHo7-BKa6DyiRywVV5ozodgLtWFSdoBsHJsdliHIT4DaGFF-FY-H7es7kxYBXH-92wvveEKoZ4ZfXIQsspN8OX0DA_mv-ZoaNbGpI45UtcvPTD9HjjoueNEgKC5uwFD_JF7I4p6sKwdUHROUESp3qjngBuG2x4pAgMKIWdt3KXe_e4UuX7BAahLaeWIv4UN3jmryBwb_el2VFVcbXyo2m8ZeRaLNc0ALNDe4-Bx8j1WrRR02_weictuu0C7A08l4QjcT81_UO8mITcx2YtXLBx5xUfXukSnROS0QjOB5O4xFXyAqSLxXeXSFQgfEcNwfBdK3uf2kUB28INEc5uxIwTXspyXD_s4jHyVbWQSZXYB_vGIMPGIgBghNq81WJCH6vpkQ6_ivz66p52kC5BAQVJr9x97tqft5n_QxAIsthCQdT7KFUj3P82E_2lLFgj7MPPDXPKpCGSL4IMgG2eQNjY7BEE6G_G2Pb7hyM--oiG93C3BwdweNVSKFxKGlb3Tvk_2Hz7Sc591vyGGMcEBpFhwb6LkGBsLi9qFCFxAjWQl6PhkHh-7nGbo0-w1hckMsuXPxc08_7lOn2lej-_EM8jL5DrWiLIIh7i7qYUY10HeM-Csv8xemtChA6VPaOO6UfGFExYJY9t7Y89q-2E3FYK2Oh2aiE_JCZM2FJbAizOU9fNhkSkG2oB8k2Jpm7NdqAtpG7byCZS6ul9dPiYX0LLAAD9NxX2NR981QSzyXmIrWv2d3wP3lq3NeAC26vHP6cN4CUxogpM8dwUAP0Wic6upP4dsfIOCSKN7AzTYK7KdkN0Ads8gnTJ_ElDRgATjErICn28FCFJVz0C4t2CFp6wMCXqoQTvWBCwM4w91jwU4xe51Xh0SaVBiMnHFSiByNgheuYRQsCHR9acyAB986-foPK4KYIWxDIY5Yid2AkbxWT83cVFSNW1WybHmk1nPJU2pXz0U0KJLbDY9R9sVuYTt9Degwi6s8Es9jutGUk872v-HgEb4ZJoaH5QQ1sYDGJZyogTt-rMX-UovQDvtljAOTlv5cW3SiSla2AHEP5bd36WMEH7iD9Cd9XCwuKKwErmaKwhidiKtO2Q2jIuI1IjrxU-cf3dEZKjfe4jtX38yCnJOI1NwPNLo2FBR4vadVYG36Ta5bWN4pSRoeLHZFpQR62q6t_G2RWZVRZ8zz5qCb6SmiR88HcdYSoGLiphxYStckE_KFowfjcgTldoH2Af42djOKytlCnJceK0lLW8TxRX7cHII9ZTSEzM-vt5vKob-5DMLr7cTAwrprPitJFWVB2oeecJ8kUVDgs2kWd_5QGXGWh5GzurYibkRaXP2QsGmAVz8h3yFB1zf5wkgWiRZqE4NdP4stfkqJWvIDwecxojppztfrmLmV-uHVnydRGUXypO0CwSLQUYs2qWTlnm55oF7mrNogYiKzauZjEaVQ20vL_sHuoPwQ1dOpoUL6_kEi0YDlUIMnC4Ec3qLTCCC_syqEM3B-BGhIBIiOnoghLx5KbPSuVaekTG4cuDZN1UevjPvdMbztK5iqSJFgXL9Ayw4dVQB3nDZAWOZI2BQZNtzUkPLFSFlG2HLHT0F3zGqEh169HNlkds1qtpjBMEbKpT1lRFfz6QOrW-YncngPFNelCj4P_Zk5gamjIj7kpXZrhgaufgyiOeLtJo4VQrEv8QQlK65c8vUPK9x_CAT0dtDg8CyAd5ncHf7cCoGIzzC8dY89vNSj_0YjbIqYjySZrjnVzYRQsqOQiWaWwEjX6dHYDE7i3Fbci3a884RIQt-XqgD0Q4t3ZZiuACfBsmeVF25cncbignvpcZAUwWmi6OxqqQWoY-VXBrJyFjE3Au-yI_ANOCDSM8qS9-eq40N7ve7BjtdtMMfi65RcUmL18qJlbzg-LohhyhpU58mTbnnyot1S-VQuj1OohkzXmZPzpbp_6yKyEkuc4XogVG-s3ip-eJdsM8eXbY2_gd3OtM_Yx7ZEoxoyls6l1WhMkvIE-6NKS75rbEHqfCBtm76Qz5-xp8LCjhXbLj1XkIBTElf9tfg-iFe3rSJn31HQ3OqBG4KZUNcpWX-DWmjigKUtrzAh9ledWooAOlDmfCKSSGWIiafBX74VnLMVOV6xkeu19DZuwHieAUF9fjma_HICVbM10HwaoMlLAQD2Mw7MCvO-OD6nHk2pROZl4PjjjmgfEB4RJpCX5MOBT0SvTvb8BPjzA1h5HH-2eq2i9n4xIX7mRdcCADd24RrdmJy3tC9ECr0q2zCH0_CffKYLIQ78DHN0P8y7KjCaXSNUwZd2MoNj1j_0IK2-eqC8ViVr83PQrnQ40y1uksJOvvW9qvLXr-IMd6Bp7Fv3TUFlW_4dMQjQgGUNJhGEprKwSTBNfIXBiviDBLjDlgrY3bhm48cl99WNs6fTD8Q09BEPoBpgl2W-Pbr8BnpfRvONn9ullblUyNRayxixl3eG6HViSUTgn00t-V3yfurQcWOtOb0ocvmnkPzHJEXGS9MT4jxJ3Q5EPwzHs1mVWW9rIHVgRIUEHdwSmD-yiQUw51tqiZ_qpRoZwhD74iCt4PM8U8nWtgzZGhEBSGpFa8Vp6w7RPAAHg22ad3BlE-7_rWfOFDL1gniqmjqEGSVsYT_Zi_K18knTXNULy-GrWNrmLSLGRYUSQkVKFrYR0W2hMa-X3VNtTt9oXltUh951psy-Zvh",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10196,
+            "cachedInputTokens": 10110,
+            "cacheWriteTokens": 83,
+            "outputTokens": 127
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

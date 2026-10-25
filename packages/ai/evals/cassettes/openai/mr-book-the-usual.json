@@ -89,6 +89,204 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "96b776328a4d2c5b55f137d8d6d1c6e1c040418365672f7bb1c53dc43655cce8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dvQaQFaRdrDC3G5urBiKUhd5",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ee97ef26062059610da5773adfdd304e55f3998026ed334d62c8a4ee4b919cc7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1ljN9t23BDU7nOKuky2H9T6M",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10054,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 151,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6d878620f80c9ac8aea84ae29ccaa2639b911bee4219a4ea5f09f4ec1ed501d5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uovBunMiRje1GgaGhvGAKwSm",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10502,
+            "cachedInputTokens": 10051,
+            "cacheWriteTokens": 448,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "281dfc00ac41bb6b14da42c9dc82bbb2f73ef12e120dcec5c2e8c803a5ed76da",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jJGHLZqGQrbw85SGD7iNlsWV",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11009,
+            "cachedInputTokens": 10499,
+            "cacheWriteTokens": 507,
+            "outputTokens": 109
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "59dac0fa724ac183814089ef48d01300c81363723e76117c9421fd96a5052733",
+        "response": {
+          "text": "Maria’s usual, “Colour with Jess”, is ready for Wednesday, November 4 at 10am. Approve it on the card to confirm the booking.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11197,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 1308,
+            "outputTokens": 37
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "96b776328a4d2c5b55f137d8d6d1c6e1c040418365672f7bb1c53dc43655cce8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_d3NF0guQ9BqR8q5RqpuJBMku",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "62cec33ec6714b514c2950fc354a10553d80e196161338249614565c848bbc4d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SgCZKzvps7GvlmGsaCEEplWj",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10055,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 152,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8362076ce902dfb12855232163cb41aeb20ed056f3e85ae5c212148a467bcaf0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OAExXUskT4ZYe8fLZ7VV7JVz",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10505,
+            "cachedInputTokens": 10052,
+            "cacheWriteTokens": 450,
+            "outputTokens": 107
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d3778e727c10cd96b5c01e5b59c98e28947785b55ac1a646b32d01467a2add43",
+        "response": {
+          "text": "Maria’s usual is Colour with Jess. I’ve proposed it for Wednesday, November 4 at 10:00; it’s waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10691,
+            "cachedInputTokens": 10502,
+            "cacheWriteTokens": 186,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

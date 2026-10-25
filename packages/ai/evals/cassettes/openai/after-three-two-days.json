@@ -72,6 +72,148 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "cbdf144f46cf2239e41f9748cfaca569b011d5a04e427455d4ce714e1c2773fa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ZuXlvwM0aipkuG0ldHR2svKf",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9906,
+            "cachedInputTokens": 9903,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1c5fb2f12e329765b0fe459eb2f4a583767814e8b261634cd2061527b5010a95",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1NTkc00RmyW7X0vKtK9UZBiL",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-05\",\"days\":1,\"notBefore\":\"15:00\"}"
+            },
+            {
+              "id": "call_tA6JuogwMbfoF2QRN06tf57D",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"15:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10373,
+            "cachedInputTokens": 9903,
+            "cacheWriteTokens": 467,
+            "outputTokens": 192
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b32acd5624eebfee087fd1deec0e240a529e5fca44f8ea78a449841e1b189833",
+        "response": {
+          "text": "Yes. Jess has haircut openings Thursday at 3:00, 3:15, 3:30, 3:45, and 4:00 PM; Friday at 3:15, 3:30, 3:45, and 4:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11087,
+            "cachedInputTokens": 10370,
+            "cacheWriteTokens": 714,
+            "outputTokens": 63
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "cbdf144f46cf2239e41f9748cfaca569b011d5a04e427455d4ce714e1c2773fa",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_hTcQgak9v1Zr4ibLDXQ3t4uf",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9906,
+            "cachedInputTokens": 9903,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f366d4a0a6c97a53b78f58033edec4929ea042bcb34ba9daa3c0e8176ea55a57",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_R94iNMnInAFdcKbNtDaLS1X1",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-05\",\"days\":1,\"notBefore\":\"15:00\"}"
+            },
+            {
+              "id": "call_NLTqBfJpt4vDypEKWyv2eXnQ",
+              "name": "find_availability",
+              "arguments": "{\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-06\",\"days\":1,\"notBefore\":\"15:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10357,
+            "cachedInputTokens": 9903,
+            "cacheWriteTokens": 451,
+            "outputTokens": 186
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0ba2ead761fd4f644ce1ddea8ccaef32f83e692e65e403ff0d170da294794b64",
+        "response": {
+          "text": "Jess has haircut times after 3 on Thursday: 3:00, 3:15, 3:30, 3:45, and 4:00. Friday: 3:15, 3:30, 3:45, and 4:00. Which would you like?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11074,
+            "cachedInputTokens": 10354,
+            "cacheWriteTokens": 717,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

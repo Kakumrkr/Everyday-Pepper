@@ -109,6 +109,224 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "7cc47498e8b29c8760b1ce67e6ae6722028c941833d6303f36ddf7e20877177a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_qySkuTtS42c6AyJ5tTTW8F9t",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9907,
+            "cachedInputTokens": 9904,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "24072223bb69d61abbc559ecd82ef9286f32f4648656aa8b3a44b98924254c0e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1fQnLmiXo0zcxF48jdIL86w1",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10359,
+            "cachedInputTokens": 9904,
+            "cacheWriteTokens": 452,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d22b21bee7d56f60c132765715e33b1ba5800a047d661337e4296615c6452ecd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wHBlOl1E1hxOaX5oc0BozUXR",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10513,
+            "cachedInputTokens": 10356,
+            "cacheWriteTokens": 154,
+            "outputTokens": 113
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d5e94da529e30871ae231d322b82896149a39ded7d2f9be44166dd807540fbe7",
+        "response": {
+          "text": "Maria’s colour with Jess on Wednesday, November 4 at 2:00 PM is awaiting your approval on the card. Her recorded allergy is “Hazelnut oil.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10799,
+            "cachedInputTokens": 10510,
+            "cacheWriteTokens": 286,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c3c9c0feb08e6320116e473eeb54ef47a497a43767caf1bb303ea8f93fe6f399",
+        "response": {
+          "text": "The booking is waiting for your approval on the card. No warnings were reported.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10692,
+            "cachedInputTokens": 10356,
+            "cacheWriteTokens": 333,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "7cc47498e8b29c8760b1ce67e6ae6722028c941833d6303f36ddf7e20877177a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rJaQVOH2QhMJWhjJQMUwiSQ1",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9907,
+            "cachedInputTokens": 9904,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fbc8fc820b8082fb0dce753d4e5c8619d3e06dd0a132f21c78ae60bad0c458ad",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_T1DE6nRds4AjDZhRkStUFso7",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10368,
+            "cachedInputTokens": 9904,
+            "cacheWriteTokens": 461,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8b336dc71a9c14078cbb5274d570136079aeced3091edd0789081a69278ca2ce",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_i04RnPvPsjCh1UrZe4VRhZ76",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10521,
+            "cachedInputTokens": 10365,
+            "cacheWriteTokens": 153,
+            "outputTokens": 115
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f76dbe68ae7d5fb60fc8fbb05c0ee4316f1e87ae4cf61ac94fb98067b6d7622f",
+        "response": {
+          "text": "Maria L.’s Colour appointment with Jess on Wednesday, November 4 at 2:00 PM is awaiting your approval on the card. Her record notes an allergy: “Hazelnut oil.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10809,
+            "cachedInputTokens": 10518,
+            "cacheWriteTokens": 288,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "22824e32c1083cedece265fc87ae717fa76f874299a107eff02e7456ba9bc917",
+        "response": {
+          "text": "The booking is still waiting for your approval on the card. No warnings were listed for it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10702,
+            "cachedInputTokens": 10365,
+            "cacheWriteTokens": 334,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

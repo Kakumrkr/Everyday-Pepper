@@ -45,6 +45,94 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "0e7e55b16ac8335797d989509d645a578e768a85722cd419429751aa61d679e9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_FYIfrVtgTUAIDgHZKxsKmhTz",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "71c5c0cf5779804575137031a0716608fa213792cff5de617a950c5bdd0ba7a5",
+        "response": {
+          "text": "Maria’s last noted formula was “6N + 20 vol, 35 min”.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10164,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 261,
+            "outputTokens": 22
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "0e7e55b16ac8335797d989509d645a578e768a85722cd419429751aa61d679e9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_5gtFdTPdfFbDSmVlwzsbld89",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d6e20f32a33e2dbae34be55861c10aec64fe4b4172cb4dd6c01e77f3f18204b7",
+        "response": {
+          "text": "Maria’s last visit note says: “6N + 20 vol, 35 min.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10160,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 257,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }
