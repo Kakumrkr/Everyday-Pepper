@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "31fa7130ffea38fe423093ddd9dce8cf71206806ddd2bbeb07fbc9d81b300a4d",
+        "fingerprint": "48a719d1d612cb99042d81966e3286993b324587220f4ab7fe3b0500575551d3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Lk99SbElYoijeirsw2S7KETK",
+              "id": "call_zkynDg2ZpN1IPVM1TZw3Rq2j",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9837,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "078c760eaa288d3030ef96d6f6fe6f1bc696860136590f4097c3962220bb7e76",
+        "fingerprint": "c06dfc9f268af474fa5471acae494cb809cc75c6fc8df6cbb4f7ab0fcbf5c6b7",
         "response": {
-          "text": "Nothing is waiting for your OK right now. There are 13 other feed suggestions, mostly schedule gaps, plus two clients due for rebooking.",
+          "text": "No items are waiting for your OK. The feed shows 13 suggestions, but none require approval.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,10 +36,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11526,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 1686,
-            "outputTokens": 33
+            "inputTokens": 11566,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 1666,
+            "outputTokens": 24
           },
           "model": "gpt-6-luna"
         }

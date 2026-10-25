@@ -1079,3 +1079,34 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Recordings:** $0.3590 in 181 runs (Phase 8 $0.9827 of $1.25): four probes ($0.128) and one full pass^1 ($0.232; the eval database hit its background time limit after part 32 and parts 33–127 ran again). Every gate met but `autonomy` 10/11 (`move-done-no-approval-talk`, carried, user). `--phase-estimate-ok` (user). S36b's stale pass^3 trials 2–3 of 7 chat cases dropped. Security review: no findings.
   - **Checks:** `pnpm check` green; `pnpm test:integration` 1,218/1,218 (after the poll fix and the dropped trials; `@pepper/ai` re-run 163/163); Playwright 90/90.
   - **For S38a:** the `find_availability` guide line for moves (clears the carried miss in S38b); the `waitlist_match` feed item and "Join the waitlist"; the Phase 8 cap for S38b ($0.27 left, a full pass^1 ≈ $0.36) at the brief.
+
+- **S38a Phase 8e "a" (2026-10-25): the daily briefing, the `waitlist_match` item and "Join the waitlist", scripted model only** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)). Branch `claude/s38a-daily-briefing`, pushed without a PR (M2); S38b records and opens the PR.
+  - **Built:**
+    - migrations 0049 (`daily_briefing`, `business:` subjects, `insight_runs.briefing_due_at`) and 0050 (`booking_verifications.purpose`, `waitlist_entry_id`);
+    - `buildBriefings`/`runBriefingFor`, with pushes carrying counts only, and the worker's "Morning job" (drafts, then briefing; `DRAFTS_POLL_MS`);
+    - `feed_settings.morningHour` and a shared `claimMorning`;
+    - Home's `DailyBriefing` card with the hour setting;
+    - the `waitlist_match` provider;
+    - the public `waitlist-requests` flow and the booking page's button;
+    - `get_feed` v5 ("brief me") and `find_availability` v4 (the move line);
+    - eval action `morningBriefing` and 4 scripted cases;
+    - Phase 8 cap $1.25 → $1.75.
+  - **Checks:**
+    - `pnpm check` green.
+    - `pnpm test:integration`: every package green but the planned stale real-model replay (ai 163/164). One latency check, `memory-latency` episode search, missed its p95 under the parallel run and passed alone (3/3); this branch doesn't touch memory.
+    - Playwright 94/94: the briefing on both sides of the morning hour, and the waitlist journey.
+    - Code review: 8 of 10 findings fixed (ADR-0042 results). Security review: no findings. No model called ($0).
+  - **For S38b:** merge this branch, probe the changed sets (`feed`, `feed_safety`, `autonomy`, scheduling), record every set once, then pass^3 on the gated sets within the $1.75 cap. `move-done-no-approval-talk` must pass and `KNOWN_REAL_MODEL_MISSES` end empty. Then the security review against playbook §6 (`security-review-s38.md`), the Phase 8 exit, and one PR for both halves.
+- **S38b Phase 8e "b" (2026-10-25): every set recorded on Luna + Sol, pass^3 on the gated sets, the security review and the Phase 8 exit** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md) "Results (S38b)", [security review](../engineering/security-review-s38.md)). Merged `claude/s38a-daily-briefing`; one PR for S38a + S38b.
+  - **Built:**
+    - `add_to_waitlist` v2;
+    - three cases fitted to the eval world (`tool-create-booking-1`, `tool-get-feed-4`, `wl-staff-colleague-refused`);
+    - security tests for the daily draft cap, the system tools from the chat, and an expired or used waitlist code;
+    - `--phase-estimate-ok` passes the $4.50 stop's estimate;
+    - Phase 8 cap $2.00.
+  - **Recording:** a probe ($0.142); a first full pass found `waitlist` under its gate (Luna claimed an add it never made); one fix and a second full pass ($0.251); pass^3 on 167 cases ($0.204). Every §2 gate met. `move-done-no-approval-talk` passes. S38b spend $0.808 in total (Phase 8 $1.79 of $2.00).
+  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,239/1,239 (two load misses under the parallel run, each passing alone and untouched by S38b: an appointments concurrency property test at its 60 s limit, about 8 s alone, and the `memory-latency` episode search p95, as in S38a); Playwright not re-run (no screen changed since S38a's 94/94). Security review: three medium proof gaps fixed with tests, six low findings logged (L9–L14).
+  - **For later:**
+    - `wl-add-marco-saturday` and `wl-staff-own-client` are named known misses: the domain check in Phase 9's first build session, then re-record;
+    - the cost estimate runs about 150× actual with 21 tools (a better estimator would spare the flags);
+    - L9–L14 for Phase 11.

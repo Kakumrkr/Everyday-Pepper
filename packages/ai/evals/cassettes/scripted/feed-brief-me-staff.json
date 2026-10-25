@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_41",
+              "name": "get_feed",
+              "arguments": "{\"kind\": null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "Your day: your bookings are on the calendar, with some open time in between. Your feed also shows a regular of yours who is due back.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

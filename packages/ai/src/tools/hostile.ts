@@ -173,7 +173,8 @@ export function hostileAttacks(targets: HostileTargets, date: string): Attack[] 
     );
   }
 
-  // Made-up tools for what only people may do (ADR-0028: approve, undo, autonomy).
+  // Made-up tools for what only people may do (ADR-0028: approve, undo, autonomy), and the
+  // system tools only the morning pass and the waitlist matcher run (S38b): never the chat's.
   for (const name of [
     'approve_proposal',
     'undo_action',
@@ -182,6 +183,8 @@ export function hostileAttacks(targets: HostileTargets, date: string): Attack[] 
     'send_email',
     'email_clients',
     'run_sql',
+    'send_rebooking_nudge',
+    'send_waitlist_offers',
   ]) {
     attacks.push({
       id: `unknown.${name}`,

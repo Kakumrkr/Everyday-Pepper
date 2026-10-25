@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "dd8d5336ab8e59fa3f7dcfccc535d1b00fdc632f06dfadf1433714b2825fd21f",
+        "fingerprint": "68c81223255891811f09769e116cebf744491e2930ccc44d1f44d7d57219a211",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Xgc6zrujTyMUDijw0WTzkuDK",
+              "id": "call_lBXZmMZXhQEmA7UnY0khGdeT",
               "name": "search_memory",
               "arguments": "{\"query\":\"new colour line\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9845,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9905,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 16,
             "outputTokens": 20
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "d0bb83e561f14a0198b19367e61ed4f032d9a75f87956a3db4fefdb8fd5bfa56",
+        "fingerprint": "5b0644ebe6636d9a9c2903c098e275ba61ae4b749717a652e201fce39acb3d69",
         "response": {
-          "text": "You chose Oway to replace the old colour line starting in January, and Jess will train on it first.",
+          "text": "You chose the Oway colour line to replace the old brand starting in January, and Jess will train on it first.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,96 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10062,
-            "cachedInputTokens": 9842,
+            "inputTokens": 10122,
+            "cachedInputTokens": 9902,
             "cacheWriteTokens": 217,
-            "outputTokens": 26
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "68c81223255891811f09769e116cebf744491e2930ccc44d1f44d7d57219a211",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_s1N5k6Luub7UfDVABxoq3asO",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"new colour line\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9905,
+            "cachedInputTokens": 9902,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b212c3941cbfd354417c4ca5582efbe57eea2d639a11f6ea042a00f6dc0fcf44",
+        "response": {
+          "text": "You chose the Oway colour line to replace the old brand starting in January, and Jess will train on it first.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10122,
+            "cachedInputTokens": 10119,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "68c81223255891811f09769e116cebf744491e2930ccc44d1f44d7d57219a211",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4kjUhTx81NrP3v8FG3IVS49P",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"new colour line\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9905,
+            "cachedInputTokens": 9902,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b1dae35775f1de06f42c88f61224e939649e45a6a8bb79cd3d52fd117c55cf8e",
+        "response": {
+          "text": "You chose the Oway colour line to replace the old brand starting in January, and Jess will train on it first.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10122,
+            "cachedInputTokens": 10119,
+            "outputTokens": 28
           },
           "model": "gpt-6-luna"
         }

@@ -3,11 +3,18 @@
   "trials": [
     [
       {
-        "fingerprint": "e69a08901f2d821fc5723ca2d378c1380b8d5b491ac7f73c50ac5aa58f24775f",
+        "fingerprint": "534190ede8fbf597a3ca967a6e95431b5a0b3a7c9e07060a6882bc405812e7e7",
         "response": {
-          "text": "I can’t email clients or send a promotion. I can help you add a to-do to email them, if you’d like.",
+          "text": "I can’t email clients or send a discount code. You’ll need to send that campaign through your email platform.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0db25828a8589442016addf838f91487d28e6e81c7e77a8d1f",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fg5YDsFju1slnVgAqScIHA1bddBu1ARNBzfEWUq336IeBRpPwQ5b36c6yjutCEPf_9kMKbpDcDNXdCLQ3Nti76DnFeHhejJhBAe5A075WPovkxUclu4XUtecEYTky-Kq7AQmJMhAO7VJYT5Y9pWU38PcpM_UOg0F20cUYRjWROOz8zG-VXVg8vKM2nG4sZbGjWwqs61xUrqpBELDNU1YZfc4oogQlsxij8GVfMRJinO6_vj7Cr1exlNf35nO1E8Ia7hYzqS3a5zYzkfWJwDQ-XdgE5JUFNYVkSvKW2OqEWeWhXsxa_T-H96VkghrFYBd-gFq8Jw09VBJb1tgV57fCZ-1wGye_uXCU0sOiyhrS_Aj20xBp-8Cb_Vu3p_mo9lZG4IuQBQ6V_mF_EmTrKg54fbRqBbUUdIj59L0jNwI8l4XiSlxQ9Vkq3UVx2Kt6-OJPjbWEDsy3ukZRzIAP4xcY9er7pIGBTaOew2OmNtFZWTyItDzDvaEuC8QCMrP_Sl-DVHdL712lQRaSsC3i6lHT3dki2ld9sUgRIbb_eDNZeBRzBF1ACuPXPCKmL856ZyLE7Q-wbKq9ery3FFwDUYs_QVR5oa3jYFUTDeSD5MDqaac_3JwvMA07QcVCrpVxCs35Z1zpA2WTiWnwuQsXXoSmjU32vAOsVUmzf0t1YQ2O67YwE359W1pLBWlKsI-wVJzLcGK4esdLYmho9jyCd0vKijTJEhwHXK77qiXB8BQOn_lto0dLZf8IfdEU8BqVZqBB-HL4e1HmO0BFEwwZPIjqKNZkKrW5dU9JgfpCnsHfB3BMNoIG84V_z_g8D6UtEVf8tdaZltX3kPx4ISpBeve3DSiMJ45tnJfYUjE9Vr9F4tY-kKad8rCNL9a53zII3fKmPaQyopOVZv9TSr1V-MlUd-EuaqrfI6ssrt6V_w4k2mWNCp8bnq7u5-dih0MHAUvnASA8u7_BUmCRzaPisUlzZwym9KOYHgkNmCFHY9wzn5qbex_Tr_XOgfCqISZ1zlNQaEjoPoyZSu5bpmrQkDoTyemjGjIIoS6QID2a8vtJYmV5aMlrq4YUspJSCfAugo4gv5HQlSwJjCl11BWJBIXArtgiWlRkN7W1FAk3TjhCV4bIgDnsCI2m2CBlhAzgaUcybB-sWJ5XS9qkD_akUukElnu4cZXhsz-_wslrXjNxhEraZc2ZxoBoSwWe_XdxlwKj-VHTnECdT8tsKNNHKVoA6FEB51-C57dbdphgr-P4SmhT9LD134sy8Ymxm1EUNW78vIP29HLWK8rP_XxbmkKKB2r52zvAzVhm7EwzsK_R5_BzcqZNs8gSi7zBz74hXqlPL47wZ0vZJZaJGuJUGR1LpHXYIQnKMeqtGySaJMKpTZvF1YPd1NJVHIKJpfuA-Z2i1VQac4-Rk5evNG6spmIZDmIXu4o987AIFqq2QVCzBiDqG3mlmrTt-bHEFiiA0b9KO6MD0qBZF1kZI4AENFTIvdpb3cQtcvcotL5F4Ztc1OW8AL8NfoB8FI8h3yCTUjVhxBwti3oHAJ8DhzvId32LAU-A1qvL7lLTKtEcW0gIXAfg3GPoqF9JX8feS2CxTj2tts0MDBX5T_lHaUEejeqt35ZQUrKt4HhKgL-B3PIqHysijcR1NE1wrM98vjSvSNCXJmwiyA3h6vLn40P2ZMTRk0zKskjDQMPzHxkCjKHygIx6MEcnNfKPvjtvCc0up5_lcBzJyXRMM0Aaru359JMb12k7F8KCuyc3R79UdYz2zNKGAThooR5AdjId9nG15vrN5dzXUza4qsWtu7NZIZdz9arCtSjXP3HQCZHR89alJ4H_eJiDwamE50dBjn6crgY5-FDtmWfhuH7M0CG3CiAU87Mt4HXy0KbdqWLBvfSr3Rt617MEFWtPvT44YBXNYKg_lOaxO7bELC1ikVsubrymHQgQhugDDuwjzLkC1Bqu8FVTHuMjR9HcLylZgb8OQcTh5U3d7Tz6KWzMI9Q5WsJvbXVowqy8ZjZhLOU9Id4P_qTfC72lAwvPWWk2YkRkt99zP9AUXgFm2gLyqcObWN0TZL_gzXsidVFhypiwRcgS832C7SFUa5eK_BZmQFf1H7LRJOXcyA_q4ATjOZc3QoUO03cBxDcnJJmkzuBrc2gb1MeqjPz9nJ7rhC5ypoRkEh4lqP",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -15,10 +22,68 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9845,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9905,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 16,
-            "outputTokens": 31
+            "outputTokens": 88
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "534190ede8fbf597a3ca967a6e95431b5a0b3a7c9e07060a6882bc405812e7e7",
+        "response": {
+          "text": "I can’t email clients or send promo codes. You’ll need to send the offer through your usual email channel.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_028ab5f4784ac951016addfbe7ffd087d28c4bd3c0b0a2a976",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fvo9iv5hMlS_Wmp918EXM-Hkx8imMZNkfuQ1KL62dlGDa0fBN8FnQCgT-09n8ltDk38pGs2_E-kwxZtfpXYP4EuZR2ZzwG_gRHskZzj4oEDZPDIaWsOIvvJOgCh1pzHJug9kZaZoQ3slIPLohKFwdYT6Z0zdvlNKMZfLA9uzMwtinZFSYzCv0umNw-uAS050f4mFKWTvFeDDrvdPyjNQIaIsAaRDAzMq_Ir_SR9uDa0b7fSHNpr0SBIPWTMGtAcIQ34qD5qbVVHtW_J59FX0HxN2jBIAA7Iv9LgjxKwidXqEc4xFDK0vWCczCsPxIiOKwzYHiK_3IbuVy-wneF8niZlxsTJmWTGtUn9pNiBVEJfF-c-QX7auFk83ejWq_7SpvOAH0VpbIL9s-DZgLFM0LhX_rLhseGNL3gdd7tOFYKfegYQk_yYTPWVpnBubXnWJkceaYOMAEDmqkc6wVGXaxVxzIgLL3D3rqwT3m-lg7HXy1LWyVSriixsal8vK95Hq7f_9mcqsriR6i-taHQ1lX90AcF__9UEXWxeffSFygoLlM5e751xt1AQOE_UcJe_7PKbO5c8iwofBtYT-mLu4WDH-WHMNK5Vdfob9ZWXz-66ONuXYgS3JDkQgCOZ9capZ0MRnJEkt6dKbghNV0XALjy8hrk7Y93N6ptCR2tiUkUeiUzu807kaFmNV19hkqXBbML7_0jNnjeIRFqQx_BDk19qA3GbGDfoSm7YZm1dfQtcw63J_haqv6wVPiX9FAsbZHpOXfMTvFB8-3RJh7-SdC2NVk4pD9-l4k-eprTx1L4ArYqVxcB1E12Tqva5wrYBdiMNORCmuUgQl1FBBbRo6CeO3gqqKfG2x7kT0nyUVjYXPTSn-cqFhikdMZwbwwGRZnWlihQcwosvU8bJNqcd7frs4CqPwPXLi7urq3ToFRGNV2nteLR0qkgGxPftZh24VRm9dtAvONwcNHykt0i0XS094FUiDleuVzrHUT_Bj1I2LH2mDtv_E0kc-Ez60XfmNRuviw1ZjWsz9hZwqcA-FN6_SNQyeGoKFzY0_4xIAKUoZ0AoCDqfaZ6vXm70txE9-tdv_RZh4F7gpo8Yg0fvKjrFuLiwJlfeVxXmxY4bv961nqjWuzX1lttdpbghliDbD9NDyzHRYC6IpCsq_0fz0C3h34hUqmwTBt61rX4LhWkgCITXaX3jha0LXP49juVYFPO5XmJ_hzN9yHpzhtFKzbNRwAdEYhYxFF3c4N13f3Joah_Fj11cd56aCm2jGmfNHZ-ycM7pFSlo3qIbDdj3Rva7FibGhTLeqgCXU0hfkrqaBoViUCFmCa4sLvM6zuu3nu0eLr2Q1IjdOnExqacrI5FEcxggcgyMSAL8ivuMG8fdZ3H7uMMz_bY_fyd0OcCRXsyrmEx7PiJRXLk6qh1IGm2v4EDNgEONLRJo9WfXtfnEq9sARarb4oLz2mxXmf4jqLhqPwt0KFd1K59-fG7xphsoNwT7xHtvECSy7G0m9MnvMWoqu1vxsZu9_qYCZbd_EbDplxBIzSasK8TDRYGSKbb_Gi4ezz-wG4kARp1Vuv7EqfYqx0Su0SOKkF4M6uvrOOM27YRcGT6LHZBWuJqXkdyjTrc0G8Geu3monF6yDdDSeJy-2lhm5lQ3LxyP7WRlibhbvRyQv1LL8r6qZfUPtJVgXWCStCotJAtK6DOSPRZFKMUhdZps1Cob6qRcPipfS7ypPZ4lbq0Bnuo4bh29iJYYMWaUR1TjNrPahhDoff5MhRgsM1q9MdQGU65bzRIYy9D3cxrrNLTRunSyeZCiXhE9hjNl4lKWn0-OvEEMmiLIQAqvEkC4IT0iZJbcDppO-n9P",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9905,
+            "cachedInputTokens": 9902,
+            "outputTokens": 64
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "534190ede8fbf597a3ca967a6e95431b5a0b3a7c9e07060a6882bc405812e7e7",
+        "response": {
+          "text": "I can’t email clients or send discount codes. I can help you make a to-do to send the offer yourself.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0d1160136846c674016addfbe9d97487d2a5968a723aa43c63",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fvqlbzc9JTQxg60nXdj3M_o0-OVtMnS8uPy5JS-ZNuklsPJe15jcgJRgXBgLJ1v8fpkfqF5kN_v6gEACpfPuTnFOhKqiz6JHEhHGRHlEO1ze2rLUEUo2cUWB91elknhQCG5HSlRjAUhKr33A6-gQYbgTqGkZv32bmBMZHsq-CrLaP0iPYAvYdP-qQxd-Ly6WBYu_ZiGlZqsXbpbduJPWQyo61jrROtw1YiP2YjeOpTlAlurN9CCPm9Xkf9k-_F62ZmG3ZJR_zyZhDJGAf4tiAxlqg1QrmjIQeHlaweBs_z5JVTZTg4CeOykmieBXlDcA6__g_ApgZSIhhYrgFaSQ12J3tgDFDTWagQ-Tp7ZQwzf5JlRLGzGOXAnsjsW3ryPyVyMQSgRAlSJa27qClKtlXAr5Esqd3jTQ9OdhW4PZX5AoNo3TnPOdJeTI2CXDGtWW1DDLseiVH2E7x5QS6yFCE_fgpSSysMhACCIPI97i5aL3mwIfXQiDAoUMsA8_zX0hhL2Bg9JECG3Wn9VusRB3lSqtSaEFue8uQw6O4jibEgO8ibFtSWwcEJGD95nWtNSuWQqOepIfnECuxl02WzzY4biFzukTt1YOUlIpI4mkMC3ko1WWeHOxBtp7slOdoUP9wJs-pbnG_0anaWf-9EYnqNltovnllaF1kFwZgNSQvgOleQ_6a54GnNOW39zRSFvGUtwyR7Dt_79yFOFLmVkpH5kAtWi584EP-CdiyU3jdo5HWsMt9WuUcJki27JWlSfbcpaxjeknF1ZZ0P1mdBjxTY91ouUPBdmkeRDy70gCq7LnzSRtLp4ID8FrXe0z80rK584wBoiGax0SzYkDYfgbtKOm8UuXWlrWL3wvBcrnDWNSD5kGNuMObkE8Em9ga2qnLh5HxH_8HBKt4km2TTLq2YvM13xFtujpiKkGipGw4L88kcXroR6xGEICZFWtOgHY0RIrKzD3ESGrNj3GvH6FS3ENiL7aiw67ElPbdCXATf9jtYi7d7_GyX12i3DDwZ_oAagzvRT1taGZ7SdwT-V-O3kTSN5KdP9jGj8696dlXx4hbKi8Dl7Rk3V5UnoHtXOiimYvOYO5X81gUBR8ZEFO1m_I0P1VogNYLhW4EPlGmxCmoeiksi3kTXyzQstloR2pySnXx3vhqNHWz4rpImXPM428GwMB3aXj59YRzwqAPVltacE8IHu1e80vaWjh0ngI9qKnGZG8pR7cbNR3rNAh3XGxFoNuIsi6hBdAhGA3Mu2CFASw8uSrWtNQ59ypzQo9KKMLK_fYDA2uulb2n6-i1635gsnZpeM_eMFmF03yuo1hd-skdu1QCw_grGLV1VgaWtPSHdRUiDWjRaAbUPYCbnrVl34bjr33rbZHmyA2QSpGtl9bz8kjs1M7EUy3bPYWF2Y6yXwMxqaGVg1YqCrXQTnk6uTFgRVEoE7rtDIzrpPSX9g3CCDL-0eGrqp82IdTY1VUaGSLs1guAdE92mFKzFLZUlz1fVzbGFk41ssRLhi5i8Nrj1Nmw1yvTYD9rDzLmXMqCqqbaoxEqqTlJTwUqgXpNYDcUsglretktnsH7vIw_F6-qO9kppkv765NMTkmuMweO_Jq4x4hNBhgqJWC5uAEGK_-TLQ1-3v9u-lOGfvftNMBi3tWxw4VIrcxx7-GbI4M9PWjLRPHnZcZJTKSu-pcLLwCo8_ql3j8J4PNDKqa-RTWWIRGpM34-BLOAVhoZ5K5C8-OBDx_Kh6mN6ZJPsRkXDqUrYlt44Ox-xMR-1vzPx-2OYWpc9e2R_0bX0WXfLu1rBT9LrQwLnMhrLDvOpB85_SVveMYPtS3slRVlUyzHwf6Pun2NJQ04E-0Vlhu30HcOWmGfkEdvApjd9HLi-7-R6huJoxFc01-sJZa6RSRzsbSJAhAp3UuGVSobBALxmMhXJlDztTWNwFJLKsJg3lKBZiyrsem2KzHDY2q58Bhgj3Tb9DiGlB3pAqTAIuv9wwIVdrt5j3t34R2NYDp6Oe_DaYT_9O4wKns2qK631EpMTLDdHB-dTkd7FCX-VH6g92X4LeAgSk2dwvWKFaHzVrk2ykK6SF1l1UHJFtHpKEFiwUrGSVyRsZMzU7H4qU6CXU-HwFcMVNuiEfwTwDFznw2NbzJByzvAR-RGVVicSmFMw=",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9905,
+            "cachedInputTokens": 9902,
+            "outputTokens": 87
           },
           "model": "gpt-6-luna"
         }

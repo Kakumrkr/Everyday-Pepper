@@ -1,4 +1,9 @@
-import { addToWaitlist, changeBooking, claimWaitlistOffer } from '@pepper/appointments';
+import {
+  addToWaitlist,
+  changeBooking,
+  claimWaitlistOffer,
+  runInsightsFor,
+} from '@pepper/appointments';
 import {
   BookingIdSchema,
   ClientIdSchema,
@@ -21,6 +26,7 @@ import {
   findOutboxMessage,
   listDueOutboxMessages,
   listDueWaitlistMatches,
+  listOpenFeedItems,
   listWaitlistMatches,
   updateClient,
   withTenant,
@@ -154,6 +160,16 @@ function tokenOf(text: string) {
   return OfferTokenSchema.parse(match[1]);
 }
 
+/** The feed's `waitlist_match` items after an insights run (S38a), as payloads. */
+async function matchItems(w: EvalWorld) {
+  await runInsightsFor(db, w.tenantId, {
+    clock: w.clock,
+    insightsOf: () => ({ enabled: ['waitlist_match'], minGapMinutes: 60 }),
+  });
+  const items = await withTenant(db, w.tenantId, (tx) => listOpenFeedItems(tx, w.clock.now()));
+  return items.filter((item) => item.kind === 'waitlist_match').map((item) => item.payload);
+}
+
 const offerProposals = async (w: EvalWorld, actor: Actor) =>
   (await listPendingProposals(db, actor, { clock: w.clock })).filter(
     (p) => p.tool === 'send_waitlist_offers',
@@ -201,6 +217,15 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
     expect(await offerEmails(w)).toEqual([]);
     const [match] = await withTenant(db, w.tenantId, (tx) => listWaitlistMatches(tx, 10));
     expect(match).toMatchObject({ status: 'done', outcome: 'proposed' });
+    // The feed shows the freed time waiting for an OK (S38a).
+    expect(await matchItems(w)).toEqual([
+      {
+        startsAt: '2026-11-03T20:00:00.000Z',
+        endsAt: '2026-11-03T21:00:00.000Z',
+        state: 'needs_ok',
+        offered: 0,
+      },
+    ]);
 
     // Approved by the manager: one email each, with its own claim link; the first claim books.
     if (proposal === undefined) throw new Error('no proposal');
@@ -221,6 +246,7 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
       status: 'confirmed',
       startsAt: '2026-11-03T20:00:00.000Z',
     });
+    expect(await matchItems(w)).toMatchObject([{ state: 'claimed', offered: 2 }]);
   });
 
   it('a client whose address went before the approval: the offer is stale, nothing is sent', async () => {
@@ -264,6 +290,7 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
     expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('offered');
     expect(await offerProposals(w, w.actorFor('owner'))).toEqual([]);
     expect(await offerEmails(w)).toHaveLength(2);
+    expect(await matchItems(w)).toMatchObject([{ state: 'offered', offered: 2 }]);
     const [action] = (await listRecentActions(db, w.actorFor('owner'))).filter(
       (a) => a.tool === 'send_waitlist_offers',
     );
@@ -271,6 +298,8 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
     const undone = await undoToolAction(depsAs(w, 'owner'), action.id, null);
     expect(undone).toMatchObject({ execution: { status: 'undone' } });
     expect(await offerEmails(w)).toEqual([]);
+    // Offers taken back: the feed no longer says they are out (code review).
+    expect(await matchItems(w)).toEqual([]);
   });
 
   it('nobody waiting for that time: no proposal, the match is done', async () => {

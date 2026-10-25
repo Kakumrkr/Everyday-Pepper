@@ -14,6 +14,7 @@ import {
 import type { Clock } from '@pepper/core';
 import {
   listDueInsightRuns,
+  listActiveWaitlistMatches,
   listInsightBookings,
   listServices,
   listStaffMembers,
@@ -126,7 +127,7 @@ export async function runInsightsFor(
     const off = new Set(tenant.settings.disabledKinds);
     const enabled = template.enabled.filter(
       (kind): kind is FeedInsightKind =>
-        FeedInsightKindSchema.safeParse(kind).success && !off.has(kind as FeedInsightKind),
+        FeedInsightKindSchema.safeParse(kind).success && !off.has(kind),
     );
     const snapshot = await loadSnapshot(tx, {
       now: startedAt.getTime(),
@@ -140,7 +141,8 @@ export async function runInsightsFor(
   });
 }
 
-async function loadSnapshot(
+/** The business's snapshot for the providers (and the morning briefing). */
+export async function loadSnapshot(
   tx: TenantTx,
   base: Pick<InsightSnapshot, 'now' | 'timeZone' | 'minGapMinutes'>,
 ): Promise<InsightSnapshot> {
@@ -151,11 +153,12 @@ async function loadSnapshot(
     from: new Date(base.now - DAY_MS),
     to: new Date(base.now + (INSIGHT_HORIZON_DAYS + 1) * DAY_MS),
   };
-  const [hours, timeOff, services, bookings] = [
+  const [hours, timeOff, services, bookings, matches] = [
     await listWorkingHoursOf(tx, staffIds),
     await listTimeOffBetween(tx, staffIds, range),
     await listServices(tx),
     await listInsightBookings(tx, new Date(base.now - INSIGHT_HISTORY_DAYS * DAY_MS)),
+    await listActiveWaitlistMatches(tx, new Date(base.now)),
   ];
   return {
     ...base,
@@ -181,6 +184,14 @@ async function loadSnapshot(
       bufferBeforeMinutes: row.bufferBeforeMinutes,
       bufferAfterMinutes: row.bufferAfterMinutes,
       status: BookingStatusSchema.parse(row.status),
+    })),
+    waitlistMatches: matches.map((match) => ({
+      bookingId: BookingIdSchema.parse(match.bookingId),
+      staffMemberId: StaffMemberIdSchema.parse(match.staffMemberId),
+      start: match.startsAt.getTime(),
+      end: match.endsAt.getTime(),
+      state: match.state,
+      offered: match.offered,
     })),
   };
 }

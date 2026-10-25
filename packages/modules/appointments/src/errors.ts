@@ -100,6 +100,14 @@ export class WaitlistExpiredError extends Error {
   }
 }
 
+/** The booking page's waitlist takes days up to `PUBLIC_WAITLIST_DAYS` ahead only (S38a). */
+export class WaitlistDayTooFarError extends Error {
+  constructor() {
+    super('That day is too far ahead to join the waitlist');
+    this.name = 'WaitlistDayTooFarError';
+  }
+}
+
 // The public booking page (ADR-0022).
 
 /** No business has a booking page at this address. */

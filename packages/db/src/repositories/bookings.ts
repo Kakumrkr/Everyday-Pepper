@@ -335,7 +335,8 @@ export interface NewWaitlistEntry {
   staffMemberId: StaffMemberId | null;
   windows: WaitlistWindow[];
   expiresAt: Date;
-  createdBy: UserId;
+  /** `null`: the client added themselves on the booking page (S38a). */
+  createdBy: UserId | null;
 }
 
 export async function insertWaitlistEntry(
@@ -351,7 +352,7 @@ export async function insertWaitlistEntry(
       staffMemberId: input.staffMemberId === null ? null : Id.parse(input.staffMemberId),
       windows,
       expiresAt: input.expiresAt,
-      createdByUserId: Id.parse(input.createdBy),
+      createdByUserId: input.createdBy === null ? null : Id.parse(input.createdBy),
     })
     .returning();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row

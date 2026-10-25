@@ -24,6 +24,7 @@ export function SlotPicker({
   staffMemberId,
   staffNames,
   onPick,
+  onWaitlist,
 }: {
   slug: string;
   timeZone: string;
@@ -34,6 +35,8 @@ export function SlotPicker({
   staffMemberId: string | null;
   staffNames: ReadonlyMap<string, string>;
   onPick: (slot: AvailableSlot) => void;
+  /** "Join the waitlist" for a day with nothing free (S38a); absent: not offered. */
+  onWaitlist?: (day: { date: string; label: string }) => void;
 }) {
   const days = upcomingDays(timeZone, now);
   const [date, setDate] = useState(days[0]?.date ?? '');
@@ -97,7 +100,20 @@ export function SlotPicker({
             {slots.message}
           </p>
         ) : slots.slots.length === 0 ? (
-          <p className="m-0 text-ink-2">Nothing free that day. Try another day.</p>
+          <div className="grid gap-2">
+            <p className="m-0 text-ink-2">Nothing free that day. Try another day.</p>
+            {onWaitlist === undefined ? null : (
+              <button
+                type="button"
+                className={chipClass({ className: 'justify-self-start' })}
+                onClick={() => {
+                  onWaitlist({ date, label: dayLabel });
+                }}
+              >
+                Join the waitlist for {dayLabel}
+              </button>
+            )}
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-2" data-testid="free-times">
             {slots.slots.map((slot) => (

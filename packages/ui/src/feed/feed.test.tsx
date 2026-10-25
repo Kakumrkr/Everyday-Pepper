@@ -2,9 +2,10 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import axe from 'axe-core';
-import { FeedItemSchema, type FeedSettings } from '@pepper/contracts';
+import { DailyBriefingPayloadSchema, FeedItemSchema, type FeedSettings } from '@pepper/contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { feedLine, formatDuration } from './feed-lines.js';
+import { DailyBriefing, type DailyBriefingProps } from './daily-briefing.js';
+import { briefingLines, feedLine, formatDuration } from './feed-lines.js';
 import { FeedSuggestions, type FeedSuggestionsProps } from './feed-suggestions.js';
 
 afterEach(cleanup);
@@ -99,7 +100,7 @@ describe('feedLine', () => {
   });
 });
 
-const OPEN: FeedSettings = { suggestionsPaused: false, disabledKinds: [] };
+const OPEN: FeedSettings = { suggestionsPaused: false, disabledKinds: [], morningHour: null };
 
 function setup(props: Partial<FeedSuggestionsProps> = {}) {
   const onClose = vi.fn(() => Promise.resolve<string | null>(null));
@@ -230,5 +231,154 @@ describe('FeedSuggestions', () => {
     expect(screen.queryByRole('button', { name: /Turn off/ })).toBeNull();
     expect(screen.getByText('All clear.')).toBeTruthy();
     await expectAccessible(container);
+  });
+});
+
+const briefingPayload = DailyBriefingPayloadSchema.parse({
+  scope: 'business',
+  bookingCount: 8,
+  firstStartsAt: '2026-11-02T14:00:00.000Z',
+  gapCount: 2,
+  openMinutes: 90,
+  needsOkCount: 1,
+  rebookingDueCount: 3,
+  waitlistWaiting: 4,
+  waitlistOffered: 2,
+  waitlistClaimed: 1,
+});
+const briefing = FeedItemSchema.parse({
+  ...base,
+  id: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700201',
+  day: '2026-11-02',
+  kind: 'daily_briefing',
+  payload: briefingPayload,
+  subjects: noSubjects,
+  names: noNames,
+});
+
+describe('the S38a lines', () => {
+  it('words the briefing from its numbers, leaving out what is zero', () => {
+    expect(briefingLines(briefingPayload, NY)).toEqual({
+      title: 'Today: 8 bookings, the first at 9:00 am',
+      lines: [
+        '2 open gaps to fill, 1 h 30 min in all.',
+        '1 thing waits for your OK.',
+        '3 regulars are due back.',
+        '4 on the waitlist; 2 offers sent since yesterday, 1 claimed.',
+      ],
+    });
+    expect(
+      briefingLines(
+        {
+          ...briefingPayload,
+          scope: 'staff',
+          bookingCount: 0,
+          firstStartsAt: null,
+          gapCount: 0,
+          needsOkCount: null,
+          rebookingDueCount: null,
+          waitlistWaiting: null,
+          waitlistOffered: null,
+          waitlistClaimed: null,
+        },
+        NY,
+      ),
+    ).toEqual({
+      title: 'Your day: nothing booked yet',
+      lines: ['Nothing needs you this morning.'],
+    });
+  });
+
+  it('says what a freed time is doing for the waitlist', () => {
+    const match = (state: 'needs_ok' | 'offered' | 'claimed', offered: number) =>
+      feedLine(
+        FeedItemSchema.parse({
+          ...base,
+          id: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700202',
+          day: '2026-11-03',
+          kind: 'waitlist_match',
+          payload: {
+            startsAt: '2026-11-03T20:00:00.000Z',
+            endsAt: '2026-11-03T21:00:00.000Z',
+            state,
+            offered,
+          },
+          subjects: { ...noSubjects, staffMemberId: STAFF, bookingId: BOOKING },
+          names: { ...noNames, staff: 'Jess' },
+        }),
+        NY,
+        NOW,
+      );
+    expect(match('needs_ok', 0).why).toBe(
+      'People on the waitlist fit it. The offers wait for your OK above.',
+    );
+    const offered = match('offered', 3);
+    expect(offered.title).toMatch(/^Jess's .+ opened up$/);
+    expect(offered.why).toBe('Offered to 3 people on the waitlist. The first to claim it gets it.');
+    const claimed = match('claimed', 1);
+    expect(claimed.title).toMatch(/was rebooked from the waitlist$/);
+    expect(claimed.why).toBe('Claimed by the person it was offered to.');
+  });
+});
+
+function briefingSetup(props: Partial<DailyBriefingProps> = {}) {
+  const onRead = vi.fn(() => Promise.resolve<string | null>(null));
+  const onHour = vi.fn(() => Promise.resolve<string | null>(null));
+  const view = render(
+    <DailyBriefing
+      briefing={briefing}
+      timeZone={NY}
+      canChangeSettings
+      morningHour={null}
+      templateMorningHour={7}
+      onRead={onRead}
+      onHour={onHour}
+      {...props}
+    />,
+  );
+  return { ...view, onRead, onHour };
+}
+
+describe('DailyBriefing', () => {
+  it('shows the day accessibly and puts it away with "Got it"', async () => {
+    const { container, onRead } = briefingSetup();
+    expect(
+      screen.getByRole('region', { name: 'Today: 8 bookings, the first at 9:00 am' }),
+    ).toBeTruthy();
+    expect(screen.getByText('3 regulars are due back.')).toBeTruthy();
+    expect((await axe.run(container)).violations).toEqual([]);
+    await userEvent.click(screen.getByRole('button', { name: 'Got it' }));
+    expect(onRead).toHaveBeenCalledWith(briefing.id);
+    expect(screen.getByRole('heading', { name: 'Your daily briefing' })).toBeTruthy();
+  });
+
+  it('lets owners pick the hour, the template default first', async () => {
+    const { onHour } = briefingSetup();
+    const select = screen.getByLabelText('Briefing at');
+    expect((select as HTMLSelectElement).value).toBe('template');
+    expect(screen.getByRole('option', { name: '7:00 am (default)' })).toBeTruthy();
+    await userEvent.selectOptions(select, '9');
+    expect(onHour).toHaveBeenCalledWith(9);
+    await userEvent.selectOptions(select, 'template');
+    expect(onHour).toHaveBeenLastCalledWith(null);
+  });
+
+  it('says when it comes before the morning run, and shows a failure', async () => {
+    const { onRead } = briefingSetup({ briefing: null, morningHour: 8 });
+    expect(screen.getByText(/Every morning at 8:00 am/)).toBeTruthy();
+    cleanup();
+    onRead.mockClear();
+    const failing = briefingSetup({ onRead: vi.fn(() => Promise.resolve('Try again.')) });
+    await userEvent.click(screen.getByRole('button', { name: 'Got it' }));
+    expect(screen.getByRole('alert').textContent).toBe('Try again.');
+    expect(failing.onHour).not.toHaveBeenCalled();
+  });
+
+  it('gives staff their day without the setting, and nothing before it comes', () => {
+    briefingSetup({ canChangeSettings: false });
+    expect(screen.queryByLabelText('Briefing at')).toBeNull();
+    cleanup();
+    const { container } = briefingSetup({ canChangeSettings: false, briefing: null });
+    expect(container.textContent).toBe('');
   });
 });

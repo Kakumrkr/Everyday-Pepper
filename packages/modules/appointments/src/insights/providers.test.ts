@@ -21,8 +21,10 @@ import {
   rebookingDue,
   scheduleGaps,
   staffOverload,
+  waitlistMatch,
 } from './providers.js';
 import { feedDedupeKey as dedupeKey } from '@pepper/db';
+import type { BookingId } from '@pepper/contracts';
 import type { InsightCandidate } from './types.js';
 
 // The insight fixtures (S35, playbook §2 "insight correctness 100% on the fixtures, across time
@@ -478,6 +480,62 @@ describe('staff_overload', () => {
       staffOverload.find(s([...base, early('2026-11-01T04:00:00Z', '2026-11-01T11:00:00Z')])),
     );
     expect(item.payload).toMatchObject({ busyDays: ['2026-10-30', '2026-10-31', '2026-11-01'] });
+  });
+});
+
+describe('waitlist_match (S38a)', () => {
+  const FREED = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700031' as BookingId;
+  const match = (start: string, state: 'needs_ok' | 'offered' | 'claimed' = 'offered') => ({
+    bookingId: FREED,
+    staffMemberId: JESS,
+    start: at(start),
+    end: at(start) + 3_600_000,
+    state,
+    offered: state === 'needs_ok' ? 0 : 3,
+  });
+
+  it("shows a freed time to its staff member and the leads, dated by the slot's local day", () => {
+    const item = only(
+      waitlistMatch.find(
+        snapshot({
+          now: at('2026-11-02T15:00:00Z'),
+          timeZone: KOLKATA,
+          waitlistMatches: [match('2026-11-02T19:00:00Z')],
+        }),
+      ),
+    );
+    expect(item).toEqual({
+      kind: 'waitlist_match',
+      subjectKey: `booking:${FREED}`,
+      // 00:30 on 3 November in Kolkata.
+      day: '2026-11-03',
+      audienceStaffId: JESS,
+      subjects: { staffMemberId: JESS, clientId: null, bookingId: FREED, serviceId: null },
+      payload: {
+        startsAt: '2026-11-02T19:00:00.000Z',
+        endsAt: '2026-11-02T20:00:00.000Z',
+        state: 'offered',
+        offered: 3,
+      },
+      expiresAt: at('2026-11-02T19:00:00Z'),
+    });
+  });
+
+  it('keeps each state, and drops a time that has started', () => {
+    const items = waitlistMatch.find(
+      snapshot({
+        now: at('2026-11-02T15:00:00Z'),
+        waitlistMatches: [
+          match('2026-11-02T16:00:00Z', 'needs_ok'),
+          match('2026-11-02T17:00:00Z', 'claimed'),
+          match('2026-11-02T15:00:00Z'),
+        ],
+      }),
+    );
+    expect(items.map((item) => item.payload)).toMatchObject([
+      { state: 'needs_ok', offered: 0 },
+      { state: 'claimed', offered: 3 },
+    ]);
   });
 });
 

@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "71bf659067982909ed0f15427943c4adbef42682e7ec2f780cb54f3efdeeeed4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_iijSl16trA9Pw0QS2DBtorH4",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9895,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 6,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f3fb71ec1e57d79720708c9084411aa3fec37d19a2043f72eb052088e2f52661",
+        "response": {
+          "text": "There’s nothing to review right now—no suggestions, pending approvals, or waitlist entries.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9952,
+            "cachedInputTokens": 9892,
+            "cacheWriteTokens": 57,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "71bf659067982909ed0f15427943c4adbef42682e7ec2f780cb54f3efdeeeed4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_gkOTe3yhXmECn38tlZMch0wj",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9895,
+            "cachedInputTokens": 9892,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f310c1208b6b33238162ffc83cbd3382354418ed22eec744a9be1daa43219b0f",
+        "response": {
+          "text": "There’s nothing to flag right now—no suggestions or waitlist entries.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9952,
+            "cachedInputTokens": 9949,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "71bf659067982909ed0f15427943c4adbef42682e7ec2f780cb54f3efdeeeed4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0hyemFAImN7QmkAn1FTyRn5k",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9895,
+            "cachedInputTokens": 9892,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "95310d1fb3e7d9c1ee4c759351de8a0b6dede8cb0596a5347c6ca435151bdd86",
+        "response": {
+          "text": "There’s nothing to flag right now—no suggestions or waitlist entries.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9952,
+            "cachedInputTokens": 9949,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -4,10 +4,12 @@ import {
   BookingConfirmResponseSchema,
   BookingRequestResponseSchema,
   SlotUnavailableSchema,
+  WaitlistConfirmResponseSchema,
   WrongCodeSchema,
   type AvailableSlot,
   type BookingConfirmResponse,
   type PublicBusiness,
+  type WaitlistConfirmResponse,
 } from '@pepper/contracts';
 import { buttonClass, chipClass, Icon } from '@pepper/ui';
 import { useMemo, useRef, useState, type SubmitEvent } from 'react';
@@ -27,8 +29,18 @@ import { durationLabel, priceLabel, servicesByCategory } from '../../../lib/setu
 import { Field, Notice } from '../booking/sheet';
 import { SlotPicker } from './slot-picker';
 
-type Step = 'service' | 'staff' | 'time' | 'details' | 'verify' | 'done';
+type Step = 'service' | 'staff' | 'time' | 'details' | 'verify' | 'done' | 'waitlisted';
 const STEPS: readonly Step[] = ['service', 'staff', 'time', 'details', 'verify'];
+
+/** What to say about a wrong or expired code. */
+function codeProblemText(problem: 'wrong_code' | 'expired', body: unknown): string {
+  if (problem === 'expired') return 'That code has expired. Send a new one.';
+  const wrong = WrongCodeSchema.safeParse(body);
+  const left = wrong.success ? wrong.data.attemptsLeft : null;
+  return left === null
+    ? 'That code isn’t right.'
+    : `That code isn’t right. ${String(left)} ${left === 1 ? 'try' : 'tries'} left.`;
+}
 
 /** The nearest free times of a 409 `slot_unavailable` answer, or `null`. */
 function alternativesOf(result: CallResult<unknown>): AvailableSlot[] | null {
@@ -56,6 +68,8 @@ function staffChoices(staff: readonly { id: string; displayName: string }[]): St
  * The client's booking (W8, AC-W8-2): service → staff member or anyone → time → details →
  * the code emailed to them → booked, with the link to reschedule or cancel. Nothing is booked
  * before the code; if the time goes meanwhile, the same code books one of the nearest times.
+ * A day with nothing free offers "Join the waitlist" (S38a): the same details and code, and
+ * the client then waits for that day.
  */
 export function BookingFlow({ business, now }: { business: PublicBusiness; now: number }) {
   const { slug, timeZone } = business;
@@ -72,6 +86,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ClientDetails, string>>>({});
   const [busy, setBusy] = useState(false);
   const [booked, setBooked] = useState<BookingConfirmResponse | null>(null);
+  // "Join the waitlist" (S38a): the day with nothing free; the steps after it join instead.
+  const [waitlistDay, setWaitlistDay] = useState<{ date: string; label: string } | null>(null);
+  const [waitlisted, setWaitlisted] = useState<WaitlistConfirmResponse | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   const service = serviceOf(business, serviceId);
@@ -87,16 +104,30 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
     requestAnimationFrame(() => headingRef.current?.focus());
   }
 
-  async function sendCode(chosen: AvailableSlot, who: ClientDetails): Promise<void> {
+  async function sendCode(chosen: AvailableSlot | null, who: ClientDetails): Promise<void> {
     if (serviceId === null) return;
     setBusy(true);
     setError(null);
-    const answer = await sendJson('POST', publicApiPath(slug, '/booking-requests'), {
-      serviceId,
-      staffMemberId,
-      startsAt: chosen.startsAt,
-      ...who,
-    });
+    const answer =
+      waitlistDay !== null
+        ? await sendJson('POST', publicApiPath(slug, '/waitlist-requests'), {
+            serviceId,
+            staffMemberId,
+            date: waitlistDay.date,
+            ...who,
+          })
+        : chosen === null
+          ? null
+          : await sendJson('POST', publicApiPath(slug, '/booking-requests'), {
+              serviceId,
+              staffMemberId,
+              startsAt: chosen.startsAt,
+              ...who,
+            });
+    if (answer === null) {
+      setBusy(false);
+      return;
+    }
     setBusy(false);
     if (answer.ok) {
       const parsed = BookingRequestResponseSchema.safeParse(answer.data);
@@ -134,7 +165,39 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
     }
     setFieldErrors({});
     setDetails(checked.details);
-    if (slot !== null) await sendCode(slot, checked.details);
+    await sendCode(slot, checked.details);
+  }
+
+  async function joinWaitlist(): Promise<void> {
+    if (requestId === null) return;
+    setBusy(true);
+    setError(null);
+    const answer = await sendJson(
+      'POST',
+      publicApiPath(slug, `/waitlist-requests/${requestId}/confirm`),
+      { code: code.trim() },
+    );
+    setBusy(false);
+    if (answer.ok) {
+      const parsed = WaitlistConfirmResponseSchema.safeParse(answer.data);
+      if (!parsed.success) {
+        setError('Something went wrong. Try again.');
+        return;
+      }
+      setWaitlisted(parsed.data);
+      go('waitlisted');
+      return;
+    }
+    const problem = confirmProblem(answer.status, answer.body);
+    if (problem === 'used') {
+      setError('You’re already on the waitlist. Check your email for the details.');
+      return;
+    }
+    if (problem === 'wrong_code' || problem === 'expired') {
+      setError(codeProblemText(problem, answer.body));
+      return;
+    }
+    setError(answer.message);
   }
 
   async function confirm(startsAt?: string): Promise<void> {
@@ -157,19 +220,11 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       go('done');
       return;
     }
-    switch (confirmProblem(answer.status, answer.body)) {
-      case 'wrong_code': {
-        const wrong = WrongCodeSchema.safeParse(answer.body);
-        const left = wrong.success ? wrong.data.attemptsLeft : null;
-        setError(
-          left === null
-            ? 'That code isn’t right.'
-            : `That code isn’t right. ${String(left)} ${left === 1 ? 'try' : 'tries'} left.`,
-        );
-        return;
-      }
+    const problem = confirmProblem(answer.status, answer.body);
+    switch (problem) {
+      case 'wrong_code':
       case 'expired':
-        setError('That code has expired. Send a new one.');
+        setError(codeProblemText(problem, answer.body));
         return;
       case 'used':
         setError('This booking is already confirmed. Check your email for the details.');
@@ -188,7 +243,8 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       setError('Enter the 6 digits from the email.');
       return;
     }
-    await confirm();
+    if (waitlistDay !== null) await joinWaitlist();
+    else await confirm();
   }
 
   const index = STEPS.indexOf(step);
@@ -206,7 +262,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       label: staffMemberId === null ? 'Anyone available' : (staffNames.get(staffMemberId) ?? ''),
     });
   }
-  if (slot !== null && index > 2) {
+  if (waitlistDay !== null && index > 2) {
+    picked.push({ step: 'time', label: `Waitlist: ${waitlistDay.label}` });
+  } else if (slot !== null && index > 2) {
     picked.push({ step: 'time', label: dateTimeLabel(timeZone, slot.startsAt) });
   }
 
@@ -348,6 +406,13 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
             staffNames={staffNames}
             onPick={(chosen) => {
               setSlot(chosen);
+              setWaitlistDay(null);
+              setAlternatives(null);
+              go('details');
+            }}
+            onWaitlist={(day) => {
+              setWaitlistDay(day);
+              setSlot(null);
               setAlternatives(null);
               go('details');
             }}
@@ -357,8 +422,12 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
 
       {step === 'details' ? (
         <>
-          {heading('Your details')}
-          <p className="m-0 text-ink-2">We’ll email you a code to confirm it’s you.</p>
+          {heading(waitlistDay === null ? 'Your details' : 'Join the waitlist')}
+          <p className="m-0 text-ink-2">
+            {waitlistDay === null
+              ? 'We’ll email you a code to confirm it’s you.'
+              : `We’ll email you a code to confirm it’s you. If a time opens up on ${waitlistDay.label}, we email you a link to claim it.`}
+          </p>
           <form className="grid gap-3" noValidate onSubmit={(event) => void onDetails(event)}>
             <Field label="Full name">
               <input
@@ -430,7 +499,11 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               </Field>
               {error === null ? null : <Notice tone="error">{error}</Notice>}
               <button type="submit" disabled={busy} className={buttonClass()}>
-                {busy ? 'Confirming…' : 'Confirm booking'}
+                {busy
+                  ? 'Confirming…'
+                  : waitlistDay === null
+                    ? 'Confirm booking'
+                    : 'Join the waitlist'}
               </button>
               <button
                 type="button"
@@ -441,7 +514,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
                   className: 'justify-self-start',
                 })}
                 onClick={() => {
-                  if (slot !== null) void sendCode(slot, details);
+                  void sendCode(slot, details);
                 }}
               >
                 Send a new code
@@ -492,6 +565,32 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               </button>
             </section>
           )}
+        </>
+      ) : null}
+
+      {step === 'waitlisted' && waitlisted !== null && details !== null ? (
+        <>
+          <span
+            aria-hidden="true"
+            className="grid size-12 place-items-center rounded-full bg-ok-soft text-ok"
+          >
+            <Icon name="check" />
+          </span>
+          {heading(`You’re on the waitlist, ${details.name.split(/\s+/)[0] ?? details.name}`)}
+          <p className="m-0 text-ink-2">
+            If a time opens up, we email <b className="text-ink">{details.email}</b> a link to claim
+            it. The first to claim it gets it.
+          </p>
+          <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-md border border-line bg-surface p-4">
+            <dt className="text-ink-2">Service</dt>
+            <dd className="m-0 font-semibold">{waitlisted.entry.service.name}</dd>
+            <dt className="text-ink-2">With</dt>
+            <dd className="m-0 font-semibold">
+              {waitlisted.entry.staff?.displayName ?? 'Anyone available'}
+            </dd>
+            <dt className="text-ink-2">Day</dt>
+            <dd className="m-0 font-semibold">{waitlistDay?.label ?? waitlisted.entry.date}</dd>
+          </dl>
         </>
       ) : null}
 

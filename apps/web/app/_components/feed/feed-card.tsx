@@ -30,6 +30,11 @@ function actionFor(item: FeedItem): FeedAction | null {
             label: `Open ${item.names.client}`,
             href: `${ROUTES.clients}/${item.subjects.clientId}`,
           };
+    case 'waitlist_match':
+      return { label: 'Open the waitlist', href: ROUTES.waitlist };
+    // Shown on its own card (`BriefingCard`), never as a suggestion.
+    case 'daily_briefing':
+      return null;
   }
 }
 

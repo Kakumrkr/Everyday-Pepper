@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "653f0bf10ab6f5630884c4456f51bc4ec3a1770546ac63231a44c57b2190f2ed",
+        "fingerprint": "6d89dec28a49f5114da6f1075208cf7568436a8ecdc04769646d9fa3b1891a62",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_zJUvoW09pmTCcsuGRVhNIDpI",
+              "id": "call_6xlzjA1JOQCCvPHRuckdfVqG",
               "name": "search_memory",
               "arguments": "{\"query\":\"Jess Saturdays\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9842,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9902,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 13,
             "outputTokens": 19
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "d7c6be5d189c9cdd07cddb79399523274b3b5deaf44f4c853075b33546bfec2f",
+        "fingerprint": "f29b25b3e8f89013710042e1e3a5dab80ebfd41e420cf2ea34823a5b7f4af243",
         "response": {
           "text": "I don’t remember what we decided about Jess and Saturdays.",
           "toolCalls": [],
@@ -37,9 +37,95 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9921,
-            "cachedInputTokens": 9839,
+            "inputTokens": 9981,
+            "cachedInputTokens": 9899,
             "cacheWriteTokens": 79,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6d89dec28a49f5114da6f1075208cf7568436a8ecdc04769646d9fa3b1891a62",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1DQ06Zf5EYYJLBZNhIWGxBZd",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Jess Saturdays\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "369216cdd6419175b559808bcc20fcbf0e6863e9c0e3595d38d0e544806bcff8",
+        "response": {
+          "text": "I don’t remember what we decided about Jess and Saturdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9981,
+            "cachedInputTokens": 9978,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6d89dec28a49f5114da6f1075208cf7568436a8ecdc04769646d9fa3b1891a62",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_m7Nng4NOdCgUgXrEF3k6ZOZQ",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"Jess Saturdays\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3a2f020ec305c060d6fa2bcd2e031c430b304f14fa7b07d09c82ead93efca7a0",
+        "response": {
+          "text": "I don’t remember what we decided about Jess and Saturdays.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9981,
+            "cachedInputTokens": 9978,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"

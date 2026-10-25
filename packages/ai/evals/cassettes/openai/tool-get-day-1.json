@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "89b8b4bcf0ca02d0ef3a7fdb981d547a3e64cc39589f2bf1706e74b0f1809cbd",
+        "fingerprint": "467857a7c3496ef1cc5254e267a360fe520ab744db5d76f51417949a4b8fb14b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_1mzkBHEJQjFW1gFf6rVbuBx8",
+              "id": "call_uYhfLFjARqyuxPlOfsKdE5zV",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9837,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9897,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 8,
             "outputTokens": 29
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "e04ef4c7977fbbb73579148709e99871f3e6ea6b341263818789f8f3c74e4dde",
+        "fingerprint": "0a49f0497f0811e9469facc26e0af4457eb2df46f8aa6496dda3b777c0bdc5c5",
         "response": {
-          "text": "There’s nothing on the schedule today: no bookings or blocked time.",
+          "text": "There are no bookings or blocked times on today’s schedule.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,96 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9920,
-            "cachedInputTokens": 9834,
+            "inputTokens": 9980,
+            "cachedInputTokens": 9894,
             "cacheWriteTokens": 83,
-            "outputTokens": 18
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "467857a7c3496ef1cc5254e267a360fe520ab744db5d76f51417949a4b8fb14b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_C7nr6riHoWpkFMJnLoNtOPDZ",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9897,
+            "cachedInputTokens": 9894,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "78fd2e178fed8952f61ea756e53c717529af66ddac5d09434e25bcd1345c3cb1",
+        "response": {
+          "text": "There are no bookings or blocked times today.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9980,
+            "cachedInputTokens": 9977,
+            "outputTokens": 13
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "467857a7c3496ef1cc5254e267a360fe520ab744db5d76f51417949a4b8fb14b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Iuujf8hATbMrpxWYV2y4uDLK",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9897,
+            "cachedInputTokens": 9894,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "b256222cfd2a35e2b8519c434ac58f13325376ad677101d17c8ababc5d602474",
+        "response": {
+          "text": "There’s nothing on today—no bookings or blocked time.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9980,
+            "cachedInputTokens": 9977,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }

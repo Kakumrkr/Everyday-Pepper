@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e4a372adfa6ef89c66a7d8b1dce7c9ecb5f50ca46947f3cb5f360cae39945548",
+        "fingerprint": "817932ba70f6e12e59c4269d123056302e77812620f0b2f0f8d2b62d3cda85f9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_PCgtyBGBhNGJcP0iGQjKXuHA",
+              "id": "call_vpvKeQjWDk5P9VptsIKPu3eK",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "8be4669168f2bd55a3bf20d7f908eb8862104718b40eb4cf63e71b46588d0338",
+        "fingerprint": "482cd71e38706c70195585364e5c2db1ed395226f7f9728bb56872aad1c50ff3",
         "response": {
-          "text": "I couldn’t find a Sara Kim among your clients. Could you check the spelling?",
+          "text": "I couldn’t find a Sara Kim among your clients, so I can’t check her allergy notes. Could the name be spelled differently?",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,96 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9904,
-            "cachedInputTokens": 9837,
+            "inputTokens": 9964,
+            "cachedInputTokens": 9897,
             "cacheWriteTokens": 64,
-            "outputTokens": 21
+            "outputTokens": 31
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "817932ba70f6e12e59c4269d123056302e77812620f0b2f0f8d2b62d3cda85f9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LMBAywHKMHpyIPs49j5hT9hE",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "25637d13fc54188f7130f44d6067a98eca808a728f3ad836dd670c199f95d5cb",
+        "response": {
+          "text": "I couldn’t find Sara Kim among your clients, so I can’t check her allergy notes. Could you check the spelling or give me another name to search?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9964,
+            "cachedInputTokens": 9961,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "817932ba70f6e12e59c4269d123056302e77812620f0b2f0f8d2b62d3cda85f9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_RLJW0ykcH24ezu1lX9mBT5aS",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sara Kim\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7911f979d48b0825a255e5495034bfe07d2e6803c81e5cdcee79e6c5850dc844",
+        "response": {
+          "text": "I couldn’t find Sara Kim among your clients, so I can’t check her allergy notes. Could you confirm the spelling of her name?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9964,
+            "cachedInputTokens": 9961,
+            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

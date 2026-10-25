@@ -72,6 +72,7 @@ export function snapshot(overrides: Partial<InsightSnapshot> & { now: number }):
     minGapMinutes: 60,
     staff: [staffMember(JESS)],
     bookings: [],
+    waitlistMatches: [],
     services: [
       { id: COLOR, rebookAfterDays: 42 },
       { id: CUT, rebookAfterDays: null },

@@ -5,6 +5,10 @@ import {
   FeedItemIdSchema,
   FeedItemSchema,
   FeedSettingsChangeSchema,
+  fromZoned,
+  PLATFORM_DRAFTS,
+  TemplateIdSchema,
+  toZoned,
   type FeedClose,
   type FeedInsightKind,
   type FeedItem,
@@ -12,6 +16,7 @@ import {
   type FeedResponse,
   type FeedSettings,
   type FeedSettingsChange,
+  type TemplateId,
 } from '@pepper/contracts';
 import {
   appendAuditEntry,
@@ -20,7 +25,10 @@ import {
   findCurrentTenant,
   listOpenFeedItems,
   listWaitingFeedItems,
+  readBriefing,
   readFeedSettings,
+  readMorningDueAt,
+  setMorningDueAt,
   requestInsightRun,
   updateCurrentTenantMailingAddress,
   withMember,
@@ -45,6 +53,8 @@ const DAY_MS = 86_400_000;
 
 export interface FeedOptions {
   clock?: Clock;
+  /** The template's morning hour (the api passes `templateDrafts`; L1 never imports L3). */
+  morningHourOf?: (templateId: TemplateId | null) => number;
 }
 
 /** The member's feed: suggestions (none while paused), switches and the ask-once question. */
@@ -62,14 +72,21 @@ export async function getFeed(
     const rows = stored.suggestionsPaused
       ? []
       : await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds });
+    const tenant = await findCurrentTenant(tx);
+    const briefing = await readBriefing(tx, canChangeSettings ? 'business' : 'own', now);
+    const templateId = TemplateIdSchema.nullable()
+      .catch(null)
+      .parse(tenant?.templateId ?? null);
     return {
       suggestions: rows.flatMap((row) => toFeedItem(row) ?? []),
+      briefing: briefing === undefined ? null : (toFeedItem(briefing) ?? null),
       settings: publicSettings(stored),
+      templateMorningHour: (options.morningHourOf ?? (() => PLATFORM_DRAFTS.morningHour))(
+        templateId,
+      ),
       canChangeSettings,
       askToTurnOff: canChangeSettings ? await kindToAskAbout(tx, stored, now) : null,
-      mailingAddress: canChangeSettings
-        ? ((await findCurrentTenant(tx))?.mailingAddress ?? null)
-        : null,
+      mailingAddress: canChangeSettings ? (tenant?.mailingAddress ?? null) : null,
     };
   });
 }
@@ -84,10 +101,23 @@ export async function feedForAiIn(
   actor: Actor,
   now: Date,
   options: { kind?: FeedInsightKind; limit?: number } = {},
-): Promise<{ paused: boolean; suggestions: FeedItem[]; waiting: FeedItem[] }> {
+): Promise<{
+  paused: boolean;
+  briefing: FeedItem | null;
+  suggestions: FeedItem[];
+  waiting: FeedItem[];
+}> {
   requirePermission(actor, 'feed.read');
   const stored = await readFeedSettings(tx);
-  if (stored.suggestionsPaused) return { paused: true, suggestions: [], waiting: [] };
+  // Today's briefing, also while paused (it only informs): the business's for owners and
+  // managers, the member's own day for staff.
+  const read = await readBriefing(
+    tx,
+    can(actor.context, 'settings.manage') ? 'business' : 'own',
+    now,
+  );
+  const briefing = read === undefined ? null : (toFeedItem(read) ?? null);
+  if (stored.suggestionsPaused) return { paused: true, briefing, suggestions: [], waiting: [] };
   const limit = options.limit ?? 20;
   const wanted = (row: FeedItemWithNames) =>
     !(stored.disabledKinds as readonly string[]).includes(row.kind) &&
@@ -101,7 +131,7 @@ export async function feedForAiIn(
       .filter(wanted)
       .slice(0, limit)
       .flatMap((row) => toFeedItem(row) ?? []);
-  return { paused: false, suggestions: items(open), waiting: items(waiting) };
+  return { paused: false, briefing, suggestions: items(open), waiting: items(waiting) };
 }
 
 /** Dismisses (snoozing that kind for that subject for 30 days) or marks done an open item. */
@@ -131,6 +161,7 @@ export async function changeFeedSettings(
   db: Database,
   actor: Actor,
   change: FeedSettingsChange,
+  options: Pick<FeedOptions, 'morningHourOf'> = {},
 ): Promise<FeedSettings> {
   requirePermission(actor, 'settings.manage');
   const parsed = FeedSettingsChangeSchema.parse(change);
@@ -156,12 +187,16 @@ export async function changeFeedSettings(
     const after: StoredFeedSettings = {
       suggestionsPaused: parsed.suggestionsPaused ?? before.suggestionsPaused,
       disabledKinds: parsed.disabledKinds ?? before.disabledKinds,
+      morningHour: parsed.morningHour === undefined ? before.morningHour : parsed.morningHour,
       answeredKinds:
         parsed.askAnswered === undefined || before.answeredKinds.includes(parsed.askAnswered)
           ? before.answeredKinds
           : [...before.answeredKinds, parsed.askAnswered],
     };
     await writeFeedSettings(tx, after);
+    if (after.morningHour !== before.morningHour) {
+      await moveMorningRuns(tx, after.morningHour, options.morningHourOf);
+    }
     const [was, is] = [publicSettings(before), publicSettings(after)];
     if (JSON.stringify(was) !== JSON.stringify(is)) {
       // On again, or a kind back on: the feed is computed again at once, not within the hour.
@@ -181,10 +216,33 @@ export async function changeFeedSettings(
   });
 }
 
+/**
+ * A new morning hour takes effect at once (S38a code review): each pass's next due time keeps
+ * its local day and takes the new hour, so a pass not yet run today runs at the new hour, and
+ * one already run today still waits for tomorrow.
+ */
+async function moveMorningRuns(
+  tx: TenantTx,
+  own: number | null,
+  morningHourOf: FeedOptions['morningHourOf'],
+): Promise<void> {
+  const tenant = await findCurrentTenant(tx);
+  if (tenant === undefined) return;
+  const templateId = TemplateIdSchema.nullable().catch(null).parse(tenant.templateId);
+  const hour = own ?? (morningHourOf ?? (() => PLATFORM_DRAFTS.morningHour))(templateId);
+  for (const pass of ['drafts', 'briefing'] as const) {
+    const due = await readMorningDueAt(tx, pass);
+    if (due === null) continue;
+    const day = toZoned(tenant.timeZone, due.getTime());
+    await setMorningDueAt(tx, pass, new Date(fromZoned(tenant.timeZone, day, hour * 60)));
+  }
+}
+
 function publicSettings(stored: StoredFeedSettings): FeedSettings {
   return {
     suggestionsPaused: stored.suggestionsPaused,
     disabledKinds: [...stored.disabledKinds].sort(),
+    morningHour: stored.morningHour,
   };
 }
 

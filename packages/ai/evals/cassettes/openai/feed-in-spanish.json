@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d82182189fb426feff9c97bbb6d5639f75d8f851404b8e2cd6ce678cc5d23a2e",
+        "fingerprint": "54623f9eb1e6d41d7cbd1714176e2dcf71954ecb73555b2ee2c34c081d7bde65",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_llpUHyGdNfXoj53VtYbGafIV",
+              "id": "call_1UaqxjRRx8uhLdO2QSBJLvS6",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9842,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9902,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 13,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "06dc6ca5921e5fe66e0a1a466f59bfaf25f79f865097fa553b648cf79890bbbe",
+        "fingerprint": "7af5413b48a278037215d7c53844d78393324a13c6c4d40bfb6bbc3c9dfddaeb",
         "response": {
-          "text": "Sí. Hay espacios libres hoy, lunes 2 de noviembre: Jess tiene un bloque abierto de 9:00 a 17:00 y Marco también de 9:00 a 17:00. Además, Sara K. y Sarah P. ya tienen pendiente volver para un corte. No hay nadie en lista de espera ni correos pendientes de aprobación.",
+          "text": "Sí. Hoy (2 de noviembre) hay bloques de tiempo libres de 9:00 a 17:00 para Jess y Marco. También hay dos clientas con corte atrasado: Sara K. desde el 26 de octubre y Sarah P. desde el 27 de octubre. No hay nadie en la lista de espera.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11522,
-            "cachedInputTokens": 9839,
-            "cacheWriteTokens": 1680,
-            "outputTokens": 77
+            "inputTokens": 11533,
+            "cachedInputTokens": 9899,
+            "cacheWriteTokens": 1631,
+            "outputTokens": 71
           },
           "model": "gpt-6-luna"
         }

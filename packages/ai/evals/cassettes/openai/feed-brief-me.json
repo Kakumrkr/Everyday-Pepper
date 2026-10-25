@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3dd6462798d2ff89c67b02e88d01fc9fa53657c4b26731c96c27c70a670a78d2",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3gQy4NtPEXptaKhgkUKPzRmQ",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9895,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 6,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "891ee1d9a794372359fe4d0feb9c823fb77f0f8135614843899ef7f48ef7bd6b",
+        "response": {
+          "text": "Morning, Lena. There are no bookings today, with two open schedule gaps: Jess and Marco each have 9:00–5:00 available. The feed also flags two regulars due to rebook: Sara K. and Sarah P. No items are waiting for your OK, and the waitlist is empty.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11568,
+            "cachedInputTokens": 9892,
+            "cacheWriteTokens": 1673,
+            "outputTokens": 69
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

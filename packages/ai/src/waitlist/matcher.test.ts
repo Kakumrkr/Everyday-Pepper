@@ -17,6 +17,7 @@ const db = vi.hoisted(() => ({
   findCurrentTenant: vi.fn(),
   finishWaitlistMatch: vi.fn(),
   listMemberships: vi.fn(),
+  requestInsightRun: vi.fn(),
   retryWaitlistMatch: vi.fn(),
 }));
 const domain = vi.hoisted(() => ({ stillOfferable: vi.fn(), waitlistCandidatesIn: vi.fn() }));
@@ -98,6 +99,8 @@ describe('runWaitlistMatch', () => {
   it('the dial decides: proposed at ask, offered when it ran', async () => {
     expect(await run()).toBe('proposed');
     expect(db.finishWaitlistMatch).toHaveBeenLastCalledWith({}, MATCH, 'proposed');
+    // The feed shows the offers waiting for an OK within a minute (S38a).
+    expect(db.requestInsightRun).toHaveBeenCalledTimes(1);
     expect(trust.actForBusiness.mock.calls[0]?.[3]).toMatchObject({
       payload: { matchId: MATCH, entries: [candidate] },
       idempotencyKey: `waitlist.${MATCH}`,

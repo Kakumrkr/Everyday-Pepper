@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingStatusSchema } from './bookings.js';
 import { ClientEmailSchema, PhoneSchema } from './clients.js';
+import { LocalDateSchema } from './rules.js';
 import { BrandColorSchema, TenantSlugSchema, TimeZoneSchema } from './tenancy.js';
 import { UtcDateTimeSchema } from './time.js';
 
@@ -180,3 +181,37 @@ export type PublicOffer = z.infer<typeof PublicOfferSchema>;
 
 export const PublicOfferResponseSchema = z.object({ offer: PublicOfferSchema });
 export type PublicOfferResponse = z.infer<typeof PublicOfferResponseSchema>;
+
+/**
+ * `POST /v1/public/businesses/:slug/waitlist-requests` (S38a, ADR-0042): "Join the waitlist"
+ * when nothing fits on a day. Like a booking, it waits for the code emailed to the client;
+ * the code adds them to the waitlist for that local day, with the staff member or anyone.
+ */
+export const WaitlistRequestInputSchema = z
+  .object({
+    serviceId: ServiceIdSchema,
+    staffMemberId: StaffMemberIdSchema.nullable().default(null),
+    date: LocalDateSchema,
+    name: z.string().trim().min(1).max(120),
+    email: z.string().trim().max(254).pipe(ClientEmailSchema),
+    phone: PhoneSchema.nullable().default(null),
+  })
+  .strict();
+export type WaitlistRequestInput = z.input<typeof WaitlistRequestInputSchema>;
+export type WaitlistRequest = z.output<typeof WaitlistRequestInputSchema>;
+
+/** `POST …/waitlist-requests/:requestId/confirm`: the code from the email. */
+export const WaitlistConfirmInputSchema = z.object({ code: VerificationCodeSchema }).strict();
+export type WaitlistConfirmInput = z.input<typeof WaitlistConfirmInputSchema>;
+
+/** The client's place on the waitlist, as the booking page shows it. */
+export const PublicWaitlistEntrySchema = z.object({
+  service: z.object({ id: ServiceIdSchema, name: z.string() }),
+  staff: z.object({ id: StaffMemberIdSchema, displayName: z.string() }).nullable(),
+  date: LocalDateSchema,
+  expiresAt: UtcDateTimeSchema,
+});
+export type PublicWaitlistEntry = z.infer<typeof PublicWaitlistEntrySchema>;
+
+export const WaitlistConfirmResponseSchema = z.object({ entry: PublicWaitlistEntrySchema });
+export type WaitlistConfirmResponse = z.infer<typeof WaitlistConfirmResponseSchema>;

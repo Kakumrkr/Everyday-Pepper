@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "13d450c4667ef27792596d8c0e0820513a5022e8151a7f3cd20dd5bcd3f544eb",
+        "fingerprint": "b5867d6eddcab5d4e1cf6da5462d8dbcd199ef9cee2e7666b39947ab511e37ae",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xlDQwRhp7nsvUBsCKSpNiZYa",
+              "id": "call_iMBpjzcI74E9Fg52q9yyrnlx",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,63 +16,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9837,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "134aeb112d3170d3911245997f2ecbfbaa823db5cda7f7046c1dfd02a37cebc5",
-        "response": {
-          "text": "I found Maria L. The business has noted that she’s allergic to “Hazelnut oil”.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9995,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 155,
-            "outputTokens": 24
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "f3a57cba909faec5864ea234a8a46525f34d2702d7eb0527ca98d57f37543670",
+        "fingerprint": "6ebbc94ead4c9b79c0b5da69e734a0ab601edbfd788abd7f0ab56265c897f25b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xs6yWtEhheG3HZOlrY0xuhbs",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
-            "cacheWriteTokens": 11,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "6b8e53f1765ad41d17b67182db064fb38a314b916151fdb542d9af9fa7c83f04",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_HfDIZVdRkJL3lz7Gd50CTTMU",
+              "id": "call_AEtgV86rjpI5yWwrqGJvuyON",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -80,18 +37,40 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9925,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 85,
-            "outputTokens": 44
+            "inputTokens": 10053,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 153,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4edecb5937249034a0e5a5dc8e70294dae8ce619239bbee06ea107ecadeb8e50",
+        "fingerprint": "0845e0cb2972adceca0b2f366a59f7e128ba06d7db69637fe740d6154eb185c1",
         "response": {
-          "text": "Maria L. has a confirmed haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour appointment with Jess on Oct 23. I don’t have any other client notes to share.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_aMvvU0o93TvefhSrQtNBWvMG",
+              "name": "get_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria-last}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10574,
+            "cachedInputTokens": 10050,
+            "cacheWriteTokens": 521,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1c452904537329b101c60e0b65ea3fa66966def675f9adacc4f880d9320ac3a4",
+        "response": {
+          "text": "Maria L. has an upcoming haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her recorded allergy is “Hazelnut oil.” Her most recent visit was a colour appointment with Jess on Oct 23.",
           "toolCalls": [],
           "replay": [
             {
@@ -101,10 +80,336 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10382,
-            "cachedInputTokens": 9922,
-            "cacheWriteTokens": 457,
-            "outputTokens": 52
+            "inputTokens": 10873,
+            "cachedInputTokens": 10571,
+            "cacheWriteTokens": 299,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e25618c9d8d5ab6b71bdd31e3b47aa25acc57ca43198ee92b401d0f013512f03",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_97J5yMROQgkgPKgC6rXH1ee5",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "723ef5e4ef69430606ca8216c26dd0680be6b60622708b4c488c150a8bd02620",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SxJbyfNxsYeSUsafovHyqT2o",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9982,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c500218db12b575b02f8ac8936700661905a473dcb63f7fcecd8cc4b8a29b594",
+        "response": {
+          "text": "Maria L. is booked for a haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour with Jess on Oct 23. I don’t see any other notes or remembered details about her.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10424,
+            "cachedInputTokens": 9979,
+            "cacheWriteTokens": 442,
+            "outputTokens": 54
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b5867d6eddcab5d4e1cf6da5462d8dbcd199ef9cee2e7666b39947ab511e37ae",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IWlCcEYy6jD1eGTDmBuE9ZJV",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8551b1a187269441f8b0b5dfe09cbccfdf1d0fbfec6c483784981dd30f99f204",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ADi1bCUl5n5g5QTMiFYmgKcp",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10054,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 154,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "eaa5970d9ab1e2b759cdc2a2e567ede44d10dafc9c5db9dcf448df94651bc098",
+        "response": {
+          "text": "Maria L. has a sensitive allergy note: “Hazelnut oil.” She has a haircut booked with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour appointment with Jess on Oct 23.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10572,
+            "cachedInputTokens": 10051,
+            "cacheWriteTokens": 518,
+            "outputTokens": 54
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e25618c9d8d5ab6b71bdd31e3b47aa25acc57ca43198ee92b401d0f013512f03",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_oGwnXNjcXlbWn8lzsEk4bwaB",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 11,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "864abcb9aca0b090f3b5d6b9b2e91d07a884b9f60b561ec9c08f63b553304145",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_E6FFJwCFNblvMymE1c5ovVB5",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9982,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 82,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c13ba387d85a45d2f66301dacf87639f5b4f793eb9ea933fbf44013ca8ecb0cc",
+        "response": {
+          "text": "Maria L. has a haircut booked with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour appointment with Jess on Oct 23. I don’t have any other notes to share.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10420,
+            "cachedInputTokens": 9979,
+            "cacheWriteTokens": 438,
+            "outputTokens": 51
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b5867d6eddcab5d4e1cf6da5462d8dbcd199ef9cee2e7666b39947ab511e37ae",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Grz5M53ezbmAIXpOiT30k9h8",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "1052f034bd1191380abfe41a469ef2a6b4e237d60b4a828c1a3e38b4ad3ce658",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_R6MfSy0exZkbvhmaDLfmZjlH",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10057,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 157,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f1291c4c6300bf9cbc06ed6fb015c4112e955d8cc87819752303b85ee51a840c",
+        "response": {
+          "text": "Maria L. has an upcoming haircut with Jess tomorrow, Nov 3, at 3:00 PM. Her last noted visit was a colour appointment with Jess on Oct 23. The record notes an allergy: “Hazelnut oil.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10590,
+            "cachedInputTokens": 10054,
+            "cacheWriteTokens": 533,
+            "outputTokens": 53
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e25618c9d8d5ab6b71bdd31e3b47aa25acc57ca43198ee92b401d0f013512f03",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Zd5KovwRDJnK4ofMowcJLz5N",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "134353a6710e843fee14c2f5f8cee077a9efbffc1933d38ce04ce1e0d6a6a65e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_TACbimAlDFgXNQEHLPjaPc0o",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9986,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 86,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "13ca30bd7d60873f645f5ebeb757b4966c19d03f58a144927a788731d37789e3",
+        "response": {
+          "text": "Maria L. is booked for a haircut with Jess tomorrow, Nov 3 at 3:00 PM. Her last noted visit was a colour appointment with Jess on Oct 23. I don’t see any other client notes here.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10440,
+            "cachedInputTokens": 9983,
+            "cacheWriteTokens": 454,
+            "outputTokens": 51
           },
           "model": "gpt-6-luna"
         }

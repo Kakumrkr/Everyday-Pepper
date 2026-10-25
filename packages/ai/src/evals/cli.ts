@@ -4,7 +4,8 @@
 //   [--cassettes <dir>] [--phase <n>] [--concurrency <n>] [--retrieval]` (ADR-0027, ADR-0030, S27;
 //   `--phase`, S29; `--concurrency`, S31: cases at once, default 4; `--retrieval`, S31: the
 //   episode_retrieval set's recall@5 instead of the cases; `--phase-estimate-ok`, S31: the
-//   phase's worst-case estimate may pass its cap, its actual spend still may not). Replays cassettes by
+//   phase's worst-case estimate may pass its cap, and from S38b the $4.50 stop, their actual
+//   spend still may not). Replays cassettes by
 // default, at no cost: every case (the files and those generated from the tool guides) runs
 // through the real agent loop and tools in a seeded world on Postgres: `EVAL_DATABASE_URL` (a
 // migrated database, the services' login), or a throwaway one in Docker. Only `--provider
@@ -204,7 +205,11 @@ async function main(): Promise<number> {
       estimate = Math.max(estimate, usd);
     }
     const spent = spentUsd(ledger);
-    const overall = refuseCumulative({ spentUsd: spent, estimateUsd: estimate });
+    const overall = refuseCumulative({
+      spentUsd: spent,
+      estimateUsd: estimate,
+      estimateOk: values['phase-estimate-ok'],
+    });
     if (overall !== null) {
       print(`Refused: ${overall}`);
       return 2;

@@ -101,7 +101,9 @@ export const findAvailability: ReadTool = {
   name: 'find_availability',
   // 2 (S33): "is she free at 10?" goes to get_day; the example's `notBefore` is one day's.
   // 3 (S36): `notBefore` holds on every day of the range ("mornings off next week").
-  version: 3,
+  // 4 (S38a): a move to a named time goes straight to move_booking (S37b's carried miss: the
+  // booking's own time counts as taken here, so a check first offered another time).
+  version: 4,
   localTimes: true,
   guide: {
     use: 'Find free start times for a service, with one staff member or anyone who offers it, on a day or a few days.',
@@ -109,6 +111,7 @@ export const findAvailability: ReadTool = {
       'to book (use create_booking with a time found here)',
       'to see what is already booked (use get_day)',
       'to check whether someone is free at one time on one day, without a service (read that day with get_day and answer; never ask which service)',
+      'before moving a booking to a time the member named (call move_booking with that time: it checks the time itself, and here the booking still holds its own time)',
     ],
     returns:
       'free start times with the staff member, earliest first, and whether more exist. Offer them; book one only when the member chose it or asked you to find a time and book it.',

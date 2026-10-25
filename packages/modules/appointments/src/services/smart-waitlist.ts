@@ -49,6 +49,7 @@ import { rankCandidates, windowsHold, type WaitlistFit } from '../bookings/waitl
 import { waitlistAuditValues } from '../mapping.js';
 import { serviceToBook, type TemplateRuleDefaultsOf } from './availability.js';
 import { isBookable } from './bookings.js';
+import { requestInsights } from './insights.js';
 
 // The smart waitlist (S37, ADR-0041, AC-W5-1), the domain's half. A booking cancelled or moved
 // away from a time asks, in its own transaction, for that time to be matched
@@ -245,6 +246,8 @@ export async function makeWaitlistOffersIn(
     await changeEntryStatus(tx, entry, 'offered');
     made.push({ offer, token });
   }
+  // The feed's `waitlist_match` item shows the offers within about a minute (S38a).
+  if (made.length > 0) await requestInsights(tx);
   return made;
 }
 

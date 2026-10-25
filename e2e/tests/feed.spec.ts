@@ -1,4 +1,4 @@
-import { ServiceSchema, StaffMemberSchema } from '@pepper/contracts';
+import { CurrentBusinessResponseSchema, ServiceSchema, StaffMemberSchema } from '@pepper/contracts';
 import { expect, test } from '@playwright/test';
 import { callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js';
 
@@ -105,4 +105,47 @@ test('an unsubscribe link that is not valid says so, without signing in (S36)', 
   await expect(page.getByRole('heading', { name: 'Unsubscribe' })).toBeVisible();
   await expect(page.getByText('This unsubscribe link isn’t valid.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Unsubscribe' })).toHaveCount(0);
+});
+
+test('Home shows the daily briefing or when it comes, and the owner sets its hour (S38a)', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page);
+  const { business } = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  // The worker briefs a new business on its first pass once its morning hour has passed today
+  // (the template's 7:00): on the real clock, the card shows today's briefing then, and when it
+  // comes before.
+  const localHour = Number(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: business.timeZone,
+      hour: 'numeric',
+      hourCycle: 'h23',
+    }).format(new Date()),
+  );
+  const card = page.getByTestId('daily-briefing');
+  if (localHour >= 7) {
+    await expect(async () => {
+      await page.goto('/');
+      await expect(card.getByRole('heading', { name: /^Today: / })).toBeVisible({
+        timeout: 2_000,
+      });
+    }).toPass({ timeout: 60_000, intervals: [2_000, 5_000] });
+    await (await hydrated(card.getByRole('button', { name: 'Got it' }))).click();
+    await expect(card.getByRole('heading', { name: 'Your daily briefing' })).toBeVisible();
+    await page.reload();
+    await expect(card.getByRole('heading', { name: /^Today: / })).toHaveCount(0);
+  }
+  await expect(card).toContainText('Every morning at 7:00 am');
+
+  // The owner moves it to 9:00; it stays after a reload, and back to the default.
+  const hour = card.getByLabel('Briefing at');
+  await (await hydrated(hour)).selectOption('9');
+  await expect(card).toContainText('Every morning at 9:00 am');
+  await page.reload();
+  await expect(card.getByLabel('Briefing at')).toHaveValue('9');
+  await card.getByLabel('Briefing at').selectOption('template');
+  await expect(card).toContainText('Every morning at 7:00 am');
 });

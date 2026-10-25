@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DailyBriefingPayloadSchema,
   FeedInsightKindSchema,
   FeedItemSchema,
+  FeedKindSchema,
   FeedSettingsChangeSchema,
   FeedSettingsSchema,
 } from './feed.js';
@@ -29,14 +31,65 @@ const item = {
 };
 
 describe('feed kinds', () => {
-  it('adds staff_overload to the insight types and writes four kinds in S35', () => {
+  it('writes every insight type from the insights pass, and the briefing besides (S38a)', () => {
     expect(InsightTypeSchema.options).toContain('staff_overload');
     expect(FeedInsightKindSchema.options).toEqual([
       'schedule_gaps',
       'rebooking_due',
       'no_show_pattern',
       'staff_overload',
+      'waitlist_match',
     ]);
+    expect([...FeedInsightKindSchema.options].sort()).toEqual(
+      [...InsightTypeSchema.options].sort(),
+    );
+    expect(FeedKindSchema.options).toEqual([...FeedInsightKindSchema.options, 'daily_briefing']);
+  });
+});
+
+const briefing = {
+  scope: 'business',
+  bookingCount: 8,
+  firstStartsAt: '2026-11-02T14:00:00.000Z',
+  gapCount: 1,
+  openMinutes: 90,
+  needsOkCount: 2,
+  rebookingDueCount: 3,
+  waitlistWaiting: 4,
+  waitlistOffered: 1,
+  waitlistClaimed: 0,
+};
+
+describe('the S38a kinds', () => {
+  it('parses a briefing and a waitlist match', () => {
+    expect(
+      FeedItemSchema.parse({ ...item, kind: 'daily_briefing', payload: briefing }),
+    ).toMatchObject({ kind: 'daily_briefing', payload: { bookingCount: 8 } });
+    expect(
+      FeedItemSchema.parse({
+        ...item,
+        kind: 'waitlist_match',
+        payload: {
+          startsAt: '2026-11-02T19:00:00.000Z',
+          endsAt: '2026-11-02T20:00:00.000Z',
+          state: 'offered',
+          offered: 3,
+        },
+      }),
+    ).toMatchObject({ kind: 'waitlist_match' });
+  });
+
+  it('holds numbers only: no names or free text in a briefing', () => {
+    expect(DailyBriefingPayloadSchema.safeParse({ ...briefing, note: 'Ana at 9' }).success).toBe(
+      false,
+    );
+    expect(DailyBriefingPayloadSchema.safeParse({ ...briefing, bookingCount: -1 }).success).toBe(
+      false,
+    );
+    expect(
+      DailyBriefingPayloadSchema.safeParse({ ...briefing, scope: 'staff', needsOkCount: null })
+        .success,
+    ).toBe(true);
   });
 });
 
@@ -62,10 +115,14 @@ describe('FeedItemSchema', () => {
 
 describe('FeedSettings', () => {
   it('accepts either switch and the once-only answer', () => {
+    // Settings stored before S38a have no morning hour: the template's.
     expect(FeedSettingsSchema.parse({ suggestionsPaused: true, disabledKinds: [] })).toEqual({
       suggestionsPaused: true,
       disabledKinds: [],
+      morningHour: null,
     });
+    expect(FeedSettingsChangeSchema.parse({ morningHour: 8 })).toEqual({ morningHour: 8 });
+    expect(FeedSettingsChangeSchema.parse({ morningHour: null })).toEqual({ morningHour: null });
     expect(FeedSettingsChangeSchema.parse({ askAnswered: 'schedule_gaps' })).toEqual({
       askAnswered: 'schedule_gaps',
     });
@@ -74,7 +131,10 @@ describe('FeedSettings', () => {
   it.each([
     {},
     { disabledKinds: ['schedule_gaps', 'schedule_gaps'] },
-    { disabledKinds: ['waitlist_match'] },
+    { disabledKinds: ['daily_briefing'] },
+    { morningHour: 4 },
+    { morningHour: 12 },
+    { morningHour: 7.5 },
     { suggestionsPaused: 'yes' },
     { tenantId: ID },
   ])('rejects %j', (change) => {

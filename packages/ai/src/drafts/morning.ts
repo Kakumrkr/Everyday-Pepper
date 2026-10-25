@@ -1,7 +1,9 @@
 import {
+  claimMorning,
   findAvailabilityIn,
   listServicesIn,
   listStaffIn,
+  morningHourOf,
   runInsightsFor,
   type InsightsOptions,
   type TemplateRuleDefaultsOf,
@@ -11,7 +13,6 @@ import {
   ClientIdSchema,
   DRAFT_LIMITS,
   formatDate,
-  fromZoned,
   RebookingDuePayloadSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
@@ -26,7 +27,6 @@ import {
 } from '@pepper/contracts';
 import { proposeForBusiness, type Actor, type Clock } from '@pepper/core';
 import {
-  claimDraftsRun,
   findClient,
   linkFeedItemToProposal,
   listDraftableRebookings,
@@ -53,8 +53,8 @@ import { writeDraft, type DraftFacts, type DraftWriterDeps } from './writer.js';
 // (their usual staff member first), the routine model writes the words, and the trust layer
 // stores the proposal with its exact email, linked to the feed item. Nothing is sent until an
 // owner or manager approves it. At most `DRAFT_LIMITS.perBusinessPerDay` drafts a business a
-// day, and no client gets a second nudge within their interval. S38's daily briefing will run
-// this same pass first.
+// day, and no client gets a second nudge within their interval. The worker's morning job runs
+// it just before the daily briefing (S38a), which counts what it drafted.
 
 const DAY_MS = 86_400_000;
 /** Businesses per scan, and scans per pass. */
@@ -139,14 +139,10 @@ export async function runMorningDraftsFor(
     if (tenant === undefined) return { outcome: 'gone' as const };
     const drafts = options.draftsOf(TemplateIdSchema.nullable().parse(tenant.templateId));
     const today = toZoned(tenant.timeZone, now.getTime());
-    const morningOf = (offset: number) =>
-      new Date(fromZoned(tenant.timeZone, addDays(today, offset), drafts.morningHour * 60));
-    // Before this morning's hour: wait for it (a business's first day included).
-    if (now < morningOf(0)) {
-      await claimDraftsRun(tx, now, morningOf(0));
-      return { outcome: 'waiting' as const };
-    }
-    if (!(await claimDraftsRun(tx, now, morningOf(1)))) return { outcome: 'not_due' as const };
+    // The business's own hour (S38a), else its template's: the briefing's hour too.
+    const hour = morningHourOf(tenant.settings.morningHour, drafts.morningHour);
+    const claimed = await claimMorning(tx, 'drafts', { timeZone: tenant.timeZone, hour }, now);
+    if (claimed !== 'claimed') return { outcome: claimed };
     if (tenant.settings.suggestionsPaused) return { outcome: 'paused' as const };
     if (tenant.settings.disabledKinds.includes('rebooking_due')) {
       return { outcome: 'paused' as const };

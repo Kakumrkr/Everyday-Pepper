@@ -7,11 +7,11 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
-import { runDueInsights, sendDueReminders } from '@pepper/appointments';
+import { runDueBriefings, runDueInsights, sendDueReminders } from '@pepper/appointments';
 import { cleanUp, sendDueTaskPushes, systemClock, type Clock } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
-import { templateInsights } from '@pepper/templates';
+import { templateDrafts, templateInsights } from '@pepper/templates';
 import { morningDraftsJob, type DraftsJobConfig } from './drafts.js';
 import { Periodic } from './periodic.js';
 
@@ -33,6 +33,12 @@ export interface JobsOptions {
    */
   drafts?: (DraftsJobConfig & { pollMs: number }) | null;
   /**
+   * How often the morning job looks for businesses whose morning hour has come (S38a): the
+   * drafts pass, when configured, then the daily briefing. Default: the drafts' `pollMs`, else
+   * every minute.
+   */
+  morningPollMs?: number;
+  /**
    * Whether this worker sends pushes (VAPID keys set, ADR-0026); the due-task job runs, on
    * the reminders' interval, only then.
    */
@@ -49,7 +55,9 @@ export const JOBS_OPTIONS = Symbol('JOBS_OPTIONS');
  * `cleanupIntervalMs` old rows are deleted. Several worker processes may run them at once: a
  * reminder or due task is taken under a row lock, and deleting is idempotent. Every
  * `insightsPollMs` the feed of each business that is due is computed again (ADR-0039); a
- * business is taken under an advisory lock, and the feed is written by dedupe key.
+ * business is taken under an advisory lock, and the feed is written by dedupe key. The morning
+ * job drafts and briefs each business once a day at its local morning hour (S36, S38a), each
+ * pass claimed by a conditional update.
  */
 @Injectable()
 export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -58,7 +66,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   readonly dueTasks: Periodic | null;
   readonly cleanup: Periodic;
   readonly insights: Periodic;
-  readonly drafts: Periodic | null;
+  readonly morning: Periodic;
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -98,27 +106,50 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
     const drafts = options.drafts ?? null;
     const runDrafts =
       drafts === null ? null : morningDraftsJob(db, drafts, { outboxKey: options.key, clock });
-    this.drafts =
-      drafts === null || runDrafts === null
-        ? null
-        : new Periodic(
-            'Morning drafts job',
-            drafts.pollMs,
-            async () => {
-              const result = await runDrafts();
-              // Counts only.
-              if (result.businesses > 0) {
-                this.logger.log(
-                  `Morning drafts: ${String(result.businesses)} businesses, ${String(result.drafted)} drafted`,
+    // One job, in order: this morning's drafts first, so the briefing counts them (S38a).
+    this.morning = new Periodic(
+      'Morning job',
+      options.morningPollMs ?? drafts?.pollMs ?? 60_000,
+      async () => {
+        // A failing drafts pass never holds back the briefing, which needs no model.
+        const result =
+          runDrafts === null
+            ? null
+            : await runDrafts().catch((error: unknown) => {
+                this.logger.warn(
+                  `Morning drafts failed: ${error instanceof Error ? error.name : 'Error'}`,
                 );
-              }
-              // Not a refusal: a model call or a proposal broke (the next morning tries again).
-              if (result.failed > 0) {
-                this.logger.warn(`Morning drafts: ${String(result.failed)} failed`);
-              }
-            },
-            this.logger,
+                return null;
+              });
+        if (result !== null) {
+          // Counts only.
+          if (result.businesses > 0) {
+            this.logger.log(
+              `Morning drafts: ${String(result.businesses)} businesses, ${String(result.drafted)} drafted`,
+            );
+          }
+          // Not a refusal: a model call or a proposal broke (the next morning tries again).
+          if (result.failed > 0) {
+            this.logger.warn(`Morning drafts: ${String(result.failed)} failed`);
+          }
+        }
+        const briefed = await runDueBriefings(db, {
+          clock,
+          insightsOf: templateInsights,
+          morningHourOf: (templateId) => templateDrafts(templateId).morningHour,
+          pushKey: options.pushes === true ? options.key : null,
+        });
+        if (briefed.businesses > 0) {
+          this.logger.log(
+            `Daily briefing: ${String(briefed.businesses)} businesses, ${String(briefed.pushes)} pushes`,
           );
+        }
+        if (briefed.failed > 0) {
+          this.logger.warn(`Daily briefing: ${String(briefed.failed)} failed`);
+        }
+      },
+      this.logger,
+    );
     this.cleanup = new Periodic(
       'Clean-up job',
       options.cleanupIntervalMs,
@@ -137,7 +168,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
     this.reminders.start();
     this.dueTasks?.start();
     this.insights.start();
-    this.drafts?.start();
+    this.morning.start();
     this.cleanup.start({ immediately: true });
   }
 
@@ -146,13 +177,13 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       this.reminders.stop(),
       this.dueTasks?.stop(),
       this.insights.stop(),
-      this.drafts?.stop(),
+      this.morning.stop(),
       this.cleanup.stop(),
     ]);
   }
 }
 
-/** The reminder, due-task, insights, morning drafts and clean-up jobs. Needs `ConnectionsModule`. */
+/** The reminder, due-task, insights, morning (drafts, briefing) and clean-up jobs. Needs `ConnectionsModule`. */
 @Module({})
 export class JobsModule {
   static forRoot(options: JobsOptions): DynamicModule {

@@ -6,6 +6,7 @@ import {
   type BookingRequestId,
   type ServiceId,
   type StaffMemberId,
+  type WaitlistEntryId,
 } from '@pepper/contracts';
 import { and, count, eq, gt, sql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -33,6 +34,8 @@ export interface NewBookingVerification {
   phone: string | null;
   codeHash: string;
   expiresAt: Date;
+  /** `waitlist` (S38a): the code adds the client to the waitlist for that local day. */
+  purpose?: 'booking' | 'waitlist';
 }
 
 export async function insertBookingVerification(
@@ -50,6 +53,7 @@ export async function insertBookingVerification(
       phone: input.phone === null ? null : PhoneSchema.parse(input.phone),
       codeHash: HashSchema.parse(input.codeHash),
       expiresAt: input.expiresAt,
+      purpose: z.enum(['booking', 'waitlist']).parse(input.purpose ?? 'booking'),
     })
     .returning();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
@@ -89,6 +93,18 @@ export async function setVerificationBooking(
   await tx
     .update(bookingVerifications)
     .set({ bookingId: Id.parse(bookingId) })
+    .where(eq(bookingVerifications.id, BookingRequestIdSchema.parse(id)));
+}
+
+/** Records the waitlist entry a request's code added (S38a); it cannot be used again. */
+export async function setVerificationWaitlistEntry(
+  tx: TenantTx,
+  id: BookingRequestId,
+  entryId: WaitlistEntryId,
+): Promise<void> {
+  await tx
+    .update(bookingVerifications)
+    .set({ waitlistEntryId: Id.parse(entryId) })
     .where(eq(bookingVerifications.id, BookingRequestIdSchema.parse(id)));
 }
 

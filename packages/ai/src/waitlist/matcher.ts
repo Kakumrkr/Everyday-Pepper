@@ -22,6 +22,7 @@ import {
   findCurrentTenant,
   finishWaitlistMatch,
   listMemberships,
+  requestInsightRun,
   retryWaitlistMatch,
   WAITLIST_MATCH_MAX_ATTEMPTS,
   withTenant,
@@ -89,6 +90,8 @@ export async function runWaitlistMatch(
     const outcome = await withTenant(db, due.tenantId, async (tx) => {
       const result = await matchIn(db, tx, due.tenantId, claimed, options);
       await finishWaitlistMatch(tx, matchId, result);
+      // The feed's `waitlist_match` item: offers waiting for an OK show within a minute (S38a).
+      if (result === 'proposed') await requestInsightRun(tx);
       return result;
     });
     span.setAttributes({

@@ -1,19 +1,29 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-24 · **Plan version:** 0.31 · **Current phase:** 8 — Operator feed, in progress (8a–8d done: the feed, insights, suggestions with drafts and the smart waitlist, recorded) → next: **S38a** (the daily briefing)
+**Last updated:** 2026-10-25 · **Plan version:** 0.32 · **Current phase:** 8 — Operator feed, **done** (S34–S38b; exit in S38b) → next: **S39** (Phase 9 planning: zero-setup onboarding, with the carried waitlist fix)
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: S38a (see Planned sessions).
+Nothing in progress (S38b closed). Next: S39 from "Planned sessions".
 
 ## Last sessions
-- **S37b Phase 8d "b" (2026-10-24): the smart waitlist recorded on Luna + Sol; one PR for S37a + S37b** ([ADR-0041](../adr/0041-smart-waitlist.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** `seed.full` / `evalFull` (the eval world books asked-for windows solid; the model was right to book free times); case fixes ("Sara Kim", staff's own client, the service named); `add_to_waitlist` guide: add straight away when the windows are full; the code review's 9 real findings fixed with tests (claims inside the offer window vs minimum notice, removed entries' offers, a claimant's own misfit, undo of a cancel, rank names, `clientId` filter, per-service fit cache, alerts only on give-up, ADR sync).
-  - **Gates (pass^1):** `waitlist` 12/12, `feed_safety` 10/10, every set at or above its gate except `autonomy` 10/11 (`move-done-no-approval-talk`, carried to S38, user). Spend $0.359 (Phase 8 $0.98 of $1.25). Security review: no findings. `pnpm check` green, `pnpm test:integration` 1,218/1,218, Playwright 90/90.
-- **S37a Phase 8d "a" (2026-10-24): the smart waitlist on the scripted model, branch `claude/elegant-rubin-kltm4o` pushed without a PR** ([ADR-0041](../adr/0041-smart-waitlist.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** migrations 0046–0048 (`waitlist_matches`, `waitlist_offers`, `waitlist.change`); a match row in every cancel/move transaction; the worker's relay + BullMQ `waitlist` matcher (lease, back-off); ranking (asked-for staff, waiting longest, visits); offers to the top 3 through `actForBusiness` (ask by default); single-use claim links, first claim books (match-row lock), the others emailed "taken"; `add_to_waitlist` (21 tools); waitlist in `get_feed` v4 / `find_client_bookings` v3; the claim page and `/waitlist`; sets `waitlist` (12) and `feed_safety` +2; `MAX_CASES_PER_RUN` 18.
-  - **Checks:** AC-W5-1 on the real worker 2/2 and in Playwright; `pnpm check` green (after unit tests for the matcher and the worker's runner lifted two coverage gates); `pnpm test:integration` 1,210/1,211 (only the planned stale replay, 229 cassettes); Playwright 90/90. No model called ($0).
+- **S38b Phase 8e "b" (2026-10-25): every set recorded on Luna + Sol, pass^3 on the gated sets, the security review and the Phase 8 exit; one PR for S38a + S38b** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md) "Results (S38b)", [security review](../engineering/security-review-s38.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:** `add_to_waitlist` v2 (call it before saying a client waits; add even when other times are free); three eval cases fitted to the eval world; three security tests (the daily draft cap, the system tools attacked from the chat, an expired or used waitlist code); `--phase-estimate-ok` also passes the $4.50 stop's estimate; Phase 8 cap $2.00.
+  - **Gates:** every §2 gate met; pass^3 100% on feed_safety, safety, permissions, autonomy, memory_delete, memory_safety; drafts, recall, episodic 100%; scheduling 49/50. `move-done-no-approval-talk` passes. `waitlist` 10/12: two named known misses carried to Phase 9 (user).
+  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,239/1,239 (two load misses under the parallel run, each passing alone and untouched by S38b: an appointments concurrency property test at its 60 s limit, about 8 s alone, and the `memory-latency` episode search p95, as in S38a); Playwright not re-run (no screen changed since S38a's 94/94). Spend $0.808 (Phase 8 $1.79 of $2.00; all phases $3.80).
+- **S38a Phase 8e "a" (2026-10-25): the daily briefing, `waitlist_match`, "Join the waitlist", scripted only; branch `claude/s38a-daily-briefing` pushed without a PR** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:**
+    - migrations 0049–0050 and the morning job (drafts, then briefing, at the business's hour);
+    - Home's briefing card and pushes with counts only;
+    - the `waitlist_match` item and the public waitlist with an emailed code;
+    - `get_feed` v5 and `find_availability` v4;
+    - Phase 8 cap $1.75.
+  - **Checks:**
+    - `pnpm check` green.
+    - Integration green but the planned stale replay; one memory latency check missed under load and passed alone.
+    - Playwright 94/94.
+    - Code review: 8 findings fixed. Security review: none. $0.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -21,12 +31,14 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
 - **CI minutes:** one CI run per session: all checks locally first, every commit (docs, "ADR accepted", STATUS) in before the PR, pushes to an open PR only to fix CI; docs-only PRs skip the slow jobs; CI runs on PRs, weekly on `main` and by hand. **No retries in CI** (M1).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
-- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy. **Phase 7 (S28):** at most $1.00 of the rest, recorded per session from S30 on Luna + Sol; the runner enforces it (`--phase 7`). **Phase 8 (S34):** at most $1.25 of the remaining $2.99 (about $1.10 planned), enforced by `--phase 8` from S36a; S36b spent $0.62, S37b $0.36, so S38b has $0.27 (the cap is revisited at the S38a brief, user).
+- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy. **Phase 7 (S28):** at most $1.00 of the rest, recorded per session from S30 on Luna + Sol; the runner enforces it (`--phase 7`). **Phase 8 (S34):** at most $1.25 of the remaining $2.99 (about $1.10 planned), enforced by `--phase 8` from S36a; S36b spent $0.62, S37b $0.36, so $0.27 was left; raised to $1.75 at the S38a brief and **to $2.00 in S38b** (user); Phase 8 spent $1.79. All phases $3.80 of $5.00, the runner's stop at $4.50: **$0.70 left for Phases 9–11** (S39 decides Phase 9's share). `--phase-estimate-ok` (user's say-so each session) also passes the $4.50 stop's estimate, never its actual spend.
 - **Skip domain, business email and LLC** until before the pilot (Phase 11); brand, trademark and domain checks then.
 - **Design:** Pepper green + chili accent (PCR-002), Bricolage Grotesque + Figtree, warm and friendly, mobile-first (`docs/mockups/README.md`).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S38b (user, 2026-10-25):** at the brief "Go with your recommendations". During the recording: "Allow for S38b" (`--phase-estimate-ok`); "Fix, cap $2.00" (the `add_to_waitlist` guide fix and a second full re-record; Phase 8 cap $1.75 → $2.00); "Carry to Phase 9" (`wl-add-marco-saturday`, `wl-staff-own-client` named known misses; Phase 9's first session moves the full-window check into the domain); "Allow, these runs only" (`--max-cost 2` for single-case pass^3 runs over the $1.50 guard); "Extend the flag" (`--phase-estimate-ok` passes the $4.50 stop's estimate). **Claude:** cases fitted where the model was right (`tool-create-booking-1`, `tool-get-feed-4`, `wl-staff-colleague-refused`); three security tests for controls without one; low findings L9–L14 logged.
+- **S38a (user, 2026-10-25):** at the brief "Go with your recommendations": the Phase 8 cap rises to $1.75; ADR-0042 pre-approved. **Claude (ADR-0042):** a `daily_briefing` kind; the hour a business setting over the template's, shared with the drafts pass; the briefing runs while paused; the public waitlist through the booking code's flow; the code review's 8 fixes.
 - **S37b (user, 2026-10-24):** at the brief "Go with your recommendations". During the recording: "Allow for S37b" (`--phase-estimate-ok` for the full recording); "Carry to S38" (`move-done-no-approval-talk` named in `KNOWN_REAL_MODEL_MISSES`; S38a adds a `find_availability` guide line, S38b's re-record must clear it); "Decide at the S38a brief" (the Phase 8 cap for S38b's re-record and pass^3). **Claude:** the waitlist cases corrected where the model was right (free times, two Saras, a client staff can't see); S36b's stale pass^3 trials 2–3 of 7 chat cases dropped; the code review's duplication finding left (ADR-0041 results).
 - **S37a (user, 2026-10-24):** at the brief "Just go with your recommendations and complete the job. Don't wait for me"; keep S37b's recording small. Taken: D-1 offers follow the dial (default ask), D-2 the 2-minute clock ends at the offer made, D-3 a `waitlist_matches` table, D-4 no guide changes (moot), D-5 ADR-0041 pre-approved. **Claude (ADR-0041):** lexicographic ranking, no template weights; clients without an email not offered; `MAX_CASES_PER_RUN` 20 → 18 (21 tools broke the $1.50 run cap's worst case); the `waitlist_match` feed item and "Join the waitlist" on the booking page deferred to S38a.
 - **S36b (user, 2026-10-24):** at the brief "Go ahead with your recommendations" (D-1 A pass^3 only where §2 names it for S36; D-2 A seven more cases; D-3 ask after one failed fix). During the recording: "Record again" (second full recording), "Second fix, then record" (team to-dos), "Allow, these 7 only" (`--phase-estimate-ok` for 7 chat cases' pass^3). **Claude:** graders corrected where the model was right; transport failures re-run; the code review's findings fixed in this PR.
@@ -64,11 +76,11 @@ Full wording and the history in [decisions.md](decisions.md).
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S37b and M2 are done and merged (Phases 0–7, Phase 8 through 8d). Details in [session-log.md](session-log.md).
+S1–S38b and M2 are done and merged (Phases 0–8). Details in [session-log.md](session-log.md).
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S38a/b | Phase 8e: the daily briefing; the `waitlist_match` feed item and "Join the waitlist" (from S37a); the `find_availability` guide line for moves (S37b's carried miss); the Phase 8 cap for "b" at the brief ($0.27 left; a full pass^1 ≈ $0.36); "b" re-records everything, pass^3, security review, Phase 8 exit | 8e | Every playbook §2 gate; `KNOWN_REAL_MODEL_MISSES` empty; spend within the cap |
+| S39 | Phase 9 planning (zero-setup onboarding): the Phase 9 playbook and PCR (sessions, gates, eval sets, the Phase 9 OpenAI share of the $0.70 left); first build task: `add_to_waitlist` checks its windows in the domain so `KNOWN_REAL_MODEL_MISSES` can end empty at the next recording | 9 | Playbook and PCR approved; the waitlist fix planned with its recording |
 
 ## How to resume in a new session
 Start the session from the latest `main`. Say: *"/session-brief"* (or *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."*). A "b" half's prompt names the "a" branch to merge first. During the session Claude keeps "In progress" current after each finished task; at the end (`/session-close`) it moves that session's summary into "Last sessions", appends a short entry to `session-log.md` and new chat decisions to `decisions.md`, and commits them.

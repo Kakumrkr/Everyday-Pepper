@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "f34a0fc7676d40974c2b640525f0dd1514d2512aa31897d54e4c0394226d7940",
+        "fingerprint": "0bbda729b70e9493ad09eb0cf2406a806291114ac73775fc8e372ca840925c1c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_uAaNOr7QhJBXHbnWjSKDE8Lq",
+              "id": "call_1I0Pm1Jnfo6YoRsvEcRJaYzE",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9845,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9905,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 16,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "a9bd9a5a63e12fed9b2999f478add834cf5e920968d0e52ee4762ac940c281af",
+        "fingerprint": "2d5e9904540e08d728eeb81b9298815e0bb6923eb653947e0248d86a165d24bd",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_x4wxI0gC7ZkaZMM0sgdbIoVe",
+              "id": "call_rPnDhVI6KW6pRhBPuO8zP9K9",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:ana}}\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9930,
-            "cachedInputTokens": 9842,
-            "cacheWriteTokens": 85,
-            "outputTokens": 44
+            "inputTokens": 9988,
+            "cachedInputTokens": 9902,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8cbf46510036da4f4c2cfc601b788537fdd10339372de1ea64b381080b4788a2",
+        "fingerprint": "ce76d550e7077b693048627287fcbda3daed3e3e40b23d1dfa38dc84ce0b2efb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ZShCKAMvDt6ZdVd1cS1wGmyr",
+              "id": "call_njlittQxgWYvWxZOW8lyEEBK",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -60,48 +60,40 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10215,
-            "cachedInputTokens": 9927,
-            "cacheWriteTokens": 285,
+            "inputTokens": 10275,
+            "cachedInputTokens": 9985,
+            "cacheWriteTokens": 287,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "94a7aa8cb91d1bccf9f90ad09cb97e11c4d9f5d2ef7fe80d528b5b6bb9a55fbc",
+        "fingerprint": "8be58f827cde61aec35d32b33979251b500301d732c9b56f278bb0b569aeeb0b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GVgDNaZYn6DiXKVD2LaoOj5E",
+              "id": "call_0LDF42XGAw5Inro4MJ5o07uH",
               "name": "move_booking",
               "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"staffMemberId\":\"{{staff:marco}}\",\"emailClient\":null}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_0c936b339d14496e016add38bdcf8c87d2a98e03b76484242b",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3Ti-9JTVyqr__Mo0N9MhWYH_MnBgcLKU7RiDgUciGDDfsS25EUaDvdlydNY9BYlGgMCSwJPCKR1LwWDEKHAY8wVY44dGa8vH77BlE0YjyMTSExRCuXXhiTUXIFnuC6dNmLH88yp7R1IK767YtgrNRYyvhqZEdY2xBi-Cn7bE-Ef-CIE855pnjr-LoQ57JXFoQRnJQJQ5NT0bziEjy3bG72SwC5hG81x0h-5PtEvk61EyIQeD_emJr1HT1LNYjfxpy4xWQD4Lr6tWnmf_ShudURnglxZwbhWuMr3olqRl4sW09GH5bX_ZuR3dA0GJ9rY2Fxyp5OCcSPB0efkTjMqqccLW1grxhfoFYwIHLVT4S4Va9LralU8pJFuR-DENE1xJ-lsOv_uYIEIUaCOos6YwSpEkGxKnZNKn5BM-F82TqkNpbvbalB5RIf2RwFraE2ffjS2gYe-jAzrSkEi9Q8IXwTjlZGAcNH5qCYbr1-chkSue-4GVlC7ZzTOsxHwpHy4KlJdPQJHKWjEKhkdKl0HQZmg2fgvw4GK4muQfr-rauxKuHr1QOsMevaIXHa_vj1wLXWB_8YjKPuOv1B1PPVKpkasnf5DcNL7tM3OQ-uWyC60YdPGinWvfzHlIRPtB9rZ4Ad3QRflfRQjKFJLC9S8KxeU7MbMKJom7h19EXCpgZc1vgPpaDogavpvzEbzPSU6XekbI_10lxukCzggk6dIVijyQxEXaZqNh8ax1IflVuRT-UFRIOX0P4BNN7r8Ock_QySomffVkf9W-kCtOwXMSxSB8BXBpyOflJbIidTTrdtK1mwOujB-PVsEUAj7I1iNURMFoQzm_BtXG1XhwqWsRNtWcdGPNfK8U0AmyYcZ7xQSbSz23gg5TKeNqh2JrbHx-lja11AS5cuJYX-mnb5zh3CdFywnC1E5kx2ySQhRLFlpAnBekfwv-vwVvp88weXXMQYeltYz6xSWl8DXd3TEVnkNPJcweCf_n_WMFmwOU9aJAsRVVrUqHhJl3jEiDJ0ijd6NNT6eXHd6HEU2Seo2Hb-SnuH1HHtwZb3iML2n5RD0aB_shmNlieTXWbDwfDZuP-lEGLvwi80T846MJRGaVR9D41zxIQqcQR2XV-y7G9s9tIeSEP2t2Bj3te8vx_YV3ZErrGDNoLdME7euLqPQLwB5R16UCmg4LqSpzRNc4u-O0E61Mu8rMzAR0yKSqi2D05Udy6JcOAg03u6MUtwLSfYZ73sYOLSvk6NNBoC28EPtMrOJHfJttNj37lywJneefLUNuajQihcdB3CVQqeZ6NQeaWc3xXsKvERECQ-32pWo4IeFkhJhukDvhsz2cTHBvu_tg3-A18T4c5ykq6l1HxIJuZSJ1_rfeE6oG72Dic7vfyoMUDC_015LWyBET0no-HuyNJ9IoOTUiOcFoPrq3KZ6Lso-yJSxtpYZ7RCvySnQBEKv-hOeT1qch6nHIgyRJT7vZizkNY_xxaVjLdANAkA0_SEi_OxKeNbOMY46_WomLNcPT2rev2FjTzKWqh-B-wJwRxAIoUKLOzBXFzfqpV4uxvF1w7pTyGxFDZ9-RC8JpAw9XU9wwMyHravVIVnM3ENx8B0SaOIiBjK6OYxzYh-wTDvfGigopavx2peBl0mutLkQRlBfM6n0UWfnu9eWH5JlLBDqZnmNZy3XBt9nrNAVEelXN0jlef2kYcSClVteX5w-bTy_oD756-i5uLjS0nUKs33TuGeO3NWSaoOOmg89lrvtRQm2uqsVcE4h5Dc6irEc=",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10664,
-            "cachedInputTokens": 10212,
-            "cacheWriteTokens": 449,
-            "outputTokens": 118
+            "inputTokens": 10735,
+            "cachedInputTokens": 10272,
+            "cacheWriteTokens": 460,
+            "outputTokens": 87
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "63d08164a220e1d7e0a0bb1771ddfd27401f0f92c13492f4c45d94b9b90153fe",
+        "fingerprint": "4831fc0ee6a7eeb100a0ca78426541681c0158eb76995ae2bed354fc90293c39",
         "response": {
-          "text": "Moved Ana’s haircut from Friday at 2pm to Saturday, November 7 at 11am with Marco.",
+          "text": "Moved Ana’s haircut to Saturday, November 7 at 11am with Marco.",
           "toolCalls": [],
           "replay": [
             {
@@ -111,10 +103,231 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10854,
+            "inputTokens": 10894,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 1005,
+            "outputTokens": 21
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "0bbda729b70e9493ad09eb0cf2406a806291114ac73775fc8e372ca840925c1c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ZBOqpSOFfxSBGCgg1oEhhXgN",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9905,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 16,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ee36b7b222073894c54aa6307fc1b2e74383ea8ea639a953eab25dce7c8c6759",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_yupzg9yDGLinZuuoOBg1Q5DL",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9989,
+            "cachedInputTokens": 9902,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "03a9b0c97305100deb79d3425750fe3e6f87baa18925906e037242eed28c7cc3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Q7WEUXUmARNWemhiUmKd3y1k",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10273,
+            "cachedInputTokens": 9986,
+            "cacheWriteTokens": 284,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0aaf6558e23133547c57b3ab2707365c6c1955e0a024e8729b6e9f0a4f780d3b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2yWZa53jVK6PHP1haUNbq816",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"staffMemberId\":\"{{staff:marco}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10731,
+            "cachedInputTokens": 10270,
+            "cacheWriteTokens": 458,
+            "outputTokens": 89
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fd69fdd5786f5383c4476324e8eba9e8b632a2a8adf1a6036169fd1b357bcaba",
+        "response": {
+          "text": "Moved Ana’s haircut to Saturday, November 7 at 11am with Marco.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10892,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 10851,
-            "outputTokens": 27
+            "cacheWriteTokens": 10889,
+            "outputTokens": 21
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "0bbda729b70e9493ad09eb0cf2406a806291114ac73775fc8e372ca840925c1c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4tM3KzhQnNL3sdVLWSEOWwWP",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9905,
+            "cachedInputTokens": 9902,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "40094ac886aa96243f76942f22e90d3edc70eb054d588451df889dd69cc8a6b1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MMYqMmIxfd24Gjq7BVucbNBL",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9992,
+            "cachedInputTokens": 9902,
+            "cacheWriteTokens": 87,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3dc84cb13e0717cbd0a65156313e18b683f39230adc959e95a614e37b7914da5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_G3sbD4v8t7oJubQyMOGb2sHb",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10286,
+            "cachedInputTokens": 9989,
+            "cacheWriteTokens": 294,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d3f8db654a215b9016c1c7fff2556fc7c3a7794ae9c08d6eb756423f9b445896",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Q6n9RSeRlRrHlAXyU3nox13H",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"date\":\"2026-11-07\",\"time\":\"11:00\",\"staffMemberId\":\"{{staff:marco}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10748,
+            "cachedInputTokens": 10283,
+            "cacheWriteTokens": 462,
+            "outputTokens": 86
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d0dff4e96e47f4f4cd35b6d3d066c8efe9ac4411af4d68436399b74786232764",
+        "response": {
+          "text": "Moved Ana’s Friday haircut to Saturday, November 7 at 11am with Marco.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10906,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 1017,
+            "outputTokens": 22
           },
           "model": "gpt-6.1-sol"
         }

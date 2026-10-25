@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "82848433df4a27a5751743e9f79830123cc5619f5817b97c78fe8b16e804fbcc",
+        "fingerprint": "1e0e33c372e3593529bcc7086ce31574cf9838c1d566ab733047305cbb3922a6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_StuGCrLj2hs5XSwr85f3K4Pm",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9845,
-            "cachedInputTokens": 9826,
-            "cacheWriteTokens": 16,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "fc9bfeac6e3337d2a471e26fa61c854fbf654626a199dd1eb7cdf0ad5d51bae8",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_1XmsNjPlSjNu7vQuVt6jvoch",
+              "id": "call_PMaSTLyJRFBSIirZfEyUTzWE",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -38,25 +16,69 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10305,
-            "cachedInputTokens": 9842,
-            "cacheWriteTokens": 460,
+            "inputTokens": 9905,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 16,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5fc436a9d6ed47f19a0c8743b1374f75c242ede9b9da9b65eadbef553590549e",
+        "fingerprint": "f1bf7568a83291276db3affbe4e045c9a96e81fc097caa8deb5690c4f2af6211",
         "response": {
-          "text": "Jess’s hours tomorrow are 9am–5pm, so I can’t book 7pm. You’ll need to add that outside-hours appointment on the calendar, or choose a time during Jess’s hours.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ms0wlxljahYPglzT20nnMIvV",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9989,
+            "cachedInputTokens": 9902,
+            "cacheWriteTokens": 84,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6cf1aa1fcde9b0aabe3494b654ca7c8f3173658a8a0fd3b6953d76c98559d687",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kw5GdZh0kpFpQlymFj2lk5I9",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10456,
+            "cachedInputTokens": 9986,
+            "cacheWriteTokens": 467,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a7b22274e786d4644d300eba224a3d2b240751af32649ea553d87dabc2cf0dae",
+        "response": {
+          "text": "Jess’s listed hours are 9:00 AM–5:00 PM on Tuesday, so I can’t book the 7:00 PM haircut. What time before 5:00 PM would you like instead? Ana already has a haircut with Jess on Friday, November 6 at 2:00 PM.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_041c790438850058016add3606701087d2abd4a21d30bd91d4",
+              "id": "rs_0ee6678abe1b9c43016addf5cf8f2487d2b79d75b2ba4a3c1c",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3TYH9-oc3-9w1ywT6i7iOkil_lrdSM5TeOKFCNMYiRcNN1AroDI6BKIll9NHwD0Do85Ws_VLVhHAztGJ0gttQID9gIayI12_GLsq8fQ9La0h4ZD0AsGpQp4t_4hNhIvLb8jCDj5mpfT5791tRZ8js3IEZkeTc541kiEFlaMgNBEwyZc6c4EF_boVepjaCPW0rRFzHMZd5yy9Clzs4eqb4O6KaPv1qMN2AsOd635oLtgCilI-MNqhreXTCjnPzwxGhyInMnmyaaObIkRZ02e92I9PXcUlJlvn3P_vQOBdbCKVT_2rJ9nxWcAklDxC3nRvf10JzVCAC3Srgjj3wbkMs35BkHjPibiEwKSjROmgQT616XXadVcxKgdi_Yag6voSsZCa2aK5wPccHll-8swcPG8VuOBtMyIFFkBUzYUxMZd9l7cRnnVKV9vaDYwB-uwBx5RwD6M9Qm6kF_0ZYCLnxv10t5XAa5tyCmBZauPfweqgZFmPDKiuSefV616BUI9WfB8axAB7Tml4sE57PsEQQinmKJ4GJdgJo90hzXoOQQpxvMUU_O7nG3wvYiOJcq_8GZnYx07Cxdk6hgYyoRjYY3Pseh78w3K2rs8sCz1jNCtNtW_QyGBrtz5NwOpmpmgSfrHqItBUA_w086JtaNO87m0L4FN5msSSrNhYf5sDU9LquVS135r4cln_mEsIOKSTRC0JJ7vdVLjnMefzBfoqfFjrGcu4diV4GoolIf3ybq2BqfuZN_J97sYYbm9mMfwJNX59k1tmMQo5NJeuGx_c3Xm18qnzdQyNtbB6QM03eX9MGayL5Itq2UYl0VuFjs8Vum7x7wy1_1eQeS7dAwby0CD0bVDNMezXNhG5ERGPKkaueIoa8RB7hKaKdqUzZT34DqDXEY-pvKl6ahQsYuWcmT2B9OSKbsms1p8QndrAQeGqp_q64M04typP-CsF55IB0oWk4GaZr5s-Kn_pvdZ0AVF2KRqTs-5Kqb4h7v1J8L7xqYsslmlEHVCTT1auBHPotifm-M1upFlbz7-qNYPFlXZFlALs1zImI_zpXs_ITwrgvTKAQ_pnhlzWIqDmnTImTBsNAsexkXpInYLyIUcikWn46eErCcpB8CWpFUUhyuUlEZ2hXPtGBhiCYx8ZQ9_f06bgDRWJPqwNj86vDbGzcrLAiwxVypYbhvdlitwWe3znEmYe2a5kqZ_g60-7i938L4Otn_pQOx0l1UQddxJMfJEkKnWvreVrE6fNsySCz6Lyb05sbWHtK_wr_5pzeDP2rWuK3yKuyLjJ6NIHXEg5Ri4SeF9B1puve0R5mstTRdL1f37ANCu1MmHe7fAX-hbzjbsSrX4kUICG0IiW76_gxacNllNY6gvaZhfvyTmslLHSkbnglHDz7WyhMC5gmrSwprvsO05o0y1tldLNbX_qoN19dWCNHFwkR9dN6DvK-6y1KdjHPkTj1iQB1bHhXIBWU0SzfaQEQoktgVJ-_SM28njXkDKczM6Ir-g7jB13qZe64FXQeGn27KfkeesKKf_5fov6iR1jlQmPrNj7ybu0O8aefkOzdvxpNfPFFOspi5VKlwkLoSTKdemDTxoMNXdhvyPqiGv_iwe-H1tGRfb9qsw6q6HRW29HCp7fKgiwYvcZAIQNtGkG7g7KsrWQ-yH3IDJzDmCAKLDU4VrbXcXGgrJkgypZLGZ5Aj0opZjeYVKeT_5vkkKMP0NCc_P0L2htgJ7sRYFNX-oOybugXAX7e1KhOMrsbDz55Y8kdS-8kJyI4uvjzjcE5SM9QE-3BcXEDkjweUB0FHEnygsyDciy_j3Z50DaQQ2bXDiHMI9FugNzH-BP4GVTBD43B3IPqr3r6pAjIU1Xg9f0JzBEMPhsV_1PJJbG-JzsxRCBcTZQzU0nvyE1Wit533LhvVTLAqyXG9cSPeEJxHrGzsjSQghDGtTG1zBaV4J3jnRAcqccBaZRoMqcK5RvdIQAy7eyqzym-4NUmOwid7vQIZElQ7rvMsuTmstAdogFSYZ2JgSJ3p-N18nTzgTEWV854irb-QimJ5_vdf_W4pytdWCZ-a-tF95VD7WoU6ModOIE4WZAE7pAFJgi_ABr2rkRglLtHThMbnd_",
+              "encrypted_content": "gAAAAABq3fXQu-V6-hI02Z1e5OPEBrIM9edWIX8-cd5kzniNbBAu_kLBf_BUW1b6734UmGFM3M_3vX1kvkSJnYVpCswUqBJw6ornrz_PFoPV3NvqUX0G6EciZ6JGURoc_ufFnW3NB2kV_yciCxSfi_7MrWLkuT1gJMEKlABwBzRIXXSKf5B89PvDcQtTjZNKWMxPVhoYCfqlQ7cui3va-mxYxcRvQe-ac2S0jyM5xoTpUfUDDK24SH-QM8zflFD7jTp-VPm8sFldTNC0HTt9Xv4oiIrIg_mgPZKtAFIknK2WD513Sd2mGQcr5iejARj6YR1Qgjx_pyVMwgy7lG7gIiWrh3TAdMACO1wDxzde2GI7Udllm_aTQQYatoU52QwxcMMCbC5BiL9-cVlvJWu44lHEAHuGWrNYrtOZ3Rp2lR8IEcYj0MRyZaaFa6KcdEzwUov_JC5EQ-nkzXztelpJfNKgKnIv6re6G2LNQYWiPEY0L3vdoUJp09ruW5uXJB5Z2UgVltwZjNuRuWEOJ_aJj0hztxc0oqxBbm1PmQPOmvkzIiMGrDeFDDXQ7_GT7BhXna_xLjrulZOWXPRaGoWghZ9B1z2NYVKbizs6grbISHYqwYG2V9JPbEVWPOMFHBnzv-gF8wEOBMyKmg-AkOia-bxHkdW8uqGSN3klkDFF5d9_bMI-KXtlY0LfuW0_3fYA5PgkJ81uQnE8fajbKnwD3QZIJqgnfr15BNr55rps46xNl9UkZ_MXbHSeJ9ubkxGvypXGllEjKSrNgGsgkya9QaMlQ9FxxjsL6umLRshDlGMqXIpK3s9nGyjEU8jbocp9J3QA1dvdh45YAtqT7MFCQLnkaZEspU6L0CfFUafEK6ClcyZN1CWmZ84QbXkNoUGFdjCRFAteD8oJFA0F6eNU5A8oBRutMvJr8kWw4x0m1MLqOYOxkp9ljfsLhdrC_tXWZFOTQHgEPuBRmeTQPotbsPgtCRL7r85rtp6U3HRe_37z4WCVtkO9e2RpL5jrLlWBQH5KUXPXesfj1VI0FAjKwN0C2Znowsr114HsIPMlSlpf3zU_fLepeDST6-1GPr07il5HNt-mSwUh1nptr5tDlivziCJj_X2ktH-9fOYok0PHTzsc8vOjWtoXJWrwUtm5JLnu7CSrOIfXg5hBNnWz5Zzg_Dh_yWRI_SVYA32lA_cumQMkCuT6mmq1F1jJxbRmcL9BowBWza3B0qHm04dhTlbj_t3YoNVSpcFG7tGXErCJFQ5Tttx4Gox73pwCDG4hTg_TxDKgKDMUY4F-ng_gfGxBWK6_-gV6zWfh71VYnTWT6gqpwLNyG-YFV6wEU1v9xIRLYAIKITrSBM_DEczQANsfKDtim42dJyTNOU-BmcUOUDmUK1lvvTuhQGvcpcB_w312elCbDRM0vKFE-uQTknIiUffSXT4v9xESxm1rpHWYl8nEMRAf8jf_xH0zXCxLmDI7aNyy_ZBqlmdrlhvhjoDJ3ITsZCRDwijoM96Q9rIqymRK98w0GMfhZZKlopknp1MtwGC6Ww-U-YPkOA4swudqPznBxaSboc8-WlV5_kB3V15XpyyxSLKft21v6nlW7cFUDnotNggRLsd7UN7iUMam4nU5F-YJkuiajEuDh9A_xSvkjocqPmmj_ASS32CRDsKSKF8RXYDLo6cKMkkFaaA9gTOa5ixPLEwTIUGBYilSTaTeOORtCoMQ5jzrAuaXN9nhaQoYJVKosn8PHzBss8VE_gn9xIbRdwGJqYObuwiGNKoWUQWiydZNaxEFoH7rZUcxtGqObY6N3EJcTah8O7z9ULoAv8ReADIxLC254g5ZnkTOk1qBs6MtoMAhyudg9rj0Ym7TLKwBCPg8CC2JDeTKF1NU5zvEeTTrtHu546kJ2HcqvwVQ0eOs3Uct4xrFSp7Kt75vcvC4K-w9Bl89TkHsPkUmsF0mPyFolQzJ9axLxVMcmkno9geHsv1Ci3Ew5FDAvsBIudf8o7q1ib_xYaGNKv3jyi52yFxz0AYujeIPjFtBCwjJvCVJZ2CprAddtUBeL2p2lsThSXLHvdjpy3I60acYTRk__gBfxO_AOc_FVHgDyrpbrJBqyrAMzDW0lfQkdogUp41J4c1ATU0cYwg9tkVuRuJ9HAuDpGPAJyfkTZvgfKYQ-ujV35Qf77jkJv0uZQAZjynzb3Ldv2WRfnndZkLF5hHFwvV7w5FOC2IIpzQPxzGXkR1EU5_YbIeL9WvK8W0pUbnGQcg3Ry-hXzKMbBE21QdvlN4zcnjQszzyfsRFb-xPdHg=",
               "summary": []
             },
             {
@@ -66,10 +88,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10386,
-            "cachedInputTokens": 10302,
-            "cacheWriteTokens": 81,
-            "outputTokens": 103
+            "inputTokens": 10740,
+            "cachedInputTokens": 10453,
+            "cacheWriteTokens": 284,
+            "outputTokens": 139
           },
           "model": "gpt-6-luna"
         }

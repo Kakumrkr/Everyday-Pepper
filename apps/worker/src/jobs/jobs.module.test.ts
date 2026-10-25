@@ -8,7 +8,11 @@ import { JobsRunner, type JobsOptions } from './jobs.module.js';
 // The runner's wiring with the domain passes replaced; the real ones run against Postgres in
 // jobs.int.test.ts.
 
-const appointments = vi.hoisted(() => ({ sendDueReminders: vi.fn(), runDueInsights: vi.fn() }));
+const appointments = vi.hoisted(() => ({
+  sendDueReminders: vi.fn(),
+  runDueInsights: vi.fn(),
+  runDueBriefings: vi.fn(),
+}));
 vi.mock('@pepper/appointments', () => appointments);
 const core = vi.hoisted(() => ({ cleanUp: vi.fn(), sendDueTaskPushes: vi.fn() }));
 vi.mock('@pepper/core', async (original) => ({
@@ -46,6 +50,7 @@ beforeEach(() => {
     conversations: 6,
   });
   core.sendDueTaskPushes.mockResolvedValue(1);
+  appointments.runDueBriefings.mockResolvedValue({ businesses: 1, written: 2, pushes: 0 });
   drafts.run.mockResolvedValue({ businesses: 1, drafted: 3, failed: 0 });
   drafts.morningDraftsJob.mockReturnValue(drafts.run);
 });
@@ -69,8 +74,35 @@ describe('JobsRunner', () => {
     });
   });
 
-  it('runs the morning drafts only when configured, built once with the outbox key and clock', async () => {
-    expect(new JobsRunner(DB as never, OPTIONS).drafts).toBeNull();
+  it('briefs every morning, with pushes only when this worker sends them (S38a)', async () => {
+    await new JobsRunner(DB as never, OPTIONS).morning.runOnce();
+    expect(drafts.run).not.toHaveBeenCalled();
+    expect(appointments.runDueBriefings).toHaveBeenCalledWith(
+      DB.db,
+      expect.objectContaining({ clock, insightsOf: templateInsights, pushKey: null }),
+    );
+    const [, options] = appointments.runDueBriefings.mock.calls[0] as [
+      unknown,
+      { morningHourOf: (id: null) => number },
+    ];
+    expect(options.morningHourOf(null)).toBe(7);
+    await new JobsRunner(DB as never, { ...OPTIONS, pushes: true }).morning.runOnce();
+    expect(appointments.runDueBriefings).toHaveBeenLastCalledWith(
+      DB.db,
+      expect.objectContaining({ pushKey: OPTIONS.key }),
+    );
+  });
+
+  it('runs the morning drafts only when configured, before the briefing, built once', async () => {
+    const order: string[] = [];
+    drafts.run.mockImplementation(() => {
+      order.push('drafts');
+      return Promise.resolve({ businesses: 1, drafted: 3, failed: 0 });
+    });
+    appointments.runDueBriefings.mockImplementation(() => {
+      order.push('briefing');
+      return Promise.resolve({ businesses: 1, written: 2, pushes: 0 });
+    });
     const config = {
       openai: {} as never,
       monthlyTokens: 1000,
@@ -83,10 +115,28 @@ describe('JobsRunner', () => {
       outboxKey: OPTIONS.key,
       clock,
     });
-    await runner.drafts?.runOnce();
-    await runner.drafts?.runOnce();
-    expect(drafts.run).toHaveBeenCalledTimes(2);
+    await runner.morning.runOnce();
+    await runner.morning.runOnce();
+    expect(order).toEqual(['drafts', 'briefing', 'drafts', 'briefing']);
     expect(drafts.morningDraftsJob).toHaveBeenCalledTimes(1);
+  });
+
+  it('still briefs when the drafts pass throws (S38a code review)', async () => {
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    drafts.run.mockRejectedValueOnce(new Error('database down'));
+    const runner = new JobsRunner(DB as never, {
+      ...OPTIONS,
+      drafts: {
+        openai: {} as never,
+        monthlyTokens: 1000,
+        baseUrl: 'https://a.example',
+        pollMs: 60_000,
+      },
+    });
+    await runner.morning.runOnce();
+    expect(appointments.runDueBriefings).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith('Morning drafts failed: Error');
+    warn.mockRestore();
   });
 
   it('warns when a morning draft broke, not only refused (S36b code review)', async () => {
@@ -101,7 +151,7 @@ describe('JobsRunner', () => {
         pollMs: 60_000,
       },
     });
-    await runner.drafts?.runOnce();
+    await runner.morning.runOnce();
     expect(warn).toHaveBeenCalledWith('Morning drafts: 2 failed');
     warn.mockRestore();
   });

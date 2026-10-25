@@ -89,6 +89,9 @@ export const createBooking: WriteTool = {
     examples: [
       {
         say: 'Book Maria for a haircut tomorrow at 10',
+        // S38b: the eval world books Maria's haircut tomorrow at 3pm, and the model rightly
+        // asked whether to move it instead of booking a second one that day.
+        evalSay: 'Book Maria for a haircut on Thursday at 10',
         args: { clientId: { $any: true }, serviceId: { $any: true }, time: '10:00' },
       },
       {

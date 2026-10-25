@@ -20,6 +20,13 @@ export {
   type FeedChange,
   type FeedSuggestionsProps,
 } from './feed/feed-suggestions.js';
-export { FEED_KIND_NOUN, feedLine, formatDuration, type FeedLine } from './feed/feed-lines.js';
+export {
+  briefingLines,
+  FEED_KIND_NOUN,
+  feedLine,
+  formatDuration,
+  type FeedLine,
+} from './feed/feed-lines.js';
+export { DailyBriefing, type DailyBriefingProps } from './feed/daily-briefing.js';
 export { DraftEditor, type DraftEditorProps, type DraftWords } from './cards/draft-editor.js';
 export { MailingAddress, type MailingAddressProps } from './feed/mailing-address.js';

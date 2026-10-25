@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5df86ebf32699ce39961fd2d3aff31ff40a327998510320639575e6a90a44b9a",
+        "fingerprint": "1053ffe0f6be04a2be3959e50bac2f3ad8af8db4eeae6d10a2f7ddffa46f89d0",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ERr97Gw7fdLULkMt14MEMW1C",
+              "id": "call_RCKqAS9TzSo67ZoKZZsMOwCA",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah Park\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9838,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9898,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 9,
             "outputTokens": 19
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "b7bf3b5629cc928f7f4143dc38c0fcbc07fae1bd10cf07a32e64ea05a6786fe5",
+        "fingerprint": "ba9272578156e02803834c8ed8fcd1f8a2b3abcbe0c62b7518597b21cb128485",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_PqYI9QWohpu81VNJ41hSEpf1",
+              "id": "call_5Un8VfIotLTnssYxQkCnMFJf",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sarah}}\"}"
             }
@@ -38,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9921,
-            "cachedInputTokens": 9835,
+            "inputTokens": 9981,
+            "cachedInputTokens": 9895,
             "cacheWriteTokens": 83,
             "outputTokens": 41
           },
@@ -47,7 +47,7 @@
         }
       },
       {
-        "fingerprint": "e5885497a2d1781a03a7f2404ba69a64551669430e7d75a6c123df322a7fd3c0",
+        "fingerprint": "b35052e927235d8adfaa30b414d7cba80bb4c8852bcaea19f19de42f7086668f",
         "response": {
           "text": "Sarah Park has no upcoming appointments to cancel.",
           "toolCalls": [],
@@ -59,8 +59,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10037,
-            "cachedInputTokens": 9918,
+            "inputTokens": 10097,
+            "cachedInputTokens": 9978,
             "cacheWriteTokens": 116,
             "outputTokens": 13
           },

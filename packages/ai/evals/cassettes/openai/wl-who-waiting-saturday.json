@@ -3,31 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "212399bb5f9c5eb4c13b65a873209f897485c5f90ff80fb613c1228321410371",
+        "fingerprint": "c1175cd2168a90898b3619fde58a413f2cb5feddd21c84532df511c711e31284",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GMoUOpcKt05OpbGhEZ0BTieQ",
+              "id": "call_eUCiqL3Ke7tw6Tud7u1m0iMT",
               "name": "get_feed",
-              "arguments": "{\"kind\":null}"
+              "arguments": "{\"kind\":\"waitlist_match\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
-            "outputTokens": 18
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "90af68611fb5677d367ebd2dc43acac6c481564f51d5037ac0d464c244719e36",
+        "fingerprint": "8c4c0f7d65be883504ebe532a0516be6c06fa884832788f0bd57ba411291ecec",
         "response": {
-          "text": "Sara K. is waiting for a haircut with anyone this Saturday, November 7, between 10 AM and 1 PM.",
+          "text": "Sara K. is waiting for a haircut spot on Saturday, November 7, from 10 AM to 1 PM, with anyone.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10129,
-            "cachedInputTokens": 9838,
-            "cacheWriteTokens": 288,
-            "outputTokens": 30
+            "inputTokens": 10198,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 297,
+            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

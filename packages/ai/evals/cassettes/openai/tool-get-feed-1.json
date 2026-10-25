@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a651e9e52e7754ff5631225c667cd1c748314ea0505ef4031c6ae40d372deff5",
+        "fingerprint": "9ecc62dfb0584f12dee5bb5b7041325b8b1a7746c009c6988b9b407e7ef88c72",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0EgBDVIkPYnvv8DaKlTPHz41",
+              "id": "call_sbFqfUnqpKCXNt4rXDNYuOca",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9840,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9900,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "275df780295629ee6416d5ba0013cced6b529792f3b798579724ce2445f9cd1b",
+        "fingerprint": "38cd79c46729b5a12ebfad817df3bb22a7313602379b3c52975799ca500baee7",
         "response": {
-          "text": "Nothing flagged for today—there are no suggestions or waitlist entries to review.",
+          "text": "Nothing flagged for today—there are no suggestions or waitlist items to review.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,96 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9892,
-            "cachedInputTokens": 9837,
-            "cacheWriteTokens": 52,
+            "inputTokens": 9957,
+            "cachedInputTokens": 9897,
+            "cacheWriteTokens": 57,
             "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "9ecc62dfb0584f12dee5bb5b7041325b8b1a7746c009c6988b9b407e7ef88c72",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vNh1Crs96RFH2berWKdvLA8k",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bbdb7646191829fe9d31bb0619579d4cfa1c6334adb599a38ceb8ed732075b20",
+        "response": {
+          "text": "Nothing to look at today—there are no suggestions or waitlist entries.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9957,
+            "cachedInputTokens": 9954,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "9ecc62dfb0584f12dee5bb5b7041325b8b1a7746c009c6988b9b407e7ef88c72",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_IuOz2Ts9JQjVWOw2yw6qLDYt",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9900,
+            "cachedInputTokens": 9897,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6b49df9d4b4ada27743b7b512bc109c20f5fd5483458bded65770998ef7201c4",
+        "response": {
+          "text": "Nothing flagged for you to look at today—there are no suggestions or waitlist entries.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9957,
+            "cachedInputTokens": 9954,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

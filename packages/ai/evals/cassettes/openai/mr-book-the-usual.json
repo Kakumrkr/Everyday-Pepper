@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e1fe5fe7a417c0502df29ea2647ff6e62a2ad61c0aff5987791e14a6cdcb5c97",
+        "fingerprint": "96b776328a4d2c5b55f137d8d6d1c6e1c040418365672f7bb1c53dc43655cce8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Eg3j0CqqVjq9OJiBntHYfxYq",
+              "id": "call_J7mc748vHp2NZEZ5MWOg1bOH",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9843,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9903,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "5366c837cef4be0fcc44f283c281628d222790541de71af335c28b4448eab29f",
+        "fingerprint": "478b1db8b7c972295ff5e197037289b5656cde0b7cd7cd429d9f428abf6df1c8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_82a8eFe1NQPCCNCqkuMPIUiX",
+              "id": "call_YxaCKuslU8KACjOibVRkbhw4",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -38,48 +38,40 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9997,
-            "cachedInputTokens": 9840,
-            "cacheWriteTokens": 154,
+            "inputTokens": 10063,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 160,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0ea7aa5c070ae9a3b260d1e9f71b92e590fc342a6fd0668c40ab10ddba525525",
+        "fingerprint": "5bc958b59cc892a8fadba7ec139bd47d6c85e7326daa56d99b3d86dfe35feb91",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Qtogr9MoOiYKp9RMoyGQiTkx",
+              "id": "call_kjv8cSpuF0IumSnd5BygbiCf",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_01d98637b247bb79016add36c83f9487d288397327f20d7cc4",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3TbJq-etCaRhbyqxpTy5G_JpO9BmLvPXAuksaMlvVUG6y2zkKEa2fhFDeQ9K1auAxpxsJBOvVyLQC_sXv0pqCzeZ-2JswTvabs0J8dBVmjTvL8s7VAiIVI3s_aPQuYFwMulDth9Vso7Jb_O3-v3YW8zDGvHp4JjZA8kHUNqA8AQI2EArrdZyRNXbqeK5cU8uOrx9hzlIkmi5y32cdDLs08CCej0qOOb3pkD6pEdZRc4LhMqTayFSwo9uuGB7eoDo2rZo0Ks801DENBnPXDK0jCbDsR5noX2x_iOUPgZIkmCWeFrV-IZ2hbEFM2qDalt96Llutt5v3Fc7y48rNn37K7P_H2j3qjVtvvXNcZgfxB4PLhGGms-mtftJ0kWk3VzARgHLH91wNXWLG6cbgwOftZ_YCboulBaeDMWcsj4QistqCXgNX8CTz3ICBnmj968YxChzNKT_jbVHjt8_t-QwwY1AVaQi01SshnvWoUY48Kk-nFvfL1zEVCamkJv6-zKpw8NhTe35C74lEetysXlayjKE972xgy4kp8Yp33NDIUcQswzVVfTmYGPVD-17iYT_RuDvRGZYUB-D_h082z7Skz2tuB8L64odIrevlK7-wRou9qUvUo0igNuSnNHXv2D7G8IoqrQIcgRBOV2tapV3aYChjOnniH9eOZXhSOMLpOVj30kSz4ZEzH_HjHyFw-sPc01uLVyu_o407pQqUkuu9p4DkJl4S5j9qV_65_icSL017EjVb-H5etYDtPrDKwJ0fLoVfRgJ84Fr4O8Q5mQbL_fAbv0NEU1nzcF9Toz5EL5rAVneClgeBHhzOOxiGV_n5OPKo9tX4ScGjX-e4Rj8m8RPvurguD_5DKBlAauWFJgZ4Y3zevuF2D3U4drV7tIxPNfepL_8lettZM5qGXkYrUZ1hsIUxAwRfFi0XFcl4vApsS0c6A2TDgWBm-qld3I0JAElpLiuGDxcmMGelij3mu-jKcziNmhz82Xuo3TbUN3vTyHnrtlTSxT_Ou_uQMZjVaMrBSB1QvHuCQqbqHYvMyUEYUNrBIS_UtphaQNin2P6YX6R-fcSHmZz8tD1b9mDK7YtJs71PAIXViySI2s9cb1cPIPSSZj6Nb6jCHYBIEAmE6RMNWZ04Tv6zkCO2Lom70rRN-VDv3PyaZatOrrmdpcQQLRy0rmQW-ehSBI_tg-gpBVIGlySSduM38NA2oN9CUWTF2yRvjgKWANUjj0VZ5PaYHnU_Mt6n8lm1cgu5SfXwbiU5sys2Ond7d2iusjCv72H16_gjE8Ptjy7MqH4VIp-h4wM6Y0Z9TUw3XIA2Iqgtf9MLG8oBcJkzrF5wYQ4hpdOO2cUjJMB0FR5xma_a_zRj5pv-2L1hMkpi8HvG18IleACnUaHwy_GmjEhxaAy1-xRQNRWSCNIqeznwLjgQgi6DKHG-DCioPWXRV5xDaxSz2h-jEjpeOutm-nBnJYEFxQK2340Nm0ym_aX6LRfBJsdVNZNFLmyimmQsqoPa2kQg9-BxUqX6Oy3b1RXaPOdQ6zQG2DbP1k5ziHHC-qiYLhubp89sXjYxcEMpkFHlHUX7Ch5f_ncaCjBDk9_yXnh2kt1srNHaALkwvPmCCQTJbZ9zhCctkxwM3YVJRYU6jWqYJ1_QQIi41qDonlnHKJnHGBGKoEGW3OyT1nSfTKpYeDaCJfAsP0j5mvo1qbg9dgeUSLi5cqDzg5hzzjBDA36vf_3VRBKZ1Wq01ePEEnlb_l_Em3UCzX6A20LhGTIfXStqS1bMFCtLlGJgDpGz74pTbfy",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10469,
-            "cachedInputTokens": 9994,
-            "cacheWriteTokens": 472,
-            "outputTokens": 146
+            "inputTokens": 10517,
+            "cachedInputTokens": 10060,
+            "cacheWriteTokens": 454,
+            "outputTokens": 113
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "36ea571d121d3fe72993a78691098c27e9d9e5d3c847c78c35c0d7c1ecfe77ec",
+        "fingerprint": "107a26b98a2f36492993e5a23f6615e5be63161196c85c2c999ea13de51e89d1",
         "response": {
-          "text": "Maria’s Colour with Jess is proposed for Wednesday, November 4 at 10:00. It’s waiting for your approval on the card.",
+          "text": "Maria’s usual—Colour with Jess—at 10:00 Wednesday, Nov 4 is awaiting your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -89,10 +81,208 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10694,
-            "cachedInputTokens": 10466,
-            "cacheWriteTokens": 225,
-            "outputTokens": 33
+            "inputTokens": 10709,
+            "cachedInputTokens": 10514,
+            "cacheWriteTokens": 192,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "96b776328a4d2c5b55f137d8d6d1c6e1c040418365672f7bb1c53dc43655cce8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dvQaQFaRdrDC3G5urBiKUhd5",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ee97ef26062059610da5773adfdd304e55f3998026ed334d62c8a4ee4b919cc7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1ljN9t23BDU7nOKuky2H9T6M",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10054,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 151,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6d878620f80c9ac8aea84ae29ccaa2639b911bee4219a4ea5f09f4ec1ed501d5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uovBunMiRje1GgaGhvGAKwSm",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10502,
+            "cachedInputTokens": 10051,
+            "cacheWriteTokens": 448,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "281dfc00ac41bb6b14da42c9dc82bbb2f73ef12e120dcec5c2e8c803a5ed76da",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jJGHLZqGQrbw85SGD7iNlsWV",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11009,
+            "cachedInputTokens": 10499,
+            "cacheWriteTokens": 507,
+            "outputTokens": 109
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "59dac0fa724ac183814089ef48d01300c81363723e76117c9421fd96a5052733",
+        "response": {
+          "text": "Maria’s usual, “Colour with Jess”, is ready for Wednesday, November 4 at 10am. Approve it on the card to confirm the booking.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11197,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 1308,
+            "outputTokens": 37
+          },
+          "model": "gpt-6.1-sol"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "96b776328a4d2c5b55f137d8d6d1c6e1c040418365672f7bb1c53dc43655cce8",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_d3NF0guQ9BqR8q5RqpuJBMku",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9903,
+            "cachedInputTokens": 9900,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "62cec33ec6714b514c2950fc354a10553d80e196161338249614565c848bbc4d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SgCZKzvps7GvlmGsaCEEplWj",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10055,
+            "cachedInputTokens": 9900,
+            "cacheWriteTokens": 152,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8362076ce902dfb12855232163cb41aeb20ed056f3e85ae5c212148a467bcaf0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OAExXUskT4ZYe8fLZ7VV7JVz",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10505,
+            "cachedInputTokens": 10052,
+            "cacheWriteTokens": 450,
+            "outputTokens": 107
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d3778e727c10cd96b5c01e5b59c98e28947785b55ac1a646b32d01467a2add43",
+        "response": {
+          "text": "Maria’s usual is Colour with Jess. I’ve proposed it for Wednesday, November 4 at 10:00; it’s waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10691,
+            "cachedInputTokens": 10502,
+            "cacheWriteTokens": 186,
+            "outputTokens": 38
           },
           "model": "gpt-6-luna"
         }

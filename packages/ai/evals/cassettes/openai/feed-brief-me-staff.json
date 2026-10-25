@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "44028331c8e6d1b500b6b96a3b981e9ebcbca506d5ab53cdd2a3549bab08bb38",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dtg2Pf46T61h13pACJ1reGB9",
+              "name": "get_feed",
+              "arguments": "{\"kind\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9898,
+            "cachedInputTokens": 9886,
+            "cacheWriteTokens": 9,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "34909326ddf4407ab22b698c4266ed71128069d2967b667e01794a31b5ed2e2b",
+        "response": {
+          "text": "You have no bookings today, Monday, Nov 2. Your schedule is open from 9 AM to 5 PM. There are also gaps tomorrow through Friday, and two haircut regulars are due back: Sara K. and Sarah P. No items are waiting for your OK, and the waitlist is empty.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10899,
+            "cachedInputTokens": 9895,
+            "cacheWriteTokens": 1001,
+            "outputTokens": 68
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

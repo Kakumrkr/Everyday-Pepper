@@ -1,5 +1,12 @@
 import { changeFeedSettings } from '@pepper/core';
-import { syncFeedItems, withTenant, type Database, type FeedCandidate } from '@pepper/db';
+import { DailyBriefingPayloadSchema } from '@pepper/contracts';
+import {
+  syncFeedItems,
+  withTenant,
+  writeBriefings,
+  type Database,
+  type FeedCandidate,
+} from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { toolMessageContent, type ToolOutcome } from './registry.js';
 import {
@@ -156,7 +163,61 @@ describe('get_feed', () => {
       await callTool(depsFor(other, other.owner), 'get_feed', { kind: null }),
     );
     // The waitlist is not a suggestion: it is listed while paused too (S37).
-    expect(outcome.data).toEqual({ paused: true, items: [], waitlist: [] });
+    expect(outcome.data).toEqual({ paused: true, briefing: null, items: [], waitlist: [] });
     expect(outcome.summary).toBe('Suggestions are paused for this business.');
+  });
+
+  it("reads today's briefing: the business's for owners, her own day for Jess (S38a)", async () => {
+    const day = (scope: 'business' | 'staff', bookingCount: number) =>
+      DailyBriefingPayloadSchema.parse({
+        scope,
+        bookingCount,
+        firstStartsAt: '2026-11-02T14:00:00.000Z',
+        gapCount: 1,
+        openMinutes: 60,
+        needsOkCount: scope === 'business' ? 2 : null,
+        rebookingDueCount: scope === 'business' ? 1 : null,
+        waitlistWaiting: scope === 'business' ? 0 : null,
+        waitlistOffered: scope === 'business' ? 0 : null,
+        waitlistClaimed: scope === 'business' ? 0 : null,
+      });
+    await withTenant(db, world.tenantId, (tx) =>
+      writeBriefings(tx, [
+        {
+          staffMemberId: null,
+          day: '2026-11-02',
+          payload: day('business', 6),
+          expiresAt: new Date('2026-11-03T05:00:00Z'),
+        },
+        {
+          staffMemberId: world.jessStaff.id,
+          day: '2026-11-02',
+          payload: day('staff', 2),
+          expiresAt: new Date('2026-11-03T05:00:00Z'),
+        },
+      ]),
+    );
+    const owner = answered(await callTool(depsFor(world, world.owner), 'get_feed', { kind: null }));
+    expect((owner.data as { briefing: unknown }).briefing).toEqual({
+      day: '2026-11-02',
+      bookings: 6,
+      firstBooking: '09:00',
+      openGaps: 1,
+      openMinutes: 60,
+      waitingForOk: 2,
+      regularsDueBack: 1,
+      onWaitlist: 0,
+      waitlistOffersLastDay: 0,
+      waitlistClaimedLastDay: 0,
+    });
+    expect(owner.summary).toContain('Today: 6 bookings.');
+    const jess = answered(await callTool(depsFor(world, world.jess), 'get_feed', { kind: null }));
+    expect((jess.data as { briefing: unknown }).briefing).toMatchObject({
+      bookings: 2,
+      waitingForOk: null,
+    });
+    // Marco's staff login has no briefing of his own written: none, never Jess's or the business's.
+    const priya = answered(await callTool(depsFor(world, world.priya), 'get_feed', { kind: null }));
+    expect((priya.data as { briefing: unknown }).briefing).toBeNull();
   });
 });

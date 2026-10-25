@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "eae4becd81e4c48adadf4b326089f8d6b26bf765f777ba22cf04e6936de0b689",
+        "fingerprint": "612ac809b6b29efd449f539f7f842394dd8d01775e40b31f7e0ccfefcf8d9003",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gWbee7UM0cVBeGAaTVTi6vu0",
+              "id": "call_MTnXrHVybaltc11TeKHJpDUa",
               "name": "find_clients",
               "arguments": "{\"name\":\"Ana\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9842,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9902,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 13,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "3aa02f1aefc882c3f6379e07d58e692cdf9db443adfbbae3740cc0b1d0a2bdbe",
+        "fingerprint": "a9fd2a40c10f7ef24fd29a3c66fdae5cf575c9dff53fbc0863f6ec23c00d6c1d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Y9utaIHL0GgH3xovJpscqB2l",
+              "id": "call_WUQawqFc8kHxf6eUDscjwsyv",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:ana}}\"}"
             }
@@ -38,8 +38,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9925,
-            "cachedInputTokens": 9839,
+            "inputTokens": 9985,
+            "cachedInputTokens": 9899,
             "cacheWriteTokens": 83,
             "outputTokens": 42
           },
@@ -47,12 +47,12 @@
         }
       },
       {
-        "fingerprint": "f2d53e8521b1867ce02180947315fdaef3eead0623a837523c5b01d30b8215ba",
+        "fingerprint": "0439e6b079b96cabef5f46fb16f1fbc3bd0123297decfb61be4c5061109d7f11",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ViNzSLH7x6kaFD3nnXvCRoNA",
+              "id": "call_Lnm9lsBP9rZDUSJ1LYAxMFA1",
               "name": "cancel_booking",
               "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":null}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10208,
-            "cachedInputTokens": 9922,
-            "cacheWriteTokens": 283,
-            "outputTokens": 43
+            "inputTokens": 10261,
+            "cachedInputTokens": 9982,
+            "cacheWriteTokens": 276,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3cb73a88a7669358e5bd7420e3d14af141928e1db6e7eaf798dde5a86dfe0e4c",
+        "fingerprint": "0c5c59dc68e4a4793c6a2582056089f7314e53e3a00d1be6ddc2e015018062ff",
         "response": {
-          "text": "Ana’s Haircut with Jess on Friday, Nov 6 at 2:00 PM is waiting for your approval on the card. It hasn’t been canceled yet.",
+          "text": "Ana R.’s haircut with Jess on Friday, November 6 at 2:00 PM is waiting for your approval on the card. It hasn’t been cancelled yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +81,186 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10330,
-            "cachedInputTokens": 10205,
-            "cacheWriteTokens": 122,
-            "outputTokens": 38
+            "inputTokens": 10381,
+            "cachedInputTokens": 10258,
+            "cacheWriteTokens": 120,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "612ac809b6b29efd449f539f7f842394dd8d01775e40b31f7e0ccfefcf8d9003",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_NucdTZNJP3z8aw5Fafx5DbSZ",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a6d8c65800f18ab10c0165cd592ce6bf131e5a68a9929d4b361bfae57db21abf",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_S37XyTWF8Qc5PMxBmtiBNiFs",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9987,
+            "cachedInputTokens": 9899,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "dd1fcaf2167215ab7d804f1173f3c5805b768518fd74badaef7524b5a3e78fcc",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_neAnEFetjqJfjNshMnTqgawx",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10272,
+            "cachedInputTokens": 9984,
+            "cacheWriteTokens": 285,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5fae7c70be5f7a75dfd9db85f1ae2793ea5bb079d22315df437d6a6d4e7ada9f",
+        "response": {
+          "text": "Ana’s Friday haircut with Jess at 2:00 PM is ready to cancel. Please approve it on the card; it hasn’t been cancelled yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10396,
+            "cachedInputTokens": 10269,
+            "cacheWriteTokens": 124,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "612ac809b6b29efd449f539f7f842394dd8d01775e40b31f7e0ccfefcf8d9003",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_RbqOQX61D0AqEGwGh3ivlEDd",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9902,
+            "cachedInputTokens": 9899,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a5b5664892317387345121e34615926029e156b182e0d65c5a1abeb139b2dd89",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_DUD519OXBdPuKAxb9y9st62f",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9982,
+            "cachedInputTokens": 9899,
+            "cacheWriteTokens": 80,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "280ba3d73a4b2a22743d6021f37e7478dc84eca7ca51b522ef762e03233dd4ba",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ALc4iSS7MD37eTCb3Zpjo1pD",
+              "name": "cancel_booking",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10257,
+            "cachedInputTokens": 9979,
+            "cacheWriteTokens": 275,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9663ccfcd8f3932828d0a2e06c5c4d310c24aecc8a4b6a3ed4c9c44b7ed68faf",
+        "response": {
+          "text": "Ana’s Friday haircut with Jess at 2:00 PM is awaiting your approval on the card. It hasn’t been cancelled yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10381,
+            "cachedInputTokens": 10254,
+            "cacheWriteTokens": 124,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

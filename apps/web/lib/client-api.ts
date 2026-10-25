@@ -49,6 +49,7 @@ const MESSAGES: Record<string, string> = {
   booking_not_changeable: 'This booking can’t be changed any more.',
   booking_not_started: 'Mark it done or a no-show once it has started.',
   waitlist_expired: 'Those times have already passed.',
+  waitlist_day_too_far: 'That day is too far ahead. Pick a sooner day.',
   waitlist_offer_not_found: 'This offer link doesn’t work. Contact the business instead.',
   waitlist_offer_used: 'You already claimed this time. Check your email for the booking.',
   waitlist_offer_taken: 'Sorry, someone else claimed this time first.',

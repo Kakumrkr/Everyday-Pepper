@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5c24b6970edf1bbc9b285296096885230391c69098241ad0252aadc4abe5b833",
+        "fingerprint": "d50f8bdea5035108565a3b85ebb6ac3c16ce246e12a391e6281929f1806c5a74",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_goADDvqMFnJotXqDWI8qUhzg",
+              "id": "call_nsdESrzMWBzrDenO0l9qCpDr",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,31 +25,61 @@
         }
       },
       {
-        "fingerprint": "a7ee234b5f2c9538fae5a8e5d2e33789643fd34a7f2fd1a0c279f1bf0be833f5",
+        "fingerprint": "62d8e1246b67e1d9f440a485993ce915346048f9e72a0d00fc5a07917e76819e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_hALnPV1QJ29Ma5zePyn3HXUM",
-              "name": "get_feed",
-              "arguments": "{\"kind\":\"schedule_gaps\"}"
+              "id": "call_EeCdKanUcDsnXXROcxGoJAXU",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10301,
-            "cachedInputTokens": 9838,
-            "cacheWriteTokens": 460,
-            "outputTokens": 20
+            "inputTokens": 10369,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 468,
+            "outputTokens": 51
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e01fe257640dbab2333b265139f59c416fb26cf3c8efd8f84f189f00bfa4844f",
+        "fingerprint": "987fc8f1fc6e7877e667e99a62f958a319453e41fe0d8f2f65d287e7ea2eb05e",
         "response": {
-          "text": "Yes. Jess has open time this week: Monday 9–5, Tuesday 9–12, Wednesday and Thursday 9–5, and Friday 9–2. These are open stretches, not specific service start times.",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Hh2i223wFaWxvzIR7QfCuryR",
+              "name": "get_feed",
+              "arguments": "{\"kind\":\"schedule_gaps\"}"
+            }
+          ],
+          "replay": [
+            {
+              "id": "rs_0e9c7bbdd6c95f4e016addf5e796d087d2b74b6daadbd1b50c",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3fXohkB2i8XkoZCCVmqw-hyx1Zoto_5No783GlYXU3o0HZoUmwjpShUEME770ykGlQ-bP6CbaHMOYyJ_xUQMGB6Y51xo6t8I5R_AJq8zvOc9VXIVXlBRfOQQu6R07X8ccG5jgzgMsln3c7E8UDUphU3aITjGyMsSfNqODPwnQNYlja5CJ8IJIP9tYdMl1PTVwbwO6vXzlvFTjYuHgOvnTeifprbW_pTmWEY-rSIaLSLu_abMiiNzfoBdKckg-7Legn3rd-EDqZYDPXWlMRnZnZf0iBJQC3Dbr61AfzK8xjg3PkmxzUW3BYoPcqnOL8Tg7EOTuACg1QNnFCO0SGLqVrplRor_VFnWA6Emh6epr9_qu4Ul9gLT2Lfpm70OaBIcL784LvKi1B__bNT9UwJjMeBgJnXGYQJwkzNec4PbCDLWAQcR0JpKdsr-iPqydc4gwwCEOTeZg7F6FgH_E1cJ5FWG4vFkMpHkgncTSEkyxoXCLmH9THuUzt7Xn0PRId9rVMNjoQ7fU9SHoVdZerv5ptz9g-VyfxnqMOwzWQX7r_hjPtFloADmHbtwhf5ceKrYIMO-SK-9_ndQdo36CMGzWbIi6tczHSJnYRUbSsGt_mio81Tc572qSzr9n51CsJyG_JmfgO3ILvbbIUYiW5mey3iLNlrs_Enx7KLprZAztpe5lkIuxDJwXa26gS2Nb0ICAFpeXf7OtSZbXh6uf0K6QsTZ6GWxcjulReAjzjzoM6w6w_hqIwWzYk9zJWRLVDR6itNcACwqVVOEXCXlf8YguYt0iUObJSpJgSeqjJieMnpq-BzDEPiMuPGXU2fMlMpYFu6DiPAza1SpIwpoFxGKInraaaTsRnzpbQYaKeHPRyUCDFBHIdcmq22KCUJ2rAh9rBukz7pgGybg5oW2aJVwXopi0PWwSb7Jf4ZuQqP8aRw0WIzjaoNKd7DId-X2NhUUM6HThA_RFUCDDSlw6FGGA6FlsMJPMMLs2pBcpS-Z-xiD48swK9UBJR9Rc4C5-RWnqtOLhKGrSW4eC7die16WzBoaSD6Rj3QP5dw0XXggg2vuLbQQP6Hbm3Uw6u9SPI0kLcVqVZMI0SMscRywnCcblsOneJ1OwV2KlGxaSGpdDfzQClqYblva-K5xLm4bd3l7BwZAit2jHVyyQXmmjZFJjhohvwV5ik-1n-NQnbhOhTEy-_SV5LlfhnHSlQYnxSovZRGhUXFOpFTUK8YK1YG737AetkaFLBDYiO2oIgvsWNnnY8P_oldTaBFH5wPL9h0tlxQ29g5qDRvIZmcFYnI5LEPqK2N1oUI954XhU5NbowYVHgT3TwUcDbZx0RJB7zfA6esiISho7fEQBXPCKvlX5uxnZ0RNRpt5khfs4-f21NRQknUnqPn7maMBJT8bSkCKWbgbX1o8bLFQvwVC3t6eJA9BrNOKOEFHLWObLq0FnV8O_T-AgUc3cmfVY3RGS_K1facRtb8C6A3REER9EIr4bDkkkFKWTWuOkVplhJJP6wLptx-FSey8VY1-0DprxlX0pF1-BUprp4omU0y9Y4fF7WqXSIHLt5fHQgXYnhTGYL4q292BWLPZQf-pa1WdRndMoeto_cq4yXvn9bLlPUgbVSMT3RGbpJ6BMCTcgm_s_h3oRIQEj3TO3F5xt7uoRQ7HiQKvmmc3F7LxECUECfSRFHi21LPJgTtdJdb-W_pOAK0WmTCq_5U7ZkLdniLFoQop_ZJRyXLA129twkqavamF3IkkmrQpX-sr0RPVFC5btU1OgNwDEw41oiI_mAWaklredeLhWnOfxiN-39bE6mFyv8Uph8T6FZbYJjPA6grmqtp6tEaBXdyhr9099IFrbQ80tuhu",
+              "summary": []
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10474,
+            "cachedInputTokens": 10366,
+            "cacheWriteTokens": 105,
+            "outputTokens": 54
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6fda1a84dbbc3798444ba4b5555b4765a397340b5fe35987d92edd3a6b206160",
+        "response": {
+          "text": "Yes. Jess has open time Monday through Friday this week (Nov 2–6). She’s fully open 9–5 today, Wednesday, and Thursday. Tuesday and Friday have some bookings, but her longest open stretches are 9–12.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11667,
-            "cachedInputTokens": 10298,
-            "cacheWriteTokens": 1366,
-            "outputTokens": 51
+            "inputTokens": 11886,
+            "cachedInputTokens": 10471,
+            "cacheWriteTokens": 1412,
+            "outputTokens": 55
           },
           "model": "gpt-6-luna"
         }

@@ -3,31 +3,39 @@
   "trials": [
     [
       {
-        "fingerprint": "1a85842b6d008d18025585ad39a239a82ff37f2677ec94d2b7241f144df00370",
+        "fingerprint": "4d9363ab0b8c3e79d1ac4b6543cc96bde45209c96eafbfb5d1f06b86c3644480",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_JH9PU6gv5pSGD8T8TudcbJOm",
+              "id": "call_OwqFuM67RzzXFiXJHWgy4ME2",
               "name": "remember_fact",
               "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_0ff1a97c88767d80016addf7977d4887d28ec917499a7e26ae",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq3feYW4Xgdh3djsLQ-D0-B5Llu71jAgIv03rrGRGKtPf8yioXAlUdlXRd2UjQsxU3MLz8emUw65lz3p3piEW9vCSgGUhv3204TZq62pah7ujTGVBZ5NXmd-DzA1jg_ISj44qLdiYpNK0JZ_JY260GBFyk4F0M2t1bL-UAFltyWCDf4iUk_L7Yefk8pcVzCHrBrZBxN4NVfFQZw3wBM5DLAW2GehV4e70621CO0fFJbMN9Rpf0phm6sO4djxOt16TBD6sSVyLcMAut5kDoAo8cdDKODpzLiQEO1FAOLPaeuT9-yVgZle7OYKgccxEMO3-co0dn52fLL-sRv-sFYGwo9Wlbe-5FX93amaOn6ONnm_7uauGriKorPX8f_GXaETF4FeBpaulfHijgSecGCaQMoZh6aE7UgasKfuO5AOo5FP0SCgPh8qesy_SowYrIY_RkkEjUUvA4Hwf3_E6OVNrCeTEHX8xM9WrW9HtFifnGHxfkAPkyoj9r7WNTlbZg8Yk7qwBFzsUmj9nSo7V23A46F8dFZMfv-yM6mhclTlkuj0wIKEfoH0BqPWwn1PKgVZuoMBxQilQfUAEtzGhTsd7JfNbzvXU7miNvwBKJv4jjnYrtpBQaQ8JFUgss1fvq85JwtiWDGz80hNHV0crcLaE4Vpnsce5USOlbQzsyhrkMHxSRk7yyZFVQ-X8xDBr0vj6Y6L5ixp7MqmlMTBGN61iVB9F17ByiS2s1doWJfgI0qWycrPvMsF2uFM0keC-j9DlLf9J-sQdGPDfwc3R-rblSfXRzBPIzY912_qd2RvoYxvcEa5eG8cc3tza-grsxDreJHDw-aiUklErKi0fcGvUIg0R-V2GvVT0M8OHDNXOdrBXvqgsWYHTw1XGesY3ruvxNtSfnRxM4Wu77aoJThxGgjAcM2YL8sV2dokiE8KSuGsOK1UUaSHC2ozNVXGRT19IIXYSh9xlqYNqQFtQyfKroGRJ-BgaBHwf7v-a4QxgP_rloFd1Ido6PokSaU_ILQdMwydCHYFQztYbBnnShb3fQ999ucN3mjYdLGMbVbRvqt_7pe-kh4U8KWewCWASqxy8OxBxq6BDJH5WNDU5cwcbNSy9FHleK24nvkJ2M1QGryYOUri0PMhWJbOCWN_qDCQh7cni1NDHu6k5ggKoOyyi5mrTswYFhzPPgD6rttJiZd-wSd05DOxLaN0AZ6cr4MTqzP45XkEVuUz0IwnolnjBuxGkq_-7WwAPs7Y9lNUWCUhqbwXE_0z_uo2qDAVMiF7E7hTJIf3HeLWbPsxwQICgA7hnUufwnlYlU_1YsQWPhU88CZLUFbX9wyLHdIfmD5WBlqXmdRazaOMxygdINR0FG88axIbDzl2aV8vH6OmSFQjIPknGOCRV842G7ljlj5664grH6hfQy4i5Rqa-XtqR9oH2pqbTUZoPrJUQvJIzUd-VRuPJLc4aoI6GqwH1b5VqmNkWWt7P5Nfpu5WoP5BH8eVmOD87SCSissZ1yL_w1ozliWzp6W9wM9YeUWJbYHmmLAepig3OHcCQpnvygZD3E7qNKw5p5LYVfbBb25i0GcCAY1EFdKgK8fSzYkRpugSNaEH4tP1dgAZ3TqloWPuORl8kmkDAKMw0bI6gp03XGjsDfD-TG_bvT3KIvahf9lhHQgjzJpY28xm0md9TuLdohcePbAd2Fbnc3OCJ9C8HLZe5sbSXqXRXVkbowV8jnmKyt7I78_5GA4bTWe5M3KlI5Qrfo1KsjoDMf3wrlW6_fDAfAcc4=",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
-            "outputTokens": 40
+            "outputTokens": 69
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "35211ea82bc5c4a98ff10117561051d0c2153b9df8ec85b0f82823dbd780fa40",
+        "fingerprint": "dae695f0374608d44391bda1aeb6a5540c18a948fc485fe81df5147be1487530",
         "response": {
-          "text": "I can’t save business-wide notes with my current role. An owner or manager can add that note.",
+          "text": "I couldn’t save that because your role doesn’t have permission. An owner or manager can save it.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +45,97 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9934,
-            "cachedInputTokens": 9838,
-            "cacheWriteTokens": 93,
+            "inputTokens": 10023,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 122,
             "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4d9363ab0b8c3e79d1ac4b6543cc96bde45209c96eafbfb5d1f06b86c3644480",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_POk7Zc80LgfgkLWhVzrrGk4l",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a6472f428f15ecf1fc9f4c2fbb07072df024ad3044eb14e3a395d137c4c1da43",
+        "response": {
+          "text": "I couldn’t save that because your role doesn’t allow it. An owner or manager can record the Friday closing note.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9994,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 93,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4d9363ab0b8c3e79d1ac4b6543cc96bde45209c96eafbfb5d1f06b86c3644480",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_guVuqIXi7I8e31NdwoS5WF1f",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8d92f5ff6aa1a0373c4893033280cc9d8704a17e74d4316ac8bd20cb0b1a11fc",
+        "response": {
+          "text": "I couldn’t save that because your staff role doesn’t have permission. An owner or manager can record it.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 9994,
+            "cachedInputTokens": 9991,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

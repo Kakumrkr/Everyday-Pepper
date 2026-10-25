@@ -425,3 +425,106 @@ export async function listWaitlistMatches(
     .orderBy(asc(waitlistMatches.createdAt), asc(waitlistMatches.id))
     .limit(Limit.parse(limit));
 }
+
+// The feed and the briefing (S38a, ADR-0042) ------------------------------------------------
+
+// Written out in full: in a query on one table drizzle leaves a column's table off, which inside
+// a subquery would name the subquery's own column.
+const MATCH_ID = sql.raw('"waitlist_matches"."id"');
+
+/** A freed time still ahead whose offers wait for an OK, went out, or were claimed. */
+export interface ActiveWaitlistMatch {
+  matchId: string;
+  bookingId: string;
+  staffMemberId: string;
+  startsAt: Date;
+  endsAt: Date;
+  state: 'needs_ok' | 'offered' | 'claimed';
+  offered: number;
+}
+
+/**
+ * This business's freed times starting after `now` that the matcher offered or proposed: with
+ * how many clients hold an open offer for each and whether one claimed it. Left out: a
+ * proposal no longer pending with no offers made (turned down, expired), and offers that all
+ * closed unclaimed (expired, taken back). Staff see their own only (RLS).
+ */
+export async function listActiveWaitlistMatches(
+  tx: TenantTx,
+  now: Date,
+  limit = 100,
+): Promise<ActiveWaitlistMatch[]> {
+  const rows = await tx
+    .select({
+      matchId: waitlistMatches.id,
+      bookingId: waitlistMatches.bookingId,
+      staffMemberId: waitlistMatches.staffMemberId,
+      startsAt: waitlistMatches.startsAt,
+      endsAt: waitlistMatches.endsAt,
+      // Offers still open or claimed: expired, taken back or "taken" ones no longer count.
+      offered: sql<number>`(SELECT count(*)::int FROM waitlist_offers o WHERE o.match_id = ${MATCH_ID} AND o.status IN ('offered', 'claimed'))`,
+      made: sql<number>`(SELECT count(*)::int FROM waitlist_offers o WHERE o.match_id = ${MATCH_ID})`,
+      claimed: sql<boolean>`EXISTS (SELECT 1 FROM waitlist_offers o WHERE o.match_id = ${MATCH_ID} AND o.status = 'claimed')`,
+      pending: sql<boolean>`EXISTS (SELECT 1 FROM ai_action_proposals p WHERE p.idempotency_key = 'waitlist.' || ${MATCH_ID}::text AND p.status = 'pending' AND p.expires_at > ${now}::timestamptz)`,
+    })
+    .from(waitlistMatches)
+    .where(
+      and(
+        eq(waitlistMatches.status, 'done'),
+        inArray(waitlistMatches.outcome, ['offered', 'proposed']),
+        gt(waitlistMatches.startsAt, now),
+      ),
+    )
+    .orderBy(asc(waitlistMatches.startsAt), asc(waitlistMatches.id))
+    .limit(Limit.parse(limit));
+  return rows.flatMap((row) => {
+    const state = row.claimed
+      ? 'claimed'
+      : row.offered > 0
+        ? 'offered'
+        : row.pending && row.made === 0
+          ? 'needs_ok'
+          : undefined;
+    if (state === undefined) return [];
+    return [
+      {
+        matchId: row.matchId,
+        bookingId: row.bookingId,
+        staffMemberId: row.staffMemberId,
+        startsAt: row.startsAt,
+        endsAt: row.endsAt,
+        state,
+        offered: row.claimed ? row.made : row.offered,
+      },
+    ];
+  });
+}
+
+/** The waitlist in numbers for the briefing: waiting now, and offers made and claimed since. */
+export async function waitlistActivity(
+  tx: TenantTx,
+  now: Date,
+  since: Date,
+): Promise<{ waiting: number; offered: number; claimed: number }> {
+  const [waiting] = await tx
+    .select({ count: count() })
+    .from(waitlistEntries)
+    .where(
+      and(
+        inArray(waitlistEntries.status, ['waiting', 'offered']),
+        gt(waitlistEntries.expiresAt, now),
+      ),
+    );
+  const [offers] = await tx
+    .select({
+      offered: count(),
+      claimed: sql<number>`count(*) FILTER (WHERE ${waitlistOffers.status} = 'claimed')::int`,
+    })
+    .from(waitlistOffers)
+    .where(gt(waitlistOffers.createdAt, since));
+  return {
+    waiting: waiting?.count ?? 0,
+    offered: offers?.offered ?? 0,
+    claimed: offers?.claimed ?? 0,
+  };
+}

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c399416ec02335915da0913bd2e12e2d189a429104b22905c4bdd74df3662d7a",
+        "fingerprint": "6f3c8f3e8e5ee7e209272318ffd532e5ab95ecee0b7ccf151e738b94f054ea36",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_oGiOtR8UoDd9Lfh8DkDqxELz",
+              "id": "call_QcD6u1TaxFoyqu0FrumDTgNX",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "d26d9e81d47add72fcb04a1d113db1d65d40d919693687720f5b2667e6785777",
+        "fingerprint": "0038a5d6eb3a5c5b44ea27e56777f6f85d22fa6aa26ccb3b2abcc70143809dc9",
         "response": {
-          "text": "Jess doesn’t usually work Saturdays. Her listed schedule is Monday–Friday, 9–5.",
+          "text": "Jess doesn’t work Saturdays, so she can’t take a client this Saturday. Marco works Saturdays from 10:00 to 16:00.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,98 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10416,
-            "cachedInputTokens": 9838,
-            "cacheWriteTokens": 575,
-            "outputTokens": 24
+            "inputTokens": 10466,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 565,
+            "outputTokens": 34
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6f3c8f3e8e5ee7e209272318ffd532e5ab95ecee0b7ccf151e738b94f054ea36",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_XShQUlG6Oh5NoOmiTPPQEkIz",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "59a40791732b08241eb128bbebccfb87fd85fd80d711c92d7721b1d16f4edf6f",
+        "response": {
+          "text": "Jess doesn’t usually work Saturdays. Marco is scheduled this Saturday from 10 AM to 4 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10455,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 554,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "6f3c8f3e8e5ee7e209272318ffd532e5ab95ecee0b7ccf151e738b94f054ea36",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sjWuCEE3yg4aU8TkvJlmc14W",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 9901,
+            "cachedInputTokens": 9898,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "0e01a1734fc5139321230dac8f869fc01922e554f43ffd5ea1ea74ecbeb6a211",
+        "response": {
+          "text": "Jess doesn’t usually work Saturdays, so she isn’t scheduled to take a client this Saturday.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10467,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 566,
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }

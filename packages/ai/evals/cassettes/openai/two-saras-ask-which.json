@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "35c062441b6e4606d1dcfff0e6b1eeb62bd003c8f49708de11d1886065834366",
+        "fingerprint": "45b9b94d0a9b63e6c2f84da07089572afc2bcfa26f484912532c7b60a4acac52",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Jgm9HBye6QLFKsQIDS3toiqE",
+              "id": "call_9DgKO4VfG4tWlN1XaiJB59WA",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,21 +16,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9842,
+            "inputTokens": 9902,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9839,
+            "cacheWriteTokens": 9899,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b9c1f2c3de11f0b51972ed8b716177d033d26ea17be87e91469a1629b4b615b5",
+        "fingerprint": "3ce6e78f65dc5ef53a375ca8358daab8f5d5edee5547c25341353817fcbffa6c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_EjxzB1DA1u3lxHdkgYsU3gm9",
+              "id": "call_gv0FQG1g5SUCIwhbq7oBnQ4J",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara\"}"
             }
@@ -38,16 +38,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10304,
-            "cachedInputTokens": 9839,
-            "cacheWriteTokens": 462,
+            "inputTokens": 10361,
+            "cachedInputTokens": 9899,
+            "cacheWriteTokens": 459,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e240a2053dd588dabe5c58c4aede35bee180f5b385d96358f8a2ca8af6aa3d4d",
+        "fingerprint": "541a3755af2997fbea1140cdc60d0674e485311fb2d6457d1981f8b24114a3b9",
         "response": {
           "text": "I found two matches: Sarah P. and Sara K. Which one should I book?",
           "toolCalls": [],
@@ -59,9 +59,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10431,
-            "cachedInputTokens": 10301,
-            "cacheWriteTokens": 127,
+            "inputTokens": 10487,
+            "cachedInputTokens": 10358,
+            "cacheWriteTokens": 126,
             "outputTokens": 22
           },
           "model": "gpt-6-luna"

@@ -2,6 +2,7 @@ import {
   getBookingRules,
   getWorkingHours,
   listWaitlist,
+  runBriefingFor,
   runInsightsFor,
 } from '@pepper/appointments';
 import {
@@ -70,7 +71,13 @@ const EVAL_OUTBOX_KEY = outboxKeyFrom('pepper-eval-runner-outbox-key-not-a-secre
 
 /** The insights every eval world runs (all four kinds, an hour as the shortest gap). */
 export const EVAL_INSIGHTS = {
-  enabled: ['rebooking_due', 'schedule_gaps', 'no_show_pattern', 'staff_overload'] as const,
+  enabled: [
+    'rebooking_due',
+    'schedule_gaps',
+    'no_show_pattern',
+    'staff_overload',
+    'waitlist_match',
+  ] as const,
   minGapMinutes: 60,
 };
 
@@ -260,6 +267,13 @@ export function loopSubject(
           await runInsightsFor(db, world.tenantId, {
             clock: world.clock,
             insightsOf: () => EVAL_INSIGHTS,
+          });
+        } else if ('morningBriefing' in turn.action) {
+          await runBriefingFor(db, world.tenantId, {
+            clock: world.clock,
+            insightsOf: () => EVAL_INSIGHTS,
+            morningHourOf: () => EVAL_DRAFTS.morningHour,
+            pushKey: null,
           });
         } else if ('morningDrafts' in turn.action) {
           await runMorningDraftsFor(db, world.tenantId, {

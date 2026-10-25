@@ -1,0 +1,6 @@
+ALTER TABLE "booking_verifications" ADD COLUMN "purpose" text DEFAULT 'booking' NOT NULL;--> statement-breakpoint
+ALTER TABLE "booking_verifications" ADD COLUMN "waitlist_entry_id" uuid;--> statement-breakpoint
+ALTER TABLE "booking_verifications" ADD CONSTRAINT "booking_verifications_waitlist_entry_fk" FOREIGN KEY ("tenant_id","waitlist_entry_id") REFERENCES "public"."waitlist_entries"("tenant_id","id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "booking_verifications_waitlist_entry_idx" ON "booking_verifications" USING btree ("tenant_id","waitlist_entry_id");--> statement-breakpoint
+ALTER TABLE "booking_verifications" ADD CONSTRAINT "booking_verifications_purpose_known" CHECK ("booking_verifications"."purpose" IN ('booking', 'waitlist'));--> statement-breakpoint
+ALTER TABLE "booking_verifications" ADD CONSTRAINT "booking_verifications_purpose_result" CHECK (("booking_verifications"."purpose" = 'booking' AND "booking_verifications"."waitlist_entry_id" IS NULL) OR ("booking_verifications"."purpose" = 'waitlist' AND "booking_verifications"."booking_id" IS NULL));

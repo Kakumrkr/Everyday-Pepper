@@ -4,8 +4,10 @@ import {
   FeedInsightKindSchema,
   FeedItemIdSchema,
   FeedSettingsSchema,
+  DailyBriefingPayloadSchema,
   LocalDateSchema,
   TenantIdSchema,
+  type DailyBriefingPayload,
   type FeedInsightKind,
   type FeedItemId,
   type TenantId,
@@ -203,7 +205,8 @@ export async function listOpenFeedItems(
       and(
         eq(feedItems.status, 'suggestion'),
         gt(feedItems.expiresAt, now),
-        excluded.length === 0 ? undefined : notInArray(feedItems.kind, excluded),
+        // The briefing informs; it is read on its own (`readBriefing`), never as a suggestion.
+        notInArray(feedItems.kind, [...excluded, BRIEFING]),
       ),
     )
     .orderBy(desc(feedItems.createdAt), asc(feedItems.id))
@@ -305,7 +308,7 @@ export async function readFeedSettings(tx: TenantTx): Promise<StoredFeedSettings
 /** Replaces the business's feed switches (owners and managers; the service checks). */
 export async function writeFeedSettings(
   tx: TenantTx,
-  settings: StoredFeedSettings,
+  settings: z.input<typeof StoredFeedSettingsSchema>,
 ): Promise<StoredFeedSettings> {
   const value = StoredFeedSettingsSchema.parse(settings);
   await tx.update(tenants).set({ feedSettings: value });
@@ -601,50 +604,186 @@ export async function listWaitingFeedItems(tx: TenantTx, limit = 50): Promise<Fe
   }));
 }
 
-/** Records when the business's morning drafts pass is due next. */
-export async function setDraftsDueAt(tx: TenantTx, at: Date): Promise<void> {
+// The morning passes (S36 drafts, S38a briefing): each is due once a day at the business's
+// local morning hour, tracked by its own column of `insight_runs`.
+
+/** A once-a-day morning pass and the `insight_runs` column that says when it is due. */
+export type MorningPass = 'drafts' | 'briefing';
+const dueColumn = (pass: MorningPass) =>
+  pass === 'drafts' ? insightRuns.draftsDueAt : insightRuns.briefingDueAt;
+const dueSet = (pass: MorningPass, at: Date) =>
+  pass === 'drafts' ? { draftsDueAt: at } : { briefingDueAt: at };
+
+/** Records when the business's morning pass is due next. */
+export async function setMorningDueAt(tx: TenantTx, pass: MorningPass, at: Date): Promise<void> {
   await tx.insert(insightRuns).values({}).onConflictDoNothing({ target: insightRuns.tenantId });
-  await tx.update(insightRuns).set({ draftsDueAt: at });
+  await tx.update(insightRuns).set(dueSet(pass, at));
 }
 
 /**
- * Claims the business's morning drafts pass when it is due at `now` (never run, or due), by
- * moving its due time to `next`: of two workers, only one gets `true`.
+ * Claims the business's morning pass when it is due at `now` (never run, or due), by moving its
+ * due time to `next`: of two workers, only one gets `true`.
  */
-export async function claimDraftsRun(tx: TenantTx, now: Date, next: Date): Promise<boolean> {
+export async function claimMorningRun(
+  tx: TenantTx,
+  pass: MorningPass,
+  now: Date,
+  next: Date,
+): Promise<boolean> {
   await tx.insert(insightRuns).values({}).onConflictDoNothing({ target: insightRuns.tenantId });
+  const column = dueColumn(pass);
   const rows = await tx
     .update(insightRuns)
-    .set({ draftsDueAt: next })
-    .where(or(isNull(insightRuns.draftsDueAt), lte(insightRuns.draftsDueAt, now)))
+    .set(dueSet(pass, next))
+    .where(or(isNull(column), lte(column, now)))
     .returning({ id: insightRuns.id });
   return rows.length > 0;
 }
 
-/** When the business's morning drafts pass is due (`null`: never run). */
-export async function readDraftsDueAt(tx: TenantTx): Promise<Date | null> {
-  const [row] = await tx.select({ at: insightRuns.draftsDueAt }).from(insightRuns);
+/** When the business's morning pass is due (`null`: never run). */
+export async function readMorningDueAt(tx: TenantTx, pass: MorningPass): Promise<Date | null> {
+  const [row] = await tx.select({ at: dueColumn(pass) }).from(insightRuns);
   return row?.at ?? null;
 }
 
 /**
- * Up to `limit` businesses whose morning drafts pass is due at `now`, across businesses (ids
- * only): never run, or due. The pass itself decides, in the business's time zone, whether its
- * morning hour has come.
+ * Up to `limit` businesses whose morning pass is due at `now`, across businesses (ids only):
+ * never run, or due. The pass itself decides, in the business's time zone, whether its morning
+ * hour has come.
  */
-export async function listDueDraftRuns(
+export async function listDueMorningRuns(
   db: Database,
+  pass: MorningPass,
   now: Date,
   limit: number,
 ): Promise<TenantId[]> {
   const max = z.number().int().min(1).max(1000).parse(limit);
+  const column = dueColumn(pass);
   const rows = await withJobScan(db, 'insights', (tx) =>
     tx
       .select({ tenantId: insightRuns.tenantId })
       .from(insightRuns)
-      .where(or(isNull(insightRuns.draftsDueAt), lte(insightRuns.draftsDueAt, now)))
-      .orderBy(sql`${insightRuns.draftsDueAt} ASC NULLS FIRST`, asc(insightRuns.tenantId))
+      .where(or(isNull(column), lte(column, now)))
+      .orderBy(sql`${column} ASC NULLS FIRST`, asc(insightRuns.tenantId))
       .limit(max),
   );
   return rows.map((row) => TenantIdSchema.parse(row.tenantId));
+}
+
+/** The drafts pass's due time (S36 names, kept for its callers). */
+export const setDraftsDueAt = (tx: TenantTx, at: Date) => setMorningDueAt(tx, 'drafts', at);
+export const claimDraftsRun = (tx: TenantTx, now: Date, next: Date) =>
+  claimMorningRun(tx, 'drafts', now, next);
+export const readDraftsDueAt = (tx: TenantTx) => readMorningDueAt(tx, 'drafts');
+export const listDueDraftRuns = (db: Database, now: Date, limit: number) =>
+  listDueMorningRuns(db, 'drafts', now, limit);
+
+// ---------------------------------------------------------------------------------------------
+// The daily briefing (S38a, ADR-0042): one item a local day for the business (owners and
+// managers, `business:<tenant>`) and one for each staff member's own day (`staff:<id>`,
+// addressed to them alone). Numbers only; the words are `feedLine`'s.
+
+const BRIEFING = 'daily_briefing';
+
+/** A briefing the morning pass wants to exist: the business's or one staff member's. */
+export interface BriefingCandidate {
+  /** `null`: the business's (owners and managers); else that staff member's own day. */
+  staffMemberId: string | null;
+  day: string;
+  payload: DailyBriefingPayload;
+  expiresAt: Date;
+}
+
+/**
+ * Writes today's briefings: adds them, or brings an unread one up to date (a second run of the
+ * same morning). One marked read (`closeFeedItem`, done) stays read. Returns how many were added.
+ */
+export async function writeBriefings(
+  tx: TenantTx,
+  candidates: readonly BriefingCandidate[],
+): Promise<number> {
+  if (candidates.length === 0) return 0;
+  const [tenant] = await tx.select({ id: tenants.id }).from(tenants);
+  if (tenant === undefined) return 0;
+  const values = candidates.map((candidate) => {
+    const staffMemberId = nullableId(candidate.staffMemberId);
+    const subjectKey =
+      staffMemberId === null ? `business:${Id.parse(tenant.id)}` : `staff:${staffMemberId}`;
+    const day = LocalDateSchema.parse(candidate.day);
+    return {
+      kind: BRIEFING,
+      subjectKey,
+      day,
+      dedupeKey: `${BRIEFING}:${subjectKey}:${day}`,
+      audienceStaffId: staffMemberId,
+      staffMemberId,
+      payload: DailyBriefingPayloadSchema.parse(candidate.payload),
+      expiresAt: candidate.expiresAt,
+    };
+  });
+  const written = await tx
+    .insert(feedItems)
+    .values(values)
+    .onConflictDoUpdate({
+      target: [feedItems.tenantId, feedItems.dedupeKey],
+      set: { payload: sql`excluded.payload`, expiresAt: sql`excluded.expires_at` },
+      setWhere: sql`${feedItems.status} = 'suggestion'`,
+    })
+    .returning({ inserted: sql<boolean>`(xmax = 0)` });
+  return written.filter((row) => row.inserted).length;
+}
+
+/**
+ * Today's unread briefing for the transaction's member: the business's (`business`, owners and
+ * managers) or their own day's (`own`, a staff member: the member scope shows them only theirs).
+ */
+export async function readBriefing(
+  tx: TenantTx,
+  scope: 'business' | 'own',
+  now: Date,
+): Promise<FeedItemWithNames | undefined> {
+  const [row] = await tx
+    .select({ item: feedItems, staffName: staffMembers.displayName })
+    .from(feedItems)
+    .leftJoin(staffMembers, eq(staffMembers.id, feedItems.staffMemberId))
+    .where(
+      and(
+        eq(feedItems.kind, BRIEFING),
+        eq(feedItems.status, 'suggestion'),
+        gt(feedItems.expiresAt, now),
+        scope === 'business'
+          ? sql`${feedItems.subjectKey} LIKE 'business:%'`
+          : sql`${feedItems.subjectKey} LIKE 'staff:%'`,
+      ),
+    )
+    .orderBy(desc(feedItems.day), desc(feedItems.createdAt))
+    .limit(1);
+  return row === undefined
+    ? undefined
+    : { ...row.item, staffName: row.staffName, clientName: null, serviceName: null };
+}
+
+/** The business-wide numbers a briefing carries beside the day's schedule. */
+export interface BriefingCounts {
+  needsOk: number;
+  rebookingDue: number;
+}
+
+/** Proposals waiting for an OK, and open "due back" suggestions, in the business now. */
+export async function briefingCounts(tx: TenantTx, now: Date): Promise<BriefingCounts> {
+  const [proposals] = await tx
+    .select({ count: sql<number>`count(*)::int` })
+    .from(aiActionProposals)
+    .where(and(eq(aiActionProposals.status, 'pending'), gt(aiActionProposals.expiresAt, now)));
+  const [due] = await tx
+    .select({ count: sql<number>`count(*)::int` })
+    .from(feedItems)
+    .where(
+      and(
+        eq(feedItems.kind, 'rebooking_due'),
+        inArray(feedItems.status, ['suggestion', 'needs_ok']),
+        gt(feedItems.expiresAt, now),
+      ),
+    );
+  return { needsOk: proposals?.count ?? 0, rebookingDue: due?.count ?? 0 };
 }

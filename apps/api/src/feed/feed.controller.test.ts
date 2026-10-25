@@ -46,7 +46,9 @@ const FEED: FeedResponse = {
       createdAt: '2026-11-02T15:00:00.000Z' as never,
     },
   ],
-  settings: { suggestionsPaused: false, disabledKinds: [] },
+  briefing: null,
+  settings: { suggestionsPaused: false, disabledKinds: [], morningHour: null },
+  templateMorningHour: 7,
   canChangeSettings: true,
   askToTurnOff: null,
   mailingAddress: null,
@@ -172,7 +174,7 @@ describe('/v1/feed', () => {
     role = r;
     expect(
       (await send('patch', '/v1/feed/settings', { suggestionsPaused: true }).expect(200)).body,
-    ).toEqual({ suggestionsPaused: true, disabledKinds: [] });
+    ).toEqual({ suggestionsPaused: true, disabledKinds: [], morningHour: null });
     expect(feed.changeSettings).toHaveBeenCalledWith(context(), { suggestionsPaused: true });
   });
 
@@ -185,7 +187,7 @@ describe('/v1/feed', () => {
     ).toBe('forbidden');
     role = 'owner';
     await send('patch', '/v1/feed/settings', {}).expect(400);
-    await send('patch', '/v1/feed/settings', { disabledKinds: ['waitlist_match'] }).expect(400);
+    await send('patch', '/v1/feed/settings', { disabledKinds: ['daily_briefing'] }).expect(400);
     expect(feed.changeSettings).not.toHaveBeenCalled();
   });
 });

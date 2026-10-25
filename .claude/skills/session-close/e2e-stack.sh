@@ -25,7 +25,7 @@ case "${1:-}" in
       DEPLOYMENT_ENVIRONMENT=ci node --env-file=../../.env --import ./dist/instrument.js \
       dist/main.js) </dev/null >"$logs/api.log" 2>&1 &
     api=$!
-    (cd apps/worker && exec setsid env -u OPENAI_API_KEY DEPLOYMENT_ENVIRONMENT=ci INSIGHTS_POLL_MS=10000 \
+    (cd apps/worker && exec setsid env -u OPENAI_API_KEY DEPLOYMENT_ENVIRONMENT=ci INSIGHTS_POLL_MS=10000 DRAFTS_POLL_MS=10000 \
       node --env-file=../../.env --import ./dist/instrument.js dist/main.js) \
       </dev/null >"$logs/worker.log" 2>&1 &
     worker=$!

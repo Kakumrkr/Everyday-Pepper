@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d0877e71e84edd40bd6c6dbcedfa2fdd419ea1b1291de44ab4aa3831835fa5d8",
+        "fingerprint": "f55825400f2afbc8747a664e7e1b786ef4e18a516cfb8495393df103e1ba35cd",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0bf6VkkqzizrV41g0nt4GOER",
+              "id": "call_K83aPyMyBKCeS4QF660BZPTA",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9841,
-            "cachedInputTokens": 9826,
+            "inputTokens": 9901,
+            "cachedInputTokens": 9886,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,12 +25,34 @@
         }
       },
       {
-        "fingerprint": "e3b9c172bf57f3d25aa58d2e88df39b9a6094a6d98392eb3c4e64a62a4d074c5",
+        "fingerprint": "1f55c533b04b4e0d38059b745f004ac8a239fe032fd2c4f6d1dd1be45e98fe92",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_hHCGbjm3PoqpkdjlWLkngpbU",
+              "id": "call_ZXFpfa4uhA4I0ypXYNLwrgWy",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10364,
+            "cachedInputTokens": 9898,
+            "cacheWriteTokens": 463,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8ef72a2dd53b3e6198790020def7bbbd3ac18cc977fa7e79cce4a855606d421d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LtQOP7Qd4HyvP6ugKSDDmMTV",
               "name": "add_todo",
               "arguments": "{\"title\":\"Call Ana back\",\"dueDate\":\"2026-11-05\",\"dueTime\":null,\"assigneeStaffMemberId\":\"{{staff:jess}}\"}"
             }
@@ -38,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10294,
-            "cachedInputTokens": 9838,
-            "cacheWriteTokens": 453,
-            "outputTokens": 65
+            "inputTokens": 10449,
+            "cachedInputTokens": 10361,
+            "cacheWriteTokens": 85,
+            "outputTokens": 64
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "9d875319796eddcbe9c8edc00d5db561af4bf8fe6ee72763490a694af8f8abe1",
+        "fingerprint": "200b46f88c3c6856363d782d5c79350ae3107718b43de57e7bff74329c3e941c",
         "response": {
-          "text": "Jess’s to-do is set: call Ana back on Thursday, November 5, at 9:00 AM.",
+          "text": "Added a to-do for Jess to call Ana back on Thursday, November 5, at 9:00 AM.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,9 +81,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10417,
-            "cachedInputTokens": 10291,
-            "cacheWriteTokens": 123,
+            "inputTokens": 10571,
+            "cachedInputTokens": 10446,
+            "cacheWriteTokens": 122,
             "outputTokens": 28
           },
           "model": "gpt-6-luna"

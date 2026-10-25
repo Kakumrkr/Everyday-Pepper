@@ -485,7 +485,7 @@
   {
     "id": "wl-staff-colleague-refused",
     "set": "waitlist",
-    "description": "Jess can't put a client on Marco's list: she says so, nothing is added.",
+    "description": "Jess can't put a client on Marco's list: she says so, nothing is added. Marco's Saturday is booked solid (S38b: with free times the model rightly offered them and never reached the refusal; Marco also does colour, so the request names the service).",
     "holdout": false,
     "now": "2026-11-02T12:00:00.000Z",
     "timeZone": "America/New_York",
@@ -495,7 +495,7 @@
     },
     "turns": [
       {
-        "user": "Put Maria on Marco's waitlist for Saturday"
+        "user": "Put Maria on Marco's waitlist for a haircut on Saturday"
       }
     ],
     "expect": {
@@ -506,6 +506,16 @@
       "waitlist": {
         "open": 0
       }
+    },
+    "seed": {
+      "full": [
+        {
+          "staff": "{{staff:marco}}",
+          "date": "2026-11-07",
+          "start": "09:00",
+          "end": "18:00"
+        }
+      ]
     }
   },
   {

@@ -30,7 +30,10 @@ const JobsEnvSchema = z.object({
    * page and one-click unsubscribe. Unset: no morning drafts.
    */
   AUTH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
-  /** How often the morning drafts pass looks for businesses whose morning has come (S36). */
+  /**
+   * How often the morning job (the drafts pass, S36, and the daily briefing, S38a) looks for
+   * businesses whose morning has come.
+   */
   DRAFTS_POLL_MS: z.coerce.number().int().min(10_000).max(600_000).default(60_000),
   /**
    * How often the smart waitlist's relay looks for freed times (S37); AC-W5-1 allows 2 minutes
@@ -53,6 +56,8 @@ export interface WorkerConfig extends ServiceConfig {
   reminderPollMs: number;
   cleanupIntervalMs: number;
   insightsPollMs: number;
+  /** How often the morning job runs (`DRAFTS_POLL_MS`, S38a). */
+  morningPollMs: number;
   /**
    * Writes episodes (S31, ADR-0037) with the routine model and the embedding model; `null`
    * when OpenAI or its embedding model is not configured (then the api queues none).
@@ -87,6 +92,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     reminderPollMs: jobs.REMINDER_POLL_MS,
     cleanupIntervalMs: jobs.CLEANUP_INTERVAL_MS,
     insightsPollMs: jobs.INSIGHTS_POLL_MS,
+    morningPollMs: jobs.DRAFTS_POLL_MS,
     episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
     drafts: draftsConfig(loadOpenAiConfig(env), jobs),
     waitlist:
