@@ -17,7 +17,7 @@ What they told us (simulated interviews, [readout](../research/interviews/2026-1
 - **B · Clean premium:** calm, generous white space, precise type, few colors, subtle depth. It should feel like Apple or Linear.
 - **C · Bold modern** (the outside option): strong color fields, big numbers, energetic, like Cash App.
 
-Each mockup shows the same five screens: Home card board, Calendar day, Client profile, the public booking page, and an approval card with "Why?" and Undo.
+S39 uses `ui-ux-pro-max` for candidate systems and `frontend-design` for the mockups (playbook P1-14). This file decides over both. Each mockup shows the same five screens: Home card board, Calendar day, Client profile, the public booking page, and an approval card with "Why?" and Undo.
 
 **What the user wants:** premium, distinctive, not a template. **What to avoid:** generic SaaS (grey cards on white, blue buttons), the cream + terracotta + serif look, gradients for decoration, emoji as icons, stock photos.
 

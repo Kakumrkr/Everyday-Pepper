@@ -6,6 +6,8 @@ Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility
 - P1 (planning session, **the V1 re-plan**): [V1 playbook](v1-playbook.md) (Phases 9–17, one row per session S39–S76, the session standard, skills by kind, budget), [scorecard](scorecard.md), [DESIGN.md](../design/DESIGN.md), [ADR-0043](../adr/0043-card-board-first-interaction.md) (cards first), [ADR-0044](../adr/0044-redesign-and-design-rules.md) (redesign and enforced design rules).
   - **Plan change ([PCR-007](changes/PCR-007.md), user):** Phases 9–11 replaced by 9 New look · 10 First 10 minutes · 11 Switching + privacy · 12 The employee · 13 Pilot readiness · the pilot · 14 SMS · 15 Deposits · 16 Calendar + staff · 17 Launch gate. SMS, deposits, recovery, export and deletion, history import, week view, recurring, reports, billing and a landing page into V1; extraction at setup out of V1. First customer narrowed to 1–6 chair owner-operators. AI budget $10 for Phases 9–17. The `/session-brief` and `/session-close` skills and `CLAUDE.md` carry the session standard.
 
+  - After P1 (user): imports also take CSV/JSON/JSONL exports of an owner's own app, with smart mapping and an AI-suggested mapping (S56a); direct database connections after V1 (P1-13). UI UX Pro Max added beside frontend-design (P1-14).
+
   **Compatibility:** docs and skills only; every planned change is additive (PCR-007).
 
 ## 0.32 — 2026-10-25
