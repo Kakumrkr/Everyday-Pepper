@@ -9,3 +9,4 @@ CLAUDE.md
 next-env.d.ts
 e2e/test-results/
 e2e/playwright-report/
+.claude/skills/ui-ux-pro-max/
