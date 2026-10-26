@@ -1,10 +1,12 @@
 # UX Principles
 
+> **P1 (2026-10-26):** a complete redesign is planned for Phase 9 ([ADR-0044](../adr/0044-redesign-and-design-rules.md)). The enforced rules, copy rules and screen checklist are in [DESIGN.md](../design/DESIGN.md), which wins where this file differs. The tokens below stay in force until S40 replaces them.
+
 **Direction:** warm and friendly (Airbnb-like): soft rounded shapes, generous spacing, friendly microcopy, real photography/illustration accents; calm, never cluttered. Working name **Pepper**. Design direction **approved 2026-10-16** (S1/S2 mockups: [`../mockups/README.md`](../mockups/README.md)); tokens below.
 
 ## Principles
 1. **Mobile-first, one-thumb.** Owners use the app between clients. Primary actions reachable with one thumb; works great at 375 px width.
-2. **Conversation first, UI always available.** Every chat action has an equivalent screen; every screen has an "ask" entry.
+2. **Cards first, chat available** ([ADR-0043](../adr/0043-card-board-first-interaction.md)). Home is a board of one-tap decisions; every chat action has an equivalent screen; every screen has an "ask" entry.
 3. **Cards, not walls of text.** AI responses render as typed cards: Booking, SlotPicker, ChangeDiff (before/after), ClientSummary, Suggestion, Confirmation, Undo toast.
 4. **Show, then do.** For anything not set to "just do it", show exactly what will happen before it happens.
 5. **Always reversible.** Undo is visible after every change; history shows who (person or AI) did what.

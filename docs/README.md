@@ -6,7 +6,10 @@ One app that lets small service businesses run day-to-day operations by talking 
 
 ## Research
 - [Competitor audit](research/competitor-audit.md)
-- [Owner interview script](research/owner-interview-script.md)
+- [Owner interview script](research/owner-interview-script.md) · [five-owner guide](research/five-owner-interview-guide.md) · [simulated interviews (hypotheses)](research/interviews/2026-10-26-simulated-five-owners.md)
+
+## Design
+- [**DESIGN.md**: rules, direction, components](design/DESIGN.md)
 
 ## Mockups
 - [Pepper prototype & design direction](mockups/README.md)
@@ -37,6 +40,8 @@ One app that lets small service businesses run day-to-day operations by talking 
 ## Plan
 - [**Status — start here**](plan/STATUS.md)
 - [Roadmap & phases](plan/roadmap-phases.md)
+- [**V1 playbook (Phases 9–17, every session to launch)**](plan/v1-playbook.md)
+- [Scorecard](plan/scorecard.md)
 - [Phase 6 playbook (AI agent + trust layer)](plan/phase-6-playbook.md)
 - [Dependency map](plan/dependency-map.md)
 - [Traceability](plan/traceability.md)
@@ -64,6 +69,9 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [ADR-0016 Booking rules and the availability engine](adr/0016-booking-rules-and-availability.md)
 - [ADR-0017 Bookings, clients and the waitlist](adr/0017-bookings-clients-and-waitlist.md)
 - [ADR-0018 Industry templates](adr/0018-industry-templates.md)
+- ADR-0019 … ADR-0042: see the [adr folder](adr/)
+- [ADR-0043 Cards first, chat second: the Home card board](adr/0043-card-board-first-interaction.md)
+- [ADR-0044 A complete redesign, and design rules enforced by tests](adr/0044-redesign-and-design-rules.md)
 
 ## How these docs are maintained
 - Docs change in the same commit as the behaviour they describe.

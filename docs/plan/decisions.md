@@ -334,3 +334,16 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - `wl-staff-colleague-refused`: Marco's Saturday booked solid and the service named.
   
   Also: a transport failure re-run; three security tests for controls that had none; the low findings L9–L14 logged for Phase 11; Playwright not re-run, because no screen changed after S38a.
+- **P1 V1 re-plan (user, 2026-10-26):** a planning-only session ("we're not going to start the session 39"); Claude as senior advisor with the Grill Me skill. Decisions (V1 playbook §2):
+  - **P1-1** 10/10 staged with "what 10 looks like" ("you can write what 10 looks like… the final achieving of the product should be great").
+  - **P1-2** five owners as reference; the shared readout is simulated and kept as hypotheses.
+  - **P1-5** SMS and deposits (Stripe) into V1 ("move the deposit SMS… to version one").
+  - **P1-6** brand, LLC and domain parked ("keep it away right now… we can change it after").
+  - **P1-7** a data-sharing OpenAI project for dev evals and a **$10** cap ("at max 10 bucks is enough").
+  - **P1-3/P1-4/P1-8** segment, cards first and the website/booking-page staging (Claude's recommendations, accepted: "Yeah, that's it").
+  - **P1-9** pilot after Phase 13; neutral pilot domain.
+  - **P1-10** a complete redesign first ("completely retheme the UI… use some awesome skills for UI & UX"); dislikes bland, template-like, not premium; lean warm boutique + clean premium.
+  - **P1-11** smart deposits; **P1-12** approve by text ("Yeah, let's go with your recommendations").
+  - The user's ideas, recorded: an own-domain website from Pepper (after PMF) and booking-page templates with their images (V1.1; branded page in V1).
+  - "Plan it properly by preserving the original working flow… raise the PR and merge the plan."
+

@@ -17,6 +17,21 @@ Policy: [Phase 6 playbook §4](phase-6-playbook.md) (user, S22; confirmed for S2
 
 The OpenAI dashboard's usage page is the final word on money; this ledger is computed from the token counts the API reported, at the listed prices.
 
+## V1 (Phases 9–17): $10 on top of the $3.80 spent (P1, user, 2026-10-26)
+
+Policy ([V1 playbook](v1-playbook.md) §8, P1-7):
+- **Caps:**
+  - Phase 12 (S56b) $3.00
+  - Phase 17 (S76) $1.50
+  - reserve $5.50 for a fix round in a "b" half
+  - no real calls in Phases 9–11 or 13–16
+- **The runner's total stop** rises from $4.50 to the new total ($13.80) in S56a, the first session that needs it. Until then the $4.50 stop holds.
+- **Two OpenAI projects** (the user creates them before S56b):
+  - `pepper-dev-evals`, with **data sharing on** for the free daily tokens. Eval cases and fixtures only, all made up: no real client, owner or business data ever reaches it. S56a adds a test that fails on real-looking phone numbers and email addresses in eval fixtures.
+  - The production project, sharing **off**, with zero data retention confirmed before the pilot.
+- **Free tokens come first, money only past them.** The ledger records what the API reported, with the price it would have cost.
+- **Pilot running costs are a separate budget** (target ≤ $3 per active business a month, [scorecard.md](scorecard.md) §3).
+
 ## Phase 7 ($1.00 cap, raised to $1.55 in S33; [playbook §4](phase-7-playbook.md))
 
 Runs labelled `P7`. The runner refuses a run whose worst-case estimate would take Phase 7 past its cap ($1.00 until S33, then $1.55).

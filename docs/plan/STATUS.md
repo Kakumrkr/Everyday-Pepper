@@ -1,42 +1,41 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-25 · **Plan version:** 0.32 · **Current phase:** 8 — Operator feed, **done** (S34–S38b; exit in S38b) → next: **S39** (Phase 9 planning: zero-setup onboarding, with the carried waitlist fix)
+**Last updated:** 2026-10-26 · **Plan version:** 0.33 ([PCR-007](changes/PCR-007.md)) · **Current phase:** 8 — Operator feed, **done** (S34–S38b) · V1 re-planned in **P1** → next: **S39** (Phase 9 · New look: design direction)
+
+**The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress (S38b closed). Next: S39 from "Planned sessions".
+Nothing in progress (P1 closed). Next: S39 from "Planned sessions".
 
 ## Last sessions
+- **P1 V1 re-plan (2026-10-26): planning only, no product code** ([PCR-007](changes/PCR-007.md), [V1 playbook](v1-playbook.md), [scorecard](scorecard.md), [ADR-0043](../adr/0043-card-board-first-interaction.md), [ADR-0044](../adr/0044-redesign-and-design-rules.md), [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).
+  - **Why:** the user's launch-readiness review (private) scored 1–8/10 per category: a strong AI layer on a thin foundation. P1 checked every claim against the code; all held.
+  - **How:** grilling rounds over the review and five *simulated* owner interviews ([readout](../research/interviews/2026-10-26-simulated-five-owners.md), hypotheses only), decisions P1-1…P1-12 (playbook §2).
+  - **Result:** Phases 9–17, S39–S76: a new look first, then setup, import and privacy, the card-board employee, pilot readiness, the pilot, SMS, deposits, calendar, the launch gate. SMS and deposits in V1; AI budget $10 for V1; the session standard (walkthrough, top-up, retro, scorecard gates); `/session-brief` and `/session-close` updated.
+  - **Branches:** the four leftover "a" branches (S32a, S36a, S37a, S38a) were checked: each is contained in its merged "b" PR (#41, #45, #46, #47). `/session-close` now deletes the "a" branch after the merge.
 - **S38b Phase 8e "b" (2026-10-25): every set recorded on Luna + Sol, pass^3 on the gated sets, the security review and the Phase 8 exit; one PR for S38a + S38b** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md) "Results (S38b)", [security review](../engineering/security-review-s38.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** `add_to_waitlist` v2 (call it before saying a client waits; add even when other times are free); three eval cases fitted to the eval world; three security tests (the daily draft cap, the system tools attacked from the chat, an expired or used waitlist code); `--phase-estimate-ok` also passes the $4.50 stop's estimate; Phase 8 cap $2.00.
   - **Gates:** every §2 gate met; pass^3 100% on feed_safety, safety, permissions, autonomy, memory_delete, memory_safety; drafts, recall, episodic 100%; scheduling 49/50. `move-done-no-approval-talk` passes. `waitlist` 10/12: two named known misses carried to Phase 9 (user).
   - **Checks:** `pnpm check` green; `pnpm test:integration` 1,239/1,239 (two load misses under the parallel run, each passing alone and untouched by S38b: an appointments concurrency property test at its 60 s limit, about 8 s alone, and the `memory-latency` episode search p95, as in S38a); Playwright not re-run (no screen changed since S38a's 94/94). Spend $0.808 (Phase 8 $1.79 of $2.00; all phases $3.80).
-- **S38a Phase 8e "a" (2026-10-25): the daily briefing, `waitlist_match`, "Join the waitlist", scripted only; branch `claude/s38a-daily-briefing` pushed without a PR** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:**
-    - migrations 0049–0050 and the morning job (drafts, then briefing, at the business's hour);
-    - Home's briefing card and pushes with counts only;
-    - the `waitlist_match` item and the public waitlist with an emailed code;
-    - `get_feed` v5 and `find_availability` v4;
-    - Phase 8 cap $1.75.
-  - **Checks:**
-    - `pnpm check` green.
-    - Integration green but the planned stale replay; one memory latency check missed under load and passed alone.
-    - Playwright 94/94.
-    - Code review: 8 findings fixed. Security review: none. $0.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
+- **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
+- **Product (user, P1):** first customer 1–6 chair owner-operators (barber, hair, lash/brow, nails); cards first, chat second (ADR-0043); SMS and deposits in V1; branded booking page in V1, layouts in V1.1, own-domain site after PMF; the pilot starts after Phase 13, email only.
 - **Workflow (user, M2):** tests in tiers (full suites once at the end, one at a time); real-model sessions split into "a" (build on the fakes) and "b" (probe, record once, PR); the skills `/session-brief`, `/eval-record`, `/session-close`; short session-log entries.
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
 - **CI minutes:** one CI run per session: all checks locally first, every commit (docs, "ADR accepted", STATUS) in before the PR, pushes to an open PR only to fix CI; docs-only PRs skip the slow jobs; CI runs on PRs, weekly on `main` and by hand. **No retries in CI** (M1).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
-- **OpenAI cost (user, S22):** $5 credit in total for Phase 6 with a hard limit, spent only at the final testing stage (S27); everything before runs on fake providers (playbook §4). S27 spent $0.74 ([ai-budget.md](ai-budget.md)); later phases use the rest under the same policy. **Phase 7 (S28):** at most $1.00 of the rest, recorded per session from S30 on Luna + Sol; the runner enforces it (`--phase 7`). **Phase 8 (S34):** at most $1.25 of the remaining $2.99 (about $1.10 planned), enforced by `--phase 8` from S36a; S36b spent $0.62, S37b $0.36, so $0.27 was left; raised to $1.75 at the S38a brief and **to $2.00 in S38b** (user); Phase 8 spent $1.79. All phases $3.80 of $5.00, the runner's stop at $4.50: **$0.70 left for Phases 9–11** (S39 decides Phase 9's share). `--phase-estimate-ok` (user's say-so each session) also passes the $4.50 stop's estimate, never its actual spend.
-- **Skip domain, business email and LLC** until before the pilot (Phase 11); brand, trademark and domain checks then.
-- **Design:** Pepper green + chili accent (PCR-002), Bricolage Grotesque + Figtree, warm and friendly, mobile-first (`docs/mockups/README.md`).
+- **OpenAI cost (user, P1):** **$10 for Phases 9–17** on top of the $3.80 spent through Phase 8 (caps: Phase 12 $3.00, Phase 17 $1.50, reserve $5.50; no real calls elsewhere). Development evals on a separate `pepper-dev-evals` project with data sharing on (free daily tokens, made-up data only); production on a sharing-off, zero-retention project. The runner's $4.50 total stop rises to $13.80 in S56a. History of earlier caps: [ai-budget.md](ai-budget.md), [decisions.md](decisions.md).
+- **Brand, LLC and domain parked (user, P1):** the name can change later; a cheap neutral domain for the pilot in Phase 13; the LLC before SMS and Stripe go live (both are built in sandbox first).
+- **Design (user, P1):** a complete redesign in Phase 9 (ADR-0044); direction picked from three mockups in S39 (warm boutique and clean premium side by side, bold as the third); rules in [DESIGN.md](../design/DESIGN.md) enforced by lint, contrast and screenshot tests. Until S40 the current tokens (PCR-002) stay.
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **P1 (user, 2026-10-26):** planning only, no S39 work. Grill Me installed (the `grilling` skill). Decisions P1-1…P1-12 in the [V1 playbook](v1-playbook.md) §2: staged 10/10 with "what 10 looks like" lines; five interviews as reference (the shared ones are simulated); SMS and deposits into V1; brand/LLC/domain parked; data-sharing dev-evals project and a **$10** V1 cap ("max 10 bucks"); the 1–6 chair segment, cards first and the booking-page/website staging; pilot after Phase 13 with a neutral domain; a complete redesign first, warm-boutique + clean-premium (dislikes: bland, template-like, not premium); smart deposits; approve by text. "Plan it properly by preserving the original working flow", "raise the PR and merge the plan".
 - **S38b (user, 2026-10-25):** at the brief "Go with your recommendations". During the recording: "Allow for S38b" (`--phase-estimate-ok`); "Fix, cap $2.00" (the `add_to_waitlist` guide fix and a second full re-record; Phase 8 cap $1.75 → $2.00); "Carry to Phase 9" (`wl-add-marco-saturday`, `wl-staff-own-client` named known misses; Phase 9's first session moves the full-window check into the domain); "Allow, these runs only" (`--max-cost 2` for single-case pass^3 runs over the $1.50 guard); "Extend the flag" (`--phase-estimate-ok` passes the $4.50 stop's estimate). **Claude:** cases fitted where the model was right (`tool-create-booking-1`, `tool-get-feed-4`, `wl-staff-colleague-refused`); three security tests for controls without one; low findings L9–L14 logged.
 - **S38a (user, 2026-10-25):** at the brief "Go with your recommendations": the Phase 8 cap rises to $1.75; ADR-0042 pre-approved. **Claude (ADR-0042):** a `daily_briefing` kind; the hour a business setting over the template's, shared with the drafts pass; the briefing runs while paused; the public waitlist through the booking code's flow; the code review's 8 fixes.
 - **S37b (user, 2026-10-24):** at the brief "Go with your recommendations". During the recording: "Allow for S37b" (`--phase-estimate-ok` for the full recording); "Carry to S38" (`move-done-no-approval-talk` named in `KNOWN_REAL_MODEL_MISSES`; S38a adds a `find_availability` guide line, S38b's re-record must clear it); "Decide at the S38a brief" (the Phase 8 cap for S38b's re-record and pass^3). **Claude:** the waitlist cases corrected where the model was right (free times, two Saras, a client staff can't see); S36b's stale pass^3 trials 2–3 of 7 chat cases dropped; the code review's duplication finding left (ADR-0041 results).
@@ -45,42 +44,61 @@ Full wording and the history in [decisions.md](decisions.md).
 - **S36a (user, 2026-10-24):** at the brief "Go ahead, start with the recommendation and complete the tasks": D-1 A (a morning drafts pass once a day per business at the template's hour, which S38's briefing will call); D-2 A (the postal address in settings, no nudge until it is set); D-3 owners and managers approve nudges; D-4 ADR-0040 pre-approved. **Claude (ADR-0040):** a pass's proposals belong to the business (`requestedBy` null, audited as system) and always ask; edits re-fingerprint through `reviseProposal`; any earlier nudge in the interval (sent, refused or expired) blocks another; opt-out stops nudges only.
 - **S35 (user, 2026-10-24):** at the brief "Go ahead with your recommendations, ADR is pre-approved" (D-1 re-run via a request row + 1-minute `Periodic` pass; D-2 thresholds; D-3 audience; D-4 Needs your OK / Done from proposals and receipts; D-5 `feed_settings` with ask-once; D-6 ADR-0039). Later "complete all tasks don't have to ask, go with recommendation". **Claude (ADR-0039):** `services.rebook_after_days`; `apps/worker` may import templates; append-only `insight_requests` + advisory lock (after a timestamp version lost a request and a counter row was a hot lock); hours/time-off changes also re-run; dismissed items come back after the snooze.
 - **S34 (user, 2026-10-24):** at the brief "Go ahead with your recommendations": layout A (S35; S36a/b; S37a/b; S38a/b), Phase 8 cap $1.25, BullMQ only for the waitlist with `Periodic` passes for insights and the morning run, insights by rules and only drafts by the model, waitlist offers start at "ask". Then "approved, go ahead with /session-close": the playbook and PCR-006 with the review's additions (one-click unsubscribe for nudges, `add_to_waitlist` + dial action `waitlist.change`, offers to the top 3, a template-written briefing without email, `staff_overload`, snooze and "Pause suggestions").
-- **S33 (user, 2026-10-24):** at the brief "Go ahead, start with your recommendation": one session; cap option A ($1.40; pass^3 on every set a §2 pass^3 gate names); held-out (a) (`in-two-days` accepts `get_day`, `who-works-saturdays` untuned); `--phase-estimate-ok`. **During the recording:** "Raise the cap to $1.55" (one whole-suite run measured at ≈ $0.197). **After it:** "go with your recommendation": carry `pasted-request-then-book` as a named known miss (its guide fix in Phase 8's first batch) and cap the business block at 600 tokens. **Claude:** the `other-business-bookings` grader corrected; pass^3 gates from §2; `in-three-days` held out in place of `in-two-days` (code review); dependency patches (security review D1–D2).
-- **S32b (user, 2026-10-23, Session Brief):** "go ahead with your recommendation": a gate still missing after one fix → ask; S33's pass^3 is a cap decision at its brief; **"Allow, as in S31"** `--phase-estimate-ok` for this session's recordings. **Claude:** the `just-do-it-still-asks` grader corrected where the model was right.
-- **S32a (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved": D-11 over the mock-up (final delete, no Undo); ADR-0038 pre-approved; scripted model only, branch pushed without a PR. **Claude (ADR-0038):** "What I know" from the chat header; 500 facts a page; the chip counts only active facts; `memory-ids.ts` for the chat contract.
-- **M2 (user, 2026-10-23, after S31):** asked how to make sessions take less time and fewer tokens without changing how the project runs; approved Claude's plan (test tiers, probe before recording, the three skills, the hook fix, fewer docs); chose the split rule **from S32** (not S33) and the **short** session-log entry. The S32 scope is unchanged, only cut in two.
-- **S31 (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved"; D-1 full re-record at the end and parallel eval runs; D-2 episodes linked to their facts by id; D-3 one per conversation; D-4 forgetting a rule's fact keeps the rule; D-5 rules only from stated preferences; D-6 no episode when nothing is worth remembering. **During the recording:** "Fix + re-record" (memory_write gate), "Estimate guard only" (`--phase-estimate-ok`), "Code fix only" (carry `mr-same-as-last-time`; narrow `remember_fact`'s wording in S32). **Claude (ADR-0037):** the worker imports `@pepper/ai`; a read tool may `prepare` outside the transaction; the remembered rule linked through the receipt; recorded int8 embeddings.
-- **S30b (user, 2026-10-23):** record S30 within the $1 cap, fix only what fails, PR and merge. Forget's reworded-value leak: the user chose **"Turn-level + verbatim"** (ADR-0036). **Claude:** runs packed by estimate (guards unchanged); three graders corrected where the model was right; stale S27 trials 2–3 dropped (pass^3 at S33).
-- **S30 (user, 2026-10-23, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved"; PR and merge at the end, then the next session's prompt. D-1 `forget_fact` always asks (no new dial action); D-2 a save after outside text asks; D-3 no warning without read access; D-4 free-time fix now; D-5 one trial of every set; D-7 record when the key is there. **Claude (ADR-0035):** stash values as proposed facts; references filled per request; only outside text makes saves ask; saves of a key take turns; real runs in chunks of 20.
-- **S29 (user, 2026-10-23):** "Go ahead with your recommendations, start S29". Embedding tests on fixtures shaped like OpenAI's documented answers ($0); real embeddings recorded in S31. **Claude (ADR-0034):** `embed` as a port of its own; the scrub limited to text since the fact existed plus its source turn; cards that held a forgotten value dropped; staff read the business's non-sensitive facts and change only their clients' and visits'; `--phase` required to record.
-- **S28 (user, 2026-10-23):** asked for the Phase 7 playbook, then "review your plan, if you can build a better plan you can, and start" (Claude as technical advisor: better, more and more efficient features than competitors). Approved: the reviewed playbook and PCR-005 (§10 D-1…D-16), adjustable at the S29 brief.
-- **S27 (user, 2026-10-22, Session Brief):** one session; unblock Undo refuses over a new booking; routine model by evals; about 120 cases with 20% held out; Sentry/Grafana at the start of Phase 11 pilot prep (Claude's advice). **Claude (ADR-0033, choice delegated "by pass rate, latency and cost"):** Luna + Sol at effort `low`; the strong model after step 4; the link scrubber; case corrections only where a case contradicted the world, the dial or the privacy rules; the reserve was not spent.
-- **S26b (user, 2026-10-21, Session Brief):** "Go ahead with your recommendations, ADR is pre-approved": a staff member unblocking a colleague's time is `forbidden` (they can see it); explanation facts this session; no new card kinds or Playwright journeys.
-- **S26b defaults (Claude, in ADR-0032):** `find_client_bookings` 5 upcoming / 3 recent without a window; `list_todos` 20, titles redacted, the AI's own to-dos labelled untrusted; `get_day` v2; preview facts are the explanation's; change rows read from the sides' shape; the cost guard's one run is 25 cases (S27 chunks sets).
-- **S26 (user, 2026-10-21, Session Brief):** "Go ahead with your recommendations, draft PCR-004, ADR is pre-approved":
-  - migration 0036 in ADR-0031 as an ADR-0028 amendment, without a PCR;
-  - staff may undo what a lead approved for them;
-  - jsdom, Testing Library and axe-core (dev-only) in `@pepper/ui`;
-  - managers change autonomy (ADR-0028 over the prototype);
-  - the chat's Redis polling stays; blocking reads in Phase 11;
-  - PCR-004: S26b (four tools) before S27.
-- **End of S26 (user, pre-approved at the brief):** "I'm pre-approving the PCR and ADR. You have to raise PR and merge to main and at last give a perfect prompt to start the next session."
-- **S26 defaults (Claude, in ADR-0031):** cards read their record by id; Approve sends only the shown fingerprint; `ToolDeps.requester`; plain text only; Stop and leaving cancel; a card choice during a turn is queued; "Approve all" in order, stopping at the first failure.
-- **S25 (user, 2026-10-21, Session Brief):** "Go ahead with your recommendations, ADR is fine": own-only conversations, deleted after 90 days; 5M tokens a month, soft at 80%; turns keep running when the connection drops (explicit cancel only); ADR-0027/0029 amendments in ADR-0030 without a PCR. D8 decided: SSE.
-- **S25 defaults (Claude, in ADR-0030):** 6 steps / 20 s / 5 writes; reads parallel, writes serial; tool calls recorded before they run, recovery only reads; breaker 3 → 30 s; rate limits 20 / 5 min per member; events in a Redis stream (1 h).
 
 ## Waiting on the user
-1. **Before the pilot, at the start of Phase 11 pilot prep (user, S27):** create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`). Claude raises it at that brief.
-2. **Before the pilot, by hand (S27 security review):** the 5-minute VoiceOver/NVDA check of the streamed chat; confirm the OWASP LLM/Agentic Top 10 2026 titles in the signed-in PDFs on genai.owasp.org; check zero data retention eligibility on the OpenAI account (L2), now also for episodes (S33 review L8); state the backup retention for deleted memory (L7).
+Raised by Claude at the brief of the session named.
+1. **During Phase 10 (S45 brief):** start Google's OAuth verification for the Calendar scopes (it takes weeks; needed in S70).
+2. **Before S56b:** create the two OpenAI projects (`pepper-dev-evals` with data sharing on, production with sharing off), check the free daily token limits on the dashboard (Data Controls → Sharing), and set the hard limit to the $10 V1 budget.
+3. **By S57 (Phase 13):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
+4. **Before the pilot (S60), by hand:** the 5-minute VoiceOver/NVDA check; a push test on a real iPhone; confirm the OWASP LLM/Agentic Top 10 2026 titles; zero data retention on the production OpenAI project (L2, L8); the backup retention for deleted memory (L7); 3–5 pilot owners from the target segment.
+5. **Before SMS and Stripe go live (Phases 14–15):** form the LLC, register 10DLC (4–8 weeks), open the Stripe account (test mode needs only a sign-up, from S65).
 
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S38b and M2 are done and merged (Phases 0–8). Details in [session-log.md](session-log.md).
+S1–S38b, M1–M2 and P1 are done (Phases 0–8 and the re-plan). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S39 | Phase 9 planning (zero-setup onboarding): the Phase 9 playbook and PCR (sessions, gates, eval sets, the Phase 9 OpenAI share of the $0.70 left); first build task: `add_to_waitlist` checks its windows in the domain so `KNOWN_REAL_MODEL_MISSES` can end empty at the next recording | 9 | Playbook and PCR approved; the waitlist fix planned with its recording |
+| S39 | Phase 9 · Design direction: three clickable mockups (warm boutique, clean premium, bold), the user picks; DESIGN.md and ADR-0044 filled in; no app code | 9 | A direction approved |
+| S40 | Foundation: new tokens, fonts, component kit, gallery, raw-color lint, screenshot tests | 9 | Theme/contrast tests and gallery baselines green |
+| S41 | App shell + navigation (More tab, Pepper group), Home, Chat and the cards on the kit | 9 | Those screens on the kit; journeys + screenshots green |
+| S42 | Calendar, Clients, Services, Team, Autonomy, What I know, Waitlist on the kit | 9 | Every signed-in screen on the kit |
+| S43 | Public pages + auth on the kit, legacy stylesheet deleted, UX copy pass, **Phase 9 gate** | 9 | Scorecard C3, C4, C10 ≥ 8 |
+| S44 | Password reset, email verification, change email; `add_to_waitlist` window check in the domain | 10 | Journeys + domain tests green |
+| S45 | Business type at signup → pre-filled menu and hours; US zones first; activation events | 10 | A barber business bookable with zero typing |
+| S46 | Setup checklist + warnings; staff without hours hidden; first free day; plain zone names | 10 | Review UX #1–#5 closed with tests |
+| S47 | Branded booking page (profile, images, colors), remembered devices, drop-off per step; **Phase 10 gate** | 10 | New owner bookable < 10 min |
+| S48 | Client import (five tools + generic), preview, dedupe, undo by batch | 11 | AC-W1-3; no duplicates on re-import |
+| S49 | History + upcoming appointments import; tags, birthdays | 11 | 1,000 clients / 5,000 visits < 2 min |
+| S50 | Client merge, delete, staff walk-ins, paging and search | 11 | Playwright; isolation suite 100% |
+| S51 | Export, account + business deletion, terms/privacy drafts; **Phase 11 gate** | 11 | Export round-trips; C11, C13 ≥ 8 |
+| S52 | Home card board (ranked by $, grouped, quiet start) + activity log | 12 | Grouped feed; every AI action in the log |
+| S53 | Autonomy presets, standing rules, client-visible moves ask, earned trust | 12 | Preset/rule tests; move card names the email |
+| S54 | Cancellation → fill with receipts, win-back list, the post-import aha | 12 | Offer < 2 min p95; 0 wrong sends |
+| S55 | Weekly value card, evening wrap, review requests | 12 | Numbers equal fixture sums; caps tested |
+| S56a | `send_client_message`, `mark_no_show`, prompt fixes, new eval cases; scripted ("a") | 12 | Every eval set green on scripted cassettes |
+| S56b | Record ("b", $3.00 cap), `KNOWN_REAL_MODEL_MISSES` empty; **Phase 12 gate**; one PR | 12 | Every gate met; C1, C5 ≥ 8, C8 ≥ 9 |
+| S57 | Deploy: VPS, neutral domain, TLS, Resend + SPF/DKIM/DMARC, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
+| S58 | Backups + restore drill, Sentry/Grafana, Redis rate limits, load test | 13 | Restore drill passes; SLOs met |
+| S59 | Support button, help page, terms + privacy, AI disclosure, pilot metrics page | 13 | Every metric has a number |
+| S60 | Security review, manual checks, **pilot gate** → 🚦 pilot starts | 13 | Scorecard pilot column met |
+| S61 | SMS channel: adapter, consent, STOP/HELP, quiet hours, sandbox | 14 | Contract tests; STOP < 1 min |
+| S62 | SMS reminders (incl. < 24 h bookings), confirm by text | 14 | Timing + idempotency tests |
+| S63 | Approve by text (signed single-use codes) | 14 | Replay and spoof tests |
+| S64 | SMS live after 10DLC; **Phase 14 gate** | 14 | C12 ≥ 7 |
+| S65 | Stripe Connect Express onboarding, idempotent webhooks | 15 | Webhook replay/signature tests |
+| S66 | Deposits + card on file, Stripe-hosted fields, refunds | 15 | Test-mode pay/cancel/refund journeys |
+| S67 | Smart deposits + cancellation-policy builder | 15 | Rule fixtures; policy in every channel |
+| S68 | No-show fee by approval card; **Phase 15 gate** | 15 | No charge without approval; C12 ≥ 8 |
+| S69 | Week view + drag to move | 16 | Drag journeys; double-booking check |
+| S70 | Google Calendar in (busy blocks) | 16 | Contract + token-expiry tests |
+| S71 | Google Calendar out, incremental sync | 16 | Conflict + duplicate scenarios |
+| S72 | Recurring appointments, staff week; **Phase 16 gate** | 16 | Recurrence property tests; C6 ≥ 8 |
+| S73 | Reports (five numbers) | 17 | Numbers equal fixture sums |
+| S74 | Pepper billing: plans, 30-day trial, dunning | 17 | Test-mode billing journeys |
+| S75 | Landing page + pricing | 17 | Lighthouse ≥ 95 mobile |
+| S76 | Final re-record ($1.50), security review, **launch gate** | 17 | Every category ≥ 9; go/no-go |
 
 ## How to resume in a new session
-Start the session from the latest `main`. Say: *"/session-brief"* (or *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."*). A "b" half's prompt names the "a" branch to merge first. During the session Claude keeps "In progress" current after each finished task; at the end (`/session-close`) it moves that session's summary into "Last sessions", appends a short entry to `session-log.md` and new chat decisions to `decisions.md`, and commits them.
+Start the session from the latest `main`. Say: *"/session-brief"*. The brief reads this file and the session's playbook row, names the skills and the top-up, and carries the last retro. (or *"Read CLAUDE.md and docs/plan/STATUS.md, give me the Session Brief, then continue."*). A "b" half's prompt names the "a" branch to merge first. During the session Claude keeps "In progress" current after each finished task; at the end (`/session-close`) it moves that session's summary into "Last sessions", appends a short entry to `session-log.md` and new chat decisions to `decisions.md`, and commits them.
