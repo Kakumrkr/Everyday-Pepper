@@ -1,6 +1,6 @@
 # S39 design-direction mockups
 
-Three directions for the redesign (ADR-0044, [DESIGN.md](../../design/DESIGN.md) §2), each with the same five phone screens: Home card board, Calendar day, Client profile, the public booking page (in the shop's own colour, PCR-001) and an approval card with Why? and Undo. Light, plus a dark row per direction. Every screen shows one made-up shop: Southside Cuts, Chicago, on Tue Oct 27 (barbers Dre and Randy, prices from `packages/templates/src/catalog/barber.ts`).
+Three directions, plus the recommended A+B mix (`M*` files), for the redesign (ADR-0044, [DESIGN.md](../../design/DESIGN.md) §2), each with the same five phone screens: Home card board, Calendar day, Client profile, the public booking page (in the shop's own colour, PCR-001) and an approval card with Why? and Undo. Light, plus a dark row per direction. Every screen shows one made-up shop: Southside Cuts, Chicago, on Tue Oct 27 (barbers Dre and Randy, prices from `packages/templates/src/catalog/barber.ts`).
 
 - **Live, clickable canvas (private to the owner):** https://claude.ai/artifact/QCiTKo7b95kE6MAtXjNQCY
 - `canvas/`: the canvas sources (`.dc.html` artboards and `canvas.json`). They need the canvas runtime and don't open on their own.
