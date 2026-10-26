@@ -1110,3 +1110,11 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
     - `wl-add-marco-saturday` and `wl-staff-own-client` are named known misses: the domain check in Phase 9's first build session, then re-record;
     - the cost estimate runs about 150× actual with 21 tools (a better estimator would spare the flags);
     - L9–L14 for Phase 11.
+- **P1 V1 re-plan (2026-10-26): planning only, no product code** ([PCR-007](changes/PCR-007.md), [V1 playbook](v1-playbook.md), [scorecard](scorecard.md), [ADR-0043](../adr/0043-card-board-first-interaction.md), [ADR-0044](../adr/0044-redesign-and-design-rules.md), [DESIGN.md](../design/DESIGN.md)).
+  - **Inputs:** the user's private launch-readiness review (2026-10-25, not in the repo); every claim checked against the code by an Explore agent (all held; 23 tools in the catalog, 21 in the chat); five simulated owner interviews (saved as hypotheses).
+  - **Method:** the `grilling` skill (Grill Me, installed from the Skills For Real Engineers plugin), four decision rounds, Q1–Q17 → P1-1…P1-12.
+  - **Written:** the playbook (39 sessions to launch), the scorecard with "what 10 looks like", DESIGN.md rules with their enforcement, two ADRs, PCR-007, the five-owner guide; roadmap, scope, vision, UX principles, budget, risks (R14–R18), dependency map, `CLAUDE.md`, `/session-brief` (owner value, scorecard, skills, top-up), `/session-close` (walkthrough, retro, scorecard gate, "a" branch deletion).
+  - **Branches:** `claude/kind-euler-4ts3n5` (S32a), `claude/s36a-suggestions-drafts`, `claude/elegant-rubin-kltm4o` (S37a) and `claude/s38a-daily-briefing` checked: each is contained in its merged "b" PR (#41, #45, #46, #47).
+  - **Checks:** `prettier --check` on the changed docs; docs-only PR, so CI skips the slow jobs.
+  - **Retro:** went well: checking the review against the code before deciding · do better: name each session's owner value from the start, not 38 sessions in · top-up for S39: show the five mockup screens with real-looking barber data (prices, names, photos placeholders) so the pick is about the product, not lorem ipsum.
+

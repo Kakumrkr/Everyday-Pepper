@@ -2,6 +2,12 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.33 — 2026-10-26
+- P1 (planning session, **the V1 re-plan**): [V1 playbook](v1-playbook.md) (Phases 9–17, one row per session S39–S76, the session standard, skills by kind, budget), [scorecard](scorecard.md), [DESIGN.md](../design/DESIGN.md), [ADR-0043](../adr/0043-card-board-first-interaction.md) (cards first), [ADR-0044](../adr/0044-redesign-and-design-rules.md) (redesign and enforced design rules).
+  - **Plan change ([PCR-007](changes/PCR-007.md), user):** Phases 9–11 replaced by 9 New look · 10 First 10 minutes · 11 Switching + privacy · 12 The employee · 13 Pilot readiness · the pilot · 14 SMS · 15 Deposits · 16 Calendar + staff · 17 Launch gate. SMS, deposits, recovery, export and deletion, history import, week view, recurring, reports, billing and a landing page into V1; extraction at setup out of V1. First customer narrowed to 1–6 chair owner-operators. AI budget $10 for Phases 9–17. The `/session-brief` and `/session-close` skills and `CLAUDE.md` carry the session standard.
+
+  **Compatibility:** docs and skills only; every planned change is additive (PCR-007).
+
 ## 0.32 — 2026-10-25
 - S38a + S38b (Phase 8e, **Phase 8 exit**): the daily briefing, the `waitlist_match` feed item and the public "Join the waitlist" ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md)); every set re-recorded on Luna + Sol and pass^3 on the gated sets ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md) "Results (S38b)"); [security review](../engineering/security-review-s38.md).
   - **Plan change (user):** the Phase 8 OpenAI cap goes from $1.25 to $1.75 (S38a brief) and to $2.00 (S38b, for the waitlist guide fix's second recording); spent $1.79. `--phase-estimate-ok` also passes the $4.50 stop's estimate, never its actual spend.

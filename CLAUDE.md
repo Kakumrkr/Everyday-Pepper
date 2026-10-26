@@ -3,7 +3,7 @@
 These rules apply to every Claude Code session in this repository. Read this file first, then the docs relevant to the task.
 
 ## Project in one paragraph
-**Pepper** (working name; the "AI Employee") — one app that lets small service businesses run day-to-day operations by talking to an AI that acts, remembers, suggests, and follows through ("you're hiring an employee, not buying software"). V1 targets **appointment-based** US businesses (Beauty, Wellness & fitness). Start with `docs/README.md`; the master plan is `docs/plan/roadmap-phases.md`.
+**Pepper** (working name; the "AI Employee") — one app that lets small service businesses run day-to-day operations with an AI that acts, remembers, suggests, and follows through ("you're hiring an employee, not buying software"). Owners mostly approve what it prepares with one tap; chat is there for anything else (cards first, ADR-0043). V1 targets **appointment-based** US businesses (Beauty, Wellness & fitness), first the 1–6 chair owner-operator: barber, hair, lash/brow, nails. Start with `docs/README.md`; the master plan is `docs/plan/roadmap-phases.md`, and **every session from S39 to launch has a row in `docs/plan/v1-playbook.md`**, judged by `docs/plan/scorecard.md`.
 
 ## Your roles
 Act as the project's **Principal Software Engineer, Software Architect, Product Planner, Code Reviewer, QA Engineer, Security Engineer, and DevOps Engineer**. Each change should satisfy all of these perspectives.
@@ -23,6 +23,8 @@ Act as the project's **Principal Software Engineer, Software Architect, Product 
 ## Session protocol
 The user guides each feature session. **One session = one feature-sized goal** (one big feature, or a few small related tasks). Big phases are split across several sessions; unrelated small fixes are batched into a separate maintenance session. If a session's goal turns out larger than expected, finish a clean, tested sub-part, commit, and move the rest to the next planned session.
 **A session that records the real model is split in two** (user, M2): **"a"** builds the change and gets every eval green on the scripted cassettes, runs the end checks, pushes its branch (no PR: its recorded cassettes are stale until "b") and gives the "b" prompt naming that branch; **"b"** merges that branch into its own, probes, records once, fixes, re-runs the end checks and opens the one PR. Both halves are rows in "Planned sessions".
+
+**Session standard (user, P1).** On top of the steps below, every session follows `docs/plan/v1-playbook.md` §3: it ships owner value (or a named enabler of the next session), names its scorecard categories, the skills for its kind of work (§4) and one **top-up** in the brief; closes with a **product walkthrough** at 375 px in light and dark and a three-line **retro**; a phase's last session scores the scorecard and doesn't close the phase below target.
 
 Project skills (`.claude/skills/`) hold the routine steps: **`/session-brief`** to start, **`/eval-record`** to record, **`/session-close`** to finish. Use them instead of rebuilding the steps.
 
@@ -70,7 +72,8 @@ Next.js + TypeScript (PWA, `apps/web`) · NestJS (`apps/api`, `apps/worker`) · 
 - No secrets in code, logs, fixtures, or commits. Config via validated env; `.env` files are git-ignored.
 - PII never logged; use the redacting logger.
 - Times stored in UTC, rendered in the tenant's time zone; never use the server's local time.
-- Money (future) as integer minor units.
+- Money as integer minor units (cents).
+- **UI** follows `docs/design/DESIGN.md`: tokens only (no raw colors, sizes or durations), components from `packages/ui`, phone first at 375 px, light and dark equally finished, screenshot tests for every restyled screen.
 
 ## Testing standards
 See `docs/engineering/testing-strategy.md`. Minimum per change: unit tests for logic; integration tests (real Postgres via Testcontainers) for repositories/RLS; contract tests for module interfaces and integrations; Playwright for user-visible flows; LLM evals for any prompt/tool/model change. Coverage gate ≥ 80% on `packages/core` and modules. Cross-tenant isolation suite must stay at 100%.
@@ -86,4 +89,5 @@ See `docs/engineering/testing-strategy.md`. Minimum per change: unit tests for l
 ## Git
 - Small, focused commits with descriptive messages; never commit failing builds.
 - Do not create PRs, push to other branches, or deploy unless asked.
+- After a split session's PR merges, delete its merged "a" branch (GitHub's auto-delete removes only the PR's own branch; `/session-close` step 5).
 - **Save GitHub Actions minutes** (private repo, 2,000 minutes a month; one CI run is ~18 minutes). Pushing a session branch without a PR runs nothing; every push to an open PR runs full CI. So: run all checks locally first (`pnpm check`, `pnpm test:integration`, Playwright when screens or flows change); put every commit in before opening the PR, including the docs and the "ADR accepted" and STATUS updates; then open the PR once and merge after one green run. Push to an open PR only to fix a CI failure, and group fixes into one push. CI runs on PRs (not again on `main` after merge), weekly on `main`, and skips its jobs for docs-only PRs (`.github/workflows/ci.yml`).
