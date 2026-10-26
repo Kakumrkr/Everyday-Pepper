@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A+B · Calendar day</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Figtree', system-ui, sans-serif; font-size: 16px; line-height: 1.4">
+<header style="padding: 24px 20px 12px; display: flex; flex-direction: column; gap: 14px; border-bottom: 1px solid {{t.line}}">
+<div style="display: flex; align-items: flex-end; justify-content: space-between">
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 14px; color: {{t.ink2}}; font-weight: 500">Tuesday</span>
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05">October 27</h1>
+</div>
+<div style="display: flex; flex-direction: column; align-items: flex-end">
+<span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums">{{money}}</span>
+<span style="font-size: 13px; color: {{t.ink2}}">{{count}} visits · {{gaps}} open</span>
+</div>
+</div>
+<div role="group" aria-label="Pick a day" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+<button type="button" aria-pressed="{{d.today}}" style="{{d.style}}"><span style="font-size: 12px; font-weight: 600">{{d.w}}</span><span style="font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums">{{d.n}}</span></button>
+</sc-for>
+</div>
+<div role="group" aria-label="Whose day" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: 999px; background: {{t.surface2}}">
+<sc-for list="{{tabs}}" as="x" hint-placeholder-count="3">
+<button type="button" onClick="{{x.pick}}" aria-pressed="{{x.on}}" style="{{x.style}}">{{x.label}}</button>
+</sc-for>
+</div>
+</header>
+
+<main style="flex: 1; overflow-y: auto; padding: 12px 20px 24px">
+<div style="{{gridStyle}}">
+<div style="position: relative">
+<sc-for list="{{hours}}" as="h" hint-placeholder-count="10">
+<span style="position: absolute; left: 0; top: {{h.top}}px; transform: translateY(-50%); font-size: 12px; color: {{t.ink2}}; font-variant-numeric: tabular-nums">{{h.label}}</span>
+</sc-for>
+</div>
+<sc-for list="{{cols}}" as="c" hint-placeholder-count="2">
+<div style="position: relative; border-left: 1px solid {{t.line}}">
+<sc-for list="{{c.blocks}}" as="a" hint-placeholder-count="8">
+<button type="button" onClick="{{a.pick}}" aria-label="{{a.aria}}" style="{{a.style}}"><span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{a.name}}</span><span style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{a.sub}}</span></button>
+</sc-for>
+</div>
+</sc-for>
+<div aria-hidden="true" style="position: absolute; left: 44px; right: 0; top: 30px; height: 2px; background: {{t.danger}}"></div>
+</div>
+</main>
+
+<sc-if value="{{hasSel}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; background: {{t.scrim}}; display: flex; align-items: flex-end">
+<section role="dialog" aria-label="{{sel.name}}" style="width: 100%; background: {{t.surface}}; border-radius: 28px 28px 0 0; padding: 12px 20px 28px; display: flex; flex-direction: column; gap: 14px">
+<span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: {{t.line}}"></span>
+<h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700">{{sel.name}}</h2>
+<dl style="margin: 0; display: grid; grid-template-columns: 84px minmax(0, 1fr); font-size: 15px; border-top: 1px solid {{t.line}}">
+<dt style="padding: 10px 0; border-bottom: 1px solid {{t.line}}; color: {{t.ink2}}">When</dt><dd style="margin: 0; padding: 10px 0; border-bottom: 1px solid {{t.line}}">{{sel.detail}}</dd>
+<dt style="padding: 10px 0; border-bottom: 1px solid {{t.line}}; color: {{t.ink2}}">Value</dt><dd style="margin: 0; padding: 10px 0; border-bottom: 1px solid {{t.line}}; font-weight: 700; font-variant-numeric: tabular-nums">{{sel.price}}</dd>
+<dt style="padding: 10px 0; border-bottom: 1px solid {{t.line}}; color: {{t.ink2}}">Note</dt><dd style="margin: 0; padding: 10px 0; border-bottom: 1px solid {{t.line}}">{{sel.note}}</dd>
+</dl>
+<div style="display: flex; gap: 8px">
+<a href="{{sel.href}}" style="flex: 1; min-height: 48px; border-radius: 999px; background: {{t.brand}}; color: {{t.brandInk}}; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none">{{sel.cta}}</a>
+<button type="button" onClick="{{close}}" style="min-height: 48px; padding: 0 20px; border: 1.5px solid {{t.lineStrong}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-weight: 600; cursor: pointer">Close</button>
+</div>
+</section>
+</div>
+</sc-if>
+
+<nav aria-label="Main" style="display: flex; justify-content: space-around; padding: 8px 8px 22px; background: {{t.surface}}; border-top: 1px solid {{t.line}}">
+<a href="MHome.dc.html" style="min-width: 64px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: {{t.ink2}}; font-size: 12px; font-weight: 600"><span style="height: 30px; display: flex; align-items: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span>Home</a>
+<a href="MCalendar.dc.html" aria-current="page" style="min-width: 64px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: {{t.brand}}; font-size: 12px; font-weight: 700"><span style="width: 52px; height: 30px; border-radius: 999px; background: {{t.brandSoft}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>Calendar</a>
+<a href="MClient.dc.html" style="min-width: 64px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: {{t.ink2}}; font-size: 12px; font-weight: 600"><span style="height: 30px; display: flex; align-items: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg></span>Clients</a>
+<a href="MApprove.dc.html" style="min-width: 64px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: {{t.ink2}}; font-size: 12px; font-weight: 600"><span style="height: 30px; display: flex; align-items: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></span>Chat</a>
+<a href="MBooking.dc.html" style="min-width: 64px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: {{t.ink2}}; font-size: 12px; font-weight: 600"><span style="height: 30px; display: flex; align-items: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></span>More</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: null, who: 'Both' };
+  }
+  renderVals() {
+    const light = { bg: '#F6F1EC', surface: '#FFFDFB', surface2: '#EFE7DF', ink: '#2A1F26', ink2: '#5E4F58', line: '#E4D8CD', lineStrong: '#8E7C86', brand: '#5A2D52', brandInk: '#FFFFFF', brandSoft: '#F0E2EC', accent: '#E8A33D', accentSoft: '#F8E7C8', danger: '#B3261E', scrim: 'rgba(42,31,38,0.45)' };
+    const dark = { bg: '#1A1418', surface: '#241C21', surface2: '#2E242B', ink: '#F5EDF1', ink2: '#CDBFC7', line: '#3A2F36', lineStrong: '#8A7A84', brand: '#E0B3D6', brandInk: '#2A1023', brandSoft: '#3B2737', accent: '#F2B85A', accentSoft: '#3D3018', danger: '#FF8A80', scrim: 'rgba(0,0,0,0.6)' };
+    const t = this.props.dark ? dark : light;
+    const PX = 1.5;
+    const base = 'position: absolute; left: 4px; right: 0; box-sizing: border-box; border-radius: 12px; padding: 4px 8px; display: flex; flex-direction: column; text-align: left; font: inherit; color: ' + t.ink + '; cursor: pointer; overflow: hidden; ';
+    const toMin = (s) => { const [h, m] = s.split(':').map(Number); return (h < 9 ? h + 12 : h) * 60 + m; };
+    const block = (who, a) => {
+      const top = (toMin(a.at) - 540) * PX;
+      const h = a.len * PX - 3;
+      let look;
+      if (a.kind === 'open') look = 'background: transparent; border: 1.5px dashed ' + t.lineStrong + ';';
+      else if (a.kind === 'break') look = 'background: ' + t.surface2 + '; border: 0; color: ' + t.ink2 + ';';
+      else if (who === 'dre') look = 'background: ' + t.brandSoft + '; border: 0; border-left: 4px solid ' + t.brand + ';';
+      else look = 'background: ' + t.accentSoft + '; border: 0; border-left: 4px solid ' + t.accent + ';';
+      const short = a.len <= 15 ? 'flex-direction: row; gap: 6px; align-items: center; padding-top: 0; padding-bottom: 0; ' : '';
+      return { ...a, style: base + 'top: ' + top + 'px; height: ' + h + 'px; ' + short + look, aria: a.name + ', ' + a.at + ', ' + a.sub, pick: () => this.setState({ sel: a }) };
+    };
+    const dreList = [
+      { at: '9:00', len: 30, name: 'Kevin Nguyen', sub: 'Haircut · $35', price: '$35', v: 35, detail: '9:00–9:30 · Haircut with you', note: 'On time 14 of 14 visits.', cta: 'Open Kevin', href: 'MClient.dc.html' },
+      { at: '9:45', len: 45, name: 'Andre Wallace', sub: 'Skin fade · $45', price: '$45', v: 45, detail: '9:45–10:30 · Skin fade with you', note: 'New client, from Instagram.', cta: 'Open Andre', href: 'MClient.dc.html' },
+      { at: '10:30', len: 45, name: "Mike O'Connor", sub: 'Haircut and beard', price: '$55', v: 55, detail: '10:30–11:15 · Haircut and beard', note: 'Likes the hot towel finish.', cta: 'Open Mike', href: 'MClient.dc.html' },
+      { at: '11:30', len: 45, name: 'Jordan Ellis', sub: 'Hot towel shave', price: '$45', v: 45, detail: '11:30–12:15 · Hot towel shave', note: 'Wedding on Saturday.', cta: 'Open Jordan', href: 'MClient.dc.html' },
+      { at: '12:30', len: 30, kind: 'break', name: 'Lunch', sub: 'Blocked', price: '—', detail: '12:30–1:00', note: 'Clients cannot book this time.', cta: 'Edit hours', href: 'MCalendar.dc.html' },
+      { at: '1:00', len: 90, kind: 'open', name: 'Open · 90 min', sub: 'Jaylen is waiting', price: '+$45', detail: '1:00–2:30 with you', note: 'Chris cancelled his 1:15. Jaylen Brooks is first on the waitlist.', cta: 'Offer 1:15 to Jaylen', href: 'MHome.dc.html' },
+      { at: '2:30', len: 30, name: 'Darius Hill', sub: 'Asks to move', price: '$35', v: 35, detail: '2:30–3:00 · Haircut with you', note: 'Emailed at 9:12 asking for anything after 4.', cta: 'Review the move', href: 'MApprove.dc.html' },
+      { at: '3:15', len: 15, name: 'Nate Simmons', sub: 'Line-up', price: '$15', v: 15, detail: '3:15–3:30 · Line-up', note: 'Quick one before his shift.', cta: 'Open Nate', href: 'MClient.dc.html' },
+      { at: '3:30', len: 90, kind: 'open', name: 'Open · 90 min', sub: 'Fits 2 haircuts', price: '~$70', detail: '3:30–5:00 with you', note: 'If Darius moves to 4:15, 3:30–4:15 stays free.', cta: 'Tell overdue regulars', href: 'MHome.dc.html' },
+      { at: '5:00', len: 30, name: 'Eli Romero', sub: "Kid's cut · $25", price: '$25', v: 25, detail: "5:00–5:30 · Kid's cut", note: 'Comes with his dad, Luis (overdue).', cta: 'Open Eli', href: 'MClient.dc.html' },
+    ];
+    const randyList = [
+      { at: '10:00', len: 45, name: 'Brandon Lee', sub: 'Skin fade · $45', price: '$45', v: 45, detail: '10:00–10:45 · with Randy', note: 'Regular every 2 weeks.', cta: 'Open Brandon', href: 'MClient.dc.html' },
+      { at: '11:00', len: 15, name: 'Omar Haddad', sub: 'Beard trim', price: '$20', v: 20, detail: '11:00–11:15 · with Randy', note: 'Walk-in last time.', cta: 'Open Omar', href: 'MClient.dc.html' },
+      { at: '1:00', len: 30, name: 'Victor Diaz', sub: 'Haircut · $35', price: '$35', v: 35, detail: '1:00–1:30 · with Randy', note: 'No notes yet.', cta: 'Open Victor', href: 'MClient.dc.html' },
+      { at: '3:00', len: 45, name: 'Ray Thompson', sub: 'Haircut and beard', price: '$55', v: 55, detail: '3:00–3:45 · with Randy', note: 'No notes yet.', cta: 'Open Ray', href: 'MClient.dc.html' },
+      { at: '4:30', len: 15, name: 'Jamal Price', sub: 'Buzz cut', price: '$20', v: 20, detail: '4:30–4:45 · with Randy', note: 'No notes yet.', cta: 'Open Jamal', href: 'MClient.dc.html' },
+    ];
+    const who = this.state.who;
+    const shown = [];
+    if (who !== 'Randy') shown.push({ list: dreList, key: 'dre' });
+    if (who !== 'Dre') shown.push({ list: randyList, key: 'randy' });
+    const cols = shown.map((c) => ({ blocks: c.list.map((a) => block(c.key, a)) }));
+    const all = shown.flatMap((c) => c.list);
+    const appts = all.filter((a) => !a.kind);
+    const gridStyle = 'position: relative; height: 830px; display: grid; grid-template-columns: 44px repeat(' + cols.length + ', minmax(0, 1fr)); gap: 8px';
+    const hours = ['9', '10', '11', '12', '1', '2', '3', '4', '5', '6'].map((label, i) => ({ label, top: i * 60 * PX }));
+    const dayBase = 'min-height: 48px; border-radius: 14px; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font: inherit; cursor: pointer; ';
+    const days = [['Mon', '26'], ['Tue', '27'], ['Wed', '28'], ['Thu', '29'], ['Fri', '30'], ['Sat', '31'], ['Sun', '1']].map(([w, n]) => {
+      const today = n === '27';
+      return { w, n, today, style: dayBase + (today ? 'background: ' + t.brand + '; color: ' + t.brandInk + ';' : 'background: transparent; color: ' + t.ink + ';') };
+    });
+    const seg = 'min-height: 40px; border: 0; border-radius: 999px; font: inherit; font-size: 14px; cursor: pointer; ';
+    const tabs = ['Both', 'Dre', 'Randy'].map((label) => {
+      const on = who === label;
+      return { label, on, pick: () => this.setState({ who: label }), style: seg + (on ? 'background: ' + t.surface + '; color: ' + t.ink + '; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.12);' : 'background: transparent; color: ' + t.ink2 + '; font-weight: 600;') };
+    });
+    const sel = this.state.sel;
+    return {
+      t, cols, hours, days, tabs, gridStyle,
+      count: appts.length,
+      money: '$' + appts.reduce((s, a) => s + a.v, 0),
+      gaps: all.length - appts.length - all.filter((a) => a.kind === 'break').length,
+      hasSel: !!sel, sel: sel || {},
+      close: () => this.setState({ sel: null }),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,25 +1,24 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-26 · **Plan version:** 0.33 ([PCR-007](changes/PCR-007.md)) · **Current phase:** 8 — Operator feed, **done** (S34–S38b) · V1 re-planned in **P1** → next: **S39** (Phase 9 · New look: design direction)
+**Last updated:** 2026-10-26 · **Plan version:** 0.33 ([PCR-007](changes/PCR-007.md)) · **Current phase:** 9 — New look (S39 done: direction A+B) → next: **S40** (Foundation: tokens, fonts, component kit)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress (P1 closed). Next: S39 from "Planned sessions".
+Nothing in progress (S39 closed). Next: S40 from "Planned sessions".
 
 ## Last sessions
+- **S39 Phase 9 · design direction (2026-10-26): the user chose "A+B"; docs and mockups only** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) Direction, [DESIGN.md](../design/DESIGN.md) §2–4, [mockups](../mockups/s39/README.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:** a clickable canvas (https://claude.ai/artifact/QCiTKo7b95kE6MAtXjNQCY, private): A warm boutique, B clean premium, C bold modern, then the A+B mix, five phone screens each plus dark, on one made-up barbershop with numbers that add up (the P1 top-up).
+  - **Chosen:** A's colors (plum + marigold on warm off-white), Bricolage Grotesque + Figtree, pills, briefing block and sheets; B's hairline lists, one big number per screen, the approval detail table, the booking step bar and sticky action bar. A raised card means "this needs you".
+  - **Checks:** the contrast check passes for every pair in both themes; `pnpm check` green; no code changed, so integration and Playwright were not run.
 - **P1 V1 re-plan (2026-10-26): planning only, no product code** ([PCR-007](changes/PCR-007.md), [V1 playbook](v1-playbook.md), [scorecard](scorecard.md), [ADR-0043](../adr/0043-card-board-first-interaction.md), [ADR-0044](../adr/0044-redesign-and-design-rules.md), [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).
   - **Why:** the user's launch-readiness review (private) scored 1–8/10 per category: a strong AI layer on a thin foundation. P1 checked every claim against the code; all held.
   - **How:** grilling rounds over the review and five *simulated* owner interviews ([readout](../research/interviews/2026-10-26-simulated-five-owners.md), hypotheses only), decisions P1-1…P1-12 (playbook §2).
   - **Result:** Phases 9–17, S39–S76: a new look first, then setup, import and privacy, the card-board employee, pilot readiness, the pilot, SMS, deposits, calendar, the launch gate. SMS and deposits in V1; AI budget $10 for V1; the session standard (walkthrough, top-up, retro, scorecard gates); `/session-brief` and `/session-close` updated.
   - **Branches:** the four leftover "a" branches (S32a, S36a, S37a, S38a) were checked: each is contained in its merged "b" PR (#41, #45, #46, #47). The user deletes them by hand on GitHub: sessions can't delete other branches (403). `/session-close` now checks the "a" branch and asks the user to delete it.
-- **S38b Phase 8e "b" (2026-10-25): every set recorded on Luna + Sol, pass^3 on the gated sets, the security review and the Phase 8 exit; one PR for S38a + S38b** ([ADR-0042](../adr/0042-daily-briefing-and-public-waitlist.md) "Results (S38b)", [security review](../engineering/security-review-s38.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** `add_to_waitlist` v2 (call it before saying a client waits; add even when other times are free); three eval cases fitted to the eval world; three security tests (the daily draft cap, the system tools attacked from the chat, an expired or used waitlist code); `--phase-estimate-ok` also passes the $4.50 stop's estimate; Phase 8 cap $2.00.
-  - **Gates:** every §2 gate met; pass^3 100% on feed_safety, safety, permissions, autonomy, memory_delete, memory_safety; drafts, recall, episodic 100%; scheduling 49/50. `move-done-no-approval-talk` passes. `waitlist` 10/12: two named known misses carried to Phase 9 (user).
-  - **Checks:** `pnpm check` green; `pnpm test:integration` 1,239/1,239 (two load misses under the parallel run, each passing alone and untouched by S38b: an appointments concurrency property test at its 60 s limit, about 8 s alone, and the `memory-latency` episode search p95, as in S38a); Playwright not re-run (no screen changed since S38a's 94/94). Spend $0.808 (Phase 8 $1.79 of $2.00; all phases $3.80).
-
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -30,11 +29,12 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
 - **OpenAI cost (user, P1):** **$10 for Phases 9–17** on top of the $3.80 spent through Phase 8 (caps: Phase 12 $3.00, Phase 17 $1.50, reserve $5.50; no real calls elsewhere). Development evals on a separate `pepper-dev-evals` project with data sharing on (free daily tokens, made-up data only); production on a sharing-off, zero-retention project. The runner's $4.50 total stop rises to $13.80 in S56a. History of earlier caps: [ai-budget.md](ai-budget.md), [decisions.md](decisions.md).
 - **Brand, LLC and domain parked (user, P1):** the name can change later; a cheap neutral domain for the pilot in Phase 13; the LLC before SMS and Stripe go live (both are built in sandbox first).
-- **Design (user, P1):** a complete redesign in Phase 9 (ADR-0044); direction picked from three mockups in S39 (warm boutique and clean premium side by side, bold as the third); rules in [DESIGN.md](../design/DESIGN.md) enforced by lint, contrast and screenshot tests. Until S40 the current tokens (PCR-002) stay.
+- **Design (user, P1, S39):** a complete redesign in Phase 9 (ADR-0044); direction **A+B** chosen in S39 (warm boutique colors and type, clean premium's lists and tables); tokens, type scale and components in [DESIGN.md](../design/DESIGN.md) §2–4; rules enforced by lint, contrast and screenshot tests. Until S40 ships them, the current tokens (PCR-002) stay.
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S39 (user, 2026-10-26):** at the brief "go ahead with your recommendations" (one canvas, Google Fonts in mockups only); "what is your rec?" → Claude: A as the base with B's calm; "sure" to an A+B row; **"go with A+B"**. PCR-002's colors are superseded from S40 (ADR-0044).
 - **P1 (user, 2026-10-26):** planning only, no S39 work. Grill Me installed (the `grilling` skill). Decisions P1-1…P1-12 in the [V1 playbook](v1-playbook.md) §2: staged 10/10 with "what 10 looks like" lines; five interviews as reference (the shared ones are simulated); SMS and deposits into V1; brand/LLC/domain parked; data-sharing dev-evals project and a **$10** V1 cap ("max 10 bucks"); the 1–6 chair segment, cards first and the booking-page/website staging; pilot after Phase 13 with a neutral domain; a complete redesign first, warm-boutique + clean-premium (dislikes: bland, template-like, not premium); smart deposits; approve by text. "Plan it properly by preserving the original working flow", "raise the PR and merge the plan". After P1: imports from an owner's own app via CSV/JSON exports, with direct database connections after V1 (P1-13); UI UX Pro Max beside frontend-design (P1-14: "include both… my goal is a better product").
 - **S38b (user, 2026-10-25):** at the brief "Go with your recommendations". During the recording: "Allow for S38b" (`--phase-estimate-ok`); "Fix, cap $2.00" (the `add_to_waitlist` guide fix and a second full re-record; Phase 8 cap $1.75 → $2.00); "Carry to Phase 9" (`wl-add-marco-saturday`, `wl-staff-own-client` named known misses; Phase 9's first session moves the full-window check into the domain); "Allow, these runs only" (`--max-cost 2` for single-case pass^3 runs over the $1.50 guard); "Extend the flag" (`--phase-estimate-ok` passes the $4.50 stop's estimate). **Claude:** cases fitted where the model was right (`tool-create-booking-1`, `tool-get-feed-4`, `wl-staff-colleague-refused`); three security tests for controls without one; low findings L9–L14 logged.
 - **S38a (user, 2026-10-25):** at the brief "Go with your recommendations": the Phase 8 cap rises to $1.75; ADR-0042 pre-approved. **Claude (ADR-0042):** a `daily_briefing` kind; the hour a business setting over the template's, shared with the drafts pass; the briefing runs while paused; the public waitlist through the booking code's flow; the code review's 8 fixes.
@@ -56,11 +56,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S38b, M1–M2 and P1 are done (Phases 0–8 and the re-plan). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S39, M1–M2 and P1 are done (Phases 0–8, the re-plan, and Phase 9's design direction). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S39 | Phase 9 · Design direction: three clickable mockups (warm boutique, clean premium, bold), the user picks; DESIGN.md and ADR-0044 filled in; no app code | 9 | A direction approved |
 | S40 | Foundation: new tokens, fonts, component kit, gallery, raw-color lint, screenshot tests | 9 | Theme/contrast tests and gallery baselines green |
 | S41 | App shell + navigation (More tab, Pepper group), Home, Chat and the cards on the kit | 9 | Those screens on the kit; journeys + screenshots green |
 | S42 | Calendar, Clients, Services, Team, Autonomy, What I know, Waitlist on the kit | 9 | Every signed-in screen on the kit |

@@ -42,3 +42,4 @@ Format: Given / When / Then. IDs (`AC-W<workflow>-<n>`) are referenced from test
 ## Cross-cutting
 - **AC-X-1** No user can read or write another tenant's data through UI, API, or AI (cross-tenant suite).
 - **AC-X-2** If the LLM provider is unavailable, all non-AI screens remain fully functional.
+- **AC-X-3** Every screen follows the design direction the user approved in S39 ([DESIGN.md](../design/DESIGN.md)): colors, type, spacing, radius and motion from tokens only; light and dark equally finished; text contrast ≥ 4.5:1 and icons/borders ≥ 3:1 in both themes; tap targets ≥ 44 px; nothing scrolls sideways at 375 px.

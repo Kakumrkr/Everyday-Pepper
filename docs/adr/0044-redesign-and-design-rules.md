@@ -1,6 +1,6 @@
 # ADR-0044: A complete redesign, and design rules enforced by tests
 
-- **Status:** Accepted (the plan and the rules). Approved by the user in planning session P1 on 2026-10-26. The **Direction** section below is filled in when the user picks a direction in S39.
+- **Status:** Accepted (the plan and the rules). Approved by the user in planning session P1 on 2026-10-26. The **Direction** section was filled in S39 (the user chose "A+B", 2026-10-26).
 - **Date:** 2026-10-26
 - **Builds on:** ADR-0019 (design system and app shell), PCR-001 (the business's brand color on the booking page), PCR-002 (Pepper green + chili); [V1 playbook](../plan/v1-playbook.md) Phase 9; [PCR-007](../plan/changes/PCR-007.md)
 
@@ -23,7 +23,13 @@ The look is already central. Every color, radius and font lives in `packages/ui/
 6. **Visual change needs a reason.** A screenshot difference fails CI until the baseline is updated in the same PR, with the screenshots shown in the PR.
 
 ## Direction
-_(S39: the chosen direction, what was mixed, the user's words, and the token values. PCR-002's colors are superseded from S40 if the pick changes them.)_
+**Chosen in S39 (user, 2026-10-26): "A+B"**, warm boutique with clean premium's calm on the busy screens. The user, after the three directions: *"I like A very good. and B is also very warm and good. what is your rec?"*; Claude recommended A as the base with B's list and table patterns and built an A+B row of the same five screens; the user: *"go with A+B"*.
+
+- **Mixed:** A's colors (plum `#5A2D52` and marigold `#E8A33D` on `#F6F1EC`; dark `#E0B3D6` / `#F2B85A` on `#1A1418`), type (Bricolage Grotesque + Figtree), pill buttons, briefing block and bottom sheets; B's hairline lists, one big tabular number per screen, the labelled detail table on approvals, the booking page's step bar and sticky action bar, the segmented switch. A raised card means "this needs you"; everything else is a quiet row.
+- **Not taken:** C (bold modern), and B's near-black-and-green palette. The `ui-ux-pro-max` candidate systems (pink + lavender, black + gold, gold + purple) were input only.
+- **Values:** the full token table, type scale and component list are in [DESIGN.md](../design/DESIGN.md) §2–4; every color pair passed the contrast check (`docs/mockups/s39/contrast.py`) in both themes.
+- **Supersedes PCR-002's colors from S40** (Pepper green + chili). The staff tints `s1`–`s3` become `brand-soft`, `accent-soft`, `info-soft` with a colored left bar. Bricolage Grotesque is added through Fontsource beside Figtree (D11); S40 checks the package and its licence (OFL) before adding it.
+- **Reference:** the A+B row of the S39 canvas (sources in `docs/mockups/s39/`).
 
 ## Consequences
 - Phase 9 adds five sessions before the old Phase 9 work. Each screen is redone once, before the new features land on it.

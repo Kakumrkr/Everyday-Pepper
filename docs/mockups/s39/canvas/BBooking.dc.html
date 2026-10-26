@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>B · Booking page</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Geist', system-ui, sans-serif; font-size: 16px; line-height: 1.45; letter-spacing: -0.005em">
+<main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column">
+
+<header style="padding: 28px 24px 20px; display: flex; flex-direction: column; gap: 14px; border-bottom: 1px solid {{t.line}}">
+<div style="display: flex; align-items: center; gap: 14px">
+<span style="width: 56px; height: 56px; border-radius: 14px; background: {{t.biz}}; color: {{t.bizInk}}; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; flex-shrink: 0">SC</span>
+<div style="display: flex; flex-direction: column">
+<h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.03em">Southside Cuts</h1>
+<span style="font-size: 14px; color: {{t.ink2}}">2418 S Halsted St, Chicago · Open until 6</span>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+<div role="img" aria-label="Photo of a skin fade" style="aspect-ratio: 4 / 5; border-radius: 10px; background: {{t.surface2}}; color: {{t.ink2}}; font-size: 11px; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box">[Skin fade]</div>
+<div role="img" aria-label="Photo of the shop" style="aspect-ratio: 4 / 5; border-radius: 10px; background: {{t.surface2}}; color: {{t.ink2}}; font-size: 11px; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box">[The shop]</div>
+<div role="img" aria-label="Photo of a beard trim" style="aspect-ratio: 4 / 5; border-radius: 10px; background: {{t.surface2}}; color: {{t.ink2}}; font-size: 11px; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box">[Beard trim]</div>
+</div>
+<ol aria-label="Steps" style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+<li style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 500; color: {{s.color}}"><span style="height: 3px; border-radius: 2px; background: {{s.bar}}"></span>{{s.label}}</li>
+</sc-for>
+</ol>
+</header>
+
+<sc-if value="{{s1}}" hint-placeholder-val="{{ true }}">
+<section aria-label="Services" style="padding: 0 24px">
+<sc-for list="{{services}}" as="s" hint-placeholder-count="8">
+<button type="button" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="width: 100%; min-height: 64px; border: 0; border-bottom: 1px solid {{t.line}}; background: transparent; color: {{t.ink}}; padding: 0; display: flex; align-items: center; gap: 14px; text-align: left; font: inherit; cursor: pointer">
+<span style="{{s.dot}}"></span>
+<span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">{{s.name}}</span><span style="font-size: 14px; color: {{t.ink2}}">{{s.len}}</span></span>
+<span style="font-weight: 500; font-variant-numeric: tabular-nums">{{s.price}}</span>
+</button>
+</sc-for>
+<p style="margin: 16px 0 24px; font-size: 14px; color: {{t.ink2}}">Free to cancel or move up to 12 hours before. (312) 555-0148</p>
+</section>
+</sc-if>
+
+<sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
+<section aria-label="Pick a time" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px">
+<div role="group" aria-label="Barber" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: 11px; background: {{t.surface2}}">
+<sc-for list="{{barbers}}" as="b" hint-placeholder-count="3">
+<button type="button" onClick="{{b.pick}}" aria-pressed="{{b.on}}" style="{{b.style}}">{{b.name}}</button>
+</sc-for>
+</div>
+<sc-for list="{{days}}" as="d" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: {{t.ink2}}">{{d.label}}</h2>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{d.times}}" as="x" hint-placeholder-count="4">
+<button type="button" onClick="{{x.pick}}" aria-pressed="{{x.on}}" style="{{x.style}}">{{x.label}}</button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<span style="font-size: 14px; color: {{t.ink2}}">Chicago time</span>
+</section>
+</sc-if>
+
+<sc-if value="{{s3}}" hint-placeholder-val="{{ false }}">
+<section aria-label="Your details" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 500; color: {{t.ink2}}">Name
+<input type="text" value="Terrell Young" style="min-height: 46px; border: 1px solid {{t.lineStrong}}; border-radius: 10px; background: {{t.bg}}; color: {{t.ink}}; padding: 0 12px; font: inherit; font-size: 16px"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 500; color: {{t.ink2}}">Email
+<input type="email" value="terrell.young@example.com" style="min-height: 46px; border: 1px solid {{t.lineStrong}}; border-radius: 10px; background: {{t.bg}}; color: {{t.ink}}; padding: 0 12px; font: inherit; font-size: 16px"></label>
+<span style="font-size: 14px; color: {{t.ink2}}">We'll email you a code to confirm. Free to cancel up to 12 hours before.</span>
+</section>
+</sc-if>
+
+<sc-if value="{{s4}}" hint-placeholder-val="{{ false }}">
+<section aria-live="polite" style="padding: 32px 24px; display: flex; flex-direction: column; gap: 10px">
+<span style="color: {{t.biz}}"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span>
+<h2 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.03em">You're booked</h2>
+<p style="margin: 0; font-size: 16px">{{summary}}</p>
+<p style="margin: 0; font-size: 14px; color: {{t.ink2}}">Check your email for the confirmation and a link to move or cancel.</p>
+</section>
+</sc-if>
+
+<footer style="margin-top: auto; padding: 20px 24px; font-size: 12px; color: {{t.ink3}}">Booking by Pepper</footer>
+</main>
+
+<sc-if value="{{hasBar}}" hint-placeholder-val="{{ true }}">
+<div style="padding: 12px 24px 26px; border-top: 1px solid {{t.line}}; background: {{t.bg}}; display: flex; align-items: center; gap: 12px">
+<div style="flex: 1; display: flex; flex-direction: column; min-width: 0">
+<span style="font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{barTitle}}</span>
+<span style="font-size: 13px; color: {{t.ink2}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{barSub}}</span>
+</div>
+<sc-if value="{{canBack}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{back}}" aria-label="Back" style="width: 48px; height: 48px; border: 1px solid {{t.lineStrong}}; border-radius: 10px; background: transparent; color: {{t.ink}}; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button></sc-if>
+<button type="button" onClick="{{next}}" disabled="{{cantGo}}" style="{{nextStyle}}">{{nextLabel}}</button>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: 1, svc: 1, barber: 'Anyone', time: null };
+  }
+  renderVals() {
+    const light = { bg: '#FFFFFF', surface: '#FFFFFF', surface2: '#F3F3F2', ink: '#0E0E10', ink2: '#4A4A50', ink3: '#6B6B72', line: '#E6E6E8', lineStrong: '#8A8A92', biz: '#145A55', bizInk: '#FFFFFF' };
+    const dark = { bg: '#0A0A0B', surface: '#2A2A2E', surface2: '#1C1C1F', ink: '#F4F4F5', ink2: '#B4B4BA', ink3: '#8E8E96', line: '#26262A', lineStrong: '#6E6E76', biz: '#6FCFC4', bizInk: '#06201E' };
+    const t = this.props.dark ? dark : light;
+    const st = this.state;
+    const list = [['Haircut', '30 min', '$35'], ['Skin fade', '45 min', '$45'], ['Haircut and beard', '45 min', '$55'], ['Beard trim', '15 min', '$20'], ['Line-up', '15 min', '$15'], ['Hot towel shave', '45 min', '$45'], ['Buzz cut', '15 min', '$20'], ["Kid's cut", '30 min', '$25']];
+    const services = list.map(([name, len, price], i) => {
+      const on = st.svc === i;
+      return { name, len, price, on, pick: () => this.setState({ svc: i }), dot: 'width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box; flex-shrink: 0; ' + (on ? 'border: 6px solid ' + t.biz + ';' : 'border: 1.5px solid ' + t.lineStrong + ';') };
+    });
+    const seg = 'min-height: 40px; border: 0; border-radius: 9px; font: inherit; font-size: 14px; cursor: pointer; ';
+    const barbers = ['Anyone', 'Dre', 'Randy'].map((name) => {
+      const on = st.barber === name;
+      return { name, on, pick: () => this.setState({ barber: name }), style: seg + (on ? 'background: ' + t.surface + '; color: ' + t.ink + '; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.12);' : 'background: transparent; color: ' + t.ink2 + '; font-weight: 500;') };
+    });
+    const cell = 'min-height: 46px; border-radius: 10px; font: inherit; font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; cursor: pointer; ';
+    const mk = (day, label) => {
+      const on = !!st.time && st.time.day === day && st.time.label === label;
+      return { label, on, pick: () => this.setState({ time: { day, label } }), style: cell + (on ? 'border: 0; background: ' + t.biz + '; color: ' + t.bizInk + ';' : 'border: 1px solid ' + t.lineStrong + '; background: transparent; color: ' + t.ink + ';') };
+    };
+    const days = [
+      { label: 'Today · Tue Oct 27', key: 'Today', times: ['3:30', '3:45', '4:00', '4:15'] },
+      { label: 'Tomorrow · Wed Oct 28', key: 'Wed Oct 28', times: ['9:00', '9:30', '10:45', '11:00', '1:00', '2:15', '4:30', '5:00'] },
+    ].map((d) => ({ label: d.label, times: d.times.map((x) => mk(d.key, x)) }));
+    const svc = list[st.svc];
+    const who = st.barber === 'Anyone' ? 'Dre' : st.barber;
+    const when = st.time ? st.time.day + ' ' + st.time.label + ' with ' + who : 'Pick a time';
+    const stepLabels = ['Service', 'Time', 'Details'];
+    const steps = stepLabels.map((label, i) => ({ label, bar: i < Math.min(st.step, 3) ? t.biz : t.line, color: i < Math.min(st.step, 3) ? t.ink : t.ink2 }));
+    const cantGo = st.step === 2 && !st.time;
+    const nextLabel = st.step === 1 ? 'Continue' : st.step === 2 ? 'Continue' : 'Book';
+    return {
+      t, services, barbers, days, steps,
+      s1: st.step === 1, s2: st.step === 2, s3: st.step === 3, s4: st.step === 4,
+      hasBar: st.step < 4,
+      barTitle: svc[0] + ' · ' + svc[2],
+      barSub: st.step === 1 ? svc[1] : when,
+      summary: svc[0] + ', ' + when + '.',
+      cantGo, nextLabel,
+      nextStyle: 'min-height: 48px; padding: 0 22px; border: 0; border-radius: 10px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; ' + (cantGo ? 'background: ' + t.surface2 + '; color: ' + t.ink2 + ';' : 'background: ' + t.biz + '; color: ' + t.bizInk + ';'),
+      next: () => this.setState({ step: st.step + 1 }),
+      canBack: st.step > 1,
+      back: () => this.setState({ step: st.step - 1 }),
+    };
+  }
+}
+</script>
+</body>
+</html>

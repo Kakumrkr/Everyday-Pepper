@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>B · Client profile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Geist', system-ui, sans-serif; font-size: 16px; line-height: 1.45; letter-spacing: -0.005em">
+<main style="flex: 1; overflow-y: auto; padding: 16px 24px 24px; display: flex; flex-direction: column; gap: 26px">
+<a href="BHome.dc.html" style="align-self: flex-start; min-height: 44px; display: flex; align-items: center; gap: 2px; color: {{t.ink2}}; text-decoration: none; font-size: 15px; font-weight: 500"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>Clients</a>
+
+<header style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 36px; font-weight: 600; letter-spacing: -0.035em; line-height: 1.05">Marcus Bell</h1>
+<span style="font-size: 15px; color: {{t.ink2}}">Client since March 2024 · usually with Dre</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: {{t.warn}}; font-weight: 500"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: {{t.warn}}"></span>Last visit 5 weeks ago, usually every 3</span>
+</header>
+
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid {{t.line}}; border-bottom: 1px solid {{t.line}}">
+<div style="padding: 14px 0; display: flex; flex-direction: column-reverse; gap: 2px"><dt style="font-size: 13px; color: {{t.ink2}}">Visits</dt><dd style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">18</dd></div>
+<div style="padding: 14px 0 14px 14px; border-left: 1px solid {{t.line}}; display: flex; flex-direction: column-reverse; gap: 2px"><dt style="font-size: 13px; color: {{t.ink2}}">Lifetime</dt><dd style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">$1,080</dd></div>
+<div style="padding: 14px 0 14px 14px; border-left: 1px solid {{t.line}}; display: flex; flex-direction: column-reverse; gap: 2px"><dt style="font-size: 13px; color: {{t.ink2}}">No-shows</dt><dd style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">0</dd></div>
+</dl>
+
+<sc-if value="{{showBook}}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="usual" style="border: 1px solid {{t.line}}; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<span id="usual" style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: {{t.ink2}}">Suggested</span>
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+<span style="font-size: 18px; font-weight: 600; letter-spacing: -0.015em">Sat Oct 31, 10:00</span>
+<span style="font-size: 18px; font-weight: 600; color: {{t.accent}}; font-variant-numeric: tabular-nums">$60</span>
+</div>
+<span style="font-size: 15px; color: {{t.ink2}}">Skin fade + beard trim with Dre, his usual. He'll get an email to confirm.</span>
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{book}}" style="flex: 1; min-height: 46px; border: 0; border-radius: 10px; background: {{t.brand}}; color: {{t.brandInk}}; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Book it</button>
+<a href="BCalendar.dc.html" style="min-height: 46px; padding: 0 16px; border: 1px solid {{t.lineStrong}}; border-radius: 10px; color: {{t.ink}}; font-size: 15px; font-weight: 500; display: flex; align-items: center; text-decoration: none">Other time</a>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{booked}}" hint-placeholder-val="{{ false }}">
+<section aria-live="polite" style="border: 1px solid {{t.line}}; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 10px">
+<span style="color: {{t.accent}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+<span style="flex: 1; font-size: 15px">Booked Sat 10:00. Email sent.</span>
+<button type="button" onClick="{{undo}}" style="min-height: 44px; padding: 0 14px; border: 1px solid {{t.lineStrong}}; border-radius: 10px; background: transparent; color: {{t.ink}}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Undo</button>
+</section>
+</sc-if>
+
+<section aria-labelledby="knows" style="display: flex; flex-direction: column">
+<h2 id="knows" style="margin: 0; padding-bottom: 10px; border-bottom: 1px solid {{t.line}}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em">What Pepper knows</h2>
+<div style="padding: 14px 0; border-bottom: 1px solid {{t.line}}; display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 12px"><span style="font-size: 14px; color: {{t.ink2}}">Cut</span><span>#2 sides, scissors on top, short beard<br><span style="font-size: 13px; color: {{t.ink3}}">Your note, Aug 11</span></span></div>
+<div style="padding: 14px 0; border-bottom: 1px solid {{t.line}}; display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 12px"><span style="font-size: 14px; color: {{t.ink2}}">Times</span><span>Saturday mornings, or after 5 on weekdays<br><span style="font-size: 13px; color: {{t.ink3}}">From 12 bookings</span></span></div>
+<div style="padding: 14px 0; border-bottom: 1px solid {{t.line}}; display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 12px"><span style="font-size: 14px; color: {{t.ink2}}">Avoid</span><span>Menthol aftershave<br><span style="font-size: 13px; color: {{t.ink3}}">He said so on Jun 3</span></span></div>
+</section>
+
+<section aria-labelledby="visits" style="display: flex; flex-direction: column">
+<h2 id="visits" style="margin: 0; padding-bottom: 10px; border-bottom: 1px solid {{t.line}}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em">Visits</h2>
+<sc-for list="{{visits}}" as="v" hint-placeholder-count="4">
+<div style="min-height: 56px; display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 12px; border-bottom: 1px solid {{t.line}}">
+<span style="font-size: 14px; color: {{t.ink2}}; font-variant-numeric: tabular-nums">{{v.date}}</span>
+<span style="font-size: 15px">{{v.what}}</span>
+<span style="font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums">{{v.price}}</span>
+</div>
+</sc-for>
+<a href="BClient.dc.html" style="min-height: 48px; display: flex; align-items: center; color: {{t.ink}}; font-size: 15px; font-weight: 600; text-decoration: none">All 18 visits</a>
+</section>
+
+<section aria-label="Contact" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<a href="BApprove.dc.html" style="min-height: 46px; border: 1px solid {{t.lineStrong}}; border-radius: 10px; color: {{t.ink}}; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 500; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>Email</a>
+<a href="tel:+13125550187" style="min-height: 46px; border: 1px solid {{t.lineStrong}}; border-radius: 10px; color: {{t.ink}}; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 500; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/></svg>Call</a>
+</section>
+</main>
+
+<nav aria-label="Main" style="display: flex; justify-content: space-around; padding: 6px 8px 22px; background: {{t.bar}}; border-top: 1px solid {{t.line}}">
+<a href="BHome.dc.html" style="min-width: 60px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.ink3}}; font-size: 11px; font-weight: 500"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+<a href="BCalendar.dc.html" style="min-width: 60px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.ink3}}; font-size: 11px; font-weight: 500"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</a>
+<a href="BClient.dc.html" aria-current="page" style="min-width: 60px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.ink}}; font-size: 11px; font-weight: 600"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg>Clients</a>
+<a href="BApprove.dc.html" style="min-width: 60px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.ink3}}; font-size: 11px; font-weight: 500"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Chat</a>
+<a href="BBooking.dc.html" style="min-width: 60px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.ink3}}; font-size: 11px; font-weight: 500"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { booked: false };
+  }
+  renderVals() {
+    const light = { bg: '#FFFFFF', bar: '#FAFAFA', ink: '#0E0E10', ink2: '#4A4A50', ink3: '#6B6B72', line: '#E6E6E8', lineStrong: '#8A8A92', brand: '#0E0E10', brandInk: '#FFFFFF', accent: '#1E7B54', warn: '#8F5B00' };
+    const dark = { bg: '#0A0A0B', bar: '#141416', ink: '#F4F4F5', ink2: '#B4B4BA', ink3: '#8E8E96', line: '#26262A', lineStrong: '#6E6E76', brand: '#F4F4F5', brandInk: '#0A0A0B', accent: '#4FD39A', warn: '#F2B44B' };
+    const t = this.props.dark ? dark : light;
+    const visits = [
+      { date: 'Sep 22', what: 'Skin fade + beard · Dre', price: '$60' },
+      { date: 'Aug 29', what: 'Skin fade + beard · Dre', price: '$60' },
+      { date: 'Aug 8', what: 'Skin fade · Randy', price: '$45' },
+      { date: 'Jul 18', what: 'Skin fade + beard · Dre', price: '$60' },
+    ];
+    return {
+      t, visits,
+      booked: this.state.booked,
+      showBook: !this.state.booked,
+      book: () => this.setState({ booked: true }),
+      undo: () => this.setState({ booked: false }),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 The design rules for every screen. Planning session P1 (2026-10-26) set them up ([ADR-0044](../adr/0044-redesign-and-design-rules.md), [V1 playbook](../plan/v1-playbook.md) Phase 9). Any session that changes a screen reads this file first.
 
-**Status:** the rules (§5–§7) are in force from S39. The direction (§2–§4) is chosen by the user in **S39** and filled in then. Until S40 ships the new tokens, the old ones in `packages/ui/src/tokens.ts` stay (ADR-0019, PCR-002).
+**Status:** the rules (§5–§7) are in force from S39. The direction (§2–§4) was chosen by the user in **S39: "A+B"** (warm boutique, with clean premium's calm on the busy screens). Until S40 ships the new tokens, the old ones in `packages/ui/src/tokens.ts` stay (ADR-0019, PCR-002).
 
 ## 1. Who we design for
 
@@ -21,26 +21,73 @@ S39 uses `ui-ux-pro-max` for candidate systems and `frontend-design` for the moc
 
 **What the user wants:** premium, distinctive, not a template. **What to avoid:** generic SaaS (grey cards on white, blue buttons), the cream + terracotta + serif look, gradients for decoration, emoji as icons, stock photos.
 
-**Chosen:** _(S39 fills this in: the direction, what was mixed, and the user's words.)_
+**Chosen (S39, user, 2026-10-26): "A+B".** The user's words: *"I like A very good. and B is also very warm and good"*, then, after the A+B row, *"go with A+B"*. The reference is the A+B row of the [S39 canvas](../mockups/s39/README.md) (`docs/mockups/s39/canvas/M*.dc.html`).
 
-## 3. Tokens (S39 picks the values, S40 ships them)
+- **From A (warm boutique):** the colors (plum and marigold on a warm off-white), Bricolage Grotesque for headings and big numbers, Figtree for text, pill buttons, the plum briefing block, rounded lifted cards, the bottom-sheet approval, the two-barber timeline.
+- **From B (clean premium):** lists as rows with hairline dividers instead of a card per item, one big tabular number per screen, the labelled detail table (Time · Service · Who's told · Then), the step bar and the sticky bottom action bar on the booking page, the segmented switch (Both / Dre / Randy).
+- **The one idea that ties them:** *a lifted card means "this needs you"*. Decision cards (briefing, approvals, offers) are raised; everything else (done items, overdue lists, visits, memory, services) is a quiet hairline row.
+- **Color jobs:** plum `brand` is the primary action and Pepper's own mark; marigold `accent` is money and highlights (the "+$45" chip, the day's progress bar), never a button's text background on its own; status colors only for status. On the booking page the business's color replaces `brand` (PCR-001), and Pepper's plum appears only in the footer.
+- Not taken: C (bold modern), and B's near-black-and-green palette.
 
-The source of truth stays `packages/ui/src/tokens.ts`, mirrored in `theme.css` and kept equal by `theme.test.ts` (ADR-0019). S40 adds:
+## 3. Tokens (S39 picked the values, S40 ships them)
 
-| Group | Tokens |
-|---|---|
-| Color | `bg`, `surface`, `surface-2`, `ink`, `ink-2`, `ink-3`, `line`, `brand`, `brand-ink`, `brand-soft`, `accent`, `ok`, `warn`, `danger`, `info` (each with `-soft`), light and dark |
-| Type | display, title, heading, body, label, caption, number (tabular); sizes on a 1.2 scale from a 16 px body |
-| Space | 4 px base: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64 |
-| Radius | sm, md, lg, pill |
-| Elevation | flat, raised (cards), floating (sheets, toasts) |
-| Motion | fast 120 ms, base 180 ms, slow 240 ms; one easing curve; everything off under `prefers-reduced-motion` |
+The source of truth stays `packages/ui/src/tokens.ts`, mirrored in `theme.css` and kept equal by `theme.test.ts` (ADR-0019). Every pair below passed the S39 contrast check (`docs/mockups/s39/contrast.py`, both themes); S40 moves the pairs into `TEXT_PAIRS`.
 
-The booking page keeps the business's own brand color (PCR-001). Pepper's colors appear there only in the footer.
+**Color** (light / dark)
+
+| Token | Light | Dark | Job |
+|---|---|---|---|
+| `bg` | `#F6F1EC` | `#1A1418` | page |
+| `surface` | `#FFFDFB` | `#241C21` | cards, sheets, bars |
+| `surface-2` | `#EFE7DF` | `#2E242B` | wells, segmented track, photo placeholders |
+| `ink` | `#2A1F26` | `#F5EDF1` | text |
+| `ink-2` | `#5E4F58` | `#CDBFC7` | secondary text |
+| `ink-3` | `#6F5E68` | `#A898A2` | hints, captions |
+| `line` | `#E4D8CD` | `#3A2F36` | hairline dividers (decorative, no contrast minimum) |
+| `line-strong` | `#8E7C86` | `#8A7A84` | input and control borders (3:1) |
+| `brand` | `#5A2D52` | `#E0B3D6` | primary actions, the briefing block, current tab |
+| `brand-ink` | `#FFFFFF` | `#2A1023` | text on `brand` |
+| `brand-soft` | `#F0E2EC` | `#3B2737` | selected tab pill, quiet brand buttons, the owner's calendar blocks |
+| `accent` | `#E8A33D` | `#F2B85A` | money chips, progress |
+| `accent-ink` | `#2A1F26` | `#2A1F26` | text on `accent` |
+| `accent-soft` | `#F8E7C8` | `#3D3018` | the second staff member's calendar blocks |
+| `ok` / `ok-soft` | `#2F6B4F` / `#E3EFE7` | `#7FCBA4` / `#1F3A2D` | done, receipts |
+| `warn` / `warn-soft` | `#8A5A00` / `#F7E9CC` | `#F0C26B` / `#3D3018` | overdue, at risk |
+| `danger` / `danger-soft` | `#B3261E` / `#F6DEDB` | `#FF8A80` / `#3D1E1C` | errors, the "now" line |
+| `info` / `info-soft` | `#2F5E8A` / `#E1EAF3` | `#9CC3E8` / `#1C2A38` | notices; the third staff member's blocks |
+| `scrim` | `rgba(42,31,38,0.45)` | `rgba(0,0,0,0.6)` | behind sheets |
+
+Staff colors (the old `s1`–`s3`) become `brand-soft`, `accent-soft` and `info-soft` with a 4 px left bar in `brand`, `accent` and `info`, so a booking's barber never depends on color alone (the name is on the block too).
+
+**Type.** Bricolage Grotesque (variable, opsz 12–96, 500–800) for display, titles and big numbers; Figtree (variable, 400–700; already in the app) for everything else. Both self-hosted through Fontsource (D11). Sizes on a 1.2 scale from a 16 px body, rounded:
+
+| Style | Font | Size / line | Weight | Use |
+|---|---|---|---|---|
+| `number-xl` | Bricolage | 57 / 1.0, −0.04em | 700 | the one big number on a screen ($430) |
+| `display` | Bricolage | 33 / 1.1, −0.02em | 700 | screen titles ("Morning, Dre", "Marcus Bell") |
+| `title` | Bricolage | 28 / 1.15, −0.02em | 700 | sheet and receipt titles |
+| `heading` | Bricolage | 23 / 1.2, −0.01em | 700 | section heads ("Needs your OK") |
+| `subheading` | Figtree | 19 / 1.3 | 700 | card titles |
+| `body` | Figtree | 16 / 1.45 | 400 | text |
+| `label` | Figtree | 14 / 1.4 | 600 | buttons' small text, row meta, segmented options |
+| `caption` | Figtree | 13 / 1.35 | 500 | sources ("Your note, Aug 11"), times in lists |
+| `number` | either | any | any | `font-variant-numeric: tabular-nums` on every amount, count and time (D10) |
+
+**Space** 4 px base: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64. Screen gutter 20 px on phones; 12 px between cards, 16–24 px between sections.
+
+**Radius** `sm` 12 (inputs' inner elements, small tiles), `md` 16 (inputs, time chips, wells), `lg` 24 (cards), `xl` 32 (the briefing block, sheet tops), `pill` 999 (buttons, chips, segmented controls, the tab pill).
+
+**Elevation** `flat` (rows, wells); `raised` for decision cards only: light `0 1px 2px rgba(42,31,38,.06), 0 10px 28px rgba(42,31,38,.07)`, dark `0 1px 2px rgba(0,0,0,.5)` (dark lifts by `surface` instead); `floating` for sheets and toasts: light `0 -8px 32px rgba(42,31,38,.16)`, dark `0 -8px 32px rgba(0,0,0,.6)`.
+
+**Motion** fast 120 ms (press, toggle), base 180 ms (expand Why?, chip select), slow 240 ms (sheets); one easing `cubic-bezier(0.2, 0, 0, 1)`; all off under `prefers-reduced-motion`.
+
+**Sizes** tap targets ≥ 44 px (D3); primary buttons 48–54 px tall; the bottom tab bar 52 px items with a 52 × 30 px pill on the current tab.
+
+The booking page keeps the business's own brand color (PCR-001); Pepper's colors appear there only in the footer.
 
 ## 4. Components (S40 builds them in `packages/ui`)
 
-Button (primary, secondary, quiet, danger; sm/md/lg), IconButton, Input, Select, Textarea, Checkbox, Switch, Sheet (bottom sheet on phones), Dialog, Tabs, Card, ListRow, Badge, Avatar, EmptyState, Skeleton, Toast, Stat (big number with a label). The AI cards (`packages/ui/src/cards`) are rebuilt from these. Radix primitives sit underneath where focus or overlay behaviour is needed. A dev-only gallery route shows every component in every state.
+Button (primary pill in `brand`, secondary pill outlined in `line-strong`, quiet text button, danger; sm/md/lg), IconButton, Input, Select, Textarea, Checkbox, Switch, Sheet (bottom sheet on phones, `xl` top radius, `floating`), Dialog, Tabs, **Segmented** (pill track in `surface-2`, the selected option a raised `surface` pill), Card (**raised, only for something that needs a decision**), **ListRow** (hairline row: optional leading time or icon, title + meta, trailing amount or action, chevron when it navigates), **DetailTable** (`dl` with a label column and hairline rows: the approval card's Time · Service · Who's told · Then), Badge and **MoneyChip** (`accent` pill with tabular "+$45"), Avatar (initials on `brand-soft` or `accent`), EmptyState, Skeleton, Toast, **Receipt** (`ok-soft` strip with Undo), Stat (big number with a label; one `number-xl` per screen), **StepBar** (3 segments), **StickyActionBar** (summary + Back + primary at the bottom, D3), **TimeChip**, **BriefingBlock** (`brand` block with the day's number and progress), BottomTabBar (Home · Calendar · Clients · Chat · More, current tab in a `brand-soft` pill). The AI cards (`packages/ui/src/cards`) are rebuilt from these: ChangeCard = Card + DetailTable + Why? + Receipt. Radix primitives sit underneath where focus or overlay behaviour is needed. A dev-only gallery route shows every component in every state.
 
 ## 5. Rules, and how each one is enforced
 
