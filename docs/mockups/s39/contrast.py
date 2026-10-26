@@ -1,7 +1,7 @@
 """S39: contrast of each mockup direction's token pairs (WCAG 2.2: text 4.5:1, icons/borders 3:1).
 
 Run: python3 docs/mockups/s39/contrast.py  (exit 1 if any pair fails)
-S40 moves the chosen direction's values into packages/ui/src/tokens.ts, where theme.test.ts takes over.
+The user chose A+B in S39 (A's colors). S40 moves the chosen direction's values into packages/ui/src/tokens.ts, where theme.test.ts takes over.
 """
 import sys
 
@@ -9,10 +9,12 @@ DIRECTIONS = {
     "A warm boutique": {
         "light": dict(bg="#F6F1EC", surface="#FFFDFB", surface2="#EFE7DF", ink="#2A1F26", ink2="#5E4F58", ink3="#6F5E68",
                       line="#E4D8CD", lineStrong="#8E7C86", brand="#5A2D52", brandInk="#FFFFFF", brandSoft="#F0E2EC", accent="#E8A33D", accentInk="#2A1F26",
-                      ok="#2F6B4F", warn="#8A5A00", danger="#B3261E"),
+                      ok="#2F6B4F", warn="#8A5A00", danger="#B3261E", info="#2F5E8A",
+                      accentSoft="#F8E7C8", okSoft="#E3EFE7", warnSoft="#F7E9CC", dangerSoft="#F6DEDB", infoSoft="#E1EAF3"),
         "dark": dict(bg="#1A1418", surface="#241C21", surface2="#2E242B", ink="#F5EDF1", ink2="#CDBFC7", ink3="#A898A2",
                      line="#3A2F36", lineStrong="#8A7A84", brand="#E0B3D6", brandInk="#2A1023", brandSoft="#3B2737", accent="#F2B85A", accentInk="#2A1F26",
-                     ok="#7FCBA4", warn="#F0C26B", danger="#FF8A80"),
+                     ok="#7FCBA4", warn="#F0C26B", danger="#FF8A80", info="#9CC3E8",
+                     accentSoft="#3D3018", okSoft="#1F3A2D", warnSoft="#3D3018", dangerSoft="#3D1E1C", infoSoft="#1C2A38"),
     },
     "B clean premium": {
         "light": dict(bg="#FAFAFA", surface="#FFFFFF", surface2="#F3F3F2", ink="#0E0E10", ink2="#4A4A50", ink3="#6B6B72",
@@ -60,6 +62,12 @@ def pairs(t: dict):
     yield "brand on brandSoft", t["brand"], t["brandSoft"], 4.5
     yield "ink on brandSoft", t["ink"], t["brandSoft"], 4.5
     yield "accentInk on accent", t["accentInk"], t["accent"], 4.5
+    # The chosen direction (A+B uses A's colors) also has status colors on their soft fills.
+    for k in ("ok", "warn", "danger", "info"):
+        if k + "Soft" in t:
+            yield f"{k} on {k}Soft", t[k], t[k + "Soft"], 4.5
+    if "accentSoft" in t:
+        yield "ink on accentSoft", t["ink"], t["accentSoft"], 4.5
 
 
 failed = 0

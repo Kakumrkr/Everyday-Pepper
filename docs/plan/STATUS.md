@@ -11,7 +11,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - Done: AC-X-3 added to acceptance-criteria + traceability; the `ui-ux-pro-max` candidate systems (pink+lavender/Playfair, black+gold/Cormorant, gold+purple/Plex) were all taken as input only. A uses none of them; B keeps only the near-black primary; C keeps none.
 - Done: the canvas (https://claude.ai/artifact/QCiTKo7b95kE6MAtXjNQCY), 18 artboards: A warm boutique (plum + marigold, Bricolage Grotesque + Figtree), B clean premium (near-black + money-green, Geist), C bold modern (pepper red + lime, Archivo). Each has 5 clickable screens and a dark row, with realistic Southside Cuts data (the top-up). Sources + `contrast.py` (all pairs pass, both themes) in `docs/mockups/s39/`.
 - User (2026-10-26): "I like A very good. and B is also very warm and good. what is your rec?" Claude recommended A as the base with B's calm on data screens; the user said "sure" to an A+B row first. Done: the A+B row (5 screens + dark) on the canvas.
-- Next: the user confirms A+B (or adjusts); then DESIGN.md §2–4, ADR-0044 Direction, `/session-close`.
+- User: "go with A+B". Done: DESIGN.md §2–4 (direction, token table, type scale, components) and ADR-0044 Direction written; contrast check extended to the status soft pairs (all pass).
+- Next: `/session-close`.
 - Open: the user's pick.
 
 ## Last sessions
