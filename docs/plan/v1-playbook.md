@@ -28,6 +28,8 @@ Two more inputs shaped the plan:
 | P1-10 | **A complete redesign comes first** (Phase 9, [ADR-0044](../adr/0044-redesign-and-design-rules.md)), so every new screen is built in the new look. Direction: warm-boutique and clean-premium side by side, bold as the third mockup option. The user dislikes the current look as bland, template-like and not premium. |
 | P1-11 | **Smart deposits:** deposits only from new clients and clients with a no-show history. Regulars in good standing are exempt automatically, and the owner can adjust the rule (Phase 15). |
 | P1-12 | **Approve by text:** Pepper texts the owner a card summary ("Reply Y") over the SMS channel (Phase 14). The full two-way chat by text stays in V1.1. |
+| P1-13 | **Import from an owner's own app** (user, after P1): any app's database can be exported, so the importer takes **CSV, JSON and JSONL** exports with flexible column mapping (S48). Pepper suggests the mapping from header names and value patterns. An AI suggestion for the columns those miss comes in S56a and is recorded in S56b. The model sees column names and masked samples only, and the owner confirms. **Direct database connections** (Postgres, AWS RDS, MongoDB Atlas) are not in V1: Pepper would hold a password to the owner's system. After V1 they're offered as a one-time, read-only "we move you" migration run with the owner, with no credentials stored. |
+| P1-14 | **Design skills** (user, after P1): **UI UX Pro Max** (community, MIT) proposes candidate design systems and supplies UX and accessibility checklists. **frontend-design** makes the screens distinctive. [DESIGN.md](../design/DESIGN.md) and its tests decide over both. A third-party skill is read through before its first use. |
 
 ## 3. How every session works from S39 (the session standard)
 
@@ -46,7 +48,7 @@ The brief names the skills for the session; a skill that isn't installed in a se
 | Kind | Skills |
 |---|---|
 | Every session | `/session-brief`, `/session-close`, `/code-review`; `/security-review` when auth, tenancy, tool arguments, payments, messaging or outside text are touched |
-| UI and design | `frontend-design`, the Design plugin (`design-critique`, `design-system`, `ux-copy`, `accessibility-review`), `artifact-design` (clickable mockups), `run` (see it in the app) |
+| UI and design | `frontend-design` (distinctive screens), `ui-ux-pro-max` (candidate design systems for the industry; UX and accessibility checklists), the Design plugin (`design-critique`, `design-system`, `ux-copy`, `accessibility-review`), `artifact-design` (clickable mockups), `run` (see it in the app) |
 | Domain and backend | `tdd` (test first), `codebase-design` (module seams), `diagnosing-bugs` |
 | AI | `/eval-record` ("b" halves only) |
 | Planning and hard choices | `grilling` (decision rounds with recommendations) |
@@ -60,7 +62,7 @@ Goal: Pepper looks premium, warm and distinctly its own on every screen, and the
 
 | # | Target | Built | Done when |
 |---|---|---|---|
-| S39 | **Design direction** | Three clickable phone mockups of the same 5 screens (Home card board, Calendar, Client, booking page, an approval card), as artifacts the user opens on the phone. Directions: warm-boutique, clean-premium, bold. The user picks one or mixes them. The pick is written into DESIGN.md §2–4 and ADR-0044 "Direction". No app code. | The user approves one direction; DESIGN.md has its tokens, type scale and component list |
+| S39 | **Design direction** | Three clickable phone mockups of the same 5 screens (Home card board, Calendar, Client, booking page, an approval card), as artifacts the user opens on the phone. Directions: warm-boutique, clean-premium, bold. `ui-ux-pro-max` proposes candidate systems for "barber / salon / beauty", and `frontend-design` makes each direction distinctive. The user picks one or mixes them. The pick is written into DESIGN.md §2–4 and ADR-0044 "Direction". No app code. | The user approves one direction; DESIGN.md has its tokens, type scale and component list |
 | S40 | **Foundation** | New `tokens.ts` / `theme.css` (color, type scale, spacing, radius, elevation, motion), fonts, and the component kit in `packages/ui` (Button, IconButton, Input, Select, Sheet, Dialog, Tabs, Card, ListRow, Badge, EmptyState, Skeleton, Toast). A dev-only gallery route. The lint rule against raw colors. Screenshot tests of the gallery at 375 / 412 / 1280 px, light and dark. | Theme and contrast tests green; gallery screenshots committed as baselines; no raw color in `packages/ui` |
 | S41 | **App shell, navigation, Home and Chat** | New shell: bottom tabs Home · Calendar · Clients · Chat · More; desktop sidebar with a "Pepper" group (What I know, Autonomy, Waitlist). Home, Chat and every card (`packages/ui/cards`, feed) on the new kit. | Those screens on the kit; Playwright journeys green; screenshots at 3 widths × 2 themes |
 | S42 | **Calendar, Clients and settings screens** | Calendar day view, Clients list and profile, Services, Team, Autonomy, What I know, Waitlist on the new kit; every empty state says what to do next. | Every signed-in screen on the kit |
@@ -81,7 +83,7 @@ Goal: an owner can move in from Square, Booksy, Vagaro, GlossGenius or Fresha wi
 
 | # | Target | Built | Done when |
 |---|---|---|---|
-| S48 | **Client import** | CSV upload with mapping presets for the five tools plus generic, preview, validation with reasons per row, duplicate matching and merge, a worker job, and **undo the whole import** (batch id). AC-W1-3. | Fixtures in each tool's export format import cleanly; re-import creates no duplicates |
+| S48 | **Client import** | Upload of **CSV, JSON or JSONL** (the five tools' exports, or any app's own database export) with mapping presets for the five tools, smart mapping for anything else (header names and value patterns: phones, emails, dates), preview, validation with reasons per row, duplicate matching and merge, a worker job, and **undo the whole import** (batch id). AC-W1-3. | Fixtures in each tool's export format import cleanly; re-import creates no duplicates |
 | S49 | **History import** | Past visits (visit history Pepper and the AI can use) and upcoming appointments, conflicts listed, never an email on import. Client tags and birthdays. | A 1,000-client, 5,000-visit file imports in < 2 minutes with correct counts |
 | S50 | **Client lifecycle** | Merge two clients, delete a client (memory scrubbed, audited), staff add a walk-in client (privacy rules kept), client list paging and search past 50. | Each in Playwright; the isolation suite at 100% |
 | S51 | **Export and deletion** | Full business export (a ZIP of CSV and JSON), account deletion and business deletion with a grace period and scrub; terms and privacy policy drafted (docs, reviewed in S59). Phase gate. | Export round-trips through import; deletion leaves no tenant rows |
@@ -95,7 +97,7 @@ Goal: Pepper fills the chair and proves it in dollars, with the owner tapping in
 | S53 | **Trust controls** | Autonomy presets (Careful, Balanced, Hands-off) with "Customise" for the 13 actions. Standing rules in plain words, mapped to the dial and booking rules. Client-visible moves default to "ask", and the card says who gets an email. Earned trust: after 20 correct actions of one kind, Pepper offers to do that kind alone. | Preset and rule tests; the move card names the email |
 | S54 | **The money loop** | Cancellation → fill: waitlist and overdue regulars ranked, the offer drafted, sent per the dial or a standing rule, then a receipt ("Filled Tue 2 pm, +$60"). The win-back list ("haven't been back") with one-tap drafts. The first-session aha after import ("12 regulars are overdue, about $540"). | A cancelled slot is offered in < 2 minutes p95; 0 wrong-client sends in the race and fixture tests |
 | S55 | **Proof of value** | The weekly "what Pepper did for you" card (visits booked, gaps filled, regulars back, dollars, minutes saved) and the evening wrap ("tomorrow: 7 visits, 1 at risk"). Post-visit review requests (owner-approved, at most one per client per 90 days). | Card numbers equal the fixture sums; caps tested |
-| S56a | **AI tools and polish ("a")** | `send_client_message` (reminder, running late, a custom note; outbox; "ask" by default) and `mark_no_show`; the prompt's "in Settings" line fixed; guess-and-confirm for typos; honest "I can't do that yet, here's what happens instead". New eval cases: one-sentence move ≥ 98%. Scripted model only. Raise the runner's total stop to the new budget. | Every eval set green on the scripted cassettes |
+| S56a | **AI tools and polish ("a")** | `send_client_message` (reminder, running late, a custom note; outbox; "ask" by default) and `mark_no_show`; the prompt's "in Settings" line fixed; guess-and-confirm for typos; honest "I can't do that yet, here's what happens instead". AI-suggested import mapping for columns S48's smart mapping misses (column names and masked samples only, owner confirms). New eval cases: one-sentence move ≥ 98%, mapping suggestions. Scripted model only. Raise the runner's total stop to the new budget. | Every eval set green on the scripted cassettes |
 | S56b | **Record ("b") + phase gate** — Rec | Merge S56a, probe the changed sets, record once, pass^3 on the gated sets; `KNOWN_REAL_MODEL_MISSES` empty (the two waitlist cases included). Phase cap $3.00. | Every gate met; the scorecard targets met |
 
 ### Phase 13 · Pilot readiness (S57–S60)
@@ -168,6 +170,7 @@ A hypothesis that fails goes to a decision round (grilling) before the next phas
 - **Reserve with Google:** apply early, build after V1.
 - **V1.1:** booking-page layouts, goals, two-way chat by text.
 - **After PMF:** mini-website on the owner's domain, booth-rental shops, clinical studios, voice, multi-location, classes and memberships, gift cards, packages, product sales, inventory, payroll, mass marketing, a marketplace.
+- **Direct database connections** to an owner's own app (P1-13): after V1, as a "we move you" migration service.
 - **Website / Google profile / photo extraction** (the old Phase 9, AC-W1-1/2): after V1.
 
 ## 8. Budget

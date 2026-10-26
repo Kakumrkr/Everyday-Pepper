@@ -8,7 +8,7 @@ Plan 0.33 ([PCR-007](../plan/changes/PCR-007.md), P1 2026-10-26): first customer
 - **Industry templates**: Beauty (salon, barber, nails, spa, lash/brow) and Wellness & fitness (personal trainer, massage, yoga/pilates private sessions).
 - **AI agent** with interactive cards, trust layer (autonomy dial, explanations, undo), persistent memory.
 - **Operator feed** with daily briefing, insights, smart waitlist.
-- **Ten-minute setup**: business type at signup with a pre-filled menu, a setup checklist and warnings; **import** of clients, visit history and upcoming appointments from Square, Booksy, Vagaro, GlossGenius, Fresha or any CSV.
+- **Ten-minute setup**: business type at signup with a pre-filled menu, a setup checklist and warnings; **import** of clients, visit history and upcoming appointments from Square, Booksy, Vagaro, GlossGenius, Fresha, any CSV, or a CSV/JSON export of the owner's own app (direct database connections after V1).
 - **Accounts and privacy**: password reset, email verification, MFA, full data export, client, account and business deletion, terms and privacy policy.
 - **Branded public booking page** (logo, cover, gallery, colors, phone, address, policy; guest + email verification with remembered devices, self-reschedule/cancel).
 - **Messaging**: email and **SMS** (confirmations, reminders, confirm by text, owner-approved drafts, `send_client_message`), and **approve by text** for the owner.

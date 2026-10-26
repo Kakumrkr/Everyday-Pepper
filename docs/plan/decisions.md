@@ -346,4 +346,4 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - **P1-11** smart deposits; **P1-12** approve by text ("Yeah, let's go with your recommendations").
   - The user's ideas, recorded: an own-domain website from Pepper (after PMF) and booking-page templates with their images (V1.1; branded page in V1).
   - "Plan it properly by preserving the original working flow… raise the PR and merge the plan."
-
+- **After P1 (user, 2026-10-26):** "is it possible to import their data if they have their own application… Postgres, AWS, MongoDB Atlas?" Claude's advice, taken ("you can include both"): **P1-13**, the importer takes CSV/JSON/JSONL exports with smart mapping (S48) and an AI-suggested mapping (S56a, recorded in S56b; column names and masked samples only, the owner confirms); direct database connections after V1 as a one-time read-only migration, never stored credentials. **P1-14**, "is ui-ux-pro-max better than frontend-design?": both, for different jobs ("include both or only keep 1, your wish. My goal is a better product"); DESIGN.md decides over both; third-party skills are read before first use.
