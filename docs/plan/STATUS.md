@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress (P1 closed). Next: S39 from "Planned sessions".
+**S39 · Phase 9 design direction** (branch `claude/s39-design-direction`). Brief approved by the user 2026-10-26: "go ahead with your recommendations" (D-1 A: one canvas with all three directions so you can compare them; D-2 A: Google Fonts only in the mockups, S40 self-hosts the fonts).
+- Done: AC-X-3 added to acceptance-criteria + traceability; the `ui-ux-pro-max` candidate systems (pink+lavender/Playfair, black+gold/Cormorant, gold+purple/Plex) were all taken as input only. A uses none of them; B keeps only the near-black primary; C keeps none.
+- Next: the canvas (artifact https://claude.ai/artifact/QCiTKo7b95kE6MAtXjNQCY): A warm boutique, B clean premium, C bold, 5 screens each (Home board, Calendar day, Client, booking page, approval card) + a dark row, realistic barber data (top-up); then the contrast check; then the user picks; then DESIGN.md §2–4 + ADR-0044 Direction.
+- Open: the user's pick.
 
 ## Last sessions
 - **P1 V1 re-plan (2026-10-26): planning only, no product code** ([PCR-007](changes/PCR-007.md), [V1 playbook](v1-playbook.md), [scorecard](scorecard.md), [ADR-0043](../adr/0043-card-board-first-interaction.md), [ADR-0044](../adr/0044-redesign-and-design-rules.md), [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).
