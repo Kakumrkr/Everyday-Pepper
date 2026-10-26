@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>C · Home board</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Archivo', system-ui, sans-serif; font-size: 16px; line-height: 1.4">
+<main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px">
+
+<section aria-label="Today in brief" style="background: {{t.brand}}; color: {{t.brandInk}}; padding: 28px 20px 24px; border-radius: 0 0 32px 32px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-size: 15px; font-weight: 800; font-stretch: 112%; text-transform: uppercase; letter-spacing: 0.02em">Tue · Oct 27</span>
+<a href="CClient.dc.html" aria-label="Your profile" style="width: 44px; height: 44px; border-radius: 50%; background: {{t.brandInk}}; color: {{t.brand}}; display: flex; align-items: center; justify-content: center; font-weight: 900; text-decoration: none">DC</a>
+</div>
+<span style="font-size: 96px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.04em; line-height: 0.85; font-variant-numeric: tabular-nums">$430</span>
+<span style="font-size: 18px; font-weight: 700">booked today, Dre. 12 visits, 2 gaps.</span>
+</section>
+
+<div style="padding: 8px 20px 0; display: flex; align-items: baseline; justify-content: space-between">
+<h2 style="margin: 0; font-size: 26px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.02em; text-transform: uppercase">Your OK</h2>
+<span style="font-size: 14px; font-weight: 700; color: {{t.ink2}}">Biggest first</span>
+</div>
+
+<article style="margin: 0 12px; background: {{t.accent}}; color: {{t.accentInk}}; border-radius: 28px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<span style="font-size: 24px; font-weight: 900; font-stretch: 105%; letter-spacing: -0.02em; line-height: 1.05">Give 1:15 to Jaylen Brooks</span>
+<span style="font-size: 36px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums">+$45</span>
+</div>
+<sc-if value="{{showOffer}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 16px; font-weight: 500">Chris cancelled. Jaylen's waiting for a skin fade. He'll get an email and 2 hours to take it.</span>
+<sc-if value="{{why}}" hint-placeholder-val="{{ false }}">
+<div style="background: {{t.accentDeep}}; border-radius: 18px; padding: 12px 14px; font-size: 15px; font-weight: 500">First on the waitlist since yesterday. Fits before your 2:30. 6 visits, zero no-shows.</div>
+</sc-if>
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{offer}}" style="flex: 1; min-height: 52px; border: 0; border-radius: 999px; background: #0B0B0B; color: #FAFAF7; font: inherit; font-size: 17px; font-weight: 800; cursor: pointer">Offer it</button>
+<button type="button" onClick="{{toggleWhy}}" aria-expanded="{{why}}" style="min-height: 52px; padding: 0 20px; border: 2px solid #0B0B0B; border-radius: 999px; background: transparent; color: {{t.accentInk}}; font: inherit; font-weight: 800; cursor: pointer">Why?</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{offered}}" hint-placeholder-val="{{ false }}">
+<div aria-live="polite" style="display: flex; align-items: center; gap: 10px">
+<span style="flex: 1; font-size: 17px; font-weight: 800">Offered. Open until 11:20.</span>
+<button type="button" onClick="{{undo}}" style="min-height: 48px; padding: 0 18px; border: 0; border-radius: 999px; background: #0B0B0B; color: #FAFAF7; font: inherit; font-weight: 800; cursor: pointer">Undo</button>
+</div>
+</sc-if>
+</article>
+
+<a href="CApprove.dc.html" style="margin: 0 12px; background: {{t.surface}}; color: {{t.ink}}; border-radius: 28px; padding: 20px; display: flex; flex-direction: column; gap: 8px; text-decoration: none">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<span style="font-size: 22px; font-weight: 900; font-stretch: 105%; letter-spacing: -0.02em; line-height: 1.05">Move Darius to 4:15</span>
+<span style="font-size: 28px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums">$35</span>
+</div>
+<span style="font-size: 15px; color: {{t.ink2}}">Saves his visit. He'll get an email about the new time.</span>
+<span style="font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 6px">Review <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+</a>
+
+<div style="margin: 0 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<a href="CClient.dc.html" style="background: {{t.ink0}}; color: {{t.ink0Text}}; border-radius: 28px; padding: 18px; display: flex; flex-direction: column; gap: 6px; text-decoration: none; min-height: 150px; box-sizing: border-box">
+<span style="font-size: 40px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; line-height: 1">6</span>
+<span style="font-size: 16px; font-weight: 800; line-height: 1.15">regulars overdue</span>
+<span style="margin-top: auto; font-size: 15px; font-weight: 700; color: {{t.accentOnInk}}; font-variant-numeric: tabular-nums">~$270 back</span>
+</a>
+<a href="CCalendar.dc.html" style="background: {{t.surface}}; color: {{t.ink}}; border-radius: 28px; padding: 18px; display: flex; flex-direction: column; gap: 6px; text-decoration: none; min-height: 150px; box-sizing: border-box">
+<span style="font-size: 40px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; line-height: 1">3h</span>
+<span style="font-size: 16px; font-weight: 800; line-height: 1.15">Randy free Thu morning</span>
+<span style="margin-top: auto; font-size: 15px; font-weight: 700; color: {{t.ink2}}; font-variant-numeric: tabular-nums">~$135 if filled</span>
+</a>
+</div>
+
+<section aria-labelledby="done" style="margin: 8px 20px 0; display: flex; flex-direction: column">
+<h2 id="done" style="margin: 0 0 4px; font-size: 26px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.02em; text-transform: uppercase">Done</h2>
+<div style="min-height: 52px; display: flex; align-items: center; gap: 12px; border-bottom: 2px solid {{t.ink}}; font-weight: 600">
+<span style="flex: 1">Moved Sam to Fri 10:00</span>
+<button type="button" style="min-height: 44px; padding: 0 14px; border: 2px solid {{t.ink}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Undo</button>
+</div>
+<div style="min-height: 52px; display: flex; align-items: center; border-bottom: 2px solid {{t.ink}}; font-weight: 600">Reminded 9 clients for tomorrow</div>
+<div style="min-height: 52px; display: flex; align-items: center; font-weight: 600">Confirmed 4 new bookings</div>
+</section>
+</main>
+
+<nav aria-label="Main" style="margin: 0 12px 16px; display: flex; justify-content: space-around; padding: 6px; background: {{t.ink0}}; border-radius: 999px">
+<a href="CHome.dc.html" aria-current="page" style="width: 60px; height: 52px; border-radius: 999px; background: {{t.brand}}; color: {{t.brandInk}}; display: flex; align-items: center; justify-content: center" aria-label="Home"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></a>
+<a href="CCalendar.dc.html" aria-label="Calendar" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></a>
+<a href="CClient.dc.html" aria-label="Clients" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg></a>
+<a href="CApprove.dc.html" aria-label="Chat" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></a>
+<a href="CBooking.dc.html" aria-label="More" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { offered: false, why: false };
+  }
+  renderVals() {
+    const light = { bg: '#F2F0EA', surface: '#FFFFFF', ink: '#0B0B0B', ink2: '#3D3D3D', ink0: '#0B0B0B', ink0Text: '#FAFAF7', brand: '#BA2A13', brandInk: '#FFFFFF', accent: '#D4F04A', accentDeep: '#C2DE3A', accentInk: '#0B0B0B', accentOnInk: '#D4F04A' };
+    const dark = { bg: '#0B0B0B', surface: '#171717', ink: '#FAFAF7', ink2: '#C9C9C4', ink0: '#FAFAF7', ink0Text: '#0B0B0B', brand: '#FF5A3C', brandInk: '#0B0B0B', accent: '#D4F04A', accentDeep: '#C2DE3A', accentInk: '#0B0B0B', accentOnInk: '#3A4A00' };
+    const t = this.props.dark ? dark : light;
+    return {
+      t,
+      offered: this.state.offered,
+      showOffer: !this.state.offered,
+      why: this.state.why,
+      offer: () => this.setState({ offered: true, why: false }),
+      undo: () => this.setState({ offered: false }),
+      toggleWhy: () => this.setState({ why: !this.state.why }),
+    };
+  }
+}
+</script>
+</body>
+</html>

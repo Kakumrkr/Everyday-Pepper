@@ -1,0 +1,44 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-10-26T12:00:00Z"},
+  "title": "Pepper design directions",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 390, "h": 844, "title": "A · Home board", "is_interactive": true, "radius": 36},
+    "ACalendar.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "A · Calendar day", "is_interactive": true, "radius": 36},
+    "AClient.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "A · Client profile", "is_interactive": true, "radius": 36},
+    "ABooking.dc.html": {"x": 1410, "y": 0, "w": 390, "h": 844, "title": "A · Booking page (the shop's colour)", "is_interactive": true, "radius": 36},
+    "AApprove.dc.html": {"x": 1880, "y": 0, "w": 390, "h": 844, "title": "A · Approval card", "is_interactive": true, "radius": 36},
+    "ADark.dc.html": {"x": 0, "y": 964, "w": 2270, "h": 844, "title": "A · the same five screens in dark", "is_interactive": true},
+
+    "BHome.dc.html": {"x": 0, "y": 2208, "w": 390, "h": 844, "title": "B · Home board", "is_interactive": true, "radius": 36},
+    "BCalendar.dc.html": {"x": 470, "y": 2208, "w": 390, "h": 844, "title": "B · Calendar day", "is_interactive": true, "radius": 36},
+    "BClient.dc.html": {"x": 940, "y": 2208, "w": 390, "h": 844, "title": "B · Client profile", "is_interactive": true, "radius": 36},
+    "BBooking.dc.html": {"x": 1410, "y": 2208, "w": 390, "h": 844, "title": "B · Booking page (the shop's colour)", "is_interactive": true, "radius": 36},
+    "BApprove.dc.html": {"x": 1880, "y": 2208, "w": 390, "h": 844, "title": "B · Approval card", "is_interactive": true, "radius": 36},
+    "BDark.dc.html": {"x": 0, "y": 3172, "w": 2270, "h": 844, "title": "B · the same five screens in dark", "is_interactive": true},
+
+    "CHome.dc.html": {"x": 0, "y": 4416, "w": 390, "h": 844, "title": "C · Home board", "is_interactive": true, "radius": 36},
+    "CCalendar.dc.html": {"x": 470, "y": 4416, "w": 390, "h": 844, "title": "C · Calendar day", "is_interactive": true, "radius": 36},
+    "CClient.dc.html": {"x": 940, "y": 4416, "w": 390, "h": 844, "title": "C · Client profile", "is_interactive": true, "radius": 36},
+    "CBooking.dc.html": {"x": 1410, "y": 4416, "w": 390, "h": 844, "title": "C · Booking page (the shop's colour)", "is_interactive": true, "radius": 36},
+    "CApprove.dc.html": {"x": 1880, "y": 4416, "w": 390, "h": 844, "title": "C · Approval card", "is_interactive": true, "radius": 36},
+    "CDark.dc.html": {"x": 0, "y": 5380, "w": 2270, "h": 844, "title": "C · the same five screens in dark", "is_interactive": true}
+  },
+  "order": [
+    "Main.dc.html", "ACalendar.dc.html", "AClient.dc.html", "ABooking.dc.html", "AApprove.dc.html", "ADark.dc.html",
+    "BHome.dc.html", "BCalendar.dc.html", "BClient.dc.html", "BBooking.dc.html", "BApprove.dc.html", "BDark.dc.html",
+    "CHome.dc.html", "CCalendar.dc.html", "CClient.dc.html", "CBooking.dc.html", "CApprove.dc.html", "CDark.dc.html"
+  ],
+  "notes": {
+    "titleA": {"x": 0, "y": -300, "text": "A · Warm boutique", "kind": "title1", "maxW": 2270},
+    "titleB": {"x": 0, "y": 1908, "text": "B · Clean premium", "kind": "title1", "maxW": 2270},
+    "titleC": {"x": 0, "y": 4116, "text": "C · Bold modern", "kind": "title1", "maxW": 2270},
+    "noteA": {"x": 2400, "y": 0, "w": 340, "size": "m", "fill": "orange", "text": "A · Warm boutique. Plum and marigold on warm bone. Bricolage Grotesque headings, Figtree text. Soft rounded cards, pill buttons. Meant to feel like a good salon."},
+    "noteB": {"x": 2400, "y": 2208, "w": 340, "size": "m", "fill": "gray", "text": "B · Clean premium. Near-black on white, one green that only ever means money. Geist throughout, hairline rules, big tabular numbers, lots of space. Meant to feel like Apple or Linear."},
+    "noteC": {"x": 2400, "y": 4416, "w": 340, "size": "m", "fill": "red", "text": "C · Bold modern. Pepper red and lime colour blocks, heavy Archivo, thick black outlines, huge numbers. Energetic, like Cash App."},
+    "howTo": {"x": 2400, "y": -300, "w": 340, "size": "m", "fill": "teal", "text": "Same shop, same morning in all three: Southside Cuts, Chicago, Tue Oct 27, barbers Dre and Randy. Press Play on any phone and tap through: tabs, Why?, Approve, Undo, and the booking flow. The booking page uses the shop's own teal; Pepper's look shows only in its frame and footer."}
+  },
+  "designSystems": []
+}

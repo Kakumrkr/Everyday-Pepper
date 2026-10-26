@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>C · Approval card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Archivo', system-ui, sans-serif; font-size: 16px; line-height: 1.4">
+<main style="flex: 1; overflow-y: auto; padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 12px">
+<a href="CHome.dc.html" style="align-self: flex-start; min-height: 44px; padding: 0 8px; display: flex; align-items: center; gap: 4px; color: {{t.ink}}; text-decoration: none; font-weight: 800"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>TODAY</a>
+
+<sc-if value="{{asking}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<section aria-labelledby="ttl" style="background: {{t.brand}}; color: {{t.brandInk}}; border-radius: 32px; padding: 22px 20px; display: flex; flex-direction: column; gap: 14px">
+<span style="font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em">Needs your OK · keeps $35</span>
+<h1 id="ttl" style="margin: 0; font-size: 34px; font-weight: 900; font-stretch: 108%; letter-spacing: -0.03em; line-height: 1">Move Darius Hill?</h1>
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="font-size: 56px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; opacity: 0.6; text-decoration: line-through; text-decoration-thickness: 4px">2:30</span>
+<svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+<span style="font-size: 56px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums">{{newTime}}</span>
+</div>
+<span style="font-size: 15px; font-weight: 700">Haircut with you · today</span>
+</section>
+
+<div style="background: {{t.accent}}; color: {{t.accentInk}}; border-radius: 24px; padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>
+<span style="font-weight: 700">Darius will get an email about the new time. Then 2:30 goes to the waitlist.</span>
+</div>
+
+<sc-if value="{{editing}}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="Other free times" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{times}}" as="x" hint-placeholder-count="3">
+<button type="button" onClick="{{x.pick}}" aria-pressed="{{x.on}}" style="{{x.style}}">{{x.label}}</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{why}}" hint-placeholder-val="{{ false }}">
+<div style="background: {{t.surface}}; border-radius: 24px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 18px; font-weight: 900; text-transform: uppercase">Why</span>
+<span style="font-weight: 600">"Stuck at work, anything after 4?" Darius, 9:12.</span>
+<span>4:15 is your first free half hour after 4. 11 visits, never missed one.</span>
+<span style="color: {{t.ink2}}">You told me to ask before moving anyone.</span>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+<section aria-live="polite" style="background: {{t.accent}}; color: {{t.accentInk}}; border-radius: 32px; padding: 24px 20px; display: flex; flex-direction: column; gap: 10px">
+<h1 style="margin: 0; font-size: 44px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.035em; line-height: 0.92; text-transform: uppercase">Moved to<br>{{newTime}}</h1>
+<span style="font-weight: 700">Darius's email goes out in a minute. Undo before 9:50 and it never sends.</span>
+</section>
+</sc-if>
+
+<sc-if value="{{undone}}" hint-placeholder-val="{{ false }}">
+<section aria-live="polite" style="background: {{t.surface}}; border-radius: 32px; padding: 24px 20px; display: flex; flex-direction: column; gap: 10px">
+<h1 style="margin: 0; font-size: 44px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.035em; line-height: 0.92; text-transform: uppercase">Back at<br>2:30</h1>
+<span style="font-weight: 700">Nothing was sent. The card is back on Today.</span>
+</section>
+</sc-if>
+</main>
+
+<div style="padding: 8px 12px 20px; display: flex; flex-direction: column; gap: 8px">
+<sc-if value="{{asking}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" onClick="{{approve}}" style="min-height: 64px; border: 0; border-radius: 999px; background: {{t.ink0}}; color: {{t.ink0Text}}; font: inherit; font-size: 20px; font-weight: 900; cursor: pointer">Move to {{newTime}}</button>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" onClick="{{toggleWhy}}" aria-expanded="{{why}}" style="min-height: 52px; border: 2px solid {{t.ink}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-weight: 800; cursor: pointer">Why?</button>
+<button type="button" onClick="{{toggleEdit}}" aria-expanded="{{editing}}" style="min-height: 52px; border: 2px solid {{t.ink}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-weight: 800; cursor: pointer">Other</button>
+<a href="CHome.dc.html" style="min-height: 52px; border-radius: 999px; color: {{t.ink}}; font-weight: 800; display: flex; align-items: center; justify-content: center; text-decoration: underline; text-underline-offset: 4px">Not now</a>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button type="button" onClick="{{undo}}" style="min-height: 64px; border: 2px solid {{t.ink}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-size: 18px; font-weight: 900; cursor: pointer">Undo</button>
+<a href="CHome.dc.html" style="min-height: 64px; border-radius: 999px; background: {{t.ink0}}; color: {{t.ink0Text}}; font-size: 18px; font-weight: 900; display: flex; align-items: center; justify-content: center; text-decoration: none">Done</a>
+</div>
+</sc-if>
+<sc-if value="{{undone}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{reset}}" style="min-height: 64px; border: 2px solid {{t.ink}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-size: 18px; font-weight: 900; cursor: pointer">See it again</button>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'ask', why: false, editing: false, time: '4:15' };
+  }
+  renderVals() {
+    const light = { bg: '#F2F0EA', surface: '#FFFFFF', ink: '#0B0B0B', ink2: '#3D3D3D', ink0: '#0B0B0B', ink0Text: '#FAFAF7', brand: '#BA2A13', brandInk: '#FFFFFF', accent: '#D4F04A', accentInk: '#0B0B0B' };
+    const dark = { bg: '#0B0B0B', surface: '#171717', ink: '#FAFAF7', ink2: '#C9C9C4', ink0: '#FAFAF7', ink0Text: '#0B0B0B', brand: '#FF5A3C', brandInk: '#0B0B0B', accent: '#D4F04A', accentInk: '#0B0B0B' };
+    const t = this.props.dark ? dark : light;
+    const st = this.state;
+    const chip = 'min-height: 56px; border-radius: 999px; font: inherit; font-size: 20px; font-weight: 900; font-variant-numeric: tabular-nums; cursor: pointer; ';
+    const times = ['3:30', '4:15', '5:30'].map((label) => {
+      const on = st.time === label;
+      return { label, on, pick: () => this.setState({ time: label }), style: chip + (on ? 'border: 0; background: ' + t.ink0 + '; color: ' + t.ink0Text + ';' : 'border: 2px solid ' + t.ink + '; background: transparent; color: ' + t.ink + ';') };
+    });
+    return {
+      t, times,
+      newTime: st.time,
+      asking: st.phase === 'ask', done: st.phase === 'done', undone: st.phase === 'undone',
+      why: st.why, editing: st.editing,
+      toggleWhy: () => this.setState({ why: !st.why }),
+      toggleEdit: () => this.setState({ editing: !st.editing }),
+      approve: () => this.setState({ phase: 'done', why: false, editing: false }),
+      undo: () => this.setState({ phase: 'undone' }),
+      reset: () => this.setState({ phase: 'ask', time: '4:15' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

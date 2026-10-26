@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>C · Client profile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Archivo', system-ui, sans-serif; font-size: 16px; line-height: 1.4">
+<main style="flex: 1; overflow-y: auto; padding: 12px 12px 20px; display: flex; flex-direction: column; gap: 12px">
+<a href="CHome.dc.html" style="align-self: flex-start; min-height: 44px; padding: 0 8px; display: flex; align-items: center; gap: 4px; color: {{t.ink}}; text-decoration: none; font-weight: 800"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>CLIENTS</a>
+
+<header style="background: {{t.ink0}}; color: {{t.ink0Text}}; border-radius: 28px; padding: 22px 20px; display: flex; flex-direction: column; gap: 10px">
+<span style="align-self: flex-start; padding: 5px 12px; border-radius: 999px; background: {{t.brand}}; color: {{t.brandInk}}; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.03em">2 weeks overdue</span>
+<h1 style="margin: 0; font-size: 46px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.035em; line-height: 0.9; text-transform: uppercase">Marcus<br>Bell</h1>
+<span style="font-size: 15px; opacity: 0.85">Since March 2024 · Dre's client · every 3 weeks</span>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="background: {{t.accent}}; color: {{t.accentInk}}; border-radius: 22px; padding: 14px; display: flex; flex-direction: column"><span style="font-size: 30px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">$1,080</span><span style="font-size: 13px; font-weight: 700">spent</span></div>
+<div style="background: {{t.surface}}; border-radius: 22px; padding: 14px; display: flex; flex-direction: column"><span style="font-size: 30px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">18</span><span style="font-size: 13px; font-weight: 700; color: {{t.ink2}}">visits</span></div>
+<div style="background: {{t.surface}}; border-radius: 22px; padding: 14px; display: flex; flex-direction: column"><span style="font-size: 30px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">0</span><span style="font-size: 13px; font-weight: 700; color: {{t.ink2}}">no-shows</span></div>
+</div>
+
+<sc-if value="{{showBook}}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{book}}" style="min-height: 84px; border: 0; border-radius: 28px; background: {{t.brand}}; color: {{t.brandInk}}; padding: 14px 20px; display: flex; align-items: center; gap: 12px; text-align: left; font: inherit; cursor: pointer">
+<span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 20px; font-weight: 900">Book his usual</span><span style="font-size: 14px; font-weight: 600">Sat 10:00 · fade + beard · $60 · he gets an email</span></span>
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+</button>
+</sc-if>
+<sc-if value="{{booked}}" hint-placeholder-val="{{ false }}">
+<div aria-live="polite" style="min-height: 84px; box-sizing: border-box; border-radius: 28px; background: {{t.accent}}; color: {{t.accentInk}}; padding: 14px 20px; display: flex; align-items: center; gap: 12px">
+<span style="flex: 1; font-size: 18px; font-weight: 900">Booked Sat 10:00. Emailed.</span>
+<button type="button" onClick="{{undo}}" style="min-height: 48px; padding: 0 18px; border: 0; border-radius: 999px; background: #0B0B0B; color: #FAFAF7; font: inherit; font-weight: 800; cursor: pointer">Undo</button>
+</div>
+</sc-if>
+
+<section aria-labelledby="knows" style="background: {{t.surface}}; border-radius: 28px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="knows" style="margin: 0; font-size: 22px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.02em; text-transform: uppercase">Pepper knows</h2>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 700">#2 sides, scissors on top, short beard</span><span style="font-size: 13px; color: {{t.ink2}}">Your note · Aug 11</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 700">Saturday mornings, or weekdays after 5</span><span style="font-size: 13px; color: {{t.ink2}}">From 12 bookings</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 700">No menthol aftershave</span><span style="font-size: 13px; color: {{t.ink2}}">He told Pepper · Jun 3</span></div>
+</section>
+
+<section aria-labelledby="visits" style="padding: 8px 8px 0; display: flex; flex-direction: column">
+<h2 id="visits" style="margin: 0 0 4px; font-size: 22px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.02em; text-transform: uppercase">Visits</h2>
+<sc-for list="{{visits}}" as="v" hint-placeholder-count="4">
+<div style="min-height: 56px; display: flex; align-items: center; gap: 12px; border-bottom: 2px solid {{t.ink}}">
+<span style="width: 62px; font-weight: 900; font-variant-numeric: tabular-nums">{{v.date}}</span>
+<span style="flex: 1; font-weight: 500">{{v.what}}</span>
+<span style="font-weight: 900; font-variant-numeric: tabular-nums">{{v.price}}</span>
+</div>
+</sc-for>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-top: 4px">
+<a href="CApprove.dc.html" style="min-height: 52px; border-radius: 999px; border: 2px solid {{t.ink}}; color: {{t.ink}}; display: flex; align-items: center; justify-content: center; font-weight: 800; text-decoration: none">Email</a>
+<a href="tel:+13125550187" style="min-height: 52px; border-radius: 999px; border: 2px solid {{t.ink}}; color: {{t.ink}}; display: flex; align-items: center; justify-content: center; font-weight: 800; text-decoration: none">Call</a>
+</div>
+</main>
+
+<nav aria-label="Main" style="margin: 0 12px 16px; display: flex; justify-content: space-around; padding: 6px; background: {{t.ink0}}; border-radius: 999px">
+<a href="CHome.dc.html" aria-label="Home" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></a>
+<a href="CCalendar.dc.html" aria-label="Calendar" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></a>
+<a href="CClient.dc.html" aria-current="page" aria-label="Clients" style="width: 60px; height: 52px; border-radius: 999px; background: {{t.brand}}; color: {{t.brandInk}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg></a>
+<a href="CApprove.dc.html" aria-label="Chat" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></a>
+<a href="CBooking.dc.html" aria-label="More" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { booked: false };
+  }
+  renderVals() {
+    const light = { bg: '#F2F0EA', surface: '#FFFFFF', ink: '#0B0B0B', ink2: '#3D3D3D', ink0: '#0B0B0B', ink0Text: '#FAFAF7', brand: '#BA2A13', brandInk: '#FFFFFF', accent: '#D4F04A', accentInk: '#0B0B0B' };
+    const dark = { bg: '#0B0B0B', surface: '#171717', ink: '#FAFAF7', ink2: '#C9C9C4', ink0: '#FAFAF7', ink0Text: '#0B0B0B', brand: '#FF5A3C', brandInk: '#0B0B0B', accent: '#D4F04A', accentInk: '#0B0B0B' };
+    const t = this.props.dark ? dark : light;
+    const visits = [
+      { date: 'Sep 22', what: 'Fade + beard · Dre', price: '$60' },
+      { date: 'Aug 29', what: 'Fade + beard · Dre', price: '$60' },
+      { date: 'Aug 8', what: 'Skin fade · Randy', price: '$45' },
+      { date: 'Jul 18', what: 'Fade + beard · Dre', price: '$60' },
+    ];
+    return {
+      t, visits,
+      booked: this.state.booked,
+      showBook: !this.state.booked,
+      book: () => this.setState({ booked: true }),
+      undo: () => this.setState({ booked: false }),
+    };
+  }
+}
+</script>
+</body>
+</html>

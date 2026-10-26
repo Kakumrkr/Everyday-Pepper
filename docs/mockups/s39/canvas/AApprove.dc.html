@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A · Approval card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Figtree', system-ui, sans-serif; font-size: 16px; line-height: 1.45">
+
+<div aria-hidden="true" style="padding: 28px 20px; display: flex; flex-direction: column; gap: 16px">
+<span style="font-size: 14px; color: {{t.ink2}}">Tuesday, October 27</span>
+<span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 32px; font-weight: 700">Morning, Dre</span>
+<div style="height: 150px; border-radius: 28px; background: {{t.brand}}"></div>
+<div style="height: 120px; border-radius: 24px; background: {{t.surface}}"></div>
+</div>
+
+<div style="position: absolute; inset: 0; background: {{t.scrim}}; display: flex; align-items: flex-end">
+<section role="dialog" aria-labelledby="ttl" style="width: 100%; max-height: 780px; overflow-y: auto; box-sizing: border-box; background: {{t.surface}}; border-radius: 32px 32px 0 0; padding: 12px 20px 30px; display: flex; flex-direction: column; gap: 16px">
+<span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: {{t.line}}"></span>
+
+<sc-if value="{{asking}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<span style="padding: 4px 10px; border-radius: 999px; background: {{t.brandSoft}}; color: {{t.brand}}; font-size: 13px; font-weight: 700">Needs your OK</span>
+<span style="font-size: 14px; color: {{t.ink2}}">Keeps a $35 visit</span>
+</div>
+<h1 id="ttl" style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15">Move Darius Hill to {{newTime}} today?</h1>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr); align-items: center; background: {{t.surface2}}; border-radius: 22px; padding: 14px 16px">
+<div style="display: flex; flex-direction: column"><span style="font-size: 13px; color: {{t.ink2}}">Now</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; text-decoration: line-through; text-decoration-thickness: 2px; color: {{t.ink2}}">2:30</span></div>
+<span style="color: {{t.ink2}}"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<div style="display: flex; flex-direction: column"><span style="font-size: 13px; color: {{t.ink2}}">New</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{t.brand}}">{{newTime}}</span></div>
+<span style="grid-column: 1 / -1; margin-top: 6px; font-size: 14px; color: {{t.ink2}}">Haircut · 30 min · with you</span>
+</div>
+
+<div style="display: flex; gap: 10px; align-items: flex-start; font-size: 15px">
+<span style="color: {{t.brand}}; margin-top: 2px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6 8.5 7 8.5-7"/></svg></span>
+<span><strong>Darius will get an email about the new time.</strong> Your 2:30 opens up, and I'll offer it to the waitlist next.</span>
+</div>
+
+<sc-if value="{{editing}}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="Other free times" style="display: flex; gap: 8px">
+<sc-for list="{{times}}" as="x" hint-placeholder-count="3">
+<button type="button" onClick="{{x.pick}}" aria-pressed="{{x.on}}" style="{{x.style}}">{{x.label}}</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{why}}" hint-placeholder-val="{{ false }}">
+<div style="background: {{t.surface2}}; border-radius: 20px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 15px">
+<span style="font-weight: 700">Why I'm suggesting this</span>
+<span>Darius emailed at 9:12: <em>"Stuck at work, anything after 4?"</em></span>
+<span>4:15 is your first free half hour after 4. He's been 11 times and has never missed one.</span>
+<span style="color: {{t.ink2}}">You asked me to check before moving anyone, so nothing changes until you tap Move.</span>
+</div>
+</sc-if>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" onClick="{{approve}}" style="min-height: 54px; border: 0; border-radius: 999px; background: {{t.brand}}; color: {{t.brandInk}}; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer">Move to {{newTime}}</button>
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{toggleWhy}}" aria-expanded="{{why}}" style="flex: 1; min-height: 48px; border: 1.5px solid {{t.lineStrong}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-weight: 600; cursor: pointer">Why?</button>
+<button type="button" onClick="{{toggleEdit}}" aria-expanded="{{editing}}" style="flex: 1; min-height: 48px; border: 1.5px solid {{t.lineStrong}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-weight: 600; cursor: pointer">Other time</button>
+<a href="Main.dc.html" style="flex: 1; min-height: 48px; border-radius: 999px; color: {{t.ink2}}; font-weight: 600; display: flex; align-items: center; justify-content: center; text-decoration: none">Not now</a>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+<div aria-live="polite" style="display: flex; flex-direction: column; gap: 14px">
+<span style="width: 56px; height: 56px; border-radius: 50%; background: {{t.okSoft}}; color: {{t.ok}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Moved Darius to {{newTime}}</h1>
+<p style="margin: 0; font-size: 15px; color: {{t.ink2}}">His email goes out in a minute. Undo before 9:50 and it never sends.</p>
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{undo}}" style="flex: 1; min-height: 52px; border: 1.5px solid {{t.lineStrong}}; border-radius: 999px; background: transparent; color: {{t.ink}}; font: inherit; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>Undo</button>
+<a href="Main.dc.html" style="flex: 1; min-height: 52px; border-radius: 999px; background: {{t.brand}}; color: {{t.brandInk}}; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none">Back to today</a>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{undone}}" hint-placeholder-val="{{ false }}">
+<div aria-live="polite" style="display: flex; flex-direction: column; gap: 14px">
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Back at 2:30</h1>
+<p style="margin: 0; font-size: 15px; color: {{t.ink2}}">Nothing was sent to Darius. His card is back on your board.</p>
+<button type="button" onClick="{{reset}}" style="min-height: 52px; border: 0; border-radius: 999px; background: {{t.brandSoft}}; color: {{t.brand}}; font: inherit; font-weight: 700; cursor: pointer">See the card again</button>
+</div>
+</sc-if>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'ask', why: false, editing: false, time: '4:15' };
+  }
+  renderVals() {
+    const light = { bg: '#F6F1EC', surface: '#FFFDFB', surface2: '#EFE7DF', ink: '#2A1F26', ink2: '#5E4F58', line: '#E4D8CD', lineStrong: '#8E7C86', brand: '#5A2D52', brandInk: '#FFFFFF', brandSoft: '#F0E2EC', ok: '#2F6B4F', okSoft: '#E3EFE7', scrim: 'rgba(42,31,38,0.45)' };
+    const dark = { bg: '#1A1418', surface: '#241C21', surface2: '#2E242B', ink: '#F5EDF1', ink2: '#CDBFC7', line: '#3A2F36', lineStrong: '#8A7A84', brand: '#E0B3D6', brandInk: '#2A1023', brandSoft: '#3B2737', ok: '#7FCBA4', okSoft: '#1F3A2D', scrim: 'rgba(0,0,0,0.6)' };
+    const t = this.props.dark ? dark : light;
+    const st = this.state;
+    const chip = 'flex: 1; min-height: 48px; border-radius: 16px; font: inherit; font-weight: 700; font-variant-numeric: tabular-nums; cursor: pointer; ';
+    const times = ['3:30', '4:15', '5:30'].map((label) => {
+      const on = st.time === label;
+      return { label, on, pick: () => this.setState({ time: label }), style: chip + (on ? 'border: 0; background: ' + t.brand + '; color: ' + t.brandInk + ';' : 'border: 1.5px solid ' + t.lineStrong + '; background: transparent; color: ' + t.ink + ';') };
+    });
+    return {
+      t, times,
+      newTime: st.time,
+      asking: st.phase === 'ask', done: st.phase === 'done', undone: st.phase === 'undone',
+      why: st.why, editing: st.editing,
+      toggleWhy: () => this.setState({ why: !st.why }),
+      toggleEdit: () => this.setState({ editing: !st.editing }),
+      approve: () => this.setState({ phase: 'done', why: false, editing: false }),
+      undo: () => this.setState({ phase: 'undone' }),
+      reset: () => this.setState({ phase: 'ask', time: '4:15' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

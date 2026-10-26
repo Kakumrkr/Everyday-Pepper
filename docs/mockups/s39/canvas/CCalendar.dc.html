@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>C · Calendar day</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Archivo', system-ui, sans-serif; font-size: 16px; line-height: 1.35">
+<header style="padding: 24px 16px 12px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: flex-end; justify-content: space-between">
+<h1 style="margin: 0; font-size: 44px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; line-height: 0.9; text-transform: uppercase">Tue<br>Oct 27</h1>
+<div style="display: flex; flex-direction: column; align-items: flex-end">
+<span style="font-size: 30px; font-weight: 900; font-stretch: 112%; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">$430</span>
+<span style="font-size: 14px; font-weight: 700; color: {{t.ink2}}">12 visits</span>
+</div>
+</div>
+<div style="background: {{t.ink0}}; color: {{t.ink0Text}}; border-radius: 24px; padding: 16px 18px; display: flex; align-items: center; gap: 14px">
+<div style="display: flex; flex-direction: column; flex: 1">
+<span style="font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: {{t.accentOnInk}}">Next · in 25 min</span>
+<span style="font-size: 20px; font-weight: 800">Andre Wallace</span>
+<span style="font-size: 14px; opacity: 0.8">Skin fade with you · new client</span>
+</div>
+<span style="font-size: 32px; font-weight: 900; font-stretch: 112%; font-variant-numeric: tabular-nums">9:45</span>
+</div>
+<div role="group" aria-label="Whose day" style="display: flex; gap: 8px">
+<sc-for list="{{tabs}}" as="x" hint-placeholder-count="3">
+<button type="button" onClick="{{x.pick}}" aria-pressed="{{x.on}}" style="{{x.style}}">{{x.label}}</button>
+</sc-for>
+</div>
+</header>
+
+<main style="flex: 1; overflow-y: auto; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="12">
+<a href="{{r.href}}" style="{{r.style}}">
+<span style="width: 58px; font-size: 20px; font-weight: 900; font-stretch: 105%; font-variant-numeric: tabular-nums; flex-shrink: 0">{{r.at}}</span>
+<span style="flex: 1; display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</span><span style="font-size: 14px; font-weight: 500; opacity: 0.85">{{r.sub}}</span></span>
+<span style="font-size: 13px; font-weight: 900; padding: 4px 9px; border-radius: 999px; border: 2px solid currentColor">{{r.who}}</span>
+</a>
+</sc-for>
+</main>
+
+<nav aria-label="Main" style="margin: 0 12px 16px; display: flex; justify-content: space-around; padding: 6px; background: {{t.ink0}}; border-radius: 999px">
+<a href="CHome.dc.html" aria-label="Home" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></a>
+<a href="CCalendar.dc.html" aria-current="page" aria-label="Calendar" style="width: 60px; height: 52px; border-radius: 999px; background: {{t.brand}}; color: {{t.brandInk}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></a>
+<a href="CClient.dc.html" aria-label="Clients" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg></a>
+<a href="CApprove.dc.html" aria-label="Chat" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></a>
+<a href="CBooking.dc.html" aria-label="More" style="width: 60px; height: 52px; border-radius: 999px; color: {{t.ink0Text}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { who: 'All' };
+  }
+  renderVals() {
+    const light = { bg: '#F2F0EA', surface: '#FFFFFF', ink: '#0B0B0B', ink2: '#3D3D3D', ink0: '#0B0B0B', ink0Text: '#FAFAF7', brand: '#BA2A13', brandInk: '#FFFFFF', brandSoft: '#FCE9E3', accent: '#D4F04A', accentInk: '#0B0B0B', accentOnInk: '#D4F04A' };
+    const dark = { bg: '#0B0B0B', surface: '#171717', ink: '#FAFAF7', ink2: '#C9C9C4', ink0: '#FAFAF7', ink0Text: '#0B0B0B', brand: '#FF5A3C', brandInk: '#0B0B0B', brandSoft: '#3A1A13', accent: '#D4F04A', accentInk: '#0B0B0B', accentOnInk: '#3A4A00' };
+    const t = this.props.dark ? dark : light;
+    const all = [
+      ['9:00', 'DRE', 'Kevin Nguyen', 'Haircut · $35'],
+      ['9:45', 'DRE', 'Andre Wallace', 'Skin fade · $45 · new'],
+      ['10:00', 'RANDY', 'Brandon Lee', 'Skin fade · $45'],
+      ['10:30', 'DRE', "Mike O'Connor", 'Haircut and beard · $55'],
+      ['11:00', 'RANDY', 'Omar Haddad', 'Beard trim · $20'],
+      ['11:30', 'DRE', 'Jordan Ellis', 'Hot towel shave · $45'],
+      ['1:00', 'DRE', 'OPEN 90 MIN', 'Jaylen is waiting · +$45', 'gap'],
+      ['1:00', 'RANDY', 'Victor Diaz', 'Haircut · $35'],
+      ['2:30', 'DRE', 'Darius Hill', 'Wants to move · tap to review', 'ask'],
+      ['3:00', 'RANDY', 'Ray Thompson', 'Haircut and beard · $55'],
+      ['3:15', 'DRE', 'Nate Simmons', 'Line-up · $15'],
+      ['3:30', 'DRE', 'OPEN 90 MIN', 'Fits 2 haircuts · ~$70', 'gap'],
+      ['4:30', 'RANDY', 'Jamal Price', 'Buzz cut · $20'],
+      ['5:00', 'DRE', 'Eli Romero', "Kid's cut · $25"],
+    ];
+    const base = 'min-height: 64px; border-radius: 20px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; text-decoration: none; box-sizing: border-box; ';
+    const pickWho = this.state.who;
+    const rows = all
+      .filter((r) => pickWho === 'All' || r[1] === pickWho.toUpperCase())
+      .map(([at, who, name, sub, kind]) => {
+        let look;
+        if (kind === 'gap') look = 'background: ' + t.accent + '; color: ' + t.accentInk + ';';
+        else if (kind === 'ask') look = 'background: ' + t.brand + '; color: ' + t.brandInk + ';';
+        else if (who === 'DRE') look = 'background: ' + t.surface + '; color: ' + t.ink + ';';
+        else look = 'background: transparent; color: ' + t.ink + '; border: 2px solid ' + t.ink + ';';
+        const href = kind === 'gap' ? 'CHome.dc.html' : kind === 'ask' ? 'CApprove.dc.html' : 'CClient.dc.html';
+        return { at, who, name, sub, href, style: base + look };
+      });
+    const chip = 'min-height: 44px; padding: 0 18px; border-radius: 999px; font: inherit; font-weight: 800; cursor: pointer; ';
+    const tabs = ['All', 'Dre', 'Randy'].map((label) => {
+      const on = pickWho === label;
+      return { label, on, pick: () => this.setState({ who: label }), style: chip + (on ? 'border: 0; background: ' + t.ink0 + '; color: ' + t.ink0Text + ';' : 'border: 2px solid ' + t.ink + '; background: transparent; color: ' + t.ink + ';') };
+    });
+    return { t, rows, tabs };
+  }
+}
+</script>
+</body>
+</html>
