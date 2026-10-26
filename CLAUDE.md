@@ -89,5 +89,5 @@ See `docs/engineering/testing-strategy.md`. Minimum per change: unit tests for l
 ## Git
 - Small, focused commits with descriptive messages; never commit failing builds.
 - Do not create PRs, push to other branches, or deploy unless asked.
-- After a split session's PR merges, delete its merged "a" branch (GitHub's auto-delete removes only the PR's own branch; `/session-close` step 5).
+- After a split session's PR merges, its "a" branch is left behind: GitHub's auto-delete removes only the PR's own branch, and sessions can't delete other branches. `/session-close` step 5 checks it is merged and asks the user to delete it.
 - **Save GitHub Actions minutes** (private repo, 2,000 minutes a month; one CI run is ~18 minutes). Pushing a session branch without a PR runs nothing; every push to an open PR runs full CI. So: run all checks locally first (`pnpm check`, `pnpm test:integration`, Playwright when screens or flows change); put every commit in before opening the PR, including the docs and the "ADR accepted" and STATUS updates; then open the PR once and merge after one green run. Push to an open PR only to fix a CI failure, and group fixes into one push. CI runs on PRs (not again on `main` after merge), weekly on `main`, and skips its jobs for docs-only PRs (`.github/workflows/ci.yml`).

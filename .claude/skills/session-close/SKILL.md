@@ -41,7 +41,7 @@ An "a" half (CLAUDE.md, split sessions): STATUS "In progress" says what "b" does
 
 All commits in (docs included). Then open the PR (the repo's template if there is one; no model ids; the walkthrough screenshots), subscribe to its activity, wait for the one CI run. Green: merge (squash) and unsubscribe. Red: fix every failure in one push.
 
-After the merge, **delete the merged "a" branch** of a split session (`git push origin --delete <a-branch>`, after checking `git merge-base --is-ancestor origin/<a-branch> <the merged PR's head>`). GitHub's auto-delete removes only the PR's own head branch, which left S32a, S36a, S37a and S38a behind until P1.
+After the merge, **hand the merged "a" branch of a split session to the user to delete**. GitHub's auto-delete removes only the PR's own head branch, which left S32a, S36a, S37a and S38a behind until P1. A session can't delete another branch: the git proxy refuses (403) and the GitHub tools have no branch delete. So check `git merge-base --is-ancestor origin/<a-branch> <the merged PR's head>`, then give the user the branch name, the PR it is in, and the link `https://github.com/kakumaniramakrishnarao/Everyday-Pepper/branches` (the bin icon on its row).
 
 ## 6. The next session's prompt
 
