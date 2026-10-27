@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-27 · **Plan version:** 0.33 ([PCR-007](changes/PCR-007.md)) · **Current phase:** 9 — New look (S41 done: shell, Home, Chat and the cards on the kit) → next: **S42** (the other signed-in screens on the kit)
+**Last updated:** 2026-10-27 · **Plan version:** 0.34 ([PCR-008](changes/PCR-008.md)) · **Current phase:** 9 — New look (S41 done: shell, Home, Chat and the cards on the kit) → next: **S42** (Calendar and Clients on the kit)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -32,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **After S41 (user, 2026-10-27):** faster sessions ([PCR-008](changes/PCR-008.md)): review before checks, each suite once, integration only when its code changed, the walkthrough from the screenshot baselines, sessions sized to one context window (S42 split into S42 + S42.2). Full wording in [decisions.md](decisions.md).
 - **S41 (user, 2026-10-27):** at the brief "Go ahead with your recommendations": D-1 a More tab on phones (Pepper group, then Services, Team, account); the desktop sidebar shows everything; D-2 Home's settings move to More (Home keeps an "Add your address" line); D-3 the hook installs the headless shell Playwright expects. **Claude:** the code review's 7 fixes, 2 left with reasons (session log).
 - **S40 (user, 2026-10-27):** at the brief "Go ahead start with your recommendation": D-1 DESIGN token names with the old names as aliases until S43; D-2 Radix dialog, tabs, toggle-group and toast in `packages/ui`; D-3 the gallery behind `PEPPER_GALLERY=1`, 404 otherwise; D-4 Linux baselines made in the session with CI's headless shell, 1% tolerance. Then "continue and complete the session close". **Claude (ADR-0044 Built):** Select, Checkbox and Switch native; the old `Card` renamed `LegacyCard`; the review's eight fixes.
 - **S39 (user, 2026-10-26):** at the brief "go ahead with your recommendations" (one canvas, Google Fonts in mockups only); "what is your rec?" → Claude: A as the base with B's calm; "sure" to an A+B row; **"go with A+B"**. PCR-002's colors are superseded from S40 (ADR-0044).
@@ -60,7 +61,8 @@ S1–S41, M1–M2 and P1 are done (Phases 0–8, the re-plan, and Phase 9's dire
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S42 | Calendar, Clients, Services, Team, Autonomy, What I know, Waitlist on the kit | 9 | Every signed-in screen on the kit |
+| S42 | Calendar (day view) and Clients (list, profile) on the kit | 9 | Calendar and Clients on the kit; journeys + screenshots green |
+| S42.2 | Services, Team, Autonomy, What I know, Waitlist on the kit (split from S42, PCR-008) | 9 | Every signed-in screen on the kit |
 | S43 | Public pages + auth on the kit, legacy stylesheet deleted, UX copy pass, **Phase 9 gate** | 9 | Scorecard C3, C4, C10 ≥ 8 |
 | S44 | Password reset, email verification, change email; `add_to_waitlist` window check in the domain | 10 | Journeys + domain tests green |
 | S45 | Business type at signup → pre-filled menu and hours; US zones first; activation events | 10 | A barber business bookable with zero typing |
