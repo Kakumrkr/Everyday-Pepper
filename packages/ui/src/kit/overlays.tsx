@@ -216,7 +216,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <RadixToast.Viewport
         className={cx(
-          'fixed inset-x-0 bottom-0 z-50 m-0 flex list-none flex-col gap-2 p-4 pb-20',
+          'fixed inset-x-0 bottom-0 z-50 m-0 flex list-none flex-col gap-2 p-4',
+          // Above the bottom tabs, whose height grows by the phone's safe area.
+          'pb-[calc(5rem+env(safe-area-inset-bottom))]',
           'desk:inset-x-auto desk:right-6 desk:bottom-6 desk:w-96 desk:p-0',
         )}
       />

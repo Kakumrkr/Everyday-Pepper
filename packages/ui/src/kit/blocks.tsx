@@ -65,7 +65,10 @@ export interface ListRowProps {
   meta?: ReactNode;
   /** A time ("9:45") or an icon before the title. */
   leading?: ReactNode;
-  /** An amount, a badge or an action after it. */
+  /**
+   * An amount or a badge after it; an action only on a row without `href` (the linked row is
+   * one link, and a button can't sit inside it).
+   */
   trailing?: ReactNode;
   /** The row opens this (a chevron shows it navigates). */
   href?: string | undefined;
@@ -253,14 +256,16 @@ export function TimeChip({
 }
 
 /** Where the client is in the booking: one segment per step, the current one named. */
-export function StepBar({ steps, current }: { steps: readonly string[]; current: number }) {
+export function StepBar({ steps, current: asked }: { steps: readonly string[]; current: number }) {
+  const current = Math.min(Math.max(0, Math.trunc(asked)), steps.length - 1);
   const name = steps[current] ?? '';
   return (
     <div className="flex flex-col gap-2">
       <ol aria-label="Booking steps" className="m-0 flex list-none gap-1.5 p-0">
         {steps.map((step, index) => (
           <li
-            key={step}
+            // By position: two steps may share a label.
+            key={index}
             aria-current={index === current ? 'step' : undefined}
             className={cx(
               'h-1.5 flex-1 rounded-pill',
@@ -329,7 +334,9 @@ export function BriefingBlock({
   progressLabel: string;
   children?: ReactNode;
 }) {
-  const percent = Math.round(Math.min(1, Math.max(0, progress)) * 100);
+  const percent = Number.isFinite(progress)
+    ? Math.round(Math.min(1, Math.max(0, progress)) * 100)
+    : 0;
   return (
     <section
       aria-label={greeting}

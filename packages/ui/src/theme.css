@@ -101,7 +101,8 @@
   --color-scrim: var(--scrim);
   /* The names screens built before S40 use (tokens.ts LEGACY_ALIASES; S43 deletes them). */
   --color-on-brand: var(--brand-ink);
-  --color-brand-strong: var(--brand);
+  /* Pressed and hovered: the brand pulled toward `ink` (darker in light, lighter in dark). */
+  --color-brand-strong: color-mix(in srgb, var(--brand) 82%, var(--ink));
   --color-on-accent: var(--accent-ink);
   --color-wait: var(--warn);
   --color-wait-soft: var(--warn-soft);

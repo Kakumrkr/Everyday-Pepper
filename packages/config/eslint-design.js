@@ -49,5 +49,6 @@ export const designExemptFiles = [
   'packages/ui/src/tokens.ts',
   'packages/ui/src/brand.ts',
   'apps/web/lib/setup.ts',
-  '**/*.test.{ts,tsx}',
+  'apps/web/**/*.test.{ts,tsx}',
+  'packages/ui/**/*.test.{ts,tsx}',
 ];

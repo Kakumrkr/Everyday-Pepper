@@ -173,6 +173,12 @@ describe('StepBar', () => {
     expect(screen.getByText('Step 2 of 3 · Time')).toBeTruthy();
     await expectAccessible(container);
   });
+
+  it('keeps a step past the end on the last one, and takes repeated labels', () => {
+    render(<StepBar steps={['Time', 'Details', 'Time']} current={5} />);
+    expect(screen.getByText('Step 3 of 3 · Time')).toBeTruthy();
+    expect(screen.getAllByRole('listitem')[2]?.getAttribute('aria-current')).toBe('step');
+  });
 });
 
 describe('StickyActionBar', () => {
@@ -211,6 +217,17 @@ describe('BriefingBlock', () => {
       <BriefingBlock greeting="g" value="v" valueLabel="l" progress={1.4} progressLabel="p" />,
     );
     expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('100');
+    // A closed day has no capacity: 0 / 0 is NaN, shown as empty.
+    rerender(
+      <BriefingBlock
+        greeting="g"
+        value="v"
+        valueLabel="l"
+        progress={Number.NaN}
+        progressLabel="p"
+      />,
+    );
+    expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('0');
   });
 });
 

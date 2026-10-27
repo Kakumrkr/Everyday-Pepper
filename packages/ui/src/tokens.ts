@@ -40,6 +40,7 @@ export type ColorToken = keyof typeof COLORS;
  */
 export const LEGACY_ALIASES = {
   'on-brand': 'brand-ink',
+  // Mixed toward `ink` in theme.css, so legacy hover and pressed states still show.
   'brand-strong': 'brand',
   'on-accent': 'accent-ink',
   wait: 'warn',

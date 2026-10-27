@@ -40,6 +40,8 @@ export function Badge({
 const DOLLARS = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
+  // Both bounds: older Safari refuses a maximum below the currency's default minimum.
+  minimumFractionDigits: 0,
   maximumFractionDigits: 0,
 });
 const DOLLARS_AND_CENTS = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });

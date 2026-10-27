@@ -106,8 +106,12 @@ describe('the repository config', () => {
     });
   }
 
+  it('leaves test files outside the web app and the kit alone', async () => {
+    assert.deepEqual(await selectorsFor('apps/api/src/x.test.ts'), []);
+  });
+
   it('lists only a few exempt files, each named in eslint-design.js', () => {
-    assert.ok(designExemptFiles.length <= 4);
+    assert.ok(designExemptFiles.length <= 5);
   });
 });
 
@@ -116,10 +120,12 @@ describe('stylesheets', () => {
 
   /** Every .css file under `dir`, but not dependencies or build output. */
   function stylesheets(dir) {
-    return readdirSync(join(root, dir), { withFileTypes: true, recursive: true })
-      .filter((e) => e.isFile() && e.name.endsWith('.css'))
-      .map((e) => join(e.parentPath, e.name))
-      .filter((path) => !/node_modules|\.next|dist/.test(path));
+    const skipped = new Set(['node_modules', '.next', 'dist', 'coverage']);
+    return readdirSync(join(root, dir), { withFileTypes: true }).flatMap((entry) => {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) return skipped.has(entry.name) ? [] : stylesheets(path);
+      return entry.name.endsWith('.css') ? [join(root, path)] : [];
+    });
   }
 
   it('hold raw colors and durations only in the theme (D1, D7)', () => {
