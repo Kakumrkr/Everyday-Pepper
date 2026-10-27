@@ -37,7 +37,7 @@ The M2 workflow is unchanged: `/session-brief` → approval → tasks with tiere
 
 1. **Owner value first.** Every session ships something an owner, staff member or client can see or feel, or it is a named enabler of the next one ("foundation for S41").
 2. **A scorecard gate at every phase end.** The phase's last session scores each category against [scorecard.md](scorecard.md), with evidence. A phase isn't done below its target.
-3. **A product walkthrough at every close.** `/session-close` walks the changed flow as the person who uses it, on a 375 px phone in light and dark (screenshots into the PR). Green tests are necessary, not sufficient.
+3. **A product walkthrough at every close.** `/session-close` looks at the changed screens' screenshot baselines (375/412/1280 px, light and dark) and walks one changed flow as the person who uses it, on a 375 px phone (screenshots into the PR; PCR-008). Green tests are necessary, not sufficient.
 4. **Raise the bar.** The brief proposes one **top-up**: a small extra inside the session's area that moves a scorecard line towards 10 (copy, an empty state, an edge case, a speed-up). The close writes a three-line **retro** (what went well, what to do better, the top-up for the next session), and the next prompt carries it.
 5. **The right skills for the work** (§4), and design rules enforced by tests ([DESIGN.md](../design/DESIGN.md) §5).
 
@@ -57,7 +57,7 @@ The brief names the skills for the session; a skill that isn't installed in a se
 
 Each row: target · what is built · done when. "Rec" marks the only sessions that call the real model.
 
-### Phase 9 · New look (S39–S43)
+### Phase 9 · New look (S39–S43, with S42.2)
 Goal: Pepper looks premium, warm and distinctly its own on every screen, and the design rules are enforced by tests. Scorecard target at exit: friendly UX 8, mobile 8, accessibility 8.
 
 | # | Target | Built | Done when |
@@ -65,7 +65,8 @@ Goal: Pepper looks premium, warm and distinctly its own on every screen, and the
 | S39 | **Design direction** | Three clickable phone mockups of the same 5 screens (Home card board, Calendar, Client, booking page, an approval card), as artifacts the user opens on the phone. Directions: warm-boutique, clean-premium, bold. `ui-ux-pro-max` proposes candidate systems for "barber / salon / beauty", and `frontend-design` makes each direction distinctive. The user picks one or mixes them. The pick is written into DESIGN.md §2–4 and ADR-0044 "Direction". No app code. | The user approves one direction; DESIGN.md has its tokens, type scale and component list |
 | S40 | **Foundation** | New `tokens.ts` / `theme.css` (color, type scale, spacing, radius, elevation, motion), fonts, and the component kit in `packages/ui` (Button, IconButton, Input, Select, Sheet, Dialog, Tabs, Card, ListRow, Badge, EmptyState, Skeleton, Toast). A dev-only gallery route. The lint rule against raw colors. Screenshot tests of the gallery at 375 / 412 / 1280 px, light and dark. | Theme and contrast tests green; gallery screenshots committed as baselines; no raw color in `packages/ui` |
 | S41 | **App shell, navigation, Home and Chat** | New shell: bottom tabs Home · Calendar · Clients · Chat · More; desktop sidebar with a "Pepper" group (What I know, Autonomy, Waitlist). Home, Chat and every card (`packages/ui/cards`, feed) on the new kit. | Those screens on the kit; Playwright journeys green; screenshots at 3 widths × 2 themes |
-| S42 | **Calendar, Clients and settings screens** | Calendar day view, Clients list and profile, Services, Team, Autonomy, What I know, Waitlist on the new kit; every empty state says what to do next. | Every signed-in screen on the kit |
+| S42 | **Calendar and Clients** | Calendar day view, Clients list and profile on the new kit; every empty state says what to do next. Split from one seven-screen session (PCR-008). | Calendar and Clients on the kit; journeys + screenshots green |
+| S42.2 | **Settings screens** | Services, Team, Autonomy, What I know, Waitlist on the new kit; every empty state says what to do next. | Every signed-in screen on the kit |
 | S43 | **Public pages, auth and the phase gate** | Booking page, manage-booking, sign-in, sign-up, MFA, create business on the kit; the legacy stylesheet deleted; UX copy pass; the Phase 9 scorecard. | Legacy stylesheet gone; axe clean; scorecard targets met |
 
 ### Phase 10 · First 10 minutes (S44–S47)
