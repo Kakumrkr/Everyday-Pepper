@@ -7,13 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S40 close: PR #53 open, CI red on the e2e job only** (lint/typecheck/test/build and integration were still running at the stop). 5 of 8 gallery screenshots differ: at 375 px CI's page is 18 px taller, 412 px differs by 2%, and the light sheet by 2%. 1280 px, the dark sheet, axe, overflow and the segmented test all pass.
-- **Cause:** the repo's Playwright 1.64.1 uses Chromium **build 1248** (Chrome 156), which CI installs. The sandbox's preinstalled headless shell is **1243**, and the baselines were made with it. The session-start hook's "CI's browser" is out of date.
-- **Next step (fix, then one push):**
-  1. Make the baselines with build 1248, either by installing it into a scratch `PLAYWRIGHT_BROWSERS_PATH` (not over `/opt/pw-browsers`; the install was interrupted and needs the user's OK), or from CI's uploaded `playwright-report` artifact.
-  2. Re-run `gallery.spec.ts` with that browser (`e2e-stack.sh start` first).
-  3. Commit the 8 PNGs and push once. Then merge (squash) when CI is green and give the S41 prompt.
-- **For later:** the session-start hook and dev-setup should point Playwright at the browser build the pinned version expects.
+**S40 close: PR #53, fixing the e2e job.** 5 of 8 gallery screenshots differed on CI: the baselines came from the sandbox's Chromium build 1243, and CI runs build 1248, the one Playwright 1.64.1 expects.
+- **Fix:** those 5 baselines are now CI's own images from build 1248, taken from the run's `playwright-report` artifact (the other 3 passed on CI). One push; then merge (squash) when CI is green, and give the S41 prompt.
+- **For later:** the session-start hook and dev-setup should point Playwright at the browser build the pinned version expects. Until then, take baselines from CI's report.
 
 ## Last sessions
 - **S40 Phase 9 · Foundation (2026-10-27): the A+B tokens, the kit, the gallery, the design lint and screenshot tests** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) "Built", [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).
