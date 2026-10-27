@@ -45,8 +45,8 @@ export function brandTokens(hex: string | null): Record<Theme, BrandTokens> {
 
 /**
  * CSS variables carrying both themes' brand tokens, for the booking page's `style` attribute;
- * the page's stylesheet maps them onto `--brand`, `--brand-strong`, `--brand-soft` and
- * `--on-brand` by the system's light or dark setting.
+ * the page's stylesheet maps them onto `--brand`, `--brand-soft` and `--brand-ink` by the
+ * system's light or dark setting (`biz-strong` stays for its contrast check only).
  */
 export function brandStyle(tokens: Record<Theme, BrandTokens>): Record<string, string> {
   return Object.fromEntries(

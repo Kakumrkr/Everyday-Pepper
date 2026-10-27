@@ -8,8 +8,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 
 ## In progress
 **S40 Phase 9 · Foundation** (branch `claude/s40-design-foundation`). Brief approved 2026-10-27: "Go ahead start with your recommendation" (D-1 A: DESIGN token names, old names kept as aliases until S43, `s1`–`s3` dropped; D-2 Radix primitives into `packages/ui`; D-3 A: gallery behind `PEPPER_GALLERY=1`, 404 otherwise; D-4 baselines made here with CI's headless shell, small tolerance).
-Tasks: 1 AC-X-4 + traceability ✅ · 2 tokens/theme + 3:1 check · 3 raw-color/duration lint · 4 kit: controls · 5 kit: content blocks · 6 kit: Radix pieces · 7 gallery (Southside Cuts data, top-up) · 8 gallery screenshots 3 widths × 2 themes + axe · 9 docs, `/session-close`.
-Next step: task 2.
+Tasks: 1 AC-X-4 + traceability ✅ · 2 tokens/theme + 3:1 check ✅ · 3 raw-color/duration lint · 4 kit: controls · 5 kit: content blocks · 6 kit: Radix pieces · 7 gallery (Southside Cuts data, top-up) · 8 gallery screenshots 3 widths × 2 themes + axe · 9 docs, `/session-close`.
+Next step: task 3 (lint). Note: the old names live on only as Tailwind aliases (`--color-on-brand` etc.); raw `var(--on-brand)` no longer exists, so legacy CSS uses the new names.
 
 ## Last sessions
 - **S39 Phase 9 · design direction (2026-10-26): the user chose "A+B"; docs and mockups only** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) Direction, [DESIGN.md](../design/DESIGN.md) §2–4, [mockups](../mockups/s39/README.md)). Full entry in [session-log.md](session-log.md).

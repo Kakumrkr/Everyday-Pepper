@@ -10,29 +10,27 @@
     <style>
       :root {
         color-scheme: light dark;
-        --bg: #f7faf5;
-        --surface: #ffffff;
-        --line: #dce6d8;
-        --ink: #1b2a1e;
-        --ink-2: #536257;
-        --brand: #2a7230;
-        --brand-strong: #23652a;
-        --on-brand: #ffffff;
-        --accent: #c2361b;
-        --on-accent: #ffffff;
+        --bg: #f6f1ec;
+        --surface: #fffdfb;
+        --line: #e4d8cd;
+        --ink: #2a1f26;
+        --ink-2: #5e4f58;
+        --brand: #5a2d52;
+        --brand-ink: #ffffff;
+        --accent: #e8a33d;
+        --accent-ink: #2a1f26;
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #0f1510;
-          --surface: #172019;
-          --line: #2f3b31;
-          --ink: #eaf3ea;
-          --ink-2: #a7b7aa;
-          --brand: #86d28e;
-          --brand-strong: #97db9e;
-          --on-brand: #0a1f0d;
-          --accent: #ff8c70;
-          --on-accent: #2a0b04;
+          --bg: #1a1418;
+          --surface: #241c21;
+          --line: #3a2f36;
+          --ink: #f5edf1;
+          --ink-2: #cdbfc7;
+          --brand: #e0b3d6;
+          --brand-ink: #2a1023;
+          --accent: #f2b85a;
+          --accent-ink: #2a1f26;
         }
       }
       * {
@@ -81,13 +79,13 @@
         border: 0;
         border-radius: 999px;
         background: var(--brand);
-        color: var(--on-brand);
+        color: var(--brand-ink);
         font: inherit;
         font-weight: 600;
         cursor: pointer;
       }
       button:focus-visible {
-        outline: 3px solid var(--brand-strong);
+        outline: 3px solid var(--brand);
         outline-offset: 3px;
       }
     </style>
@@ -101,16 +99,16 @@
         />
         <path
           fill="none"
-          stroke="var(--brand-strong)"
+          stroke="var(--brand)"
           stroke-width="3"
           stroke-linecap="round"
           d="M20 7.2c0-2.6 1.4-4.6 4.4-5.6"
         />
-        <circle fill="var(--on-accent)" cx="14.2" cy="17.4" r="2.3" />
-        <circle fill="var(--on-accent)" cx="25.8" cy="17.4" r="2.3" />
+        <circle fill="var(--accent-ink)" cx="14.2" cy="17.4" r="2.3" />
+        <circle fill="var(--accent-ink)" cx="25.8" cy="17.4" r="2.3" />
         <path
           fill="none"
-          stroke="var(--on-accent)"
+          stroke="var(--accent-ink)"
           stroke-width="2.4"
           stroke-linecap="round"
           d="M14.4 23.6c3.2 3 8 3 11.2 0"
