@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.34 — 2026-10-27
+- After S41 (user): **faster sessions** ([PCR-008](changes/PCR-008.md)). `/session-close` reviews first, then runs each suite once (a red step re-runs only the failing tests; integration only when the session changed code it runs; the walkthrough uses the screenshot baselines plus one flow). The brief sizes a session to one context window; S42 is split into S42 (Calendar, Clients) and S42.2 (settings screens). Decisions are written out once, in `decisions.md`.
+
+  **Compatibility:** process and docs only; no test removed, CI unchanged.
+
 ## 0.33 — 2026-10-26
 - P1 (planning session, **the V1 re-plan**): [V1 playbook](v1-playbook.md) (Phases 9–17, one row per session S39–S76, the session standard, skills by kind, budget), [scorecard](scorecard.md), [DESIGN.md](../design/DESIGN.md), [ADR-0043](../adr/0043-card-board-first-interaction.md) (cards first), [ADR-0044](../adr/0044-redesign-and-design-rules.md) (redesign and enforced design rules).
   - **Plan change ([PCR-007](changes/PCR-007.md), user):** Phases 9–11 replaced by 9 New look · 10 First 10 minutes · 11 Switching + privacy · 12 The employee · 13 Pilot readiness · the pilot · 14 SMS · 15 Deposits · 16 Calendar + staff · 17 Launch gate. SMS, deposits, recovery, export and deletion, history import, week view, recurring, reports, billing and a landing page into V1; extraction at setup out of V1. First customer narrowed to 1–6 chair owner-operators. AI budget $10 for Phases 9–17. The `/session-brief` and `/session-close` skills and `CLAUDE.md` carry the session standard.

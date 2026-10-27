@@ -25,6 +25,7 @@ The main context is the session's scarcest resource: reading every planning doc 
    - Top-up: <one small extra inside this area that moves a scorecard line towards 10; the last retro's carried top-up first>
    ```
    New acceptance criteria go into `acceptance-criteria.md` and `traceability.md` in the session's first task.
+   **Size check (PCR-008).** A session should finish in one context window, without `/compact`. If the target moves more than about four screens, or spans a screen change plus a backend change plus a tooling fix, the brief proposes a split under "Decisions needed" (each part its own session and PR; not an "a"/"b" recording split). S41 moved the shell, Home, Chat and every card at once and had to compact before its close.
 4. **Wait for the user's OK.** Then write the plan into STATUS "In progress" with the first checkpoint.
 
 A skill named in playbook §4 that isn't installed in this session is left out of "Skills" and said so; never pretend to have run it.

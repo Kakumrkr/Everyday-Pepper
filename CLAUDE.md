@@ -30,7 +30,8 @@ Project skills (`.claude/skills/`) hold the routine steps: **`/session-brief`** 
 
 For every session:
 1. **Read** (through `/session-brief`, which sends the long docs to an Explore agent) `CLAUDE.md`, **`docs/plan/STATUS.md` (where the last session stopped, what is in progress, and the planned sessions list)**, `docs/plan/roadmap-phases.md`, `docs/plan/dependency-map.md`, and the docs for the area being changed. Open `docs/plan/session-log.md` (every past session in full) and `docs/plan/decisions.md` (every decision made in chat) only when the task needs that history.
-2. **Before doing any work, present a Session Brief** and wait for the user to confirm or adjust it:
+2. **Size it to one context window** (PCR-008): a target that moves more than about four screens, or mixes screens, backend and tooling, is proposed as a split in the brief.
+   **Before doing any work, present a Session Brief** and wait for the user to confirm or adjust it:
    ```
    ## Session Brief
    - Where we are: <phase, what the last session finished>
@@ -47,9 +48,9 @@ For every session:
 4. **Implement** task by task; after each, run the tests of what it changed (tiers 1–2 in "Running tests").
 5. **Review** your own diff adversarially (security, tenancy, edge cases).
 6. **Summarize** (principle 10) and update docs/traceability.
-7. **Update `docs/plan/STATUS.md`** (done, decisions made in conversation, next steps) and commit it, so the next session can continue exactly where this one stopped. Decisions that exist only in chat are lost — always write them down. Keep `STATUS.md` short (under ~150 lines): move this session's summary into "Last sessions" (dropping the older one there), append a short entry (5–10 lines, linking the ADR and PR) to `docs/plan/session-log.md` and the chat decisions no ADR holds to `docs/plan/decisions.md`. The other docs change only when their subject did (`/session-close` lists them).
+7. **Update `docs/plan/STATUS.md`** (done, decisions made in conversation, next steps) and commit it, so the next session can continue exactly where this one stopped. Decisions that exist only in chat are lost — always write them down, **once**: in full in `docs/plan/decisions.md` (unless an ADR holds them), with a one-line pointer in STATUS "Recent decisions". Keep `STATUS.md` short (under ~150 lines): move this session's summary into "Last sessions" (3–4 lines, dropping the older one there) and append a short entry (5–10 lines, linking the ADR and PR) to `docs/plan/session-log.md`. The other docs change only when their subject did (`/session-close` lists them).
 
-**Checkpoints.** After each finished task (code committed, checks green), commit and update the "In progress" section at the top of `STATUS.md`: what is done, the next step, open questions, and any decision made in chat. Then `/compact`, a worker restart or a usage limit loses nothing, and a new session can continue from the file alone. Clear "In progress" when the session ends.
+**Checkpoints.** After each finished task (code committed, checks green), commit and update the "In progress" section at the top of `STATUS.md`: what is done (one line per task), the next step, open questions, and any decision made in chat. Then `/compact`, a worker restart or a usage limit loses nothing, and a new session can continue from the file alone. Clear "In progress" when the session ends.
 
 ## Plan change process
 The plan is versioned. Any change to an approved plan or contract needs a **Plan Change Record** (`docs/plan/changes/PCR-NNN.md`, from `PCR-template.md`) listing affected parts from `docs/plan/dependency-map.md`, impact on each, compatibility strategy, and tests proving no regression. Record it in `docs/plan/CHANGELOG.md`. Do not implement until the user approves the PCR.
@@ -80,7 +81,7 @@ See `docs/engineering/testing-strategy.md`. Minimum per change: unit tests for l
 - **Running tests (tiers, user, M2).** The same tests, run when they tell you something:
   1. **While building a task:** the unit tests of the package changed (`pnpm --filter <pkg> test`, or `vitest run <file>`), and the integration files touched (`pnpm --filter <pkg> test:integration <file>`).
   2. **When a task is done (the checkpoint):** typecheck of the packages changed and what depends on them (`pnpm turbo run typecheck --filter=...<pkg>`) and lint of the files changed (`pnpm exec eslint <files>`), plus tier 1.
-  3. **Once, at the end (`/session-close`):** `pnpm check`, then `pnpm test:integration`, then Playwright if a screen or flow changed: **in full, one at a time**, never two suites side by side (they starve each other and time out). A fix re-runs that step, then the next.
+  3. **Once, at the end (`/session-close`), after the code review and its fixes:** `pnpm check`, then `pnpm test:integration` (only when the session changed code it runs: `packages/` other than `ui`, `apps/api`, `apps/worker`, migrations; CI runs it on every PR), then Playwright if a screen or flow changed: **in full, one at a time**, never two suites side by side (they starve each other and time out). A red step: fix it, re-run only the failing tests, then the next step (PCR-008; CI runs every suite once on the PR).
   - Playwright while building: only the spec of the screen changed (`test:e2e tests/<spec>.ts`).
   - Long runs go in the background with their output in a file; read the summary lines, and the failure only if there is one.
   - Real-model evals: probe the sets a change touches first, then record the whole suite once (`/eval-record`).
