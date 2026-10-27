@@ -1,5 +1,5 @@
 import { ServicesResponseSchema, StaffResponseSchema } from '@pepper/contracts';
-import { buttonClass, Card } from '@pepper/ui';
+import { buttonClass, LegacyCard } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -59,14 +59,14 @@ export default async function ServicesPage() {
       ) : null}
 
       {services !== null && list.length === 0 ? (
-        <Card>
+        <LegacyCard>
           <h2 className="m-0 font-display text-lg font-bold">No services yet</h2>
           <p className="mt-1 mb-0 text-ink-2">
             {manages
               ? 'Add what you offer, with how long it takes. Then choose who offers it on the Team page.'
               : 'An owner or manager adds the services you offer here.'}
           </p>
-        </Card>
+        </LegacyCard>
       ) : null}
 
       <div className="grid gap-4">
@@ -76,7 +76,7 @@ export default async function ServicesPage() {
           manages={current.permissions.includes('settings.manage')}
         />
         {servicesByCategory(list).map((group) => (
-          <Card key={group.category ?? ''} as="section">
+          <LegacyCard key={group.category ?? ''} as="section">
             <h2 className="m-0 mb-2 font-display text-lg font-bold">
               {group.category ?? (categories.length === 0 ? 'Menu' : 'Other')}
             </h2>
@@ -113,7 +113,7 @@ export default async function ServicesPage() {
                 );
               })}
             </ul>
-          </Card>
+          </LegacyCard>
         ))}
       </div>
     </div>

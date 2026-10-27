@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
 import { cx } from './class-names.js';
 
-/** A content card: surface, line border, large radius; no shadow (only floating things have one). */
-export function Card({
+/**
+ * The card screens built before S40 use: surface, line border, large radius, no shadow. S41–S43
+ * move them onto the kit (a raised `Card` for decisions, `ListRow`s for the rest) and delete it.
+ */
+export function LegacyCard({
   children,
   className,
   as: Tag = 'section',

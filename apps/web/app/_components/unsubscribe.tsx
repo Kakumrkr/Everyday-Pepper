@@ -1,7 +1,7 @@
 'use client';
 
 import { UnsubscribeResponseSchema, type UnsubscribeResponse } from '@pepper/contracts';
-import { buttonClass, Card } from '@pepper/ui';
+import { buttonClass, LegacyCard } from '@pepper/ui';
 import { useEffect, useId, useState } from 'react';
 import { fetchJson, sendJson } from '../../lib/client-api';
 
@@ -37,7 +37,7 @@ export function Unsubscribe({ token }: { token: string }) {
   }
 
   return (
-    <Card labelledBy={headingId} className="flex flex-col gap-3">
+    <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
       <h1 id={headingId} className="m-0 text-xl font-bold">
         Unsubscribe
       </h1>
@@ -74,6 +74,6 @@ export function Unsubscribe({ token }: { token: string }) {
           </div>
         </>
       )}
-    </Card>
+    </LegacyCard>
   );
 }

@@ -1,4 +1,4 @@
-import { buttonClass, Card, chipClass, Icon } from '@pepper/ui';
+import { buttonClass, LegacyCard, chipClass, Icon } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -167,14 +167,14 @@ export default async function CalendarPage({
       ) : null}
 
       {columns.length === 0 ? (
-        <Card>
+        <LegacyCard>
           <h2 className="m-0 font-display text-lg font-bold">No one to show yet</h2>
           <p className="mt-1 mb-0 text-ink-2">
             {day.staff.length === 0
               ? 'Once your team and services are set up, their appointments show here.'
               : 'There is no one on the calendar for this filter.'}
           </p>
-        </Card>
+        </LegacyCard>
       ) : (
         <DayGrid
           timeZone={timeZone}

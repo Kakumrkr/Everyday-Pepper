@@ -8,7 +8,7 @@ import {
   type Booking,
   type RecordSource,
 } from '@pepper/contracts';
-import { Card, cx } from '@pepper/ui';
+import { LegacyCard, cx } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -118,7 +118,7 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
       </header>
 
       <div className="grid gap-4">
-        <Card>
+        <LegacyCard>
           <h2 className="m-0 mb-2 font-display text-lg font-bold">Contact</h2>
           {client.email === null && client.phone === null ? (
             <p className="m-0 text-ink-2">No email or phone yet.</p>
@@ -136,7 +136,7 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
               )}
             </ul>
           )}
-        </Card>
+        </LegacyCard>
 
         {!readsNotes ? null : memory === null ? (
           <p role="alert" className="m-0 rounded-md bg-wait-soft px-4 py-3 font-semibold text-wait">
@@ -158,7 +158,7 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
           </p>
         ) : null}
 
-        <Card>
+        <LegacyCard>
           <h2 className="m-0 mb-2 font-display text-lg font-bold">Coming up</h2>
           {visits.upcoming.length === 0 ? (
             <p className="m-0 text-ink-2">Nothing booked in the next two months.</p>
@@ -168,9 +168,9 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
               items={visits.upcoming.map((booking) => ({ id: booking.id, ...describe(booking) }))}
             />
           )}
-        </Card>
+        </LegacyCard>
 
-        <Card>
+        <LegacyCard>
           <h2 className="m-0 mb-2 font-display text-lg font-bold">Recent visits</h2>
           {visits.past.length === 0 ? (
             <p className="m-0 text-ink-2">No visits in the last two months.</p>
@@ -185,7 +185,7 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
               }))}
             />
           )}
-        </Card>
+        </LegacyCard>
       </div>
     </div>
   );

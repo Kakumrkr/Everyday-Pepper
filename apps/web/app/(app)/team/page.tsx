@@ -4,7 +4,7 @@ import {
   WeeklyHoursSchema,
   type StaffMember,
 } from '@pepper/contracts';
-import { Card, cx } from '@pepper/ui';
+import { LegacyCard, cx } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -85,11 +85,11 @@ export default async function TeamPage() {
           </p>
         ) : null}
         {staffAnswer !== null && staff.length === 0 ? (
-          <Card>
+          <LegacyCard>
             <p className="m-0 text-ink-2">
               No one yet. Add yourself and anyone else clients can book, with their weekly hours.
             </p>
-          </Card>
+          </LegacyCard>
         ) : null}
         <ul className="m-0 grid list-none gap-3 p-0 desk:grid-cols-2" data-testid="staff-list">
           {staff.map((member, index) => (

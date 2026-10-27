@@ -1,7 +1,7 @@
 'use client';
 
 import { MemoryFactsResponseSchema, type ClientId, type MemoryFactView } from '@pepper/contracts';
-import { Card } from '@pepper/ui';
+import { LegacyCard } from '@pepper/ui';
 import { useState } from 'react';
 import { fetchJson } from '../../../lib/client-api';
 import { SUGGESTED_KEYS, visitLine } from '../../../lib/memory';
@@ -60,7 +60,7 @@ export function ClientMemory({
 
   return (
     <>
-      <Card>
+      <LegacyCard>
         <section aria-labelledby="client-memory" className="flex flex-col gap-3">
           <h2 id="client-memory" className="m-0 font-display text-lg font-bold">
             What Pepper knows
@@ -90,8 +90,8 @@ export function ClientMemory({
             </p>
           )}
         </section>
-      </Card>
-      <Card>
+      </LegacyCard>
+      <LegacyCard>
         <section aria-labelledby="client-visit-notes" className="flex flex-col gap-3">
           <h2 id="client-visit-notes" className="m-0 font-display text-lg font-bold">
             Visit notes
@@ -106,7 +106,7 @@ export function ClientMemory({
             </ul>
           )}
         </section>
-      </Card>
+      </LegacyCard>
     </>
   );
 }

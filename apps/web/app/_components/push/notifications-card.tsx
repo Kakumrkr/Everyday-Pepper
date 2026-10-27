@@ -1,7 +1,7 @@
 'use client';
 
 import { PushKeyResponseSchema, PushStatusResponseSchema } from '@pepper/contracts';
-import { buttonClass, Card } from '@pepper/ui';
+import { buttonClass, LegacyCard } from '@pepper/ui';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { fetchJson, sendJson } from '../../../lib/client-api';
 import {
@@ -82,7 +82,7 @@ export function NotificationsCard() {
 
   if (state === 'loading' || state === 'unavailable') return null;
   return (
-    <Card as="section" labelledBy={headingId}>
+    <LegacyCard as="section" labelledBy={headingId}>
       <h2 id={headingId} className="m-0 font-display text-lg font-bold">
         Notifications on this device
       </h2>
@@ -114,6 +114,6 @@ export function NotificationsCard() {
           <Notice tone="error">{error}</Notice>
         </div>
       )}
-    </Card>
+    </LegacyCard>
   );
 }
