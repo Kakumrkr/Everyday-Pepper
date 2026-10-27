@@ -103,6 +103,9 @@ describe('theme.css', () => {
       /--motion-fast: 0ms;\s*--motion-base: 0ms;\s*--motion-slow: 0ms;/,
     );
     expect(css).toContain(`--ease-standard: ${MOTION.easing};`);
+    // Sheets and overlays animate through the same tokens.
+    expect(css).toContain('--animate-sheet-in: sheet-in var(--motion-slow) var(--ease-standard);');
+    expect(css).toContain('--animate-fade-in: fade-in var(--motion-base) var(--ease-standard);');
   });
 });
 

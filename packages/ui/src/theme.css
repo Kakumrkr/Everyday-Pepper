@@ -108,6 +108,21 @@
   --shadow-raised: var(--elevation-raised);
   --shadow-floating: var(--elevation-floating);
   --default-transition-duration: var(--motion-fast);
+  --animate-sheet-in: sheet-in var(--motion-slow) var(--ease-standard);
+  --animate-fade-in: fade-in var(--motion-base) var(--ease-standard);
+}
+
+/* Sheets rise from the bottom; overlays and dialogs fade in (none under reduced motion). */
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
 }
 
 @theme {

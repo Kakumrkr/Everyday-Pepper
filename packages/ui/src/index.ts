@@ -81,3 +81,13 @@ export {
   type ListRowProps,
   type TabItem,
 } from './kit/blocks.js';
+export {
+  Dialog,
+  Segmented,
+  Sheet,
+  Tabs,
+  Toast,
+  ToastProvider,
+  type SegmentOption,
+  type TabPanel,
+} from './kit/overlays.js';
