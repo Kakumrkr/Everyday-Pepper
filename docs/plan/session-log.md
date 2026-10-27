@@ -1135,7 +1135,7 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Top-up (S39 retro):** the gallery runs on Southside Cuts' data ($430 over 12 visits, tested to add up).
   - **Checks:**
     - `pnpm check` green.
-    - `pnpm test:integration`: all green, but not in one run (1,489 tests). The first run lost the appointments concurrency property test at its 60 s limit, while lint and typecheck ran beside it. The second run lost the two `memory-latency` p95 tests (search p95 1,259 ms) under turbo's parallel packages. Each passed alone: memory-latency 3/3; appointments 173, ai 164 and api 74 run serially. These are S38b's known load misses, and S40 touched no backend code.
+    - `pnpm test:integration`: all green, but not in one run (1,239 tests). The first run lost the appointments concurrency property test at its 60 s limit, while lint and typecheck ran beside it. The second run lost the two `memory-latency` p95 tests (search p95 1,259 ms) under turbo's parallel packages. Each passed alone: memory-latency 3/3; appointments 173, ai 164 and api 74 run serially. These are S38b's known load misses, and S40 touched no backend code.
     - Playwright 105/105 (11 skipped: the gallery's mobile copies).
   - **Found while building:**
     - The legacy element styles in `globals.css` (`button`, `input`) bleed into the kit, so kit parts set their own background, padding and radius.
