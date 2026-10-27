@@ -7,7 +7,11 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S41 is closed. Next: S42 (see "Planned sessions").
+**S42 Phase 9 · Calendar and Clients on the kit** (branch `ccr-146c293a-4c46lt`). Brief approved: "Go ahead and start the session with your recommendations" → D-1 A (the screens spec sets the morning hour to a fixed hour already past in the business zone, then polls; no app code), D-2 A (map the stored staff color onto the three staff tokens on the calendar; the Team picker in S42.2).
+Tasks: 1 ACs (AC-X-6 widened, AC-X-7 empties with actions, AC-X-8) · 2 the briefing wait in `screens.spec.ts` · 3 Calendar day view on the kit · 4 Clients list + editor · 5 client profile · 6 top-up: tap targets at 375 px + screenshot baselines for Calendar, Clients, profile.
+- Done: 1.
+- Next: 2.
+- Open questions: none.
 
 ## Last sessions
 - **S41 Phase 9 · App shell, Home, Chat and the cards on the kit (2026-10-27)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S41 note, [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).
