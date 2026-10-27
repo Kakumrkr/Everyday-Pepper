@@ -7,7 +7,7 @@ import {
   type FeedResponse,
   type FeedSettingsChange,
 } from '@pepper/contracts';
-import { buttonStyle, FeedSuggestions, MailingAddress, type FeedAction } from '@pepper/ui';
+import { buttonStyle, FeedSuggestions, type FeedAction } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
@@ -40,8 +40,8 @@ function actionFor(item: FeedItem): FeedAction | null {
 
 /**
  * Home's "Suggestions" (S35, ADR-0039) on `/v1/feed`: dismiss and acting on a suggestion close
- * it; the switches, and the mailing address rebooking emails carry (S36, owners and managers),
- * refresh the page so the server reads the feed again.
+ * it; the switches refresh the page so the server reads the feed again. The mailing address
+ * rebooking emails carry moved to More's settings (S41, `MailingAddressSetting`).
  */
 export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: string }) {
   const router = useRouter();
@@ -71,14 +71,6 @@ export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: str
         return answer.ok ? null : answer.message;
       }}
       onSettings={changeSettings}
-      footer={
-        feed.canChangeSettings ? (
-          <MailingAddress
-            address={feed.mailingAddress}
-            onSave={(mailingAddress) => changeSettings({ mailingAddress })}
-          />
-        ) : null
-      }
     />
   );
 }

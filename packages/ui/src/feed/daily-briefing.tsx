@@ -115,7 +115,7 @@ export function DailyBriefing({
           </button>
         )}
         {canChangeSettings ? (
-          <label htmlFor={hourId} className="flex items-center gap-2 type-label">
+          <label htmlFor={hourId} className="flex items-center gap-2 type-label whitespace-nowrap">
             Briefing at
             <select
               id={hourId}

@@ -1,17 +1,19 @@
+import { FeedResponseSchema } from '@pepper/contracts';
 import { Icon, List, ListRow } from '@pepper/ui';
 import { appNav, type NavItem } from '../../../lib/nav';
 import { BusinessSwitcher, SignOutButton } from '../../_components/account-actions';
 import { kitLink } from '../../_components/kit-link';
 import { NotificationsCard } from '../../_components/push/notifications-card';
-import { currentAccount, currentBusiness } from '../../_server/account';
+import { MailingAddressSetting } from '../../_components/feed/mailing-address-setting';
+import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
 
 // Per request: the page depends on the session cookie.
 export const dynamic = 'force-dynamic';
 
 /**
  * More (S41, AC-X-5): on phones the places beyond the tabs (Pepper's group and the business's
- * setup), then this device's settings and the account; on desktop the sidebar lists the places,
- * so the page is "Settings" with only the last two.
+ * setup), then the settings (this device's notifications, the rebooking emails' address) and the
+ * account; on desktop the sidebar lists the places, so the page is "Settings" with the rest.
  */
 export default async function MorePage() {
   // The app layout has sent anyone without a usable session elsewhere already.
@@ -20,6 +22,11 @@ export default async function MorePage() {
   const { me } = account;
   const current = await currentBusiness();
   const nav = appNav(current?.permissions ?? null);
+  // The feed's settings carry the mailing address; owners and managers may change it.
+  const feed =
+    current?.permissions.includes('feed.read') === true
+      ? await currentJson('/v1/feed', FeedResponseSchema)
+      : null;
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-8">
@@ -37,6 +44,14 @@ export default async function MorePage() {
       <Places title="Pepper" items={nav.pepper} />
       <Places title="Business" items={nav.business} />
       {current === null ? null : <NotificationsCard />}
+      {feed?.canChangeSettings === true ? (
+        <section aria-labelledby="rebooking-heading" className="flex flex-col gap-3">
+          <h2 id="rebooking-heading" className="m-0 type-subheading">
+            Rebooking emails
+          </h2>
+          <MailingAddressSetting address={feed.mailingAddress} />
+        </section>
+      ) : null}
       <section aria-labelledby="account-heading" className="flex flex-col items-start gap-4">
         <h2 id="account-heading" className="m-0 type-heading">
           Account
@@ -68,8 +83,12 @@ function Places({ title, items }: { title: string; items: readonly NavItem[] }) 
         {items.map((item) => (
           <ListRow
             key={item.key}
-            title={item.label}
-            leading={<Icon name={item.icon} className="text-brand" />}
+            title={
+              <span className="flex items-center gap-3">
+                <Icon name={item.icon} className="shrink-0 text-brand" />
+                {item.label}
+              </span>
+            }
             href={item.href}
             renderLink={kitLink}
           />
