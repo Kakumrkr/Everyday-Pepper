@@ -11,6 +11,9 @@ const launchOptions = executablePath ? { executablePath } : {};
 
 export default defineConfig({
   testDir: 'tests',
+  // Screenshot baselines (S40, gallery.spec.ts): one folder per spec, named by the test's own
+  // name and the OS they were made on (Linux, like CI); not per project.
+  snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{platform}{ext}',
   forbidOnly: Boolean(process.env['CI']),
   retries: 0,
   reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : 'list',

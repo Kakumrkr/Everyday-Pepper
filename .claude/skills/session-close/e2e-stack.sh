@@ -3,7 +3,8 @@
 # Redis and Mailpit in Docker; the built api, worker and web as plain Node processes (building
 # the app images takes far longer). Chat answers come from the journeys' scripted model, as in
 # CI (ADR-0031): OPENAI_API_KEY is removed from the services, so no model is ever called. The
-# worker runs the insights job every 10 s, as in CI (S35).
+# worker runs the insights job every 10 s, as in CI (S35). The web serves the component gallery
+# (PEPPER_GALLERY=1), as in CI (S40).
 #   .claude/skills/session-close/e2e-stack.sh start <log dir>   # then: pnpm test:e2e [spec]
 #   .claude/skills/session-close/e2e-stack.sh stop
 set -euo pipefail
@@ -29,7 +30,7 @@ case "${1:-}" in
       node --env-file=../../.env --import ./dist/instrument.js dist/main.js) \
       </dev/null >"$logs/worker.log" 2>&1 &
     worker=$!
-    API_INTERNAL_URL=http://localhost:4000 setsid pnpm --filter @pepper/web start \
+    API_INTERNAL_URL=http://localhost:4000 PEPPER_GALLERY=1 setsid pnpm --filter @pepper/web start \
       </dev/null >"$logs/web.log" 2>&1 &
     echo "$api $worker $!" >"$pids"
     timeout 180 bash -c 'until curl -s -o /dev/null http://localhost:3000/ && curl -s -o /dev/null http://localhost:4000/v1/me; do sleep 2; done'
