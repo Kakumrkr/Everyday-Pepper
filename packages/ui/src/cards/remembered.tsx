@@ -2,7 +2,9 @@
 
 import { MEMORY_LIMITS, type MemoryFactShown } from '@pepper/contracts';
 import { useId, useState, type SubmitEvent } from 'react';
-import { buttonClass, chipClass, cx } from '../class-names.js';
+import { chipClass, cx } from '../class-names.js';
+import { buttonStyle } from '../kit/button.js';
+import { fieldStyle } from '../kit/fields.js';
 import { Icon } from '../icons.js';
 import { keyWords } from './labels.js';
 
@@ -57,11 +59,11 @@ export function Remembered({
           className="flex max-w-[62ch] flex-col gap-2 rounded-md border border-line bg-surface p-3"
         >
           {error !== null ? (
-            <p role="alert" className="m-0 text-sm text-danger">
+            <p role="alert" className="m-0 type-label text-danger">
               {error}
             </p>
           ) : facts === null ? (
-            <p className="m-0 text-sm text-ink-2">Reading what I remembered…</p>
+            <p className="m-0 type-label text-ink-2">Reading what I remembered…</p>
           ) : (
             <ul className="m-0 flex list-none flex-col gap-2 p-0">
               {facts.map((fact) => (
@@ -99,7 +101,7 @@ function FactRow({
 
   if (fact.state === 'gone' || forgotten) {
     return (
-      <p role={forgotten ? 'status' : undefined} className="m-0 text-sm text-ink-2">
+      <p role={forgotten ? 'status' : undefined} className="m-0 type-label text-ink-2">
         {forgotten ? 'Forgotten. I won’t use it again.' : 'No longer remembered.'}
       </p>
     );
@@ -139,7 +141,7 @@ function FactRow({
       <p className="m-0 whitespace-pre-wrap">
         <b>{label}:</b> {current}
         {fact.sensitive ? (
-          <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 text-xs font-semibold text-ink-2">
+          <span className="ml-2 inline-flex items-center gap-1 rounded-pill bg-surface-2 px-2 type-caption font-semibold text-ink-2">
             <Icon name="lock" className="size-3.5" />
             Sensitive
           </span>
@@ -147,7 +149,7 @@ function FactRow({
       </p>
       {mode === 'fix' ? (
         <form onSubmit={save} className="flex flex-col gap-2">
-          <label htmlFor={inputId} className="text-sm font-semibold">
+          <label htmlFor={inputId} className="type-label font-semibold">
             {label}
           </label>
           <input
@@ -157,10 +159,10 @@ function FactRow({
             onChange={(event) => {
               setDraft(event.target.value);
             }}
-            className="min-h-11 rounded-md border border-line bg-surface px-3"
+            className={cx(fieldStyle, 'min-h-12')}
           />
           <div className="flex flex-wrap gap-2">
-            <button type="submit" disabled={busy} className={buttonClass({ size: 'sm' })}>
+            <button type="submit" disabled={busy} className={buttonStyle({ size: 'sm' })}>
               Save
             </button>
             <button
@@ -170,7 +172,7 @@ function FactRow({
                 setDraft(current);
                 setMode('view');
               }}
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+              className={buttonStyle({ variant: 'secondary', size: 'sm' })}
             >
               Cancel
             </button>
@@ -178,7 +180,7 @@ function FactRow({
         </form>
       ) : mode === 'confirm' ? (
         <div role="group" aria-label={`Forget ${label}?`} className="flex flex-col gap-2">
-          <p className="m-0 text-sm">
+          <p className="m-0 type-label">
             Forget this everywhere? I won’t use it again in any chat, and it can’t be undone.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -193,7 +195,7 @@ function FactRow({
                   },
                 );
               }}
-              className={buttonClass({ size: 'sm', className: 'bg-danger hover:bg-danger' })}
+              className={buttonStyle({ variant: 'danger', size: 'sm' })}
             >
               Forget
             </button>
@@ -203,7 +205,7 @@ function FactRow({
               onClick={() => {
                 setMode('view');
               }}
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+              className={buttonStyle({ variant: 'secondary', size: 'sm' })}
             >
               Keep it
             </button>
@@ -218,7 +220,7 @@ function FactRow({
               setMessage(null);
               setMode('fix');
             }}
-            className={buttonClass({ variant: 'quiet', size: 'sm' })}
+            className={buttonStyle({ variant: 'quiet', size: 'sm' })}
           >
             Fix
           </button>
@@ -229,14 +231,14 @@ function FactRow({
               setMessage(null);
               setMode('confirm');
             }}
-            className={buttonClass({ variant: 'quiet', size: 'sm' })}
+            className={buttonStyle({ variant: 'quiet', size: 'sm' })}
           >
             Forget
           </button>
         </div>
       )}
       {message === null ? null : (
-        <p role="status" className={cx('m-0 text-sm', message !== 'Saved.' && 'text-danger')}>
+        <p role="status" className={cx('m-0 type-label', message !== 'Saved.' && 'text-danger')}>
           {message}
         </p>
       )}

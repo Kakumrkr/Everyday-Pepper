@@ -17,6 +17,12 @@ const CONTROL =
   'placeholder:text-ink-3 disabled:opacity-50 aria-invalid:border-danger ' +
   FOCUS_RING;
 
+/**
+ * The kit's control look for a field that keeps its own label and layout (a card's inline
+ * editor): add `min-h-12` for one line, `py-3` and a height for several (S41).
+ */
+export const fieldStyle = CONTROL;
+
 interface FieldProps {
   /** The visible label. */
   label: string;

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { cx } from '@pepper/ui';
 import { requiredStep } from '../../lib/account';
-import { navItems } from '../../lib/nav';
+import { appNav } from '../../lib/nav';
 import { MANIFEST_URL } from '../../lib/pwa';
 import { AppNav } from '../_components/app-nav';
 import { ServiceWorker } from '../_components/service-worker';
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * The signed-in app's shell (S14): bottom tabs on phones, a sidebar from 960 px. Sends people
+ * The signed-in app's shell (S14, S41): bottom tabs on phones, a sidebar from 960 px. Sends people
  * who still have a step to do (sign in, create a business, two-step) there first.
  */
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -38,10 +39,19 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh desk:grid desk:grid-cols-[240px_minmax(0,1fr)]">
       <AppNav
-        items={navItems(current?.permissions ?? null)}
+        nav={appNav(current?.permissions ?? null)}
         businessName={current?.business.name ?? null}
       />
-      <main className="min-w-0 px-4 pt-6 pb-28 desk:px-10 desk:pt-10 desk:pb-10">{children}</main>
+      <main
+        className={cx(
+          'min-w-0 px-5 pt-6 pb-28 desk:px-10 desk:pt-10 desk:pb-10',
+          // A screen that fills the height (Chat) ends right above the phone's tab bar.
+          'has-data-fill-screen:flex has-data-fill-screen:min-h-dvh has-data-fill-screen:flex-col',
+          'has-data-fill-screen:pb-[calc(var(--spacing-tab-bar)+env(safe-area-inset-bottom))] desk:has-data-fill-screen:pb-10',
+        )}
+      >
+        {children}
+      </main>
       <ServiceWorker />
     </div>
   );

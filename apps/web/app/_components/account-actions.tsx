@@ -1,6 +1,7 @@
 'use client';
 
 import type { UserBusiness } from '@pepper/contracts';
+import { Button, cx, FOCUS_RING, Icon } from '@pepper/ui';
 import { useState } from 'react';
 import { ROUTES, withNext } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
@@ -15,9 +16,8 @@ export function SignOutButton({
   label?: string;
 }) {
   return (
-    <button
-      type="button"
-      className="secondary"
+    <Button
+      variant="secondary"
       onClick={() => {
         void sendJson('POST', '/api/auth/sign-out', {}).then(() => {
           window.location.assign(withNext(ROUTES.signIn, next));
@@ -25,7 +25,7 @@ export function SignOutButton({
       }}
     >
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -40,27 +40,39 @@ export function BusinessSwitcher({
   const [error, setError] = useState<string | null>(null);
   return (
     <section aria-labelledby="switch-heading">
-      <h2 id="switch-heading">Your businesses</h2>
-      <ul className="businesses">
-        {businesses.map((business) => (
-          <li key={business.tenantId}>
-            <button
-              type="button"
-              className="secondary"
-              aria-pressed={business.tenantId === activeTenantId}
-              onClick={() => {
-                void sendJson('PUT', '/v1/me/active-tenant', { tenantId: business.tenantId }).then(
-                  (result) => {
+      <h2 id="switch-heading" className="m-0 mb-1 type-heading">
+        Your businesses
+      </h2>
+      <ul className="m-0 list-none divide-y divide-line p-0">
+        {businesses.map((business) => {
+          const active = business.tenantId === activeTenantId;
+          return (
+            <li key={business.tenantId} className="-mx-2">
+              <button
+                type="button"
+                aria-pressed={active}
+                className={cx(
+                  'flex min-h-14 w-full items-center gap-3 rounded-sm bg-transparent px-2 py-3 text-left text-ink hover:bg-surface-2',
+                  FOCUS_RING,
+                )}
+                onClick={() => {
+                  void sendJson('PUT', '/v1/me/active-tenant', {
+                    tenantId: business.tenantId,
+                  }).then((result) => {
                     if (result.ok) window.location.assign(ROUTES.home);
                     else setError(result.message);
-                  },
-                );
-              }}
-            >
-              {business.name} <span className="hint">({business.role})</span>
-            </button>
-          </li>
-        ))}
+                  });
+                }}
+              >
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="truncate type-body font-semibold">{business.name}</span>
+                  <span className="type-caption text-ink-2">{business.role}</span>
+                </span>
+                {active ? <Icon name="check" className="text-brand" /> : null}
+              </button>
+            </li>
+          );
+        })}
       </ul>
       <FormError message={error} />
     </section>

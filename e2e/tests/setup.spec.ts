@@ -16,6 +16,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   anotherPerson,
   callApi,
+  goTo,
   hydrated,
   onboardOwner,
   ownClientAddress,
@@ -45,13 +46,8 @@ async function businessClock(page: Page): Promise<{ timeZone: string; day: Civil
   return { timeZone, day: addDays(toZoned(timeZone, Date.now()), 7) };
 }
 
-/** Clicks a nav link (the visible one: tabs on phones, the sidebar on desktops). */
-async function go(page: Page, name: string): Promise<void> {
-  await page
-    .getByRole('navigation', { name: 'Main' })
-    .getByRole('link', { name, exact: true })
-    .click();
-}
+/** Opens a place: a tab or More on phones, the sidebar on desktops (`goTo`). */
+const go = goTo;
 
 async function fitsTheScreen(page: Page): Promise<void> {
   const overflow = await page.evaluate(

@@ -14,7 +14,6 @@ import {
   hoursSummary,
   timeChoices,
   localDateIn,
-  money,
   noticeLabel,
   priceLabel,
   servicesByCategory,
@@ -53,15 +52,14 @@ describe('money', () => {
     expect(textFromCents(null)).toBe('');
     expect(textFromCents(6500)).toBe('65');
     expect(textFromCents(6505)).toBe('65.05');
-    expect(money(6500)).toBe('$65');
-    expect(money(6550)).toBe('$65.50');
-    expect(money(120000)).toBe('$1,200');
   });
 
   it('labels a price as "from" or a range, or none', () => {
     expect(priceLabel({ priceFromCents: null, priceToCents: null })).toBeNull();
     expect(priceLabel({ priceFromCents: 6500, priceToCents: null })).toBe('from $65');
     expect(priceLabel({ priceFromCents: 6500, priceToCents: 8000 })).toBe('$65–$80');
+    // One money format across the app: the kit's `formatMoney` (S41).
+    expect(priceLabel({ priceFromCents: 6550, priceToCents: 120000 })).toBe('$65.50–$1,200');
   });
 });
 
