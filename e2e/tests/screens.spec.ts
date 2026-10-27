@@ -1,4 +1,4 @@
-import { CurrentBusinessResponseSchema, FeedResponseSchema } from '@pepper/contracts';
+import { CurrentBusinessResponseSchema } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import { hydrated, onboardOwner, ownClientAddress } from './helpers.js';
 
@@ -22,35 +22,39 @@ test.beforeEach(async ({ context }) => {
 });
 
 /**
- * Home's briefing in the same state every run: the worker briefs a new business on its first
- * pass once its morning hour has passed on its clock, so after that hour the test waits for the
- * briefing and puts it away ("Got it"); the card then says when the next one comes, as before.
- * Within two minutes of the hour it waits the hour out first, so the worker can't brief mid-test.
+ * Home's briefing in the same state every run, without waiting on the clock (S42). The worker
+ * briefs a business on its first pass once its morning hour has passed, so the test fixes the
+ * hour away from now: the earliest hour (5 am) once it has passed in the business's zone, so the
+ * worker briefs and the test puts the briefing away ("Got it"); before 5 am the latest (11 am),
+ * at least six hours off. Then it hands the hour back to the template (7 am, still hours off
+ * before 5 am), so the card always says "Every morning at 7:00 am". The hours are the template's
+ * range (5–11, `MorningHourSchema`).
  */
 async function settleBriefing(page: Page): Promise<void> {
   const { business } = CurrentBusinessResponseSchema.parse(
     await (await page.request.get('/v1/tenant')).json(),
   );
-  const feed = FeedResponseSchema.parse(await (await page.request.get('/v1/feed')).json());
-  const morning = feed.settings.morningHour ?? feed.templateMorningHour;
-  const clock = () => {
-    const [hour = 0, minute = 0] = new Intl.DateTimeFormat('en-US', {
-      timeZone: business.timeZone,
-      hour: 'numeric',
-      minute: 'numeric',
-      hourCycle: 'h23',
-    })
-      .formatToParts(new Date())
-      .filter((part) => part.type === 'hour' || part.type === 'minute')
-      .map((part) => Number(part.value));
-    return hour * 60 + minute;
+  const [hour = 0] = new Intl.DateTimeFormat('en-US', {
+    timeZone: business.timeZone,
+    hour: 'numeric',
+    hourCycle: 'h23',
+  })
+    .formatToParts(new Date())
+    .filter((part) => part.type === 'hour')
+    .map((part) => Number(part.value));
+  const briefed = hour >= 5;
+  const setHour = async (morningHour: number | null) => {
+    const response = await page.request.patch('/v1/feed/settings', {
+      data: { morningHour },
+      headers: { origin: new URL(page.url()).origin },
+    });
+    expect(response.ok(), await response.text()).toBe(true);
   };
-  const untilMorning = morning * 60 - clock();
-  if (untilMorning > 0 && untilMorning <= 2) {
-    await page.waitForTimeout(untilMorning * 60_000 + 5_000);
-  }
+  await setHour(briefed ? 5 : 11);
+
   const card = page.getByTestId('daily-briefing');
-  if (clock() >= morning * 60) {
+  if (briefed) {
+    // The worker's next pass (every 10 s in CI and the e2e stack).
     await expect(async () => {
       await page.goto('/');
       await expect(card.getByRole('heading', { name: /^Today: / })).toBeVisible({
@@ -58,9 +62,12 @@ async function settleBriefing(page: Page): Promise<void> {
       });
     }).toPass({ timeout: 60_000, intervals: [2_000, 5_000] });
     await (await hydrated(card.getByRole('button', { name: 'Got it' }))).click();
+    await expect(card.getByRole('heading', { name: 'Your daily briefing' })).toBeVisible();
   }
+  await setHour(null);
   await page.goto('/');
   await expect(card.getByRole('heading', { name: 'Your daily briefing' })).toBeVisible();
+  await expect(card).toContainText('Every morning at 7:00 am');
 }
 
 /** The page still, with its fonts, in `colorScheme`. */
