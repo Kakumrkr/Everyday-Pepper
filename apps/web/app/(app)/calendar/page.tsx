@@ -1,4 +1,4 @@
-import { buttonClass, LegacyCard, chipClass, Icon } from '@pepper/ui';
+import { buttonStyle, cx, EmptyState, FOCUS_RING, Icon } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -18,16 +18,30 @@ import { bookableStaff, bookingAbilities, type BookingSetup } from '../../../lib
 import { seesDetailsOf } from '../../../lib/calendar-data';
 import { NewBooking } from '../../_components/booking/new-booking';
 import { DayGrid, type CalendarColumn } from '../../_components/day-grid';
+import { kitLink } from '../../_components/kit-link';
 import { currentAccount, currentBusiness, currentCalendarDay } from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Calendar · Pepper' };
 
+// The day buttons: kit pills, the arrows square (44 px, D3).
+const DAY_LINK = buttonStyle({ variant: 'secondary', size: 'sm' });
+const ARROW_LINK = cx(DAY_LINK, 'w-11 px-0');
+// The staff filter as the kit's segmented track (DESIGN.md §2); links, so each view has a URL.
+const SEGMENT = cx(
+  'inline-flex min-h-11 shrink-0 items-center rounded-pill px-4 type-label whitespace-nowrap no-underline',
+  'text-ink-2 transition motion-base ease-standard hover:text-ink',
+  'aria-[current=true]:bg-surface aria-[current=true]:text-ink aria-[current=true]:shadow-raised',
+  FOCUS_RING,
+);
+
 /**
  * The calendar's day view: one column per staff member on the business's clock. Owners and
  * managers see every booking; staff see their own in full and colleagues' as busy times
  * (AC-W9-1: the api decides what each role gets). Members who may book get "New booking" and
- * a sheet for each booking they see in full (S15).
+ * a sheet for each booking they see in full (S15). On the kit (S42): the day's title and its
+ * buttons, the staff filter as a segmented track, the staff tones on the grid, and empty days
+ * that say what to do next (AC-X-7).
  */
 export default async function CalendarPage({
   searchParams,
@@ -85,43 +99,41 @@ export default async function CalendarPage({
   const books =
     abilities.books &&
     bookableStaff(day.staff, { userId, ownOnly: abilities.ownStaffOnly }).length > 0;
+  const quiet = !day.failed && columns.every((column) => column.entries.length === 0);
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="m-0 font-display text-2xl font-bold">Calendar</h1>
-          <p className="m-0 text-ink-2" data-testid="calendar-day">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="m-0 type-display">Calendar</h1>
+          <p className="m-0 type-label text-ink-2 tabular-nums" data-testid="calendar-day">
             {dayTitle(date, today)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {books ? <NewBooking setup={setup} date={formatDate(date)} /> : null}
-          <Link
-            href={ROUTES.waitlist}
-            className={buttonClass({ variant: 'secondary', size: 'sm' })}
-          >
+          <Link href={ROUTES.waitlist} className={DAY_LINK}>
             Waitlist
           </Link>
           <nav aria-label="Day" className="flex items-center gap-1">
             <Link
               href={calendarHref(addDays(date, -1), staffMemberId)}
               aria-label="Previous day"
-              className={buttonClass({ variant: 'secondary', size: 'sm', className: 'w-11 px-0' })}
+              className={ARROW_LINK}
             >
               <Icon name="left" />
             </Link>
             <Link
               href={calendarHref(today, staffMemberId)}
               aria-current={sameDate(date, today) ? 'date' : undefined}
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+              className={DAY_LINK}
             >
               Today
             </Link>
             <Link
               href={calendarHref(addDays(date, 1), staffMemberId)}
               aria-label="Next day"
-              className={buttonClass({ variant: 'secondary', size: 'sm', className: 'w-11 px-0' })}
+              className={ARROW_LINK}
             >
               <Icon name="right" />
             </Link>
@@ -130,59 +142,83 @@ export default async function CalendarPage({
       </header>
 
       {filterable.length > 1 ? (
-        <nav aria-label="Staff" className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
-          <Link
-            href={calendarHref(date, null)}
-            aria-current={staffMemberId === null ? 'true' : undefined}
-            className={chipClass({ selected: staffMemberId === null, className: 'shrink-0' })}
-          >
-            Everyone
-          </Link>
-          {filterable.map((member) => (
+        <nav aria-label="Staff" className="-mx-5 overflow-x-auto px-5 pb-1">
+          <div className="inline-flex gap-1 rounded-pill bg-surface-2 p-1">
             <Link
-              key={member.id}
-              href={calendarHref(date, member.id)}
-              aria-current={staffMemberId === member.id ? 'true' : undefined}
-              className={chipClass({
-                selected: staffMemberId === member.id,
-                className: 'shrink-0',
-              })}
+              href={calendarHref(date, null)}
+              aria-current={staffMemberId === null ? 'true' : undefined}
+              className={SEGMENT}
             >
-              {member.displayName}
+              Everyone
             </Link>
-          ))}
+            {filterable.map((member) => (
+              <Link
+                key={member.id}
+                href={calendarHref(date, member.id)}
+                aria-current={staffMemberId === member.id ? 'true' : undefined}
+                className={SEGMENT}
+              >
+                {member.displayName}
+              </Link>
+            ))}
+          </div>
         </nav>
       ) : null}
 
       {day.failed ? (
-        <p role="alert" className="mb-4 rounded-md bg-wait-soft px-4 py-3 font-semibold text-wait">
+        <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
           I couldn’t load everything for this day. Try again in a moment.
         </p>
       ) : null}
       {day.truncated ? (
-        <p className="mb-4 rounded-md bg-info-soft px-4 py-3 text-info">
+        <p className="m-0 rounded-md bg-info-soft px-4 py-3 type-label text-info">
           This day has more appointments than I can show at once; pick one staff member to see
           theirs.
         </p>
       ) : null}
 
       {columns.length === 0 ? (
-        <LegacyCard>
-          <h2 className="m-0 font-display text-lg font-bold">No one to show yet</h2>
-          <p className="mt-1 mb-0 text-ink-2">
-            {day.staff.length === 0
-              ? 'Once your team and services are set up, their appointments show here.'
-              : 'There is no one on the calendar for this filter.'}
-          </p>
-        </LegacyCard>
+        staffMemberId === null ? (
+          <EmptyState
+            icon="team"
+            title="No one on the calendar yet"
+            body={
+              current.permissions.includes('staff.manage')
+                ? 'Add yourself and your team, and everyone’s appointments show here.'
+                : 'Once the owner adds the team, everyone’s appointments show here.'
+            }
+            action={
+              current.permissions.includes('staff.manage')
+                ? { label: 'Add your team', href: ROUTES.team, renderLink: kitLink }
+                : { label: 'Back to Home', href: ROUTES.home, renderLink: kitLink }
+            }
+          />
+        ) : (
+          <EmptyState
+            icon="calendar"
+            title="No one to show here"
+            body="This staff member isn’t on the calendar any more."
+            action={{ label: 'Show everyone', href: calendarHref(date, null), renderLink: kitLink }}
+          />
+        )
       ) : (
-        <DayGrid
-          timeZone={timeZone}
-          date={date}
-          columns={columns}
-          now={sameDate(date, today) ? new Date().toISOString() : null}
-          setup={books ? setup : null}
-        />
+        <>
+          {quiet ? (
+            <p className="m-0 type-body text-ink-2" data-testid="calendar-quiet">
+              {books
+                ? 'Nothing booked this day yet. Tap New booking to add one.'
+                : 'Nothing booked this day yet.'}
+            </p>
+          ) : null}
+          <DayGrid
+            timeZone={timeZone}
+            date={date}
+            columns={columns}
+            staff={day.staff}
+            now={sameDate(date, today) ? new Date().toISOString() : null}
+            setup={books ? setup : null}
+          />
+        </>
       )}
     </div>
   );

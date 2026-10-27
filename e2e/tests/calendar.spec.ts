@@ -46,6 +46,11 @@ test('an owner sees a booking on the calendar on the business clock, moves betwe
   );
   const { timeZone } = tenant.business;
 
+  // A new business: the calendar says what to do next, as an action (AC-X-7).
+  await page.goto('/calendar');
+  await expect(page.getByText('No one on the calendar yet')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Add your team' })).toHaveAttribute('href', '/team');
+
   const service = await api(
     page,
     '/v1/services',
@@ -97,10 +102,15 @@ test('an owner sees a booking on the calendar on the business clock, moves betwe
     page.getByRole('region', { name: 'Marco' }).getByTestId('booking-block'),
   ).toHaveCount(0);
 
-  // The day after: nothing booked.
+  await expect(page.getByTestId('calendar-quiet')).toHaveCount(0);
+
+  // The day after: nothing booked, and the page says how to book (AC-X-7).
   await page.getByRole('link', { name: 'Next day' }).click();
   await expect(page).toHaveURL(new RegExp(`date=${formatDate(addDays(day, 1))}`));
   await expect(page.getByTestId('booking-block')).toHaveCount(0);
+  await expect(page.getByTestId('calendar-quiet')).toHaveText(
+    'Nothing booked this day yet. Tap New booking to add one.',
+  );
   await page.getByRole('link', { name: 'Previous day' }).click();
   await expect(page.getByTestId('booking-block')).toHaveCount(1);
 

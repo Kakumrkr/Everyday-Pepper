@@ -172,4 +172,21 @@ export function sameDate(a: CivilDate, b: CivilDate): boolean {
   return a.year === b.year && a.month === b.month && a.day === b.day;
 }
 
+/** The three staff tones of the calendar (DESIGN.md §3): a soft block with a bar of its color. */
+export type StaffTone = 'brand' | 'accent' | 'info';
+const STAFF_TONES: readonly StaffTone[] = ['brand', 'accent', 'info'];
+
+/**
+ * A staff member's tone: by their place in the business's staff list, so the first three
+ * always differ (S42, DESIGN.md §3). Not by their stored colour: most were made with the same
+ * default, and the old palette has no tokens. The name is always shown too (never color alone).
+ */
+export function staffTone(staff: readonly { id: string }[], staffMemberId: string): StaffTone {
+  const index = Math.max(
+    0,
+    staff.findIndex((member) => member.id === staffMemberId),
+  );
+  return STAFF_TONES[index % STAFF_TONES.length] ?? 'brand';
+}
+
 export { addDays, formatDate };
