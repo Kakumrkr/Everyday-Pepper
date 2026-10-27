@@ -145,6 +145,22 @@ export async function signOut(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/sign-in$/);
 }
 
+/**
+ * Opens a place as a member would (S41): from the tabs on a phone or the sidebar on a desktop,
+ * and on a phone through More when it is not a tab (Services, Team, the Pepper group).
+ */
+export async function goTo(page: Page, name: string): Promise<void> {
+  const nav = page.getByRole('navigation', { name: 'Main' });
+  const link = nav.getByRole('link', { name, exact: true });
+  if ((await link.count()) === 0) {
+    await (await hydrated(nav.getByRole('link', { name: 'More', exact: true }))).click();
+    await expect(page).toHaveURL(/\/more$/);
+    await page.getByRole('main').getByRole('link', { name, exact: true }).click();
+    return;
+  }
+  await link.click();
+}
+
 export async function enterPassword(page: Page, email: string, password = PASSWORD): Promise<void> {
   await hydrated(page.getByRole('button', { name: 'Sign in' }));
   await page.getByLabel('Email').fill(email);
