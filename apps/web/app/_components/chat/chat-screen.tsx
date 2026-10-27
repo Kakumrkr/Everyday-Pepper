@@ -228,7 +228,9 @@ export function ChatScreen({
   const blocks = blocksOf(state.items);
   const statusLine = state.activity ?? said ?? '';
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
+    // The screen's full height, so the composer sits at the bottom within thumb reach (D3) even
+    // before there is a conversation: above the tab bar on phones, at the foot on desktop.
+    <div className="mx-auto flex min-h-[calc(100dvh-4.8125rem-env(safe-area-inset-bottom))] max-w-3xl flex-col gap-4 desk:min-h-[calc(100dvh-5rem)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="m-0 type-display">Chat with Pepper</h1>
         <div className="flex flex-wrap items-center gap-1">
@@ -266,7 +268,7 @@ export function ChatScreen({
         role="log"
         aria-label="Conversation with Pepper"
         aria-busy={running}
-        className="flex flex-col gap-4"
+        className="flex flex-1 flex-col gap-4"
       >
         {state.items.length === 0 && available ? (
           <p className="m-0 type-body text-ink-2">

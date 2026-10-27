@@ -15,7 +15,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - **Done (4):** ChangeCard (raised only while proposed; DetailTable), choices, why/notice, draft editor, remembered, briefing (plum block, bookings as the big number), suggestions (raised cards, 44 px switch), mailing address; `fieldStyle` exported from the kit.
 - **Done (5):** Home on the kit (header with business · role, briefing, Needs your OK, Suggestions, Done for you, To-dos; empty state to More without a business); `money()` → `formatMoney`. Playwright shell, feed, tasks, notifications, accessibility green (21 + shell 2).
 - **Done (6):** Chat on the kit (header, bubbles, composer above the 53 px tab bar, IconButtons), Why? on the kit Sheet (new `returnFocus` prop + test); mailing address moved to More (D-2). Playwright chat, memory, accessibility 26/26.
-- **Next step:** task 7, screenshots of Home, Chat, More (3 widths × 2 themes) with fixed data.
+- **Done (7):** `screens.spec.ts`: Home, Chat, More at 375/412/1280 × light/dark (18 baselines, build 1248, stable over 3 runs; briefing settled, business "Southside Cuts", email masked); `onboardOwner(page, { business })`; Chat fills the screen so the composer sits above the tabs.
+- **Next step:** task 8, `/session-close`.
 
 ## Last sessions
 - **S40 Phase 9 · Foundation (2026-10-27): the A+B tokens, the kit, the gallery, the design lint and screenshot tests** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) "Built", [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).

@@ -81,17 +81,26 @@ export interface Owner {
   business: string;
 }
 
-/** Signs up, creates a business and turns on two-step verification. */
-export async function onboardOwner(page: Page): Promise<Owner> {
+/**
+ * Signs up, creates a business and turns on two-step verification. `business` names it (the
+ * screenshot tests need the same name every run; the booking link stays unique).
+ */
+export async function onboardOwner(
+  page: Page,
+  { business = `Juniper ${unique('studio')}` }: { business?: string } = {},
+): Promise<Owner> {
   const email = `${unique('owner')}@example.test`;
-  const business = `Juniper ${unique('studio')}`;
   await signUp(page, email);
 
   // Sign-up hashes the password: with several workers at once it can take longer than 5 s.
   await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
   await hydrated(page.getByRole('button', { name: 'Create business' }));
   await page.getByLabel('Business name').fill(business);
-  await expect(page.getByLabel('Booking link')).toHaveValue(/^juniper-studio-/);
+  if (business.startsWith('Juniper ')) {
+    await expect(page.getByLabel('Booking link')).toHaveValue(/^juniper-studio-/);
+  } else {
+    await page.getByLabel('Booking link').fill(unique('shop'));
+  }
   await page.getByRole('button', { name: 'Create business' }).click();
 
   // Owners must protect the business before they can use it.
