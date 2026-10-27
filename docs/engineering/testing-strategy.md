@@ -13,6 +13,7 @@ Every feature and bug fix ships with automated tests that were actually run. Acc
 | E2E | Playwright (mobile + desktop viewports) | Auth (S7, `e2e/tests/auth.spec.ts`: sign up → business → MFA setup → sign out → sign in with TOTP or backup code; TOTP codes from `totpCode` in `@pepper/testing`), onboarding, booking page, chat with cards, feed, undo | All pass on PR to main |
 | LLM evals | Custom runner in `packages/ai/src/evals` with cases and cassettes in `packages/ai/evals` (ADR-0027, playbook §5) | Golden conversations: correct tool + args, refusals, confirmations, injection resistance, memory recall/deletion; deterministic graders, pass^k; replayed from cassettes in CI | ≥ 90% scheduling set, 100% safety set |
 | Load | k6 | Booking page + chat turns at pilot scale ×10 | SLOs met |
+| Visual | Playwright `toHaveScreenshot` (`e2e/tests/gallery.spec.ts`, S40, ADR-0044): the component gallery at 375 / 412 / 1280 px × light / dark and the approval sheet; baselines in `e2e/tests/__screenshots__/`, made on Linux with CI's headless shell, 1% pixel tolerance | Every kit component; screens from S41 | A diff fails CI unless the PR updates the baseline (`playwright test gallery --project=desktop --update-snapshots`) and shows the change |
 | Accessibility | axe in Playwright (`@axe-core/playwright`, `e2e/tests/accessibility.spec.ts`, S18) | Key screens, WCAG 2.2 A/AA tags, light and dark, phone and desktop | No serious or critical violations (lesser ones are reported as annotations) |
 
 ## Rules
