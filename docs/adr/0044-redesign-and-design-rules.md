@@ -37,6 +37,8 @@ The look is already central. Every color, radius and font lives in `packages/ui/
 - **Lint:** `packages/config/eslint-design.js` (raw hex, color functions, Tailwind palette, black/white and arbitrary colors, Tailwind and inline durations) in the same `no-restricted-syntax` list as the raw-HTML rules; four exempt files (tokens, brand-color arithmetic, staff color choices, tests); stylesheets outside the theme checked by `eslint-design.test.js`.
 - **Gallery:** `/dev/gallery`, only with `PEPPER_GALLERY=1` (CI's e2e run; 404 otherwise), on Southside Cuts' data. **Screenshots:** `e2e/tests/gallery.spec.ts`, 8 Linux baselines in `e2e/tests/__screenshots__/`, 1% pixel tolerance.
 
+**S41 (2026-10-27):** the shell (bottom tabs Home · Calendar · Clients · Chat · More; a desktop sidebar with a "Pepper" and a "Business" group and Settings), a `/more` page that holds the places beyond the tabs, this device's notifications, the rebooking emails' address and the account (they left Home), Home, Chat and the AI cards on the kit. A card is raised only while it waits for a decision. Screenshots of Home, Chat and More (`screens.spec.ts`) and the D3 tap-target check (`tap-targets.ts`) run in Playwright.
+
 ## Consequences
 - Phase 9 adds five sessions before the old Phase 9 work. Each screen is redone once, before the new features land on it.
 - Screenshot tests add baselines to the repo and a little time to CI. Baselines change only with a reviewed visual change.
