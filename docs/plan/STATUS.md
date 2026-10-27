@@ -7,9 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S40 close: PR #53, fixing the e2e job.** 5 of 8 gallery screenshots differed on CI: the baselines came from the sandbox's Chromium build 1243, and CI runs build 1248, the one Playwright 1.64.1 expects.
-- **Fix:** those 5 baselines are now CI's own images from build 1248, taken from the run's `playwright-report` artifact (the other 3 passed on CI). One push; then merge (squash) when CI is green, and give the S41 prompt.
-- **For later:** the session-start hook and dev-setup should point Playwright at the browser build the pinned version expects. Until then, take baselines from CI's report.
+**S41 Phase 9 · App shell, Home, Chat and the cards on the kit** (brief approved 2026-10-27: "Go ahead with your recommendations").
+- **Decisions:** D-1 More = Pepper group (What I know, Autonomy, Waitlist), then Services, Team, account; desktop shows all in the sidebar, no More. D-2 Home's settings cards (notifications, booking page, mailing address) move to More as quiet rows. D-3 the session-start hook installs the headless shell build Playwright expects (1248) when missing.
+- **Tasks:** 1 ACs (AC-X-5 shell, AC-X-6 tap targets) + hook + STATUS · 2 `nav.ts` model · 3 shell + `/more` + `shell.spec.ts` · 4 cards on the kit · 5 Home on the kit, `money()` → `formatMoney` · 6 Chat on the kit · 7 screenshots (Home, Chat, More × 3 widths × 2 themes) + D3 tap-target check (top-up) · 8 `/session-close`.
+- **Next step:** task 1.
 
 ## Last sessions
 - **S40 Phase 9 · Foundation (2026-10-27): the A+B tokens, the kit, the gallery, the design lint and screenshot tests** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) "Built", [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).
