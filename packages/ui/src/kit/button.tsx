@@ -10,8 +10,9 @@ export type KitButtonSize = 'sm' | 'md' | 'lg';
 export const FOCUS_RING =
   'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand';
 
+// Every property the legacy element styles in globals.css also set is set here (S43 deletes them).
 const BASE =
-  'inline-flex items-center justify-center gap-2 rounded-pill font-semibold no-underline ' +
+  'inline-flex items-center justify-center gap-2 rounded-pill py-2 font-semibold no-underline ' +
   'transition motion-fast ease-standard active:scale-98 ' +
   'disabled:cursor-not-allowed disabled:opacity-50 aria-busy:cursor-progress ' +
   FOCUS_RING;
@@ -105,7 +106,7 @@ export function IconButton({
       {...rest}
       type={type}
       aria-label={label}
-      className={cx(BASE, ICON_VARIANTS[variant], 'size-11 shrink-0', className)}
+      className={cx(BASE, ICON_VARIANTS[variant], 'size-11 shrink-0 p-0', className)}
     >
       <Icon name={icon} />
     </button>

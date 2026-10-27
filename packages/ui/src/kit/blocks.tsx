@@ -211,7 +211,7 @@ export function Receipt({
           type="button"
           onClick={undo.onUndo}
           className={cx(
-            'inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill px-3 type-label text-ok hover:bg-surface',
+            'inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill bg-transparent px-3 py-0 type-label text-ok hover:bg-surface',
             FOCUS_RING,
           )}
         >
@@ -240,7 +240,7 @@ export function TimeChip({
       aria-pressed={selected}
       onClick={onSelect}
       className={cx(
-        'min-h-11 rounded-md border px-4 type-label tabular-nums transition motion-fast ease-standard',
+        'min-h-11 rounded-md border px-4 py-0 type-label tabular-nums transition motion-fast ease-standard',
         selected
           ? 'border-brand bg-brand text-brand-ink'
           : 'border-line-strong bg-surface text-ink hover:bg-surface-2',

@@ -144,7 +144,7 @@ export function Tabs({
             key={tab.value}
             value={tab.value}
             className={cx(
-              '-mb-px min-h-11 border-b-2 border-transparent px-3 type-label text-ink-2',
+              '-mb-px min-h-11 rounded-none border-0 border-b-2 border-transparent bg-transparent px-3 py-0 type-label text-ink-2',
               'transition motion-fast ease-standard hover:text-ink',
               'data-[state=active]:border-brand data-[state=active]:text-ink',
               FOCUS_RING,
@@ -196,7 +196,7 @@ export function Segmented({
           key={option.value}
           value={option.value}
           className={cx(
-            'min-h-11 flex-1 rounded-pill px-4 type-label whitespace-nowrap text-ink-2',
+            'min-h-11 flex-1 rounded-pill bg-transparent px-4 py-0 type-label whitespace-nowrap text-ink-2',
             'transition motion-base ease-standard hover:text-ink',
             'data-[state=on]:bg-surface data-[state=on]:text-ink data-[state=on]:shadow-raised',
             FOCUS_RING,
@@ -248,7 +248,7 @@ export function Toast({
           altText={action.altText}
           onClick={action.onClick}
           className={cx(
-            'min-h-11 shrink-0 rounded-pill px-3 type-label text-bg underline underline-offset-2',
+            'min-h-11 shrink-0 rounded-pill bg-transparent px-3 py-0 type-label text-bg underline underline-offset-2',
             // The ring in the page color: the toast is ink, where `brand` would be too faint.
             'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-bg',
           )}

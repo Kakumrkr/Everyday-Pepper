@@ -153,7 +153,7 @@ export function Checkbox({ label, hint, className, ...rest }: CheckboxProps) {
         id={id}
         type="checkbox"
         aria-describedby={hint === undefined ? undefined : `${id}-hint`}
-        className={cx('mt-0.5 size-6 shrink-0 cursor-pointer accent-brand', FOCUS_RING)}
+        className={cx('mt-0.5 size-6 min-h-0 shrink-0 cursor-pointer p-0 accent-brand', FOCUS_RING)}
       />
       <div className="flex flex-col gap-0.5">
         <label htmlFor={id} className="cursor-pointer type-body text-ink">
@@ -196,7 +196,7 @@ export function Switch({ label, hint, className, ...rest }: SwitchProps) {
           type="checkbox"
           role="switch"
           aria-describedby={hint === undefined ? undefined : `${id}-hint`}
-          className="peer absolute inset-0 z-10 m-0 size-full cursor-pointer opacity-0"
+          className="peer absolute inset-0 z-10 m-0 size-full min-h-0 cursor-pointer p-0 opacity-0"
         />
         <span
           aria-hidden="true"
