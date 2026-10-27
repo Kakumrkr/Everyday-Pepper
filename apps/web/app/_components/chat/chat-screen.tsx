@@ -3,14 +3,17 @@
 import type { ChatStatus, LocalSlot } from '@pepper/contracts';
 import {
   BookingCard,
-  buttonClass,
+  Button,
+  buttonStyle,
   ChatNotice,
   chipClass,
   ClientChoice,
   cx,
   DayCard,
+  fieldStyle,
   formatDate,
   Icon,
+  IconButton,
   Mark,
   PlanCard,
   SlotPicker,
@@ -227,27 +230,27 @@ export function ChatScreen({
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="m-0 font-display text-2xl font-bold">Chat with Pepper</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href={ROUTES.memory} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+        <h1 className="m-0 type-display">Chat with Pepper</h1>
+        <div className="flex flex-wrap items-center gap-1">
+          <Link href={ROUTES.memory} className={buttonStyle({ variant: 'quiet', size: 'sm' })}>
             <Icon name="memory" />
             What I know
           </Link>
-          <Link href={ROUTES.autonomy} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+          <Link href={ROUTES.autonomy} className={buttonStyle({ variant: 'quiet', size: 'sm' })}>
             <Icon name="dial" />
             Autonomy
           </Link>
           {state.items.length === 0 ? null : (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               disabled={running}
               onClick={() => {
                 dispatch({ type: 'reset' });
               }}
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
             >
               New chat
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -266,7 +269,7 @@ export function ChatScreen({
         className="flex flex-col gap-4"
       >
         {state.items.length === 0 && available ? (
-          <p className="m-0 text-ink-2">
+          <p className="m-0 type-body text-ink-2">
             Ask me to book, move or cancel appointments, block time, add to-dos, or plan your day. I
             check with you first whenever your settings say so.
           </p>
@@ -304,10 +307,11 @@ export function ChatScreen({
           ),
         )}
       </div>
-      <p role="status" className="m-0 min-h-5 text-sm text-ink-2">
+      <p role="status" className="m-0 min-h-5 type-label text-ink-2">
         {statusLine}
       </p>
-      <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] -mx-4 flex flex-col gap-2 border-t border-line bg-bg px-4 py-3 desk:bottom-0 desk:mx-0 desk:px-0">
+      {/* Above the 53 px tab bar (its 52 px tabs and hairline) on phones; at the foot on desktop. */}
+      <div className="sticky bottom-[calc(3.3125rem+env(safe-area-inset-bottom))] -mx-5 flex flex-col gap-2 border-t border-line bg-bg px-5 py-3 desk:bottom-0 desk:mx-0 desk:px-0">
         {state.items.length === 0 && available ? (
           <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Try asking" role="group">
             {SUGGESTIONS[lead ? 'lead' : 'staff'].map((suggestion) => (
@@ -337,28 +341,27 @@ export function ChatScreen({
             onChange={(event) => {
               setDraft(event.target.value);
             }}
-            className="min-h-12 min-w-0 flex-1 rounded-full border-[1.5px] border-line bg-surface px-5 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className={cx(fieldStyle, 'min-h-12 min-w-0 flex-1 rounded-pill px-5')}
           />
           {running ? (
-            <button
-              type="button"
+            <IconButton
+              icon="stop"
+              label="Stop"
+              variant="secondary"
+              className="size-12"
               onClick={() => {
                 stop(false);
               }}
-              className={buttonClass({ variant: 'secondary', className: 'w-12 px-0' })}
-              aria-label="Stop"
-            >
-              <Icon name="stop" />
-            </button>
+            />
           ) : (
-            <button
+            <IconButton
               type="submit"
+              icon="send"
+              label="Send"
+              variant="primary"
+              className="size-12"
               disabled={!available || draft.trim() === ''}
-              className={buttonClass({ className: 'w-12 px-0' })}
-              aria-label="Send"
-            >
-              <Icon name="send" />
-            </button>
+            />
           )}
         </form>
       </div>
@@ -385,7 +388,7 @@ function ItemView({
     case 'user':
       return (
         <div className="flex justify-end">
-          <p className="m-0 max-w-[82%] rounded-[20px_20px_6px_20px] bg-brand-strong px-4 py-2.5 whitespace-pre-wrap text-on-brand">
+          <p className="m-0 max-w-[82%] rounded-[20px_20px_6px_20px] bg-brand px-4 py-2.5 type-body whitespace-pre-wrap text-brand-ink">
             <span className="sr-only">You: </span>
             {item.text}
           </p>
@@ -399,7 +402,7 @@ function ItemView({
             <p
               aria-busy={item.streaming}
               className={cx(
-                'm-0 max-w-[62ch] min-w-0 whitespace-pre-wrap',
+                'm-0 max-w-[62ch] min-w-0 type-body whitespace-pre-wrap text-ink',
                 item.streaming && 'min-h-6',
               )}
             >

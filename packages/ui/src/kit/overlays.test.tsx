@@ -71,6 +71,43 @@ describe.each(['sheet', 'dialog'] as const)('%s', (kind) => {
   });
 });
 
+describe('Sheet without a trigger', () => {
+  it('returns focus to `returnFocus` on close, not just the last focused element (S41)', async () => {
+    function Opened() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <Button
+            onClick={() => {
+              setOpen(true);
+            }}
+          >
+            Why?
+          </Button>
+          <Button>Undo</Button>
+          <Sheet
+            open={open}
+            onOpenChange={setOpen}
+            title="Why I did this"
+            returnFocus={() => screen.getByRole('button', { name: 'Undo' })}
+          >
+            <p>Your settings let me book on my own.</p>
+          </Sheet>
+        </>
+      );
+    }
+    render(<Opened />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Why?' }));
+    expect(screen.getByRole('dialog', { name: 'Why I did this' })).toBeTruthy();
+    await user.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Undo' }));
+  });
+});
+
 describe('Tabs', () => {
   it('shows one panel and moves along with the arrow keys', async () => {
     const { container } = render(
