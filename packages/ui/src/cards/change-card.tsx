@@ -1,7 +1,10 @@
 import type { AiMemoryView, AutonomyAction, ChangeSide } from '@pepper/contracts';
 import { useId, type ReactNode } from 'react';
-import { buttonClass, cx } from '../class-names.js';
+import { cx } from '../class-names.js';
 import { Icon } from '../icons.js';
+import { DetailTable } from '../kit/blocks.js';
+import { Button } from '../kit/button.js';
+import { Badge, type BadgeTone } from '../kit/marks.js';
 import {
   ACTION_LABEL,
   changeRows,
@@ -28,23 +31,18 @@ const STATUS: Record<ChangeStatus, { label: string; tone: 'wait' | 'ok' | 'plain
   refused: { label: 'Not done', tone: 'plain' },
 };
 
-const PILL: Record<'wait' | 'ok' | 'plain', string> = {
-  wait: 'bg-wait-soft text-wait',
-  ok: 'bg-ok-soft text-ok',
-  plain: 'bg-surface-2 text-ink-2',
+const TONE: Record<'wait' | 'ok' | 'plain', BadgeTone> = {
+  wait: 'warn',
+  ok: 'ok',
+  plain: 'neutral',
 };
 
-/** A small status label: always words, never color alone. */
+/** A small status label: always words, never color alone (the kit's Badge). */
 export function StatusPill({ label, tone }: { label: string; tone: 'wait' | 'ok' | 'plain' }) {
   return (
-    <span
-      className={cx(
-        'inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold',
-        PILL[tone],
-      )}
-    >
+    <Badge tone={TONE[tone]} className="shrink-0">
       {label}
-    </span>
+    </Badge>
   );
 }
 
@@ -86,6 +84,8 @@ export interface ChangeCardProps {
  * what changes and which emails go, from the domain's dry run. Approve sends only what this card
  * was given (its caller holds the proposal's id and fingerprint); nothing here is model HTML.
  * Buttons are real buttons, so the card works from the keyboard; nothing takes focus by itself.
+ * On the kit (S41, DESIGN.md §4): raised while it waits for a decision ("a lifted card means
+ * this needs you"), flat with a hairline once settled; the rows are a DetailTable.
  */
 export function ChangeCard(props: ChangeCardProps) {
   const headingId = useId();
@@ -109,23 +109,27 @@ export function ChangeCard(props: ChangeCardProps) {
   return (
     <article
       aria-labelledby={headingId}
-      className="flex max-w-[34rem] flex-col gap-3 rounded-lg border border-line bg-surface p-4"
+      className={cx(
+        'flex max-w-[34rem] flex-col gap-3 rounded-lg bg-surface p-5',
+        status === 'proposed' ? 'shadow-raised' : 'border border-line',
+      )}
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 id={headingId} className="m-0 text-xs font-bold tracking-wide text-ink-2 uppercase">
+        <h3 id={headingId} className="m-0 type-label text-ink-2">
           {ACTION_LABEL[action]}
         </h3>
         <StatusPill {...pill} />
       </div>
       {summary === null || summary === '' ? null : (
-        <p className="m-0 font-semibold whitespace-pre-wrap">{summary}</p>
+        <p className="m-0 type-subheading whitespace-pre-wrap text-ink">{summary}</p>
       )}
       {rows.length === 0 ? null : (
-        <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
-          {rows.map((row) => (
-            <div key={row.label} className="contents">
-              <dt className="text-ink-2">{row.label}</dt>
-              <dd className="m-0 min-w-0">
+        <DetailTable
+          className="border-t border-line"
+          rows={rows.map((row) => ({
+            label: row.label,
+            value: (
+              <span className="min-w-0 break-words">
                 {row.before === null ? null : (
                   <>
                     <s className="text-ink-2">{row.before}</s>
@@ -133,68 +137,47 @@ export function ChangeCard(props: ChangeCardProps) {
                     <span aria-hidden="true"> → </span>
                   </>
                 )}
-                <span className="font-semibold">{row.after}</span>
-              </dd>
-            </div>
-          ))}
-        </dl>
+                <span className="font-semibold tabular-nums">{row.after}</span>
+              </span>
+            ),
+          }))}
+        />
       )}
       {props.memory === undefined || props.memory === null ? null : (
         <MemoryLines memory={props.memory} />
       )}
       <EmailLines {...props} emails={emails} />
       {props.approvedByName === undefined || props.approvedByName === null ? null : (
-        <p className="m-0 text-sm text-ink-2">Approved by {props.approvedByName}.</p>
+        <p className="m-0 type-caption text-ink-2">Approved by {props.approvedByName}.</p>
       )}
-      {undoText === null ? null : <p className="m-0 text-sm text-ink-2">{undoText}</p>}
-      <p role="status" className="m-0 text-sm font-semibold empty:hidden">
+      {undoText === null ? null : <p className="m-0 type-caption text-ink-2">{undoText}</p>}
+      <p role="status" className="m-0 type-label text-ink empty:hidden">
         {notice}
       </p>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 empty:hidden">
         {decide ? (
           <>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={props.onApprove}
-              className={buttonClass({ size: 'sm' })}
-            >
-              <Icon name="check" />
+            <Button icon="check" busy={busy} onClick={props.onApprove}>
               Approve
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={props.onReject}
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
-            >
+            </Button>
+            <Button variant="secondary" disabled={busy} onClick={props.onReject}>
               Not now
-            </button>
+            </Button>
           </>
         ) : null}
         {undoText === null ? null : (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={props.onUndo}
-            className={buttonClass({ variant: 'secondary', size: 'sm' })}
-          >
-            <Icon name="undo" />
+          <Button variant="secondary" size="sm" icon="undo" disabled={busy} onClick={props.onUndo}>
             Undo
-          </button>
+          </Button>
         )}
         {props.onWhy === undefined ? null : (
-          <button
-            type="button"
-            onClick={props.onWhy}
-            className={buttonClass({ variant: 'quiet', size: 'sm' })}
-          >
+          <Button variant="quiet" size="sm" onClick={props.onWhy}>
             Why?
-          </button>
+          </Button>
         )}
       </div>
       {decide && props.settingsLink !== undefined ? (
-        <p className="m-0 text-xs text-ink-2">
+        <p className="m-0 type-caption text-ink-2">
           Your settings ask me to check with you first. {props.settingsLink}
         </p>
       ) : null}
@@ -206,11 +189,11 @@ function EmailLines({ action, emails, before, after, timeZone, now, status }: Ch
   const books = action.startsWith('booking');
   if (emails.length === 0) {
     return books && status !== 'refused' ? (
-      <p className="m-0 text-sm text-ink-2">No email to the client.</p>
+      <p className="m-0 type-caption text-ink-2">No email to the client.</p>
     ) : null;
   }
   return (
-    <ul className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
+    <ul className="m-0 flex list-none flex-col gap-1 p-0 type-label text-ink">
       {emails.map((email, index) => (
         <li key={`${email.clientId}-${String(index)}`}>
           {emailLine(email, clientNameFor(email.clientId, before, after), timeZone, now)}
@@ -226,9 +209,9 @@ function MemoryLines({ memory }: { memory: AiMemoryView }) {
   return (
     <>
       {warnings.length === 0 ? null : (
-        <div role="note" className="flex items-start gap-2 rounded-md bg-wait-soft p-3 text-sm">
-          <Icon name="alert" className="mt-0.5 text-wait" />
-          <div className="flex flex-col gap-1">
+        <div role="note" className="flex items-start gap-2 rounded-md bg-warn-soft p-3 type-label">
+          <Icon name="alert" className="mt-0.5 text-warn" />
+          <div className="flex flex-col gap-1 text-ink">
             <p className="m-0 font-bold">Heads up</p>
             <ul className="m-0 flex list-none flex-col gap-1 p-0">
               {warnings.map((each) => (
@@ -241,7 +224,7 @@ function MemoryLines({ memory }: { memory: AiMemoryView }) {
         </div>
       )}
       {fact === null ? null : (
-        <p className="m-0 text-sm whitespace-pre-wrap">
+        <p className="m-0 type-label whitespace-pre-wrap text-ink">
           {fact.state === 'gone' ? (
             'A fact you deleted'
           ) : (
@@ -256,7 +239,7 @@ function MemoryLines({ memory }: { memory: AiMemoryView }) {
         </p>
       )}
       {lastVisit === null ? null : (
-        <div className="flex flex-col gap-1 text-sm">
+        <div className="flex flex-col gap-1 type-label text-ink">
           <p className="m-0 text-ink-2">
             Last time ({formatDate(lastVisit.date)}, {lastVisit.serviceName}):
           </p>

@@ -2,7 +2,9 @@
 
 import { DRAFT_LIMITS, wordCount } from '@pepper/contracts';
 import { useId, useState } from 'react';
-import { buttonClass, cx } from '../class-names.js';
+import { cx } from '../class-names.js';
+import { buttonStyle } from '../kit/button.js';
+import { fieldStyle } from '../kit/fields.js';
 
 export interface DraftWords {
   subject: string;
@@ -17,10 +19,7 @@ export interface DraftEditorProps {
   onSave: (words: DraftWords) => Promise<string | null>;
 }
 
-const field = cx(
-  'w-full rounded-md border border-line bg-surface p-2 text-sm text-ink',
-  'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand',
-);
+const field = cx(fieldStyle, 'min-h-12 py-3');
 
 /**
  * A rebooking email's words on its "Needs your OK" card (S36, ADR-0040): shown as plain text,
@@ -43,14 +42,14 @@ export function DraftEditor({ draft, canEdit, onSave }: DraftEditorProps) {
     return (
       <section
         aria-label="The email"
-        className="flex flex-col gap-2 rounded-md border border-line bg-bg p-3 text-sm"
+        className="flex flex-col gap-2 rounded-md bg-surface-2 p-4 type-body text-ink"
         data-testid="nudge-draft"
       >
         <p className="m-0">
           <span className="font-semibold">Subject:</span> {draft.subject}
         </p>
         <p className="m-0 whitespace-pre-wrap">{draft.body}</p>
-        <p className="m-0 text-xs text-ink-2">
+        <p className="m-0 type-caption text-ink-2">
           Below it I add the open time, your booking link, your business name and address, and an
           unsubscribe link.
         </p>
@@ -58,7 +57,7 @@ export function DraftEditor({ draft, canEdit, onSave }: DraftEditorProps) {
           <div>
             <button
               type="button"
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+              className={buttonStyle({ variant: 'secondary', size: 'sm' })}
               onClick={() => {
                 setSubject(draft.subject);
                 setBody(draft.body);
@@ -77,7 +76,7 @@ export function DraftEditor({ draft, canEdit, onSave }: DraftEditorProps) {
   return (
     <form
       aria-label="Edit the email"
-      className="flex flex-col gap-2 rounded-md border border-line bg-bg p-3 text-sm"
+      className="flex flex-col gap-2 rounded-md bg-surface-2 p-4 type-body text-ink"
       onSubmit={(event) => {
         event.preventDefault();
         setBusy(true);
@@ -116,7 +115,10 @@ export function DraftEditor({ draft, canEdit, onSave }: DraftEditorProps) {
       />
       <p
         id={countId}
-        className={cx('m-0 text-xs', words > DRAFT_LIMITS.maxWords ? 'text-danger' : 'text-ink-2')}
+        className={cx(
+          'm-0 type-caption',
+          words > DRAFT_LIMITS.maxWords ? 'text-danger' : 'text-ink-2',
+        )}
       >
         {words} of {DRAFT_LIMITS.maxWords} words. No links, email addresses or phone numbers: I add
         the booking link.
@@ -130,14 +132,14 @@ export function DraftEditor({ draft, canEdit, onSave }: DraftEditorProps) {
         <button
           type="submit"
           disabled={busy || words > DRAFT_LIMITS.maxWords}
-          className={buttonClass({ size: 'sm' })}
+          className={buttonStyle({ size: 'sm' })}
         >
           Save the words
         </button>
         <button
           type="button"
           disabled={busy}
-          className={buttonClass({ variant: 'secondary', size: 'sm' })}
+          className={buttonStyle({ variant: 'secondary', size: 'sm' })}
           onClick={() => {
             setEditing(false);
           }}

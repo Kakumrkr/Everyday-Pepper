@@ -30,7 +30,7 @@ export function WhyContent({
   return (
     <div className="flex flex-col gap-4">
       <Block title="What started it">
-        <p className="m-0 whitespace-pre-wrap">{why.started}</p>
+        <p className="m-0 whitespace-pre-wrap text-ink">{why.started}</p>
       </Block>
       {why.did.length === 0 ? null : (
         <Block title="What I did">
@@ -70,7 +70,7 @@ export function WhyContent({
           </ul>
         </Block>
       )}
-      <div className="flex items-start gap-2 rounded-md bg-info-soft p-3 text-sm">
+      <div className="flex items-start gap-2 rounded-md bg-info-soft p-3 type-label text-ink">
         <Icon name="dial" className="mt-0.5 text-info" />
         <p className="m-0">
           Setting used: <b>{why.setting}</b>
@@ -83,8 +83,8 @@ export function WhyContent({
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-1">
-      <h3 className="m-0 text-xs font-bold tracking-wide text-ink-2 uppercase">{title}</h3>
+    <section className="flex flex-col gap-1 type-body text-ink">
+      <h3 className="m-0 type-label text-ink-2">{title}</h3>
       {children}
     </section>
   );
@@ -110,12 +110,17 @@ export function ChatNotice({
   return (
     <div
       className={cx(
-        'flex max-w-[34rem] flex-col gap-2 rounded-lg p-4 text-sm',
-        tone === 'wait' ? 'bg-wait-soft' : 'bg-info-soft',
+        'flex max-w-[34rem] flex-col gap-1 rounded-lg px-4 py-3 type-body text-ink',
+        tone === 'wait' ? 'bg-warn-soft' : 'bg-info-soft',
       )}
     >
       <p className="m-0 whitespace-pre-wrap">{text}</p>
-      {safe === null ? null : <p className="m-0">{renderLink(safe)}</p>}
+      {/* The link stands alone on its line, so it gets the full 44 px target (D3). */}
+      {safe === null ? null : (
+        <p className="m-0 [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center">
+          {renderLink(safe)}
+        </p>
+      )}
     </div>
   );
 }

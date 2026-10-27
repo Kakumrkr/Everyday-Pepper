@@ -7,8 +7,8 @@ import type {
   FeedSettingsChange,
 } from '@pepper/contracts';
 import { useId, useState, type ReactNode } from 'react';
-import { LegacyCard } from '../legacy-card.js';
-import { buttonClass, cx } from '../class-names.js';
+import { cx } from '../class-names.js';
+import { buttonStyle, FOCUS_RING } from '../kit/button.js';
 import { FEED_KIND_NOUN, feedLine } from './feed-lines.js';
 
 /** What a close or a switch change came to: `null` when it worked, else a message to show. */
@@ -42,6 +42,8 @@ export interface FeedSuggestionsProps {
  * words, a primary action and Dismiss (snoozed for 30 days). Owners and managers get the
  * "Pause suggestions" switch and, once per kind, the offer to turn off a kind they keep
  * dismissing. Empty states say what will appear. Every sentence comes from `feedLine`.
+ * On the kit (S41): each suggestion is a raised card (it needs a decision); the section around
+ * them is flat.
  */
 export function FeedSuggestions({
   items,
@@ -87,16 +89,17 @@ export function FeedSuggestions({
   };
 
   return (
-    <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <h2 id={headingId} className="m-0 text-lg font-bold">
+    <section aria-labelledby={headingId} className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-3">
+        <h2 id={headingId} className="m-0 type-heading">
           Suggestions
         </h2>
         {canChangeSettings ? (
-          <div className="flex items-center gap-2">
-            <span id={pauseId} className="text-sm font-semibold text-ink-2">
+          <div className="flex items-center gap-1">
+            <span id={pauseId} className="type-label text-ink-2">
               Pause suggestions
             </span>
+            {/* A 44 px target around the kit's 52 × 32 track (D3). */}
             <button
               type="button"
               role="switch"
@@ -105,25 +108,41 @@ export function FeedSuggestions({
               disabled={busy}
               onClick={() => void change({ suggestionsPaused: !settings.suggestionsPaused })}
               className={cx(
-                'relative h-7 w-12 shrink-0 rounded-full border-0 p-0',
-                'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand',
-                'after:absolute after:top-[3px] after:left-[3px] after:h-[22px] after:w-[22px] after:rounded-full after:bg-surface after:transition-[left] motion-reduce:after:transition-none',
-                settings.suggestionsPaused ? 'bg-brand-strong after:left-[23px]' : 'bg-line',
+                'group inline-flex min-h-11 shrink-0 items-center rounded-pill border-0 bg-transparent px-1 py-0',
+                'disabled:opacity-50',
+                FOCUS_RING,
               )}
-            />
+            >
+              <span
+                aria-hidden="true"
+                className={cx(
+                  'relative h-8 w-13 rounded-pill border transition motion-fast ease-standard',
+                  settings.suggestionsPaused
+                    ? 'border-brand bg-brand'
+                    : 'border-line-strong bg-surface-2',
+                )}
+              >
+                <span
+                  className={cx(
+                    'absolute top-0.75 left-0.75 size-6 rounded-pill shadow-raised transition motion-fast ease-standard',
+                    settings.suggestionsPaused ? 'translate-x-5 bg-brand-ink' : 'bg-line-strong',
+                  )}
+                />
+              </span>
+            </button>
           </div>
         ) : null}
       </div>
       {error !== null ? (
-        <p role="alert" className="m-0 text-sm text-danger">
+        <p role="alert" className="m-0 type-label text-danger">
           {error}
         </p>
       ) : null}
-      <p role="status" className="m-0 text-sm text-ink-2 empty:hidden">
+      <p role="status" className="m-0 type-label text-ink-2 empty:hidden">
         {notice}
       </p>
       {askToTurnOff !== null && canChangeSettings && !settings.suggestionsPaused ? (
-        <div className="flex flex-col gap-2 rounded-md border border-dashed border-accent p-3 text-sm">
+        <div className="flex flex-col gap-3 rounded-lg bg-surface p-5 type-body text-ink shadow-raised">
           <p className="m-0">
             You've dismissed {FEED_KIND_NOUN[askToTurnOff]} 3 times in 2 weeks. Should I stop
             looking for them?
@@ -132,7 +151,7 @@ export function FeedSuggestions({
             <button
               type="button"
               disabled={busy}
-              className={buttonClass({ size: 'sm' })}
+              className={buttonStyle({ size: 'sm' })}
               onClick={() =>
                 void change({
                   disabledKinds: [...settings.disabledKinds, askToTurnOff],
@@ -145,7 +164,7 @@ export function FeedSuggestions({
             <button
               type="button"
               disabled={busy}
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+              className={buttonStyle({ variant: 'secondary', size: 'sm' })}
               onClick={() => void change({ askAnswered: askToTurnOff })}
             >
               Keep them
@@ -172,17 +191,17 @@ export function FeedSuggestions({
               <li key={item.id}>
                 <article
                   aria-label={line.title}
-                  className="flex flex-col gap-2 rounded-md border border-line bg-bg p-3"
+                  className="flex flex-col gap-2 rounded-lg bg-surface p-5 shadow-raised"
                   data-testid="feed-suggestion"
                   data-kind={item.kind}
                 >
-                  <p className="m-0 font-semibold leading-snug">{line.title}</p>
-                  <p className="m-0 text-sm text-ink-2">{line.why}</p>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="m-0 type-subheading text-ink">{line.title}</p>
+                  <p className="m-0 type-body text-ink-2">{line.why}</p>
+                  <div className="mt-1 flex flex-wrap gap-2">
                     {action === null ? null : renderAction(action, () => void close(item, 'done'))}
                     <button
                       type="button"
-                      className={buttonClass({ variant: 'secondary', size: 'sm' })}
+                      className={buttonStyle({ variant: 'secondary', size: 'sm' })}
                       onClick={() => void close(item, 'dismissed')}
                     >
                       Dismiss
@@ -195,13 +214,13 @@ export function FeedSuggestions({
         </ul>
       )}
       {footer}
-    </LegacyCard>
+    </section>
   );
 }
 
 function EmptyState({ title, text }: { title: string; text: string }) {
   return (
-    <p className="m-0 rounded-md bg-surface-2 p-3 text-sm text-ink-2">
+    <p className="m-0 rounded-lg bg-surface-2 px-5 py-4 type-body text-ink-2">
       <strong className="text-ink">{title}</strong> {text}
     </p>
   );
