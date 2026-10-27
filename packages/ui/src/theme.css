@@ -164,6 +164,10 @@
   --text-caption--letter-spacing: 0em;
   --text-caption--font-weight: 500;
   --spacing: 0.25rem;
+  /* The phone's bottom tab bar (DESIGN.md §3): 52 px tabs and the hairline above them. Screens
+     that sit above it (Chat's composer) use these, never their own numbers (S41). */
+  --spacing-tab-item: 3.25rem;
+  --spacing-tab-bar: calc(var(--spacing-tab-item) + 1px);
   --radius-sm: 12px;
   --radius-md: 16px;
   --radius-lg: 24px;

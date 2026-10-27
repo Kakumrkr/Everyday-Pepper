@@ -79,7 +79,9 @@ export function DailyBriefing({
         <p className="m-0 flex flex-col gap-1">
           <span className="type-number-xl tabular-nums">{String(shown.payload.bookingCount)}</span>
           <span className="type-label">
-            {shown.payload.bookingCount === 1 ? 'booking today' : 'bookings today'}
+            {/* Staff see their own day (S38a), so the number says whose bookings they are. */}
+            {shown.payload.bookingCount === 1 ? 'booking' : 'bookings'}
+            {shown.payload.scope === 'staff' ? ' for you today' : ' today'}
           </span>
         </p>
       )}

@@ -77,8 +77,10 @@ test('the owner gives rebooking emails their mailing address, and changes it (S3
   page,
 }) => {
   await onboardOwner(page);
-  // In More's settings since S41.
-  await page.goto('/more');
+  // Home says rebooking emails wait for the address, and leads to More's settings (S41).
+  const needed = page.getByTestId('mailing-address-needed');
+  await (await hydrated(needed.getByRole('link', { name: 'Add your address' }))).click();
+  await expect(page).toHaveURL(/\/more$/);
   const suggestions = page.getByRole('region', { name: 'Rebooking emails' });
   const form = suggestions.getByRole('form', { name: 'Mailing address for rebooking emails' });
   await expect(form).toBeVisible();
@@ -90,6 +92,10 @@ test('the owner gives rebooking emails their mailing address, and changes it (S3
   );
   await page.reload();
   await expect(suggestions.getByTestId('mailing-address')).toContainText('12 Juniper Lane');
+  await page.goto('/');
+  await expect(page.getByTestId('daily-briefing')).toBeVisible();
+  await expect(needed).toHaveCount(0);
+  await page.goto('/more');
 
   // Something that is not an address is refused, and the old one stays.
   await (await hydrated(suggestions.getByRole('button', { name: 'Change it' }))).click();

@@ -352,6 +352,20 @@ describe('DailyBriefing', () => {
     expect(screen.getByRole('heading', { name: 'Your daily briefing' })).toBeTruthy();
   });
 
+  it("shows the day's bookings as the screen's big number, and whose they are (S41)", () => {
+    briefingSetup();
+    expect(screen.getByText('8').className).toContain('type-number-xl');
+    expect(screen.getByText('bookings today', { exact: false })).toBeTruthy();
+    cleanup();
+    briefingSetup({
+      briefing: FeedItemSchema.parse({
+        ...briefing,
+        payload: { ...briefingPayload, scope: 'staff', bookingCount: 1 },
+      }),
+    });
+    expect(screen.getByText('booking for you today', { exact: false })).toBeTruthy();
+  });
+
   it('lets owners pick the hour, the template default first', async () => {
     const { onHour } = briefingSetup();
     const select = screen.getByLabelText('Briefing at');

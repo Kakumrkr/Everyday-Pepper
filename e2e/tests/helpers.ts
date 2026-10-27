@@ -151,6 +151,8 @@ export async function signOut(page: Page): Promise<void> {
  */
 export async function goTo(page: Page, name: string): Promise<void> {
   const nav = page.getByRole('navigation', { name: 'Main' });
+  // The shell first, so a link not rendered yet is never taken for one that is not a tab.
+  await expect(nav.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
   const link = nav.getByRole('link', { name, exact: true });
   if ((await link.count()) === 0) {
     await (await hydrated(nav.getByRole('link', { name: 'More', exact: true }))).click();

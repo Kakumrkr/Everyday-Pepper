@@ -1,4 +1,4 @@
-import { CurrentBusinessResponseSchema } from '@pepper/contracts';
+import { CurrentBusinessResponseSchema, FeedResponseSchema } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import { hydrated, onboardOwner, ownClientAddress } from './helpers.js';
 
@@ -23,22 +23,34 @@ test.beforeEach(async ({ context }) => {
 
 /**
  * Home's briefing in the same state every run: the worker briefs a new business on its first
- * pass once the morning hour (7:00) has passed on its clock, so after 7 the test waits for that
- * briefing and puts it away ("Got it"); the card then says when the next one comes, as before 7.
+ * pass once its morning hour has passed on its clock, so after that hour the test waits for the
+ * briefing and puts it away ("Got it"); the card then says when the next one comes, as before.
+ * Within two minutes of the hour it waits the hour out first, so the worker can't brief mid-test.
  */
 async function settleBriefing(page: Page): Promise<void> {
   const { business } = CurrentBusinessResponseSchema.parse(
     await (await page.request.get('/v1/tenant')).json(),
   );
-  const localHour = Number(
-    new Intl.DateTimeFormat('en-US', {
+  const feed = FeedResponseSchema.parse(await (await page.request.get('/v1/feed')).json());
+  const morning = feed.settings.morningHour ?? feed.templateMorningHour;
+  const clock = () => {
+    const [hour = 0, minute = 0] = new Intl.DateTimeFormat('en-US', {
       timeZone: business.timeZone,
       hour: 'numeric',
+      minute: 'numeric',
       hourCycle: 'h23',
-    }).format(new Date()),
-  );
+    })
+      .formatToParts(new Date())
+      .filter((part) => part.type === 'hour' || part.type === 'minute')
+      .map((part) => Number(part.value));
+    return hour * 60 + minute;
+  };
+  const untilMorning = morning * 60 - clock();
+  if (untilMorning > 0 && untilMorning <= 2) {
+    await page.waitForTimeout(untilMorning * 60_000 + 5_000);
+  }
   const card = page.getByTestId('daily-briefing');
-  if (localHour >= 7) {
+  if (clock() >= morning * 60) {
     await expect(async () => {
       await page.goto('/');
       await expect(card.getByRole('heading', { name: /^Today: / })).toBeVisible({
@@ -59,7 +71,7 @@ async function still(page: Page, colorScheme: (typeof SCHEMES)[number]): Promise
 
 for (const width of WIDTHS) {
   test(`Home, Chat and More at ${String(width)} px, light and dark`, async ({ page }) => {
-    test.setTimeout(150_000);
+    test.setTimeout(300_000);
     await page.setViewportSize({ width, height: 900 });
     await onboardOwner(page, { business: 'Southside Cuts' });
     await settleBriefing(page);

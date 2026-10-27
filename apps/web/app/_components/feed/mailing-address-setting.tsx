@@ -1,9 +1,8 @@
 'use client';
 
-import { FeedSettingsSchema } from '@pepper/contracts';
 import { MailingAddress } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
-import { sendJson } from '../../../lib/client-api';
+import { saveFeedSettings } from '../../../lib/feed-settings';
 
 /**
  * The mailing address rebooking emails carry (S36, ADR-0040), in More's settings since S41
@@ -14,13 +13,11 @@ export function MailingAddressSetting({ address }: { address: string | null }) {
   return (
     <MailingAddress
       address={address}
-      onSave={async (mailingAddress) => {
-        const answer = await sendJson('PATCH', '/v1/feed/settings', { mailingAddress });
-        if (!answer.ok) return answer.message;
-        if (!FeedSettingsSchema.safeParse(answer.data).success) return 'Something went wrong.';
-        router.refresh();
-        return null;
-      }}
+      onSave={(mailingAddress) =>
+        saveFeedSettings({ mailingAddress }, () => {
+          router.refresh();
+        })
+      }
     />
   );
 }

@@ -1,18 +1,19 @@
 'use client';
 
 import {
-  FeedSettingsSchema,
   parseDate,
   type FeedItem,
   type FeedResponse,
   type FeedSettingsChange,
 } from '@pepper/contracts';
-import { buttonStyle, FeedSuggestions, type FeedAction } from '@pepper/ui';
+import { buttonStyle, cx, FeedSuggestions, type FeedAction } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
 import { calendarHref } from '../../../lib/calendar';
 import { sendJson } from '../../../lib/client-api';
+import { saveFeedSettings } from '../../../lib/feed-settings';
+import { MORE_HREF } from '../../../lib/nav';
 
 /** Where a suggestion leads: the day on the calendar, or the client. */
 function actionFor(item: FeedItem): FeedAction | null {
@@ -41,17 +42,15 @@ function actionFor(item: FeedItem): FeedAction | null {
 /**
  * Home's "Suggestions" (S35, ADR-0039) on `/v1/feed`: dismiss and acting on a suggestion close
  * it; the switches refresh the page so the server reads the feed again. The mailing address
- * rebooking emails carry moved to More's settings (S41, `MailingAddressSetting`).
+ * rebooking emails carry moved to More's settings (S41, `MailingAddressSetting`); until it is
+ * set, a line here leads there.
  */
 export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: string }) {
   const router = useRouter();
-  const changeSettings = async (change: FeedSettingsChange): Promise<string | null> => {
-    const answer = await sendJson('PATCH', '/v1/feed/settings', change);
-    if (!answer.ok) return answer.message;
-    if (!FeedSettingsSchema.safeParse(answer.data).success) return 'Something went wrong.';
-    router.refresh();
-    return null;
-  };
+  const changeSettings = (change: FeedSettingsChange) =>
+    saveFeedSettings(change, () => {
+      router.refresh();
+    });
   return (
     <FeedSuggestions
       items={feed.suggestions}
@@ -71,6 +70,23 @@ export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: str
         return answer.ok ? null : answer.message;
       }}
       onSettings={changeSettings}
+      footer={
+        // Until the address is set no rebooking email is drafted (ADR-0040), so Home says so.
+        feed.canChangeSettings && feed.mailingAddress === null ? (
+          <div className="flex flex-wrap items-center gap-x-2" data-testid="mailing-address-needed">
+            <p className="m-0 type-body text-ink-2">
+              I can draft rebooking emails for regulars who are due once your mailing address is
+              set.
+            </p>
+            <Link
+              href={MORE_HREF}
+              className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), '-ml-4')}
+            >
+              Add your address
+            </Link>
+          </div>
+        ) : null
+      }
     />
   );
 }

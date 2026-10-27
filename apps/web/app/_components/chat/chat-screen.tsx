@@ -228,9 +228,9 @@ export function ChatScreen({
   const blocks = blocksOf(state.items);
   const statusLine = state.activity ?? said ?? '';
   return (
-    // The screen's full height, so the composer sits at the bottom within thumb reach (D3) even
-    // before there is a conversation: above the tab bar on phones, at the foot on desktop.
-    <div className="mx-auto flex min-h-[calc(100dvh-4.8125rem-env(safe-area-inset-bottom))] max-w-3xl flex-col gap-4 desk:min-h-[calc(100dvh-5rem)]">
+    // The screen's full height (the shell's `data-fill-screen`), so the composer sits at the
+    // bottom within thumb reach (D3) even before there is a conversation.
+    <div data-fill-screen className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="m-0 type-display">Chat with Pepper</h1>
         <div className="flex flex-wrap items-center gap-1">
@@ -312,8 +312,8 @@ export function ChatScreen({
       <p role="status" className="m-0 min-h-5 type-label text-ink-2">
         {statusLine}
       </p>
-      {/* Above the 53 px tab bar (its 52 px tabs and hairline) on phones; at the foot on desktop. */}
-      <div className="sticky bottom-[calc(3.3125rem+env(safe-area-inset-bottom))] -mx-5 flex flex-col gap-2 border-t border-line bg-bg px-5 py-3 desk:bottom-0 desk:mx-0 desk:px-0">
+      {/* Above the tab bar on phones; at the foot on desktop. */}
+      <div className="sticky bottom-[calc(var(--spacing-tab-bar)+env(safe-area-inset-bottom))] -mx-5 flex flex-col gap-2 border-t border-line bg-bg px-5 py-3 desk:bottom-0 desk:mx-0 desk:px-0">
         {state.items.length === 0 && available ? (
           <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Try asking" role="group">
             {SUGGESTIONS[lead ? 'lead' : 'staff'].map((suggestion) => (

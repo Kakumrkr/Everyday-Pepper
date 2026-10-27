@@ -47,12 +47,12 @@ export function BusinessSwitcher({
         {businesses.map((business) => {
           const active = business.tenantId === activeTenantId;
           return (
-            <li key={business.tenantId}>
+            <li key={business.tenantId} className="-mx-2">
               <button
                 type="button"
                 aria-pressed={active}
                 className={cx(
-                  '-mx-2 flex min-h-14 w-[calc(100%+1rem)] items-center gap-3 rounded-sm bg-transparent px-2 py-3 text-left text-ink hover:bg-surface-2',
+                  'flex min-h-14 w-full items-center gap-3 rounded-sm bg-transparent px-2 py-3 text-left text-ink hover:bg-surface-2',
                   FOCUS_RING,
                 )}
                 onClick={() => {

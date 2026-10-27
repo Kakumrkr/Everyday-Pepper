@@ -402,7 +402,7 @@ export function BottomTabBar({
                 href: item.href,
                 'aria-current': active ? 'page' : undefined,
                 className: cx(
-                  'flex min-h-13 flex-col items-center justify-center gap-0.5 no-underline type-caption',
+                  'flex min-h-tab-item flex-col items-center justify-center gap-0.5 no-underline type-caption',
                   active ? 'text-ink' : 'text-ink-2',
                   FOCUS_RING,
                 ),

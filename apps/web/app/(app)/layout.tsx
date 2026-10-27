@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { cx } from '@pepper/ui';
 import { requiredStep } from '../../lib/account';
 import { appNav } from '../../lib/nav';
 import { MANIFEST_URL } from '../../lib/pwa';
@@ -41,7 +42,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         nav={appNav(current?.permissions ?? null)}
         businessName={current?.business.name ?? null}
       />
-      <main className="min-w-0 px-5 pt-6 pb-28 desk:px-10 desk:pt-10 desk:pb-10">{children}</main>
+      <main
+        className={cx(
+          'min-w-0 px-5 pt-6 pb-28 desk:px-10 desk:pt-10 desk:pb-10',
+          // A screen that fills the height (Chat) ends right above the phone's tab bar.
+          'has-data-fill-screen:flex has-data-fill-screen:min-h-dvh has-data-fill-screen:flex-col',
+          'has-data-fill-screen:pb-[calc(var(--spacing-tab-bar)+env(safe-area-inset-bottom))] desk:has-data-fill-screen:pb-10',
+        )}
+      >
+        {children}
+      </main>
       <ServiceWorker />
     </div>
   );
