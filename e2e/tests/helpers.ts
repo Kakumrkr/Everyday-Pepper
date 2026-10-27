@@ -128,6 +128,8 @@ export async function setUpTwoFactor(
 }
 
 export async function signOut(page: Page): Promise<void> {
+  // Sign out sits in More's account section (S41).
+  await page.goto('/more');
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
   await page.goto('/');

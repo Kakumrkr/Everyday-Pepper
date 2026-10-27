@@ -1,30 +1,58 @@
+import type { Permission } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import { isCurrent, navItems } from './nav';
+import { appNav, currentKey, isCurrent, tabItems } from './nav';
 
-describe('navItems', () => {
-  it('without a business: only Home', () => {
-    expect(navItems(null).map((item) => item.label)).toEqual(['Home']);
+const OWNER: Permission[] = [
+  'calendar.read',
+  'bookings.read',
+  'clients.read',
+  'services.read',
+  'ai.chat',
+  'autonomy.manage',
+];
+
+const labels = (items: readonly { label: string }[]) => items.map((item) => item.label);
+
+describe('appNav (AC-X-5)', () => {
+  it('without a business: only Home, no More', () => {
+    const nav = appNav(null);
+    expect(labels(nav.main)).toEqual(['Home']);
+    expect(nav.pepper).toEqual([]);
+    expect(nav.business).toEqual([]);
+    expect(nav.more).toBeNull();
+    expect(labels(tabItems(nav))).toEqual(['Home']);
   });
 
-  it('with a business: Calendar, Clients and Services when the role may read them, and Team', () => {
-    expect(navItems(['calendar.read', 'bookings.read']).map((item) => item.href)).toEqual([
+  it("an owner's tabs are Home · Calendar · Clients · Chat · More", () => {
+    const nav = appNav(OWNER);
+    expect(labels(tabItems(nav))).toEqual(['Home', 'Calendar', 'Clients', 'Chat', 'More']);
+    expect(tabItems(nav).map((item) => item.href)).toEqual([
       '/',
       '/calendar',
-      '/team',
-    ]);
-    expect(
-      navItems(['calendar.read', 'clients.read', 'services.read']).map((item) => item.label),
-    ).toEqual(['Home', 'Calendar', 'Clients', 'Services', 'Team']);
-    expect(navItems([]).map((item) => item.label)).toEqual(['Home', 'Team']);
-  });
-
-  it('Chat second, for every role that may talk to Pepper (S26)', () => {
-    expect(navItems(['ai.chat', 'calendar.read']).map((item) => item.href)).toEqual([
-      '/',
+      '/clients',
       '/chat',
-      '/calendar',
-      '/team',
+      '/more',
     ]);
+  });
+
+  it('the Pepper group holds What I know, Autonomy and Waitlist; the business group Services and Team', () => {
+    const nav = appNav(OWNER);
+    expect(labels(nav.pepper)).toEqual(['What I know', 'Autonomy', 'Waitlist']);
+    expect(nav.pepper.map((item) => item.href)).toEqual(['/memory', '/autonomy', '/waitlist']);
+    expect(labels(nav.business)).toEqual(['Services', 'Team']);
+  });
+
+  it('hides what the role cannot open', () => {
+    const nav = appNav(['calendar.read']);
+    expect(labels(tabItems(nav))).toEqual(['Home', 'Calendar', 'More']);
+    expect(labels(nav.pepper)).toEqual(['Autonomy']);
+    expect(labels(nav.business)).toEqual(['Team']);
+    const none = appNav([]);
+    expect(labels(tabItems(none))).toEqual(['Home', 'More']);
+  });
+
+  it('never more than five tabs, so each stays a wide target at 375 px', () => {
+    expect(tabItems(appNav(OWNER)).length).toBeLessThanOrEqual(5);
   });
 });
 
@@ -35,5 +63,28 @@ describe('isCurrent', () => {
     expect(isCurrent('/calendar', '/calendar')).toBe(true);
     expect(isCurrent('/calendar/week', '/calendar')).toBe(true);
     expect(isCurrent('/calendars', '/calendar')).toBe(false);
+  });
+});
+
+describe('currentKey', () => {
+  const nav = appNav(OWNER);
+
+  it('a tab lights itself in both bars', () => {
+    expect(currentKey(nav, '/', true)).toBe('home');
+    expect(currentKey(nav, '/clients/abc', true)).toBe('clients');
+    expect(currentKey(nav, '/chat', false)).toBe('chat');
+  });
+
+  it('a place outside the tabs lights More on phones and itself in the sidebar', () => {
+    expect(currentKey(nav, '/waitlist', true)).toBe('more');
+    expect(currentKey(nav, '/waitlist', false)).toBe('waitlist');
+    expect(currentKey(nav, '/services/rules', true)).toBe('more');
+    expect(currentKey(nav, '/services/rules', false)).toBe('services');
+  });
+
+  it('More lights itself; unknown pages light nothing', () => {
+    expect(currentKey(nav, '/more', true)).toBe('more');
+    expect(currentKey(nav, '/more', false)).toBe('more');
+    expect(currentKey(nav, '/security/two-factor', true)).toBeNull();
   });
 });

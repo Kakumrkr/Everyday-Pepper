@@ -1,7 +1,7 @@
 'use client';
 
 import { PushKeyResponseSchema, PushStatusResponseSchema } from '@pepper/contracts';
-import { buttonClass, LegacyCard } from '@pepper/ui';
+import { Button } from '@pepper/ui';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { fetchJson, sendJson } from '../../../lib/client-api';
 import {
@@ -37,7 +37,8 @@ const api: PushApi = {
 };
 
 /**
- * Notifications on this device (S21, ADR-0026), on Home: one switch per device and business.
+ * Notifications on this device (S21, ADR-0026), in More's settings (S41): one switch per device
+ * and business.
  * Hidden when the deployment sends no pushes. Pushes never name a client.
  */
 export function NotificationsCard() {
@@ -82,38 +83,26 @@ export function NotificationsCard() {
 
   if (state === 'loading' || state === 'unavailable') return null;
   return (
-    <LegacyCard as="section" labelledBy={headingId}>
-      <h2 id={headingId} className="m-0 font-display text-lg font-bold">
-        Notifications on this device
-      </h2>
-      <p className="mt-1 mb-3 text-ink-2" data-testid="push-state" data-state={state}>
-        {TEXT[state]}
-      </p>
+    <section aria-labelledby={headingId} className="flex flex-col items-start gap-3">
+      <div className="flex flex-col gap-1">
+        <h2 id={headingId} className="m-0 type-subheading">
+          Notifications on this device
+        </h2>
+        <p className="m-0 type-body text-ink-2" data-testid="push-state" data-state={state}>
+          {TEXT[state]}
+        </p>
+      </div>
       {state === 'off' ? (
-        <button
-          type="button"
-          disabled={busy}
-          className={buttonClass({ size: 'sm' })}
-          onClick={() => void toggle(true)}
-        >
+        <Button size="sm" busy={busy} onClick={() => void toggle(true)}>
           Turn on notifications
-        </button>
+        </Button>
       ) : null}
       {state === 'on' ? (
-        <button
-          type="button"
-          disabled={busy}
-          className={buttonClass({ variant: 'secondary', size: 'sm' })}
-          onClick={() => void toggle(false)}
-        >
+        <Button variant="secondary" size="sm" busy={busy} onClick={() => void toggle(false)}>
           Turn off
-        </button>
+        </Button>
       ) : null}
-      {error === null ? null : (
-        <div className="mt-3">
-          <Notice tone="error">{error}</Notice>
-        </div>
-      )}
-    </LegacyCard>
+      {error === null ? null : <Notice tone="error">{error}</Notice>}
+    </section>
   );
 }
