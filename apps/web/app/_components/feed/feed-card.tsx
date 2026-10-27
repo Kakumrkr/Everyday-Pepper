@@ -7,7 +7,7 @@ import {
   type FeedResponse,
   type FeedSettingsChange,
 } from '@pepper/contracts';
-import { buttonClass, FeedSuggestions, MailingAddress, type FeedAction } from '@pepper/ui';
+import { buttonStyle, FeedSuggestions, MailingAddress, type FeedAction } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
@@ -62,11 +62,7 @@ export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: str
       now={Date.now()}
       actionFor={actionFor}
       renderAction={(action, onFollow) => (
-        <Link
-          href={action.href}
-          onClick={onFollow}
-          className={buttonClass({ size: 'sm', className: 'no-underline' })}
-        >
+        <Link href={action.href} onClick={onFollow} className={buttonStyle({ size: 'sm' })}>
           {action.label}
         </Link>
       )}

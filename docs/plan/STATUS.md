@@ -13,7 +13,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - **Done:** 1 (ACs, hook: `~/.cache/pepper-playwright`, 1248) · 2 (`appNav`/`tabItems`/`currentKey`, 9 unit tests) · 3 (shell on `BottomTabBar` + sidebar groups, `/more` with Pepper/Business rows, notifications, account; sign-out and notifications moved off Home; `shell.spec.ts` + `tap-targets.ts`: desktop green, the phone test waits on Home's 17 px link → task 5).
 - **Running Playwright here:** `export PLAYWRIGHT_CHROMIUM_EXECUTABLE=~/.cache/pepper-playwright/chromium_headless_shell-1248/...` (this session's env still points at 1243).
 - **Done (4):** ChangeCard (raised only while proposed; DetailTable), choices, why/notice, draft editor, remembered, briefing (plum block, bookings as the big number), suggestions (raised cards, 44 px switch), mailing address; `fieldStyle` exported from the kit.
-- **Next step:** task 5, Home on the kit (AiActivity, TaskCard, FeedCard wiring), `money()` → `formatMoney`.
+- **Done (5):** Home on the kit (header with business · role, briefing, Needs your OK, Suggestions, Done for you, To-dos; empty state to More without a business); `money()` → `formatMoney`. Playwright shell, feed, tasks, notifications, accessibility green (21 + shell 2).
+- **Next step:** task 6, Chat on the kit.
 
 ## Last sessions
 - **S40 Phase 9 · Foundation (2026-10-27): the A+B tokens, the kit, the gallery, the design lint and screenshot tests** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) "Built", [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).

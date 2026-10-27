@@ -4,12 +4,15 @@ import {
   FeedResponseSchema,
   TasksResponseSchema,
 } from '@pepper/contracts';
+import { EmptyState } from '@pepper/ui';
 import { redirect } from 'next/navigation';
 import { requiredStep } from '../../lib/account';
+import { MORE_HREF } from '../../lib/nav';
 import { currentAccount, currentBusiness, currentJson, currentMembers } from '../_server/account';
 import { AiActivity } from '../_components/chat/ai-activity';
 import { BriefingCard } from '../_components/feed/briefing-card';
 import { FeedCard } from '../_components/feed/feed-card';
+import { kitLink } from '../_components/kit-link';
 import { TaskCard } from '../_components/tasks/task-card';
 import { Unavailable } from '../_components/unavailable';
 
@@ -19,7 +22,8 @@ export const dynamic = 'force-dynamic';
 /**
  * Signed-in home, inside the app shell: the operator feed (S35, ADR-0039). Today's briefing
  * (S38a), Needs your OK (the AI's proposals), Suggestions (what the rules found, `/v1/feed`)
- * and Done for you (receipts), then the to-dos and notifications.
+ * and Done for you (receipts), then the to-dos. On the kit (S41): the plum briefing first, what
+ * needs a decision raised, the rest flat; notifications and the account moved to More.
  */
 export default async function HomePage() {
   const account = await currentAccount();
@@ -51,57 +55,58 @@ export default async function HomePage() {
       ? await currentJson('/v1/feed', FeedResponseSchema)
       : null;
   return (
-    <div className="mx-auto max-w-xl">
-      <h1>Hi {me.user.name}</h1>
+    <div className="mx-auto flex max-w-xl flex-col gap-6">
+      <header className="flex flex-col gap-1">
+        {current === null ? null : (
+          <p className="m-0 type-label text-ink-2" data-testid="current-business">
+            <span data-testid="business-name">{current.business.name}</span>
+            {' · '}
+            <span data-testid="business-role" className="capitalize">
+              {current.role}
+            </span>
+          </p>
+        )}
+        <h1 className="m-0 type-display">Hi {me.user.name}</h1>
+      </header>
       {current === null ? (
-        <p className="status">Choose a business below.</p>
-      ) : (
-        <p className="status" data-state="ok" data-testid="current-business">
-          <span data-testid="business-name">{current.business.name}</span>
-          <span data-testid="business-role">{current.role}</span>
-        </p>
-      )}
-      {current !== null && feed !== null ? (
-        <div className="mt-6 empty:hidden">
-          <BriefingCard feed={feed} timeZone={current.business.timeZone} />
-        </div>
-      ) : null}
-      {current !== null && proposals !== null && actions !== null ? (
-        <div className="mt-6">
-          <AiActivity
-            section="needs"
-            proposals={proposals.proposals}
-            actions={actions.actions}
-            timeZone={current.business.timeZone}
-          />
-        </div>
+        <EmptyState
+          icon="home"
+          title="Choose a business"
+          body="Pick the business to work in, and I’ll show you its day."
+          action={{ label: 'Choose a business', href: MORE_HREF, renderLink: kitLink }}
+        />
       ) : null}
       {current !== null && feed !== null ? (
-        <div className="mt-6">
-          <FeedCard feed={feed} timeZone={current.business.timeZone} />
-        </div>
+        <BriefingCard feed={feed} timeZone={current.business.timeZone} />
       ) : null}
       {current !== null && proposals !== null && actions !== null ? (
-        <div className="mt-6">
-          <AiActivity
-            section="done"
-            proposals={proposals.proposals}
-            actions={actions.actions}
-            timeZone={current.business.timeZone}
-          />
-        </div>
+        <AiActivity
+          section="needs"
+          proposals={proposals.proposals}
+          actions={actions.actions}
+          timeZone={current.business.timeZone}
+        />
+      ) : null}
+      {current !== null && feed !== null ? (
+        <FeedCard feed={feed} timeZone={current.business.timeZone} />
+      ) : null}
+      {current !== null && proposals !== null && actions !== null ? (
+        <AiActivity
+          section="done"
+          proposals={proposals.proposals}
+          actions={actions.actions}
+          timeZone={current.business.timeZone}
+        />
       ) : null}
       {current !== null && open !== null && done !== null ? (
-        <div className="mt-6">
-          <TaskCard
-            open={open.tasks}
-            done={done.tasks}
-            me={me.user.id}
-            members={members}
-            timeZone={current.business.timeZone}
-            now={Date.now()}
-          />
-        </div>
+        <TaskCard
+          open={open.tasks}
+          done={done.tasks}
+          me={me.user.id}
+          members={members}
+          timeZone={current.business.timeZone}
+          now={Date.now()}
+        />
       ) : null}
     </div>
   );

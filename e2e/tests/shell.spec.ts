@@ -54,7 +54,7 @@ test('on a phone: five tabs, More holds the rest, and every tap target is 44 px 
     'Services',
     'Team',
   ]);
-  await expect(page.getByText(owner.business)).toBeVisible();
+  await expect(page.getByRole('main').getByText(`${owner.business} · owner`)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
   await expectTapTargets(page, 'More at 375 px');
   await expectAccessible(page);
