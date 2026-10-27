@@ -5,8 +5,8 @@ import { callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js'
 // Home as the operator feed through the real stack (S35, ADR-0039): the worker's insights job
 // finds Jess's open time and Home shows it under Suggestions; Dismiss snoozes it (it does not
 // come back), and "Pause suggestions" hides the rest; S36 adds the mailing address rebooking
-// emails carry and the public unsubscribe page. The stack runs the job every 10 s
-// (`INSIGHTS_POLL_MS` in CI).
+// emails carry (in More's settings since S41) and the public unsubscribe page. The stack runs
+// the job every 10 s (`INSIGHTS_POLL_MS` in CI).
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
@@ -77,7 +77,11 @@ test('the owner gives rebooking emails their mailing address, and changes it (S3
   page,
 }) => {
   await onboardOwner(page);
-  const suggestions = page.getByRole('region', { name: 'Suggestions' });
+  // Home says rebooking emails wait for the address, and leads to More's settings (S41).
+  const needed = page.getByTestId('mailing-address-needed');
+  await (await hydrated(needed.getByRole('link', { name: 'Add your address' }))).click();
+  await expect(page).toHaveURL(/\/more$/);
+  const suggestions = page.getByRole('region', { name: 'Rebooking emails' });
   const form = suggestions.getByRole('form', { name: 'Mailing address for rebooking emails' });
   await expect(form).toBeVisible();
   const field = form.getByLabel('Your business’s mailing address');
@@ -88,6 +92,10 @@ test('the owner gives rebooking emails their mailing address, and changes it (S3
   );
   await page.reload();
   await expect(suggestions.getByTestId('mailing-address')).toContainText('12 Juniper Lane');
+  await page.goto('/');
+  await expect(page.getByTestId('daily-briefing')).toBeVisible();
+  await expect(needed).toHaveCount(0);
+  await page.goto('/more');
 
   // Something that is not an address is refused, and the old one stays.
   await (await hydrated(suggestions.getByRole('button', { name: 'Change it' }))).click();

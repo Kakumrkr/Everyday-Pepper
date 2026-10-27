@@ -43,6 +43,7 @@ export {
 } from './kit/button.js';
 export {
   Checkbox,
+  fieldStyle,
   Input,
   Select,
   Switch,

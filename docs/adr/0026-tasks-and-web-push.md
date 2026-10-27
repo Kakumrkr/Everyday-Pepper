@@ -31,7 +31,7 @@ Phase 5 (messaging and jobs) lists **tasks** next to the outbox, email and remin
      - **A to-do coming due:** its assignee, or the owners and managers for a team task, gets "To-do due: *title*", opening Home. The due-task job runs on the reminders' interval (`REMINDER_POLL_MS`, 60 s) through a read-only `job_scan` policy named `tasks`. It handles each task under a row lock and once per due time; a new due time notifies again.
      - Team-made bookings push nothing: the team made them.
    - **The service worker** (`public/sw.js`) shows a push (title, line, tag, icon). A tap opens its page in an open window of the app or a new one, and only ever a page of this origin: a full URL, `//host` or `/\host` opens Home.
-   - **The switch** ("Notifications on this device" on Home):
+   - **The switch** ("Notifications on this device" on Home; in More's settings since S41, ADR-0044):
      - Turn on asks for permission, subscribes with the public key and saves the device.
      - Turn off removes this business's device but keeps the browser subscription, because one subscription serves every business on the device.
      - Other states: blocked, unsupported, and "add to your Home Screen first" on iPhone and iPad (iOS shows pushes only for installed apps).

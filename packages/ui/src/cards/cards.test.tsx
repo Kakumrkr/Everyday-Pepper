@@ -341,8 +341,8 @@ describe('BookingCard, DayCard and PlanCard', () => {
       'listitem',
     );
     expect(items.map((item) => item.textContent)).toEqual([
-      '9:00 amJess: blocked until 9:30 am',
-      '10:00 amMaria L. · Haircut · Jess',
+      '9:00 amJessBlocked until 9:30 am',
+      '10:00 amMaria L.Haircut · Jess',
     ]);
     await expectAccessible(container);
   });

@@ -1,7 +1,7 @@
 'use client';
 
 import type { AiActionView, AiProposalView, ToolCard } from '@pepper/contracts';
-import { LegacyCard } from '@pepper/ui';
+import { buttonStyle, cx } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useId } from 'react';
@@ -16,7 +16,7 @@ const SHOWN = 5;
  * waiting for the member) or "Done for you" (receipts with Undo and Why?), one section each,
  * with an empty state that says what will appear. Staff see their own, including what a lead
  * approved for them (S23 log). Each card reads its live state and approves exactly what it
- * shows.
+ * shows. On the kit (S41): flat sections; a proposal's card is raised, a receipt's is flat.
  */
 export function AiActivity({
   section,
@@ -36,8 +36,8 @@ export function AiActivity({
   };
   if (section === 'needs') {
     return (
-      <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
-        <h2 id={headingId} className="m-0 text-lg font-bold">
+      <section aria-labelledby={headingId} className="flex flex-col gap-3">
+        <h2 id={headingId} className="m-0 type-heading">
           Needs your OK
         </h2>
         {proposals.length === 0 ? (
@@ -55,12 +55,12 @@ export function AiActivity({
             />
           ))
         )}
-      </LegacyCard>
+      </section>
     );
   }
   return (
-    <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
-      <h2 id={headingId} className="m-0 text-lg font-bold">
+    <section aria-labelledby={headingId} className="flex flex-col gap-3">
+      <h2 id={headingId} className="m-0 type-heading">
         Done for you
       </h2>
       {actions.length === 0 ? (
@@ -80,18 +80,19 @@ export function AiActivity({
             />
           ))
       )}
-      <p className="m-0 text-sm">
-        <Link href={ROUTES.autonomy} className="font-semibold text-brand underline">
-          Change what I do on my own
-        </Link>
-      </p>
-    </LegacyCard>
+      <Link
+        href={ROUTES.autonomy}
+        className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), '-ml-4 self-start')}
+      >
+        Change what I do on my own
+      </Link>
+    </section>
   );
 }
 
 function EmptyState({ title, text }: { title: string; text: string }) {
   return (
-    <p className="m-0 rounded-md bg-surface-2 p-3 text-sm text-ink-2">
+    <p className="m-0 rounded-lg bg-surface-2 px-5 py-4 type-body text-ink-2">
       <strong className="text-ink">{title}</strong> {text}
     </p>
   );

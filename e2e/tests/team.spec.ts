@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import {
   anotherPerson,
   enterPassword,
+  goTo,
   hydrated,
   onboardOwner,
   ownClientAddress,
@@ -36,7 +37,7 @@ test('an owner invites a manager, who signs up, joins and sets up MFA; the owner
 }) => {
   test.setTimeout(120_000); // two-step setups may wait for the next 30-second code
   const owner = await onboardOwner(page);
-  await page.getByRole('link', { name: 'Team' }).click();
+  await goTo(page, 'Team');
   await expect(page.getByRole('heading', { name: 'Team' })).toBeVisible();
   await expect(page.getByTestId('member')).toHaveCount(1);
   await expect(page.getByTestId('member')).toContainText('(you)');
@@ -134,7 +135,7 @@ test('a forwarded link is refused; the invited person signs in, joins as staff, 
   await expect(priya.getByTestId('business-role')).toHaveText('staff');
 
   // Staff see no team list and no invite form, only "Leave".
-  await priya.getByRole('link', { name: 'Team' }).click();
+  await goTo(priya, 'Team');
   await expect(priya.getByRole('heading', { name: 'Team' })).toBeVisible();
   await expect(priya.getByTestId('members')).toHaveCount(0);
   await expect(priya.getByRole('button', { name: 'Create invite link' })).toHaveCount(0);

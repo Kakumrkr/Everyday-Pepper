@@ -14,7 +14,7 @@ import {
   type WeeklyHours,
   type WeeklyHoursInput,
 } from '@pepper/contracts';
-import { formatDuration } from '@pepper/ui';
+import { formatDuration, formatMoney } from '@pepper/ui';
 
 // The setup screens (S16): services, staff hours and time off, booking rules and a client's
 // visits. Everything here is pure; the screens call the api, which validates and decides.
@@ -42,22 +42,13 @@ export function textFromCents(cents: number | null): string {
   return rest === 0 ? String(dollars) : `${String(dollars)}.${String(rest).padStart(2, '0')}`;
 }
 
-/** `$65` or `$65.50`. */
-export function money(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
-  }).format(cents / 100);
-}
-
 /** A service's price as clients see it: `from $65`, `$65–$80`, or `null` for none. */
 export function priceLabel(
   service: Pick<Service, 'priceFromCents' | 'priceToCents'>,
 ): string | null {
   const { priceFromCents: from, priceToCents: to } = service;
   if (from === null) return null;
-  return to === null ? `from ${money(from)}` : `${money(from)}–${money(to)}`;
+  return to === null ? `from ${formatMoney(from)}` : `${formatMoney(from)}–${formatMoney(to)}`;
 }
 
 /** `45 min`, `1 h`, `1 h 30 min`. */

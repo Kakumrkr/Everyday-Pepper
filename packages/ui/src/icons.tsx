@@ -82,6 +82,21 @@ const PATHS = {
       <path d="M9.5 8.5h5M9.5 11.5h3" />
     </>
   ),
+  // S41: the Pepper group's waitlist and the settings place.
+  waitlist: (
+    <>
+      <path d="M4 6h9M4 12h7M4 18h9" />
+      <circle cx="17.5" cy="15.5" r="3.5" />
+      <path d="M17.5 13.8v1.7l1.2 1" />
+    </>
+  ),
+  settings: (
+    <>
+      <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+      <circle cx="15" cy="7" r="2" />
+      <circle cx="9" cy="17" r="2" />
+    </>
+  ),
   alert: (
     <>
       <path d="M12 4 3 20h18L12 4Z" />

@@ -53,7 +53,7 @@ test('an owner turns notifications on for this device, keeps them across reloads
   test.setTimeout(90_000);
   await fakePush(context);
   await onboardOwner(page);
-  await page.goto('/');
+  await page.goto('/more');
 
   const state = card(page).getByTestId('push-state');
   await expect(state).toHaveAttribute('data-state', 'off');
@@ -80,7 +80,7 @@ test('a browser where notifications are blocked says how to allow them', async (
   await page.addInitScript(() => {
     Object.defineProperty(Notification, 'permission', { get: () => 'denied' });
   });
-  await page.goto('/');
+  await page.goto('/more');
   await expect(card(page).getByTestId('push-state')).toHaveAttribute('data-state', 'blocked');
   await expect(card(page).getByRole('button')).toHaveCount(0);
 });

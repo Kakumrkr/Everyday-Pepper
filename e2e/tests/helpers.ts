@@ -81,17 +81,26 @@ export interface Owner {
   business: string;
 }
 
-/** Signs up, creates a business and turns on two-step verification. */
-export async function onboardOwner(page: Page): Promise<Owner> {
+/**
+ * Signs up, creates a business and turns on two-step verification. `business` names it (the
+ * screenshot tests need the same name every run; the booking link stays unique).
+ */
+export async function onboardOwner(
+  page: Page,
+  { business = `Juniper ${unique('studio')}` }: { business?: string } = {},
+): Promise<Owner> {
   const email = `${unique('owner')}@example.test`;
-  const business = `Juniper ${unique('studio')}`;
   await signUp(page, email);
 
   // Sign-up hashes the password: with several workers at once it can take longer than 5 s.
   await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
   await hydrated(page.getByRole('button', { name: 'Create business' }));
   await page.getByLabel('Business name').fill(business);
-  await expect(page.getByLabel('Booking link')).toHaveValue(/^juniper-studio-/);
+  if (business.startsWith('Juniper ')) {
+    await expect(page.getByLabel('Booking link')).toHaveValue(/^juniper-studio-/);
+  } else {
+    await page.getByLabel('Booking link').fill(unique('shop'));
+  }
   await page.getByRole('button', { name: 'Create business' }).click();
 
   // Owners must protect the business before they can use it.
@@ -128,10 +137,30 @@ export async function setUpTwoFactor(
 }
 
 export async function signOut(page: Page): Promise<void> {
+  // Sign out sits in More's account section (S41).
+  await page.goto('/more');
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
   await page.goto('/');
   await expect(page).toHaveURL(/\/sign-in$/);
+}
+
+/**
+ * Opens a place as a member would (S41): from the tabs on a phone or the sidebar on a desktop,
+ * and on a phone through More when it is not a tab (Services, Team, the Pepper group).
+ */
+export async function goTo(page: Page, name: string): Promise<void> {
+  const nav = page.getByRole('navigation', { name: 'Main' });
+  // The shell first, so a link not rendered yet is never taken for one that is not a tab.
+  await expect(nav.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
+  const link = nav.getByRole('link', { name, exact: true });
+  if ((await link.count()) === 0) {
+    await (await hydrated(nav.getByRole('link', { name: 'More', exact: true }))).click();
+    await expect(page).toHaveURL(/\/more$/);
+    await page.getByRole('main').getByRole('link', { name, exact: true }).click();
+    return;
+  }
+  await link.click();
 }
 
 export async function enterPassword(page: Page, email: string, password = PASSWORD): Promise<void> {

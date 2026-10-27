@@ -1,7 +1,7 @@
 'use client';
 
 import { TaskSchema, type Member, type Task } from '@pepper/contracts';
-import { buttonClass, LegacyCard, cx } from '@pepper/ui';
+import { Button, cx, fieldStyle, FOCUS_RING } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -18,8 +18,9 @@ import { Field, Notice } from '../booking/sheet';
  * The member's to-dos on Home (S21, ADR-0026): add one with an optional due time on the
  * business's clock, mark it done, undo. Owners and managers see everyone's and may give a
  * to-do to anyone (`members` is their team); staff see and add only their own. The api
- * checks every change.
+ * checks every change. On the kit (S41): a flat section, to-dos as hairline rows.
  */
+const CONTROL = cx(fieldStyle, 'min-h-12');
 export function TaskCard({
   open,
   done,
@@ -83,33 +84,36 @@ export function TaskCard({
   }
 
   return (
-    <LegacyCard as="section" labelledBy={headingId}>
-      <h2 id={headingId} className="m-0 font-display text-lg font-bold">
+    <section aria-labelledby={headingId} className="flex flex-col gap-3">
+      <h2 id={headingId} className="m-0 type-heading">
         To-dos
       </h2>
 
       {open.length === 0 ? (
-        <p className="mt-1 mb-0 text-ink-2">Nothing to do. Add the first to-do below.</p>
+        <p className="m-0 type-body text-ink-2">Nothing to do. Add the first to-do below.</p>
       ) : (
-        <ul className="m-0 mt-2 grid list-none gap-1 p-0" data-testid="open-tasks">
+        <ul className="m-0 list-none divide-y divide-line p-0" data-testid="open-tasks">
           {open.map((task) => {
             const due = task.dueAt === null ? null : dueLabel(timeZone, task.dueAt, now);
             return (
-              <li key={task.id} className="flex items-start gap-2">
+              <li key={task.id} className="flex items-start gap-2 py-1.5">
                 <button
                   type="button"
                   disabled={busy}
                   aria-label={`Mark done: ${task.title}`}
                   onClick={() => void setStatus(task, 'done')}
-                  className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full bg-transparent hover:bg-brand-soft focus-visible:outline-3 focus-visible:outline-brand disabled:cursor-progress"
+                  className={cx(
+                    'grid size-11 shrink-0 cursor-pointer place-items-center rounded-pill bg-transparent p-0 hover:bg-brand-soft disabled:cursor-progress',
+                    FOCUS_RING,
+                  )}
                 >
-                  <span aria-hidden="true" className="size-5 rounded-full border-2 border-brand" />
+                  <span aria-hidden="true" className="size-5 rounded-pill border-2 border-brand" />
                 </button>
                 <div className="grid gap-0.5 pt-2.5">
-                  <span className="font-semibold">{task.title}</span>
-                  <span className="text-sm text-ink-2">
+                  <span className="type-body font-semibold text-ink">{task.title}</span>
+                  <span className="type-caption text-ink-2 tabular-nums">
                     {due === null ? null : (
-                      <span className={cx(due.overdue && 'font-semibold text-wait')}>
+                      <span className={cx(due.overdue && 'font-semibold text-warn')}>
                         {due.overdue ? `Overdue · ${due.text}` : due.text}
                       </span>
                     )}
@@ -123,9 +127,10 @@ export function TaskCard({
         </ul>
       )}
 
-      <form className="mt-4 grid gap-3" noValidate onSubmit={(event) => void add(event)}>
+      <form className="mt-2 grid gap-3" noValidate onSubmit={(event) => void add(event)}>
         <Field label="New to-do">
           <input
+            className={CONTROL}
             name="title"
             value={title}
             maxLength={200}
@@ -138,6 +143,7 @@ export function TaskCard({
         <div className="grid grid-cols-2 gap-3">
           <Field label="Due date" hint="Optional">
             <input
+              className={CONTROL}
               type="date"
               name="dueDay"
               value={day}
@@ -148,6 +154,7 @@ export function TaskCard({
           </Field>
           <Field label="Time" hint="9:00 AM if empty">
             <input
+              className={CONTROL}
               type="time"
               name="dueTime"
               value={time}
@@ -161,6 +168,7 @@ export function TaskCard({
         {members === null ? null : (
           <Field label="For">
             <select
+              className={CONTROL}
               name="assignee"
               value={assignee}
               onChange={(event) => {
@@ -176,36 +184,33 @@ export function TaskCard({
           </Field>
         )}
         {error === null ? null : <Notice tone="error">{error}</Notice>}
-        <button
-          type="submit"
-          disabled={busy}
-          className={buttonClass({ className: 'justify-self-start' })}
-        >
+        <Button type="submit" variant="secondary" busy={busy} className="justify-self-start">
           Add to-do
-        </button>
+        </Button>
       </form>
 
       {done.length === 0 ? null : (
-        <section aria-label="Recently done" className="mt-5">
-          <h3 className="m-0 text-sm font-bold text-ink-2">Recently done</h3>
-          <ul className="m-0 mt-1 grid list-none gap-1 p-0" data-testid="done-tasks">
+        <section aria-label="Recently done" className="mt-3">
+          <h3 className="m-0 type-label text-ink-2">Recently done</h3>
+          <ul className="m-0 list-none divide-y divide-line p-0" data-testid="done-tasks">
             {done.map((task) => (
-              <li key={task.id} className="flex min-h-11 items-center justify-between gap-3">
-                <span className="text-ink-2 line-through">{task.title}</span>
-                <button
-                  type="button"
+              <li key={task.id} className="flex min-h-12 items-center justify-between gap-3">
+                <span className="type-body text-ink-2 line-through">{task.title}</span>
+                <Button
+                  variant="quiet"
+                  size="sm"
+                  icon="undo"
                   disabled={busy}
                   aria-label={`Undo: ${task.title}`}
-                  className={buttonClass({ variant: 'quiet', size: 'sm' })}
                   onClick={() => void setStatus(task, 'open')}
                 >
                   Undo
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
         </section>
       )}
-    </LegacyCard>
+    </section>
   );
 }

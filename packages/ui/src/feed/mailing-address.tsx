@@ -1,7 +1,9 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { buttonClass, cx } from '../class-names.js';
+import { cx } from '../class-names.js';
+import { buttonStyle } from '../kit/button.js';
+import { fieldStyle } from '../kit/fields.js';
 
 export interface MailingAddressProps {
   /** The address rebooking emails carry, or `null` when none is set yet. */
@@ -24,11 +26,13 @@ export function MailingAddress({ address, onSave }: MailingAddressProps) {
 
   if (address !== null && !editing) {
     return (
-      <p className="m-0 text-sm text-ink-2" data-testid="mailing-address">
-        Rebooking emails carry your address: {address.replaceAll('\n', ', ')}.{' '}
+      <div className="flex flex-wrap items-center gap-x-2" data-testid="mailing-address">
+        <p className="m-0 type-body text-ink-2">
+          Rebooking emails carry your address: {address.replaceAll('\n', ', ')}.
+        </p>
         <button
           type="button"
-          className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-brand underline"
+          className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), '-ml-4')}
           onClick={() => {
             setValue(address);
             setEditing(true);
@@ -36,13 +40,13 @@ export function MailingAddress({ address, onSave }: MailingAddressProps) {
         >
           Change it
         </button>
-      </p>
+      </div>
     );
   }
   return (
     <form
       aria-label="Mailing address for rebooking emails"
-      className="flex flex-col gap-2 rounded-md border border-dashed border-accent p-3 text-sm"
+      className="flex flex-col gap-3 rounded-lg bg-surface p-5 type-body text-ink shadow-raised"
       onSubmit={(event) => {
         event.preventDefault();
         setBusy(true);
@@ -54,7 +58,7 @@ export function MailingAddress({ address, onSave }: MailingAddressProps) {
         });
       }}
     >
-      <label htmlFor={fieldId} className="font-semibold">
+      <label htmlFor={fieldId} className="type-subheading">
         Your business’s mailing address
       </label>
       <p className="m-0 text-ink-2">
@@ -63,10 +67,7 @@ export function MailingAddress({ address, onSave }: MailingAddressProps) {
       </p>
       <textarea
         id={fieldId}
-        className={cx(
-          'min-h-20 w-full rounded-md border border-line bg-surface p-2 text-sm text-ink',
-          'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand',
-        )}
+        className={cx(fieldStyle, 'min-h-24 py-3')}
         value={value}
         maxLength={300}
         placeholder={'12 Main St\nPortland, OR 97201'}
@@ -83,7 +84,7 @@ export function MailingAddress({ address, onSave }: MailingAddressProps) {
         <button
           type="submit"
           disabled={busy || value.trim() === ''}
-          className={buttonClass({ size: 'sm' })}
+          className={buttonStyle({ size: 'sm' })}
         >
           Save address
         </button>
@@ -91,7 +92,7 @@ export function MailingAddress({ address, onSave }: MailingAddressProps) {
           <button
             type="button"
             disabled={busy}
-            className={buttonClass({ variant: 'secondary', size: 'sm' })}
+            className={buttonStyle({ variant: 'secondary', size: 'sm' })}
             onClick={() => {
               setEditing(false);
             }}

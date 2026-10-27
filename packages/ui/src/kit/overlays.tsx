@@ -21,6 +21,11 @@ interface OverlayProps {
   children: ReactNode;
   /** The sheet's actions, at the bottom within thumb reach (D3). */
   footer?: ReactNode;
+  /**
+   * Where focus goes on close when the opener is not `trigger` (a card's Why? button, S41);
+   * without it Radix returns focus to the trigger.
+   */
+  returnFocus?: (() => HTMLElement | null) | undefined;
 }
 
 const OVERLAY = 'fixed inset-0 z-40 bg-scrim animate-fade-in';
@@ -52,6 +57,7 @@ export function Sheet({
   trigger,
   children,
   footer,
+  returnFocus,
 }: OverlayProps) {
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
@@ -60,6 +66,12 @@ export function Sheet({
         <RadixDialog.Overlay className={OVERLAY} />
         <RadixDialog.Content
           {...(description === undefined && { 'aria-describedby': undefined })}
+          {...(returnFocus !== undefined && {
+            onCloseAutoFocus: (event: Event) => {
+              event.preventDefault();
+              returnFocus()?.focus();
+            },
+          })}
           className={cx(
             'fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col gap-4 rounded-t-xl bg-surface px-5 pt-5',
             'pb-[max(1.25rem,env(safe-area-inset-bottom))] text-ink shadow-floating animate-sheet-in',

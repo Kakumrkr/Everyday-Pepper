@@ -1,12 +1,18 @@
 import type { BookingView, LocalSlot, ToolCard } from '@pepper/contracts';
 import { useId, type ReactNode } from 'react';
-import { buttonClass, cx } from '../class-names.js';
+import { cx } from '../class-names.js';
+import { DetailTable, List, ListRow } from '../kit/blocks.js';
+import { Button, FOCUS_RING } from '../kit/button.js';
 import { formatDate, formatTime, formatWhen } from './labels.js';
 
 type DayCardModel = Extract<ToolCard, { kind: 'day' }>;
 
-const CARD = 'flex max-w-[34rem] flex-col gap-3 rounded-lg border border-line bg-surface p-4';
-const EYEBROW = 'm-0 text-xs font-bold tracking-wide text-ink-2 uppercase';
+// On the kit (S41): a card that asks the member to pick is raised ("this needs you"); one that
+// only shows something is flat with a hairline (DESIGN.md §2).
+const CARD = 'flex max-w-[34rem] flex-col gap-3 rounded-lg bg-surface p-5';
+const ASKS = cx(CARD, 'shadow-raised');
+const SHOWS = cx(CARD, 'border border-line');
+const EYEBROW = 'm-0 type-label text-ink-2';
 
 /**
  * Times to pick from (AC-W2-1): the nearest free ones instead of a taken time, or the free ones
@@ -29,12 +35,12 @@ export function SlotPicker({
   const headingId = useId();
   const done = disabled || (picked !== undefined && picked !== null);
   return (
-    <section aria-labelledby={headingId} className={CARD}>
+    <section aria-labelledby={headingId} className={done ? SHOWS : ASKS}>
       <h3 id={headingId} className={EYEBROW}>
         Pick a time
       </h3>
       {slots.length === 0 ? (
-        <p className="m-0 text-sm text-ink-2">No free times to offer.</p>
+        <p className="m-0 type-body text-ink-2">No free times to offer.</p>
       ) : (
         <div role="group" aria-labelledby={headingId} className="grid grid-cols-2 gap-2">
           {slots.map((slot) => {
@@ -52,22 +58,25 @@ export function SlotPicker({
                   onPick(slot);
                 }}
                 className={cx(
-                  'flex min-h-11 flex-col items-start rounded-md border-[1.5px] px-3 py-2 text-left',
-                  'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand',
-                  chosen ? 'border-brand bg-brand-soft' : 'border-line bg-bg hover:border-brand',
+                  'flex min-h-13 flex-col items-start justify-center rounded-md border px-3 py-2 text-left text-ink',
+                  'transition motion-fast ease-standard',
+                  FOCUS_RING,
+                  chosen
+                    ? 'border-brand bg-brand-soft'
+                    : 'border-line-strong bg-surface hover:bg-surface-2',
                   done && !chosen ? 'opacity-60' : '',
                 )}
               >
-                <span className="font-bold tabular-nums">
+                <span className="type-label tabular-nums">
                   {formatDate(slot.date)} · {formatTime(slot.time)}
                 </span>
-                <span className="text-xs text-ink-2">with {slot.staffName}</span>
+                <span className="type-caption text-ink-2">with {slot.staffName}</span>
               </button>
             );
           })}
         </div>
       )}
-      {note === undefined ? null : <p className="m-0 text-xs text-ink-2">{note}</p>}
+      {note === undefined ? null : <p className="m-0 type-caption text-ink-2">{note}</p>}
     </section>
   );
 }
@@ -85,27 +94,24 @@ export function ClientChoice({
   const headingId = useId();
   const done = picked !== undefined && picked !== null;
   return (
-    <section aria-labelledby={headingId} className={CARD}>
+    <section aria-labelledby={headingId} className={done ? SHOWS : ASKS}>
       <h3 id={headingId} className={EYEBROW}>
         Which one?
       </h3>
       <div role="group" aria-labelledby={headingId} className="flex flex-wrap gap-2">
         {clients.map((client) => (
-          <button
+          <Button
             key={client.clientId}
-            type="button"
             aria-pressed={picked === client.clientId}
             disabled={done}
             onClick={() => {
               onPick(client);
             }}
-            className={buttonClass({
-              variant: picked === client.clientId ? 'primary' : 'secondary',
-              size: 'sm',
-            })}
+            variant={picked === client.clientId ? 'primary' : 'secondary'}
+            size="sm"
           >
             {client.name}
-          </button>
+          </Button>
         ))}
       </div>
     </section>
@@ -116,24 +122,25 @@ export function ClientChoice({
 export function BookingCard({ booking }: { booking: BookingView }) {
   const headingId = useId();
   return (
-    <section aria-labelledby={headingId} className={CARD}>
+    <section aria-labelledby={headingId} className={SHOWS}>
       <h3 id={headingId} className={EYEBROW}>
         Booking
       </h3>
-      <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
-        <dt className="text-ink-2">When</dt>
-        <dd className="m-0 font-semibold">
-          {formatWhen(booking.date, booking.time)}–{formatTime(booking.endTime)}
-        </dd>
-        <dt className="text-ink-2">Client</dt>
-        <dd className="m-0">{booking.clientName}</dd>
-        <dt className="text-ink-2">Service</dt>
-        <dd className="m-0">
-          {booking.serviceName} with {booking.staffName}
-        </dd>
-        <dt className="text-ink-2">Status</dt>
-        <dd className="m-0">{booking.status}</dd>
-      </dl>
+      <DetailTable
+        rows={[
+          {
+            label: 'When',
+            value: (
+              <span className="font-semibold tabular-nums">
+                {formatWhen(booking.date, booking.time)}–{formatTime(booking.endTime)}
+              </span>
+            ),
+          },
+          { label: 'Client', value: booking.clientName },
+          { label: 'Service', value: `${booking.serviceName} with ${booking.staffName}` },
+          { label: 'Status', value: booking.status },
+        ]}
+      />
     </section>
   );
 }
@@ -145,36 +152,37 @@ export function DayCard({ day, footer }: { day: DayCardModel; footer?: ReactNode
     ...day.bookings.map((booking) => ({
       key: booking.bookingId,
       time: booking.time,
-      line: `${booking.clientName} · ${booking.serviceName} · ${booking.staffName}`,
+      title: booking.clientName,
+      meta: `${booking.serviceName} · ${booking.staffName}`,
     })),
     ...day.blocked.map((block) => ({
       key: `${block.staffMemberId}-${block.from}`,
       time: block.from,
-      line: `${block.staffName}: blocked until ${formatTime(block.to)}`,
+      title: block.staffName,
+      meta: `Blocked until ${formatTime(block.to)}`,
     })),
   ].sort((a, b) => a.time.localeCompare(b.time));
   return (
-    <section aria-labelledby={headingId} className={CARD}>
+    <section aria-labelledby={headingId} className={SHOWS}>
       <div className="flex items-center justify-between gap-2">
         <h3 id={headingId} className={EYEBROW}>
           {formatDate(day.date)}
         </h3>
-        <span className="text-xs font-bold text-ink-2">{day.bookings.length} booked</span>
+        <span className="type-caption text-ink-2 tabular-nums">{day.bookings.length} booked</span>
       </div>
       {items.length === 0 ? (
-        <p className="m-0 text-sm text-ink-2">Nothing booked.</p>
+        <p className="m-0 type-body text-ink-2">Nothing booked.</p>
       ) : (
-        <ul className="m-0 flex list-none flex-col p-0 text-sm">
+        <List>
           {items.map((item) => (
-            <li
+            <ListRow
               key={item.key}
-              className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2 border-b border-line py-2 last:border-b-0"
-            >
-              <span className="font-semibold text-ink-2 tabular-nums">{formatTime(item.time)}</span>
-              <span>{item.line}</span>
-            </li>
+              leading={formatTime(item.time)}
+              title={item.title}
+              meta={item.meta}
+            />
           ))}
-        </ul>
+        </List>
       )}
       {footer}
     </section>
@@ -208,14 +216,9 @@ export function PlanCard({
           Plan
         </h3>
         {pending > 1 && onApproveAll !== undefined ? (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={onApproveAll}
-            className={buttonClass({ size: 'sm' })}
-          >
+          <Button size="sm" icon="check" busy={busy} onClick={onApproveAll}>
             Approve all {pending}
-          </button>
+          </Button>
         ) : null}
       </div>
       {children}

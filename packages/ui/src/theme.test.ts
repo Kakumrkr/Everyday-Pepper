@@ -81,6 +81,9 @@ describe('theme.css', () => {
       expect(css).toContain(`--radius-${name}: ${String(px)}px;`);
     }
     expect(css).toContain('--spacing: 0.25rem;');
+    // The tab bar's height is one value the bar and Chat's composer share (S41).
+    expect(css).toContain('--spacing-tab-item: 3.25rem;');
+    expect(css).toContain('--spacing-tab-bar: calc(var(--spacing-tab-item) + 1px);');
     for (const step of SPACE) expect(step % 4).toBe(0);
     expect(css).toContain(`--breakpoint-desk: ${String(DESKTOP_MIN_WIDTH / 16)}rem;`);
   });
