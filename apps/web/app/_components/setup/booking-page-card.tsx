@@ -1,7 +1,7 @@
 'use client';
 
 import { BusinessSchema } from '@pepper/contracts';
-import { brandTokens, buttonClass, Card } from '@pepper/ui';
+import { brandTokens, buttonClass, LegacyCard } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -41,7 +41,7 @@ export function BookingPageCard({
   }
 
   return (
-    <Card as="section" labelledBy={headingId}>
+    <LegacyCard as="section" labelledBy={headingId}>
       <h2 id={headingId} className="m-0 font-display text-lg font-bold">
         Your booking page
       </h2>
@@ -90,6 +90,6 @@ export function BookingPageCard({
           <Notice tone={notice.tone}>{notice.text}</Notice>
         </div>
       )}
-    </Card>
+    </LegacyCard>
   );
 }

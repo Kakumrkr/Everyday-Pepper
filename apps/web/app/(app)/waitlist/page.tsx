@@ -5,7 +5,7 @@ import {
   WaitlistOffersResponseSchema,
   WaitlistResponseSchema,
 } from '@pepper/contracts';
-import { Card } from '@pepper/ui';
+import { LegacyCard } from '@pepper/ui';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
@@ -78,7 +78,7 @@ export default async function WaitlistPage() {
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
                 {entries.entries.map((entry) => (
                   <li key={entry.id}>
-                    <Card className="flex flex-col gap-1 p-3">
+                    <LegacyCard className="flex flex-col gap-1 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-semibold">
                           {clientName.get(entry.clientId) ?? 'A client'}
@@ -98,7 +98,7 @@ export default async function WaitlistPage() {
                       <span className="text-sm text-ink-2">
                         {entry.windows.map(windowLabel).join(' · ')}
                       </span>
-                    </Card>
+                    </LegacyCard>
                   </li>
                 ))}
               </ul>
@@ -112,7 +112,7 @@ export default async function WaitlistPage() {
               <p className="m-0 text-ink-2">No freed times offered yet.</p>
             ) : (
               offersBySlot(offers.offers, timeZone).map((group) => (
-                <Card key={group.key} className="flex flex-col gap-2 p-3">
+                <LegacyCard key={group.key} className="flex flex-col gap-2 p-3">
                   <span className="font-semibold">
                     {group.label} with {staffName.get(group.staffMemberId) ?? 'a staff member'}
                   </span>
@@ -139,7 +139,7 @@ export default async function WaitlistPage() {
                       </li>
                     ))}
                   </ul>
-                </Card>
+                </LegacyCard>
               ))
             )}
           </section>

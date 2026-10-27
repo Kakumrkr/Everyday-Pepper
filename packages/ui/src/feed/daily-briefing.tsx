@@ -2,7 +2,7 @@
 
 import type { FeedItem } from '@pepper/contracts';
 import { useId, useState } from 'react';
-import { Card } from '../card.js';
+import { LegacyCard } from '../legacy-card.js';
 import { buttonClass } from '../class-names.js';
 import { briefingLines } from './feed-lines.js';
 import type { FeedChange } from './feed-suggestions.js';
@@ -64,7 +64,7 @@ export function DailyBriefing({
   if (words === null && !canChangeSettings) return null;
   return (
     <div data-testid="daily-briefing">
-      <Card labelledBy={headingId} className="flex flex-col gap-3">
+      <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
         <h2 id={headingId} className="m-0 text-lg font-bold">
           {words?.title ?? 'Your daily briefing'}
         </h2>
@@ -119,7 +119,7 @@ export function DailyBriefing({
             </label>
           ) : null}
         </div>
-      </Card>
+      </LegacyCard>
     </div>
   );
 }

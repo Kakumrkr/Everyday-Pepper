@@ -1,7 +1,7 @@
 'use client';
 
 import type { AiActionView, AiProposalView, ToolCard } from '@pepper/contracts';
-import { Card } from '@pepper/ui';
+import { LegacyCard } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useId } from 'react';
@@ -36,7 +36,7 @@ export function AiActivity({
   };
   if (section === 'needs') {
     return (
-      <Card labelledBy={headingId} className="flex flex-col gap-3">
+      <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
         <h2 id={headingId} className="m-0 text-lg font-bold">
           Needs your OK
         </h2>
@@ -55,11 +55,11 @@ export function AiActivity({
             />
           ))
         )}
-      </Card>
+      </LegacyCard>
     );
   }
   return (
-    <Card labelledBy={headingId} className="flex flex-col gap-3">
+    <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
       <h2 id={headingId} className="m-0 text-lg font-bold">
         Done for you
       </h2>
@@ -85,7 +85,7 @@ export function AiActivity({
           Change what I do on my own
         </Link>
       </p>
-    </Card>
+    </LegacyCard>
   );
 }
 

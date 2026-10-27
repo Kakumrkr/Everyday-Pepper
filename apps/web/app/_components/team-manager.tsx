@@ -7,7 +7,7 @@ import type {
   MembershipRole,
   Permission,
 } from '@pepper/contracts';
-import { buttonClass, Card } from '@pepper/ui';
+import { buttonClass, LegacyCard } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../lib/account';
@@ -53,7 +53,7 @@ export function TeamManager(props: TeamManagerProps) {
   return (
     <div className="grid gap-4">
       {members === null ? null : (
-        <Card as="section" className="grid gap-2">
+        <LegacyCard as="section" className="grid gap-2">
           <h3 className="m-0 text-base font-bold">People at {businessName}</h3>
           <ul className="m-0 grid list-none divide-y divide-line p-0" data-testid="members">
             {members.map((member) => (
@@ -67,7 +67,7 @@ export function TeamManager(props: TeamManagerProps) {
               />
             ))}
           </ul>
-        </Card>
+        </LegacyCard>
       )}
       <FormError message={error} />
       {permissions.includes('members.invite') ? <InviteSection {...props} settle={settle} /> : null}
@@ -199,7 +199,7 @@ function InviteSection({
   }
 
   return (
-    <Card as="section" className="grid gap-3">
+    <LegacyCard as="section" className="grid gap-3">
       <h3 className="m-0 text-base font-bold">Invite someone</h3>
       <form className="grid gap-3" onSubmit={(event) => void submit(event)} noValidate>
         <label className="grid gap-1.5 font-semibold">
@@ -281,7 +281,7 @@ function InviteSection({
           </ul>
         </>
       )}
-    </Card>
+    </LegacyCard>
   );
 }
 
@@ -300,7 +300,7 @@ function LeaveBusiness({ me, businessName }: { me: string; businessName: string 
   }
 
   return (
-    <Card as="section" className="grid gap-3">
+    <LegacyCard as="section" className="grid gap-3">
       <h3 className="m-0 text-base font-bold">Leave {businessName}</h3>
       <p className="m-0 text-ink-2">
         You’ll lose access to this business until someone invites you again.
@@ -340,6 +340,6 @@ function LeaveBusiness({ me, businessName }: { me: string; businessName: string 
           Leave {businessName}
         </button>
       )}
-    </Card>
+    </LegacyCard>
   );
 }

@@ -7,7 +7,7 @@ import type {
   FeedSettingsChange,
 } from '@pepper/contracts';
 import { useId, useState, type ReactNode } from 'react';
-import { Card } from '../card.js';
+import { LegacyCard } from '../legacy-card.js';
 import { buttonClass, cx } from '../class-names.js';
 import { FEED_KIND_NOUN, feedLine } from './feed-lines.js';
 
@@ -87,7 +87,7 @@ export function FeedSuggestions({
   };
 
   return (
-    <Card labelledBy={headingId} className="flex flex-col gap-3">
+    <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <h2 id={headingId} className="m-0 text-lg font-bold">
           Suggestions
@@ -195,7 +195,7 @@ export function FeedSuggestions({
         </ul>
       )}
       {footer}
-    </Card>
+    </LegacyCard>
   );
 }
 

@@ -5,7 +5,7 @@ import {
   TimeOffResponseSchema,
   WeeklyHoursSchema,
 } from '@pepper/contracts';
-import { Card } from '@pepper/ui';
+import { LegacyCard } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -89,7 +89,7 @@ export default async function StaffMemberPage({
           </header>
 
           <div className="grid gap-4">
-            <Card>
+            <LegacyCard>
               <h2 className="m-0 mb-3 font-display text-lg font-bold">Details</h2>
               {managesStaff ? (
                 <StaffForm
@@ -114,9 +114,9 @@ export default async function StaffMemberPage({
                   </div>
                 </dl>
               )}
-            </Card>
+            </LegacyCard>
 
-            <Card>
+            <LegacyCard>
               <h2 className="m-0 font-display text-lg font-bold">Weekly hours</h2>
               <p className="mt-1 mb-3 text-ink-2">On the business’s clock ({timeZone}).</p>
               {hours === null ? (
@@ -128,9 +128,9 @@ export default async function StaffMemberPage({
               ) : (
                 <HoursList lines={hoursSummary(hours)} />
               )}
-            </Card>
+            </LegacyCard>
 
-            <Card>
+            <LegacyCard>
               <h2 className="m-0 mb-3 font-display text-lg font-bold">Time off</h2>
               {timeOff === null ? (
                 <p role="alert" className="m-0 font-semibold text-wait">
@@ -145,7 +145,7 @@ export default async function StaffMemberPage({
                   today={localDateIn(timeZone, Date.now())}
                 />
               )}
-            </Card>
+            </LegacyCard>
           </div>
         </>
       )}

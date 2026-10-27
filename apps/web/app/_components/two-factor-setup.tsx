@@ -22,8 +22,10 @@ function QrCode({ text }: { text: string }) {
       aria-label="QR code for your authenticator app"
       shapeRendering="crispEdges"
     >
+      {/* eslint-disable-next-line no-restricted-syntax -- a QR code stays black on white in both themes, so every scanner reads it */}
       <rect width={size} height={size} fill="#fff" />
       {dark.map(([x, y]) => (
+        // eslint-disable-next-line no-restricted-syntax -- the QR code's modules: black on white, as above
         <rect key={`${String(x)},${String(y)}`} x={x} y={y} width={1} height={1} fill="#000" />
       ))}
     </svg>

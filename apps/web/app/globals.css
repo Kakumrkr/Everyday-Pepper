@@ -60,8 +60,8 @@
     margin: 0;
     padding: 12px 16px;
     border-radius: 12px;
-    background: var(--wait-soft);
-    color: var(--wait);
+    background: var(--warn-soft);
+    color: var(--warn);
     font-weight: 600;
   }
 
@@ -127,7 +127,7 @@
     border: 0;
     border-radius: 10px;
     background: var(--brand);
-    color: var(--on-brand);
+    color: var(--brand-ink);
     font: inherit;
     font-weight: 700;
     cursor: pointer;
@@ -245,7 +245,7 @@
     padding: 10px 16px;
     border-radius: 10px;
     background: var(--brand);
-    color: var(--on-brand);
+    color: var(--brand-ink);
     font-weight: 700;
     text-decoration: none;
   }

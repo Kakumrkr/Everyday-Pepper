@@ -1,7 +1,7 @@
 'use client';
 
 import { TaskSchema, type Member, type Task } from '@pepper/contracts';
-import { buttonClass, Card, cx } from '@pepper/ui';
+import { buttonClass, LegacyCard, cx } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -83,7 +83,7 @@ export function TaskCard({
   }
 
   return (
-    <Card as="section" labelledBy={headingId}>
+    <LegacyCard as="section" labelledBy={headingId}>
       <h2 id={headingId} className="m-0 font-display text-lg font-bold">
         To-dos
       </h2>
@@ -206,6 +206,6 @@ export function TaskCard({
           </ul>
         </section>
       )}
-    </Card>
+    </LegacyCard>
   );
 }

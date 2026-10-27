@@ -1,7 +1,7 @@
 export * from './brand.js';
 export * from './class-names.js';
 export * from './tokens.js';
-export { Card } from './card.js';
+export { LegacyCard } from './legacy-card.js';
 export { Icon, type IconName } from './icons.js';
 export { Logo, Mark } from './logo.js';
 export {
@@ -30,3 +30,64 @@ export {
 export { DailyBriefing, type DailyBriefingProps } from './feed/daily-briefing.js';
 export { DraftEditor, type DraftEditorProps, type DraftWords } from './cards/draft-editor.js';
 export { MailingAddress, type MailingAddressProps } from './feed/mailing-address.js';
+// The kit (S40, DESIGN.md §4).
+export {
+  Button,
+  buttonStyle,
+  FOCUS_RING,
+  IconButton,
+  type ButtonProps,
+  type IconButtonProps,
+  type KitButtonSize,
+  type KitButtonVariant,
+} from './kit/button.js';
+export {
+  Checkbox,
+  Input,
+  Select,
+  Switch,
+  Textarea,
+  type CheckboxProps,
+  type InputProps,
+  type SelectOption,
+  type SelectProps,
+  type SwitchProps,
+  type TextareaProps,
+} from './kit/fields.js';
+export {
+  Avatar,
+  Badge,
+  formatMoney,
+  initialsOf,
+  MoneyChip,
+  Skeleton,
+  type BadgeTone,
+} from './kit/marks.js';
+export {
+  BottomTabBar,
+  BriefingBlock,
+  Card,
+  DetailTable,
+  EmptyState,
+  List,
+  ListRow,
+  Receipt,
+  Stat,
+  StepBar,
+  StickyActionBar,
+  TimeChip,
+  type EmptyAction,
+  type KitLink,
+  type ListRowProps,
+  type TabItem,
+} from './kit/blocks.js';
+export {
+  Dialog,
+  Segmented,
+  Sheet,
+  Tabs,
+  Toast,
+  ToastProvider,
+  type SegmentOption,
+  type TabPanel,
+} from './kit/overlays.js';

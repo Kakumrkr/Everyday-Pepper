@@ -8,7 +8,15 @@ import {
   type AutonomyLevel,
   type BusinessAutonomy,
 } from '@pepper/contracts';
-import { AUTONOMY_GROUPS, Card, cx, DIAL_LABEL, Icon, LEVEL_HELP, LEVEL_LABEL } from '@pepper/ui';
+import {
+  AUTONOMY_GROUPS,
+  LegacyCard,
+  cx,
+  DIAL_LABEL,
+  Icon,
+  LEVEL_HELP,
+  LEVEL_LABEL,
+} from '@pepper/ui';
 import { useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 
@@ -57,7 +65,7 @@ export function AutonomySettings({
           Only owners and managers change these. This is what Pepper may do for you today.
         </p>
       )}
-      <Card>
+      <LegacyCard>
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor={switchId} className="font-bold">
@@ -86,7 +94,7 @@ export function AutonomySettings({
             className="mt-1 size-6 shrink-0 accent-brand-strong"
           />
         </div>
-      </Card>
+      </LegacyCard>
       <section className="flex flex-col gap-2">
         <h2 className="m-0 text-lg font-bold">Looking things up</h2>
         <p className="m-0 text-sm text-ink-2">

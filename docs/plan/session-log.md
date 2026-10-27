@@ -1124,3 +1124,27 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Skills:** `ui-ux-pro-max` (its three candidates taken as input only), `artifact-design` via the Design canvas. Not installed here: `frontend-design`, the Design plugin, `grilling`.
   - **For later:** S40 checks the Fontsource package and OFL licence for Bricolage Grotesque; S40 snaps the mockups' sizes to the type scale.
   - **Retro:** went well: one shop with numbers that add up made the pick about the product · do better: build the likely mix row up front instead of after the question · top-up for S40: a gallery page that shows each component with the same Southside Cuts data, so the kit is judged on real content.
+- **S40 Phase 9 · Foundation (2026-10-27): tokens, kit, gallery, lint, screenshots** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) "Built", [DESIGN.md](../design/DESIGN.md) §3–5; branch `claude/s40-design-foundation`).
+  - **Built:**
+    - `tokens.ts`/`theme.css` from DESIGN §3: 22 colors, `type-*` styles, radii up to `pill`, raised/floating shadows, motion off under reduced motion. Old names stay as Tailwind aliases until S43; `brand-strong` mixes toward `ink`. `theme.test.ts` adds a 3:1 non-text check.
+    - The kit: 27 components in `packages/ui/src/kit/` on Radix (dialog, tabs, toggle-group, toast), with native select, checkbox and switch. The old `Card` is `LegacyCard`.
+    - The design lint `packages/config/eslint-design.js` (+ node:test), in the same `no-restricted-syntax` list as the raw-HTML rules.
+    - `/dev/gallery` behind `PEPPER_GALLERY=1`.
+    - `e2e/tests/gallery.spec.ts` with 8 Linux baselines, axe, an overflow check and the segmented filter.
+    - AC-X-4 added.
+  - **Top-up (S39 retro):** the gallery runs on Southside Cuts' data ($430 over 12 visits, tested to add up).
+  - **Checks:**
+    - `pnpm check` green.
+    - `pnpm test:integration`: all green, but not in one run (1,239 tests). The first run lost the appointments concurrency property test at its 60 s limit, while lint and typecheck ran beside it. The second run lost the two `memory-latency` p95 tests (search p95 1,259 ms) under turbo's parallel packages. Each passed alone: memory-latency 3/3; appointments 173, ai 164 and api 74 run serially. These are S38b's known load misses, and S40 touched no backend code.
+    - Playwright 105/105 (11 skipped: the gallery's mobile copies).
+  - **Found while building:**
+    - The legacy element styles in `globals.css` (`button`, `input`) bleed into the kit, so kit parts set their own background, padding and radius.
+    - Docker image builds fail behind the sandbox proxy (self-signed CA), so the e2e stack script (`e2e-stack.sh`) runs the stack; it now sets `PEPPER_GALLERY=1`.
+    - Code review: 8 fixes; 2 left (layout sizes are not tokens; two `initials` helpers).
+  - **Walkthrough:** today's screens (Home, Calendar, Chat, booking page) at 375 px in light and dark, all in the new palette.
+  - **For later:**
+    - S41 moves screens onto the kit and folds `money()` (`apps/web/lib/setup.ts`) into `formatMoney`.
+    - S42: `STAFF_COLORS` still offers the old palette (a new staff member defaults to green).
+    - S43: the booking page doesn't wrap a long unbroken business name (seen at 375 px with test names); one `initials` rule for the kit and the booking page; delete the aliases and `LegacyCard`.
+  - **Skills:** `/session-brief`, `/session-close`, `/code-review`. `ui-ux-pro-max` was not opened: DESIGN.md already held the system. Not installed: `frontend-design` and the Design plugin.
+  - **Retro:** went well: the gallery on real data found the legacy-style bleed before any screen moved · do better: run nothing beside the integration suite, not even a lint · top-up for S41: a Playwright tap-target check (D3, ≥ 44 px) on the new shell and Home, run at 375 px.

@@ -7,7 +7,7 @@ import {
   type RuleDefaults,
   type SlotIntervalMinutes,
 } from '@pepper/contracts';
-import { buttonClass, Card } from '@pepper/ui';
+import { buttonClass, LegacyCard } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -71,7 +71,7 @@ export function RulesEditor({
 
   return (
     <div className="grid gap-4">
-      <Card>
+      <LegacyCard>
         <h2 className="m-0 mb-3 font-display text-lg font-bold">When clients can book</h2>
         <fieldset disabled={!manages || busy} className="m-0 grid gap-4 border-0 p-0">
           <Field label="Start times every">
@@ -145,9 +145,9 @@ export function RulesEditor({
             />
           </Field>
         </fieldset>
-      </Card>
+      </LegacyCard>
 
-      <Card>
+      <LegacyCard>
         <h2 className="m-0 font-display text-lg font-bold">Closed days</h2>
         <p className="mt-1 mb-3 text-ink-2">Holidays and other days no one can be booked.</p>
         {value.blackouts.length === 0 ? (
@@ -219,7 +219,7 @@ export function RulesEditor({
             </button>
           </div>
         ) : null}
-      </Card>
+      </LegacyCard>
 
       {ownRules > 0 ? (
         <p className="m-0 text-sm text-ink-2">
