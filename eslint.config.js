@@ -6,6 +6,7 @@ import nextPlugin from '@next/eslint-plugin-next';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import { designExemptFiles, designRestrictions } from './packages/config/eslint-design.js';
 
 /**
  * Layer boundaries (CLAUDE.md "Architecture rules", docs/plan/dependency-map.md).
@@ -75,6 +76,22 @@ const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowe
   },
 }));
 
+/** OWASP LLM10 (S26, ADR-0031): `no-restricted-syntax` entries against raw HTML. */
+const noRawHtml = [
+  {
+    selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+    message: 'Render text as text (OWASP LLM10): never dangerouslySetInnerHTML.',
+  },
+  {
+    selector: 'AssignmentExpression[left.property.name=/^(innerHTML|outerHTML)$/]',
+    message: 'Render text as text (OWASP LLM10): never innerHTML.',
+  },
+  {
+    selector: 'ImportDeclaration[source.value=/markdown|^marked$|remark|rehype|sanitize-html/]',
+    message: 'No Markdown or HTML renderers in the app: the AI’s text stays plain text.',
+  },
+];
+
 export default defineConfig(
   {
     name: 'pepper/ignores',
@@ -129,26 +146,16 @@ export default defineConfig(
   {
     // OWASP LLM10 (S26, ADR-0031): the AI's words and anything a card carries are rendered as
     // plain text. No raw HTML, and no Markdown renderer that could turn model text into links.
-    name: 'pepper/no-raw-html',
+    // With them, the design rules D1 and D7 (S40, packages/config/eslint-design.js): one
+    // `no-restricted-syntax` list, as a later block would replace the rule, not add to it.
+    name: 'pepper/no-raw-html-and-design',
     files: ['apps/web/**/*.{ts,tsx}', 'packages/ui/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
-          message: 'Render text as text (OWASP LLM10): never dangerouslySetInnerHTML.',
-        },
-        {
-          selector: 'AssignmentExpression[left.property.name=/^(innerHTML|outerHTML)$/]',
-          message: 'Render text as text (OWASP LLM10): never innerHTML.',
-        },
-        {
-          selector:
-            'ImportDeclaration[source.value=/markdown|^marked$|remark|rehype|sanitize-html/]',
-          message: 'No Markdown or HTML renderers in the app: the AI’s text stays plain text.',
-        },
-      ],
-    },
+    rules: { 'no-restricted-syntax': ['error', ...noRawHtml, ...designRestrictions] },
+  },
+  {
+    name: 'pepper/design-exempt',
+    files: designExemptFiles,
+    rules: { 'no-restricted-syntax': ['error', ...noRawHtml] },
   },
   {
     name: 'pepper/web-service-worker',
