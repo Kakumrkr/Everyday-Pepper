@@ -23,6 +23,9 @@ const MESSAGES: Record<string, string> = {
   INVALID_BACKUP_CODE:
     'That backup code didn’t work. Check it, or use your authenticator app instead.',
   INVALID_TWO_FACTOR_COOKIE: 'Your sign-in timed out. Start again.',
+  EMAIL_NOT_VERIFIED: 'Confirm your email first. We sent you a new link.',
+  INVALID_TOKEN: 'This link has run out. Ask for a new one.',
+  TOKEN_EXPIRED: 'This link has run out. Ask for a new one.',
   ACCOUNT_TEMPORARILY_LOCKED: 'Too many wrong codes. Try again in 15 minutes.',
   slug_taken: 'That booking link is taken. Try another.',
   business_limit_reached: 'One account can own at most 5 businesses.',
@@ -84,6 +87,12 @@ const MESSAGES: Record<string, string> = {
   nudge_not_sendable: 'This email can’t go to this client any more. Nothing was sent.',
   unsubscribe_link_invalid: 'This unsubscribe link doesn’t work. Contact the business instead.',
 };
+
+/** The api's error code in a refusal's body (ours, or Better Auth's `EMAIL_NOT_VERIFIED`…). */
+export function errorCodeOf(body: unknown): string | undefined {
+  const parsed = ErrorBodySchema.safeParse(body);
+  return parsed.success ? parsed.data.code : undefined;
+}
 
 const FALLBACK = 'Something went wrong. Try again.';
 const TOO_MANY = 'Too many attempts. Wait a few seconds and try again.';

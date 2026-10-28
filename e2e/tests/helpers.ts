@@ -59,11 +59,14 @@ export async function freshCode(secret: string, used: Set<string>): Promise<stri
   }
 }
 
-/** Fills in the sign-up form; opens it first unless `onPage`. */
+/**
+ * Fills in the sign-up form (opening it first unless `onPage`), then, unless `confirm` is
+ * false, opens the link of the email check (S44), which signs in and goes on.
+ */
 export async function signUp(
   page: Page,
   email: string,
-  { name = 'Ana Reyes', onPage = false } = {},
+  { name = 'Ana Reyes', onPage = false, confirm = true } = {},
 ): Promise<void> {
   if (!onPage) await page.goto('/sign-up');
   await hydrated(page.getByRole('button', { name: 'Create account' }));
@@ -71,6 +74,20 @@ export async function signUp(
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Create account' }).click();
+  if (!confirm) return;
+  // Sign-up hashes the password: with several workers at once it can take longer than 5 s.
+  await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible({
+    timeout: 20_000,
+  });
+  await page.goto(await linkTo(email, 'Confirm your email for Pepper'));
+}
+
+/** The app link in the newest email to `to` about `subject`, as a path on the app. */
+export async function linkTo(to: string, subject: string): Promise<string> {
+  const text = await emailTo(to.toLowerCase(), subject);
+  const link = /https?:\/\/\S+?(\/api\/auth\/\S+)/.exec(text)?.[1];
+  if (link === undefined) throw new Error(`No link in the email to ${to} about "${subject}"`);
+  return link;
 }
 
 export interface Owner {
@@ -92,7 +109,6 @@ export async function onboardOwner(
   const email = `${unique('owner')}@example.test`;
   await signUp(page, email);
 
-  // Sign-up hashes the password: with several workers at once it can take longer than 5 s.
   await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
   await hydrated(page.getByRole('button', { name: 'Create business' }));
   await page.getByLabel('Business name').fill(business);

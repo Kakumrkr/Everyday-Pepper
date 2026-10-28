@@ -3,21 +3,24 @@
 import { Button, Input } from '@pepper/ui';
 import { useId, useState, type SubmitEvent } from 'react';
 import { flushSync } from 'react-dom';
-import { checkSignUp, ROUTES, withNext, type SignUpField } from '../../lib/account';
+import { checkSignUp, confirmedUrl, ROUTES, withNext, type SignUpField } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
 import { AuthPage, TextLink } from './auth-page';
+import { CheckInbox } from './check-inbox';
 import { Notice } from './form-parts';
 
 /**
- * Creates an account and signs in; then `next` (e.g. the invite to accept) or the home page,
- * which asks for the business.
+ * Creates an account, then asks to confirm the email (S44, AC-W1-5): its link signs in and goes
+ * on to `next` (e.g. the invite to accept) or the home page, which asks for the business. A
+ * taken address gets the same answer here, and its owner an email (no account oracle).
  */
 export function SignUpForm({ next = null }: { next?: string | null }) {
   const formId = useId();
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<SignUpField, string>>>({});
   const [busy, setBusy] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,14 +42,19 @@ export function SignUpForm({ next = null }: { next?: string | null }) {
       return;
     }
     setBusy(true);
-    const result = await sendJson('POST', '/api/auth/sign-up/email', fields);
+    const result = await sendJson('POST', '/api/auth/sign-up/email', {
+      ...fields,
+      callbackURL: confirmedUrl(next),
+    });
     setBusy(false);
     if (!result.ok) {
       setError(result.message);
       return;
     }
-    window.location.assign(next ?? ROUTES.home);
+    setSentTo(fields.email.trim());
   }
+
+  if (sentTo !== null) return <CheckInbox email={sentTo} next={next} />;
 
   return (
     <AuthPage

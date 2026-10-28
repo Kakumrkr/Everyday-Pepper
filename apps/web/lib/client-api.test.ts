@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { fetchJson, messageFor, sendJson } from './client-api';
+import { errorCodeOf, fetchJson, messageFor, sendJson } from './client-api';
 
 describe('messageFor', () => {
   it.each([
@@ -127,5 +127,21 @@ describe('fetchJson', () => {
       ok: false,
       status: 0,
     });
+  });
+});
+
+describe('errorCodeOf', () => {
+  it("reads the api's or Better Auth's code, and nothing from another body", () => {
+    expect(errorCodeOf({ code: 'EMAIL_NOT_VERIFIED', message: 'x' })).toBe('EMAIL_NOT_VERIFIED');
+    expect(errorCodeOf({ message: 'x' })).toBeUndefined();
+    expect(errorCodeOf(null)).toBeUndefined();
+    expect(errorCodeOf('text')).toBeUndefined();
+  });
+
+  it('words an expired link and an unconfirmed email for people', () => {
+    expect(messageFor(400, { code: 'INVALID_TOKEN' })).toBe(
+      'This link has run out. Ask for a new one.',
+    );
+    expect(messageFor(403, { code: 'EMAIL_NOT_VERIFIED' })).toMatch(/^Confirm your email first/);
   });
 });
