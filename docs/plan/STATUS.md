@@ -7,9 +7,32 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S44 · Account recovery + the waitlist fix** (brief approved 2026-10-28: "D1 is B. Rest all, go with your recommendation. and complete the session"). D-1 B: one session, the waitlist check stays in S44. D-2 A: auth emails sent at once through `MAILER` (ADR-0045), not the outbox. D-3 A: a migration marks today's accounts verified; only new sign-ups must verify.
-Tasks: 1 ACs · 2 waitlist window check in the domain · 3 auth emails + Better Auth config · 4 forgot/new password screens · 5 check-your-inbox · 6 change email · 7 journeys + baselines · 8 ADR-0045, reviews, close.
-Done: 1 ACs (AC-W1-4…6, AC-W5-2); 2 waitlist check (`WaitlistTimesFreeError`, api 409 `waitlist_times_free`, AI `times_free` + slot picker; fixtures join while full; evals green on cassettes). 3 auth emails + Better Auth (`auth-emails.ts` sent at once via `MAILER`; reset 1 h single-use, sessions revoked; verification 24 h, new accounts only via migration 0051; change email to the new address + notice to the old; taken-address sign-up answers the same; email endpoints 3/min; reset token kept out of request logs). 4–6 screens on `AuthPage` (forgot password + sent, new password, run-out link, "Check your inbox" after sign-up/unconfirmed sign-in with "Send again", `/email-confirmed`, change email at `/account/email` from More); e2e `signUp` confirms via Mailpit; journeys in `auth.spec.ts`, baselines in `screens.spec.ts`. 7 journeys green (`auth.spec.ts` 22 passed), 36 new + 6 updated baselines; ADR-0045 + ADR-0042 S44 note written. Next: `/session-close` (review, checks, walkthrough, PR).
+**S44 · Account recovery + the waitlist fix** (brief approved 2026-10-28: "D1 is B. Rest all, go with your recommendation. and complete the session"). D-1 B: one session. D-2 A: auth emails through `MAILER` (ADR-0045). D-3 A: migration 0051 marks earlier accounts verified. Full wording in [decisions.md](decisions.md) (S44 entry, written).
+**Done (all committed and pushed on `claude/affectionate-goodall-9yg8gg`, no PR yet):**
+- Tasks 1–8: ACs AC-W1-4…6 and AC-W5-2 (traceability filled); the waitlist window check (`WaitlistTimesFreeError`); Better Auth reset, verification and change email (`auth-emails.ts`); 4 screens on `AuthPage`; the e2e journeys (`auth.spec.ts` 22 passed before the review); 36 new and 6 updated baselines (`screens.spec.ts`, account screens); ADR-0045 and ADR-0042's S44 note.
+- `/session-close` step 1: `/code-review` with 8 fixes in commit `00a772f`:
+  - background send;
+  - change email confirmed by the current address and then the new one (`sendChangeEmailConfirmation`, `landingOn`, `/email-confirmed?changed=pending|1`);
+  - the sign-up rate limit;
+  - a startup error when no mailer is configured;
+  - reload links on "Check your inbox";
+  - `refusal.tsx` suggests exactly the wanted appointment (`suggestedWindow(tz, startsAt, minutes)`) and names the free times;
+  - one `slotsFor` per check.
+  Left as is, with reasons: the outbox exception (D-2) and the eval world seeding through time off. `/security-review`: nothing found. Tier 2 is green: web 308, api 343, appointments 134.
+- Step 2.1: `pnpm check` green.
+
+**Next, in order:**
+1. `pnpm test:integration`. It was running in the background at the checkpoint: re-run it if its log is gone. Fix any red and re-run only the failing file.
+2. Full Playwright, alone:
+   - `.claude/skills/session-close/e2e-stack.sh start <scratchpad>/stack`, then `MAILPIT_URL=http://localhost:8025 pnpm --filter @pepper/e2e test:e2e --workers=3`, then `e2e-stack.sh stop`. Docker image builds fail on the proxy, so use this script and not `docker compose up --build`.
+   - Expect the changed journeys to need checking: the `booking.spec` waitlist window is now 10:30–11:30, and `auth.spec` AC-W1-6 now uses two links.
+   - None of the review's screens were re-shot. If the account screenshots differ, look at them, then `--update-snapshots`.
+3. Walkthrough: a new owner at 375 px, dark theme, through sign-up → check inbox → confirm → forgot password → reset. Screenshots go to `<scratchpad>/walkthrough/`. Then go through DESIGN §7.
+4. Docs:
+   - STATUS: S44 goes into "Last sessions" (S43 drops out); clear "In progress"; add a "Recent decisions" line; S44 leaves the planned sessions table.
+   - session-log: an S44 entry with its **Retro**. Top-up idea for S45: the business-type picker on `AuthPage` with field errors.
+   - ADR-0045 already says Accepted.
+5. Open the PR once: subscribe, one CI run, squash merge. Then give the S45 prompt.
 
 ## Last sessions
 - **S43.2 Phase 9 · Account screens on the kit, Phase 9 gate (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S43.2 note, [scorecard](scorecard.md) §5). Full entry in [session-log.md](session-log.md).
