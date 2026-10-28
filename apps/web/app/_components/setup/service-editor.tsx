@@ -19,7 +19,6 @@ export function ServiceEditor({
   categories,
   open: shown,
   onOpenChange,
-  returnFocus,
 }: {
   /** The service to edit; none adds a new one. */
   service?: Service;
@@ -28,8 +27,6 @@ export function ServiceEditor({
   /** Opened from elsewhere too (the empty menu's "Add your first service"). */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** Where focus goes on close when another button opened it (Sheet's `returnFocus`). */
-  returnFocus?: (() => HTMLElement | null) | undefined;
 }) {
   const [own, setOwn] = useState(false);
   const open = shown ?? own;
@@ -39,7 +36,6 @@ export function ServiceEditor({
     <Sheet
       title={service === undefined ? 'Add a service' : `Edit ${service.name}`}
       open={open}
-      returnFocus={returnFocus}
       onOpenChange={(next) => {
         setOpen(next);
         if (next) setKey((k) => k + 1);

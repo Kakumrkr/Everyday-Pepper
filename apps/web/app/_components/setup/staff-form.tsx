@@ -24,14 +24,11 @@ interface StaffFormProps {
 export function AddStaffMember({
   open: shown,
   onOpenChange,
-  returnFocus,
   ...props
 }: Omit<StaffFormProps, 'member'> & {
   /** Opened from elsewhere too (the empty list's "Add the first person"). */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** Where focus goes on close when another button opened it (Sheet's `returnFocus`). */
-  returnFocus?: (() => HTMLElement | null) | undefined;
 }) {
   const [own, setOwn] = useState(false);
   const open = shown ?? own;
@@ -42,7 +39,6 @@ export function AddStaffMember({
       title="Add someone who can be booked"
       description="Then set their weekly hours."
       open={open}
-      returnFocus={returnFocus}
       onOpenChange={(next) => {
         setOpen(next);
         if (next) setKey((k) => k + 1);

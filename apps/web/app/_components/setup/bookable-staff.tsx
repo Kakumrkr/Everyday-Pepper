@@ -2,10 +2,9 @@
 
 import type { Member, Service } from '@pepper/contracts';
 import { EmptyState } from '@pepper/ui';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { kitLink } from '../kit-link';
-import { useSheetOpener } from '../use-sheet-opener';
 import { AddStaffMember } from './staff-form';
 
 /**
@@ -29,7 +28,9 @@ export function BookableStaff({
   linkedUserIds: string[];
   children: ReactNode;
 }) {
-  const adding = useSheetOpener();
+  // Focus goes back to the header's button on close, opened from either: a save replaces the
+  // empty state, and its button with it, once the page refreshes (S42.2 walkthrough).
+  const [adding, setAdding] = useState(false);
   return (
     <section aria-labelledby="bookable-heading" className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -46,9 +47,8 @@ export function BookableStaff({
             services={services}
             members={members}
             linkedUserIds={linkedUserIds}
-            open={adding.open}
-            onOpenChange={adding.onOpenChange}
-            returnFocus={adding.returnFocus}
+            open={adding}
+            onOpenChange={setAdding}
           />
         ) : null}
       </div>
@@ -65,7 +65,9 @@ export function BookableStaff({
             body="Add yourself and anyone else clients can book, then set their weekly hours."
             action={{
               label: 'Add the first person',
-              onClick: adding.openFromHere,
+              onClick: () => {
+                setAdding(true);
+              },
             }}
           />
         ) : (

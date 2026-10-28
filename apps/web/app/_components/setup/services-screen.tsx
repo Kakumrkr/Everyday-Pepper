@@ -1,10 +1,9 @@
 'use client';
 
 import { EmptyState } from '@pepper/ui';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { kitLink } from '../kit-link';
-import { useSheetOpener } from '../use-sheet-opener';
 import { ServiceEditor } from './service-editor';
 
 /**
@@ -27,7 +26,9 @@ export function ServicesScreen({
   actions: ReactNode;
   children: ReactNode;
 }) {
-  const adding = useSheetOpener();
+  // Focus goes back to the header's button on close, opened from either: a save replaces the
+  // empty state, and its button with it, once the page refreshes (S42.2 walkthrough).
+  const [adding, setAdding] = useState(false);
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -40,12 +41,7 @@ export function ServicesScreen({
         <div className="flex flex-wrap gap-2">
           {actions}
           {manages ? (
-            <ServiceEditor
-              categories={categories}
-              open={adding.open}
-              onOpenChange={adding.onOpenChange}
-              returnFocus={adding.returnFocus}
-            />
+            <ServiceEditor categories={categories} open={adding} onOpenChange={setAdding} />
           ) : null}
         </div>
       </header>
@@ -62,7 +58,9 @@ export function ServicesScreen({
             body="Add what you offer and how long it takes. Then choose who offers it on the Team page."
             action={{
               label: 'Add your first service',
-              onClick: adding.openFromHere,
+              onClick: () => {
+                setAdding(true);
+              },
             }}
           />
         ) : (
