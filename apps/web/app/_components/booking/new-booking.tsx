@@ -1,7 +1,7 @@
 'use client';
 
 import { BookingSchema, type AvailableSlot } from '@pepper/contracts';
-import { buttonClass, buttonStyle, Icon } from '@pepper/ui';
+import { Button, buttonStyle, Icon, Select, Sheet, SheetFooter } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { bookableStaff, type BookingSetup } from '../../../lib/booking';
@@ -9,7 +9,7 @@ import { sendJson } from '../../../lib/client-api';
 import { ClientPicker, type ChosenClient } from './client-picker';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
-import { Field, Notice, Sheet } from './sheet';
+import { Notice } from './sheet';
 import { TimePicker } from './time-picker';
 
 /**
@@ -17,7 +17,8 @@ import { TimePicker } from './time-picker';
  * client, service, staff member and a time, then `POST /v1/bookings`. A refused time shows the
  * nearest free ones and the waitlist (AC-W2-1). One idempotency key per opening, so a double
  * tap or a retried request books once. The client gets a confirmation email with their
- * reschedule/cancel link unless the team unticks it (ADR-0025).
+ * reschedule/cancel link unless the team unticks it (ADR-0025). On the kit (S42.2): Book sits
+ * in the sheet's footer, within thumb reach (D3).
  */
 export function NewBooking({
   setup,
@@ -94,7 +95,9 @@ function NewBookingForm({
   const [notifyClient, setNotifyClient] = useState(true);
 
   if (services.length === 0) {
-    return <p className="m-0 text-ink-2">Add a service first; then you can book it here.</p>;
+    return (
+      <p className="m-0 type-body text-ink-2">Add a service first; then you can book it here.</p>
+    );
   }
 
   async function book(at: string): Promise<void> {
@@ -125,7 +128,7 @@ function NewBookingForm({
   return (
     <div className="grid gap-5">
       <section aria-label="Client" className="grid gap-2">
-        <h3 className="m-0 text-base font-bold">Client</h3>
+        <h3 className="m-0 type-subheading text-ink">Client</h3>
         <ClientPicker
           managesClients={abilities.managesClients}
           value={client}
@@ -137,50 +140,41 @@ function NewBookingForm({
       </section>
 
       <section aria-label="Appointment" className="grid gap-3">
-        <h3 className="m-0 text-base font-bold">Appointment</h3>
-        <Field label="Service">
-          <select
-            name="service"
-            value={serviceId}
-            onChange={(event) => {
-              setServiceId(event.target.value);
-              setStartsAt(null);
-              setRefused(null);
-            }}
-          >
-            {services.map((service) => (
-              <option key={service.id} value={service.id}>
-                {service.name} · {service.durationMinutes} min
-              </option>
-            ))}
-          </select>
-        </Field>
+        <h3 className="m-0 type-subheading text-ink">Appointment</h3>
+        <Select
+          label="Service"
+          name="service"
+          value={serviceId}
+          options={services.map((service) => ({
+            value: service.id,
+            label: `${service.name} · ${String(service.durationMinutes)} min`,
+          }))}
+          onChange={(event) => {
+            setServiceId(event.target.value);
+            setStartsAt(null);
+            setRefused(null);
+          }}
+        />
         {offering.length === 0 ? (
-          <p className="m-0 text-ink-2" role="status">
+          <p className="m-0 type-body text-ink-2" role="status">
             {!abilities.ownStaffOnly
               ? 'No one offers this service yet.'
               : 'You don’t offer this service. Ask an owner or manager to add it to your services.'}
           </p>
         ) : (
           <>
-            <Field label="With">
-              <select
-                name="staff"
-                value={staffMemberId}
-                disabled={offering.length === 1}
-                onChange={(event) => {
-                  setChosenStaff(event.target.value);
-                  setStartsAt(null);
-                  setRefused(null);
-                }}
-              >
-                {offering.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.displayName}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <Select
+              label="With"
+              name="staff"
+              value={staffMemberId}
+              disabled={offering.length === 1}
+              options={offering.map((member) => ({ value: member.id, label: member.displayName }))}
+              onChange={(event) => {
+                setChosenStaff(event.target.value);
+                setStartsAt(null);
+                setRefused(null);
+              }}
+            />
             <TimePicker
               timeZone={timeZone}
               serviceId={serviceId}
@@ -198,7 +192,9 @@ function NewBookingForm({
       </section>
 
       {client === null ? null : client.client.email === null ? (
-        <p className="m-0 text-ink-2">No email address on file, so no confirmation is sent.</p>
+        <p className="m-0 type-body text-ink-2">
+          No email address on file, so no confirmation is sent.
+        </p>
       ) : (
         <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
           Email the client a confirmation
@@ -231,16 +227,19 @@ function NewBookingForm({
         />
       )}
 
-      <button
-        type="button"
-        disabled={!ready || busy}
-        className={buttonClass({ className: 'w-full' })}
-        onClick={() => {
-          if (startsAt !== null) void book(startsAt);
-        }}
-      >
-        {busy ? 'Booking…' : 'Book'}
-      </button>
+      <SheetFooter>
+        <Button
+          block
+          size="lg"
+          disabled={!ready}
+          busy={busy}
+          onClick={() => {
+            if (startsAt !== null) void book(startsAt);
+          }}
+        >
+          {busy ? 'Booking…' : 'Book'}
+        </Button>
+      </SheetFooter>
     </div>
   );
 }

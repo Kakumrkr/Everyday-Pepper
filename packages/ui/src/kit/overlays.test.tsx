@@ -5,7 +5,7 @@ import axe from 'axe-core';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Button } from './button.js';
-import { Dialog, Segmented, Sheet, Tabs, Toast, ToastProvider } from './overlays.js';
+import { Dialog, Segmented, Sheet, SheetFooter, Tabs, Toast, ToastProvider } from './overlays.js';
 
 afterEach(cleanup);
 
@@ -105,6 +105,56 @@ describe('Sheet without a trigger', () => {
       expect(screen.queryByRole('dialog')).toBeNull();
     });
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Undo' }));
+  });
+});
+
+describe('SheetFooter', () => {
+  it("puts a form's actions in the sheet's footer, below the scrolling body (D3, S42.2)", async () => {
+    function Form() {
+      const [saved, setSaved] = useState(false);
+      return (
+        <form
+          id="service"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSaved(true);
+          }}
+        >
+          <p>{saved ? 'Saved' : 'Line-up, 20 min'}</p>
+          <SheetFooter>
+            <Button type="submit" form="service">
+              Save
+            </Button>
+          </SheetFooter>
+        </form>
+      );
+    }
+    render(
+      <Sheet open onOpenChange={() => undefined} title="Edit Line-up">
+        <Form />
+      </Sheet>,
+    );
+    const save = await screen.findByRole('button', { name: 'Save' });
+    const footer = save.parentElement;
+    expect(footer?.dataset['slot']).toBe('sheet-footer');
+    // Not inside the body that scrolls, and after it, so it stays at the bottom.
+    const body = screen.getByText('Line-up, 20 min').closest('[data-slot="sheet-body"]');
+    expect(body?.contains(save)).toBe(false);
+    expect(body?.nextElementSibling).toBe(footer);
+    await userEvent.click(save);
+    expect(screen.getByText('Saved')).toBeTruthy();
+    await expectAccessible(screen.getByRole('dialog'));
+  });
+
+  it('leaves no empty footer when nothing is put in it', () => {
+    render(
+      <Sheet open onOpenChange={() => undefined} title="Why I did this">
+        <p>Your settings let me book on my own.</p>
+      </Sheet>,
+    );
+    expect(document.querySelector('[data-slot="sheet-footer"]')?.className).toContain(
+      'empty:hidden',
+    );
   });
 });
 

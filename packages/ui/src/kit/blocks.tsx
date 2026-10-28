@@ -231,19 +231,24 @@ export function Receipt({
 export function TimeChip({
   time,
   selected = false,
+  disabled = false,
   onSelect,
 }: {
   time: string;
   selected?: boolean;
+  /** While the choice is being booked, so it can't be pressed twice. */
+  disabled?: boolean;
   onSelect: () => void;
 }) {
   return (
     <button
       type="button"
       aria-pressed={selected}
+      disabled={disabled}
       onClick={onSelect}
       className={cx(
         'min-h-11 rounded-md border px-4 py-0 type-label tabular-nums transition motion-fast ease-standard',
+        'disabled:cursor-not-allowed disabled:opacity-50',
         selected
           ? 'border-brand bg-brand text-brand-ink'
           : 'border-line-strong bg-surface text-ink hover:bg-surface-2',

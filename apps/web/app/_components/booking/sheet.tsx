@@ -81,8 +81,8 @@ export function Notice({ tone, children }: { tone: 'error' | 'ok'; children: Rea
       role={tone === 'error' ? 'alert' : 'status'}
       className={
         tone === 'error'
-          ? 'm-0 rounded-md bg-wait-soft px-4 py-3 font-semibold text-wait'
-          : 'm-0 rounded-md bg-ok-soft px-4 py-3 font-semibold text-ok'
+          ? 'm-0 rounded-md bg-danger-soft px-4 py-3 type-body font-semibold text-danger'
+          : 'm-0 rounded-md bg-ok-soft px-4 py-3 type-body font-semibold text-ok'
       }
     >
       {children}

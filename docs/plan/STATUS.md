@@ -9,11 +9,11 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S42.2 · booking sheets, Services and Team on the kit** (branch `s42-2-settings-kit`). Brief approved: "Go ahead with your recommendation and complete the session" (D-1 split: Autonomy, What I know, Waitlist move to S42.3; D-2 tones stay automatic by place, the colour picker goes, Team shows each member's tone).
 - [x] T1 AC-X-9, AC-X-6 widened, traceability, S42.3 row
-- [ ] T2 booking + new-booking sheets on the kit Sheet, actions in the footer
+- [x] T2 booking + new-booking sheets on the kit Sheet, actions in the footer (kit `SheetFooter`, `TimeChip disabled`; client editor Save in the footer too)
 - [ ] T3 Services, service editor, rules editor
 - [ ] T4 Team, staff form (no picker; tone swatch), staff page, hours, time off; old local sheet deleted
 - [ ] T5 `screens.spec.ts` baselines + tap targets (screens and open sheets) at 375 px
-- Next: T2.
+- Next: T3.
 
 ## Last sessions
 - **S42 Phase 9 · Calendar and Clients on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42 note). Full entry in [session-log.md](session-log.md).

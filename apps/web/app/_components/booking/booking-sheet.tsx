@@ -6,7 +6,7 @@ import {
   type BookingChange,
   type BookingStatus,
 } from '@pepper/contracts';
-import { buttonClass, cx } from '@pepper/ui';
+import { Button, cx, DetailTable, Select, Sheet, SheetFooter } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import {
@@ -23,7 +23,7 @@ import { sendJson } from '../../../lib/client-api';
 import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
-import { Field, Notice, Sheet } from './sheet';
+import { Notice } from './sheet';
 import { TimePicker } from './time-picker';
 
 /** What the booking sheet shows and changes; the calendar has it for every booking it draws. */
@@ -43,7 +43,8 @@ export interface BookingSummary {
  * A booking on the calendar, as a button that opens its sheet: the details, done or no-show
  * once it has started, move and cancel. Every change goes through `PATCH /v1/bookings/:id`,
  * which checks it again (staff: their own bookings; done and no-show final for them). A move or
- * cancellation emails the client unless the team unticks it (ADR-0025).
+ * cancellation emails the client unless the team unticks it (ADR-0025). On the kit (S42.2):
+ * each view's actions sit in the sheet's footer, within thumb reach (D3).
  */
 export function BookingSheet({
   booking,
@@ -134,53 +135,64 @@ function BookingDetails({
   }
 
   const summary = (
-    <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
-      <dt className="text-ink-2">When</dt>
-      <dd className="m-0 font-semibold">
-        {dateTimeLabel(timeZone, booking.startsAt)} – {timeLabel(timeZone, booking.endsAt)}
-      </dd>
-      <dt className="text-ink-2">Status</dt>
-      <dd className="m-0 font-semibold" data-testid="booking-status">
-        {STATUS_LABELS[booking.status]}
-      </dd>
-      {booking.overridden ? (
-        <>
-          <dt className="text-ink-2">Note</dt>
-          <dd className="m-0 text-wait">Booked outside the usual hours</dd>
-        </>
-      ) : null}
-    </dl>
+    <DetailTable
+      rows={[
+        {
+          label: 'When',
+          value: (
+            <span className="tabular-nums">
+              {dateTimeLabel(timeZone, booking.startsAt)} – {timeLabel(timeZone, booking.endsAt)}
+            </span>
+          ),
+        },
+        {
+          label: 'Status',
+          value: <span data-testid="booking-status">{STATUS_LABELS[booking.status]}</span>,
+        },
+        ...(booking.overridden
+          ? [
+              {
+                label: 'Note',
+                value: <span className="text-warn">Booked outside the usual hours</span>,
+              },
+            ]
+          : []),
+      ]}
+    />
   );
 
   if (view === 'cancel') {
     return (
       <div className="grid gap-4">
         {summary}
-        <p className="m-0 font-semibold">Cancel this booking? The time becomes free again.</p>
+        <p className="m-0 type-body font-semibold">
+          Cancel this booking? The time becomes free again.
+        </p>
         <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
           Email the client that it is cancelled
         </NotifyClient>
         {error === null ? null : <Notice tone="error">{error}</Notice>}
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            disabled={busy}
-            className={buttonClass({ variant: 'secondary', className: 'text-danger' })}
+        <SheetFooter>
+          <Button
+            block
+            size="lg"
+            variant="danger"
+            busy={busy}
             onClick={() => void change({ status: 'cancelled', notifyClient })}
           >
             Cancel booking
-          </button>
-          <button
-            type="button"
-            className={buttonClass({ variant: 'secondary' })}
+          </Button>
+          <Button
+            block
+            variant="quiet"
             onClick={() => {
               setView('details');
               setError(null);
             }}
           >
             Keep it
-          </button>
-        </div>
+          </Button>
+        </SheetFooter>
       </div>
     );
   }
@@ -225,58 +237,64 @@ function BookingDetails({
       ) : null}
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       {none ? (
-        <p className="m-0 text-ink-2">
+        <p className="m-0 type-body text-ink-2">
           {booking.status === 'cancelled' || abilities.correctsOutcomes
             ? 'Nothing more to change here.'
             : 'This is recorded. An owner or manager can correct it if needed.'}
         </p>
       ) : (
-        <div className="flex flex-wrap gap-2">
+        <SheetFooter>
           {actions.complete ? (
-            <button
-              type="button"
-              disabled={busy}
-              className={buttonClass()}
+            <Button
+              block
+              size="lg"
+              busy={busy}
               onClick={() => void change({ status: 'completed' })}
             >
               Mark done
-            </button>
+            </Button>
           ) : null}
-          {actions.noShow ? (
-            <button
-              type="button"
-              disabled={busy}
-              className={buttonClass({ variant: 'secondary' })}
-              onClick={() => void change({ status: 'no_show' })}
-            >
-              No-show
-            </button>
-          ) : null}
-          {actions.move ? (
-            <button
-              type="button"
-              className={buttonClass({ variant: 'secondary' })}
-              onClick={() => {
-                setView('move');
-                setError(null);
-              }}
-            >
-              Move
-            </button>
+          {actions.noShow || actions.move ? (
+            <div className="flex gap-2">
+              {actions.noShow ? (
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  disabled={busy}
+                  onClick={() => void change({ status: 'no_show' })}
+                >
+                  No-show
+                </Button>
+              ) : null}
+              {actions.move ? (
+                // Before the visit starts, moving it is the main thing left to do (D4).
+                <Button
+                  variant={actions.complete ? 'secondary' : 'primary'}
+                  size={actions.complete ? 'md' : 'lg'}
+                  className="flex-1"
+                  onClick={() => {
+                    setView('move');
+                    setError(null);
+                  }}
+                >
+                  Move
+                </Button>
+              ) : null}
+            </div>
           ) : null}
           {actions.cancel ? (
-            <button
-              type="button"
-              className={buttonClass({ variant: 'quiet', className: 'text-danger' })}
+            <Button
+              block
+              variant="danger"
               onClick={() => {
                 setView('cancel');
                 setError(null);
               }}
             >
               Cancel booking
-            </button>
+            </Button>
           ) : null}
-        </div>
+        </SheetFooter>
       )}
     </div>
   );
@@ -319,26 +337,21 @@ function MoveBooking({
 
   return (
     <div className="grid gap-4">
-      <p className="m-0 text-ink-2">
-        Now {dateTimeLabel(timeZone, booking.startsAt)}. Pick the new time.
+      <p className="m-0 type-body text-ink-2">
+        Now <span className="tabular-nums">{dateTimeLabel(timeZone, booking.startsAt)}</span>. Pick
+        the new time.
       </p>
       {choices.length > 1 ? (
-        <Field label="With">
-          <select
-            name="staff"
-            value={staffMemberId}
-            onChange={(event) => {
-              setStaffMemberId(event.target.value);
-              setStartsAt(null);
-            }}
-          >
-            {choices.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.displayName}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <Select
+          label="With"
+          name="staff"
+          value={staffMemberId}
+          options={choices.map((member) => ({ value: member.id, label: member.displayName }))}
+          onChange={(event) => {
+            setStaffMemberId(event.target.value);
+            setStartsAt(null);
+          }}
+        />
       ) : null}
       <TimePicker
         timeZone={timeZone}
@@ -363,21 +376,22 @@ function MoveBooking({
           }}
         />
       )}
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled={startsAt === null || busy}
-          className={buttonClass()}
+      <SheetFooter>
+        <Button
+          block
+          size="lg"
+          disabled={startsAt === null}
+          busy={busy}
           onClick={() => {
             if (startsAt !== null) onMove(startsAt, staffMemberId);
           }}
         >
           {busy ? 'Moving…' : 'Move here'}
-        </button>
-        <button type="button" className={buttonClass({ variant: 'secondary' })} onClick={onBack}>
+        </Button>
+        <Button block variant="quiet" onClick={onBack}>
           Back
-        </button>
-      </div>
+        </Button>
+      </SheetFooter>
     </div>
   );
 }

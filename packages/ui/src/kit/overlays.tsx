@@ -4,7 +4,8 @@ import * as RadixDialog from '@radix-ui/react-dialog';
 import * as RadixTabs from '@radix-ui/react-tabs';
 import * as RadixToast from '@radix-ui/react-toast';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { cx } from '../class-names.js';
 import { FOCUS_RING, IconButton } from './button.js';
 
@@ -48,6 +49,19 @@ function Header({ title, description }: { title: string; description?: string | 
   );
 }
 
+// The open sheet's footer, for `SheetFooter` inside its body.
+const FooterSlot = createContext<HTMLElement | null>(null);
+
+/**
+ * Actions rendered in the enclosing Sheet's footer, below the scrolling body within thumb
+ * reach (D3), by a form that keeps its own state inside the body (S42.2). A submit button
+ * here is outside the form in the DOM, so it names it with `form="<id>"`.
+ */
+export function SheetFooter({ children }: { children: ReactNode }) {
+  const slot = useContext(FooterSlot);
+  return slot === null ? null : createPortal(children, slot);
+}
+
 /** A bottom sheet on phones (an approval, a booking); centred from 960 px. */
 export function Sheet({
   open,
@@ -59,6 +73,7 @@ export function Sheet({
   footer,
   returnFocus,
 }: OverlayProps) {
+  const [slot, setSlot] = useState<HTMLDivElement | null>(null);
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       {trigger !== undefined && <RadixDialog.Trigger asChild>{trigger}</RadixDialog.Trigger>}
@@ -84,8 +99,12 @@ export function Sheet({
             className="mx-auto -mt-2 h-1 w-10 rounded-pill bg-line desk:hidden"
           />
           <Header title={title} description={description} />
-          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-          {footer !== undefined && <div className="flex flex-col gap-2">{footer}</div>}
+          <div data-slot="sheet-body" className="min-h-0 flex-1 overflow-y-auto">
+            <FooterSlot.Provider value={slot}>{children}</FooterSlot.Provider>
+          </div>
+          <div ref={setSlot} data-slot="sheet-footer" className="flex flex-col gap-2 empty:hidden">
+            {footer}
+          </div>
         </RadixDialog.Content>
       </RadixDialog.Portal>
     </RadixDialog.Root>

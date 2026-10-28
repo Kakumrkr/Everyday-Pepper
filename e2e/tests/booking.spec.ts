@@ -116,7 +116,7 @@ test('an owner books from the calendar: free times, a taken time with alternativ
 
   // A new client, the first free time (09:00); she gets a confirmation with her own link.
   let dialog = await openNewBooking(page);
-  await dialog.getByRole('button', { name: 'New client' }).click();
+  await dialog.getByRole('radio', { name: 'New client' }).click();
   await dialog.getByLabel('Name').fill('Maria Lopez');
   await dialog.getByLabel('Email (optional)').fill(maria);
   await dialog.getByRole('button', { name: 'Add client' }).click();
@@ -293,7 +293,7 @@ test('a staff member finds a client by exact phone and books for themselves; col
 
   const dialog = await openNewBooking(priya);
   // Staff cannot search or add clients: an exact email or phone only.
-  await expect(dialog.getByRole('button', { name: 'New client' })).toHaveCount(0);
+  await expect(dialog.getByRole('radio', { name: 'New client' })).toHaveCount(0);
   await dialog.getByLabel('Client’s email or phone').fill('555 010');
   await dialog.getByRole('button', { name: 'Find client' }).click();
   await expect(dialog.getByRole('alert')).toContainText('full email address or phone number');

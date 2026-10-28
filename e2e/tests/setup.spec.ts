@@ -138,7 +138,7 @@ test('setup: a new owner adds a service, a staff member with weekly hours and a 
   await page.goto(`/calendar?date=${formatDate(day)}`);
   await (await hydrated(page.getByRole('button', { name: 'New booking' }))).click();
   dialog = sheet(page);
-  await dialog.getByRole('button', { name: 'New client' }).click();
+  await dialog.getByRole('radio', { name: 'New client' }).click();
   await dialog.getByLabel('Name').fill('Maria Lopez');
   await dialog.getByRole('button', { name: 'Add client' }).click();
   await expect(dialog.getByTestId('chosen-client')).toHaveText('Maria Lopez');

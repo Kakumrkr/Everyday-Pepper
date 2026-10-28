@@ -86,6 +86,7 @@ export {
   Dialog,
   Segmented,
   Sheet,
+  SheetFooter,
   Tabs,
   Toast,
   ToastProvider,
