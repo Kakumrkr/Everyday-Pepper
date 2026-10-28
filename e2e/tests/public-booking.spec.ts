@@ -97,7 +97,13 @@ test('a client books on the page in the business’s color, confirms the emailed
   const send = client.getByRole('button', { name: 'Send my code' });
   // PCR-001: the page's buttons are in the business's color, not Pepper's green.
   await expect(send).toHaveCSS('background-color', 'rgb(122, 59, 143)');
+  // Sent empty: focus goes to the first field to fix, its error its description (S43.2).
+  await send.click();
+  await expect(client.getByLabel('Full name')).toBeFocused();
+  await expect(client.getByLabel('Full name')).toHaveAttribute('aria-invalid', 'true');
   await client.getByLabel('Full name').fill('Ana Ruiz');
+  await send.click();
+  await expect(client.getByLabel('Email')).toBeFocused();
   await client.getByLabel('Email').fill(email);
   await send.click();
 

@@ -25,6 +25,7 @@ import {
   StickyActionBar,
 } from '@pepper/ui';
 import { useId, useMemo, useRef, useState, type ReactNode, type SubmitEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { dateTimeLabel, timeLabel } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
@@ -210,14 +211,20 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
 
   async function onDetails(event: SubmitEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const element = event.currentTarget;
+    const form = new FormData(element);
     const checked = checkDetails({
       name: formText(form, 'name'),
       email: formText(form, 'email'),
       phone: formText(form, 'phone'),
     });
     if (!checked.ok) {
-      setFieldErrors(checked.errors);
+      flushSync(() => {
+        setFieldErrors(checked.errors);
+      });
+      // Then to the first field to fix, so a screen reader reads its error (its description).
+      const first = (['name', 'email', 'phone'] as const).find((field) => field in checked.errors);
+      if (first !== undefined) element.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
       return;
     }
     setFieldErrors({});

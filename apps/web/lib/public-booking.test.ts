@@ -96,6 +96,14 @@ describe('the page data', () => {
     expect(localTimeLabel('Etc/GMT+5')).toBe('GMT-5');
   });
 
+  it('names an offset zone by its offset at the time shown, not in 1970', () => {
+    const july = Date.UTC(2026, 6, 1);
+    expect(localTimeLabel('EST5EDT', july)).toBe('GMT-4');
+    expect(localTimeLabel('EST5EDT', Date.UTC(2026, 0, 15))).toBe('GMT-5');
+    // Singapore moved from +7:30 to +8 in 1982.
+    expect(localTimeLabel('Singapore', july)).toBe('GMT+8');
+  });
+
   it('makes initials of a business name', () => {
     expect(initials('Juniper Hair Studio')).toBe('JH');
     expect(initials('  plum ')).toBe('P');
