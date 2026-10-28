@@ -7,7 +7,13 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S42 is closed. Next: S42.2 (see "Planned sessions").
+**S42.2 · booking sheets, Services and Team on the kit** (branch `s42-2-settings-kit`). Brief approved: "Go ahead with your recommendation and complete the session" (D-1 split: Autonomy, What I know, Waitlist move to S42.3; D-2 tones stay automatic by place, the colour picker goes, Team shows each member's tone).
+- [x] T1 AC-X-9, AC-X-6 widened, traceability, S42.3 row
+- [ ] T2 booking + new-booking sheets on the kit Sheet, actions in the footer
+- [ ] T3 Services, service editor, rules editor
+- [ ] T4 Team, staff form (no picker; tone swatch), staff page, hours, time off; old local sheet deleted
+- [ ] T5 `screens.spec.ts` baselines + tap targets (screens and open sheets) at 375 px
+- Next: T2.
 
 ## Last sessions
 - **S42 Phase 9 · Calendar and Clients on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42 note). Full entry in [session-log.md](session-log.md).
@@ -63,7 +69,8 @@ S1–S42, M1–M2 and P1 are done (Phases 0–8, the re-plan, and Phase 9's dire
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S42.2 | Services, Team (and its colour picker), Autonomy, What I know, Waitlist and the booking sheets on the kit (split from S42, PCR-008) | 9 | Every signed-in screen on the kit |
+| S42.2 | The booking sheets, Services and Team (tones by place, no colour picker) on the kit, sheet actions in the footer (split from S42, PCR-008) | 9 | AC-X-9; tap targets clean on those screens and sheets |
+| S42.3 | Autonomy, What I know and Waitlist on the kit, their empty states with actions (split from S42.2, D-1) | 9 | Every signed-in screen on the kit |
 | S43 | Public pages + auth on the kit, legacy stylesheet deleted, UX copy pass, **Phase 9 gate** | 9 | Scorecard C3, C4, C10 ≥ 8 |
 | S44 | Password reset, email verification, change email; `add_to_waitlist` window check in the domain | 10 | Journeys + domain tests green |
 | S45 | Business type at signup → pre-filled menu and hours; US zones first; activation events | 10 | A barber business bookable with zero typing |
