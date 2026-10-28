@@ -2,7 +2,7 @@
 
 The design rules for every screen. Planning session P1 (2026-10-26) set them up ([ADR-0044](../adr/0044-redesign-and-design-rules.md), [V1 playbook](../plan/v1-playbook.md) Phase 9). Any session that changes a screen reads this file first.
 
-**Status:** the rules (§5–§7) are in force from S39. The direction (§2–§4) was chosen by the user in **S39: "A+B"** (warm boutique, with clean premium's calm on the busy screens). **S40 shipped the tokens, the kit (`packages/ui/src/kit/`), the gallery (`/dev/gallery` with `PEPPER_GALLERY=1`) and the lint** (ADR-0044 "Built"). **S41 moved the shell (bottom tabs, a sidebar with a Pepper group, More), Home, Chat and the AI cards onto the kit.** S42–S43 move the rest; until then they use the old class names, which point at the new values.
+**Status:** the rules (§5–§7) are in force from S39. The direction (§2–§4) was chosen by the user in **S39: "A+B"** (warm boutique, with clean premium's calm on the busy screens). **S40 shipped the tokens, the kit (`packages/ui/src/kit/`), the gallery (`/dev/gallery` with `PEPPER_GALLERY=1`) and the lint** (ADR-0044 "Built"). **S41 moved the shell (bottom tabs, a sidebar with a Pepper group, More), Home, Chat and the AI cards onto the kit; S42 the Calendar day view, the Clients list and a client's profile.** S42.2–S43 move the rest; until then they use the old class names, which point at the new values.
 
 ## 1. Who we design for
 
@@ -57,7 +57,7 @@ The source of truth stays `packages/ui/src/tokens.ts`, mirrored in `theme.css` a
 | `info` / `info-soft` | `#2F5E8A` / `#E1EAF3` | `#9CC3E8` / `#1C2A38` | notices; the third staff member's blocks |
 | `scrim` | `rgba(42,31,38,0.45)` | `rgba(0,0,0,0.6)` | behind sheets |
 
-Staff colors (the old `s1`–`s3`) become `brand-soft`, `accent-soft` and `info-soft` with a 4 px left bar in `brand`, `accent` and `info`, so a booking's barber never depends on color alone (the name is on the block too).
+Staff colors (the old `s1`–`s3`) become `brand-soft`, `accent-soft` and `info-soft` with a 4 px left bar in `brand`, `accent` and `info`, by a member's place among the active staff (S42), so a booking's barber never depends on color alone (the name heads the column).
 
 **Type.** Bricolage Grotesque (variable, opsz 12–96, 500–800) for display, titles and big numbers; Figtree (variable, 400–700; already in the app) for everything else. Both self-hosted through Fontsource (D11). Sizes on a 1.2 scale from a 16 px body, rounded:
 
@@ -95,10 +95,10 @@ Button (primary pill in `brand`, secondary pill outlined in `line-strong`, quiet
 |---|---|---|
 | D1 | Colors only from tokens: no raw hex, `rgb()`, or Tailwind palette or arbitrary colors in `apps/web` and `packages/ui` | ESLint rule `packages/config/eslint-design.js` (S40), stylesheets by its test; a failing build |
 | D2 | Contrast ≥ 4.5:1 for text and ≥ 3:1 for icons and borders, in both themes | `theme.test.ts` (`TEXT_PAIRS`, `NON_TEXT_PAIRS` from S40) |
-| D3 | Tap targets ≥ 44 × 44 px; the main action within thumb reach at the bottom of the screen on phones | Playwright check at 375 px: `e2e/tests/tap-targets.ts` in `shell.spec.ts` (S41; S42–S43 add their screens) |
+| D3 | Tap targets ≥ 44 × 44 px; the main action within thumb reach at the bottom of the screen on phones | Playwright check at 375 px: `e2e/tests/tap-targets.ts` in `shell.spec.ts` (S41) and `screens.spec.ts` (S42: Calendar, Clients, profile; S42.2–S43 add theirs) |
 | D4 | One primary action per screen or sheet | Design review at `/session-close` |
 | D5 | Every empty screen says what to do next, with the action ("Add your first service →") | Walkthrough at `/session-close`; component API (EmptyState needs an action) |
-| D6 | Light and dark are equally finished | Screenshot tests at 375 / 412 / 1280 px × light / dark (`e2e/tests/gallery.spec.ts` from S40; `screens.spec.ts` from S41: Home, Chat, More) |
+| D6 | Light and dark are equally finished | Screenshot tests at 375 / 412 / 1280 px × light / dark (`e2e/tests/gallery.spec.ts` from S40; `screens.spec.ts` from S41: Home, Chat, More; S42: Calendar, Clients, a profile) |
 | D7 | Motion from the motion tokens only, ≤ 240 ms, off under reduced motion | Lint for raw durations (S40); `theme.test.ts` checks the tokens drop to 0 under reduced motion |
 | D8 | Accessible: labels, focus rings, keyboard paths, landmarks, no information by color alone | axe in Playwright (exists); keyboard journeys |
 | D9 | Skeletons, not spinners, for loads over 300 ms; optimistic UI for safe actions | Review |
