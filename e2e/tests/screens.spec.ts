@@ -9,7 +9,19 @@ import {
   toZoned,
 } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
-import { emailTo, hydrated, onboardOwner, ownClientAddress, toast, unique } from './helpers.js';
+import {
+  emailTo,
+  enterPassword,
+  freshCode,
+  hydrated,
+  onboardOwner,
+  ownClientAddress,
+  PASSWORD,
+  signOut,
+  signUp,
+  toast,
+  unique,
+} from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 
 // The signed-in screens on the kit (S41, DESIGN.md D6; AC-X-3): Home, Chat and More (S41), and
@@ -26,6 +38,9 @@ import { expectTapTargets } from './tap-targets.js';
 // pages in the shop's own color (the booking page at every step, manage-booking, the offer and
 // unsubscribe links), their tap targets and the sticky action at the bottom of a 375 px phone,
 // and Autonomy's "Saved" toast in view on that phone (AC-X-11). Dates on them move: masked.
+// S43.2 adds the account screens (sign-in and its code step, sign-up, the invite page, create
+// business, two-step setup), their tap targets and the main action at the bottom of a 375 px
+// phone (AC-X-12); the QR code, key, backup codes and time zone change per run: masked.
 //
 // Update the baselines after a deliberate change, on Linux with CI's browser:
 //   pnpm --filter @pepper/e2e exec playwright test screens --project=desktop --update-snapshots
@@ -147,6 +162,84 @@ async function expectStickyAtTheBottom(page: Page, name: string): Promise<void> 
 
 // "Wed, Oct 29, 9:00 AM" and "Wed, Oct 29": dates that move with the run.
 const DATED = /^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}/;
+
+// A well-formed invite token (the page checks it only once the visitor is signed in).
+const SOME_INVITE = 'q1W2e3R4t5Y6u7I8o9P0a_S-d1F2g3H4j5K6l7Z8x9C';
+
+for (const width of WIDTHS) {
+  test(`The account screens at ${String(width)} px, light and dark`, async ({ page }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    const phone = width === 375;
+    const shots = async (name: string, mask: ReturnType<Page['locator']>[] = []) => {
+      if (phone) {
+        await expectTapTargets(page, `the ${name} screen`);
+        const wide = await page.evaluate(() => document.documentElement.scrollWidth);
+        expect(wide, `${name} scrolls sideways`).toBeLessThanOrEqual(width);
+      }
+      for (const scheme of SCHEMES) {
+        await still(page, scheme);
+        await expect
+          .soft(page)
+          .toHaveScreenshot(`${name}-${String(width)}-${scheme}.png`, { ...SHOT, mask });
+      }
+      await page.emulateMedia({ colorScheme: 'light' });
+    };
+
+    await page.goto('/sign-in');
+    await hydrated(page.getByRole('button', { name: 'Sign in' }));
+    if (phone) await expectStickyAtTheBottom(page, 'Sign in');
+    await shots('auth-sign-in');
+
+    await page.goto('/sign-up');
+    await hydrated(page.getByRole('button', { name: 'Create account' }));
+    if (phone) await expectStickyAtTheBottom(page, 'Create account');
+    await shots('auth-sign-up');
+
+    await page.goto('/invite');
+    await expect(page.getByRole('alert').filter({ hasText: 'incomplete' })).toBeVisible();
+    await shots('auth-invite-broken');
+    // A new page load: a hash change alone doesn't open the page again.
+    await page.goto('about:blank');
+    await page.goto(`/invite#${SOME_INVITE}`);
+    await expect(page.getByRole('heading', { name: /invited to join/ })).toBeVisible();
+    await shots('auth-invite');
+
+    const email = `${unique('owner')}@example.test`;
+    await signUp(page, email);
+    await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
+    await hydrated(page.getByRole('button', { name: 'Create business' }));
+    if (phone) await expectStickyAtTheBottom(page, 'Create business');
+    await shots('auth-business', [page.getByLabel('Time zone')]);
+
+    await page.getByLabel('Business name').fill('Southside Cuts');
+    await page.getByLabel('Booking link').fill(unique('shop'));
+    await page.getByRole('button', { name: 'Create business' }).click();
+    await expect(page).toHaveURL(/\/security\/two-factor$/, { timeout: 30_000 });
+    await hydrated(page.getByRole('button', { name: 'Continue' }));
+    if (phone) await expectStickyAtTheBottom(page, 'Continue');
+    await shots('auth-two-factor');
+
+    await page.getByLabel('Confirm your password').fill(PASSWORD);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    const qr = page.getByRole('img', { name: /QR code/ });
+    await expect(qr).toBeVisible();
+    if (phone) await expectStickyAtTheBottom(page, 'Turn on two-step verification');
+    const secret = page.getByTestId('totp-secret');
+    await shots('auth-two-factor-codes', [qr, secret, page.getByTestId('backup-codes')]);
+
+    const used = new Set<string>();
+    const key = ((await secret.textContent()) ?? '').replace(/\s/g, '');
+    await page.getByLabel('Enter the 6-digit code').fill(await freshCode(key, used));
+    await page.getByRole('button', { name: 'Turn on two-step verification' }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await signOut(page);
+    await enterPassword(page, email);
+    await expect(page.getByRole('heading', { name: 'Two-step verification' })).toBeVisible();
+    if (phone) await expectStickyAtTheBottom(page, 'Verify');
+    await shots('auth-sign-in-code');
+  });
+}
 
 for (const width of WIDTHS) {
   test(`The public pages at ${String(width)} px, light and dark`, async ({ page }) => {

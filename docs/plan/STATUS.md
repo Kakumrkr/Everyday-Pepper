@@ -9,14 +9,14 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S43.2 · Auth on the kit, legacy stylesheet out, Phase 9 gate** (branch `claude/blissful-cerf-j8hfl7`). Brief approved: "go with your recommendation and complete the session" (D-1 one session, fallback split invite + two-step + deletion + gate → S43.3; D-2 copy pass on the auth screens plus empty/error lines met on the way).
 - [x] 1. AC-X-12 in acceptance-criteria + traceability
-- [ ] 2. `AuthPage` layout; sign-in, sign-up on the kit, main action in the sticky bar (top-up)
-- [ ] 3. Two-step setup, create business, invite, shared parts on the kit
-- [ ] 4. `chipClass` → `chipStyle`, old `Field` → kit Input, `.visually-hidden` → `sr-only`; legacy layer, `LEGACY_ALIASES`, `body > main` resets deleted
-- [ ] 5. Copy pass (helpers' labels in the same commit)
-- [ ] 6. Account screenshots, tap targets, `expectStickyAtTheBottom` in `screens.spec.ts`
+- [x] 2. `AuthPage` layout; sign-in, sign-up on the kit, main action in the sticky bar (top-up)
+- [x] 3. Two-step setup, create business, invite, shared parts on the kit
+- [x] 4. `chipClass` → `chipStyle`, old `Field` → kit Input, `.visually-hidden` → `sr-only`; legacy layer, `LEGACY_ALIASES`, `body > main` resets deleted
+- [x] 5. Copy pass (helpers' labels in the same commit)
+- [x] 6. Account screenshots, tap targets, `expectStickyAtTheBottom` in `screens.spec.ts`
 - [ ] 7. Scorecard C3/C4/C10 with evidence
 - [ ] 8. Review, `/security-review`, `/session-close`
-Next step: task 2. Open questions: none.
+Next step: task 7 (scorecard). Notes: 48 new account baselines; 62 updated (the 20 px gutter on public pages without the old body padding, the to-do form on kit fields, time fields 1 px shorter). Open questions: none.
 
 ## Last sessions
 - **S43 Phase 9 · Public pages on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S43 note). Full entry in [session-log.md](session-log.md).

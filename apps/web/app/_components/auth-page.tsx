@@ -20,7 +20,7 @@ export function AuthPage({
   children?: ReactNode;
 }) {
   return (
-    <main className="mx-auto flex w-full min-w-0 max-w-md flex-col gap-6 px-5 pt-10 pb-32">
+    <main className="mx-auto flex w-full min-w-0 max-w-lg flex-col gap-6 px-5 pt-10 pb-32">
       <Logo />
       <header className="flex flex-col gap-2">
         <h1 className="m-0 type-display text-ink">{title}</h1>
