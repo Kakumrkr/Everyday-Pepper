@@ -133,8 +133,8 @@ function ClientForm({ client, onDone }: { client: Client | undefined; onDone: ()
         maxLength={20}
         defaultValue={client?.phone ?? ''}
       />
-      {error === null ? null : <Notice tone="error">{error}</Notice>}
       <SheetFooter>
+        {error === null ? null : <Notice tone="error">{error}</Notice>}
         <Button type="submit" form={formId} busy={busy} block size="lg">
           {busy ? 'Saving…' : client === undefined ? 'Add client' : 'Save'}
         </Button>

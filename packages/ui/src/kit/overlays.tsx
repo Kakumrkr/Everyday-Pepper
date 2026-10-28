@@ -24,7 +24,8 @@ interface OverlayProps {
   footer?: ReactNode;
   /**
    * Where focus goes on close when the opener is not `trigger` (a card's Why? button, S41);
-   * without it Radix returns focus to the trigger.
+   * without it, or when it finds nothing (the opener is gone), Radix returns focus to the
+   * trigger.
    */
   returnFocus?: (() => HTMLElement | null) | undefined;
 }
@@ -86,8 +87,10 @@ export function Sheet({
           {...(description === undefined && { 'aria-describedby': undefined })}
           {...(returnFocus !== undefined && {
             onCloseAutoFocus: (event: Event) => {
+              const target = returnFocus();
+              if (target === null) return;
               event.preventDefault();
-              returnFocus()?.focus();
+              target.focus();
             },
           })}
           className={cx(
@@ -137,7 +140,8 @@ export function Dialog({
           )}
         >
           <Header title={title} description={description} />
-          {children}
+          {/* A dialog opened from a sheet keeps its own actions, not the sheet's footer. */}
+          <FooterSlot.Provider value={undefined}>{children}</FooterSlot.Provider>
           {footer !== undefined && <div className="flex flex-wrap justify-end gap-2">{footer}</div>}
         </RadixDialog.Content>
       </RadixDialog.Portal>

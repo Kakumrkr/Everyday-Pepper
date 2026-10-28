@@ -108,7 +108,49 @@ describe('Sheet without a trigger', () => {
   });
 });
 
+describe('Sheet returnFocus', () => {
+  it('falls back to the trigger when the opener is gone', async () => {
+    render(<SheetDemoWith returnFocus={() => null} />);
+    const trigger = screen.getByRole('button', { name: 'Add service' });
+    await userEvent.click(trigger);
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+    expect(document.activeElement).toBe(trigger);
+  });
+});
+
+function SheetDemoWith({ returnFocus }: { returnFocus: () => HTMLElement | null }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Sheet
+      open={open}
+      onOpenChange={setOpen}
+      title="Add a service"
+      trigger={<Button>Add service</Button>}
+      returnFocus={returnFocus}
+    >
+      <p>Name</p>
+    </Sheet>
+  );
+}
+
 describe('SheetFooter', () => {
+  it('stays in a dialog opened from inside a sheet', async () => {
+    render(
+      <Sheet open onOpenChange={() => undefined} title="Marcus Bell">
+        <Dialog open onOpenChange={() => undefined} title="Delete this note?">
+          <SheetFooter>
+            <Button>Delete</Button>
+          </SheetFooter>
+        </Dialog>
+      </Sheet>,
+    );
+    const button = await screen.findByRole('button', { name: 'Delete' });
+    expect(screen.getByRole('dialog', { name: 'Delete this note?' }).contains(button)).toBe(true);
+  });
+
   it("puts a form's actions in the sheet's footer, below the scrolling body (D3, S42.2)", async () => {
     function Form() {
       const [saved, setSaved] = useState(false);

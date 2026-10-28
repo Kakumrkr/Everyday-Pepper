@@ -201,7 +201,6 @@ function NewBookingForm({
         </NotifyClient>
       )}
 
-      {error === null ? null : <Notice tone="error">{error}</Notice>}
       {refused === null || client === null ? null : (
         <Refusal
           timeZone={timeZone}
@@ -228,6 +227,7 @@ function NewBookingForm({
       )}
 
       <SheetFooter>
+        {error === null ? null : <Notice tone="error">{error}</Notice>}
         <Button
           block
           size="lg"

@@ -26,7 +26,7 @@ export function ClientDirectory({
   initial: Client[];
   staffView: boolean;
   /** Owners and managers: opens "Add a client" (the empty list's action). */
-  onAdd?: ((opener: HTMLElement | null) => void) | undefined;
+  onAdd?: (() => void) | undefined;
 }) {
   const [clients, setClients] = useState(initial);
   const searchField = useRef<HTMLInputElement>(null);
@@ -107,14 +107,7 @@ export function ClientDirectory({
               icon="clients"
               title="No clients yet"
               body="Add your regulars once, and booking them takes a tap. Anyone you book is added too."
-              action={{
-                label: 'Add your first client',
-                onClick: () => {
-                  onAdd(
-                    document.activeElement instanceof HTMLElement ? document.activeElement : null,
-                  );
-                },
-              }}
+              action={{ label: 'Add your first client', onClick: onAdd }}
             />
           )}
         </div>

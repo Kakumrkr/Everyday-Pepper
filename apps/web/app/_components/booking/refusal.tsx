@@ -7,7 +7,7 @@ import {
   type WaitlistEntryInput,
 } from '@pepper/contracts';
 import { Button, Input, TimeChip } from '@pepper/ui';
-import { useState, type SubmitEvent } from 'react';
+import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { dateTimeLabel, suggestedWindow } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
@@ -38,8 +38,17 @@ export function Refusal({
   /** For a new booking: the entry to add, without its windows, and the wanted start. */
   waitlist?: { entry: Omit<WaitlistEntryInput, 'windows'>; wanted: string; onAdded: () => void };
 }) {
+  const box = useRef<HTMLElement>(null);
+  // The sheet's Book or Move sits in its footer; the answer shows where the eye can find it.
+  useEffect(() => {
+    box.current?.scrollIntoView({ block: 'nearest' });
+  }, []);
   return (
-    <section aria-label="That time is taken" className="grid gap-3 rounded-md bg-warn-soft p-4">
+    <section
+      ref={box}
+      aria-label="That time is taken"
+      className="grid gap-3 rounded-md bg-warn-soft p-4"
+    >
       <p className="m-0 type-body font-semibold text-ink" role="alert">
         That time can’t be booked.
         {alternatives.length === 0

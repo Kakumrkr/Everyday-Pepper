@@ -1,8 +1,8 @@
 'use client';
 
 import type { Client } from '@pepper/contracts';
-import { useState } from 'react';
 import { ClientDirectory } from './client-directory';
+import { useSheetOpener } from '../use-sheet-opener';
 import { ClientEditor } from './client-editor';
 
 /**
@@ -17,9 +17,7 @@ export function ClientsScreen({
   initial: Client[] | null;
   manages: boolean;
 }) {
-  const [adding, setAdding] = useState(false);
-  // The empty list's button, when it opened the sheet: focus goes back there on close.
-  const [opener, setOpener] = useState<HTMLElement | null>(null);
+  const adding = useSheetOpener();
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -31,13 +29,9 @@ export function ClientsScreen({
         </div>
         {manages ? (
           <ClientEditor
-            open={adding}
-            onOpenChange={(next) => {
-              // Opened by its own trigger: Radix returns focus there.
-              if (next) setOpener(null);
-              setAdding(next);
-            }}
-            returnFocus={opener === null ? undefined : () => (opener.isConnected ? opener : null)}
+            open={adding.open}
+            onOpenChange={adding.onOpenChange}
+            returnFocus={adding.returnFocus}
           />
         ) : null}
       </header>
@@ -49,14 +43,7 @@ export function ClientsScreen({
         <ClientDirectory
           initial={initial}
           staffView={!manages}
-          onAdd={
-            manages
-              ? (from) => {
-                  setOpener(from);
-                  setAdding(true);
-                }
-              : undefined
-          }
+          onAdd={manages ? adding.openFromHere : undefined}
         />
       )}
     </div>

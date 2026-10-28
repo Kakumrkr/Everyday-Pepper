@@ -171,8 +171,8 @@ function BookingDetails({
         <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
           Email the client that it is cancelled
         </NotifyClient>
-        {error === null ? null : <Notice tone="error">{error}</Notice>}
         <SheetFooter>
+          {error === null ? null : <Notice tone="error">{error}</Notice>}
           <Button
             block
             size="lg"
@@ -235,7 +235,6 @@ function BookingDetails({
           }
         />
       ) : null}
-      {error === null ? null : <Notice tone="error">{error}</Notice>}
       {none ? (
         <p className="m-0 type-body text-ink-2">
           {booking.status === 'cancelled' || abilities.correctsOutcomes
@@ -244,6 +243,7 @@ function BookingDetails({
         </p>
       ) : (
         <SheetFooter>
+          {error === null ? null : <Notice tone="error">{error}</Notice>}
           {actions.complete ? (
             <Button
               block
@@ -365,7 +365,6 @@ function MoveBooking({
       <NotifyClient checked={notifyClient} onChange={onNotifyClientChange}>
         Email the client the new time
       </NotifyClient>
-      {error === null ? null : <Notice tone="error">{error}</Notice>}
       {refused === null ? null : (
         <Refusal
           timeZone={timeZone}
@@ -377,6 +376,7 @@ function MoveBooking({
         />
       )}
       <SheetFooter>
+        {error === null ? null : <Notice tone="error">{error}</Notice>}
         <Button
           block
           size="lg"

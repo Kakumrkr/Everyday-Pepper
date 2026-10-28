@@ -92,7 +92,7 @@ export default async function StaffMemberPage({
             </h1>
             <p className="m-0 flex flex-wrap items-center gap-2 type-body text-ink-2">
               {member.active ? (
-                'Bookable, with this colour on the calendar.'
+                'Bookable, with this color on the calendar.'
               ) : (
                 <>
                   <Badge>Not bookable</Badge> Not on the calendar or the booking page right now.

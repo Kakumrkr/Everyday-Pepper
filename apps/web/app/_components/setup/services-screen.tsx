@@ -1,9 +1,10 @@
 'use client';
 
 import { EmptyState } from '@pepper/ui';
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { kitLink } from '../kit-link';
+import { useSheetOpener } from '../use-sheet-opener';
 import { ServiceEditor } from './service-editor';
 
 /**
@@ -26,9 +27,7 @@ export function ServicesScreen({
   actions: ReactNode;
   children: ReactNode;
 }) {
-  const [adding, setAdding] = useState(false);
-  // The empty menu's button, when it opened the sheet: focus goes back there on close.
-  const [opener, setOpener] = useState<HTMLElement | null>(null);
+  const adding = useSheetOpener();
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -43,13 +42,9 @@ export function ServicesScreen({
           {manages ? (
             <ServiceEditor
               categories={categories}
-              open={adding}
-              onOpenChange={(next) => {
-                // Opened by its own trigger: Radix returns focus there.
-                if (next) setOpener(null);
-                setAdding(next);
-              }}
-              returnFocus={opener === null ? undefined : () => (opener.isConnected ? opener : null)}
+              open={adding.open}
+              onOpenChange={adding.onOpenChange}
+              returnFocus={adding.returnFocus}
             />
           ) : null}
         </div>
@@ -67,12 +62,7 @@ export function ServicesScreen({
             body="Add what you offer and how long it takes. Then choose who offers it on the Team page."
             action={{
               label: 'Add your first service',
-              onClick: () => {
-                setOpener(
-                  document.activeElement instanceof HTMLElement ? document.activeElement : null,
-                );
-                setAdding(true);
-              },
+              onClick: adding.openFromHere,
             }}
           />
         ) : (

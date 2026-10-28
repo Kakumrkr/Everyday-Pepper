@@ -156,14 +156,14 @@ export function StaffForm({ member, services, members, linkedUserIds }: StaffFor
         defaultChecked={member?.active ?? true}
       />
 
-      {message === null ? null : <Notice tone={message.tone}>{message.text}</Notice>}
       <SheetFooter>
+        {message === null ? null : <Notice tone={message.tone}>{message.text}</Notice>}
         <Button
           type="submit"
           form={formId}
           busy={busy}
           size="lg"
-          className="w-full desk:w-auto desk:self-start"
+          className="w-full desk:w-auto desk:self-start desk:justify-self-start"
         >
           {busy ? 'Saving…' : member === undefined ? 'Add' : 'Save details'}
         </Button>

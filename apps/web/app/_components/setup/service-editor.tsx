@@ -192,8 +192,8 @@ function ServiceForm({
         label="Clients can book it"
         defaultChecked={service?.active ?? true}
       />
-      {error === null ? null : <Notice tone="error">{error}</Notice>}
       <SheetFooter>
+        {error === null ? null : <Notice tone="error">{error}</Notice>}
         <Button type="submit" form={formId} busy={busy} block size="lg">
           {busy ? 'Saving…' : service === undefined ? 'Add service' : 'Save'}
         </Button>
