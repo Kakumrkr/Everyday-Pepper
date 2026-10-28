@@ -1,13 +1,13 @@
 'use client';
 
 import { ClientsResponseSchema, type Client } from '@pepper/contracts';
-import { buttonClass, Icon } from '@pepper/ui';
-import Link from 'next/link';
+import { Avatar, cx, EmptyState, fieldStyle, IconButton, List, ListRow } from '@pepper/ui';
 import { useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { fetchJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { Notice } from '../booking/sheet';
+import { kitLink } from '../kit-link';
 
 /** How many clients one search shows. */
 const SEARCH_LIMIT = 50;
@@ -15,9 +15,19 @@ const SEARCH_LIMIT = 50;
 /**
  * The client list with a search by name or email (`GET /v1/clients`). The api decides whom
  * each role sees: owners and managers every client, staff the clients they have appointments
- * with (AC-W9-1). The search stays out of the page's URL.
+ * with (AC-W9-1). The search stays out of the page's URL. On the kit (S42): hairline rows with
+ * initials, and an empty list that says what to do next (AC-X-7); `onAdd` opens the add sheet.
  */
-export function ClientDirectory({ initial, staffView }: { initial: Client[]; staffView: boolean }) {
+export function ClientDirectory({
+  initial,
+  staffView,
+  onAdd,
+}: {
+  initial: Client[];
+  staffView: boolean;
+  /** Owners and managers: opens "Add a client" (the empty list's action). */
+  onAdd?: (() => void) | undefined;
+}) {
   const [clients, setClients] = useState(initial);
   const [searched, setSearched] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -55,49 +65,62 @@ export function ClientDirectory({ initial, staffView }: { initial: Client[]; sta
           autoComplete="off"
           maxLength={120}
           placeholder="Name or email"
+          className={cx(fieldStyle, 'min-h-12 min-w-0 flex-1')}
         />
-        <button
+        <IconButton
           type="submit"
+          icon="search"
+          label="Search"
+          variant="secondary"
           disabled={busy}
-          aria-label="Search"
-          className={buttonClass({ variant: 'secondary', className: 'w-11 shrink-0 px-0' })}
-        >
-          <Icon name="search" />
-        </button>
+          className="size-12"
+        />
       </form>
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       {clients.length === 0 ? (
-        <p className="m-0 text-ink-2" role="status">
-          {searched !== null
-            ? `No clients match “${searched}”.`
-            : staffView
-              ? 'Clients you have appointments with show here.'
-              : 'No clients yet. Add one, or book someone from the calendar.'}
-        </p>
+        <div role="status">
+          {searched !== null ? (
+            <EmptyState
+              icon="search"
+              title={`No clients match “${searched}”`}
+              body="Check the spelling, or search by email instead."
+              action={{ label: 'Show everyone', onClick: () => void search('') }}
+            />
+          ) : staffView || onAdd === undefined ? (
+            <EmptyState
+              icon="clients"
+              title="No clients here yet"
+              body="Clients you have appointments with show here. Book someone and they’re added."
+              action={{ label: 'Open the calendar', href: ROUTES.calendar, renderLink: kitLink }}
+            />
+          ) : (
+            <EmptyState
+              icon="clients"
+              title="No clients yet"
+              body="Add your regulars once, and booking them takes a tap. Anyone you book is added too."
+              action={{ label: 'Add your first client', onClick: onAdd }}
+            />
+          )}
+        </div>
       ) : (
-        <ul
-          className="m-0 grid list-none divide-y divide-line rounded-lg border border-line bg-surface p-0"
-          data-testid="clients"
-        >
+        <List label="Clients" className="rounded-lg bg-surface px-4">
           {clients.map((client) => (
-            <li key={client.id}>
-              <Link
-                href={`${ROUTES.clients}/${client.id}`}
-                className="grid gap-0.5 px-4 py-3 font-normal text-ink no-underline hover:bg-surface-2"
-                data-testid="client"
-              >
-                <span className="font-bold">{client.name}</span>
-                <span className="truncate text-sm text-ink-2">
-                  {[client.email, client.phone].filter((part) => part !== null).join(' · ') ||
-                    'No contact details'}
-                </span>
-              </Link>
-            </li>
+            <ListRow
+              key={client.id}
+              href={`${ROUTES.clients}/${client.id}`}
+              renderLink={kitLink}
+              leading={<Avatar name={client.name} size="sm" />}
+              title={client.name}
+              meta={
+                [client.email, client.phone].filter((part) => part !== null).join(' · ') ||
+                'No contact details yet'
+              }
+            />
           ))}
-        </ul>
+        </List>
       )}
       {clients.length === SEARCH_LIMIT ? (
-        <p className="m-0 text-sm text-ink-2">
+        <p className="m-0 type-caption text-ink-2">
           Showing the first {SEARCH_LIMIT}; search to narrow it.
         </p>
       ) : null}

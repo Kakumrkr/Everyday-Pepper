@@ -9,8 +9,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S42 Phase 9 · Calendar and Clients on the kit** (branch `ccr-146c293a-4c46lt`). Brief approved: "Go ahead and start the session with your recommendations" → D-1 A (the screens spec sets the morning hour to a fixed hour already past in the business zone, then polls; no app code), D-2 A (map the stored staff color onto the three staff tokens on the calendar; the Team picker in S42.2).
 Tasks: 1 ACs (AC-X-6 widened, AC-X-7 empties with actions, AC-X-8) · 2 the briefing wait in `screens.spec.ts` · 3 Calendar day view on the kit · 4 Clients list + editor · 5 client profile · 6 top-up: tap targets at 375 px + screenshot baselines for Calendar, Clients, profile.
-- Done: 1. 2 (`settleBriefing` fixes the hour at 5 or 11 am, then back to the template's 7; ~10 s a test instead of up to 2 min; existing baselines green). 3 (Calendar on the kit; staff tones by place in the team, not the stored colour: most share the default, `staffTone`; empty states with actions; the now-line in `danger`; calendar + booking specs green).
-- Next: 4.
+- Done: 1. 2 (`settleBriefing` fixes the hour at 5 or 11 am, then back to the template's 7; ~10 s a test instead of up to 2 min; existing baselines green). 3 (Calendar on the kit; staff tones by place in the team, not the stored colour: most share the default, `staffTone`; empty states with actions; the now-line in `danger`; calendar + booking specs green). 4 (Clients list on kit rows with initials, kit search; `ClientsScreen` shares the add sheet with the empty list's "Add your first client"; editor on the kit Sheet and Inputs). 5 (profile: initials + display name, Contact as a DetailTable, "Add a phone or email", visits and memory as hairline sections; `FactItem`/`AddFact` on kit buttons and fields). setup, memory, accessibility, shell specs green.
+- Next: 6 (tap targets + screenshots).
 - Open questions: none.
 
 ## Last sessions

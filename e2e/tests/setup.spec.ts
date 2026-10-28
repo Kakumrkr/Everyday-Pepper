@@ -158,6 +158,15 @@ test('clients: the owner finds a client, sees the coming visit on the profile, e
 }) => {
   test.setTimeout(120_000);
   await onboardOwner(page);
+  // No clients yet: the list says what to do next and opens the add sheet (AC-X-7).
+  await page.goto('/clients');
+  await expect(page.getByText('No clients yet')).toBeVisible();
+  await (await hydrated(page.getByRole('button', { name: 'Add your first client' }))).click();
+  await expect(sheet(page).getByRole('heading', { name: 'Add a client' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(sheet(page)).toBeHidden();
+  await page.goto('/');
+
   const { timeZone, day } = await businessClock(page);
   const service = await callApi(
     page,
@@ -208,12 +217,13 @@ test('clients: the owner finds a client, sees the coming visit on the profile, e
   );
 
   await go(page, 'Clients');
-  await expect(page.getByTestId('client')).toHaveCount(2);
+  const clients = page.getByRole('list', { name: 'Clients' }).getByRole('link');
+  await expect(clients).toHaveCount(2);
   await (await hydrated(page.getByLabel('Search clients by name or email'))).fill('maria@');
   await page.getByRole('button', { name: 'Search' }).click();
-  await expect(page.getByTestId('client')).toHaveCount(1);
+  await expect(clients).toHaveCount(1);
   await fitsTheScreen(page);
-  await page.getByTestId('client').click();
+  await clients.click();
 
   await expect(page.getByRole('heading', { name: 'Maria Lopez', level: 1 })).toBeVisible();
   await expect(page.getByTestId('client-contact')).toContainText('maria@example.test');

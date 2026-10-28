@@ -8,7 +8,7 @@ import {
   type Booking,
   type RecordSource,
 } from '@pepper/contracts';
-import { LegacyCard, cx } from '@pepper/ui';
+import { Avatar, Badge, buttonStyle, cx, DetailTable, FOCUS_RING, Icon } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -39,8 +39,9 @@ const SOURCES: Record<RecordSource, string> = {
 /**
  * A client's profile (S16): how to reach them, what Pepper knows about them and their visit
  * notes (S32), their coming and recent visits (62 days each way), Book, and, for owners and
- * managers, editing their details. Staff reach only their own
- * clients and see only their own visits with them (AC-W9-1, decided by the api).
+ * managers, editing their details. Staff reach only their own clients and see only their own
+ * visits with them (AC-W9-1, decided by the api). On the kit (S42): initials and the name as
+ * the title, then quiet sections of hairline rows; the empty ones say what to do next.
  */
 export default async function ClientPage({ params }: { params: Promise<{ clientId: string }> }) {
   const account = await currentAccount();
@@ -97,100 +98,144 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
     }`,
   });
 
+  const manages = current.permissions.includes('clients.manage');
   return (
-    <div className="mx-auto max-w-2xl">
-      <p className="m-0 mb-1">
-        <Link href={ROUTES.clients}>Clients</Link>
-      </p>
-      <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="m-0 font-display text-2xl font-bold [overflow-wrap:anywhere]">
-            {client.name}
-          </h1>
-          <p className="m-0 text-ink-2">{SOURCES[client.source]}</p>
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <Link
+        href={ROUTES.clients}
+        className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), '-ml-3 self-start')}
+      >
+        <Icon name="left" />
+        Clients
+      </Link>
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-4">
+          <Avatar name={client.name} size="lg" />
+          <div className="flex min-w-0 flex-col gap-1">
+            <h1 className="m-0 type-display [overflow-wrap:anywhere]">{client.name}</h1>
+            <p className="m-0 type-label text-ink-2">{SOURCES[client.source]}</p>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {current.permissions.includes('clients.manage') ? <ClientEditor client={client} /> : null}
+          {manages ? <ClientEditor client={client} /> : null}
           {books ? (
             <NewBooking setup={setup} date={localDateIn(timeZone, now)} client={{ client }} />
           ) : null}
         </div>
       </header>
 
-      <div className="grid gap-4">
-        <LegacyCard>
-          <h2 className="m-0 mb-2 font-display text-lg font-bold">Contact</h2>
-          {client.email === null && client.phone === null ? (
-            <p className="m-0 text-ink-2">No email or phone yet.</p>
-          ) : (
-            <ul className="m-0 grid list-none gap-1 p-0" data-testid="client-contact">
-              {client.email === null ? null : (
-                <li>
-                  <a href={`mailto:${client.email}`}>{client.email}</a>
-                </li>
-              )}
-              {client.phone === null ? null : (
-                <li>
-                  <a href={`tel:${client.phone}`}>{client.phone}</a>
-                </li>
-              )}
-            </ul>
-          )}
-        </LegacyCard>
+      <section aria-labelledby="client-contact" className="flex flex-col gap-3">
+        <h2 id="client-contact" className="m-0 type-heading">
+          Contact
+        </h2>
+        {client.email === null && client.phone === null ? (
+          <div className="flex flex-col items-start gap-3">
+            <p className="m-0 type-body text-ink-2">
+              No email or phone yet{manages ? ': add one and I can send their reminders.' : '.'}
+            </p>
+            {manages ? <ClientEditor client={client} label="Add a phone or email" /> : null}
+          </div>
+        ) : (
+          <div className="rounded-lg bg-surface px-4" data-testid="client-contact">
+            <DetailTable
+              rows={[
+                ...(client.email === null
+                  ? []
+                  : [
+                      {
+                        label: 'Email',
+                        value: <ContactLink href={`mailto:${client.email}`} text={client.email} />,
+                      },
+                    ]),
+                ...(client.phone === null
+                  ? []
+                  : [
+                      {
+                        label: 'Phone',
+                        value: <ContactLink href={`tel:${client.phone}`} text={client.phone} />,
+                      },
+                    ]),
+              ]}
+            />
+          </div>
+        )}
+      </section>
 
-        {!readsNotes ? null : memory === null ? (
-          <p role="alert" className="m-0 rounded-md bg-wait-soft px-4 py-3 font-semibold text-wait">
-            I couldn’t read what I know about {client.name}. Try again in a moment.
+      {!readsNotes ? null : memory === null ? (
+        <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
+          I couldn’t read what I know about {client.name}. Try again in a moment.
+        </p>
+      ) : (
+        <ClientMemory
+          clientId={id.data}
+          clientName={client.name}
+          initialFacts={memory.facts}
+          timeZone={timeZone}
+          canChange={current.permissions.includes('client_notes.manage')}
+        />
+      )}
+
+      {past === null || upcoming === null ? (
+        <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
+          I couldn’t load all of {client.name}’s visits. Try again in a moment.
+        </p>
+      ) : null}
+
+      <section aria-labelledby="client-upcoming" className="flex flex-col gap-3">
+        <h2 id="client-upcoming" className="m-0 type-heading">
+          Coming up
+        </h2>
+        {visits.upcoming.length === 0 ? (
+          <p className="m-0 type-body text-ink-2">
+            Nothing booked in the next two months.
+            {books ? ' Tap Book to find them a time.' : null}
           </p>
         ) : (
-          <ClientMemory
-            clientId={id.data}
-            clientName={client.name}
-            initialFacts={memory.facts}
-            timeZone={timeZone}
-            canChange={current.permissions.includes('client_notes.manage')}
+          <VisitList
+            testId="upcoming-visits"
+            items={visits.upcoming.map((booking) => ({ id: booking.id, ...describe(booking) }))}
           />
         )}
+      </section>
 
-        {past === null || upcoming === null ? (
-          <p role="alert" className="m-0 rounded-md bg-wait-soft px-4 py-3 font-semibold text-wait">
-            I couldn’t load all of {client.name}’s visits. Try again in a moment.
-          </p>
-        ) : null}
-
-        <LegacyCard>
-          <h2 className="m-0 mb-2 font-display text-lg font-bold">Coming up</h2>
-          {visits.upcoming.length === 0 ? (
-            <p className="m-0 text-ink-2">Nothing booked in the next two months.</p>
-          ) : (
-            <VisitList
-              testId="upcoming-visits"
-              items={visits.upcoming.map((booking) => ({ id: booking.id, ...describe(booking) }))}
-            />
-          )}
-        </LegacyCard>
-
-        <LegacyCard>
-          <h2 className="m-0 mb-2 font-display text-lg font-bold">Recent visits</h2>
-          {visits.past.length === 0 ? (
-            <p className="m-0 text-ink-2">No visits in the last two months.</p>
-          ) : (
-            <VisitList
-              testId="past-visits"
-              items={visits.past.map((booking) => ({
-                id: booking.id,
-                ...describe(booking),
-                status: booking.status === 'confirmed' ? undefined : STATUS_LABELS[booking.status],
-                muted: booking.status === 'cancelled' || booking.status === 'no_show',
-              }))}
-            />
-          )}
-        </LegacyCard>
-      </div>
+      <section aria-labelledby="client-past" className="flex flex-col gap-3">
+        <h2 id="client-past" className="m-0 type-heading">
+          Recent visits
+        </h2>
+        {visits.past.length === 0 ? (
+          <p className="m-0 type-body text-ink-2">No visits in the last two months.</p>
+        ) : (
+          <VisitList
+            testId="past-visits"
+            items={visits.past.map((booking) => ({
+              id: booking.id,
+              ...describe(booking),
+              status: booking.status === 'confirmed' ? undefined : STATUS_LABELS[booking.status],
+              muted: booking.status === 'cancelled' || booking.status === 'no_show',
+            }))}
+          />
+        )}
+      </section>
     </div>
   );
 }
 
+/** An email or phone on its own line: a 44 px tap target (D3), the text wrapping if long. */
+function ContactLink({ href, text }: { href: string; text: string }) {
+  return (
+    <a
+      href={href}
+      className={cx(
+        'inline-flex min-h-11 items-center font-semibold text-brand [overflow-wrap:anywhere] underline-offset-2',
+        FOCUS_RING,
+      )}
+    >
+      {text}
+    </a>
+  );
+}
+
+/** Visits as quiet hairline rows: the time first, then what and with whom, a status if any. */
 function VisitList({
   items,
   testId,
@@ -199,24 +244,23 @@ function VisitList({
   testId: string;
 }) {
   return (
-    <ul className="m-0 grid list-none divide-y divide-line p-0" data-testid={testId}>
+    <ul
+      className="m-0 flex list-none flex-col divide-y divide-line rounded-lg bg-surface px-4 py-0"
+      data-testid={testId}
+    >
       {items.map((item) => (
         <li
           key={item.id}
           className={cx(
-            'flex items-start justify-between gap-3 py-2',
-            item.muted === true && 'text-ink-2',
+            'flex min-h-14 items-center justify-between gap-3 py-3',
+            item.muted === true && 'opacity-70',
           )}
         >
-          <div className="min-w-0">
-            <p className="m-0 font-semibold">{item.when}</p>
-            <p className="m-0 text-sm text-ink-2">{item.what}</p>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <p className="m-0 type-body font-semibold text-ink tabular-nums">{item.when}</p>
+            <p className="m-0 type-caption text-ink-2">{item.what}</p>
           </div>
-          {item.status === undefined ? null : (
-            <span className="shrink-0 rounded-full bg-surface-2 px-2 py-0.5 text-xs font-semibold text-ink-2">
-              {item.status}
-            </span>
-          )}
+          {item.status === undefined ? null : <Badge>{item.status}</Badge>}
         </li>
       ))}
     </ul>

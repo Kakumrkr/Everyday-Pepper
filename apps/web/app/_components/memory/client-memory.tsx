@@ -1,7 +1,6 @@
 'use client';
 
 import { MemoryFactsResponseSchema, type ClientId, type MemoryFactView } from '@pepper/contracts';
-import { LegacyCard } from '@pepper/ui';
 import { useState } from 'react';
 import { fetchJson } from '../../../lib/client-api';
 import { SUGGESTED_KEYS, visitLine } from '../../../lib/memory';
@@ -11,7 +10,8 @@ import { FactItem } from './fact-item';
 /**
  * "What Pepper knows" about a client and the notes of their visits, on their profile (S32,
  * AC-W3-1): read, add, edit and delete by hand. Staff reach only their own clients' (the api
- * decides); a visit note is added from the visit on the calendar.
+ * decides); a visit note is added from the visit on the calendar. On the kit (S42): two quiet
+ * sections of hairline rows (nothing here waits for a decision, so nothing is raised).
  */
 export function ClientMemory({
   clientId,
@@ -60,53 +60,56 @@ export function ClientMemory({
 
   return (
     <>
-      <LegacyCard>
-        <section aria-labelledby="client-memory" className="flex flex-col gap-3">
-          <h2 id="client-memory" className="m-0 font-display text-lg font-bold">
-            What Pepper knows
-          </h2>
-          {about.length === 0 ? (
-            <p className="m-0 text-ink-2">
-              Nothing yet. Tell me in chat, like “Remember that {clientName} prefers mornings”.
-            </p>
-          ) : (
-            <ul className="m-0 flex list-none flex-col gap-2 p-0" data-testid="client-facts">
-              {about.map((fact) => item(fact, null))}
-            </ul>
-          )}
-          {canChange ? (
-            <AddFact
-              subject={{ type: 'client', id: clientId }}
-              suggestions={SUGGESTED_KEYS.client}
-              legend={`Add something about ${clientName}`}
-              onAdded={() => {
-                void reload();
-              }}
-            />
-          ) : null}
-          {error === null ? null : (
-            <p role="alert" className="m-0 text-sm text-danger">
-              {error}
-            </p>
-          )}
-        </section>
-      </LegacyCard>
-      <LegacyCard>
-        <section aria-labelledby="client-visit-notes" className="flex flex-col gap-3">
-          <h2 id="client-visit-notes" className="m-0 font-display text-lg font-bold">
-            Visit notes
-          </h2>
-          {notes.length === 0 ? (
-            <p className="m-0 text-ink-2">
-              No notes yet. Add one from a visit on the calendar, like the color formula.
-            </p>
-          ) : (
-            <ul className="m-0 flex list-none flex-col gap-2 p-0" data-testid="visit-notes">
-              {notes.map((fact) => item(fact, visitLine(fact, timeZone)))}
-            </ul>
-          )}
-        </section>
-      </LegacyCard>
+      <section aria-labelledby="client-memory" className="flex flex-col gap-3">
+        <h2 id="client-memory" className="m-0 type-heading">
+          What Pepper knows
+        </h2>
+        {about.length === 0 ? (
+          <p className="m-0 type-body text-ink-2">
+            Nothing yet. {canChange ? 'Add it below, or tell me in chat' : 'Tell me in chat'}, like
+            “Remember that {clientName} prefers mornings”.
+          </p>
+        ) : (
+          <ul
+            className="m-0 flex list-none flex-col divide-y divide-line rounded-lg bg-surface px-4 py-0"
+            data-testid="client-facts"
+          >
+            {about.map((fact) => item(fact, null))}
+          </ul>
+        )}
+        {canChange ? (
+          <AddFact
+            subject={{ type: 'client', id: clientId }}
+            suggestions={SUGGESTED_KEYS.client}
+            legend={`Add something about ${clientName}`}
+            onAdded={() => {
+              void reload();
+            }}
+          />
+        ) : null}
+        {error === null ? null : (
+          <p role="alert" className="m-0 type-label text-danger">
+            {error}
+          </p>
+        )}
+      </section>
+      <section aria-labelledby="client-visit-notes" className="flex flex-col gap-3">
+        <h2 id="client-visit-notes" className="m-0 type-heading">
+          Visit notes
+        </h2>
+        {notes.length === 0 ? (
+          <p className="m-0 type-body text-ink-2">
+            No notes yet. Open a visit on the calendar to add one, like the color formula.
+          </p>
+        ) : (
+          <ul
+            className="m-0 flex list-none flex-col divide-y divide-line rounded-lg bg-surface px-4 py-0"
+            data-testid="visit-notes"
+          >
+            {notes.map((fact) => item(fact, visitLine(fact, timeZone)))}
+          </ul>
+        )}
+      </section>
     </>
   );
 }
