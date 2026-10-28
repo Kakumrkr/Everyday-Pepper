@@ -1,6 +1,7 @@
 import { MeResponseSchema, type MeResponse } from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  checkSignUp,
   loadAccount,
   loadCurrentBusiness,
   loadInvites,
@@ -226,5 +227,25 @@ describe('loadPublicBusiness', () => {
     expect(
       await loadPublicBusiness('juniper', { ...options, fetch: answering(200, { name: 1 }).fetch }),
     ).toEqual({ state: 'unavailable' });
+  });
+});
+
+describe('checkSignUp', () => {
+  it('says what each empty or short field needs, before anything is sent', () => {
+    expect(checkSignUp({ name: ' ', email: '', password: '' })).toEqual({
+      name: 'Enter your name, as your team and clients will see it.',
+      email: 'Enter your email. You’ll sign in with it.',
+      password: 'Use a password of at least 10 characters.',
+    });
+    expect(checkSignUp({ name: 'Ana', email: 'ana@', password: 'x'.repeat(129) })).toEqual({
+      email: 'Enter your email. You’ll sign in with it.',
+      password: 'Use a password of at most 128 characters.',
+    });
+  });
+
+  it('passes a filled-in form', () => {
+    expect(
+      checkSignUp({ name: 'Ana Reyes', email: 'ana@example.com', password: 'correct horse' }),
+    ).toEqual({});
   });
 });

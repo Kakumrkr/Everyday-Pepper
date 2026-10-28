@@ -2,6 +2,7 @@
 
 import { Button, Input } from '@pepper/ui';
 import { useId, useState, type ReactNode, type SubmitEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { ROUTES } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
@@ -73,13 +74,22 @@ export function TwoFactorSetup() {
 
   async function verify(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+    const input = event.currentTarget.querySelector<HTMLElement>('[name="code"]');
     const code = formText(event.currentTarget, 'code').replace(/\s/g, '');
     setBusy(true);
     setError(null);
     const result = await sendJson('POST', '/api/auth/two-factor/verify-totp', { code });
-    setBusy(false);
-    if (result.ok) window.location.assign(ROUTES.home);
-    else setError(result.message);
+    if (result.ok) {
+      window.location.assign(ROUTES.home);
+      return;
+    }
+    flushSync(() => {
+      setBusy(false);
+      setError(result.message);
+    });
+    // The field sits at the foot of a long page: bring it and its error above the action bar.
+    input?.focus({ preventScroll: true });
+    input?.scrollIntoView({ block: 'center' });
   }
 
   const errorLine = error === null ? null : <Notice tone="error">{error}</Notice>;
@@ -162,10 +172,10 @@ export function TwoFactorSetup() {
               inputMode="numeric"
               autoComplete="one-time-code"
               required
+              error={error ?? undefined}
             />
           </SetupStep>
         </ol>
-        {errorLine}
       </form>
     </AuthPage>
   );

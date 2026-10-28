@@ -2,9 +2,12 @@ import { expect, test } from '@playwright/test';
 import {
   enterPassword,
   freshCode,
+  hydrated,
   onboardOwner,
   ownClientAddress,
+  PASSWORD,
   signOut,
+  signUp,
   unique,
 } from './helpers.js';
 
@@ -68,6 +71,43 @@ test.describe('owner sign-in with two-step verification', () => {
       await page.goto(path);
       await expect(page).toHaveURL(/\/sign-in$/);
     }
+  });
+
+  // S43.2 walkthrough: an empty sign-up said "Something went wrong"; a wrong setup code's error
+  // sat under the action bar, out of view on a phone.
+  test('sign-up says what each empty field needs, and focuses the first', async ({ page }) => {
+    await page.goto('/sign-up');
+    await (await hydrated(page.getByRole('button', { name: 'Create account' }))).click();
+    await expect(page.getByLabel('Your name')).toBeFocused();
+    await expect(page.getByLabel('Your name')).toHaveAccessibleDescription(/Enter your name/);
+    await expect(page.getByText('Enter your email. You’ll sign in with it.')).toBeVisible();
+    await expect(page.getByText('Use a password of at least 10 characters.')).toBeVisible();
+    await expect(page).toHaveURL(/\/sign-up$/);
+  });
+
+  test('a wrong code while turning on two-step verification shows in view', async ({ page }) => {
+    test.setTimeout(60_000);
+    await signUp(page, `${unique('owner')}@example.test`);
+    await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
+    await hydrated(page.getByRole('button', { name: 'Create business' }));
+    await page.getByLabel('Business name').fill('Wrong Code Studio');
+    await page.getByLabel('Booking link').fill(unique('shop'));
+    await page.getByRole('button', { name: 'Create business' }).click();
+    await expect(page).toHaveURL(/\/security\/two-factor$/, { timeout: 30_000 });
+    await hydrated(page.getByRole('button', { name: 'Continue' }));
+    await page.getByLabel('Confirm your password').fill(PASSWORD);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByLabel('Enter the 6-digit code').fill('000000');
+    await page.getByRole('button', { name: 'Turn on two-step verification' }).click();
+    const error = page.getByText('That code didn’t work.', { exact: false });
+    await expect(error).toBeInViewport({ ratio: 1 });
+    // …and above the action bar fixed at the bottom of the screen.
+    const box = await error.boundingBox();
+    const bar = await page
+      .getByRole('button', { name: 'Turn on two-step verification' })
+      .boundingBox();
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThan(bar?.y ?? 0);
+    await expect(page.getByLabel('Enter the 6-digit code')).toBeFocused();
   });
 
   test('the forms fit a phone screen', async ({ page }) => {
