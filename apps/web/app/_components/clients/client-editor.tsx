@@ -21,12 +21,15 @@ export function ClientEditor({
   label,
   open: shown,
   onOpenChange,
+  returnFocus,
 }: {
   client?: Client;
   label?: string;
   /** Opened from elsewhere too (the empty list's "Add your first client"). */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Where focus goes on close when another button opened it (Sheet's `returnFocus`). */
+  returnFocus?: (() => HTMLElement | null) | undefined;
 }) {
   const [own, setOwn] = useState(false);
   const open = shown ?? own;
@@ -36,6 +39,7 @@ export function ClientEditor({
     <Sheet
       title={client === undefined ? 'Add a client' : `Edit ${client.name}`}
       open={open}
+      returnFocus={returnFocus}
       onOpenChange={(next) => {
         setOpen(next);
         if (next) setKey((k) => k + 1);

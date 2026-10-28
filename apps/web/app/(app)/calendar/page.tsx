@@ -99,6 +99,7 @@ export default async function CalendarPage({
   const books =
     abilities.books &&
     bookableStaff(day.staff, { userId, ownOnly: abilities.ownStaffOnly }).length > 0;
+  const manageStaff = current.permissions.includes('staff.manage');
   const quiet = !day.failed && columns.every((column) => column.entries.length === 0);
 
   return (
@@ -178,18 +179,25 @@ export default async function CalendarPage({
       ) : null}
 
       {columns.length === 0 ? (
-        staffMemberId === null ? (
+        // A failed load already said so above: no call to add a team that may exist.
+        day.failed ? null : staffMemberId === null ? (
           <EmptyState
             icon="team"
-            title="No one on the calendar yet"
+            title={day.staff.length === 0 ? 'No one on the calendar yet' : 'No one is on today'}
             body={
-              current.permissions.includes('staff.manage')
-                ? 'Add yourself and your team, and everyone’s appointments show here.'
-                : 'Once the owner adds the team, everyone’s appointments show here.'
+              day.staff.length > 0
+                ? 'Everyone on your team is switched off. Turn someone back on in Team.'
+                : manageStaff
+                  ? 'Add yourself and your team, and everyone’s appointments show here.'
+                  : 'Once the owner adds the team, everyone’s appointments show here.'
             }
             action={
-              current.permissions.includes('staff.manage')
-                ? { label: 'Add your team', href: ROUTES.team, renderLink: kitLink }
+              manageStaff
+                ? {
+                    label: day.staff.length === 0 ? 'Add your team' : 'Open Team',
+                    href: ROUTES.team,
+                    renderLink: kitLink,
+                  }
                 : { label: 'Back to Home', href: ROUTES.home, renderLink: kitLink }
             }
           />
@@ -214,7 +222,7 @@ export default async function CalendarPage({
             timeZone={timeZone}
             date={date}
             columns={columns}
-            staff={day.staff}
+            staff={filterable}
             now={sameDate(date, today) ? new Date().toISOString() : null}
             setup={books ? setup : null}
           />

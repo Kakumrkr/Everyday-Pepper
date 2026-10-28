@@ -165,6 +165,7 @@ test('clients: the owner finds a client, sees the coming visit on the profile, e
   await expect(sheet(page).getByRole('heading', { name: 'Add a client' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(sheet(page)).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Add your first client' })).toBeFocused();
   await page.goto('/');
 
   const { timeZone, day } = await businessClock(page);

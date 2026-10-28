@@ -18,6 +18,8 @@ export function ClientsScreen({
   manages: boolean;
 }) {
   const [adding, setAdding] = useState(false);
+  // The empty list's button, when it opened the sheet: focus goes back there on close.
+  const [opener, setOpener] = useState<HTMLElement | null>(null);
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -27,7 +29,17 @@ export function ClientsScreen({
             {manages ? 'Everyone who books with you.' : 'The clients you have appointments with.'}
           </p>
         </div>
-        {manages ? <ClientEditor open={adding} onOpenChange={setAdding} /> : null}
+        {manages ? (
+          <ClientEditor
+            open={adding}
+            onOpenChange={(next) => {
+              // Opened by its own trigger: Radix returns focus there.
+              if (next) setOpener(null);
+              setAdding(next);
+            }}
+            returnFocus={opener === null ? undefined : () => (opener.isConnected ? opener : null)}
+          />
+        ) : null}
       </header>
       {initial === null ? (
         <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
@@ -39,7 +51,8 @@ export function ClientsScreen({
           staffView={!manages}
           onAdd={
             manages
-              ? () => {
+              ? (from) => {
+                  setOpener(from);
                   setAdding(true);
                 }
               : undefined

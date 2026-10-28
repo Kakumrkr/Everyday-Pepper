@@ -2,7 +2,7 @@
 
 import { ClientsResponseSchema, type Client } from '@pepper/contracts';
 import { Avatar, cx, EmptyState, fieldStyle, IconButton, List, ListRow } from '@pepper/ui';
-import { useState, type SubmitEvent } from 'react';
+import { useRef, useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { fetchJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
@@ -26,9 +26,10 @@ export function ClientDirectory({
   initial: Client[];
   staffView: boolean;
   /** Owners and managers: opens "Add a client" (the empty list's action). */
-  onAdd?: (() => void) | undefined;
+  onAdd?: ((opener: HTMLElement | null) => void) | undefined;
 }) {
   const [clients, setClients] = useState(initial);
+  const searchField = useRef<HTMLInputElement>(null);
   const [searched, setSearched] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -59,6 +60,7 @@ export function ClientDirectory({
           Search clients by name or email
         </label>
         <input
+          ref={searchField}
           id="client-search"
           name="search"
           type="search"
@@ -84,7 +86,14 @@ export function ClientDirectory({
               icon="search"
               title={`No clients match “${searched}”`}
               body="Check the spelling, or search by email instead."
-              action={{ label: 'Show everyone', onClick: () => void search('') }}
+              action={{
+                label: 'Show everyone',
+                onClick: () => {
+                  // The field shows what the list shows: empty again.
+                  if (searchField.current !== null) searchField.current.value = '';
+                  void search('');
+                },
+              }}
             />
           ) : staffView || onAdd === undefined ? (
             <EmptyState
@@ -98,7 +107,14 @@ export function ClientDirectory({
               icon="clients"
               title="No clients yet"
               body="Add your regulars once, and booking them takes a tap. Anyone you book is added too."
-              action={{ label: 'Add your first client', onClick: onAdd }}
+              action={{
+                label: 'Add your first client',
+                onClick: () => {
+                  onAdd(
+                    document.activeElement instanceof HTMLElement ? document.activeElement : null,
+                  );
+                },
+              }}
             />
           )}
         </div>

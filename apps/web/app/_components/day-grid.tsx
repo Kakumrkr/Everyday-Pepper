@@ -58,7 +58,7 @@ export function DayGrid({
   timeZone: string;
   date: CivilDate;
   columns: CalendarColumn[];
-  /** The business's staff, in order: their tones. */
+  /** The business's active staff, in order: their tones (so visible columns differ). */
   staff: readonly StaffMember[];
   /** The current instant when the day is today (draws the now-line). */
   now: string | null;
