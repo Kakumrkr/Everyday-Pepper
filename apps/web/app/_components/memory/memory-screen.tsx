@@ -6,8 +6,9 @@ import {
   type MemoryFactView,
   type Permission,
 } from '@pepper/contracts';
-import { buttonClass, chipClass } from '@pepper/ui';
+import { Badge, Button, cx, EmptyState, FOCUS_RING, Switch } from '@pepper/ui';
 import { useState } from 'react';
+import { ROUTES } from '../../../lib/account';
 import { sendJson } from '../../../lib/client-api';
 import {
   canChange,
@@ -16,12 +17,15 @@ import {
   matchesFilter,
   type MemoryFilter,
 } from '../../../lib/memory';
+import { kitLink } from '../kit-link';
 import { FactItem } from './fact-item';
 
 /**
  * "What I know" (S32, playbook §7): everything Pepper remembers that the member may read,
  * grouped and filtered, each with where it came from; the member's own past conversations;
- * and the pause switch. Nothing here is cached (`no-store` answers, ADR-0038).
+ * and the pause switch. Nothing here is cached (`no-store` answers, ADR-0038). On the kit since
+ * S42.3: each group a quiet block of hairline rows, and an empty memory that offers the chat,
+ * where Pepper learns (AC-X-7).
  */
 export function MemoryScreen({
   initialFacts,
@@ -46,7 +50,7 @@ export function MemoryScreen({
     <div className="flex flex-col gap-6">
       <PauseSwitch paused={initialPaused} canPause={permissions.includes('settings.manage')} />
       {initialFacts.length >= MEMORY_FACTS_PAGE ? (
-        <p className="m-0 rounded-md bg-wait-soft px-4 py-3 text-sm text-wait">
+        <p className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
           I remember more than {MEMORY_FACTS_PAGE} things; these are the first {MEMORY_FACTS_PAGE}.
           A client’s profile shows everything about them.
         </p>
@@ -60,29 +64,48 @@ export function MemoryScreen({
             onClick={() => {
               setFilter(key);
             }}
-            className={chipClass({ selected: filter === key })}
+            className={cx(
+              'min-h-11 rounded-pill border px-4 py-0 type-label tabular-nums transition motion-fast ease-standard',
+              filter === key
+                ? 'border-brand bg-brand text-brand-ink'
+                : 'border-line-strong bg-surface text-ink hover:bg-surface-2',
+              FOCUS_RING,
+            )}
           >
             {label} · {facts.filter((fact) => matchesFilter(fact, key)).length}
           </button>
         ))}
       </div>
-      {groups.length === 0 ? (
-        <p className="m-0 rounded-md bg-surface-2 px-4 py-3 text-ink-2">
-          {facts.length === 0
-            ? 'I don’t remember anything yet. Tell me in chat, like “Remember that Maria is allergic to PPD”.'
-            : 'Nothing here for this filter.'}
-        </p>
+      {facts.length === 0 ? (
+        <EmptyState
+          icon="memory"
+          title="I don’t remember anything yet."
+          body="Tell me in chat, like “Remember that Maria is allergic to PPD”, and it shows up here."
+          action={{ label: 'Tell Pepper in chat', href: ROUTES.chat, renderLink: kitLink }}
+        />
+      ) : groups.length === 0 ? (
+        <EmptyState
+          icon="memory"
+          title="Nothing here for this filter."
+          body="Everything I remember is under All."
+          action={{
+            label: 'Show everything',
+            onClick: () => {
+              setFilter('all');
+            },
+          }}
+        />
       ) : (
         groups.map((group) => (
           <section
             key={group.key}
             aria-labelledby={`memory-${group.key}`}
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-3"
           >
-            <h2 id={`memory-${group.key}`} className="m-0 font-display text-lg font-bold">
+            <h2 id={`memory-${group.key}`} className="m-0 type-heading">
               {group.title}
             </h2>
-            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            <ul className="m-0 list-none divide-y divide-line rounded-lg bg-surface p-0 px-4">
               {group.facts.map((fact) => (
                 <li key={fact.id}>
                   <FactItem
@@ -104,7 +127,7 @@ export function MemoryScreen({
               ))}
             </ul>
             {group.key === 'clients' ? (
-              <p className="m-0 text-xs text-ink-2">
+              <p className="m-0 type-caption text-ink-2">
                 Sensitive facts are shown only to owners, managers and the client’s own stylist.
               </p>
             ) : null}
@@ -145,41 +168,34 @@ function PauseSwitch({ paused: initial, canPause }: { paused: boolean; canPause:
     else setError(answer.message);
   }
 
+  const said = paused
+    ? 'I’m not saving anything new from chat. What I already know still helps, and you can still fix or delete it.'
+    : 'I remember what you tell me in chat. Pause it any time; what I already know stays until you delete it.';
   return (
-    <section
-      aria-labelledby="memory-learning"
-      className="flex flex-col gap-2 rounded-md border border-line bg-surface p-4"
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="memory-learning" className="m-0 text-base font-bold">
-          Learn new things
-        </h2>
-        {canPause ? (
-          <button
-            type="button"
-            role="switch"
-            aria-checked={!paused}
-            aria-labelledby="memory-learning"
-            disabled={busy}
-            onClick={() => {
-              void toggle();
-            }}
-            className={buttonClass({ variant: paused ? 'secondary' : 'primary', size: 'sm' })}
-          >
-            {paused ? 'Paused' : 'On'}
-          </button>
-        ) : (
-          <span className="text-sm font-semibold">{paused ? 'Paused' : 'On'}</span>
-        )}
-      </div>
-      <p className="m-0 text-sm text-ink-2">
-        {paused
-          ? 'I’m not saving anything new from chat. What I already know still helps, and you can still fix or delete it.'
-          : 'I remember what you tell me in chat. Pause it any time; what I already know stays until you delete it.'}
-        {canPause ? null : ' Owners and managers can change this.'}
-      </p>
+    <section aria-label="Learn new things" className="rounded-lg bg-surface px-4 py-1">
+      {canPause ? (
+        <Switch
+          label="Learn new things"
+          hint={said}
+          checked={!paused}
+          disabled={busy}
+          onChange={() => {
+            void toggle();
+          }}
+        />
+      ) : (
+        <div className="flex flex-col gap-0.5 py-2">
+          <p className="m-0 flex items-center justify-between gap-4 type-body text-ink">
+            Learn new things
+            <Badge tone={paused ? 'warn' : 'ok'}>{paused ? 'Paused' : 'On'}</Badge>
+          </p>
+          <p className="m-0 type-caption text-ink-2">
+            {said} Owners and managers can change this.
+          </p>
+        </div>
+      )}
       {error === null ? null : (
-        <p role="alert" className="m-0 text-sm text-danger">
+        <p role="alert" className="m-0 pb-2 type-label text-danger">
           {error}
         </p>
       )}
@@ -212,61 +228,63 @@ function Episodes({
 
   return (
     <section aria-labelledby="memory-episodes" className="flex flex-col gap-2">
-      <h2 id="memory-episodes" className="m-0 font-display text-lg font-bold">
-        Our past conversations
-      </h2>
-      <p className="m-0 text-sm text-ink-2">Only you see these.</p>
-      <ul className="m-0 flex list-none flex-col gap-2 p-0">
+      <div className="flex flex-col gap-1">
+        <h2 id="memory-episodes" className="m-0 type-heading">
+          Our past conversations
+        </h2>
+        <p className="m-0 type-body text-ink-2">Only you see these.</p>
+      </div>
+      <ul className="m-0 list-none divide-y divide-line rounded-lg bg-surface p-0 px-4">
         {episodes.map((episode) => (
-          <li
-            key={episode.id}
-            className="flex flex-col gap-1.5 rounded-md border border-line bg-surface p-3"
-          >
-            <p className="m-0 whitespace-pre-wrap">{episode.summary}</p>
-            <p className="m-0 text-xs text-ink-2">{date.format(new Date(episode.createdAt))}</p>
+          <li key={episode.id} className="flex flex-col gap-1.5 py-3">
+            <p className="m-0 type-body whitespace-pre-wrap text-ink">{episode.summary}</p>
+            <p className="m-0 type-caption text-ink-2">
+              {date.format(new Date(episode.createdAt))}
+            </p>
             {confirming === episode.id ? (
               <div
                 role="group"
                 aria-label="Delete this conversation?"
                 className="flex flex-wrap items-center gap-2"
               >
-                <span className="text-sm">Delete it? It can’t be undone.</span>
-                <button
-                  type="button"
+                <span className="type-body text-ink">Delete it? It can’t be undone.</span>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => {
                     void remove(episode.id);
                   }}
-                  className={buttonClass({ size: 'sm', className: 'bg-danger hover:bg-danger' })}
                 >
                   Delete
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => {
                     setConfirming(null);
                   }}
-                  className={buttonClass({ variant: 'secondary', size: 'sm' })}
                 >
                   Keep it
-                </button>
+                </Button>
               </div>
             ) : (
-              <button
-                type="button"
+              <Button
+                variant="quiet"
+                size="sm"
+                className="self-start"
                 aria-label={`Delete the conversation of ${date.format(new Date(episode.createdAt))}`}
                 onClick={() => {
                   setConfirming(episode.id);
                 }}
-                className={buttonClass({ variant: 'quiet', size: 'sm', className: 'self-start' })}
               >
                 Delete
-              </button>
+              </Button>
             )}
           </li>
         ))}
       </ul>
       {error === null ? null : (
-        <p role="alert" className="m-0 text-sm text-danger">
+        <p role="alert" className="m-0 type-label text-danger">
           {error}
         </p>
       )}

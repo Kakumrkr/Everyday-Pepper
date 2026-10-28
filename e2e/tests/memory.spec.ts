@@ -81,6 +81,9 @@ test('a fact told in the chat: on "What I know" and the profile (AC-W3-1), then 
   await page.goto('/memory');
   await expect(page.getByText('Allergy: PPD')).toHaveCount(0);
   await expect(page.getByText('I don’t remember anything yet.', { exact: false })).toBeVisible();
+  // The empty memory offers its next step: the chat, where Pepper learns (AC-X-7).
+  await page.getByRole('link', { name: 'Tell Pepper in chat' }).click();
+  await expect(page).toHaveURL(/\/chat$/);
 });
 
 test('a visit note from the booking sheet, edited on the profile; deleted from "What I know"', async ({
@@ -188,17 +191,14 @@ test('staff see their clients and the business’s non-sensitive facts; owners p
   // The owner pauses learning: the chat saves nothing new, screens still can.
   await page.goto('/memory');
   const learning = await hydrated(page.getByRole('switch', { name: 'Learn new things' }));
-  await expect(learning).toHaveAttribute('aria-checked', 'true');
+  await expect(learning).toBeChecked();
   await learning.click();
-  await expect(learning).toHaveAttribute('aria-checked', 'false');
+  await expect(learning).not.toBeChecked();
   await expect(
     page.getByText('I’m not saving anything new from chat.', { exact: false }),
   ).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('switch', { name: 'Learn new things' })).toHaveAttribute(
-    'aria-checked',
-    'false',
-  );
+  await expect(page.getByRole('switch', { name: 'Learn new things' })).not.toBeChecked();
   await ask(page, "Remember Sam's usual service is Haircut");
   await expect(log(page).getByText('I couldn’t do that. Nothing changed.')).toBeVisible();
   await page.goto('/memory');

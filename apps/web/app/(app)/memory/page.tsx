@@ -13,7 +13,8 @@ export const metadata: Metadata = { title: 'What I know · Pepper' };
 /**
  * "What I know" (S32, playbook §7): what Pepper remembers that the member may read (staff:
  * their clients and visits, and the business's non-sensitive facts), their own past
- * conversations, and the pause switch. Read fresh on every visit, never cached.
+ * conversations, and the pause switch. Read fresh on every visit, never cached. On the kit
+ * since S42.3 (AC-X-10).
  */
 export default async function MemoryPage() {
   // The app layout has sent anyone without a usable session elsewhere already.
@@ -26,18 +27,17 @@ export default async function MemoryPage() {
     currentJson('/v1/memory/settings', MemorySettingsSchema),
   ]);
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <div>
-        <p className="m-0 text-xs font-bold tracking-wide text-ink-2 uppercase">Trust</p>
-        <h1 className="m-0 font-display text-2xl font-bold">What I know</h1>
-      </div>
-      <p className="m-0 text-ink-2">
-        Everything I remember{current === null ? '' : ` about ${current.business.name}`}. Fix
-        anything that’s wrong. When you delete something, I forget it everywhere, chats included,
-        and it can’t be undone.
-      </p>
+    <div className="mx-auto flex max-w-2xl flex-col gap-5">
+      <header className="flex flex-col gap-1">
+        <h1 className="m-0 type-display">What I know</h1>
+        <p className="m-0 type-body text-ink-2">
+          Everything I remember{current === null ? '' : ` about ${current.business.name}`}. Fix
+          anything that’s wrong. When you delete something, I forget it everywhere, chats
+          included, and it can’t be undone.
+        </p>
+      </header>
       {current === null || facts === null || episodes === null || settings === null ? (
-        <p role="alert" className="rounded-md bg-wait-soft px-4 py-3 font-semibold text-wait">
+        <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
           I couldn’t read what I know right now. Try again in a moment.
         </p>
       ) : (
