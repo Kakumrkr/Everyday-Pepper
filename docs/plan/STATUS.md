@@ -7,7 +7,15 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S42.2 is closed. Next: S42.3 (see "Planned sessions").
+**S42.3 Phase 9 · Autonomy, What I know and Waitlist on the kit** (branch `claude/s42-3-phase-9-autonomy-waitlist-5wxtf1`). Brief approved: "Go with ur recommendation and do the complete session work" (D-1 A: Waitlist empties offer "Add someone in chat" and "Open the calendar"; D-2 A: the dial stays a radio group, restyled with tokens).
+- [x] 1. AC-X-6 widened, AC-X-10 new, traceability.
+- [ ] 2. Kit Switch: the whole row a 44 px label (top-up), unit test first.
+- [ ] 3. Autonomy on the kit (Switch, dial on tokens), `chat.spec.ts`.
+- [ ] 4. What I know on the kit, "Tell Pepper in chat", `memory.spec.ts`.
+- [ ] 5. Waitlist on the kit, empties with actions, `waitlist.spec.ts`.
+- [ ] 6. `screens.spec.ts` block: baselines + `expectTapTargets` at 375 px.
+- [ ] 7. `/session-close`.
+Next step: task 2.
 
 ## Last sessions
 - **S42.2 Phase 9 · Booking sheets, Services and Team on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42.2 note). Full entry in [session-log.md](session-log.md).

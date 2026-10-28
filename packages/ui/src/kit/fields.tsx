@@ -182,27 +182,37 @@ export type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | '
   hint?: string | undefined;
 };
 
-/** An on/off setting that takes effect at once (a checkbox with the switch role). */
+/**
+ * An on/off setting that takes effect at once (a checkbox with the switch role). The whole row,
+ * label, hint and switch, is one label and so one tap target (D3); the name is the label alone.
+ */
 export function Switch({ label, hint, className, ...rest }: SwitchProps) {
   const id = useId();
   return (
-    <div className={cx('flex min-h-11 items-center justify-between gap-4 py-2', className)}>
-      <div className="flex flex-col gap-0.5">
-        <label htmlFor={id} className="cursor-pointer type-body text-ink">
+    <label
+      className={cx(
+        'flex min-h-11 cursor-pointer items-center justify-between gap-4 py-2',
+        rest.disabled === true && 'cursor-not-allowed',
+        className,
+      )}
+    >
+      <span className="flex flex-col gap-0.5">
+        <span id={`${id}-label`} className="type-body text-ink">
           {label}
-        </label>
+        </span>
         {hint !== undefined && (
-          <p id={`${id}-hint`} className="m-0 type-caption text-ink-2">
+          <span id={`${id}-hint`} className="type-caption text-ink-2">
             {hint}
-          </p>
+          </span>
         )}
-      </div>
+      </span>
       <span className="relative inline-flex shrink-0">
         <input
           {...rest}
           id={id}
           type="checkbox"
           role="switch"
+          aria-labelledby={`${id}-label`}
           aria-describedby={hint === undefined ? undefined : `${id}-hint`}
           className="peer absolute inset-0 z-10 m-0 size-full min-h-0 cursor-pointer p-0 opacity-0"
         />
@@ -223,6 +233,6 @@ export function Switch({ label, hint, className, ...rest }: SwitchProps) {
           )}
         />
       </span>
-    </div>
+    </label>
   );
 }
