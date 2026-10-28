@@ -1,48 +1,23 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-28 · **Plan version:** 0.34 ([PCR-008](changes/PCR-008.md)) · **Current phase:** 10 — First 10 minutes (Phase 9 closed in S43.2: every screen on the kit, C3/C4/C10 at 8) → next: **S44** (password reset, email verification, change email)
+**Last updated:** 2026-10-28 · **Plan version:** 0.34 ([PCR-008](changes/PCR-008.md)) · **Current phase:** 10 — First 10 minutes (Phase 9 closed in S43.2: every screen on the kit, C3/C4/C10 at 8) → next: **S45** (business type at signup → pre-filled menu and hours)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S44 · Account recovery + the waitlist fix** (brief approved 2026-10-28: "D1 is B. Rest all, go with your recommendation. and complete the session"). D-1 B: one session. D-2 A: auth emails through `MAILER` (ADR-0045). D-3 A: migration 0051 marks earlier accounts verified. Full wording in [decisions.md](decisions.md) (S44 entry, written).
-**Done (all committed and pushed on `claude/affectionate-goodall-9yg8gg`, no PR yet):**
-- Tasks 1–8: ACs AC-W1-4…6 and AC-W5-2 (traceability filled); the waitlist window check (`WaitlistTimesFreeError`); Better Auth reset, verification and change email (`auth-emails.ts`); 4 screens on `AuthPage`; the e2e journeys (`auth.spec.ts` 22 passed before the review); 36 new and 6 updated baselines (`screens.spec.ts`, account screens); ADR-0045 and ADR-0042's S44 note.
-- `/session-close` step 1: `/code-review` with 8 fixes in commit `00a772f`:
-  - background send;
-  - change email confirmed by the current address and then the new one (`sendChangeEmailConfirmation`, `landingOn`, `/email-confirmed?changed=pending|1`);
-  - the sign-up rate limit;
-  - a startup error when no mailer is configured;
-  - reload links on "Check your inbox";
-  - `refusal.tsx` suggests exactly the wanted appointment (`suggestedWindow(tz, startsAt, minutes)`) and names the free times;
-  - one `slotsFor` per check.
-  Left as is, with reasons: the outbox exception (D-2) and the eval world seeding through time off. `/security-review`: nothing found. Tier 2 is green: web 308, api 343, appointments 134.
-- Step 2.1: `pnpm check` green.
-
-**Next, in order:**
-1. `pnpm test:integration`. It was running in the background at the checkpoint: re-run it if its log is gone. Fix any red and re-run only the failing file.
-2. Full Playwright, alone:
-   - `.claude/skills/session-close/e2e-stack.sh start <scratchpad>/stack`, then `MAILPIT_URL=http://localhost:8025 pnpm --filter @pepper/e2e test:e2e --workers=3`, then `e2e-stack.sh stop`. Docker image builds fail on the proxy, so use this script and not `docker compose up --build`.
-   - Expect the changed journeys to need checking: the `booking.spec` waitlist window is now 10:30–11:30, and `auth.spec` AC-W1-6 now uses two links.
-   - None of the review's screens were re-shot. If the account screenshots differ, look at them, then `--update-snapshots`.
-3. Walkthrough: a new owner at 375 px, dark theme, through sign-up → check inbox → confirm → forgot password → reset. Screenshots go to `<scratchpad>/walkthrough/`. Then go through DESIGN §7.
-4. Docs:
-   - STATUS: S44 goes into "Last sessions" (S43 drops out); clear "In progress"; add a "Recent decisions" line; S44 leaves the planned sessions table.
-   - session-log: an S44 entry with its **Retro**. Top-up idea for S45: the business-type picker on `AuthPage` with field errors.
-   - ADR-0045 already says Accepted.
-5. Open the PR once: subscribe, one CI run, squash merge. Then give the S45 prompt.
+Nothing in progress.
 
 ## Last sessions
+- **S44 Phase 10 · Account recovery + the waitlist window check (2026-10-28)** ([ADR-0045](../adr/0045-account-recovery-and-email.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:** password reset, email check for new accounts, change of email (current address, then the new one), sent in the background through `MAILER`; migration 0051; four screens on `AuthPage`; `add_to_waitlist` refuses windows with free times (409 `waitlist_times_free`, the AI's `times_free`). AC-W1-4…6, AC-W5-2.
+  - **Top-up (S43.2 retro):** each new screen's error under its field, the action at the bottom (`expectStickyAtTheBottom`), axe clean.
+  - **Checks:** `pnpm check` green; integration green (two fixes: a timeout under load re-run alone, the hostile fake's waitlist window); Playwright 136 passed, 31 skipped, 3 baselines updated and re-run green; axe 6 of 6.
 - **S43.2 Phase 9 · Account screens on the kit, Phase 9 gate (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S43.2 note, [scorecard](scorecard.md) §5). Full entry in [session-log.md](session-log.md).
   - **Built:** sign-in, sign-up, two-step setup, create business and invite on one kit `AuthPage`, main action in the sticky bar; the legacy stylesheet, `LEGACY_ALIASES`, `chipClass`, `Field`, `FormError` deleted; copy pass; AC-X-12. **Gate met:** C3, C4, C10 6 → 8.
   - **Top-up (S43 retro):** sign-in's and sign-up's main action at the bottom of a 375 px phone, checked with `expectStickyAtTheBottom`.
   - **Checks:** `pnpm check` green; integration skipped (screens, kit, e2e only); Playwright 127 passed, 31 skipped, 0 failed; walkthrough fixes re-run green; 48 new baselines, 64 updated.
-- **S43 Phase 9 · Public pages on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S43 note). Full entry in [session-log.md](session-log.md).
-  - **Built:** the booking page (step bar, one-tap rows, sticky "Send my code"/"Confirm booking", "Times are Chicago time"), manage-booking ("Book again" once cancelled), the offer page and unsubscribe on the kit in the business's colour; `LegacyCard` and `buttonClass` gone; AC-X-11. Split at the brief: auth, the legacy stylesheet and the Phase 9 gate → S43.2 (D-1).
-  - **Top-up (S42.3 retro):** Autonomy's "Saved" a kit Toast above the tabs, in view at 375 px; errors stay until dismissed; the toast area lets taps through.
-  - **Checks:** `pnpm check` green; integration skipped (screens, kit, e2e only); Playwright 121 passed, 28 skipped, 1 failed (the review's time grid at 1280 px), updated and re-run twice green; 54 new baselines, 6 updated.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -58,6 +33,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S44 (user, 2026-10-28):** at the brief "D1 is B. Rest all, go with your recommendation. and complete the session" (D-1 no split; D-2 account emails through `MAILER`, ADR-0045; D-3 migration 0051 marks earlier accounts confirmed). **Claude:** the free-time rule as the matcher's; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
 - **S43.2 (user, 2026-10-28):** at the brief "go with your recommendation and complete the session" (D-1 one session, no split; D-2 copy pass on the account screens and the lines met on the way). **Claude:** `AuthPage` with the sticky bar on every width; the API status only when it isn't ready; the Phase 9 scores; the review's 2 and the walkthrough's 2 fixes. Full wording in [decisions.md](decisions.md).
 - **S43 (user, 2026-10-28):** at the brief "Go with your recommendation and complete the session work" (D-1 split: auth, legacy stylesheet, Phase 9 gate → S43.2; D-2 the kit Toast as it is). **Claude:** one-tap rows, the sticky bar centred on wide screens, the clock by city or offset, "Saved" for the provider's 6 s; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S42.3 (user, 2026-10-28):** at the brief "Go with ur recommendation and do the complete session work" (D-1 Waitlist empties offer the chat and the calendar; D-2 the dial stays a radio group). **Claude:** the Switch hint outside its label; `chipStyle`; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
@@ -88,11 +64,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S43.2, M1–M2 and P1 are done (Phases 0–9: the re-plan and the new look on every screen, Phase 9 gate met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S44, M1–M2 and P1 are done (Phases 0–9: the re-plan and the new look on every screen, Phase 9 gate met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S44 | Password reset, email verification, change email; `add_to_waitlist` window check in the domain | 10 | Journeys + domain tests green |
 | S45 | Business type at signup → pre-filled menu and hours; US zones first; activation events | 10 | A barber business bookable with zero typing |
 | S46 | Setup checklist + warnings; staff without hours hidden; first free day; plain zone names | 10 | Review UX #1–#5 closed with tests |
 | S47 | Branded booking page (profile, images, colors), remembered devices, drop-off per step; **Phase 10 gate** | 10 | New owner bookable < 10 min |
