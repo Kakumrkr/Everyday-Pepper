@@ -39,6 +39,8 @@ The look is already central. Every color, radius and font lives in `packages/ui/
 
 **S41 (2026-10-27):** the shell (bottom tabs Home · Calendar · Clients · Chat · More; a desktop sidebar with a "Pepper" and a "Business" group and Settings), a `/more` page that holds the places beyond the tabs, this device's notifications, the rebooking emails' address and the account (they left Home), Home, Chat and the AI cards on the kit. A card is raised only while it waits for a decision. Screenshots of Home, Chat and More (`screens.spec.ts`) and the D3 tap-target check (`tap-targets.ts`) run in Playwright.
 
+**S42 (2026-10-28):** the Calendar day view, the Clients list and a client's profile on the kit. Staff tones (`brand`, `accent`, `info` soft blocks with a 4 px bar) come from a member's place among the active staff (`staffTone`), not the stored colour, which most share. The grid is 88 px an hour so a 30-minute booking is a 44 px target, and two staff columns fit 375 px. Empty states offer their next step as an action (AC-X-7). Screenshots of the three screens in `screens.spec.ts`, whose briefing no longer waits on the wall clock.
+
 ## Consequences
 - Phase 9 adds five sessions before the old Phase 9 work. Each screen is redone once, before the new features land on it.
 - Screenshot tests add baselines to the repo and a little time to CI. Baselines change only with a reviewed visual change.

@@ -10,6 +10,7 @@ import {
   readCalendarParams,
   readDate,
   sameDate,
+  staffTone,
   timeRange,
   todayIn,
 } from './calendar';
@@ -192,5 +193,23 @@ describe('labels', () => {
   it('sameDate', () => {
     expect(sameDate(nov3, { ...nov3 })).toBe(true);
     expect(sameDate(nov3, { ...nov3, day: 4 })).toBe(false);
+  });
+});
+
+describe('staffTone', () => {
+  const staff = ['a', 'b', 'c', 'd'].map((id) => ({ id }));
+
+  it('gives the first three staff members three different tones, then starts again', () => {
+    expect(staff.map((member) => staffTone(staff, member.id))).toEqual([
+      'brand',
+      'accent',
+      'info',
+      'brand',
+    ]);
+  });
+
+  it('keeps a member’s tone when the list is filtered elsewhere, and falls back to brand', () => {
+    expect(staffTone(staff, 'c')).toBe('info');
+    expect(staffTone(staff, 'unknown')).toBe('brand');
   });
 });

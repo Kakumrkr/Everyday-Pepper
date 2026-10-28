@@ -1,7 +1,7 @@
 'use client';
 
 import { MEMORY_LIMITS, type MemorySubject } from '@pepper/contracts';
-import { buttonClass } from '@pepper/ui';
+import { buttonStyle, cx, fieldStyle } from '@pepper/ui';
 import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { toFactKey } from '../../../lib/memory';
@@ -68,7 +68,7 @@ export function AddFact({
         onClick={() => {
           setOpen(true);
         }}
-        className={buttonClass({ variant: 'secondary', size: 'sm', className: 'self-start' })}
+        className={cx(buttonStyle({ variant: 'secondary', size: 'sm' }), 'self-start')}
       >
         {legend}
       </button>
@@ -82,8 +82,8 @@ export function AddFact({
       className="flex flex-col gap-2"
     >
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
-        <legend className="mb-1 font-semibold">{legend}</legend>
-        <label htmlFor={`${id}-key`} className="text-sm font-semibold">
+        <legend className="mb-1 type-label">{legend}</legend>
+        <label htmlFor={`${id}-key`} className="type-label">
           About
         </label>
         <input
@@ -94,14 +94,14 @@ export function AddFact({
           onChange={(event) => {
             setLabel(event.target.value);
           }}
-          className="min-h-11 rounded-md border border-line bg-surface px-3"
+          className={cx(fieldStyle, 'min-h-11')}
         />
         <datalist id={`${id}-keys`}>
           {suggestions.map((suggestion) => (
             <option key={suggestion} value={suggestion} />
           ))}
         </datalist>
-        <label htmlFor={`${id}-value`} className="text-sm font-semibold">
+        <label htmlFor={`${id}-value`} className="type-label">
           Note
         </label>
         <input
@@ -111,9 +111,9 @@ export function AddFact({
           onChange={(event) => {
             setValue(event.target.value);
           }}
-          className="min-h-11 rounded-md border border-line bg-surface px-3"
+          className={cx(fieldStyle, 'min-h-11')}
         />
-        <label className="flex min-h-11 items-center gap-2 text-sm">
+        <label className="flex min-h-11 items-center gap-2 type-label">
           <input
             type="checkbox"
             checked={sensitive}
@@ -126,12 +126,12 @@ export function AddFact({
         </label>
       </fieldset>
       {error === null ? null : (
-        <p role="alert" className="m-0 text-sm text-danger">
+        <p role="alert" className="m-0 type-label text-danger">
           {error}
         </p>
       )}
       <div className="flex flex-wrap gap-2">
-        <button type="submit" disabled={busy} className={buttonClass({ size: 'sm' })}>
+        <button type="submit" disabled={busy} className={buttonStyle({ size: 'sm' })}>
           Save
         </button>
         <button
@@ -141,7 +141,7 @@ export function AddFact({
             setOpen(false);
             setError(null);
           }}
-          className={buttonClass({ variant: 'secondary', size: 'sm' })}
+          className={buttonStyle({ variant: 'secondary', size: 'sm' })}
         >
           Cancel
         </button>

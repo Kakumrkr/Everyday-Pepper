@@ -1,7 +1,7 @@
 'use client';
 
 import { BookingSchema, type AvailableSlot } from '@pepper/contracts';
-import { buttonClass, Icon } from '@pepper/ui';
+import { buttonClass, buttonStyle, Icon } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { bookableStaff, type BookingSetup } from '../../../lib/booking';
@@ -40,7 +40,7 @@ export function NewBooking({
         if (next) setKey((k) => k + 1);
       }}
       trigger={
-        <button type="button" className={buttonClass({ size: 'sm' })}>
+        <button type="button" className={buttonStyle({ size: 'sm' })}>
           <Icon name="plus" />
           {client === undefined ? 'New booking' : 'Book'}
         </button>

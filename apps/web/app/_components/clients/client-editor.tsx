@@ -1,39 +1,58 @@
 'use client';
 
 import { ClientSchema, type Client } from '@pepper/contracts';
-import { buttonClass, Icon } from '@pepper/ui';
+import { Button, buttonStyle, Icon, Input, Sheet } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { normalizeContact } from '../../../lib/booking';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { Field, Notice, Sheet } from '../booking/sheet';
+import { Notice } from '../booking/sheet';
 
 /**
  * Adds a client (`POST /v1/clients`, then their profile) or edits one's name, email and phone
- * (`PUT /v1/clients/:id`). Owners and managers only; the api checks it again.
+ * (`PUT /v1/clients/:id`). Owners and managers only; the api checks it again. On the kit (S42):
+ * its Sheet and fields; `label` names the opener when the screen words it differently ("Add a
+ * phone or email" on an empty profile).
  */
-export function ClientEditor({ client }: { client?: Client }) {
-  const [open, setOpen] = useState(false);
+export function ClientEditor({
+  client,
+  label,
+  open: shown,
+  onOpenChange,
+  returnFocus,
+}: {
+  client?: Client;
+  label?: string;
+  /** Opened from elsewhere too (the empty list's "Add your first client"). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Where focus goes on close when another button opened it (Sheet's `returnFocus`). */
+  returnFocus?: (() => HTMLElement | null) | undefined;
+}) {
+  const [own, setOwn] = useState(false);
+  const open = shown ?? own;
+  const setOpen = onOpenChange ?? setOwn;
   const [key, setKey] = useState(0);
   return (
     <Sheet
       title={client === undefined ? 'Add a client' : `Edit ${client.name}`}
       open={open}
+      returnFocus={returnFocus}
       onOpenChange={(next) => {
         setOpen(next);
         if (next) setKey((k) => k + 1);
       }}
       trigger={
         client === undefined ? (
-          <button type="button" className={buttonClass({ size: 'sm' })}>
+          <button type="button" className={buttonStyle({ size: 'sm' })}>
             <Icon name="plus" />
-            Add client
+            {label ?? 'Add client'}
           </button>
         ) : (
-          <button type="button" className={buttonClass({ variant: 'secondary', size: 'sm' })}>
-            Edit details
+          <button type="button" className={buttonStyle({ variant: 'secondary', size: 'sm' })}>
+            {label ?? 'Edit details'}
           </button>
         )
       }
@@ -88,37 +107,35 @@ function ClientForm({ client, onDone }: { client: Client | undefined; onDone: ()
 
   return (
     <form className="grid gap-4" onSubmit={(event) => void submit(event)} noValidate>
-      <Field label="Name">
-        <input
-          name="name"
-          required
-          autoComplete="off"
-          maxLength={120}
-          defaultValue={client?.name ?? ''}
-        />
-      </Field>
-      <Field label="Email (optional)">
-        <input
-          name="email"
-          type="email"
-          autoComplete="off"
-          maxLength={254}
-          defaultValue={client?.email ?? ''}
-        />
-      </Field>
-      <Field label="Phone (optional)" hint="US numbers as you’d dial them; others with +.">
-        <input
-          name="phone"
-          type="tel"
-          autoComplete="off"
-          maxLength={20}
-          defaultValue={client?.phone ?? ''}
-        />
-      </Field>
+      <Input
+        label="Name"
+        name="name"
+        required
+        autoComplete="off"
+        maxLength={120}
+        defaultValue={client?.name ?? ''}
+      />
+      <Input
+        label="Email (optional)"
+        name="email"
+        type="email"
+        autoComplete="off"
+        maxLength={254}
+        defaultValue={client?.email ?? ''}
+      />
+      <Input
+        label="Phone (optional)"
+        hint="US numbers as you’d dial them; others with +."
+        name="phone"
+        type="tel"
+        autoComplete="off"
+        maxLength={20}
+        defaultValue={client?.phone ?? ''}
+      />
       {error === null ? null : <Notice tone="error">{error}</Notice>}
-      <button type="submit" disabled={busy} className={buttonClass({ className: 'w-full' })}>
+      <Button type="submit" busy={busy} block>
         {busy ? 'Saving…' : client === undefined ? 'Add client' : 'Save'}
-      </button>
+      </Button>
     </form>
   );
 }

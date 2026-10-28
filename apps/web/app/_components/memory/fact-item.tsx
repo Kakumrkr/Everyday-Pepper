@@ -1,7 +1,7 @@
 'use client';
 
 import { MEMORY_LIMITS, MemoryFactSchema, type MemoryFactView } from '@pepper/contracts';
-import { buttonClass, cx, Icon } from '@pepper/ui';
+import { Badge, buttonStyle, cx, fieldStyle, Icon } from '@pepper/ui';
 import Link from 'next/link';
 import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -80,7 +80,7 @@ export function FactItem({
   }
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-md border border-line bg-surface p-3">
+    <div className="flex flex-col gap-1.5 py-3">
       {mode === 'edit' ? (
         <form
           onSubmit={(event) => {
@@ -88,7 +88,7 @@ export function FactItem({
           }}
           className="flex flex-col gap-2"
         >
-          <label htmlFor={inputId} className="text-sm font-semibold">
+          <label htmlFor={inputId} className="type-label">
             {label}
             {about === null ? null : <span className="font-normal text-ink-2"> · {about}</span>}
           </label>
@@ -99,10 +99,10 @@ export function FactItem({
             onChange={(event) => {
               setDraft(event.target.value);
             }}
-            className="min-h-11 rounded-md border border-line bg-surface px-3"
+            className={cx(fieldStyle, 'min-h-11')}
           />
           <div className="flex flex-wrap gap-2">
-            <button type="submit" disabled={busy} className={buttonClass({ size: 'sm' })}>
+            <button type="submit" disabled={busy} className={buttonStyle({ size: 'sm' })}>
               Save
             </button>
             <button
@@ -112,7 +112,7 @@ export function FactItem({
                 setDraft(fact.value);
                 setMode('view');
               }}
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+              className={buttonStyle({ variant: 'secondary', size: 'sm' })}
             >
               Cancel
             </button>
@@ -120,21 +120,21 @@ export function FactItem({
         </form>
       ) : (
         <>
-          <p className="m-0 whitespace-pre-wrap">
+          <p className="m-0 type-body whitespace-pre-wrap">
             <b>{label}:</b> {fact.value}
           </p>
-          {about === null ? null : <p className="m-0 text-sm text-ink-2">{about}</p>}
-          <p className="m-0 text-xs text-ink-2">{sourceLine(fact, timeZone)}</p>
+          {about === null ? null : <p className="m-0 type-label text-ink-2">{about}</p>}
+          <p className="m-0 type-caption text-ink-3">{sourceLine(fact, timeZone)}</p>
           {fact.sensitive || rule !== null ? (
             <div className="flex flex-wrap gap-2">
               {fact.sensitive ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-wait-soft px-2 text-xs font-semibold text-wait">
+                <Badge tone="warn">
                   <Icon name="lock" className="size-3.5" />
                   Sensitive
-                </span>
+                </Badge>
               ) : null}
               {rule === null ? null : (
-                <Link href={rule} className="text-xs font-semibold text-brand underline">
+                <Link href={rule} className={buttonStyle({ variant: 'quiet', size: 'sm' })}>
                   See the rule
                 </Link>
               )}
@@ -144,7 +144,7 @@ export function FactItem({
       )}
       {mode === 'confirm' ? (
         <div role="group" aria-label={`Delete ${label}?`} className="flex flex-col gap-2">
-          <p className="m-0 text-sm">
+          <p className="m-0 type-body">
             Delete this? I’ll forget it everywhere, chats included. It can’t be undone.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -154,7 +154,7 @@ export function FactItem({
               onClick={() => {
                 void forget();
               }}
-              className={buttonClass({ size: 'sm', className: 'bg-danger hover:bg-danger' })}
+              className={buttonStyle({ variant: 'danger', size: 'sm' })}
             >
               Delete
             </button>
@@ -164,7 +164,7 @@ export function FactItem({
               onClick={() => {
                 setMode('view');
               }}
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+              className={buttonStyle({ variant: 'secondary', size: 'sm' })}
             >
               Keep it
             </button>
@@ -180,7 +180,7 @@ export function FactItem({
               setError(null);
               setMode('edit');
             }}
-            className={buttonClass({ variant: 'quiet', size: 'sm' })}
+            className={buttonStyle({ variant: 'quiet', size: 'sm' })}
           >
             Edit
           </button>
@@ -191,14 +191,14 @@ export function FactItem({
               setError(null);
               setMode('confirm');
             }}
-            className={buttonClass({ variant: 'quiet', size: 'sm' })}
+            className={buttonStyle({ variant: 'quiet', size: 'sm' })}
           >
             Delete
           </button>
         </div>
       ) : null}
       {error === null ? null : (
-        <p role="alert" className={cx('m-0 text-sm text-danger')}>
+        <p role="alert" className="m-0 type-label text-danger">
           {error}
         </p>
       )}
