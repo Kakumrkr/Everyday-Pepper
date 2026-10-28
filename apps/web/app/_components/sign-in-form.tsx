@@ -1,6 +1,7 @@
 'use client';
 
-import { Button, Input } from '@pepper/ui';
+import { Button, buttonStyle, cx, Input } from '@pepper/ui';
+import Link from 'next/link';
 import { useId, useState, type ReactNode, type SubmitEvent } from 'react';
 import { errorCodeOf, sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
@@ -101,9 +102,12 @@ export function SignInForm({
           />
           {errorLine}
         </form>
-        <p className="m-0 type-body text-ink-2">
-          <TextLink href={ROUTES.forgotPassword}>Forgot your password?</TextLink>
-        </p>
+        <Link
+          href={ROUTES.forgotPassword}
+          className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), 'self-start')}
+        >
+          Forgot your password?
+        </Link>
         <p className="m-0 type-body text-ink-2">
           New to Pepper? <TextLink href={withNext(ROUTES.signUp, next)}>Create an account</TextLink>
         </p>
