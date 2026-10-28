@@ -125,6 +125,10 @@ describe('requestLogging', () => {
     expect(withoutSecrets('/v1/public/unsubscribe/AbC-123_xyz')).toBe(
       '/v1/public/unsubscribe/:token',
     );
+    expect(withoutSecrets('/api/auth/reset-password/rGh4rbjniOmh1w3s')).toBe(
+      '/api/auth/reset-password/:token',
+    );
+    expect(withoutSecrets('/api/auth/reset-password')).toBe('/api/auth/reset-password');
     expect(withoutSecrets('/v1/feed/settings')).toBe('/v1/feed/settings');
   });
 });

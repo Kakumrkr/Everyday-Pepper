@@ -146,7 +146,11 @@ async function signUp(name: string): Promise<{ browser: Browser; userId: string 
   const response = await b
     .post('/api/auth/sign-up/email', { name, email, password: PASSWORD })
     .expect(200);
-  return { browser: b, userId: (response.body as { user: { id: string } }).user.id };
+  const userId = (response.body as { user: { id: string } }).user.id;
+  // The email check is auth.int.test's subject (S44): here it is marked done, then signed in.
+  await database.db.execute(sql`UPDATE users SET email_verified = true WHERE id = ${userId}`);
+  await b.post('/api/auth/sign-in/email', { email, password: PASSWORD }).expect(200);
+  return { browser: b, userId };
 }
 
 /** An owner with a business and a second factor, and a staff member of it. */

@@ -1,4 +1,5 @@
 import { UserIdSchema } from '@pepper/contracts';
+import type { Mailer } from '@pepper/core';
 import {
   authDatabaseAdapter,
   listUserBusinesses,
@@ -9,6 +10,17 @@ import {
 import { betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins';
 import type { AuthConfig } from '../config.js';
+import {
+  AccountMailer,
+  accountExistsEmail,
+  changeOf,
+  confirmNewEmailEmail,
+  emailChangeNoticeEmail,
+  resetPasswordEmail,
+  RESET_LINK_MINUTES,
+  verifyEmailEmail,
+  VERIFY_LINK_HOURS,
+} from './auth-emails.js';
 
 /** Where Better Auth's endpoints are served (forwarded by the web app, ADR-0012). */
 export const AUTH_BASE_PATH = '/api/auth';
@@ -18,16 +30,33 @@ export const MIN_PASSWORD_LENGTH = 10;
 
 export interface BetterAuthOptions extends AuthConfig {
   db: Database;
+  /** Sends the account emails at once (ADR-0045); `null` when no SMTP_URL is configured. */
+  mailer: Mailer | null;
   /** Receives Better Auth's own log lines (they go through the redacting logger). */
   log: (level: 'debug' | 'info' | 'warn' | 'error', message: string) => void;
 }
 
 /**
- * The Better Auth instance (ADR-0007, ADR-0012): email and password sign-in, TOTP second
- * factor with backup codes, database sessions in HttpOnly SameSite=Lax cookies, rate limits on,
- * telemetry off. Tenant membership and roles stay in our own tables; auth only proves identity.
+ * Stricter limits (per address, in the window's seconds) on the endpoints that send email, so
+ * nobody floods an inbox; Better Auth's own stricter rules cover sign-in, sign-up and codes.
+ */
+export const EMAIL_RATE_LIMITS = {
+  '/request-password-reset': { window: 60, max: 3 },
+  '/send-verification-email': { window: 60, max: 3 },
+  '/change-email': { window: 60, max: 3 },
+} as const;
+
+/**
+ * The Better Auth instance (ADR-0007, ADR-0012, ADR-0045): email and password sign-in with a
+ * checked email for new accounts, password reset and change of email by emailed links, TOTP
+ * second factor with backup codes, database sessions in HttpOnly SameSite=Lax cookies, rate
+ * limits on, telemetry off. Tenant membership and roles stay in our own tables; auth only
+ * proves identity.
  */
 export function createBetterAuth(options: BetterAuthOptions) {
+  const mail = new AccountMailer(options.mailer, (level, message) => {
+    options.log(level, message);
+  });
   return betterAuth({
     appName: 'Pepper',
     baseURL: options.baseUrl,
@@ -40,8 +69,34 @@ export function createBetterAuth(options: BetterAuthOptions) {
       minPasswordLength: MIN_PASSWORD_LENGTH,
       maxPasswordLength: 128,
       autoSignIn: true,
-      // Needs the email channel (Phase 5); until then addresses are not verified.
-      requireEmailVerification: false,
+      // New accounts confirm their email before signing in (accounts from before S44 were
+      // marked confirmed by migration). It also makes sign-up answer the same for a taken
+      // address, whose owner gets an email instead (no account oracle).
+      requireEmailVerification: true,
+      sendResetPassword: ({ user, url }) =>
+        mail.send('password reset', resetPasswordEmail(user, url)),
+      resetPasswordTokenExpiresIn: RESET_LINK_MINUTES * 60,
+      revokeSessionsOnPasswordReset: true,
+      onExistingUserSignUp: ({ user }) =>
+        mail.send('account exists', accountExistsEmail(user, `${options.baseUrl}/sign-in`)),
+    },
+    emailVerification: {
+      // A change of address arrives here too, with `user.email` already the new address.
+      sendVerificationEmail: ({ user, url, token }) => {
+        const change = changeOf(token);
+        return change === null
+          ? mail.send('email check', verifyEmailEmail(user, url))
+          : mail.send(
+              'change of email',
+              confirmNewEmailEmail(user, change.to, url),
+              emailChangeNoticeEmail(user, change.from, change.to),
+            );
+      },
+      sendOnSignUp: true,
+      // An unconfirmed sign-in sends a fresh link (the old one may have run out).
+      sendOnSignIn: true,
+      autoSignInAfterVerification: true,
+      expiresIn: VERIFY_LINK_HOURS * 60 * 60,
     },
     session: {
       expiresIn: 60 * 60 * 24 * 7,
@@ -66,13 +121,14 @@ export function createBetterAuth(options: BetterAuthOptions) {
       },
     },
     user: {
-      changeEmail: { enabled: false },
+      // The new address confirms by its link before anything changes; the old one is told.
+      changeEmail: { enabled: true, updateEmailWithoutVerification: false },
       deleteUser: { enabled: false },
     },
     plugins: [twoFactor({ issuer: 'Pepper' })],
     // Built-in limits (stricter on sign-in, sign-up and second-factor checks), kept in memory:
     // enough for one api instance; move to Redis before running several.
-    rateLimit: { enabled: true, storage: 'memory' },
+    rateLimit: { enabled: true, storage: 'memory', customRules: { ...EMAIL_RATE_LIMITS } },
     advanced: {
       // Better Auth skips its origin (CSRF) checks when NODE_ENV is "test"; pin them on so
       // tests exercise exactly what runs in production.

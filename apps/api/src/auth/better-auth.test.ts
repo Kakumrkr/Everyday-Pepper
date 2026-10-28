@@ -1,12 +1,37 @@
 import type { Database } from '@pepper/db';
 import { describe, expect, it, vi } from 'vitest';
-import { AUTH_BASE_PATH, createBetterAuth, MIN_PASSWORD_LENGTH } from './better-auth.js';
+import type { EmailMessage } from '@pepper/core';
+import {
+  AUTH_BASE_PATH,
+  createBetterAuth,
+  EMAIL_RATE_LIMITS,
+  MIN_PASSWORD_LENGTH,
+} from './better-auth.js';
 
 // Regression checks on the security-relevant settings; the flows themselves run against real
 // Postgres in auth.int.test.ts.
-function create(baseUrl = 'http://localhost:3000', log = vi.fn()) {
-  return createBetterAuth({ baseUrl, secret: 's'.repeat(32), db: {} as Database, log });
+function create(baseUrl = 'http://localhost:3000', log = vi.fn(), sent: EmailMessage[] = []) {
+  const mailer = {
+    send: (message: EmailMessage) => {
+      sent.push(message);
+      return Promise.resolve();
+    },
+  };
+  return createBetterAuth({ baseUrl, secret: 's'.repeat(32), db: {} as Database, mailer, log });
 }
+
+const ana = {
+  id: 'u1',
+  name: 'Ana Reyes',
+  email: 'ana@example.test',
+  emailVerified: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+/** A JWT-shaped token whose payload is `payload` (only the payload is read). */
+const tokenWith = (payload: object) =>
+  `h.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.s`;
 
 describe('createBetterAuth', () => {
   it('serves under /api/auth for the app origin only', () => {
@@ -16,18 +41,55 @@ describe('createBetterAuth', () => {
     expect(options.trustedOrigins).toEqual(['http://localhost:3000']);
   });
 
-  it('allows email sign-in with long passwords, and nothing that needs email yet', () => {
+  it('allows email sign-in with long passwords for confirmed addresses (ADR-0045)', () => {
     const { options } = create();
     expect(options.emailAndPassword).toMatchObject({
       enabled: true,
       minPasswordLength: MIN_PASSWORD_LENGTH,
-      requireEmailVerification: false,
+      requireEmailVerification: true,
+      resetPasswordTokenExpiresIn: 3600,
+      revokeSessionsOnPasswordReset: true,
     });
     expect(MIN_PASSWORD_LENGTH).toBeGreaterThanOrEqual(10);
+    expect(options.emailVerification).toMatchObject({
+      sendOnSignUp: true,
+      sendOnSignIn: true,
+      autoSignInAfterVerification: true,
+      expiresIn: 24 * 3600,
+    });
     expect(options.user).toMatchObject({
-      changeEmail: { enabled: false },
+      changeEmail: { enabled: true, updateEmailWithoutVerification: false },
       deleteUser: { enabled: false },
     });
+  });
+
+  it('emails each link to the right address with the right words', async () => {
+    const sent: EmailMessage[] = [];
+    const { options } = create(undefined, vi.fn(), sent);
+    await options.emailAndPassword.sendResetPassword({ user: ana, url: 'R', token: 't' });
+    await options.emailVerification.sendVerificationEmail({
+      user: ana,
+      url: 'V',
+      token: tokenWith({ email: ana.email }),
+    });
+    await options.emailVerification.sendVerificationEmail({
+      user: { ...ana, email: 'new@example.test' },
+      url: 'C',
+      token: tokenWith({ email: ana.email, updateTo: 'new@example.test' }),
+    });
+    await options.emailAndPassword.onExistingUserSignUp({ user: ana });
+    expect(sent.map((m) => [m.to, m.subject])).toEqual([
+      ['ana@example.test', 'Reset your Pepper password'],
+      ['ana@example.test', 'Confirm your email for Pepper'],
+      ['new@example.test', 'Confirm your new email for Pepper'],
+      ['ana@example.test', 'Your Pepper email is about to change'],
+      ['ana@example.test', 'You already have a Pepper account'],
+    ]);
+  });
+
+  it('limits the endpoints that send email more tightly', () => {
+    expect(create().options.rateLimit.customRules).toEqual(EMAIL_RATE_LIMITS);
+    for (const rule of Object.values(EMAIL_RATE_LIMITS)) expect(rule.max).toBeLessThanOrEqual(3);
   });
 
   it('reads sessions from the database every time and never lets clients set the business', () => {

@@ -52,9 +52,11 @@ import {
 import { createLogger, createServiceApp, DATABASE } from '@pepper/runtime';
 import {
   postgresUrlAs,
+  startMailpit,
   startPostgres,
   startRedis,
   totpCodeFromUri,
+  type TestMailpit,
   type TestService,
 } from '@pepper/testing';
 import type { INestApplication } from '@nestjs/common';
@@ -71,6 +73,7 @@ const PASSWORD = 'correct horse battery';
 
 let postgres: TestService;
 let redis: TestService;
+let mailpit: TestMailpit;
 let app: INestApplication;
 let server: Server;
 let db: Database;
@@ -78,7 +81,7 @@ const logLines: Record<string, unknown>[] = [];
 let ipCounter = 0;
 
 beforeAll(async () => {
-  [postgres, redis] = await Promise.all([startPostgres(), startRedis()]);
+  [postgres, redis, mailpit] = await Promise.all([startPostgres(), startRedis(), startMailpit()]);
   const databaseUrl = postgresUrlAs(postgres.url, 'pepper_service', 'test-password');
   await prepareDatabase(postgres.url, databaseUrl);
   const config = loadApiConfig({
@@ -87,6 +90,7 @@ beforeAll(async () => {
     AUTH_SECRET: 'an-integration-test-secret-32-chars',
     OUTBOX_SECRET: 'an-integration-test-outbox-secret-32+',
     AUTH_BASE_URL: ORIGIN,
+    SMTP_URL: mailpit.smtpUrl,
     LOG_LEVEL: 'info',
   });
   const sink = new Writable({
@@ -107,7 +111,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await app.close();
-  await Promise.all([postgres.stop(), redis.stop()]);
+  await Promise.all([postgres.stop(), redis.stop(), mailpit.stop()]);
 });
 
 /**
@@ -136,10 +140,51 @@ function newEmail(name: string): string {
   return `${name}.${String(emailCounter)}@example.test`;
 }
 
+/** The emails Mailpit holds for `to`, newest first. */
+async function inbox(to: string): Promise<{ ID: string; Subject: string }[]> {
+  const search = await fetch(
+    `${mailpit.apiUrl}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`,
+  );
+  return ((await search.json()) as { messages: { ID: string; Subject: string }[] }).messages;
+}
+
+/** The text of the newest email to `to` with `subject` in its subject, waiting for it. */
+async function emailTo(to: string, subject: string): Promise<string> {
+  const deadline = Date.now() + 15_000;
+  for (;;) {
+    const found = (await inbox(to)).find((message) => message.Subject.includes(subject));
+    if (found !== undefined) {
+      const message = await fetch(`${mailpit.apiUrl}/api/v1/message/${found.ID}`);
+      return ((await message.json()) as { Text: string }).Text;
+    }
+    if (Date.now() > deadline) throw new Error(`No email to ${to} about "${subject}"`);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+}
+
+/** The app link in an email, as a path on the api (the web app forwards `/api/auth/*`). */
+function linkIn(text: string): string {
+  const url = new RegExp(`${ORIGIN}(/api/auth/\\S+)`).exec(text)?.[1];
+  if (url === undefined) throw new Error(`No link in: ${text}`);
+  return url;
+}
+
+/** Opens the email check sent to `email` in `b`, which signs it in (S44, AC-W1-5). */
+async function confirmEmail(b: Browser, email: string): Promise<void> {
+  const link = linkIn(await emailTo(email, 'Confirm your email'));
+  await b.get(link).expect(302);
+}
+
+/** Creates an account in `b` and confirms its email, so `b` is signed in. */
+async function register(b: Browser, name: string, email: string): Promise<void> {
+  await b.post('/api/auth/sign-up/email', { name, email, password: PASSWORD }).expect(200);
+  await confirmEmail(b, email);
+}
+
 async function signUp(name: string): Promise<{ browser: Browser; email: string }> {
   const b = browser();
   const email = newEmail(name);
-  await b.post('/api/auth/sign-up/email', { name, email, password: PASSWORD }).expect(200);
+  await register(b, name, email);
   return { browser: b, email };
 }
 
@@ -168,12 +213,17 @@ describe('owner journey', () => {
   let totpUri: string;
   let tenantId: string;
 
-  it('signs up with a session cookie that scripts cannot read', async () => {
+  it('signs up, confirms her email by its link, and gets a session cookie scripts cannot read', async () => {
     const b = browser();
     anaEmail = newEmail('ana');
-    const response = await b
+    await b
       .post('/api/auth/sign-up/email', { name: 'Ana Reyes', email: anaEmail, password: PASSWORD })
       .expect(200);
+    // AC-W1-5: no session before the email is confirmed.
+    await b.get('/v1/me').expect(401);
+    const text = await emailTo(anaEmail, 'Confirm your email for Pepper');
+    expect(text).toContain('Hi Ana,');
+    const response = await b.get(linkIn(text)).expect(302);
     const cookies = ([] as string[]).concat(response.headers['set-cookie'] ?? []);
     const session = cookies.find((c) => c.startsWith('pepper.session_token='));
     expect(session).toMatch(/HttpOnly/i);
@@ -359,21 +409,28 @@ describe('across businesses (AC-X-1)', () => {
 });
 
 describe('Better Auth safeguards', () => {
-  it('stores emails lowercased and refuses a second account for the same email', async () => {
+  it('stores emails lowercased; a second sign-up answers the same and emails the owner instead', async () => {
     const b = browser();
     const email = newEmail('Casey').replace('casey', 'Casey');
-    await b
-      .post('/api/auth/sign-up/email', { name: 'Casey', email, password: PASSWORD })
-      .expect(200);
+    await register(b, 'Casey', email);
     const [row] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
     expect(row?.email).toBe(email.toLowerCase());
-    await browser()
+    const again = browser();
+    // No account oracle (ADR-0012's gap, closed in S44): the same answer as a new address.
+    await again
       .post('/api/auth/sign-up/email', {
         name: 'Casey 2',
         email: email.toLowerCase(),
-        password: PASSWORD,
+        password: 'another long password',
       })
-      .expect(422);
+      .expect(200);
+    await again.get('/v1/me').expect(401);
+    expect(await emailTo(email.toLowerCase(), 'You already have a Pepper account')).toContain(
+      `${ORIGIN}/sign-in`,
+    );
+    expect(await db.select().from(users).where(eq(users.email, email.toLowerCase()))).toHaveLength(
+      1,
+    );
   });
 
   it('refuses short passwords', async () => {
@@ -592,7 +649,7 @@ describe('invites (ADR-0014)', () => {
     expect(listed.invites.map((i) => i.id)).toEqual([created.id]);
 
     const jess = browser();
-    await jess.post('/api/auth/sign-up/email', { name: 'Jess', email, password: PASSWORD });
+    await register(jess, 'Jess', email);
     expect((await me(jess)).businesses).toEqual([]);
     const preview = await jess.post('/v1/invites/lookup', { token }).expect(200);
     expect(preview.body).toMatchObject({ businessName: juniper.name, role: 'manager' });
@@ -654,7 +711,7 @@ describe('invites (ADR-0014)', () => {
     const { invite: created, token } = await invite(ana, email, 'staff');
     await ana.delete(`/v1/invites/${created.id}`).expect(204);
     const marco = browser();
-    await marco.post('/api/auth/sign-up/email', { name: 'Marco', email, password: PASSWORD });
+    await register(marco, 'Marco', email);
     expect(errorCode((await marco.post('/v1/invites/accept', { token }).expect(404)).body)).toBe(
       'invite_invalid',
     );
@@ -667,7 +724,7 @@ describe('invites (ADR-0014)', () => {
     const email = newEmail('staffer');
     const { token } = await invite(ana, email, 'staff');
     const staffer = browser();
-    await staffer.post('/api/auth/sign-up/email', { name: 'Staffer', email, password: PASSWORD });
+    await register(staffer, 'Staffer', email);
     await staffer.post('/v1/invites/accept', { token }).expect(200);
     const asStaff = await staffer.post('/v1/invites', { email: newEmail('x'), role: 'staff' });
     expect([asStaff.status, errorCode(asStaff.body)]).toEqual([403, 'forbidden']);
@@ -676,11 +733,7 @@ describe('invites (ADR-0014)', () => {
     const managerEmail = newEmail('mgr');
     const { token: managerToken } = await invite(ana, managerEmail, 'manager');
     const manager = browser();
-    await manager.post('/api/auth/sign-up/email', {
-      name: 'Mgr',
-      email: managerEmail,
-      password: PASSWORD,
-    });
+    await register(manager, 'Mgr', managerEmail);
     await manager.post('/v1/invites/accept', { token: managerToken }).expect(200);
     await enrolTotp(manager);
     const asManager = await manager.post('/v1/invites', { email: newEmail('y'), role: 'owner' });
@@ -1334,5 +1387,105 @@ describe('industry templates (ADR-0018)', () => {
       at('09:15'),
       at('09:30'),
     ]);
+  });
+});
+
+describe('account recovery and email (S44, ADR-0045)', () => {
+  it('AC-W1-5: an unconfirmed sign-in is refused and sends a fresh link; "Send again" tells no one apart', async () => {
+    const b = browser();
+    const email = newEmail('lena');
+    await b.post('/api/auth/sign-up/email', { name: 'Lena', email, password: PASSWORD });
+    const refused = await b.post('/api/auth/sign-in/email', { email, password: PASSWORD });
+    expect([refused.status, (refused.body as { code?: string }).code]).toEqual([
+      403,
+      'EMAIL_NOT_VERIFIED',
+    ]);
+    await b.get('/v1/me').expect(401);
+    // The same answer for an address without an account.
+    for (const asked of [email, newEmail('nobody')]) {
+      await browser()
+        .post('/api/auth/send-verification-email', { email: asked, callbackURL: '/' })
+        .expect(200);
+    }
+    expect(await inbox(newEmail('nobody'))).toEqual([]);
+    await confirmEmail(b, email);
+    expect((await me(b)).user).toMatchObject({ email });
+  });
+
+  it('AC-W1-4: a reset answers the same for any address, works once, and signs out every other session', async () => {
+    const { browser: phone, email } = await signUp('rosa');
+    const laptop = browser();
+    await laptop.post('/api/auth/sign-in/email', { email, password: PASSWORD }).expect(200);
+    const asker = browser();
+    for (const asked of [email, newEmail('nobody')]) {
+      const answer = await asker
+        .post('/api/auth/request-password-reset', { email: asked, redirectTo: '/reset-password' })
+        .expect(200);
+      expect(answer.body).toMatchObject({ status: true });
+    }
+    const text = await emailTo(email, 'Reset your Pepper password');
+    expect(text).toContain('It works once, for 60 minutes.');
+    // The link checks the token and sends the browser to the page with it.
+    const opened = await asker.get(linkIn(text)).expect(302);
+    const location = new URL(String(opened.headers['location']), ORIGIN);
+    expect(location.pathname).toBe('/reset-password');
+    const token = location.searchParams.get('token');
+    expect(token).toBeTruthy();
+
+    const newPassword = 'a brand new passphrase';
+    await asker.post('/api/auth/reset-password', { token, newPassword }).expect(200);
+    await phone.get('/v1/me').expect(401);
+    await laptop.get('/v1/me').expect(401);
+    const again = await asker.post('/api/auth/reset-password', {
+      token,
+      newPassword: 'x'.repeat(12),
+    });
+    expect(again.status).toBe(400);
+    await browser().post('/api/auth/sign-in/email', { email, password: PASSWORD }).expect(401);
+    await browser().post('/api/auth/sign-in/email', { email, password: newPassword }).expect(200);
+  });
+
+  it('AC-W1-6: a new email counts only once its link is opened; the old address is told', async () => {
+    const { browser: b, email } = await signUp('nora');
+    const newAddress = newEmail('nora.new');
+    await b
+      .post('/api/auth/change-email', { newEmail: newAddress, callbackURL: '/account' })
+      .expect(200);
+    const notice = await emailTo(email, 'Your Pepper email is about to change');
+    expect(notice).toContain(newAddress);
+    const text = await emailTo(newAddress, 'Confirm your new email for Pepper');
+    // Nothing changed yet: the old address still signs in, the new one doesn't.
+    expect((await me(b)).user.email).toBe(email);
+    await browser()
+      .post('/api/auth/sign-in/email', { email: newAddress, password: PASSWORD })
+      .expect(401);
+
+    await b.get(linkIn(text)).expect(302);
+    expect((await me(b)).user.email).toBe(newAddress);
+    await browser().post('/api/auth/sign-in/email', { email, password: PASSWORD }).expect(401);
+    await browser()
+      .post('/api/auth/sign-in/email', { email: newAddress, password: PASSWORD })
+      .expect(200);
+  });
+
+  it('a change to an address that has an account answers the same and changes nothing', async () => {
+    const { browser: b, email } = await signUp('ivy');
+    const { email: taken } = await signUp('ivy.taken');
+    await b
+      .post('/api/auth/change-email', { newEmail: taken, callbackURL: '/account' })
+      .expect(200);
+    expect((await inbox(taken)).map((m) => m.Subject)).not.toContain(
+      'Confirm your new email for Pepper',
+    );
+    expect((await me(b)).user.email).toBe(email);
+  });
+
+  it('sends no address or link token to the logs (the reset path is logged as :token)', () => {
+    const leaked = logLines
+      .map((line) => JSON.stringify(line))
+      .filter((line) =>
+        /verify-email\?token|reset-password\/(?!:token)|@example\.test/.test(line),
+      );
+    expect(leaked).toEqual([]);
   });
 });
