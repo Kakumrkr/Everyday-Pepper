@@ -1445,14 +1445,20 @@ describe('account recovery and email (S44, ADR-0045)', () => {
     await browser().post('/api/auth/sign-in/email', { email, password: newPassword }).expect(200);
   });
 
-  it('AC-W1-6: a new email counts only once its link is opened; the old address is told', async () => {
+  it('AC-W1-6: a new email counts only once the current address, then the new one, confirm', async () => {
     const { browser: b, email } = await signUp('nora');
     const newAddress = newEmail('nora.new');
     await b
-      .post('/api/auth/change-email', { newEmail: newAddress, callbackURL: '/account' })
+      .post('/api/auth/change-email', { newEmail: newAddress, callbackURL: '/email-confirmed' })
       .expect(200);
-    const notice = await emailTo(email, 'Your Pepper email is about to change');
-    expect(notice).toContain(newAddress);
+    // The current address confirms first: a stolen session alone can't move the account.
+    const confirm = await emailTo(email, 'Confirm the change of your Pepper email');
+    expect(confirm).toContain(newAddress);
+    expect(await inbox(newAddress)).toEqual([]);
+    const first = await browser().get(linkIn(confirm)).expect(302);
+    expect(first.headers['location']).toBe('/email-confirmed?changed=pending');
+    expect((await me(b)).user.email).toBe(email);
+
     const text = await emailTo(newAddress, 'Confirm your new email for Pepper');
     // Nothing changed yet: the old address still signs in, the new one doesn't.
     expect((await me(b)).user.email).toBe(email);
@@ -1460,7 +1466,8 @@ describe('account recovery and email (S44, ADR-0045)', () => {
       .post('/api/auth/sign-in/email', { email: newAddress, password: PASSWORD })
       .expect(401);
 
-    await b.get(linkIn(text)).expect(302);
+    const second = await b.get(linkIn(text)).expect(302);
+    expect(second.headers['location']).toBe('/email-confirmed?changed=1');
     expect((await me(b)).user.email).toBe(newAddress);
     await browser().post('/api/auth/sign-in/email', { email, password: PASSWORD }).expect(401);
     await browser()
@@ -1477,15 +1484,16 @@ describe('account recovery and email (S44, ADR-0045)', () => {
     expect((await inbox(taken)).map((m) => m.Subject)).not.toContain(
       'Confirm your new email for Pepper',
     );
+    expect((await inbox(email)).map((m) => m.Subject)).not.toContain(
+      'Confirm the change of your Pepper email',
+    );
     expect((await me(b)).user.email).toBe(email);
   });
 
   it('sends no address or link token to the logs (the reset path is logged as :token)', () => {
     const leaked = logLines
       .map((line) => JSON.stringify(line))
-      .filter((line) =>
-        /verify-email\?token|reset-password\/(?!:token)|@example\.test/.test(line),
-      );
+      .filter((line) => /verify-email\?token|reset-password\/(?!:token)|@example\.test/.test(line));
     expect(leaked).toEqual([]);
   });
 });

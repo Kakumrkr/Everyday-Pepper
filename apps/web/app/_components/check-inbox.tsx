@@ -74,10 +74,15 @@ export function CheckInbox({
       {result === null ? null : <Notice tone={result.tone}>{result.text}</Notice>}
       <p className="m-0 type-body text-ink-2">
         The link works for 24 hours. Wrong email?{' '}
-        <TextLink href={ROUTES.signUp}>Start again</TextLink>
+        <TextLink href={ROUTES.signUp} reload>
+          Start again
+        </TextLink>
       </p>
       <p className="m-0 type-body text-ink-2">
-        Already confirmed? <TextLink href={ROUTES.signIn}>Sign in</TextLink>
+        Already confirmed?{' '}
+        <TextLink href={ROUTES.signIn} reload>
+          Sign in
+        </TextLink>
       </p>
     </AuthPage>
   );

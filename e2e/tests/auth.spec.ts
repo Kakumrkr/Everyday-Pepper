@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test';
 import {
   anotherPerson,
   emailsTo,
-  emailTo,
   enterPassword,
   freshCode,
   hydrated,
@@ -203,7 +202,7 @@ test.describe('account recovery and email', () => {
     await visitor.context().close();
   });
 
-  test('AC-W1-6: change email from More; it counts once the new address confirms', async ({
+  test('AC-W1-6: change email from More; it counts once both addresses confirm', async ({
     page,
   }) => {
     test.setTimeout(90_000);
@@ -222,9 +221,11 @@ test.describe('account recovery and email', () => {
     const newEmail = `${unique('ana.new')}@example.test`;
     await page.getByLabel('New email').fill(newEmail);
     await page.getByRole('button', { name: 'Send the link' }).click();
-    await expect(page.getByRole('heading', { name: 'Check your new inbox' })).toBeVisible();
-    expect(await emailTo(owner.email, 'Your Pepper email is about to change')).toContain(newEmail);
-    // Nothing changed yet.
+    await expect(page.getByRole('heading', { name: 'Confirm it’s you' })).toBeVisible();
+
+    // The current address confirms first; then one more link goes to the new one.
+    await page.goto(await linkTo(owner.email, 'Confirm the change of your Pepper email'));
+    await expect(page.getByRole('heading', { name: 'One more step' })).toBeVisible();
     await page.goto('/more');
     await expect(page.getByText(owner.email, { exact: true })).toBeVisible();
 

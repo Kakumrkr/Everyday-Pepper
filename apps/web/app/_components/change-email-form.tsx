@@ -10,13 +10,10 @@ import { formText } from '../../lib/form';
 import { AuthPage, TextLink } from './auth-page';
 import { Notice } from './form-parts';
 
-/** Where the new address's link lands: "Your email is changed". */
-const CHANGED = `${ROUTES.emailConfirmed}?changed=1`;
-
 /**
- * Change of email (S44, AC-W1-6): the new address gets a link, the old one a notice, and nothing
- * changes until the link is opened. An address that already has an account gets the same answer
- * (no account oracle) and no link.
+ * Change of email (S44, AC-W1-6): the current address confirms by a link first, then the new one
+ * by another (the api sets where each lands); nothing changes before both. An address that
+ * already has an account gets the same answer here (no account oracle) and no link.
  */
 export function ChangeEmailForm({ current }: { current: string }) {
   const formId = useId();
@@ -41,7 +38,7 @@ export function ChangeEmailForm({ current }: { current: string }) {
     setBusy(true);
     const result = await sendJson('POST', '/api/auth/change-email', {
       newEmail: email,
-      callbackURL: CHANGED,
+      callbackURL: ROUTES.emailConfirmed,
     });
     setBusy(false);
     if (!result.ok) {
@@ -54,12 +51,12 @@ export function ChangeEmailForm({ current }: { current: string }) {
   if (sentTo !== null) {
     return (
       <AuthPage
-        title="Check your new inbox"
+        title="Confirm it’s you"
         lead={
           <>
-            We sent a link to <span className="font-semibold break-all text-ink">{sentTo}</span>.
-            Your email changes when you open it. Until then, you sign in with{' '}
-            <span className="font-semibold break-all text-ink">{current}</span>.
+            We sent a link to your current email,{' '}
+            <span className="font-semibold break-all text-ink">{current}</span>. Open it, then the
+            one we send to <span className="font-semibold break-all text-ink">{sentTo}</span>.
           </>
         }
         action={
@@ -69,7 +66,7 @@ export function ChangeEmailForm({ current }: { current: string }) {
         }
       >
         <p className="m-0 type-body text-ink-2">
-          We also told {current}, in case this wasn’t you. The link works for 24 hours.
+          Nothing changes until both links are opened. They work for 24 hours.
         </p>
       </AuthPage>
     );
@@ -80,8 +77,8 @@ export function ChangeEmailForm({ current }: { current: string }) {
       title="Change your email"
       lead={
         <>
-          You sign in with <span className="font-semibold break-all text-ink">{current}</span>.
-          We’ll send a link to the new address to make sure it’s yours.
+          You sign in with <span className="font-semibold break-all text-ink">{current}</span>. To
+          keep your account safe, we’ll ask both addresses to confirm.
         </>
       }
       action={

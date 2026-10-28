@@ -245,26 +245,31 @@ async function freeTimesIn(
     templateRuleDefaults: TemplateRuleDefaultsOf | undefined;
   },
 ): Promise<AvailableSlot[]> {
-  const free: AvailableSlot[] = [];
-  for (const window of search.windows) {
+  // One load over the windows' whole span, then only the times that fit inside a window.
+  const bounds = search.windows.map((window) => {
     const day = parseDate(window.date);
-    const from = Math.max(fromZoned(search.timeZone, day, minutesOfDay(window.start)), search.now);
-    const to = fromZoned(search.timeZone, day, minutesOfDay(window.end));
-    if (from >= to) continue;
-    const slots = await slotsFor(tx, {
-      service: serviceToBook(search.service),
-      staffMemberIds: search.staffMemberId === null ? undefined : [search.staffMemberId],
-      from,
-      to,
-      now: search.now,
-      templateRuleDefaults: search.templateRuleDefaults,
-    });
-    // As the matcher offers them: the whole appointment inside the window.
-    const fitting = slots.filter((slot) =>
-      windowsHold([window], search.timeZone, slot.start, search.service.durationMinutes),
-    );
-    free.push(...fitting.map(toAvailableSlot));
-  }
+    return {
+      from: fromZoned(search.timeZone, day, minutesOfDay(window.start)),
+      to: fromZoned(search.timeZone, day, minutesOfDay(window.end)),
+    };
+  });
+  const from = Math.max(Math.min(...bounds.map((b) => b.from)), search.now);
+  const to = Math.max(...bounds.map((b) => b.to));
+  if (from >= to) return [];
+  const slots = await slotsFor(tx, {
+    service: serviceToBook(search.service),
+    staffMemberIds: search.staffMemberId === null ? undefined : [search.staffMemberId],
+    from,
+    to,
+    now: search.now,
+    templateRuleDefaults: search.templateRuleDefaults,
+  });
+  // As the matcher offers them: the whole appointment inside a window.
+  const free = slots
+    .filter((slot) =>
+      windowsHold(search.windows, search.timeZone, slot.start, search.service.durationMinutes),
+    )
+    .map(toAvailableSlot);
   return free
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
     .slice(0, WAITLIST_FREE_TIMES_SHOWN);

@@ -4,8 +4,9 @@ import {
   AccountMailer,
   accountExistsEmail,
   changeOf,
+  confirmChangeEmail,
   confirmNewEmailEmail,
-  emailChangeNoticeEmail,
+  landingOn,
   resetPasswordEmail,
   verifyEmailEmail,
 } from './auth-emails.js';
@@ -36,15 +37,12 @@ describe('the account emails (S44)', () => {
     expect(resetPasswordEmail({ name: ' ', email: 'x@example.test' }, 'u').text).toMatch(/^Hi,/);
   });
 
-  it('tells the old address about a change, and the owner of a taken address where to sign in', () => {
-    const notice = emailChangeNoticeEmail(
-      { ...ana, email: 'new@example.test' },
-      'ana@example.test',
-      'new@example.test',
-    );
-    expect(notice.to).toBe('ana@example.test');
-    expect(notice.text).toContain('new@example.test');
-    expect(notice.text).toContain('Forgot your password?');
+  it('asks the current address to confirm a change, and tells a taken address where to sign in', () => {
+    const confirm = confirmChangeEmail(ana, 'new@example.test', 'https://app.example/c');
+    expect(confirm.to).toBe('ana@example.test');
+    expect(confirm.text).toContain('new@example.test');
+    expect(confirm.text).toContain('https://app.example/c');
+    expect(confirm.text).toContain('Forgot your password?');
     const exists = accountExistsEmail(ana, 'https://app.example/sign-in');
     expect(exists.text).toContain('https://app.example/sign-in');
   });
@@ -62,18 +60,46 @@ describe('changeOf', () => {
   });
 });
 
+describe('landingOn', () => {
+  it('sets where an emailed Better Auth link lands, keeping its token', () => {
+    const link = landingOn(
+      'https://app.example/api/auth/verify-email?token=abc&callbackURL=%2Faccount',
+      '/email-confirmed?changed=1',
+    );
+    const url = new URL(link);
+    expect(url.searchParams.get('token')).toBe('abc');
+    expect(url.searchParams.get('callbackURL')).toBe('/email-confirmed?changed=1');
+  });
+});
+
 describe('AccountMailer', () => {
-  it('never fails the request, and logs no address when a send fails', async () => {
+  it('returns before the mail server answers (no timing oracle), and never fails the request', async () => {
+    let answer: () => void = () => undefined;
+    const slow = {
+      send: vi.fn(() => new Promise<void>((resolve) => (answer = resolve))),
+    };
+    const mailer = new AccountMailer(slow, vi.fn());
+    await mailer.send('password reset', resetPasswordEmail(ana, 'u'));
+    expect(slow.send).toHaveBeenCalledTimes(1);
+    answer();
+    await mailer.settled();
+  });
+
+  it('logs no address when a send fails', async () => {
     const log = vi.fn();
     const failing = {
       send: vi.fn((message: EmailMessage) =>
         Promise.reject(new Error(`refused for ${message.to}`)),
       ),
     };
-    await new AccountMailer(failing, log).send('password reset', resetPasswordEmail(ana, 'u'));
+    const mailer = new AccountMailer(failing, log);
+    await mailer.send('password reset', resetPasswordEmail(ana, 'u'));
+    await mailer.settled();
     expect(log).toHaveBeenCalledWith('error', 'Could not send the password reset email: Error');
     expect(JSON.stringify(log.mock.calls)).not.toContain('ana@example.test');
-    await new AccountMailer(null, log).send('email check', verifyEmailEmail(ana, 'u'));
+    const none = new AccountMailer(null, log);
+    await none.send('email check', verifyEmailEmail(ana, 'u'));
+    await none.settled();
     expect(log).toHaveBeenLastCalledWith(
       'warn',
       'No mailer configured: the email check email was not sent',

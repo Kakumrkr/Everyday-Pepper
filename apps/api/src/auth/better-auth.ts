@@ -14,8 +14,9 @@ import {
   AccountMailer,
   accountExistsEmail,
   changeOf,
+  confirmChangeEmail,
   confirmNewEmailEmail,
-  emailChangeNoticeEmail,
+  landingOn,
   resetPasswordEmail,
   RESET_LINK_MINUTES,
   verifyEmailEmail,
@@ -41,6 +42,8 @@ export interface BetterAuthOptions extends AuthConfig {
  * nobody floods an inbox; Better Auth's own stricter rules cover sign-in, sign-up and codes.
  */
 export const EMAIL_RATE_LIMITS = {
+  // A sign-up with a taken address emails its owner.
+  '/sign-up/email': { window: 60, max: 3 },
   '/request-password-reset': { window: 60, max: 3 },
   '/send-verification-email': { window: 60, max: 3 },
   '/change-email': { window: 60, max: 3 },
@@ -53,10 +56,20 @@ export const EMAIL_RATE_LIMITS = {
  * limits on, telemetry off. Tenant membership and roles stay in our own tables; auth only
  * proves identity.
  */
+/** Where the web app shows a change of email's two steps (`/email-confirmed`). */
+export const CHANGE_CONFIRMED_PATH = '/email-confirmed?changed=pending';
+export const EMAIL_CHANGED_PATH = '/email-confirmed?changed=1';
+
 export function createBetterAuth(options: BetterAuthOptions) {
   const mail = new AccountMailer(options.mailer, (level, message) => {
     options.log(level, message);
   });
+  if (options.mailer === null) {
+    options.log(
+      'error',
+      'No SMTP_URL: new accounts cannot confirm their email or reset a password',
+    );
+  }
   return betterAuth({
     appName: 'Pepper',
     baseURL: options.baseUrl,
@@ -81,15 +94,15 @@ export function createBetterAuth(options: BetterAuthOptions) {
         mail.send('account exists', accountExistsEmail(user, `${options.baseUrl}/sign-in`)),
     },
     emailVerification: {
-      // A change of address arrives here too, with `user.email` already the new address.
+      // A change of address arrives here too (its second step, once the current address
+      // confirmed), with `user.email` already the new address.
       sendVerificationEmail: ({ user, url, token }) => {
         const change = changeOf(token);
         return change === null
           ? mail.send('email check', verifyEmailEmail(user, url))
           : mail.send(
-              'change of email',
-              confirmNewEmailEmail(user, change.to, url),
-              emailChangeNoticeEmail(user, change.from, change.to),
+              'new email',
+              confirmNewEmailEmail(user, change.to, landingOn(url, EMAIL_CHANGED_PATH)),
             );
       },
       sendOnSignUp: true,
@@ -121,8 +134,16 @@ export function createBetterAuth(options: BetterAuthOptions) {
       },
     },
     user: {
-      // The new address confirms by its link before anything changes; the old one is told.
-      changeEmail: { enabled: true, updateEmailWithoutVerification: false },
+      // The current address confirms first, then the new one; nothing changes before both.
+      changeEmail: {
+        enabled: true,
+        updateEmailWithoutVerification: false,
+        sendChangeEmailConfirmation: ({ user, newEmail, url }) =>
+          mail.send(
+            'change of email',
+            confirmChangeEmail(user, newEmail, landingOn(url, CHANGE_CONFIRMED_PATH)),
+          ),
+      },
       deleteUser: { enabled: false },
     },
     plugins: [twoFactor({ issuer: 'Pepper' })],

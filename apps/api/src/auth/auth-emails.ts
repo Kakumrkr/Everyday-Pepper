@@ -1,8 +1,8 @@
 import type { EmailMessage, Mailer } from '@pepper/core';
 import { z } from 'zod';
 
-// The account emails (S44, ADR-0045): a password reset, a new account's email check, a new
-// address's check and a notice to the old one, and "you already have an account" for a
+// The account emails (S44, ADR-0045): a password reset, a new account's email check, a change
+// of email (confirmed by the current address, then the new one), and "you already have an account" for a
 // sign-up with a taken address. Sent at once through the mailer, not the outbox: an account
 // has no business yet (the outbox is per business), and the person is waiting for the link.
 
@@ -56,7 +56,7 @@ export function verifyEmailEmail(user: Person, url: string): EmailMessage {
   };
 }
 
-/** To the new address: nothing changes until it is opened. */
+/** To the new address, once the current one confirmed: nothing changes until it is opened. */
 export function confirmNewEmailEmail(user: Person, newEmail: string, url: string): EmailMessage {
   return {
     to: newEmail,
@@ -74,23 +74,24 @@ export function confirmNewEmailEmail(user: Person, newEmail: string, url: string
   };
 }
 
-/** To the old address at the same time, so a change nobody asked for doesn't go unseen. */
-export function emailChangeNoticeEmail(
-  user: Person,
-  oldEmail: string,
-  newEmail: string,
-): EmailMessage {
+/**
+ * To the current address first (S44 review): a change starts only once it is confirmed here, so
+ * a stolen session alone can't move the account to another address.
+ */
+export function confirmChangeEmail(user: Person, newEmail: string, url: string): EmailMessage {
   return {
-    to: oldEmail,
-    subject: 'Your Pepper email is about to change',
+    to: user.email,
+    subject: 'Confirm the change of your Pepper email',
     text: [
       hello(user.name),
       '',
-      `Someone signed in to your Pepper account asked to change its email to ${newEmail}.`,
-      'Nothing changes until that address confirms it.',
+      `You asked to sign in to Pepper with ${newEmail} from now on. To confirm, open this link:`,
       '',
-      'If this was you, there is nothing to do. If it was not, change your password now:',
-      'sign in, or choose "Forgot your password?" on the sign-in page.',
+      `    ${url}`,
+      '',
+      `Then we send one more link to ${newEmail}. It works for ${String(VERIFY_LINK_HOURS)} hours.`,
+      'If you did not ask for this, do not open the link: nothing changes. Someone may know your',
+      'password, so choose a new one: "Forgot your password?" on the sign-in page.',
     ].join('\n'),
   };
 }
@@ -135,17 +136,34 @@ export function changeOf(token: string): { from: string; to: string } | null {
 }
 
 /**
- * Sends account emails, never failing the request: an error would tell an address that has an
- * account from one that hasn't, so it is logged (without the address) and the person can ask
- * again ("Send again", "Forgot your password?").
+ * Sends account emails in the background, never failing or slowing the request: a refusal, or
+ * the time an SMTP round trip takes, would tell an address that has an account from one that
+ * hasn't. A failure is logged (without the address) and the person can ask again ("Send the
+ * link again", "Forgot your password?").
  */
 export class AccountMailer {
+  private readonly pending = new Set<Promise<void>>();
+
   constructor(
     private readonly mailer: Mailer | null,
     private readonly log: (level: 'warn' | 'error', message: string) => void,
   ) {}
 
-  async send(kind: string, ...messages: EmailMessage[]): Promise<void> {
+  /** Starts sending and returns at once. */
+  send(kind: string, ...messages: EmailMessage[]): Promise<void> {
+    const sending = this.deliver(kind, messages).finally(() => {
+      this.pending.delete(sending);
+    });
+    this.pending.add(sending);
+    return Promise.resolve();
+  }
+
+  /** Waits for the emails being sent (tests, shutdown). */
+  async settled(): Promise<void> {
+    await Promise.all([...this.pending]);
+  }
+
+  private async deliver(kind: string, messages: EmailMessage[]): Promise<void> {
     if (this.mailer === null) {
       this.log('warn', `No mailer configured: the ${kind} email was not sent`);
       return;
@@ -161,4 +179,11 @@ export class AccountMailer {
       }
     }
   }
+}
+
+/** `url` (an emailed Better Auth link) landing on `path` once opened. */
+export function landingOn(url: string, path: string): string {
+  const link = new URL(url);
+  link.searchParams.set('callbackURL', path);
+  return link.toString();
 }

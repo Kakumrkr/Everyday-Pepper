@@ -160,7 +160,7 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   await dialog.getByRole('button', { name: 'Book', exact: true }).click();
   await dialog.getByRole('button', { name: 'Add to the waitlist' }).click();
   await expect(dialog.getByLabel('From')).toHaveValue('10:30');
-  await expect(dialog.getByLabel('Until')).toHaveValue('12:30');
+  await expect(dialog.getByLabel('Until')).toHaveValue('11:30');
   await dialog.getByRole('button', { name: 'Add to the waitlist' }).click();
   await expect(dialog).toBeHidden();
   const waitlist = WaitlistResponseSchema.parse(
@@ -168,7 +168,7 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   );
   expect(waitlist.entries).toHaveLength(1);
   expect(waitlist.entries[0]?.windows).toEqual([
-    { date: formatDate(s.day), start: '10:30', end: '12:30' },
+    { date: formatDate(s.day), start: '10:30', end: '11:30' },
   ]);
 
   // Move the 10:00 booking to 1:00 PM.

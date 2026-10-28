@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from 'vitest';
 import type { EmailMessage } from '@pepper/core';
 import {
   AUTH_BASE_PATH,
+  CHANGE_CONFIRMED_PATH,
   createBetterAuth,
+  EMAIL_CHANGED_PATH,
   EMAIL_RATE_LIMITS,
   MIN_PASSWORD_LENGTH,
 } from './better-auth.js';
@@ -66,25 +68,54 @@ describe('createBetterAuth', () => {
   it('emails each link to the right address with the right words', async () => {
     const sent: EmailMessage[] = [];
     const { options } = create(undefined, vi.fn(), sent);
-    await options.emailAndPassword.sendResetPassword({ user: ana, url: 'R', token: 't' });
+    const verify = 'https://app.example/api/auth/verify-email?token=t&callbackURL=%2F';
+    await options.emailAndPassword.sendResetPassword({
+      user: ana,
+      url: 'https://r.example',
+      token: 't',
+    });
     await options.emailVerification.sendVerificationEmail({
       user: ana,
-      url: 'V',
+      url: verify,
       token: tokenWith({ email: ana.email }),
+    });
+    await options.user.changeEmail.sendChangeEmailConfirmation({
+      user: ana,
+      newEmail: 'new@example.test',
+      url: verify,
+      token: 't',
     });
     await options.emailVerification.sendVerificationEmail({
       user: { ...ana, email: 'new@example.test' },
-      url: 'C',
+      url: verify,
       token: tokenWith({ email: ana.email, updateTo: 'new@example.test' }),
     });
     await options.emailAndPassword.onExistingUserSignUp({ user: ana });
+    await vi.waitFor(() => {
+      expect(sent).toHaveLength(5);
+    });
     expect(sent.map((m) => [m.to, m.subject])).toEqual([
       ['ana@example.test', 'Reset your Pepper password'],
       ['ana@example.test', 'Confirm your email for Pepper'],
+      ['ana@example.test', 'Confirm the change of your Pepper email'],
       ['new@example.test', 'Confirm your new email for Pepper'],
-      ['ana@example.test', 'Your Pepper email is about to change'],
       ['ana@example.test', 'You already have a Pepper account'],
     ]);
+    // Each step of a change lands on its own page.
+    expect(sent[2]?.text).toContain(encodeURIComponent(CHANGE_CONFIRMED_PATH));
+    expect(sent[3]?.text).toContain(encodeURIComponent(EMAIL_CHANGED_PATH));
+  });
+
+  it('says loudly when no mailer is configured', () => {
+    const log = vi.fn();
+    createBetterAuth({
+      baseUrl: 'http://localhost:3000',
+      secret: 's'.repeat(32),
+      db: {} as Database,
+      mailer: null,
+      log,
+    });
+    expect(log).toHaveBeenCalledWith('error', expect.stringContaining('No SMTP_URL'));
   });
 
   it('limits the endpoints that send email more tightly', () => {
