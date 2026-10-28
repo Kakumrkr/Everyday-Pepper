@@ -1,7 +1,7 @@
 'use client';
 
 import { BusinessSchema } from '@pepper/contracts';
-import { brandTokens, buttonClass, LegacyCard } from '@pepper/ui';
+import { brandTokens, Button, FOCUS_RING } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -9,7 +9,8 @@ import { Notice } from '../booking/sheet';
 
 /**
  * The business's public booking page (S17): its link, and for owners and managers its color
- * (PCR-001). Any color works: the page adjusts it until its text is readable (WCAG AA).
+ * (PCR-001). Any color works: the page adjusts it until its text is readable (WCAG AA). On the
+ * kit since S42.2: a quiet section, since nothing here waits on a decision.
  */
 export function BookingPageCard({
   slug,
@@ -41,55 +42,48 @@ export function BookingPageCard({
   }
 
   return (
-    <LegacyCard as="section" labelledBy={headingId}>
-      <h2 id={headingId} className="m-0 font-display text-lg font-bold">
+    <section aria-labelledby={headingId} className="flex flex-col gap-3">
+      <h2 id={headingId} className="m-0 type-heading">
         Your booking page
       </h2>
-      <p className="mt-1 mb-3 text-ink-2">
-        Clients book here themselves, after confirming their email.{' '}
-        <a href={path} target="_blank" rel="noreferrer" className="font-semibold text-brand">
-          {path}
-        </a>
-      </p>
-      {manages ? (
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 font-semibold">
-            Color
-            <input
-              type="color"
-              name="brandColor"
-              value={color}
-              onChange={(event) => {
-                setColor(event.target.value);
-              }}
-              className="h-11 w-14 cursor-pointer rounded-md border border-line bg-surface p-1"
-            />
-          </label>
-          <button
-            type="button"
-            disabled={busy}
-            className={buttonClass({ size: 'sm' })}
-            onClick={() => void save(color)}
+      <div className="flex flex-col gap-3 rounded-lg bg-surface p-4">
+        <p className="m-0 type-body text-ink-2">
+          Clients book here themselves, after confirming their email.{' '}
+          <a
+            href={path}
+            target="_blank"
+            rel="noreferrer"
+            className={`font-semibold break-all text-brand ${FOCUS_RING}`}
           >
-            Save color
-          </button>
-          {brandColor === null ? null : (
-            <button
-              type="button"
-              disabled={busy}
-              className={buttonClass({ variant: 'quiet', size: 'sm' })}
-              onClick={() => void save(null)}
-            >
-              Use the default
-            </button>
-          )}
-        </div>
-      ) : null}
-      {notice === null ? null : (
-        <div className="mt-3">
-          <Notice tone={notice.tone}>{notice.text}</Notice>
-        </div>
-      )}
-    </LegacyCard>
+            {path}
+          </a>
+        </p>
+        {manages ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 type-label text-ink">
+              Color
+              <input
+                type="color"
+                name="brandColor"
+                value={color}
+                onChange={(event) => {
+                  setColor(event.target.value);
+                }}
+                className={`h-11 w-14 cursor-pointer rounded-md border border-line-strong bg-surface p-1 ${FOCUS_RING}`}
+              />
+            </label>
+            <Button size="sm" busy={busy} onClick={() => void save(color)}>
+              Save color
+            </Button>
+            {brandColor === null ? null : (
+              <Button variant="quiet" size="sm" disabled={busy} onClick={() => void save(null)}>
+                Use the default
+              </Button>
+            )}
+          </div>
+        ) : null}
+        {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
+      </div>
+    </section>
   );
 }

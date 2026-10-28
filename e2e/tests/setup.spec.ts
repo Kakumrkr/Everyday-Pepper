@@ -65,8 +65,9 @@ test('setup: a new owner adds a service, a staff member with weekly hours and a 
 
   // The menu.
   await go(page, 'Services');
-  await expect(page.getByRole('heading', { name: 'No services yet' })).toBeVisible();
-  await (await hydrated(page.getByRole('button', { name: 'Add service' }))).click();
+  // The empty menu offers its next step (AC-X-7), and it opens the same sheet as the header.
+  await expect(page.getByText('No services yet')).toBeVisible();
+  await (await hydrated(page.getByRole('button', { name: 'Add your first service' }))).click();
   let dialog = sheet(page);
   await dialog.getByLabel('Name').fill('Haircut');
   await dialog.getByLabel('Category').fill('Hair');
