@@ -1,28 +1,36 @@
 'use client';
 
 import { ServiceSchema, type Service } from '@pepper/contracts';
-import { buttonClass, Icon } from '@pepper/ui';
+import { Button, buttonStyle, Checkbox, Icon, Input, Sheet, SheetFooter } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
-import { useState, type SubmitEvent } from 'react';
+import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { centsFromText, textFromCents } from '../../../lib/setup';
-import { Field, Notice, Sheet } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /**
  * Adds a service to the menu (`POST /v1/services`) or edits one (`PUT /v1/services/:id`, all
- * fields). Owners and managers only; the api checks it again.
+ * fields). Owners and managers only; the api checks it again. On the kit (S42.2): its fields,
+ * and Save in the sheet's footer within thumb reach (D3).
  */
 export function ServiceEditor({
   service,
   categories,
+  open: shown,
+  onOpenChange,
 }: {
   /** The service to edit; none adds a new one. */
   service?: Service;
   /** Categories in use, offered as suggestions. */
   categories: string[];
+  /** Opened from elsewhere too (the empty menu's "Add your first service"). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [own, setOwn] = useState(false);
+  const open = shown ?? own;
+  const setOpen = onOpenChange ?? setOwn;
   const [key, setKey] = useState(0);
   return (
     <Sheet
@@ -34,14 +42,14 @@ export function ServiceEditor({
       }}
       trigger={
         service === undefined ? (
-          <button type="button" className={buttonClass({ size: 'sm' })}>
+          <button type="button" className={buttonStyle({ size: 'sm' })}>
             <Icon name="plus" />
             Add service
           </button>
         ) : (
           <button
             type="button"
-            className={buttonClass({ variant: 'quiet', size: 'sm' })}
+            className={buttonStyle({ variant: 'quiet', size: 'sm' })}
             aria-label={`Edit ${service.name}`}
           >
             Edit
@@ -73,6 +81,7 @@ function ServiceForm({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const formId = useId();
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -109,90 +118,82 @@ function ServiceForm({
   }
 
   return (
-    <form className="grid gap-4" onSubmit={(event) => void submit(event)} noValidate>
-      <Field label="Name">
-        <input name="name" required maxLength={120} defaultValue={service?.name ?? ''} />
-      </Field>
-      <Field label="Category" hint="Optional, e.g. Hair or Nails. Groups the menu.">
-        <input
-          name="category"
-          list="service-categories"
-          maxLength={60}
-          defaultValue={service?.category ?? ''}
-        />
-      </Field>
+    <form id={formId} className="grid gap-4" onSubmit={(event) => void submit(event)} noValidate>
+      <Input label="Name" name="name" required maxLength={120} defaultValue={service?.name ?? ''} />
+      <Input
+        label="Category"
+        hint="Optional, e.g. Hair or Nails. Groups the menu."
+        name="category"
+        list="service-categories"
+        maxLength={60}
+        defaultValue={service?.category ?? ''}
+      />
       <datalist id="service-categories">
         {categories.map((category) => (
           <option key={category} value={category} />
         ))}
       </datalist>
-      <Field label="How long it takes (minutes)">
-        <input
-          name="duration"
+      <Input
+        label="How long it takes (minutes)"
+        name="duration"
+        type="number"
+        inputMode="numeric"
+        min={5}
+        max={720}
+        step={5}
+        required
+        defaultValue={service?.durationMinutes ?? 60}
+      />
+      <div className="grid grid-cols-2 items-end gap-3">
+        <Input
+          label="Price from ($)"
+          name="priceFrom"
+          inputMode="decimal"
+          placeholder="None"
+          defaultValue={textFromCents(service?.priceFromCents ?? null)}
+        />
+        <Input
+          label="Up to ($)"
+          hint="Optional, for a range."
+          name="priceTo"
+          inputMode="decimal"
+          placeholder="—"
+          defaultValue={textFromCents(service?.priceToCents ?? null)}
+        />
+      </div>
+      <div className="grid grid-cols-2 items-end gap-3">
+        <Input
+          label="Prep before (min)"
+          name="bufferBefore"
           type="number"
           inputMode="numeric"
-          min={5}
-          max={720}
+          min={0}
+          max={240}
           step={5}
-          required
-          defaultValue={service?.durationMinutes ?? 60}
+          defaultValue={service?.bufferBeforeMinutes ?? 0}
         />
-      </Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Price from ($)">
-          <input
-            name="priceFrom"
-            inputMode="decimal"
-            placeholder="None"
-            defaultValue={textFromCents(service?.priceFromCents ?? null)}
-          />
-        </Field>
-        <Field label="Up to ($)" hint="Optional, for a range.">
-          <input
-            name="priceTo"
-            inputMode="decimal"
-            placeholder="—"
-            defaultValue={textFromCents(service?.priceToCents ?? null)}
-          />
-        </Field>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Prep before (min)">
-          <input
-            name="bufferBefore"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={240}
-            step={5}
-            defaultValue={service?.bufferBeforeMinutes ?? 0}
-          />
-        </Field>
-        <Field label="Clean-up after (min)">
-          <input
-            name="bufferAfter"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={240}
-            step={5}
-            defaultValue={service?.bufferAfterMinutes ?? 0}
-          />
-        </Field>
-      </div>
-      <label className="flex min-h-11 items-center gap-3 font-semibold">
-        <input
-          name="active"
-          type="checkbox"
-          className="size-5 min-h-0 w-auto accent-brand"
-          defaultChecked={service?.active ?? true}
+        <Input
+          label="Clean-up after (min)"
+          name="bufferAfter"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={240}
+          step={5}
+          defaultValue={service?.bufferAfterMinutes ?? 0}
         />
-        Clients can book it
-      </label>
-      {error === null ? null : <Notice tone="error">{error}</Notice>}
-      <button type="submit" disabled={busy} className={buttonClass({ className: 'w-full' })}>
-        {busy ? 'Saving…' : service === undefined ? 'Add service' : 'Save'}
-      </button>
+      </div>
+      <Checkbox
+        name="active"
+        label="Clients can book it"
+        defaultChecked={service?.active ?? true}
+      />
+      <SheetFooter>
+        {error === null ? null : <Notice tone="error">{error}</Notice>}
+        <Button type="submit" form={formId} busy={busy} block size="lg">
+          {busy ? 'Saving…' : service === undefined ? 'Add service' : 'Save'}
+        </Button>
+      </SheetFooter>
     </form>
   );
 }

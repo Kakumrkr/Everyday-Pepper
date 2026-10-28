@@ -120,6 +120,15 @@ describe('fields', () => {
     await expectAccessible(container);
   });
 
+  it("makes the checkbox's whole row its tap target, the hint kept out of its name (D3)", () => {
+    render(<Checkbox label="Haircut" hint="Not bookable yet" />);
+    const box = screen.getByRole('checkbox', { name: 'Haircut' });
+    const label = box.closest('label');
+    expect(label?.className).toContain('min-h-11');
+    expect(label?.textContent).toBe('Haircut');
+    expect(box.getAttribute('aria-describedby')).toBeTruthy();
+  });
+
   it('is a switch to screen readers, toggled with Space', async () => {
     const onChange = vi.fn();
     const { container } = render(

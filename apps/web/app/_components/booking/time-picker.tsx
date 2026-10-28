@@ -1,12 +1,11 @@
 'use client';
 
 import { AvailabilityResponseSchema, formatDate, type AvailableSlot } from '@pepper/contracts';
-import { chipClass } from '@pepper/ui';
+import { Input, TimeChip } from '@pepper/ui';
 import { useEffect, useId, useState } from 'react';
 import { availabilityPath, instantAt, timeLabel } from '../../../lib/booking';
 import { readDate } from '../../../lib/calendar';
 import { fetchJson } from '../../../lib/client-api';
-import { Field } from './sheet';
 
 type Slots =
   | { state: 'loading' }
@@ -70,65 +69,63 @@ export function TimePicker({
 
   return (
     <div className="grid gap-3">
-      <Field label="Day">
-        <input
-          type="date"
-          name="date"
-          required
-          value={date}
-          onChange={(event) => {
-            onDateChange(event.target.value);
-            setOtherTime('');
-            onChange(null);
-          }}
-        />
-      </Field>
+      <Input
+        label="Day"
+        type="date"
+        name="date"
+        required
+        value={date}
+        onChange={(event) => {
+          onDateChange(event.target.value);
+          setOtherTime('');
+          onChange(null);
+        }}
+      />
       <section aria-labelledby={headingId} className="grid gap-2">
-        <h3 id={headingId} className="m-0 text-base font-semibold">
+        <h3 id={headingId} className="m-0 type-label text-ink">
           Free times
         </h3>
         {day === null ? (
-          <p className="m-0 text-ink-2">Pick a day first.</p>
+          <p className="m-0 type-body text-ink-2">Pick a day first.</p>
         ) : slots.state === 'loading' ? (
-          <p className="m-0 text-ink-2" role="status">
+          <p className="m-0 type-body text-ink-2" role="status">
             Looking for free times…
           </p>
         ) : slots.state === 'failed' ? (
-          <p className="m-0 font-semibold text-wait" role="alert">
+          <p className="m-0 type-body font-semibold text-danger" role="alert">
             {slots.message}
           </p>
         ) : slots.slots.length === 0 ? (
-          <p className="m-0 text-ink-2">No free times on {formatDate(day)}. Try another day.</p>
+          <p className="m-0 type-body text-ink-2">
+            No free times on {formatDate(day)}. Try another day.
+          </p>
         ) : (
           <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto" data-testid="free-times">
             {slots.slots.map((slot) => (
-              <button
+              <TimeChip
                 key={slot.startsAt}
-                type="button"
-                aria-pressed={value === slot.startsAt}
-                className={chipClass({ selected: value === slot.startsAt })}
-                onClick={() => {
+                time={timeLabel(timeZone, slot.startsAt)}
+                selected={value === slot.startsAt}
+                onSelect={() => {
                   setOtherTime('');
                   onChange(slot.startsAt);
                 }}
-              >
-                {timeLabel(timeZone, slot.startsAt)}
-              </button>
+              />
             ))}
           </div>
         )}
       </section>
-      <Field label="Or another time" hint="I’ll check it and suggest the nearest free times.">
-        <input
-          type="time"
-          name="time"
-          step={300}
-          value={otherTime}
-          onChange={(event) => {
-            chooseOther(event.target.value);
-          }}
-        />
-      </Field>
+      <Input
+        label="Or another time"
+        hint="I’ll check it and suggest the nearest free times."
+        type="time"
+        name="time"
+        step={300}
+        value={otherTime}
+        onChange={(event) => {
+          chooseOther(event.target.value);
+        }}
+      />
     </div>
   );
 }

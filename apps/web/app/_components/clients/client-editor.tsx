@@ -1,19 +1,19 @@
 'use client';
 
 import { ClientSchema, type Client } from '@pepper/contracts';
-import { Button, buttonStyle, Icon, Input, Sheet } from '@pepper/ui';
+import { Button, buttonStyle, Icon, Input, Sheet, SheetFooter } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
-import { useState, type SubmitEvent } from 'react';
+import { useId, useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { normalizeContact } from '../../../lib/booking';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /**
  * Adds a client (`POST /v1/clients`, then their profile) or edits one's name, email and phone
  * (`PUT /v1/clients/:id`). Owners and managers only; the api checks it again. On the kit (S42):
- * its Sheet and fields; `label` names the opener when the screen words it differently ("Add a
+ * its Sheet and fields, Save in the sheet's footer (S42.2); `label` names the opener when the screen words it differently ("Add a
  * phone or email" on an empty profile).
  */
 export function ClientEditor({
@@ -72,6 +72,7 @@ function ClientForm({ client, onDone }: { client: Client | undefined; onDone: ()
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const formId = useId();
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -106,7 +107,7 @@ function ClientForm({ client, onDone }: { client: Client | undefined; onDone: ()
   }
 
   return (
-    <form className="grid gap-4" onSubmit={(event) => void submit(event)} noValidate>
+    <form id={formId} className="grid gap-4" onSubmit={(event) => void submit(event)} noValidate>
       <Input
         label="Name"
         name="name"
@@ -132,10 +133,12 @@ function ClientForm({ client, onDone }: { client: Client | undefined; onDone: ()
         maxLength={20}
         defaultValue={client?.phone ?? ''}
       />
-      {error === null ? null : <Notice tone="error">{error}</Notice>}
-      <Button type="submit" busy={busy} block>
-        {busy ? 'Saving…' : client === undefined ? 'Add client' : 'Save'}
-      </Button>
+      <SheetFooter>
+        {error === null ? null : <Notice tone="error">{error}</Notice>}
+        <Button type="submit" form={formId} busy={busy} block size="lg">
+          {busy ? 'Saving…' : client === undefined ? 'Add client' : 'Save'}
+        </Button>
+      </SheetFooter>
     </form>
   );
 }

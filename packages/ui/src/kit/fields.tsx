@@ -150,27 +150,29 @@ export type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' |
   hint?: string | undefined;
 };
 
+/** A checkbox whose whole row (box and label) is the tap target (D3); the hint sits below. */
 export function Checkbox({ label, hint, className, ...rest }: CheckboxProps) {
   const id = useId();
   return (
-    <div className={cx('flex min-h-11 items-start gap-3 py-2.5', className)}>
-      <input
-        {...rest}
-        id={id}
-        type="checkbox"
-        aria-describedby={hint === undefined ? undefined : `${id}-hint`}
-        className={cx('mt-0.5 size-6 min-h-0 shrink-0 cursor-pointer p-0 accent-brand', FOCUS_RING)}
-      />
-      <div className="flex flex-col gap-0.5">
-        <label htmlFor={id} className="cursor-pointer type-body text-ink">
-          {label}
-        </label>
-        {hint !== undefined && (
-          <p id={`${id}-hint`} className="m-0 type-caption text-ink-2">
-            {hint}
-          </p>
-        )}
-      </div>
+    <div className={cx('flex flex-col', className)}>
+      <label className="flex min-h-11 cursor-pointer items-start gap-3 py-2.5 type-body text-ink">
+        <input
+          {...rest}
+          id={id}
+          type="checkbox"
+          aria-describedby={hint === undefined ? undefined : `${id}-hint`}
+          className={cx(
+            'mt-0.5 size-6 min-h-0 shrink-0 cursor-pointer p-0 accent-brand',
+            FOCUS_RING,
+          )}
+        />
+        {label}
+      </label>
+      {hint !== undefined && (
+        <p id={`${id}-hint`} className="m-0 -mt-2 mb-1 pl-9 type-caption text-ink-2">
+          {hint}
+        </p>
+      )}
     </div>
   );
 }

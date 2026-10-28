@@ -1,6 +1,7 @@
 import { StaffMemberSchema, type StaffMember } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
+  activeStaffTone,
   calendarHref,
   columnsFor,
   dayRange,
@@ -211,5 +212,24 @@ describe('staffTone', () => {
   it('keeps a member’s tone when the list is filtered elsewhere, and falls back to brand', () => {
     expect(staffTone(staff, 'c')).toBe('info');
     expect(staffTone(staff, 'unknown')).toBe('brand');
+  });
+});
+
+describe('activeStaffTone', () => {
+  const staff = [
+    { id: 'dre', active: true },
+    { id: 'old', active: false },
+    { id: 'randy', active: true },
+  ];
+
+  it('gives the Team list the tone the calendar shows: by place among the active staff', () => {
+    expect(activeStaffTone(staff, 'dre')).toBe('brand');
+    // Not "info": the calendar has no column for the inactive member before Randy.
+    expect(activeStaffTone(staff, 'randy')).toBe('accent');
+  });
+
+  it('gives a member who is not bookable no tone (they have no calendar column)', () => {
+    expect(activeStaffTone(staff, 'old')).toBeNull();
+    expect(activeStaffTone(staff, 'unknown')).toBeNull();
   });
 });

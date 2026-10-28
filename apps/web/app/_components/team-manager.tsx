@@ -7,7 +7,7 @@ import type {
   MembershipRole,
   Permission,
 } from '@pepper/contracts';
-import { buttonClass, LegacyCard } from '@pepper/ui';
+import { Badge, Button, cx, fieldStyle, Input, Select } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../lib/account';
@@ -22,7 +22,10 @@ const ROLE_LABELS: Record<MembershipRole, string> = {
   staff: 'Staff',
 };
 
-const ROW = 'flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3';
+const ROW = 'flex min-h-14 flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3';
+
+// A quiet block of the screen (nothing here is a decision card, DESIGN.md §2).
+const BLOCK = 'flex flex-col gap-3 rounded-lg bg-surface p-4';
 
 interface TeamManagerProps {
   me: string;
@@ -37,7 +40,8 @@ interface TeamManagerProps {
 
 /**
  * Lists the team and offers what the member's role allows: change roles, remove people, invite
- * with a link, cancel invites, and leave. Every action is checked again by the api.
+ * with a link, cancel invites, and leave. Every action is checked again by the api. On the kit
+ * since S42.2.
  */
 export function TeamManager(props: TeamManagerProps) {
   const { me, role, businessName, permissions, members } = props;
@@ -51,11 +55,11 @@ export function TeamManager(props: TeamManagerProps) {
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="flex flex-col gap-4">
       {members === null ? null : (
-        <LegacyCard as="section" className="grid gap-2">
-          <h3 className="m-0 text-base font-bold">People at {businessName}</h3>
-          <ul className="m-0 grid list-none divide-y divide-line p-0" data-testid="members">
+        <section aria-label={`People at ${businessName}`} className={BLOCK}>
+          <h3 className="m-0 type-subheading text-ink">People at {businessName}</h3>
+          <ul className="m-0 list-none divide-y divide-line p-0" data-testid="members">
             {members.map((member) => (
               <MemberRow
                 key={member.userId}
@@ -67,7 +71,7 @@ export function TeamManager(props: TeamManagerProps) {
               />
             ))}
           </ul>
-        </LegacyCard>
+        </section>
       )}
       <FormError message={error} />
       {permissions.includes('members.invite') ? <InviteSection {...props} settle={settle} /> : null}
@@ -96,10 +100,14 @@ function MemberRow({
   const path = `/v1/members/${member.userId}`;
   return (
     <li className={ROW} data-testid="member">
-      <div className="min-w-0 [overflow-wrap:anywhere]">
-        <strong>{member.name}</strong>
-        {isMe ? <span className="text-ink-2"> (you)</span> : null}
-        <span className="block text-sm text-ink-2">{member.email}</span>
+      <div className="min-w-0 flex-1 basis-40">
+        <span className="type-body font-semibold [overflow-wrap:anywhere] text-ink">
+          {member.name}
+        </span>
+        {isMe ? <span className="type-caption text-ink-2"> (you)</span> : null}
+        <span className="block truncate type-caption text-ink-2" title={member.email}>
+          {member.email}
+        </span>
       </div>
       {editable ? (
         <div className="flex flex-wrap items-center gap-2">
@@ -108,7 +116,7 @@ function MemberRow({
           </label>
           <select
             id={`role-${member.userId}`}
-            className="w-auto"
+            className={cx(fieldStyle, 'min-h-11 w-auto pr-8')}
             value={member.role}
             onChange={(event) => {
               void sendJson('PATCH', path, { role: event.target.value }).then(settle);
@@ -122,41 +130,40 @@ function MemberRow({
           </select>
           {confirming ? (
             <>
-              <button
-                type="button"
-                className={buttonClass({ size: 'sm' })}
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={() => void sendJson('DELETE', path, undefined).then(settle)}
               >
                 Yes, remove {member.name}
-              </button>
-              <button
-                type="button"
-                className={buttonClass({ variant: 'secondary', size: 'sm' })}
+              </Button>
+              <Button
+                variant="quiet"
+                size="sm"
                 onClick={() => {
                   setConfirming(false);
                 }}
               >
                 Cancel
-              </button>
+              </Button>
             </>
           ) : (
-            <button
-              type="button"
-              className={buttonClass({ variant: 'secondary', size: 'sm' })}
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 setConfirming(true);
               }}
             >
               Remove {member.name}
-            </button>
+            </Button>
           )}
         </div>
       ) : (
-        <span
-          className="rounded-full bg-ok-soft px-2.5 py-0.5 text-sm font-semibold text-ok"
-          data-testid="member-role"
-        >
-          {ROLE_LABELS[member.role]}
+        <span data-testid="member-role">
+          <Badge tone={member.role === 'owner' ? 'brand' : 'neutral'}>
+            {ROLE_LABELS[member.role]}
+          </Badge>
         </span>
       )}
     </li>
@@ -199,44 +206,32 @@ function InviteSection({
   }
 
   return (
-    <LegacyCard as="section" className="grid gap-3">
-      <h3 className="m-0 text-base font-bold">Invite someone</h3>
-      <form className="grid gap-3" onSubmit={(event) => void submit(event)} noValidate>
-        <label className="grid gap-1.5 font-semibold">
-          Their email
-          <input name="email" type="email" autoComplete="off" required />
-        </label>
-        <label className="grid gap-1.5 font-semibold">
-          Role
-          <select name="role" defaultValue="staff">
-            {roles.map((r) => (
-              <option key={r} value={r}>
-                {ROLE_LABELS[r]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="submit"
-          disabled={busy}
-          className={buttonClass({ className: 'w-full desk:w-auto desk:justify-self-start' })}
-        >
+    <section aria-label="Invite someone" className={BLOCK}>
+      <h3 className="m-0 type-subheading text-ink">Invite someone</h3>
+      <form className="flex flex-col gap-3" onSubmit={(event) => void submit(event)} noValidate>
+        <Input label="Their email" name="email" type="email" autoComplete="off" required />
+        <Select
+          label="Role"
+          name="role"
+          defaultValue="staff"
+          options={roles.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
+        />
+        <Button type="submit" busy={busy} className="w-full desk:w-auto desk:self-start">
           Create invite link
-        </button>
+        </Button>
       </form>
       {created === null ? null : (
-        <div className="grid gap-2 rounded-md bg-ok-soft p-3" role="status">
-          <p className="m-0">
+        <div className="flex flex-col gap-2 rounded-md bg-ok-soft p-3" role="status">
+          <p className="m-0 type-body text-ink">
             Send this link to {created.email}. It works once, for 7 days, and only for that email.
           </p>
-          <code data-testid="invite-link">{created.link}</code>
-          <button
-            type="button"
-            className={buttonClass({
-              variant: 'secondary',
-              size: 'sm',
-              className: 'justify-self-start',
-            })}
+          <code data-testid="invite-link" className="type-caption break-all text-ink">
+            {created.link}
+          </code>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="self-start"
             onClick={() => {
               void navigator.clipboard.writeText(created.link).then(
                 () => {
@@ -249,39 +244,39 @@ function InviteSection({
             }}
           >
             {copied ? 'Copied' : 'Copy link'}
-          </button>
+          </Button>
         </div>
       )}
       {invites === null || invites.length === 0 ? null : (
         <>
-          <h4 className="m-0 mt-2 text-sm font-bold">Waiting to join</h4>
-          <ul className="m-0 grid list-none divide-y divide-line p-0" data-testid="invites">
+          <h4 className="m-0 mt-2 type-label text-ink">Waiting to join</h4>
+          <ul className="m-0 list-none divide-y divide-line p-0" data-testid="invites">
             {invites.map((invite) => (
               <li className={ROW} key={invite.id} data-testid="invite">
                 <div className="min-w-0 [overflow-wrap:anywhere]">
-                  <strong>{invite.email}</strong>
-                  <span className="block text-sm text-ink-2">
+                  <span className="type-body font-semibold text-ink">{invite.email}</span>
+                  <span className="block type-caption text-ink-2">
                     {ROLE_LABELS[invite.role]} · link works until{' '}
                     {expires.format(new Date(invite.expiresAt))}
                   </span>
                 </div>
                 {role === 'owner' || invite.role !== 'owner' ? (
-                  <button
-                    type="button"
-                    className={buttonClass({ variant: 'secondary', size: 'sm' })}
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() =>
                       void sendJson('DELETE', `/v1/invites/${invite.id}`, undefined).then(settle)
                     }
                   >
                     Cancel invite for {invite.email}
-                  </button>
+                  </Button>
                 ) : null}
               </li>
             ))}
           </ul>
         </>
       )}
-    </LegacyCard>
+    </section>
   );
 }
 
@@ -300,46 +295,39 @@ function LeaveBusiness({ me, businessName }: { me: string; businessName: string 
   }
 
   return (
-    <LegacyCard as="section" className="grid gap-3">
-      <h3 className="m-0 text-base font-bold">Leave {businessName}</h3>
-      <p className="m-0 text-ink-2">
+    <section aria-label={`Leave ${businessName}`} className={BLOCK}>
+      <h3 className="m-0 type-subheading text-ink">Leave {businessName}</h3>
+      <p className="m-0 type-body text-ink-2">
         You’ll lose access to this business until someone invites you again.
       </p>
       <FormError message={error} />
       {confirming ? (
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className={buttonClass({ size: 'sm' })}
-            onClick={() => void leave()}
-          >
+          <Button variant="danger" size="sm" onClick={() => void leave()}>
             Yes, leave {businessName}
-          </button>
-          <button
-            type="button"
-            className={buttonClass({ variant: 'secondary', size: 'sm' })}
+          </Button>
+          <Button
+            variant="quiet"
+            size="sm"
             onClick={() => {
               setConfirming(false);
             }}
           >
             Cancel
-          </button>
+          </Button>
         </div>
       ) : (
-        <button
-          type="button"
-          className={buttonClass({
-            variant: 'secondary',
-            size: 'sm',
-            className: 'justify-self-start',
-          })}
+        <Button
+          variant="secondary"
+          size="sm"
+          className="self-start"
           onClick={() => {
             setConfirming(true);
           }}
         >
           Leave {businessName}
-        </button>
+        </Button>
       )}
-    </LegacyCard>
+    </section>
   );
 }

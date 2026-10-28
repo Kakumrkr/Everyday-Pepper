@@ -1,12 +1,12 @@
 'use client';
 
 import { TimeOffSchema, type TimeOff } from '@pepper/contracts';
-import { buttonClass } from '@pepper/ui';
+import { Button, Checkbox, Input, Select } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { clockLabel, timeChoices, timeOffLabel, timeOffSpan } from '../../../lib/setup';
-import { Field, Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /**
  * A staff member's coming time off: whole days, or part of one day, on the business's clock
@@ -75,29 +75,28 @@ export function TimeOffEditor({
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="flex flex-col gap-3">
       {entries.length === 0 ? (
-        <p className="m-0 text-ink-2">No time off coming up.</p>
+        <p className="m-0 type-body text-ink-2">
+          No time off coming up{manages ? '. Add a holiday or an afternoon off below.' : '.'}
+        </p>
       ) : (
-        <ul className="m-0 grid list-none gap-2 p-0" data-testid="time-off">
+        <ul className="m-0 list-none divide-y divide-line p-0" data-testid="time-off">
           {entries.map((entry) => {
             const label = timeOffLabel(timeZone, entry);
             return (
-              <li
-                key={entry.id}
-                className="flex items-center justify-between gap-3 rounded-md bg-surface-2 px-4 py-2"
-              >
-                <span>{label}</span>
+              <li key={entry.id} className="flex min-h-14 items-center justify-between gap-3 py-2">
+                <span className="type-body text-ink tabular-nums">{label}</span>
                 {manages ? (
-                  <button
-                    type="button"
+                  <Button
+                    variant="quiet"
+                    size="sm"
                     disabled={busy}
                     aria-label={`Remove time off ${label}`}
-                    className={buttonClass({ variant: 'quiet', size: 'sm' })}
                     onClick={() => void remove(entry)}
                   >
                     Remove
-                  </button>
+                  </Button>
                 ) : null}
               </li>
             );
@@ -106,94 +105,73 @@ export function TimeOffEditor({
       )}
 
       {manages ? (
-        <fieldset disabled={busy} className="m-0 grid gap-3 border-0 p-0">
-          <legend className="mb-1 p-0 font-semibold">Add time off</legend>
-          <label className="flex min-h-11 items-center gap-3">
-            <input
-              type="checkbox"
-              checked={partOfDay}
-              className="size-5 min-h-0 w-auto accent-brand"
+        <fieldset disabled={busy} className="m-0 flex flex-col gap-3 border-0 p-0">
+          <legend className="mb-1 p-0 type-label text-ink">Add time off</legend>
+          <Checkbox
+            label="Only part of a day"
+            checked={partOfDay}
+            onChange={(event) => {
+              setPartOfDay(event.target.checked);
+              setMessage(null);
+            }}
+          />
+          <div className="grid grid-cols-2 items-end gap-3">
+            <Input
+              label={partOfDay ? 'Day' : 'First day'}
+              type="date"
+              name="firstDay"
+              min={today}
+              value={firstDay}
               onChange={(event) => {
-                setPartOfDay(event.target.checked);
+                setFirstDay(event.target.value);
                 setMessage(null);
               }}
             />
-            Only part of a day
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={partOfDay ? 'Day' : 'First day'}>
-              <input
+            {partOfDay ? null : (
+              <Input
+                label="Last day"
+                hint="Empty: just the first day."
                 type="date"
-                name="firstDay"
-                min={today}
-                value={firstDay}
+                name="lastDay"
+                min={firstDay || today}
+                value={lastDay}
                 onChange={(event) => {
-                  setFirstDay(event.target.value);
+                  setLastDay(event.target.value);
                   setMessage(null);
                 }}
               />
-            </Field>
-            {partOfDay ? null : (
-              <Field label="Last day">
-                <input
-                  type="date"
-                  name="lastDay"
-                  min={firstDay || today}
-                  value={lastDay}
-                  onChange={(event) => {
-                    setLastDay(event.target.value);
-                    setMessage(null);
-                  }}
-                />
-              </Field>
             )}
           </div>
-          {partOfDay ? null : (
-            <p className="m-0 -mt-1 text-sm text-ink-2">No last day: just the first day.</p>
-          )}
           {partOfDay ? (
             <div className="grid grid-cols-2 gap-3">
-              <Field label="From">
-                <select
-                  value={from}
-                  onChange={(event) => {
-                    setFrom(event.target.value);
-                  }}
-                >
-                  {times.slice(0, -1).map((time) => (
-                    <option key={time} value={time}>
-                      {clockLabel(time)}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Until">
-                <select
-                  value={to}
-                  onChange={(event) => {
-                    setTo(event.target.value);
-                  }}
-                >
-                  {times.slice(1).map((time) => (
-                    <option key={time} value={time}>
-                      {clockLabel(time)}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+              <Select
+                label="From"
+                value={from}
+                options={times
+                  .slice(0, -1)
+                  .map((time) => ({ value: time, label: clockLabel(time) }))}
+                onChange={(event) => {
+                  setFrom(event.target.value);
+                }}
+              />
+              <Select
+                label="Until"
+                value={to}
+                options={times.slice(1).map((time) => ({ value: time, label: clockLabel(time) }))}
+                onChange={(event) => {
+                  setTo(event.target.value);
+                }}
+              />
             </div>
           ) : null}
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             disabled={busy || firstDay === ''}
-            className={buttonClass({
-              variant: 'secondary',
-              className: 'w-full desk:w-auto desk:justify-self-start',
-            })}
+            className="w-full desk:w-auto desk:self-start"
             onClick={() => void add()}
           >
             Add time off
-          </button>
+          </Button>
         </fieldset>
       ) : null}
       {message === null ? null : <Notice tone={message.tone}>{message.text}</Notice>}

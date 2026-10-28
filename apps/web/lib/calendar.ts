@@ -189,4 +189,18 @@ export function staffTone(staff: readonly { id: string }[], staffMemberId: strin
   return STAFF_TONES[index % STAFF_TONES.length] ?? 'brand';
 }
 
+/**
+ * The tone the calendar gives a member, for other screens (the Team list, S42.2): by place
+ * among the active staff, as the calendar's columns; `null` for a member who can't be booked.
+ */
+export function activeStaffTone(
+  staff: readonly { id: string; active: boolean }[],
+  staffMemberId: string,
+): StaffTone | null {
+  const active = staff.filter((member) => member.active);
+  return active.some((member) => member.id === staffMemberId)
+    ? staffTone(active, staffMemberId)
+    : null;
+}
+
 export { addDays, formatDate };

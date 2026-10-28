@@ -12,7 +12,7 @@ import {
   dueAtFrom,
   dueLabel,
 } from '../../../lib/tasks';
-import { Field, Notice } from '../booking/sheet';
+import { Field, Notice } from '../form-parts';
 
 /**
  * The member's to-dos on Home (S21, ADR-0026): add one with an optional due time on the

@@ -65,8 +65,9 @@ test('setup: a new owner adds a service, a staff member with weekly hours and a 
 
   // The menu.
   await go(page, 'Services');
-  await expect(page.getByRole('heading', { name: 'No services yet' })).toBeVisible();
-  await (await hydrated(page.getByRole('button', { name: 'Add service' }))).click();
+  // The empty menu offers its next step (AC-X-7), and it opens the same sheet as the header.
+  await expect(page.getByText('No services yet')).toBeVisible();
+  await (await hydrated(page.getByRole('button', { name: 'Add your first service' }))).click();
   let dialog = sheet(page);
   await dialog.getByLabel('Name').fill('Haircut');
   await dialog.getByLabel('Category').fill('Hair');
@@ -92,7 +93,9 @@ test('setup: a new owner adds a service, a staff member with weekly hours and a 
 
   // Jess, who offers it: added, then her page for the hours.
   await go(page, 'Team');
-  await (await hydrated(page.getByRole('button', { name: 'Add staff member' }))).click();
+  // No one bookable yet: the empty list offers its next step (AC-X-7), the same sheet.
+  await expect(page.getByText('No one can be booked yet')).toBeVisible();
+  await (await hydrated(page.getByRole('button', { name: 'Add the first person' }))).click();
   dialog = sheet(page);
   await dialog.getByLabel('Name').fill('Jess');
   await dialog.getByRole('checkbox', { name: 'Haircut' }).check();
@@ -138,7 +141,7 @@ test('setup: a new owner adds a service, a staff member with weekly hours and a 
   await page.goto(`/calendar?date=${formatDate(day)}`);
   await (await hydrated(page.getByRole('button', { name: 'New booking' }))).click();
   dialog = sheet(page);
-  await dialog.getByRole('button', { name: 'New client' }).click();
+  await dialog.getByRole('radio', { name: 'New client' }).click();
   await dialog.getByLabel('Name').fill('Maria Lopez');
   await dialog.getByRole('button', { name: 'Add client' }).click();
   await expect(dialog.getByTestId('chosen-client')).toHaveText('Maria Lopez');

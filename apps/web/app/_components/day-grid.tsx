@@ -1,7 +1,8 @@
 import type { BookingStatus, CivilDate, StaffMember } from '@pepper/contracts';
 import { cx } from '@pepper/ui';
 import type { BookingSetup } from '../../lib/booking';
-import { hourLabel, layoutDay, staffTone, timeRange, type StaffTone } from '../../lib/calendar';
+import { hourLabel, layoutDay, staffTone, timeRange } from '../../lib/calendar';
+import { STAFF_TONE_CLASSES } from './staff-tone';
 import { BookingSheet } from './booking/booking-sheet';
 
 export type CalendarEntry =
@@ -28,13 +29,6 @@ export interface CalendarColumn {
  * S42); a 15-minute one is 22 px, the one exception.
  */
 const HOUR_HEIGHT = 88;
-
-// A staff member's blocks: the soft tone with a 4 px bar of the full one (DESIGN.md §3).
-const TONES: Record<StaffTone, { block: string; dot: string }> = {
-  brand: { block: 'bg-brand-soft border-brand', dot: 'bg-brand' },
-  accent: { block: 'bg-accent-soft border-accent', dot: 'bg-accent' },
-  info: { block: 'bg-info-soft border-info', dot: 'bg-info' },
-};
 
 const STATUS_LABELS: Partial<Record<BookingStatus, string>> = {
   completed: 'Done',
@@ -96,7 +90,7 @@ export function DayGrid({
           </div>
         </div>
         {columns.map(({ member, entries }, column) => {
-          const tone = TONES[staffTone(staff, member.id)];
+          const tone = STAFF_TONE_CLASSES[staffTone(staff, member.id)];
           return (
             <section
               key={member.id}

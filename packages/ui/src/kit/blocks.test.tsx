@@ -162,6 +162,13 @@ describe('TimeChip', () => {
     expect(onSelect).toHaveBeenCalledOnce();
     await expectAccessible(container);
   });
+
+  it("can't be pressed while a choice is being booked", async () => {
+    const onSelect = vi.fn();
+    render(<TimeChip time="Tue 11:00 AM" disabled onSelect={onSelect} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Tue 11:00 AM' }));
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });
 
 describe('StepBar', () => {

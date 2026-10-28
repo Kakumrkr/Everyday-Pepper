@@ -1,14 +1,14 @@
 'use client';
 
 import { StaffMemberSchema, type Member, type Service, type StaffMember } from '@pepper/contracts';
-import { buttonClass, cx, Icon } from '@pepper/ui';
+import { Button, buttonStyle, Checkbox, Icon, Input, Select, Sheet, SheetFooter } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
-import { useState, type SubmitEvent } from 'react';
+import { useId, useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { STAFF_COLORS } from '../../../lib/setup';
-import { Field, Notice, Sheet } from '../booking/sheet';
+import { STAFF_COLOR } from '../../../lib/setup';
+import { Notice } from '../form-parts';
 
 interface StaffFormProps {
   /** The staff member to edit; none adds a new one. */
@@ -21,8 +21,18 @@ interface StaffFormProps {
 }
 
 /** "Add staff member" on the Team page: a sheet, then the new member's page for their hours. */
-export function AddStaffMember(props: Omit<StaffFormProps, 'member'>) {
-  const [open, setOpen] = useState(false);
+export function AddStaffMember({
+  open: shown,
+  onOpenChange,
+  ...props
+}: Omit<StaffFormProps, 'member'> & {
+  /** Opened from elsewhere too (the empty list's "Add the first person"). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [own, setOwn] = useState(false);
+  const open = shown ?? own;
+  const setOpen = onOpenChange ?? setOwn;
   const [key, setKey] = useState(0);
   return (
     <Sheet
@@ -34,7 +44,7 @@ export function AddStaffMember(props: Omit<StaffFormProps, 'member'>) {
         if (next) setKey((k) => k + 1);
       }}
       trigger={
-        <button type="button" className={buttonClass({ size: 'sm' })}>
+        <button type="button" className={buttonStyle({ size: 'sm' })}>
           <Icon name="plus" />
           Add staff member
         </button>
@@ -46,20 +56,19 @@ export function AddStaffMember(props: Omit<StaffFormProps, 'member'>) {
 }
 
 /**
- * A staff member's name, calendar colour, app login and the services they offer
- * (`POST /v1/staff`, or `PUT /v1/staff/:id` with every field). Owners and managers only.
+ * A staff member's name, app login and the services they offer (`POST /v1/staff`, or
+ * `PUT /v1/staff/:id` with every field). Owners and managers only. No colour to pick (S42.2,
+ * D-2): the calendar gives each active member a tone by their place, so the stored colour is
+ * only sent back as it was. In the add sheet, Save sits in the sheet's footer (D3).
  */
 export function StaffForm({ member, services, members, linkedUserIds }: StaffFormProps) {
   const router = useRouter();
-  const [color, setColor] = useState(member?.color ?? STAFF_COLORS[0].value);
   const [message, setMessage] = useState<{ tone: 'error' | 'ok'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const formId = useId();
   const logins = (members ?? []).filter(
     (m) => m.userId === member?.userId || !linkedUserIds.includes(m.userId),
   );
-  const colors = STAFF_COLORS.some((c) => c.value === color)
-    ? STAFF_COLORS
-    : [...STAFF_COLORS, { value: color, name: 'Current' }];
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,7 +77,7 @@ export function StaffForm({ member, services, members, linkedUserIds }: StaffFor
     const userId = formText(form, 'userId');
     const body = {
       displayName: formText(form, 'displayName'),
-      color,
+      color: member?.color ?? STAFF_COLOR,
       active: data.get('active') !== null,
       // Without the list (it could not be loaded), the link stays as it was.
       userId: members === null ? (member?.userId ?? null) : userId === '' ? null : userId,
@@ -94,104 +103,67 @@ export function StaffForm({ member, services, members, linkedUserIds }: StaffFor
   }
 
   return (
-    <form className="grid gap-4" onSubmit={(event) => void submit(event)} noValidate>
-      <Field label="Name" hint="As clients see it, e.g. Jess or Dr. Lee.">
-        <input
-          name="displayName"
-          required
-          maxLength={80}
-          defaultValue={member?.displayName ?? ''}
-        />
-      </Field>
-
-      <fieldset className="m-0 grid gap-2 border-0 p-0">
-        <legend className="mb-1.5 p-0 font-semibold">Calendar colour</legend>
-        <div className="flex flex-wrap gap-2">
-          {colors.map((choice) => (
-            <label
-              key={choice.value}
-              className={cx(
-                'flex size-11 cursor-pointer items-center justify-center rounded-full border-2',
-                'has-[input:focus-visible]:outline-3 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-brand',
-                choice.value === color ? 'border-ink' : 'border-transparent',
-              )}
-            >
-              <input
-                type="radio"
-                name="color"
-                value={choice.value}
-                checked={choice.value === color}
-                onChange={() => {
-                  setColor(choice.value);
-                }}
-                className="visually-hidden"
-              />
-              <span
-                aria-hidden="true"
-                className="size-8 rounded-full"
-                style={{ background: choice.value }}
-              />
-              <span className="visually-hidden">{choice.name}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+    <form id={formId} className="grid gap-4" onSubmit={(event) => void submit(event)} noValidate>
+      <Input
+        label="Name"
+        hint="As clients see it, e.g. Jess or Dr. Lee."
+        name="displayName"
+        required
+        maxLength={80}
+        defaultValue={member?.displayName ?? ''}
+      />
 
       {members === null ? null : (
-        <Field
+        <Select
           label="Their Pepper login"
           hint="Linking a login lets them see their own appointments and add their time off."
-        >
-          <select name="userId" defaultValue={member?.userId ?? ''}>
-            <option value="">They don’t sign in</option>
-            {logins.map((m) => (
-              <option key={m.userId} value={m.userId}>
-                {m.name} ({m.email})
-              </option>
-            ))}
-          </select>
-        </Field>
+          name="userId"
+          defaultValue={member?.userId ?? ''}
+          options={[
+            { value: '', label: 'They don’t sign in' },
+            ...logins.map((m) => ({ value: m.userId, label: `${m.name} (${m.email})` })),
+          ]}
+        />
       )}
 
-      <fieldset className="m-0 grid gap-1 border-0 p-0">
-        <legend className="mb-1.5 p-0 font-semibold">Services they offer</legend>
+      <fieldset className="m-0 flex flex-col border-0 p-0">
+        <legend className="mb-1 p-0 type-label text-ink">Services they offer</legend>
         {services.length === 0 ? (
-          <p className="m-0 text-ink-2">No services yet. Add them on the Services page.</p>
+          <p className="m-0 type-body text-ink-2">
+            No services yet. Add them on the Services page.
+          </p>
         ) : (
           services.map((service) => (
-            <label key={service.id} className="flex min-h-11 items-center gap-3">
-              <input
-                type="checkbox"
-                name="serviceIds"
-                value={service.id}
-                defaultChecked={member?.serviceIds.some((id) => id === service.id) ?? false}
-                className="size-5 min-h-0 w-auto accent-brand"
-              />
-              {service.name}
-              {service.active ? null : <span className="text-sm text-ink-2">(not bookable)</span>}
-            </label>
+            <Checkbox
+              key={service.id}
+              name="serviceIds"
+              value={service.id}
+              label={service.active ? service.name : `${service.name} (not bookable)`}
+              defaultChecked={member?.serviceIds.some((id) => id === service.id) ?? false}
+            />
           ))
         )}
       </fieldset>
 
-      <label className="flex min-h-11 items-center gap-3 font-semibold">
-        <input
-          name="active"
-          type="checkbox"
-          defaultChecked={member?.active ?? true}
-          className="size-5 min-h-0 w-auto accent-brand"
-        />
-        Can be booked
-      </label>
+      <Checkbox
+        name="active"
+        label="Can be booked"
+        hint="Shown on the calendar and the booking page."
+        defaultChecked={member?.active ?? true}
+      />
 
-      {message === null ? null : <Notice tone={message.tone}>{message.text}</Notice>}
-      <button
-        type="submit"
-        disabled={busy}
-        className={buttonClass({ className: 'w-full desk:w-auto desk:justify-self-start' })}
-      >
-        {busy ? 'Saving…' : member === undefined ? 'Add' : 'Save details'}
-      </button>
+      <SheetFooter>
+        {message === null ? null : <Notice tone={message.tone}>{message.text}</Notice>}
+        <Button
+          type="submit"
+          form={formId}
+          busy={busy}
+          size="lg"
+          className="w-full desk:w-auto desk:self-start desk:justify-self-start"
+        >
+          {busy ? 'Saving…' : member === undefined ? 'Add' : 'Save details'}
+        </Button>
+      </SheetFooter>
     </form>
   );
 }

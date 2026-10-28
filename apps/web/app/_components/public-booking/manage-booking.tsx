@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { dateTimeLabel, STATUS_LABELS } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
 import { publicApiPath, readManageToken } from '../../../lib/public-booking';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 import { alternativesOf } from '../booking/refusal';
 import { SlotPicker } from './slot-picker';
 

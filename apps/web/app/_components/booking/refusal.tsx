@@ -6,12 +6,12 @@ import {
   type AvailableSlot,
   type WaitlistEntryInput,
 } from '@pepper/contracts';
-import { buttonClass, chipClass } from '@pepper/ui';
-import { useState, type SubmitEvent } from 'react';
+import { Button, Input, TimeChip } from '@pepper/ui';
+import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { dateTimeLabel, suggestedWindow } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { Field, Notice } from './sheet';
+import { Notice } from '../form-parts';
 
 /** The nearest free times of a 409 `slot_unavailable` answer, or `null` for any other one. */
 export function alternativesOf(result: CallResult<unknown>): AvailableSlot[] | null {
@@ -38,9 +38,18 @@ export function Refusal({
   /** For a new booking: the entry to add, without its windows, and the wanted start. */
   waitlist?: { entry: Omit<WaitlistEntryInput, 'windows'>; wanted: string; onAdded: () => void };
 }) {
+  const box = useRef<HTMLElement>(null);
+  // The sheet's Book or Move sits in its footer; the answer shows where the eye can find it.
+  useEffect(() => {
+    box.current?.scrollIntoView({ block: 'nearest' });
+  }, []);
   return (
-    <section aria-label="That time is taken" className="grid gap-3 rounded-md bg-wait-soft p-4">
-      <p className="m-0 font-semibold text-wait" role="alert">
+    <section
+      ref={box}
+      aria-label="That time is taken"
+      className="grid gap-3 rounded-md bg-warn-soft p-4"
+    >
+      <p className="m-0 type-body font-semibold text-ink" role="alert">
         That time can’t be booked.
         {alternatives.length === 0
           ? ' There’s nothing free nearby.'
@@ -49,17 +58,14 @@ export function Refusal({
       {alternatives.length === 0 ? null : (
         <div className="flex flex-wrap gap-2" data-testid="alternatives">
           {alternatives.map((slot) => (
-            <button
+            <TimeChip
               key={slot.startsAt}
-              type="button"
+              time={dateTimeLabel(timeZone, slot.startsAt)}
               disabled={busy}
-              className={chipClass()}
-              onClick={() => {
+              onSelect={() => {
                 onPick(slot);
               }}
-            >
-              {dateTimeLabel(timeZone, slot.startsAt)}
-            </button>
+            />
           ))}
         </div>
       )}
@@ -108,44 +114,36 @@ function WaitlistOffer({
 
   if (!open) {
     return (
-      <button
-        type="button"
-        className={buttonClass({ variant: 'secondary', className: 'justify-self-start' })}
+      <Button
+        variant="secondary"
+        size="sm"
+        className="justify-self-start"
         onClick={() => {
           setOpen(true);
         }}
       >
         Add to the waitlist
-      </button>
+      </Button>
     );
   }
   return (
     <form className="grid gap-2" onSubmit={(event) => void add(event)}>
-      <p className="m-0 text-ink">I’ll keep them on the waitlist for this time:</p>
-      <Field label="Day">
-        <input type="date" name="date" required defaultValue={suggested.date} />
-      </Field>
+      <p className="m-0 type-body text-ink">I’ll keep them on the waitlist for this time:</p>
+      <Input label="Day" type="date" name="date" required defaultValue={suggested.date} />
       <div className="grid grid-cols-2 gap-2">
-        <Field label="From">
-          <input type="time" name="start" required defaultValue={suggested.start} />
-        </Field>
-        <Field label="Until">
-          <input
-            type="time"
-            name="end"
-            required
-            defaultValue={suggested.end === '24:00' ? '23:59' : suggested.end}
-          />
-        </Field>
+        <Input label="From" type="time" name="start" required defaultValue={suggested.start} />
+        <Input
+          label="Until"
+          type="time"
+          name="end"
+          required
+          defaultValue={suggested.end === '24:00' ? '23:59' : suggested.end}
+        />
       </div>
       {error === null ? null : <Notice tone="error">{error}</Notice>}
-      <button
-        type="submit"
-        disabled={busy}
-        className={buttonClass({ className: 'justify-self-start' })}
-      >
+      <Button type="submit" size="sm" busy={busy} className="justify-self-start">
         Add to the waitlist
-      </button>
+      </Button>
     </form>
   );
 }
