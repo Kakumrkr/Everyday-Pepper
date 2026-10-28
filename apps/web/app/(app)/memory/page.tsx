@@ -32,8 +32,8 @@ export default async function MemoryPage() {
         <h1 className="m-0 type-display">What I know</h1>
         <p className="m-0 type-body text-ink-2">
           Everything I remember{current === null ? '' : ` about ${current.business.name}`}. Fix
-          anything that’s wrong. When you delete something, I forget it everywhere, chats
-          included, and it can’t be undone.
+          anything that’s wrong. When you delete something, I forget it everywhere, chats included,
+          and it can’t be undone.
         </p>
       </header>
       {current === null || facts === null || episodes === null || settings === null ? (

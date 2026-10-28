@@ -8,15 +8,7 @@ import {
   type AutonomyLevel,
   type BusinessAutonomy,
 } from '@pepper/contracts';
-import {
-  AUTONOMY_GROUPS,
-  cx,
-  DIAL_LABEL,
-  Icon,
-  LEVEL_HELP,
-  LEVEL_LABEL,
-  Switch,
-} from '@pepper/ui';
+import { AUTONOMY_GROUPS, cx, DIAL_LABEL, Icon, LEVEL_HELP, LEVEL_LABEL, Switch } from '@pepper/ui';
 import { useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 
@@ -171,7 +163,9 @@ function DialRow({
                 'flex min-h-11 cursor-pointer items-center justify-center gap-1 rounded-sm px-1 text-center type-label leading-tight',
                 'transition motion-base ease-standard',
                 'has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-brand',
-                level === option ? 'bg-surface text-ink shadow-raised' : 'text-ink-2 hover:text-ink',
+                level === option
+                  ? 'bg-surface text-ink shadow-raised'
+                  : 'text-ink-2 hover:text-ink',
                 (disabled || unavailable) && 'cursor-not-allowed opacity-60',
               )}
             >
