@@ -15,6 +15,7 @@ import {
   enterPassword,
   freshCode,
   hydrated,
+  linkTo,
   onboardOwner,
   ownClientAddress,
   PASSWORD,
@@ -176,8 +177,14 @@ test('the account screens have no serious accessibility violations', async ({ pa
   await expect(page.getByRole('heading', { name: /invited to join/ })).toBeVisible();
   await expectAccessible(page, 'invite: signed out');
 
+  // S44: "Check your inbox", then the link signs in.
   const email = `${unique('owner')}@example.test`;
-  await signUp(page, email);
+  await signUp(page, email, { confirm: false });
+  await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible({
+    timeout: 20_000,
+  });
+  await expectAccessible(page, 'check your inbox');
+  await page.goto(await linkTo(email, 'Confirm your email for Pepper'));
   await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
   await hydrated(page.getByRole('button', { name: 'Create business' }));
   await expectAccessible(page, 'create business');
@@ -198,6 +205,11 @@ test('the account screens have no serious accessibility violations', async ({ pa
   await page.getByLabel('Enter the 6-digit code').fill(await freshCode(key, used));
   await page.getByRole('button', { name: 'Turn on two-step verification' }).click();
   await expect(page).toHaveURL(/\/$/);
+  // S44: change email, its form with an error, then "Confirm it’s you".
+  await page.goto('/account/email');
+  const save = await hydrated(page.getByRole('button', { name: /Send/ }));
+  await save.click();
+  await expectAccessible(page, 'change email: error');
   await signOut(page);
   await enterPassword(page, email);
   await expect(page.getByRole('heading', { name: 'Two-step verification' })).toBeVisible();
@@ -220,6 +232,9 @@ test('the signed-out and public screens have no serious accessibility violations
   for (const [screen, path] of [
     ['sign in', '/sign-in'],
     ['sign up', '/sign-up'],
+    ['forgot password', '/forgot-password'],
+    ['new password', '/reset-password?token=not-a-real-token'],
+    ['reset link run out', '/reset-password?error=INVALID_TOKEN'],
     ['offline page', '/offline.html'],
     ['broken booking link', `/book/${s.slug}/manage#not-a-token`],
     ['broken offer link', `/book/${s.slug}/offer`],
