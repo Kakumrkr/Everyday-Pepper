@@ -6,7 +6,7 @@ import {
   type PublicBooking,
   type PublicBusiness,
 } from '@pepper/contracts';
-import { Button, buttonStyle, chipStyle, DetailTable } from '@pepper/ui';
+import { Button, buttonStyle, cx, chipStyle, DetailTable } from '@pepper/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { dateTimeLabel, STATUS_LABELS } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
@@ -120,7 +120,7 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
         <Notice tone="error">{view.message}</Notice>
         <a
           href={`/book/${encodeURIComponent(slug)}`}
-          className={`${buttonStyle({ variant: 'secondary' })} self-start`}
+          className={cx(buttonStyle({ variant: 'secondary' }), 'self-start')}
         >
           Book a visit
         </a>

@@ -319,11 +319,14 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       label: staffMemberId === null ? 'Anyone available' : (staffNames.get(staffMemberId) ?? ''),
     });
   }
-  if (waitlistDay !== null && index > 2) {
-    picked.push({ step: 'time', label: `Waitlist: ${waitlistDay.label}` });
-  } else if (slot !== null && index > 2) {
-    picked.push({ step: 'time', label: dateTimeLabel(timeZone, slot.startsAt) });
-  }
+  // The chosen time, or the waitlist's day: in the choices and the sticky bar alike.
+  const when =
+    waitlistDay !== null
+      ? `Waitlist: ${waitlistDay.label}`
+      : slot === null
+        ? null
+        : dateTimeLabel(timeZone, slot.startsAt);
+  if (when !== null && index > 2) picked.push({ step: 'time', label: when });
 
   const heading = (text: string) => (
     <h1 ref={headingRef} tabIndex={-1} className="m-0 type-display text-ink outline-none">
@@ -335,13 +338,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   const barSummary = (
     <>
       <span className="block truncate">{service?.name}</span>
-      <span className="block truncate type-caption text-ink-2">
-        {waitlistDay !== null
-          ? `Waitlist: ${waitlistDay.label}`
-          : slot === null
-            ? null
-            : dateTimeLabel(timeZone, slot.startsAt)}
-      </span>
+      <span className="block truncate type-caption text-ink-2">{when}</span>
     </>
   );
 

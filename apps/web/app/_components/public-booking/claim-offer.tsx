@@ -7,7 +7,7 @@ import {
   type PublicBusiness,
   type PublicOffer,
 } from '@pepper/contracts';
-import { Button, buttonStyle, DetailTable } from '@pepper/ui';
+import { Button, buttonStyle, cx, DetailTable } from '@pepper/ui';
 import { useEffect, useState } from 'react';
 import { dateTimeLabel } from '../../../lib/booking';
 import { sendJson } from '../../../lib/client-api';
@@ -98,7 +98,7 @@ export function ClaimOffer({ business }: { business: PublicBusiness }) {
         <Notice tone="error">{view.message}</Notice>
         <a
           href={`/book/${encodeURIComponent(slug)}`}
-          className={`${buttonStyle({ variant: 'secondary' })} self-start`}
+          className={cx(buttonStyle({ variant: 'secondary' }), 'self-start')}
         >
           Book a visit
         </a>
@@ -115,7 +115,7 @@ export function ClaimOffer({ business }: { business: PublicBusiness }) {
         </Notice>
         <a
           href={managePath(slug, view.manageToken)}
-          className={`${buttonStyle({ variant: 'secondary' })} self-start`}
+          className={cx(buttonStyle({ variant: 'secondary' }), 'self-start')}
         >
           Reschedule or cancel
         </a>
@@ -154,7 +154,7 @@ export function ClaimOffer({ business }: { business: PublicBusiness }) {
       ) : (
         <a
           href={`/book/${encodeURIComponent(slug)}`}
-          className={`${buttonStyle({ variant: 'secondary' })} self-start`}
+          className={cx(buttonStyle({ variant: 'secondary' }), 'self-start')}
         >
           See other times
         </a>

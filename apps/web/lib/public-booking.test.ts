@@ -91,6 +91,9 @@ describe('the page data', () => {
     expect(localTimeLabel('America/Argentina/Buenos_Aires')).toBe('Buenos Aires time');
     expect(localTimeLabel('UTC')).toBe('UTC');
     expect(localTimeLabel('Etc/UTC')).toBe('UTC');
+    expect(localTimeLabel('GMT')).toBe('UTC');
+    // An offset zone by its offset (Etc's signs are inverted: Etc/GMT+5 is five hours behind).
+    expect(localTimeLabel('Etc/GMT+5')).toBe('GMT-5');
   });
 
   it('makes initials of a business name', () => {

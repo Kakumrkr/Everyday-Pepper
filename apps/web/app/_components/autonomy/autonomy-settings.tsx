@@ -23,9 +23,6 @@ import { sendJson } from '../../../lib/client-api';
 
 const LEVELS = AutonomyLevelSchema.options;
 
-/** How long "Saved." stays (an error stays until it's dismissed). */
-const SAVED_FOR_MS = 4000;
-
 /** The toast after a change; `id` makes a second save show a fresh one. */
 interface SaveNote {
   id: number;
@@ -134,7 +131,6 @@ export function AutonomySettings({
           key={note.id}
           open
           tone={note.tone}
-          duration={SAVED_FOR_MS}
           title={note.text}
           onOpenChange={(open) => {
             if (!open) setNote(null);

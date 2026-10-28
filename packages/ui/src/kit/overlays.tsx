@@ -254,7 +254,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <RadixToast.Viewport
         className={cx(
-          'fixed inset-x-0 bottom-0 z-50 m-0 flex list-none flex-col gap-2 p-4',
+          // Taps pass through the empty area (the tab bar below it); the toasts take their own.
+          'pointer-events-none fixed inset-x-0 bottom-0 z-50 m-0 flex list-none flex-col gap-2 p-4',
           // Above the bottom tabs, whose height grows by the phone's safe area.
           'pb-[calc(5rem+env(safe-area-inset-bottom))]',
           'desk:inset-x-auto desk:right-6 desk:bottom-6 desk:w-96 desk:p-0',
@@ -298,7 +299,7 @@ export function Toast({
       type={error ? 'foreground' : 'background'}
       duration={error ? Infinity : duration}
       className={cx(
-        'flex items-center gap-3 rounded-lg px-4 py-3 shadow-floating animate-fade-in',
+        'pointer-events-auto flex items-center gap-3 rounded-lg px-4 py-3 shadow-floating animate-fade-in',
         error ? 'bg-danger text-bg' : 'bg-ink text-bg',
       )}
     >
