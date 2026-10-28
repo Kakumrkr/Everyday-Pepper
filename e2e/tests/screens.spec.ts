@@ -156,7 +156,12 @@ for (const width of WIDTHS) {
     const slug = await southsideMenu(page);
     const phone = width === 375;
     const shots = async (name: string, mask: ReturnType<Page['locator']>[] = []) => {
-      if (phone) await expectTapTargets(page, `the booking page: ${name}`);
+      if (phone) {
+        await expectTapTargets(page, `the booking page: ${name}`);
+        // D12: nothing scrolls sideways (the day strip once widened the whole page).
+        const wide = await page.evaluate(() => document.documentElement.scrollWidth);
+        expect(wide, `${name} scrolls sideways`).toBeLessThanOrEqual(width);
+      }
       for (const scheme of SCHEMES) {
         await still(page, scheme);
         await expect
@@ -519,7 +524,8 @@ for (const width of WIDTHS) {
       await page.goto('/autonomy');
       const dial = page.getByRole('radiogroup', { name: 'Offering open slots to the waitlist' });
       await dial.scrollIntoViewIfNeeded();
-      await (await hydrated(dial.getByRole('radio', { name: 'Do it and tell me' }))).check();
+      await hydrated(dial.getByRole('radio', { name: 'Do it and tell me' }));
+      await dial.getByText('Do it and tell me').click();
       const saved = toast(page);
       await expect(saved).toContainText('Saved.');
       const box = await saved.boundingBox();
@@ -531,7 +537,7 @@ for (const width of WIDTHS) {
       await expectTapTargets(page, 'autonomy, with the saved toast');
       // It goes by itself; then the dial goes back to "Ask me" for the shots.
       await expect(saved).toHaveCount(0, { timeout: 10_000 });
-      await dial.getByRole('radio', { name: 'Ask me' }).check();
+      await dial.getByText('Ask me', { exact: true }).click();
       await expect(saved).toContainText('Saved.');
       await expect(saved).toHaveCount(0, { timeout: 10_000 });
     }

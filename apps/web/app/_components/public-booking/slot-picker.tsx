@@ -99,7 +99,7 @@ export function SlotPicker({
           Times on {dayLabel}
         </h2>
         {slots.state === 'loading' ? (
-          <div role="status" className="grid grid-cols-3 gap-2">
+          <div role="status" className="grid grid-cols-2 gap-2 min-[400px]:grid-cols-3">
             <span className="sr-only">Looking for free times…</span>
             {[0, 1, 2, 3, 4, 5].map((n) => (
               <Skeleton key={n} className="h-11 rounded-md" />
@@ -127,12 +127,15 @@ export function SlotPicker({
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2" data-testid="free-times">
+          <div className="grid grid-cols-2 gap-2 min-[400px]:grid-cols-3" data-testid="free-times">
             {slots.slots.map((slot) => (
               <button
                 key={`${slot.startsAt}-${slot.staffMemberId}`}
                 type="button"
-                className={cx(chipStyle(false), 'flex flex-col items-center justify-center')}
+                className={cx(
+                  chipStyle(false),
+                  'flex flex-col items-center justify-center whitespace-nowrap',
+                )}
                 onClick={() => {
                   onPick(slot);
                 }}

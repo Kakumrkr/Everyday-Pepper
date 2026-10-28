@@ -309,13 +309,8 @@ export function StickyActionBar({
   /** `inline` shows it in place (the gallery). */
   placement?: 'fixed' | 'inline';
 }) {
-  return (
-    <div
-      className={cx(
-        'flex items-center gap-3 bg-surface px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-floating',
-        placement === 'fixed' ? 'fixed inset-x-0 bottom-0 z-20' : 'rounded-lg',
-      )}
-    >
+  const content = (
+    <>
       <div className="min-w-0 flex-1 type-label text-ink">{summary}</div>
       {back !== undefined && (
         <Button variant="secondary" onClick={back.onClick}>
@@ -323,7 +318,16 @@ export function StickyActionBar({
         </Button>
       )}
       {primary}
+    </>
+  );
+  const bar = 'bg-surface px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-floating';
+  return placement === 'fixed' ? (
+    <div className={cx(bar, 'fixed inset-x-0 bottom-0 z-20')}>
+      {/* On a wide screen, as wide as the page it ends: summary and action stay together. */}
+      <div className="mx-auto flex w-full max-w-lg items-center gap-3">{content}</div>
     </div>
+  ) : (
+    <div className={cx(bar, 'flex items-center gap-3 rounded-lg')}>{content}</div>
   );
 }
 

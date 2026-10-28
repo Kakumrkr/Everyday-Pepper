@@ -6,7 +6,8 @@ import { initials } from '../../../lib/public-booking';
 /**
  * The public pages' frame in the business's own color (PCR-001): its name on top, and Pepper
  * only in the small print. `.bookpage` maps the brand tokens onto the business's, so every kit
- * part inside wears its color. The bottom padding keeps the footer clear of a sticky action bar.
+ * part inside wears its color. The bottom padding keeps the footer clear of a sticky action bar;
+ * `min-w-0` keeps the day strip's width from widening the page past the phone.
  */
 export function BookingPageShell({
   business,
@@ -17,7 +18,7 @@ export function BookingPageShell({
 }) {
   return (
     <main
-      className="bookpage mx-auto flex w-full max-w-lg flex-col gap-6 self-start rounded-none border-0 bg-transparent px-5 pt-6 pb-28"
+      className="bookpage mx-auto flex w-full min-w-0 max-w-lg flex-col gap-6 self-start rounded-none border-0 bg-transparent px-5 pt-6 pb-28"
       style={brandStyle(brandTokens(business.brandColor))}
     >
       <header className="flex items-center gap-3">
