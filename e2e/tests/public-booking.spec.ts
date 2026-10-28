@@ -147,6 +147,11 @@ test('a client books on the page in the business’s color, confirms the emailed
   await client.getByRole('button', { name: 'Yes, cancel it' }).click();
   await expect(client.getByText('Your booking is cancelled.')).toBeVisible();
   await expect(client.getByTestId('booking-status')).toHaveText('Cancelled');
+  // D5: a cancelled booking offers the next step.
+  await expect(client.getByRole('link', { name: 'Book again' })).toHaveAttribute(
+    'href',
+    `/book/${slug}`,
+  );
   expect((await bookings())[0]?.status).toBe('cancelled');
   await expect(emailTo(email, 'is cancelled')).resolves.toContain('Hi Ana');
 });

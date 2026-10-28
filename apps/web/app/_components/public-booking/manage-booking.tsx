@@ -151,11 +151,18 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
         ]}
       />
       {!booking.changeable ? (
-        <p className="m-0 type-body text-ink-2">
-          {booking.status === 'cancelled'
-            ? 'This booking is cancelled. Book again any time.'
-            : `This booking can’t be changed online any more. Call or message ${business.name}.`}
-        </p>
+        booking.status === 'cancelled' ? (
+          <a
+            href={`/book/${encodeURIComponent(slug)}`}
+            className={cx(buttonStyle({ variant: 'secondary' }), 'self-start')}
+          >
+            Book again
+          </a>
+        ) : (
+          <p className="m-0 type-body text-ink-2">
+            {`This booking can’t be changed online any more. Call or message ${business.name}.`}
+          </p>
+        )
       ) : mode === 'view' ? (
         <div className="flex flex-wrap gap-3">
           <Button
