@@ -119,7 +119,8 @@ export function validArguments(
       clientId: ids.clientId,
       serviceId: ids.serviceId,
       staffMemberId: ids.staffMemberId,
-      windows: [{ date, start: '09:00', end: '17:00' }],
+      // Jess's blocked lunch (`hostileTargets`): a full window, which the waitlist takes (S44).
+      windows: [{ date, start: '12:00', end: '13:00' }],
     },
   };
 }
