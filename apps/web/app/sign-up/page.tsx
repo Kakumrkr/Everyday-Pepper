@@ -15,11 +15,5 @@ export default async function SignUpPage({
 }) {
   const next = safeNext((await searchParams)['next']);
   if ((await currentAccount()).state === 'signed-in') redirect(next ?? ROUTES.home);
-  return (
-    <main>
-      <h1 className="wordmark">pepper</h1>
-      <p className="tagline">Hire your AI employee. Start with your account.</p>
-      <SignUpForm next={next} />
-    </main>
-  );
+  return <SignUpForm next={next} />;
 }

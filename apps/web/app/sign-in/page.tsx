@@ -16,12 +16,5 @@ export default async function SignInPage({
 }) {
   const next = safeNext((await searchParams)['next']);
   if ((await currentAccount()).state === 'signed-in') redirect(next ?? ROUTES.home);
-  return (
-    <main>
-      <h1 className="wordmark">pepper</h1>
-      <p className="tagline">Sign in to your business.</p>
-      <SignInForm next={next} />
-      <ApiStatus />
-    </main>
-  );
+  return <SignInForm next={next} status={<ApiStatus />} />;
 }

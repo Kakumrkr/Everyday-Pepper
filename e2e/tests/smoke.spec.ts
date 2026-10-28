@@ -44,10 +44,11 @@ test.describe('smoke: the stack is up', () => {
 
     await expect(page).toHaveURL(/\/sign-in$/);
     await expect(page).toHaveTitle('Sign in · Pepper');
-    await expect(page.getByRole('heading', { level: 1, name: 'pepper' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Sign in' })).toBeVisible();
     const status = page.getByTestId('api-status');
     await expect(status).toHaveAttribute('data-state', 'ok');
     await expect(status).toContainText('ready');
+    await expect(status).toBeHidden();
     // Mobile-first: nothing overflows the viewport sideways.
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

@@ -5,19 +5,26 @@ import { Button, cx, FOCUS_RING, Icon } from '@pepper/ui';
 import { useState } from 'react';
 import { ROUTES, withNext } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
-import { FormError } from './form-error';
+import { Notice } from './form-parts';
 
-/** Signs out, then shows sign-in (returning to `next` afterwards, if given). */
+/**
+ * Signs out, then shows sign-in (returning to `next` afterwards, if given). `main` makes it the
+ * screen's one primary action (the invite for another email).
+ */
 export function SignOutButton({
   next = null,
   label = 'Sign out',
+  main = false,
 }: {
   next?: string | null;
   label?: string;
+  main?: boolean;
 }) {
   return (
     <Button
-      variant="secondary"
+      variant={main ? 'primary' : 'secondary'}
+      size={main ? 'lg' : 'md'}
+      block={main}
       onClick={() => {
         void sendJson('POST', '/api/auth/sign-out', {}).then(() => {
           window.location.assign(withNext(ROUTES.signIn, next));
@@ -74,7 +81,7 @@ export function BusinessSwitcher({
           );
         })}
       </ul>
-      <FormError message={error} />
+      {error === null ? null : <Notice tone="error">{error}</Notice>}
     </section>
   );
 }

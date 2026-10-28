@@ -1,7 +1,7 @@
 'use client';
 
 import { TaskSchema, type Member, type Task } from '@pepper/contracts';
-import { Button, cx, fieldStyle, FOCUS_RING } from '@pepper/ui';
+import { Button, cx, FOCUS_RING, Input, Select } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -12,7 +12,7 @@ import {
   dueAtFrom,
   dueLabel,
 } from '../../../lib/tasks';
-import { Field, Notice } from '../form-parts';
+import { Notice } from '../form-parts';
 
 /**
  * The member's to-dos on Home (S21, ADR-0026): add one with an optional due time on the
@@ -20,7 +20,6 @@ import { Field, Notice } from '../form-parts';
  * to-do to anyone (`members` is their team); staff see and add only their own. The api
  * checks every change. On the kit (S41): a flat section, to-dos as hairline rows.
  */
-const CONTROL = cx(fieldStyle, 'min-h-12');
 export function TaskCard({
   open,
   done,
@@ -128,60 +127,49 @@ export function TaskCard({
       )}
 
       <form className="mt-2 grid gap-3" noValidate onSubmit={(event) => void add(event)}>
-        <Field label="New to-do">
-          <input
-            className={CONTROL}
-            name="title"
-            value={title}
-            maxLength={200}
-            placeholder="e.g. Order more color"
+        <Input
+          label="New to-do"
+          name="title"
+          value={title}
+          maxLength={200}
+          placeholder="e.g. Order more color"
+          onChange={(event) => {
+            setTitle(event.target.value);
+          }}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            label="Due date"
+            hint="Optional"
+            type="date"
+            name="dueDay"
+            value={day}
             onChange={(event) => {
-              setTitle(event.target.value);
+              setDay(event.target.value);
             }}
           />
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Due date" hint="Optional">
-            <input
-              className={CONTROL}
-              type="date"
-              name="dueDay"
-              value={day}
-              onChange={(event) => {
-                setDay(event.target.value);
-              }}
-            />
-          </Field>
-          <Field label="Time" hint="9:00 AM if empty">
-            <input
-              className={CONTROL}
-              type="time"
-              name="dueTime"
-              value={time}
-              disabled={day === ''}
-              onChange={(event) => {
-                setTime(event.target.value);
-              }}
-            />
-          </Field>
+          <Input
+            label="Time"
+            hint="9:00 AM if empty"
+            type="time"
+            name="dueTime"
+            value={time}
+            disabled={day === ''}
+            onChange={(event) => {
+              setTime(event.target.value);
+            }}
+          />
         </div>
         {members === null ? null : (
-          <Field label="For">
-            <select
-              className={CONTROL}
-              name="assignee"
-              value={assignee}
-              onChange={(event) => {
-                setAssignee(event.target.value);
-              }}
-            >
-              {assigneeChoices(me, members).map((choice) => (
-                <option key={choice.value} value={choice.value}>
-                  {choice.label}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <Select
+            label="For"
+            name="assignee"
+            value={assignee}
+            options={assigneeChoices(me, members)}
+            onChange={(event) => {
+              setAssignee(event.target.value);
+            }}
+          />
         )}
         {error === null ? null : <Notice tone="error">{error}</Notice>}
         <Button type="submit" variant="secondary" busy={busy} className="justify-self-start">

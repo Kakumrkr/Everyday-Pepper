@@ -204,6 +204,13 @@ describe('StickyActionBar', () => {
     expect(screen.getByRole('button', { name: 'Book' })).toBeTruthy();
     await expectAccessible(container);
   });
+
+  it('without a summary, gives the whole bar to the action (the account forms)', () => {
+    const { container } = render(<StickyActionBar primary={<Button block>Sign in</Button>} />);
+    const row = container.firstElementChild?.firstElementChild;
+    expect(row?.children).toHaveLength(1);
+    expect(within(row as HTMLElement).getByRole('button', { name: 'Sign in' })).toBeTruthy();
+  });
 });
 
 describe('BriefingBlock', () => {

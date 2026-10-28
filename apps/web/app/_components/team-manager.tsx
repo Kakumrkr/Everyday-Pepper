@@ -14,7 +14,7 @@ import { ROUTES } from '../../lib/account';
 import { sendJson, type CallResult } from '../../lib/client-api';
 import { formText } from '../../lib/form';
 import { grantableRoles, inviteLink } from '../../lib/invite';
-import { FormError } from './form-error';
+import { Notice } from './form-parts';
 
 const ROLE_LABELS: Record<MembershipRole, string> = {
   owner: 'Owner',
@@ -73,7 +73,7 @@ export function TeamManager(props: TeamManagerProps) {
           </ul>
         </section>
       )}
-      <FormError message={error} />
+      {error === null ? null : <Notice tone="error">{error}</Notice>}
       {permissions.includes('members.invite') ? <InviteSection {...props} settle={settle} /> : null}
       <LeaveBusiness me={me} businessName={businessName} />
     </div>
@@ -111,7 +111,7 @@ function MemberRow({
       </div>
       {editable ? (
         <div className="flex flex-wrap items-center gap-2">
-          <label className="visually-hidden" htmlFor={`role-${member.userId}`}>
+          <label className="sr-only" htmlFor={`role-${member.userId}`}>
             Role for {member.name}
           </label>
           <select
@@ -300,7 +300,7 @@ function LeaveBusiness({ me, businessName }: { me: string; businessName: string 
       <p className="m-0 type-body text-ink-2">
         You’ll lose access to this business until someone invites you again.
       </p>
-      <FormError message={error} />
+      {error === null ? null : <Notice tone="error">{error}</Notice>}
       {confirming ? (
         <div className="flex flex-wrap gap-2">
           <Button variant="danger" size="sm" onClick={() => void leave()}>

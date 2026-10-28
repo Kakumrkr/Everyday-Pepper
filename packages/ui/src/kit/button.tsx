@@ -10,7 +10,7 @@ export type KitButtonSize = 'sm' | 'md' | 'lg';
 export const FOCUS_RING =
   'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand';
 
-// Every property the legacy element styles in globals.css also set is set here (S43 deletes them).
+// A kit button sets its own background, border, padding and radius: no element styles apply.
 const BASE =
   'inline-flex items-center justify-center gap-2 rounded-pill py-2 font-semibold no-underline ' +
   'transition motion-fast ease-standard active:scale-98 ' +

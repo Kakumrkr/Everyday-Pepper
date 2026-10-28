@@ -18,7 +18,7 @@ export function BookingPageShell({
 }) {
   return (
     <main
-      className="bookpage mx-auto flex w-full min-w-0 max-w-lg flex-col gap-6 self-start rounded-none border-0 bg-transparent px-5 pt-6 pb-28"
+      className="bookpage mx-auto flex w-full min-w-0 max-w-lg flex-col gap-6 px-5 pt-6 pb-28"
       style={brandStyle(brandTokens(business.brandColor))}
     >
       <header className="flex items-center gap-3">

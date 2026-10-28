@@ -303,7 +303,8 @@ export function StickyActionBar({
   primary,
   placement = 'fixed',
 }: {
-  summary: ReactNode;
+  /** What is chosen so far; left out, the action takes the whole bar (the account forms). */
+  summary?: ReactNode;
   back?: { label: string; onClick: () => void } | undefined;
   primary: ReactNode;
   /** `inline` shows it in place (the gallery). */
@@ -311,7 +312,7 @@ export function StickyActionBar({
 }) {
   const content = (
     <>
-      <div className="min-w-0 flex-1 type-label text-ink">{summary}</div>
+      {summary !== undefined && <div className="min-w-0 flex-1 type-label text-ink">{summary}</div>}
       {back !== undefined && (
         <Button variant="secondary" onClick={back.onClick}>
           {back.label}
