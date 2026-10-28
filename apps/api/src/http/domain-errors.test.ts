@@ -9,6 +9,7 @@ import {
   IdempotencyKeyReusedError,
   ServiceNotFoundError,
   SlotUnavailableError,
+  WaitlistTimesFreeError,
   StaffMemberNotFoundError,
   TimeOffNotFoundError,
   TooManyBookingRequestsError,
@@ -24,6 +25,7 @@ import {
 import {
   AvailableSlotSchema,
   SlotUnavailableSchema,
+  WaitlistTimesFreeSchema,
   UndoRefusedBodySchema,
   WrongCodeSchema,
 } from '@pepper/contracts';
@@ -108,6 +110,21 @@ describe('toHttpError', () => {
       code: 'slot_unavailable',
       message: 'That time cannot be booked',
       alternatives: [alternative],
+    });
+  });
+
+  it('answers a waitlist window that is not full with 409 and its free times (AC-W5-2)', () => {
+    const free = AvailableSlotSchema.parse({
+      staffMemberId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708198',
+      startsAt: '2026-11-07T16:00:00.000Z',
+      endsAt: '2026-11-07T16:45:00.000Z',
+    });
+    const answer = toHttpError(new WaitlistTimesFreeError([free])) as HttpException;
+    expect(answer.getStatus()).toBe(409);
+    expect(WaitlistTimesFreeSchema.parse(answer.getResponse())).toEqual({
+      code: 'waitlist_times_free',
+      message: 'A time inside these windows is still free: book it instead',
+      alternatives: [free],
     });
   });
 

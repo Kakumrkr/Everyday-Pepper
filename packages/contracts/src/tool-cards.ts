@@ -23,6 +23,8 @@ import { UtcDateTimeSchema } from './time.js';
  * - `not_found`: no such record in this business, or not one the member may reach;
  * - `forbidden`: the member's role may not do this (say so; never retry another way);
  * - `slot_unavailable`: the time can't be booked; the 3 nearest times that can come with it;
+ * - `times_free`: the waitlist is for full times, and a time inside the windows is free (S44);
+ *   the earliest free times come with it;
  * - `not_changeable`: the record's state doesn't allow it (a cancelled booking);
  * - `too_late`: the appointment has already started;
  * - `conflict`: the same request was already made differently;
@@ -37,6 +39,7 @@ export const ToolErrorCodeSchema = z.enum([
   'not_found',
   'forbidden',
   'slot_unavailable',
+  'times_free',
   'not_changeable',
   'too_late',
   'conflict',

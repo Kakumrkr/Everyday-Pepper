@@ -5,6 +5,7 @@ import {
   createBooking,
   createService,
   createStaffMember,
+  removeTimeOff,
   replaceWorkingHours,
   SlotUnavailableError,
 } from '@pepper/appointments';
@@ -16,6 +17,8 @@ import {
   LLM_EMBED_BATCH_MAX,
   MemoryFactIdSchema,
   MemorySubjectSchema,
+  minutesOfDay,
+  parseDate,
   ServiceIdSchema,
   StaffMemberIdSchema,
   TenantIdSchema,
@@ -391,6 +394,19 @@ export async function seedEvalWorld(
       if (value === undefined) throw new Error(`No seeded record ${key}`);
       return value;
     };
+    // They joined while their windows were full (the waitlist takes only full times, AC-W5-2):
+    // everyone off then, and back once they are on the list, so the world's times are as seeded.
+    const off = [];
+    for (const window of waiting.windows) {
+      const day = parseDate(window.date);
+      const span = {
+        startsAt: new Date(fromZoned(at.timeZone, day, minutesOfDay(window.start))).toISOString(),
+        endsAt: new Date(fromZoned(at.timeZone, day, minutesOfDay(window.end))).toISOString(),
+      };
+      for (const staffId of [jess.id, marco.id]) {
+        off.push([staffId, (await addTimeOff(db, owner, staffId, span)).id] as const);
+      }
+    }
     await addToWaitlist(
       db,
       owner,
@@ -403,6 +419,7 @@ export async function seedEvalWorld(
       },
       { clock },
     );
+    for (const [staffId, timeOffId] of off) await removeTimeOff(db, owner, staffId, timeOffId);
   }
   for (const fact of seed.facts) {
     const { fact: saved } = await saveFact(db, owner, {

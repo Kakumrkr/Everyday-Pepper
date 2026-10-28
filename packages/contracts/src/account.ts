@@ -49,6 +49,7 @@ export const ApiErrorCodeSchema = z.enum([
   'waitlist_entry_not_found',
   'waitlist_entry_not_changeable',
   'waitlist_expired',
+  'waitlist_times_free',
   'waitlist_day_too_far',
   // Waitlist offers (S37, ADR-0041).
   'waitlist_offer_not_found',

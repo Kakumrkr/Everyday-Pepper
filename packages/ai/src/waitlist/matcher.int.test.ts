@@ -1,6 +1,8 @@
 import {
+  addTimeOff,
   addToWaitlist,
   changeBooking,
+  removeTimeOff,
   claimWaitlistOffer,
   runInsightsFor,
 } from '@pepper/appointments';
@@ -96,6 +98,17 @@ async function cancelWithTwoWaiting(w: EvalWorld) {
   const owner = w.actorFor('owner');
   const window = [{ date: '2026-11-03', start: '13:00', end: '17:00' }];
   const haircut = ServiceIdSchema.parse(id(w, '{{service:haircut}}'));
+  // They joined while the afternoon was full (the waitlist takes only full times, AC-W5-2):
+  // Jess and Marco off, back once they are on the list.
+  const staff = ['{{staff:jess}}', '{{staff:marco}}'].map((key) =>
+    StaffMemberIdSchema.parse(id(w, key)),
+  );
+  const afternoon = { startsAt: '2026-11-03T18:00:00.000Z', endsAt: '2026-11-03T22:00:00.000Z' };
+  const off = await Promise.all(
+    staff.map(
+      async (staffId) => [staffId, await addTimeOff(db, owner, staffId, afternoon)] as const,
+    ),
+  );
   await addToWaitlist(
     db,
     owner,
@@ -117,6 +130,7 @@ async function cancelWithTwoWaiting(w: EvalWorld) {
     },
     { clock: w.clock },
   );
+  for (const [staffId, timeOff] of off) await removeTimeOff(db, owner, staffId, timeOff.id);
   await changeBooking(
     db,
     owner,

@@ -6,6 +6,7 @@ import {
   IdempotencyKeyReusedError,
   ServiceNotFoundError,
   SlotUnavailableError,
+  WaitlistTimesFreeError,
   StaffMemberNotFoundError,
   TimeOffNotFoundError,
 } from '@pepper/appointments';
@@ -40,6 +41,7 @@ const zodError = (() => {
 
 const CASES: [unknown, string][] = [
   [new SlotUnavailableError([]), 'slot_unavailable'],
+  [new WaitlistTimesFreeError([]), 'times_free'],
   [zodError, 'invalid_arguments'],
   [new InvalidToolArgumentsError('No contact details, please.'), 'invalid_arguments'],
   [new UnknownToolError(), 'unknown_tool'],

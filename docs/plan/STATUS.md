@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S43.2 is closed. Next: S44 (see "Planned sessions").
+**S44 · Account recovery + the waitlist fix** (brief approved 2026-10-28: "D1 is B. Rest all, go with your recommendation. and complete the session"). D-1 B: one session, the waitlist check stays in S44. D-2 A: auth emails sent at once through `MAILER` (ADR-0045), not the outbox. D-3 A: a migration marks today's accounts verified; only new sign-ups must verify.
+Tasks: 1 ACs · 2 waitlist window check in the domain · 3 auth emails + Better Auth config · 4 forgot/new password screens · 5 check-your-inbox · 6 change email · 7 journeys + baselines · 8 ADR-0045, reviews, close.
+Done: 1 ACs (AC-W1-4…6, AC-W5-2); 2 waitlist check (`WaitlistTimesFreeError`, api 409 `waitlist_times_free`, AI `times_free` + slot picker; fixtures join while full; evals green on cassettes). Next: task 3 (auth emails + Better Auth config).
 
 ## Last sessions
 - **S43.2 Phase 9 · Account screens on the kit, Phase 9 gate (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S43.2 note, [scorecard](scorecard.md) §5). Full entry in [session-log.md](session-log.md).

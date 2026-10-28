@@ -1,4 +1,4 @@
-import { addToWaitlist, listWaitlist } from '@pepper/appointments';
+import { addTimeOff, addToWaitlist, listWaitlist } from '@pepper/appointments';
 import type { Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { undoToolAction } from './registry.js';
@@ -32,6 +32,18 @@ afterAll(async () => {
 
 const windows = [{ date: TUESDAY, start: '13:00', end: '17:00' }];
 
+/**
+ * A new world whose Tuesday afternoon is full (Jess and Marco off 13:00–17:00 New York time), as
+ * the waitlist takes only full times (AC-W5-2).
+ */
+async function fullWorld(): Promise<World> {
+  const w = await newWorld(db);
+  const day = { startsAt: `${TUESDAY}T18:00:00.000Z`, endsAt: `${TUESDAY}T22:00:00.000Z` };
+  await addTimeOff(db, w.owner, w.jessStaff.id, day);
+  await addTimeOff(db, w.owner, w.marcoStaff.id, day);
+  return w;
+}
+
 function add(w: World, actor = w.owner, extra: Record<string, unknown> = {}) {
   return callTool(depsFor(w, actor), 'add_to_waitlist', {
     clientId: w.maria.id,
@@ -44,7 +56,7 @@ function add(w: World, actor = w.owner, extra: Record<string, unknown> = {}) {
 
 describe('add_to_waitlist', () => {
   it('puts the client on the list at once (notify) and tells the member, with Undo', async () => {
-    const w = await newWorld(db);
+    const w = await fullWorld();
     const outcome = await add(w);
     if (outcome.status !== 'done') throw new Error(`expected done, got ${outcome.status}`);
     expect(outcome.summary).toContain(
@@ -69,7 +81,7 @@ describe('add_to_waitlist', () => {
   });
 
   it('staff add only their own clients, for their own staff member', async () => {
-    const w = await newWorld(db);
+    const w = await fullWorld();
     // Maria is not Jess's client yet: she can't reach her.
     expect(await add(w, w.jess)).toMatchObject({ status: 'refused', code: 'not_found' });
     await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
@@ -81,8 +93,23 @@ describe('add_to_waitlist', () => {
     expect(colleague).toMatchObject({ status: 'refused', code: 'forbidden' });
   });
 
-  it('times that have passed are refused as too late; another business is not found', async () => {
+  it('AC-W5-2: a window with a free time is refused with those times as a slot picker', async () => {
     const w = await newWorld(db);
+    const outcome = await add(w);
+    expect(outcome).toMatchObject({ status: 'refused', code: 'times_free' });
+    if (outcome.status !== 'refused') throw new Error('expected a refusal');
+    // Jess's first free times on Tuesday afternoon, in the business's time.
+    expect(outcome.alternatives.map((slot) => [slot.time, slot.staffName])).toEqual([
+      ['13:00', 'Jess'],
+      ['13:15', 'Jess'],
+      ['13:30', 'Jess'],
+    ]);
+    expect(outcome.card).toMatchObject({ kind: 'slot_picker', serviceId: w.haircut.id });
+    expect(await listWaitlist(db, w.owner, {}, { clock: w.clock })).toEqual([]);
+  });
+
+  it('times that have passed are refused as too late; another business is not found', async () => {
+    const w = await fullWorld();
     const past = await add(w, w.owner, {
       windows: [{ date: '2026-11-01', start: '09:00', end: '12:00' }],
     });
@@ -95,7 +122,7 @@ describe('add_to_waitlist', () => {
 
 describe('who is waiting, in the reads', () => {
   it('get_feed and find_client_bookings list the open entries, staff only their own', async () => {
-    const w = await newWorld(db);
+    const w = await fullWorld();
     await addToWaitlist(db, w.owner, {
       clientId: w.maria.id,
       serviceId: w.haircut.id,

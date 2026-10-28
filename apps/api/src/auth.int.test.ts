@@ -33,6 +33,7 @@ import {
   TenantIdSchema,
   TimeOffResponseSchema,
   TimeOffSchema,
+  WaitlistTimesFreeSchema,
   WeeklyHoursSchema,
   UserIdSchema,
 } from '@pepper/contracts';
@@ -1107,6 +1108,25 @@ describe('clients, bookings and the waitlist (ADR-0017)', () => {
 
   it('the waitlist: Cara sees and cancels only entries for her', async () => {
     const windows = [{ date, start: '09:00', end: '12:00' }];
+    // A morning with free times is refused with them (AC-W5-2)…
+    const free = await ana.post('/v1/waitlist', {
+      clientId: lee.id,
+      serviceId: service.id,
+      windows,
+    });
+    expect([free.status, errorCode(free.body)]).toEqual([409, 'waitlist_times_free']);
+    const times = WaitlistTimesFreeSchema.parse(free.body).alternatives.map((s) => s.startsAt);
+    expect(times).toHaveLength(3);
+    expect(times.every((t) => t >= at('09:00') && t < at('12:00'))).toBe(true);
+    // …so the morning is made full (both off) while they join, and opened again after.
+    const morning = { startsAt: at('09:00'), endsAt: at('12:00') };
+    const off = [];
+    for (const s of [caraStaff, marco]) {
+      const entry = TimeOffSchema.parse(
+        (await ana.post(`/v1/staff/${s.id}/time-off`, morning).expect(201)).body,
+      );
+      off.push(`/v1/staff/${s.id}/time-off/${entry.id}`);
+    }
     const anyone = WaitlistEntrySchema.parse(
       (
         await ana
@@ -1137,6 +1157,7 @@ describe('clients, bookings and the waitlist (ADR-0017)', () => {
     expect(
       WaitlistResponseSchema.parse((await ana.get('/v1/waitlist').expect(200)).body).entries,
     ).toEqual([anyone, hers]);
+    for (const path of off) await ana.delete(path).expect(204);
     const notHers = await cara.patch(`/v1/waitlist/${anyone.id}`, { status: 'cancelled' });
     expect([notHers.status, errorCode(notHers.body)]).toEqual([404, 'waitlist_entry_not_found']);
     await cara.patch(`/v1/waitlist/${hers.id}`, { status: 'cancelled' }).expect(200);

@@ -100,6 +100,17 @@ export class WaitlistExpiredError extends Error {
   }
 }
 
+/**
+ * A time inside the windows asked for can still be booked, so nothing was added (S44, AC-W5-2):
+ * the waitlist is for times that are full. `freeTimes` are the earliest that can, earliest first.
+ */
+export class WaitlistTimesFreeError extends Error {
+  constructor(readonly freeTimes: readonly AvailableSlot[]) {
+    super('A time inside these windows is still free');
+    this.name = 'WaitlistTimesFreeError';
+  }
+}
+
 /** The booking page's waitlist takes days up to `PUBLIC_WAITLIST_DAYS` ahead only (S38a). */
 export class WaitlistDayTooFarError extends Error {
   constructor() {

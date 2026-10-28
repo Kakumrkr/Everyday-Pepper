@@ -6,6 +6,9 @@ Format: Given / When / Then. IDs (`AC-W<workflow>-<n>`) are referenced from test
 - **AC-W1-1** Given a new owner with a website listing services and prices, when they submit the URL, then a draft with ≥ 90% of listed services (name, price, duration estimate) is shown for review within 60 s.
 - **AC-W1-2** Given a draft, when the owner confirms, then services, hours and staff are created and nothing is created before confirmation.
 - **AC-W1-3** Given a Vagaro/Fresha/Square/Booksy/generic client CSV, when imported, then valid rows are created, invalid rows are reported with reasons, and re-importing the same file creates no duplicates.
+- **AC-W1-4** Given an owner who forgot their password, when they ask for a reset from sign-in, then the answer is the same whether or not the address has an account, an email with a single-use link (valid 1 hour) reaches a real account, setting a new password through it signs every other session out, and the link does not work a second time.
+- **AC-W1-5** Given a new sign-up, when the account is created, then a verification email is sent and the person can't use the app until they open its link (a sign-in before that offers to send it again); accounts created before S44 are not asked to verify.
+- **AC-W1-6** Given a signed-in owner, when they change their email, then nothing changes until they open the link sent to the new address, and afterwards they sign in with the new address only.
 
 ## W2 Conversational scheduling
 - **AC-W2-1** Given Jess is booked 3–5 pm Friday, when the owner asks to book a 2 h service with Jess at 4 pm Friday, then no booking is created, the conflict is explained, and the 3 nearest valid slots are offered as a slot-picker card.
@@ -23,6 +26,7 @@ Format: Given / When / Then. IDs (`AC-W<workflow>-<n>`) are referenced from test
 
 ## W5 Smart waitlist
 - **AC-W5-1** Given a waitlist entry matching a cancelled slot, when the cancellation occurs, then an offer is proposed (or sent, per autonomy) to the best match within 2 minutes; the first confirmation books it and others are notified the slot is taken.
+- **AC-W5-2** Given a waitlist request whose window still has a free time for that service (and staff member, if named), when anyone adds it (the app or the AI), then nothing is added and the free times are returned, so the person can book one instead.
 
 ## W6 Reminders
 - **AC-W6-1** Given a booking 24 h ahead, then a reminder email is sent within 5 minutes of schedule; cancelled bookings never receive reminders.

@@ -16,13 +16,20 @@ import {
   WaitlistEntryNotFoundError,
   WaitlistDayTooFarError,
   WaitlistExpiredError,
+  WaitlistTimesFreeError,
   WaitlistOfferExpiredError,
   WaitlistOfferNotFoundError,
   WaitlistOfferTakenError,
   WaitlistOfferUsedError,
   WrongVerificationCodeError,
 } from '@pepper/appointments';
-import type { ApiErrorCode, SlotUnavailable, UndoRefusedBody, WrongCode } from '@pepper/contracts';
+import type {
+  ApiErrorCode,
+  SlotUnavailable,
+  UndoRefusedBody,
+  WaitlistTimesFree,
+  WrongCode,
+} from '@pepper/contracts';
 import {
   ActionNotFoundError,
   AlreadyAMemberError,
@@ -136,7 +143,7 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
 
 /**
  * The api's answer to a domain error (`{ code, message }`; a refused booking time also lists
- * `alternatives`); any other error is returned unchanged, so unexpected ones still become a
+ * `alternatives`, and so does a waitlist window that isn't full); any other error is returned unchanged, so unexpected ones still become a
  * reported 500.
  */
 export function toHttpError(error: unknown): unknown {
@@ -146,6 +153,14 @@ export function toHttpError(error: unknown): unknown {
       ...apiError('slot_unavailable'),
       code: 'slot_unavailable',
       alternatives: [...error.alternatives],
+    };
+    return new ConflictException(body);
+  }
+  if (error instanceof WaitlistTimesFreeError) {
+    const body: WaitlistTimesFree = {
+      ...apiError('waitlist_times_free'),
+      code: 'waitlist_times_free',
+      alternatives: [...error.freeTimes],
     };
     return new ConflictException(body);
   }
