@@ -233,7 +233,8 @@ for (const width of WIDTHS) {
     await expect(page.getByRole('heading', { name: /invited to join/ })).toBeVisible();
     await shots('auth-invite');
 
-    const email = `${unique('owner')}@example.test`;
+    // The same length every run, so the masked address wraps the lead the same way.
+    const email = `${unique('owner').replace(/\D/g, '').padStart(24, '0').slice(-24)}@example.test`;
     await signUp(page, email, { confirm: false });
     await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible({
       timeout: 20_000,
