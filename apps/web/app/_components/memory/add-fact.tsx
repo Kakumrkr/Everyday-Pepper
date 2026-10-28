@@ -1,7 +1,7 @@
 'use client';
 
 import { MEMORY_LIMITS, type MemorySubject } from '@pepper/contracts';
-import { buttonStyle, cx, fieldStyle } from '@pepper/ui';
+import { buttonStyle, Checkbox, cx, fieldStyle } from '@pepper/ui';
 import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { toFactKey } from '../../../lib/memory';
@@ -113,17 +113,13 @@ export function AddFact({
           }}
           className={cx(fieldStyle, 'min-h-11')}
         />
-        <label className="flex min-h-11 items-center gap-2 type-label">
-          <input
-            type="checkbox"
-            checked={sensitive}
-            onChange={(event) => {
-              setSensitive(event.target.checked);
-            }}
-            className="size-5"
-          />
-          Sensitive (health or personal): only owners, managers and their stylist see it
-        </label>
+        <Checkbox
+          label="Sensitive (health or personal): only owners, managers and their stylist see it"
+          checked={sensitive}
+          onChange={(event) => {
+            setSensitive(event.target.checked);
+          }}
+        />
       </fieldset>
       {error === null ? null : (
         <p role="alert" className="m-0 type-label text-danger">

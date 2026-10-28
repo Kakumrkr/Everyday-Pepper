@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Autonomy · Pepper' };
 
 /**
  * What Pepper may do on its own (S26, ADR-0028/0031), grouped by risk. Everyone in the business
- * reads it; owners and managers change it; the AI never does.
+ * reads it; owners and managers change it; the AI never does. On the kit since S42.3 (AC-X-10).
  */
 export default async function AutonomyPage() {
   // The app layout has sent anyone without a usable session elsewhere already.
@@ -19,23 +19,33 @@ export default async function AutonomyPage() {
     current === null ? null : await currentJson('/v1/autonomy', BusinessAutonomySchema);
   if (current === null || autonomy === null) {
     return (
-      <p className="mx-auto max-w-3xl">The settings can’t be read right now. Try again soon.</p>
+      <div className="mx-auto flex max-w-2xl flex-col gap-5">
+        <AutonomyHeader />
+        <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
+          I couldn’t load these settings. Try again in a moment.
+        </p>
+      </div>
     );
   }
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <div>
-        <p className="m-0 text-xs font-bold tracking-wide text-ink-2 uppercase">Trust</p>
-        <h1 className="m-0 font-display text-2xl font-bold">Autonomy</h1>
-      </div>
-      <p className="m-0 text-ink-2">
-        Choose what I do on my own. Start careful and give me more room as you get comfortable. I
-        can suggest changes, but only you can make them here, and every change is logged.
-      </p>
+    <div className="mx-auto flex max-w-2xl flex-col gap-5">
+      <AutonomyHeader />
       <AutonomySettings
         initial={autonomy}
         canChange={current.permissions.includes('autonomy.manage')}
       />
     </div>
+  );
+}
+
+function AutonomyHeader() {
+  return (
+    <header className="flex flex-col gap-1">
+      <h1 className="m-0 type-display">Autonomy</h1>
+      <p className="m-0 type-body text-ink-2">
+        Choose what I do on my own. Start careful and give me more room as you get comfortable. I
+        can suggest changes, but only you can make them here, and every change is logged.
+      </p>
+    </header>
   );
 }

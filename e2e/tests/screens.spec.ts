@@ -21,6 +21,8 @@ import { expectTapTargets } from './tap-targets.js';
 // run) is masked. At 375 px each S42 screen also has its tap targets checked (AC-X-6). S42.2 adds
 // Services, Team, a staff member's page and the booking sheets (AC-X-9), and at 375 px the open
 // sheets' tap targets and their main action at the bottom of the phone, in the sheet's footer.
+// S42.3 adds Autonomy, What I know (empty, then with two facts) and Waitlist (empty), and their
+// tap targets at 375 px, Autonomy's switch row and dial included (AC-X-10).
 //
 // Update the baselines after a deliberate change, on Linux with CI's browser:
 //   pnpm --filter @pepper/e2e exec playwright test screens --project=desktop --update-snapshots
@@ -362,6 +364,81 @@ for (const width of WIDTHS) {
         mask: [dialog.getByLabel('Day', { exact: true }), page.getByTestId('calendar-day')],
       });
       await page.keyboard.press('Escape');
+    }
+  });
+}
+
+for (const width of WIDTHS) {
+  test(`Autonomy, What I know and Waitlist at ${String(width)} px, light and dark`, async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const anything = { parse: (value: unknown) => value };
+    // A fact's source line ends with the day it was added, which moves.
+    const addedOn = () => page.getByText(/ · [A-Z][a-z]{2} \d{1,2}$/);
+
+    if (width === 375) {
+      // AC-X-6 at 375 px: Autonomy's switch row and dial, the empty memory and waitlist.
+      for (const path of ['/autonomy', '/memory', '/waitlist']) {
+        await page.goto(path);
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+        await expectTapTargets(page, path);
+      }
+      await expect(page.getByRole('link', { name: 'Add someone in chat' })).toBeVisible();
+    }
+
+    for (const scheme of SCHEMES) {
+      await page.goto('/autonomy');
+      await expect(page.getByRole('switch', { name: 'Ask me first for everything' })).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`autonomy-${String(width)}-${scheme}.png`, SHOT);
+
+      await page.goto('/memory');
+      await expect(page.getByRole('link', { name: 'Tell Pepper in chat' })).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`memory-empty-${String(width)}-${scheme}.png`, SHOT);
+
+      await page.goto('/waitlist');
+      await expect(page.getByRole('link', { name: 'Add someone in chat' })).toBeVisible();
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`waitlist-empty-${String(width)}-${scheme}.png`, SHOT);
+    }
+
+    // What I know with something in it: a note about the shop and one about a client.
+    const { marcus } = await southsideDay(page);
+    await post(
+      page,
+      '/v1/memory/facts',
+      { subject: { type: 'business' }, key: 'parking', value: 'Free on the street after 6 pm' },
+      anything,
+    );
+    await post(
+      page,
+      '/v1/memory/facts',
+      {
+        subject: { type: 'client', id: marcus },
+        key: 'usual_service',
+        value: 'Skin fade, a #1 on the sides',
+      },
+      anything,
+    );
+    if (width === 375) {
+      await page.goto('/memory');
+      await expect(page.getByText('Free on the street after 6 pm')).toBeVisible();
+      await expectTapTargets(page, 'what I know, with facts');
+    }
+    for (const scheme of SCHEMES) {
+      await page.goto('/memory');
+      await expect(page.getByText('Skin fade, a #1 on the sides')).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`memory-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        mask: [addedOn()],
+      });
     }
   });
 }

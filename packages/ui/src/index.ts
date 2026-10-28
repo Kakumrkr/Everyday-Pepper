@@ -68,6 +68,7 @@ export {
   BottomTabBar,
   BriefingBlock,
   Card,
+  chipStyle,
   DetailTable,
   EmptyState,
   List,

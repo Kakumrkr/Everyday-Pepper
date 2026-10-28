@@ -1,4 +1,5 @@
 import type { WaitlistEntry, WaitlistOffer, WaitlistWindow } from '@pepper/contracts';
+import type { BadgeTone } from '@pepper/ui';
 import { dateTimeLabel } from './booking';
 
 // The waitlist screen (S37): pure helpers. The api decides who sees what (staff their own
@@ -17,6 +18,22 @@ export const ENTRY_STATUS_LABELS: Record<WaitlistEntry['status'], string> = {
   booked: 'Booked',
   expired: 'Expired',
   cancelled: 'Removed',
+};
+
+/** Each status's badge: done green, waiting for someone amber, the rest neutral. */
+export const OFFER_STATUS_TONES: Record<WaitlistOffer['status'], BadgeTone> = {
+  offered: 'warn',
+  claimed: 'ok',
+  taken: 'neutral',
+  expired: 'neutral',
+};
+
+export const ENTRY_STATUS_TONES: Record<WaitlistEntry['status'], BadgeTone> = {
+  waiting: 'neutral',
+  offered: 'warn',
+  booked: 'ok',
+  expired: 'neutral',
+  cancelled: 'neutral',
 };
 
 /** "Sat, Nov 7, 9:00 AM – 12:00 PM": one window in words (local wall-clock times). */
