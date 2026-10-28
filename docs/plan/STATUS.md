@@ -14,9 +14,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 4. `chipClass` → `chipStyle`, old `Field` → kit Input, `.visually-hidden` → `sr-only`; legacy layer, `LEGACY_ALIASES`, `body > main` resets deleted
 - [x] 5. Copy pass (helpers' labels in the same commit)
 - [x] 6. Account screenshots, tap targets, `expectStickyAtTheBottom` in `screens.spec.ts`
-- [ ] 7. Scorecard C3/C4/C10 with evidence
+- [x] 7. Scorecard C3/C4/C10 with evidence
 - [ ] 8. Review, `/security-review`, `/session-close`
-Next step: task 7 (scorecard). Notes: 48 new account baselines; 62 updated (the 20 px gutter on public pages without the old body padding, the to-do form on kit fields, time fields 1 px shorter). Open questions: none.
+Next step: task 8 (review, then /session-close). Notes: 48 new account baselines; 62 updated (the 20 px gutter on public pages without the old body padding, the to-do form on kit fields, time fields 1 px shorter). Open questions: none.
 
 ## Last sessions
 - **S43 Phase 9 · Public pages on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S43 note). Full entry in [session-log.md](session-log.md).
