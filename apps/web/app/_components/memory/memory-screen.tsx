@@ -6,7 +6,7 @@ import {
   type MemoryFactView,
   type Permission,
 } from '@pepper/contracts';
-import { Badge, Button, cx, EmptyState, FOCUS_RING, Switch } from '@pepper/ui';
+import { Badge, Button, chipStyle, EmptyState, Switch } from '@pepper/ui';
 import { useState } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { sendJson } from '../../../lib/client-api';
@@ -55,27 +55,23 @@ export function MemoryScreen({
           A client’s profile shows everything about them.
         </p>
       ) : null}
-      <div role="group" aria-label="Show" className="flex flex-wrap gap-2">
-        {MEMORY_FILTERS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            aria-pressed={filter === key}
-            onClick={() => {
-              setFilter(key);
-            }}
-            className={cx(
-              'min-h-11 rounded-pill border px-4 py-0 type-label tabular-nums transition motion-fast ease-standard',
-              filter === key
-                ? 'border-brand bg-brand text-brand-ink'
-                : 'border-line-strong bg-surface text-ink hover:bg-surface-2',
-              FOCUS_RING,
-            )}
-          >
-            {label} · {facts.filter((fact) => matchesFilter(fact, key)).length}
-          </button>
-        ))}
-      </div>
+      {facts.length === 0 ? null : (
+        <div role="group" aria-label="Show" className="flex flex-wrap gap-2">
+          {MEMORY_FILTERS.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={filter === key}
+              onClick={() => {
+                setFilter(key);
+              }}
+              className={chipStyle(filter === key)}
+            >
+              {label} · {facts.filter((fact) => matchesFilter(fact, key)).length}
+            </button>
+          ))}
+        </div>
+      )}
       {facts.length === 0 ? (
         <EmptyState
           icon="memory"
@@ -84,17 +80,18 @@ export function MemoryScreen({
           action={{ label: 'Tell Pepper in chat', href: ROUTES.chat, renderLink: kitLink }}
         />
       ) : groups.length === 0 ? (
-        <EmptyState
-          icon="memory"
-          title="Nothing here for this filter."
-          body="Everything I remember is under All."
-          action={{
-            label: 'Show everything',
-            onClick: () => {
+        <div className="flex flex-col items-start gap-3 rounded-lg bg-surface-2 px-4 py-4">
+          <p className="m-0 type-body text-ink-2">Nothing here for this filter.</p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
               setFilter('all');
-            },
-          }}
-        />
+            }}
+          >
+            Show everything
+          </Button>
+        </div>
       ) : (
         groups.map((group) => (
           <section
@@ -189,9 +186,7 @@ function PauseSwitch({ paused: initial, canPause }: { paused: boolean; canPause:
             Learn new things
             <Badge tone={paused ? 'warn' : 'ok'}>{paused ? 'Paused' : 'On'}</Badge>
           </p>
-          <p className="m-0 type-caption text-ink-2">
-            {said} Owners and managers can change this.
-          </p>
+          <p className="m-0 type-caption text-ink-2">{said} Owners and managers can change this.</p>
         </div>
       )}
       {error === null ? null : (

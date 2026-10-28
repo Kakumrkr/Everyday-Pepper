@@ -129,14 +129,16 @@ describe('fields', () => {
     expect(box.getAttribute('aria-describedby')).toBeTruthy();
   });
 
-  it("makes the switch's whole row its tap target, the hint kept out of its name (D3)", async () => {
+  it("makes the switch's row its tap target, the hint below and out of its name (D3)", async () => {
     render(<Switch label="Ask me first" hint="I wait for an OK" />);
     const toggle = screen.getByRole('switch', { name: 'Ask me first' });
     const row = toggle.closest('label');
     expect(row?.className).toContain('min-h-11');
-    expect(row?.textContent).toContain('I wait for an OK');
+    expect(row?.textContent).toBe('Ask me first');
     expect(toggle.getAttribute('aria-describedby')).toBeTruthy();
-    // Tapping the hint, away from the switch itself, still toggles it.
+    // Tapping the label, away from the switch itself, toggles it; reading the hint doesn't.
+    await userEvent.click(screen.getByText('Ask me first'));
+    expect(toggle).toHaveProperty('checked', true);
     await userEvent.click(screen.getByText('I wait for an OK'));
     expect(toggle).toHaveProperty('checked', true);
   });

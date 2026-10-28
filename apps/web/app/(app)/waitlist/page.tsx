@@ -5,14 +5,15 @@ import {
   WaitlistOffersResponseSchema,
   WaitlistResponseSchema,
 } from '@pepper/contracts';
-import { Badge, buttonStyle, EmptyState, type BadgeTone } from '@pepper/ui';
+import { Badge, buttonStyle, EmptyState } from '@pepper/ui';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
 import {
   ENTRY_STATUS_LABELS,
+  ENTRY_STATUS_TONES,
   OFFER_STATUS_LABELS,
+  OFFER_STATUS_TONES,
   offersBySlot,
   windowLabel,
 } from '../../../lib/waitlist';
@@ -47,9 +48,6 @@ export default async function WaitlistPage() {
   const serviceName = new Map<string, string>(services?.services.map((s) => [s.id, s.name]) ?? []);
   const staffName = new Map<string, string>(staff?.staff.map((s) => [s.id, s.displayName]) ?? []);
   const { timeZone } = current.business;
-
-  const offerTone = (status: string): BadgeTone =>
-    status === 'claimed' ? 'ok' : status === 'offered' ? 'warn' : 'neutral';
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
@@ -95,7 +93,7 @@ export default async function WaitlistPage() {
                         {entry.windows.map(windowLabel).join(' · ')}
                       </span>
                     </div>
-                    <Badge tone={entry.status === 'offered' ? 'warn' : 'neutral'}>
+                    <Badge tone={ENTRY_STATUS_TONES[entry.status]}>
                       {ENTRY_STATUS_LABELS[entry.status]}
                     </Badge>
                   </li>
@@ -113,12 +111,11 @@ export default async function WaitlistPage() {
                   No freed times offered yet. When a booking is cancelled or moved, I offer the time
                   here.
                 </p>
-                <Link
-                  href={ROUTES.calendar}
-                  className={buttonStyle({ variant: 'secondary', size: 'sm' })}
-                >
-                  Open the calendar
-                </Link>
+                {kitLink({
+                  href: ROUTES.calendar,
+                  className: buttonStyle({ variant: 'secondary', size: 'sm' }),
+                  children: 'Open the calendar',
+                })}
               </div>
             ) : (
               offersBySlot(offers.offers, timeZone).map((group) => (
@@ -135,7 +132,7 @@ export default async function WaitlistPage() {
                         <span className="type-body text-ink">
                           {offer.rank}. {clientName.get(offer.clientId) ?? 'A client'}
                         </span>
-                        <Badge tone={offerTone(offer.status)}>
+                        <Badge tone={OFFER_STATUS_TONES[offer.status]}>
                           {OFFER_STATUS_LABELS[offer.status]}
                         </Badge>
                       </li>

@@ -177,62 +177,62 @@ export function Checkbox({ label, hint, className, ...rest }: CheckboxProps) {
   );
 }
 
-export type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'id' | 'role'> & {
+export type SwitchProps = Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'id' | 'role' | 'aria-label' | 'aria-labelledby' | 'aria-describedby'
+> & {
   label: string;
   hint?: string | undefined;
 };
 
 /**
- * An on/off setting that takes effect at once (a checkbox with the switch role). The whole row,
- * label, hint and switch, is one label and so one tap target (D3); the name is the label alone.
+ * An on/off setting that takes effect at once (a checkbox with the switch role). The label and
+ * the switch are one label, so the whole row is one 44 px tap target (D3); the hint sits below,
+ * outside it, so reading it never flips the setting (as the Checkbox).
  */
 export function Switch({ label, hint, className, ...rest }: SwitchProps) {
   const id = useId();
   return (
-    <label
-      className={cx(
-        'flex min-h-11 cursor-pointer items-center justify-between gap-4 py-2',
-        rest.disabled === true && 'cursor-not-allowed',
-        className,
-      )}
-    >
-      <span className="flex flex-col gap-0.5">
-        <span id={`${id}-label`} className="type-body text-ink">
-          {label}
-        </span>
-        {hint !== undefined && (
-          <span id={`${id}-hint`} className="type-caption text-ink-2">
-            {hint}
-          </span>
+    <div className={cx('flex flex-col py-1', className)}>
+      <label
+        className={cx(
+          'flex min-h-11 cursor-pointer items-center justify-between gap-4',
+          rest.disabled === true && 'cursor-not-allowed',
         )}
-      </span>
-      <span className="relative inline-flex shrink-0">
-        <input
-          {...rest}
-          id={id}
-          type="checkbox"
-          role="switch"
-          aria-labelledby={`${id}-label`}
-          aria-describedby={hint === undefined ? undefined : `${id}-hint`}
-          className="peer absolute inset-0 z-10 m-0 size-full min-h-0 cursor-pointer p-0 opacity-0"
-        />
-        <span
-          aria-hidden="true"
-          className={cx(
-            'h-8 w-13 rounded-pill border border-line-strong bg-surface-2 transition motion-fast ease-standard',
-            'peer-checked:border-brand peer-checked:bg-brand',
-            'peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand',
-            'peer-disabled:opacity-50',
-          )}
-        />
-        <span
-          aria-hidden="true"
-          className={cx(
-            'pointer-events-none absolute top-1 left-1 size-6 rounded-pill bg-line-strong shadow-raised',
-            'transition motion-fast ease-standard peer-checked:translate-x-5 peer-checked:bg-brand-ink',
-          )}
-        />
-      </span>
-    </label>
+      >
+        <span className="type-body text-ink">{label}</span>
+        <span className="relative inline-flex shrink-0">
+          <input
+            {...rest}
+            id={id}
+            type="checkbox"
+            role="switch"
+            aria-describedby={hint === undefined ? undefined : `${id}-hint`}
+            className="peer absolute inset-0 z-10 m-0 size-full min-h-0 cursor-pointer p-0 opacity-0"
+          />
+          <span
+            aria-hidden="true"
+            className={cx(
+              'h-8 w-13 rounded-pill border border-line-strong bg-surface-2 transition motion-fast ease-standard',
+              'peer-checked:border-brand peer-checked:bg-brand',
+              'peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand',
+              'peer-disabled:opacity-50',
+            )}
+          />
+          <span
+            aria-hidden="true"
+            className={cx(
+              'pointer-events-none absolute top-1 left-1 size-6 rounded-pill bg-line-strong shadow-raised',
+              'transition motion-fast ease-standard peer-checked:translate-x-5 peer-checked:bg-brand-ink',
+            )}
+          />
+        </span>
+      </label>
+      {hint !== undefined && (
+        <p id={`${id}-hint`} className="m-0 mb-1 type-caption text-ink-2">
+          {hint}
+        </p>
+      )}
+    </div>
   );
 }

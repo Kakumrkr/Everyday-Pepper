@@ -227,6 +227,18 @@ export function Receipt({
   );
 }
 
+/** The classes of a pressable chip (a time, a filter); `selected` marks the chosen one. */
+export function chipStyle(selected: boolean): string {
+  return cx(
+    'min-h-11 rounded-md border px-4 py-0 type-label tabular-nums transition motion-fast ease-standard',
+    'disabled:cursor-not-allowed disabled:opacity-50',
+    selected
+      ? 'border-brand bg-brand text-brand-ink'
+      : 'border-line-strong bg-surface text-ink hover:bg-surface-2',
+    FOCUS_RING,
+  );
+}
+
 /** A time to pick ("4:15"); `selected` marks the chosen one. */
 export function TimeChip({
   time,
@@ -246,14 +258,7 @@ export function TimeChip({
       aria-pressed={selected}
       disabled={disabled}
       onClick={onSelect}
-      className={cx(
-        'min-h-11 rounded-md border px-4 py-0 type-label tabular-nums transition motion-fast ease-standard',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        selected
-          ? 'border-brand bg-brand text-brand-ink'
-          : 'border-line-strong bg-surface text-ink hover:bg-surface-2',
-        FOCUS_RING,
-      )}
+      className={chipStyle(selected)}
     >
       {time}
     </button>
