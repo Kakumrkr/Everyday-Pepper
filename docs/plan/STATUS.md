@@ -1,29 +1,23 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-28 · **Plan version:** 0.34 ([PCR-008](changes/PCR-008.md)) · **Current phase:** 9 — New look (S42 done: Calendar and Clients on the kit) → next: **S42.2** (settings screens on the kit)
+**Last updated:** 2026-10-28 · **Plan version:** 0.34 ([PCR-008](changes/PCR-008.md)) · **Current phase:** 9 — New look (S42.2 done: booking sheets, Services and Team on the kit) → next: **S42.3** (Autonomy, What I know, Waitlist on the kit)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S42.2 · booking sheets, Services and Team on the kit** (branch `s42-2-settings-kit`). Brief approved: "Go ahead with your recommendation and complete the session" (D-1 split: Autonomy, What I know, Waitlist move to S42.3; D-2 tones stay automatic by place, the colour picker goes, Team shows each member's tone).
-- [x] T1 AC-X-9, AC-X-6 widened, traceability, S42.3 row
-- [x] T2 booking + new-booking sheets on the kit Sheet, actions in the footer (kit `SheetFooter`, `TimeChip disabled`; client editor Save in the footer too)
-- [x] T3 Services (ServicesScreen: empty state opens the add sheet), service editor (Save in footer), rules page + editor, booking-page card
-- [x] T4 Team (BookableStaff: empty state opens the add sheet; rows with tone dots via `activeStaffTone`), staff form (no picker, Save in footer), staff page, hours, time off, team-manager; old local sheet deleted (`form-parts.tsx` keeps Field + Notice)
-- [x] T5 `screens.spec.ts`: 30 baselines (services, team, staff, booking-sheet, new-booking × 3 widths × 2 themes, stable 3×), tap targets on 4 screens + 5 open sheets, main action at the bottom; kit Checkbox label wraps its box (44 px row)
-- Next: `/session-close`.
+Nothing in progress: S42.2 is closed. Next: S42.3 (see "Planned sessions").
 
 ## Last sessions
+- **S42.2 Phase 9 · Booking sheets, Services and Team on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42.2 note). Full entry in [session-log.md](session-log.md).
+  - **Built:** the booking and new-booking sheets, Services (editor, rules), Team (list, a member's page, staff sheet) on the kit; actions in the sheet footer (kit `SheetFooter`); tones by place, no colour picker (D-2); empty states "Add your first service", "Add the first person"; AC-X-9.
+  - **Top-up (S42 retro):** every sheet's main action at the bottom of a 375 px phone, tap targets clean on 4 screens and 5 open sheets.
+  - **Checks:** `pnpm check` green; integration skipped (screens only); Playwright one full run, the gallery's 6 deliberate diffs updated and re-run green; 30 new baselines.
 - **S42 Phase 9 · Calendar and Clients on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42 note). Full entry in [session-log.md](session-log.md).
   - **Built:** Calendar day view (segmented staff filter, staff tones by place among active staff, 88 px an hour, two columns at 375 px), Clients list and profile on the kit; every empty state offers its next step (AC-X-7, AC-X-8); the screens spec fixes the briefing hour instead of waiting.
   - **Top-up (S41 retro):** tap targets clean on Calendar, Clients and a profile at 375 px.
   - **Checks:** `pnpm check` green; integration skipped (screens only); Playwright 113 passed, 19 skipped; 18 new baselines.
-- **S41 Phase 9 · App shell, Home, Chat and the cards on the kit (2026-10-27)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S41 note, [DESIGN.md](../design/DESIGN.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** one shell from `lib/nav.ts`: tabs Home, Calendar, Clients, Chat, More on phones; a sidebar with Pepper and Business groups on desktop. `/more` holds the Pepper group, Services, Team, notifications, the mailing address and the account. Home, Chat, Why? and every AI card on the kit; the session-start hook installs Playwright's headless shell 1248.
-  - **Top-up (S40 retro):** `tap-targets.ts` checks every control is ≥ 44 px on the shell and Home at 375 px (it found a 17 px link).
-  - **Checks:** `pnpm check` green; integration 1,239 passed in one run; Playwright 110 passed, 16 skipped (the mobile copies of desktop-only specs); 18 new screenshot baselines (Home, Chat, More × 375/412/1280 × light/dark).
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -39,6 +33,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S42.2 (user, 2026-10-28):** at the brief "Go ahead with your recommendation and complete the session" (D-1 split: Autonomy, What I know, Waitlist → S42.3; D-2 tones stay automatic, the colour picker goes). **Claude:** a kit `SheetFooter`; errors beside the footer action; focus back to the header button after an add; the review's 6 fixes. Full wording in [decisions.md](decisions.md).
 - **S42 (user, 2026-10-28):** at the brief "Go ahead and start the session with your recommendations" (D-1 the screens spec fixes the briefing hour; D-2 staff tones on the calendar now, the Team picker in S42.2); then "do all the work including PR and merge". **Claude:** tones by place among active staff, not the stored colour; 88 px an hour; the review's 4 fixes. Full wording in [decisions.md](decisions.md).
 - **After S41 (user, 2026-10-27):** faster sessions ([PCR-008](changes/PCR-008.md)): review before checks, each suite once, integration only when its code changed, the walkthrough from the screenshot baselines, sessions sized to one context window (S42 split into S42 + S42.2). Full wording in [decisions.md](decisions.md).
 - **S41 (user, 2026-10-27):** at the brief "Go ahead with your recommendations": D-1 a More tab on phones (Pepper group, then Services, Team, account); the desktop sidebar shows everything; D-2 Home's settings move to More (Home keeps an "Add your address" line); D-3 the hook installs the headless shell Playwright expects. **Claude:** the code review's 7 fixes, 2 left with reasons (session log).
@@ -65,11 +60,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S42, M1–M2 and P1 are done (Phases 0–8, the re-plan, and Phase 9's direction, foundation, shell, Home, Chat, Calendar and Clients). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S42.2, M1–M2 and P1 are done (Phases 0–8, the re-plan, and Phase 9's direction, foundation, shell, Home, Chat, Calendar, Clients, the booking sheets, Services and Team). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S42.2 | The booking sheets, Services and Team (tones by place, no colour picker) on the kit, sheet actions in the footer (split from S42, PCR-008) | 9 | AC-X-9; tap targets clean on those screens and sheets |
 | S42.3 | Autonomy, What I know and Waitlist on the kit, their empty states with actions (split from S42.2, D-1) | 9 | Every signed-in screen on the kit |
 | S43 | Public pages + auth on the kit, legacy stylesheet deleted, UX copy pass, **Phase 9 gate** | 9 | Scorecard C3, C4, C10 ≥ 8 |
 | S44 | Password reset, email verification, change email; `add_to_waitlist` window check in the domain | 10 | Journeys + domain tests green |
