@@ -14,6 +14,7 @@ import {
   enterPassword,
   freshCode,
   hydrated,
+  linkTo,
   onboardOwner,
   ownClientAddress,
   PASSWORD,
@@ -40,7 +41,10 @@ import { expectTapTargets } from './tap-targets.js';
 // and Autonomy's "Saved" toast in view on that phone (AC-X-11). Dates on them move: masked.
 // S43.2 adds the account screens (sign-in and its code step, sign-up, the invite page, create
 // business, two-step setup), their tap targets and the main action at the bottom of a 375 px
-// phone (AC-X-12); the QR code, key, backup codes and time zone change per run: masked.
+// phone (AC-X-12); the QR code, key, backup codes and time zone change per run: masked. S44
+// adds forgot password (with its field error, and sent), a new password (with its field error),
+// a run-out reset link, "Check your inbox" after sign-up and change email (the run's email
+// masked), each main action at the bottom of a 375 px phone.
 //
 // Update the baselines after a deliberate change, on Linux with CI's browser:
 //   pnpm --filter @pepper/e2e exec playwright test screens --project=desktop --update-snapshots
@@ -196,6 +200,30 @@ for (const width of WIDTHS) {
     if (phone) await expectStickyAtTheBottom(page, 'Create account');
     await shots('auth-sign-up');
 
+    // S44: password reset, each field's error under it and the main action at the bottom.
+    await page.goto('/forgot-password');
+    await (await hydrated(page.getByRole('button', { name: 'Send me a link' }))).click();
+    await expect(page.getByLabel('Email')).toHaveAccessibleDescription(
+      'Enter the email you sign in with.',
+    );
+    if (phone) await expectStickyAtTheBottom(page, 'Send me a link');
+    await shots('auth-forgot');
+    await page.getByLabel('Email').fill('ana.reyes@example.test');
+    await page.getByRole('button', { name: 'Send me a link' }).click();
+    await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
+    await shots('auth-forgot-sent');
+
+    await page.goto('/reset-password?token=some-reset-token');
+    await (await hydrated(page.getByRole('button', { name: 'Save new password' }))).click();
+    await expect(page.getByLabel('New password')).toHaveAccessibleDescription(
+      /Use a password of at least 10 characters/,
+    );
+    if (phone) await expectStickyAtTheBottom(page, 'Save new password');
+    await shots('auth-reset');
+    await page.goto('/reset-password?error=INVALID_TOKEN');
+    await expect(page.getByRole('heading', { name: 'This link has run out' })).toBeVisible();
+    await shots('auth-reset-expired');
+
     await page.goto('/invite');
     await expect(page.getByRole('alert').filter({ hasText: 'incomplete' })).toBeVisible();
     await shots('auth-invite-broken');
@@ -205,8 +233,15 @@ for (const width of WIDTHS) {
     await expect(page.getByRole('heading', { name: /invited to join/ })).toBeVisible();
     await shots('auth-invite');
 
-    const email = `${unique('owner')}@example.test`;
-    await signUp(page, email);
+    // The same length every run, so the masked address wraps the lead the same way.
+    const email = `${unique('owner').replace(/\D/g, '').padStart(24, '0').slice(-24)}@example.test`;
+    await signUp(page, email, { confirm: false });
+    await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible({
+      timeout: 20_000,
+    });
+    if (phone) await expectStickyAtTheBottom(page, 'Send the link again');
+    await shots('auth-check-inbox', [page.getByText(email, { exact: true })]);
+    await page.goto(await linkTo(email, 'Confirm your email for Pepper'));
     await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
     await hydrated(page.getByRole('button', { name: 'Create business' }));
     if (phone) await expectStickyAtTheBottom(page, 'Create business');
@@ -238,6 +273,17 @@ for (const width of WIDTHS) {
     await expect(page.getByRole('heading', { name: 'Two-step verification' })).toBeVisible();
     if (phone) await expectStickyAtTheBottom(page, 'Verify');
     await shots('auth-sign-in-code');
+
+    await page.getByLabel('Code').fill(await freshCode(key, used));
+    await page.getByRole('button', { name: 'Verify' }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await page.goto('/account/email');
+    await (await hydrated(page.getByRole('button', { name: 'Send the link' }))).click();
+    await expect(page.getByLabel('New email')).toHaveAccessibleDescription(
+      'Enter the new email you want to sign in with.',
+    );
+    if (phone) await expectStickyAtTheBottom(page, 'Send the link');
+    await shots('auth-change-email', [page.getByText(email, { exact: true })]);
   });
 }
 

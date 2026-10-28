@@ -152,16 +152,18 @@ export function bookingActions(
   };
 }
 
-/** How long a waitlist window lasts by default, from the time the client wanted. */
-const WAITLIST_WINDOW_MINUTES = 120;
-
 /**
- * The waitlist window to suggest for a refused time: that local day, from the wanted time for
- * two hours (to midnight at most). The member can change it before adding the entry.
+ * The waitlist window to suggest for a refused time: that local day, exactly the wanted
+ * appointment (`minutes` long, to midnight at most). That time is taken, so the window is full
+ * (the waitlist takes only full times, S44); the member can widen it before adding the entry.
  */
-export function suggestedWindow(timeZone: string, startsAt: string): WaitlistWindow {
+export function suggestedWindow(
+  timeZone: string,
+  startsAt: string,
+  minutes: number,
+): WaitlistWindow {
   const { date, time } = localParts(timeZone, startsAt);
-  const end = Math.min(minutesOfDay(time) + WAITLIST_WINDOW_MINUTES, 1440);
+  const end = Math.min(minutesOfDay(time) + minutes, 1440);
   return { date, start: time, end: clockTime(end) };
 }
 

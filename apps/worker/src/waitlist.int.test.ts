@@ -121,7 +121,7 @@ interface Business {
 
 /**
  * Plum Salon (UTC, open every day 08:00–20:00): a booking with Jess two days from now at 15:00,
- * and two clients waiting for that afternoon. `cancel` cancels it and returns when.
+ * and two clients waiting for that hour. `cancel` cancels it and returns when.
  */
 async function newBusiness(): Promise<Business> {
   businesses += 1;
@@ -168,7 +168,8 @@ async function newBusiness(): Promise<Business> {
     await addToWaitlist(db, owner, {
       clientId: client.id,
       serviceId: service.id,
-      windows: [{ date: day, start: '13:00', end: '18:00' }],
+      // Exactly Jess's booked hour: full, as the waitlist takes only full times (AC-W5-2).
+      windows: [{ date: day, start: '15:00', end: '16:00' }],
     });
     waiting.push(client);
   }

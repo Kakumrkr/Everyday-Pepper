@@ -53,6 +53,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   waitlist_entry_not_found: 'No such waitlist entry in this business',
   waitlist_entry_not_changeable: 'This waitlist entry can no longer be changed',
   waitlist_expired: 'Every window of this waitlist entry has already passed',
+  waitlist_times_free: 'A time inside these windows is still free: book it instead',
   waitlist_day_too_far: 'That day is too far ahead to join the waitlist',
   waitlist_offer_not_found: 'This offer link is not valid',
   waitlist_offer_used: 'This offer has already been claimed',

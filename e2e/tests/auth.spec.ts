@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 import {
+  anotherPerson,
+  emailsTo,
   enterPassword,
   freshCode,
   hydrated,
+  linkTo,
   onboardOwner,
   ownClientAddress,
   PASSWORD,
@@ -112,6 +115,129 @@ test.describe('owner sign-in with two-step verification', () => {
 
   test('the forms fit a phone screen', async ({ page }) => {
     for (const path of ['/sign-in', '/sign-up']) {
+      await page.goto(path);
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow).toBe(0);
+    }
+  });
+});
+
+// S44 (ADR-0045): the account emails, read from Mailpit, through the real stack.
+test.describe('account recovery and email', () => {
+  test('AC-W1-5: a new account confirms its email; signing in first sends a new link', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const email = `${unique('lena')}@example.test`;
+    await signUp(page, email, { name: 'Lena', confirm: false });
+    await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByText(email, { exact: true })).toBeVisible();
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/sign-in$/);
+
+    // Signing in before confirming: "Check your inbox" again, with a fresh link on its way.
+    await enterPassword(page, email);
+    await expect(page.getByText('Your email isn’t confirmed yet.', { exact: false })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Send again in \d+ s$/ })).toBeDisabled();
+    await expect.poll(async () => (await emailsTo(email)).length, { timeout: 15_000 }).toBe(2);
+
+    await page.goto(await linkTo(email, 'Confirm your email for Pepper'));
+    await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
+    // The link worked once to sign in; a run-out or broken one says how to get a new one.
+    await page.goto('/email-confirmed?error=INVALID_TOKEN');
+    await expect(page.getByRole('heading', { name: 'This link has run out' })).toBeVisible();
+  });
+
+  test('AC-W1-4: forgot password → link → new password; other devices are signed out', async ({
+    page,
+    browser,
+    baseURL,
+  }) => {
+    test.setTimeout(120_000);
+    const owner = await onboardOwner(page);
+    const visitor = await anotherPerson(browser, baseURL);
+    await visitor.goto('/sign-in');
+    await (await hydrated(visitor.getByRole('link', { name: 'Forgot your password?' }))).click();
+    await expect(visitor).toHaveURL(/\/forgot-password$/);
+    await (await hydrated(visitor.getByRole('button', { name: 'Send me a link' }))).click();
+    await expect(visitor.getByLabel('Email')).toBeFocused();
+    await expect(visitor.getByLabel('Email')).toHaveAccessibleDescription(
+      'Enter the email you sign in with.',
+    );
+    await visitor.getByLabel('Email').fill(owner.email);
+    await visitor.getByRole('button', { name: 'Send me a link' }).click();
+    await expect(visitor.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
+
+    const link = await linkTo(owner.email, 'Reset your Pepper password');
+    await visitor.goto(link);
+    await expect(visitor).toHaveURL(/\/reset-password\?token=/);
+    await (await hydrated(visitor.getByRole('button', { name: 'Save new password' }))).click();
+    await expect(visitor.getByLabel('New password')).toHaveAccessibleDescription(
+      /Use a password of at least 10 characters/,
+    );
+    const newPassword = 'a brand new passphrase';
+    await visitor.getByLabel('New password').fill(newPassword);
+    await visitor.getByRole('button', { name: 'Save new password' }).click();
+    await expect(visitor.getByRole('heading', { name: 'Password saved' })).toBeVisible();
+
+    // The owner's phone was signed out by the reset.
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/sign-in$/);
+    await enterPassword(page, owner.email);
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'That email and password don’t match.' }),
+    ).toBeVisible();
+    await enterPassword(page, owner.email, newPassword);
+    await page.getByLabel('Code').fill(await freshCode(owner.secret, owner.usedCodes));
+    await page.getByRole('button', { name: 'Verify' }).click();
+    await expect(page.getByTestId('business-name')).toHaveText(owner.business);
+
+    // The link works once.
+    await visitor.goto(link);
+    await expect(visitor.getByRole('heading', { name: 'This link has run out' })).toBeVisible();
+    await visitor.context().close();
+  });
+
+  test('AC-W1-6: change email from More; it counts once both addresses confirm', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const owner = await onboardOwner(page);
+    await page.goto('/more');
+    await page.getByRole('link', { name: 'Change email' }).click();
+    await expect(page).toHaveURL(/\/account\/email$/);
+    await (await hydrated(page.getByRole('button', { name: 'Send the link' }))).click();
+    await expect(page.getByLabel('New email')).toBeFocused();
+    await page.getByLabel('New email').fill(owner.email.toUpperCase());
+    await page.getByRole('button', { name: 'Send the link' }).click();
+    await expect(page.getByLabel('New email')).toHaveAccessibleDescription(
+      'That’s already your email. Enter a different one.',
+    );
+
+    const newEmail = `${unique('ana.new')}@example.test`;
+    await page.getByLabel('New email').fill(newEmail);
+    await page.getByRole('button', { name: 'Send the link' }).click();
+    await expect(page.getByRole('heading', { name: 'Confirm it’s you' })).toBeVisible();
+
+    // The current address confirms first; then one more link goes to the new one.
+    await page.goto(await linkTo(owner.email, 'Confirm the change of your Pepper email'));
+    await expect(page.getByRole('heading', { name: 'One more step' })).toBeVisible();
+    await page.goto('/more');
+    await expect(page.getByText(owner.email, { exact: true })).toBeVisible();
+
+    await page.goto(await linkTo(newEmail, 'Confirm your new email for Pepper'));
+    await expect(page.getByRole('heading', { name: 'Your email is changed' })).toBeVisible();
+    await expect(page.getByText(newEmail, { exact: true })).toBeVisible();
+    await page.getByRole('link', { name: 'Done' }).click();
+    await expect(page.getByText(newEmail, { exact: true })).toBeVisible();
+  });
+
+  test('the new account screens fit a phone screen', async ({ page }) => {
+    for (const path of ['/forgot-password', '/reset-password?token=t', '/reset-password']) {
       await page.goto(path);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

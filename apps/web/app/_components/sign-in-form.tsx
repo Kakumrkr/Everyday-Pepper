@@ -1,18 +1,21 @@
 'use client';
 
-import { Button, Input } from '@pepper/ui';
+import { Button, buttonStyle, cx, Input } from '@pepper/ui';
+import Link from 'next/link';
 import { useId, useState, type ReactNode, type SubmitEvent } from 'react';
-import { sendJson } from '../../lib/client-api';
+import { errorCodeOf, sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
-import { ROUTES, withNext } from '../../lib/account';
+import { confirmedUrl, ROUTES, withNext } from '../../lib/account';
 import { AuthPage, TextLink } from './auth-page';
+import { CheckInbox } from './check-inbox';
 import { Notice } from './form-parts';
 
-type Step = 'credentials' | 'code' | 'backup-code';
+type Step = 'credentials' | 'code' | 'backup-code' | 'confirm-email';
 
 /**
  * Email and password, then (if set up) the authenticator code or a backup code; then `next`
- * (an allowed page, see `safeNext`) or home. `status` says when Pepper can't be reached.
+ * (an allowed page, see `safeNext`) or home. An unconfirmed email shows "Check your inbox" (the
+ * api has sent a new link, S44). `status` says when Pepper can't be reached.
  */
 export function SignInForm({
   next = null,
@@ -25,17 +28,21 @@ export function SignInForm({
   const [step, setStep] = useState<Step>('credentials');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState('');
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     setBusy(true);
     setError(null);
+    const typed = step === 'credentials' ? formText(form, 'email') : email;
+    setEmail(typed);
     const result =
       step === 'credentials'
         ? await sendJson<{ twoFactorRedirect?: boolean }>('POST', '/api/auth/sign-in/email', {
-            email: formText(form, 'email'),
+            email: typed,
             password: formPassword(form, 'password'),
+            callbackURL: confirmedUrl(next),
           })
         : await sendJson(
             'POST',
@@ -46,6 +53,10 @@ export function SignInForm({
           );
     setBusy(false);
     if (!result.ok) {
+      if (step === 'credentials' && errorCodeOf(result.body) === 'EMAIL_NOT_VERIFIED') {
+        setStep('confirm-email');
+        return;
+      }
       setError(result.message);
       return;
     }
@@ -60,6 +71,8 @@ export function SignInForm({
   }
 
   const errorLine = error === null ? null : <Notice tone="error">{error}</Notice>;
+
+  if (step === 'confirm-email') return <CheckInbox email={email.trim()} next={next} resent />;
 
   if (step === 'credentials') {
     return (
@@ -89,6 +102,12 @@ export function SignInForm({
           />
           {errorLine}
         </form>
+        <Link
+          href={ROUTES.forgotPassword}
+          className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), 'self-start')}
+        >
+          Forgot your password?
+        </Link>
         <p className="m-0 type-body text-ink-2">
           New to Pepper? <TextLink href={withNext(ROUTES.signUp, next)}>Create an account</TextLink>
         </p>

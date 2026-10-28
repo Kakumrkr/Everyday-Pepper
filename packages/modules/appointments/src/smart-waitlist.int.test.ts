@@ -45,6 +45,7 @@ import {
   type MadeOffer,
 } from './services/smart-waitlist.js';
 import { createStaffMember, updateStaffMember } from './services/staff.js';
+import { addTimeOff, removeTimeOff } from './services/time-off.js';
 import { addToWaitlist, changeWaitlistEntry, listWaitlist } from './services/waitlist.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
@@ -141,22 +142,41 @@ function bookJess(w: World, time = '10:00', clientIndex = 0) {
   );
 }
 
+/**
+ * Runs `join` while Tuesday is full (both off all day), as the waitlist takes only full times
+ * (AC-W5-2); afterwards the day is open again, so a cancellation frees a time to offer.
+ */
+async function whileFull<T>(w: World, join: () => Promise<T>): Promise<T> {
+  const day = { startsAt: '2026-11-03T05:00:00.000Z', endsAt: '2026-11-04T05:00:00.000Z' };
+  const off = [
+    [w.jess.id, await addTimeOff(db, w.owner, w.jess.id, day)],
+    [w.marco.id, await addTimeOff(db, w.owner, w.marco.id, day)],
+  ] as const;
+  try {
+    return await join();
+  } finally {
+    for (const [staffId, timeOff] of off) await removeTimeOff(db, w.owner, staffId, timeOff.id);
+  }
+}
+
 function wait(
   w: World,
   clientIndex: number,
   staffMemberId: string | null,
   window = { start: '09:00', end: '12:00' },
 ): Promise<WaitlistEntry> {
-  return addToWaitlist(
-    db,
-    w.owner,
-    {
-      clientId: client(w, clientIndex).id,
-      serviceId: w.haircut.id,
-      staffMemberId: staffMemberId,
-      windows: [{ date: '2026-11-03', ...window }],
-    },
-    { clock: w.clock },
+  return whileFull(w, () =>
+    addToWaitlist(
+      db,
+      w.owner,
+      {
+        clientId: client(w, clientIndex).id,
+        serviceId: w.haircut.id,
+        staffMemberId: staffMemberId,
+        windows: [{ date: '2026-11-03', ...window }],
+      },
+      { clock: w.clock },
+    ),
   );
 }
 
@@ -458,16 +478,18 @@ describe('offers and claims (AC-W5-1)', () => {
       serviceIds: [w.haircut.id, colour.id],
     });
     // Sara waits for a colour (90 minutes fit while 11:00–11:30 is free), Ana for a haircut.
-    await addToWaitlist(
-      db,
-      w.owner,
-      {
-        clientId: client(w, 1).id,
-        serviceId: colour.id,
-        staffMemberId: null,
-        windows: [{ date: '2026-11-03', start: '09:00', end: '12:00' }],
-      },
-      { clock: w.clock },
+    await whileFull(w, () =>
+      addToWaitlist(
+        db,
+        w.owner,
+        {
+          clientId: client(w, 1).id,
+          serviceId: colour.id,
+          staffMemberId: null,
+          windows: [{ date: '2026-11-03', start: '09:00', end: '12:00' }],
+        },
+        { clock: w.clock },
+      ),
     );
     await wait(w, 2, null);
     const made = await cancelAndOffer(w);

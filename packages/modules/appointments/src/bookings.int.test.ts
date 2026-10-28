@@ -44,6 +44,7 @@ import {
   StaffMemberNotFoundError,
   WaitlistEntryNotChangeableError,
   WaitlistExpiredError,
+  WaitlistTimesFreeError,
 } from './errors.js';
 import { findAvailability, type TemplateRuleDefaultsOf } from './services/availability.js';
 import {
@@ -676,7 +677,7 @@ describe('clients', () => {
         clientId: lee.id,
         serviceId: b.service.id,
         staffMemberId: b.jess.id,
-        windows: [{ date: '2026-11-05', start: '09:00', end: '12:00' }],
+        windows: [{ date: '2026-11-07', start: '09:00', end: '12:00' }],
       },
       { clock: b.clock },
     );
@@ -735,7 +736,7 @@ describe('finding a client by exact email or phone (ADR-0020)', () => {
       clientId: b.client.id,
       serviceId: b.service.id,
       staffMemberId: b.jess.id,
-      windows: [{ date: '2026-11-05', start: '09:00', end: '12:00' }],
+      windows: [{ date: '2026-11-07', start: '09:00', end: '12:00' }],
     };
     await expect(addToWaitlist(db, b.staff, entry, { clock: b.clock })).rejects.toBeInstanceOf(
       ClientNotFoundError,
@@ -752,7 +753,76 @@ describe('finding a client by exact email or phone (ADR-0020)', () => {
 });
 
 describe('waitlist', () => {
-  const windows = [{ date: '2026-11-05', start: '09:00', end: '12:00' }];
+  // A Saturday: no one works, so every time in it is full.
+  const saturday = { date: '2026-11-07', start: '09:00', end: '12:00' };
+  const windows = [saturday];
+
+  it('AC-W5-2: a window with a free time is refused with the earliest free times, and nothing is added', async () => {
+    const b = await newBusiness();
+    const thursday = { date: '2026-11-05', start: '09:00', end: '12:00' };
+    const refused = await addToWaitlist(
+      db,
+      b.owner,
+      { clientId: b.client.id, serviceId: b.service.id, windows: [saturday, thursday] },
+      { clock: b.clock },
+    ).catch((error: unknown) => error);
+    expect(refused).toBeInstanceOf(WaitlistTimesFreeError);
+    // 09:00, 09:15 and 09:30 EST with Jess, the only one who offers the haircut.
+    expect((refused as WaitlistTimesFreeError).freeTimes).toEqual(
+      ['14:00', '14:15', '14:30'].map((time) => ({
+        staffMemberId: b.jess.id,
+        startsAt: `2026-11-05T${time}:00.000Z`,
+        endsAt: expect.any(String) as unknown,
+      })),
+    );
+    // Named staff count alone: Marco doesn't offer it, so his Thursday is full.
+    await expect(
+      addToWaitlist(
+        db,
+        b.owner,
+        {
+          clientId: b.client.id,
+          serviceId: b.service.id,
+          staffMemberId: b.marco.id,
+          windows: [thursday],
+        },
+        { clock: b.clock },
+      ),
+    ).resolves.toMatchObject({ status: 'waiting', staffMemberId: b.marco.id });
+    expect(await listWaitlist(db, b.owner, {}, { clock: b.clock })).toHaveLength(1);
+  });
+
+  it('AC-W5-2: a window booked through is full, even when later times that day are free', async () => {
+    const b = await newBusiness();
+    // Jess 09:00–10:00 (+10 minutes' clean-up) on Thursday; from 10:15 she is free again, but a
+    // 60-minute haircut from 10:15 doesn't fit inside 09:00–11:00.
+    await book(b, b.owner, request(b, '2026-11-05T14:00:00.000Z'));
+    const entry = await addToWaitlist(
+      db,
+      b.owner,
+      {
+        clientId: b.client.id,
+        serviceId: b.service.id,
+        staffMemberId: b.jess.id,
+        windows: [{ date: '2026-11-05', start: '09:00', end: '11:00' }],
+      },
+      { clock: b.clock },
+    );
+    expect(entry.status).toBe('waiting');
+    await expect(
+      addToWaitlist(
+        db,
+        b.owner,
+        {
+          clientId: b.client.id,
+          serviceId: b.service.id,
+          staffMemberId: b.jess.id,
+          windows: [{ date: '2026-11-05', start: '09:00', end: '11:15' }],
+        },
+        { clock: b.clock },
+      ),
+    ).rejects.toBeInstanceOf(WaitlistTimesFreeError);
+  });
 
   it('adds, lists and cancels entries, audited without client details', async () => {
     const b = await newBusiness();
@@ -766,7 +836,7 @@ describe('waitlist', () => {
     expect(entry).toMatchObject({
       status: 'waiting',
       staffMemberId: null,
-      expiresAt: '2026-11-05T17:00:00.000Z',
+      expiresAt: '2026-11-07T17:00:00.000Z',
     });
     expect(await listWaitlist(db, b.manager, {}, { clock: b.clock })).toEqual([entry]);
 
@@ -785,7 +855,7 @@ describe('waitlist', () => {
     const waitlistEntries = (await auditOf(b.tenantId)).filter((e) =>
       e.action.startsWith('waitlist'),
     );
-    expect(JSON.stringify(waitlistEntries)).not.toMatch(/09:00|12:00|2026-11-05"|Maria/);
+    expect(JSON.stringify(waitlistEntries)).not.toMatch(/09:00|12:00|2026-11-07"|Maria/);
   });
 
   it('an entry whose windows have all passed is refused; one that has since passed reads as expired', async () => {
@@ -808,7 +878,7 @@ describe('waitlist', () => {
       { clientId: b.client.id, serviceId: b.service.id, windows },
       { clock: b.clock },
     );
-    b.clock.set('2026-11-05T17:00:00.000Z');
+    b.clock.set('2026-11-07T17:00:00.000Z');
     expect(await listWaitlist(db, b.owner, {}, { clock: b.clock })).toEqual([]);
     expect(await listWaitlist(db, b.owner, { all: 'true' }, { clock: b.clock })).toEqual([
       { ...entry, status: 'expired' },

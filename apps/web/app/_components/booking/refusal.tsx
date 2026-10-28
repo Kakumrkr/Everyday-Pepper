@@ -3,6 +3,7 @@
 import {
   SlotUnavailableSchema,
   WaitlistEntrySchema,
+  WaitlistTimesFreeSchema,
   type AvailableSlot,
   type WaitlistEntryInput,
 } from '@pepper/contracts';
@@ -36,7 +37,12 @@ export function Refusal({
   onPick: (slot: AvailableSlot) => void;
   busy: boolean;
   /** For a new booking: the entry to add, without its windows, and the wanted start. */
-  waitlist?: { entry: Omit<WaitlistEntryInput, 'windows'>; wanted: string; onAdded: () => void };
+  waitlist?: {
+    entry: Omit<WaitlistEntryInput, 'windows'>;
+    wanted: string;
+    minutes: number;
+    onAdded: () => void;
+  };
 }) {
   const box = useRef<HTMLElement>(null);
   // The sheet's Book or Move sits in its footer; the answer shows where the eye can find it.
@@ -78,17 +84,20 @@ function WaitlistOffer({
   timeZone,
   entry,
   wanted,
+  minutes,
   onAdded,
 }: {
   timeZone: string;
   entry: Omit<WaitlistEntryInput, 'windows'>;
   wanted: string;
+  /** The service's length: the suggested window is exactly the wanted appointment. */
+  minutes: number;
   onAdded: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const suggested = suggestedWindow(timeZone, wanted);
+  const suggested = suggestedWindow(timeZone, wanted, minutes);
 
   async function add(event: SubmitEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -109,7 +118,21 @@ function WaitlistOffer({
       onAdded();
       return;
     }
-    setError(answer.ok ? 'Something went wrong. Try again.' : answer.message);
+    if (answer.ok) {
+      setError('Something went wrong. Try again.');
+      return;
+    }
+    // A window with a free time is refused with those times (S44): name them.
+    const free = WaitlistTimesFreeSchema.safeParse(answer.body);
+    setError(
+      free.success && free.data.alternatives.length > 0
+        ? `That isn’t full: ${free.data.alternatives
+            .map((slot) => dateTimeLabel(timeZone, slot.startsAt))
+            .join(
+              ', ',
+            )} ${free.data.alternatives.length === 1 ? 'is' : 'are'} free. Book one instead.`
+        : answer.message,
+    );
   }
 
   if (!open) {

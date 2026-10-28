@@ -1,5 +1,7 @@
 import { FeedResponseSchema } from '@pepper/contracts';
-import { Icon, List, ListRow } from '@pepper/ui';
+import { buttonStyle, Icon, List, ListRow } from '@pepper/ui';
+import Link from 'next/link';
+import { ROUTES } from '../../../lib/account';
 import { appNav, type NavItem } from '../../../lib/nav';
 import { BusinessSwitcher, SignOutButton } from '../../_components/account-actions';
 import { kitLink } from '../../_components/kit-link';
@@ -59,6 +61,9 @@ export default async function MorePage() {
         <p className="m-0 type-body text-ink-2">
           Signed in as <span className="font-semibold break-all text-ink">{me.user.email}</span>
         </p>
+        <Link href={ROUTES.changeEmail} className={buttonStyle({ variant: 'secondary' })}>
+          Change email
+        </Link>
         {me.businesses.length > 1 || current === null ? (
           <div className="w-full">
             <BusinessSwitcher businesses={me.businesses} activeTenantId={me.activeTenantId} />

@@ -95,7 +95,7 @@ export class BookingsService {
   }
 
   addToWaitlist(tenant: TenantContext, input: WaitlistEntryInput): Promise<WaitlistEntry> {
-    return addToWaitlist(this.db, actorOf(tenant), input);
+    return addToWaitlist(this.db, actorOf(tenant), input, { templateRuleDefaults });
   }
 
   changeWaitlistEntry(

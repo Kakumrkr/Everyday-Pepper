@@ -1,5 +1,6 @@
 import type { DatabaseHandle } from '@pepper/db';
-import { DATABASE } from '@pepper/runtime';
+import type { Mailer } from '@pepper/core';
+import { DATABASE, MAILER } from '@pepper/runtime';
 import { Logger, Module, type DynamicModule } from '@nestjs/common';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { AccountController } from '../account/account.controller.js';
@@ -24,7 +25,8 @@ export function toNestLog(
 /**
  * Sign-in (Better Auth at `/api/auth/*`), the session and tenant guards, the origin check for
  * every write, and the account endpoints (`/v1/me`, `/v1/tenants`, `/v1/tenant`). Global, so
- * feature modules can use its guards. Needs `ConnectionsModule` (the `DATABASE` handle).
+ * feature modules can use its guards. Needs `ConnectionsModule` (the `DATABASE` handle) and
+ * the `MAILER` (account emails, ADR-0045).
  */
 @Module({})
 export class AuthModule {
@@ -37,12 +39,14 @@ export class AuthModule {
       providers: [
         {
           provide: AuthService,
-          inject: [DATABASE],
-          useFactory: (database: DatabaseHandle) =>
+          // Optional, so modules tested without email still start (no mailer: emails are logged).
+          inject: [DATABASE, { token: MAILER, optional: true }],
+          useFactory: (database: DatabaseHandle, mailer: Mailer | null | undefined) =>
             new BetterAuthService(
               createBetterAuth({
                 ...config,
                 db: database.db,
+                mailer: mailer ?? null,
                 log,
               }),
               database.db,

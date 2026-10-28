@@ -32,10 +32,28 @@ export function AuthPage({
   );
 }
 
-/** A link inside a sentence ("New to Pepper? Create an account"). */
-export function TextLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link href={href} className="font-semibold text-brand underline underline-offset-2">
+const TEXT_LINK = 'font-semibold text-brand underline underline-offset-2';
+
+/**
+ * A link inside a sentence ("New to Pepper? Create an account"). `reload` loads the page afresh,
+ * for a link to the page already open (a form's later step, S44): a client-side visit would keep
+ * the step.
+ */
+export function TextLink({
+  href,
+  children,
+  reload = false,
+}: {
+  href: string;
+  children: ReactNode;
+  reload?: boolean;
+}) {
+  return reload ? (
+    <a href={href} className={TEXT_LINK}>
+      {children}
+    </a>
+  ) : (
+    <Link href={href} className={TEXT_LINK}>
       {children}
     </Link>
   );

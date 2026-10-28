@@ -235,3 +235,14 @@ export const SlotUnavailableSchema = z.object({
   alternatives: z.array(AvailableSlotSchema),
 });
 export type SlotUnavailable = z.infer<typeof SlotUnavailableSchema>;
+
+/**
+ * Body of the 409 `waitlist_times_free` answer (S44, AC-W5-2): a time inside the windows can
+ * still be booked, so nothing was added; the earliest free times, earliest first.
+ */
+export const WaitlistTimesFreeSchema = z.object({
+  code: z.literal('waitlist_times_free'),
+  message: z.string(),
+  alternatives: z.array(AvailableSlotSchema),
+});
+export type WaitlistTimesFree = z.infer<typeof WaitlistTimesFreeSchema>;

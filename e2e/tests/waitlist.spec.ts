@@ -1,4 +1,4 @@
-import { ClientSchema, WaitlistEntrySchema } from '@pepper/contracts';
+import { ClientSchema, TimeOffSchema, WaitlistEntrySchema } from '@pepper/contracts';
 import { test, type Page } from '@playwright/test';
 import { book, expect, salon } from './chat-helpers.js';
 import {
@@ -52,6 +52,15 @@ test('a cancelled time is offered to the waitlist; the first claim books it, the
   await onboardOwner(page);
   const s = await salon(page);
   const booking = await book(page, s, s.mariaId, s.jessId, '15:00');
+  // Marco is off for that hour, so it is full when they join (AC-W5-2: the waitlist takes only
+  // full times); they wait for exactly it.
+  await callApi(
+    page,
+    'POST',
+    `/v1/staff/${s.marcoId}/time-off`,
+    { startsAt: booking.startsAt, endsAt: booking.endsAt },
+    TimeOffSchema,
+  );
   const sara = await client(page, 'Sara Kim');
   const ana = await client(page, 'Ana Ruiz');
   for (const waiting of [sara, ana]) {
@@ -62,7 +71,7 @@ test('a cancelled time is offered to the waitlist; the first claim books it, the
       {
         clientId: waiting.id,
         serviceId: s.serviceId,
-        windows: [{ date: s.day, start: '13:00', end: '17:00' }],
+        windows: [{ date: s.day, start: '15:00', end: '16:00' }],
       },
       WaitlistEntrySchema,
     );

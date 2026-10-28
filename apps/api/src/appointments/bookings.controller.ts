@@ -146,7 +146,10 @@ export class BookingsController {
     return { offers: await answering(() => this.bookings.waitlistOffers(tenant)) };
   }
 
-  /** 201 the entry; 400 `waitlist_expired` when every window has passed. */
+  /**
+   * 201 the entry; 400 `waitlist_expired` when every window has passed; 409
+   * `waitlist_times_free` with the earliest free times when a window isn't full (S44).
+   */
   @Post('waitlist')
   @RequirePermission('bookings.manage')
   addToWaitlist(

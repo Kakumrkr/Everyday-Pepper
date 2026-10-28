@@ -165,13 +165,13 @@ describe('bookingActions', () => {
 });
 
 describe('suggestedWindow', () => {
-  it('the wanted day, from the wanted time for two hours, to midnight at most', () => {
-    expect(suggestedWindow(NY, '2026-11-03T14:15:00.000Z')).toEqual({
+  it('the wanted day, exactly the wanted appointment, to midnight at most', () => {
+    expect(suggestedWindow(NY, '2026-11-03T14:15:00.000Z', 45)).toEqual({
       date: '2026-11-03',
       start: '09:15',
-      end: '11:15',
+      end: '10:00',
     });
-    expect(suggestedWindow(NY, '2026-11-04T03:30:00.000Z')).toEqual({
+    expect(suggestedWindow(NY, '2026-11-04T03:30:00.000Z', 120)).toEqual({
       date: '2026-11-03',
       start: '22:30',
       end: '24:00',

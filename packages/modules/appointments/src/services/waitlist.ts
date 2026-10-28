@@ -6,11 +6,15 @@ import {
   WaitlistEntryInputSchema,
   WaitlistQuerySchema,
   WaitlistStatusSchema,
+  minutesOfDay,
   type WaitlistChange,
   type WaitlistEntry,
   type WaitlistEntryId,
   type WaitlistEntryInput,
   type WaitlistQuery,
+  type WaitlistWindow,
+  type AvailableSlot,
+  type StaffMemberId,
 } from '@pepper/contracts';
 import { auditActorOf, requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
 import {
@@ -24,9 +28,13 @@ import {
   lockWaitlistEntry,
   withMember,
   type Database,
+  type ServiceRow,
   type TenantTx,
 } from '@pepper/db';
-import { waitlistExpiry } from '../bookings/planning.js';
+import { fromZoned, parseDate } from '../availability/zoned-time.js';
+import { toAvailableSlot, waitlistExpiry } from '../bookings/planning.js';
+import { windowsHold } from '../bookings/waitlist-ranking.js';
+import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import { ownStaffMemberId } from './bookings.js';
 import { findClientToBook } from './clients.js';
 import { withdrawOffersOfEntry } from './smart-waitlist.js';
@@ -36,20 +44,35 @@ import {
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
   WaitlistExpiredError,
+  WaitlistTimesFreeError,
 } from '../errors.js';
 import { staffOwner, toWaitlistEntry, waitlistAuditValues } from '../mapping.js';
 
 // The waitlist (ADR-0017): clients waiting for a service at times that are full. It follows
 // the bookings' permissions: owners and managers manage every entry; staff only entries for
 // their own staff member (an entry for "anyone" is the business's to hand out). Offering freed
-// slots to the best entry is the smart waitlist (Phase 8).
+// slots to the best entry is the smart waitlist (Phase 8). It is for times that are full: an
+// entry whose windows still hold a free time is refused with those times (S44, AC-W5-2), so
+// whoever adds it (the app or the AI) books instead; the domain judges "full", not the caller.
 
-/** Adds a client to the waitlist; it expires when its last window ends. */
+/** How many free times a refused waitlist entry lists. */
+export const WAITLIST_FREE_TIMES_SHOWN = 3;
+
+export interface WaitlistOptions {
+  clock?: Clock;
+  /** The template's booking rules, as availability takes them (the app passes them). */
+  templateRuleDefaults?: TemplateRuleDefaultsOf;
+}
+
+/**
+ * Adds a client to the waitlist; it expires when its last window ends. `WaitlistTimesFreeError`
+ * when a time inside a window can still be booked.
+ */
 export async function addToWaitlist(
   db: Database,
   actor: Actor,
   input: WaitlistEntryInput,
-  options: { clock?: Clock } = {},
+  options: WaitlistOptions = {},
 ): Promise<WaitlistEntry> {
   requirePermission(actor, 'bookings.manage');
   const entry = WaitlistEntryInputSchema.parse(input);
@@ -61,7 +84,7 @@ export async function addToWaitlistIn(
   tx: TenantTx,
   actor: Actor,
   input: WaitlistEntryInput,
-  options: { clock?: Clock } = {},
+  options: WaitlistOptions = {},
 ): Promise<WaitlistEntry> {
   requirePermission(actor, 'bookings.manage');
   const entry = WaitlistEntryInputSchema.parse(input);
@@ -73,13 +96,23 @@ export async function addToWaitlistIn(
     if (staff === undefined) throw new StaffMemberNotFoundError();
     requirePermission(actor, 'bookings.manage', staffOwner(staff));
   }
-  if ((await findService(tx, entry.serviceId)) === undefined) throw new ServiceNotFoundError();
+  const service = await findService(tx, entry.serviceId);
+  if (service === undefined) throw new ServiceNotFoundError();
   await findClientToBook(tx, entry.clientId, entry.clientContact);
   const tenant = await findCurrentTenant(tx);
   // withMember always has a tenant; its row is visible to every member.
   if (tenant === undefined) throw new Error('No tenant in this transaction');
   const expiresAt = waitlistExpiry(entry.windows, tenant.timeZone);
   if (expiresAt <= now.getTime()) throw new WaitlistExpiredError();
+  const free = await freeTimesIn(tx, {
+    service,
+    staffMemberId: entry.staffMemberId,
+    windows: entry.windows,
+    timeZone: tenant.timeZone,
+    now: now.getTime(),
+    templateRuleDefaults: options.templateRuleDefaults,
+  });
+  if (free.length > 0) throw new WaitlistTimesFreeError(free);
 
   const row = await insertWaitlistEntry(tx, {
     clientId: entry.clientId,
@@ -193,4 +226,51 @@ export async function changeWaitlistEntryIn(
     requestId: actor.requestId,
   });
   return toWaitlistEntry(updated, now);
+}
+
+/**
+ * The earliest times inside the windows that can be booked now, with the staff member or anyone
+ * who offers the service (the same engine and rules as booking), whose whole appointment fits
+ * the window as the matcher would offer it; at most `WAITLIST_FREE_TIMES_SHOWN`. A window that
+ * has begun counts from now.
+ */
+async function freeTimesIn(
+  tx: TenantTx,
+  search: {
+    service: ServiceRow;
+    staffMemberId: StaffMemberId | null;
+    windows: readonly WaitlistWindow[];
+    timeZone: string;
+    now: number;
+    templateRuleDefaults: TemplateRuleDefaultsOf | undefined;
+  },
+): Promise<AvailableSlot[]> {
+  // One load over the windows' whole span, then only the times that fit inside a window.
+  const bounds = search.windows.map((window) => {
+    const day = parseDate(window.date);
+    return {
+      from: fromZoned(search.timeZone, day, minutesOfDay(window.start)),
+      to: fromZoned(search.timeZone, day, minutesOfDay(window.end)),
+    };
+  });
+  const from = Math.max(Math.min(...bounds.map((b) => b.from)), search.now);
+  const to = Math.max(...bounds.map((b) => b.to));
+  if (from >= to) return [];
+  const slots = await slotsFor(tx, {
+    service: serviceToBook(search.service),
+    staffMemberIds: search.staffMemberId === null ? undefined : [search.staffMemberId],
+    from,
+    to,
+    now: search.now,
+    templateRuleDefaults: search.templateRuleDefaults,
+  });
+  // As the matcher offers them: the whole appointment inside a window.
+  const free = slots
+    .filter((slot) =>
+      windowsHold(search.windows, search.timeZone, slot.start, search.service.durationMinutes),
+    )
+    .map(toAvailableSlot);
+  return free
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
+    .slice(0, WAITLIST_FREE_TIMES_SHOWN);
 }

@@ -104,6 +104,12 @@ export async function loadInvites(options: ApiCallOptions): Promise<Invite[] | n
 export const ROUTES = {
   signIn: '/sign-in',
   signUp: '/sign-up',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  /** Where an emailed link lands once opened (S44): a run-out link, or a changed email. */
+  emailConfirmed: '/email-confirmed',
+  changeEmail: '/account/email',
+  more: '/more',
   createBusiness: '/onboarding/business',
   twoFactor: '/security/two-factor',
   invite: '/invite',
@@ -118,6 +124,14 @@ export const ROUTES = {
   waitlist: '/waitlist',
   home: '/',
 } as const;
+
+/**
+ * Where an emailed check link sends the browser once opened (S44): `/email-confirmed`, which
+ * goes on to `next` (or home), or explains a link that has run out.
+ */
+export function confirmedUrl(next: string | null): string {
+  return withNext(ROUTES.emailConfirmed, next);
+}
 
 /** `path` with `?next=` set to `next`, if any (sign-in and sign-up return there). */
 export function withNext(path: string, next: string | null): string {
@@ -154,12 +168,30 @@ export function checkSignUp(
   if (name === '' || name.length > 120) {
     errors.name = 'Enter your name, as your team and clients will see it.';
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-    errors.email = 'Enter your email. You’ll sign in with it.';
-  }
-  if (form.password.length < 10) errors.password = 'Use a password of at least 10 characters.';
-  else if (form.password.length > 128) {
-    errors.password = 'Use a password of at most 128 characters.';
-  }
+  const email = emailError(form.email, 'Enter your email. You’ll sign in with it.');
+  if (email !== undefined) errors.email = email;
+  const password = passwordError(form.password);
+  if (password !== undefined) errors.password = password;
   return errors;
+}
+
+/** `message` unless `email` looks like an email address (the api decides the rest). */
+export function emailError(email: string, message = 'Enter your email.'): string | undefined {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ? undefined : message;
+}
+
+/** Why a new password won't do, if it won't (Better Auth's lengths, ADR-0007). */
+export function passwordError(password: string): string | undefined {
+  if (password.length < 10) return 'Use a password of at least 10 characters.';
+  if (password.length > 128) return 'Use a password of at most 128 characters.';
+  return undefined;
+}
+
+/** The error for a change of email to `email` from `current`, if any. */
+export function newEmailError(email: string, current: string): string | undefined {
+  const invalid = emailError(email, 'Enter the new email you want to sign in with.');
+  if (invalid !== undefined) return invalid;
+  return email.trim().toLowerCase() === current.toLowerCase()
+    ? 'That’s already your email. Enter a different one.'
+    : undefined;
 }

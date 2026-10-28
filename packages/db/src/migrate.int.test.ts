@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { cp, mkdtemp, readdir, rm } from 'node:fs/promises';
+import { cp, mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +36,24 @@ async function query<T extends pg.QueryResultRow>(
 }
 
 describe('runMigrations', () => {
+  it('0051 marks the accounts made before S44 as confirmed, so they still sign in (ADR-0045)', async () => {
+    const [before] = await query<{ id: string }>(
+      database.migrationUrl,
+      "INSERT INTO users (id, name, email) VALUES (gen_random_uuid(), 'Old', $1) RETURNING id",
+      [`old-${String(Date.now())}@example.test`],
+    );
+    const sql = await readFile(
+      new URL('../migrations/0051_existing_accounts_verified.sql', import.meta.url),
+      'utf8',
+    );
+    await query(database.migrationUrl, sql);
+    expect(
+      await query(database.migrationUrl, 'SELECT email_verified FROM users WHERE id = $1', [
+        before?.id,
+      ]),
+    ).toEqual([{ email_verified: true }]);
+  });
+
   it('applied every migration once', async () => {
     const files = (await readdir(new URL('../migrations', import.meta.url))).filter((f) =>
       f.endsWith('.sql'),

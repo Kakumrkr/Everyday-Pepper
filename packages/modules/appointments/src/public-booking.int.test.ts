@@ -38,6 +38,7 @@ import {
 } from './errors.js';
 import { createBooking, listBookings } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
+import { addTimeOff } from './services/time-off.js';
 import {
   cancelManagedBooking,
   codeHash,
@@ -678,6 +679,11 @@ describe('"Join the waitlist" on the booking page (S38a)', () => {
     await confirmJoin(p, first.requestId, first.code);
     const [client] = await listClients(db, p.owner, {});
     if (client === undefined) throw new Error('no client');
+    // The team adds a full afternoon with Marco (he is off then; AC-W5-2 takes only full times).
+    await addTimeOff(db, p.owner, p.marco.id, {
+      startsAt: '2026-11-05T20:00:00.000Z',
+      endsAt: '2026-11-05T23:00:00.000Z',
+    });
     await addToWaitlist(
       db,
       p.owner,

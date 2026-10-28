@@ -2,6 +2,10 @@ import { MeResponseSchema, type MeResponse } from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import {
   checkSignUp,
+  confirmedUrl,
+  emailError,
+  newEmailError,
+  passwordError,
   loadAccount,
   loadCurrentBusiness,
   loadInvites,
@@ -247,5 +251,29 @@ describe('checkSignUp', () => {
     expect(
       checkSignUp({ name: 'Ana Reyes', email: 'ana@example.com', password: 'correct horse' }),
     ).toEqual({});
+  });
+});
+
+describe('account recovery checks (S44)', () => {
+  it('asks for an email address, a long enough password, and a new email that differs', () => {
+    expect(emailError('ana@example.test')).toBeUndefined();
+    expect(emailError('ana@', 'Enter the email you sign in with.')).toBe(
+      'Enter the email you sign in with.',
+    );
+    expect(passwordError('short')).toBe('Use a password of at least 10 characters.');
+    expect(passwordError('x'.repeat(129))).toBe('Use a password of at most 128 characters.');
+    expect(passwordError('a long passphrase')).toBeUndefined();
+    expect(newEmailError('ANA@example.test ', 'ana@example.test')).toBe(
+      'That’s already your email. Enter a different one.',
+    );
+    expect(newEmailError('nope', 'ana@example.test')).toBe(
+      'Enter the new email you want to sign in with.',
+    );
+    expect(newEmailError('ana@new.example', 'ana@example.test')).toBeUndefined();
+  });
+
+  it('sends an emailed link back through /email-confirmed, keeping an allowed next page', () => {
+    expect(confirmedUrl(null)).toBe('/email-confirmed');
+    expect(confirmedUrl('/invite')).toBe('/email-confirmed?next=%2Finvite');
   });
 });

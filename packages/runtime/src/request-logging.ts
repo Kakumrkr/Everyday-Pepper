@@ -22,8 +22,12 @@ type Middleware = (
   next: () => void,
 ) => void;
 
-// Paths that carry a secret (S36: a one-click unsubscribe link's token); the rest is kept.
-const SECRET_PATHS = [/^(\/v1\/public\/unsubscribe\/)[^/]+/];
+// Paths that carry a secret (S36: a one-click unsubscribe link's token; S44: a password reset
+// link's token); the rest is kept.
+const SECRET_PATHS = [
+  /^(\/v1\/public\/unsubscribe\/)[^/]+/,
+  /^(\/api\/auth\/reset-password\/)[^/]+/,
+];
 
 /** The path as logged: a secret in it is replaced by `:token`. */
 export function withoutSecrets(path: string): string {

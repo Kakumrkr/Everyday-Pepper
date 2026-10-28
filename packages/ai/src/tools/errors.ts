@@ -11,6 +11,7 @@ import {
   WaitlistEntryNotChangeableError,
   WaitlistEntryNotFoundError,
   WaitlistExpiredError,
+  WaitlistTimesFreeError,
 } from '@pepper/appointments';
 import type { AvailableSlot, ToolErrorCode } from '@pepper/contracts';
 import {
@@ -37,7 +38,10 @@ import { ZodError } from 'zod';
 export interface ToolRefusal {
   code: ToolErrorCode;
   message: string;
-  /** With `slot_unavailable`: the nearest times that can be booked, nearest first. */
+  /**
+   * With `slot_unavailable`: the nearest times that can be booked, nearest first; with
+   * `times_free`: the earliest free times inside the windows asked for.
+   */
   alternatives?: readonly AvailableSlot[];
 }
 
@@ -153,6 +157,14 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
     return {
       code: 'too_late',
       message: 'Every one of those times has already passed. Ask the member for later days.',
+    };
+  }
+  if (error instanceof WaitlistTimesFreeError) {
+    return {
+      code: 'times_free',
+      message:
+        'Nothing was added: the waitlist is for full times, and the times listed here inside those windows are free. Offer them to the member to book; never pick one for them.',
+      alternatives: error.freeTimes,
     };
   }
   if (error instanceof WaitlistEntryNotChangeableError) {
