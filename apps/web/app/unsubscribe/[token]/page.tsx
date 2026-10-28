@@ -19,7 +19,7 @@ export const metadata: Metadata = {
  */
 export default async function UnsubscribePage({ params }: Params) {
   return (
-    <main className="mx-auto grid max-w-md gap-5 p-4">
+    <main className="mx-auto flex w-full min-w-0 max-w-md flex-col gap-5 self-start rounded-none border-0 bg-transparent px-5 pt-10 pb-10">
       <Unsubscribe token={(await params).token} />
     </main>
   );

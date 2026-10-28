@@ -1,7 +1,7 @@
 'use client';
 
 import { UnsubscribeResponseSchema, type UnsubscribeResponse } from '@pepper/contracts';
-import { buttonClass, LegacyCard } from '@pepper/ui';
+import { Button, Card, Skeleton } from '@pepper/ui';
 import { useEffect, useId, useState } from 'react';
 import { fetchJson, sendJson } from '../../lib/client-api';
 
@@ -37,43 +37,40 @@ export function Unsubscribe({ token }: { token: string }) {
   }
 
   return (
-    <LegacyCard labelledBy={headingId} className="flex flex-col gap-3">
-      <h1 id={headingId} className="m-0 text-xl font-bold">
+    <Card labelledBy={headingId} className="flex flex-col gap-4">
+      <h1 id={headingId} className="m-0 type-title text-ink">
         Unsubscribe
       </h1>
       {state.kind === 'loading' ? (
-        <p className="m-0 text-ink-2">One moment…</p>
+        <div role="status" className="flex flex-col gap-2">
+          <span className="sr-only">One moment…</span>
+          <Skeleton className="w-full" />
+          <Skeleton className="w-2/3" />
+        </div>
       ) : state.kind === 'invalid' ? (
-        <p className="m-0">
+        <p className="m-0 type-body text-ink">
           This unsubscribe link isn’t valid. Contact the business if you keep getting emails.
         </p>
       ) : state.kind === 'error' ? (
-        <p role="alert" className="m-0 text-danger">
+        <p role="alert" className="m-0 type-body font-semibold text-danger">
           {state.message}
         </p>
       ) : state.page.unsubscribed ? (
-        <p role="status" className="m-0" data-testid="unsubscribed">
+        <p role="status" className="m-0 type-body text-ink" data-testid="unsubscribed">
           You won’t get rebooking emails from {state.page.businessName} any more. Booking
           confirmations and reminders still come.
         </p>
       ) : (
         <>
-          <p className="m-0">
+          <p className="m-0 type-body text-ink">
             Stop rebooking emails from {state.page.businessName}? Booking confirmations and
             reminders will still come.
           </p>
-          <div>
-            <button
-              type="button"
-              disabled={busy}
-              className={buttonClass()}
-              onClick={() => void unsubscribe()}
-            >
-              Unsubscribe
-            </button>
-          </div>
+          <Button block busy={busy} onClick={() => void unsubscribe()}>
+            Unsubscribe
+          </Button>
         </>
       )}
-    </LegacyCard>
+    </Card>
   );
 }

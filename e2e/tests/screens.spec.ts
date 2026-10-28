@@ -9,7 +9,7 @@ import {
   toZoned,
 } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
-import { hydrated, onboardOwner, ownClientAddress } from './helpers.js';
+import { emailTo, hydrated, onboardOwner, ownClientAddress, toast, unique } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 
 // The signed-in screens on the kit (S41, DESIGN.md D6; AC-X-3): Home, Chat and More (S41), and
@@ -22,7 +22,10 @@ import { expectTapTargets } from './tap-targets.js';
 // Services, Team, a staff member's page and the booking sheets (AC-X-9), and at 375 px the open
 // sheets' tap targets and their main action at the bottom of the phone, in the sheet's footer.
 // S42.3 adds Autonomy, What I know (empty, then with two facts) and Waitlist (empty), and their
-// tap targets at 375 px, Autonomy's switch row and dial included (AC-X-10).
+// tap targets at 375 px, Autonomy's switch row and dial included (AC-X-10). S43 adds the public
+// pages in the shop's own color (the booking page at every step, manage-booking, the offer and
+// unsubscribe links), their tap targets and the sticky action at the bottom of a 375 px phone,
+// and Autonomy's "Saved" toast in view on that phone (AC-X-11). Dates on them move: masked.
 //
 // Update the baselines after a deliberate change, on Linux with CI's browser:
 //   pnpm --filter @pepper/e2e exec playwright test screens --project=desktop --update-snapshots
@@ -92,7 +95,136 @@ async function still(page: Page, colorScheme: (typeof SCHEMES)[number]): Promise
   await page.evaluate(() => document.fonts.ready);
 }
 
+/** The S39 mockups' shop on its booking page: three priced services, Dre and Randy, every day. */
+async function southsideMenu(page: Page): Promise<string> {
+  const { business } = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  const menu = [
+    { name: 'Haircut', durationMinutes: 30, priceFromCents: 3500 },
+    { name: 'Skin fade', durationMinutes: 45, priceFromCents: 4500 },
+    { name: 'Beard trim', durationMinutes: 15, priceFromCents: 2000 },
+  ];
+  const services: string[] = [];
+  for (const service of menu)
+    services.push((await post(page, '/v1/services', service, ServiceSchema)).id);
+  for (const displayName of ['Dre', 'Randy']) {
+    const member = await post(
+      page,
+      '/v1/staff',
+      { displayName, serviceIds: services },
+      StaffMemberSchema,
+    );
+    const hours = await page.request.put(`/v1/staff/${member.id}/hours`, {
+      data: {
+        intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
+          weekday,
+          start: '09:00',
+          end: '18:00',
+        })),
+      },
+      headers: { origin: new URL(page.url()).origin },
+    });
+    expect(hours.ok(), await hours.text()).toBe(true);
+  }
+  const color = await page.request.put('/v1/tenant/booking-page', {
+    data: { brandColor: '#145a55' },
+    headers: { origin: new URL(page.url()).origin },
+  });
+  expect(color.ok(), await color.text()).toBe(true);
+  return business.slug;
+}
+
+/** The sticky bar's main action: at the bottom of the phone, within thumb reach (D3). */
+async function expectStickyAtTheBottom(page: Page, name: string): Promise<void> {
+  const box = await page.getByRole('button', { name, exact: true }).boundingBox();
+  const height = page.viewportSize()?.height ?? 0;
+  expect(box, `${name} on the page`).not.toBeNull();
+  if (box === null) return;
+  expect(box.y + box.height, `${name} near the bottom`).toBeGreaterThan(height - 120);
+  expect(box.y + box.height, `${name} on the screen`).toBeLessThanOrEqual(height);
+}
+
+// "Wed, Oct 29, 9:00 AM" and "Wed, Oct 29": dates that move with the run.
+const DATED = /^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}/;
+
 for (const width of WIDTHS) {
+  test(`The public pages at ${String(width)} px, light and dark`, async ({ page }) => {
+    test.setTimeout(240_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const slug = await southsideMenu(page);
+    const phone = width === 375;
+    const shots = async (name: string, mask: ReturnType<Page['locator']>[] = []) => {
+      if (phone) {
+        await expectTapTargets(page, `the booking page: ${name}`);
+        // D12: nothing scrolls sideways (the day strip once widened the whole page).
+        const wide = await page.evaluate(() => document.documentElement.scrollWidth);
+        expect(wide, `${name} scrolls sideways`).toBeLessThanOrEqual(width);
+      }
+      for (const scheme of SCHEMES) {
+        await still(page, scheme);
+        await expect
+          .soft(page)
+          .toHaveScreenshot(`${name}-${String(width)}-${scheme}.png`, { ...SHOT, mask });
+      }
+      await page.emulateMedia({ colorScheme: 'light' });
+    };
+
+    await page.goto(`/book/${slug}`);
+    await expect(page.getByRole('heading', { name: 'Book a visit' })).toBeVisible();
+    await hydrated(page.getByRole('button', { name: /^Skin fade/ }));
+    await shots('book-services');
+
+    await page.getByRole('button', { name: /^Skin fade/ }).click();
+    await expect(page.getByRole('heading', { name: 'Who would you like?' })).toBeVisible();
+    await shots('book-staff');
+
+    await page.getByRole('button', { name: /^Anyone available/ }).click();
+    // Tomorrow: a whole working day, the same times every run.
+    await page.getByRole('group', { name: 'Day' }).getByRole('button').nth(1).click();
+    const times = page.getByTestId('free-times');
+    await expect(times.getByRole('button').first()).toBeVisible();
+    await shots('book-time', [
+      page.getByRole('group', { name: 'Day' }),
+      page.getByRole('heading', { name: /^Times on / }),
+    ]);
+
+    await times.getByRole('button').first().click();
+    await expect(page.getByRole('heading', { name: 'Your details' })).toBeVisible();
+    if (phone) await expectStickyAtTheBottom(page, 'Send my code');
+    await shots('book-details', [page.getByText(DATED)]);
+
+    const email = `${unique('ana')}@example.test`;
+    await page.getByLabel('Full name').fill('Ana Ruiz');
+    await page.getByLabel('Email').fill(email);
+    await page.getByRole('button', { name: 'Send my code' }).click();
+    await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible();
+    if (phone) await expectStickyAtTheBottom(page, 'Confirm booking');
+    await shots('book-code', [page.getByText(DATED), page.getByText(email)]);
+
+    const code = /^ {4}(\d{6})$/m.exec(await emailTo(email, 'is your code'))?.[1] ?? '';
+    await page.getByLabel('Code').fill(code);
+    await page.getByRole('button', { name: 'Confirm booking' }).click();
+    await expect(page.getByRole('heading', { name: 'You’re booked, Ana' })).toBeVisible();
+    await shots('book-done', [page.getByText(DATED), page.getByText(email)]);
+
+    await page.getByRole('link', { name: 'Reschedule or cancel' }).click();
+    await expect(page.getByTestId('booking-status')).toHaveText('Booked');
+    await hydrated(page.getByRole('button', { name: 'Reschedule' }));
+    await shots('book-manage', [page.getByText(DATED)]);
+
+    // A link opened without its secret, and an unsubscribe link that isn't valid.
+    await page.goto(`/book/${slug}/offer`);
+    await expect(page.getByText('This link is incomplete. Open it from your email.')).toBeVisible();
+    await shots('book-offer-broken');
+    await page.goto('/unsubscribe/not-a-real-token');
+    await expect(
+      page.getByText('This unsubscribe link isn’t valid.', { exact: false }),
+    ).toBeVisible();
+    await shots('unsubscribe-invalid');
+  });
+
   test(`Home, Chat and More at ${String(width)} px, light and dark`, async ({ page }) => {
     test.setTimeout(300_000);
     await page.setViewportSize({ width, height: 900 });
@@ -387,6 +519,27 @@ for (const width of WIDTHS) {
         await expectTapTargets(page, path);
       }
       await expect(page.getByRole('link', { name: 'Add someone in chat' })).toBeVisible();
+
+      // The S43 top-up: a change far down the page is confirmed in view, above the tabs.
+      await page.goto('/autonomy');
+      const dial = page.getByRole('radiogroup', { name: 'Offering open slots to the waitlist' });
+      await dial.scrollIntoViewIfNeeded();
+      await hydrated(dial.getByRole('radio', { name: 'Do it and tell me' }));
+      await dial.getByText('Do it and tell me').click();
+      const saved = toast(page);
+      await expect(saved).toContainText('Saved.');
+      const box = await saved.boundingBox();
+      expect(box, 'the saved toast').not.toBeNull();
+      if (box !== null) {
+        expect(box.y, 'the toast on the screen').toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, 'the toast above the tabs').toBeLessThanOrEqual(900 - 52);
+      }
+      await expectTapTargets(page, 'autonomy, with the saved toast');
+      // It goes by itself; then the dial goes back to "Ask me" for the shots.
+      await expect(saved).toHaveCount(0, { timeout: 10_000 });
+      await dial.getByText('Ask me', { exact: true }).click();
+      await expect(saved).toContainText('Saved.');
+      await expect(saved).toHaveCount(0, { timeout: 10_000 });
     }
 
     for (const scheme of SCHEMES) {

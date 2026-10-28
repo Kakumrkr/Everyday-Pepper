@@ -234,3 +234,8 @@ export async function emailTo(to: string, subject: string): Promise<string> {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 }
+
+/** The note in the app's toast area (S43): above the tabs on phones, bottom right on desktop. */
+export function toast(page: Page): Locator {
+  return page.getByRole('region', { name: /^Notifications/ }).getByRole('listitem');
+}

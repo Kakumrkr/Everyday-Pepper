@@ -1,7 +1,6 @@
 export * from './brand.js';
 export * from './class-names.js';
 export * from './tokens.js';
-export { LegacyCard } from './legacy-card.js';
 export { Icon, type IconName } from './icons.js';
 export { Logo, Mark } from './logo.js';
 export {

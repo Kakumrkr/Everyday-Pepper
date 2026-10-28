@@ -1,11 +1,11 @@
 'use client';
 
 import { AvailabilityResponseSchema, parseDate, type AvailableSlot } from '@pepper/contracts';
-import { chipClass } from '@pepper/ui';
+import { Button, chipStyle, cx, FOCUS_RING, Skeleton } from '@pepper/ui';
 import { useEffect, useId, useState } from 'react';
 import { timeLabel } from '../../../lib/booking';
 import { fetchJson } from '../../../lib/client-api';
-import { publicAvailabilityPath, upcomingDays } from '../../../lib/public-booking';
+import { localTimeLabel, publicAvailabilityPath, upcomingDays } from '../../../lib/public-booking';
 
 type Slots =
   | { state: 'loading' }
@@ -65,71 +65,90 @@ export function SlotPicker({
   }, [slug, timeZone, serviceId, staffMemberId, date]);
 
   return (
-    <div className="grid gap-4">
-      <div role="group" aria-label="Day" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {days.map((day) => (
-          <button
-            key={day.date}
-            type="button"
-            aria-pressed={day.date === date}
-            aria-label={day.label}
-            className={chipClass({
-              selected: day.date === date,
-              className: 'min-w-16 shrink-0 flex-col justify-center gap-0 rounded-md px-3 py-2',
-            })}
-            onClick={() => {
-              setDate(day.date);
-            }}
-          >
-            <span className="text-xs font-semibold">{day.weekday}</span>
-            <span className="text-lg font-bold text-ink">{day.day}</span>
-            <span className="text-xs">{day.month}</span>
-          </button>
-        ))}
+    <div className="flex flex-col gap-5">
+      <div role="group" aria-label="Day" className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+        {days.map((day) => {
+          const selected = day.date === date;
+          return (
+            <button
+              key={day.date}
+              type="button"
+              aria-pressed={selected}
+              aria-label={day.label}
+              className={cx(
+                'flex min-h-11 min-w-16 shrink-0 flex-col items-center justify-center rounded-md border px-3 py-2 font-normal tabular-nums',
+                'transition motion-fast ease-standard',
+                selected
+                  ? 'border-brand bg-brand text-brand-ink'
+                  : 'border-line-strong bg-surface text-ink hover:bg-surface-2',
+                FOCUS_RING,
+              )}
+              onClick={() => {
+                setDate(day.date);
+              }}
+            >
+              <span className="type-caption">{day.weekday}</span>
+              <span className="type-subheading">{day.day}</span>
+              <span className="type-caption">{day.month}</span>
+            </button>
+          );
+        })}
       </div>
-      <section aria-labelledby={timesId} className="grid gap-2">
-        <h2 id={timesId} className="m-0 text-base font-semibold">
+      <section aria-labelledby={timesId} className="flex flex-col gap-3">
+        <h2 id={timesId} className="m-0 type-label text-ink-2">
           Times on {dayLabel}
         </h2>
         {slots.state === 'loading' ? (
-          <p className="m-0 text-ink-2" role="status">
-            Looking for free times…
-          </p>
+          <div
+            role="status"
+            className="grid grid-cols-[repeat(auto-fill,minmax(--spacing(26),1fr))] gap-2"
+          >
+            <span className="sr-only">Looking for free times…</span>
+            {[0, 1, 2, 3, 4, 5].map((n) => (
+              <Skeleton key={n} className="h-11 rounded-md" />
+            ))}
+          </div>
         ) : slots.state === 'failed' ? (
-          <p className="m-0 font-semibold text-wait" role="alert">
+          <p
+            className="m-0 rounded-md bg-warn-soft px-4 py-3 type-body font-semibold text-warn"
+            role="alert"
+          >
             {slots.message}
           </p>
         ) : slots.slots.length === 0 ? (
-          <div className="grid gap-2">
-            <p className="m-0 text-ink-2">Nothing free that day. Try another day.</p>
+          <div className="flex flex-col items-start gap-3 rounded-lg bg-surface-2 px-5 py-6">
+            <p className="m-0 type-body text-ink">Nothing free that day. Try another day.</p>
             {onWaitlist === undefined ? null : (
-              <button
-                type="button"
-                className={chipClass({ className: 'justify-self-start' })}
+              <Button
+                variant="secondary"
                 onClick={() => {
                   onWaitlist({ date, label: dayLabel });
                 }}
               >
                 Join the waitlist for {dayLabel}
-              </button>
+              </Button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2" data-testid="free-times">
+          <div
+            className="grid grid-cols-[repeat(auto-fill,minmax(--spacing(26),1fr))] gap-2"
+            data-testid="free-times"
+          >
             {slots.slots.map((slot) => (
               <button
                 key={`${slot.startsAt}-${slot.staffMemberId}`}
                 type="button"
-                className={chipClass({
-                  className: 'flex-col justify-center gap-0 rounded-md py-2',
-                })}
+                className={cx(
+                  chipStyle(false),
+                  'flex min-w-0 flex-col items-center justify-center',
+                )}
                 onClick={() => {
                   onPick(slot);
                 }}
               >
-                <span className="font-bold text-ink">{timeLabel(timeZone, slot.startsAt)}</span>
+                <span className="whitespace-nowrap">{timeLabel(timeZone, slot.startsAt)}</span>
                 {staffMemberId === null ? (
-                  <span className="text-xs">
+                  <span className="w-full truncate type-caption font-normal text-ink-2">
                     with {staffNames.get(slot.staffMemberId) ?? 'staff'}
                   </span>
                 ) : null}
@@ -138,7 +157,7 @@ export function SlotPicker({
           </div>
         )}
       </section>
-      <p className="m-0 text-sm text-ink-2">Times are in the business’s time zone ({timeZone}).</p>
+      <p className="m-0 type-caption text-ink-2">Times are {localTimeLabel(timeZone)}.</p>
     </div>
   );
 }

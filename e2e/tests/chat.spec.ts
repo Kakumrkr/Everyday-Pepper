@@ -14,6 +14,7 @@ import {
   onboardOwner,
   ownClientAddress,
   signUp,
+  toast,
   unique,
 } from './helpers.js';
 
@@ -146,7 +147,7 @@ test('ask vs "do it and tell me": the Autonomy page changes what the chat does',
   await expect(page.getByText('Always needs your OK: a new rule changes')).toBeVisible();
   await expectAccessible(page, 'autonomy');
   await row.getByText('Do it and tell me').click();
-  await expect(page.getByRole('status')).toHaveText('Saved. Create a booking: Do it and tell me.');
+  await expect(toast(page)).toHaveText('Saved. Create a booking: Do it and tell me.');
 
   await ask(page, `Book Maria for Haircut with Jess on ${s.day} at 14:00`);
   const card = changeCard(page, 'New booking');
@@ -163,7 +164,7 @@ test('ask vs "do it and tell me": the Autonomy page changes what the chat does',
   // "Ask me first for everything" overrides it.
   await page.goto('/autonomy');
   await (await hydrated(page.getByRole('switch', { name: 'Ask me first for everything' }))).check();
-  await expect(page.getByRole('status')).toHaveText('Saved. I’ll ask you first for everything.');
+  await expect(toast(page)).toHaveText('Saved. I’ll ask you first for everything.');
   await ask(page, `Book Sam for Haircut with Marco on ${s.day} at 15:00`);
   await expect(changeCard(page, 'New booking').getByText('Needs your OK')).toBeVisible();
 });
@@ -202,7 +203,7 @@ test('staff: refused outside their role; their proposal approved by the owner is
   // With "ask me first" on, her own reminder waits; the owner approves it from Home.
   await page.goto('/autonomy');
   await (await hydrated(page.getByRole('switch', { name: 'Ask me first for everything' }))).check();
-  await expect(page.getByRole('status')).toContainText('Saved.');
+  await expect(toast(page)).toContainText('Saved.');
   await ask(priya, 'Remind me to restock the towels');
   await expect(changeCard(priya, 'To-do').getByText('Needs your OK')).toBeVisible();
 

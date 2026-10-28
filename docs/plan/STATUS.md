@@ -1,23 +1,23 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-28 · **Plan version:** 0.34 ([PCR-008](changes/PCR-008.md)) · **Current phase:** 9 — New look (S42.3 done: every signed-in screen on the kit) → next: **S43** (public pages + auth, Phase 9 gate)
+**Last updated:** 2026-10-28 · **Plan version:** 0.34 ([PCR-008](changes/PCR-008.md)) · **Current phase:** 9 — New look (S43 done: every signed-in and public screen on the kit) → next: **S43.2** (auth, legacy stylesheet, Phase 9 gate)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S42.3 is closed. Next: S43 (see "Planned sessions").
+Nothing in progress: S43 is closed. Next: S43.2 (see "Planned sessions").
 
 ## Last sessions
+- **S43 Phase 9 · Public pages on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S43 note). Full entry in [session-log.md](session-log.md).
+  - **Built:** the booking page (step bar, one-tap rows, sticky "Send my code"/"Confirm booking", "Times are Chicago time"), manage-booking ("Book again" once cancelled), the offer page and unsubscribe on the kit in the business's colour; `LegacyCard` and `buttonClass` gone; AC-X-11. Split at the brief: auth, the legacy stylesheet and the Phase 9 gate → S43.2 (D-1).
+  - **Top-up (S42.3 retro):** Autonomy's "Saved" a kit Toast above the tabs, in view at 375 px; errors stay until dismissed; the toast area lets taps through.
+  - **Checks:** `pnpm check` green; integration skipped (screens, kit, e2e only); Playwright 121 passed, 28 skipped, 1 failed (the review's time grid at 1280 px), updated and re-run twice green; 54 new baselines, 6 updated.
 - **S42.3 Phase 9 · Autonomy, What I know and Waitlist on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42.3 note). Full entry in [session-log.md](session-log.md).
   - **Built:** the three screens on the kit, so every signed-in screen is on it; the dial a radio group on tokens (D-2); empties "Tell Pepper in chat", "Add someone in chat", "Open the calendar" (D-1); kit `chipStyle`; AC-X-10.
   - **Top-up (S42.2 retro):** the kit Switch's label and switch are one 44 px `<label>` (hint below); tap targets clean on the three screens at 375 px, Autonomy's switch and dial included.
   - **Checks:** `pnpm check` green; integration skipped (screens and kit only); Playwright 110 passed, 25 skipped, 9 failed (deliberate baseline diffs), updated and re-run: 9 passed; 24 new baselines.
-- **S42.2 Phase 9 · Booking sheets, Services and Team on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42.2 note). Full entry in [session-log.md](session-log.md).
-  - **Built:** the booking and new-booking sheets, Services (editor, rules), Team (list, a member's page, staff sheet) on the kit; actions in the sheet footer (kit `SheetFooter`); tones by place, no colour picker (D-2); empty states "Add your first service", "Add the first person"; AC-X-9.
-  - **Top-up (S42 retro):** every sheet's main action at the bottom of a 375 px phone, tap targets clean on 4 screens and 5 open sheets.
-  - **Checks:** `pnpm check` green; integration skipped (screens only); Playwright one full run, the gallery's 6 deliberate diffs updated and re-run green; 30 new baselines.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -33,6 +33,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S43 (user, 2026-10-28):** at the brief "Go with your recommendation and complete the session work" (D-1 split: auth, legacy stylesheet, Phase 9 gate → S43.2; D-2 the kit Toast as it is). **Claude:** one-tap rows, the sticky bar centred on wide screens, the clock by city or offset, "Saved" for the provider's 6 s; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S42.3 (user, 2026-10-28):** at the brief "Go with ur recommendation and do the complete session work" (D-1 Waitlist empties offer the chat and the calendar; D-2 the dial stays a radio group). **Claude:** the Switch hint outside its label; `chipStyle`; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S42.2 (user, 2026-10-28):** at the brief "Go ahead with your recommendation and complete the session" (D-1 split: Autonomy, What I know, Waitlist → S42.3; D-2 tones stay automatic, the colour picker goes). **Claude:** a kit `SheetFooter`; errors beside the footer action; focus back to the header button after an add; the review's 6 fixes. Full wording in [decisions.md](decisions.md).
 - **S42 (user, 2026-10-28):** at the brief "Go ahead and start the session with your recommendations" (D-1 the screens spec fixes the briefing hour; D-2 staff tones on the calendar now, the Team picker in S42.2); then "do all the work including PR and merge". **Claude:** tones by place among active staff, not the stored colour; 88 px an hour; the review's 4 fixes. Full wording in [decisions.md](decisions.md).
@@ -61,11 +62,11 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S42.3, M1–M2 and P1 are done (Phases 0–8, the re-plan, and Phase 9's direction, foundation, shell and every signed-in screen on the kit). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S43, M1–M2 and P1 are done (Phases 0–8, the re-plan, and Phase 9's direction, foundation, shell, every signed-in screen and the public pages on the kit). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S43 | Public pages + auth on the kit, legacy stylesheet deleted, UX copy pass, **Phase 9 gate** | 9 | Scorecard C3, C4, C10 ≥ 8 |
+| S43.2 | Auth (sign-in, sign-up, MFA, create business, invite) on the kit, legacy stylesheet and aliases deleted, UX copy pass, **Phase 9 gate** | 9 | Scorecard C3, C4, C10 ≥ 8 |
 | S44 | Password reset, email verification, change email; `add_to_waitlist` window check in the domain | 10 | Journeys + domain tests green |
 | S45 | Business type at signup → pre-filled menu and hours; US zones first; activation events | 10 | A barber business bookable with zero typing |
 | S46 | Setup checklist + warnings; staff without hours hidden; first free day; plain zone names | 10 | Review UX #1–#5 closed with tests |

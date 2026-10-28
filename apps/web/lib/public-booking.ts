@@ -87,6 +87,27 @@ export function serviceOf(
   return business.services.find((service) => service.id === serviceId);
 }
 
+/**
+ * The business's clock in words for its clients (DESIGN.md §6, no zone ids): its city
+ * (`America/Los_Angeles` → "Los Angeles time"), "UTC", or an offset zone by its offset
+ * ("GMT-5": Etc's own names invert the sign).
+ */
+export function localTimeLabel(timeZone: string): string {
+  if (
+    ['UTC', 'GMT', 'Etc/UTC', 'Etc/GMT', 'Etc/UCT', 'Etc/Universal', 'Etc/Zulu'].includes(timeZone)
+  ) {
+    return 'UTC';
+  }
+  if (timeZone.startsWith('Etc/') || !timeZone.includes('/')) {
+    const offset = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' })
+      .formatToParts(0)
+      .find((part) => part.type === 'timeZoneName')?.value;
+    return offset ?? timeZone;
+  }
+  const city = timeZone.split('/').at(-1)?.replaceAll('_', ' ') ?? timeZone;
+  return `${city} time`;
+}
+
 /** Up to two initials of a name: `Juniper Hair Studio` → `JH`. */
 export function initials(name: string): string {
   return name

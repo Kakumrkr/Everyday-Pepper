@@ -8,11 +8,27 @@ import {
   type AutonomyLevel,
   type BusinessAutonomy,
 } from '@pepper/contracts';
-import { AUTONOMY_GROUPS, cx, DIAL_LABEL, Icon, LEVEL_HELP, LEVEL_LABEL, Switch } from '@pepper/ui';
+import {
+  AUTONOMY_GROUPS,
+  cx,
+  DIAL_LABEL,
+  Icon,
+  LEVEL_HELP,
+  LEVEL_LABEL,
+  Switch,
+  Toast,
+} from '@pepper/ui';
 import { useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 
 const LEVELS = AutonomyLevelSchema.options;
+
+/** The toast after a change; `id` makes a second save show a fresh one. */
+interface SaveNote {
+  id: number;
+  text: string;
+  tone: 'note' | 'error';
+}
 
 /**
  * The autonomy dial (S26, ADR-0028; Microsoft HAX G17: global controls): what Pepper may do on
@@ -21,6 +37,7 @@ const LEVELS = AutonomyLevelSchema.options;
  * shows why. "Ask me first for everything" overrides the rest while on. Owners and managers
  * change it (the api checks); everyone else sees it read-only. On the kit since S42.3: the
  * kit Switch (its whole row one 44 px target) and each group's actions as quiet hairline rows.
+ * Each save is confirmed by a kit Toast (S43), in view on a phone wherever the change was made.
  */
 export function AutonomySettings({
   initial,
@@ -30,7 +47,7 @@ export function AutonomySettings({
   canChange: boolean;
 }) {
   const [autonomy, setAutonomy] = useState(initial);
-  const [saved, setSaved] = useState('');
+  const [note, setNote] = useState<SaveNote | null>(null);
   const [busy, setBusy] = useState(false);
 
   /** Shows the change at once, saves it, and puts it back if the save is refused. */
@@ -43,10 +60,11 @@ export function AutonomySettings({
     const parsed = answer.ok ? BusinessAutonomySchema.safeParse(answer.data) : null;
     if (parsed?.success === true) {
       setAutonomy(parsed.data);
-      setSaved(done);
+      setNote((last) => ({ id: (last?.id ?? 0) + 1, text: done, tone: 'note' }));
     } else {
       setAutonomy(before);
-      setSaved(answer.ok ? 'Something went wrong. Nothing changed.' : answer.message);
+      const text = answer.ok ? 'Something went wrong. Nothing changed.' : answer.message;
+      setNote((last) => ({ id: (last?.id ?? 0) + 1, text, tone: 'error' }));
     }
   }
 
@@ -108,9 +126,17 @@ export function AutonomySettings({
           </ul>
         </section>
       ))}
-      <p role="status" className="m-0 min-h-5 type-label text-ink">
-        {saved}
-      </p>
+      {note === null ? null : (
+        <Toast
+          key={note.id}
+          open
+          tone={note.tone}
+          title={note.text}
+          onOpenChange={(open) => {
+            if (!open) setNote(null);
+          }}
+        />
+      )}
     </div>
   );
 }

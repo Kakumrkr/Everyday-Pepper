@@ -3,6 +3,7 @@ import {
   checkDetails,
   confirmProblem,
   initials,
+  localTimeLabel,
   managePath,
   publicApiPath,
   publicAvailabilityPath,
@@ -82,6 +83,17 @@ describe('the page data', () => {
     expect(serviceOf(BUSINESS, 's1')?.name).toBe('Cut');
     expect(serviceOf(BUSINESS, null)).toBeUndefined();
     expect(staffFor(BUSINESS, 's1').map((s) => s.displayName)).toEqual(['Jess']);
+  });
+
+  it('names the business clock by its city, never by its zone id', () => {
+    expect(localTimeLabel('America/Chicago')).toBe('Chicago time');
+    expect(localTimeLabel('America/Los_Angeles')).toBe('Los Angeles time');
+    expect(localTimeLabel('America/Argentina/Buenos_Aires')).toBe('Buenos Aires time');
+    expect(localTimeLabel('UTC')).toBe('UTC');
+    expect(localTimeLabel('Etc/UTC')).toBe('UTC');
+    expect(localTimeLabel('GMT')).toBe('UTC');
+    // An offset zone by its offset (Etc's signs are inverted: Etc/GMT+5 is five hours behind).
+    expect(localTimeLabel('Etc/GMT+5')).toBe('GMT-5');
   });
 
   it('makes initials of a business name', () => {

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-// Two small form parts: `Field` for the screens not yet on the kit's fields (the public pages
-// and task cards, until S43), and `Notice`, the error or result line every screen shows. The
-// kit's Sheet replaced the sheet that lived beside them (S42.2).
+// Two small form parts: `Field` for the forms not yet on the kit's fields (task cards, the
+// clients search; S43.2), and `Notice`, the error or result line every screen shows. The kit's
+// Sheet replaced the sheet that lived beside them (S42.2).
 
 /** A form field: a label above its control, with an optional hint. */
 export function Field({
