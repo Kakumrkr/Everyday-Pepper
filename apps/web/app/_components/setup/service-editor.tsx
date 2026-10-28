@@ -148,7 +148,7 @@ function ServiceForm({
         required
         defaultValue={service?.durationMinutes ?? 60}
       />
-      <div className="grid grid-cols-2 items-start gap-3">
+      <div className="grid grid-cols-2 items-end gap-3">
         <Input
           label="Price from ($)"
           name="priceFrom"
@@ -165,7 +165,7 @@ function ServiceForm({
           defaultValue={textFromCents(service?.priceToCents ?? null)}
         />
       </div>
-      <div className="grid grid-cols-2 items-start gap-3">
+      <div className="grid grid-cols-2 items-end gap-3">
         <Input
           label="Prep before (min)"
           name="bufferBefore"

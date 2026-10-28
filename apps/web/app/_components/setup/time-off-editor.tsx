@@ -115,7 +115,7 @@ export function TimeOffEditor({
               setMessage(null);
             }}
           />
-          <div className="grid grid-cols-2 items-start gap-3">
+          <div className="grid grid-cols-2 items-end gap-3">
             <Input
               label={partOfDay ? 'Day' : 'First day'}
               type="date"

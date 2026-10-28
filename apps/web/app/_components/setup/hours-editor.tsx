@@ -203,7 +203,7 @@ function TimeSelect({
       aria-label={label}
       value={value}
       disabled={disabled}
-      className={cx(fieldStyle, 'min-h-11 min-w-0 px-3 tabular-nums')}
+      className={cx(fieldStyle, 'min-h-11 min-w-0 appearance-none px-2 text-center tabular-nums')}
       onChange={(event) => {
         onChange(event.target.value);
       }}

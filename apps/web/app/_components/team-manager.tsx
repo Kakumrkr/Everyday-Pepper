@@ -100,10 +100,14 @@ function MemberRow({
   const path = `/v1/members/${member.userId}`;
   return (
     <li className={ROW} data-testid="member">
-      <div className="min-w-0 [overflow-wrap:anywhere]">
-        <span className="type-body font-semibold text-ink">{member.name}</span>
+      <div className="min-w-0 flex-1 basis-40">
+        <span className="type-body font-semibold [overflow-wrap:anywhere] text-ink">
+          {member.name}
+        </span>
         {isMe ? <span className="type-caption text-ink-2"> (you)</span> : null}
-        <span className="block type-caption text-ink-2">{member.email}</span>
+        <span className="block truncate type-caption text-ink-2" title={member.email}>
+          {member.email}
+        </span>
       </div>
       {editable ? (
         <div className="flex flex-wrap items-center gap-2">

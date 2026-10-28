@@ -18,7 +18,9 @@ import { expectTapTargets } from './tap-targets.js';
 // unless the PR updates the baseline, ADR-0044). Home, Chat and More are a new owner's, so every
 // list shows its empty state; Calendar and Clients have the S39 mockups' shop on a day a week
 // ahead (its date, which moves, is masked). Names are the same every run; the email (unique per
-// run) is masked. At 375 px each S42 screen also has its tap targets checked (AC-X-6).
+// run) is masked. At 375 px each S42 screen also has its tap targets checked (AC-X-6). S42.2 adds
+// Services, Team, a staff member's page and the booking sheets (AC-X-9), and at 375 px the open
+// sheets' tap targets and their main action at the bottom of the phone, in the sheet's footer.
 //
 // Update the baselines after a deliberate change, on Linux with CI's browser:
 //   pnpm --filter @pepper/e2e exec playwright test screens --project=desktop --update-snapshots
@@ -133,7 +135,9 @@ async function post<T>(
 }
 
 /** Southside Cuts' day a week ahead (the S39 mockups): Dre and Randy at work 9–6, four bookings. */
-async function southsideDay(page: Page): Promise<{ date: string; marcus: string; audy: string }> {
+async function southsideDay(
+  page: Page,
+): Promise<{ date: string; marcus: string; audy: string; dre: string }> {
   const { business } = CurrentBusinessResponseSchema.parse(
     await (await page.request.get('/v1/tenant')).json(),
   );
@@ -209,7 +213,7 @@ async function southsideDay(page: Page): Promise<{ date: string; marcus: string;
       { parse: (body: unknown) => body },
     );
   }
-  return { date: formatDate(day), marcus: marcus.id, audy: audy.id };
+  return { date: formatDate(day), marcus: marcus.id, audy: audy.id, dre: dre.id };
 }
 
 for (const width of WIDTHS) {
@@ -253,6 +257,111 @@ for (const width of WIDTHS) {
         ...SHOT,
         mask: [page.getByTestId('upcoming-visits').locator('p').first()],
       });
+    }
+  });
+}
+
+/** The open sheet's main action: in its footer, at the bottom of the phone (D3, AC-X-9). */
+async function expectActionAtTheBottom(page: Page, name: string): Promise<void> {
+  // Measured once the sheet has slid in.
+  await page
+    .getByRole('dialog')
+    .evaluate((sheet) => Promise.all(sheet.getAnimations().map((motion) => motion.finished)));
+  const action = page
+    .getByRole('dialog')
+    .locator('[data-slot="sheet-footer"]')
+    .getByRole('button', { name, exact: true });
+  const box = await action.boundingBox();
+  const height = page.viewportSize()?.height ?? 0;
+  expect(box, `${name} in the sheet's footer`).not.toBeNull();
+  if (box === null) return;
+  expect(box.y + box.height, `${name} near the bottom`).toBeGreaterThan(height - 120);
+  expect(box.y + box.height, `${name} on the screen`).toBeLessThanOrEqual(height);
+}
+
+for (const width of WIDTHS) {
+  test(`Services, Team, a staff member and the booking sheets at ${String(width)} px, light and dark`, async ({
+    page,
+  }) => {
+    test.setTimeout(240_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const { date, dre } = await southsideDay(page);
+    const dialog = page.getByRole('dialog');
+
+    if (width === 375) {
+      // AC-X-6 at 375 px: the screens, then each sheet open with its action in thumb reach.
+      for (const path of ['/services', '/services/rules', '/team', `/team/${dre}`]) {
+        await page.goto(path);
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+        await expectTapTargets(page, path);
+      }
+      const sheets = [
+        { path: '/services', open: 'Add service', action: 'Add service' },
+        { path: '/services', open: 'Edit Skin fade', action: 'Save' },
+        { path: '/team', open: 'Add staff member', action: 'Add' },
+        { path: `/calendar?date=${date}`, open: 'New booking', action: 'Book' },
+      ];
+      for (const { path, open, action } of sheets) {
+        await page.goto(path);
+        await (await hydrated(page.getByRole('button', { name: open, exact: true }))).click();
+        await expect(dialog).toBeVisible();
+        await expectActionAtTheBottom(page, action);
+        await expectTapTargets(page, `the ${open} sheet`);
+        await page.keyboard.press('Escape');
+        await expect(dialog).toBeHidden();
+      }
+      await page.goto(`/calendar?date=${date}`);
+      await (await hydrated(page.getByTestId('booking-block').first())).click();
+      await expectActionAtTheBottom(page, 'Move');
+      await expectTapTargets(page, 'the booking sheet');
+    }
+
+    for (const scheme of SCHEMES) {
+      await page.goto('/services');
+      await expect(page.getByTestId('service')).toHaveCount(2);
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`services-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        mask: [page.getByRole('link', { name: /^\/book\// })],
+      });
+
+      await page.goto('/team');
+      await expect(page.getByTestId('staff-member')).toHaveCount(2);
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`team-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        mask: [page.getByTestId('members').getByText(/@example\.test$/)],
+      });
+
+      await page.goto(`/team/${dre}`);
+      await expect(page.getByRole('heading', { name: 'Dre', level: 1 })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Save hours' })).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`staff-${String(width)}-${scheme}.png`, SHOT);
+
+      // The booking sheet (Marcus at 9:30 with Dre) and the new-booking sheet, on the screen.
+      await page.goto(`/calendar?date=${date}`);
+      await (await hydrated(page.getByTestId('booking-block').first())).click();
+      await expect(dialog.getByTestId('booking-status')).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`booking-sheet-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        fullPage: false,
+        mask: [dialog.locator('dd').first(), page.getByTestId('calendar-day')],
+      });
+      await page.keyboard.press('Escape');
+      await (
+        await hydrated(page.getByRole('button', { name: 'New booking', exact: true }))
+      ).click();
+      await expect(dialog.getByTestId('free-times')).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`new-booking-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        fullPage: false,
+        mask: [dialog.getByLabel('Day', { exact: true }), page.getByTestId('calendar-day')],
+      });
+      await page.keyboard.press('Escape');
     }
   });
 }
