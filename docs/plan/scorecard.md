@@ -13,14 +13,14 @@ The fifteen categories Pepper is judged by, from the launch-readiness review of 
 |---|---|---|---|---|---|---|
 | C1 | Core usefulness | 5 | 5 | 8 | 9 | An owner runs the whole week in Pepper (book, remind, deposit, fill, report) and never opens another tool |
 | C2 | Realism and completeness | 4 | 4 | 8 | 9 | A new business looks fully real in 10 minutes: menu, prices, hours, photos, contact, policy |
-| C3 | Friendly UX | 6 | 6 | 9 | 9 | No dead ends, no jargon; every screen has one clear next step; owners describe it as "easy" without prompting |
-| C4 | Mobile usability | 6 | 6 | 9 | 9 | Every flow done one-thumbed at 375 px in under 90 seconds; screenshot tests at 3 widths × 2 themes |
+| C3 | Friendly UX | 6 | 8 | 9 | 9 | No dead ends, no jargon; every screen has one clear next step; owners describe it as "easy" without prompting |
+| C4 | Mobile usability | 6 | 8 | 9 | 9 | Every flow done one-thumbed at 375 px in under 90 seconds; screenshot tests at 3 widths × 2 themes |
 | C5 | Owner experience | 5 | 5 | 8 | 9 | The day's work is a card board of one-tap decisions ranked by dollars; the trust controls are easy to find |
 | C6 | Staff experience | 4 | 4 | 7 | 9 | Staff see their day and week, add walk-ins, and their personal calendar blocks bookings |
 | C7 | Customer booking | 5 | 5 | 8 | 9 | Booking in < 60 s on a phone; contact details, policy and the business's brand on the page; drop-off ≤ 15% at any step |
 | C8 | AI trust and safety | 8 | 8 | 9 | 10 | 100% pass^3 on the safety sets; every action explained and undoable; the owner can see exactly what Pepper said to whom |
 | C9 | Reliability | 6 | 6 | 8 | 9 | Deployed, monitored, backed up with a passed restore drill, SLOs met under load, 30 days with no unseen error |
-| C10 | Accessibility | 6 | 6 | 8 | 9 | WCAG 2.2 AA on every screen, axe clean, the manual screen-reader check passed, reduced motion honoured |
+| C10 | Accessibility | 6 | 8 | 8 | 9 | WCAG 2.2 AA on every screen, axe clean, the manual screen-reader check passed, reduced motion honoured |
 | C11 | Security and privacy | 6 | 6 | 9 | 9 | Recovery, verification, MFA, export, deletion, terms and privacy policy; no open high finding; zero data retention on the production AI project |
 | C12 | Market competitiveness | 3 | 3 | 6 | 9 | Everything owners rely on daily (SMS, deposits, week view, sync, reports) plus the Pepper-only features |
 | C13 | Switching value | 2 | 2 | 8 | 9 | "We move you": an import from any of the five tools with history, in minutes, undoable |
@@ -33,7 +33,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 
 | Phase exit | Categories that must reach the number |
 |---|---|
-| 9 · New look (S43) | C3 8 · C4 8 · C10 8 |
+| 9 · New look (S43.2) | C3 8 · C4 8 · C10 8 (met, S43.2: §5) |
 | 10 · First 10 minutes (S47) | C1 6 · C2 6 · C5 7 · C7 7 |
 | 11 · Switching + privacy (S51) | C13 8 · C11 8 |
 | 12 · The employee (S56b) | C1 8 · C5 8 · C8 9 |
@@ -69,3 +69,13 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | Date | Session | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 | C9 | C10 | C11 | C12 | C13 | C14 | C15 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 2026-10-25 | Review (S38b) | 5 | 4 | 6 | 6 | 5 | 4 | 5 | 8 | 6 | 6 | 6 | 3 | 2 | 3 | 1 |
+| 2026-10-28 | Phase 9 gate (S43.2) | 5 | 4 | 8 | 8 | 5 | 4 | 5 | 8 | 6 | 8 | 6 | 3 | 2 | 3 | 1 |
+
+## 5. Phase 9 gate (S43.2, 2026-10-28): the evidence
+
+Scored by Claude in S43.2 from the tests and baselines below; only C3, C4 and C10 were scored, the rest carry over.
+
+- **C3 Friendly UX 6 → 8.** Every screen is on the kit (ADR-0044: shell, Home, Chat, cards S41; Calendar, Clients S42; sheets, Services, Team S42.2; Autonomy, What I know, Waitlist S42.3; public pages S43; account screens S43.2), so no screen uses the stylesheet from before it (AC-X-12). Every empty screen offers its next step (AC-X-8–10), a cancelled booking offers "Book again" (S43), and errors say what to do (copy pass, `apps/web/lib/client-api.ts`). Not yet 9: Team and Services empty show two primary buttons and a staff page has two (S42.2 gaps); the staff page still names the zone id (S46); no owner has used it yet (the pilot).
+- **C4 Mobile usability 6 → 8.** Screenshot baselines at 375 / 412 / 1280 px × light / dark for every screen (`e2e/tests/screens.spec.ts`, `gallery.spec.ts`); tap targets ≥ 44 px on every screen at 375 px (`tap-targets.ts`); the main action at the bottom of the phone on every sheet, the booking page and the account screens (`expectStickyAtTheBottom`); no sideways scroll checks. Not yet 9: no timed one-thumb run of every flow, no real-phone check (before the pilot).
+- **C10 Accessibility 6 → 8.** axe (WCAG 2.2 A/AA) finds nothing serious on every signed-in, public and account screen, light and dark, phone and desktop (`e2e/tests/accessibility.spec.ts`); contrast pairs and reduced-motion tokens tested (`packages/ui/src/theme.test.ts`); visible labels with hints and errors tied to the field (kit `Input`); keyboard journeys in the specs. Not yet 9: the manual VoiceOver/NVDA check (STATUS "Waiting on the user" 4, before S60).
+

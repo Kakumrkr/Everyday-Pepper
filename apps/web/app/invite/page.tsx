@@ -13,10 +13,5 @@ export const metadata: Metadata = { title: 'Join a business · Pepper' };
 export default async function InvitePage() {
   const account = await currentAccount();
   if (account.state === 'unavailable') return <Unavailable />;
-  return (
-    <main>
-      <h1 className="wordmark">pepper</h1>
-      <InviteAcceptance email={account.state === 'signed-in' ? account.me.user.email : null} />
-    </main>
-  );
+  return <InviteAcceptance email={account.state === 'signed-in' ? account.me.user.email : null} />;
 }

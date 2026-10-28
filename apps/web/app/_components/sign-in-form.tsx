@@ -1,19 +1,27 @@
 'use client';
 
-import Link from 'next/link';
-import { useState, type SubmitEvent } from 'react';
+import { Button, Input } from '@pepper/ui';
+import { useId, useState, type ReactNode, type SubmitEvent } from 'react';
 import { sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
 import { ROUTES, withNext } from '../../lib/account';
-import { FormError } from './form-error';
+import { AuthPage, TextLink } from './auth-page';
+import { Notice } from './form-parts';
 
 type Step = 'credentials' | 'code' | 'backup-code';
 
 /**
  * Email and password, then (if set up) the authenticator code or a backup code; then `next`
- * (an allowed page, see `safeNext`) or home.
+ * (an allowed page, see `safeNext`) or home. `status` says when Pepper can't be reached.
  */
-export function SignInForm({ next = null }: { next?: string | null }) {
+export function SignInForm({
+  next = null,
+  status = null,
+}: {
+  next?: string | null;
+  status?: ReactNode;
+}) {
+  const formId = useId();
   const [step, setStep] = useState<Step>('credentials');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -51,61 +59,85 @@ export function SignInForm({ next = null }: { next?: string | null }) {
     window.location.assign(next ?? ROUTES.home);
   }
 
+  const errorLine = error === null ? null : <Notice tone="error">{error}</Notice>;
+
   if (step === 'credentials') {
     return (
-      <form className="form" onSubmit={(event) => void submit(event)} noValidate>
-        <label>
-          Email
-          <input name="email" type="email" autoComplete="email" required />
-        </label>
-        <label>
-          Password
-          <input name="password" type="password" autoComplete="current-password" required />
-        </label>
-        <FormError message={error} />
-        <button type="submit" disabled={busy}>
-          Sign in
-        </button>
-        <p className="hint">
-          New to Pepper? <Link href={withNext(ROUTES.signUp, next)}>Create an account</Link>
+      <AuthPage
+        title="Sign in"
+        lead="Welcome back. Sign in to see your day."
+        action={
+          <Button type="submit" form={formId} size="lg" block busy={busy}>
+            {busy ? 'Signing in…' : 'Sign in'}
+          </Button>
+        }
+      >
+        {status}
+        <form
+          id={formId}
+          className="flex flex-col gap-4"
+          onSubmit={(event) => void submit(event)}
+          noValidate
+        >
+          <Input label="Email" name="email" type="email" autoComplete="email" required />
+          <Input
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+          />
+          {errorLine}
+        </form>
+        <p className="m-0 type-body text-ink-2">
+          New to Pepper? <TextLink href={withNext(ROUTES.signUp, next)}>Create an account</TextLink>
         </p>
-      </form>
+      </AuthPage>
     );
   }
 
   const backup = step === 'backup-code';
   return (
-    <form className="form" onSubmit={(event) => void submit(event)} noValidate key={step}>
-      <h2>Two-step verification</h2>
-      <p className="hint">
-        {backup
-          ? 'Enter one of the backup codes you saved.'
-          : 'Enter the 6-digit code from your authenticator app.'}
-      </p>
-      <label>
-        {backup ? 'Backup code' : 'Code'}
-        <input
+    <AuthPage
+      key={step}
+      title="Two-step verification"
+      lead={
+        backup
+          ? 'Enter one of the backup codes you saved when you turned this on.'
+          : 'Enter the 6-digit code your authenticator app shows for Pepper.'
+      }
+      action={
+        <Button type="submit" form={formId} size="lg" block busy={busy}>
+          {busy ? 'Checking…' : 'Verify'}
+        </Button>
+      }
+    >
+      <form
+        id={formId}
+        className="flex flex-col gap-4"
+        onSubmit={(event) => void submit(event)}
+        noValidate
+      >
+        <Input
+          label={backup ? 'Backup code' : 'Code'}
           name="code"
           inputMode={backup ? 'text' : 'numeric'}
           autoComplete="one-time-code"
           required
           autoFocus
         />
-      </label>
-      <FormError message={error} />
-      <button type="submit" disabled={busy}>
-        Verify
-      </button>
-      <button
-        type="button"
-        className="link-button"
+        {errorLine}
+      </form>
+      <Button
+        variant="quiet"
+        className="self-start"
         onClick={() => {
           setError(null);
           setStep(backup ? 'code' : 'backup-code');
         }}
       >
         {backup ? 'Use the authenticator app instead' : 'Use a backup code instead'}
-      </button>
-    </form>
+      </Button>
+    </AuthPage>
   );
 }

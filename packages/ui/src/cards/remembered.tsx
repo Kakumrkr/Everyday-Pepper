@@ -2,7 +2,8 @@
 
 import { MEMORY_LIMITS, type MemoryFactShown } from '@pepper/contracts';
 import { useId, useState, type SubmitEvent } from 'react';
-import { chipClass, cx } from '../class-names.js';
+import { cx } from '../class-names.js';
+import { chipStyle } from '../kit/blocks.js';
 import { buttonStyle } from '../kit/button.js';
 import { fieldStyle } from '../kit/fields.js';
 import { Icon } from '../icons.js';
@@ -47,9 +48,9 @@ export function Remembered({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onToggle}
-        className={chipClass({ selected: open, className: 'self-start' })}
+        className={cx(chipStyle(open), 'inline-flex items-center gap-2 self-start')}
       >
-        <Icon name="memory" className="text-brand" />
+        <Icon name="memory" className={open ? undefined : 'text-brand'} />
         Remembered{count > 1 ? ` · ${String(count)}` : ''}
       </button>
       {open ? (

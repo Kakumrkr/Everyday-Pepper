@@ -90,9 +90,9 @@ export function serviceOf(
 /**
  * The business's clock in words for its clients (DESIGN.md §6, no zone ids): its city
  * (`America/Los_Angeles` → "Los Angeles time"), "UTC", or an offset zone by its offset
- * ("GMT-5": Etc's own names invert the sign).
+ * ("GMT-5": Etc's own names invert the sign), the offset in force `at` that moment (now).
  */
-export function localTimeLabel(timeZone: string): string {
+export function localTimeLabel(timeZone: string, at: number = Date.now()): string {
   if (
     ['UTC', 'GMT', 'Etc/UTC', 'Etc/GMT', 'Etc/UCT', 'Etc/Universal', 'Etc/Zulu'].includes(timeZone)
   ) {
@@ -100,7 +100,7 @@ export function localTimeLabel(timeZone: string): string {
   }
   if (timeZone.startsWith('Etc/') || !timeZone.includes('/')) {
     const offset = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' })
-      .formatToParts(0)
+      .formatToParts(at)
       .find((part) => part.type === 'timeZoneName')?.value;
     return offset ?? timeZone;
   }

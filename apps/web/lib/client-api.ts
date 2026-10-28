@@ -11,16 +11,17 @@ const ErrorBodySchema = z.object({ code: z.string().optional(), message: z.strin
 
 // Better Auth codes and our own (ApiErrorCodeSchema), in words a business owner understands.
 const MESSAGES: Record<string, string> = {
-  INVALID_EMAIL_OR_PASSWORD: 'That email and password don’t match.',
+  INVALID_EMAIL_OR_PASSWORD: 'That email and password don’t match. Check both and try again.',
   INVALID_EMAIL: 'Enter a valid email address.',
   USER_ALREADY_EXISTS: 'An account with this email already exists. Sign in instead.',
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
     'An account with this email already exists. Sign in instead.',
   PASSWORD_TOO_SHORT: 'Use a password of at least 10 characters.',
   PASSWORD_TOO_LONG: 'Use a password of at most 128 characters.',
-  INVALID_PASSWORD: 'That password isn’t right.',
+  INVALID_PASSWORD: 'That password isn’t right. Try again.',
   INVALID_CODE: 'That code didn’t work. Check your authenticator app and try again.',
-  INVALID_BACKUP_CODE: 'That backup code didn’t work.',
+  INVALID_BACKUP_CODE:
+    'That backup code didn’t work. Check it, or use your authenticator app instead.',
   INVALID_TWO_FACTOR_COOKIE: 'Your sign-in timed out. Start again.',
   ACCOUNT_TEMPORARILY_LOCKED: 'Too many wrong codes. Try again in 15 minutes.',
   slug_taken: 'That booking link is taken. Try another.',
@@ -45,7 +46,7 @@ const MESSAGES: Record<string, string> = {
   client_not_found: 'I couldn’t find that client.',
   client_email_taken: 'A client with this email already exists. Search for them instead.',
   booking_not_found: 'That booking is gone, or it isn’t yours to change.',
-  slot_unavailable: 'That time can’t be booked.',
+  slot_unavailable: 'That time can’t be booked. Pick another time.',
   booking_not_changeable: 'This booking can’t be changed any more.',
   booking_not_started: 'Mark it done or a no-show once it has started.',
   waitlist_expired: 'Those times have already passed.',

@@ -56,7 +56,7 @@ export function ClientDirectory({
           void search(formText(event.currentTarget, 'search').trim());
         }}
       >
-        <label className="visually-hidden" htmlFor="client-search">
+        <label className="sr-only" htmlFor="client-search">
           Search clients by name or email
         </label>
         <input

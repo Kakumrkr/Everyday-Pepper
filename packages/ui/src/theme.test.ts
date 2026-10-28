@@ -4,7 +4,6 @@ import {
   COLORS,
   DESKTOP_MIN_WIDTH,
   ELEVATION,
-  LEGACY_ALIASES,
   MIN_NON_TEXT_CONTRAST,
   MIN_TEXT_CONTRAST,
   MOTION,
@@ -57,10 +56,9 @@ describe('theme.css', () => {
     }
   });
 
-  it('maps each name screens built before S40 use onto its new token', () => {
-    for (const [alias, token] of Object.entries(LEGACY_ALIASES)) {
-      expect(css).toMatch(new RegExp(`--color-${alias}: [^;]*var\\(--${token}\\)[^;]*;`));
-      expect(alias in COLORS, alias).toBe(false);
+  it('has none of the names screens used before the kit (deleted in S43.2)', () => {
+    for (const name of ['on-brand', 'brand-strong', 'on-accent', 'wait', 'wait-soft']) {
+      expect(css).not.toContain(`--color-${name}:`);
     }
   });
 

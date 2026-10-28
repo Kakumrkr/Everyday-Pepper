@@ -139,3 +139,27 @@ export function requiredStep(account: Account): string | null {
   }
   return null;
 }
+
+export type SignUpField = 'name' | 'email' | 'password';
+
+/**
+ * The sign-up form checked in the browser (S43.2), so an empty or short field says what it needs
+ * under itself; the api checks again. Empty when the form can be sent.
+ */
+export function checkSignUp(
+  form: Record<SignUpField, string>,
+): Partial<Record<SignUpField, string>> {
+  const errors: Partial<Record<SignUpField, string>> = {};
+  const name = form.name.trim();
+  if (name === '' || name.length > 120) {
+    errors.name = 'Enter your name, as your team and clients will see it.';
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+    errors.email = 'Enter your email. You’ll sign in with it.';
+  }
+  if (form.password.length < 10) errors.password = 'Use a password of at least 10 characters.';
+  else if (form.password.length > 128) {
+    errors.password = 'Use a password of at most 128 characters.';
+  }
+  return errors;
+}

@@ -33,20 +33,6 @@ export const COLORS = {
 
 export type ColorToken = keyof typeof COLORS;
 
-/**
- * The names screens built before S40 use, mapped onto the new tokens (ADR-0044; DESIGN.md §3).
- * Tailwind classes only (`text-on-brand`, `bg-wait-soft`, …): S41–S43 move the screens onto the
- * kit and S43 deletes these.
- */
-export const LEGACY_ALIASES = {
-  'on-brand': 'brand-ink',
-  // Mixed toward `ink` in theme.css, so legacy hover and pressed states still show.
-  'brand-strong': 'brand',
-  'on-accent': 'accent-ink',
-  wait: 'warn',
-  'wait-soft': 'warn-soft',
-} as const satisfies Record<string, ColorToken>;
-
 /** The dimmed backdrop behind sheets and dialogs: [light, dark]. */
 export const SCRIM = ['rgba(42, 31, 38, 0.45)', 'rgba(0, 0, 0, 0.6)'] as const;
 

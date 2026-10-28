@@ -13,10 +13,5 @@ export default async function TwoFactorPage() {
   if (account.state === 'signed-out') redirect(ROUTES.signIn);
   if (account.state === 'unavailable') return <Unavailable />;
   if (account.me.user.twoFactorEnabled) redirect(ROUTES.home);
-  return (
-    <main>
-      <h1>Protect your business</h1>
-      <TwoFactorSetup />
-    </main>
-  );
+  return <TwoFactorSetup />;
 }

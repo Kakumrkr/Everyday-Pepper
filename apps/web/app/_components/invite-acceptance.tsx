@@ -1,13 +1,15 @@
 'use client';
 
 import type { AcceptInviteResponse, InvitePreviewResponse, InviteToken } from '@pepper/contracts';
+import { Button, buttonStyle } from '@pepper/ui';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ROUTES, withNext } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
 import { INVITE_TOKEN_KEY, inviteTokenFromHash } from '../../lib/invite';
 import { SignOutButton } from './account-actions';
-import { FormError } from './form-error';
+import { AuthPage, TextLink } from './auth-page';
+import { Notice } from './form-parts';
 
 type State =
   | { step: 'reading' }
@@ -89,60 +91,81 @@ export function InviteAcceptance({ email }: { email: string | null }) {
     window.location.assign(ROUTES.home);
   }
 
+  const mainLink = (href: string, label: string) => (
+    <Link href={href} className={buttonStyle({ size: 'lg', block: true })}>
+      {label}
+    </Link>
+  );
+
   switch (state.step) {
     case 'reading':
     case 'looking-up':
-      return <p className="tagline">Opening your invite…</p>;
+      return (
+        <AuthPage title="Join a business" lead={<span role="status">Opening your invite…</span>} />
+      );
     case 'no-token':
       return (
-        <p className="tagline" role="alert">
-          This invite link is incomplete. Open the link from your invite again.
-        </p>
+        <AuthPage
+          title="We can’t open this invite"
+          lead={
+            <span role="alert">
+              This invite link is incomplete. Open the link from your invite email again.
+            </span>
+          }
+        />
       );
     case 'signed-out':
       return (
-        <section aria-labelledby="invite-heading" className="form">
-          <h2 id="invite-heading">You’re invited to join a business on Pepper</h2>
-          <p className="hint">
-            Create an account or sign in with the email address the invite was sent to.
+        <AuthPage
+          title="You’re invited to join a business on Pepper"
+          lead="Create an account or sign in with the email address the invite was sent to."
+          action={mainLink(withNext(ROUTES.signUp, ROUTES.invite), 'Create an account')}
+        >
+          <p className="m-0 type-body text-ink-2">
+            Already have an account?{' '}
+            <TextLink href={withNext(ROUTES.signIn, ROUTES.invite)}>Sign in</TextLink>
           </p>
-          <Link className="button" href={withNext(ROUTES.signUp, ROUTES.invite)}>
-            Create an account
-          </Link>
-          <Link className="button secondary" href={withNext(ROUTES.signIn, ROUTES.invite)}>
-            Sign in
-          </Link>
-        </section>
+        </AuthPage>
       );
     case 'failed':
       return (
-        <section aria-labelledby="invite-heading" className="form">
-          <h2 id="invite-heading">This invite can’t be used</h2>
-          <FormError message={state.message} />
+        <AuthPage
+          title="This invite can’t be used"
+          action={
+            state.wrongAccount ? (
+              <SignOutButton next={ROUTES.invite} label="Sign in with another email" main />
+            ) : (
+              mainLink(ROUTES.home, 'Go to Pepper')
+            )
+          }
+        >
+          <Notice tone="error">{state.message}</Notice>
           {state.wrongAccount ? (
-            <>
-              <p className="hint">You’re signed in as {email}.</p>
-              <SignOutButton next={ROUTES.invite} label="Sign in with another email" />
-            </>
-          ) : (
-            <Link href={ROUTES.home}>Go to Pepper</Link>
-          )}
-        </section>
+            <p className="m-0 type-body text-ink-2">
+              You’re signed in as <b className="text-ink">{email}</b>.
+            </p>
+          ) : null}
+        </AuthPage>
       );
     case 'ready': {
       const { preview, token } = state;
       return (
-        <section aria-labelledby="invite-heading" className="form">
-          <h2 id="invite-heading">Join {preview.businessName}</h2>
-          <p className="hint">
-            You’ve been invited to join <strong>{preview.businessName}</strong> as{' '}
-            <span data-testid="invite-role">{ROLE_NAMES[preview.role]}</span>.
-          </p>
-          <FormError message={error} />
-          <button type="button" disabled={busy} onClick={() => void join(token)}>
-            Join {preview.businessName}
-          </button>
-        </section>
+        <AuthPage
+          title={`Join ${preview.businessName}`}
+          lead={
+            <>
+              You’ve been invited to join <b className="text-ink">{preview.businessName}</b> as{' '}
+              <span data-testid="invite-role">{ROLE_NAMES[preview.role]}</span>.
+            </>
+          }
+          action={
+            <Button size="lg" block busy={busy} onClick={() => void join(token)}>
+              Join {preview.businessName}
+            </Button>
+          }
+        >
+          {error === null ? null : <Notice tone="error">{error}</Notice>}
+        </AuthPage>
       );
     }
   }

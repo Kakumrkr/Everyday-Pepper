@@ -12,9 +12,14 @@ import {
   anotherPerson,
   callApi,
   emailTo,
+  enterPassword,
+  freshCode,
   hydrated,
   onboardOwner,
   ownClientAddress,
+  PASSWORD,
+  signOut,
+  signUp,
   unique,
 } from './helpers.js';
 
@@ -158,6 +163,48 @@ test('the signed-in screens have no serious accessibility violations', async ({ 
     await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
     await expectAccessible(page, screen);
   }
+});
+
+// S43.2 (AC-X-12): every account screen a new owner meets, on the kit.
+test('the account screens have no serious accessibility violations', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.goto('/invite');
+  await expect(page.getByRole('alert').filter({ hasText: 'incomplete' })).toBeVisible();
+  await expectAccessible(page, 'invite: incomplete link');
+  await page.goto('about:blank');
+  await page.goto('/invite#q1W2e3R4t5Y6u7I8o9P0a_S-d1F2g3H4j5K6l7Z8x9C');
+  await expect(page.getByRole('heading', { name: /invited to join/ })).toBeVisible();
+  await expectAccessible(page, 'invite: signed out');
+
+  const email = `${unique('owner')}@example.test`;
+  await signUp(page, email);
+  await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
+  await hydrated(page.getByRole('button', { name: 'Create business' }));
+  await expectAccessible(page, 'create business');
+  await page.getByLabel('Business name').fill('Axe Studio');
+  await page.getByLabel('Booking link').fill(unique('axe'));
+  await page.getByRole('button', { name: 'Create business' }).click();
+
+  await expect(page).toHaveURL(/\/security\/two-factor$/, { timeout: 30_000 });
+  await hydrated(page.getByRole('button', { name: 'Continue' }));
+  await expectAccessible(page, 'two-step setup: password');
+  await page.getByLabel('Confirm your password').fill(PASSWORD);
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByRole('img', { name: /QR code/ })).toBeVisible();
+  await expectAccessible(page, 'two-step setup: codes');
+
+  const key = ((await page.getByTestId('totp-secret').textContent()) ?? '').replace(/\s/g, '');
+  const used = new Set<string>();
+  await page.getByLabel('Enter the 6-digit code').fill(await freshCode(key, used));
+  await page.getByRole('button', { name: 'Turn on two-step verification' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await signOut(page);
+  await enterPassword(page, email);
+  await expect(page.getByRole('heading', { name: 'Two-step verification' })).toBeVisible();
+  await expectAccessible(page, 'sign in: code');
+  await page.getByRole('button', { name: 'Use a backup code instead' }).click();
+  await expect(page.getByLabel('Backup code')).toBeVisible();
+  await expectAccessible(page, 'sign in: backup code');
 });
 
 test('the signed-out and public screens have no serious accessibility violations', async ({

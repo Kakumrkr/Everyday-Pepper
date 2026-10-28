@@ -6,7 +6,7 @@ import {
   Button,
   buttonStyle,
   ChatNotice,
-  chipClass,
+  chipStyle,
   ClientChoice,
   cx,
   DayCard,
@@ -320,7 +320,7 @@ export function ChatScreen({
               <button
                 key={suggestion}
                 type="button"
-                className={chipClass({ className: 'shrink-0 whitespace-nowrap' })}
+                className={cx(chipStyle(false), 'shrink-0 whitespace-nowrap')}
                 onClick={() => void send(suggestion)}
               >
                 {suggestion}
