@@ -87,6 +87,15 @@ export function serviceOf(
   return business.services.find((service) => service.id === serviceId);
 }
 
+/**
+ * The business's clock in words for its clients (DESIGN.md §6, no zone ids): its city
+ * (`America/Los_Angeles` → "Los Angeles time"), or "UTC".
+ */
+export function localTimeLabel(timeZone: string): string {
+  const city = timeZone.split('/').at(-1)?.replaceAll('_', ' ') ?? timeZone;
+  return city === 'UTC' || city === '' ? 'UTC' : `${city} time`;
+}
+
 /** Up to two initials of a name: `Juniper Hair Studio` → `JH`. */
 export function initials(name: string): string {
   return name

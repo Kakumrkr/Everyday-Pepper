@@ -57,7 +57,7 @@ The brief names the skills for the session; a skill that isn't installed in a se
 
 Each row: target · what is built · done when. "Rec" marks the only sessions that call the real model.
 
-### Phase 9 · New look (S39–S43, with S42.2)
+### Phase 9 · New look (S39–S43.2, with S42.2, S42.3)
 Goal: Pepper looks premium, warm and distinctly its own on every screen, and the design rules are enforced by tests. Scorecard target at exit: friendly UX 8, mobile 8, accessibility 8.
 
 | # | Target | Built | Done when |
@@ -68,7 +68,8 @@ Goal: Pepper looks premium, warm and distinctly its own on every screen, and the
 | S42 | **Calendar and Clients** | Calendar day view, Clients list and profile on the new kit; every empty state says what to do next. Split from one seven-screen session (PCR-008). | Calendar and Clients on the kit; journeys + screenshots green |
 | S42.2 | **Booking sheets, Services and Team** | The booking and new-booking sheets, Services and Team on the new kit; each sheet's main action in its footer; staff tones by place (no colour picker). Split from the settings session (D-1). | AC-X-9 |
 | S42.3 | **Autonomy, What I know and Waitlist** | Those three on the new kit; every empty state says what to do next. | Every signed-in screen on the kit |
-| S43 | **Public pages, auth and the phase gate** | Booking page, manage-booking, sign-in, sign-up, MFA, create business on the kit; the legacy stylesheet deleted; UX copy pass; the Phase 9 scorecard. | Legacy stylesheet gone; axe clean; scorecard targets met |
+| S43 | **Public pages** | Booking page (every step), manage-booking, the offer page and unsubscribe on the kit, in the business's brand; `LegacyCard` and the old aliases out of them; Autonomy's "Saved" as a kit Toast. Split from the gate session (D-1, PCR-008). | AC-X-11; axe and tap targets clean on the public pages |
+| S43.2 | **Auth and the phase gate** | Sign-in, sign-up, MFA, create business and invite on the kit; the legacy stylesheet and aliases deleted; UX copy pass; the Phase 9 scorecard. | Legacy stylesheet gone; axe clean; scorecard targets met |
 
 ### Phase 10 · First 10 minutes (S44–S47)
 Goal: a new owner can take bookings in under 10 minutes, and never hits a dead end. Exit: core usefulness 6, realism 6, owner experience 7, customer booking 7.

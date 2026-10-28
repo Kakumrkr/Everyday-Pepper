@@ -264,38 +264,51 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** A short note about something that just happened, with one action (usually Undo). */
+/**
+ * A short note about something that just happened, with one action (usually Undo). A note
+ * closes on its own; an error (`tone="error"`) is announced at once and stays until dismissed,
+ * so it can't vanish before it's read.
+ */
 export function Toast({
   open,
   onOpenChange,
   title,
   action,
+  tone = 'note',
+  duration,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   action?: { label: string; altText: string; onClick: () => void } | undefined;
+  tone?: 'note' | 'error';
+  /** How long a note stays, in ms (the provider's 6 s by default). */
+  duration?: number | undefined;
 }) {
+  const error = tone === 'error';
+  // The ring in the page color: the toast is ink, where `brand` would be too faint.
+  const onInk = cx(
+    'min-h-11 shrink-0 rounded-pill bg-transparent px-3 py-0 type-label text-bg underline underline-offset-2',
+    'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-bg',
+  );
   return (
     <RadixToast.Root
       open={open}
       onOpenChange={onOpenChange}
-      className="flex items-center gap-3 rounded-lg bg-ink px-4 py-3 text-bg shadow-floating animate-fade-in"
+      type={error ? 'foreground' : 'background'}
+      duration={error ? Infinity : duration}
+      className={cx(
+        'flex items-center gap-3 rounded-lg px-4 py-3 shadow-floating animate-fade-in',
+        error ? 'bg-danger text-bg' : 'bg-ink text-bg',
+      )}
     >
       <RadixToast.Title className="flex-1 type-body">{title}</RadixToast.Title>
       {action !== undefined && (
-        <RadixToast.Action
-          altText={action.altText}
-          onClick={action.onClick}
-          className={cx(
-            'min-h-11 shrink-0 rounded-pill bg-transparent px-3 py-0 type-label text-bg underline underline-offset-2',
-            // The ring in the page color: the toast is ink, where `brand` would be too faint.
-            'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-bg',
-          )}
-        >
+        <RadixToast.Action altText={action.altText} onClick={action.onClick} className={onInk}>
           {action.label}
         </RadixToast.Action>
       )}
+      {error && <RadixToast.Close className={onInk}>Dismiss</RadixToast.Close>}
     </RadixToast.Root>
   );
 }

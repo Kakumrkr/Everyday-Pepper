@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import axe from 'axe-core';
 import { useState } from 'react';
@@ -288,5 +288,25 @@ describe('Toast', () => {
     expect(await screen.findByText('Reminded 9 clients')).toBeTruthy();
     await userEvent.click(screen.getByRole('button', { name: 'Undo' }));
     expect(onUndo).toHaveBeenCalledOnce();
+  });
+
+  it('closes a note on its own; an error stays until it is dismissed', async () => {
+    vi.useFakeTimers();
+    const onSaved = vi.fn();
+    const onError = vi.fn();
+    render(
+      <ToastProvider>
+        <Toast open onOpenChange={onSaved} title="Saved." duration={4000} />
+        <Toast open tone="error" onOpenChange={onError} title="Nothing changed." />
+      </ToastProvider>,
+    );
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    vi.useRealTimers();
+    expect(onSaved).toHaveBeenCalledWith(false);
+    expect(onError).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+    expect(onError).toHaveBeenCalledWith(false);
   });
 });

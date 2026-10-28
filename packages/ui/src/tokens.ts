@@ -73,6 +73,9 @@ export const TEXT_PAIRS: readonly (readonly [ColorToken, ColorToken])[] = [
   ['danger', 'danger-soft'],
   ['ink', 'danger-soft'],
   ['info', 'info-soft'],
+  // Toasts: page-colored text on ink, and on danger for an error that stays.
+  ['bg', 'ink'],
+  ['bg', 'danger'],
 ];
 
 /**

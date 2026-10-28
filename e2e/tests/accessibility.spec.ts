@@ -8,7 +8,15 @@ import {
   StaffMemberSchema,
 } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
-import { anotherPerson, callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js';
+import {
+  anotherPerson,
+  callApi,
+  emailTo,
+  hydrated,
+  onboardOwner,
+  ownClientAddress,
+  unique,
+} from './helpers.js';
 
 // Accessibility of the key screens (S18; testing-strategy.md: axe in Playwright, no serious
 // violations): WCAG 2.2 A and AA rules, in light and dark, on phone and desktop (the two
@@ -167,6 +175,8 @@ test('the signed-out and public screens have no serious accessibility violations
     ['sign up', '/sign-up'],
     ['offline page', '/offline.html'],
     ['broken booking link', `/book/${s.slug}/manage#not-a-token`],
+    ['broken offer link', `/book/${s.slug}/offer`],
+    ['unsubscribe link', '/unsubscribe/not-a-real-token'],
   ] as const) {
     await visitor.goto(path);
     await expect(visitor.getByRole('heading', { level: 1 }).first()).toBeVisible();
@@ -186,4 +196,22 @@ test('the signed-out and public screens have no serious accessibility violations
   await visitor.getByTestId('free-times').getByRole('button').first().click();
   await expect(visitor.getByRole('heading', { name: 'Your details' })).toBeVisible();
   await expectAccessible(visitor, 'booking page: details');
+
+  // S43: the code, the booked page and the booking behind its link (AC-X-11).
+  const email = `${unique('ana')}@example.test`;
+  await visitor.getByLabel('Full name').fill('Ana Ruiz');
+  await visitor.getByLabel('Email').fill(email);
+  await visitor.getByRole('button', { name: 'Send my code' }).click();
+  await expect(visitor.getByRole('heading', { name: 'Check your email' })).toBeVisible();
+  await expectAccessible(visitor, 'booking page: code');
+  const code = /^ {4}(\d{6})$/m.exec(await emailTo(email, 'is your code'))?.[1] ?? '';
+  await visitor.getByLabel('Code').fill(code);
+  await visitor.getByRole('button', { name: 'Confirm booking' }).click();
+  await expect(visitor.getByRole('heading', { name: /You’re booked/ })).toBeVisible();
+  await expectAccessible(visitor, 'booking page: booked');
+  await visitor.getByRole('link', { name: 'Reschedule or cancel' }).click();
+  await expect(visitor.getByTestId('booking-status')).toHaveText('Booked');
+  await expectAccessible(visitor, 'manage booking');
+  await (await hydrated(visitor.getByRole('button', { name: 'Cancel booking' }))).click();
+  await expectAccessible(visitor, 'manage booking: cancel');
 });

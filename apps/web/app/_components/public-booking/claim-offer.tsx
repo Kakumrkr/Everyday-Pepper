@@ -7,7 +7,7 @@ import {
   type PublicBusiness,
   type PublicOffer,
 } from '@pepper/contracts';
-import { buttonClass } from '@pepper/ui';
+import { Button, buttonStyle, DetailTable } from '@pepper/ui';
 import { useEffect, useState } from 'react';
 import { dateTimeLabel } from '../../../lib/booking';
 import { sendJson } from '../../../lib/client-api';
@@ -86,7 +86,7 @@ export function ClaimOffer({ business }: { business: PublicBusiness }) {
 
   if (view.state === 'loading') {
     return (
-      <p className="m-0 text-ink-2" role="status">
+      <p className="m-0 type-body text-ink-2" role="status">
         Opening your offer…
       </p>
     );
@@ -94,11 +94,11 @@ export function ClaimOffer({ business }: { business: PublicBusiness }) {
   if (view.state === 'broken') {
     return (
       <>
-        <h1 className="m-0 font-display text-2xl font-bold">A time opened up</h1>
+        <h1 className="m-0 type-display text-ink">A time opened up</h1>
         <Notice tone="error">{view.message}</Notice>
         <a
           href={`/book/${encodeURIComponent(slug)}`}
-          className={buttonClass({ variant: 'secondary' })}
+          className={`${buttonStyle({ variant: 'secondary' })} self-start`}
         >
           Book a visit
         </a>
@@ -107,15 +107,15 @@ export function ClaimOffer({ business }: { business: PublicBusiness }) {
   }
   if (view.state === 'booked') {
     return (
-      <div className="grid gap-4">
-        <h1 className="m-0 font-display text-2xl font-bold">You’re booked</h1>
+      <div className="flex flex-col gap-5">
+        <h1 className="m-0 type-display text-ink">You’re booked</h1>
         <Notice tone="ok">
           {view.booking.service.name} with {view.booking.staff.displayName},{' '}
           {dateTimeLabel(timeZone, view.booking.startsAt)}. We emailed you the details.
         </Notice>
         <a
           href={managePath(slug, view.manageToken)}
-          className={buttonClass({ variant: 'secondary' })}
+          className={`${buttonStyle({ variant: 'secondary' })} self-start`}
         >
           Reschedule or cancel
         </a>
@@ -126,37 +126,35 @@ export function ClaimOffer({ business }: { business: PublicBusiness }) {
   const { offer } = view;
   const closed = offerStateText(offer.status);
   return (
-    <div className="grid gap-4">
-      <h1 className="m-0 font-display text-2xl font-bold">A time opened up</h1>
+    <div className="flex flex-col gap-5">
+      <h1 className="m-0 type-display text-ink">A time opened up</h1>
       {closed === null ? null : <Notice tone="error">{closed}</Notice>}
       {error === null ? null : <Notice tone="error">{error}</Notice>}
-      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-md border border-line bg-surface p-4">
-        <dt className="text-ink-2">Service</dt>
-        <dd className="m-0 font-semibold">{offer.service.name}</dd>
-        <dt className="text-ink-2">With</dt>
-        <dd className="m-0 font-semibold">{offer.staff.displayName}</dd>
-        <dt className="text-ink-2">When</dt>
-        <dd className="m-0 font-semibold">{dateTimeLabel(timeZone, offer.startsAt)}</dd>
-      </dl>
+      <DetailTable
+        className="rounded-lg bg-surface px-4"
+        rows={[
+          { label: 'Service', value: offer.service.name },
+          { label: 'With', value: offer.staff.displayName },
+          {
+            label: 'When',
+            value: <span className="tabular-nums">{dateTimeLabel(timeZone, offer.startsAt)}</span>,
+          },
+        ]}
+      />
       {closed === null ? (
         <>
-          <p className="m-0 text-ink-2">
-            A few people on the waitlist were offered this time; whoever claims it first gets it.
+          <p className="m-0 type-body text-ink-2">
+            A few people on the waitlist were offered this time, and the first to claim it gets it.
             The offer ends {dateTimeLabel(timeZone, offer.expiresAt)}.
           </p>
-          <button
-            type="button"
-            className={buttonClass({ variant: 'primary' })}
-            disabled={busy}
-            onClick={() => void claim(offer)}
-          >
+          <Button size="lg" block busy={busy} onClick={() => void claim(offer)}>
             {busy ? 'Claiming…' : 'Claim this time'}
-          </button>
+          </Button>
         </>
       ) : (
         <a
           href={`/book/${encodeURIComponent(slug)}`}
-          className={buttonClass({ variant: 'secondary' })}
+          className={`${buttonStyle({ variant: 'secondary' })} self-start`}
         >
           See other times
         </a>

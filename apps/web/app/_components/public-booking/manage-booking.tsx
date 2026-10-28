@@ -6,7 +6,7 @@ import {
   type PublicBooking,
   type PublicBusiness,
 } from '@pepper/contracts';
-import { buttonClass, chipClass } from '@pepper/ui';
+import { Button, buttonStyle, chipStyle, DetailTable } from '@pepper/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { dateTimeLabel, STATUS_LABELS } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
@@ -108,7 +108,7 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
 
   if (view.state === 'loading') {
     return (
-      <p className="m-0 text-ink-2" role="status">
+      <p className="m-0 type-body text-ink-2" role="status">
         Opening your booking…
       </p>
     );
@@ -116,11 +116,11 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
   if (view.state === 'broken') {
     return (
       <>
-        <h1 className="m-0 font-display text-2xl font-bold">Your booking</h1>
+        <h1 className="m-0 type-display text-ink">Your booking</h1>
         <Notice tone="error">{view.message}</Notice>
         <a
           href={`/book/${encodeURIComponent(slug)}`}
-          className={buttonClass({ variant: 'secondary' })}
+          className={`${buttonStyle({ variant: 'secondary' })} self-start`}
         >
           Book a visit
         </a>
@@ -130,79 +130,77 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
 
   const { booking } = view;
   return (
-    <div className="grid gap-4">
-      <h1 className="m-0 font-display text-2xl font-bold">Your booking</h1>
+    <div className="flex flex-col gap-5">
+      <h1 className="m-0 type-display text-ink">Your booking</h1>
       {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
-      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-md border border-line bg-surface p-4">
-        <dt className="text-ink-2">Service</dt>
-        <dd className="m-0 font-semibold">{booking.service.name}</dd>
-        <dt className="text-ink-2">With</dt>
-        <dd className="m-0 font-semibold">{booking.staff.displayName}</dd>
-        <dt className="text-ink-2">When</dt>
-        <dd className="m-0 font-semibold">{dateTimeLabel(timeZone, booking.startsAt)}</dd>
-        <dt className="text-ink-2">Status</dt>
-        <dd className="m-0 font-semibold" data-testid="booking-status">
-          {STATUS_LABELS[booking.status]}
-        </dd>
-      </dl>
+      <DetailTable
+        className="rounded-lg bg-surface px-4"
+        rows={[
+          { label: 'Service', value: booking.service.name },
+          { label: 'With', value: booking.staff.displayName },
+          {
+            label: 'When',
+            value: (
+              <span className="tabular-nums">{dateTimeLabel(timeZone, booking.startsAt)}</span>
+            ),
+          },
+          {
+            label: 'Status',
+            value: <span data-testid="booking-status">{STATUS_LABELS[booking.status]}</span>,
+          },
+        ]}
+      />
       {!booking.changeable ? (
-        <p className="m-0 text-ink-2">
+        <p className="m-0 type-body text-ink-2">
           {booking.status === 'cancelled'
-            ? 'This booking is cancelled.'
-            : 'This booking can’t be changed online any more. Contact the business.'}
+            ? 'This booking is cancelled. Book again any time.'
+            : `This booking can’t be changed online any more. Call or message ${business.name}.`}
         </p>
       ) : mode === 'view' ? (
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className={buttonClass()}
+        <div className="flex flex-wrap gap-3">
+          <Button
             onClick={() => {
               setNotice(null);
               setMode('move');
             }}
           >
             Reschedule
-          </button>
-          <button
-            type="button"
-            className={buttonClass({ variant: 'secondary' })}
+          </Button>
+          <Button
+            variant="secondary"
             onClick={() => {
               setNotice(null);
               setMode('cancel');
             }}
           >
             Cancel booking
-          </button>
+          </Button>
         </div>
       ) : mode === 'cancel' ? (
         <section
           aria-label="Cancel this booking"
-          className="grid gap-3 rounded-md bg-wait-soft p-4"
+          className="flex flex-col gap-4 rounded-lg bg-danger-soft p-5"
         >
-          <p className="m-0 font-semibold text-wait">Cancel this booking? This can’t be undone.</p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={busy}
-              className={buttonClass()}
-              onClick={() => void cancel()}
-            >
+          <p className="m-0 type-body font-semibold text-ink">
+            Cancel this booking? This can’t be undone, and the time goes to someone else.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="danger" busy={busy} onClick={() => void cancel()}>
               {busy ? 'Cancelling…' : 'Yes, cancel it'}
-            </button>
-            <button
-              type="button"
-              className={buttonClass({ variant: 'secondary' })}
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => {
                 setMode('view');
               }}
             >
               Keep it
-            </button>
+            </Button>
           </div>
         </section>
       ) : (
-        <section aria-label="Pick a new time" className="grid gap-3">
-          <h2 className="m-0 text-lg font-bold">
+        <section aria-label="Pick a new time" className="flex flex-col gap-4">
+          <h2 className="m-0 type-heading text-ink">
             Pick a new time with {booking.staff.displayName}
           </h2>
           {alternatives === null || alternatives.length === 0 ? null : (
@@ -212,7 +210,7 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
                   key={other.startsAt}
                   type="button"
                   disabled={busy}
-                  className={chipClass()}
+                  className={chipStyle(false)}
                   onClick={() => void move(other.startsAt)}
                 >
                   {dateTimeLabel(timeZone, other.startsAt)}
@@ -229,20 +227,17 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
             staffNames={staffNames}
             onPick={(slot) => void move(slot.startsAt)}
           />
-          <button
-            type="button"
-            className={buttonClass({
-              variant: 'quiet',
-              size: 'sm',
-              className: 'justify-self-start',
-            })}
+          <Button
+            variant="quiet"
+            size="sm"
+            className="self-start"
             onClick={() => {
               setMode('view');
               setAlternatives(null);
             }}
           >
             Keep the current time
-          </button>
+          </Button>
         </section>
       )}
     </div>

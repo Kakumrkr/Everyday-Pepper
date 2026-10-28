@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S42.3 is closed. Next: S43 (see "Planned sessions").
+**S43 Phase 9 · Public pages on the kit + the Saved toast** (user at the brief: "Go with your recommendation and complete the session work": D-1 split, auth + legacy stylesheet + the Phase 9 gate → S43.2; D-2 the kit Toast as it is, "Saved" for 4 s, errors stay).
+Tasks: 1 AC-X-11 · 2 booking flow, slot picker, page shell on the kit · 3 manage-booking, offer, unsubscribe on the kit, `LegacyCard` gone · 4 old aliases and `buttonClass`/`chipClass` out of those files · 5 tap targets, screenshots, axe on the public pages · 6 top-up: an app `ToastProvider`, Autonomy's "Saved" as a kit Toast at 375 px.
+Done: 1 AC-X-11 · 2 booking flow on the kit (StepBar, hairline choice rows, kit Inputs, StickyActionBar with Send my code / Confirm, DetailTable; "Times are Chicago time") · 3 manage-booking, offer, unsubscribe (kit Card) on the kit, `LegacyCard` and `buttonClass` deleted · 4 old aliases out of the public files · 6 kit Toast `tone`/`duration`, app `ToastProvider`, Autonomy's toast. Next: 5 run `screens`, `public-booking`, `accessibility`, `chat` specs, make the public baselines.
 
 ## Last sessions
 - **S42.3 Phase 9 · Autonomy, What I know and Waitlist on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42.3 note). Full entry in [session-log.md](session-log.md).
@@ -65,7 +67,8 @@ S1–S42.3, M1–M2 and P1 are done (Phases 0–8, the re-plan, and Phase 9's di
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S43 | Public pages + auth on the kit, legacy stylesheet deleted, UX copy pass, **Phase 9 gate** | 9 | Scorecard C3, C4, C10 ≥ 8 |
+| S43 | Public pages (booking, manage-booking, offer, unsubscribe) on the kit; Autonomy's "Saved" as a toast | 9 | AC-X-11; axe and tap targets clean on the public pages |
+| S43.2 | Auth (sign-in, sign-up, MFA, create business, invite) on the kit, legacy stylesheet and aliases deleted, UX copy pass, **Phase 9 gate** | 9 | Scorecard C3, C4, C10 ≥ 8 |
 | S44 | Password reset, email verification, change email; `add_to_waitlist` window check in the domain | 10 | Journeys + domain tests green |
 | S45 | Business type at signup → pre-filled menu and hours; US zones first; activation events | 10 | A barber business bookable with zero typing |
 | S46 | Setup checklist + warnings; staff without hours hidden; first free day; plain zone names | 10 | Review UX #1–#5 closed with tests |
