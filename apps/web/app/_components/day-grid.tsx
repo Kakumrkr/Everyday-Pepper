@@ -23,8 +23,11 @@ export interface CalendarColumn {
   entries: CalendarEntry[];
 }
 
-/** Pixels per hour of the grid: a 15-minute appointment is 16 px, a 1-hour one 64 px. */
-const HOUR_HEIGHT = 64;
+/**
+ * Pixels per hour of the grid: a 30-minute appointment is 44 px, the smallest tap target (D3,
+ * S42); a 15-minute one is 22 px, the one exception.
+ */
+const HOUR_HEIGHT = 88;
 
 // A staff member's blocks: the soft tone with a 4 px bar of the full one (DESIGN.md §3).
 const TONES: Record<StaffTone, { block: string; dot: string }> = {
@@ -40,7 +43,7 @@ const STATUS_LABELS: Partial<Record<BookingStatus, string>> = {
 
 /**
  * One day on a time grid, a column per staff member; the hours fit every entry (8 am – 8 pm at
- * least). Columns scroll sideways inside the grid on narrow screens; the page itself never does.
+ * least). Two columns fit a 375 px phone; more scroll sideways inside the grid, the page never.
  * With `setup` (the member may book), a booking opens its sheet when tapped. Each staff member
  * has a tone from `staff` (the whole team, so a filtered view keeps it) and their name on top.
  */
@@ -78,7 +81,7 @@ export function DayGrid({
       data-testid="day-grid"
     >
       <div className="flex min-w-fit">
-        <div className="w-14 shrink-0 border-r border-line" aria-hidden="true">
+        <div className="w-12 shrink-0 border-r border-line" aria-hidden="true">
           <div className="h-12 border-b border-line" />
           <div className="relative" style={{ height: `${height}px` }}>
             {grid.hours.map((minute, index) => (
@@ -99,7 +102,7 @@ export function DayGrid({
               key={member.id}
               aria-label={member.displayName}
               data-testid="calendar-column"
-              className="min-w-40 flex-1 border-r border-line last:border-r-0"
+              className="min-w-34 flex-1 border-r border-line last:border-r-0"
             >
               <h2 className="m-0 flex h-12 items-center gap-2 border-b border-line px-3 type-label text-ink">
                 <span
@@ -185,6 +188,8 @@ function Entry({
     );
   }
   const status = STATUS_LABELS[entry.status];
+  // From 45 minutes (66 px) the service gets a line of its own.
+  const roomy = Date.parse(entry.endsAt) - Date.parse(entry.startsAt) >= 45 * 60_000;
   const className = cx(
     'absolute inset-x-1 overflow-hidden rounded-sm border-0 border-l-4 border-solid px-2 py-1 text-left type-caption leading-tight text-ink',
     tone,
@@ -194,8 +199,17 @@ function Entry({
   const content = (
     <>
       <span className="block truncate font-semibold">{entry.client}</span>
-      <span className="block truncate">{entry.service}</span>
-      <span className="block truncate text-ink-2 tabular-nums">{time}</span>
+      {roomy ? (
+        <>
+          <span className="block truncate">{entry.service}</span>
+          <span className="block truncate text-ink-2 tabular-nums">{time}</span>
+        </>
+      ) : (
+        // Two lines fit a 30-minute block (44 px): who, then when and what.
+        <span className="block truncate text-ink-2">
+          <span className="tabular-nums">{time}</span> · {entry.service}
+        </span>
+      )}
       {status === undefined ? null : <span className="block font-semibold">{status}</span>}
       {entry.overridden ? <span className="block text-warn">Outside the usual hours</span> : null}
     </>

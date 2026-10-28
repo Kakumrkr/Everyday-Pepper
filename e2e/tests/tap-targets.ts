@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test';
 
 /**
  * DESIGN D3 (AC-X-6): every visible control on the page is at least 44 × 44 px. Links inside a
- * sentence are exempt (WCAG 2.5.8's inline exception), as are controls inside `exempt`.
+ * sentence are exempt (WCAG 2.5.8's inline exception).
  */
 export async function expectTapTargets(page: Page, screen: string): Promise<void> {
   const small = await page.evaluate(() => {
