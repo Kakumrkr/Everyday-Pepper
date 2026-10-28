@@ -23,7 +23,7 @@ import { sendJson } from '../../../lib/client-api';
 import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
-import { Notice } from './sheet';
+import { Notice } from '../form-parts';
 import { TimePicker } from './time-picker';
 
 /** What the booking sheet shows and changes; the calendar has it for every booking it draws. */

@@ -6,7 +6,7 @@ import { useRef, useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { fetchJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 import { kitLink } from '../kit-link';
 
 /** How many clients one search shows. */

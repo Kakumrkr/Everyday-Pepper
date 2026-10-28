@@ -5,7 +5,7 @@ import { brandTokens, Button, FOCUS_RING } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /**
  * The business's public booking page (S17): its link, and for owners and managers its color

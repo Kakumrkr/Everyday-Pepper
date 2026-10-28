@@ -146,6 +146,19 @@ describe('SheetFooter', () => {
     await expectAccessible(screen.getByRole('dialog'));
   });
 
+  it('leaves the actions in place outside a sheet (the same form on a page)', () => {
+    render(
+      <form id="details">
+        <SheetFooter>
+          <Button type="submit">Save details</Button>
+        </SheetFooter>
+      </form>,
+    );
+    expect(screen.getByRole('button', { name: 'Save details' }).closest('form')?.id).toBe(
+      'details',
+    );
+  });
+
   it('leaves no empty footer when nothing is put in it', () => {
     render(
       <Sheet open onOpenChange={() => undefined} title="Why I did this">

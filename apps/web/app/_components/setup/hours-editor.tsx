@@ -1,7 +1,7 @@
 'use client';
 
 import { WeeklyHoursSchema, type WeeklyHours } from '@pepper/contracts';
-import { buttonClass, Icon } from '@pepper/ui';
+import { Button, Checkbox, cx, fieldStyle, IconButton } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -15,7 +15,7 @@ import {
   type DayHours,
   type DayInterval,
 } from '../../../lib/setup';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /**
  * A staff member's weekly hours on the business's clock (`PUT /v1/staff/:id/hours`, the whole
@@ -63,28 +63,24 @@ export function HoursEditor({
   const monday = week[0]?.intervals ?? [];
 
   return (
-    <div className="grid gap-3">
-      <ul className="m-0 grid list-none gap-2 p-0" data-testid="hours-editor">
+    <div className="flex flex-col gap-3">
+      <ul className="m-0 list-none divide-y divide-line p-0" data-testid="hours-editor">
         {week.map((day) => {
           const name = WEEKDAYS[day.weekday - 1]?.long ?? '';
           const working = day.intervals.length > 0;
           return (
             <li
               key={day.weekday}
-              className="grid gap-2 rounded-md bg-surface-2 px-3 py-2 desk:grid-cols-[9rem_1fr]"
+              className="grid gap-1 py-2 desk:grid-cols-[9rem_1fr] desk:items-start"
             >
-              <label className="flex min-h-11 items-center gap-3 font-semibold">
-                <input
-                  type="checkbox"
-                  checked={working}
-                  disabled={busy}
-                  className="size-5 min-h-0 w-auto accent-brand"
-                  onChange={(event) => {
-                    setDay(day.weekday, event.target.checked ? [DEFAULT_DAY] : []);
-                  }}
-                />
-                {name}
-              </label>
+              <Checkbox
+                label={name}
+                checked={working}
+                disabled={busy}
+                onChange={(event) => {
+                  setDay(day.weekday, event.target.checked ? [DEFAULT_DAY] : []);
+                }}
+              />
               {working ? (
                 <div className="grid gap-2">
                   {day.intervals.map((interval, index) => (
@@ -104,7 +100,9 @@ export function HoursEditor({
                           );
                         }}
                       />
-                      <span aria-hidden="true">–</span>
+                      <span aria-hidden="true" className="text-ink-2">
+                        –
+                      </span>
                       <TimeSelect
                         label={`${name} until`}
                         value={interval.end}
@@ -118,35 +116,26 @@ export function HoursEditor({
                         }}
                       />
                       {day.intervals.length > 1 ? (
-                        <button
-                          type="button"
+                        <IconButton
+                          icon="close"
+                          variant="quiet"
                           disabled={busy}
-                          className={buttonClass({
-                            variant: 'quiet',
-                            size: 'sm',
-                            className: 'w-11 px-0',
-                          })}
-                          aria-label={`Remove ${name} ${clockLabel(interval.start)} to ${clockLabel(interval.end)}`}
+                          label={`Remove ${name} ${clockLabel(interval.start)} to ${clockLabel(interval.end)}`}
                           onClick={() => {
                             setDay(
                               day.weekday,
                               day.intervals.filter((_, n) => n !== index),
                             );
                           }}
-                        >
-                          <Icon name="close" />
-                        </button>
+                        />
                       ) : null}
                     </div>
                   ))}
-                  <button
-                    type="button"
+                  <Button
+                    variant="quiet"
+                    size="sm"
                     disabled={busy || day.intervals.length >= 6}
-                    className={buttonClass({
-                      variant: 'quiet',
-                      size: 'sm',
-                      className: 'justify-self-start',
-                    })}
+                    className="-ml-4 justify-self-start"
                     aria-label={`Add more hours on ${name}`}
                     onClick={() => {
                       const last = day.intervals[day.intervals.length - 1];
@@ -155,20 +144,20 @@ export function HoursEditor({
                     }}
                   >
                     Add hours (e.g. after a break)
-                  </button>
+                  </Button>
                 </div>
               ) : (
-                <p className="m-0 flex min-h-11 items-center text-ink-2">Day off</p>
+                <p className="m-0 flex min-h-11 items-center type-body text-ink-2">Day off</p>
               )}
             </li>
           );
         })}
       </ul>
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           disabled={busy || monday.length === 0}
-          className={buttonClass({ variant: 'secondary', size: 'sm' })}
           onClick={() => {
             setWeek((current) =>
               current.map((day) =>
@@ -181,17 +170,17 @@ export function HoursEditor({
           }}
         >
           Use Monday’s hours Monday to Friday
-        </button>
+        </Button>
       </div>
       {message === null ? null : <Notice tone={message.tone}>{message.text}</Notice>}
-      <button
-        type="button"
-        disabled={busy}
-        className={buttonClass({ className: 'w-full desk:w-auto desk:justify-self-start' })}
+      <Button
+        size="lg"
+        busy={busy}
+        className="w-full desk:w-auto desk:self-start"
         onClick={() => void save()}
       >
         {busy ? 'Saving…' : 'Save hours'}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -214,7 +203,7 @@ function TimeSelect({
       aria-label={label}
       value={value}
       disabled={disabled}
-      className="min-w-0"
+      className={cx(fieldStyle, 'min-h-11 min-w-0 px-3 tabular-nums')}
       onChange={(event) => {
         onChange(event.target.value);
       }}

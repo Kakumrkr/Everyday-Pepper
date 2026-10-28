@@ -9,7 +9,7 @@ import { sendJson } from '../../../lib/client-api';
 import { ClientPicker, type ChosenClient } from './client-picker';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
-import { Notice } from './sheet';
+import { Notice } from '../form-parts';
 import { TimePicker } from './time-picker';
 
 /**

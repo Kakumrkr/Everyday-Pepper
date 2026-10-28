@@ -8,7 +8,7 @@ import { ROUTES } from '../../../lib/account';
 import { normalizeContact } from '../../../lib/booking';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /**
  * Adds a client (`POST /v1/clients`, then their profile) or edits one's name, email and phone

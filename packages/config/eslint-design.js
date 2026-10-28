@@ -42,8 +42,9 @@ export const designRestrictions = [
 
 /**
  * Files that may hold raw colors, each for a reason: the tokens themselves, the arithmetic that
- * derives a business's booking-page colors (PCR-001), the staff color choices an owner picks
- * from (stored data, PCR-001), and tests, which compare values.
+ * derives a business's booking-page colors (PCR-001), the colour stored for a new staff member
+ * (stored data the api requires; screens show tones instead, S42.2), and tests, which compare
+ * values.
  */
 export const designExemptFiles = [
   'packages/ui/src/tokens.ts',

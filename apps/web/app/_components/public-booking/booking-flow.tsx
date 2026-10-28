@@ -26,7 +26,7 @@ import {
   type ClientDetails,
 } from '../../../lib/public-booking';
 import { durationLabel, priceLabel, servicesByCategory } from '../../../lib/setup';
-import { Field, Notice } from '../booking/sheet';
+import { Field, Notice } from '../form-parts';
 import { SlotPicker } from './slot-picker';
 
 type Step = 'service' | 'staff' | 'time' | 'details' | 'verify' | 'done' | 'waitlisted';

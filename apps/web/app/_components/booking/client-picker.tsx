@@ -6,7 +6,7 @@ import { useState, type SubmitEvent } from 'react';
 import { normalizeContact } from '../../../lib/booking';
 import { fetchJson, sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { Notice } from './sheet';
+import { Notice } from '../form-parts';
 
 /** The client chosen, with the exact contact staff found them by (ADR-0020). */
 export interface ChosenClient {

@@ -11,7 +11,7 @@ import { useState, type SubmitEvent } from 'react';
 import { dateTimeLabel, suggestedWindow } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { Notice } from './sheet';
+import { Notice } from '../form-parts';
 
 /** The nearest free times of a 409 `slot_unavailable` answer, or `null` for any other one. */
 export function alternativesOf(result: CallResult<unknown>): AvailableSlot[] | null {

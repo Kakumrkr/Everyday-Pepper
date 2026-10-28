@@ -395,16 +395,11 @@ export function splitVisits(
 
 // Staff ------------------------------------------------------------------------------------
 
-/** Colours offered for a staff member on the calendar (a stored other colour is kept). */
-export const STAFF_COLORS = [
-  { value: '#2a7230', name: 'Green' },
-  { value: '#0b6b63', name: 'Teal' },
-  { value: '#1d65a8', name: 'Blue' },
-  { value: '#7a3b8f', name: 'Plum' },
-  { value: '#b4483a', name: 'Coral' },
-  { value: '#8f4c00', name: 'Amber' },
-  { value: '#536257', name: 'Slate' },
-] as const;
+/**
+ * The colour stored for a new staff member, which the api requires. Screens don't show it:
+ * the calendar's tone comes from a member's place among the active staff (S42, S42.2 D-2).
+ */
+export const STAFF_COLOR = '#2a7230';
 
 /** The local date `days` after today on the business's clock (`YYYY-MM-DD`). */
 export function localDateIn(timeZone: string, now: number, days = 0): string {

@@ -12,7 +12,7 @@ import {
   type PushApi,
   type PushState,
 } from '../../../lib/push';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /** What the card says in each state. */
 const TEXT: Record<Exclude<PushState, 'unavailable'>, string> = {

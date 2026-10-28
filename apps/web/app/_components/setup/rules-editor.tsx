@@ -22,7 +22,7 @@ import {
   withBusinessRules,
   type BusinessRules,
 } from '../../../lib/setup';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /**
  * The business-wide booking rules (`PUT /v1/rules`): the start-time grid, notice, how far

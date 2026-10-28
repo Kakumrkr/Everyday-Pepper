@@ -7,7 +7,7 @@ import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { centsFromText, textFromCents } from '../../../lib/setup';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 /**
  * Adds a service to the menu (`POST /v1/services`) or edits one (`PUT /v1/services/:id`, all

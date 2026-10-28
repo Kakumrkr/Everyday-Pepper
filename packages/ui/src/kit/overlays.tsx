@@ -49,16 +49,19 @@ function Header({ title, description }: { title: string; description?: string | 
   );
 }
 
-// The open sheet's footer, for `SheetFooter` inside its body.
-const FooterSlot = createContext<HTMLElement | null>(null);
+// The open sheet's footer, for `SheetFooter` inside its body: `null` until it has mounted,
+// `undefined` outside any sheet.
+const FooterSlot = createContext<HTMLElement | null | undefined>(undefined);
 
 /**
  * Actions rendered in the enclosing Sheet's footer, below the scrolling body within thumb
  * reach (D3), by a form that keeps its own state inside the body (S42.2). A submit button
- * here is outside the form in the DOM, so it names it with `form="<id>"`.
+ * here is outside the form in the DOM, so it names it with `form="<id>"`. Outside a sheet (the
+ * same form on a page) the actions stay where they are.
  */
 export function SheetFooter({ children }: { children: ReactNode }) {
   const slot = useContext(FooterSlot);
+  if (slot === undefined) return children;
   return slot === null ? null : createPortal(children, slot);
 }
 

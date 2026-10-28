@@ -18,7 +18,7 @@ import {
   readOfferToken,
   refusedClaimStatus,
 } from '../../../lib/public-booking';
-import { Notice } from '../booking/sheet';
+import { Notice } from '../form-parts';
 
 type View =
   | { state: 'loading' }

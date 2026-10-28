@@ -93,7 +93,9 @@ test('setup: a new owner adds a service, a staff member with weekly hours and a 
 
   // Jess, who offers it: added, then her page for the hours.
   await go(page, 'Team');
-  await (await hydrated(page.getByRole('button', { name: 'Add staff member' }))).click();
+  // No one bookable yet: the empty list offers its next step (AC-X-7), the same sheet.
+  await expect(page.getByText('No one can be booked yet')).toBeVisible();
+  await (await hydrated(page.getByRole('button', { name: 'Add the first person' }))).click();
   dialog = sheet(page);
   await dialog.getByLabel('Name').fill('Jess');
   await dialog.getByRole('checkbox', { name: 'Haircut' }).check();

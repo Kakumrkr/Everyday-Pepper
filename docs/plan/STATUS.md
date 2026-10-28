@@ -11,9 +11,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T1 AC-X-9, AC-X-6 widened, traceability, S42.3 row
 - [x] T2 booking + new-booking sheets on the kit Sheet, actions in the footer (kit `SheetFooter`, `TimeChip disabled`; client editor Save in the footer too)
 - [x] T3 Services (ServicesScreen: empty state opens the add sheet), service editor (Save in footer), rules page + editor, booking-page card
-- [ ] T4 Team, staff form (no picker; tone swatch), staff page, hours, time off; old local sheet deleted
+- [x] T4 Team (BookableStaff: empty state opens the add sheet; rows with tone dots via `activeStaffTone`), staff form (no picker, Save in footer), staff page, hours, time off, team-manager; old local sheet deleted (`form-parts.tsx` keeps Field + Notice)
 - [ ] T5 `screens.spec.ts` baselines + tap targets (screens and open sheets) at 375 px
-- Next: T4.
+- Next: T5.
 
 ## Last sessions
 - **S42 Phase 9 · Calendar and Clients on the kit (2026-10-28)** ([ADR-0044](../adr/0044-redesign-and-design-rules.md) S42 note). Full entry in [session-log.md](session-log.md).
