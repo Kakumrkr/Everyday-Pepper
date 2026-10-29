@@ -11,7 +11,8 @@ import { kitLink } from '../kit-link';
 
 /**
  * Home's setup review (S46, PCR-009, AC-W1-11/12), for owners and managers. Until someone says
- * "I've checked these", it shows what the business type filled in, each line leading to the
+ * "I've checked these", it shows what clients can book (for a new business, what its type filled
+ * in; an empty menu only says where to start), each line leading to the
  * screen that changes it; whatever currently stops clients from booking shows above that, and
  * stays after the check until it is fixed. Nothing to check and nothing to fix: no card.
  */
@@ -20,6 +21,8 @@ export function SetupReviewCard({ review }: { review: SetupReview }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const reviewed = review.reviewedAt !== null;
+  // An empty menu has nothing to check yet: only what to do first.
+  const empty = review.services.count === 0;
   const fixes = review.warnings.map(setupFix);
   if (reviewed && fixes.length === 0) return null;
 
@@ -40,15 +43,22 @@ export function SetupReviewCard({ review }: { review: SetupReview }) {
     <Card labelledBy="setup-review" className="flex flex-col gap-4">
       <div className="flex flex-col gap-1" data-testid="setup-review">
         <h2 id="setup-review" className="m-0 type-heading">
-          {reviewed ? 'Before clients can book everything' : 'Check what I set up'}
+          {reviewed
+            ? 'Before clients can book everything'
+            : empty
+              ? 'Set up your booking page'
+              : 'Check what I set up'}
         </h2>
-        {reviewed ? null : (
+        {reviewed ? null : empty ? (
+          <p className="m-0 type-body text-ink-2">
+            Add what you offer and who does it, and clients can book you.
+          </p>
+        ) : (
           <p className="m-0 type-body text-ink-2">
             <span className="font-semibold text-ink tabular-nums" data-testid="setup-summary">
               {setupSummary(review)}
             </span>
-            . I filled these in from your business type. Change anything that’s off, then tell me
-            it’s right.
+            . This is what clients can book. Change anything that’s off, then tell me it’s right.
           </p>
         )}
       </div>
@@ -74,7 +84,7 @@ export function SetupReviewCard({ review }: { review: SetupReview }) {
           ))}
         </ul>
       )}
-      {reviewed ? null : (
+      {reviewed || empty ? null : (
         <>
           <List label="What I set up">
             {setupRows(review).map((row) => (

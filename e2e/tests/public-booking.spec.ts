@@ -30,6 +30,10 @@ test.beforeEach(async ({ context }) => {
 const EVERY_DAY = {
   intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({ weekday, start: '09:00', end: '17:00' })),
 };
+/** Half an hour every day: too short for an hour's service. */
+const SHORT_DAYS = {
+  intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({ weekday, start: '09:00', end: '09:30' })),
+};
 
 /** A 60-minute haircut that Jess offers every day; returns the page's slug. */
 async function salon(page: Page): Promise<string> {
@@ -256,7 +260,7 @@ test('a client joins the waitlist for a full day with the emailed code (S38a)', 
 }) => {
   test.setTimeout(120_000);
   await onboardOwner(page);
-  // Jess offers haircuts but has no hours yet: no day has a free time.
+  // Jess works half an hour a day and a haircut takes an hour: no day has a free time.
   const tenant = CurrentBusinessResponseSchema.parse(
     await (await page.request.get('/v1/tenant')).json(),
   );
@@ -267,21 +271,28 @@ test('a client joins the waitlist for a full day with the emailed code (S38a)', 
     { name: 'Haircut', durationMinutes: 60 },
     ServiceSchema,
   );
-  await callApi(
+  const jess = await callApi(
     page,
     'POST',
     '/v1/staff',
     { displayName: 'Jess', serviceIds: [service.id] },
     StaffMemberSchema,
   );
+  await callApi(page, 'PUT', `/v1/staff/${jess.id}/hours`, SHORT_DAYS, {
+    parse: (body: unknown) => body,
+  });
 
   const client = await anotherPerson(browser, baseURL);
   const email = `${unique('waiting')}@example.test`;
   await client.goto(`/book/${tenant.business.slug}`);
   await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
   await client.getByRole('button', { name: /Jess/ }).click();
+  // AC-W8-4: the whole strip is empty, said as such, and the waitlist stays.
+  await expect(client.getByTestId('range-empty')).toHaveText(
+    'No free times in the next two weeks. Join the waitlist and I’ll tell you if one opens.',
+  );
   await client.getByRole('group', { name: 'Day' }).getByRole('button').nth(1).click();
-  await expect(client.getByText('Nothing free that day. Try another day.')).toBeVisible();
+  await expect(client.getByText('Nothing free that day.', { exact: true })).toBeVisible();
   await client.getByRole('button', { name: /^Join the waitlist for / }).click();
 
   await expect(client.getByRole('heading', { name: 'Join the waitlist' })).toBeVisible();
@@ -305,4 +316,88 @@ test('a client joins the waitlist for a full day with the emailed code (S38a)', 
   const [entry] = await entries();
   expect(entry).toMatchObject({ serviceId: service.id, status: 'waiting' });
   expect(entry?.windows).toEqual([expect.objectContaining({ start: '00:00', end: '24:00' })]);
+});
+
+test('AC-W8-3/4/5: only people with hours are offered, the strip opens on the first free day, and a failed day can be tried again', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page);
+  const tenant = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  const { slug, timeZone } = tenant.business;
+  const service = await callApi(
+    page,
+    'POST',
+    '/v1/services',
+    { name: 'Beard trim', durationMinutes: 30 },
+    ServiceSchema,
+  );
+  // Jess works only on the weekday four days from now; Nia has no hours at all.
+  const fourDaysOn = new Date(Date.now() + 4 * 24 * 3600 * 1000);
+  const weekdayName = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(
+    fourDaysOn,
+  );
+  const weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(weekdayName) + 1;
+  const label = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  }).format(fourDaysOn);
+  for (const displayName of ['Jess', 'Nia']) {
+    const member = await callApi(
+      page,
+      'POST',
+      '/v1/staff',
+      { displayName, serviceIds: [service.id] },
+      StaffMemberSchema,
+    );
+    if (displayName === 'Jess') {
+      await callApi(
+        page,
+        'PUT',
+        `/v1/staff/${member.id}/hours`,
+        { intervals: [{ weekday, start: '09:00', end: '17:00' }] },
+        { parse: (body: unknown) => body },
+      );
+    }
+  }
+
+  const client = await anotherPerson(browser, baseURL);
+  // The first answer for one day fails; the strip-wide search and the retry go through.
+  let failed = 0;
+  await client.route('**/v1/public/businesses/*/availability?*', async (route) => {
+    const url = new URL(route.request().url());
+    const span =
+      Date.parse(url.searchParams.get('to') ?? '') - Date.parse(url.searchParams.get('from') ?? '');
+    if (span <= 25 * 3600 * 1000 && failed === 0) {
+      failed += 1;
+      await route.fulfill({ status: 500, json: { code: 'internal', message: 'Boom' } });
+      return;
+    }
+    await route.continue();
+  });
+  await client.goto(`/book/${slug}`);
+  await (await hydrated(client.getByRole('button', { name: /Beard trim/ }))).click();
+  // AC-W8-3: Nia, who has no hours, is not offered.
+  await expect(client.getByRole('button', { name: /Jess/ })).toBeVisible();
+  await expect(client.getByRole('button', { name: /Nia/ })).toHaveCount(0);
+  await client.getByRole('button', { name: /Jess/ }).click();
+
+  // AC-W8-4: today and the next days are empty; the strip opens on Jess's day.
+  const day = client.getByRole('group', { name: 'Day' }).getByRole('button', { name: label });
+  await expect(day).toHaveAttribute('aria-pressed', 'true');
+  // AC-W8-5: its times failed to load; "Try again" asks again for the same day.
+  const problem = client.getByRole('alert').filter({ hasText: 'I couldn’t load the times' });
+  await expect(problem).toContainText(`I couldn’t load the times for ${label}.`);
+  await client.getByRole('button', { name: 'Try again' }).click();
+  await expect(client.getByTestId('free-times').getByRole('button').first()).toBeVisible();
+  await expect(day).toHaveAttribute('aria-pressed', 'true');
+  await expect(problem).toHaveCount(0);
+  expect(failed).toBe(1);
+  await expect(client.getByText(/^Times are in /)).toBeVisible();
 });

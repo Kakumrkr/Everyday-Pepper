@@ -13,10 +13,11 @@ import {
   upcomingDays,
 } from '../../../lib/public-booking';
 
+// Each answer names the day (and try) it is for, so another day's times never show.
 type Slots =
   | { state: 'loading' }
-  | { state: 'ready'; slots: AvailableSlot[] }
-  | { state: 'failed'; message: string };
+  | { state: 'ready'; key: string; slots: AvailableSlot[] }
+  | { state: 'failed'; key: string; message: string };
 
 /**
  * Picks a free start time: a strip of the next two weeks, then the times the business offers
@@ -93,7 +94,7 @@ export function SlotPicker({
   useEffect(() => {
     if (date === '' || searching) return;
     let current = true;
-    setSlots({ state: 'loading' });
+    const key = `${date}/${String(attempt)}`;
     void fetchJson(
       publicAvailabilityPath(slug, timeZone, parseDate(date), { serviceId, staffMemberId }),
       AvailabilityResponseSchema,
@@ -101,8 +102,8 @@ export function SlotPicker({
       if (!current) return;
       setSlots(
         answer.ok
-          ? { state: 'ready', slots: answer.data.slots }
-          : { state: 'failed', message: answer.message },
+          ? { state: 'ready', key, slots: answer.data.slots }
+          : { state: 'failed', key, message: answer.message },
       );
     });
     return () => {
@@ -110,7 +111,8 @@ export function SlotPicker({
     };
   }, [slug, timeZone, serviceId, staffMemberId, date, searching, attempt]);
 
-  const loading = searching || slots.state === 'loading';
+  const loading =
+    searching || slots.state === 'loading' || slots.key !== `${date}/${String(attempt)}`;
 
   return (
     <div className="flex flex-col gap-5">
