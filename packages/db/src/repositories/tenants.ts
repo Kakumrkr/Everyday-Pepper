@@ -139,7 +139,9 @@ export async function markCurrentTenantSetupReviewed(
 ): Promise<Tenant | undefined> {
   const [tenant] = await tx
     .update(tenants)
-    .set({ setupReviewedAt: sql`coalesce(${tenants.setupReviewedAt}, ${at.toISOString()}::timestamptz)` })
+    .set({
+      setupReviewedAt: sql`coalesce(${tenants.setupReviewedAt}, ${at.toISOString()}::timestamptz)`,
+    })
     .where(eq(tenants.id, sql`current_tenant_id()`))
     .returning();
   return tenant;
