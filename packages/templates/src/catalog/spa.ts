@@ -1,4 +1,5 @@
 import type { TemplateInput } from '@pepper/contracts';
+import { days } from './hours.js';
 
 /** Day spa: facials, body treatments and massage; rooms need turning over between guests. */
 export const spa: TemplateInput = {
@@ -82,6 +83,7 @@ export const spa: TemplateInput = {
     },
   ],
   defaultRules: { slotIntervalMinutes: 15, minimumNoticeMinutes: 240, maximumAdvanceDays: 120 },
+  defaultHours: { intervals: days([2, 3, 4, 5, 6, 7], '10:00', '18:00') },
   defaultAutonomy: {},
   intakeFields: [
     {

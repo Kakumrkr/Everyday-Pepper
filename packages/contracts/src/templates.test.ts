@@ -34,6 +34,7 @@ function template(overrides: Partial<TemplateInput> = {}): TemplateInput {
       { name: 'Haircut', durationMinutes: 30, priceFromCents: 3000, rebookAfterDays: 21 },
     ],
     defaultRules: { slotIntervalMinutes: 15 },
+    defaultHours: { intervals: [{ weekday: 2, start: '09:00', end: '17:00' }] },
     defaultAutonomy: {},
     intakeFields: [{ key: 'notes', label: 'Notes', type: 'long_text' }],
     insights: { enabled: ['rebooking_due'], rebookingIntervalDays: 21, minGapMinutes: 30 },
@@ -320,12 +321,33 @@ describe('TemplateInsightsSchema', () => {
 
 describe('TemplateSummarySchema', () => {
   it('describes a template for onboarding', () => {
-    const { id, name, group, terminology } = TemplateSchema.parse(template());
-    expect(TemplateSummarySchema.parse({ id, name, group, terminology })).toEqual({
-      id,
-      name,
-      group,
-      terminology,
-    });
+    const { id, name, group, featured, terminology } = TemplateSchema.parse(template());
+    const summary = { id, name, group, featured, serviceCount: 1, terminology };
+    expect(TemplateSummarySchema.parse(summary)).toEqual(summary);
+  });
+});
+
+describe('TemplateSchema defaultHours and featured (S45, ADR-0046)', () => {
+  it('is not featured unless it says so', () => {
+    expect(TemplateSchema.parse(template()).featured).toBe(false);
+    expect(TemplateSchema.parse(template({ featured: true })).featured).toBe(true);
+  });
+
+  it('needs opening hours on at least one day', () => {
+    expect(TemplateSchema.safeParse(template({ defaultHours: { intervals: [] } })).success).toBe(
+      false,
+    );
+  });
+
+  it('checks the hours like a staff member’s week', () => {
+    const overlapping = {
+      intervals: [
+        { weekday: 2, start: '09:00', end: '13:00' },
+        { weekday: 2, start: '12:00', end: '17:00' },
+      ],
+    };
+    expect(TemplateSchema.safeParse(template({ defaultHours: overlapping })).success).toBe(false);
+    const backwards = { intervals: [{ weekday: 2, start: '17:00', end: '09:00' }] };
+    expect(TemplateSchema.safeParse(template({ defaultHours: backwards })).success).toBe(false);
   });
 });

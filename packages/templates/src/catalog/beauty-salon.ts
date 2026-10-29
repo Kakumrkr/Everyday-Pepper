@@ -1,4 +1,5 @@
 import type { TemplateInput } from '@pepper/contracts';
+import { days } from './hours.js';
 
 /** Hair salon: cuts, color and styling; color needs a patch test and processing time. */
 export const beautySalon: TemplateInput = {
@@ -6,6 +7,7 @@ export const beautySalon: TemplateInput = {
   version: 1,
   name: 'Hair salon',
   group: 'beauty',
+  featured: true,
   terminology: {
     client: { singular: 'client', plural: 'clients' },
     staff: { singular: 'stylist', plural: 'stylists' },
@@ -97,6 +99,7 @@ export const beautySalon: TemplateInput = {
     },
   ],
   defaultRules: { slotIntervalMinutes: 15, minimumNoticeMinutes: 120, maximumAdvanceDays: 90 },
+  defaultHours: { intervals: days([2, 3, 4, 5, 6], '09:00', '18:00') },
   defaultAutonomy: {},
   intakeFields: [
     {

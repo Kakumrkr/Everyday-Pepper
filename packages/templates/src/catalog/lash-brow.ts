@@ -1,4 +1,5 @@
 import type { TemplateInput } from '@pepper/contracts';
+import { days } from './hours.js';
 
 /** Lash and brow studio: extensions need fills every few weeks; tinting needs a patch test. */
 export const lashBrow: TemplateInput = {
@@ -6,6 +7,7 @@ export const lashBrow: TemplateInput = {
   version: 1,
   name: 'Lash & brow studio',
   group: 'beauty',
+  featured: true,
   terminology: {
     client: { singular: 'client', plural: 'clients' },
     staff: { singular: 'artist', plural: 'artists' },
@@ -88,6 +90,7 @@ export const lashBrow: TemplateInput = {
     { name: 'Lash removal', category: 'Lashes', durationMinutes: 30, priceFromCents: 2500 },
   ],
   defaultRules: { slotIntervalMinutes: 15, minimumNoticeMinutes: 120, maximumAdvanceDays: 60 },
+  defaultHours: { intervals: days([2, 3, 4, 5, 6], '10:00', '18:00') },
   defaultAutonomy: {},
   intakeFields: [
     { key: 'lash_map', label: 'Lash map (curl, length, thickness)', type: 'long_text' },

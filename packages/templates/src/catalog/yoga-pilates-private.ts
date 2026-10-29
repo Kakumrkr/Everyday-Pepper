@@ -1,4 +1,5 @@
 import type { TemplateInput } from '@pepper/contracts';
+import { days } from './hours.js';
 
 /** Private yoga and Pilates: one-to-one or duet sessions, often weekly at a fixed time. */
 export const yogaPilatesPrivate: TemplateInput = {
@@ -68,6 +69,9 @@ export const yogaPilatesPrivate: TemplateInput = {
     },
   ],
   defaultRules: { slotIntervalMinutes: 30, minimumNoticeMinutes: 720, maximumAdvanceDays: 60 },
+  defaultHours: {
+    intervals: [...days([1, 2, 3, 4, 5], '07:00', '19:00'), ...days([6], '08:00', '12:00')],
+  },
   defaultAutonomy: {},
   intakeFields: [
     { key: 'goals', label: 'Goals', type: 'long_text' },

@@ -144,11 +144,22 @@ describe('GET /v1/templates', () => {
       .set('cookie', 'signed-in')
       .expect(200);
     const { templates } = TemplatesResponseSchema.parse(response.body);
-    expect(templates.map((t) => t.id)).toEqual(TemplateIdSchema.options);
+    // The four featured types first (S45, AC-W1-8).
+    expect(templates.map((t) => t.id)).toEqual([
+      'beauty-salon',
+      'barber',
+      'nails',
+      'lash-brow',
+      ...TemplateIdSchema.options.filter(
+        (id) => !['beauty-salon', 'barber', 'nails', 'lash-brow'].includes(id),
+      ),
+    ]);
     expect(templates[1]).toEqual({
       id: 'barber',
       name: 'Barbershop',
       group: 'beauty',
+      featured: true,
+      serviceCount: 8,
       terminology: {
         client: { singular: 'client', plural: 'clients' },
         staff: { singular: 'barber', plural: 'barbers' },

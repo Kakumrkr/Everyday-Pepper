@@ -1,4 +1,5 @@
 import type { TemplateInput } from '@pepper/contracts';
+import { days } from './hours.js';
 
 /** Personal training: recurring one-to-one sessions, often several a week. */
 export const personalTrainer: TemplateInput = {
@@ -64,6 +65,9 @@ export const personalTrainer: TemplateInput = {
     },
   ],
   defaultRules: { slotIntervalMinutes: 30, minimumNoticeMinutes: 720, maximumAdvanceDays: 60 },
+  defaultHours: {
+    intervals: [...days([1, 2, 3, 4, 5], '07:00', '19:00'), ...days([6], '08:00', '12:00')],
+  },
   defaultAutonomy: {},
   intakeFields: [
     { key: 'goals', label: 'Goals', type: 'long_text' },

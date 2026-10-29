@@ -54,14 +54,22 @@ export function getTemplate(id: TemplateId): Template {
   return template;
 }
 
-/** What onboarding shows to pick a business type (`GET /v1/templates`). */
+/**
+ * What onboarding shows to pick a business type (`GET /v1/templates`): the featured types
+ * first, each group in the schema's order.
+ */
 export function templateSummaries(): TemplateSummary[] {
-  return listTemplates().map(({ id, name, group, terminology }) => ({
-    id,
-    name,
-    group,
-    terminology,
-  }));
+  const templates = listTemplates();
+  return [...templates.filter((t) => t.featured), ...templates.filter((t) => !t.featured)].map(
+    ({ id, name, group, featured, serviceCatalog, terminology }) => ({
+      id,
+      name,
+      group,
+      featured,
+      serviceCount: serviceCatalog.length,
+      terminology,
+    }),
+  );
 }
 
 /**
