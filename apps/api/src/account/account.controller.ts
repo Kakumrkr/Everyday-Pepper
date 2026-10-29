@@ -86,7 +86,9 @@ export class AccountController {
     @Body() body: unknown,
   ): Promise<Business> {
     const input = parseBody(NewTenantSchema, body);
-    const business = await answering(() => this.tenancy.createBusiness(session.user.id, input));
+    const business = await answering(() =>
+      this.tenancy.createBusiness(session.user.id, input, session.user.name),
+    );
     await this.auth.setActiveTenant(session, business.id);
     return business;
   }

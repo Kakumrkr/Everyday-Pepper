@@ -290,21 +290,29 @@ describe('POST /v1/tenants', () => {
   it('creates a business owned by the user and makes it active', async () => {
     const response = await post(input).expect(201);
     expect(response.body).toEqual(BUSINESS);
-    expect(tenancy.createBusiness).toHaveBeenCalledWith(USER, {
-      ...input,
-      locale: 'en-US',
-      templateId: null,
-    });
+    expect(tenancy.createBusiness).toHaveBeenCalledWith(
+      USER,
+      {
+        ...input,
+        locale: 'en-US',
+        templateId: null,
+      },
+      'Ana',
+    );
     expect(auth.setActiveTenant).toHaveBeenCalledWith(auth.session, TENANT);
   });
 
   it('passes the chosen template on', async () => {
     await post({ ...input, templateId: 'beauty-salon' }).expect(201);
-    expect(tenancy.createBusiness).toHaveBeenCalledWith(USER, {
-      ...input,
-      locale: 'en-US',
-      templateId: 'beauty-salon',
-    });
+    expect(tenancy.createBusiness).toHaveBeenCalledWith(
+      USER,
+      {
+        ...input,
+        locale: 'en-US',
+        templateId: 'beauty-salon',
+      },
+      'Ana',
+    );
   });
 
   it('400 for an unknown template', async () => {

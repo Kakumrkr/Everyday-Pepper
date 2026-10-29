@@ -1,5 +1,6 @@
 import {
   BookingPageSettingsSchema,
+  TenantIdSchema,
   UserIdSchema,
   type BookingPageSettings,
   type NewTenant,
@@ -13,6 +14,7 @@ import {
   withMember,
   type Database,
   type Tenant,
+  type TenantTx,
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 
@@ -25,20 +27,24 @@ export const BUSINESS_LIMIT_PER_OWNER = 5;
 /**
  * Creates a business owned by `owner`, with its `tenant.created` audit entry, in one
  * transaction. Throws `TenantSlugTakenError` or `BusinessLimitReachedError` (`@pepper/db`).
- * `owner` comes from the authenticated session.
+ * `owner` comes from the authenticated session. `seed` runs last in the same transaction, as
+ * the owner (S45: the business type's menu, staff and hours, written by the layers above).
  */
 export async function createBusiness(
   db: Database,
   owner: UserId,
   input: NewTenant,
-  options: { requestId?: string | undefined } = {},
+  options: {
+    requestId?: string | undefined;
+    seed?: ((tx: TenantTx, actor: Actor, tenant: Tenant) => Promise<void>) | undefined;
+  } = {},
 ): Promise<Tenant> {
   const ownerUserId = UserIdSchema.parse(owner);
   return createTenant(db, input, {
     owner: ownerUserId,
     ownerLimit: BUSINESS_LIMIT_PER_OWNER,
-    afterInsert: (tx, tenant) =>
-      appendAuditEntry(tx, {
+    afterInsert: async (tx, tenant) => {
+      await appendAuditEntry(tx, {
         actor: { kind: 'user', userId: ownerUserId },
         change: {
           action: 'tenant.created',
@@ -53,7 +59,16 @@ export async function createBusiness(
           },
         },
         requestId: options.requestId,
-      }),
+      });
+      if (options.seed !== undefined) {
+        const context = { tenantId: TenantIdSchema.parse(tenant.id), userId: ownerUserId };
+        const actor: Actor = {
+          context: { ...context, role: 'owner' },
+          requestId: options.requestId,
+        };
+        await options.seed(tx, actor, tenant);
+      }
+    },
   });
 }
 

@@ -42,21 +42,33 @@ export async function createService(
   input: ServiceInput,
 ): Promise<Service> {
   requirePermission(actor, 'services.manage');
+  return withTenant(db, actor.context.tenantId, (tx) => createServiceIn(tx, actor, input));
+}
+
+/**
+ * `createService` inside the caller's transaction. `rebookAfterDays`: when a regular is due
+ * again, from a template's starting menu (S45).
+ */
+export async function createServiceIn(
+  tx: TenantTx,
+  actor: Actor,
+  input: ServiceInput,
+  options: { rebookAfterDays?: number | null } = {},
+): Promise<Service> {
+  requirePermission(actor, 'services.manage');
   const fields = ServiceInputSchema.parse(input);
-  return withTenant(db, actor.context.tenantId, async (tx) => {
-    const row = await insertService(tx, fields);
-    await appendAuditEntry(tx, {
-      actor: auditActorOf(actor),
-      change: {
-        action: 'service.created',
-        entity: { type: 'service', id: row.id },
-        before: null,
-        after: serviceAuditValues(row),
-      },
-      requestId: actor.requestId,
-    });
-    return toService(row);
+  const row = await insertService(tx, fields, options);
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'service.created',
+      entity: { type: 'service', id: row.id },
+      before: null,
+      after: serviceAuditValues(row),
+    },
+    requestId: actor.requestId,
   });
+  return toService(row);
 }
 
 /** Replaces a service's fields (all of them; `active: false` takes it off the menu). */

@@ -9,11 +9,11 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S45 Phase 10 · Business type at signup** (brief approved 2026-10-29: "Go ahead with your recommendations and complete the session" — D-1 A one session (events → S45.2 only if the context runs long), D-2 A the owner is the first staff member, D-3 A an `activation_events` table, D-4 A the type required in the UI, D-5 ADR-0046 pre-approved). Branch `claude/business-type-signup-menu-hours-56rlwb`.
 - [x] T1 docs: AC-W1-7…10, traceability, ADR-0046
-- [ ] T2 contracts + templates: `defaultHours`, `featured` in the summary
-- [ ] T3 seeding at creation (api → `afterInsert`), appointments `*In` variants
+- [x] T2 contracts + templates: `defaultHours`, `featured` in the summary
+- [x] T3 seeding at creation (api → `afterInsert`), appointments `*In` variants
 - [ ] T4 activation events: migration 0052, recorded at signup, creation, bookable, first booking
 - [ ] T5 web: the type picker on `AuthPage`, US zones first; Playwright zero-typing journey
-- Next: T2.
+- Next: T4 (activation events).
 
 ## Last sessions
 - **S44 Phase 10 · Account recovery + the waitlist window check (2026-10-28)** ([ADR-0045](../adr/0045-account-recovery-and-email.md)). Full entry in [session-log.md](session-log.md).
