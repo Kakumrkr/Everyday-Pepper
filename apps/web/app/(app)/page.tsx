@@ -2,6 +2,7 @@ import {
   AiActionsResponseSchema,
   AiProposalsResponseSchema,
   FeedResponseSchema,
+  SetupReviewSchema,
   TasksResponseSchema,
 } from '@pepper/contracts';
 import { EmptyState } from '@pepper/ui';
@@ -13,6 +14,7 @@ import { AiActivity } from '../_components/chat/ai-activity';
 import { BriefingCard } from '../_components/feed/briefing-card';
 import { FeedCard } from '../_components/feed/feed-card';
 import { kitLink } from '../_components/kit-link';
+import { SetupReviewCard } from '../_components/setup/setup-review-card';
 import { TaskCard } from '../_components/tasks/task-card';
 import { Unavailable } from '../_components/unavailable';
 
@@ -23,7 +25,9 @@ export const dynamic = 'force-dynamic';
  * Signed-in home, inside the app shell: the operator feed (S35, ADR-0039). Today's briefing
  * (S38a), Needs your OK (the AI's proposals), Suggestions (what the rules found, `/v1/feed`)
  * and Done for you (receipts), then the to-dos. On the kit (S41): the plum briefing first, what
- * needs a decision raised, the rest flat; notifications and the account moved to More.
+ * needs a decision raised, the rest flat; notifications and the account moved to More. Owners
+ * and managers see the setup review first until it is checked, and anything that stops clients
+ * from booking (S46); when it can't load, Home says nothing about setup rather than guess.
  */
 export default async function HomePage() {
   const account = await currentAccount();
@@ -50,6 +54,10 @@ export default async function HomePage() {
         currentJson('/v1/ai/actions', AiActionsResponseSchema),
       ])
     : [null, null];
+  const setup =
+    current?.permissions.includes('settings.manage') === true
+      ? await currentJson('/v1/setup', SetupReviewSchema)
+      : null;
   const feed =
     current?.permissions.includes('feed.read') === true
       ? await currentJson('/v1/feed', FeedResponseSchema)
@@ -76,6 +84,7 @@ export default async function HomePage() {
           action={{ label: 'Choose a business', href: MORE_HREF, renderLink: kitLink }}
         />
       ) : null}
+      {current !== null && setup !== null ? <SetupReviewCard review={setup} /> : null}
       {current !== null && feed !== null ? (
         <BriefingCard feed={feed} timeZone={current.business.timeZone} />
       ) : null}

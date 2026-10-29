@@ -2,10 +2,16 @@
 
 import { AvailabilityResponseSchema, parseDate, type AvailableSlot } from '@pepper/contracts';
 import { Button, chipStyle, cx, FOCUS_RING, Skeleton } from '@pepper/ui';
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { timeLabel } from '../../../lib/booking';
 import { fetchJson } from '../../../lib/client-api';
-import { localTimeLabel, publicAvailabilityPath, upcomingDays } from '../../../lib/public-booking';
+import {
+  firstFreeDay,
+  localTimeLabel,
+  publicAvailabilityPath,
+  publicRangePath,
+  upcomingDays,
+} from '../../../lib/public-booking';
 
 type Slots =
   | { state: 'loading' }
@@ -14,7 +20,11 @@ type Slots =
 
 /**
  * Picks a free start time: a strip of the next two weeks, then the times the business offers
- * that day (`GET …/availability`), with who takes each one when the client chose anyone.
+ * that day (`GET …/availability`), with who takes each one when the client chose anyone. It
+ * opens on the first day with a free time (S46, AC-W8-4): one request over the whole strip per
+ * service and staff choice, then the chosen day's times. A day the client taps wins over that
+ * search, and a late answer never replaces a newer one. A failed load offers "Try again" for
+ * the same day (AC-W8-5); the choices made before the picker stay with the page.
  */
 export function SlotPicker({
   slug,
@@ -40,12 +50,48 @@ export function SlotPicker({
 }) {
   const days = upcomingDays(timeZone, now);
   const [date, setDate] = useState(days[0]?.date ?? '');
+  // Until the strip-wide search answers (or the client taps a day), no day is loaded.
+  const [searching, setSearching] = useState(true);
+  // The whole strip has nothing free: said once, above the day's own (empty) times.
+  const [rangeEmpty, setRangeEmpty] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  // The client tapped a day since this search started: its answer no longer moves the strip.
+  const picked = useRef(false);
+  const heading = useRef<HTMLHeadingElement>(null);
   const [slots, setSlots] = useState<Slots>({ state: 'loading' });
   const dayLabel = days.find((day) => day.date === date)?.label ?? date;
   const timesId = useId();
+  const firstDate = days[0]?.date ?? '';
+  const lastDate = days.at(-1)?.date ?? '';
 
   useEffect(() => {
-    if (date === '') return;
+    let current = true;
+    picked.current = false;
+    setSearching(true);
+    setRangeEmpty(false);
+    const strip = upcomingDays(timeZone, now);
+    const path = publicRangePath(slug, timeZone, strip, { serviceId, staffMemberId });
+    if (path === null) {
+      setSearching(false);
+      return;
+    }
+    void fetchJson(path, AvailabilityResponseSchema).then((answer) => {
+      if (!current) return;
+      // A failed search proves nothing: the strip stays on today and loads it.
+      const found = answer.ok
+        ? firstFreeDay(answer.data, timeZone, strip)
+        : ({ kind: 'unknown' } as const);
+      if (found.kind === 'day' && !picked.current) setDate(found.date);
+      if (found.kind === 'none') setRangeEmpty(true);
+      setSearching(false);
+    });
+    return () => {
+      current = false;
+    };
+  }, [slug, timeZone, now, serviceId, staffMemberId, firstDate, lastDate]);
+
+  useEffect(() => {
+    if (date === '' || searching) return;
     let current = true;
     setSlots({ state: 'loading' });
     void fetchJson(
@@ -62,7 +108,9 @@ export function SlotPicker({
     return () => {
       current = false;
     };
-  }, [slug, timeZone, serviceId, staffMemberId, date]);
+  }, [slug, timeZone, serviceId, staffMemberId, date, searching, attempt]);
+
+  const loading = searching || slots.state === 'loading';
 
   return (
     <div className="flex flex-col gap-5">
@@ -84,7 +132,10 @@ export function SlotPicker({
                 FOCUS_RING,
               )}
               onClick={() => {
+                // The client's own choice: the strip-wide search no longer moves the day.
+                picked.current = true;
                 setDate(day.date);
+                setSearching(false);
               }}
             >
               <span className="type-caption">{day.weekday}</span>
@@ -95,10 +146,21 @@ export function SlotPicker({
         })}
       </div>
       <section aria-labelledby={timesId} className="flex flex-col gap-3">
-        <h2 id={timesId} className="m-0 type-label text-ink-2">
+        <h2
+          id={timesId}
+          ref={heading}
+          tabIndex={-1}
+          className="m-0 type-label text-ink-2 outline-none"
+        >
           Times on {dayLabel}
         </h2>
-        {slots.state === 'loading' ? (
+        {rangeEmpty ? (
+          <p className="m-0 type-body text-ink-2" data-testid="range-empty">
+            No free times in the next two weeks.
+            {onWaitlist === undefined ? null : ' Join the waitlist and I’ll tell you if one opens.'}
+          </p>
+        ) : null}
+        {loading ? (
           <div
             role="status"
             className="grid grid-cols-[repeat(auto-fill,minmax(--spacing(26),1fr))] gap-2"
@@ -109,15 +171,27 @@ export function SlotPicker({
             ))}
           </div>
         ) : slots.state === 'failed' ? (
-          <p
-            className="m-0 rounded-md bg-warn-soft px-4 py-3 type-body font-semibold text-warn"
-            role="alert"
-          >
-            {slots.message}
-          </p>
+          <div className="flex flex-col items-start gap-3 rounded-md bg-warn-soft px-4 py-3">
+            <p className="m-0 type-body font-semibold text-warn" role="alert">
+              I couldn’t load the times for {dayLabel}.{' '}
+              <span className="font-normal">{slots.message}</span>
+            </p>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                // The button goes while the times load: focus stays on what it reloads.
+                heading.current?.focus();
+                setAttempt((n) => n + 1);
+              }}
+            >
+              Try again
+            </Button>
+          </div>
         ) : slots.slots.length === 0 ? (
           <div className="flex flex-col items-start gap-3 rounded-lg bg-surface-2 px-5 py-6">
-            <p className="m-0 type-body text-ink">Nothing free that day. Try another day.</p>
+            <p className="m-0 type-body text-ink">
+              {rangeEmpty ? 'Nothing free that day.' : 'Nothing free that day. Try another day.'}
+            </p>
             {onWaitlist === undefined ? null : (
               <Button
                 variant="secondary"
@@ -157,7 +231,7 @@ export function SlotPicker({
           </div>
         )}
       </section>
-      <p className="m-0 type-caption text-ink-2">Times are {localTimeLabel(timeZone)}.</p>
+      <p className="m-0 type-caption text-ink-2">Times are in {localTimeLabel(timeZone)}.</p>
     </div>
   );
 }
