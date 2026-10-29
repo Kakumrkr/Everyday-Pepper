@@ -22,5 +22,40 @@ Every feature and bug fix ships with automated tests that were actually run. Acc
 - Tests never call the real OpenAI API. Unit and integration tests use the scripted fake or fixtures shaped like OpenAI's documented API; evals replay cassettes. Only `pnpm --filter @pepper/ai eval --provider openai --record` calls the API: in S27, with a key, a model price and an estimate under the per-run cap (Phase 6 budget $5, playbook §4).
 - Time is injected (clock abstraction); tests cover DST transitions and multiple US time zones.
 - Test data contains no real personal data.
-- Tests run in tiers (M2, `CLAUDE.md` "Running tests"): the changed package's tests and the touched integration files while building, typecheck and lint of what changed at each checkpoint, and, at the end after the code review, `pnpm check`, `pnpm test:integration` (when the session changed code it runs) and Playwright in full once, one suite at a time; a red step re-runs only the failing tests, and CI runs every suite once on the PR (PCR-008).
+- Code-change tests run in tiers (M2, `CLAUDE.md` "Running tests"): the changed package's tests and the touched integration files while building, typecheck and lint of what changed at each checkpoint, and, at the end after review/fixes, `pnpm check`, `pnpm test:integration` (when its code changed) and Playwright in full once when a screen/flow changed, one local suite at a time. Prose-only work uses the selection matrix below (PCR-009). A red step re-runs affected failing cases and any new scope; CI remains unchanged.
 - Tests that pass locally must pass on GitHub, whose runners are slower and run every suite at once: anything that waits on time (polling, property runs, start-up) uses generous explicit limits (`expect.poll`/`vi.waitFor` with a `timeout`, never the 1 s default). CI has no retries; a failure is fixed, never retried away. In cloud sessions Playwright runs CI's headless shell (see [dev-setup](dev-setup.md)).
+
+## Check selection from S46 through launch
+
+Classify the actual final diff, including intended new files and downstream consumers, rather than choosing by the session name. The brief names the profile; the close rechecks it if the scope changed. This matrix is the maintained source for check selection; `/session-close` supplies the commands and order.
+
+| Profile | During work | Local close | CI and boundaries |
+|---|---|---|---|
+| Non-runtime prose/planning/workflow Markdown only | Review facts, decisions, instructions and affected references | Diff/whitespace, affected relative links and acceptance-ID/reference consistency when applicable; skill validation for edited skills where available | Existing docs-only CI behavior; no app build, Docker or application suites when none consumes the changes |
+| UI/screens or user flows | Changed UI/package logic tests and affected browser specs; typecheck/lint changed scope and dependents | `pnpm check`; full Playwright once when a screen/flow changed; integration only if its code also changed | Normal required CI; retain mobile/desktop, visual/accessibility and relevant domain guarantees |
+| Backend/domain/schema/integration | Changed unit and integration files; typecheck/lint affected packages and dependents | `pnpm check`; full integration when its code changed; full Playwright if a user-visible flow changed | Normal required CI; retain isolation, permissions, concurrency, idempotency and migration checks |
+| AI/prompt/tool or mixed/uncertain change | Affected logic, integrations and scripted evals; downstream screens/flows as needed | Normal code-change gates above, including applicable replay; real-model recording only in its approved session and budget | Normal required CI; safety and eval thresholds unchanged; runtime-loaded Markdown is a code input, not prose-only |
+
+A Markdown extension alone does not qualify for prose-only checks. Runtime prompts, templates, fixtures, executable scripts, dependencies/lockfiles, build inputs or configuration require checks of the behavior they affect. If uncertain, use the normal code-change path. Review workflow-instruction changes for preserved check coverage, failure handling and publication authorization.
+
+## Avoid repeated work without weakening gates
+
+- Focus checks during implementation. Reuse already-passed targeted evidence at the same checkpoint only while code, dependencies, fixtures, configuration and relevant environment are unchanged. Run the required final code-change checks once after review/fixes; this rule does not eliminate the final run.
+- If review fixes touch a new area, check that area and its consumers. Repeat a full suite only when changed scope, unresolved concerns or new failures justify it; diagnose repeated unchanged failures instead of using another full run as the fix. No hidden retries, loosened thresholds, disabled cases or smaller meaningful fixtures.
+- Keep local full suites sequential. Reuse a valid stack for related checks, rebuild when inputs require it, and use existing build caching. Do not remove an apparent duplicate build before verifying host-versus-container output requirements.
+- Reuse deliberate screenshot baselines and walk one changed customer/owner/staff flow as required by the session standard; do not recreate screenshots of every unaffected screen.
+- In the existing session-log entry, record one compact timing line from available logs: setup/build, targeted checks, final suites, walkthrough/rework, CI execution and time between attempts. Use "unknown" when not measured. No new report/dashboard or test rerun just to collect timing.
+
+## Efficiency baseline and next investigation
+
+Read on a performance/CI maintenance review, not as mandatory context for each feature session. These are actual Actions timings, not full Claude development-session timings:
+
+| Source | Observed elapsed time | Interpretation |
+|---|---|---|
+| [S44 successful run](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/actions/runs/40788762841) | 20 min 18 s | Recent successful CI baseline |
+| [S45 earlier failed run](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/actions/runs/40818175681) | 22 min 15 s | Remembered-fact chat browser case failed; cause not diagnosed here |
+| [S45 eventual successful run](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/actions/runs/40820780831) | 65 min 9 s | First attempt ~20 min, ~32 min gap after its last job, then ~13 min integration rerun; gap cause unknown |
+
+The original S45 integration attempt failed episode-search latency: p95 **615.43 ms** over the existing **450 ms** failure limit (already 3× the 150 ms target). A later rerun passed. Resource contention is plausible from integration configs/history, not established as the cause. Diagnose it; do not increase the threshold or retry it away. S45's retained browser job took 19 min 44 s, including 3 min 28 s stack startup and a 15 min 11 s browser command/build prerequisite. Its unit/coverage step was 2 min 6 s; jobs run in parallel, so their durations cannot be added as wall time.
+
+Use a separate bounded maintenance session to inspect browser fixture/setup cost and package/file concurrency, and to compare controlled latency execution with the current complete run. Keep the same assertions, fixture scale and every-PR checks during investigation. Do not serialize operations inside race-condition tests. No CI/helper/runtime changes or measured speedup are claimed by this workflow refinement.

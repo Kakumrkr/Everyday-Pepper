@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-29 · **Plan version:** 0.34 ([PCR-008](changes/PCR-008.md)) · **Current phase:** 10 — First 10 minutes (S44 recovery, S45 business type done) → next: **S46** (setup checklist and warnings)
+**Last updated:** 2026-10-29 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 10 — First 10 minutes (S44 recovery, S45 business type done) → next: **S46** (setup review, readiness and recoverable availability)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -33,6 +33,8 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **Before S46 (user standing authority, 2026-10-29):** [PCR-009](changes/PCR-009.md) separates reviewed setup from automatic bookability, keeps current warnings, defines public no-hours/first-free-day behavior and adds in-place availability retry; explicit shared acceptance replaces the private-review gate. Planning only; S46 is not implemented. S47 still owns contact/profile details.
+- **Workflow through launch (2026-10-29, PCR-009):** the existing brief/close skills now use the [maintained check matrix and efficiency baseline](../engineering/testing-strategy.md): prose-only validation, targeted development checks, required final code checks once, diagnosis before reruns, reused valid setup, concise existing records and one timing line. No test/CI script changed; Claude's existing approval and GitHub closeout flow stays intact.
 - **S45 (user, 2026-10-29):** at the brief "Go ahead with your recommendations and complete the session" (D-1 one session; D-2 the owner as first staff; D-3 activation tables; D-4 type required on screen; D-5 ADR-0046). **Claude:** seed through the screens' functions; `signup_events` global, `activation_events` per business; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S44 (user, 2026-10-28):** at the brief "D1 is B. Rest all, go with your recommendation. and complete the session" (D-1 no split; D-2 account emails through `MAILER`, ADR-0045; D-3 migration 0051 marks earlier accounts confirmed). **Claude:** the free-time rule as the matcher's; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
 - **S43.2 (user, 2026-10-28):** at the brief "go with your recommendation and complete the session" (D-1 one session, no split; D-2 copy pass on the account screens and the lines met on the way). **Claude:** `AuthPage` with the sticky bar on every width; the API status only when it isn't ready; the Phase 9 scores; the review's 2 and the walkthrough's 2 fixes. Full wording in [decisions.md](decisions.md).
@@ -69,7 +71,7 @@ S1–S45, M1–M2 and P1 are done (Phases 0–9: the re-plan and the new look on
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S46 | Setup checklist + warnings; staff without hours hidden; first free day; plain zone names | 10 | Review UX #1–#5 closed with tests |
+| S46 | Setup review independent of bookability; current warnings; public no-hours eligibility; first free day and retry; plain zone names ([PCR-009](changes/PCR-009.md)) | 10 | AC-W1-11/12, AC-W8-3…6; existing safeguards preserved |
 | S47 | Branded booking page (profile, images, colors), remembered devices, drop-off per step; **Phase 10 gate** | 10 | New owner bookable < 10 min |
 | S48 | Client import: CSV, JSON or JSONL (five tools, generic, or an own app's export), smart mapping, preview, dedupe, undo by batch | 11 | AC-W1-3; no duplicates on re-import |
 | S49 | History + upcoming appointments import; tags, birthdays | 11 | 1,000 clients / 5,000 visits < 2 min |
