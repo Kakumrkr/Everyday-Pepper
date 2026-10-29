@@ -18,6 +18,7 @@ export * from './permissions.js';
 export * from './public-booking.js';
 export * from './push.js';
 export * from './rules.js';
+export * from './setup.js';
 export * from './templates.js';
 export * from './time.js';
 export * from './tool-cards.js';

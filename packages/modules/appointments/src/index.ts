@@ -21,6 +21,7 @@ export * from './services/reminders.js';
 export * from './services/rules.js';
 export * from './services/seed.js';
 export * from './services/services.js';
+export * from './services/setup.js';
 export * from './services/smart-waitlist.js';
 export * from './services/staff.js';
 export * from './services/team-pushes.js';

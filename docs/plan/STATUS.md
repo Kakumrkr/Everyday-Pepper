@@ -7,7 +7,14 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress.
+**S46** (brief approved 2026-10-29: "Go ahead with your recommendations and complete the session": D-1 one session, fallback split after task 4 → S46.2; D-2 `tenants.setup_reviewed_at`, migration 0053; D-3 no ADR, PCR-009 covers it). Profile: backend/domain/schema + screens.
+1. [ ] AC traceability; migration 0053 + repository + RLS test
+2. [ ] Setup review domain + `GET /v1/setup`, `POST /v1/setup/review` (settings.manage, audited)
+3. [ ] Home setup card (review, warnings, links; staff hidden) + e2e + screenshots
+4. [ ] Public menu drops staff without hours / services without such a provider
+5. [ ] Slot picker: first free day (one bounded range request), "Try again", truncation-safe
+6. [ ] Plain zone names (`zoneName`) on create business, booking page, staff page
+Next: task 1.
 
 ## Last sessions
 - **S45 Phase 10 · Business type at signup → pre-filled menu and hours; activation events (2026-10-29)** ([ADR-0046](../adr/0046-business-type-seeding-and-activation-events.md)). Full entry in [session-log.md](session-log.md).

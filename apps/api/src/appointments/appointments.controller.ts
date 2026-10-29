@@ -7,10 +7,12 @@ import {
   TimeOffIdSchema,
   TimeOffInputSchema,
   TimeOffQuerySchema,
+  SetupReviewSchema,
   WeeklyHoursSchema,
   type BookingRulesResponse,
   type Service,
   type ServicesResponse,
+  type SetupReview,
   type StaffMember,
   type StaffResponse,
   type TimeOff,
@@ -43,7 +45,7 @@ const TimeOffParamsSchema = StaffParamsSchema.extend({ timeOffId: TimeOffIdSchem
 /**
  * The appointments data of the active business: `/v1/services` and `/v1/staff` with each
  * staff member's `hours` and `time-off` (ADR-0015), and its booking rules, `/v1/rules`
- * (ADR-0016). Route guards check the permission at all; the domain services check it again,
+ * (ADR-0016), and Home's setup review, `/v1/setup` (S46). Route guards check the permission at all; the domain services check it again,
  * on the record where it is scoped (a staff member's own time off), and write the audit
  * entries.
  */
@@ -51,6 +53,21 @@ const TimeOffParamsSchema = StaffParamsSchema.extend({ timeOffId: TimeOffIdSchem
 @UseGuards(TenantGuard)
 export class AppointmentsController {
   constructor(private readonly appointments: AppointmentsService) {}
+
+  /** The setup review and current readiness warnings (S46); 403 `forbidden` for staff. */
+  @Get('setup')
+  @RequirePermission('settings.manage')
+  async setup(@CurrentTenant() tenant: TenantContext): Promise<SetupReview> {
+    return SetupReviewSchema.parse(await answering(() => this.appointments.setup(tenant)));
+  }
+
+  /** "I've checked these": 200 the review, kept from the first time; 403 for staff. */
+  @Post('setup/review')
+  @HttpCode(200)
+  @RequirePermission('settings.manage')
+  async reviewSetup(@CurrentTenant() tenant: TenantContext): Promise<SetupReview> {
+    return SetupReviewSchema.parse(await answering(() => this.appointments.reviewSetup(tenant)));
+  }
 
   @Get('services')
   @RequirePermission('services.read')

@@ -152,6 +152,9 @@ export const tenants = pgTable(
     // The postal address commercial mail carries (S36, CAN-SPAM); NULL: no rebooking emails
     // are drafted. Owners and managers set it with the feed's switches.
     mailingAddress: text('mailing_address'),
+    // When an owner or manager last said "I've checked these" on Home's setup review (S46,
+    // PCR-009); NULL: not yet. Being bookable never sets it, and it changes no setup.
+    setupReviewedAt: timestamp('setup_reviewed_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [

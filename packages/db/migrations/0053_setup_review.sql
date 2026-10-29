@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "setup_reviewed_at" timestamp with time zone;

@@ -130,6 +130,22 @@ export async function updateCurrentTenantMailingAddress(
 }
 
 /**
+ * Records that the business's setup was reviewed (S46, PCR-009), keeping the first time: a
+ * second "I've checked these" changes nothing. Touches no other column.
+ */
+export async function markCurrentTenantSetupReviewed(
+  tx: TenantTx,
+  at: Date,
+): Promise<Tenant | undefined> {
+  const [tenant] = await tx
+    .update(tenants)
+    .set({ setupReviewedAt: sql`coalesce(${tenants.setupReviewedAt}, ${at.toISOString()}::timestamptz)` })
+    .where(eq(tenants.id, sql`current_tenant_id()`))
+    .returning();
+  return tenant;
+}
+
+/**
  * Runs `work` in a transaction bound to the business whose booking page is at `slug`, for
  * anonymous visitors (ADR-0022); `undefined` when no business has that slug. The business is
  * found through the read-only `public_lookup` policy, which needs no tenant; the transaction is

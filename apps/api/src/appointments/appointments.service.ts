@@ -1,9 +1,11 @@
 import {
+  acknowledgeSetupReview,
   addTimeOff,
   createService,
   createStaffMember,
   getBookingRules,
   getRuleDefaults,
+  getSetupReview,
   getWorkingHours,
   listServices,
   listStaff,
@@ -20,6 +22,7 @@ import type {
   Service,
   ServiceId,
   ServiceInput,
+  SetupReview,
   StaffMember,
   StaffMemberId,
   StaffMemberInput,
@@ -47,6 +50,14 @@ export class AppointmentsService {
 
   constructor(@Inject(DATABASE) database: { db: Database }) {
     this.db = database.db;
+  }
+
+  setup(tenant: TenantContext): Promise<SetupReview> {
+    return getSetupReview(this.db, actorOf(tenant));
+  }
+
+  reviewSetup(tenant: TenantContext): Promise<SetupReview> {
+    return acknowledgeSetupReview(this.db, actorOf(tenant));
   }
 
   services(tenant: TenantContext): Promise<Service[]> {
