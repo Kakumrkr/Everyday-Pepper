@@ -187,15 +187,17 @@ test.describe('business type at signup (S45, ADR-0046)', () => {
     await expect(page).toHaveURL(/\/onboarding\/business$/);
 
     const zones = page.getByLabel('Time zone').locator('option');
+    // Plain names with their city (S46, AC-W8-6); each option still stores the zone id.
     expect((await zones.allTextContents()).slice(0, 7)).toEqual([
-      'America/New York',
-      'America/Chicago',
-      'America/Denver',
-      'America/Phoenix',
-      'America/Los Angeles',
-      'America/Anchorage',
-      'Pacific/Honolulu',
+      'Eastern Time (New York)',
+      'Central Time (Chicago)',
+      'Mountain Time (Denver)',
+      'Arizona Time (Phoenix)',
+      'Pacific Time (Los Angeles)',
+      'Alaska Time (Anchorage)',
+      'Hawaii Time (Honolulu)',
     ]);
+    await expect(zones.nth(3)).toHaveAttribute('value', 'America/Phoenix');
     const browserZone = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
     await expect(page.getByLabel('Time zone')).toHaveValue(browserZone);
   });
