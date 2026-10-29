@@ -62,11 +62,7 @@ export async function acknowledgeSetupReview(
   });
 }
 
-async function setupReviewIn(
-  tx: TenantTx,
-  actor: Actor,
-  known?: Tenant,
-): Promise<SetupReview> {
+async function setupReviewIn(tx: TenantTx, actor: Actor, known?: Tenant): Promise<SetupReview> {
   // A member's own business is always visible to them.
   const tenant = known ?? (await findCurrentTenant(tx));
   if (tenant === undefined) throw new Error('No tenant in this transaction');
