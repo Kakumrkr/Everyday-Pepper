@@ -12,8 +12,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T2 contracts + templates: `defaultHours`, `featured` in the summary
 - [x] T3 seeding at creation (api → `afterInsert`), appointments `*In` variants
 - [x] T4 activation events: migration 0052, recorded at signup, creation, bookable, first booking
-- [ ] T5 web: the type picker on `AuthPage`, US zones first; Playwright zero-typing journey
-- Next: T5 (web picker + US zones + Playwright).
+- [x] T5 web: the type picker on `AuthPage`, US zones first; Playwright zero-typing journey
+- Next: `/session-close` (review, checks, walkthrough, docs, PR).
 
 ## Last sessions
 - **S44 Phase 10 · Account recovery + the waitlist window check (2026-10-28)** ([ADR-0045](../adr/0045-account-recovery-and-email.md)). Full entry in [session-log.md](session-log.md).

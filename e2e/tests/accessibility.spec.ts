@@ -19,6 +19,7 @@ import {
   onboardOwner,
   ownClientAddress,
   PASSWORD,
+  pickBusinessType,
   signOut,
   signUp,
   unique,
@@ -188,6 +189,7 @@ test('the account screens have no serious accessibility violations', async ({ pa
   await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
   await hydrated(page.getByRole('button', { name: 'Create business' }));
   await expectAccessible(page, 'create business');
+  await pickBusinessType(page, 'Barbershop');
   await page.getByLabel('Business name').fill('Axe Studio');
   await page.getByLabel('Booking link').fill(unique('axe'));
   await page.getByRole('button', { name: 'Create business' }).click();

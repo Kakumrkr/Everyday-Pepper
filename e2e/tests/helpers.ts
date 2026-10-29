@@ -98,26 +98,55 @@ export interface Owner {
   business: string;
 }
 
+/** Picks a business type on the create-business screen (S45): a tile, or one under "More types". */
+export async function pickBusinessType(page: Page, name: string): Promise<void> {
+  const radio = page.getByRole('radio', { name: new RegExp(`^${name}`) });
+  if (!(await radio.isVisible())) await page.getByRole('button', { name: 'More types' }).click();
+  // The radio is visually hidden inside its tile: tap the tile, as a person does.
+  await page.locator('label').filter({ has: radio }).click();
+  await expect(radio).toBeChecked();
+}
+
 /**
  * Signs up, creates a business and turns on two-step verification. `business` names it (the
- * screenshot tests need the same name every run; the booking link stays unique).
+ * screenshot tests need the same name every run; the booking link stays unique). With `type`
+ * the business is created on the screen from that business type (S45: its menu, the owner as
+ * staff and hours pre-filled); without, through the api with no type, so the spec starts from
+ * an empty business and builds its own menu (as every spec did before S45; the screen's own
+ * journeys are in auth.spec.ts).
  */
 export async function onboardOwner(
   page: Page,
-  { business = `Juniper ${unique('studio')}` }: { business?: string } = {},
+  { business = `Juniper ${unique('studio')}`, type }: { business?: string; type?: string } = {},
 ): Promise<Owner> {
   const email = `${unique('owner')}@example.test`;
   await signUp(page, email);
 
   await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
   await hydrated(page.getByRole('button', { name: 'Create business' }));
-  await page.getByLabel('Business name').fill(business);
-  if (business.startsWith('Juniper ')) {
-    await expect(page.getByLabel('Booking link')).toHaveValue(/^juniper-studio-/);
+  const slug = business.startsWith('Juniper ')
+    ? business.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    : unique('shop');
+  if (type === undefined) {
+    const status = await page.evaluate(
+      async (body) =>
+        (
+          await fetch('/v1/tenants', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(body),
+          })
+        ).status,
+      { name: business, slug, timeZone: 'America/New_York', locale: 'en-US' },
+    );
+    expect(status).toBe(201);
+    await page.goto('/');
   } else {
-    await page.getByLabel('Booking link').fill(unique('shop'));
+    await pickBusinessType(page, type);
+    await page.getByLabel('Business name').fill(business);
+    await page.getByLabel('Booking link').fill(slug);
+    await page.getByRole('button', { name: 'Create business' }).click();
   }
-  await page.getByRole('button', { name: 'Create business' }).click();
 
   // Owners must protect the business before they can use it.
   const { secret, backupCodes, usedCodes } = await setUpTwoFactor(page);
