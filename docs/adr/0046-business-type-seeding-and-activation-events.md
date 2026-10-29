@@ -1,6 +1,6 @@
 # ADR-0046: Business type at signup, a seeded first week, and activation events
 
-- **Status:** Accepted. Pre-approved by the user at the S45 brief on 2026-10-29 ("Go ahead with your recommendations and complete the session").
+- **Status:** Accepted (built in S45). Pre-approved by the user at the S45 brief on 2026-10-29 ("Go ahead with your recommendations and complete the session").
 - **Date:** 2026-10-29
 - **Builds on:**
   - ADR-0018 (industry templates; `tenants.template_id`, "onboarding will make picking a type required in the UI", template prices only pre-fill)
