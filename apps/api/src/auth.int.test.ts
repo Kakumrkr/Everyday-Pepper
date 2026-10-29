@@ -39,10 +39,12 @@ import {
 } from '@pepper/contracts';
 import {
   accounts,
+  activationEvents,
   addMembership,
   auditLog,
   prepareDatabase,
   sessions,
+  signupEvents,
   twoFactors,
   users,
   withTenant,
@@ -1282,7 +1284,8 @@ describe('industry templates (ADR-0018)', () => {
     const { templates } = TemplatesResponseSchema.parse(
       (await bo.get('/v1/templates').expect(200)).body,
     );
-    expect(templates.map((t) => t.id)).toEqual(TemplateIdSchema.options);
+    expect([...templates.map((t) => t.id)].sort()).toEqual([...TemplateIdSchema.options].sort());
+    expect(templates.filter((t) => t.featured)).toHaveLength(4);
     expect(templates.find((t) => t.id === 'spa')?.terminology.client.singular).toBe('guest');
   });
 
@@ -1386,6 +1389,44 @@ describe('industry templates (ADR-0018)', () => {
       at('09:00'),
       at('09:15'),
       at('09:30'),
+    ]);
+  });
+});
+
+describe('activation events (S45, ADR-0046)', () => {
+  it('AC-W1-10: records the sign-up, the business and its first bookable state, ids and times only', async () => {
+    const { browser: eve, email } = await signUp('eve');
+    const [account] = await db.select().from(users).where(eq(users.email, email));
+    if (account === undefined) throw new Error('no account');
+    const signups = await db
+      .select()
+      .from(signupEvents)
+      .where(eq(signupEvents.accountId, account.id));
+    expect(signups).toHaveLength(1);
+    expect(Object.keys(signups[0] ?? {}).sort()).toEqual(['accountId', 'id', 'occurredAt']);
+
+    const created = await eve
+      .post('/v1/tenants', {
+        name: 'Eve’s Barbers',
+        slug: 'eves-barbers',
+        timeZone: 'America/Chicago',
+        templateId: 'barber',
+      })
+      .expect(201);
+    const tenantId = TenantIdSchema.parse((created.body as { id: string }).id);
+    const events = await withTenant(db, tenantId, (tx) =>
+      tx.select().from(activationEvents).orderBy(activationEvents.kind),
+    );
+    expect(events.map((e) => [e.kind, e.accountId])).toEqual([
+      ['bookable', null],
+      ['business_created', account.id],
+    ]);
+    expect(Object.keys(events[0] ?? {}).sort()).toEqual([
+      'accountId',
+      'id',
+      'kind',
+      'occurredAt',
+      'tenantId',
     ]);
   });
 });

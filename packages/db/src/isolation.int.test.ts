@@ -34,6 +34,7 @@ import {
   replaceStaffServices,
   replaceWorkingHours,
 } from './repositories/appointments.js';
+import { recordActivation } from './repositories/activation.js';
 import { appendAuditEntry } from './repositories/audit.js';
 import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
@@ -70,6 +71,8 @@ const GLOBAL_TABLES: Record<string, string> = {
   accounts: 'sign-in methods (password hash) of a global user',
   verifications: 'short-lived Better Auth tokens, keyed by identifier, not by tenant',
   two_factors: 'TOTP secret and backup codes of a global user',
+  signup_events:
+    'an account’s sign-up (S45, ADR-0046), before any business; its id and the time only',
 };
 
 interface TenantTable {
@@ -122,6 +125,17 @@ const OWN_AUDIENCE =
   '(( SELECT current_member_sees_all() AS current_member_sees_all) OR (audience_staff_id IN ( SELECT current_member_staff_ids() AS current_member_staff_ids)))';
 
 const TENANT_TABLES: Record<string, TenantTable> = {
+  activation_events: {
+    tenantColumn: 'tenant_id',
+    // A business's first steps (S45, ADR-0046): appended once per kind, never changed.
+    seed: async (tx) => {
+      await recordActivation(tx, 'first_booking');
+      const { rows } = await tx.execute<{ id: string }>(sql`SELECT current_tenant_id() AS id`);
+      return idWhere(tx, 'activation_events', 'tenant_id', String(rows[0]?.id));
+    },
+    touch: 'kind = kind',
+    appendOnly: true,
+  },
   tenants: {
     tenantColumn: 'id',
     // The tenant row already exists; return the transaction's tenant.

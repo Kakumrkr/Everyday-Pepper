@@ -2240,3 +2240,50 @@ export type InsightRunRow = typeof insightRuns.$inferSelect;
 export type InsightRequestRow = typeof insightRequests.$inferSelect;
 export type WaitlistMatchRow = typeof waitlistMatches.$inferSelect;
 export type WaitlistOfferRow = typeof waitlistOffers.$inferSelect;
+
+/**
+ * A business's first steps (S45, ADR-0046, AC-W1-10): created, first bookable, first booking.
+ * Each kind once per business (`ON CONFLICT DO NOTHING`), with ids and times only: no names,
+ * emails, phones or prices. `account_id` (the owner who created it) only on `business_created`,
+ * to link the business to its owner's sign-up. Append-only for the services; S59's metrics
+ * page reads it.
+ */
+export const activationEvents = pgTable(
+  'activation_events',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    accountId: uuid('account_id').references(() => users.id, { onDelete: 'set null' }),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('activation_events_tenant_kind_unique').on(table.tenantId, table.kind),
+    check(
+      'activation_events_kind_known',
+      sql`${table.kind} IN ('business_created', 'bookable', 'first_booking')`,
+    ),
+    check(
+      'activation_events_account_on_creation',
+      sql`${table.kind} = 'business_created' OR ${table.accountId} IS NULL`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
+/**
+ * An account's sign-up (S45, ADR-0046, AC-W1-10), before any business: the account's id and
+ * the time only. Global (no business yet): only the api's Better Auth hook writes it, and
+ * nothing reads it through the app until S59's metrics page. Gone with the account.
+ */
+export const signupEvents = pgTable('signup_events', {
+  id: uuid('id').primaryKey().$defaultFn(newId),
+  accountId: uuid('account_id')
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
+});

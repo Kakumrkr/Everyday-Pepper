@@ -77,6 +77,13 @@ export const TemplateIdSchema = z.enum([
 ]);
 export type TemplateId = z.infer<typeof TemplateIdSchema>;
 
+/**
+ * A business's first steps, each recorded once (S45, ADR-0046, AC-W1-10); an account's
+ * sign-up is recorded apart, before any business exists.
+ */
+export const ActivationKindSchema = z.enum(['business_created', 'bookable', 'first_booking']);
+export type ActivationKind = z.infer<typeof ActivationKindSchema>;
+
 /** Input for creating a tenant (business); no template: platform defaults only. */
 export const NewTenantSchema = z.object({
   name: z.string().trim().min(1).max(120),

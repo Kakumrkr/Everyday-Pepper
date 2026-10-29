@@ -24,6 +24,7 @@ import {
 } from '@pepper/db';
 import { ServiceNotFoundError, StaffMemberNotFoundError } from '../errors.js';
 import { sameValues, staffAuditValues, toStaffMember } from '../mapping.js';
+import { noteBookableIn } from './activation.js';
 
 // The people who can be booked (ADR-0015). Changes need `staff.manage` and are audited in the
 // same transaction. Staff members are deactivated, not deleted: bookings will refer to them.
@@ -78,6 +79,7 @@ export async function createStaffMemberIn(
     },
     requestId: actor.requestId,
   });
+  await noteBookableIn(tx);
   return toStaffMember(created);
 }
 
@@ -109,6 +111,7 @@ export async function updateStaffMember(
         },
         requestId: actor.requestId,
       });
+      await noteBookableIn(tx);
     }
     return toStaffMember(updated);
   });

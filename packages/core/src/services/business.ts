@@ -10,6 +10,7 @@ import {
   appendAuditEntry,
   createTenant,
   findCurrentTenant,
+  recordActivation,
   updateCurrentTenantBrandColor,
   withMember,
   type Database,
@@ -60,6 +61,8 @@ export async function createBusiness(
         },
         requestId: options.requestId,
       });
+      // Ids and the time only (S45, ADR-0046): links the business to its owner's sign-up.
+      await recordActivation(tx, 'business_created', { accountId: ownerUserId });
       if (options.seed !== undefined) {
         const context = { tenantId: TenantIdSchema.parse(tenant.id), userId: ownerUserId };
         const actor: Actor = {

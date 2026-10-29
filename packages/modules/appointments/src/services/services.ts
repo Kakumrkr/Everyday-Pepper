@@ -18,6 +18,7 @@ import {
 } from '@pepper/db';
 import { ServiceNotFoundError } from '../errors.js';
 import { sameValues, serviceAuditValues, toService } from '../mapping.js';
+import { noteBookableIn } from './activation.js';
 
 // The business's services menu (ADR-0015). Changes need `services.manage` and are audited in
 // the same transaction. Services are deactivated, not deleted: bookings will refer to them.
@@ -93,6 +94,8 @@ export async function updateService(
         change: { action: 'service.updated', entity: { type: 'service', id }, before, after },
         requestId: actor.requestId,
       });
+      // A service back on the menu can make the business bookable.
+      await noteBookableIn(tx);
     }
     return toService(row);
   });

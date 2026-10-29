@@ -71,6 +71,7 @@ import {
   StaffMemberNotFoundError,
 } from '../errors.js';
 import { bookingAuditValues, sameValues, staffOwner, toBooking, toBusyTime } from '../mapping.js';
+import { noteFirstBookingIn } from './activation.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import { findClientToBook } from './clients.js';
 import { changeOf, emailDetailsOf, newManageToken, type BookingNotify } from './notices.js';
@@ -190,6 +191,7 @@ export async function createBookingIn(
     }
     throw error;
   }
+  await noteFirstBookingIn(tx);
   await appendAuditEntry(tx, {
     actor: auditActorOf(actor),
     change: {
