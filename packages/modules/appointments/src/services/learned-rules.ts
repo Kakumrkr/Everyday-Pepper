@@ -26,6 +26,7 @@ import {
 } from '@pepper/db';
 import { z } from 'zod';
 import { StaffMemberNotFoundError } from '../errors.js';
+import { noteBookableIn } from './activation.js';
 import { listStaffIn } from './staff.js';
 import { hoursToMinutes, minutesToHours, rowsToRules, sameValues } from '../mapping.js';
 
@@ -330,4 +331,6 @@ export async function undoLearnedRuleIn(
     await replaceWorkingHourRows(tx, staffMemberId, hoursToMinutes(before));
     await auditHours(tx, actor, staffMemberId, current, before);
   }
+  // Hours back can make the business bookable (S45, ADR-0046).
+  await noteBookableIn(tx);
 }

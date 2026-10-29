@@ -1,4 +1,5 @@
 import type { TemplateInput } from '@pepper/contracts';
+import { days } from './hours.js';
 
 /** Massage therapy: 60–90 minute sessions with time to reset the room between clients. */
 export const massage: TemplateInput = {
@@ -86,6 +87,7 @@ export const massage: TemplateInput = {
     },
   ],
   defaultRules: { slotIntervalMinutes: 15, minimumNoticeMinutes: 240, maximumAdvanceDays: 90 },
+  defaultHours: { intervals: days([1, 2, 3, 4, 5, 6], '10:00', '19:00') },
   defaultAutonomy: {},
   intakeFields: [
     {

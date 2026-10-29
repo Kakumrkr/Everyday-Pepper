@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PriceCentsSchema, SERVICE_LIMITS } from './appointments.js';
+import { PriceCentsSchema, SERVICE_LIMITS, WeeklyHoursSchema } from './appointments.js';
 import { TemplateMemorySchema } from './memory.js';
 import { RuleDefaultsSchema, type RuleDefaults } from './rules.js';
 import { TemplateIdSchema } from './tenancy.js';
@@ -199,6 +199,8 @@ export const TemplateSchema = z
     /** Shown in onboarding, e.g. "Hair salon". */
     name: z.string().trim().min(1).max(60),
     group: TemplateGroupSchema,
+    /** Shown first when a new owner picks their type (S45: the V1 segment); the rest under "More types". */
+    featured: z.boolean().default(false),
     terminology: TerminologySchema,
     modules: z.array(ModuleIdSchema).min(1).refine(isUnique, 'Each module once'),
     serviceCatalog: z
@@ -209,6 +211,13 @@ export const TemplateSchema = z
         message: 'Service names are unique (ignoring case)',
       }),
     defaultRules: TemplateRuleDefaultsSchema,
+    /**
+     * The opening hours a new business starts with (S45, ADR-0046): its first staff member's
+     * week, in the business's local time. Like prices, they only pre-fill.
+     */
+    defaultHours: WeeklyHoursSchema.refine(({ intervals }) => intervals.length > 0, {
+      message: 'A template opens on at least one day',
+    }),
     defaultAutonomy: AutonomySettingsSchema,
     intakeFields: z
       .array(IntakeFieldSchema)
@@ -238,6 +247,9 @@ export const TemplateSummarySchema = z.object({
   id: TemplateIdSchema,
   name: z.string(),
   group: TemplateGroupSchema,
+  featured: z.boolean(),
+  /** How many services the business starts with. */
+  serviceCount: z.number().int().min(1),
   terminology: TerminologySchema,
 });
 export type TemplateSummary = z.infer<typeof TemplateSummarySchema>;

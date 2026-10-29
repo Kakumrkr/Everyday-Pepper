@@ -48,6 +48,30 @@ describe.each(templates.map((t) => [t.id, t] as const))('template %s', (_id, tem
     expect(TemplateSchema.parse(template)).toEqual(template);
   });
 
+  it('opens on at least four days a week, between 6 a.m. and 9 p.m. (S45)', () => {
+    const { intervals } = template.defaultHours;
+    expect(new Set(intervals.map((i) => i.weekday)).size).toBeGreaterThanOrEqual(4);
+    for (const interval of intervals) {
+      expect(interval.start >= '06:00' && interval.end <= '21:00').toBe(true);
+    }
+  });
+
+  it('fits its longest service into its shortest day (bookable on day one)', () => {
+    const minutes = (time: string): number => {
+      const [h = 0, m = 0] = time.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const shortestDay = Math.min(
+      ...template.defaultHours.intervals.map((i) => minutes(i.end) - minutes(i.start)),
+    );
+    const longest = Math.max(
+      ...template.serviceCatalog.map(
+        (s) => s.bufferBeforeMinutes + s.durationMinutes + s.bufferAfterMinutes,
+      ),
+    );
+    expect(longest).toBeLessThanOrEqual(shortestDay);
+  });
+
   it('turns on the appointments module', () => {
     expect(template.modules).toContain('appointments');
   });
@@ -154,11 +178,32 @@ describe('getTemplate', () => {
 describe('templateSummaries', () => {
   it('describes every template for onboarding, without the rest of the template', () => {
     const summaries = templateSummaries();
-    expect(summaries.map((s) => s.id)).toEqual(TemplateIdSchema.options);
+    expect([...summaries.map((s) => s.id)].sort()).toEqual([...TemplateIdSchema.options].sort());
     for (const summary of summaries) {
       expect(TemplateSummarySchema.strict().parse(summary)).toEqual(summary);
+      expect(summary.serviceCount).toBe(getTemplate(summary.id).serviceCatalog.length);
     }
     expect(summaries[0]?.terminology.staff).toEqual({ singular: 'stylist', plural: 'stylists' });
+  });
+
+  it('lists the four V1 segment types first (S45, AC-W1-8), then the rest', () => {
+    const summaries = templateSummaries();
+    expect(summaries.slice(0, 4).map((s) => s.id)).toEqual([
+      'beauty-salon',
+      'barber',
+      'nails',
+      'lash-brow',
+    ]);
+    expect(summaries.map((s) => s.featured)).toEqual([
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+    ]);
   });
 });
 

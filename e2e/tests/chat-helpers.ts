@@ -115,6 +115,20 @@ export function changeCard(page: Page, name: string): Locator {
 }
 
 export async function expectAccessible(page: Page, screen: string): Promise<void> {
+  // Contrast is checked on the settled screen: a control fading back from disabled (a turn
+  // just ended) reads as low contrast mid-transition (S45, CI). Endless ones (a spinner) aside.
+  await page.waitForFunction(
+    () =>
+      document
+        .getAnimations()
+        .every(
+          (animation) =>
+            animation.playState !== 'running' ||
+            animation.effect?.getTiming().iterations === Infinity,
+        ),
+    undefined,
+    { timeout: 10_000 },
+  );
   const { violations } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();

@@ -4,6 +4,7 @@ import {
   authDatabaseAdapter,
   listUserBusinesses,
   newId,
+  recordSignup,
   withUser,
   type Database,
 } from '@pepper/db';
@@ -123,6 +124,19 @@ export function createBetterAuth(options: BetterAuthOptions) {
       },
     },
     databaseHooks: {
+      user: {
+        create: {
+          // An activation event (S45, ADR-0046): the account's id and the time, never its
+          // address. A failure is logged and never fails the sign-up.
+          after: async (user) => {
+            try {
+              await recordSignup(options.db, UserIdSchema.parse(user.id));
+            } catch {
+              options.log('error', 'Could not record a sign-up event');
+            }
+          },
+        },
+      },
       session: {
         create: {
           // A new session starts in the user's first business (oldest membership), so signing

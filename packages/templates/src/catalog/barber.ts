@@ -1,4 +1,5 @@
 import type { TemplateInput } from '@pepper/contracts';
+import { days } from './hours.js';
 
 /** Barbershop: short, frequent cuts and beard work; many regulars book a few weeks out. */
 export const barber: TemplateInput = {
@@ -6,6 +7,7 @@ export const barber: TemplateInput = {
   version: 1,
   name: 'Barbershop',
   group: 'beauty',
+  featured: true,
   terminology: {
     client: { singular: 'client', plural: 'clients' },
     staff: { singular: 'barber', plural: 'barbers' },
@@ -82,6 +84,7 @@ export const barber: TemplateInput = {
     },
   ],
   defaultRules: { slotIntervalMinutes: 15, minimumNoticeMinutes: 30, maximumAdvanceDays: 60 },
+  defaultHours: { intervals: days([2, 3, 4, 5, 6], '09:00', '18:00') },
   defaultAutonomy: {},
   intakeFields: [
     { key: 'usual_cut', label: 'Usual cut (guard numbers, length)', type: 'long_text' },

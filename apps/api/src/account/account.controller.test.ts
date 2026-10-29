@@ -144,11 +144,22 @@ describe('GET /v1/templates', () => {
       .set('cookie', 'signed-in')
       .expect(200);
     const { templates } = TemplatesResponseSchema.parse(response.body);
-    expect(templates.map((t) => t.id)).toEqual(TemplateIdSchema.options);
+    // The four featured types first (S45, AC-W1-8).
+    expect(templates.map((t) => t.id)).toEqual([
+      'beauty-salon',
+      'barber',
+      'nails',
+      'lash-brow',
+      ...TemplateIdSchema.options.filter(
+        (id) => !['beauty-salon', 'barber', 'nails', 'lash-brow'].includes(id),
+      ),
+    ]);
     expect(templates[1]).toEqual({
       id: 'barber',
       name: 'Barbershop',
       group: 'beauty',
+      featured: true,
+      serviceCount: 8,
       terminology: {
         client: { singular: 'client', plural: 'clients' },
         staff: { singular: 'barber', plural: 'barbers' },
@@ -279,21 +290,29 @@ describe('POST /v1/tenants', () => {
   it('creates a business owned by the user and makes it active', async () => {
     const response = await post(input).expect(201);
     expect(response.body).toEqual(BUSINESS);
-    expect(tenancy.createBusiness).toHaveBeenCalledWith(USER, {
-      ...input,
-      locale: 'en-US',
-      templateId: null,
-    });
+    expect(tenancy.createBusiness).toHaveBeenCalledWith(
+      USER,
+      {
+        ...input,
+        locale: 'en-US',
+        templateId: null,
+      },
+      'Ana',
+    );
     expect(auth.setActiveTenant).toHaveBeenCalledWith(auth.session, TENANT);
   });
 
   it('passes the chosen template on', async () => {
     await post({ ...input, templateId: 'beauty-salon' }).expect(201);
-    expect(tenancy.createBusiness).toHaveBeenCalledWith(USER, {
-      ...input,
-      locale: 'en-US',
-      templateId: 'beauty-salon',
-    });
+    expect(tenancy.createBusiness).toHaveBeenCalledWith(
+      USER,
+      {
+        ...input,
+        locale: 'en-US',
+        templateId: 'beauty-salon',
+      },
+      'Ana',
+    );
   });
 
   it('400 for an unknown template', async () => {

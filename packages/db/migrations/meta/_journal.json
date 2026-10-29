@@ -365,6 +365,13 @@
       "when": 1793223217512,
       "tag": "0051_existing_accounts_verified",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1793245283978,
+      "tag": "0052_activation_events",
+      "breakpoints": true
     }
   ]
 }

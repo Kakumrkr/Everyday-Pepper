@@ -24,6 +24,7 @@ import {
 } from '@pepper/db';
 import { ServiceNotFoundError, StaffMemberNotFoundError } from '../errors.js';
 import { sameValues, staffAuditValues, toStaffMember } from '../mapping.js';
+import { noteBookableIn } from './activation.js';
 
 // The people who can be booked (ADR-0015). Changes need `staff.manage` and are audited in the
 // same transaction. Staff members are deactivated, not deleted: bookings will refer to them.
@@ -52,25 +53,34 @@ export async function createStaffMember(
   input: StaffMemberInput,
 ): Promise<StaffMember> {
   requirePermission(actor, 'staff.manage');
+  return withTenant(db, actor.context.tenantId, (tx) => createStaffMemberIn(tx, actor, input));
+}
+
+/** `createStaffMember` inside the caller's transaction. */
+export async function createStaffMemberIn(
+  tx: TenantTx,
+  actor: Actor,
+  input: StaffMemberInput,
+): Promise<StaffMember> {
+  requirePermission(actor, 'staff.manage');
   const fields = StaffMemberInputSchema.parse(input);
-  return withTenant(db, actor.context.tenantId, async (tx) => {
-    const values = await resolve(tx, fields);
-    const row = await insertStaffMember(tx, values);
-    const id = StaffMemberIdSchema.parse(row.id);
-    await replaceStaffServices(tx, id, fields.serviceIds);
-    const created = await reread(tx, id);
-    await appendAuditEntry(tx, {
-      actor: auditActorOf(actor),
-      change: {
-        action: 'staff_member.created',
-        entity: { type: 'staff_member', id },
-        before: null,
-        after: staffAuditValues(created),
-      },
-      requestId: actor.requestId,
-    });
-    return toStaffMember(created);
+  const values = await resolve(tx, fields);
+  const row = await insertStaffMember(tx, values);
+  const id = StaffMemberIdSchema.parse(row.id);
+  await replaceStaffServices(tx, id, fields.serviceIds);
+  const created = await reread(tx, id);
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'staff_member.created',
+      entity: { type: 'staff_member', id },
+      before: null,
+      after: staffAuditValues(created),
+    },
+    requestId: actor.requestId,
   });
+  await noteBookableIn(tx);
+  return toStaffMember(created);
 }
 
 /** Replaces a staff member's fields, login link and services (all of them). */
@@ -101,6 +111,7 @@ export async function updateStaffMember(
         },
         requestId: actor.requestId,
       });
+      await noteBookableIn(tx);
     }
     return toStaffMember(updated);
   });

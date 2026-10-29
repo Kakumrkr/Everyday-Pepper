@@ -28,6 +28,7 @@ Classes & Memberships (capacity, passes) · Quotes & Jobs (estimates, approvals,
 - `modules` enabled (V1: `appointments`)
 - `serviceCatalog` defaults (names, durations, buffers, typical price ranges)
 - `defaultRules`, `defaultAutonomy`
+- `defaultHours` (the first staff member's week) and `featured` (shown first when picking a type), S45
 - `intakeFields` for customer profiles
 - `insights` enabled + thresholds (e.g. rebooking interval for haircut = 6 weeks)
 - `promptFragments` (domain hints for the AI)
@@ -36,6 +37,8 @@ Classes & Memberships (capacity, passes) · Quotes & Jobs (estimates, approvals,
 V1 templates: `beauty-salon`, `barber`, `nails`, `spa`, `lash-brow`, `personal-trainer`, `massage`, `yoga-pilates-private`. Adding a template requires: schema validation test, onboarding fixture, eval set.
 
 Built in S13 ([ADR-0018](../adr/0018-industry-templates.md)): `TemplateSchema` in `packages/contracts/src/templates.ts` (plus `insights.enabled`/`rebookingIntervalDays`/`minGapMinutes`, per-service `rebookAfterDays`, and `sensitive` intake fields); one package `packages/templates` (`@pepper/templates`) with a data file per template, parsed at load and frozen; `tenants.template_id`; `GET /v1/templates`. Only the rule defaults are consumed so far (through a lookup the api passes to the appointments services, since L2 does not import L3). Schema tests exist for all eight; onboarding fixtures come in Phase 9 and eval sets in Phase 6.
+
+S45 ([ADR-0046](../adr/0046-business-type-seeding-and-activation-events.md)): the service catalog and `defaultHours` are consumed at signup. `POST /v1/tenants` with a type seeds the whole menu, the owner as staff and the hours in the creation's transaction (the api builds the seed, `@pepper/appointments` writes it); the prices only pre-fill.
 
 ## Tenant customization (L4)
 Tenant settings override template defaults (rules, autonomy, terminology tweaks). Stored versioned; changes audited.

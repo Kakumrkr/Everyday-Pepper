@@ -2,6 +2,7 @@ import { getTableConfig, type PgTable } from 'drizzle-orm/pg-core';
 import { describe, expect, it } from 'vitest';
 import {
   accounts,
+  activationEvents,
   aiActionExecutions,
   aiActionProposals,
   auditLog,
@@ -12,6 +13,7 @@ import {
   memoryFacts,
   pushSubscriptions,
   sessions,
+  signupEvents,
   tasks,
   tenants,
   twoFactors,
@@ -31,6 +33,18 @@ function foreignKeys(table: PgTable) {
 }
 
 describe('schema foreign keys', () => {
+  it('removes activation events with their business and a sign-up with its account (S45)', () => {
+    expect(foreignKeys(activationEvents)).toEqual(
+      expect.arrayContaining([
+        { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+        { from: ['account_id'], to: 'users(id)', onDelete: 'set null' },
+      ]),
+    );
+    expect(foreignKeys(signupEvents)).toEqual([
+      { from: ['account_id'], to: 'users(id)', onDelete: 'cascade' },
+    ]);
+  });
+
   it('removes a user’s memberships, sessions, accounts and second factor with the user', () => {
     for (const table of [memberships, sessions, accounts, twoFactors]) {
       expect(foreignKeys(table)).toContainEqual({

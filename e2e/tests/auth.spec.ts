@@ -9,6 +9,7 @@ import {
   onboardOwner,
   ownClientAddress,
   PASSWORD,
+  pickBusinessType,
   signOut,
   signUp,
   unique,
@@ -93,6 +94,7 @@ test.describe('owner sign-in with two-step verification', () => {
     await signUp(page, `${unique('owner')}@example.test`);
     await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
     await hydrated(page.getByRole('button', { name: 'Create business' }));
+    await pickBusinessType(page, 'Barbershop');
     await page.getByLabel('Business name').fill('Wrong Code Studio');
     await page.getByLabel('Booking link').fill(unique('shop'));
     await page.getByRole('button', { name: 'Create business' }).click();
@@ -125,6 +127,80 @@ test.describe('owner sign-in with two-step verification', () => {
 });
 
 // S44 (ADR-0045): the account emails, read from Mailpit, through the real stack.
+test.describe('business type at signup (S45, ADR-0046)', () => {
+  test('AC-W1-7: a barbershop is bookable with nothing typed but its name', async ({
+    page,
+    browser,
+    baseURL,
+  }) => {
+    test.setTimeout(90_000);
+    await signUp(page, `${unique('owner')}@example.test`, { name: 'Marcus Reed' });
+    await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
+    await hydrated(page.getByRole('button', { name: 'Create business' }));
+    await pickBusinessType(page, 'Barbershop');
+    await page.getByLabel('Business name').fill(`Fade Room ${String(Date.now())}`);
+    const slug = await page.getByLabel('Booking link').inputValue();
+    await page.getByRole('button', { name: 'Create business' }).click();
+    await expect(page).toHaveURL(/\/security\/two-factor$/, { timeout: 30_000 });
+
+    // The booking page offers the template's menu, with the owner, at the template's hours.
+    const client = await anotherPerson(browser, baseURL);
+    await client.goto(`/book/${slug}`);
+    await expect(client.getByRole('heading', { name: 'Book a visit' })).toBeVisible();
+    await expect(client.getByRole('button', { name: /Skin fade/ })).toBeVisible();
+    await (await hydrated(client.getByRole('button', { name: /^Haircut(?! and)/ }))).click();
+    await client.getByRole('button', { name: /Marcus Reed/ }).click();
+    await expect(client.getByRole('heading', { name: 'Pick a time' })).toBeVisible();
+    // Days open on the template's hours (Tuesday to Saturday): one of the next four days has
+    // times. Each day's answer is waited for (times, or "Nothing free that day").
+    const days = client.getByRole('group', { name: 'Day' }).getByRole('button');
+    const times = client.getByTestId('free-times').getByRole('button');
+    const answered = times.first().or(client.getByText('Nothing free that day. Try another day.'));
+    let offered = 0;
+    for (let day = 0; day < 4 && offered === 0; day += 1) {
+      await days.nth(day).click();
+      await expect(answered).toBeVisible({ timeout: 15_000 });
+      offered = await times.count();
+    }
+    expect(offered).toBeGreaterThan(0);
+  });
+
+  test('AC-W1-8, AC-W1-9: the four types first, the error under the picker, US zones first', async ({
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    await signUp(page, `${unique('owner')}@example.test`);
+    await expect(page).toHaveURL(/\/onboarding\/business$/, { timeout: 20_000 });
+    const create = await hydrated(page.getByRole('button', { name: 'Create business' }));
+    const types = page.getByRole('radiogroup', { name: 'Type of business' });
+    for (const name of ['Hair salon', 'Barbershop', 'Nail salon', 'Lash & brow studio']) {
+      await expect(types.getByRole('radio', { name: new RegExp(`^${name}`) })).toBeVisible();
+    }
+    await expect(types.getByRole('radio', { name: /^Day spa/ })).toBeHidden();
+    await page.getByRole('button', { name: 'More types' }).click();
+    await expect(types.getByRole('radio', { name: /^Day spa/ })).toBeVisible();
+
+    await page.getByLabel('Business name').fill('No Type Yet');
+    await create.click();
+    await expect(types).toHaveAccessibleDescription(/Pick your type of business\./);
+    await expect(types.getByRole('radio').first()).toBeFocused();
+    await expect(page).toHaveURL(/\/onboarding\/business$/);
+
+    const zones = page.getByLabel('Time zone').locator('option');
+    expect((await zones.allTextContents()).slice(0, 7)).toEqual([
+      'America/New York',
+      'America/Chicago',
+      'America/Denver',
+      'America/Phoenix',
+      'America/Los Angeles',
+      'America/Anchorage',
+      'Pacific/Honolulu',
+    ]);
+    const browserZone = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
+    await expect(page.getByLabel('Time zone')).toHaveValue(browserZone);
+  });
+});
+
 test.describe('account recovery and email', () => {
   test('AC-W1-5: a new account confirms its email; signing in first sends a new link', async ({
     page,

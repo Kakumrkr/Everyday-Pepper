@@ -19,6 +19,7 @@ import {
 } from '@pepper/db';
 import { StaffMemberNotFoundError } from '../errors.js';
 import { hoursToMinutes, minutesToHours, sameValues } from '../mapping.js';
+import { noteBookableIn } from './activation.js';
 import { requestInsights } from './insights.js';
 
 // A staff member's weekly working hours, in the business's local time (ADR-0015). Everyone in
@@ -66,28 +67,40 @@ export async function replaceWorkingHours(
   input: WeeklyHoursInput,
 ): Promise<WeeklyHours> {
   requirePermission(actor, 'hours.manage');
+  return withTenant(db, actor.context.tenantId, (tx) =>
+    replaceWorkingHoursIn(tx, actor, staffMemberId, input),
+  );
+}
+
+/** `replaceWorkingHours` inside the caller's transaction. */
+export async function replaceWorkingHoursIn(
+  tx: TenantTx,
+  actor: Actor,
+  staffMemberId: StaffMemberId,
+  input: WeeklyHoursInput,
+): Promise<WeeklyHours> {
+  requirePermission(actor, 'hours.manage');
   const id = StaffMemberIdSchema.parse(staffMemberId);
   const hours = WeeklyHoursSchema.parse(input);
-  return withTenant(db, actor.context.tenantId, async (tx) => {
-    // Locking the staff member serialises concurrent changes to their week.
-    if ((await lockStaffMember(tx, id)) === undefined) throw new StaffMemberNotFoundError();
-    const before = minutesToHours(await listWorkingHours(tx, id));
-    await replaceWorkingHourRows(tx, id, hoursToMinutes(hours));
-    const after = minutesToHours(await listWorkingHours(tx, id));
-    if (!sameValues(before, after)) {
-      // New hours open or close gaps: the feed is computed again soon (ADR-0039).
-      await requestInsights(tx);
-      await appendAuditEntry(tx, {
-        actor: auditActorOf(actor),
-        change: {
-          action: 'working_hours.replaced',
-          entity: { type: 'staff_member', id },
-          before,
-          after,
-        },
-        requestId: actor.requestId,
-      });
-    }
-    return after;
-  });
+  // Locking the staff member serialises concurrent changes to their week.
+  if ((await lockStaffMember(tx, id)) === undefined) throw new StaffMemberNotFoundError();
+  const before = minutesToHours(await listWorkingHours(tx, id));
+  await replaceWorkingHourRows(tx, id, hoursToMinutes(hours));
+  const after = minutesToHours(await listWorkingHours(tx, id));
+  if (!sameValues(before, after)) {
+    // New hours open or close gaps: the feed is computed again soon (ADR-0039).
+    await requestInsights(tx);
+    await noteBookableIn(tx);
+    await appendAuditEntry(tx, {
+      actor: auditActorOf(actor),
+      change: {
+        action: 'working_hours.replaced',
+        entity: { type: 'staff_member', id },
+        before,
+        after,
+      },
+      requestId: actor.requestId,
+    });
+  }
+  return after;
 }

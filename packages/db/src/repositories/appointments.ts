@@ -1,6 +1,7 @@
 import {
   ServiceInputSchema,
   StaffColorSchema,
+  TEMPLATE_LIMITS,
   type Rule,
   type ServiceFields,
   type ServiceId,
@@ -61,11 +62,30 @@ export async function lockService(tx: TenantTx, id: ServiceId): Promise<ServiceR
   return row;
 }
 
-/** Throws `ServiceNameTakenError` when the business has a service with this name. */
-export async function insertService(tx: TenantTx, fields: ServiceFields): Promise<ServiceRow> {
+/** A regular's rebooking interval, as the `services_rebook_after_days_range` check allows. */
+const RebookAfterDaysSchema = z
+  .number()
+  .int()
+  .min(TEMPLATE_LIMITS.minRebookingDays)
+  .max(TEMPLATE_LIMITS.maxRebookingDays)
+  .nullable();
+
+/**
+ * Throws `ServiceNameTakenError` when the business has a service with this name.
+ * `rebookAfterDays`: when a regular is due again (a template's starting menu, S45).
+ */
+export async function insertService(
+  tx: TenantTx,
+  fields: ServiceFields,
+  options: { rebookAfterDays?: number | null } = {},
+): Promise<ServiceRow> {
   const values = ServiceInputSchema.parse(fields);
+  const rebookAfterDays = RebookAfterDaysSchema.parse(options.rebookAfterDays ?? null);
   return serviceNameUnique(async () => {
-    const [row] = await tx.insert(services).values(values).returning();
+    const [row] = await tx
+      .insert(services)
+      .values({ ...values, rebookAfterDays })
+      .returning();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
     return row!;
   });

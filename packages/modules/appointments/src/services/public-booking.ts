@@ -117,6 +117,7 @@ import {
   takeBackWaitlistOffersIn,
 } from './smart-waitlist.js';
 import { bookingAuditValues, waitlistAuditValues } from '../mapping.js';
+import { noteFirstBookingIn } from './activation.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import {
   changeOf,
@@ -385,6 +386,7 @@ export async function confirmBookingRequest(
         manageTokenHash: newHash,
       });
       await setVerificationBooking(tx, id, BookingIdSchema.parse(row.id));
+      await noteFirstBookingIn(tx);
       await keepReminderInStep(tx, row, now);
       await requestInsights(tx);
       await appendAuditEntry(tx, {
@@ -1028,6 +1030,7 @@ export async function claimWaitlistOffer(
         if (!(error instanceof BookingOverlapError)) throw error;
       }
       if (booked !== undefined) {
+        await noteFirstBookingIn(tx);
         await markOfferClaimed(
           tx,
           WaitlistOfferIdSchema.parse(offer.id),

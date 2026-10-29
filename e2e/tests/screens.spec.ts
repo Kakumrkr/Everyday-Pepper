@@ -18,6 +18,7 @@ import {
   onboardOwner,
   ownClientAddress,
   PASSWORD,
+  pickBusinessType,
   signOut,
   signUp,
   toast,
@@ -247,6 +248,7 @@ for (const width of WIDTHS) {
     if (phone) await expectStickyAtTheBottom(page, 'Create business');
     await shots('auth-business', [page.getByLabel('Time zone')]);
 
+    await pickBusinessType(page, 'Barbershop');
     await page.getByLabel('Business name').fill('Southside Cuts');
     await page.getByLabel('Booking link').fill(unique('shop'));
     await page.getByRole('button', { name: 'Create business' }).click();

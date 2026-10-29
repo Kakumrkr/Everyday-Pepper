@@ -1,4 +1,5 @@
 import type { TemplateInput } from '@pepper/contracts';
+import { days } from './hours.js';
 
 /** Nail salon: manicures, pedicures and enhancements; gel and acrylic need regular fills. */
 export const nails: TemplateInput = {
@@ -6,6 +7,7 @@ export const nails: TemplateInput = {
   version: 1,
   name: 'Nail salon',
   group: 'beauty',
+  featured: true,
   terminology: {
     client: { singular: 'client', plural: 'clients' },
     staff: { singular: 'nail tech', plural: 'nail techs' },
@@ -87,6 +89,7 @@ export const nails: TemplateInput = {
     },
   ],
   defaultRules: { slotIntervalMinutes: 15, minimumNoticeMinutes: 60, maximumAdvanceDays: 60 },
+  defaultHours: { intervals: days([1, 2, 3, 4, 5, 6], '10:00', '19:00') },
   defaultAutonomy: {},
   intakeFields: [
     {

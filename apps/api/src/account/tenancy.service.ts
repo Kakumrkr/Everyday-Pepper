@@ -9,6 +9,7 @@ import {
   type UserBusiness,
   type UserId,
 } from '@pepper/contracts';
+import { seedBusinessIn } from '@pepper/appointments';
 import { createBusiness, updateBookingPage, type TenantContext } from '@pepper/core';
 import {
   findCurrentTenant,
@@ -19,7 +20,9 @@ import {
   type Database,
 } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
+import { getTemplate } from '@pepper/templates';
 import { Inject, Injectable } from '@nestjs/common';
+import { seedFromTemplate } from './template-seed.js';
 
 /** Businesses and memberships of signed-in users, over the tenant-scoped repositories. */
 @Injectable()
@@ -43,12 +46,29 @@ export class TenancyService {
   }
 
   /**
-   * Creates a business owned by `owner`, with its audit entry. Throws `TenantSlugTakenError`
-   * or `BusinessLimitReachedError` (`@pepper/db`).
+   * Creates a business owned by `owner`, with its audit entry; with a business type, also its
+   * starting menu, the owner as staff (named `ownerName`) and the type's hours, in the same
+   * transaction (S45, ADR-0046). Throws `TenantSlugTakenError` or `BusinessLimitReachedError`
+   * (`@pepper/db`).
    */
-  async createBusiness(owner: UserId, input: NewTenant): Promise<Business> {
+  async createBusiness(owner: UserId, input: NewTenant, ownerName: string): Promise<Business> {
     const requestId = currentRequestContext()?.requestId;
-    return toBusiness(await createBusiness(this.db, owner, input, { requestId }));
+    const templateId = input.templateId ?? null;
+    const seed =
+      templateId === null
+        ? undefined
+        : seedFromTemplate(getTemplate(templateId), { userId: owner, name: ownerName });
+    return toBusiness(
+      await createBusiness(this.db, owner, input, {
+        requestId,
+        seed:
+          seed === undefined
+            ? undefined
+            : async (tx, actor) => {
+                await seedBusinessIn(tx, actor, seed);
+              },
+      }),
+    );
   }
 
   /** Sets the booking page's settings, audited (owners and managers). */
