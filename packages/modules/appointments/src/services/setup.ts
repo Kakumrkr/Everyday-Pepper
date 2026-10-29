@@ -14,6 +14,7 @@ import {
   markCurrentTenantSetupReviewed,
   withTenant,
   type Database,
+  type Tenant,
   type TenantTx,
 } from '@pepper/db';
 import { listWeeklyHoursIn } from './hours.js';
@@ -43,29 +44,31 @@ export async function acknowledgeSetupReview(
 ): Promise<SetupReview> {
   requirePermission(actor, 'settings.manage');
   return withTenant(db, actor.context.tenantId, async (tx) => {
-    const before = await findCurrentTenant(tx);
-    const after = await markCurrentTenantSetupReviewed(tx, now);
-    // A member's own business is always visible to them.
-    if (before === undefined || after === undefined)
-      throw new Error('No tenant in this transaction');
-    if (before.setupReviewedAt === null) {
+    // Written only the first time, so only the first (of any concurrent ones) is audited.
+    const marked = await markCurrentTenantSetupReviewed(tx, now);
+    if (marked !== undefined) {
       await appendAuditEntry(tx, {
         actor: auditActorOf(actor),
         change: {
           action: 'tenant.updated',
-          entity: { type: 'tenant', id: after.id },
+          entity: { type: 'tenant', id: marked.id },
           before: { setupReviewed: false },
           after: { setupReviewed: true },
         },
         requestId: actor.requestId,
       });
     }
-    return setupReviewIn(tx, actor);
+    return setupReviewIn(tx, actor, marked);
   });
 }
 
-async function setupReviewIn(tx: TenantTx, actor: Actor): Promise<SetupReview> {
-  const tenant = await findCurrentTenant(tx);
+async function setupReviewIn(
+  tx: TenantTx,
+  actor: Actor,
+  known?: Tenant,
+): Promise<SetupReview> {
+  // A member's own business is always visible to them.
+  const tenant = known ?? (await findCurrentTenant(tx));
   if (tenant === undefined) throw new Error('No tenant in this transaction');
   const services = (await listServicesIn(tx, actor)).filter((service) => service.active);
   const staff = (await listStaffIn(tx, actor)).filter((member) => member.active);

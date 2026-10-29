@@ -31,11 +31,12 @@ export function SetupReviewCard({ review }: { review: SetupReview }) {
     setSaving(true);
     setError(null);
     const answer = await sendJson('POST', '/v1/setup/review', {});
-    setSaving(false);
     if (!answer.ok) {
+      setSaving(false);
       setError(answer.message);
       return;
     }
+    // Stays disabled until the refreshed Home replaces the card.
     router.refresh();
   }
 

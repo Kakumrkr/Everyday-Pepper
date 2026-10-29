@@ -10,7 +10,7 @@ import {
   type TenantSlug,
   type UserId,
 } from '@pepper/contracts';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import { BusinessLimitReachedError, isUniqueViolation, TenantSlugTakenError } from '../errors.js';
@@ -130,8 +130,9 @@ export async function updateCurrentTenantMailingAddress(
 }
 
 /**
- * Records that the business's setup was reviewed (S46, PCR-009), keeping the first time: a
- * second "I've checked these" changes nothing. Touches no other column.
+ * Records that the business's setup was reviewed (S46, PCR-009), the first time only: the
+ * business, or `undefined` when it already was (nothing is written then, so of two concurrent
+ * calls exactly one gets the row). Touches no other column.
  */
 export async function markCurrentTenantSetupReviewed(
   tx: TenantTx,
@@ -139,10 +140,8 @@ export async function markCurrentTenantSetupReviewed(
 ): Promise<Tenant | undefined> {
   const [tenant] = await tx
     .update(tenants)
-    .set({
-      setupReviewedAt: sql`coalesce(${tenants.setupReviewedAt}, ${at.toISOString()}::timestamptz)`,
-    })
-    .where(eq(tenants.id, sql`current_tenant_id()`))
+    .set({ setupReviewedAt: at })
+    .where(and(eq(tenants.id, sql`current_tenant_id()`), isNull(tenants.setupReviewedAt)))
     .returning();
   return tenant;
 }

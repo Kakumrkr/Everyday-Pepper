@@ -34,7 +34,10 @@ function priceRange(review: SetupReview): string | null {
  */
 export function setupSummary(review: SetupReview): string {
   const services = count(review.services.count, 'service', 'services');
-  const withHours = review.providers.filter((p) => p.hours.intervals.length > 0);
+  // Only people who can be booked for something: hours and at least one service.
+  const withHours = review.providers.filter(
+    (p) => p.hours.intervals.length > 0 && p.serviceCount > 0,
+  );
   const only = withHours.length === 1 ? withHours[0] : undefined;
   if (only !== undefined) return `${services}, ${hoursSummary(only.hours).join(', ')}`;
   return `${services}, ${count(withHours.length, 'person', 'people')} with hours`;

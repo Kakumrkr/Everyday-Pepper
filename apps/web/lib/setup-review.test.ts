@@ -30,6 +30,11 @@ describe('the setup review in words (S46, AC-W1-11)', () => {
     );
   });
 
+  it('leaves out of the summary someone who offers nothing', () => {
+    const owner = { id: ANA, displayName: 'Ana', isYou: true, serviceCount: 0, hours: TUE_SAT };
+    expect(setupSummary(review({ providers: [owner] }))).toBe('8 services, 0 people with hours');
+  });
+
   it('lists the menu, each person with their hours and the time zone, with where to edit', () => {
     expect(setupRows(review())).toEqual([
       { key: 'menu', title: 'Menu and prices', meta: '8 services · $25–$60', href: '/services' },

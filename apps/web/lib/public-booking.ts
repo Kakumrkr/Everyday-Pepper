@@ -28,6 +28,17 @@ export function publicApiPath(slug: string, rest = ''): string {
   return `/v1/public/businesses/${encodeURIComponent(slug)}${rest}`;
 }
 
+/** `GET …/availability` over [from, to), with one staff member or anyone. */
+function availabilityPath(
+  slug: string,
+  range: { from: string; to: string },
+  query: { serviceId: string; staffMemberId: string | null },
+): string {
+  const params = new URLSearchParams({ ...range, serviceId: query.serviceId });
+  if (query.staffMemberId !== null) params.set('staffMemberId', query.staffMemberId);
+  return `${publicApiPath(slug, '/availability')}?${params.toString()}`;
+}
+
 /** `GET …/availability` over one local day, with one staff member or anyone. */
 export function publicAvailabilityPath(
   slug: string,
@@ -35,9 +46,7 @@ export function publicAvailabilityPath(
   date: CivilDate,
   query: { serviceId: string; staffMemberId: string | null },
 ): string {
-  const params = new URLSearchParams({ ...dayRange(timeZone, date), serviceId: query.serviceId });
-  if (query.staffMemberId !== null) params.set('staffMemberId', query.staffMemberId);
-  return `${publicApiPath(slug, '/availability')}?${params.toString()}`;
+  return availabilityPath(slug, dayRange(timeZone, date), query);
 }
 
 /**
@@ -53,13 +62,11 @@ export function publicRangePath(
   const first = days[0];
   const last = days.at(-1);
   if (first === undefined || last === undefined) return null;
-  const params = new URLSearchParams({
+  const range = {
     from: dayRange(timeZone, parseDate(first.date)).from,
     to: dayRange(timeZone, parseDate(last.date)).to,
-    serviceId: query.serviceId,
-  });
-  if (query.staffMemberId !== null) params.set('staffMemberId', query.staffMemberId);
-  return `${publicApiPath(slug, '/availability')}?${params.toString()}`;
+  };
+  return availabilityPath(slug, range, query);
 }
 
 /**

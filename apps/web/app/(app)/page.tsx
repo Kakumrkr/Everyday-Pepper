@@ -54,14 +54,14 @@ export default async function HomePage() {
         currentJson('/v1/ai/actions', AiActionsResponseSchema),
       ])
     : [null, null];
-  const setup =
+  const [setup, feed] = await Promise.all([
     current?.permissions.includes('settings.manage') === true
-      ? await currentJson('/v1/setup', SetupReviewSchema)
-      : null;
-  const feed =
+      ? currentJson('/v1/setup', SetupReviewSchema)
+      : null,
     current?.permissions.includes('feed.read') === true
-      ? await currentJson('/v1/feed', FeedResponseSchema)
-      : null;
+      ? currentJson('/v1/feed', FeedResponseSchema)
+      : null,
+  ]);
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6">
       <header className="flex flex-col gap-1">

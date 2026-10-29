@@ -134,11 +134,18 @@ describe('tenants', () => {
     const reviewed = await withTenant(db, id, (tx) => markCurrentTenantSetupReviewed(tx, at));
     expect(reviewed?.setupReviewedAt).toEqual(at);
     expect(reviewed).toMatchObject({ name: first.name, timeZone: first.timeZone });
-    // Again later: the first time stays.
+    // Again later: nothing written, the first time stays.
     const again = await withTenant(db, id, (tx) =>
       markCurrentTenantSetupReviewed(tx, new Date('2026-10-30T15:00:00.000Z')),
     );
-    expect(again?.setupReviewedAt).toEqual(at);
+    expect(again).toBeUndefined();
+    expect((await withTenant(db, id, findCurrentTenant))?.setupReviewedAt).toEqual(at);
+    // Two at once: exactly one writes.
+    const third = TenantIdSchema.parse((await createTenant(db, { ...juniper, slug: 'twice' })).id);
+    const both = await Promise.all(
+      [0, 1].map(() => withTenant(db, third, (tx) => markCurrentTenantSetupReviewed(tx, at))),
+    );
+    expect(both.filter((row) => row !== undefined)).toHaveLength(1);
     const untouched = await withTenant(db, TenantIdSchema.parse(other.id), findCurrentTenant);
     expect(untouched?.setupReviewedAt).toBeNull();
   });
