@@ -66,6 +66,7 @@ import {
   listWaitlistEntries,
   listServices,
   listStaffMembers,
+  listWorkingHoursOf,
   lockBookingByManageTokenHash,
   lockBookingVerification,
   lockStaffMember,
@@ -176,11 +177,22 @@ export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise
     async (tx, tenant) => {
       const services = (await listServices(tx)).filter((s) => s.active);
       const activeServices = new Set(services.map((s) => s.id));
-      const staff = (await listStaffMembers(tx))
-        .filter((s) => s.active)
+      const active = (await listStaffMembers(tx)).filter((s) => s.active);
+      // Someone without working hours can never be booked, so the page leaves them out (S46,
+      // AC-W8-3). Time off and full days are not read here: those people stay listed.
+      const withHours = new Set(
+        (
+          await listWorkingHoursOf(
+            tx,
+            active.map((s) => StaffMemberIdSchema.parse(s.id)),
+          )
+        ).map((row) => row.staffMemberId),
+      );
+      const staff = active
+        .filter((s) => withHours.has(s.id))
         .map((s) => ({ ...s, serviceIds: s.serviceIds.filter((id) => activeServices.has(id)) }))
         .filter((s) => s.serviceIds.length > 0);
-      // A service nobody offers cannot be booked, so the page does not list it.
+      // A service nobody (with hours) offers cannot be booked, so the page does not list it.
       const offered = new Set(staff.flatMap((s) => s.serviceIds));
       return PublicBusinessSchema.parse({
         name: tenant.name,

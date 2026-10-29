@@ -87,6 +87,8 @@ const RulesValuesSchema = z.object({ rules: z.array(RuleSchema) }).strict();
 const TenantChangeSchema = z.union([
   z.object({ brandColor: BrandColorSchema.nullable() }).strict(),
   z.object({ mailingAddressSet: z.boolean() }).strict(),
+  // Home's setup review (S46): only that it was checked.
+  z.object({ setupReviewed: z.boolean() }).strict(),
 ]);
 
 const ClientValuesSchema = z.object({ source: RecordSourceSchema }).strict();

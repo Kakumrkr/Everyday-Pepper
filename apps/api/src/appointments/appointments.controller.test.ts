@@ -18,6 +18,7 @@ import {
   PLATFORM_RULE_DEFAULTS,
   type MembershipRole,
   type Service,
+  type SetupReview,
   type StaffMember,
   type TimeOff,
   type WeeklyHours,
@@ -78,6 +79,13 @@ const RULES_RESPONSE: BookingRulesResponse = {
   ...RULES,
   defaults: { ...PLATFORM_RULE_DEFAULTS, slotIntervalMinutes: 30 },
 };
+const REVIEW: SetupReview = {
+  reviewedAt: null,
+  timeZone: 'America/Chicago',
+  services: { count: 1, lowestPriceCents: 6500, highestPriceCents: 6500 },
+  providers: [{ id: STAFF_ID, displayName: 'Jess', isYou: true, serviceCount: 1, hours: HOURS }],
+  warnings: [],
+};
 const TIME_OFF: TimeOff = {
   id: TIME_OFF_ID,
   staffMemberId: STAFF_ID,
@@ -102,6 +110,8 @@ class FakeAuth extends AuthService {
 let role: MembershipRole = 'owner';
 const tenancy = { roleIn: vi.fn(() => Promise.resolve(role)) };
 const appointments = {
+  setup: vi.fn(() => Promise.resolve(REVIEW)),
+  reviewSetup: vi.fn(() => Promise.resolve({ ...REVIEW, reviewedAt: AT })),
   services: vi.fn(() => Promise.resolve([SERVICE])),
   createService: vi.fn((): Promise<Service> => Promise.resolve(SERVICE)),
   updateService: vi.fn((): Promise<Service> => Promise.resolve(SERVICE)),
@@ -168,6 +178,26 @@ function code(body: unknown): string {
 
 const haircut = { name: "Women's haircut", durationMinutes: 60, priceFromCents: 6500 };
 const span = { startsAt: '2026-10-20T13:00:00.000Z', endsAt: '2026-10-20T17:00:00.000Z' };
+
+describe('the setup review (S46)', () => {
+  it.each<MembershipRole>(['owner', 'manager'])('a(n) %s reads and checks it', async (r) => {
+    role = r;
+    expect((await get('/v1/setup').expect(200)).body).toEqual(REVIEW);
+    expect((await send('post', '/v1/setup/review', {}).expect(200)).body).toEqual({
+      ...REVIEW,
+      reviewedAt: AT,
+    });
+    expect(appointments.reviewSetup).toHaveBeenCalledWith(context());
+  });
+
+  it('403 for staff, before the domain is asked', async () => {
+    role = 'staff';
+    expect(code((await get('/v1/setup').expect(403)).body)).toBe('forbidden');
+    expect(code((await send('post', '/v1/setup/review', {}).expect(403)).body)).toBe('forbidden');
+    expect(appointments.setup).not.toHaveBeenCalled();
+    expect(appointments.reviewSetup).not.toHaveBeenCalled();
+  });
+});
 
 describe('reading: every role', () => {
   it.each<MembershipRole>(['owner', 'manager', 'staff'])('a(n) %s reads everything', async (r) => {

@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-29 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 10 — First 10 minutes (S44 recovery, S45 business type done) → next: **S46** (setup review, readiness and recoverable availability)
+**Last updated:** 2026-10-29 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 10 — First 10 minutes (S44 recovery, S45 business type, S46 setup review done) → next: **S47** (branded booking page; Phase 10 gate)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -10,14 +10,14 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 Nothing in progress.
 
 ## Last sessions
+- **S46 Phase 10 · Setup review, readiness warnings and recoverable availability (2026-10-29)** ([PCR-009](changes/PCR-009.md); no ADR). Full entry in [session-log.md](session-log.md).
+  - **Built:** Home's setup card for owners and managers ("8 services, Tue–Sat 9:00 AM–6:00 PM", menu, people, zone; "I've checked these" in `tenants.setup_reviewed_at`, migration 0053) and current fixes from today's setup; `GET /v1/setup`, `POST /v1/setup/review`. The booking page drops people without hours, opens on the first free day, says when two weeks are empty, and offers "Try again"; plain zone names. AC-W1-11/12, AC-W8-3…6.
+  - **Top-up (S45 retro):** the one-look summary line on the card.
+  - **Checks:** `pnpm check` green; integration green (one under-load timeout in a bookings property test, 46/46 alone); Playwright 147 passed, 31 skipped (one S45 label check updated); 6 Home baselines.
 - **S45 Phase 10 · Business type at signup → pre-filled menu and hours; activation events (2026-10-29)** ([ADR-0046](../adr/0046-business-type-seeding-and-activation-events.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** a type picker on create business (four first, "More types"); the type seeds the menu, the owner as staff and the template's hours in one transaction; migration 0052 `activation_events` + `signup_events` (ids and times only); US time zones first. AC-W1-7…10. A barbershop is bookable with zero typing.
   - **Top-up (S44 retro):** the picker's error under it on `AuthPage`, the sticky action, axe clean; US zones first.
   - **Checks:** `pnpm check` green (one coverage fix); integration 1,265 green; Playwright 143 passed, 31 skipped; 6 baselines updated.
-- **S44 Phase 10 · Account recovery + the waitlist window check (2026-10-28)** ([ADR-0045](../adr/0045-account-recovery-and-email.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** password reset, email check for new accounts, change of email (current address, then the new one), sent in the background through `MAILER`; migration 0051; four screens on `AuthPage`; `add_to_waitlist` refuses windows with free times (409 `waitlist_times_free`, the AI's `times_free`). AC-W1-4…6, AC-W5-2.
-  - **Top-up (S43.2 retro):** each new screen's error under its field, the action at the bottom (`expectStickyAtTheBottom`), axe clean.
-  - **Checks:** `pnpm check` green; integration green (two fixes: a timeout under load re-run alone, the hostile fake's waitlist window); Playwright 136 passed, 31 skipped, 3 baselines updated and re-run green; axe 6 of 6.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -33,6 +33,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S46 (user, 2026-10-29):** at the brief "Go ahead with your recommendations and complete the session" (D-1 one session; D-2 `tenants.setup_reviewed_at`; D-3 no ADR). **Claude:** the review in appointments behind `settings.manage`; warnings never from `bookable`; one strip-wide request picks the first free day; plain names only for zones on the same clock; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **Before S46 (user standing authority, 2026-10-29):** [PCR-009](changes/PCR-009.md) separates reviewed setup from automatic bookability, keeps current warnings, defines public no-hours/first-free-day behavior and adds in-place availability retry; explicit shared acceptance replaces the private-review gate. Planning only; S46 is not implemented. S47 still owns contact/profile details.
 - **Workflow through launch (2026-10-29, PCR-009):** the existing brief/close skills now use the [maintained check matrix and efficiency baseline](../engineering/testing-strategy.md): prose-only validation, targeted development checks, required final code checks once, diagnosis before reruns, reused valid setup, concise existing records and one timing line. No test/CI script changed; Claude's existing approval and GitHub closeout flow stays intact.
 - **S45 (user, 2026-10-29):** at the brief "Go ahead with your recommendations and complete the session" (D-1 one session; D-2 the owner as first staff; D-3 activation tables; D-4 type required on screen; D-5 ADR-0046). **Claude:** seed through the screens' functions; `signup_events` global, `activation_events` per business; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
@@ -67,11 +68,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S45, M1–M2 and P1 are done (Phases 0–9: the re-plan and the new look on every screen, Phase 9 gate met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S46, M1–M2 and P1 are done (Phases 0–9: the re-plan and the new look on every screen, Phase 9 gate met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S46 | Setup review independent of bookability; current warnings; public no-hours eligibility; first free day and retry; plain zone names ([PCR-009](changes/PCR-009.md)) | 10 | AC-W1-11/12, AC-W8-3…6; existing safeguards preserved |
 | S47 | Branded booking page (profile, images, colors), remembered devices, drop-off per step; **Phase 10 gate** | 10 | New owner bookable < 10 min |
 | S48 | Client import: CSV, JSON or JSONL (five tools, generic, or an own app's export), smart mapping, preview, dedupe, undo by batch | 11 | AC-W1-3; no duplicates on re-import |
 | S49 | History + upcoming appointments import; tags, birthdays | 11 | 1,000 clients / 5,000 visits < 2 min |

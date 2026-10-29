@@ -21,7 +21,11 @@ import {
   updateMembershipRole,
 } from './repositories/memberships.js';
 import { setSessionActiveTenant } from './repositories/sessions.js';
-import { createTenant, findCurrentTenant } from './repositories/tenants.js';
+import {
+  createTenant,
+  findCurrentTenant,
+  markCurrentTenantSetupReviewed,
+} from './repositories/tenants.js';
 import { sessions, users } from './schema.js';
 import { withTenant, withUser } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
@@ -119,6 +123,31 @@ describe('tenants', () => {
       return result.rows;
     });
     expect(after?.updated_at).not.toBe(after?.created_at);
+  });
+
+  it('records the setup review once, for its own business only (S46)', async () => {
+    const first = await createTenant(db, { ...juniper, slug: 'reviewed' });
+    const other = await createTenant(db, { ...juniper, slug: 'not-reviewed' });
+    expect(first.setupReviewedAt).toBeNull();
+    const id = TenantIdSchema.parse(first.id);
+    const at = new Date('2026-10-29T15:00:00.000Z');
+    const reviewed = await withTenant(db, id, (tx) => markCurrentTenantSetupReviewed(tx, at));
+    expect(reviewed?.setupReviewedAt).toEqual(at);
+    expect(reviewed).toMatchObject({ name: first.name, timeZone: first.timeZone });
+    // Again later: nothing written, the first time stays.
+    const again = await withTenant(db, id, (tx) =>
+      markCurrentTenantSetupReviewed(tx, new Date('2026-10-30T15:00:00.000Z')),
+    );
+    expect(again).toBeUndefined();
+    expect((await withTenant(db, id, findCurrentTenant))?.setupReviewedAt).toEqual(at);
+    // Two at once: exactly one writes.
+    const third = TenantIdSchema.parse((await createTenant(db, { ...juniper, slug: 'twice' })).id);
+    const both = await Promise.all(
+      [0, 1].map(() => withTenant(db, third, (tx) => markCurrentTenantSetupReviewed(tx, at))),
+    );
+    expect(both.filter((row) => row !== undefined)).toHaveLength(1);
+    const untouched = await withTenant(db, TenantIdSchema.parse(other.id), findCurrentTenant);
+    expect(untouched?.setupReviewedAt).toBeNull();
   });
 });
 

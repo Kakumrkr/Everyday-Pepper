@@ -55,7 +55,7 @@ import {
 import { addToWaitlist, listWaitlist } from './services/waitlist.js';
 import type { BookingNotice, BookingNotify } from './services/notices.js';
 import { createService, updateService } from './services/services.js';
-import { createStaffMember } from './services/staff.js';
+import { createStaffMember, listStaff } from './services/staff.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // The public booking page through the domain services, against real Postgres (ADR-0022): a
@@ -215,6 +215,50 @@ describe('getPublicBusiness', () => {
     });
     const business = await getPublicBusiness(db, p.slug);
     expect([business.services, business.staff]).toEqual([[], []]);
+  });
+
+  it('leaves out people without working hours and what only they offer (AC-W8-3)', async () => {
+    const p = await newPage();
+    const color = p.hidden;
+    const nia = await createStaffMember(db, p.owner, {
+      displayName: 'Nia',
+      serviceIds: [p.service.id, color.id],
+    });
+    let business = await getPublicBusiness(db, p.slug);
+    expect(business.staff.map((s) => s.displayName)).toEqual(['Jess', 'Marco']);
+    expect(business.services.map((s) => s.name)).toEqual(['Haircut']);
+    // Internally Nia is still on the team.
+    expect((await listStaff(db, p.owner)).map((s) => s.displayName)).toContain('Nia');
+
+    await replaceWorkingHours(db, p.owner, nia.id, {
+      intervals: [{ weekday: 6, start: '10:00', end: '14:00' }],
+    });
+    business = await getPublicBusiness(db, p.slug);
+    expect(business.staff.map((s) => s.displayName)).toEqual(['Jess', 'Marco', 'Nia']);
+    expect(business.services.map((s) => s.name)).toEqual(['Colour', 'Haircut']);
+  });
+
+  it('keeps someone fully booked or on time off, who has hours (AC-W8-3)', async () => {
+    const p = await newPage();
+    // Marco is away for the next three weeks, and Jess's Tuesday is taken.
+    await addTimeOff(db, p.owner, p.marco.id, {
+      startsAt: '2026-11-02T00:00:00.000Z',
+      endsAt: '2026-11-23T00:00:00.000Z',
+    });
+    const client = await createClient(db, p.owner, { name: 'Sam' });
+    await createBooking(
+      db,
+      p.owner,
+      {
+        clientId: client.id,
+        serviceId: p.service.id,
+        staffMemberId: p.jess.id,
+        startsAt: tue('09:00'),
+      },
+      { clock: p.clock },
+    );
+    const business = await getPublicBusiness(db, p.slug);
+    expect(business.staff.map((s) => s.displayName)).toEqual(['Jess', 'Marco']);
   });
 
   it.each(['no-such-page', 'Not A Slug', ''])('has no page at %j', async (slug) => {

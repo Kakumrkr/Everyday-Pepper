@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { ROUTES } from '../../../../lib/account';
 import { activeStaffTone } from '../../../../lib/calendar';
+import { localTimeLabel } from '../../../../lib/public-booking';
 import { hoursSummary, localDateIn } from '../../../../lib/setup';
 import { HoursEditor } from '../../../_components/setup/hours-editor';
 import { StaffForm } from '../../../_components/setup/staff-form';
@@ -135,7 +136,7 @@ export default async function StaffMemberPage({
               <h2 id="staff-hours" className="m-0 type-heading">
                 Weekly hours
               </h2>
-              <p className="m-0 type-body text-ink-2">On the business’s clock ({timeZone}).</p>
+              <p className="m-0 type-body text-ink-2">In {localTimeLabel(timeZone)}.</p>
             </div>
             <div className={block}>
               {hours === null ? (

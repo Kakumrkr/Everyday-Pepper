@@ -8,7 +8,9 @@ import {
   fromZoned,
   MembersResponseSchema,
   ServiceSchema,
+  ServicesResponseSchema,
   StaffMemberSchema,
+  WeeklyHoursSchema,
   toZoned,
   type CivilDate,
 } from '@pepper/contracts';
@@ -156,6 +158,65 @@ test('setup: a new owner adds a service, a staff member with weekly hours and a 
   );
 });
 
+test('setup review (AC-W1-11/12): a new barbershop checks what was filled in once; a current problem stays until it is fixed', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page, { type: 'Barbershop' });
+
+  // Bookable from the start, and still asked to check what the type filled in.
+  const review = page.getByRole('region', { name: 'Check what I set up' });
+  await expect(review).toBeVisible();
+  await expect(review.getByTestId('setup-summary')).toHaveText(/^\d+ services, \S+/);
+  await expect(review.getByRole('link', { name: /Menu and prices/ })).toHaveAttribute(
+    'href',
+    '/services',
+  );
+  await expect(review.getByRole('link', { name: /\(you\)/ })).toBeVisible();
+  await expect(review.getByText('Time zone')).toBeVisible();
+  await expect(review.getByTestId('setup-fix')).toHaveCount(0);
+  await fitsTheScreen(page);
+
+  await (await hydrated(review.getByRole('button', { name: 'I’ve checked these' }))).click();
+  await expect(review).toBeHidden();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'To-dos' })).toBeVisible();
+  await expect(page.getByTestId('setup-review')).toHaveCount(0);
+
+  // A new barber who offers the menu but has no hours: Home says so, after the check too.
+  const { services } = ServicesResponseSchema.parse(
+    await (await page.request.get('/v1/services')).json(),
+  );
+  const ben = await callApi(
+    page,
+    'POST',
+    '/v1/staff',
+    { displayName: 'Ben', serviceIds: services.map((service) => service.id) },
+    StaffMemberSchema,
+  );
+  await page.reload();
+  const fixes = page.getByRole('region', { name: 'Before clients can book everything' });
+  await expect(fixes.getByTestId('setup-fix')).toHaveText([
+    /Ben has no working hours, so clients can’t book them\./,
+  ]);
+  await expect(fixes.getByRole('link', { name: 'Set their hours' })).toHaveAttribute(
+    'href',
+    `/team/${ben.id}`,
+  );
+
+  // Hours set: the warning goes on the next look.
+  await callApi(
+    page,
+    'PUT',
+    `/v1/staff/${ben.id}/hours`,
+    { intervals: [{ weekday: 2, start: '09:00', end: '17:00' }] },
+    WeeklyHoursSchema,
+  );
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'To-dos' })).toBeVisible();
+  await expect(page.getByTestId('setup-review')).toHaveCount(0);
+});
+
 test('clients: the owner finds a client, sees the coming visit on the profile, edits their phone and books again', async ({
   page,
 }) => {
@@ -284,6 +345,9 @@ test('a staff member adds their own time off; hours, rules and the menu are read
   await expect(priya).toHaveURL(/\/invite$/);
   await (await hydrated(priya.getByRole('button', { name: `Join ${owner.business}` }))).click();
   await expect(priya.getByTestId('business-role')).toHaveText('staff');
+  // The setup review and its fixes are for owners and managers (AC-W1-12).
+  await expect(priya.getByTestId('setup-review')).toHaveCount(0);
+  expect((await priya.request.get('/v1/setup')).status()).toBe(403);
 
   // The owner links Priya's login on the Team screen.
   await page.goto('/team');

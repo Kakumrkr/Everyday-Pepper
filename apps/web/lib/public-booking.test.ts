@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   checkDetails,
   confirmProblem,
+  firstFreeDay,
   initials,
   localTimeLabel,
   managePath,
   publicApiPath,
   publicAvailabilityPath,
+  publicRangePath,
   offerStateText,
   readManageToken,
   readOfferToken,
@@ -85,9 +87,13 @@ describe('the page data', () => {
     expect(staffFor(BUSINESS, 's1').map((s) => s.displayName)).toEqual(['Jess']);
   });
 
-  it('names the business clock by its city, never by its zone id', () => {
-    expect(localTimeLabel('America/Chicago')).toBe('Chicago time');
-    expect(localTimeLabel('America/Los_Angeles')).toBe('Los Angeles time');
+  it('names the business clock plainly, else by its city, never by its zone id (AC-W8-6)', () => {
+    expect(localTimeLabel('America/Chicago')).toBe('Central Time');
+    expect(localTimeLabel('America/Los_Angeles')).toBe('Pacific Time');
+    // Arizona keeps standard time all year: never "Mountain Time" like Denver.
+    expect(localTimeLabel('America/Denver')).toBe('Mountain Time');
+    expect(localTimeLabel('America/Phoenix')).toBe('Arizona Time');
+    expect(localTimeLabel('Europe/Paris')).toBe('Paris time');
     expect(localTimeLabel('America/Argentina/Buenos_Aires')).toBe('Buenos Aires time');
     expect(localTimeLabel('UTC')).toBe('UTC');
     expect(localTimeLabel('Etc/UTC')).toBe('UTC');
@@ -193,5 +199,44 @@ describe('refusedClaimStatus (S37)', () => {
   it('leaves anything else to "try again"', () => {
     expect(refusedClaimStatus(refused(429, 'too_many_requests'))).toBeNull();
     expect(refusedClaimStatus({ ok: true, data: {} })).toBeNull();
+  });
+});
+
+describe('the first free day (S46, AC-W8-4)', () => {
+  // Monday 2 November 2026, 11:30 PM in Chicago: still the 2nd there, the 3rd in UTC.
+  const NOW = Date.UTC(2026, 10, 3, 5, 30);
+  const ZONE = 'America/Chicago';
+  const days = upcomingDays(ZONE, NOW);
+  const slot = (startsAt: string) => ({ startsAt, endsAt: startsAt, staffMemberId: 'a' });
+
+  it('asks once for the whole strip, on the business’s clock', () => {
+    const path = publicRangePath('juniper', ZONE, days, { serviceId: 's1', staffMemberId: null });
+    const params = new URL(path ?? '', 'https://x.test').searchParams;
+    expect(params.get('from')).toBe('2026-11-02T06:00:00.000Z');
+    // Fourteen days later at local midnight, after the switch back to standard time.
+    expect(params.get('to')).toBe('2026-11-16T06:00:00.000Z');
+    expect(params.get('staffMemberId')).toBeNull();
+    expect(
+      publicRangePath('juniper', ZONE, [], { serviceId: 's1', staffMemberId: 'a' }),
+    ).toBeNull();
+  });
+
+  it('opens on the day of the earliest time, in the business’s zone', () => {
+    // Today is full; 9:00 PM Thursday in Chicago is already Friday in UTC.
+    const answer = {
+      slots: [slot('2026-11-07T15:00:00.000Z'), slot('2026-11-06T03:00:00.000Z')],
+      truncated: true,
+    };
+    expect(firstFreeDay(answer, ZONE, days)).toEqual({ kind: 'day', date: '2026-11-05' });
+  });
+
+  it('calls the range empty only when the whole answer is in', () => {
+    expect(firstFreeDay({ slots: [], truncated: false }, ZONE, days)).toEqual({ kind: 'none' });
+    expect(firstFreeDay({ slots: [], truncated: true }, ZONE, days)).toEqual({ kind: 'unknown' });
+  });
+
+  it('does not jump to a day outside the strip', () => {
+    const answer = { slots: [slot('2026-12-01T15:00:00.000Z')], truncated: false };
+    expect(firstFreeDay(answer, ZONE, days)).toEqual({ kind: 'unknown' });
   });
 });

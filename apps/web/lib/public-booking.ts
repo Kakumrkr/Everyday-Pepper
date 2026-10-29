@@ -3,6 +3,7 @@ import {
   formatDate,
   ManageTokenSchema,
   OfferTokenSchema,
+  parseDate,
   PhoneSchema,
   type CivilDate,
   type PublicOffer,
@@ -12,6 +13,7 @@ import {
 } from '@pepper/contracts';
 import { dayRange, todayIn } from './calendar';
 import { normalizeContact } from './booking';
+import { plainZoneName } from './time-zones';
 import type { CallResult } from './client-api';
 import { z } from 'zod';
 
@@ -26,6 +28,17 @@ export function publicApiPath(slug: string, rest = ''): string {
   return `/v1/public/businesses/${encodeURIComponent(slug)}${rest}`;
 }
 
+/** `GET …/availability` over [from, to), with one staff member or anyone. */
+function availabilityPath(
+  slug: string,
+  range: { from: string; to: string },
+  query: { serviceId: string; staffMemberId: string | null },
+): string {
+  const params = new URLSearchParams({ ...range, serviceId: query.serviceId });
+  if (query.staffMemberId !== null) params.set('staffMemberId', query.staffMemberId);
+  return `${publicApiPath(slug, '/availability')}?${params.toString()}`;
+}
+
 /** `GET …/availability` over one local day, with one staff member or anyone. */
 export function publicAvailabilityPath(
   slug: string,
@@ -33,9 +46,48 @@ export function publicAvailabilityPath(
   date: CivilDate,
   query: { serviceId: string; staffMemberId: string | null },
 ): string {
-  const params = new URLSearchParams({ ...dayRange(timeZone, date), serviceId: query.serviceId });
-  if (query.staffMemberId !== null) params.set('staffMemberId', query.staffMemberId);
-  return `${publicApiPath(slug, '/availability')}?${params.toString()}`;
+  return availabilityPath(slug, dayRange(timeZone, date), query);
+}
+
+/**
+ * `GET …/availability` over the whole strip, first day to last (S46, AC-W8-4): one request,
+ * well inside the api's 62 days, to find the first day with a free time.
+ */
+export function publicRangePath(
+  slug: string,
+  timeZone: string,
+  days: readonly Pick<StripDay, 'date'>[],
+  query: { serviceId: string; staffMemberId: string | null },
+): string | null {
+  const first = days[0];
+  const last = days.at(-1);
+  if (first === undefined || last === undefined) return null;
+  const range = {
+    from: dayRange(timeZone, parseDate(first.date)).from,
+    to: dayRange(timeZone, parseDate(last.date)).to,
+  };
+  return availabilityPath(slug, range, query);
+}
+
+/**
+ * What the strip-wide answer says about where to open (AC-W8-4): the day of its earliest time
+ * (the api answers earliest first, so a cut-off answer still has it); `none` only when the
+ * whole answer is in and empty; `unknown` when it cannot tell (a cut-off answer with no time,
+ * or a first time outside the strip), so the strip stays where it is.
+ */
+export function firstFreeDay(
+  answer: { slots: readonly { startsAt: string }[]; truncated: boolean },
+  timeZone: string,
+  days: readonly Pick<StripDay, 'date'>[],
+): { kind: 'day'; date: string } | { kind: 'none' } | { kind: 'unknown' } {
+  const earliest = answer.slots
+    .map((slot) => Date.parse(slot.startsAt))
+    .reduce((a, b) => Math.min(a, b), Number.POSITIVE_INFINITY);
+  if (earliest === Number.POSITIVE_INFINITY) {
+    return answer.truncated ? { kind: 'unknown' } : { kind: 'none' };
+  }
+  const date = formatDate(todayIn(timeZone, earliest));
+  return days.some((day) => day.date === date) ? { kind: 'day', date } : { kind: 'unknown' };
 }
 
 /** One day of the strip. */
@@ -88,11 +140,13 @@ export function serviceOf(
 }
 
 /**
- * The business's clock in words for its clients (DESIGN.md §6, no zone ids): its city
- * (`America/Los_Angeles` → "Los Angeles time"), "UTC", or an offset zone by its offset
+ * The business's clock in words (DESIGN.md §6, no zone ids): its plain name ("Central Time",
+ * S46), else its city (`Europe/Paris` → "Paris time"), "UTC", or an offset zone by its offset
  * ("GMT-5": Etc's own names invert the sign), the offset in force `at` that moment (now).
  */
 export function localTimeLabel(timeZone: string, at: number = Date.now()): string {
+  const plain = plainZoneName(timeZone);
+  if (plain !== undefined) return plain;
   if (
     ['UTC', 'GMT', 'Etc/UTC', 'Etc/GMT', 'Etc/UCT', 'Etc/Universal', 'Etc/Zulu'].includes(timeZone)
   ) {
