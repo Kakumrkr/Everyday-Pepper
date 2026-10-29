@@ -36,7 +36,10 @@ export function seedFromTemplate(
   };
 }
 
+/** The account's name, cut to the staff name's length by whole characters (never half an emoji). */
 function displayNameOf(name: string): string {
-  const trimmed = name.trim().slice(0, DISPLAY_NAME_MAX).trim();
+  const characters = Array.from(name.trim());
+  while (characters.join('').length > DISPLAY_NAME_MAX) characters.pop();
+  const trimmed = characters.join('').trim();
   return trimmed === '' ? OWNER_FALLBACK_NAME : trimmed;
 }

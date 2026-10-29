@@ -2,11 +2,11 @@
 
 import type { Business, TemplateId, TemplateSummary } from '@pepper/contracts';
 import { Button, Input, Select } from '@pepper/ui';
-import { useId, useRef, useState, type SubmitEvent } from 'react';
+import { useEffect, useId, useRef, useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
 import { suggestSlug } from '../../lib/slug';
-import { browserTimeZone, orderedTimeZones } from '../../lib/time-zones';
+import { browserTimeZone, FALLBACK_TIME_ZONE, orderedTimeZones } from '../../lib/time-zones';
 import { AuthPage } from './auth-page';
 import { BusinessTypePicker } from './business-type-picker';
 import { Notice } from './form-parts';
@@ -29,12 +29,15 @@ export function CreateBusinessForm({ types }: { types: readonly TemplateSummary[
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const firstType = useRef<HTMLInputElement>(null);
-  // Built once, around the zone the browser started with.
-  const [{ zones, initialZone }] = useState(() => {
+  // The server renders the US zones around New York; once in the browser, every zone and the
+  // browser's own (both differ from the server's, so they wait for the mount: no hydration gap).
+  const [zones, setZones] = useState(() => orderedTimeZones([], FALLBACK_TIME_ZONE));
+  const [timeZone, setTimeZone] = useState(FALLBACK_TIME_ZONE);
+  useEffect(() => {
     const zone = browserTimeZone();
-    return { zones: orderedTimeZones(Intl.supportedValuesOf('timeZone'), zone), initialZone: zone };
-  });
-  const [timeZone, setTimeZone] = useState(initialZone);
+    setZones(orderedTimeZones(Intl.supportedValuesOf('timeZone'), zone));
+    setTimeZone(zone);
+  }, []);
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();

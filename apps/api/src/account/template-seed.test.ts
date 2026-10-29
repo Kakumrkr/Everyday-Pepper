@@ -59,5 +59,7 @@ describe('seedFromTemplate (S45, AC-W1-7)', () => {
     );
     const long = seedFromTemplate(template, { userId, name: 'A'.repeat(200) }).owner.displayName;
     expect(long).toHaveLength(80);
+    const emoji = seedFromTemplate(template, { userId, name: `${'A'.repeat(79)}💈` }).owner;
+    expect(emoji.displayName).toBe('A'.repeat(79));
   });
 });

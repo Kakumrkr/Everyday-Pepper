@@ -13,7 +13,11 @@ export async function noteBookableIn(tx: TenantTx): Promise<void> {
   if (await isBusinessBookable(tx)) await recordActivation(tx, 'bookable');
 }
 
-/** Records `first_booking` with the business's first booking (by staff, the AI or a client). */
+/**
+ * Records `first_booking` with the business's first booking (by staff, the AI or a client);
+ * once recorded, one indexed lookup per booking.
+ */
 export async function noteFirstBookingIn(tx: TenantTx): Promise<void> {
+  if (await hasActivation(tx, 'first_booking')) return;
   await recordActivation(tx, 'first_booking');
 }

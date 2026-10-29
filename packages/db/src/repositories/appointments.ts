@@ -1,6 +1,7 @@
 import {
   ServiceInputSchema,
   StaffColorSchema,
+  TEMPLATE_LIMITS,
   type Rule,
   type ServiceFields,
   type ServiceId,
@@ -61,6 +62,14 @@ export async function lockService(tx: TenantTx, id: ServiceId): Promise<ServiceR
   return row;
 }
 
+/** A regular's rebooking interval, as the `services_rebook_after_days_range` check allows. */
+const RebookAfterDaysSchema = z
+  .number()
+  .int()
+  .min(TEMPLATE_LIMITS.minRebookingDays)
+  .max(TEMPLATE_LIMITS.maxRebookingDays)
+  .nullable();
+
 /**
  * Throws `ServiceNameTakenError` when the business has a service with this name.
  * `rebookAfterDays`: when a regular is due again (a template's starting menu, S45).
@@ -71,7 +80,7 @@ export async function insertService(
   options: { rebookAfterDays?: number | null } = {},
 ): Promise<ServiceRow> {
   const values = ServiceInputSchema.parse(fields);
-  const rebookAfterDays = options.rebookAfterDays ?? null;
+  const rebookAfterDays = RebookAfterDaysSchema.parse(options.rebookAfterDays ?? null);
   return serviceNameUnique(async () => {
     const [row] = await tx
       .insert(services)

@@ -26,7 +26,8 @@ Until S45 a new business started empty: the owner typed every service, added the
 - A barber is bookable with zero typing; an owner who doesn't take clients themselves turns their staff entry off (S46's checklist will point to it).
 - Template hours fit some shops badly; they are editable, and the owner sees them on the booking page at once.
 - A new template needs `defaultHours`, `featured` and its schema test (ADR-0018's checklist grows by one line).
-- The bookable check runs on staff and hours changes until the event exists, then costs one indexed lookup.
+- The bookable check runs on staff, services and hours changes (and a learned rule's undo) until the event exists, then costs one indexed lookup; `first_booking` likewise reads before it writes.
+- No backfill (code review): no real business exists before the pilot's deploy (S57), and development and CI databases start empty; a business created before migration 0052 would get its events from its next change, with that time.
 
 ## Tests
 `packages/contracts/src/templates.test.ts`, `packages/templates/src/templates.test.ts` (hours valid and long enough, featured four), `apps/api/src/account/template-seed.test.ts`, `apps/api/src/account/tenancy.int.test.ts` (barber seeded and bookable, audited, nothing without a type, all or nothing), `packages/modules/appointments/src/activation.int.test.ts`, `packages/db/src/isolation.int.test.ts`, `apps/api/src/auth.int.test.ts` "AC-W1-10…", `apps/web/lib/time-zones.test.ts`, `e2e/tests/auth.spec.ts` "business type at signup", `e2e/tests/accessibility.spec.ts`, `e2e/tests/screens.spec.ts` (`auth-business`).

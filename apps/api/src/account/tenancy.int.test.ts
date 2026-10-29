@@ -10,6 +10,7 @@ import { createBusiness, ManualClock, type Actor } from '@pepper/core';
 import {
   createDatabase,
   listAuditEntries,
+  listServices,
   prepareDatabase,
   tenants,
   users,
@@ -124,6 +125,10 @@ describe('creating a business with a type (AC-W1-7)', () => {
     expect(actions).toContain('working_hours.replaced');
     expect(actions).toContain('tenant.created');
     expect(entries.every((e) => e.actor.kind === 'user')).toBe(true);
+    const rows = await withTenant(handle.db, business.id, listServices);
+    expect(Object.fromEntries(rows.map((row) => [row.name, row.rebookAfterDays]))).toEqual(
+      Object.fromEntries(template.serviceCatalog.map((s) => [s.name, s.rebookAfterDays])),
+    );
   });
 
   it('seeds nothing without a type', async () => {

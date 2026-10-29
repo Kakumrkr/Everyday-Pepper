@@ -151,11 +151,15 @@ test.describe('business type at signup (S45, ADR-0046)', () => {
     await (await hydrated(client.getByRole('button', { name: /^Haircut(?! and)/ }))).click();
     await client.getByRole('button', { name: /Marcus Reed/ }).click();
     await expect(client.getByRole('heading', { name: 'Pick a time' })).toBeVisible();
+    // Days open on the template's hours (Tuesday to Saturday): one of the next four days has
+    // times. Each day's answer is waited for (times, or "Nothing free that day").
     const days = client.getByRole('group', { name: 'Day' }).getByRole('button');
     const times = client.getByTestId('free-times').getByRole('button');
+    const answered = times.first().or(client.getByText('Nothing free that day. Try another day.'));
     let offered = 0;
-    for (let day = 0; day < 7 && offered === 0; day += 1) {
+    for (let day = 0; day < 4 && offered === 0; day += 1) {
       await days.nth(day).click();
+      await expect(answered).toBeVisible({ timeout: 15_000 });
       offered = await times.count();
     }
     expect(offered).toBeGreaterThan(0);
