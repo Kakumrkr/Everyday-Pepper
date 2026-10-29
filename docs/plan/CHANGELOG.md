@@ -2,6 +2,12 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.35 — 2026-10-29
+- Before S46 (owner's standing authorization): **setup confidence and lean sessions through launch** ([PCR-009](changes/PCR-009.md)). S46 now distinguishes automatic bookability from an explicit per-business setup review; keeps current readiness warnings after acknowledgment; defines public staff/service eligibility, bounded first-free-day selection, accurate zone labels and retry without losing selections. AC-W1-11/12 and AC-W8-3…6 are added as planned criteria. Contact/profile details remain S47, correcting the original ambiguous S46 private-review gate.
+- The same planning refinement updates existing session-brief/session-close instructions and the maintained testing strategy for all remaining sessions: explicit check profiles, narrow prose-only checks, no repeated unchanged targeted checks, diagnosis before repeated full runs, valid-stack reuse, compact timing evidence, and existing-file continuity. There is no per-session report-file requirement; Claude's existing approval and GitHub closeout flow stays intact.
+
+  **Compatibility:** planning/workflow instructions only; no product code, schema, test/CI/helper scripts, event semantics, budget or release scores changed. Code-change coverage and required gates remain; genuine non-runtime prose changes use document validation. Existing signup, permissions, booking verification/recovery, availability rules and outbox guarantees remain required. Later-date navigation is a tracked follow-up. Product implementation and verification remain S46.
+
 ## 0.34 — 2026-10-27
 - After S41 (user): **faster sessions** ([PCR-008](changes/PCR-008.md)). `/session-close` reviews first, then runs each suite once (a red step re-runs only the failing tests; integration only when the session changed code it runs; the walkthrough uses the screenshot baselines plus one flow). The brief sizes a session to one context window; S42 is split into S42 (Calendar, Clients) and S42.2 (settings screens). Decisions are written out once, in `decisions.md`.
 

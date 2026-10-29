@@ -1,19 +1,25 @@
 ---
 name: session-close
-description: Close a Pepper session - review first, then the full checks once and in order, the walkthrough, the docs, one PR, one green CI run, merge, and the next session's prompt. Use when a session's tasks are done, or when the user says to wrap up, open the PR or merge.
+description: Close a Pepper session with scope-appropriate checks, review, walkthrough when relevant, concise shared records, the existing PR/merge workflow, and a next-session handoff. Use when tasks are done or the user asks to wrap up.
 ---
 
-# Closing a session (M2 + P1, user-approved workflow; made faster in PCR-008)
+# Closing a session (M2 + P1; PCR-008 and PCR-009)
 
-**Order matters: review before checks.** A fix after the checks sends every suite round again (S41 ran the full Playwright suite three times that way). So the review and its fixes come first, and each suite then runs **once**.
+**Order matters: review before final checks.** S41 ran the full Playwright suite three times after late fixes. Review and fix first, then run each applicable final suite once; revalidate broader scope only when new changes or findings justify it.
 
-Every suite runs alone, never two side by side (they starve each other and time out). Long runs go in the background (`run_in_background`), output to `<scratchpad>/<name>.log`; read only the summary lines (`tail`, `grep -E "passed|failed|✘"`), and the failure itself only if there is one.
+Every local full suite runs alone, never two side by side (they starve each other and time out). Long runs go in the background (`run_in_background`), output to `<scratchpad>/<name>.log`; read the summary and relevant failures rather than dumping passing logs. Use the check-selection matrix in `docs/engineering/testing-strategy.md` as the maintained source for scope decisions.
 
 ## 1. Review the diff (first)
 
-Run `/code-review` on the branch; add `/security-review` when the change touches auth, permissions, tenancy (RLS), tool arguments, or anything an outsider's text reaches. Fix what is real; say why for what is not. After the fixes, run tier 2 only (typecheck and lint of what changed, the changed packages' unit tests) and the Playwright spec of any screen a fix touched.
+For code changes, run `/code-review` on the branch; add `/security-review` when the change touches auth, permissions, tenancy (RLS), tool arguments, or anything an outsider's text reaches. Fix what is real; say why for what is not. After fixes, run tier 2 and affected tests only. Do not repeat an already-passed targeted check at the same checkpoint when its code, dependencies, fixtures, configuration and relevant environment are unchanged; record the evidence reused. The required final code-change run below remains mandatory.
+
+For prose/planning-only work, review the actual diff and cross-document consistency directly. Workflow/skill instruction edits need a review of check coverage, failure handling and authorization boundaries; validate edited skills with an available validator. Do not invoke unrelated design or application review workflows merely because they are installed.
 
 ## 2. Checks, once, in this order
+
+**Classify the final diff first, including intended new files.** For non-runtime prose/planning/workflow Markdown only: run whitespace/diff checks, affected relative-link checks, acceptance-ID/reference consistency where relevant, and the review above. No application build, Docker stack, integration or browser suite is required when none consumes the changed material. Say which checks were not applicable and why. Runtime-loaded prompts/templates, code, fixtures, configuration, lockfiles and executable scripts use the normal code-change path even if a file is text/Markdown. Mixed or uncertain changes use the code-change path.
+
+For code changes:
 
 1. `pnpm check` (format, lint, typecheck, unit tests with coverage, build).
 2. `pnpm test:integration`, alone: **only when the session changed code the integration tests run** (anything under `packages/` except `packages/ui`, or `apps/api`, `apps/worker`, or a migration). A screens-only session (`apps/web`, `packages/ui`, `e2e`, docs) skips it and says so in the PR: CI runs it on the PR anyway.
@@ -26,7 +32,11 @@ Run `/code-review` on the branch; add `/security-review` when the change touches
    `PLAYWRIGHT_CHROMIUM_EXECUTABLE` comes from the session-start hook (CI's headless shell).
 4. If the session recorded the evals: the free replay passed inside step 2.
 
-**A red step:** fix it, re-run **only the failing tests** (the file, or `test:e2e tests/<spec>.ts`), then go on to the next step. Do not re-run the whole suite: CI runs every suite once on the PR. A fix that touches code outside the failing test's area also re-runs tier 2 of what it touched.
+**A red step:** fix it, re-run the affected failing cases (the file, or `test:e2e tests/<spec>.ts`), then go on. A fix that touches another area also runs tier 2 and relevant regressions there. Do not repeat the whole suite merely to recheck the same failure; broaden validation when the fix or new evidence broadens the affected scope. CI's required suites remain unchanged.
+
+If a check fails again without an explanatory change, inspect its failure and isolate the cause instead of repeating unchanged full runs. A reproduction attempt is diagnostic evidence, not a fix; retain unresolved failures and their logs. Never make a gate pass by increasing tolerances, shrinking meaningful fixtures, disabling cases, or retrying away instability. Full revalidation beyond the normal close is justified when new changes or findings broaden the affected scope.
+
+Keep one valid E2E stack alive for related targeted runs; rebuild/restart when changed inputs require it. Use the helper and existing Turborepo cache rather than repeatedly rebuilding Docker app images in cloud sessions. Do not remove build prerequisites without verifying which outputs the test process imports.
 
 **Screenshot baselines:** when a screenshot test fails because the screen changed on purpose, look at the new image, then `--update-snapshots` that spec and run it once more (a second run shows it is stable).
 
@@ -41,6 +51,8 @@ The screenshot spec already shows each changed screen at 375/412/1280 px in ligh
 - `docs/plan/session-log.md`: a short entry (5 to 10 lines: built, checks with counts, carried items, links to the ADR and PR), ending with a **Retro** of three lines: _went well_ · _do better_ · _top-up for the next session_.
 - The ADR if a decision was made ("Accepted" and its results), `docs/plan/ai-budget.md` if the real model was called, `docs/plan/traceability.md` if acceptance criteria changed, and the area doc whose behaviour changed.
 - **A phase's last session** also scores every category in `docs/plan/scorecard.md` (§4 history row, with the evidence in the session-log entry). A category under its §2 target is named in the PR and becomes the next brief's first task.
+
+Use one existing session-log entry; do not create a new session report, checklist or handoff file. Add one compact timing line from existing logs: setup/build, targeted checks, final suites, walkthrough/rework, CI execution and waiting where available. Mark unmeasured time as unknown; do not run checks again to collect timings. The next target stays in the playbook/STATUS. Create a PCR only for an actual approved-plan/contract change and an ADR only for an architectural decision.
 
 ## 5. PR, once (an "a" half stops before this)
 

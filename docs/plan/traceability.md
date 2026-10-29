@@ -4,6 +4,12 @@ Links each requirement to its design and tests. Test columns are filled in as ph
 
 | Requirement | Design | Phase | Tests |
 |---|---|---|---|
+| AC-W1-11 setup review distinct from technical bookability | [PCR-009](changes/PCR-009.md), S46 playbook, ADR-0046 activation semantics preserved | 10 | **Planned, not implemented:** S46 must map tenant-scoped acknowledgment persistence, existing/seeded setup, permissions/isolation and Home walkthrough tests before closing |
+| AC-W1-12 current actionable readiness warnings | [PCR-009](changes/PCR-009.md), appointments/domain readiness | 10 | **Planned, not implemented:** S46 must map readiness domain/API tests, acknowledgment-independent warning updates and permitted repair actions; no conflation with full dates/time off/load failure |
+| AC-W8-3 public staff/service eligibility with working hours | [PCR-009](changes/PCR-009.md), public booking and hours domain | 10 | **Planned, not implemented:** S46 must map public menu integration and E2E cases for no-hours, mixed/inactive providers and fully booked/time-off providers, preserving internal visibility |
+| AC-W8-4 first free day within displayed range | [PCR-009](changes/PCR-009.md), existing availability rules | 10 | **Planned, not implemented:** S46 must map range-empty/later-day cases, bounded requests, truncated/failing responses and stale-result/date-choice protection |
+| AC-W8-5 retry availability without losing selections | [PCR-009](changes/PCR-009.md), public slot picker | 10 | **Planned, not implemented:** S46 must map failure-then-success E2E, retained inputs, accessible feedback and stale/duplicate-request protection |
+| AC-W8-6 accurate friendly time-zone labels | [PCR-009](changes/PCR-009.md), business-zone rendering | 10 | **Planned, not implemented:** S46 must map deterministic zone/DST unit cases and the changed setup/public screenshots; preserve stored zones/date boundaries |
 | AC-W1-1/2 onboarding draft & confirm | jobs-messaging-integrations (extraction), modules-and-templates | 9 | _tbd_ |
 | AC-W1-3 CSV import idempotent | jobs-messaging-integrations | 9 | _tbd_ |
 | AC-W1-4 password reset, no account revealed, single-use link | ADR-0007, ADR-0012, ADR-0045 | 10 | S44: `apps/api/src/auth.int.test.ts` "AC-W1-4: a reset answers the same…", "sends no address or link token to the logs"; `apps/api/src/auth/better-auth.test.ts`, `auth-emails.test.ts`; `packages/runtime/src/request-logging.test.ts`; `e2e/tests/auth.spec.ts` "AC-W1-4…"; screens `e2e/tests/screens.spec.ts` (`auth-forgot*`, `auth-reset*`) |
