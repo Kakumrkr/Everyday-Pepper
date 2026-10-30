@@ -5,6 +5,7 @@ import {
   OfferTokenSchema,
   parseDate,
   PhoneSchema,
+  type BookingFunnelStep,
   type CivilDate,
   type PublicOffer,
   type PublicBusiness,
@@ -22,6 +23,26 @@ import { z } from 'zod';
 
 /** How many days ahead the page's day strip offers. */
 export const BOOKING_DAYS = 14;
+
+/**
+ * Tells the api a visit entered a booking step (S47, AC-W8-9): a random visit id and the step,
+ * nothing about the client. Never waits and never fails the page; `keepalive` lets the last
+ * one go out as the client leaves.
+ */
+export function recordBookingStep(
+  slug: string,
+  visitId: string,
+  step: BookingFunnelStep,
+  fetch: typeof globalThis.fetch = globalThis.fetch,
+): void {
+  fetch(publicApiPath(slug, '/funnel'), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ visitId, step }),
+    credentials: 'same-origin',
+    keepalive: true,
+  }).catch(() => undefined);
+}
 
 /** The api path of a business's booking page, plus `rest`. */
 export function publicApiPath(slug: string, rest = ''): string {
