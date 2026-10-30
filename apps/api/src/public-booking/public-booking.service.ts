@@ -110,24 +110,31 @@ export class PublicBookingService {
     slug: TenantSlug,
     input: BookingRequest,
     deviceToken?: DeviceToken,
-  ): Promise<BookingRequestResponse> {
-    const mailer = this.requireMailer();
+  ): Promise<{ response: BookingRequestResponse; refreshDevice?: DeviceToken }> {
+    // A remembered device sends no code email, so only a browser without one needs the mailer
+    // before anything is stored.
+    if (deviceToken === undefined) this.requireMailer();
     const asked = await requestBooking(this.db, slug, input, {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
       deviceToken,
     });
-    if (asked.remembered) {
+    if (asked.remembered && deviceToken !== undefined) {
       const { response } = await this.confirm(slug, asked.requestId, { code: asked.code });
-      return { requestId: asked.requestId, expiresAt: asked.expiresAt, confirmed: response };
+      // Its 90 days start again, so the cookie's do too.
+      return {
+        response: { requestId: asked.requestId, expiresAt: asked.expiresAt, confirmed: response },
+        refreshDevice: deviceToken,
+      };
     }
+    const mailer = this.requireMailer();
     try {
       await mailer.send(codeEmail(asked.email, asked.code, VERIFICATION_CODE_TTL_MINUTES));
     } catch (error) {
       this.logger.error(`Could not send a booking code: ${messageOf(error)}`);
       throw new ServiceUnavailableException(apiError('email_unavailable'));
     }
-    return { requestId: asked.requestId, expiresAt: asked.expiresAt };
+    return { response: { requestId: asked.requestId, expiresAt: asked.expiresAt } };
   }
 
   /** "Join the waitlist" (S38a): the code is emailed at once, like a booking's. */
@@ -158,8 +165,10 @@ export class PublicBookingService {
     slug: TenantSlug,
     requestId: BookingRequestId,
     input: BookingConfirmInput,
+    deviceToken?: DeviceToken,
   ): Promise<{ response: BookingConfirmResponse; device?: DeviceToken }> {
     const confirmed = await confirmBookingRequest(this.db, slug, requestId, input, {
+      deviceToken,
       codeKey: this.options.codeKey,
       templateRuleDefaults,
       notify: this.notify,
@@ -171,7 +180,7 @@ export class PublicBookingService {
   }
 
   /** "Forget this device" (S47): the business stops remembering the browser's token. */
-  forget(slug: TenantSlug, token: DeviceToken | undefined): Promise<void> {
+  forget(slug: TenantSlug, token: DeviceToken | undefined): Promise<boolean> {
     return forgetDevice(this.db, slug, token);
   }
 

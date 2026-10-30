@@ -598,11 +598,27 @@ describe('remembered devices (S47, ADR-0047, AC-W8-8)', () => {
   it('is forgotten on "Forget this device"', async () => {
     const p = await newPage();
     const token = await remembered(p);
-    await forgetDevice(db, p.slug, token);
+    expect(await forgetDevice(db, p.slug, token)).toBe(true);
     expect((await again(p, token, { startsAt: tue('12:00') })).remembered).toBe(false);
-    // Unknown or malformed tokens and pages are no-ops.
-    await expect(forgetDevice(db, p.slug, 'nope')).resolves.toBeUndefined();
-    await expect(forgetDevice(db, 'no-such-page', token)).resolves.toBeUndefined();
+    // Unknown or malformed tokens and pages forget nothing.
+    expect(await forgetDevice(db, p.slug, token)).toBe(false);
+    expect(await forgetDevice(db, p.slug, 'nope')).toBe(false);
+    expect(await forgetDevice(db, 'no-such-page', token)).toBe(false);
+  });
+
+  it('ends the browser’s earlier device when it is remembered again', async () => {
+    const p = await newPage();
+    const first = await remembered(p, 'ana@example.test');
+    const asked = await request(p, { email: 'bo@example.test', startsAt: tue('12:00') });
+    const second = await confirmBookingRequest(
+      db,
+      p.slug,
+      asked.requestId,
+      { code: asked.code, remember: true },
+      { codeKey: KEY, clock: p.clock, deviceToken: first },
+    );
+    expect(second.device?.token).not.toBe(first);
+    expect((await again(p, first, { startsAt: tue('14:00') })).remembered).toBe(false);
   });
 });
 

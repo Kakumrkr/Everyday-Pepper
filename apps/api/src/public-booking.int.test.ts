@@ -323,11 +323,14 @@ describe('the public booking page', () => {
       .expect(201);
     const answer = BookingRequestResponseSchema.parse(again.body);
     expect(answer.confirmed?.booking.status).toBe('confirmed');
+    // Its 90 days start again, in the browser too.
+    expect(again.headers['set-cookie']?.[0]).toMatch(new RegExp(`^${cookie}; .*Max-Age=7776000`));
     expect(mailer.sent.filter((m) => m.subject.includes('is your code'))).toEqual([]);
     expect(await bookedFor('bo.device@example.test')).toBe(2);
 
     // Forgotten: the cookie is cleared and the next request asks for a code.
-    const forgot = await bo.post('/device/forget', {}).set('cookie', cookie).expect(204);
+    const forgot = await bo.post('/device/forget', {}).set('cookie', cookie).expect(200);
+    expect(forgot.body).toEqual({ forgotten: true });
     expect(String(forgot.headers['set-cookie']?.[0])).toContain('Max-Age=0');
     const third_ = await bo
       .post('/booking-requests', ask(third.startsAt))

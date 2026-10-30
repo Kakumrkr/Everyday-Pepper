@@ -92,7 +92,6 @@ export const BookingRequestInputSchema = z
 export type BookingRequestInput = z.input<typeof BookingRequestInputSchema>;
 export type BookingRequest = z.output<typeof BookingRequestInputSchema>;
 
-/** The answer: the code is on its way to the email address. */
 /**
  * The secret of a remembered device (S47, ADR-0047): 256 random bits, base64url, kept only in
  * an httpOnly cookie on the client and as a hash in the database.
@@ -102,6 +101,10 @@ export const DeviceTokenSchema = z
   .regex(/^[A-Za-z0-9_-]{43}$/)
   .brand<'DeviceToken'>();
 export type DeviceToken = z.infer<typeof DeviceTokenSchema>;
+
+/** Answer of `POST …/device/forget`: whether this browser was remembered (S47). */
+export const DeviceForgetResponseSchema = z.object({ forgotten: z.boolean() });
+export type DeviceForgetResponse = z.infer<typeof DeviceForgetResponseSchema>;
 
 /** How long a remembered device skips the code after it was last used (days). */
 export const REMEMBERED_DEVICE_DAYS = 90;

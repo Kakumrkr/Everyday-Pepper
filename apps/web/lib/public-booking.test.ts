@@ -11,6 +11,7 @@ import {
   publicRangePath,
   offerStateText,
   readManageToken,
+  newVisitId,
   readOfferToken,
   recordBookingStep,
   refusedClaimStatus,
@@ -254,5 +255,15 @@ describe('recordBookingStep (S47, AC-W8-9)', () => {
       keepalive: true,
     });
     await Promise.resolve();
+  });
+});
+
+describe('newVisitId (S47)', () => {
+  it('is a v4 UUID, also where randomUUID is missing (plain http)', () => {
+    const v4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+    expect(newVisitId()).toMatch(v4);
+    const noRandomUuid = { getRandomValues: crypto.getRandomValues.bind(crypto) };
+    expect(newVisitId(noRandomUuid)).toMatch(v4);
+    expect(newVisitId(noRandomUuid)).not.toBe(newVisitId(noRandomUuid));
   });
 });

@@ -16,8 +16,8 @@ import {
   insertRememberedDevice,
   recordFunnelStep,
   useRememberedDevice,
+  withMember,
   withPublicTenant,
-  withTenant,
   type Database,
   type TenantTx,
 } from '@pepper/db';
@@ -39,12 +39,18 @@ function expiryFrom(now: Date): Date {
   return new Date(now.getTime() + REMEMBERED_DEVICE_DAYS * DAY_MS);
 }
 
-/** Remembers this browser for `email` in the transaction's business; the new secret. */
+/**
+ * Remembers this browser for `email` in the transaction's business; the new secret. `replaces`:
+ * the token the browser held until now, which stops working (its cookie is overwritten).
+ */
 export async function rememberDeviceIn(
   tx: TenantTx,
   email: string,
   now: Date,
+  replaces?: string,
 ): Promise<{ token: DeviceToken; expiresAt: Date }> {
+  const previous = DeviceTokenSchema.safeParse(replaces);
+  if (previous.success) await deleteRememberedDevice(tx, deviceTokenHash(previous.data));
   const token = DeviceTokenSchema.parse(randomBytes(32).toString('base64url'));
   const expiresAt = expiryFrom(now);
   await insertRememberedDevice(tx, { email, tokenHash: deviceTokenHash(token), expiresAt, now });
@@ -72,18 +78,22 @@ export async function recognizeDeviceIn(
   return used !== undefined;
 }
 
-/** "Forget this device": the business at `slug` stops remembering it (nothing when unknown). */
+/**
+ * "Forget this device": the business at `slug` stops remembering it. Whether it remembered it
+ * (only the browser holding the token can ask).
+ */
 export async function forgetDevice(
   db: Database,
   slug: TenantSlug,
   token: string | undefined,
-): Promise<void> {
+): Promise<boolean> {
   const parsedSlug = TenantSlugSchema.safeParse(slug);
   const parsed = DeviceTokenSchema.safeParse(token);
-  if (!parsedSlug.success || !parsed.success) return;
-  await withPublicTenant(db, parsedSlug.data, (tx) =>
+  if (!parsedSlug.success || !parsed.success) return false;
+  const forgotten = await withPublicTenant(db, parsedSlug.data, (tx) =>
     deleteRememberedDevice(tx, deviceTokenHash(parsed.data)),
   );
+  return forgotten === true;
 }
 
 /**
@@ -108,5 +118,5 @@ export async function getBookingFunnel(
   range: { from: Date; to: Date },
 ): Promise<BookingFunnelCounts> {
   requirePermission(actor, 'settings.manage');
-  return withTenant(db, actor.context.tenantId, (tx) => countFunnelSteps(tx, range));
+  return withMember(db, actor.context, (tx) => countFunnelSteps(tx, range));
 }

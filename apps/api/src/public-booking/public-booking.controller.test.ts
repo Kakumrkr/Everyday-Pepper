@@ -82,14 +82,16 @@ const ASK = {
 const service = {
   business: vi.fn(() => Promise.resolve(BUSINESS)),
   availability: vi.fn(() => Promise.resolve([SLOT])),
-  request: vi.fn(() =>
-    Promise.resolve({ requestId: REQUEST_ID, expiresAt: '2026-11-02T12:10:00.000Z' }),
+  request: vi.fn((): Promise<{ response: unknown; refreshDevice?: string }> =>
+    Promise.resolve({
+      response: { requestId: REQUEST_ID, expiresAt: '2026-11-02T12:10:00.000Z' },
+    }),
   ),
   confirm: vi.fn((): Promise<{ response: unknown; device?: string }> =>
     Promise.resolve({ response: { booking: BOOKING, manageToken: TOKEN } }),
   ),
   secureCookies: false,
-  forget: vi.fn(() => Promise.resolve()),
+  forget: vi.fn(() => Promise.resolve(true)),
   funnelStep: vi.fn(() => Promise.resolve()),
   managed: vi.fn(() => Promise.resolve(BOOKING)),
   reschedule: vi.fn(() => Promise.resolve(BOOKING)),
@@ -256,7 +258,12 @@ describe('the public booking page api (no session)', () => {
       booking: BOOKING,
       manageToken: TOKEN,
     });
-    expect(service.confirm).toHaveBeenCalledWith('juniper', REQUEST_ID, { code: '042917' });
+    expect(service.confirm).toHaveBeenCalledWith(
+      'juniper',
+      REQUEST_ID,
+      { code: '042917' },
+      undefined,
+    );
     expect(hits).toEqual([{ limit: 'confirm-ip', key: '203.0.113.7' }]);
   });
 
@@ -269,6 +276,19 @@ describe('the public booking page api (no session)', () => {
       .send(ASK)
       .expect(201);
     expect(service.request).toHaveBeenCalledWith('juniper', expect.anything(), device);
+  });
+
+  it('renews the device cookie when a remembered browser books (S47)', async () => {
+    const device = 'd'.repeat(43);
+    service.request.mockResolvedValueOnce({
+      response: { requestId: REQUEST_ID, expiresAt: '2026-11-02T12:10:00.000Z' },
+      refreshDevice: device,
+    });
+    const response = await post('/booking-requests', ASK).expect(201);
+    expect(response.headers['set-cookie']?.[0]).toMatch(
+      new RegExp(`^pepper_device=${device}; .*Max-Age=7776000`),
+    );
+    expect(JSON.stringify(response.body)).not.toContain(device);
   });
 
   it('sets the httpOnly device cookie only when the client asked to be remembered (S47)', async () => {
@@ -287,20 +307,23 @@ describe('the public booking page api (no session)', () => {
     ]);
     // The secret never appears in the body.
     expect(JSON.stringify(remembered.body)).not.toContain('d'.repeat(43));
-    expect(service.confirm).toHaveBeenLastCalledWith('juniper', REQUEST_ID, {
-      code: '042917',
-      remember: true,
-    });
+    expect(service.confirm).toHaveBeenLastCalledWith(
+      'juniper',
+      REQUEST_ID,
+      { code: '042917', remember: true },
+      undefined,
+    );
   });
 
-  it('forgets the device: 204 and the cookie cleared (S47)', async () => {
+  it('forgets the device: whether it was known, and the cookie cleared (S47)', async () => {
     const response = await request(server)
       .post(`${BASE}/device/forget`)
       .set('origin', ORIGIN)
       .set('x-forwarded-for', '203.0.113.7')
       .set('cookie', `pepper_device=${'d'.repeat(43)}`)
       .send({})
-      .expect(204);
+      .expect(200);
+    expect(response.body).toEqual({ forgotten: true });
     expect(service.forget).toHaveBeenCalledWith('juniper', 'd'.repeat(43));
     expect(response.headers['set-cookie']?.[0]).toMatch(/^pepper_device=; .*Max-Age=0/);
     expect(hits).toEqual([{ limit: 'forget-ip', key: '203.0.113.7' }]);

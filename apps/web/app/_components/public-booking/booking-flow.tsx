@@ -3,6 +3,7 @@
 import {
   BookingConfirmResponseSchema,
   BookingRequestResponseSchema,
+  DeviceForgetResponseSchema,
   SlotUnavailableSchema,
   WaitlistConfirmResponseSchema,
   WrongCodeSchema,
@@ -42,6 +43,7 @@ import {
   checkDetails,
   confirmProblem,
   managePath,
+  newVisitId,
   publicApiPath,
   recordBookingStep,
   serviceOf,
@@ -163,9 +165,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   // "Remember me on this phone" (S47, D-2: on by default); `withoutCode`: this booking used it.
   const [remember, setRemember] = useState(true);
   const [withoutCode, setWithoutCode] = useState(false);
-  const [forgotten, setForgotten] = useState(false);
+  const [forgotten, setForgotten] = useState<'forgotten' | 'unknown' | null>(null);
   // A random id for this visit, linked to nothing (AC-W8-9).
-  const [visitId] = useState(() => crypto.randomUUID());
+  const [visitId] = useState(newVisitId);
 
   useEffect(() => {
     recordBookingStep(slug, visitId, step);
@@ -719,13 +721,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
             <Policy text={business.cancellationPolicy} />
           )}
           {withoutCode || remember ? (
-            <ForgetDevice
-              slug={slug}
-              forgotten={forgotten}
-              onForgotten={() => {
-                setForgotten(true);
-              }}
-            />
+            <ForgetDevice slug={slug} forgotten={forgotten} onForgotten={setForgotten} />
           ) : null}
         </>
       ) : null}
@@ -743,15 +739,17 @@ export function ForgetDevice({
   onForgotten,
 }: {
   slug: string;
-  forgotten: boolean;
-  onForgotten: () => void;
+  forgotten: 'forgotten' | 'unknown' | null;
+  onForgotten: (outcome: 'forgotten' | 'unknown') => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  if (forgotten) {
+  if (forgotten !== null) {
     return (
       <p className="m-0 type-caption text-ink-2" role="status">
-        This phone is forgotten. Next time we’ll email you a code.
+        {forgotten === 'forgotten'
+          ? 'This phone is forgotten. Next time we’ll email you a code.'
+          : 'This phone wasn’t remembered, so there was nothing to forget.'}
       </p>
     );
   }
@@ -767,8 +765,12 @@ export function ForgetDevice({
           setError(null);
           void sendJson('POST', publicApiPath(slug, '/device/forget'), {}).then((answer) => {
             setBusy(false);
-            if (answer.ok) onForgotten();
-            else setError(answer.message);
+            if (!answer.ok) {
+              setError(answer.message);
+              return;
+            }
+            const parsed = DeviceForgetResponseSchema.safeParse(answer.data);
+            onForgotten(parsed.success && !parsed.data.forgotten ? 'unknown' : 'forgotten');
           });
         }}
       >

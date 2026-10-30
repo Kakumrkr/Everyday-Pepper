@@ -33,7 +33,7 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
   const [view, setView] = useState<View>({ state: 'loading' });
   const [mode, setMode] = useState<'view' | 'move' | 'cancel'>('view');
   // "Forget this phone" (S47, AC-W8-8): shown on every visit (the cookie is unreadable here).
-  const [forgotten, setForgotten] = useState(false);
+  const [forgotten, setForgotten] = useState<'forgotten' | 'unknown' | null>(null);
   const [alternatives, setAlternatives] = useState<AvailableSlot[] | null>(null);
   const [notice, setNotice] = useState<{ tone: 'error' | 'ok'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -251,13 +251,7 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
         </section>
       )}
       {business.cancellationPolicy === null ? null : <Policy text={business.cancellationPolicy} />}
-      <ForgetDevice
-        slug={slug}
-        forgotten={forgotten}
-        onForgotten={() => {
-          setForgotten(true);
-        }}
-      />
+      <ForgetDevice slug={slug} forgotten={forgotten} onForgotten={setForgotten} />
     </div>
   );
 }

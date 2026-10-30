@@ -372,7 +372,7 @@ export async function confirmBookingRequest(
   slug: TenantSlug,
   requestId: BookingRequestId,
   input: BookingConfirmInput,
-  options: CodeOptions,
+  options: RequestOptions,
 ): Promise<{
   booking: PublicBooking;
   manageToken: ManageToken;
@@ -451,8 +451,11 @@ export async function confirmBookingRequest(
       };
       await options.notify?.(tx, { kind: 'confirmed', email, manageToken, change: changeOf(row) });
       // The code just proved the address: the browser may skip it next time (S47).
+      // The browser's earlier device (another email, say) ends: its cookie is replaced (S47).
       const device =
-        remember === true ? await rememberDeviceIn(tx, request.email, new Date(now)) : undefined;
+        remember === true
+          ? await rememberDeviceIn(tx, request.email, new Date(now), options.deviceToken)
+          : undefined;
       return { booking, manageToken, email, ...(device === undefined ? {} : { device }) };
     });
   } catch (error) {

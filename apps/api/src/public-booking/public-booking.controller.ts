@@ -14,6 +14,7 @@ import {
   type AvailabilityResponse,
   type BookingConfirmResponse,
   type BookingRequestResponse,
+  type DeviceForgetResponse,
   type PublicBookingResponse,
   type PublicBusiness,
   type PublicOfferResponse,
@@ -101,12 +102,20 @@ export class PublicBookingController {
     @Param() params: unknown,
     @Body() body: unknown,
     @Req() request: IncomingRequest,
+    @Res({ passthrough: true }) response: ServerResponse,
   ): Promise<BookingRequestResponse> {
     const { slug } = parseBody(SlugParamsSchema, params);
     const input = parseBody(BookingRequestInputSchema, body);
     await this.limits.hit(REQUESTS_PER_ADDRESS, clientAddress(request));
     await this.limits.hit(REQUESTS_PER_BUSINESS, pageKey(slug));
-    return answering(() => this.booking.request(slug, input, deviceTokenOf(request)));
+    const asked = await answering(() => this.booking.request(slug, input, deviceTokenOf(request)));
+    if (asked.refreshDevice !== undefined) {
+      response.setHeader(
+        'Set-Cookie',
+        deviceCookie(slug, asked.refreshDevice, this.booking.secureCookies),
+      );
+    }
+    return asked.response;
   }
 
   /**
@@ -125,7 +134,9 @@ export class PublicBookingController {
     const { slug, requestId } = parseBody(RequestParamsSchema, params);
     const input = parseBody(BookingConfirmInputSchema, body);
     await this.limits.hit(CODE_CHECKS, clientAddress(request));
-    const confirmed = await answering(() => this.booking.confirm(slug, requestId, input));
+    const confirmed = await answering(() =>
+      this.booking.confirm(slug, requestId, input, deviceTokenOf(request)),
+    );
     // "Remember me on this phone" (S47): the secret goes only into the httpOnly cookie.
     if (confirmed.device !== undefined) {
       response.setHeader(
@@ -136,18 +147,22 @@ export class PublicBookingController {
     return confirmed.response;
   }
 
-  /** "Forget this device" (S47, AC-W8-8): 204, the cookie cleared, whether or not it was known. */
+  /**
+   * "Forget this device" (S47, AC-W8-8): 200 with whether this browser was remembered; the
+   * cookie is cleared either way.
+   */
   @Post('device/forget')
-  @HttpCode(204)
+  @HttpCode(200)
   async forget(
     @Param() params: unknown,
     @Req() request: IncomingRequest,
     @Res({ passthrough: true }) response: ServerResponse,
-  ): Promise<void> {
+  ): Promise<DeviceForgetResponse> {
     const { slug } = parseBody(SlugParamsSchema, params);
     await this.limits.hit(DEVICE_FORGETS, clientAddress(request));
-    await this.booking.forget(slug, deviceTokenOf(request));
+    const forgotten = await this.booking.forget(slug, deviceTokenOf(request));
     response.setHeader('Set-Cookie', clearedDeviceCookie(slug, this.booking.secureCookies));
+    return { forgotten };
   }
 
   /**
