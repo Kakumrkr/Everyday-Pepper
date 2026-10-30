@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BusinessProfileSchema } from './account.js';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingStatusSchema } from './bookings.js';
 import { ClientEmailSchema, PhoneSchema } from './clients.js';
@@ -60,14 +61,17 @@ export const PublicStaffMemberSchema = z.object({
 export type PublicStaffMember = z.infer<typeof PublicStaffMemberSchema>;
 
 /** `GET /v1/public/businesses/:slug`: what the booking page shows. */
-export const PublicBusinessSchema = z.object({
-  name: z.string(),
-  slug: TenantSlugSchema,
-  timeZone: TimeZoneSchema,
-  brandColor: BrandColorSchema.nullable(),
-  services: z.array(PublicServiceSchema),
-  staff: z.array(PublicStaffMemberSchema),
-});
+export const PublicBusinessSchema = z
+  .object({
+    name: z.string(),
+    slug: TenantSlugSchema,
+    timeZone: TimeZoneSchema,
+    brandColor: BrandColorSchema.nullable(),
+    services: z.array(PublicServiceSchema),
+    staff: z.array(PublicStaffMemberSchema),
+    // The phone, public address and cancellation policy the business chose to show (S47).
+  })
+  .extend(BusinessProfileSchema.shape);
 export type PublicBusiness = z.infer<typeof PublicBusinessSchema>;
 
 /**

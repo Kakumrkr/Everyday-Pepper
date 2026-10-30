@@ -379,6 +379,13 @@
       "when": 1793295299632,
       "tag": "0053_setup_review",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1793324203796,
+      "tag": "0054_booking_page_profile",
+      "breakpoints": true
     }
   ]
 }

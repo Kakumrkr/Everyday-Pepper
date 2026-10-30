@@ -44,6 +44,9 @@ const BUSINESS: PublicBusiness = {
   slug: 'juniper',
   timeZone: 'America/New_York',
   brandColor: '#7a3e6c',
+  phone: '+15551234567',
+  publicAddress: null,
+  cancellationPolicy: 'Cancel 24 hours ahead.',
   services: [],
   staff: [],
 };

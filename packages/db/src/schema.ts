@@ -155,10 +155,21 @@ export const tenants = pgTable(
     // When an owner or manager last said "I've checked these" on Home's setup review (S46,
     // PCR-009); NULL: not yet. Being bookable never sets it, and it changes no setup.
     setupReviewedAt: timestamp('setup_reviewed_at', { withTimezone: true }),
+    // What the booking page shows clients besides the menu (S47); NULL: not shown. The public
+    // address is apart from the mailing address, which the page never shows.
+    phone: text('phone'),
+    publicAddress: text('public_address'),
+    cancellationPolicy: text('cancellation_policy'),
     ...timestamps,
   },
   (table) => [
     check('tenants_mailing_address_length', sql`length(${table.mailingAddress}) BETWEEN 5 AND 300`),
+    check('tenants_phone_format', sql`${table.phone} ~ '^\\+[1-9][0-9]{6,14}$'`),
+    check('tenants_public_address_length', sql`length(${table.publicAddress}) BETWEEN 5 AND 300`),
+    check(
+      'tenants_cancellation_policy_length',
+      sql`length(${table.cancellationPolicy}) BETWEEN 1 AND 600`,
+    ),
     check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
     check('tenants_brand_color_format', sql`${table.brandColor} ~ '^#[0-9a-f]{6}$'`),
     tenantIsolation(sql.raw('id')),

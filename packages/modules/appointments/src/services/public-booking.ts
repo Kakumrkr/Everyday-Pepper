@@ -199,6 +199,10 @@ export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise
         slug: tenant.slug,
         timeZone: tenant.timeZone,
         brandColor: tenant.brandColor,
+        // What the business chose to show (S47); never the mailing address.
+        phone: tenant.phone,
+        publicAddress: tenant.publicAddress,
+        cancellationPolicy: tenant.cancellationPolicy,
         services: services
           .filter((s) => offered.has(s.id))
           .map((s) => ({

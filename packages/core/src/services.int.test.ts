@@ -149,10 +149,48 @@ describe('updateBookingPage (PCR-001, ADR-0022)', () => {
     ]);
   });
 
+  it('sets the profile, keeps what is left out and audits which fields changed (S47)', async () => {
+    const team = await newTeam();
+    const owner = as(team, team.owner, 'owner', 'req-profile');
+    await updateBookingPage(db, owner, { brandColor: '#7a3e6c' });
+    const after = await updateBookingPage(db, owner, {
+      phone: '555 123 4567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+    });
+    expect(after).toMatchObject({
+      brandColor: '#7a3e6c',
+      phone: '+15551234567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+      cancellationPolicy: null,
+    });
+    await updateBookingPage(db, owner, { phone: '+15551234567' });
+    await updateBookingPage(db, owner, { brandColor: null, cancellationPolicy: 'Cancel ahead.' });
+    const entries = await withTenant(db, team.tenantId, (tx) =>
+      listAuditEntries(tx, { limit: 10 }),
+    );
+    const changes = entries.filter((e) => e.action === 'tenant.updated');
+    expect(changes.map((e) => [e.before, e.after])).toEqual([
+      [
+        { brandColor: '#7a3e6c', profileChanged: ['cancellationPolicy'] },
+        { brandColor: null, profileChanged: ['cancellationPolicy'] },
+      ],
+      [
+        { profileChanged: ['phone', 'publicAddress'] },
+        { profileChanged: ['phone', 'publicAddress'] },
+      ],
+      [{ brandColor: null }, { brandColor: '#7a3e6c' }],
+    ]);
+    // Never the values themselves.
+    expect(JSON.stringify(changes)).not.toContain('Main St');
+  });
+
   it('is not for staff', async () => {
     const team = await newTeam();
     await expect(
       updateBookingPage(db, as(team, team.staff, 'staff'), { brandColor: '#7a3e6c' }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(
+      updateBookingPage(db, as(team, team.staff, 'staff'), { phone: '5551234567' }),
     ).rejects.toBeInstanceOf(ForbiddenError);
   });
 });

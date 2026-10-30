@@ -27,7 +27,7 @@ import { insertClient } from './repositories/clients.js';
 import {
   createTenant,
   findCurrentTenant,
-  updateCurrentTenantBrandColor,
+  updateCurrentTenantBookingPage,
   withPublicTenant,
 } from './repositories/tenants.js';
 import { withTenant, type TenantTx } from './tenant.js';
@@ -94,13 +94,50 @@ describe('brand color', () => {
       withTenant(
         db,
         tenant,
-        async (tx) => (await updateCurrentTenantBrandColor(tx, value))?.brandColor,
+        async (tx) => (await updateCurrentTenantBookingPage(tx, { brandColor: value }))?.brandColor,
       );
     expect(
       await withTenant(db, tenant, async (tx) => (await findCurrentTenant(tx))?.brandColor),
     ).toBe(null);
     expect(await color('#7A3E6C')).toBe('#7a3e6c');
     expect(await color(null)).toBe(null);
+  });
+
+  it('sets the profile fields it is given and keeps the others (S47)', async () => {
+    const update = (settings: Parameters<typeof updateCurrentTenantBookingPage>[1]) =>
+      withTenant(db, tenant, (tx) => updateCurrentTenantBookingPage(tx, settings));
+    await update({ brandColor: '#7a3e6c' });
+    const after = await update({
+      phone: '(555) 123-4567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+      cancellationPolicy: 'Cancel 24 hours ahead.',
+    });
+    expect(after).toMatchObject({
+      brandColor: '#7a3e6c',
+      phone: '+15551234567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+      cancellationPolicy: 'Cancel 24 hours ahead.',
+      mailingAddress: null,
+    });
+    expect(await update({ phone: null })).toMatchObject({
+      phone: null,
+      cancellationPolicy: 'Cancel 24 hours ahead.',
+    });
+    await update({ brandColor: null, publicAddress: null, cancellationPolicy: null });
+  });
+
+  it('the database refuses a malformed phone, address or policy (S47)', async () => {
+    for (const statement of [
+      `UPDATE tenants SET phone = '555-1234'`,
+      `UPDATE tenants SET public_address = 'x'`,
+      `UPDATE tenants SET cancellation_policy = ''`,
+      `UPDATE tenants SET cancellation_policy = repeat('a', 601)`,
+    ]) {
+      const error = await withTenant(db, tenant, (tx) => tx.execute(statement)).catch(
+        (e: unknown) => e,
+      );
+      expect(sqlState(error)).toBe('23514');
+    }
   });
 
   it('the database refuses a malformed color', async () => {

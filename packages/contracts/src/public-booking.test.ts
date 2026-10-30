@@ -98,7 +98,11 @@ describe('PublicBusinessSchema', () => {
       brandColor: '#7a3e6c',
       services: [],
       staff: [],
+      phone: '+15551234567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+      cancellationPolicy: null,
     });
     expect(parsed.brandColor).toBe('#7a3e6c');
+    expect(parsed.phone).toBe('+15551234567');
   });
 });

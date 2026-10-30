@@ -20,7 +20,13 @@ import {
   updateBookingPage,
   type Actor,
 } from '@pepper/core';
-import { findCurrentTenant, listAuditEntries, withTenant, type Database } from '@pepper/db';
+import {
+  findCurrentTenant,
+  listAuditEntries,
+  updateCurrentTenantMailingAddress,
+  withTenant,
+  type Database,
+} from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   BookingNotChangeableError,
@@ -189,6 +195,9 @@ describe('getPublicBusiness', () => {
       slug: p.slug,
       timeZone: 'America/New_York',
       brandColor: '#7a3e6c',
+      phone: null,
+      publicAddress: null,
+      cancellationPolicy: null,
       services: [
         {
           id: p.service.id,
@@ -204,6 +213,25 @@ describe('getPublicBusiness', () => {
         { id: p.marco.id, displayName: 'Marco', color: p.marco.color, serviceIds: [p.service.id] },
       ],
     });
+  });
+
+  it('shows the profile the business set, never its mailing address (S47, AC-W8-7)', async () => {
+    const p = await newPage();
+    await updateBookingPage(db, p.owner, {
+      phone: '(555) 123-4567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+      cancellationPolicy: 'Cancel 24 hours ahead.',
+    });
+    await withTenant(db, p.tenantId, (tx) =>
+      updateCurrentTenantMailingAddress(tx, '9 Home Lane\nAustin, TX 78702'),
+    );
+    const business = await getPublicBusiness(db, p.slug);
+    expect(business).toMatchObject({
+      phone: '+15551234567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+      cancellationPolicy: 'Cancel 24 hours ahead.',
+    });
+    expect(JSON.stringify(business)).not.toContain('Home Lane');
   });
 
   it('hides a service that is not bookable', async () => {

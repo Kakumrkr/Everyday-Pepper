@@ -1,11 +1,11 @@
 import {
-  BrandColorSchema,
+  BookingPageSettingsSchema,
   MailingAddressSchema,
   NewTenantSchema,
   TenantIdSchema,
   TenantSlugSchema,
   UserIdSchema,
-  type BrandColor,
+  type BookingPageSettings,
   type NewTenant,
   type TenantSlug,
   type UserId,
@@ -101,14 +101,19 @@ export async function findCurrentTenant(tx: TenantTx): Promise<Tenant | undefine
   return tenant;
 }
 
-/** Sets the transaction's business's booking page color; `undefined` when there is none. */
-export async function updateCurrentTenantBrandColor(
+/**
+ * Sets the booking page's settings (PCR-001's color, S47's phone, public address and
+ * cancellation policy) that `settings` names; the others stay. `null` clears one.
+ */
+export async function updateCurrentTenantBookingPage(
   tx: TenantTx,
-  brandColor: BrandColor | null,
+  settings: BookingPageSettings,
 ): Promise<Tenant | undefined> {
+  const { brandColor, phone, publicAddress, cancellationPolicy } =
+    BookingPageSettingsSchema.parse(settings);
   const [tenant] = await tx
     .update(tenants)
-    .set({ brandColor: brandColor === null ? null : BrandColorSchema.parse(brandColor) })
+    .set({ brandColor, phone, publicAddress, cancellationPolicy })
     .where(eq(tenants.id, sql`current_tenant_id()`))
     .returning();
   return tenant;

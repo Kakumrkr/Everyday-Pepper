@@ -89,6 +89,17 @@ const TenantChangeSchema = z.union([
   z.object({ mailingAddressSet: z.boolean() }).strict(),
   // Home's setup review (S46): only that it was checked.
   z.object({ setupReviewed: z.boolean() }).strict(),
+  // The booking page's profile (S47): which fields changed, never their values (a home
+  // address or a personal phone is someone's), with the color's value when it changed too.
+  z
+    .object({
+      brandColor: BrandColorSchema.nullable().optional(),
+      profileChanged: z
+        .array(z.enum(['phone', 'publicAddress', 'cancellationPolicy']))
+        .min(1)
+        .max(3),
+    })
+    .strict(),
 ]);
 
 const ClientValuesSchema = z.object({ source: RecordSourceSchema }).strict();
