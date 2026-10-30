@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   ApiErrorSchema,
   BookingPageSettingsSchema,
+  BusinessPhoneSchema,
+  CancellationPolicySchema,
+  PublicAddressSchema,
   ChangeMemberRoleRequestSchema,
   CurrentBusinessResponseSchema,
   MeResponseSchema,
@@ -54,6 +57,9 @@ describe('CurrentBusinessResponseSchema', () => {
         locale: 'en-US',
         templateId: 'beauty-salon',
         brandColor: '#7a3e6c',
+        phone: null,
+        publicAddress: null,
+        cancellationPolicy: null,
       },
       role: 'staff',
       permissions: ['business.read', 'calendar.read'],
@@ -81,7 +87,50 @@ describe('CurrentBusinessResponseSchema', () => {
   });
 });
 
+describe('the business profile (S47, AC-W8-7)', () => {
+  it('turns the ways owners write a US phone into the international form', () => {
+    for (const typed of ['(555) 123-4567', '555.123.4567', '555-123-4567', '1 555 123 4567']) {
+      expect(BusinessPhoneSchema.parse(typed)).toBe('+15551234567');
+    }
+    expect(BusinessPhoneSchema.parse('+44 20 7946 0958')).toBe('+442079460958');
+  });
+
+  it('refuses what is not a phone number', () => {
+    for (const typed of ['123', 'call me', '+0123456789', '555 123 456 789 0123', '']) {
+      expect(BusinessPhoneSchema.safeParse(typed).success).toBe(false);
+    }
+  });
+
+  it('keeps an address to a few tidy lines without contact details', () => {
+    expect(PublicAddressSchema.parse('  12  Main St \n\n Austin, TX 78701 ')).toBe(
+      '12 Main St\nAustin, TX 78701',
+    );
+    expect(PublicAddressSchema.safeParse('x').success).toBe(false);
+    expect(PublicAddressSchema.safeParse('12 Main St, call +15551234567').success).toBe(false);
+  });
+
+  it('keeps a policy to 600 characters and 8 lines', () => {
+    expect(CancellationPolicySchema.parse(' Cancel  24 hours ahead. \n\n Thanks ')).toBe(
+      'Cancel 24 hours ahead.\nThanks',
+    );
+    expect(CancellationPolicySchema.safeParse('   ').success).toBe(false);
+    expect(CancellationPolicySchema.safeParse('a'.repeat(601)).success).toBe(false);
+    expect(CancellationPolicySchema.safeParse(Array(9).fill('line').join('\n')).success).toBe(
+      false,
+    );
+  });
+});
+
 describe('BookingPageSettingsSchema', () => {
+  it('changes only the fields sent (S47)', () => {
+    expect(BookingPageSettingsSchema.parse({ phone: '(555) 123-4567' })).toEqual({
+      phone: '+15551234567',
+    });
+    expect(
+      BookingPageSettingsSchema.parse({ publicAddress: null, cancellationPolicy: null }),
+    ).toEqual({ publicAddress: null, cancellationPolicy: null });
+  });
+
   it('takes a color or null (the neutral default)', () => {
     expect(BookingPageSettingsSchema.parse({ brandColor: '#7A3E6C' })).toEqual({
       brandColor: '#7a3e6c',

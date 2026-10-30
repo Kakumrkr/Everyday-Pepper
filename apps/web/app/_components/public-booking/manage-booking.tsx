@@ -13,6 +13,7 @@ import { sendJson, type CallResult } from '../../../lib/client-api';
 import { publicApiPath, readManageToken } from '../../../lib/public-booking';
 import { Notice } from '../form-parts';
 import { alternativesOf } from '../booking/refusal';
+import { ForgetDevice, Policy } from './booking-flow';
 import { SlotPicker } from './slot-picker';
 
 type View =
@@ -31,6 +32,8 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
   const [token, setToken] = useState<string | null>(null);
   const [view, setView] = useState<View>({ state: 'loading' });
   const [mode, setMode] = useState<'view' | 'move' | 'cancel'>('view');
+  // "Forget this phone" (S47, AC-W8-8): shown on every visit (the cookie is unreadable here).
+  const [forgotten, setForgotten] = useState<'forgotten' | 'unknown' | null>(null);
   const [alternatives, setAlternatives] = useState<AvailableSlot[] | null>(null);
   const [notice, setNotice] = useState<{ tone: 'error' | 'ok'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -247,6 +250,8 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
           </Button>
         </section>
       )}
+      {business.cancellationPolicy === null ? null : <Policy text={business.cancellationPolicy} />}
+      <ForgetDevice slug={slug} forgotten={forgotten} onForgotten={setForgotten} />
     </div>
   );
 }

@@ -20,7 +20,7 @@ import {
   uuid,
   vector,
 } from 'drizzle-orm/pg-core';
-import type { TemplateId } from '@pepper/contracts';
+import { BOOKING_FUNNEL_STEPS, type TemplateId } from '@pepper/contracts';
 import { newId } from './ids.js';
 
 // Source of truth for the tables. `pnpm --filter @pepper/db generate` turns changes into a SQL
@@ -155,10 +155,21 @@ export const tenants = pgTable(
     // When an owner or manager last said "I've checked these" on Home's setup review (S46,
     // PCR-009); NULL: not yet. Being bookable never sets it, and it changes no setup.
     setupReviewedAt: timestamp('setup_reviewed_at', { withTimezone: true }),
+    // What the booking page shows clients besides the menu (S47); NULL: not shown. The public
+    // address is apart from the mailing address, which the page never shows.
+    phone: text('phone'),
+    publicAddress: text('public_address'),
+    cancellationPolicy: text('cancellation_policy'),
     ...timestamps,
   },
   (table) => [
     check('tenants_mailing_address_length', sql`length(${table.mailingAddress}) BETWEEN 5 AND 300`),
+    check('tenants_phone_format', sql`${table.phone} ~ '^\\+[1-9][0-9]{6,14}$'`),
+    check('tenants_public_address_length', sql`length(${table.publicAddress}) BETWEEN 5 AND 300`),
+    check(
+      'tenants_cancellation_policy_length',
+      sql`length(${table.cancellationPolicy}) BETWEEN 1 AND 600`,
+    ),
     check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
     check('tenants_brand_color_format', sql`${table.brandColor} ~ '^#[0-9a-f]{6}$'`),
     tenantIsolation(sql.raw('id')),
@@ -1002,6 +1013,72 @@ export const bookingVerifications = pgTable(
       using: sql`current_user_id() IS NULL`,
       withCheck: sql`current_user_id() IS NULL`,
     }),
+  ],
+);
+
+/**
+ * A browser a client asked the booking page to remember (S47, ADR-0047, AC-W8-8): their next
+ * booking with the same email skips the code until `expires_at`, which each use moves on.
+ * Only the token's SHA-256 is kept; the secret lives in an httpOnly cookie. Like booking
+ * requests, only the booking page (no user) reaches them.
+ */
+export const rememberedDevices = pgTable(
+  'remembered_devices',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    lastUsedAt: timestamp('last_used_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('remembered_devices_token_hash_unique').on(table.tokenHash),
+    index('remembered_devices_expires_idx').on(table.tenantId, table.expiresAt),
+    check(
+      'remembered_devices_email_format',
+      sql`${table.email} = lower(${table.email}) AND length(${table.email}) BETWEEN 3 AND 254 AND ${table.email} LIKE '%_@_%'`,
+    ),
+    check('remembered_devices_token_hash_format', sql`${table.tokenHash} ~ '^[0-9a-f]{64}$'`),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`current_user_id() IS NULL`,
+      withCheck: sql`current_user_id() IS NULL`,
+    }),
+  ],
+);
+
+/**
+ * A booking page visit entering a step (S47, ADR-0047, AC-W8-9): a random id per visit (made
+ * by the page, linked to nothing), the step and the time; no name, email, phone or address.
+ * Once per visit and step; appended, never changed.
+ */
+export const bookingFunnelEvents = pgTable(
+  'booking_funnel_events',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    visitId: uuid('visit_id').notNull(),
+    step: text('step').notNull(),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('booking_funnel_events_visit_step_unique').on(table.tenantId, table.visitId, table.step),
+    index('booking_funnel_events_occurred_idx').on(table.tenantId, table.occurredAt),
+    check(
+      'booking_funnel_events_step_known',
+      sql.raw(`step IN (${BOOKING_FUNNEL_STEPS.map((step) => `'${step}'`).join(', ')})`),
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
   ],
 );
 
@@ -2290,3 +2367,4 @@ export const signupEvents = pgTable('signup_events', {
     .references(() => users.id, { onDelete: 'cascade' }),
   occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
 });
+export type RememberedDevice = typeof rememberedDevices.$inferSelect;

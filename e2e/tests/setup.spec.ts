@@ -183,6 +183,22 @@ test('setup review (AC-W1-11/12): a new barbershop checks what was filled in onc
   await expect(page.getByRole('heading', { name: 'To-dos' })).toBeVisible();
   await expect(page.getByTestId('setup-review')).toHaveCount(0);
 
+  // AC-W1-13: the booking page's link stays on Home, with Copy.
+  const link = page.getByRole('region', { name: 'Your booking page' });
+  const tenant = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  const url = new URL(`/book/${tenant.business.slug}`, page.url()).toString();
+  await expect(link.getByRole('link', { name: url })).toHaveAttribute(
+    'href',
+    `/book/${tenant.business.slug}`,
+  );
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  await (await hydrated(link.getByRole('button', { name: 'Copy link' }))).click();
+  await expect(link.getByRole('button', { name: 'Copied' })).toBeVisible();
+  await expect(link.getByRole('status')).toHaveText(/^Copied\./);
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(url);
+
   // A new barber who offers the menu but has no hours: Home says so, after the check too.
   const { services } = ServicesResponseSchema.parse(
     await (await page.request.get('/v1/services')).json(),

@@ -11,6 +11,7 @@ import {
   anotherPerson,
   callApi,
   emailTo,
+  emailsTo,
   hydrated,
   onboardOwner,
   ownClientAddress,
@@ -164,6 +165,102 @@ test('a client books on the page in the business’s color, confirms the emailed
   );
   expect((await bookings())[0]?.status).toBe('cancelled');
   await expect(emailTo(email, 'is cancelled')).resolves.toContain('Hi Ana');
+});
+
+test('AC-W8-7/8/9: the page shows the contact details and policy, a remembered phone books again without a code, and each step is counted with nothing personal', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(150_000);
+  await onboardOwner(page);
+  const slug = await salon(page);
+
+  // The owner fills in what clients see; a wrong phone is named under its field first.
+  await page.goto('/services');
+  const card = page.getByRole('region', { name: 'Your booking page' });
+  const details = card.getByRole('form', { name: 'What clients see' });
+  await hydrated(details.getByRole('button', { name: 'Save details' }));
+  await details.getByLabel('Phone').fill('555 12');
+  await details.getByRole('button', { name: 'Save details' }).click();
+  await expect(details.getByLabel('Phone')).toBeFocused();
+  await expect(details.getByLabel('Phone')).toHaveAttribute('aria-invalid', 'true');
+  await details.getByLabel('Phone').fill('(512) 555-0142');
+  await details.getByLabel('Address').fill('12 Main St\nAustin, TX 78701');
+  await details.getByLabel('Cancellation policy').fill('Please cancel at least 24 hours ahead.');
+  await details.getByRole('button', { name: 'Save details' }).click();
+  await expect(details.getByText('Saved. Clients see these on your booking page.')).toBeVisible();
+
+  // The client sees them; every step they enter is counted with a visit id and the step only.
+  const client = await anotherPerson(browser, baseURL);
+  const steps: unknown[] = [];
+  client.on('request', (request) => {
+    if (request.url().endsWith('/funnel')) steps.push(request.postDataJSON());
+  });
+  const email = `${unique('regular')}@example.test`;
+  await client.goto(`/book/${slug}`);
+  const contact = client.getByTestId('business-contact');
+  await expect(contact.getByRole('link', { name: '(512) 555-0142' })).toHaveAttribute(
+    'href',
+    'tel:+15125550142',
+  );
+  await expect(contact).toContainText('12 Main St');
+  await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
+  await client.getByRole('button', { name: /Anyone available/ }).click();
+  await pickTime(client, 1);
+  await expect(client.getByTestId('cancellation-policy')).toContainText('24 hours ahead');
+  await client.getByLabel('Full name').fill('Rae Kim');
+  await client.getByLabel('Email').fill(email);
+  await client.getByRole('button', { name: 'Send my code' }).click();
+
+  // AC-W8-8: "Remember me on this phone" is on; the code proves the email once.
+  await expect(client.getByRole('heading', { name: 'Check your email' })).toBeVisible();
+  await expect(client.getByLabel('Remember me on this phone')).toBeChecked();
+  const code = /^ {4}(\d{6})$/m.exec(await emailTo(email, 'is your code'))?.[1] ?? '';
+  await client.getByLabel('Code').fill(code);
+  await client.getByRole('button', { name: 'Confirm booking' }).click();
+  await expect(client.getByRole('heading', { name: /You’re booked, Rae/ })).toBeVisible();
+  await expect(client.getByTestId('cancellation-policy')).toBeVisible();
+  const cookies = await client.context().cookies();
+  expect(cookies.find((cookie) => cookie.name === 'pepper_device')).toMatchObject({
+    httpOnly: true,
+    sameSite: 'Lax',
+    path: `/v1/public/businesses/${slug}`,
+  });
+
+  // AC-W8-9: one event per step entered, none carrying the client's details.
+  await expect
+    .poll(() => steps.map((step) => (step as { step: string }).step), { timeout: 10_000 })
+    .toEqual(['service', 'staff', 'time', 'details', 'verify', 'done']);
+  for (const step of steps) expect(Object.keys(step as object).sort()).toEqual(['step', 'visitId']);
+  expect(JSON.stringify(steps)).not.toContain('Rae');
+  expect(JSON.stringify(steps)).not.toContain(email);
+
+  // The next booking from this phone: straight to the confirmation, no code email.
+  await client.goto(`/book/${slug}`);
+  await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
+  await client.getByRole('button', { name: /Anyone available/ }).click();
+  await pickTime(client, 2);
+  await client.getByLabel('Full name').fill('Rae Kim');
+  await client.getByLabel('Email').fill(email);
+  await client.getByRole('button', { name: 'Send my code' }).click();
+  await expect(client.getByRole('heading', { name: /You’re booked, Rae/ })).toBeVisible();
+  await expect(client.getByText(/This phone is remembered, so no code was needed\./)).toBeVisible();
+  expect((await emailsTo(email)).filter((m) => m.Subject.includes('is your code'))).toHaveLength(1);
+
+  // Forgotten: the next booking asks for a code again.
+  await client.getByRole('button', { name: 'Forget this phone' }).click();
+  await expect(
+    client.getByText('This phone is forgotten. Next time we’ll email you a code.'),
+  ).toBeVisible();
+  await client.goto(`/book/${slug}`);
+  await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
+  await client.getByRole('button', { name: /Anyone available/ }).click();
+  await pickTime(client, 3);
+  await client.getByLabel('Full name').fill('Rae Kim');
+  await client.getByLabel('Email').fill(email);
+  await client.getByRole('button', { name: 'Send my code' }).click();
+  await expect(client.getByRole('heading', { name: 'Check your email' })).toBeVisible();
 });
 
 test('an unknown booking page is not found, and a broken link says so', async ({ page }) => {

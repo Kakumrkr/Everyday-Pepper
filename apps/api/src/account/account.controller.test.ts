@@ -34,6 +34,9 @@ const BUSINESS: Business = {
   locale: 'en-US',
   templateId: 'beauty-salon',
   brandColor: null,
+  phone: null,
+  publicAddress: null,
+  cancellationPolicy: null,
 };
 
 /** Signed in as USER when the request carries `cookie: signed-in`. */
@@ -64,9 +67,8 @@ const tenancy = {
   ),
   createBusiness: vi.fn(() => Promise.resolve(BUSINESS)),
   business: vi.fn((): Promise<Business | null> => Promise.resolve(BUSINESS)),
-  updateBookingPage: vi.fn(
-    (_tenant: unknown, settings: { brandColor: string | null }): Promise<Business> =>
-      Promise.resolve({ ...BUSINESS, brandColor: settings.brandColor }),
+  updateBookingPage: vi.fn((_tenant: unknown, settings: Partial<Business>): Promise<Business> =>
+    Promise.resolve({ ...BUSINESS, ...settings }),
   ),
 };
 
@@ -250,6 +252,25 @@ describe('PUT /v1/tenant/booking-page', () => {
   it('400 for a color that is not #rrggbb', async () => {
     const response = await put({ brandColor: 'plum' }).expect(400);
     expect(response.body).toMatchObject({ code: 'validation_failed', fields: ['brandColor'] });
+  });
+
+  it('sets only the profile fields sent, in their stored form (S47)', async () => {
+    const response = await put({ phone: '(555) 123-4567', cancellationPolicy: null }).expect(200);
+    expect(response.body).toMatchObject({ phone: '+15551234567', cancellationPolicy: null });
+    expect(tenancy.updateBookingPage).toHaveBeenCalledWith(expect.anything(), {
+      phone: '+15551234567',
+      cancellationPolicy: null,
+    });
+  });
+
+  it('400 names the profile field to fix, and an empty body changes nothing (S47)', async () => {
+    const response = await put({ phone: 'call me', publicAddress: 'x' }).expect(400);
+    expect(response.body).toMatchObject({
+      code: 'validation_failed',
+      fields: ['phone', 'publicAddress'],
+    });
+    await put({}).expect(400);
+    expect(tenancy.updateBookingPage).not.toHaveBeenCalled();
   });
 });
 

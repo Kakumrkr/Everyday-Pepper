@@ -1,10 +1,10 @@
 'use client';
 
 import type { SetupReview } from '@pepper/contracts';
-import { Badge, Button, buttonStyle, Card, List, ListRow } from '@pepper/ui';
+import { Badge, Button, buttonStyle, Card, FOCUS_RING, List, ListRow } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { setupFix, setupRows, setupSummary } from '../../../lib/setup-review';
 import { kitLink } from '../kit-link';
@@ -14,9 +14,10 @@ import { kitLink } from '../kit-link';
  * "I've checked these", it shows what clients can book (for a new business, what its type filled
  * in; an empty menu only says where to start), each line leading to the
  * screen that changes it; whatever currently stops clients from booking shows above that, and
- * stays after the check until it is fixed. Nothing to check and nothing to fix: no card.
+ * stays after the check until it is fixed. Once checked, the booking page's link stays on Home
+ * with a Copy button, to send to clients (S47, AC-W1-13), as a quiet row: nothing to decide.
  */
-export function SetupReviewCard({ review }: { review: SetupReview }) {
+export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: string }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export function SetupReviewCard({ review }: { review: SetupReview }) {
   // An empty menu has nothing to check yet: only what to do first.
   const empty = review.services.count === 0;
   const fixes = review.warnings.map(setupFix);
-  if (reviewed && fixes.length === 0) return null;
+  if (reviewed && fixes.length === 0) return <BookingLink slug={slug} />;
 
   async function confirm() {
     if (saving) return;
@@ -40,7 +41,7 @@ export function SetupReviewCard({ review }: { review: SetupReview }) {
     router.refresh();
   }
 
-  return (
+  const card = (
     <Card labelledBy="setup-review" className="flex flex-col gap-4">
       <div className="flex flex-col gap-1" data-testid="setup-review">
         <h2 id="setup-review" className="m-0 type-heading">
@@ -111,5 +112,71 @@ export function SetupReviewCard({ review }: { review: SetupReview }) {
         </>
       )}
     </Card>
+  );
+  return reviewed ? (
+    <>
+      {card}
+      <BookingLink slug={slug} />
+    </>
+  ) : (
+    card
+  );
+}
+
+/** The booking page's full link with Copy (AC-W1-13): what an owner sends to clients. */
+function BookingLink({ slug }: { slug: string }) {
+  const path = `/book/${encodeURIComponent(slug)}`;
+  // The page's own origin, known only in the browser; the path until then.
+  const [link, setLink] = useState(path);
+  const [copied, setCopied] = useState<boolean | null>(null);
+  const headingId = useId();
+  useEffect(() => {
+    setLink(`${window.location.origin}${path}`);
+  }, [path]);
+
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="flex flex-col gap-2 rounded-lg bg-surface p-4"
+      data-testid="booking-link"
+    >
+      <h2 id={headingId} className="m-0 type-subheading text-ink">
+        Your booking page
+      </h2>
+      <p className="m-0 type-body text-ink-2">Send this link to clients so they can book you.</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <a
+          href={path}
+          target="_blank"
+          rel="noreferrer"
+          className={`min-w-0 flex-1 font-semibold break-all text-brand ${FOCUS_RING}`}
+        >
+          {link}
+        </a>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            void navigator.clipboard.writeText(link).then(
+              () => {
+                setCopied(true);
+              },
+              () => {
+                setCopied(false);
+              },
+            );
+          }}
+        >
+          {copied === true ? 'Copied' : 'Copy link'}
+        </Button>
+      </div>
+      <p className="m-0 type-caption text-ink-2" role="status">
+        {copied === true
+          ? 'Copied. Paste it in a message, your bio or your site.'
+          : copied === false
+            ? 'Couldn’t copy. Press and hold the link to copy it.'
+            : ''}
+      </p>
+    </section>
   );
 }

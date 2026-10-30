@@ -281,6 +281,80 @@ describe('the public booking page', () => {
     await ana.post('/booking/lookup', { token: 'A'.repeat(43) }).expect(404);
   });
 
+  it('AC-W8-8: a remembered browser books again without a code; forgetting it asks again', async () => {
+    // Three times two hours apart, from the end of the window (the other tests take the first).
+    const slots = (await freeSlots()).reverse();
+    const apart: AvailableSlot[] = [];
+    for (const candidate of slots) {
+      if (
+        apart.every(
+          (s) => Math.abs(Date.parse(s.startsAt) - Date.parse(candidate.startsAt)) >= 2 * 3_600_000,
+        )
+      )
+        apart.push(candidate);
+    }
+    const [slot, later, third] = apart;
+    if (slot === undefined || later === undefined || third === undefined)
+      throw new Error('no free times');
+    const bo = visitor();
+    const ask = (startsAt: string) => ({
+      serviceId,
+      staffMemberId: null,
+      startsAt,
+      name: 'Bo Lee',
+      email: 'bo.device@example.test',
+    });
+    const asked = await bo.post('/booking-requests', ask(slot.startsAt)).expect(201);
+    const { requestId } = BookingRequestResponseSchema.parse(asked.body);
+    const confirmed = await bo
+      .post(`/booking-requests/${requestId}/confirm`, {
+        code: codeIn(mailer.sent.at(-1)),
+        remember: true,
+      })
+      .expect(201);
+    const cookie = (confirmed.headers['set-cookie']?.[0] ?? '').split(';')[0] ?? '';
+    expect(cookie).toMatch(/^pepper_device=[A-Za-z0-9_-]{43}$/);
+
+    // The same browser and email: booked at once, no code email.
+    mailer.sent.length = 0;
+    const again = await bo
+      .post('/booking-requests', ask(later.startsAt))
+      .set('cookie', cookie)
+      .expect(201);
+    const answer = BookingRequestResponseSchema.parse(again.body);
+    expect(answer.confirmed?.booking.status).toBe('confirmed');
+    // Its 90 days start again, in the browser too.
+    expect(again.headers['set-cookie']?.[0]).toMatch(new RegExp(`^${cookie}; .*Max-Age=7776000`));
+    expect(mailer.sent.filter((m) => m.subject.includes('is your code'))).toEqual([]);
+    expect(await bookedFor('bo.device@example.test')).toBe(2);
+
+    // Forgotten: the cookie is cleared and the next request asks for a code.
+    const forgot = await bo.post('/device/forget', {}).set('cookie', cookie).expect(200);
+    expect(forgot.body).toEqual({ forgotten: true });
+    expect(String(forgot.headers['set-cookie']?.[0])).toContain('Max-Age=0');
+    const third_ = await bo
+      .post('/booking-requests', ask(third.startsAt))
+      .set('cookie', cookie)
+      .expect(201);
+    expect(BookingRequestResponseSchema.parse(third_.body).confirmed).toBeUndefined();
+    expect(mailer.sent.at(-1)?.to).toBe('bo.device@example.test');
+    // The two confirmations, as the worker would send them.
+    expect(await deliverQueued()).toBe(2);
+  });
+
+  it('AC-W8-9: records booking steps with nothing personal', async () => {
+    const visitId = '5c1a7e9b-3d2f-4b8a-9e6c-1f0d2a3b4c5d';
+    await visitor().post('/funnel', { visitId, step: 'service' }).expect(204);
+    await visitor().post('/funnel', { visitId, step: 'service' }).expect(204);
+    await visitor().post('/funnel', { visitId, step: 'details' }).expect(204);
+    const { rows } = await withTenant(db, tenantId, (tx) =>
+      tx.execute<{ step: string }>(
+        sql`SELECT step FROM booking_funnel_events WHERE visit_id = ${visitId} ORDER BY step`,
+      ),
+    );
+    expect(rows.map((row) => row.step)).toEqual(['details', 'service']);
+  });
+
   it('limits booking requests per client address in Redis', async () => {
     const [slot] = await freeSlots();
     if (slot === undefined) throw new Error('no free times');

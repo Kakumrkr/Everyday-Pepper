@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BusinessProfileSchema } from './account.js';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingStatusSchema } from './bookings.js';
 import { ClientEmailSchema, PhoneSchema } from './clients.js';
@@ -60,14 +61,17 @@ export const PublicStaffMemberSchema = z.object({
 export type PublicStaffMember = z.infer<typeof PublicStaffMemberSchema>;
 
 /** `GET /v1/public/businesses/:slug`: what the booking page shows. */
-export const PublicBusinessSchema = z.object({
-  name: z.string(),
-  slug: TenantSlugSchema,
-  timeZone: TimeZoneSchema,
-  brandColor: BrandColorSchema.nullable(),
-  services: z.array(PublicServiceSchema),
-  staff: z.array(PublicStaffMemberSchema),
-});
+export const PublicBusinessSchema = z
+  .object({
+    name: z.string(),
+    slug: TenantSlugSchema,
+    timeZone: TimeZoneSchema,
+    brandColor: BrandColorSchema.nullable(),
+    services: z.array(PublicServiceSchema),
+    staff: z.array(PublicStaffMemberSchema),
+    // The phone, public address and cancellation policy the business chose to show (S47).
+  })
+  .extend(BusinessProfileSchema.shape);
 export type PublicBusiness = z.infer<typeof PublicBusinessSchema>;
 
 /**
@@ -88,10 +92,31 @@ export const BookingRequestInputSchema = z
 export type BookingRequestInput = z.input<typeof BookingRequestInputSchema>;
 export type BookingRequest = z.output<typeof BookingRequestInputSchema>;
 
-/** The answer: the code is on its way to the email address. */
+/**
+ * The secret of a remembered device (S47, ADR-0047): 256 random bits, base64url, kept only in
+ * an httpOnly cookie on the client and as a hash in the database.
+ */
+export const DeviceTokenSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{43}$/)
+  .brand<'DeviceToken'>();
+export type DeviceToken = z.infer<typeof DeviceTokenSchema>;
+
+/** Answer of `POST …/device/forget`: whether this browser was remembered (S47). */
+export const DeviceForgetResponseSchema = z.object({ forgotten: z.boolean() });
+export type DeviceForgetResponse = z.infer<typeof DeviceForgetResponseSchema>;
+
+/** How long a remembered device skips the code after it was last used (days). */
+export const REMEMBERED_DEVICE_DAYS = 90;
+
+/**
+ * Answer of `POST …/booking-requests`: the code's request; or, from a device remembered for
+ * that email (S47, AC-W8-8), the booking itself, made without a code (`confirmed`).
+ */
 export const BookingRequestResponseSchema = z.object({
   requestId: BookingRequestIdSchema,
   expiresAt: UtcDateTimeSchema,
+  confirmed: z.lazy(() => BookingConfirmResponseSchema).optional(),
 });
 export type BookingRequestResponse = z.infer<typeof BookingRequestResponseSchema>;
 
@@ -101,7 +126,12 @@ export type BookingRequestResponse = z.infer<typeof BookingRequestResponseSchema
  * taken); the code proves the email address, whatever the time.
  */
 export const BookingConfirmInputSchema = z
-  .object({ code: VerificationCodeSchema, startsAt: UtcDateTimeSchema.optional() })
+  .object({
+    code: VerificationCodeSchema,
+    startsAt: UtcDateTimeSchema.optional(),
+    // "Remember me on this phone" (S47, AC-W8-8): the next booking from it skips the code.
+    remember: z.boolean().optional(),
+  })
   .strict();
 export type BookingConfirmInput = z.input<typeof BookingConfirmInputSchema>;
 
@@ -215,3 +245,29 @@ export type PublicWaitlistEntry = z.infer<typeof PublicWaitlistEntrySchema>;
 
 export const WaitlistConfirmResponseSchema = z.object({ entry: PublicWaitlistEntrySchema });
 export type WaitlistConfirmResponse = z.infer<typeof WaitlistConfirmResponseSchema>;
+
+/** The booking page's steps whose entry is counted (S47, ADR-0047, AC-W8-9). */
+export const BOOKING_FUNNEL_STEPS = [
+  'service',
+  'staff',
+  'time',
+  'details',
+  'verify',
+  'done',
+  'waitlisted',
+] as const;
+export const BookingFunnelStepSchema = z.enum(BOOKING_FUNNEL_STEPS);
+export type BookingFunnelStep = z.infer<typeof BookingFunnelStepSchema>;
+
+/**
+ * `POST /v1/public/businesses/:slug/funnel`: a visit entered a step. `visitId` is random, made
+ * by the page for this visit and linked to nothing; there is no name, email or phone.
+ */
+export const BookingFunnelEventInputSchema = z
+  .object({ visitId: z.uuid().toLowerCase(), step: BookingFunnelStepSchema })
+  .strict();
+export type BookingFunnelEventInput = z.infer<typeof BookingFunnelEventInputSchema>;
+
+/** How many visits entered each step over a period (S47; S59's metrics page reads it). */
+export const BookingFunnelCountsSchema = z.record(BookingFunnelStepSchema, z.number().int().min(0));
+export type BookingFunnelCounts = z.infer<typeof BookingFunnelCountsSchema>;

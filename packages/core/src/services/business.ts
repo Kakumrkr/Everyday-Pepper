@@ -11,7 +11,7 @@ import {
   createTenant,
   findCurrentTenant,
   recordActivation,
-  updateCurrentTenantBrandColor,
+  updateCurrentTenantBookingPage,
   withMember,
   type Database,
   type Tenant,
@@ -75,9 +75,13 @@ export async function createBusiness(
   });
 }
 
+/** The booking page's profile fields (S47); the audit names those that changed. */
+const PROFILE_FIELDS = ['phone', 'publicAddress', 'cancellationPolicy'] as const;
+
 /**
- * Sets the booking page's settings (PCR-001: its color; `null`: Pepper's neutral default),
- * with a `tenant.updated` audit entry when something changed. Owners and managers.
+ * Sets the booking page's settings (PCR-001: its color, `null` for Pepper's neutral default;
+ * S47: the phone, public address and cancellation policy, `null` for not shown); a field left
+ * out stays. A `tenant.updated` audit entry holds the fields that changed. Owners and managers.
  */
 export async function updateBookingPage(
   db: Database,
@@ -85,21 +89,28 @@ export async function updateBookingPage(
   settings: BookingPageSettings,
 ): Promise<Tenant> {
   requirePermission(actor, 'settings.manage');
-  const { brandColor } = BookingPageSettingsSchema.parse(settings);
+  const parsed = BookingPageSettingsSchema.parse(settings);
   return withMember(db, actor.context, async (tx) => {
     const before = await findCurrentTenant(tx);
-    const after = await updateCurrentTenantBrandColor(tx, brandColor);
+    const after = await updateCurrentTenantBookingPage(tx, parsed);
     // A member's own business is always visible to them.
     if (before === undefined || after === undefined)
       throw new Error('No tenant in this transaction');
-    if (before.brandColor !== after.brandColor) {
+    const colorChanged = before.brandColor !== after.brandColor;
+    const profileChanged = PROFILE_FIELDS.filter((field) => before[field] !== after[field]);
+    if (colorChanged || profileChanged.length > 0) {
+      // The profile's values are not kept (a home address is someone's): only which changed.
+      const values = (brandColor: string | null) =>
+        profileChanged.length === 0
+          ? { brandColor }
+          : { ...(colorChanged ? { brandColor } : {}), profileChanged };
       await appendAuditEntry(tx, {
         actor: auditActorOf(actor),
         change: {
           action: 'tenant.updated',
           entity: { type: 'tenant', id: after.id },
-          before: { brandColor: before.brandColor },
-          after: { brandColor: after.brandColor },
+          before: values(before.brandColor),
+          after: values(after.brandColor),
         },
         requestId: actor.requestId,
       });

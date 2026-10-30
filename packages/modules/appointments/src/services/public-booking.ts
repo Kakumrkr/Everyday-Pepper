@@ -32,6 +32,7 @@ import {
   type BookingConfirmInput,
   type BookingRequestId,
   type BookingRequestInput,
+  type DeviceToken,
   type ManageToken,
   type OfferToken,
   type PublicBooking,
@@ -129,6 +130,7 @@ import {
   type BookingNotify,
 } from './notices.js';
 import { requestInsights } from './insights.js';
+import { recognizeDeviceIn, rememberDeviceIn } from './remembered-devices.js';
 import { keepReminderInStep } from './reminders.js';
 import {
   isBookable,
@@ -169,6 +171,12 @@ export interface CodeOptions extends PublicOptions {
   codeKey: Buffer;
 }
 
+/** A booking request's options: the browser's remembered-device token, if it sent one. */
+export interface RequestOptions extends CodeOptions {
+  /** From the device cookie (S47, ADR-0047); unchecked, so anything may come. */
+  deviceToken?: string | undefined;
+}
+
 /** The menu and team the booking page shows. */
 export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise<PublicBusiness> {
   return inPage(
@@ -199,6 +207,10 @@ export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise
         slug: tenant.slug,
         timeZone: tenant.timeZone,
         brandColor: tenant.brandColor,
+        // What the business chose to show (S47); never the mailing address.
+        phone: tenant.phone,
+        publicAddress: tenant.publicAddress,
+        cancellationPolicy: tenant.cancellationPolicy,
         services: services
           .filter((s) => offered.has(s.id))
           .map((s) => ({
@@ -261,18 +273,21 @@ export async function findPublicAvailability(
  * Asks to book a time: checks that it is free now and stores the request with the hash of a
  * new code, which the caller emails to the client. `SlotUnavailableError` (with alternatives)
  * when the time is not free, `TooManyBookingRequestsError` after
- * `MAX_REQUESTS_PER_EMAIL_PER_HOUR` requests for the email address.
+ * `MAX_REQUESTS_PER_EMAIL_PER_HOUR` requests for the email address. `remembered` (S47,
+ * AC-W8-8): the browser's device token is one this business remembers for this email, so the
+ * caller confirms with the code at once instead of emailing it.
  */
 export async function requestBooking(
   db: Database,
   slug: TenantSlug,
   input: BookingRequestInput,
-  options: CodeOptions,
+  options: RequestOptions,
 ): Promise<{
   requestId: BookingRequestId;
   expiresAt: UtcDateTime;
   code: VerificationCode;
   email: BookingEmailDetails;
+  remembered: boolean;
 }> {
   const request = BookingRequestInputSchema.parse(input);
   const now = nowOf(options);
@@ -312,7 +327,14 @@ export async function requestBooking(
         codeHash: codeHash(options.codeKey, request.email, code),
         expiresAt,
       });
+      const remembered = await recognizeDeviceIn(
+        tx,
+        options.deviceToken,
+        request.email,
+        new Date(now),
+      );
       return {
+        remembered,
         requestId: BookingRequestIdSchema.parse(row.id),
         expiresAt: UtcDateTimeSchema.parse(expiresAt.toISOString()),
         code,
@@ -350,10 +372,16 @@ export async function confirmBookingRequest(
   slug: TenantSlug,
   requestId: BookingRequestId,
   input: BookingConfirmInput,
-  options: CodeOptions,
-): Promise<{ booking: PublicBooking; manageToken: ManageToken; email: BookingEmailDetails }> {
+  options: RequestOptions,
+): Promise<{
+  booking: PublicBooking;
+  manageToken: ManageToken;
+  email: BookingEmailDetails;
+  /** With `remember` (S47, AC-W8-8): the new device's secret, for the caller's cookie. */
+  device?: { token: DeviceToken; expiresAt: Date };
+}> {
   const id = BookingRequestIdSchema.parse(requestId);
-  const { code, startsAt } = BookingConfirmInputSchema.parse(input);
+  const { code, startsAt, remember } = BookingConfirmInputSchema.parse(input);
   const now = nowOf(options);
   await checkCode(db, slug, id, code, { now, codeKey: options.codeKey, purpose: 'booking' });
 
@@ -422,7 +450,13 @@ export async function confirmBookingRequest(
         clientName: client.name,
       };
       await options.notify?.(tx, { kind: 'confirmed', email, manageToken, change: changeOf(row) });
-      return { booking, manageToken, email };
+      // The code just proved the address: the browser may skip it next time (S47).
+      // The browser's earlier device (another email, say) ends: its cookie is replaced (S47).
+      const device =
+        remember === true
+          ? await rememberDeviceIn(tx, request.email, new Date(now), options.deviceToken)
+          : undefined;
+      return { booking, manageToken, email, ...(device === undefined ? {} : { device }) };
     });
   } catch (error) {
     if ((error instanceof SlotTaken || error instanceof BookingOverlapError) && search) {

@@ -1,24 +1,28 @@
 'use client';
 
-import { BusinessSchema } from '@pepper/contracts';
-import { brandTokens, Button, FOCUS_RING } from '@pepper/ui';
+import { BusinessSchema, CANCELLATION_POLICY_MAX, type BusinessProfile } from '@pepper/contracts';
+import { brandTokens, Button, FOCUS_RING, Input, Textarea } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
+import { profileFields, profileFromFields, type ProfileFields } from '../../../lib/booking-profile';
 import { sendJson } from '../../../lib/client-api';
 import { Notice } from '../form-parts';
 
 /**
  * The business's public booking page (S17): its link, and for owners and managers its color
  * (PCR-001). Any color works: the page adjusts it until its text is readable (WCAG AA). On the
- * kit since S42.2: a quiet section, since nothing here waits on a decision.
+ * kit since S42.2: a quiet section, since nothing here waits on a decision. Since S47 also the
+ * phone, address and cancellation policy clients see there (AC-W8-7).
  */
 export function BookingPageCard({
   slug,
   brandColor,
+  profile,
   manages,
 }: {
   slug: string;
   brandColor: string | null;
+  profile: BusinessProfile;
   manages: boolean;
 }) {
   const router = useRouter();
@@ -83,7 +87,102 @@ export function BookingPageCard({
           </div>
         ) : null}
         {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
+        {manages ? <ProfileForm profile={profile} /> : null}
       </div>
     </section>
+  );
+}
+
+/**
+ * What clients see about the business on its page (S47, AC-W8-7). Each field is optional: an
+ * empty one isn't shown. Checked here first, so the message sits under the field to fix.
+ */
+function ProfileForm({ profile }: { profile: BusinessProfile }) {
+  const router = useRouter();
+  const [fields, setFields] = useState<ProfileFields>(() => profileFields(profile));
+  const [errors, setErrors] = useState<Partial<Record<keyof ProfileFields, string>>>({});
+  const [notice, setNotice] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const headingId = useId();
+
+  const field = (key: keyof ProfileFields) => ({
+    name: key,
+    value: fields[key],
+    error: errors[key],
+    onChange: (event: { target: { value: string } }) => {
+      setFields((current) => ({ ...current, [key]: event.target.value }));
+    },
+  });
+
+  async function save(): Promise<void> {
+    setNotice(null);
+    const checked = profileFromFields(fields);
+    if (!checked.ok) {
+      setErrors(checked.errors);
+      const first = Object.keys(checked.errors)[0];
+      if (first !== undefined) document.getElementsByName(first)[0]?.focus();
+      return;
+    }
+    setErrors({});
+    setBusy(true);
+    const answer = await sendJson('PUT', '/v1/tenant/booking-page', checked.profile);
+    setBusy(false);
+    const parsed = answer.ok ? BusinessSchema.safeParse(answer.data) : null;
+    if (parsed?.success !== true) {
+      setNotice({ tone: 'error', text: answer.ok ? 'Something went wrong.' : answer.message });
+      return;
+    }
+    setFields(profileFields(parsed.data));
+    setNotice({ tone: 'ok', text: 'Saved. Clients see these on your booking page.' });
+    router.refresh();
+  }
+
+  return (
+    <form
+      aria-labelledby={headingId}
+      noValidate
+      className="flex flex-col gap-4 border-t border-line pt-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void save();
+      }}
+    >
+      <div className="flex flex-col gap-1">
+        <h3 id={headingId} className="m-0 type-subheading text-ink">
+          What clients see
+        </h3>
+        <p className="m-0 type-body text-ink-2">Leave a field empty to keep it off the page.</p>
+      </div>
+      <Input
+        label="Phone"
+        type="tel"
+        autoComplete="tel"
+        inputMode="tel"
+        placeholder="(555) 123-4567"
+        {...field('phone')}
+      />
+      <Textarea
+        label="Address"
+        hint="Where clients come to you. Your mailing address stays private."
+        rows={2}
+        maxLength={300}
+        placeholder={'12 Main St\nAustin, TX 78701'}
+        {...field('publicAddress')}
+      />
+      <Textarea
+        label="Cancellation policy"
+        hint="Clients see it before they book and on their confirmation."
+        rows={3}
+        maxLength={CANCELLATION_POLICY_MAX}
+        placeholder="Please cancel or move at least 24 hours ahead."
+        {...field('cancellationPolicy')}
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" variant="secondary" size="sm" busy={busy}>
+          Save details
+        </Button>
+      </div>
+      {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
+    </form>
   );
 }

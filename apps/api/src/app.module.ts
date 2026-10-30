@@ -39,7 +39,10 @@ export class AppModule {
           publicKey: config.pushPublicKey,
           outboxKey: outboxKeyFrom(config.outboxSecret),
         }),
-        PublicBookingModule.forRoot({ codeKey: config.bookingCodeKey }),
+        PublicBookingModule.forRoot({
+          codeKey: config.bookingCodeKey,
+          secureCookies: config.auth.baseUrl.startsWith('https:'),
+        }),
         UnsubscribeModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
         ChatModule.forRoot({
           openai: config.ai.openai,

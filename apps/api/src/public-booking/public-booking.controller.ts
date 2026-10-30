@@ -1,6 +1,7 @@
 import {
   AvailabilityQuerySchema,
   BookingConfirmInputSchema,
+  BookingFunnelEventInputSchema,
   BookingRequestIdSchema,
   BookingRequestInputSchema,
   ManageBookingInputSchema,
@@ -13,17 +14,20 @@ import {
   type AvailabilityResponse,
   type BookingConfirmResponse,
   type BookingRequestResponse,
+  type DeviceForgetResponse,
   type PublicBookingResponse,
   type PublicBusiness,
   type PublicOfferResponse,
   type WaitlistConfirmResponse,
 } from '@pepper/contracts';
-import { Body, Controller, Get, HttpCode, Param, Post, Query, Req } from '@nestjs/common';
+import type { ServerResponse } from 'node:http';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { z } from 'zod';
 import { capped } from '../appointments/bookings.controller.js';
 import { answering } from '../http/domain-errors.js';
 import { clientAddress, RateLimiter, type RateLimit } from '../http/rate-limit.js';
 import { parseBody } from '../http/zod-body.js';
+import { clearedDeviceCookie, deviceCookie, deviceTokenOf } from './device-cookie.js';
 import { PublicBookingService } from './public-booking.service.js';
 
 // Limits for anonymous callers (ADR-0022). Per address: generous for people, tight for
@@ -36,6 +40,10 @@ const CODE_CHECKS: RateLimit = { name: 'confirm-ip', max: 30, windowSeconds: 600
 const LINK_USES: RateLimit = { name: 'link-ip', max: 30, windowSeconds: 600 };
 // Waitlist claims (S37): a person claims once or twice; a script trying secrets is stopped.
 const OFFER_CLAIMS: RateLimit = { name: 'claim-ip', max: 10, windowSeconds: 600 };
+// Booking steps (S47): a visit enters at most seven; a script inflating the counts is stopped.
+const FUNNEL_EVENTS: RateLimit = { name: 'funnel-ip', max: 60, windowSeconds: 600 };
+// "Forget this device" (S47): a person forgets once.
+const DEVICE_FORGETS: RateLimit = { name: 'forget-ip', max: 10, windowSeconds: 600 };
 
 const SlugParamsSchema = z.object({ slug: z.string() });
 const RequestParamsSchema = z.object({ slug: z.string(), requestId: BookingRequestIdSchema });
@@ -84,20 +92,30 @@ export class PublicBookingController {
   }
 
   /**
-   * 201: a code is on its way to the email address; nothing is booked yet. 409
-   * `slot_unavailable` with alternatives; 429 `too_many_requests`; 503 `email_unavailable`.
+   * 201: a code is on its way to the email address; nothing is booked yet. From a device the
+   * business remembers for that email (S47, the cookie), 201 with the booking in `confirmed`
+   * and no code. 409 `slot_unavailable` with alternatives; 429 `too_many_requests`; 503
+   * `email_unavailable`.
    */
   @Post('booking-requests')
   async request(
     @Param() params: unknown,
     @Body() body: unknown,
     @Req() request: IncomingRequest,
+    @Res({ passthrough: true }) response: ServerResponse,
   ): Promise<BookingRequestResponse> {
     const { slug } = parseBody(SlugParamsSchema, params);
     const input = parseBody(BookingRequestInputSchema, body);
     await this.limits.hit(REQUESTS_PER_ADDRESS, clientAddress(request));
     await this.limits.hit(REQUESTS_PER_BUSINESS, pageKey(slug));
-    return answering(() => this.booking.request(slug, input));
+    const asked = await answering(() => this.booking.request(slug, input, deviceTokenOf(request)));
+    if (asked.refreshDevice !== undefined) {
+      response.setHeader(
+        'Set-Cookie',
+        deviceCookie(slug, asked.refreshDevice, this.booking.secureCookies),
+      );
+    }
+    return asked.response;
   }
 
   /**
@@ -111,11 +129,57 @@ export class PublicBookingController {
     @Param() params: unknown,
     @Body() body: unknown,
     @Req() request: IncomingRequest,
+    @Res({ passthrough: true }) response: ServerResponse,
   ): Promise<BookingConfirmResponse> {
     const { slug, requestId } = parseBody(RequestParamsSchema, params);
     const input = parseBody(BookingConfirmInputSchema, body);
     await this.limits.hit(CODE_CHECKS, clientAddress(request));
-    return answering(() => this.booking.confirm(slug, requestId, input));
+    const confirmed = await answering(() =>
+      this.booking.confirm(slug, requestId, input, deviceTokenOf(request)),
+    );
+    // "Remember me on this phone" (S47): the secret goes only into the httpOnly cookie.
+    if (confirmed.device !== undefined) {
+      response.setHeader(
+        'Set-Cookie',
+        deviceCookie(slug, confirmed.device, this.booking.secureCookies),
+      );
+    }
+    return confirmed.response;
+  }
+
+  /**
+   * "Forget this device" (S47, AC-W8-8): 200 with whether this browser was remembered; the
+   * cookie is cleared either way.
+   */
+  @Post('device/forget')
+  @HttpCode(200)
+  async forget(
+    @Param() params: unknown,
+    @Req() request: IncomingRequest,
+    @Res({ passthrough: true }) response: ServerResponse,
+  ): Promise<DeviceForgetResponse> {
+    const { slug } = parseBody(SlugParamsSchema, params);
+    await this.limits.hit(DEVICE_FORGETS, clientAddress(request));
+    const forgotten = await this.booking.forget(slug, deviceTokenOf(request));
+    response.setHeader('Set-Cookie', clearedDeviceCookie(slug, this.booking.secureCookies));
+    return { forgotten };
+  }
+
+  /**
+   * A visit entered a booking step (S47, AC-W8-9): 204 always (an unknown page records
+   * nothing), so the page never waits on it; 429 past the per-address limit.
+   */
+  @Post('funnel')
+  @HttpCode(204)
+  async funnel(
+    @Param() params: unknown,
+    @Body() body: unknown,
+    @Req() request: IncomingRequest,
+  ): Promise<void> {
+    const { slug } = parseBody(SlugParamsSchema, params);
+    const event = parseBody(BookingFunnelEventInputSchema, body);
+    await this.limits.hit(FUNNEL_EVENTS, clientAddress(request));
+    await this.booking.funnelStep(slug, event);
   }
 
   /**

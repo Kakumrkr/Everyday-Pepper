@@ -84,7 +84,9 @@ export default async function HomePage() {
           action={{ label: 'Choose a business', href: MORE_HREF, renderLink: kitLink }}
         />
       ) : null}
-      {current !== null && setup !== null ? <SetupReviewCard review={setup} /> : null}
+      {current !== null && setup !== null ? (
+        <SetupReviewCard review={setup} slug={current.business.slug} />
+      ) : null}
       {current !== null && feed !== null ? (
         <BriefingCard feed={feed} timeZone={current.business.timeZone} />
       ) : null}

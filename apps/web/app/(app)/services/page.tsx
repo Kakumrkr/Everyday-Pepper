@@ -93,6 +93,7 @@ export default async function ServicesPage() {
       <BookingPageCard
         slug={current.business.slug}
         brandColor={current.business.brandColor}
+        profile={current.business}
         manages={current.permissions.includes('settings.manage')}
       />
     </ServicesScreen>

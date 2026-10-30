@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import {
   ManageTokenSchema,
   MAX_VERIFICATION_ATTEMPTS,
@@ -15,12 +15,20 @@ import {
 import {
   createBusiness,
   createClient,
+  ForbiddenError,
   listClients,
   ManualClock,
   updateBookingPage,
   type Actor,
 } from '@pepper/core';
-import { findCurrentTenant, listAuditEntries, withTenant, type Database } from '@pepper/db';
+import {
+  findCurrentTenant,
+  listAuditEntries,
+  updateCurrentTenantMailingAddress,
+  withPublicTenant,
+  withTenant,
+  type Database,
+} from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   BookingNotChangeableError,
@@ -52,6 +60,12 @@ import {
   requestWaitlistJoin,
   rescheduleManagedBooking,
 } from './services/public-booking.js';
+import {
+  forgetDevice,
+  getBookingFunnel,
+  recognizeDeviceIn,
+  recordBookingStep,
+} from './services/remembered-devices.js';
 import { addToWaitlist, listWaitlist } from './services/waitlist.js';
 import type { BookingNotice, BookingNotify } from './services/notices.js';
 import { createService, updateService } from './services/services.js';
@@ -189,6 +203,9 @@ describe('getPublicBusiness', () => {
       slug: p.slug,
       timeZone: 'America/New_York',
       brandColor: '#7a3e6c',
+      phone: null,
+      publicAddress: null,
+      cancellationPolicy: null,
       services: [
         {
           id: p.service.id,
@@ -204,6 +221,25 @@ describe('getPublicBusiness', () => {
         { id: p.marco.id, displayName: 'Marco', color: p.marco.color, serviceIds: [p.service.id] },
       ],
     });
+  });
+
+  it('shows the profile the business set, never its mailing address (S47, AC-W8-7)', async () => {
+    const p = await newPage();
+    await updateBookingPage(db, p.owner, {
+      phone: '(555) 123-4567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+      cancellationPolicy: 'Cancel 24 hours ahead.',
+    });
+    await withTenant(db, p.tenantId, (tx) =>
+      updateCurrentTenantMailingAddress(tx, '9 Home Lane\nAustin, TX 78702'),
+    );
+    const business = await getPublicBusiness(db, p.slug);
+    expect(business).toMatchObject({
+      phone: '+15551234567',
+      publicAddress: '12 Main St\nAustin, TX 78701',
+      cancellationPolicy: 'Cancel 24 hours ahead.',
+    });
+    expect(JSON.stringify(business)).not.toContain('Home Lane');
   });
 
   it('hides a service that is not bookable', async () => {
@@ -497,6 +533,111 @@ describe('confirmBookingRequest', () => {
     expect(refused?.reason).toBeInstanceOf(SlotUnavailableError);
     expect((refused?.reason as SlotUnavailableError).alternatives).toHaveLength(3);
     expect(await bookingsOf(p)).toHaveLength(1);
+  });
+});
+
+describe('remembered devices (S47, ADR-0047, AC-W8-8)', () => {
+  const DAY = 86_400_000;
+
+  async function remembered(p: Page, email = 'ana@example.test') {
+    const asked = await request(p, { email });
+    const confirmed = await confirmBookingRequest(
+      db,
+      p.slug,
+      asked.requestId,
+      { code: asked.code, remember: true },
+      { codeKey: KEY, clock: p.clock },
+    );
+    if (confirmed.device === undefined) throw new Error('not remembered');
+    return confirmed.device.token;
+  }
+
+  const again = (p: Page, deviceToken: string | undefined, extra: Partial<BookingRequestInput>) =>
+    requestBooking(db, p.slug, ask(p, extra), { codeKey: KEY, clock: p.clock, deviceToken });
+
+  it('remembers the browser only when asked, and recognizes it for the same email', async () => {
+    const p = await newPage();
+    const plain = await book(p, { startsAt: tue('14:00') });
+    expect(plain.device).toBeUndefined();
+    const token = await remembered(p, 'bo@example.test');
+    const next = await again(p, token, { email: 'BO@example.test', startsAt: tue('12:00') });
+    expect(next.remembered).toBe(true);
+    // Only the hash is stored.
+    const stored = await withTenant(db, p.tenantId, (tx) =>
+      tx.execute<{ token_hash: string }>(`SELECT token_hash FROM remembered_devices`),
+    );
+    expect(JSON.stringify(stored.rows)).not.toContain(token);
+  });
+
+  it('asks for a code for another email, another business, a changed or no token', async () => {
+    const p = await newPage();
+    const other = await newPage();
+    const token = await remembered(p);
+    const later = { startsAt: tue('12:00') };
+    expect((await again(p, token, { ...later, email: 'eve@example.test' })).remembered).toBe(false);
+    expect((await again(other, token, later)).remembered).toBe(false);
+    const changed = `${token.slice(0, -1)}${token.endsWith('A') ? 'B' : 'A'}`;
+    expect((await again(p, changed, later)).remembered).toBe(false);
+    expect((await again(p, 'not a token', later)).remembered).toBe(false);
+    expect((await again(p, undefined, later)).remembered).toBe(false);
+  });
+
+  it('lasts 90 days from its last use, then asks again', async () => {
+    const p = await newPage();
+    const token = await remembered(p);
+    const start = p.clock.now().getTime();
+    const knownAt = (days: number) =>
+      withPublicTenant(db, p.slug, (tx) =>
+        recognizeDeviceIn(tx, token, 'ana@example.test', new Date(start + days * DAY)),
+      );
+    expect(await knownAt(80)).toBe(true);
+    expect(await knownAt(160)).toBe(true);
+    expect(await knownAt(251)).toBe(false);
+  });
+
+  it('is forgotten on "Forget this device"', async () => {
+    const p = await newPage();
+    const token = await remembered(p);
+    expect(await forgetDevice(db, p.slug, token)).toBe(true);
+    expect((await again(p, token, { startsAt: tue('12:00') })).remembered).toBe(false);
+    // Unknown or malformed tokens and pages forget nothing.
+    expect(await forgetDevice(db, p.slug, token)).toBe(false);
+    expect(await forgetDevice(db, p.slug, 'nope')).toBe(false);
+    expect(await forgetDevice(db, 'no-such-page', token)).toBe(false);
+  });
+
+  it('ends the browser’s earlier device when it is remembered again', async () => {
+    const p = await newPage();
+    const first = await remembered(p, 'ana@example.test');
+    const asked = await request(p, { email: 'bo@example.test', startsAt: tue('12:00') });
+    const second = await confirmBookingRequest(
+      db,
+      p.slug,
+      asked.requestId,
+      { code: asked.code, remember: true },
+      { codeKey: KEY, clock: p.clock, deviceToken: first },
+    );
+    expect(second.device?.token).not.toBe(first);
+    expect((await again(p, first, { startsAt: tue('14:00') })).remembered).toBe(false);
+  });
+});
+
+describe('the booking funnel (S47, ADR-0047, AC-W8-9)', () => {
+  it('counts the steps visits entered, for the business only and its managers', async () => {
+    const p = await newPage();
+    const other = await newPage();
+    const visit = randomUUID();
+    await recordBookingStep(db, p.slug, { visitId: visit, step: 'service' });
+    await recordBookingStep(db, p.slug, { visitId: visit, step: 'service' });
+    await recordBookingStep(db, p.slug, { visitId: visit, step: 'time' });
+    await recordBookingStep(db, other.slug, { visitId: randomUUID(), step: 'service' });
+    await recordBookingStep(db, 'no-such-page', { visitId: randomUUID(), step: 'service' });
+    const range = { from: new Date(Date.now() - 60_000), to: new Date(Date.now() + 60_000) };
+    const counts = await getBookingFunnel(db, p.owner, range);
+    expect(counts).toMatchObject({ service: 1, time: 1, done: 0 });
+    expect((await getBookingFunnel(db, other.owner, range)).service).toBe(1);
+    const staff: Actor = { context: { ...p.owner.context, role: 'staff' } };
+    await expect(getBookingFunnel(db, staff, range)).rejects.toBeInstanceOf(ForbiddenError);
   });
 });
 

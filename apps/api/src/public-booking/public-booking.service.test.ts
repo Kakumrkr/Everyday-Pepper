@@ -77,7 +77,9 @@ describe('PublicBookingService', () => {
   it('emails the code and answers without it', async () => {
     const send = vi.fn(() => Promise.resolve());
     const answer = await serviceWith({ send }).request('juniper', {} as never);
-    expect(answer).toEqual({ requestId: 'r-1', expiresAt: '2026-11-02T12:10:00.000Z' });
+    expect(answer).toEqual({
+      response: { requestId: 'r-1', expiresAt: '2026-11-02T12:10:00.000Z' },
+    });
     expect(JSON.stringify(answer)).not.toContain('042917');
     expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -138,12 +140,58 @@ describe('PublicBookingService', () => {
     expect(status(error)).toBe(503);
   });
 
+  it('books at once from a remembered device, with no code email (S47, AC-W8-8)', async () => {
+    appointments.requestBooking.mockResolvedValueOnce({
+      requestId: 'r-1',
+      expiresAt: '2026-11-02T12:10:00.000Z',
+      code: '042917',
+      email: DETAILS,
+      remembered: true,
+    });
+    const device = 'd'.repeat(43) as never;
+    // No mailer is needed: nothing is emailed but the queued confirmation.
+    const answer = await serviceWith(null).request('juniper', {} as never, device);
+    expect(appointments.requestBooking.mock.calls.at(-1)?.at(-1)).toMatchObject({
+      deviceToken: device,
+    });
+    expect(appointments.confirmBookingRequest).toHaveBeenCalledWith(
+      {},
+      'juniper',
+      'r-1',
+      { code: '042917' },
+      expect.anything(),
+    );
+    expect(answer).toEqual({
+      response: {
+        requestId: 'r-1',
+        expiresAt: '2026-11-02T12:10:00.000Z',
+        confirmed: { booking: { status: 'confirmed' }, manageToken: TOKEN },
+      },
+      refreshDevice: device,
+    });
+  });
+
+  it('passes a new device secret out apart from the answer (S47)', async () => {
+    appointments.confirmBookingRequest.mockResolvedValueOnce({
+      booking: { status: 'confirmed' },
+      manageToken: TOKEN,
+      email: DETAILS,
+      device: { token: 'd'.repeat(43), expiresAt: new Date() },
+    });
+    const answer = await serviceWith(null).confirm('juniper', 'r-1' as never, {
+      code: '042917',
+      remember: true,
+    });
+    expect(answer.device).toBe('d'.repeat(43));
+    expect(JSON.stringify(answer.response)).not.toContain('d'.repeat(43));
+  });
+
   it('queues the client email and the team push inside each change (ADR-0026)', async () => {
     const send = vi.fn(() => Promise.resolve());
     const answer = await serviceWith({ send }).confirm('juniper', 'r-1' as never, {
       code: '042917',
     });
-    expect(answer).toEqual({ booking: { status: 'confirmed' }, manageToken: TOKEN });
+    expect(answer).toEqual({ response: { booking: { status: 'confirmed' }, manageToken: TOKEN } });
     await serviceWith(null).reschedule('juniper', TOKEN as never, '2026-11-04T15:00:00.000Z');
     await serviceWith(null).cancel('juniper', TOKEN as never);
     for (const fn of [

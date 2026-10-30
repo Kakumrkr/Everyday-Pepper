@@ -92,7 +92,14 @@ function toBusiness(tenant: {
   locale: string;
   templateId: string | null;
   brandColor: string | null;
+  phone: string | null;
+  publicAddress: string | null;
+  cancellationPolicy: string | null;
 }): Business {
   const { id, name, slug, timeZone, locale, templateId, brandColor } = tenant;
-  return BusinessSchema.parse({ id, name, slug, timeZone, locale, templateId, brandColor });
+  const { phone, publicAddress, cancellationPolicy } = tenant;
+  return BusinessSchema.parse({
+    ...{ id, name, slug, timeZone, locale, templateId, brandColor },
+    ...{ phone, publicAddress, cancellationPolicy },
+  });
 }

@@ -3,6 +3,7 @@
 import {
   BookingConfirmResponseSchema,
   BookingRequestResponseSchema,
+  DeviceForgetResponseSchema,
   SlotUnavailableSchema,
   WaitlistConfirmResponseSchema,
   WrongCodeSchema,
@@ -14,6 +15,7 @@ import {
 import {
   Button,
   buttonStyle,
+  Checkbox,
   chipStyle,
   cx,
   DetailTable,
@@ -24,7 +26,15 @@ import {
   StepBar,
   StickyActionBar,
 } from '@pepper/ui';
-import { useId, useMemo, useRef, useState, type ReactNode, type SubmitEvent } from 'react';
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type SubmitEvent,
+} from 'react';
 import { flushSync } from 'react-dom';
 import { dateTimeLabel, timeLabel } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
@@ -33,7 +43,9 @@ import {
   checkDetails,
   confirmProblem,
   managePath,
+  newVisitId,
   publicApiPath,
+  recordBookingStep,
   serviceOf,
   staffFor,
   type ClientDetails,
@@ -126,7 +138,9 @@ function Summary({ rows }: { rows: readonly { label: string; value: ReactNode }[
  * the code emailed to them → booked, with the link to reschedule or cancel. Nothing is booked
  * before the code; if the time goes meanwhile, the same code books one of the nearest times.
  * A day with nothing free offers "Join the waitlist" (S38a): the same details and code, and
- * the client then waits for that day.
+ * the client then waits for that day. A browser the client asked to remember books for the
+ * same email without a code (S47, AC-W8-8), and each step entered is counted with a random
+ * visit id only (AC-W8-9).
  */
 export function BookingFlow({ business, now }: { business: PublicBusiness; now: number }) {
   const { slug, timeZone } = business;
@@ -148,6 +162,16 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   const [waitlisted, setWaitlisted] = useState<WaitlistConfirmResponse | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const formId = useId();
+  // "Remember me on this phone" (S47, D-2: on by default); `withoutCode`: this booking used it.
+  const [remember, setRemember] = useState(true);
+  const [withoutCode, setWithoutCode] = useState(false);
+  const [forgotten, setForgotten] = useState<'forgotten' | 'unknown' | null>(null);
+  // A random id for this visit, linked to nothing (AC-W8-9).
+  const [visitId] = useState(newVisitId);
+
+  useEffect(() => {
+    recordBookingStep(slug, visitId, step);
+  }, [slug, visitId, step]);
 
   const service = serviceOf(business, serviceId);
   const staffNames = useMemo(
@@ -196,6 +220,13 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       setRequestId(parsed.data.requestId);
       setCode('');
       setAlternatives(null);
+      // A remembered browser: booked already, no code to type (S47).
+      if (parsed.data.confirmed !== undefined) {
+        setBooked(parsed.data.confirmed);
+        setWithoutCode(true);
+        go('done');
+        return;
+      }
       go('verify');
       return;
     }
@@ -271,7 +302,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
     const answer = await sendJson(
       'POST',
       publicApiPath(slug, `/booking-requests/${requestId}/confirm`),
-      { code: code.trim(), ...(startsAt !== undefined && { startsAt }) },
+      { code: code.trim(), remember, ...(startsAt !== undefined && { startsAt }) },
     );
     setBusy(false);
     if (answer.ok) {
@@ -510,6 +541,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               defaultValue={details?.phone ?? ''}
               error={fieldErrors.phone}
             />
+            {business.cancellationPolicy === null ? null : (
+              <Policy text={business.cancellationPolicy} />
+            )}
             <p className="m-0 type-caption text-ink-2">
               We only use your details for this appointment and messages about it.
             </p>
@@ -552,6 +586,16 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
                   }}
                   className="text-center type-title tracking-[0.4em] tabular-nums"
                 />
+                {waitlistDay === null ? (
+                  <Checkbox
+                    label="Remember me on this phone"
+                    hint="Next time you book here with this email, you won’t need a code. Untick it on a shared device."
+                    checked={remember}
+                    onChange={(event) => {
+                      setRemember(event.target.checked);
+                    }}
+                  />
+                ) : null}
                 {error === null ? null : <Notice tone="error">{error}</Notice>}
                 <Button
                   variant="quiet"
@@ -649,8 +693,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
           <Done />
           {heading(`You’re booked, ${firstName}`)}
           <p className="m-0 type-body text-ink-2">
-            We emailed a confirmation to <b className="text-ink">{details.email}</b>, with a link to
-            reschedule or cancel.
+            {withoutCode ? 'This phone is remembered, so no code was needed. ' : ''}We emailed a
+            confirmation to <b className="text-ink">{details.email}</b>, with a link to reschedule
+            or cancel.
           </p>
           <Summary
             rows={[
@@ -672,9 +717,81 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
           >
             Reschedule or cancel
           </a>
+          {business.cancellationPolicy === null ? null : (
+            <Policy text={business.cancellationPolicy} />
+          )}
+          {withoutCode || remember ? (
+            <ForgetDevice slug={slug} forgotten={forgotten} onForgotten={setForgotten} />
+          ) : null}
         </>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * "Forget this phone" (S47, AC-W8-8): the business stops remembering this browser, and the
+ * next booking asks for a code again.
+ */
+export function ForgetDevice({
+  slug,
+  forgotten,
+  onForgotten,
+}: {
+  slug: string;
+  forgotten: 'forgotten' | 'unknown' | null;
+  onForgotten: (outcome: 'forgotten' | 'unknown') => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (forgotten !== null) {
+    return (
+      <p className="m-0 type-caption text-ink-2" role="status">
+        {forgotten === 'forgotten'
+          ? 'This phone is forgotten. Next time we’ll email you a code.'
+          : 'This phone wasn’t remembered, so there was nothing to forget.'}
+      </p>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-1">
+      <Button
+        variant="quiet"
+        size="sm"
+        busy={busy}
+        className="self-start"
+        onClick={() => {
+          setBusy(true);
+          setError(null);
+          void sendJson('POST', publicApiPath(slug, '/device/forget'), {}).then((answer) => {
+            setBusy(false);
+            if (!answer.ok) {
+              setError(answer.message);
+              return;
+            }
+            const parsed = DeviceForgetResponseSchema.safeParse(answer.data);
+            onForgotten(parsed.success && !parsed.data.forgotten ? 'unknown' : 'forgotten');
+          });
+        }}
+      >
+        Forget this phone
+      </Button>
+      {error === null ? null : <Notice tone="error">{error}</Notice>}
+    </div>
+  );
+}
+
+/** The business's cancellation policy in its own words (S47, AC-W8-7), before and after booking. */
+export function Policy({ text }: { text: string }) {
+  return (
+    <section
+      aria-label="Cancellation policy"
+      className="flex flex-col gap-1 rounded-lg bg-surface p-4"
+      data-testid="cancellation-policy"
+    >
+      <h2 className="m-0 type-label text-ink">Cancellation policy</h2>
+      <p className="m-0 whitespace-pre-line type-body text-ink-2">{text}</p>
+    </section>
   );
 }
 

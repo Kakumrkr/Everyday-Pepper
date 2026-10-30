@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   checkDetails,
   confirmProblem,
@@ -11,7 +11,9 @@ import {
   publicRangePath,
   offerStateText,
   readManageToken,
+  newVisitId,
   readOfferToken,
+  recordBookingStep,
   refusedClaimStatus,
   serviceOf,
   staffFor,
@@ -238,5 +240,30 @@ describe('the first free day (S46, AC-W8-4)', () => {
   it('does not jump to a day outside the strip', () => {
     const answer = { slots: [slot('2026-12-01T15:00:00.000Z')], truncated: false };
     expect(firstFreeDay(answer, ZONE, days)).toEqual({ kind: 'unknown' });
+  });
+});
+
+describe('recordBookingStep (S47, AC-W8-9)', () => {
+  it('posts the visit id and step only, and never throws', async () => {
+    const fetch = vi.fn(() => Promise.reject(new Error('offline')));
+    recordBookingStep('plum-salon', 'v-1', 'time', fetch);
+    expect(fetch).toHaveBeenCalledWith('/v1/public/businesses/plum-salon/funnel', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ visitId: 'v-1', step: 'time' }),
+      credentials: 'same-origin',
+      keepalive: true,
+    });
+    await Promise.resolve();
+  });
+});
+
+describe('newVisitId (S47)', () => {
+  it('is a v4 UUID, also where randomUUID is missing (plain http)', () => {
+    const v4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+    expect(newVisitId()).toMatch(v4);
+    const noRandomUuid = { getRandomValues: crypto.getRandomValues.bind(crypto) };
+    expect(newVisitId(noRandomUuid)).toMatch(v4);
+    expect(newVisitId(noRandomUuid)).not.toBe(newVisitId(noRandomUuid));
   });
 });
