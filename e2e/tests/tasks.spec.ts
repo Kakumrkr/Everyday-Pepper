@@ -22,9 +22,17 @@ function todos(page: Page) {
   return page.getByRole('region', { name: 'To-dos' });
 }
 
-/** Tomorrow's date as the date input takes it (the test browser runs on UTC). */
+/**
+ * Tomorrow's date in the business's zone (`onboardOwner`: New York), as the date input takes it.
+ * The UTC date is a day ahead of New York's each evening, which made "tomorrow" two days away.
+ */
 function tomorrow(): string {
-  return new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(
+    new Date(),
+  );
+  const next = new Date(`${today}T12:00:00Z`);
+  next.setUTCDate(next.getUTCDate() + 1);
+  return next.toISOString().slice(0, 10);
 }
 
 test('the owner adds, ticks off and undoes a to-do; a staff member sees only their own', async ({
