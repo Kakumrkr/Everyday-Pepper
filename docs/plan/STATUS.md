@@ -9,7 +9,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S47** (Phase 10): booking page profile (phone, public address, cancellation policy), brand color contrast, remembered devices, drop-off per step; top-up: booking link + Copy on the setup card. Brief approved 2026-10-30, "Go ahead with your recommendations and complete the session": D-1 A (split: images, the timed new-owner journey and the **Phase 10 gate → S47.2**), D-2 A (remember checkbox on by default, 90 days, per business + email, "Forget this device"), D-3 A (separate optional public address), D-4 A (one brand color with a contrast guard), D-5 ADR-0047 pre-approved.
 Tasks: 1 ACs/traceability/dependency-map · 2 profile backend (migration 0054) · 3 profile UI · 4 remembered devices (ADR-0047) · 5 drop-off events · 6 top-up · 7 close.
-Done: (none yet). Next: task 1.
+Done: 1 ACs (AC-W1-13, AC-W8-7…9) · 2 profile backend (0054, contracts, core, api; db/core/appointments int + api/web unit green). Next: task 3 profile UI.
 
 ## Last sessions
 - **S46 Phase 10 · Setup review, readiness warnings and recoverable availability (2026-10-29)** ([PCR-009](changes/PCR-009.md); no ADR). Full entry in [session-log.md](session-log.md).
