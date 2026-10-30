@@ -17,6 +17,7 @@ export * from './services/briefing.js';
 export * from './services/morning.js';
 export * from './services/notices.js';
 export * from './services/public-booking.js';
+export * from './services/remembered-devices.js';
 export * from './services/reminders.js';
 export * from './services/rules.js';
 export * from './services/seed.js';

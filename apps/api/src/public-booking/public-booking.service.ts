@@ -9,6 +9,8 @@ import {
   rescheduleManagedBooking,
   requestBooking,
   codeEmail,
+  forgetDevice,
+  recordBookingStep,
   confirmWaitlistJoin,
   requestWaitlistJoin,
   waitlistCodeEmail,
@@ -20,6 +22,8 @@ import {
   type AvailableSlot,
   type BookingConfirmInput,
   type BookingConfirmResponse,
+  type BookingFunnelEventInput,
+  type DeviceToken,
   type BookingRequest,
   type BookingRequestId,
   type BookingRequestResponse,
@@ -45,6 +49,8 @@ import { TeamPushes } from '../push/team-pushes.js';
 export interface PublicBookingOptions {
   /** HMAC key of the stored code hashes. */
   codeKey: Buffer;
+  /** Whether the remembered-device cookie is `Secure` (the app is served over https). */
+  secureCookies?: boolean;
 }
 
 export const PUBLIC_BOOKING_OPTIONS = Symbol('PUBLIC_BOOKING_OPTIONS');
@@ -90,12 +96,31 @@ export class PublicBookingService {
     return findPublicAvailability(this.db, slug, query, { templateRuleDefaults, limit });
   }
 
-  async request(slug: TenantSlug, input: BookingRequest): Promise<BookingRequestResponse> {
+  /** Whether the device cookie is sent only over https. */
+  get secureCookies(): boolean {
+    return this.options.secureCookies === true;
+  }
+
+  /**
+   * Asks to book. From a device the business remembers for that email (S47, AC-W8-8), the
+   * request is confirmed at once with its own code, so no code email is sent and the answer
+   * carries the booking (`confirmed`).
+   */
+  async request(
+    slug: TenantSlug,
+    input: BookingRequest,
+    deviceToken?: DeviceToken,
+  ): Promise<BookingRequestResponse> {
     const mailer = this.requireMailer();
     const asked = await requestBooking(this.db, slug, input, {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
+      deviceToken,
     });
+    if (asked.remembered) {
+      const { response } = await this.confirm(slug, asked.requestId, { code: asked.code });
+      return { requestId: asked.requestId, expiresAt: asked.expiresAt, confirmed: response };
+    }
     try {
       await mailer.send(codeEmail(asked.email, asked.code, VERIFICATION_CODE_TTL_MINUTES));
     } catch (error) {
@@ -128,17 +153,38 @@ export class PublicBookingService {
     return confirmWaitlistJoin(this.db, slug, requestId, input, { codeKey: this.options.codeKey });
   }
 
+  /** Confirms with the code; `device`: the new secret when the client asked to be remembered. */
   async confirm(
     slug: TenantSlug,
     requestId: BookingRequestId,
     input: BookingConfirmInput,
-  ): Promise<BookingConfirmResponse> {
+  ): Promise<{ response: BookingConfirmResponse; device?: DeviceToken }> {
     const confirmed = await confirmBookingRequest(this.db, slug, requestId, input, {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
       notify: this.notify,
     });
-    return { booking: confirmed.booking, manageToken: confirmed.manageToken };
+    return {
+      response: { booking: confirmed.booking, manageToken: confirmed.manageToken },
+      ...(confirmed.device === undefined ? {} : { device: confirmed.device.token }),
+    };
+  }
+
+  /** "Forget this device" (S47): the business stops remembering the browser's token. */
+  forget(slug: TenantSlug, token: DeviceToken | undefined): Promise<void> {
+    return forgetDevice(this.db, slug, token);
+  }
+
+  /**
+   * A visit entered a step (S47, AC-W8-9). Never fails the caller: the page doesn't wait on
+   * it, and a lost count is better than a lost booking.
+   */
+  async funnelStep(slug: TenantSlug, event: BookingFunnelEventInput): Promise<void> {
+    try {
+      await recordBookingStep(this.db, slug, event);
+    } catch (error) {
+      this.logger.warn(`Could not record a booking step: ${messageOf(error)}`);
+    }
   }
 
   managed(slug: TenantSlug, token: ManageToken): Promise<PublicBooking> {

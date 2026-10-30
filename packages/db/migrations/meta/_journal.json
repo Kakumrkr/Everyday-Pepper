@@ -386,6 +386,13 @@
       "when": 1793324203796,
       "tag": "0054_booking_page_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1793324737183,
+      "tag": "0055_remembered_devices_and_funnel",
+      "breakpoints": true
     }
   ]
 }

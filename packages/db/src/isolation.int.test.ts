@@ -36,6 +36,7 @@ import {
 } from './repositories/appointments.js';
 import { recordActivation } from './repositories/activation.js';
 import { appendAuditEntry } from './repositories/audit.js';
+import { recordFunnelStep } from './repositories/booking-funnel.js';
 import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
@@ -43,6 +44,7 @@ import { insertConversation, insertMessage, insertTurn } from './repositories/co
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { insertMemoryEpisode, insertMemoryFact } from './repositories/memory.js';
+import { insertRememberedDevice } from './repositories/remembered-devices.js';
 import { listTenantIdsForCleanup } from './repositories/cleanup.js';
 import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbox.js';
 import { savePushSubscription } from './repositories/push-subscriptions.js';
@@ -419,6 +421,40 @@ const TENANT_TABLES: Record<string, TenantTable> = {
         with_check: '(current_user_id() IS NULL)',
       },
     ],
+  },
+  remembered_devices: {
+    tenantColumn: 'tenant_id',
+    // A browser the booking page remembers (S47, ADR-0047): only the token's hash.
+    seed: async (tx) =>
+      (
+        await insertRememberedDevice(tx, {
+          email: `ana-${newId()}@example.test`,
+          tokenHash: randomBytes(32).toString('hex'),
+          expiresAt: new Date('2027-01-20T15:00:00Z'),
+          now: new Date('2026-10-20T15:00:00Z'),
+        })
+      ).id,
+    touch: 'last_used_at = last_used_at',
+    // Like booking requests: members never reach them; only the booking page (no user) does.
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '(current_user_id() IS NULL)',
+        with_check: '(current_user_id() IS NULL)',
+      },
+    ],
+  },
+  booking_funnel_events: {
+    tenantColumn: 'tenant_id',
+    // A visit entering a booking step (S47, ADR-0047): a random visit id, never changed.
+    seed: async (tx) => {
+      const visitId = newId();
+      await recordFunnelStep(tx, { visitId, step: 'service' });
+      return idWhere(tx, 'booking_funnel_events', 'visit_id', visitId);
+    },
+    touch: 'step = step',
+    appendOnly: true,
   },
   outbox_messages: {
     tenantColumn: 'tenant_id',
