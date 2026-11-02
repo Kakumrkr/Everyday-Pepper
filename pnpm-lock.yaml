@@ -429,6 +429,9 @@ importers:
       '@pepper/db':
         specifier: workspace:*
         version: link:../../db
+      '@pepper/storage':
+        specifier: workspace:*
+        version: link:../../storage
     devDependencies:
       '@pepper/config':
         specifier: workspace:*

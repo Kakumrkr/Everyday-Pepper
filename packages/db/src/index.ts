@@ -8,6 +8,7 @@ export * from './repositories/appointments.js';
 export * from './repositories/audit.js';
 export * from './repositories/booking-verifications.js';
 export * from './repositories/booking-funnel.js';
+export * from './repositories/business-photos.js';
 export * from './repositories/bookings.js';
 export * from './repositories/waitlist.js';
 export * from './repositories/cleanup.js';

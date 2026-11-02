@@ -133,3 +133,18 @@ export async function processImage(input: Uint8Array, kind: PhotoKind): Promise<
     throw new ImageRejectedError('unreadable', 'That file is not a photo we can read.');
   }
 }
+
+/**
+ * A photo of one color, `width`×`height`, as a JPEG, PNG or WebP file: for tests and the e2e
+ * journeys, which need real images without fixtures on disk.
+ */
+export function solidColorPhoto(
+  width: number,
+  height: number,
+  format: 'jpeg' | 'png' | 'webp' = 'jpeg',
+  color = { r: 176, g: 108, b: 72 },
+): Promise<Buffer> {
+  return sharp({ create: { width, height, channels: 3, background: color } })
+    .toFormat(format)
+    .toBuffer();
+}

@@ -24,7 +24,8 @@
   "dependencies": {
     "@pepper/contracts": "workspace:*",
     "@pepper/core": "workspace:*",
-    "@pepper/db": "workspace:*"
+    "@pepper/db": "workspace:*",
+    "@pepper/storage": "workspace:*"
   },
   "devDependencies": {
     "@pepper/config": "workspace:*",

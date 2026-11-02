@@ -4,6 +4,7 @@ import {
   ImageRejectedError,
   MAX_PHOTO_BYTES,
   processImage,
+  solidColorPhoto,
   variantWidths,
   type ImageRejection,
   type PhotoKind,
@@ -119,5 +120,13 @@ describe('processImage (AC-W8-10)', () => {
   it('refuses a truncated photo', async () => {
     const whole = await image(800, 800).jpeg().toBuffer();
     expect(await rejection(whole.subarray(0, whole.byteLength / 2), 'gallery')).toBe('unreadable');
+  });
+});
+
+describe('solidColorPhoto', () => {
+  it('makes a real photo of the size and format asked', async () => {
+    const png = await solidColorPhoto(640, 480, 'png');
+    expect(await sharp(png).metadata()).toMatchObject({ format: 'png', width: 640, height: 480 });
+    expect((await sharp(await solidColorPhoto(10, 10)).metadata()).format).toBe('jpeg');
   });
 });

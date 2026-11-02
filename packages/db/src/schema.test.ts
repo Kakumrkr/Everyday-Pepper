@@ -7,11 +7,14 @@ import {
   aiActionProposals,
   auditLog,
   autonomySettings,
+  bookingFunnelEvents,
+  businessPhotos,
   invites,
   memberships,
   memoryEpisodes,
   memoryFacts,
   pushSubscriptions,
+  rememberedDevices,
   sessions,
   signupEvents,
   tasks,
@@ -42,6 +45,29 @@ describe('schema foreign keys', () => {
     );
     expect(foreignKeys(signupEvents)).toEqual([
       { from: ['account_id'], to: 'users(id)', onDelete: 'cascade' },
+    ]);
+  });
+
+  it('removes the booking page’s photos, remembered devices and step events with their business (S47, S47.2)', () => {
+    for (const table of [businessPhotos, rememberedDevices, bookingFunnelEvents]) {
+      expect(foreignKeys(table)).toEqual([
+        { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+      ]);
+    }
+  });
+
+  it('keeps one logo and one cover per business, and checks what a photo row holds', () => {
+    const config = getTableConfig(businessPhotos);
+    expect(config.indexes.map((index) => index.config.name)).toEqual([
+      'business_photos_one_per_kind',
+      'business_photos_created_idx',
+    ]);
+    expect(config.indexes[0]?.config.unique).toBe(true);
+    expect(config.checks.map((check) => check.name)).toEqual([
+      'business_photos_kind_known',
+      'business_photos_widths_valid',
+      'business_photos_size_positive',
+      'business_photos_caption_length',
     ]);
   });
 

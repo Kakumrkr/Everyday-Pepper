@@ -200,3 +200,21 @@ export class WaitlistOfferExpiredError extends Error {
     this.name = 'WaitlistOfferExpiredError';
   }
 }
+
+// Booking page photos (S47.2, ADR-0048).
+
+/** No such photo in the business (or one of another business). */
+export class PhotoNotFoundError extends Error {
+  constructor() {
+    super('No such photo');
+    this.name = 'PhotoNotFoundError';
+  }
+}
+
+/** The gallery already holds its 12 photos. */
+export class GalleryFullError extends Error {
+  constructor() {
+    super('The gallery holds 12 photos');
+    this.name = 'GalleryFullError';
+  }
+}

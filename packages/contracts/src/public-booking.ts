@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BusinessPhotosSchema } from './photos.js';
 import { BusinessProfileSchema } from './account.js';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingStatusSchema } from './bookings.js';
@@ -69,6 +70,8 @@ export const PublicBusinessSchema = z
     brandColor: BrandColorSchema.nullable(),
     services: z.array(PublicServiceSchema),
     staff: z.array(PublicStaffMemberSchema),
+    /** Its logo, cover and gallery (S47.2, ADR-0048); none until the owner adds them. */
+    photos: BusinessPhotosSchema,
     // The phone, public address and cancellation policy the business chose to show (S47).
   })
   .extend(BusinessProfileSchema.shape);

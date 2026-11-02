@@ -6,6 +6,7 @@ export {
   MAX_PHOTO_PIXELS,
   PHOTO_RULES,
   processImage,
+  solidColorPhoto,
   variantWidths,
   type ImageRejection,
   type ImageVariant,

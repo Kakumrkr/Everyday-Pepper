@@ -11,7 +11,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 Tasks: 1 ACs + ADR-0048 + dependency map · 2 `packages/storage` (S3 adapter, SeaweedFS in Compose/Testcontainers, contract tests) · 3 image pipeline (sharp) · 4 migration 0056 `business_photos` + repository + service + isolation · 5 api (owner upload/caption/delete/list, public image route) · 6 web (Photos card, booking page cover/logo/gallery, Playwright + baselines) · 7 top-up: the funnel line on the setup card.
 - Done: 1 ACs AC-W8-10…12, AC-W1-14, ADR-0048, dependency map, S47.3 row (playbook, roadmap, STATUS).
 - Done: 2 `@pepper/storage` (ObjectStore, S3 adapter, config) + 3 image pipeline (sharp 0.35, unit 18/18, 100% coverage); SeaweedFS 4.01 in Compose (signed keys, healthcheck), `.env.example`, e2e-stack, `startSeaweedFs`; contract test 5/5 against SeaweedFS.
-- Next: task 4 (migration 0056 `business_photos`, repository, appointments service, isolation).
+- Done: 4 contracts `photos.ts` (+ audit actions, `PublicBusiness.photos`, `SetupReview.week`), migration 0056 `business_photos` (forced RLS, one logo/cover, checks), db repository + isolation entry (392 green with migrate), appointments `addPhoto`/`changePhotoCaption`/`removePhoto`/`listPhotos`/`readPagePhoto` (10/10 int), layer rule: storage is L1.
+- Next: task 5 (api endpoints, forwarder 10 MB on the upload path).
 
 ## Last sessions
 - **S47 Phase 10 · Booking page profile, remembered devices, drop-off per step (2026-10-30)** ([ADR-0047](../adr/0047-remembered-devices-and-booking-funnel.md)). Full entry in [session-log.md](session-log.md).
