@@ -1,3 +1,4 @@
+import { crc32, deflateSync } from 'node:zlib';
 import sharp, { type Sharp } from 'sharp';
 import { describe, expect, it } from 'vitest';
 import {
@@ -14,6 +15,28 @@ const background = { r: 200, g: 120, b: 80 };
 
 function image(width: number, height: number): Sharp {
   return sharp({ create: { width, height, channels: 3, background } });
+}
+
+/** A PNG whose IHDR claims `width`×`height` (8-bit RGB), with one byte of image data: no pixels. */
+function pngHeaderOnly(width: number, height: number): Uint8Array {
+  const chunk = (type: string, data: Buffer): Buffer => {
+    const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
+    const length = Buffer.alloc(4);
+    length.writeUInt32BE(data.byteLength);
+    const crc = Buffer.alloc(4);
+    crc.writeUInt32BE(crc32(body));
+    return Buffer.concat([length, body, crc]);
+  };
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr.set([8, 2, 0, 0, 0], 8); // bit depth 8, color type RGB, no interlace
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr),
+    chunk('IDAT', deflateSync(Buffer.alloc(1))),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
 }
 
 async function rejection(input: Uint8Array, kind: PhotoKind): Promise<ImageRejection> {
@@ -98,9 +121,10 @@ describe('processImage (AC-W8-10)', () => {
   });
 
   it('refuses too many pixels from the header alone (decompression bombs)', async () => {
-    // 8000×6000 = 48 MP of one color compresses to a few kilobytes.
-    const bomb = await image(8000, 6000).png({ compressionLevel: 9 }).toBuffer();
-    expect(bomb.byteLength).toBeLessThan(MAX_PHOTO_BYTES);
+    // A PNG that says 8000×6000 (48 MP) in its header and carries no pixels at all: refused
+    // from the header, without decoding (or, in the test, making 48 MP first).
+    const bomb = pngHeaderOnly(8000, 6000);
+    expect(bomb.byteLength).toBeLessThan(100);
     expect(await rejection(bomb, 'gallery')).toBe('too_many_pixels');
   });
 
