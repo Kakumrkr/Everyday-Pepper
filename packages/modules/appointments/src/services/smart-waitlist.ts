@@ -74,6 +74,9 @@ export async function requestWaitlistMatch(
     staffMemberId: StaffMemberIdSchema.parse(freed.staffMemberId),
     startsAt: freed.startsAt,
     endsAt: freed.endsAt,
+    // Due from the clock that freed it, not the database's: a business clock (tests, evals)
+    // ahead of or behind the server's would otherwise hold the match back or run it early.
+    availableAt: new Date(now),
   });
 }
 

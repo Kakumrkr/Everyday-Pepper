@@ -40,10 +40,20 @@ export const WAITLIST_MATCH_MAX_ATTEMPTS = 5;
 
 // Matches -----------------------------------------------------------------------------------
 
-/** Asks for a freed slot to be matched, in the transaction that freed it. */
+/**
+ * Asks for a freed slot to be matched, in the transaction that freed it. `availableAt` is when
+ * the worker may take it: the domain's clock, so a match is due at the time that freed it (the
+ * database's own `now()` when left out).
+ */
 export async function insertWaitlistMatch(
   tx: TenantTx,
-  slot: { bookingId: BookingId; staffMemberId: StaffMemberId; startsAt: Date; endsAt: Date },
+  slot: {
+    bookingId: BookingId;
+    staffMemberId: StaffMemberId;
+    startsAt: Date;
+    endsAt: Date;
+    availableAt?: Date;
+  },
 ): Promise<WaitlistMatchId> {
   const [row] = await tx
     .insert(waitlistMatches)
@@ -52,6 +62,7 @@ export async function insertWaitlistMatch(
       staffMemberId: Id.parse(slot.staffMemberId),
       startsAt: slot.startsAt,
       endsAt: slot.endsAt,
+      ...(slot.availableAt && { availableAt: slot.availableAt }),
     })
     .returning({ id: waitlistMatches.id });
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
