@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing. S47 closed; the next session starts from "Planned sessions".
+**S47.2 Photos on the booking page** (branch `claude/gifted-curie-stpvd0`). Brief approved by the user (2026-11-02): "start with your recommendations and complete the session successfully" — D-1 A (S47.2 = photos end to end + top-up; the timed journey, Phase 10 gate and phase-exit security review → **S47.3**), D-2 A sharp, D-3 A images served by the api (private bucket, immutable cache, no pre-signed URLs yet), D-4 A (journey timed by a per-action owner time model, < 600 s, wall clock reported), D-5 one logo, one cover, ≤ 12 gallery photos, caption as alt text, D-6 ADR-0048 pre-approved. A first attempt in another account was never pushed and is rebuilt here; checkpoints are pushed to the branch from now on.
+Tasks: 1 ACs + ADR-0048 + dependency map · 2 `packages/storage` (S3 adapter, SeaweedFS in Compose/Testcontainers, contract tests) · 3 image pipeline (sharp) · 4 migration 0056 `business_photos` + repository + service + isolation · 5 api (owner upload/caption/delete/list, public image route) · 6 web (Photos card, booking page cover/logo/gallery, Playwright + baselines) · 7 top-up: the funnel line on the setup card.
+- Done: (none yet)
+- Next: task 1.
 
 ## Last sessions
 - **S47 Phase 10 · Booking page profile, remembered devices, drop-off per step (2026-10-30)** ([ADR-0047](../adr/0047-remembered-devices-and-booking-funnel.md)). Full entry in [session-log.md](session-log.md).
