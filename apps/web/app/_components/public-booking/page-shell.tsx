@@ -64,7 +64,7 @@ export function BookingPageShell({
             width={logo.width}
             height={logo.height}
             loading="eager"
-            className="size-14 shrink-0 self-start rounded-pill bg-surface-2 object-cover"
+            className="size-14 shrink-0 self-start rounded-pill border border-line bg-surface-2 object-cover"
             data-testid="business-logo"
           />
         )}

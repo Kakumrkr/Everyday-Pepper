@@ -285,6 +285,9 @@ importers:
       '@pepper/config':
         specifier: workspace:*
         version: link:../packages/config
+      '@pepper/storage':
+        specifier: workspace:*
+        version: link:../packages/storage
       '@pepper/testing':
         specifier: workspace:*
         version: link:../packages/testing
