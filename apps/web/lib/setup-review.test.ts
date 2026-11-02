@@ -15,6 +15,7 @@ const review = (overrides: Partial<SetupReview> = {}): SetupReview => ({
   services: { count: 8, lowestPriceCents: 2500, highestPriceCents: 6000 },
   providers: [{ id: ANA, displayName: 'Ana', isYou: true, serviceCount: 8, hours: TUE_SAT }],
   warnings: [],
+  week: { visits: 0, booked: 0 },
   ...overrides,
 });
 

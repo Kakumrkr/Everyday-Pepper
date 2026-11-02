@@ -39,6 +39,7 @@ import { flushSync } from 'react-dom';
 import { dateTimeLabel, timeLabel } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
+import { photoAlt, photoSrc, photoSrcSet } from '../../../lib/photos';
 import {
   checkDetails,
   confirmProblem,
@@ -52,6 +53,7 @@ import {
 } from '../../../lib/public-booking';
 import { durationLabel, priceLabel, servicesByCategory } from '../../../lib/setup';
 import { Notice } from '../form-parts';
+import { PhotoImage } from '../photo-image';
 import { SlotPicker } from './slot-picker';
 
 type Step = 'service' | 'staff' | 'time' | 'details' | 'verify' | 'done' | 'waitlisted';
@@ -435,6 +437,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               </section>
             ))
           )}
+          <WorkGallery business={business} />
         </>
       ) : null}
 
@@ -804,5 +807,36 @@ function Done() {
     >
       <Icon name="check" />
     </span>
+  );
+}
+
+/**
+ * The business's photos of its work under the menu (S47.2, AC-W8-12): a grid of squares, each
+ * with its caption as alt text; nothing when there are none.
+ */
+function WorkGallery({ business }: { business: PublicBusiness }) {
+  const photos = business.photos.gallery;
+  if (photos.length === 0) return null;
+  return (
+    <section aria-labelledby="work-gallery" className="flex flex-col gap-2">
+      <h2 id="work-gallery" className="m-0 type-label text-ink-2">
+        Recent work
+      </h2>
+      <ul className="m-0 grid list-none grid-cols-3 gap-2 p-0" data-testid="work-gallery">
+        {photos.map((photo) => (
+          <li key={photo.id} className="min-w-0">
+            <PhotoImage
+              src={photoSrc(business.slug, photo, 320)}
+              srcSet={photoSrcSet(business.slug, photo)}
+              sizes="(min-width: 32rem) 10rem, 33vw"
+              alt={photoAlt(photo, 'gallery', business.name)}
+              width={photo.width}
+              height={photo.height}
+              className="aspect-square w-full rounded-md bg-surface-2 object-cover"
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
