@@ -30,6 +30,7 @@ function isNotFound(error: unknown): boolean {
 export class S3ObjectStore implements ObjectStore {
   private readonly client: S3Client;
   private readonly bucket: string;
+  private bucketReady: Promise<void> | null = null;
 
   constructor(config: StorageConfig) {
     this.bucket = config.bucket;
@@ -44,8 +45,20 @@ export class S3ObjectStore implements ObjectStore {
     });
   }
 
-  /** Makes the bucket when it is missing (development and CI); a pilot bucket is made by hand. */
-  async ensureBucket(): Promise<void> {
+  /**
+   * Makes the bucket when it is missing (development and CI); a pilot bucket is made by hand.
+   * Checked once per store; a failed check (a store that started after the api) is tried
+   * again on the next call, and every write makes sure of it first.
+   */
+  ensureBucket(): Promise<void> {
+    this.bucketReady ??= this.makeBucket().catch((error: unknown) => {
+      this.bucketReady = null;
+      throw error;
+    });
+    return this.bucketReady;
+  }
+
+  private async makeBucket(): Promise<void> {
     try {
       await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
     } catch (error) {
@@ -55,6 +68,7 @@ export class S3ObjectStore implements ObjectStore {
   }
 
   async put(key: string, body: Uint8Array, contentType: string): Promise<void> {
+    await this.ensureBucket();
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,

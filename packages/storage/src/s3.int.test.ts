@@ -35,6 +35,18 @@ describe('S3ObjectStore against SeaweedFS (ADR-0048)', () => {
     await expect(store.ensureBucket()).resolves.toBeUndefined();
   });
 
+  it('makes the bucket on the first write when the start-up check could not', async () => {
+    // As in CI: the api started before the store could make buckets, so its check failed.
+    const late = new S3ObjectStore({ ...config, bucket: 'pepper-late' });
+    try {
+      const key = photoObjectKey(TENANT, PHOTO, 128);
+      await late.put(key, Uint8Array.from([7]), 'image/webp');
+      expect(Array.from((await late.get(key))?.body ?? [])).toEqual([7]);
+    } finally {
+      late.close();
+    }
+  });
+
   it('puts, reads, heads and deletes an object', async () => {
     const key = photoObjectKey(TENANT, PHOTO, 640);
     const body = Uint8Array.from({ length: 70_000 }, (_, i) => i % 251);
