@@ -208,6 +208,7 @@ describe('loadPublicBusiness', () => {
     phone: null,
     publicAddress: null,
     cancellationPolicy: null,
+    photos: { logo: null, cover: null, gallery: [] },
     services: [],
     staff: [],
   };
