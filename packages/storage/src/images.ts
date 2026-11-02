@@ -86,7 +86,10 @@ export async function processImage(input: Uint8Array, kind: PhotoKind): Promise<
     // Reads the header only: the pixel count is checked before anything is decoded.
     metadata = await sharp(input, headerOptions).metadata();
   } catch {
-    throw new ImageRejectedError('unreadable', 'That file is not a photo we can read. Use a JPEG, PNG or WebP photo.');
+    throw new ImageRejectedError(
+      'unreadable',
+      'That file is not a photo we can read. Use a JPEG, PNG or WebP photo.',
+    );
   }
   if (metadata.format === 'heif') {
     throw new ImageRejectedError('heic', 'HEIC photos are not supported yet. Save it as a JPEG.');
@@ -130,7 +133,10 @@ export async function processImage(input: Uint8Array, kind: PhotoKind): Promise<
     );
     return { width, height, variants };
   } catch {
-    throw new ImageRejectedError('unreadable', 'That file is not a photo we can read. Use a JPEG, PNG or WebP photo.');
+    throw new ImageRejectedError(
+      'unreadable',
+      'That file is not a photo we can read. Use a JPEG, PNG or WebP photo.',
+    );
   }
 }
 
