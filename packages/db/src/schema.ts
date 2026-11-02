@@ -24,6 +24,7 @@ import {
   BOOKING_FUNNEL_STEPS,
   BUSINESS_PHOTO_KINDS,
   MAX_PHOTO_CAPTION_LENGTH,
+  MAX_PHOTO_WIDTH,
   type TemplateId,
 } from '@pepper/contracts';
 import { newId } from './ids.js';
@@ -1120,7 +1121,7 @@ export const businessPhotos = pgTable(
     ),
     check(
       'business_photos_widths_valid',
-      sql`cardinality(${table.widths}) BETWEEN 1 AND 3 AND 0 < ALL(${table.widths}) AND 1920 >= ALL(${table.widths})`,
+      sql`cardinality(${table.widths}) BETWEEN 1 AND 3 AND 0 < ALL(${table.widths}) AND ${sql.raw(String(MAX_PHOTO_WIDTH))} >= ALL(${table.widths})`,
     ),
     check('business_photos_size_positive', sql`${table.width} > 0 AND ${table.height} > 0`),
     check(

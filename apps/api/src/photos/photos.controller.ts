@@ -64,7 +64,8 @@ export class PhotosController {
     @Req() request: IncomingMessage,
   ): Promise<BusinessPhoto> {
     const { kind } = parseBody(PhotoUploadQuerySchema, query);
-    this.photos.requireStorage();
+    // Before reading the body: without storage there is nowhere to put it.
+    this.photos.storage();
     await this.limits.hit(UPLOADS, tenant.userId);
     const bytes = await readUpload(request, MAX_PHOTO_BYTES);
     return answering(() => this.photos.add(tenant, kind, bytes));

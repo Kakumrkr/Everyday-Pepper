@@ -63,7 +63,6 @@ export function PhotosCard({
       if (photo.kind === 'gallery') return { ...current, gallery: [...current.gallery, photo] };
       return { ...current, [photo.kind]: photo };
     });
-    router.refresh();
   };
   const removed = (kind: BusinessPhotoKind, id: string) => {
     setPhotos((current) => {
@@ -125,11 +124,21 @@ function usePicker(
   onAdded: (photo: BusinessPhoto) => void,
   setMessage: (message: Message) => void,
 ) {
+  const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
   async function send(files: File[]): Promise<void> {
     setMessage(null);
+    try {
+      await sendAll(files);
+    } finally {
+      // Once per batch: the page behind the card (and Home) shows the photos now stored.
+      router.refresh();
+    }
+  }
+
+  async function sendAll(files: File[]): Promise<void> {
     for (const file of files) {
       const refused = precheckPhoto(file);
       if (refused !== null) {

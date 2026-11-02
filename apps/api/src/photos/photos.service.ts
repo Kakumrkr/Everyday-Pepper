@@ -15,8 +15,14 @@ import type {
 import type { Actor, TenantContext } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
-import type { ObjectStore } from '@pepper/storage';
-import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { S3ObjectStore, type ObjectStore } from '@pepper/storage';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
 import { apiError } from '../auth/guards.js';
 
 /** The object store for photos (ADR-0048); `null` when no `S3_*` is configured. */
@@ -28,7 +34,7 @@ export const OBJECT_STORE = Symbol('OBJECT_STORE');
  * are not found.
  */
 @Injectable()
-export class PhotosService {
+export class PhotosService implements OnApplicationShutdown {
   private readonly db: Database;
   private readonly logger = new Logger(PhotosService.name);
 
@@ -61,14 +67,13 @@ export class PhotosService {
     return readPagePhoto(this.db, slug, id, width, this.store);
   }
 
-  /** Whether uploads can be stored; checked before an upload's body is read. */
-  requireStorage(): void {
-    if (this.store === null) {
-      throw new ServiceUnavailableException(apiError('storage_unavailable'));
-    }
+  /** Closes the store's connections when the app stops. */
+  onApplicationShutdown(): void {
+    if (this.store instanceof S3ObjectStore) this.store.close();
   }
 
-  private storage(): PhotoStorageOptions {
+  /** The store and its clean-up report; 503 `storage_unavailable` without one. */
+  storage(): PhotoStorageOptions {
     const store = this.store;
     if (store === null) throw new ServiceUnavailableException(apiError('storage_unavailable'));
     return {

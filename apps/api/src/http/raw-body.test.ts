@@ -24,6 +24,8 @@ describe('readUpload (ADR-0048)', () => {
       'content-length': '4',
     });
     await expect(readUpload(request, 10)).rejects.toMatchObject({ status: 413 });
+    // The connection stays up for the 413 to be sent.
+    expect(request.destroyed).toBe(false);
   });
 
   it('refuses a declared length over the limit before reading', async () => {

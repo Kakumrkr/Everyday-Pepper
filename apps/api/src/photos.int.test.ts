@@ -190,7 +190,6 @@ describe('photos through the api (S47.2)', () => {
     const refused = await b.owner.upload('gallery', svg, 'image/jpeg').expect(415);
     expect(refused.body).toMatchObject({ code: 'photo_rejected', reason: 'unsupported_type' });
     const small = await b.owner.upload('cover', await solidColorPhoto(800, 500)).expect(422);
-    expect(refused.body).not.toEqual(small.body);
     expect(small.body).toMatchObject({ code: 'photo_rejected', reason: 'too_small' });
     expect((small.body as { message: string }).message).toContain('600 px');
     await b.owner.upload('logo', Buffer.alloc(10 * 1024 * 1024 + 1)).expect(413);

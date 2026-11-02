@@ -24,12 +24,12 @@ export async function readUpload(request: IncomingMessage, maxBytes: number): Pr
   if (Number(request.headers['content-length'] ?? 0) > maxBytes) throw tooLarge();
   const chunks: Buffer[] = [];
   let size = 0;
-  for await (const chunk of request) {
+  // Not destroyed on the early exit below, so the 413 still reaches the client.
+  for await (const chunk of request.iterator({ destroyOnReturn: false })) {
     const part = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
     size += part.byteLength;
     if (size > maxBytes) {
-      // Stop reading: the rest is not wanted, and the answer goes out at once.
-      request.unpipe();
+      // The rest is drained unread, and the answer goes out at once.
       request.resume();
       throw tooLarge();
     }
