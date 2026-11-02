@@ -1,0 +1,25 @@
+# ADR-0048: Business photos and object storage
+
+- **Status:** Accepted (built in S47.2). Pre-approved by the user at the S47.2 brief on 2026-11-02 ("start with your recommendations and complete the session successfully"; D-2, D-3, D-5, D-6).
+- **Date:** 2026-11-02
+- **Builds on:**
+  - ADR-0011 (SeaweedFS as the S3-compatible server in development and CI; provider-neutral client code; contract tests for exactly the calls used)
+  - ADR-0022 (the public booking page: `withPublicTenant`, Redis rate limits, the app's Origin on writes)
+  - ADR-0012 (the web app forwards `/v1/*` to the api: one origin for the browser)
+  - [V1 playbook](../plan/v1-playbook.md) Phase 10, S47.2; [scorecard](../plan/scorecard.md) C2, C7
+
+## Context
+The booking page shows a business's name, color, contact details and menu (S17, S47) but no picture of the place or the work, which is what clients of a barber or a lash artist look at first. Nothing in the stack stored files yet: ADR-0011 chose SeaweedFS but left it out of Compose until a feature needed it.
+
+## Decision
+1. **`@pepper/storage` (L1, platform).** An `ObjectStore` port (`put`, `get`, `head`, `delete`) with one adapter, `S3ObjectStore` on `@aws-sdk/client-s3` (path-style addressing, so SeaweedFS, R2 and S3 all work), and an in-memory store for unit tests. Configuration from `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, validated with Zod: all set, or none (storage off: the photo endpoints answer 503 `storage_unavailable` and the page shows no photos; nothing else changes). The api makes the bucket when it is missing (development and CI); a pilot bucket is made by hand and stays private. Keys are `tenants/<tenant id>/photos/<photo id>/<width>.webp`; the tenant comes from the session, never from a request. Contract tests run the adapter against SeaweedFS (pinned by digest in `docker-compose.yml`, started by `@pepper/testing`'s `startSeaweedFs`).
+2. **Images are checked and remade on the server (D-2: `sharp`).** The upload's bytes are decoded, and what they are decides, not the file name or `Content-Type`: JPEG, PNG or WebP, at most 10 MB, at most 40 megapixels (refused before decoding the pixels, against decompression bombs), and at least 128 px on the short side for a logo or 600 px for a cover or gallery photo. The image is turned upright from its EXIF orientation and re-encoded as WebP without metadata (no location, camera or time), at up to three widths per kind (logo 128/256, cover 640/1280/1920, gallery 320/640/1280), never wider than the original. HEIC is refused with a plain message (an iPhone's picker hands over JPEG).
+3. **`business_photos` (migration 0056).** Tenant-owned with forced RLS: `id`, `tenant_id`, `kind` (`logo`, `cover`, `gallery`), `widths`, `width`, `height`, `caption` (≤ 150 characters, the alt text), `created_at`. One logo and one cover per business (a partial unique index), up to 12 gallery photos (D-5: checked under a per-business transaction lock). Services in appointments behind `settings.manage` with audit entries `business_photo.added`/`updated`/`removed` (kind and id; the caption is not kept). The objects are written before the row; if the row's transaction fails they are deleted, and a replaced or removed photo's objects are deleted after its transaction commits (a failure there is logged and leaves an unreachable object, never a row without its images).
+4. **Served by the api, from the app's origin (D-3).** `GET /v1/public/businesses/:slug/photos/:id/:width` reads the row through the page's own tenant (so one business's page can't serve another's photo), then the object, and answers `image/webp` with `Cache-Control: public, max-age=31536000, immutable` (a photo id never changes its bytes), `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'` and `Cross-Origin-Resource-Policy: same-origin`; its own rate limit (600 a minute per address). The bucket is never public, its host is never shown to a browser, and no pre-signed URL is needed yet: ADR-0011's "pre-signed URLs" call is deferred until a feature hands a client a direct link (exports, S51). The web forwarder allows a 10 MB body on the upload path only, and passes the image headers back.
+5. **Owner endpoints.** `GET /v1/tenant/photos`, `POST /v1/tenant/photos?kind=` (the raw image as the body, read with a 10 MB cap; 413, 415 and 422 with what to fix; rate limited per member), `PATCH /v1/tenant/photos/:id` (`{ caption }`) and `DELETE /v1/tenant/photos/:id`. `PublicBusiness.photos` holds `{ logo, cover, gallery }`.
+
+## Consequences
+- Owners make the page theirs in a minute; clients see the place and the work. The page stays one origin and needs no CSP change.
+- The api holds a whole upload in memory (≤ 10 MB) and resizes it in the request; at pilot scale that is fine, and a job can take it later.
+- Deleting a business removes its rows by cascade but not its objects; S51 (account and business deletion) removes the `tenants/<id>/` prefix.
+- A new native dependency (`sharp`, prebuilt for Linux x64/arm64 glibc and musl); its version is pinned in the lockfile like any other.
