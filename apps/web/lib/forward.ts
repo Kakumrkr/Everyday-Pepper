@@ -20,7 +20,10 @@ const REQUEST_HEADERS = [
 /** Response headers passed back to the browser. */
 const RESPONSE_HEADERS = [
   'cache-control',
+  // A booking page photo's own (ADR-0048): it may only be an image, used on this origin.
+  'content-security-policy',
   'content-type',
+  'cross-origin-resource-policy',
   'location',
   'retry-after',
   'x-request-id',
@@ -28,6 +31,16 @@ const RESPONSE_HEADERS = [
 
 /** Largest body forwarded; the api's JSON parser accepts no more (Express default, 100 KB). */
 export const MAX_BODY_BYTES = 100 * 1024;
+
+/** Largest photo upload (ADR-0048), on `POST /v1/tenant/photos` only; the api checks it too. */
+export const MAX_PHOTO_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+/** The body limit of a request: a photo upload's, or the JSON default. */
+export function bodyLimitOf(method: string, pathname: string): number {
+  return method === 'POST' && pathname === '/v1/tenant/photos'
+    ? MAX_PHOTO_UPLOAD_BYTES
+    : MAX_BODY_BYTES;
+}
 
 const TOO_LARGE = { code: 'payload_too_large', message: 'That request is too large.' };
 
@@ -55,12 +68,13 @@ export async function forwardToApi(request: Request, options: ForwardOptions): P
     if (value !== null) headers.set(name, value);
   }
   const hasBody = request.method !== 'GET' && request.method !== 'HEAD';
+  const limit = bodyLimitOf(request.method, incoming.pathname);
   // Checked before and after reading, so a missing or false Content-Length cannot get past it.
-  if (Number(request.headers.get('content-length') ?? 0) > MAX_BODY_BYTES) {
+  if (Number(request.headers.get('content-length') ?? 0) > limit) {
     return Response.json(TOO_LARGE, { status: 413 });
   }
   const body = hasBody ? await request.arrayBuffer() : undefined;
-  if (body !== undefined && body.byteLength > MAX_BODY_BYTES) {
+  if (body !== undefined && body.byteLength > limit) {
     return Response.json(TOO_LARGE, { status: 413 });
   }
 

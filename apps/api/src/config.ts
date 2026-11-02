@@ -9,6 +9,7 @@ import {
   type ServiceConfig,
 } from '@pepper/runtime/instrument';
 import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
+import { loadStorageConfig, type StorageConfig } from '@pepper/storage';
 import { z } from 'zod';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -77,6 +78,8 @@ export interface ApiConfig extends ServiceConfig {
   /** The public VAPID key (ADR-0026); `null`: no pushes are offered or queued. */
   pushPublicKey: string | null;
   ai: AiConfig;
+  /** Object storage for booking page photos (ADR-0048); `null`: photos are off. */
+  storage: StorageConfig | null;
 }
 
 /**
@@ -95,6 +98,7 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     outboxSecret: loadOutboxSecret('api', env),
     pushPublicKey: loadPushPublicKey('api', env),
     ai: loadAiConfig(env, present, service.environment),
+    storage: loadStorageConfig('api', env),
   };
 }
 

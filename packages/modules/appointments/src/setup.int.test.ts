@@ -1,4 +1,4 @@
-import { TenantIdSchema, type TenantId, type UserId } from '@pepper/contracts';
+import { TenantIdSchema, TenantSlugSchema, type TenantId, type UserId } from '@pepper/contracts';
 import { createBusiness, ForbiddenError, type Actor } from '@pepper/core';
 import {
   activationEvents,
@@ -8,10 +8,12 @@ import {
   withTenant,
   type Database,
 } from '@pepper/db';
+import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { replaceWorkingHours } from './services/hours.js';
 import { seedBusinessIn } from './services/seed.js';
 import { createService, listServices, updateService } from './services/services.js';
+import { recordBookingStep } from './services/remembered-devices.js';
 import { acknowledgeSetupReview, getSetupReview } from './services/setup.js';
 import { createStaffMember, updateStaffMember } from './services/staff.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
@@ -84,6 +86,7 @@ async function newBusiness(options: { seeded?: boolean } = {}) {
   });
   return {
     tenantId,
+    slug: TenantSlugSchema.parse(tenant.slug),
     owner: actor(ownerId, 'owner'),
     manager: actor(managerId, 'manager'),
     staff: actor(staffId, 'staff'),
@@ -184,5 +187,29 @@ describe('current readiness warnings (AC-W1-12)', () => {
     ]);
     await updateService(db, owner, color.id, { name: 'Color', durationMinutes: 90, active: false });
     expect((await getSetupReview(db, owner)).warnings).toEqual([]);
+  });
+});
+
+describe('the booking page’s week (S47.2, AC-W1-14)', () => {
+  it('counts the last 7 days’ visits and bookings of this business only', async () => {
+    const a = await newBusiness({ seeded: true });
+    const other = await newBusiness({ seeded: true });
+    expect((await getSetupReview(db, a.owner)).week).toEqual({ visits: 0, booked: 0 });
+    const visit = async (slug: typeof a.slug, steps: ('service' | 'done' | 'waitlisted')[]) => {
+      const visitId = randomUUID();
+      for (const step of steps) await recordBookingStep(db, slug, { visitId, step });
+    };
+    await visit(a.slug, ['service', 'done']);
+    await visit(a.slug, ['service', 'waitlisted']);
+    await visit(a.slug, ['service']);
+    await visit(other.slug, ['service', 'done']);
+    // A visit from eight days ago is not this week's.
+    await withTenant(db, a.tenantId, (tx) =>
+      tx.execute(
+        `INSERT INTO booking_funnel_events (id, visit_id, step, occurred_at) VALUES (gen_random_uuid(), gen_random_uuid(), 'service', now() - interval '8 days')`,
+      ),
+    );
+    expect((await getSetupReview(db, a.owner)).week).toEqual({ visits: 3, booked: 2 });
+    expect((await getSetupReview(db, other.owner)).week).toEqual({ visits: 1, booked: 1 });
   });
 });

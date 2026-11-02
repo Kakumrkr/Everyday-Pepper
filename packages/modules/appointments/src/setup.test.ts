@@ -1,6 +1,6 @@
 import { ServiceIdSchema, StaffMemberIdSchema, type WeeklyHours } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import { setupWarnings } from './services/setup.js';
+import { bookingWeek, setupWarnings } from './services/setup.js';
 
 // The setup review's warnings (S46, AC-W1-12): from today's active services, staff and hours.
 
@@ -75,5 +75,16 @@ describe('setupWarnings', () => {
         new Map([[ana, WEEK]]),
       ),
     ).toEqual([{ kind: 'service_without_provider', serviceId: cut, name: 'Cut' }]);
+  });
+});
+
+describe('bookingWeek (AC-W1-14)', () => {
+  it('reads visits from the first step and bookings as done plus waitlisted', () => {
+    const none = { service: 0, staff: 0, time: 0, details: 0, verify: 0, done: 0, waitlisted: 0 };
+    expect(bookingWeek(none)).toEqual({ visits: 0, booked: 0 });
+    expect(bookingWeek({ ...none, service: 12, details: 9, done: 6, waitlisted: 1 })).toEqual({
+      visits: 12,
+      booked: 7,
+    });
   });
 });

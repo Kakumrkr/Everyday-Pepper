@@ -12,7 +12,8 @@ Tasks: 1 ACs + ADR-0048 + dependency map · 2 `packages/storage` (S3 adapter, Se
 - Done: 1 ACs AC-W8-10…12, AC-W1-14, ADR-0048, dependency map, S47.3 row (playbook, roadmap, STATUS).
 - Done: 2 `@pepper/storage` (ObjectStore, S3 adapter, config) + 3 image pipeline (sharp 0.35, unit 18/18, 100% coverage); SeaweedFS 4.01 in Compose (signed keys, healthcheck), `.env.example`, e2e-stack, `startSeaweedFs`; contract test 5/5 against SeaweedFS.
 - Done: 4 contracts `photos.ts` (+ audit actions, `PublicBusiness.photos`, `SetupReview.week`), migration 0056 `business_photos` (forced RLS, one logo/cover, checks), db repository + isolation entry (392 green with migrate), appointments `addPhoto`/`changePhotoCaption`/`removePhoto`/`listPhotos`/`readPagePhoto` (10/10 int), layer rule: storage is L1.
-- Next: task 5 (api endpoints, forwarder 10 MB on the upload path).
+- Done: 5 api `PhotosModule` (`/v1/tenant/photos` GET/POST raw body/PATCH/DELETE behind `settings.manage`, upload rate limit; public `…/photos/:id/:width` immutable, nosniff, CSP, CORP; `S3_*` config, bucket made on start), error codes, `readUpload` (4 unit), api int 4/4 on Postgres+Redis+SeaweedFS; web forwarder 10 MB on the upload path only and image headers (12 unit). Top-up backend: `SetupReview.week` (`bookingWeek`, unit + int).
+- Next: task 6 (web: Photos card on Services, booking page cover/logo/gallery, Playwright + baselines), then 7 (the week line on the setup card).
 
 ## Last sessions
 - **S47 Phase 10 · Booking page profile, remembered devices, drop-off per step (2026-10-30)** ([ADR-0047](../adr/0047-remembered-devices-and-booking-funnel.md)). Full entry in [session-log.md](session-log.md).
