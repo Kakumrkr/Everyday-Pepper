@@ -3,6 +3,8 @@ import {
   BookingNotFoundError,
   BookingNotStartedError,
   BookingPageNotFoundError,
+  GalleryFullError,
+  PhotoNotFoundError,
   BookingRequestExpiredError,
   BookingRequestNotFoundError,
   BookingRequestUsedError,
@@ -52,6 +54,7 @@ import {
   StaffMemberLinkTakenError,
   TenantSlugTakenError,
 } from '@pepper/db';
+import { ImageRejectedError } from '@pepper/storage';
 import { BadRequestException, HttpException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 import { answering, toHttpError } from './domain-errors.js';
@@ -174,5 +177,34 @@ describe('answering', () => {
     await expect(answering(() => Promise.reject(new LastOwnerError()))).rejects.toBeInstanceOf(
       HttpException,
     );
+  });
+});
+
+describe('photo errors (S47.2, ADR-0048)', () => {
+  it('answers a missing photo 404, a full gallery 409, and a refused upload with what to fix', () => {
+    const cases: [Error, number, object][] = [
+      [new PhotoNotFoundError(), 404, { code: 'photo_not_found' }],
+      [new GalleryFullError(), 409, { code: 'gallery_full' }],
+      [new ImageRejectedError('too_large', 'x'), 413, { code: 'photo_too_large' }],
+      ...(['unsupported_type', 'heic', 'unreadable'] as const).map(
+        (reason): [Error, number, object] => [
+          new ImageRejectedError(reason, 'Use a JPEG.'),
+          415,
+          { code: 'photo_rejected', message: 'Use a JPEG.', reason },
+        ],
+      ),
+      ...(['too_many_pixels', 'too_small', 'bad_shape'] as const).map(
+        (reason): [Error, number, object] => [
+          new ImageRejectedError(reason, 'Use a bigger photo.'),
+          422,
+          { code: 'photo_rejected', message: 'Use a bigger photo.', reason },
+        ],
+      ),
+    ];
+    for (const [error, status, body] of cases) {
+      const answer = toHttpError(error) as HttpException;
+      expect(answer.getStatus()).toBe(status);
+      expect(answer.getResponse()).toMatchObject(body);
+    }
   });
 });
