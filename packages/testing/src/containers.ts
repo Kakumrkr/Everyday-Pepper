@@ -71,13 +71,33 @@ export interface TestObjectStorage {
   stop(): Promise<void>;
 }
 
+/**
+ * SeaweedFS's settings, as in docker-compose.yml (`compose.test.ts` checks they match): small
+ * volumes grown one at a time, and an explicit maximum. Left to size itself from the free
+ * disk, a runner with less disk gets too few volumes and a new bucket's first write fails with
+ * InternalError (S47.2).
+ */
+export const SEAWEEDFS_COMMAND = [
+  'server',
+  '-s3',
+  '-dir=/data',
+  '-ip.bind=0.0.0.0',
+  '-master.volumeSizeLimitMB=64',
+  '-volume.max=100',
+] as const;
+export const SEAWEEDFS_ENV = { WEED_MASTER_VOLUME_GROWTH_COPY_1: '1' } as const;
+
 /** SeaweedFS, the Compose image, accepting signed requests with its keys only. */
 export async function startSeaweedFs(): Promise<TestObjectStorage> {
   const accessKeyId = 'pepper_test';
   const secretAccessKey = 'pepper-test-secret';
   const container = await new GenericContainer(composeImage('seaweedfs'))
-    .withCommand(['server', '-s3', '-dir=/data', '-ip.bind=0.0.0.0'])
-    .withEnvironment({ AWS_ACCESS_KEY_ID: accessKeyId, AWS_SECRET_ACCESS_KEY: secretAccessKey })
+    .withCommand([...SEAWEEDFS_COMMAND])
+    .withEnvironment({
+      ...SEAWEEDFS_ENV,
+      AWS_ACCESS_KEY_ID: accessKeyId,
+      AWS_SECRET_ACCESS_KEY: secretAccessKey,
+    })
     .withExposedPorts(8333)
     .withWaitStrategy(Wait.forHttp('/healthz', 8333).withStartupTimeout(120_000))
     .start();

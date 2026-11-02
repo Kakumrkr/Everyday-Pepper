@@ -64,8 +64,20 @@ services:
   # the local-only keys below (override them in .env); the api makes the bucket on start.
   seaweedfs:
     image: chrislusf/seaweedfs:4.01@sha256:d91cdf769018b143f1c944085b36d29893d9af199e656b2537367c35744fc221
-    command: ['server', '-s3', '-dir=/data', '-ip.bind=0.0.0.0']
+    # Small volumes, grown one at a time, and an explicit maximum: left to size itself from
+    # the free disk, a runner with less disk gets too few volumes and a new bucket's first
+    # write fails with InternalError (S47.2's first CI run).
+    command:
+      [
+        'server',
+        '-s3',
+        '-dir=/data',
+        '-ip.bind=0.0.0.0',
+        '-master.volumeSizeLimitMB=64',
+        '-volume.max=100',
+      ]
     environment:
+      WEED_MASTER_VOLUME_GROWTH_COPY_1: '1'
       AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-pepperdev}
       AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-pepper-dev-only-s3-secret}
     ports: ['127.0.0.1:8333:8333']
