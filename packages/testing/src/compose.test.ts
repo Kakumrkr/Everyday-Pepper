@@ -5,6 +5,7 @@ describe('composeImage', () => {
   it('reads the pinned images from the repository docker-compose.yml', () => {
     expect(composeImage('postgres')).toMatch(/^pgvector\/pgvector:pg\d+@sha256:[0-9a-f]{64}$/);
     expect(composeImage('redis')).toMatch(/^redis:[\w.-]+@sha256:[0-9a-f]{64}$/);
+    expect(composeImage('seaweedfs')).toMatch(/^chrislusf\/seaweedfs:[\w.-]+@sha256:[0-9a-f]{64}$/);
   });
 
   it('finds the image line among other keys of the service only', () => {

@@ -1,7 +1,7 @@
 # Local development and CI smoke stack. `docker compose up --build` serves:
 #   web http://localhost:3000 · api http://localhost:4000 · worker http://localhost:4100 (health; runs the outbox)
 #   Mailpit (fake inbox) http://localhost:8025, SMTP localhost:1025
-# Infra only, for `pnpm dev`: docker compose up postgres redis mailpit
+# Infra only, for `pnpm dev`: docker compose up postgres redis mailpit seaweedfs
 # Credentials below are local-only defaults; override them in a git-ignored .env (see .env.example).
 # Ports bind to 127.0.0.1 so nothing is exposed beyond this machine.
 name: pepper
@@ -60,6 +60,23 @@ services:
       timeout: 3s
       retries: 10
 
+  # S3-compatible object storage (ADR-0011, ADR-0048): business photos. Signed requests only, with
+  # the local-only keys below (override them in .env); the api makes the bucket on start.
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.01@sha256:d91cdf769018b143f1c944085b36d29893d9af199e656b2537367c35744fc221
+    command: ['server', '-s3', '-dir=/data', '-ip.bind=0.0.0.0']
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-pepperdev}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-pepper-dev-only-s3-secret}
+    ports: ['127.0.0.1:8333:8333']
+    volumes: [seaweedfs-data:/data]
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8333/healthz']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+
   # One-shot: applies migrations and provisions the services' login role, then exits.
   migrate:
     build: { context: ., target: api }
@@ -99,11 +116,18 @@ services:
       OPENAI_REASONING_STRONG: ${OPENAI_REASONING_STRONG:-}
       OPENAI_MODEL_EMBEDDING: ${OPENAI_MODEL_EMBEDDING:-}
       AI_SCRIPTED_PROVIDER: ${AI_SCRIPTED_PROVIDER:-}
+      # Business photos (ADR-0048) in SeaweedFS; all S3_* set or none (photos off).
+      # The Compose network name, not .env's localhost endpoint (which is for `pnpm dev`).
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_BUCKET: ${S3_BUCKET:-pepper-dev}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-pepperdev}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-pepper-dev-only-s3-secret}
     ports: ['127.0.0.1:4000:4000']
     depends_on:
       migrate: { condition: service_completed_successfully }
       redis: { condition: service_healthy }
       mailpit: { condition: service_healthy }
+      seaweedfs: { condition: service_healthy }
 
   worker:
     build: { context: ., target: worker }
@@ -156,3 +180,4 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  seaweedfs-data:

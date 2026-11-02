@@ -61,3 +61,32 @@ export async function startMailpit(): Promise<TestMailpit> {
     },
   };
 }
+
+/** SeaweedFS's S3 API (ADR-0011, ADR-0048) with throwaway keys, on a random host port. */
+export interface TestObjectStorage {
+  /** `http://host:port`. */
+  readonly endpoint: string;
+  readonly accessKeyId: string;
+  readonly secretAccessKey: string;
+  stop(): Promise<void>;
+}
+
+/** SeaweedFS, the Compose image, accepting signed requests with its keys only. */
+export async function startSeaweedFs(): Promise<TestObjectStorage> {
+  const accessKeyId = 'pepper_test';
+  const secretAccessKey = 'pepper-test-secret';
+  const container = await new GenericContainer(composeImage('seaweedfs'))
+    .withCommand(['server', '-s3', '-dir=/data', '-ip.bind=0.0.0.0'])
+    .withEnvironment({ AWS_ACCESS_KEY_ID: accessKeyId, AWS_SECRET_ACCESS_KEY: secretAccessKey })
+    .withExposedPorts(8333)
+    .withWaitStrategy(Wait.forHttp('/healthz', 8333).withStartupTimeout(120_000))
+    .start();
+  return {
+    endpoint: `http://${container.getHost()}:${String(container.getMappedPort(8333))}`,
+    accessKeyId,
+    secretAccessKey,
+    stop: async () => {
+      await container.stop();
+    },
+  };
+}
