@@ -1,31 +1,23 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-10-30 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 10 — First 10 minutes (S44 recovery, S45 business type, S46 setup review, S47 booking page profile done) → next: **S47.2** (photos; Phase 10 gate)
+**Last updated:** 2026-11-02 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 10 — First 10 minutes (S44 recovery, S45 business type, S46 setup review, S47 booking page profile, S47.2 photos done) → next: **S47.3** (the timed journey; Phase 10 gate)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S47.2 Photos on the booking page** (branch `claude/gifted-curie-stpvd0`). Brief approved by the user (2026-11-02): "start with your recommendations and complete the session successfully" — D-1 A (S47.2 = photos end to end + top-up; the timed journey, Phase 10 gate and phase-exit security review → **S47.3**), D-2 A sharp, D-3 A images served by the api (private bucket, immutable cache, no pre-signed URLs yet), D-4 A (journey timed by a per-action owner time model, < 600 s, wall clock reported), D-5 one logo, one cover, ≤ 12 gallery photos, caption as alt text, D-6 ADR-0048 pre-approved. A first attempt in another account was never pushed and is rebuilt here; checkpoints are pushed to the branch from now on.
-Tasks: 1 ACs + ADR-0048 + dependency map · 2 `packages/storage` (S3 adapter, SeaweedFS in Compose/Testcontainers, contract tests) · 3 image pipeline (sharp) · 4 migration 0056 `business_photos` + repository + service + isolation · 5 api (owner upload/caption/delete/list, public image route) · 6 web (Photos card, booking page cover/logo/gallery, Playwright + baselines) · 7 top-up: the funnel line on the setup card.
-- Done: 1 ACs AC-W8-10…12, AC-W1-14, ADR-0048, dependency map, S47.3 row (playbook, roadmap, STATUS).
-- Done: 2 `@pepper/storage` (ObjectStore, S3 adapter, config) + 3 image pipeline (sharp 0.35, unit 18/18, 100% coverage); SeaweedFS 4.01 in Compose (signed keys, healthcheck), `.env.example`, e2e-stack, `startSeaweedFs`; contract test 5/5 against SeaweedFS.
-- Done: 4 contracts `photos.ts` (+ audit actions, `PublicBusiness.photos`, `SetupReview.week`), migration 0056 `business_photos` (forced RLS, one logo/cover, checks), db repository + isolation entry (392 green with migrate), appointments `addPhoto`/`changePhotoCaption`/`removePhoto`/`listPhotos`/`readPagePhoto` (10/10 int), layer rule: storage is L1.
-- Done: 5 api `PhotosModule` (`/v1/tenant/photos` GET/POST raw body/PATCH/DELETE behind `settings.manage`, upload rate limit; public `…/photos/:id/:width` immutable, nosniff, CSP, CORP; `S3_*` config, bucket made on start), error codes, `readUpload` (4 unit), api int 4/4 on Postgres+Redis+SeaweedFS; web forwarder 10 MB on the upload path only and image headers (12 unit). Top-up backend: `SetupReview.week` (`bookingWeek`, unit + int).
-- Done: 6 web Photos card on Services (logo, cover, gallery with captions; `PhotoImage`; `lib/photos.ts` 5 unit), booking page cover/logo (hairline in dark)/"Recent work" grid; 7 "12 visits, 7 booked this week" on the booking link (`bookingWeekLine`); `e2e/tests/photos.spec.ts` 2/2; baselines `book-photos-*` (new), `services-*` (Photos card).
-- Close in progress: `/code-review` (7 findings) done; fixes 1, 3–7 applied but **not yet re-tested**: `readUpload` keeps the request alive for its 413 (`iterator({ destroyOnReturn: false })`, a unit check added), `PhotosService` closes the S3 client on shutdown and `storage()` replaces `requireStorage()`, Photos card refreshes once per batch, `MAX_PHOTO_WIDTH` in the schema check (no migration drift), a vacuous api test line removed. Skipped 2 (page lists photos when `S3_*` is later unset: rows exist only if storage was on; operator error).
-- Next: re-run raw-body unit + `photos.int.test.ts` (api) + typecheck/lint of api/web; then `/security-review`; then `pnpm check`, `pnpm test:integration`, Playwright full (`e2e-stack.sh start`, `--workers=3`); walkthrough; docs (session-log with retro, decisions.md S47.2, traceability tests, ADR-0048 results, STATUS Last sessions); PR, CI, merge. Retro top-up for S47.3 still to choose.
+Nothing in progress. Next: **S47.3** (the timed new-owner journey and the Phase 10 gate).
 
 ## Last sessions
+- **S47.2 Phase 10 · Photos on the booking page (2026-11-02)** ([ADR-0048](../adr/0048-business-photos-and-object-storage.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:** `@pepper/storage` (S3 adapter, SeaweedFS in Compose and tests; sharp: checked by content, upright, no metadata, WebP widths); migration 0056 `business_photos` (RLS, one logo and cover, 12 gallery photos); owner endpoints behind `settings.manage` and the page's image route (immutable, own origin); the Photos card on Services; cover, logo and "Recent work" on the booking page. AC-W8-10…12.
+  - **Top-up (S47 retro):** "12 visits, 7 booked this week" on Home's booking link (AC-W1-14). Also fixed: waitlist matches were due by the database clock (tests broke once real time passed their fixed clock).
+  - **Checks:** `pnpm check` green; integration green (ai matcher and a load timeout re-run green); Playwright 151 passed, 31 skipped; baselines `book-photos-*`, `services-*`.
 - **S47 Phase 10 · Booking page profile, remembered devices, drop-off per step (2026-10-30)** ([ADR-0047](../adr/0047-remembered-devices-and-booking-funnel.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** phone, public address and cancellation policy on the booking page (migration 0054); "Remember me on this phone" skips the code for 90 days, "Forget this phone" (migration 0055 `remembered_devices`); each booking step counted with a random visit id only (`booking_funnel_events`). AC-W8-7…9.
   - **Top-up (S46 retro):** Home keeps the booking link with Copy after the setup check (AC-W1-13).
   - **Checks:** `pnpm check` green; integration 1,305 green; Playwright 146 passed, 31 skipped (tasks' UTC `tomorrow()` fixed, book-done baseline updated); 24 baselines.
-- **S46 Phase 10 · Setup review, readiness warnings and recoverable availability (2026-10-29)** ([PCR-009](changes/PCR-009.md); no ADR). Full entry in [session-log.md](session-log.md).
-  - **Built:** Home's setup card for owners and managers ("8 services, Tue–Sat 9:00 AM–6:00 PM", menu, people, zone; "I've checked these" in `tenants.setup_reviewed_at`, migration 0053) and current fixes from today's setup; `GET /v1/setup`, `POST /v1/setup/review`. The booking page drops people without hours, opens on the first free day, says when two weeks are empty, and offers "Try again"; plain zone names. AC-W1-11/12, AC-W8-3…6.
-  - **Top-up (S45 retro):** the one-look summary line on the card.
-  - **Checks:** `pnpm check` green; integration green (one under-load timeout in a bookings property test, 46/46 alone); Playwright 147 passed, 31 skipped (one S45 label check updated); 6 Home baselines.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -41,6 +33,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S47.2 (user, 2026-11-02):** rebuilt from its brief (the first attempt was never pushed); "start with your recommendations and complete the session successfully" (D-1 A photos + top-up, the timed journey and Phase 10 gate → S47.3; D-2 sharp; D-3 the api serves images; D-4 a per-action time model; D-5 1 logo, 1 cover, ≤ 12 gallery, caption = alt; D-6 ADR-0048). **Claude:** storage is L1; images before the row; the gallery's 12 under a lock; the review's 6 fixes; waitlist matches due by the domain clock. Full wording in [decisions.md](decisions.md).
 - **S47 (user, 2026-10-30):** at the brief "Go a head with your recommendations and complete the session" (D-1 split: photos, the timed journey and the Phase 10 gate → S47.2; D-2 remember on by default, 90 days, per business and email; D-3 a separate public address; D-4 one brand color; D-5 ADR-0047). Later: attribution off in `.claude/settings.json`, commits under the user's own name. **Claude:** one booking path for remembered phones; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S46 (user, 2026-10-29):** at the brief "Go ahead with your recommendations and complete the session" (D-1 one session; D-2 `tenants.setup_reviewed_at`; D-3 no ADR). **Claude:** the review in appointments behind `settings.manage`; warnings never from `bookable`; one strip-wide request picks the first free day; plain names only for zones on the same clock; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **Before S46 (user standing authority, 2026-10-29):** [PCR-009](changes/PCR-009.md) separates reviewed setup from automatic bookability, keeps current warnings, defines public no-hours/first-free-day behavior and adds in-place availability retry; explicit shared acceptance replaces the private-review gate. Planning only; S46 is not implemented. S47 still owns contact/profile details.
@@ -77,11 +70,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S47, M1–M2 and P1 are done (Phases 0–9: the re-plan and the new look on every screen, Phase 9 gate met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S47.2, M1–M2 and P1 are done (Phases 0–9: the re-plan and the new look on every screen, Phase 9 gate met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S47.2 | Photos (logo, cover, gallery) on the booking page; top-up: the funnel line on the setup card | 10 | AC-W8-10…12, AC-W1-14; photos on the page in both themes |
 | S47.3 | The timed new-owner journey; **Phase 10 gate**; phase-exit security review | 10 | New owner bookable < 10 min; Phase 10 scorecard targets met |
 | S48 | Client import: CSV, JSON or JSONL (five tools, generic, or an own app's export), smart mapping, preview, dedupe, undo by batch | 11 | AC-W1-3; no duplicates on re-import |
 | S49 | History + upcoming appointments import; tags, birthdays | 11 | 1,000 clients / 5,000 visits < 2 min |

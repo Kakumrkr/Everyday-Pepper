@@ -23,3 +23,8 @@ The booking page shows a business's name, color, contact details and menu (S17, 
 - The api holds a whole upload in memory (≤ 10 MB) and resizes it in the request; at pilot scale that is fine, and a job can take it later.
 - Deleting a business removes its rows by cascade but not its objects; S51 (account and business deletion) removes the `tenants/<id>/` prefix.
 - A new native dependency (`sharp`, prebuilt for Linux x64/arm64 glibc and musl); its version is pinned in the lockfile like any other.
+
+## Results (S47.2)
+- Built as decided: `@pepper/storage` (port, S3 adapter, sharp pipeline; 19 unit tests at 100% coverage, 5 contract tests against SeaweedFS 4.01), migration 0056, the appointments services, `PhotosModule` (owner endpoints, the public image route) and the Photos card on Services; the booking page shows the cover, the logo (with a hairline border, which keeps a dark logo visible on the dark theme) and a "Recent work" grid.
+- Uploads sent without a declared length are capped while read and still answer 413 (the code review's first finding). The decompression-bomb check is tested with a PNG whose header claims 48 MP and carries no pixels.
+- `/security-review`: nothing found (tenant from the session only, RLS on every read and write, keys built from UUIDs, only re-encoded WebP stored and served with `nosniff` and `default-src 'none'`).
