@@ -1,32 +1,23 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-03 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 11 — Switching + privacy (Phase 10 gate met in S47.3) → next: **S48** (client import)
+**Last updated:** 2026-11-03 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 11 — Switching + privacy (Phase 10 gate met in S47.3) → next: **S48.2** (client import screens)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S48 · Client import engine** (brief approved 2026-11-03: "Go ahead with your recommendations and complete the session": D-1 split, S48 engine (backend, worker, API) + **S48.2** screens and the "Bring your clients" top-up; D-2 `csv-parse`; D-3 match by external id → email → a phone only one client has, merges fill empty fields only; D-4 undo within 7 days, clients booked since are kept; D-5 no raw file kept, staged rows' values cleared after the undo window, 5 MB / 10,000 rows; D-6 ADR-0049 pre-approved).
-- [x] 1 ACs: AC-W1-3 restated, AC-W1-17…20 (acceptance-criteria, traceability).
-- [x] 2 contracts: `imports.ts` (formats, presets, fields, mapping, preview, batch), `normalizePhone` shared with `BusinessPhoneSchema`.
-- [x] 3 `@pepper/imports` (`packages/modules/imports`): `parseImportFile` (CSV via `csv-parse`, JSON, JSONL; UTF-8 or Windows-1252; limits), `suggestMapping` (five presets, headers, values), `mapRows`/`planRows` (reasons per row; match by id → email → phone with the same name → an earlier import's identical row); fixtures per tool + generic + own app + messy; 56 unit tests (property: no duplicate on re-import), 99% lines.
-- [x] 4 migration 0058 (`import_batches` with `job_scan('imports')`, `import_rows`, `client_import_refs`; RLS + owners/managers-only member scope, forced RLS) and `repositories/imports.ts`; isolation suite 399 green.
-- [x] 5 domain service `services/imports.ts`: stage, get/list, remap, discard, commit, undo (7 days, purge on undo), `runImport` (lease, chunks of 500, re-plan per chunk, failed after 3 attempts), `tidyImports` (staged > 24 h discarded, rows purged after the window); audit `client_import.committed/finished/undone` (counts only); 24 integration tests green.
-- [x] 6 worker: `imports/relay.ts` + `ImportsRunner` (BullMQ `imports`, job id = batch id, `IMPORT_POLL_MS` 2 s, hourly `tidyImports`, alert with ids only on failure; closes at once without Redis); 55 worker tests green.
-- [x] 7 api `/v1/imports` (`clients.manage`): GET list, POST upload (5 MB; CSV/JSONL as text, JSON as octet-stream; 20 per 10 min per member), GET one, PUT mapping, POST commit (202) / undo, DELETE staged; `readUpload` takes an upload kind (photos unchanged); owner sentences in `import_*` errors; 13 controller + 3 integration tests green.
-- [x] 8 ADR-0049; dependency map, jobs, data model, playbook row S48 + new S48.2.
-- Next: `/session-close` (review, checks, PR). Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
+Nothing in progress. Next: **S48.2** (client import screens + "Bring your clients").
 
 ## Last sessions
+- **S48 Phase 11 · Client import engine (2026-11-03)** ([ADR-0049](../adr/0049-client-import-batches-and-undo.md), PR #70). Full entry in [session-log.md](session-log.md).
+  - **Built:** `@pepper/imports` (CSV/JSON/JSONL, five tool presets, header and value mapping, reasons per row, matching by id → email → phone + name → an earlier identical row); migration 0058; stage, remap, commit, leased chunked run, undo for 7 days, tidy-up; the worker's `imports` queue; `/v1/imports`. AC-W1-3, AC-W1-17…19.
+  - **Top-up:** reasons for the owner with the row and the fix; "Bring your clients" moved to S48.2.
+  - **Checks:** `pnpm check` green; affected integration green (db 698, api 93, imports 26, …); no Playwright (no screen).
 - **S47.3 Phase 10 · The timed new-owner journey and the Phase 10 gate (2026-11-03)** (no ADR; scorecard §6). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0057 keeps episode embeddings in the row (the latency miss was TOAST reads: search p95 45 → 24 ms alone, 50 ms in the full parallel run; limit unchanged); the owner time model (`@pepper/testing`) and `new-owner-journey.spec.ts`: a new barber bookable in **7:06**, a client books in 1:35 and again in 0:34 (AC-W1-15, AC-W8-13); **Phase 10 gate met** (C1 6, C2 7, C5 7, C7 7); phase-exit security review: no high/medium (L15–L17 logged).
   - **Top-up (S47.2 retro):** Home's Tip "Add photos" until the page has a cover (AC-W1-16).
   - **Checks:** `pnpm check` green; integration 1,339 green in one run; Playwright 152 passed, 32 skipped, 0 failed.
-- **S47.2 Phase 10 · Photos on the booking page (2026-11-02)** ([ADR-0048](../adr/0048-business-photos-and-object-storage.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** `@pepper/storage` (S3 adapter, SeaweedFS in Compose and tests; sharp: checked by content, upright, no metadata, WebP widths); migration 0056 `business_photos` (RLS, one logo and cover, 12 gallery photos); owner endpoints behind `settings.manage` and the page's image route (immutable, own origin); the Photos card on Services; cover, logo and "Recent work" on the booking page. AC-W8-10…12.
-  - **Top-up (S47 retro):** "12 visits, 7 booked this week" on Home's booking link (AC-W1-14). Also fixed: waitlist matches were due by the database clock (tests broke once real time passed their fixed clock).
-  - **Checks:** `pnpm check` green; integration green (ai matcher and a load timeout re-run green); Playwright 151 passed, 31 skipped; baselines `book-photos-*`, `services-*`.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -42,6 +33,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S48 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 split → S48.2; D-2 `csv-parse`; D-3 match id → email → phone; D-4 undo 7 days; D-5 no raw file, 5 MB / 10,000 rows; D-6 ADR-0049). **Claude:** phone + name, scoped external ids, undo keeps used clients; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
 - **S47.3 (user, 2026-11-03):** at the brief "Go ahead, start with your recommendation and complete" (D-1 no manual main run; D-2 a faster query, the limit unchanged; D-3 a separate `suggestions` list; D-4 score honestly). **Claude:** TOAST diagnosed, 0057 lifts forced RLS for its rewrite; AC-W8-13 restated once measured (< 2 min first, < 60 s remembered); the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S47.2 (user, 2026-11-02):** rebuilt from its brief (the first attempt was never pushed); "start with your recommendations and complete the session successfully" (D-1 A photos + top-up, the timed journey and Phase 10 gate → S47.3; D-2 sharp; D-3 the api serves images; D-4 a per-action time model; D-5 1 logo, 1 cover, ≤ 12 gallery, caption = alt; D-6 ADR-0048). **Claude:** storage is L1; images before the row; the gallery's 12 under a lock; the review's 6 fixes; waitlist matches due by the domain clock. Full wording in [decisions.md](decisions.md).
 - **S47 (user, 2026-10-30):** at the brief "Go a head with your recommendations and complete the session" (D-1 split: photos, the timed journey and the Phase 10 gate → S47.2; D-2 remember on by default, 90 days, per business and email; D-3 a separate public address; D-4 one brand color; D-5 ADR-0047). Later: attribution off in `.claude/settings.json`, commits under the user's own name. **Claude:** one booking path for remembered phones; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
@@ -80,11 +72,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S47.3, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on every screen and the first 10 minutes; Phase 9 and 10 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S48, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on every screen and the first 10 minutes; Phase 9 and 10 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S48 | Client import engine (backend, worker, API): CSV, JSON or JSONL (five tools, generic, own app), smart mapping, preview, dedupe, undo by batch | 11 | AC-W1-3, AC-W1-17…19; no duplicates on re-import |
 | S48.2 | Client import screens (upload, mapping, preview, result with Undo) + Home's "Bring your clients" (top-up) | 11 | Playwright journey; AC-W1-20 |
 | S49 | History + upcoming appointments import; tags, birthdays | 11 | 1,000 clients / 5,000 visits < 2 min |
 | S50 | Client merge, delete, staff walk-ins, paging and search | 11 | Playwright; isolation suite 100% |
