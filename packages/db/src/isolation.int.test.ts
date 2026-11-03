@@ -46,6 +46,7 @@ import {
   deleteClientRow,
   findClient,
   insertClient,
+  insertWalkInClient,
   mergeClientRows,
 } from './repositories/clients.js';
 import { insertImportBatch, insertImportRefs, replaceImportRows } from './repositories/imports.js';
@@ -1879,5 +1880,72 @@ describe('merging and deleting clients (S50, ADR-0051)', () => {
       (e: unknown) => e,
     );
     expect(sqlState(error)).toBe('42501');
+  });
+});
+
+describe('walk-in clients (S50.2, ADR-0052)', () => {
+  let staffUser: UserId;
+  let staffOfA: StaffMemberId;
+  const asStaff = <T>(tenant: TenantId, work: (tx: TenantTx) => Promise<T>) =>
+    withMember(db, { tenantId: tenant, userId: staffUser }, work);
+
+  beforeAll(async () => {
+    staffUser = await insertUser(db, 'Staff of A');
+    staffOfA = await withTenant(db, tenantA, async (tx) => {
+      const membership = await addMembership(tx, { userId: staffUser, role: 'staff' });
+      const staff = await insertStaffMember(tx, {
+        displayName: 'Walk-in staff',
+        color: '#2a7230',
+        active: true,
+        membershipId: membership.id,
+      });
+      return StaffMemberIdSchema.parse(staff.id);
+    });
+  });
+
+  it("a staff member of one business can't add a walk-in to another", async () => {
+    const error = await asStaff(tenantB, (tx) =>
+      insertWalkInClient(tx, { name: 'Across', email: null, phone: null }),
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('42501');
+  });
+
+  it('the walk-in function refuses a transaction without a member', async () => {
+    const error = await inTenant(
+      tenantA,
+      `SELECT create_walk_in_client('${newId()}'::uuid, 'No member', NULL, NULL)`,
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('42501');
+  });
+
+  it("a walk-in belongs to the staff member's business only, and needs its own booking there", async () => {
+    const id = await asStaff(tenantA, async (tx) => {
+      const added = await insertWalkInClient(tx, { name: 'Walk A', email: null, phone: null });
+      await insertBooking(tx, {
+        clientId: added,
+        serviceId: await withTenant(db, tenantA, seedService),
+        staffMemberId: staffOfA,
+        startsAt: new Date('2099-06-01T14:00:00Z'),
+        endsAt: new Date('2099-06-01T14:45:00Z'),
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+        priceFromCents: null,
+        priceToCents: null,
+        source: 'team',
+        overridden: true,
+        idempotencyKey: null,
+        createdBy: staffUser,
+      });
+      return added;
+    });
+    expect(await withTenant(db, tenantB, (tx) => findClient(tx, id))).toBeUndefined();
+    expect(await withTenant(db, tenantA, (tx) => findClient(tx, id))).toMatchObject({
+      name: 'Walk A',
+    });
+    // A booking in another business doesn't count: the client is refused at commit.
+    const unbooked = await asStaff(tenantA, (tx) =>
+      insertWalkInClient(tx, { name: 'Walk unbooked', email: null, phone: null }),
+    ).catch((e: unknown) => e);
+    expect(sqlState(unbooked)).toBe('23514');
   });
 });
