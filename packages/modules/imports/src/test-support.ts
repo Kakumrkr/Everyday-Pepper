@@ -37,6 +37,7 @@ export class MemoryBusiness {
   }
 
   apply(rows: readonly MappedRow[], plan: readonly PlannedRow[]): void {
+    const byPosition: (KnownClient | undefined)[] = [];
     plan.forEach((planned, i) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one plan per row
       const row = rows[i]!;
@@ -57,7 +58,15 @@ export class MemoryBusiness {
           const { tags = [], ...rest } = planned.fills;
           Object.assign(client, rest, { tags: [...client.tags, ...tags] });
         }
+      } else if (planned.sameAs !== undefined) {
+        // A repeat of an earlier row's client is recorded as that client, as the service does.
+        const same = planned.sameAs;
+        client =
+          'position' in same
+            ? byPosition[same.position]
+            : this.clients.find((c) => c.id === same.clientId);
       }
+      byPosition[i] = client;
       if (client === undefined) return;
       if (row.externalId !== null && !this.refs.has(row.externalId))
         this.refs.set(row.externalId, client);

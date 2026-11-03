@@ -485,7 +485,9 @@ async function applyChunk(
   for (const [i, planned] of plan.entries()) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per plan entry
     const row = rows[i]!;
-    const clientId = createdIds.get(i) ?? planned.clientId;
+    // A repeat of an earlier row's client records that client, so a re-import finds the row
+    // again by its identity even when its own contact has become ambiguous (S49's CI).
+    const clientId = clientOf(i);
     const filled = fills.get(i) ?? {};
     const visit = visits.get(i);
     let outcome: ImportRowOutcome = planned.outcome;
@@ -499,7 +501,7 @@ async function applyChunk(
       outcome,
       reasons:
         visit === undefined ? planned.reasons : [...clientReasons(planned), ...visit.reasons],
-      clientId: clientId ?? (visit === undefined ? null : clientOf(i)),
+      clientId,
       fills: filled,
       createdClient: createdIds.has(i),
       bookingId: visit?.bookingId ?? null,

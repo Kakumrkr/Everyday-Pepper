@@ -666,3 +666,27 @@ describe('tags and birthdays (S49, AC-W1-25, AC-W1-26)', () => {
     expect(await listClients(db, business.owner, { import: other.batch.id })).toEqual([]);
   });
 });
+
+describe('a repeat row on a re-import (S49 CI, fast-check seed 1909035259)', () => {
+  it('finds it again by its identity when its contact has become ambiguous', async () => {
+    const business = await newBusiness();
+    const csv = (rows: string[][]) =>
+      Buffer.from(['Name,Email,Phone,Id', ...rows.map((r) => r.join(','))].join('\n'));
+    const first = csv([
+      ['Cy', 'a@example.com', '5550100002', ''],
+      ['Ana', 'a@example.com', '5550100002', '1'],
+    ]);
+    const second = csv([
+      ['Cy', '', '', '1'],
+      ['Cy', 'b@example.com', '5550100002', ''],
+      ['Ana', 'b@example.com', '', ''],
+    ]);
+    await importFile(business, first);
+    await importFile(business, second);
+    // Both files again: nothing new (a repeat row's id and identity point at its client).
+    for (const file of [first, second]) {
+      expect((await stageImport(db, business.owner, file)).batch.counts.create).toBe(0);
+    }
+    expect((await clientsOf(business.tenantId)).map((c) => c.name)).toEqual(['Ana', 'Cy']);
+  });
+});

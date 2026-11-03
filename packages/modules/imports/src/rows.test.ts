@@ -215,6 +215,28 @@ describe('planRows (D-3)', () => {
   const csv = (records: string[][]) =>
     Buffer.from(['Name,Email,Phone,Id', ...records.map((r) => r.join(','))].join('\n'));
 
+  it('finds a repeat row again on a re-import, when its phone has become ambiguous', () => {
+    // fast-check's counterexample from S49's CI (seed 1909035259): the third row of the second
+    // file was skipped as Cy's repeat and, recording no client, became a new client when the
+    // second file came again and Cy's phone was shared by then.
+    const first = [
+      ['Cy', 'a@example.com', '5550100002', ''],
+      ['Ana', 'a@example.com', '5550100002', '1'],
+    ];
+    const second = [
+      ['Cy', '', '', '1'],
+      ['Cy', 'b@example.com', '5550100002', ''],
+      ['Ana', 'b@example.com', '', ''],
+    ];
+    const business = new MemoryBusiness();
+    business.import(csv(first));
+    business.import(csv(second));
+    const count = business.clients.length;
+    business.import(csv(first));
+    business.import(csv(second));
+    expect(business.clients).toHaveLength(count);
+  });
+
   it('never creates two clients with one email, and a re-import creates nothing (property)', () => {
     fc.assert(
       fc.property(rows, rows, (first, second) => {
