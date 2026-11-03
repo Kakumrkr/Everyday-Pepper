@@ -1,0 +1,6 @@
+Appointment ID,Date,Time,Duration (minutes),Customer ID,Customer Name,Customer Email,Customer Phone,Service,Team Member,Status,Price
+SQA-1001,03/02/2026,10:00 AM,45,SQ8J2K1M0A,Marcus Bell,marcus.bell@example.com,(555) 010-0101,Haircut,Dre,Completed,$45.00
+SQA-1002,04/13/2026,2:30 PM,45,SQ8J2K1M0A,Marcus Bell,marcus.bell@example.com,(555) 010-0101,Haircut,Dre,Completed,$45.00
+SQA-1003,05/20/2026,11:00 AM,30,SQ8J2K1M0B,Dana Ortiz,dana.ortiz@example.com,555-010-0102,Beard Trim,Kai,No Show,$25.00
+SQA-1004,06/01/2026,9:00 AM,60,SQ8J2K1M0D,Ana Silva,ana.silva@example.org,,Color,Dre,Cancelled,$90.00
+SQA-1005,01/12/2027,3:00 PM,45,SQ8J2K1M0B,Dana Ortiz,dana.ortiz@example.com,555-010-0102,Haircut,Dre,Confirmed,$45.00

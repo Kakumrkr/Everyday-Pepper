@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ImportCountsSchema, ImportUndoSchema } from './imports.js';
 import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
-import { BookingSourceSchema, BookingStatusSchema } from './bookings.js';
+import { BookingOriginSchema, BookingStatusSchema } from './bookings.js';
 import { ClientIdSchema, RecordSourceSchema } from './clients.js';
 import { FeedSettingsSchema } from './feed.js';
 import {
@@ -122,7 +122,7 @@ const BookingValuesSchema = z
     startsAt: UtcDateTimeSchema,
     endsAt: UtcDateTimeSchema,
     status: BookingStatusSchema,
-    source: BookingSourceSchema,
+    source: BookingOriginSchema,
     overridden: z.boolean(),
   })
   .strict();

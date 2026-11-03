@@ -438,6 +438,7 @@ const OUTCOME_BADGES: Record<
   unchanged: { label: 'Already here', tone: 'neutral' },
   invalid: { label: 'Fix', tone: 'warn' },
   skipped: { label: 'Left out', tone: 'neutral' },
+  conflict: { label: 'Time taken', tone: 'warn' },
 };
 
 /** A row of the file: where it is, who it is, and what to fix or what it does. */

@@ -187,7 +187,13 @@ async function matches(w: World): Promise<WaitlistMatchRow[]> {
 /** Cancels the 10:00 booking and offers its time to the ranking's best (as the worker does). */
 async function cancelAndOffer(w: World, fanOut = 3): Promise<MadeOffer[]> {
   const booking = await bookJess(w);
-  await changeBooking(db, w.owner, booking.id, { status: 'cancelled', notifyClient: false });
+  await changeBooking(
+    db,
+    w.owner,
+    booking.id,
+    { status: 'cancelled', notifyClient: false },
+    { clock: w.clock },
+  );
   const [match] = await matches(w);
   if (match === undefined) throw new Error('no match row');
   return withTenant(db, w.tenantId, async (tx) => {
@@ -228,9 +234,21 @@ describe('freed times ask for a match (in the freeing transaction)', () => {
   it('a cancellation, a move (its old time) and a client cancelling by link each write one', async () => {
     const w = await newWorld();
     const cancelled = await bookJess(w, '10:00');
-    await changeBooking(db, w.owner, cancelled.id, { status: 'cancelled', notifyClient: false });
+    await changeBooking(
+      db,
+      w.owner,
+      cancelled.id,
+      { status: 'cancelled', notifyClient: false },
+      { clock: w.clock },
+    );
     const moved = await bookJess(w, '13:00', 1);
-    await changeBooking(db, w.owner, moved.id, { startsAt: tue('15:00'), notifyClient: false });
+    await changeBooking(
+      db,
+      w.owner,
+      moved.id,
+      { startsAt: tue('15:00'), notifyClient: false },
+      { clock: w.clock },
+    );
     const found = await matches(w);
     expect(found.map((m) => [m.startsAt.toISOString(), m.staffMemberId, m.status])).toEqual([
       [tue('10:00'), w.jess.id, 'pending'],
@@ -294,7 +312,13 @@ describe('ranking who is waiting (published formula)', () => {
     await wait(w, 4, null, { start: '13:00', end: '17:00' }); // window misses 10:00
     const anyoneNew = await wait(w, 5, null);
     const booking = await bookJess(w);
-    await changeBooking(db, w.owner, booking.id, { status: 'cancelled', notifyClient: false });
+    await changeBooking(
+      db,
+      w.owner,
+      booking.id,
+      { status: 'cancelled', notifyClient: false },
+      { clock: w.clock },
+    );
     const [match] = await matches(w);
     if (match === undefined) throw new Error('no match');
     const ranked = await withTenant(db, w.tenantId, (tx) =>
@@ -311,7 +335,13 @@ describe('ranking who is waiting (published formula)', () => {
     const w = await newWorld();
     await wait(w, 1, null);
     const booking = await bookJess(w, '10:00');
-    await changeBooking(db, w.owner, booking.id, { status: 'cancelled', notifyClient: false });
+    await changeBooking(
+      db,
+      w.owner,
+      booking.id,
+      { status: 'cancelled', notifyClient: false },
+      { clock: w.clock },
+    );
     await bookJess(w, '10:30', 2); // overlaps the freed 10:00-11:00
     const [match] = await matches(w);
     if (match === undefined) throw new Error('no match');
@@ -508,7 +538,13 @@ describe('offers and claims (AC-W5-1)', () => {
     const w = await newWorld();
     for (const i of [1, 2]) await wait(w, i, null);
     const booking = await bookJess(w);
-    await changeBooking(db, w.owner, booking.id, { status: 'cancelled', notifyClient: false });
+    await changeBooking(
+      db,
+      w.owner,
+      booking.id,
+      { status: 'cancelled', notifyClient: false },
+      { clock: w.clock },
+    );
     const [match] = await matches(w);
     if (match === undefined) throw new Error('no match row');
     const made = await withTenant(db, w.tenantId, async (tx) =>

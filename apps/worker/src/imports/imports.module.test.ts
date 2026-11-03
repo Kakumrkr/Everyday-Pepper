@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { importVisitBook } from '@pepper/appointments';
 import { ImportsModule, ImportsRunner, type ImportsOptions } from './imports.module.js';
 
 // The import runner's wiring with BullMQ, Redis and the import service replaced; the service
@@ -143,7 +144,10 @@ describe('ImportsRunner', () => {
     running.onApplicationBootstrap();
     imports.runImport.mockResolvedValueOnce('done');
     await expect(fakes.processor?.(JOB)).resolves.toBe('done');
-    expect(imports.runImport).toHaveBeenCalledWith({}, JOB.data, OPTIONS.clock);
+    // A visits file writes its bookings through the appointments module's port (ADR-0050).
+    expect(imports.runImport).toHaveBeenCalledWith({}, JOB.data, OPTIONS.clock, {
+      visits: importVisitBook,
+    });
     expect(runtime.raiseAlert).not.toHaveBeenCalled();
     imports.runImport.mockResolvedValueOnce('failed');
     await expect(fakes.processor?.(JOB)).resolves.toBe('failed');

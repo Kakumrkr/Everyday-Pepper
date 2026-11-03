@@ -1,0 +1,6 @@
+Date,Time,Client,Email,Phone,Service,Staff,Length,Price,Status
+2026-04-02,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-0601,Haircut,Dre,45,45,done
+2026-05-14,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-0601,Haircut,Dre,45,45,done
+2026-05-14,11:00 AM,Ben Cole,,555-010-0602,Fade Deluxe,Jo,50,55,done
+2026-06-30,11:00 AM,Ben Cole,,555-010-0602,Fade Deluxe,,50,55,done
+2027-01-08,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-0601,Haircut,Dre,45,45,booked

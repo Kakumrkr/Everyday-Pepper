@@ -6,6 +6,8 @@ import {
   ImportMappingInputSchema,
   ImportReasonSchema,
   ImportUndoSchema,
+  ImportVisitSchema,
+  ClientBirthdaySchema,
   IMPORT_PREVIEW_ROWS,
   IMPORT_UNDO_DAYS,
   type ImportBatch,
@@ -14,13 +16,15 @@ import {
   type ImportCounts,
   type ImportFormat,
   type ImportMapping,
+  type ImportReason,
+  type ImportVisit,
   type ImportMappingInput,
   type ImportPreview,
   type ImportRow,
   type ImportRowOutcome,
   type TenantId,
 } from '@pepper/contracts';
-import { auditActorOf, requirePermission, type Actor, type Clock } from '@pepper/core';
+import { auditActorOf, requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
 import {
   appendAuditEntry,
   claimImportBatch,
@@ -50,6 +54,7 @@ import {
   updateImportBatch,
   withMember,
   withTenant,
+  type AppliedImportRow,
   type Database,
   type ImportBatchRow,
   type ImportRowRow,
@@ -66,16 +71,27 @@ import {
   ImportNotStagedError,
   ImportNotUndoableError,
 } from '../errors.js';
-import { mappingOf, mappingProblems, normalizeHeader, suggestMapping } from '../mapping.js';
+import { kindOf, mappingOf, mappingProblems, normalizeHeader, suggestMapping } from '../mapping.js';
 import { parseImportFile, type Table } from '../parse.js';
 import {
   mapRows,
   planRows,
+  rowLabel,
   type KnownClient,
   type MappedRow,
   type MatchIndex,
   type PlannedRow,
 } from '../rows.js';
+import {
+  planVisits,
+  serviceKey,
+  visitTimes,
+  type NewVisit,
+  type PlannedVisit,
+  type VisitBook,
+  type VisitEntry,
+  type VisitService,
+} from '../visits.js';
 
 // Client import (S48, ADR-0049, AC-W1-3, AC-W1-17…19). An owner or manager (`clients.manage`)
 // stages a file: it is parsed, mapped and planned against the business's clients, and its
@@ -83,6 +99,10 @@ import {
 // follows), discard it, or commit it: the worker's `imports` queue then runs it in chunks,
 // planning each chunk again against the clients as they are by then, and it can be undone
 // for IMPORT_UNDO_DAYS. Client details never reach the audit log or the logs.
+//
+// A visits file (S49, ADR-0050) goes the same way: its rows find or create their clients as a
+// client file's do, then become past visits or upcoming appointments through the `VisitBook`
+// the appointments module serves (passed in by the api and the worker), with no email.
 
 /** Rows a run writes per transaction (each extends the lease). */
 export const IMPORT_RUN_CHUNK = 500;
@@ -106,23 +126,42 @@ const EMPTY_COUNTS: ImportCounts = {
   unchanged: 0,
   invalid: 0,
   skipped: 0,
+  conflict: 0,
+  clients: 0,
+  past: 0,
+  upcoming: 0,
 };
+
+/** What an import's services need beyond the database (S49). */
+export interface ImportOptions {
+  /** "Now" for a visits file: what is past and what is upcoming. */
+  clock?: Clock;
+  /** The appointments module's port, for a visits file (ADR-0050 §2). */
+  visits?: VisitBook;
+}
+
+function visitBookOf(options: ImportOptions): VisitBook {
+  if (options.visits === undefined) throw new Error('A visits file needs the VisitBook');
+  return options.visits;
+}
 
 /** Imports the business's clients from a file it uploaded: the staged preview (AC-W1-17/18). */
 export async function stageImport(
   db: Database,
   actor: Actor,
   bytes: Uint8Array,
-  options: { format?: ImportFormat | undefined } = {},
+  options: { format?: ImportFormat | undefined } & ImportOptions = {},
 ): Promise<ImportPreview> {
   requirePermission(actor, 'clients.manage');
   // Before any transaction: a file that can't be read is refused with its reason.
   const table = parseImportFile(bytes, options.format);
   const { preset, columns } = suggestMapping(table);
   const mapping = mappingOf(columns);
+  const kind = kindOf(mapping);
   return withMember(db, actor.context, async (tx) => {
     const batch = await insertImportBatch(tx, {
       createdByUserId: actor.context.userId,
+      kind,
       format: table.format,
       preset,
       system: preset ?? fileSystem(table.columns),
@@ -131,8 +170,12 @@ export async function stageImport(
       counts: EMPTY_COUNTS,
     });
     const id = ImportBatchIdSchema.parse(batch.id);
-    const counts = await planAndStore(tx, id, table, mapping, batch.system);
-    const updated = await updateImportBatch(tx, id, { counts });
+    const planned = await planAndStore(tx, batch, id, table, mapping, options);
+    const updated = await updateImportBatch(tx, id, {
+      counts: planned.counts,
+      notices: planned.notices,
+      problems: [...mappingProblems(mapping), ...planned.problems],
+    });
     return previewOf(tx, updated ?? batch);
   });
 }
@@ -170,6 +213,7 @@ export async function remapImport(
   actor: Actor,
   batchId: ImportBatchId,
   input: ImportMappingInput,
+  options: ImportOptions = {},
 ): Promise<ImportPreview> {
   requirePermission(actor, 'clients.manage');
   const id = ImportBatchIdSchema.parse(batchId);
@@ -191,11 +235,13 @@ export async function remapImport(
     });
     const mapping = mappingOf(columns);
     const table = await tableOf(tx, batch, before);
-    const counts = await planAndStore(tx, id, table, mapping, batch.system);
+    const planned = await planAndStore(tx, batch, id, table, mapping, options);
     const updated = await updateImportBatch(tx, id, {
+      kind: kindOf(mapping),
       columns,
-      problems: mappingProblems(mapping),
-      counts,
+      problems: [...mappingProblems(mapping), ...planned.problems],
+      notices: planned.notices,
+      counts: planned.counts,
     });
     return previewOf(tx, updated ?? batch);
   });
@@ -231,9 +277,15 @@ export async function commitImport(
     const [problem] = ProblemsSchema.parse(batch.problems);
     if (problem !== undefined) throw new ImportNotReadyError(problem);
     const counts = ImportCountsSchema.parse(batch.counts);
-    if (counts.create + counts.merge === 0) {
+    // A visits file's rows count by their visit; a client detail it fills is something too.
+    const fillsClients =
+      batch.kind === 'visits' &&
+      (await listImportRows(tx, id)).some((row) => Object.keys(row.fills as object).length > 0);
+    if (counts.create + counts.merge === 0 && !fillsClients) {
       throw new ImportNotReadyError(
-        'There’s nothing to import: every row is invalid, skipped or already a client.',
+        batch.kind === 'visits'
+          ? 'There’s nothing to import: every visit is invalid, skipped, taken or already in Pepper.'
+          : 'There’s nothing to import: every row is invalid, skipped or already a client.',
       );
     }
     const now = clock.now();
@@ -257,8 +309,9 @@ export async function commitImport(
 }
 
 /**
- * Undoes a finished import within IMPORT_UNDO_DAYS (AC-W1-19): its new clients go unless they
- * have a booking or waitlist entry since, the emails and phones it filled are cleared where
+ * Undoes a finished import within IMPORT_UNDO_DAYS (AC-W1-19, AC-W1-25): a visits file's
+ * bookings go unless changed since, then its new clients unless they have a booking or
+ * waitlist entry since; the emails, phones, birthdays and tags it filled are cleared where
  * unchanged, and its rows' client details are cleared (D-5).
  */
 export async function undoImport(
@@ -266,6 +319,7 @@ export async function undoImport(
   actor: Actor,
   batchId: ImportBatchId,
   clock: Clock,
+  options: ImportOptions = {},
 ): Promise<ImportBatch> {
   requirePermission(actor, 'clients.manage');
   const id = ImportBatchIdSchema.parse(batchId);
@@ -282,7 +336,15 @@ export async function undoImport(
         `An import can be undone for ${String(IMPORT_UNDO_DAYS)} days, and this one’s are over.`,
       );
     }
-    const undo = await undoImportBatchRows(tx, id);
+    const bookings =
+      batch.kind === 'visits' ? await visitBookOf(options).undo(tx, id) : { deleted: 0, kept: 0 };
+    // The insights forget the history that went (as a run made them see it).
+    if (bookings.deleted > 0) await visitBookOf(options).finished(tx);
+    const undo = {
+      ...(await undoImportBatchRows(tx, id)),
+      bookings: bookings.deleted,
+      bookingsKept: bookings.kept,
+    };
     await purgeImportRows(tx, id);
     const updated = await updateImportBatch(tx, id, {
       status: 'undone',
@@ -323,6 +385,7 @@ export async function runImport(
   db: Database,
   job: ImportJob,
   clock: Clock,
+  options: ImportOptions = {},
 ): Promise<ImportRunResult> {
   const id = ImportBatchIdSchema.parse(job.batchId);
   const lease = () => new Date(clock.now().getTime() + IMPORT_LEASE_MS);
@@ -331,7 +394,7 @@ export async function runImport(
   );
   if (claimed === undefined) return 'not_due';
   if (claimed.attempts > IMPORT_MAX_ATTEMPTS) {
-    await withTenant(db, job.tenantId, (tx) => finish(tx, id, 'failed', clock));
+    await withTenant(db, job.tenantId, (tx) => finish(tx, claimed, 'failed', clock, options));
     return 'failed';
   }
   for (;;) {
@@ -342,10 +405,10 @@ export async function runImport(
       if (batch?.status !== 'running') return 'not_due';
       const pending = await listPendingImportRows(tx, id, IMPORT_RUN_CHUNK);
       if (pending.length === 0) {
-        await finish(tx, id, 'done', clock);
+        await finish(tx, batch, 'done', clock, options);
         return 'done';
       }
-      await applyChunk(tx, batch, pending, clock.now());
+      await applyChunk(tx, batch, pending, clock.now(), options);
       await updateImportBatch(tx, id, { leaseUntil: lease() });
       return 'more';
     });
@@ -358,20 +421,20 @@ async function applyChunk(
   batch: ImportBatchRow,
   rows: readonly ImportRowRow[],
   now: Date,
+  options: ImportOptions,
 ): Promise<void> {
   const id = ImportBatchIdSchema.parse(batch.id);
   const format = batch.format as ImportFormat;
-  // The row as staged; invalid rows stay invalid (their reasons were given in the preview).
-  const mapped: MappedRow[] = rows.map((row) => ({
-    row: row.row,
-    name: row.name,
-    email: row.email,
-    phone: row.phone,
-    externalId: row.externalId,
-    hash: row.rowHash,
-    valid: row.outcome !== 'invalid',
-    reasons: row.outcome === 'invalid' ? ReasonsSchema.parse(row.reasons) : [],
-  }));
+  // The rows again under the batch's mapping (as staged: the same cells, the same mapping).
+  const columns = ColumnsSchema.parse(batch.columns);
+  const mapped = mapRows(
+    {
+      format,
+      columns: columns.map(({ column }) => column),
+      rows: rows.map((row) => ({ row: row.row, cells: CellsSchema.parse(row.cells ?? []) })),
+    },
+    mappingOf(columns),
+  );
   const claimed = new Map(
     (await listClaimedImportClients(tx, id)).map(({ clientId, row }) => [clientId, row]),
   );
@@ -385,40 +448,215 @@ async function applyChunk(
     created.map(({ i, id: clientId }) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per plan entry
       const row = mapped[i]!;
-      return { id: clientId, name: row.name ?? '', email: row.email, phone: row.phone };
+      return {
+        id: clientId,
+        name: row.name ?? '',
+        email: row.email,
+        phone: row.phone,
+        tags: row.tags,
+        birthday: row.birthday,
+      };
     }),
   );
-  const applied: Pick<
-    ImportRowValues,
-    'position' | 'outcome' | 'reasons' | 'clientId' | 'fills'
-  >[] = [];
+  const fills = new Map<number, PlannedRow['fills']>();
+  for (const [i, planned] of plan.entries()) {
+    if (planned.outcome !== 'merge' || planned.clientId === null) continue;
+    // Only what is still empty is filled (someone may have added it since the plan).
+    fills.set(i, await fillClientContact(tx, planned.clientId, planned.fills));
+  }
+  const clientOf = (i: number): string | null => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per plan entry
+    const planned = plan[i]!;
+    const own = createdIds.get(i) ?? planned.clientId;
+    if (own !== null) return own;
+    if (planned.sameAs === undefined) return null;
+    return 'clientId' in planned.sameAs
+      ? planned.sameAs.clientId
+      : clientOf(planned.sameAs.position);
+  };
+
+  const visits =
+    batch.kind === 'visits'
+      ? await applyVisits(tx, batch, mapped, plan, clientOf, now, options)
+      : new Map<number, AppliedVisit>();
+
+  const applied: AppliedImportRow[] = [];
   const refs: { externalId: string; clientId: string }[] = [];
   for (const [i, planned] of plan.entries()) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per plan entry
     const row = rows[i]!;
-    const clientId = createdIds.get(i) ?? planned.clientId;
+    // A repeat of an earlier row's client records that client, so a re-import finds the row
+    // again by its identity even when its own contact has become ambiguous (S49's CI).
+    const clientId = clientOf(i);
+    const filled = fills.get(i) ?? {};
+    const visit = visits.get(i);
     let outcome: ImportRowOutcome = planned.outcome;
-    let fills: PlannedRow['fills'] = {};
-    if (planned.outcome === 'merge' && planned.clientId !== null) {
-      // Only what is still empty is filled (someone may have added it since the plan).
-      fills = await fillClientContact(tx, planned.clientId, planned.fills);
-      if (Object.keys(fills).length === 0) outcome = 'unchanged';
-    }
+    if (planned.outcome === 'merge' && Object.keys(filled).length === 0) outcome = 'unchanged';
+    if (visit !== undefined) outcome = visit.outcome;
     if (clientId !== null && row.externalId !== null) {
       refs.push({ externalId: row.externalId, clientId });
     }
-    applied.push({ position: row.position, outcome, reasons: planned.reasons, clientId, fills });
+    applied.push({
+      position: row.position,
+      outcome,
+      reasons:
+        visit === undefined ? planned.reasons : [...clientReasons(planned), ...visit.reasons],
+      clientId,
+      fills: filled,
+      createdClient: createdIds.has(i),
+      bookingId: visit?.bookingId ?? null,
+      visit: visit?.display ?? null,
+    });
   }
   await insertImportRefs(tx, id, batch.system, refs);
   await markImportRowsApplied(tx, id, applied, now);
 }
 
+interface AppliedVisit {
+  outcome: ImportRowOutcome;
+  reasons: ImportReason[];
+  bookingId: string | null;
+  display: ImportVisit | null;
+}
+
+/** Plans and writes a chunk's visits, once their clients are in (ADR-0050). */
+async function applyVisits(
+  tx: TenantTx,
+  batch: ImportBatchRow,
+  mapped: readonly MappedRow[],
+  plan: readonly PlannedRow[],
+  clientOf: (i: number) => string | null,
+  now: Date,
+  options: ImportOptions,
+): Promise<Map<number, AppliedVisit>> {
+  const book = visitBookOf(options);
+  const id = ImportBatchIdSchema.parse(batch.id);
+  const entries: { i: number; entry: VisitEntry }[] = [];
+  for (const [i, row] of mapped.entries()) {
+    const clientId = clientOf(i);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per plan entry
+    const planned = plan[i]!;
+    if (row.visit === null || clientId === null || planned.outcome === 'invalid') continue;
+    entries.push({ i, entry: { row: row.row, visit: row.visit, clientKey: clientId } });
+  }
+  const out = new Map<number, AppliedVisit>();
+  if (entries.length === 0) return out;
+  const { visits, summary } = await planWith(
+    tx,
+    book,
+    batch.createdByUserId,
+    entries,
+    now.getTime(),
+    batch.format as ImportFormat,
+  );
+  // Hidden services for names the business doesn't have, made once (or found if made since),
+  // with the most common length of their rows, as the preview said.
+  const hidden = new Map<string, VisitService>();
+  if (summary.newServices.length > 0) {
+    const wanted = summary.newServices.map(({ name, durationMinutes }) => ({
+      name,
+      durationMinutes,
+    }));
+    for (const service of await book.addHiddenServices(tx, wanted)) {
+      hidden.set(serviceKey(service.name), service);
+    }
+  }
+  const writes: { i: number; k: number; visit: NewVisit }[] = [];
+  for (const [k, { i }] of entries.entries()) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one plan per entry
+    const visit = visits[k]!;
+    const service = visit.serviceId === null ? hidden.get(visit.serviceKey) : undefined;
+    const serviceId = visit.serviceId ?? service?.id ?? null;
+    const clientId = clientOf(i);
+    if (visit.outcome !== 'create') {
+      out.set(i, {
+        outcome: visit.outcome,
+        reasons: visit.reasons,
+        bookingId: null,
+        display: displayOf(visit, null),
+      });
+      continue;
+    }
+    if (visit.staffId === null) {
+      // Nobody on the team can take it (the default staff member left since the preview).
+      out.set(i, {
+        outcome: 'invalid',
+        reasons: [
+          {
+            code: 'no_staff',
+            message: `${rowLabelOf(batch, visit.row)}: nobody on your team can take this visit. Add yourself to your team, then import the file again.`,
+          },
+        ],
+        bookingId: null,
+        display: displayOf(visit, null),
+      });
+      continue;
+    }
+    if (serviceId === null || clientId === null) {
+      throw new Error('A planned visit has no service or client');
+    }
+    writes.push({
+      i,
+      k,
+      visit: {
+        id: newId(),
+        clientId,
+        serviceId,
+        staffMemberId: visit.staffId,
+        startsAt: new Date(visit.startsAt),
+        endsAt: new Date(visit.startsAt + visit.durationMinutes * 60_000),
+        bufferBeforeMinutes: service?.bufferBeforeMinutes ?? visit.bufferBeforeMinutes,
+        bufferAfterMinutes: service?.bufferAfterMinutes ?? visit.bufferAfterMinutes,
+        priceFromCents: visit.priceCents,
+        status: visit.status,
+        createdBy: batch.createdByUserId,
+      },
+    });
+  }
+  const { conflicts } = await book.writeVisits(
+    tx,
+    id,
+    writes.map(({ visit }) => visit),
+  );
+  const lost = new Set(conflicts);
+  for (const { i, k, visit } of writes) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one plan per entry
+    const planned = visits[k]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per entry
+    const label = mapped[i]!.row;
+    out.set(
+      i,
+      lost.has(visit.id)
+        ? {
+            outcome: 'conflict' as const,
+            reasons: [
+              {
+                code: 'conflict',
+                message: `${rowLabelOf(batch, label)}: ${planned.staffName} was booked at that time meanwhile, so this one is left out.`,
+              },
+            ],
+            bookingId: null,
+            display: displayOf(planned, null),
+          }
+        : {
+            outcome: 'create',
+            reasons: [],
+            bookingId: visit.id,
+            display: displayOf(planned, visit.id),
+          },
+    );
+  }
+  return out;
+}
+
 async function finish(
   tx: TenantTx,
-  id: ImportBatchId,
+  batch: ImportBatchRow,
   status: 'done' | 'failed',
   clock: Clock,
+  options: ImportOptions,
 ): Promise<void> {
+  const id = ImportBatchIdSchema.parse(batch.id);
   const now = clock.now();
   const rows = await listImportRows(tx, id);
   // What was written: a failed run's rows it never reached count for nothing.
@@ -426,6 +664,8 @@ async function finish(
     ...countRows(rows.filter((row) => row.appliedAt !== null)),
     rows: rows.length,
   };
+  // New bookings: the insights see them once, not once per visit (ADR-0050 §7).
+  if (batch.kind === 'visits' && counts.create > 0) await visitBookOf(options).finished(tx);
   await updateImportBatch(tx, id, {
     status,
     counts,
@@ -433,14 +673,15 @@ async function finish(
     undoUntil: new Date(now.getTime() + IMPORT_UNDO_DAYS * DAY_MS),
     leaseUntil: null,
   });
-  const { create, merge, unchanged, invalid, skipped } = counts;
+  const { create, merge, unchanged, invalid, skipped, conflict, clients, past, upcoming } = counts;
+  const tally = { create, merge, unchanged, invalid, skipped, conflict, clients, past, upcoming };
   await appendAuditEntry(tx, {
     actor: { kind: 'system' },
     change: {
       action: 'client_import.finished',
       entity: { type: 'client_import', id },
       before: null,
-      after: { create, merge, unchanged, invalid, skipped, status },
+      after: { ...tally, status },
     },
   });
 }
@@ -473,19 +714,68 @@ export async function tidyImports(db: Database, clock: Clock, limit = 100): Prom
 
 // Planning ----------------------------------------------------------------------------------
 
-/** Plans the table under `mapping` and stores its rows; returns the preview's counts. */
+/**
+ * Plans the table under `mapping` and stores its rows; returns the preview's counts, notices and
+ * problems. A visits file's rows are planned as clients first, then as visits (ADR-0050).
+ */
 async function planAndStore(
   tx: TenantTx,
+  batch: ImportBatchRow,
   id: ImportBatchId,
   table: Table,
   mapping: ImportMapping,
-  system: string,
-): Promise<ImportCounts> {
+  options: ImportOptions,
+): Promise<{ counts: ImportCounts; notices: string[]; problems: string[] }> {
   const mapped = mapRows(table, mapping);
-  const plan = planRows(table.format, mapped, await matchIndex(tx, mapped, system));
-  const rows: ImportRowValues[] = plan.map((planned, position) => {
+  const plan = planRows(table.format, mapped, await matchIndex(tx, mapped, batch.system));
+  const keyOf = (i: number): string | null => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per plan entry
+    const planned = plan[i]!;
+    if (planned.outcome === 'create') return `row:${String(i)}`;
+    if (planned.clientId !== null) return planned.clientId;
+    if (planned.sameAs === undefined) return null;
+    return 'clientId' in planned.sameAs ? planned.sameAs.clientId : keyOf(planned.sameAs.position);
+  };
+  const visits = new Map<number, PlannedVisit>();
+  let notices: string[] = [];
+  let problems: string[] = [];
+  if (kindOf(mapping) === 'visits') {
+    const entries: { i: number; entry: VisitEntry }[] = [];
+    for (const [i, row] of mapped.entries()) {
+      const key = keyOf(i);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per plan entry
+      if (row.visit === null || key === null || plan[i]!.outcome === 'invalid') continue;
+      entries.push({ i, entry: { row: row.row, visit: row.visit, clientKey: key } });
+    }
+    if (entries.length > 0) {
+      const now = (options.clock ?? systemClock).now().getTime();
+      const planned = await planWith(
+        tx,
+        visitBookOf(options),
+        batch.createdByUserId,
+        entries,
+        now,
+        table.format,
+      );
+      for (const [k, { i }] of entries.entries()) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one plan per entry
+        visits.set(i, planned.visits[k]!);
+      }
+      ({ notices, problems } = planned.summary);
+    }
+  }
+  const rows: (ImportRowValues & { createdClient: boolean })[] = plan.map((planned, position) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one row per plan entry
     const row = mapped[position]!;
+    const visit = visits.get(position);
+    const visitRow = kindOf(mapping) === 'visits';
+    // A visits file's row says what its visit does; its client's part is in `fills` and reasons.
+    let outcome: ImportRowOutcome = planned.outcome;
+    if (visitRow && planned.outcome !== 'invalid') {
+      outcome =
+        visit?.outcome ??
+        (planned.sameAs === undefined && planned.outcome === 'skipped' ? 'skipped' : 'invalid');
+    }
     return {
       position,
       row: row.row,
@@ -496,14 +786,63 @@ async function planAndStore(
       phone: row.phone,
       externalId: row.externalId,
       rowHash: row.hash,
-      outcome: planned.outcome,
-      reasons: planned.reasons,
+      outcome,
+      reasons:
+        visit === undefined ? planned.reasons : [...clientReasons(planned), ...visit.reasons],
       clientId: planned.clientId,
       fills: planned.fills,
+      details: { tags: row.tags, birthday: row.birthday },
+      visit: visit === undefined ? null : displayOf(visit, null),
+      createdClient: planned.outcome === 'create',
     };
   });
   await replaceImportRows(tx, id, rows);
-  return countRows(rows);
+  return { counts: countRows(rows), notices, problems };
+}
+
+/** Loads what a chunk of visits needs through the port, and plans them. */
+async function planWith(
+  tx: TenantTx,
+  book: VisitBook,
+  userId: string | null,
+  entries: readonly { entry: VisitEntry }[],
+  now: number,
+  format: ImportFormat,
+): Promise<ReturnType<typeof planVisits>> {
+  const context = await book.context(tx, userId);
+  let first = Infinity;
+  let last = -Infinity;
+  let firstUpcoming = Infinity;
+  for (const { entry } of entries) {
+    const times = visitTimes(entry.visit, context.timeZone);
+    if (times === null) continue;
+    first = Math.min(first, times.start);
+    last = Math.max(last, times.start);
+    if (times.start >= now) firstUpcoming = Math.min(firstUpcoming, times.start);
+  }
+  // Busy time around the upcoming visits (a day either side covers lengths and buffers).
+  const busy =
+    firstUpcoming === Infinity
+      ? []
+      : await book.busy(tx, new Date(firstUpcoming - DAY_MS), new Date(last + DAY_MS));
+  const clientIds = [
+    ...new Set(
+      entries.map(({ entry }) => entry.clientKey).filter((key) => !key.startsWith('row:')),
+    ),
+  ];
+  const starts =
+    first === Infinity || clientIds.length === 0
+      ? []
+      : await book.visitStarts(tx, clientIds, new Date(first), new Date(last + 1));
+  const existing = new Set(
+    starts.map(({ clientId, startsAt }) => `${clientId}|${String(startsAt.getTime())}`),
+  );
+  return planVisits(
+    format,
+    entries.map(({ entry }) => entry),
+    context,
+    { now, busy, existing },
+  );
 }
 
 /** The staged file again, from its rows' cells. */
@@ -554,12 +893,48 @@ const known = (client: MatchClient): KnownClient => ({
   name: client.name,
   email: client.email,
   phone: client.phone,
+  tags: client.tags,
+  birthday:
+    client.birthdayMonth === null || client.birthdayDay === null
+      ? null
+      : { month: client.birthdayMonth, day: client.birthdayDay, year: client.birthdayYear },
 });
 
-function countRows(rows: readonly { outcome: string }[]): ImportCounts {
+function countRows(
+  rows: readonly { outcome: string; createdClient: boolean; visit?: unknown }[],
+): ImportCounts {
   const counts = { ...EMPTY_COUNTS, rows: rows.length };
-  for (const { outcome } of rows) counts[outcome as ImportRowOutcome] += 1;
+  for (const { outcome, createdClient, visit } of rows) {
+    counts[outcome as ImportRowOutcome] += 1;
+    if (createdClient) counts.clients += 1;
+    if (outcome === 'create' && visit !== null && visit !== undefined) {
+      const { status } = ImportVisitSchema.parse(visit);
+      if (status === 'confirmed') counts.upcoming += 1;
+      else counts.past += 1;
+    }
+  }
   return counts;
+}
+
+/** A visit row's client reasons: several visits of one client aren't duplicates. */
+function clientReasons(planned: PlannedRow): ImportReason[] {
+  return planned.reasons.filter(({ code }) => code !== 'duplicate_in_file');
+}
+
+/** A planned visit as the preview shows it. */
+function displayOf(visit: PlannedVisit, bookingId: string | null): ImportVisit {
+  return ImportVisitSchema.parse({
+    startsAt: new Date(visit.startsAt).toISOString(),
+    durationMinutes: visit.durationMinutes,
+    service: visit.serviceName,
+    staff: visit.staffName,
+    status: visit.status,
+    bookingId,
+  });
+}
+
+function rowLabelOf(batch: ImportBatchRow, row: number): string {
+  return rowLabel(batch.format as ImportFormat, row);
 }
 
 // Answers -----------------------------------------------------------------------------------
@@ -592,17 +967,35 @@ function toRow(row: ImportRowRow): ImportRow {
     outcome: row.outcome as ImportRowOutcome,
     reasons: ReasonsSchema.parse(row.reasons),
     clientId: row.clientId as ImportRow['clientId'],
+    ...detailsOf(row.details),
+    visit:
+      row.visit === null
+        ? null
+        : ImportVisitSchema.parse({ ...(row.visit as object), bookingId: row.bookingId }),
   };
+}
+
+const DetailsSchema = z.object({
+  tags: z.array(z.string()).default([]),
+  birthday: ClientBirthdaySchema.nullable().default(null),
+});
+
+/** A row's tags and birthday (cleared with its other client data). */
+function detailsOf(details: unknown): { tags: string[]; birthday: ImportRow['birthday'] } {
+  const parsed = DetailsSchema.safeParse(details ?? {});
+  return parsed.success ? parsed.data : { tags: [], birthday: null };
 }
 
 function toBatch(row: ImportBatchRow): ImportBatch {
   return ImportBatchSchema.parse({
     id: row.id,
     status: row.status,
+    kind: row.kind,
     format: row.format,
     preset: row.preset,
     columns: row.columns,
     problems: row.problems,
+    notices: row.notices,
     counts: row.counts,
     createdAt: row.createdAt.toISOString(),
     committedAt: row.committedAt?.toISOString() ?? null,

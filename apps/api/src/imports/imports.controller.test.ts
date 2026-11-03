@@ -43,11 +43,24 @@ const IMPORT_ID = ImportBatchIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f70819
 const BATCH: ImportBatch = {
   id: IMPORT_ID,
   status: 'staged',
+  kind: 'clients',
   format: 'csv',
   preset: null,
   columns: [{ column: 'Name', field: 'name', by: 'header', later: null }],
   problems: [],
-  counts: { rows: 1, create: 1, merge: 0, unchanged: 0, invalid: 0, skipped: 0 },
+  notices: [],
+  counts: {
+    rows: 1,
+    create: 1,
+    merge: 0,
+    unchanged: 0,
+    invalid: 0,
+    skipped: 0,
+    conflict: 0,
+    clients: 1,
+    past: 0,
+    upcoming: 0,
+  },
   createdAt: UtcDateTimeSchema.parse('2026-11-03T12:00:00.000Z'),
   committedAt: null,
   finishedAt: null,
@@ -66,6 +79,9 @@ const PREVIEW: ImportPreview = {
       outcome: 'create',
       reasons: [],
       clientId: null,
+      tags: [],
+      birthday: null,
+      visit: null,
     },
   ],
 };
@@ -253,7 +269,7 @@ describe('/v1/imports (AC-W1-3, AC-W1-17…19)', () => {
       .put(`/v1/imports/${IMPORT_ID}/mapping`)
       .set('cookie', 'signed-in')
       .set('origin', ORIGIN)
-      .send({ columns: [{ column: 'Name', field: 'birthday' }] })
+      .send({ columns: [{ column: 'Name', field: 'notes' }] })
       .expect(400);
     expect(code(bad.body)).toBe('validation_failed');
     const missing = await request(server).get('/v1/imports/not-an-id').set('cookie', 'signed-in');

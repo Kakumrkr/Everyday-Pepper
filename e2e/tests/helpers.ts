@@ -286,7 +286,7 @@ export function toast(page: Page): Locator {
 }
 
 // Made-up rows: two new clients, one already here who gains an email, one without a name,
-// and a repeat of an earlier row. The birthday column is recognised but comes later (S49).
+// and a repeat of an earlier row. The birthday column imports too (S49).
 export const IMPORT_CSV = [
   'Name,Email,Phone,Birthday',
   'Ana Ruiz,ana.ruiz@example.com,555-010-1001,1990-04-02',

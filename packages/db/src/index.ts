@@ -16,6 +16,7 @@ export * from './repositories/clients.js';
 export * from './repositories/conversations.js';
 export * from './repositories/feed.js';
 export * from './repositories/imports.js';
+export * from './repositories/imported-bookings.js';
 export * from './repositories/invites.js';
 export * from './repositories/memberships.js';
 export * from './repositories/memory.js';

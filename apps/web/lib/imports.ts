@@ -321,6 +321,17 @@ const FIELD_WORDS: Record<ImportField, string> = {
   email: 'Email',
   phone: 'Phone',
   external_id: 'Their id in your old app',
+  birthday: 'Birthday',
+  tags: 'Tags',
+  visit_date: 'Visit date',
+  visit_time: 'Visit time',
+  visit_end: 'Visit end',
+  duration: 'Length',
+  service: 'Service',
+  staff: 'Who did it',
+  price: 'Price',
+  status: 'Visit status',
+  visit_id: 'Their id for the visit',
 };
 
 /** The choices for a column: what it can fill, or not imported. */
@@ -333,9 +344,7 @@ export const FIELD_OPTIONS: readonly { value: string; label: string }[] = [
 ];
 
 const LATER_WORDS: Record<ImportLaterField, string> = {
-  birthday: 'Birthdays',
   notes: 'Notes',
-  tags: 'Tags',
   visits: 'Visits',
 };
 

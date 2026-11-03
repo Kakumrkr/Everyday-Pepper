@@ -50,7 +50,9 @@ describe('the fixtures (AC-W1-3)', () => {
     expect(of('Square Customer ID')).toMatchObject({ field: 'external_id', by: 'preset' });
     expect(of('Email Address')).toMatchObject({ field: 'email', by: 'preset' });
     expect(of('Email Subscription Status')).toMatchObject({ field: null, later: null });
-    expect(of('Birthday')).toMatchObject({ field: null, later: 'birthday' });
+    expect(of('Birthday')).toMatchObject({ field: 'birthday', by: 'preset' });
+    expect(of('Groups')).toMatchObject({ field: 'tags', by: 'preset' });
+    expect(of('Last Visit')).toMatchObject({ field: null, later: 'visits' });
     expect(of('Memo')).toMatchObject({ field: null, later: 'notes' });
     expect(of('Reference ID')).toMatchObject({ field: null });
   });

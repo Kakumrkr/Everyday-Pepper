@@ -41,7 +41,7 @@ describe('ImportMappingSchema', () => {
         { column: 'B', field: 'external_id' },
       ],
     ],
-    ['an unknown field', [{ column: 'A', field: 'birthday' }]],
+    ['an unknown field', [{ column: 'A', field: 'notes' }]],
     ['no columns', []],
     ['an empty column name', [{ column: '', field: 'name' }]],
     [

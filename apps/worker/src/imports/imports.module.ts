@@ -7,6 +7,7 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
+import { importVisitBook } from '@pepper/appointments';
 import { systemClock, type Clock } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { runImport, tidyImports, type ImportRunResult } from '@pepper/imports';
@@ -67,7 +68,8 @@ export class ImportsRunner implements OnApplicationBootstrap, OnApplicationShutd
       IMPORTS_QUEUE,
       async (job: Job): Promise<ImportRunResult> => {
         const data = ImportJobSchema.parse(job.data);
-        const result = await runImport(this.db, data, this.clock);
+        // A visits file writes its bookings through the appointments module (ADR-0050).
+        const result = await runImport(this.db, data, this.clock, { visits: importVisitBook });
         if (result === 'failed') {
           // Ids only: what the import holds is client data.
           raiseAlert('Client import failed', { batchId: data.batchId, tenantId: data.tenantId });

@@ -1280,4 +1280,23 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Timing:** the Docker app images can't build behind the proxy (pnpm's TLS); the helper's Node stack instead, ~1 min per restart; `pnpm check` ~7 min; integration 6 min; screens 4 min; journeys 0.5 min; CI green in one run: build 10.5 min, integration 10.8 min, AI evals 5.7 min, E2E 20 min.
   - **For later:** S49 the "later" columns (birthdays, notes, tags, visits); S56a AI-suggested mapping; real exports from the pilot to correct the presets.
   - **Retro:** went well: the journey on the real worker found the forwarder's 100 KB limit, which no unit test would have · do better: grep the domain for `defaultNow()` columns read back as "now" (the waitlist time bomb was the S47.2 retro's warning, met again) · top-up for S49: the result screen's "See your clients" opens the list filtered to this import's new clients.
+- **S49 Phase 11 · History import engine, tags, birthdays (2026-11-03)** ([ADR-0050](../adr/0050-visit-and-appointment-import.md); [PR #72](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/72); branch `s49-history-import`). D-1…D-6 A (decisions.md S49); split at the brief, the screens → S49.2.
+  - **Built:**
+    - Migration 0059: tags and birthday on clients; imported bookings with their batch; imported history occupies no time.
+    - `@pepper/imports`: visits files (five tool presets, `values.ts` readers, the `visits.ts` planner and `VisitBook` port); repeat clients through `sameAs`; tags and birthdays filled, never overwritten; undo of bookings.
+    - `importVisitBook` in appointments: no email, no reminder, insights once.
+    - `/v1/clients?import=`. AC-W1-22…26 new, AC-W1-17 restated.
+  - **Top-up (S48.2 retro):** the clients list filters to one import's new clients (API and core); the result screen's link → S49.2.
+  - **Fixed on the way:** `smart-waitlist.int.test.ts` failed on `main` once 3 November's 10:00 passed in real time: 6 `changeBooking` calls ran on the system clock. They now pass the test's clock. CI's first run then found (fast-check seed 1909035259) an S48 gap, red on `main` too: a row skipped as a repeat of an earlier row's client recorded no client, so a re-import made a new one once that row's phone became ambiguous. Repeat rows now record their client and its id; the counterexample is a unit and an integration test; 6,000 property runs green. CI: red twice, each fixed at its cause (the counterexample; then that property's 5 s default limit against ~5.3 s on CI's runner with coverage, now an explicit 30 s), then green.
+  - **Checks:**
+    - `pnpm check` green (2 web fixture fixes);
+    - affected integration: db 708, core 189, imports 27, appointments 210 (14 red before the clock fix, also on `main`), runtime 2, ai 165, api 93, worker 14;
+    - unit: imports 162, contracts 641;
+    - Playwright: import 2 (phone), screens import 3 (desktop; 6 column baselines updated: Birthday imports);
+    - **gate:** 1,000 clients / 5,000 visits in about 5 s, exact counts.
+  - **Walkthrough:** the column step's Birthday row in the baselines (375/412/1280, both themes). The visit screens come in S49.2.
+  - **Review:** `/code-review` 10 findings, all fixed (hidden-service length as previewed, `no_staff`, two-digit birth years, `import` kept out of booking inputs, insights after an undo, fills-only commits, the tag cap counting stored tags, one service read, the shared `importNameKey`, a misplaced doc comment). `/security-review`: nothing found.
+  - **Timing:** `pnpm check` about 1.5 min (cached build); affected integration 10.7 min; E2E stack start about 2 min; Playwright 1 min; CI (third run, green): build 9.6 min, integration 10.6 min, AI evals 5.7 min, E2E 19.6 min.
+  - **For later:** S49.2 the screens (file kind, conflicts and notices, the result's counts, tags and birthday on the profile, "See your clients"); S53 a "remind these clients" choice for imported appointments; client notes as memory facts; real appointment exports from the pilot to correct the visit presets.
+  - **Retro:** went well: a pure planner shared by the preview and the run, and an end-to-end gate in the worker that took 5 s, not the 2 min budget · do better: after a contract change, grep the tests for `as Client`-style casts (typecheck missed two web fixtures) and run the screenshot spec with `--update-snapshots=all` when copy changes inside the tolerance · top-up for S49.2: the result screen names its conflicts as a short list with "Book again" for each, so a skipped upcoming client isn't forgotten.
 

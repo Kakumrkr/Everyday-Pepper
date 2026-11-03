@@ -1,0 +1,44 @@
+# ADR-0050: Visit and appointment import, tags and birthdays
+
+- **Status:** Accepted (built in S49). Pre-approved by the user at the S49 brief on 2026-11-03 ("Go ahead with your recommendations and complete the session"; D-1 to D-6 A).
+- **Date:** 2026-11-03
+- **Builds on:**
+  - ADR-0049 (client import: staged batches, matching, the leased run, undo for 7 days, no raw file kept)
+  - ADR-0017 (bookings, the occupancy table and its exclusion constraint), ADR-0025 (reminders and booking emails through the outbox)
+  - ADR-0039 (insights re-run by a request row), [V1 playbook](../plan/v1-playbook.md) Phase 11, S49; [scorecard](../plan/scorecard.md) C13
+
+## Context
+A client list alone leaves Pepper blind on day one: no history to suggest a rebooking from, no calendar to protect. Owners switching from Square, Booksy, Vagaro, GlossGenius or Fresha can export their appointments: one row per appointment, with a date, the client, usually a service and a staff member. ADR-0049 left two questions to this session: how the import module writes bookings without importing the appointments module, and what an imported appointment may trigger. An owner who switches must not have Pepper email 400 clients about appointments they already know about, and the history must be readable the same way as visits booked in Pepper.
+
+## Decision
+1. **One batch, two kinds.** An import is a client file or a visits file (`import_batches.kind`), decided by the mapping: a file with a date column mapped (`visit_date`) is a visits file. A visit field is suggested only when the file has both a date and a service or staff column, so a client file's "Date Added" stays a client file. The five tools' appointment exports have presets of their own, recognised by their headers, sharing the tool's `system` with its client export, so a Square appointment's customer id finds the client a Square client import recorded. The same stage, remap, commit, run, undo and tidy-up apply.
+2. **A port, owned by the importer, served by appointments (D-2).** `@pepper/imports` declares `VisitBook`: the business's time zone, services and staff for planning; busy time and existing visits for the rows' range; creating hidden services; writing visits; re-running insights once a run ends; and undoing a batch's bookings. `@pepper/appointments` exports `importVisitBook`, which implements it with its own rules (no import of the other module, by structural typing). The api and the worker pass it in. A visits batch without a `VisitBook` is a programming error.
+3. **Clients first, as in a client file.** Each visit row finds its client by the same matching (external id, email, phone with name, an earlier import's identical row). Several rows of one client are one client: the planner reports the row a "duplicate" is the same as, and visits use that row's client. A client not found is created (`source` import); one whose phone and name several clients share is skipped with ADR-0049's reason.
+4. **Services and staff by name (D-3).** A service matches by name, ignoring case and spaces; one Pepper doesn't have is created once per name as a **hidden** service (`active` false: never on the booking page), with the most common duration of its rows (60 minutes when none is given) and no price. A staff member matches by display name, or by first name when exactly one staff member has it; one not found, or no staff column, goes to the owner's own staff member (the business's first active one when the owner isn't bookable). Both are named once in the preview's notices ("“Fade deluxe” isn't one of your services: 12 visits bring it in as a hidden service.").
+5. **Times in the business's zone.** A date and time without an offset are the business's local time (`fromZoned`); an ISO time with an offset is taken as is. Dates read as US (`1/5/2026`), ISO, or with a month name; times as `2:30 PM` or `14:30`. Duration from a duration or end column, else the service's. A price, when given, is the visit's (cents).
+6. **Past and upcoming (D-4).** A row that starts before now is a past visit: `completed`, or `no_show` when its status says so. **Imported past visits occupy no time** (the occupancy trigger skips `source = 'import'` rows that are completed or no-show), so history whose bookings overlapped in the other tool comes in whole and is never checked against the calendar. A row from now on is a `confirmed` upcoming appointment, unless its time overlaps another booking of its staff member (already in Pepper, or written earlier in the file): then it's left out as `conflict`, with the row, the time and what to do. The exclusion constraint stays the last word: each upcoming visit is written in its own savepoint and a lost race is a conflict too. Opening hours, time off and booking rules aren't checked: the appointment was already made. Cancelled rows are skipped. A visit Pepper already has (the same client at the same start) is `unchanged`, so a re-import adds nothing.
+7. **Never an email (D-5).** Imported bookings (`source` `import`, `import_batch_id` set) are written without the booking service's side effects: no confirmation, no reminder planned, no waitlist matching. A reminder exists only once the owner moves the booking (then it is theirs). Insights re-run once, when the run ends.
+8. **Tags and birthdays (D-6).** `clients.tags` is a text array (at most 20, each 1–40 characters, trimmed, no duplicates ignoring case); the birthday is `birthday_month`, `birthday_day` and an optional `birthday_year` (checked as a real date; February 29 allowed without a year). A file's tags are split on commas, semicolons and bars. A new client gets them; a matched one gets a birthday only if it has none and only the tags it lacks (`fills`). A birthday that can't be read is left out with a reason and never blocks the row.
+9. **Undo, extended.** A visits batch's undo removes its bookings that nobody changed since (`updated_at` unchanged, no visit note), then the clients it created as before (a kept booking keeps its client), and clears the birthdays and tags it added where unchanged. `import_rows.created_client` marks rows that created a client, whatever the batch's kind. Counts add `bookings` removed and kept.
+10. **Counts and the filter.** A batch's counts add `conflict`, `clients` (new clients), `past` and `upcoming`; stored counts without them read as 0. `GET /v1/clients?import=<batch>` lists the clients a batch created, for the result screen's "See your clients" (S48.2 retro top-up; the link in S49.2).
+
+## Consequences
+- Pepper knows each client's history from the first day: the rebooking suggestions and the AI's `find_client_bookings` read imported visits like any other.
+- Imported appointments are quiet by design: an owner whose old tool still sends reminders gets no duplicates; one who wants Pepper's reminders moves or re-creates the booking (S53's autonomy work may add a "remind these" choice).
+- Hidden services and the owner's calendar absorb what the file names and Pepper doesn't have; the notices say so and the owner can rename, show or merge afterwards.
+- The visit layouts are reconstructed from public descriptions and made-up fixtures, as the client presets were; real exports from the pilot will correct them.
+- Planning reads the rows' range of busy time and visits in one pass per chunk, and past visits are written in bulk: the 1,000-client, 5,000-visit gate is measured, not assumed.
+
+## Results (S49)
+- Built as decided, with the review's refinements:
+  - a hidden service takes the length the preview named;
+  - a visit nobody on the team can take at run time is `no_staff` (to fix), never a phantom import;
+  - `import` stays out of the booking inputs (`BookingOriginSchema` for reading);
+  - an undo re-runs the insights;
+  - a re-import that only fills client details may commit.
+- Tests:
+  - imports: 162 unit (`values`, `visits`, mapping, rows), 27 integration;
+  - db: `imported-bookings.int.test.ts`, 10;
+  - appointments: `import-visits.int.test.ts`, 5;
+  - worker: `visits.int.test.ts`, 8 end to end.
+- **The gate:** 1,000 clients and 5,000 visits staged and run in about 5 s (stage 1.2 s, run 3.8 s), counts exact.
