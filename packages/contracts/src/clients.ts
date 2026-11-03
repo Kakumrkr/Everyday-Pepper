@@ -179,12 +179,15 @@ export const MAX_CLIENT_NAMES = 100;
  * Query of `GET /v1/clients/names` (S50.2): the names on visits (the calendar, the booking
  * sheet) in one request: `ids`, comma-separated client ids (never a name or contact).
  */
+/** The clients one names request asks about (1 to `MAX_CLIENT_NAMES`). */
+export const ClientNameIdsSchema = z.array(ClientIdSchema).min(1).max(MAX_CLIENT_NAMES);
+
 export const ClientNamesRequestSchema = z
   .object({
     ids: z
       .string()
       .transform((text) => text.split(','))
-      .pipe(z.array(ClientIdSchema).min(1).max(MAX_CLIENT_NAMES)),
+      .pipe(ClientNameIdsSchema),
   })
   .strict();
 export type ClientNamesRequest = z.input<typeof ClientNamesRequestSchema>;

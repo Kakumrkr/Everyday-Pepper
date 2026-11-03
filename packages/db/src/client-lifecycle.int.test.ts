@@ -688,6 +688,8 @@ describe('paging and searching clients (S50.2)', () => {
     expect(await search('(555) 123')).toEqual(['Zed']);
     expect(await search('555-123-4567')).toEqual(['Zed']);
     expect(await search('55')).toEqual([]);
+    // An email-like search with digits matches no phone.
+    expect(await search('zed555@')).toEqual([]);
     expect(await search('555 123', true)).toEqual([]);
   });
 });

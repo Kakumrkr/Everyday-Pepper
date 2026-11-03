@@ -3,7 +3,13 @@
 import { ClientSchema, ClientsResponseSchema, type Client } from '@pepper/contracts';
 import { Avatar, Button, cx, FOCUS_RING, Input, List, Segmented } from '@pepper/ui';
 import { useState, type SubmitEvent } from 'react';
-import { normalizeContact, walkInFrom, walkInPrefill, type WalkIn } from '../../../lib/booking';
+import {
+  normalizeContact,
+  walkInFrom,
+  walkInPrefill,
+  walkInProblem,
+  type WalkIn,
+} from '../../../lib/booking';
 import { fetchJson, sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { Notice } from '../form-parts';
@@ -31,51 +37,24 @@ export function ClientPicker({
   value: PickedClient | null;
   onChange: (chosen: PickedClient | null) => void;
 }) {
-  if (value !== null && 'walkIn' in value) {
-    const contact = [value.walkIn.email, value.walkIn.phone].filter((part) => part !== null);
-    return (
-      <div className="flex items-center gap-3 rounded-md bg-surface-2 px-4 py-3">
-        <Avatar name={value.walkIn.name} />
-        <div className="min-w-0 flex-1">
-          <p className="m-0 truncate type-body font-semibold text-ink" data-testid="chosen-client">
-            {value.walkIn.name}
-          </p>
-          <p className="m-0 truncate type-caption text-ink-2">
-            {['New client, added with this booking', ...contact].join(' · ')}
-          </p>
-        </div>
-        <Button
-          variant="quiet"
-          size="sm"
-          onClick={() => {
-            onChange(null);
-          }}
-        >
-          Change
-        </Button>
-      </div>
-    );
-  }
   if (value !== null) {
+    const card =
+      'walkIn' in value
+        ? {
+            name: value.walkIn.name,
+            caption: [
+              'New client, added with this booking',
+              ...[value.walkIn.email, value.walkIn.phone].filter((part) => part !== null),
+            ].join(' · '),
+          }
+        : { name: value.client.name, caption: contactLine(value.client) };
     return (
-      <div className="flex items-center gap-3 rounded-md bg-surface-2 px-4 py-3">
-        <Avatar name={value.client.name} />
-        <div className="min-w-0 flex-1">
-          <p className="m-0 truncate type-body font-semibold text-ink" data-testid="chosen-client">
-            {value.client.name}
-          </p>
-          <p className="m-0 truncate type-caption text-ink-2">{contactLine(value.client)}</p>
-        </div>
-        <Button
-          variant="quiet"
-          size="sm"
-          onClick={() => {
-            onChange(null);
-          }}
-        >
-          Change
-        </Button>
-      </div>
+      <ChosenCard
+        {...card}
+        onChange={() => {
+          onChange(null);
+        }}
+      />
     );
   }
   return managesClients ? (
@@ -125,16 +104,18 @@ function WalkInForm({
   prefill: { email: string; phone: string };
   onChoose: (chosen: PickedClient) => void;
 }) {
+  const [problem, setProblem] = useState<string | null>(null);
   function use(event: SubmitEvent<HTMLFormElement>): void {
     event.preventDefault();
     const form = event.currentTarget;
-    onChoose({
-      walkIn: walkInFrom({
-        name: formText(form, 'name'),
-        email: formText(form, 'email'),
-        phone: formText(form, 'phone'),
-      }),
+    const walkIn = walkInFrom({
+      name: formText(form, 'name'),
+      email: formText(form, 'email'),
+      phone: formText(form, 'phone'),
     });
+    const wrong = walkInProblem(walkIn);
+    setProblem(wrong);
+    if (wrong === null) onChoose({ walkIn });
   }
   return (
     <form className="grid gap-2" onSubmit={use}>
@@ -159,10 +140,37 @@ function WalkInForm({
         maxLength={20}
         defaultValue={prefill.phone}
       />
+      {problem === null ? null : <Notice tone="error">{problem}</Notice>}
       <Button type="submit" variant="secondary" size="sm" className="justify-self-start">
         Use new client
       </Button>
     </form>
+  );
+}
+
+/** The client chosen, with "Change" to choose again. */
+function ChosenCard({
+  name,
+  caption,
+  onChange,
+}: {
+  name: string;
+  caption: string;
+  onChange: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-md bg-surface-2 px-4 py-3">
+      <Avatar name={name} />
+      <div className="min-w-0 flex-1">
+        <p className="m-0 truncate type-body font-semibold text-ink" data-testid="chosen-client">
+          {name}
+        </p>
+        <p className="m-0 truncate type-caption text-ink-2">{caption}</p>
+      </div>
+      <Button variant="quiet" size="sm" onClick={onChange}>
+        Change
+      </Button>
+    </div>
   );
 }
 

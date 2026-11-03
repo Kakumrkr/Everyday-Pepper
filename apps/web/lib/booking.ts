@@ -11,6 +11,8 @@ import {
   type Service,
   type StaffMember,
   type WaitlistWindow,
+  type WalkInClient,
+  WalkInClientSchema,
 } from '@pepper/contracts';
 import { dayRange } from './calendar';
 
@@ -188,10 +190,20 @@ export function normalizeContact(text: string): string {
 }
 
 /** A walk-in staff add with their booking (S50.2, ADR-0052): created when the booking is. */
-export interface WalkIn {
-  name: string;
-  email: string | null;
-  phone: string | null;
+export type WalkIn = WalkInClient;
+
+/**
+ * What is wrong with a walk-in typed on the Book sheet, said so it can be fixed there (before
+ * Book), or `null` when the api will take it.
+ */
+export function walkInProblem(walkIn: WalkIn): string | null {
+  const parsed = WalkInClientSchema.safeParse(walkIn);
+  if (parsed.success) return null;
+  const field = parsed.error.issues[0]?.path[0];
+  if (field === 'phone')
+    return 'Type the phone as you’d dial it, e.g. (555) 123-4567, or leave it empty.';
+  if (field === 'email') return 'Check the email address, or leave it empty.';
+  return 'Type the client’s name.';
 }
 
 /**

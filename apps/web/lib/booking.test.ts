@@ -14,6 +14,7 @@ import {
   timeLabel,
   walkInFrom,
   walkInPrefill,
+  walkInProblem,
 } from './booking';
 
 const NY = 'America/New_York';
@@ -206,6 +207,14 @@ describe('walk-ins (S50.2)', () => {
       email: 'w@example.test',
       phone: null,
     });
+  });
+
+  it('says what to fix before Book (AC-W1-34)', () => {
+    const walkIn = { name: 'Walk', email: null, phone: null };
+    expect(walkInProblem(walkIn)).toBeNull();
+    expect(walkInProblem({ ...walkIn, phone: '55512' })).toMatch(/phone as you’d dial it/);
+    expect(walkInProblem({ ...walkIn, email: 'not-an-email' })).toMatch(/email address/);
+    expect(walkInProblem({ ...walkIn, name: '' })).toBe('Type the client’s name.');
   });
 
   it('fills in the contact a search found no client for', () => {

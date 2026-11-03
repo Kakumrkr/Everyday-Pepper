@@ -52,13 +52,19 @@ export function ClientDirectory({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<'search' | 'more' | null>(null);
 
+  // The latest request: an older answer (Show more, then a new search) is dropped.
+  const latest = useRef(0);
+
   /** The first page of `text` (empty: everyone), or with `after` the next page of it. */
   async function load(text: string, after: string | null = null) {
+    latest.current += 1;
+    const request = latest.current;
     setBusy(after === null ? 'search' : 'more');
     const answer = await fetchJson(
       clientsPath({ search: text, importId, after }),
       ClientsPageSchema,
     );
+    if (request !== latest.current) return;
     setBusy(null);
     setError(answer.ok ? null : answer.message);
     if (!answer.ok) return;

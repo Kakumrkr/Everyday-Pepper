@@ -6,7 +6,7 @@ import {
   ClientMergeSchema,
   ClientSchema,
   ClientsQuerySchema,
-  MAX_CLIENT_NAMES,
+  ClientNameIdsSchema,
   WalkInClientSchema,
   type Client,
   type ClientId,
@@ -97,8 +97,7 @@ export async function clientNames(
   ids: readonly ClientId[],
 ): Promise<ClientNamesResponse['names']> {
   requirePermission(actor, 'clients.read');
-  const wanted = [...new Set(ids.map((id) => ClientIdSchema.parse(id)))];
-  if (wanted.length > MAX_CLIENT_NAMES) throw new RangeError('Too many clients asked for');
+  const wanted = [...new Set(ClientNameIdsSchema.parse(ids))];
   const rows = await withMember(db, actor.context, (tx) => findClientsByIds(tx, wanted));
   return rows.map((row) => ({
     id: ClientIdSchema.parse(row.id),

@@ -195,8 +195,8 @@ export const MIN_PHONE_SEARCH_DIGITS = 3;
 
 /**
  * Clients by name, at most `limit`; with `search`, only those whose name or email contains it
- * (case-insensitive; `%` and `_` in it match themselves) or, when it has at least
- * `MIN_PHONE_SEARCH_DIGITS` digits, whose phone contains those digits in any format; with
+ * (case-insensitive; `%` and `_` in it match themselves) or, when it looks like a phone
+ * number with at least `MIN_PHONE_SEARCH_DIGITS` digits, whose phone contains those digits; with
  * `after`, those after that client in the same order (S50.2: the order is `lower(name), id`,
  * so equal names neither repeat nor go missing between pages).
  */
@@ -218,7 +218,10 @@ export async function listClients(
 ): Promise<ClientRow[]> {
   const pattern =
     options.search === undefined ? undefined : `%${options.search.replace(/[\\%_]/g, '\\$&')}%`;
-  const digits = options.search?.replace(/\D/g, '') ?? '';
+  // Only a search that looks like a phone number (digits, spaces, + ( ) - .), so an email
+  // search such as "ana2024@" doesn't also list every phone with 2024 in it.
+  const phoneLike = options.search !== undefined && /^[+\d\s().-]+$/.test(options.search);
+  const digits = phoneLike ? (options.search?.replace(/\D/g, '') ?? '') : '';
   const byPhone =
     digits.length >= MIN_PHONE_SEARCH_DIGITS ? like(clients.phone, `%${digits}%`) : undefined;
   const bySearch =
