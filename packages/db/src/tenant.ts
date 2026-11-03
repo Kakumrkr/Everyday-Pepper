@@ -122,7 +122,9 @@ export async function withJobScan<T>(
   job: ScanJob,
   work: (tx: TenantTx) => Promise<T>,
 ): Promise<T> {
-  const name = z.enum(['reminders', 'cleanup', 'tasks', 'insights', 'waitlist', 'imports']).parse(job);
+  const name = z
+    .enum(['reminders', 'cleanup', 'tasks', 'insights', 'waitlist', 'imports'])
+    .parse(job);
   return db.transaction(
     async (tx) => {
       await tx.execute(sql`SELECT set_config('app.job_scan', ${name}, true)`);
