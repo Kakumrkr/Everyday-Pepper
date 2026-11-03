@@ -14,8 +14,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 4 migration 0058 (`import_batches` with `job_scan('imports')`, `import_rows`, `client_import_refs`; RLS + owners/managers-only member scope, forced RLS) and `repositories/imports.ts`; isolation suite 399 green.
 - [x] 5 domain service `services/imports.ts`: stage, get/list, remap, discard, commit, undo (7 days, purge on undo), `runImport` (lease, chunks of 500, re-plan per chunk, failed after 3 attempts), `tidyImports` (staged > 24 h discarded, rows purged after the window); audit `client_import.committed/finished/undone` (counts only); 24 integration tests green.
 - [x] 6 worker: `imports/relay.ts` + `ImportsRunner` (BullMQ `imports`, job id = batch id, `IMPORT_POLL_MS` 2 s, hourly `tidyImports`, alert with ids only on failure; closes at once without Redis); 55 worker tests green.
-- [ ] 7 api endpoints · 8 ADR-0049.
-- Next: task 7. Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
+- [x] 7 api `/v1/imports` (`clients.manage`): GET list, POST upload (5 MB; CSV/JSONL as text, JSON as octet-stream; 20 per 10 min per member), GET one, PUT mapping, POST commit (202) / undo, DELETE staged; `readUpload` takes an upload kind (photos unchanged); owner sentences in `import_*` errors; 13 controller + 3 integration tests green.
+- [ ] 8 ADR-0049, then the close.
+- Next: task 8 (ADR-0049, docs), then `/session-close`. Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
 
 ## Last sessions
 - **S47.3 Phase 10 · The timed new-owner journey and the Phase 10 gate (2026-11-03)** (no ADR; scorecard §6). Full entry in [session-log.md](session-log.md).

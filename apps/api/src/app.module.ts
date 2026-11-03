@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { BookingEmailsModule } from './booking-emails/booking-emails.js';
 import { ChatModule } from './chat/chat.module.js';
 import { ClientsModule } from './clients/clients.module.js';
+import { ImportsModule } from './imports/imports.module.js';
 import { MemoryModule } from './memory/memory.module.js';
 import type { ApiConfig } from './config.js';
 import { PhotosModule } from './photos/photos.module.js';
@@ -27,6 +28,7 @@ export class AppModule {
         AuthModule.forRoot(config.auth),
         TeamModule,
         ClientsModule,
+        ImportsModule,
         MemoryModule,
         TasksModule,
         FeedModule,
