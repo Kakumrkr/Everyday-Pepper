@@ -7,7 +7,14 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S50.2** (staff walk-ins, client paging and search past 50).
+**S50.2** (brief approved: "Go ahead with your recommendations and complete the session"; D-1 A definer function + commit-time check, D-2 A book the matching client, D-3 A cursor + "Show more", D-4 ADR-0052).
+- [x] 1 Docs: AC-W1-34…36, traceability, ADR-0052, data-model.
+- [ ] 2 Migration 0061 `create_walk_in_client` + deferred booked check (db integration, isolation)
+- [ ] 3 Contracts + appointments `createWalkInBooking`, `POST /v1/bookings/walk-in`
+- [ ] 4 Book sheet "New client" for staff (booking.spec)
+- [ ] 5 Client paging + phone search, "Show more" (clients.spec)
+- [ ] 6 Top-up: `POST /v1/clients/names`, calendar + booking sheet "Deleted client"
+- [ ] 7 Close
 
 ## Last sessions
 - **S50 Phase 11 · Client merge and delete, tags and birthday editing (2026-11-03)** ([ADR-0051](../adr/0051-client-merge-and-delete.md), [PR #74](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/74)). Full entry in [session-log.md](session-log.md).
