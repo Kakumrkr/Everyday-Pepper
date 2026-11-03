@@ -14,6 +14,8 @@ export type CalendarEntry =
       service: string;
       serviceId: string;
       client: string;
+      /** The client's profile; `null` for a deleted client (S50.2) or one not found. */
+      clientId: string | null;
       status: BookingStatus;
       overridden: boolean;
     }

@@ -4,16 +4,15 @@ import {
   ClientInputSchema,
   ClientLookupSchema,
   ClientMergeSchema,
-  ClientNamesRequestSchema,
   ClientSchema,
   ClientsQuerySchema,
+  MAX_CLIENT_NAMES,
   WalkInClientSchema,
   type Client,
   type ClientId,
   type ClientInput,
   type ClientLookup,
   type ClientMerge,
-  type ClientNamesRequest,
   type ClientNamesResponse,
   type ClientRecords,
   type ClientsPage,
@@ -90,18 +89,17 @@ export async function listClients(
 
 /**
  * The names on visits (S50.2): of these clients, those the member may see, a deleted one as
- * "Deleted client" with `deleted` (ADR-0051), in the order asked.
+ * "Deleted client" with `deleted` (ADR-0051); at most `MAX_CLIENT_NAMES`.
  */
 export async function clientNames(
   db: Database,
   actor: Actor,
-  request: ClientNamesRequest,
+  ids: readonly ClientId[],
 ): Promise<ClientNamesResponse['names']> {
   requirePermission(actor, 'clients.read');
-  const { ids } = ClientNamesRequestSchema.parse(request);
-  const rows = await withMember(db, actor.context, (tx) =>
-    findClientsByIds(tx, [...new Set(ids)]),
-  );
+  const wanted = [...new Set(ids.map((id) => ClientIdSchema.parse(id)))];
+  if (wanted.length > MAX_CLIENT_NAMES) throw new RangeError('Too many clients asked for');
+  const rows = await withMember(db, actor.context, (tx) => findClientsByIds(tx, wanted));
   return rows.map((row) => ({
     id: ClientIdSchema.parse(row.id),
     name: row.name,

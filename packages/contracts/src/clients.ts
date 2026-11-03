@@ -172,15 +172,20 @@ export const ClientsPageSchema = ClientsResponseSchema.extend({
 });
 export type ClientsPage = z.infer<typeof ClientsPageSchema>;
 
-/** The most client names one `POST /v1/clients/names` answers. */
-export const MAX_CLIENT_NAMES = 200;
+/** The most client names one `GET /v1/clients/names` answers (an address stays short). */
+export const MAX_CLIENT_NAMES = 100;
 
 /**
- * `POST /v1/clients/names` (S50.2): the names on visits (the calendar, the booking sheet), in
- * one request. A body, as the ids would make a long address.
+ * Query of `GET /v1/clients/names` (S50.2): the names on visits (the calendar, the booking
+ * sheet) in one request: `ids`, comma-separated client ids (never a name or contact).
  */
 export const ClientNamesRequestSchema = z
-  .object({ ids: z.array(ClientIdSchema).min(1).max(MAX_CLIENT_NAMES) })
+  .object({
+    ids: z
+      .string()
+      .transform((text) => text.split(','))
+      .pipe(z.array(ClientIdSchema).min(1).max(MAX_CLIENT_NAMES)),
+  })
   .strict();
 export type ClientNamesRequest = z.input<typeof ClientNamesRequestSchema>;
 

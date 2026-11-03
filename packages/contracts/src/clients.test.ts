@@ -118,14 +118,16 @@ describe('ClientsQuerySchema', () => {
 
 describe('ClientNamesRequestSchema (S50.2)', () => {
   const id = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708190';
+  const other = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708191';
 
-  it(`takes 1 to ${String(MAX_CLIENT_NAMES)} client ids`, () => {
-    expect(ClientNamesRequestSchema.parse({ ids: [id] })).toEqual({ ids: [id] });
-    expect(ClientNamesRequestSchema.safeParse({ ids: [] }).success).toBe(false);
-    expect(
-      ClientNamesRequestSchema.safeParse({ ids: Array.from({ length: 201 }, () => id) }).success,
-    ).toBe(false);
-    expect(ClientNamesRequestSchema.safeParse({ ids: ['not-an-id'] }).success).toBe(false);
+  it(`takes 1 to ${String(MAX_CLIENT_NAMES)} comma-separated client ids`, () => {
+    expect(ClientNamesRequestSchema.parse({ ids: `${id},${other}` })).toEqual({
+      ids: [id, other],
+    });
+    expect(ClientNamesRequestSchema.safeParse({ ids: '' }).success).toBe(false);
+    const many = Array.from({ length: MAX_CLIENT_NAMES + 1 }, () => id).join(',');
+    expect(ClientNamesRequestSchema.safeParse({ ids: many }).success).toBe(false);
+    expect(ClientNamesRequestSchema.safeParse({ ids: 'Maria Lopez' }).success).toBe(false);
   });
 });
 

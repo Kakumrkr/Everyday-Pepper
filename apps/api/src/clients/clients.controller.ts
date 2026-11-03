@@ -54,18 +54,18 @@ export class ClientsController {
   }
 
   /**
-   * 200 `{ names }` (S50.2): the names on visits, of the clients asked for that the member may
-   * see (staff: their own), a deleted client as "Deleted client" with `deleted`.
+   * 200 `{ names }` (S50.2): the names on visits, of the clients asked for (`ids`, comma-
+   * separated) that the member may see (staff: their own), a deleted client as "Deleted
+   * client" with `deleted`. Before `:clientId`, which would take "names" for an id.
    */
-  @Post('names')
-  @HttpCode(200)
+  @Get('names')
   @RequirePermission('clients.read')
   async names(
     @CurrentTenant() tenant: TenantContext,
-    @Body() body: unknown,
+    @Query() query: unknown,
   ): Promise<ClientNamesResponse> {
-    const request = parseBody(ClientNamesRequestSchema, body);
-    return { names: await answering(() => this.clients.names(tenant, request)) };
+    const { ids } = parseBody(ClientNamesRequestSchema, query);
+    return { names: await answering(() => this.clients.names(tenant, ids)) };
   }
 
   /**

@@ -139,22 +139,13 @@ describe('/v1/clients', () => {
     'a(n) %s reads the names on visits, a deleted client marked (S50.2)',
     async (r) => {
       role = r;
-      const response = await request(server)
-        .post('/v1/clients/names')
-        .set('cookie', 'signed-in')
-        .set('origin', ORIGIN)
-        .send({ ids: [CLIENT_ID] })
-        .expect(200);
+      const response = await get(`/v1/clients/names?ids=${CLIENT_ID},${OTHER_ID}`).expect(200);
       expect(response.body).toEqual({
         names: [{ id: CLIENT_ID, name: 'Deleted client', deleted: true }],
       });
-      expect(clients.names).toHaveBeenCalledWith(context(), { ids: [CLIENT_ID] });
-      await request(server)
-        .post('/v1/clients/names')
-        .set('cookie', 'signed-in')
-        .set('origin', ORIGIN)
-        .send({ ids: [] })
-        .expect(400);
+      expect(clients.names).toHaveBeenCalledWith(context(), [CLIENT_ID, OTHER_ID]);
+      await get('/v1/clients/names?ids=').expect(400);
+      expect(clients.get).not.toHaveBeenCalled();
     },
   );
 

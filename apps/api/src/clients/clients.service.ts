@@ -4,7 +4,6 @@ import type {
   ClientInput,
   ClientLookup,
   ClientMerge,
-  ClientNamesRequest,
   ClientNamesResponse,
   ClientRecords,
   ClientsPage,
@@ -43,8 +42,8 @@ export class ClientsService {
     return listClientsPage(this.db, actorOf(tenant), query);
   }
 
-  names(tenant: TenantContext, request: ClientNamesRequest): Promise<ClientNamesResponse['names']> {
-    return clientNames(this.db, actorOf(tenant), request);
+  names(tenant: TenantContext, ids: readonly ClientId[]): Promise<ClientNamesResponse['names']> {
+    return clientNames(this.db, actorOf(tenant), ids);
   }
 
   lookUp(tenant: TenantContext, lookup: ClientLookup): Promise<Client[]> {

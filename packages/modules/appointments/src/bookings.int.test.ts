@@ -22,6 +22,7 @@ import {
   ForbiddenError,
   getClientRecords,
   mergeClients,
+  clientNames,
   getClient,
   listClients,
   lookUpClients,
@@ -729,6 +730,10 @@ describe('walk-ins (S50.2, ADR-0052)', () => {
     await expect(getClient(db, b.colleague, booking.clientId)).rejects.toBeInstanceOf(
       ClientNotFoundError,
     );
+    expect(await clientNames(db, b.staff, [booking.clientId, b.client.id])).toEqual([
+      { id: booking.clientId, name: 'Walk In', deleted: false },
+    ]);
+    expect(await clientNames(db, b.colleague, [booking.clientId])).toEqual([]);
     expect(await names(b)).toEqual(['Maria Lopez', 'Walk In']);
     const audit = await auditOf(b.tenantId);
     expect(
@@ -885,6 +890,10 @@ describe('merging and deleting clients (S50, ADR-0051)', () => {
     await expect(getClient(db, b.owner, b.client.id)).rejects.toBeInstanceOf(ClientNotFoundError);
     expect(await listClients(db, b.owner)).toEqual([]);
     expect(await lookUpClients(db, b.owner, { contact: 'maria@example.test' })).toEqual([]);
+    // Their visits still name them, as "Deleted client" (S50.2, AC-W1-36).
+    expect(await clientNames(db, b.owner, [b.client.id])).toEqual([
+      { id: b.client.id, name: 'Deleted client', deleted: true },
+    ]);
     await expect(book(b, b.owner, request(b, tue('13:00')))).rejects.toBeInstanceOf(
       ClientNotFoundError,
     );

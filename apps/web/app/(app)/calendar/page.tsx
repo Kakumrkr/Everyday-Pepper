@@ -15,7 +15,7 @@ import {
   todayIn,
 } from '../../../lib/calendar';
 import { bookableStaff, bookingAbilities, type BookingSetup } from '../../../lib/booking';
-import { seesDetailsOf } from '../../../lib/calendar-data';
+import { seesDetailsOf, visitClient } from '../../../lib/calendar-data';
 import { NewBooking } from '../../_components/booking/new-booking';
 import { DayGrid, type CalendarColumn } from '../../_components/day-grid';
 import { kitLink } from '../../_components/kit-link';
@@ -81,7 +81,7 @@ export default async function CalendarPage({
           endsAt: booking.endsAt,
           service: services.get(booking.serviceId) ?? 'Appointment',
           serviceId: booking.serviceId,
-          client: day.clientNames.get(booking.clientId) ?? 'Client',
+          ...visitClient(day.clientNames.get(booking.clientId), booking.clientId),
           status: booking.status,
           overridden: booking.overridden,
         })),
