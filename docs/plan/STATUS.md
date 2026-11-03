@@ -7,7 +7,11 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S48.2** (client import screens + "Bring your clients").
+**S48.2** · Client import screens + "Bring your clients" (user: "Go ahead with your recommendations and complete the session": D-1 A Home reads `GET /v1/imports`, offer until an import is done; D-2 A the count sentence; D-3 A one route `/clients/import?batch=`; D-4 no ADR, top-up = AC-W1-21).
+- [x] 1 AC-W1-21 + traceability
+- [x] 2 `lib/imports.ts` (calls, sentence, steps) + forwarder's 5 MB limit for `POST /v1/imports`
+- [ ] 3–4 the four steps on the kit · 5 Home + Clients entry · 6 `import.spec.ts`, `screens.spec.ts` shots
+- Next: tasks 3–4 (the screen).
 
 ## Last sessions
 - **S48 Phase 11 · Client import engine (2026-11-03)** ([ADR-0049](../adr/0049-client-import-batches-and-undo.md), PR #70). Full entry in [session-log.md](session-log.md).

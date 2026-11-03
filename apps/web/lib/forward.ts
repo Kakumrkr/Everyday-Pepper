@@ -1,3 +1,5 @@
+import { MAX_IMPORT_BYTES } from '@pepper/contracts';
+
 /** Request headers passed on to the api; everything else (e.g. `authorization`) is dropped. */
 const REQUEST_HEADERS = [
   'accept',
@@ -35,11 +37,13 @@ export const MAX_BODY_BYTES = 100 * 1024;
 /** Largest photo upload (ADR-0048), on `POST /v1/tenant/photos` only; the api checks it too. */
 export const MAX_PHOTO_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-/** The body limit of a request: a photo upload's, or the JSON default. */
+/** The body limit of a request: a photo's or a client file's upload, or the JSON default. */
 export function bodyLimitOf(method: string, pathname: string): number {
-  return method === 'POST' && pathname === '/v1/tenant/photos'
-    ? MAX_PHOTO_UPLOAD_BYTES
-    : MAX_BODY_BYTES;
+  if (method !== 'POST') return MAX_BODY_BYTES;
+  if (pathname === '/v1/tenant/photos') return MAX_PHOTO_UPLOAD_BYTES;
+  // A client import's file (S48.2, ADR-0049); the api checks it too.
+  if (pathname === '/v1/imports') return MAX_IMPORT_BYTES;
+  return MAX_BODY_BYTES;
 }
 
 const TOO_LARGE = { code: 'payload_too_large', message: 'That request is too large.' };
