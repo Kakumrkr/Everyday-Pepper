@@ -67,6 +67,8 @@ const client = (clientId: string): Client =>
     email: null,
     phone: null,
     source: 'team',
+    tags: [],
+    birthday: null,
     createdAt: T,
     updatedAt: T,
   }) as Client;
