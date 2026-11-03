@@ -6,7 +6,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
-import { bookingWeekLine, setupFix, setupRows, setupSummary } from '../../../lib/setup-review';
+import {
+  bookingWeekLine,
+  setupFix,
+  setupRows,
+  setupSummary,
+  setupTip,
+  type SetupFix,
+} from '../../../lib/setup-review';
 import { kitLink } from '../kit-link';
 
 /**
@@ -25,7 +32,10 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
   // An empty menu has nothing to check yet: only what to do first.
   const empty = review.services.count === 0;
   const fixes = review.warnings.map(setupFix);
-  if (reviewed && fixes.length === 0) return <BookingLink slug={slug} week={review.week} />;
+  const tips = review.suggestions.map(setupTip);
+  if (reviewed && fixes.length === 0) {
+    return <BookingLink slug={slug} week={review.week} tips={tips} />;
+  }
 
   async function confirm() {
     if (saving) return;
@@ -88,6 +98,7 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
       )}
       {reviewed || empty ? null : (
         <>
+          <Tips tips={tips} />
           <List label="What I set up">
             {setupRows(review).map((row) => (
               <ListRow
@@ -116,7 +127,7 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
   return reviewed ? (
     <>
       {card}
-      <BookingLink slug={slug} week={review.week} />
+      <BookingLink slug={slug} week={review.week} tips={tips} />
     </>
   ) : (
     card
@@ -127,7 +138,15 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
  * The booking page's full link with Copy (AC-W1-13): what an owner sends to clients; and how
  * the page did this week, in one line (S47.2, AC-W1-14).
  */
-function BookingLink({ slug, week }: { slug: string; week: SetupReview['week'] }) {
+function BookingLink({
+  slug,
+  week,
+  tips,
+}: {
+  slug: string;
+  week: SetupReview['week'];
+  tips: SetupFix[];
+}) {
   const path = `/book/${encodeURIComponent(slug)}`;
   // The page's own origin, known only in the browser; the path until then.
   const [link, setLink] = useState(path);
@@ -176,6 +195,7 @@ function BookingLink({ slug, week }: { slug: string; week: SetupReview['week'] }
           {copied === true ? 'Copied' : 'Copy link'}
         </Button>
       </div>
+      <Tips tips={tips} />
       <p className="m-0 type-caption text-ink-2" role="status">
         {copied === true
           ? 'Copied. Paste it in a message, your bio or your site.'
@@ -184,5 +204,35 @@ function BookingLink({ slug, week }: { slug: string; week: SetupReview['week'] }
             : ''}
       </p>
     </section>
+  );
+}
+
+/**
+ * What would make the booking page better (S47.3, AC-W1-16): quieter than a fix, since nothing
+ * stops a booking; the link goes where to act on it.
+ */
+function Tips({ tips }: { tips: SetupFix[] }) {
+  if (tips.length === 0) return null;
+  return (
+    <ul className="m-0 flex list-none flex-col gap-3 p-0" aria-label="Suggestions">
+      {tips.map((tip) => (
+        <li
+          key={tip.key}
+          className="flex flex-col gap-2 rounded-md bg-surface-2 p-3"
+          data-testid="setup-tip"
+        >
+          <p className="m-0 flex items-start gap-2 type-body text-ink">
+            <Badge tone="info">Tip</Badge>
+            <span>{tip.text}</span>
+          </p>
+          <Link
+            href={tip.action.href}
+            className={buttonStyle({ variant: 'secondary', size: 'sm' })}
+          >
+            {tip.action.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }

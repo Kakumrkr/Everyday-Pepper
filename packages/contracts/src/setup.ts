@@ -30,6 +30,16 @@ export const SetupWarningSchema = z.discriminatedUnion('kind', [
 ]);
 export type SetupWarning = z.infer<typeof SetupWarningSchema>;
 
+/**
+ * Something that makes the booking page better but stops no booking (S47.3, AC-W1-16). Never a
+ * warning: a business without photos is fully bookable.
+ */
+export const SetupSuggestionSchema = z.discriminatedUnion('kind', [
+  /** The booking page has no cover photo yet. */
+  z.object({ kind: z.literal('add_photos') }).strict(),
+]);
+export type SetupSuggestion = z.infer<typeof SetupSuggestionSchema>;
+
 /** An active staff member as the review shows them. */
 export const SetupProviderSchema = z
   .object({
@@ -60,6 +70,7 @@ export const SetupReviewSchema = z
       .strict(),
     providers: z.array(SetupProviderSchema),
     warnings: z.array(SetupWarningSchema),
+    suggestions: z.array(SetupSuggestionSchema),
     /**
      * The booking page's last 7 days (S47.2, AC-W1-14): visits that opened it and visits that
      * booked (`done` + `waitlisted`), from the step counts (ADR-0047).

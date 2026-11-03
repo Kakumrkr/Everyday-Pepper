@@ -85,6 +85,7 @@ const REVIEW: SetupReview = {
   services: { count: 1, lowestPriceCents: 6500, highestPriceCents: 6500 },
   providers: [{ id: STAFF_ID, displayName: 'Jess', isYou: true, serviceCount: 1, hours: HOURS }],
   warnings: [],
+  suggestions: [],
   week: { visits: 0, booked: 0 },
 };
 const TIME_OFF: TimeOff = {

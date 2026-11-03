@@ -9,7 +9,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S47.3** (user, 2026-11-03: "Go ahead, start with your recommendation and complete": D-1 A no manual main run; D-2 A faster query, limit/runs/target unchanged; D-3 A a separate `suggestions` list; D-4 A score honestly, S47.4 if below target).
 Tasks: 1 ACs (AC-W1-15/16, AC-W8-13) · 2 memory-latency fix (diagnose, then speed up) · 3 owner time model · 4 `new-owner-journey.spec.ts` · 5 "Add photos" suggestion · 6 gate + `/security-review` · 7 close.
-Done: — · Next: task 1.
+Done: 1 ACs (c53304b) · 2 migration 0057, episode vectors in the row: search p95 45 → 24 ms alone, 61 → 32 ms under CPU load (7035b7d) · 3 `@pepper/testing` owner-time.ts (KLM-based) · 4 `new-owner-journey.spec.ts`: owner 7:04 by the model, client first booking 1:35, remembered 0:34 (AC-W8-13 restated: < 2 min first, < 60 s remembered; the code email alone is 50 s) · 5 `suggestions: [add_photos]` on SetupReview, Tip on Home's card (not on an empty menu); photos.spec + journey get their own client address (a shared rate-limit bucket failed photos once).
+Next: task 6 (scorecard gate, `/security-review` over Phase 10). For later: skip the staff step when one person offers the service (C7).
 
 ## Last sessions
 - **S47.2 Phase 10 · Photos on the booking page (2026-11-02)** ([ADR-0048](../adr/0048-business-photos-and-object-storage.md)). Full entry in [session-log.md](session-log.md).

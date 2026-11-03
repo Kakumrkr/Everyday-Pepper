@@ -76,7 +76,12 @@ export function PhotosCard({
   };
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-3" data-testid="photos-card">
+    <section
+      id="photos"
+      aria-labelledby={headingId}
+      className="flex scroll-mt-4 flex-col gap-3"
+      data-testid="photos-card"
+    >
       <div className="flex flex-col gap-1">
         <h2 id={headingId} className="m-0 type-heading">
           Photos

@@ -1,4 +1,4 @@
-import type { SetupReview, SetupWarning } from '@pepper/contracts';
+import type { SetupReview, SetupSuggestion, SetupWarning } from '@pepper/contracts';
 import { formatMoney } from '@pepper/ui';
 import { ROUTES } from './account';
 import { localTimeLabel } from './public-booking';
@@ -95,6 +95,20 @@ export function setupFix(warning: SetupWarning): SetupFix {
         action: { label: 'Choose who offers it', href: ROUTES.team },
       };
   }
+}
+
+/** Each suggestion in words, with where to act on it (S47.3, AC-W1-16). */
+const TIPS: Record<SetupSuggestion['kind'], SetupFix> = {
+  add_photos: {
+    key: 'add_photos',
+    text: 'Your booking page has no photos yet. A cover and your work help clients choose you.',
+    action: { label: 'Add photos', href: `${ROUTES.services}#photos` },
+  },
+};
+
+/** A suggestion in words, with where to act on it. */
+export function setupTip(suggestion: SetupSuggestion): SetupFix {
+  return TIPS[suggestion.kind];
 }
 
 /**
