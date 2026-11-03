@@ -227,6 +227,24 @@ describe('AuditChangeSchema', () => {
         after: { changed: ['email', 'phone'] },
       },
     ],
+    [
+      'client.merged',
+      {
+        action: 'client.merged',
+        entity: { type: 'client', id: CLIENT },
+        before: null,
+        after: { mergedClientId: CLIENT, moved: { visits: 2, waitlistEntries: 0, notes: 1 } },
+      },
+    ],
+    [
+      'client.deleted',
+      {
+        action: 'client.deleted',
+        entity: { type: 'client', id: CLIENT },
+        before: null,
+        after: { pastVisitsKept: 3, notesForgotten: 1 },
+      },
+    ],
     ['booking.created', bookingCreated],
     [
       'booking.updated',

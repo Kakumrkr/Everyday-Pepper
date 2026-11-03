@@ -45,6 +45,8 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   time_off_not_found: 'No such time off for this staff member',
   client_not_found: 'No such client in this business',
   client_email_taken: 'The business already has a client with this email',
+  client_has_upcoming_visits: 'Cancel or move the client’s upcoming visits first',
+  client_merge_overlap: 'These two clients have visits at the same time, so they are two people',
   booking_not_found: 'No such booking in this business',
   slot_unavailable: 'That time cannot be booked',
   booking_not_changeable: 'This booking can no longer be changed this way',

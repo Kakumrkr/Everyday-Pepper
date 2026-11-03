@@ -19,6 +19,7 @@ import {
   type ConversationTurnId,
   type StaffMemberId,
   type TenantId,
+  type ClientId,
   type UserId,
 } from '@pepper/contracts';
 import { sql } from 'drizzle-orm';
@@ -41,7 +42,12 @@ import { recordFunnelStep } from './repositories/booking-funnel.js';
 import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBusinessPhoto } from './repositories/business-photos.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
-import { insertClient } from './repositories/clients.js';
+import {
+  deleteClientRow,
+  findClient,
+  insertClient,
+  mergeClientRows,
+} from './repositories/clients.js';
 import { insertImportBatch, insertImportRefs, replaceImportRows } from './repositories/imports.js';
 import { insertConversation, insertMessage, insertTurn } from './repositories/conversations.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
@@ -62,7 +68,7 @@ import {
   insertWaitlistOffer,
   listDueWaitlistMatches,
 } from './repositories/waitlist.js';
-import { withTenant, withUser, type TenantTx } from './tenant.js';
+import { withMember, withTenant, withUser, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
 /**
@@ -1824,5 +1830,54 @@ describe('tenant context', () => {
     });
     const after = await db.execute(sql`SELECT count(*)::int AS n FROM tenants`);
     expect(after.rows).toEqual([{ n: 0 }]);
+  });
+});
+
+describe('merging and deleting clients (S50, ADR-0051)', () => {
+  let owner: UserId;
+  let mine: ClientId;
+  let theirs: ClientId;
+  const asOwner = <T>(work: (tx: TenantTx) => Promise<T>) =>
+    withMember(db, { tenantId: tenantA, userId: owner }, work);
+  const newClient = (tenant: TenantId, name: string) =>
+    withTenant(db, tenant, async (tx) =>
+      ClientIdSchema.parse(
+        (await insertClient(tx, { name, email: null, phone: null, source: 'team' })).id,
+      ),
+    );
+
+  beforeAll(async () => {
+    owner = await insertUser(db, 'Owner of A');
+    await withTenant(db, tenantA, (tx) => addMembership(tx, { userId: owner, role: 'owner' }));
+    mine = await newClient(tenantA, 'Mine');
+    theirs = await newClient(tenantB, 'Theirs');
+  });
+
+  it("another business's client can't be merged in, merged into or deleted", async () => {
+    const at = new Date('2099-01-01T00:00:00Z');
+    expect(await asOwner((tx) => mergeClientRows(tx, mine, theirs, at))).toBeUndefined();
+    expect(await asOwner((tx) => mergeClientRows(tx, theirs, mine, at))).toBeUndefined();
+    expect(await asOwner((tx) => deleteClientRow(tx, theirs, at))).toBeUndefined();
+    const still = await withTenant(db, tenantB, (tx) => findClient(tx, theirs));
+    expect(still).toMatchObject({ name: 'Theirs', deletedAt: null });
+    expect(await asOwner((tx) => findClient(tx, mine))).toBeDefined();
+  });
+
+  it("the merge and forget functions refuse another business's client", async () => {
+    for (const statement of [
+      `SELECT client_forget('${theirs}'::uuid)`,
+      `SELECT client_merge_episodes('${theirs}'::uuid, '${mine}'::uuid)`,
+      `SELECT client_merge_episodes('${mine}'::uuid, '${theirs}'::uuid)`,
+    ]) {
+      const error = await asOwner((tx) => tx.execute(sql.raw(statement))).catch((e: unknown) => e);
+      expect(sqlState(error)).toBe('P0002');
+    }
+  });
+
+  it('the merge and forget functions refuse a transaction without a member', async () => {
+    const error = await inTenant(tenantA, `SELECT client_forget('${mine}'::uuid)`).catch(
+      (e: unknown) => e,
+    );
+    expect(sqlState(error)).toBe('42501');
   });
 });

@@ -404,6 +404,41 @@ export function clientsHref(batch: ImportBatch): string {
     : ROUTES.clients;
 }
 
+/** What "Book again" can preselect: the business's bookable services and its staff. */
+export interface BookAgainChoices {
+  services: readonly { id: string; name: string }[];
+  staff: readonly { id: string; displayName: string }[];
+}
+
+/** A name as the import matches it (ADR-0050): ignoring case and spaces. */
+const nameKey = (name: string) => name.toLowerCase().replace(/\s+/g, '');
+
+/**
+ * Where a time taken's "Book again" goes (AC-W1-33, the S49.2 retro top-up): the client's
+ * profile with Book open, the visit's service and staff member chosen when they match by name
+ * (a staff member by display name, or by first name when only one has it). Ids, never names,
+ * in the address.
+ */
+export function bookAgainHref(
+  clientId: string,
+  visit: Pick<ImportVisit, 'service' | 'staff'> | null,
+  choices: BookAgainChoices,
+): string {
+  const query = new URLSearchParams({ book: '1' });
+  if (visit !== null) {
+    const service = choices.services.find((s) => nameKey(s.name) === nameKey(visit.service));
+    if (service !== undefined) query.set('service', service.id);
+    const wanted = nameKey(visit.staff);
+    const exact = choices.staff.filter((m) => nameKey(m.displayName) === wanted);
+    const byFirst = choices.staff.filter(
+      (m) => nameKey(m.displayName.trim().split(/\s+/)[0] ?? '') === wanted,
+    );
+    const staff = exact.length === 1 ? exact[0] : byFirst.length === 1 ? byFirst[0] : undefined;
+    if (staff !== undefined) query.set('staff', staff.id);
+  }
+  return `${ROUTES.clients}/${clientId}?${query.toString()}`;
+}
+
 /**
  * The upcoming times a run left out because another booking held them (AC-W1-29), as the result
  * lists them with "Book again", and how many more the file has than the rows read.

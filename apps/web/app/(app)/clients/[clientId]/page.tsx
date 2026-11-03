@@ -23,6 +23,7 @@ import {
 import { birthdayLabel } from '../../../../lib/clients';
 import { localDateIn, splitVisits, visitRanges } from '../../../../lib/setup';
 import { NewBooking } from '../../../_components/booking/new-booking';
+import { ClientActions } from '../../../_components/clients/client-actions';
 import { ClientEditor } from '../../../_components/clients/client-editor';
 import { ClientMemory } from '../../../_components/memory/client-memory';
 import { currentAccount, currentBusiness, currentJson } from '../../../_server/account';
@@ -40,18 +41,28 @@ const SOURCES: Record<RecordSource, string> = {
 /**
  * A client's profile (S16): how to reach them, what Pepper knows about them and their visit
  * notes (S32), their coming and recent visits (62 days each way), Book, and, for owners and
- * managers, editing their details. Their tags and birthday (S49.2, AC-W1-28) show when they
- * have any; editing them comes in S50. Staff reach only their own clients and see only their own
+ * managers, editing their details (tags and birthday too, S50, AC-W1-32) and, at the foot,
+ * merging and deleting them (ADR-0051, AC-W1-30, AC-W1-31). `?book=1` opens Book at once,
+ * with `service` and `staff` chosen when bookable ("Book again", AC-W1-33). Staff reach only their own clients and see only their own
  * visits with them (AC-W9-1, decided by the api). On the kit (S42): initials and the name as
  * the title, then quiet sections of hairline rows; the empty ones say what to do next.
  */
-export default async function ClientPage({ params }: { params: Promise<{ clientId: string }> }) {
+export default async function ClientPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ clientId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const account = await currentAccount();
   if (account.state !== 'signed-in') return null;
   const current = await currentBusiness();
   if (!current?.permissions.includes('clients.read')) redirect(ROUTES.home);
   const id = ClientIdSchema.safeParse((await params).clientId);
   if (!id.success) notFound();
+  const wanted = await searchParams;
+  const one = (value: string | string[] | undefined) =>
+    typeof value === 'string' ? value : undefined;
 
   const now = Date.now();
   const ranges = visitRanges(now);
@@ -121,7 +132,13 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
         <div className="flex flex-wrap gap-2">
           {manages ? <ClientEditor client={client} /> : null}
           {books ? (
-            <NewBooking setup={setup} date={localDateIn(timeZone, now)} client={{ client }} />
+            <NewBooking
+              setup={setup}
+              date={localDateIn(timeZone, now)}
+              client={{ client }}
+              defaultOpen={one(wanted['book']) === '1'}
+              preset={{ serviceId: one(wanted['service']), staffMemberId: one(wanted['staff']) }}
+            />
           ) : null}
         </div>
       </header>
@@ -249,6 +266,8 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
           />
         )}
       </section>
+
+      {manages ? <ClientActions client={client} /> : null}
     </div>
   );
 }

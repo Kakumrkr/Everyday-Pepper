@@ -109,10 +109,24 @@ const ClientValuesSchema = z.object({ source: RecordSourceSchema }).strict();
 const ClientEditSchema = z
   .object({
     changed: z
-      .array(z.enum(['name', 'email', 'phone']))
+      .array(z.enum(['name', 'email', 'phone', 'tags', 'birthday']))
       .min(1)
-      .max(3),
+      .max(5),
   })
+  .strict();
+const RecordCount = z.number().int().min(0);
+/** A merge (S50, ADR-0051): the client merged in (now gone) and what moved, as counts. */
+const ClientMergedSchema = z
+  .object({
+    mergedClientId: ClientIdSchema,
+    moved: z
+      .object({ visits: RecordCount, waitlistEntries: RecordCount, notes: RecordCount })
+      .strict(),
+  })
+  .strict();
+/** A deletion (S50, ADR-0051): what stayed and what was forgotten, as counts; no details. */
+const ClientDeletedSchema = z
+  .object({ pastVisitsKept: RecordCount, notesForgotten: RecordCount })
   .strict();
 const BookingValuesSchema = z
   .object({
@@ -331,6 +345,22 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('client'),
       before: z.null(),
       after: ClientEditSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('client.merged'),
+      entity: entity('client'),
+      before: z.null(),
+      after: ClientMergedSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('client.deleted'),
+      entity: entity('client'),
+      before: z.null(),
+      after: ClientDeletedSchema,
     })
     .strict(),
   // The client unsubscribed from marketing email with the one-click link (S36): no address.

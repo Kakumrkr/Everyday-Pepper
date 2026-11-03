@@ -35,6 +35,8 @@ import type {
 import {
   ActionNotFoundError,
   AlreadyAMemberError,
+  ClientHasUpcomingVisitsError,
+  ClientMergeOverlapError,
   ClientNotFoundError,
   ConversationNotFoundError,
   ForbiddenError,
@@ -117,6 +119,8 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [TimeOffNotFoundError, NotFoundException, 'time_off_not_found'],
   [ClientNotFoundError, NotFoundException, 'client_not_found'],
   [ClientEmailTakenError, ConflictException, 'client_email_taken'],
+  [ClientHasUpcomingVisitsError, ConflictException, 'client_has_upcoming_visits'],
+  [ClientMergeOverlapError, ConflictException, 'client_merge_overlap'],
   [BookingNotFoundError, NotFoundException, 'booking_not_found'],
   [BookingNotChangeableError, ConflictException, 'booking_not_changeable'],
   [BookingNotStartedError, ConflictException, 'booking_not_started'],

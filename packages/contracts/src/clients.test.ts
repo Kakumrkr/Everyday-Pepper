@@ -6,6 +6,7 @@ import {
   ClientContactSchema,
   ClientInputSchema,
   ClientLookupSchema,
+  ClientMergeSchema,
   ClientsQuerySchema,
   PhoneSchema,
   normalizePhone,
@@ -32,9 +33,46 @@ describe('ClientInputSchema', () => {
     ['an invalid email', { name: 'Maria', email: 'maria@' }],
     ['a local phone number', { name: 'Maria', phone: '555-123-4567' }],
     ['an unknown field', { name: 'Maria', source: 'ai' }],
+    ['21 tags', { name: 'Maria', tags: Array.from({ length: 21 }, (_, i) => `t${String(i)}`) }],
+    ['an empty tag', { name: 'Maria', tags: ['  '] }],
+    ['a day not in the month', { name: 'Maria', birthday: { month: 2, day: 30, year: null } }],
   ])('rejects %s', (_label, input) => {
     expect(ClientInputSchema.safeParse(input).success).toBe(false);
   });
+
+  it('leaves tags and birthday out unless given (an edit keeps them, S50)', () => {
+    const parsed = ClientInputSchema.parse({ name: 'Maria' });
+    expect('tags' in parsed).toBe(false);
+    expect('birthday' in parsed).toBe(false);
+  });
+
+  it('tidies tags and drops repeats, ignoring case', () => {
+    expect(
+      ClientInputSchema.parse({ name: 'Maria', tags: [' VIP ', 'vip', 'color  client'] }).tags,
+    ).toEqual(['VIP', 'color client']);
+  });
+
+  it('takes a birthday without its year, or null to clear it', () => {
+    expect(
+      ClientInputSchema.parse({ name: 'Maria', birthday: { month: 2, day: 29, year: null } })
+        .birthday,
+    ).toEqual({ month: 2, day: 29, year: null });
+    expect(ClientInputSchema.parse({ name: 'Maria', birthday: null }).birthday).toBeNull();
+  });
+});
+
+describe('ClientMergeSchema', () => {
+  it('takes the other client by id, lowercased', () => {
+    const id = '0B1C2D3E-4F50-4A1B-8C2D-3E4F5A6B7C8D';
+    expect(ClientMergeSchema.parse({ otherClientId: id }).otherClientId).toBe(id.toLowerCase());
+  });
+
+  it.each([{}, { otherClientId: 'nope' }, { otherClientId: crypto.randomUUID(), extra: 1 }])(
+    'rejects %j',
+    (input) => {
+      expect(ClientMergeSchema.safeParse(input).success).toBe(false);
+    },
+  );
 });
 
 describe('PhoneSchema', () => {

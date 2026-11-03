@@ -451,7 +451,13 @@ export async function listInsightBookings(tx: TenantTx, since: Date): Promise<In
       status: bookings.status,
     })
     .from(bookings)
-    .where(gte(bookings.startsAt, since))
+    .where(
+      and(
+        gte(bookings.startsAt, since),
+        // A deleted client's past visits (ADR-0051) suggest nothing: no rebooking, no pattern.
+        sql`NOT EXISTS (SELECT 1 FROM ${clients} c WHERE c.id = ${bookings.clientId} AND c.deleted_at IS NOT NULL)`,
+      ),
+    )
     .orderBy(asc(bookings.startsAt), asc(bookings.id));
 }
 

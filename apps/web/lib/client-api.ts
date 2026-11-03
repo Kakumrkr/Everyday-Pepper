@@ -48,6 +48,9 @@ const MESSAGES: Record<string, string> = {
   staff_member_not_found: 'That staff member is no longer bookable.',
   client_not_found: 'I couldn’t find that client.',
   client_email_taken: 'A client with this email already exists. Search for them instead.',
+  client_has_upcoming_visits: 'They still have visits coming up. Cancel or move those first.',
+  client_merge_overlap:
+    'These two have visits at the same time, so they’re two people. I kept them apart.',
   booking_not_found: 'That booking is gone, or it isn’t yours to change.',
   slot_unavailable: 'That time can’t be booked. Pick another time.',
   booking_not_changeable: 'This booking can’t be changed any more.',

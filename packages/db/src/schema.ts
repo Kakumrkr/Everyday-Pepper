@@ -693,10 +693,17 @@ export const clients = pgTable(
     birthdayMonth: smallint('birthday_month'),
     birthdayDay: smallint('birthday_day'),
     birthdayYear: smallint('birthday_year'),
+    // When the client was deleted (S50, ADR-0051): the row stays, without their details, so
+    // past visits still count; nothing lists, finds or books them.
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
     unique('clients_tenant_id_id_unique').on(table.tenantId, table.id),
+    check(
+      'clients_deleted_without_details',
+      sql`${table.deletedAt} IS NULL OR (${table.email} IS NULL AND ${table.phone} IS NULL AND cardinality(${table.tags}) = 0 AND ${table.birthdayMonth} IS NULL AND ${table.birthdayYear} IS NULL)`,
+    ),
     // One client per email in a business (the booking page will find returning clients by it).
     uniqueIndex('clients_tenant_email_unique').on(table.tenantId, table.email),
     index('clients_tenant_name_idx').on(table.tenantId, sql`lower(${table.name})`),

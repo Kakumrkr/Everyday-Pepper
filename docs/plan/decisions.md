@@ -392,3 +392,14 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - the import screen resumes the import its address names on mount (Back after "Book again" restored a render from before `?batch=`), unless the owner acted first;
     - the e2e visits fixture's upcoming rows are in 2099, the last year a file may give, so no day turns them into history;
     - the review's 5 fixes; the altitude finding (a shared `router.replace` instead of `replaceState`) waits until a second screen writes its state into the address.
+- **S50 (user, 2026-11-03):** at the brief, "Go ahead with your recommendations and complete the session":
+  - D-1 A: split. S50 is merge, delete, tags/birthday editing and the top-up; staff walk-ins and client paging/search past 50 move to **S50.2**.
+  - D-2 A: a deleted client is anonymised, not removed: the row stays as "Deleted client" for past visits (`deleted_at`, no details by a check); refused while upcoming visits exist.
+  - D-3 A: the owner picks the client kept; blanks filled from the other, tags combined, the kept birthday wins; clients booked at the same time can't be merged; no undo.
+  - D-4: ADR-0051.
+  - **Claude's refinements:**
+    - facts move only through the one subject change a merge names (`pepper.client_merge`); a shared key keeps the kept client's fact, and a dropped fact with the same value scrubs nothing;
+    - two owner/manager-only definer functions (`client_merge_episodes`, `client_forget`); the scrub of a deleted client's name, email and phone only reaches chats since they were added;
+    - a deletion also ends remembered browsers, the import rows' details and hash, past bookings' manage links, and pending proposals about them; insights skip deleted clients' visits; a merge re-runs insights;
+    - "Book again" carries ids (`?book=1&service=&staff=`), matched by name on the import screen; Book drops `?book=1` from the address when it closes;
+    - the review's 5 fixes; queued booking emails to a deleted client still go out (ADR-0051, for later).

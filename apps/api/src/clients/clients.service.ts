@@ -1,9 +1,20 @@
-import type { Client, ClientId, ClientInput, ClientLookup, ClientsQuery } from '@pepper/contracts';
+import type {
+  Client,
+  ClientId,
+  ClientInput,
+  ClientLookup,
+  ClientMerge,
+  ClientRecords,
+  ClientsQuery,
+} from '@pepper/contracts';
 import {
   createClient,
+  deleteClient,
   getClient,
+  getClientRecords,
   listClients,
   lookUpClients,
+  mergeClients,
   updateClient,
   type Actor,
   type TenantContext,
@@ -42,6 +53,18 @@ export class ClientsService {
 
   update(tenant: TenantContext, id: ClientId, input: ClientInput): Promise<Client> {
     return updateClient(this.db, actorOf(tenant), id, input);
+  }
+
+  records(tenant: TenantContext, id: ClientId): Promise<ClientRecords> {
+    return getClientRecords(this.db, actorOf(tenant), id);
+  }
+
+  merge(tenant: TenantContext, id: ClientId, merge: ClientMerge): Promise<Client> {
+    return mergeClients(this.db, actorOf(tenant), id, merge);
+  }
+
+  delete(tenant: TenantContext, id: ClientId): Promise<void> {
+    return deleteClient(this.db, actorOf(tenant), id);
   }
 }
 
