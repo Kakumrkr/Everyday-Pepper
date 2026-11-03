@@ -90,6 +90,13 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   photo_not_found: 'There is no such photo',
   photo_rejected: 'That file is not a photo we can use',
   photo_too_large: 'That photo is over 10 MB',
+  import_not_found: 'No such import',
+  import_rejected: 'That file can’t be imported',
+  import_too_large: 'That file is over 5 MB. Split it into smaller files.',
+  import_not_staged: 'That import has already been started',
+  import_not_ready: 'That import isn’t ready',
+  import_not_undoable: 'That import can’t be undone',
+  import_mapping_invalid: 'That mapping doesn’t fit the file',
   gallery_full: 'The gallery holds 12 photos',
   storage_unavailable: 'Photos are not available right now',
 };

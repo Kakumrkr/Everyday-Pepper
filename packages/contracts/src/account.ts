@@ -97,6 +97,14 @@ export const ApiErrorCodeSchema = z.enum([
   'photo_rejected',
   'photo_too_large',
   'gallery_full',
+  // Client imports (S48, ADR-0049).
+  'import_not_found',
+  'import_rejected',
+  'import_too_large',
+  'import_not_staged',
+  'import_not_ready',
+  'import_not_undoable',
+  'import_mapping_invalid',
   'storage_unavailable',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
