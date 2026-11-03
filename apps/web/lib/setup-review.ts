@@ -96,3 +96,15 @@ export function setupFix(warning: SetupWarning): SetupFix {
       };
   }
 }
+
+/**
+ * The booking page's last 7 days in one line (S47.2, AC-W1-14): "12 visits, 7 booked this
+ * week", or what to do when nobody came yet.
+ */
+export function bookingWeekLine(week: SetupReview['week']): string {
+  if (week.visits === 0 && week.booked === 0) {
+    return 'No visits yet this week. Share your link to get your first booking.';
+  }
+  const visits = `${String(week.visits)} ${week.visits === 1 ? 'visit' : 'visits'}`;
+  return `${visits}, ${String(week.booked)} booked this week`;
+}

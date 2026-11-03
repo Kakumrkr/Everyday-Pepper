@@ -18,7 +18,9 @@ const allowedInternalImports = {
   'packages/contracts': [],
   'packages/db': ['contracts', 'testing'],
   'packages/core': ['contracts', 'db', 'testing'],
-  'packages/modules/*': ['contracts', 'db', 'core', 'testing'],
+  // S47.2 (ADR-0048): object storage and the image pipeline are L1 platform, below the modules.
+  'packages/storage': ['testing'],
+  'packages/modules/*': ['contracts', 'db', 'core', 'storage', 'testing'],
   'packages/templates': ['contracts'],
   // ADR-0029: the AI's tools are thin adapters over the domain services (core and the modules)
   // and run in their member transactions (db's `withMember`, types); never L3 templates.
@@ -29,7 +31,17 @@ const allowedInternalImports = {
   // Test-only helpers; a devDependency wherever used, so a production import fails the image.
   'packages/testing': [],
   // Apps also get each modules/* package as it is created.
-  'apps/api': ['contracts', 'core', 'db', 'ai', 'runtime', 'testing', 'appointments', 'templates'],
+  'apps/api': [
+    'contracts',
+    'core',
+    'db',
+    'ai',
+    'runtime',
+    'storage',
+    'testing',
+    'appointments',
+    'templates',
+  ],
   // S31 (ADR-0037): the episode job summarises and embeds through the AI package's ports.
   // S35 (ADR-0039): the insights job passes the templates' thresholds to the appointments pass.
   'apps/worker': [
@@ -44,7 +56,8 @@ const allowedInternalImports = {
     'templates',
   ],
   'apps/web': ['contracts', 'ui'],
-  e2e: ['contracts', 'testing'],
+  // S47.2: the journeys make real photos with storage's `solidColorPhoto`.
+  e2e: ['contracts', 'storage', 'testing'],
 };
 
 const boundaryConfigs = Object.entries(allowedInternalImports).map(([dir, allowed]) => ({

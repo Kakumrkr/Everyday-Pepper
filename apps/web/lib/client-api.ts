@@ -81,6 +81,11 @@ const MESSAGES: Record<string, string> = {
   memory_episode_not_found: 'I no longer remember that conversation.',
   memory_limit_reached: 'I remember as much as I can here. Delete something first.',
   memory_paused: 'Remembering new things is paused for this business.',
+  photo_not_found: 'That photo is gone. Refresh to see the latest.',
+  photo_rejected: 'That file is not a photo we can use. Try a JPEG, PNG or WebP.',
+  photo_too_large: 'That photo is over 10 MB. Pick a smaller one.',
+  gallery_full: 'The gallery holds 12 photos. Remove one to add another.',
+  storage_unavailable: 'Photos can’t be saved right now. Try again soon.',
   // Rebooking emails (S36).
   draft_refused:
     'Leave out links, email addresses, phone numbers and anything sensitive, and keep it to 120 words.',

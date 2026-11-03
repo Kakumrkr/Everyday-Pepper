@@ -38,6 +38,7 @@ import { recordActivation } from './repositories/activation.js';
 import { appendAuditEntry } from './repositories/audit.js';
 import { recordFunnelStep } from './repositories/booking-funnel.js';
 import { insertBookingVerification } from './repositories/booking-verifications.js';
+import { insertBusinessPhoto } from './repositories/business-photos.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
 import { insertConversation, insertMessage, insertTurn } from './repositories/conversations.js';
@@ -455,6 +456,22 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'step = step',
     appendOnly: true,
+  },
+  business_photos: {
+    tenantColumn: 'tenant_id',
+    // A booking page photo (S47.2, ADR-0048): read by the page and by every member.
+    seed: async (tx) =>
+      (
+        await insertBusinessPhoto(tx, {
+          id: newId(),
+          kind: 'gallery',
+          widths: [320, 640],
+          width: 900,
+          height: 600,
+          caption: null,
+        })
+      ).id,
+    touch: 'caption = caption',
   },
   outbox_messages: {
     tenantColumn: 'tenant_id',

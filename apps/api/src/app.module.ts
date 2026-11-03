@@ -8,6 +8,7 @@ import { ChatModule } from './chat/chat.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import { MemoryModule } from './memory/memory.module.js';
 import type { ApiConfig } from './config.js';
+import { PhotosModule } from './photos/photos.module.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { UnsubscribeModule } from './unsubscribe/unsubscribe.controller.js';
 import { PushModule } from './push/push.module.js';
@@ -43,6 +44,7 @@ export class AppModule {
           codeKey: config.bookingCodeKey,
           secureCookies: config.auth.baseUrl.startsWith('https:'),
         }),
+        PhotosModule.forRoot(config.storage),
         UnsubscribeModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
         ChatModule.forRoot({
           openai: config.ai.openai,

@@ -15,6 +15,7 @@ export * from './memory.js';
 export { ANSWER_FACTS_MAX, memoryFactRefsIn } from './memory-ids.js';
 export * from './outbox.js';
 export * from './permissions.js';
+export * from './photos.js';
 export * from './public-booking.js';
 export * from './push.js';
 export * from './rules.js';

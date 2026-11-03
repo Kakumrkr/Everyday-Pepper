@@ -25,6 +25,7 @@ import {
   unique,
 } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
+import { solidColorPhoto } from '@pepper/storage';
 
 // The signed-in screens on the kit (S41, DESIGN.md D6; AC-X-3): Home, Chat and More (S41), and
 // Calendar, Clients and a client's profile (S42, AC-X-8) at 375, 412 and 1280 px in light and
@@ -364,6 +365,39 @@ for (const width of WIDTHS) {
       page.getByText('This unsubscribe link isn’t valid.', { exact: false }),
     ).toBeVisible();
     await shots('unsubscribe-invalid');
+
+    // S47.2 (AC-W8-12): the page with its logo, cover and three photos of the work.
+    const origin = new URL(page.url()).origin;
+    const add = async (kind: string, body: Buffer, type: string) => {
+      const answer = await page.request.post(`/v1/tenant/photos?kind=${kind}`, {
+        headers: { 'content-type': type, origin },
+        data: body,
+      });
+      expect(answer.status()).toBe(201);
+    };
+    await add('logo', await solidColorPhoto(400, 400, 'png', { r: 34, g: 34, b: 34 }), 'image/png');
+    await add(
+      'cover',
+      await solidColorPhoto(1600, 900, 'jpeg', { r: 132, g: 92, b: 64 }),
+      'image/jpeg',
+    );
+    for (const color of [
+      { r: 96, g: 64, b: 52 },
+      { r: 150, g: 120, b: 96 },
+      { r: 70, g: 58, b: 74 },
+    ]) {
+      await add('gallery', await solidColorPhoto(900, 900, 'jpeg', color), 'image/jpeg');
+    }
+    await page.goto(`/book/${slug}`);
+    await expect(page.getByTestId('work-gallery').getByRole('img')).toHaveCount(3);
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          [...document.images].every((img) => img.complete && img.naturalWidth > 0),
+        ),
+      )
+      .toBe(true);
+    await shots('book-photos');
   });
 
   test(`Home, Chat and More at ${String(width)} px, light and dark`, async ({ page }) => {

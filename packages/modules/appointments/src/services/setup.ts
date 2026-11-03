@@ -1,5 +1,6 @@
 import {
   SetupReviewSchema,
+  type BookingFunnelCounts,
   type Service,
   type SetupReview,
   type SetupWarning,
@@ -10,6 +11,7 @@ import {
 import { auditActorOf, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
+  countFunnelSteps,
   findCurrentTenant,
   markCurrentTenantSetupReviewed,
   withTenant,
@@ -95,7 +97,20 @@ async function setupReviewIn(tx: TenantTx, actor: Actor, known?: Tenant): Promis
       hours: hours.get(member.id) ?? { intervals: [] },
     })),
     warnings: setupWarnings(services, staff, hours),
+    week: bookingWeek(
+      await countFunnelSteps(tx, { from: new Date(Date.now() - WEEK_MS), to: new Date() }),
+    ),
   });
+}
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * The booking page's week in two numbers (S47.2, AC-W1-14): visits that opened it (every visit
+ * starts at the service step) and visits that booked or joined the waitlist.
+ */
+export function bookingWeek(counts: BookingFunnelCounts): { visits: number; booked: number } {
+  return { visits: counts.service, booked: counts.done + counts.waitlisted };
 }
 
 /**

@@ -206,6 +206,8 @@ describe('getPublicBusiness', () => {
       phone: null,
       publicAddress: null,
       cancellationPolicy: null,
+      // No photos until the owner adds them (S47.2).
+      photos: { logo: null, cover: null, gallery: [] },
       services: [
         {
           id: p.service.id,

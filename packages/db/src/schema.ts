@@ -20,7 +20,13 @@ import {
   uuid,
   vector,
 } from 'drizzle-orm/pg-core';
-import { BOOKING_FUNNEL_STEPS, type TemplateId } from '@pepper/contracts';
+import {
+  BOOKING_FUNNEL_STEPS,
+  BUSINESS_PHOTO_KINDS,
+  MAX_PHOTO_CAPTION_LENGTH,
+  MAX_PHOTO_WIDTH,
+  type TemplateId,
+} from '@pepper/contracts';
 import { newId } from './ids.js';
 
 // Source of truth for the tables. `pnpm --filter @pepper/db generate` turns changes into a SQL
@@ -1077,6 +1083,52 @@ export const bookingFunnelEvents = pgTable(
     check(
       'booking_funnel_events_step_known',
       sql.raw(`step IN (${BOOKING_FUNNEL_STEPS.map((step) => `'${step}'`).join(', ')})`),
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+
+/**
+ * A photo on the business's booking page (S47.2, ADR-0048, AC-W8-10…12): its logo, cover or
+ * one of up to 12 gallery photos. The images are in object storage under
+ * `tenants/<tenant>/photos/<id>/<width>.webp`, one per width listed; a new upload is a new id,
+ * so a photo's images never change. The caption is its alt text.
+ */
+export const businessPhotos = pgTable(
+  'business_photos',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    widths: integer('widths').array().notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    caption: text('caption'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // One logo and one cover per business; the gallery's limit is checked under a lock.
+    uniqueIndex('business_photos_one_per_kind')
+      .on(table.tenantId, table.kind)
+      .where(sql`${table.kind} <> 'gallery'`),
+    index('business_photos_created_idx').on(table.tenantId, table.createdAt),
+    check(
+      'business_photos_kind_known',
+      sql.raw(`kind IN (${BUSINESS_PHOTO_KINDS.map((kind) => `'${kind}'`).join(', ')})`),
+    ),
+    check(
+      'business_photos_widths_valid',
+      sql`cardinality(${table.widths}) BETWEEN 1 AND 3 AND 0 < ALL(${table.widths}) AND ${sql.raw(String(MAX_PHOTO_WIDTH))} >= ALL(${table.widths})`,
+    ),
+    check('business_photos_size_positive', sql`${table.width} > 0 AND ${table.height} > 0`),
+    check(
+      'business_photos_caption_length',
+      sql.raw(
+        `caption IS NULL OR length(caption) BETWEEN 1 AND ${String(MAX_PHOTO_CAPTION_LENGTH)}`,
+      ),
     ),
     tenantIsolation(sql.raw('tenant_id')),
   ],
@@ -2368,3 +2420,4 @@ export const signupEvents = pgTable('signup_events', {
   occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
 });
 export type RememberedDevice = typeof rememberedDevices.$inferSelect;
+export type BusinessPhotoRow = typeof businessPhotos.$inferSelect;

@@ -12,6 +12,7 @@ import {
   TimeZoneSchema,
   UserIdSchema,
 } from './tenancy.js';
+import { BusinessPhotoKindSchema } from './photos.js';
 import { MemoryFactStatusSchema, MemorySourceSchema, MemorySubjectTypeSchema } from './memory.js';
 import { RuleSchema } from './rules.js';
 import { TaskSourceSchema, TaskStatusSchema } from './tasks.js';
@@ -456,6 +457,31 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('tenant'),
       before: z.object({ paused: z.boolean() }).strict(),
       after: z.object({ paused: z.boolean() }).strict(),
+    })
+    .strict(),
+  // Booking page photos (S47.2, ADR-0048): the kind only; a caption is the owner's free text.
+  z
+    .object({
+      action: z.literal('business_photo.added'),
+      entity: entity('business_photo'),
+      before: z.null(),
+      after: z.object({ kind: BusinessPhotoKindSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('business_photo.updated'),
+      entity: entity('business_photo'),
+      before: z.object({ captioned: z.boolean() }).strict(),
+      after: z.object({ captioned: z.boolean() }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('business_photo.removed'),
+      entity: entity('business_photo'),
+      before: z.object({ kind: BusinessPhotoKindSchema }).strict(),
+      after: z.null(),
     })
     .strict(),
   // The operator feed's switches (ADR-0039).

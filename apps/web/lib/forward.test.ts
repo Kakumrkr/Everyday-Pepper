@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { forwardToApi, MAX_BODY_BYTES } from './forward';
+import { bodyLimitOf, forwardToApi, MAX_BODY_BYTES, MAX_PHOTO_UPLOAD_BYTES } from './forward';
 
 const API = 'http://api:4000';
 
@@ -111,6 +111,55 @@ describe('forwardToApi', () => {
       expect(calls).toHaveLength(0);
     },
   );
+
+  it('lets a photo upload, and only that, carry up to 10 MB (S47.2)', async () => {
+    expect(bodyLimitOf('POST', '/v1/tenant/photos')).toBe(MAX_PHOTO_UPLOAD_BYTES);
+    expect(bodyLimitOf('PATCH', '/v1/tenant/photos')).toBe(MAX_BODY_BYTES);
+    expect(bodyLimitOf('POST', '/v1/tenant/photos/x')).toBe(MAX_BODY_BYTES);
+    expect(bodyLimitOf('POST', '/v1/tenants')).toBe(MAX_BODY_BYTES);
+    const { fetch, calls } = upstream(new Response('{}', { status: 201 }));
+    const photo = new Uint8Array(MAX_BODY_BYTES * 3);
+    const response = await forwardToApi(
+      new Request('http://localhost:3000/v1/tenant/photos?kind=cover', {
+        method: 'POST',
+        headers: { 'content-type': 'image/jpeg' },
+        body: photo,
+      }),
+      { apiBaseUrl: API, fetch },
+    );
+    expect(response.status).toBe(201);
+    expect((calls[0]?.init.body as ArrayBuffer).byteLength).toBe(photo.byteLength);
+    const refused = await forwardToApi(
+      new Request('http://localhost:3000/v1/tenant/photos?kind=cover', {
+        method: 'POST',
+        headers: { 'content-length': String(MAX_PHOTO_UPLOAD_BYTES + 1) },
+        body: 'x',
+      }),
+      { apiBaseUrl: API, fetch },
+    );
+    expect(refused.status).toBe(413);
+    expect(calls).toHaveLength(1);
+  });
+
+  it('passes a photo’s own headers back', async () => {
+    const { fetch } = upstream(
+      new Response('webp', {
+        headers: {
+          'content-type': 'image/webp',
+          'cache-control': 'public, max-age=31536000, immutable',
+          'content-security-policy': "default-src 'none'",
+          'cross-origin-resource-policy': 'same-origin',
+        },
+      }),
+    );
+    const response = await forwardToApi(
+      new Request('http://localhost:3000/v1/public/businesses/fade/photos/x/640'),
+      { apiBaseUrl: API, fetch },
+    );
+    expect(response.headers.get('cache-control')).toBe('public, max-age=31536000, immutable');
+    expect(response.headers.get('content-security-policy')).toBe("default-src 'none'");
+    expect(response.headers.get('cross-origin-resource-policy')).toBe('same-origin');
+  });
 
   it('answers 502 without details when the api is unreachable', async () => {
     const fetch = vi.fn(() =>

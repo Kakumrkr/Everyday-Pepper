@@ -91,6 +91,12 @@ export const ApiErrorCodeSchema = z.enum([
   'memory_episode_not_found',
   'memory_limit_reached',
   'memory_paused',
+  // Booking page photos (S47.2, ADR-0048).
+  'photo_not_found',
+  'photo_rejected',
+  'photo_too_large',
+  'gallery_full',
+  'storage_unavailable',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

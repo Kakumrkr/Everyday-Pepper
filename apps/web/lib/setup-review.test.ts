@@ -1,6 +1,6 @@
 import { ServiceIdSchema, StaffMemberIdSchema, type SetupReview } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import { setupFix, setupRows, setupSummary } from './setup-review';
+import { bookingWeekLine, setupFix, setupRows, setupSummary } from './setup-review';
 
 const TUE_SAT = {
   intervals: [2, 3, 4, 5, 6].map((weekday) => ({ weekday, start: '09:00', end: '18:00' })),
@@ -15,6 +15,7 @@ const review = (overrides: Partial<SetupReview> = {}): SetupReview => ({
   services: { count: 8, lowestPriceCents: 2500, highestPriceCents: 6000 },
   providers: [{ id: ANA, displayName: 'Ana', isYou: true, serviceCount: 8, hours: TUE_SAT }],
   warnings: [],
+  week: { visits: 0, booked: 0 },
   ...overrides,
 });
 
@@ -76,5 +77,15 @@ describe('the setup review in words (S46, AC-W1-11)', () => {
     expect(
       setupFix({ kind: 'service_without_provider', serviceId: COLOR, name: 'Color' }).text,
     ).toBe('No one with hours offers Color, so it isn’t on your booking page.');
+  });
+});
+
+describe('bookingWeekLine (AC-W1-14)', () => {
+  it('says the week in one line, and what to do before the first visit', () => {
+    expect(bookingWeekLine({ visits: 12, booked: 7 })).toBe('12 visits, 7 booked this week');
+    expect(bookingWeekLine({ visits: 1, booked: 0 })).toBe('1 visit, 0 booked this week');
+    expect(bookingWeekLine({ visits: 0, booked: 0 })).toBe(
+      'No visits yet this week. Share your link to get your first booking.',
+    );
   });
 });

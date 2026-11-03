@@ -1,0 +1,35 @@
+{
+  "name": "@pepper/storage",
+  "version": "0.0.0",
+  "private": true,
+  "description": "L1 object storage (ADR-0048): the ObjectStore port, its S3 adapter (SeaweedFS in development and CI, ADR-0011), and the image pipeline that checks and remakes uploaded photos.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@pepper/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.int.config.ts"
+  },
+  "devDependencies": {
+    "@pepper/config": "workspace:*",
+    "@pepper/testing": "workspace:*",
+    "@vitest/coverage-v8": "^5.0.5",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1161.0",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  }
+}

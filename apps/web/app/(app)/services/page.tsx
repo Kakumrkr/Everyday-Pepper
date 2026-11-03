@@ -1,4 +1,8 @@
-import { ServicesResponseSchema, StaffResponseSchema } from '@pepper/contracts';
+import {
+  BusinessPhotosSchema,
+  ServicesResponseSchema,
+  StaffResponseSchema,
+} from '@pepper/contracts';
 import { Badge, buttonStyle } from '@pepper/ui';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
@@ -7,6 +11,7 @@ import { redirect } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
 import { durationLabel, priceLabel, servicesByCategory } from '../../../lib/setup';
 import { BookingPageCard } from '../../_components/setup/booking-page-card';
+import { PhotosCard } from '../../_components/setup/photos-card';
 import { ServiceEditor } from '../../_components/setup/service-editor';
 import { ServicesScreen } from '../../_components/setup/services-screen';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
@@ -27,9 +32,12 @@ export default async function ServicesPage() {
   const current = await currentBusiness();
   if (!current?.permissions.includes('services.read')) redirect(ROUTES.home);
 
-  const [services, staff] = await Promise.all([
+  const managesPage = current.permissions.includes('settings.manage');
+  const [services, staff, photos] = await Promise.all([
     currentJson('/v1/services', ServicesResponseSchema),
     currentJson('/v1/staff', StaffResponseSchema),
+    // The booking page's photos (S47.2): owners and managers only.
+    managesPage ? currentJson('/v1/tenant/photos', BusinessPhotosSchema) : Promise.resolve(null),
   ]);
   const manages = current.permissions.includes('services.manage');
   const list = services?.services ?? [];
@@ -94,8 +102,15 @@ export default async function ServicesPage() {
         slug={current.business.slug}
         brandColor={current.business.brandColor}
         profile={current.business}
-        manages={current.permissions.includes('settings.manage')}
+        manages={managesPage}
       />
+      {managesPage ? (
+        <PhotosCard
+          slug={current.business.slug}
+          businessName={current.business.name}
+          initial={photos}
+        />
+      ) : null}
     </ServicesScreen>
   );
 }

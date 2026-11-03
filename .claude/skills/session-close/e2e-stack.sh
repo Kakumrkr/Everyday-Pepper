@@ -1,7 +1,7 @@
 #!/bin/bash
 # Starts the stack Playwright runs against, the way S31 ran it in a cloud session: Postgres,
-# Redis and Mailpit in Docker; the built api, worker and web as plain Node processes (building
-# the app images takes far longer). Chat answers come from the journeys' scripted model, as in
+# Redis, Mailpit and SeaweedFS (S47.2) in Docker; the built api, worker and web as plain Node
+# processes (building the app images takes far longer). Chat answers come from the journeys' scripted model, as in
 # CI (ADR-0031): OPENAI_API_KEY is removed from the services, so no model is ever called. The
 # worker runs the insights job every 10 s, as in CI (S35). The web serves the component gallery
 # (PEPPER_GALLERY=1), as in CI (S40).
@@ -16,7 +16,7 @@ case "${1:-}" in
     logs=${2:?log dir}
     [ ! -f "$pids" ] || { echo "e2e-stack: already started (stop it first)" >&2; exit 1; }
     [ -f .env ] || cp .env.example .env
-    docker compose up -d --wait postgres redis mailpit
+    docker compose up -d --wait postgres redis mailpit seaweedfs
     pnpm turbo run build --filter=@pepper/api --filter=@pepper/worker --filter=@pepper/web \
       --output-logs=errors-only
     pnpm db:migrate

@@ -6,6 +6,8 @@ import {
   BookingRequestExpiredError,
   BookingRequestNotFoundError,
   BookingRequestUsedError,
+  GalleryFullError,
+  PhotoNotFoundError,
   IdempotencyKeyReusedError,
   ServiceNotFoundError,
   SlotUnavailableError,
@@ -75,6 +77,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { ImageRejectedError } from '@pepper/storage';
 import { apiError } from '../auth/guards.js';
 
 type ErrorClass = abstract new (...args: never[]) => Error;
@@ -139,7 +142,35 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [BookingRequestExpiredError, GoneException, 'booking_request_expired'],
   [BookingRequestUsedError, ConflictException, 'booking_request_used'],
   [TooManyBookingRequestsError, TooManyRequestsException, 'too_many_requests'],
+  [PhotoNotFoundError, NotFoundException, 'photo_not_found'],
+  [GalleryFullError, ConflictException, 'gallery_full'],
 ];
+
+/** 413: the body is over the limit (Nest has no exception class for it under this name). */
+export class PayloadTooLargeError extends HttpException {
+  constructor(body: object) {
+    super(body, HttpStatus.PAYLOAD_TOO_LARGE);
+  }
+}
+
+/** 415: the body is not a type the endpoint takes. */
+export class UnsupportedMediaTypeError extends HttpException {
+  constructor(body: object) {
+    super(body, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+  }
+}
+
+/**
+ * A refused upload (ADR-0048): 413 over 10 MB, 415 not a JPEG, PNG or WebP (HEIC too), 422 a
+ * photo that is too small, too many pixels or too long; the message says what to fix.
+ */
+function photoRejected(error: ImageRejectedError): HttpException {
+  if (error.reason === 'too_large') return new PayloadTooLargeError(apiError('photo_too_large'));
+  const body = { code: 'photo_rejected', message: error.message, reason: error.reason };
+  return ['unsupported_type', 'heic', 'unreadable'].includes(error.reason)
+    ? new UnsupportedMediaTypeError(body)
+    : new UnprocessableEntityException(body);
+}
 
 /**
  * The api's answer to a domain error (`{ code, message }`; a refused booking time also lists
@@ -172,6 +203,7 @@ export function toHttpError(error: unknown): unknown {
     };
     return new ConflictException(body);
   }
+  if (error instanceof ImageRejectedError) return photoRejected(error);
   if (error instanceof WrongVerificationCodeError) {
     const body: WrongCode = {
       ...apiError('wrong_code'),

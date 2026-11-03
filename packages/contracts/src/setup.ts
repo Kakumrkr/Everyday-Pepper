@@ -60,6 +60,11 @@ export const SetupReviewSchema = z
       .strict(),
     providers: z.array(SetupProviderSchema),
     warnings: z.array(SetupWarningSchema),
+    /**
+     * The booking page's last 7 days (S47.2, AC-W1-14): visits that opened it and visits that
+     * booked (`done` + `waitlisted`), from the step counts (ADR-0047).
+     */
+    week: z.object({ visits: z.number().int().min(0), booked: z.number().int().min(0) }).strict(),
   })
   .strict();
 export type SetupReview = z.infer<typeof SetupReviewSchema>;

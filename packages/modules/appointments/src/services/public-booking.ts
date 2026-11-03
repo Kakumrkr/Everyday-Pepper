@@ -89,6 +89,7 @@ import {
   type WaitlistOfferRow,
 } from '@pepper/db';
 import type { ServiceToBook } from '../availability/engine.js';
+import { businessPhotosIn } from './business-photos.js';
 import { addDays, formatDate, fromZoned, parseDate, toZoned } from '../availability/zoned-time.js';
 import { toAvailableSlot, waitlistExpiry } from '../bookings/planning.js';
 import {
@@ -211,6 +212,7 @@ export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise
         phone: tenant.phone,
         publicAddress: tenant.publicAddress,
         cancellationPolicy: tenant.cancellationPolicy,
+        photos: await businessPhotosIn(tx),
         services: services
           .filter((s) => offered.has(s.id))
           .map((s) => ({

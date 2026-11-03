@@ -49,6 +49,7 @@ const BUSINESS: PublicBusiness = {
   cancellationPolicy: 'Cancel 24 hours ahead.',
   services: [],
   staff: [],
+  photos: { logo: null, cover: null, gallery: [] },
 };
 const SLOT = AvailableSlotSchema.parse({
   staffMemberId: STAFF_ID,

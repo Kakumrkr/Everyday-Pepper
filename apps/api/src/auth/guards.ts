@@ -87,6 +87,11 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   memory_episode_not_found: 'Pepper no longer remembers this conversation',
   memory_limit_reached: 'Pepper remembers as much as it can here. Delete something first',
   memory_paused: 'Remembering new things is paused for this business',
+  photo_not_found: 'There is no such photo',
+  photo_rejected: 'That file is not a photo we can use',
+  photo_too_large: 'That photo is over 10 MB',
+  gallery_full: 'The gallery holds 12 photos',
+  storage_unavailable: 'Photos are not available right now',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
-import { setupFix, setupRows, setupSummary } from '../../../lib/setup-review';
+import { bookingWeekLine, setupFix, setupRows, setupSummary } from '../../../lib/setup-review';
 import { kitLink } from '../kit-link';
 
 /**
@@ -25,7 +25,7 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
   // An empty menu has nothing to check yet: only what to do first.
   const empty = review.services.count === 0;
   const fixes = review.warnings.map(setupFix);
-  if (reviewed && fixes.length === 0) return <BookingLink slug={slug} />;
+  if (reviewed && fixes.length === 0) return <BookingLink slug={slug} week={review.week} />;
 
   async function confirm() {
     if (saving) return;
@@ -116,15 +116,18 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
   return reviewed ? (
     <>
       {card}
-      <BookingLink slug={slug} />
+      <BookingLink slug={slug} week={review.week} />
     </>
   ) : (
     card
   );
 }
 
-/** The booking page's full link with Copy (AC-W1-13): what an owner sends to clients. */
-function BookingLink({ slug }: { slug: string }) {
+/**
+ * The booking page's full link with Copy (AC-W1-13): what an owner sends to clients; and how
+ * the page did this week, in one line (S47.2, AC-W1-14).
+ */
+function BookingLink({ slug, week }: { slug: string; week: SetupReview['week'] }) {
   const path = `/book/${encodeURIComponent(slug)}`;
   // The page's own origin, known only in the browser; the path until then.
   const [link, setLink] = useState(path);
@@ -144,6 +147,9 @@ function BookingLink({ slug }: { slug: string }) {
         Your booking page
       </h2>
       <p className="m-0 type-body text-ink-2">Send this link to clients so they can book you.</p>
+      <p className="m-0 type-label text-ink tabular-nums" data-testid="booking-week">
+        {bookingWeekLine(week)}
+      </p>
       <div className="flex flex-wrap items-center gap-3">
         <a
           href={path}
