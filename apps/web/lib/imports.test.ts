@@ -390,7 +390,7 @@ describe('a visits file (AC-W1-27)', () => {
 
   it('says what it added and that no one was emailed', () => {
     expect(resultSentence(visits({ status: 'done' }))).toBe(
-      'Added 40 past visits, 6 upcoming appointments and 12 new clients. No one was emailed. 2 upcoming times were already taken, so those visits are left out.',
+      'Added 40 past visits, 6 upcoming appointments and 12 new clients. No one was emailed.',
     );
     expect(
       resultSentence(

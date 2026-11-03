@@ -286,14 +286,10 @@ export function resultSentence(batch: ImportBatch): string {
     case 'running':
       return `Importing ${count(counts.rows, 'row', 'rows')}. You can leave this screen; I’ll keep going.`;
     case 'done': {
-      if (kind !== 'visits') return `${did}.`;
-      // An import never emails (AC-W1-24): said where the owner would worry about it.
-      const quiet = counts.upcoming > 0 ? ' No one was emailed.' : '';
-      const taken =
-        counts.conflict > 0
-          ? ` ${count(counts.conflict, 'upcoming time was', 'upcoming times were')} already taken, so ${counts.conflict === 1 ? 'that visit is' : 'those visits are'} left out.`
-          : '';
-      return `${did}.${quiet}${taken}`;
+      // An import never emails (AC-W1-24): said where the owner would worry about it. The
+      // times taken are the result's own list ("Book these again"), not repeated here.
+      const quiet = kind === 'visits' && counts.upcoming > 0 ? ' No one was emailed.' : '';
+      return `${did}.${quiet}`;
     }
     case 'failed':
       return `${did} before it stopped. Undo it, or try the file again later.`;

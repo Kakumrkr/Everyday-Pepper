@@ -250,7 +250,7 @@ test('import (AC-W1-27…29): an owner brings a visits file, finds its new clien
     timeout: 60_000,
   });
   await expect(page.getByTestId('import-result')).toContainText(
-    'Added 3 past visits, 1 upcoming appointment and 3 new clients. No one was emailed. 1 upcoming time was already taken, so that visit is left out.',
+    'Added 3 past visits, 1 upcoming appointment and 3 new clients. No one was emailed.',
   );
   const taken = page.getByTestId('import-taken');
   await expect(taken).toHaveCount(1);
