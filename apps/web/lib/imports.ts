@@ -1,4 +1,5 @@
 import {
+  ImportBatchIdSchema,
   ImportBatchSchema,
   ImportFieldSchema,
   ImportPreviewSchema,
@@ -32,6 +33,16 @@ export const IMPORT_PATH = '/clients/import';
 
 export function importHref(id: ImportBatchId): string {
   return `${IMPORT_PATH}?batch=${encodeURIComponent(id)}`;
+}
+
+/**
+ * The import an address names (`?batch=`), or `null`. Back to the screen after "Book again" can
+ * restore the page as first rendered, before the address named its import; the screen then
+ * resumes the import from here.
+ */
+export function batchInAddress(search: string): ImportBatchId | null {
+  const parsed = ImportBatchIdSchema.safeParse(new URLSearchParams(search).get('batch'));
+  return parsed.success ? parsed.data : null;
 }
 
 /** What the file picker offers: the extensions, and the types a phone may label them with. */

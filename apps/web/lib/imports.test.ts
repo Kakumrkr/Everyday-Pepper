@@ -6,6 +6,7 @@ import {
 } from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  batchInAddress,
   clientsHref,
   columnNote,
   commitImport,
@@ -466,5 +467,13 @@ describe('after the import (AC-W1-29)', () => {
     expect(takenTimes(batch({ status: 'staged', kind: 'visits' }), [taken(4, null)]).rows).toEqual(
       [],
     );
+  });
+});
+
+describe('batchInAddress', () => {
+  it('reads the import a link or Back names, and nothing else', () => {
+    expect(batchInAddress(`?batch=${ID}`)).toBe(ID);
+    expect(batchInAddress('?batch=not-an-id')).toBeNull();
+    expect(batchInAddress('')).toBeNull();
   });
 });

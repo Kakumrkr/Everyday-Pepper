@@ -20,6 +20,7 @@ import { ROUTES } from '../../../lib/account';
 import { errorCodeOf } from '../../../lib/client-api';
 import {
   ACCEPTED_IMPORT_TYPES,
+  batchInAddress,
   clientsHref,
   columnNote,
   commitImport,
@@ -74,6 +75,23 @@ export function ImportScreen({
     missing ? 'I couldn’t find that import. Pick your file again.' : null,
   );
   const heading = useRef<HTMLHeadingElement>(null);
+  const initialId = initial?.batch.id ?? null;
+
+  // Back to this screen (after "Book again") can restore its first render, from before the
+  // address named the import: resume the import the address names.
+  useEffect(() => {
+    const named = batchInAddress(window.location.search);
+    if (named === null || named === initialId) return;
+    let stopped = false;
+    void loadImport(named).then((answer) => {
+      if (stopped || !answer.ok) return;
+      setPreview(answer.data);
+      setStep(stepOf(answer.data.batch));
+    });
+    return () => {
+      stopped = true;
+    };
+  }, [initialId]);
 
   // Each step starts at its heading, for a screen reader and a phone scrolled down.
   function go(next: ImportStep) {

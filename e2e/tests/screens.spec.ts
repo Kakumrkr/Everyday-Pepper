@@ -2,7 +2,9 @@ import {
   ClientSchema,
   CurrentBusinessResponseSchema,
   ServiceSchema,
+  ServicesResponseSchema,
   StaffMemberSchema,
+  StaffResponseSchema,
   addDays,
   formatDate,
   fromZoned,
@@ -24,6 +26,7 @@ import {
   signUp,
   toast,
   unique,
+  visitsCsv,
 } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 import { solidColorPhoto } from '@pepper/storage';
@@ -813,6 +816,64 @@ for (const width of WIDTHS) {
     });
     // The undo's last day moves with today.
     await shots('done', [page.getByTestId('import-undo-until')]);
+  });
+}
+
+for (const width of WIDTHS) {
+  test(`A visits import, its new clients and a profile at ${String(width)} px, light and dark`, async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts', type: 'Barbershop' });
+    const { services } = ServicesResponseSchema.parse(
+      await (await page.request.get('/v1/services')).json(),
+    );
+    const { staff } = StaffResponseSchema.parse(await (await page.request.get('/v1/staff')).json());
+    const service = services.find((each) => each.active)?.name ?? '';
+    const owner = staff[0]?.displayName ?? '';
+    const shots = async (name: string, mask: Locator[] = [], action = true) => {
+      if (width === 375) {
+        await expectTapTargets(page, `the ${name}`);
+        if (action) await expectImportActionAtTheBottom(page);
+      }
+      for (const scheme of SCHEMES) {
+        await still(page, scheme);
+        await expect
+          .soft(page)
+          .toHaveScreenshot(`${name}-${String(width)}-${scheme}.png`, { ...SHOT, mask });
+      }
+    };
+
+    await page.goto('/clients/import');
+    await hydrated(page.getByRole('button', { name: 'Pick a file' }));
+    await page.getByTestId('import-input').setInputFiles({
+      name: 'appointments.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from(visitsCsv({ service, staff: owner })),
+    });
+    await expect(page.getByRole('heading', { name: 'Check the columns' })).toBeVisible();
+    await shots('import-visits-columns');
+
+    await page.getByRole('button', { name: 'Check the visits' }).click();
+    await expect(page.getByTestId('import-notice').first()).toBeVisible();
+    await shots('import-visits');
+
+    await page.getByRole('button', { name: 'Import 4 visits' }).click();
+    await expect(page.getByRole('heading', { name: 'Your visits are in' })).toBeVisible({
+      timeout: 60_000,
+    });
+    await expect(page.getByTestId('import-taken')).toBeVisible();
+    // The undo's last day moves with today.
+    await shots('import-visits-done', [page.getByTestId('import-undo-until')]);
+
+    await page.getByTestId('import-see-clients').click();
+    await expect(page.getByTestId('clients-import-filter')).toBeVisible();
+    await shots('clients-imported', [], false);
+
+    await page.getByRole('link', { name: /Ana Ruiz/ }).click();
+    await expect(page.getByTestId('client-birthday')).toBeVisible();
+    await shots('client-imported', [], false);
   });
 }
 

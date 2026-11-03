@@ -1,7 +1,19 @@
 import { AxeBuilder } from '@axe-core/playwright';
-import { ClientSchema, ClientsResponseSchema } from '@pepper/contracts';
+import {
+  ClientSchema,
+  ClientsResponseSchema,
+  ServicesResponseSchema,
+  StaffResponseSchema,
+} from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
-import { callApi, hydrated, IMPORT_CSV, onboardOwner, ownClientAddress } from './helpers.js';
+import {
+  callApi,
+  hydrated,
+  IMPORT_CSV,
+  onboardOwner,
+  ownClientAddress,
+  visitsCsv,
+} from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 
 // Client import through the screens and the real worker (S48.2, ADR-0049, AC-W1-17…21): an
@@ -51,7 +63,9 @@ test('import (AC-W1-17…21): an owner brings a CSV through the screens and undo
   await expect(offer).toBeVisible();
   await offer.getByRole('link', { name: 'Bring your clients' }).click();
   await expect(page).toHaveURL(/\/clients\/import$/);
-  await expect(page.getByRole('heading', { name: 'Pick your client list' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Pick your clients or appointments' }),
+  ).toBeVisible();
 
   // A file that can't be read: what to fix, and nothing staged.
   const input = page.getByTestId('import-input');
@@ -141,7 +155,9 @@ test('import (AC-W1-17…21): an owner brings a CSV through the screens and undo
   // Undone, the offer is back; and Import a file starts over.
   await page.getByRole('button', { name: 'Import a file' }).click();
   await expect(page).toHaveURL(/\/clients\/import$/);
-  await expect(page.getByRole('heading', { name: 'Pick your client list' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Pick your clients or appointments' }),
+  ).toBeVisible();
   await page.goto('/');
   await expect(page.getByTestId('import-offer')).toBeVisible();
 });
@@ -159,4 +175,131 @@ test('import: Clients offers Import to the owner; a link to an import of no one 
     'I couldn’t find that import. Pick your file again.',
   );
   await expect(page.getByRole('button', { name: 'Pick a file' })).toBeVisible();
+});
+
+test('import (AC-W1-27…29): an owner brings a visits file, finds its new clients, books a time taken again', async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  await onboardOwner(page, { type: 'Barbershop' });
+  // Zoe was a client before the import: the filtered list leaves her out.
+  await callApi(
+    page,
+    'POST',
+    '/v1/clients',
+    { name: 'Zoe Lin', phone: '+15550101009' },
+    ClientSchema,
+  );
+  const { services } = ServicesResponseSchema.parse(
+    await (await page.request.get('/v1/services')).json(),
+  );
+  const { staff } = StaffResponseSchema.parse(await (await page.request.get('/v1/staff')).json());
+  const service = services.find((each) => each.active)?.name ?? '';
+  const owner = staff[0]?.displayName ?? '';
+  expect(service).not.toBe('');
+  expect(owner).not.toBe('');
+
+  await page.goto('/clients/import');
+  await hydrated(page.getByRole('button', { name: 'Pick a file' }));
+  await expect(page.getByText('No one gets an email')).toBeVisible();
+  await page.getByTestId('import-input').setInputFiles({
+    name: 'appointments.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(visitsCsv({ service, staff: owner })),
+  });
+  await expect(page.getByRole('heading', { name: 'Check the columns' })).toBeVisible();
+  await expect(page.getByLabel('Date', { exact: true })).toHaveValue('visit_date');
+  await expect(page.getByLabel('Tags', { exact: true })).toHaveValue('tags');
+  // AC-W1-27: the steps speak of visits.
+  await page.getByRole('button', { name: 'Check the visits' }).click();
+
+  // The preview: one sentence, the notices, the row to fix, the time taken, the visits' lines.
+  await expect(page.getByTestId('import-sentence')).toHaveText(
+    '3 past visits, 1 upcoming, 3 new clients, 1 to fix, 1 time taken, 1 left out',
+  );
+  await expect(page.getByTestId('import-notice')).toHaveText([
+    /“Beard sculpt” isn’t one of your services: 1 visit brings it in as a hidden service/,
+    new RegExp(`“Jo” isn’t on your team: 1 visit goes to ${owner}`),
+  ]);
+  const groups = page.getByRole('heading', { level: 3 });
+  await expect(groups).toHaveText([
+    'To fix · 1',
+    'Times taken · 1',
+    'Left out · 1',
+    'Ready to import · 4',
+  ]);
+  await expect(page.getByTestId('import-conflict')).toContainText('Dee Park');
+  await expect(page.getByTestId('import-conflict')).toContainText('Time taken');
+  await expect(page.getByTestId('import-ready').first()).toContainText(
+    `Tue, Mar 4, 2025, 10:00 AM · ${service} with ${owner}`,
+  );
+  await expect(page.getByTestId('import-ready').filter({ hasText: '2030' })).toContainText(
+    'Upcoming',
+  );
+  await expect(page.getByTestId('import-ready').filter({ hasText: 'May 20' })).toContainText(
+    'No-show',
+  );
+  expect(
+    (await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()).violations.map((v) => v.id),
+  ).toEqual([]);
+  await expectTapTargets(page, 'the visits preview');
+
+  // Import: what it added, that no one was emailed, and the time taken to book again.
+  await (await hydrated(page.getByRole('button', { name: 'Import 4 visits' }))).click();
+  await expect(page.getByRole('heading', { name: 'Your visits are in' })).toBeVisible({
+    timeout: 60_000,
+  });
+  await expect(page.getByTestId('import-result')).toContainText(
+    'Added 3 past visits, 1 upcoming appointment and 3 new clients. No one was emailed. 1 upcoming time was already taken, so that visit is left out.',
+  );
+  const taken = page.getByTestId('import-taken');
+  await expect(taken).toHaveCount(1);
+  await expect(taken).toContainText('Dee Park');
+  await expect(taken).toContainText(`Tue, Jun 4, 2030, 10:15 AM · ${service} with ${owner}`);
+  expect(
+    (await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()).violations.map((v) => v.id),
+  ).toEqual([]);
+  await expectTapTargets(page, 'the visits result');
+
+  // AC-W1-29: "Book again" opens Dee's profile, where Book is hers.
+  await taken.getByRole('link', { name: /^Book again/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Dee Park' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Book' })).toBeVisible();
+  await page.goBack();
+
+  // AC-W1-29: "See your clients" lists only the import's new clients; a search stays inside.
+  await (await hydrated(page.getByTestId('import-see-clients'))).click();
+  await expect(page).toHaveURL(/\/clients\?import=[0-9a-f-]{36}$/);
+  await expect(page.getByTestId('clients-import-filter')).toContainText('New from your import');
+  const list = page.getByRole('list', { name: 'Clients' });
+  await expect(list.getByRole('link')).toHaveText([/Ana Ruiz/, /Ben Ito/, /Dee Park/]);
+  await page.getByLabel('Search clients by name or email').fill('Lin');
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(page.getByText('No clients match “Lin”')).toBeVisible();
+
+  // AC-W1-28: Ana's profile shows her tags and birthday.
+  await page.getByRole('button', { name: 'Clear the search' }).click();
+  await list.getByRole('link', { name: /Ana Ruiz/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Ana Ruiz' })).toBeVisible();
+  await expect(page.getByTestId('client-tags').getByRole('listitem')).toHaveText(['VIP', 'Color']);
+  await expect(page.getByTestId('client-birthday')).toHaveText('April 2, 1990');
+  await page.goBack();
+
+  // "Show everyone" leaves the filter.
+  await (await hydrated(page.getByRole('link', { name: 'Show everyone' }))).click();
+  await expect(page).toHaveURL(/\/clients$/);
+  await expect(page.getByTestId('clients-import-filter')).toHaveCount(0);
+  await expect(page.getByRole('list', { name: 'Clients' }).getByText('Zoe Lin')).toBeVisible();
+
+  // The undo names what it takes back.
+  await page.goBack();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/clients\/import\?batch=/);
+  await (await hydrated(page.getByRole('button', { name: /^Undo/ }))).click();
+  const dialog = page.getByRole('dialog', { name: 'Undo this import?' });
+  await expect(dialog).toContainText('I’ll remove the 4 visits and 3 new clients it added');
+  await dialog.getByRole('button', { name: 'Undo import' }).click();
+  await expect(page.getByTestId('import-result')).toHaveText(
+    'Undone: 4 visits and 3 clients removed.',
+  );
 });
