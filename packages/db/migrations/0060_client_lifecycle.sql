@@ -30,6 +30,45 @@ BEGIN
 END;
 $$;
 --> statement-breakpoint
+-- A merge drops the other client's fact where the kept client has one under the same key. When
+-- the kept fact holds the same value, nothing is forgotten: the value is still remembered, so
+-- the chats and episodes that quote it stay. Otherwise as in migration 0042.
+CREATE OR REPLACE FUNCTION memory_facts_forget() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path = public, pg_temp
+  AS $$
+DECLARE
+  member text := current_setting('app.user_id', true);
+  merge text := current_setting('pepper.client_merge', true);
+BEGIN
+  IF OLD.status = 'proposed' THEN
+    RETURN OLD;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM tenants WHERE id = OLD.tenant_id) THEN
+    RETURN OLD;
+  END IF;
+  IF OLD.client_id IS NOT NULL AND merge IS NOT NULL
+     AND split_part(merge, '>', 1) = OLD.client_id::text
+     AND EXISTS (SELECT 1 FROM memory_facts k
+                  WHERE k.tenant_id = OLD.tenant_id AND k.status = 'active'
+                    AND k.client_id::text = split_part(merge, '>', 2)
+                    AND k.subject_type = OLD.subject_type AND k.key = OLD.key
+                    AND k.value = OLD.value) THEN
+    RETURN OLD;
+  END IF;
+  PERFORM set_config('app.user_id', '', true);
+  PERFORM memory_scrub(OLD.tenant_id, OLD.value, OLD.created_at, OLD.source_turn_id);
+  PERFORM memory_scrub(OLD.tenant_id, OLD.previous_value, OLD.created_at, OLD.source_turn_id);
+  PERFORM memory_forget_recalled(OLD.tenant_id, OLD.id, OLD.created_at);
+  DELETE FROM memory_episodes
+   WHERE tenant_id = OLD.tenant_id AND fact_ids @> ARRAY[OLD.id];
+  PERFORM set_config('app.user_id', COALESCE(member, ''), true);
+  RETURN OLD;
+END;
+$$;
+--> statement-breakpoint
+REVOKE EXECUTE ON FUNCTION memory_facts_forget() FROM PUBLIC;
+--> statement-breakpoint
 -- Every member's episodes that name the merged client name the kept one instead (episodes are
 -- otherwise written once, migration 0039). Owners and managers only, inside their business.
 CREATE FUNCTION client_merge_episodes(p_from uuid, p_to uuid) RETURNS void

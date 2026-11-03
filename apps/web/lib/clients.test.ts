@@ -66,6 +66,9 @@ describe('merge and delete sentences (AC-W1-30, AC-W1-31)', () => {
     expect(
       mergeSentence('A', 'B', { ...none, pastVisits: 1, waitlistEntries: 2, notes: 3 }),
     ).toMatch(/^A’s 1 visit, 2 waitlist entries and 3 notes move to B\./);
+    expect(mergeSentence('A', 'B', { ...none, upcomingVisits: 1 })).toMatch(
+      /^A’s 1 visit moves to B\./,
+    );
   });
 
   it('says what a deletion keeps and forgets, and refuses with visits coming up', () => {

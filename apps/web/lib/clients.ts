@@ -75,6 +75,8 @@ function count(n: number, one: string, many: string): string {
 /** What a merge moves, in one sentence (AC-W1-30). */
 export function mergeSentence(other: string, kept: string, records: ClientRecords): string {
   const visits = records.upcomingVisits + records.pastVisits;
+  const counts = [visits, records.waitlistEntries, records.notes].filter((n) => n > 0);
+  const verb = counts.length === 1 && counts[0] === 1 ? 'moves' : 'move';
   const parts = [
     ...(visits === 0 ? [] : [count(visits, 'visit', 'visits')]),
     ...(records.waitlistEntries === 0
@@ -85,7 +87,7 @@ export function mergeSentence(other: string, kept: string, records: ClientRecord
   const moves =
     parts.length === 0
       ? `${other} has no visits or notes to move.`
-      : `${other}’s ${listOf(parts)} move to ${kept}.`;
+      : `${other}’s ${listOf(parts)} ${verb} to ${kept}.`;
   return `${moves} Their email, phone, birthday and tags fill what ${kept} is missing, then ${other} is removed. This can’t be undone.`;
 }
 

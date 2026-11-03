@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { ClientEmailTakenError, isUniqueViolation } from '../errors.js';
 import { clients, importRows, type ClientRow } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
+import { requestInsightRun } from './feed.js';
 
 // The clients of the transaction's tenant (ADR-0017). Run inside `withMember` for a member's
 // request: the `member_scope` policies then show staff only the clients they have a booking or
@@ -297,12 +298,13 @@ export async function mergeClientRows(
 
   // Notes: the kept client's fact wins a shared key; the rest move (the one move a fact's
   // subject may make, named for the guard trigger in migration 0060).
+  // A dropped fact with the kept one's value forgets nothing (the trigger reads the setting).
+  await tx.execute(sql`SELECT set_config('pepper.client_merge', ${`${other}>${keep}`}, true)`);
   await tx.execute(sql`
     DELETE FROM memory_facts f
     WHERE f.client_id = ${other} AND f.status = 'active' AND EXISTS (
       SELECT 1 FROM memory_facts k WHERE k.client_id = ${keep} AND k.status = 'active'
         AND k.subject_type = f.subject_type AND k.key = f.key)`);
-  await tx.execute(sql`SELECT set_config('pepper.client_merge', ${`${other}>${keep}`}, true)`);
   const notes = await tx.execute(
     sql`UPDATE memory_facts SET client_id = ${keep} WHERE client_id = ${other}`,
   );
@@ -318,6 +320,8 @@ export async function mergeClientRows(
   await tx.execute(sql`UPDATE waitlist_offers SET client_id = ${keep} WHERE client_id = ${other}`);
   await tx.execute(sql`DELETE FROM feed_items WHERE client_id = ${other}`);
   await expireProposalsAbout(tx, other, now);
+  // The kept client's suggestions are worked out again with both histories (ADR-0039).
+  await requestInsightRun(tx);
   await tx.execute(
     sql`UPDATE client_import_refs SET client_id = ${keep} WHERE client_id = ${other}`,
   );
@@ -406,6 +410,10 @@ export async function deleteClientRow(
   await tx.execute(sql`DELETE FROM waitlist_offers WHERE client_id = ${clientId}`);
   await tx.execute(sql`DELETE FROM waitlist_entries WHERE client_id = ${clientId}`);
   await tx.execute(sql`DELETE FROM client_import_refs WHERE client_id = ${clientId}`);
+  // Their old emails' reschedule/cancel links stop working (ADR-0022).
+  await tx.execute(
+    sql`UPDATE bookings SET manage_token_hash = NULL WHERE client_id = ${clientId} AND manage_token_hash IS NOT NULL`,
+  );
   // The import keeps its row count, not the person: no details, no link, no matching hash.
   await tx.execute(sql`
     UPDATE import_rows SET cells = NULL, name = NULL, email = NULL, phone = NULL,

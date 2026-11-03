@@ -186,10 +186,11 @@ function MergeForm({ client, onDone }: { client: Client; onDone: () => void }) {
                 size="sm"
                 variant="secondary"
                 disabled={busy}
+                // The visible word first, so a voice command "Pick" finds it.
+                aria-label={`Pick ${candidate.name}`}
                 onClick={() => void choose(candidate)}
               >
                 Pick
-                <span className="sr-only">: {candidate.name}</span>
               </Button>
             </li>
           ))}

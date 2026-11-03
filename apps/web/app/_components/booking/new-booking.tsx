@@ -36,7 +36,12 @@ export function NewBooking({
   /** The service and staff member to start from, when they are still bookable. */
   preset?: BookingPreset;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setShown] = useState(defaultOpen);
+  const setOpen = (next: boolean) => {
+    setShown(next);
+    // Opened by the address (`?book=1`): closing it drops that, so a reload doesn't reopen it.
+    if (!next && defaultOpen) window.history.replaceState(null, '', window.location.pathname);
+  };
   const [key, setKey] = useState(0);
   return (
     <Sheet

@@ -194,7 +194,10 @@ test('import (AC-W1-27…29): an owner brings a visits file, finds its new clien
     await (await page.request.get('/v1/services')).json(),
   );
   const { staff } = StaffResponseSchema.parse(await (await page.request.get('/v1/staff')).json());
-  const service = services.find((each) => each.active)?.name ?? '';
+  // Not the first service: "Book again" must choose it, not fall on the default (AC-W1-33).
+  const active = services.filter((each) => each.active);
+  const chosen = active[1] ?? active[0];
+  const service = chosen?.name ?? '';
   const owner = staff[0]?.displayName ?? '';
   expect(service).not.toBe('');
   expect(owner).not.toBe('');
@@ -261,10 +264,20 @@ test('import (AC-W1-27…29): an owner brings a visits file, finds its new clien
   ).toEqual([]);
   await expectTapTargets(page, 'the visits result');
 
-  // AC-W1-29: "Book again" opens Dee's profile, where Book is hers.
+  // AC-W1-29, AC-W1-33: "Book again" opens Dee's profile with Book open on the visit's service
+  // and staff member.
   await taken.getByRole('link', { name: /^Book again/ }).click();
+  await expect(page).toHaveURL(
+    new RegExp(
+      `/clients/[0-9a-f-]{36}\\?book=1&service=${chosen?.id ?? ''}&staff=${staff[0]?.id ?? ''}$`,
+    ),
+  );
+  const book = page.getByRole('dialog', { name: 'Book Dee Park' });
+  await expect(book).toBeVisible();
+  await expect(book.getByLabel('Service')).toHaveValue(chosen?.id ?? '');
+  await expect(book.getByLabel('With')).toHaveValue(staff[0]?.id ?? '');
+  await page.keyboard.press('Escape');
   await expect(page.getByRole('heading', { level: 1, name: 'Dee Park' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Book' })).toBeVisible();
   await page.goBack();
 
   // AC-W1-29: "See your clients" lists only the import's new clients; a search stays inside.

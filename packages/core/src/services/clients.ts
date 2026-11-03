@@ -247,8 +247,7 @@ export async function mergeClients(
   if (keep === other) throw new ClientNotFoundError();
   const now = (options.clock ?? systemClock).now();
   return withMember(db, actor.context, async (tx) => {
-    if ((await findClient(tx, keep)) === undefined || (await findClient(tx, other)) === undefined)
-      throw new ClientNotFoundError();
+    // Clients the member can't see have no visits to overlap; the merge then finds no one.
     if (await clientVisitsOverlap(tx, keep, other)) throw new ClientMergeOverlapError();
     const result = await mergeClientRows(tx, keep, other, now);
     if (result === undefined) throw new ClientNotFoundError();

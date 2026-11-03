@@ -329,6 +329,16 @@ describe('merging clients (ADR-0051)', () => {
       }),
     );
     await note(keep, 'allergy', 'Latex gloves');
+    await note(keep, 'shampoo', 'Sulfate free');
+    await note(other, 'shampoo', 'Sulfate free');
+    const same = await chat(ana, 'Dee only takes sulfate free shampoo.');
+    const asked = async () =>
+      (
+        await inTenant((tx) =>
+          tx.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM insight_requests`),
+        )
+      ).rows[0]?.n ?? 0;
+    const requestsBefore = await asked();
     const lost = await note(other, 'allergy', 'Peroxide');
     const moved = await note(other, 'drink', 'Oat flat white');
     const told = await chat(ana, 'Dee H. loves an oat flat white; peroxide is a no.');
@@ -368,7 +378,14 @@ describe('merging clients (ADR-0051)', () => {
         sql`SELECT id, value FROM memory_facts WHERE client_id = ${keep} ORDER BY key`,
       ),
     );
-    expect(facts.rows.map((row) => row.value)).toEqual(['Latex gloves', 'Oat flat white']);
+    expect(facts.rows.map((row) => row.value)).toEqual([
+      'Latex gloves',
+      'Oat flat white',
+      'Sulfate free',
+    ]);
+    // The same value on both: still remembered, so nothing is scrubbed.
+    expect(await chatText(same)).toEqual(['Dee only takes sulfate free shampoo.']);
+    expect(await asked()).toBe(requestsBefore + 1);
     expect(facts.rows.map((row) => row.id)).toContain(moved);
     expect(facts.rows.map((row) => row.id)).not.toContain(lost);
     // The note that lost to the kept client's is forgotten like a deleted fact; the moved one isn't.
@@ -438,6 +455,9 @@ describe('deleting a client (ADR-0051)', () => {
   it('forgets them everywhere and keeps their past visits under a placeholder', async () => {
     const id = await client('Zoe Quill', { email: 'zoe@example.test', phone: '+15550002222' });
     const past = await visit(id, new Date('2099-02-02T15:00:00Z'));
+    await inTenant((tx) =>
+      tx.execute(sql`UPDATE bookings SET manage_token_hash = ${'c'.repeat(64)} WHERE id = ${past}`),
+    );
     await visit(id, new Date('2099-01-05T15:00:00Z'));
     await inTenant((tx) =>
       tx.execute(
@@ -486,6 +506,12 @@ describe('deleting a client (ADR-0051)', () => {
     });
     expect(row?.deletedAt?.toISOString()).toBe(NOW.toISOString());
     expect(await count('bookings', id)).toBe(2);
+    const links = await inTenant((tx) =>
+      tx.execute<{ n: number }>(
+        sql`SELECT count(*)::int AS n FROM bookings WHERE client_id = ${id} AND manage_token_hash IS NOT NULL`,
+      ),
+    );
+    expect(links.rows[0]?.n).toBe(0);
     expect(await count('memory_facts', id)).toBe(0);
     expect(await chatText(told)).toEqual([
       '[forgotten] ([forgotten], [forgotten]) cannot have [forgotten].',

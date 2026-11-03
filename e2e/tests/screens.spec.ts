@@ -570,6 +570,29 @@ for (const width of WIDTHS) {
         ...SHOT,
         mask: [page.getByTestId('upcoming-visits').locator('p').first()],
       });
+
+      // S50: the editor with tags and birthday, and Delete waiting for the coming visit.
+      const sheet = page.getByRole('dialog');
+      await (await hydrated(page.getByRole('button', { name: 'Edit details' }))).click();
+      await expect(sheet.getByLabel('Tags (optional)')).toBeVisible();
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`client-edit-${String(width)}-${scheme}.png`, {
+          ...SHOT,
+          fullPage: false,
+        });
+      await page.keyboard.press('Escape');
+      await (await hydrated(page.getByRole('button', { name: 'Delete client' }))).click();
+      await expect(sheet.getByTestId('delete-confirm')).toContainText('1 visit coming up');
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`client-delete-${String(width)}-${scheme}.png`, {
+          ...SHOT,
+          fullPage: false,
+        });
+      await page.keyboard.press('Escape');
     }
   });
 }
