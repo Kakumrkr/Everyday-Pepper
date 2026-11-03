@@ -1,0 +1,40 @@
+{
+  "name": "@pepper/imports",
+  "version": "0.0.0",
+  "private": true,
+  "description": "L2 import module (S48, ADR-0049): client exports from other tools (CSV, JSON, JSONL) parsed, mapped, previewed, imported as a batch and undone.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@pepper/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.int.config.ts"
+  },
+  "dependencies": {
+    "@pepper/contracts": "workspace:*",
+    "@pepper/core": "workspace:*",
+    "@pepper/db": "workspace:*",
+    "csv-parse": "^7.0.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@pepper/config": "workspace:*",
+    "@pepper/testing": "workspace:*",
+    "@types/pg": "^8.23.1",
+    "@vitest/coverage-v8": "^5.0.5",
+    "fast-check": "^4.10.2",
+    "pg": "^8.23.1",
+    "vitest": "^5.0.5"
+  }
+}

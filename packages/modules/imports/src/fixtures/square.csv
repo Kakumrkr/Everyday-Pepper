@@ -1,0 +1,5 @@
+Reference ID,First Name,Last Name,Email Address,Phone Number,Nickname,Company Name,Birthday,Memo,Groups,First Visit,Last Visit,Transaction Count,Square Customer ID,Email Subscription Status
+,Marcus,Bell,marcus.bell@example.com,(555) 010-0101,,,1990-04-12,Skin fade #2,Regulars,2024-01-09,2026-10-20,31,SQ8J2K1M0A,subscribed
+R-22,Dana,Ortiz,dana.ortiz@example.com,555-010-0102,Dee,,,,,2025-03-01,2026-09-30,6,SQ8J2K1M0B,unsubscribed
+,Tyrell,Grant,,+1 555 010 0103,,,,"Prefers mornings, ""no small talk""",,2025-06-14,2026-10-02,12,SQ8J2K1M0C,
+,Ana,Silva,ana.silva@example.org,,,,,,,2026-02-02,2026-02-02,1,SQ8J2K1M0D,subscribed
