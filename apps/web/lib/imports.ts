@@ -10,18 +10,22 @@ import {
   type ImportCounts,
   type ImportField,
   type ImportFormat,
+  type ImportKind,
   type ImportLaterField,
   type ImportMapping,
   type ImportPreset,
   type ImportPreview,
   type ImportRow,
+  type ImportVisit,
 } from '@pepper/contracts';
 import { z } from 'zod';
+import { ROUTES } from './account';
 import { errorCodeOf, messageFor, type CallResult } from './client-api';
 
 // Client import in the browser (S48.2, ADR-0049, AC-W1-17…21): the owner's file sent as it is,
 // the mapping changed column by column, the preview in one sentence with the rows to fix first,
-// the import committed, followed while the worker runs, and undone.
+// the import committed, followed while the worker runs, and undone. A visits file (S49.2,
+// ADR-0050, AC-W1-27…29) speaks of visits, lists the times taken, and links its new clients.
 
 /** The import screen's path; `?batch=` resumes an import after a refresh or a link. */
 export const IMPORT_PATH = '/clients/import';
@@ -183,12 +187,9 @@ export function discardImport(
 }
 
 /** The screen's steps; mapping and preview are both a staged import's. */
-export const IMPORT_STEPS = [
-  'Pick a file',
-  'Check the columns',
-  'Check the clients',
-  'Done',
-] as const;
+export function importSteps(kind: ImportKind): readonly string[] {
+  return ['Pick a file', 'Check the columns', `Check the ${kind}`, 'Done'];
+}
 export type ImportStep = 'upload' | 'mapping' | 'preview' | 'result';
 
 export function stepIndex(step: ImportStep): number {
@@ -215,38 +216,90 @@ export const count = (n: number, one: string, many: string) =>
 
 /**
  * The preview in one sentence (AC-W1-21): "143 new clients, 12 to fill in, 3 to fix", then the
- * duplicates left out and the clients already here, only when there are any.
+ * duplicates left out and the clients already here, only when there are any. A visits file's
+ * (AC-W1-27): "40 past visits, 6 upcoming, 12 new clients, 3 to fix", then the times taken,
+ * the rows left out and the visits already here, only when there are any.
  */
-export function previewSentence(counts: ImportCounts): string {
-  const parts = [
-    count(counts.create, 'new client', 'new clients'),
-    `${String(counts.merge)} to fill in`,
-    `${String(counts.invalid)} to fix`,
-  ];
+export function previewSentence(counts: ImportCounts, kind: ImportKind = 'clients'): string {
+  const parts =
+    kind === 'visits'
+      ? [
+          count(counts.past, 'past visit', 'past visits'),
+          `${String(counts.upcoming)} upcoming`,
+          count(counts.clients, 'new client', 'new clients'),
+          `${String(counts.invalid)} to fix`,
+          ...(counts.conflict > 0 ? [count(counts.conflict, 'time taken', 'times taken')] : []),
+        ]
+      : [
+          count(counts.create, 'new client', 'new clients'),
+          `${String(counts.merge)} to fill in`,
+          `${String(counts.invalid)} to fix`,
+        ];
   if (counts.skipped > 0) parts.push(`${String(counts.skipped)} left out`);
   if (counts.unchanged > 0) parts.push(`${String(counts.unchanged)} already here`);
   return parts.join(', ');
 }
 
+/** "a, b and c". */
+function listed(parts: readonly string[]): string {
+  if (parts.length <= 1) return parts.join('');
+  return `${parts.slice(0, -1).join(', ')} and ${parts.at(-1) ?? ''}`;
+}
+
+/** What a visits file added: "40 past visits, 6 upcoming appointments and 12 new clients". */
+function visitsAdded(counts: ImportCounts): string {
+  const parts = [
+    ...(counts.past > 0 ? [count(counts.past, 'past visit', 'past visits')] : []),
+    ...(counts.upcoming > 0
+      ? [count(counts.upcoming, 'upcoming appointment', 'upcoming appointments')]
+      : []),
+    ...(counts.clients > 0 ? [count(counts.clients, 'new client', 'new clients')] : []),
+  ];
+  return parts.length === 0 ? 'nothing' : listed(parts);
+}
+
 /** What the import did, or is doing, in words. */
 export function resultSentence(batch: ImportBatch): string {
-  const { counts } = batch;
-  const did = [
-    `${count(counts.create, 'new client', 'new clients')} added`,
-    ...(counts.merge > 0 ? [`${String(counts.merge)} filled in`] : []),
-  ].join(', ');
+  const { counts, kind } = batch;
+  const did =
+    kind === 'visits'
+      ? `Added ${visitsAdded(counts)}`
+      : [
+          `${count(counts.create, 'new client', 'new clients')} added`,
+          ...(counts.merge > 0 ? [`${String(counts.merge)} filled in`] : []),
+        ].join(', ');
   switch (batch.status) {
     case 'staged':
-      return previewSentence(counts);
+      return previewSentence(counts, kind);
     case 'queued':
     case 'running':
       return `Importing ${count(counts.rows, 'row', 'rows')}. You can leave this screen; I’ll keep going.`;
-    case 'done':
-      return `${did}.`;
+    case 'done': {
+      if (kind !== 'visits') return `${did}.`;
+      // An import never emails (AC-W1-24): said where the owner would worry about it.
+      const quiet = counts.upcoming > 0 ? ' No one was emailed.' : '';
+      const taken =
+        counts.conflict > 0
+          ? ` ${count(counts.conflict, 'upcoming time was', 'upcoming times were')} already taken, so ${counts.conflict === 1 ? 'that visit is' : 'those visits are'} left out.`
+          : '';
+      return `${did}.${quiet}${taken}`;
+    }
     case 'failed':
       return `${did} before it stopped. Undo it, or try the file again later.`;
     case 'undone': {
-      const undo = batch.undo ?? { deleted: 0, restored: 0, kept: 0 };
+      const undo = batch.undo ?? { deleted: 0, restored: 0, kept: 0, bookings: 0, bookingsKept: 0 };
+      if (kind === 'visits') {
+        const restored = undo.restored > 0 ? `, ${String(undo.restored)} cleared again` : '';
+        const keptVisits =
+          undo.bookingsKept > 0
+            ? ` ${count(undo.bookingsKept, 'visit was', 'visits were')} kept: ${undo.bookingsKept === 1 ? 'it' : 'they'} changed since.`
+            : '';
+        const keptClients =
+          undo.kept > 0
+            ? ` ${count(undo.kept, 'client was', 'clients were')} kept: they booked or changed since.`
+            : '';
+        return `Undone: ${count(undo.bookings, 'visit', 'visits')} and ${count(undo.deleted, 'client', 'clients')} removed${restored}.${keptVisits}${keptClients}`;
+      }
       const kept =
         undo.kept > 0
           ? ` ${count(undo.kept, 'client was', 'clients were')} kept: they booked or changed since.`
@@ -273,17 +326,88 @@ export function undoUntilLabel(batch: ImportBatch, timeZone: string): string | n
   }).format(new Date(batch.undoUntil));
 }
 
-/** The rows to fix first (AC-W1-21): can't be imported, then left out; the rest after. */
+/**
+ * The rows to fix first (AC-W1-21): can't be imported, then (a visits file's, AC-W1-27) the
+ * upcoming times another booking holds, then left out; the rest after.
+ */
 export function rowsToFixFirst(rows: readonly ImportRow[]): {
   toFix: ImportRow[];
+  taken: ImportRow[];
   leftOut: ImportRow[];
   rest: ImportRow[];
 } {
   return {
     toFix: rows.filter((row) => row.outcome === 'invalid'),
+    taken: rows.filter((row) => row.outcome === 'conflict'),
     leftOut: rows.filter((row) => row.outcome === 'skipped'),
-    rest: rows.filter((row) => row.outcome !== 'invalid' && row.outcome !== 'skipped'),
+    rest: rows.filter(
+      (row) => row.outcome !== 'invalid' && row.outcome !== 'skipped' && row.outcome !== 'conflict',
+    ),
   };
+}
+
+/**
+ * A visit as a row shows it (AC-W1-27): the date with its year (history goes back years) in the
+ * business's time zone, then the service and who it was with.
+ */
+export function visitLine(visit: ImportVisit, timeZone: string): string {
+  const when = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(visit.startsAt));
+  return `${when} · ${visit.service} with ${visit.staff}`;
+}
+
+type BadgeTone = 'ok' | 'info' | 'warn' | 'neutral';
+
+const OUTCOME_BADGES: Record<ImportRow['outcome'], { label: string; tone: BadgeTone }> = {
+  create: { label: 'New', tone: 'ok' },
+  merge: { label: 'Fills in', tone: 'info' },
+  unchanged: { label: 'Already here', tone: 'neutral' },
+  invalid: { label: 'Fix', tone: 'warn' },
+  skipped: { label: 'Left out', tone: 'neutral' },
+  conflict: { label: 'Time taken', tone: 'warn' },
+};
+
+const VISIT_BADGES: Record<ImportVisit['status'], { label: string; tone: BadgeTone }> = {
+  completed: { label: 'Past visit', tone: 'ok' },
+  no_show: { label: 'No-show', tone: 'neutral' },
+  confirmed: { label: 'Upcoming', tone: 'info' },
+};
+
+/** What a row does, as its badge: a visit it adds by what the visit becomes. */
+export function rowBadge(row: ImportRow): { label: string; tone: BadgeTone } {
+  if (row.outcome === 'create' && row.visit !== null) return VISIT_BADGES[row.visit.status];
+  return OUTCOME_BADGES[row.outcome];
+}
+
+/**
+ * Where "See your clients" goes (AC-W1-29): the Clients list filtered to the clients the import
+ * added, when it added any and still has them; the whole list otherwise.
+ */
+export function clientsHref(batch: ImportBatch): string {
+  const kept = batch.status === 'done' || batch.status === 'failed';
+  return kept && batch.counts.clients > 0
+    ? `${ROUTES.clients}?import=${encodeURIComponent(batch.id)}`
+    : ROUTES.clients;
+}
+
+/**
+ * The upcoming times a run left out because another booking held them (AC-W1-29), as the result
+ * lists them with "Book again", and how many more the file has than the rows read.
+ */
+export function takenTimes(
+  batch: ImportBatch,
+  rows: readonly ImportRow[],
+): { rows: ImportRow[]; more: number } {
+  if (batch.status !== 'done' && batch.status !== 'failed') return { rows: [], more: 0 };
+  const taken = rows.filter((row) => row.outcome === 'conflict');
+  return { rows: taken, more: Math.max(0, batch.counts.conflict - taken.length) };
 }
 
 /**
@@ -302,7 +426,10 @@ export function moreRowsNote(counts: ImportCounts, shown: readonly ImportRow[]):
 }
 
 /** The undo's confirmation in words, with what it takes back. */
-export function undoQuestion(counts: ImportCounts): string {
+export function undoQuestion(counts: ImportCounts, kind: ImportKind = 'clients'): string {
+  if (kind === 'visits') {
+    return `I’ll remove the ${count(counts.create, 'visit', 'visits')} and ${count(counts.clients, 'new client', 'new clients')} it added, and clear any email or phone it filled in. A visit changed since, and anyone who booked since, stays.`;
+  }
   const added = count(counts.create, 'client', 'clients');
   return counts.merge > 0
     ? `I’ll remove the ${added} it added and clear the emails and phones it filled in. Anyone who booked since stays.`

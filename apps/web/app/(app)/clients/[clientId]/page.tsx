@@ -20,6 +20,7 @@ import {
   STATUS_LABELS,
   type BookingSetup,
 } from '../../../../lib/booking';
+import { birthdayLabel } from '../../../../lib/clients';
 import { localDateIn, splitVisits, visitRanges } from '../../../../lib/setup';
 import { NewBooking } from '../../../_components/booking/new-booking';
 import { ClientEditor } from '../../../_components/clients/client-editor';
@@ -39,7 +40,8 @@ const SOURCES: Record<RecordSource, string> = {
 /**
  * A client's profile (S16): how to reach them, what Pepper knows about them and their visit
  * notes (S32), their coming and recent visits (62 days each way), Book, and, for owners and
- * managers, editing their details. Staff reach only their own clients and see only their own
+ * managers, editing their details. Their tags and birthday (S49.2, AC-W1-28) show when they
+ * have any; editing them comes in S50. Staff reach only their own clients and see only their own
  * visits with them (AC-W9-1, decided by the api). On the kit (S42): initials and the name as
  * the title, then quiet sections of hairline rows; the empty ones say what to do next.
  */
@@ -123,6 +125,23 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
           ) : null}
         </div>
       </header>
+      {client.tags.length === 0 ? null : (
+        // Tags as quiet chips: words the owner gave, not a status (DESIGN.md §2).
+        <ul
+          className="-mt-3 m-0 flex list-none flex-wrap gap-1.5 p-0"
+          aria-label="Tags"
+          data-testid="client-tags"
+        >
+          {client.tags.map((tag) => (
+            <li
+              key={tag}
+              className="max-w-full rounded-pill bg-surface-2 px-2.5 py-0.5 type-caption text-ink-2 [overflow-wrap:anywhere]"
+            >
+              {tag}
+            </li>
+          ))}
+        </ul>
+      )}
 
       <section aria-labelledby="client-contact" className="flex flex-col gap-3">
         <h2 id="client-contact" className="m-0 type-heading">
@@ -135,7 +154,8 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
             </p>
             {manages ? <ClientEditor client={client} label="Add a phone or email" /> : null}
           </div>
-        ) : (
+        ) : null}
+        {client.email === null && client.phone === null && client.birthday === null ? null : (
           <div className="rounded-lg bg-surface px-4" data-testid="client-contact">
             <DetailTable
               rows={[
@@ -153,6 +173,18 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
                       {
                         label: 'Phone',
                         value: <ContactLink href={`tel:${client.phone}`} text={client.phone} />,
+                      },
+                    ]),
+                ...(client.birthday === null
+                  ? []
+                  : [
+                      {
+                        label: 'Birthday',
+                        value: (
+                          <span className="tabular-nums" data-testid="client-birthday">
+                            {birthdayLabel(client.birthday)}
+                          </span>
+                        ),
                       },
                     ]),
               ]}

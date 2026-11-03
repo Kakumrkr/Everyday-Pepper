@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S49.2** (history import screens; tags and birthday on the profile; "See your clients" filtered).
+**S49.2 · History import screens** (user, 2026-11-03: "Go ahead with your recommendations and complete the session": D-1 A tags and birthday read-only on the profile, editing → S50; D-2 A "Book again" opens the client's profile; D-3 no ADR). Screens only; no package or API change.
+- [x] 1 ACs AC-W1-27…29 · [x] 2 `lib/imports.ts` visits wording (unit green) · [x] 3 import screen steps (`import-rows.tsx`) · [x] 4 filtered Clients list · [x] 5 profile tags + birthday (`lib/clients.ts`) · [x] 6 top-up: `TakenTimes` with "Book again" · [ ] e2e visits journey · [ ] 7 screenshots
+- Next: the visits journey in `import.spec.ts` (fixture in `helpers.ts`), then the `screens.spec` baselines.
 
 ## Last sessions
 - **S49 Phase 11 · History import engine, tags, birthdays (2026-11-03)** ([ADR-0050](../adr/0050-visit-and-appointment-import.md), PR #72). Full entry in [session-log.md](session-log.md).
