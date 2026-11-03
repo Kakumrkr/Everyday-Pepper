@@ -12,7 +12,7 @@ Nothing in progress. Next: **S50.2** (staff walk-ins, client paging and search p
 ## Last sessions
 - **S50 Phase 11 · Client merge and delete, tags and birthday editing (2026-11-03)** ([ADR-0051](../adr/0051-client-merge-and-delete.md), [PR #74](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/74)). Full entry in [session-log.md](session-log.md).
   - **Built:** merge (everything moves to the client kept, blanks filled, tags combined, no overlapping visits); delete (forgotten everywhere, past visits kept as "Deleted client", refused with visits coming up); tags and birthday in the editor; AC-W1-30…33. Top-up: "Book again" opens Book with the visit's service and staff.
-  - **Checks:** `pnpm check` green; affected integration green (db 719 incl. isolation, core 189, appointments 214, api 93, …); Playwright clients + import 4/4; 12 new and 12 updated screen baselines.
+  - **Checks:** `pnpm check` green; affected integration green (db 719 incl. isolation, core 189, appointments 214, api 93, …); Playwright clients + import 4/4; 12 new and 12 updated screen baselines; CI green on the first run.
 - **S49.2 Phase 11 · History import screens, tags and birthday on the profile (2026-11-03)** (no ADR; [PR #73](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/73)). Full entry in [session-log.md](session-log.md).
   - **Built:** the import screens take a visits file (one-sentence preview, notices, times taken, visit lines, "No one was emailed"), `/clients?import=` filtered, tags and birthday on the profile (AC-W1-27…29). Top-up: "Book these again" with "Book again" per time taken.
   - **On the way:** Back after "Book again" lost the result (Next's cached render); the screen resumes the import its address names.
