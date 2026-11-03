@@ -91,6 +91,14 @@ describe('loadWorkerConfig', () => {
     ).toThrow(/WAITLIST_POLL_MS/);
   });
 
+  it('looks for committed client imports every 2 s by default (S48)', () => {
+    expect(loadWorkerConfig(required).importPollMs).toBe(2000);
+    expect(loadWorkerConfig({ ...required, IMPORT_POLL_MS: '500' }).importPollMs).toBe(500);
+    expect(() => loadWorkerConfig({ ...required, IMPORT_POLL_MS: '100' })).toThrow(
+      /IMPORT_POLL_MS/,
+    );
+  });
+
   it('reads the mail settings and the relay interval', () => {
     expect(loadWorkerConfig(required)).toMatchObject({ mail: null, outboxPollMs: 1000 });
     expect(

@@ -22,6 +22,7 @@
     "@pepper/contracts": "workspace:*",
     "@pepper/core": "workspace:*",
     "@pepper/db": "workspace:*",
+    "@pepper/imports": "workspace:*",
     "@pepper/runtime": "workspace:*",
     "@pepper/storage": "workspace:*",
     "@pepper/templates": "workspace:*",

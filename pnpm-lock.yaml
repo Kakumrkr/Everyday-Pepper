@@ -74,6 +74,9 @@ importers:
       '@pepper/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@pepper/imports':
+        specifier: workspace:*
+        version: link:../../packages/modules/imports
       '@pepper/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -214,6 +217,9 @@ importers:
       '@pepper/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@pepper/imports':
+        specifier: workspace:*
+        version: link:../../packages/modules/imports
       '@pepper/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime

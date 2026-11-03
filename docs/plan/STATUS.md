@@ -13,8 +13,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 3 `@pepper/imports` (`packages/modules/imports`): `parseImportFile` (CSV via `csv-parse`, JSON, JSONL; UTF-8 or Windows-1252; limits), `suggestMapping` (five presets, headers, values), `mapRows`/`planRows` (reasons per row; match by id → email → phone with the same name → an earlier import's identical row); fixtures per tool + generic + own app + messy; 56 unit tests (property: no duplicate on re-import), 99% lines.
 - [x] 4 migration 0058 (`import_batches` with `job_scan('imports')`, `import_rows`, `client_import_refs`; RLS + owners/managers-only member scope, forced RLS) and `repositories/imports.ts`; isolation suite 399 green.
 - [x] 5 domain service `services/imports.ts`: stage, get/list, remap, discard, commit, undo (7 days, purge on undo), `runImport` (lease, chunks of 500, re-plan per chunk, failed after 3 attempts), `tidyImports` (staged > 24 h discarded, rows purged after the window); audit `client_import.committed/finished/undone` (counts only); 24 integration tests green.
-- [ ] 6 (stage, remap, commit, run, undo) · 6 worker `imports` queue + relay · 7 api endpoints · 8 ADR-0049.
-- Next: task 6. Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
+- [x] 6 worker: `imports/relay.ts` + `ImportsRunner` (BullMQ `imports`, job id = batch id, `IMPORT_POLL_MS` 2 s, hourly `tidyImports`, alert with ids only on failure; closes at once without Redis); 55 worker tests green.
+- [ ] 7 api endpoints · 8 ADR-0049.
+- Next: task 7. Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
 
 ## Last sessions
 - **S47.3 Phase 10 · The timed new-owner journey and the Phase 10 gate (2026-11-03)** (no ADR; scorecard §6). Full entry in [session-log.md](session-log.md).
