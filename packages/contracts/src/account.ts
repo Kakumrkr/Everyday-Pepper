@@ -43,6 +43,8 @@ export const ApiErrorCodeSchema = z.enum([
   'time_off_not_found',
   'client_not_found',
   'client_email_taken',
+  'client_has_upcoming_visits',
+  'client_merge_overlap',
   'booking_not_found',
   'slot_unavailable',
   'booking_not_changeable',

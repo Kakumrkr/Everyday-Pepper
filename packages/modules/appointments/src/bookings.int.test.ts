@@ -12,10 +12,15 @@ import {
   type UserId,
 } from '@pepper/contracts';
 import {
+  ClientHasUpcomingVisitsError,
+  ClientMergeOverlapError,
   ClientNotFoundError,
   createBusiness,
   createClient,
+  deleteClient,
   ForbiddenError,
+  getClientRecords,
+  mergeClients,
   getClient,
   listClients,
   lookUpClients,
@@ -686,6 +691,134 @@ describe('clients', () => {
     expect((await listClients(db, b.owner, { search: 'lop' })).map((c) => c.name)).toEqual([
       'Maria Lopez',
     ]);
+  });
+});
+
+describe('merging and deleting clients (S50, ADR-0051)', () => {
+  it('owners and managers merge two clients; the kept one has both histories; audited with counts', async () => {
+    const b = await newBusiness();
+    const dupe = await createClient(db, b.owner, {
+      name: 'Maria L.',
+      phone: '+15550001234',
+      tags: ['VIP'],
+      birthday: { month: 4, day: 9, year: null },
+    });
+    await book(b, b.owner, request(b, tue('10:00'), { clientId: dupe.id }));
+    expect(await getClientRecords(db, b.manager, dupe.id, { clock: b.clock })).toEqual({
+      upcomingVisits: 1,
+      pastVisits: 0,
+      waitlistEntries: 0,
+      notes: 0,
+    });
+    await expect(
+      mergeClients(db, b.staff, b.client.id, { otherClientId: dupe.id }, { clock: b.clock }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    const kept = await mergeClients(
+      db,
+      b.manager,
+      b.client.id,
+      { otherClientId: dupe.id },
+      { clock: b.clock },
+    );
+    expect(kept).toMatchObject({
+      id: b.client.id,
+      name: 'Maria Lopez',
+      email: 'maria@example.test',
+      phone: '+15550001234',
+      tags: ['VIP'],
+      birthday: { month: 4, day: 9, year: null },
+    });
+    await expect(getClient(db, b.owner, dupe.id)).rejects.toBeInstanceOf(ClientNotFoundError);
+    const visits = await listBookings(db, b.owner, {
+      from: tue('00:00'),
+      to: tue('23:59'),
+    });
+    expect(visits.map((visit) => visit.clientId)).toEqual([b.client.id]);
+    const merged = (await auditOf(b.tenantId)).filter((e) => e.action === 'client.merged');
+    expect(merged).toEqual([
+      expect.objectContaining({
+        entity: { type: 'client', id: b.client.id },
+        after: { mergedClientId: dupe.id, moved: { visits: 1, waitlistEntries: 0, notes: 0 } },
+      }),
+    ]);
+    // Merging again (the other is gone), into itself, or with another business's client: no one.
+    for (const otherClientId of [dupe.id, b.client.id, (await newBusiness()).client.id]) {
+      await expect(
+        mergeClients(db, b.owner, b.client.id, { otherClientId }, { clock: b.clock }),
+      ).rejects.toBeInstanceOf(ClientNotFoundError);
+    }
+  });
+
+  it('two clients booked at the same time are two people', async () => {
+    const b = await newBusiness();
+    const twin = await createClient(db, b.owner, { name: 'Marta Lopez' });
+    await book(b, b.owner, request(b, tue('10:00')));
+    await updateStaffMember(db, b.owner, b.marco.id, {
+      displayName: 'Marco',
+      userId: b.colleague.context.userId,
+      serviceIds: [b.service.id],
+    });
+    await book(
+      b,
+      b.owner,
+      request(b, tue('10:30'), { clientId: twin.id, staffMemberId: b.marco.id }),
+    );
+    await expect(
+      mergeClients(db, b.owner, b.client.id, { otherClientId: twin.id }, { clock: b.clock }),
+    ).rejects.toBeInstanceOf(ClientMergeOverlapError);
+  });
+
+  it('deleting waits for upcoming visits, then forgets the client; nothing books them again', async () => {
+    const b = await newBusiness();
+    const booking = await book(b, b.owner, request(b, tue('10:00')));
+    await expect(deleteClient(db, b.staff, b.client.id, { clock: b.clock })).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    const refused = await deleteClient(db, b.owner, b.client.id, { clock: b.clock }).catch(
+      (e: unknown) => e,
+    );
+    expect(refused).toBeInstanceOf(ClientHasUpcomingVisitsError);
+    expect((refused as ClientHasUpcomingVisitsError).upcoming).toBe(1);
+    await changeBooking(db, b.owner, booking.id, { status: 'cancelled' }, { clock: b.clock });
+    await deleteClient(db, b.manager, b.client.id, { clock: b.clock });
+    await expect(getClient(db, b.owner, b.client.id)).rejects.toBeInstanceOf(ClientNotFoundError);
+    expect(await listClients(db, b.owner)).toEqual([]);
+    expect(await lookUpClients(db, b.owner, { contact: 'maria@example.test' })).toEqual([]);
+    await expect(book(b, b.owner, request(b, tue('13:00')))).rejects.toBeInstanceOf(
+      ClientNotFoundError,
+    );
+    await expect(deleteClient(db, b.owner, b.client.id, { clock: b.clock })).rejects.toBeInstanceOf(
+      ClientNotFoundError,
+    );
+    // The email is free for a new client.
+    await createClient(db, b.owner, { name: 'Maria Lopez', email: 'maria@example.test' });
+    const deleted = (await auditOf(b.tenantId)).filter((e) => e.action === 'client.deleted');
+    expect(deleted).toEqual([
+      expect.objectContaining({
+        entity: { type: 'client', id: b.client.id },
+        after: { pastVisitsKept: 0, notesForgotten: 0 },
+      }),
+    ]);
+  });
+
+  it('an edit sets tags and birthday and names them in the audit entry', async () => {
+    const b = await newBusiness();
+    const edited = await updateClient(db, b.owner, b.client.id, {
+      name: 'Maria Lopez',
+      email: 'maria@example.test',
+      tags: ['Color', 'color'],
+      birthday: { month: 12, day: 31, year: 1990 },
+    });
+    expect(edited).toMatchObject({ tags: ['Color'], birthday: { month: 12, day: 31, year: 1990 } });
+    // Left out, they stay.
+    expect(
+      await updateClient(db, b.owner, b.client.id, {
+        name: 'Maria Lopez',
+        email: 'maria@example.test',
+      }),
+    ).toEqual(edited);
+    const updates = (await auditOf(b.tenantId)).filter((e) => e.action === 'client.updated');
+    expect(updates.map((e) => e.after)).toEqual([{ changed: ['tags', 'birthday'] }]);
   });
 });
 

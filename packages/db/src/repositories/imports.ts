@@ -31,6 +31,7 @@ import {
   type ImportRowRow,
 } from '../schema.js';
 import { withJobScan, type TenantTx } from '../tenant.js';
+import { birthdayColumns } from './clients.js';
 
 // Client imports (S48, ADR-0049): batches, their rows, the external ids they record, and the
 // lookups that match a file's rows to the business's clients. Run in the business's member
@@ -414,15 +415,6 @@ export async function insertImportedClients(
       })),
     );
   }
-}
-
-function birthdayColumns(birthday: ClientBirthday | null) {
-  const value = birthday === null ? null : ClientBirthdaySchema.parse(birthday);
-  return {
-    birthdayMonth: value?.month ?? null,
-    birthdayDay: value?.day ?? null,
-    birthdayYear: value?.year ?? null,
-  };
 }
 
 /**

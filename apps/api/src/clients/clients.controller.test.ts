@@ -9,7 +9,11 @@ import {
   type Client,
   type MembershipRole,
 } from '@pepper/contracts';
-import { ClientNotFoundError } from '@pepper/core';
+import {
+  ClientHasUpcomingVisitsError,
+  ClientMergeOverlapError,
+  ClientNotFoundError,
+} from '@pepper/core';
 import { ClientEmailTakenError } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
@@ -60,7 +64,13 @@ const clients = {
   lookUp: vi.fn(() => Promise.resolve([CLIENT])),
   create: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
   update: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
+  records: vi.fn(() =>
+    Promise.resolve({ upcomingVisits: 0, pastVisits: 3, waitlistEntries: 0, notes: 1 }),
+  ),
+  merge: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
+  delete: vi.fn(() => Promise.resolve()),
 };
+const OTHER_ID = ClientIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708191');
 
 @Global()
 @Module({ providers: [{ provide: DATABASE, useValue: { db: {} } }], exports: [DATABASE] })
@@ -216,6 +226,74 @@ describe('/v1/clients', () => {
       expect(clients.lookUp).toHaveBeenCalledTimes(1);
     },
   );
+
+  describe('merging and deleting (S50, ADR-0051)', () => {
+    const merge = (body: object, id: string = CLIENT_ID) =>
+      request(server)
+        .post(`/v1/clients/${id}/merge`)
+        .set('cookie', 'signed-in')
+        .set('origin', ORIGIN)
+        .send(body);
+    const remove = (id: string = CLIENT_ID) =>
+      request(server).delete(`/v1/clients/${id}`).set('cookie', 'signed-in').set('origin', ORIGIN);
+
+    it.each<MembershipRole>(['owner', 'manager'])(
+      'a(n) %s reads the counts, merges (200) and deletes (204)',
+      async (r) => {
+        role = r;
+        expect((await get(`/v1/clients/${CLIENT_ID}/records`).expect(200)).body).toEqual({
+          upcomingVisits: 0,
+          pastVisits: 3,
+          waitlistEntries: 0,
+          notes: 1,
+        });
+        expect((await merge({ otherClientId: OTHER_ID.toUpperCase() }).expect(200)).body).toEqual(
+          CLIENT,
+        );
+        expect(clients.merge).toHaveBeenCalledWith(context(), CLIENT_ID, {
+          otherClientId: OTHER_ID,
+        });
+        await remove().expect(204);
+        expect(clients.delete).toHaveBeenCalledWith(context(), CLIENT_ID);
+      },
+    );
+
+    it('403 for staff, before the service is asked', async () => {
+      role = 'staff';
+      expect(code((await get(`/v1/clients/${CLIENT_ID}/records`).expect(403)).body)).toBe(
+        'forbidden',
+      );
+      expect(code((await merge({ otherClientId: OTHER_ID }).expect(403)).body)).toBe('forbidden');
+      expect(code((await remove().expect(403)).body)).toBe('forbidden');
+      expect(clients.records).not.toHaveBeenCalled();
+      expect(clients.merge).not.toHaveBeenCalled();
+      expect(clients.delete).not.toHaveBeenCalled();
+    });
+
+    it('409 client_merge_overlap and client_has_upcoming_visits; 404; 400 for a bad body', async () => {
+      clients.merge.mockRejectedValueOnce(new ClientMergeOverlapError());
+      expect(code((await merge({ otherClientId: OTHER_ID }).expect(409)).body)).toBe(
+        'client_merge_overlap',
+      );
+      clients.delete.mockRejectedValueOnce(new ClientHasUpcomingVisitsError(2));
+      expect(code((await remove().expect(409)).body)).toBe('client_has_upcoming_visits');
+      clients.delete.mockRejectedValueOnce(new ClientNotFoundError());
+      expect(code((await remove().expect(404)).body)).toBe('client_not_found');
+      await merge({}).expect(400);
+      await merge({ otherClientId: OTHER_ID, keep: 'both' }).expect(400);
+      await remove('not-an-id').expect(400);
+      expect(clients.merge).toHaveBeenCalledTimes(1);
+    });
+
+    it('403 from another origin', async () => {
+      await request(server)
+        .delete(`/v1/clients/${CLIENT_ID}`)
+        .set('cookie', 'signed-in')
+        .set('origin', 'https://evil.test')
+        .expect(403);
+      expect(clients.delete).not.toHaveBeenCalled();
+    });
+  });
 
   it('401 signed out', async () => {
     await request(server).get('/v1/clients').expect(401);

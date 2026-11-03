@@ -57,17 +57,6 @@ export type ClientContact = z.infer<typeof ClientContactSchema>;
 export const ClientLookupSchema = z.object({ contact: ClientContactSchema }).strict();
 export type ClientLookup = z.input<typeof ClientLookupSchema>;
 
-/** A client as a team member enters them (`POST /v1/clients`). */
-export const ClientInputSchema = z
-  .object({
-    name: z.string().trim().min(1).max(120),
-    email: ClientEmailSchema.nullable().default(null),
-    phone: PhoneSchema.nullable().default(null),
-  })
-  .strict();
-export type ClientInput = z.input<typeof ClientInputSchema>;
-export type ClientFields = z.output<typeof ClientInputSchema>;
-
 /** The most tags a client has (S49, ADR-0050). */
 export const MAX_CLIENT_TAGS = 20;
 /** The longest tag. */
@@ -99,6 +88,36 @@ export const ClientBirthdaySchema = z
   });
 export type ClientBirthday = z.infer<typeof ClientBirthdaySchema>;
 
+/** A client's tags as a team member enters them: no repeats (ignoring case), at most 20. */
+export const ClientTagsSchema = z
+  .array(ClientTagSchema)
+  .max(MAX_CLIENT_TAGS)
+  .transform((tags) => {
+    const seen = new Set<string>();
+    return tags.filter((tag) => {
+      const key = tag.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  });
+
+/**
+ * A client as a team member enters them (`POST /v1/clients`, `PUT /v1/clients/:id`). Tags and
+ * birthday (S50) are optional: left out, an edit keeps them as they are.
+ */
+export const ClientInputSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+    email: ClientEmailSchema.nullable().default(null),
+    phone: PhoneSchema.nullable().default(null),
+    tags: ClientTagsSchema.optional(),
+    birthday: ClientBirthdaySchema.nullable().optional(),
+  })
+  .strict();
+export type ClientInput = z.input<typeof ClientInputSchema>;
+export type ClientFields = z.output<typeof ClientInputSchema>;
+
 /** A client as the api returns them. */
 export const ClientSchema = z.object({
   id: ClientIdSchema,
@@ -129,3 +148,22 @@ export type ClientsQuery = z.input<typeof ClientsQuerySchema>;
 
 export const ClientsResponseSchema = z.object({ clients: z.array(ClientSchema) });
 export type ClientsResponse = z.infer<typeof ClientsResponseSchema>;
+
+/**
+ * `POST /v1/clients/:clientId/merge` (S50, ADR-0051): `otherClientId` goes into the client of
+ * the path, who is kept. Owners and managers only.
+ */
+export const ClientMergeSchema = z.object({ otherClientId: ClientIdSchema }).strict();
+export type ClientMerge = z.input<typeof ClientMergeSchema>;
+
+/**
+ * `GET /v1/clients/:clientId/records` (S50): what a merge would move or a deletion would keep
+ * and forget, as counts. Visits are bookings not cancelled; upcoming ones end after now.
+ */
+export const ClientRecordsSchema = z.object({
+  upcomingVisits: z.number().int().min(0),
+  pastVisits: z.number().int().min(0),
+  waitlistEntries: z.number().int().min(0),
+  notes: z.number().int().min(0),
+});
+export type ClientRecords = z.infer<typeof ClientRecordsSchema>;

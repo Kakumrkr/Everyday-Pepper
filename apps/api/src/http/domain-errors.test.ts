@@ -34,6 +34,8 @@ import {
 import {
   ActionNotFoundError,
   AlreadyAMemberError,
+  ClientHasUpcomingVisitsError,
+  ClientMergeOverlapError,
   ClientNotFoundError,
   ForbiddenError,
   InviteInvalidError,
@@ -78,6 +80,8 @@ describe('toHttpError', () => {
     [new TimeOffNotFoundError(), 404, 'time_off_not_found'],
     [new ClientNotFoundError(), 404, 'client_not_found'],
     [new ClientEmailTakenError(), 409, 'client_email_taken'],
+    [new ClientHasUpcomingVisitsError(2), 409, 'client_has_upcoming_visits'],
+    [new ClientMergeOverlapError(), 409, 'client_merge_overlap'],
     [new BookingNotFoundError(), 404, 'booking_not_found'],
     [new BookingNotChangeableError(), 409, 'booking_not_changeable'],
     [new BookingNotStartedError(), 409, 'booking_not_started'],

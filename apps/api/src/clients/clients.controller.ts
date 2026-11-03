@@ -2,14 +2,17 @@ import {
   ClientIdSchema,
   ClientInputSchema,
   ClientLookupSchema,
+  ClientMergeSchema,
   ClientsQuerySchema,
   type Client,
+  type ClientRecords,
   type ClientsResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -27,8 +30,8 @@ import { ClientsService } from './clients.service.js';
 const ClientParamsSchema = z.object({ clientId: ClientIdSchema });
 
 /**
- * The active business's clients, `/v1/clients` (ADR-0017). Owners and managers see, add and
- * edit every client; staff see only the clients they have a booking or waitlist entry with (the
+ * The active business's clients, `/v1/clients` (ADR-0017). Owners and managers see, add, edit,
+ * merge and delete every client (S50, ADR-0051); staff see only the clients they have a booking or waitlist entry with (the
  * database's member scope, AC-W9-1), so another client is simply not found. Everyone may find
  * a client by an exact email or phone (`POST /v1/clients/lookup`, ADR-0020).
  */
@@ -92,5 +95,42 @@ export class ClientsController {
     const { clientId } = parseBody(ClientParamsSchema, params);
     const input = parseBody(ClientInputSchema, body);
     return answering(() => this.clients.update(tenant, clientId, input));
+  }
+
+  /** What a merge would move or a deletion keep and forget (S50). 404 `client_not_found`. */
+  @Get(':clientId/records')
+  @RequirePermission('clients.manage')
+  records(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+  ): Promise<ClientRecords> {
+    const { clientId } = parseBody(ClientParamsSchema, params);
+    return answering(() => this.clients.records(tenant, clientId));
+  }
+
+  /**
+   * Merges `otherClientId` into this client, who is kept (ADR-0051). 200 the client kept; 404
+   * `client_not_found` (either, or the same twice); 409 `client_merge_overlap`.
+   */
+  @Post(':clientId/merge')
+  @HttpCode(200)
+  @RequirePermission('clients.manage')
+  merge(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+    @Body() body: unknown,
+  ): Promise<Client> {
+    const { clientId } = parseBody(ClientParamsSchema, params);
+    const merge = parseBody(ClientMergeSchema, body);
+    return answering(() => this.clients.merge(tenant, clientId, merge));
+  }
+
+  /** Deletes the client (ADR-0051). 204; 404 `client_not_found`; 409 `client_has_upcoming_visits`. */
+  @Delete(':clientId')
+  @HttpCode(204)
+  @RequirePermission('clients.manage')
+  async remove(@CurrentTenant() tenant: TenantContext, @Param() params: unknown): Promise<void> {
+    const { clientId } = parseBody(ClientParamsSchema, params);
+    await answering(() => this.clients.delete(tenant, clientId));
   }
 }

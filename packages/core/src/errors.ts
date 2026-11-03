@@ -75,6 +75,22 @@ export class ClientNotFoundError extends Error {
   }
 }
 
+/** A client with upcoming visits can't be deleted (S50, ADR-0051): cancel them first. */
+export class ClientHasUpcomingVisitsError extends Error {
+  constructor(readonly upcoming: number) {
+    super('The client has upcoming visits');
+    this.name = 'ClientHasUpcomingVisitsError';
+  }
+}
+
+/** Two clients booked at the same time are two people: they can't be merged (ADR-0051). */
+export class ClientMergeOverlapError extends Error {
+  constructor() {
+    super('The two clients have visits at the same time');
+    this.name = 'ClientMergeOverlapError';
+  }
+}
+
 /** No such conversation or turn of the member (every role sees only its own, ADR-0030). */
 export class ConversationNotFoundError extends Error {
   constructor() {
