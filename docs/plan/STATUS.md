@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S50** (client merge, delete, staff walk-ins, paging and search; tags and birthday editable on the profile, S49.2 D-1).
+**S50 · Client merge, delete, tags and birthday editing** (brief approved 2026-11-03: "Go ahead with your recommendations and complete the session"; D-1 A split, walk-ins and paging/search → **S50.2**; D-2 A delete = anonymise, refused with upcoming visits; D-3 A merge rules, no undo; D-4 ADR-0051).
+- Done: domain + api (migration 0060, `mergeClientRows`/`deleteClientRow`/`countClientRecords`, core services, `POST :id/merge`, `DELETE :id`, `GET :id/records`; tags/birthday in `ClientInputSchema`); ACs AC-W1-30…33; ADR-0051.
+- Next: profile screens (tags/birthday editor, Merge with…, Delete client), the "Book again" preselect top-up, `clients.spec.ts`, then `/session-close`.
+- Open questions: none.
 
 ## Last sessions
 - **S49.2 Phase 11 · History import screens, tags and birthday on the profile (2026-11-03)** (no ADR; [PR #73](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/73)). Full entry in [session-log.md](session-log.md).
