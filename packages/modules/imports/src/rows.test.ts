@@ -237,22 +237,28 @@ describe('planRows (D-3)', () => {
     expect(business.clients).toHaveLength(count);
   });
 
-  it('never creates two clients with one email, and a re-import creates nothing (property)', () => {
-    fc.assert(
-      fc.property(rows, rows, (first, second) => {
-        const business = new MemoryBusiness();
-        if (first.length > 0) business.import(csv(first));
-        if (second.length > 0) business.import(csv(second));
-        const emails = business.clients.flatMap((c) => (c.email ? [c.email] : []));
-        expect(new Set(emails).size).toBe(emails.length);
-        const count = business.clients.length;
-        if (first.length > 0) business.import(csv(first));
-        if (second.length > 0) business.import(csv(second));
-        expect(business.clients).toHaveLength(count);
-      }),
-      { numRuns: 300 },
-    );
-  });
+  // 300 runs take ~0.7 s here and ~5.3 s on CI's busy runner with coverage: a 30 s limit
+  // (S49's CI timed out on the 5 s default).
+  it(
+    'never creates two clients with one email, and a re-import creates nothing (property)',
+    { timeout: 30_000 },
+    () => {
+      fc.assert(
+        fc.property(rows, rows, (first, second) => {
+          const business = new MemoryBusiness();
+          if (first.length > 0) business.import(csv(first));
+          if (second.length > 0) business.import(csv(second));
+          const emails = business.clients.flatMap((c) => (c.email ? [c.email] : []));
+          expect(new Set(emails).size).toBe(emails.length);
+          const count = business.clients.length;
+          if (first.length > 0) business.import(csv(first));
+          if (second.length > 0) business.import(csv(second));
+          expect(business.clients).toHaveLength(count);
+        }),
+        { numRuns: 300 },
+      );
+    },
+  );
 });
 
 describe('tags and birthdays (S49, AC-W1-25)', () => {
