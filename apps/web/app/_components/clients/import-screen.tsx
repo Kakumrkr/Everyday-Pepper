@@ -1,6 +1,6 @@
 'use client';
 
-import type { ImportBatch, ImportPreview, ImportRow } from '@pepper/contracts';
+import type { ImportBatch, ImportBatchId, ImportPreview, ImportRow } from '@pepper/contracts';
 import {
   Badge,
   Button,
@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { formatPhone } from '../../../lib/booking-profile';
+import { errorCodeOf } from '../../../lib/client-api';
 import {
   ACCEPTED_IMPORT_TYPES,
   columnNote,
@@ -29,6 +30,7 @@ import {
   IMPORT_STEPS,
   inProgress,
   loadImport,
+  moreRowsNote,
   POLL_LIMIT_MS,
   POLL_MS,
   precheckImport,
@@ -41,6 +43,7 @@ import {
   stepOf,
   undoable,
   undoImport,
+  undoQuestion,
   undoUntilLabel,
   uploadImport,
   withField,
@@ -111,6 +114,19 @@ export function ImportScreen({
       go('mapping');
     });
 
+  // Started elsewhere (another tab, a double tap): show where it is instead of the stale step.
+  async function refused(id: ImportBatchId, answer: { message: string; body?: unknown }) {
+    if (errorCodeOf(answer.body) === 'import_not_staged') {
+      const current = await loadImport(id);
+      if (current.ok) {
+        setPreview(current.data);
+        go(stepOf(current.data.batch));
+        return;
+      }
+    }
+    setError(answer.message);
+  }
+
   const remap = (column: string, field: string) =>
     run(async () => {
       if (preview === null) return;
@@ -119,27 +135,28 @@ export function ImportScreen({
         withField(preview.batch.columns, column, field),
       );
       if (!answer.ok) {
-        setError(answer.message);
+        await refused(preview.batch.id, answer);
         return;
       }
       setPreview(answer.data);
     });
 
-  // Back to the start: the staged import is thrown away (the api discards it after 24 h anyway).
-  const startOver = () =>
-    run(async () => {
-      if (preview?.batch.status === 'staged') await discardImport(preview.batch.id);
-      setPreview(null);
-      window.history.replaceState(null, '', IMPORT_PATH);
-      go('upload');
-    });
+  // Back to the start: the staged import is thrown away, without waiting (the api discards
+  // one nobody commits after 24 h anyway).
+  function startOver() {
+    if (busy) return;
+    if (preview?.batch.status === 'staged') void discardImport(preview.batch.id);
+    setPreview(null);
+    window.history.replaceState(null, '', IMPORT_PATH);
+    go('upload');
+  }
 
   const commit = () =>
     run(async () => {
       if (preview === null) return;
       const answer = await commitImport(preview.batch.id);
       if (!answer.ok) {
-        setError(answer.message);
+        await refused(preview.batch.id, answer);
         return;
       }
       setPreview({ batch: answer.data, rows: [] });
@@ -177,7 +194,7 @@ export function ImportScreen({
           batch={preview.batch}
           busy={busy}
           onChange={(column, field) => void remap(column, field)}
-          onBack={() => void startOver()}
+          onBack={startOver}
           onNext={() => {
             go('preview');
           }}
@@ -356,6 +373,7 @@ function PreviewStep({
   const { toFix, leftOut, rest } = rowsToFixFirst(rows);
   const importing = batch.counts.create + batch.counts.merge;
   const blocked = batch.problems.length > 0 || importing === 0;
+  const more = moreRowsNote(batch.counts, rows);
   return (
     <>
       <section className="flex flex-col gap-3" aria-labelledby="import-preview">
@@ -375,11 +393,7 @@ function PreviewStep({
       <RowGroup title="To fix" rows={toFix} testId="import-fix" />
       <RowGroup title="Left out" rows={leftOut} testId="import-skipped" />
       <RowGroup title="Ready to import" rows={rest} testId="import-ready" />
-      {rows.length < batch.counts.rows ? (
-        <p className="m-0 type-caption text-ink-2 tabular-nums">
-          Showing {rows.length} of {batch.counts.rows} rows. The rest import the same way.
-        </p>
-      ) : null}
+      {more === null ? null : <p className="m-0 type-caption text-ink-2 tabular-nums">{more}</p>}
       <ActionBar>
         <Button variant="secondary" disabled={busy} onClick={onBack}>
           Columns
@@ -442,8 +456,9 @@ function RowLine({ row }: { row: ImportRow }) {
         {contact === '' ? null : (
           <span className="type-caption break-words text-ink-2">{contact}</span>
         )}
-        {row.reasons.map((reason) => (
-          <span key={reason.code} className="type-body text-ink">
+        {row.reasons.map((reason, index) => (
+          // By position: a row may have the same reason twice (two bad phone columns).
+          <span key={index} className="type-body text-ink">
             {reason.message}
           </span>
         ))}
@@ -579,7 +594,7 @@ function ResultStep({
         open={confirming}
         onOpenChange={setConfirming}
         title="Undo this import?"
-        description={`I’ll remove the ${String(batch.counts.create)} clients it added and clear the emails and phones it filled in. Anyone who booked since stays.`}
+        description={undoQuestion(batch.counts)}
         footer={
           <>
             <Button

@@ -64,8 +64,10 @@ export default async function HomePage() {
     current?.permissions.includes('feed.read') === true
       ? currentJson('/v1/feed', FeedResponseSchema)
       : null,
-    // "Bring your clients" after the setup check (S48.2, AC-W1-20), for who may import.
-    current?.permissions.includes('clients.manage') === true
+    // "Bring your clients" after the setup check (S48.2, AC-W1-20): on the setup card, for
+    // who may import.
+    current?.permissions.includes('settings.manage') === true &&
+    current.permissions.includes('clients.manage')
       ? currentJson('/v1/imports', z.array(ImportBatchSchema))
       : null,
   ]);

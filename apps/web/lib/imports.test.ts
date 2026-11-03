@@ -5,6 +5,7 @@ import {
   commitImport,
   importFormatOf,
   importMessageFor,
+  moreRowsNote,
   offersImport,
   precheckImport,
   previewSentence,
@@ -13,6 +14,7 @@ import {
   rowsToFixFirst,
   stepOf,
   undoable,
+  undoQuestion,
   undoUntilLabel,
   uploadImport,
   withField,
@@ -220,5 +222,40 @@ describe('offersImport (AC-W1-20)', () => {
       true,
     );
     expect(offersImport([batch({ status: 'done' })])).toBe(false);
+  });
+});
+
+describe('a long preview and the undo question', () => {
+  const row = (n: number, outcome: 'create' | 'invalid') => ({
+    row: n,
+    name: 'Ana',
+    email: null,
+    phone: null,
+    outcome,
+    reasons: [],
+    clientId: null,
+  });
+
+  it('says when rows to fix are beyond the rows shown, and nothing when all are shown', () => {
+    const many = { rows: 300, create: 50, merge: 0, unchanged: 0, invalid: 250, skipped: 0 };
+    const shown = Array.from({ length: 200 }, (_, i) => row(i + 2, 'invalid'));
+    expect(moreRowsNote(many, shown)).toBe(
+      'Showing 200 of 300 rows. 50 more rows to fix aren’t shown: fix the ones above, then pick the file again.',
+    );
+    const fine = { ...many, create: 299, invalid: 1 };
+    expect(
+      moreRowsNote(fine, [
+        row(2, 'invalid'),
+        ...shown.slice(1).map((r) => ({ ...r, outcome: 'create' as const })),
+      ]),
+    ).toBe('Showing 200 of 300 rows. The rest are ready to import.');
+    expect(moreRowsNote({ ...many, rows: 1 }, [row(2, 'create')])).toBeNull();
+  });
+
+  it('names what an undo takes back, in the right number', () => {
+    expect(undoQuestion({ ...counts, create: 1, merge: 0 })).toBe(
+      'I’ll remove the 1 client it added. Anyone who booked since stays.',
+    );
+    expect(undoQuestion(counts)).toContain('143 clients it added and clear the emails and phones');
   });
 });

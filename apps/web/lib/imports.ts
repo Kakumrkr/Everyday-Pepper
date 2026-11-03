@@ -3,6 +3,7 @@ import {
   ImportFieldSchema,
   ImportPreviewSchema,
   MAX_IMPORT_BYTES,
+  SINGLE_IMPORT_FIELDS,
   type ImportBatch,
   type ImportBatchId,
   type ImportColumn,
@@ -209,7 +210,8 @@ export function inProgress(batch: ImportBatch): boolean {
 export const POLL_MS = 1500;
 export const POLL_LIMIT_MS = 10 * 60 * 1000;
 
-const count = (n: number, one: string, many: string) => `${String(n)} ${n === 1 ? one : many}`;
+export const count = (n: number, one: string, many: string) =>
+  `${String(n)} ${n === 1 ? one : many}`;
 
 /**
  * The preview in one sentence (AC-W1-21): "143 new clients, 12 to fill in, 3 to fix", then the
@@ -284,6 +286,29 @@ export function rowsToFixFirst(rows: readonly ImportRow[]): {
   };
 }
 
+/**
+ * What a preview cut at IMPORT_PREVIEW_ROWS leaves out, when it does: the rows to fix come
+ * first, so the note says how many of them aren't shown.
+ */
+export function moreRowsNote(counts: ImportCounts, shown: readonly ImportRow[]): string | null {
+  if (shown.length >= counts.rows) return null;
+  const toFix = counts.invalid + counts.skipped;
+  const fixShown = shown.filter((row) => row.outcome === 'invalid' || row.outcome === 'skipped');
+  const hidden = toFix - fixShown.length;
+  const of = `Showing ${String(shown.length)} of ${String(counts.rows)} rows`;
+  return hidden > 0
+    ? `${of}. ${count(hidden, 'more row to fix isn’t', 'more rows to fix aren’t')} shown: fix the ones above, then pick the file again.`
+    : `${of}. The rest are ready to import.`;
+}
+
+/** The undo's confirmation in words, with what it takes back. */
+export function undoQuestion(counts: ImportCounts): string {
+  const added = count(counts.create, 'client', 'clients');
+  return counts.merge > 0
+    ? `I’ll remove the ${added} it added and clear the emails and phones it filled in. Anyone who booked since stays.`
+    : `I’ll remove the ${added} it added. Anyone who booked since stays.`;
+}
+
 /** Home offers "Bring your clients" (AC-W1-20) until an import has finished, not undone. */
 export function offersImport(imports: readonly ImportBatch[]): boolean {
   return !imports.some((batch) => batch.status === 'done');
@@ -346,9 +371,6 @@ export function columnNote(column: ImportColumn, preset: ImportPreset | null): s
   }
 }
 
-/** Fields one column at most may fill (the api's rule). */
-const SINGLE: readonly ImportField[] = ['name', 'first_name', 'last_name', 'external_id'];
-
 /**
  * The mapping with one column changed (`''`: not imported). A field only one column may fill
  * moves to this column: the column that had it is no longer imported.
@@ -362,7 +384,7 @@ export function withField(
   const field = parsed.success ? parsed.data : null;
   return columns.map((each) => {
     if (each.column === column) return { column: each.column, field };
-    const taken = field !== null && SINGLE.includes(field) && each.field === field;
+    const taken = field !== null && SINGLE_IMPORT_FIELDS.includes(field) && each.field === field;
     return { column: each.column, field: taken ? null : each.field };
   });
 }

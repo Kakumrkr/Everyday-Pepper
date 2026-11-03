@@ -46,6 +46,11 @@ export function bodyLimitOf(method: string, pathname: string): number {
   return MAX_BODY_BYTES;
 }
 
+/** How long the api may take to answer: staging a client file reads up to 10,000 rows. */
+export function answerTimeoutOf(method: string, pathname: string): number {
+  return method === 'POST' && pathname === '/v1/imports' ? 60_000 : 10_000;
+}
+
 const TOO_LARGE = { code: 'payload_too_large', message: 'That request is too large.' };
 
 export interface ForwardOptions {
@@ -62,8 +67,9 @@ export interface ForwardOptions {
  * decides anything.
  */
 export async function forwardToApi(request: Request, options: ForwardOptions): Promise<Response> {
-  const { apiBaseUrl, timeoutMs = 10_000, fetch = globalThis.fetch } = options;
+  const { apiBaseUrl, fetch = globalThis.fetch } = options;
   const incoming = new URL(request.url);
+  const timeoutMs = options.timeoutMs ?? answerTimeoutOf(request.method, incoming.pathname);
   const target = new URL(incoming.pathname + incoming.search, apiBaseUrl);
 
   const headers = new Headers();

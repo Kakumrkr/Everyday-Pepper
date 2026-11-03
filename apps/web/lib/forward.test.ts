@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { MAX_IMPORT_BYTES } from '@pepper/contracts';
-import { bodyLimitOf, forwardToApi, MAX_BODY_BYTES, MAX_PHOTO_UPLOAD_BYTES } from './forward';
+import {
+  answerTimeoutOf,
+  bodyLimitOf,
+  forwardToApi,
+  MAX_BODY_BYTES,
+  MAX_PHOTO_UPLOAD_BYTES,
+} from './forward';
 
 const API = 'http://api:4000';
 
@@ -117,6 +123,10 @@ describe('forwardToApi', () => {
     expect(bodyLimitOf('POST', '/v1/imports')).toBe(MAX_IMPORT_BYTES);
     expect(bodyLimitOf('PUT', '/v1/imports/x/mapping')).toBe(MAX_BODY_BYTES);
     expect(bodyLimitOf('POST', '/v1/imports/x/commit')).toBe(MAX_BODY_BYTES);
+    // Staging reads the whole file before it answers.
+    expect(answerTimeoutOf('POST', '/v1/imports')).toBe(60_000);
+    expect(answerTimeoutOf('GET', '/v1/imports')).toBe(10_000);
+    expect(answerTimeoutOf('POST', '/v1/clients')).toBe(10_000);
     const { fetch, calls } = upstream(new Response('{}', { status: 201 }));
     const file = new Uint8Array(MAX_BODY_BYTES * 4);
     const response = await forwardToApi(
