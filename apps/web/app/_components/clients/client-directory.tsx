@@ -1,7 +1,17 @@
 'use client';
 
 import { ClientsResponseSchema, type Client } from '@pepper/contracts';
-import { Avatar, cx, EmptyState, fieldStyle, IconButton, List, ListRow } from '@pepper/ui';
+import {
+  Avatar,
+  buttonStyle,
+  cx,
+  EmptyState,
+  fieldStyle,
+  IconButton,
+  List,
+  ListRow,
+} from '@pepper/ui';
+import Link from 'next/link';
 import { useRef, useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { fetchJson } from '../../../lib/client-api';
@@ -17,16 +27,20 @@ const SEARCH_LIMIT = 50;
  * each role sees: owners and managers every client, staff the clients they have appointments
  * with (AC-W9-1). The search stays out of the page's URL. On the kit (S42): hairline rows with
  * initials, and an empty list that says what to do next (AC-X-7); `onAdd` opens the add sheet.
+ * With `importId` (S49.2, AC-W1-29) it lists only the clients that import added, a search
+ * staying inside them, and "Show everyone" leaves the filter.
  */
 export function ClientDirectory({
   initial,
   staffView,
   onAdd,
+  importId = null,
 }: {
   initial: Client[];
   staffView: boolean;
   /** Owners and managers: opens "Add a client" (the empty list's action). */
   onAdd?: (() => void) | undefined;
+  importId?: string | null;
 }) {
   const [clients, setClients] = useState(initial);
   const searchField = useRef<HTMLInputElement>(null);
@@ -37,6 +51,7 @@ export function ClientDirectory({
   async function search(text: string) {
     const query = new URLSearchParams({ limit: String(SEARCH_LIMIT) });
     if (text !== '') query.set('search', text);
+    if (importId !== null) query.set('import', importId);
     setBusy(true);
     const answer = await fetchJson(`/v1/clients?${query.toString()}`, ClientsResponseSchema);
     setBusy(false);
@@ -48,6 +63,17 @@ export function ClientDirectory({
 
   return (
     <div className="grid gap-3">
+      {importId === null ? null : (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface-2 py-1 pr-1 pl-4"
+          data-testid="clients-import-filter"
+        >
+          <p className="m-0 type-body text-ink">New from your import</p>
+          <Link href={ROUTES.clients} className={buttonStyle({ variant: 'quiet', size: 'sm' })}>
+            Show everyone
+          </Link>
+        </div>
+      )}
       <form
         role="search"
         className="flex gap-2"
@@ -81,13 +107,20 @@ export function ClientDirectory({
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       {clients.length === 0 ? (
         <div role="status">
-          {searched !== null ? (
+          {searched === null && importId !== null ? (
+            <EmptyState
+              icon="clients"
+              title="No new clients from this import"
+              body="Everyone in the file was already here, or the import was undone."
+              action={{ label: 'Show everyone', href: ROUTES.clients, renderLink: kitLink }}
+            />
+          ) : searched !== null ? (
             <EmptyState
               icon="search"
               title={`No clients match “${searched}”`}
               body="Check the spelling, or search by email instead."
               action={{
-                label: 'Show everyone',
+                label: importId === null ? 'Show everyone' : 'Clear the search',
                 onClick: () => {
                   // The field shows what the list shows: empty again.
                   if (searchField.current !== null) searchField.current.value = '';

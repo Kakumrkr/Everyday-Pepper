@@ -1,8 +1,16 @@
-import { ImportBatchSchema, type ImportBatch, type ImportColumn } from '@pepper/contracts';
+import {
+  ImportBatchSchema,
+  ImportRowSchema,
+  type ImportBatch,
+  type ImportColumn,
+} from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  batchInAddress,
+  clientsHref,
   columnNote,
   commitImport,
+  importSteps,
   importFormatOf,
   importMessageFor,
   moreRowsNote,
@@ -11,12 +19,15 @@ import {
   previewSentence,
   remapImport,
   resultSentence,
+  rowBadge,
   rowsToFixFirst,
   stepOf,
+  takenTimes,
   undoable,
   undoQuestion,
   undoUntilLabel,
   uploadImport,
+  visitLine,
   withField,
 } from './imports';
 
@@ -277,6 +288,15 @@ describe('a long preview and the undo question', () => {
       ]),
     ).toBe('Showing 200 of 300 rows. The rest are ready to import.');
     expect(moreRowsNote({ ...many, rows: 1 }, [row(2, 'create')])).toBeNull();
+    // A visits file: times taken beyond the cut aren't "ready to import".
+    expect(
+      moreRowsNote({ ...fine, invalid: 0, create: 270, conflict: 30 }, [
+        ...shown.slice(0, 10).map((r) => ({ ...r, outcome: 'conflict' as const })),
+        ...shown.slice(10).map((r) => ({ ...r, outcome: 'create' as const })),
+      ]),
+    ).toBe(
+      'Showing 200 of 300 rows. 20 more times taken aren’t shown; the rest are ready to import.',
+    );
   });
 
   it('names what an undo takes back, in the right number', () => {
@@ -284,5 +304,185 @@ describe('a long preview and the undo question', () => {
       'I’ll remove the 1 client it added. Anyone who booked since stays.',
     );
     expect(undoQuestion(counts)).toContain('143 clients it added and clear the emails and phones');
+  });
+});
+
+describe('a visits file (AC-W1-27)', () => {
+  const visitCounts = {
+    rows: 52,
+    create: 46,
+    merge: 0,
+    unchanged: 1,
+    invalid: 3,
+    skipped: 0,
+    conflict: 2,
+    clients: 12,
+    past: 40,
+    upcoming: 6,
+  };
+  const visits = (overrides: Record<string, unknown> = {}) =>
+    batch({ kind: 'visits', counts: visitCounts, ...overrides });
+  const visitRow = (
+    n: number,
+    outcome: 'create' | 'invalid' | 'skipped' | 'conflict' | 'unchanged',
+    status: 'completed' | 'no_show' | 'confirmed' = 'completed',
+  ) =>
+    ImportRowSchema.parse({
+      row: n,
+      name: 'Ana Ruiz',
+      email: null,
+      phone: null,
+      outcome,
+      reasons: [],
+      clientId: '0190a0a0-0000-7000-8000-0000000000c1',
+      tags: [],
+      birthday: null,
+      visit: {
+        startsAt: '2026-11-10T19:30:00.000Z',
+        durationMinutes: 45,
+        service: 'Skin fade',
+        staff: 'Dre',
+        status,
+        bookingId: null,
+      },
+    });
+
+  it('names its steps after visits', () => {
+    expect(importSteps('visits')[2]).toBe('Check the visits');
+    expect(importSteps('clients')[2]).toBe('Check the clients');
+  });
+
+  it('says the preview as one sentence of visits, clients and rows to fix', () => {
+    expect(previewSentence(visitCounts, 'visits')).toBe(
+      '40 past visits, 6 upcoming, 12 new clients, 3 to fix, 2 times taken, 1 already here',
+    );
+    expect(
+      previewSentence(
+        { ...visitCounts, past: 1, upcoming: 0, clients: 1, conflict: 0, unchanged: 0 },
+        'visits',
+      ),
+    ).toBe('1 past visit, 0 upcoming, 1 new client, 3 to fix');
+  });
+
+  it('lists the times taken apart from the rows to fix', () => {
+    const { toFix, taken, leftOut, rest } = rowsToFixFirst([
+      visitRow(2, 'create'),
+      visitRow(3, 'conflict', 'confirmed'),
+      visitRow(4, 'invalid'),
+      visitRow(5, 'skipped'),
+    ]);
+    expect(toFix.map((r) => r.row)).toEqual([4]);
+    expect(taken.map((r) => r.row)).toEqual([3]);
+    expect(leftOut.map((r) => r.row)).toEqual([5]);
+    expect(rest.map((r) => r.row)).toEqual([2]);
+  });
+
+  it('shows a visit’s date with its year in the business’s time zone, its service and staff', () => {
+    const { visit } = visitRow(2, 'create');
+    if (visit === null) throw new Error('a visit row has its visit');
+    expect(visitLine(visit, 'America/New_York')).toBe(
+      'Tue, Nov 10, 2026, 2:30 PM · Skin fade with Dre',
+    );
+    expect(visitLine(visit, 'America/Los_Angeles')).toBe(
+      'Tue, Nov 10, 2026, 11:30 AM · Skin fade with Dre',
+    );
+  });
+
+  it('badges a visit by what it becomes', () => {
+    expect(rowBadge(visitRow(2, 'create')).label).toBe('Past visit');
+    expect(rowBadge(visitRow(2, 'create', 'no_show')).label).toBe('No-show');
+    expect(rowBadge(visitRow(2, 'create', 'confirmed')).label).toBe('Upcoming');
+    expect(rowBadge(visitRow(2, 'conflict', 'confirmed')).label).toBe('Time taken');
+    expect(rowBadge(visitRow(2, 'unchanged')).label).toBe('Already here');
+    expect(rowBadge({ ...visitRow(2, 'create'), visit: null }).label).toBe('New');
+  });
+
+  it('says what it added and that no one was emailed', () => {
+    expect(resultSentence(visits({ status: 'done' }))).toBe(
+      'Added 40 past visits, 6 upcoming appointments and 12 new clients. No one was emailed.',
+    );
+    expect(
+      resultSentence(
+        visits({
+          status: 'done',
+          counts: { ...visitCounts, upcoming: 0, conflict: 0, clients: 0, past: 1 },
+        }),
+      ),
+    ).toBe('Added 1 past visit.');
+    expect(resultSentence(visits({ status: 'failed' }))).toBe(
+      'Added 40 past visits, 6 upcoming appointments and 12 new clients before it stopped. Undo it, or try the file again later.',
+    );
+    expect(
+      resultSentence(
+        visits({
+          status: 'undone',
+          undo: { deleted: 12, restored: 0, kept: 0, bookings: 45, bookingsKept: 1 },
+        }),
+      ),
+    ).toBe('Undone: 45 visits and 12 clients removed. 1 visit was kept: it changed since.');
+  });
+
+  it('names the visits and clients an undo takes back', () => {
+    expect(undoQuestion(visitCounts, 'visits')).toBe(
+      'I’ll remove the 46 visits and 12 new clients it added, and clear any email or phone it filled in. A visit changed since, and anyone who booked since, stays.',
+    );
+  });
+});
+
+describe('after the import (AC-W1-29)', () => {
+  it('opens the Clients list filtered to the import’s new clients, when it added any', () => {
+    expect(clientsHref(batch({ status: 'done' }))).toBe(`/clients?import=${ID}`);
+    expect(clientsHref(batch({ status: 'failed' }))).toBe(`/clients?import=${ID}`);
+    expect(clientsHref(batch({ status: 'done', counts: { ...counts, clients: 0 } }))).toBe(
+      '/clients',
+    );
+    expect(clientsHref(batch({ status: 'undone' }))).toBe('/clients');
+  });
+
+  it('lists the times taken once the import ran, and how many more the file has', () => {
+    const taken = (n: number, clientId: string | null) =>
+      ImportRowSchema.parse({
+        row: n,
+        name: 'Ana Ruiz',
+        email: null,
+        phone: null,
+        outcome: 'conflict' as const,
+        reasons: [],
+        clientId,
+        tags: [],
+        birthday: null,
+        visit: {
+          startsAt: '2026-11-10T19:30:00.000Z',
+          durationMinutes: 45,
+          service: 'Skin fade',
+          staff: 'Dre',
+          status: 'confirmed' as const,
+          bookingId: null,
+        },
+      });
+    const done = batch({
+      status: 'done',
+      kind: 'visits',
+      counts: { ...counts, conflict: 3 },
+    });
+    const list = takenTimes(done, [
+      taken(4, '0190a0a0-0000-7000-8000-0000000000c1'),
+      ImportRowSchema.parse({ ...taken(5, null), outcome: 'create' }),
+      taken(6, null),
+    ]);
+    // A time taken without its client (never after a run) is listed without "Book again".
+    expect(list.rows.map((r) => r.row)).toEqual([4, 6]);
+    expect(list.more).toBe(1);
+    expect(takenTimes(batch({ status: 'staged', kind: 'visits' }), [taken(4, null)]).rows).toEqual(
+      [],
+    );
+  });
+});
+
+describe('batchInAddress', () => {
+  it('reads the import a link or Back names, and nothing else', () => {
+    expect(batchInAddress(`?batch=${ID}`)).toBe(ID);
+    expect(batchInAddress('?batch=not-an-id')).toBeNull();
+    expect(batchInAddress('')).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ImportBatch, ImportBatchId, ImportPreview, ImportRow } from '@pepper/contracts';
+import type { ImportBatch, ImportBatchId, ImportPreview } from '@pepper/contracts';
 import {
   Badge,
   Button,
@@ -17,17 +17,18 @@ import {
 import Link from 'next/link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
-import { formatPhone } from '../../../lib/booking-profile';
 import { errorCodeOf } from '../../../lib/client-api';
 import {
   ACCEPTED_IMPORT_TYPES,
+  batchInAddress,
+  clientsHref,
   columnNote,
   commitImport,
   discardImport,
   FIELD_OPTIONS,
   importHref,
   IMPORT_PATH,
-  IMPORT_STEPS,
+  importSteps,
   inProgress,
   loadImport,
   moreRowsNote,
@@ -49,11 +50,13 @@ import {
   withField,
   type ImportStep,
 } from '../../../lib/imports';
+import { RowGroup, TakenTimes } from './import-rows';
 
 /**
  * Bring your clients (S48.2, AC-W1-17…21): pick a file, check the columns, check the clients
  * (the counts in one sentence, the rows to fix first), import, and undo for a week. Nothing
- * reaches the clients until Import; the api re-checks every step.
+ * reaches the clients until Import; the api re-checks every step. A visits file (S49.2,
+ * AC-W1-27…29) brings their history and upcoming appointments the same way, with no email.
  */
 export function ImportScreen({
   initial,
@@ -72,9 +75,28 @@ export function ImportScreen({
     missing ? 'I couldn’t find that import. Pick your file again.' : null,
   );
   const heading = useRef<HTMLHeadingElement>(null);
+  // Back to this screen (after "Book again") can restore its first render: from before the
+  // address named the import, or of an earlier step of it. Resume the import the address names
+  // where it is now (a hydrated first load asks once more, which is cheap).
+  // What the owner did since wins over that answer.
+  const acted = useRef(false);
+  useEffect(() => {
+    const named = batchInAddress(window.location.search);
+    if (named === null) return;
+    let stopped = false;
+    void loadImport(named).then((answer) => {
+      if (stopped || acted.current || !answer.ok) return;
+      setPreview(answer.data);
+      setStep(stepOf(answer.data.batch));
+    });
+    return () => {
+      stopped = true;
+    };
+  }, []);
 
   // Each step starts at its heading, for a screen reader and a phone scrolled down.
   function go(next: ImportStep) {
+    acted.current = true;
     setStep(next);
     setError(null);
     window.scrollTo({ top: 0 });
@@ -89,6 +111,7 @@ export function ImportScreen({
 
   async function run(work: () => Promise<void>) {
     if (busy) return;
+    acted.current = true;
     setBusy(true);
     setError(null);
     try {
@@ -176,7 +199,11 @@ export function ImportScreen({
         <h1 ref={heading} tabIndex={-1} className="m-0 type-display outline-none">
           Bring your clients
         </h1>
-        <StepBar steps={IMPORT_STEPS} current={stepIndex(step)} label="Import steps" />
+        <StepBar
+          steps={importSteps(preview?.batch.kind ?? 'clients')}
+          current={stepIndex(step)}
+          label="Import steps"
+        />
       </header>
       {error === null ? null : (
         <p
@@ -202,6 +229,7 @@ export function ImportScreen({
       ) : step === 'preview' ? (
         <PreviewStep
           preview={preview}
+          timeZone={timeZone}
           busy={busy}
           onBack={() => {
             go('mapping');
@@ -210,7 +238,7 @@ export function ImportScreen({
         />
       ) : (
         <ResultStep
-          batch={preview.batch}
+          preview={preview}
           timeZone={timeZone}
           onChange={setPreview}
           onAgain={() => {
@@ -245,25 +273,29 @@ function UploadStep({ busy, onFile }: { busy: boolean; onFile: (file: File) => v
     <>
       <section className="flex flex-col gap-3" aria-labelledby="import-upload">
         <h2 id="import-upload" className="m-0 type-heading">
-          Pick your client list
+          Pick your clients or appointments
         </h2>
         <p className="m-0 type-body text-ink-2">
-          Export your clients from the app you use now (Square, Booksy, Vagaro, GlossGenius, Fresha
-          or any other) as a CSV or JSON file, then pick it here. I’ll match the columns and show
-          you every client before anything changes.
+          Export your client list, or your appointments, from the app you use now (Square, Booksy,
+          Vagaro, GlossGenius, Fresha or any other) as a CSV or JSON file, then pick it here. I’ll
+          match the columns and show you everything before anything changes.
         </p>
         <List label="What happens">
           <ListRow
             title="Nothing changes until you say Import"
-            meta="You see every client first."
+            meta="You see every client and visit first."
           />
           <ListRow
             title="No one is added twice"
             meta="Clients already here only get the email or phone they’re missing."
           />
+          <ListRow
+            title="No one gets an email"
+            meta="Appointments come in quietly: no confirmations, no reminders."
+          />
           <ListRow title="Undo for 7 days" meta="One tap takes the whole import back out." />
         </List>
-        <p className="m-0 type-caption text-ink-2">Up to 10,000 clients and 5 MB per file.</p>
+        <p className="m-0 type-caption text-ink-2">Up to 10,000 rows and 5 MB per file.</p>
       </section>
       <input
         ref={input}
@@ -333,7 +365,7 @@ function MappingStep({
           Another file
         </Button>
         <Button disabled={busy} onClick={onNext}>
-          Check the clients
+          Check the {batch.kind}
         </Button>
       </ActionBar>
     </>
@@ -358,41 +390,68 @@ function Problems({ problems }: { problems: readonly string[] }) {
   );
 }
 
+/** What the owner should know that doesn't stop the import (a hidden service it brings). */
+function Notices({ notices }: { notices: readonly string[] }) {
+  if (notices.length === 0) return null;
+  return (
+    <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Good to know">
+      {notices.map((notice) => (
+        <li
+          key={notice}
+          className="flex items-start gap-2 rounded-md bg-surface-2 px-4 py-3 type-body text-ink"
+          data-testid="import-notice"
+        >
+          <Badge tone="info">Note</Badge>
+          <span>{notice}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function PreviewStep({
   preview,
+  timeZone,
   busy,
   onBack,
   onImport,
 }: {
   preview: ImportPreview;
+  timeZone: string;
   busy: boolean;
   onBack: () => void;
   onImport: () => void;
 }) {
   const { batch, rows } = preview;
-  const { toFix, leftOut, rest } = rowsToFixFirst(rows);
-  const importing = batch.counts.create + batch.counts.merge;
+  const visits = batch.kind === 'visits';
+  const { toFix, taken, leftOut, rest } = rowsToFixFirst(rows);
+  // A visits file's `create` is its visits; a client file's, with `merge`, its clients.
+  const importing = visits ? batch.counts.create : batch.counts.create + batch.counts.merge;
   const blocked = batch.problems.length > 0 || importing === 0;
   const more = moreRowsNote(batch.counts, rows);
+  const [one, many] = visits ? (['visit', 'visits'] as const) : (['client', 'clients'] as const);
   return (
     <>
       <section className="flex flex-col gap-3" aria-labelledby="import-preview">
         <h2 id="import-preview" className="sr-only">
-          Check the clients
+          Check the {batch.kind}
         </h2>
         <p className="m-0 type-title text-ink tabular-nums" data-testid="import-sentence">
-          {previewSentence(batch.counts)}
+          {previewSentence(batch.counts, batch.kind)}
         </p>
         <p className="m-0 type-body text-ink-2">
           {toFix.length > 0
             ? 'The rows to fix are left out. Fix them in your file and pick it again, or import the rest now.'
             : 'Nothing is written until you tap Import.'}
+          {visits ? ' No one gets an email.' : null}
         </p>
         <Problems problems={batch.problems} />
+        <Notices notices={batch.notices} />
       </section>
-      <RowGroup title="To fix" rows={toFix} testId="import-fix" />
-      <RowGroup title="Left out" rows={leftOut} testId="import-skipped" />
-      <RowGroup title="Ready to import" rows={rest} testId="import-ready" />
+      <RowGroup title="To fix" rows={toFix} testId="import-fix" timeZone={timeZone} />
+      <RowGroup title="Times taken" rows={taken} testId="import-conflict" timeZone={timeZone} />
+      <RowGroup title="Left out" rows={leftOut} testId="import-skipped" timeZone={timeZone} />
+      <RowGroup title="Ready to import" rows={rest} testId="import-ready" timeZone={timeZone} />
       {more === null ? null : <p className="m-0 type-caption text-ink-2 tabular-nums">{more}</p>}
       <ActionBar>
         <Button variant="secondary" disabled={busy} onClick={onBack}>
@@ -403,79 +462,20 @@ function PreviewStep({
             ? 'Importing…'
             : importing === 0
               ? 'Nothing to import'
-              : `Import ${String(importing)} ${importing === 1 ? 'client' : 'clients'}`}
+              : `Import ${String(importing)} ${importing === 1 ? one : many}`}
         </Button>
       </ActionBar>
     </>
   );
 }
 
-function RowGroup({ title, rows, testId }: { title: string; rows: ImportRow[]; testId: string }) {
-  if (rows.length === 0) return null;
-  const id = `${testId}-heading`;
-  return (
-    <section className="flex flex-col gap-2" aria-labelledby={id}>
-      <h3 id={id} className="m-0 type-subheading text-ink tabular-nums">
-        {title} · {rows.length}
-      </h3>
-      <List>
-        {rows.map((row) => (
-          <li key={row.row} data-testid={testId}>
-            <RowLine row={row} />
-          </li>
-        ))}
-      </List>
-    </section>
-  );
-}
-
-const OUTCOME_BADGES: Record<
-  ImportRow['outcome'],
-  { label: string; tone: 'ok' | 'info' | 'warn' | 'neutral' }
-> = {
-  create: { label: 'New', tone: 'ok' },
-  merge: { label: 'Fills in', tone: 'info' },
-  unchanged: { label: 'Already here', tone: 'neutral' },
-  invalid: { label: 'Fix', tone: 'warn' },
-  skipped: { label: 'Left out', tone: 'neutral' },
-  conflict: { label: 'Time taken', tone: 'warn' },
-};
-
-/** A row of the file: where it is, who it is, and what to fix or what it does. */
-function RowLine({ row }: { row: ImportRow }) {
-  const badge = OUTCOME_BADGES[row.outcome];
-  const contact = [row.email, row.phone === null ? null : formatPhone(row.phone)]
-    .filter((part) => part !== null)
-    .join(' · ');
-  return (
-    <div className="flex items-start gap-3 py-3">
-      <span className="w-14 shrink-0 type-caption text-ink-2 tabular-nums">Row {row.row}</span>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="type-body font-semibold break-words text-ink">
-          {row.name ?? 'No name'}
-        </span>
-        {contact === '' ? null : (
-          <span className="type-caption break-words text-ink-2">{contact}</span>
-        )}
-        {row.reasons.map((reason, index) => (
-          // By position: a row may have the same reason twice (two bad phone columns).
-          <span key={index} className="type-body text-ink">
-            {reason.message}
-          </span>
-        ))}
-      </div>
-      <Badge tone={badge.tone}>{badge.label}</Badge>
-    </div>
-  );
-}
-
 function ResultStep({
-  batch,
+  preview,
   timeZone,
   onChange,
   onAgain,
 }: {
-  batch: ImportBatch;
+  preview: ImportPreview;
   timeZone: string;
   onChange: (preview: ImportPreview) => void;
   onAgain: () => void;
@@ -484,7 +484,9 @@ function ResultStep({
   const [undoing, setUndoing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stalled, setStalled] = useState(false);
+  const { batch, rows } = preview;
   const running = inProgress(batch);
+  const what = batch.kind === 'visits' ? 'visits' : 'clients';
 
   // While the worker runs: ask again every POLL_MS, and stop asking after POLL_LIMIT_MS.
   useEffect(() => {
@@ -534,12 +536,12 @@ function ResultStep({
       <section className="flex flex-col gap-3" aria-labelledby="import-result">
         <h2 id="import-result" className="m-0 type-heading">
           {running
-            ? 'Importing your clients'
+            ? `Importing your ${what}`
             : batch.status === 'undone'
               ? 'Import undone'
               : batch.status === 'failed'
                 ? 'The import stopped'
-                : 'Your clients are in'}
+                : `Your ${what} are in`}
         </h2>
         {running ? (
           <div className="flex flex-col gap-3" role="status" data-testid="import-result">
@@ -591,11 +593,12 @@ function ResultStep({
           </p>
         )}
       </section>
+      <TakenTimes batch={batch} rows={rows} timeZone={timeZone} />
       <Dialog
         open={confirming}
         onOpenChange={setConfirming}
         title="Undo this import?"
-        description={undoQuestion(batch.counts)}
+        description={undoQuestion(batch.counts, batch.kind)}
         footer={
           <>
             <Button
@@ -622,8 +625,9 @@ function ResultStep({
             </Button>
           ) : (
             <Link
-              href={ROUTES.clients}
+              href={clientsHref(batch)}
               className={buttonStyle({ variant: 'primary', block: true })}
+              data-testid="import-see-clients"
             >
               See your clients
             </Link>

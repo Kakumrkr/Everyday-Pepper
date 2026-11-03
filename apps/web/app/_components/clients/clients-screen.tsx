@@ -16,9 +16,12 @@ import { ClientEditor } from './client-editor';
 export function ClientsScreen({
   initial,
   manages,
+  importId = null,
 }: {
   initial: Client[] | null;
   manages: boolean;
+  /** Only the clients this import added (AC-W1-29). */
+  importId?: string | null;
 }) {
   const adding = useSheetOpener();
   return (
@@ -56,6 +59,7 @@ export function ClientsScreen({
           initial={initial}
           staffView={!manages}
           onAdd={manages ? adding.openFromHere : undefined}
+          importId={importId}
         />
       )}
     </div>

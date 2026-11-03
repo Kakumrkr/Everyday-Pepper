@@ -295,3 +295,24 @@ export const IMPORT_CSV = [
   'Ana Ruiz,ana.ruiz@example.com,555-010-1001,1990-04-02',
   'Cara Diaz,,555-010-1004,',
 ].join('\n');
+
+/**
+ * A made-up visits file (S49.2) for a business whose own service is `service` and whose owner
+ * is `staff` on the team: three past visits (one a no-show, one of a service it doesn't have,
+ * one with "Jo", who isn't on the team), one upcoming appointment, a second one at the same
+ * time (a time taken), a cancelled visit (left out) and a date it can't read (to fix). The
+ * dates are fixed, history in 2025 and the upcoming ones in 2099 (the last year a file may
+ * give), so screenshots stay still and no day turns them into history.
+ */
+export function visitsCsv({ service, staff }: { service: string; staff: string }): string {
+  return [
+    'Date,Time,Client,Email,Phone,Service,Staff,Length,Price,Status,Tags,Birthday',
+    `2025-03-04,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-1001,${service},${staff},45,40,done,VIP; Color,1990-04-02`,
+    `2025-04-15,11:30 AM,Ana Ruiz,ana.ruiz@example.com,555-010-1001,Beard sculpt,${staff},30,25,done,,`,
+    `2025-05-20,2:00 PM,Ben Ito,,555-010-1002,${service},Jo,45,40,no show,,`,
+    `2099-06-02,10:00 AM,Ben Ito,,555-010-1002,${service},${staff},45,40,booked,,`,
+    `2099-06-02,10:15 AM,Dee Park,dee.park@example.com,555-010-1005,${service},${staff},45,40,booked,,`,
+    `2025-06-01,9:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-1001,${service},${staff},45,40,cancelled,,`,
+    `soon,10:00 AM,Ben Ito,,555-010-1002,${service},${staff},45,40,done,,`,
+  ].join('\n');
+}

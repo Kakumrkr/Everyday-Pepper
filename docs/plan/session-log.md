@@ -1299,4 +1299,21 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Timing:** `pnpm check` about 1.5 min (cached build); affected integration 10.7 min; E2E stack start about 2 min; Playwright 1 min; CI (third run, green): build 9.6 min, integration 10.6 min, AI evals 5.7 min, E2E 19.6 min.
   - **For later:** S49.2 the screens (file kind, conflicts and notices, the result's counts, tags and birthday on the profile, "See your clients"); S53 a "remind these clients" choice for imported appointments; client notes as memory facts; real appointment exports from the pilot to correct the visit presets.
   - **Retro:** went well: a pure planner shared by the preview and the run, and an end-to-end gate in the worker that took 5 s, not the 2 min budget · do better: after a contract change, grep the tests for `as Client`-style casts (typecheck missed two web fixtures) and run the screenshot spec with `--update-snapshots=all` when copy changes inside the tolerance · top-up for S49.2: the result screen names its conflicts as a short list with "Book again" for each, so a skipped upcoming client isn't forgotten.
+- **S49.2 Phase 11 · History import screens, tags and birthday on the profile (2026-11-03)** (no ADR; [PR #73](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/73); branch `claude/cool-clarke-suggig`). D-1 A, D-2 A, D-3 no ADR (decisions.md S49.2). Screens only.
+  - **Built:**
+    - The import screens take a visits file: the steps say "visits", and the preview opens with one sentence of past and upcoming visits, new clients and rows to fix. It shows the notices, a "Times taken" group, each visit's line (date with year, in the business's zone · service with staff) and badges; Import counts the visits.
+    - The result says "No one was emailed". The undo question names visits and clients.
+    - `/clients?import=` shows "New from your import", a search stays inside it, and "Show everyone" leaves it.
+    - Tags and birthday are on the profile. AC-W1-27…29.
+  - **Top-up (S49 retro):** "Book these again" lists each upcoming visit left out because its time was taken, with "Book again" to the client's profile.
+  - **Fixed on the way:** Back after "Book again" showed "Pick a file". Next restored the render from before `history.replaceState` named the import. The screen now resumes the import its address names, unless the owner acted first.
+  - **Checks:**
+    - `pnpm check` green (web unit 371; `lib/imports` 30, `lib/clients` 2);
+    - affected integration: none (screens only);
+    - Playwright `import.spec.ts` 3/3 on the phone (new: the visits journey), `screens.spec.ts` 24/24 on desktop (new: 30 baselines for visits columns, preview, done, the filtered list and an imported profile; `import-file` 6 updated).
+  - **Walkthrough:** 375 px, dark: pick → preview → done → Book again (Book is Dee's) → Back to the result → the new clients. The baselines were looked at in both themes, and the walkthrough moved the times taken out of the receipt.
+  - **Review:** `/code-review` found 6 issues. Five are fixed: resume on every mount, hidden times taken in the long-preview note, the no-email line always, tag keys, the fixture's 2099. The altitude finding (`router.replace`) is left with a reason. `/security-review`: nothing found.
+  - **Timing:** packages build 11 s; the Docker app images failed behind the proxy (time unknown), so the stack ran through `e2e-stack.sh` (first start unmeasured, cached restart 7 s); `pnpm check` 5.1 min; Playwright import 20 s, screens 4.1 min; CI (first run, green): build 11.5 min, integration 12 min, AI evals 7.2 min, E2E 20.9 min.
+  - **For later:** S50 edits tags and birthday (a `ClientInputSchema` change); Book from "Book again" doesn't carry the visit's service, staff or time; the `router.replace` question if a second screen writes its state into the address.
+  - **Retro:** went well: the journey on the real stack found the Back bug the unit tests couldn't, and the walkthrough trimmed a cramped receipt · do better: fixtures with dates are fixed far from now from the start (2099, the year cap), not after review · top-up for S50: "Book again" opens Book with the taken visit's service and staff already chosen.
 
