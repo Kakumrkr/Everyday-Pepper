@@ -155,7 +155,10 @@ describe('a visits file (AC-W1-22…25)', () => {
     const again = await stageImport(db, b.owner, fixture('visits.csv'), b.options);
     expect(again.batch.counts).toMatchObject({ create: 0, unchanged: 5, clients: 0 });
 
+    const requests = await count(b, 'SELECT count(*)::int AS n FROM insight_requests');
     const undone = await undoImport(db, b.owner, preview.batch.id, b.clock, b.options);
+    // The insights run again without the history that went.
+    expect(await count(b, 'SELECT count(*)::int AS n FROM insight_requests')).toBe(requests + 1);
     expect(undone.undo).toEqual({
       deleted: 2,
       restored: 0,
@@ -221,6 +224,61 @@ describe('a visits file (AC-W1-22…25)', () => {
     expect(await count(b, "SELECT count(*)::int AS n FROM bookings WHERE status = 'no_show'")).toBe(
       1,
     );
+  });
+});
+
+describe('after the code review (S49)', () => {
+  const file = (...rows: string[]) =>
+    Buffer.from(['Date,Time,Client,Email,Service,Staff,Length,Tags', ...rows].join('\n'));
+
+  it('makes a hidden service as long as most of its visits, as the preview said', async () => {
+    const b = await newBusiness();
+    const preview = await stageImport(
+      db,
+      b.owner,
+      file(
+        '2026-01-05,10:00,Ana,ana@example.test,Fade,Dre,45,',
+        '2026-02-05,10:00,Ana,ana@example.test,Fade,Dre,45,',
+        '2026-03-05,10:00,Ana,ana@example.test,Fade,Dre,90,',
+      ),
+      b.options,
+    );
+    expect(preview.batch.notices[0]).toContain('hidden service of 45 minutes');
+    await run(b, preview);
+    expect(await count(b, "SELECT duration_minutes AS n FROM services WHERE name = 'Fade'")).toBe(
+      45,
+    );
+  });
+
+  it('leaves a visit nobody on the team can take as one to fix, not as imported', async () => {
+    const b = await newBusiness();
+    const preview = await stageImport(
+      db,
+      b.owner,
+      file('2026-01-05,10:00,Ana,ana@example.test,Haircut,,45,'),
+      b.options,
+    );
+    expect(preview.batch.problems).toEqual([]);
+    await withTenant(db, b.tenantId, (tx) => tx.execute('UPDATE staff_members SET active = false'));
+    await run(b, preview);
+    const done = await withTenant(db, b.tenantId, async (tx) => {
+      const { rows } = await tx.execute<{ counts: { create: number; invalid: number } }>(
+        `SELECT counts FROM import_batches WHERE id = '${preview.batch.id}'`,
+      );
+      return rows[0]?.counts;
+    });
+    expect(done).toMatchObject({ create: 0, invalid: 1, past: 0 });
+    expect(await count(b, 'SELECT count(*)::int AS n FROM bookings')).toBe(0);
+  });
+
+  it('commits a re-import that only fills client details', async () => {
+    const b = await newBusiness();
+    const first = '2026-01-05,10:00,Ana,ana@example.test,Haircut,Dre,45,';
+    await run(b, await stageImport(db, b.owner, file(first), b.options));
+    const again = await stageImport(db, b.owner, file(`${first}VIP`), b.options);
+    expect(again.batch.counts).toMatchObject({ create: 0, unchanged: 1 });
+    await run(b, again);
+    expect(await count(b, "SELECT count(*)::int AS n FROM clients WHERE tags = '{VIP}'")).toBe(1);
   });
 });
 

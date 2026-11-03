@@ -277,7 +277,11 @@ export async function commitImport(
     const [problem] = ProblemsSchema.parse(batch.problems);
     if (problem !== undefined) throw new ImportNotReadyError(problem);
     const counts = ImportCountsSchema.parse(batch.counts);
-    if (counts.create + counts.merge === 0) {
+    // A visits file's rows count by their visit; a client detail it fills is something too.
+    const fillsClients =
+      batch.kind === 'visits' &&
+      (await listImportRows(tx, id)).some((row) => Object.keys(row.fills as object).length > 0);
+    if (counts.create + counts.merge === 0 && !fillsClients) {
       throw new ImportNotReadyError(
         batch.kind === 'visits'
           ? 'There’s nothing to import: every visit is invalid, skipped, taken or already in Pepper.'
@@ -334,6 +338,8 @@ export async function undoImport(
     }
     const bookings =
       batch.kind === 'visits' ? await visitBookOf(options).undo(tx, id) : { deleted: 0, kept: 0 };
+    // The insights forget the history that went (as a run made them see it).
+    if (bookings.deleted > 0) await visitBookOf(options).finished(tx);
     const undo = {
       ...(await undoImportBatchRows(tx, id)),
       bookings: bookings.deleted,
@@ -533,7 +539,7 @@ async function applyVisits(
   }
   const out = new Map<number, AppliedVisit>();
   if (entries.length === 0) return out;
-  const { visits } = await planWith(
+  const { visits, summary } = await planWith(
     tx,
     book,
     batch.createdByUserId,
@@ -541,19 +547,15 @@ async function applyVisits(
     now.getTime(),
     batch.format as ImportFormat,
   );
-  // Hidden services for names the business doesn't have, made once (or found if made since).
-  const toAdd = new Map<string, { name: string; durationMinutes: number }>();
-  for (const visit of visits) {
-    if (visit.outcome === 'create' && visit.serviceId === null) {
-      toAdd.set(visit.serviceKey, {
-        name: visit.serviceName,
-        durationMinutes: visit.durationMinutes,
-      });
-    }
-  }
+  // Hidden services for names the business doesn't have, made once (or found if made since),
+  // with the most common length of their rows, as the preview said.
   const hidden = new Map<string, VisitService>();
-  if (toAdd.size > 0) {
-    for (const service of await book.addHiddenServices(tx, [...toAdd.values()])) {
+  if (summary.newServices.length > 0) {
+    const wanted = summary.newServices.map(({ name, durationMinutes }) => ({
+      name,
+      durationMinutes,
+    }));
+    for (const service of await book.addHiddenServices(tx, wanted)) {
       hidden.set(serviceKey(service.name), service);
     }
   }
@@ -564,12 +566,7 @@ async function applyVisits(
     const service = visit.serviceId === null ? hidden.get(visit.serviceKey) : undefined;
     const serviceId = visit.serviceId ?? service?.id ?? null;
     const clientId = clientOf(i);
-    if (
-      visit.outcome !== 'create' ||
-      serviceId === null ||
-      visit.staffId === null ||
-      clientId === null
-    ) {
+    if (visit.outcome !== 'create') {
       out.set(i, {
         outcome: visit.outcome,
         reasons: visit.reasons,
@@ -577,6 +574,24 @@ async function applyVisits(
         display: displayOf(visit, null),
       });
       continue;
+    }
+    if (visit.staffId === null) {
+      // Nobody on the team can take it (the default staff member left since the preview).
+      out.set(i, {
+        outcome: 'invalid',
+        reasons: [
+          {
+            code: 'no_staff',
+            message: `${rowLabelOf(batch, visit.row)}: nobody on your team can take this visit. Add yourself to your team, then import the file again.`,
+          },
+        ],
+        bookingId: null,
+        display: displayOf(visit, null),
+      });
+      continue;
+    }
+    if (serviceId === null || clientId === null) {
+      throw new Error('A planned visit has no service or client');
     }
     writes.push({
       i,

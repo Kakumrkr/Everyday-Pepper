@@ -322,6 +322,16 @@ describe('tags and birthdays (AC-W1-25)', () => {
     expect(client).toMatchObject({ tags: ['VIP'], birthdayMonth: null, birthdayDay: null });
   });
 
+  it('never adds a tag past 20, counting tags that differ only in case', async () => {
+    const b = await newBusiness();
+    const full = [...Array.from({ length: 18 }, (_, i) => `t${String(i)}`), 'VIP', 'vip'];
+    const filled = await withTenant(db, b.tenant, async (tx) => {
+      await tx.update(clients).set({ tags: full }).where(eq(clients.id, b.client));
+      return fillClientContact(tx, b.client, { tags: ['New'] });
+    });
+    expect(filled).toEqual({});
+  });
+
   it('creates imported clients with tags and a birthday, listed by their import', async () => {
     const b = await newBusiness();
     const id = newId();

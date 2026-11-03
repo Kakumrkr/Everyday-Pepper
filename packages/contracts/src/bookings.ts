@@ -22,11 +22,15 @@ export const BookingStatusSchema = z.enum(['confirmed', 'completed', 'no_show', 
 export type BookingStatus = z.infer<typeof BookingStatusSchema>;
 
 /**
- * Where a booking came from (`team`: made in the app by a member; `import`: brought in from
- * another tool's appointments, S49, ADR-0050).
+ * Where a booking a member, the AI or the booking page makes comes from (`team`: made in the app
+ * by a member). Only an import writes `import` bookings, through its own path (S49, ADR-0050).
  */
-export const BookingSourceSchema = RecordSourceSchema;
+export const BookingSourceSchema = RecordSourceSchema.exclude(['import']);
 export type BookingSource = z.infer<typeof BookingSourceSchema>;
+
+/** Where any booking came from, as it is read: also `import` (S49, ADR-0050). */
+export const BookingOriginSchema = RecordSourceSchema;
+export type BookingOrigin = z.infer<typeof BookingOriginSchema>;
 
 /**
  * A booking's status can move from the first to the second. `cancelled` is final. What
@@ -111,7 +115,7 @@ export const BookingSchema = z.object({
   priceFromCents: z.number().int().nullable(),
   priceToCents: z.number().int().nullable(),
   status: BookingStatusSchema,
-  source: BookingSourceSchema,
+  source: BookingOriginSchema,
   /** Booked outside hours or rules by an owner or manager. */
   overridden: z.boolean(),
   createdAt: UtcDateTimeSchema,

@@ -6,6 +6,7 @@ import {
   ImportFormatSchema,
   ImportKindSchema,
   ImportPresetSchema,
+  MAX_CLIENT_TAGS,
   PhoneSchema,
   TenantIdSchema,
   type ImportBatchId,
@@ -393,7 +394,7 @@ export interface NewImportedClient {
   birthday?: ClientBirthday | null;
 }
 
-const Tags = z.array(ClientTagSchema).max(20);
+const Tags = z.array(ClientTagSchema).max(MAX_CLIENT_TAGS);
 
 /** Inserts the clients a run creates (`source` import). */
 export async function insertImportedClients(
@@ -461,7 +462,7 @@ export async function fillClientContact(
     if (done.length > 0) filled.birthday = ClientBirthdaySchema.parse(fills.birthday);
   }
   if (fills.tags !== undefined && fills.tags.length > 0) {
-    // Only tags the client lacks (ignoring case), and never past 20.
+    // Only tags the client lacks (ignoring case), and never past MAX_CLIENT_TAGS.
     const wanted = Tags.parse(fills.tags);
     const [row] = await tx
       .select({ tags: clients.tags })
@@ -469,9 +470,10 @@ export async function fillClientContact(
       .where(eq(clients.id, Id.parse(id)))
       .for('update');
     const have = new Set((row?.tags ?? []).map((tag) => tag.toLowerCase()));
+    // Room by the stored tags, not the case-insensitive set (a client may hold "VIP" and "vip").
     const added = wanted
       .filter((tag) => !have.has(tag.toLowerCase()))
-      .slice(0, Math.max(0, 20 - have.size));
+      .slice(0, Math.max(0, MAX_CLIENT_TAGS - (row?.tags.length ?? 0)));
     if (row !== undefined && added.length > 0) {
       await tx
         .update(clients)

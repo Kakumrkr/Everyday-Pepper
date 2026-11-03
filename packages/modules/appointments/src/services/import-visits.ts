@@ -1,4 +1,4 @@
-import { type ImportBatchId } from '@pepper/contracts';
+import { importNameKey, type ImportBatchId } from '@pepper/contracts';
 import {
   BookingOverlapError,
   findCurrentTenant,
@@ -23,8 +23,6 @@ import { requestInsights } from './insights.js';
 // no confirmation, no reminder planned, no waitlist matching (AC-W1-24). The insights re-run
 // once, when the run finishes. It matches `@pepper/imports`' `VisitBook` by shape: neither
 // module imports the other; the api and the worker pass it in.
-
-const key = (name: string) => name.replace(/\s+/g, ' ').trim().toLowerCase();
 
 interface ImportService {
   id: string;
@@ -82,11 +80,10 @@ export const importVisitBook = {
     tx: TenantTx,
     wanted: readonly { name: string; durationMinutes: number }[],
   ): Promise<ImportService[]> {
+    const byKey = new Map((await listServices(tx)).map((row) => [importNameKey(row.name), row]));
     const out: ImportService[] = [];
     for (const { name, durationMinutes } of wanted) {
-      const found = async () =>
-        (await listServices(tx)).find((service) => key(service.name) === key(name));
-      const existing = await found();
+      const existing = byKey.get(importNameKey(name));
       if (existing !== undefined) {
         out.push(toService(existing));
         continue;
@@ -104,11 +101,14 @@ export const importVisitBook = {
             active: false,
           }),
         );
+        byKey.set(importNameKey(row.name), row);
         out.push(toService(row));
       } catch (error) {
         // Made by someone else meanwhile: use theirs.
         if (!(error instanceof ServiceNameTakenError)) throw error;
-        const made = await found();
+        const made = (await listServices(tx)).find(
+          (service) => importNameKey(service.name) === importNameKey(name),
+        );
         if (made === undefined) throw error;
         out.push(toService(made));
       }

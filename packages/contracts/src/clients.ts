@@ -68,7 +68,6 @@ export const ClientInputSchema = z
 export type ClientInput = z.input<typeof ClientInputSchema>;
 export type ClientFields = z.output<typeof ClientInputSchema>;
 
-/** A client as the api returns them. */
 /** The most tags a client has (S49, ADR-0050). */
 export const MAX_CLIENT_TAGS = 20;
 /** The longest tag. */
@@ -100,6 +99,7 @@ export const ClientBirthdaySchema = z
   });
 export type ClientBirthday = z.infer<typeof ClientBirthdaySchema>;
 
+/** A client as the api returns them. */
 export const ClientSchema = z.object({
   id: ClientIdSchema,
   name: z.string(),

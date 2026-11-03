@@ -58,6 +58,14 @@ export const IMPORT_FIELDS = [
 export const ImportFieldSchema = z.enum(IMPORT_FIELDS);
 export type ImportField = z.infer<typeof ImportFieldSchema>;
 
+/**
+ * A service's or staff member's name as an import compares it: single-spaced, trimmed, without
+ * case (S49; shared by the planner and the appointments module's hidden services).
+ */
+export function importNameKey(name: string): string {
+  return name.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
 /** The fields that make a row a visit (S49). */
 export const VISIT_IMPORT_FIELDS: readonly ImportField[] = [
   'visit_date',
@@ -195,6 +203,7 @@ export const IMPORT_REASON_CODES = [
   'visit_exists',
   'visit_duplicate',
   'conflict',
+  'no_staff',
 ] as const;
 export const ImportReasonCodeSchema = z.enum(IMPORT_REASON_CODES);
 export type ImportReasonCode = z.infer<typeof ImportReasonCodeSchema>;

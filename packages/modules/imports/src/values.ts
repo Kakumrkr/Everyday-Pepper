@@ -206,6 +206,14 @@ export function readStatus(cell: string): CellStatus {
   return 'kept';
 }
 
+/** A birth year: two digits are the latest year not after this one (`55` is 1955). */
+function birthYear(text: string): number {
+  if (text.length > 2) return Number(text);
+  const now = new Date().getUTCFullYear();
+  const year = 2000 + Number(text);
+  return year > now ? year - 100 : year;
+}
+
 /**
  * A birthday: `1990-04-12`, `4/12/1990`, `4/12`, `--04-12`, `April 12`, `12 Apr`, `Apr 12, 1990`.
  * A year of 1900 or before is a tool's placeholder for "no year".
@@ -223,7 +231,7 @@ export function readBirthday(cell: string): ClientBirthday | null {
   else if (noYear !== null) [month, day] = [Number(noYear[1]), Number(noYear[2])];
   else if (us !== null) {
     [month, day] = [Number(us[1]), Number(us[2])];
-    year = us[3] === undefined ? null : fullYear(us[3]);
+    year = us[3] === undefined ? null : birthYear(us[3]);
   } else {
     const words = text.replace(/(\d)(st|nd|rd|th)\b/gi, '$1').split(' ');
     const [a = '', b = '', c] = words;

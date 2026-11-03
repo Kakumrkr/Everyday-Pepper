@@ -1,5 +1,6 @@
 import {
   fromZoned,
+  importNameKey,
   toZoned,
   type ImportBatchId,
   type ImportFormat,
@@ -114,6 +115,8 @@ export interface VisitEntry {
 
 /** What a visit row does. */
 export interface PlannedVisit {
+  /** The file's row number. */
+  row: number;
   outcome: 'create' | 'unchanged' | 'skipped' | 'conflict' | 'invalid';
   reasons: ImportReason[];
   startsAt: number;
@@ -138,7 +141,8 @@ export interface VisitSummary {
   problems: string[];
 }
 
-export const serviceKey = (name: string) => name.replace(/\s+/g, ' ').trim().toLowerCase();
+/** A service's or staff member's name as it is compared. */
+export const serviceKey = importNameKey;
 
 /** The instant of a cell's date and minute: its own offset, else the business's zone. */
 function instantOf(cell: CellDate, minute: number, timeZone: string): number {
@@ -272,6 +276,7 @@ export function planVisits(
     const member = visit.staff === null ? undefined : staffByName(context.staff, visit.staff);
     const staff = member ?? context.defaultStaff;
     const plan: PlannedVisit = {
+      row,
       outcome: 'create',
       reasons: [],
       startsAt: start,

@@ -122,6 +122,8 @@ describe('readBirthday (AC-W1-25)', () => {
     ['Apr 12th, 1990', { month: 4, day: 12, year: 1990 }],
     ['1900-04-12', { month: 4, day: 12, year: null }],
     ['2/29', { month: 2, day: 29, year: null }],
+    ['3/2/55', { month: 3, day: 2, year: 1955 }],
+    ['3/2/05', { month: 3, day: 2, year: 2005 }],
   ])('%s', (cell, birthday) => {
     expect(readBirthday(cell)).toEqual(birthday);
   });
