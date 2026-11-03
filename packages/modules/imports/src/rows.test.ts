@@ -177,6 +177,22 @@ describe('planRows (D-3)', () => {
     ]);
   });
 
+  it('treats a client an earlier chunk of the run claimed as a duplicate', () => {
+    const ana = client('a', 'Ana Silva', 'ana@example.com', null);
+    const result = planRows(
+      'csv',
+      mapRows(table(['Ana Silva', 'ana@example.com', '5550100001', '']), [...mapping]),
+      indexOf([ana]),
+      { claimed: new Map([['a', 7]]) },
+    );
+    expect(result[0]).toMatchObject({
+      outcome: 'skipped',
+      reasons: [
+        { code: 'duplicate_in_file', message: 'Row 2: the same client as row 7, so it’s skipped.' },
+      ],
+    });
+  });
+
   it('finds name-only rows again by an earlier import’s identical row', () => {
     const business = new MemoryBusiness();
     const file = Buffer.from('Name\nAna\nBen\n');

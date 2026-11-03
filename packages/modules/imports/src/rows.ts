@@ -188,7 +188,15 @@ export function planRows(
   format: ImportFormat,
   rows: readonly MappedRow[],
   index: MatchIndex,
+  options: {
+    /**
+     * Clients earlier chunks of the same run already created or matched, with the file row
+     * that did: a row reaching one is a duplicate, as in the preview.
+     */
+    claimed?: ReadonlyMap<string, number>;
+  } = {},
 ): PlannedRow[] {
+  const claimedRows = options.claimed ?? new Map<string, number>();
   // The index grows with what earlier rows of the file create or fill.
   const byExternalId = new Map<string, Candidate>(index.byExternalId);
   const byEmail = new Map<string, Candidate>(index.byEmail);
@@ -249,8 +257,9 @@ export function planRows(
       return { ...base, outcome: 'create' };
     }
     const earlier = claimedBy.get(keyOf(match));
-    if (earlier !== undefined || 'planned' in match) {
-      const first = rows[earlier ?? 0]?.row ?? 0;
+    const earlierRow = 'planned' in match ? undefined : claimedRows.get(match.id);
+    if (earlier !== undefined || earlierRow !== undefined || 'planned' in match) {
+      const first = earlierRow ?? rows[earlier ?? 0]?.row ?? 0;
       return skip({
         code: 'duplicate_in_file',
         message: `${label}: the same client as ${rowLabel(format, first).toLowerCase()}, so it’s skipped.`,

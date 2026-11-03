@@ -189,10 +189,13 @@ function jsonRecords(text: string): { row: number; value: Record<string, unknown
   } catch {
     throw notJson('JSON');
   }
+  // An object without a list of records is one record (a one-line JSONL file looks the same).
   const list = Array.isArray(parsed)
     ? parsed
     : isRecord(parsed)
-      ? Object.values(parsed).find((value) => Array.isArray(value) && value.some(isRecord))
+      ? (Object.values(parsed).find((value) => Array.isArray(value) && value.some(isRecord)) ?? [
+          parsed,
+        ])
       : undefined;
   if (!Array.isArray(list)) throw notJson('JSON');
   return list.map((value, index) => {

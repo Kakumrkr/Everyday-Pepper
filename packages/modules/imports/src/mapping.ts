@@ -204,13 +204,11 @@ export function suggestMapping(table: Table): {
   const taken = new Set<ImportField>();
   const columns = table.columns.map((column, index): ImportColumn => {
     const header = normalizeHeader(column);
-    let target: Target | undefined = presetColumns[header];
-    let by: ImportColumn['by'] = target === undefined ? null : 'preset';
-    if (target === undefined) {
-      target = byHeader(header);
-      by = target === null ? null : 'header';
-    }
-    if (target === null) {
+    // A column the tool's preset names, even as "not imported", is decided by the preset.
+    const inPreset = Object.hasOwn(presetColumns, header);
+    let target: Target = inPreset ? (presetColumns[header] ?? null) : byHeader(header);
+    let by: ImportColumn['by'] = target === null ? null : inPreset ? 'preset' : 'header';
+    if (target === null && !inPreset) {
       target = byValues(table, index);
       by = target === null ? null : 'values';
     }

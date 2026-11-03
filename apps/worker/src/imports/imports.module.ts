@@ -66,10 +66,10 @@ export class ImportsRunner implements OnApplicationBootstrap, OnApplicationShutd
     this.worker = new Worker(
       IMPORTS_QUEUE,
       async (job: Job): Promise<ImportRunResult> => {
-        const result = await runImport(this.db, ImportJobSchema.parse(job.data), this.clock);
+        const data = ImportJobSchema.parse(job.data);
+        const result = await runImport(this.db, data, this.clock);
         if (result === 'failed') {
           // Ids only: what the import holds is client data.
-          const data = ImportJobSchema.parse(job.data);
           raiseAlert('Client import failed', { batchId: data.batchId, tenantId: data.tenantId });
         }
         return result;

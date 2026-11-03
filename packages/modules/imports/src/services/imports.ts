@@ -37,7 +37,9 @@ import {
   listImportBatches,
   listImportHousekeeping,
   listImportPreviewRows,
+  listClaimedImportClients,
   listImportRows,
+  listPendingImportRows,
   lockImportBatch,
   lockTenantImports,
   markImportRowsApplied,
@@ -336,17 +338,18 @@ export async function runImport(
     const more = await withTenant(db, job.tenantId, async (tx) => {
       await lockTenantImports(tx);
       const batch = await lockImportBatch(tx, id);
-      if (batch?.status !== 'running') return false;
-      const pending = (await listImportRows(tx, id)).filter((row) => row.appliedAt === null);
+      // Another worker took it over and finished or gave it up: that one reports it.
+      if (batch?.status !== 'running') return 'not_due';
+      const pending = await listPendingImportRows(tx, id, IMPORT_RUN_CHUNK);
       if (pending.length === 0) {
         await finish(tx, id, 'done', clock);
-        return false;
+        return 'done';
       }
-      await applyChunk(tx, batch, pending.slice(0, IMPORT_RUN_CHUNK), clock.now());
+      await applyChunk(tx, batch, pending, clock.now());
       await updateImportBatch(tx, id, { leaseUntil: lease() });
-      return true;
+      return 'more';
     });
-    if (!more) return 'done';
+    if (more !== 'more') return more;
   }
 }
 
@@ -369,7 +372,10 @@ async function applyChunk(
     valid: row.outcome !== 'invalid',
     reasons: row.outcome === 'invalid' ? ReasonsSchema.parse(row.reasons) : [],
   }));
-  const plan = planRows(format, mapped, await matchIndex(tx, mapped, batch.system));
+  const claimed = new Map(
+    (await listClaimedImportClients(tx, id)).map(({ clientId, row }) => [clientId, row]),
+  );
+  const plan = planRows(format, mapped, await matchIndex(tx, mapped, batch.system), { claimed });
   const created = plan.flatMap((planned, i) =>
     planned.outcome === 'create' ? [{ i, id: newId() }] : [],
   );
@@ -414,7 +420,12 @@ async function finish(
   clock: Clock,
 ): Promise<void> {
   const now = clock.now();
-  const counts = countRows(await listImportRows(tx, id));
+  const rows = await listImportRows(tx, id);
+  // What was written: a failed run's rows it never reached count for nothing.
+  const counts = {
+    ...countRows(rows.filter((row) => row.appliedAt !== null)),
+    rows: rows.length,
+  };
   await updateImportBatch(tx, id, {
     status,
     counts,

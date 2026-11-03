@@ -334,6 +334,42 @@ describe('running (AC-W1-3)', () => {
     });
   });
 
+  it('skips a duplicate whose first row was in an earlier chunk, as the preview did', async () => {
+    const business = await newBusiness();
+    const lines = Array.from(
+      { length: IMPORT_RUN_CHUNK + 5 },
+      (_, i) => `Client ${String(i)},c${String(i)}@example.com,`,
+    );
+    // The last row repeats the first client, with a phone the preview won't import.
+    lines.push('Client 0,c0@example.com,5550100999');
+    const { batch } = await stageImport(
+      db,
+      business.owner,
+      Buffer.from(`Name,Email,Phone\n${lines.join('\n')}`),
+    );
+    expect(batch.counts).toMatchObject({ create: IMPORT_RUN_CHUNK + 5, skipped: 1 });
+    await commitImport(db, business.owner, batch.id, business.clock);
+    await runImport(db, { batchId: batch.id, tenantId: business.tenantId }, business.clock);
+    const done = await getImport(db, business.owner, batch.id);
+    expect(done.batch.counts).toMatchObject({ create: IMPORT_RUN_CHUNK + 5, merge: 0, skipped: 1 });
+    expect(done.rows[0]).toMatchObject({
+      outcome: 'skipped',
+      reasons: [
+        {
+          code: 'duplicate_in_file',
+          message: `Row ${String(IMPORT_RUN_CHUNK + 7)}: the same client as row 2, so it’s skipped.`,
+        },
+      ],
+    });
+    const phones = await withTenant(
+      db,
+      business.tenantId,
+      async (tx) =>
+        (await tx.execute(`SELECT count(*)::int AS n FROM clients WHERE phone IS NOT NULL`)).rows,
+    );
+    expect(phones).toEqual([{ n: 0 }]);
+  });
+
   it('marks a batch failed after its attempts, keeping it undoable', async () => {
     const business = await newBusiness();
     const { batch } = await stageImport(db, business.owner, fixture('vagaro.csv'));
@@ -347,7 +383,12 @@ describe('running (AC-W1-3)', () => {
       await runImport(db, { batchId: batch.id, tenantId: business.tenantId }, business.clock),
     ).toBe('failed');
     const failed = (await getImport(db, business.owner, batch.id)).batch;
-    expect(failed).toMatchObject({ status: 'failed', undoUntil: '2026-11-10T15:00:00.000Z' });
+    // Nothing was written: its counts say so, not the preview's.
+    expect(failed).toMatchObject({
+      status: 'failed',
+      undoUntil: '2026-11-10T15:00:00.000Z',
+      counts: { rows: 3, create: 0, merge: 0 },
+    });
     expect((await undoImport(db, business.owner, batch.id, business.clock)).status).toBe('undone');
   });
 });
@@ -441,6 +482,51 @@ describe('undo (AC-W1-19)', () => {
         phone: '+15550109999',
         source: 'team',
       },
+    ]);
+  });
+
+  it('clears both fields one row filled, and keeps a created client edited since', async () => {
+    const business = await newBusiness();
+    // Found by an identical row of an earlier import, with neither email nor phone yet.
+    const first = await importFile(business, Buffer.from('Name\nAna Silva\nBen Adler\n'));
+    expect(first.counts).toMatchObject({ create: 2 });
+    const filled = await importFile(
+      business,
+      Buffer.from('Name,Email,Phone\nAna Silva,ana@example.com,5550100001\n'),
+    );
+    // Ana is not matched by name alone: a new client (the preview said so).
+    expect(filled.counts).toMatchObject({ create: 1 });
+    await undoImport(db, business.owner, filled.id, business.clock);
+
+    // The same export layout twice (its external ids are its own): Cy first without contact.
+    const byId = await importFile(business, Buffer.from('Id,Name,Email,Phone\nX1,Cy Okafor,,\n'));
+    expect(byId.counts).toMatchObject({ create: 1 });
+    const both = await importFile(
+      business,
+      Buffer.from('Id,Name,Email,Phone\nX1,Cy Okafor,cy@example.com,5550100002\n'),
+    );
+    expect(both.counts).toMatchObject({ merge: 1 });
+    const undone = await undoImport(db, business.owner, both.id, business.clock);
+    expect(undone.undo).toEqual({ deleted: 0, restored: 1, kept: 0 });
+    expect((await clientsOf(business.tenantId)).find((c) => c.name === 'Cy Okafor')).toEqual({
+      name: 'Cy Okafor',
+      email: null,
+      phone: null,
+      source: 'import',
+    });
+
+    // Ben is edited after the first import: its undo keeps him.
+    await withTenant(db, business.tenantId, (tx) =>
+      tx.execute(`UPDATE clients SET name = 'Ben Adler Jr' WHERE name = 'Ben Adler'`),
+    );
+    expect((await undoImport(db, business.owner, first.id, business.clock)).undo).toEqual({
+      deleted: 1,
+      restored: 0,
+      kept: 1,
+    });
+    expect((await clientsOf(business.tenantId)).map((c) => c.name)).toEqual([
+      'Ben Adler Jr',
+      'Cy Okafor',
     ]);
   });
 

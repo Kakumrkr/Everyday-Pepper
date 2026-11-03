@@ -57,6 +57,23 @@ describe('suggestMapping (AC-W1-17)', () => {
     expect(columns.map((c) => c.field)).toEqual([null, null]);
   });
 
+  it('leaves a column the preset ignores alone, even when its values look like phones', () => {
+    const { preset, columns } = suggestMapping(
+      table(
+        ['Square Customer ID', 'First Name', 'Reference ID', 'Phone Number'],
+        ['SQ1', 'Ana', '5550100001', '(555) 010-0002'],
+        ['SQ2', 'Ben', '5550100003', ''],
+      ),
+    );
+    expect(preset).toBe('square');
+    expect(columns.map((c) => [c.column, c.field, c.by])).toEqual([
+      ['Square Customer ID', 'external_id', 'preset'],
+      ['First Name', 'first_name', 'preset'],
+      ['Reference ID', null, null],
+      ['Phone Number', 'phone', 'preset'],
+    ]);
+  });
+
   it('gives a single field to its first column only', () => {
     const { columns } = suggestMapping(
       table(['Name', 'Client', 'ID', 'Customer ID'], ['a', 'b', '1', '2']),

@@ -418,16 +418,17 @@ export async function insertImportRefs(
 }
 
 /**
- * Undoes what a batch wrote (AC-W1-19): removes the clients it created that have no booking or
- * waitlist entry, clears the emails and phones it filled where they still hold its value, and
- * removes the external ids it recorded. Returns the counts.
+ * Undoes what a batch wrote (AC-W1-19): removes the clients it created that nobody has used or
+ * changed since (no booking, waitlist entry or memory fact, and never updated: a later edit or
+ * another import's merge keeps them), and clears the emails and phones it filled where they
+ * still hold its value. External ids it recorded stay with the clients that remain and go with
+ * the deleted ones. Returns the counts.
  */
 export async function undoImportBatchRows(
   tx: TenantTx,
   batchId: ImportBatchId,
 ): Promise<{ deleted: number; restored: number; kept: number }> {
   const id = Id.parse(batchId);
-  await tx.delete(clientImportRefs).where(eq(clientImportRefs.batchId, id));
   const created = await tx.execute<{ total: number; deleted: number }>(sql`
     WITH created AS (
       SELECT client_id FROM import_rows
@@ -436,26 +437,28 @@ export async function undoImportBatchRows(
     ), removed AS (
       DELETE FROM clients c USING created
       WHERE c.id = created.client_id
+        AND c.updated_at = c.created_at
         AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.client_id = c.id)
         AND NOT EXISTS (SELECT 1 FROM waitlist_entries w WHERE w.client_id = c.id)
+        AND NOT EXISTS (SELECT 1 FROM memory_facts f WHERE f.client_id = c.id)
       RETURNING c.id
     )
     SELECT (SELECT count(*) FROM created c JOIN clients k ON k.id = c.client_id)::int AS total,
            (SELECT count(*) FROM removed)::int AS deleted`);
+  // One statement per row of clients: an UPDATE touching a row twice applies only once.
   const restored = await tx.execute<{ restored: number }>(sql`
-    WITH emails AS (
-      UPDATE clients c SET email = NULL FROM import_rows r
+    WITH restored AS (
+      UPDATE clients c
+      SET email = CASE WHEN r.fills ? 'email' AND c.email = r.fills->>'email' THEN NULL ELSE c.email END,
+          phone = CASE WHEN r.fills ? 'phone' AND c.phone = r.fills->>'phone' THEN NULL ELSE c.phone END
+      FROM import_rows r
       WHERE r.batch_id = ${id} AND r.outcome = 'merge' AND r.applied_at IS NOT NULL
-        AND r.client_id = c.id AND r.fills ? 'email' AND c.email = r.fills->>'email'
-      RETURNING c.id
-    ), phones AS (
-      UPDATE clients c SET phone = NULL FROM import_rows r
-      WHERE r.batch_id = ${id} AND r.outcome = 'merge' AND r.applied_at IS NOT NULL
-        AND r.client_id = c.id AND r.fills ? 'phone' AND c.phone = r.fills->>'phone'
+        AND r.client_id = c.id
+        AND ((r.fills ? 'email' AND c.email = r.fills->>'email')
+          OR (r.fills ? 'phone' AND c.phone = r.fills->>'phone'))
       RETURNING c.id
     )
-    SELECT (SELECT count(DISTINCT id) FROM (SELECT id FROM emails UNION ALL SELECT id FROM phones) x)::int
-      AS restored`);
+    SELECT count(DISTINCT id)::int AS restored FROM restored`);
   const counts = created.rows[0] ?? { total: 0, deleted: 0 };
   return {
     deleted: counts.deleted,
@@ -463,6 +466,39 @@ export async function undoImportBatchRows(
     kept: counts.total - counts.deleted,
     restored: restored.rows[0]?.restored ?? 0,
   };
+}
+
+/** A batch's rows not applied yet, in file order, at most `limit` (the next chunk of a run). */
+export function listPendingImportRows(
+  tx: TenantTx,
+  batchId: ImportBatchId,
+  limit: number,
+): Promise<ImportRowRow[]> {
+  return tx
+    .select()
+    .from(importRows)
+    .where(and(eq(importRows.batchId, Id.parse(batchId)), isNull(importRows.appliedAt)))
+    .orderBy(asc(importRows.position))
+    .limit(z.number().int().min(1).max(1000).parse(limit));
+}
+
+/** The clients this batch's applied rows created or matched, with the row that did. */
+export async function listClaimedImportClients(
+  tx: TenantTx,
+  batchId: ImportBatchId,
+): Promise<{ clientId: string; row: number }[]> {
+  const rows = await tx
+    .selectDistinctOn([importRows.clientId], { clientId: importRows.clientId, row: importRows.row })
+    .from(importRows)
+    .where(
+      and(
+        eq(importRows.batchId, Id.parse(batchId)),
+        sql`${importRows.appliedAt} IS NOT NULL`,
+        sql`${importRows.clientId} IS NOT NULL`,
+      ),
+    )
+    .orderBy(importRows.clientId, asc(importRows.position));
+  return rows.flatMap((r) => (r.clientId === null ? [] : [{ clientId: r.clientId, row: r.row }]));
 }
 
 /** Serialises a business's import runs and undos until the transaction ends. */

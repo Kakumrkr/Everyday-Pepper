@@ -80,11 +80,18 @@ describe('parseImportFile', () => {
     ['a header only', 'Name,Email\n', 'empty'],
     ['broken JSON', '[{"a":', 'unreadable'],
     ['a JSON list of numbers', '[1,2]', 'unreadable'],
-    ['a JSON object without a list', '{"a":1}', 'unreadable'],
     ['a bad JSONL line', '{"a":1}\nnope', 'unreadable'],
     ['a JSONL line that isn’t a record', '{"a":1}\n[1]', 'unreadable'],
   ])('refuses %s', (_label, text, expected) => {
     expect(problem(() => parseImportFile(bytes(text)))?.[0]).toBe(expected);
+  });
+
+  it('reads an object without a list as one record (a one-line JSONL file)', () => {
+    expect(parseImportFile(bytes('{"name":"Ana","email":"ana@example.com"}\n'))).toEqual({
+      format: 'json',
+      columns: ['name', 'email'],
+      rows: [{ row: 1, cells: ['Ana', 'ana@example.com'] }],
+    });
   });
 
   it('says which line of a JSONL file is broken', () => {
