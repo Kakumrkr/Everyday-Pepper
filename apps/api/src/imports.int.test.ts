@@ -192,8 +192,9 @@ describe('client import through the api (S48)', () => {
     const undone = ImportBatchSchema.parse(
       (await b.owner.post(`/v1/imports/${committed.id}/undo`).expect(200)).body,
     );
-    expect(undone).toMatchObject({ status: 'undone', undo: { deleted: 3, restored: 0, kept: 0 } });
-    expect(await clientCount(b.owner)).toBe(0);
+    // Ethan's phone was filled by the second import since: he stays (ADR-0049).
+    expect(undone).toMatchObject({ status: 'undone', undo: { deleted: 2, restored: 0, kept: 1 } });
+    expect(await clientCount(b.owner)).toBe(1);
     const listed = (await b.owner.get('/v1/imports').expect(200)).body as { id: string }[];
     expect(listed.map((batch) => batch.id)).toEqual([third.batch.id, again.batch.id, committed.id]);
   });
