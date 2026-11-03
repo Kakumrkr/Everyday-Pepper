@@ -14,7 +14,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 4 Book sheet "New client" for staff (unit green; booking.spec runs with the stack after 5–6)
 - [x] 5 Client paging + phone search, "Show more" (unit green; clients.spec with the stack)
 - [x] 6 Top-up: `GET /v1/clients/names`, calendar + booking sheet "Deleted client" (unit + integration green)
-- [ ] 7 Close
+- [ ] 7 Close: `/code-review` 7 findings (6 fixed, baselines in the screens run); `/security-review` nothing found. Next: `pnpm check` → affected integration → Playwright booking, clients, screens (`--update-snapshots=changed`) → walkthrough → PR.
 
 ## Last sessions
 - **S50 Phase 11 · Client merge and delete, tags and birthday editing (2026-11-03)** ([ADR-0051](../adr/0051-client-merge-and-delete.md), [PR #74](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/74)). Full entry in [session-log.md](session-log.md).
