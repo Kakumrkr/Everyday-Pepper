@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   detectPreset,
+  kindOf,
   mappingOf,
   mappingProblems,
   normalizeHeader,
@@ -26,9 +27,27 @@ describe('normalizeHeader', () => {
 
 describe('detectPreset', () => {
   it('needs every header of a signature', () => {
-    expect(detectPreset(['Cell Phone', 'Customer Since'])).toBe('vagaro');
+    expect(detectPreset(['Cell Phone', 'Customer Since'])).toEqual({
+      preset: 'vagaro',
+      visits: false,
+    });
     expect(detectPreset(['Cell Phone'])).toBeNull();
-    expect(detectPreset(['Client Name', 'Total Spend'])).toBe('glossgenius');
+    expect(detectPreset(['Client Name', 'Total Spend'])).toEqual({
+      preset: 'glossgenius',
+      visits: false,
+    });
+  });
+
+  it('knows each tool’s appointments export before its client export (S49)', () => {
+    expect(detectPreset(['Appointment ID', 'Team Member', 'Customer Name'])).toEqual({
+      preset: 'square',
+      visits: true,
+    });
+    expect(detectPreset(['Booking ID', 'Staffer', 'Customer ID', 'Mobile'])).toEqual({
+      preset: 'booksy',
+      visits: true,
+    });
+    expect(detectPreset(['Ref #', 'Scheduled Date'])).toEqual({ preset: 'fresha', visits: true });
   });
 });
 
@@ -96,5 +115,54 @@ describe('suggestMapping (AC-W1-17)', () => {
       'Choose the column with the client’s name.',
     ]);
     expect(mappingProblems([{ column: 'Last', field: 'last_name' }])).toEqual([]);
+  });
+});
+
+describe('visits files (S49, AC-W1-22)', () => {
+  it('suggests visit fields for a file with a date and a service or staff column', () => {
+    const { columns } = suggestMapping(
+      table(
+        ['ID', 'Date', 'Time', 'Client', 'Service', 'Stylist', 'Total', 'Status', 'Tags'],
+        ['7', '1/5/2026', '2 PM', 'Ana', 'Cut', 'Dre', '$45', 'done', 'VIP'],
+      ),
+    );
+    expect(columns.map((c) => [c.column, c.field])).toEqual([
+      ['ID', 'visit_id'],
+      ['Date', 'visit_date'],
+      ['Time', 'visit_time'],
+      ['Client', 'name'],
+      ['Service', 'service'],
+      ['Stylist', 'staff'],
+      ['Total', 'price'],
+      ['Status', 'status'],
+      ['Tags', 'tags'],
+    ]);
+    expect(kindOf(mappingOf(columns))).toBe('visits');
+  });
+
+  it('keeps a client file a client file, even with a date and a status', () => {
+    const { columns } = suggestMapping(
+      table(
+        ['ID', 'Name', 'Date', 'Status', 'Birthday'],
+        ['7', 'Ana', '1/5/2026', 'active', '4/12'],
+      ),
+    );
+    expect(columns.map((c) => [c.column, c.field])).toEqual([
+      ['ID', 'external_id'],
+      ['Name', 'name'],
+      ['Date', null],
+      ['Status', null],
+      ['Birthday', 'birthday'],
+    ]);
+    expect(kindOf(mappingOf(columns))).toBe('clients');
+  });
+
+  it('asks for the date when visit columns are mapped without one', () => {
+    expect(
+      mappingProblems([
+        { column: 'Name', field: 'name' },
+        { column: 'Service', field: 'service' },
+      ]),
+    ).toEqual(['Choose the column with the visit’s date, or don’t import the visit columns.']);
   });
 });

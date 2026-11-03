@@ -2,8 +2,10 @@ import {
   ClientEmailSchema,
   normalizePhone,
   PhoneSchema,
+  VISIT_IMPORT_FIELDS,
   type ImportColumn,
   type ImportField,
+  type ImportKind,
   type ImportLaterField,
   type ImportMapping,
   type ImportPreset,
@@ -18,6 +20,9 @@ import type { Table } from './parse.js';
 // The presets are written from the tools' documented export columns as far as they are public;
 // fixtures in `src/fixtures` hold made-up rows in each layout. Header matching ignores case,
 // spaces and punctuation, and anything a preset misses still goes through the smart mapping.
+// A visits file (S49, ADR-0050: one row per appointment) has presets of its own; a visit
+// field is suggested only for a file with a date and a service or staff column, so a client
+// file's "Date Added" doesn't turn it into a visits file.
 
 type Target = ImportField | { later: ImportLaterField } | null;
 
@@ -42,9 +47,9 @@ export const PRESETS: Readonly<Record<ImportPreset, Preset>> = {
       referenceid: null,
       nickname: null,
       companyname: null,
-      birthday: later('birthday'),
+      birthday: 'birthday',
       memo: later('notes'),
-      groups: later('tags'),
+      groups: 'tags',
       firstvisit: later('visits'),
       lastvisit: later('visits'),
       transactioncount: later('visits'),
@@ -58,9 +63,9 @@ export const PRESETS: Readonly<Record<ImportPreset, Preset>> = {
       lastname: 'last_name',
       email: 'email',
       mobile: 'phone',
-      birthday: later('birthday'),
+      birthday: 'birthday',
       notes: later('notes'),
-      tags: later('tags'),
+      tags: 'tags',
       lastvisitdate: later('visits'),
     },
   },
@@ -73,7 +78,7 @@ export const PRESETS: Readonly<Record<ImportPreset, Preset>> = {
       cellphone: 'phone',
       dayphone: 'phone',
       nightphone: 'phone',
-      birthday: later('birthday'),
+      birthday: 'birthday',
       customersince: later('visits'),
       lastvisit: later('visits'),
       notes: later('notes'),
@@ -85,7 +90,7 @@ export const PRESETS: Readonly<Record<ImportPreset, Preset>> = {
       clientname: 'name',
       email: 'email',
       phone: 'phone',
-      birthday: later('birthday'),
+      birthday: 'birthday',
       notes: later('notes'),
       lastappointmentdate: later('visits'),
       totalspend: later('visits'),
@@ -100,12 +105,100 @@ export const PRESETS: Readonly<Record<ImportPreset, Preset>> = {
       mobilenumber: 'phone',
       telephone: 'phone',
       email: 'email',
-      dateofbirth: later('birthday'),
+      dateofbirth: 'birthday',
       notes: later('notes'),
       gender: null,
       clientsource: null,
       added: null,
       blocked: null,
+    },
+  },
+};
+
+/**
+ * Each tool's appointments export (S49), by normalised header. They share the tool's client
+ * export's `system`, so the client ids in both meet.
+ */
+export const VISIT_PRESETS: Readonly<Record<ImportPreset, Preset>> = {
+  square: {
+    signature: ['appointmentid', 'teammember', 'customername'],
+    columns: {
+      appointmentid: 'visit_id',
+      date: 'visit_date',
+      time: 'visit_time',
+      durationminutes: 'duration',
+      customerid: 'external_id',
+      customername: 'name',
+      customeremail: 'email',
+      customerphone: 'phone',
+      service: 'service',
+      teammember: 'staff',
+      status: 'status',
+      price: 'price',
+    },
+  },
+  booksy: {
+    signature: ['bookingid', 'staffer'],
+    columns: {
+      bookingid: 'visit_id',
+      appointmentdate: 'visit_date',
+      starttime: 'visit_time',
+      endtime: 'visit_end',
+      customerid: 'external_id',
+      customername: 'name',
+      email: 'email',
+      mobile: 'phone',
+      service: 'service',
+      staffer: 'staff',
+      status: 'status',
+      price: 'price',
+    },
+  },
+  vagaro: {
+    signature: ['appointmentdate', 'serviceprovider'],
+    columns: {
+      appointmentdate: 'visit_date',
+      starttime: 'visit_time',
+      endtime: 'visit_end',
+      firstname: 'first_name',
+      lastname: 'last_name',
+      email: 'email',
+      cellphone: 'phone',
+      service: 'service',
+      serviceprovider: 'staff',
+      status: 'status',
+      amount: 'price',
+    },
+  },
+  glossgenius: {
+    signature: ['servicename', 'appointmentstatus'],
+    columns: {
+      appointmentdate: 'visit_date',
+      clientname: 'name',
+      email: 'email',
+      phone: 'phone',
+      servicename: 'service',
+      teammember: 'staff',
+      duration: 'duration',
+      price: 'price',
+      appointmentstatus: 'status',
+    },
+  },
+  fresha: {
+    signature: ['ref', 'scheduleddate'],
+    columns: {
+      ref: 'visit_id',
+      scheduleddate: 'visit_date',
+      time: 'visit_time',
+      duration: 'duration',
+      clientid: 'external_id',
+      client: 'name',
+      mobilenumber: 'phone',
+      email: 'email',
+      service: 'service',
+      teammember: 'staff',
+      status: 'status',
+      price: 'price',
     },
   },
 };
@@ -148,9 +241,58 @@ const HEADERS: readonly [Target, readonly string[]][] = [
     ],
   ],
   ['external_id', ['id', 'clientid', 'customerid', 'externalid', 'recordid', 'uuid']],
-  [later('birthday'), ['birthday', 'birthdate', 'dateofbirth', 'dob', 'bday']],
+  ['birthday', ['birthday', 'birthdate', 'dateofbirth', 'dob', 'bday']],
   [later('notes'), ['notes', 'note', 'memo', 'comments', 'comment', 'clientnotes']],
-  [later('tags'), ['tags', 'tag', 'labels', 'groups']],
+  ['tags', ['tags', 'tag', 'labels', 'groups', 'clienttags', 'customertags']],
+  [
+    'visit_date',
+    [
+      'date',
+      'appointmentdate',
+      'visitdate',
+      'bookingdate',
+      'scheduleddate',
+      'startdate',
+      'datetime',
+      'startdatetime',
+      'start',
+      'startsat',
+      'startat',
+      'appointmentstart',
+      'scheduledat',
+    ],
+  ],
+  ['visit_time', ['time', 'starttime', 'appointmenttime', 'visittime', 'bookingtime', 'from']],
+  ['visit_end', ['endtime', 'end', 'endsat', 'endat', 'finish', 'finishtime', 'enddatetime']],
+  ['duration', ['duration', 'durationminutes', 'durationmins', 'length', 'minutes', 'mins']],
+  [
+    'service',
+    ['service', 'servicename', 'services', 'treatment', 'appointmenttype', 'servicetype'],
+  ],
+  [
+    'staff',
+    [
+      'staff',
+      'staffname',
+      'staffmember',
+      'teammember',
+      'provider',
+      'serviceprovider',
+      'employee',
+      'stylist',
+      'barber',
+      'artist',
+      'technician',
+      'staffer',
+      'professional',
+    ],
+  ],
+  ['price', ['price', 'amount', 'total', 'servicetotal', 'cost', 'charged', 'paid']],
+  ['status', ['status', 'appointmentstatus', 'bookingstatus', 'visitstatus', 'state']],
+  [
+    'visit_id',
+    ['appointmentid', 'bookingid', 'visitid', 'appointmentref', 'bookingref', 'ref', 'reference'],
+  ],
   [
     later('visits'),
     ['lastvisit', 'firstvisit', 'lastappointment', 'visits', 'totalvisits', 'customersince'],
@@ -173,13 +315,19 @@ export function normalizeHeader(header: string): string {
     .replace(/[^a-z0-9]/g, '');
 }
 
-/** The tool whose export has these columns, if any. */
-export function detectPreset(columns: readonly string[]): ImportPreset | null {
+/** The tool whose export has these columns, if any, and whether it's its appointments export. */
+export function detectPreset(
+  columns: readonly string[],
+): { preset: ImportPreset; visits: boolean } | null {
   const headers = new Set(columns.map(normalizeHeader));
-  for (const [preset, { signature }] of Object.entries(PRESETS) as [ImportPreset, Preset][]) {
-    if (signature.every((header) => headers.has(header))) return preset;
-  }
-  return null;
+  const find = (presets: Readonly<Record<ImportPreset, Preset>>) =>
+    (Object.entries(presets) as [ImportPreset, Preset][]).find(([, { signature }]) =>
+      signature.every((header) => headers.has(header)),
+    )?.[0];
+  const visits = find(VISIT_PRESETS);
+  if (visits !== undefined) return { preset: visits, visits: true };
+  const clients = find(PRESETS);
+  return clients === undefined ? null : { preset: clients, visits: false };
 }
 
 /** Fields only one column may fill. */
@@ -188,7 +336,10 @@ const SINGLE: ReadonlySet<ImportField> = new Set([
   'first_name',
   'last_name',
   'external_id',
+  'birthday',
+  ...VISIT_IMPORT_FIELDS,
 ]);
+const VISIT_FIELDS: ReadonlySet<ImportField> = new Set(VISIT_IMPORT_FIELDS);
 
 /** How many values a column's pattern is judged on, and the share that must fit. */
 const SAMPLE = 50;
@@ -199,14 +350,32 @@ export function suggestMapping(table: Table): {
   preset: ImportPreset | null;
   columns: ImportColumn[];
 } {
-  const preset = detectPreset(table.columns);
-  const presetColumns = preset === null ? {} : PRESETS[preset].columns;
+  const detected = detectPreset(table.columns);
+  const preset = detected?.preset ?? null;
+  const presetColumns =
+    detected === null ? {} : (detected.visits ? VISIT_PRESETS : PRESETS)[detected.preset].columns;
+  const headers = table.columns.map(normalizeHeader);
+  // Visit fields only for a file that looks like visits: a date, and a service or staff column.
+  const looksLikeVisits =
+    detected?.visits ??
+    (headers.some((h) => byHeader(h) === 'visit_date') &&
+      headers.some((h) => {
+        const target = byHeader(h);
+        return target === 'service' || target === 'staff';
+      }));
   const taken = new Set<ImportField>();
   const columns = table.columns.map((column, index): ImportColumn => {
     const header = normalizeHeader(column);
     // A column the tool's preset names, even as "not imported", is decided by the preset.
     const inPreset = Object.hasOwn(presetColumns, header);
     let target: Target = inPreset ? (presetColumns[header] ?? null) : byHeader(header);
+    // In a visits file, a bare "ID" is the appointment's, not the client's.
+    if (!inPreset && looksLikeVisits && target === 'external_id' && header === 'id') {
+      target = 'visit_id';
+    }
+    if (typeof target === 'string' && VISIT_FIELDS.has(target) && !looksLikeVisits) {
+      target = null;
+    }
     let by: ImportColumn['by'] = target === null ? null : inPreset ? 'preset' : 'header';
     if (target === null && !inPreset) {
       target = byValues(table, index);
@@ -267,9 +436,23 @@ export function mappingOf(columns: readonly ImportColumn[]): ImportMapping {
   return columns.map(({ column, field }) => ({ column, field }));
 }
 
+/** A client file, or a visits file when a column gives the visit's date (S49). */
+export function kindOf(mapping: ImportMapping): ImportKind {
+  return mapping.some(({ field }) => field === 'visit_date') ? 'visits' : 'clients';
+}
+
 /** What's wrong with a mapping as a whole: the sentences shown above the preview. */
 export function mappingProblems(mapping: ImportMapping): string[] {
   const fields = new Set(mapping.map(({ field }) => field));
-  if (fields.has('name') || fields.has('first_name') || fields.has('last_name')) return [];
-  return ['Choose the column with the client’s name.'];
+  const problems: string[] = [];
+  if (!fields.has('name') && !fields.has('first_name') && !fields.has('last_name')) {
+    problems.push('Choose the column with the client’s name.');
+  }
+  const visitFields = [...fields].filter(
+    (field): field is ImportField => field !== null && VISIT_FIELDS.has(field),
+  );
+  if (visitFields.length > 0 && !fields.has('visit_date')) {
+    problems.push('Choose the column with the visit’s date, or don’t import the visit columns.');
+  }
+  return problems;
 }

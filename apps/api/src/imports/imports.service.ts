@@ -7,6 +7,7 @@ import type {
 } from '@pepper/contracts';
 import { systemClock, type Actor, type Clock, type TenantContext } from '@pepper/core';
 import type { Database } from '@pepper/db';
+import { importVisitBook } from '@pepper/appointments';
 import {
   commitImport,
   discardImport,
@@ -24,7 +25,8 @@ export const IMPORTS_CLOCK = Symbol('IMPORTS_CLOCK');
 
 /**
  * The client import services for a request (S48, ADR-0049): binds the database, the clock and
- * the request id (for the audit log). Domain errors pass through; the controller answers them.
+ * the request id (for the audit log), and for a visits file the appointments module's
+ * `VisitBook` (S49, ADR-0050). Domain errors pass through; the controller answers them.
  */
 @Injectable()
 export class ImportsService {
@@ -44,7 +46,11 @@ export class ImportsService {
   }
 
   stage(tenant: TenantContext, bytes: Uint8Array, format: ImportFormat | undefined) {
-    return stageImport(this.db, actorOf(tenant), bytes, { format });
+    return stageImport(this.db, actorOf(tenant), bytes, {
+      format,
+      clock: this.clock,
+      visits: importVisitBook,
+    });
   }
 
   get(tenant: TenantContext, id: ImportBatchId): Promise<ImportPreview> {
@@ -52,7 +58,10 @@ export class ImportsService {
   }
 
   remap(tenant: TenantContext, id: ImportBatchId, input: ImportMappingInput) {
-    return remapImport(this.db, actorOf(tenant), id, input);
+    return remapImport(this.db, actorOf(tenant), id, input, {
+      clock: this.clock,
+      visits: importVisitBook,
+    });
   }
 
   commit(tenant: TenantContext, id: ImportBatchId): Promise<ImportBatch> {
@@ -60,7 +69,7 @@ export class ImportsService {
   }
 
   undo(tenant: TenantContext, id: ImportBatchId): Promise<ImportBatch> {
-    return undoImport(this.db, actorOf(tenant), id, this.clock);
+    return undoImport(this.db, actorOf(tenant), id, this.clock, { visits: importVisitBook });
   }
 
   discard(tenant: TenantContext, id: ImportBatchId): Promise<void> {

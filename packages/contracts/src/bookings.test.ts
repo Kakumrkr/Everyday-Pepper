@@ -112,7 +112,7 @@ describe('status rules', () => {
   });
 
   it('a booking does not come from an import', () => {
-    expect(BookingSourceSchema.options).toEqual(['team', 'ai', 'booking_page']);
+    expect(BookingSourceSchema.options).toEqual(['team', 'ai', 'booking_page', 'import']);
   });
 });
 

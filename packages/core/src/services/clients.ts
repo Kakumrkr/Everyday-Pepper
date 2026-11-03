@@ -36,15 +36,20 @@ import { ClientNotFoundError } from '../errors.js';
 // adds and edits clients. A client's details are personal data: the audit entries record only
 // where the client came from and which details an edit changed.
 
-/** Clients by name; with `search`, those whose name or email contains it. */
+/**
+ * Clients by name; with `search`, those whose name or email contains it; with `import`, those
+ * that import created (S49).
+ */
 export async function listClients(
   db: Database,
   actor: Actor,
   query: ClientsQuery = {},
 ): Promise<Client[]> {
   requirePermission(actor, 'clients.read');
-  const { search, limit } = ClientsQuerySchema.parse(query);
-  const rows = await withMember(db, actor.context, (tx) => listClientRows(tx, { search, limit }));
+  const { search, limit, import: importBatchId } = ClientsQuerySchema.parse(query);
+  const rows = await withMember(db, actor.context, (tx) =>
+    listClientRows(tx, { search, limit, importBatchId }),
+  );
   return rows.map(toClient);
 }
 
@@ -175,6 +180,11 @@ export function toClient(row: ClientRow): Client {
     email: row.email,
     phone: row.phone,
     source: row.source,
+    tags: row.tags,
+    birthday:
+      row.birthdayMonth === null || row.birthdayDay === null
+        ? null
+        : { month: row.birthdayMonth, day: row.birthdayDay, year: row.birthdayYear },
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   });

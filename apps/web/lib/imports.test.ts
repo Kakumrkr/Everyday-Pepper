@@ -21,12 +21,25 @@ import {
 } from './imports';
 
 const ID = '0190a0a0-0000-7000-8000-0000000000b1';
-const counts = { rows: 158, create: 143, merge: 12, unchanged: 0, invalid: 3, skipped: 0 };
+const counts = {
+  rows: 158,
+  create: 143,
+  merge: 12,
+  unchanged: 0,
+  invalid: 3,
+  skipped: 0,
+  conflict: 0,
+  clients: 143,
+  past: 0,
+  upcoming: 0,
+};
 
 function batch(overrides: Record<string, unknown> = {}): ImportBatch {
   return ImportBatchSchema.parse({
     id: ID,
     status: 'staged',
+    kind: 'clients',
+    notices: [],
     format: 'csv',
     preset: null,
     columns: [],
@@ -75,6 +88,9 @@ describe('rowsToFixFirst (AC-W1-21)', () => {
       outcome,
       reasons: [],
       clientId: null,
+      tags: [],
+      birthday: null,
+      visit: null,
     });
     const { toFix, leftOut, rest } = rowsToFixFirst([
       row(2, 'create'),
@@ -141,15 +157,15 @@ describe('the mapping (AC-W1-17)', () => {
   const client: ImportColumn = { column: 'Client', field: 'name', by: 'header', later: null };
   const nickname: ImportColumn = { column: 'Nickname', field: null, by: null, later: null };
   const mobile: ImportColumn = { column: 'Mobile', field: 'phone', by: 'values', later: null };
-  const birthday: ImportColumn = { column: 'Birthday', field: null, by: null, later: 'birthday' };
-  const columns = [client, nickname, mobile, birthday];
+  const notes: ImportColumn = { column: 'Notes', field: null, by: null, later: 'notes' };
+  const columns = [client, nickname, mobile, notes];
 
   it('moves a one-column field to the column chosen, and keeps the rest', () => {
     expect(withField(columns, 'Nickname', 'name')).toEqual([
       { column: 'Client', field: null },
       { column: 'Nickname', field: 'name' },
       { column: 'Mobile', field: 'phone' },
-      { column: 'Birthday', field: null },
+      { column: 'Notes', field: null },
     ]);
     expect(withField(columns, 'Mobile', '')[2]).toEqual({ column: 'Mobile', field: null });
     // Several columns may give a phone: the first valid one wins.
@@ -167,7 +183,7 @@ describe('the mapping (AC-W1-17)', () => {
     expect(columnNote({ ...client, by: 'preset' }, 'square')).toBe('As Square exports it.');
     expect(columnNote(client, null)).toBe('From the column’s name.');
     expect(columnNote(mobile, null)).toBe('From what’s in it.');
-    expect(columnNote(birthday, null)).toBe('Birthdays come in a later update.');
+    expect(columnNote(notes, null)).toBe('Notes come in a later update.');
     expect(columnNote(nickname, null)).toBe('Not imported.');
   });
 
@@ -234,10 +250,21 @@ describe('a long preview and the undo question', () => {
     outcome,
     reasons: [],
     clientId: null,
+    tags: [],
+    birthday: null,
+    visit: null,
   });
 
   it('says when rows to fix are beyond the rows shown, and nothing when all are shown', () => {
-    const many = { rows: 300, create: 50, merge: 0, unchanged: 0, invalid: 250, skipped: 0 };
+    const many = {
+      ...counts,
+      rows: 300,
+      create: 50,
+      merge: 0,
+      unchanged: 0,
+      invalid: 250,
+      skipped: 0,
+    };
     const shown = Array.from({ length: 200 }, (_, i) => row(i + 2, 'invalid'));
     expect(moreRowsNote(many, shown)).toBe(
       'Showing 200 of 300 rows. 50 more rows to fix aren’t shown: fix the ones above, then pick the file again.',

@@ -684,6 +684,15 @@ export const clients = pgTable(
     // When the client unsubscribed from marketing email (S36, RFC 8058 one-click): no rebooking
     // nudge reaches them; booking emails still do. NULL: subscribed.
     emailOptOutAt: timestamp('email_opt_out_at', { withTimezone: true }),
+    // The client's tags and birthday (S49, ADR-0050): an import brings them; the year may be
+    // unknown. Personal data like the rest of the row.
+    tags: text('tags')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    birthdayMonth: smallint('birthday_month'),
+    birthdayDay: smallint('birthday_day'),
+    birthdayYear: smallint('birthday_year'),
     ...timestamps,
   },
   (table) => [
@@ -698,6 +707,14 @@ export const clients = pgTable(
     ),
     check('clients_phone_format', sql`${table.phone} ~ '^[+][1-9][0-9]{6,14}$'`),
     check('clients_source_known', sql`${table.source} IN ('team', 'ai', 'booking_page', 'import')`),
+    check(
+      'clients_tags_shape',
+      sql`cardinality(${table.tags}) <= 20 AND array_position(${table.tags}, NULL) IS NULL`,
+    ),
+    check(
+      'clients_birthday_shape',
+      sql`(${table.birthdayMonth} IS NULL) = (${table.birthdayDay} IS NULL) AND (${table.birthdayYear} IS NULL OR ${table.birthdayMonth} IS NOT NULL) AND ${table.birthdayMonth} BETWEEN 1 AND 12 AND ${table.birthdayDay} BETWEEN 1 AND (CASE WHEN ${table.birthdayMonth} = 2 THEN 29 WHEN ${table.birthdayMonth} IN (4, 6, 9, 11) THEN 30 ELSE 31 END) AND ${table.birthdayYear} BETWEEN 1900 AND 2100`,
+    ),
     tenantIsolation(sql.raw('tenant_id')),
     pgPolicy('member_scope', {
       as: 'restrictive',
@@ -743,10 +760,16 @@ export const bookings = pgTable(
     createdByUserId: uuid('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
     }),
+    // The import that brought it (S49, ADR-0050; `source` import); an undo removes it while
+    // unchanged. No foreign key, as for `import_rows.client_id`.
+    importBatchId: uuid('import_batch_id'),
     ...timestamps,
   },
   (table) => [
     unique('bookings_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('bookings_import_batch_idx')
+      .on(table.tenantId, table.importBatchId)
+      .where(sql`${table.importBatchId} IS NOT NULL`),
     uniqueIndex('bookings_tenant_idempotency_key_unique').on(table.tenantId, table.idempotencyKey),
     index('bookings_staff_member_starts_at_idx').on(
       table.tenantId,
@@ -773,7 +796,14 @@ export const bookings = pgTable(
       'bookings_status_known',
       sql`${table.status} IN ('confirmed', 'completed', 'no_show', 'cancelled')`,
     ),
-    check('bookings_source_known', sql`${table.source} IN ('team', 'ai', 'booking_page')`),
+    check(
+      'bookings_source_known',
+      sql`${table.source} IN ('team', 'ai', 'booking_page', 'import')`,
+    ),
+    check(
+      'bookings_import_batch',
+      sql`(${table.source} = 'import') = (${table.importBatchId} IS NOT NULL)`,
+    ),
     check(
       'bookings_idempotency_key_format',
       sql`${table.idempotencyKey} ~ '^[A-Za-z0-9_-]{8,100}$'`,
@@ -2441,6 +2471,8 @@ export const importBatches = pgTable(
       onDelete: 'set null',
     }),
     status: text('status').notNull().default('staged'),
+    // A client file or a visits file (S49, ADR-0050), as its mapping says.
+    kind: text('kind').notNull().default('clients'),
     format: text('format').notNull(),
     preset: text('preset'),
     system: text('system').notNull(),
@@ -2449,6 +2481,10 @@ export const importBatches = pgTable(
       .notNull()
       .default(sql`'[]'::jsonb`),
     counts: jsonb('counts').notNull(),
+    // Sentences about the whole file that don't stop it (a hidden service it brings, S49).
+    notices: jsonb('notices')
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     undo: jsonb('undo'),
     committedAt: timestamp('committed_at', { withTimezone: true }),
     finishedAt: timestamp('finished_at', { withTimezone: true }),
@@ -2472,6 +2508,7 @@ export const importBatches = pgTable(
       sql`${table.status} IN ('staged', 'queued', 'running', 'done', 'failed', 'undone')`,
     ),
     check('import_batches_format_known', sql`${table.format} IN ('csv', 'json', 'jsonl')`),
+    check('import_batches_kind_known', sql`${table.kind} IN ('clients', 'visits')`),
     check(
       'import_batches_preset_known',
       sql`${table.preset} IS NULL OR ${table.preset} IN ('square', 'booksy', 'vagaro', 'glossgenius', 'fresha')`,
@@ -2536,6 +2573,13 @@ export const importRows = pgTable(
     fills: jsonb('fills')
       .notNull()
       .default(sql`'{}'::jsonb`),
+    // The row's tags and birthday, and for a visits file its visit (S49, ADR-0050); cleared
+    // with the rest of the row's client data.
+    details: jsonb('details'),
+    visit: jsonb('visit'),
+    // Whether applying it created its client (what an undo may remove), and the booking it made.
+    createdClient: boolean('created_client').notNull().default(false),
+    bookingId: uuid('booking_id'),
     appliedAt: timestamp('applied_at', { withTimezone: true }),
   },
   (table) => [
@@ -2544,7 +2588,7 @@ export const importRows = pgTable(
     index('import_rows_tenant_client_idx').on(table.tenantId, table.clientId),
     check(
       'import_rows_outcome_known',
-      sql`${table.outcome} IN ('create', 'merge', 'unchanged', 'invalid', 'skipped')`,
+      sql`${table.outcome} IN ('create', 'merge', 'unchanged', 'invalid', 'skipped', 'conflict')`,
     ),
     check('import_rows_position', sql`${table.position} >= 0 AND ${table.row} > 0`),
     foreignKey({

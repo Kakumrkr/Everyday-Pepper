@@ -33,6 +33,8 @@ const CLIENT: Client = {
   email: 'maria@example.test',
   phone: null,
   source: 'team',
+  tags: [],
+  birthday: null,
   createdAt: AT,
   updatedAt: AT,
 };

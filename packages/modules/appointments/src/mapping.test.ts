@@ -230,6 +230,7 @@ const bookingRow: BookingRow = {
   overridden: false,
   idempotencyKey: 'ai-run-0001',
   manageTokenHash: null,
+  importBatchId: null,
   createdByUserId: USER,
   createdAt: CREATED,
   updatedAt: UPDATED,

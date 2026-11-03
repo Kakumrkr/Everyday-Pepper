@@ -21,8 +21,11 @@ export type BookingId = z.infer<typeof BookingIdSchema>;
 export const BookingStatusSchema = z.enum(['confirmed', 'completed', 'no_show', 'cancelled']);
 export type BookingStatus = z.infer<typeof BookingStatusSchema>;
 
-/** Where a booking came from (`team`: made in the app by a member). */
-export const BookingSourceSchema = RecordSourceSchema.exclude(['import']);
+/**
+ * Where a booking came from (`team`: made in the app by a member; `import`: brought in from
+ * another tool's appointments, S49, ADR-0050).
+ */
+export const BookingSourceSchema = RecordSourceSchema;
 export type BookingSource = z.infer<typeof BookingSourceSchema>;
 
 /**

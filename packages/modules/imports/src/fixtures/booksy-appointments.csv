@@ -1,0 +1,4 @@
+Booking ID,Appointment Date,Start Time,End Time,Customer ID,Customer Name,Email,Mobile,Service,Staffer,Status,Price
+BK-501,2026-02-10,09:30,10:15,BKC-11,Priya Shah,priya.shah@example.com,555-010-0201,Lash Fill,Dre,finished,65
+BK-502,2026-03-24,09:30,10:15,BKC-11,Priya Shah,priya.shah@example.com,555-010-0201,Lash Fill,Dre,finished,65
+BK-503,2027-01-05,13:00,14:30,BKC-12,Omar Haddad,,555-010-0202,Full Set,Dre,confirmed,140

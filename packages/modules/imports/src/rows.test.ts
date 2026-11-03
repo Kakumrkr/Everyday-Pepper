@@ -27,6 +27,8 @@ const client = (
   name,
   email,
   phone,
+  tags: [],
+  birthday: null,
 });
 
 function indexOf(clients: KnownClient[], refs: Record<string, KnownClient> = {}): MatchIndex {
@@ -228,5 +230,128 @@ describe('planRows (D-3)', () => {
       }),
       { numRuns: 300 },
     );
+  });
+});
+
+describe('tags and birthdays (S49, AC-W1-25)', () => {
+  const withDetails = [
+    { column: 'Name', field: 'name' },
+    { column: 'Email', field: 'email' },
+    { column: 'Birthday', field: 'birthday' },
+    { column: 'Tags', field: 'tags' },
+  ] as const;
+  const detailsTable = (...rows: string[][]): Table => ({
+    format: 'csv',
+    columns: ['Name', 'Email', 'Birthday', 'Tags'],
+    rows: rows.map((cells, i) => ({ row: i + 2, cells })),
+  });
+
+  it('reads them, and a birthday that can’t be read is a warning, never a stop', () => {
+    const rows = mapRows(
+      detailsTable(['Ana', 'ana@example.com', 'April 12', 'VIP; Color'], ['Ben', '', 'soon', '']),
+      [...withDetails],
+    );
+    expect(rows[0]).toMatchObject({
+      birthday: { month: 4, day: 12, year: null },
+      tags: ['VIP', 'Color'],
+      valid: true,
+    });
+    expect(rows[1]).toMatchObject({ birthday: null, valid: true, reasons: [] });
+    expect(rows[1]?.warnings.map((w) => w.message)).toEqual([
+      'Row 3: the birthday “soon” can’t be read, so it’s left out. Write it as 4/12/1990 or April 12.',
+    ]);
+    // The warning stays on the planned row.
+    const [, ben] = planRows('csv', rows, indexOf([]));
+    expect(ben?.outcome).toBe('create');
+    expect(ben?.reasons.map((r) => r.code)).toEqual(['birthday_invalid']);
+  });
+
+  it('fills a birthday only when empty, and adds only the tags the client lacks', () => {
+    const ana = { ...client('c1', 'Ana', 'ana@example.com', null), tags: ['vip'] };
+    const ben = {
+      ...client('c2', 'Ben', 'ben@example.com', null),
+      birthday: { month: 1, day: 2, year: null },
+    };
+    const planned = planRows(
+      'csv',
+      mapRows(
+        detailsTable(
+          ['Ana', 'ana@example.com', '4/12/1990', 'VIP, Color'],
+          ['Ben', 'ben@example.com', '5/5', 'New'],
+        ),
+        [...withDetails],
+      ),
+      indexOf([ana, ben]),
+    );
+    expect(planned.map((p) => [p.outcome, p.fills])).toEqual([
+      ['merge', { birthday: { month: 4, day: 12, year: 1990 }, tags: ['Color'] }],
+      ['merge', { tags: ['New'] }],
+    ]);
+  });
+});
+
+describe('several rows of one client (S49, visits files)', () => {
+  it('says which row or client a repeat belongs to', () => {
+    const known = client('c1', 'Ana', 'ana@example.com', null);
+    const planned = plan(
+      table(
+        ['Ben', 'ben@example.com', '', ''],
+        ['Ben', 'ben@example.com', '', ''],
+        ['Ana', 'ana@example.com', '', ''],
+        ['Ana', 'ana@example.com', '', ''],
+      ),
+      indexOf([known]),
+    );
+    expect(planned.map((p) => [p.outcome, p.sameAs])).toEqual([
+      ['create', undefined],
+      ['skipped', { position: 0 }],
+      ['unchanged', undefined],
+      ['skipped', { clientId: 'c1' }],
+    ]);
+  });
+});
+
+describe('a visits file’s rows (S49)', () => {
+  const visitMapping = [
+    { column: 'Name', field: 'name' },
+    { column: 'Date', field: 'visit_date' },
+    { column: 'Time', field: 'visit_time' },
+    { column: 'Length', field: 'duration' },
+    { column: 'Price', field: 'price' },
+  ] as const;
+  const visitTable = (...rows: string[][]): Table => ({
+    format: 'csv',
+    columns: ['Name', 'Date', 'Time', 'Length', 'Price'],
+    rows: rows.map((cells, i) => ({ row: i + 2, cells })),
+  });
+
+  it('gives each unreadable part of a visit its reason', () => {
+    const rows = mapRows(
+      visitTable(
+        ['Ana', '1/5/2026', '2:30 PM', '45', '$45'],
+        ['Ben', 'someday', '2:30 PM', '45', ''],
+        ['Cy', '1/5/2026', 'late', '45', ''],
+        ['Di', '1/5/2026', '', '45', ''],
+        ['Ed', '1/5/2026', '9 AM', '2 days', ''],
+        ['Flo', '1/5/2026', '9 AM', '30', 'free'],
+      ),
+      [...visitMapping],
+    );
+    expect(
+      rows.map((r) => [r.valid, r.reasons.map((x) => x.code), r.warnings.map((x) => x.code)]),
+    ).toEqual([
+      [true, [], []],
+      [false, ['date_invalid'], []],
+      [false, ['time_invalid'], []],
+      [false, ['time_invalid'], []],
+      [false, ['duration_invalid'], []],
+      [true, [], ['price_invalid']],
+    ]);
+    expect(rows[0]?.visit).toMatchObject({
+      time: 870,
+      duration: 45,
+      priceCents: 4500,
+      status: 'kept',
+    });
   });
 });

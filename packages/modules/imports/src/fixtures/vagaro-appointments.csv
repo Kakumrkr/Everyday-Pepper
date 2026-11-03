@@ -1,0 +1,4 @@
+Appointment Date,Start Time,End Time,First Name,Last Name,Email,Cell Phone,Service,Service Provider,Status,Amount
+1/8/2026,10:00 AM,10:45 AM,Lena,Fischer,lena.fischer@example.com,(555) 010-0301,Gel Manicure,Dre,Checked Out,$40.00
+2/19/2026,4:15 PM,5:00 PM,Lena,Fischer,lena.fischer@example.com,(555) 010-0301,Gel Manicure,Dre,Checked Out,$40.00
+2/2/2027,11:00 AM,12:00 PM,Rosa,Diaz,,(555) 010-0302,Pedicure,Dre,Booked,$55.00

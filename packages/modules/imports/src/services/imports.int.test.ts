@@ -6,7 +6,7 @@ import {
   type TenantId,
   type UserId,
 } from '@pepper/contracts';
-import { createBusiness, ForbiddenError, ManualClock, type Actor } from '@pepper/core';
+import { createBusiness, ForbiddenError, listClients, ManualClock, type Actor } from '@pepper/core';
 import {
   addMembership,
   insertClient,
@@ -273,7 +273,18 @@ describe('running (AC-W1-3)', () => {
     expect(imports.map((entry) => [entry.action, entry.after])).toEqual([
       [
         'client_import.finished',
-        { create: 4, merge: 0, unchanged: 0, invalid: 0, skipped: 0, status: 'done' },
+        {
+          create: 4,
+          merge: 0,
+          unchanged: 0,
+          invalid: 0,
+          skipped: 0,
+          conflict: 0,
+          clients: 4,
+          past: 0,
+          upcoming: 0,
+          status: 'done',
+        },
       ],
       ['client_import.committed', { rows: 4 }],
     ]);
@@ -474,7 +485,8 @@ describe('undo (AC-W1-19)', () => {
       tx.execute(`UPDATE clients SET phone = '+15550109999' WHERE name = 'Jasmine Reed'`),
     );
     const undone = await undoImport(db, business.owner, batch.id, business.clock);
-    expect(undone.undo).toEqual({ deleted: 2, restored: 0, kept: 0 });
+    // The phone stays (changed since); the birthday and tag it added go (S49), so Jasmine counts.
+    expect(undone.undo).toEqual({ deleted: 2, restored: 1, kept: 0, bookings: 0, bookingsKept: 0 });
     expect(await clientsOf(business.tenantId)).toEqual([
       {
         name: 'Jasmine Reed',
@@ -507,7 +519,7 @@ describe('undo (AC-W1-19)', () => {
     );
     expect(both.counts).toMatchObject({ merge: 1 });
     const undone = await undoImport(db, business.owner, both.id, business.clock);
-    expect(undone.undo).toEqual({ deleted: 0, restored: 1, kept: 0 });
+    expect(undone.undo).toEqual({ deleted: 0, restored: 1, kept: 0, bookings: 0, bookingsKept: 0 });
     expect((await clientsOf(business.tenantId)).find((c) => c.name === 'Cy Okafor')).toEqual({
       name: 'Cy Okafor',
       email: null,
@@ -523,6 +535,8 @@ describe('undo (AC-W1-19)', () => {
       deleted: 1,
       restored: 0,
       kept: 1,
+      bookings: 0,
+      bookingsKept: 0,
     });
     expect((await clientsOf(business.tenantId)).map((c) => c.name)).toEqual([
       'Ben Adler Jr',
@@ -624,3 +638,31 @@ async function dueBatches() {
     (b) => b.batchId,
   );
 }
+
+describe('tags and birthdays (S49, AC-W1-25, AC-W1-26)', () => {
+  it('brings them with the clients, shows them in the preview, and lists the import’s clients', async () => {
+    const business = await newBusiness();
+    const staged = await stageImport(db, business.owner, fixture('booksy.csv'));
+    expect(staged.rows.find((row) => row.name === 'Lena Park')).toMatchObject({
+      tags: ['VIP', 'Lashes'],
+      birthday: null,
+      visit: null,
+    });
+    expect(staged.rows.find((row) => row.name === 'Jasmine Reed')?.birthday).toEqual({
+      month: 3,
+      day: 14,
+      year: 1995,
+    });
+    await commitImport(db, business.owner, staged.batch.id, business.clock);
+    await runImport(db, { batchId: staged.batch.id, tenantId: business.tenantId }, business.clock);
+    const listed = await listClients(db, business.owner, { import: staged.batch.id });
+    expect(listed.map((client) => [client.name, client.tags, client.birthday])).toEqual([
+      ['Jasmine Reed', ['VIP'], { month: 3, day: 14, year: 1995 }],
+      ['Kofi Mensah', [], null],
+      ['Lena Park', ['VIP', 'Lashes'], null],
+    ]);
+    // Another import's filter lists none of them.
+    const other = await stageImport(db, business.owner, fixture('generic.csv'));
+    expect(await listClients(db, business.owner, { import: other.batch.id })).toEqual([]);
+  });
+});

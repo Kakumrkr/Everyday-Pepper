@@ -1,13 +1,18 @@
 import {
   ClientEmailSchema,
   ImportBatchIdSchema,
+  ClientBirthdaySchema,
+  ClientTagSchema,
   ImportFormatSchema,
+  ImportKindSchema,
   ImportPresetSchema,
   PhoneSchema,
   TenantIdSchema,
   type ImportBatchId,
   type ImportBatchStatus,
+  type ClientBirthday,
   type ImportFormat,
+  type ImportKind,
   type ImportPreset,
   type ImportRowOutcome,
   type TenantId,
@@ -45,11 +50,14 @@ function chunks<T>(items: readonly T[], size = CHUNK): T[][] {
 
 export interface NewImportBatch {
   createdByUserId: string | null;
+  /** Default `clients`. */
+  kind?: ImportKind;
   format: ImportFormat;
   preset: ImportPreset | null;
   system: string;
   columns: unknown;
   problems: readonly string[];
+  notices?: readonly string[];
   counts: unknown;
 }
 
@@ -61,14 +69,25 @@ export async function insertImportBatch(
     .insert(importBatches)
     .values({
       ...batch,
+      kind: ImportKindSchema.parse(batch.kind ?? 'clients'),
       format: ImportFormatSchema.parse(batch.format),
       preset: batch.preset === null ? null : ImportPresetSchema.parse(batch.preset),
       system: System.parse(batch.system),
       problems: [...batch.problems],
+      notices: [...(batch.notices ?? [])],
     })
     .returning();
   if (row === undefined) throw new Error('Insert returned no row');
   return row;
+}
+
+/** What an import fills on a client it matches, or sets on one it creates (S49 adds two). */
+export interface ClientFills {
+  email?: string;
+  phone?: string;
+  birthday?: ClientBirthday;
+  /** Tags the client didn't have. */
+  tags?: string[];
 }
 
 /** A row of a batch as it is planned (and, once applied, as it was applied). */
@@ -84,8 +103,18 @@ export interface ImportRowValues {
   outcome: ImportRowOutcome;
   reasons: readonly { code: string; message: string }[];
   clientId: string | null;
-  fills: Readonly<{ email?: string; phone?: string }>;
+  fills: Readonly<ClientFills>;
+  /** The row's tags and birthday (S49). */
+  details?: unknown;
+  /** A visits file's visit, as planned (S49). */
+  visit?: unknown;
 }
+
+/** What applying a row did. */
+export type AppliedImportRow = Pick<
+  ImportRowValues,
+  'position' | 'outcome' | 'reasons' | 'clientId' | 'fills' | 'visit'
+> & { createdClient: boolean; bookingId: string | null };
 
 /** Replaces a staged batch's rows (a first plan, or a new mapping's). */
 export async function replaceImportRows(
@@ -103,32 +132,36 @@ export async function replaceImportRows(
         cells: [...row.cells],
         reasons: [...row.reasons],
         fills: { ...row.fills },
+        details: row.details ?? null,
+        visit: row.visit ?? null,
       })),
     );
   }
 }
 
-/** Records what the run did with these rows (after it wrote their clients). */
+/** Records what the run did with these rows (after it wrote their clients and visits). */
 export async function markImportRowsApplied(
   tx: TenantTx,
   batchId: ImportBatchId,
-  rows: readonly Pick<ImportRowValues, 'position' | 'outcome' | 'reasons' | 'clientId' | 'fills'>[],
+  rows: readonly AppliedImportRow[],
   at: Date,
 ): Promise<void> {
   const id = Id.parse(batchId);
+  const uuidOrNull = (value: string | null) => (value === null ? null : Id.parse(value));
   for (const part of chunks(rows)) {
     const values = sql.join(
       part.map(
         (row) =>
-          sql`(${row.position}::int, ${row.outcome}::text, ${JSON.stringify(row.reasons)}::jsonb, ${row.clientId === null ? null : Id.parse(row.clientId)}::uuid, ${JSON.stringify(row.fills)}::jsonb)`,
+          sql`(${row.position}::int, ${row.outcome}::text, ${JSON.stringify(row.reasons)}::jsonb, ${uuidOrNull(row.clientId)}::uuid, ${JSON.stringify(row.fills)}::jsonb, ${row.createdClient}::boolean, ${uuidOrNull(row.bookingId)}::uuid, ${row.visit === null || row.visit === undefined ? null : JSON.stringify(row.visit)}::jsonb)`,
       ),
       sql`, `,
     );
     await tx.execute(sql`
       UPDATE import_rows AS r
       SET outcome = v.outcome, reasons = v.reasons, client_id = v.client_id, fills = v.fills,
-          applied_at = ${at}
-      FROM (VALUES ${values}) AS v(position, outcome, reasons, client_id, fills)
+          created_client = v.created_client, booking_id = v.booking_id,
+          visit = COALESCE(v.visit, r.visit), applied_at = ${at}
+      FROM (VALUES ${values}) AS v(position, outcome, reasons, client_id, fills, created_client, booking_id, visit)
       WHERE r.batch_id = ${id} AND r.position = v.position`);
   }
 }
@@ -170,8 +203,10 @@ export type ImportBatchChange = Partial<
   Pick<
     ImportBatchRow,
     | 'status'
+    | 'kind'
     | 'columns'
     | 'problems'
+    | 'notices'
     | 'counts'
     | 'undo'
     | 'committedAt'
@@ -215,7 +250,10 @@ export function listImportRows(tx: TenantTx, batchId: ImportBatchId): Promise<Im
     .orderBy(asc(importRows.position));
 }
 
-/** The rows a preview shows: invalid and skipped first, then in file order, at most `limit`. */
+/**
+ * The rows a preview shows: invalid, skipped and conflicting first, then in file order, at most
+ * `limit`.
+ */
 export function listImportPreviewRows(
   tx: TenantTx,
   batchId: ImportBatchId,
@@ -226,7 +264,7 @@ export function listImportPreviewRows(
     .from(importRows)
     .where(eq(importRows.batchId, Id.parse(batchId)))
     .orderBy(
-      sql`CASE ${importRows.outcome} WHEN 'invalid' THEN 0 WHEN 'skipped' THEN 1 ELSE 2 END`,
+      sql`CASE ${importRows.outcome} WHEN 'invalid' THEN 0 WHEN 'conflict' THEN 1 WHEN 'skipped' THEN 2 ELSE 3 END`,
       asc(importRows.position),
     )
     .limit(Limit.parse(limit));
@@ -243,18 +281,27 @@ export async function purgeImportRows(tx: TenantTx, batchId: ImportBatchId): Pro
       phone: null,
       externalId: null,
       reasons: [],
+      details: null,
+      visit: null,
     })
     .where(eq(importRows.batchId, Id.parse(batchId)));
 }
 
 // Matching ----------------------------------------------------------------------------------
 
-export type MatchClient = Pick<ClientRow, 'id' | 'name' | 'email' | 'phone'>;
+export type MatchClient = Pick<
+  ClientRow,
+  'id' | 'name' | 'email' | 'phone' | 'tags' | 'birthdayMonth' | 'birthdayDay' | 'birthdayYear'
+>;
 const matchColumns = {
   id: clients.id,
   name: clients.name,
   email: clients.email,
   phone: clients.phone,
+  tags: clients.tags,
+  birthdayMonth: clients.birthdayMonth,
+  birthdayDay: clients.birthdayDay,
+  birthdayYear: clients.birthdayYear,
 };
 
 /** The business's clients with any of these emails. */
@@ -342,7 +389,11 @@ export interface NewImportedClient {
   name: string;
   email: string | null;
   phone: string | null;
+  tags?: readonly string[];
+  birthday?: ClientBirthday | null;
 }
+
+const Tags = z.array(ClientTagSchema).max(20);
 
 /** Inserts the clients a run creates (`source` import). */
 export async function insertImportedClients(
@@ -357,21 +408,32 @@ export async function insertImportedClients(
         email: row.email === null ? null : ClientEmailSchema.parse(row.email),
         phone: row.phone === null ? null : PhoneSchema.parse(row.phone),
         source: 'import',
+        tags: Tags.parse(row.tags ?? []),
+        ...birthdayColumns(row.birthday ?? null),
       })),
     );
   }
 }
 
+function birthdayColumns(birthday: ClientBirthday | null) {
+  const value = birthday === null ? null : ClientBirthdaySchema.parse(birthday);
+  return {
+    birthdayMonth: value?.month ?? null,
+    birthdayDay: value?.day ?? null,
+    birthdayYear: value?.year ?? null,
+  };
+}
+
 /**
- * Fills a client's email and phone where they are still empty (a merge never overwrites);
- * returns the fields it filled.
+ * Fills a client's email, phone and birthday where they are still empty, and adds the tags it
+ * lacks (a merge never overwrites); returns what it filled.
  */
 export async function fillClientContact(
   tx: TenantTx,
   id: string,
-  fills: { email?: string; phone?: string },
-): Promise<{ email?: string; phone?: string }> {
-  const filled: { email?: string; phone?: string } = {};
+  fills: ClientFills,
+): Promise<ClientFills> {
+  const filled: ClientFills = {};
   if (fills.email !== undefined) {
     const email = ClientEmailSchema.parse(fills.email);
     const done = await tx
@@ -389,6 +451,34 @@ export async function fillClientContact(
       .where(and(eq(clients.id, Id.parse(id)), isNull(clients.phone)))
       .returning({ id: clients.id });
     if (done.length > 0) filled.phone = phone;
+  }
+  if (fills.birthday !== undefined) {
+    const done = await tx
+      .update(clients)
+      .set(birthdayColumns(fills.birthday))
+      .where(and(eq(clients.id, Id.parse(id)), isNull(clients.birthdayMonth)))
+      .returning({ id: clients.id });
+    if (done.length > 0) filled.birthday = ClientBirthdaySchema.parse(fills.birthday);
+  }
+  if (fills.tags !== undefined && fills.tags.length > 0) {
+    // Only tags the client lacks (ignoring case), and never past 20.
+    const wanted = Tags.parse(fills.tags);
+    const [row] = await tx
+      .select({ tags: clients.tags })
+      .from(clients)
+      .where(eq(clients.id, Id.parse(id)))
+      .for('update');
+    const have = new Set((row?.tags ?? []).map((tag) => tag.toLowerCase()));
+    const added = wanted
+      .filter((tag) => !have.has(tag.toLowerCase()))
+      .slice(0, Math.max(0, 20 - have.size));
+    if (row !== undefined && added.length > 0) {
+      await tx
+        .update(clients)
+        .set({ tags: [...row.tags, ...added] })
+        .where(eq(clients.id, Id.parse(id)));
+      filled.tags = added;
+    }
   }
   return filled;
 }
@@ -418,21 +508,28 @@ export async function insertImportRefs(
 }
 
 /**
- * Undoes what a batch wrote (AC-W1-19): removes the clients it created that nobody has used or
- * changed since (no booking, waitlist entry or memory fact, and never updated: a later edit or
- * another import's merge keeps them), and clears the emails and phones it filled where they
- * still hold its value. External ids it recorded stay with the clients that remain and go with
- * the deleted ones. Returns the counts.
+ * Undoes what a batch wrote to clients (AC-W1-19, AC-W1-25): removes the clients it created
+ * that nobody has used or changed since (no booking, waitlist entry or memory fact, and never
+ * updated: a later edit or another import's merge keeps them), and clears the emails, phones
+ * and birthdays it filled where they still hold its value and removes the tags it added.
+ * External ids it recorded stay with the clients that remain and go with the deleted ones.
+ * A visits batch's bookings go first (`undoImportedBookings`), so its clients are free to go.
+ * Returns the counts.
  */
 export async function undoImportBatchRows(
   tx: TenantTx,
   batchId: ImportBatchId,
 ): Promise<{ deleted: number; restored: number; kept: number }> {
   const id = Id.parse(batchId);
+  // The birthday it filled, still as it filled it (the year may be null on both sides).
+  const birthdayFilled = sql`(r.fills ? 'birthday'
+    AND c.birthday_month = (r.fills->'birthday'->>'month')::smallint
+    AND c.birthday_day = (r.fills->'birthday'->>'day')::smallint
+    AND c.birthday_year IS NOT DISTINCT FROM (r.fills->'birthday'->>'year')::smallint)`;
   const created = await tx.execute<{ total: number; deleted: number }>(sql`
     WITH created AS (
-      SELECT client_id FROM import_rows
-      WHERE batch_id = ${id} AND outcome = 'create' AND applied_at IS NOT NULL
+      SELECT DISTINCT client_id FROM import_rows
+      WHERE batch_id = ${id} AND created_client AND applied_at IS NOT NULL
         AND client_id IS NOT NULL
     ), removed AS (
       DELETE FROM clients c USING created
@@ -450,12 +547,21 @@ export async function undoImportBatchRows(
     WITH restored AS (
       UPDATE clients c
       SET email = CASE WHEN r.fills ? 'email' AND c.email = r.fills->>'email' THEN NULL ELSE c.email END,
-          phone = CASE WHEN r.fills ? 'phone' AND c.phone = r.fills->>'phone' THEN NULL ELSE c.phone END
+          phone = CASE WHEN r.fills ? 'phone' AND c.phone = r.fills->>'phone' THEN NULL ELSE c.phone END,
+          birthday_month = CASE WHEN ${birthdayFilled} THEN NULL ELSE c.birthday_month END,
+          birthday_day = CASE WHEN ${birthdayFilled} THEN NULL ELSE c.birthday_day END,
+          birthday_year = CASE WHEN ${birthdayFilled} THEN NULL ELSE c.birthday_year END,
+          tags = CASE WHEN r.fills ? 'tags' THEN ARRAY(
+            SELECT t FROM unnest(c.tags) WITH ORDINALITY AS u(t, n)
+            WHERE NOT (t = ANY (ARRAY(SELECT jsonb_array_elements_text(r.fills->'tags'))))
+            ORDER BY n) ELSE c.tags END
       FROM import_rows r
-      WHERE r.batch_id = ${id} AND r.outcome = 'merge' AND r.applied_at IS NOT NULL
+      WHERE r.batch_id = ${id} AND r.fills <> '{}'::jsonb AND r.applied_at IS NOT NULL
         AND r.client_id = c.id
         AND ((r.fills ? 'email' AND c.email = r.fills->>'email')
-          OR (r.fills ? 'phone' AND c.phone = r.fills->>'phone'))
+          OR (r.fills ? 'phone' AND c.phone = r.fills->>'phone')
+          OR ${birthdayFilled}
+          OR (r.fills ? 'tags' AND c.tags && ARRAY(SELECT jsonb_array_elements_text(r.fills->'tags'))))
       RETURNING c.id
     )
     SELECT count(DISTINCT id)::int AS restored FROM restored`);

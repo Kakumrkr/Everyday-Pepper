@@ -10,7 +10,7 @@ import {
 import { and, asc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { ClientEmailTakenError, isUniqueViolation } from '../errors.js';
-import { clients, type ClientRow } from '../schema.js';
+import { clients, importRows, type ClientRow } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
 
 // The clients of the transaction's tenant (ADR-0017). Run inside `withMember` for a member's
@@ -143,20 +143,40 @@ export async function listClients(
     limit: number;
     /** Match names only, never email addresses (the AI's lookup, ADR-0029). */
     namesOnly?: boolean;
+    /**
+     * Only the clients this import created (S49): the import's rows are owners' and managers'
+     * only, so for staff the list is empty.
+     */
+    importBatchId?: string | undefined;
   },
 ): Promise<ClientRow[]> {
   const pattern =
     options.search === undefined ? undefined : `%${options.search.replace(/[\\%_]/g, '\\$&')}%`;
+  const bySearch =
+    pattern === undefined
+      ? undefined
+      : options.namesOnly === true
+        ? ilike(clients.name, pattern)
+        : or(ilike(clients.name, pattern), ilike(clients.email, pattern));
+  const byImport =
+    options.importBatchId === undefined
+      ? undefined
+      : inArray(
+          clients.id,
+          tx
+            .select({ id: sql<string>`${importRows.clientId}` })
+            .from(importRows)
+            .where(
+              and(
+                eq(importRows.batchId, z.uuid().parse(options.importBatchId)),
+                eq(importRows.createdClient, true),
+              ),
+            ),
+        );
   return tx
     .select()
     .from(clients)
-    .where(
-      pattern === undefined
-        ? undefined
-        : options.namesOnly === true
-          ? ilike(clients.name, pattern)
-          : or(ilike(clients.name, pattern), ilike(clients.email, pattern)),
-    )
+    .where(and(bySearch, byImport))
     .orderBy(asc(sql`lower(${clients.name})`), asc(clients.id))
     .limit(z.number().int().min(1).max(200).parse(options.limit));
 }

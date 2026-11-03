@@ -9,7 +9,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S49 (branch `s49-history-import`)**: brief approved 2026-11-03, "Go ahead with your recommendations and complete the session" (D-1…D-6 A: split, screens + the top-up's link → S49.2; appointments' published `VisitBook` port wired by api/worker; unknown services hidden, unknown staff → the owner; overlapping upcoming left out and listed, past never checked; no reminders for imported; birthday month/day + optional year, tags text[]).
 Tasks: 1 ACs AC-W1-22…26 + ADR-0050 · 2 migration 0059 + db repos · 3 contracts + `@pepper/imports` visits/tags/birthday planner · 4 appointments `importVisitBook` (no outbox, no reminders) · 5 runner + undo · 6 api `kind`, `/v1/clients?import=` · 7 1k/5k timing test.
-Done: — · Next: task 1.
+Done: 1 ACs + ADR-0050 · 2 migration 0059 (tags, birthday, `bookings.import_batch_id`/source import, history occupies no time) + db repos (`imported-bookings.ts`), db int 9 green · 3 contracts + `@pepper/imports` (`values.ts`, visit presets, `visits.ts` planner + `VisitBook` port; 160 unit) · 4 (code) `importVisitBook` in appointments · 6 api/worker pass the port; `/v1/clients?import=`. Imports int 27 green.
+Next: appointments int test for the port (no outbox/reminder, find_client_bookings, insights) → worker `visits.int.test.ts` (end to end, undo, conflicts) → timing test 1k/5k.
 
 ## Last sessions
 - **S48.2 Phase 11 · Client import screens + "Bring your clients" (2026-11-03)** (no ADR; PR #71). Full entry in [session-log.md](session-log.md).

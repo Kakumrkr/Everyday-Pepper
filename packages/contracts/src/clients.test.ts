@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ClientBirthdaySchema,
+  ClientTagSchema,
+  daysInMonth,
   ClientContactSchema,
   ClientInputSchema,
   ClientLookupSchema,
@@ -99,5 +102,43 @@ describe('normalizePhone', () => {
     [' 555123456 ', '555123456'],
   ])('%s → %s', (input, output) => {
     expect(normalizePhone(input)).toBe(output);
+  });
+});
+
+describe('ClientBirthdaySchema (S49)', () => {
+  it.each([
+    [{ month: 2, day: 29, year: null }, true],
+    [{ month: 2, day: 29, year: 2000 }, true],
+    [{ month: 2, day: 29, year: 1990 }, false],
+    [{ month: 4, day: 31, year: null }, false],
+    [{ month: 12, day: 31, year: 1985 }, true],
+    [{ month: 13, day: 1, year: null }, false],
+    [{ month: 1, day: 1, year: 1899 }, false],
+  ])('%o → %s', (birthday, ok) => {
+    expect(ClientBirthdaySchema.safeParse(birthday).success).toBe(ok);
+  });
+
+  it('counts the days of a month, February by its year', () => {
+    expect(daysInMonth(2)).toBe(29);
+    expect(daysInMonth(2, 1900)).toBe(28);
+    expect(daysInMonth(2, 2024)).toBe(29);
+    expect(daysInMonth(9)).toBe(30);
+    expect(daysInMonth(10)).toBe(31);
+  });
+});
+
+describe('ClientTagSchema (S49)', () => {
+  it('trims and single-spaces a tag, up to 40 characters', () => {
+    expect(ClientTagSchema.parse('  VIP   client ')).toBe('VIP client');
+    expect(ClientTagSchema.safeParse('   ').success).toBe(false);
+    expect(ClientTagSchema.safeParse('x'.repeat(41)).success).toBe(false);
+  });
+});
+
+describe('ClientsQuerySchema import filter (S49)', () => {
+  it('takes an import id, lowercased', () => {
+    const id = '0199F4B2-7C1E-7A00-8000-000000000001';
+    expect(ClientsQuerySchema.parse({ import: id }).import).toBe(id.toLowerCase());
+    expect(ClientsQuerySchema.safeParse({ import: 'nope' }).success).toBe(false);
   });
 });

@@ -1,0 +1,4 @@
+Ref #,Scheduled Date,Time,Duration,Client ID,Client,Mobile Number,Email,Service,Team Member,Status,Price
+FR-9001,15 Jan 2026,14:00,1h,FC-77,Theo Grant,+1 555 010 0501,theo.grant@example.com,Brow Lamination,Dre,Completed,70
+FR-9002,26 Feb 2026,14:00,1h,FC-77,Theo Grant,+1 555 010 0501,theo.grant@example.com,Brow Lamination,Dre,No-show,70
+FR-9003,9 Feb 2027,10:30,30min,FC-78,Mia Brooks,+1 555 010 0502,,Brow Tint,Dre,Confirmed,25

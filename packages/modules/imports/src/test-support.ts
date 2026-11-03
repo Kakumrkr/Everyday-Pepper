@@ -47,11 +47,16 @@ export class MemoryBusiness {
           name: row.name ?? '',
           email: row.email,
           phone: row.phone,
+          tags: row.tags,
+          birthday: row.birthday,
         };
         this.clients.push(client);
       } else if (planned.outcome === 'merge' || planned.outcome === 'unchanged') {
         client = this.clients.find((c) => c.id === planned.clientId);
-        if (client !== undefined) Object.assign(client, planned.fills);
+        if (client !== undefined) {
+          const { tags = [], ...rest } = planned.fills;
+          Object.assign(client, rest, { tags: [...client.tags, ...tags] });
+        }
       }
       if (client === undefined) return;
       if (row.externalId !== null && !this.refs.has(row.externalId))

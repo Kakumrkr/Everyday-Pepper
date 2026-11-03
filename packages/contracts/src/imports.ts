@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { ClientIdSchema } from './clients.js';
+import { BookingIdSchema } from './bookings.js';
+import { ClientBirthdaySchema, ClientIdSchema } from './clients.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // Client import (S48, ADR-0049, AC-W1-3, AC-W1-17…19): an owner uploads a client export from
@@ -18,10 +19,22 @@ export const ImportPresetSchema = z.enum(IMPORT_PRESETS);
 export type ImportPreset = z.infer<typeof ImportPresetSchema>;
 
 /**
+ * What a file holds (S49, ADR-0050): clients (one row per client), or visits (one row per
+ * appointment, with its client). A file is a visits file when a column gives the visit's date.
+ */
+export const IMPORT_KINDS = ['clients', 'visits'] as const;
+export const ImportKindSchema = z.enum(IMPORT_KINDS);
+export type ImportKind = z.infer<typeof ImportKindSchema>;
+
+/**
  * What a column can fill. A client's name comes from `name`, or from `first_name` and
  * `last_name` together; `external_id` is the other tool's id for the client, used to find them
  * again on a re-import. Email and phone may come from several columns: the first valid value
- * in column order wins (e.g. a cell phone, then a home phone).
+ * in column order wins (e.g. a cell phone, then a home phone); tags from several columns are
+ * put together. The visit fields (S49) make a visits file: `visit_date` is the date, or the
+ * date and time; `visit_time` the start time when separate; `visit_end` the end (a time, or a
+ * date and time); `duration` in minutes or as "1h 30m"; `visit_id` the other tool's id for
+ * the appointment.
  */
 export const IMPORT_FIELDS = [
   'name',
@@ -30,12 +43,40 @@ export const IMPORT_FIELDS = [
   'email',
   'phone',
   'external_id',
+  'birthday',
+  'tags',
+  'visit_date',
+  'visit_time',
+  'visit_end',
+  'duration',
+  'service',
+  'staff',
+  'price',
+  'status',
+  'visit_id',
 ] as const;
 export const ImportFieldSchema = z.enum(IMPORT_FIELDS);
 export type ImportField = z.infer<typeof ImportFieldSchema>;
 
-/** Fields an export may have that Pepper recognises but doesn't import yet (S49). */
-export const IMPORT_LATER_FIELDS = ['birthday', 'notes', 'tags', 'visits'] as const;
+/** The fields that make a row a visit (S49). */
+export const VISIT_IMPORT_FIELDS: readonly ImportField[] = [
+  'visit_date',
+  'visit_time',
+  'visit_end',
+  'duration',
+  'service',
+  'staff',
+  'price',
+  'status',
+  'visit_id',
+];
+
+/**
+ * Columns an export may have that Pepper recognises but doesn't import: notes (not yet), and
+ * a client file's visit summaries ("Last Visit", "Total Spend"), which a visits file brings
+ * as real visits instead.
+ */
+export const IMPORT_LATER_FIELDS = ['notes', 'visits'] as const;
 export const ImportLaterFieldSchema = z.enum(IMPORT_LATER_FIELDS);
 export type ImportLaterField = z.infer<typeof ImportLaterFieldSchema>;
 
@@ -62,6 +103,8 @@ export const SINGLE_IMPORT_FIELDS: readonly ImportField[] = [
   'first_name',
   'last_name',
   'external_id',
+  'birthday',
+  ...VISIT_IMPORT_FIELDS,
 ];
 
 /** One column of the file and what it fills (`null`: not imported). */
@@ -118,8 +161,17 @@ export type ImportColumn = z.infer<typeof ImportColumnSchema>;
 /**
  * What a row does (or did, once the import ran): becomes a new client, fills empty fields of
  * the client it matches, matches one with nothing to add, can't be imported, or is skipped.
+ * A visits file's row (S49): `create` adds the visit, `unchanged` is a visit Pepper already
+ * has, `conflict` an upcoming time another booking of its staff member holds.
  */
-export const IMPORT_ROW_OUTCOMES = ['create', 'merge', 'unchanged', 'invalid', 'skipped'] as const;
+export const IMPORT_ROW_OUTCOMES = [
+  'create',
+  'merge',
+  'unchanged',
+  'invalid',
+  'skipped',
+  'conflict',
+] as const;
 export const ImportRowOutcomeSchema = z.enum(IMPORT_ROW_OUTCOMES);
 export type ImportRowOutcome = z.infer<typeof ImportRowOutcomeSchema>;
 
@@ -133,6 +185,16 @@ export const IMPORT_REASON_CODES = [
   'duplicate_in_file',
   'phone_shared',
   'email_taken',
+  'birthday_invalid',
+  'tags_cut',
+  'date_invalid',
+  'time_invalid',
+  'duration_invalid',
+  'price_invalid',
+  'cancelled',
+  'visit_exists',
+  'visit_duplicate',
+  'conflict',
 ] as const;
 export const ImportReasonCodeSchema = z.enum(IMPORT_REASON_CODES);
 export type ImportReasonCode = z.infer<typeof ImportReasonCodeSchema>;
@@ -143,6 +205,22 @@ export const ImportReasonSchema = z.object({
   message: z.string(),
 });
 export type ImportReason = z.infer<typeof ImportReasonSchema>;
+
+/** What a visit becomes: history (completed or no-show), or an upcoming appointment. */
+export const ImportVisitStatusSchema = z.enum(['completed', 'no_show', 'confirmed']);
+export type ImportVisitStatus = z.infer<typeof ImportVisitStatusSchema>;
+
+/** A visits file's row as the preview shows its visit (S49). */
+export const ImportVisitSchema = z.object({
+  startsAt: UtcDateTimeSchema,
+  durationMinutes: z.number().int().positive(),
+  service: z.string(),
+  staff: z.string(),
+  status: ImportVisitStatusSchema,
+  /** The booking it made, once applied. */
+  bookingId: BookingIdSchema.nullable(),
+});
+export type ImportVisit = z.infer<typeof ImportVisitSchema>;
 
 /** A row as the preview shows it. */
 export const ImportRowSchema = z.object({
@@ -155,6 +233,10 @@ export const ImportRowSchema = z.object({
   reasons: z.array(ImportReasonSchema),
   /** The client it matches or created. */
   clientId: ClientIdSchema.nullable(),
+  tags: z.array(z.string()),
+  birthday: ClientBirthdaySchema.nullable(),
+  /** A visits file's visit; `null` for a client file or a row whose visit can't be read. */
+  visit: ImportVisitSchema.nullable(),
 });
 export type ImportRow = z.infer<typeof ImportRowSchema>;
 
@@ -165,6 +247,13 @@ export const ImportCountsSchema = z.object({
   unchanged: z.number().int().nonnegative(),
   invalid: z.number().int().nonnegative(),
   skipped: z.number().int().nonnegative(),
+  /** A visits file's (S49): upcoming times another booking holds. */
+  conflict: z.number().int().nonnegative().default(0),
+  /** New clients (a visits file creates them along the way; a client file's `create`). */
+  clients: z.number().int().nonnegative().default(0),
+  /** Visits added (or to add) before now, and from now on. */
+  past: z.number().int().nonnegative().default(0),
+  upcoming: z.number().int().nonnegative().default(0),
 });
 export type ImportCounts = z.infer<typeof ImportCountsSchema>;
 
@@ -183,11 +272,16 @@ export const IMPORT_BATCH_STATUSES = [
 export const ImportBatchStatusSchema = z.enum(IMPORT_BATCH_STATUSES);
 export type ImportBatchStatus = z.infer<typeof ImportBatchStatusSchema>;
 
-/** What an undo did: clients removed, emails and phones cleared again, clients kept. */
+/**
+ * What an undo did: clients removed, clients whose filled details were cleared again, clients
+ * kept; for a visits file, its bookings removed and kept (changed since, S49).
+ */
 export const ImportUndoSchema = z.object({
   deleted: z.number().int().nonnegative(),
   restored: z.number().int().nonnegative(),
   kept: z.number().int().nonnegative(),
+  bookings: z.number().int().nonnegative().default(0),
+  bookingsKept: z.number().int().nonnegative().default(0),
 });
 export type ImportUndo = z.infer<typeof ImportUndoSchema>;
 
@@ -195,12 +289,15 @@ export type ImportUndo = z.infer<typeof ImportUndoSchema>;
 export const ImportBatchSchema = z.object({
   id: ImportBatchIdSchema,
   status: ImportBatchStatusSchema,
+  kind: ImportKindSchema,
   format: ImportFormatSchema,
   /** The tool the file was recognised as; `null` for any other file. */
   preset: ImportPresetSchema.nullable(),
   columns: z.array(ImportColumnSchema),
   /** Problems with the whole mapping, e.g. no column gives a name. */
   problems: z.array(z.string()),
+  /** What the owner should know that doesn't stop it (a hidden service it brings, S49). */
+  notices: z.array(z.string()),
   /** The preview's counts while staged; what the import did once it ran. */
   counts: ImportCountsSchema,
   createdAt: UtcDateTimeSchema,

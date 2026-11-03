@@ -69,12 +69,45 @@ export type ClientInput = z.input<typeof ClientInputSchema>;
 export type ClientFields = z.output<typeof ClientInputSchema>;
 
 /** A client as the api returns them. */
+/** The most tags a client has (S49, ADR-0050). */
+export const MAX_CLIENT_TAGS = 20;
+/** The longest tag. */
+export const MAX_CLIENT_TAG_LENGTH = 40;
+
+/** A client's tag: trimmed, single-spaced, 1–40 characters. */
+export const ClientTagSchema = z
+  .string()
+  .transform((tag) => tag.replace(/\s+/g, ' ').trim())
+  .pipe(z.string().min(1).max(MAX_CLIENT_TAG_LENGTH));
+
+/** Days in a month, February with 29 (a birthday may come without its year). */
+export function daysInMonth(month: number, year: number | null = null): number {
+  if (month === 2)
+    return year === null || (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 29 : 28;
+  return [4, 6, 9, 11].includes(month) ? 30 : 31;
+}
+
+/** A client's birthday (S49, ADR-0050): month and day, and the year when it's known. */
+export const ClientBirthdaySchema = z
+  .object({
+    month: z.number().int().min(1).max(12),
+    day: z.number().int().min(1).max(31),
+    year: z.number().int().min(1900).max(2100).nullable(),
+  })
+  .strict()
+  .refine(({ month, day, year }) => day <= daysInMonth(month, year), {
+    message: 'That day isn’t in the month',
+  });
+export type ClientBirthday = z.infer<typeof ClientBirthdaySchema>;
+
 export const ClientSchema = z.object({
   id: ClientIdSchema,
   name: z.string(),
   email: z.string().nullable(),
   phone: z.string().nullable(),
   source: RecordSourceSchema,
+  tags: z.array(z.string()),
+  birthday: ClientBirthdaySchema.nullable(),
   createdAt: UtcDateTimeSchema,
   updatedAt: UtcDateTimeSchema,
 });
@@ -82,11 +115,13 @@ export type Client = z.infer<typeof ClientSchema>;
 
 /**
  * Query of `GET /v1/clients`: by name, at most `limit`; with `search`, only clients whose name
- * or email contains it (case-insensitive).
+ * or email contains it (case-insensitive); with `import`, only the clients that import created
+ * (S49, the import result's "See your clients").
  */
 export const ClientsQuerySchema = z
   .object({
     search: z.string().trim().min(1).max(120).optional(),
+    import: z.uuid().toLowerCase().optional(),
     limit: z.coerce.number().int().min(1).max(200).default(50),
   })
   .strict();
