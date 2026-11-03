@@ -57,7 +57,12 @@ export const ImportBatchIdSchema = z.uuid().toLowerCase().brand<'ImportBatchId'>
 export type ImportBatchId = z.infer<typeof ImportBatchIdSchema>;
 
 /** Fields one column at most may fill. */
-export const SINGLE_IMPORT_FIELDS: readonly ImportField[] = ['name', 'first_name', 'last_name', 'external_id'];
+export const SINGLE_IMPORT_FIELDS: readonly ImportField[] = [
+  'name',
+  'first_name',
+  'last_name',
+  'external_id',
+];
 
 /** One column of the file and what it fills (`null`: not imported). */
 export const ImportColumnMappingSchema = z
