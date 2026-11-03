@@ -23,6 +23,18 @@ export const PhoneSchema = z
   .trim()
   .regex(/^\+[1-9]\d{6,14}$/, 'Use the international form, e.g. +15551234567');
 
+/**
+ * A phone as people write it, in the international form where it can be (S47, S48): spaces,
+ * dashes, dots and brackets are dropped, ten US digits get +1 and eleven starting with 1 get
+ * a +. Anything else is returned without separators, for `PhoneSchema` to judge.
+ */
+export function normalizePhone(value: string): string {
+  const digits = value.trim().replace(/[\s().-]/g, '');
+  if (/^\d{10}$/.test(digits)) return `+1${digits}`;
+  if (/^1\d{10}$/.test(digits)) return `+${digits}`;
+  return digits;
+}
+
 /** An email address, stored lowercased (one client per address in a business). */
 export const ClientEmailSchema = z.email().max(254).toLowerCase();
 

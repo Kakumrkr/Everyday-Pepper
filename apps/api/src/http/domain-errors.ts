@@ -77,6 +77,14 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import {
+  ImportFileError,
+  ImportMappingInvalidError,
+  ImportNotFoundError,
+  ImportNotReadyError,
+  ImportNotStagedError,
+  ImportNotUndoableError,
+} from '@pepper/imports';
 import { ImageRejectedError } from '@pepper/storage';
 import { apiError } from '../auth/guards.js';
 
@@ -144,6 +152,8 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [TooManyBookingRequestsError, TooManyRequestsException, 'too_many_requests'],
   [PhotoNotFoundError, NotFoundException, 'photo_not_found'],
   [GalleryFullError, ConflictException, 'gallery_full'],
+  [ImportNotFoundError, NotFoundException, 'import_not_found'],
+  [ImportNotStagedError, ConflictException, 'import_not_staged'],
 ];
 
 /** 413: the body is over the limit (Nest has no exception class for it under this name). */
@@ -170,6 +180,34 @@ function photoRejected(error: ImageRejectedError): HttpException {
   return ['unsupported_type', 'heic', 'unreadable'].includes(error.reason)
     ? new UnsupportedMediaTypeError(body)
     : new UnprocessableEntityException(body);
+}
+
+/**
+ * Client import refusals (S48, ADR-0049) carry a sentence for the owner: a file that can't be
+ * read (413 over 5 MB, else 422 with the problem), an import not ready to commit, a mapping
+ * that doesn't fit the file, an import that can't be undone.
+ */
+function importAnswer(error: unknown): HttpException | undefined {
+  if (error instanceof ImportFileError) {
+    if (error.problem === 'too_large')
+      return new PayloadTooLargeError(apiError('import_too_large'));
+    return new UnprocessableEntityException({
+      code: 'import_rejected',
+      message: error.message,
+      reason: error.problem,
+    });
+  }
+  const withMessage = (code: ApiErrorCode, message: string) => ({ code, message });
+  if (error instanceof ImportNotReadyError) {
+    return new ConflictException(withMessage('import_not_ready', error.message));
+  }
+  if (error instanceof ImportMappingInvalidError) {
+    return new UnprocessableEntityException(withMessage('import_mapping_invalid', error.message));
+  }
+  if (error instanceof ImportNotUndoableError) {
+    return new ConflictException(withMessage('import_not_undoable', error.message));
+  }
+  return undefined;
 }
 
 /**
@@ -204,6 +242,8 @@ export function toHttpError(error: unknown): unknown {
     return new ConflictException(body);
   }
   if (error instanceof ImageRejectedError) return photoRejected(error);
+  const imported = importAnswer(error);
+  if (imported !== undefined) return imported;
   if (error instanceof WrongVerificationCodeError) {
     const body: WrongCode = {
       ...apiError('wrong_code'),

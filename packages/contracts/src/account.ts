@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { MailingAddressSchema } from './drafts.js';
+import { normalizePhone } from './clients.js';
 import { PermissionSchema } from './permissions.js';
 import {
   BrandColorSchema,
@@ -96,6 +97,14 @@ export const ApiErrorCodeSchema = z.enum([
   'photo_rejected',
   'photo_too_large',
   'gallery_full',
+  // Client imports (S48, ADR-0049).
+  'import_not_found',
+  'import_rejected',
+  'import_too_large',
+  'import_not_staged',
+  'import_not_ready',
+  'import_not_undoable',
+  'import_mapping_invalid',
   'storage_unavailable',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
@@ -142,12 +151,7 @@ export type SetActiveTenantRequest = z.infer<typeof SetActiveTenantRequestSchema
  */
 export const BusinessPhoneSchema = z
   .string()
-  .transform((value) => {
-    const digits = value.replace(/[\s().-]/g, '');
-    if (/^\d{10}$/.test(digits)) return `+1${digits}`;
-    if (/^1\d{10}$/.test(digits)) return `+${digits}`;
-    return digits;
-  })
+  .transform(normalizePhone)
   .pipe(z.string().regex(/^\+[1-9]\d{6,14}$/, 'Enter a phone number such as (555) 123-4567'));
 export type BusinessPhone = z.infer<typeof BusinessPhoneSchema>;
 

@@ -55,7 +55,7 @@ function tenantIsolation(column: SQL): ReturnType<typeof pgPolicy> {
  * only in a transaction without a tenant whose `app.job_scan` setting names `job`.
  */
 function jobScan(
-  job: 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist',
+  job: 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist' | 'imports',
 ): ReturnType<typeof pgPolicy> {
   return pgPolicy('job_scan', {
     for: 'select',
@@ -2421,3 +2421,192 @@ export const signupEvents = pgTable('signup_events', {
 });
 export type RememberedDevice = typeof rememberedDevices.$inferSelect;
 export type BusinessPhotoRow = typeof businessPhotos.$inferSelect;
+
+/**
+ * A client import (S48, ADR-0049, AC-W1-3/17…19): one uploaded file, staged (previewed, nothing
+ * written) until an owner or manager commits it, then run by the worker's `imports` queue
+ * (leased like waitlist matches) and undoable until `undo_until`. `system` scopes the file's
+ * external ids: the tool's preset, or `file:` and a digest of the columns for any other file.
+ * Its columns, counts and problems hold no client data; its rows do (`import_rows`).
+ */
+export const importBatches = pgTable(
+  'import_batches',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    status: text('status').notNull().default('staged'),
+    format: text('format').notNull(),
+    preset: text('preset'),
+    system: text('system').notNull(),
+    columns: jsonb('columns').notNull(),
+    problems: jsonb('problems')
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    counts: jsonb('counts').notNull(),
+    undo: jsonb('undo'),
+    committedAt: timestamp('committed_at', { withTimezone: true }),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    undoUntil: timestamp('undo_until', { withTimezone: true }),
+    undoneAt: timestamp('undone_at', { withTimezone: true }),
+    // When its rows' client data was cleared (D-5: after the undo window, or on undo).
+    purgedAt: timestamp('purged_at', { withTimezone: true }),
+    availableAt: timestamp('available_at', { withTimezone: true }).notNull().defaultNow(),
+    leaseUntil: timestamp('lease_until', { withTimezone: true }),
+    attempts: smallint('attempts').notNull().default(0),
+    ...timestamps,
+  },
+  (table) => [
+    unique('import_batches_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('import_batches_due_idx')
+      .on(table.availableAt)
+      .where(sql`${table.status} IN ('queued', 'running')`),
+    index('import_batches_tenant_created_idx').on(table.tenantId, table.createdAt),
+    check(
+      'import_batches_status_known',
+      sql`${table.status} IN ('staged', 'queued', 'running', 'done', 'failed', 'undone')`,
+    ),
+    check('import_batches_format_known', sql`${table.format} IN ('csv', 'json', 'jsonl')`),
+    check(
+      'import_batches_preset_known',
+      sql`${table.preset} IS NULL OR ${table.preset} IN ('square', 'booksy', 'vagaro', 'glossgenius', 'fresha')`,
+    ),
+    check('import_batches_system_format', sql`${table.system} ~ '^[a-z0-9:]{1,64}$'`),
+    check(
+      'import_batches_committed',
+      sql`${table.status} = 'staged' OR ${table.committedAt} IS NOT NULL`,
+    ),
+    check(
+      'import_batches_finished',
+      sql`${table.status} NOT IN ('done', 'failed', 'undone') OR (${table.finishedAt} IS NOT NULL AND ${table.undoUntil} IS NOT NULL)`,
+    ),
+    check(
+      'import_batches_undone',
+      sql`(${table.status} = 'undone') = (${table.undoneAt} IS NOT NULL)`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    // Owners and managers only (`clients.manage`): staff see no import, even in a member query.
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: memberSeesAll,
+      withCheck: memberSeesAll,
+    }),
+    jobScan('imports'),
+  ],
+);
+
+/**
+ * One row of an import's file (S48, ADR-0049): its cells (so a new mapping re-plans it), its
+ * client details under the mapping, its outcome with reasons and, once applied, the client it
+ * created or matched and the empty fields it filled (`fills`, what an undo clears again).
+ * `row_hash` (name, email, phone, external id) finds an identical row of an earlier import on
+ * a re-import. Personal data: never logged; cleared (`purged_at` on the batch) once the batch
+ * can no longer be undone, keeping only the hash, outcome and client.
+ */
+export const importRows = pgTable(
+  'import_rows',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    batchId: uuid('batch_id').notNull(),
+    position: integer('position').notNull(),
+    row: integer('row').notNull(),
+    cells: jsonb('cells'),
+    name: text('name'),
+    email: text('email'),
+    phone: text('phone'),
+    externalId: text('external_id'),
+    rowHash: text('row_hash').notNull(),
+    outcome: text('outcome').notNull(),
+    reasons: jsonb('reasons')
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    // No foreign key: the client may be deleted (an undo, later a client deletion) while the
+    // row stays as the import's record.
+    clientId: uuid('client_id'),
+    fills: jsonb('fills')
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    appliedAt: timestamp('applied_at', { withTimezone: true }),
+  },
+  (table) => [
+    unique('import_rows_batch_position_unique').on(table.batchId, table.position),
+    index('import_rows_tenant_hash_idx').on(table.tenantId, table.rowHash),
+    index('import_rows_tenant_client_idx').on(table.tenantId, table.clientId),
+    check(
+      'import_rows_outcome_known',
+      sql`${table.outcome} IN ('create', 'merge', 'unchanged', 'invalid', 'skipped')`,
+    ),
+    check('import_rows_position', sql`${table.position} >= 0 AND ${table.row} > 0`),
+    foreignKey({
+      name: 'import_rows_batch_fk',
+      columns: [table.tenantId, table.batchId],
+      foreignColumns: [importBatches.tenantId, importBatches.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: memberSeesAll,
+      withCheck: memberSeesAll,
+    }),
+  ],
+);
+
+/**
+ * Another system's id for a client (S48, ADR-0049): `system` is an import's (a tool's preset,
+ * or `file:` and a digest of a file's columns), so a re-import of that export finds the client
+ * by it. `batch_id` is the import that recorded it (an undo removes its own); no foreign key,
+ * as import batches outlive nothing they point at.
+ */
+export const clientImportRefs = pgTable(
+  'client_import_refs',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    system: text('system').notNull(),
+    externalId: text('external_id').notNull(),
+    clientId: uuid('client_id').notNull(),
+    batchId: uuid('batch_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('client_import_refs_system_id_unique').on(
+      table.tenantId,
+      table.system,
+      table.externalId,
+    ),
+    index('client_import_refs_client_idx').on(table.tenantId, table.clientId),
+    check('client_import_refs_system_format', sql`${table.system} ~ '^[a-z0-9:]{1,64}$'`),
+    check(
+      'client_import_refs_external_id_length',
+      sql`length(${table.externalId}) BETWEEN 1 AND 200`,
+    ),
+    foreignKey({
+      name: 'client_import_refs_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: memberSeesAll,
+      withCheck: memberSeesAll,
+    }),
+  ],
+);
+export type ImportBatchRow = typeof importBatches.$inferSelect;
+export type ImportRowRow = typeof importRows.$inferSelect;

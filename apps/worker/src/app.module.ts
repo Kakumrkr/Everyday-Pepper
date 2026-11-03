@@ -2,6 +2,7 @@ import { outboxKeyFrom } from '@pepper/core';
 import { ConnectionsModule, HealthModule, MailModule } from '@pepper/runtime';
 import { Module, type DynamicModule } from '@nestjs/common';
 import type { WorkerConfig } from './config.js';
+import { ImportsModule } from './imports/imports.module.js';
 import { JobsModule } from './jobs/jobs.module.js';
 import { OutboxModule } from './outbox/outbox.module.js';
 import { episodeWriterFor } from './outbox/episodes.js';
@@ -33,6 +34,7 @@ export class AppModule {
           drafts: config.drafts,
           pushes: config.push !== null,
         }),
+        ImportsModule.forRoot({ redisUrl: config.redisUrl, pollMs: config.importPollMs }),
         ...(config.waitlist === null
           ? []
           : [

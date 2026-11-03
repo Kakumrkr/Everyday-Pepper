@@ -13,7 +13,7 @@
 | Insights pass (S35, no queue) | Rule-based insights: open time, overdue regulars, no-show patterns, staff overload; feed items upserted by dedupe key, expired when their reason goes | A `Periodic` pass every `INSIGHTS_POLL_MS` (60 s) over `insight_runs`: a business runs when never run, an hour after its last run, or after a booking, working-hours or time-off change added a row to `insight_requests`; one worker per business (advisory lock) ([ADR-0039](../adr/0039-operator-feed-and-insights.md)) |
 | `waitlist` | Match and offer a freed time (AC-W5-1, within 2 min) | A `waitlist_matches` row written in the cancellation's (or move's) transaction; the relay scans due rows every `WAITLIST_POLL_MS` (5 s) through `job_scan('waitlist')` and queues one BullMQ job per row, job id = row id; the job leases the row, ranks who is waiting and offers the time through the dial (retries with back-off, 5 attempts); runs only when `AUTH_BASE_URL` is set ([ADR-0041](../adr/0041-smart-waitlist.md)) |
 | `calendar-sync` | Google Calendar push/incremental sync | Webhook + every 15 min |
-| `imports` | CSV import, onboarding extraction | User action |
+| `imports` | Client import (S48, [ADR-0049](../adr/0049-client-import-batches-and-undo.md): a relay over committed `import_batches`, one job per batch, leased, chunks of 500; hourly tidy-up); onboarding extraction later | User action (commit) |
 
 **Built (S19, [ADR-0024](../adr/0024-transactional-outbox-and-email-delivery.md)):** `queueEmail` in the business change's transaction; `deliverOutboxMessage` claims a message under a 5-minute lease, sends it with a stable `Message-ID`, marks it sent and meters `emails_sent`; retries live in Postgres (30 s doubling to 1 h, 8 attempts), a 5xx answer gives up at once, a message given up raises an alert. The booking page's code email stays direct (the client is waiting); its other emails use the outbox.
 
@@ -32,7 +32,7 @@
 Per staff OAuth connection. Inbound: external events → `ExternalBusyBlock` (block availability, details not stored beyond title-optional). Outbound: our bookings → events in the staff's calendar. Source of truth for bookings is our system. Push notifications + sync tokens; full resync on token invalidation; conflicts resolved by "external busy always blocks, our bookings win for our events". Requires Google OAuth app verification before public launch.
 
 ## Onboarding extraction
-Fetch website / Google Business profile (public data) or OCR a price-list photo → LLM structured output into template-shaped draft → validation → review card. Fetched content treated as untrusted. Competitor CSV import via column mapping presets + AI-assisted mapping for unknown formats; dry-run report before commit.
+Fetch website / Google Business profile (public data) or OCR a price-list photo → LLM structured output into template-shaped draft → validation → review card. Fetched content treated as untrusted. Client import from other tools (S48, ADR-0049): CSV, JSON or JSONL with mapping presets for Square, Booksy, Vagaro, GlossGenius and Fresha, smart mapping by headers and values (AI-assisted mapping for the rest in S56a), a staged preview with reasons per row before commit, duplicate matching, and undo by batch for 7 days.
 
 ## Files
-S3-compatible storage (dev server: SeaweedFS, ADR-0011; R2/S3 in pilot): uploads, imports, exports. Pre-signed URLs, private by default, tenant-prefixed keys.
+S3-compatible storage (dev server: SeaweedFS, ADR-0011; R2/S3 in pilot): uploads (photos) and exports (imports keep no file, ADR-0049). Pre-signed URLs, private by default, tenant-prefixed keys.

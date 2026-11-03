@@ -40,6 +40,8 @@ const JobsEnvSchema = z.object({
    * from the cancellation to the offer.
    */
   WAITLIST_POLL_MS: z.coerce.number().int().min(500).max(60_000).default(5000),
+  /** How often the client import relay looks for committed imports (S48, ADR-0049). */
+  IMPORT_POLL_MS: z.coerce.number().int().min(500).max(60_000).default(2000),
   /** A business's monthly allowance of model tokens, as the api's (episodes count, S31). */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
 });
@@ -73,6 +75,8 @@ export interface WorkerConfig extends ServiceConfig {
    * to the web app; `null` when `AUTH_BASE_URL` is not configured (no offers are made then).
    */
   waitlist: { baseUrl: string; pollMs: number } | null;
+  /** How often committed client imports are looked for (S48, ADR-0049). */
+  importPollMs: number;
 }
 
 /**
@@ -93,6 +97,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     cleanupIntervalMs: jobs.CLEANUP_INTERVAL_MS,
     insightsPollMs: jobs.INSIGHTS_POLL_MS,
     morningPollMs: jobs.DRAFTS_POLL_MS,
+    importPollMs: jobs.IMPORT_POLL_MS,
     episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
     drafts: draftsConfig(loadOpenAiConfig(env), jobs),
     waitlist:

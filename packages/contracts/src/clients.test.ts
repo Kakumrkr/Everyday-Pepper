@@ -5,6 +5,7 @@ import {
   ClientLookupSchema,
   ClientsQuerySchema,
   PhoneSchema,
+  normalizePhone,
 } from './clients.js';
 
 describe('ClientInputSchema', () => {
@@ -85,5 +86,18 @@ describe('ClientContactSchema', () => {
     expect(ClientLookupSchema.safeParse({ contact: '+15551234567', limit: 50 }).success).toBe(
       false,
     );
+  });
+});
+
+describe('normalizePhone', () => {
+  it.each([
+    ['(555) 123-4567', '+15551234567'],
+    ['555.123.4567', '+15551234567'],
+    ['1 555 123 4567', '+15551234567'],
+    ['+1 (555) 123-4567', '+15551234567'],
+    ['+44 7911 123456', '+447911123456'],
+    [' 555123456 ', '555123456'],
+  ])('%s → %s', (input, output) => {
+    expect(normalizePhone(input)).toBe(output);
   });
 });

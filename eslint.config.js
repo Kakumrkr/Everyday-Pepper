@@ -40,6 +40,7 @@ const allowedInternalImports = {
     'storage',
     'testing',
     'appointments',
+    'imports',
     'templates',
   ],
   // S31 (ADR-0037): the episode job summarises and embeds through the AI package's ports.
@@ -53,6 +54,7 @@ const allowedInternalImports = {
     'runtime',
     'testing',
     'appointments',
+    'imports',
     'templates',
   ],
   'apps/web': ['contracts', 'ui'],

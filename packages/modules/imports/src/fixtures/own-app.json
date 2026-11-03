@@ -1,0 +1,23 @@
+{
+  "exported_at": "2026-10-30T12:00:00Z",
+  "clients": [
+    {
+      "id": 1,
+      "name": "Victor Hughes",
+      "contact": { "email": "victor.h@example.com", "phone": "5550100701" },
+      "tags": ["regular"]
+    },
+    {
+      "id": 2,
+      "name": "Nadia Petrova",
+      "contact": { "email": "nadia.p@example.com", "phone": null },
+      "tags": []
+    },
+    {
+      "id": 3,
+      "name": "Leo Fischer",
+      "contact": { "email": null, "phone": "+1 (555) 010-0703" },
+      "notes": "Allergic to tea tree oil"
+    }
+  ]
+}

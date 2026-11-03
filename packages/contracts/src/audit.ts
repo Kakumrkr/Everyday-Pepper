@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ImportCountsSchema, ImportUndoSchema } from './imports.js';
 import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
 import { BookingSourceSchema, BookingStatusSchema } from './bookings.js';
 import { ClientIdSchema, RecordSourceSchema } from './clients.js';
@@ -533,6 +534,33 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('ai_action_execution'),
       before: ExecutionValuesSchema,
       after: ExecutionValuesSchema.extend({ undoReason: UndoReasonSchema.nullable() }).strict(),
+    })
+    .strict(),
+  // Client imports (S48, ADR-0049): counts only, never a client's details.
+  z
+    .object({
+      action: z.literal('client_import.committed'),
+      entity: entity('client_import'),
+      before: z.null(),
+      after: z.object({ rows: z.number().int().nonnegative() }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('client_import.finished'),
+      entity: entity('client_import'),
+      before: z.null(),
+      after: ImportCountsSchema.omit({ rows: true })
+        .extend({ status: z.enum(['done', 'failed']) })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('client_import.undone'),
+      entity: entity('client_import'),
+      before: z.null(),
+      after: ImportUndoSchema.strict(),
     })
     .strict(),
 ]);
