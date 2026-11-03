@@ -23,6 +23,7 @@ import {
   rowsToFixFirst,
   stepOf,
   takenTimes,
+  bookAgainHref,
   undoable,
   undoQuestion,
   undoUntilLabel,
@@ -476,6 +477,48 @@ describe('after the import (AC-W1-29)', () => {
     expect(takenTimes(batch({ status: 'staged', kind: 'visits' }), [taken(4, null)]).rows).toEqual(
       [],
     );
+  });
+});
+
+describe('bookAgainHref (AC-W1-33)', () => {
+  const CLIENT = '0190a0a0-0000-7000-8000-0000000000c1';
+  const visit = {
+    startsAt: '2099-11-10T19:30:00.000Z',
+    durationMinutes: 45,
+    service: 'Skin  Fade',
+    staff: 'dre',
+    status: 'confirmed' as const,
+    bookingId: null,
+  };
+  const choices = {
+    services: [
+      { id: 's-cut', name: 'Cut' },
+      { id: 's-fade', name: 'skin fade' },
+    ],
+    staff: [
+      { id: 'm-dre', displayName: 'Dre Lewis' },
+      { id: 'm-sam', displayName: 'Sam' },
+    ],
+  };
+
+  it('opens Book with the service and staff matched by name, ids in the address', () => {
+    expect(bookAgainHref(CLIENT, visit, choices)).toBe(
+      `/clients/${CLIENT}?book=1&service=s-fade&staff=m-dre`,
+    );
+  });
+
+  it('leaves out what doesn’t match, or matches more than one first name', () => {
+    expect(
+      bookAgainHref(
+        CLIENT,
+        { ...visit, service: 'Beard', staff: 'Dre' },
+        {
+          ...choices,
+          staff: [...choices.staff, { id: 'm-dre2', displayName: 'Dre Kim' }],
+        },
+      ),
+    ).toBe(`/clients/${CLIENT}?book=1`);
+    expect(bookAgainHref(CLIENT, null, choices)).toBe(`/clients/${CLIENT}?book=1`);
   });
 });
 

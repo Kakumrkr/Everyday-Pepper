@@ -1,4 +1,9 @@
-import { ImportBatchIdSchema, ImportPreviewSchema } from '@pepper/contracts';
+import {
+  ImportBatchIdSchema,
+  ImportPreviewSchema,
+  ServicesResponseSchema,
+  StaffResponseSchema,
+} from '@pepper/contracts';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { ROUTES } from '../../../../lib/account';
@@ -25,15 +30,23 @@ export default async function ImportPage({
 
   const { batch } = await searchParams;
   const id = ImportBatchIdSchema.safeParse(batch);
-  const initial = id.success
-    ? await currentJson(`/v1/imports/${id.data}`, ImportPreviewSchema)
-    : null;
+  const [initial, services, staff] = await Promise.all([
+    id.success ? currentJson(`/v1/imports/${id.data}`, ImportPreviewSchema) : null,
+    currentJson('/v1/services', ServicesResponseSchema),
+    currentJson('/v1/staff', StaffResponseSchema),
+  ]);
+  // "Book again" preselects by name among what can be booked (AC-W1-33); none: the defaults.
+  const bookAgain = {
+    services: (services?.services ?? []).filter((service) => service.active),
+    staff: (staff?.staff ?? []).filter((member) => member.active),
+  };
 
   return (
     <ImportScreen
       initial={initial}
       missing={batch !== undefined && initial === null}
       timeZone={current.business.timeZone}
+      bookAgain={bookAgain}
     />
   );
 }

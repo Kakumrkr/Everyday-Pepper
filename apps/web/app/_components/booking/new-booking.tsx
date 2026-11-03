@@ -18,18 +18,25 @@ import { TimePicker } from './time-picker';
  * nearest free ones and the waitlist (AC-W2-1). One idempotency key per opening, so a double
  * tap or a retried request books once. The client gets a confirmation email with their
  * reschedule/cancel link unless the team unticks it (ADR-0025). On the kit (S42.2): Book sits
- * in the sheet's footer, within thumb reach (D3).
+ * in the sheet's footer, within thumb reach (D3). "Book again" from an import's times taken
+ * (S50, AC-W1-33) opens it at once with the visit's service and staff member chosen.
  */
 export function NewBooking({
   setup,
   date,
   client,
+  defaultOpen = false,
+  preset,
 }: {
   setup: BookingSetup;
   date: string;
   client?: ChosenClient;
+  /** Open on arrival (the profile's `?book=1`). */
+  defaultOpen?: boolean;
+  /** The service and staff member to start from, when they are still bookable. */
+  preset?: BookingPreset;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [key, setKey] = useState(0);
   return (
     <Sheet
@@ -52,6 +59,7 @@ export function NewBooking({
         setup={setup}
         date={date}
         client={client ?? null}
+        preset={preset}
         onDone={() => {
           setOpen(false);
         }}
@@ -60,28 +68,39 @@ export function NewBooking({
   );
 }
 
+/** A service and staff member a Book starts from (ids; unknown ones fall back). */
+export interface BookingPreset {
+  serviceId?: string | undefined;
+  staffMemberId?: string | undefined;
+}
+
 function NewBookingForm({
   setup,
   date: initialDate,
   client: initialClient,
+  preset,
   onDone,
 }: {
   setup: BookingSetup;
   date: string;
   client: ChosenClient | null;
+  preset: BookingPreset | undefined;
   onDone: () => void;
 }) {
   const router = useRouter();
   const { timeZone, services, abilities } = setup;
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [client, setClient] = useState<ChosenClient | null>(initialClient);
-  const [serviceId, setServiceId] = useState(services[0]?.id ?? '');
+  const [serviceId, setServiceId] = useState(
+    services.find((service) => service.id === preset?.serviceId)?.id ?? services[0]?.id ?? '',
+  );
   const offering = bookableStaff(setup.staff, {
     userId: setup.userId,
     ownOnly: abilities.ownStaffOnly,
     serviceId,
   });
-  const [chosenStaff, setChosenStaff] = useState('');
+  // A preset staff member who doesn't offer the service (or isn't bookable) falls back below.
+  const [chosenStaff, setChosenStaff] = useState(preset?.staffMemberId ?? '');
   const staffMemberId = offering.some((m) => m.id === chosenStaff)
     ? chosenStaff
     : (offering[0]?.id ?? '');

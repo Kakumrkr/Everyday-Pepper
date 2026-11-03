@@ -48,6 +48,7 @@ import {
   undoUntilLabel,
   uploadImport,
   withField,
+  type BookAgainChoices,
   type ImportStep,
 } from '../../../lib/imports';
 import { RowGroup, TakenTimes } from './import-rows';
@@ -62,8 +63,11 @@ export function ImportScreen({
   initial,
   missing,
   timeZone,
+  bookAgain,
 }: {
   initial: ImportPreview | null;
+  /** What a time taken's "Book again" may preselect (AC-W1-33). */
+  bookAgain: BookAgainChoices;
   /** A `?batch=` that isn't (or is no longer) an import of this business. */
   missing: boolean;
   timeZone: string;
@@ -240,6 +244,7 @@ export function ImportScreen({
         <ResultStep
           preview={preview}
           timeZone={timeZone}
+          bookAgain={bookAgain}
           onChange={setPreview}
           onAgain={() => {
             setPreview(null);
@@ -472,11 +477,13 @@ function PreviewStep({
 function ResultStep({
   preview,
   timeZone,
+  bookAgain,
   onChange,
   onAgain,
 }: {
   preview: ImportPreview;
   timeZone: string;
+  bookAgain: BookAgainChoices;
   onChange: (preview: ImportPreview) => void;
   onAgain: () => void;
 }) {
@@ -593,7 +600,7 @@ function ResultStep({
           </p>
         )}
       </section>
-      <TakenTimes batch={batch} rows={rows} timeZone={timeZone} />
+      <TakenTimes batch={batch} rows={rows} timeZone={timeZone} choices={bookAgain} />
       <Dialog
         open={confirming}
         onOpenChange={setConfirming}

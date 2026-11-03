@@ -1,9 +1,15 @@
 import type { ImportBatch, ImportRow } from '@pepper/contracts';
 import { Badge, buttonStyle, List } from '@pepper/ui';
 import Link from 'next/link';
-import { ROUTES } from '../../../lib/account';
 import { formatPhone } from '../../../lib/booking-profile';
-import { count, rowBadge, takenTimes, visitLine } from '../../../lib/imports';
+import {
+  bookAgainHref,
+  count,
+  rowBadge,
+  takenTimes,
+  visitLine,
+  type BookAgainChoices,
+} from '../../../lib/imports';
 
 /** A group of the preview's rows under its heading and count; nothing when it has none. */
 export function RowGroup({
@@ -76,17 +82,20 @@ function RowLine({ row, timeZone }: { row: ImportRow; timeZone: string }) {
 
 /**
  * The upcoming visits a run left out because their time was taken (AC-W1-29, the S49 retro
- * top-up): each with its client and time, and "Book again" on the client's profile, where Book
- * is theirs already. So a client with a standing appointment isn't forgotten.
+ * top-up): each with its client and time, and "Book again": the client's profile with Book open
+ * on the visit's service and staff member (S50, AC-W1-33). So a client with a standing appointment isn't forgotten.
  */
 export function TakenTimes({
   batch,
   rows,
   timeZone,
+  choices,
 }: {
   batch: ImportBatch;
   rows: readonly ImportRow[];
   timeZone: string;
+  /** What "Book again" may preselect (AC-W1-33). */
+  choices: BookAgainChoices;
 }) {
   const taken = takenTimes(batch, rows);
   if (taken.rows.length === 0 && taken.more === 0) return null;
@@ -115,7 +124,7 @@ export function TakenTimes({
               </div>
               {row.clientId === null ? null : (
                 <Link
-                  href={`${ROUTES.clients}/${row.clientId}`}
+                  href={bookAgainHref(row.clientId, row.visit, choices)}
                   className={buttonStyle({ variant: 'secondary', size: 'sm' })}
                 >
                   Book again
