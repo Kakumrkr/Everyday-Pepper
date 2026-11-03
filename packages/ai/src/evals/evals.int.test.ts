@@ -37,7 +37,9 @@ afterAll(async () => {
 });
 
 describe('every eval set on its scripted cassettes', () => {
-  it('passes every case that has one, at no cost', { timeout: 240_000 }, async () => {
+  // Every case runs in turn (about 190 s here and on CI's 2-CPU runner beside the other
+  // packages); the cap is the replay test's below, since a slow runner took it past 240 s.
+  it('passes every case that has one, at no cost', { timeout: 600_000 }, async () => {
     const all = [...(await loadCases(paths)), ...toolEvalCases()];
     const cassettes = new Map(
       await Promise.all(
