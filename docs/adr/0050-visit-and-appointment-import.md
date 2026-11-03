@@ -1,6 +1,6 @@
 # ADR-0050: Visit and appointment import, tags and birthdays
 
-- **Status:** Accepted (S49). Pre-approved by the user at the S49 brief on 2026-11-03 ("Go ahead with your recommendations and complete the session"; D-1 to D-6 A).
+- **Status:** Accepted (built in S49). Pre-approved by the user at the S49 brief on 2026-11-03 ("Go ahead with your recommendations and complete the session"; D-1 to D-6 A).
 - **Date:** 2026-11-03
 - **Builds on:**
   - ADR-0049 (client import: staged batches, matching, the leased run, undo for 7 days, no raw file kept)
@@ -28,3 +28,17 @@ A client list alone leaves Pepper blind on day one: no history to suggest a rebo
 - Hidden services and the owner's calendar absorb what the file names and Pepper doesn't have; the notices say so and the owner can rename, show or merge afterwards.
 - The visit layouts are reconstructed from public descriptions and made-up fixtures, as the client presets were; real exports from the pilot will correct them.
 - Planning reads the rows' range of busy time and visits in one pass per chunk, and past visits are written in bulk: the 1,000-client, 5,000-visit gate is measured, not assumed.
+
+## Results (S49)
+- Built as decided, with the review's refinements:
+  - a hidden service takes the length the preview named;
+  - a visit nobody on the team can take at run time is `no_staff` (to fix), never a phantom import;
+  - `import` stays out of the booking inputs (`BookingOriginSchema` for reading);
+  - an undo re-runs the insights;
+  - a re-import that only fills client details may commit.
+- Tests:
+  - imports: 162 unit (`values`, `visits`, mapping, rows), 27 integration;
+  - db: `imported-bookings.int.test.ts`, 10;
+  - appointments: `import-visits.int.test.ts`, 5;
+  - worker: `visits.int.test.ts`, 8 end to end.
+- **The gate:** 1,000 clients and 5,000 visits staged and run in about 5 s (stage 1.2 s, run 3.8 s), counts exact.
