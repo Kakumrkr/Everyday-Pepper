@@ -186,3 +186,53 @@ export function normalizeContact(text: string): string {
   if (/^1\d{10}$/.test(digits)) return `+${digits}`;
   return digits;
 }
+
+/** A walk-in staff add with their booking (S50.2, ADR-0052): created when the booking is. */
+export interface WalkIn {
+  name: string;
+  email: string | null;
+  phone: string | null;
+}
+
+/**
+ * A walk-in from what was typed on the Book sheet: the name trimmed, an empty email or phone
+ * left out, a phone in E.164 (`normalizeContact`).
+ */
+export function walkInFrom(typed: { name: string; email: string; phone: string }): WalkIn {
+  const email = typed.email.trim();
+  const phone = typed.phone.trim();
+  return {
+    name: typed.name.trim(),
+    email: email === '' ? null : email,
+    phone: phone === '' ? null : normalizeContact(phone),
+  };
+}
+
+/**
+ * What a contact typed on the Book sheet fills in on "New client" when no client has it: an
+ * email goes in the email field, anything else in the phone field.
+ */
+export function walkInPrefill(contact: string): { email: string; phone: string } {
+  return contact.includes('@') ? { email: contact, phone: '' } : { email: '', phone: contact };
+}
+
+/**
+ * The request that books the chosen client: `POST /v1/bookings` for a client who exists (with
+ * the exact contact staff found them by, ADR-0020), `POST /v1/bookings/walk-in` with the new
+ * client otherwise.
+ */
+export function bookingRequest(
+  who: { clientId: string; contact?: string | undefined } | { walkIn: WalkIn },
+  slot: Record<string, unknown>,
+): { path: string; body: Record<string, unknown> } {
+  if ('walkIn' in who)
+    return { path: '/v1/bookings/walk-in', body: { ...slot, client: who.walkIn } };
+  return {
+    path: '/v1/bookings',
+    body: {
+      clientId: who.clientId,
+      ...(who.contact !== undefined && { clientContact: who.contact }),
+      ...slot,
+    },
+  };
+}

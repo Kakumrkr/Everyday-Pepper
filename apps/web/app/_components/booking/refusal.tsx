@@ -37,12 +37,14 @@ export function Refusal({
   onPick: (slot: AvailableSlot) => void;
   busy: boolean;
   /** For a new booking: the entry to add, without its windows, and the wanted start. */
-  waitlist?: {
-    entry: Omit<WaitlistEntryInput, 'windows'>;
-    wanted: string;
-    minutes: number;
-    onAdded: () => void;
-  };
+  waitlist?:
+    | {
+        entry: Omit<WaitlistEntryInput, 'windows'>;
+        wanted: string;
+        minutes: number;
+        onAdded: () => void;
+      }
+    | undefined;
 }) {
   const box = useRef<HTMLElement>(null);
   // The sheet's Book or Move sits in its footer; the answer shows where the eye can find it.

@@ -11,7 +11,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 1 Docs: AC-W1-34…36, traceability, ADR-0052, data-model.
 - [x] 2 Migration 0061 `create_walk_in_client` + deferred booked check (db integration, isolation)
 - [x] 3 Contracts + appointments `createWalkInBooking`, `POST /v1/bookings/walk-in`
-- [ ] 4 Book sheet "New client" for staff (booking.spec)
+- [x] 4 Book sheet "New client" for staff (unit green; booking.spec runs with the stack after 5–6)
 - [ ] 5 Client paging + phone search, "Show more" (clients.spec)
 - [ ] 6 Top-up: `POST /v1/clients/names`, calendar + booking sheet "Deleted client"
 - [ ] 7 Close

@@ -5,12 +5,15 @@ import {
   bookableStaff,
   bookingAbilities,
   bookingActions,
+  bookingRequest,
   dateTimeLabel,
   instantAt,
   localParts,
   normalizeContact,
   suggestedWindow,
   timeLabel,
+  walkInFrom,
+  walkInPrefill,
 } from './booking';
 
 const NY = 'America/New_York';
@@ -188,5 +191,39 @@ describe('normalizeContact', () => {
     ['12345', '12345'],
   ])('%j → %j', (typed, sent) => {
     expect(normalizeContact(typed)).toBe(sent);
+  });
+});
+
+describe('walk-ins (S50.2)', () => {
+  it('takes what was typed: trimmed, empty details left out, a phone in E.164', () => {
+    expect(walkInFrom({ name: ' Walk In ', email: ' ', phone: '(555) 123-4567' })).toEqual({
+      name: 'Walk In',
+      email: null,
+      phone: '+15551234567',
+    });
+    expect(walkInFrom({ name: 'Walk', email: 'w@example.test', phone: '' })).toEqual({
+      name: 'Walk',
+      email: 'w@example.test',
+      phone: null,
+    });
+  });
+
+  it('fills in the contact a search found no client for', () => {
+    expect(walkInPrefill('w@example.test')).toEqual({ email: 'w@example.test', phone: '' });
+    expect(walkInPrefill('+15551234567')).toEqual({ email: '', phone: '+15551234567' });
+  });
+
+  it('books a client who exists, or the walk-in with their booking', () => {
+    const slot = { serviceId: 's', staffMemberId: 'm', startsAt: AT };
+    expect(bookingRequest({ clientId: 'c', contact: '+15551234567' }, slot)).toEqual({
+      path: '/v1/bookings',
+      body: { clientId: 'c', clientContact: '+15551234567', ...slot },
+    });
+    expect(bookingRequest({ clientId: 'c' }, slot).body).not.toHaveProperty('clientContact');
+    const walkIn = { name: 'Walk', email: null, phone: null };
+    expect(bookingRequest({ walkIn }, slot)).toEqual({
+      path: '/v1/bookings/walk-in',
+      body: { ...slot, client: walkIn },
+    });
   });
 });

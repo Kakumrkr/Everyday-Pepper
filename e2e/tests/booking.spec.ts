@@ -231,7 +231,7 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   await expect(page.getByTestId('booking-block')).toContainText('No-show');
 });
 
-test('a staff member finds a client by exact phone and books for themselves; colleagues show as busy; a recorded outcome is final for them', async ({
+test('a staff member finds a client by exact phone and books for themselves, books a walk-in (AC-W1-34); colleagues show as busy; a recorded outcome is final for them', async ({
   page,
   browser,
   baseURL,
@@ -292,8 +292,8 @@ test('a staff member finds a client by exact phone and books for themselves; col
   await expect(marcoColumn.getByTestId('booking-block')).toHaveCount(0);
 
   const dialog = await openNewBooking(priya);
-  // Staff cannot search or add clients: an exact email or phone only.
-  await expect(dialog.getByRole('radio', { name: 'New client' })).toHaveCount(0);
+  // Staff cannot search clients: an exact email or phone only (or a walk-in, below).
+  await expect(dialog.getByLabel('Name or email')).toHaveCount(0);
   await dialog.getByLabel('Client’s email or phone').fill('555 010');
   await dialog.getByRole('button', { name: 'Find client' }).click();
   await expect(dialog.getByRole('alert')).toContainText('full email address or phone number');
@@ -310,6 +310,34 @@ test('a staff member finds a client by exact phone and books for themselves; col
   await expect(
     priya.getByRole('region', { name: 'Priya' }).getByTestId('booking-block'),
   ).toHaveAccessibleName(/^10:00\s?–\s?11:00\sAM, Haircut with Lee Chen$/);
+
+  // A walk-in no one has added: found by no phone, added with Priya's booking (AC-W1-34).
+  const walkIn = await openNewBooking(priya);
+  await walkIn.getByLabel('Client’s email or phone').fill('(555) 020-3333');
+  await walkIn.getByRole('button', { name: 'Find client' }).click();
+  await expect(walkIn.getByText('No client with that email or phone.')).toBeVisible();
+  await walkIn.getByRole('button', { name: 'Add as a new client' }).click();
+  await expect(walkIn.getByLabel('Phone (optional)')).toHaveValue('+15550203333');
+  await walkIn.getByLabel('Name', { exact: true }).fill('Walker Inn');
+  await walkIn.getByRole('button', { name: 'Use new client' }).click();
+  await expect(walkIn.getByTestId('chosen-client')).toHaveText('Walker Inn');
+  await expect(walkIn.getByText('New client, added with this booking')).toBeVisible();
+  await walkIn.getByTestId('free-times').getByRole('button', { name: '12:00 PM' }).click();
+  await walkIn.getByRole('button', { name: 'Book', exact: true }).click();
+  await expect(walkIn).toBeHidden();
+  await expect(
+    priya.getByRole('region', { name: 'Priya' }).getByTestId('booking-block'),
+  ).toHaveCount(2);
+  await expect(
+    priya.getByRole('region', { name: 'Priya' }).getByTestId('booking-block').nth(1),
+  ).toHaveAccessibleName(/Haircut with Walker Inn$/);
+  // The owner has the new client too, added by the team.
+  const all = ClientsResponseSchema.parse(
+    await (await page.request.get('/v1/clients?search=Walker')).json(),
+  ).clients;
+  expect(all.map((client) => [client.name, client.phone, client.source])).toEqual([
+    ['Walker Inn', '+15550203333', 'team'],
+  ]);
 
   // Yesterday's appointment with Lee: Priya records a no-show; then it is final for her.
   const yesterday = addDays(toZoned(s.timeZone, Date.now()), -1);
