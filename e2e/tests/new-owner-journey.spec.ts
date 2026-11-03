@@ -132,7 +132,7 @@ test('a new barber is bookable in under 10 minutes; a client books in under 2, a
   const review = page.getByRole('region', { name: 'Check what I set up' });
   await expect(review).toBeVisible();
   // AC-W1-16: with no cover yet, the card suggests photos, before the check too.
-  await expect(review.getByTestId('setup-tip')).toContainText('no photos yet');
+  await expect(review.getByTestId('setup-tip')).toContainText('no cover photo yet');
   clock.read(await review.innerText());
   await (await hydrated(review.getByRole('button', { name: 'I’ve checked these' }))).click();
   clock.tap().wait('load');
@@ -202,6 +202,8 @@ test('a new barber is bookable in under 10 minutes; a client books in under 2, a
     await (await page.request.get('/v1/tenant')).json(),
   );
   const client = await anotherPerson(browser, baseURL);
+  // `anotherPerson` copies the project's phone (412 px); the client is timed at 375 px too.
+  await client.setViewportSize({ width: 375, height: 812 });
   const clientEmail = `${unique('rae')}@example.test`;
   const clientClock = new OwnerClock();
   const clientStarted = Date.now();
@@ -229,7 +231,8 @@ test('a new barber is bookable in under 10 minutes; a client books in under 2, a
     clientClock.tap().wait('load');
     if (!remembered) {
       await expect(client.getByRole('heading', { name: 'Check your email' })).toBeVisible();
-      const code = /^ {4}(\d{6})$/m.exec(await emailTo(clientEmail, 'is your code'))?.[1] ?? '';
+      const code = /^ {4}(\d{6})$/m.exec(await emailTo(clientEmail, 'is your code'))?.[1];
+      if (code === undefined) throw new Error('No code in the client’s email');
       clientClock.wait('switchApp').wait('emailWait').wait('switchApp');
       await client.getByLabel('Code').fill(code);
       clientClock.type(code);

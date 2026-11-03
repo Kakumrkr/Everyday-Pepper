@@ -10,6 +10,13 @@
 ALTER TABLE "memory_episodes" ALTER COLUMN "embedding" SET STORAGE PLAIN;
 --> statement-breakpoint
 -- Rewrite rows written before this migration so their vectors move into the row too (the cast
--- makes a fresh value; an unchanged one would keep its TOAST pointer). Migrations run as the
--- database owner, outside tenant context; the vector values are unchanged.
+-- makes a fresh value; an unchanged one would keep its TOAST pointer); the values are unchanged.
+-- The table forces RLS (0039), whose policies see no row outside tenant context, so a migration
+-- owner that is not a superuser (a managed database's) would update nothing: RLS is lifted for
+-- the owner only while the rewrite runs, inside the migrations' one transaction. One statement
+-- is fine at this size (no pilot data yet; at most 5,000 episodes a member).
+ALTER TABLE "memory_episodes" NO FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 UPDATE "memory_episodes" SET "embedding" = "embedding"::text::vector;
+--> statement-breakpoint
+ALTER TABLE "memory_episodes" FORCE ROW LEVEL SECURITY;

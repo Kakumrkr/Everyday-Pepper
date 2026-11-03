@@ -95,7 +95,7 @@ describe('setup suggestions in words (S47.3, AC-W1-16)', () => {
   it('suggests photos with a link to the Photos card', () => {
     expect(setupTip({ kind: 'add_photos' })).toEqual({
       key: 'add_photos',
-      text: 'Your booking page has no photos yet. A cover and your work help clients choose you.',
+      text: 'Your booking page has no cover photo yet. A cover and photos of your work help clients choose you.',
       action: { label: 'Add photos', href: '/services#photos' },
     });
   });

@@ -74,31 +74,10 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
           </p>
         )}
       </div>
-      {fixes.length === 0 ? null : (
-        <ul className="m-0 flex list-none flex-col gap-3 p-0" aria-label="Needs fixing">
-          {fixes.map((fix) => (
-            <li
-              key={fix.key}
-              className="flex flex-col gap-2 rounded-md bg-surface-2 p-3"
-              data-testid="setup-fix"
-            >
-              <p className="m-0 flex items-start gap-2 type-body text-ink">
-                <Badge tone="warn">Fix</Badge>
-                <span>{fix.text}</span>
-              </p>
-              <Link
-                href={fix.action.href}
-                className={buttonStyle({ variant: 'secondary', size: 'sm' })}
-              >
-                {fix.action.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <Notes notes={fixes} label="Needs fixing" badge="Fix" tone="warn" testId="setup-fix" />
       {reviewed || empty ? null : (
         <>
-          <Tips tips={tips} />
+          <Notes notes={tips} label="Suggestions" badge="Tip" tone="info" testId="setup-tip" />
           <List label="What I set up">
             {setupRows(review).map((row) => (
               <ListRow
@@ -195,7 +174,7 @@ function BookingLink({
           {copied === true ? 'Copied' : 'Copy link'}
         </Button>
       </div>
-      <Tips tips={tips} />
+      <Notes notes={tips} label="Suggestions" badge="Tip" tone="info" testId="setup-tip" />
       <p className="m-0 type-caption text-ink-2" role="status">
         {copied === true
           ? 'Copied. Paste it in a message, your bio or your site.'
@@ -208,28 +187,40 @@ function BookingLink({
 }
 
 /**
- * What would make the booking page better (S47.3, AC-W1-16): quieter than a fix, since nothing
- * stops a booking; the link goes where to act on it.
+ * Short notes with where to act on each: what stops a booking ("Fix", AC-W1-12) or what would
+ * make the page better ("Tip", S47.3, AC-W1-16; quieter, since nothing stops a booking).
  */
-function Tips({ tips }: { tips: SetupFix[] }) {
-  if (tips.length === 0) return null;
+function Notes({
+  notes,
+  label,
+  badge,
+  tone,
+  testId,
+}: {
+  notes: SetupFix[];
+  label: string;
+  badge: string;
+  tone: 'warn' | 'info';
+  testId: string;
+}) {
+  if (notes.length === 0) return null;
   return (
-    <ul className="m-0 flex list-none flex-col gap-3 p-0" aria-label="Suggestions">
-      {tips.map((tip) => (
+    <ul className="m-0 flex list-none flex-col gap-3 p-0" aria-label={label}>
+      {notes.map((note) => (
         <li
-          key={tip.key}
+          key={note.key}
           className="flex flex-col gap-2 rounded-md bg-surface-2 p-3"
-          data-testid="setup-tip"
+          data-testid={testId}
         >
           <p className="m-0 flex items-start gap-2 type-body text-ink">
-            <Badge tone="info">Tip</Badge>
-            <span>{tip.text}</span>
+            <Badge tone={tone}>{badge}</Badge>
+            <span>{note.text}</span>
           </p>
           <Link
-            href={tip.action.href}
+            href={note.action.href}
             className={buttonStyle({ variant: 'secondary', size: 'sm' })}
           >
-            {tip.action.label}
+            {note.action.label}
           </Link>
         </li>
       ))}

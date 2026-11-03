@@ -101,7 +101,7 @@ export function setupFix(warning: SetupWarning): SetupFix {
 const TIPS: Record<SetupSuggestion['kind'], SetupFix> = {
   add_photos: {
     key: 'add_photos',
-    text: 'Your booking page has no photos yet. A cover and your work help clients choose you.',
+    text: 'Your booking page has no cover photo yet. A cover and photos of your work help clients choose you.',
     action: { label: 'Add photos', href: `${ROUTES.services}#photos` },
   },
 };
