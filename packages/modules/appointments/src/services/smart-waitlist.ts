@@ -245,6 +245,7 @@ export async function makeWaitlistOffersIn(
       rank,
       tokenHash: hash,
       expiresAt,
+      offeredAt: options.now,
     });
     await changeEntryStatus(tx, entry, 'offered');
     made.push({ offer, token });

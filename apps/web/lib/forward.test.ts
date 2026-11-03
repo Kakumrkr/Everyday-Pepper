@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { bodyLimitOf, forwardToApi, MAX_BODY_BYTES, MAX_PHOTO_UPLOAD_BYTES } from './forward';
+import { MAX_IMPORT_BYTES } from '@pepper/contracts';
+import {
+  answerTimeoutOf,
+  bodyLimitOf,
+  forwardToApi,
+  MAX_BODY_BYTES,
+  MAX_PHOTO_UPLOAD_BYTES,
+} from './forward';
 
 const API = 'http://api:4000';
 
@@ -111,6 +118,28 @@ describe('forwardToApi', () => {
       expect(calls).toHaveLength(0);
     },
   );
+
+  it('lets a client import upload, and only that, carry up to 5 MB (S48.2)', async () => {
+    expect(bodyLimitOf('POST', '/v1/imports')).toBe(MAX_IMPORT_BYTES);
+    expect(bodyLimitOf('PUT', '/v1/imports/x/mapping')).toBe(MAX_BODY_BYTES);
+    expect(bodyLimitOf('POST', '/v1/imports/x/commit')).toBe(MAX_BODY_BYTES);
+    // Staging reads the whole file before it answers.
+    expect(answerTimeoutOf('POST', '/v1/imports')).toBe(60_000);
+    expect(answerTimeoutOf('GET', '/v1/imports')).toBe(10_000);
+    expect(answerTimeoutOf('POST', '/v1/clients')).toBe(10_000);
+    const { fetch, calls } = upstream(new Response('{}', { status: 201 }));
+    const file = new Uint8Array(MAX_BODY_BYTES * 4);
+    const response = await forwardToApi(
+      new Request('http://localhost:3000/v1/imports?format=csv', {
+        method: 'POST',
+        headers: { 'content-type': 'text/csv' },
+        body: file,
+      }),
+      { apiBaseUrl: API, fetch },
+    );
+    expect(response.status).toBe(201);
+    expect((calls[0]?.init.body as ArrayBuffer).byteLength).toBe(file.byteLength);
+  });
 
   it('lets a photo upload, and only that, carry up to 10 MB (S47.2)', async () => {
     expect(bodyLimitOf('POST', '/v1/tenant/photos')).toBe(MAX_PHOTO_UPLOAD_BYTES);

@@ -390,6 +390,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
           rank: 1,
           tokenHash: randomBytes(32).toString('hex'),
           expiresAt: new Date('2026-10-23T14:00:00Z'),
+          offeredAt: new Date('2026-10-23T13:50:00Z'),
         })
       ).id;
     },

@@ -14,6 +14,7 @@ import {
   setupTip,
   type SetupFix,
 } from '../../../lib/setup-review';
+import { IMPORT_PATH } from '../../../lib/imports';
 import { kitLink } from '../kit-link';
 
 /**
@@ -24,7 +25,16 @@ import { kitLink } from '../kit-link';
  * stays after the check until it is fixed. Once checked, the booking page's link stays on Home
  * with a Copy button, to send to clients (S47, AC-W1-13), as a quiet row: nothing to decide.
  */
-export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: string }) {
+export function SetupReviewCard({
+  review,
+  slug,
+  offersImport = false,
+}: {
+  review: SetupReview;
+  slug: string;
+  /** Offer "Bring your clients" once the setup is checked (S48.2, AC-W1-20). */
+  offersImport?: boolean;
+}) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +43,14 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
   const empty = review.services.count === 0;
   const fixes = review.warnings.map(setupFix);
   const tips = review.suggestions.map(setupTip);
+  const offer = reviewed && offersImport ? <ImportOffer /> : null;
   if (reviewed && fixes.length === 0) {
-    return <BookingLink slug={slug} week={review.week} tips={tips} />;
+    return (
+      <>
+        <BookingLink slug={slug} week={review.week} tips={tips} />
+        {offer}
+      </>
+    );
   }
 
   async function confirm() {
@@ -107,6 +123,7 @@ export function SetupReviewCard({ review, slug }: { review: SetupReview; slug: s
     <>
       {card}
       <BookingLink slug={slug} week={review.week} tips={tips} />
+      {offer}
     </>
   ) : (
     card
@@ -182,6 +199,35 @@ function BookingLink({
             ? 'Couldn’t copy. Press and hold the link to copy it.'
             : ''}
       </p>
+    </section>
+  );
+}
+
+/**
+ * "Bring your clients" (S48.2, AC-W1-20): once the setup is checked, the next thing an owner
+ * moving from another app does; it goes once an import has finished.
+ */
+function ImportOffer() {
+  const headingId = useId();
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="flex flex-col gap-2 rounded-lg bg-surface p-4"
+      data-testid="import-offer"
+    >
+      <h2 id={headingId} className="m-0 type-subheading text-ink">
+        Bring your clients
+      </h2>
+      <p className="m-0 type-body text-ink-2">
+        Moving from Square, Booksy, Vagaro, GlossGenius or Fresha? Bring your client list over in a
+        few minutes, so I know who’s who from the first booking.
+      </p>
+      <Link
+        href={IMPORT_PATH}
+        className={`${buttonStyle({ variant: 'secondary', size: 'sm' })} self-start`}
+      >
+        Bring your clients
+      </Link>
     </section>
   );
 }

@@ -1,6 +1,9 @@
 'use client';
 
 import type { Client } from '@pepper/contracts';
+import { buttonStyle } from '@pepper/ui';
+import Link from 'next/link';
+import { IMPORT_PATH } from '../../../lib/imports';
 import { ClientDirectory } from './client-directory';
 import { useSheetOpener } from '../use-sheet-opener';
 import { ClientEditor } from './client-editor';
@@ -28,11 +31,20 @@ export function ClientsScreen({
           </p>
         </div>
         {manages ? (
-          <ClientEditor
-            open={adding.open}
-            onOpenChange={adding.onOpenChange}
-            returnFocus={adding.returnFocus}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={IMPORT_PATH}
+              className={buttonStyle({ variant: 'secondary' })}
+              data-testid="import-clients"
+            >
+              Import
+            </Link>
+            <ClientEditor
+              open={adding.open}
+              onOpenChange={adding.onOpenChange}
+              returnFocus={adding.returnFocus}
+            />
+          </div>
         ) : null}
       </header>
       {initial === null ? (

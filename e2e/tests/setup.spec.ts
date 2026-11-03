@@ -364,6 +364,13 @@ test('a staff member adds their own time off; hours, rules and the menu are read
   // The setup review and its fixes are for owners and managers (AC-W1-12).
   await expect(priya.getByTestId('setup-review')).toHaveCount(0);
   expect((await priya.request.get('/v1/setup')).status()).toBe(403);
+  // Client import is for owners and managers too (S48.2): no entry, no screen, no api.
+  await priya.goto('/clients');
+  await expect(priya.getByRole('heading', { name: 'Clients', level: 1 })).toBeVisible();
+  await expect(priya.getByTestId('import-clients')).toHaveCount(0);
+  await priya.goto('/clients/import');
+  await expect(priya).toHaveURL(/\/clients$/);
+  expect((await priya.request.get('/v1/imports')).status()).toBe(403);
 
   // The owner links Priya's login on the Team screen.
   await page.goto('/team');
