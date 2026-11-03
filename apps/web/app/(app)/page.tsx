@@ -2,12 +2,15 @@ import {
   AiActionsResponseSchema,
   AiProposalsResponseSchema,
   FeedResponseSchema,
+  ImportBatchSchema,
   SetupReviewSchema,
   TasksResponseSchema,
 } from '@pepper/contracts';
 import { EmptyState } from '@pepper/ui';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
 import { requiredStep } from '../../lib/account';
+import { offersImport } from '../../lib/imports';
 import { MORE_HREF } from '../../lib/nav';
 import { currentAccount, currentBusiness, currentJson, currentMembers } from '../_server/account';
 import { AiActivity } from '../_components/chat/ai-activity';
@@ -54,12 +57,16 @@ export default async function HomePage() {
         currentJson('/v1/ai/actions', AiActionsResponseSchema),
       ])
     : [null, null];
-  const [setup, feed] = await Promise.all([
+  const [setup, feed, imports] = await Promise.all([
     current?.permissions.includes('settings.manage') === true
       ? currentJson('/v1/setup', SetupReviewSchema)
       : null,
     current?.permissions.includes('feed.read') === true
       ? currentJson('/v1/feed', FeedResponseSchema)
+      : null,
+    // "Bring your clients" after the setup check (S48.2, AC-W1-20), for who may import.
+    current?.permissions.includes('clients.manage') === true
+      ? currentJson('/v1/imports', z.array(ImportBatchSchema))
       : null,
   ]);
   return (
@@ -85,7 +92,11 @@ export default async function HomePage() {
         />
       ) : null}
       {current !== null && setup !== null ? (
-        <SetupReviewCard review={setup} slug={current.business.slug} />
+        <SetupReviewCard
+          review={setup}
+          slug={current.business.slug}
+          offersImport={imports !== null && offersImport(imports)}
+        />
       ) : null}
       {current !== null && feed !== null ? (
         <BriefingCard feed={feed} timeZone={current.business.timeZone} />

@@ -21,7 +21,7 @@ import {
 const ID = '0190a0a0-0000-7000-8000-0000000000b1';
 const counts = { rows: 158, create: 143, merge: 12, unchanged: 0, invalid: 3, skipped: 0 };
 
-function batch(overrides: Partial<ImportBatch> = {}): ImportBatch {
+function batch(overrides: Record<string, unknown> = {}): ImportBatch {
   return ImportBatchSchema.parse({
     id: ID,
     status: 'staged',

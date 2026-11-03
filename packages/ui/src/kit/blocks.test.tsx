@@ -178,7 +178,15 @@ describe('StepBar', () => {
     expect(steps.map((s) => s.textContent)).toEqual(['Service, done', 'Time', 'Details']);
     expect(steps[1]?.getAttribute('aria-current')).toBe('step');
     expect(screen.getByText('Step 2 of 3 · Time')).toBeTruthy();
+    expect(screen.getByRole('list', { name: 'Booking steps' })).toBeTruthy();
     await expectAccessible(container);
+  });
+
+  it('takes the name of another flow’s steps', () => {
+    render(
+      <StepBar steps={['File', 'Columns', 'Clients', 'Done']} current={0} label="Import steps" />,
+    );
+    expect(screen.getByRole('list', { name: 'Import steps' })).toBeTruthy();
   });
 
   it('keeps a step past the end on the last one, and takes repeated labels', () => {

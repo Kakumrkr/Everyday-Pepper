@@ -265,13 +265,24 @@ export function TimeChip({
   );
 }
 
-/** Where the client is in the booking: one segment per step, the current one named. */
-export function StepBar({ steps, current: asked }: { steps: readonly string[]; current: number }) {
+/**
+ * Where someone is in a flow (the booking, an import): one segment per step, the current one
+ * named; `label` names the steps for screen readers.
+ */
+export function StepBar({
+  steps,
+  current: asked,
+  label = 'Booking steps',
+}: {
+  steps: readonly string[];
+  current: number;
+  label?: string | undefined;
+}) {
   const current = Math.min(Math.max(0, Math.trunc(asked)), steps.length - 1);
   const name = steps[current] ?? '';
   return (
     <div className="flex flex-col gap-2">
-      <ol aria-label="Booking steps" className="m-0 flex list-none gap-1.5 p-0">
+      <ol aria-label={label} className="m-0 flex list-none gap-1.5 p-0">
         {steps.map((step, index) => (
           <li
             // By position: two steps may share a label.

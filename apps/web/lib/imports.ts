@@ -284,18 +284,6 @@ export function rowsToFixFirst(rows: readonly ImportRow[]): {
   };
 }
 
-const OUTCOME_WORDS: Record<ImportRow['outcome'], string> = {
-  create: 'New',
-  merge: 'Fills in',
-  unchanged: 'Already here',
-  invalid: 'Fix',
-  skipped: 'Left out',
-};
-
-export function outcomeLabel(outcome: ImportRow['outcome']): string {
-  return OUTCOME_WORDS[outcome];
-}
-
 /** Home offers "Bring your clients" (AC-W1-20) until an import has finished, not undone. */
 export function offersImport(imports: readonly ImportBatch[]): boolean {
   return !imports.some((batch) => batch.status === 'done');
@@ -342,7 +330,7 @@ export function presetName(preset: ImportPreset): string {
 export function columnNote(column: ImportColumn, preset: ImportPreset | null): string {
   if (column.field === null) {
     if (column.later !== null) return `${LATER_WORDS[column.later]} come in a later update.`;
-    return column.by === 'owner' ? 'You chose not to import it.' : 'Not imported.';
+    return 'Not imported.';
   }
   switch (column.by) {
     case 'preset':
