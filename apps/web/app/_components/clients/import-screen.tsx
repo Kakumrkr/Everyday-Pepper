@@ -17,6 +17,7 @@ import {
 import Link from 'next/link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
+import { formatPhone } from '../../../lib/booking-profile';
 import {
   ACCEPTED_IMPORT_TYPES,
   columnNote,
@@ -146,7 +147,8 @@ export function ImportScreen({
     });
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-5">
+    // Room at the end for the phone's fixed action bar.
+    <div className="mx-auto flex max-w-2xl flex-col gap-5 pb-20 desk:pb-0">
       <header className="flex flex-col gap-3">
         <Link
           href={ROUTES.clients}
@@ -205,14 +207,17 @@ export function ImportScreen({
   );
 }
 
-/** The step's Back and its one main action, above the tabs within thumb reach (D3). */
+/**
+ * The step's Back and its one main action: on a phone fixed above the tabs, within thumb reach
+ * however short the step (D3); on a desktop at the end of the step, kept in view.
+ */
 function ActionBar({ children }: { children: ReactNode }) {
   return (
     <div
-      className="sticky bottom-[calc(var(--spacing-tab-bar)+env(safe-area-inset-bottom))] -mx-5 flex items-center justify-end gap-3 border-t border-line bg-bg px-5 py-3 desk:bottom-0 desk:mx-0 desk:px-0"
+      className="fixed inset-x-0 bottom-[calc(var(--spacing-tab-bar)+env(safe-area-inset-bottom))] z-10 border-t border-line bg-bg px-5 py-3 desk:sticky desk:bottom-0 desk:px-0"
       data-testid="import-actions"
     >
-      {children}
+      <div className="mx-auto flex max-w-2xl items-center justify-end gap-3">{children}</div>
     </div>
   );
 }
@@ -424,7 +429,9 @@ const OUTCOME_BADGES: Record<
 /** A row of the file: where it is, who it is, and what to fix or what it does. */
 function RowLine({ row }: { row: ImportRow }) {
   const badge = OUTCOME_BADGES[row.outcome];
-  const contact = [row.email, row.phone].filter((part) => part !== null).join(' · ');
+  const contact = [row.email, row.phone === null ? null : formatPhone(row.phone)]
+    .filter((part) => part !== null)
+    .join(' · ');
   return (
     <div className="flex items-start gap-3 py-3">
       <span className="w-14 shrink-0 type-caption text-ink-2 tabular-nums">Row {row.row}</span>
@@ -540,7 +547,7 @@ function ResultStep({
               }}
             >
               <span className="tabular-nums">{resultSentence(batch)}</span> You can undo it until{' '}
-              {until}.
+              <span data-testid="import-undo-until">{until}</span>.
             </Receipt>
           </div>
         ) : (

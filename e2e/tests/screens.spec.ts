@@ -8,12 +8,13 @@ import {
   fromZoned,
   toZoned,
 } from '@pepper/contracts';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   emailTo,
   enterPassword,
   freshCode,
   hydrated,
+  IMPORT_CSV,
   linkTo,
   onboardOwner,
   ownClientAddress,
@@ -769,4 +770,58 @@ for (const width of WIDTHS) {
       });
     }
   });
+}
+
+for (const width of WIDTHS) {
+  test(`Client import's four steps at ${String(width)} px, light and dark`, async ({ page }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    await post(page, '/v1/clients', { name: 'Ben Ito', phone: '+15550101002' }, ClientSchema);
+    const shots = async (name: string, mask: Locator[] = []) => {
+      if (width === 375) {
+        await expectTapTargets(page, `the import's ${name}`);
+        await expectImportActionAtTheBottom(page);
+      }
+      for (const scheme of SCHEMES) {
+        await still(page, scheme);
+        await expect
+          .soft(page)
+          .toHaveScreenshot(`import-${name}-${String(width)}-${scheme}.png`, { ...SHOT, mask });
+      }
+    };
+
+    await page.goto('/clients/import');
+    await hydrated(page.getByRole('button', { name: 'Pick a file' }));
+    await shots('file');
+
+    await page.getByTestId('import-input').setInputFiles({
+      name: 'clients.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from(IMPORT_CSV),
+    });
+    await expect(page.getByRole('heading', { name: 'Check the columns' })).toBeVisible();
+    await shots('columns');
+
+    await page.getByRole('button', { name: 'Check the clients' }).click();
+    await expect(page.getByTestId('import-sentence')).toBeVisible();
+    await shots('clients');
+
+    await page.getByRole('button', { name: 'Import 3 clients' }).click();
+    await expect(page.getByRole('heading', { name: 'Your clients are in' })).toBeVisible({
+      timeout: 60_000,
+    });
+    // The undo's last day moves with today.
+    await shots('done', [page.getByTestId('import-undo-until')]);
+  });
+}
+
+/** The step's main action sits at the bottom, above the tabs, within thumb reach (D3). */
+async function expectImportActionAtTheBottom(page: Page): Promise<void> {
+  const box = await page.getByTestId('import-actions').boundingBox();
+  const height = page.viewportSize()?.height ?? 0;
+  expect(box, 'the import step’s actions').not.toBeNull();
+  if (box === null) return;
+  expect(box.y + box.height, 'the actions near the bottom').toBeGreaterThan(height - 160);
+  expect(box.y + box.height, 'the actions on the screen').toBeLessThanOrEqual(height);
 }

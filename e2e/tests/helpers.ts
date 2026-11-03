@@ -284,3 +284,14 @@ export async function emailTo(to: string, subject: string): Promise<string> {
 export function toast(page: Page): Locator {
   return page.getByRole('region', { name: /^Notifications/ }).getByRole('listitem');
 }
+
+// Made-up rows: two new clients, one already here who gains an email, one without a name,
+// and a repeat of an earlier row. The birthday column is recognised but comes later (S49).
+export const IMPORT_CSV = [
+  'Name,Email,Phone,Birthday',
+  'Ana Ruiz,ana.ruiz@example.com,555-010-1001,1990-04-02',
+  'Ben Ito,ben.ito@example.com,555-010-1002,',
+  ',nobody@example.com,555-010-1003,',
+  'Ana Ruiz,ana.ruiz@example.com,555-010-1001,1990-04-02',
+  'Cara Diaz,,555-010-1004,',
+].join('\n');

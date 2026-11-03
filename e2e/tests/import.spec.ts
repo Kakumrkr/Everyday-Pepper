@@ -1,7 +1,7 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { ClientSchema, ClientsResponseSchema } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
-import { callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js';
+import { callApi, hydrated, IMPORT_CSV, onboardOwner, ownClientAddress } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 
 // Client import through the screens and the real worker (S48.2, ADR-0049, AC-W1-17…21): an
@@ -14,17 +14,6 @@ test.beforeEach(async ({ context }) => {
 });
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
-
-// Made-up rows: two new clients, one already here who gains an email, one without a name,
-// and a repeat of an earlier row. The birthday column is recognised but comes later (S49).
-const IMPORT_CSV = [
-  'Name,Email,Phone,Birthday',
-  'Ana Ruiz,ana.ruiz@example.com,555-010-1001,1990-04-02',
-  'Ben Ito,ben.ito@example.com,555-010-1002,',
-  ',nobody@example.com,555-010-1003,',
-  'Ana Ruiz,ana.ruiz@example.com,555-010-1001,1990-04-02',
-  'Cara Diaz,,555-010-1004,',
-].join('\n');
 
 const SENTENCE = '2 new clients, 1 to fill in, 1 to fix, 1 left out';
 
