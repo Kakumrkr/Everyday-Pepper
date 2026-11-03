@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S47.3** (the timed new-owner journey and the Phase 10 gate).
+**S47.3** (user, 2026-11-03: "Go ahead, start with your recommendation and complete": D-1 A no manual main run; D-2 A faster query, limit/runs/target unchanged; D-3 A a separate `suggestions` list; D-4 A score honestly, S47.4 if below target).
+Tasks: 1 ACs (AC-W1-15/16, AC-W8-13) · 2 memory-latency fix (diagnose, then speed up) · 3 owner time model · 4 `new-owner-journey.spec.ts` · 5 "Add photos" suggestion · 6 gate + `/security-review` · 7 close.
+Done: — · Next: task 1.
 
 ## Last sessions
 - **S47.2 Phase 10 · Photos on the booking page (2026-11-02)** ([ADR-0048](../adr/0048-business-photos-and-object-storage.md)). Full entry in [session-log.md](session-log.md).
