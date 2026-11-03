@@ -427,8 +427,13 @@ export function moreRowsNote(counts: ImportCounts, shown: readonly ImportRow[]):
   const fixShown = shown.filter((row) => row.outcome === 'invalid' || row.outcome === 'skipped');
   const hidden = toFix - fixShown.length;
   const of = `Showing ${String(shown.length)} of ${String(counts.rows)} rows`;
-  return hidden > 0
-    ? `${of}. ${count(hidden, 'more row to fix isn’t', 'more rows to fix aren’t')} shown: fix the ones above, then pick the file again.`
+  if (hidden > 0) {
+    return `${of}. ${count(hidden, 'more row to fix isn’t', 'more rows to fix aren’t')} shown: fix the ones above, then pick the file again.`;
+  }
+  // A visits file's times taken come before the rows left out: some may be beyond the cut.
+  const takenHidden = counts.conflict - shown.filter((row) => row.outcome === 'conflict').length;
+  return takenHidden > 0
+    ? `${of}. ${count(takenHidden, 'more time taken isn’t', 'more times taken aren’t')} shown; the rest are ready to import.`
     : `${of}. The rest are ready to import.`;
 }
 

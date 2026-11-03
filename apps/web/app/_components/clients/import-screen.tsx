@@ -75,26 +75,28 @@ export function ImportScreen({
     missing ? 'I couldn’t find that import. Pick your file again.' : null,
   );
   const heading = useRef<HTMLHeadingElement>(null);
-  const initialId = initial?.batch.id ?? null;
-
-  // Back to this screen (after "Book again") can restore its first render, from before the
-  // address named the import: resume the import the address names.
+  // Back to this screen (after "Book again") can restore its first render: from before the
+  // address named the import, or of an earlier step of it. Resume the import the address names
+  // where it is now (a hydrated first load asks once more, which is cheap).
+  // What the owner did since wins over that answer.
+  const acted = useRef(false);
   useEffect(() => {
     const named = batchInAddress(window.location.search);
-    if (named === null || named === initialId) return;
+    if (named === null) return;
     let stopped = false;
     void loadImport(named).then((answer) => {
-      if (stopped || !answer.ok) return;
+      if (stopped || acted.current || !answer.ok) return;
       setPreview(answer.data);
       setStep(stepOf(answer.data.batch));
     });
     return () => {
       stopped = true;
     };
-  }, [initialId]);
+  }, []);
 
   // Each step starts at its heading, for a screen reader and a phone scrolled down.
   function go(next: ImportStep) {
+    acted.current = true;
     setStep(next);
     setError(null);
     window.scrollTo({ top: 0 });
@@ -109,6 +111,7 @@ export function ImportScreen({
 
   async function run(work: () => Promise<void>) {
     if (busy) return;
+    acted.current = true;
     setBusy(true);
     setError(null);
     try {
@@ -439,9 +442,8 @@ function PreviewStep({
         <p className="m-0 type-body text-ink-2">
           {toFix.length > 0
             ? 'The rows to fix are left out. Fix them in your file and pick it again, or import the rest now.'
-            : visits
-              ? 'Nothing is written until you tap Import, and no one gets an email.'
-              : 'Nothing is written until you tap Import.'}
+            : 'Nothing is written until you tap Import.'}
+          {visits ? ' No one gets an email.' : null}
         </p>
         <Problems problems={batch.problems} />
         <Notices notices={batch.notices} />

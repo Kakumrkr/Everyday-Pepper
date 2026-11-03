@@ -132,9 +132,10 @@ export default async function ClientPage({ params }: { params: Promise<{ clientI
           aria-label="Tags"
           data-testid="client-tags"
         >
-          {client.tags.map((tag) => (
+          {client.tags.map((tag, index) => (
             <li
-              key={tag}
+              // By position too: nothing but the import promises tags without repeats.
+              key={`${String(index)}-${tag}`}
               className="max-w-full rounded-pill bg-surface-2 px-2.5 py-0.5 type-caption text-ink-2 [overflow-wrap:anywhere]"
             >
               {tag}

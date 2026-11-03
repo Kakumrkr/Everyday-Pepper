@@ -233,7 +233,7 @@ test('import (AC-W1-27…29): an owner brings a visits file, finds its new clien
   await expect(page.getByTestId('import-ready').first()).toContainText(
     `Tue, Mar 4, 2025, 10:00 AM · ${service} with ${owner}`,
   );
-  await expect(page.getByTestId('import-ready').filter({ hasText: '2030' })).toContainText(
+  await expect(page.getByTestId('import-ready').filter({ hasText: '2099' })).toContainText(
     'Upcoming',
   );
   await expect(page.getByTestId('import-ready').filter({ hasText: 'May 20' })).toContainText(
@@ -255,7 +255,7 @@ test('import (AC-W1-27…29): an owner brings a visits file, finds its new clien
   const taken = page.getByTestId('import-taken');
   await expect(taken).toHaveCount(1);
   await expect(taken).toContainText('Dee Park');
-  await expect(taken).toContainText(`Tue, Jun 4, 2030, 10:15 AM · ${service} with ${owner}`);
+  await expect(taken).toContainText(`Tue, Jun 2, 2099, 10:15 AM · ${service} with ${owner}`);
   expect(
     (await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()).violations.map((v) => v.id),
   ).toEqual([]);

@@ -288,6 +288,15 @@ describe('a long preview and the undo question', () => {
       ]),
     ).toBe('Showing 200 of 300 rows. The rest are ready to import.');
     expect(moreRowsNote({ ...many, rows: 1 }, [row(2, 'create')])).toBeNull();
+    // A visits file: times taken beyond the cut aren't "ready to import".
+    expect(
+      moreRowsNote({ ...fine, invalid: 0, create: 270, conflict: 30 }, [
+        ...shown.slice(0, 10).map((r) => ({ ...r, outcome: 'conflict' as const })),
+        ...shown.slice(10).map((r) => ({ ...r, outcome: 'create' as const })),
+      ]),
+    ).toBe(
+      'Showing 200 of 300 rows. 20 more times taken aren’t shown; the rest are ready to import.',
+    );
   });
 
   it('names what an undo takes back, in the right number', () => {
