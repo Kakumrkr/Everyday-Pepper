@@ -5,6 +5,7 @@ import { randomBytes } from 'node:crypto';
 import {
   BookingIdSchema,
   ClientIdSchema,
+  ImportBatchIdSchema,
   EMBEDDING_DIMENSIONS,
   OutboxMessageIdSchema,
   ServiceIdSchema,
@@ -41,6 +42,7 @@ import { insertBookingVerification } from './repositories/booking-verifications.
 import { insertBusinessPhoto } from './repositories/business-photos.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
+import { insertImportBatch, insertImportRefs, replaceImportRows } from './repositories/imports.js';
 import { insertConversation, insertMessage, insertTurn } from './repositories/conversations.js';
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
@@ -473,6 +475,50 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       ).id,
     touch: 'caption = caption',
   },
+  import_batches: {
+    tenantColumn: 'tenant_id',
+    // A client import (S48, ADR-0049): owners and managers only; the worker scans committed ones.
+    seed: async (tx) => seedImportBatch(tx),
+    touch: 'attempts = attempts',
+    memberScope: [{ policyname: 'member_scope', cmd: 'ALL', qual: SEES_ALL, with_check: SEES_ALL }],
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('imports'::text))",
+  },
+  import_rows: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const batchId = await seedImportBatch(tx);
+      await replaceImportRows(tx, ImportBatchIdSchema.parse(batchId), [
+        {
+          position: 0,
+          row: 2,
+          cells: ['Maria Lopez'],
+          name: 'Maria Lopez',
+          email: null,
+          phone: null,
+          externalId: null,
+          rowHash: 'a'.repeat(64),
+          outcome: 'create',
+          reasons: [],
+          clientId: null,
+          fills: {},
+        },
+      ]);
+      return idWhere(tx, 'import_rows', 'batch_id', batchId);
+    },
+    touch: 'outcome = outcome',
+    memberScope: [{ policyname: 'member_scope', cmd: 'ALL', qual: SEES_ALL, with_check: SEES_ALL }],
+  },
+  client_import_refs: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const clientId = await seedClient(tx);
+      const batchId = ImportBatchIdSchema.parse(await seedImportBatch(tx));
+      await insertImportRefs(tx, batchId, 'square', [{ externalId: newId(), clientId }]);
+      return idWhere(tx, 'client_import_refs', 'client_id', clientId);
+    },
+    touch: 'system = system',
+    memberScope: [{ policyname: 'member_scope', cmd: 'ALL', qual: SEES_ALL, with_check: SEES_ALL }],
+  },
   outbox_messages: {
     tenantColumn: 'tenant_id',
     seed: async (tx) => {
@@ -857,6 +903,19 @@ async function seedProposal(tx: TenantTx) {
 }
 
 /** A new client of the transaction's tenant. */
+async function seedImportBatch(tx: TenantTx) {
+  const batch = await insertImportBatch(tx, {
+    createdByUserId: null,
+    format: 'csv',
+    preset: null,
+    system: 'file:0123456789abcdef',
+    columns: [],
+    problems: [],
+    counts: { rows: 0, create: 0, merge: 0, unchanged: 0, invalid: 0, skipped: 0 },
+  });
+  return batch.id;
+}
+
 async function seedClient(tx: TenantTx) {
   const client = await insertClient(tx, {
     name: 'Maria Lopez',

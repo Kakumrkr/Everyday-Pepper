@@ -109,7 +109,7 @@ export async function withUser<T>(
 }
 
 /** A worker job that may scan across businesses through its `job_scan` policy (ADR-0025). */
-export type ScanJob = 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist';
+export type ScanJob = 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist' | 'imports';
 
 /**
  * Runs `work` in a read-only transaction without a tenant in which the `job_scan` policies of
@@ -122,7 +122,7 @@ export async function withJobScan<T>(
   job: ScanJob,
   work: (tx: TenantTx) => Promise<T>,
 ): Promise<T> {
-  const name = z.enum(['reminders', 'cleanup', 'tasks', 'insights', 'waitlist']).parse(job);
+  const name = z.enum(['reminders', 'cleanup', 'tasks', 'insights', 'waitlist', 'imports']).parse(job);
   return db.transaction(
     async (tx) => {
       await tx.execute(sql`SELECT set_config('app.job_scan', ${name}, true)`);

@@ -11,8 +11,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 1 ACs: AC-W1-3 restated, AC-W1-17…20 (acceptance-criteria, traceability).
 - [x] 2 contracts: `imports.ts` (formats, presets, fields, mapping, preview, batch), `normalizePhone` shared with `BusinessPhoneSchema`.
 - [x] 3 `@pepper/imports` (`packages/modules/imports`): `parseImportFile` (CSV via `csv-parse`, JSON, JSONL; UTF-8 or Windows-1252; limits), `suggestMapping` (five presets, headers, values), `mapRows`/`planRows` (reasons per row; match by id → email → phone with the same name → an earlier import's identical row); fixtures per tool + generic + own app + messy; 56 unit tests (property: no duplicate on re-import), 99% lines.
-- [ ] 4 migration 0058 · 5 domain service (stage, remap, commit, run, undo) · 6 worker `imports` queue + relay · 7 api endpoints · 8 ADR-0049.
-- Next: task 4. Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
+- [x] 4 migration 0058 (`import_batches` with `job_scan('imports')`, `import_rows`, `client_import_refs`; RLS + owners/managers-only member scope, forced RLS) and `repositories/imports.ts`; isolation suite 399 green.
+- [ ] 5 domain service (stage, remap, commit, run, undo) · 6 worker `imports` queue + relay · 7 api endpoints · 8 ADR-0049.
+- Next: task 5. Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
 
 ## Last sessions
 - **S47.3 Phase 10 · The timed new-owner journey and the Phase 10 gate (2026-11-03)** (no ADR; scorecard §6). Full entry in [session-log.md](session-log.md).
