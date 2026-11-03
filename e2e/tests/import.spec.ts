@@ -69,7 +69,9 @@ test('import (AC-W1-17…21): an owner brings a CSV through the screens and undo
   await expect(page).toHaveURL(/\/clients\/import\?batch=[0-9a-f-]{36}$/);
   await expect(page.getByLabel('Name', { exact: true })).toHaveValue('name');
   await expect(page.getByLabel('Phone', { exact: true })).toHaveValue('phone');
-  await expect(column(page, 'Birthday')).toContainText('Birthdays come in a later update.');
+  // S49: birthdays import now, found by the column's name.
+  await expect(page.getByLabel('Birthday', { exact: true })).toHaveValue('birthday');
+  await expect(column(page, 'Birthday')).toContainText('From the column’s name.');
   await expectTapTargets(page, 'the import’s columns');
 
   // AC-W1-17: the owner changes a column and the preview follows; then puts it back.
