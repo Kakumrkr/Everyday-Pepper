@@ -7,7 +7,10 @@ import {
   ClientInputSchema,
   ClientLookupSchema,
   ClientMergeSchema,
+  ClientNamesRequestSchema,
+  ClientsPageSchema,
   ClientsQuerySchema,
+  MAX_CLIENT_NAMES,
   PhoneSchema,
   normalizePhone,
 } from './clients.js';
@@ -100,6 +103,29 @@ describe('ClientsQuerySchema', () => {
   it('rejects an empty search and a page over 200', () => {
     expect(ClientsQuerySchema.safeParse({ search: ' ' }).success).toBe(false);
     expect(ClientsQuerySchema.safeParse({ limit: '201' }).success).toBe(false);
+  });
+
+  it('continues after a client id, never after a name (S50.2)', () => {
+    const id = '0199F0A4-7C1E-7D2A-9B3C-4D5E6F708190';
+    expect(ClientsQuerySchema.parse({ after: id }).after).toBe(id.toLowerCase());
+    expect(ClientsQuerySchema.safeParse({ after: 'Maria Lopez' }).success).toBe(false);
+    expect(ClientsPageSchema.parse({ clients: [], nextCursor: null })).toEqual({
+      clients: [],
+      nextCursor: null,
+    });
+  });
+});
+
+describe('ClientNamesRequestSchema (S50.2)', () => {
+  const id = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708190';
+
+  it(`takes 1 to ${String(MAX_CLIENT_NAMES)} client ids`, () => {
+    expect(ClientNamesRequestSchema.parse({ ids: [id] })).toEqual({ ids: [id] });
+    expect(ClientNamesRequestSchema.safeParse({ ids: [] }).success).toBe(false);
+    expect(
+      ClientNamesRequestSchema.safeParse({ ids: Array.from({ length: 201 }, () => id) }).success,
+    ).toBe(false);
+    expect(ClientNamesRequestSchema.safeParse({ ids: ['not-an-id'] }).success).toBe(false);
   });
 });
 

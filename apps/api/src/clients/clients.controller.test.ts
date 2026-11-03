@@ -59,7 +59,8 @@ class FakeAuth extends AuthService {
 let role: MembershipRole = 'owner';
 const tenancy = { roleIn: vi.fn(() => Promise.resolve(role)) };
 const clients = {
-  list: vi.fn(() => Promise.resolve([CLIENT])),
+  list: vi.fn(() => Promise.resolve({ clients: [CLIENT], nextCursor: CLIENT_ID })),
+  names: vi.fn(() => Promise.resolve([{ id: CLIENT_ID, name: 'Deleted client', deleted: true }])),
   get: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
   lookUp: vi.fn(() => Promise.resolve([CLIENT])),
   create: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
@@ -122,10 +123,40 @@ describe('/v1/clients', () => {
     role = r;
     expect((await get('/v1/clients?search=mar&limit=10').expect(200)).body).toEqual({
       clients: [CLIENT],
+      nextCursor: CLIENT_ID,
     });
     expect(clients.list).toHaveBeenCalledWith(context(), { search: 'mar', limit: 10 });
     expect((await get(`/v1/clients/${CLIENT_ID}`).expect(200)).body).toEqual(CLIENT);
   });
+
+  it('pages after a client id; 400 for a cursor that isn’t one (S50.2)', async () => {
+    await get(`/v1/clients?after=${OTHER_ID}`).expect(200);
+    expect(clients.list).toHaveBeenCalledWith(context(), { limit: 50, after: OTHER_ID });
+    expect(code((await get('/v1/clients?after=Maria').expect(400)).body)).toBe('validation_failed');
+  });
+
+  it.each<MembershipRole>(['owner', 'staff'])(
+    'a(n) %s reads the names on visits, a deleted client marked (S50.2)',
+    async (r) => {
+      role = r;
+      const response = await request(server)
+        .post('/v1/clients/names')
+        .set('cookie', 'signed-in')
+        .set('origin', ORIGIN)
+        .send({ ids: [CLIENT_ID] })
+        .expect(200);
+      expect(response.body).toEqual({
+        names: [{ id: CLIENT_ID, name: 'Deleted client', deleted: true }],
+      });
+      expect(clients.names).toHaveBeenCalledWith(context(), { ids: [CLIENT_ID] });
+      await request(server)
+        .post('/v1/clients/names')
+        .set('cookie', 'signed-in')
+        .set('origin', ORIGIN)
+        .send({ ids: [] })
+        .expect(400);
+    },
+  );
 
   it('404 client_not_found (also for a client who is not a staff member’s own)', async () => {
     role = 'staff';

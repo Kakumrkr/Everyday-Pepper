@@ -10,7 +10,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 **S50.2** (brief approved: "Go ahead with your recommendations and complete the session"; D-1 A definer function + commit-time check, D-2 A book the matching client, D-3 A cursor + "Show more", D-4 ADR-0052).
 - [x] 1 Docs: AC-W1-34…36, traceability, ADR-0052, data-model.
 - [x] 2 Migration 0061 `create_walk_in_client` + deferred booked check (db integration, isolation)
-- [ ] 3 Contracts + appointments `createWalkInBooking`, `POST /v1/bookings/walk-in`
+- [x] 3 Contracts + appointments `createWalkInBooking`, `POST /v1/bookings/walk-in`
 - [ ] 4 Book sheet "New client" for staff (booking.spec)
 - [ ] 5 Client paging + phone search, "Show more" (clients.spec)
 - [ ] 6 Top-up: `POST /v1/clients/names`, calendar + booking sheet "Deleted client"

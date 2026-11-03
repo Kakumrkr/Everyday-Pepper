@@ -4,15 +4,19 @@ import type {
   ClientInput,
   ClientLookup,
   ClientMerge,
+  ClientNamesRequest,
+  ClientNamesResponse,
   ClientRecords,
+  ClientsPage,
   ClientsQuery,
 } from '@pepper/contracts';
 import {
+  clientNames,
   createClient,
   deleteClient,
   getClient,
   getClientRecords,
-  listClients,
+  listClientsPage,
   lookUpClients,
   mergeClients,
   updateClient,
@@ -35,8 +39,12 @@ export class ClientsService {
     this.db = database.db;
   }
 
-  list(tenant: TenantContext, query: ClientsQuery): Promise<Client[]> {
-    return listClients(this.db, actorOf(tenant), query);
+  list(tenant: TenantContext, query: ClientsQuery): Promise<ClientsPage> {
+    return listClientsPage(this.db, actorOf(tenant), query);
+  }
+
+  names(tenant: TenantContext, request: ClientNamesRequest): Promise<ClientNamesResponse['names']> {
+    return clientNames(this.db, actorOf(tenant), request);
   }
 
   lookUp(tenant: TenantContext, lookup: ClientLookup): Promise<Client[]> {

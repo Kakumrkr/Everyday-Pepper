@@ -3,6 +3,7 @@ import {
   changeBooking,
   changeWaitlistEntry,
   createBooking,
+  createWalkInBooking,
   findAvailability,
   getBooking,
   listBookings,
@@ -26,6 +27,7 @@ import type {
   WaitlistEntryInput,
   WaitlistOffer,
   WaitlistQuery,
+  WalkInBookingInput,
 } from '@pepper/contracts';
 import type { Actor, TenantContext } from '@pepper/core';
 import type { Database } from '@pepper/db';
@@ -61,6 +63,13 @@ export class BookingsService {
 
   createBooking(tenant: TenantContext, input: BookingInput): Promise<Booking> {
     return createBooking(this.db, actorOf(tenant), input, {
+      templateRuleDefaults,
+      notify: this.emails.notify,
+    });
+  }
+
+  createWalkInBooking(tenant: TenantContext, input: WalkInBookingInput): Promise<Booking> {
+    return createWalkInBooking(this.db, actorOf(tenant), input, {
       templateRuleDefaults,
       notify: this.emails.notify,
     });

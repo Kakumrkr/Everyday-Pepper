@@ -3,9 +3,12 @@ import {
   ClientInputSchema,
   ClientLookupSchema,
   ClientMergeSchema,
+  ClientNamesRequestSchema,
   ClientsQuerySchema,
   type Client,
+  type ClientNamesResponse,
   type ClientRecords,
+  type ClientsPage,
   type ClientsResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
@@ -45,9 +48,24 @@ export class ClientsController {
   async list(
     @CurrentTenant() tenant: TenantContext,
     @Query() query: unknown,
-  ): Promise<ClientsResponse> {
+  ): Promise<ClientsPage> {
     const parsed = parseBody(ClientsQuerySchema, query);
-    return { clients: await answering(() => this.clients.list(tenant, parsed)) };
+    return answering(() => this.clients.list(tenant, parsed));
+  }
+
+  /**
+   * 200 `{ names }` (S50.2): the names on visits, of the clients asked for that the member may
+   * see (staff: their own), a deleted client as "Deleted client" with `deleted`.
+   */
+  @Post('names')
+  @HttpCode(200)
+  @RequirePermission('clients.read')
+  async names(
+    @CurrentTenant() tenant: TenantContext,
+    @Body() body: unknown,
+  ): Promise<ClientNamesResponse> {
+    const request = parseBody(ClientNamesRequestSchema, body);
+    return { names: await answering(() => this.clients.names(tenant, request)) };
   }
 
   /**

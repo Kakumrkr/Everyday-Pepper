@@ -10,6 +10,7 @@ import {
   canChangeStatus,
   IdempotencyKeySchema,
   statusNeedsStart,
+  WalkInBookingInputSchema,
 } from './bookings.js';
 
 const CLIENT = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708190';
@@ -48,6 +49,30 @@ describe('BookingInputSchema', () => {
     ['notifyClient as text', { ...booking, notifyClient: 'no' }],
   ])('rejects %s', (_label, input) => {
     expect(BookingInputSchema.safeParse(input).success).toBe(false);
+  });
+});
+
+describe('WalkInBookingInputSchema (S50.2)', () => {
+  const slot = { serviceId: SERVICE, staffMemberId: STAFF, startsAt: booking.startsAt };
+
+  it('takes a new client instead of a client id', () => {
+    const parsed = WalkInBookingInputSchema.parse({
+      ...slot,
+      client: { name: ' Walk In ', email: 'Walk@Example.com' },
+    });
+    expect(parsed.client).toEqual({ name: 'Walk In', email: 'walk@example.com', phone: null });
+    expect(parsed).not.toHaveProperty('clientId');
+  });
+
+  it.each([
+    ['a client id', { ...booking, client: { name: 'Walk' } }],
+    ['a client contact', { ...slot, clientContact: 'a@b.co', client: { name: 'Walk' } }],
+    ['no client', slot],
+    ['a client without a name', { ...slot, client: { name: ' ' } }],
+    ['client tags (owners edit those)', { ...slot, client: { name: 'Walk', tags: ['vip'] } }],
+    ['a phone not in E.164', { ...slot, client: { name: 'Walk', phone: '555-1234' } }],
+  ])('rejects %s', (_label, input) => {
+    expect(WalkInBookingInputSchema.safeParse(input).success).toBe(false);
   });
 });
 

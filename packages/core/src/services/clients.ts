@@ -1,18 +1,25 @@
 import {
+  ClientContactSchema,
   ClientIdSchema,
   ClientInputSchema,
   ClientLookupSchema,
   ClientMergeSchema,
+  ClientNamesRequestSchema,
   ClientSchema,
   ClientsQuerySchema,
+  WalkInClientSchema,
   type Client,
   type ClientId,
   type ClientInput,
   type ClientLookup,
   type ClientMerge,
+  type ClientNamesRequest,
+  type ClientNamesResponse,
   type ClientRecords,
+  type ClientsPage,
   type ClientsQuery,
   type RecordSource,
+  type WalkInClientInput,
 } from '@pepper/contracts';
 import {
   appendAuditEntry,
@@ -23,6 +30,7 @@ import {
   findClientsByContact,
   findClientsByIds,
   insertClient,
+  insertWalkInClient,
   listClients as listClientRows,
   mergeClientRows,
   setTransactionClientContact,
@@ -33,6 +41,7 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
+import { can } from '../permissions.js';
 import { systemClock, type Clock } from '../clock.js';
 import {
   ClientHasUpcomingVisitsError,
@@ -50,20 +59,98 @@ import {
 // changed, and what a merge or deletion moved or kept, as counts.
 
 /**
- * Clients by name; with `search`, those whose name or email contains it; with `import`, those
- * that import created (S49).
+ * Clients by name, a page of `limit` at a time (S50.2: `after` the last client of the page
+ * before; `nextCursor` is `null` after the last); with `search`, those whose name or email
+ * contains it or whose phone contains its digits; with `import`, those that import created
+ * (S49).
  */
+export async function listClientsPage(
+  db: Database,
+  actor: Actor,
+  query: ClientsQuery = {},
+): Promise<ClientsPage> {
+  requirePermission(actor, 'clients.read');
+  const { search, limit, import: importBatchId, after } = ClientsQuerySchema.parse(query);
+  // One more than the page shows tells whether another page follows.
+  const rows = await withMember(db, actor.context, (tx) =>
+    listClientRows(tx, { search, limit: limit + 1, importBatchId, after }),
+  );
+  const page = rows.slice(0, limit).map(toClient);
+  return { clients: page, nextCursor: rows.length > limit ? (page.at(-1)?.id ?? null) : null };
+}
+
+/** `listClientsPage`'s clients alone (one page). */
 export async function listClients(
   db: Database,
   actor: Actor,
   query: ClientsQuery = {},
 ): Promise<Client[]> {
+  return (await listClientsPage(db, actor, query)).clients;
+}
+
+/**
+ * The names on visits (S50.2): of these clients, those the member may see, a deleted one as
+ * "Deleted client" with `deleted` (ADR-0051), in the order asked.
+ */
+export async function clientNames(
+  db: Database,
+  actor: Actor,
+  request: ClientNamesRequest,
+): Promise<ClientNamesResponse['names']> {
   requirePermission(actor, 'clients.read');
-  const { search, limit, import: importBatchId } = ClientsQuerySchema.parse(query);
+  const { ids } = ClientNamesRequestSchema.parse(request);
   const rows = await withMember(db, actor.context, (tx) =>
-    listClientRows(tx, { search, limit, importBatchId }),
+    findClientsByIds(tx, [...new Set(ids)]),
   );
-  return rows.map(toClient);
+  return rows.map((row) => ({
+    id: ClientIdSchema.parse(row.id),
+    name: row.name,
+    deleted: row.deletedAt !== null,
+  }));
+}
+
+/**
+ * The client a walk-in's booking is for (S50.2, ADR-0052), in the booking's transaction:
+ * the client with the walk-in's email or, without one, the one client with their phone (the
+ * match `lookUpClients` already gives staff, ADR-0020); otherwise a new client. Owners and
+ * managers add them as on the Clients screen; staff through the database's walk-in function,
+ * which refuses the commit unless the same transaction books them. Call it only right before
+ * writing the booking.
+ */
+export async function walkInClientIn(
+  tx: TenantTx,
+  actor: Actor,
+  input: WalkInClientInput,
+): Promise<{ clientId: ClientId; added: boolean }> {
+  requirePermission(actor, 'bookings.manage');
+  const fields = WalkInClientSchema.parse(input);
+  const contact = fields.email ?? fields.phone;
+  if (contact !== null) {
+    const value = ClientContactSchema.parse(contact);
+    await setTransactionClientContact(tx, value);
+    const matches = await findClientsByContact(tx, value);
+    const match =
+      fields.email === null
+        ? matches.length === 1
+          ? matches[0]
+          : undefined
+        : matches.find((row) => row.email === fields.email);
+    if (match !== undefined) return { clientId: ClientIdSchema.parse(match.id), added: false };
+  }
+  const clientId = can(actor.context, 'clients.manage')
+    ? ClientIdSchema.parse((await insertClient(tx, { ...fields, source: 'team' })).id)
+    : await insertWalkInClient(tx, fields);
+  await appendAuditEntry(tx, {
+    actor: auditActorOf(actor),
+    change: {
+      action: 'client.created',
+      entity: { type: 'client', id: clientId },
+      before: null,
+      after: { source: 'team', walkIn: true },
+    },
+    requestId: actor.requestId,
+  });
+  return { clientId, added: true };
 }
 
 /**
