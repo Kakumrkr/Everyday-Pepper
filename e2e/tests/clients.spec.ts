@@ -76,8 +76,9 @@ async function bookYesterday(page: Page, clientId: string): Promise<string> {
   );
   const { staff } = StaffResponseSchema.parse(await (await page.request.get('/v1/staff')).json());
   const service = services.find((each) => each.active);
-  const member = staff.find((each) => each.active && each.serviceIds.includes(service?.id ?? ''));
-  if (service === undefined || member === undefined) throw new Error('No one to book');
+  if (service === undefined) throw new Error('No service to book');
+  const member = staff.find((each) => each.active && each.serviceIds.includes(service.id));
+  if (member === undefined) throw new Error('No one to book');
   const yesterday = addDays(toZoned(timeZone, Date.now()), -1);
   await callApi(
     page,
