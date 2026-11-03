@@ -945,52 +945,58 @@ describe('under concurrency (property tests)', () => {
     return occupied;
   }
 
-  it('concurrent bookings and moves never double-book, and every request either succeeds or gets alternatives', async () => {
-    const b = await newBusiness();
-    await updateStaffMember(db, b.owner, b.marco.id, {
-      displayName: 'Marco',
-      userId: b.colleague.context.userId,
-      serviceIds: [b.service.id],
-    });
-    let day = 0;
-    await fc.assert(
-      fc.asyncProperty(
-        fc.array(
-          fc.record({
-            staff: fc.integer({ min: 0, max: 1 }),
-            // 09:00 … 16:00 local in 15-minute steps.
-            slot: fc.integer({ min: 0, max: 28 }),
-            override: fc.boolean(),
-          }),
-          { minLength: 2, maxLength: 12 },
-        ),
-        async (requests) => {
-          const date = weekday(day++);
-          const at = (slot: number) =>
-            new Date(date.getTime() + (14 * 60 + slot * 15) * 60_000).toISOString();
-          const results = await Promise.allSettled(
-            requests.map((r) =>
-              book(
-                b,
-                b.owner,
-                request(b, at(r.slot), {
-                  staffMemberId: r.staff === 0 ? b.jess.id : b.marco.id,
-                  override: r.override,
-                }),
+  // 40 property runs of concurrent writes: ~45 s here, and it ran past the 60 s default with
+  // every package at once (S34, S40, S46, S47.2); the runs and the assertions are unchanged.
+  it(
+    'concurrent bookings and moves never double-book, and every request either succeeds or gets alternatives',
+    { timeout: 180_000 },
+    async () => {
+      const b = await newBusiness();
+      await updateStaffMember(db, b.owner, b.marco.id, {
+        displayName: 'Marco',
+        userId: b.colleague.context.userId,
+        serviceIds: [b.service.id],
+      });
+      let day = 0;
+      await fc.assert(
+        fc.asyncProperty(
+          fc.array(
+            fc.record({
+              staff: fc.integer({ min: 0, max: 1 }),
+              // 09:00 … 16:00 local in 15-minute steps.
+              slot: fc.integer({ min: 0, max: 28 }),
+              override: fc.boolean(),
+            }),
+            { minLength: 2, maxLength: 12 },
+          ),
+          async (requests) => {
+            const date = weekday(day++);
+            const at = (slot: number) =>
+              new Date(date.getTime() + (14 * 60 + slot * 15) * 60_000).toISOString();
+            const results = await Promise.allSettled(
+              requests.map((r) =>
+                book(
+                  b,
+                  b.owner,
+                  request(b, at(r.slot), {
+                    staffMemberId: r.staff === 0 ? b.jess.id : b.marco.id,
+                    override: r.override,
+                  }),
+                ),
               ),
-            ),
-          );
-          for (const result of results) {
-            if (result.status === 'rejected')
-              expect(result.reason).toBeInstanceOf(SlotUnavailableError);
-          }
-          expect(results.some((r) => r.status === 'fulfilled')).toBe(true);
-          await assertNoOverlap(b);
-        },
-      ),
-      { numRuns: 40, seed: 20261017 },
-    );
-  });
+            );
+            for (const result of results) {
+              if (result.status === 'rejected')
+                expect(result.reason).toBeInstanceOf(SlotUnavailableError);
+            }
+            expect(results.some((r) => r.status === 'fulfilled')).toBe(true);
+            await assertNoOverlap(b);
+          },
+        ),
+        { numRuns: 40, seed: 20261017 },
+      );
+    },
+  );
 
   it('concurrent bookings never exceed the daily cap', async () => {
     const b = await newBusiness();

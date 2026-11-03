@@ -2,13 +2,19 @@ import { AxeBuilder } from '@axe-core/playwright';
 import { BusinessPhotosSchema, CurrentBusinessResponseSchema } from '@pepper/contracts';
 import { solidColorPhoto } from '@pepper/storage';
 import { expect, test } from '@playwright/test';
-import { anotherPerson, goTo, hydrated, onboardOwner } from './helpers.js';
+import { anotherPerson, goTo, hydrated, onboardOwner, ownClientAddress } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 
 // Photos on the booking page through the real stack (S47.2, ADR-0048, AC-W8-10…12, AC-W1-14):
 // a new barbershop owner adds a logo, a cover and their work on Services; a client sees them
 // on the page with alt text, from the app's own origin; a file that isn't a usable photo is
 // refused with what to fix; Home's booking link says how the page did this week.
+
+// Its own client address, so its sign-up never shares Better Auth's rate limit with another
+// spec's (a shared bucket answered "Too many attempts" in a full run).
+test.beforeEach(async ({ context }) => {
+  await ownClientAddress(context);
+});
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 

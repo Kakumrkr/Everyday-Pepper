@@ -1,6 +1,6 @@
 import { ServiceIdSchema, StaffMemberIdSchema, type WeeklyHours } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import { bookingWeek, setupWarnings } from './services/setup.js';
+import { bookingWeek, setupSuggestions, setupWarnings } from './services/setup.js';
 
 // The setup review's warnings (S46, AC-W1-12): from today's active services, staff and hours.
 
@@ -86,5 +86,12 @@ describe('bookingWeek (AC-W1-14)', () => {
       visits: 12,
       booked: 7,
     });
+  });
+});
+
+describe('setupSuggestions (AC-W1-16)', () => {
+  it('suggests photos until the page has a cover, never as a warning', () => {
+    expect(setupSuggestions({ covers: 0 })).toEqual([{ kind: 'add_photos' }]);
+    expect(setupSuggestions({ covers: 1 })).toEqual([]);
   });
 });

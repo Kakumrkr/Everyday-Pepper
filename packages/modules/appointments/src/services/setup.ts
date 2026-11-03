@@ -3,6 +3,7 @@ import {
   type BookingFunnelCounts,
   type Service,
   type SetupReview,
+  type SetupSuggestion,
   type SetupWarning,
   type StaffMember,
   type StaffMemberId,
@@ -11,6 +12,7 @@ import {
 import { auditActorOf, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
+  countBusinessPhotos,
   countFunnelSteps,
   findCurrentTenant,
   markCurrentTenantSetupReviewed,
@@ -97,6 +99,7 @@ async function setupReviewIn(tx: TenantTx, actor: Actor, known?: Tenant): Promis
       hours: hours.get(member.id) ?? { intervals: [] },
     })),
     warnings: setupWarnings(services, staff, hours),
+    suggestions: setupSuggestions({ covers: await countBusinessPhotos(tx, 'cover') }),
     week: bookingWeek(
       await countFunnelSteps(tx, { from: new Date(Date.now() - WEEK_MS), to: new Date() }),
     ),
@@ -111,6 +114,14 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
  */
 export function bookingWeek(counts: BookingFunnelCounts): { visits: number; booked: number } {
   return { visits: counts.service, booked: counts.done + counts.waitlisted };
+}
+
+/**
+ * What would make the booking page better without stopping any booking (S47.3, AC-W1-16): a
+ * page with no cover photo yet looks unfinished to a new client.
+ */
+export function setupSuggestions(photos: { covers: number }): SetupSuggestion[] {
+  return photos.covers === 0 ? [{ kind: 'add_photos' }] : [];
 }
 
 /**

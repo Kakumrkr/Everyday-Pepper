@@ -4,12 +4,22 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import { TenantIdSchema } from '@pepper/contracts';
 import { postgresUrlAs } from '@pepper/testing';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDatabase } from './client.js';
 import { APP_ROLE, provisionAppRole, runMigrations } from './migrate.js';
-import { APP_LOGIN, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
+import { addMembership } from './repositories/memberships.js';
+import { createTenant } from './repositories/tenants.js';
+import { withTenant } from './tenant.js';
+import {
+  APP_LOGIN,
+  insertUser,
+  sqlState,
+  startTestDatabase,
+  type TestDatabase,
+} from './test-support.js';
 
 let database: TestDatabase;
 
@@ -52,6 +62,101 @@ describe('runMigrations', () => {
         before?.id,
       ]),
     ).toEqual([{ email_verified: true }]);
+  });
+
+  it('0057 keeps episode embeddings in the row and moves earlier ones in, values unchanged (S47.3)', async () => {
+    const toastChunks = async () => {
+      const [toast] = await query<{ name: string }>(
+        database.migrationUrl,
+        `SELECT reltoastrelid::regclass::text AS name FROM pg_class WHERE relname = 'memory_episodes'`,
+      );
+      const [row] = await query<{ chunks: number }>(
+        database.migrationUrl,
+        `SELECT count(*)::int AS chunks FROM ${String(toast?.name)}`,
+      );
+      return row?.chunks;
+    };
+    expect(
+      await query(
+        database.migrationUrl,
+        `SELECT attstorage FROM pg_attribute
+         WHERE attrelid = 'memory_episodes'::regclass AND attname = 'embedding'`,
+      ),
+    ).toEqual([{ attstorage: 'p' }]);
+
+    // An episode written as before 0057: its vector out of line in TOAST.
+    const tenant = TenantIdSchema.parse(
+      (
+        await createTenant(database.app.db, {
+          name: 'Old episodes',
+          slug: `old-episodes-${String(Date.now())}`,
+          timeZone: 'America/New_York',
+        })
+      ).id,
+    );
+    const owner = await insertUser(database.app.db, 'Owner');
+    await withTenant(database.app.db, tenant, (tx) =>
+      addMembership(tx, { userId: owner, role: 'owner' }),
+    );
+    // Back to the migrated storage whatever happens, so later tests see production's schema.
+    try {
+      await query(
+        database.migrationUrl,
+        'ALTER TABLE memory_episodes ALTER COLUMN embedding SET STORAGE EXTENDED',
+      );
+      await query(
+        database.migrationUrl,
+        `INSERT INTO memory_episodes (id, tenant_id, user_id, summary, embedding, embedding_model)
+         VALUES (gen_random_uuid(), $1, $2, 'Before 0057',
+           (SELECT array_agg(random() - 0.5)::vector FROM generate_series(1, 1536)), 'm')`,
+        [tenant, owner],
+      );
+      expect(await toastChunks()).toBeGreaterThan(0);
+      const [before] = await query<{ embedding: string }>(
+        database.migrationUrl,
+        'SELECT embedding::text FROM memory_episodes WHERE tenant_id = $1',
+        [tenant],
+      );
+
+      const sql = await readFile(
+        new URL('../migrations/0057_memory_embedding_in_row.sql', import.meta.url),
+        'utf8',
+      );
+      // Run as the table's owner without superuser (a managed database's migration role):
+      // forced RLS would hide every row from its rewrite unless the migration lifts it.
+      await query(
+        database.migrationUrl,
+        `CREATE ROLE episodes_owner LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD 'owner-test-password'`,
+      );
+      await query(database.migrationUrl, 'ALTER TABLE memory_episodes OWNER TO episodes_owner');
+      await query(
+        postgresUrlAs(database.migrationUrl, 'episodes_owner', 'owner-test-password'),
+        sql,
+      );
+
+      expect(await toastChunks()).toBe(0);
+      // RLS is lifted for the rewrite only: forced again afterwards.
+      expect(
+        await query(
+          database.migrationUrl,
+          `SELECT relforcerowsecurity FROM pg_class WHERE relname = 'memory_episodes'`,
+        ),
+      ).toEqual([{ relforcerowsecurity: true }]);
+      expect(
+        await query(
+          database.migrationUrl,
+          'SELECT embedding::text FROM memory_episodes WHERE tenant_id = $1',
+          [tenant],
+        ),
+      ).toEqual([before]);
+    } finally {
+      await query(
+        database.migrationUrl,
+        'ALTER TABLE memory_episodes ALTER COLUMN embedding SET STORAGE PLAIN',
+      );
+      await query(database.migrationUrl, 'ALTER TABLE memory_episodes OWNER TO CURRENT_USER');
+      await query(database.migrationUrl, 'DROP ROLE IF EXISTS episodes_owner');
+    }
   });
 
   it('applied every migration once', async () => {

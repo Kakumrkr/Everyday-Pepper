@@ -4,6 +4,7 @@ import {
   activationEvents,
   addMembership,
   findCurrentTenant,
+  insertBusinessPhoto,
   listAuditEntries,
   withTenant,
   type Database,
@@ -211,5 +212,35 @@ describe('the booking page’s week (S47.2, AC-W1-14)', () => {
     );
     expect((await getSetupReview(db, a.owner)).week).toEqual({ visits: 3, booked: 2 });
     expect((await getSetupReview(db, other.owner)).week).toEqual({ visits: 1, booked: 1 });
+  });
+});
+
+describe('the photos suggestion (S47.3, AC-W1-16)', () => {
+  it('suggests photos until this business has a cover; a logo or gallery alone is not enough', async () => {
+    const a = await newBusiness({ seeded: true });
+    const other = await newBusiness({ seeded: true });
+    const photo = (kind: 'logo' | 'cover' | 'gallery') => ({
+      id: randomUUID(),
+      kind,
+      widths: [480],
+      width: 1600,
+      height: 900,
+      caption: null,
+    });
+    expect((await getSetupReview(db, a.owner)).suggestions).toEqual([{ kind: 'add_photos' }]);
+    await withTenant(db, a.tenantId, async (tx) => {
+      await insertBusinessPhoto(tx, photo('logo'));
+      await insertBusinessPhoto(tx, photo('gallery'));
+    });
+    expect((await getSetupReview(db, a.manager)).suggestions).toEqual([{ kind: 'add_photos' }]);
+
+    await withTenant(db, a.tenantId, (tx) => insertBusinessPhoto(tx, photo('cover')));
+    // Gone, before and after the check; a suggestion never shows as a warning.
+    const review = await getSetupReview(db, a.owner);
+    expect(review.suggestions).toEqual([]);
+    expect(review.warnings).toEqual([]);
+    expect((await acknowledgeSetupReview(db, a.owner)).suggestions).toEqual([]);
+    // Another business's cover counts for nothing here.
+    expect((await getSetupReview(db, other.owner)).suggestions).toEqual([{ kind: 'add_photos' }]);
   });
 });

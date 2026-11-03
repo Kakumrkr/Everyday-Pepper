@@ -633,7 +633,8 @@ export async function listMemoryEpisodes(
 /**
  * The `limit` episodes the transaction may read that are most similar to `embedding` (cosine),
  * most similar first. Exact search, no index (playbook D-4): the member scope filters before
- * the limit, so every match the member may see is considered.
+ * the limit, so every match the member may see is considered. The vectors live in the row, not
+ * in TOAST (migration 0057), so the scan reads them without reassembling each one.
  */
 export async function searchMemoryEpisodes(
   tx: TenantTx,

@@ -4,8 +4,12 @@ name: CI
 # - on pull requests. Branch protection requires the branch to be up to date with main, so the
 #   PR run has tested exactly what a merge lands; main is not tested again on push.
 # - weekly on main, and by hand (workflow_dispatch), as a safety net.
-# A pull request that changes only docs (docs/** or *.md) skips the three jobs below; skipped
-# jobs count as passed for the required checks.
+# A pull request that changes only docs (docs/** or *.md) skips the jobs below; so does a push
+# that changes only docs since a head whose checks all passed (a session pushes its close notes
+# after the code's run is green); skipped jobs count as passed for the required checks.
+# On pull requests the integration jobs run only the packages a change can affect (Turborepo
+# `--affected`: changed packages and their dependents); a change outside every package (CI,
+# root configuration, the lockfile's root) runs them all, as do the weekly and manual runs.
 on:
   pull_request:
   schedule:
@@ -24,8 +28,12 @@ jobs:
     name: Code changed?
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      checks: read
     outputs:
       code: ${{ steps.diff.outputs.code }}
+      all: ${{ steps.diff.outputs.all }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: github.event_name == 'pull_request'
@@ -34,21 +42,54 @@ jobs:
           # The PR's merge commit and its first parent, the base branch.
           fetch-depth: 2
 
-      - name: Compare with the base branch
+      - name: Compare with the base branch and the last tested head
         id: diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ github.event.action }}
+          BEFORE: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$GITHUB_EVENT_NAME" != 'pull_request' ]; then
             echo 'code=true' >> "$GITHUB_OUTPUT"
+            echo 'all=true' >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          docs_only() { [ -n "$1" ] && ! printf '%s\n' "$1" | grep -qvE '^docs/|\.md$'; }
           files="$(git diff --name-only HEAD^1 HEAD)"
           printf '%s\n' "$files"
-          if [ -n "$files" ] && ! printf '%s\n' "$files" | grep -qvE '^docs/|\.md$'; then
+          # Anything outside a workspace package (CI, root configuration) runs every package.
+          if printf '%s\n' "$files" | grep -qvE '^(apps|packages|e2e)/|^docs/|\.md$'; then
+            echo 'all=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'all=false' >> "$GITHUB_OUTPUT"
+          fi
+          if docs_only "$files"; then
             echo 'Only docs changed: the checks below are skipped.'
             echo 'code=false' >> "$GITHUB_OUTPUT"
-          else
-            echo 'code=true' >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          # A push of docs only on top of a head whose checks all passed (or were skipped as
+          # docs) needs no new run. Any doubt (a failed lookup, a check missing, failed or
+          # cancelled) runs everything.
+          if [ "$ACTION" = 'synchronize' ] && [ -n "$BEFORE" ]; then
+            since="$(gh api "repos/$GITHUB_REPOSITORY/compare/$BEFORE...$HEAD_SHA" \
+              --jq '.files[].filename' 2>/dev/null || true)"
+            if docs_only "$since"; then
+              verdict="$(gh api "repos/$GITHUB_REPOSITORY/commits/$BEFORE/check-runs?per_page=100" \
+                --jq '[.check_runs[]
+                  | select(.name | test("^(Lint, typecheck, test, build|Integration|E2E)"))]
+                  | group_by(.name) | map(max_by(.started_at))
+                  | if length == 4 and all(.conclusion == "success" or .conclusion == "skipped")
+                    then "passed" else "no" end' 2>/dev/null || echo no)"
+              if [ "$verdict" = 'passed' ]; then
+                echo "Only docs changed since $BEFORE, whose checks passed: skipped."
+                echo 'code=false' >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+          fi
+          echo 'code=true' >> "$GITHUB_OUTPUT"
 
   check:
     name: Lint, typecheck, test, build
@@ -98,6 +139,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # The base branch's history, for `--affected`.
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
@@ -110,15 +153,48 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Real Postgres (pgvector) and Redis in throwaway containers, same images as Compose.
+      # Every package but the AI evals, which run beside this job (2 CPUs each).
       - name: Integration tests
-        run: pnpm test:integration
+        env:
+          AFFECTED: ${{ needs.changes.outputs.all != 'true' && '--affected' || '' }}
+        run: pnpm turbo run test:integration $AFFECTED --filter='!@pepper/ai'
+
+  ai-integration:
+    name: Integration (AI evals)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # The AI package's tools, agent loop and eval replays (about 10 minutes on its own runner,
+      # so they no longer slow the other packages' timed tests).
+      - name: Integration tests
+        env:
+          AFFECTED: ${{ needs.changes.outputs.all != 'true' && '--affected' || '' }}
+        run: pnpm turbo run test:integration $AFFECTED --filter=@pepper/ai
 
   e2e:
     name: E2E smoke (Docker Compose)
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
-    # The suite takes ~17 min on one worker (2-CPU runner) plus ~5 min to build the stack.
+    # Flows run on the phone project; the desktop project runs the specs that set widths or check
+    # the desktop layout (e2e/playwright.config.ts). Plus ~5 min to build the stack.
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

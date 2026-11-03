@@ -65,6 +65,11 @@ if command -v dockerd >/dev/null 2>&1 && ! docker info >/dev/null 2>&1; then
   if [ ! -e /etc/docker/daemon.json ] && mkdir -p /etc/docker 2>/dev/null; then
     echo '{ "registry-mirrors": ["https://mirror.gcr.io"] }' >/etc/docker/daemon.json || true
   fi
+  # A restarted session worker leaves the old daemon's pid file behind, and dockerd then refuses
+  # to start ("process with PID … is still running"); remove it when that process is gone.
+  if [ -f /var/run/docker.pid ] && ! kill -0 "$(cat /var/run/docker.pid 2>/dev/null)" 2>/dev/null; then
+    rm -f /var/run/docker.pid
+  fi
   nohup dockerd >/tmp/dockerd.log 2>&1 &
   for _ in $(seq 1 30); do
     docker info >/dev/null 2>&1 && break
