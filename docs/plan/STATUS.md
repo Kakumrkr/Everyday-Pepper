@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S48** (client import).
+**S48 · Client import engine** (brief approved 2026-11-03: "Go ahead with your recommendations and complete the session": D-1 split, S48 engine (backend, worker, API) + **S48.2** screens and the "Bring your clients" top-up; D-2 `csv-parse`; D-3 match by external id → email → a phone only one client has, merges fill empty fields only; D-4 undo within 7 days, clients booked since are kept; D-5 no raw file kept, staged rows' values cleared after the undo window, 5 MB / 10,000 rows; D-6 ADR-0049 pre-approved).
+- [x] 1 ACs: AC-W1-3 restated, AC-W1-17…20 (acceptance-criteria, traceability).
+- [ ] 2 contracts (import schemas, shared US phone normaliser) · 3 parser + mapper (`@pepper/imports`, fixtures) · 4 migration 0058 · 5 domain service (stage, remap, commit, run, undo) · 6 worker `imports` queue + relay · 7 api endpoints · 8 ADR-0049.
+- Next: task 2.
 
 ## Last sessions
 - **S47.3 Phase 10 · The timed new-owner journey and the Phase 10 gate (2026-11-03)** (no ADR; scorecard §6). Full entry in [session-log.md](session-log.md).
