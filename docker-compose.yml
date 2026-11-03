@@ -82,12 +82,19 @@ services:
       AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-pepper-dev-only-s3-secret}
     ports: ['127.0.0.1:8333:8333']
     volumes: [seaweedfs-data:/data]
+    # Ready once it can store: S3 answers and the master hands out a write (`/dir/assign`).
+    # S3's /healthz alone answers before the volume server may grow volumes (~10 s later, more
+    # on a slow runner), when a first write fails with InternalError.
     healthcheck:
-      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8333/healthz']
+      test:
+        [
+          'CMD-SHELL',
+          'wget -q -O /dev/null http://127.0.0.1:8333/healthz && wget -q -O - http://127.0.0.1:9333/dir/assign | grep -q fid',
+        ]
       interval: 5s
       timeout: 3s
-      retries: 20
-      start_period: 20s
+      retries: 40
+      start_period: 30s
 
   # One-shot: applies migrations and provisions the services' login role, then exits.
   migrate:

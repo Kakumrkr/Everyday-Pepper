@@ -98,8 +98,15 @@ export async function startSeaweedFs(): Promise<TestObjectStorage> {
       AWS_ACCESS_KEY_ID: accessKeyId,
       AWS_SECRET_ACCESS_KEY: secretAccessKey,
     })
-    .withExposedPorts(8333)
-    .withWaitStrategy(Wait.forHttp('/healthz', 8333).withStartupTimeout(120_000))
+    .withExposedPorts(8333, 9333)
+    // Ready once it can store (as Compose's healthcheck): S3's /healthz answers before the
+    // volume server may grow volumes, when a first write fails with InternalError.
+    .withWaitStrategy(
+      Wait.forAll([
+        Wait.forHttp('/healthz', 8333),
+        Wait.forHttp('/dir/assign', 9333).forResponsePredicate((body) => body.includes('"fid"')),
+      ]).withStartupTimeout(180_000),
+    )
     .start();
   return {
     endpoint: `http://${container.getHost()}:${String(container.getMappedPort(8333))}`,
