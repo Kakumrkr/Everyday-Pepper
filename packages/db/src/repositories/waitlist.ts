@@ -245,6 +245,11 @@ export interface NewWaitlistOffer {
   rank: number;
   tokenHash: string;
   expiresAt: Date;
+  /**
+   * When it is offered, by the domain's clock (not the database's): a claim checks the time
+   * against the booking rules as they stood then, the way `expiresAt` was reckoned.
+   */
+  offeredAt: Date;
 }
 
 export async function insertWaitlistOffer(
@@ -263,6 +268,7 @@ export async function insertWaitlistOffer(
       rank: z.number().int().min(1).max(5).parse(offer.rank),
       tokenHash: TokenHashSchema.parse(offer.tokenHash),
       expiresAt: offer.expiresAt,
+      createdAt: offer.offeredAt,
     })
     .returning();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
