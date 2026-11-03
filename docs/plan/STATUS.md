@@ -15,8 +15,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 5 domain service `services/imports.ts`: stage, get/list, remap, discard, commit, undo (7 days, purge on undo), `runImport` (lease, chunks of 500, re-plan per chunk, failed after 3 attempts), `tidyImports` (staged > 24 h discarded, rows purged after the window); audit `client_import.committed/finished/undone` (counts only); 24 integration tests green.
 - [x] 6 worker: `imports/relay.ts` + `ImportsRunner` (BullMQ `imports`, job id = batch id, `IMPORT_POLL_MS` 2 s, hourly `tidyImports`, alert with ids only on failure; closes at once without Redis); 55 worker tests green.
 - [x] 7 api `/v1/imports` (`clients.manage`): GET list, POST upload (5 MB; CSV/JSONL as text, JSON as octet-stream; 20 per 10 min per member), GET one, PUT mapping, POST commit (202) / undo, DELETE staged; `readUpload` takes an upload kind (photos unchanged); owner sentences in `import_*` errors; 13 controller + 3 integration tests green.
-- [ ] 8 ADR-0049, then the close.
-- Next: task 8 (ADR-0049, docs), then `/session-close`. Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
+- [x] 8 ADR-0049; dependency map, jobs, data model, playbook row S48 + new S48.2.
+- Next: `/session-close` (review, checks, PR). Note: phone matches need the same name too (a family shares a phone), a refinement of D-3 written into ADR-0049.
 
 ## Last sessions
 - **S47.3 Phase 10 · The timed new-owner journey and the Phase 10 gate (2026-11-03)** (no ADR; scorecard §6). Full entry in [session-log.md](session-log.md).
@@ -84,7 +84,8 @@ S1–S47.3, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S48 | Client import: CSV, JSON or JSONL (five tools, generic, or an own app's export), smart mapping, preview, dedupe, undo by batch | 11 | AC-W1-3; no duplicates on re-import |
+| S48 | Client import engine (backend, worker, API): CSV, JSON or JSONL (five tools, generic, own app), smart mapping, preview, dedupe, undo by batch | 11 | AC-W1-3, AC-W1-17…19; no duplicates on re-import |
+| S48.2 | Client import screens (upload, mapping, preview, result with Undo) + Home's "Bring your clients" (top-up) | 11 | Playwright journey; AC-W1-20 |
 | S49 | History + upcoming appointments import; tags, birthdays | 11 | 1,000 clients / 5,000 visits < 2 min |
 | S50 | Client merge, delete, staff walk-ins, paging and search | 11 | Playwright; isolation suite 100% |
 | S51 | Export, account + business deletion, terms/privacy drafts; **Phase 11 gate** | 11 | Export round-trips; C11, C13 ≥ 8 |
