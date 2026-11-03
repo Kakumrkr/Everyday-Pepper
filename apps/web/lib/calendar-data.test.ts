@@ -67,7 +67,7 @@ const client = (clientId: string): Client =>
     email: null,
     phone: null,
     source: 'team',
-    tags: [],
+    tags: [] as string[],
     birthday: null,
     createdAt: T,
     updatedAt: T,
