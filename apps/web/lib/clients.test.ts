@@ -7,6 +7,8 @@ import {
   tagsFromText,
   tagsText,
   upcomingSentence,
+  clientsPath,
+  CLIENTS_PAGE,
 } from './clients';
 
 describe('birthdayLabel (AC-W1-28)', () => {
@@ -81,6 +83,16 @@ describe('merge and delete sentences (AC-W1-30, AC-W1-31)', () => {
     expect(deleteSentence('Zoe', { ...none, upcomingVisits: 1 })).toBeNull();
     expect(upcomingSentence('Zoe', { ...none, upcomingVisits: 2 })).toBe(
       'Zoe has 2 visits coming up. Cancel or move them first, then delete.',
+    );
+  });
+});
+
+describe('clientsPath (AC-W1-35)', () => {
+  it('asks for a page by name, with the search, the import and the cursor when given', () => {
+    expect(clientsPath({})).toBe(`/v1/clients?limit=${String(CLIENTS_PAGE)}`);
+    expect(clientsPath({ search: '', importId: null, after: null })).toBe('/v1/clients?limit=50');
+    expect(clientsPath({ search: '555 123', importId: 'b1', after: 'c9' })).toBe(
+      '/v1/clients?limit=50&search=555+123&import=b1&after=c9',
     );
   });
 });

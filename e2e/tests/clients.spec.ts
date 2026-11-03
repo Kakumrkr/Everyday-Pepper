@@ -158,3 +158,42 @@ test('clients (AC-W1-30…32): an owner edits tags and birthday, merges a duplic
   expect(await clientsNamed(page, 'Zoe')).toEqual([]);
   expect((await page.request.get(`/v1/clients/${zoe.id}`)).status()).toBe(404);
 });
+
+test('the Clients list shows 50 at a time with "Show more", and finds a client by part of their phone (AC-W1-35)', async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  await onboardOwner(page, { type: 'Barbershop' });
+  const names = Array.from(
+    { length: 55 },
+    (_, index) => `Client ${String(index + 1).padStart(2, '0')}`,
+  );
+  for (const [index, name] of names.entries()) {
+    await callApi(
+      page,
+      'POST',
+      '/v1/clients',
+      { name, ...(index === 52 && { phone: '+15550104321' }) },
+      ClientSchema,
+    );
+  }
+  await page.goto('/clients');
+  const rows = page.getByRole('list', { name: 'Clients' }).getByRole('listitem');
+  await expect(rows).toHaveCount(50);
+  await (await hydrated(page.getByRole('button', { name: 'Show more' }))).click();
+  await expect(rows).toHaveCount(55);
+  await expect(page.getByRole('button', { name: 'Show more' })).toHaveCount(0);
+  const shown = (await rows.locator('a').allTextContents()).map(
+    (text) => /Client \d\d/.exec(text)?.[0],
+  );
+  expect(shown).toEqual(names);
+
+  await page
+    .getByRole('searchbox', { name: 'Search clients by name, email or phone' })
+    .fill('(555) 010-4321');
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText('Client 53');
+  // The search and the cursor stay out of the address.
+  expect(page.url()).not.toMatch(/search|after|555/);
+});

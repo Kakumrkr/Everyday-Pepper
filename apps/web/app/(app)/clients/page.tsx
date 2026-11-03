@@ -1,7 +1,8 @@
-import { ClientsResponseSchema, ImportBatchIdSchema } from '@pepper/contracts';
+import { ClientsPageSchema, ImportBatchIdSchema } from '@pepper/contracts';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
+import { clientsPath } from '../../../lib/clients';
 import { ClientsScreen } from '../../_components/clients/clients-screen';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
 
@@ -27,15 +28,13 @@ export default async function ClientsPage({
   const parsed = ImportBatchIdSchema.safeParse((await searchParams)['import']);
   // Imports are owners' and managers' (staff never see one); anything else lists everyone.
   const importId = manages && parsed.success ? parsed.data : null;
-  const query = new URLSearchParams({ limit: '50' });
-  if (importId !== null) query.set('import', importId);
-  const answer = await currentJson(`/v1/clients?${query.toString()}`, ClientsResponseSchema);
+  const answer = await currentJson(clientsPath({ importId }), ClientsPageSchema);
 
   return (
     // Keyed by the filter: "Show everyone" is the same screen, so its list starts again.
     <ClientsScreen
       key={importId ?? 'everyone'}
-      initial={answer?.clients ?? null}
+      initial={answer}
       manages={manages}
       importId={importId}
     />
