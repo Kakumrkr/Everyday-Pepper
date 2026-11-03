@@ -24,6 +24,14 @@ export default defineConfig({
   },
   projects: [
     { name: 'mobile', use: { ...devices['Pixel 7'], launchOptions } },
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], launchOptions } },
+    // Phone first (DESIGN.md): every journey runs on the phone. The desktop project runs what
+    // only a desktop shows: the screenshot and gallery specs (which set their own widths), the
+    // sidebar shell and the accessibility scans of the desktop layout. A spec that checks a
+    // desktop-only behaviour joins this list.
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], launchOptions },
+      testMatch: ['accessibility.spec.ts', 'gallery.spec.ts', 'screens.spec.ts', 'shell.spec.ts'],
+    },
   ],
 });

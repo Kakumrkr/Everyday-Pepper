@@ -529,7 +529,8 @@ describe('the reminder job (AC-W6-1)', () => {
     expect(remindersIn(mailer)).toHaveLength(1);
   });
 
-  it('clears a backlog larger than one batch in one pass', async () => {
+  // ~22 s here: a cap of 3× its time, as for every long test (testing-strategy.md).
+  it('clears a backlog larger than one batch in one pass', { timeout: 120_000 }, async () => {
     const b = await newBusiness();
     const bookings = [];
     // REMINDER_BATCH + 5 one-hour bookings back to back, booked with the owner's override.

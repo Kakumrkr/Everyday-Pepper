@@ -22,13 +22,14 @@ For prose/planning-only work, review the actual diff and cross-document consiste
 For code changes:
 
 1. `pnpm check` (format, lint, typecheck, unit tests with coverage, build).
-2. `pnpm test:integration`, alone: **only when the session changed code the integration tests run** (anything under `packages/` except `packages/ui`, or `apps/api`, `apps/worker`, or a migration). A screens-only session (`apps/web`, `packages/ui`, `e2e`, docs) skips it and says so in the PR: CI runs it on the PR anyway.
-3. Playwright, alone, only if a screen or flow changed: the full suite, once.
+2. The integration tests of the packages the change can affect, alone: `TURBO_SCM_BASE=origin/main pnpm turbo run test:integration --affected` (changed packages and their dependents; nothing for a screens-only session). CI runs every package on the PR.
+3. Playwright, alone, only if a screen or flow changed: the specs of the changed screens and flows, plus `screens.spec.ts` when a screen changed (its baselines). CI runs the full suite.
    ```sh
    .claude/skills/session-close/e2e-stack.sh start <scratchpad>   # after pnpm check: it uses the build
-   pnpm --filter @pepper/e2e test:e2e --workers=3
+   pnpm --filter @pepper/e2e test:e2e --workers=3 tests/<spec>.ts …
    .claude/skills/session-close/e2e-stack.sh stop
    ```
+   **The full suites run once, in CI, inside this session** (user, 2026-11-03): step 5.
    `PLAYWRIGHT_CHROMIUM_EXECUTABLE` comes from the session-start hook (CI's headless shell).
 4. If the session recorded the evals: the free replay passed inside step 2.
 
@@ -54,11 +55,14 @@ The screenshot spec already shows each changed screen at 375/412/1280 px in ligh
 
 Use one existing session-log entry; do not create a new session report, checklist or handoff file. Add one compact timing line from existing logs: setup/build, targeted checks, final suites, walkthrough/rework, CI execution and waiting where available. Mark unmeasured time as unknown; do not run checks again to collect timings. The next target stays in the playbook/STATUS. Create a PCR only for an actual approved-plan/contract change and an ADR only for an architectural decision.
 
-## 5. PR, once (an "a" half stops before this)
+## 5. PR, once, and its CI inside the session (an "a" half stops before this)
 
 An "a" half (CLAUDE.md, split sessions): STATUS "In progress" says what "b" does next; push the branch (no PR) and go to step 6 with a prompt that names the branch.
 
-All commits in (docs included). Then open the PR (the repo's template if there is one; no model ids; the walkthrough screenshots or the baselines' paths), subscribe to its activity, wait for the one CI run. Green: merge (squash) and unsubscribe. Red: fix every failure in one push.
+1. Every code commit in (steps 1–3 green, the walkthrough's fixes made), then open the PR (the repo's template if there is one; no model ids; the walkthrough screenshots or the baselines' paths) and subscribe to its activity.
+2. **While CI runs** (about 12 minutes), write step 4's docs locally and commit them; do not push yet (a push now would cancel the run).
+3. **Green:** push the docs commit. A push of docs only on top of a green head skips the jobs (`ci.yml`), so its run finishes in a minute; then merge (squash) and unsubscribe.
+4. **Red: fixed in this session, never handed to the next.** Read the failing job's log, find the root cause (compare with the last green run's timings and with `main`: a test that is slow everywhere is a test problem, a failure only here is this change's), fix it with a test that shows it, run that check locally, and push the fix together with the docs in one push. Never re-run to get green, raise an assertion threshold, skip or quarantine a test; a time cap below ~3× a test's measured time is a test problem (testing-strategy.md).
 
 After the merge, **hand the merged "a" branch of a split session to the user to delete**. GitHub's auto-delete removes only the PR's own head branch, which left S32a, S36a, S37a and S38a behind until P1. A session can't delete another branch: the git proxy refuses (403) and the GitHub tools have no branch delete. So check `git merge-base --is-ancestor origin/<a-branch> <the merged PR's head>`, then give the user the branch name, the PR it is in, and the link `https://github.com/kakumaniramakrishnarao/Everyday-Pepper/branches` (the bin icon on its row).
 
