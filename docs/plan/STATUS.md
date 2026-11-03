@@ -1,25 +1,23 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-03 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 11 — Switching + privacy (Phase 10 gate met in S47.3) → next: **S49.2** (history import screens)
+**Last updated:** 2026-11-03 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 11 — Switching + privacy (Phase 10 gate met in S47.3) → next: **S50** (client merge, delete, staff walk-ins, paging and search)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S49.2 · History import screens** (user, 2026-11-03: "Go ahead with your recommendations and complete the session": D-1 A tags and birthday read-only on the profile, editing → S50; D-2 A "Book again" opens the client's profile; D-3 no ADR). Screens only; no package or API change.
-- [x] 1 ACs AC-W1-27…29 · [x] 2 `lib/imports.ts` visits wording (unit green) · [x] 3 import screen steps (`import-rows.tsx`) · [x] 4 filtered Clients list · [x] 5 profile tags + birthday (`lib/clients.ts`) · [x] 6 top-up: `TakenTimes` with "Book again" · [ ] e2e visits journey · [ ] 7 screenshots
-- Next: the visits journey in `import.spec.ts` (fixture in `helpers.ts`), then the `screens.spec` baselines.
+Nothing in progress. Next: **S50** (client merge, delete, staff walk-ins, paging and search; tags and birthday editable on the profile, S49.2 D-1).
 
 ## Last sessions
+- **S49.2 Phase 11 · History import screens, tags and birthday on the profile (2026-11-03)** (no ADR; [PR #73](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/73)). Full entry in [session-log.md](session-log.md).
+  - **Built:** the import screens take a visits file (one-sentence preview, notices, times taken, visit lines, "No one was emailed"), `/clients?import=` filtered, tags and birthday on the profile (AC-W1-27…29). Top-up: "Book these again" with "Book again" per time taken.
+  - **On the way:** Back after "Book again" lost the result (Next's cached render); the screen resumes the import its address names.
+  - **Checks:** `pnpm check` green; integration none (screens only); Playwright import 3, screens 24 (30 new baselines); CI green on the first run.
 - **S49 Phase 11 · History import engine, tags, birthdays (2026-11-03)** ([ADR-0050](../adr/0050-visit-and-appointment-import.md), PR #72). Full entry in [session-log.md](session-log.md).
   - **Built:** visits files (the five tools' appointments exports, any sheet); past visits as history; upcoming appointments with conflicts listed; no email; hidden services; tags and birthdays; undo; `/v1/clients?import=`. AC-W1-22…26.
   - **Gate:** 1,000 clients and 5,000 visits in about 5 s, counts exact. On the way: the `smart-waitlist` tests' real-clock time bomb.
   - **Checks:** `pnpm check` green; affected integration green (db 708, appointments 210, ai 165, api 93, worker 14, …); Playwright import 2 and screens import 3 (6 baselines updated).
-- **S48.2 Phase 11 · Client import screens + "Bring your clients" (2026-11-03)** (no ADR; PR #71). Full entry in [session-log.md](session-log.md).
-  - **Built:** `/clients/import` (file → columns → clients → done with Undo for 7 days), Clients' Import, Home's "Bring your clients" after the check (AC-W1-20); the forwarder takes 5 MB / 60 s for `POST /v1/imports` only.
-  - **Top-up:** the preview's count sentence with the rows to fix first (AC-W1-21). On the way: waitlist offers dated by the domain clock (5 integration tests failed on their fixed day).
-  - **Checks:** `pnpm check` green; affected integration green; Playwright screens 21, import + setup 6.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -35,6 +33,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S49.2 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 tags and birthday read-only, editing → S50; D-2 "Book again" opens the profile; D-3 no ADR). **Claude:** no-email lines; times taken as their own list; the import screen resumes from its address; fixture dates in 2099; the review's 5 fixes. Full wording in [decisions.md](decisions.md).
 - **S49 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 split → S49.2; D-2 the `VisitBook` port; D-3 hidden services, the owner's calendar; D-4 overlapping upcoming visits listed, history unchecked; D-5 no reminders; D-6 month/day/optional year, tags text[]). **Claude:** imported history occupies no time; repeat clients in a visits file; the review's 10 fixes; the `smart-waitlist` clock. Full wording in [decisions.md](decisions.md).
 - **S48.2 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 Home reads `GET /v1/imports`; D-2 the count sentence; D-3 one route; D-4 no ADR, AC-W1-21). **Claude:** the action bar fixed above the tabs on phones; offers dated by the domain clock; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
 - **S48 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 split → S48.2; D-2 `csv-parse`; D-3 match id → email → phone; D-4 undo 7 days; D-5 no raw file, 5 MB / 10,000 rows; D-6 ADR-0049). **Claude:** phone + name, scoped external ids, undo keeps used clients; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
@@ -76,11 +75,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S49, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on every screen and the first 10 minutes; Phase 9 and 10 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S49.2, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on every screen and the first 10 minutes; Phase 9 and 10 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S49.2 | History import screens; tags + birthday on the profile; "See your clients" filtered | 11 | Visits fixture through the screens |
 | S50 | Client merge, delete, staff walk-ins, paging and search | 11 | Playwright; isolation suite 100% |
 | S51 | Export, account + business deletion, terms/privacy drafts; **Phase 11 gate** | 11 | Export round-trips; C11, C13 ≥ 8 |
 | S52 | Home card board (ranked by $, grouped, quiet start) + activity log | 12 | Grouped feed; every AI action in the log |

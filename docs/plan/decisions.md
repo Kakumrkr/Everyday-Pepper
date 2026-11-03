@@ -381,4 +381,14 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - the 1,000/5,000 gate lives in the worker's integration suite;
     - the review's 10 fixes;
     - `smart-waitlist` tests now pass their own clock to `changeBooking` (a real-clock time bomb that failed on `main` too); after CI's property counterexample, a row skipped as a repeat of an earlier row's client records that client (ADR-0049 §3's re-import promise).
-
+- **S49.2 (user, 2026-11-03):** at the brief, "Go ahead with your recommendations and complete the session":
+  - D-1 A: tags and birthday on the profile are read-only; editing them (a `ClientInputSchema` change) comes with S50's profile work.
+  - D-2 A: "Book again" opens the client's profile, where Book is already theirs; no service or time prefill in `NewBooking`.
+  - D-3: no ADR (screens on the existing contract).
+  - **Claude's refinements:**
+    - a visits import says "No one gets an email" on the upload step and the preview, and "No one was emailed" on the result;
+    - the times taken are their own preview group and the result's "Book these again" list, not repeated in the receipt (walkthrough);
+    - "See your clients" is filtered only when the import added clients and still has them; a search stays inside the filter;
+    - the import screen resumes the import its address names on mount (Back after "Book again" restored a render from before `?batch=`), unless the owner acted first;
+    - the e2e visits fixture's upcoming rows are in 2099, the last year a file may give, so no day turns them into history;
+    - the review's 5 fixes; the altitude finding (a shared `router.replace` instead of `replaceState`) waits until a second screen writes its state into the address.
