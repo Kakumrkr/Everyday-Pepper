@@ -1287,7 +1287,7 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
     - `importVisitBook` in appointments: no email, no reminder, insights once.
     - `/v1/clients?import=`. AC-W1-22…26 new, AC-W1-17 restated.
   - **Top-up (S48.2 retro):** the clients list filters to one import's new clients (API and core); the result screen's link → S49.2.
-  - **Fixed on the way:** `smart-waitlist.int.test.ts` failed on `main` once 3 November's 10:00 passed in real time: 6 `changeBooking` calls ran on the system clock. They now pass the test's clock.
+  - **Fixed on the way:** `smart-waitlist.int.test.ts` failed on `main` once 3 November's 10:00 passed in real time: 6 `changeBooking` calls ran on the system clock. They now pass the test's clock. CI's first run then found (fast-check seed 1909035259) an S48 gap, red on `main` too: a row skipped as a repeat of an earlier row's client recorded no client, so a re-import made a new one once that row's phone became ambiguous. Repeat rows now record their client and its id; the counterexample is a unit and an integration test; 6,000 property runs green. CI: one red run (that property), then green.
   - **Checks:**
     - `pnpm check` green (2 web fixture fixes);
     - affected integration: db 708, core 189, imports 27, appointments 210 (14 red before the clock fix, also on `main`), runtime 2, ai 165, api 93, worker 14;

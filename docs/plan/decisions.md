@@ -380,5 +380,5 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - a two-digit birth year is the latest year not after this one;
     - the 1,000/5,000 gate lives in the worker's integration suite;
     - the review's 10 fixes;
-    - `smart-waitlist` tests now pass their own clock to `changeBooking` (a real-clock time bomb that failed on `main` too).
+    - `smart-waitlist` tests now pass their own clock to `changeBooking` (a real-clock time bomb that failed on `main` too); after CI's property counterexample, a row skipped as a repeat of an earlier row's client records that client (ADR-0049 §3's re-import promise).
 
