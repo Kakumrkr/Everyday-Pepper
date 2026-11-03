@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S49** (history + upcoming appointments import; tags, birthdays).
+**S49 (branch `s49-history-import`)**: brief approved 2026-11-03, "Go ahead with your recommendations and complete the session" (D-1…D-6 A: split, screens + the top-up's link → S49.2; appointments' published `VisitBook` port wired by api/worker; unknown services hidden, unknown staff → the owner; overlapping upcoming left out and listed, past never checked; no reminders for imported; birthday month/day + optional year, tags text[]).
+Tasks: 1 ACs AC-W1-22…26 + ADR-0050 · 2 migration 0059 + db repos · 3 contracts + `@pepper/imports` visits/tags/birthday planner · 4 appointments `importVisitBook` (no outbox, no reminders) · 5 runner + undo · 6 api `kind`, `/v1/clients?import=` · 7 1k/5k timing test.
+Done: — · Next: task 1.
 
 ## Last sessions
 - **S48.2 Phase 11 · Client import screens + "Bring your clients" (2026-11-03)** (no ADR; PR #71). Full entry in [session-log.md](session-log.md).
@@ -77,7 +79,8 @@ S1–S48.2, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S49 | History + upcoming appointments import; tags, birthdays | 11 | 1,000 clients / 5,000 visits < 2 min |
+| S49 | History + upcoming appointments import (engine); tags, birthdays | 11 | 1,000 clients / 5,000 visits < 2 min |
+| S49.2 | History import screens; tags + birthday on the profile; "See your clients" filtered | 11 | Visits fixture through the screens |
 | S50 | Client merge, delete, staff walk-ins, paging and search | 11 | Playwright; isolation suite 100% |
 | S51 | Export, account + business deletion, terms/privacy drafts; **Phase 11 gate** | 11 | Export round-trips; C11, C13 ≥ 8 |
 | S52 | Home card board (ranked by $, grouped, quiet start) + activity log | 12 | Grouped feed; every AI action in the log |
