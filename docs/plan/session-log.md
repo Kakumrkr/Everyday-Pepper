@@ -1317,3 +1317,19 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **For later:** S50 edits tags and birthday (a `ClientInputSchema` change); Book from "Book again" doesn't carry the visit's service, staff or time; the `router.replace` question if a second screen writes its state into the address.
   - **Retro:** went well: the journey on the real stack found the Back bug the unit tests couldn't, and the walkthrough trimmed a cramped receipt · do better: fixtures with dates are fixed far from now from the start (2099, the year cap), not after review · top-up for S50: "Book again" opens Book with the taken visit's service and staff already chosen.
 
+- **S50 Phase 11 · Client merge and delete, tags and birthday editing (2026-11-03)** ([ADR-0051](../adr/0051-client-merge-and-delete.md); [PR #74](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/74); branch `claude/kind-ritchie-jy836g`). D-1 A (walk-ins and paging → S50.2), D-2 A, D-3 A, D-4 ADR (decisions.md S50).
+  - **Built:**
+    - Migration 0060 adds `clients.deleted_at`, the merge-only fact move, `client_merge_episodes` and `client_forget`, and a forget trigger that keeps values still remembered.
+    - Repository: `mergeClientRows`, `deleteClientRow`, `countClientRecords`. Core services and three endpoints. AC-W1-30…33.
+    - Profile: tags and birthday in the editor, and a "Tidy up" section with "Merge with…" (search, pick, the counts in a sentence) and "Delete client" (what stays and what is forgotten, or "cancel or move first").
+  - **Top-up (S49.2 retro):** "Book again" opens Book with the visit's service and staff chosen. They are matched by name on the import screen, and only ids go in the address.
+  - **Checks:**
+    - `pnpm check` green (web unit 379);
+    - affected integration green: db 719 (new `client-lifecycle` 8; isolation 405), core 189, appointments 214, ai 165, api 93, imports 28, worker 14, runtime 2;
+    - Playwright on the phone: `clients.spec.ts` (new) and `import.spec.ts`, 4/4;
+    - `screens.spec.ts` client block on desktop: 12 new baselines (editor, delete), and the profile's 12 updated for "Tidy up".
+  - **Walkthrough:** 375 px, light and dark baselines, plus the clients journey on the phone: edit → merge → delete refused → delete.
+  - **Review:** `/code-review` found 6 issues. Five are fixed: same-value facts unscrubbed, a merge re-runs insights, `?book=1` cleared on close, manage links ended, redundant lookups dropped. One is noted in the ADR: queued emails still go out. `/security-review`: nothing found.
+  - **Timing:** the e2e stack started in 1.3 min (cached restart about the same); `pnpm check` about 5 min; affected integration with `--concurrency=1`, time not measured; Playwright clients+import 21 s; screens client block 47 s; CI: see the PR.
+  - **For later:** S50.2 walk-ins and paging/search past 50; queued booking emails to a deleted client; AI receipts naming a deleted client; phones written differently in chats.
+  - **Retro:** went well: the db integration file drove the design (the fact guard, the definer functions) before any screen · do better: run `prettier` on generated migration metadata and use `--update-snapshots=changed`, not `all` (it rewrote baselines that hadn't changed) · top-up for S50.2: a deleted client's past visits read "Deleted client" on the calendar and booking sheet without a broken profile link.
