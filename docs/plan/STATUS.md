@@ -7,7 +7,13 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S54** (cancellation → fill with receipts, win-back list, the post-import aha; Phase 12).
+**S54 — the money loop, part 1 (cancellation → fill)**, branch `claude/festive-hypatia-vrneqj`. Brief pre-approved by the user ("pre-approved with your recommendation"): D-1 split, the win-back list and the post-import aha → **S54.2**; D-2 regulars fill only what the waitlist leaves, one regular offer per client per 7 days, nudge opt-out respected; D-3 ADR-0056; D-4 no recording (system tool only).
+- [x] 1. AC-W5-3…5 in acceptance + traceability
+- [ ] 2. Migration 0064: offers without an entry (`source`), repo + contracts
+- [ ] 3. Domain: regular candidates, offers, claim/release/undo, the regular's email
+- [ ] 4. Matcher + tool: regulars, "~$X"; Activity offer/fill outcome (top-up)
+- [ ] 5. Wrong-client fixtures, race with a regular, worker p95
+Next step: task 2.
 
 ## Last sessions
 - **S53 Phase 12 · Trust controls (2026-11-04)** ([ADR-0055](../adr/0055-trust-controls-presets-standing-rules-earned-trust.md), [PR #79](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/79)). Full entry in [session-log.md](session-log.md).
