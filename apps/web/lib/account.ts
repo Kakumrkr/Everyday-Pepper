@@ -112,6 +112,10 @@ export const ROUTES = {
   more: '/more',
   /** The business export (S51, ADR-0053): owners only. */
   yourData: '/more/data',
+  /** Deleting the business (S51.2, ADR-0054): owners only. */
+  deleteBusiness: '/more/data/delete',
+  /** Deleting the signed-in account (S51.2, ADR-0054). */
+  deleteAccount: '/account/delete',
   createBusiness: '/onboarding/business',
   twoFactor: '/security/two-factor',
   invite: '/invite',

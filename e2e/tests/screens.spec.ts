@@ -411,7 +411,7 @@ for (const width of WIDTHS) {
     await shots('book-photos');
   });
 
-  test(`Home, Chat, More and Your data at ${String(width)} px, light and dark`, async ({
+  test(`Home, Chat, More, Your data and deleting at ${String(width)} px, light and dark`, async ({
     page,
   }) => {
     test.setTimeout(300_000);
@@ -443,6 +443,27 @@ for (const width of WIDTHS) {
       await expect(page.getByRole('heading', { name: 'Your data', level: 1 })).toBeVisible();
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`your-data-${String(width)}-${scheme}.png`, SHOT);
+
+      // Delete business and Delete account (S51.2, ADR-0054): the download first, the name or
+      // the password, one danger action. The account's email is masked (it is unique per run).
+      await page.goto('/more/data/delete');
+      await expect(
+        page.getByRole('heading', { name: 'Delete Southside Cuts', level: 1 }),
+      ).toBeVisible();
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`delete-business-${String(width)}-${scheme}.png`, SHOT);
+
+      await page.goto('/account/delete');
+      await expect(
+        page.getByRole('heading', { name: 'Delete your account', level: 1 }),
+      ).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`delete-account-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        mask: [page.getByText(/@example\.test/)],
+      });
     }
   });
 }
