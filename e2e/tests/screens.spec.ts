@@ -468,6 +468,12 @@ for (const width of WIDTHS) {
   });
 }
 
+/** Masked dates as one full-width line each, so their text's length never moves the layout. */
+const DATE_LINES_FIXED = `[data-testid="booking-when"], [data-testid="calendar-day"] {
+  display: block !important; width: 100% !important; white-space: nowrap !important;
+  overflow: hidden !important;
+}`;
+
 /** Calls the api as the signed-in browser (the app's own origin, as the api requires). */
 async function post<T>(
   page: Page,
@@ -712,11 +718,14 @@ for (const width of WIDTHS) {
       await page.goto(`/calendar?date=${date}`);
       await (await hydrated(page.getByTestId('booking-block').first())).click();
       await expect(dialog.getByTestId('booking-status')).toBeVisible();
+      await page.addStyleTag({ content: DATE_LINES_FIXED });
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`booking-sheet-${String(width)}-${scheme}.png`, {
         ...SHOT,
         fullPage: false,
-        // The day moves with today; the client row (S50.2) stays in the picture.
+        // The day moves with today; the client row (S50.2) stays in the picture. Each masked
+        // date is one full-width line, so a longer day's name can't wrap it and move the sheet
+        // (S51.2: "Wednesday, November 11" wrapped at 412 px and failed the shot on that day).
         mask: [dialog.getByTestId('booking-when'), page.getByTestId('calendar-day')],
       });
       await page.keyboard.press('Escape');
