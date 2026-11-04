@@ -7,6 +7,7 @@ export * from './chat.js';
 export * from './bookings.js';
 export * from './clients.js';
 export * from './drafts.js';
+export * from './export.js';
 export * from './feed.js';
 export * from './health.js';
 export * from './imports.js';

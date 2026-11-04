@@ -86,11 +86,19 @@ export function MoneyChip({
   );
 }
 
-/** Up to two initials of `name` ("Marcus Bell" → "MB", "Dre" → "D"). */
+/**
+ * Up to two initials of `name`, from its first and last words that start with a letter
+ * ("Marcus Bell" → "MB", "Dre" → "D", "Client 42" → "C"; AC-W1-39); none without a letter.
+ */
 export function initialsOf(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  const first = words[0]?.[0] ?? '';
-  const last = words.length > 1 ? (words[words.length - 1]?.[0] ?? '') : '';
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .filter((word) => /^\p{L}/u.test(word));
+  // The first letter whole, even one written with two code units.
+  const initial = (word: string | undefined) => /^\p{L}/u.exec(word ?? '')?.[0] ?? '';
+  const first = initial(words[0]);
+  const last = words.length > 1 ? initial(words[words.length - 1]) : '';
   return (first + last).toUpperCase();
 }
 

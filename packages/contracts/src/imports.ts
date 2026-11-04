@@ -13,8 +13,18 @@ export const IMPORT_FORMATS = ['csv', 'json', 'jsonl'] as const;
 export const ImportFormatSchema = z.enum(IMPORT_FORMATS);
 export type ImportFormat = z.infer<typeof ImportFormatSchema>;
 
-/** The tools whose client exports Pepper recognises by their headers. */
-export const IMPORT_PRESETS = ['square', 'booksy', 'vagaro', 'glossgenius', 'fresha'] as const;
+/**
+ * The tools whose client exports Pepper recognises by their headers; `pepper` is Pepper's own
+ * export (S51, ADR-0053), whose client ids are also matched as the business's own clients.
+ */
+export const IMPORT_PRESETS = [
+  'square',
+  'booksy',
+  'vagaro',
+  'glossgenius',
+  'fresha',
+  'pepper',
+] as const;
 export const ImportPresetSchema = z.enum(IMPORT_PRESETS);
 export type ImportPreset = z.infer<typeof ImportPresetSchema>;
 
