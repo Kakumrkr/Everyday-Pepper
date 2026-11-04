@@ -52,6 +52,61 @@ function receipt(overrides: Partial<Record<keyof AiActionView, unknown>> = {}): 
   });
 }
 
+describe('waitlist offer outcome (S54, AC-W5-5)', () => {
+  const offer = (overrides: Partial<Record<keyof AiActionView, unknown>> = {}) =>
+    receipt({
+      action: 'message.waitlist_offer',
+      tool: 'send_waitlist_offers',
+      summary:
+        "Offer Jess's opening Tue 2:00 PM to Maria L., ~$60; the first to claim it books it.",
+      after: {
+        date: '2026-11-10',
+        time: '14:00',
+        staffName: 'Jess',
+        serviceName: 'Haircut',
+        offeredTo: 'Maria L. and Ana R.',
+        offers: 2,
+        valueCents: 6000,
+      },
+      ...overrides,
+    });
+
+  it('names who got it and the slot’s value while it is open', () => {
+    expect(
+      activityLine(offer({ fill: { state: 'open', clientName: null, priceCents: null } }), NY)
+        .title,
+    ).toBe('Offered Tue, Nov 10, 2:00 pm to Maria L. and Ana R., ~$60');
+  });
+
+  it('says who filled it and for how much once claimed', () => {
+    expect(
+      activityLine(offer({ fill: { state: 'filled', clientName: 'Ana R.', priceCents: 6550 } }), NY)
+        .title,
+    ).toBe('Filled Tue, Nov 10, 2:00 pm with Ana R., +$66');
+  });
+
+  it('says nobody claimed it once every offer closed, but not for one undone', () => {
+    const closed = { fill: { state: 'unclaimed', clientName: null, priceCents: null } };
+    expect(activityLine(offer(closed), NY).title).toBe(
+      'Offered Tue, Nov 10, 2:00 pm to Maria L. and Ana R., ~$60; nobody claimed it',
+    );
+    expect(
+      activityLine(offer({ ...closed, status: 'undone', undoneAt: '2026-11-04T15:16:00.000Z' }), NY)
+        .title,
+    ).toBe('Offered Tue, Nov 10, 2:00 pm to Maria L. and Ana R., ~$60');
+  });
+
+  it('a time without a price, or a receipt from before S54, keeps to what it knows', () => {
+    const after = { date: '2026-11-10', time: '14:00', staffName: 'Jess', offeredTo: 'Maria L.' };
+    expect(activityLine(offer({ after }), NY).title).toBe(
+      'Offered Tue, Nov 10, 2:00 pm to Maria L.',
+    );
+    expect(activityLine(offer({ after: null }), NY).title).toBe(
+      "Offer Jess's opening Tue 2:00 PM to Maria L., ~$60; the first to claim it books it.",
+    );
+  });
+});
+
 describe('activity words', () => {
   it('says what was done, when, by whose OK and what it sent', () => {
     expect(activityLine(receipt(), NY)).toEqual({

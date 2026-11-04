@@ -5,6 +5,8 @@ import {
   removeTimeOff,
   claimWaitlistOffer,
   runInsightsFor,
+  updateService,
+  waitlistFillOf,
 } from '@pepper/appointments';
 import {
   BookingIdSchema,
@@ -15,6 +17,7 @@ import {
   ServiceIdSchema,
   StaffMemberIdSchema,
   TenantSlugSchema,
+  WaitlistMatchIdSchema,
   type MembershipRole,
 } from '@pepper/contracts';
 import {
@@ -327,5 +330,105 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
     );
     expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('no_match');
     expect(await offerProposals(w, w.actorFor('owner'))).toEqual([]);
+  });
+});
+
+describe('regulars (S54, AC-W5-3…5): what the waitlist leaves goes to overdue regulars', () => {
+  it('each email to its own client: the regular’s with the footer, the value on the action', async () => {
+    // Sara and Sarah (no email) are Jess's regulars, a week overdue; Ana waits for Jess.
+    const w = await seedEvalWorld(
+      db,
+      'juniper_feed',
+      { now: new Date(NOW), timeZone: 'America/New_York' },
+      { facts: [], memoryPaused: false, feed: { optedOut: [], mailingAddress: true } },
+    );
+    const owner = w.actorFor('owner');
+    const haircut = ServiceIdSchema.parse(id(w, '{{service:haircut}}'));
+    await updateService(db, owner, haircut, {
+      name: 'Haircut',
+      durationMinutes: 60,
+      bufferAfterMinutes: 10,
+      priceFromCents: 6000,
+    });
+    const jess = StaffMemberIdSchema.parse(id(w, '{{staff:jess}}'));
+    const afternoon = { startsAt: '2026-11-03T18:00:00.000Z', endsAt: '2026-11-03T22:00:00.000Z' };
+    const offs = await Promise.all(
+      ['{{staff:jess}}', '{{staff:marco}}'].map(async (key) => {
+        const staffId = StaffMemberIdSchema.parse(id(w, key));
+        return [staffId, await addTimeOff(db, owner, staffId, afternoon)] as const;
+      }),
+    );
+    await addToWaitlist(
+      db,
+      owner,
+      {
+        clientId: ClientIdSchema.parse(id(w, '{{client:ana}}')),
+        serviceId: haircut,
+        staffMemberId: jess,
+        windows: [{ date: '2026-11-03', start: '13:00', end: '17:00' }],
+      },
+      { clock: w.clock },
+    );
+    for (const [staffId, timeOff] of offs) await removeTimeOff(db, owner, staffId, timeOff.id);
+    await changeBooking(
+      db,
+      owner,
+      BookingIdSchema.parse(id(w, '{{booking:maria}}')),
+      { status: 'cancelled', notifyClient: false },
+      { clock: w.clock },
+    );
+    await runInsightsFor(db, w.tenantId, {
+      clock: w.clock,
+      insightsOf: () => ({ enabled: ['rebooking_due'], minGapMinutes: 60 }),
+    });
+
+    expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('proposed');
+    const [proposal] = await offerProposals(w, owner);
+    if (proposal === undefined) throw new Error('no proposal');
+    expect(proposal).toMatchObject({
+      preview: {
+        summary:
+          "Offer Jess's opening Tue 2026-11-03 at 15:00 to Ana R. and Sara K., ~$60; the first to claim it books it.",
+        after: { offeredTo: 'Ana R. and Sara K.', valueCents: 6000 },
+      },
+    });
+    // *Why?* says Sara was due back, as a nudge's does.
+    expect(proposal.explanation.facts.map((f) => f.kind)).toEqual([
+      'slot_was_free',
+      'waitlist_rank',
+      'rebooking_due',
+    ]);
+
+    const approved = await approveToolProposal(
+      depsAs(w, 'owner'),
+      proposal.id,
+      proposal.fingerprint,
+    );
+    expect(approved.kind).toBe('executed');
+    const emails = await offerEmails(w);
+    expect(emails.map((e) => e.to).sort()).toEqual(['ana@example.test', 'sara@example.test']);
+    const sara = emails.find((e) => e.to === 'sara@example.test');
+    const ana = emails.find((e) => e.to === 'ana@example.test');
+    if (sara === undefined || ana === undefined) throw new Error('missing an email');
+    expect(sara.text).toContain('It has been a while');
+    expect(sara.text).toContain('Unsubscribe: https://app.pepper.test/unsubscribe/');
+    expect(sara.text).toMatch(/Hi Sara/);
+    expect(ana.text).toContain('A time you were waiting for opened up');
+    expect(ana.text).not.toContain('Unsubscribe');
+    // Each link claims its own client's offer: Sara's books Sara.
+    const slug = TenantSlugSchema.parse(/\/book\/([^/]+)\/offer#/.exec(sara.text)?.[1]);
+    const claimed = await claimWaitlistOffer(db, slug, tokenOf(sara.text), { clock: w.clock });
+    expect(claimed.email.email).toBe('sara@example.test');
+
+    // Activity: the receipt now says who filled it and for how much.
+    const [receipt] = (await listRecentActions(db, owner, { limit: 5 })).filter(
+      (a) => a.tool === 'send_waitlist_offers',
+    );
+    if (receipt === undefined) throw new Error('no receipt');
+    expect(
+      await waitlistFillOf(db, owner, WaitlistMatchIdSchema.parse(receipt.entity.id), {
+        clock: w.clock,
+      }),
+    ).toEqual({ state: 'filled', clientName: 'Sara Kim', priceCents: 6000 });
   });
 });

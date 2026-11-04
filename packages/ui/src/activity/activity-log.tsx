@@ -2,8 +2,8 @@
 
 import type { AiActionView, AiEmailStatus } from '@pepper/contracts';
 import { useEffect, useId, useState, type ReactNode } from 'react';
-import { ACTION_LABEL, formatDate, formatInstant, undoLine } from '../cards/labels.js';
-import { Badge } from '../kit/marks.js';
+import { ACTION_LABEL, formatDate, formatInstant, formatTime, undoLine } from '../cards/labels.js';
+import { Badge, formatMoney } from '../kit/marks.js';
 import { Button } from '../kit/button.js';
 
 // The Activity log (S52, ADR-0043, AC-W7-4): everything Pepper did that the member may see,
@@ -60,13 +60,47 @@ export function dayHeading(day: string, timeZone: string, now: number): string {
   return formatDate(day);
 }
 
+/** Whole dollars, rounded: an estimate or a listed price on a line ("$60"). */
+const dollars = (cents: number) => formatMoney(Math.round(cents / 100) * 100);
+
+/**
+ * A waitlist offer's line (S54, AC-W5-5): who got it and what the time is worth, then, once
+ * someone claims it, who and for how much ("Filled Tue, Nov 3, 2:00 pm with Maria L., +$60").
+ * `null` when the receipt lacks the time (one from before S54 keeps its summary).
+ */
+export function waitlistOfferTitle(action: AiActionView): string | null {
+  const after = action.after;
+  const date = typeof after?.['date'] === 'string' ? after['date'] : null;
+  const time = typeof after?.['time'] === 'string' ? after['time'] : null;
+  if (date === null || time === null) return null;
+  const slot = `${formatDate(date)}, ${formatTime(time)}`;
+  const offeredTo = typeof after?.['offeredTo'] === 'string' ? after['offeredTo'] : '';
+  const value = typeof after?.['valueCents'] === 'number' ? after['valueCents'] : null;
+  const fill = action.fill;
+  if (fill?.state === 'filled') {
+    const who = fill.clientName === null ? '' : ` with ${fill.clientName}`;
+    const price = fill.priceCents ?? value;
+    return `Filled ${slot}${who}${price === null || price === 0 ? '' : `, +${dollars(price)}`}`;
+  }
+  const offered = `Offered ${slot}${offeredTo === '' ? '' : ` to ${offeredTo}`}${
+    value === null ? '' : `, ~${dollars(value)}`
+  }`;
+  return fill?.state === 'unclaimed' && action.status !== 'undone'
+    ? `${offered}; nobody claimed it`
+    : offered;
+}
+
 /** One receipt in words: what was done, and when, by whose OK, and what it sent. */
 export function activityLine(
   action: AiActionView,
   timeZone: string,
 ): { title: string; meta: string } {
+  const offer = action.action === 'message.waitlist_offer' ? waitlistOfferTitle(action) : null;
   const title =
-    action.summary === null || action.summary === '' ? ACTION_LABEL[action.action] : action.summary;
+    offer ??
+    (action.summary === null || action.summary === ''
+      ? ACTION_LABEL[action.action]
+      : action.summary);
   const time = formatInstant(action.createdAt, timeZone).split(', ').at(-1) ?? '';
   const how =
     action.approvedByName !== null

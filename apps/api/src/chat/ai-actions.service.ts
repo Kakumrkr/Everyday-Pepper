@@ -2,9 +2,11 @@ import {
   approvalRefusal,
   approveToolProposal,
   reviseNudgeDraft,
+  shortClientName,
   shownPreview,
   undoToolAction,
 } from '@pepper/ai';
+import { waitlistFillOf } from '@pepper/appointments';
 import {
   AiEmailViewSchema,
   AiWhyFactSchema,
@@ -19,6 +21,7 @@ import {
   type AiActionsQuery,
   type AiActionsResponse,
   type AiActionView,
+  WaitlistMatchIdSchema,
   type AiEmailRecipient,
   type AiEmailView,
   type AiMemoryView,
@@ -302,6 +305,33 @@ export class AiActionsService {
           : null,
       forYou,
       ...(await this.withMemory(actor, execution.explanation, null)),
+      ...(await this.fillOf(actor, execution)),
+    };
+  }
+
+  /**
+   * A waitlist offer's outcome for its Activity line (S54, AC-W5-5): who claimed it and the
+   * booking's price, or whether it is still open; nothing for other actions.
+   */
+  private async fillOf(
+    actor: Actor,
+    execution: ActionExecution,
+  ): Promise<Pick<AiActionView, 'fill'>> {
+    if (execution.action !== 'message.waitlist_offer') return {};
+    if (execution.entity.type !== 'waitlist_match') return {};
+    const fill = await waitlistFillOf(
+      this.db,
+      actor,
+      WaitlistMatchIdSchema.parse(execution.entity.id),
+      { clock: this.clock },
+    );
+    if (fill === undefined) return {};
+    return {
+      fill: {
+        state: fill.state,
+        clientName: fill.clientName === null ? null : shortClientName(fill.clientName),
+        priceCents: fill.priceCents,
+      },
     };
   }
 

@@ -32,6 +32,7 @@ import {
   insertWaitlistMatch,
   insertWaitlistOffer,
   listOpenOffersOfEntry,
+  listOffersOfMatch,
   listOpenOffersOfFreedBooking,
   listRecentWaitlistOffers,
   listRegularCandidates,
@@ -468,6 +469,47 @@ export async function listWaitlistOffers(
     listRecentWaitlistOffers(tx, options.limit ?? 50),
   );
   return rows.map((row) => toWaitlistOffer(row, now));
+}
+
+/**
+ * What came of a freed time's offers (S54, AC-W5-5), for the offer's line on Activity:
+ * `filled` (a client claimed it: who, and the booking's price), `open` (an offer can still be
+ * claimed), or `unclaimed` (every offer closed). `undefined` when the viewer can't see the
+ * time's offers (staff see their own staff member's only) or none were made.
+ */
+export interface WaitlistFill {
+  state: 'open' | 'filled' | 'unclaimed';
+  /** The client who claimed it (their full name; the caller shortens it). */
+  clientName: string | null;
+  /** The booking's listed price in cents; `null` without one. */
+  priceCents: number | null;
+}
+
+export async function waitlistFillOf(
+  db: Database,
+  actor: Actor,
+  matchId: WaitlistMatchId,
+  options: { clock?: Clock } = {},
+): Promise<WaitlistFill | undefined> {
+  requirePermission(actor, 'bookings.read');
+  const now = (options.clock ?? systemClock).now();
+  return withMember(db, actor.context, async (tx) => {
+    const offers = await listOffersOfMatch(tx, matchId);
+    if (offers.length === 0) return undefined;
+    const claimed = offers.find((offer) => offer.status === 'claimed');
+    if (claimed !== undefined && claimed.bookingId !== null) {
+      const booking = await findBooking(tx, BookingIdSchema.parse(claimed.bookingId));
+      const client = await findClient(tx, ClientIdSchema.parse(claimed.clientId));
+      return {
+        state: 'filled',
+        // A client deleted since isn't named.
+        clientName: client === undefined || client.deletedAt !== null ? null : client.name,
+        priceCents: booking?.priceFromCents ?? null,
+      };
+    }
+    const open = offers.some((offer) => offer.status === 'offered' && offer.expiresAt > now);
+    return { state: open ? 'open' : 'unclaimed', clientName: null, priceCents: null };
+  });
 }
 
 /** An offer as the team sees it; one past its time reads as expired before the pass runs. */
