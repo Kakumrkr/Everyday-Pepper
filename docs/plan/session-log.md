@@ -1412,6 +1412,6 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Timing:**
     - Local: `pnpm check` ~5 min ×2; affected integration 9.4 min (`--concurrency=1`); e2e stack ~2 min; waitlist spec 2.4 min; screens blocks 1.2 min.
     - The worker's p95 value was asserted, not printed (the suite hides console output).
-    - CI: see the PR.
+    - CI (first run, green): build 8.7 min, integration 7.0 min, AI evals 4.7 min, E2E 18.6 min.
   - **For later:** the win-back list and the post-import aha (S54.2); a nudge-only test of the weekly quiet rule across nudges and offers; batch `fill` reads if Activity grows; the summary's "Tue 2026-11-03 at 15:00" wording in proposals (the Activity line already reads well).
   - **Retro:** went well: a control case in the "never offered" fixture proved the exclusions weren't passing on an empty list · do better: run `prettier --check` on generated migration files before the first `pnpm check` · top-up for S54.2: the win-back list's empty state says what will fill it ("After 2 visits, a client who stops coming shows here") with the action to import past visits.
