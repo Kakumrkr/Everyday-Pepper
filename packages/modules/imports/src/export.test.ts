@@ -183,7 +183,15 @@ describe('buildBusinessExport (AC-W1-37)', () => {
         timeOff: [],
       },
     ]);
-    expect(files['README.txt']).toContain('America/Chicago');
+    // The zone in words, as the app says it (AC-W1-44), never its id.
+    expect(files['README.txt']).toContain('in Central Time, the business');
+    expect(files['README.txt']).not.toContain('America/Chicago');
+  });
+
+  it('names a time zone without a plain name by its city (AC-W1-44)', () => {
+    const paris = { ...data(), business: { ...data().business, timeZone: 'Europe/Paris' } };
+    const files = unzip(buildBusinessExport(paris, AT).bytes);
+    expect(files['README.txt']).toContain('in Paris time, the business');
   });
 
   it('splits a CSV past the import’s row limit into files it takes whole', () => {

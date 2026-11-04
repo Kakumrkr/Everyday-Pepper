@@ -166,6 +166,9 @@ export const tenants = pgTable(
     phone: text('phone'),
     publicAddress: text('public_address'),
     cancellationPolicy: text('cancellation_policy'),
+    // When the business is deleted for good (S51.2, ADR-0054): 30 days after the owner asked;
+    // NULL: not being deleted. While set, the booking page is closed and no email goes out.
+    deletionDueAt: timestamp('deletion_due_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
@@ -209,6 +212,9 @@ export const users = pgTable(
     emailVerified: boolean('email_verified').notNull().default(false),
     image: text('image'),
     twoFactorEnabled: boolean('two_factor_enabled').notNull().default(false),
+    // When the account is deleted for good (S51.2, ADR-0054); NULL: not being deleted. Ours,
+    // not Better Auth's: it never reads or writes it.
+    deletionDueAt: timestamp('deletion_due_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [check('users_email_lowercase', sql`${table.email} = lower(${table.email})`)],

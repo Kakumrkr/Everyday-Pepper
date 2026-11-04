@@ -3,6 +3,7 @@ import {
   clockTime,
   MAX_IMPORT_ROWS,
   formatDate,
+  localTimeLabel,
   toZoned,
   type BusinessExportCounts,
 } from '@pepper/contracts';
@@ -69,7 +70,8 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
       .filter((name) => !BUSINESS_EXPORT_FILES.some((file) => file.name === name))
       .map((name) => `${name}  More rows of the file before it (10,000 rows a file)`),
     '',
-    `visits.csv gives each visit's date and time in ${data.business.timeZone}, the business's time zone.`,
+    // In words, as the app says it ("Eastern Time", "Paris time"; S51.2, AC-W1-44).
+    `visits.csv gives each visit's date and time in ${localTimeLabel(data.business.timeZone, exportedAt.getTime())}, the business's time zone.`,
     'Prices are in dollars; in the JSON files, money is in cents.',
     'To bring your clients and visits into Pepper again: Clients → Import, clients.csv first,',
     'then visits.csv. Pepper recognises its own files, so no column needs mapping.',

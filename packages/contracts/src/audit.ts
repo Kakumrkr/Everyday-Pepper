@@ -579,6 +579,24 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       after: BusinessExportCountsSchema,
     })
     .strict(),
+  // The owner asked for the business to be deleted, or kept it (S51.2, ADR-0054). The
+  // deletion itself leaves no entry: the audit log goes with the business.
+  z
+    .object({
+      action: z.literal('business.deletion_scheduled'),
+      entity: entity('tenant'),
+      before: z.null(),
+      after: z.object({ dueAt: UtcDateTimeSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('business.deletion_cancelled'),
+      entity: entity('tenant'),
+      before: z.object({ dueAt: UtcDateTimeSchema }).strict(),
+      after: z.null(),
+    })
+    .strict(),
   // Client imports (S48, ADR-0049): counts only, never a client's details.
   z
     .object({

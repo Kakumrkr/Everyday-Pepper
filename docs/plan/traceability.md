@@ -46,6 +46,11 @@ Links each requirement to its design and tests. Test columns are filled in as ph
 | AC-W1-37 Business export (owner only) | S51 | 11 | `imports/src/export.test.ts`; `db/src/export.int.test.ts`; `api` `export.controller.test.ts`, `export.int.test.ts`; `e2e/tests/export.spec.ts` |
 | AC-W1-38 Export round-trips through import | S51 | 11 | `api/src/export.int.test.ts` "round trip" |
 | AC-W1-39 Initials skip digits | S50.2 retro top-up | 11 | `ui/src/kit/controls.test.tsx` "initials" |
+| AC-W1-40 Business deletion scheduled, kept, owner only | S51.2 | 11 | `core/src/services/deletion.test.ts`; `api/src/deletion.int.test.ts`; `e2e/tests/deletion.spec.ts` |
+| AC-W1-41 A due business leaves no tenant rows | S51.2 | 11 | `db/src/deletion.int.test.ts`; `worker/src/jobs.int.test.ts` "deletion" |
+| AC-W1-42 Account deletion with a grace period | S51.2 | 11 | `db/src/deletion.int.test.ts`; `api/src/deletion.int.test.ts`; `e2e/tests/deletion.spec.ts` |
+| AC-W1-43 A finished email change ends other sessions (L15) | S51.2 | 11 | `api/src/auth.int.test.ts` "change of email" |
+| AC-W1-44 The export's README names the time zone in words | S51 retro top-up | 11 | `imports/src/export.test.ts` "time zone" |
 | AC-W1-4 password reset, no account revealed, single-use link | ADR-0007, ADR-0012, ADR-0045 | 10 | S44: `apps/api/src/auth.int.test.ts` "AC-W1-4: a reset answers the same…", "sends no address or link token to the logs"; `apps/api/src/auth/better-auth.test.ts`, `auth-emails.test.ts`; `packages/runtime/src/request-logging.test.ts`; `e2e/tests/auth.spec.ts` "AC-W1-4…"; screens `e2e/tests/screens.spec.ts` (`auth-forgot*`, `auth-reset*`) |
 | AC-W1-5 email verification for new accounts | ADR-0007, ADR-0045, PCR-007 | 10 | S44: `apps/api/src/auth.int.test.ts` "signs up, confirms her email…", "AC-W1-5: an unconfirmed sign-in…", "…a second sign-up answers the same…"; migration 0051 `packages/db/src/migrate.int.test.ts`; `e2e/tests/auth.spec.ts` "AC-W1-5…"; screens `auth-check-inbox` |
 | AC-W1-6 change email through the new address | ADR-0007, ADR-0045 | 10 | S44: `apps/api/src/auth.int.test.ts` "AC-W1-6…", "a change to an address that has an account…"; `e2e/tests/auth.spec.ts` "AC-W1-6…"; screens `auth-change-email` |

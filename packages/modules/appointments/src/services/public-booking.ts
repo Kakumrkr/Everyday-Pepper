@@ -645,7 +645,7 @@ export async function getManagedBooking(
       if (row === undefined) throw new BookingNotFoundError();
       return toPublicBooking(tx, row, now);
     },
-    { readOnly: true },
+    { readOnly: true, whileClosing: true },
   );
 }
 
@@ -658,22 +658,27 @@ export async function cancelManagedBooking(
 ): Promise<{ booking: PublicBooking; email: BookingEmailDetails }> {
   const hash = manageTokenHash(ManageTokenSchema.parse(token));
   const now = nowOf(options);
-  return inPage(db, slug, async (tx, tenant) => {
-    const row = await lockChangeable(tx, hash, now);
-    const cancelled = await setBookingStatus(tx, BookingIdSchema.parse(row.id), 'cancelled');
-    if (cancelled === undefined) throw new BookingNotFoundError();
-    await auditUpdate(tx, row, cancelled);
-    await keepReminderInStep(tx, cancelled, now);
-    await requestInsights(tx);
-    await requestWaitlistMatch(tx, row, now);
-    const result = await withEmail(tx, tenant, cancelled, now);
-    await options.notify?.(tx, {
-      kind: 'cancelled',
-      email: result.email,
-      change: changeOf(cancelled),
-    });
-    return result;
-  });
+  return inPage(
+    db,
+    slug,
+    async (tx, tenant) => {
+      const row = await lockChangeable(tx, hash, now);
+      const cancelled = await setBookingStatus(tx, BookingIdSchema.parse(row.id), 'cancelled');
+      if (cancelled === undefined) throw new BookingNotFoundError();
+      await auditUpdate(tx, row, cancelled);
+      await keepReminderInStep(tx, cancelled, now);
+      await requestInsights(tx);
+      await requestWaitlistMatch(tx, row, now);
+      const result = await withEmail(tx, tenant, cancelled, now);
+      await options.notify?.(tx, {
+        kind: 'cancelled',
+        email: result.email,
+        change: changeOf(cancelled),
+      });
+      return result;
+    },
+    { whileClosing: true },
+  );
 }
 
 /**
@@ -809,12 +814,16 @@ function nowOf(options: PublicOptions): number {
   return (options.clock ?? systemClock).now().getTime();
 }
 
-/** Runs `work` for the business at `slug`; `BookingPageNotFoundError` when there is none. */
+/**
+ * Runs `work` for the business at `slug`; `BookingPageNotFoundError` when there is none, or
+ * when the business is being deleted (S51.2, ADR-0054: its page takes nothing new), unless
+ * `whileClosing` (a client may still see and cancel a visit they already have).
+ */
 async function inPage<T>(
   db: Database,
   slug: TenantSlug,
   work: (tx: TenantTx, tenant: Tenant) => Promise<T>,
-  options: { readOnly?: boolean } = {},
+  options: { readOnly?: boolean; whileClosing?: boolean } = {},
 ): Promise<T> {
   const parsed = TenantSlugSchema.safeParse(slug);
   if (!parsed.success) throw new BookingPageNotFoundError();
@@ -822,8 +831,11 @@ async function inPage<T>(
   const result = await withPublicTenant(
     db,
     parsed.data,
-    async (tx, tenant) => ({ value: await work(tx, tenant) }),
-    options,
+    async (tx, tenant) => {
+      if (tenant.deletionDueAt !== null && options.whileClosing !== true) return undefined;
+      return { value: await work(tx, tenant) };
+    },
+    { readOnly: options.readOnly === true },
   );
   if (result === undefined) throw new BookingPageNotFoundError();
   return result.value;

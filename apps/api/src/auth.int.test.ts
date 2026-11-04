@@ -1522,6 +1522,29 @@ describe('account recovery and email (S44, ADR-0045)', () => {
       .expect(200);
   });
 
+  it('AC-W1-43 (L15): a finished change of email ends every other session', async () => {
+    const { browser: phone, email } = await signUp('opal');
+    const laptop = browser();
+    await laptop.post('/api/auth/sign-in/email', { email, password: PASSWORD }).expect(200);
+    const tablet = browser();
+    await tablet.post('/api/auth/sign-in/email', { email, password: PASSWORD }).expect(200);
+    const newAddress = newEmail('opal.new');
+    await phone
+      .post('/api/auth/change-email', { newEmail: newAddress, callbackURL: '/email-confirmed' })
+      .expect(200);
+    await browser()
+      .get(linkIn(await emailTo(email, 'Confirm the change of your Pepper email')))
+      .expect(302);
+    // Only the current address has confirmed: nothing ends yet.
+    await laptop.get('/v1/me').expect(200);
+    await phone
+      .get(linkIn(await emailTo(newAddress, 'Confirm your new email for Pepper')))
+      .expect(302);
+    expect((await me(phone)).user.email).toBe(newAddress);
+    await laptop.get('/v1/me').expect(401);
+    await tablet.get('/v1/me').expect(401);
+  });
+
   it('a change to an address that has an account answers the same and changes nothing', async () => {
     const { browser: b, email } = await signUp('ivy');
     const { email: taken } = await signUp('ivy.taken');

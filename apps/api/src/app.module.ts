@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { BookingEmailsModule } from './booking-emails/booking-emails.js';
 import { ChatModule } from './chat/chat.module.js';
 import { ClientsModule } from './clients/clients.module.js';
+import { DeletionModule } from './deletion/deletion.module.js';
 import { ExportModule } from './export/export.module.js';
 import { ImportsModule } from './imports/imports.module.js';
 import { MemoryModule } from './memory/memory.module.js';
@@ -31,6 +32,7 @@ export class AppModule {
         ClientsModule,
         ImportsModule,
         ExportModule,
+        DeletionModule,
         MemoryModule,
         TasksModule,
         FeedModule,

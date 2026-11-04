@@ -14,7 +14,6 @@ import {
 } from '@pepper/contracts';
 import { dayRange, todayIn } from './calendar';
 import { normalizeContact } from './booking';
-import { plainZoneName } from './time-zones';
 import type { CallResult } from './client-api';
 import { z } from 'zod';
 
@@ -175,28 +174,8 @@ export function serviceOf(
   return business.services.find((service) => service.id === serviceId);
 }
 
-/**
- * The business's clock in words (DESIGN.md §6, no zone ids): its plain name ("Central Time",
- * S46), else its city (`Europe/Paris` → "Paris time"), "UTC", or an offset zone by its offset
- * ("GMT-5": Etc's own names invert the sign), the offset in force `at` that moment (now).
- */
-export function localTimeLabel(timeZone: string, at: number = Date.now()): string {
-  const plain = plainZoneName(timeZone);
-  if (plain !== undefined) return plain;
-  if (
-    ['UTC', 'GMT', 'Etc/UTC', 'Etc/GMT', 'Etc/UCT', 'Etc/Universal', 'Etc/Zulu'].includes(timeZone)
-  ) {
-    return 'UTC';
-  }
-  if (timeZone.startsWith('Etc/') || !timeZone.includes('/')) {
-    const offset = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' })
-      .formatToParts(at)
-      .find((part) => part.type === 'timeZoneName')?.value;
-    return offset ?? timeZone;
-  }
-  const city = timeZone.split('/').at(-1)?.replaceAll('_', ' ') ?? timeZone;
-  return `${city} time`;
-}
+// The business's clock in words lives in `@pepper/contracts` (S51.2), shared with the export.
+export { localTimeLabel } from '@pepper/contracts';
 
 /** Up to two initials of a name: `Juniper Hair Studio` → `JH`. */
 export function initials(name: string): string {

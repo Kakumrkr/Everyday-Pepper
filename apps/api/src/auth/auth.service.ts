@@ -1,6 +1,7 @@
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
 import { TenantIdSchema, UserIdSchema, type TenantId, type UserId } from '@pepper/contracts';
 import { setSessionActiveTenant, type Database } from '@pepper/db';
+import { isAPIError } from 'better-auth/api';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { z } from 'zod';
 import type { BetterAuth } from './better-auth.js';
@@ -33,6 +34,15 @@ export abstract class AuthService {
   abstract setActiveTenant(session: AuthSession, tenantId: TenantId | null): Promise<void>;
   /** Serves `/api/auth/*` (sign-up, sign-in, sign-out, second factor). */
   abstract handle(request: IncomingMessage, response: ServerResponse): Promise<void>;
+
+  /**
+   * Whether `password` is the password of the account signed in on `headers` (S51.2: deleting
+   * an account asks for it). Refuses unless an implementation can check it.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default refuses; BetterAuthService checks
+  verifyPassword(_headers: IncomingHttpHeaders, _password: string): Promise<boolean> {
+    return Promise.resolve(false);
+  }
 }
 
 // What Better Auth returns for a session; parsed rather than trusted, since the shape belongs
@@ -84,6 +94,17 @@ export class BetterAuthService extends AuthService {
       tenantId,
     );
     if (!found) throw new Error('The session no longer exists');
+  }
+
+  override async verifyPassword(headers: IncomingHttpHeaders, password: string): Promise<boolean> {
+    try {
+      await this.auth.api.verifyPassword({ body: { password }, headers: fromNodeHeaders(headers) });
+      return true;
+    } catch (error) {
+      // A wrong password is a 400; anything else (no session, a database error) is not ours.
+      if (isAPIError(error) && error.statusCode === 400) return false;
+      throw error;
+    }
   }
 
   async handle(request: IncomingMessage, response: ServerResponse): Promise<void> {

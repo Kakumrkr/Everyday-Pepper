@@ -14,7 +14,9 @@ import {
 } from '@pepper/contracts';
 import {
   addUsage,
+  cancelPendingOutboxEmails,
   claimOutboxMessage,
+  findCurrentTenantDeletion,
   deletePushSubscription,
   findPushSubscription,
   insertOutboxMessage,
@@ -92,7 +94,8 @@ export async function queuePush(
  * What one delivery call did. `dropped`: a push whose device is gone (the member turned it
  * off, or the push service no longer knows it); nothing is wrong, so nothing is alerted.
  */
-export type DeliveryResult = 'sent' | 'retry' | 'dead' | 'skipped' | 'dropped';
+/** `cancelled`: an email of a business being deleted, taken back unsent (ADR-0054). */
+export type DeliveryResult = 'sent' | 'retry' | 'dead' | 'skipped' | 'dropped' | 'cancelled';
 
 /**
  * Writes the episode an outbox message names (S31, ADR-0037): `@pepper/ai`'s writer, given by
@@ -142,9 +145,17 @@ export async function deliverOutboxMessage(
   const id = OutboxMessageIdSchema.parse(due.messageId);
   const claimedAt = options.clock.now();
   const leaseUntil = new Date(claimedAt.getTime() + (options.leaseMs ?? OUTBOX_LEASE_MS));
-  const claimed = await withTenant(db, tenantId, (tx) =>
-    claimOutboxMessage(tx, id, claimedAt, leaseUntil),
-  );
+  const claimed = await withTenant(db, tenantId, async (tx) => {
+    // A business being deleted sends no more email (S51.2, ADR-0054): it is taken back.
+    if (
+      (await findCurrentTenantDeletion(tx)) !== null &&
+      (await cancelPendingOutboxEmails(tx, claimedAt, { id })) > 0
+    ) {
+      return 'cancelled' as const;
+    }
+    return claimOutboxMessage(tx, id, claimedAt, leaseUntil);
+  });
+  if (claimed === 'cancelled') return 'cancelled';
   if (claimed === undefined || claimed.payload === null) return 'skipped';
 
   let dropped = false;
