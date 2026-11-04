@@ -51,7 +51,8 @@ test('a taken time → the slot picker → Approve exactly as shown → Why? →
   // Booking asks first by default: the card shows what will happen and waits.
   const card = changeCard(page, 'New booking');
   await expect(card.getByText('Needs your OK')).toBeVisible();
-  await expect(card.getByText('Emails Maria L. a confirmation.')).toBeVisible();
+  // The card names who gets the email, by name and address (S53, AC-W7-7).
+  await expect(card.getByText(`Emails Maria L. (${s.mariaEmail}) a confirmation.`)).toBeVisible();
   await expect(card.getByText('Client')).toBeVisible();
   await expectAccessible(page, 'chat with a proposal');
   await card.getByRole('button', { name: 'Approve' }).click();
@@ -128,6 +129,17 @@ test('ask vs "do it and tell me": the Autonomy page changes what the chat does',
   const s = await salon(page);
 
   await page.goto('/autonomy');
+  // S53: a new business starts on Balanced, its standing rules in words; the 13 actions are
+  // behind "Customise each action".
+  const presets = page.getByRole('radiogroup', { name: 'How much I do on my own' });
+  await expect(presets.getByRole('radio', { name: /^Balanced/ })).toBeChecked();
+  await expect(page.getByTestId('standing-rules')).toContainText(
+    'I ask you before new bookings, moves',
+  );
+  await (await hydrated(page.getByRole('button', { name: 'Customise each action' }))).click();
+  await expect(page.getByTestId('count-booking.create')).toHaveText(
+    'Not done in the last 30 days.',
+  );
   const row = page.getByRole('radiogroup', { name: 'Create a booking' });
   await hydrated(row.getByRole('radio', { name: 'Do it and tell me' }));
   // The bulk lock is visible and can't be chosen.
@@ -148,6 +160,9 @@ test('ask vs "do it and tell me": the Autonomy page changes what the chat does',
   await expectAccessible(page, 'autonomy');
   await row.getByText('Do it and tell me').click();
   await expect(toast(page)).toHaveText('Saved. Create a booking: Do it and tell me.');
+  // One change makes it "your own mix".
+  await expect(page.getByText('Your own mix.', { exact: false })).toBeVisible();
+  await expect(presets.getByRole('radio', { checked: true })).toHaveCount(0);
 
   await ask(page, `Book Maria for Haircut with Jess on ${s.day} at 14:00`);
   const card = changeCard(page, 'New booking');
@@ -160,6 +175,12 @@ test('ask vs "do it and tell me": the Autonomy page changes what the chat does',
     page.getByRole('dialog').getByText('Create a booking: Do it and tell me'),
   ).toBeVisible();
   await page.keyboard.press('Escape');
+
+  // The count comes from the Activity log; "your own mix" opens each action at once.
+  await page.goto('/autonomy');
+  await expect(page.getByTestId('count-booking.create')).toHaveText(
+    'Done once in the last 30 days.',
+  );
 
   // "Ask me first for everything" overrides it.
   await page.goto('/autonomy');
@@ -243,20 +264,12 @@ test('a stale approval shows the fresh proposal and runs nothing', async ({ page
   await onboardOwner(page);
   const s = await salon(page);
   const booking = await book(page, s, s.mariaId, s.jessId, '10:00');
-  // Moves ask first here.
-  await callApi(
-    page,
-    'PUT',
-    '/v1/autonomy',
-    { levels: { 'booking.move': 'ask' } },
-    {
-      parse: (body: unknown) => body,
-    },
-  );
 
+  // A move emails the client, so it asks by default, and the card says who gets the email (S53).
   await ask(page, `Move Maria's booking on ${s.day} to 15:00`);
   const card = changeCard(page, 'Move');
   await expect(card.getByText('Needs your OK')).toBeVisible();
+  await expect(card.getByText(`(${s.mariaEmail}) the new time.`, { exact: false })).toBeVisible();
   // Meanwhile the booking is moved on the calendar: the card is out of date.
   const moved = await page.request.patch(`/v1/bookings/${booking.id}`, {
     data: { startsAt: s.at('11:00') },

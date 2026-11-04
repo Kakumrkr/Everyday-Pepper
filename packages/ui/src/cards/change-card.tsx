@@ -54,6 +54,8 @@ export interface ChangeCardProps {
   before: ChangeSide | null;
   after: ChangeSide | null;
   emails: (EmailItem & { clientId: string })[];
+  /** Each emailed client's address the viewer may see (S53): the card says who gets it. */
+  recipients?: readonly { clientId: string; address: string }[];
   undoUntil: string | null;
   /** The viewer may approve or reject it (shows the buttons only while `proposed`). */
   canDecide: boolean;
@@ -185,7 +187,16 @@ export function ChangeCard(props: ChangeCardProps) {
   );
 }
 
-function EmailLines({ action, emails, before, after, timeZone, now, status }: ChangeCardProps) {
+function EmailLines({
+  action,
+  emails,
+  recipients,
+  before,
+  after,
+  timeZone,
+  now,
+  status,
+}: ChangeCardProps) {
   const books = action.startsWith('booking');
   if (emails.length === 0) {
     return books && status !== 'refused' ? (
@@ -196,11 +207,24 @@ function EmailLines({ action, emails, before, after, timeZone, now, status }: Ch
     <ul className="m-0 flex list-none flex-col gap-1 p-0 type-label text-ink">
       {emails.map((email, index) => (
         <li key={`${email.clientId}-${String(index)}`}>
-          {emailLine(email, clientNameFor(email.clientId, before, after), timeZone, now)}
+          {emailLine(
+            email,
+            recipientName(
+              clientNameFor(email.clientId, before, after),
+              recipients?.find((r) => r.clientId === email.clientId)?.address,
+            ),
+            timeZone,
+            now,
+          )}
         </li>
       ))}
     </ul>
   );
+}
+
+/** "Ana (ana@example.com)": the client and the address the email goes to, when known. */
+function recipientName(name: string, address: string | undefined): string {
+  return address === undefined ? name : `${name} (${address})`;
 }
 
 /** Memory on a card, as plain text (values are people's words, never markup). */

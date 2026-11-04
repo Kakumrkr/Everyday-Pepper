@@ -197,6 +197,29 @@ export async function lookUpClients(
   return rows.map(toClient);
 }
 
+/**
+ * The email addresses of these clients the member may see (S53: a card says who gets its
+ * email); a deleted client or one without an address is left out. Without `clients.read`, none.
+ */
+export async function clientEmailAddresses(
+  db: Database,
+  actor: Actor,
+  ids: readonly ClientId[],
+): Promise<Map<ClientId, string>> {
+  const wanted = [...new Set(ids)];
+  if (wanted.length === 0 || !can(actor.context, 'clients.read')) return new Map();
+  const rows = await withMember(db, actor.context, (tx) =>
+    findClientsByIds(tx, ClientNameIdsSchema.parse(wanted)),
+  );
+  return new Map(
+    rows.flatMap((row) =>
+      row.deletedAt === null && row.email !== null && row.email !== ''
+        ? [[ClientIdSchema.parse(row.id), row.email] as const]
+        : [],
+    ),
+  );
+}
+
 /** One client; `ClientNotFoundError` for an unknown id or another staff member's client. */
 export async function getClient(db: Database, actor: Actor, clientId: ClientId): Promise<Client> {
   requirePermission(actor, 'clients.read');

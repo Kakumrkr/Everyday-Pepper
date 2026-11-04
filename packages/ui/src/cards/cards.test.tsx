@@ -180,6 +180,34 @@ describe('ChangeCard', () => {
     expect(screen.getByText('changes to', { exact: false })).toBeTruthy();
     expect(screen.getByText('No email to the client.')).toBeTruthy();
   });
+
+  it('a move that asks names who gets the email, by name and address (S53)', async () => {
+    const { container } = render(
+      <ChangeCard
+        {...change({
+          action: 'booking.move',
+          before: { ...side, time: '10:00', endTime: '11:00' },
+          emails: [{ template: 'rescheduled', clientId: CLIENT }],
+          recipients: [{ clientId: CLIENT, address: 'maria@example.com' }],
+        })}
+      />,
+    );
+    expect(screen.getByText('Emails Maria L. (maria@example.com) the new time.')).toBeTruthy();
+    await expectAccessible(container);
+  });
+
+  it('without an address the viewer may see, the card names the client only', () => {
+    render(
+      <ChangeCard
+        {...change({
+          action: 'booking.move',
+          emails: [{ template: 'rescheduled', clientId: CLIENT }],
+          recipients: [],
+        })}
+      />,
+    );
+    expect(screen.getByText('Emails Maria L. the new time.')).toBeTruthy();
+  });
 });
 
 describe('ChangeCard with memory (S30)', () => {

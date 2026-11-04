@@ -9,7 +9,8 @@ import {
   ApproveProposalRequestSchema,
   ApproveProposalResponseSchema,
   AutonomyChangeSchema,
-  BusinessAutonomySchema,
+  AutonomyTrackRecordSchema,
+  AutonomyViewSchema,
   EditDraftRequestSchema,
   UndoActionRequestSchema,
   UndoActionResponseSchema,
@@ -18,7 +19,8 @@ import {
   type AiProposalsResponse,
   type AiProposalView,
   type ApproveProposalResponse,
-  type BusinessAutonomy,
+  type AutonomyTrackRecord,
+  type AutonomyView,
   type UndoActionResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
@@ -172,8 +174,18 @@ export class AutonomyController {
 
   @Get()
   @RequirePermission('business.read')
-  async get(@CurrentTenant() tenant: TenantContext): Promise<BusinessAutonomy> {
-    return BusinessAutonomySchema.parse(await answering(() => this.ai.autonomy(tenant)));
+  async get(@CurrentTenant() tenant: TenantContext): Promise<AutonomyView> {
+    return AutonomyViewSchema.parse(await answering(() => this.ai.autonomy(tenant)));
+  }
+
+  /**
+   * Per action, how often Pepper did it in the last 30 days and its run since the last mistake;
+   * the earned-trust offers only for members who change autonomy (S53, ADR-0055).
+   */
+  @Get('track-record')
+  @RequirePermission('business.read')
+  async trackRecord(@CurrentTenant() tenant: TenantContext): Promise<AutonomyTrackRecord> {
+    return AutonomyTrackRecordSchema.parse(await answering(() => this.ai.trackRecord(tenant)));
   }
 
   /** 403 for staff; 400 for "just do it" where it is not allowed (bulk messages). */
@@ -182,10 +194,8 @@ export class AutonomyController {
   async change(
     @CurrentTenant() tenant: TenantContext,
     @Body() body: unknown,
-  ): Promise<BusinessAutonomy> {
+  ): Promise<AutonomyView> {
     const change = parseBody(AutonomyChangeSchema, body);
-    return BusinessAutonomySchema.parse(
-      await answering(() => this.ai.changeAutonomy(tenant, change)),
-    );
+    return AutonomyViewSchema.parse(await answering(() => this.ai.changeAutonomy(tenant, change)));
   }
 }

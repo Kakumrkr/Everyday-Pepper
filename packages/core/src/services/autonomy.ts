@@ -2,12 +2,17 @@ import {
   AutonomyActionSchema,
   AutonomyChangeSchema,
   AutonomySettingsSchema,
+  presetLevels,
+  type AutonomyAction,
   type AutonomyChange,
   type AutonomyLevel,
+  type AutonomyPreset,
   type AutonomySettings,
+  type AutonomyTrackRecord,
   type BusinessAutonomy,
 } from '@pepper/contracts';
 import {
+  actionTrackRecord,
   appendAuditEntry,
   findAutonomySettings,
   saveAutonomySettings,
@@ -16,7 +21,9 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
-import { resolveAutonomy } from '../autonomy.js';
+import { earnedTrustOffer, resolveAutonomy } from '../autonomy.js';
+import { systemClock, type Clock } from '../clock.js';
+import { can } from '../permissions.js';
 import { ForbiddenError } from '../errors.js';
 
 // A business's autonomy settings (ADR-0028): what the AI may do without asking. Everyone in
@@ -67,14 +74,23 @@ export async function changeAutonomy(
       askFirst: stored?.askFirst ?? false,
       levels: validLevels(stored?.levels ?? {}),
     };
-    const changed = fields.levels ?? {};
+    // A preset (S53) sets every action: `balanced` back to the defaults, the others explicitly.
+    const changed: NonNullable<AutonomyChange['levels']> =
+      fields.preset === undefined
+        ? (fields.levels ?? {})
+        : presetChange(fields.preset, defaults.templateDefaults);
     const levels: AutonomySettings = Object.fromEntries(
       AutonomyActionSchema.options.flatMap((action) => {
         const level = action in changed ? changed[action] : before.levels[action];
         return level === null || level === undefined ? [] : [[action, level]];
       }),
     );
-    const after = { askFirst: fields.askFirst ?? before.askFirst, levels };
+    // A preset is a whole choice: it also turns "Ask me first for everything" off (S53), so the
+    // page never shows a preset that the switch overrides.
+    const after = {
+      askFirst: fields.askFirst ?? (fields.preset === undefined ? before.askFirst : false),
+      levels,
+    };
     if (sameChoices(before, after)) return resolveAutonomy(after, defaults.templateDefaults);
 
     await saveAutonomySettings(tx, { ...after, updatedBy: actor.context.userId });
@@ -90,6 +106,56 @@ export async function changeAutonomy(
     });
     return resolveAutonomy(after, defaults.templateDefaults);
   });
+}
+
+/** The levels a preset stores: none for `balanced` (the defaults), every action otherwise. */
+function presetChange(
+  preset: AutonomyPreset,
+  templateDefaults: AutonomySettings,
+): Record<AutonomyAction, AutonomyLevel | null> {
+  const levels = presetLevels(preset, resolveAutonomy(undefined, templateDefaults).levels);
+  return Object.fromEntries(
+    AutonomyActionSchema.options.map((action) => [
+      action,
+      preset === 'balanced' ? null : levels[action],
+    ]),
+  ) as Record<AutonomyAction, AutonomyLevel | null>;
+}
+
+/**
+ * The AI's track record per action (S53, ADR-0055): how often it did each in the last 30 days,
+ * how many it did in a row since its last mistake, and, for members who change autonomy, the
+ * level Pepper offers once that streak is earned. Staff see their own records' counts (the
+ * trust tables' member scope).
+ */
+export async function getTrackRecord(
+  db: Database,
+  actor: Actor,
+  options: AutonomyDefaults & { clock?: Clock },
+): Promise<AutonomyTrackRecord> {
+  requirePermission(actor, 'business.read');
+  const now = (options.clock ?? systemClock).now().getTime();
+  const day = 24 * 60 * 60 * 1000;
+  const { rows, autonomy } = await withMember(db, actor.context, async (tx) => ({
+    rows: await actionTrackRecord(tx, {
+      since30: new Date(now - 30 * day),
+      since90: new Date(now - 90 * day),
+    }),
+    autonomy: await loadAutonomy(tx, options),
+  }));
+  const decides = can(actor.context, 'autonomy.manage');
+  return {
+    actions: AutonomyActionSchema.options.map((action) => {
+      const row = rows.find((r) => r.action === action);
+      const correctInARow = row?.correctInARow ?? 0;
+      return {
+        action,
+        doneLast30Days: row?.doneSince30 ?? 0,
+        correctInARow,
+        offer: decides ? earnedTrustOffer(action, autonomy, correctInARow) : null,
+      };
+    }),
+  };
 }
 
 /**

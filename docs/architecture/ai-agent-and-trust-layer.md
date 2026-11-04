@@ -30,13 +30,19 @@ The LLM selects tools and fills arguments. It never accesses the database, never
 | Tier | Examples | Default autonomy | Can be "just do it"? |
 |---|---|---|---|
 | `read` | availability, lookup, summaries | auto | yes |
-| `internal_write` | create/move booking, add note, block time | do it and tell me (undo shown) | yes |
+| `internal_write` | create/move booking, add note, block time | do it and tell me (undo shown); new bookings, cancellations and moves (S53: the client is emailed) ask | yes |
 | `external_or_irreversible` | email a customer, cancel with notification, bulk change | ask me | single-recipient only; never for bulk (>10) |
 
 The dial's eleven actions, their tiers, defaults, approval permissions and undo windows are `AUTONOMY_ACTIONS` in `packages/contracts/src/trust.ts` (PCR-003 added `booking.cancel` and `task.create`). A tool call involving several actions (a move that emails the client) follows the strictest; the bulk lock counts the recipients the domain's preview found, whatever the action ([ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md)).
 
 ## Autonomy dial
 Per tenant, per `actionType`: `ask` / `notify` / `auto`, bounded by tier rules above, plus an "Ask me first for everything" switch. Stored in `autonomy_settings` (S23, overrides only; else the template's default, else the platform's); editable in the Autonomy settings page (S26) by owners and managers; the AI can propose changes ("Want me to auto-confirm bookings from now on?") but changing autonomy is itself an `ask` action and the AI can never make it. `decideAutonomy` (pure, property-tested) is called inside the trust layer from the domain's own preview, so no caller can skip it; untrusted text in the turn makes external actions ask and quiet writes visible.
+
+**Trust controls (S53, [ADR-0055](../adr/0055-trust-controls-presets-standing-rules-earned-trust.md)).**
+- **Presets.** Careful, Balanced and Hands-off are expanded into levels (`presetLevels`). `PUT /v1/autonomy {preset}` saves them, and `GET` names the preset the levels match (`null`: your own mix).
+- **Standing rules** are the dial and the booking rules read back as sentences on the page.
+- **Moves.** A move asks by default (it emails the client), and its card names the address (`recipients` on the proposal view).
+- **Track record.** `GET /v1/autonomy/track-record` gives each action's 30-day count and its run since the last mistake (an Undo marked "wrong", or a card turned down). After 20 in a row, owners and managers are offered one step more room.
 
 ## Action records (S23, [ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md))
 - `ActionProposal` (`ai_action_proposals`) — pending action with the exact payload, the domain's preview, the **state fingerprint** it was previewed on, explanation, expiry (24 h, never past the appointment); one pending per target; approved/rejected by a person, or expired/superseded. Approval re-runs the preview in its transaction: a different fingerprint supersedes it with a fresh proposal instead of running. Only the member it was made for, or an owner/manager, decides, with their own role re-checked at that moment.
@@ -55,7 +61,7 @@ Typed card payloads (`contracts/tool-cards.ts`, validated with Zod in the browse
 A card is a snapshot: each reads its record by id (`/v1/ai/proposals/:id`, `/v1/ai/actions/:id`) for its live state. Approve sends only the fingerprint the card showed; a stale card is replaced by the fresh proposal. Undo shows its window and says whether the client was already emailed. The AI's words are plain text, never HTML or Markdown (a lint rule); links come only from `ScreenLinkSchema`.
 
 ## Chat and settings screens (S26)
-`/chat`: streamed text, resume with `Last-Event-ID`, Stop and cancel on leaving, suggestion chips, the AI off/paused/fallback states with a screen link (AC-X-2). `/autonomy`: the dial grouped by risk, the bulk lock shown, "Ask me first for everything"; owners and managers change it. A lead's approval of a staff member's proposal keeps the requester's "me", and the receipt is the staff member's too (migration 0036).
+`/chat`: streamed text, resume with `Last-Event-ID`, Stop and cancel on leaving, suggestion chips, the AI off/paused/fallback states with a screen link (AC-X-2). `/autonomy`: presets, the standing rules, then the dial grouped by risk (behind "Customise each action", with each action's 30-day count and earned-trust offer, S53), the bulk lock shown, "Ask me first for everything"; owners and managers change it. A lead's approval of a staff member's proposal keeps the requester's "me", and the receipt is the staff member's too (migration 0036).
 
 ## Guardrails
 Per-tenant monthly token budget reserved atomically before every model call (`AI_MONTHLY_TOKENS`, default 5M; soft at 80% → routine model only, hard → AI paused, screens work); rate limits per member (20 turns / 5 min), business and address; max steps, writes and time per turn; PII minimisation in prompts (no contacts, members' messages redacted); OpenAI data controls set so API data is not used for training (verify zero-retention eligibility before pilot).

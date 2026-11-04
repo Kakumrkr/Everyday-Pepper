@@ -426,3 +426,60 @@ export async function listExecutions(
     .orderBy(desc(aiActionExecutions.createdAt), desc(aiActionExecutions.id))
     .limit(LimitSchema.parse(options.limit));
 }
+
+/** One action's counts for its track record (S53, ADR-0055). */
+export interface ActionTrackRow {
+  action: AutonomyAction;
+  /** Executions created at or after `since30`. */
+  doneSince30: number;
+  /** Executions created at or after `since90` and after the action's last mistake. */
+  correctInARow: number;
+}
+
+const TrackRowSchema = z.object({
+  action: AutonomyActionSchema,
+  done_30: z.coerce.number().int().min(0),
+  correct: z.coerce.number().int().min(0),
+});
+
+/**
+ * Per action, how many times the AI did it since `since30`, and how many it did since `since90`
+ * after its last mistake: an execution later undone as "wrong", or a proposal a member turned
+ * down (S53's earned trust). Every time compared is one the database stamped (`created_at`), so
+ * the run is never skewed by the domain clock: it restarts after the action that was wrong, or
+ * the request that was turned down. Under `withMember`, staff count only their own records.
+ * Actions with no executions since `since90` have no row.
+ */
+export async function actionTrackRecord(
+  tx: TenantTx,
+  options: { since30: Date; since90: Date },
+): Promise<ActionTrackRow[]> {
+  const since30 = z.date().parse(options.since30);
+  const since90 = z.date().parse(options.since90);
+  const { rows } = await tx.execute(sql`
+    WITH mistakes AS (
+      SELECT m.action, max(m.at) AS at FROM (
+        SELECT action, created_at AS at FROM ai_action_executions
+          WHERE undo_reason = 'wrong' AND created_at >= ${since90.toISOString()}::timestamptz
+        UNION ALL
+        SELECT action, created_at AS at FROM ai_action_proposals
+          WHERE status = 'rejected' AND created_at >= ${since90.toISOString()}::timestamptz
+      ) m
+      GROUP BY m.action
+    )
+    SELECT e.action,
+      count(*) FILTER (WHERE e.created_at >= ${since30.toISOString()}::timestamptz) AS done_30,
+      count(*) FILTER (
+        WHERE (mistakes.at IS NULL OR e.created_at > mistakes.at)
+          AND e.undo_reason IS DISTINCT FROM 'wrong'
+      ) AS correct
+    FROM ai_action_executions e
+    LEFT JOIN mistakes ON mistakes.action = e.action
+    WHERE e.created_at >= ${since90.toISOString()}::timestamptz
+    GROUP BY e.action
+  `);
+  return rows.map((raw) => {
+    const row = TrackRowSchema.parse(raw);
+    return { action: row.action, doneSince30: row.done_30, correctInARow: row.correct };
+  });
+}

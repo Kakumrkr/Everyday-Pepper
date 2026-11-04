@@ -774,6 +774,9 @@ for (const width of WIDTHS) {
 
       // The S43 top-up: a change far down the page is confirmed in view, above the tabs.
       await page.goto('/autonomy');
+      // S53: the actions are behind "Customise each action" while a preset is chosen.
+      await (await hydrated(page.getByRole('button', { name: 'Customise each action' }))).click();
+      await expectTapTargets(page, 'autonomy, each action open');
       const dial = page.getByRole('radiogroup', { name: 'Offering open slots to the waitlist' });
       await dial.scrollIntoViewIfNeeded();
       await hydrated(dial.getByRole('radio', { name: 'Do it and tell me' }));
@@ -799,6 +802,13 @@ for (const width of WIDTHS) {
       await expect(page.getByRole('switch', { name: 'Ask me first for everything' })).toBeVisible();
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`autonomy-${String(width)}-${scheme}.png`, SHOT);
+      // Each action open, with its 30-day count (S53).
+      await (await hydrated(page.getByRole('button', { name: 'Customise each action' }))).click();
+      await expect(page.getByTestId('count-booking.move')).toBeVisible();
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`autonomy-custom-${String(width)}-${scheme}.png`, SHOT);
 
       await page.goto('/memory');
       await expect(page.getByRole('link', { name: 'Tell Pepper in chat' })).toBeVisible();

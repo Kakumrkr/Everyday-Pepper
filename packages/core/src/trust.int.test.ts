@@ -62,8 +62,10 @@ import {
   undoAction,
   type ActionRunner,
 } from './services/ai-actions.js';
-import { changeAutonomy, getAutonomy } from './services/autonomy.js';
+import { autonomyPresetOf } from './autonomy.js';
+import { changeAutonomy, getAutonomy, getTrackRecord } from './services/autonomy.js';
 import { createBusiness } from './services/business.js';
+import { clientEmailAddresses, createClient, deleteClient } from './services/clients.js';
 import { queueEmail } from './services/outbox.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
@@ -1379,5 +1381,142 @@ describe('S36: proposals of the business, revisions and the feed (ADR-0040)', ()
     expect(expired).toBeGreaterThanOrEqual(1);
     expect((await getProposal(db, ana(), third.id)).status).toBe('expired');
     expect(await statusOf('2030-01-09')).toBe('expired');
+  });
+});
+
+describe('presets and the track record (S53)', () => {
+  // A business of its own, so the other tests' receipts and mistakes don't count here.
+  let lena: Actor;
+  let sam: Actor;
+
+  beforeAll(async () => {
+    const lenaId = await insertUser(db, 'Lena');
+    const samId = await insertUser(db, 'Sam');
+    const tenant = await createBusiness(db, lenaId, {
+      name: 'Lena Nails',
+      slug: 'lena-trust-record',
+      timeZone: 'America/New_York',
+    });
+    const id = TenantIdSchema.parse(tenant.id);
+    await withTenant(db, id, (tx) => addMembership(tx, { userId: samId, role: 'staff' }));
+    lena = { context: { tenantId: id, userId: lenaId, role: 'owner' } };
+    sam = { context: { tenantId: id, userId: samId, role: 'staff' } };
+  });
+
+  // The run is measured in the database's own times; the windows by the clock (real here).
+  /** One to-do the AI adds for `actor`. */
+  async function addTodo(actor: Actor) {
+    const result = await requestAction(
+      db,
+      actor,
+      todoRunner,
+      {
+        payload: todo(actor.context.userId),
+        idempotencyKey: turnKey(),
+        explanation,
+        untrustedContext: false,
+      },
+      { ...defaults, clock: realTime },
+    );
+    return result;
+  }
+  const record = async (actor: Actor) => {
+    const { actions } = await getTrackRecord(db, actor, { ...defaults, clock: realTime });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- every action has a row
+    return actions.find((row) => row.action === 'task.create')!;
+  };
+
+  it('a preset sets every action; balanced goes back to the defaults', async () => {
+    await changeAutonomy(db, lena, { askFirst: true }, defaults);
+    // A preset is a whole choice: "Ask me first for everything" goes off with it.
+    expect((await changeAutonomy(db, lena, { preset: 'careful' }, defaults)).askFirst).toBe(false);
+    const careful = await changeAutonomy(db, lena, { preset: 'careful' }, defaults);
+    expect(new Set(Object.values(careful.levels))).toEqual(new Set(['ask']));
+    expect(autonomyPresetOf(careful, {})).toBe('careful');
+    const handsOff = await changeAutonomy(db, lena, { preset: 'hands_off' }, defaults);
+    expect(handsOff.levels).toMatchObject({ 'booking.move': 'auto', 'message.bulk': 'ask' });
+    expect(autonomyPresetOf(handsOff, {})).toBe('hands_off');
+    const mixed = await changeAutonomy(db, lena, { levels: { 'task.create': 'ask' } }, defaults);
+    expect(autonomyPresetOf(mixed, {})).toBeNull();
+    const balanced = await changeAutonomy(db, lena, { preset: 'balanced' }, defaults);
+    expect(balanced).toEqual(await getAutonomy(db, lena, defaults));
+    expect(balanced.levels['booking.move']).toBe('ask');
+    expect(autonomyPresetOf(balanced, {})).toBe('balanced');
+    await expect(changeAutonomy(db, sam, { preset: 'hands_off' }, defaults)).rejects.toThrow(
+      ForbiddenError,
+    );
+  });
+
+  it('counts the last 30 days and the run since the last mistake', async () => {
+    expect(await record(lena)).toEqual({
+      action: 'task.create',
+      doneLast30Days: 0,
+      correctInARow: 0,
+      offer: null,
+    });
+    const first = await addTodo(lena);
+    if (first.kind !== 'executed') throw new Error('expected an execution');
+    await addTodo(lena);
+    await addTodo(sam);
+    expect(await record(lena)).toMatchObject({ doneLast30Days: 3, correctInARow: 3 });
+    // Staff see their own records only.
+    expect(await record(sam)).toMatchObject({ doneLast30Days: 1, correctInARow: 1 });
+
+    // An Undo marked "wrong" is a mistake: the run starts again after the wrong one.
+    await undoAction(
+      db,
+      lena,
+      first.execution.id,
+      { runner: todoRunner, reason: 'wrong' },
+      { clock: realTime },
+    );
+    await addTodo(lena);
+    expect(await record(lena)).toMatchObject({ doneLast30Days: 4, correctInARow: 3 });
+
+    // A card turned down is a mistake too.
+    await changeAutonomy(db, lena, { levels: { 'task.create': 'ask' } }, defaults);
+    const asked = await addTodo(lena);
+    if (asked.kind !== 'proposed') throw new Error('expected a proposal');
+    await rejectProposal(db, lena, asked.proposal.id, { clock: realTime });
+    expect(await record(lena)).toMatchObject({ doneLast30Days: 4, correctInARow: 0 });
+    await changeAutonomy(db, lena, { levels: { 'task.create': null } }, defaults);
+
+    // Older than 30 days: no longer counted.
+    const later = await getTrackRecord(db, lena, {
+      ...defaults,
+      clock: { now: () => new Date(Date.now() + 31 * DAY) },
+    });
+    expect(later.actions.find((row) => row.action === 'task.create')).toMatchObject({
+      doneLast30Days: 0,
+    });
+  });
+
+  it('names the addresses a card emails, only for clients the member may see (S53)', async () => {
+    const ana = await createClient(db, lena, { name: 'Ana', email: 'ana@example.test' });
+    const noEmail = await createClient(db, lena, { name: 'Bo' });
+    const gone = await createClient(db, lena, { name: 'Cy', email: 'cy@example.test' });
+    await deleteClient(db, lena, gone.id);
+    const ids = [ana.id, noEmail.id, gone.id, ana.id];
+    expect([...(await clientEmailAddresses(db, lena, ids))]).toEqual([
+      [ana.id, 'ana@example.test'],
+    ]);
+    // Staff reach only their own clients: none here.
+    expect((await clientEmailAddresses(db, sam, ids)).size).toBe(0);
+    expect((await clientEmailAddresses(db, lena, [])).size).toBe(0);
+  });
+
+  it('after 20 correct in a row, offers owners one step more room, never staff', async () => {
+    for (let i = 0; i < 20; i += 1) await addTodo(lena);
+    expect(await record(lena)).toMatchObject({ correctInARow: 20, offer: 'auto' });
+    expect((await record(sam)).offer).toBeNull();
+    await changeAutonomy(db, lena, { askFirst: true }, defaults);
+    expect((await record(lena)).offer).toBeNull();
+    await changeAutonomy(
+      db,
+      lena,
+      { askFirst: false, levels: { 'task.create': 'auto' } },
+      defaults,
+    );
+    expect((await record(lena)).offer).toBeNull();
   });
 });

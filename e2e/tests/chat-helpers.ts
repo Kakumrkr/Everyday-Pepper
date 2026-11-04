@@ -32,6 +32,8 @@ export interface Salon {
   jessId: string;
   marcoId: string;
   mariaId: string;
+  /** Maria's address, which a card that emails her names (S53). */
+  mariaEmail: string;
   samId: string;
 }
 
@@ -81,6 +83,7 @@ export async function salon(page: Page, jessLogin: string | null = null): Promis
     jessId,
     marcoId,
     mariaId: maria.id,
+    mariaEmail: maria.email ?? '',
     samId: sam.id,
   };
 }

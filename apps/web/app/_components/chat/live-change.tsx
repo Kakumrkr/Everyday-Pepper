@@ -293,6 +293,7 @@ function cardProps(
       before: proposal.before,
       after: proposal.after,
       emails: proposal.emails,
+      recipients: proposal.recipients ?? [],
       undoUntil: null,
       canDecide: proposal.canDecide,
       canUndo: false,
