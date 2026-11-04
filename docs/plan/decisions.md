@@ -462,3 +462,20 @@ Every decision the user made in chat, and the defaults Claude chose that the use
   - D-3: standing rules are the dial and booking rules read back as sentences; rules typed in words go to S56 (an AI change).
   - D-4: ADR-0055. D-5: no migration (presets expand into levels; counts from the existing trust tables).
   - **Claude's refinements:** Balanced is stored as "no own levels" (the defaults); a preset also turns "Ask me first for everything" off; Hands-off still asks for a message to more than 10 clients and a new rule; the run since the last mistake compares only database-stamped times (it restarts after the wrong action or the turned-down request; 90 days); offers go to owners and managers only and never while asking first; the address on proposals only (a receipt's address could have changed since); the booking-rules link for members who manage them; the review's 10 fixes and the walkthrough check's server/client fix (the page's day worked out in the browser).
+- **S54 (user, 2026-11-04):** at the brief, "pre-approved with your recommendation. Complete the session successfully" (top-up named in the prompt: the fill receipt on Activity names the client who got the offer and the slot's value, "Offered Tue 2 pm to Maria, ~$60"):
+  - D-1: split; S54 is cancellation → fill with regulars and receipts; the win-back list and the post-import aha go to **S54.2**.
+  - D-2: regulars fill only the seats the waitlist leaves; one regular's offer per client per 7 days; the nudge opt-out holds.
+  - D-3: ADR-0056 extends ADR-0041. D-4: no recording (`send_waitlist_offers` is never offered to the model).
+  - **Claude's refinements:**
+    - Regulars are read from the feed's open `rebooking_due` suggestions, so the insights pass's rule is the only definition of "overdue".
+    - Their offer has no waitlist entry (migration 0064, `source`). Their email carries the nudge's footer, and without a mailing address no regular is offered anything.
+    - A regular gets no "taken" email. The client who freed the time is never offered it back.
+    - The value is the best-ranked offer's service price.
+    - The Activity line is built from the receipt's `after` plus a live `fill`.
+    - The waitlist screen marks a regular's offer.
+    - The review's fixes:
+      - a merge with two regular offers on one time;
+      - paused or turned-off suggestions;
+      - one marketing email a week across nudges and offers;
+      - no regular's offer without the footer;
+      - the order in SQL.
