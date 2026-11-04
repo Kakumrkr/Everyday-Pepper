@@ -503,7 +503,7 @@ export async function waitlistFillOf(
       return {
         state: 'filled',
         // A client deleted since isn't named.
-        clientName: client === undefined || client.deletedAt !== null ? null : client.name,
+        clientName: client?.deletedAt === null ? client.name : null,
         priceCents: booking?.priceFromCents ?? null,
       };
     }
