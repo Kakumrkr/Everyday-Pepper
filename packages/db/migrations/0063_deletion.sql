@@ -15,7 +15,10 @@ CREATE FUNCTION tenants_deletion_due() RETURNS trigger
   SET search_path = public, pg_temp
   AS $$
 BEGIN
+  -- The services' roles only: a superuser (operations by hand, tests) is a member of every
+  -- role, so it is named out; the migration role is not a member of pepper_app.
   IF pg_has_role(current_user, 'pepper_app', 'MEMBER')
+     AND NOT (SELECT rolsuper FROM pg_roles WHERE rolname = current_user)
      AND (OLD.deletion_due_at IS NULL OR OLD.deletion_due_at > now()) THEN
     RAISE EXCEPTION 'this business is not due for deletion' USING ERRCODE = '42501';
   END IF;
