@@ -11,9 +11,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 1. AC-W5-3…5 in acceptance + traceability
 - [x] 2. Migration 0064: offers without an entry (`source`), repo + contracts
 - [x] 3. Domain: regular candidates (from the feed's `rebooking_due`), offers, claim/release/undo, the regular's email with the unsubscribe footer (no mailing address: no regulars), no "taken" email to a regular; the tool and matcher pass regulars (smart-waitlist int 25/25)
-- [ ] 4. Matcher + tool: regulars, "~$X"; Activity offer/fill outcome (top-up)
-- [ ] 5. Wrong-client fixtures, race with a regular, worker p95
-Next step: task 4 ("~$X" is in the tool's summary already; Activity fill outcome next).
+- [x] 4. Matcher + tool: regulars, "~$X"; Activity offer/fill outcome (top-up; `fill` on the action view, matcher int 6/6, ui 9/9)
+- [x] 5. Wrong-client fixtures, race with a regular, worker p95 (worker int 3/3)
+Next step: ADR-0056, then `/session-close` (review, tier 3, walkthrough of Activity, PR).
 
 ## Last sessions
 - **S53 Phase 12 · Trust controls (2026-11-04)** ([ADR-0055](../adr/0055-trust-controls-presets-standing-rules-earned-trust.md), [PR #79](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/79)). Full entry in [session-log.md](session-log.md).

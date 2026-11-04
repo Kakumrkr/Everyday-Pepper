@@ -243,6 +243,37 @@ describe('AC-W5-1 on the worker', () => {
   );
 
   it(
+    'p95 (S54, AC-W5-4): ten cancellations at once, each offered within 2 minutes at the 95th percentile',
+    { timeout: 300_000 },
+    async () => {
+      const shops = [];
+      for (let i = 0; i < 10; i += 1) shops.push(await newBusiness());
+      const cancelled = await Promise.all(shops.map((b) => b.cancel()));
+      const latencies = await Promise.all(
+        shops.map(async (b, i) => {
+          const [proposal] = await eventually(
+            () => offerProposals(b),
+            (found) => found.length > 0,
+          );
+          return Date.parse(proposal?.createdAt ?? '') - (cancelled[i] ?? 0);
+        }),
+      );
+      const sorted = [...latencies].sort((a, b) => a - b);
+      // The 95th percentile of ten is the slowest but none (nearest rank: ceil(0.95 × 10) = 10).
+      const p95 = sorted[Math.ceil(0.95 * sorted.length) - 1] ?? Infinity;
+      expect(p95).toBeLessThan(TWO_MINUTES);
+      // Each proposal offers the time to its own business's waiting clients only.
+      for (const b of shops) {
+        const [proposal] = await offerProposals(b);
+        const preview = proposal?.preview as { emails?: { clientId: string }[] } | undefined;
+        expect((preview?.emails ?? []).map((e) => e.clientId).sort()).toEqual(
+          b.waiting.map((client) => client.id).sort(),
+        );
+      }
+    },
+  );
+
+  it(
     'at "auto": the offers are made within 2 minutes; the first claim books, the other is told',
     { timeout: 180_000 },
     async () => {
