@@ -242,6 +242,15 @@ describe('deleting an account (AC-W1-42)', () => {
     await laptop.get('/v1/me').expect(401);
     // The account still signs in while it waits, so its owner can keep it.
     await phone.get('/v1/me').expect(200);
+    // Owning a new business would hold the deletion up forever: refused until it is kept.
+    const owning = await phone
+      .post('/v1/tenants', {
+        name: 'Late Start',
+        slug: `late-${newId().slice(-8)}`,
+        timeZone: 'America/New_York',
+      })
+      .expect(409);
+    expect((owning.body as { code: string }).code).toBe('account_being_deleted');
     await phone.delete('/v1/me/deletion').expect(200, { dueAt: null });
     await phone.get('/v1/me/deletion').expect(200, { dueAt: null });
   });

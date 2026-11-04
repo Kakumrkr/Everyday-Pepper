@@ -22,7 +22,7 @@ import {
   findAccountDeletion,
   findCurrentTenant,
   findCurrentTenantDeletion,
-  isPolicyViolation,
+  isNotDueForDeletion,
   listAccountsDueForDeletion,
   listTenantsDueForDeletion,
   listUserBusinesses,
@@ -200,6 +200,8 @@ export interface DeletionPassResult {
 }
 
 const PAGE = 50;
+// The most a listing returns; past this many deferred in one pass, the rest wait for the next.
+const MAX_LISTED = 1000;
 
 /**
  * Deletes for good every business and account whose day has come (AC-W1-41, AC-W1-42):
@@ -216,9 +218,9 @@ export async function runDueDeletions(
   const result: DeletionPassResult = { businesses: 0, accounts: 0, deferred: 0 };
   const deferredTenants = new Set<string>();
   for (;;) {
-    const due = (await listTenantsDueForDeletion(db, now, PAGE + deferredTenants.size)).filter(
-      (id) => !deferredTenants.has(id),
-    );
+    const due = (
+      await listTenantsDueForDeletion(db, now, Math.min(PAGE + deferredTenants.size, MAX_LISTED))
+    ).filter((id) => !deferredTenants.has(id));
     if (due.length === 0) break;
     for (const tenantId of due) {
       try {
@@ -232,7 +234,7 @@ export async function runDueDeletions(
         deleteCurrentTenantIfDue(tx, now),
       ).catch((error: unknown) => {
         // The database's own clock says the day hasn't come (this clock runs ahead of it).
-        if (isPolicyViolation(error)) return null;
+        if (isNotDueForDeletion(error)) return null;
         throw error;
       });
       if (deleted === true) {
@@ -246,9 +248,9 @@ export async function runDueDeletions(
   }
   const deferredAccounts = new Set<string>();
   for (;;) {
-    const due = (await listAccountsDueForDeletion(db, now, PAGE + deferredAccounts.size)).filter(
-      (account) => !deferredAccounts.has(account.id),
-    );
+    const due = (
+      await listAccountsDueForDeletion(db, now, Math.min(PAGE + deferredAccounts.size, MAX_LISTED))
+    ).filter((account) => !deferredAccounts.has(account.id));
     if (due.length === 0) break;
     for (const account of due) {
       if ((await soleOwnedLiveBusinesses(db, account.id)).length > 0) {

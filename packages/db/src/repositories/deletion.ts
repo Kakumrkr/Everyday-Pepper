@@ -13,6 +13,20 @@ import { withJobScan, type TenantTx } from '../tenant.js';
 
 const LimitSchema = z.number().int().min(1).max(1000);
 
+/** The message of migration 0063's trigger, when a business isn't due by the database's clock. */
+const NOT_DUE = 'this business is not due for deletion';
+
+/** Whether `error` (or an error it wraps) is migration 0063's refusal of an early delete. */
+export function isNotDueForDeletion(error: unknown): boolean {
+  for (let current = error, depth = 0; current instanceof Error && depth < 5; depth++) {
+    if ((current as Error & { code?: unknown }).code === '42501' && current.message === NOT_DUE) {
+      return true;
+    }
+    current = current.cause;
+  }
+  return false;
+}
+
 /** When the transaction's business is deleted for good, or `null` when it isn't being deleted. */
 export async function findCurrentTenantDeletion(tx: TenantTx): Promise<Date | null> {
   const [row] = await tx
@@ -210,7 +224,7 @@ export async function listAccountsDueForDeletion(
 export async function deleteInvitesTo(tx: TenantTx, email: string): Promise<number> {
   const deleted = await tx
     .delete(invites)
-    .where(eq(invites.email, z.email().parse(email).toLowerCase()))
+    .where(eq(invites.email, z.string().min(1).max(320).parse(email).toLowerCase()))
     .returning({ id: invites.id });
   return deleted.length;
 }

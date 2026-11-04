@@ -9,6 +9,7 @@ import {
 import {
   appendAuditEntry,
   createTenant,
+  findAccountDeletion,
   findCurrentTenant,
   recordActivation,
   updateCurrentTenantBookingPage,
@@ -18,6 +19,7 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
+import { AccountBeingDeletedError } from '../errors.js';
 
 /**
  * The most businesses one user may own (S8, approved by the user). Guards against scripted
@@ -41,6 +43,9 @@ export async function createBusiness(
   } = {},
 ): Promise<Tenant> {
   const ownerUserId = UserIdSchema.parse(owner);
+  // An account being deleted owns nothing new: its deletion would wait on the business forever
+  // (S51.2, ADR-0054). Keep the account first.
+  if ((await findAccountDeletion(db, ownerUserId)) !== null) throw new AccountBeingDeletedError();
   return createTenant(db, input, {
     owner: ownerUserId,
     ownerLimit: BUSINESS_LIMIT_PER_OWNER,
