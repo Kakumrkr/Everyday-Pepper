@@ -32,19 +32,19 @@ test('deletion (AC-W1-40, AC-W1-42): the owner schedules and keeps the business,
   page,
 }) => {
   test.setTimeout(150_000);
-  await onboardOwner(page, { business: 'Juniper Leaving Studio' });
+  // A name of its own per run (its booking link is made from it).
+  const name = `Juniper Leaving ${unique('studio')}`;
+  await onboardOwner(page, { business: name });
 
   // The business: More → Download your data → Delete.
   await page.goto('/more');
   await page.getByRole('link', { name: 'Download your data' }).click();
-  await page.getByRole('link', { name: /Delete Juniper Leaving Studio/ }).click();
+  await page.getByRole('link', { name: new RegExp(`Delete ${name}`) }).click();
   await expect(page).toHaveURL(/\/more\/data\/delete$/);
-  await expect(
-    page.getByRole('heading', { name: 'Delete Juniper Leaving Studio', level: 1 }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: `Delete ${name}`, level: 1 })).toBeVisible();
   // The download is offered first, before the name to type (the S51 retro's top-up).
   const download = page.getByRole('button', { name: 'Download your data' });
-  const confirm = page.getByLabel('Type Juniper Leaving Studio to confirm');
+  const confirm = page.getByLabel(`Type ${name} to confirm`);
   const [downloadBox, confirmBox] = await Promise.all([
     download.boundingBox(),
     confirm.boundingBox(),
@@ -52,16 +52,14 @@ test('deletion (AC-W1-40, AC-W1-42): the owner schedules and keeps the business,
   expect(downloadBox?.y ?? Infinity).toBeLessThan(confirmBox?.y ?? 0);
   await checkScreen(page, 'Delete business');
 
-  const remove = await hydrated(
-    page.getByRole('button', { name: 'Delete Juniper Leaving Studio' }),
-  );
+  const remove = await hydrated(page.getByRole('button', { name: `Delete ${name}` }));
   await confirm.fill('Juniper');
   await remove.click();
   await expect(page.getByText('That isn’t the business’s name.')).toBeVisible();
-  await confirm.fill('juniper leaving studio');
+  await confirm.fill(name.toLowerCase());
   await remove.click();
   await expect(
-    page.getByRole('heading', { name: 'Juniper Leaving Studio is being deleted', level: 1 }),
+    page.getByRole('heading', { name: `${name} is being deleted`, level: 1 }),
   ).toBeVisible();
   await expect(page.getByTestId('business-deletion-due')).toContainText('Pepper deletes');
   await checkScreen(page, 'Business being deleted');
@@ -69,15 +67,13 @@ test('deletion (AC-W1-40, AC-W1-42): the owner schedules and keeps the business,
   // More says so too.
   await page.goto('/more');
   await expect(page.getByTestId('business-deletion-notice')).toContainText(
-    'Pepper deletes Juniper Leaving Studio on',
+    `Pepper deletes ${name} on`,
   );
 
   // The account: refused while it alone owns a live business. Keep the business first.
   await page.getByRole('link', { name: 'Keep it' }).click();
-  await (await hydrated(page.getByRole('button', { name: 'Keep Juniper Leaving Studio' }))).click();
-  await expect(
-    page.getByRole('heading', { name: 'Delete Juniper Leaving Studio', level: 1 }),
-  ).toBeVisible();
+  await (await hydrated(page.getByRole('button', { name: `Keep ${name}` }))).click();
+  await expect(page.getByRole('heading', { name: `Delete ${name}`, level: 1 })).toBeVisible();
 
   await page.goto('/more');
   await page.getByRole('link', { name: 'Delete your account' }).click();
