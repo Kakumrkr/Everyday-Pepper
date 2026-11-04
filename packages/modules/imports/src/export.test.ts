@@ -197,7 +197,8 @@ describe('buildBusinessExport (AC-W1-37)', () => {
     expect(parseImportFile(strToBytes(files['clients.csv'])).rows).toHaveLength(MAX_IMPORT_ROWS);
     expect(parseImportFile(strToBytes(files['clients-2.csv'])).rows).toHaveLength(1);
     expect(files['README.txt']).toContain('clients-2.csv');
-  });
+    // 10,001 rows written, zipped and read back: ~8 s under coverage on this machine.
+  }, 30_000);
 });
 
 function strToBytes(text: string | undefined): Uint8Array {
