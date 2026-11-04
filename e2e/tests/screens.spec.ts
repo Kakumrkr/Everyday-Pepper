@@ -56,6 +56,13 @@ import { solidColorPhoto } from '@pepper/storage';
 //   pnpm --filter @pepper/e2e exec playwright test screens --project=desktop --update-snapshots
 
 const WIDTHS = [375, 412, 1280] as const;
+/** The import result's undo day, fixed for the shot: the real one is 7 days from today. */
+async function fixUndoDay(page: Page): Promise<void> {
+  await page.getByTestId('import-undo-until').evaluate((element) => {
+    element.textContent = 'Tuesday, November 10';
+  });
+}
+
 const SCHEMES = ['light', 'dark'] as const;
 const SHOT = { fullPage: true, animations: 'disabled', maxDiffPixelRatio: 0.01 } as const;
 
@@ -680,7 +687,8 @@ for (const width of WIDTHS) {
       await expect.soft(page).toHaveScreenshot(`booking-sheet-${String(width)}-${scheme}.png`, {
         ...SHOT,
         fullPage: false,
-        mask: [dialog.locator('dd').first(), page.getByTestId('calendar-day')],
+        // The day moves with today; the client row (S50.2) stays in the picture.
+        mask: [dialog.getByTestId('booking-when'), page.getByTestId('calendar-day')],
       });
       await page.keyboard.press('Escape');
       await (
@@ -833,7 +841,9 @@ for (const width of WIDTHS) {
     await expect(page.getByRole('heading', { name: 'Your clients are in' })).toBeVisible({
       timeout: 60_000,
     });
-    // The undo's last day moves with today.
+    // The undo's last day moves with today, and so would its width (a longer weekday wraps
+    // the line): one fixed day of the same form, masked as well.
+    await fixUndoDay(page);
     await shots('done', [page.getByTestId('import-undo-until')]);
   });
 }
@@ -883,7 +893,9 @@ for (const width of WIDTHS) {
       timeout: 60_000,
     });
     await expect(page.getByTestId('import-taken')).toBeVisible();
-    // The undo's last day moves with today.
+    // The undo's last day moves with today, and so would its width (a longer weekday wraps
+    // the line): one fixed day of the same form, masked as well.
+    await fixUndoDay(page);
     await shots('import-visits-done', [page.getByTestId('import-undo-until')]);
 
     await page.getByTestId('import-see-clients').click();

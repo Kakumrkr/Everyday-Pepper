@@ -149,7 +149,8 @@ function BookingDetails({
             ) : (
               <Link
                 href={`${ROUTES.clients}/${encodeURIComponent(booking.clientId)}`}
-                className="font-semibold text-brand underline underline-offset-2"
+                // A tap target of its own, not a link in a sentence (D3: at least 44 px).
+                className="inline-flex min-h-11 items-center font-semibold text-brand underline underline-offset-2"
                 data-testid="booking-client"
               >
                 {booking.client}
@@ -159,7 +160,7 @@ function BookingDetails({
         {
           label: 'When',
           value: (
-            <span className="tabular-nums">
+            <span className="tabular-nums" data-testid="booking-when">
               {dateTimeLabel(timeZone, booking.startsAt)} – {timeLabel(timeZone, booking.endsAt)}
             </span>
           ),
