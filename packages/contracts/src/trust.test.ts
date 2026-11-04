@@ -10,12 +10,18 @@ import {
   AutonomyLevelSchema,
   AutonomySettingsSchema,
   BULK_RECIPIENT_LIMIT,
+  AutonomyPresetSchema,
+  AutonomyTrackRecordSchema,
   levelAllowed,
+  presetLevels,
+  presetOf,
   RiskTierSchema,
   StateFingerprintSchema,
   TRUST_JSON_MAX_BYTES,
   TrustJsonSchema,
   looksLikeContact,
+  type AutonomyAction,
+  type AutonomyLevel,
 } from './trust.js';
 
 describe('RiskTierSchema', () => {
@@ -49,7 +55,7 @@ describe('AUTONOMY_ACTIONS', () => {
     );
     expect(defaults).toEqual({
       'booking.create': 'ask',
-      'booking.move': 'notify',
+      'booking.move': 'ask',
       'booking.cancel': 'ask',
       'booking_request.accept': 'notify',
       'time.block': 'notify',
@@ -150,6 +156,82 @@ describe('AutonomyChangeSchema', () => {
     );
     expect(AutonomyChangeSchema.safeParse({ levels: { 'rule.change': null } }).success).toBe(true);
     expect(AutonomyChangeSchema.safeParse({ tenantId: 'x' }).success).toBe(false);
+  });
+});
+
+const DEFAULTS = Object.fromEntries(
+  AutonomyActionSchema.options.map((action) => [action, AUTONOMY_ACTIONS[action].defaultLevel]),
+) as Record<AutonomyAction, AutonomyLevel>;
+
+describe('autonomy presets (S53)', () => {
+  it('sets only levels each action allows, for every preset', () => {
+    for (const preset of AutonomyPresetSchema.options) {
+      const levels = presetLevels(preset, DEFAULTS);
+      for (const action of AutonomyActionSchema.options) {
+        expect(levelAllowed(action, levels[action])).toBe(true);
+      }
+    }
+  });
+
+  it('careful asks for everything; balanced is the defaults', () => {
+    expect(new Set(Object.values(presetLevels('careful', DEFAULTS)))).toEqual(new Set(['ask']));
+    expect(presetLevels('balanced', DEFAULTS)).toEqual(DEFAULTS);
+  });
+
+  it('hands-off does changes alone, tells about client messages, still asks for bulk and rules', () => {
+    const levels = presetLevels('hands_off', DEFAULTS);
+    expect(levels['booking.move']).toBe('auto');
+    expect(levels['booking.cancel']).toBe('auto');
+    expect(levels['message.confirmation']).toBe('auto');
+    expect(levels['message.rebooking_nudge']).toBe('notify');
+    expect(levels['message.waitlist_offer']).toBe('notify');
+    expect(levels['message.bulk']).toBe('ask');
+    expect(levels['rule.change']).toBe('ask');
+  });
+
+  it('names the preset the levels match, or none for a mix', () => {
+    for (const preset of AutonomyPresetSchema.options) {
+      expect(presetOf(presetLevels(preset, DEFAULTS), DEFAULTS)).toBe(preset);
+    }
+    expect(presetOf({ ...DEFAULTS, 'task.create': 'auto' }, DEFAULTS)).toBeNull();
+    // A template whose defaults are all "ask me": careful and balanced are the same levels.
+    const allAsk = presetLevels('careful', DEFAULTS);
+    expect(presetOf(allAsk, allAsk)).toBe('careful');
+  });
+
+  it('takes a preset in a change, never with levels too', () => {
+    expect(AutonomyChangeSchema.parse({ preset: 'careful' })).toEqual({ preset: 'careful' });
+    expect(AutonomyChangeSchema.safeParse({ preset: 'reckless' }).success).toBe(false);
+    expect(
+      AutonomyChangeSchema.safeParse({ preset: 'careful', levels: { 'task.create': 'auto' } })
+        .success,
+    ).toBe(false);
+  });
+});
+
+describe('AutonomyTrackRecordSchema', () => {
+  const row = (action: AutonomyAction) => ({
+    action,
+    doneLast30Days: 3,
+    correctInARow: 3,
+    offer: null,
+  });
+
+  it('holds one row for every action', () => {
+    expect(
+      AutonomyTrackRecordSchema.safeParse({ actions: AutonomyActionSchema.options.map(row) })
+        .success,
+    ).toBe(true);
+    expect(
+      AutonomyTrackRecordSchema.safeParse({
+        actions: AutonomyActionSchema.options.slice(1).map(row),
+      }).success,
+    ).toBe(false);
+    expect(
+      AutonomyTrackRecordSchema.safeParse({
+        actions: AutonomyActionSchema.options.map((a) => ({ ...row(a), doneLast30Days: -1 })),
+      }).success,
+    ).toBe(false);
   });
 });
 

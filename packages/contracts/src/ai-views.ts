@@ -99,6 +99,17 @@ export const AiEmailViewSchema = z.strictObject({
 export type AiEmailView = z.infer<typeof AiEmailViewSchema>;
 
 /**
+ * Where a card's emails go (S53): each client's address, so the card says who gets the email
+ * ("Emails Ana (ana@example.com) the new time"). Read live and only for clients the viewer may
+ * see; a client without an address, deleted or out of the viewer's reach is left out.
+ */
+export const AiEmailRecipientSchema = z.strictObject({
+  clientId: ClientIdSchema,
+  address: z.string().max(320),
+});
+export type AiEmailRecipient = z.infer<typeof AiEmailRecipientSchema>;
+
+/**
  * What a card shows from memory (S30), read live by id: the fact a memory tool saves or
  * forgets ("Updated: was …"), the booking's warnings (AC-W3-2: an allergy on a color service)
  * and the client's last visit with its notes. Only what the viewer may read; nothing deleted.
@@ -128,6 +139,8 @@ export const AiProposalViewSchema = z.strictObject({
   before: SafeSideSchema.nullable(),
   after: SafeSideSchema.nullable(),
   emails: z.array(WouldBeEmailSchema).max(20),
+  /** The addresses of `emails`' clients (S53). */
+  recipients: z.array(AiEmailRecipientSchema).max(20).optional(),
   expiresAt: UtcDateTimeSchema,
   createdAt: UtcDateTimeSchema,
   /** The receipt, once approved. */
@@ -167,6 +180,8 @@ export const AiActionViewSchema = z.strictObject({
   before: SafeSideSchema.nullable(),
   after: SafeSideSchema.nullable(),
   emails: z.array(AiEmailViewSchema).max(100),
+  /** The addresses of `emails`' clients (S53). */
+  recipients: z.array(AiEmailRecipientSchema).max(20).optional(),
   createdAt: UtcDateTimeSchema,
   undoUntil: UtcDateTimeSchema.nullable(),
   /** The window is open, it is done, and the viewer may undo it. */

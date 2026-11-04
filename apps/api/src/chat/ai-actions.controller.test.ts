@@ -98,6 +98,15 @@ const action = {
 const autonomy = {
   askFirst: false,
   levels: Object.fromEntries(AutonomyActionSchema.options.map((a) => [a, 'ask'])),
+  preset: 'careful',
+};
+const trackRecord = {
+  actions: AutonomyActionSchema.options.map((a) => ({
+    action: a,
+    doneLast30Days: 2,
+    correctInARow: 2,
+    offer: null,
+  })),
 };
 
 let role: MembershipRole = 'staff';
@@ -117,6 +126,7 @@ const ai = {
   ),
   autonomy: vi.fn(() => Promise.resolve(autonomy)),
   changeAutonomy: vi.fn(() => Promise.resolve({ ...autonomy, askFirst: true })),
+  trackRecord: vi.fn(() => Promise.resolve(trackRecord)),
 };
 const chat = { status: vi.fn(() => Promise.resolve({ state: 'paused' })) };
 
@@ -277,6 +287,25 @@ describe('/v1/autonomy and /v1/chat/status', () => {
     expect(changed.body).toMatchObject({ askFirst: true });
     await send('put', '/v1/autonomy', { levels: { 'message.bulk': 'auto' } }).expect(400);
     expect(ai.changeAutonomy).toHaveBeenCalledTimes(1);
+  });
+
+  it('takes a preset, never with levels too or an unknown one (S53)', async () => {
+    role = 'owner';
+    await send('put', '/v1/autonomy', { preset: 'hands_off' }).expect(200);
+    expect(ai.changeAutonomy).toHaveBeenLastCalledWith(
+      { ...tenant, role: 'owner' },
+      { preset: 'hands_off' },
+    );
+    await send('put', '/v1/autonomy', { preset: 'reckless' }).expect(400);
+    await send('put', '/v1/autonomy', {
+      preset: 'careful',
+      levels: { 'task.create': 'ask' },
+    }).expect(400);
+  });
+
+  it('everyone reads the track record (S53)', async () => {
+    role = 'staff';
+    expect((await get('/v1/autonomy/track-record').expect(200)).body).toEqual(trackRecord);
   });
 
   it('says whether the AI is on', async () => {

@@ -30,6 +30,7 @@ import {
   findProposalByKey,
   insertExecution,
   insertProposal,
+  actionTrackRecord,
   listExecutions,
   listPendingProposals,
   lockExecution,
@@ -534,5 +535,55 @@ describe('a business deleted', () => {
     } finally {
       await owner.close();
     }
+  });
+});
+
+describe('actionTrackRecord (S53)', () => {
+  const window = () => ({
+    since30: new Date(Date.now() - 30 * 86_400_000),
+    since90: new Date(Date.now() - 90 * 86_400_000),
+  });
+  const blockFor = (userId: UserId) =>
+    execution({ action: 'time.block', tool: 'block_time', onBehalfOf: userId });
+
+  it('counts per action, starting the run again after a wrong undo or a rejection', async () => {
+    const first = await stored(inTenant((tx) => insertExecution(tx, blockFor(ana))));
+    await inTenant((tx) => insertExecution(tx, blockFor(jess)));
+    const counts = async (userId?: UserId) =>
+      (
+        await (userId === undefined
+          ? inTenant((tx) => actionTrackRecord(tx, window()))
+          : as(userId, (tx) => actionTrackRecord(tx, window())))
+      ).find((row) => row.action === 'time.block');
+    expect(await counts()).toEqual({ action: 'time.block', doneSince30: 2, correctInARow: 2 });
+    // Staff count their own records only (the member scope).
+    expect(await counts(jess)).toMatchObject({ doneSince30: 1, correctInARow: 1 });
+    expect(await counts(ben)).toBeUndefined();
+
+    await inTenant((tx) =>
+      tx.execute(
+        sql`UPDATE ai_action_executions SET status = 'undone', undone_at = now(), undone_by_user_id = ${ana}, undo_reason = 'wrong' WHERE id = ${first.id}`,
+      ),
+    );
+    expect(await counts()).toMatchObject({ doneSince30: 2, correctInARow: 0 });
+    await inTenant((tx) => insertExecution(tx, blockFor(ana)));
+    expect(await counts()).toMatchObject({ doneSince30: 3, correctInARow: 1 });
+
+    const refused = await stored(
+      inTenant((tx) => insertProposal(tx, proposal({ action: 'time.block', tool: 'block_time' }))),
+    );
+    await inTenant((tx) =>
+      tx.execute(
+        sql`UPDATE ai_action_proposals SET status = 'rejected', decided_at = now() + interval '1 second', decided_by_user_id = ${ana} WHERE id = ${refused.id}`,
+      ),
+    );
+    expect(await counts()).toMatchObject({ doneSince30: 3, correctInARow: 0 });
+  });
+
+  it('sees only its own business', async () => {
+    const other = await createTenant(db, { name: 'Elm', slug: 'elm-track', timeZone: 'UTC' });
+    const otherId = TenantIdSchema.parse(other.id);
+    const rows = await withTenant(db, otherId, (tx) => actionTrackRecord(tx, window()));
+    expect(rows).toEqual([]);
   });
 });

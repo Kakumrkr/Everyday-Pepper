@@ -3,6 +3,7 @@ import {
   AutonomyActionSchema,
   AutonomyLevelSchema,
   BULK_RECIPIENT_LIMIT,
+  EARNED_TRUST_STREAK,
   levelAllowed,
   RiskTierSchema,
   type AutonomyAction,
@@ -14,7 +15,12 @@ import {
 } from '@pepper/contracts';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { decideAutonomy, resolveAutonomy } from './autonomy.js';
+import {
+  autonomyPresetOf,
+  decideAutonomy,
+  earnedTrustOffer,
+  resolveAutonomy,
+} from './autonomy.js';
 
 // decideAutonomy is the trust layer's core rule (ADR-0028): property tests over every action ×
 // level × tier × context, then the rules pinned one by one.
@@ -318,11 +324,22 @@ describe('decideAutonomy: rules', () => {
     ).toEqual({ outcome: 'execute', reason: 'read_only' });
   });
 
+  it('asks before a move by default: the client is emailed (S53)', () => {
+    for (const actions of [['booking.move'], ['booking.move', 'message.confirmation']] as const) {
+      expect(
+        decideAutonomy(
+          { actions: [...actions], tier: 'internal_write', recipients: 1, untrustedContext: false },
+          defaults,
+        ),
+      ).toEqual({ outcome: 'propose', reason: 'setting' });
+    }
+  });
+
   it('follows the setting, with the reason "setting"', () => {
     expect(
       decideAutonomy(
         {
-          actions: ['booking.move'],
+          actions: ['time.block'],
           tier: 'internal_write',
           recipients: 0,
           untrustedContext: false,
@@ -464,5 +481,50 @@ describe('resolveAutonomy', () => {
     );
     expect(resolved.levels['message.bulk']).toBe('ask');
     expect(resolved.levels).not.toHaveProperty('booking.delete');
+  });
+});
+
+describe('earnedTrustOffer (S53)', () => {
+  const base = resolveAutonomy(undefined, {});
+
+  it('offers one step more room after the streak, not before', () => {
+    expect(earnedTrustOffer('booking.move', base, EARNED_TRUST_STREAK - 1)).toBeNull();
+    expect(earnedTrustOffer('booking.move', base, EARNED_TRUST_STREAK)).toBe('notify');
+    expect(earnedTrustOffer('time.block', base, EARNED_TRUST_STREAK)).toBe('auto');
+    expect(earnedTrustOffer('message.confirmation', base, 100)).toBeNull();
+  });
+
+  it('never offers a level the action does not allow, nor while asking first', () => {
+    expect(earnedTrustOffer('rule.change', base, 100)).toBeNull();
+    const bulkTold = { ...base, levels: { ...base.levels, 'message.bulk': 'notify' as const } };
+    expect(earnedTrustOffer('message.bulk', bulkTold, 100)).toBeNull();
+    expect(earnedTrustOffer('booking.move', { ...base, askFirst: true }, 100)).toBeNull();
+  });
+
+  it('offers only allowed levels for any action, level and streak', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom(...ACTIONS),
+        fc.constantFrom(...AutonomyLevelSchema.options),
+        fc.nat(200),
+        (action, level, streak) => {
+          const offer = earnedTrustOffer(
+            action,
+            { askFirst: false, levels: { ...base.levels, [action]: level } },
+            streak,
+          );
+          return offer === null || (levelAllowed(action, offer) && offer !== level);
+        },
+      ),
+    );
+  });
+});
+
+describe('autonomyPresetOf (S53)', () => {
+  it('reads the defaults as balanced, against the template’s own', () => {
+    expect(autonomyPresetOf(resolveAutonomy(undefined, {}), {})).toBe('balanced');
+    const template = { 'booking.create': 'notify' } as const;
+    expect(autonomyPresetOf(resolveAutonomy(undefined, template), template)).toBe('balanced');
+    expect(autonomyPresetOf(resolveAutonomy(undefined, {}), template)).toBeNull();
   });
 });

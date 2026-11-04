@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S53** (trust controls: presets, standing rules, client-visible moves ask, earned trust; Phase 12).
+**S53** trust controls (brief pre-approved: D-1 no split, D-2 the eval business keeps moves on "do it and tell me" until S56, D-3 standing rules read back as sentences, D-4 ADR-0055, D-5 no migration).
+- Done: contracts (presets, `booking.move` asks, track record, `recipients`); db `actionTrackRecord`; core presets, `getTrackRecord`, `earnedTrustOffer`, `clientEmailAddresses`; api `/v1/autonomy` preset + `/track-record`; ui `trust-words`, the card's address; web Autonomy page; e2e chat/screens specs updated; AC-W7-5…9, ADR-0055. Unit + db/core/ai integration green.
+- Next: `/code-review`, `/session-close` (tier 3, screens baselines, walkthrough, PR).
 
 ## Last sessions
 - **S52 Phase 12 · Home card board + Activity log (2026-11-04)** ([ADR-0043](../adr/0043-card-board-first-interaction.md), [PR #78](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/78)). Full entry in [session-log.md](session-log.md).

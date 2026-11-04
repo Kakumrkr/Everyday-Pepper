@@ -19,6 +19,7 @@ import {
   type AiActionsQuery,
   type AiActionsResponse,
   type AiActionView,
+  type AiEmailRecipient,
   type AiEmailView,
   type AiMemoryView,
   type AiProposalsResponse,
@@ -27,7 +28,10 @@ import {
   type ApproveProposalResponse,
   type AutonomyAction,
   type AutonomyChange,
+  type AutonomyTrackRecord,
+  type AutonomyView,
   type BusinessAutonomy,
+  type AutonomySettings,
   type ChangeSide,
   type EditDraftRequest,
   type MemoryFactId,
@@ -37,11 +41,14 @@ import {
 } from '@pepper/contracts';
 import {
   actionMessages,
+  autonomyPresetOf,
   changeAutonomy,
+  clientEmailAddresses,
   getAction,
   getActionOfProposal,
   getAutonomy,
   getProposal,
+  getTrackRecord,
   listPendingProposals,
   listRecentActions,
   memberFirstNames,
@@ -183,14 +190,36 @@ export class AiActionsService {
     };
   }
 
-  async autonomy(tenant: TenantContext): Promise<BusinessAutonomy> {
+  async autonomy(tenant: TenantContext): Promise<AutonomyView> {
     const deps = await this.chat.toolDeps(tenant);
-    return getAutonomy(this.db, actorOf(tenant), deps.autonomy);
+    return withPreset(await getAutonomy(this.db, actorOf(tenant), deps.autonomy), deps.autonomy);
   }
 
-  async changeAutonomy(tenant: TenantContext, change: AutonomyChange): Promise<BusinessAutonomy> {
+  async changeAutonomy(tenant: TenantContext, change: AutonomyChange): Promise<AutonomyView> {
     const deps = await this.chat.toolDeps(tenant);
-    return changeAutonomy(this.db, actorOf(tenant), change, deps.autonomy);
+    return withPreset(
+      await changeAutonomy(this.db, actorOf(tenant), change, deps.autonomy),
+      deps.autonomy,
+    );
+  }
+
+  /** The Autonomy page's counts and earned-trust offers (S53, ADR-0055). */
+  async trackRecord(tenant: TenantContext): Promise<AutonomyTrackRecord> {
+    const deps = await this.chat.toolDeps(tenant);
+    return getTrackRecord(this.db, actorOf(tenant), { ...deps.autonomy, clock: this.clock });
+  }
+
+  /** Each emailed client's address the viewer may see (S53: the card names who gets it). */
+  private async recipientsOf(
+    actor: Actor,
+    emails: readonly { clientId: string }[],
+  ): Promise<AiEmailRecipient[]> {
+    const ids = emails.flatMap((email) => {
+      const id = ClientIdSchema.safeParse(email.clientId);
+      return id.success ? [id.data] : [];
+    });
+    const addresses = await clientEmailAddresses(this.db, actor, ids);
+    return [...addresses].map(([clientId, address]) => ({ clientId, address }));
   }
 
   // -------------------------------------------------------------------------------------------
@@ -214,6 +243,7 @@ export class AiActionsService {
       before: shown?.before ?? null,
       after: shown?.after ?? null,
       emails: shown?.emails ?? [],
+      recipients: await this.recipientsOf(actor, shown?.emails ?? []),
       expiresAt: proposal.expiresAt,
       createdAt: proposal.createdAt,
       executionId: execution?.id ?? null,
@@ -236,6 +266,7 @@ export class AiActionsService {
       actionMessages(this.db, actor, execution),
     ]);
     const forYou = execution.requestedByUserId === me || execution.onBehalfOfUserId === me;
+    const emails = emailsOf(execution, messages);
     const approvedByOther =
       execution.proposalId !== null &&
       execution.onBehalfOfUserId !== null &&
@@ -255,7 +286,8 @@ export class AiActionsService {
       summary: execution.summary,
       before: sideOf(execution.before),
       after: sideOf(execution.after),
-      emails: emailsOf(execution, messages),
+      emails,
+      recipients: await this.recipientsOf(actor, emails),
       createdAt: execution.createdAt,
       undoUntil: execution.undoUntil,
       canUndo: open && (forYou || this.reachesAll(actor, execution.action)),
@@ -344,6 +376,14 @@ function emailsOf(execution: ActionExecution, messages: readonly ActionMessage[]
       sendsAt: message.status === 'pending' ? message.availableAt.toISOString() : null,
     }),
   );
+}
+
+/** The autonomy with the preset it matches (S53). */
+function withPreset(
+  autonomy: BusinessAutonomy,
+  defaults: { templateDefaults: AutonomySettings },
+): AutonomyView {
+  return { ...autonomy, preset: autonomyPresetOf(autonomy, defaults.templateDefaults) };
 }
 
 /** The fact a memory save proposes (its payload holds only the id, S30), if it is one. */

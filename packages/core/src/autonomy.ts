@@ -4,11 +4,14 @@ import {
   AutonomyLevelSchema,
   AutonomyRequestSchema,
   BULK_RECIPIENT_LIMIT,
+  EARNED_TRUST_STREAK,
   levelAllowed,
+  presetOf,
   type AutonomyAction,
   type AutonomyDecision,
   type AutonomyLevel,
   type AutonomyOutcome,
+  type AutonomyPreset,
   type AutonomyRequest,
   type AutonomySettings,
   type BusinessAutonomy,
@@ -117,4 +120,34 @@ export function resolveAutonomy(
     levels[action] = level.success && allowed(action, level.data) ? level.data : 'ask';
   }
   return { askFirst: own?.askFirst === true, levels };
+}
+
+const NEXT_LEVEL: Record<AutonomyLevel, AutonomyLevel | null> = {
+  ask: 'notify',
+  notify: 'auto',
+  auto: null,
+};
+
+/**
+ * Earned trust (S53, ADR-0055): after `EARNED_TRUST_STREAK` correct actions of one kind in a row,
+ * Pepper offers one step more room for it ("ask me" → "do it and tell me" → "just do it"), where
+ * the action allows that step. No offer while "Ask me first for everything" is on: the member
+ * chose to see everything first.
+ */
+export function earnedTrustOffer(
+  action: AutonomyAction,
+  autonomy: BusinessAutonomy,
+  correctInARow: number,
+): AutonomyLevel | null {
+  if (autonomy.askFirst || correctInARow < EARNED_TRUST_STREAK) return null;
+  const next = NEXT_LEVEL[autonomy.levels[action]];
+  return next !== null && levelAllowed(action, next) ? next : null;
+}
+
+/** The preset a business's effective autonomy matches (S53), against its own defaults. */
+export function autonomyPresetOf(
+  autonomy: BusinessAutonomy,
+  templateDefaults: AutonomySettings,
+): AutonomyPreset | null {
+  return presetOf(autonomy.levels, resolveAutonomy(undefined, templateDefaults).levels);
 }

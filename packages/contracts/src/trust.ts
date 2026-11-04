@@ -66,9 +66,11 @@ export const AUTONOMY_ACTIONS = {
     permission: 'bookings.manage',
     undo: BOOKING_UNDO,
   },
+  // A move emails the client the new time, so it waits for the member's OK by default (S53,
+  // ADR-0055: client-visible moves ask; it was "do it and tell me" before).
   'booking.move': {
     riskTier: 'internal_write',
-    defaultLevel: 'notify',
+    defaultLevel: 'ask',
     allowsAuto: true,
     permission: 'bookings.manage',
     undo: BOOKING_UNDO,
@@ -217,12 +219,72 @@ export const BusinessAutonomySchema = z
 export type BusinessAutonomy = z.infer<typeof BusinessAutonomySchema>;
 
 /**
+ * The Autonomy page's presets (S53, ADR-0055): one tap sets every action. `careful` asks before
+ * every change; `balanced` is the business's defaults (its template's, else the platform's);
+ * `hands_off` does every change inside Pepper alone, sends confirmations alone, sends nudges and
+ * waitlist offers and tells the member, and still asks for a message to many clients and a new
+ * booking rule. A business whose levels match none is "your own mix" (`null`).
+ */
+export const AutonomyPresetSchema = z.enum(['careful', 'balanced', 'hands_off']);
+export type AutonomyPreset = z.infer<typeof AutonomyPresetSchema>;
+
+/** The levels a preset sets, every one allowed for its action; `defaults` for `balanced`. */
+export function presetLevels(
+  preset: AutonomyPreset,
+  defaults: Record<AutonomyAction, AutonomyLevel>,
+): Record<AutonomyAction, AutonomyLevel> {
+  const levels = {} as Record<AutonomyAction, AutonomyLevel>;
+  for (const action of AutonomyActionSchema.options) {
+    levels[action] = presetLevel(preset, action, defaults[action]);
+  }
+  return levels;
+}
+
+function presetLevel(
+  preset: AutonomyPreset,
+  action: AutonomyAction,
+  balanced: AutonomyLevel,
+): AutonomyLevel {
+  if (preset === 'careful') return 'ask';
+  if (preset === 'balanced') return balanced;
+  if (action === 'message.bulk') return 'ask';
+  const meta = AUTONOMY_ACTIONS[action];
+  const wanted: AutonomyLevel =
+    meta.riskTier === 'external_or_irreversible' && action !== 'message.confirmation'
+      ? 'notify'
+      : 'auto';
+  if (levelAllowed(action, wanted)) return wanted;
+  return levelAllowed(action, 'notify') ? 'notify' : 'ask';
+}
+
+/** The preset the levels match, or `null` ("your own mix"); `careful` wins a tie. */
+export function presetOf(
+  levels: Record<AutonomyAction, AutonomyLevel>,
+  defaults: Record<AutonomyAction, AutonomyLevel>,
+): AutonomyPreset | null {
+  return (
+    AutonomyPresetSchema.options.find((preset) => {
+      const wanted = presetLevels(preset, defaults);
+      return AutonomyActionSchema.options.every((action) => levels[action] === wanted[action]);
+    }) ?? null
+  );
+}
+
+/** `GET /v1/autonomy`: the business's autonomy and the preset it matches (S53). */
+export const AutonomyViewSchema = BusinessAutonomySchema.extend({
+  preset: AutonomyPresetSchema.nullable(),
+}).strict();
+export type AutonomyView = z.infer<typeof AutonomyViewSchema>;
+
+/**
  * A change to a business's autonomy: the switch, and levels per action (`null`: back to the
- * template's or platform default). "Just do it" is refused where it is not allowed.
+ * template's or platform default), or a preset (S53) instead of levels. "Just do it" is refused
+ * where it is not allowed.
  */
 export const AutonomyChangeSchema = z
   .object({
     askFirst: z.boolean().optional(),
+    preset: AutonomyPresetSchema.optional(),
     levels: z
       .partialRecord(AutonomyActionSchema, AutonomyLevelSchema.nullable())
       .refine(
@@ -234,8 +296,35 @@ export const AutonomyChangeSchema = z
       )
       .optional(),
   })
-  .strict();
+  .strict()
+  .refine((change) => change.preset === undefined || change.levels === undefined, {
+    message: 'Choose a preset or levels, not both',
+  });
 export type AutonomyChange = z.infer<typeof AutonomyChangeSchema>;
+
+/** Correct actions of one kind in a row after which Pepper offers to do that kind alone (S53). */
+export const EARNED_TRUST_STREAK = 20;
+
+/**
+ * One action's track record (S53, ADR-0055), from the AI's executions and proposals the member
+ * may see: how often Pepper did it in the last 30 days (the Activity log's count), how many it
+ * did in a row since its last mistake (an Undo marked "wrong", or a card turned down; the last
+ * 90 days), and the level Pepper offers to move it to once that reaches
+ * `EARNED_TRUST_STREAK` (`null`: no offer; only for members who change autonomy).
+ */
+export const ActionTrackRecordSchema = z.strictObject({
+  action: AutonomyActionSchema,
+  doneLast30Days: z.number().int().min(0),
+  correctInARow: z.number().int().min(0),
+  offer: AutonomyLevelSchema.nullable(),
+});
+export type ActionTrackRecord = z.infer<typeof ActionTrackRecordSchema>;
+
+/** `GET /v1/autonomy/track-record`: every action on the dial, in the dial's order. */
+export const AutonomyTrackRecordSchema = z.strictObject({
+  actions: z.array(ActionTrackRecordSchema).length(AutonomyActionSchema.options.length),
+});
+export type AutonomyTrackRecord = z.infer<typeof AutonomyTrackRecordSchema>;
 
 // ---------------------------------------------------------------------------------------------
 // Decisions (ADR-0028). `decideAutonomy` in @pepper/core turns an action, the business's

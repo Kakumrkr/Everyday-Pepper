@@ -1,4 +1,9 @@
-import { BusinessAutonomySchema } from '@pepper/contracts';
+import {
+  AutonomyTrackRecordSchema,
+  AutonomyViewSchema,
+  BookingRulesResponseSchema,
+} from '@pepper/contracts';
+import { localDay } from '@pepper/ui';
 import type { Metadata } from 'next';
 import { AutonomySettings } from '../../_components/autonomy/autonomy-settings';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
@@ -9,14 +14,25 @@ export const metadata: Metadata = { title: 'Autonomy · Pepper' };
 /**
  * What Pepper may do on its own (S26, ADR-0028/0031), grouped by risk. Everyone in the business
  * reads it; owners and managers change it; the AI never does. On the kit since S42.3 (AC-X-10).
+ * S53 (ADR-0055): presets, the standing rules in words, each action's 30-day count and the
+ * earned-trust offers.
  */
 export default async function AutonomyPage() {
   // The app layout has sent anyone without a usable session elsewhere already.
   const account = await currentAccount();
   if (account.state !== 'signed-in') return null;
   const current = await currentBusiness();
-  const autonomy =
-    current === null ? null : await currentJson('/v1/autonomy', BusinessAutonomySchema);
+  const [autonomy, trackRecord, rules] =
+    current === null
+      ? [null, null, null]
+      : await Promise.all([
+          currentJson('/v1/autonomy', AutonomyViewSchema),
+          // Counts and rules are extras: the dial still shows without them.
+          currentJson('/v1/autonomy/track-record', AutonomyTrackRecordSchema),
+          current.permissions.includes('rules.read')
+            ? currentJson('/v1/rules', BookingRulesResponseSchema)
+            : Promise.resolve(null),
+        ]);
   if (current === null || autonomy === null) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-5">
@@ -33,6 +49,9 @@ export default async function AutonomyPage() {
       <AutonomySettings
         initial={autonomy}
         canChange={current.permissions.includes('autonomy.manage')}
+        trackRecord={trackRecord}
+        rules={rules}
+        today={localDay(new Date().toISOString(), current.business.timeZone)}
       />
     </div>
   );

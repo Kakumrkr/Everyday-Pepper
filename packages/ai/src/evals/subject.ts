@@ -10,6 +10,7 @@ import {
   StaffMemberIdSchema,
   type ConversationId,
   type ConversationTurnId,
+  type AutonomySettings,
   type LlmRequest,
   type LlmStreamEvent,
   type MemoryWarningRule,
@@ -62,6 +63,14 @@ import { addUsage, emptyUsage, type Transcript } from './transcript.js';
 // a cassette, a fake, or (S27) the real one.
 
 /** Runs one case: seeds its world, asks `providerFor` for the model, returns what happened. */
+
+/**
+ * The eval business's autonomy (S53, decision D-2): moves "do it and tell me", as it was set up
+ * before moves started asking by default (ADR-0055), so the recorded answers stay valid until the
+ * whole suite is recorded again in S56b. S56a adds cases for a move that asks and removes this.
+ */
+export const EVAL_WORLD_AUTONOMY: AutonomySettings = { 'booking.move': 'notify' };
+
 export type EvalSubject = (
   evalCase: EvalCase,
   providerFor: (world: EvalWorld) => LlmProvider,
@@ -225,7 +234,7 @@ export function loopSubject(
       db,
       actor,
       clock: world.clock,
-      autonomy: { templateDefaults: {} },
+      autonomy: { templateDefaults: EVAL_WORLD_AUTONOMY },
       memoryWarnings: EVAL_MEMORY_WARNINGS,
       emails: { baseUrl: 'http://localhost:3000', outboxKey: EVAL_OUTBOX_KEY },
       embedder,

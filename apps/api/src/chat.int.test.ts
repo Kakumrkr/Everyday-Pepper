@@ -7,7 +7,8 @@ import {
   AiProposalViewSchema,
   ApiErrorSchema,
   ApproveProposalResponseSchema,
-  BusinessAutonomySchema,
+  AutonomyTrackRecordSchema,
+  AutonomyViewSchema,
   ChatEventSchema,
   ChatStatusSchema,
   UndoActionResponseSchema,
@@ -411,16 +412,30 @@ describe('S26: proposals, receipts, Why, Undo and the autonomy dial over HTTP (A
 
   it('the dial: everyone reads it, staff cannot change it, "just do it" never for bulk', async () => {
     const { owner, staff } = await business();
-    const read = BusinessAutonomySchema.parse((await staff.get('/v1/autonomy').expect(200)).body);
+    const read = AutonomyViewSchema.parse((await staff.get('/v1/autonomy').expect(200)).body);
     expect(read.askFirst).toBe(false);
+    // A new business starts balanced, and a move waits for an OK (S53).
+    expect(read.preset).toBe('balanced');
+    expect(read.levels['booking.move']).toBe('ask');
     expect(errorCode((await staff.put('/v1/autonomy', { askFirst: true }).expect(403)).body)).toBe(
       'forbidden',
     );
     await owner.put('/v1/autonomy', { levels: { 'message.bulk': 'auto' } }).expect(400);
-    const changed = BusinessAutonomySchema.parse(
+    const changed = AutonomyViewSchema.parse(
       (await owner.put('/v1/autonomy', { askFirst: true }).expect(200)).body,
     );
     expect(changed.askFirst).toBe(true);
+    const careful = AutonomyViewSchema.parse(
+      (await owner.put('/v1/autonomy', { preset: 'careful' }).expect(200)).body,
+    );
+    expect(careful.preset).toBe('careful');
+    await staff.put('/v1/autonomy', { preset: 'hands_off' }).expect(403);
+    const record = AutonomyTrackRecordSchema.parse(
+      (await staff.get('/v1/autonomy/track-record').expect(200)).body,
+    );
+    expect(record.actions.every((row) => row.doneLast30Days === 0 && row.offer === null)).toBe(
+      true,
+    );
     expect(ChatStatusSchema.parse((await staff.get('/v1/chat/status').expect(200)).body)).toEqual({
       state: 'on',
     });

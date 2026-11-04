@@ -545,7 +545,7 @@ describe('conflicts and stale approvals', () => {
 });
 
 describe('the dial and the emails', () => {
-  it('asks before a booking and does a move, holding its email for the undo grace', async () => {
+  it('asks before a booking and a move by default; a move set to "do it and tell me" holds its email for the undo grace', async () => {
     const w = await newWorld(db);
     const create = await callTool(depsFor(w, w.owner), 'create_booking', {
       clientId: w.maria.id,
@@ -563,15 +563,23 @@ describe('the dial and the emails', () => {
     });
 
     const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
-    const move = done(
-      await callTool(depsFor(w, w.owner), 'move_booking', {
-        bookingId: booking.id,
-        date: TUESDAY,
-        time: '15:00',
-        staffMemberId: null,
-        emailClient: null,
-      }),
-    );
+    const moveArgs = {
+      bookingId: booking.id,
+      date: TUESDAY,
+      time: '15:00',
+      staffMemberId: null,
+      emailClient: null,
+    };
+    // The client is emailed, so a move asks by default (S53) and its card names the email.
+    const asked = await callTool(depsFor(w, w.owner), 'move_booking', moveArgs);
+    expect(proposed(asked).explanation.decision).toEqual({ outcome: 'propose', reason: 'setting' });
+    expect(asked.card).toMatchObject({
+      state: 'proposed',
+      emails: [{ template: 'rescheduled', clientId: w.maria.id }],
+    });
+
+    await changeAutonomy(db, w.owner, { levels: { 'booking.move': 'notify' } }, defaults);
+    const move = done(await callTool(depsFor(w, w.owner), 'move_booking', moveArgs));
     expect(move.outcome).toBe('execute_and_notify');
     const [emailId] = move.outboxMessageIds;
     const email = await outboxOf(w, emailId ?? '');
@@ -581,6 +589,7 @@ describe('the dial and the emails', () => {
 
   it('asks before emailing a client after untrusted text, and sends none when told not to', async () => {
     const w = await newWorld(db);
+    await changeAutonomy(db, w.owner, { levels: { 'booking.move': 'notify' } }, defaults);
     const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
     const args = {
       bookingId: booking.id,
