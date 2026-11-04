@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { appNav, currentKey, isCurrent, tabItems } from './nav';
 
 const OWNER: Permission[] = [
+  'business.read',
   'calendar.read',
   'bookings.read',
   'clients.read',
@@ -35,10 +36,15 @@ describe('appNav (AC-X-5)', () => {
     ]);
   });
 
-  it('the Pepper group holds What I know, Autonomy and Waitlist; the business group Services and Team', () => {
+  it('the Pepper group holds Activity, What I know, Autonomy and Waitlist; the business group Services and Team', () => {
     const nav = appNav(OWNER);
-    expect(labels(nav.pepper)).toEqual(['What I know', 'Autonomy', 'Waitlist']);
-    expect(nav.pepper.map((item) => item.href)).toEqual(['/memory', '/autonomy', '/waitlist']);
+    expect(labels(nav.pepper)).toEqual(['Activity', 'What I know', 'Autonomy', 'Waitlist']);
+    expect(nav.pepper.map((item) => item.href)).toEqual([
+      '/activity',
+      '/memory',
+      '/autonomy',
+      '/waitlist',
+    ]);
     expect(labels(nav.business)).toEqual(['Services', 'Team']);
   });
 

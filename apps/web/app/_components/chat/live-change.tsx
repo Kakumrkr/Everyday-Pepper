@@ -35,7 +35,7 @@ type Live =
 /** What approving came to, for a plan's "Approve all" (it stops at anything but `executed`). */
 export type ApproveOutcome = 'executed' | 'other';
 
-const UNDO_REFUSAL: Record<string, string> = {
+export const UNDO_REFUSAL: Record<string, string> = {
   slot_taken: 'That time has been booked since, so I can’t put it back. Nothing was changed.',
   already_started: 'The appointment has started, so it can’t be undone. Nothing was changed.',
   already_sent: 'The email has already left, so it can’t be unsent. Nothing was changed.',

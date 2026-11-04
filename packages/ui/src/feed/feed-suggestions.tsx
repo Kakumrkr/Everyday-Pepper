@@ -8,7 +8,10 @@ import type {
 } from '@pepper/contracts';
 import { useId, useState, type ReactNode } from 'react';
 import { cx } from '../class-names.js';
+import { List, ListRow, type KitLink } from '../kit/blocks.js';
 import { buttonStyle, FOCUS_RING } from '../kit/button.js';
+import { MoneyChip } from '../kit/marks.js';
+import { boardOf, groupLine, groupRowLine, type BoardCard, type BoardItem } from './board.js';
 import { FEED_KIND_NOUN, feedLine } from './feed-lines.js';
 
 /** What a close or a switch change came to: `null` when it worked, else a message to show. */
@@ -21,7 +24,8 @@ export interface FeedAction {
 }
 
 export interface FeedSuggestionsProps {
-  items: readonly FeedItem[];
+  /** The open suggestions, with the dollars at stake when the api priced them (S52). */
+  items: readonly BoardItem[];
   settings: FeedSettings;
   canChangeSettings: boolean;
   askToTurnOff: FeedInsightKind | null;
@@ -35,6 +39,14 @@ export interface FeedSuggestionsProps {
   onSettings: (change: FeedSettingsChange) => FeedChange;
   /** Shown at the card's end (S36: the mailing address rebooking emails carry). */
   footer?: ReactNode;
+  /**
+   * The board's quiet start (S52, AC-W4-5): the business has no booking history yet, so no
+   * suggestion is shown, only what will come; `quietAction` is how to start.
+   */
+  quiet?: boolean;
+  quietAction?: ReactNode;
+  /** The rows under a grouped card link with this (the app's router link). */
+  renderLink?: KitLink;
 }
 
 /**
@@ -57,6 +69,9 @@ export function FeedSuggestions({
   onClose,
   onSettings,
   footer,
+  quiet = false,
+  quietAction,
+  renderLink,
 }: FeedSuggestionsProps) {
   const headingId = useId();
   const pauseId = useId();
@@ -64,14 +79,14 @@ export function FeedSuggestions({
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const shown = items.filter((item) => !closed.has(item.id));
+  const shown = boardOf(items.filter((item) => !closed.has(item.id)));
 
   const close = async (item: FeedItem, outcome: 'dismissed' | 'done') => {
     setError(null);
     const failed = await onClose(item.id, outcome);
     if (failed !== null) {
       setError(failed);
-      return;
+      return false;
     }
     setClosed((previous) => new Set([...previous, item.id]));
     if (outcome === 'dismissed') {
@@ -79,6 +94,16 @@ export function FeedSuggestions({
         `Snoozed for 30 days. I won't suggest ${FEED_KIND_NOUN[item.kind]} for this again until then.`,
       );
     }
+    return true;
+  };
+  /** "Dismiss all" on a grouped card: each of its items, stopping at the first refusal. */
+  const dismissAll = async (card: Extract<BoardCard, { type: 'group' }>) => {
+    for (const item of card.items) {
+      if (!(await close(item, 'dismissed'))) return;
+    }
+    setNotice(
+      `Snoozed for 30 days. I won't suggest these ${FEED_KIND_NOUN[card.kind]} again until then.`,
+    );
   };
   const change = async (next: FeedSettingsChange) => {
     setBusy(true);
@@ -177,6 +202,18 @@ export function FeedSuggestions({
           title="Suggestions are paused."
           text="I won't add new ones. Requests that need your OK still show."
         />
+      ) : quiet ? (
+        <div
+          className="flex flex-col items-start gap-2 rounded-lg bg-surface-2 px-5 py-4"
+          data-testid="feed-quiet"
+        >
+          <p className="m-0 type-body text-ink-2">
+            <strong className="text-ink">Quiet for now.</strong> Once clients start booking, I'll
+            show you what's worth the most here: open time to fill, regulars who are due and freed
+            times for your waitlist.
+          </p>
+          {quietAction}
+        </div>
       ) : shown.length === 0 ? (
         <EmptyState
           title="All clear."
@@ -184,37 +221,173 @@ export function FeedSuggestions({
         />
       ) : (
         <ul className="m-0 flex list-none flex-col gap-3 p-0">
-          {shown.map((item) => {
-            const line = feedLine(item, timeZone, now);
-            const action = actionFor(item);
-            return (
-              <li key={item.id}>
-                <article
-                  aria-label={line.title}
-                  className="flex flex-col gap-2 rounded-lg bg-surface p-5 shadow-raised"
-                  data-testid="feed-suggestion"
-                  data-kind={item.kind}
-                >
-                  <p className="m-0 type-subheading text-ink">{line.title}</p>
-                  <p className="m-0 type-body text-ink-2">{line.why}</p>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {action === null ? null : renderAction(action, () => void close(item, 'done'))}
-                    <button
-                      type="button"
-                      className={buttonStyle({ variant: 'secondary', size: 'sm' })}
-                      onClick={() => void close(item, 'dismissed')}
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                </article>
+          {shown.map((card) =>
+            card.type === 'single' ? (
+              <li key={card.key}>
+                <SingleCard
+                  item={card.item}
+                  valueCents={card.valueCents}
+                  timeZone={timeZone}
+                  now={now}
+                  action={actionFor(card.item)}
+                  renderAction={renderAction}
+                  onClose={(outcome) => void close(card.item, outcome)}
+                />
               </li>
-            );
-          })}
+            ) : (
+              <li key={card.key}>
+                <GroupCard
+                  card={card}
+                  actionFor={actionFor}
+                  renderLink={renderLink}
+                  onFollow={(item) => void close(item, 'done')}
+                  onDismissAll={() => void dismissAll(card)}
+                />
+              </li>
+            ),
+          )}
         </ul>
       )}
       {footer}
     </section>
+  );
+}
+
+function SingleCard({
+  item,
+  valueCents,
+  timeZone,
+  now,
+  action,
+  renderAction,
+  onClose,
+}: {
+  item: FeedItem;
+  valueCents: number | null;
+  timeZone: string;
+  now: number;
+  action: FeedAction | null;
+  renderAction: FeedSuggestionsProps['renderAction'];
+  onClose: (outcome: 'dismissed' | 'done') => void;
+}) {
+  const line = feedLine(item, timeZone, now);
+  return (
+    <article
+      aria-label={line.title}
+      className="flex flex-col gap-2 rounded-lg bg-surface p-5 shadow-raised"
+      data-testid="feed-suggestion"
+      data-kind={item.kind}
+    >
+      <CardTitle title={line.title} valueCents={valueCents} />
+      <p className="m-0 type-body text-ink-2">{line.why}</p>
+      <div className="mt-1 flex flex-wrap gap-2">
+        {action === null
+          ? null
+          : renderAction(action, () => {
+              onClose('done');
+            })}
+        <button
+          type="button"
+          className={buttonStyle({ variant: 'secondary', size: 'sm' })}
+          onClick={() => {
+            onClose('dismissed');
+          }}
+        >
+          Dismiss
+        </button>
+      </div>
+    </article>
+  );
+}
+
+/**
+ * Similar suggestions as one card (S52, AC-W4-3): what they add up to, then each of them as a
+ * quiet row that opens it (following one marks it done), and "Dismiss all".
+ */
+function GroupCard({
+  card,
+  actionFor,
+  renderLink,
+  onFollow,
+  onDismissAll,
+}: {
+  card: Extract<BoardCard, { type: 'group' }>;
+  actionFor: FeedSuggestionsProps['actionFor'];
+  renderLink: KitLink | undefined;
+  onFollow: (item: FeedItem) => void;
+  onDismissAll: () => void;
+}) {
+  const line = groupLine(card);
+  return (
+    <article
+      aria-label={line.title}
+      className="flex flex-col gap-2 rounded-lg bg-surface p-5 shadow-raised"
+      data-testid="feed-suggestion"
+      data-kind={card.kind}
+      data-group={String(card.items.length)}
+    >
+      <CardTitle title={line.title} valueCents={card.valueCents} />
+      <p className="m-0 type-body text-ink-2">{line.why}</p>
+      <List label={line.title}>
+        {card.items.map((item) => {
+          const action = actionFor(item);
+          // The row's link records the visit as acted on, as a single card's action does.
+          const link: KitLink | undefined =
+            action === null
+              ? undefined
+              : (props) => (
+                  <span
+                    className="contents"
+                    onClickCapture={() => {
+                      onFollow(item);
+                    }}
+                  >
+                    {renderLink === undefined ? (
+                      <a href={props.href} className={props.className}>
+                        {props.children}
+                      </a>
+                    ) : (
+                      renderLink(props)
+                    )}
+                  </span>
+                );
+          return (
+            <ListRow
+              key={item.id}
+              title={groupRowLine(item)}
+              trailing={
+                item.valueCents === undefined || item.valueCents === null ? undefined : (
+                  <MoneyChip cents={item.valueCents} kind="estimate" />
+                )
+              }
+              href={action?.href}
+              renderLink={link}
+            />
+          );
+        })}
+      </List>
+      <div className="mt-1 flex flex-wrap gap-2">
+        <button
+          type="button"
+          className={buttonStyle({ variant: 'secondary', size: 'sm' })}
+          onClick={onDismissAll}
+        >
+          Dismiss all
+        </button>
+      </div>
+    </article>
+  );
+}
+
+/** A card's title, with the dollars at stake beside it when there are some. */
+function CardTitle({ title, valueCents }: { title: string; valueCents: number | null }) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <p className="m-0 type-subheading text-ink">{title}</p>
+      {valueCents === null || valueCents === 0 ? null : (
+        <MoneyChip cents={valueCents} kind="estimate" className="mt-0.5 shrink-0" />
+      )}
+    </div>
   );
 }
 

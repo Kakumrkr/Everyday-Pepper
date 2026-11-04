@@ -411,7 +411,7 @@ for (const width of WIDTHS) {
     await shots('book-photos');
   });
 
-  test(`Home, Chat, More, Your data and deleting at ${String(width)} px, light and dark`, async ({
+  test(`Home, Activity, Chat, More, Your data and deleting at ${String(width)} px, light and dark`, async ({
     page,
   }) => {
     test.setTimeout(300_000);
@@ -423,7 +423,15 @@ for (const width of WIDTHS) {
       await page.goto('/');
       await expect(page.getByRole('heading', { name: 'To-dos' })).toBeVisible();
       await still(page, scheme);
+      // A new business has no visits yet, so the board is quiet (S52, AC-W4-5).
+      await expect(page.getByTestId('feed-quiet')).toBeVisible();
       await expect.soft(page).toHaveScreenshot(`home-${String(width)}-${scheme}.png`, SHOT);
+
+      // Activity (S52, AC-W7-4): nothing done yet says what will be listed.
+      await page.goto('/activity');
+      await expect(page.getByTestId('activity-empty')).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`activity-${String(width)}-${scheme}.png`, SHOT);
 
       await page.goto('/chat');
       await expect(page.getByRole('group', { name: 'Try asking' })).toBeVisible();

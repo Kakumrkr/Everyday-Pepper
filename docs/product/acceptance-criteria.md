@@ -48,6 +48,7 @@ Format: Given / When / Then. IDs (`AC-W<workflow>-<n>`) are referenced from test
 - **AC-W1-42** Given a signed-in person on "Delete account" (More → Account), then their password deletes the account 30 days later: every other session ends at once, "Keep my account" cancels it until the day, and after it the account, its sign-in, sessions, second factor and memberships are gone, and the business records it touched name nobody (actor ids set to none, open invites to its email removed). The only owner of a business that isn't being deleted is told to delete the business first; a wrong password is refused and the attempts are limited (S51.2, ADR-0054).
 - **AC-W1-43** Given a change of email that both addresses confirmed, then every other session of the account ends, and the browser that confirmed it stays signed in (S51.2, L15).
 - **AC-W1-44** Given an export's `README.txt`, then it names the business's time zone in words, as the app does ("Eastern Time"; a zone without a plain name by its city, "Paris time"), never by its zone id (S51.2, the S51 retro top-up).
+- **AC-W1-45** Given a business that is being deleted, then Home says so in one quiet line with the day ("Pepper deletes Fade Room on Friday, December 4."): its owner gets "Keep Fade Room", which cancels the deletion there and then, and everyone else reads that its booking page is closed until then (S52, the S51.2 retro top-up).
 
 ## W2 Conversational scheduling
 - **AC-W2-1** Given Jess is booked 3–5 pm Friday, when the owner asks to book a 2 h service with Jess at 4 pm Friday, then no booking is created, the conflict is explained, and the 3 nearest valid slots are offered as a slot-picker card.
@@ -62,6 +63,9 @@ Format: Given / When / Then. IDs (`AC-W<workflow>-<n>`) are referenced from test
 ## W4 Operator feed
 - **AC-W4-1** Given tomorrow has ≥ 1 h open in a staff schedule and ≥ 1 overdue regular eligible for it, when the daily briefing runs, then a suggestion with a drafted email appears under "Needs your OK".
 - **AC-W4-2** Given an approved suggestion, when sent, then exactly one email per recipient is sent even if the job retries.
+- **AC-W4-3** Given a staff member with open time on several days of the coming week (the feed-noise case: one gap suggestion per day), then Home shows one card for them ("Randy has 14 h open over the next 5 days"), its days listed under it, and Dismiss on the card snoozes every one of them; regulars who are due are grouped into one card the same way ("4 regulars are due back"), each with their own link (S52, ADR-0043).
+- **AC-W4-4** Given suggestions worth different amounts, then Home lists them by the dollars at stake, the most first, each with an estimate ("~$540"): open time at the business's average price per minute of its priced services, a regular who is due at their service's price, a client likely to miss at the booking's price; a suggestion without a price (a busy week, a business with no prices) comes after them, newest first (S52, ADR-0043).
+- **AC-W4-5** Given a business with no booking history yet (no visit that started before now; imported visits count), then Home shows no suggestions, only a quiet line saying what will come once clients book and how to start; the first visit lifts it. The briefing, what waits for an OK and the to-dos show as before (S52, ADR-0043).
 
 ## W5 Smart waitlist
 - **AC-W5-1** Given a waitlist entry matching a cancelled slot, when the cancellation occurs, then an offer is proposed (or sent, per autonomy) to the best match within 2 minutes; the first confirmation books it and others are notified the slot is taken.
@@ -74,6 +78,7 @@ Format: Given / When / Then. IDs (`AC-W<workflow>-<n>`) are referenced from test
 - **AC-W7-1** Every AI action shows a "Why?" explanation listing the inputs used.
 - **AC-W7-2** Deleting a memory fact removes it from all future AI context (verified by eval).
 - **AC-W7-3** Actions in the `external_or_irreversible` tier can never be set to "just do it" for bulk operations (> 10 recipients).
+- **AC-W7-4** Given a member on Activity (More → Activity, `/activity`), then every action Pepper took that they may see is listed, newest first, in plain words: what was done, when, who approved it, which emails it sent or held back, and whether it was undone, with Undo while its window is open; "Show older" pages back through all of them. Staff see the ones done for them (S52, ADR-0043).
 
 ## W8 Public booking
 - **AC-W8-1** Given two customers booking the same last slot concurrently, then exactly one succeeds and the other is offered alternatives.

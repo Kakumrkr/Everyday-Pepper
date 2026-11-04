@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S52** (Home card board ranked by $, grouped, quiet start + activity log; Phase 12).
+**S52** (branch `claude/s52-home-card-board`; brief pre-approved: D-1 no split, D-2 the feed-noise case = one gap card per day, D-3 no ADR).
+- Done: AC-W4-3…5, AC-W7-4, AC-W1-45; `valueCents` + `hasBookingHistory` on `GET /v1/feed` (core `feed-value.ts`); `boardOf` grouping/ranking + grouped card (ui); `/v1/ai/actions?after=&limit=` (row-cursor) + Activity screen (`/activity`, Pepper group); Home deletion line with Keep; e2e feed/chat/deletion/shell/screens updated.
+- Next: traceability rows, e2e stack (feed, chat, deletion, shell, screens + baselines), review, `/session-close`.
 
 ## Last sessions
 - **S51.2 Phase 11 · Account and business deletion, L15, Phase 11 gate (2026-11-04)** ([ADR-0054](../adr/0054-account-and-business-deletion.md), [PR #77](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/77)). Full entry in [session-log.md](session-log.md).

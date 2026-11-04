@@ -188,6 +188,16 @@ export const FeedItemSchema = z
   .and(FeedInsightSchema);
 export type FeedItem = z.infer<typeof FeedItemSchema>;
 
+/**
+ * A suggestion on Home's card board (S52, ADR-0043): the item and the dollars at stake, an
+ * estimate from the business's service prices (`null`: nothing to price, such as a busy week
+ * or a business without prices). Home ranks and groups by it; the AI's `get_feed` doesn't read it.
+ */
+export const FeedBoardItemSchema = FeedItemSchema.and(
+  z.object({ valueCents: z.number().int().min(0).max(1_000_000_000).nullable() }),
+);
+export type FeedBoardItem = z.infer<typeof FeedBoardItemSchema>;
+
 /** A morning pass hour, local: the same range as a template's `drafts.morningHour`. */
 export const MorningHourSchema = z.number().int().min(5).max(11);
 
@@ -237,8 +247,16 @@ export type FeedSettingsChange = z.input<typeof FeedSettingsChangeSchema>;
 /** `GET /v1/feed`: the open suggestions the member may see, and the business's switches. */
 export const FeedResponseSchema = z
   .object({
-    /** Empty while suggestions are paused. Never a briefing. */
-    suggestions: z.array(FeedItemSchema),
+    /**
+     * Empty while suggestions are paused, and while the business has no booking history (the
+     * board's quiet start). Never a briefing.
+     */
+    suggestions: z.array(FeedBoardItemSchema),
+    /**
+     * Whether the business has had a visit yet (S52): until then Home's board stays quiet, with
+     * one line saying what will come.
+     */
+    hasBookingHistory: z.boolean(),
     /**
      * Today's briefing for this member (S38a): the business's for owners and managers, their
      * own day for staff; `null` before the morning pass or once marked read. Shown while

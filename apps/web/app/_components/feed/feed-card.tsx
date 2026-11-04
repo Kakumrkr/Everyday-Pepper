@@ -14,6 +14,7 @@ import { calendarHref } from '../../../lib/calendar';
 import { sendJson } from '../../../lib/client-api';
 import { saveFeedSettings } from '../../../lib/feed-settings';
 import { MORE_HREF } from '../../../lib/nav';
+import { kitLink } from '../kit-link';
 
 /** Where a suggestion leads: the day on the calendar, or the client. */
 function actionFor(item: FeedItem): FeedAction | null {
@@ -40,7 +41,8 @@ function actionFor(item: FeedItem): FeedAction | null {
 }
 
 /**
- * Home's "Suggestions" (S35, ADR-0039) on `/v1/feed`: dismiss and acting on a suggestion close
+ * Home's "Suggestions" (S35, ADR-0039) on `/v1/feed`, as the card board (S52, ADR-0043):
+ * ranked by dollars and grouped, quiet before the first visit; dismiss and acting on a suggestion close
  * it; the switches refresh the page so the server reads the feed again. The mailing address
  * rebooking emails carry moved to More's settings (S41, `MailingAddressSetting`); until it is
  * set, a line here leads there.
@@ -70,6 +72,17 @@ export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: str
         return answer.ok ? null : answer.message;
       }}
       onSettings={changeSettings}
+      renderLink={kitLink}
+      // The board's quiet start (S52, AC-W4-5): nothing to suggest before the first visit.
+      quiet={!feed.hasBookingHistory}
+      quietAction={
+        <Link
+          href={ROUTES.calendar}
+          className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), '-ml-4')}
+        >
+          Add a booking
+        </Link>
+      }
       footer={
         // Until the address is set no rebooking email is drafted (ADR-0040), so Home says so.
         feed.canChangeSettings && feed.mailingAddress === null ? (

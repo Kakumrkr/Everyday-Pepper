@@ -16,6 +16,7 @@ import {
   type ActionExplanation,
   type ActionProposal,
   type ActionProposalId,
+  type AiActionsQuery,
   type AiActionsResponse,
   type AiActionView,
   type AiEmailView,
@@ -103,10 +104,19 @@ export class AiActionsService {
     return this.actionView(actor, await getAction(this.db, actor, id));
   }
 
-  async actions(tenant: TenantContext): Promise<AiActionsResponse> {
+  async actions(tenant: TenantContext, query: AiActionsQuery = {}): Promise<AiActionsResponse> {
     const actor = actorOf(tenant);
-    const recent = await listRecentActions(this.db, actor, { limit: RECENT_ACTIONS });
-    return { actions: await Promise.all(recent.map((e) => this.actionView(actor, e))) };
+    const limit = query.limit ?? RECENT_ACTIONS;
+    // One more than the page tells whether there is a next one.
+    const recent = await listRecentActions(this.db, actor, {
+      limit: limit + 1,
+      ...(query.after === undefined ? {} : { after: query.after }),
+    });
+    const page = recent.slice(0, limit);
+    return {
+      actions: await Promise.all(page.map((e) => this.actionView(actor, e))),
+      next: recent.length > limit ? (page.at(-1)?.id ?? null) : null,
+    };
   }
 
   /** Approves exactly the proposal and fingerprint the card showed. */

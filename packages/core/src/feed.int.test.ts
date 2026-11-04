@@ -1,5 +1,8 @@
 import {
+  ClientIdSchema,
   FeedItemIdSchema,
+  ServiceIdSchema,
+  StaffMemberIdSchema,
   TenantIdSchema,
   type FeedItemId,
   type MembershipRole,
@@ -8,6 +11,9 @@ import {
 } from '@pepper/contracts';
 import {
   addMembership,
+  insertBooking,
+  insertClient,
+  insertService,
   insertStaffMember,
   listAuditEntries,
   syncFeedItems,
@@ -140,6 +146,65 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await database.stop();
+});
+
+/** Ben's first visit, an hour before now, at the business's only price ($90 an hour). */
+async function firstVisit(): Promise<void> {
+  await withTenant(db, tenantId, async (tx) => {
+    const service = await insertService(tx, {
+      name: 'Skin fade',
+      category: 'cut',
+      durationMinutes: 60,
+      bufferBeforeMinutes: 0,
+      bufferAfterMinutes: 0,
+      priceFromCents: 9000,
+      priceToCents: null,
+      active: true,
+    });
+    const client = await insertClient(tx, {
+      name: 'Lee Park',
+      email: null,
+      phone: null,
+      source: 'team',
+    });
+    await insertBooking(tx, {
+      clientId: ClientIdSchema.parse(client.id),
+      serviceId: ServiceIdSchema.parse(service.id),
+      staffMemberId: StaffMemberIdSchema.parse(benStaff),
+      startsAt: new Date('2026-11-02T14:00:00Z'),
+      endsAt: new Date('2026-11-02T15:00:00Z'),
+      bufferBeforeMinutes: 0,
+      bufferAfterMinutes: 0,
+      priceFromCents: 9000,
+      priceToCents: null,
+      source: 'team',
+      overridden: false,
+      idempotencyKey: null,
+      createdBy: null,
+    });
+  });
+}
+
+describe('the card board (S52, ADR-0043)', () => {
+  it('stays quiet until the business has booking history, then prices every card (AC-W4-5, AC-W4-4)', async () => {
+    const quiet = await getFeed(db, ana(), { clock });
+    expect(quiet).toMatchObject({ suggestions: [], hasBookingHistory: false });
+    expect((await getFeed(db, jessActor(), { clock })).suggestions).toEqual([]);
+
+    await firstVisit();
+    const board = await getFeed(db, ana(), { clock });
+    expect(board.hasBookingHistory).toBe(true);
+    // 120 open minutes at $90 an hour; a busy week has no price.
+    expect(board.suggestions.map((item) => [item.kind, item.valueCents]).sort()).toEqual([
+      ['schedule_gaps', 18000],
+      ['schedule_gaps', 18000],
+      ['staff_overload', null],
+    ]);
+    // The business's history, though Ben's visit is outside Jess's scope.
+    const jessBoard = await getFeed(db, jessActor(), { clock });
+    expect(jessBoard.hasBookingHistory).toBe(true);
+    expect(jessBoard.suggestions.map((item) => item.valueCents)).toEqual([18000]);
+  });
 });
 
 describe('getFeed (role matrix)', () => {

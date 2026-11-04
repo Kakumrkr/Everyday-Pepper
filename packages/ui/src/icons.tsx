@@ -90,6 +90,12 @@ const PATHS = {
       <path d="M17.5 13.8v1.7l1.2 1" />
     </>
   ),
+  activity: (
+    <>
+      <path d="M8 6h12M8 12h12M8 18h12" />
+      <path d="M4 6h.01M4 12h.01M4 18h.01" />
+    </>
+  ),
   settings: (
     <>
       <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />

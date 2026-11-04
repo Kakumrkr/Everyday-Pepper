@@ -183,8 +183,21 @@ export const AiActionViewSchema = z.strictObject({
 });
 export type AiActionView = z.infer<typeof AiActionViewSchema>;
 
-/** `GET /v1/ai/actions`: the AI's recent actions the viewer may see, newest first. */
-export const AiActionsResponseSchema = z.strictObject({ actions: z.array(AiActionViewSchema) });
+/**
+ * `GET /v1/ai/actions`: the AI's recent actions the viewer may see, newest first; `next` is the
+ * cursor of the page after this one (`null`: none). The Activity log (S52, AC-W7-4) pages on.
+ */
+export const AiActionsResponseSchema = z.strictObject({
+  actions: z.array(AiActionViewSchema),
+  next: ActionExecutionIdSchema.nullable(),
+});
+
+/** `GET /v1/ai/actions?after=&limit=`: a page of the Activity log (S52). */
+export const AiActionsQuerySchema = z.strictObject({
+  after: ActionExecutionIdSchema.optional(),
+  limit: z.coerce.number().int().min(1).max(50).optional(),
+});
+export type AiActionsQuery = z.infer<typeof AiActionsQuerySchema>;
 export type AiActionsResponse = z.infer<typeof AiActionsResponseSchema>;
 
 /** `GET /v1/ai/proposals`: proposals waiting for the viewer's OK, oldest first. */
