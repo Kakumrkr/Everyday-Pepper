@@ -187,6 +187,15 @@ describe('marks', () => {
     expect(initialsOf('')).toBe('');
   });
 
+  it('skips words that start with a digit or a symbol in initials (AC-W1-39)', () => {
+    expect(initialsOf('Client 42')).toBe('C');
+    expect(initialsOf('Dee Hart')).toBe('DH');
+    expect(initialsOf('4 Seasons')).toBe('S');
+    expect(initialsOf('Ana (VIP) López 2')).toBe('AL');
+    expect(initialsOf('élodie martin')).toBe('ÉM');
+    expect(initialsOf('42 #7')).toBe('');
+  });
+
   it('hides decorative avatars and skeletons from screen readers', async () => {
     const { container } = render(
       <div>

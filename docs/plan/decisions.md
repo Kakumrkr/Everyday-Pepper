@@ -417,3 +417,17 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - the booking sheet gains a Client row linking to the profile (a full 44 px target), none for a deleted client;
     - screenshots: the booking sheet masks the visit's day by test id (not the first row), and the import result's undo day is fixed for its shot (a longer weekday wrapped the line on another day);
     - the review's 6 fixes.
+- **S51 (user, 2026-11-04):** at the brief, "Pre approved with ur recommendation. complete the session successfully":
+  - D-1: split (PCR-008): the export, the legal drafts and the initials top-up here; account and business deletion (grace period, scrub), L15 and the **Phase 11 gate** → S51.2.
+  - D-2: `fflate` writes the ZIP (small, no dependencies).
+  - D-3: the owner only (`business.export`, OWNER_ONLY).
+  - D-4: built on request, answered directly; nothing stored or queued.
+  - D-5: ADR-0053.
+  - **Claude's refinements:**
+    - a `pepper` import preset (migration 0062) over one column list shared with the writer; its `system` also matches the business's own client ids (not deleted, under RLS), so a re-import into the same business adds nothing;
+    - every tenant table named in `BUSINESS_EXPORT_TABLES` (exported, or why not), pinned by a db test; photos and to-dos named as later;
+    - explicit columns only (no manage-link hashes, idempotency keys, device tokens, who typed it); the audit entry holds counts only;
+    - CSVs spreadsheet-safe (a `'` before formula-like text except plain numbers and E.164 phones; BOM; CRLF), the import drops the `'` again; files split at the import's 10,000 rows;
+    - a deleted client's visits only in `appointments.json` (in `visits.csv` they would create a "Deleted client");
+    - 10 exports an hour per business and person; the web proxy gives the export 60 s and passes `content-disposition`;
+    - the review's 6 fixes; the "from" price only and tags with separators noted in the ADR.

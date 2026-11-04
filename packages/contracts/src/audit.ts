@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BusinessExportCountsSchema } from './export.js';
 import { ImportCountsSchema, ImportUndoSchema } from './imports.js';
 import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
 import { BookingOriginSchema, BookingStatusSchema } from './bookings.js';
@@ -567,6 +568,15 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('ai_action_execution'),
       before: ExecutionValuesSchema,
       after: ExecutionValuesSchema.extend({ undoReason: UndoReasonSchema.nullable() }).strict(),
+    })
+    .strict(),
+  // The owner downloaded the business's data (S51, ADR-0053): counts only.
+  z
+    .object({
+      action: z.literal('business.exported'),
+      entity: entity('tenant'),
+      before: z.null(),
+      after: BusinessExportCountsSchema,
     })
     .strict(),
   // Client imports (S48, ADR-0049): counts only, never a client's details.

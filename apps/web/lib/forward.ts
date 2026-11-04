@@ -22,12 +22,15 @@ const REQUEST_HEADERS = [
 /** Response headers passed back to the browser. */
 const RESPONSE_HEADERS = [
   'cache-control',
+  // The business export's file name (S51, ADR-0053).
+  'content-disposition',
   // A booking page photo's own (ADR-0048): it may only be an image, used on this origin.
   'content-security-policy',
   'content-type',
   'cross-origin-resource-policy',
   'location',
   'retry-after',
+  'x-content-type-options',
   'x-request-id',
 ] as const;
 
@@ -48,7 +51,11 @@ export function bodyLimitOf(method: string, pathname: string): number {
 
 /** How long the api may take to answer: staging a client file reads up to 10,000 rows. */
 export function answerTimeoutOf(method: string, pathname: string): number {
-  return method === 'POST' && pathname === '/v1/imports' ? 60_000 : 10_000;
+  // Staging reads a whole file; an export reads the whole business (S51).
+  const long =
+    (method === 'POST' && pathname === '/v1/imports') ||
+    (method === 'GET' && pathname === '/v1/tenant/export');
+  return long ? 60_000 : 10_000;
 }
 
 const TOO_LARGE = { code: 'payload_too_large', message: 'That request is too large.' };

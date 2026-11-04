@@ -2518,7 +2518,7 @@ export const importBatches = pgTable(
     check('import_batches_kind_known', sql`${table.kind} IN ('clients', 'visits')`),
     check(
       'import_batches_preset_known',
-      sql`${table.preset} IS NULL OR ${table.preset} IN ('square', 'booksy', 'vagaro', 'glossgenius', 'fresha')`,
+      sql`${table.preset} IS NULL OR ${table.preset} IN ('square', 'booksy', 'vagaro', 'glossgenius', 'fresha', 'pepper')`,
     ),
     check('import_batches_system_format', sql`${table.system} ~ '^[a-z0-9:]{1,64}$'`),
     check(

@@ -11,6 +11,7 @@ import {
   type ImportPreset,
 } from '@pepper/contracts';
 import type { Table } from './parse.js';
+import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS, presetColumns } from './pepper-format.js';
 
 // How a client file's columns map onto a client (S48, ADR-0049, AC-W1-17): a known tool's
 // export is recognised by its headers and mapped by its preset; other columns by their header
@@ -113,6 +114,8 @@ export const PRESETS: Readonly<Record<ImportPreset, Preset>> = {
       blocked: null,
     },
   },
+  // Pepper's own export (S51, ADR-0053).
+  pepper: { signature: ['pepperclientid'], columns: presetColumns(PEPPER_CLIENT_COLUMNS) },
 };
 
 /**
@@ -200,6 +203,11 @@ export const VISIT_PRESETS: Readonly<Record<ImportPreset, Preset>> = {
       status: 'status',
       price: 'price',
     },
+  },
+  // Pepper's own export (S51, ADR-0053).
+  pepper: {
+    signature: ['peppervisitid', 'pepperclientid'],
+    columns: presetColumns(PEPPER_VISIT_COLUMNS),
   },
 };
 

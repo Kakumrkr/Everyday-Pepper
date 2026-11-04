@@ -15,6 +15,7 @@ import {
   type ImportColumn,
   type ImportCounts,
   type ImportFormat,
+  type ImportPreset,
   type ImportMapping,
   type ImportReason,
   type ImportVisit,
@@ -34,6 +35,7 @@ import {
   findClientsByEmails,
   findClientsByImportHashes,
   findClientsByImportRefs,
+  findClientsByOwnIds,
   findClientsByPhones,
   insertImportBatch,
   insertImportedClients,
@@ -103,6 +105,9 @@ import {
 // A visits file (S49, ADR-0050) goes the same way: its rows find or create their clients as a
 // client file's do, then become past visits or upcoming appointments through the `VisitBook`
 // the appointments module serves (passed in by the api and the worker), with no email.
+
+/** The `system` of Pepper's own export: its preset's name (S51, ADR-0053). */
+const PEPPER_SYSTEM: ImportPreset = 'pepper';
 
 /** Rows a run writes per transaction (each extends the lease). */
 export const IMPORT_RUN_CHUNK = 500;
@@ -870,7 +875,11 @@ async function matchIndex(
     ...new Set(values.filter((v): v is string => v !== null)),
   ];
   // One after another: a transaction's queries share one connection.
-  const byRef = await findClientsByImportRefs(tx, system, unique(valid.map((r) => r.externalId)));
+  const externalIds = unique(valid.map((r) => r.externalId));
+  const byRef = await findClientsByImportRefs(tx, system, externalIds);
+  // Pepper's own export carries the business's client ids (S51, ADR-0053): a re-import into
+  // the same business finds them; into another one, the refs its first import kept.
+  const byOwnId = system === PEPPER_SYSTEM ? await findClientsByOwnIds(tx, externalIds) : [];
   const byEmail = await findClientsByEmails(tx, unique(valid.map((r) => r.email)));
   const byPhone = await findClientsByPhones(tx, unique(valid.map((r) => r.phone)));
   const byHash = await findClientsByImportHashes(tx, unique(valid.map((r) => r.hash)));
@@ -881,7 +890,9 @@ async function matchIndex(
     phones.set(phone, [...(phones.get(phone) ?? []), known(client)]);
   }
   return {
-    byExternalId: new Map(byRef.map((client) => [client.externalId, known(client)])),
+    byExternalId: new Map(
+      [...byOwnId, ...byRef].map((client) => [client.externalId, known(client)]),
+    ),
     byEmail: new Map(byEmail.map((client) => [client.email ?? '', known(client)])),
     byPhone: phones,
     byHash: new Map(byHash.map((client) => [client.rowHash, known(client)])),

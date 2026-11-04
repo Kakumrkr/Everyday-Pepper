@@ -11,6 +11,8 @@ export const PermissionSchema = z.enum([
   'business.read',
   'business.update',
   'business.delete',
+  // Download everything the business holds (S51, ADR-0053): the owner only.
+  'business.export',
   'billing.manage',
   'usage.read',
   // Team.

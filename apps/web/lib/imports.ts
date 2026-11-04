@@ -528,6 +528,7 @@ const PRESET_NAMES: Record<ImportPreset, string> = {
   vagaro: 'Vagaro',
   glossgenius: 'GlossGenius',
   fresha: 'Fresha',
+  pepper: 'Pepper',
 };
 
 export function presetName(preset: ImportPreset): string {

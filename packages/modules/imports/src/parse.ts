@@ -105,6 +105,14 @@ function detectDelimiter(text: string): string {
   return best;
 }
 
+/**
+ * A cell without the `'` a spreadsheet-safe CSV puts before text that would otherwise run as a
+ * formula (`'=…`, `'+…`, `'-…`, `'@…`; Pepper's own export writes them, ADR-0053).
+ */
+export function unguarded(cell: string): string {
+  return /^'[=+\-@\t\r]/.test(cell) ? cell.slice(1) : cell;
+}
+
 function readCsv(text: string): Table {
   let records: string[][];
   try {
@@ -131,7 +139,10 @@ function readCsv(text: string): Table {
   const rows: TableRow[] = [];
   body.forEach((record, index) => {
     if (blank(record)) return;
-    rows.push({ row: start + index + 2, cells: columns.map((_, i) => record[i] ?? '') });
+    rows.push({
+      row: start + index + 2,
+      cells: columns.map((_, i) => unguarded(record[i] ?? '')),
+    });
   });
   // The whole file is read (5 MB at most), so blank lines don't count towards the limit.
   if (rows.length > MAX_IMPORT_ROWS) throw TOO_MANY_ROWS;

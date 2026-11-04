@@ -355,6 +355,28 @@ export async function findClientsByImportRefs(
 }
 
 /**
+ * The business's own clients (not deleted) whose ids are among `ids`, as external ids: a file
+ * Pepper exported carries them (S51, ADR-0053), so re-importing it into the same business
+ * finds the same clients. Anything not shaped like an id is ignored; RLS keeps the lookup to
+ * the transaction's business, so another business's ids match nothing.
+ */
+export async function findClientsByOwnIds(
+  tx: TenantTx,
+  ids: readonly string[],
+): Promise<(MatchClient & { externalId: string })[]> {
+  const wanted = ids.filter((id) => Id.safeParse(id).success);
+  const out: (MatchClient & { externalId: string })[] = [];
+  for (const part of chunks(wanted)) {
+    const rows = await tx
+      .select(matchColumns)
+      .from(clients)
+      .where(and(inArray(clients.id, part), isNull(clients.deletedAt)));
+    out.push(...rows.map((row) => ({ ...row, externalId: row.id })));
+  }
+  return out;
+}
+
+/**
  * The clients identical rows (by hash) of the business's earlier imports created or matched,
  * leaving out undone imports, rows not applied and clients since deleted.
  */

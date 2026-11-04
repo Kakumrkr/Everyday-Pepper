@@ -20,6 +20,7 @@ One app that lets small service businesses run day-to-day operations by talking 
 - [V1 scope & roadmap](product/v1-scope.md)
 - [Acceptance criteria](product/acceptance-criteria.md)
 - [UX principles](product/ux-principles.md)
+- [Legal drafts: terms and privacy (S51, reviewed in S59)](legal/README.md)
 
 ## Architecture
 - [Overview & layers](architecture/overview.md)
@@ -72,6 +73,8 @@ One app that lets small service businesses run day-to-day operations by talking 
 - ADR-0019 … ADR-0042: see the [adr folder](adr/)
 - [ADR-0043 Cards first, chat second: the Home card board](adr/0043-card-board-first-interaction.md)
 - [ADR-0044 A complete redesign, and design rules enforced by tests](adr/0044-redesign-and-design-rules.md)
+- ADR-0045 … ADR-0052: see the [adr folder](adr/)
+- [ADR-0053 The business export](adr/0053-business-export.md)
 
 ## How these docs are maintained
 - Docs change in the same commit as the behaviour they describe.
