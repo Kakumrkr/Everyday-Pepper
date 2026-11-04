@@ -123,18 +123,29 @@ describe('add_to_waitlist', () => {
 describe('who is waiting, in the reads', () => {
   it('get_feed and find_client_bookings list the open entries, staff only their own', async () => {
     const w = await fullWorld();
-    await addToWaitlist(db, w.owner, {
-      clientId: w.maria.id,
-      serviceId: w.haircut.id,
-      staffMemberId: w.jessStaff.id,
-      windows,
-    });
-    await addToWaitlist(db, w.owner, {
-      clientId: w.sara.id,
-      serviceId: w.haircut.id,
-      staffMemberId: w.marcoStaff.id,
-      windows,
-    });
+    // The world's clock (as everywhere here): the fixed Tuesday has passed by the real one.
+    await addToWaitlist(
+      db,
+      w.owner,
+      {
+        clientId: w.maria.id,
+        serviceId: w.haircut.id,
+        staffMemberId: w.jessStaff.id,
+        windows,
+      },
+      { clock: w.clock },
+    );
+    await addToWaitlist(
+      db,
+      w.owner,
+      {
+        clientId: w.sara.id,
+        serviceId: w.haircut.id,
+        staffMemberId: w.marcoStaff.id,
+        windows,
+      },
+      { clock: w.clock },
+    );
     const feed = await callTool(depsFor(w, w.owner), 'get_feed', { kind: null });
     if (feed.status !== 'answered') throw new Error('expected an answer');
     expect(feed.summary).toContain('2 on the waitlist');
