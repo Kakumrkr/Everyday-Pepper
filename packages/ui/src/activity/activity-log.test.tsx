@@ -189,9 +189,11 @@ describe('ActivityLog', () => {
         now={NOW}
         onMore={() => Promise.resolve('x')}
         onUndo={() => Promise.resolve('x')}
+        emptyAction={<a href="/chat">Ask me to do something</a>}
       />,
     );
     expect(screen.getByTestId('activity-empty').textContent).toContain('Nothing yet.');
+    expect(screen.getByRole('link', { name: 'Ask me to do something' })).toBeTruthy();
     cleanup();
     render(
       <ActivityLog

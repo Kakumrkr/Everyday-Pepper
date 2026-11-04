@@ -1,7 +1,7 @@
 'use client';
 
 import type { AiActionView, AiEmailStatus } from '@pepper/contracts';
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
 import { ACTION_LABEL, formatDate, formatInstant, undoLine } from '../cards/labels.js';
 import { Badge } from '../kit/marks.js';
 import { Button } from '../kit/button.js';
@@ -28,6 +28,8 @@ export interface ActivityLogProps {
    * already gone), or a message when it can't.
    */
   onUndo: (id: string) => Promise<{ action: AiActionView; notice: string } | string>;
+  /** What to do while the log is empty (DESIGN D5): a link to ask Pepper for something. */
+  emptyAction?: ReactNode;
 }
 
 const EMAIL_WORDS: Record<AiEmailStatus, (n: number) => string> = {
@@ -84,7 +86,14 @@ export function activityLine(
 }
 
 /** The log, by local day, with "Show older" and Undo. */
-export function ActivityLog({ initial, timeZone, now: start, onMore, onUndo }: ActivityLogProps) {
+export function ActivityLog({
+  initial,
+  timeZone,
+  now: start,
+  onMore,
+  onUndo,
+  emptyAction,
+}: ActivityLogProps) {
   // Undo windows and "Today" read against the clock, so it moves while the page is open.
   const [now, setNow] = useState(start);
   useEffect(() => {
@@ -150,13 +159,16 @@ export function ActivityLog({ initial, timeZone, now: start, onMore, onUndo }: A
         {notice}
       </p>
       {actions.length === 0 ? (
-        <p
-          className="m-0 rounded-lg bg-surface-2 px-5 py-4 type-body text-ink-2"
+        <div
+          className="flex flex-col items-start gap-2 rounded-lg bg-surface-2 px-5 py-4"
           data-testid="activity-empty"
         >
-          <strong className="text-ink">Nothing yet.</strong> Everything I do for you, like bookings,
-          emails and to-dos, will be listed here with who it was for and what was sent.
-        </p>
+          <p className="m-0 type-body text-ink-2">
+            <strong className="text-ink">Nothing yet.</strong> Everything I do for you, like
+            bookings, emails and to-dos, will be listed here with who it was for and what was sent.
+          </p>
+          {emptyAction}
+        </div>
       ) : (
         days.map(({ day, items }) => (
           <Day

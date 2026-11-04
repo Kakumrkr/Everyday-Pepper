@@ -1,7 +1,9 @@
 'use client';
 
 import { AiActionsResponseSchema, type AiActionsResponse } from '@pepper/contracts';
-import { ActivityLog } from '@pepper/ui';
+import { ActivityLog, buttonStyle, cx } from '@pepper/ui';
+import Link from 'next/link';
+import { ROUTES } from '../../../lib/account';
 import { ACTIVITY_PAGE } from '../../../lib/activity';
 import { fetchJson } from '../../../lib/client-api';
 import { undoAction } from '../chat/undo-action';
@@ -30,6 +32,14 @@ export function ActivityScreen({
         );
         return answer.ok ? answer.data : answer.message;
       }}
+      emptyAction={
+        <Link
+          href={ROUTES.chat}
+          className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), '-ml-4')}
+        >
+          Ask me to do something
+        </Link>
+      }
       onUndo={async (id) => {
         const result = await undoAction(id);
         return result.ok ? { action: result.action, notice: result.notice } : result.message;
