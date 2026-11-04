@@ -403,3 +403,17 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - a deletion also ends remembered browsers, the import rows' details and hash, past bookings' manage links, and pending proposals about them; insights skip deleted clients' visits; a merge re-runs insights;
     - "Book again" carries ids (`?book=1&service=&staff=`), matched by name on the import screen; Book drops `?book=1` from the address when it closes;
     - the review's 5 fixes; queued booking emails to a deleted client still go out (ADR-0051, for later).
+- **S50.2 (user, 2026-11-03):** at the brief, "Go ahead with your recommendations and complete the session":
+  - D-1 A: a staff walk-in is written by a definer function (`create_walk_in_client`) only inside the booking's transaction, with a deferred check that refuses a commit without its booking; the clients RLS policy is unchanged.
+  - D-2 A: a walk-in whose email (or, without one, whose only matching phone) is a client's books that client, as the exact-contact lookup already shows staff.
+  - D-3 A: the client list pages by a keyset cursor (a client id) with "Show more", 50 at a time.
+  - D-4: ADR-0052.
+  - **Claude's refinements:**
+    - the new client's id comes from the app (UUIDv7) as an argument; the deferred trigger fires only for `source = 'team'` rows and checks the ids the function named in `pepper.walk_in_clients`;
+    - owners and managers booking a walk-in add the client as on the Clients screen; staff without a staff member are refused (42501);
+    - a walk-in's idempotent retry matches the time, not the client its first try added;
+    - phone search only for phone-like text (digits, spaces, `+ ( ) - .`), at least 3 digits; the AI's name-only lookup unchanged;
+    - the names on visits as `GET /v1/clients/names?ids=` (at most 100): the web server reads it while drawing the calendar, and the api refuses a POST that doesn't come from the app's pages;
+    - the booking sheet gains a Client row linking to the profile (a full 44 px target), none for a deleted client;
+    - screenshots: the booking sheet masks the visit's day by test id (not the first row), and the import result's undo day is fixed for its shot (a longer weekday wrapped the line on another day);
+    - the review's 6 fixes.
