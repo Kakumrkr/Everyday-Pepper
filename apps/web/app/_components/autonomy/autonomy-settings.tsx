@@ -12,7 +12,6 @@ import {
   type AutonomyTrackRecord,
   type AutonomyView,
   type BookingRulesResponse,
-  type LocalDate,
 } from '@pepper/contracts';
 import {
   AUTONOMY_GROUPS,
@@ -23,6 +22,7 @@ import {
   Icon,
   LEVEL_HELP,
   LEVEL_LABEL,
+  localDay,
   offerLine,
   PRESET_HELP,
   PRESET_LABEL,
@@ -63,7 +63,7 @@ export function AutonomySettings({
   trackRecord,
   rules,
   canChangeRules,
-  today,
+  timeZone,
 }: {
   initial: AutonomyView;
   canChange: boolean;
@@ -73,8 +73,8 @@ export function AutonomySettings({
   rules: BookingRulesResponse | null;
   /** The member may change the booking rules: the link to them is shown. */
   canChangeRules: boolean;
-  /** The business's local date, for which blackouts are still ahead. */
-  today: LocalDate;
+  /** The business's time zone: its today decides which blackouts are still ahead. */
+  timeZone: string;
 }) {
   const [autonomy, setAutonomy] = useState(initial);
   const [note, setNote] = useState<SaveNote | null>(null);
@@ -109,7 +109,7 @@ export function AutonomySettings({
     );
   const recordOf = (action: AutonomyAction): ActionTrackRecord | undefined =>
     trackRecord?.actions.find((row) => row.action === action);
-  const lines = standingRules(autonomy, rules, today);
+  const lines = standingRules(autonomy, rules, localDay(new Date().toISOString(), timeZone));
 
   return (
     <div className="flex flex-col gap-6">

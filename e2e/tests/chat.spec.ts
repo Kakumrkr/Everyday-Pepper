@@ -51,7 +51,8 @@ test('a taken time → the slot picker → Approve exactly as shown → Why? →
   // Booking asks first by default: the card shows what will happen and waits.
   const card = changeCard(page, 'New booking');
   await expect(card.getByText('Needs your OK')).toBeVisible();
-  await expect(card.getByText('Emails Maria L. a confirmation.')).toBeVisible();
+  // The card names who gets the email, by name and address (S53, AC-W7-7).
+  await expect(card.getByText(`Emails Maria L. (${s.mariaEmail}) a confirmation.`)).toBeVisible();
   await expect(card.getByText('Client')).toBeVisible();
   await expectAccessible(page, 'chat with a proposal');
   await card.getByRole('button', { name: 'Approve' }).click();

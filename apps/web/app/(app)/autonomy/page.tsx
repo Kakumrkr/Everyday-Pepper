@@ -3,7 +3,6 @@ import {
   AutonomyViewSchema,
   BookingRulesResponseSchema,
 } from '@pepper/contracts';
-import { localDay } from '@pepper/ui';
 import type { Metadata } from 'next';
 import { AutonomySettings } from '../../_components/autonomy/autonomy-settings';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
@@ -52,7 +51,7 @@ export default async function AutonomyPage() {
         trackRecord={trackRecord}
         rules={rules}
         canChangeRules={current.permissions.includes('rules.manage')}
-        today={localDay(new Date().toISOString(), current.business.timeZone)}
+        timeZone={current.business.timeZone}
       />
     </div>
   );
