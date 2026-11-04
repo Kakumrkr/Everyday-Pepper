@@ -110,7 +110,7 @@ export function groupLine(card: Extract<BoardCard, { type: 'group' }>): {
       0,
     );
     return {
-      title: `${staff} has ${formatDuration(minutes)} open on ${String(card.items.length)} of the next ${String(FEED_HORIZON_DAYS)} days`,
+      title: `${staff} has ${roughDuration(minutes)} open on ${String(card.items.length)} of the next ${String(FEED_HORIZON_DAYS)} days`,
       why: 'Inside working hours, from now on. A day goes away when it’s booked or it ends.',
     };
   }
@@ -121,10 +121,18 @@ export function groupLine(card: Extract<BoardCard, { type: 'group' }>): {
   };
 }
 
-/** One row under a group card: the day and its open time, or the client and their service. */
+/** A week's total in words: whole hours from 10 h ("61 h"), exact below ("7 h 15 min"). */
+export function roughDuration(minutes: number): string {
+  return minutes >= 600 ? `${String(Math.round(minutes / 60))} h` : formatDuration(minutes);
+}
+
+/**
+ * One row under a group card: the day and its open time (the title says it's open, and a
+ * 375 px row has room for no more), or the client and their service.
+ */
 export function groupRowLine(item: BoardItem): string {
   if (item.kind === 'schedule_gaps') {
-    return `${formatDate(item.day)} · ${formatDuration(item.payload.openMinutes)} open`;
+    return `${formatDate(item.day)} · ${formatDuration(item.payload.openMinutes)}`;
   }
   const client = item.names.client ?? 'A client';
   return item.names.service === null ? client : `${client} · ${item.names.service}`;

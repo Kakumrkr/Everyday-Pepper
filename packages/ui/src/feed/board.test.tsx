@@ -4,7 +4,7 @@ import { userEvent } from '@testing-library/user-event';
 import axe from 'axe-core';
 import { FeedItemSchema, type FeedSettings } from '@pepper/contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { boardOf, groupLine, namesList, type BoardItem } from './board.js';
+import { boardOf, groupLine, namesList, roughDuration, type BoardItem } from './board.js';
 import { FeedSuggestions, type FeedSuggestionsProps } from './feed-suggestions.js';
 
 afterEach(cleanup);
@@ -136,6 +136,15 @@ describe('boardOf (AC-W4-3, AC-W4-4)', () => {
     expect(boardOf([unpriced, overload]).map((card) => card.valueCents)).toEqual([null, null]);
   });
 
+  it('rounds a long week to whole hours', () => {
+    expect([135, 599, 600, 3677].map(roughDuration)).toEqual([
+      '2 h 15 min',
+      '9 h 59 min',
+      '10 h',
+      '61 h',
+    ]);
+  });
+
   it('lists names in words', () => {
     expect(namesList(['A'])).toBe('A');
     expect(namesList(['A', 'B'])).toBe('A and B');
@@ -186,7 +195,7 @@ describe('the grouped card (AC-W4-3)', () => {
     expect(rows.map((row) => row.getAttribute('href'))).toEqual(
       ['03', '04', '05', '06', '07'].map((day) => `/calendar?date=2026-11-${day}`),
     );
-    expect(rows[0]?.textContent).toContain('Tue, Nov 3 · 3 h open');
+    expect(rows[0]?.textContent).toContain('Tue, Nov 3 · 3 h');
     const result = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });
     expect(result.violations.map((violation) => violation.id)).toEqual([]);
   });
