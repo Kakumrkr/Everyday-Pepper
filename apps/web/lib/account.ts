@@ -110,6 +110,8 @@ export const ROUTES = {
   emailConfirmed: '/email-confirmed',
   changeEmail: '/account/email',
   more: '/more',
+  /** The business export (S51, ADR-0053): owners only. */
+  yourData: '/more/data',
   createBusiness: '/onboarding/business',
   twoFactor: '/security/two-factor',
   invite: '/invite',

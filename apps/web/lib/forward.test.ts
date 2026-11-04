@@ -103,6 +103,29 @@ describe('forwardToApi', () => {
     expect(kept.headers.get('cache-control')).toBe('public, max-age=60');
   });
 
+  it('passes a download’s file name and nosniff on (S51)', async () => {
+    const zip = upstream(
+      new Response(new Uint8Array([0x50, 0x4b]), {
+        headers: {
+          'content-type': 'application/zip',
+          'content-disposition': 'attachment; filename="pepper-export-fade-2099-03-10.zip"',
+          'x-content-type-options': 'nosniff',
+          'cache-control': 'no-store',
+        },
+      }),
+    );
+    const response = await forwardToApi(new Request('http://localhost:3000/v1/tenant/export'), {
+      apiBaseUrl: API,
+      fetch: zip.fetch,
+    });
+    expect(Object.fromEntries(response.headers)).toMatchObject({
+      'content-type': 'application/zip',
+      'content-disposition': 'attachment; filename="pepper-export-fade-2099-03-10.zip"',
+      'x-content-type-options': 'nosniff',
+      'cache-control': 'no-store',
+    });
+  });
+
   it.each([
     ['declared', { 'content-length': String(MAX_BODY_BYTES + 1) }, 'x'],
     ['actual', {}, 'x'.repeat(MAX_BODY_BYTES + 1)],
@@ -127,6 +150,7 @@ describe('forwardToApi', () => {
     expect(answerTimeoutOf('POST', '/v1/imports')).toBe(60_000);
     expect(answerTimeoutOf('GET', '/v1/imports')).toBe(10_000);
     expect(answerTimeoutOf('POST', '/v1/clients')).toBe(10_000);
+    expect(answerTimeoutOf('GET', '/v1/tenant/export')).toBe(60_000);
     const { fetch, calls } = upstream(new Response('{}', { status: 201 }));
     const file = new Uint8Array(MAX_BODY_BYTES * 4);
     const response = await forwardToApi(

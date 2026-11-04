@@ -64,6 +64,11 @@ export default async function MorePage() {
         <Link href={ROUTES.changeEmail} className={buttonStyle({ variant: 'secondary' })}>
           Change email
         </Link>
+        {current?.permissions.includes('business.export') === true ? (
+          <Link href={ROUTES.yourData} className={buttonStyle({ variant: 'secondary' })}>
+            Download your data
+          </Link>
+        ) : null}
         {me.businesses.length > 1 || current === null ? (
           <div className="w-full">
             <BusinessSwitcher businesses={me.businesses} activeTenantId={me.activeTenantId} />

@@ -11,10 +11,10 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 1. AC-W1-37…39 in acceptance-criteria + traceability.
 - [x] 2. Export engine: `readBusinessExport` (db, every tenant table named), `buildBusinessExport` (imports, `fflate`), a `pepper` import preset (migration 0062) whose client ids match the business's own.
 - [x] 3. `GET /v1/tenant/export` (owner only, audited, 10/hour); round trip green in `api/src/export.int.test.ts`.
-- [ ] 4. Web "Your data" screen from More; Playwright + baselines.
+- [x] 4. Web "Your data" (`/more/data`, owners only) from More → Account; `export.spec.ts` and `your-data-*` shots written (run at the close).
 - [ ] 5. `docs/legal/terms.md`, `privacy.md` drafts.
 - [x] 6. Top-up: initials skip digits (`initialsOf`).
-Next step: task 4 (the "Your data" screen).
+Next step: task 5 (legal drafts), then ADR-0053 and `/session-close`.
 
 ## Last sessions
 - **S50.2 Phase 11 · Staff walk-ins, client paging and phone search (2026-11-04)** ([ADR-0052](../adr/0052-staff-walk-in-clients-and-client-paging.md), [PR #75](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/75)). Full entry in [session-log.md](session-log.md).

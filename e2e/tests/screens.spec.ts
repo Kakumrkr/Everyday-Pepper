@@ -411,7 +411,9 @@ for (const width of WIDTHS) {
     await shots('book-photos');
   });
 
-  test(`Home, Chat and More at ${String(width)} px, light and dark`, async ({ page }) => {
+  test(`Home, Chat, More and Your data at ${String(width)} px, light and dark`, async ({
+    page,
+  }) => {
     test.setTimeout(300_000);
     await page.setViewportSize({ width, height: 900 });
     await onboardOwner(page, { business: 'Southside Cuts' });
@@ -435,6 +437,12 @@ for (const width of WIDTHS) {
         ...SHOT,
         mask: [page.getByText(/@example\.test$/)],
       });
+
+      // Your data (S51, ADR-0053): what the export holds and its one action.
+      await page.goto('/more/data');
+      await expect(page.getByRole('heading', { name: 'Your data', level: 1 })).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`your-data-${String(width)}-${scheme}.png`, SHOT);
     }
   });
 }
