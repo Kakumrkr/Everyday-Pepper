@@ -4,11 +4,13 @@ import {
   makeWaitlistOffersIn,
   offerEmailDetails,
   offerUrl,
+  regularOfferEmail,
   SlotUnavailableError,
   takeBackWaitlistOffersIn,
   waitlistOfferEmail,
 } from '@pepper/appointments';
 import {
+  BookingIdSchema,
   ClientIdSchema,
   MAX_WAITLIST_WINDOWS,
   ServiceIdSchema,
@@ -19,7 +21,8 @@ import {
   WaitlistMatchIdSchema,
   WaitlistOfferIdSchema,
 } from '@pepper/contracts';
-import { findCurrentTenant } from '@pepper/db';
+import { unsubscribeKeyFrom, unsubscribeToken } from '@pepper/core';
+import { findCurrentTenant, findService } from '@pepper/db';
 import type { TrustJson, WaitlistEntry } from '@pepper/contracts';
 import { z } from 'zod';
 import { localOf } from '../local-time.js';
@@ -56,25 +59,65 @@ const OfferArgs = z.strictObject({
   staffMemberId: z.uuid(),
   /** The freed time (UTC). */
   startsAt: UtcDateTimeSchema,
-  /** The ranking's best, with their rank and what *Why?* says about them. */
+  /**
+   * The ranking's best, with their rank and what *Why?* says about them: people on the
+   * waitlist (an entry), then overdue regulars (no entry, their usual service; S54).
+   */
   entries: z
     .array(
-      z.strictObject({
-        entryId: z.uuid(),
-        rank: z.number().int().min(1).max(WAITLIST_OFFER_LIMITS.maxFanOut),
-        fit: z.enum(['asked_for_staff', 'anyone']),
-        waitingSince: UtcDateTimeSchema,
-        visits: z.number().int().min(0),
-      }),
+      z.union([
+        z.strictObject({
+          entryId: z.uuid(),
+          rank: z.number().int().min(1).max(WAITLIST_OFFER_LIMITS.maxFanOut),
+          fit: z.enum(['asked_for_staff', 'anyone']),
+          waitingSince: UtcDateTimeSchema,
+          visits: z.number().int().min(0),
+        }),
+        z.strictObject({
+          entryId: z.null(),
+          clientId: z.uuid(),
+          serviceId: z.uuid(),
+          rank: z.number().int().min(1).max(WAITLIST_OFFER_LIMITS.maxFanOut),
+          fit: z.literal('regular'),
+          dueOn: DateArg,
+          intervalDays: z.number().int().min(1).max(730).nullable(),
+          visits: z.number().int().min(0),
+        }),
+      ]),
     )
     .min(1)
     .max(WAITLIST_OFFER_LIMITS.maxFanOut),
+  /** The booking that freed the time: its client isn't offered it back (S54). */
+  freedBookingId: z.uuid().nullable().optional(),
 });
 export type WaitlistOfferArgs = z.infer<typeof OfferArgs>;
 
 const Inverse = z.strictObject({
   offerIds: z.array(z.uuid()).max(WAITLIST_OFFER_LIMITS.maxFanOut),
 });
+
+const DOLLARS = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+/** "$60" (whole dollars, as the cards round an estimate). */
+function dollars(cents: number): string {
+  return DOLLARS.format(Math.round(cents / 100));
+}
+
+/** A service's listed price in cents, or `null` without one. */
+async function offerValueCents(
+  scope: WriteScope,
+  serviceId: string | undefined,
+): Promise<number | null> {
+  if (serviceId === undefined) return null;
+  const service = await findService(scope.tx, ServiceIdSchema.parse(serviceId));
+  const cents = service?.priceFromCents ?? null;
+  return cents === null || cents <= 0 ? null : cents;
+}
 
 /** "Maria L., Sara K. and Ana R." */
 function names(list: readonly string[]): string {
@@ -122,10 +165,20 @@ export const sendWaitlistOffers: WriteTool = {
         matchId,
         staffMemberId,
         startsAt: start,
-        entries: args.entries.map((e) => ({
-          entryId: WaitlistEntryIdSchema.parse(e.entryId),
-          rank: e.rank,
-        })),
+        freedBookingId:
+          args.freedBookingId === undefined || args.freedBookingId === null
+            ? null
+            : BookingIdSchema.parse(args.freedBookingId),
+        entries: args.entries.map((e) =>
+          e.entryId === null
+            ? {
+                entryId: null,
+                clientId: ClientIdSchema.parse(e.clientId),
+                serviceId: ServiceIdSchema.parse(e.serviceId),
+                rank: e.rank,
+              }
+            : { entryId: WaitlistEntryIdSchema.parse(e.entryId), rank: e.rank },
+        ),
       },
       {
         now: scope.now,
@@ -140,29 +193,51 @@ export const sendWaitlistOffers: WriteTool = {
     // By offer: a client skipped below must not shift the later names onto the wrong rank.
     const nameOf = new Map<string, string>();
     const services = new Set<string>();
+    const { baseUrl, outboxKey } = scope.deps.emails;
     for (const { offer, token } of made) {
       const details = await offerEmailDetails(scope.tx, tenant, offer);
       // Candidates have an address; one removed meanwhile is simply not emailed.
       if (details === undefined) continue;
       nameOf.set(offer.id, shortClientName(details.clientName));
       services.add(serviceName(directory, offer.serviceId));
+      const clientId = ClientIdSchema.parse(offer.clientId);
+      const claimUrl = offerUrl(baseUrl, tenant.slug, token);
+      // The domain offers a regular only with a mailing address on file (S54); never without
+      // the footer.
+      if (offer.source === 'regular' && tenant.mailingAddress === null) {
+        throw new Error('A regular was offered a time without a mailing address');
+      }
+      const expiresAt = offer.expiresAt.toISOString();
       await scope.emailClient({
-        clientId: ClientIdSchema.parse(offer.clientId),
+        clientId,
         template: 'waitlist_offer',
         dedupeKey: `waitlist.offer:${offer.id}`,
-        message: waitlistOfferEmail(
-          details,
-          offerUrl(scope.deps.emails.baseUrl, tenant.slug, token),
-          offer.expiresAt.toISOString(),
-        ),
+        message:
+          offer.source === 'regular' && tenant.mailingAddress !== null
+            ? regularOfferEmail(details, claimUrl, expiresAt, {
+                mailingAddress: tenant.mailingAddress,
+                unsubscribeUrl: `${baseUrl}/unsubscribe/${unsubscribeToken(
+                  unsubscribeKeyFrom(outboxKey),
+                  { tenantId: scope.actor.context.tenantId, clientId },
+                )}`,
+              })
+            : waitlistOfferEmail(details, claimUrl, expiresAt),
       });
     }
+    // The time's worth: the best-ranked offer's service at its listed price (an estimate:
+    // whoever claims it books their own service).
+    const valueCents = await offerValueCents(scope, made[0]?.offer.serviceId);
 
     const staff = staffName(directory, staffMemberId);
     const local = localOf(scope.timeZone, start);
     const service = [...services].join(' / ');
     const offeredTo = [...nameOf.values()];
-    const ranked = new Map(args.entries.map((e) => [e.entryId, e]));
+    const ranked = new Map(
+      args.entries.flatMap((e) => (e.entryId === null ? [] : [[e.entryId, e] as const])),
+    );
+    const regulars = new Map(
+      args.entries.flatMap((e) => (e.entryId === null ? [[e.clientId, e] as const] : [])),
+    );
     return {
       entity: { type: 'waitlist_match', id: matchId },
       targetKey: `waitlist_match:${matchId}`,
@@ -177,13 +252,16 @@ export const sendWaitlistOffers: WriteTool = {
         serviceName: service,
         offeredTo: names(offeredTo),
         offers: made.length,
+        ...(valueCents !== null && { valueCents }),
       },
       touched: {
         slot: args.startsAt,
-        entries: made.map(({ offer }) => offer.entryId),
+        entries: made.map(({ offer }) => offer.entryId ?? `regular:${offer.clientId}`),
       },
       inverse: { offerIds: made.map(({ offer }) => offer.id) },
-      summary: `Offer ${staff}'s opening ${when(local.date, local.time)} to ${names(offeredTo)}; the first to claim it books it.`,
+      summary: `Offer ${staff}'s opening ${when(local.date, local.time)} to ${names(offeredTo)}${
+        valueCents === null ? '' : `, ~${dollars(valueCents)}`
+      }; the first to claim it books it.`,
       facts: [
         {
           kind: 'slot_was_free',
@@ -191,7 +269,20 @@ export const sendWaitlistOffers: WriteTool = {
           value: { date: local.date, time: local.time, staffName: staff },
         },
         ...made.map(({ offer }) => {
-          const why = ranked.get(offer.entryId);
+          const why = offer.entryId === null ? undefined : ranked.get(offer.entryId);
+          const regular = offer.entryId === null ? regulars.get(offer.clientId) : undefined;
+          if (regular !== undefined) {
+            // An overdue regular (S54): *Why?* says when they were due, as a nudge's does.
+            return {
+              kind: 'rebooking_due',
+              ref: offer.clientId,
+              value: {
+                clientName: nameOf.get(offer.id) ?? 'a client',
+                dueOn: regular.dueOn,
+                ...(regular.intervalDays !== null && { intervalDays: regular.intervalDays }),
+              },
+            };
+          }
           return {
             kind: 'waitlist_rank',
             ref: offer.entryId,

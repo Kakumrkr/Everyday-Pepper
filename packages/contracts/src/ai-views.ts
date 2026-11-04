@@ -193,6 +193,17 @@ export const AiActionViewSchema = z.strictObject({
   why: AiWhySchema,
   /** Memory on the card (S30); absent when there is none. */
   memory: AiMemoryViewSchema.optional(),
+  /**
+   * A waitlist offer's outcome (S54, AC-W5-5): claimed (who, short name, and the booking's
+   * price), still open, or closed unclaimed; absent for other actions.
+   */
+  fill: z
+    .strictObject({
+      state: z.enum(['open', 'filled', 'unclaimed']),
+      clientName: z.string().max(40).nullable(),
+      priceCents: z.number().int().min(0).nullable(),
+    })
+    .optional(),
 });
 export type AiActionView = z.infer<typeof AiActionViewSchema>;
 

@@ -362,6 +362,16 @@ export async function mergeClientRows(
   const entries = await tx.execute(
     sql`UPDATE waitlist_entries SET client_id = ${keep} WHERE client_id = ${other}`,
   );
+  // A regular is offered a time once (S54, migration 0064): when both were offered the same
+  // time as regulars, the unclaimed one goes (the claimed one, if any, holds its booking).
+  await tx.execute(sql`
+    DELETE FROM waitlist_offers o
+    WHERE o.source = 'regular' AND o.status <> 'claimed' AND o.client_id IN (${keep}, ${other})
+      AND EXISTS (
+        SELECT 1 FROM waitlist_offers k
+        WHERE k.source = 'regular' AND k.match_id = o.match_id AND k.id <> o.id
+          AND k.client_id IN (${keep}, ${other})
+          AND (k.status = 'claimed' OR (o.status <> 'claimed' AND o.client_id = ${other})))`);
   await tx.execute(sql`UPDATE waitlist_offers SET client_id = ${keep} WHERE client_id = ${other}`);
   await tx.execute(sql`DELETE FROM feed_items WHERE client_id = ${other}`);
   await expireProposalsAbout(tx, other, now);

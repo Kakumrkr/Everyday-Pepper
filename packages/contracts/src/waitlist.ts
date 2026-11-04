@@ -159,7 +159,10 @@ export function offerExpiry(now: number, slotStart: number): number {
 /** A waitlist offer as the team sees it on the waitlist screen. */
 export const WaitlistOfferSchema = z.object({
   id: WaitlistOfferIdSchema,
-  entryId: WaitlistEntryIdSchema,
+  /** The waitlist entry offered; `null` for an overdue regular (S54, ADR-0056). */
+  entryId: WaitlistEntryIdSchema.nullable(),
+  /** Someone on the waitlist, or an overdue regular Pepper offered the time to (S54). */
+  source: z.enum(['waitlist', 'regular']),
   clientId: ClientIdSchema,
   staffMemberId: StaffMemberIdSchema,
   startsAt: UtcDateTimeSchema,

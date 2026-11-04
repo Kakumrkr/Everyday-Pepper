@@ -2310,7 +2310,10 @@ export const waitlistOffers = pgTable(
       .default(currentTenantId)
       .references(() => tenants.id, { onDelete: 'cascade' }),
     matchId: uuid('match_id').notNull(),
-    entryId: uuid('entry_id').notNull(),
+    /** The waitlist entry offered; `null` for an overdue regular (`source` 'regular', S54). */
+    entryId: uuid('entry_id'),
+    /** Who the offer went to: someone on the waitlist, or an overdue regular (S54, ADR-0056). */
+    source: text('source').notNull().default('waitlist'),
     clientId: uuid('client_id').notNull(),
     serviceId: uuid('service_id').notNull(),
     staffMemberId: uuid('staff_member_id').notNull(),
@@ -2325,6 +2328,10 @@ export const waitlistOffers = pgTable(
   (table) => [
     unique('waitlist_offers_token_hash_unique').on(table.tokenHash),
     unique('waitlist_offers_match_entry_unique').on(table.tenantId, table.matchId, table.entryId),
+    // A regular is offered a time once; waitlist offers keep their per-entry rule above.
+    uniqueIndex('waitlist_offers_match_regular_unique')
+      .on(table.tenantId, table.matchId, table.clientId)
+      .where(sql`${table.source} = 'regular'`),
     index('waitlist_offers_open_idx')
       .on(table.expiresAt)
       .where(sql`${table.status} = 'offered'`),
@@ -2342,6 +2349,11 @@ export const waitlistOffers = pgTable(
       sql`(${table.status} = 'claimed') = (${table.bookingId} IS NOT NULL)`,
     ),
     check('waitlist_offers_rank_range', sql`${table.rank} BETWEEN 1 AND 5`),
+    check('waitlist_offers_source_known', sql`${table.source} IN ('waitlist', 'regular')`),
+    check(
+      'waitlist_offers_source_entry',
+      sql`(${table.source} = 'waitlist') = (${table.entryId} IS NOT NULL)`,
+    ),
     check('waitlist_offers_token_hash_format', sql`${table.tokenHash} ~ '^[0-9a-f]{64}$'`),
     foreignKey({
       name: 'waitlist_offers_match_fk',

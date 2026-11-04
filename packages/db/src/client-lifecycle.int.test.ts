@@ -403,6 +403,30 @@ describe('merging clients (ADR-0051)', () => {
     expect(rows.rows).toEqual([{ client_id: keep, created_client: false }]);
   });
 
+  it('two copies offered one time as regulars (S54): the merge keeps one offer', async () => {
+    const keep = await client('Rae One', { email: 'rae1@example.test' });
+    const other = await client('Rae Two', { email: 'rae2@example.test' });
+    const freed = await visit(await client('Freed Slot'), new Date('2099-04-03T15:00:00Z'));
+    const match = newId();
+    const offerFor = (clientId: ClientId, rank: number) =>
+      sql`INSERT INTO waitlist_offers (id, match_id, entry_id, source, client_id, service_id, staff_member_id, starts_at, rank, token_hash, expires_at)
+        VALUES (${newId()}, ${match}, NULL, 'regular', ${clientId}, ${service}, ${jessStaff}, '2099-04-03T15:00:00Z', ${rank}, ${'a'.repeat(63) + String(rank)}, '2099-04-03T14:00:00Z')`;
+    await inTenant(async (tx) => {
+      await tx.execute(sql`
+        INSERT INTO waitlist_matches (id, booking_id, staff_member_id, starts_at, ends_at)
+        VALUES (${match}, ${freed}, ${jessStaff}, '2099-04-03T15:00:00Z', '2099-04-03T16:00:00Z')`);
+      await tx.execute(offerFor(keep, 1));
+      await tx.execute(offerFor(other, 2));
+    });
+    expect(await as(ana, (tx) => mergeClientRows(tx, keep, other, NOW))).toBeDefined();
+    const offers = await inTenant((tx) =>
+      tx.execute<{ client_id: string; rank: number }>(
+        sql`SELECT client_id, rank FROM waitlist_offers WHERE match_id = ${match}`,
+      ),
+    );
+    expect(offers.rows).toEqual([{ client_id: keep, rank: 1 }]);
+  });
+
   it('sees overlapping visits of the two, and merges nothing twice', async () => {
     const a = await client('Kai One');
     const b = await client('Kai Two');

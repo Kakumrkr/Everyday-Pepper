@@ -1388,3 +1388,30 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Timing:** `pnpm check` ~5 min ×2; affected integration 11.4 min (`--concurrency=1`); ai integration alone ~10 min; e2e stack ~1 min ×2 (web rebuilt once); chat spec 48 s; screens block 49 s + 41 s; walkthrough 12 s; CI (first run, green): build 11.0 min, integration 11.8 min, AI evals 6.9 min, E2E 20.8 min.
   - **For later:** rules typed in words (S56); a "Not now" for the offer; offers on Home; a preset step in onboarding; S56a: eval cases for a move that asks, drop `EVAL_WORLD_AUTONOMY`.
   - **Retro:** went well: pinning the eval business's level kept every recorded cassette valid without a recording · do better: a server page must not call a function from `@pepper/ui` (it's client-only); only the browser run caught it, so check imports into server components when writing them · top-up for S54: the cancellation → fill receipt names the client who got the offer and the slot's dollars on Activity ("Offered Tue 2 pm to Maria, ~$60").
+
+- **S54 Phase 12 · The money loop, part 1: cancellation → fill with overdue regulars, offer and fill receipts (2026-11-04)** ([ADR-0056](../adr/0056-regulars-fill-freed-times-and-fill-receipts.md); [PR #80](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/80); branch `claude/festive-hypatia-vrneqj`). D-1 split (the win-back list and the post-import aha → S54.2), D-2 regulars after the waitlist with one offer a week and the opt-out held, D-3 ADR-0056, D-4 no recording (decisions.md S54).
+  - **Built:**
+    - Migration 0064: `waitlist_offers.entry_id` nullable, plus `source`; a regular is offered a time once.
+    - db `listRegularCandidates`: open `rebooking_due` items, an address, no opt-out, not deleted, nothing booked ahead, no regular's offer or nudge in 7 days.
+    - appointments `regularCandidatesIn`: after the waitlist; never the client who cancelled; checked again at the offer; none while paused or turned off or without a mailing address. Also `waitlistFillOf` and `regularOfferEmail` (the nudge's footer).
+    - Claims, Undo and expiry work without an entry; a regular is sent no "taken" email.
+    - The tool and matcher pass regulars; `valueCents` and "~$60" on the action.
+    - `fill` on `GET /v1/ai/actions`; Activity's offer and fill lines.
+    - The waitlist screen marks a regular's offer.
+    - AC-W5-3…5.
+  - **Top-up (S53 retro, AC-W5-5):** Activity names who got the offer and the slot's value ("Offered Tue, Nov 10, 2:00 pm to Maria L. and Ana R., ~$60"), then "Filled … with Ana R., +$60".
+  - **Checks:**
+    - `pnpm check` green (a first run red on the generated snapshot's formatting).
+    - Affected integration green: db 740 (a merge with two regular offers), core 194, appointments 229 (smart waitlist 26: regulars, never offered with a control, paused, race with a regular), ai 166 (matcher 6: each email to its own client, the footer, the fill), api 103, worker 17 (p95 over ten cancellations < 2 min), imports 28, runtime 2.
+    - Playwright: waitlist 1/1 (now also Activity's "Filled" line); screens Home/Activity and Waitlist blocks 6/6, baselines unchanged.
+  - **Review:** `/code-review` found 9.
+    - Fixed (6): the merge's unique clash, paused or turned-off suggestions, nudges and offers in one weekly quiet rule, no regular's email without the footer, the order in SQL, the duplicated sort.
+    - Left (3): an Undo'd offer still counts toward the quiet week (the safe side); `fill` read per receipt (rare); two dollar formatters (`ai` can't import `ui`).
+    - `/security-review` couldn't start (no `origin/HEAD`); a manual pass found nothing.
+  - **Walkthrough:** 375 px dark as the owner: cancel → approve on Home → Sara claims → Activity "Filled Wed, Nov 11, 3:00 pm with Sara K." (no price in that salon, so no dollars).
+  - **Timing:**
+    - Local: `pnpm check` ~5 min ×2; affected integration 9.4 min (`--concurrency=1`); e2e stack ~2 min; waitlist spec 2.4 min; screens blocks 1.2 min.
+    - The worker's p95 value was asserted, not printed (the suite hides console output).
+    - CI (first run, green): build 8.7 min, integration 7.0 min, AI evals 4.7 min, E2E 18.6 min.
+  - **For later:** the win-back list and the post-import aha (S54.2); a nudge-only test of the weekly quiet rule across nudges and offers; batch `fill` reads if Activity grows; the summary's "Tue 2026-11-03 at 15:00" wording in proposals (the Activity line already reads well).
+  - **Retro:** went well: a control case in the "never offered" fixture proved the exclusions weren't passing on an empty list · do better: run `prettier --check` on generated migration files before the first `pnpm check` · top-up for S54.2: the win-back list's empty state says what will fill it ("After 2 visits, a client who stops coming shows here") with the action to import past visits.

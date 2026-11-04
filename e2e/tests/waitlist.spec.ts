@@ -127,6 +127,10 @@ test('a cancelled time is offered to the waitlist; the first claim books it, the
   await expect(offers).toContainText(/2\. Ana Ruiz\s*Someone else took it/);
   // Ana is waiting again.
   await expect(page.getByRole('region', { name: 'Waiting (1)' })).toContainText('Ana Ruiz');
+
+  // Activity's receipt says who filled it (S54, AC-W5-5).
+  await page.goto('/activity');
+  await expect(page.getByTestId('activity-row').first()).toContainText(/Filled .+ with Sara K\./);
 });
 
 async function businessName(page: Page): Promise<string> {

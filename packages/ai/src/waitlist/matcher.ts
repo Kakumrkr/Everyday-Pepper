@@ -163,13 +163,27 @@ async function matchIn(
     matchId: match.id,
     staffMemberId: match.staffMemberId,
     startsAt: match.startsAt.toISOString(),
-    entries: ranked.map((r) => ({
-      entryId: r.entryId,
-      rank: r.rank,
-      fit: r.fit,
-      waitingSince: r.waitingSince,
-      visits: r.visits,
-    })),
+    freedBookingId: match.bookingId,
+    entries: ranked.map((r) =>
+      r.source === 'regular'
+        ? {
+            entryId: null,
+            clientId: r.clientId,
+            serviceId: r.serviceId,
+            rank: r.rank,
+            fit: r.fit,
+            dueOn: r.dueOn,
+            intervalDays: r.intervalDays,
+            visits: r.visits,
+          }
+        : {
+            entryId: r.entryId,
+            rank: r.rank,
+            fit: r.fit,
+            waitingSince: r.waitingSince,
+            visits: r.visits,
+          },
+    ),
   };
   try {
     const result = await actForBusiness(

@@ -1,7 +1,11 @@
 import {
+  BookingIdSchema,
+  StaffMemberIdSchema,
   TenantIdSchema,
   WaitlistMatchIdSchema,
+  WaitlistOfferIdSchema,
   type Client,
+  type FeedSettingsChange,
   type ManageToken,
   type Service,
   type StaffMember,
@@ -9,10 +13,19 @@ import {
   type TenantSlug,
   type WaitlistEntry,
 } from '@pepper/contracts';
-import { createBusiness, createClient, ManualClock, type Actor } from '@pepper/core';
+import {
+  changeFeedSettings,
+  createBusiness,
+  createClient,
+  deleteClient,
+  ManualClock,
+  type Actor,
+} from '@pepper/core';
 import {
   expireWaitlistOffers,
+  insertBooking,
   listWaitlistMatches,
+  optOutClientEmail,
   withTenant,
   type Database,
   type WaitlistMatchRow,
@@ -32,6 +45,7 @@ import {
   reinstateBookingIn,
 } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
+import { runInsightsFor } from './services/insights.js';
 import {
   cancelManagedBooking,
   claimWaitlistOffer,
@@ -585,5 +599,324 @@ describe('offers and claims (AC-W5-1)', () => {
     await expect(
       getWaitlistOffer(db, w.slug, 'b'.repeat(43) as never, { clock: w.clock }),
     ).rejects.toBeInstanceOf(WaitlistOfferNotFoundError);
+  });
+});
+
+// Overdue regulars fill what the waitlist leaves (S54, ADR-0056, AC-W5-3, AC-W5-4) ------------
+
+const DAY_MS = 86_400_000;
+
+/** Three past visits with `staff`, 28 days apart, the last `daysAgo` days before NOW. */
+async function pastVisits(
+  w: World,
+  clientIndex: number,
+  staffMemberId: string,
+  daysAgo = 35,
+): Promise<void> {
+  await withTenant(db, w.tenantId, async (tx) => {
+    for (const back of [daysAgo + 56, daysAgo + 28, daysAgo]) {
+      // Each client at their own hour, so no two visits overlap.
+      const start = Date.parse(NOW) - back * DAY_MS + clientIndex * 3_600_000;
+      await insertBooking(tx, {
+        clientId: client(w, clientIndex).id,
+        serviceId: w.haircut.id,
+        staffMemberId: StaffMemberIdSchema.parse(staffMemberId),
+        startsAt: new Date(start),
+        endsAt: new Date(start + 60 * 60_000),
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+        priceFromCents: 6000,
+        priceToCents: null,
+        source: 'team',
+        overridden: false,
+        idempotencyKey: null,
+        createdBy: null,
+        manageTokenHash: null,
+      });
+    }
+  });
+}
+
+/** Runs the insights pass (the feed's `rebooking_due` items are who is overdue). */
+function insights(w: World) {
+  return runInsightsFor(db, w.tenantId, {
+    clock: w.clock,
+    insightsOf: () => ({ enabled: ['rebooking_due'], minGapMinutes: 60 }),
+  });
+}
+
+async function withAddress(w: World): Promise<void> {
+  await changeFeedSettings(db, w.owner, { mailingAddress: '12 Elm Street, Springfield' });
+}
+
+/** Cancels Maria's 10:00 with Jess, runs the insights pass, and offers the time (fan-out 3). */
+async function cancelInsightsAndOffer(w: World, fanOut = 3): Promise<MadeOffer[]> {
+  const booking = await bookJess(w);
+  await changeBooking(
+    db,
+    w.owner,
+    booking.id,
+    { status: 'cancelled', notifyClient: false },
+    { clock: w.clock },
+  );
+  await insights(w);
+  const match = (await matches(w)).at(-1);
+  if (match === undefined) throw new Error('no match row');
+  return withTenant(db, w.tenantId, async (tx) => {
+    const ranked = await waitlistCandidatesIn(tx, match, { now: w.clock.now(), fanOut });
+    return makeWaitlistOffersIn(
+      tx,
+      w.owner,
+      {
+        matchId: WaitlistMatchIdSchema.parse(match.id),
+        staffMemberId: w.jess.id,
+        startsAt: match.startsAt,
+        freedBookingId: BookingIdSchema.parse(match.bookingId),
+        entries: ranked,
+      },
+      { now: w.clock.now() },
+    );
+  });
+}
+
+const offeredNames = (w: World, made: readonly MadeOffer[]) =>
+  made.map(({ offer }) => [
+    w.clients.find((c) => c.id === offer.clientId)?.name,
+    offer.source,
+    offer.rank,
+  ]);
+
+describe('regulars (S54): overdue regulars fill what the waitlist leaves', () => {
+  it('the waitlist first, then Jess’s regulars most overdue first; one offer per client', async () => {
+    const w = await newWorld();
+    await withAddress(w);
+    await wait(w, 1, w.jess.id); // Sara, on the waitlist
+    await pastVisits(w, 2, w.jess.id, 35); // Ana, due a week ago
+    await pastVisits(w, 3, w.jess.id, 45); // Bea, due 17 days ago: more overdue
+    await pastVisits(w, 1, w.jess.id, 40); // Sara is overdue too, but already offered as waiting
+    const made = await cancelInsightsAndOffer(w);
+    expect(offeredNames(w, made)).toEqual([
+      ['Sara Kim', 'waitlist', 1],
+      ['Bea Cole', 'regular', 2],
+      ['Ana Ruiz', 'regular', 3],
+    ]);
+    expect(made.every(({ offer }) => offer.source === 'waitlist' || offer.entryId === null)).toBe(
+      true,
+    );
+  });
+
+  it('a full waitlist leaves no seat for regulars', async () => {
+    const w = await newWorld();
+    await withAddress(w);
+    await wait(w, 1, w.jess.id);
+    await wait(w, 2, null);
+    await pastVisits(w, 3, w.jess.id);
+    const made = await cancelInsightsAndOffer(w, 2);
+    expect(offeredNames(w, made)).toEqual([
+      ['Sara Kim', 'waitlist', 1],
+      ['Ana Ruiz', 'waitlist', 2],
+    ]);
+  });
+
+  it('a regular’s claim books their usual service; nobody else is told by email, waiting clients are', async () => {
+    const w = await newWorld();
+    await withAddress(w);
+    await wait(w, 1, w.jess.id);
+    await pastVisits(w, 3, w.jess.id);
+    const made = await cancelInsightsAndOffer(w);
+    const bea = made.find(({ offer }) => offer.source === 'regular');
+    if (bea === undefined) throw new Error('no regular offer');
+    const told: WaitlistTakenNotice[] = [];
+    const { booking } = await claim(w, bea, told);
+    expect(booking).toMatchObject({ startsAt: tue('10:00') });
+    expect(await activeBookingsAt(w, '10:00')).toHaveLength(1);
+    // Sara, on the waitlist, is told it's taken and waits again.
+    expect(told.map((n) => n.email.email)).toEqual([client(w, 1).email]);
+    const entries = await listWaitlist(db, w.owner, { all: true }, { clock: w.clock });
+    expect(entries.map((e) => [e.clientId, e.status])).toEqual([[client(w, 1).id, 'waiting']]);
+
+    // The other way round: Sara claims first; Bea, a regular, isn't emailed about it.
+    const w2 = await newWorld();
+    await withAddress(w2);
+    await wait(w2, 1, w2.jess.id);
+    await pastVisits(w2, 3, w2.jess.id);
+    const made2 = await cancelInsightsAndOffer(w2);
+    const sara = made2.find(({ offer }) => offer.source === 'waitlist');
+    if (sara === undefined) throw new Error('no waitlist offer');
+    const told2: WaitlistTakenNotice[] = [];
+    await claim(w2, sara, told2);
+    expect(told2).toEqual([]);
+    const bea2 = made2.find(({ offer }) => offer.source === 'regular');
+    if (bea2 === undefined) throw new Error('no regular offer');
+    await expect(claim(w2, bea2)).rejects.toBeInstanceOf(WaitlistOfferTakenError);
+  });
+
+  it('concurrent claims with a regular: exactly one booking', async () => {
+    const w = await newWorld();
+    await withAddress(w);
+    await wait(w, 1, w.jess.id);
+    await pastVisits(w, 2, w.jess.id, 35);
+    await pastVisits(w, 3, w.jess.id, 45);
+    const made = await cancelInsightsAndOffer(w);
+    expect(made).toHaveLength(3);
+    const results = await Promise.allSettled(made.map((m) => claim(w, m)));
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    const refused: unknown[] = results.flatMap((r) =>
+      r.status === 'rejected' ? [r.reason as unknown] : [],
+    );
+    expect(refused.every((e) => e instanceof WaitlistOfferTakenError)).toBe(true);
+    expect(await activeBookingsAt(w, '10:00')).toHaveLength(1);
+  });
+
+  it('taking a regular’s offer back (Undo) closes it; nothing waits on the list', async () => {
+    const w = await newWorld();
+    await withAddress(w);
+    await pastVisits(w, 3, w.jess.id);
+    const made = await cancelInsightsAndOffer(w);
+    expect(offeredNames(w, made)).toEqual([['Bea Cole', 'regular', 1]]);
+    const closed = await withTenant(db, w.tenantId, (tx) =>
+      takeBackWaitlistOffersIn(
+        tx,
+        made.map(({ offer }) => WaitlistOfferIdSchema.parse(offer.id)),
+      ),
+    );
+    expect(closed).toBe(1);
+    const [only] = made;
+    if (only === undefined) throw new Error('no offer');
+    await expect(claim(w, only)).rejects.toBeInstanceOf(WaitlistOfferExpiredError);
+    expect(await listWaitlist(db, w.owner, { all: true }, { clock: w.clock })).toEqual([]);
+  });
+});
+
+describe('never offered (S54, AC-W5-4: 0 wrong-client sends)', () => {
+  it('the client who cancelled, another staff member’s regular, an opted-out, address-less, deleted or booked-ahead client', async () => {
+    const w = await newWorld();
+    await withAddress(w);
+    // Maria (0) gave the time up and is overdue with Jess herself.
+    await pastVisits(w, 0, w.jess.id, 40);
+    // Sara (1) is Marco's regular.
+    await pastVisits(w, 1, w.marco.id);
+    // Ana (2) unsubscribed from marketing email.
+    await pastVisits(w, 2, w.jess.id);
+    await withTenant(db, w.tenantId, (tx) => optOutClientEmail(tx, client(w, 2).id, new Date(NOW)));
+    // Bea (3) is booked ahead (Thursday).
+    await pastVisits(w, 3, w.jess.id);
+    await createBooking(
+      db,
+      w.owner,
+      {
+        clientId: client(w, 3).id,
+        serviceId: w.haircut.id,
+        staffMemberId: w.marco.id,
+        startsAt: '2026-11-05T15:00:00.000Z',
+        notifyClient: false,
+      },
+      { clock: w.clock },
+    );
+    // Cleo (4) was deleted.
+    await pastVisits(w, 4, w.jess.id);
+    await deleteClient(db, w.owner, client(w, 4).id, { clock: w.clock });
+    // A client without an address.
+    const noEmail = await createClient(db, w.owner, { name: 'Nell Gray' });
+    w.clients.push(noEmail);
+    await pastVisits(w, w.clients.length - 1, w.jess.id);
+    // The control: Dee (5), Jess's regular with nothing in the way, is the only one offered.
+    await pastVisits(w, 5, w.jess.id);
+
+    const made = await cancelInsightsAndOffer(w);
+    expect(offeredNames(w, made)).toEqual([['Dee Fox', 'regular', 1]]);
+  });
+
+  it('suggestions paused, or due regulars turned off: no regular is offered anything', async () => {
+    const changes: FeedSettingsChange[] = [
+      { suggestionsPaused: true },
+      { disabledKinds: ['rebooking_due'] },
+    ];
+    for (const change of changes) {
+      const w = await newWorld();
+      await withAddress(w);
+      await pastVisits(w, 3, w.jess.id);
+      await insights(w);
+      await changeFeedSettings(db, w.owner, change);
+      expect(await cancelInsightsAndOffer(w)).toEqual([]);
+    }
+  });
+
+  it('no mailing address on file: no regular is offered anything (the footer needs it)', async () => {
+    const w = await newWorld();
+    await pastVisits(w, 3, w.jess.id);
+    expect(await cancelInsightsAndOffer(w)).toEqual([]);
+  });
+
+  it('one regular’s offer a week: a second freed time within 7 days goes to someone else', async () => {
+    const w = await newWorld();
+    await withAddress(w);
+    await pastVisits(w, 3, w.jess.id, 45);
+    expect(offeredNames(w, await cancelInsightsAndOffer(w))).toEqual([['Bea Cole', 'regular', 1]]);
+    await pastVisits(w, 2, w.jess.id, 35);
+    const later = await bookJess(w, '14:00', 5);
+    await changeBooking(
+      db,
+      w.owner,
+      later.id,
+      { status: 'cancelled', notifyClient: false },
+      { clock: w.clock },
+    );
+    await insights(w);
+    const match = (await matches(w)).at(-1);
+    if (match === undefined) throw new Error('no match row');
+    const second = await withTenant(db, w.tenantId, (tx) =>
+      waitlistCandidatesIn(tx, match, { now: w.clock.now(), fanOut: 3 }),
+    );
+    expect(second.map((c) => [c.clientId, c.source])).toEqual([[client(w, 2).id, 'regular']]);
+  });
+
+  it('a regular who books meanwhile is checked again at the offer and left out', async () => {
+    const w = await newWorld();
+    await withAddress(w);
+    await pastVisits(w, 3, w.jess.id);
+    const booking = await bookJess(w);
+    await changeBooking(
+      db,
+      w.owner,
+      booking.id,
+      { status: 'cancelled', notifyClient: false },
+      { clock: w.clock },
+    );
+    await insights(w);
+    const match = (await matches(w)).at(-1);
+    if (match === undefined) throw new Error('no match row');
+    const ranked = await withTenant(db, w.tenantId, (tx) =>
+      waitlistCandidatesIn(tx, match, { now: w.clock.now(), fanOut: 3 }),
+    );
+    expect(ranked).toHaveLength(1);
+    // Before the OK, Bea books Thursday herself.
+    await createBooking(
+      db,
+      w.owner,
+      {
+        clientId: client(w, 3).id,
+        serviceId: w.haircut.id,
+        staffMemberId: w.marco.id,
+        startsAt: '2026-11-05T15:00:00.000Z',
+        notifyClient: false,
+      },
+      { clock: w.clock },
+    );
+    const made = await withTenant(db, w.tenantId, (tx) =>
+      makeWaitlistOffersIn(
+        tx,
+        w.owner,
+        {
+          matchId: WaitlistMatchIdSchema.parse(match.id),
+          staffMemberId: w.jess.id,
+          startsAt: match.startsAt,
+          freedBookingId: BookingIdSchema.parse(match.bookingId),
+          entries: ranked,
+        },
+        { now: w.clock.now() },
+      ),
+    );
+    expect(made).toEqual([]);
   });
 });
