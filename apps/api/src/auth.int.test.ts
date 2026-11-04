@@ -1040,7 +1040,10 @@ describe('clients, bookings and the waitlist (ADR-0017)', () => {
     );
     const taken = await ana.post('/v1/clients', { name: 'M', email: 'MARIA@example.test' });
     expect([taken.status, errorCode(taken.body)]).toEqual([409, 'client_email_taken']);
-    expect((await cara.get('/v1/clients').expect(200)).body).toEqual({ clients: [] });
+    expect((await cara.get('/v1/clients').expect(200)).body).toEqual({
+      clients: [],
+      nextCursor: null,
+    });
     expect(errorCode((await cara.get(`/v1/clients/${maria.id}`).expect(404)).body)).toBe(
       'client_not_found',
     );
@@ -1228,7 +1231,10 @@ describe('clients, bookings and the waitlist (ADR-0017)', () => {
       busy: [],
       truncated: false,
     });
-    expect((await dev.get('/v1/clients').expect(200)).body).toEqual({ clients: [] });
+    expect((await dev.get('/v1/clients').expect(200)).body).toEqual({
+      clients: [],
+      nextCursor: null,
+    });
     expect((await dev.get('/v1/waitlist?all=true').expect(200)).body).toEqual({ entries: [] });
     const probes = [
       await dev.get(`/v1/clients/${maria.id}`),
