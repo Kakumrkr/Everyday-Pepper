@@ -16,7 +16,9 @@ const defaults: BusinessAutonomy = {
     AutonomyActionSchema.options.map((action) => [action, AUTONOMY_ACTIONS[action].defaultLevel]),
   ) as Record<AutonomyAction, AutonomyLevel>,
 };
-const record = (overrides: Partial<{ done: number; streak: number; offer: AutonomyLevel | null }>) => ({
+const record = (
+  overrides: Partial<{ done: number; streak: number; offer: AutonomyLevel | null }>,
+) => ({
   action: 'task.create' as const,
   doneLast30Days: overrides.done ?? 0,
   correctInARow: overrides.streak ?? 0,

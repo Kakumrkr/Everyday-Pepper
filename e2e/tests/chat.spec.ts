@@ -132,9 +132,13 @@ test('ask vs "do it and tell me": the Autonomy page changes what the chat does',
   // behind "Customise each action".
   const presets = page.getByRole('radiogroup', { name: 'How much I do on my own' });
   await expect(presets.getByRole('radio', { name: /^Balanced/ })).toBeChecked();
-  await expect(page.getByTestId('standing-rules')).toContainText('I ask you before new bookings, moves');
+  await expect(page.getByTestId('standing-rules')).toContainText(
+    'I ask you before new bookings, moves',
+  );
   await (await hydrated(page.getByRole('button', { name: 'Customise each action' }))).click();
-  await expect(page.getByTestId('count-booking.create')).toHaveText('Not done in the last 30 days.');
+  await expect(page.getByTestId('count-booking.create')).toHaveText(
+    'Not done in the last 30 days.',
+  );
   const row = page.getByRole('radiogroup', { name: 'Create a booking' });
   await hydrated(row.getByRole('radio', { name: 'Do it and tell me' }));
   // The bulk lock is visible and can't be chosen.

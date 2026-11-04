@@ -196,8 +196,6 @@ export class AutonomyController {
     @Body() body: unknown,
   ): Promise<AutonomyView> {
     const change = parseBody(AutonomyChangeSchema, body);
-    return AutonomyViewSchema.parse(
-      await answering(() => this.ai.changeAutonomy(tenant, change)),
-    );
+    return AutonomyViewSchema.parse(await answering(() => this.ai.changeAutonomy(tenant, change)));
   }
 }

@@ -279,7 +279,9 @@ function PresetOption({
         'flex min-h-11 cursor-pointer flex-col gap-1 rounded-lg border px-4 py-3',
         'transition motion-base ease-standard',
         'has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-brand',
-        selected ? 'border-brand bg-surface shadow-raised' : 'border-line bg-surface hover:border-ink-2',
+        selected
+          ? 'border-brand bg-surface shadow-raised'
+          : 'border-line bg-surface hover:border-ink-2',
         disabled && 'cursor-not-allowed opacity-60',
       )}
     >

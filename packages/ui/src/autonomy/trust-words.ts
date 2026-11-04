@@ -116,7 +116,8 @@ export function standingRules(
     const ask = at('ask');
     const notify = at('notify');
     const auto = at('auto');
-    if (ask.length > 0) lines.push({ text: `I ask you before ${list(ask)}.`, changedOn: 'autonomy' });
+    if (ask.length > 0)
+      lines.push({ text: `I ask you before ${list(ask)}.`, changedOn: 'autonomy' });
     if (notify.length > 0) {
       lines.push({
         text: `${capitalised(list(notify))}: I do them and tell you, with Undo.`,
@@ -156,7 +157,9 @@ export function standingRules(
     });
   }
   const closed = own
-    .filter((rule): rule is Extract<Rule, { type: 'blackout_window' }> => rule.type === 'blackout_window')
+    .filter(
+      (rule): rule is Extract<Rule, { type: 'blackout_window' }> => rule.type === 'blackout_window',
+    )
     .filter((rule) => rule.params.endDate >= today)
     .sort((a, b) => a.params.startDate.localeCompare(b.params.startDate));
   if (closed.length > 0) {

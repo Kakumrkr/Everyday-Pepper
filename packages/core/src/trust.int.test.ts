@@ -1511,7 +1511,12 @@ describe('presets and the track record (S53)', () => {
     expect((await record(sam)).offer).toBeNull();
     await changeAutonomy(db, lena, { askFirst: true }, defaults);
     expect((await record(lena)).offer).toBeNull();
-    await changeAutonomy(db, lena, { askFirst: false, levels: { 'task.create': 'auto' } }, defaults);
+    await changeAutonomy(
+      db,
+      lena,
+      { askFirst: false, levels: { 'task.create': 'auto' } },
+      defaults,
+    );
     expect((await record(lena)).offer).toBeNull();
   });
 });

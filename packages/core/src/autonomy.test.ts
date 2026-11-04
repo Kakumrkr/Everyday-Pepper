@@ -15,12 +15,7 @@ import {
 } from '@pepper/contracts';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import {
-  autonomyPresetOf,
-  decideAutonomy,
-  earnedTrustOffer,
-  resolveAutonomy,
-} from './autonomy.js';
+import { autonomyPresetOf, decideAutonomy, earnedTrustOffer, resolveAutonomy } from './autonomy.js';
 
 // decideAutonomy is the trust layer's core rule (ADR-0028): property tests over every action ×
 // level × tier × context, then the rules pinned one by one.
