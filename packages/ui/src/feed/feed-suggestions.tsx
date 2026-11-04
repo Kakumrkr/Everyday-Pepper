@@ -36,6 +36,11 @@ export interface FeedSuggestionsProps {
   /** Renders the action's link (the app's router link); `onFollow` records it as acted on. */
   renderAction: (action: FeedAction, onFollow: () => void) => ReactNode;
   onClose: (id: string, outcome: 'dismissed' | 'done') => FeedChange;
+  /**
+   * A grouped card's "Dismiss all" (S52): its items closed together, as one dismissal. Without
+   * it, each item is closed on its own.
+   */
+  onCloseMany?: (ids: readonly string[], outcome: 'dismissed') => FeedChange;
   onSettings: (change: FeedSettingsChange) => FeedChange;
   /** Shown at the card's end (S36: the mailing address rebooking emails carry). */
   footer?: ReactNode;
@@ -67,6 +72,7 @@ export function FeedSuggestions({
   actionFor,
   renderAction,
   onClose,
+  onCloseMany,
   onSettings,
   footer,
   quiet = false,
@@ -96,10 +102,23 @@ export function FeedSuggestions({
     }
     return true;
   };
-  /** "Dismiss all" on a grouped card: each of its items, stopping at the first refusal. */
+  /** "Dismiss all" on a grouped card: its items together (one dismissal), or one by one. */
   const dismissAll = async (card: Extract<BoardCard, { type: 'group' }>) => {
-    for (const item of card.items) {
-      if (!(await close(item, 'dismissed'))) return;
+    if (onCloseMany === undefined) {
+      for (const item of card.items) {
+        if (!(await close(item, 'dismissed'))) return;
+      }
+    } else {
+      setError(null);
+      const failed = await onCloseMany(
+        card.items.map((item) => item.id),
+        'dismissed',
+      );
+      if (failed !== null) {
+        setError(failed);
+        return;
+      }
+      setClosed((previous) => new Set([...previous, ...card.items.map((item) => item.id)]));
     }
     setNotice(
       `Snoozed for 30 days. I won't suggest these ${FEED_KIND_NOUN[card.kind]} again until then.`,
@@ -356,7 +375,9 @@ function GroupCard({
               key={item.id}
               title={groupRowLine(item)}
               trailing={
-                item.valueCents === undefined || item.valueCents === null ? undefined : (
+                item.valueCents === undefined ||
+                item.valueCents === null ||
+                item.valueCents === 0 ? undefined : (
                   <MoneyChip cents={item.valueCents} kind="estimate" />
                 )
               }

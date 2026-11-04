@@ -1,7 +1,7 @@
 'use client';
 
 import type { AiActionView, AiEmailStatus } from '@pepper/contracts';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { ACTION_LABEL, formatDate, formatInstant, undoLine } from '../cards/labels.js';
 import { Badge } from '../kit/marks.js';
 import { Button } from '../kit/button.js';
@@ -23,8 +23,11 @@ export interface ActivityLogProps {
   now: number;
   /** Reads the page after `next`; a message when it can't. */
   onMore: (next: string) => Promise<ActivityPage | string>;
-  /** Undoes the action; the receipt as it is now, or a message when it can't. */
-  onUndo: (id: string) => Promise<AiActionView | string>;
+  /**
+   * Undoes the action: the receipt as it is now and what to say (its emails taken back or
+   * already gone), or a message when it can't.
+   */
+  onUndo: (id: string) => Promise<{ action: AiActionView; notice: string } | string>;
 }
 
 const EMAIL_WORDS: Record<AiEmailStatus, (n: number) => string> = {
@@ -67,7 +70,7 @@ export function activityLine(
     action.approvedByName !== null
       ? `approved by ${action.approvedByName}`
       : action.outcome === 'propose'
-        ? 'after your OK'
+        ? 'after approval'
         : 'on its own, as Autonomy allows';
   const counts = new Map<AiEmailStatus, number>();
   for (const email of action.emails) counts.set(email.status, (counts.get(email.status) ?? 0) + 1);
@@ -81,7 +84,17 @@ export function activityLine(
 }
 
 /** The log, by local day, with "Show older" and Undo. */
-export function ActivityLog({ initial, timeZone, now, onMore, onUndo }: ActivityLogProps) {
+export function ActivityLog({ initial, timeZone, now: start, onMore, onUndo }: ActivityLogProps) {
+  // Undo windows and "Today" read against the clock, so it moves while the page is open.
+  const [now, setNow] = useState(start);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 30_000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
   const [actions, setActions] = useState(initial.actions);
   const [next, setNext] = useState(initial.next);
   const [busy, setBusy] = useState<string | null>(null);
@@ -114,8 +127,8 @@ export function ActivityLog({ initial, timeZone, now, onMore, onUndo }: Activity
       setError(answer);
       return;
     }
-    setActions((shown) => shown.map((action) => (action.id === id ? answer : action)));
-    setNotice('Undone.');
+    setActions((shown) => shown.map((action) => (action.id === id ? answer.action : action)));
+    setNotice(answer.notice);
   };
 
   const days: { day: string; items: AiActionView[] }[] = [];

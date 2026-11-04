@@ -5,7 +5,7 @@ import axe from 'axe-core';
 import { FeedItemSchema, type FeedSettings } from '@pepper/contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { boardOf, groupLine, namesList, type BoardItem } from './board.js';
-import { FeedSuggestions } from './feed-suggestions.js';
+import { FeedSuggestions, type FeedSuggestionsProps } from './feed-suggestions.js';
 
 afterEach(cleanup);
 
@@ -114,7 +114,7 @@ describe('boardOf (AC-W4-3, AC-W4-4)', () => {
       'Maria Lopez',
       'Sam Ortiz',
     ]);
-    expect(groupLine(week).title).toBe('Randy has 15 h open over the next 5 days');
+    expect(groupLine(week).title).toBe('Randy has 15 h open on 5 of the next 7 days');
     expect(groupLine(regulars)).toEqual({
       title: '3 regulars are due back',
       why: 'Lee Park, Maria Lopez and Sam Ortiz. Each is past their usual time, with nothing booked yet.',
@@ -145,7 +145,10 @@ describe('boardOf (AC-W4-3, AC-W4-4)', () => {
 
 const OPEN: FeedSettings = { suggestionsPaused: false, disabledKinds: [], morningHour: null };
 
-function setup(items: readonly BoardItem[], extra: { quiet?: boolean } = {}) {
+function setup(
+  items: readonly BoardItem[],
+  extra: Pick<Partial<FeedSuggestionsProps>, 'quiet' | 'onCloseMany'> = {},
+) {
   const onClose = vi.fn(() => Promise.resolve<string | null>(null));
   const view = render(
     <FeedSuggestions
@@ -175,7 +178,9 @@ describe('the grouped card (AC-W4-3)', () => {
     const { container } = setup([...RANDY_WEEK, DRE_DAY]);
     const cards = screen.getAllByTestId('feed-suggestion');
     expect(cards).toHaveLength(2);
-    const week = screen.getByRole('article', { name: 'Randy has 15 h open over the next 5 days' });
+    const week = screen.getByRole('article', {
+      name: 'Randy has 15 h open on 5 of the next 7 days',
+    });
     expect(within(week).getByText('about $1,350')).toBeTruthy();
     const rows = within(week).getAllByRole('link');
     expect(rows.map((row) => row.getAttribute('href'))).toEqual(
@@ -197,7 +202,9 @@ describe('the grouped card (AC-W4-3)', () => {
     await userEvent.click(firstRow);
     expect(onClose).toHaveBeenCalledWith(REGULARS[1]?.id, 'done');
 
-    const week = screen.getByRole('article', { name: 'Randy has 15 h open over the next 5 days' });
+    const week = screen.getByRole('article', {
+      name: 'Randy has 15 h open on 5 of the next 7 days',
+    });
     await userEvent.click(within(week).getByRole('button', { name: 'Dismiss all' }));
     for (const item of RANDY_WEEK) expect(onClose).toHaveBeenCalledWith(item.id, 'dismissed');
     await vi.waitFor(() => {
@@ -206,6 +213,25 @@ describe('the grouped card (AC-W4-3)', () => {
     expect(screen.getByRole('status').textContent).toBe(
       "Snoozed for 30 days. I won't suggest these open gaps again until then.",
     );
+  });
+
+  it('closes the whole card in one call when it can, so it counts as one dismissal', async () => {
+    const onCloseMany = vi.fn(() => Promise.resolve<string | null>(null));
+    const { onClose } = setup(RANDY_WEEK, { onCloseMany });
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss all' }));
+    // In the card's order: by day.
+    expect(onCloseMany).toHaveBeenCalledExactlyOnceWith(
+      [...RANDY_WEEK].sort((a, b) => a.day.localeCompare(b.day)).map((item) => item.id),
+      'dismissed',
+    );
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('feed-suggestion')).toBeNull();
+
+    cleanup();
+    setup(RANDY_WEEK, { onCloseMany: () => Promise.resolve('That card is no longer open') });
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss all' }));
+    expect((await screen.findByRole('alert')).textContent).toBe('That card is no longer open');
+    expect(screen.getAllByTestId('feed-suggestion')).toHaveLength(1);
   });
 
   it('stays quiet before the first booking, with how to start (AC-W4-5)', () => {

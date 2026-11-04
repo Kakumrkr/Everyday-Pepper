@@ -1,3 +1,4 @@
+import { FEED_HORIZON_DAYS } from '@pepper/contracts';
 import type {
   BookingId,
   BookingStatus,
@@ -16,7 +17,7 @@ import type { Interval, WorkingWindow } from '../availability/engine.js';
 // tenant and writes the candidates through the feed repository, which dedupes by key.
 
 /** How far ahead gaps, overload and no-show visits are looked for, in local days from today. */
-export const INSIGHT_HORIZON_DAYS = 7;
+export const INSIGHT_HORIZON_DAYS = FEED_HORIZON_DAYS;
 /** A no-show pattern: at least this many no-shows within the window. */
 export const NO_SHOW_PATTERN = { minCount: 2, windowDays: 180 } as const;
 /** Overload: booked at least this share of working time on at least `minDays` of the horizon. */

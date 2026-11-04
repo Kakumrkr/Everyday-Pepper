@@ -50,7 +50,7 @@ test('Home shows a gap suggestion; Dismiss snoozes it and Pause hides the rest',
   // New hours ask for a run; the worker's next pass writes Jess's open days, which Home shows
   // as one card for the week (S52, AC-W4-3), each day a row under it.
   const week = suggestions.getByRole('article', {
-    name: /^Jess has .* open over the next \d+ days$/,
+    name: /^Jess has .* open on \d+ of the next 7 days$/,
   });
   await expect(async () => {
     await page.goto('/');

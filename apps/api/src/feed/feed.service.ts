@@ -1,5 +1,6 @@
 import type {
   FeedClose,
+  FeedCloseMany,
   FeedItemId,
   FeedResponse,
   FeedSettings,
@@ -8,6 +9,7 @@ import type {
 import {
   changeFeedSettings,
   closeFeedItem,
+  closeFeedItems,
   getFeed,
   type Actor,
   type TenantContext,
@@ -37,6 +39,10 @@ export class FeedService {
 
   close(tenant: TenantContext, id: FeedItemId, close: FeedClose): Promise<void> {
     return closeFeedItem(this.db, actorOf(tenant), id, close);
+  }
+
+  async closeMany(tenant: TenantContext, close: FeedCloseMany): Promise<void> {
+    await closeFeedItems(this.db, actorOf(tenant), close);
   }
 
   changeSettings(tenant: TenantContext, change: FeedSettingsChange): Promise<FeedSettings> {

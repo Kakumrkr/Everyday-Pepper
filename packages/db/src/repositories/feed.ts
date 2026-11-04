@@ -251,14 +251,18 @@ export async function closeFeedItem(
   return row;
 }
 
-/** How many items of `kind` the business dismissed since `since`. */
+/**
+ * How many times the business dismissed items of `kind` since `since`: one tap is one
+ * dismissal, so the items a grouped card's "Dismiss all" closed together (one `acted_at`, S52)
+ * count once.
+ */
 export async function countDismissals(
   tx: TenantTx,
   kind: FeedInsightKind,
   since: Date,
 ): Promise<number> {
   const [row] = await tx
-    .select({ count: sql<number>`count(*)::int` })
+    .select({ count: sql<number>`count(DISTINCT ${feedItems.actedAt})::int` })
     .from(feedItems)
     .where(
       and(

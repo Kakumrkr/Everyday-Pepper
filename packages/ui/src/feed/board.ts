@@ -1,4 +1,4 @@
-import type { FeedItem } from '@pepper/contracts';
+import { FEED_HORIZON_DAYS, type FeedItem } from '@pepper/contracts';
 import { formatDate } from '../cards/labels.js';
 import { formatDuration } from './feed-lines.js';
 
@@ -110,7 +110,7 @@ export function groupLine(card: Extract<BoardCard, { type: 'group' }>): {
       0,
     );
     return {
-      title: `${staff} has ${formatDuration(minutes)} open over the next ${plural(card.items.length, 'day')}`,
+      title: `${staff} has ${formatDuration(minutes)} open on ${String(card.items.length)} of the next ${String(FEED_HORIZON_DAYS)} days`,
       why: 'Inside working hours, from now on. A day goes away when it’s booked or it ends.',
     };
   }

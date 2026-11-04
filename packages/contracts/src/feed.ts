@@ -52,6 +52,12 @@ export const FeedItemStatusSchema = z.enum([
 ]);
 export type FeedItemStatus = z.infer<typeof FeedItemStatusSchema>;
 
+/**
+ * How far ahead the insights pass looks for gaps, overload and no-show visits, in local days
+ * from today (S35); Home's grouped card says it ("on 5 of the next 7 days", S52).
+ */
+export const FEED_HORIZON_DAYS = 7;
+
 /** How long a dismissal keeps the same kind for the same subject away. */
 export const FEED_SNOOZE_DAYS = 30;
 /** Dismissals of one kind within this many days before the owner is asked once to turn it off. */
@@ -285,3 +291,19 @@ export type FeedResponse = z.infer<typeof FeedResponseSchema>;
 /** `POST /v1/feed/:id/close`: dismiss (snoozed 30 days) or done (acted on). */
 export const FeedCloseSchema = z.object({ outcome: z.enum(['dismissed', 'done']) }).strict();
 export type FeedClose = z.infer<typeof FeedCloseSchema>;
+
+/**
+ * `POST /v1/feed/close`: a grouped card's items closed together (S52, "Dismiss all"), at one
+ * moment, so they count as one dismissal for the "turn this off?" question.
+ */
+export const FeedCloseManySchema = z
+  .object({
+    ids: z
+      .array(FeedItemIdSchema)
+      .min(1)
+      .max(50)
+      .refine((ids) => new Set(ids).size === ids.length, 'Each item once'),
+    outcome: FeedCloseSchema.shape.outcome,
+  })
+  .strict();
+export type FeedCloseMany = z.infer<typeof FeedCloseManySchema>;

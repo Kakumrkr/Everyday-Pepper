@@ -85,7 +85,7 @@ describe('activity words', () => {
         }),
         NY,
       ).meta,
-    ).toBe('10:15 am, after your OK · 1 email taken back · undone at 10:45 am');
+    ).toBe('10:15 am, after approval · 1 email taken back · undone at 10:45 am');
   });
 
   it('heads each local day: today, yesterday (also across a DST change), then the date', () => {
@@ -124,15 +124,16 @@ describe('ActivityLog', () => {
       }),
     );
     const onUndo = vi.fn((undoneId: string) =>
-      Promise.resolve<AiActionView | string>(
-        receipt({
+      Promise.resolve<{ action: AiActionView; notice: string } | string>({
+        action: receipt({
           ...today,
           id: undoneId,
           status: 'undone',
           canUndo: false,
           undoneAt: '2026-11-04T16:59:00.000Z',
         }),
-      ),
+        notice: 'Undone. The client was already emailed, and I didn’t email them again.',
+      }),
     );
     const view = render(
       <ActivityLog
@@ -168,7 +169,9 @@ describe('ActivityLog', () => {
     );
     expect(onUndo).toHaveBeenCalledWith(today.id);
     expect(await screen.findByText('Undone', { selector: 'span' })).toBeTruthy();
-    expect(screen.getByRole('status').textContent).toBe('Undone.');
+    expect(screen.getByRole('status').textContent).toBe(
+      'Undone. The client was already emailed, and I didn’t email them again.',
+    );
 
     await userEvent.click(screen.getByRole('button', { name: 'Show older' }));
     expect(onMore).toHaveBeenCalledWith(yesterday.id);

@@ -223,11 +223,11 @@ test('staff: refused outside their role; their proposal approved by the owner is
   await expect(receipt.getByRole('button', { name: 'Undo' })).toBeVisible();
   await expectAccessible(priya, 'home with receipts');
 
-  // Activity (S52, AC-W7-4): the same receipt in plain words, for the owner (her own OK) and
+  // Activity (S52, AC-W7-4): the same receipt in plain words, for the owner (who approved it) and
   // for Priya (Ana's), who undoes it there.
   await page.goto('/activity');
   await expect(page.getByTestId('activity-row')).toHaveCount(1);
-  await expect(page.getByTestId('activity-row')).toContainText('after your OK');
+  await expect(page.getByTestId('activity-row')).toContainText('after approval');
   await priya.goto('/activity');
   const row = priya.getByTestId('activity-row');
   await expect(row).toHaveCount(1);

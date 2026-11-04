@@ -26,7 +26,7 @@ import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';
 import { FeedItemNotFoundError, ForbiddenError } from './errors.js';
 import { createBusiness } from './services/business.js';
-import { changeFeedSettings, closeFeedItem, getFeed } from './services/feed.js';
+import { changeFeedSettings, closeFeedItem, closeFeedItems, getFeed } from './services/feed.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // The feed services against real Postgres (ADR-0039): the role matrix (owners and managers see
@@ -276,9 +276,23 @@ describe('switches', () => {
     );
   });
 
-  it('asks owners once after 3 dismissals of a kind in 14 days', async () => {
-    await sync(['2026-11-05', '2026-11-06', '2026-11-07'].map((day) => gap(jessStaff, day)));
-    for (const day of ['2026-11-05', '2026-11-06', '2026-11-07']) {
+  it('asks owners once after 3 dismissals of a kind in 14 days; "Dismiss all" is one (S52)', async () => {
+    const days = ['2026-11-05', '2026-11-06', '2026-11-07', '2026-11-08', '2026-11-09'];
+    await sync(days.map((day) => gap(jessStaff, day)));
+    // Three days dismissed together, as a grouped card's "Dismiss all": one dismissal.
+    const together = await Promise.all(
+      days.slice(0, 3).map((day) => idOf('schedule_gaps', day, jessStaff)),
+    );
+    expect(
+      await closeFeedItems(db, jessActor(), { ids: together, outcome: 'dismissed' }, { clock }),
+    ).toBe(3);
+    await expect(
+      closeFeedItems(db, jessActor(), { ids: together, outcome: 'dismissed' }, { clock }),
+    ).rejects.toBeInstanceOf(FeedItemNotFoundError);
+    expect((await getFeed(db, ana(), { clock })).askToTurnOff).toBeNull();
+    // Two more taps, each its own moment: three in all.
+    for (const day of days.slice(3)) {
+      clock.advanceBy(1_000);
       await closeFeedItem(
         db,
         jessActor(),

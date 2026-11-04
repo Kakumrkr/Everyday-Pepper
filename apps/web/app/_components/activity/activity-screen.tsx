@@ -1,17 +1,10 @@
 'use client';
 
-import {
-  AiActionsResponseSchema,
-  UndoActionResponseSchema,
-  UndoRefusedBodySchema,
-  type AiActionsResponse,
-} from '@pepper/contracts';
+import { AiActionsResponseSchema, type AiActionsResponse } from '@pepper/contracts';
 import { ActivityLog } from '@pepper/ui';
-import { fetchJson, sendJson } from '../../../lib/client-api';
-import { UNDO_REFUSAL } from '../chat/live-change';
-
-/** How many receipts a page of the log holds. */
-export const ACTIVITY_PAGE = 20;
+import { ACTIVITY_PAGE } from '../../../lib/activity';
+import { fetchJson } from '../../../lib/client-api';
+import { undoAction } from '../chat/undo-action';
 
 /**
  * The Activity log in the app (S52, AC-W7-4): "Show older" reads the next page of
@@ -38,15 +31,8 @@ export function ActivityScreen({
         return answer.ok ? answer.data : answer.message;
       }}
       onUndo={async (id) => {
-        const answer = await sendJson('POST', `/v1/ai/actions/${id}/undo`, { reason: null });
-        if (!answer.ok) {
-          const refused = UndoRefusedBodySchema.safeParse(answer.body);
-          return refused.success
-            ? (UNDO_REFUSAL[refused.data.reason] ?? answer.message)
-            : answer.message;
-        }
-        const result = UndoActionResponseSchema.safeParse(answer.data);
-        return result.success ? result.data.action : 'Something went wrong. Nothing was changed.';
+        const result = await undoAction(id);
+        return result.ok ? { action: result.action, notice: result.notice } : result.message;
       }}
     />
   );

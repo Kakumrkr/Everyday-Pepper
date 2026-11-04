@@ -4,8 +4,6 @@ import {
   AiActionViewSchema,
   AiProposalViewSchema,
   ApproveProposalResponseSchema,
-  UndoActionResponseSchema,
-  UndoRefusedBodySchema,
   type AiActionView,
   type AiProposalView,
   type LocalSlot,
@@ -23,6 +21,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { fetchJson, sendJson } from '../../../lib/client-api';
+import { undoAction } from './undo-action';
 import { WhySheet } from './why-sheet';
 
 type ChangeSnapshot = Extract<ToolCard, { kind: 'change' }>;
@@ -34,14 +33,6 @@ type Live =
 
 /** What approving came to, for a plan's "Approve all" (it stops at anything but `executed`). */
 export type ApproveOutcome = 'executed' | 'other';
-
-export const UNDO_REFUSAL: Record<string, string> = {
-  slot_taken: 'That time has been booked since, so I can’t put it back. Nothing was changed.',
-  already_started: 'The appointment has started, so it can’t be undone. Nothing was changed.',
-  already_sent: 'The email has already left, so it can’t be unsent. Nothing was changed.',
-  changed_since: 'It was changed since, so undoing it would lose that. Nothing was changed.',
-  not_possible: 'This can’t be undone any more. Nothing was changed.',
-};
 
 /**
  * A change card in the chat, kept true to the trust layer's record (S26, ADR-0031). A streamed
@@ -186,29 +177,15 @@ export function LiveChangeCard({
     const id = live.kind === 'action' ? live.action.id : card.executionId;
     if (id === null) return;
     setBusy(true);
-    const answer = await sendJson('POST', `/v1/ai/actions/${id}/undo`, { reason: null });
+    const result = await undoAction(id);
     setBusy(false);
-    if (!answer.ok) {
-      const refused = UndoRefusedBodySchema.safeParse(answer.body);
-      setNotice(
-        refused.success ? (UNDO_REFUSAL[refused.data.reason] ?? answer.message) : answer.message,
-      );
+    if (!result.ok) {
+      setNotice(result.message);
       await loadAction(id);
       return;
     }
-    const result = UndoActionResponseSchema.safeParse(answer.data);
-    if (!result.success) {
-      setNotice('Something went wrong.');
-      return;
-    }
-    setLive({ kind: 'action', action: result.data.action });
-    setNotice(
-      result.data.alreadySent > 0
-        ? 'Undone. The client was already emailed, and I didn’t email them again.'
-        : result.data.takenBack > 0
-          ? 'Undone, and the email was taken back before it left.'
-          : 'Undone.',
-    );
+    setLive({ kind: 'action', action: result.action });
+    setNotice(result.notice);
   }
 
   const props = cardProps(card, live, timeZone, now);

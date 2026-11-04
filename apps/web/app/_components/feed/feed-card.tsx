@@ -71,6 +71,10 @@ export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: str
         const answer = await sendJson('POST', `/v1/feed/${id}/close`, { outcome });
         return answer.ok ? null : answer.message;
       }}
+      onCloseMany={async (ids, outcome) => {
+        const answer = await sendJson('POST', '/v1/feed/close', { ids, outcome });
+        return answer.ok ? null : answer.message;
+      }}
       onSettings={changeSettings}
       renderLink={kitLink}
       // The board's quiet start (S52, AC-W4-5): nothing to suggest before the first visit.

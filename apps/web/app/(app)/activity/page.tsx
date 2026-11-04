@@ -1,6 +1,7 @@
 import { AiActionsResponseSchema } from '@pepper/contracts';
 import type { Metadata } from 'next';
-import { ACTIVITY_PAGE, ActivityScreen } from '../../_components/activity/activity-screen';
+import { ACTIVITY_PAGE } from '../../../lib/activity';
+import { ActivityScreen } from '../../_components/activity/activity-screen';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,11 @@ export default async function ActivityPage() {
           first: what changed, who approved it and what was sent.
         </p>
       </header>
-      {current === null || page === null ? (
+      {current === null ? (
+        <p className="m-0 rounded-lg bg-surface-2 px-5 py-4 type-body text-ink-2">
+          Choose a business on More, and I’ll show you what I’ve done there.
+        </p>
+      ) : page === null ? (
         <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
           I couldn’t read what I’ve done right now. Try again in a moment.
         </p>
