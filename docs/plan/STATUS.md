@@ -7,10 +7,7 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S51.2 close, paused for /compact** ([PR #77](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/77), branch `claude/ecstatic-bardeen-lbwm57`; every code and docs commit is in; the session-log entry and the rest of STATUS are written).
-- CI run 2: build, integration and AI evals green; E2E 108/109. The one failure is `accessibility.spec.ts` "signed-out and public screens": `animation.finished` rejected with AbortError (a cancelled fade), a race in the test helper, not this PR's code (it passed in run 1 and locally).
-- Done locally, **not yet pushed**: the helper waits with `.catch(() => undefined)` on each animation.
-- Next: run `accessibility.spec.ts` locally (`.claude/skills/session-close/e2e-stack.sh start <scratchpad>`), push, wait for green, add the CI line to the session log, clear this section, squash-merge, unsubscribe; then the S52 prompt.
+Nothing in progress. Next: **S52** (Home card board ranked by $, grouped, quiet start + activity log; Phase 12).
 
 ## Last sessions
 - **S51.2 Phase 11 · Account and business deletion, L15, Phase 11 gate (2026-11-04)** ([ADR-0054](../adr/0054-account-and-business-deletion.md), [PR #77](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/77)). Full entry in [session-log.md](session-log.md).
