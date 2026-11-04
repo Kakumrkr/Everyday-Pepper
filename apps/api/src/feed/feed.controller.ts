@@ -1,4 +1,5 @@
 import {
+  FeedCloseManySchema,
   FeedCloseSchema,
   FeedItemIdSchema,
   FeedResponseSchema,
@@ -33,6 +34,18 @@ export class FeedController {
   @RequirePermission('feed.read')
   async get(@CurrentTenant() tenant: TenantContext): Promise<FeedResponse> {
     return FeedResponseSchema.parse(await answering(() => this.feed.get(tenant)));
+  }
+
+  /**
+   * A grouped card's items at once ("Dismiss all", S52): one moment, one dismissal. 204; 404
+   * `feed_item_not_found` when none of them is open and the member's.
+   */
+  @Post('close')
+  @HttpCode(204)
+  @RequirePermission('feed.read')
+  async closeMany(@CurrentTenant() tenant: TenantContext, @Body() body: unknown): Promise<void> {
+    const close = parseBody(FeedCloseManySchema, body);
+    await answering(() => this.feed.closeMany(tenant, close));
   }
 
   /** 204; 404 `feed_item_not_found` (closed, expired or not the member's). */

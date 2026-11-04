@@ -24,7 +24,7 @@ import {
   type UndoReason,
   type UserId,
 } from '@pepper/contracts';
-import { and, asc, desc, eq, gt, lt, lte } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, lt, lte, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   aiActionExecutions,
@@ -400,16 +400,28 @@ export async function markExecutionUndone(
   return row;
 }
 
-/** Up to `limit` executions, newest first, created before `before` if given (a page). */
+/**
+ * Up to `limit` executions, newest first: created before `before` if given, or after the
+ * execution `after` in that order (the Activity log's pages, S52). The cursor is compared in
+ * the database, row against row: executions made in one transaction share a time, and a
+ * JavaScript date would lose the microseconds, so a page could skip one.
+ */
 export async function listExecutions(
   tx: TenantTx,
-  options: { limit: number; before?: Date },
+  options: { limit: number; before?: Date; after?: ActionExecutionId },
 ): Promise<AiActionExecutionRow[]> {
+  const after =
+    options.after === undefined ? undefined : ActionExecutionIdSchema.parse(options.after);
   return tx
     .select()
     .from(aiActionExecutions)
     .where(
-      options.before === undefined ? undefined : lt(aiActionExecutions.createdAt, options.before),
+      and(
+        options.before === undefined ? undefined : lt(aiActionExecutions.createdAt, options.before),
+        after === undefined
+          ? undefined
+          : sql`(${aiActionExecutions.createdAt}, ${aiActionExecutions.id}) < (SELECT e.created_at, e.id FROM ai_action_executions e WHERE e.id = ${after})`,
+      ),
     )
     .orderBy(desc(aiActionExecutions.createdAt), desc(aiActionExecutions.id))
     .limit(LimitSchema.parse(options.limit));

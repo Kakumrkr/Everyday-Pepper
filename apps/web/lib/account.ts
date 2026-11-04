@@ -128,6 +128,8 @@ export const ROUTES = {
   autonomy: '/autonomy',
   memory: '/memory',
   waitlist: '/waitlist',
+  /** Everything Pepper did (S52, ADR-0043, AC-W7-4). */
+  activity: '/activity',
   home: '/',
 } as const;
 

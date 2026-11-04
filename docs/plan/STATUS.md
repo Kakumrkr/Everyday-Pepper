@@ -1,21 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-04 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 12 — The employee (Phase 11 gate met in S51.2) → next: **S52** (Home card board + activity log)
+**Last updated:** 2026-11-04 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 12 — The employee (Phase 11 gate met in S51.2) → next: **S53** (trust controls)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S52** (Home card board ranked by $, grouped, quiet start + activity log; Phase 12).
+Nothing in progress. Next: **S53** (trust controls: presets, standing rules, client-visible moves ask, earned trust; Phase 12).
 
 ## Last sessions
+- **S52 Phase 12 · Home card board + Activity log (2026-11-04)** ([ADR-0043](../adr/0043-card-board-first-interaction.md), [PR #78](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/78)). Full entry in [session-log.md](session-log.md).
+  - **Built:** suggestions priced from the business's prices and ranked ("~$540"); a staff member's open week and the regulars who are due one card each ("Dismiss all" one dismissal); quiet until the first visit; Activity (`/activity`) with Undo and paging; AC-W4-3…5, AC-W7-4. Top-up: Home's deletion line with Keep (AC-W1-45).
+  - **Checks:** `pnpm check` green; affected integration green (db 737, core 190, api 103, …); Playwright feed, chat, deletion, shell 16/16; screens block 3/3 twice (6 new, 10 updated baselines).
 - **S51.2 Phase 11 · Account and business deletion, L15, Phase 11 gate (2026-11-04)** ([ADR-0054](../adr/0054-account-and-business-deletion.md), [PR #77](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/77)). Full entry in [session-log.md](session-log.md).
   - **Built:** the owner deletes the business by its name and anyone their account by its password, each kept for 30 days (booking page closed, no client email, other sessions ended); the worker deletes after the day (photos first, every tenant row; a trigger refuses early deletes); L15; AC-W1-40…44. Top-up: download first, README zone in words. **Phase 11 gate met:** C11 8, C13 8.
   - **Checks:** `pnpm check` green; affected integration green (db 736 incl. isolation, api 103, worker 16, …); Playwright deletion 2/2 + export, shell, public-booking, auth; screens block 3/3 twice (12 new, 12 updated baselines).
-- **S51 Phase 11 · Business export, terms and privacy drafts (2026-11-04)** ([ADR-0053](../adr/0053-business-export.md), [PR #76](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/76)). Full entry in [session-log.md](session-log.md).
-  - **Built:** the owner downloads a ZIP of Pepper's CSVs and JSON (More → Your data, `business.export`); a `pepper` import preset reads `clients.csv` and `visits.csv` back with nothing mapped and no duplicates; `docs/legal/` drafts; AC-W1-37…39. Top-up: initials skip digits.
-  - **Checks:** `pnpm check` green; affected integration green (db 729 incl. isolation, api 95 with the round trip, …); Playwright export 1/1, screens block 3/3 (6 new, 4 updated baselines), shell 2/2.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -31,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S52 (user, 2026-11-04):** at the brief "Pre approved for ur recommendation" (D-1 no split; D-2 the feed-noise case = one gap card per day; D-3 no ADR). **Claude:** dollars from own prices, Home only; "Dismiss all" one dismissal; the quiet start reads the business's history; a row cursor for Activity; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
 - **S51.2 (user, 2026-11-04):** at the brief "Pre-Aprovved your recommendation. completet the session sucessfully" (D-1 no split; D-2 30 days, the team keeps working, page closed, no client email; D-3 an only owner deletes the business first; D-4 L15 by an after hook; D-5 ADR-0054). **Claude:** a trigger refuses early deletes; an account being deleted can't own or join; the review's 4 fixes. Full wording in [decisions.md](decisions.md).
 - **S51 (user, 2026-11-04):** at the brief "Pre approved with ur recommendation" (D-1 split → S51.2 deletion and the gate; D-2 `fflate`; D-3 owner only; D-4 built on request; D-5 ADR-0053). **Claude:** the `pepper` preset matching the business's own ids; every tenant table named; spreadsheet-safe CSVs undone on import; the review's 6 fixes. Full wording in [decisions.md](decisions.md).
 - **S50.2 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 a definer function + commit-time check; D-2 book the matching client; D-3 cursor + "Show more"; D-4 ADR-0052). **Claude:** names on visits by GET; phone search for phone-like text; screenshot masks by test id; the review's 6 fixes. Full wording in [decisions.md](decisions.md).
@@ -77,11 +78,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S51.2, M1–M2 and P1 are done (Phases 0–11: the re-plan, the new look on every screen and the first 10 minutes; Phase 9, 10 and 11 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S52, M1–M2 and P1 are done (Phases 0–11: the re-plan, the new look on every screen and the first 10 minutes; Phase 9, 10 and 11 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S52 | Home card board (ranked by $, grouped, quiet start) + activity log | 12 | Grouped feed; every AI action in the log |
 | S53 | Autonomy presets, standing rules, client-visible moves ask, earned trust | 12 | Preset/rule tests; move card names the email |
 | S54 | Cancellation → fill with receipts, win-back list, the post-import aha | 12 | Offer < 2 min p95; 0 wrong sends |
 | S55 | Weekly value card, evening wrap, review requests | 12 | Numbers equal fixture sums; caps tested |

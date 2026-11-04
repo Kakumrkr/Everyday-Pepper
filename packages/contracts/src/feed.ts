@@ -52,6 +52,12 @@ export const FeedItemStatusSchema = z.enum([
 ]);
 export type FeedItemStatus = z.infer<typeof FeedItemStatusSchema>;
 
+/**
+ * How far ahead the insights pass looks for gaps, overload and no-show visits, in local days
+ * from today (S35); Home's grouped card says it ("on 5 of the next 7 days", S52).
+ */
+export const FEED_HORIZON_DAYS = 7;
+
 /** How long a dismissal keeps the same kind for the same subject away. */
 export const FEED_SNOOZE_DAYS = 30;
 /** Dismissals of one kind within this many days before the owner is asked once to turn it off. */
@@ -188,6 +194,16 @@ export const FeedItemSchema = z
   .and(FeedInsightSchema);
 export type FeedItem = z.infer<typeof FeedItemSchema>;
 
+/**
+ * A suggestion on Home's card board (S52, ADR-0043): the item and the dollars at stake, an
+ * estimate from the business's service prices (`null`: nothing to price, such as a busy week
+ * or a business without prices). Home ranks and groups by it; the AI's `get_feed` doesn't read it.
+ */
+export const FeedBoardItemSchema = FeedItemSchema.and(
+  z.object({ valueCents: z.number().int().min(0).max(1_000_000_000).nullable() }),
+);
+export type FeedBoardItem = z.infer<typeof FeedBoardItemSchema>;
+
 /** A morning pass hour, local: the same range as a template's `drafts.morningHour`. */
 export const MorningHourSchema = z.number().int().min(5).max(11);
 
@@ -237,8 +253,16 @@ export type FeedSettingsChange = z.input<typeof FeedSettingsChangeSchema>;
 /** `GET /v1/feed`: the open suggestions the member may see, and the business's switches. */
 export const FeedResponseSchema = z
   .object({
-    /** Empty while suggestions are paused. Never a briefing. */
-    suggestions: z.array(FeedItemSchema),
+    /**
+     * Empty while suggestions are paused, and while the business has no booking history (the
+     * board's quiet start). Never a briefing.
+     */
+    suggestions: z.array(FeedBoardItemSchema),
+    /**
+     * Whether the business has had a visit yet (S52): until then Home's board stays quiet, with
+     * one line saying what will come.
+     */
+    hasBookingHistory: z.boolean(),
     /**
      * Today's briefing for this member (S38a): the business's for owners and managers, their
      * own day for staff; `null` before the morning pass or once marked read. Shown while
@@ -267,3 +291,19 @@ export type FeedResponse = z.infer<typeof FeedResponseSchema>;
 /** `POST /v1/feed/:id/close`: dismiss (snoozed 30 days) or done (acted on). */
 export const FeedCloseSchema = z.object({ outcome: z.enum(['dismissed', 'done']) }).strict();
 export type FeedClose = z.infer<typeof FeedCloseSchema>;
+
+/**
+ * `POST /v1/feed/close`: a grouped card's items closed together (S52, "Dismiss all"), at one
+ * moment, so they count as one dismissal for the "turn this off?" question.
+ */
+export const FeedCloseManySchema = z
+  .object({
+    ids: z
+      .array(FeedItemIdSchema)
+      .min(1)
+      .max(50)
+      .refine((ids) => new Set(ids).size === ids.length, 'Each item once'),
+    outcome: FeedCloseSchema.shape.outcome,
+  })
+  .strict();
+export type FeedCloseMany = z.infer<typeof FeedCloseManySchema>;

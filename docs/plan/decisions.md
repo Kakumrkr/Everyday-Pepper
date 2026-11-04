@@ -445,3 +445,14 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - the delete-account screen is an account screen (`/account/delete`), reachable without a business; the README's zone uses the app's own words ("Eastern Time"), so zone names moved to `@pepper/contracts`;
     - an account being deleted can't create or join a business, and its only-owned business can't be kept (the review's finding 1);
     - the review's 4 fixes; 4 left with reasons (session log).
+- **S52 (user, 2026-11-04):** at the brief, "Pre approved for ur recommendation. Complete the session successfull" (top-up named in the prompt: Home says when the business is being deleted, one quiet line with Keep for the owner):
+  - D-1: no split (Home and one new screen; the backend is a read and a cursor).
+  - D-2: the review's "feed-noise case" isn't written in the repo; read as one gap suggestion per staff member per day (ADR-0043's "Randy is open all week"), now one card.
+  - D-3: no new ADR (ADR-0043 decides the board and the log).
+  - **Claude's refinements:**
+    - dollars from the business's own prices: open time at total price over total length of active priced services, a regular at their service's "from" price, a no-show risk at the booking's, a claimed freed time and a busy week unpriced; shown as "~$X" estimates; computed in core for Home only (`get_feed` unchanged, so no eval cassette moves);
+    - groups: a staff member's gaps (two or more days) and every regular who is due (two or more); unpriced cards after the priced ones, newest first;
+    - the quiet start reads the business's history (a past, non-cancelled visit; imported ones count) beside the member's transaction, so staff at an established shop aren't quiet; the briefing, OKs and to-dos still show;
+    - "Dismiss all" is one call at one moment (`POST /v1/feed/close`), and dismissals are counted by distinct `acted_at`, so a grouped card counts once towards "turn this off?";
+    - Activity at `/activity` in the Pepper group (`business.read`), on `/v1/ai/actions?after=&limit=` with the cursor compared row against row in the database; undo words shared with the cards (`undoAction`); "after approval" when the approver isn't named;
+    - the review's 9 fixes; the walkthrough's 2 (a week's total in whole hours from 10 h, day rows without "open").

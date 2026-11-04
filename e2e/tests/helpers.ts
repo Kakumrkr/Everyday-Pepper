@@ -1,4 +1,5 @@
 import { randomInt } from 'node:crypto';
+import { ImportPreviewSchema } from '@pepper/contracts';
 import { totpCode } from '@pepper/testing';
 import {
   expect,
@@ -315,4 +316,39 @@ export function visitsCsv({ service, staff }: { service: string; staff: string }
     `2025-06-01,9:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-1001,${service},${staff},45,40,cancelled,,`,
     `soon,10:00 AM,Ben Ito,,555-010-1002,${service},${staff},45,40,done,,`,
   ].join('\n');
+}
+
+/**
+ * Gives a new business booking history (S52: Home's board stays quiet without it): one past
+ * visit of `service` with `staff`, imported through the api and the worker like an owner's own
+ * file, in 2025 so no day changes it. Waits until the import is done.
+ */
+export async function importPastVisit(
+  page: Page,
+  { service, staff }: { service: string; staff: string },
+): Promise<void> {
+  const origin = new URL(page.url()).origin;
+  const csv = [
+    'Date,Time,Client,Email,Phone,Service,Staff,Length,Price,Status',
+    `2025-03-04,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-1001,${service},${staff},60,45,done`,
+  ].join('\n');
+  const staged = await page.request.post('/v1/imports?format=csv', {
+    data: Buffer.from(csv),
+    headers: { origin, 'content-type': 'text/csv' },
+  });
+  expect(staged.status(), `stage: ${await staged.text()}`).toBe(201);
+  const { batch } = ImportPreviewSchema.parse(await staged.json());
+  const committed = await page.request.post(`/v1/imports/${batch.id}/commit`, {
+    headers: { origin },
+  });
+  expect(committed.status(), `commit: ${await committed.text()}`).toBe(202);
+  await expect
+    .poll(
+      async () => {
+        const read = await page.request.get(`/v1/imports/${batch.id}`);
+        return ImportPreviewSchema.parse(await read.json()).batch.status;
+      },
+      { timeout: 60_000, intervals: [500, 1_000, 2_000] },
+    )
+    .toBe('done');
 }

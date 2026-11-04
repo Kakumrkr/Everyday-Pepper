@@ -49,7 +49,12 @@ test('on a phone: five tabs, More holds the rest, and every tap target is 44 px 
   await expect(page).toHaveURL(/\/more$/);
   await expect(page.getByRole('heading', { level: 1, name: 'More' })).toBeVisible();
   const pepper = page.getByRole('region', { name: 'Pepper' });
-  await expect(pepper.getByRole('link')).toHaveText(['What I know', 'Autonomy', 'Waitlist']);
+  await expect(pepper.getByRole('link')).toHaveText([
+    'Activity',
+    'What I know',
+    'Autonomy',
+    'Waitlist',
+  ]);
   await expect(page.getByRole('region', { name: 'Business' }).getByRole('link')).toHaveText([
     'Services',
     'Team',
@@ -89,6 +94,7 @@ test('on a desktop: the sidebar has the everyday places, the Pepper and Business
     'Calendar',
     'Clients',
     'Chat',
+    'Activity',
     'What I know',
     'Autonomy',
     'Waitlist',

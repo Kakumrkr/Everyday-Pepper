@@ -1,6 +1,7 @@
 import {
   ActionExecutionIdSchema,
   ActionProposalIdSchema,
+  AiActionsQuerySchema,
   AiActionsResponseSchema,
   AiActionViewSchema,
   AiProposalsResponseSchema,
@@ -21,7 +22,17 @@ import {
   type UndoActionResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
-import { Body, Controller, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { z } from 'zod';
 import { CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';
 import { answering } from '../http/domain-errors.js';
@@ -108,11 +119,18 @@ export class AiActionsController {
     return AiProposalViewSchema.parse(await answering(() => this.ai.reject(tenant, proposalId)));
   }
 
-  /** The AI's recent actions the member may see ("Done for you"), newest first. */
+  /**
+   * The AI's recent actions the member may see ("Done for you", the Activity log), newest
+   * first; `?after=<id>&limit=` pages on (S52).
+   */
   @Get('actions')
   @RequirePermission('business.read')
-  async actions(@CurrentTenant() tenant: TenantContext): Promise<AiActionsResponse> {
-    return AiActionsResponseSchema.parse(await answering(() => this.ai.actions(tenant)));
+  async actions(
+    @CurrentTenant() tenant: TenantContext,
+    @Query() query: unknown,
+  ): Promise<AiActionsResponse> {
+    const page = parseBody(AiActionsQuerySchema, query);
+    return AiActionsResponseSchema.parse(await answering(() => this.ai.actions(tenant, page)));
   }
 
   /** 404 `action_not_found`. */

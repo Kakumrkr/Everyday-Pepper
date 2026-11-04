@@ -1,15 +1,18 @@
 import {
   FEED_ASK_TO_TURN_OFF,
+  FeedCloseManySchema,
   FeedCloseSchema,
   FeedInsightKindSchema,
   FeedItemIdSchema,
   FeedItemSchema,
   FeedSettingsChangeSchema,
+  type FeedBoardItem,
   fromZoned,
   PLATFORM_DRAFTS,
   TemplateIdSchema,
   toZoned,
   type FeedClose,
+  type FeedCloseMany,
   type FeedInsightKind,
   type FeedItem,
   type FeedItemId,
@@ -23,15 +26,18 @@ import {
   closeFeedItem as closeFeedItemRow,
   countDismissals,
   findCurrentTenant,
+  hasBookingHistory,
   listOpenFeedItems,
   listWaitingFeedItems,
   readBriefing,
+  readFeedPrices,
   readFeedSettings,
   readMorningDueAt,
   setMorningDueAt,
   requestInsightRun,
   updateCurrentTenantMailingAddress,
   withMember,
+  withTenant,
   writeFeedSettings,
   type Database,
   type FeedItemWithNames,
@@ -42,6 +48,7 @@ import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
 import { FeedItemNotFoundError } from '../errors.js';
 import { can } from '../permissions.js';
+import { feedValueCents, pricePerMinute } from './feed-value.js';
 
 // The operator feed for a member (Phase 8, ADR-0039): the open suggestions the insights pass
 // wrote, with names added (the database's member scope shows staff only the items addressed
@@ -66,19 +73,33 @@ export async function getFeed(
   requirePermission(actor, 'feed.read');
   const now = new Date((options.clock ?? systemClock).now());
   const canChangeSettings = can(actor.context, 'settings.manage');
+  // The board stays quiet until the business has booking history (S52, ADR-0043): a new
+  // business's whole open week isn't news. The business's, not only what a staff member's
+  // scope shows: a yes or no that names nothing.
+  // Read beside the member's transaction, not before it (Home is the hottest screen).
+  const historyRead = withTenant(db, actor.context.tenantId, (tx) => hasBookingHistory(tx, now));
+  // Handled here too, so a failure while the member's transaction fails first isn't unhandled.
+  historyRead.catch(() => undefined);
   return withMember(db, actor.context, async (tx) => {
     const stored = await readFeedSettings(tx);
+    const history = await historyRead;
     // Kinds turned off are left out by the query, so they never take the feed's places.
-    const rows = stored.suggestionsPaused
-      ? []
-      : await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds });
+    const rows =
+      stored.suggestionsPaused || !history
+        ? []
+        : await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds });
+    const suggestions = await priced(
+      tx,
+      rows.flatMap((row) => toFeedItem(row) ?? []),
+    );
     const tenant = await findCurrentTenant(tx);
     const briefing = await readBriefing(tx, canChangeSettings ? 'business' : 'own', now);
     const templateId = TemplateIdSchema.nullable()
       .catch(null)
       .parse(tenant?.templateId ?? null);
     return {
-      suggestions: rows.flatMap((row) => toFeedItem(row) ?? []),
+      suggestions,
+      hasBookingHistory: history,
       briefing: briefing === undefined ? null : (toFeedItem(briefing) ?? null),
       settings: publicSettings(stored),
       templateMorningHour: (options.morningHourOf ?? (() => PLATFORM_DRAFTS.morningHour))(
@@ -149,6 +170,30 @@ export async function closeFeedItem(
   await withMember(db, actor.context, async (tx) => {
     const closed = await closeFeedItemRow(tx, itemId, outcome, now);
     if (closed === undefined) throw new FeedItemNotFoundError();
+  });
+}
+
+/**
+ * Closes a grouped card's open items together (S52): in one transaction at one moment, so
+ * "Dismiss all" is one dismissal. Items already closed or not the member's are skipped; none
+ * left to close is `FeedItemNotFoundError`.
+ */
+export async function closeFeedItems(
+  db: Database,
+  actor: Actor,
+  close: FeedCloseMany,
+  options: FeedOptions = {},
+): Promise<number> {
+  requirePermission(actor, 'feed.read');
+  const { ids, outcome } = FeedCloseManySchema.parse(close);
+  const now = new Date((options.clock ?? systemClock).now());
+  return withMember(db, actor.context, async (tx) => {
+    let closed = 0;
+    for (const id of ids) {
+      if ((await closeFeedItemRow(tx, id, outcome, now)) !== undefined) closed += 1;
+    }
+    if (closed === 0) throw new FeedItemNotFoundError();
+    return closed;
   });
 }
 
@@ -258,6 +303,17 @@ async function kindToAskAbout(
     if ((await countDismissals(tx, kind, since)) >= FEED_ASK_TO_TURN_OFF.dismissals) return kind;
   }
   return null;
+}
+
+/** The items with their dollars at stake, from the business's prices (S52). */
+async function priced(tx: TenantTx, items: FeedItem[]): Promise<FeedBoardItem[]> {
+  if (items.length === 0) return [];
+  const prices = await readFeedPrices(
+    tx,
+    items.flatMap((item) => (item.subjects.bookingId === null ? [] : [item.subjects.bookingId])),
+  );
+  const rate = pricePerMinute(prices.services);
+  return items.map((item) => ({ ...item, valueCents: feedValueCents(item, prices, rate) }));
 }
 
 /** The row as the api returns it; `undefined` for a row whose payload no longer parses. */

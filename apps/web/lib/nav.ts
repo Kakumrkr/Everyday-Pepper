@@ -42,6 +42,10 @@ export function appNav(permissions: readonly Permission[] | null): Nav {
   if (can('ai.chat')) main.push({ key: 'chat', href: ROUTES.chat, label: 'Chat', icon: 'chat' });
 
   const pepper: NavItem[] = [];
+  // Everything Pepper did, in plain words (S52, ADR-0043): staff see what was done for them.
+  if (can('business.read')) {
+    pepper.push({ key: 'activity', href: ROUTES.activity, label: 'Activity', icon: 'activity' });
+  }
   // What Pepper remembers comes from conversations, so it is there for whoever may chat.
   if (can('ai.chat')) {
     pepper.push({ key: 'memory', href: ROUTES.memory, label: 'What I know', icon: 'memory' });

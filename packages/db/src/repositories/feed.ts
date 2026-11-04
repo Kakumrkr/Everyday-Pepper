@@ -21,7 +21,9 @@ import {
   gte,
   inArray,
   isNull,
+  lt,
   lte,
+  ne,
   notInArray,
   or,
   sql,
@@ -249,14 +251,18 @@ export async function closeFeedItem(
   return row;
 }
 
-/** How many items of `kind` the business dismissed since `since`. */
+/**
+ * How many times the business dismissed items of `kind` since `since`: one tap is one
+ * dismissal, so the items a grouped card's "Dismiss all" closed together (one `acted_at`, S52)
+ * count once.
+ */
 export async function countDismissals(
   tx: TenantTx,
   kind: FeedInsightKind,
   since: Date,
 ): Promise<number> {
   const [row] = await tx
-    .select({ count: sql<number>`count(*)::int` })
+    .select({ count: sql<number>`count(DISTINCT ${feedItems.actedAt})::int` })
     .from(feedItems)
     .where(
       and(
@@ -792,4 +798,59 @@ export async function briefingCounts(tx: TenantTx, now: Date): Promise<BriefingC
       ),
     );
   return { needsOk: proposals?.count ?? 0, rebookingDue: due?.count ?? 0 };
+}
+
+/** A service's price and length, for Home's dollar estimates (S52). */
+export interface FeedServicePrice {
+  id: string;
+  durationMinutes: number;
+  priceFromCents: number | null;
+  active: boolean;
+}
+
+/**
+ * What Home's dollar estimates are read from (S52, ADR-0043): every service's "from" price and
+ * length, and the "from" price of the bookings named (a no-show risk's visit). Bookings the
+ * member may not see are simply missing.
+ */
+export async function readFeedPrices(
+  tx: TenantTx,
+  bookingIds: readonly string[],
+): Promise<{ services: FeedServicePrice[]; bookingPrices: Map<string, number | null> }> {
+  const ids = z
+    .array(z.uuid())
+    .max(200)
+    .parse([...new Set(bookingIds)]);
+  const serviceRows = await tx
+    .select({
+      id: services.id,
+      durationMinutes: services.durationMinutes,
+      priceFromCents: services.priceFromCents,
+      active: services.active,
+    })
+    .from(services);
+  const bookingRows =
+    ids.length === 0
+      ? []
+      : await tx
+          .select({ id: bookings.id, priceFromCents: bookings.priceFromCents })
+          .from(bookings)
+          .where(inArray(bookings.id, ids));
+  return {
+    services: serviceRows,
+    bookingPrices: new Map(bookingRows.map((row) => [row.id, row.priceFromCents])),
+  };
+}
+
+/**
+ * Whether the business has booking history (S52, ADR-0043): a visit that started before `now`
+ * and wasn't cancelled (imported history counts). Until then Home's board stays quiet.
+ */
+export async function hasBookingHistory(tx: TenantTx, now: Date): Promise<boolean> {
+  const [row] = await tx
+    .select({ id: bookings.id })
+    .from(bookings)
+    .where(and(lt(bookings.startsAt, now), ne(bookings.status, 'cancelled')))
+    .limit(1);
+  return row !== undefined;
 }

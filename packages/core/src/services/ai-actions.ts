@@ -696,15 +696,21 @@ export async function findToolCallResult(
   });
 }
 
-/** The AI's recent actions with their receipts (staff: those done for them), newest first. */
+/**
+ * The AI's recent actions with their receipts (staff: those done for them), newest first;
+ * `after` pages on from that execution (the Activity log, S52).
+ */
 export async function listRecentActions(
   db: Database,
   actor: Actor,
-  options: { limit?: number } = {},
+  options: { limit?: number; after?: ActionExecutionId } = {},
 ): Promise<ActionExecution[]> {
   requirePermission(actor, 'business.read');
   const rows = await withMember(db, actor.context, (tx) =>
-    listExecutions(tx, { limit: options.limit ?? 50 }),
+    listExecutions(tx, {
+      limit: options.limit ?? 50,
+      ...(options.after === undefined ? {} : { after: options.after }),
+    }),
   );
   return rows.map(toExecution);
 }

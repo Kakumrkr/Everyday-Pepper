@@ -70,10 +70,24 @@ test('deletion (AC-W1-40, AC-W1-42): the owner schedules and keeps the business,
     `Pepper deletes ${name} on`,
   );
 
-  // The account: refused while it alone owns a live business. Keep the business first.
-  await page.getByRole('link', { name: 'Keep it' }).click();
-  await (await hydrated(page.getByRole('button', { name: `Keep ${name}` }))).click();
+  await expect(page.getByRole('link', { name: 'Keep it' })).toHaveAttribute(
+    'href',
+    '/more/data/delete',
+  );
+
+  // Home says so in one quiet line, and its owner keeps the business there (S52, AC-W1-45).
+  await page.goto('/');
+  const line = page.getByTestId('home-deletion-line');
+  await expect(line).toContainText(`Pepper deletes ${name} on`);
+  await expectTapTargets(page, 'Home while the business is being deleted');
+  await (await hydrated(line.getByRole('button', { name: `Keep ${name}` }))).click();
+  await expect(line).toHaveCount(0);
+  await page.goto('/more');
+  await expect(page.getByTestId('business-deletion-notice')).toHaveCount(0);
+  await page.goto('/more/data/delete');
   await expect(page.getByRole('heading', { name: `Delete ${name}`, level: 1 })).toBeVisible();
+
+  // The account: refused while it alone owns a live business.
 
   await page.goto('/more');
   await page.getByRole('link', { name: 'Delete your account' }).click();

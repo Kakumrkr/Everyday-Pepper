@@ -111,7 +111,7 @@ const ai = {
     Promise.resolve({ ...proposal, draft: { subject: 'Hi', body: 'See you soon.' } }),
   ),
   action: vi.fn(() => Promise.resolve(action)),
-  actions: vi.fn(() => Promise.resolve({ actions: [action] })),
+  actions: vi.fn(() => Promise.resolve({ actions: [action], next: null })),
   undo: vi.fn((): Promise<unknown> =>
     Promise.resolve({ action: { ...action, status: 'undone' }, takenBack: 1, alreadySent: 0 }),
   ),
@@ -239,6 +239,14 @@ describe('/v1/ai actions', () => {
   it('lists and reads receipts', async () => {
     expect((await get('/v1/ai/actions').expect(200)).body).toMatchObject({ actions: [{ id: ID }] });
     expect((await get(`/v1/ai/actions/${ID}`).expect(200)).body).toMatchObject({ canUndo: true });
+  });
+
+  it('pages the Activity log by an execution id, and refuses anything else (S52)', async () => {
+    await get(`/v1/ai/actions?after=${ID}&limit=20`).expect(200);
+    expect(ai.actions).toHaveBeenLastCalledWith(expect.anything(), { after: ID, limit: 20 });
+    await get('/v1/ai/actions?after=not-an-id').expect(400);
+    await get('/v1/ai/actions?limit=500').expect(400);
+    await get(`/v1/ai/actions?before=${ID}`).expect(400);
   });
 
   it('undoes with a reason only, and says why when the world moved on', async () => {

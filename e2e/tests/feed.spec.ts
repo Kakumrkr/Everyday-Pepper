@@ -1,10 +1,11 @@
 import { CurrentBusinessResponseSchema, ServiceSchema, StaffMemberSchema } from '@pepper/contracts';
 import { expect, test } from '@playwright/test';
-import { callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js';
+import { callApi, hydrated, importPastVisit, onboardOwner, ownClientAddress } from './helpers.js';
 
-// Home as the operator feed through the real stack (S35, ADR-0039): the worker's insights job
-// finds Jess's open time and Home shows it under Suggestions; Dismiss snoozes it (it does not
-// come back), and "Pause suggestions" hides the rest; S36 adds the mailing address rebooking
+// Home as the operator feed through the real stack (S35, ADR-0039): quiet before the first
+// visit (S52); then the worker's insights job finds Jess's open time and Home shows her week as
+// one card (S52, ADR-0043); Dismiss all snoozes it (it does not come back), and "Pause
+// suggestions" hides the rest; S36 adds the mailing address rebooking
 // emails carry (in More's settings since S41) and the public unsubscribe page. The stack runs
 // the job every 10 s (`INSIGHTS_POLL_MS` in CI).
 
@@ -39,36 +40,44 @@ test('Home shows a gap suggestion; Dismiss snoozes it and Pause hides the rest',
     parse: (body: unknown) => body,
   });
 
-  // New hours ask for a run; the worker's next pass writes Jess's open days.
+  // Before the first visit the board stays quiet, however open the week is (S52, AC-W4-5).
   const suggestions = page.getByRole('region', { name: 'Suggestions' });
-  const gaps = suggestions.getByRole('article', { name: /^Jess has .* open on / });
+  await page.goto('/');
+  await expect(suggestions.getByTestId('feed-quiet')).toContainText('Quiet for now.');
+  await expect(suggestions.getByRole('link', { name: 'Add a booking' })).toBeVisible();
+  await importPastVisit(page, { service: 'Haircut', staff: 'Jess' });
+
+  // New hours ask for a run; the worker's next pass writes Jess's open days, which Home shows
+  // as one card for the week (S52, AC-W4-3), each day a row under it.
+  const week = suggestions.getByRole('article', {
+    name: /^Jess has .* open on \d+ of the next 7 days$/,
+  });
   await expect(async () => {
     await page.goto('/');
-    await expect(gaps.first()).toBeVisible({ timeout: 2_000 });
+    await expect(week).toBeVisible({ timeout: 2_000 });
   }).toPass({ timeout: 90_000, intervals: [2_000, 5_000] });
+  await expect(suggestions.getByRole('article', { name: /^Jess has/ })).toHaveCount(1);
+  const days = week.getByRole('listitem');
+  expect(await days.count()).toBeGreaterThan(1);
   await expect(page.getByRole('region', { name: 'Needs your OK' })).toContainText(
     'Nothing waiting.',
   );
 
-  // Dismiss the first: it goes at once, with the snooze notice, and does not come back.
-  const first = gaps.first();
-  const title = await first.getAttribute('aria-label');
-  if (title === null) throw new Error('A suggestion without a name');
-  const before = await gaps.count();
-  await (await hydrated(first.getByRole('button', { name: 'Dismiss' }))).click();
+  // Dismiss all: the week goes at once, with the snooze notice, and does not come back.
+  await (await hydrated(week.getByRole('button', { name: 'Dismiss all' }))).click();
   await expect(suggestions.getByRole('status')).toHaveText(
-    "Snoozed for 30 days. I won't suggest open gaps for this again until then.",
+    "Snoozed for 30 days. I won't suggest these open gaps again until then.",
   );
-  await expect(gaps).toHaveCount(before - 1);
+  await expect(week).toHaveCount(0);
   await page.reload();
-  await expect(suggestions.getByRole('article', { name: title })).toHaveCount(0);
+  await expect(suggestions.getByRole('article', { name: /^Jess has/ })).toHaveCount(0);
 
   // Pause: nothing new, and what was there is hidden; on again, the switch says so.
   const pause = suggestions.getByRole('switch', { name: 'Pause suggestions' });
   await (await hydrated(pause)).click();
   await expect(pause).toHaveAttribute('aria-checked', 'true');
   await expect(suggestions).toContainText('Suggestions are paused.');
-  await expect(gaps).toHaveCount(0);
+  await expect(suggestions.getByTestId('feed-suggestion')).toHaveCount(0);
   await pause.click();
   await expect(pause).toHaveAttribute('aria-checked', 'false');
 });

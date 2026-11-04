@@ -26,6 +26,22 @@ export {
   formatDuration,
   type FeedLine,
 } from './feed/feed-lines.js';
+export {
+  boardOf,
+  groupLine,
+  groupRowLine,
+  namesList,
+  type BoardCard,
+  type BoardItem,
+} from './feed/board.js';
+export {
+  ActivityLog,
+  activityLine,
+  dayHeading,
+  localDay,
+  type ActivityLogProps,
+  type ActivityPage,
+} from './activity/activity-log.js';
 export { DailyBriefing, type DailyBriefingProps } from './feed/daily-briefing.js';
 export { DraftEditor, type DraftEditorProps, type DraftWords } from './cards/draft-editor.js';
 export { MailingAddress, type MailingAddressProps } from './feed/mailing-address.js';

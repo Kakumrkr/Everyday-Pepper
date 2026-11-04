@@ -44,8 +44,10 @@ const FEED: FeedResponse = {
       proposalId: null,
       expiresAt: '2026-11-03T22:00:00.000Z' as never,
       createdAt: '2026-11-02T15:00:00.000Z' as never,
+      valueCents: 18000,
     },
   ],
+  hasBookingHistory: true,
   briefing: null,
   settings: { suggestionsPaused: false, disabledKinds: [], morningHour: null },
   templateMorningHour: 7,
@@ -72,6 +74,7 @@ const tenancy = { roleIn: vi.fn(() => Promise.resolve(role)) };
 const feed = {
   get: vi.fn(() => Promise.resolve(FEED)),
   close: vi.fn(() => Promise.resolve()),
+  closeMany: vi.fn(() => Promise.resolve()),
   changeSettings: vi.fn(() => Promise.resolve({ suggestionsPaused: true, disabledKinds: [] })),
 };
 
@@ -168,6 +171,19 @@ describe('/v1/feed', () => {
       'https://evil.test',
     ).expect(403);
     expect(feed.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes a grouped card at once (S52); 400 for none, a repeat or a bad id; 404 when none is open', async () => {
+    const body = { ids: [ITEM_ID], outcome: 'dismissed' };
+    await send('post', '/v1/feed/close', body).expect(204);
+    expect(feed.closeMany).toHaveBeenCalledWith(context(), body);
+    await send('post', '/v1/feed/close', { ids: [], outcome: 'dismissed' }).expect(400);
+    await send('post', '/v1/feed/close', { ids: [ITEM_ID, ITEM_ID], outcome: 'done' }).expect(400);
+    await send('post', '/v1/feed/close', { ids: ['nope'], outcome: 'dismissed' }).expect(400);
+    feed.closeMany.mockRejectedValueOnce(new FeedItemNotFoundError());
+    expect(code((await send('post', '/v1/feed/close', body).expect(404)).body)).toBe(
+      'feed_item_not_found',
+    );
   });
 
   it.each<MembershipRole>(['owner', 'manager'])('a(n) %s changes the switches', async (r) => {

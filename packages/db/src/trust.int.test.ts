@@ -1,5 +1,6 @@
 import {
   ActionExecutionIdSchema,
+  type ActionExecutionId,
   ActionProposalIdSchema,
   OutboxMessageIdSchema,
   TenantIdSchema,
@@ -413,6 +414,27 @@ describe('executions', () => {
     const seen = (await as(jess, (tx) => listExecutions(tx, { limit: 500 }))).map((e) => e.id);
     expect(seen).toContain(forJess.id);
     expect(seen).not.toContain(forBen.id);
+  });
+
+  it('pages newest first without skipping executions that share a time (S52, AC-W7-4)', async () => {
+    // Five in one transaction: one `now()`, so only the id orders them.
+    await inTenant(async (tx) => {
+      for (let i = 0; i < 5; i += 1) await insertExecution(tx, execution({ onBehalfOf: ana }));
+    });
+    const all = (await inTenant((tx) => listExecutions(tx, { limit: 500 }))).map((e) => e.id);
+    const paged: string[] = [];
+    let after: ActionExecutionId | undefined;
+    for (;;) {
+      const page = await inTenant((tx) =>
+        listExecutions(tx, { limit: 2, ...(after === undefined ? {} : { after }) }),
+      );
+      paged.push(...page.map((e) => e.id));
+      const last = page.at(-1);
+      if (page.length < 2 || last === undefined) break;
+      after = ActionExecutionIdSchema.parse(last.id);
+    }
+    expect(paged).toEqual(all);
+    expect(new Set(paged).size).toBe(all.length);
   });
 });
 
