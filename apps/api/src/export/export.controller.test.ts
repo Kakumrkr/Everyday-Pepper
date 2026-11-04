@@ -113,7 +113,7 @@ describe('/v1/tenant/export (AC-W1-37)', () => {
     expect(exports.export).toHaveBeenCalledWith({ tenantId: TENANT, userId: USER, role: 'owner' });
     expect(limiter.hit).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'business-export' }),
-      USER,
+      `${TENANT}:${USER}`,
     );
   });
 

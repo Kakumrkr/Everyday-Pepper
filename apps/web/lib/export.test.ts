@@ -48,8 +48,19 @@ describe('fetchExport', () => {
     expect(await fetchExport(fetch)).toMatchObject({ ok: false, status, message });
   });
 
-  it('says when the phone is offline', async () => {
+  it('says when the phone is offline, or the file stops on the way', async () => {
     const { fetch } = answering(new TypeError('Failed to fetch'));
     expect(await fetchExport(fetch)).toMatchObject({ ok: false, status: 0 });
+    const broken = new ReadableStream({
+      start(controller) {
+        controller.error(new TypeError('network error'));
+      },
+    });
+    const cut = answering(new Response(broken, { headers: { 'content-type': 'application/zip' } }));
+    expect(await fetchExport(cut.fetch)).toMatchObject({
+      ok: false,
+      status: 0,
+      message: 'The download stopped. Check your connection and try again.',
+    });
   });
 });

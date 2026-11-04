@@ -16,19 +16,28 @@ export function fileNameOf(disposition: string | null): string {
 export async function fetchExport(
   fetch: typeof globalThis.fetch = globalThis.fetch,
 ): Promise<CallResult<{ file: Blob; name: string }>> {
+  const offline = {
+    ok: false,
+    status: 0,
+    message: 'The download stopped. Check your connection and try again.',
+  } as const;
   let response: Response;
   try {
     response = await fetch(EXPORT_PATH, { credentials: 'same-origin' });
   } catch {
-    return { ok: false, status: 0, message: 'You seem to be offline. Check your connection.' };
+    return offline;
   }
   if (response.ok) {
+    // The file comes after the headers: a connection lost on the way is said too.
+    let file: Blob;
+    try {
+      file = await response.blob();
+    } catch {
+      return offline;
+    }
     return {
       ok: true,
-      data: {
-        file: await response.blob(),
-        name: fileNameOf(response.headers.get('content-disposition')),
-      },
+      data: { file, name: fileNameOf(response.headers.get('content-disposition')) },
     };
   }
   const body: unknown = await response.json().catch(() => undefined);

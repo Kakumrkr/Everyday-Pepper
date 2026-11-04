@@ -5,7 +5,7 @@ import { answering } from '../http/domain-errors.js';
 import { RateLimiter, type RateLimit } from '../http/rate-limit.js';
 import { ExportService } from './export.service.js';
 
-// Each export reads the whole business: a few a day are plenty, a loop is stopped.
+// Each export reads the whole business: a few an hour are plenty, a loop is stopped.
 const EXPORTS: RateLimit = { name: 'business-export', max: 10, windowSeconds: 3600 };
 
 /**
@@ -26,7 +26,8 @@ export class ExportController {
   @Header('cache-control', 'no-store')
   @Header('x-content-type-options', 'nosniff')
   async download(@CurrentTenant() tenant: TenantContext): Promise<StreamableFile> {
-    await this.limits.hit(EXPORTS, tenant.userId);
+    // Per business and person: an owner of several businesses exports each.
+    await this.limits.hit(EXPORTS, `${tenant.tenantId}:${tenant.userId}`);
     const built = await answering(() => this.exports.export(tenant));
     return new StreamableFile(built.bytes, {
       type: 'application/zip',

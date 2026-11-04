@@ -92,10 +92,9 @@ function browser() {
     get: (path: string) => send(agent.get(path)),
     post: (path: string, body: object = {}) => send(agent.post(path)).send(body),
     put: (path: string, body: object) => send(agent.put(path)).send(body),
+    delete: (path: string) => send(agent.delete(path)),
     upload: (bytes: Uint8Array) =>
-      send(agent.post('/v1/imports'))
-        .set('content-type', 'text/csv')
-        .send(Buffer.from(bytes)),
+      send(agent.post('/v1/imports')).set('content-type', 'text/csv').send(Buffer.from(bytes)),
     /** The export, its body kept as bytes. */
     download: () =>
       send(agent.get('/v1/tenant/export'))
@@ -248,29 +247,38 @@ describe('the business export (AC-W1-37, AC-W1-38)', () => {
     });
     // And a client with only a name and tags, who has never visited.
     await a.owner.post('/v1/clients', { name: '=Dee Hart', tags: ['vip'] }).expect(201);
+    // Cy is deleted: their past visit stays in the business's history, not in visits.csv.
+    const listed = (await a.owner.get('/v1/clients?search=Cy').expect(200)).body as {
+      clients: { id: string; name: string }[];
+    };
+    const cy = listed.clients.find((client) => client.name === 'Cy');
+    if (cy === undefined) throw new Error('Cy was not imported');
+    await a.owner.delete(`/v1/clients/${cy.id}`).expect(204);
 
     const fromA = await exported(a.owner);
     expect(Object.keys(fromA.files)).toEqual(BUSINESS_EXPORT_FILES.map((file) => file.name));
     const before = shape(fromA);
-    expect(before.clients).toHaveLength(4);
-    expect(before.visits).toHaveLength(4);
+    expect(before.clients).toHaveLength(3);
+    expect(before.visits).toHaveLength(3);
+    const appointments = JSON.parse(fromA.files['appointments.json'] ?? '[]') as {
+      clientId: string | null;
+    }[];
+    expect(appointments.map((a) => a.clientId === null)).toEqual([false, false, true, false]);
 
     const b = await business();
     const clients = await importFile(b, new TextEncoder().encode(fromA.files['clients.csv']));
-    expect(clients.counts).toMatchObject({ create: 4, invalid: 0, skipped: 0 });
+    expect(clients.counts).toMatchObject({ create: 3, invalid: 0, skipped: 0 });
     const visits = await importFile(b, new TextEncoder().encode(fromA.files['visits.csv']));
     // Every visit finds the client clients.csv brought: no client is added twice.
-    expect(visits.counts).toMatchObject({ create: 4, clients: 0, conflict: 0, invalid: 0 });
+    expect(visits.counts).toMatchObject({ create: 3, clients: 0, conflict: 0, invalid: 0 });
     const after = shape(await exported(b.owner));
-    // The formula guard's quote is the one change a spreadsheet-safe file makes.
-    expect(after.clients).toEqual(
-      before.clients.map((line) => line.replace(/^=Dee Hart/, "'=Dee Hart")),
-    );
+    // The formula guard's quote comes off again on import: the clients are the same.
+    expect(after.clients).toEqual(before.clients);
     expect(after.visits).toEqual(before.visits);
 
     // Back into the business it came from: nothing new.
     const again = await importFile(a, new TextEncoder().encode(fromA.files['clients.csv']));
-    expect(again.counts).toMatchObject({ create: 0, unchanged: 4 });
+    expect(again.counts).toMatchObject({ create: 0, unchanged: 3 });
     const visitsAgain = await importFile(a, new TextEncoder().encode(fromA.files['visits.csv']));
     expect(visitsAgain.counts).toMatchObject({ create: 0, clients: 0 });
     expect(shape(await exported(a.owner))).toEqual(before);
@@ -286,7 +294,9 @@ describe('the business export (AC-W1-37, AC-W1-38)', () => {
     const theirs = await exported(a.owner);
     expect(theirs.files['clients.csv']).toContain('Maria Lopez');
 
-    const entries = await withTenant(database.db, a.tenantId, (tx) => listAuditEntries(tx, { limit: 100 }));
+    const entries = await withTenant(database.db, a.tenantId, (tx) =>
+      listAuditEntries(tx, { limit: 100 }),
+    );
     const audit = entries.filter((entry) => entry.action === 'business.exported');
     expect(audit).toHaveLength(1);
     expect(audit[0]).toMatchObject({

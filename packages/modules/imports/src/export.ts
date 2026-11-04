@@ -1,5 +1,6 @@
 import {
   BUSINESS_EXPORT_FILES,
+  clockTime,
   MAX_IMPORT_ROWS,
   formatDate,
   toZoned,
@@ -13,17 +14,15 @@ import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS } from './pepper-format.js'
 // read, written as Pepper's own CSVs (the `pepper` preset reads them back) and JSON, and
 // zipped. Pure: the service reads, audits and hands the bytes to the api.
 
-/** The name a deleted client's visits carry (ADR-0051), as on the calendar. */
-const DELETED_CLIENT = 'Deleted client';
-
 /**
  * A cell as a spreadsheet should show it: text that a spreadsheet would run as a formula
  * (`=`, `+`, `-`, `@`, a tab or a carriage return first) gets a leading `'`, except a plain
- * number or phone (`+15551234567`, `-5`), which a spreadsheet shows as it is; then quoted
- * when it holds a comma, a quote or a line break (RFC 4180).
+ * number (`-5`, `4.50`) or an E.164 phone (`+15551234567`), which a spreadsheet shows as it is;
+ * then quoted when it holds a comma, a quote or a line break (RFC 4180). The import drops the
+ * `'` again (`parseImportFile`).
  */
 export function csvCell(value: string): string {
-  const risky = /^[=+\-@\t\r]/.test(value) && !/^[+-]?[\d\s().-]*$/.test(value);
+  const risky = /^[=+\-@\t\r]/.test(value) && !/^[+-]?\d+(\.\d+)?$/.test(value);
   const safe = risky ? `'${value}` : value;
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
@@ -44,12 +43,6 @@ function birthday(client: BusinessExportData['clients'][number]): string {
   if (month === null || day === null) return '';
   const md = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   return year === null ? `--${md}` : `${String(year)}-${md}`;
-}
-
-function clock(minuteOfDay: number): string {
-  const hh = String(Math.floor(minuteOfDay / 60)).padStart(2, '0');
-  const mm = String(minuteOfDay % 60).padStart(2, '0');
-  return `${hh}:${mm}`;
 }
 
 /** Rows split into files the import takes whole (`visits.csv`, `visits-2.csv`, …). */
@@ -110,13 +103,16 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
     };
     return PEPPER_CLIENT_COLUMNS.map(({ header }) => cells[header]);
   });
-  const visitRows = data.bookings.map((booking) => {
-    const local = toZoned(zone, booking.startsAt.getTime());
+  // A deleted client was forgotten (ADR-0051): their visits stay in appointments.json with no
+  // client, and are left out of visits.csv, which would import them as a new client.
+  const visitRows = data.bookings.flatMap((booking) => {
     const client = clients.get(booking.clientId);
+    if (client === undefined) return [];
+    const local = toZoned(zone, booking.startsAt.getTime());
     const cells: Record<(typeof PEPPER_VISIT_COLUMNS)[number]['header'], string> = {
       pepper_visit_id: booking.id,
       date: formatDate(local),
-      time: clock(local.minuteOfDay),
+      time: clockTime(local.minuteOfDay),
       duration_minutes: String(
         Math.round((booking.endsAt.getTime() - booking.startsAt.getTime()) / 60_000),
       ),
@@ -124,13 +120,12 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
       staff: staff.get(booking.staffMemberId)?.displayName ?? '',
       price: dollars(booking.priceFromCents),
       status: booking.status,
-      // A deleted client was forgotten: their visit stays, with no one to import it for.
-      pepper_client_id: client?.id ?? '',
-      client: client?.name ?? DELETED_CLIENT,
-      email: client?.email ?? '',
-      phone: client?.phone ?? '',
+      pepper_client_id: client.id,
+      client: client.name,
+      email: client.email ?? '',
+      phone: client.phone ?? '',
     };
-    return PEPPER_VISIT_COLUMNS.map(({ header }) => cells[header]);
+    return [PEPPER_VISIT_COLUMNS.map(({ header }) => cells[header])];
   });
 
   const csvFiles = [
@@ -177,8 +172,8 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
             .filter((hours) => hours.staffMemberId === member.id)
             .map(({ weekday, startMinute, endMinute }) => ({
               weekday,
-              start: clock(startMinute),
-              end: clock(endMinute),
+              start: clockTime(startMinute),
+              end: clockTime(endMinute),
             })),
           timeOff: data.timeOff
             .filter((away) => away.staffMemberId === member.id)

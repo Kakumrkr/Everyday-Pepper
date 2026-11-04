@@ -122,7 +122,12 @@ describe('csvCell', () => {
   it('leaves phones and plain numbers as they are', () => {
     expect(csvCell('+15551234567')).toBe('+15551234567');
     expect(csvCell('-5')).toBe('-5');
-    expect(csvCell('+1 (555) 123-4567')).toBe('+1 (555) 123-4567');
+    expect(csvCell('4.50')).toBe('4.50');
+  });
+
+  it('guards dates and phones a spreadsheet would calculate', () => {
+    expect(csvCell('--04-12')).toBe("'--04-12");
+    expect(csvCell('+1-555-123-4567')).toBe("'+1-555-123-4567");
   });
 
   it('starts with a byte-order mark and ends every line with CRLF', () => {
@@ -149,19 +154,18 @@ describe('buildBusinessExport (AC-W1-37)', () => {
     const files = unzip(buildBusinessExport(data(), AT).bytes);
     expect(files['clients.csv']).toBe(
       '\uFEFFpepper_client_id,name,email,phone,birthday,tags\r\n' +
-        `${CLIENT},"Dee ""DJ"" Hart",dee@example.test,+15551234567,--04-12,vip; beard\r\n`,
+        `${CLIENT},"Dee ""DJ"" Hart",dee@example.test,+15551234567,'--04-12,vip; beard\r\n`,
     );
   });
 
-  it('gives visits in the business’s time zone, and a deleted client’s visit with no one', () => {
+  it('gives visits in the business’s time zone, without a deleted client’s', () => {
     const files = unzip(buildBusinessExport(data(), AT).bytes);
     const lines = (files['visits.csv'] ?? '').split('\r\n');
     expect(lines[1]).toBe(
       `0190a000-0000-7000-8000-000000000100,2099-03-03,09:00,45,Skin fade,Jess,45.00,completed,${CLIENT},"Dee ""DJ"" Hart",dee@example.test,+15551234567`,
     );
-    expect(lines[2]).toBe(
-      '0190a000-0000-7000-8000-000000000101,2099-03-04,09:00,45,Skin fade,Jess,45.00,completed,,Deleted client,,',
-    );
+    // The deleted client's visit isn't there to import (it would make a new client).
+    expect(lines.slice(2)).toEqual(['']);
     const appointments = JSON.parse(files['appointments.json'] ?? '[]') as { clientId: unknown }[];
     expect(appointments.map((a) => a.clientId)).toEqual([CLIENT, null]);
   });

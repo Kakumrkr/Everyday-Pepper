@@ -28,6 +28,11 @@ describe('parseImportFile', () => {
     });
   });
 
+  it('drops the quote a spreadsheet-safe file puts before a formula-like cell (S51)', () => {
+    const table = parseImportFile(bytes("Name,Birthday,Note\n'=Dee,'--04-12,'plain\n"));
+    expect(table.rows[0]?.cells).toEqual(['=Dee', '--04-12', "'plain"]);
+  });
+
   it('finds a semicolon or tab delimiter and pads short rows', () => {
     expect(parseImportFile(bytes('a;b\n1')).rows).toEqual([{ row: 2, cells: ['1', ''] }]);
     expect(parseImportFile(bytes('a\tb\n1\t2')).rows).toEqual([{ row: 2, cells: ['1', '2'] }]);
