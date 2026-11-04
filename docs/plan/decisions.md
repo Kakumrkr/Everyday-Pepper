@@ -431,3 +431,17 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - a deleted client's visits only in `appointments.json` (in `visits.csv` they would create a "Deleted client");
     - 10 exports an hour per business and person; the web proxy gives the export 60 s and passes `content-disposition`;
     - the review's 6 fixes; the "from" price only and tags with separators noted in the ADR.
+- **S51.2 (user, 2026-11-04):** at the brief, "Pre-Aprovved your recommendation. completet the session sucessfully" (with the top-up named in the prompt: "Download your data" first on the delete-business screen, the time zone in words in the export's README):
+  - D-1: no split (two screens change; the backend and the worker job are one feature).
+  - D-2: 30 days for both a business and an account; while a business waits its team keeps working, its booking page takes nothing new and Pepper emails its clients nothing.
+  - D-3: the only owner of a business that isn't being deleted can't delete their account ("Delete the business first").
+  - D-4: L15 by Better Auth's `after` hook on `/verify-email`.
+  - D-5: ADR-0054.
+  - **Claude's refinements:**
+    - a trigger refuses the services' delete of a business before its day by the database's clock (migration 0063); the worker skips (and counts) a business the database calls not due;
+    - the business confirmed by its typed name (case, spacing and curly quotes ignored), the account by its password (Better Auth's server-side check, 5 tries in 15 minutes); scheduling the account ends its other sessions;
+    - a client's manage link can still show and cancel a visit while the business waits; the outbox takes back a waiting business's emails;
+    - photos' images deleted by the worker before the business (the worker gets `S3_*`; `storage` allowed in its import rules); a business whose images can't go waits;
+    - the delete-account screen is an account screen (`/account/delete`), reachable without a business; the README's zone uses the app's own words ("Eastern Time"), so zone names moved to `@pepper/contracts`;
+    - an account being deleted can't create or join a business, and its only-owned business can't be kept (the review's finding 1);
+    - the review's 4 fixes; 4 left with reasons (session log).

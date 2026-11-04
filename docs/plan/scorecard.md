@@ -21,9 +21,9 @@ The fifteen categories Pepper is judged by, from the launch-readiness review of 
 | C8 | AI trust and safety | 8 | 8 | 9 | 10 | 100% pass^3 on the safety sets; every action explained and undoable; the owner can see exactly what Pepper said to whom |
 | C9 | Reliability | 6 | 6 | 8 | 9 | Deployed, monitored, backed up with a passed restore drill, SLOs met under load, 30 days with no unseen error |
 | C10 | Accessibility | 6 | 8 | 8 | 9 | WCAG 2.2 AA on every screen, axe clean, the manual screen-reader check passed, reduced motion honoured |
-| C11 | Security and privacy | 6 | 6 | 9 | 9 | Recovery, verification, MFA, export, deletion, terms and privacy policy; no open high finding; zero data retention on the production AI project |
+| C11 | Security and privacy | 6 | 8 | 9 | 9 | Recovery, verification, MFA, export, deletion, terms and privacy policy; no open high finding; zero data retention on the production AI project |
 | C12 | Market competitiveness | 3 | 3 | 6 | 9 | Everything owners rely on daily (SMS, deposits, week view, sync, reports) plus the Pepper-only features |
-| C13 | Switching value | 2 | 2 | 8 | 9 | "We move you": an import from any of the five tools with history, in minutes, undoable |
+| C13 | Switching value | 2 | 8 | 8 | 9 | "We move you": an import from any of the five tools with history, in minutes, undoable |
 | C14 | Pilot readiness | 3 | 3 | 9 | — | Deployed, a sending domain, support the same day, metrics from day one |
 | C15 | Public-launch readiness | 1 | 1 | — | 9 | Billing, a landing page, legal pages, pricing, support, a case study |
 
@@ -35,7 +35,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 |---|---|
 | 9 · New look (S43.2) | C3 8 · C4 8 · C10 8 (met, S43.2: §5) |
 | 10 · First 10 minutes (S47.3) | C1 6 · C2 6 · C5 7 · C7 7 (met, S47.3: §6) |
-| 11 · Switching + privacy (S51) | C13 8 · C11 8 |
+| 11 · Switching + privacy (S51.2) | C13 8 · C11 8 (met, S51.2: §7) |
 | 12 · The employee (S56b) | C1 8 · C5 8 · C8 9 |
 | 13 · Pilot readiness (S60) | the "Pilot gate" column |
 | 14 · SMS (S64) | C12 7 |
@@ -71,6 +71,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 2026-10-25 | Review (S38b) | 5 | 4 | 6 | 6 | 5 | 4 | 5 | 8 | 6 | 6 | 6 | 3 | 2 | 3 | 1 |
 | 2026-10-28 | Phase 9 gate (S43.2) | 5 | 4 | 8 | 8 | 5 | 4 | 5 | 8 | 6 | 8 | 6 | 3 | 2 | 3 | 1 |
 | 2026-11-03 | Phase 10 gate (S47.3) | 6 | 7 | 8 | 8 | 7 | 4 | 7 | 8 | 6 | 8 | 6 | 3 | 2 | 3 | 1 |
+| 2026-11-04 | Phase 11 gate (S51.2) | 6 | 7 | 8 | 8 | 7 | 4 | 7 | 8 | 6 | 8 | 8 | 3 | 8 | 3 | 1 |
 
 ## 5. Phase 9 gate (S43.2, 2026-10-28): the evidence
 
@@ -89,7 +90,15 @@ Scored by Claude in S47.3 from the tests below; only C1, C2, C5 and C7 were scor
 - **C5 Owner experience 5 → 7.** Home leads a new owner one step at a time with no dead end: an empty menu says where to start; a seeded one asks to check it (AC-W1-11); what stops a booking is named with its fix (AC-W1-12); a page without a cover gets a Tip to add photos (AC-W1-16); then the link with Copy and the week in one line (AC-W1-13/14); the feed, undo and autonomy controls from Phases 5–8 on the kit (Phase 9). Not yet 8: the card board ranked by dollars and the activity log (Phase 12); two-step setup is 2:14 of the 7:06.
 - **C7 Customer booking 5 → 7.** Contact, policy, brand and photos on the page (AC-W8-7, AC-W8-12); only bookable people offered, the first free day opened, a failed day retried in place (AC-W8-3…5); a remembered phone skips the code (AC-W8-8); drop-off per step counted with nothing personal (AC-W8-9). A new client books in **1:35** by the model (50 s of it the code email) and again from the same phone in **0:34** (AC-W8-13). Not yet 8: the first booking is over a minute; the staff step shows even when one person offers the service (for later); drop-off has no real traffic yet (S59 reads it).
 - **Phase-exit security review** (`/security-review`, S47.3): S47.3's diff and a cross-session pass over S46–S47.2 (S44/S45's auth configuration and migrations 0051–0052 read in the current tree): no high or medium finding. The remembered-device token is bound to the business and the email, stored as a hash, the cookie path per business; public photos and funnel writes are scoped by the page's slug; uploads are typed by content with the pixel limit before decoding and server-made object keys; every new table has forced RLS and is in the isolation suite. Logged as low:
-  - **L15** A finished email change does not end the account's other sessions (both addresses must confirm first). Phase 11, with account deletion.
+  - **L15** A finished email change does not end the account's other sessions (both addresses must confirm first). Phase 11, with account deletion. **Closed in S51.2** (AC-W1-43).
   - **L16** With email down, a request carrying an unknown device cookie stores the booking request before answering 503 (the mailer check used to come first). Ordering only; fix when the booking flow is next touched.
   - **L17** Funnel counts can be inflated with random visit ids within the per-address rate limit. Accepted as analytics noise; S59 reads the funnel with an inflation guard.
 
+
+
+## 7. Phase 11 gate (S51.2, 2026-11-04): the evidence
+
+Scored by Claude in S51.2 from the tests below; only C11 and C13 were scored, the rest carry over (C6's walk-ins, S50.2, are scored at Phase 16's gate).
+
+- **C13 Switching value 2 → 8.** Clients from any of the five tools' exports or any CSV/JSON/JSONL, mapped by preset or by header and value patterns, previewed with reasons per row, matched (id → email → phone → name) and merged, undoable for 7 days (ADR-0049, AC-W1-3, AC-W1-17…21); past visits and upcoming appointments with conflicts listed and no email sent, 1,000 clients and 5,000 visits in under 2 minutes (ADR-0050, AC-W1-22…29); merge and delete (ADR-0051); the export imports back with nothing mapped and no duplicates (ADR-0053, AC-W1-37…38, `apps/api/src/export.int.test.ts`). Not yet 9: no owner has moved in yet (the pilot), and the mapping of an unknown file is by rules (AI suggestions in S56a).
+- **C11 Security and privacy 6 → 8.** On top of recovery, email verification and change, and MFA for owners and managers (S44, ADR-0045): the owner-only export (ADR-0053); **deletion** of a business and of an account with 30 days to change one's mind, the business's rows proved gone from every `tenant_id` table, an early delete refused by the database itself, the account's sign-in and sessions gone and business records naming nobody (ADR-0054, AC-W1-40…42, `packages/db/src/deletion.int.test.ts`, `apps/api/src/deletion.int.test.ts`, `apps/worker/src/jobs.int.test.ts`); **L15 closed** (AC-W1-43, `apps/api/src/auth.int.test.ts`); terms and privacy drafts (`docs/legal/`, S51); the isolation suite at 100%. `/code-review` and a security pass on S51.2: no high or medium finding (the 4 fixed review findings in session-log). Not yet 9: zero data retention on the production AI project and backup retention (STATUS "Waiting on the user" 4, S58), the terms reviewed (S59), the pre-pilot security review (S60).
