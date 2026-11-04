@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S51.2** (account + business deletion with a grace period, L15; Phase 11 gate).
+**S51.2** (brief pre-approved by the user: "Pre-Aprovved your recommendation. completet the session sucessfully"; D-1 no split, D-2 30 days for both, the team keeps working, the page closed and no client email meanwhile, D-3 an only owner deletes the business first, D-4 L15 by Better Auth's after hook, D-5 ADR-0054).
+- Done: AC-W1-40…44; migration 0063 (due dates, early-delete trigger); db/core/api deletion; L15; README zone in words (commit 1eaa292). Worker deletion job, photos first (2545d8b).
+- Next: screens (More → Delete account; Your data → Delete business, download first; the waiting banners), Playwright `deletion.spec.ts` + screens shots; ADR-0054; Phase 11 scores; close.
 
 ## Last sessions
 - **S51 Phase 11 · Business export, terms and privacy drafts (2026-11-04)** ([ADR-0053](../adr/0053-business-export.md), [PR #76](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/76)). Full entry in [session-log.md](session-log.md).
