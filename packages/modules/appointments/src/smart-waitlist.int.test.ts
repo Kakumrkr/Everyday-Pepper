@@ -5,6 +5,7 @@ import {
   WaitlistMatchIdSchema,
   WaitlistOfferIdSchema,
   type Client,
+  type FeedSettingsChange,
   type ManageToken,
   type Service,
   type StaffMember,
@@ -824,6 +825,21 @@ describe('never offered (S54, AC-W5-4: 0 wrong-client sends)', () => {
 
     const made = await cancelInsightsAndOffer(w);
     expect(offeredNames(w, made)).toEqual([['Dee Fox', 'regular', 1]]);
+  });
+
+  it('suggestions paused, or due regulars turned off: no regular is offered anything', async () => {
+    const changes: FeedSettingsChange[] = [
+      { suggestionsPaused: true },
+      { disabledKinds: ['rebooking_due'] },
+    ];
+    for (const change of changes) {
+      const w = await newWorld();
+      await withAddress(w);
+      await pastVisits(w, 3, w.jess.id);
+      await insights(w);
+      await changeFeedSettings(db, w.owner, change);
+      expect(await cancelInsightsAndOffer(w)).toEqual([]);
+    }
   });
 
   it('no mailing address on file: no regular is offered anything (the footer needs it)', async () => {

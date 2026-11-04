@@ -202,13 +202,17 @@ export const sendWaitlistOffers: WriteTool = {
       services.add(serviceName(directory, offer.serviceId));
       const clientId = ClientIdSchema.parse(offer.clientId);
       const claimUrl = offerUrl(baseUrl, tenant.slug, token);
+      // The domain offers a regular only with a mailing address on file (S54); never without
+      // the footer.
+      if (offer.source === 'regular' && tenant.mailingAddress === null) {
+        throw new Error('A regular was offered a time without a mailing address');
+      }
       const expiresAt = offer.expiresAt.toISOString();
       await scope.emailClient({
         clientId,
         template: 'waitlist_offer',
         dedupeKey: `waitlist.offer:${offer.id}`,
         message:
-          // The domain offered a regular only with a mailing address on file (S54).
           offer.source === 'regular' && tenant.mailingAddress !== null
             ? regularOfferEmail(details, claimUrl, expiresAt, {
                 mailingAddress: tenant.mailingAddress,

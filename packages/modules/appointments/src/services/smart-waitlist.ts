@@ -38,6 +38,7 @@ import {
   listRegularCandidates,
   listWaitingEntries,
   lockWaitlistEntry,
+  readInsightTenant,
   setWaitlistEntryStatus,
   settleOpenOffers,
   withMember,
@@ -247,8 +248,15 @@ export async function regularCandidatesIn(
   if (input.limit <= 0) return [];
   // An unasked offer is marketing email: without the business's mailing address for its
   // footer (as a rebooking nudge, ADR-0040), no regular is offered anything.
-  const tenant = await findCurrentTenant(tx);
+  const tenant = await readInsightTenant(tx);
   if (tenant === undefined || tenant.mailingAddress === null) return [];
+  // Suggestions paused, or "regulars who are due" turned off: the owner asked for quiet.
+  if (
+    tenant.settings.suggestionsPaused ||
+    tenant.settings.disabledKinds.includes('rebooking_due')
+  ) {
+    return [];
+  }
   const freed =
     input.freedBookingId === null ? undefined : await findBooking(tx, input.freedBookingId);
   const except = [...input.exceptClientIds];
@@ -264,13 +272,8 @@ export async function regularCandidatesIn(
   const fits = new Map<string, boolean>();
   const seen = new Set<string>();
   const chosen: Extract<WaitlistCandidateView, { source: 'regular' }>[] = [];
-  const ordered = [...rows].sort(
-    (a, b) =>
-      a.dueOn.localeCompare(b.dueOn) ||
-      b.visits - a.visits ||
-      (a.clientId < b.clientId ? -1 : a.clientId > b.clientId ? 1 : 0),
-  );
-  for (const row of ordered) {
+  // Already in the published order (most overdue, most visits, id).
+  for (const row of rows) {
     if (chosen.length >= input.limit) break;
     if (seen.has(row.clientId)) continue;
     seen.add(row.clientId);

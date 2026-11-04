@@ -519,6 +519,8 @@ export async function listDraftableRebookings(
         // A superseded nudge reached no one: its replacement (an edit, a refresh) counts on its
         // own, and one refused at approval (the time was booked meanwhile) blocks nothing.
         sql`NOT EXISTS (SELECT 1 FROM ${aiActionProposals} WHERE ${aiActionProposals.action} = ${NUDGE_ACTION} AND ${aiActionProposals.targetKey} = 'nudge:client:' || ${feedItems.clientId}::text AND ${aiActionProposals.status} <> 'superseded' AND ${aiActionProposals.createdAt} > ${now}::timestamptz - make_interval(days => coalesce((${feedItems.payload}->>'intervalDays')::int, 28)))`,
+        // Offered a freed time as a regular this week (S54): one marketing email a week at most.
+        sql`NOT EXISTS (SELECT 1 FROM waitlist_offers o WHERE o.client_id = ${feedItems.clientId} AND o.source = 'regular' AND o.created_at > ${now}::timestamptz - make_interval(days => 7))`,
       ),
     )
     .orderBy(asc(feedItems.day), asc(feedItems.id))

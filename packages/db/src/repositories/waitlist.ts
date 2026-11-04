@@ -28,6 +28,7 @@ import {
 } from 'drizzle-orm';
 import { z } from 'zod';
 import {
+  aiActionProposals,
   bookings,
   clients,
   feedItems,
@@ -39,6 +40,7 @@ import {
   type WaitlistOfferRow,
 } from '../schema.js';
 import type { Database } from '../client.js';
+import { NUDGE_ACTION } from './feed.js';
 import { withJobScan, type TenantTx } from '../tenant.js';
 
 // The smart waitlist (S37, ADR-0041): freed slots to match (`waitlist_matches`, written in the
@@ -464,7 +466,7 @@ export interface RegularCandidateRow {
  * Up to `limit` regulars who are due back with `staffMemberId` (an open `rebooking_due`
  * suggestion on the feed: not dismissed, not waiting on a nudge's OK), most overdue first,
  * whose client can be emailed (an address, not opted out of marketing email, not deleted),
- * has nothing booked from `now` on, and had no regular's offer within
+ * has nothing booked from `now` on, and had no regular's offer or rebooking nudge within
  * `REGULAR_OFFER_QUIET_DAYS`. `exceptClientIds` are left out (the client who freed the time,
  * those already on the waitlist's offers).
  */
@@ -511,9 +513,18 @@ export async function listRegularCandidates(
             ),
         sql`NOT EXISTS (SELECT 1 FROM ${bookings} WHERE ${bookings.clientId} = ${feedItems.clientId} AND ${bookings.status} = 'confirmed' AND ${bookings.startsAt} >= ${input.now.toISOString()}::timestamptz)`,
         sql`NOT EXISTS (SELECT 1 FROM ${waitlistOffers} WHERE ${waitlistOffers.clientId} = ${feedItems.clientId} AND ${waitlistOffers.source} = 'regular' AND ${waitlistOffers.createdAt} > ${input.now.toISOString()}::timestamptz - make_interval(days => ${REGULAR_OFFER_QUIET_DAYS}))`,
+        // Nor a rebooking nudge (ADR-0040) in that time: one marketing email a week at most.
+        sql`NOT EXISTS (SELECT 1 FROM ${aiActionProposals} WHERE ${aiActionProposals.action} = ${NUDGE_ACTION} AND ${aiActionProposals.targetKey} = 'nudge:client:' || ${feedItems.clientId}::text AND ${aiActionProposals.status} <> 'superseded' AND ${aiActionProposals.createdAt} > ${input.now.toISOString()}::timestamptz - make_interval(days => ${REGULAR_OFFER_QUIET_DAYS}))`,
       ),
     )
-    .orderBy(asc(feedItems.day), asc(feedItems.clientId))
+    // Most overdue, then most visits, then the id: the published order (ADR-0056).
+    .orderBy(
+      asc(feedItems.day),
+      desc(
+        sql`(SELECT count(*) FROM ${bookings} WHERE ${bookings.clientId} = ${feedItems.clientId} AND ${bookings.status} = 'completed')`,
+      ),
+      asc(feedItems.clientId),
+    )
     .limit(max);
   return rows.flatMap((row) =>
     row.clientId === null || row.serviceId === null
