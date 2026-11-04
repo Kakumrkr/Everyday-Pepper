@@ -300,7 +300,7 @@ test('clients: the owner finds a client, sees the coming visit on the profile, e
   await go(page, 'Clients');
   const clients = page.getByRole('list', { name: 'Clients' }).getByRole('link');
   await expect(clients).toHaveCount(2);
-  await (await hydrated(page.getByLabel('Search clients by name or email'))).fill('maria@');
+  await (await hydrated(page.getByLabel('Search clients by name, email or phone'))).fill('maria@');
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(clients).toHaveCount(1);
   await fitsTheScreen(page);
