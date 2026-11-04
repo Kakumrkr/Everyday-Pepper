@@ -7,7 +7,14 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S51** (export, account + business deletion, terms/privacy drafts; Phase 11 gate).
+**S51 · Business export + terms/privacy drafts** (brief pre-approved by the user, 2026-11-04: "Pre approved with ur recommendation"). D-1 split: account + business deletion, L15 and the **Phase 11 gate → S51.2**; D-2 `fflate` for the ZIP; D-3 owner only (`business.export`); D-4 built on request, nothing stored; D-5 ADR-0053.
+- [x] 1. AC-W1-37…39 in acceptance-criteria + traceability.
+- [ ] 2. Export engine (db read + imports' files/ZIP), round-trip integration.
+- [ ] 3. `GET /v1/tenant/export` (owner only, audited).
+- [ ] 4. Web "Your data" screen from More; Playwright + baselines.
+- [ ] 5. `docs/legal/terms.md`, `privacy.md` drafts.
+- [ ] 6. Top-up: initials skip digits (`initialsOf`).
+Next step: task 2.
 
 ## Last sessions
 - **S50.2 Phase 11 · Staff walk-ins, client paging and phone search (2026-11-04)** ([ADR-0052](../adr/0052-staff-walk-in-clients-and-client-paging.md), [PR #75](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/75)). Full entry in [session-log.md](session-log.md).
@@ -79,7 +86,8 @@ S1–S50.2, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S51 | Export, account + business deletion, terms/privacy drafts; **Phase 11 gate** | 11 | Export round-trips; C11, C13 ≥ 8 |
+| S51 | Business export (round-trips through import), terms/privacy drafts | 11 | Export round-trips |
+| S51.2 | Account + business deletion (grace period, scrub), L15; **Phase 11 gate** | 11 | No tenant rows left; C11, C13 ≥ 8 |
 | S52 | Home card board (ranked by $, grouped, quiet start) + activity log | 12 | Grouped feed; every AI action in the log |
 | S53 | Autonomy presets, standing rules, client-visible moves ask, earned trust | 12 | Preset/rule tests; move card names the email |
 | S54 | Cancellation → fill with receipts, win-back list, the post-import aha | 12 | Offer < 2 min p95; 0 wrong sends |
