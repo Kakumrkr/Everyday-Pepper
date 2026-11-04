@@ -9,6 +9,7 @@ import {
   type ServiceConfig,
 } from '@pepper/runtime/instrument';
 import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
+import { loadStorageConfig, type StorageConfig } from '@pepper/storage';
 import { z } from 'zod';
 
 const JobsEnvSchema = z.object({
@@ -50,6 +51,11 @@ const JobsEnvSchema = z.object({
 export interface WorkerConfig extends ServiceConfig {
   /** `null`: no email sender configured; queued emails wait until there is one. */
   mail: MailConfig | null;
+  /**
+   * The photos' object store (ADR-0048), to delete a business's images before the business
+   * (S51.2, ADR-0054); `null`: none, so a business with photos waits for one.
+   */
+  storage: StorageConfig | null;
   /** `null`: no VAPID keys, so pushes are not sent (the api then queues none, ADR-0026). */
   push: PushConfig | null;
   /** Opens the messages the api sealed (ADR-0024); the same as the api's. */
@@ -90,6 +96,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
   return {
     ...service,
     mail: loadMailConfig('worker', env),
+    storage: loadStorageConfig('worker', env),
     push: loadPushConfig('worker', env),
     outboxSecret: loadOutboxSecret('worker', env),
     outboxPollMs: jobs.OUTBOX_POLL_MS,

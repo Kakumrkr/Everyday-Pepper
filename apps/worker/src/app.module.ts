@@ -1,5 +1,6 @@
 import { outboxKeyFrom } from '@pepper/core';
 import { ConnectionsModule, HealthModule, MailModule } from '@pepper/runtime';
+import { S3ObjectStore } from '@pepper/storage';
 import { Module, type DynamicModule } from '@nestjs/common';
 import type { WorkerConfig } from './config.js';
 import { ImportsModule } from './imports/imports.module.js';
@@ -33,6 +34,7 @@ export class AppModule {
           morningPollMs: config.morningPollMs,
           drafts: config.drafts,
           pushes: config.push !== null,
+          objectStore: config.storage === null ? null : new S3ObjectStore(config.storage),
         }),
         ImportsModule.forRoot({ redisUrl: config.redisUrl, pollMs: config.importPollMs }),
         ...(config.waitlist === null

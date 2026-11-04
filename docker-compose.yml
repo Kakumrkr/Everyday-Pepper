@@ -176,11 +176,18 @@ services:
       # the routine model; off unless OPENAI_API_KEY is set. Links in them use the web origin.
       AUTH_BASE_URL: ${AUTH_BASE_URL:-http://localhost:3000}
       DRAFTS_POLL_MS: ${DRAFTS_POLL_MS:-}
+      # Deleting a business after its 30 days (S51.2, ADR-0054) deletes its photos' images
+      # first: the same store as the api's.
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_BUCKET: ${S3_BUCKET:-pepper-dev}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-pepperdev}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-pepper-dev-only-s3-secret}
     ports: ['127.0.0.1:4100:4100']
     depends_on:
       migrate: { condition: service_completed_successfully }
       redis: { condition: service_healthy }
       mailpit: { condition: service_healthy }
+      seaweedfs: { condition: service_healthy }
 
   web:
     build: { context: ., target: web }

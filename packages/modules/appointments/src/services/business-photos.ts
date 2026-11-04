@@ -9,6 +9,7 @@ import {
   type BusinessPhotoKind,
   type BusinessPhotos,
   type PublicPhoto,
+  type TenantId,
   type TenantSlug,
 } from '@pepper/contracts';
 import { auditActorOf, requirePermission, type Actor } from '@pepper/core';
@@ -25,6 +26,7 @@ import {
   updateBusinessPhotoCaption,
   withMember,
   withPublicTenant,
+  withTenant,
   type BusinessPhotoRow,
   type Database,
   type TenantTx,
@@ -268,4 +270,23 @@ export async function readPagePhoto(
   if (key === undefined || key === null) return null;
   const object = await store.get(key);
   return object?.body ?? null;
+}
+
+/**
+ * Deletes every stored image of the business's photos (S51.2, ADR-0054), the step before the
+ * business itself is deleted for good; the rows go with the business. Returns how many images.
+ * Throws when they can't be deleted (no store, or the store failed), so the business waits for
+ * the next pass rather than leaving its images behind.
+ */
+export async function deleteAllPhotoImages(
+  db: Database,
+  tenantId: TenantId,
+  store: ObjectStore | null,
+): Promise<number> {
+  const rows = await withTenant(db, tenantId, listBusinessPhotos);
+  const keys = rows.flatMap((row) => objectKeys(tenantId, row));
+  if (keys.length === 0) return 0;
+  if (store === null) throw new Error('No object store to delete the photos from');
+  await store.delete(keys);
+  return keys.length;
 }

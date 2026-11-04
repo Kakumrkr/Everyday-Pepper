@@ -45,6 +45,7 @@ const allowedInternalImports = {
   ],
   // S31 (ADR-0037): the episode job summarises and embeds through the AI package's ports.
   // S35 (ADR-0039): the insights job passes the templates' thresholds to the appointments pass.
+  // S51.2 (ADR-0054): the deletion job deletes a business's photos from the object store.
   'apps/worker': [
     'contracts',
     'core',
@@ -52,6 +53,7 @@ const allowedInternalImports = {
     'ai',
     'integrations',
     'runtime',
+    'storage',
     'testing',
     'appointments',
     'imports',
