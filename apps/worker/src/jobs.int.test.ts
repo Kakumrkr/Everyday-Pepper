@@ -6,9 +6,22 @@ import {
   createStaffMember,
   REMINDER_LEAD_MS,
 } from '@pepper/appointments';
-import { TenantIdSchema, UserIdSchema } from '@pepper/contracts';
+import { OutboxMessageIdSchema, TenantIdSchema, UserIdSchema } from '@pepper/contracts';
 import { createBusiness, createClient, outboxKeyFrom, type Actor } from '@pepper/core';
-import { prepareDatabase, users, type Database, type DatabaseHandle } from '@pepper/db';
+import {
+  findCurrentTenant,
+  insertBusinessPhoto,
+  insertOutboxMessage,
+  newId,
+  outboxMessages,
+  prepareDatabase,
+  scheduleCurrentTenantDeletion,
+  users,
+  withTenant,
+  type Database,
+  type DatabaseHandle,
+} from '@pepper/db';
+import { MemoryObjectStore, photoObjectKey } from '@pepper/storage';
 import { ConnectionsModule, DATABASE, MailModule } from '@pepper/runtime';
 import {
   postgresUrlAs,
@@ -36,6 +49,8 @@ let redis: TestService;
 let mailpit: TestMailpit;
 let app: INestApplicationContext;
 let db: Database;
+/** The photos' store the deletion job deletes from. */
+const store = new MemoryObjectStore();
 
 interface MailpitMessage {
   Created: string;
@@ -69,7 +84,13 @@ beforeAll(async () => {
       ConnectionsModule.forRoot({ databaseUrl, redisUrl: redis.url }),
       MailModule.forRoot({ smtpUrl: mailpit.smtpUrl, from: 'Plum Salon <hello@plum.example>' }),
       OutboxModule.forRoot({ redisUrl: redis.url, key, pollMs: 100 }),
-      JobsModule.forRoot({ key, reminderPollMs: 1000, cleanupIntervalMs: 60_000 }),
+      JobsModule.forRoot({
+        key,
+        reminderPollMs: 1000,
+        cleanupIntervalMs: 60_000,
+        deletionPollMs: 500,
+        objectStore: store,
+      }),
     ],
   }).compile();
   app = await moduleRef.init();
@@ -138,5 +159,73 @@ describe('the reminder job (AC-W6-1)', () => {
     await new Promise((resolve) => setTimeout(resolve, 3000));
     expect(await inbox('kept@example.test')).toHaveLength(1);
     expect(await inbox('cancelled@example.test')).toEqual([]);
+  });
+});
+
+describe('the deletion job (S51.2, AC-W1-40, AC-W1-41)', () => {
+  async function owned(name: string, slug: string) {
+    const [owner] = await db
+      .insert(users)
+      .values({ name, email: `${slug}@owner.example` })
+      .returning({ id: users.id });
+    if (owner === undefined) throw new Error('no owner');
+    const tenant = await createBusiness(db, UserIdSchema.parse(owner.id), {
+      name,
+      slug,
+      timeZone: 'America/Chicago',
+    });
+    return TenantIdSchema.parse(tenant.id);
+  }
+
+  it('deletes a business past its day: its photos’ images first, then every row', async () => {
+    const tenantId = await owned('Gone Salon', 'gone-salon');
+    const photoId = newId();
+    const keys = [320, 640].map((width) => photoObjectKey(tenantId, photoId, width));
+    for (const key of keys) await store.put(key, new Uint8Array([1, 2, 3]), 'image/webp');
+    await withTenant(db, tenantId, (tx) =>
+      insertBusinessPhoto(tx, {
+        id: photoId,
+        kind: 'logo',
+        widths: [320, 640],
+        width: 640,
+        height: 640,
+        caption: null,
+      }),
+    );
+    // As if the 30 days had gone by.
+    await withTenant(db, tenantId, (tx) =>
+      scheduleCurrentTenantDeletion(tx, new Date(Date.now() - 60_000)),
+    );
+    const gone = await eventually(
+      () => withTenant(db, tenantId, findCurrentTenant),
+      (tenant) => tenant === undefined,
+    );
+    expect(gone).toBeUndefined();
+    for (const key of keys) expect(await store.head(key)).toBeNull();
+  });
+
+  it('takes back a waiting business’s emails instead of sending them', async () => {
+    const tenantId = await owned('Closing Salon', 'closing-salon');
+    await withTenant(db, tenantId, (tx) =>
+      scheduleCurrentTenantDeletion(tx, new Date(Date.now() + 30 * 86_400_000)),
+    );
+    const id = OutboxMessageIdSchema.parse(newId());
+    await withTenant(db, tenantId, (tx) =>
+      insertOutboxMessage(tx, {
+        id,
+        type: 'email',
+        dedupeKey: `closing:${id}`,
+        payload: Buffer.from('never opened'),
+        availableAt: new Date(),
+      }),
+    );
+    const [message] = await eventually(
+      () =>
+        withTenant(db, tenantId, (tx) =>
+          tx.select({ status: outboxMessages.status }).from(outboxMessages),
+        ),
+      (rows) => rows[0]?.status !== 'pending',
+    );
+    expect(message?.status).toBe('cancelled');
   });
 });

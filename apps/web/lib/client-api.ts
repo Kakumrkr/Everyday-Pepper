@@ -94,6 +94,11 @@ const MESSAGES: Record<string, string> = {
     'Leave out links, email addresses, phone numbers and anything sensitive, and keep it to 120 words.',
   nudge_not_sendable: 'This email can’t go to this client any more. Nothing was sent.',
   unsubscribe_link_invalid: 'This unsubscribe link doesn’t work. Contact the business instead.',
+  deletion_name_mismatch: 'That isn’t the business’s name. Type it as it’s shown.',
+  wrong_password: 'That password isn’t right. Try again.',
+  account_owns_business:
+    'You’re the only owner of a business. Delete the business first, or make someone else an owner.',
+  account_being_deleted: 'Your account is being deleted. Keep your account first.',
 };
 
 /** The api's error code in a refusal's body (ours, or Better Auth's `EMAIL_NOT_VERIFIED`…). */

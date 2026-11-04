@@ -411,7 +411,7 @@ for (const width of WIDTHS) {
     await shots('book-photos');
   });
 
-  test(`Home, Chat, More and Your data at ${String(width)} px, light and dark`, async ({
+  test(`Home, Chat, More, Your data and deleting at ${String(width)} px, light and dark`, async ({
     page,
   }) => {
     test.setTimeout(300_000);
@@ -443,9 +443,36 @@ for (const width of WIDTHS) {
       await expect(page.getByRole('heading', { name: 'Your data', level: 1 })).toBeVisible();
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`your-data-${String(width)}-${scheme}.png`, SHOT);
+
+      // Delete business and Delete account (S51.2, ADR-0054): the download first, the name or
+      // the password, one danger action. The account's email is masked (it is unique per run).
+      await page.goto('/more/data/delete');
+      await expect(
+        page.getByRole('heading', { name: 'Delete Southside Cuts', level: 1 }),
+      ).toBeVisible();
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`delete-business-${String(width)}-${scheme}.png`, SHOT);
+
+      await page.goto('/account/delete');
+      await expect(
+        page.getByRole('heading', { name: 'Delete your account', level: 1 }),
+      ).toBeVisible();
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`delete-account-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        mask: [page.getByText(/@example\.test/)],
+      });
     }
   });
 }
+
+/** Masked dates as one full-width line each, so their text's length never moves the layout. */
+const DATE_LINES_FIXED = `[data-testid="booking-when"], [data-testid="calendar-day"] {
+  display: block !important; width: 100% !important; white-space: nowrap !important;
+  overflow: hidden !important;
+}`;
 
 /** Calls the api as the signed-in browser (the app's own origin, as the api requires). */
 async function post<T>(
@@ -691,11 +718,14 @@ for (const width of WIDTHS) {
       await page.goto(`/calendar?date=${date}`);
       await (await hydrated(page.getByTestId('booking-block').first())).click();
       await expect(dialog.getByTestId('booking-status')).toBeVisible();
+      await page.addStyleTag({ content: DATE_LINES_FIXED });
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`booking-sheet-${String(width)}-${scheme}.png`, {
         ...SHOT,
         fullPage: false,
-        // The day moves with today; the client row (S50.2) stays in the picture.
+        // The day moves with today; the client row (S50.2) stays in the picture. Each masked
+        // date is one full-width line, so a longer day's name can't wrap it and move the sheet
+        // (S51.2: "Wednesday, November 11" wrapped at 412 px and failed the shot on that day).
         mask: [dialog.getByTestId('booking-when'), page.getByTestId('calendar-day')],
       });
       await page.keyboard.press('Escape');

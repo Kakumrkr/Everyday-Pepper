@@ -1,7 +1,13 @@
-import { FeedResponseSchema } from '@pepper/contracts';
+import { DeletionStatusSchema, FeedResponseSchema } from '@pepper/contracts';
 import { buttonStyle, Icon, List, ListRow } from '@pepper/ui';
 import Link from 'next/link';
 import { ROUTES } from '../../../lib/account';
+import {
+  ACCOUNT_DELETION_PATH,
+  BUSINESS_DELETION_PATH,
+  deletionDayLabel,
+} from '../../../lib/deletion';
+import { TextLink } from '../../_components/auth-page';
 import { appNav, type NavItem } from '../../../lib/nav';
 import { BusinessSwitcher, SignOutButton } from '../../_components/account-actions';
 import { kitLink } from '../../_components/kit-link';
@@ -29,6 +35,14 @@ export default async function MorePage() {
     current?.permissions.includes('feed.read') === true
       ? await currentJson('/v1/feed', FeedResponseSchema)
       : null;
+  // A business or an account being deleted says so here (S51.2, ADR-0054).
+  const [businessDeletion, accountDeletion] = await Promise.all([
+    current === null ? null : currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema),
+    currentJson(ACCOUNT_DELETION_PATH, DeletionStatusSchema),
+  ]);
+  const timeZone = current?.business.timeZone ?? 'UTC';
+  const businessDueAt = businessDeletion?.dueAt ?? null;
+  const accountDueAt = accountDeletion?.dueAt ?? null;
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-8">
@@ -43,6 +57,23 @@ export default async function MorePage() {
           </p>
         )}
       </div>
+      {current === null || businessDueAt === null ? null : (
+        <p
+          className="m-0 rounded-md bg-info-soft px-4 py-3 type-body text-ink"
+          data-testid="business-deletion-notice"
+        >
+          Pepper deletes {current.business.name} on{' '}
+          <span className="font-semibold">{deletionDayLabel(businessDueAt, timeZone)}</span>.
+          {current.permissions.includes('business.delete') ? (
+            <>
+              {' '}
+              <TextLink href={ROUTES.deleteBusiness}>Keep it</TextLink>
+            </>
+          ) : (
+            ' Its booking page is closed until then.'
+          )}
+        </p>
+      )}
       <Places title="Pepper" items={nav.pepper} />
       <Places title="Business" items={nav.business} />
       {current === null ? null : <NotificationsCard />}
@@ -75,6 +106,17 @@ export default async function MorePage() {
           </div>
         ) : null}
         <SignOutButton />
+        {accountDueAt === null ? (
+          <Link href={ROUTES.deleteAccount} className={buttonStyle({ variant: 'quiet' })}>
+            Delete your account
+          </Link>
+        ) : (
+          <p className="m-0 type-body text-ink" data-testid="account-deletion-notice">
+            Your account is deleted on{' '}
+            <span className="font-semibold">{deletionDayLabel(accountDueAt, timeZone)}</span>.{' '}
+            <TextLink href={ROUTES.deleteAccount}>Keep my account</TextLink>
+          </p>
+        )}
       </section>
     </div>
   );

@@ -135,6 +135,26 @@ export function changeOf(token: string): { from: string; to: string } | null {
   }
 }
 
+const StepTokenSchema = z.object({ requestType: z.string() });
+
+/**
+ * Whether an email check link's token is a change of address's last step (the new address
+ * confirming), read from its payload as `changeOf` does. Only called once Better Auth has
+ * verified that token (L15: the other sessions then end).
+ */
+export function isFinishedChangeOf(token: string): boolean {
+  const payload = token.split('.')[1];
+  if (payload === undefined) return false;
+  try {
+    const parsed = StepTokenSchema.safeParse(
+      JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')),
+    );
+    return parsed.success && parsed.data.requestType === 'change-email-verification';
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Sends account emails in the background, never failing or slowing the request: a refusal, or
  * the time an SMTP round trip takes, would tell an address that has an account from one that

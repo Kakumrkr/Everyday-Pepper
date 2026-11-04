@@ -11,7 +11,7 @@ All tenant-owned tables: `id (uuid v7)`, `tenant_id` (defaults to the transactio
 - `verifications`.
 - `two_factors`: encrypted TOTP secret and backup codes, lockout counters.
 
-Deleting a user cascades to their sessions, accounts, second factor and memberships. A signed-in user reads their own memberships and businesses across tenants only through `withUser` (read-only `member_read` policies, applied only when no tenant is set).
+Deleting a user cascades to their sessions, accounts, second factor and memberships. Accounts and businesses are deleted 30 days after it is asked for (`users.deletion_due_at`, `tenants.deletion_due_at`; a trigger refuses the services' delete of a business before its day; [ADR-0054](../adr/0054-account-and-business-deletion.md)); a business's rows go with its `tenants` row, since every tenant table cascades from it. A signed-in user reads their own memberships and businesses across tenants only through `withUser` (read-only `member_read` policies, applied only when no tenant is set).
 
 ## L1 Core
 | Entity | Key fields / notes |

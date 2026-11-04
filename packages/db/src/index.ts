@@ -14,6 +14,7 @@ export * from './repositories/bookings.js';
 export * from './repositories/waitlist.js';
 export * from './repositories/cleanup.js';
 export * from './repositories/clients.js';
+export * from './repositories/deletion.js';
 export * from './repositories/conversations.js';
 export * from './repositories/feed.js';
 export * from './repositories/imports.js';

@@ -101,6 +101,11 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   import_mapping_invalid: 'That mapping doesn’t fit the file',
   gallery_full: 'The gallery holds 12 photos',
   storage_unavailable: 'Photos are not available right now',
+  deletion_name_mismatch: 'Type the business’s name exactly as it is shown',
+  wrong_password: 'That password isn’t right',
+  account_owns_business:
+    'You’re the only owner of a business. Delete the business first, or make someone else an owner',
+  account_being_deleted: 'Your account is being deleted. Keep your account first',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */

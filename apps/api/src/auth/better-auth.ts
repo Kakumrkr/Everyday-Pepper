@@ -2,6 +2,7 @@ import { UserIdSchema } from '@pepper/contracts';
 import type { Mailer } from '@pepper/core';
 import {
   authDatabaseAdapter,
+  endOtherSessions,
   listUserBusinesses,
   newId,
   recordSignup,
@@ -9,6 +10,7 @@ import {
   type Database,
 } from '@pepper/db';
 import { betterAuth } from 'better-auth';
+import { createAuthMiddleware } from 'better-auth/api';
 import { twoFactor } from 'better-auth/plugins';
 import type { AuthConfig } from '../config.js';
 import {
@@ -17,6 +19,7 @@ import {
   changeOf,
   confirmChangeEmail,
   confirmNewEmailEmail,
+  isFinishedChangeOf,
   landingOn,
   resetPasswordEmail,
   RESET_LINK_MINUTES,
@@ -159,6 +162,18 @@ export function createBetterAuth(options: BetterAuthOptions) {
           ),
       },
       deleteUser: { enabled: false },
+    },
+    hooks: {
+      // L15 (S51.2, AC-W1-43): once the new address confirms a change of email, every other
+      // session of the account ends; the browser that confirmed it stays signed in. Better
+      // Auth has verified the token by the time a session is set here.
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== '/verify-email') return;
+        const created = ctx.context.newSession;
+        const token: unknown = ctx.query?.['token'];
+        if (created === null || typeof token !== 'string' || !isFinishedChangeOf(token)) return;
+        await endOtherSessions(options.db, UserIdSchema.parse(created.user.id), created.session.id);
+      }),
     },
     plugins: [twoFactor({ issuer: 'Pepper' })],
     // Built-in limits (stricter on sign-in, sign-up and second-factor checks), kept in memory:

@@ -7,10 +7,16 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
-import { runDueBriefings, runDueInsights, sendDueReminders } from '@pepper/appointments';
-import { cleanUp, sendDueTaskPushes, systemClock, type Clock } from '@pepper/core';
+import {
+  deleteAllPhotoImages,
+  runDueBriefings,
+  runDueInsights,
+  sendDueReminders,
+} from '@pepper/appointments';
+import { cleanUp, runDueDeletions, sendDueTaskPushes, systemClock, type Clock } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
+import type { ObjectStore } from '@pepper/storage';
 import { templateDrafts, templateInsights } from '@pepper/templates';
 import { morningDraftsJob, type DraftsJobConfig } from './drafts.js';
 import { Periodic } from './periodic.js';
@@ -43,6 +49,13 @@ export interface JobsOptions {
    * the reminders' interval, only then.
    */
   pushes?: boolean;
+  /**
+   * How often businesses and accounts past their 30 days are deleted (S51.2, ADR-0054); it
+   * also runs at start-up. Default: every hour.
+   */
+  deletionPollMs?: number;
+  /** The photos' store, whose images go before their business; `null`: none configured. */
+  objectStore?: ObjectStore | null;
   clock?: Clock;
 }
 
@@ -65,6 +78,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   readonly reminders: Periodic;
   readonly dueTasks: Periodic | null;
   readonly cleanup: Periodic;
+  readonly deletions: Periodic;
   readonly insights: Periodic;
   readonly morning: Periodic;
 
@@ -150,6 +164,29 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       },
       this.logger,
     );
+    const store = options.objectStore ?? null;
+    this.deletions = new Periodic(
+      'Deletion job',
+      options.deletionPollMs ?? 60 * 60_000,
+      async () => {
+        const result = await runDueDeletions(db, {
+          clock,
+          beforeBusinessDeleted: async (tenantId) => {
+            await deleteAllPhotoImages(db, tenantId, store);
+          },
+        });
+        // Counts only: never a business's or an account's id or name.
+        if (result.businesses > 0 || result.accounts > 0) {
+          this.logger.log(
+            `Deletion: ${String(result.businesses)} businesses, ${String(result.accounts)} accounts deleted`,
+          );
+        }
+        if (result.deferred > 0) {
+          this.logger.warn(`Deletion: ${String(result.deferred)} due, left for the next pass`);
+        }
+      },
+      this.logger,
+    );
     this.cleanup = new Periodic(
       'Clean-up job',
       options.cleanupIntervalMs,
@@ -165,6 +202,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   }
 
   onApplicationBootstrap(): void {
+    this.deletions.start({ immediately: true });
     this.reminders.start();
     this.dueTasks?.start();
     this.insights.start();
@@ -179,11 +217,12 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       this.insights.stop(),
       this.morning.stop(),
       this.cleanup.stop(),
+      this.deletions.stop(),
     ]);
   }
 }
 
-/** The reminder, due-task, insights, morning (drafts, briefing) and clean-up jobs. Needs `ConnectionsModule`. */
+/** The reminder, due-task, insights, morning (drafts, briefing), clean-up and deletion jobs. Needs `ConnectionsModule`. */
 @Module({})
 export class JobsModule {
   static forRoot(options: JobsOptions): DynamicModule {

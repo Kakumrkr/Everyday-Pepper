@@ -226,6 +226,9 @@ importers:
       '@pepper/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
+      '@pepper/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
       '@pepper/templates':
         specifier: workspace:*
         version: link:../../packages/templates

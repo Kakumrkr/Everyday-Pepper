@@ -20,6 +20,7 @@ import {
   addMembership,
   appendAuditEntry,
   countOpenInvites,
+  findAccountDeletion,
   findCurrentTenant,
   findMembership,
   insertInvite,
@@ -39,6 +40,7 @@ import {
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
 import {
+  AccountBeingDeletedError,
   AlreadyAMemberError,
   ForbiddenError,
   InviteInvalidError,
@@ -196,6 +198,8 @@ export async function acceptInvite(
 ): Promise<AcceptInviteResponse> {
   const now = (options.clock ?? systemClock).now();
   const userId = UserIdSchema.parse(invitee.userId);
+  // An account being deleted joins no team (S51.2, ADR-0054): keep the account first.
+  if ((await findAccountDeletion(db, userId)) !== null) throw new AccountBeingDeletedError();
   const accepted = await withInviteTenant(db, hashInviteToken(token), async (tx, found) => {
     await lockTenantMemberships(tx);
     const invite = await lockInvite(tx, found.id);

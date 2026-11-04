@@ -3,6 +3,7 @@
 import { Button } from '@pepper/ui';
 import { useState } from 'react';
 import { fetchExport } from '../../lib/export';
+import { TabActionBar } from './tab-action-bar';
 
 type State =
   | { kind: 'idle' }
@@ -26,11 +27,12 @@ function save(file: Blob, name: string) {
 }
 
 /**
- * "Download your data" (S51, ADR-0053, AC-W1-37): the screen's one action, on a phone fixed
- * above the tabs within thumb reach (D3), on a desktop at the end of the page. What happened
- * is said beside it, for screen readers too.
+ * "Download your data" (S51, ADR-0053, AC-W1-37). On "Your data" it is the screen's one action
+ * (`bar`, above the tabs on a phone); on "Delete business" it comes first but isn't the main
+ * action (`inline`, secondary: S51.2's top-up, AC-W1-40). What happened is said beside it, for
+ * screen readers too.
  */
-export function ExportDownload() {
+export function ExportDownload({ placement = 'bar' }: { placement?: 'bar' | 'inline' }) {
   const [state, setState] = useState<State>({ kind: 'idle' });
 
   async function download() {
@@ -44,33 +46,41 @@ export function ExportDownload() {
     setState({ kind: 'saved', name: result.data.name });
   }
 
+  const button = (
+    <Button
+      className={placement === 'bar' ? 'w-full desk:w-auto' : undefined}
+      variant={placement === 'bar' ? 'primary' : 'secondary'}
+      busy={state.kind === 'busy'}
+      onClick={() => {
+        void download();
+      }}
+    >
+      {state.kind === 'busy' ? 'Getting your data…' : 'Download your data'}
+    </Button>
+  );
+  const status = (
+    <p aria-live="polite" className="m-0 type-body empty:hidden" data-testid="export-status">
+      {state.kind === 'saved' && (
+        <span className="text-ink">
+          Saved as <span className="font-semibold break-all">{state.name}</span>. Keep it somewhere
+          private: it has your clients’ details.
+        </span>
+      )}
+      {state.kind === 'failed' && <span className="text-danger">{state.message}</span>}
+    </p>
+  );
+  if (placement === 'inline') {
+    return (
+      <div className="flex flex-col items-start gap-3">
+        {button}
+        {status}
+      </div>
+    );
+  }
   return (
     <>
-      <p aria-live="polite" className="m-0 type-body empty:hidden" data-testid="export-status">
-        {state.kind === 'saved' && (
-          <span className="text-ink">
-            Saved as <span className="font-semibold break-all">{state.name}</span>. Keep it
-            somewhere private: it has your clients’ details.
-          </span>
-        )}
-        {state.kind === 'failed' && <span className="text-danger">{state.message}</span>}
-      </p>
-      <div
-        className="fixed inset-x-0 bottom-[calc(var(--spacing-tab-bar)+env(safe-area-inset-bottom))] z-10 border-t border-line bg-bg px-5 py-3 desk:static desk:border-0 desk:px-0 desk:py-0"
-        data-testid="export-actions"
-      >
-        <div className="mx-auto flex max-w-xl justify-end desk:justify-start">
-          <Button
-            className="w-full desk:w-auto"
-            busy={state.kind === 'busy'}
-            onClick={() => {
-              void download();
-            }}
-          >
-            {state.kind === 'busy' ? 'Getting your data…' : 'Download your data'}
-          </Button>
-        </div>
-      </div>
+      {status}
+      <TabActionBar testId="export-actions">{button}</TabActionBar>
     </>
   );
 }

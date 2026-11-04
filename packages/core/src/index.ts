@@ -17,6 +17,7 @@ export * from './services/business.js';
 export * from './services/cleanup.js';
 export * from './services/clients.js';
 export * from './services/conversations.js';
+export * from './services/deletion.js';
 export * from './services/episodes.js';
 export * from './services/invites.js';
 export * from './services/feed.js';

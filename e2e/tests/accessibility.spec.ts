@@ -40,8 +40,12 @@ async function expectAccessible(page: Page, screen: string): Promise<void> {
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
     // Buttons fade between colors (`transition-colors`); measure once the new scheme has settled.
+    // A fade replaced mid-way is cancelled, and its `finished` rejects (AbortError): it has
+    // ended all the same (S51.2 CI: a public screen's button lost a race with its next fade).
     await page.evaluate(() =>
-      Promise.all(document.getAnimations().map((animation) => animation.finished)),
+      Promise.all(
+        document.getAnimations().map((animation) => animation.finished.catch(() => undefined)),
+      ),
     );
     const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     const blocking = violations.filter(

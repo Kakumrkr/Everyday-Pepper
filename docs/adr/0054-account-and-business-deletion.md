@@ -1,0 +1,23 @@
+# ADR-0054: Account and business deletion with a grace period
+
+- **Status:** Accepted (built in S51.2). Approved by the user at the S51.2 brief on 2026-11-04 ("Pre-Aprovved your recommendation. completet the session sucessfully"; D-1 no split, D-2 30 days for both, D-3 an only owner deletes the business first, D-4 L15 by Better Auth's after hook, D-5 this ADR).
+- **Date:** 2026-11-04
+- **Builds on:** ADR-0053 (the export, offered first), ADR-0051 (a client's deletion), ADR-0048 (photos in object storage), ADR-0025 (the worker's scans), ADR-0012 and ADR-0045 (accounts), ADR-0013 (`business.delete`, owners only); [scorecard](../plan/scorecard.md) C11, C13, L15; AC-W1-40…44
+
+## Context
+"Leave with everything" (C13) ends with leaving: the owner takes the export and then wants the business gone, and anyone may want their account gone. Deletion can't be undone, so a mistake, a stolen session or an owner having a bad day must not destroy a business in one tap; and what "gone" means has to be checkable, table by table.
+
+## Decision
+1. **Asked for now, done in 30 days (D-2).** `tenants.deletion_due_at` and `users.deletion_due_at` (migration 0063; NULL: not being deleted) hold the day, `DELETION_GRACE_DAYS` after the request; asking again keeps the first day; either can be kept until then (`DELETE …/deletion`).
+2. **A business: the owner, by its name.** `POST /v1/tenant/deletion` (`business.delete`, owners only, with their second factor as for any owner request) with the name typed (case, spacing and curly quotes ignored), audited `business.deletion_scheduled`; `DELETE` keeps it (`business.deletion_cancelled`). While it waits the team keeps working (nothing is lost if the owner changes their mind), but **its booking page takes nothing new** (`inPage` refuses; a client's manage link can still show and cancel a visit) and **Pepper emails its clients nothing**: pending emails are taken back when it is scheduled, and the outbox takes back any email of a waiting business instead of sending it.
+3. **An account: by its password.** `POST /v1/me/deletion` checks the password (Better Auth's server-side `verifyPassword`; 5 tries in 15 minutes) and ends every other session at once. The account still signs in while it waits, so its owner can keep it. **The only owner of a business that isn't being deleted can't delete their account (D-3)**: the business would be left with nobody who may run it; and an account that waits can't create or join a business. Keeping a business is refused to its only owner while their own account waits.
+4. **The worker deletes (hourly and at start-up).** `runDueDeletions`: businesses first, each in its own transaction: the photos' images from the object store (the worker now has the `S3_*` settings), then the `tenants` row, which takes every tenant table with it (all cascade from it, as the table owner). **The database refuses an early delete**: a trigger on `tenants` refuses the services' delete of a business that isn't due by the database's own clock, whatever the code above does. Then accounts: the invites to its address in each business it belongs to, then the `users` row, which takes its sign-in, sessions, second factor, memberships and sign-up record; every other row that named it keeps no link (`ON DELETE SET NULL`). A business whose images couldn't be deleted, or an account that is again an only owner, waits for the next pass; logs carry counts only.
+5. **L15 (D-4): a finished change of email ends the other sessions.** A Better Auth `after` hook on `/verify-email`, once the new address's link has set a session, deletes the account's other sessions; the browser that confirmed stays signed in.
+
+## Consequences
+- "No tenant rows left" is a test: `packages/db/src/deletion.int.test.ts` counts every table with a `tenant_id` (from the catalog, so a new table is covered) before and after, and another business's counts don't change.
+- The audit log goes with the business; nothing records the deletion itself (a tombstone would be a row of a deleted business). The worker's log line has counts only.
+- Backups still hold a deleted business until they expire (the retention is set with the backups in S58).
+- A staff member's `staff_members` row (the business's own record, with the name shown on past visits) stays when their account goes; only its link to the account is cleared.
+- A client with a manage link can cancel but not move a visit while the business waits; the refusal reads "no booking page" (better words: for later).
+- Not built: an email when a deletion is scheduled or done; handing a business to another owner.

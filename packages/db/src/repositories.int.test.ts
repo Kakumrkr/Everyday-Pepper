@@ -204,6 +204,8 @@ describe('memberships', () => {
     const user = await insertUser(db);
     await withTenant(db, tenant, (tx) => addMembership(tx, { userId: user, role: 'owner' }));
     const remaining = await withTenant(db, tenant, async (tx) => {
+      // Only a business whose deletion day has passed may be deleted (S51.2, migration 0063).
+      await tx.execute(sql`UPDATE tenants SET deletion_due_at = now() - interval '1 day'`);
       await tx.execute(sql`DELETE FROM tenants`);
       return listMemberships(tx);
     });
@@ -433,7 +435,11 @@ describe('sessions', () => {
     );
     const id = await insertSession(user);
     await setSessionActiveTenant(db, { id, userId: user }, tenant);
-    await withTenant(db, tenant, (tx) => tx.execute(sql`DELETE FROM tenants`));
+    // Only a business whose deletion day has passed may be deleted (S51.2, migration 0063).
+    await withTenant(db, tenant, async (tx) => {
+      await tx.execute(sql`UPDATE tenants SET deletion_due_at = now() - interval '1 day'`);
+      await tx.execute(sql`DELETE FROM tenants`);
+    });
     expect(await activeTenantOf(id)).toBeNull();
   });
 });

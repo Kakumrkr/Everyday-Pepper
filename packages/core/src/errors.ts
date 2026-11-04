@@ -280,3 +280,33 @@ export class MemoryEpisodeNotFoundError extends Error {
     this.name = 'MemoryEpisodeNotFoundError';
   }
 }
+
+/** The name typed to confirm a business's deletion isn't the business's (S51.2, ADR-0054). */
+export class DeletionNameMismatchError extends Error {
+  constructor() {
+    super('The typed name is not the business’s');
+    this.name = 'DeletionNameMismatchError';
+  }
+}
+
+/**
+ * The account is the only owner of a business that isn't being deleted, so it can't be deleted
+ * (S51.2, ADR-0054): the business would be left with nobody who may run it.
+ */
+export class AccountOwnsBusinessError extends Error {
+  constructor() {
+    super('The account is the only owner of a business');
+    this.name = 'AccountOwnsBusinessError';
+  }
+}
+
+/**
+ * The owner's own account is being deleted, so they can't keep a business they alone own: it
+ * would outlive its only owner (S51.2, ADR-0054). Keep the account first.
+ */
+export class AccountBeingDeletedError extends Error {
+  constructor() {
+    super('The account is being deleted');
+    this.name = 'AccountBeingDeletedError';
+  }
+}

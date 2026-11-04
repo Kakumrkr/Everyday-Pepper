@@ -108,6 +108,11 @@ export const ApiErrorCodeSchema = z.enum([
   'import_not_undoable',
   'import_mapping_invalid',
   'storage_unavailable',
+  // Deleting a business or an account (S51.2, ADR-0054).
+  'deletion_name_mismatch',
+  'wrong_password',
+  'account_owns_business',
+  'account_being_deleted',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

@@ -1,10 +1,12 @@
-import { BUSINESS_EXPORT_FILES } from '@pepper/contracts';
+import { BUSINESS_EXPORT_FILES, DeletionStatusSchema } from '@pepper/contracts';
 import { List, ListRow } from '@pepper/ui';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { ROUTES } from '../../../../lib/account';
+import { BUSINESS_DELETION_PATH, deletionDayLabel } from '../../../../lib/deletion';
 import { ExportDownload } from '../../../_components/export-download';
-import { currentAccount, currentBusiness } from '../../../_server/account';
+import { kitLink } from '../../../_components/kit-link';
+import { currentAccount, currentBusiness, currentJson } from '../../../_server/account';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Your data · Pepper' };
@@ -19,6 +21,10 @@ export default async function YourDataPage() {
   if (account.state !== 'signed-in') return null;
   const current = await currentBusiness();
   if (current?.permissions.includes('business.export') !== true) redirect(ROUTES.more);
+  const deletion = current.permissions.includes('business.delete')
+    ? await currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema)
+    : null;
+  const dueAt = deletion?.dueAt ?? null;
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-8 pb-24 desk:pb-0">
@@ -58,6 +64,25 @@ export default async function YourDataPage() {
           />
         </List>
       </section>
+      {deletion === null ? null : (
+        <section aria-labelledby="export-leave" className="flex flex-col gap-1">
+          <h2 id="export-leave" className="m-0 type-heading">
+            Leaving Pepper
+          </h2>
+          <List>
+            <ListRow
+              title={dueAt === null ? `Delete ${current.business.name}` : 'Being deleted'}
+              meta={
+                dueAt === null
+                  ? 'Pepper keeps it for 30 days, then deletes everything. Download your data first.'
+                  : `On ${deletionDayLabel(dueAt, current.business.timeZone)}. Keep it until then.`
+              }
+              href={ROUTES.deleteBusiness}
+              renderLink={kitLink}
+            />
+          </List>
+        </section>
+      )}
       <ExportDownload />
     </div>
   );
