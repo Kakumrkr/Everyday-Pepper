@@ -1049,9 +1049,13 @@ export async function claimWaitlistOffer(
     if (offer.status === 'taken') return { kind: 'taken' };
     if (offer.status === 'expired' || offer.expiresAt.getTime() <= now) return { kind: 'expired' };
 
-    // Taken off the list meanwhile: the link is withdrawn, the others' offers stay open.
-    const entry = await lockWaitlistEntry(tx, WaitlistEntryIdSchema.parse(offer.entryId));
-    if (entry?.status !== 'offered') {
+    // Taken off the list meanwhile: the link is withdrawn, the others' offers stay open. A
+    // regular's offer has no entry (S54, ADR-0056).
+    const entry =
+      offer.entryId === null
+        ? null
+        : await lockWaitlistEntry(tx, WaitlistEntryIdSchema.parse(offer.entryId));
+    if (entry !== null && entry?.status !== 'offered') {
       await takeBackWaitlistOffersIn(tx, [WaitlistOfferIdSchema.parse(offer.id)]);
       return { kind: 'expired' };
     }
@@ -1096,7 +1100,7 @@ export async function claimWaitlistOffer(
           WaitlistOfferIdSchema.parse(offer.id),
           BookingIdSchema.parse(booked.id),
         );
-        await changeEntryStatus(tx, entry, 'booked', booked.id);
+        if (entry !== null) await changeEntryStatus(tx, entry, 'booked', booked.id);
       }
     }
 
@@ -1189,6 +1193,8 @@ async function closeAsTaken(
   for (const offer of closed) {
     await releaseEntry(tx, offer);
     if (offer.id === claimantOfferId || options.tellTaken === undefined) continue;
+    // A regular wasn't waiting for it (S54): no second email about a time they didn't ask for.
+    if (offer.source === 'regular') continue;
     const details = await offerEmailDetails(tx, tenant, offer);
     if (details !== undefined) {
       await options.tellTaken(tx, {

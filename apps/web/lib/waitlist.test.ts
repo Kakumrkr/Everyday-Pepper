@@ -6,6 +6,7 @@ const offer = (rank: number, startsAt: string, status: WaitlistOffer['status'] =
   ({
     id: `0199f0a4-7c1e-7d2a-9b3c-4d5e6f70810${String(rank)}`,
     entryId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708110',
+    source: 'waitlist',
     clientId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708120',
     staffMemberId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708130',
     startsAt,

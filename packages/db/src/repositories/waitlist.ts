@@ -12,10 +12,25 @@ import {
   type WaitlistOfferId,
   type WaitlistOfferStatus,
 } from '@pepper/contracts';
-import { and, asc, count, desc, eq, gt, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  lte,
+  notInArray,
+  or,
+  sql,
+} from 'drizzle-orm';
 import { z } from 'zod';
 import {
   bookings,
+  clients,
+  feedItems,
   waitlistEntries,
   waitlistMatches,
   waitlistOffers,
@@ -237,7 +252,8 @@ export async function setWaitlistEntryStatus(
 
 export interface NewWaitlistOffer {
   matchId: WaitlistMatchId;
-  entryId: WaitlistEntryId;
+  /** The waitlist entry offered, or `null` for an overdue regular (S54, ADR-0056). */
+  entryId: WaitlistEntryId | null;
   clientId: ClientId;
   serviceId: ServiceId;
   staffMemberId: StaffMemberId;
@@ -260,7 +276,8 @@ export async function insertWaitlistOffer(
     .insert(waitlistOffers)
     .values({
       matchId: Id.parse(offer.matchId),
-      entryId: Id.parse(offer.entryId),
+      entryId: offer.entryId === null ? null : Id.parse(offer.entryId),
+      source: offer.entryId === null ? 'regular' : 'waitlist',
       clientId: Id.parse(offer.clientId),
       serviceId: Id.parse(offer.serviceId),
       staffMemberId: Id.parse(offer.staffMemberId),
@@ -414,21 +431,103 @@ export async function expireWaitlistOffers(
       ),
     )
     .returning({ entryId: waitlistOffers.entryId });
-  if (closed.length > 0) {
+  // A regular's offer has no entry to put back (S54).
+  const entryIds = closed.flatMap((offer) => (offer.entryId === null ? [] : [offer.entryId]));
+  if (entryIds.length > 0) {
     await tx
       .update(waitlistEntries)
       .set({ status: 'waiting' })
-      .where(
-        and(
-          inArray(
-            waitlistEntries.id,
-            closed.map((offer) => offer.entryId),
-          ),
-          eq(waitlistEntries.status, 'offered'),
-        ),
-      );
+      .where(and(inArray(waitlistEntries.id, entryIds), eq(waitlistEntries.status, 'offered')));
   }
   return closed.length;
+}
+
+// Overdue regulars (S54, ADR-0056) ---------------------------------------------------------
+
+/** How long a regular offered a freed time is left alone before another such offer. */
+export const REGULAR_OFFER_QUIET_DAYS = 7;
+
+/** An overdue regular a freed time may be offered to, as the insights pass found them. */
+export interface RegularCandidateRow {
+  clientId: string;
+  /** Their last visit's service: the one offered. */
+  serviceId: string;
+  /** The local day they were due back (YYYY-MM-DD). */
+  dueOn: string;
+  /** Their usual interval in days, as the insight reckoned it. */
+  intervalDays: number | null;
+  /** Completed visits, for the ranking's tie-break. */
+  visits: number;
+}
+
+/**
+ * Up to `limit` regulars who are due back with `staffMemberId` (an open `rebooking_due`
+ * suggestion on the feed: not dismissed, not waiting on a nudge's OK), most overdue first,
+ * whose client can be emailed (an address, not opted out of marketing email, not deleted),
+ * has nothing booked from `now` on, and had no regular's offer within
+ * `REGULAR_OFFER_QUIET_DAYS`. `exceptClientIds` are left out (the client who freed the time,
+ * those already on the waitlist's offers).
+ */
+export async function listRegularCandidates(
+  tx: TenantTx,
+  input: {
+    staffMemberId: StaffMemberId;
+    now: Date;
+    exceptClientIds: readonly ClientId[];
+    /** Only these clients (checking chosen candidates again before the offer); all if absent. */
+    onlyClientIds?: readonly ClientId[];
+    limit: number;
+  },
+): Promise<RegularCandidateRow[]> {
+  const max = z.number().int().min(1).max(200).parse(input.limit);
+  const staffMemberId = Id.parse(input.staffMemberId);
+  const except = input.exceptClientIds.map((id) => Id.parse(id));
+  const rows = await tx
+    .select({
+      clientId: feedItems.clientId,
+      serviceId: feedItems.serviceId,
+      dueOn: feedItems.day,
+      intervalDays: sql<number | null>`(${feedItems.payload}->>'intervalDays')::int`,
+      visits: sql<number>`(SELECT count(*)::int FROM ${bookings} WHERE ${bookings.clientId} = ${feedItems.clientId} AND ${bookings.status} = 'completed')`,
+    })
+    .from(feedItems)
+    .innerJoin(clients, eq(clients.id, feedItems.clientId))
+    .where(
+      and(
+        eq(feedItems.kind, 'rebooking_due'),
+        eq(feedItems.status, 'suggestion'),
+        gt(feedItems.expiresAt, input.now),
+        eq(feedItems.staffMemberId, staffMemberId),
+        sql`${feedItems.serviceId} IS NOT NULL`,
+        sql`${clients.email} IS NOT NULL`,
+        isNull(clients.emailOptOutAt),
+        isNull(clients.deletedAt),
+        except.length === 0 ? undefined : notInArray(feedItems.clientId, except),
+        input.onlyClientIds === undefined
+          ? undefined
+          : inArray(
+              feedItems.clientId,
+              input.onlyClientIds.map((id) => Id.parse(id)),
+            ),
+        sql`NOT EXISTS (SELECT 1 FROM ${bookings} WHERE ${bookings.clientId} = ${feedItems.clientId} AND ${bookings.status} = 'confirmed' AND ${bookings.startsAt} >= ${input.now.toISOString()}::timestamptz)`,
+        sql`NOT EXISTS (SELECT 1 FROM ${waitlistOffers} WHERE ${waitlistOffers.clientId} = ${feedItems.clientId} AND ${waitlistOffers.source} = 'regular' AND ${waitlistOffers.createdAt} > ${input.now.toISOString()}::timestamptz - make_interval(days => ${REGULAR_OFFER_QUIET_DAYS}))`,
+      ),
+    )
+    .orderBy(asc(feedItems.day), asc(feedItems.clientId))
+    .limit(max);
+  return rows.flatMap((row) =>
+    row.clientId === null || row.serviceId === null
+      ? []
+      : [
+          {
+            clientId: row.clientId,
+            serviceId: row.serviceId,
+            dueOn: row.dueOn,
+            intervalDays: row.intervalDays,
+            visits: row.visits,
+          },
+        ],
+  );
 }
 
 /** This business's freed times asked to be matched, oldest first. */

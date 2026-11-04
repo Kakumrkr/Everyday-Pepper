@@ -187,6 +187,41 @@ export function waitlistOfferEmail(
   };
 }
 
+/**
+ * A freed time offered to an overdue regular who isn't on the waitlist (S54, ADR-0056): their
+ * usual service, the same single-use claim link, and the marketing footer a rebooking nudge
+ * carries (the business's mailing address, a one-click unsubscribe link).
+ */
+export function regularOfferEmail(
+  details: BookingEmailDetails,
+  claimUrl: string,
+  expiresAt: string,
+  footer: { mailingAddress: string; unsubscribeUrl: string },
+): EmailMessage {
+  return {
+    to: details.email,
+    subject: `A time opened up at ${details.businessName}`,
+    text: [
+      `Hi ${details.clientName},`,
+      '',
+      `It has been a while, and a time just opened up at ${details.businessName}:`,
+      `${what(details)}.`,
+      '',
+      'If you would like it, open this link (it is just for you):',
+      claimUrl,
+      '',
+      `It was offered to a few clients; whoever claims it first gets it. The offer ends ${formatWhen(expiresAt, details.timeZone)}.`,
+      '',
+      '--',
+      details.businessName,
+      footer.mailingAddress,
+      '',
+      `You get this email because you are a client of ${details.businessName}.`,
+      `Unsubscribe: ${footer.unsubscribeUrl}`,
+    ].join('\n'),
+  };
+}
+
 /** Another client claimed the time first, or it was booked meanwhile (S37). */
 export function waitlistTakenEmail(details: BookingEmailDetails): EmailMessage {
   return {

@@ -25,6 +25,7 @@ import { requirePermission, systemClock, type Actor, type Clock } from '@pepper/
 import {
   appendAuditEntry,
   countCompletedVisits,
+  findBooking,
   findClient,
   findCurrentTenant,
   findService,
@@ -33,6 +34,7 @@ import {
   listOpenOffersOfEntry,
   listOpenOffersOfFreedBooking,
   listRecentWaitlistOffers,
+  listRegularCandidates,
   listWaitingEntries,
   lockWaitlistEntry,
   setWaitlistEntryStatus,
@@ -80,17 +82,35 @@ export async function requestWaitlistMatch(
   });
 }
 
-/** One entry the freed time may be offered to, with what *Why?* says about it. */
-export interface WaitlistCandidateView {
-  entryId: WaitlistEntryId;
-  clientId: ClientId;
-  serviceId: ServiceId;
-  rank: number;
-  fit: WaitlistFit;
-  /** When they joined the list (UTC). */
-  waitingSince: string;
-  visits: number;
-}
+/**
+ * One client the freed time may be offered to, with what *Why?* says about them: someone on
+ * the waitlist (`source` 'waitlist', their entry) or an overdue regular of that staff member
+ * (`source` 'regular', no entry; S54, ADR-0056).
+ */
+export type WaitlistCandidateView =
+  | {
+      source: 'waitlist';
+      entryId: WaitlistEntryId;
+      clientId: ClientId;
+      serviceId: ServiceId;
+      rank: number;
+      fit: WaitlistFit;
+      /** When they joined the list (UTC). */
+      waitingSince: string;
+      visits: number;
+    }
+  | {
+      source: 'regular';
+      entryId: null;
+      clientId: ClientId;
+      serviceId: ServiceId;
+      rank: number;
+      fit: 'regular';
+      /** The local day they were due back (YYYY-MM-DD). */
+      dueOn: string;
+      intervalDays: number | null;
+      visits: number;
+    };
 
 export interface CandidateOptions {
   now: Date;
@@ -107,7 +127,7 @@ export interface CandidateOptions {
  */
 export async function waitlistCandidatesIn(
   tx: TenantTx,
-  match: Pick<WaitlistMatchRow, 'staffMemberId' | 'startsAt'>,
+  match: Pick<WaitlistMatchRow, 'staffMemberId' | 'startsAt' | 'bookingId'>,
   options: CandidateOptions,
 ): Promise<WaitlistCandidateView[]> {
   const tenant = await findCurrentTenant(tx);
@@ -155,7 +175,9 @@ export async function waitlistCandidatesIn(
     fitting.map((entry) => ClientIdSchema.parse(entry.clientId)),
   );
   const fanOut = Math.min(Math.max(1, options.fanOut), WAITLIST_OFFER_LIMITS.maxFanOut);
-  return rankCandidates(
+  const waiting: WaitlistCandidateView[] = [];
+  const offeredClients = new Set<string>();
+  for (const { candidate, fit } of rankCandidates(
     fitting.map((entry) => ({
       entryId: entry.id,
       staffMemberId: entry.staffMemberId,
@@ -164,16 +186,121 @@ export async function waitlistCandidatesIn(
       entry,
     })),
     staffMemberId,
-    fanOut,
-  ).map(({ candidate, fit, rank }) => ({
-    entryId: WaitlistEntryIdSchema.parse(candidate.entry.id),
-    clientId: ClientIdSchema.parse(candidate.entry.clientId),
-    serviceId: ServiceIdSchema.parse(candidate.entry.serviceId),
-    rank,
-    fit,
-    waitingSince: candidate.entry.createdAt.toISOString(),
-    visits: candidate.visits,
-  }));
+    WAITLIST_OFFER_LIMITS.maxFanOut,
+  )) {
+    // One offer per client: a second entry of theirs is not a second chance at the same time.
+    if (waiting.length >= fanOut || offeredClients.has(candidate.entry.clientId)) continue;
+    offeredClients.add(candidate.entry.clientId);
+    waiting.push({
+      source: 'waitlist',
+      entryId: WaitlistEntryIdSchema.parse(candidate.entry.id),
+      clientId: ClientIdSchema.parse(candidate.entry.clientId),
+      serviceId: ServiceIdSchema.parse(candidate.entry.serviceId),
+      rank: waiting.length + 1,
+      fit,
+      waitingSince: candidate.entry.createdAt.toISOString(),
+      visits: candidate.visits,
+    });
+  }
+  if (waiting.length >= fanOut) return waiting;
+  const regulars = await regularCandidatesIn(tx, {
+    staffMemberId,
+    start,
+    now: options.now,
+    freedBookingId: BookingIdSchema.parse(match.bookingId),
+    exceptClientIds: [...offeredClients].map((id) => ClientIdSchema.parse(id)),
+    limit: fanOut - waiting.length,
+    templateRuleDefaults: options.templateRuleDefaults,
+  });
+  return [
+    ...waiting,
+    ...regulars.map((regular, index) => ({ ...regular, rank: waiting.length + index + 1 })),
+  ];
+}
+
+/** How many of a staff member's due regulars are read for one freed time, at most. */
+const MAX_REGULARS_READ = 50;
+
+/**
+ * Overdue regulars of the freed time's staff member who may be offered it (S54, ADR-0056,
+ * AC-W5-3), most overdue first: the feed's open `rebooking_due` suggestions for that staff
+ * member (the insights pass's rule: past their usual interval, nothing booked) whose client can
+ * be emailed and wasn't offered a time in the last 7 days (`listRegularCandidates`), never the
+ * client who freed it, and whose last service is bookable with that staff member at exactly
+ * that time. Ranks start at 1; the caller puts them after the waitlist.
+ */
+export async function regularCandidatesIn(
+  tx: TenantTx,
+  input: {
+    staffMemberId: StaffMemberId;
+    start: number;
+    now: Date;
+    freedBookingId: BookingId | null;
+    exceptClientIds: readonly ClientId[];
+    limit: number;
+    /** Only these clients (checking chosen ones again before the offer). */
+    onlyClientIds?: readonly ClientId[];
+    templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
+  },
+): Promise<Extract<WaitlistCandidateView, { source: 'regular' }>[]> {
+  if (input.limit <= 0) return [];
+  // An unasked offer is marketing email: without the business's mailing address for its
+  // footer (as a rebooking nudge, ADR-0040), no regular is offered anything.
+  const tenant = await findCurrentTenant(tx);
+  if (tenant === undefined || tenant.mailingAddress === null) return [];
+  const freed =
+    input.freedBookingId === null ? undefined : await findBooking(tx, input.freedBookingId);
+  const except = [...input.exceptClientIds];
+  // Whoever gave the time up isn't offered it back.
+  if (freed !== undefined) except.push(ClientIdSchema.parse(freed.clientId));
+  const rows = await listRegularCandidates(tx, {
+    staffMemberId: input.staffMemberId,
+    now: input.now,
+    exceptClientIds: except,
+    ...(input.onlyClientIds !== undefined && { onlyClientIds: input.onlyClientIds }),
+    limit: MAX_REGULARS_READ,
+  });
+  const fits = new Map<string, boolean>();
+  const seen = new Set<string>();
+  const chosen: Extract<WaitlistCandidateView, { source: 'regular' }>[] = [];
+  const ordered = [...rows].sort(
+    (a, b) =>
+      a.dueOn.localeCompare(b.dueOn) ||
+      b.visits - a.visits ||
+      (a.clientId < b.clientId ? -1 : a.clientId > b.clientId ? 1 : 0),
+  );
+  for (const row of ordered) {
+    if (chosen.length >= input.limit) break;
+    if (seen.has(row.clientId)) continue;
+    seen.add(row.clientId);
+    if (!fits.has(row.serviceId)) {
+      const service = await findService(tx, ServiceIdSchema.parse(row.serviceId));
+      fits.set(
+        row.serviceId,
+        service?.active === true &&
+          (await isBookable(tx, {
+            service: serviceToBook(service),
+            staffMemberId: input.staffMemberId,
+            start: input.start,
+            now: input.now.getTime(),
+            templateRuleDefaults: input.templateRuleDefaults,
+          })),
+      );
+    }
+    if (fits.get(row.serviceId) !== true) continue;
+    chosen.push({
+      source: 'regular',
+      entryId: null,
+      clientId: ClientIdSchema.parse(row.clientId),
+      serviceId: ServiceIdSchema.parse(row.serviceId),
+      rank: chosen.length + 1,
+      fit: 'regular',
+      dueOn: row.dueOn,
+      intervalDays: row.intervalDays,
+      visits: row.visits,
+    });
+  }
+  return chosen;
 }
 
 /** Whether a freed time can still be offered at `now`: its offers would stay open long enough. */
@@ -192,6 +319,11 @@ export function newOfferToken(): { token: OfferToken; hash: string } {
 export function offerTokenHash(token: OfferToken): string {
   return createHash('sha256').update(OfferTokenSchema.parse(token)).digest('hex');
 }
+
+/** Who an offer goes to: a waitlist entry, or a regular (no entry) with their service. */
+export type OfferTarget =
+  | { entryId: WaitlistEntryId; rank: number }
+  | { entryId: null; clientId: ClientId; serviceId: ServiceId; rank: number };
 
 export interface MadeOffer {
   offer: WaitlistOfferRow;
@@ -212,7 +344,9 @@ export async function makeWaitlistOffersIn(
     matchId: WaitlistMatchId;
     staffMemberId: StaffMemberId;
     startsAt: Date;
-    entries: readonly { entryId: WaitlistEntryId; rank: number }[];
+    /** The freed booking: its client is never offered the time back (regulars, S54). */
+    freedBookingId?: BookingId | null;
+    entries: readonly OfferTarget[];
   },
   options: { now: Date; templateRuleDefaults?: TemplateRuleDefaultsOf | undefined },
 ): Promise<MadeOffer[]> {
@@ -220,34 +354,60 @@ export async function makeWaitlistOffersIn(
   if (!stillOfferable(input.startsAt, options.now)) return [];
   const expiresAt = new Date(offerExpiry(options.now.getTime(), input.startsAt.getTime()));
   const made: MadeOffer[] = [];
-  for (const { entryId, rank } of [...input.entries].sort((a, b) => a.rank - b.rank)) {
-    const entry = await lockWaitlistEntry(tx, entryId);
-    if (entry?.status !== 'waiting' || entry.expiresAt <= options.now) continue;
-    if (entry.staffMemberId !== null && entry.staffMemberId !== input.staffMemberId) continue;
-    const service = await findService(tx, ServiceIdSchema.parse(entry.serviceId));
-    if (!service?.active) continue;
-    const bookable = await isBookable(tx, {
-      service: serviceToBook(service),
-      staffMemberId: input.staffMemberId,
-      start: input.startsAt.getTime(),
-      now: options.now.getTime(),
-      templateRuleDefaults: options.templateRuleDefaults,
-    });
-    if (!bookable) continue;
+  const offeredClients = new Set<string>();
+  for (const target of [...input.entries].sort((a, b) => a.rank - b.rank)) {
+    let clientId: ClientId;
+    let serviceId: ServiceId;
+    let entry: WaitlistEntryRow | undefined;
+    if (target.entryId === null) {
+      // A regular (S54): every rule checked again now (an address, not opted out, nothing
+      // booked meanwhile, no other offer this week, still due), or no offer.
+      const [still] = await regularCandidatesIn(tx, {
+        staffMemberId: input.staffMemberId,
+        start: input.startsAt.getTime(),
+        now: options.now,
+        freedBookingId: input.freedBookingId ?? null,
+        exceptClientIds: [...offeredClients].map((id) => ClientIdSchema.parse(id)),
+        onlyClientIds: [target.clientId],
+        limit: 1,
+        templateRuleDefaults: options.templateRuleDefaults,
+      });
+      if (still?.serviceId !== target.serviceId) continue;
+      clientId = still.clientId;
+      serviceId = still.serviceId;
+    } else {
+      entry = await lockWaitlistEntry(tx, target.entryId);
+      if (entry?.status !== 'waiting' || entry.expiresAt <= options.now) continue;
+      if (entry.staffMemberId !== null && entry.staffMemberId !== input.staffMemberId) continue;
+      if (offeredClients.has(entry.clientId)) continue;
+      const service = await findService(tx, ServiceIdSchema.parse(entry.serviceId));
+      if (!service?.active) continue;
+      const bookable = await isBookable(tx, {
+        service: serviceToBook(service),
+        staffMemberId: input.staffMemberId,
+        start: input.startsAt.getTime(),
+        now: options.now.getTime(),
+        templateRuleDefaults: options.templateRuleDefaults,
+      });
+      if (!bookable) continue;
+      clientId = ClientIdSchema.parse(entry.clientId);
+      serviceId = ServiceIdSchema.parse(entry.serviceId);
+    }
     const { token, hash } = newOfferToken();
     const offer = await insertWaitlistOffer(tx, {
       matchId: input.matchId,
-      entryId,
-      clientId: ClientIdSchema.parse(entry.clientId),
-      serviceId: ServiceIdSchema.parse(entry.serviceId),
+      entryId: target.entryId,
+      clientId,
+      serviceId,
       staffMemberId: input.staffMemberId,
       startsAt: input.startsAt,
-      rank,
+      rank: target.rank,
       tokenHash: hash,
       expiresAt,
       offeredAt: options.now,
     });
-    await changeEntryStatus(tx, entry, 'offered');
+    if (entry !== undefined) await changeEntryStatus(tx, entry, 'offered');
+    offeredClients.add(clientId);
     made.push({ offer, token });
   }
   // The feed's `waitlist_match` item shows the offers within about a minute (S38a).
@@ -316,6 +476,7 @@ export function toWaitlistOffer(row: WaitlistOfferRow, now: Date): WaitlistOffer
   return WaitlistOfferSchema.parse({
     id: row.id,
     entryId: row.entryId,
+    source: row.source,
     clientId: row.clientId,
     staffMemberId: row.staffMemberId,
     startsAt: row.startsAt.toISOString(),
@@ -331,6 +492,8 @@ export async function releaseEntry(
   tx: TenantTx,
   offer: Pick<WaitlistOfferRow, 'entryId'>,
 ): Promise<void> {
+  // A regular's offer has no entry (S54).
+  if (offer.entryId === null) return;
   const entry = await lockWaitlistEntry(tx, WaitlistEntryIdSchema.parse(offer.entryId));
   if (entry?.status === 'offered') await changeEntryStatus(tx, entry, 'waiting');
 }

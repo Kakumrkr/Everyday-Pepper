@@ -131,6 +131,9 @@ export default async function WaitlistPage() {
                       >
                         <span className="type-body text-ink">
                           {offer.rank}. {clientName.get(offer.clientId) ?? 'A client'}
+                          {offer.source === 'regular' && (
+                            <span className="text-ink-2"> · a regular who is due</span>
+                          )}
                         </span>
                         <Badge tone={OFFER_STATUS_TONES[offer.status]}>
                           {OFFER_STATUS_LABELS[offer.status]}
