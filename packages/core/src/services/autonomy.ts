@@ -85,7 +85,12 @@ export async function changeAutonomy(
         return level === null || level === undefined ? [] : [[action, level]];
       }),
     );
-    const after = { askFirst: fields.askFirst ?? before.askFirst, levels };
+    // A preset is a whole choice: it also turns "Ask me first for everything" off (S53), so the
+    // page never shows a preset that the switch overrides.
+    const after = {
+      askFirst: fields.askFirst ?? (fields.preset === undefined ? before.askFirst : false),
+      levels,
+    };
     if (sameChoices(before, after)) return resolveAutonomy(after, defaults.templateDefaults);
 
     await saveAutonomySettings(tx, { ...after, updatedBy: actor.context.userId });

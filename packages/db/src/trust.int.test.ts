@@ -565,16 +565,17 @@ describe('actionTrackRecord (S53)', () => {
         sql`UPDATE ai_action_executions SET status = 'undone', undone_at = now(), undone_by_user_id = ${ana}, undo_reason = 'wrong' WHERE id = ${first.id}`,
       ),
     );
-    expect(await counts()).toMatchObject({ doneSince30: 2, correctInARow: 0 });
+    // The run restarts after the wrong one: Jess's, made after it, still counts.
+    expect(await counts()).toMatchObject({ doneSince30: 2, correctInARow: 1 });
     await inTenant((tx) => insertExecution(tx, blockFor(ana)));
-    expect(await counts()).toMatchObject({ doneSince30: 3, correctInARow: 1 });
+    expect(await counts()).toMatchObject({ doneSince30: 3, correctInARow: 2 });
 
     const refused = await stored(
       inTenant((tx) => insertProposal(tx, proposal({ action: 'time.block', tool: 'block_time' }))),
     );
     await inTenant((tx) =>
       tx.execute(
-        sql`UPDATE ai_action_proposals SET status = 'rejected', decided_at = now() + interval '1 second', decided_by_user_id = ${ana} WHERE id = ${refused.id}`,
+        sql`UPDATE ai_action_proposals SET status = 'rejected', decided_at = now(), decided_by_user_id = ${ana} WHERE id = ${refused.id}`,
       ),
     );
     expect(await counts()).toMatchObject({ doneSince30: 3, correctInARow: 0 });

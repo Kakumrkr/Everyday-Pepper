@@ -310,7 +310,6 @@ function cardProps(
       before: action.before,
       after: action.after,
       emails: action.emails,
-      recipients: action.recipients ?? [],
       undoUntil: action.undoUntil,
       canDecide: false,
       canUndo: action.canUndo,

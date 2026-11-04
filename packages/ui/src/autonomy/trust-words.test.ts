@@ -31,12 +31,18 @@ describe('standingRules (S53)', () => {
       '2026-11-04',
     ).map((line) => line.text);
     expect(lines).toEqual([
-      'I ask you before new bookings, moves, cancellations, rebooking nudges and waitlist offers.',
+      'I ask you before new bookings, moves, cancellations, rebooking nudges, waitlist offers and messages to several clients.',
       'Accepting booking-page requests, blocking time, client notes, to-dos and waitlist changes: I do them and tell you, with Undo.',
       'Confirmation emails: I just do them and list them in Activity.',
       'A message to more than 10 clients, and a new booking rule, always wait for your OK.',
       'Clients book at least 2 hours ahead, up to 90 days ahead.',
     ]);
+  });
+
+  it('reads back a bulk level the owner chose', () => {
+    const told = { ...defaults, levels: { ...defaults.levels, 'message.bulk': 'notify' as const } };
+    const lines = standingRules(told, null, '2026-11-04').map((line) => line.text);
+    expect(lines[1]).toMatch(/messages to several clients: I do them and tell you/);
   });
 
   it('says only the switch while asking first for everything', () => {

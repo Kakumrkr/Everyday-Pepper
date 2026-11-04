@@ -444,10 +444,11 @@ const TrackRowSchema = z.object({
 
 /**
  * Per action, how many times the AI did it since `since30`, and how many it did since `since90`
- * after its last mistake: an execution undone as "wrong", or a proposal a member turned down
- * (S53's earned trust). Executions undone as "wrong" fall before their own undo, so they never
- * count as correct. Under `withMember`, staff count only their own records. Actions with no
- * executions since `since90` have no row.
+ * after its last mistake: an execution later undone as "wrong", or a proposal a member turned
+ * down (S53's earned trust). Every time compared is one the database stamped (`created_at`), so
+ * the run is never skewed by the domain clock: it restarts after the action that was wrong, or
+ * the request that was turned down. Under `withMember`, staff count only their own records.
+ * Actions with no executions since `since90` have no row.
  */
 export async function actionTrackRecord(
   tx: TenantTx,
@@ -458,17 +459,20 @@ export async function actionTrackRecord(
   const { rows } = await tx.execute(sql`
     WITH mistakes AS (
       SELECT m.action, max(m.at) AS at FROM (
-        SELECT action, undone_at AS at FROM ai_action_executions
-          WHERE undo_reason = 'wrong' AND undone_at IS NOT NULL
+        SELECT action, created_at AS at FROM ai_action_executions
+          WHERE undo_reason = 'wrong' AND created_at >= ${since90.toISOString()}::timestamptz
         UNION ALL
-        SELECT action, decided_at AS at FROM ai_action_proposals
-          WHERE status = 'rejected' AND decided_at IS NOT NULL
+        SELECT action, created_at AS at FROM ai_action_proposals
+          WHERE status = 'rejected' AND created_at >= ${since90.toISOString()}::timestamptz
       ) m
       GROUP BY m.action
     )
     SELECT e.action,
       count(*) FILTER (WHERE e.created_at >= ${since30.toISOString()}::timestamptz) AS done_30,
-      count(*) FILTER (WHERE mistakes.at IS NULL OR e.created_at > mistakes.at) AS correct
+      count(*) FILTER (
+        WHERE (mistakes.at IS NULL OR e.created_at > mistakes.at)
+          AND e.undo_reason IS DISTINCT FROM 'wrong'
+      ) AS correct
     FROM ai_action_executions e
     LEFT JOIN mistakes ON mistakes.action = e.action
     WHERE e.created_at >= ${since90.toISOString()}::timestamptz

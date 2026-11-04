@@ -62,8 +62,6 @@ import { addUsage, emptyUsage, type Transcript } from './transcript.js';
 // business looks like afterwards, not only by what the model said. Only the model is swapped:
 // a cassette, a fake, or (S27) the real one.
 
-/** Runs one case: seeds its world, asks `providerFor` for the model, returns what happened. */
-
 /**
  * The eval business's autonomy (S53, decision D-2): moves "do it and tell me", as it was set up
  * before moves started asking by default (ADR-0055), so the recorded answers stay valid until the
@@ -71,6 +69,7 @@ import { addUsage, emptyUsage, type Transcript } from './transcript.js';
  */
 export const EVAL_WORLD_AUTONOMY: AutonomySettings = { 'booking.move': 'notify' };
 
+/** Runs one case: seeds its world, asks `providerFor` for the model, returns what happened. */
 export type EvalSubject = (
   evalCase: EvalCase,
   providerFor: (world: EvalWorld) => LlmProvider,

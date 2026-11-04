@@ -99,7 +99,7 @@ export const AiEmailViewSchema = z.strictObject({
 export type AiEmailView = z.infer<typeof AiEmailViewSchema>;
 
 /**
- * Where a card's emails go (S53): each client's address, so the card says who gets the email
+ * Where a proposal's emails would go (S53): each client's address, so the card says who gets the email
  * ("Emails Ana (ana@example.com) the new time"). Read live and only for clients the viewer may
  * see; a client without an address, deleted or out of the viewer's reach is left out.
  */
@@ -180,8 +180,6 @@ export const AiActionViewSchema = z.strictObject({
   before: SafeSideSchema.nullable(),
   after: SafeSideSchema.nullable(),
   emails: z.array(AiEmailViewSchema).max(100),
-  /** The addresses of `emails`' clients (S53). */
-  recipients: z.array(AiEmailRecipientSchema).max(20).optional(),
   createdAt: UtcDateTimeSchema,
   undoUntil: UtcDateTimeSchema.nullable(),
   /** The window is open, it is done, and the viewer may undo it. */

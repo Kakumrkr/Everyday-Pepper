@@ -41,7 +41,7 @@ Per tenant, per `actionType`: `ask` / `notify` / `auto`, bounded by tier rules a
 **Trust controls (S53, [ADR-0055](../adr/0055-trust-controls-presets-standing-rules-earned-trust.md)).**
 - **Presets.** Careful, Balanced and Hands-off are expanded into levels (`presetLevels`). `PUT /v1/autonomy {preset}` saves them, and `GET` names the preset the levels match (`null`: your own mix).
 - **Standing rules** are the dial and the booking rules read back as sentences on the page.
-- **Moves.** A move asks by default (it emails the client), and its card names the address (`recipients` on the proposal and receipt views).
+- **Moves.** A move asks by default (it emails the client), and its card names the address (`recipients` on the proposal view).
 - **Track record.** `GET /v1/autonomy/track-record` gives each action's 30-day count and its run since the last mistake (an Undo marked "wrong", or a card turned down). After 20 in a row, owners and managers are offered one step more room.
 
 ## Action records (S23, [ADR-0028](../adr/0028-trust-layer-proposals-executions-and-autonomy.md))

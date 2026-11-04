@@ -51,6 +51,7 @@ export default async function AutonomyPage() {
         canChange={current.permissions.includes('autonomy.manage')}
         trackRecord={trackRecord}
         rules={rules}
+        canChangeRules={current.permissions.includes('rules.manage')}
         today={localDay(new Date().toISOString(), current.business.timeZone)}
       />
     </div>

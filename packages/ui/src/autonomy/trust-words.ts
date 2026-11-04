@@ -27,9 +27,9 @@ export const PRESET_LABEL: Record<AutonomyPreset, string> = {
 export const PRESET_HELP: Record<AutonomyPreset, string> = {
   careful: 'I ask before every change and every email.',
   balanced:
-    'I ask before anything a client sees, and do small changes inside Pepper and tell you.',
+    'I ask before new bookings, moves, cancellations and client nudges. Smaller changes I do and tell you; confirmations go on their own.',
   hands_off:
-    'I do changes on my own, and tell you when I email clients. Big sends and new rules still wait for you.',
+    'I make changes and send their emails on my own, and tell you when I send nudges and offers. Big sends and new rules still wait for you.',
 };
 
 /** Each action in a list of standing rules ("I ask you before moves and cancellations"). */
@@ -46,7 +46,7 @@ export const ACTION_NOUN: Record<AutonomyAction, string> = {
   'message.confirmation': 'confirmation emails',
   'message.rebooking_nudge': 'rebooking nudges',
   'message.waitlist_offer': 'waitlist offers',
-  'message.bulk': 'messages to many clients',
+  'message.bulk': 'messages to several clients',
 };
 
 /** One standing rule and where it is changed. */
@@ -101,9 +101,9 @@ export function standingRules(
   today: LocalDate,
 ): StandingRule[] {
   const lines: StandingRule[] = [];
-  // The two that never change are said once, on their own line.
+  // A new booking rule never changes: it is said once, on its own line with the bulk lock.
   const dialed = AutonomyActionSchema.options.filter(
-    (action) => action !== 'message.bulk' && !('askOnly' in AUTONOMY_ACTIONS[action]),
+    (action) => !('askOnly' in AUTONOMY_ACTIONS[action]),
   );
   if (autonomy.askFirst) {
     lines.push({

@@ -209,7 +209,10 @@ export class AiActionsService {
     return getTrackRecord(this.db, actorOf(tenant), { ...deps.autonomy, clock: this.clock });
   }
 
-  /** Each emailed client's address the viewer may see (S53: the card names who gets it). */
+  /**
+   * Each emailed client's address the viewer may see (S53: a proposal's card names who would get
+   * it). One read per card: proposals waiting for an OK are few.
+   */
   private async recipientsOf(
     actor: Actor,
     emails: readonly { clientId: string }[],
@@ -266,6 +269,7 @@ export class AiActionsService {
       actionMessages(this.db, actor, execution),
     ]);
     const forYou = execution.requestedByUserId === me || execution.onBehalfOfUserId === me;
+    // No address on a receipt: the client's address now may not be where the email went.
     const emails = emailsOf(execution, messages);
     const approvedByOther =
       execution.proposalId !== null &&
@@ -287,7 +291,6 @@ export class AiActionsService {
       before: sideOf(execution.before),
       after: sideOf(execution.after),
       emails,
-      recipients: await this.recipientsOf(actor, emails),
       createdAt: execution.createdAt,
       undoUntil: execution.undoUntil,
       canUndo: open && (forYou || this.reachesAll(actor, execution.action)),

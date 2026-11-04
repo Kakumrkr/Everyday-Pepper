@@ -62,6 +62,7 @@ export function AutonomySettings({
   canChange,
   trackRecord,
   rules,
+  canChangeRules,
   today,
 }: {
   initial: AutonomyView;
@@ -70,6 +71,8 @@ export function AutonomySettings({
   trackRecord: AutonomyTrackRecord | null;
   /** `null`: the member may not read the booking rules, or they could not be read. */
   rules: BookingRulesResponse | null;
+  /** The member may change the booking rules: the link to them is shown. */
+  canChangeRules: boolean;
   /** The business's local date, for which blackouts are still ahead. */
   today: LocalDate;
 }) {
@@ -189,7 +192,7 @@ export function AutonomySettings({
             </li>
           ))}
         </ul>
-        {rules === null ? null : (
+        {rules === null || !canChangeRules ? null : (
           <Link
             href={ROUTES.rules}
             className={cx(buttonStyle({ variant: 'quiet', size: 'sm' }), 'self-start -ml-3')}

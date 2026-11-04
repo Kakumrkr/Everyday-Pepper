@@ -1403,8 +1403,7 @@ describe('presets and the track record (S53)', () => {
     sam = { context: { tenantId: id, userId: samId, role: 'staff' } };
   });
 
-  // The database stamps receipts with its own time, and undos and rejections with the clock's:
-  // the real clock here, as in the app.
+  // The run is measured in the database's own times; the windows by the clock (real here).
   /** One to-do the AI adds for `actor`. */
   async function addTodo(actor: Actor) {
     const result = await requestAction(
@@ -1428,6 +1427,9 @@ describe('presets and the track record (S53)', () => {
   };
 
   it('a preset sets every action; balanced goes back to the defaults', async () => {
+    await changeAutonomy(db, lena, { askFirst: true }, defaults);
+    // A preset is a whole choice: "Ask me first for everything" goes off with it.
+    expect((await changeAutonomy(db, lena, { preset: 'careful' }, defaults)).askFirst).toBe(false);
     const careful = await changeAutonomy(db, lena, { preset: 'careful' }, defaults);
     expect(new Set(Object.values(careful.levels))).toEqual(new Set(['ask']));
     expect(autonomyPresetOf(careful, {})).toBe('careful');
@@ -1460,7 +1462,7 @@ describe('presets and the track record (S53)', () => {
     // Staff see their own records only.
     expect(await record(sam)).toMatchObject({ doneLast30Days: 1, correctInARow: 1 });
 
-    // An Undo marked "wrong" is a mistake: the run starts again after it.
+    // An Undo marked "wrong" is a mistake: the run starts again after the wrong one.
     await undoAction(
       db,
       lena,
@@ -1469,7 +1471,7 @@ describe('presets and the track record (S53)', () => {
       { clock: realTime },
     );
     await addTodo(lena);
-    expect(await record(lena)).toMatchObject({ doneLast30Days: 4, correctInARow: 1 });
+    expect(await record(lena)).toMatchObject({ doneLast30Days: 4, correctInARow: 3 });
 
     // A card turned down is a mistake too.
     await changeAutonomy(db, lena, { levels: { 'task.create': 'ask' } }, defaults);
