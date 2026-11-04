@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  AccountBeingDeletedError,
+  AccountOwnsBusinessError,
   AlreadyAMemberError,
+  DeletionNameMismatchError,
   ClientNotFoundError,
   DraftRefusedError,
   FeedItemNotFoundError,
@@ -20,6 +23,17 @@ import {
 describe('domain errors', () => {
   it.each([
     [new ForbiddenError(), 'ForbiddenError', 'Not allowed'],
+    [
+      new DeletionNameMismatchError(),
+      'DeletionNameMismatchError',
+      'The typed name is not the business’s',
+    ],
+    [
+      new AccountOwnsBusinessError(),
+      'AccountOwnsBusinessError',
+      'The account is the only owner of a business',
+    ],
+    [new AccountBeingDeletedError(), 'AccountBeingDeletedError', 'The account is being deleted'],
     [new ForbiddenError('members.invite'), 'ForbiddenError', 'Not allowed: members.invite'],
     [new MemberNotFoundError(), 'MemberNotFoundError', 'No such member in this business'],
     [new LastOwnerError(), 'LastOwnerError', 'A business needs at least one owner'],
