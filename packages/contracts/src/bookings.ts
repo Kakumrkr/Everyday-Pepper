@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
-import { ClientContactSchema, ClientIdSchema, RecordSourceSchema } from './clients.js';
+import {
+  ClientContactSchema,
+  ClientIdSchema,
+  RecordSourceSchema,
+  WalkInClientSchema,
+} from './clients.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // Bookings (ADR-0017). A booking is one client's appointment for one service with one staff
@@ -79,6 +84,20 @@ export const BookingInputSchema = z
   })
   .strict();
 export type BookingInput = z.input<typeof BookingInputSchema>;
+
+/**
+ * A walk-in's booking (`POST /v1/bookings/walk-in`, S50.2, ADR-0052): the booking's fields with
+ * the new `client` instead of `clientId`. The client and the booking are created together or
+ * not at all; a client with the same email (or, without one, the one client with the phone)
+ * is booked instead of adding a second.
+ */
+export const WalkInBookingInputSchema = BookingInputSchema.omit({
+  clientId: true,
+  clientContact: true,
+})
+  .extend({ client: WalkInClientSchema })
+  .strict();
+export type WalkInBookingInput = z.input<typeof WalkInBookingInputSchema>;
 
 /** `PATCH /v1/bookings/:id`: move it (same service and client), or change its status. */
 export const BookingChangeSchema = z.union([

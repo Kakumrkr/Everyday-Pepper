@@ -11,6 +11,8 @@ import {
   type Service,
   type StaffMember,
   type WaitlistWindow,
+  type WalkInClient,
+  WalkInClientSchema,
 } from '@pepper/contracts';
 import { dayRange } from './calendar';
 
@@ -185,4 +187,64 @@ export function normalizeContact(text: string): string {
   if (/^\d{10}$/.test(digits)) return `+1${digits}`;
   if (/^1\d{10}$/.test(digits)) return `+${digits}`;
   return digits;
+}
+
+/** A walk-in staff add with their booking (S50.2, ADR-0052): created when the booking is. */
+export type WalkIn = WalkInClient;
+
+/**
+ * What is wrong with a walk-in typed on the Book sheet, said so it can be fixed there (before
+ * Book), or `null` when the api will take it.
+ */
+export function walkInProblem(walkIn: WalkIn): string | null {
+  const parsed = WalkInClientSchema.safeParse(walkIn);
+  if (parsed.success) return null;
+  const field = parsed.error.issues[0]?.path[0];
+  if (field === 'phone')
+    return 'Type the phone as you’d dial it, e.g. (555) 123-4567, or leave it empty.';
+  if (field === 'email') return 'Check the email address, or leave it empty.';
+  return 'Type the client’s name.';
+}
+
+/**
+ * A walk-in from what was typed on the Book sheet: the name trimmed, an empty email or phone
+ * left out, a phone in E.164 (`normalizeContact`).
+ */
+export function walkInFrom(typed: { name: string; email: string; phone: string }): WalkIn {
+  const email = typed.email.trim();
+  const phone = typed.phone.trim();
+  return {
+    name: typed.name.trim(),
+    email: email === '' ? null : email,
+    phone: phone === '' ? null : normalizeContact(phone),
+  };
+}
+
+/**
+ * What a contact typed on the Book sheet fills in on "New client" when no client has it: an
+ * email goes in the email field, anything else in the phone field.
+ */
+export function walkInPrefill(contact: string): { email: string; phone: string } {
+  return contact.includes('@') ? { email: contact, phone: '' } : { email: '', phone: contact };
+}
+
+/**
+ * The request that books the chosen client: `POST /v1/bookings` for a client who exists (with
+ * the exact contact staff found them by, ADR-0020), `POST /v1/bookings/walk-in` with the new
+ * client otherwise.
+ */
+export function bookingRequest(
+  who: { clientId: string; contact?: string | undefined } | { walkIn: WalkIn },
+  slot: Record<string, unknown>,
+): { path: string; body: Record<string, unknown> } {
+  if ('walkIn' in who)
+    return { path: '/v1/bookings/walk-in', body: { ...slot, client: who.walkIn } };
+  return {
+    path: '/v1/bookings',
+    body: {
+      clientId: who.clientId,
+      ...(who.contact !== undefined && { clientContact: who.contact }),
+      ...slot,
+    },
+  };
 }

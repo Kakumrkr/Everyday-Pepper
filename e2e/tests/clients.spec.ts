@@ -1,10 +1,16 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import {
+  addDays,
   AvailabilityResponseSchema,
   BookingSchema,
   ClientSchema,
   ClientsResponseSchema,
+  CurrentBusinessResponseSchema,
+  formatDate,
+  fromZoned,
   ServicesResponseSchema,
+  StaffResponseSchema,
+  toZoned,
 } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import { callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js';
@@ -60,7 +66,38 @@ async function bookSoon(page: Page, clientId: string): Promise<void> {
   );
 }
 
-test('clients (AC-W1-30…32): an owner edits tags and birthday, merges a duplicate and deletes a client', async ({
+/** Books the client yesterday at 11:00 on the business's clock (a past visit); its date. */
+async function bookYesterday(page: Page, clientId: string): Promise<string> {
+  const { timeZone } = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  ).business;
+  const { services } = ServicesResponseSchema.parse(
+    await (await page.request.get('/v1/services')).json(),
+  );
+  const { staff } = StaffResponseSchema.parse(await (await page.request.get('/v1/staff')).json());
+  const service = services.find((each) => each.active);
+  if (service === undefined) throw new Error('No service to book');
+  const member = staff.find((each) => each.active && each.serviceIds.includes(service.id));
+  if (member === undefined) throw new Error('No one to book');
+  const yesterday = addDays(toZoned(timeZone, Date.now()), -1);
+  await callApi(
+    page,
+    'POST',
+    '/v1/bookings',
+    {
+      clientId,
+      serviceId: service.id,
+      staffMemberId: member.id,
+      startsAt: new Date(fromZoned(timeZone, yesterday, 11 * 60)).toISOString(),
+      override: true,
+      notifyClient: false,
+    },
+    BookingSchema,
+  );
+  return formatDate(yesterday);
+}
+
+test('clients (AC-W1-30…32, AC-W1-36): an owner edits tags and birthday, merges a duplicate and deletes a client, whose past visit then reads "Deleted client"', async ({
   page,
 }) => {
   test.setTimeout(180_000);
@@ -143,6 +180,7 @@ test('clients (AC-W1-30…32): an owner edits tags and birthday, merges a duplic
     { name: 'Zoe Quill', email: 'zoe.q@example.test' },
     ClientSchema,
   );
+  const visitDay = await bookYesterday(page, zoe.id);
   await page.goto(`/clients/${zoe.id}`);
   await (await hydrated(page.getByRole('button', { name: 'Delete client' }))).click();
   const confirm = page.getByRole('dialog', { name: 'Delete Zoe Quill?' });
@@ -157,4 +195,52 @@ test('clients (AC-W1-30…32): an owner edits tags and birthday, merges a duplic
   await expect(page.getByRole('list', { name: 'Clients' }).getByText('Zoe Quill')).toHaveCount(0);
   expect(await clientsNamed(page, 'Zoe')).toEqual([]);
   expect((await page.request.get(`/v1/clients/${zoe.id}`)).status()).toBe(404);
+
+  // AC-W1-36: her past visit stays on the calendar as "Deleted client", with no profile link.
+  await page.goto(`/calendar?date=${visitDay}`);
+  const visit = page.getByTestId('booking-block');
+  await expect(visit).toHaveAccessibleName(/with Deleted client$/);
+  await (await hydrated(visit)).click();
+  const sheet = page.getByRole('dialog', { name: 'Deleted client' });
+  await expect(sheet.getByTestId('booking-client')).toHaveText('Deleted client');
+  await expect(sheet.getByRole('link', { name: 'Deleted client' })).toHaveCount(0);
+});
+
+test('the Clients list shows 50 at a time with "Show more", and finds a client by part of their phone (AC-W1-35)', async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  await onboardOwner(page, { type: 'Barbershop' });
+  const names = Array.from(
+    { length: 55 },
+    (_, index) => `Client ${String(index + 1).padStart(2, '0')}`,
+  );
+  for (const [index, name] of names.entries()) {
+    await callApi(
+      page,
+      'POST',
+      '/v1/clients',
+      { name, ...(index === 52 && { phone: '+15550104321' }) },
+      ClientSchema,
+    );
+  }
+  await page.goto('/clients');
+  const rows = page.getByRole('list', { name: 'Clients' }).getByRole('listitem');
+  await expect(rows).toHaveCount(50);
+  await (await hydrated(page.getByRole('button', { name: 'Show more' }))).click();
+  await expect(rows).toHaveCount(55);
+  await expect(page.getByRole('button', { name: 'Show more' })).toHaveCount(0);
+  const shown = (await rows.locator('a').allTextContents()).map(
+    (text) => /Client \d\d/.exec(text)?.[0],
+  );
+  expect(shown).toEqual(names);
+
+  await page
+    .getByRole('searchbox', { name: 'Search clients by name, email or phone' })
+    .fill('(555) 010-4321');
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText('Client 53');
+  // The search and the cursor stay out of the address.
+  expect(page.url()).not.toMatch(/search|after|555/);
 });

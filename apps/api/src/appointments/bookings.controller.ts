@@ -10,6 +10,7 @@ import {
   WaitlistEntryIdSchema,
   WaitlistEntryInputSchema,
   WaitlistQuerySchema,
+  WalkInBookingInputSchema,
   type AvailabilityResponse,
   type Booking,
   type BookingsResponse,
@@ -75,6 +76,19 @@ export class BookingsController {
   create(@CurrentTenant() tenant: TenantContext, @Body() body: unknown): Promise<Booking> {
     const input = parseBody(BookingInputSchema, body);
     return answering(() => this.bookings.createBooking(tenant, input));
+  }
+
+  /**
+   * A walk-in's booking (S50.2, ADR-0052): `client` (a name, an email or phone when given)
+   * instead of `clientId`; the client and the booking are added together or not at all, and a
+   * client with that email (or, without one, the one client with that phone) is booked instead
+   * of a second. 201 the booking; the same refusals as `POST /v1/bookings`.
+   */
+  @Post('bookings/walk-in')
+  @RequirePermission('bookings.manage')
+  createWalkIn(@CurrentTenant() tenant: TenantContext, @Body() body: unknown): Promise<Booking> {
+    const input = parseBody(WalkInBookingInputSchema, body);
+    return answering(() => this.bookings.createWalkInBooking(tenant, input));
   }
 
   /**

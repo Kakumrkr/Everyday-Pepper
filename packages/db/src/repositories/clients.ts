@@ -1,6 +1,7 @@
 import {
   ClientBirthdaySchema,
   ClientContactSchema,
+  ClientIdSchema,
   ClientInputSchema,
   MAX_CLIENT_TAGS,
   RecordSourceSchema,
@@ -11,9 +12,10 @@ import {
   type ClientRecords,
   type RecordSource,
 } from '@pepper/contracts';
-import { and, asc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
+import { and, asc, eq, ilike, inArray, isNull, like, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { ClientEmailTakenError, isUniqueViolation } from '../errors.js';
+import { newId } from '../ids.js';
 import { clients, importRows, type ClientRow } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
 import { requestInsightRun } from './feed.js';
@@ -63,6 +65,31 @@ export async function insertClient(
     const [row] = await tx.insert(clients).values(values).returning();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
     return row!;
+  } catch (error) {
+    if (isUniqueViolation(error, 'clients_tenant_email_unique')) {
+      throw new ClientEmailTakenError({ cause: error });
+    }
+    throw error;
+  }
+}
+
+/**
+ * Adds a walk-in client for a staff member (S50.2, ADR-0052) through `create_walk_in_client`:
+ * staff may not write clients themselves, so the database adds this one only for a staff
+ * member of the business, and the commit fails unless the same transaction books them. Returns
+ * the new client's id: the staff member sees the client only once the booking is written.
+ * Throws `ClientEmailTakenError` when the business has a client with this email.
+ */
+export async function insertWalkInClient(
+  tx: TenantTx,
+  fields: Pick<ClientFields, 'name' | 'email' | 'phone'>,
+): Promise<ClientId> {
+  const { name, email, phone } = ClientInputSchema.parse(fields);
+  try {
+    const result = await tx.execute<{ id: string }>(
+      sql`SELECT create_walk_in_client(${newId()}::uuid, ${name}, ${email}, ${phone}) AS id`,
+    );
+    return ClientIdSchema.parse(result.rows[0]?.id);
   } catch (error) {
     if (isUniqueViolation(error, 'clients_tenant_email_unique')) {
       throw new ClientEmailTakenError({ cause: error });
@@ -163,9 +190,15 @@ export async function findClientsByContact(
     .limit(MAX_CONTACT_MATCHES);
 }
 
+/** The fewest digits a search needs before it also matches phone numbers (S50.2). */
+export const MIN_PHONE_SEARCH_DIGITS = 3;
+
 /**
  * Clients by name, at most `limit`; with `search`, only those whose name or email contains it
- * (case-insensitive; `%` and `_` in it match themselves).
+ * (case-insensitive; `%` and `_` in it match themselves) or, when it looks like a phone
+ * number with at least `MIN_PHONE_SEARCH_DIGITS` digits, whose phone contains those digits; with
+ * `after`, those after that client in the same order (S50.2: the order is `lower(name), id`,
+ * so equal names neither repeat nor go missing between pages).
  */
 export async function listClients(
   tx: TenantTx,
@@ -179,16 +212,28 @@ export async function listClients(
      * only, so for staff the list is empty.
      */
     importBatchId?: string | undefined;
+    /** Continue after this client (the last one of the page before). */
+    after?: ClientId | undefined;
   },
 ): Promise<ClientRow[]> {
   const pattern =
     options.search === undefined ? undefined : `%${options.search.replace(/[\\%_]/g, '\\$&')}%`;
+  // Only a search that looks like a phone number (digits, spaces, + ( ) - .), so an email
+  // search such as "ana2024@" doesn't also list every phone with 2024 in it.
+  const phoneLike = options.search !== undefined && /^[+\d\s().-]+$/.test(options.search);
+  const digits = phoneLike ? (options.search?.replace(/\D/g, '') ?? '') : '';
+  const byPhone =
+    digits.length >= MIN_PHONE_SEARCH_DIGITS ? like(clients.phone, `%${digits}%`) : undefined;
   const bySearch =
     pattern === undefined
       ? undefined
       : options.namesOnly === true
         ? ilike(clients.name, pattern)
-        : or(ilike(clients.name, pattern), ilike(clients.email, pattern));
+        : or(ilike(clients.name, pattern), ilike(clients.email, pattern), byPhone);
+  const byCursor =
+    options.after === undefined
+      ? undefined
+      : sql`(lower(${clients.name}), ${clients.id}) > (SELECT lower(c.name), c.id FROM ${clients} c WHERE c.id = ${Id.parse(options.after)})`;
   const byImport =
     options.importBatchId === undefined
       ? undefined
@@ -207,9 +252,9 @@ export async function listClients(
   return tx
     .select()
     .from(clients)
-    .where(and(bySearch, byImport, notDeleted))
+    .where(and(bySearch, byImport, byCursor, notDeleted))
     .orderBy(asc(sql`lower(${clients.name})`), asc(clients.id))
-    .limit(z.number().int().min(1).max(200).parse(options.limit));
+    .limit(z.number().int().min(1).max(201).parse(options.limit));
 }
 
 // Merging and deleting (S50, ADR-0051) ---------------------------------------------------------

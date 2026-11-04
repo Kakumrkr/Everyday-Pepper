@@ -428,6 +428,13 @@
       "when": 1793732001489,
       "tag": "0060_client_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1793737617682,
+      "tag": "0061_walk_in_clients",
+      "breakpoints": true
     }
   ]
 }

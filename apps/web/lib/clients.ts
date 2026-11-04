@@ -112,3 +112,23 @@ function listOf(parts: readonly string[]): string {
   if (parts.length <= 1) return parts.join('');
   return `${parts.slice(0, -1).join(', ')} and ${parts.at(-1) ?? ''}`;
 }
+
+/** How many clients the Clients list shows at a time (S50.2). */
+export const CLIENTS_PAGE = 50;
+
+/**
+ * The address of a page of the Clients list (`GET /v1/clients`): by name, `CLIENTS_PAGE` at a
+ * time, with the search, the import filter and the cursor (`after`, a client id) when given.
+ */
+export function clientsPath(options: {
+  search?: string | undefined;
+  importId?: string | null | undefined;
+  after?: string | null | undefined;
+}): string {
+  const query = new URLSearchParams({ limit: String(CLIENTS_PAGE) });
+  if (options.search !== undefined && options.search !== '') query.set('search', options.search);
+  const { importId = null, after = null } = options;
+  if (importId !== null) query.set('import', importId);
+  if (after !== null) query.set('after', after);
+  return `/v1/clients?${query.toString()}`;
+}

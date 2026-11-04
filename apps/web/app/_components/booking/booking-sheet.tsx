@@ -7,6 +7,7 @@ import {
   type BookingStatus,
 } from '@pepper/contracts';
 import { Button, cx, DetailTable, Select, Sheet, SheetFooter } from '@pepper/ui';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import {
@@ -18,6 +19,7 @@ import {
   timeLabel,
   type BookingSetup,
 } from '../../../lib/booking';
+import { ROUTES } from '../../../lib/account';
 import { timeRange } from '../../../lib/calendar';
 import { sendJson } from '../../../lib/client-api';
 import { VisitNotes } from '../memory/visit-notes';
@@ -30,6 +32,8 @@ import { TimePicker } from './time-picker';
 export interface BookingSummary {
   id: string;
   client: string;
+  /** The client's profile to open; `null` for a deleted client (S50.2, AC-W1-36). */
+  clientId: string | null;
   service: string;
   serviceId: string;
   staffMemberId: string;
@@ -138,9 +142,25 @@ function BookingDetails({
     <DetailTable
       rows={[
         {
+          label: 'Client',
+          value:
+            booking.clientId === null ? (
+              <span data-testid="booking-client">{booking.client}</span>
+            ) : (
+              <Link
+                href={`${ROUTES.clients}/${encodeURIComponent(booking.clientId)}`}
+                // A tap target of its own, not a link in a sentence (D3: at least 44 px).
+                className="inline-flex min-h-11 items-center font-semibold text-brand underline underline-offset-2"
+                data-testid="booking-client"
+              >
+                {booking.client}
+              </Link>
+            ),
+        },
+        {
           label: 'When',
           value: (
-            <span className="tabular-nums">
+            <span className="tabular-nums" data-testid="booking-when">
               {dateTimeLabel(timeZone, booking.startsAt)} – {timeLabel(timeZone, booking.endsAt)}
             </span>
           ),

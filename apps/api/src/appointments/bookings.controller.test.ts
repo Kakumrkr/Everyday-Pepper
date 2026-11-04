@@ -114,6 +114,7 @@ const bookings = {
   bookings: vi.fn(() => Promise.resolve([BOOKING])),
   booking: vi.fn((): Promise<Booking> => Promise.resolve(BOOKING)),
   createBooking: vi.fn((): Promise<Booking> => Promise.resolve(BOOKING)),
+  createWalkInBooking: vi.fn((): Promise<Booking> => Promise.resolve(BOOKING)),
   changeBooking: vi.fn((): Promise<Booking> => Promise.resolve(BOOKING)),
   busy: vi.fn(() => Promise.resolve([BUSY])),
   availability: vi.fn(() => Promise.resolve([SLOT])),
@@ -315,6 +316,35 @@ describe('booking', () => {
       await send('post', '/v1/bookings', body).expect(400);
     }
     expect(bookings.createBooking).not.toHaveBeenCalled();
+  });
+
+  describe('a walk-in (S50.2, ADR-0052)', () => {
+    const slot = { serviceId: SERVICE_ID, staffMemberId: STAFF_ID, startsAt: newBooking.startsAt };
+
+    it.each<MembershipRole>(['owner', 'staff'])('a(n) %s books one (201)', async (r) => {
+      role = r;
+      const body = { ...slot, client: { name: 'Walk In', phone: '+15550009999' } };
+      expect((await send('post', '/v1/bookings/walk-in', body).expect(201)).body).toEqual(BOOKING);
+      expect(bookings.createWalkInBooking).toHaveBeenCalledWith(context(), {
+        ...slot,
+        client: { name: 'Walk In', email: null, phone: '+15550009999' },
+        override: false,
+        notifyClient: true,
+      });
+    });
+
+    it('409 slot_unavailable; 400 for a client id, no name or a bad phone', async () => {
+      bookings.createWalkInBooking.mockRejectedValueOnce(new SlotUnavailableError([SLOT]));
+      await send('post', '/v1/bookings/walk-in', { ...slot, client: { name: 'Walk' } }).expect(409);
+      for (const body of [
+        { ...newBooking, client: { name: 'Walk' } },
+        { ...slot, client: { name: ' ' } },
+        { ...slot, client: { name: 'Walk', phone: '555-1234' } },
+      ]) {
+        await send('post', '/v1/bookings/walk-in', body).expect(400);
+      }
+      expect(bookings.createWalkInBooking).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('moves or changes the status with PATCH', async () => {

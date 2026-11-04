@@ -10,6 +10,7 @@ import {
   type TemplateId,
   type TenantId,
   type UserId,
+  type WalkInBookingInput,
 } from '@pepper/contracts';
 import {
   ClientHasUpcomingVisitsError,
@@ -21,6 +22,7 @@ import {
   ForbiddenError,
   getClientRecords,
   mergeClients,
+  clientNames,
   getClient,
   listClients,
   lookUpClients,
@@ -55,6 +57,7 @@ import { findAvailability, type TemplateRuleDefaultsOf } from './services/availa
 import {
   changeBooking,
   createBooking,
+  createWalkInBooking,
   getBooking,
   listBookings,
   listBusyTimes,
@@ -694,6 +697,109 @@ describe('clients', () => {
   });
 });
 
+describe('walk-ins (S50.2, ADR-0052)', () => {
+  const walkIn = (
+    b: Business,
+    actor: Actor,
+    client: { name: string; email?: string; phone?: string },
+    extra: Partial<Pick<WalkInBookingInput, 'startsAt' | 'staffMemberId' | 'idempotencyKey'>> = {},
+  ) =>
+    createWalkInBooking(
+      db,
+      actor,
+      {
+        serviceId: b.service.id,
+        staffMemberId: b.jess.id,
+        startsAt: tue('10:00'),
+        ...extra,
+        client,
+      },
+      { clock: b.clock },
+    );
+  const names = async (b: Business) => (await listClients(db, b.owner)).map((c) => c.name);
+
+  it('staff book a walk-in for themselves; the client is theirs, not a colleague’s', async () => {
+    const b = await newBusiness();
+    const booking = await walkIn(b, b.staff, { name: 'Walk In', phone: '+15550009999' });
+    expect(booking).toMatchObject({ staffMemberId: b.jess.id, status: 'confirmed' });
+    expect(await getClient(db, b.staff, booking.clientId)).toMatchObject({
+      name: 'Walk In',
+      phone: '+15550009999',
+      source: 'team',
+    });
+    await expect(getClient(db, b.colleague, booking.clientId)).rejects.toBeInstanceOf(
+      ClientNotFoundError,
+    );
+    expect(await clientNames(db, b.staff, [booking.clientId, b.client.id])).toEqual([
+      { id: booking.clientId, name: 'Walk In', deleted: false },
+    ]);
+    expect(await clientNames(db, b.colleague, [booking.clientId])).toEqual([]);
+    expect(await names(b)).toEqual(['Maria Lopez', 'Walk In']);
+    const audit = await auditOf(b.tenantId);
+    expect(
+      audit.find((e) => e.action === 'client.created' && e.entity.id === booking.clientId),
+    ).toMatchObject({ after: { source: 'team', walkIn: true } });
+  });
+
+  it('adds no client when the time is taken or the staff member isn’t theirs', async () => {
+    const b = await newBusiness();
+    await book(b, b.owner, request(b, tue('10:00')));
+    await refusal(walkIn(b, b.staff, { name: 'Too Late' }));
+    await expect(
+      walkIn(b, b.staff, { name: 'Not Mine' }, { staffMemberId: b.marco.id }),
+    ).rejects.toThrow();
+    expect(await names(b)).toEqual(['Maria Lopez']);
+  });
+
+  it('books the client with the same email, or the only one with the phone, instead of a second', async () => {
+    const b = await newBusiness();
+    const byEmail = await walkIn(b, b.staff, { name: 'M. Lopez', email: 'MARIA@example.test' });
+    expect(byEmail.clientId).toBe(b.client.id);
+    expect((await getClient(db, b.staff, b.client.id)).name).toBe('Maria Lopez');
+    const dee = await createClient(db, b.owner, { name: 'Dee', phone: '+15550001234' });
+    const byPhone = await walkIn(
+      b,
+      b.staff,
+      { name: 'Dee H', phone: '+15550001234' },
+      {
+        startsAt: tue('12:00'),
+      },
+    );
+    expect(byPhone.clientId).toBe(dee.id);
+    // A phone two clients share (a family) matches neither: a new client.
+    await createClient(db, b.owner, { name: 'Dee Junior', phone: '+15550001234' });
+    const shared = await walkIn(
+      b,
+      b.staff,
+      { name: 'Dee Senior', phone: '+15550001234' },
+      {
+        startsAt: tue('14:00'),
+      },
+    );
+    expect([b.client.id, dee.id]).not.toContain(shared.clientId);
+    expect(await names(b)).toEqual(['Dee', 'Dee Junior', 'Dee Senior', 'Maria Lopez']);
+    const created = (await auditOf(b.tenantId)).filter(
+      (e) => e.action === 'client.created' && 'walkIn' in e.after,
+    );
+    expect(created).toHaveLength(1);
+  });
+
+  it('a retry with the same key returns the first booking and adds no second client', async () => {
+    const b = await newBusiness();
+    const key = 'walk-in-retry-1';
+    const first = await walkIn(b, b.staff, { name: 'Retry Walk' }, { idempotencyKey: key });
+    const again = await walkIn(b, b.staff, { name: 'Retry Walk' }, { idempotencyKey: key });
+    expect(again.id).toBe(first.id);
+    expect(await names(b)).toEqual(['Maria Lopez', 'Retry Walk']);
+  });
+
+  it('owners book a walk-in with anyone', async () => {
+    const b = await newBusiness();
+    const booking = await walkIn(b, b.owner, { name: 'Owner Walk' }, { staffMemberId: b.jess.id });
+    expect((await getClient(db, b.owner, booking.clientId)).name).toBe('Owner Walk');
+  });
+});
+
 describe('merging and deleting clients (S50, ADR-0051)', () => {
   it('owners and managers merge two clients; the kept one has both histories; audited with counts', async () => {
     const b = await newBusiness();
@@ -784,6 +890,10 @@ describe('merging and deleting clients (S50, ADR-0051)', () => {
     await expect(getClient(db, b.owner, b.client.id)).rejects.toBeInstanceOf(ClientNotFoundError);
     expect(await listClients(db, b.owner)).toEqual([]);
     expect(await lookUpClients(db, b.owner, { contact: 'maria@example.test' })).toEqual([]);
+    // Their visits still name them, as "Deleted client" (S50.2, AC-W1-36).
+    expect(await clientNames(db, b.owner, [b.client.id])).toEqual([
+      { id: b.client.id, name: 'Deleted client', deleted: true },
+    ]);
     await expect(book(b, b.owner, request(b, tue('13:00')))).rejects.toBeInstanceOf(
       ClientNotFoundError,
     );

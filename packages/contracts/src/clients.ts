@@ -118,6 +118,20 @@ export const ClientInputSchema = z
 export type ClientInput = z.input<typeof ClientInputSchema>;
 export type ClientFields = z.output<typeof ClientInputSchema>;
 
+/**
+ * A walk-in client as staff add them with their booking (`POST /v1/bookings/walk-in`, S50.2,
+ * ADR-0052): a name, and an email or phone when the client gives one.
+ */
+export const WalkInClientSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+    email: ClientEmailSchema.nullable().default(null),
+    phone: PhoneSchema.nullable().default(null),
+  })
+  .strict();
+export type WalkInClientInput = z.input<typeof WalkInClientSchema>;
+export type WalkInClient = z.output<typeof WalkInClientSchema>;
+
 /** A client as the api returns them. */
 export const ClientSchema = z.object({
   id: ClientIdSchema,
@@ -134,20 +148,58 @@ export type Client = z.infer<typeof ClientSchema>;
 
 /**
  * Query of `GET /v1/clients`: by name, at most `limit`; with `search`, only clients whose name
- * or email contains it (case-insensitive); with `import`, only the clients that import created
- * (S49, the import result's "See your clients").
+ * or email contains it (case-insensitive) or whose phone contains its digits (at least 3, any
+ * format; S50.2); with `import`, only the clients that import created (S49, the import result's
+ * "See your clients"); with `after`, the page after that client (the `nextCursor` of the page
+ * before, S50.2: a client id, so no name, email or phone is ever in the address).
  */
 export const ClientsQuerySchema = z
   .object({
     search: z.string().trim().min(1).max(120).optional(),
     import: z.uuid().toLowerCase().optional(),
     limit: z.coerce.number().int().min(1).max(200).default(50),
+    after: ClientIdSchema.optional(),
   })
   .strict();
 export type ClientsQuery = z.input<typeof ClientsQuerySchema>;
 
 export const ClientsResponseSchema = z.object({ clients: z.array(ClientSchema) });
 export type ClientsResponse = z.infer<typeof ClientsResponseSchema>;
+
+/** `GET /v1/clients`: a page, and the cursor of the next one (`null` after the last). */
+export const ClientsPageSchema = ClientsResponseSchema.extend({
+  nextCursor: ClientIdSchema.nullable(),
+});
+export type ClientsPage = z.infer<typeof ClientsPageSchema>;
+
+/** The most client names one `GET /v1/clients/names` answers (an address stays short). */
+export const MAX_CLIENT_NAMES = 100;
+
+/**
+ * Query of `GET /v1/clients/names` (S50.2): the names on visits (the calendar, the booking
+ * sheet) in one request: `ids`, comma-separated client ids (never a name or contact).
+ */
+/** The clients one names request asks about (1 to `MAX_CLIENT_NAMES`). */
+export const ClientNameIdsSchema = z.array(ClientIdSchema).min(1).max(MAX_CLIENT_NAMES);
+
+export const ClientNamesRequestSchema = z
+  .object({
+    ids: z
+      .string()
+      .transform((text) => text.split(','))
+      .pipe(ClientNameIdsSchema),
+  })
+  .strict();
+export type ClientNamesRequest = z.input<typeof ClientNamesRequestSchema>;
+
+/**
+ * The names of the clients asked for that the member may see; a deleted client (ADR-0051) as
+ * "Deleted client" with `deleted`, so no link leads to their profile.
+ */
+export const ClientNamesResponseSchema = z.object({
+  names: z.array(z.object({ id: ClientIdSchema, name: z.string(), deleted: z.boolean() })),
+});
+export type ClientNamesResponse = z.infer<typeof ClientNamesResponseSchema>;
 
 /**
  * `POST /v1/clients/:clientId/merge` (S50, ADR-0051): `otherClientId` goes into the client of

@@ -286,7 +286,7 @@ test('import (AC-W1-27…29): an owner brings a visits file, finds its new clien
   await expect(page.getByTestId('clients-import-filter')).toContainText('New from your import');
   const list = page.getByRole('list', { name: 'Clients' });
   await expect(list.getByRole('link')).toHaveText([/Ana Ruiz/, /Ben Ito/, /Dee Park/]);
-  await page.getByLabel('Search clients by name or email').fill('Lin');
+  await page.getByLabel('Search clients by name, email or phone').fill('Lin');
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(page.getByText('No clients match “Lin”')).toBeVisible();
 

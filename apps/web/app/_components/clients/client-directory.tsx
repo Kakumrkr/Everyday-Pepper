@@ -1,8 +1,9 @@
 'use client';
 
-import { ClientsResponseSchema, type Client } from '@pepper/contracts';
+import { ClientsPageSchema, type Client } from '@pepper/contracts';
 import {
   Avatar,
+  Button,
   buttonStyle,
   cx,
   EmptyState,
@@ -14,16 +15,15 @@ import {
 import Link from 'next/link';
 import { useRef, useState, type SubmitEvent } from 'react';
 import { ROUTES } from '../../../lib/account';
+import { clientsPath } from '../../../lib/clients';
 import { fetchJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { Notice } from '../form-parts';
 import { kitLink } from '../kit-link';
 
-/** How many clients one search shows. */
-const SEARCH_LIMIT = 50;
-
 /**
- * The client list with a search by name or email (`GET /v1/clients`). The api decides whom
+ * The client list with a search by name, email or phone (`GET /v1/clients`), 50 at a time with
+ * "Show more" (S50.2, AC-W1-35: the api's cursor is a client id). The api decides whom
  * each role sees: owners and managers every client, staff the clients they have appointments
  * with (AC-W9-1). The search stays out of the page's URL. On the kit (S42): hairline rows with
  * initials, and an empty list that says what to do next (AC-X-7); `onAdd` opens the add sheet.
@@ -32,32 +32,46 @@ const SEARCH_LIMIT = 50;
  */
 export function ClientDirectory({
   initial,
+  initialCursor = null,
   staffView,
   onAdd,
   importId = null,
 }: {
   initial: Client[];
+  /** Where the page after `initial` starts; `null` when it is the last. */
+  initialCursor?: string | null;
   staffView: boolean;
   /** Owners and managers: opens "Add a client" (the empty list's action). */
   onAdd?: (() => void) | undefined;
   importId?: string | null;
 }) {
   const [clients, setClients] = useState(initial);
+  const [cursor, setCursor] = useState(initialCursor);
   const searchField = useRef<HTMLInputElement>(null);
   const [searched, setSearched] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<'search' | 'more' | null>(null);
 
-  async function search(text: string) {
-    const query = new URLSearchParams({ limit: String(SEARCH_LIMIT) });
-    if (text !== '') query.set('search', text);
-    if (importId !== null) query.set('import', importId);
-    setBusy(true);
-    const answer = await fetchJson(`/v1/clients?${query.toString()}`, ClientsResponseSchema);
-    setBusy(false);
+  // The latest request: an older answer (Show more, then a new search) is dropped.
+  const latest = useRef(0);
+
+  /** The first page of `text` (empty: everyone), or with `after` the next page of it. */
+  async function load(text: string, after: string | null = null) {
+    latest.current += 1;
+    const request = latest.current;
+    setBusy(after === null ? 'search' : 'more');
+    const answer = await fetchJson(
+      clientsPath({ search: text, importId, after }),
+      ClientsPageSchema,
+    );
+    if (request !== latest.current) return;
+    setBusy(null);
     setError(answer.ok ? null : answer.message);
     if (!answer.ok) return;
-    setClients(answer.data.clients);
+    setClients((shown) =>
+      after === null ? answer.data.clients : [...shown, ...answer.data.clients],
+    );
+    setCursor(answer.data.nextCursor);
     setSearched(text === '' ? null : text);
   }
 
@@ -79,11 +93,11 @@ export function ClientDirectory({
         className="flex gap-2"
         onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
           event.preventDefault();
-          void search(formText(event.currentTarget, 'search').trim());
+          void load(formText(event.currentTarget, 'search').trim());
         }}
       >
         <label className="sr-only" htmlFor="client-search">
-          Search clients by name or email
+          Search clients by name, email or phone
         </label>
         <input
           ref={searchField}
@@ -92,7 +106,7 @@ export function ClientDirectory({
           type="search"
           autoComplete="off"
           maxLength={120}
-          placeholder="Name or email"
+          placeholder="Name, email or phone"
           className={cx(fieldStyle, 'min-h-12 min-w-0 flex-1')}
         />
         <IconButton
@@ -100,7 +114,7 @@ export function ClientDirectory({
           icon="search"
           label="Search"
           variant="secondary"
-          disabled={busy}
+          disabled={busy !== null}
           className="size-12"
         />
       </form>
@@ -118,13 +132,13 @@ export function ClientDirectory({
             <EmptyState
               icon="search"
               title={`No clients match “${searched}”`}
-              body="Check the spelling, or search by email instead."
+              body="Check the spelling, or search by email or phone instead."
               action={{
                 label: importId === null ? 'Show everyone' : 'Clear the search',
                 onClick: () => {
                   // The field shows what the list shows: empty again.
                   if (searchField.current !== null) searchField.current.value = '';
-                  void search('');
+                  void load('');
                 },
               }}
             />
@@ -161,11 +175,18 @@ export function ClientDirectory({
           ))}
         </List>
       )}
-      {clients.length === SEARCH_LIMIT ? (
-        <p className="m-0 type-caption text-ink-2">
-          Showing the first {SEARCH_LIMIT}; search to narrow it.
-        </p>
-      ) : null}
+      {cursor === null || clients.length === 0 ? null : (
+        <Button
+          variant="secondary"
+          block
+          busy={busy === 'more'}
+          onClick={() => {
+            void load(searched ?? '', cursor);
+          }}
+        >
+          Show more
+        </Button>
+      )}
     </div>
   );
 }

@@ -3,9 +3,12 @@ import {
   ClientInputSchema,
   ClientLookupSchema,
   ClientMergeSchema,
+  ClientNamesRequestSchema,
   ClientsQuerySchema,
   type Client,
+  type ClientNamesResponse,
   type ClientRecords,
+  type ClientsPage,
   type ClientsResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
@@ -45,9 +48,24 @@ export class ClientsController {
   async list(
     @CurrentTenant() tenant: TenantContext,
     @Query() query: unknown,
-  ): Promise<ClientsResponse> {
+  ): Promise<ClientsPage> {
     const parsed = parseBody(ClientsQuerySchema, query);
-    return { clients: await answering(() => this.clients.list(tenant, parsed)) };
+    return answering(() => this.clients.list(tenant, parsed));
+  }
+
+  /**
+   * 200 `{ names }` (S50.2): the names on visits, of the clients asked for (`ids`, comma-
+   * separated) that the member may see (staff: their own), a deleted client as "Deleted
+   * client" with `deleted`. Before `:clientId`, which would take "names" for an id.
+   */
+  @Get('names')
+  @RequirePermission('clients.read')
+  async names(
+    @CurrentTenant() tenant: TenantContext,
+    @Query() query: unknown,
+  ): Promise<ClientNamesResponse> {
+    const { ids } = parseBody(ClientNamesRequestSchema, query);
+    return { names: await answering(() => this.clients.names(tenant, ids)) };
   }
 
   /**

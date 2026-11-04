@@ -104,7 +104,10 @@ const TenantChangeSchema = z.union([
     .strict(),
 ]);
 
-const ClientValuesSchema = z.object({ source: RecordSourceSchema }).strict();
+/** Where a new client came from; `walkIn` when staff added them with their booking (S50.2). */
+const ClientValuesSchema = z
+  .object({ source: RecordSourceSchema, walkIn: z.literal(true).optional() })
+  .strict();
 /** Which of a client's details an edit changed (never the values). */
 const ClientEditSchema = z
   .object({

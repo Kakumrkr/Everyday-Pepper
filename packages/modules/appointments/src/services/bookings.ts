@@ -4,6 +4,7 @@ import {
   BookingIdSchema,
   BookingInputSchema,
   BookingsQuerySchema,
+  WalkInBookingInputSchema,
   BookingStatusSchema,
   BusyQuerySchema,
   ClientIdSchema,
@@ -20,8 +21,11 @@ import {
   type BookingSource,
   type BusyQuery,
   type BusyTime,
+  type ClientContact,
   type ClientId,
   type StaffMemberId,
+  type WalkInBookingInput,
+  type WalkInClient,
 } from '@pepper/contracts';
 import {
   auditActorOf,
@@ -30,6 +34,7 @@ import {
   permissionScope,
   requirePermission,
   systemClock,
+  walkInClientIn,
   type Actor,
   type Clock,
 } from '@pepper/core';
@@ -122,14 +127,51 @@ export async function createBookingIn(
   options: CreateBookingOptions = {},
 ): Promise<Booking> {
   requirePermission(actor, 'bookings.manage');
-  const request = BookingInputSchema.parse(input);
+  const { clientId, clientContact, ...slot } = BookingInputSchema.parse(input);
+  return bookIn(tx, actor, slot, { kind: 'existing', clientId, contact: clientContact }, options);
+}
+
+/**
+ * Books a walk-in (S50.2, ADR-0052): the new client and their booking together or not at all.
+ * Staff book for themselves, as any booking; a client with the walk-in's email (or, without
+ * one, the one client with their phone) is booked instead of adding a second.
+ * `SlotUnavailableError` (with alternatives) when the time is not free: no client is added.
+ */
+export async function createWalkInBooking(
+  db: Database,
+  actor: Actor,
+  input: WalkInBookingInput,
+  options: CreateBookingOptions = {},
+): Promise<Booking> {
+  requirePermission(actor, 'bookings.manage');
+  const { client, ...slot } = WalkInBookingInputSchema.parse(input);
+  return withMember(db, actor.context, (tx) =>
+    bookIn(tx, actor, slot, { kind: 'walk_in', client }, options),
+  );
+}
+
+/** Whom a booking is for: a client the member may book, or a walk-in to add with it. */
+type ClientToBook =
+  | { kind: 'existing'; clientId: ClientId; contact: ClientContact | undefined }
+  | { kind: 'walk_in'; client: WalkInClient };
+
+type SlotRequest = Omit<ReturnType<typeof BookingInputSchema.parse>, 'clientId' | 'clientContact'>;
+
+async function bookIn(
+  tx: TenantTx,
+  actor: Actor,
+  request: SlotRequest,
+  who: ClientToBook,
+  options: CreateBookingOptions,
+): Promise<Booking> {
   if (request.override) requireOverride(actor);
   const now = (options.clock ?? systemClock).now().getTime();
   const start = Date.parse(request.startsAt);
   const key = request.idempotencyKey ?? null;
   const { templateRuleDefaults } = options;
+  // A walk-in's retry with the key names the same time, not the client its first try added.
   const sameRequest = (row: BookingRow) =>
-    row.clientId === request.clientId &&
+    (who.kind === 'walk_in' || row.clientId === who.clientId) &&
     row.serviceId === request.serviceId &&
     row.staffMemberId === request.staffMemberId &&
     row.startsAt.getTime() === start;
@@ -149,7 +191,7 @@ export async function createBookingIn(
   const serviceRow = await findService(tx, request.serviceId);
   if (serviceRow === undefined) throw new ServiceNotFoundError();
   const service = serviceToBook(serviceRow);
-  await findClientToBook(tx, request.clientId, request.clientContact);
+  if (who.kind === 'existing') await findClientToBook(tx, who.clientId, who.contact);
 
   const search: BookableSearch = {
     service,
@@ -161,12 +203,16 @@ export async function createBookingIn(
   const end = start + service.durationMinutes * MINUTE_MS;
   const fits = request.override ? offers(staff, service) : await isBookable(tx, search);
   if (!fits) throw await unavailable(tx, search);
+  // The walk-in is added only now, the time found free; a refused write below rolls it back
+  // with the booking (the database refuses to commit a walk-in without one, ADR-0052).
+  const clientId =
+    who.kind === 'existing' ? who.clientId : (await walkInClientIn(tx, actor, who.client)).clientId;
 
   let row: BookingRow;
   try {
     row = await inSavepoint(tx, (sp) =>
       insertBooking(sp, {
-        clientId: request.clientId,
+        clientId,
         serviceId: request.serviceId,
         staffMemberId: request.staffMemberId,
         startsAt: new Date(start),

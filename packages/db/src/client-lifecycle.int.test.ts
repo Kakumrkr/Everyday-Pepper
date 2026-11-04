@@ -15,6 +15,7 @@ import {
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
+import { ClientEmailTakenError } from './errors.js';
 import { newId } from './ids.js';
 import { insertService, insertStaffMember } from './repositories/appointments.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
@@ -27,6 +28,7 @@ import {
   findClientsByContact,
   findClientsByIds,
   insertClient,
+  insertWalkInClient,
   listClients,
   mergeClientRows,
   updateClient,
@@ -558,5 +560,136 @@ describe('deleting a client (ADR-0051)', () => {
       tx.execute(sql`SELECT client_merge_episodes(${stranger}::uuid, ${id}::uuid)`),
     ).catch((error: unknown) => error);
     expect(sqlState(merge)).toBe('P0002');
+  });
+});
+
+describe('walk-in clients (S50.2, ADR-0052)', () => {
+  const bookIn = (tx: TenantTx, clientId: ClientId, startsAt: Date) =>
+    insertBooking(tx, {
+      clientId,
+      serviceId: service,
+      staffMemberId: jessStaff,
+      startsAt,
+      endsAt: new Date(startsAt.getTime() + 3_600_000),
+      bufferBeforeMinutes: 0,
+      bufferAfterMinutes: 0,
+      priceFromCents: 4000,
+      priceToCents: null,
+      source: 'team',
+      overridden: true,
+      idempotencyKey: null,
+      createdBy: jess,
+    });
+  const named = async (name: string) =>
+    (
+      await inTenant((tx) =>
+        tx.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM clients WHERE name = ${name}`),
+      )
+    ).rows[0]?.n;
+
+  it('a staff member adds a walk-in with their booking; other staff don’t see them', async () => {
+    const id = await as(jess, async (tx) => {
+      const added = await insertWalkInClient(tx, {
+        name: 'Walker Inn',
+        email: 'walker@example.com',
+        phone: '+15550001111',
+      });
+      // Not theirs until the booking is written.
+      expect(await findClient(tx, added)).toBeUndefined();
+      await bookIn(tx, added, new Date('2099-05-17T07:00:00Z'));
+      expect((await findClient(tx, added))?.name).toBe('Walker Inn');
+      return added;
+    });
+    const kim = await insertUser(db, 'Kim');
+    await inTenant(async (tx) => {
+      const membership = await addMembership(tx, { userId: kim, role: 'staff' });
+      await insertStaffMember(tx, {
+        displayName: 'Kim',
+        color: '#2a7230',
+        active: true,
+        membershipId: membership.id,
+      });
+    });
+    expect(await as(kim, (tx) => findClient(tx, id))).toBeUndefined();
+    const seen = await as(ana, (tx) => findClient(tx, id));
+    expect(seen).toMatchObject({ source: 'team', email: 'walker@example.com' });
+  });
+
+  it('refuses at commit a walk-in the transaction didn’t book', async () => {
+    const refused = await as(jess, (tx) =>
+      insertWalkInClient(tx, { name: 'Never Booked', email: null, phone: null }),
+    ).catch((error: unknown) => error);
+    expect(sqlState(refused)).toBe('23514');
+    expect(await named('Never Booked')).toBe(0);
+  });
+
+  it('only a staff member of the business adds one, and staff still can’t add a client', async () => {
+    // Ana is the owner without a staff member; a stranger has no membership at all.
+    const owner = await as(ana, (tx) =>
+      insertWalkInClient(tx, { name: 'Owner Walk', email: null, phone: null }),
+    ).catch((error: unknown) => error);
+    expect(sqlState(owner)).toBe('42501');
+    const stranger = await insertUser(db, 'Stranger');
+    const outside = await as(stranger, (tx) =>
+      insertWalkInClient(tx, { name: 'Outside Walk', email: null, phone: null }),
+    ).catch((error: unknown) => error);
+    expect(sqlState(outside)).toBe('42501');
+    const elsewhere = await newTenant('Hazel');
+    const across = await withMember(db, { tenantId: elsewhere, userId: jess }, (tx) =>
+      insertWalkInClient(tx, { name: 'Across Walk', email: null, phone: null }),
+    ).catch((error: unknown) => error);
+    expect(sqlState(across)).toBe('42501');
+    const direct = await as(jess, (tx) =>
+      insertClient(tx, { name: 'Direct Add', email: null, phone: null, source: 'team' }),
+    ).catch((error: unknown) => error);
+    expect(sqlState(direct)).toBe('42501');
+    expect(await named('Owner Walk')).toBe(0);
+    expect(await named('Direct Add')).toBe(0);
+  });
+
+  it('a walk-in with a taken email is refused as taken', async () => {
+    await client('Taken Email', { email: 'taken@example.com' });
+    const refused = await as(jess, (tx) =>
+      insertWalkInClient(tx, { name: 'Second', email: 'taken@example.com', phone: null }),
+    ).catch((error: unknown) => error);
+    expect(refused).toBeInstanceOf(ClientEmailTakenError);
+  });
+});
+
+describe('paging and searching clients (S50.2)', () => {
+  it('pages by name and id with no repeats or gaps, and finds part of a phone', async () => {
+    const shop = await newTenant('Paging');
+    const names = ['Pat', 'pat', 'Pat', 'Amy', 'Zed', 'Bo', 'Pat'];
+    await withTenant(db, shop, async (tx) => {
+      for (const [index, name] of names.entries()) {
+        await insertClient(tx, {
+          name,
+          email: null,
+          phone: index === 4 ? '+15551234567' : null,
+          source: 'import',
+        });
+      }
+    });
+    const all = await withTenant(db, shop, (tx) => listClients(tx, { limit: 50 }));
+    const paged: string[] = [];
+    let after: ClientId | undefined;
+    for (;;) {
+      const page = await withTenant(db, shop, (tx) => listClients(tx, { limit: 2, after }));
+      paged.push(...page.map((row) => row.id));
+      if (page.length < 2) break;
+      after = ClientIdSchema.parse(page.at(-1)?.id);
+    }
+    expect(paged).toEqual(all.map((row) => row.id));
+    expect(new Set(paged).size).toBe(names.length);
+    const search = (text: string, namesOnly = false) =>
+      withTenant(db, shop, (tx) => listClients(tx, { search: text, limit: 50, namesOnly })).then(
+        (rows) => rows.map((row) => row.name),
+      );
+    expect(await search('(555) 123')).toEqual(['Zed']);
+    expect(await search('555-123-4567')).toEqual(['Zed']);
+    expect(await search('55')).toEqual([]);
+    // An email-like search with digits matches no phone.
+    expect(await search('zed555@')).toEqual([]);
+    expect(await search('555 123', true)).toEqual([]);
   });
 });

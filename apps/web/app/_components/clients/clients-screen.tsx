@@ -18,7 +18,8 @@ export function ClientsScreen({
   manages,
   importId = null,
 }: {
-  initial: Client[] | null;
+  /** The first page, and the cursor of the next (S50.2); `null` when it couldn't load. */
+  initial: { clients: Client[]; nextCursor: string | null } | null;
   manages: boolean;
   /** Only the clients this import added (AC-W1-29). */
   importId?: string | null;
@@ -56,7 +57,8 @@ export function ClientsScreen({
         </p>
       ) : (
         <ClientDirectory
-          initial={initial}
+          initial={initial.clients}
+          initialCursor={initial.nextCursor}
           staffView={!manages}
           onAdd={manages ? adding.openFromHere : undefined}
           importId={importId}

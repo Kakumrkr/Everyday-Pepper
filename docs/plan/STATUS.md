@@ -1,22 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-03 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 11 — Switching + privacy (Phase 10 gate met in S47.3) → next: **S50.2** (staff walk-ins, client paging and search past 50)
+**Last updated:** 2026-11-04 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 11 — Switching + privacy (Phase 10 gate met in S47.3) → next: **S51** (export, account + business deletion, terms/privacy drafts; **Phase 11 gate**)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S50.2** (staff walk-ins, client paging and search past 50).
+Nothing in progress. Next: **S51** (export, account + business deletion, terms/privacy drafts; Phase 11 gate).
 
 ## Last sessions
+- **S50.2 Phase 11 · Staff walk-ins, client paging and phone search (2026-11-04)** ([ADR-0052](../adr/0052-staff-walk-in-clients-and-client-paging.md), [PR #75](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/75)). Full entry in [session-log.md](session-log.md).
+  - **Built:** staff book a walk-in from the Book sheet (client and booking together; a definer function and a commit-time check, RLS unchanged); Clients pages with "Show more" and finds part of a phone; AC-W1-34…36. Top-up: the calendar's names in one request, "Deleted client" on its visits.
+  - **Checks:** `pnpm check` green; affected integration green (db 727 incl. isolation, appointments 219, api 93, …); Playwright booking + clients 4/4, screens 24/24 (6 baselines updated).
 - **S50 Phase 11 · Client merge and delete, tags and birthday editing (2026-11-03)** ([ADR-0051](../adr/0051-client-merge-and-delete.md), [PR #74](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/74)). Full entry in [session-log.md](session-log.md).
   - **Built:** merge (everything moves to the client kept, blanks filled, tags combined, no overlapping visits); delete (forgotten everywhere, past visits kept as "Deleted client", refused with visits coming up); tags and birthday in the editor; AC-W1-30…33. Top-up: "Book again" opens Book with the visit's service and staff.
   - **Checks:** `pnpm check` green; affected integration green (db 719 incl. isolation, core 189, appointments 214, api 93, …); Playwright clients + import 4/4; 12 new and 12 updated screen baselines; CI green on the first run.
-- **S49.2 Phase 11 · History import screens, tags and birthday on the profile (2026-11-03)** (no ADR; [PR #73](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/73)). Full entry in [session-log.md](session-log.md).
-  - **Built:** the import screens take a visits file (one-sentence preview, notices, times taken, visit lines, "No one was emailed"), `/clients?import=` filtered, tags and birthday on the profile (AC-W1-27…29). Top-up: "Book these again" with "Book again" per time taken.
-  - **On the way:** Back after "Book again" lost the result (Next's cached render); the screen resumes the import its address names.
-  - **Checks:** `pnpm check` green; integration none (screens only); Playwright import 3, screens 24 (30 new baselines); CI green on the first run.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -32,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S50.2 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 a definer function + commit-time check; D-2 book the matching client; D-3 cursor + "Show more"; D-4 ADR-0052). **Claude:** names on visits by GET; phone search for phone-like text; screenshot masks by test id; the review's 6 fixes. Full wording in [decisions.md](decisions.md).
 - **S50 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 split → S50.2 walk-ins and paging; D-2 delete anonymises, refused with upcoming visits; D-3 merge rules, no undo; D-4 ADR-0051). **Claude:** the merge-only fact move; two definer functions; same-value facts unscrubbed; the review's 5 fixes. Full wording in [decisions.md](decisions.md).
 - **S49.2 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 tags and birthday read-only, editing → S50; D-2 "Book again" opens the profile; D-3 no ADR). **Claude:** no-email lines; times taken as their own list; the import screen resumes from its address; fixture dates in 2099; the review's 5 fixes. Full wording in [decisions.md](decisions.md).
 - **S49 (user, 2026-11-03):** at the brief "Go ahead with your recommendations and complete the session" (D-1 split → S49.2; D-2 the `VisitBook` port; D-3 hidden services, the owner's calendar; D-4 overlapping upcoming visits listed, history unchecked; D-5 no reminders; D-6 month/day/optional year, tags text[]). **Claude:** imported history occupies no time; repeat clients in a visits file; the review's 10 fixes; the `smart-waitlist` clock. Full wording in [decisions.md](decisions.md).
@@ -75,11 +75,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S50, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on every screen and the first 10 minutes; Phase 9 and 10 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S50.2, M1–M2 and P1 are done (Phases 0–10: the re-plan, the new look on every screen and the first 10 minutes; Phase 9 and 10 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S50.2 | Staff walk-ins, client paging and search past 50 | 11 | Playwright; isolation suite 100% |
 | S51 | Export, account + business deletion, terms/privacy drafts; **Phase 11 gate** | 11 | Export round-trips; C11, C13 ≥ 8 |
 | S52 | Home card board (ranked by $, grouped, quiet start) + activity log | 12 | Grouped feed; every AI action in the log |
 | S53 | Autonomy presets, standing rules, client-visible moves ask, earned trust | 12 | Preset/rule tests; move card names the email |

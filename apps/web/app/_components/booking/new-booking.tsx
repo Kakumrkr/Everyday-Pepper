@@ -4,9 +4,9 @@ import { BookingSchema, type AvailableSlot } from '@pepper/contracts';
 import { Button, buttonStyle, Icon, Select, Sheet, SheetFooter } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { bookableStaff, type BookingSetup } from '../../../lib/booking';
+import { bookableStaff, bookingRequest, type BookingSetup } from '../../../lib/booking';
 import { sendJson } from '../../../lib/client-api';
-import { ClientPicker, type ChosenClient } from './client-picker';
+import { ClientPicker, type ChosenClient, type PickedClient } from './client-picker';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
 import { Notice } from '../form-parts';
@@ -95,7 +95,7 @@ function NewBookingForm({
   const router = useRouter();
   const { timeZone, services, abilities } = setup;
   const [idempotencyKey] = useState(() => crypto.randomUUID());
-  const [client, setClient] = useState<ChosenClient | null>(initialClient);
+  const [client, setClient] = useState<PickedClient | null>(initialClient);
   const [serviceId, setServiceId] = useState(
     services.find((service) => service.id === preset?.serviceId)?.id ?? services[0]?.id ?? '',
   );
@@ -127,15 +127,11 @@ function NewBookingForm({
   async function book(at: string): Promise<void> {
     if (client === null) return;
     setBusy(true);
-    const answer = await sendJson('POST', '/v1/bookings', {
-      clientId: client.client.id,
-      ...(client.contact !== undefined && { clientContact: client.contact }),
-      serviceId,
-      staffMemberId,
-      startsAt: at,
-      idempotencyKey,
-      notifyClient,
-    });
+    const { path, body } = bookingRequest(
+      'walkIn' in client ? client : { clientId: client.client.id, contact: client.contact },
+      { serviceId, staffMemberId, startsAt: at, idempotencyKey, notifyClient },
+    );
+    const answer = await sendJson('POST', path, body);
     setBusy(false);
     if (answer.ok && BookingSchema.safeParse(answer.data).success) {
       onDone();
@@ -215,7 +211,8 @@ function NewBookingForm({
         )}
       </section>
 
-      {client === null ? null : client.client.email === null ? (
+      {client === null ? null : ('walkIn' in client ? client.walkIn : client.client).email ===
+        null ? (
         <p className="m-0 type-body text-ink-2">
           No email address on file, so no confirmation is sent.
         </p>
@@ -234,20 +231,25 @@ function NewBookingForm({
             setStartsAt(slot.startsAt);
             void book(slot.startsAt);
           }}
-          waitlist={{
-            entry: {
-              clientId: client.client.id,
-              ...(client.contact !== undefined && { clientContact: client.contact }),
-              serviceId,
-              staffMemberId,
-            },
-            wanted: refused.wanted,
-            minutes: services.find((s) => s.id === serviceId)?.durationMinutes ?? 60,
-            onAdded: () => {
-              onDone();
-              router.refresh();
-            },
-          }}
+          // A walk-in isn't a client until booked, so the waitlist can't hold them yet.
+          waitlist={
+            'walkIn' in client
+              ? undefined
+              : {
+                  entry: {
+                    clientId: client.client.id,
+                    ...(client.contact !== undefined && { clientContact: client.contact }),
+                    serviceId,
+                    staffMemberId,
+                  },
+                  wanted: refused.wanted,
+                  minutes: services.find((s) => s.id === serviceId)?.durationMinutes ?? 60,
+                  onAdded: () => {
+                    onDone();
+                    router.refresh();
+                  },
+                }
+          }
         />
       )}
 
