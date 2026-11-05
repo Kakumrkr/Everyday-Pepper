@@ -499,3 +499,12 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - Owners and managers only (`requireWinBackAccess`); Home asks when the member holds `settings.manage`. The wrap first on Home, the week card after "Done for you"; both flat blocks.
     - Home's screenshot leaves the wrap out (it depends on the clock); the gallery shoots both blocks.
     - The walkthrough's fix: "booked thanks to me", not "through me" (an owner-booked regular is Pepper's by the email).
+- **S55.2 (user, 2026-11-05):** at the brief, "Preapproved with your recommendation complete the session successful" (the carried top-up: the win-back email's last-visit date carries the year when it was over a year ago):
+  - D-1: no split. D-2: the morning pass drafts review requests the day after the visit (no model call). D-3: no review link, no requests. D-4: 90 days between requests, any outcome but superseded. D-5: ADR-0059.
+  - **Claude's refinements:**
+    - A visit counts when it was kept (confirmed or completed), is over, started in the last 48 hours and is not imported; one request a client, by their latest visit; 20 a business a day, the earliest visit first.
+    - Its own dial action `message.review_request` (ask by default, hands-off → do and tell); a system tool never offered to the model; the words editable on the card like a nudge's.
+    - No request within 7 days of a rebooking nudge or a regular's offer (one marketing email a week; the review's fix). Requests still run when rebooking suggestions are turned off, not while paused or without the mailing address.
+    - The link: https with a public host (no IP or internal name, no credentials), on More's "Emails to clients"; audited only as set or not; in the business export.
+    - The unsubscribe page names both rebooking offers and review requests.
+    - The review's 9 fixes; eval cases left (nothing model-written to grade).
