@@ -479,3 +479,14 @@ Every decision the user made in chat, and the defaults Claude chose that the use
       - one marketing email a week across nudges and offers;
       - no regular's offer without the footer;
       - the order in SQL.
+- **S54.2 (user, 2026-11-05):** at the brief, "Pre-approving with your recommendation. Complete the session successfully" (top-up named in the prompt: the win-back list's empty state says what will fill it, with the action to import past visits):
+  - D-1: no split. D-2: the list is computed on read from bookings, not from feed items. D-3: the draft reuses `send_rebooking_nudge` and `message.rebooking_nudge`. D-4: ADR-0057.
+  - **Claude's refinements:**
+    - From 2 visits (the empty state's words), with no twice-the-interval cut-off; most recently due first.
+    - Value: the service's price, else what the last visit cost (imported services are hidden and unpriced).
+    - The domain writes the words (no model call); a name that breaks a draft rule falls back to safe words.
+    - 20 win-back drafts a business a day, besides the morning pass's, counted under an advisory lock; the 28-day nudge and 7-day offer quiet windows.
+    - The proposal names the member who tapped (`proposeForBusiness` `requestedBy`); the client's feed card links to it.
+    - A refused draft is a 200 answer with a reason; a hidden service gets its own reason.
+    - The draft's transaction joins the ai coverage config's integration-proven exclusion (like the tools); its words and first answer are a unit-tested module.
+    - The review's fixes: hidden services, safe words, expired drafts, a locked cap, chunked reads, one visit rule, refusal copy from the limits, dead code.

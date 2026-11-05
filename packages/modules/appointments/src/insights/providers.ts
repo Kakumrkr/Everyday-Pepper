@@ -114,7 +114,16 @@ export function openGaps(
   return open.filter((gap) => gap.end - gap.start >= snapshot.minGapMinutes * MINUTE_MS);
 }
 
-export { bookingsByStaff, localDate, minutes, occupies, startOfDay, workingIntervals };
+export {
+  bookingsByStaff,
+  daysBetween,
+  localDate,
+  medianDays,
+  minutes,
+  occupies,
+  startOfDay,
+  workingIntervals,
+};
 
 const NO_SUBJECTS = { staffMemberId: null, clientId: null, bookingId: null, serviceId: null };
 
@@ -160,28 +169,42 @@ function medianDays(intervals: number[]): number {
   return Math.min(CLIENT_MEDIAN.maxDays, Math.max(CLIENT_MEDIAN.minDays, Math.round(median)));
 }
 
+/**
+ * Each client's past visits (confirmed or completed), oldest first, leaving out every client
+ * with a confirmed booking from `now` on: who the rebooking rules look at (S35; S54.2's
+ * "Haven't been back" shares it, so the two never disagree about a visit).
+ */
+export function clientVisits(
+  bookings: readonly InsightBooking[],
+  now: number,
+): Map<ClientId, InsightBooking[]> {
+  const visits = new Map<ClientId, InsightBooking[]>();
+  const bookedAhead = new Set<ClientId>();
+  for (const booking of bookings) {
+    if (booking.start >= now) {
+      if (booking.status === 'confirmed') bookedAhead.add(booking.clientId);
+    } else if (occupies(booking)) {
+      const list = visits.get(booking.clientId) ?? [];
+      list.push(booking);
+      visits.set(booking.clientId, list);
+    }
+  }
+  for (const clientId of bookedAhead) visits.delete(clientId);
+  for (const list of visits.values()) {
+    list.sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
+  }
+  return visits;
+}
+
 /** A regular past their usual return date, with nothing booked, until twice the interval. */
 export const rebookingDue: InsightProvider = {
   kind: 'rebooking_due',
   find(snapshot) {
     const { now, timeZone } = snapshot;
     const serviceDays = new Map(snapshot.services.map((s) => [s.id, s.rebookAfterDays]));
-    const visits = new Map<ClientId, InsightBooking[]>();
-    const bookedAhead = new Set<ClientId>();
-    for (const booking of snapshot.bookings) {
-      if (booking.start >= now) {
-        if (booking.status === 'confirmed') bookedAhead.add(booking.clientId);
-      } else if (occupies(booking)) {
-        const list = visits.get(booking.clientId) ?? [];
-        list.push(booking);
-        visits.set(booking.clientId, list);
-      }
-    }
     const today = localDate(timeZone, now);
     const items: InsightCandidate[] = [];
-    for (const [clientId, list] of visits) {
-      if (bookedAhead.has(clientId)) continue;
-      list.sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
+    for (const [clientId, list] of clientVisits(snapshot.bookings, now)) {
       const last = list.at(-1);
       if (last === undefined) continue;
       const lastDay = localDate(timeZone, last.start);

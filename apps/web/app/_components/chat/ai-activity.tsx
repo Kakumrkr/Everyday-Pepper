@@ -98,7 +98,9 @@ function EmptyState({ title, text }: { title: string; text: string }) {
   );
 }
 
-function snapshotOfProposal(proposal: AiProposalView): Extract<ToolCard, { kind: 'change' }> {
+export function snapshotOfProposal(
+  proposal: AiProposalView,
+): Extract<ToolCard, { kind: 'change' }> {
   return {
     kind: 'change',
     tool: proposal.tool,

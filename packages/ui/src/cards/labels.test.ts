@@ -95,6 +95,11 @@ describe('changeRows', () => {
     expect(factLine({ kind: 'nudge_last_visit', value: { date: '2026-09-28' } })).toBe(
       'Their last visit was on Mon, Sep 28.',
     );
+    expect(factLine({ kind: 'win_back', value: { visits: 4, dueOn: '2026-10-12' } })).toBe(
+      'After 4 visits they were due back on Mon, Oct 12, and nothing is booked.',
+    );
+    expect(factLine({ kind: 'win_back', value: { visits: 'many' } })).toBeNull();
+    expect(stepLabel('win_back')).toBe('Drafted the email you asked for');
     expect(
       factLine({
         kind: 'rebooking_due',

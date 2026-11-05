@@ -327,11 +327,18 @@ export async function importPastVisit(
   page: Page,
   { service, staff }: { service: string; staff: string },
 ): Promise<void> {
+  await importVisitsFile(
+    page,
+    [
+      'Date,Time,Client,Email,Phone,Service,Staff,Length,Price,Status',
+      `2025-03-04,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-1001,${service},${staff},60,45,done`,
+    ].join('\n'),
+  );
+}
+
+/** Imports a visits CSV through the api and the worker, and waits until it is done. */
+export async function importVisitsFile(page: Page, csv: string): Promise<void> {
   const origin = new URL(page.url()).origin;
-  const csv = [
-    'Date,Time,Client,Email,Phone,Service,Staff,Length,Price,Status',
-    `2025-03-04,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-1001,${service},${staff},60,45,done`,
-  ].join('\n');
   const staged = await page.request.post('/v1/imports?format=csv', {
     data: Buffer.from(csv),
     headers: { origin, 'content-type': 'text/csv' },

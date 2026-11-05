@@ -22,6 +22,9 @@ export default defineConfig({
         'src/tools/registry.ts',
         'src/tools/runner.ts',
         'src/tools/test-support.ts',
+        // The same for the one-tap win-back draft's transaction (S54.2): its words and its
+        // first answer are unit-tested in `win-back-words.ts`.
+        'src/drafts/win-back.ts',
         // The eval subject and its seeded worlds run the loop on Postgres (evals.int.test.ts).
         'src/evals/subject.ts',
         'src/evals/world.ts',

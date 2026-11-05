@@ -1415,3 +1415,26 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
     - CI (first run, green): build 8.7 min, integration 7.0 min, AI evals 4.7 min, E2E 18.6 min.
   - **For later:** the win-back list and the post-import aha (S54.2); a nudge-only test of the weekly quiet rule across nudges and offers; batch `fill` reads if Activity grows; the summary's "Tue 2026-11-03 at 15:00" wording in proposals (the Activity line already reads well).
   - **Retro:** went well: a control case in the "never offered" fixture proved the exclusions weren't passing on an empty list · do better: run `prettier --check` on generated migration files before the first `pnpm check` · top-up for S54.2: the win-back list's empty state says what will fill it ("After 2 visits, a client who stops coming shows here") with the action to import past visits.
+
+- **S54.2 Phase 12 · The money loop, part 2: "Haven't been back" with one-tap drafts, the post-import aha (2026-11-05)** ([ADR-0057](../adr/0057-win-back-list-and-post-import-aha.md); [PR #81](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/81); branch `ccr-ba4d3085-5dez4g`). D-1 no split, D-2 the list computed on read, D-3 the rebooking nudge reused, D-4 ADR-0057 (decisions.md S54.2).
+  - **Built:**
+    - `findWinBack` (2+ visits, past the gap, nothing ahead) sharing `clientVisits` with `rebooking_due`.
+    - `listWinBackIn` and db `readWinBackClients`: reach, a pending draft, the quiet windows, value with the visit price fallback.
+    - `draftWinBack`: the nudge with the domain's words, the next open time, 20 a day.
+    - `GET /v1/win-back`, `POST /v1/win-back/:clientId/draft`.
+    - `/clients/win-back` with drafts in place, the Clients row, the visits result's "2 regulars are overdue, about $30".
+    - AC-W4-6…9.
+  - **Top-up (S54 retro, AC-W4-9):** the empty list: "After 2 visits, a client who stops coming shows here", with "Import past visits".
+  - **Checks:**
+    - `pnpm check` green after the ai coverage fix (78% → 81.6% branches).
+    - Affected integration green: db 740, core 194, appointments 233, ai 173, api 104, worker 18 (the aha's numbers = the file's sums), imports 28, runtime 2.
+    - Playwright: win-back 1/1, import 3/3, screens blocks 6/6 twice (Clients 375/412 updated, 12 new baselines).
+  - **Review:** `/code-review` found 10.
+    - Fixed (8): hidden services, safe words, expired drafts, a locked cap, chunked reads, one visit rule, refusal copy, dead code.
+    - Left (2): a tap and the Clients page recompute the list (fine at pilot sizes).
+    - Manual security pass found nothing.
+  - **Walkthrough:** 375 px dark as the owner: empty → import → aha → See who → Draft email → Approve → "Emailed Nov 5". The tap-target check caught under-44 px links (fixed).
+  - **Timing:** `pnpm check` ~5 min ×2; affected integration ~25 min (`--concurrency=1`); e2e stack ~2 min ×2 (web rebuilt once); win-back spec 8 s; import spec 17 s; screens blocks 34 s + 29 s; CI first run: build 11.4 min, integration 10.0 min, AI evals 6.3 min, E2E 18.7 min (red: the visits-import screenshot block now shows the aha; I hadn't run it locally; its 6 baselines updated and run twice, 3/3).
+  - **For later:** the nudge summary's "Thu 2026-11-05 at 09:00" wording (from S54); a count-only read for the Clients row; mapping imported services onto real ones (S56a) so their clients can be drafted; "write it for me" words (S56a).
+  - **Retro:** went well: computing the list on read made the aha correct the moment an import commits, with no worker wait · do better: run every screens block whose screen shows the change (here the import result), not only the blocks of the screens edited; and run `test:coverage` when adding a transaction-only module · top-up for S55: the weekly value card counts the regulars won back from "Haven't been back" (a win-back nudge followed by a booking) with their dollars.
+

@@ -440,6 +440,8 @@ export interface InsightBookingRow {
   bufferBeforeMinutes: number;
   bufferAfterMinutes: number;
   status: string;
+  /** The price the visit was booked (or imported) at, for "Haven't been back" (S54.2). */
+  priceFromCents: number | null;
 }
 
 /** Every booking of the business (any status) starting at or after `since`, by start. */
@@ -455,6 +457,7 @@ export async function listInsightBookings(tx: TenantTx, since: Date): Promise<In
       bufferBeforeMinutes: bookings.bufferBeforeMinutes,
       bufferAfterMinutes: bookings.bufferAfterMinutes,
       status: bookings.status,
+      priceFromCents: bookings.priceFromCents,
     })
     .from(bookings)
     .where(
