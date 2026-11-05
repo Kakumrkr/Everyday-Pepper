@@ -108,6 +108,11 @@ export interface WrapNumbers {
   }[];
 }
 
+/** It is the business's evening: from `PROOF_LIMITS.eveningHour` until midnight, local. */
+export function isEvening(timeZone: string, now: number): boolean {
+  return toZoned(timeZone, now).minuteOfDay >= PROOF_LIMITS.eveningHour * 60;
+}
+
 /**
  * Tomorrow in the business's time zone, from its evening hour (`PROOF_LIMITS.eveningHour`)
  * until midnight; `null` before. `bookings` must reach back the no-show window
@@ -119,8 +124,8 @@ export function buildEveningWrap(
   timeZone: string,
   now: number,
 ): WrapNumbers | null {
+  if (!isEvening(timeZone, now)) return null;
   const local = toZoned(timeZone, now);
-  if (local.minuteOfDay < PROOF_LIMITS.eveningHour * 60) return null;
   const tomorrow = addDays(local, 1);
   const from = fromZoned(timeZone, tomorrow, 0);
   const to = fromZoned(timeZone, addDays(tomorrow, 1), 0);

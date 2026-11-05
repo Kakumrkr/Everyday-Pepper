@@ -10,9 +10,12 @@ import { clockTime, formatDuration } from './feed-lines.js';
 
 const count = (n: number, one: string, many = `${one}s`) => `${String(n)} ${n === 1 ? one : many}`;
 
+/** The time saved as the card says it: rounded to 5 minutes. */
+const shownMinutes = (week: WeekValue) => Math.round(week.minutesSaved / 5) * 5;
+
 /** Pepper did something this week worth showing (else the card stays away, AC-W4-13). */
 export function weekHasProof(week: WeekValue): boolean {
-  return week.visitsBooked > 0 || week.minutesSaved > 0;
+  return week.visitsBooked > 0 || shownMinutes(week) > 0;
 }
 
 /** The week card's rows, the zeros left out; the time saved rounded to 5 minutes. */
@@ -43,7 +46,7 @@ export function weekLines(week: WeekValue): {
       cents: week.regularsBackCents > 0 ? week.regularsBackCents : null,
     });
   }
-  const minutes = Math.round(week.minutesSaved / 5) * 5;
+  const minutes = shownMinutes(week);
   return {
     title: 'What I did this week',
     rows,

@@ -86,6 +86,9 @@ describe('weekLines', () => {
       minutesSaved: 0,
     });
     expect(weekHasProof(quiet)).toBe(false);
+    // Two minutes round to none: nothing to say, so no bare heading either.
+    expect(weekHasProof({ ...quiet, minutesSaved: 2 })).toBe(false);
+    expect(weekHasProof({ ...quiet, minutesSaved: 3 })).toBe(true);
     const { container } = render(<WeekProof week={quiet} />);
     expect(container.innerHTML).toBe('');
   });

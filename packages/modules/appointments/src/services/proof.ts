@@ -17,7 +17,7 @@ import {
   listWeekBookings,
   type TenantTx,
 } from '@pepper/db';
-import { buildEveningWrap, buildWeekValue } from '../insights/proof.js';
+import { buildEveningWrap, buildWeekValue, isEvening } from '../insights/proof.js';
 import { NO_SHOW_PATTERN } from '../insights/types.js';
 import { requireWinBackAccess } from './win-back.js';
 
@@ -44,6 +44,22 @@ export async function readProofIn(
     await countWeekActions(tx, { from, to: now }),
   );
 
+  // The half year of bookings is read only in the evening, when the wrap shows.
+  const evening = isEvening(tenant.timeZone, now.getTime())
+    ? await readEveningWrap(tx, tenant.timeZone, now)
+    : null;
+  return ProofResponseSchema.parse({
+    week: { from: from.toISOString(), to: now.toISOString(), ...week },
+    evening,
+  });
+}
+
+/** Tomorrow's wrap with the at-risk clients' names. */
+async function readEveningWrap(
+  tx: TenantTx,
+  timeZone: string,
+  now: Date,
+): Promise<ProofResponse['evening']> {
   const wrap = buildEveningWrap(
     (
       await listInsightBookings(tx, new Date(now.getTime() - NO_SHOW_PATTERN.windowDays * DAY_MS))
@@ -58,36 +74,29 @@ export async function readProofIn(
       bufferAfterMinutes: row.bufferAfterMinutes,
       status: BookingStatusSchema.parse(row.status),
     })),
-    tenant.timeZone,
+    timeZone,
     now.getTime(),
   );
-  let evening: ProofResponse['evening'] = null;
-  if (wrap !== null) {
-    const named = wrap.atRisk.slice(0, PROOF_LIMITS.atRiskNamed);
-    const names = new Map(
-      (
-        await findClientsByIds(
-          tx,
-          named.map((visit) => visit.clientId),
-        )
-      ).map((row) => [row.id, row.name]),
-    );
-    evening = {
-      day: wrap.day,
-      visitCount: wrap.visitCount,
-      firstStartsAt: wrap.firstStartsAt,
-      atRiskCount: wrap.atRisk.length,
-      atRisk: named.map((visit) => ({
-        bookingId: visit.bookingId,
-        clientName: names.get(visit.clientId) ?? 'Client',
-        startsAt: visit.startsAt,
-        noShowCount: visit.noShowCount,
-      })),
-    };
-  }
-
-  return ProofResponseSchema.parse({
-    week: { from: from.toISOString(), to: now.toISOString(), ...week },
-    evening,
-  });
+  if (wrap === null) return null;
+  const named = wrap.atRisk.slice(0, PROOF_LIMITS.atRiskNamed);
+  const names = new Map(
+    (
+      await findClientsByIds(
+        tx,
+        named.map((visit) => visit.clientId),
+      )
+    ).map((row) => [row.id, row.name]),
+  );
+  return {
+    day: wrap.day,
+    visitCount: wrap.visitCount,
+    firstStartsAt: wrap.firstStartsAt,
+    atRiskCount: wrap.atRisk.length,
+    atRisk: named.map((visit) => ({
+      bookingId: visit.bookingId,
+      clientName: names.get(visit.clientId) ?? 'Client',
+      startsAt: visit.startsAt,
+      noShowCount: visit.noShowCount,
+    })),
+  };
 }
