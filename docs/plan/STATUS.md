@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S55** (weekly value card, evening wrap, review requests; Phase 12).
+**S55 Proof of value** (brief pre-approved by the user, 2026-11-05: D-1 split → S55.2 review requests; D-2 computed on read; D-3 `MINUTES_SAVED` in contracts; D-4 ADR-0058).
+- Done: task 1–3: contracts `proof.ts`, db `listWeekBookings`/`countWeekActions`, appointments `buildWeekValue`/`buildEveningWrap`/`readProofIn`; unit 11/11, db int 4/4, appointments int 5/5; AC-W4-10…13.
+- Next: `GET /v1/proof` (api), ui `WeekProof`/`EveningWrap`, web Home, screens spec, ADR-0058, close.
 
 ## Last sessions
 - **S54.2 Phase 12 · The money loop, part 2: win-back and the post-import aha (2026-11-05)** ([ADR-0057](../adr/0057-win-back-list-and-post-import-aha.md), [PR #81](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/81)). Full entry in [session-log.md](session-log.md).
