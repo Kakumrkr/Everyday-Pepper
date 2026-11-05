@@ -237,3 +237,24 @@ describe('client import through the api (S48)', () => {
     expect((await mine.owner.get('/v1/imports').expect(200)).body).toEqual([]);
   });
 });
+
+describe("haven't been back through the api (S54.2, AC-W4-6, AC-W4-7)", () => {
+  it('answers owners with the list and a refused draft as an answer; staff are refused', async () => {
+    const b = await business();
+    expect((await b.owner.get('/v1/win-back').expect(200)).body).toEqual({
+      clients: [],
+      count: 0,
+      totalCents: 0,
+      mailingAddressSet: false,
+    });
+    expect((await b.owner.post(`/v1/win-back/${newId()}/draft`).expect(200)).body).toEqual({
+      kind: 'refused',
+      reason: 'not_due',
+    });
+    await b.owner.post('/v1/win-back/not-an-id/draft').expect(400);
+    expect((await b.staff.get('/v1/win-back').expect(403)).body).toMatchObject({
+      code: 'forbidden',
+    });
+    await b.staff.post(`/v1/win-back/${newId()}/draft`).expect(403);
+  });
+});

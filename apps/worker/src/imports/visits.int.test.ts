@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import {
   importVisitBook,
   createBooking,
+  listWinBackIn,
   createService,
   createStaffMember,
 } from '@pepper/appointments';
@@ -392,5 +393,38 @@ describe('1,000 clients and 5,000 visits (AC-W1-26)', () => {
         "SELECT count(*)::int AS n FROM booking_reminders r JOIN bookings k ON k.id = r.id WHERE k.source = 'import'",
       ),
     ).toBe(0);
+  });
+});
+
+describe("after the import: who hasn't been back (S54.2, AC-W4-8)", () => {
+  it("counts the overdue regulars and their dollars, the file's own sums", async () => {
+    const b = await newBusiness();
+    // Ana: haircuts 30 days apart, due Jul 31. Ben: fades 42 days apart, due Oct 26. Cy is due
+    // on Nov 19, Di came once, Eve is booked again: none of them is overdue.
+    const csv = [
+      'Date,Time,Client,Email,Phone,Service,Staff,Length,Price,Status',
+      '2026-06-01,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-0601,Haircut,Dre,45,45,done',
+      '2026-07-01,10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-0601,Haircut,Dre,45,45,done',
+      '2026-08-03,11:00 AM,Ben Cole,,555-010-0602,Fade Deluxe,Dre,50,55,done',
+      '2026-09-14,11:00 AM,Ben Cole,,555-010-0602,Fade Deluxe,Dre,50,55,done',
+      '2026-09-20,12:00 PM,Cy Diaz,cy@example.com,555-010-0603,Haircut,Dre,45,45,done',
+      '2026-10-20,12:00 PM,Cy Diaz,cy@example.com,555-010-0603,Haircut,Dre,45,45,done',
+      '2026-10-01,1:00 PM,Di Fox,di@example.com,555-010-0604,Haircut,Dre,45,45,done',
+      '2026-05-01,2:00 PM,Eve Hart,eve@example.com,555-010-0605,Haircut,Dre,45,45,done',
+      '2026-06-01,2:00 PM,Eve Hart,eve@example.com,555-010-0605,Haircut,Dre,45,45,done',
+      '2099-01-05,2:00 PM,Eve Hart,eve@example.com,555-010-0605,Haircut,Dre,45,45,booked',
+    ].join('\n');
+    const preview = await stageImport(db, b.owner, Buffer.from(csv), b.options);
+    expect(preview.batch).toMatchObject({ kind: 'visits', problems: [] });
+    await run(b, preview);
+    const answer = await withTenant(db, b.tenantId, (tx) =>
+      listWinBackIn(tx, b.owner, { clock: b.clock }),
+    );
+    // Haircut has no price of its own and Fade Deluxe is a hidden service: the visits' prices.
+    expect(answer.clients.map((each) => [each.name, each.valueCents, each.reach])).toEqual([
+      ['Ben Cole', 5500, 'no_email'],
+      ['Ana Ruiz', 4500, 'email'],
+    ]);
+    expect(answer).toMatchObject({ count: 2, totalCents: 4500 + 5500 });
   });
 });

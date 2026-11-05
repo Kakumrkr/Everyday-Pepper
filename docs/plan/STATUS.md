@@ -9,7 +9,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S54.2** (brief pre-approved: D-1 no split, D-2 the list computed on read, D-3 reuse the nudge tool and its dial action, D-4 ADR-0057).
 - [x] T1 AC-W4-6…9; T2 `findWinBack` (2+ visits, no 2× cut-off); T3 `listWinBackIn` + db `readWinBackClients` (int 3/3).
-- [ ] T4 `draftWinBack` (ai) · T5 api `/v1/win-back` · T6 web list + import line · T7 baselines, ADR, close.
+- [x] T4 `draftWinBack` (ai int 6/6; `proposeForBusiness` takes `requestedBy`; *Why?* words) · T5 api `GET /v1/win-back`, `POST /v1/win-back/:clientId/draft` (api int 1/1; worker visits import → 2 overdue, $100 = file sums). Value falls back to the visit's own price (imported services have none).
+- [ ] T6 web list + import line · T7 baselines, ADR, close.
 
 ## Last sessions
 - **S54 Phase 12 · The money loop, part 1: cancellation → fill (2026-11-04)** ([ADR-0056](../adr/0056-regulars-fill-freed-times-and-fill-receipts.md), [PR #80](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/80)). Full entry in [session-log.md](session-log.md).

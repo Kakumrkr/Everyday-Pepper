@@ -105,8 +105,10 @@ async function loadWinBack(tx: TenantTx, actor: Actor, now: Date) {
       )
     ).map((row) => [row.id, row]),
   );
-  // The value is the last service's own price, as the feed prices a regular who is due (S52).
+  // The value is the last service's own price, as the feed prices a regular who is due (S52);
+  // else what the last visit cost (an imported visit's service is hidden and has no price).
   const prices = new Map(serviceRows.map((row) => [row.id, row.priceFromCents]));
+  const paid = new Map(bookingRows.map((row) => [row.id, row.priceFromCents]));
   const entries = found.flatMap((each): WinBackEntry[] => {
     const client = clients.get(each.clientId);
     if (client === undefined) return [];
@@ -118,7 +120,7 @@ async function loadWinBack(tx: TenantTx, actor: Actor, now: Date) {
         optedOut: client.optedOut,
         pendingProposalId: client.pendingProposalId,
         emailedAt: client.emailedAt,
-        valueCents: prices.get(each.serviceId) ?? null,
+        valueCents: prices.get(each.serviceId) ?? paid.get(each.lastBookingId) ?? null,
       },
     ];
   });

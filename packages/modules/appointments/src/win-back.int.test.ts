@@ -194,6 +194,22 @@ describe("haven't been back", () => {
     await expect(list(w, w.staff)).rejects.toBeInstanceOf(ForbiddenError);
   });
 
+  it('prices a visit on a service without a price at what the visit cost (imported history)', async () => {
+    const w = await newWorld();
+    const beard = toService(
+      await withTenant(db, w.tenantId, (tx) =>
+        insertService(tx, { name: 'Beard trim', durationMinutes: 30, active: false }),
+      ),
+    );
+    const maria = await createClient(db, w.owner, { name: 'Maria Lopez' });
+    await visits(w, maria, { ...beard, priceFromCents: 2800 }, [68, 40]);
+    expect(await list(w)).toMatchObject({
+      count: 1,
+      totalCents: 2800,
+      clients: [{ serviceName: 'Beard trim', valueCents: 2800 }],
+    });
+  });
+
   it("leaves out a deleted client's visits", async () => {
     const w = await newWorld();
     const maria = await createClient(db, w.owner, { name: 'Maria Lopez' });
