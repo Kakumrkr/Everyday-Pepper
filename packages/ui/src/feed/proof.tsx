@@ -28,7 +28,7 @@ export function weekLines(week: WeekValue): {
   if (week.visitsBooked > 0) {
     rows.push({
       key: 'visits',
-      title: `${count(week.visitsBooked, 'visit')} booked through me`,
+      title: `${count(week.visitsBooked, 'visit')} booked thanks to me`,
       cents: week.valueCents > 0 ? week.valueCents : null,
     });
   }

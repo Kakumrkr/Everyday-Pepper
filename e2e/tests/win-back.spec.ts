@@ -163,7 +163,7 @@ test("haven't been back (AC-W4-6…11): empty, import, the aha, draft, approve, 
   await page.goto('/');
   const week = page.getByRole('region', { name: 'What I did this week' });
   await expect(
-    week.getByRole('listitem').filter({ hasText: '1 visit booked through me' }),
+    week.getByRole('listitem').filter({ hasText: '1 visit booked thanks to me' }),
   ).toContainText(one);
   await expect(
     week.getByRole('listitem').filter({ hasText: '1 regular back after my email' }),

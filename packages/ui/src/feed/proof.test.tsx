@@ -49,7 +49,7 @@ describe('weekLines', () => {
     expect(weekLines(week())).toEqual({
       title: 'What I did this week',
       rows: [
-        { key: 'visits', title: '9 visits booked through me', cents: 54_000 },
+        { key: 'visits', title: '9 visits booked thanks to me', cents: 54_000 },
         { key: 'gaps', title: '2 freed times filled', cents: null },
         { key: 'regulars', title: '3 regulars back after my email', cents: 16_500 },
       ],
@@ -71,7 +71,7 @@ describe('weekLines', () => {
       ),
     ).toEqual({
       title: 'What I did this week',
-      rows: [{ key: 'visits', title: '1 visit booked through me', cents: null }],
+      rows: [{ key: 'visits', title: '1 visit booked thanks to me', cents: null }],
       saved: null,
     });
   });
@@ -98,7 +98,7 @@ describe('WeekProof', () => {
   it('shows the rows with their money, accessibly', async () => {
     const { container } = render(<WeekProof week={week()} />);
     const card = screen.getByRole('region', { name: 'What I did this week' });
-    expect(within(card).getByText('9 visits booked through me')).toBeTruthy();
+    expect(within(card).getByText('9 visits booked thanks to me')).toBeTruthy();
     expect(within(card).getByText('adds $540')).toBeTruthy();
     expect(within(card).getByText('About 2 h 5 min of your time saved.')).toBeTruthy();
     expect((await axe.run(container)).violations).toEqual([]);
