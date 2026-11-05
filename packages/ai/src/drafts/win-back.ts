@@ -29,6 +29,7 @@ import {
   withTenant,
   type TenantTx,
 } from '@pepper/db';
+import { visitDateWords } from './visit-date.js';
 import { drafted, firstAnswer, refused, winBackWords } from './win-back-words.js';
 import { sendRebookingNudge } from '../tools/catalog/nudges.js';
 import { clientFirstName } from '../tools/names.js';
@@ -94,11 +95,8 @@ export async function draftWinBack(
       draft: winBackWords({
         firstName: clientFirstName(entry.name) ?? null,
         serviceName,
-        lastVisit: new Date(lastVisitAt).toLocaleDateString('en-US', {
-          month: 'long',
-          day: 'numeric',
-          timeZone: tenant.timeZone,
-        }),
+        // With its year when it was over a year ago (S55.2 top-up).
+        lastVisit: visitDateWords(tenant.timeZone, lastVisitAt, now),
       }),
     };
     try {

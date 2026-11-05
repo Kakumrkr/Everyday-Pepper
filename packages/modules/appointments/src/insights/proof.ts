@@ -44,6 +44,7 @@ const MESSAGE_ACTIONS: ReadonlySet<string> = new Set<AutonomyAction>([
   'message.rebooking_nudge',
   'message.waitlist_offer',
   'message.bulk',
+  'message.review_request',
 ]);
 /** Counted as a visit already (`MINUTES_SAVED.booking`), so not again as an action. */
 const VISIT_ACTION: AutonomyAction = 'booking.create';

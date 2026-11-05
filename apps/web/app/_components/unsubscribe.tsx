@@ -12,8 +12,8 @@ type State =
   | { kind: 'error'; message: string };
 
 /**
- * One-click unsubscribe from a business's rebooking emails (S36): the page names the business,
- * and the button stops them. Booking confirmations and reminders still come.
+ * One-click unsubscribe from a business's marketing emails (S36: rebooking offers; S55.2: review
+ * requests): the page names the business, and the button stops them. Booking confirmations and reminders still come.
  */
 export function Unsubscribe({ token }: { token: string }) {
   const headingId = useId();
@@ -57,14 +57,14 @@ export function Unsubscribe({ token }: { token: string }) {
         </p>
       ) : state.page.unsubscribed ? (
         <p role="status" className="m-0 type-body text-ink" data-testid="unsubscribed">
-          You won’t get rebooking emails from {state.page.businessName} any more. Booking
-          confirmations and reminders still come.
+          You won’t get rebooking offers or review requests from {state.page.businessName} any more.
+          Booking confirmations and reminders still come.
         </p>
       ) : (
         <>
           <p className="m-0 type-body text-ink">
-            Stop rebooking emails from {state.page.businessName}? Booking confirmations and
-            reminders will still come.
+            Stop rebooking offers and review requests from {state.page.businessName}? Booking
+            confirmations and reminders will still come.
           </p>
           <Button block busy={busy} onClick={() => void unsubscribe()}>
             Unsubscribe

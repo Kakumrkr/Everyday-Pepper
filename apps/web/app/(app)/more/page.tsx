@@ -12,6 +12,7 @@ import { appNav, type NavItem } from '../../../lib/nav';
 import { BusinessSwitcher, SignOutButton } from '../../_components/account-actions';
 import { kitLink } from '../../_components/kit-link';
 import { NotificationsCard } from '../../_components/push/notifications-card';
+import { ReviewLinkSetting } from '../../_components/feed/review-link-setting';
 import { MailingAddressSetting } from '../../_components/feed/mailing-address-setting';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
 
@@ -80,9 +81,10 @@ export default async function MorePage() {
       {feed?.canChangeSettings === true ? (
         <section aria-labelledby="rebooking-heading" className="flex flex-col gap-3">
           <h2 id="rebooking-heading" className="m-0 type-subheading">
-            Rebooking emails
+            Emails to clients
           </h2>
           <MailingAddressSetting address={feed.mailingAddress} />
+          <ReviewLinkSetting url={feed.reviewUrl} addressSet={feed.mailingAddress !== null} />
         </section>
       ) : null}
       <section aria-labelledby="account-heading" className="flex flex-col items-start gap-4">

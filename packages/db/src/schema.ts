@@ -158,6 +158,9 @@ export const tenants = pgTable(
     // The postal address commercial mail carries (S36, CAN-SPAM); NULL: no rebooking emails
     // are drafted. Owners and managers set it with the feed's switches.
     mailingAddress: text('mailing_address'),
+    // Where review requests send clients (S55.2, ADR-0059): an https address; NULL: no review
+    // requests are drafted. Owners and managers set it beside the mailing address.
+    reviewUrl: text('review_url'),
     // When an owner or manager last said "I've checked these" on Home's setup review (S46,
     // PCR-009); NULL: not yet. Being bookable never sets it, and it changes no setup.
     setupReviewedAt: timestamp('setup_reviewed_at', { withTimezone: true }),
@@ -173,6 +176,10 @@ export const tenants = pgTable(
   },
   (table) => [
     check('tenants_mailing_address_length', sql`length(${table.mailingAddress}) BETWEEN 5 AND 300`),
+    check(
+      'tenants_review_url_format',
+      sql`length(${table.reviewUrl}) <= 500 AND ${table.reviewUrl} ~ '^https://[^[:space:]]+$'`,
+    ),
     check('tenants_phone_format', sql`${table.phone} ~ '^\\+[1-9][0-9]{6,14}$'`),
     check('tenants_public_address_length', sql`length(${table.publicAddress}) BETWEEN 5 AND 300`),
     check(
@@ -1405,13 +1412,13 @@ export const pushSubscriptions = pgTable(
 // once written, only a record's status fields may change (triggers in migration 0034).
 
 /**
- * The thirteen actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`;
- * S37: `waitlist.change`).
+ * The fourteen actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`;
+ * S37: `waitlist.change`; S55.2: `message.review_request`).
  */
 const autonomyActionList = sql.raw(
   "'booking.create', 'booking.move', 'booking.cancel', 'booking_request.accept', 'time.block', " +
     "'client_note.save', 'rule.change', 'task.create', 'waitlist.change', 'message.confirmation', " +
-    "'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk'",
+    "'message.rebooking_nudge', 'message.waitlist_offer', 'message.bulk', 'message.review_request'",
 );
 const trustCode = (column: SQLWrapper) => sql`${column} ~ '^[a-z][a-z0-9_.:-]{0,63}$'`;
 const trustJsonSize = (column: SQLWrapper) => sql`octet_length(${column}::text) <= 8192`;

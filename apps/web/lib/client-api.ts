@@ -93,6 +93,8 @@ const MESSAGES: Record<string, string> = {
   draft_refused:
     'Leave out links, email addresses, phone numbers and anything sensitive, and keep it to 120 words.',
   nudge_not_sendable: 'This email can’t go to this client any more. Nothing was sent.',
+  review_request_not_sendable:
+    'This review request can’t go to this client any more. Nothing was sent.',
   unsubscribe_link_invalid: 'This unsubscribe link doesn’t work. Contact the business instead.',
   deletion_name_mismatch: 'That isn’t the business’s name. Type it as it’s shown.',
   wrong_password: 'That password isn’t right. Try again.',

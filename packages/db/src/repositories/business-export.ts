@@ -81,6 +81,7 @@ export interface BusinessExportData {
     publicAddress: string | null;
     cancellationPolicy: string | null;
     mailingAddress: string | null;
+    reviewUrl: string | null;
     createdAt: Date;
   };
   rules: { staffMemberId: string | null; type: string; version: number; params: unknown }[];
@@ -180,6 +181,7 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
       publicAddress: tenants.publicAddress,
       cancellationPolicy: tenants.cancellationPolicy,
       mailingAddress: tenants.mailingAddress,
+      reviewUrl: tenants.reviewUrl,
       createdAt: tenants.createdAt,
     })
     .from(tenants);

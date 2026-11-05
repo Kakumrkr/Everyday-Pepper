@@ -92,6 +92,29 @@ describe('changeRows', () => {
       { label: 'Open time', before: null, after: 'Tue, Nov 3 · 9:00 am' },
       { label: 'With', before: null, after: 'Jess' },
     ]);
+    // A review request (S55.2): to whom, the visit and the 90-day rule.
+    expect(
+      changeRows('message.review_request', null, {
+        email: 'review',
+        clientName: 'Ana',
+        serviceName: 'Haircut',
+        staffName: 'Jess',
+        date: '2026-11-04',
+      }),
+    ).toEqual([
+      { label: 'To', before: null, after: 'Ana' },
+      { label: 'Visit', before: null, after: 'Haircut' },
+      { label: 'On', before: null, after: 'Wed, Nov 4' },
+      { label: 'With', before: null, after: 'Jess' },
+    ]);
+    expect(factLine({ kind: 'review_visit', value: { date: '2026-11-04' } })).toBe(
+      'They came in on Wed, Nov 4, and I haven’t asked them for a review in the last 90 days.',
+    );
+    expect(factLine({ kind: 'review_visit', value: {} })).toBeNull();
+    expect(stepLabel('review_requests')).toBe('Looked at yesterday’s visits');
+    expect(emailLine({ template: 'review_request' }, 'Ana', 'America/New_York', 0)).toBe(
+      'Emails Ana the thank-you below, with your review link.',
+    );
     expect(factLine({ kind: 'nudge_last_visit', value: { date: '2026-09-28' } })).toBe(
       'Their last visit was on Mon, Sep 28.',
     );

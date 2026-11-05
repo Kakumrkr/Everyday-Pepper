@@ -24,6 +24,7 @@ import {
   MemoryPausedError,
   MemorySubjectNotFoundError,
   NudgeNotSendableError,
+  ReviewRequestNotSendableError,
   TaskAssigneeNotMemberError,
   TaskNotFoundError,
   TaskNotOpenError,
@@ -65,6 +66,14 @@ const NUDGE_NOT_SENDABLE = {
   no_address: 'Add the business’s mailing address first: rebooking emails must carry it.',
   no_email: 'This client has no email address.',
   opted_out: 'This client unsubscribed from these emails.',
+} as const;
+
+const REVIEW_NOT_SENDABLE = {
+  no_address: 'Add the business’s mailing address first: review requests must carry it.',
+  no_review_link: 'Add the business’s review link first.',
+  no_email: 'This client has no email address.',
+  opted_out: 'This client unsubscribed from these emails.',
+  no_visit: 'That visit was cancelled or missed, so there is nothing to ask about.',
 } as const;
 
 const NOT_FOUND = [
@@ -145,6 +154,9 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
   }
   if (error instanceof NudgeNotSendableError) {
     return { code: 'not_changeable', message: NUDGE_NOT_SENDABLE[error.reason] };
+  }
+  if (error instanceof ReviewRequestNotSendableError) {
+    return { code: 'not_changeable', message: REVIEW_NOT_SENDABLE[error.reason] };
   }
   if (error instanceof DraftRefusedError) {
     return {

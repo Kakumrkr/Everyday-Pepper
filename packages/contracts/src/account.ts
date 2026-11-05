@@ -69,6 +69,7 @@ export const ApiErrorCodeSchema = z.enum([
   // Rebooking emails (S36, ADR-0040).
   'draft_refused',
   'nudge_not_sendable',
+  'review_request_not_sendable',
   'unsubscribe_link_invalid',
   // The public booking page (ADR-0022).
   'booking_page_not_found',

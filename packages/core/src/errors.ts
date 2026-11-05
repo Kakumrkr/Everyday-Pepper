@@ -148,6 +148,20 @@ export class NudgeNotSendableError extends Error {
   }
 }
 
+/**
+ * A review request can't go to this client now (S55.2, ADR-0059): the business has no mailing
+ * address or review link, the client has no email address or unsubscribed, or the visit it
+ * follows was cancelled, missed or never happened.
+ */
+export class ReviewRequestNotSendableError extends Error {
+  constructor(
+    readonly reason: 'no_address' | 'no_review_link' | 'no_email' | 'opted_out' | 'no_visit',
+  ) {
+    super(`A review request can't be sent (${reason})`);
+    this.name = 'ReviewRequestNotSendableError';
+  }
+}
+
 /** The task is already done: there is nothing to complete (S26b). */
 export class TaskNotOpenError extends Error {
   constructor() {

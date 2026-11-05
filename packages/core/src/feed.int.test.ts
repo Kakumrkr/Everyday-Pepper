@@ -362,3 +362,37 @@ describe('the mailing address for rebooking emails (S36)', () => {
     expect(JSON.stringify(entries)).not.toContain('Main St');
   });
 });
+
+describe('the review link for review requests (S55.2)', () => {
+  it('owners and managers set and clear it; staff never see it; the audit holds no link', async () => {
+    const link = 'https://g.page/r/juniper-review/review';
+    expect((await getFeed(db, ana(), { clock })).reviewUrl).toBeNull();
+    await changeFeedSettings(db, marco(), { reviewUrl: ` ${link} ` });
+    expect((await getFeed(db, ana(), { clock })).reviewUrl).toBe(link);
+    expect((await getFeed(db, jessActor(), { clock })).reviewUrl).toBeNull();
+    await expect(changeFeedSettings(db, jessActor(), { reviewUrl: link })).rejects.toThrow(
+      ForbiddenError,
+    );
+    // Only https, with a real host.
+    await expect(
+      changeFeedSettings(db, ana(), { reviewUrl: 'http://g.page/r/juniper' }),
+    ).rejects.toThrow();
+    // The same link again changes nothing and writes no second entry.
+    await changeFeedSettings(db, ana(), { reviewUrl: link });
+    await changeFeedSettings(db, ana(), { reviewUrl: null });
+    expect((await getFeed(db, ana(), { clock })).reviewUrl).toBeNull();
+    const entries = (
+      await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 50 }))
+    ).filter(
+      (entry) =>
+        entry.action === 'tenant.updated' &&
+        typeof entry.after === 'object' &&
+        'reviewUrlSet' in entry.after,
+    );
+    expect(entries.map((entry) => entry.after)).toEqual([
+      { reviewUrlSet: false },
+      { reviewUrlSet: true },
+    ]);
+    expect(JSON.stringify(entries)).not.toContain('g.page');
+  });
+});

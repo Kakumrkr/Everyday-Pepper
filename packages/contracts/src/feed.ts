@@ -3,6 +3,7 @@ import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingIdSchema } from './bookings.js';
 import { ClientIdSchema } from './clients.js';
 import { MailingAddressSchema } from './drafts.js';
+import { REVIEW_REQUEST_LIMITS, ReviewUrlSchema } from './review-requests.js';
 import { LocalDateSchema } from './rules.js';
 import { InsightTypeSchema } from './templates.js';
 import { UtcDateTimeSchema } from './time.js';
@@ -243,6 +244,8 @@ export const FeedSettingsChangeSchema = z
     morningHour: MorningHourSchema.nullable().optional(),
     /** The postal address rebooking emails carry (S36); `null` takes it away. */
     mailingAddress: MailingAddressSchema.nullable().optional(),
+    /** Where review requests send clients (S55.2); `null` takes it away (no more requests). */
+    reviewUrl: ReviewUrlSchema.nullable().optional(),
   })
   .strict()
   .refine((change) => Object.values(change).some((value) => value !== undefined), {
@@ -284,6 +287,11 @@ export const FeedResponseSchema = z
      * no nudge is drafted until then. Shown only to owners and managers (`null` for staff).
      */
     mailingAddress: z.string().max(300).nullable(),
+    /**
+     * Where review requests send clients (S55.2); `null` until set, and no request is drafted
+     * until then. Shown only to owners and managers (`null` for staff).
+     */
+    reviewUrl: z.string().max(REVIEW_REQUEST_LIMITS.urlMax).nullable(),
   })
   .strict();
 export type FeedResponse = z.infer<typeof FeedResponseSchema>;

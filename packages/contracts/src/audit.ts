@@ -90,6 +90,8 @@ const RulesValuesSchema = z.object({ rules: z.array(RuleSchema) }).strict();
 const TenantChangeSchema = z.union([
   z.object({ brandColor: BrandColorSchema.nullable() }).strict(),
   z.object({ mailingAddressSet: z.boolean() }).strict(),
+  // Whether review requests have a link (S55.2): only set or not, like the address.
+  z.object({ reviewUrlSet: z.boolean() }).strict(),
   // Home's setup review (S46): only that it was checked.
   z.object({ setupReviewed: z.boolean() }).strict(),
   // The booking page's profile (S47): which fields changed, never their values (a home

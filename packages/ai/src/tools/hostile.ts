@@ -186,6 +186,7 @@ export function hostileAttacks(targets: HostileTargets, date: string): Attack[] 
     'run_sql',
     'send_rebooking_nudge',
     'send_waitlist_offers',
+    'send_review_request',
   ]) {
     attacks.push({
       id: `unknown.${name}`,

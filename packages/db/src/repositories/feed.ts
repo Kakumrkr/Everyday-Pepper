@@ -404,6 +404,8 @@ export interface InsightTenant {
   settings: StoredFeedSettings;
   /** Where commercial mail says the business is (S36); `null`: no nudges are drafted. */
   mailingAddress: string | null;
+  /** Where review requests send clients (S55.2); `null`: no review requests are drafted. */
+  reviewUrl: string | null;
 }
 
 export async function readInsightTenant(tx: TenantTx): Promise<InsightTenant | undefined> {
@@ -415,6 +417,7 @@ export async function readInsightTenant(tx: TenantTx): Promise<InsightTenant | u
       templateId: tenants.templateId,
       settings: tenants.feedSettings,
       mailingAddress: tenants.mailingAddress,
+      reviewUrl: tenants.reviewUrl,
     })
     .from(tenants);
   if (row === undefined) return undefined;
@@ -426,6 +429,7 @@ export async function readInsightTenant(tx: TenantTx): Promise<InsightTenant | u
     templateId: row.templateId,
     settings: parsed.success ? parsed.data : STORED_DEFAULT,
     mailingAddress: row.mailingAddress,
+    reviewUrl: row.reviewUrl,
   };
 }
 

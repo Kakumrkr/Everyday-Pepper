@@ -44,6 +44,7 @@ import { toolRefusalOf } from '../tools/errors.js';
 import { clientFirstName } from '../tools/names.js';
 import { writeRunner } from '../tools/runner.js';
 import type { ToolDeps } from '../tools/tool.js';
+import { draftReviewRequestsFor } from './review-requests.js';
 import { writeDraft, type DraftFacts, type DraftWriterDeps } from './writer.js';
 
 // The morning drafts pass (S36, ADR-0040; AC-W4-1, playbook D-3 and D-9): once a day, at the
@@ -54,7 +55,8 @@ import { writeDraft, type DraftFacts, type DraftWriterDeps } from './writer.js';
 // stores the proposal with its exact email, linked to the feed item. Nothing is sent until an
 // owner or manager approves it. At most `DRAFT_LIMITS.perBusinessPerDay` drafts a business a
 // day, and no client gets a second nudge within their interval. The worker's morning job runs
-// it just before the daily briefing (S38a), which counts what it drafted.
+// it just before the daily briefing (S38a), which counts what it drafted. Then, when the business
+// has a review link, it asks yesterday's clients for a review (S55.2, `review-requests.ts`).
 
 const DAY_MS = 86_400_000;
 /** Businesses per scan, and scans per pass. */
@@ -76,6 +78,10 @@ export type MorningDraftsResult =
   | {
       outcome: 'ran';
       drafted: number;
+      /** Review requests proposed this morning (S55.2): 0 without the business's review link. */
+      reviewRequests: number;
+      /** Review requests the domain refused (the client opted out meanwhile, the visit went). */
+      reviewsRefused: number;
       /** The model's words broke a draft rule, or the domain refused the nudge. */
       refused: number;
       /** No free time tomorrow for their service. */
@@ -90,8 +96,8 @@ export type MorningDraftsResult =
 export async function runDueMorningDrafts(
   db: Database,
   options: MorningDraftsOptions,
-): Promise<{ businesses: number; drafted: number; failed: number }> {
-  const totals = { businesses: 0, drafted: 0, failed: 0 };
+): Promise<{ businesses: number; drafted: number; reviewRequests: number; failed: number }> {
+  const totals = { businesses: 0, drafted: 0, reviewRequests: 0, failed: 0 };
   const seen = new Set<TenantId>();
   for (let batch = 0; batch < DRAFTS_BATCHES_PER_PASS; batch += 1) {
     const due = await listDueDraftRuns(db, options.clock.now(), DRAFTS_BATCH);
@@ -102,6 +108,7 @@ export async function runDueMorningDrafts(
       if (result.outcome !== 'ran') continue;
       totals.businesses += 1;
       totals.drafted += result.drafted;
+      totals.reviewRequests += result.reviewRequests;
       totals.failed += result.failed;
     }
     if (due.length < DRAFTS_BATCH) break;
@@ -144,13 +151,15 @@ export async function runMorningDraftsFor(
     const claimed = await claimMorning(tx, 'drafts', { timeZone: tenant.timeZone, hour }, now);
     if (claimed !== 'claimed') return { outcome: claimed };
     if (tenant.settings.suggestionsPaused) return { outcome: 'paused' as const };
-    if (tenant.settings.disabledKinds.includes('rebooking_due')) {
-      return { outcome: 'paused' as const };
-    }
+    // Review requests (S55.2) go on when only the rebooking suggestions are turned off.
+    const nudgesOff = tenant.settings.disabledKinds.includes('rebooking_due');
+    const reviewsOn = tenant.reviewUrl !== null;
+    if (nudgesOff && !reviewsOn) return { outcome: 'paused' as const };
     if (tenant.mailingAddress === null) return { outcome: 'no_address' as const };
     const owner = (await listMemberships(tx)).find((member) => member.role === 'owner');
     if (owner === undefined) return { outcome: 'gone' as const };
-    return { outcome: 'claimed' as const, tenant, drafts, today, ownerId: owner.userId };
+    const parts = { nudges: !nudgesOff, reviews: reviewsOn };
+    return { outcome: 'claimed' as const, tenant, drafts, today, ownerId: owner.userId, parts };
   });
   if (claim.outcome !== 'claimed') return { outcome: claim.outcome };
 
@@ -166,17 +175,19 @@ export async function runMorningDraftsFor(
   };
   const tomorrow = formatDate(addDays(claim.today, 1));
   const result = { drafted: 0, refused: 0, noTime: 0, noBudget: 0, failed: 0 };
-  const candidates = await withTenant(db, tenantId, (tx) =>
-    candidatesFor(tx, ai, {
-      timeZone: claim.tenant.timeZone,
-      tomorrow,
-      now,
-      business: { name: claim.tenant.name, voice: claim.drafts.voice },
-      templateRuleDefaults: options.templateRuleDefaults,
-      clock: options.clock,
-      result,
-    }),
-  );
+  const candidates = claim.parts.nudges
+    ? await withTenant(db, tenantId, (tx) =>
+        candidatesFor(tx, ai, {
+          timeZone: claim.tenant.timeZone,
+          tomorrow,
+          now,
+          business: { name: claim.tenant.name, voice: claim.drafts.voice },
+          templateRuleDefaults: options.templateRuleDefaults,
+          clock: options.clock,
+          result,
+        }),
+      )
+    : [];
 
   const deps: ToolDeps = {
     db,
@@ -246,7 +257,23 @@ export async function runMorningDraftsFor(
       result[proposalFailureOf(error)] += 1;
     }
   }
-  return { outcome: 'ran', ...result };
+
+  // Yesterday's visits (S55.2): a thank-you asking for a review, when the business has its link.
+  let reviewRequests = 0;
+  let reviewsRefused = 0;
+  if (claim.parts.reviews) {
+    const reviews = await draftReviewRequestsFor(db, tenantId, {
+      ai,
+      deps,
+      timeZone: claim.tenant.timeZone,
+      today: formatDate(claim.today),
+      clock: options.clock,
+    });
+    reviewRequests = reviews.drafted;
+    reviewsRefused = reviews.refused;
+    result.failed += reviews.failed;
+  }
+  return { outcome: 'ran', ...result, reviewRequests, reviewsRefused };
 }
 
 /**
