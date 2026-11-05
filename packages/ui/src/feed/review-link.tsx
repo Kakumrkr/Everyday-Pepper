@@ -52,8 +52,9 @@ export function ReviewLink({ url: saved, addressSet, onSave }: ReviewLinkProps) 
   if (url !== null && !editing) {
     return (
       <div className="flex flex-col gap-1" data-testid="review-link">
-        <p className="m-0 type-body break-all text-ink-2">
-          The morning after a visit, I draft a thank-you that asks for a review at {url}.
+        <p className="m-0 type-body text-ink-2">
+          The morning after a visit, I draft a thank-you that asks for a review at{' '}
+          <span className="break-all">{url}</span>.
         </p>
         <button
           type="button"
@@ -93,7 +94,7 @@ export function ReviewLink({ url: saved, addressSet, onSave }: ReviewLinkProps) 
         inputMode="url"
         autoComplete="url"
         aria-describedby={hintId}
-        className={fieldStyle}
+        className={cx(fieldStyle, 'min-h-12')}
         value={value}
         maxLength={500}
         placeholder="https://g.page/r/your-business/review"
