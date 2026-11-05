@@ -36,6 +36,7 @@ import {
   setMorningDueAt,
   requestInsightRun,
   updateCurrentTenantMailingAddress,
+  updateCurrentTenantReviewUrl,
   withMember,
   withTenant,
   writeFeedSettings,
@@ -108,6 +109,7 @@ export async function getFeed(
       canChangeSettings,
       askToTurnOff: canChangeSettings ? await kindToAskAbout(tx, stored, now) : null,
       mailingAddress: canChangeSettings ? (tenant?.mailingAddress ?? null) : null,
+      reviewUrl: canChangeSettings ? (tenant?.reviewUrl ?? null) : null,
     };
   });
 }
@@ -198,9 +200,9 @@ export async function closeFeedItems(
 }
 
 /**
- * Changes the business's feed switches and the mailing address its rebooking emails carry
- * (owners and managers), with an audit entry (the address only as set or not: it may be a
- * home address).
+ * Changes the business's feed switches, the mailing address its rebooking emails carry and the
+ * link its review requests give (owners and managers), with an audit entry (the address and the
+ * link only as set or not: the address may be a home).
  */
 export async function changeFeedSettings(
   db: Database,
@@ -223,6 +225,23 @@ export async function changeFeedSettings(
             entity: { type: 'tenant', id: actor.context.tenantId },
             before: { mailingAddressSet: before !== null },
             after: { mailingAddressSet: parsed.mailingAddress !== null },
+          },
+          requestId: actor.requestId,
+        });
+      }
+    }
+    if (parsed.reviewUrl !== undefined) {
+      const tenant = await findCurrentTenant(tx);
+      const before = tenant?.reviewUrl ?? null;
+      if (before !== parsed.reviewUrl) {
+        await updateCurrentTenantReviewUrl(tx, parsed.reviewUrl);
+        await appendAuditEntry(tx, {
+          actor: auditActorOf(actor),
+          change: {
+            action: 'tenant.updated',
+            entity: { type: 'tenant', id: actor.context.tenantId },
+            before: { reviewUrlSet: before !== null },
+            after: { reviewUrlSet: parsed.reviewUrl !== null },
           },
           requestId: actor.requestId,
         });

@@ -47,6 +47,7 @@ export const ACTION_NOUN: Record<AutonomyAction, string> = {
   'message.rebooking_nudge': 'rebooking nudges',
   'message.waitlist_offer': 'waitlist offers',
   'message.bulk': 'messages to several clients',
+  'message.review_request': 'review requests',
 };
 
 /** One standing rule and where it is changed. */

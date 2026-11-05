@@ -23,10 +23,14 @@ describe('the hostile fake', () => {
       const mine = attacks.filter((a) => a.call.name === tool.name);
       expect(mine.length, tool.name).toBeGreaterThanOrEqual(7);
     }
-    expect(attacks.filter((a) => a.stoppedWith.includes('unknown_tool')).length).toBe(9);
+    expect(attacks.filter((a) => a.stoppedWith.includes('unknown_tool')).length).toBe(10);
     // The system tools (S38b) are attacked by name, as tools the chat does not have.
     expect(attacks.map((a) => a.id)).toEqual(
-      expect.arrayContaining(['unknown.send_rebooking_nudge', 'unknown.send_waitlist_offers']),
+      expect.arrayContaining([
+        'unknown.send_rebooking_nudge',
+        'unknown.send_waitlist_offers',
+        'unknown.send_review_request',
+      ]),
     );
   });
 

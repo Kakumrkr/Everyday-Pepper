@@ -33,7 +33,7 @@ describe('standingRules (S53)', () => {
       '2026-11-04',
     ).map((line) => line.text);
     expect(lines).toEqual([
-      'I ask you before new bookings, moves, cancellations, rebooking nudges, waitlist offers and messages to several clients.',
+      'I ask you before new bookings, moves, cancellations, rebooking nudges, waitlist offers, messages to several clients and review requests.',
       'Accepting booking-page requests, blocking time, client notes, to-dos and waitlist changes: I do them and tell you, with Undo.',
       'Confirmation emails: I just do them and list them in Activity.',
       'A message to more than 10 clients, and a new booking rule, always wait for your OK.',

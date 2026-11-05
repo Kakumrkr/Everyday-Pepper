@@ -9,7 +9,7 @@ import { formatMoney } from '@pepper/ui';
 // "Haven't been back" (S54.2, ADR-0057; AC-W4-6…9): the screen's address and its words.
 
 export const WIN_BACK_PATH = '/clients/win-back';
-/** Where the business's mailing address is set (More, "Rebooking emails"). */
+/** Where the business's mailing address is set (More, "Emails to clients"). */
 export const MAILING_ADDRESS_PATH = '/more#rebooking-heading';
 
 /**

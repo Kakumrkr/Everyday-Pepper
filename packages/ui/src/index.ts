@@ -54,6 +54,7 @@ export {
 } from './feed/proof.js';
 export { DraftEditor, type DraftEditorProps, type DraftWords } from './cards/draft-editor.js';
 export { MailingAddress, type MailingAddressProps } from './feed/mailing-address.js';
+export { ReviewLink, type ReviewLinkProps } from './feed/review-link.js';
 // The kit (S40, DESIGN.md §4).
 export {
   Button,

@@ -90,7 +90,7 @@ test('the owner gives rebooking emails their mailing address, and changes it (S3
   const needed = page.getByTestId('mailing-address-needed');
   await (await hydrated(needed.getByRole('link', { name: 'Add your address' }))).click();
   await expect(page).toHaveURL(/\/more$/);
-  const suggestions = page.getByRole('region', { name: 'Rebooking emails' });
+  const suggestions = page.getByRole('region', { name: 'Emails to clients' });
   const form = suggestions.getByRole('form', { name: 'Mailing address for rebooking emails' });
   await expect(form).toBeVisible();
   const field = form.getByLabel('Your business’s mailing address');
@@ -113,6 +113,36 @@ test('the owner gives rebooking emails their mailing address, and changes it (S3
   await expect(form.getByRole('alert')).toBeVisible();
   await page.reload();
   await expect(suggestions.getByTestId('mailing-address')).toContainText('12 Juniper Lane');
+});
+
+test('the owner sets the review link for review requests, and turns them off (S55.2)', async ({
+  page,
+}) => {
+  await onboardOwner(page);
+  await page.goto('/more');
+  const emails = page.getByRole('region', { name: 'Emails to clients' });
+  const form = emails.getByRole('form', { name: 'Review link for review requests' });
+  // Without the mailing address the hint says to add it first.
+  await expect(form).toContainText('add it above first');
+  const field = form.getByLabel('Your review link');
+  // Not a full https address: answered at once, nothing saved.
+  await (await hydrated(field)).fill('g.page/r/juniper');
+  await form.getByRole('button', { name: 'Save link' }).click();
+  await expect(form.getByRole('alert')).toHaveText(
+    'Enter the full address, starting with https://',
+  );
+  await field.fill('https://g.page/r/juniper/review');
+  await form.getByRole('button', { name: 'Save link' }).click();
+  await expect(emails.getByTestId('review-link')).toContainText(
+    'asks for a review at https://g.page/r/juniper/review',
+  );
+  await page.reload();
+  const link = emails.getByTestId('review-link');
+  await (await hydrated(link.getByRole('button', { name: 'Change it' }))).click();
+  await form.getByRole('button', { name: 'Stop asking for reviews' }).click();
+  await expect(form.getByLabel('Your review link')).toHaveValue('');
+  await page.reload();
+  await expect(emails.getByTestId('review-link')).toHaveCount(0);
 });
 
 test('an unsubscribe link that is not valid says so, without signing in (S36)', async ({

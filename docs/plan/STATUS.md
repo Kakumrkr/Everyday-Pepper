@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S55.2** (post-visit review requests; Phase 12).
+**S55.2 · Post-visit review requests** (brief pre-approved by the user: D-1 no split; D-2 the morning pass drafts them the day after; D-3 no review link, no requests; D-4 90 days, any outcome but superseded; D-5 ADR-0059). Branch `s55-2-review-requests`.
+- Done: contracts (`message.review_request`, `ReviewUrlSchema`, `REVIEW_REQUEST_LIMITS`); migration 0065; db `listReviewCandidates`; ai `send_review_request` + `draftReviewRequestsFor` in the morning pass; the review link on More; labels, Activity, minutes; unsubscribe copy; top-up (`visitDateWords`); AC-W4-14…18; ADR-0059. Unit + targeted integration green.
+- Next: `/code-review`, then `/session-close` (pnpm check, affected integration, feed + screens specs, More/unsubscribe baselines).
 
 ## Last sessions
 - **S55 Phase 12 · Proof of value: the week card and the evening wrap (2026-11-05)** ([ADR-0058](../adr/0058-proof-of-value-week-card-and-evening-wrap.md), [PR #82](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/82)). Full entry in [session-log.md](session-log.md).

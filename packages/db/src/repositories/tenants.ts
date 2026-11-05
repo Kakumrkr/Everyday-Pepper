@@ -1,6 +1,7 @@
 import {
   BookingPageSettingsSchema,
   MailingAddressSchema,
+  ReviewUrlSchema,
   NewTenantSchema,
   TenantIdSchema,
   TenantSlugSchema,
@@ -129,6 +130,19 @@ export async function updateCurrentTenantMailingAddress(
     .set({
       mailingAddress: mailingAddress === null ? null : MailingAddressSchema.parse(mailingAddress),
     })
+    .where(eq(tenants.id, sql`current_tenant_id()`))
+    .returning();
+  return tenant;
+}
+
+/** Sets (or, with `null`, clears) where review requests send clients (S55.2). */
+export async function updateCurrentTenantReviewUrl(
+  tx: TenantTx,
+  reviewUrl: string | null,
+): Promise<Tenant | undefined> {
+  const [tenant] = await tx
+    .update(tenants)
+    .set({ reviewUrl: reviewUrl === null ? null : ReviewUrlSchema.parse(reviewUrl) })
     .where(eq(tenants.id, sql`current_tenant_id()`))
     .returning();
   return tenant;

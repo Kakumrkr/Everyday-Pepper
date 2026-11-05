@@ -144,6 +144,8 @@ describe('AC-W4-1: the morning pass drafts a nudge under "Needs your OK"', () =>
     expect(result).toEqual({
       outcome: 'ran',
       drafted: 1,
+      // No review link in this business, so no review requests (S55.2).
+      reviewRequests: 0,
       refused: 0,
       noTime: 0,
       noBudget: 0,

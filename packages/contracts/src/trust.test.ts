@@ -67,6 +67,7 @@ describe('AUTONOMY_ACTIONS', () => {
       'message.rebooking_nudge': 'ask',
       'message.waitlist_offer': 'ask',
       'message.bulk': 'ask',
+      'message.review_request': 'ask',
     });
   });
 

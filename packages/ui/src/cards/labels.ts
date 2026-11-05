@@ -34,6 +34,7 @@ export const ACTION_LABEL: Record<AutonomyAction, string> = {
   'message.rebooking_nudge': 'Rebooking nudge',
   'message.waitlist_offer': 'Waitlist offer',
   'message.bulk': 'Message to many clients',
+  'message.review_request': 'Review request',
 };
 
 /** Each dial action as the Autonomy page names it (the approved prototype's words). */
@@ -51,6 +52,7 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
   'message.rebooking_nudge': 'Rebooking nudges to regulars who are due',
   'message.waitlist_offer': 'Offering open slots to the waitlist',
   'message.bulk': 'One message to more than 10 clients',
+  'message.review_request': 'Asking clients for a review after a visit',
 };
 
 export const LEVEL_LABEL: Record<AutonomyLevel, string> = {
@@ -108,6 +110,7 @@ const STEP_LABEL: Record<string, string> = {
   forget_fact: 'Forgot it',
   // A one-tap win-back draft (S54.2): the member asked; the words are Pepper's template.
   win_back: 'Drafted the email you asked for',
+  review_requests: 'Looked at yesterday’s visits',
 };
 
 /** One step of the *Why?* trace, in words. */
@@ -284,6 +287,15 @@ export function changeRows(
       add('Service', null, text(after, 'serviceName'));
       add('Offered to', null, text(after, 'offeredTo'));
       return rows;
+    case 'message.review_request': {
+      // A review request (S55.2): to whom, and the visit it follows.
+      const visitDay = text(after, 'date');
+      add('To', null, text(after, 'clientName'));
+      add('Visit', null, text(after, 'serviceName'));
+      add('On', null, visitDay === null ? null : formatDate(visitDay));
+      add('With', null, text(after, 'staffName'));
+      return rows;
+    }
     case 'message.confirmation':
     case 'message.bulk':
       // No tool makes these yet (messages: Phase 8); the summary says it all.
@@ -347,6 +359,7 @@ const EMAIL_NAME: Record<WouldBeEmail['template'], string> = {
   cancelled: 'cancellation email',
   rebooking_nudge: 'rebooking email',
   waitlist_offer: 'waitlist offer',
+  review_request: 'review request',
 };
 
 const WOULD_SEND: Record<WouldBeEmail['template'], (name: string) => string> = {
@@ -355,6 +368,7 @@ const WOULD_SEND: Record<WouldBeEmail['template'], (name: string) => string> = {
   cancelled: (name) => `Emails ${name} that it’s cancelled.`,
   rebooking_nudge: (name) => `Emails ${name} the rebooking note below.`,
   waitlist_offer: (name) => `Emails ${name} the open time, first to claim it books it.`,
+  review_request: (name) => `Emails ${name} the thank-you below, with your review link.`,
 };
 
 const ALREADY: Record<WouldBeEmail['template'], (name: string) => string> = {
@@ -363,6 +377,7 @@ const ALREADY: Record<WouldBeEmail['template'], (name: string) => string> = {
   cancelled: (name) => `${name} was already emailed that it’s cancelled.`,
   rebooking_nudge: (name) => `${name} was already emailed about rebooking.`,
   waitlist_offer: (name) => `${name} was already offered this time.`,
+  review_request: (name) => `${name} was already asked for a review.`,
 };
 
 /** What happens, or happened, to one email the action involves. */
@@ -485,6 +500,11 @@ export function factLine(fact: AiWhyFact): string | null {
     case 'nudge_last_visit':
       // A rebooking email (S36): the client's last visit, and why they are due.
       return date === null ? null : `Their last visit was on ${formatDate(date)}.`;
+    case 'review_visit':
+      // A review request (S55.2): the visit it follows, and the 90-day rule.
+      return date === null
+        ? null
+        : `They came in on ${formatDate(date)}, and I haven’t asked them for a review in the last 90 days.`;
     case 'rebooking_due': {
       const interval = value?.['intervalDays'];
       const dueOn = str('dueOn');

@@ -68,6 +68,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   draft_refused:
     'Leave out links, email addresses, phone numbers and sensitive notes, and keep it to 120 words',
   nudge_not_sendable: 'This email can no longer be sent to this client',
+  review_request_not_sendable: 'This review request can no longer be sent to this client',
   unsubscribe_link_invalid: 'This unsubscribe link is not valid',
   booking_page_not_found: 'There is no booking page at this address',
   booking_request_not_found: 'This booking request was not found. Start again',

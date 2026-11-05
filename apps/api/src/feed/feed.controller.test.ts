@@ -54,6 +54,7 @@ const FEED: FeedResponse = {
   canChangeSettings: true,
   askToTurnOff: null,
   mailingAddress: null,
+  reviewUrl: null,
 };
 
 class FakeAuth extends AuthService {

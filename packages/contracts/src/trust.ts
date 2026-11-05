@@ -35,6 +35,7 @@ export const AutonomyActionSchema = z.enum([
   'message.rebooking_nudge',
   'message.waitlist_offer',
   'message.bulk',
+  'message.review_request',
 ]);
 export type AutonomyAction = z.infer<typeof AutonomyActionSchema>;
 
@@ -148,6 +149,15 @@ export const AUTONOMY_ACTIONS = {
     undo: UNTIL_SENT,
   },
   'message.waitlist_offer': {
+    riskTier: 'external_or_irreversible',
+    defaultLevel: 'ask',
+    allowsAuto: true,
+    permission: 'bookings.manage',
+    undo: UNTIL_SENT,
+  },
+  // A thank-you after a visit asking for a review (S55.2, ADR-0059): asks by default, like
+  // every marketing email; at most one a client per 90 days.
+  'message.review_request': {
     riskTier: 'external_or_irreversible',
     defaultLevel: 'ask',
     allowsAuto: true,
