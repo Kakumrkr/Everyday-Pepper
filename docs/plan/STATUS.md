@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S54.2** (the win-back list with one-tap drafts, the post-import aha; Phase 12).
+**S54.2** (brief pre-approved: D-1 no split, D-2 the list computed on read, D-3 reuse the nudge tool and its dial action, D-4 ADR-0057).
+- [x] T1 AC-W4-6…9; T2 `findWinBack` (2+ visits, no 2× cut-off); T3 `listWinBackIn` + db `readWinBackClients` (int 3/3).
+- [ ] T4 `draftWinBack` (ai) · T5 api `/v1/win-back` · T6 web list + import line · T7 baselines, ADR, close.
 
 ## Last sessions
 - **S54 Phase 12 · The money loop, part 1: cancellation → fill (2026-11-04)** ([ADR-0056](../adr/0056-regulars-fill-freed-times-and-fill-receipts.md), [PR #80](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/80)). Full entry in [session-log.md](session-log.md).
