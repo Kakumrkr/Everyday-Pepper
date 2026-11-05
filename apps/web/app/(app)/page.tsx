@@ -4,10 +4,11 @@ import {
   DeletionStatusSchema,
   FeedResponseSchema,
   ImportBatchSchema,
+  ProofResponseSchema,
   SetupReviewSchema,
   TasksResponseSchema,
 } from '@pepper/contracts';
-import { EmptyState } from '@pepper/ui';
+import { EmptyState, EveningWrap, WeekProof } from '@pepper/ui';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { requiredStep } from '../../lib/account';
@@ -32,7 +33,8 @@ export const dynamic = 'force-dynamic';
  * from S52 (ADR-0043: suggestions ranked by dollars and grouped, quiet before the first visit;
  * one line while the business is being deleted). Today's briefing
  * (S38a), Needs your OK (the AI's proposals), Suggestions (what the rules found, `/v1/feed`)
- * and Done for you (receipts), then the to-dos. On the kit (S41): the plum briefing first, what
+ * and Done for you (receipts), then what I did this week (S55), then the to-dos; from the
+ * evening hour, tomorrow's wrap comes first (S55, ADR-0058). On the kit (S41): the plum briefing first, what
  * needs a decision raised, the rest flat; notifications and the account moved to More. Owners
  * and managers see the setup review first until it is checked, and anything that stops clients
  * from booking (S46); when it can't load, Home says nothing about setup rather than guess.
@@ -62,7 +64,7 @@ export default async function HomePage() {
         currentJson('/v1/ai/actions', AiActionsResponseSchema),
       ])
     : [null, null];
-  const [setup, feed, imports, deletion] = await Promise.all([
+  const [setup, feed, imports, deletion, proof] = await Promise.all([
     current?.permissions.includes('settings.manage') === true
       ? currentJson('/v1/setup', SetupReviewSchema)
       : null,
@@ -78,6 +80,11 @@ export default async function HomePage() {
     // A business being deleted says so in one quiet line (S52, AC-W1-45).
     current?.permissions.includes('business.read') === true
       ? currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema)
+      : null,
+    // Proof of value (S55, ADR-0058): the week and, in the evening, tomorrow; for the leads,
+    // who hold the business's settings (the dollars and the names are the business's).
+    current?.permissions.includes('settings.manage') === true
+      ? currentJson('/v1/proof', ProofResponseSchema)
       : null,
   ]);
   const deletionDueAt = deletion?.dueAt ?? null;
@@ -117,6 +124,9 @@ export default async function HomePage() {
           offersImport={imports !== null && offersImport(imports)}
         />
       ) : null}
+      {current !== null && proof !== null ? (
+        <EveningWrap evening={proof.evening} timeZone={current.business.timeZone} />
+      ) : null}
       {current !== null && feed !== null ? (
         <BriefingCard feed={feed} timeZone={current.business.timeZone} />
       ) : null}
@@ -139,6 +149,7 @@ export default async function HomePage() {
           timeZone={current.business.timeZone}
         />
       ) : null}
+      {proof === null ? null : <WeekProof week={proof.week} />}
       {current !== null && open !== null && done !== null ? (
         <TaskCard
           open={open.tasks}
