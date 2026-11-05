@@ -1,6 +1,7 @@
 import { and, desc, gt, inArray, isNull, lte, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { aiActionProposals, bookings, clients } from '../schema.js';
+import { NUDGE_ACTION } from './feed.js';
 import type { TenantTx } from '../tenant.js';
 
 // Post-visit review requests (S55.2, ADR-0059): which clients the morning pass may ask for a
@@ -20,7 +21,12 @@ export interface ReviewCandidate {
   serviceId: string;
   staffMemberId: string;
   startsAt: Date;
+  /** As the client typed it (untrusted text). */
+  clientName: string;
 }
+
+/** No review request within this many days of a nudge or a regular's offer: one a week. */
+const MARKETING_QUIET_DAYS = 7;
 
 /** At most this many visits are read in one pass (a busy two days). */
 const VISITS_READ_MAX = 1_000;
@@ -31,7 +37,8 @@ const VISITS_READ_MAX = 1_000;
  * (confirmed or completed; not cancelled, not a no-show) and is not imported history. The
  * client is not deleted, has an email, has not opted out of marketing email, and got no review
  * request within `quietDays` (a pending, sent, turned down or expired one all count; a
- * superseded one reached no one).
+ * superseded one reached no one), nor a rebooking nudge or a regular's offer in the last
+ * `MARKETING_QUIET_DAYS` (one marketing email a week at most, as for nudges and offers).
  */
 export async function listReviewCandidates(
   tx: TenantTx,
@@ -47,6 +54,7 @@ export async function listReviewCandidates(
       serviceId: bookings.serviceId,
       staffMemberId: bookings.staffMemberId,
       startsAt: bookings.startsAt,
+      clientName: clients.name,
     })
     .from(bookings)
     .innerJoin(clients, sql`${clients.id} = ${bookings.clientId}`)
@@ -59,6 +67,8 @@ export async function listReviewCandidates(
         isNull(clients.deletedAt),
         sql`${clients.email} IS NOT NULL`,
         isNull(clients.emailOptOutAt),
+        sql`NOT EXISTS (SELECT 1 FROM ${aiActionProposals} p WHERE p.action = ${NUDGE_ACTION} AND p.target_key = 'nudge:client:' || ${bookings.clientId}::text AND p.status <> 'superseded' AND p.created_at > ${window.now.toISOString()}::timestamptz - make_interval(days => ${MARKETING_QUIET_DAYS}))`,
+        sql`NOT EXISTS (SELECT 1 FROM waitlist_offers o WHERE o.client_id = ${bookings.clientId} AND o.source = 'regular' AND o.created_at > ${window.now.toISOString()}::timestamptz - make_interval(days => ${MARKETING_QUIET_DAYS}))`,
         sql`NOT EXISTS (SELECT 1 FROM ${aiActionProposals} p WHERE p.action = ${REVIEW_REQUEST_ACTION} AND p.target_key = ${target} AND p.status <> 'superseded' AND p.created_at > ${window.now.toISOString()}::timestamptz - make_interval(days => ${quietDays}))`,
       ),
     )

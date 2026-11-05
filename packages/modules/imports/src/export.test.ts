@@ -47,6 +47,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
       publicAddress: null,
       cancellationPolicy: null,
       mailingAddress: null,
+      reviewUrl: null,
       createdAt: AT,
     },
     rules: [],

@@ -139,7 +139,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
           // Counts only.
           if (result.businesses > 0) {
             this.logger.log(
-              `Morning drafts: ${String(result.businesses)} businesses, ${String(result.drafted)} drafted`,
+              `Morning drafts: ${String(result.businesses)} businesses, ${String(result.drafted)} drafted, ${String(result.reviewRequests)} review requests`,
             );
           }
           // Not a refusal: a model call or a proposal broke (the next morning tries again).

@@ -36,9 +36,13 @@ function isReviewUrl(value: string): boolean {
   } catch {
     return false;
   }
+  // A public name ending in letters (g.page, yelp.com): no IP address or internal host, which
+  // mail filters read as phishing.
+  const tld = url.hostname.split('.').at(-1) ?? '';
   return (
     url.protocol === 'https:' &&
     url.hostname.includes('.') &&
+    /^[a-z]{2,63}$/.test(tld) &&
     url.username === '' &&
     url.password === ''
   );

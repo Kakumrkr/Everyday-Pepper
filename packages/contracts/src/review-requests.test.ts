@@ -15,6 +15,9 @@ describe('ReviewUrlSchema (S55.2)', () => {
     'http://g.page/r/abc', // not https
     'g.page/r/abc', // no scheme
     'https://localhost/review', // no real host
+    'https://10.0.0.5/review', // an IP address
+    'https://[::1]/review',
+    'https://intranet.local1/review', // not a public name
     'https://user:pass@g.page/r/abc', // credentials
     'https://g.page/r/a b', // a space
     'javascript:alert(1)',

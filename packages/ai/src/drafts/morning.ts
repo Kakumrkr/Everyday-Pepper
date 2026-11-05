@@ -80,6 +80,8 @@ export type MorningDraftsResult =
       drafted: number;
       /** Review requests proposed this morning (S55.2): 0 without the business's review link. */
       reviewRequests: number;
+      /** Review requests the domain refused (the client opted out meanwhile, the visit went). */
+      reviewsRefused: number;
       /** The model's words broke a draft rule, or the domain refused the nudge. */
       refused: number;
       /** No free time tomorrow for their service. */
@@ -94,8 +96,8 @@ export type MorningDraftsResult =
 export async function runDueMorningDrafts(
   db: Database,
   options: MorningDraftsOptions,
-): Promise<{ businesses: number; drafted: number; failed: number }> {
-  const totals = { businesses: 0, drafted: 0, failed: 0 };
+): Promise<{ businesses: number; drafted: number; reviewRequests: number; failed: number }> {
+  const totals = { businesses: 0, drafted: 0, reviewRequests: 0, failed: 0 };
   const seen = new Set<TenantId>();
   for (let batch = 0; batch < DRAFTS_BATCHES_PER_PASS; batch += 1) {
     const due = await listDueDraftRuns(db, options.clock.now(), DRAFTS_BATCH);
@@ -106,6 +108,7 @@ export async function runDueMorningDrafts(
       if (result.outcome !== 'ran') continue;
       totals.businesses += 1;
       totals.drafted += result.drafted;
+      totals.reviewRequests += result.reviewRequests;
       totals.failed += result.failed;
     }
     if (due.length < DRAFTS_BATCH) break;
@@ -257,6 +260,7 @@ export async function runMorningDraftsFor(
 
   // Yesterday's visits (S55.2): a thank-you asking for a review, when the business has its link.
   let reviewRequests = 0;
+  let reviewsRefused = 0;
   if (claim.parts.reviews) {
     const reviews = await draftReviewRequestsFor(db, tenantId, {
       ai,
@@ -266,10 +270,10 @@ export async function runMorningDraftsFor(
       clock: options.clock,
     });
     reviewRequests = reviews.drafted;
-    result.refused += reviews.refused;
+    reviewsRefused = reviews.refused;
     result.failed += reviews.failed;
   }
-  return { outcome: 'ran', ...result, reviewRequests };
+  return { outcome: 'ran', ...result, reviewRequests, reviewsRefused };
 }
 
 /**

@@ -18,8 +18,15 @@ export interface ReviewLinkProps {
  * The business's review link for post-visit review requests (S55.2, ADR-0059): until an owner
  * or manager sets it, no request is drafted. Shown to them only.
  */
-export function ReviewLink({ url, addressSet, onSave }: ReviewLinkProps) {
+export function ReviewLink({ url: saved, addressSet, onSave }: ReviewLinkProps) {
   const fieldId = useId();
+  // What was saved last, shown at once (the page's own reading follows with the refresh).
+  const [url, setUrl] = useState(saved);
+  const [prop, setProp] = useState(saved);
+  if (prop !== saved) {
+    setProp(saved);
+    setUrl(saved);
+  }
   const hintId = useId();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(url ?? '');
@@ -36,6 +43,7 @@ export function ReviewLink({ url, addressSet, onSave }: ReviewLinkProps) {
         return;
       }
       setEditing(false);
+      setUrl(next === null ? null : next.trim());
       // Taken away: the empty form is what shows next.
       if (next === null) setValue('');
     });

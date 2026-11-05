@@ -1,13 +1,12 @@
 import { listServicesIn } from '@pepper/appointments';
 import {
-  ClientIdSchema,
   REVIEW_REQUEST_LIMITS,
   type LocalDate,
   type TenantId,
   type TrustJson,
 } from '@pepper/contracts';
 import { proposeForBusiness, type Actor, type Clock } from '@pepper/core';
-import { findClient, listReviewCandidates, withTenant, type Database } from '@pepper/db';
+import { listReviewCandidates, withTenant, type Database, type ReviewCandidate } from '@pepper/db';
 import { sendReviewRequest } from '../tools/catalog/review-requests.js';
 import { toolRefusalOf } from '../tools/errors.js';
 import { clientFirstName } from '../tools/names.js';
@@ -49,27 +48,29 @@ export async function draftReviewRequestsFor(
 ): Promise<ReviewRequestsResult> {
   const now = context.clock.now();
   const result: ReviewRequestsResult = { drafted: 0, refused: 0, failed: 0 };
-  const candidates = await withTenant(db, tenantId, async (tx) => {
-    const visits = await listReviewCandidates(tx, {
-      now,
-      since: new Date(now.getTime() - REVIEW_REQUEST_LIMITS.lookbackHours * HOUR_MS),
-      quietDays: REVIEW_REQUEST_LIMITS.quietDays,
-      limit: context.perBusinessPerDay ?? REVIEW_REQUEST_LIMITS.perBusinessPerDay,
-    });
-    if (visits.length === 0) return [];
-    const services = await listServicesIn(tx, context.ai);
-    const named = [];
-    for (const visit of visits) {
-      const client = await findClient(tx, ClientIdSchema.parse(visit.clientId));
-      if (client === undefined) continue;
-      named.push({
-        visit,
-        firstName: clientFirstName(client.name) ?? null,
-        serviceName: services.find((each) => each.id === visit.serviceId)?.name ?? 'visit',
+  let candidates: { visit: ReviewCandidate; firstName: string | null; serviceName: string }[];
+  try {
+    candidates = await withTenant(db, tenantId, async (tx) => {
+      const visits = await listReviewCandidates(tx, {
+        now,
+        since: new Date(now.getTime() - REVIEW_REQUEST_LIMITS.lookbackHours * HOUR_MS),
+        quietDays: REVIEW_REQUEST_LIMITS.quietDays,
+        limit: context.perBusinessPerDay ?? REVIEW_REQUEST_LIMITS.perBusinessPerDay,
       });
-    }
-    return named;
-  });
+      if (visits.length === 0) return [];
+      const services = await listServicesIn(tx, context.ai);
+      return visits.map((visit) => ({
+        visit,
+        firstName: clientFirstName(visit.clientName) ?? null,
+        serviceName: services.find((each) => each.id === visit.serviceId)?.name ?? 'visit',
+      }));
+    });
+  } catch {
+    // This business's reads broke: the next business's morning still runs, and so does its own
+    // tomorrow (the worker reports the failure).
+    result.failed += 1;
+    return result;
+  }
 
   for (const { visit, firstName, serviceName } of candidates) {
     const payload: TrustJson = {

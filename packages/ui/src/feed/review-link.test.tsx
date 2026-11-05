@@ -23,6 +23,8 @@ describe('ReviewLink (S55.2)', () => {
     await userEvent.type(screen.getByLabelText('Your review link'), LINK);
     await userEvent.click(screen.getByRole('button', { name: 'Save link' }));
     expect(onSave).toHaveBeenCalledWith(LINK);
+    // The saved link shows at once, before the page reads it again.
+    expect((await screen.findByTestId('review-link')).textContent).toContain(LINK);
     expect(screen.queryByRole('button', { name: 'Stop asking for reviews' })).toBeNull();
     expect((await axe.run(container)).violations).toEqual([]);
   });
@@ -42,6 +44,8 @@ describe('ReviewLink (S55.2)', () => {
     expect(screen.getByLabelText<HTMLInputElement>('Your review link').value).toBe(LINK);
     await userEvent.click(screen.getByRole('button', { name: 'Stop asking for reviews' }));
     expect(onSave).toHaveBeenCalledWith(null);
+    expect((await screen.findByRole('form')).textContent).toContain('Your review link');
+    expect(screen.queryByTestId('review-link')).toBeNull();
   });
 
   it('shows why a save failed and keeps the form', async () => {

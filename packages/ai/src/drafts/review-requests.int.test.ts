@@ -36,6 +36,7 @@ import { OUTBOX_KEY, startTestDatabase, type TestDatabase } from '../tools/test-
 import type { ToolDeps } from '../tools/tool.js';
 import { runMorningDraftsFor, type MorningDraftsOptions } from './morning.js';
 import { draftReviewRequestsFor } from './review-requests.js';
+import { draftWinBack } from './win-back.js';
 import { reviewWords } from './review-words.js';
 
 // Post-visit review requests end to end (S55.2, ADR-0059) on Postgres: AC-W4-14 (the morning
@@ -303,6 +304,20 @@ describe('AC-W4-15: one a client per 90 days, and only when it can go', () => {
       reviewRequests: 0,
     });
     expect(await reviews(w)).toEqual([]);
+  });
+
+  it('waits a week after a rebooking email: one marketing email a week at most', async () => {
+    const w = await world();
+    await reviewsOnly(w);
+    // Sara is overdue, so the owner drafts her a win-back email (a rebooking nudge) first.
+    const drafted = await draftWinBack(depsAs(w, 'owner'), client(w, 'sara'));
+    expect(drafted.kind).toBe('drafted');
+    await visit(w, 'sara', 10);
+    await visit(w, 'ana', 13);
+    expect(await runMorningDraftsFor(db, w.tenantId, optionsFor(w))).toMatchObject({
+      reviewRequests: 1,
+    });
+    expect((await reviews(w)).map(clientOf)).toEqual([client(w, 'ana')]);
   });
 
   it('drafts nothing without the review link or the mailing address, or while paused', async () => {
