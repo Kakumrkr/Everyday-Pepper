@@ -6,21 +6,17 @@ import {
   requireWinBackAccess,
 } from '@pepper/appointments';
 import {
-  ActionProposalIdSchema,
   ClientIdSchema,
   formatDate,
   fromZoned,
-  NudgeDraftSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
   toZoned,
   WIN_BACK_LIMITS,
   type AvailableSlot,
   type ClientId,
-  type NudgeDraft,
   type TrustJson,
   type WinBackDraftResult,
-  type WinBackRefusal,
 } from '@pepper/contracts';
 import { NudgeNotSendableError, proposeForBusiness, type Actor } from '@pepper/core';
 import {
@@ -33,6 +29,7 @@ import {
   withTenant,
   type TenantTx,
 } from '@pepper/db';
+import { drafted, firstAnswer, refused, winBackWords } from './win-back-words.js';
 import { sendRebookingNudge } from '../tools/catalog/nudges.js';
 import { clientFirstName } from '../tools/names.js';
 import { writeRunner } from '../tools/runner.js';
@@ -49,32 +46,6 @@ import type { ToolDeps } from '../tools/tool.js';
 // quiet window of a nudge or a regular's offer; a second tap returns the draft that waits.
 
 const DAY_MS = 86_400_000;
-
-/**
- * The words of a win-back email, from what the business knows (first name, service, date).
- * A name that breaks a draft rule (too long, or read as a link or contact) leaves the name
- * and the service out rather than failing the tap.
- */
-export function winBackWords(facts: {
-  firstName: string | null;
-  serviceName: string;
-  lastVisit: string;
-}): NudgeDraft {
-  const service = facts.serviceName.toLowerCase();
-  const hello = facts.firstName === null ? 'Hi,' : `Hi ${facts.firstName},`;
-  const named = NudgeDraftSchema.safeParse({
-    subject:
-      facts.firstName === null
-        ? `Time for your next ${service}?`
-        : `Time for your next ${service}, ${facts.firstName}?`,
-    body: `${hello}\n\nIt's been a while since your last ${service} on ${facts.lastVisit}, and we'd love to see you again.`,
-  });
-  if (named.success) return named.data;
-  return NudgeDraftSchema.parse({
-    subject: 'Time for your next visit?',
-    body: `Hi,\n\nIt's been a while since your last visit on ${facts.lastVisit}, and we'd love to see you again.`,
-  });
-}
 
 /** Drafts the win-back email for `clientId`, or says why it can't. */
 export async function draftWinBack(
@@ -93,18 +64,11 @@ export async function draftWinBack(
     const entry = (await findWinBackEntries(tx, member, now)).find(
       (each) => each.clientId === clientId,
     );
+    const first = firstAnswer(entry, tenant.mailingAddress !== null);
+    if (first !== null) return first;
     if (entry === undefined) return refused('not_due');
-    // A draft already waits (this one's, or the morning pass's): the second tap opens it.
-    if (entry.pendingProposalId !== null) {
-      return drafted(entry.pendingProposalId);
-    }
-    if (tenant.mailingAddress === null) return refused('no_address');
-    if (entry.optedOut) return refused('opted_out');
-    if (!entry.hasEmail) return refused('no_email');
-    if (entry.emailedAt !== null) return refused('recently_emailed');
     const today = toZoned(tenant.timeZone, now.getTime());
     const midnight = new Date(fromZoned(tenant.timeZone, today, 0));
-    if (!entry.serviceBookable) return refused('service_hidden');
     const cap = options.perBusinessPerDay ?? WIN_BACK_LIMITS.perBusinessPerDay;
     // Two taps at once count one after the other (the lock holds until this transaction ends).
     await lockWinBackDrafts(tx);
@@ -177,14 +141,6 @@ export async function draftWinBack(
       throw error;
     }
   });
-}
-
-function refused(reason: WinBackRefusal): WinBackDraftResult {
-  return { kind: 'refused', reason };
-}
-
-function drafted(proposalId: string): WinBackDraftResult {
-  return { kind: 'drafted', proposalId: ActionProposalIdSchema.parse(proposalId) };
 }
 
 /** Their staff member's first open time for the service; else anyone's who offers it. */

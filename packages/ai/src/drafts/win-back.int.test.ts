@@ -28,7 +28,8 @@ import { seedEvalWorld, type EvalWorld, type WorldSeed } from '../evals/world.js
 import { approveToolProposal } from '../tools/registry.js';
 import { OUTBOX_KEY, startTestDatabase, type TestDatabase } from '../tools/test-support.js';
 import type { ToolDeps } from '../tools/tool.js';
-import { draftWinBack, winBackWords } from './win-back.js';
+import { draftWinBack } from './win-back.js';
+import { winBackWords } from './win-back-words.js';
 
 // One-tap win-back drafts end to end on Postgres (S54.2, ADR-0057; AC-W4-7): the tap proposes
 // the rebooking nudge with the domain's words and the next open time, a second tap opens the
@@ -263,23 +264,5 @@ describe('AC-W4-7: one tap drafts a win-back email', () => {
       'refused',
     );
     expect(await queuedEmails(w, later(w, 3))).toEqual([]);
-  });
-});
-
-describe('the words', () => {
-  it('stay inside the draft rules, with or without a first name', () => {
-    expect(
-      winBackWords({ firstName: null, serviceName: 'Gel Manicure', lastVisit: 'May 3' }),
-    ).toEqual({
-      subject: 'Time for your next gel manicure?',
-      body: "Hi,\n\nIt's been a while since your last gel manicure on May 3, and we'd love to see you again.",
-    });
-    // A name a draft rule refuses (too long, or read as a link) leaves the name and service out.
-    for (const serviceName of ['Signature '.repeat(12), 'lash.me refill']) {
-      expect(winBackWords({ firstName: 'Ana', serviceName, lastVisit: 'May 3' })).toEqual({
-        subject: 'Time for your next visit?',
-        body: "Hi,\n\nIt's been a while since your last visit on May 3, and we'd love to see you again.",
-      });
-    }
   });
 });
