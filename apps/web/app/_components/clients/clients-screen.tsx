@@ -1,9 +1,11 @@
 'use client';
 
 import type { Client } from '@pepper/contracts';
-import { buttonStyle } from '@pepper/ui';
+import { buttonStyle, List, ListRow } from '@pepper/ui';
 import Link from 'next/link';
 import { IMPORT_PATH } from '../../../lib/imports';
+import { ahaSentence, WIN_BACK_PATH } from '../../../lib/win-back';
+import { kitLink } from '../kit-link';
 import { ClientDirectory } from './client-directory';
 import { useSheetOpener } from '../use-sheet-opener';
 import { ClientEditor } from './client-editor';
@@ -17,12 +19,15 @@ export function ClientsScreen({
   initial,
   manages,
   importId = null,
+  winBack = null,
 }: {
   /** The first page, and the cursor of the next (S50.2); `null` when it couldn't load. */
   initial: { clients: Client[]; nextCursor: string | null } | null;
   manages: boolean;
   /** Only the clients this import added (AC-W1-29). */
   importId?: string | null;
+  /** "Haven't been back"'s numbers (owners and managers, S54.2); `null`: no way in. */
+  winBack?: { count: number; totalCents: number } | null;
 }) {
   const adding = useSheetOpener();
   return (
@@ -51,6 +56,16 @@ export function ClientsScreen({
           </div>
         ) : null}
       </header>
+      {winBack === null ? null : (
+        <List className="rounded-lg bg-surface px-4">
+          <ListRow
+            href={WIN_BACK_PATH}
+            renderLink={kitLink}
+            title="Haven’t been back"
+            meta={ahaSentence(winBack) ?? 'Regulars who stop coming show here.'}
+          />
+        </List>
+      )}
       {initial === null ? (
         <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
           I couldn’t load your clients. Try again in a moment.

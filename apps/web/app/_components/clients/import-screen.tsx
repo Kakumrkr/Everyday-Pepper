@@ -1,6 +1,11 @@
 'use client';
 
-import type { ImportBatch, ImportBatchId, ImportPreview } from '@pepper/contracts';
+import {
+  WinBackResponseSchema,
+  type ImportBatch,
+  type ImportBatchId,
+  type ImportPreview,
+} from '@pepper/contracts';
 import {
   Badge,
   Button,
@@ -17,7 +22,8 @@ import {
 import Link from 'next/link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
-import { errorCodeOf } from '../../../lib/client-api';
+import { errorCodeOf, fetchJson } from '../../../lib/client-api';
+import { ahaSentence, WIN_BACK_PATH } from '../../../lib/win-back';
 import {
   ACCEPTED_IMPORT_TYPES,
   batchInAddress,
@@ -600,6 +606,7 @@ function ResultStep({
           </p>
         )}
       </section>
+      {batch.kind === 'visits' && batch.status === 'done' ? <OverdueRegulars /> : null}
       <TakenTimes batch={batch} rows={rows} timeZone={timeZone} choices={bookAgain} />
       <Dialog
         open={confirming}
@@ -642,5 +649,41 @@ function ResultStep({
         </ActionBar>
       )}
     </>
+  );
+}
+
+/**
+ * The post-import aha (S54.2, AC-W4-8): with the visits in, who is already overdue and about
+ * how much they're worth ("12 regulars are overdue, about $540"), the same numbers as
+ * "Haven't been back", with the way there. Nothing when no one is (or it can't load).
+ */
+function OverdueRegulars() {
+  const [sentence, setSentence] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    void fetchJson('/v1/win-back', WinBackResponseSchema).then((answer) => {
+      if (live && answer.ok) setSentence(ahaSentence(answer.data));
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+  if (sentence === null) return null;
+  return (
+    <section
+      aria-labelledby="import-overdue"
+      className="flex flex-col gap-2 rounded-lg bg-brand-soft px-5 py-4"
+      data-testid="import-overdue"
+    >
+      <h2 id="import-overdue" className="m-0 type-subheading text-ink tabular-nums">
+        {sentence}
+      </h2>
+      <p className="m-0 type-body text-ink-2">
+        They came regularly and stopped. One tap drafts each an email with their next open time.
+      </p>
+      <Link href={WIN_BACK_PATH} className="type-body font-semibold text-ink">
+        See who
+      </Link>
+    </section>
   );
 }
