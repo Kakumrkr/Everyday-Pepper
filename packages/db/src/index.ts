@@ -18,6 +18,7 @@ export * from './repositories/deletion.js';
 export * from './repositories/conversations.js';
 export * from './repositories/feed.js';
 export * from './repositories/win-back.js';
+export * from './repositories/proof.js';
 export * from './repositories/imports.js';
 export * from './repositories/imported-bookings.js';
 export * from './repositories/invites.js';

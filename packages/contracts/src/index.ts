@@ -11,6 +11,7 @@ export * from './drafts.js';
 export * from './export.js';
 export * from './feed.js';
 export * from './win-back.js';
+export * from './proof.js';
 export * from './health.js';
 export * from './imports.js';
 export * from './invites.js';
