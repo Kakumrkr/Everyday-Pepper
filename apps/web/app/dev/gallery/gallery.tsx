@@ -1,5 +1,6 @@
 'use client';
 
+import { EveningWrapSchema, WeekValueSchema } from '@pepper/contracts';
 import {
   Avatar,
   Badge,
@@ -12,6 +13,7 @@ import {
   DetailTable,
   Dialog,
   EmptyState,
+  EveningWrap,
   formatMoney,
   IconButton,
   Input,
@@ -28,6 +30,7 @@ import {
   StickyActionBar,
   Switch,
   Tabs,
+  WeekProof,
   Textarea,
   TimeChip,
   Toast,
@@ -47,8 +50,11 @@ import {
   OVERDUE,
   SERVICES,
   SHOP,
+  SHOP_TIME_ZONE,
   TIMES_TODAY,
+  TOMORROW,
   VISITS,
+  WEEK_PROOF,
 } from './southside';
 
 const TYPE_SAMPLES: Record<TypeToken, string> = {
@@ -267,6 +273,11 @@ export function Gallery() {
                 <ListRow key={item.text} leading={item.time} title={item.text} />
               ))}
             </List>
+          </Section>
+
+          <Section id="proof" title="Home: the week and tomorrow">
+            <EveningWrap evening={EveningWrapSchema.parse(TOMORROW)} timeZone={SHOP_TIME_ZONE} />
+            <WeekProof week={WeekValueSchema.parse(WEEK_PROOF)} />
           </Section>
 
           <Section id="calendar" title="Calendar: today">

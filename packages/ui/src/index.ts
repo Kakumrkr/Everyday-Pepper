@@ -43,6 +43,15 @@ export {
   type ActivityPage,
 } from './activity/activity-log.js';
 export { DailyBriefing, type DailyBriefingProps } from './feed/daily-briefing.js';
+export {
+  EveningWrap,
+  eveningLines,
+  WeekProof,
+  weekHasProof,
+  weekLines,
+  type EveningWrapProps,
+  type WeekProofProps,
+} from './feed/proof.js';
 export { DraftEditor, type DraftEditorProps, type DraftWords } from './cards/draft-editor.js';
 export { MailingAddress, type MailingAddressProps } from './feed/mailing-address.js';
 // The kit (S40, DESIGN.md §4).

@@ -490,3 +490,12 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - A refused draft is a 200 answer with a reason; a hidden service gets its own reason.
     - The draft's transaction joins the ai coverage config's integration-proven exclusion (like the tools); its words and first answer are a unit-tested module.
     - The review's fixes: hidden services, safe words, expired drafts, a locked cap, chunked reads, one visit rule, refusal copy from the limits, dead code.
+- **S55 (user, 2026-11-05):** at the brief, "pre-approved with your recommendation and complete the session successfully" (the carried top-up: the week card counts the regulars won back after a nudge, with their dollars):
+  - D-1: split → S55.2 post-visit review requests (a new dial action, an email, the 90-day cap, opt-out, an Activity line). D-2: the week card and the wrap computed on read (`GET /v1/proof`), no migration or worker job. D-3: `MINUTES_SAVED` in contracts. D-4: ADR-0058.
+  - **Claude's refinements:**
+    - A visit counts when Pepper had a hand in it: booked online or by the AI, a claimed offer, or a client's first booking within 14 days after a done nudge; each visit once in the dollars (its price, else its service's); cancelled, imported and deleted clients' visits left out.
+    - Minutes: a booking 4, a fill 10 more, an email 3, another action 2; the AI's `booking.create` not counted twice; "about", rounded to 5 minutes, and no card when that rounds to nothing.
+    - The wrap from 17:00 local until midnight; at risk = the feed's no-show pattern (2 in 180 days), up to 3 named; the half year of bookings read only in the evening.
+    - Owners and managers only (`requireWinBackAccess`); Home asks when the member holds `settings.manage`. The wrap first on Home, the week card after "Done for you"; both flat blocks.
+    - Home's screenshot leaves the wrap out (it depends on the clock); the gallery shoots both blocks.
+    - The walkthrough's fix: "booked thanks to me", not "through me" (an owner-booked regular is Pepper's by the email).

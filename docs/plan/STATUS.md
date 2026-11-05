@@ -1,21 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-05 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 12 — The employee (Phase 11 gate met in S51.2) → next: **S55** (weekly value card, evening wrap, review requests)
+**Last updated:** 2026-11-05 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 12 — The employee (Phase 11 gate met in S51.2) → next: **S55.2** (post-visit review requests)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S55** (weekly value card, evening wrap, review requests; Phase 12).
+Nothing in progress. Next: **S55.2** (post-visit review requests; Phase 12).
 
 ## Last sessions
+- **S55 Phase 12 · Proof of value: the week card and the evening wrap (2026-11-05)** ([ADR-0058](../adr/0058-proof-of-value-week-card-and-evening-wrap.md), [PR #82](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/82)). Full entry in [session-log.md](session-log.md).
+  - **Built:** "What I did this week" (visits thanks to Pepper, fills, regulars back with dollars, minutes saved) and the evening wrap (tomorrow's visits, the first time, who may not show), read on demand by `GET /v1/proof`, leads only; AC-W4-10…13; review requests split to S55.2.
+  - **Checks:** `pnpm check` green; affected integration green (22/22 tasks); Playwright win-back 1/1, feed 4/4, screens Home 3/3, gallery 11/11 twice.
 - **S54.2 Phase 12 · The money loop, part 2: win-back and the post-import aha (2026-11-05)** ([ADR-0057](../adr/0057-win-back-list-and-post-import-aha.md), [PR #81](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/81)). Full entry in [session-log.md](session-log.md).
   - **Built:** "Haven't been back" (2+ visits, read on demand, dollars from the service or the visit), one-tap drafts on the rebooking nudge (20 a day, 28-day quiet, opt-out checked at the send), the visits result's "2 regulars are overdue, about $30", the Clients row; the empty state top-up; AC-W4-6…9.
   - **Checks:** `pnpm check` green; affected integration green (db 740, appointments 233, ai 173, api 104, worker 18, …); Playwright win-back 1/1, import 3/3, screens blocks 6/6 twice.
-- **S54 Phase 12 · The money loop, part 1: cancellation → fill (2026-11-04)** ([ADR-0056](../adr/0056-regulars-fill-freed-times-and-fill-receipts.md), [PR #80](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/80)). Full entry in [session-log.md](session-log.md).
-  - **Built:** overdue regulars fill the seats the waitlist leaves (migration 0064: offers without an entry; the nudge's footer; every rule checked again at the offer); "~$60" on the action and `fill` on Activity ("Offered … ~$60" → "Filled … with Ana R., +$60", top-up); p95 < 2 min on the worker; wrong-client fixtures; AC-W5-3…5.
-  - **Checks:** `pnpm check` green; affected integration green (db 740, appointments 229, ai 166, api 103, worker 17, …); Playwright waitlist 1/1, screens blocks 6/6.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -31,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S55 (user, 2026-11-05):** at the brief "pre-approved with your recommendation" (D-1 split → S55.2 review requests; D-2 computed on read; D-3 `MINUTES_SAVED`; D-4 ADR-0058). **Claude:** what counts as Pepper's visit; the 14-day regular-back window; the wrap from 17:00; the review's 2 fixes; "thanks to me". Full wording in [decisions.md](decisions.md).
 - **S54.2 (user, 2026-11-05):** at the brief "Pre-approving with your recommendation" (D-1 no split; D-2 the list computed on read; D-3 the rebooking nudge reused; D-4 ADR-0057). **Claude:** from 2 visits; the visit's price for imported services; the domain's words; 20 a day under a lock; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
 - **S54 (user, 2026-11-04):** at the brief "pre-approved with your recommendation" (D-1 split → S54.2 win-back and the post-import aha; D-2 regulars after the waitlist, one offer a week, opt-out held; D-3 ADR-0056; D-4 no recording). **Claude:** regulars from the feed's `rebooking_due`; no "taken" email to a regular; the review's 6 fixes. Full wording in [decisions.md](decisions.md).
 - **S53 (user, 2026-11-04):** at the brief "pre-approved with your recommendation" (D-1 no split; D-2 the eval business pins moves until S56; D-3 standing rules read back; D-4 ADR-0055; D-5 no migration). **Claude:** Balanced as the defaults; a preset turns ask-first off; the run on database times; addresses on proposals only; the review's 10 fixes. Full wording in [decisions.md](decisions.md).
@@ -81,11 +82,11 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S54.2, M1–M2 and P1 are done (Phases 0–11: the re-plan, the new look on every screen and the first 10 minutes; Phase 9, 10 and 11 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S55, M1–M2 and P1 are done (Phases 0–11: the re-plan, the new look on every screen and the first 10 minutes; Phase 9, 10 and 11 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S55 | Weekly value card, evening wrap, review requests | 12 | Numbers equal fixture sums; caps tested |
+| S55.2 | Post-visit review requests (owner-approved, one per client per 90 days) | 12 | Caps and opt-out tested |
 | S56a | `send_client_message`, `mark_no_show`, AI-suggested import mapping, prompt fixes, new eval cases (incl. a move that asks; drop `EVAL_WORLD_AUTONOMY`); scripted ("a") | 12 | Every eval set green on scripted cassettes |
 | S56b | Record ("b", $3.00 cap), `KNOWN_REAL_MODEL_MISSES` empty; **Phase 12 gate**; one PR | 12 | Every gate met; C1, C5 ≥ 8, C8 ≥ 9 |
 | S57 | Deploy: VPS, neutral domain, TLS, Resend + SPF/DKIM/DMARC, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |

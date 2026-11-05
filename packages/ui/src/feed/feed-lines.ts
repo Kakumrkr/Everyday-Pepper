@@ -68,7 +68,7 @@ export function formatDuration(minutes: number): string {
 }
 
 /** "1:30 pm" in the business's time zone. */
-function clockTime(iso: string, timeZone: string): string {
+export function clockTime(iso: string, timeZone: string): string {
   return formatInstant(iso, timeZone).split(', ').at(-1) ?? iso;
 }
 

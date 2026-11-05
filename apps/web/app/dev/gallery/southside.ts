@@ -148,3 +148,32 @@ export const MARCUS = {
 } as const;
 
 export const TIMES_TODAY = ['3:30', '3:45', '4:00', '4:15'] as const;
+
+/** Proof of value (S55): the shop's week, and tomorrow from 5 pm (Chicago). */
+export const WEEK_PROOF = {
+  from: '2026-10-20T14:00:00.000Z',
+  to: '2026-10-27T14:00:00.000Z',
+  visitsBooked: 9,
+  gapsFilled: 2,
+  regularsBack: 3,
+  regularsBackCents: 13_500,
+  valueCents: 40_500,
+  minutesSaved: 128,
+} as const;
+
+export const TOMORROW = {
+  day: '2026-10-28',
+  visitCount: 7,
+  firstStartsAt: '2026-10-28T14:00:00.000Z',
+  atRiskCount: 1,
+  atRisk: [
+    {
+      bookingId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700931',
+      clientName: 'Tony Russo',
+      startsAt: '2026-10-28T16:30:00.000Z',
+      noShowCount: 2,
+    },
+  ],
+} as const;
+
+export const SHOP_TIME_ZONE = 'America/Chicago';

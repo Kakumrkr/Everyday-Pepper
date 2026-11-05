@@ -57,6 +57,16 @@ import { solidColorPhoto } from '@pepper/storage';
 //   pnpm --filter @pepper/e2e exec playwright test screens --project=desktop --update-snapshots
 
 const WIDTHS = [375, 412, 1280] as const;
+/**
+ * Home without the evening wrap (S55, ADR-0058): it shows only from 5 pm in the business's zone,
+ * so the shot would depend on when it runs. The gallery shoots it in a fixed state.
+ */
+async function withoutEveningWrap(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.querySelector('[data-testid="evening-wrap"]')?.remove();
+  });
+}
+
 /** The import result's undo day, fixed for the shot: the real one is 7 days from today. */
 async function fixUndoDay(page: Page): Promise<void> {
   await page.getByTestId('import-undo-until').evaluate((element) => {
@@ -426,6 +436,9 @@ for (const width of WIDTHS) {
       await still(page, scheme);
       // A new business has no visits yet, so the board is quiet (S52, AC-W4-5).
       await expect(page.getByTestId('feed-quiet')).toBeVisible();
+      // Nothing done yet, so no week card (AC-W4-13).
+      await expect(page.getByTestId('week-proof')).toHaveCount(0);
+      await withoutEveningWrap(page);
       await expect.soft(page).toHaveScreenshot(`home-${String(width)}-${scheme}.png`, SHOT);
 
       // Activity (S52, AC-W7-4): nothing done yet says what will be listed.

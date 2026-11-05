@@ -1,13 +1,20 @@
 import { AxeBuilder } from '@axe-core/playwright';
-import { ServicesResponseSchema, StaffResponseSchema } from '@pepper/contracts';
+import {
+  AvailabilityResponseSchema,
+  BookingSchema,
+  ServicesResponseSchema,
+  StaffResponseSchema,
+  WinBackResponseSchema,
+} from '@pepper/contracts';
 import { expect, test } from '@playwright/test';
-import { hydrated, onboardOwner, ownClientAddress } from './helpers.js';
+import { callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 
 // "Haven't been back" through the screens and the real worker (S54.2, ADR-0057; AC-W4-6…9):
 // a new owner finds the empty list saying what fills it, imports past visits from it, is told
 // right away how many regulars are overdue and what they're worth, opens the list, and wins
-// one back in two taps: "Draft email", then Approve.
+// one back in two taps: "Draft email", then Approve. When she books, Home's week card counts her
+// as a regular back, with her visit's dollars (S55, AC-W4-10, AC-W4-11).
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
@@ -18,7 +25,7 @@ const DAY_MS = 86_400_000;
 /** A UTC calendar day `back` days ago: far enough from today that no time zone changes it. */
 const daysAgo = (back: number) => new Date(Date.now() - back * DAY_MS).toISOString().slice(0, 10);
 
-test("haven't been back (AC-W4-6…9): empty, import, the aha, draft and approve", async ({
+test("haven't been back (AC-W4-6…11): empty, import, the aha, draft, approve, back", async ({
   page,
 }) => {
   test.setTimeout(180_000);
@@ -119,4 +126,50 @@ test("haven't been back (AC-W4-6…9): empty, import, the aha, draft and approve
   await expect(page.getByRole('link', { name: /Haven’t been back/ })).toContainText(
     `2 regulars are overdue, about ${dollars}`,
   );
+
+  // AC-W4-10, AC-W4-11: Ana books after the email; the week card counts her back, with her
+  // visit's dollars (the owner booked her, so it is the email that made her Pepper's).
+  const { clients } = WinBackResponseSchema.parse(
+    await (await page.request.get('/v1/win-back')).json(),
+  );
+  const anaId = clients.find((each) => each.name === 'Ana Ruiz')?.clientId;
+  if (anaId === undefined) throw new Error('Ana is not on the list');
+  const from = new Date(Date.now() + DAY_MS);
+  const range = `from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(
+    new Date(from.getTime() + 7 * DAY_MS).toISOString(),
+  )}`;
+  const { slots } = AvailabilityResponseSchema.parse(
+    await (await page.request.get(`/v1/availability?serviceId=${service.id}&${range}`)).json(),
+  );
+  const [slot] = slots;
+  if (slot === undefined) throw new Error('No free time to book');
+  await callApi(
+    page,
+    'POST',
+    '/v1/bookings',
+    {
+      clientId: anaId,
+      serviceId: service.id,
+      staffMemberId: slot.staffMemberId,
+      startsAt: slot.startsAt,
+    },
+    BookingSchema,
+  );
+  const one = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: each % 100 === 0 ? 0 : 2,
+  }).format(each / 100);
+  await page.goto('/');
+  const week = page.getByRole('region', { name: 'What I did this week' });
+  await expect(
+    week.getByRole('listitem').filter({ hasText: '1 visit booked thanks to me' }),
+  ).toContainText(one);
+  await expect(
+    week.getByRole('listitem').filter({ hasText: '1 regular back after my email' }),
+  ).toContainText(one);
+  await expectTapTargets(page, 'Home with the week card');
+  expect(
+    (await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()).violations.map((v) => v.id),
+  ).toEqual([]);
 });
