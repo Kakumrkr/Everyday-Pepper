@@ -17,6 +17,7 @@ import {
   freshCode,
   hydrated,
   IMPORT_CSV,
+  importVisitsFile,
   linkTo,
   onboardOwner,
   ownClientAddress,
@@ -639,6 +640,65 @@ for (const width of WIDTHS) {
         fullPage: false,
       });
       await page.keyboard.press('Escape');
+    }
+  });
+}
+
+for (const width of WIDTHS) {
+  test(`Haven't been back, empty and with regulars, at ${String(width)} px, light and dark`, async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts', type: 'Barbershop' });
+
+    // AC-W4-9: what fills it, and the import.
+    await page.goto('/clients/win-back');
+    await expect(page.getByRole('link', { name: 'Import past visits' })).toBeVisible();
+    if (width === 375) await expectTapTargets(page, 'the empty win-back list');
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`win-back-empty-${String(width)}-${scheme}.png`, SHOT);
+    }
+
+    // Three regulars past their gap (dates from today, so the days late stay the same; the
+    // dates themselves are masked), one without an email; the mailing address set.
+    const { services } = ServicesResponseSchema.parse(
+      await (await page.request.get('/v1/services')).json(),
+    );
+    const { staff } = StaffResponseSchema.parse(await (await page.request.get('/v1/staff')).json());
+    const service = services.find((each) => each.active)?.name ?? '';
+    const owner = staff[0]?.displayName ?? '';
+    const ago = (days: number) =>
+      new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
+    await importVisitsFile(
+      page,
+      [
+        'Date,Time,Client,Email,Phone,Service,Staff,Length,Price,Status',
+        `${ago(70)},10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-3001,${service},${owner},45,45,done`,
+        `${ago(40)},10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-3001,${service},${owner},45,45,done`,
+        `${ago(100)},11:00 AM,Ben Ito,,555-010-3002,${service},${owner},45,45,done`,
+        `${ago(60)},11:00 AM,Ben Ito,,555-010-3002,${service},${owner},45,45,done`,
+        `${ago(150)},1:00 PM,Cleo Hart,cleo@example.com,555-010-3003,${service},${owner},45,45,done`,
+        `${ago(90)},1:00 PM,Cleo Hart,cleo@example.com,555-010-3003,${service},${owner},45,45,done`,
+      ].join('\n'),
+    );
+    const address = await page.request.patch('/v1/feed/settings', {
+      data: { mailingAddress: '12 Juniper Lane\nPortland, OR 97201' },
+      headers: { origin: new URL(page.url()).origin },
+    });
+    expect(address.ok(), await address.text()).toBe(true);
+    await page.goto('/clients/win-back');
+    await expect(page.getByTestId('win-back-row')).toHaveCount(3);
+    if (width === 375) await expectTapTargets(page, 'the win-back list');
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`win-back-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        mask: [page.getByTestId('win-back-meta')],
+      });
     }
   });
 }

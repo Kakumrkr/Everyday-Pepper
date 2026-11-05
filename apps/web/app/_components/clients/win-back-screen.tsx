@@ -139,7 +139,9 @@ function WinBackRow({
           >
             {client.name}
           </Link>
-          <span className="type-caption text-ink-2 tabular-nums">{rowMeta(client, timeZone)}</span>
+          <span className="type-caption text-ink-2 tabular-nums" data-testid="win-back-meta">
+            {rowMeta(client, timeZone)}
+          </span>
         </span>
         {client.valueCents === null ? null : (
           <MoneyChip cents={client.valueCents} kind="estimate" className="shrink-0" />
