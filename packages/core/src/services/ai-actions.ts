@@ -486,7 +486,14 @@ export async function proposeForBusiness(
   ai: Actor,
   runner: ActionRunner,
   request: Omit<ActionRequest, 'outsideText'>,
-  options: { clock?: Clock } = {},
+  options: {
+    clock?: Clock;
+    /**
+     * The owner or manager who asked for it (S54.2: a one-tap win-back draft): the proposal is
+     * theirs and the audit names them; it still never runs without a person's OK.
+     */
+    requestedBy?: Actor;
+  } = {},
 ): Promise<ActionProposal> {
   const idempotencyKey = ActionIdempotencyKeySchema.parse(request.idempotencyKey);
   const now = (options.clock ?? systemClock).now();
@@ -505,8 +512,9 @@ export async function proposeForBusiness(
     preview,
     explanation,
     now,
-    requestedBy: null,
-    auditActor: { kind: 'system' },
+    requestedBy: options.requestedBy?.context.userId ?? null,
+    auditActor:
+      options.requestedBy === undefined ? { kind: 'system' } : auditActorOf(options.requestedBy),
   });
   return toProposal(row);
 }

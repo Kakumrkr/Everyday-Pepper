@@ -106,6 +106,8 @@ const STEP_LABEL: Record<string, string> = {
   remember_fact: 'Remembered it',
   add_visit_note: 'Noted it on the visit',
   forget_fact: 'Forgot it',
+  // A one-tap win-back draft (S54.2): the member asked; the words are Pepper's template.
+  win_back: 'Drafted the email you asked for',
 };
 
 /** One step of the *Why?* trace, in words. */
@@ -489,6 +491,14 @@ export function factLine(fact: AiWhyFact): string | null {
       return typeof interval !== 'number' || dueOn === null
         ? null
         : `They usually come back every ${String(interval)} days, so they were due on ${formatDate(dueOn)}, and nothing is booked.`;
+    }
+    case 'win_back': {
+      // A one-tap win-back draft (S54.2): how long they've been away, and the visits behind it.
+      const visits = value?.['visits'];
+      const dueOn = str('dueOn');
+      return typeof visits !== 'number' || dueOn === null
+        ? null
+        : `After ${String(visits)} visits they were due back on ${formatDate(dueOn)}, and nothing is booked.`;
     }
     case 'rule_change': {
       // `propose_rule` (S31): the rule it makes, which only an owner or manager approves.
