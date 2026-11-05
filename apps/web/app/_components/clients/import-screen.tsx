@@ -681,7 +681,10 @@ function OverdueRegulars() {
       <p className="m-0 type-body text-ink-2">
         They came regularly and stopped. One tap drafts each an email with their next open time.
       </p>
-      <Link href={WIN_BACK_PATH} className="type-body font-semibold text-ink">
+      <Link
+        href={WIN_BACK_PATH}
+        className={`${buttonStyle({ variant: 'secondary', size: 'sm' })} self-start`}
+      >
         See who
       </Link>
     </section>

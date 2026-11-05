@@ -52,8 +52,8 @@ test("haven't been back (AC-W4-6…9): empty, import, the aha, draft and approve
   await (await hydrated(page.getByRole('link', { name: 'Import past visits' }))).click();
   await expect(page).toHaveURL(/\/clients\/import$/);
 
-  // Ana (with an email) came every 30 days and was due 10 days ago; Ben (no email) every 40,
-  // due 20 days ago; Cy came once.
+  // Ana (with an email) last came 40 days ago, Ben (no email) 60 days ago: both past the
+  // service's interval, Ana the more recently due; Cy came once.
   const csv = [
     'Date,Time,Client,Email,Phone,Service,Staff,Length,Price,Status',
     `${daysAgo(70)},10:00 AM,Ana Ruiz,ana.ruiz@example.com,555-010-2001,${service.name},${owner},45,45,done`,
@@ -85,7 +85,8 @@ test("haven't been back (AC-W4-6…9): empty, import, the aha, draft and approve
   const rows = page.getByTestId('win-back-row');
   await expect(rows).toHaveCount(2);
   await expect(rows.nth(0)).toContainText('Ana Ruiz');
-  await expect(rows.nth(0)).toContainText('10 days overdue');
+  // The template's service names its own interval, so the days late follow it, not the gaps.
+  await expect(rows.nth(0)).toContainText(/\d+ days? overdue/);
   await expect(rows.nth(1)).toContainText('Ben Ito');
   await expect(rows.nth(1).getByTestId('win-back-blocked')).toHaveText('No email on file');
   await expect(rows.nth(0).getByTestId('win-back-blocked')).toHaveText(

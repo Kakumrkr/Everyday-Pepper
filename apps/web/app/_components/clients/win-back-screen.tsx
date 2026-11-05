@@ -7,7 +7,7 @@ import {
   type WinBackClient,
   type WinBackResponse,
 } from '@pepper/contracts';
-import { Avatar, Button, EmptyState, List, MoneyChip, Skeleton } from '@pepper/ui';
+import { Avatar, Button, cx, EmptyState, FOCUS_RING, List, MoneyChip, Skeleton } from '@pepper/ui';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ROUTES } from '../../../lib/account';
@@ -41,7 +41,10 @@ export function WinBackScreen({
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <header className="flex flex-col gap-1">
-        <Link href={ROUTES.clients} className="type-label text-ink-2 no-underline hover:underline">
+        <Link
+          href={ROUTES.clients}
+          className="-ml-1 inline-flex min-h-11 items-center self-start px-1 type-label text-ink-2 no-underline hover:underline"
+        >
           ← Clients
         </Link>
         <h1 className="m-0 type-display">Haven’t been back</h1>
@@ -130,15 +133,16 @@ function WinBackRow({
 
   return (
     <li className="flex flex-col gap-3 py-3" data-testid="win-back-row">
-      <div className="flex min-h-14 items-center gap-3">
+      <Link
+        href={`${ROUTES.clients}/${client.clientId}`}
+        className={cx(
+          '-mx-2 flex min-h-14 items-center gap-3 rounded-sm px-2 no-underline hover:bg-surface-2',
+          FOCUS_RING,
+        )}
+      >
         <Avatar name={client.name} size="sm" />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <Link
-            href={`${ROUTES.clients}/${client.clientId}`}
-            className="truncate type-body font-semibold text-ink no-underline hover:underline"
-          >
-            {client.name}
-          </Link>
+          <span className="truncate type-body font-semibold text-ink">{client.name}</span>
           <span className="type-caption text-ink-2 tabular-nums" data-testid="win-back-meta">
             {rowMeta(client, timeZone)}
           </span>
@@ -146,7 +150,7 @@ function WinBackRow({
         {client.valueCents === null ? null : (
           <MoneyChip cents={client.valueCents} kind="estimate" className="shrink-0" />
         )}
-      </div>
+      </Link>
       {proposalId !== null ? (
         <DraftCard proposalId={proposalId} timeZone={timeZone} />
       ) : blocked !== null ? (
