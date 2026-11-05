@@ -9,7 +9,7 @@ import { ActionProposalIdSchema } from './trust.js';
 // managers only: they decide the nudges.
 
 export const WIN_BACK_LIMITS = {
-  /** Win-back drafts one business may make in one local day (with the morning pass's own). */
+  /** Win-back drafts one business may make in one local day (besides the morning pass's). */
   perBusinessPerDay: 20,
   /** No second marketing email to a client within this many days of a nudge. */
   quietDays: 28,
@@ -35,6 +35,8 @@ export const WinBackClientSchema = z.object({
   visits: z.number().int().positive(),
   daysOverdue: z.number().int().nonnegative(),
   reach: WinBackReachSchema,
+  /** Their last service can be booked (an imported visit's hidden service can't). */
+  serviceBookable: z.boolean(),
   /** A drafted email waiting for an OK (the win-back's or the morning pass's). */
   pendingProposalId: ActionProposalIdSchema.nullable(),
   /** The last nudge or offer within the quiet window: no new draft until it passes. */
@@ -62,6 +64,8 @@ export const WinBackRefusalSchema = z.enum([
   'daily_limit',
   /** No open time for their service in the next `searchDays`. */
   'no_time',
+  /** Their last service is hidden from booking (an imported visit's). */
+  'service_hidden',
 ]);
 export type WinBackRefusal = z.infer<typeof WinBackRefusalSchema>;
 

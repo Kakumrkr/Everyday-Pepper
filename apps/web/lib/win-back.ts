@@ -1,4 +1,9 @@
-import type { WinBackClient, WinBackRefusal, WinBackResponse } from '@pepper/contracts';
+import {
+  WIN_BACK_LIMITS,
+  type WinBackClient,
+  type WinBackRefusal,
+  type WinBackResponse,
+} from '@pepper/contracts';
 import { formatMoney } from '@pepper/ui';
 
 // "Haven't been back" (S54.2, ADR-0057; AC-W4-6…9): the screen's address and its words.
@@ -50,6 +55,9 @@ export function blockedReason(
   if (client.emailedAt !== null) {
     return `Emailed ${SHORT_DATE(timeZone).format(new Date(client.emailedAt))}`;
   }
+  if (!client.serviceBookable) {
+    return `${client.serviceName ?? 'Their last service'} is hidden from booking`;
+  }
   if (!mailingAddressSet) return 'Add your mailing address first';
   return null;
 }
@@ -66,10 +74,12 @@ export function refusalText(reason: WinBackRefusal): string {
     case 'no_address':
       return 'Add your mailing address first: every email like this carries it.';
     case 'recently_emailed':
-      return 'They had an email from you in the last 4 weeks. I’ll leave them be for now.';
+      return 'They had an email from you recently. I’ll leave them be for now.';
     case 'daily_limit':
-      return 'That’s 20 drafts today. I’ll be ready for more tomorrow.';
+      return `That’s ${String(WIN_BACK_LIMITS.perBusinessPerDay)} drafts today. I’ll be ready for more tomorrow.`;
     case 'no_time':
-      return 'I couldn’t find an open time for their service in the next week.';
+      return `I couldn’t find an open time for their service in the next ${String(WIN_BACK_LIMITS.searchDays)} days.`;
+    case 'service_hidden':
+      return 'Their last service is hidden from booking. Show it in Services, then try again.';
   }
 }

@@ -1,6 +1,6 @@
 import type { BookingId, ClientId, ServiceId, StaffMemberId } from '@pepper/contracts';
 import { addDays, formatDate } from '../availability/zoned-time.js';
-import { daysBetween, localDate, medianDays, occupies } from './providers.js';
+import { clientVisits, daysBetween, localDate, medianDays } from './providers.js';
 import type { InsightBooking, InsightService } from './types.js';
 
 // "Haven't been back" (S54.2, ADR-0057): the clients with a few visits who stopped coming.
@@ -42,22 +42,10 @@ export interface WinBackClient {
 export function findWinBack(input: WinBackInput): WinBackClient[] {
   const { now, timeZone } = input;
   const serviceDays = new Map(input.services.map((s) => [s.id, s.rebookAfterDays]));
-  const visits = new Map<ClientId, InsightBooking[]>();
-  const bookedAhead = new Set<ClientId>();
-  for (const booking of input.bookings) {
-    if (booking.start >= now) {
-      if (booking.status === 'confirmed') bookedAhead.add(booking.clientId);
-    } else if (occupies(booking)) {
-      const list = visits.get(booking.clientId) ?? [];
-      list.push(booking);
-      visits.set(booking.clientId, list);
-    }
-  }
   const today = localDate(timeZone, now);
   const found: WinBackClient[] = [];
-  for (const [clientId, list] of visits) {
-    if (bookedAhead.has(clientId) || list.length < WIN_BACK.minVisits) continue;
-    list.sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
+  for (const [clientId, list] of clientVisits(input.bookings, now)) {
+    if (list.length < WIN_BACK.minVisits) continue;
     const last = list.at(-1);
     if (last === undefined) continue;
     const days = list.map((visit) => localDate(timeZone, visit.start));

@@ -42,6 +42,8 @@ export interface WinBackEntry extends WinBackClient {
   pendingProposalId: string | null;
   emailedAt: Date | null;
   valueCents: number | null;
+  /** Their last service can be booked (an imported visit's hidden service can't). */
+  serviceBookable: boolean;
 }
 
 /** Owners and managers: a role that reaches every booking and client. */
@@ -53,8 +55,9 @@ export function requireWinBackAccess(actor: Actor): void {
 }
 
 /** The quiet windows a new marketing email waits out, from `now`. */
-export function winBackQuiet(now: Date): { nudgeSince: Date; offerSince: Date } {
+export function winBackQuiet(now: Date): { now: Date; nudgeSince: Date; offerSince: Date } {
   return {
+    now,
     nudgeSince: new Date(now.getTime() - WIN_BACK_LIMITS.quietDays * DAY_MS),
     offerSince: new Date(now.getTime() - REGULAR_OFFER_QUIET_DAYS * DAY_MS),
   };
@@ -109,6 +112,7 @@ async function loadWinBack(tx: TenantTx, actor: Actor, now: Date) {
   // else what the last visit cost (an imported visit's service is hidden and has no price).
   const prices = new Map(serviceRows.map((row) => [row.id, row.priceFromCents]));
   const paid = new Map(bookingRows.map((row) => [row.id, row.priceFromCents]));
+  const active = new Map(serviceRows.map((row) => [row.id, row.active]));
   const entries = found.flatMap((each): WinBackEntry[] => {
     const client = clients.get(each.clientId);
     if (client === undefined) return [];
@@ -121,6 +125,7 @@ async function loadWinBack(tx: TenantTx, actor: Actor, now: Date) {
         pendingProposalId: client.pendingProposalId,
         emailedAt: client.emailedAt,
         valueCents: prices.get(each.serviceId) ?? paid.get(each.lastBookingId) ?? null,
+        serviceBookable: active.get(each.serviceId) === true,
       },
     ];
   });
@@ -147,6 +152,7 @@ export async function listWinBackIn(
     visits: entry.visits,
     daysOverdue: entry.daysOverdue,
     reach: entry.optedOut ? 'opted_out' : entry.hasEmail ? 'email' : 'no_email',
+    serviceBookable: entry.serviceBookable,
     pendingProposalId: entry.pendingProposalId,
     emailedAt: entry.emailedAt?.toISOString() ?? null,
   }));

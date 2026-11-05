@@ -25,10 +25,10 @@ import {
 import { NudgeNotSendableError, proposeForBusiness, type Actor } from '@pepper/core';
 import {
   countWinBackDraftsSince,
-  findClient,
   findCurrentTenant,
   findOpenRebookingItemOf,
   linkFeedItemToProposal,
+  lockWinBackDrafts,
   WIN_BACK_KEY_PREFIX,
   withTenant,
   type TenantTx,
@@ -44,12 +44,17 @@ import type { ToolDeps } from '../tools/tool.js';
 // `WIN_BACK_LIMITS.searchDays`) and words the domain writes from the facts (no model call:
 // the tap is the owner's own request, and an edit before the OK stays possible). It waits for
 // an OK like every nudge, and the send checks the opt-out, the address and the time again.
-// At most `WIN_BACK_LIMITS.perBusinessPerDay` a business a day; no client gets one within the
+// At most `WIN_BACK_LIMITS.perBusinessPerDay` taps' drafts a business a day (besides the morning
+// pass's own); no client gets one within the
 // quiet window of a nudge or a regular's offer; a second tap returns the draft that waits.
 
 const DAY_MS = 86_400_000;
 
-/** The words of a win-back email, from what the business knows (first name, service, date). */
+/**
+ * The words of a win-back email, from what the business knows (first name, service, date).
+ * A name that breaks a draft rule (too long, or read as a link or contact) leaves the name
+ * and the service out rather than failing the tap.
+ */
 export function winBackWords(facts: {
   firstName: string | null;
   serviceName: string;
@@ -57,12 +62,17 @@ export function winBackWords(facts: {
 }): NudgeDraft {
   const service = facts.serviceName.toLowerCase();
   const hello = facts.firstName === null ? 'Hi,' : `Hi ${facts.firstName},`;
-  return NudgeDraftSchema.parse({
+  const named = NudgeDraftSchema.safeParse({
     subject:
       facts.firstName === null
         ? `Time for your next ${service}?`
         : `Time for your next ${service}, ${facts.firstName}?`,
     body: `${hello}\n\nIt's been a while since your last ${service} on ${facts.lastVisit}, and we'd love to see you again.`,
+  });
+  if (named.success) return named.data;
+  return NudgeDraftSchema.parse({
+    subject: 'Time for your next visit?',
+    body: `Hi,\n\nIt's been a while since your last visit on ${facts.lastVisit}, and we'd love to see you again.`,
   });
 }
 
@@ -94,7 +104,10 @@ export async function draftWinBack(
     if (entry.emailedAt !== null) return refused('recently_emailed');
     const today = toZoned(tenant.timeZone, now.getTime());
     const midnight = new Date(fromZoned(tenant.timeZone, today, 0));
+    if (!entry.serviceBookable) return refused('service_hidden');
     const cap = options.perBusinessPerDay ?? WIN_BACK_LIMITS.perBusinessPerDay;
+    // Two taps at once count one after the other (the lock holds until this transaction ends).
+    await lockWinBackDrafts(tx);
     if ((await countWinBackDraftsSince(tx, midnight)) >= cap) {
       return refused('daily_limit');
     }
@@ -107,8 +120,6 @@ export async function draftWinBack(
     });
     if (open === undefined) return refused('no_time');
     const { slot, serviceName } = open;
-    const client = await findClient(tx, clientId);
-    if (client === undefined) return refused('not_due');
     const lastVisitAt = new Date(entry.lastVisitAt).toISOString();
     const payload: TrustJson = {
       clientId,
@@ -117,7 +128,7 @@ export async function draftWinBack(
       startsAt: slot.startsAt,
       lastVisitAt,
       draft: winBackWords({
-        firstName: clientFirstName(client.name) ?? null,
+        firstName: clientFirstName(entry.name) ?? null,
         serviceName,
         lastVisit: new Date(lastVisitAt).toLocaleDateString('en-US', {
           month: 'long',

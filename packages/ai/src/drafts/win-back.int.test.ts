@@ -1,5 +1,6 @@
 import {
   ClientIdSchema,
+  ServiceIdSchema,
   OutboxEmailSchema,
   OutboxMessageIdSchema,
   type ClientId,
@@ -13,7 +14,7 @@ import {
   rejectProposal,
   updateClient,
 } from '@pepper/core';
-import { listWinBackIn, runInsightsFor } from '@pepper/appointments';
+import { listWinBackIn, runInsightsFor, updateService } from '@pepper/appointments';
 import {
   findOutboxMessage,
   listDueOutboxMessages,
@@ -194,6 +195,41 @@ describe('AC-W4-7: one tap drafts a win-back email', () => {
     });
   });
 
+  it('never hands back an expired draft that the clean-up has not marked yet', async () => {
+    const w = await world();
+    const sara = client(w, 'sara');
+    const result = await draftWinBack(depsAs(w, 'owner'), sara);
+    if (result.kind !== 'drafted') throw new Error('not drafted');
+    // Past its time (within the week) and its time to live: still "pending" in the table.
+    w.clock.advanceBy(8 * 86_400_000);
+    expect((await list(w)).clients.find((each) => each.clientId === sara)).toMatchObject({
+      pendingProposalId: null,
+    });
+    // It still counts as this month's email, so no new one yet.
+    expect(await draftWinBack(depsAs(w, 'owner'), sara)).toEqual({
+      kind: 'refused',
+      reason: 'recently_emailed',
+    });
+  });
+
+  it('refuses a client whose last service is hidden from booking, and the list says so', async () => {
+    const w = await world();
+    const haircut = ServiceIdSchema.parse(w.placeholders.get('{{service:haircut}}'));
+    await updateService(db, w.actorFor('owner'), haircut, {
+      name: 'Haircut',
+      durationMinutes: 60,
+      active: false,
+    });
+    const sara = client(w, 'sara');
+    expect((await list(w)).clients.find((each) => each.clientId === sara)).toMatchObject({
+      serviceBookable: false,
+    });
+    expect(await draftWinBack(depsAs(w, 'owner'), sara)).toEqual({
+      kind: 'refused',
+      reason: 'service_hidden',
+    });
+  });
+
   it('holds the daily cap', async () => {
     const w = await world();
     const owner = depsAs(w, 'owner');
@@ -238,5 +274,12 @@ describe('the words', () => {
       subject: 'Time for your next gel manicure?',
       body: "Hi,\n\nIt's been a while since your last gel manicure on May 3, and we'd love to see you again.",
     });
+    // A name a draft rule refuses (too long, or read as a link) leaves the name and service out.
+    for (const serviceName of ['Signature '.repeat(12), 'lash.me refill']) {
+      expect(winBackWords({ firstName: 'Ana', serviceName, lastVisit: 'May 3' })).toEqual({
+        subject: 'Time for your next visit?',
+        body: "Hi,\n\nIt's been a while since your last visit on May 3, and we'd love to see you again.",
+      });
+    }
   });
 });

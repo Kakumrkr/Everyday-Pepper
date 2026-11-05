@@ -2,7 +2,7 @@ import { FeedItemIdSchema, type FeedItemId } from '@pepper/contracts';
 import { and, desc, eq, gt, inArray, isNull, like, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { aiActionProposals, clients, feedItems, waitlistOffers } from '../schema.js';
-import { NUDGE_ACTION, nudgeTargetKey } from './feed.js';
+import { NUDGE_ACTION } from './feed.js';
 import type { TenantTx } from '../tenant.js';
 
 // "Haven't been back" (S54.2, ADR-0057): what the list and its one-tap draft read about the
@@ -33,13 +33,24 @@ export interface WinBackClientRow {
 export async function readWinBackClients(
   tx: TenantTx,
   clientIds: readonly string[],
-  quiet: { nudgeSince: Date; offerSince: Date },
+  quiet: { now: Date; nudgeSince: Date; offerSince: Date },
 ): Promise<WinBackClientRow[]> {
-  const ids = z
-    .array(Id)
-    .max(5_000)
-    .parse([...new Set(clientIds)]);
-  if (ids.length === 0) return [];
+  const ids = z.array(Id).parse([...new Set(clientIds)]);
+  const rows: WinBackClientRow[] = [];
+  // In chunks, so a long history stays well inside Postgres's parameter limit.
+  for (let start = 0; start < ids.length; start += WIN_BACK_READ_CHUNK) {
+    rows.push(...(await readChunk(tx, ids.slice(start, start + WIN_BACK_READ_CHUNK), quiet)));
+  }
+  return rows;
+}
+
+const WIN_BACK_READ_CHUNK = 1_000;
+
+async function readChunk(
+  tx: TenantTx,
+  ids: readonly string[],
+  quiet: { now: Date; nudgeSince: Date; offerSince: Date },
+): Promise<WinBackClientRow[]> {
   const target = sql`'nudge:client:' || ${clients.id}::text`;
   const rows = await tx
     .select({
@@ -49,7 +60,7 @@ export async function readWinBackClients(
       optedOut: sql<boolean>`${clients.emailOptOutAt} IS NOT NULL`,
       pendingProposalId: sql<
         string | null
-      >`(SELECT p.id FROM ${aiActionProposals} p WHERE p.action = ${NUDGE_ACTION} AND p.target_key = ${target} AND p.status = 'pending' LIMIT 1)`,
+      >`(SELECT p.id FROM ${aiActionProposals} p WHERE p.action = ${NUDGE_ACTION} AND p.target_key = ${target} AND p.status = 'pending' AND p.expires_at > ${quiet.now.toISOString()}::timestamptz LIMIT 1)`,
       nudgedAt: sql<
         string | null
       >`(SELECT max(p.created_at) FROM ${aiActionProposals} p WHERE p.action = ${NUDGE_ACTION} AND p.target_key = ${target} AND p.status <> 'superseded' AND p.created_at > ${quiet.nudgeSince.toISOString()}::timestamptz)`,
@@ -58,7 +69,7 @@ export async function readWinBackClients(
       >`(SELECT max(o.created_at) FROM ${waitlistOffers} o WHERE o.client_id = ${clients.id} AND o.source = 'regular' AND o.created_at > ${quiet.offerSince.toISOString()}::timestamptz)`,
     })
     .from(clients)
-    .where(and(inArray(clients.id, ids), isNull(clients.deletedAt)));
+    .where(and(inArray(clients.id, [...ids]), isNull(clients.deletedAt)));
   return rows.map((row) => {
     const times = [row.nudgedAt, row.offeredAt]
       .filter((each): each is string => each !== null)
@@ -110,5 +121,9 @@ export async function findOpenRebookingItemOf(
   return row === undefined ? undefined : FeedItemIdSchema.parse(row.id);
 }
 
-/** The target key a win-back draft shares with the rebooking nudge (one pending per client). */
-export const winBackTargetKey = nudgeTargetKey;
+/** Win-back drafts of one business are counted one tap at a time (until the transaction ends). */
+export async function lockWinBackDrafts(tx: TenantTx): Promise<void> {
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtext('win_back_drafts'), hashtext(current_tenant_id()::text))`,
+  );
+}

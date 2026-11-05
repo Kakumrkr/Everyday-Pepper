@@ -14,6 +14,7 @@ const client = (overrides: Record<string, unknown> = {}): WinBackClient =>
     visits: 3,
     daysOverdue: 12,
     reach: 'email',
+    serviceBookable: true,
     pendingProposalId: null,
     emailedAt: null,
     ...overrides,
@@ -54,6 +55,9 @@ describe('a row (AC-W4-6)', () => {
       'Emailed Oct 20',
     );
     expect(blockedReason(client(), NY, false)).toBe('Add your mailing address first');
+    expect(blockedReason(client({ serviceBookable: false }), NY, true)).toBe(
+      'Haircut is hidden from booking',
+    );
   });
 
   it('words every refusal', () => {
@@ -65,6 +69,7 @@ describe('a row (AC-W4-6)', () => {
       'recently_emailed',
       'daily_limit',
       'no_time',
+      'service_hidden',
     ] as const) {
       expect(refusalText(reason)).toMatch(/\.$/);
     }

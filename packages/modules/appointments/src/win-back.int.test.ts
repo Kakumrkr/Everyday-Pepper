@@ -49,6 +49,18 @@ afterAll(async () => {
 const NOW = '2026-11-02T15:00:00.000Z';
 const DAY_MS = 86_400_000;
 
+/** A service row's fields, as `insertService` takes them. */
+const fields = (overrides: { name: string; priceFromCents?: number; active?: boolean }) => ({
+  category: null,
+  durationMinutes: 60,
+  bufferBeforeMinutes: 0,
+  bufferAfterMinutes: 0,
+  priceFromCents: null,
+  priceToCents: null,
+  active: true,
+  ...overrides,
+});
+
 interface World {
   tenantId: TenantId;
   owner: Actor;
@@ -79,11 +91,7 @@ async function newWorld(): Promise<World> {
   // A colour is due back 42 days after it (the template's starting menu sets such intervals).
   const color = toService(
     await withTenant(db, tenantId, (tx) =>
-      insertService(
-        tx,
-        { name: 'Color', durationMinutes: 60, priceFromCents: 12000 },
-        { rebookAfterDays: 42 },
-      ),
+      insertService(tx, fields({ name: 'Color', priceFromCents: 12000 }), { rebookAfterDays: 42 }),
     ),
   );
   const jess = await createStaffMember(db, owner, {
@@ -198,7 +206,7 @@ describe("haven't been back", () => {
     const w = await newWorld();
     const beard = toService(
       await withTenant(db, w.tenantId, (tx) =>
-        insertService(tx, { name: 'Beard trim', durationMinutes: 30, active: false }),
+        insertService(tx, fields({ name: 'Beard trim', active: false })),
       ),
     );
     const maria = await createClient(db, w.owner, { name: 'Maria Lopez' });
@@ -206,7 +214,7 @@ describe("haven't been back", () => {
     expect(await list(w)).toMatchObject({
       count: 1,
       totalCents: 2800,
-      clients: [{ serviceName: 'Beard trim', valueCents: 2800 }],
+      clients: [{ serviceName: 'Beard trim', valueCents: 2800, serviceBookable: false }],
     });
   });
 
