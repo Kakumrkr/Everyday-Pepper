@@ -1468,3 +1468,26 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Timing:** `pnpm check` ~9 min; affected integration ~6.2 min (ai 370 s); e2e stack ~2 min ×2; feed + screens 47 s, baselines 42 s + 31 s; CI: none (an "a" half).
   - **For S56a.2:** AI-suggested import mapping (column names and masked samples only, the owner confirms) and its scripted eval cases, on this branch. **For S56b:** probe `scheduling`, `autonomy`, `safety` and the mapping set, one full recording, pass^3 on the gated sets, `KNOWN_REAL_MODEL_MISSES` empty; the Phase 12 gate.
   - **Retro:** went well: an `advanceClock` turn let the eval world reach a started visit without a second world · do better: rebuild dependents (`turbo build`) before an integration run after a core change: the drafts tests passed against a stale core and the review caught the clock bug · top-up for S56a.2: the import screen says which columns were left unmapped and why, in one line, before the owner confirms.
+
+- **S56a.2 Phase 12 "a" · AI-suggested import mapping, scripted model only (2026-11-06)** ([ADR-0061](../adr/0061-ai-suggested-import-mapping.md); branch `claude/dreamy-keller-y57zq0` with `ccr-caaf8a98-xv3xue` merged first, pushed without a PR (M2); S56b records and opens the one PR). D-1 no split, D-2 the screen asks once by itself, D-3 shape-masked samples and untrusted names, D-4 a field or none, D-5 ADR-0061 (decisions.md S56a.2).
+  - **Built:**
+    - contracts: `ImportColumn.suggestion`, `IMPORT_SUGGESTION_LIMITS`, the question, answer and result schemas.
+    - imports: `suggestions.ts` (`maskSample` A/a/9; `mappingQuestion`, which asks nothing for a header-less file; `acceptSuggestions`), `importMappingQuestion`/`saveImportSuggestions`, and a remap to "Don't import" now marks the column the owner's.
+    - ai: `suggest_mapping` (routine model, metered, ≤ 2,000 tokens) and `suggestImportColumns`; `@pepper/ai` may import `@pepper/imports`.
+    - api: `POST /v1/imports/:id/suggestions` in the chat module (`{ outcome, preview }`, 10/10 min), and the e2e model's answer.
+    - web: "Looks like Phone to me · Use it" on the columns step.
+    - AC-W1-46…48.
+  - **Evals (scripted):** set `import_mapping` (gate 0.9, 0.8 at pass^3), an `importFile` turn, the mapping grader, and `import-mapping-s56.json` with 7 cases: a name, private notes, a hostile header, a field taken twice, a visits file, a birthday, unsure. The hostile case found that S48's header rule maps any name ending in "email" (left as it is, ADR-0061).
+  - **Top-up (S56a retro, AC-W1-48):** before Import, the preview says in one line which columns are left out and why ("Not imported: Fav (nothing in Pepper fits it).").
+  - **Checks:**
+    - `pnpm check` green.
+    - Affected integration: db 744, core 196, imports 29, appointments 238, runtime 2, api 105, worker 18, ai 193/194. The ai failure is the planned stale recorded replay (532 stale calls, as in S56a; S56b re-records).
+    - Every scripted eval set green.
+    - Playwright `import.spec.ts` 4/4 (the new test failed twice on its own expectations: the label "Full name", and the sentence's zeros).
+    - No model called ($0).
+  - **Review:** `/code-review` (medium) found 5; fixed 4 (nothing asked for a header-less file whose first row is a client; samples read from the first 50 rows only; the preview's line points to Columns; a late answer reads the import again), left 1 (a displaced column reads "you left it out": the owner's own move caused it). `/security-review` could not run (no `origin/HEAD`); the manual pass found the header-less residual, written in ADR-0061.
+  - **Walkthrough:** 375 px light and dark as a new owner: upload → "Looks like Full name to me · Use it" → the preview's left-out line → Import 2 clients. No new component; DESIGN §7 holds.
+  - **Timing:** build ~1 min; `pnpm check` ~11 min; affected integration ~6.5 min (ai 203 s) + api/worker ~1.5 min; scripted evals ~1 min ×3; e2e stack ~2 min; import spec 20–40 s ×3; walkthrough 6 s; CI: none (an "a" half).
+  - **For later:** the preview sentence shows zero counts ("2 new clients, 0 to fill in, 0 to fix"); full-page screenshots show the fixed bars mid-page; the header rule's "ends with email/phone" matches sentences.
+  - **For S56b:** merge `claude/dreamy-keller-y57zq0`; probe `scheduling`, `autonomy`, `safety` and `import_mapping`; one full recording; pass^3 on the gated sets; `KNOWN_REAL_MODEL_MISSES` empty; the Phase 12 gate.
+  - **Retro:** went well: putting the masking and checking in the domain made the model's part one small, testable call, and the eval caught a real header-rule edge · do better: check the screen's own words (the field labels, the sentence) before writing a Playwright expectation; two runs were spent on text · top-up for S56b: the preview sentence drops its zero counts ("2 new clients", not "…, 0 to fill in, 0 to fix").
