@@ -52,6 +52,11 @@ export interface Transcript {
   episodes?: { member: 'owner' | 'manager' | 'staff'; summary: string }[];
   /** The rebooking emails' words each morning pass left waiting for an OK (S36). */
   drafts?: { subject: string; body: string }[];
+  /**
+   * The import's columns afterwards (S56a.2): the field suggested for each column asked about
+   * (`null`: nothing fits), by column name.
+   */
+  mapping?: Record<string, string | null>;
   /** Rebooking emails queued to clients afterwards (S36). */
   nudgeEmails?: number;
   /** Open waitlist entries afterwards (S37). */

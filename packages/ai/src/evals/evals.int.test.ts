@@ -82,6 +82,7 @@ describe('every eval set on its scripted cassettes', () => {
         'feed',
         'feed_safety',
         'waitlist',
+        'import_mapping',
       ].sort(),
     );
   });

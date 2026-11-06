@@ -1,4 +1,4 @@
-import { DRAFT_LIMITS, type LlmUsage } from '@pepper/contracts';
+import { DRAFT_LIMITS, IMPORT_SUGGESTION_LIMITS, type LlmUsage } from '@pepper/contracts';
 import { z } from 'zod';
 import { agentTools, instructionsFor } from '../agent/context.js';
 import { DEFAULT_LIMITS } from '../agent/loop.js';
@@ -88,6 +88,12 @@ export function estimateRunCost(
       if (!('user' in turn) && 'morningDrafts' in turn.action) {
         inputTokens += DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxTokens;
         outputTokens += DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxOutputTokens;
+        continue;
+      }
+      // An imported file (S56a.2): one suggester call at most, its whole allowance in and out.
+      if (!('user' in turn) && 'importFile' in turn.action) {
+        inputTokens += IMPORT_SUGGESTION_LIMITS.maxTokens;
+        outputTokens += IMPORT_SUGGESTION_LIMITS.maxOutputTokens;
         continue;
       }
       if (!('user' in turn)) continue;

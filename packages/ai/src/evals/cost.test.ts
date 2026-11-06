@@ -1,4 +1,4 @@
-import { DRAFT_LIMITS } from '@pepper/contracts';
+import { DRAFT_LIMITS, IMPORT_SUGGESTION_LIMITS } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   costOfUsage,
@@ -101,6 +101,18 @@ describe('estimateRunCost (the budget guard, playbook §4)', () => {
       inputTokens: DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxTokens,
       cachedInputTokens: 0,
       outputTokens: DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxOutputTokens,
+    });
+  });
+
+  it('counts an imported file as one suggester call’s whole allowance (S56a.2)', () => {
+    const file = evalCase({
+      turns: [{ action: { importFile: 'Guest\nSara' } }],
+      set: 'import_mapping',
+    });
+    expect(estimateRunCost([file], 1, PRICE).usage).toEqual({
+      inputTokens: IMPORT_SUGGESTION_LIMITS.maxTokens,
+      cachedInputTokens: 0,
+      outputTokens: IMPORT_SUGGESTION_LIMITS.maxOutputTokens,
     });
   });
 

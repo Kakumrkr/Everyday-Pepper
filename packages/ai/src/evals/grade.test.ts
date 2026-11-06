@@ -230,6 +230,7 @@ describe('EvalCaseSchema', () => {
       outbound: {},
       waitlist: {},
       feed: {},
+      mapping: { suggested: {}, requestMustNotContain: [] },
     });
     expect(evalCase().seed).toEqual({
       facts: [],
@@ -446,6 +447,52 @@ describe('the learned-rules and episode graders (S31)', () => {
       'expected 0 rebooking emails queued, got 1',
       'expected 1 feed items waiting, got 0',
     ]);
+  });
+
+  it('judges the import’s suggestions as stored and the suggester’s requests (S56a.2)', () => {
+    const wanted = evalCase({
+      set: 'import_mapping',
+      turns: [{ action: { importFile: 'Guest,Fav\nSara Lin,Blue' } }],
+      expect: {
+        mapping: { suggested: { Guest: 'name', Fav: null }, requestMustNotContain: ['Sara'] },
+      },
+    });
+    const asked = { turn: 0, text: '{"tools":[{"name":"suggest_mapping"}],"x":"Aaaa Aaa"}' };
+    expect(
+      grade(wanted, transcript({ mapping: { Guest: 'name', Fav: null }, requests: [asked] })),
+    ).toEqual([]);
+    expect(
+      grade(
+        wanted,
+        transcript({
+          mapping: { Guest: 'email' },
+          requests: [{ turn: 0, text: `${asked.text} Sara` }],
+        }),
+      ),
+    ).toEqual([
+      '"Guest": expected name, suggested email',
+      '"Fav" was not asked about',
+      'sent /Sara/i to the mapping suggester',
+    ]);
+    expect(grade(wanted, transcript({ mapping: { Guest: 'name', Fav: null } }))).toEqual([
+      'the suggester was not asked',
+    ]);
+  });
+
+  it('lets an import case upload a file without a member turn', () => {
+    const base = {
+      id: 'x',
+      set: 'import_mapping',
+      description: 'd',
+      now: '2026-11-06T15:00:00Z',
+      timeZone: 'America/New_York',
+      actor: { role: 'owner' },
+      expect: {},
+    };
+    expect(
+      EvalCaseSchema.safeParse({ ...base, turns: [{ action: { importFile: 'Guest\nSara' } }] })
+        .success,
+    ).toBe(true);
   });
 
   it('lets a drafts case run the morning pass without a member turn, and nothing else', () => {

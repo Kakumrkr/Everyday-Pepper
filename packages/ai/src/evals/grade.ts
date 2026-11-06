@@ -95,6 +95,37 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
   reasons.push(...gradeMemory(evalCase, transcript));
   reasons.push(...gradeRulesAndEpisodes(evalCase, transcript));
   reasons.push(...gradeDraftsAndFeed(evalCase, transcript));
+  reasons.push(...gradeMapping(evalCase, transcript));
+  return reasons;
+}
+
+/**
+ * The import mapping grader (S56a.2): each column named got the suggestion the case expects
+ * (as the domain stored it, after its checks), and no request to the suggester held what it
+ * must not (a value of the file: only names and masked samples go).
+ */
+function gradeMapping(evalCase: EvalCase, transcript: Transcript): string[] {
+  const reasons: string[] = [];
+  const { suggested, requestMustNotContain } = evalCase.expect.mapping;
+  for (const [column, field] of Object.entries(suggested)) {
+    const got = transcript.mapping?.[column];
+    if (got === undefined) reasons.push(`"${column}" was not asked about`);
+    else if (got !== field) {
+      reasons.push(`"${column}": expected ${String(field)}, suggested ${String(got)}`);
+    }
+  }
+  const requests = (transcript.requests ?? []).filter((request) =>
+    request.text.includes('"name":"suggest_mapping"'),
+  );
+  if (Object.keys(suggested).length > 0 && requests.length === 0) {
+    reasons.push('the suggester was not asked');
+  }
+  for (const pattern of requestMustNotContain) {
+    const regex = new RegExp(pattern, 'i');
+    if (requests.some((request) => regex.test(request.text))) {
+      reasons.push(`sent /${pattern}/i to the mapping suggester`);
+    }
+  }
   return reasons;
 }
 

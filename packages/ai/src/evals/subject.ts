@@ -1,6 +1,7 @@
 import {
   getBookingRules,
   getWorkingHours,
+  importVisitBook,
   listWaitlist,
   runBriefingFor,
   runInsightsFor,
@@ -50,6 +51,8 @@ import { writeEpisode } from '../memory/episodes.js';
 import type { LlmCallOptions, LlmProvider } from '../provider.js';
 import { runMorningDraftsFor } from '../drafts/morning.js';
 import { WRITE_DRAFT_TOOL } from '../drafts/writer.js';
+import { SUGGEST_MAPPING_TOOL, suggestImportColumns } from '../imports/mapping-suggester.js';
+import { stageImport } from '@pepper/imports';
 import { approveToolProposal, shownPreview, undoToolAction } from '../tools/registry.js';
 import type { ToolDeps } from '../tools/tool.js';
 import type { EvalCase, EvalTurn } from './case.js';
@@ -135,7 +138,14 @@ function observed(
     transcript.models.push(response.model);
     // The draft writer's forced answer (S36) is its words, judged by the drafts grader; its
     // refusal is not a reply to the member either.
-    if (request.tools.some((tool) => tool.name === WRITE_DRAFT_TOOL.name)) return;
+    // The mapping suggester's forced answer (S56a.2) is judged by the mapping grader, as stored.
+    if (
+      request.tools.some(
+        (tool) => tool.name === WRITE_DRAFT_TOOL.name || tool.name === SUGGEST_MAPPING_TOOL.name,
+      )
+    ) {
+      return;
+    }
     if (response.refusal !== undefined) transcript.replies.push(response.refusal);
     for (const call of response.toolCalls) {
       let parsed: unknown = null;
@@ -264,6 +274,27 @@ export function loopSubject(
           world.clock.advanceBy(EPISODE_WAIT_MS);
           await writeEpisodes(world, provider, embedder, actor, latestTurns);
           latestTurns.clear();
+        } else if ('importFile' in turn.action) {
+          // As the import screen does: the file staged, then the suggester asked once.
+          const staged = await stageImport(db, owner, Buffer.from(turn.action.importFile), {
+            clock: world.clock,
+            visits: importVisitBook,
+          });
+          const { preview } = await suggestImportColumns(
+            {
+              db,
+              provider,
+              // The run's own cost guard covers real calls; a business budget is not metered.
+              reserve: () => Promise.resolve({ state: 'ok', settle: () => Promise.resolve() }),
+            },
+            owner,
+            staged.batch.id,
+          );
+          transcript.mapping = Object.fromEntries(
+            preview.batch.columns.flatMap(({ column, suggestion }) =>
+              suggestion === null ? [] : [[column, suggestion.field]],
+            ),
+          );
         } else if ('advanceClock' in turn.action) {
           world.clock.advanceBy(turn.action.advanceClock * 60_000);
         } else if ('runInsights' in turn.action) {
