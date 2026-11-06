@@ -5,6 +5,7 @@ import {
   getBookingIn,
   reinstateBookingIn,
   SlotUnavailableError,
+  undoNoShowIn,
 } from '@pepper/appointments';
 import {
   BookingIdSchema,
@@ -344,7 +345,8 @@ export const cancelBooking: WriteTool = {
     use: 'Cancel a booking the member asked to cancel (its id from find_client_bookings when the member names the client, else from get_day).',
     avoid: [
       'to move a booking (use move_booking)',
-      'for a no-show or a finished appointment (the calendar records those)',
+      'for a client who didn’t show up (use mark_no_show)',
+      'for a finished appointment (nothing to do: a kept visit stays as it is)',
       'for several bookings at once unless the member named each one',
     ],
     returns: 'the cancellation, done or waiting for the member’s OK.',
@@ -391,6 +393,72 @@ export const cancelBooking: WriteTool = {
   async undo(scope, inverse) {
     const { bookingId } = z.strictObject({ bookingId: BookingIdSchema }).parse(inverse);
     await reinstateBookingIn(scope.tx, scope.actor, bookingId, domainOptions(scope));
+  },
+};
+
+const NoShowArgs = z.strictObject({ bookingId: IdArg('booking') });
+type NoShowArgs = z.output<typeof NoShowArgs>;
+
+/**
+ * A visit that started marked a no-show (S56a, ADR-0060): through the same status change as the
+ * calendar, so only a visit that has started and is still booked. No client is emailed. Undo
+ * puts it back to booked (owners and managers: the status rules let only them correct an
+ * outcome).
+ */
+export const markNoShow: WriteTool = {
+  kind: 'write',
+  name: 'mark_no_show',
+  version: 1,
+  localTimes: false,
+  tier: 'internal_write',
+  guide: {
+    use: "Mark a client's visit as a no-show when the member says they didn't come (its id from find_client_bookings, or get_day). Only a visit that has started.",
+    avoid: [
+      'to cancel a visit that hasn’t happened yet (use cancel_booking)',
+      'for a client who is only running late (ask the member, or send_client_message)',
+    ],
+    returns: 'the visit marked a no-show, or why it can’t be.',
+    examples: [
+      { say: "Jay didn't show up for his 10am", args: { bookingId: { $any: true } } },
+      {
+        say: 'Mark Sara as a no-show for today',
+        evalSay: 'Sara never came in today, mark her a no-show',
+        args: { bookingId: { $any: true } },
+      },
+    ],
+  },
+  args: NoShowArgs,
+  actions: () => ['booking.no_show'],
+  async perform(scope: WriteScope, args: NoShowArgs): Promise<Performed> {
+    const directory = await directoryOf(scope);
+    const id = BookingIdSchema.parse(args.bookingId);
+    const before = await getBookingIn(scope.tx, scope.actor, id);
+    const missed = await changeBookingIn(
+      scope.tx,
+      scope.actor,
+      id,
+      { status: 'no_show' },
+      domainOptions(scope),
+    );
+    const was = await viewOf(scope, directory, before);
+    const now = await viewOf(scope, directory, missed);
+    return {
+      entity: { type: 'booking', id },
+      targetKey: `booking:${id}`,
+      recordOwner: staffLogin(directory, before.staffMemberId),
+      // It has started: the undo window runs from now, after the start too.
+      appointmentStartsAt: null,
+      before: bookingSide(was, { withId: true }),
+      after: bookingSide(now, { withId: true }),
+      touched: { bookingUpdatedAt: before.updatedAt },
+      inverse: { bookingId: id } satisfies TrustJson,
+      summary: `Mark ${was.clientName}'s ${was.serviceName} with ${was.staffName}, ${when(was.date, was.time)}, as a no-show.`,
+      facts: [{ kind: 'visit_started', ref: null, value: { date: was.date, time: was.time } }],
+    };
+  },
+  async undo(scope, inverse) {
+    const { bookingId } = z.strictObject({ bookingId: BookingIdSchema }).parse(inverse);
+    await undoNoShowIn(scope.tx, scope.actor, bookingId, { clock: scope.deps.clock });
   },
 };
 

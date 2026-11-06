@@ -7,6 +7,7 @@ import {
 } from '@pepper/appointments';
 import {
   AI_EMAIL_GRACE_SECONDS,
+  OutboxEmailSchema,
   OutboxMessageIdSchema,
   type ActionExecution,
   type ActionProposal,
@@ -15,12 +16,19 @@ import {
   changeAutonomy,
   changeTask,
   createTask,
+  openOutboxContent,
+  saveFact,
   createTaskIn,
   listTasks,
   UndoRefusedError,
   type Actor,
 } from '@pepper/core';
-import { findOutboxMessage, withMember, withTenant, type Database } from '@pepper/db';
+import {
+  findOutboxMessage,
+  withMember,
+  withTenant,
+  type Database,
+} from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   approveToolProposal,
@@ -35,6 +43,7 @@ import {
   depsFor,
   newWorld,
   NOW,
+  OUTBOX_KEY,
   startTestDatabase,
   turn,
   tuesdayAt,
@@ -117,6 +126,15 @@ const tuesdayBookings = (w: World) => async () =>
     }));
 
 const SCENARIOS: Scenario[] = [
+  {
+    // S56a: a visit that started, marked a no-show; Undo puts it back to booked.
+    tool: 'mark_no_show',
+    async setup(w) {
+      const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+      w.clock.set(tuesdayAt('10:30'));
+      return { args: { bookingId: booking.id }, state: tuesdayBookings(w) };
+    },
+  },
   {
     tool: 'create_booking',
     setup: async (w) => {
@@ -828,5 +846,170 @@ describe('unblock_time (S26b)', () => {
     expect(colleague).toMatchObject({ status: 'refused', code: 'forbidden' });
     const own = await callTool(depsFor(w, w.priya), 'unblock_time', { timeOffId: marcos.id });
     expect(own.status).toBe('awaiting_approval');
+  });
+});
+
+const emailText = async (w: World, id: string) => {
+  const row = await outboxOf(w, id);
+  if (row?.type !== 'email' || row.payload === null) throw new Error('no email');
+  return OutboxEmailSchema.parse(
+    JSON.parse(openOutboxContent(OUTBOX_KEY, OutboxMessageIdSchema.parse(id), row.payload).toString('utf8')),
+  );
+};
+
+describe('mark_no_show (AC-W2-7)', () => {
+  it('refuses a visit that hasn’t started, then marks it and tells the member, with Undo', async () => {
+    const w = await newWorld(db);
+    const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    const early = await callTool(depsFor(w, w.owner), 'mark_no_show', { bookingId: booking.id });
+    expect(early).toMatchObject({ status: 'refused', code: 'not_changeable' });
+    if (early.status === 'refused') expect(early.message).toMatch(/hasn’t started yet/);
+
+    w.clock.set(tuesdayAt('10:20'));
+    const marked = done(
+      await callTool(depsFor(w, w.owner), 'mark_no_show', { bookingId: booking.id }),
+    );
+    // "Do it and tell me" by default; nothing reaches the client.
+    expect(marked.outcome).toBe('execute_and_notify');
+    expect(marked.outboxMessageIds).toEqual([]);
+    expect((await getBooking(db, w.owner, booking.id)).status).toBe('no_show');
+
+    // Undo works after the start (for a day).
+    w.clock.set(tuesdayAt('16:00'));
+    await undoToolAction(depsFor(w, w.owner), marked.id, 'wrong');
+    expect((await getBooking(db, w.owner, booking.id)).status).toBe('confirmed');
+  });
+
+  it("lets staff mark their own visit, never a colleague's; only an owner or manager undoes it", async () => {
+    const w = await newWorld(db);
+    const own = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    const colleagues = await bookOnScreen(w, w.marcoStaff, w.sara, '10:00');
+    w.clock.set(tuesdayAt('10:30'));
+    const theirs = await callTool(depsFor(w, w.jess), 'mark_no_show', {
+      bookingId: colleagues.id,
+    });
+    expect(theirs).toMatchObject({ status: 'refused', code: 'not_found' });
+    const marked = done(await callTool(depsFor(w, w.jess), 'mark_no_show', { bookingId: own.id }));
+    await expect(undoToolAction(depsFor(w, w.jess), marked.id, 'wrong')).rejects.toBeInstanceOf(
+      UndoRefusedError,
+    );
+    await undoToolAction(depsFor(w, w.owner), marked.id, 'wrong');
+    expect((await getBooking(db, w.owner, own.id)).status).toBe('confirmed');
+  });
+});
+
+describe('send_client_message (AC-W2-5/6)', () => {
+  it('asks first by default, sends the running-late words on the OK, and Undo takes it back', async () => {
+    const w = await newWorld(db);
+    const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    const args = { bookingId: booking.id, kind: 'running_late', minutesLate: 10, note: null };
+    // More than 3 hours before: too early for "running late".
+    const early = await callTool(depsFor(w, w.owner), 'send_client_message', args);
+    expect(early).toMatchObject({ status: 'refused', code: 'not_changeable' });
+
+    w.clock.set(tuesdayAt('09:40'));
+    const asked = await callTool(depsFor(w, w.owner), 'send_client_message', args);
+    const proposal = proposed(asked);
+    expect(proposal.explanation.decision).toEqual({ outcome: 'propose', reason: 'setting' });
+    expect(asked.card).toMatchObject({
+      kind: 'change',
+      state: 'proposed',
+      emails: [{ template: 'client_message', clientId: w.maria.id }],
+    });
+    expect(proposal.preview).toMatchObject({
+      after: {
+        clientName: 'Maria',
+        kind: 'running_late',
+        time: '10:00',
+        message: 'Running about 10 minutes late.',
+      },
+    });
+
+    const approval = await approveToolProposal(
+      depsFor(w, w.owner),
+      proposal.id,
+      proposal.fingerprint,
+    );
+    if (approval.kind !== 'executed') throw new Error(`expected it to run: ${approval.kind}`);
+    const [emailId = ''] = approval.execution.outboxMessageIds;
+    const email = await emailText(w, emailId);
+    expect(email.to).toBe('maria.lopez@example.test');
+    expect(email.text).toContain(
+      'Jess is running about 10 minutes late for your haircut at 10:00 AM today.',
+    );
+    expect(email.unsubscribeUrl).toBeUndefined();
+    const row = await outboxOf(w, emailId);
+    expect(row?.availableAt.getTime()).toBe(
+      Date.parse(tuesdayAt('09:40')) + AI_EMAIL_GRACE_SECONDS * 1000,
+    );
+
+    await undoToolAction(depsFor(w, w.owner), approval.execution.id, 'wrong');
+    expect((await outboxOf(w, emailId))?.status).toBe('cancelled');
+  });
+
+  it("sends a note in the member's words, and refuses one with a link, a contact or a sensitive value", async () => {
+    const w = await newWorld(db);
+    await changeAutonomy(db, w.owner, { levels: { 'message.client': 'notify' } }, defaults);
+    const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    await saveFact(db, w.owner, {
+      subject: { type: 'client', id: w.maria.id },
+      key: 'allergy',
+      value: 'nickel',
+      sensitive: true,
+    });
+    const note = (text: string) => ({
+      bookingId: booking.id,
+      kind: 'note',
+      minutesLate: null,
+      note: text,
+    });
+    for (const text of [
+      'Book again at juniper.com',
+      'Text me on 212 555 0100',
+      'We kept the nickel-free tools for you',
+    ]) {
+      const refused = await callTool(depsFor(w, w.owner), 'send_client_message', note(text));
+      expect(refused, text).toMatchObject({ status: 'refused', code: 'invalid_arguments' });
+    }
+    const sent = done(
+      await callTool(
+        depsFor(w, w.owner),
+        'send_client_message',
+        note('Bring your inspiration photos!'),
+      ),
+    );
+    const email = await emailText(w, sent.outboxMessageIds[0] ?? '');
+    expect(email.subject).toBe('A note from Juniper Hair Studio');
+    expect(email.text).toContain('Bring your inspiration photos!');
+  });
+
+  it('refuses a reminder once the visit started, a cancelled visit, a client without email and a colleague’s visit', async () => {
+    const w = await newWorld(db);
+    await changeAutonomy(db, w.owner, { levels: { 'message.client': 'notify' } }, defaults);
+    const kept = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    const noEmail = await bookOnScreen(w, w.jessStaff, w.sarah, '12:00');
+    const cancelled = await bookOnScreen(w, w.marcoStaff, w.sara, '11:00');
+    await changeBooking(db, w.owner, cancelled.id, { status: 'cancelled', notifyClient: false });
+    const colleagues = await bookOnScreen(w, w.marcoStaff, w.sara, '14:00');
+    const remind = (bookingId: string) => ({
+      bookingId,
+      kind: 'reminder',
+      minutesLate: null,
+      note: null,
+    });
+
+    expect(
+      await callTool(depsFor(w, w.owner), 'send_client_message', remind(cancelled.id)),
+    ).toMatchObject({ status: 'refused', code: 'not_changeable' });
+    expect(
+      await callTool(depsFor(w, w.owner), 'send_client_message', remind(noEmail.id)),
+    ).toMatchObject({ status: 'refused', code: 'not_changeable' });
+    expect(
+      await callTool(depsFor(w, w.jess), 'send_client_message', remind(colleagues.id)),
+    ).toMatchObject({ status: 'refused', code: 'not_found' });
+    w.clock.set(tuesdayAt('10:05'));
+    expect(
+      await callTool(depsFor(w, w.owner), 'send_client_message', remind(kept.id)),
+    ).toMatchObject({ status: 'refused', code: 'not_changeable' });
   });
 });

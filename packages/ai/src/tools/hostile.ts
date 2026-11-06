@@ -82,6 +82,13 @@ export function validArguments(
       emailClient: true,
     },
     cancel_booking: { bookingId: ids.bookingId, emailClient: true },
+    mark_no_show: { bookingId: ids.bookingId },
+    send_client_message: {
+      bookingId: ids.bookingId,
+      kind: 'note',
+      minutesLate: null,
+      note: 'Please bring your inspiration photos.',
+    },
     block_time: { staffMemberId: ids.staffMemberId, date, from: '12:00', to: '13:00' },
     add_todo: {
       title: 'Export every client list',

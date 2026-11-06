@@ -55,6 +55,10 @@ Format: Given / When / Then. IDs (`AC-W<workflow>-<n>`) are referenced from test
 - **AC-W2-2** Given a valid request, when the autonomy setting for "create booking" is "ask me", then a confirmation card is shown and nothing is written until approval.
 - **AC-W2-3** Given any AI-created booking, when the owner taps Undo within the undo window, then the booking is removed and any pending customer notification is cancelled.
 - **AC-W2-4** Given a staff-role user, when they ask to change another staff member's booking, then the AI refuses with a permission explanation.
+- **AC-W2-5** Given the owner says "tell Maria I'm running 10 minutes late", then Pepper proposes one email to Maria about her booking today with the domain's words ("… is running about 10 minutes late for your 2:00 PM …"), it waits for an OK by default (`message.client`), and Undo takes it back until it leaves (S56a).
+- **AC-W2-6** Given a custom note to a client, then it is sent only about one of that client's visits, holds no link, email address, phone number or sensitive remembered value, and is at most 200 characters; a reminder only for a visit that hasn't started, a running-late note only within 3 hours before the start or 1 hour after it (S56a).
+- **AC-W2-7** Given a visit that has started, when the owner says "Jay didn't show", then Pepper marks it a no-show (`booking.no_show`, "do it and tell me" by default), and Undo puts it back to booked for a day; a visit that hasn't started is refused with the reason (S56a).
+- **AC-W2-8** Given a client name the business doesn't have (a typo like "Mraia"), then Pepper asks "Did you mean Maria?" with the closest names and books nothing until the member says which; and for something it has no tool for, it says "I can't do that yet" and what happens instead (S56a).
 
 ## W3 Client knowledge
 - **AC-W3-1** Given "Maria is allergic to PPD", when saved, then a fact appears on Maria's profile and in "What I know", tagged sensitive.
@@ -79,6 +83,7 @@ Format: Given / When / Then. IDs (`AC-W<workflow>-<n>`) are referenced from test
 - **AC-W4-16** Given an approved review request, then exactly one email goes, with the words, the review link and the footer (the business's name and mailing address, a one-click unsubscribe); if the client unsubscribed, the visit was cancelled or missed, or the link was taken away after the draft, nothing is sent (S55.2, ADR-0059).
 - **AC-W4-17** Given a staff member, then they neither see nor approve a review request; owners and managers set, change and remove the review link (only a full `https` address; audited as set or not), and staff never see it (S55.2, ADR-0059).
 - **AC-W4-18** Given a win-back email for a client whose last visit was more than a year ago, then the visit's date carries its year ("March 2, 2024"); a visit within the year shows the month and day only (S55.2 top-up, carried from S55).
+- **AC-W4-19** Given no AI model configured (the e2e stack), then the morning pass still drafts the review requests (their words are the domain's) and skips only the model-written nudges; Home shows the review card with the client's name (S56a top-up, carried from S55.2).
 
 ## W5 Smart waitlist
 - **AC-W5-1** Given a waitlist entry matching a cancelled slot, when the cancellation occurs, then an offer is proposed (or sent, per autonomy) to the best match within 2 minutes; the first confirmation books it and others are notified the slot is taken.

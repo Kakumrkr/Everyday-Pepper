@@ -92,7 +92,7 @@ export type ChangeSide = z.infer<typeof ChangeSideSchema>;
 export const WouldBeEmailSchema = z.strictObject({
   // `rebooking_nudge`: the email a nudge proposal sends (S36); `waitlist_offer`: a freed
   // slot offered to someone waiting (S37); `review_request`: a thank-you asking for a review
-  // (S55.2).
+  // (S55.2); `client_message`: a reminder, "running late" or a note the member asked for (S56a).
   template: z.enum([
     'confirmed',
     'rescheduled',
@@ -100,6 +100,7 @@ export const WouldBeEmailSchema = z.strictObject({
     'rebooking_nudge',
     'waitlist_offer',
     'review_request',
+    'client_message',
   ]),
   clientId: ClientIdSchema,
 });

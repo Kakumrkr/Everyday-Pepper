@@ -480,6 +480,32 @@ export async function changeBookingIn(
 }
 
 /**
+ * Puts a no-show back to booked (undoing a no-show the AI marked, S56a), in the caller's
+ * transaction. Only owners and managers correct an outcome (the status rules); the client is
+ * not emailed.
+ */
+export async function undoNoShowIn(
+  tx: TenantTx,
+  actor: Actor,
+  bookingId: BookingId,
+  options: { clock?: Clock } = {},
+): Promise<Booking> {
+  requirePermission(actor, 'bookings.manage');
+  const id = BookingIdSchema.parse(bookingId);
+  const now = (options.clock ?? systemClock).now().getTime();
+  const { row } = await lockOwnBooking(tx, actor, id);
+  const correctsOutcomes = permissionScope(actor.context.role, 'bookings.manage') === 'all';
+  if (row.status !== 'no_show' || !canChangeStatus('no_show', 'confirmed', correctsOutcomes)) {
+    throw new BookingNotChangeableError();
+  }
+  const changed = await setBookingStatus(tx, id, 'confirmed');
+  if (changed === undefined) throw new BookingNotFoundError();
+  await keepReminderInStep(tx, changed, now);
+  await requestInsights(tx);
+  return audited(tx, actor, row, changed);
+}
+
+/**
  * Brings back a cancelled booking as it was (undoing a cancellation the AI made, ADR-0028), in
  * the caller's transaction: only before it starts and while its time can still be booked (rules
  * apply; one booked outside them needs an owner or manager again). The client is not emailed.
