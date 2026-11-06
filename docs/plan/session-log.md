@@ -1044,7 +1044,6 @@ Everything each session did, oldest first: what was built, the checks run and th
   - **Checks:** fixtures 28/28; pass latency p95 328 ms (15,918 bookings, 2,000 clients); feed p95 17 ms; `pnpm check` green; `pnpm test:integration` 1,140/1,140 package by package (the full parallel run timed out load-bound tests: the `appointments` concurrency property test, as in S34, 4.1 s alone; the api process start; the pass latency at p95 8.9 s, so its failure line is now 10× the target); Playwright `feed.spec.ts` 2/2 locally (the stack via `e2e-stack.sh`; Docker image builds fail in the sandbox's TLS proxy), the full suite in CI; `/code-review` 10 findings (9 fixed, 1 answered in ADR-0039), `/security-review` no findings.
   - **Carried:** none for S36 beyond the plan; a narrower snapshot loader if a business outgrows the 2-year read (ADR-0039).
 
-
 ## Planned sessions as they stood at M1 (finished rows)
 Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into S19–S21 (user, S19 Session Brief); all three are done and merged. Phase 6 (AI agent + trust layer) is split at the S22 Session Brief.
 
