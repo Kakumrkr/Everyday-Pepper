@@ -7,7 +7,7 @@ import {
   type ImportField,
   type ImportMappingAnswer,
   type ImportMappingQuestion,
-  type ImportPreview,
+  type ImportSuggestionsResult,
   type LlmRequest,
   type LlmToolDefinition,
   type LlmUsage,
@@ -166,7 +166,7 @@ export async function suggestImportColumns(
   deps: ImportSuggestionDeps,
   actor: Actor,
   batchId: ImportBatchId,
-): Promise<{ preview: ImportPreview; outcome: MappingOutcome['kind'] | 'nothing_to_ask' }> {
+): Promise<ImportSuggestionsResult> {
   const question = await importMappingQuestion(deps.db, actor, batchId);
   if (question === null) {
     return { preview: await getImport(deps.db, actor, batchId), outcome: 'nothing_to_ask' };

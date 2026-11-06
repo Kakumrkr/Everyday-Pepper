@@ -395,3 +395,26 @@ export const ImportPreviewSchema = z.object({
   rows: z.array(ImportRowSchema),
 });
 export type ImportPreview = z.infer<typeof ImportPreviewSchema>;
+
+/**
+ * What asking for suggestions did (S56a.2, ADR-0061): `answered` (the suggestions are on the
+ * columns), `refused` (the answer was unusable; the columns are marked asked), `nothing_to_ask`,
+ * `no_budget` (this month's AI budget is spent), `ai_off` (no model configured) or
+ * `unavailable` (the model couldn't be reached). The import comes back either way.
+ */
+export const ImportSuggestionsOutcomeSchema = z.enum([
+  'answered',
+  'refused',
+  'nothing_to_ask',
+  'no_budget',
+  'ai_off',
+  'unavailable',
+]);
+export type ImportSuggestionsOutcome = z.infer<typeof ImportSuggestionsOutcomeSchema>;
+
+/** `POST /v1/imports/:id/suggestions`. */
+export const ImportSuggestionsResultSchema = z.object({
+  outcome: ImportSuggestionsOutcomeSchema,
+  preview: ImportPreviewSchema,
+});
+export type ImportSuggestionsResult = z.infer<typeof ImportSuggestionsResultSchema>;

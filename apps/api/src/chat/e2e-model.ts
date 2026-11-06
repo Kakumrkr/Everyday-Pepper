@@ -23,6 +23,8 @@ import type {
 //   "What does YYYY-MM-DD look like?"
 //   "Simulate an outage"                                        (the model can't be reached)
 //   "Think slowly"                                              (a turn to stop or resume)
+// It also answers the import mapping suggester (S56a.2): a column whose masked samples are all
+// shaped like phone numbers is `phone`, one named "Guest" is `name`, any other none.
 
 const BOOK = /^Book (\S+) for (.+?) with (\S+) on (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2})/i;
 const PICKED = /^Book \w{3} (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) with (\S+) instead/i;
@@ -54,6 +56,7 @@ interface Booking {
 
 export class E2eModel implements LlmProvider {
   async respond(request: LlmRequest, options: { signal?: AbortSignal } = {}): Promise<LlmResponse> {
+    if (request.tools.some(({ name }) => name === 'suggest_mapping')) return mappingAnswer(request);
     const { said, earlier, results } = turnOf(request.messages);
     if (/^Simulate an outage/i.test(said)) {
       // Not counted by the circuit breaker, so parallel journeys keep their model.
@@ -348,5 +351,31 @@ function pause(ms: number, signal: AbortSignal | undefined): Promise<void> {
       },
       { once: true },
     );
+  });
+}
+
+/** A phone number's shape once masked: digits and phone punctuation, 10 to 15 digits. */
+function looksLikeMaskedPhone(sample: string): boolean {
+  const digits = sample.replace(/[^9]/g, '').length;
+  return /^[+9\s().-]+$/.test(sample) && digits >= 10 && digits <= 15;
+}
+
+function mappingAnswer(request: LlmRequest): LlmResponse {
+  const { columns } = JSON.parse(request.messages[0]?.content ?? '{}') as {
+    columns?: { name: { text: string }; maskedSamples: string[] }[];
+  };
+  const answer = (columns ?? []).map(({ name, maskedSamples }) => ({
+    column: name.text,
+    field:
+      maskedSamples.length > 0 && maskedSamples.every(looksLikeMaskedPhone)
+        ? 'phone'
+        : name.text.toLowerCase() === 'guest'
+          ? 'name'
+          : null,
+  }));
+  return scriptedResponse({
+    toolCalls: [
+      { id: 'mapping', name: 'suggest_mapping', arguments: JSON.stringify({ columns: answer }) },
+    ],
   });
 }
