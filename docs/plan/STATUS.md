@@ -10,7 +10,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 **S56a (scripted "a" half), brief pre-approved by the user ("Pre-approved with your recommendations"):** D-1 split, AI-suggested import mapping → S56a.2; D-2 reminder/running-late words written by the domain, a custom note from the model checked for sensitive values, `message.client` asks by default; D-3 `booking.no_show` internal write, notify, undo back to booked; D-4 ADR-0060.
 Tasks: 1 ACs + ADR · 2 contracts + migration · 3 `mark_no_show` · 4 `send_client_message` · 5 prompt v8 + close-match search · 6 eval cases, drop `EVAL_WORLD_AUTONOMY`, $13.80 stop · 7 top-up: review pass without a model + feed spec.
 Done: 1 AC-W2-5…8, AC-W4-19, ADR-0060 · 2 `booking.no_show` + `message.client` on the dial, migration 0066, card labels · 3 `mark_no_show` + `undoNoShowIn` · 4 `send_client_message` (writes integration 51/51). Note limit 200 characters (the card shows it whole).
-Next: task 5 (prompt v8 + close names).
+· 5 prompt v8 (Autonomy page in More, "did you mean", "I can't do that yet") and close names in `find_clients` (v3), 1 edit for words of 3–5 letters, else 2 (reads 16/16).
+Next: task 6 (eval cases + cassettes, drop `EVAL_WORLD_AUTONOMY`, $13.80 stop).
 
 ## Last sessions
 - **S55.2 Phase 12 · Post-visit review requests (2026-11-05)** ([ADR-0059](../adr/0059-post-visit-review-requests.md), [PR #83](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/83)). Full entry in [session-log.md](session-log.md).

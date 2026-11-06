@@ -137,6 +137,32 @@ describe('find_clients', () => {
     });
   });
 
+  it('suggests close names for a typo, as suggestions, never matches (AC-W2-8)', async () => {
+    const typo = answered(
+      await callTool(depsFor(world, world.owner), 'find_clients', { name: 'Mraia' }),
+    );
+    expect(typo.data).toEqual({
+      matches: [],
+      more: false,
+      suggestions: [{ clientId: world.maria.id, name: 'Maria L.' }],
+    });
+    expect(typo.summary).toMatch(/Did you mean/);
+    expect(typo.card).toEqual({
+      kind: 'client_choice',
+      clients: [{ clientId: world.maria.id, name: 'Maria L.' }],
+    });
+    // Staff are offered only their own clients, and another business's never.
+    const jess = answered(
+      await callTool(depsFor(world, world.jess), 'find_clients', { name: 'Sarha' }),
+    );
+    expect(jess.data).toEqual({ matches: [], more: false });
+    const elsewhere = answered(
+      await callTool(depsFor(other, other.owner), 'find_clients', { name: 'Mraia' }),
+    );
+    expect(elsewhere.data).toMatchObject({ matches: [] });
+    expect(JSON.stringify(elsewhere.data)).not.toContain(world.maria.id);
+  });
+
   it("finds nobody of another business's", async () => {
     const answer = answered(
       await callTool(depsFor(other, other.owner), 'find_clients', { name: 'Kim' }),

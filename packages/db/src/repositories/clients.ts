@@ -12,7 +12,7 @@ import {
   type ClientRecords,
   type RecordSource,
 } from '@pepper/contracts';
-import { and, asc, eq, ilike, inArray, isNull, like, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, isNull, like, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { ClientEmailTakenError, isUniqueViolation } from '../errors.js';
 import { newId } from '../ids.js';
@@ -255,6 +255,23 @@ export async function listClients(
     .where(and(bySearch, byImport, byCursor, notDeleted))
     .orderBy(asc(sql`lower(${clients.name})`), asc(clients.id))
     .limit(z.number().int().min(1).max(201).parse(options.limit));
+}
+
+/**
+ * The names of the clients the member may see (the database's member scope: staff, their own),
+ * the most recently changed first, at most `limit`: what a misspelt name is compared with
+ * (S56a, ADR-0060). Ids and names only.
+ */
+export async function listClientNames(
+  tx: TenantTx,
+  limit: number,
+): Promise<{ id: string; name: string }[]> {
+  return tx
+    .select({ id: clients.id, name: clients.name })
+    .from(clients)
+    .where(notDeleted)
+    .orderBy(desc(clients.updatedAt), asc(clients.id))
+    .limit(z.number().int().min(1).max(10_000).parse(limit));
 }
 
 // Merging and deleting (S50, ADR-0051) ---------------------------------------------------------

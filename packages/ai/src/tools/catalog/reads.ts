@@ -22,7 +22,7 @@ import {
   type LocalSlot,
   type TrustJson,
 } from '@pepper/contracts';
-import { findClientsByNameIn, permissionScope } from '@pepper/core';
+import { closeClientNamesIn, findClientsByNameIn, permissionScope } from '@pepper/core';
 import { z } from 'zod';
 import { daysOf, instantOf, localOf } from '../local-time.js';
 import { shortClientName } from '../names.js';
@@ -207,8 +207,9 @@ export const findAvailability: ReadTool = {
 export const findClients: ReadTool = {
   kind: 'read',
   name: 'find_clients',
-  // 2 (S30): what the business remembers comes with up to 3 matches.
-  version: 2,
+  // 2 (S30): what the business remembers comes with up to 3 matches. 3 (S56a): with no match,
+  // up to 3 close names as suggestions (a typo), never as matches.
+  version: 3,
   localTimes: false,
   guide: {
     use: "Find the business's clients by name, to get the id every client action needs.",
@@ -217,7 +218,7 @@ export const findClients: ReadTool = {
       'to pick one of several matches yourself (show them and ask the member which one)',
     ],
     returns:
-      'up to 10 matches as id and short name (first name, last initial), and for up to 3 what the business remembers (memory) and their last noted visit (lastVisit). Staff find only clients they have bookings with.',
+      'up to 10 matches as id and short name (first name, last initial), and for up to 3 what the business remembers (memory) and their last noted visit (lastVisit). With no match, up to 3 close names (suggestions) for a typo: ask the member "Did you mean …?" and use one only once they say so. Staff find only clients they have bookings with.',
     examples: [
       { say: 'Book Maria for a cut tomorrow at 10', args: { name: { $regex: '^maria' } } },
       { say: "Move Sarah's appointment", args: { name: { $regex: 'sarah' } } },
@@ -250,6 +251,21 @@ export const findClients: ReadTool = {
       name: shortClientName(client.name),
     }));
     const more = found.length > CLIENTS_SHOWN;
+    // A typo (S56a, AC-W2-8): close names to ask about, only when nothing matches.
+    const suggestions =
+      matches.length === 0
+        ? (await closeClientNamesIn(scope.tx, scope.actor, args.name)).map((client) => ({
+            clientId: client.id,
+            name: shortClientName(client.name),
+          }))
+        : [];
+    if (suggestions.length > 0) {
+      return {
+        summary: `No client is called that, but close names are: ${suggestions.map((s) => s.name).join(', ')}. Ask the member "Did you mean …?"; act only once they say which.`,
+        data: { matches: [], more: false, suggestions },
+        card: { kind: 'client_choice', clients: suggestions },
+      };
+    }
     const summary =
       matches.length === 0
         ? `No client matches that name${ownOnly(scope) ? ' among your own clients' : ''}. Ask for the spelling; never guess.`
