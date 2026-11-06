@@ -41,3 +41,6 @@ S48's mapping places a column by the other tool's preset, by its header, or by i
 - api: `ImportSuggestionsController` in the chat module, and the e2e model's mapping answer.
 - web: suggestions with "Use it" on the columns step, and the left-out line on the preview.
 - evals: the `importFile` turn, the mapping grader and `import-mapping-s56.json` (7 cases).
+
+## Recorded (S56b)
+On `gpt-6-luna` (low), the routine route. The probe's first pass missed `mapping-visits-file`: with "Prefer null to a guess" and samples masked to their shape, the model left Treatment and Stylist empty, or the date column, which the domain needs before it keeps a visit's service and staff. The instructions now give each field's usual column names and say a visits file's columns go together; a tags column must be named for labels (a probe suggested tags for "Fav colour"). `import_mapping` 7/7 at pass^1 and pass^3 (gate 0.9 / 0.8). Spend in [ai-budget.md](../plan/ai-budget.md).

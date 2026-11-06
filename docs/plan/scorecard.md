@@ -11,14 +11,14 @@ The fifteen categories Pepper is judged by, from the launch-readiness review of 
 
 | # | Category | Review (10-25) | Now | Pilot gate (S60) | Launch gate (S76) | What 10 looks like |
 |---|---|---|---|---|---|---|
-| C1 | Core usefulness | 5 | 6 | 8 | 9 | An owner runs the whole week in Pepper (book, remind, deposit, fill, report) and never opens another tool |
+| C1 | Core usefulness | 5 | 8 | 8 | 9 | An owner runs the whole week in Pepper (book, remind, deposit, fill, report) and never opens another tool |
 | C2 | Realism and completeness | 4 | 7 | 8 | 9 | A new business looks fully real in 10 minutes: menu, prices, hours, photos, contact, policy |
 | C3 | Friendly UX | 6 | 8 | 9 | 9 | No dead ends, no jargon; every screen has one clear next step; owners describe it as "easy" without prompting |
 | C4 | Mobile usability | 6 | 8 | 9 | 9 | Every flow done one-thumbed at 375 px in under 90 seconds; screenshot tests at 3 widths × 2 themes |
-| C5 | Owner experience | 5 | 7 | 8 | 9 | The day's work is a card board of one-tap decisions ranked by dollars; the trust controls are easy to find |
+| C5 | Owner experience | 5 | 8 | 8 | 9 | The day's work is a card board of one-tap decisions ranked by dollars; the trust controls are easy to find |
 | C6 | Staff experience | 4 | 4 | 7 | 9 | Staff see their day and week, add walk-ins, and their personal calendar blocks bookings |
 | C7 | Customer booking | 5 | 7 | 8 | 9 | Booking in < 60 s on a phone; contact details, policy and the business's brand on the page; drop-off ≤ 15% at any step |
-| C8 | AI trust and safety | 8 | 8 | 9 | 10 | 100% pass^3 on the safety sets; every action explained and undoable; the owner can see exactly what Pepper said to whom |
+| C8 | AI trust and safety | 8 | 9 | 9 | 10 | 100% pass^3 on the safety sets; every action explained and undoable; the owner can see exactly what Pepper said to whom |
 | C9 | Reliability | 6 | 6 | 8 | 9 | Deployed, monitored, backed up with a passed restore drill, SLOs met under load, 30 days with no unseen error |
 | C10 | Accessibility | 6 | 8 | 8 | 9 | WCAG 2.2 AA on every screen, axe clean, the manual screen-reader check passed, reduced motion honoured |
 | C11 | Security and privacy | 6 | 8 | 9 | 9 | Recovery, verification, MFA, export, deletion, terms and privacy policy; no open high finding; zero data retention on the production AI project |
@@ -36,7 +36,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 9 · New look (S43.2) | C3 8 · C4 8 · C10 8 (met, S43.2: §5) |
 | 10 · First 10 minutes (S47.3) | C1 6 · C2 6 · C5 7 · C7 7 (met, S47.3: §6) |
 | 11 · Switching + privacy (S51.2) | C13 8 · C11 8 (met, S51.2: §7) |
-| 12 · The employee (S56b) | C1 8 · C5 8 · C8 9 |
+| 12 · The employee (S56b) | C1 8 · C5 8 · C8 9 (met, S56b: §8) |
 | 13 · Pilot readiness (S60) | the "Pilot gate" column |
 | 14 · SMS (S64) | C12 7 |
 | 15 · Deposits (S68) | C12 8 |
@@ -72,6 +72,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 2026-10-28 | Phase 9 gate (S43.2) | 5 | 4 | 8 | 8 | 5 | 4 | 5 | 8 | 6 | 8 | 6 | 3 | 2 | 3 | 1 |
 | 2026-11-03 | Phase 10 gate (S47.3) | 6 | 7 | 8 | 8 | 7 | 4 | 7 | 8 | 6 | 8 | 6 | 3 | 2 | 3 | 1 |
 | 2026-11-04 | Phase 11 gate (S51.2) | 6 | 7 | 8 | 8 | 7 | 4 | 7 | 8 | 6 | 8 | 8 | 3 | 8 | 3 | 1 |
+| 2026-11-06 | Phase 12 gate (S56b) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 3 | 8 | 3 | 1 |
 
 ## 5. Phase 9 gate (S43.2, 2026-10-28): the evidence
 
@@ -102,3 +103,12 @@ Scored by Claude in S51.2 from the tests below; only C11 and C13 were scored, th
 
 - **C13 Switching value 2 → 8.** Clients from any of the five tools' exports or any CSV/JSON/JSONL, mapped by preset or by header and value patterns, previewed with reasons per row, matched (id → email → phone → name) and merged, undoable for 7 days (ADR-0049, AC-W1-3, AC-W1-17…21); past visits and upcoming appointments with conflicts listed and no email sent, 1,000 clients and 5,000 visits in under 2 minutes (ADR-0050, AC-W1-22…29); merge and delete (ADR-0051); the export imports back with nothing mapped and no duplicates (ADR-0053, AC-W1-37…38, `apps/api/src/export.int.test.ts`). Not yet 9: no owner has moved in yet (the pilot), and the mapping of an unknown file is by rules (AI suggestions in S56a).
 - **C11 Security and privacy 6 → 8.** On top of recovery, email verification and change, and MFA for owners and managers (S44, ADR-0045): the owner-only export (ADR-0053); **deletion** of a business and of an account with 30 days to change one's mind, the business's rows proved gone from every `tenant_id` table, an early delete refused by the database itself, the account's sign-in and sessions gone and business records naming nobody (ADR-0054, AC-W1-40…42, `packages/db/src/deletion.int.test.ts`, `apps/api/src/deletion.int.test.ts`, `apps/worker/src/jobs.int.test.ts`); **L15 closed** (AC-W1-43, `apps/api/src/auth.int.test.ts`); terms and privacy drafts (`docs/legal/`, S51); the isolation suite at 100%. `/code-review` and a security pass on S51.2: no high or medium finding (the 4 fixed review findings in session-log). Not yet 9: zero data retention on the production AI project and backup retention (STATUS "Waiting on the user" 4, S58), the terms reviewed (S59), the pre-pilot security review (S60).
+
+## 8. Phase 12 gate (S56b, 2026-11-06): the evidence
+
+Scored by Claude in S56b from the tests and the recording below; only C1, C5 and C8 were scored, the rest carry over. The recording is on `gpt-6-luna` / `gpt-6.1-sol` (low), $0.80 of the phase's $3.00 ([ai-budget.md](ai-budget.md)).
+
+- **C1 Core usefulness 6 → 8.** Pepper now does the week's follow-through by itself or from one card: it books, moves and cancels from chat with the owner's OK, sends a client a reminder or a "running late" note about a booked visit and marks a no-show with a day's Undo (ADR-0060, AC-W2-5…8); it fills freed times from the waitlist and then from regulars (ADR-0056), drafts win-back emails for clients who drifted away (ADR-0057), asks happy clients for a review (ADR-0059) and says each week what it did and the minutes saved (ADR-0058); an owner moving in from another tool gets the columns the rules couldn't place suggested (ADR-0061, AC-W1-46…48). Every one of those tools passes on the real model (the table in ADR-0060). Not yet 9: reminders by text and deposits (Phases 14–15), a week view and calendar sync (Phase 16), the five-number report (Phase 17); no owner has run a week in it yet (the pilot).
+- **C5 Owner experience 7 → 8.** Home's cards are ranked by the dollars at stake, from the business's own prices, with "Dismiss all" (S52, AC-W4-4); Activity lists everything Pepper did with its Undo (S52, AC-W7-4); the Autonomy page in More offers three presets with every action's own setting read back as standing rules (ADR-0055, AC-W7-5); the import preview speaks in one plain sentence (AC-W1-21, zeros left out in S56b) and says what is left out and why (AC-W1-48). Not yet 9: no timed owner run of a day's cards; approval by text comes in S63.
+- **C8 AI trust and safety 8 → 9.** **100% pass^3** on every safety and trust set: safety 21/21, permissions 9/9, autonomy 13/13, memory_delete 12/12, memory_safety 14/14, feed_safety 11/11, and scheduling, memory_recall, episodic, drafts and import_mapping at 100% too (186 cases × 3); `KNOWN_REAL_MODEL_MISSES` empty for the first time since S37b (the two waitlist cases pass after the S44 domain check); the replay test (`packages/ai/src/evals/evals.int.test.ts`) holds it in CI. Honest refusals name no place that doesn't exist (prompt v9, checked by `cant-text-yet` and `cant-refund-yet`); the model sees an import's column names only as untrusted data and masked samples, and the domain checks every suggestion (ADR-0061); every action is explained, audited and undoable (Activity, S52) and the owner sees the words of every client message on its card (ADR-0060). Not yet 10: zero data retention on the production project (before the pilot), one memory_write miss at pass^1 (`mw-staff-fact`, safe), and no outside red-team.
+

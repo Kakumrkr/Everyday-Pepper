@@ -85,6 +85,15 @@ Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b prob
   - Second full recording, 252 cases: **$0.2505** (1557–1685). Every gate met; `wl-add-marco-saturday` and `wl-staff-own-client` carried to Phase 9 (user).
   - pass^3 trials 2–3 on drafts, feed_safety, safety, permissions, memory_delete, memory_safety, autonomy, memory_recall, episodic, scheduling and `lr-blackout`, 167 cases: **$0.2042** (1686–1840). Every pass^3 gate met.
 
+## Phase 12 ($3.00 cap; V1 policy above)
+
+Runs labelled `P12` (`EVAL_PHASE=12`: `record.sh` defaults to 7, so the phase is set by hand).
+
+- **S56b (2026-11-06): $0.7996 in 393 runs** (Phase 12 total: **$0.7996 of $3.00**; all phases $4.6025 of $13.80). Models `gpt-6-luna` low / `gpt-6.1-sol` low. Actual spend ran about 1/1000 of the worst-case estimates. `--max-cost 2` for 12 single-case pass^3 runs whose 3-trial worst case was $1.73 (user: "Allow, these 12 only"); no `--phase-estimate-ok`.
+  - Probe of `scheduling`, `autonomy`, `safety` and `import_mapping`, 100 cases: **$0.1211** (1841–1889); 5 misses fixed (prompt v9, the suggester's instructions, `get_feed` v6, 3 graders), re-probes **$0.0062** (1890–1894).
+  - Full recording, 272 cases: **$0.3210** (1895–2030 and 2031–2052; the eval database stopped at part 115 and parts 115–136 were run again). Every gate met; `waitlist` 12/12, so `KNOWN_REAL_MODEL_MISSES` is empty.
+  - pass^3 trials 2–3 on drafts, feed_safety, safety, permissions, memory_delete, memory_safety, autonomy, memory_recall, episodic, scheduling and import_mapping, 186 cases, plus `lr-blackout`'s stale trials: **$0.3513** (2053–2233; 15 OpenAI 500/503/cancelled trials re-run). Every pass^3 set at 100%.
+
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
