@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "3f4b1c43d371ac4f6f58a06dbab40447576f8b570b6ab075d411a2248f59d4e6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OLnay4JC2IHj0l4LCOvZi2yB",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Last seen\",\"field\":null},{\"column\":\"Usual stylist\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 937,
+            "cachedInputTokens": 0,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "3f4b1c43d371ac4f6f58a06dbab40447576f8b570b6ab075d411a2248f59d4e6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1cbBYdZmbkuRTuWlm6enqAGH",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Last seen\",\"field\":null},{\"column\":\"Usual stylist\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 937,
+            "cachedInputTokens": 0,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "3f4b1c43d371ac4f6f58a06dbab40447576f8b570b6ab075d411a2248f59d4e6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_DlFTVelu0KhLzl043pry8pzG",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Last seen\",\"field\":null},{\"column\":\"Usual stylist\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 937,
+            "cachedInputTokens": 0,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

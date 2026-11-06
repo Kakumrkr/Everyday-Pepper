@@ -21,7 +21,7 @@ Pick the sets whose tools or guides changed, plus the sets of every tool whose g
 
 ```sh
 node .claude/skills/eval-record/pack.mjs $S --set <set> --set <set>   # or --case <id>...
-.claude/skills/eval-record/record.sh $S "S<nn> probe"                 # run_in_background
+EVAL_PHASE=<phase> .claude/skills/eval-record/record.sh $S "S<nn> probe"                 # run_in_background
 ```
 
 A miss here is fixed now (failing test first if it is code), and the probe is re-run for that set only. A recording replays every step whose fingerprint still matches, so the probe's cassettes cost nothing again in the full pass unless a later change makes them stale.
@@ -30,7 +30,7 @@ A miss here is fixed now (failing test first if it is code), and the probe is re
 
 ```sh
 node .claude/skills/eval-record/pack.mjs $S                # every case, about $0.56 of estimate a run
-.claude/skills/eval-record/record.sh $S "S<nn> pass^1"     # run_in_background, not Monitor
+EVAL_PHASE=<phase> .claude/skills/eval-record/record.sh $S "S<nn> pass^1"     # run_in_background, not Monitor
 (cd packages/ai && EVAL_DATABASE_URL=$(cat $S/evaldb.url) NODE_USE_ENV_PROXY=1 \
   node dist/evals/cli.js --provider openai --retrieval --record --phase <n>)   # when episodes or search changed
 ```
@@ -43,4 +43,4 @@ node .claude/skills/eval-record/pack.mjs $S                # every case, about $
 - Replay everything for free: `pnpm --filter @pepper/ai eval --provider openai` and the replay test in `pnpm test:integration`.
 - Write the spend in `ai-budget.md` (from `evals/ledger.json`) and the results table in the session's ADR.
 
-Flags (details in `packages/ai/evals/README.md`): `--set`, `--case`, `--concurrency` (default 4), `--phase` (required to record), `--retrieval`, `--phase-estimate-ok`, `--max-cost`. Environment: `EVAL_DATABASE_URL`, `NODE_USE_ENV_PROXY=1` (both set by `record.sh`); models via `ROUTINE_MODEL`/`STRONG_MODEL`, phase via `EVAL_PHASE` (record.sh defaults to 7: set it to the current phase, e.g. `EVAL_PHASE=12`, or the phase cap is not the one checked).
+Flags (details in `packages/ai/evals/README.md`): `--set`, `--case`, `--concurrency` (default 4), `--phase` (required to record), `--retrieval`, `--phase-estimate-ok`, `--max-cost`. Environment: `EVAL_DATABASE_URL`, `NODE_USE_ENV_PROXY=1` (both set by `record.sh`); models via `ROUTINE_MODEL`/`STRONG_MODEL`, phase via `EVAL_PHASE` (required by `record.sh`: the phase whose cap is checked, e.g. `EVAL_PHASE=12`).

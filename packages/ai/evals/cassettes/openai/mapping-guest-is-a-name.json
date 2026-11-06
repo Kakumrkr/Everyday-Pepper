@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b0eff9b090824911627fbac2c42c6d5d80c0cff6ac354a7556f60cda8ba207df",
+        "fingerprint": "4d45772459b3fd053a59b8a7bcbfd84b6c43cca2a1c94a6f03802b892feea62b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_zjlnzYhULW8wAjbf1ghoSuqO",
+              "id": "call_3WZfaliQn3J5KMboLhM7Txuv",
               "name": "suggest_mapping",
               "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Loyalty pts\",\"field\":null}]}"
             }
@@ -16,7 +16,7 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 875,
+            "inputTokens": 912,
             "cachedInputTokens": 0,
             "outputTokens": 38
           },
@@ -26,12 +26,12 @@
     ],
     [
       {
-        "fingerprint": "b0eff9b090824911627fbac2c42c6d5d80c0cff6ac354a7556f60cda8ba207df",
+        "fingerprint": "4d45772459b3fd053a59b8a7bcbfd84b6c43cca2a1c94a6f03802b892feea62b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_sqeyOChpd0B4yklpeXMCdbSh",
+              "id": "call_dbuxxChPP2Je1SuXazH915Qg",
               "name": "suggest_mapping",
               "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Loyalty pts\",\"field\":null}]}"
             }
@@ -39,7 +39,7 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 875,
+            "inputTokens": 912,
             "cachedInputTokens": 0,
             "outputTokens": 38
           },
@@ -49,12 +49,12 @@
     ],
     [
       {
-        "fingerprint": "b0eff9b090824911627fbac2c42c6d5d80c0cff6ac354a7556f60cda8ba207df",
+        "fingerprint": "4d45772459b3fd053a59b8a7bcbfd84b6c43cca2a1c94a6f03802b892feea62b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_usvNMFPE4Tn5xcsgwdBbNC1U",
+              "id": "call_xwWZSkqWBi5EC3NP99d0ZgQM",
               "name": "suggest_mapping",
               "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Loyalty pts\",\"field\":null}]}"
             }
@@ -62,7 +62,7 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 875,
+            "inputTokens": 912,
             "cachedInputTokens": 0,
             "outputTokens": 38
           },

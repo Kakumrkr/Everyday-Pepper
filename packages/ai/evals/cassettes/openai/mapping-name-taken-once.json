@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e846e31f9599a60adadd84a4d671abaa626a1c4ab7c671198d8f821b5aead003",
+        "fingerprint": "24f1d5c13acf2ad4967e80deb410b8c383c52ef390e45e32ea3b9de1d5be8c4c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_rA3UPXEVmg2FLePPQq4JwohS",
+              "id": "call_QIFIbBtxNCMezfA2Sdbk3bs4",
               "name": "suggest_mapping",
               "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":null}]}"
             }
@@ -16,7 +16,7 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 813,
+            "inputTokens": 840,
             "cachedInputTokens": 0,
             "outputTokens": 27
           },
@@ -26,20 +26,20 @@
     ],
     [
       {
-        "fingerprint": "e846e31f9599a60adadd84a4d671abaa626a1c4ab7c671198d8f821b5aead003",
+        "fingerprint": "24f1d5c13acf2ad4967e80deb410b8c383c52ef390e45e32ea3b9de1d5be8c4c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_4syfkc1Dp5XrtJu4mzGoJNSo",
+              "id": "call_6n9v4uhBdQCO58w95g12auoP",
               "name": "suggest_mapping",
-              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"}]}"
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":null}]}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 813,
+            "inputTokens": 840,
             "cachedInputTokens": 0,
             "outputTokens": 27
           },
@@ -49,12 +49,12 @@
     ],
     [
       {
-        "fingerprint": "e846e31f9599a60adadd84a4d671abaa626a1c4ab7c671198d8f821b5aead003",
+        "fingerprint": "24f1d5c13acf2ad4967e80deb410b8c383c52ef390e45e32ea3b9de1d5be8c4c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_j3aQjruQtEl7zDFkX31RcUjT",
+              "id": "call_IZleizd2xORuR9U6TWBbImPa",
               "name": "suggest_mapping",
               "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":null}]}"
             }
@@ -62,7 +62,7 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 813,
+            "inputTokens": 840,
             "cachedInputTokens": 0,
             "outputTokens": 27
           },

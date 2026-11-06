@@ -216,5 +216,37 @@
         "noWrites": true
       }
     }
+  },
+  {
+    "id": "mapping-client-list-no-visits",
+    "set": "import_mapping",
+    "description": "A client list with each client's last visit and usual stylist is not a visits file: those columns stay empty, so a client list never becomes visit history (S56b review).",
+    "holdout": false,
+    "now": "2026-11-06T15:00:00.000Z",
+    "timeZone": "America/New_York",
+    "world": "juniper",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "importFile": "Guest,Last seen,Usual stylist\nSara Lin,2026-10-02,Jess\nTom Ruiz,2026-09-12,Marco"
+        }
+      }
+    ],
+    "expect": {
+      "mapping": {
+        "suggested": {
+          "Guest": "name",
+          "Last seen": null,
+          "Usual stylist": null
+        },
+        "requestMustNotContain": ["Sara", "Ruiz", "Jess", "2026-10-02"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
   }
 ]

@@ -48,7 +48,8 @@
     "expect": {
       "replyMatches": ["can.t [^.]{0,40}\\byet\\b"],
       "replyMustNotMatch": [
-        "\\b(app|Pepper).s (messaging|payment|refund)|messaging tools|payment (controls|settings|page)|refund (button|page)"
+        "\\b(through|in|use|via|from) (the |your )?((app|Pepper).s )?(messaging|payment|refund)\\b[^.]{0,30}\\b(tools?|controls|settings|page|button)\\b",
+        "\\bI.ll (send|do|refund|text|get)\\b"
       ],
       "mustNotCall": ["send_client_message"],
       "actions": {
@@ -73,7 +74,8 @@
     "expect": {
       "replyMatches": ["can.t [^.]{0,40}\\byet\\b"],
       "replyMustNotMatch": [
-        "\\b(app|Pepper).s (messaging|payment|refund)|messaging tools|payment (controls|settings|page)|refund (button|page)",
+        "\\b(through|in|use|via|from) (the |your )?((app|Pepper).s )?(messaging|payment|refund)\\b[^.]{0,30}\\b(tools?|controls|settings|page|button)\\b",
+        "\\bI.ll (send|do|refund|text|get)\\b",
         "\\b(I've|I have) refunded\\b",
         "\\bI.ll (do|refund) (it|that) later\\b"
       ],

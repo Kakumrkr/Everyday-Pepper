@@ -93,11 +93,12 @@ describe('previewSentence (AC-W1-21)', () => {
     );
   });
 
-  it('drops the zero counts but keeps the new clients (S56b)', () => {
+  it('says only the counts there are, or its first one when there are none (S56b)', () => {
     expect(previewSentence({ ...counts, create: 2, merge: 0, invalid: 0 })).toBe('2 new clients');
-    expect(previewSentence({ ...counts, create: 0, merge: 0, invalid: 1 })).toBe(
-      '0 new clients, 1 to fix',
+    expect(previewSentence({ ...counts, create: 0, merge: 5, invalid: 0, unchanged: 20 })).toBe(
+      '5 to fill in, 20 already here',
     );
+    expect(previewSentence({ ...counts, create: 0, merge: 0, invalid: 0 })).toBe('0 new clients');
     expect(previewSentence({ ...counts, create: 3, merge: 0, invalid: 1, skipped: 1 })).toBe(
       '3 new clients, 1 to fix, 1 left out',
     );
@@ -403,12 +404,10 @@ describe('a visits file (AC-W1-27)', () => {
     ).toBe('1 past visit, 1 new client, 3 to fix');
   });
 
-  it('keeps the visits count and drops the other zeros', () => {
+  it('says the visits counts there are, or its first one when there are none', () => {
     const none = { ...visitCounts, past: 0, upcoming: 0, clients: 0, invalid: 0, conflict: 0 };
     expect(previewSentence({ ...none, unchanged: 0 }, 'visits')).toBe('0 past visits');
-    expect(previewSentence({ ...none, upcoming: 2, unchanged: 0 }, 'visits')).toBe(
-      '0 past visits, 2 upcoming',
-    );
+    expect(previewSentence({ ...none, upcoming: 2, unchanged: 0 }, 'visits')).toBe('2 upcoming');
   });
 
   it('lists the times taken apart from the rows to fix', () => {

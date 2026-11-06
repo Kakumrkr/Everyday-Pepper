@@ -51383,6 +51383,75 @@
         }
       },
       "charsPerToken": 3.765777757378253
+    },
+    {
+      "id": 2234,
+      "at": "2026-11-06T22:15:11.444Z",
+      "label": "P12 S56b import_mapping pass^3 (review fix) part 1/1",
+      "status": "completed",
+      "cases": 8,
+      "trials": 3,
+      "estimateUsd": 0.264,
+      "actualUsd": 0.0026480999999999996,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 24,
+          "inputTokens": 21726,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 951,
+          "usd": 0.0026480999999999996,
+          "latencyMsP50": 1218.6207350000004,
+          "latencyMsP95": 2251.907322
+        }
+      },
+      "charsPerToken": 4.456227561447114
+    },
+    {
+      "id": 2235,
+      "at": "2026-11-06T22:15:34.961Z",
+      "label": "P12 S56b import_mapping pass^3 (review fix 2) part 1/1",
+      "status": "completed",
+      "cases": 8,
+      "trials": 3,
+      "estimateUsd": 0.264,
+      "actualUsd": 0.0022676999999999997,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 20,
+          "inputTokens": 18507,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 834,
+          "usd": 0.0022676999999999997,
+          "latencyMsP50": 1289.8858420000001,
+          "latencyMsP95": 1595.9303299999997
+        }
+      },
+      "charsPerToken": 4.4589074404279465
+    },
+    {
+      "id": 2236,
+      "at": "2026-11-06T22:16:27.057Z",
+      "label": "P12 S56b import_mapping pass^3 (review fix 2, again) part 1/1",
+      "status": "completed",
+      "cases": 8,
+      "trials": 3,
+      "estimateUsd": 0.264,
+      "actualUsd": 0.0023190000000000003,
+      "byModel": {
+        "gpt-6-luna": {
+          "calls": 21,
+          "inputTokens": 19125,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 813,
+          "usd": 0.0023190000000000003,
+          "latencyMsP50": 1220.276242,
+          "latencyMsP95": 2230.3805460000003
+        }
+      },
+      "charsPerToken": 4.459764705882353
     }
   ]
 }

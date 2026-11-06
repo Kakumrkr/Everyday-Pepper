@@ -247,8 +247,8 @@ export const count = (n: number, one: string, many: string) =>
  * The preview in one sentence (AC-W1-21): "143 new clients, 12 to fill in, 3 to fix", then the
  * duplicates left out and the clients already here. A visits file's (AC-W1-27): "40 past
  * visits, 6 upcoming, 12 new clients, 3 to fix", then the times taken, the rows left out and the
- * visits already here. The first count is always said; every other one only when there are any
- * ("2 new clients", not "2 new clients, 0 to fill in, 0 to fix"; S56b).
+ * visits already here. A count is said only when there are any ("2 new clients", not "2 new
+ * clients, 0 to fill in, 0 to fix"; S56b); a file with nothing to count says its first one.
  */
 export function previewSentence(counts: ImportCounts, kind: ImportKind = 'clients'): string {
   const parts: readonly (readonly [number, string])[] =
@@ -269,10 +269,8 @@ export function previewSentence(counts: ImportCounts, kind: ImportKind = 'client
           [counts.skipped, `${String(counts.skipped)} left out`],
           [counts.unchanged, `${String(counts.unchanged)} already here`],
         ];
-  return parts
-    .filter(([n], i) => i === 0 || n > 0)
-    .map(([, words]) => words)
-    .join(', ');
+  const said = parts.filter(([n]) => n > 0);
+  return (said.length > 0 ? said : parts.slice(0, 1)).map(([, words]) => words).join(', ');
 }
 
 /** "a, b and c". */

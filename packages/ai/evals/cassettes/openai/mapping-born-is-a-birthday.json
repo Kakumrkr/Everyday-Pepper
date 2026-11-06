@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4beefeeba9555ea2a9afa819e2c48bce249591686ff75e0a1643033f7648755d",
+        "fingerprint": "2f9acae0d5d960b14022029dc565b7882ad7792d0f5baf8d0f66156a17fbc84f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_8eyFW1g6YWaCS1UEDDuPx9LO",
+              "id": "call_x8ykT7pQyjJ3FBXMdcKJ5ebN",
               "name": "suggest_mapping",
               "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Born\",\"field\":\"birthday\"}]}"
             }
@@ -16,7 +16,7 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 872,
+            "inputTokens": 909,
             "cachedInputTokens": 0,
             "outputTokens": 35
           },
@@ -26,12 +26,12 @@
     ],
     [
       {
-        "fingerprint": "4beefeeba9555ea2a9afa819e2c48bce249591686ff75e0a1643033f7648755d",
+        "fingerprint": "2f9acae0d5d960b14022029dc565b7882ad7792d0f5baf8d0f66156a17fbc84f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_LQbi5lWBzQZSXrw6awPz26vQ",
+              "id": "call_vFRFOZWKdhF8OAhJ0CYB9kcg",
               "name": "suggest_mapping",
               "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Born\",\"field\":\"birthday\"}]}"
             }
@@ -39,7 +39,7 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 872,
+            "inputTokens": 909,
             "cachedInputTokens": 0,
             "outputTokens": 35
           },
@@ -49,20 +49,20 @@
     ],
     [
       {
-        "fingerprint": "4beefeeba9555ea2a9afa819e2c48bce249591686ff75e0a1643033f7648755d",
+        "fingerprint": "2f9acae0d5d960b14022029dc565b7882ad7792d0f5baf8d0f66156a17fbc84f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Xl7jvmKoMexUPiRBxfUrFOGd",
+              "id": "call_cYPRhkmR8qn8coseFPXvHcmh",
               "name": "suggest_mapping",
-              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Born\",\"field\":\"birthday\"}]}"
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Born\",\"field\":null}]}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 872,
+            "inputTokens": 909,
             "cachedInputTokens": 0,
             "outputTokens": 35
           },

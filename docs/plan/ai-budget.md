@@ -89,15 +89,16 @@ Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b prob
 
 Runs labelled `P12` (`EVAL_PHASE=12`: `record.sh` defaults to 7, so the phase is set by hand).
 
-- **S56b (2026-11-06): $0.7996 in 393 runs** (Phase 12 total: **$0.7996 of $3.00**; all phases $4.6025 of $13.80). Models `gpt-6-luna` low / `gpt-6.1-sol` low. Actual spend ran about 1/1000 of the worst-case estimates. `--max-cost 2` for 12 single-case pass^3 runs whose 3-trial worst case was $1.73 (user: "Allow, these 12 only"); no `--phase-estimate-ok`.
+- **S56b (2026-11-06): $0.8069 in 396 runs** (Phase 12 total: **$0.8069 of $3.00**; all phases $4.6097 of $13.80). Models `gpt-6-luna` low / `gpt-6.1-sol` low. Actual spend ran about 1/1000 of the worst-case estimates. `--max-cost 2` for 12 single-case pass^3 runs whose 3-trial worst case was $1.73 (user: "Allow, these 12 only"); no `--phase-estimate-ok`.
   - Probe of `scheduling`, `autonomy`, `safety` and `import_mapping`, 100 cases: **$0.1211** (1841–1889); 5 misses fixed (prompt v9, the suggester's instructions, `get_feed` v6, 3 graders), re-probes **$0.0062** (1890–1894).
   - Full recording, 272 cases: **$0.3210** (1895–2030 and 2031–2052; the eval database stopped at part 115 and parts 115–136 were run again). Every gate met; `waitlist` 12/12, so `KNOWN_REAL_MODEL_MISSES` is empty.
   - pass^3 trials 2–3 on drafts, feed_safety, safety, permissions, memory_delete, memory_safety, autonomy, memory_recall, episodic, scheduling and import_mapping, 186 cases, plus `lr-blackout`'s stale trials: **$0.3513** (2053–2233; 15 OpenAI 500/503/cancelled trials re-run). Every pass^3 set at 100%.
+  - After the code review: `import_mapping` pass^3 again, 8 cases with the new client-list case: **$0.0072** (2234–2236); 7/8 at pass^3 (`mapping-born-is-a-birthday` left "Born" empty in one trial), gate 0.8 met.
 
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$4.6025** of $13.80 (the runner stops at $13.80).
+Total spent: **$4.6097** of $13.80 (the runner stops at $13.80).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|
@@ -2334,6 +2335,9 @@ Total spent: **$4.6025** of $13.80 (the runner stops at $13.80).
 | 2231 | 2026-11-06 | P12 S56b pass^3 long retry (user: --max-cost 2, these 12 only) part 2/3 | completed | 1 × 3 | $1.73 | $0.0000 | $4.6007 |
 | 2232 | 2026-11-06 | P12 S56b pass^3 long retry (user: --max-cost 2, these 12 only) part 3/3 | completed | 1 × 3 | $1.73 | $0.0000 | $4.6007 |
 | 2233 | 2026-11-06 | P12 S56b lr-blackout pass^3 (stale trials 2-3) part 1/1 | completed | 1 × 3 | $0.79 | $0.0018 | $4.6025 |
+| 2234 | 2026-11-06 | P12 S56b import_mapping pass^3 (review fix) part 1/1 | completed | 8 × 3 | $0.26 | $0.0026 | $4.6051 |
+| 2235 | 2026-11-06 | P12 S56b import_mapping pass^3 (review fix 2) part 1/1 | completed | 8 × 3 | $0.26 | $0.0023 | $4.6074 |
+| 2236 | 2026-11-06 | P12 S56b import_mapping pass^3 (review fix 2, again) part 1/1 | completed | 8 × 3 | $0.26 | $0.0023 | $4.6097 |
 
 - Run 5, gpt-6-luna: 12 calls, 67483 in (38955 cached, 28492 written), 498 out, p50 1258 ms, p95 3286 ms; 3.61 chars a token
 - Run 5, gpt-6.1-sol: 4 calls, 24750 in (12287 cached, 12451 written), 224 out, p50 2023 ms, p95 2349 ms; 3.61 chars a token
@@ -4590,4 +4594,7 @@ Total spent: **$4.6025** of $13.80 (the runner stops at $13.80).
 - Run 2229, gpt-6-luna: 6 calls, 65248 in (65051 cached, 179 written), 219 out, p50 1362 ms, p95 1989 ms; 3.77 chars a token
 - Run 2230, gpt-6-luna: 5 calls, 55466 in (54648 cached, 803 written), 118 out, p50 2059 ms, p95 2576 ms; 3.76 chars a token
 - Run 2233, gpt-6-luna: 4 calls, 43574 in (32593 cached, 10969 written), 222 out, p50 2419 ms, p95 9706 ms; 3.77 chars a token
+- Run 2234, gpt-6-luna: 24 calls, 21726 in (0 cached, 0 written), 951 out, p50 1219 ms, p95 2252 ms; 4.46 chars a token
+- Run 2235, gpt-6-luna: 20 calls, 18507 in (0 cached, 0 written), 834 out, p50 1290 ms, p95 1596 ms; 4.46 chars a token
+- Run 2236, gpt-6-luna: 21 calls, 19125 in (0 cached, 0 written), 813 out, p50 1220 ms, p95 2230 ms; 4.46 chars a token
 <!-- ledger:end -->
