@@ -30,6 +30,7 @@ S48's mapping places a column by the other tool's preset, by its header, or by i
 ## Consequences
 - A file from any tool is matched in fewer taps. The owner still decides every column, and a wrong suggestion costs one tap to ignore.
 - A shape can still say a little: a name's length, or that a column holds dates. It never carries a letter or a digit.
+- A file without a header row turns its first row into the column names. When any of those names looks like an email or a phone, nothing is asked (review fix). Some first rows hold no contact, such as a name and a tag only. Their names would still go to the model, a known residual, accepted because the owner sees such a file's columns as one client's details and fixes the file.
 - A hostile column name can only make the model suggest a wrong field, and the domain's checks bound what that field can be. The new `import_mapping` eval set (gate 0.9, 0.8 at pass^3) checks such a header and a field asked for twice on the scripted cassettes. S56b records it.
 - The eval set found that S48's header rule maps any column whose name ends in "email" or "phone", even a sentence. The rule is left as it is, since such a column only fills a contact when its values are valid.
 
