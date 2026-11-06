@@ -1,27 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-05 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 12 — The employee (Phase 11 gate met in S51.2) → next: **S56a** (scripted "a" half)
+**Last updated:** 2026-11-06 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 12 — The employee (Phase 11 gate met in S51.2) → next: **S56a.2** (import mapping, scripted)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S56a (scripted "a" half), brief pre-approved by the user ("Pre-approved with your recommendations"):** D-1 split, AI-suggested import mapping → S56a.2; D-2 reminder/running-late words written by the domain, a custom note from the model checked for sensitive values, `message.client` asks by default; D-3 `booking.no_show` internal write, notify, undo back to booked; D-4 ADR-0060.
-Tasks: 1 ACs + ADR · 2 contracts + migration · 3 `mark_no_show` · 4 `send_client_message` · 5 prompt v8 + close-match search · 6 eval cases, drop `EVAL_WORLD_AUTONOMY`, $13.80 stop · 7 top-up: review pass without a model + feed spec.
-Done: 1 AC-W2-5…8, AC-W4-19, ADR-0060 · 2 `booking.no_show` + `message.client` on the dial, migration 0066, card labels · 3 `mark_no_show` + `undoNoShowIn` · 4 `send_client_message` (writes integration 51/51). Note limit 200 characters (the card shows it whole).
-· 5 prompt v8 (Autonomy page in More, "did you mean", "I can't do that yet") and close names in `find_clients` (v3), 1 edit for words of 3–5 letters, else 2 (reads 16/16).
-· 6 evals: `messages-s56.json` (5) + `honesty-s56.json` (3) + 5 generated tool cases, scripted cassettes, an `advanceClock` turn action and `evalLater`; `EVAL_WORLD_AUTONOMY` removed (4 recorded move cases now expect a proposal); stop $13.80, Phase 12/17 caps; chunks of 17; `fixtures-privacy.test.ts`. Scripted evals green; the recorded replay is the planned stale one (S56b).
-· 7 top-up: the pass takes `provider: null` (review requests only), the worker builds it with `AUTH_BASE_URL` alone, a first mailing address or review link re-arms today's pass; feed spec 6/6 (new review-card test in an afternoon time zone).
-Next: the close (`/code-review`, `/security-review`, `pnpm check`, affected integration, Playwright feed + screens Autonomy).
+Nothing in progress. **S56a is pushed without a PR on `ccr-caaf8a98-xv3xue`.** Next: **S56a.2** (AI-suggested import mapping, scripted), which merges `ccr-caaf8a98-xv3xue` first and pushes its own branch; then **S56b** merges S56a.2's branch, probes, records once ($3.00 cap) and opens the one PR.
 
 ## Last sessions
+- **S56a Phase 12 "a" · Client messages, no-shows and honest answers (2026-11-06)** ([ADR-0060](../adr/0060-client-messages-no-shows-and-honest-answers.md), branch `ccr-caaf8a98-xv3xue`, no PR until S56b). Full entry in [session-log.md](session-log.md).
+  - **Built:** `send_client_message` (reminder, running late, a checked note; asks by default) and `mark_no_show` (notify, a day's Undo); typo suggestions in `find_clients`; prompt v8; 13 scripted eval cases; a move asks in the eval business; the $13.80 stop; top-up: review requests without a model and Home's review card in Playwright; AC-W2-5…8, AC-W4-19.
+  - **Checks:** `pnpm check` green; affected integration green but the planned stale replay; scripted evals green; Playwright feed 6/6, screens Autonomy 3/3 (10 baselines updated, run twice).
 - **S55.2 Phase 12 · Post-visit review requests (2026-11-05)** ([ADR-0059](../adr/0059-post-visit-review-requests.md), [PR #83](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/83)). Full entry in [session-log.md](session-log.md).
   - **Built:** the morning after a kept visit, a thank-you asking for a review waits for an OK (`message.review_request`); one a client per 90 days, none within a week of another marketing email, 20 a day; the review link on More; AC-W4-14…18 (top-up: the win-back date's year).
   - **Checks:** `pnpm check` green; affected integration green (22/22 tasks); Playwright feed + gallery 16/16, screens More and Autonomy 14 baselines updated, run twice.
-- **S55 Phase 12 · Proof of value: the week card and the evening wrap (2026-11-05)** ([ADR-0058](../adr/0058-proof-of-value-week-card-and-evening-wrap.md), [PR #82](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/82)). Full entry in [session-log.md](session-log.md).
-  - **Built:** "What I did this week" (visits thanks to Pepper, fills, regulars back with dollars, minutes saved) and the evening wrap (tomorrow's visits, the first time, who may not show), read on demand by `GET /v1/proof`, leads only; AC-W4-10…13; review requests split to S55.2.
-  - **Checks:** `pnpm check` green; affected integration green (22/22 tasks); Playwright win-back 1/1, feed 4/4, screens Home 3/3, gallery 11/11 twice.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -30,13 +24,14 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
 - **CI inside the session (user, 2026-11-03):** local close runs `pnpm check`, the affected packages' integration and the changed specs; the full suites run once in CI on the PR; close docs are written while CI runs and pushed after green (a docs-only push on a green head skips the jobs); a red CI is fixed in the same session at its root cause; CI runs journeys on the phone, desktop-only specs on desktop, affected integration with the AI evals in a parallel job, everything weekly on `main`. **No retries in CI** (M1).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
-- **OpenAI cost (user, P1):** **$10 for Phases 9–17** on top of the $3.80 spent through Phase 8 (caps: Phase 12 $3.00, Phase 17 $1.50, reserve $5.50; no real calls elsewhere). Development evals on a separate `pepper-dev-evals` project with data sharing on (free daily tokens, made-up data only); production on a sharing-off, zero-retention project. The runner's $4.50 total stop rises to $13.80 in S56a. History of earlier caps: [ai-budget.md](ai-budget.md), [decisions.md](decisions.md).
+- **OpenAI cost (user, P1):** **$10 for Phases 9–17** on top of the $3.80 spent through Phase 8 (caps: Phase 12 $3.00, Phase 17 $1.50, reserve $5.50; no real calls elsewhere). Development evals on a separate `pepper-dev-evals` project with data sharing on (free daily tokens, made-up data only); production on a sharing-off, zero-retention project. The runner’s total stop rose from $4.50 to $13.80 in S56a. History of earlier caps: [ai-budget.md](ai-budget.md), [decisions.md](decisions.md).
 - **Brand, LLC and domain parked (user, P1):** the name can change later; a cheap neutral domain for the pilot in Phase 13; the LLC before SMS and Stripe go live (both are built in sandbox first).
 - **Design (user, P1, S39):** a complete redesign in Phase 9 (ADR-0044); direction **A+B** chosen in S39 (warm boutique colors and type, clean premium's lists and tables); tokens, type scale and components in [DESIGN.md](../design/DESIGN.md) §2–4; rules enforced by lint, contrast and screenshot tests. S40 shipped them (ADR-0044 "Built"); screens move onto the kit in S41–S43.
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S56a (user, 2026-11-06):** at the brief "Pre-approved with your recommendations" (D-1 split → S56a.2 import mapping; D-2 domain words, a checked note, `message.client` asks; D-3 `booking.no_show` notify; D-4 ADR-0060). **Claude:** messages only about a booked visit; a 200-character note; staff undo their own no-show; chunks of 17; the stop at $13.80; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S55.2 (user, 2026-11-05):** at the brief "Preapproved with your recommendation" (D-1 no split; D-2 the morning pass the day after; D-3 no link, no requests; D-4 90 days, any outcome; D-5 ADR-0059). **Claude:** kept, non-imported visits of the last 48 h; a week after any other marketing email; public https hosts only; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
 - **S55 (user, 2026-11-05):** at the brief "pre-approved with your recommendation" (D-1 split → S55.2 review requests; D-2 computed on read; D-3 `MINUTES_SAVED`; D-4 ADR-0058). **Claude:** what counts as Pepper's visit; the 14-day regular-back window; the wrap from 17:00; the review's 2 fixes; "thanks to me". Full wording in [decisions.md](decisions.md).
 - **S54.2 (user, 2026-11-05):** at the brief "Pre-approving with your recommendation" (D-1 no split; D-2 the list computed on read; D-3 the rebooking nudge reused; D-4 ADR-0057). **Claude:** from 2 visits; the visit's price for imported services; the domain's words; 20 a day under a lock; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
@@ -89,12 +84,12 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S55.2, M1–M2 and P1 are done (Phases 0–11: the re-plan, the new look on every screen and the first 10 minutes; Phase 9, 10 and 11 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S55.2, S56a (pushed, recorded in S56b), M1–M2 and P1 are done (Phases 0–11: the re-plan, the new look on every screen and the first 10 minutes; Phase 9, 10 and 11 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S56a | `send_client_message`, `mark_no_show`, AI-suggested import mapping, prompt fixes, new eval cases (incl. a move that asks; drop `EVAL_WORLD_AUTONOMY`); scripted ("a") | 12 | Every eval set green on scripted cassettes |
-| S56b | Record ("b", $3.00 cap), `KNOWN_REAL_MODEL_MISSES` empty; **Phase 12 gate**; one PR | 12 | Every gate met; C1, C5 ≥ 8, C8 ≥ 9 |
+| S56a.2 | AI-suggested import mapping (column names and masked samples only, owner confirms) + its eval cases; merges `ccr-caaf8a98-xv3xue`; scripted ("a") | 12 | Every eval set green on scripted cassettes |
+| S56b | Merge S56a.2 (with S56a); record ("b", $3.00 cap), `KNOWN_REAL_MODEL_MISSES` empty; **Phase 12 gate**; one PR | 12 | Every gate met; C1, C5 ≥ 8, C8 ≥ 9 |
 | S57 | Deploy: VPS, neutral domain, TLS, Resend + SPF/DKIM/DMARC, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58 | Backups + restore drill, Sentry/Grafana, Redis rate limits, load test | 13 | Restore drill passes; SLOs met |
 | S59 | Support button, help page, terms + privacy, AI disclosure, pilot metrics page | 13 | Every metric has a number |
