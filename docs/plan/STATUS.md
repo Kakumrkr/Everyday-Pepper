@@ -9,7 +9,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S56b** ("b": record + Phase 12 gate), branch `claude/laughing-planck-s88w9u` with `claude/dreamy-keller-y57zq0` merged. Brief approved (user, 2026-11-06: "Pre-approved with your recommendations, complete the session": D-1 no split; D-2 both sentences drop zeros, the first count always shown; D-3 the runner's guards unchanged, $3.00 cap at list price, no `--phase-estimate-ok`; D-4 no new ADR, results into ADR-0060/0061).
 Tasks: 1 top-up (AC-W1-21 zeros) · 2 ready ($0) · 3 probe scheduling/autonomy/safety/import_mapping · 4 full record + pass^3 on gated sets · 5 misses empty, ADR results, ai-budget · 6 Phase 12 gate (scorecard §8) · 7 close.
-Done: (none yet). Next: task 1.
+Done: 1 top-up (unit 35/35, import e2e 4/4, import screens 6/6 unchanged baselines) · 2 scripted evals green ($0). Next: task 3 probe.
 
 ## Last sessions
 - **S56a.2 Phase 12 "a" · AI-suggested import mapping (2026-11-06)** ([ADR-0061](../adr/0061-ai-suggested-import-mapping.md), branch `claude/dreamy-keller-y57zq0` with S56a merged, no PR until S56b). Full entry in [session-log.md](session-log.md).
