@@ -107,7 +107,7 @@ describe('estimateRunCost (the budget guard, playbook §4)', () => {
   it('keeps one run of a full chunk of one-turn cases under the $1.50 cap even at every step', () => {
     // 30 fitted with ten tools; the fourteen of S26b put ~$0.05 a case on the worst case, so
     // S27 ran sets in chunks of 25; S30's seventeen tools put ~$0.06 on it: chunks of 20; S37's
-    // twenty-one ~$0.077: chunks of 18.
+    // twenty-one ~$0.077: chunks of 18; S56a's twenty-three ~$0.084: chunks of 17.
     const cases = Array.from({ length: MAX_CASES_PER_RUN }, () => evalCase());
     expect(estimateRunCost(cases, 1, PRICE).usd).toBeLessThan(1.5);
   });
@@ -147,13 +147,13 @@ describe('selectCases (runs in chunks of at most 20, S27, S30)', () => {
     evalCase({ id: `case-${String(index + 1)}`, set: index < 50 ? 'scheduling' : 'safety' }),
   );
 
-  it('filters by set and id, then takes the chunk-th slice of 18', () => {
-    expect(MAX_CASES_PER_RUN).toBe(18);
+  it('filters by set and id, then takes the chunk-th slice of 17', () => {
+    expect(MAX_CASES_PER_RUN).toBe(17);
     expect(selectCases(cases, { sets: [], ids: [], chunk: null })).toHaveLength(60);
     expect(selectCases(cases, { sets: ['safety'], ids: [], chunk: null })).toHaveLength(10);
     const second = selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 2 });
     expect(second.map((c) => c.id)).toEqual(
-      Array.from({ length: 18 }, (_, index) => `case-${String(index + 19)}`),
+      Array.from({ length: 17 }, (_, index) => `case-${String(index + 18)}`),
     );
     expect(selectCases(cases, { sets: ['scheduling'], ids: [], chunk: 4 })).toEqual([]);
     expect(
