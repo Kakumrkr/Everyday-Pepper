@@ -73,9 +73,15 @@ export interface WorkerConfig extends ServiceConfig {
   episodes: { openai: OpenAiConfig & { embeddingModel: string }; monthlyTokens: number } | null;
   /**
    * The morning drafts pass (S36, ADR-0040): the routine model writes rebooking emails for
-   * owners to approve; `null` when OpenAI or `AUTH_BASE_URL` is not configured.
+   * owners to approve, and review requests are drafted in the domain's words (S55.2); `null`
+   * without `AUTH_BASE_URL`. Without OpenAI (`openai: null`, S56a) only the review requests run.
    */
-  drafts: { openai: OpenAiConfig; monthlyTokens: number; baseUrl: string; pollMs: number } | null;
+  drafts: {
+    openai: OpenAiConfig | null;
+    monthlyTokens: number;
+    baseUrl: string;
+    pollMs: number;
+  } | null;
   /**
    * The smart waitlist (S37, ADR-0041): freed times offered to who is waiting, with claim links
    * to the web app; `null` when `AUTH_BASE_URL` is not configured (no offers are made then).
@@ -127,7 +133,7 @@ function draftsConfig(
   openai: OpenAiConfig | null,
   jobs: z.infer<typeof JobsEnvSchema>,
 ): WorkerConfig['drafts'] {
-  if (openai === null || jobs.AUTH_BASE_URL === undefined) return null;
+  if (jobs.AUTH_BASE_URL === undefined) return null;
   return {
     openai,
     monthlyTokens: jobs.AI_MONTHLY_TOKENS,

@@ -40,4 +40,20 @@ describe('morningDraftsJob', () => {
       }),
     );
   });
+
+  it('runs the pass without a model when OpenAI is not configured (S56a)', async () => {
+    ai.OpenAiProvider.mockClear();
+    ai.runDueMorningDrafts.mockResolvedValue({ businesses: 1, drafted: 0, failed: 0 });
+    const job = morningDraftsJob(
+      { db: true } as never,
+      { openai: null, monthlyTokens: 1000, baseUrl: 'https://app.example' },
+      { outboxKey: Buffer.alloc(32, 1), clock: { now: () => new Date() } },
+    );
+    await job();
+    expect(ai.OpenAiProvider).not.toHaveBeenCalled();
+    expect(ai.runDueMorningDrafts).toHaveBeenLastCalledWith(
+      { db: true },
+      expect.objectContaining({ provider: null }),
+    );
+  });
 });

@@ -186,6 +186,25 @@ describe('AC-W4-14: the morning after a visit, a review request waits for an OK'
   });
 });
 
+describe('AC-W4-19: without a model, the review requests still come (S56a)', () => {
+  it('drafts without a provider, the nudges on but skipped', async () => {
+    const w = await world();
+    // The rebooking nudges stay on: only the missing model skips them.
+    await changeFeedSettings(db, w.actorFor('owner'), { reviewUrl: REVIEW_URL });
+    await visit(w, 'maria', 15);
+    const result = await runMorningDraftsFor(db, w.tenantId, { ...optionsFor(w), provider: null });
+    expect(result).toMatchObject({ outcome: 'ran', drafted: 0, reviewRequests: 1, failed: 0 });
+    expect((await reviews(w)).map(clientOf)).toEqual([client(w, 'maria')]);
+  });
+
+  it('without a model or a review link, the pass has nothing to do', async () => {
+    const w = await world();
+    await visit(w, 'maria', 15);
+    const result = await runMorningDraftsFor(db, w.tenantId, { ...optionsFor(w), provider: null });
+    expect(result).toEqual({ outcome: 'paused' });
+  });
+});
+
 describe('AC-W4-15: one a client per 90 days, and only when it can go', () => {
   it('asks no client twice within 90 days, whatever became of the first', async () => {
     const w = await world();

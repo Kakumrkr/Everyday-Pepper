@@ -46,7 +46,7 @@ describe('loadWorkerConfig', () => {
     });
   });
 
-  it('drafts rebooking emails only with an OpenAI key and the web origin (S36)', () => {
+  it('drafts with the web origin; rebooking emails need an OpenAI key, review requests don’t (S36, S56a)', () => {
     const openai = {
       OPENAI_API_KEY: 'sk-test-not-a-real-key-000000',
       OPENAI_MODEL_ROUTINE: 'gpt-6-luna',
@@ -55,7 +55,7 @@ describe('loadWorkerConfig', () => {
     expect(loadWorkerConfig({ ...required, ...openai }).drafts).toBeNull();
     expect(
       loadWorkerConfig({ ...required, AUTH_BASE_URL: 'https://app.example' }).drafts,
-    ).toBeNull();
+    ).toMatchObject({ openai: null, baseUrl: 'https://app.example' });
     expect(
       loadWorkerConfig({ ...required, ...openai, AUTH_BASE_URL: 'https://app.example/path' })
         .drafts,

@@ -208,15 +208,20 @@ export async function changeFeedSettings(
   db: Database,
   actor: Actor,
   change: FeedSettingsChange,
-  options: Pick<FeedOptions, 'morningHourOf'> = {},
+  options: Pick<FeedOptions, 'morningHourOf' | 'clock'> = {},
 ): Promise<FeedSettings> {
   requirePermission(actor, 'settings.manage');
   const parsed = FeedSettingsChangeSchema.parse(change);
   return withMember(db, actor.context, async (tx) => {
+    // The address or the review link set for the first time (S56a): today's drafts pass is due
+    // again, so this morning's thank-yous and nudges come now rather than tomorrow. Its own
+    // checks (the 90 days, one nudge per regular a day) keep a second run from repeating one.
+    let rearm = false;
     if (parsed.mailingAddress !== undefined) {
       const tenant = await findCurrentTenant(tx);
       const before = tenant?.mailingAddress ?? null;
       if (before !== parsed.mailingAddress) {
+        if (before === null) rearm = true;
         await updateCurrentTenantMailingAddress(tx, parsed.mailingAddress);
         await appendAuditEntry(tx, {
           actor: auditActorOf(actor),
@@ -234,6 +239,7 @@ export async function changeFeedSettings(
       const tenant = await findCurrentTenant(tx);
       const before = tenant?.reviewUrl ?? null;
       if (before !== parsed.reviewUrl) {
+        if (before === null) rearm = true;
         await updateCurrentTenantReviewUrl(tx, parsed.reviewUrl);
         await appendAuditEntry(tx, {
           actor: auditActorOf(actor),
@@ -246,6 +252,9 @@ export async function changeFeedSettings(
           requestId: actor.requestId,
         });
       }
+    }
+    if (rearm) {
+      await setMorningDueAt(tx, 'drafts', new Date((options.clock ?? systemClock).now()));
     }
     const before = await readFeedSettings(tx);
     const after: StoredFeedSettings = {
