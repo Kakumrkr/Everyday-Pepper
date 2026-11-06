@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "899f054920af3e559b1222b0b9d20e77781c0f4040ba9f84b1058416dda03318",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jN2ay9yMMCHmZjZ7eTltrNQS",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Mraia\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10759,
+            "cachedInputTokens": 10741,
+            "cacheWriteTokens": 15,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "299b8424d776819179b68925eae63cef35dccf8abe893ae286aca619d74d6529",
+        "response": {
+          "text": "Did you mean Maria L.?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10877,
+            "cachedInputTokens": 10756,
+            "cacheWriteTokens": 118,
+            "outputTokens": 10
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

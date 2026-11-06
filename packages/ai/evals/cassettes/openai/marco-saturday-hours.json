@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "eec9b290bc7fa81ffefe39fd47ae2f6dae5fe9476968a32ca3aba6886e5efc6d",
+        "fingerprint": "c3351737c911bc0a43e191c3f1f1265765249fea30b254f08809d6d95518a667",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_XgINDyyoJOARDBtPfo4TeX5B",
+              "id": "call_PjyAEMGzavjlNrxxEbXS62zi",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10756,
+            "cachedInputTokens": 10741,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "7ff9e728877324424fac626cd61529f81c05656edb3a126f8ebce8ff0f32cae9",
+        "fingerprint": "23cdc3abc29eaff6b105b576d3850813041a6d051aa7b97ac6df9f819094157b",
         "response": {
           "text": "Marco works Saturdays from 10:00 AM to 4:00 PM.",
           "toolCalls": [],
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10361,
-            "cachedInputTokens": 9898,
-            "cacheWriteTokens": 460,
+            "inputTokens": 11213,
+            "cachedInputTokens": 10753,
+            "cacheWriteTokens": 457,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"

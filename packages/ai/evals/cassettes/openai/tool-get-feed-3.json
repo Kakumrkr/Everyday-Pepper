@@ -3,83 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "2e679c52747f75f0faeb749b7d97e3429d007a82ddcd1e5c970547d460210b39",
+        "fingerprint": "d592e7772e6a2d7b2eeccecf9ea175bff0c72e793c9d5716fa6a0014b0db6302",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_LHcFGYpRRK2A6uTM783OAga8",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 12,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "c09d08dab98473e862dd7cc6aab0968a9c29cb76672fb1dc9a68c1c20dd3d707",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_sNhq629nvyj6ojJ4UlA88gTd",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:marco}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 10353,
-            "cachedInputTokens": 9898,
-            "cacheWriteTokens": 452,
-            "outputTokens": 50
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "ca06a77a6f3a57990ff5299a5a2ae59cee2f06f4cb8c32a706e72adedc989537",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_ajsf4EdEtgAvumRLGZnHlJ85",
+              "id": "call_RyiFjvSRWpwyPztDVnG6XUgj",
               "name": "get_feed",
               "arguments": "{\"kind\":\"schedule_gaps\"}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_04d007f20aa1d418016addf906083487d2bc8eabfa48c69d88",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3fkGObRafncMRqMjQJdY1c6s2H2ANvZ8ihjxaW_tVkfeQWPeJ5BqygRKk2fXg5tf0SfSgcfhRsV_6OoHBkO4h4fp1msHEyB2tZxKw2ZrQfWStun8ecQRJgVDE_ScMXVYwsxzzK4SIwkfaeuai3mhH9WP9LFy3raEuiPkBcRTWbIq3c2YhulJTAfgcjKWCmrjt6FkEb_SZ3NHfwXsRQb_mb-kqSErn4z2UcwYvWXg7cpG9Ag6E61Eay_6CSetSLDuK0yRjBVrhFnyL8ZRTJBjvy6tyRtF7I3H_k7n0S8cRFM0hA6T1LKS1SpnG-y_ln2yT4Dmbxy3sLKFktZIKmwwrUkplw9MPEqqYLOl9z_UbKwCdURqrYIkO7K1XkP9N4w23ar3doVl78ZUgYHN6XEEtpx5HoxWL8YWgLDL2hvsdT5HA4cpgpogsnhYhNjyE9T7SuFOveO2RwqH0JZQozl_fuWYwlY1LOJsdWF-44GxAKScgG3HgLzkYLgL0RCXo5M-G6nxLoEanMY8dBCyPHgAfa_sQayuadxuAQK7zkon5kytGRCBbR9viPxxgvzsYvNT5I6EYgfCsgxi405neSfCmQYbIEtuvxtSd0IWoixbk7QGpsVP9YlzhRwGagBlaLpjFnsrabreIwXJ18oA5cVZJznbeMVdwNHDfddRYBHbn57UgjEV8mItVb--UyRe2mrWzXMxfEWRCiVGofUBL2kYQxm2HMURDRP0KXyc8Q0KayhX2dPEDtwY-69znj4Qbmj_ZvBH2gNZ1S8U5oVjuH_RHftJtcC6ix2cfxHFJB0_74-rbCdgHUK9cg0tFeHioKWZIo1T2Kx1fwDhCpljwBAmMaqn2GysZOBEztL9oGQyEdgIqJcu4Hit3b3G6kpLP-2BfXuy3_5YLqcVhNCsOlbg5PumabVW1IOffgIEpfHE0At7XVvqROevyhJ-2KRpgpWrpTuArnS5_zXnP0knE47TCkJNSgbcytKYDrR_injWEt7YJR6J6we1p6vn4J-ZDLsyB24v9kUJwRwqAAUxOX03JSpYPUzW7I0mf0d_AZlFzXTHVckbeuq5gLDx2NvZq660a7P6OFUodxqHpyx64gyaCt4MikbG552hIBKQstdZoH7pDMn7yZmnouMJVM3HtiiwM9Bhn8-dAIpkmS64UlYKQ9gv1g0oeP1orzTRtvYCBs9KYLNwnVoF8eq5Wxp_su0qgZXsAkYcuHHy6PPTR4Ph8UCdEjFwuOpRyOBEqS_GhS-JqmPFc5HYIwbm91qX6yw-ezRQMDHF4r4GkaFjvBCy2EV8Pj9IAD2UDIUIRbcczimdMHCJi_FmzSpa8km7sHXxkLbewI65sFk33YECWj5FPMSsKF7-6OX1EUW8uR7X_eheLX0nmVNt8nJ8067iBTe4Y43HLFDI4yID-PitavEx4wwiPcWHRn5BLCp3v8gf8FWj9tih4laHOfK7s8wH8XK7GJVmFIj4hIjsGns6_KiONtNGKcRqk5o5KrHR8Gz-k4hinvFP456Ql0aSRb7VTD7mPZtb68RVHCMMv2v2QMlwdJ-RLqBy4O56Sek2jfaqJDFMSOxfYl900SE6Uql_TgOthyC9CjY0TWJCEBVSDUNDravm0bMiDDvnVrO7YxfEWgZDzJyy-XHA36Cqv0jX7J69yAoX_C62RRHoIGmL-C_ayD97zuhNYKCFWKAyIk5l51zgzaqP8LKjDFdUvodsD8Dq_nwXHtEH60X5mNlhDy4bOlPjR31sI73jyMpPnqgzJGj0XXy6nHKHDd5Yy34BRt9WpTWiJXwEjak_4eISGlq_4U2JMZKJ_TN44R7s28Q9TtBDOG8INw9V-Z1y0WsZyOTdu3ygPfSl9YRgRG16pGHsvSL2UQb0GvAbBpMm9M9LLxwfYWkD07L7j9YfWTyRy9Fq1F8CHdH_imLlv4Nup7rratrg5UAz8AukQP4L6_DyglGKJGX9NK8u0nOmDxl2WgYrBYwQcqLc6c3U_4WTsoq933R-NAO3FZzTHG_UhoodnkTtZhA=",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10457,
-            "cachedInputTokens": 10350,
-            "cacheWriteTokens": 104,
-            "outputTokens": 69
+            "inputTokens": 10808,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 13,
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ed73f5654b80837805d5102fd5993f1fb94ac0c1488615cd647251cd8ed9be64",
+        "fingerprint": "200222a42ffab2f7691bbc9c539aa9803538dfb813b56a435f81536daaaf9a42",
         "response": {
-          "text": "I don’t see any open-time suggestions for Marco this week. His schedule lists him working Monday through Saturday, but there are no gaps shown in the feed.",
+          "text": "There aren’t any schedule-gap suggestions for Marco this week.",
           "toolCalls": [],
           "replay": [
             {
@@ -89,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10565,
-            "cachedInputTokens": 10454,
-            "cacheWriteTokens": 108,
-            "outputTokens": 36
+            "inputTokens": 10867,
+            "cachedInputTokens": 10805,
+            "cacheWriteTokens": 59,
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }

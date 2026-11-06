@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "4ba8a5d2ab4a6908568fd9e981d656aa50f2c30782968a30ad702c125c9483c0",
+        "fingerprint": "7b66411b43d9bd675d505a14e4118d53cf4b63bc3651723868623f5f28da9ea6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6JEbtJ8UNmXrOFBepgxGbpKH",
+              "id": "call_k9Rv5TldQE5R3WFrBI0LLDXC",
               "name": "get_feed",
               "arguments": "{\"kind\":\"rebooking_due\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10755,
+            "cachedInputTokens": 10741,
             "cacheWriteTokens": 11,
             "outputTokens": 20
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "5e37ced1650aeab2056708369702e85166b0931d4edbb183f6bf58ce1da9030e",
+        "fingerprint": "bb52b6402ac9ddba56bae8ebd4688b4506b62a6b25159420aec9c7c3f0c1bcc2",
         "response": {
           "text": "No regulars are due back right now.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9959,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10814,
+            "cachedInputTokens": 10752,
             "cacheWriteTokens": 59,
             "outputTokens": 13
           },

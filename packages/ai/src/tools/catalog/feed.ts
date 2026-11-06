@@ -101,7 +101,9 @@ export const getFeed: ReadTool = {
   kind: 'read',
   name: 'get_feed',
   // 4 (S37): who is on the waitlist comes with it. 5 (S38a): today's briefing, freed times.
-  version: 5,
+  // 6 (S56b): the gaps example asks for the feed's suggestions; "is Marco free this week" is
+  // read from his days (get_day), which the recording rightly did.
+  version: 6,
   localTimes: false,
   guide: {
     use: 'Read the feed on Home: the briefing ("brief me"), what the rules found (free time in a staff member\'s days this week, with no service needed, regulars due back, clients who missed visits and are booked again, days nearly full, waitlist offers), emails waiting for an OK, and the waitlist.',
@@ -115,7 +117,7 @@ export const getFeed: ReadTool = {
     examples: [
       { say: 'Anything I should look at today?', args: { kind: null } },
       { say: 'Which regulars are due back?', args: { kind: 'rebooking_due' } },
-      { say: 'Does Marco have open time this week?', args: { kind: 'schedule_gaps' } },
+      { say: 'Any suggestions about gaps in Marco’s week?', args: { kind: 'schedule_gaps' } },
       // Any kind (S38b: the model chose waitlist_match): the waitlist comes with every read.
       { say: "Who's on the waitlist?", args: { kind: { $any: true } } },
       { say: 'Brief me', args: { kind: null } },

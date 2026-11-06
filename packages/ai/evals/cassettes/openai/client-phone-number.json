@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "ad019c0fc9a0110d98e65705d09df2d6989ae80368994aec23213d1b443097c6",
+        "fingerprint": "e7cb868f6e6e8bde57d65ca8f5817dbf2a1bcfe66721b08af788e656ee5a42c9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_k7apzqtTgf4VVo3X29JOr2qw",
+              "id": "call_2T5OnkxM601VO0tghIDq6usT",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10756,
+            "cachedInputTokens": 10741,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "6248d46bc1eb4557b61546738c70d8824c488ca4d350bb9915045772a17e12e1",
+        "fingerprint": "a561ba1e349c091797473cf93090aa403573f3de05672a5d94399b1daa6f1d55",
         "response": {
-          "text": "I can’t access client contact details here, so I don’t know Maria’s phone number or email.",
+          "text": "I can’t see clients’ phone numbers or email addresses here. Maria L. is the matching client; you can view her contact details on her client record in the app.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9983,
-            "cachedInputTokens": 9898,
-            "cacheWriteTokens": 82,
-            "outputTokens": 25
+            "inputTokens": 10842,
+            "cachedInputTokens": 10753,
+            "cacheWriteTokens": 86,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

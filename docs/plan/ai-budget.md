@@ -88,7 +88,7 @@ Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b prob
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$3.8029** of $13.80 (the runner stops at $13.80).
+Total spent: **$3.9303** of $13.80 (the runner stops at $13.80).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|
@@ -1932,6 +1932,60 @@ Total spent: **$3.8029** of $13.80 (the runner stops at $13.80).
 | 1838 | 2026-10-25 | P8 S38b pass^3 big part 10/12 | completed | 1 × 3 | $1.62 | $0.0007 | $3.7980 |
 | 1839 | 2026-10-25 | P8 S38b pass^3 big part 11/12 | completed | 1 × 3 | $1.62 | $0.0014 | $3.7994 |
 | 1840 | 2026-10-25 | P8 S38b pass^3 big part 12/12 | completed | 1 × 3 | $1.62 | $0.0035 | $3.8029 |
+| 1841 | 2026-11-06 | P12 S56b probe part 1/49 | completed | 2 × 1 | $0.52 | $0.0024 | $3.8053 |
+| 1842 | 2026-11-06 | P12 S56b probe part 2/49 | completed | 1 × 1 | $0.26 | $0.0006 | $3.8059 |
+| 1843 | 2026-11-06 | P12 S56b probe part 3/49 | completed | 1 × 1 | $0.57 | $0.0007 | $3.8066 |
+| 1844 | 2026-11-06 | P12 S56b probe part 4/49 | completed | 2 × 1 | $0.52 | $0.0307 | $3.8372 |
+| 1845 | 2026-11-06 | P12 S56b probe part 5/49 | completed | 2 × 1 | $0.52 | $0.0007 | $3.8380 |
+| 1846 | 2026-11-06 | P12 S56b probe part 6/49 | completed | 2 × 1 | $0.52 | $0.0024 | $3.8404 |
+| 1847 | 2026-11-06 | P12 S56b probe part 7/49 | completed | 2 × 1 | $0.52 | $0.0004 | $3.8408 |
+| 1848 | 2026-11-06 | P12 S56b probe part 8/49 | completed | 8 × 1 | $0.34 | $0.0009 | $3.8417 |
+| 1849 | 2026-11-06 | P12 S56b probe part 9/49 | completed | 2 × 1 | $0.52 | $0.0009 | $3.8426 |
+| 1850 | 2026-11-06 | P12 S56b probe part 10/49 | completed | 2 × 1 | $0.52 | $0.0011 | $3.8437 |
+| 1851 | 2026-11-06 | P12 S56b probe part 11/49 | completed | 2 × 1 | $0.52 | $0.0036 | $3.8473 |
+| 1852 | 2026-11-06 | P12 S56b probe part 12/49 | completed | 2 × 1 | $0.52 | $0.0010 | $3.8484 |
+| 1853 | 2026-11-06 | P12 S56b probe part 13/49 | completed | 2 × 1 | $0.52 | $0.0007 | $3.8491 |
+| 1854 | 2026-11-06 | P12 S56b probe part 14/49 | completed | 2 × 1 | $0.52 | $0.0003 | $3.8494 |
+| 1855 | 2026-11-06 | P12 S56b probe part 15/49 | completed | 2 × 1 | $0.52 | $0.0004 | $3.8497 |
+| 1856 | 2026-11-06 | P12 S56b probe part 16/49 | completed | 2 × 1 | $0.52 | $0.0003 | $3.8500 |
+| 1857 | 2026-11-06 | P12 S56b probe part 17/49 | completed | 2 × 1 | $0.52 | $0.0009 | $3.8510 |
+| 1858 | 2026-11-06 | P12 S56b probe part 18/49 | completed | 2 × 1 | $0.52 | $0.0003 | $3.8513 |
+| 1859 | 2026-11-06 | P12 S56b probe part 19/49 | completed | 1 × 1 | $0.58 | $0.0004 | $3.8517 |
+| 1860 | 2026-11-06 | P12 S56b probe part 20/49 | completed | 2 × 1 | $0.52 | $0.0008 | $3.8525 |
+| 1861 | 2026-11-06 | P12 S56b probe part 21/49 | completed | 2 × 1 | $0.52 | $0.0017 | $3.8542 |
+| 1862 | 2026-11-06 | P12 S56b probe part 22/49 | completed | 2 × 1 | $0.52 | $0.0008 | $3.8551 |
+| 1863 | 2026-11-06 | P12 S56b probe part 23/49 | completed | 2 × 1 | $0.52 | $0.0020 | $3.8571 |
+| 1864 | 2026-11-06 | P12 S56b probe part 24/49 | completed | 2 × 1 | $0.52 | $0.0012 | $3.8583 |
+| 1865 | 2026-11-06 | P12 S56b probe part 25/49 | completed | 2 × 1 | $0.52 | $0.0009 | $3.8592 |
+| 1866 | 2026-11-06 | P12 S56b probe part 26/49 | completed | 2 × 1 | $0.52 | $0.0010 | $3.8601 |
+| 1867 | 2026-11-06 | P12 S56b probe part 27/49 | completed | 2 × 1 | $0.52 | $0.0008 | $3.8609 |
+| 1868 | 2026-11-06 | P12 S56b probe part 28/49 | completed | 2 × 1 | $0.52 | $0.0066 | $3.8675 |
+| 1869 | 2026-11-06 | P12 S56b probe part 29/49 | completed | 2 × 1 | $0.52 | $0.0012 | $3.8687 |
+| 1870 | 2026-11-06 | P12 S56b probe part 30/49 | completed | 2 × 1 | $0.52 | $0.0013 | $3.8700 |
+| 1871 | 2026-11-06 | P12 S56b probe part 31/49 | completed | 2 × 1 | $0.52 | $0.0012 | $3.8713 |
+| 1872 | 2026-11-06 | P12 S56b probe part 32/49 | completed | 2 × 1 | $0.52 | $0.0009 | $3.8722 |
+| 1873 | 2026-11-06 | P12 S56b probe part 33/49 | completed | 2 × 1 | $0.52 | $0.0025 | $3.8748 |
+| 1874 | 2026-11-06 | P12 S56b probe part 34/49 | completed | 2 × 1 | $0.52 | $0.0021 | $3.8768 |
+| 1875 | 2026-11-06 | P12 S56b probe part 35/49 | completed | 2 × 1 | $0.52 | $0.0011 | $3.8779 |
+| 1876 | 2026-11-06 | P12 S56b probe part 36/49 | completed | 2 × 1 | $0.52 | $0.0008 | $3.8787 |
+| 1877 | 2026-11-06 | P12 S56b probe part 37/49 | completed | 2 × 1 | $0.52 | $0.0006 | $3.8794 |
+| 1878 | 2026-11-06 | P12 S56b probe part 38/49 | completed | 2 × 1 | $0.52 | $0.0007 | $3.8801 |
+| 1879 | 2026-11-06 | P12 S56b probe part 39/49 | completed | 2 × 1 | $0.52 | $0.0006 | $3.8807 |
+| 1880 | 2026-11-06 | P12 S56b probe part 40/49 | completed | 2 × 1 | $0.52 | $0.0009 | $3.8816 |
+| 1881 | 2026-11-06 | P12 S56b probe part 41/49 | completed | 2 × 1 | $0.52 | $0.0005 | $3.8820 |
+| 1882 | 2026-11-06 | P12 S56b probe part 42/49 | completed | 2 × 1 | $0.52 | $0.0013 | $3.8833 |
+| 1883 | 2026-11-06 | P12 S56b probe part 43/49 | completed | 2 × 1 | $0.52 | $0.0310 | $3.9143 |
+| 1884 | 2026-11-06 | P12 S56b probe part 44/49 | completed | 2 × 1 | $0.52 | $0.0011 | $3.9154 |
+| 1885 | 2026-11-06 | P12 S56b probe part 45/49 | completed | 2 × 1 | $0.52 | $0.0036 | $3.9190 |
+| 1886 | 2026-11-06 | P12 S56b probe part 46/49 | completed | 2 × 1 | $0.52 | $0.0024 | $3.9214 |
+| 1887 | 2026-11-06 | P12 S56b probe part 47/49 | completed | 2 × 1 | $0.52 | $0.0008 | $3.9223 |
+| 1888 | 2026-11-06 | P12 S56b probe part 48/49 | completed | 2 × 1 | $0.52 | $0.0011 | $3.9233 |
+| 1889 | 2026-11-06 | P12 S56b probe part 49/49 | completed | 1 × 1 | $0.26 | $0.0006 | $3.9240 |
+| 1890 | 2026-11-06 | P12 S56b probe 2 part 1/3 | completed | 3 × 1 | $0.53 | $0.0016 | $3.9256 |
+| 1891 | 2026-11-06 | P12 S56b probe 2 part 2/3 | completed | 2 × 1 | $0.52 | $0.0021 | $3.9277 |
+| 1892 | 2026-11-06 | P12 S56b probe 2 part 3/3 | completed | 1 × 1 | $0.26 | $0.0008 | $3.9285 |
+| 1893 | 2026-11-06 | P12 S56b probe 3 part 1/1 | completed | 8 × 1 | $0.34 | $0.0010 | $3.9295 |
+| 1894 | 2026-11-06 | P12 S56b probe 4 part 1/1 | completed | 7 × 1 | $0.08 | $0.0007 | $3.9303 |
 
 - Run 5, gpt-6-luna: 12 calls, 67483 in (38955 cached, 28492 written), 498 out, p50 1258 ms, p95 3286 ms; 3.61 chars a token
 - Run 5, gpt-6.1-sol: 4 calls, 24750 in (12287 cached, 12451 written), 224 out, p50 2023 ms, p95 2349 ms; 3.61 chars a token
@@ -3800,4 +3854,61 @@ Total spent: **$3.8029** of $13.80 (the runner stops at $13.80).
 - Run 1839, gpt-6-luna: 11 calls, 110684 in (109483 cached, 1168 written), 257 out, p50 1220 ms, p95 2409 ms; 3.73 chars a token
 - Run 1840, gpt-6-luna: 10 calls, 80766 in (59621 cached, 20513 written), 522 out, p50 1193 ms, p95 2265 ms; 3.77 chars a token
 - Run 1840, text-embedding-3-small: 1 calls, 30 in (0 cached, 0 written), 0 out, p50 278 ms, p95 278 ms; 3.77 chars a token
+- Run 1841, gpt-6-luna: 8 calls, 88771 in (76718 cached, 12029 written), 341 out, p50 1746 ms, p95 2394 ms; 3.75 chars a token
+- Run 1842, gpt-6-luna: 4 calls, 44010 in (43480 cached, 518 written), 142 out, p50 2098 ms, p95 3052 ms; 3.76 chars a token
+- Run 1843, gpt-6-luna: 5 calls, 55261 in (54694 cached, 552 written), 163 out, p50 1383 ms, p95 2250 ms; 3.76 chars a token
+- Run 1844, gpt-6-luna: 5 calls, 54806 in (53996 cached, 795 written), 304 out, p50 1642 ms, p95 1822 ms; 3.75 chars a token
+- Run 1844, gpt-6.1-sol: 1 calls, 11783 in (0 cached, 11780 written), 42 out, p50 2020 ms, p95 2020 ms; 3.75 chars a token
+- Run 1845, gpt-6-luna: 5 calls, 54907 in (54205 cached, 687 written), 161 out, p50 1530 ms, p95 2270 ms; 3.75 chars a token
+- Run 1846, gpt-6-luna: 8 calls, 88481 in (76411 cached, 12046 written), 330 out, p50 1359 ms, p95 1896 ms; 3.75 chars a token
+- Run 1847, gpt-6-luna: 3 calls, 32394 in (32238 cached, 147 written), 78 out, p50 1538 ms, p95 1859 ms; 3.76 chars a token
+- Run 1848, gpt-6-luna: 9 calls, 26747 in (21490 cached, 91 written), 313 out, p50 1779 ms, p95 7002 ms; 3.90 chars a token
+- Run 1849, gpt-6-luna: 6 calls, 66427 in (65171 cached, 1238 written), 227 out, p50 1480 ms, p95 1591 ms; 3.75 chars a token
+- Run 1850, gpt-6-luna: 6 calls, 67811 in (65473 cached, 2320 written), 382 out, p50 1599 ms, p95 3540 ms; 3.72 chars a token
+- Run 1851, gpt-6-luna: 8 calls, 87968 in (65436 cached, 22508 written), 279 out, p50 1707 ms, p95 4625 ms; 3.76 chars a token
+- Run 1852, gpt-6-luna: 7 calls, 76800 in (75814 cached, 965 written), 324 out, p50 1868 ms, p95 2944 ms; 3.75 chars a token
+- Run 1853, gpt-6-luna: 5 calls, 54823 in (54217 cached, 591 written), 209 out, p50 1671 ms, p95 6566 ms; 3.75 chars a token
+- Run 1854, gpt-6-luna: 2 calls, 21531 in (21482 cached, 43 written), 66 out, p50 1655 ms, p95 1778 ms; 3.76 chars a token
+- Run 1855, gpt-6-luna: 3 calls, 32360 in (32235 cached, 116 written), 91 out, p50 1617 ms, p95 2281 ms; 3.76 chars a token
+- Run 1856, gpt-6-luna: 2 calls, 21519 in (21482 cached, 31 written), 121 out, p50 1640 ms, p95 1967 ms; 3.76 chars a token
+- Run 1857, gpt-6-luna: 5 calls, 56102 in (54786 cached, 1301 written), 463 out, p50 1650 ms, p95 3090 ms; 3.86 chars a token
+- Run 1858, gpt-6-luna: 2 calls, 21547 in (21482 cached, 59 written), 152 out, p50 2306 ms, p95 3016 ms; 3.76 chars a token
+- Run 1859, gpt-6-luna: 3 calls, 32473 in (32326 cached, 138 written), 150 out, p50 1561 ms, p95 1696 ms; 3.77 chars a token
+- Run 1860, gpt-6-luna: 5 calls, 54792 in (53831 cached, 946 written), 304 out, p50 1774 ms, p95 3169 ms; 3.79 chars a token
+- Run 1861, gpt-6-luna: 4 calls, 43187 in (32250 cached, 10925 written), 104 out, p50 1560 ms, p95 2685 ms; 3.76 chars a token
+- Run 1862, gpt-6-luna: 6 calls, 65685 in (65021 cached, 646 written), 210 out, p50 1306 ms, p95 1600 ms; 3.76 chars a token
+- Run 1863, gpt-6-luna: 5 calls, 55622 in (44038 cached, 11569 written), 238 out, p50 1756 ms, p95 4299 ms; 3.75 chars a token
+- Run 1864, gpt-6-luna: 8 calls, 88934 in (87493 cached, 1417 written), 359 out, p50 1411 ms, p95 1735 ms; 3.75 chars a token
+- Run 1865, gpt-6-luna: 6 calls, 65821 in (64958 cached, 845 written), 217 out, p50 1705 ms, p95 1938 ms; 3.75 chars a token
+- Run 1866, gpt-6-luna: 6 calls, 66666 in (65052 cached, 1596 written), 220 out, p50 1626 ms, p95 1724 ms; 3.74 chars a token
+- Run 1867, gpt-6-luna: 5 calls, 55338 in (54218 cached, 1105 written), 173 out, p50 1548 ms, p95 1987 ms; 3.74 chars a token
+- Run 1868, gpt-6-luna: 8 calls, 89156 in (76763 cached, 12369 written), 353 out, p50 1450 ms, p95 2211 ms; 3.75 chars a token
+- Run 1868, gpt-6.1-sol: 1 calls, 11796 in (10741 cached, 1052 written), 40 out, p50 2121 ms, p95 2121 ms; 3.75 chars a token
+- Run 1869, gpt-6-luna: 7 calls, 79082 in (77125 cached, 1936 written), 431 out, p50 1528 ms, p95 2388 ms; 3.76 chars a token
+- Run 1870, gpt-6-luna: 7 calls, 78967 in (76761 cached, 2185 written), 529 out, p50 1461 ms, p95 3144 ms; 3.74 chars a token
+- Run 1871, gpt-6-luna: 8 calls, 88637 in (87160 cached, 1453 written), 376 out, p50 1355 ms, p95 1784 ms; 3.75 chars a token
+- Run 1872, gpt-6-luna: 6 calls, 66785 in (65436 cached, 1331 written), 191 out, p50 1450 ms, p95 1694 ms; 3.74 chars a token
+- Run 1873, gpt-6-luna: 7 calls, 79790 in (66787 cached, 12982 written), 501 out, p50 2008 ms, p95 4984 ms; 3.76 chars a token
+- Run 1874, gpt-6-luna: 5 calls, 55753 in (43469 cached, 12269 written), 221 out, p50 1602 ms, p95 1954 ms; 3.73 chars a token
+- Run 1875, gpt-6-luna: 7 calls, 77895 in (76390 cached, 1484 written), 270 out, p50 1637 ms, p95 2223 ms; 3.75 chars a token
+- Run 1876, gpt-6-luna: 6 calls, 65276 in (64654 cached, 604 written), 169 out, p50 1821 ms, p95 11864 ms; 3.76 chars a token
+- Run 1877, gpt-6-luna: 5 calls, 54153 in (53821 cached, 317 written), 126 out, p50 1525 ms, p95 1624 ms; 3.76 chars a token
+- Run 1878, gpt-6-luna: 5 calls, 55276 in (54203 cached, 1058 written), 115 out, p50 1580 ms, p95 1999 ms; 3.75 chars a token
+- Run 1879, gpt-6-luna: 4 calls, 43533 in (42985 cached, 536 written), 125 out, p50 1560 ms, p95 2226 ms; 3.76 chars a token
+- Run 1880, gpt-6-luna: 5 calls, 55407 in (54205 cached, 1187 written), 415 out, p50 1640 ms, p95 3538 ms; 3.75 chars a token
+- Run 1881, gpt-6-luna: 4 calls, 43124 in (42980 cached, 132 written), 71 out, p50 1701 ms, p95 2066 ms; 3.76 chars a token
+- Run 1882, gpt-6-luna: 8 calls, 89677 in (88117 cached, 1536 written), 349 out, p50 1675 ms, p95 1990 ms; 3.75 chars a token
+- Run 1883, gpt-6-luna: 8 calls, 88379 in (86940 cached, 1415 written), 337 out, p50 1663 ms, p95 2209 ms; 3.75 chars a token
+- Run 1883, gpt-6.1-sol: 1 calls, 11782 in (0 cached, 11779 written), 34 out, p50 1576 ms, p95 1576 ms; 3.75 chars a token
+- Run 1884, gpt-6-luna: 8 calls, 87991 in (86938 cached, 1029 written), 286 out, p50 1568 ms, p95 1766 ms; 3.76 chars a token
+- Run 1885, gpt-6-luna: 8 calls, 87990 in (65482 cached, 22484 written), 253 out, p50 1588 ms, p95 1896 ms; 3.76 chars a token
+- Run 1886, gpt-6-luna: 8 calls, 88014 in (76180 cached, 11810 written), 298 out, p50 1755 ms, p95 6520 ms; 3.76 chars a token
+- Run 1887, gpt-6-luna: 6 calls, 65611 in (64960 cached, 633 written), 224 out, p50 1613 ms, p95 1821 ms; 3.76 chars a token
+- Run 1888, gpt-6-luna: 7 calls, 78474 in (76958 cached, 1495 written), 231 out, p50 1494 ms, p95 2015 ms; 3.74 chars a token
+- Run 1889, gpt-6-luna: 4 calls, 45242 in (44282 cached, 948 written), 159 out, p50 1621 ms, p95 2057 ms; 3.78 chars a token
+- Run 1890, gpt-6-luna: 3 calls, 22455 in (10792 cached, 10814 written), 145 out, p50 1672 ms, p95 1849 ms; 3.79 chars a token
+- Run 1891, gpt-6-luna: 6 calls, 66372 in (54567 cached, 11787 written), 202 out, p50 1475 ms, p95 2219 ms; 3.75 chars a token
+- Run 1892, gpt-6-luna: 4 calls, 45450 in (44268 cached, 1170 written), 418 out, p50 1498 ms, p95 3116 ms; 3.80 chars a token
+- Run 1893, gpt-6-luna: 9 calls, 27654 in (21597 cached, 72 written), 307 out, p50 1573 ms, p95 2023 ms; 3.92 chars a token
+- Run 1894, gpt-6-luna: 7 calls, 6126 in (0 cached, 0 written), 271 out, p50 1448 ms, p95 1599 ms; 4.46 chars a token
 <!-- ledger:end -->

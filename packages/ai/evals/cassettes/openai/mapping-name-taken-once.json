@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "e846e31f9599a60adadd84a4d671abaa626a1c4ab7c671198d8f821b5aead003",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_rA3UPXEVmg2FLePPQq4JwohS",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 813,
+            "cachedInputTokens": 0,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

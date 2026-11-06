@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "be57be220240672afda1cc55ce2397badcb50109574c449427bd80a5dbecf60a",
+        "fingerprint": "3e94110394306925e545f17747c9c33c67a6959e63372ebf6d7aaacf7e2c1ca3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_4LBQPdesSScFfS2AXFmKBX8y",
+              "id": "call_nNIv4UyTwR2BBYkedBjtiqvl",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 11,
+            "inputTokens": 10755,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10752,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "9354a08af95ce401d3b3828e16de94065ba86b8546890c8ab8ea8e1ab57f2f09",
+        "fingerprint": "712e7033831f345bb205b20f8d671feb5a8c8d4f162f9c8833ca90912744e75f",
         "response": {
-          "text": "There are no open team to-dos.",
+          "text": "There are no open to-dos showing for the team.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9957,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10812,
+            "cachedInputTokens": 10752,
             "cacheWriteTokens": 57,
-            "outputTokens": 13
+            "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }

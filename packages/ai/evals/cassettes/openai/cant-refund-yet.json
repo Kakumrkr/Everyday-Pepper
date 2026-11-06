@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5dc291f0b49217fb669dc56c37690431508569a90027075d3b59255426ce3390",
+        "response": {
+          "text": "I can’t issue refunds yet. Deposits and refunds aren’t available in Pepper.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10803,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 8,
+            "outputTokens": 21
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

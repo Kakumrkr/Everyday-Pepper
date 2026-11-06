@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "bede09b366672428fce038960a476e3cf546ed4e2cb62b78443036291f72686a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HakFyAWTHkiGlWvtKVehgwzd",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10760,
+            "cachedInputTokens": 10741,
+            "cacheWriteTokens": 16,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a5848edd63ae238fcec161d8315e85de1bcc09f6883ccfa0a87a6f80e9218a4c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_OeomvKWDbMf7tvMPsRxbNcJu",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10843,
+            "cachedInputTokens": 10757,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f8ce3d579ca5596ecab94c190a09f72ed67639dfaf5ccd00f153171b84719826",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_X78lOOFgjCK9gbhYuLF4AZyT",
+              "name": "send_client_message",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"kind\":\"note\",\"minutesLate\":null,\"note\":\"Please bring your inspiration photos to your appointment.\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11130,
+            "cachedInputTokens": 10840,
+            "cacheWriteTokens": 287,
+            "outputTokens": 63
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "aa270bb86764b91f82746210fd5675bce3e729da8280179c295393bef3c75175",
+        "response": {
+          "text": "I drafted a note asking Maria to bring her inspiration photos to tomorrow’s haircut. It’s waiting for your approval on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11279,
+            "cachedInputTokens": 11127,
+            "cacheWriteTokens": 149,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

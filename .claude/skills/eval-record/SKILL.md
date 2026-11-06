@@ -5,7 +5,7 @@ description: Record Pepper's LLM evals on the real models (Luna + Sol) - probe t
 
 # Recording the evals on the real models (M2, user-approved workflow)
 
-Spends real money: read the phase's budget in `docs/plan/ai-budget.md` and `docs/plan/STATUS.md` first. Rules that never change: `OPENAI_API_KEY` from the environment only; every run under the runner's guards (run $1.50, phase cap, $4.50 total stop); never raise a cap or pass `--phase-estimate-ok` without the user saying so in this session.
+Spends real money: read the phase's budget in `docs/plan/ai-budget.md` and `docs/plan/STATUS.md` first. Rules that never change: `OPENAI_API_KEY` from the environment only; every run under the runner's guards (run $1.50, phase cap, $13.80 total stop since S56a); never raise a cap or pass `--phase-estimate-ok` without the user saying so in this session.
 
 Any change to a tool, a guide or the instructions makes **every** recorded cassette stale (each request is fingerprinted), so a session records the whole suite once, at the end. Before that, check cheaply.
 
@@ -32,7 +32,7 @@ A miss here is fixed now (failing test first if it is code), and the probe is re
 node .claude/skills/eval-record/pack.mjs $S                # every case, about $0.56 of estimate a run
 .claude/skills/eval-record/record.sh $S "S<nn> pass^1"     # run_in_background, not Monitor
 (cd packages/ai && EVAL_DATABASE_URL=$(cat $S/evaldb.url) NODE_USE_ENV_PROXY=1 \
-  node dist/evals/cli.js --provider openai --retrieval --record --phase 7)   # when episodes or search changed
+  node dist/evals/cli.js --provider openai --retrieval --record --phase <n>)   # when episodes or search changed
 ```
 
 `record.sh` prints one line per run (spent, gates, the sets that missed) and stops at the first `Refused`. Read a run's details in `$S/run-<n>.log` only when its line shows a miss.
@@ -43,4 +43,4 @@ node .claude/skills/eval-record/pack.mjs $S                # every case, about $
 - Replay everything for free: `pnpm --filter @pepper/ai eval --provider openai` and the replay test in `pnpm test:integration`.
 - Write the spend in `ai-budget.md` (from `evals/ledger.json`) and the results table in the session's ADR.
 
-Flags (details in `packages/ai/evals/README.md`): `--set`, `--case`, `--concurrency` (default 4), `--phase` (required to record), `--retrieval`, `--phase-estimate-ok`, `--max-cost`. Environment: `EVAL_DATABASE_URL`, `NODE_USE_ENV_PROXY=1` (both set by `record.sh`); models via `ROUTINE_MODEL`/`STRONG_MODEL`, phase via `EVAL_PHASE`.
+Flags (details in `packages/ai/evals/README.md`): `--set`, `--case`, `--concurrency` (default 4), `--phase` (required to record), `--retrieval`, `--phase-estimate-ok`, `--max-cost`. Environment: `EVAL_DATABASE_URL`, `NODE_USE_ENV_PROXY=1` (both set by `record.sh`); models via `ROUTINE_MODEL`/`STRONG_MODEL`, phase via `EVAL_PHASE` (record.sh defaults to 7: set it to the current phase, e.g. `EVAL_PHASE=12`, or the phase cap is not the one checked).

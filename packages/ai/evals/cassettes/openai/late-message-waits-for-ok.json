@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "dfe37c81fe5510c054de1dbe6b21cecf6b5300d9f2b9ac91140ffc91354b5422",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sDRMO1iQWHP9rLJNAzaXCoB7",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10758,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10755,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "7a55d12817268a977ca6721b0025357308f7489b140d514721e9dfd8753728da",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sD8msoZUrWZG3AkA7KnNmQtJ",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10842,
+            "cachedInputTokens": 10755,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "92d15a0e35b4e9a1297ba3d791874e9be04a6419ce272432ac8733737b711540",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_YPY61kI4rq5c7XLGaiitQjtF",
+              "name": "send_client_message",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"kind\":\"running_late\",\"minutesLate\":15,\"note\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11133,
+            "cachedInputTokens": 10839,
+            "cacheWriteTokens": 291,
+            "outputTokens": 58
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "345764aa6e2c46b94d50c6445cc4b88b374f837a4421fa2298d7d601ac30c8e5",
+        "response": {
+          "text": "Maria’s 3:00 haircut is the visit I found. The message saying you’re about 15 minutes late is waiting for your OK on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11282,
+            "cachedInputTokens": 11130,
+            "cacheWriteTokens": 149,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

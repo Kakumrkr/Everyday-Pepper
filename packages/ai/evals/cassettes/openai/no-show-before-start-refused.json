@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "dfbd5afa031108d6b21996fc78f0ae4f017339351608e08838e8cb2f1473b4b5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_TEpN0e0Gb3E1tcGfnf3TdtuA",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10805,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 10,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "72bf85d6b70ccfb69d78576246da71d44f418a46aaf67d2aff7c7074617ce4ce",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3CdgZPGBAIIPH0mHNogM9Vax",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10893,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 88,
+            "outputTokens": 47
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "552dd47ff1e8676ee8d01761a1c1d864f07b1990f7d57c986e58e72f63b212a8",
+        "response": {
+          "text": "Maria’s next appointment is tomorrow, so it hasn’t started and can’t be marked as a no-show. If she missed an earlier visit, tell me which one.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11195,
+            "cachedInputTokens": 10890,
+            "cacheWriteTokens": 302,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

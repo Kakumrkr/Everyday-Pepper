@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "529b8266f5c4a325de35a10b0a7df6f8e3e6790804a89dfd7fc1d29b8f9b29bd",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_s3jeh54uB5C0StC8huVjI8gs",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10756,
+            "cachedInputTokens": 10741,
+            "cacheWriteTokens": 12,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8620871ebe2674a9ac468b940b4cd73bf675936f85c12c01dd2dfa314caf567a",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_GAynI0UgYwC0G53K5VmGK5sW",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10841,
+            "cachedInputTokens": 10753,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d3f27e0dabe2457fa9fc7db91895058e05b8d0721bd29388e4bc7a8b22dca2b0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vqMcAq5Bk1hd68I970lLWLjc",
+              "name": "send_client_message",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\",\"kind\":\"reminder\",\"minutesLate\":null,\"note\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11135,
+            "cachedInputTokens": 10838,
+            "cacheWriteTokens": 294,
+            "outputTokens": 56
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "51c7125c8f8bd9f46aeed6b5f5f17e22b6a3b2b90c4bf6fe444bdf95e3ffa304",
+        "response": {
+          "text": "Ana’s reminder for her Friday, November 6 haircut at 2:00 PM is waiting for your OK on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11276,
+            "cachedInputTokens": 11132,
+            "cacheWriteTokens": 141,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

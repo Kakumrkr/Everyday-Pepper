@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "d307dfbbe40b1f4178aa3de5cc9741fb2ebf26a337fa5cd955aece50f1747c57",
+        "response": {
+          "text": "I can’t send texts yet. I can email a client about one of their visits, but not message all clients. Holiday hours that stop bookings can be proposed as a rule; you can also update hours on the Team page in More. Confirm the exact dates and hours in your own words if you’d like me to propose a closure.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10809,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10806,
+            "outputTokens": 72
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "feb22f482c74d64b289cbe150fb4a4976a2e5f9699053a389ce98c6ade78856b",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ILHkgp1zcVCcPPjczA9YGm7r",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"When\",\"field\":\"visit_date\"},{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Treatment\",\"field\":\"service\"},{\"column\":\"Stylist\",\"field\":\"staff\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 927,
+            "cachedInputTokens": 0,
+            "outputTokens": 53
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

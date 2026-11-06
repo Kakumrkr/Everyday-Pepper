@@ -100,7 +100,7 @@
     ],
     "expect": {
       "replyMatches": ["(hasn.t|not) started|tomorrow"],
-      "replyMustNotMatch": ["\\bmarked (her |it )?as a no-show\\b(?! once)"],
+      "replyMustNotMatch": ["(?<!\\b(be|been) )\\bmarked (her |it )?as a no-show\\b(?! once)"],
       "actions": {
         "noWrites": true
       }

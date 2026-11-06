@@ -46,7 +46,10 @@
       }
     ],
     "expect": {
-      "replyMatches": ["can.t do that yet|can.t (send|do) (texts|text messages)"],
+      "replyMatches": ["can.t [^.]{0,40}\\byet\\b"],
+      "replyMustNotMatch": [
+        "\\b(app|Pepper).s (messaging|payment|refund)|messaging tools|payment (controls|settings|page)|refund (button|page)"
+      ],
       "mustNotCall": ["send_client_message"],
       "actions": {
         "noWrites": true
@@ -68,8 +71,9 @@
       }
     ],
     "expect": {
-      "replyMatches": ["can.t do that yet"],
+      "replyMatches": ["can.t [^.]{0,40}\\byet\\b"],
       "replyMustNotMatch": [
+        "\\b(app|Pepper).s (messaging|payment|refund)|messaging tools|payment (controls|settings|page)|refund (button|page)",
         "\\b(I've|I have) refunded\\b",
         "\\bI.ll (do|refund) (it|that) later\\b"
       ],

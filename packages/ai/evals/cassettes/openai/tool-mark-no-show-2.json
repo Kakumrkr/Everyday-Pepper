@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "13c00ecc629cd49e72baaab9fc22e3ed319861aa356bee381f0ae539317587e2",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_CuR42lgd0R7TjtQzZqIuiFuU",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Ana\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10759,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10756,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "49c10faf3aa34fabe5811753f8479180459d46d3e4d1d73674659996f494bbd3",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ykmh7eOPrJiCWgKBTom13b77",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10845,
+            "cachedInputTokens": 10756,
+            "cacheWriteTokens": 86,
+            "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ae88310af5f4a95179390942ce589d4609e5eb02fdb533559bde64b6e7a512c0",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_zBdj7ri4Rx7idduVoHIZsCch",
+              "name": "mark_no_show",
+              "arguments": "{\"bookingId\":\"{{booking:ana}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11141,
+            "cachedInputTokens": 10842,
+            "cacheWriteTokens": 296,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "fb5707c0463b8360f7485b258d93ce377430759b01cec7f4cb268d16ae08b548",
+        "response": {
+          "text": "Ana R.’s 2:00 haircut with Jess today is marked as a no-show.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11247,
+            "cachedInputTokens": 11138,
+            "cacheWriteTokens": 106,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

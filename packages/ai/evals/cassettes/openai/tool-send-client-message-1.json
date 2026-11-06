@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "dd104fd379ff80795571cbe274bc231e268f84ec2148274b4353912cf7220c5e",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_X6rlQE6tKgfLLj4I3EVDuEf7",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10756,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10753,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "56a7a9f3eb70ef2121afe116355b1eea1db2df104624a4de785f6ba6a9b01000",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_ie9fDgNgLvrLrat2wpgOp8Rw",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10839,
+            "cachedInputTokens": 10753,
+            "cacheWriteTokens": 83,
+            "outputTokens": 42
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "be3031d905350638ee015e05cbebb981e2b7b71216ded72bb8ef3de5222e7a22",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_vHZSqjhAT7PgD8Eq0No6XweF",
+              "name": "send_client_message",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"kind\":\"running_late\",\"minutesLate\":10,\"note\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11130,
+            "cachedInputTokens": 10836,
+            "cacheWriteTokens": 291,
+            "outputTokens": 60
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "750cd3135b43096de6952014a610cda5b0237c32f2130c35fecc263957c71322",
+        "response": {
+          "text": "I drafted a note to Maria that you’re running about 10 minutes late. It’s waiting for your OK on the card.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11281,
+            "cachedInputTokens": 11127,
+            "cacheWriteTokens": 151,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "aec75cb2176a056f4258a768428c55b1d0d9819e1d34a95d6933db9ca1c7f25c",
+        "fingerprint": "a8dee5792f9bfaca9a35ae8ff9f15519d781df0a2e0b398df4cf98e2e2d28470",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_iAKZHBCKL3lc5EdOJVkCQTpE",
+              "id": "call_ygP6lLXoBaF6YWsLCtDYDa9w",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10755,
+            "cachedInputTokens": 10741,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,81 +25,51 @@
         }
       },
       {
-        "fingerprint": "530616da2088d6d50dbe3473715eb080c47e5e55fc2f41b31ac1ead4fe7c8c8e",
+        "fingerprint": "4607162d2830125b263f3240ffc3890a7e8fa254a2c97ff429c000e157383c58",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HaPG38F1CdREPCTYXBtWLRES",
-              "name": "get_feed",
-              "arguments": "{\"kind\":\"staff_overload\"}"
+              "id": "call_Y3wc4hcSgQzcF85JL3Cfg70j",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            },
+            {
+              "id": "call_00cIyD6wcoxgqDccPKIIwOpR",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            },
+            {
+              "id": "call_jjAFb954I3azlXbM7RW4toKx",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            },
+            {
+              "id": "call_JELILsSqDyUjXCqDhLlsKpyG",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:jess}}\"}"
+            },
+            {
+              "id": "call_qsSHovbPo0tKoDgyeU4SO7MV",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10364,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 464,
-            "outputTokens": 20
+            "inputTokens": 11230,
+            "cachedInputTokens": 10752,
+            "cacheWriteTokens": 475,
+            "outputTokens": 270
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0c5f8518fd82000ae25570abb8dcf39c9d83e1ffa91cc76697415611d5c73802",
+        "fingerprint": "8e3bba44c74f2b16b822b96b35cca33fcaf1cd258a9dcb839b4749f5afb2b752",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_gpLpCSsZHdChUWbrcan8IKDs",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
-            },
-            {
-              "id": "call_ym2fDQSI844IKwWno1dDBi1k",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
-            },
-            {
-              "id": "call_AdCJlAT4OPZoNC3NYN0A1oCL",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-04\",\"staffMemberId\":\"{{staff:jess}}\"}"
-            },
-            {
-              "id": "call_RAjfKBjsRWFAyMoLWS2D6uJL",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:jess}}\"}"
-            },
-            {
-              "id": "call_IafniDtC69jRW0ov1aSow0HI",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-06\",\"staffMemberId\":\"{{staff:jess}}\"}"
-            }
-          ],
-          "replay": [
-            {
-              "id": "rs_0bd76a7a87e3da16016addf89aceac87d28fa38f1a49489af4",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3fictdCk6Oijg5z5e9c15O-a6uk8oSMVtXWt0NT_p8JCbrDer7IvlO1oRxzXMDEd7jpSr6egypz2r5ExP4g25_Ep1ZGhtALxjN7TUHDrEjGGuE9mrGYjAKlgZZ-jFUx0mMtsXimOP8vu5hLJdb3YOgPkTYe1dLLFJqI0dQ5hwh2xjUDRqXIQ5nCJxm0zj33kuigPvhNB3Tbd3qbXqO2jqMrADxBgc5XAAoURMwSdLebvSIfEO_THpb4ovPNL6iJrymkvgBl1EjPx2kaBtzulGa8Sc7pxB8afXqnZ5kcsR8jAmGa_mzIcccY8u7hpXA3NJR3LInxiqBTnwq5Pz2HyEXG7g2lMb_LwzygPioXxqdGn-M9vj11blhE94c2QUUC1z4xrPvjFy0dxZI8Gap3YKKJ9xHk_SL3COlXf5T3tCySLdjY_0FaON7IhvzXCRdbUrF7I-YDUrPMTu3mYkBgK-JjbQvbPh8A1PXtNy8cHK0umG4a2eG-jjozdpyFj1x98S8oGLtBjFazzhrJ0lKBEWBqiesIV56b8a8AXjicR4MZQiXEreyie1TXP07jq3796qv6IgJYDY_BsTWqBbKURegTcTYKH5iOpRPmLX34eBYapvKFHFjkzjsyV73jwEeyE87G9xo3kWnwUXbFDMbaUd04rQxn_zVEXp5znXGpM3a4uK15avOEhylppf4IkI5SLGjVXMWYeOn0XSDwl_zFMkOoI1R8eDee8DVrSewiomSQzC8PB6Sv3Pjo0o4Zna5coveA4yMYk3YaKy56tnZaMgUNSAHVJpgfxf2BDjo4GbbCyyRbZN_kEdz6Mh2c5BGwzB9LMyp20q4FMMY59Q9MCW3sCDjNnDJduCwskhIQVGWJjfIWXYgGMSyuhoJhpKBAdifpgO1QGe8mCz6OYIil9ghsG6xlfaoNEPlDigw5vh8krPdUealQ3ZyetRKlpiooYwgLYaj8kj3vw-7uqxYMcMbpbj93reXlH3d4JVBFESs2Fz81AmibRtWyhZM3ApdLN3-Gqt-YuQhXD7UTxOQRpxfY7t4hJPP6Nwmxi0JAtBsczHVO42TXqSiF6STcM4mp_adh5Rf4iifrDKb_-PfiJPx3aKd4Ey10sEHV-CGKRlU9paVMI3aP8gQDBVqSU2pjjaITwrt2-48uIu5kqCkugHMGGlBLMe3g1hofqpn7ccizN_tOGSajRPbDfptit8mcU9BN-4GwxVFdRYw0MlfPIt5_WzSAnIpCOtJcSWTMbLSM-VgcPMa4n7gK3iJnFYEGaSevRcDrsASOkk0FcYz1ng7SkQQhfnVXmhEHcQ4NCMg40wWPIHot4gHcZmhZoET64LNuPiCWtAGTwBg5NN7hBxyWxnQyPy2_dMcURCWRp1xYIluzqttRfiaQb6Ihxzgde-GBmSesGg71dqaF41wtly-fALXkOt91vP0YHUAPX3QbnMu0sG9gF623LtjridWX_L3QtJeam9IPN3wt-1kYzSscDKY9BB2kBxDYSKpyAoVlIHDI5bWamLk1cX7kRjbPxunvXE8yXV4JhrmdGShu4NPZHPF-z4Ulrz979yNO181SlNVhJ6_QTgqEKGGzum8I2Rk8o58CgB-cvSpway52ar1k6cYcAmSai9yUf1-ro7FPic1OsSng5hEYd1GWXIpeLN0OTLpvLHrlvyhv5zO4tgEB0MwczxW_ZBWnhGxl6f6Bp3IuqDpNKsDTGxOSk2ezo2-1RlXcVU0DfLfZiWerP4SXu1A==",
-              "summary": []
-            }
-          ],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 10423,
-            "cachedInputTokens": 10361,
-            "cacheWriteTokens": 59,
-            "outputTokens": 261
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "fc7b7f9821dd67b3ff7bf96e21d9074d974aa1845845c82a5789049a00f7eb4d",
-        "response": {
-          "text": "Jess has 2 bookings this week: Tuesday at 3 PM and Friday at 2 PM. She also has a blocked hour Tuesday from noon to 1 PM; the rest of the week is clear.",
+          "text": "Jess has 2 bookings this week: Tuesday at 3:00 PM and Friday at 2:00 PM, both haircuts. She’s otherwise open during her usual Monday–Friday hours, with a 12–1 PM block on Tuesday.",
           "toolCalls": [],
           "replay": [
             {
@@ -109,10 +79,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11313,
-            "cachedInputTokens": 10420,
-            "cacheWriteTokens": 890,
-            "outputTokens": 46
+            "inputTokens": 12155,
+            "cachedInputTokens": 11227,
+            "cacheWriteTokens": 925,
+            "outputTokens": 55
           },
           "model": "gpt-6-luna"
         }
