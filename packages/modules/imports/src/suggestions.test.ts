@@ -61,6 +61,14 @@ describe('mappingQuestion (AC-W1-46)', () => {
     expect(mappingQuestion(file, asked, 'clients')).toBeNull();
   });
 
+  it('asks nothing about a file without a header row: its first row is a client', () => {
+    const headerless = table(
+      ['Ana Lopez', 'ana@example.com', 'VIP'],
+      ['Ben Ode', 'ben@example.com', 'Regular'],
+    );
+    expect(mappingQuestion(headerless, suggestMapping(headerless).columns, 'clients')).toBeNull();
+  });
+
   it('never asks about a column Pepper recognised but doesn’t import yet', () => {
     const notes = table(['Name', 'Notes'], ['Ana', 'Likes tea']);
     expect(mappingQuestion(notes, suggestMapping(notes).columns, 'clients')).toBeNull();

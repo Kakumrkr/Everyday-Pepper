@@ -244,12 +244,18 @@ export async function deleteImportBatch(tx: TenantTx, id: ImportBatchId): Promis
 }
 
 /** All rows of a batch in file order. */
-export function listImportRows(tx: TenantTx, batchId: ImportBatchId): Promise<ImportRowRow[]> {
-  return tx
+/** A batch's rows in file order; the first `limit` only when given (a sample, S56a.2). */
+export function listImportRows(
+  tx: TenantTx,
+  batchId: ImportBatchId,
+  limit?: number,
+): Promise<ImportRowRow[]> {
+  const rows = tx
     .select()
     .from(importRows)
     .where(eq(importRows.batchId, Id.parse(batchId)))
     .orderBy(asc(importRows.position));
+  return limit === undefined ? rows : rows.limit(limit);
 }
 
 /**

@@ -111,8 +111,8 @@ export function ImportScreen({
   }, []);
 
   // The AI's suggestions for the columns nothing placed (S56a.2, AC-W1-46): asked once per
-  // import when the columns step shows; nothing is mapped until the owner taps "Use it". An
-  // answer that comes after the owner changed a column is dropped (theirs is newer).
+  // import when the columns step shows; nothing is mapped until the owner taps "Use it". When
+  // the owner changed a column while it was asked, the import is read again (it has both).
   const [asking, setAsking] = useState(false);
   const asked = useRef(new Set<string>());
   const changes = useRef(0);
@@ -125,11 +125,17 @@ export function ImportScreen({
     const before = changes.current;
     setAsking(true);
     void suggestImport(batchId)
-      .then((answer) => {
-        if (!answer.ok || changes.current !== before) return;
-        setPreview((current) =>
-          current?.batch.id === answer.data.preview.batch.id ? answer.data.preview : current,
-        );
+      .then(async (answer) => {
+        if (!answer.ok) return;
+        // The owner changed a column meanwhile: read the import as it is now (both are in it).
+        let next = answer.data.preview;
+        if (changes.current !== before) {
+          const seen = changes.current;
+          const current = await loadImport(batchId);
+          if (!current.ok || changes.current !== seen) return;
+          next = current.data;
+        }
+        setPreview((shown) => (shown?.batch.id === next.batch.id ? next : shown));
       })
       .finally(() => {
         setAsking(false);

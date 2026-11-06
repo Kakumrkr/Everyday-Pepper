@@ -621,7 +621,7 @@ function leftOutReason(column: ImportColumn): string | null {
   if (column.field !== null) return null;
   if (column.later !== null) return `${LATER_WORDS[column.later].toLowerCase()} come later`;
   const suggested = suggestionOf(column);
-  if (suggested !== null) return `I think it’s ${FIELD_WORDS[suggested]}: use it above`;
+  if (suggested !== null) return `I think it’s ${FIELD_WORDS[suggested]}: change it in Columns`;
   if (column.by === 'owner') return 'you left it out';
   return 'nothing in Pepper fits it';
 }

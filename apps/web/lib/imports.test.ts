@@ -587,7 +587,7 @@ describe('suggestions and what is left out (S56a.2, AC-W1-46, AC-W1-48)', () => 
 
   it('names each column left out and why, in one line', () => {
     expect(leftOutLine([name, cell, fav, tel, notes, odd])).toBe(
-      'Not imported: Cell (I think it’s Phone: use it above), Fav (nothing in Pepper fits it), ' +
+      'Not imported: Cell (I think it’s Phone: change it in Columns), Fav (nothing in Pepper fits it), ' +
         'Tel (you left it out), Notes (notes come later), Odd (nothing in Pepper fits it).',
     );
     expect(leftOutLine([name])).toBeNull();

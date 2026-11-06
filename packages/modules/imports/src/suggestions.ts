@@ -8,6 +8,7 @@ import {
   type ImportKind,
   type ImportMappingAnswer,
   type ImportMappingQuestion,
+  looksLikeContact,
 } from '@pepper/contracts';
 import type { Table } from './parse.js';
 
@@ -16,8 +17,8 @@ import type { Table } from './parse.js';
 // answer is a suggestion the owner may use, column by column. The domain chooses what is asked
 // and checks every answer: the model never maps a column itself.
 
-/** How many cells are read for a column's samples. */
-const SCAN = 50;
+/** How many rows a column's samples are read from. */
+export const SUGGESTION_SAMPLE_ROWS = 50;
 
 /**
  * A value reduced to its shape: capitals become `A`, other letters `a`, digits `9`; spaces and
@@ -66,6 +67,9 @@ export function mappingQuestion(
   columns: readonly ImportColumn[],
   kind: ImportKind,
 ): ImportMappingQuestion | null {
+  // A column named like an email or a phone means the file has no header row: its "names" are
+  // a client's details, so nothing is asked (the owner maps it by hand).
+  if (columns.some(({ column }) => looksLikeContact(column))) return null;
   const asked = toAsk(columns);
   const fields = openFields(columns);
   if (asked.length === 0 || fields.length === 0) return null;
@@ -74,7 +78,7 @@ export function mappingQuestion(
     columns: asked.map(({ column }) => {
       const index = table.columns.indexOf(column);
       const samples = new Set<string>();
-      for (const { cells } of table.rows.slice(0, SCAN)) {
+      for (const { cells } of table.rows.slice(0, SUGGESTION_SAMPLE_ROWS)) {
         const value = index < 0 ? '' : (cells[index] ?? '').trim();
         if (value !== '') samples.add(maskSample(value));
         if (samples.size === IMPORT_SUGGESTION_LIMITS.samples) break;

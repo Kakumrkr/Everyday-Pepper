@@ -77,7 +77,7 @@ import {
   ImportNotUndoableError,
 } from '../errors.js';
 import { kindOf, mappingOf, mappingProblems, normalizeHeader, suggestMapping } from '../mapping.js';
-import { acceptSuggestions, mappingQuestion } from '../suggestions.js';
+import { acceptSuggestions, mappingQuestion, SUGGESTION_SAMPLE_ROWS } from '../suggestions.js';
 import { parseImportFile, type Table } from '../parse.js';
 import {
   mapRows,
@@ -273,7 +273,8 @@ export async function importMappingQuestion(
     const batch = await findOrThrow(tx, id, false);
     if (batch.status !== 'staged') throw new ImportNotStagedError();
     const columns = ColumnsSchema.parse(batch.columns);
-    const table = await tableOf(tx, batch, columns);
+    // The samples come from the first rows only (as `mappingQuestion` reads them).
+    const table = await tableOf(tx, batch, columns, SUGGESTION_SAMPLE_ROWS);
     return mappingQuestion(table, columns, batch.kind as ImportKind);
   });
 }
@@ -903,8 +904,9 @@ async function tableOf(
   tx: TenantTx,
   batch: ImportBatchRow,
   columns: readonly ImportColumn[],
+  limit?: number,
 ): Promise<Table> {
-  const rows = await listImportRows(tx, ImportBatchIdSchema.parse(batch.id));
+  const rows = await listImportRows(tx, ImportBatchIdSchema.parse(batch.id), limit);
   return {
     format: batch.format as ImportFormat,
     columns: columns.map(({ column }) => column),
