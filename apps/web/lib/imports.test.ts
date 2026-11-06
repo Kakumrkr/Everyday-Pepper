@@ -9,6 +9,10 @@ import {
   batchInAddress,
   clientsHref,
   columnNote,
+  leftOutLine,
+  needsSuggestions,
+  suggestionOf,
+  suggestionWords,
   commitImport,
   importSteps,
   importFormatOf,
@@ -187,7 +191,13 @@ describe('the mapping (AC-W1-17)', () => {
     later: null,
     suggestion: null,
   };
-  const notes: ImportColumn = { column: 'Notes', field: null, by: null, later: 'notes' };
+  const notes: ImportColumn = {
+    column: 'Notes',
+    field: null,
+    by: null,
+    later: 'notes',
+    suggestion: null,
+  };
   const columns = [client, nickname, mobile, notes];
 
   it('moves a one-column field to the column chosen, and keeps the rest', () => {
@@ -545,5 +555,41 @@ describe('batchInAddress', () => {
     expect(batchInAddress(`?batch=${ID}`)).toBe(ID);
     expect(batchInAddress('?batch=not-an-id')).toBeNull();
     expect(batchInAddress('')).toBeNull();
+  });
+});
+
+describe('suggestions and what is left out (S56a.2, AC-W1-46, AC-W1-48)', () => {
+  const column = (part: Partial<ImportColumn> & { column: string }): ImportColumn => ({
+    field: null,
+    by: null,
+    later: null,
+    suggestion: null,
+    ...part,
+  });
+  const name = column({ column: 'Client', field: 'name', by: 'header' });
+  const cell = column({ column: 'Cell', suggestion: { field: 'phone' } });
+  const fav = column({ column: 'Fav', suggestion: { field: null } });
+  const tel = column({ column: 'Tel', by: 'owner' });
+  const notes = column({ column: 'Notes', later: 'notes' });
+  const odd = column({ column: 'Odd' });
+
+  it('asks only while an unplaced column was never asked about', () => {
+    expect(needsSuggestions([name, odd])).toBe(true);
+    expect(needsSuggestions([name, cell, fav, tel, notes])).toBe(false);
+  });
+
+  it('shows a suggestion only while the column isn’t used', () => {
+    expect(suggestionOf(cell)).toBe('phone');
+    expect(suggestionWords('phone')).toBe('Looks like Phone to me.');
+    expect(suggestionOf({ ...cell, field: 'phone', by: 'owner' })).toBeNull();
+    expect(suggestionOf(fav)).toBeNull();
+  });
+
+  it('names each column left out and why, in one line', () => {
+    expect(leftOutLine([name, cell, fav, tel, notes, odd])).toBe(
+      'Not imported: Cell (I think it’s Phone: use it above), Fav (nothing in Pepper fits it), ' +
+        'Tel (you left it out), Notes (notes come later), Odd (nothing in Pepper fits it).',
+    );
+    expect(leftOutLine([name])).toBeNull();
   });
 });

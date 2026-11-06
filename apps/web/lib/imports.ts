@@ -3,6 +3,7 @@ import {
   ImportBatchSchema,
   ImportFieldSchema,
   ImportPreviewSchema,
+  ImportSuggestionsResultSchema,
   MAX_IMPORT_BYTES,
   SINGLE_IMPORT_FIELDS,
   type ImportBatch,
@@ -17,6 +18,7 @@ import {
   type ImportPreset,
   type ImportPreview,
   type ImportRow,
+  type ImportSuggestionsResult,
   type ImportVisit,
 } from '@pepper/contracts';
 import { z } from 'zod';
@@ -170,6 +172,22 @@ export function remapImport(
     `/v1/imports/${id}/mapping`,
     { method: 'PUT', ...json({ columns }) },
     ImportPreviewSchema,
+  );
+}
+
+/**
+ * Asks the AI about the columns nothing placed (`POST /v1/imports/:id/suggestions`, S56a.2):
+ * the import comes back with a suggestion on each column it could place, and nothing mapped.
+ */
+export function suggestImport(
+  id: ImportBatchId,
+  fetch: typeof globalThis.fetch = globalThis.fetch,
+): Promise<CallResult<ImportSuggestionsResult>> {
+  return call(
+    fetch,
+    `/v1/imports/${id}/suggestions`,
+    { method: 'POST' },
+    ImportSuggestionsResultSchema,
   );
 }
 
@@ -571,4 +589,52 @@ export function withField(
     const taken = field !== null && SINGLE_IMPORT_FIELDS.includes(field) && each.field === field;
     return { column: each.column, field: taken ? null : each.field };
   });
+}
+
+/** A column nothing placed: no field, nothing Pepper recognised, not decided by the owner. */
+function isUnplaced(column: ImportColumn): boolean {
+  return column.field === null && column.later === null && column.by === null;
+}
+
+/** Whether the AI may still be asked about the import's columns (AC-W1-46). */
+export function needsSuggestions(columns: readonly ImportColumn[]): boolean {
+  return columns.some((column) => isUnplaced(column) && column.suggestion === null);
+}
+
+/** The field the AI suggests for a column, while it isn't used: `null` otherwise. */
+export function suggestionOf(column: ImportColumn): ImportField | null {
+  return column.field === null ? (column.suggestion?.field ?? null) : null;
+}
+
+/** A field as the screen names it ("Phone"). */
+export function fieldLabel(field: ImportField): string {
+  return FIELD_WORDS[field];
+}
+
+/** A suggestion in words: "Looks like Phone to me." */
+export function suggestionWords(field: ImportField): string {
+  return `Looks like ${fieldLabel(field)} to me.`;
+}
+
+/** Why a column isn't imported, in a few words, or `null` when it is. */
+function leftOutReason(column: ImportColumn): string | null {
+  if (column.field !== null) return null;
+  if (column.later !== null) return `${LATER_WORDS[column.later].toLowerCase()} come later`;
+  const suggested = suggestionOf(column);
+  if (suggested !== null) return `I think it’s ${FIELD_WORDS[suggested]}: use it above`;
+  if (column.by === 'owner') return 'you left it out';
+  return 'nothing in Pepper fits it';
+}
+
+/**
+ * The columns that won't be imported and why, in one line, for the preview before Import
+ * (AC-W1-48): "Not imported: Notes (notes come later), Fav (nothing in Pepper fits it).";
+ * `null` when every column is imported.
+ */
+export function leftOutLine(columns: readonly ImportColumn[]): string | null {
+  const parts = columns.flatMap((column) => {
+    const reason = leftOutReason(column);
+    return reason === null ? [] : [`${column.column} (${reason})`];
+  });
+  return parts.length === 0 ? null : `Not imported: ${parts.join(', ')}.`;
 }

@@ -162,6 +162,52 @@ test('import (AC-W1-17…21): an owner brings a CSV through the screens and undo
   await expect(page.getByTestId('import-offer')).toBeVisible();
 });
 
+test('import (AC-W1-46…48): Pepper suggests a column it couldn’t match, the owner uses it', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page);
+  await page.goto('/clients/import');
+  await hydrated(page.getByRole('button', { name: 'Pick a file' }));
+  // "Guest" and "Fav" match no header or value; the scripted model calls "Guest" a name.
+  await page.getByTestId('import-input').setInputFiles({
+    name: 'guests.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(
+      [
+        'Guest,Email,Fav',
+        'Ana Ruiz,ana.ruiz@example.com,Blue',
+        'Cara Diaz,cara@example.com,Red',
+      ].join('\n'),
+    ),
+  });
+  await expect(page.getByRole('heading', { name: 'Check the columns' })).toBeVisible();
+  const suggestion = column(page, 'Guest').getByTestId('import-suggestion');
+  await expect(suggestion).toContainText('Looks like Name to me.');
+  await expect(column(page, 'Fav').getByTestId('import-suggestion')).toHaveCount(0);
+  // Nothing is mapped until the owner uses it.
+  await expect(page.getByLabel('Guest', { exact: true })).toHaveValue('');
+  await expect(page.getByTestId('import-problem')).toContainText('the client’s name');
+  await expectTapTargets(page, 'the import’s suggestion');
+
+  await suggestion.getByRole('button', { name: 'Use it: Guest as Name' }).click();
+  await expect(page.getByLabel('Guest', { exact: true })).toHaveValue('name');
+  await expect(column(page, 'Guest')).toContainText('You chose this.');
+  await expect(page.getByTestId('import-suggestion')).toHaveCount(0);
+  await expect(page.getByTestId('import-problem')).toHaveCount(0);
+
+  // AC-W1-48: before Import, one line says what is left out and why.
+  await page.getByRole('button', { name: 'Check the clients' }).click();
+  await expect(page.getByTestId('import-sentence')).toHaveText('2 new clients');
+  await expect(page.getByTestId('import-left-out')).toHaveText(
+    'Not imported: Fav (nothing in Pepper fits it).',
+  );
+  expect(
+    (await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()).violations.map((v) => v.id),
+  ).toEqual([]);
+  await expect(page.getByRole('button', { name: 'Import 2 clients' })).toBeEnabled();
+});
+
 test('import: Clients offers Import to the owner; a link to an import of no one opens the start', async ({
   page,
 }) => {
