@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. **S56a is pushed without a PR on `ccr-caaf8a98-xv3xue`.** Next: **S56a.2** (AI-suggested import mapping, scripted), which merges `ccr-caaf8a98-xv3xue` first and pushes its own branch; then **S56b** merges S56a.2's branch, probes, records once ($3.00 cap) and opens the one PR.
+**S56a.2 ("a", scripted), branch `claude/dreamy-keller-y57zq0`, merged `ccr-caaf8a98-xv3xue` first.** Brief pre-approved (D-1 no split; D-2 the screen asks once by itself; D-3 shape-masked samples, untrusted names; D-4 a field or none, no free text; D-5 ADR-0061).
+- Done: the domain (masked samples, the question, checked answers); the ai suggester; `POST /v1/imports/:id/suggestions` and the e2e model; the screen's "Use it" and the left-out line (top-up, AC-W1-48); the `import_mapping` eval set (7 scripted cases, every set green); ADR-0061, AC-W1-46…48.
+- Next: `/code-review`, `/security-review`, then `/session-close` (tier 3: `pnpm check`, affected integration, `import.spec.ts`); push the branch without a PR; S56b merges it.
 
 ## Last sessions
 - **S56a Phase 12 "a" · Client messages, no-shows and honest answers (2026-11-06)** ([ADR-0060](../adr/0060-client-messages-no-shows-and-honest-answers.md), branch `ccr-caaf8a98-xv3xue`, no PR until S56b). Full entry in [session-log.md](session-log.md).
