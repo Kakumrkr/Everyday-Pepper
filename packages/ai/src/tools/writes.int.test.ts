@@ -23,12 +23,7 @@ import {
   UndoRefusedError,
   type Actor,
 } from '@pepper/core';
-import {
-  findOutboxMessage,
-  withMember,
-  withTenant,
-  type Database,
-} from '@pepper/db';
+import { findOutboxMessage, withMember, withTenant, type Database } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   approveToolProposal,
@@ -853,7 +848,9 @@ const emailText = async (w: World, id: string) => {
   const row = await outboxOf(w, id);
   if (row?.type !== 'email' || row.payload === null) throw new Error('no email');
   return OutboxEmailSchema.parse(
-    JSON.parse(openOutboxContent(OUTBOX_KEY, OutboxMessageIdSchema.parse(id), row.payload).toString('utf8')),
+    JSON.parse(
+      openOutboxContent(OUTBOX_KEY, OutboxMessageIdSchema.parse(id), row.payload).toString('utf8'),
+    ),
   );
 };
 

@@ -192,6 +192,15 @@ const TurnSchema = z.union([
       z.strictObject({ morningDrafts: z.literal(true) }),
       // The morning briefing runs (S38a): the insights, then today's briefings, no model.
       z.strictObject({ morningBriefing: z.literal(true) }),
+      // Time passes (S56a): the business's clock moves on this many minutes, so a seeded visit
+      // can have started (a no-show, "running late").
+      z.strictObject({
+        advanceClock: z
+          .number()
+          .int()
+          .min(1)
+          .max(7 * 24 * 60),
+      }),
     ]),
   }),
 ]);

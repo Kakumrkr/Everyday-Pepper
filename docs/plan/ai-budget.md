@@ -10,8 +10,8 @@ Policy: [Phase 6 playbook §4](phase-6-playbook.md) (user, S22; confirmed for S2
 **Guards in code** (`packages/ai/src/evals`, S27):
 - The key comes only from the environment (`OPENAI_API_KEY`); it is never written to a file, a log or a commit.
 - A real run holds at most 25 cases (`--chunk`). Both routes' models need a price in `packages/ai/evals/prices.json`, checked on OpenAI's official pricing page.
-- Before a run: the worst-case estimate (every step, nothing cached, the dearer model) must be ≤ the run's cap ($1.50 by default) and must not take the total past **$4.50**.
-- During a run: the next call is refused once the run reaches its cap or the total reaches $4.50.
+- Before a run: the worst-case estimate (every step, nothing cached, the dearer model) must be ≤ the run's cap ($1.50 by default) and must not take the total past **$13.80** ($4.50 until S56a).
+- During a run: the next call is refused once the run reaches its cap or the total reaches $13.80.
 - After every run, completed, stopped or failed, one entry is appended below with the tokens each model actually used, what they cost at the listed prices, latency, and the measured characters per token. `packages/ai/evals/ledger.json` is the source; the runner rewrites the section between the markers.
 - Every real answer is recorded as a cassette (`packages/ai/evals/cassettes/openai/`). A recording replays an earlier answer for an unchanged request instead of paying again. CI only replays.
 
@@ -25,7 +25,7 @@ Policy ([V1 playbook](v1-playbook.md) §8, P1-7):
   - Phase 17 (S76) $1.50
   - reserve $5.50 for a fix round in a "b" half
   - no real calls in Phases 9–11 or 13–16
-- **The runner's total stop** rises from $4.50 to the new total ($13.80) in S56a, the first session that needs it. Until then the $4.50 stop holds.
+- **The runner's total stop** rose from $4.50 to the new total ($13.80) in S56a (`CUMULATIVE_STOP_USD`, the ledger's budget), with the Phase 12 ($3.00) and Phase 17 ($1.50) caps in `PHASE_CAPS_USD`. A test fails on a real-looking email address or phone number in the eval fixtures (`fixtures-privacy.test.ts`).
 - **Two OpenAI projects** (the user creates them before S56b):
   - `pepper-dev-evals`, with **data sharing on** for the free daily tokens. Eval cases and fixtures only, all made up: no real client, owner or business data ever reaches it. S56a adds a test that fails on real-looking phone numbers and email addresses in eval fixtures.
   - The production project, sharing **off**, with zero data retention confirmed before the pilot.
@@ -88,7 +88,7 @@ Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b prob
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$3.8029** of $5.00 (the runner stops at $4.50).
+Total spent: **$3.8029** of $13.80 (the runner stops at $13.80).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|

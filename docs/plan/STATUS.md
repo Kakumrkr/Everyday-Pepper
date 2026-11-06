@@ -11,7 +11,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 Tasks: 1 ACs + ADR · 2 contracts + migration · 3 `mark_no_show` · 4 `send_client_message` · 5 prompt v8 + close-match search · 6 eval cases, drop `EVAL_WORLD_AUTONOMY`, $13.80 stop · 7 top-up: review pass without a model + feed spec.
 Done: 1 AC-W2-5…8, AC-W4-19, ADR-0060 · 2 `booking.no_show` + `message.client` on the dial, migration 0066, card labels · 3 `mark_no_show` + `undoNoShowIn` · 4 `send_client_message` (writes integration 51/51). Note limit 200 characters (the card shows it whole).
 · 5 prompt v8 (Autonomy page in More, "did you mean", "I can't do that yet") and close names in `find_clients` (v3), 1 edit for words of 3–5 letters, else 2 (reads 16/16).
-Next: task 6 (eval cases + cassettes, drop `EVAL_WORLD_AUTONOMY`, $13.80 stop).
+· 6 evals: `messages-s56.json` (5) + `honesty-s56.json` (3) + 5 generated tool cases, scripted cassettes, an `advanceClock` turn action and `evalLater`; `EVAL_WORLD_AUTONOMY` removed (4 recorded move cases now expect a proposal); stop $13.80, Phase 12/17 caps; chunks of 17; `fixtures-privacy.test.ts`. Scripted evals green; the recorded replay is the planned stale one (S56b).
+Next: task 7 (top-up: review pass without a model + feed e2e).
 
 ## Last sessions
 - **S55.2 Phase 12 · Post-visit review requests (2026-11-05)** ([ADR-0059](../adr/0059-post-visit-review-requests.md), [PR #83](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/83)). Full entry in [session-log.md](session-log.md).

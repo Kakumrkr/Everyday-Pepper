@@ -48,7 +48,12 @@ export function toolEvalCases(
             timeZone: clock.timeZone,
             actor: { role: 'owner' },
             ...(example.evalFull !== undefined && { seed: { full: example.evalFull } }),
-            turns: [{ user: example.evalSay ?? example.say }],
+            turns: [
+              ...(example.evalLater === undefined
+                ? []
+                : [{ action: { advanceClock: example.evalLater } }]),
+              { user: example.evalSay ?? example.say },
+            ],
             expect: {
               toolCalls: [{ name: tool.name, arguments: example.args }],
             },

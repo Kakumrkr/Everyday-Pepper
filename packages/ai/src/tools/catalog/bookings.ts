@@ -419,10 +419,18 @@ export const markNoShow: WriteTool = {
     ],
     returns: 'the visit marked a no-show, or why it can’t be.',
     examples: [
-      { say: "Jay didn't show up for his 10am", args: { bookingId: { $any: true } } },
+      // The eval world's Maria is booked Tuesday 15:00 and Ana Friday 14:00; its clock starts
+      // Monday 07:00, so each case first moves past the visit's start.
+      {
+        say: "Jay didn't show up for his 10am",
+        evalSay: "Maria didn't show up for her 3pm today, mark her a no-show",
+        evalLater: 1940,
+        args: { bookingId: { $any: true } },
+      },
       {
         say: 'Mark Sara as a no-show for today',
-        evalSay: 'Sara never came in today, mark her a no-show',
+        evalSay: 'Ana never came in today, mark her a no-show',
+        evalLater: 6210,
         args: { bookingId: { $any: true } },
       },
     ],

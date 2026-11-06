@@ -9,12 +9,16 @@ import { costOfUsage, type ModelPrice, type PriceTable } from './cost.js';
 // tokens each model actually used and what they cost, whether the run finished, was stopped
 // or failed (a failed call can still be billed). `packages/ai/evals/ledger.json` is the
 // source; `docs/plan/ai-budget.md` shows it. Before a run the CLI refuses an estimate that
-// would take the total past $4.50; during a run `guardedProvider` refuses the next call once
+// would take the total past the stop ($13.80 from S56a); during a run `guardedProvider` refuses the next call once
 // the run reaches its cap or the total its stop, so even a wrong estimate cannot overspend.
 
-/** The whole Phase 6 budget ($5) minus a reserve the runner never touches. */
-export const CUMULATIVE_STOP_USD = 4.5;
-export const BUDGET_USD = 5;
+/**
+ * The whole budget: Phase 6's $5 ($3.80 spent through Phase 8) plus V1's $10 (P1-7, user), and
+ * the total the runner stops at. Until S56a the stop was $4.50 of $5; V1's reserve ($5.50) is a
+ * share of the $10 the phase caps don't use, so the stop is the whole total.
+ */
+export const CUMULATIVE_STOP_USD = 13.8;
+export const BUDGET_USD = 13.8;
 
 /**
  * Each later phase's share of what is left (Phase 7 playbook §4, S28): a real run names its
@@ -26,7 +30,9 @@ export const BUDGET_USD = 5;
 // $1.25 of the $2.99 left, about $1.10 of it planned; raised to $1.75 at the S38a brief (user:
 // "Go with your recommendations") for S38b's full re-record and pass^3, planned about $0.75;
 // raised to $2.00 in S38b (user: "Fix, cap $2.00") for the waitlist guide fix's second re-record.
-export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1.55, 8: 2 };
+// V1 (P1-7, user): Phase 12 $3.00 (S56b's recording) and Phase 17 $1.50 (S76's); no real calls
+// in the other phases.
+export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1.55, 8: 2, 12: 3, 17: 1.5 };
 
 /** The ledger label of a run for `phase`: `P7 <label>`. */
 export function phaseLabel(phase: number, label: string): string {

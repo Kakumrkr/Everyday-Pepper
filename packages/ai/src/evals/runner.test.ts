@@ -86,7 +86,7 @@ describe('runEvals', () => {
       providerFor: (c, trial) =>
         c.id === 'second' && trial === 1
           ? new ScriptedProvider([
-              () => Promise.reject(new BudgetStopError('The total reached the $4.50 stop.')),
+              () => Promise.reject(new BudgetStopError('The total reached the $13.80 stop.')),
             ])
           : new ScriptedProvider([scriptedResponse({ text: 'ok' })]),
     });
@@ -95,7 +95,7 @@ describe('runEvals', () => {
       ['second', 2, false],
     ]);
     expect(results[1]?.trials[1]?.reasons).toEqual([
-      'budget stop: The total reached the $4.50 stop.',
+      'budget stop: The total reached the $13.80 stop.',
     ]);
   });
 
@@ -264,7 +264,7 @@ describe('eval files', () => {
       );
       const ledger = {
         version: 1 as const,
-        budgetUsd: 5 as const,
+        budgetUsd: 13.8 as const,
         entries: [
           {
             id: 1,

@@ -20,6 +20,11 @@ export interface ToolExample {
   evalSkip?: string;
   /** Times the eval world books solid for the case (S37b): the waitlist is for full times. */
   evalFull?: readonly { staff: string; date: string; start: string; end: string }[];
+  /**
+   * Minutes the eval world's clock moves on before the request (S56a): a no-show or "running
+   * late" is about a visit that has started, or is about to.
+   */
+  evalLater?: number;
 }
 
 export interface ToolGuide {

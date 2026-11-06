@@ -10,7 +10,6 @@ import {
   StaffMemberIdSchema,
   type ConversationId,
   type ConversationTurnId,
-  type AutonomySettings,
   type LlmRequest,
   type LlmStreamEvent,
   type MemoryWarningRule,
@@ -61,13 +60,6 @@ import { addUsage, emptyUsage, type Transcript } from './transcript.js';
 // world on Postgres, with the real tools and trust layer, so a case is judged by what the
 // business looks like afterwards, not only by what the model said. Only the model is swapped:
 // a cassette, a fake, or (S27) the real one.
-
-/**
- * The eval business's autonomy (S53, decision D-2): moves "do it and tell me", as it was set up
- * before moves started asking by default (ADR-0055), so the recorded answers stay valid until the
- * whole suite is recorded again in S56b. S56a adds cases for a move that asks and removes this.
- */
-export const EVAL_WORLD_AUTONOMY: AutonomySettings = { 'booking.move': 'notify' };
 
 /** Runs one case: seeds its world, asks `providerFor` for the model, returns what happened. */
 export type EvalSubject = (
@@ -233,7 +225,8 @@ export function loopSubject(
       db,
       actor,
       clock: world.clock,
-      autonomy: { templateDefaults: EVAL_WORLD_AUTONOMY },
+      // The platform's defaults, as a new business has them (S56a: a move asks).
+      autonomy: { templateDefaults: {} },
       memoryWarnings: EVAL_MEMORY_WARNINGS,
       emails: { baseUrl: 'http://localhost:3000', outboxKey: EVAL_OUTBOX_KEY },
       embedder,
@@ -271,6 +264,8 @@ export function loopSubject(
           world.clock.advanceBy(EPISODE_WAIT_MS);
           await writeEpisodes(world, provider, embedder, actor, latestTurns);
           latestTurns.clear();
+        } else if ('advanceClock' in turn.action) {
+          world.clock.advanceBy(turn.action.advanceClock * 60_000);
         } else if ('runInsights' in turn.action) {
           await runInsightsFor(db, world.tenantId, {
             clock: world.clock,

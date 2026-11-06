@@ -64,7 +64,7 @@
   {
     "id": "move-maria-to-ten",
     "set": "scheduling",
-    "description": "Moving is \"do it and tell me\": Maria's appointment tomorrow moves to 10am, done with Undo.",
+    "description": "Maria's appointment tomorrow moves to 10am, proposed with the right day and time (a move asks by default, S53/S56a).",
     "now": "2026-11-02T14:00:00Z",
     "timeZone": "America/New_York",
     "actor": {
@@ -87,7 +87,8 @@
         }
       ],
       "actions": {
-        "done": ["move_booking"]
+        "proposed": ["move_booking"],
+        "done": []
       }
     }
   },
@@ -295,7 +296,8 @@
         }
       ],
       "actions": {
-        "done": ["move_booking"]
+        "proposed": ["move_booking"],
+        "done": []
       }
     }
   },

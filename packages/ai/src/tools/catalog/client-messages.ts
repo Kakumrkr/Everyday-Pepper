@@ -168,16 +168,21 @@ export const sendClientMessage: WriteTool = {
     ],
     returns: 'the email, waiting for the member’s OK unless their settings say otherwise.',
     examples: [
+      // The eval world's Maria is booked Tuesday 15:00 and Ana Friday 14:00, its clock Monday
+      // 07:00: "running late" moves to an hour before Maria's visit.
       {
         say: "Tell Maria I'm running 10 minutes late",
+        evalLater: 1860,
         args: { bookingId: { $any: true }, kind: 'running_late', minutesLate: 10 },
       },
       {
         say: 'Remind Ana about her appointment tomorrow',
+        evalSay: 'Remind Ana about her appointment on Friday',
         args: { bookingId: { $any: true }, kind: 'reminder' },
       },
       {
         say: 'Let Sara know to bring her inspiration photos to her appointment tomorrow',
+        evalSay: 'Let Maria know to bring her inspiration photos to her appointment tomorrow',
         args: { bookingId: { $any: true }, kind: 'note', note: { $regex: 'photo' } },
       },
     ],

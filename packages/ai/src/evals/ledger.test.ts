@@ -81,20 +81,20 @@ describe('the budget ledger (playbook §4)', () => {
     ).toBe(false);
   });
 
-  it('refuses a run whose estimate would take the total past $4.50', () => {
-    expect(CUMULATIVE_STOP_USD).toBe(4.5);
-    expect(refuseCumulative({ spentUsd: 3.5, estimateUsd: 1 })).toBeNull();
-    expect(refuseCumulative({ spentUsd: 3.5, estimateUsd: 1.01 })).toBe(
-      'Spent $3.50 so far; this run could take the total to $4.51, past the $4.50 stop.',
+  it('refuses a run whose estimate would take the total past $13.80 (S56a: V1’s $10 added)', () => {
+    expect(CUMULATIVE_STOP_USD).toBe(13.8);
+    expect(refuseCumulative({ spentUsd: 12.8, estimateUsd: 1 })).toBeNull();
+    expect(refuseCumulative({ spentUsd: 12.8, estimateUsd: 1.01 })).toBe(
+      'Spent $12.80 so far; this run could take the total to $13.81, past the $13.80 stop.',
     );
-    expect(refuseCumulative({ spentUsd: 4.5, estimateUsd: 0 })).toMatch(/past the \$4\.50 stop/);
+    expect(refuseCumulative({ spentUsd: 13.8, estimateUsd: 0 })).toMatch(/past the \$13\.80 stop/);
   });
 
-  it('lets `--phase-estimate-ok` pass the estimate, never the $4.50 already spent (S38b, user)', () => {
-    expect(refuseCumulative({ spentUsd: 3.67, estimateUsd: 1.62, estimateOk: true })).toBeNull();
-    expect(refuseCumulative({ spentUsd: 3.67, estimateUsd: 1.62 })).toMatch(/past the \$4\.50/);
-    expect(refuseCumulative({ spentUsd: 4.5, estimateUsd: 0, estimateOk: true })).toMatch(
-      /past the \$4\.50 stop/,
+  it('lets `--phase-estimate-ok` pass the estimate, never the stop already spent (S38b, user)', () => {
+    expect(refuseCumulative({ spentUsd: 12.97, estimateUsd: 1.62, estimateOk: true })).toBeNull();
+    expect(refuseCumulative({ spentUsd: 12.97, estimateUsd: 1.62 })).toMatch(/past the \$13\.80/);
+    expect(refuseCumulative({ spentUsd: 13.8, estimateUsd: 0, estimateOk: true })).toMatch(
+      /past the \$13\.80 stop/,
     );
   });
 
@@ -161,7 +161,7 @@ describe('the budget ledger (playbook §4)', () => {
     expect(md).toContain(
       'model-mini: 9 calls, 50000 in (30000 cached, 5000 written), 1200 out, p50 900 ms, p95 2100 ms',
     );
-    expect(md).toContain('Total spent: **$0.0123** of $5.00');
+    expect(md).toContain('Total spent: **$0.0123** of $13.80 (the runner stops at $13.80)');
   });
 });
 
@@ -195,7 +195,7 @@ describe('guardedProvider (the stop while a run is going)', () => {
     expect(tracker.charsPerToken()).toBeGreaterThan(0);
   });
 
-  it('refuses the next call once the run reaches its cap or the total its $4.50 stop', async () => {
+  it('refuses the next call once the run reaches its cap or the total its $13.80 stop', async () => {
     const capped = new SpendTracker({ prices: PRICES, spentBeforeUsd: 0, capUsd: 0.5 });
     const provider = guardedProvider(
       new ScriptedProvider([
@@ -208,11 +208,11 @@ describe('guardedProvider (the stop while a run is going)', () => {
     await expect(provider.respond(request)).rejects.toBeInstanceOf(BudgetStopError);
     expect(capped.stopReason()).toMatch(/this run's \$0\.50 cap/);
 
-    const total = new SpendTracker({ prices: PRICES, spentBeforeUsd: 4.5, capUsd: 1.5 });
+    const total = new SpendTracker({ prices: PRICES, spentBeforeUsd: 13.8, capUsd: 1.5 });
     await expect(
       guardedProvider(new ScriptedProvider([]), total).respond(request),
     ).rejects.toBeInstanceOf(BudgetStopError);
-    expect(total.stopReason()).toMatch(/\$4\.50 stop/);
+    expect(total.stopReason()).toMatch(/\$13\.80 stop/);
 
     const phase = new SpendTracker({
       prices: PRICES,

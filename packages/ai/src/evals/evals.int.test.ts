@@ -51,8 +51,9 @@ describe('every eval set on its scripted cassettes', () => {
     const cases = all.filter((c) => cassettes.get(c.id) !== null);
     // 31 since S27 (get_booking's guide examples are not one-turn cases, `evalSkip`); 80 with
     // S30's memory sets; 105 with S31's episodes and learned rules; 137 with S36's drafts,
-    // feed, feed_safety and the S33 leftovers; 152 with S37's waitlist.
-    expect(cases.length).toBeGreaterThanOrEqual(152);
+    // feed, feed_safety and the S33 leftovers; 152 with S37's waitlist; 165 with S56a's client
+    // messages, no-shows, typos and "I can't do that yet".
+    expect(cases.length).toBeGreaterThanOrEqual(165);
     const results = await runEvals({
       cases,
       trials: 1,
