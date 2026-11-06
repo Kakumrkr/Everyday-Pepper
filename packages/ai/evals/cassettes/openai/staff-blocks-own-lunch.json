@@ -91,6 +91,48 @@
         }
       }
     ],
-    []
+    [
+      {
+        "fingerprint": "df88d0008cf72f82916bf0dab61f2a353b0d9b94a7e51faa984025b1cd815911",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_R9E6z1ywlFN5d9O0vzaC2YqM",
+              "name": "block_time",
+              "arguments": "{\"staffMemberId\":null,\"date\":\"2026-11-04\",\"from\":\"12:00\",\"to\":\"13:00\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10809,
+            "cachedInputTokens": 10806,
+            "outputTokens": 41
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "f1b861759eca3b5a2c485b4f8184a6d4d431e3c0b442fd46dbc53d7315616d64",
+        "response": {
+          "text": "Blocked your lunch on Wednesday, November 4, from 12:00 to 1:00.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10905,
+            "cachedInputTokens": 10902,
+            "outputTokens": 25
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
   ]
 }

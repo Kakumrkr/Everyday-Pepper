@@ -88,7 +88,7 @@ Runs labelled `P8` (the first probe's label repeats the prefix: `P8 P8 S36b prob
 ## Ledger
 
 <!-- ledger:start (written by the eval runner) -->
-Total spent: **$4.5646** of $13.80 (the runner stops at $13.80).
+Total spent: **$4.6025** of $13.80 (the runner stops at $13.80).
 
 | Run | Date | What | Status | Cases × trials | Estimate | Actual | Total so far |
 |---|---|---|---|---|---|---|---|
@@ -2287,6 +2287,44 @@ Total spent: **$4.5646** of $13.80 (the runner stops at $13.80).
 | 2193 | 2026-11-06 | P12 S56b pass^3 part 138/150 | completed | 1 × 3 | $0.78 | $0.0012 | $4.5281 |
 | 2194 | 2026-11-06 | P12 S56b pass^3 part 139/150 | completed | 1 × 3 | $0.78 | $0.0354 | $4.5634 |
 | 2195 | 2026-11-06 | P12 S56b pass^3 part 140/150 | completed | 1 × 3 | $0.78 | $0.0012 | $4.5646 |
+| 2196 | 2026-11-06 | P12 S56b pass^3 part 141/150 | completed | 1 × 3 | $0.78 | $0.0011 | $4.5657 |
+| 2197 | 2026-11-06 | P12 S56b pass^3 part 142/150 | completed | 1 × 3 | $0.78 | $0.0024 | $4.5681 |
+| 2198 | 2026-11-06 | P12 S56b pass^3 part 143/150 | completed | 1 × 3 | $0.78 | $0.0024 | $4.5705 |
+| 2199 | 2026-11-06 | P12 S56b pass^3 part 144/150 | completed | 1 × 3 | $0.78 | $0.0034 | $4.5738 |
+| 2200 | 2026-11-06 | P12 S56b pass^3 part 145/150 | completed | 1 × 3 | $0.78 | $0.0012 | $4.5750 |
+| 2201 | 2026-11-06 | P12 S56b pass^3 part 146/150 | completed | 1 × 3 | $0.79 | $0.0012 | $4.5762 |
+| 2202 | 2026-11-06 | P12 S56b pass^3 part 147/150 | completed | 1 × 3 | $0.78 | $0.0005 | $4.5767 |
+| 2203 | 2026-11-06 | P12 S56b pass^3 part 148/150 | completed | 1 × 3 | $0.78 | $0.0009 | $4.5776 |
+| 2204 | 2026-11-06 | P12 S56b pass^3 part 149/150 | completed | 1 × 3 | $0.78 | $0.0013 | $4.5788 |
+| 2205 | 2026-11-06 | P12 S56b pass^3 part 150/150 | completed | 1 × 3 | $0.79 | $0.0013 | $4.5801 |
+| 2206 | 2026-11-06 | P12 S56b pass^3 retry part 1/12 | completed | 1 × 3 | $0.79 | $0.0000 | $4.5801 |
+| 2207 | 2026-11-06 | P12 S56b pass^3 retry part 2/12 | completed | 1 × 3 | $0.78 | $0.0003 | $4.5804 |
+| 2208 | 2026-11-06 | P12 S56b pass^3 retry part 3/12 | completed | 1 × 3 | $0.78 | $0.0000 | $4.5804 |
+| 2209 | 2026-11-06 | P12 S56b pass^3 retry part 4/12 | completed | 1 × 3 | $0.78 | $0.0000 | $4.5804 |
+| 2210 | 2026-11-06 | P12 S56b pass^3 retry part 5/12 | completed | 1 × 3 | $0.78 | $0.0000 | $4.5804 |
+| 2211 | 2026-11-06 | P12 S56b pass^3 retry part 6/12 | completed | 1 × 3 | $0.79 | $0.0000 | $4.5804 |
+| 2212 | 2026-11-06 | P12 S56b pass^3 retry part 7/12 | completed | 1 × 3 | $0.78 | $0.0002 | $4.5805 |
+| 2213 | 2026-11-06 | P12 S56b pass^3 retry part 8/12 | completed | 1 × 3 | $0.78 | $0.0000 | $4.5805 |
+| 2214 | 2026-11-06 | P12 S56b pass^3 retry part 9/12 | completed | 1 × 3 | $0.78 | $0.0000 | $4.5805 |
+| 2215 | 2026-11-06 | P12 S56b pass^3 retry part 10/12 | completed | 1 × 3 | $0.78 | $0.0003 | $4.5808 |
+| 2216 | 2026-11-06 | P12 S56b pass^3 retry part 11/12 | completed | 1 × 3 | $0.78 | $0.0003 | $4.5811 |
+| 2217 | 2026-11-06 | P12 S56b pass^3 retry part 12/12 | completed | 1 × 3 | $0.78 | $0.0000 | $4.5811 |
+| 2218 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 1/12 | completed | 1 × 3 | $1.73 | $0.0014 | $4.5825 |
+| 2219 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 2/12 | completed | 1 × 3 | $1.73 | $0.0013 | $4.5839 |
+| 2220 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 3/12 | completed | 1 × 3 | $1.74 | $0.0011 | $4.5850 |
+| 2221 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 4/12 | completed | 1 × 3 | $1.73 | $0.0012 | $4.5862 |
+| 2222 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 5/12 | completed | 1 × 3 | $1.73 | $0.0014 | $4.5876 |
+| 2223 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 6/12 | completed | 1 × 3 | $1.73 | $0.0009 | $4.5886 |
+| 2224 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 7/12 | completed | 1 × 3 | $1.73 | $0.0031 | $4.5917 |
+| 2225 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 8/12 | completed | 1 × 3 | $1.74 | $0.0009 | $4.5926 |
+| 2226 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 9/12 | completed | 1 × 3 | $1.74 | $0.0016 | $4.5941 |
+| 2227 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 10/12 | completed | 1 × 3 | $1.73 | $0.0015 | $4.5956 |
+| 2228 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 11/12 | completed | 1 × 3 | $1.73 | $0.0036 | $4.5992 |
+| 2229 | 2026-11-06 | P12 S56b pass^3 long (user: --max-cost 2, these 12 only) part 12/12 | completed | 1 × 3 | $1.73 | $0.0008 | $4.6000 |
+| 2230 | 2026-11-06 | P12 S56b pass^3 long retry (user: --max-cost 2, these 12 only) part 1/3 | completed | 1 × 3 | $1.73 | $0.0007 | $4.6007 |
+| 2231 | 2026-11-06 | P12 S56b pass^3 long retry (user: --max-cost 2, these 12 only) part 2/3 | completed | 1 × 3 | $1.73 | $0.0000 | $4.6007 |
+| 2232 | 2026-11-06 | P12 S56b pass^3 long retry (user: --max-cost 2, these 12 only) part 3/3 | completed | 1 × 3 | $1.73 | $0.0000 | $4.6007 |
+| 2233 | 2026-11-06 | P12 S56b lr-blackout pass^3 (stale trials 2-3) part 1/1 | completed | 1 × 3 | $0.79 | $0.0018 | $4.6025 |
 
 - Run 5, gpt-6-luna: 12 calls, 67483 in (38955 cached, 28492 written), 498 out, p50 1258 ms, p95 3286 ms; 3.61 chars a token
 - Run 5, gpt-6.1-sol: 4 calls, 24750 in (12287 cached, 12451 written), 224 out, p50 2023 ms, p95 2349 ms; 3.61 chars a token
@@ -4513,4 +4551,34 @@ Total spent: **$4.5646** of $13.80 (the runner stops at $13.80).
 - Run 2194, gpt-6-luna: 8 calls, 89162 in (87381 cached, 1757 written), 341 out, p50 1357 ms, p95 2447 ms; 3.75 chars a token
 - Run 2194, gpt-6.1-sol: 2 calls, 23738 in (10792 cached, 12940 written), 66 out, p50 1813 ms, p95 2059 ms; 3.75 chars a token
 - Run 2195, gpt-6-luna: 8 calls, 88411 in (87347 cached, 1040 written), 291 out, p50 1449 ms, p95 2745 ms; 3.76 chars a token
+- Run 2196, gpt-6-luna: 8 calls, 88440 in (87380 cached, 1036 written), 285 out, p50 1509 ms, p95 1685 ms; 3.76 chars a token
+- Run 2197, gpt-6-luna: 8 calls, 88431 in (76621 cached, 11786 written), 256 out, p50 1369 ms, p95 3683 ms; 3.76 chars a token
+- Run 2198, gpt-6-luna: 8 calls, 88348 in (76563 cached, 11761 written), 254 out, p50 2444 ms, p95 2991 ms; 3.76 chars a token
+- Run 2199, gpt-6-luna: 8 calls, 88475 in (65757 cached, 11890 written), 293 out, p50 2776 ms, p95 9821 ms; 3.76 chars a token
+- Run 2200, gpt-6-luna: 8 calls, 88473 in (87369 cached, 1080 written), 315 out, p50 1528 ms, p95 12338 ms; 3.76 chars a token
+- Run 2201, gpt-6-luna: 8 calls, 88500 in (87388 cached, 1088 written), 305 out, p50 1250 ms, p95 2308 ms; 3.77 chars a token
+- Run 2202, gpt-6-luna: 4 calls, 43402 in (43292 cached, 98 written), 145 out, p50 1535 ms, p95 1544 ms; 3.77 chars a token
+- Run 2203, gpt-6-luna: 6 calls, 66920 in (65738 cached, 1164 written), 186 out, p50 1462 ms, p95 1696 ms; 3.75 chars a token
+- Run 2204, gpt-6-luna: 8 calls, 90928 in (89024 cached, 1880 written), 279 out, p50 1363 ms, p95 3800 ms; 3.73 chars a token
+- Run 2205, gpt-6-luna: 8 calls, 90856 in (88990 cached, 1842 written), 281 out, p50 1485 ms, p95 2409 ms; 3.74 chars a token
+- Run 2207, gpt-6-luna: 2 calls, 21707 in (21701 cached, 0 written), 66 out, p50 1662 ms, p95 1816 ms; 3.77 chars a token
+- Run 2212, gpt-6-luna: 1 calls, 11285 in (10805 cached, 477 written), 20 out, p50 1541 ms, p95 1541 ms; 3.76 chars a token
+- Run 2215, gpt-6-luna: 2 calls, 21714 in (21708 cached, 0 written), 66 out, p50 1665 ms, p95 1691 ms; 3.76 chars a token
+- Run 2216, gpt-6-luna: 2 calls, 22538 in (21988 cached, 544 written), 110 out, p50 1767 ms, p95 2173 ms; 3.76 chars a token
+- Run 2218, gpt-6-luna: 10 calls, 111023 in (109898 cached, 1095 written), 335 out, p50 1357 ms, p95 3626 ms; 3.77 chars a token
+- Run 2219, gpt-6-luna: 10 calls, 109804 in (108737 cached, 1037 written), 236 out, p50 1475 ms, p95 2478 ms; 3.76 chars a token
+- Run 2220, gpt-6-luna: 8 calls, 87824 in (86746 cached, 1054 written), 263 out, p50 1680 ms, p95 2131 ms; 3.78 chars a token
+- Run 2221, gpt-6-luna: 8 calls, 88247 in (87147 cached, 1076 written), 360 out, p50 2025 ms, p95 3555 ms; 3.81 chars a token
+- Run 2222, gpt-6-luna: 10 calls, 109656 in (108189 cached, 1437 written), 364 out, p50 1711 ms, p95 2431 ms; 3.76 chars a token
+- Run 2223, gpt-6-luna: 7 calls, 76651 in (75790 cached, 840 written), 136 out, p50 1347 ms, p95 3190 ms; 3.78 chars a token
+- Run 2224, gpt-6-luna: 5 calls, 54339 in (32413 cached, 21911 written), 81 out, p50 1549 ms, p95 3186 ms; 3.77 chars a token
+- Run 2224, text-embedding-3-small: 1 calls, 3 in (0 cached, 0 written), 0 out, p50 338 ms, p95 338 ms; 3.77 chars a token
+- Run 2225, gpt-6-luna: 6 calls, 65869 in (64822 cached, 1029 written), 190 out, p50 1744 ms, p95 1991 ms; 3.76 chars a token
+- Run 2226, gpt-6-luna: 8 calls, 91285 in (87737 cached, 3524 written), 515 out, p50 1932 ms, p95 4145 ms; 3.75 chars a token
+- Run 2227, gpt-6-luna: 10 calls, 109666 in (108617 cached, 1019 written), 493 out, p50 1688 ms, p95 3293 ms; 3.78 chars a token
+- Run 2228, gpt-6-luna: 9 calls, 76859 in (54143 cached, 22082 written), 448 out, p50 1702 ms, p95 3363 ms; 3.78 chars a token
+- Run 2228, text-embedding-3-small: 1 calls, 22 in (0 cached, 0 written), 0 out, p50 580 ms, p95 580 ms; 3.78 chars a token
+- Run 2229, gpt-6-luna: 6 calls, 65248 in (65051 cached, 179 written), 219 out, p50 1362 ms, p95 1989 ms; 3.77 chars a token
+- Run 2230, gpt-6-luna: 5 calls, 55466 in (54648 cached, 803 written), 118 out, p50 2059 ms, p95 2576 ms; 3.76 chars a token
+- Run 2233, gpt-6-luna: 4 calls, 43574 in (32593 cached, 10969 written), 222 out, p50 2419 ms, p95 9706 ms; 3.77 chars a token
 <!-- ledger:end -->

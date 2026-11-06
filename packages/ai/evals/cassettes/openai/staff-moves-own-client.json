@@ -222,6 +222,49 @@
           },
           "model": "gpt-6-luna"
         }
+      },
+      {
+        "fingerprint": "82fa7160fd5d2a6ef3395c0253ee65da5e1fdac63f066b7b22ee455c613149af",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_H8AXVLi9CiFCOgBpj4uGrc7X",
+              "name": "move_booking",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"date\":\"2026-11-03\",\"time\":\"10:00\",\"staffMemberId\":null,\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11186,
+            "cachedInputTokens": 10805,
+            "cacheWriteTokens": 378,
+            "outputTokens": 71
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "9b5221784906901d10edc0ad29fee6eb0e14b11d65488fd026108ad38fdb8fa1",
+        "response": {
+          "text": "Maria’s haircut move from tomorrow at 3:00 PM to 10:00 AM with Jess is waiting for your OK on the card. It hasn’t changed yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11352,
+            "cachedInputTokens": 11183,
+            "cacheWriteTokens": 166,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
       }
     ]
   ]

@@ -46,7 +46,49 @@
         }
       }
     ],
-    [],
+    [
+      {
+        "fingerprint": "90a57fa0c61ddc5eb7eb04b995fe31d8d128f49f98f306ee81d4198f9e5acae9",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_dCtwxzd8fOTiuyiLXbqstp64",
+              "name": "remember_fact",
+              "arguments": "{\"about\":\"business\",\"id\":null,\"key\":\"schedule\",\"value\":\"We close early on Fridays.\",\"sensitive\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10807,
+            "cachedInputTokens": 10804,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "055bd4db1b757278464f33dcab710537634df76a3b6079a2550192ff4014bc2d",
+        "response": {
+          "text": "I can’t save that because your role doesn’t allow it. An owner or manager can add the note.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10900,
+            "cachedInputTokens": 10897,
+            "outputTokens": 26
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
     [
       {
         "fingerprint": "90a57fa0c61ddc5eb7eb04b995fe31d8d128f49f98f306ee81d4198f9e5acae9",

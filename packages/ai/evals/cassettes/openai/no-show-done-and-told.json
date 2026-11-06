@@ -156,6 +156,27 @@
           },
           "model": "gpt-6-luna"
         }
+      },
+      {
+        "fingerprint": "4b8f48d6e69d9549314b0450ceb579a5804427dfc841dc29455dbeb9bfad7692",
+        "response": {
+          "text": "Maria’s 3:00 haircut with Jess is marked as a no-show.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11285,
+            "cachedInputTokens": 10805,
+            "cacheWriteTokens": 477,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
       }
     ],
     [
