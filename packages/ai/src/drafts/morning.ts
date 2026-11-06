@@ -209,6 +209,7 @@ export async function runMorningDraftsFor(
   // Candidates exist only with a model (`parts.nudges`).
   const writer = options.provider;
   for (const candidate of candidates) {
+    // Never true (no candidates without a model); it narrows `writer` for the call below.
     if (writer === null) break;
     let written: Awaited<ReturnType<typeof writeDraft>>;
     try {

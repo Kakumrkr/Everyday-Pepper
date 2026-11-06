@@ -877,7 +877,7 @@ describe('mark_no_show (AC-W2-7)', () => {
     expect((await getBooking(db, w.owner, booking.id)).status).toBe('confirmed');
   });
 
-  it("lets staff mark their own visit, never a colleague's; only an owner or manager undoes it", async () => {
+  it("lets staff mark their own visit, never a colleague's, and undo their own", async () => {
     const w = await newWorld(db);
     const own = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
     const colleagues = await bookOnScreen(w, w.marcoStaff, w.sara, '10:00');
@@ -887,11 +887,13 @@ describe('mark_no_show (AC-W2-7)', () => {
     });
     expect(theirs).toMatchObject({ status: 'refused', code: 'not_found' });
     const marked = done(await callTool(depsFor(w, w.jess), 'mark_no_show', { bookingId: own.id }));
-    await expect(undoToolAction(depsFor(w, w.jess), marked.id, 'wrong')).rejects.toBeInstanceOf(
-      UndoRefusedError,
-    );
-    await undoToolAction(depsFor(w, w.owner), marked.id, 'wrong');
+    await undoToolAction(depsFor(w, w.jess), marked.id, 'wrong');
     expect((await getBooking(db, w.owner, own.id)).status).toBe('confirmed');
+    // Outside the Undo, a recorded outcome stays final for staff.
+    done(await callTool(depsFor(w, w.jess), 'mark_no_show', { bookingId: own.id }));
+    await expect(
+      changeBooking(db, w.jess, own.id, { status: 'completed', notifyClient: false }),
+    ).rejects.toThrow();
   });
 });
 

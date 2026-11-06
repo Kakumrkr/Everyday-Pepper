@@ -234,7 +234,9 @@ export const sendClientMessage: WriteTool = {
     await scope.emailClient({
       clientId,
       template: 'client_message',
-      dedupeKey: `client.message:${row.id}:${args.kind}:${wordsKey(email.text)}`,
+      // The minute it was asked for too: the same words asked again later (after an Undo, or the
+      // next day) are a new message, never dropped as a duplicate.
+      dedupeKey: `client.message:${row.id}:${args.kind}:${wordsKey(`${scope.now.toISOString().slice(0, 16)}\n${email.text}`)}`,
       message: { to: email.to, subject: email.subject, text: email.text },
     });
 

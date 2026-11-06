@@ -254,7 +254,10 @@ export async function changeFeedSettings(
       }
     }
     if (rearm) {
-      await setMorningDueAt(tx, 'drafts', new Date((options.clock ?? systemClock).now()));
+      // Only a pass already done today (due tomorrow) is brought forward; one never run is due.
+      const now = new Date((options.clock ?? systemClock).now());
+      const due = await readMorningDueAt(tx, 'drafts');
+      if (due !== null && due > now) await setMorningDueAt(tx, 'drafts', now);
     }
     const before = await readFeedSettings(tx);
     const after: StoredFeedSettings = {

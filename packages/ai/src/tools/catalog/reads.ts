@@ -261,7 +261,7 @@ export const findClients: ReadTool = {
         : [];
     if (suggestions.length > 0) {
       return {
-        summary: `No client is called that, but close names are: ${suggestions.map((s) => s.name).join(', ')}. Ask the member "Did you mean …?"; act only once they say which.`,
+        summary: `No client${ownOnly(scope) ? ' of your own' : ''} is called that, but close names are: ${suggestions.map((s) => s.name).join(', ')}. Ask the member "Did you mean …?"; act only once they say which.`,
         data: { matches: [], more: false, suggestions },
         card: { kind: 'client_choice', clients: suggestions },
       };

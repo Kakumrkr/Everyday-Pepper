@@ -46,7 +46,7 @@ const words = (text: string): string[] =>
 /**
  * How far `name` is from `search` (lower is closer), or `null` when it isn't close: every word
  * of the search must be within its allowed edits of a word of the name (or start one, for a
- * search word of 3+ letters typed in part).
+ * search word of 4+ letters typed in part).
  */
 export function nameDistance(search: string, name: string): number | null {
   const wanted = words(search);
@@ -55,16 +55,19 @@ export function nameDistance(search: string, name: string): number | null {
   let total = 0;
   for (const word of wanted) {
     let best: number | null = null;
+    const allowed = allowedEdits(word.length);
     for (const candidate of have) {
-      const distance =
-        word.length >= 3 && candidate.startsWith(word)
-          ? 0
-          : editDistance(word, candidate.slice(0, word.length + 2));
-      const full = editDistance(word, candidate);
-      const closest = Math.min(distance, full);
-      if (closest <= allowedEdits(word.length) && (best === null || closest < best)) {
-        best = closest;
-      }
+      // A word typed in part ("mrai" for Mariana) against the name's start of the same length,
+      // then the whole word when the lengths are close enough to be within the edits.
+      const prefix =
+        word.length >= 4 && candidate.length > word.length
+          ? editDistance(word, candidate.slice(0, word.length))
+          : Number.POSITIVE_INFINITY;
+      const closest =
+        prefix === 0 || Math.abs(candidate.length - word.length) > allowed
+          ? prefix
+          : Math.min(prefix, editDistance(word, candidate));
+      if (closest <= allowed && (best === null || closest < best)) best = closest;
     }
     if (best === null) return null;
     total += best;

@@ -34,8 +34,8 @@ export interface JobsOptions {
    */
   insightsPollMs?: number;
   /**
-   * The morning drafts pass (S36, ADR-0040), every `pollMs`; absent when OpenAI or the web
-   * origin is not configured (no rebooking emails are drafted then).
+   * The morning drafts pass (S36, ADR-0040), every `pollMs`; absent without the web origin.
+   * Without OpenAI (`openai: null`, S56a) it drafts only the review requests.
    */
   drafts?: (DraftsJobConfig & { pollMs: number }) | null;
   /**

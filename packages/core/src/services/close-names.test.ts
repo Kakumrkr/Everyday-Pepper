@@ -43,9 +43,17 @@ describe('nameDistance', () => {
 
 describe('closeNames', () => {
   it('suggests the closest names first, at most 3', () => {
-    expect(closeNames('Mraia', people).map((p) => p.name)).toEqual(['Maria Lopez']);
+    expect(closeNames('Mraia', people).map((p) => p.name)).toEqual([
+      'Maria Lopez',
+      'Mariana Ortiz',
+    ]);
     expect(closeNames('Sarha', people).map((p) => p.name)).toEqual(['Sara Kim', 'Sarah Park']);
     expect(closeNames('Brooksy', people).map((p) => p.name)).toEqual(['Jay Brooks']);
+    // A typo in a name typed in part.
+    expect(closeNames('Mraian', people).map((p) => p.name)).toEqual([
+      'Mariana Ortiz',
+      'Maria Lopez',
+    ]);
   });
 
   it('suggests nobody when no name is close', () => {

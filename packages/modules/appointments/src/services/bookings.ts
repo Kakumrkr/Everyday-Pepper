@@ -480,9 +480,10 @@ export async function changeBookingIn(
 }
 
 /**
- * Puts a no-show back to booked (undoing a no-show the AI marked, S56a), in the caller's
- * transaction. Only owners and managers correct an outcome (the status rules); the client is
- * not emailed.
+ * Puts a no-show back to booked, in the caller's transaction: only the trust layer's Undo of a
+ * no-show the AI marked (S56a), inside its one-day window, so a staff member may take back their
+ * own (other corrections of an outcome stay owners' and managers', `canChangeStatus`). The
+ * client is not emailed.
  */
 export async function undoNoShowIn(
   tx: TenantTx,
@@ -494,10 +495,7 @@ export async function undoNoShowIn(
   const id = BookingIdSchema.parse(bookingId);
   const now = (options.clock ?? systemClock).now().getTime();
   const { row } = await lockOwnBooking(tx, actor, id);
-  const correctsOutcomes = permissionScope(actor.context.role, 'bookings.manage') === 'all';
-  if (row.status !== 'no_show' || !canChangeStatus('no_show', 'confirmed', correctsOutcomes)) {
-    throw new BookingNotChangeableError();
-  }
+  if (row.status !== 'no_show') throw new BookingNotChangeableError();
   const changed = await setBookingStatus(tx, id, 'confirmed');
   if (changed === undefined) throw new BookingNotFoundError();
   await keepReminderInStep(tx, changed, now);
