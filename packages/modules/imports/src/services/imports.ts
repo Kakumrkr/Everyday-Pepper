@@ -15,8 +15,11 @@ import {
   type ImportColumn,
   type ImportCounts,
   type ImportFormat,
+  type ImportKind,
   type ImportPreset,
   type ImportMapping,
+  type ImportMappingAnswer,
+  type ImportMappingQuestion,
   type ImportReason,
   type ImportVisit,
   type ImportMappingInput,
@@ -74,6 +77,7 @@ import {
   ImportNotUndoableError,
 } from '../errors.js';
 import { kindOf, mappingOf, mappingProblems, normalizeHeader, suggestMapping } from '../mapping.js';
+import { acceptSuggestions, mappingQuestion } from '../suggestions.js';
 import { parseImportFile, type Table } from '../parse.js';
 import {
   mapRows,
@@ -236,7 +240,8 @@ export async function remapImport(
     const columns: ImportColumn[] = before.map((column) => {
       const field = chosen.has(column.column) ? (chosen.get(column.column) ?? null) : null;
       if (field === column.field) return column;
-      return { ...column, field, by: field === null ? null : 'owner' };
+      // The owner decided, either way: a column they left out isn't asked about again.
+      return { ...column, field, by: 'owner' };
     });
     const mapping = mappingOf(columns);
     const table = await tableOf(tx, batch, before);
@@ -248,6 +253,49 @@ export async function remapImport(
       notices: planned.notices,
       counts: planned.counts,
     });
+    return previewOf(tx, updated ?? batch);
+  });
+}
+
+/**
+ * What the AI may be asked about a staged import (S56a.2, ADR-0061, AC-W1-46): the columns
+ * nothing placed and the owner hasn't decided, by name, with masked samples; `null` when there
+ * is nothing to ask (every column placed, decided or asked already).
+ */
+export async function importMappingQuestion(
+  db: Database,
+  actor: Actor,
+  batchId: ImportBatchId,
+): Promise<ImportMappingQuestion | null> {
+  requirePermission(actor, 'clients.manage');
+  const id = ImportBatchIdSchema.parse(batchId);
+  return withMember(db, actor.context, async (tx) => {
+    const batch = await findOrThrow(tx, id, false);
+    if (batch.status !== 'staged') throw new ImportNotStagedError();
+    const columns = ColumnsSchema.parse(batch.columns);
+    const table = await tableOf(tx, batch, columns);
+    return mappingQuestion(table, columns, batch.kind as ImportKind);
+  });
+}
+
+/**
+ * Stores the AI's answer as suggestions, checked against the columns as they are now
+ * (AC-W1-47): the mapping, the plan and the counts don't change until the owner uses one.
+ */
+export async function saveImportSuggestions(
+  db: Database,
+  actor: Actor,
+  batchId: ImportBatchId,
+  question: ImportMappingQuestion,
+  answer: ImportMappingAnswer,
+): Promise<ImportPreview> {
+  requirePermission(actor, 'clients.manage');
+  const id = ImportBatchIdSchema.parse(batchId);
+  return withMember(db, actor.context, async (tx) => {
+    const batch = await findOrThrow(tx, id, true);
+    if (batch.status !== 'staged') throw new ImportNotStagedError();
+    const columns = acceptSuggestions(ColumnsSchema.parse(batch.columns), question, answer);
+    const updated = await updateImportBatch(tx, id, { columns });
     return previewOf(tx, updated ?? batch);
   });
 }

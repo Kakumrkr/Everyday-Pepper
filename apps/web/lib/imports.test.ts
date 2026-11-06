@@ -166,9 +166,27 @@ describe('the file', () => {
 });
 
 describe('the mapping (AC-W1-17)', () => {
-  const client: ImportColumn = { column: 'Client', field: 'name', by: 'header', later: null };
-  const nickname: ImportColumn = { column: 'Nickname', field: null, by: null, later: null };
-  const mobile: ImportColumn = { column: 'Mobile', field: 'phone', by: 'values', later: null };
+  const client: ImportColumn = {
+    column: 'Client',
+    field: 'name',
+    by: 'header',
+    later: null,
+    suggestion: null,
+  };
+  const nickname: ImportColumn = {
+    column: 'Nickname',
+    field: null,
+    by: null,
+    later: null,
+    suggestion: null,
+  };
+  const mobile: ImportColumn = {
+    column: 'Mobile',
+    field: 'phone',
+    by: 'values',
+    later: null,
+    suggestion: null,
+  };
   const notes: ImportColumn = { column: 'Notes', field: null, by: null, later: 'notes' };
   const columns = [client, nickname, mobile, notes];
 

@@ -173,8 +173,69 @@ export const ImportColumnSchema = z.object({
   by: ImportMappedBySchema.nullable(),
   /** A field Pepper recognised but doesn't import yet. */
   later: ImportLaterFieldSchema.nullable(),
+  /**
+   * The AI's suggestion for a column nothing else placed (S56a.2, ADR-0061, AC-W1-46): the
+   * field it thinks the column fills, `null` when it found none; the whole value is `null`
+   * until it was asked. A suggestion changes nothing until the owner uses it.
+   */
+  suggestion: z.object({ field: ImportFieldSchema.nullable() }).nullable().default(null),
 });
 export type ImportColumn = z.infer<typeof ImportColumnSchema>;
+
+/** How many unplaced columns one question asks about, and how many samples each. */
+export const IMPORT_SUGGESTION_LIMITS = {
+  columns: 20,
+  samples: 3,
+  /** A masked sample's length at most. */
+  sampleLength: 40,
+  /** The tokens one question may use, and its answer at most. */
+  maxTokens: 2_000,
+  maxOutputTokens: 600,
+} as const;
+
+/**
+ * What the model is told about a file (S56a.2, ADR-0061): only the columns nothing placed, by
+ * name, with a few samples masked to their shape ("Aaa Aaaaa", "(999) 999-9999"). No value
+ * of the file reaches the model.
+ */
+export const ImportMappingQuestionSchema = z
+  .object({
+    kind: ImportKindSchema,
+    columns: z
+      .array(
+        z
+          .object({
+            column: z.string().min(1).max(MAX_IMPORT_COLUMN_LENGTH),
+            samples: z
+              .array(z.string().max(IMPORT_SUGGESTION_LIMITS.sampleLength))
+              .max(IMPORT_SUGGESTION_LIMITS.samples),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(IMPORT_SUGGESTION_LIMITS.columns),
+    /** The fields still open: those a column already fills alone are left out. */
+    fields: z.array(ImportFieldSchema).min(1),
+  })
+  .strict();
+export type ImportMappingQuestion = z.infer<typeof ImportMappingQuestionSchema>;
+
+/** The model's answer, before the domain checks it: a field (or none) for each column. */
+export const ImportMappingAnswerSchema = z
+  .object({
+    columns: z
+      .array(
+        z
+          .object({
+            column: z.string().min(1).max(MAX_IMPORT_COLUMN_LENGTH),
+            field: ImportFieldSchema.nullable(),
+          })
+          .strict(),
+      )
+      .max(IMPORT_SUGGESTION_LIMITS.columns),
+  })
+  .strict();
+export type ImportMappingAnswer = z.infer<typeof ImportMappingAnswerSchema>;
 
 /**
  * What a row does (or did, once the import ran): becomes a new client, fills empty fields of

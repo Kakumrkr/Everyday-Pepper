@@ -390,11 +390,17 @@ export function suggestMapping(table: Table): {
       by = target === null ? null : 'values';
     }
     if (target !== null && typeof target === 'object') {
-      return { column, field: null, by, later: target.later };
+      return { column, field: null, by, later: target.later, suggestion: null };
     }
     if (target !== null && SINGLE.has(target) && taken.has(target)) target = null;
     if (target !== null) taken.add(target);
-    return { column, field: target, by: target === null ? null : by, later: null };
+    return {
+      column,
+      field: target,
+      by: target === null ? null : by,
+      later: null,
+      suggestion: null,
+    };
   });
   return { preset, columns: tidyNames(columns) };
 }
