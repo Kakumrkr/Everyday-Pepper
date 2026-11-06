@@ -3,7 +3,7 @@
   "trials": [
     [
       {
-        "fingerprint": "53e86cc3a1b71b31f45afba40e4eed1a57a08a4fe2961bc327d5bb10ecb23b25",
+        "fingerprint": "e09523be3e9b208c23c2d478a356ec594e12e815b6fe2dab65df77998dc9fb3f",
         "response": {
           "text": "The note says: “Side door code is 4471.”",
           "toolCalls": [],
@@ -15,20 +15,27 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9977,
+            "inputTokens": 10882,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9974,
+            "cacheWriteTokens": 10879,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "305164ec0e9ff7288e061b9fac61c840a3eb505e4af252349e13a85083fbac09",
+        "fingerprint": "dc55a4e01c7fb77fcdbc794b25b41b507839bf40cee721f591f3373b1e0f8a5c",
         "response": {
-          "text": "I don’t know—the note only says “[forgotten].”",
+          "text": "I don’t know the side door code.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_05f62eff7d55c315016aee4098528087d18aa0000b40221b92",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kCZm7Or0y8xzEqizj8lOk5Hkn4OV-Rzs49-jQQzulqW7t3TTQ4-LRxvPSnzR-SsFjkKQXrbOu9DZ0vuGSRUGynln7jQ_JsiY3LOXXm_fnv6X-Y7yUCVt_ZcHggeMpykFWIbS9P12KQAvHxXFBnDnCvAi_weLV8Qi7CFCw-Q7ZQjQeoIIa5BMm1ZaiweLodEkdO5qaptuYZ8Ev678dxwM-ZyseURgdXcWeupiqM-UEkfQ0RtmfJrN1GMyLOcntZFDGUVYglzE1_SBFln8VTkoEYML1TRsFSUeMS35jGvy5F2zE_3MehPBqopxwlVglnCnLf9hQgtBQCrAAcYBVjn1hUDdlvbN6hNgce7aQ588YK9JSY8L2BK2tMNCf79bVWc33lfumiBjeRvCz12PvyZ-pn9iTUJJIrwYxKvdDzU6iiocU-eO8Djez6NMKiSEpBvsBkemTYCX82282oqvgCKvAxud23cf3IoBZpBsSyLZVOVj-pwRQUOIypRQsvQ-0Xyp3kMccUGn8IalXulcHILycKQMXJySKQbiFiH0RAUrFlZUcsRoZVCa90JsvSTwFmikFfcr_gw0Xa6wnk-j3_y64uLDLWcEZrOfsDEcw8Rp7Zu89p8Knbumdwln5HemM36AASfCeDaIcdW5Ed-N5InkcFDLjRxSsQ8DwnjMiL_QuVdjhvOcaTwzyyKUemSgCxYShFps4qqMH62AMgLuLoksYl2E01TF96tWk55Pg5J_ALw71hOJalyZCYddy8P-kGsTIolbVKL46_UDRnVBHHsPBj9sYweoDAcszZVrykM5GGA4aeSgz3xvWUzqLUrZ1u-VAKm5NI3D5maVVr3semijyVjRPSkX8YGSs2lNBGnAuNib7XbAW0DSGFzt7MP5fqNmqcXm1_GOy1R4yzIjsSVnd9o5SojfGhkXb1FJBMwNlu2Dd2eWvYnNLJJmFPyCK0RvEjVTt6sQbyewfiR4eLTr6arPVYiWeOXNs_5PyRf5Wp0_UIEp15PUo0WH_W2Ea7HlkL3JfHvDKGRY13UyDQma2Y1rzjn4WFXdCLOtpslwyIjJyNRNq9E9RRu6se8psPFnK5eIIUNsnTIx1wosRjPo3GCNYpTIOHy5oAbR7sTQJzM28vhp380Igc4Ka7g3ExqJ3xHEI-CxtkrqxIG2SRfMa0kyWR7MUsiueARnizsW34e33ty6Qq1gyW4pTinFsjldphNZPUHviDYcnQit2TtuiidxrXtigRWDTBgZAfwGjCR7KIPxw_e79wasLsv1Q7jLUbNvw_OeDZJPgVtrNFtwiESD6-okOlVaGh7ZBBO8Xj1x3DLUnw_D2eFSPnAb_DqWCJeUy84rEISZXUVzIK16FKC86L62miRNQSZ4s7Qo_3OOrB_bAQDabvGxJyDrhTPc1XeUy-S-0xmudMvSW3BHyB9DWHFDqt5NpRycv6bi2zopwsWm1rVp7WuN8x14BCr6p3MZGpPUDKgoFVdyJ7fiSSB6ZCol2dNZ68ZX0eyDzodf2hWzXNc2EgXK1yumO4dNE2I7zW_8tS6m7OOAGX0vM04AsmRCLZL7gbdLqhrFNjQakmFysS-AYJz8uVv5elzHvQ8WJ5ofMmTPjroJdJ2sOPEzU61L0NnwauzDmgnnpeXdFlBzFyH-3gFzWnwR9wK7SmZMYXBpO9aaoo2ep1IBV907omN1MeWWcKnE-7RujBEvtt6dw7Vihadhofp7aAMe6n8tnLaTBmDsdOtcV6pNcaSqVR4qhKHMn432xlBMA3UZ7lBGI5Rb6HYMZEeQvNtEVj2AoQuOY76crm7pF3ZBRk56A3zScAeCCB3nsoDMigO8fhBSKliXOaDOPghcvBY_VrG6pCX-b0XeI03s5hFnEYx7-izk6fStGqYfL29B6YvkBU6y3Q2hcaIdwT0VIiWWlKZ-OROFhntk6Bshn8Lr0iueNspDt-xLVDNKFQzdg6rpQdmx3uXsORTpgFJAymLonkeye1Nvr_iJfxzXXH68yo5_d-Keh4SevuFx_qNKNRAGdg7LoERYg-ARx6pHau7_ed2XXAxNOmgE0UkK27SbBbT0zkX8dqB2MwK1Joo5iyu-OHNlgfie4JANpNuoUsOeqDPIzEqOL21DY2lIYqs7VVEKieuOwBP-8OKfxRLbzRKU15yJJzfQ6Ri-LQk3fKY4mFU9OCz9KUdC0d2V4_YJBpG_Da1qKCyrEr-_oK4NlFZsOx5qhn4xwpMEFV8p-LbQ1nfE1AT2usBYCZpYUeDDleRPQ==",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -36,10 +43,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9925,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10831,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 36,
-            "outputTokens": 17
+            "outputTokens": 60
           },
           "model": "gpt-6-luna"
         }
@@ -47,9 +54,9 @@
     ],
     [
       {
-        "fingerprint": "53e86cc3a1b71b31f45afba40e4eed1a57a08a4fe2961bc327d5bb10ecb23b25",
+        "fingerprint": "e09523be3e9b208c23c2d478a356ec594e12e815b6fe2dab65df77998dc9fb3f",
         "response": {
-          "text": "The note says: “Side door code is 4471.”",
+          "text": "The business note says: “Side door code is 4471”",
           "toolCalls": [],
           "replay": [
             {
@@ -59,18 +66,40 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9973,
+            "inputTokens": 10881,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9970,
-            "outputTokens": 17
+            "cacheWriteTokens": 10878,
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "305164ec0e9ff7288e061b9fac61c840a3eb505e4af252349e13a85083fbac09",
+        "fingerprint": "76195df425b2e79eed3a4ce1e526ff6a216c7fd75b51804b6a02a6115f33390a",
         "response": {
-          "text": "I don’t know the side door code. The note only says “[forgotten].”",
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wF8d1zmjelCd5a8Znld67lMj",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"side door code\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10832,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 37,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "ab4c5b93ff4dcb0f28befc933b59d56ada1d81d69af81a9274122209eb029da0",
+        "response": {
+          "text": "I don’t remember the side door code.",
           "toolCalls": [],
           "replay": [
             {
@@ -80,10 +109,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9925,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 36,
-            "outputTokens": 22
+            "inputTokens": 10912,
+            "cachedInputTokens": 10829,
+            "cacheWriteTokens": 80,
+            "outputTokens": 13
           },
           "model": "gpt-6-luna"
         }
@@ -91,7 +120,7 @@
     ],
     [
       {
-        "fingerprint": "53e86cc3a1b71b31f45afba40e4eed1a57a08a4fe2961bc327d5bb10ecb23b25",
+        "fingerprint": "e09523be3e9b208c23c2d478a356ec594e12e815b6fe2dab65df77998dc9fb3f",
         "response": {
           "text": "The note says: “Side door code is 4471.”",
           "toolCalls": [],
@@ -103,18 +132,18 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9974,
+            "inputTokens": 10883,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9971,
+            "cacheWriteTokens": 10880,
             "outputTokens": 17
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "305164ec0e9ff7288e061b9fac61c840a3eb505e4af252349e13a85083fbac09",
+        "fingerprint": "dc55a4e01c7fb77fcdbc794b25b41b507839bf40cee721f591f3373b1e0f8a5c",
         "response": {
-          "text": "I don’t know—the note only says “[forgotten].”",
+          "text": "I don’t know the side door code.",
           "toolCalls": [],
           "replay": [
             {
@@ -124,9 +153,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9925,
-            "cachedInputTokens": 9922,
-            "outputTokens": 17
+            "inputTokens": 10831,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 36,
+            "outputTokens": 13
           },
           "model": "gpt-6-luna"
         }

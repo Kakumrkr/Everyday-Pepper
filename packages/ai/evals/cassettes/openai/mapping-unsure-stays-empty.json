@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "b8607150a240eae058fe3be37218c148608787882b9ef2accab5e23fd9bd0771",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_kSLOMp0HL9ifqKo5pYQncUia",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Fav colour\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 912,
+            "cachedInputTokens": 0,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b8607150a240eae058fe3be37218c148608787882b9ef2accab5e23fd9bd0771",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_0ulE8A6JUzlxrmJNYeWbObqJ",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Fav colour\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 912,
+            "cachedInputTokens": 0,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b8607150a240eae058fe3be37218c148608787882b9ef2accab5e23fd9bd0771",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_x60LDwUI8Cw6uVferrHyAk6R",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Fav colour\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 912,
+            "cachedInputTokens": 0,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a5827bbf50f8ad4c2e90019b89f4ee583c61e41188ef66d178190ef2c273026d",
+        "fingerprint": "b8f864170bef7d8333fb165715357ef3c23696d726544783b200d7932e894078",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_KtD2o7mKm2s5mfL5g5RvmEtL",
+              "id": "call_MNJRToaCitzw2Af71kXbOLsf",
               "name": "add_todo",
               "arguments": "{\"title\":\"Call Maria\",\"dueDate\":\"2026-11-06\",\"dueTime\":null,\"assigneeStaffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 12,
             "outputTokens": 43
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "6f2d758eda9a1623542e8bc32a7ff999ad2db389798e6094cb83277ae2864c56",
+        "fingerprint": "a258cf7924fe7bc5d367e5f38f0e9fe67d1c549c8f56b3f74f4c35acdb34ce21",
         "response": {
-          "text": "Added a reminder for you to call Maria on Friday, November 6, at 9:00 AM.",
+          "text": "Added “Call Maria” to your to-dos for Friday, November 6 at 9:00 AM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10001,
-            "cachedInputTokens": 9898,
+            "inputTokens": 10907,
+            "cachedInputTokens": 10804,
             "cacheWriteTokens": 100,
-            "outputTokens": 26
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }

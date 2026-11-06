@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "65f04dd52ac9e7aeb77592b68ea369af8eadbe50803df21320336b1e3d910f0b",
+        "fingerprint": "eb9be1904d16f957ca890c32958b624bc707ef827e32f58622109bad22b7318e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_pbb6eFKr0GQLPhgtSfriqRdO",
+              "id": "call_dDXE469oTeyrCzYeWhQ3eUYZ",
               "name": "get_feed",
               "arguments": "{\"kind\":\"waitlist_match\"}"
             }
@@ -16,15 +16,15 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10805,
+            "cachedInputTokens": 10802,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "45764bf00a99c260f30257954b6aae1cb5147999e8c248d68309ac559c59f873",
+        "fingerprint": "ef183fecffc3605210d90b5ab001fc9fa7345cd79d3b8e7def60a2bb116f49b6",
         "response": {
           "text": "There’s no one on the waitlist right now.",
           "toolCalls": [],
@@ -36,8 +36,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9958,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10864,
+            "cachedInputTokens": 10802,
             "cacheWriteTokens": 59,
             "outputTokens": 15
           },
@@ -47,12 +47,12 @@
     ],
     [
       {
-        "fingerprint": "65f04dd52ac9e7aeb77592b68ea369af8eadbe50803df21320336b1e3d910f0b",
+        "fingerprint": "eb9be1904d16f957ca890c32958b624bc707ef827e32f58622109bad22b7318e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_VDRxwYca81airccYVQx589Ac",
+              "id": "call_UGK2BEditCR0GF4iE1ZpUQdW",
               "name": "get_feed",
               "arguments": "{\"kind\":\"waitlist_match\"}"
             }
@@ -60,17 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10805,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 10,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "56cb390e379a8623fe08ab780ad3314aac490033d6874d02ca019f93c810e1f8",
+        "fingerprint": "4bd6c046f7809f722b9ba4fed5131d97175ee2e0fb3e63c1a262ac2bf2e6b0b9",
         "response": {
-          "text": "No one is on the waitlist right now.",
+          "text": "There’s no one on the waitlist right now.",
           "toolCalls": [],
           "replay": [
             {
@@ -80,9 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9958,
-            "cachedInputTokens": 9955,
-            "outputTokens": 14
+            "inputTokens": 10864,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 59,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }
@@ -90,12 +92,12 @@
     ],
     [
       {
-        "fingerprint": "65f04dd52ac9e7aeb77592b68ea369af8eadbe50803df21320336b1e3d910f0b",
+        "fingerprint": "eb9be1904d16f957ca890c32958b624bc707ef827e32f58622109bad22b7318e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_JGtzooF981NhUODulTY0hV5q",
+              "id": "call_2ULVjFPBzUk5F4V35HsUR4ah",
               "name": "get_feed",
               "arguments": "{\"kind\":\"waitlist_match\"}"
             }
@@ -103,17 +105,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10805,
+            "cachedInputTokens": 10802,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "56eba35c872ccaf7f4e945abb2b818fd6552d8b10edb0598cf4e7e68deda824c",
+        "fingerprint": "1cd2b57e513aae401fb0649b8a4a6b577ae175f7fb213ec7acdf4f805cab8f35",
         "response": {
-          "text": "No one is on the waitlist right now.",
+          "text": "There’s nobody on the waitlist right now.",
           "toolCalls": [],
           "replay": [
             {
@@ -123,8 +125,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9958,
-            "cachedInputTokens": 9955,
+            "inputTokens": 10864,
+            "cachedInputTokens": 10861,
             "outputTokens": 14
           },
           "model": "gpt-6-luna"

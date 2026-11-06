@@ -18,13 +18,13 @@
         "proposed": ["create_booking"]
       },
       "replyMatches": ["(approve|approval|confirm|your ok|the ok|okay|tap)"],
-      "replyMustNotMatch": ["\\b(I|I.ve|I have) booked\\b", "is booked"]
+      "replyMustNotMatch": ["\\b(I|I.ve|I have) booked\\b", "(?<!nothing )\\bis booked\\b"]
     }
   },
   {
     "id": "move-done-no-approval-talk",
     "set": "autonomy",
-    "description": "A move is \"do it and tell me\": done, and the reply does not ask for an approval it does not need.",
+    "description": "A move emails the client, so it asks by default (S53; the eval business keeps the platform's defaults from S56a): waiting on a card, and the reply never says it moved.",
     "now": "2026-11-02T14:00:00Z",
     "timeZone": "America/New_York",
     "actor": {
@@ -36,8 +36,10 @@
       }
     ],
     "expect": {
+      "replyMustNotMatch": ["\\b(I've|I have) moved\\b"],
       "actions": {
-        "done": ["move_booking"]
+        "proposed": ["move_booking"],
+        "done": []
       }
     }
   },

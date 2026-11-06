@@ -3,11 +3,18 @@
   "trials": [
     [
       {
-        "fingerprint": "397a06594ee80e481f6ce8731d935448330bc4a8788235238a879eba4f2df694",
+        "fingerprint": "8ae2706bea4afae17adf2d27914baaa3ffdc3f83e7b6be240312a5a1d284f6e1",
         "response": {
-          "text": "I can’t store email addresses in memory; they belong on Maria’s client record.",
+          "text": "I can’t save email addresses as a remembered fact. Contact details belong on Maria’s client record.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_00b59662d1d7edd2016aee40e8ad5087d18ddf39f5fb372173",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kDprdbWKq8e75zlx-oaxWlEVHnr7nrBWzXPCNCVjoIartntjUApc-RSU8y4q_h0eii3__KYd6WhWaqlj2R2CIvzeQeEBF5ueSWCP6aaIJdnpjFdfoLX-8FBn4Eh8YuOYDdORz13OeVKFxGZdI2488VvrO469PsL1daeYWH-2AN1yw-BmoWbXHbeFC5OHoDQ33X6dG3CguVYJelbzdcoQLEafCccsmELhD0g1kZa08nmvrAcJuHF1gi2LubNXKqKwsOSdITFQlyXekkmhX8DEZviypJA0VEyDdN3hyHBrvye4yzh8ar3niL5uKqh20s47wq3OyAVDG8r4Xx4a-IrG8lo7zVuSon2uyRiNPXAleHlS8V8dJOTRsZGvL20pw7IeO5pAisHM_a7s3mnusR5LHHsstifYlyLCix-7BtfWnJoduLuK_oKY_TOGftk_VDzlvm-tOGxQStuRrDg8_8OqlZhF-YVKjT9MxjeGy6oibLLNx2cpLhBYtDNxxoLwC_OOXUapieDfrpDH-3MQW8U1ggY7XpZdGPnbyYEmdMkOLkC5OaGRBe0nzOjC4ZYDHK7DdU_bSNg93xgpb-5SwhbamoLX9fq0GOZL917NV45hGMKDBacRivlsupIdmyCLYKwhVpdmu8DUmHophDHwep638AEHBLUwhjjGusyOEhw9G5b8udNsa3zkFmui9DX3Auy-mbp1BFFwngJPY2yxZyQdPrNROYT_NjLpDfr7YKmuloC-lqCQ2o1HwWuILVYbPHgBEHKkHMdwTEmAuK2q1rqdi3BFvlhOEkvTpdjT1p4yw5JFlOo4wDH7OpbuIjUN_M-jfqoeJU1My-JP-O1OYQLpHsVI8VCl1XNrezPBnWB9nkOx_ae_ecQ6uhz-dE52o8R1fJTeNY6HV03gXhyHyVnLiP3IObGSE5uSDnGzfncQkleK4A3rdCere6Ynl8DAjfpfZPM2YEst7gPQOqejDZX4EgAPt1rIWnl76XN8nPvbeJ6eOG1t24qTmKkLKKa1NKjSgkIKwadsaWpvjOAZVz1yenbgK9uNf6tY2r6I3F2r1QN4um6P1AIAVaZ3_AdMOXbRolTao-NN4gN6hxWATkFJnyKARWwY2xguco1ZzwwCsrMFhqagrqtHpw6h2R4i_G94i3y7_wYdG41KWsY2p5_dweB0GB31ejPMguXWWwAWrzZ9lmvExMJOOP-IPk-CJbwlY0C9GD9RpBg6H5Iz7Fbj0ryKvuhNPZAsv4R_Yx7yAn9cyzNXVDiptAfxeIsAKQ9ezBRslHolmcNPbXfgeMqozB_xYqsh8-8Q1zBXAW3MyBf57ACOifcjwINo-eLaX6WrLQsqcpI3_iW1dmZzWfGWxe-hxP_gb0L-vTFcNVRJ4Q3t3FjoSoDDhLoC0rTVjuJBnzoHDi3n05oH417jKjDE7wgZTFv-uT228C66lBUDM7Ddhuh6VrEc2uIVzpPaRrQtHtTfuBTHhznpjjzaSMUzaUwnD8gtipQQw0-0H8LFytz2sWiSgDI-0jtgDy-HMTNEWf30k2MKZNXVGgtLlFchCLfIrH3ssOh4vJQyXpgp5Rs-LW4cGCJfcjCavE4R_1HP2OzMU-9qZ9dC9FYpZgu9RME0mFw-RbUcthxAKJ4yOGg6iCr7dHk41poshLKdoog1KhneNvu_f67g4aNgbdoCZ2r82tn8f-Q-F8oiAAu8QRUowyqDUtWDkc2wmlahA5H4xQ8rGvpK6EW1ve8QXp6yi20rywLZPH7rHHCTYhs4m56CQJ1GeyrOr3poiuGnyx3wetGmJQDUNlnscbOO1EBXpiwAQRWvCbkCvc2kqTCgxj7SIae1VPiEPd8F8z1wCe7vFmNJRwZT0J_vZNNMIisD_uQErlyeHc9hencxj7pP6IJsah_4uDewJvl__4LK6jmJNDSHcR6AApbAVT39Tk_I8vYG7yyVxknKvNZdJax-xror7q7OrT90fX-YsE0wGbAq_jL1zQZ0B_C7lNPHIC9OPFWNa7GNAxDGXxh2VSY01VMz6MtR5zfL5vvIMh-yWK-DkvDqlUcuwwekjZV_5F0vonIpTrc_3kInXjhNDem_aH1ac5V6HfOrC-QtmCH1z922Jnw6PIdaYYpiLzDN_4U3S1SsjbnuUVQyUntjjxxjgMIVoC-gTNQ68Kmt3hQSgqkDlXznjxgNR9ouTUg4-jcCsPI696N75eMczMNPg-54kQBORotQ4ia4mXJghUxlRBIoC7Pc6O9Jttv90ZFX3oEwgifc4g-YeGHnYtHoN4M0MBIl-2fzj-ul85u-FsxDy_qtMBehbkpefhHaeZBQK1BCJmd8Q4Xq0T-7-a549WrVacqHsS57Q5CpVGxttmfMl0stTMinQaG5_VjaoGInnUrFPGFzcXU-mlFimdmu_OnqsyH5YCNkk4x9rxsAPAmCTkqS9xjMDqWtM0uJcMmnu6hhZllD0d5-tj8WMsf47m0Zst9QxuZ0WwWihS1Q3-YMPjlgWZL4jfP-A6aEGKW7B_OVFEG18YMsHB1P0Yate2z42RjA1mUMZtCfKEG8H5KcMtd6-A143d4XKajxUcK-WER61udEc_RPYXFdeyAcWYMVc3OmUDI3-1OBeGJYUYDJ3sgZVA8",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -15,10 +22,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10808,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 13,
-            "outputTokens": 21
+            "outputTokens": 103
           },
           "model": "gpt-6-luna"
         }
@@ -26,9 +33,9 @@
     ],
     [
       {
-        "fingerprint": "397a06594ee80e481f6ce8731d935448330bc4a8788235238a879eba4f2df694",
+        "fingerprint": "8ae2706bea4afae17adf2d27914baaa3ffdc3f83e7b6be240312a5a1d284f6e1",
         "response": {
-          "text": "I can’t save Maria’s email as a remembered fact; contact details belong on the client record.",
+          "text": "I can’t save email addresses in memory; they belong on the client record.",
           "toolCalls": [],
           "replay": [
             {
@@ -38,9 +45,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9899,
-            "outputTokens": 24
+            "inputTokens": 10808,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 13,
+            "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
@@ -48,9 +56,9 @@
     ],
     [
       {
-        "fingerprint": "397a06594ee80e481f6ce8731d935448330bc4a8788235238a879eba4f2df694",
+        "fingerprint": "8ae2706bea4afae17adf2d27914baaa3ffdc3f83e7b6be240312a5a1d284f6e1",
         "response": {
-          "text": "I can’t save email addresses in memory. They belong on Maria’s client record.",
+          "text": "I can’t save email addresses in memory. Client contact details belong on the client record.",
           "toolCalls": [],
           "replay": [
             {
@@ -60,9 +68,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9899,
-            "outputTokens": 21
+            "inputTokens": 10808,
+            "cachedInputTokens": 10805,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

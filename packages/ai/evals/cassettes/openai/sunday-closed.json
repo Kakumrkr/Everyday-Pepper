@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "d0e53465e71356393bbf55ec00e57e2b420b04a5163c1734ba5bd110ec135170",
+        "fingerprint": "8b9b51f23a1ec3ecdb57428e9035a23402443272e47e601c5c307d1e94b99569",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_b2GdrgEwzzHbO3SyQPODYUNR",
+              "id": "call_CIxZuwpBbfMfLnLkQH41gBR2",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10809,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "20b5f26f089012d658418b41985c373ef484bc6781af09b2e50328b8b3df1a67",
+        "fingerprint": "46d10e29ee2174ff05e4d4bbf3977ee5889b3633a5d4cad70a82d8a8e83406cb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_LQv3dC66AfpCCHohfEWIEFzS",
+              "id": "call_wWCuWX3Rx6aD50FF815iqmIL",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -38,27 +38,50 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10366,
-            "cachedInputTokens": 9900,
-            "cacheWriteTokens": 463,
+            "inputTokens": 11293,
+            "cachedInputTokens": 10806,
+            "cacheWriteTokens": 484,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "071149987ccc6a7721beb2e7f4e4350239614a076eb945693c28143facbefcb2",
+        "fingerprint": "43beb02a0739f374af027a934c7359bea4362b01a47c9a80a894c54447ba09a6",
         "response": {
-          "text": "I can’t book Sunday, November 8 at 10:00—neither stylist is scheduled to work Sundays. Would you like to choose another day?",
-          "toolCalls": [],
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_A0IgL1ylhV9ZrZm2lhTtopza",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-08\",\"time\":\"10:00\",\"emailClient\":null}"
+            }
+          ],
           "replay": [
             {
-              "id": "rs_0b46f2b12c6dad58016addf58472e487d29eb45871597784e3",
+              "id": "rs_0f302d74eb761e7c016aee3f06485487d1a9892462e1ed9e4b",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3fWFjfXycJNhtMPnUNtPQWvwNPfP4ZAhvDuvV2055KgNvIWbD3ScaVlY-gVkes773z3wC_IWLSEua_skLy3U7VEO4rPwFSkcq9gTPom1y_WZPXR10SA3atYc1Gu7V-Kg6zTJCMYStxCQmyOiT2EOUao-6KkmftMAvh8yBHihPgrN37GmdhpQHW0ItOE_SIiU8R18POZtb8qFoGf3eg5zf9krHLwU3HqnZ71Vzmiz6YiHCCAvXXZ_0UySSIfqTMGv5ZgMMMwDIWHpanB09UHutqdgwxZPBz-sZVMh9YLqCjQP1c-Ry01jsuGFa9HmnACSsCR0RL7wVA8z6A9bapWbwc8hMB_G1AFS6u1Zrin0eb3Zg9IOa_nG0FjLtgol7LfcTnPurDSE-3eL6mYhwLjetv5YAJPLFz4_hx7XO7Jqly8LiOHQzbQU2u2BuUFSizkdMkSFJbhK98QuQfpiAsmKACetUJiwmnc-oeYhegs8mnaEceYrJ092I8UCbTGGXR0ozfTpplved6y8shfgQGu6nPc0HvOk_IVUpQ9bBTxrVr2pvmVt5QXeF61H_sLiNT-VEmtOJXXlisFI079xqpRKjUpCLQCWZco6TEihz1O42HJrvGlhg59qDo9irl2_grAM_LSfKXWrjMo9vSXoKKzG7ptGzgXKjGFd_tLJUv-BLZL7rDl58rr5_yOzs9PKDheD5cjASGu__pEm58GrAVPC3JdXfEh8AEKHU8GvR27wa8_tc9lwso86ouY79wC4ujN5MEFB54erWdhrf36kR-r6bSVTqQJR0vFuHs3cC09ckGdNX9-aRLUzQP4dTWk0GitNu_I9PAJdOm0yeEOMSR0LUXODwBKxntFeZF0jvg-fNKj5a_tgkMEkE6H-wsVCXOFc7pcg_sD2DZXaEwEJ3QPBgiMJiIz7APUiIw45QASoYVdIqYytWdByJR4GOKxnsOmAG29ldOl-Odwj25xPHac_OempgE6TrE4aj-NZhfZrV9xpK9Kfqlenmk0T3crTRtaXPfm-n_dUkMEsHwujeYZrJVK2RtmQV807Vs24Bt70zuZGo2C5iL1Cr5NFg6sIVNct51qxstfPf7DmjqMgtjDPzYfLgtznYxVqJxgODFhxmmrJzsCxHUdLVINNXRd9stsfGxqG_aWAVgohb4_chd-2gCLWG-azlD7lEqzKVuGXaNBEKWUpz_Ncp20EY1XIj0OlMq6nPJLJMCldSUPFvMA2ZJlt5wsCz9epo2zBb33qyFNNByPckdk05jMbAUFPIDWbscpPVN0bLMcZagGOTXVIobJ6eBcivNfIGv2zTxQrZVnGh6aJApWUnZYNQrQcF6PrToLdB2Uh5yi9DjWSGoVC_YsSlAvsf6dlCE9B3pLeGHHFOBLLdh8owPj1zQW4ZVgHFBZ_9W5FdEkta9MOBrHZBW0dcKmdyMu17rWXH8mUiJ7chP1EDGdHePmBgNS0sVakpgFaHO85SLCDr46D3G4RG134R3aXi6pyaEK7vpRuab-lqJU_FV7HtAbDA3ct1smbPprcHgYneYNbfCJqYjIt4Crro6Scyv1z6Ay3L7VUsZjPDto8ikLSk8SlM0xyw0S4BRgb3PRP7f2htfZZoS8IIEqdoy2kj3fmp2inm8kWtdlysm1qOCoG26RjM8zqvxGyi-9LIGXpVwskc_wjxmsrzyxkX1Iv3maXbgtxk82597X_KuPat4eTSHR5V8x4fWLwb61SirIZOrQfCHpG1WkH1DT0IPohySyYnT4oz4-gQxcTOQ7FlOfLzNekku0CVbLaJcSZrkfboTpsee0EG36NKSaTsBTNKaxb8bKkZlS7W7L0SKWpEpfzbQRugBn_znKgSXqRetkoX1UKO90oQ-VA6V7Op_i5O8iNSCMBhe4Vz7ia3TZ-Z8Z5lAIcb9wH_WORPlwYxEeTMOmPIL7EVCuvbpHlIK6Q5sgNqc6A8267cf1_OziDi119qBSctcENQehwoy0y3tjbCXy434Fke90jmO2ZzQoHl_txPCnkUmMvnhnVL-UpXzStQgFLVbIzXmWcBH7c3BthOrZR1R3F_HSeDOvIWQ0XBmhgkC-HH1wM15yoDoV9q34eTZ6BHJSSQxVG19dOaviur-BX61_EkKWYdlh1W0ReAcerf-Jhl87NpFn-iBjKRXk7xbhS3hXCFyFK8Xd32ZmmExIkWYGqDxHrSowgO_7WkiCVKFfjN6IUlatdIPB_hiFQHWxlNlaYZElZx0fr_pVh4uXOs_JEhr-WeAaXfTpi1WY0K6F1csNvG5XpWbiFewjO5_eZNZOdAGH5Hoz-PQnegw6XkmhaCFq2PoUrzNv7ljiyJr5DBCgx5lL8N7h0xc_XK2OTMqboIme5F7bBPmPgmTGyHx4gceRGlmEvkDAAyggEzv_2ayPjdEvyN38zXjXvyr_9MQ_43XEDMKgjQm0lKcK8xlW5esX8K10yuAq-r_DhNXlL5N7czMsbKm8MqDqPMnjkMhrQJKUQ1ArvodnFJMDkRg7efGSwj5piZAECXoQacR2Oo3fmx_UZtIDN7T_xLoeBMT3f_JXS1qYe",
+              "encrypted_content": "gAAAAABq7j8HRuOMU1dZfel9tRShuVyIA4LrGAG5yNfgzg0d6-iyoSP_STH9sJStGttUkh0GPbTTZSaPRTk9z1xD5X18MFpB3syHo1crGySAQMFyDg8IaRPXcyndc9PXChdPK98X91_d55Y6EtNUI5M3OUBp6smpFxL7UBO3oZEeemVwB3o5J7B2NymGHJ12C4Hh6v9KVihkwXkWqvZjutArjMhDHCH_dG4iUoEWWYNLXeiJPMDJlGRFH3Nt7vEGAcwDoI4mTifOCZ6DcQrOrSoAGSRFNcIwtG5NctrIupYYx9vhrW1g5XAnlhlac_T4Ad29Wa9PsiH1rdMu7XzbZI5dEpy9cnR26aUssisZQAtPfx5lblB1ydtxtSborTHPJwkMZDLT5BMYhau5RKMjeNsAVJdK2goGbDU5JqogA-ctvNmJiSRb40IudnIUY-hwkCygkH0ytuILKTnJ--VXNoPiR7qKbmYPtnPnbJK04Ca1d6-53Qh5oKeSvYgMZi3pAdz83HLu-f95wyGouRJxL_vmO3I6lxkVomvJTgC_3Sd8yHG2stycwjaTua2ATxkjQFg8MaytiBY2mpQVO75wXS4vYmw71kUaCg8dW8zBNot1r1muQ_x3zuHEWGDnvfPz3u5LFmKzW6MQL2ztj6lWnLILE3YTRdIX-X-Fa9Cj1Y7rflmV6SWeFVXHXJLYQTYKqcuMAmYArEmkR7IxYa6Ui6mr3Fuu84Xv1ntBMU-ein35u5BuP67c5-W4IJfvOcUavnWyCwnblSrSeOx5W6yOqncuzl0wzDVmLHhyy7XkNC48dEE0TnOq4v9XMD96GfQNUsB9ATF3LanPLfuMynAcDNWsmt6ogNhYqxwiAgZ2JNbuaatvcGNn72k4c0hjdMGK5ZUt3x1Uu56Jnz0zOX-pvDe8FNY79KIi4fQSec2RawVOdr0mkqImg30sHfV0881DRGbODPmfa_qimBp4U0zjbQcsWhNnZxh-07_qeo_1AsPZWSwPDKSNJqWdheGyk99Fys9R1jNU2dzntESopXf6JS9p45dyqYbDRx11T-Pj5mJnDt2DLre_syUIuNkNIapvG68m3O0yGcpRx2cutaAJbwKytTdi4_SV36m7m1D4PPGxSw1TutTx6BvDRtAZWlRJc8Y0JwkMpdExPESlSRwpND5iLN4LrMvKxYv4ShbeyoB9Vh1jzInDuVKjoxPzuO0kp_L5nv0rgLdsT7StZ8h65g7DOfMyjWbzrnIcFKlW4E4wmJbZT3OCzA6Xw3ZJw3Vxo8NYkqIVgMvm4ydFPSuLP3hUNo5FYfio4M-bXU39MB3FmB8HqXxTABqO5ftG55fedxdMiFVZ8QmSNANCYXpKRTqLP0UGEMU_9w92FErZTFSnGytsyafs7qknZ0auFAMsqF3k7ir9MLJpbVQFSQPRUwPmE0riiL-8GaVc20hdXSA5JbI2YeIzOunfDsxtPN6h7F43Tn5notKFufrk1PHaljpyQL6GRpMp_NkmYi8y6PEFAbYunjzE1AR1zwDm1X-sA8-8dD7-8leDlYzufHiyhJLWcAtBDpraYT_rUk7TgiAVvWqvF0NACBqyufnpJQDZ7B1aONR78VlgoFpiC5hzqgbRjdkeKH9MGKzKMG5UqSPYuDkNy-kJgeTZyVPibyKXYWXgg2RkAw2jMB9S2sDRTn6OWYcMAQ4Eks7Hfs_h_RUf3ah8ooCsGmg4iJ0aYFLQN9fjijXbb3OVkUPZ3I74qxMIyGzTqM8hoWjGJFLm37wOyGYN0RAmaho96dnzYw9HJtKX_GEhUOIAgrh-th6kIccqaL2UUEKUziagprLaPzG-kwyIxPal3DI7CiDGQMIfv55WGJxTNsuD3U0JFCBYMgB-FsYMP4R_JJ4S31FMM6gi95DtB604e0rN5wISCzUBaOhOCrftHF5hzGsnaSA6AtK7LcqnUvovkXI5FNgeTOiZJpgv_pjpHVqcHck3pvX9I9RJ_KXUdMoWh6612uPGS--yci35JV7HY7Ob6ekHBAqiJdixJhw9n2XiGeKXR08QRgbINVWDujfv_Yy6ddDYavFNfe6Havsi1JQHO2NK3Fh51rPu_IGvK14qlxPHNgonyBWETlqEHmb7QQ7za9n2BiJqCglDEPb8Ww==",
               "summary": []
-            },
+            }
+          ],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11378,
+            "cachedInputTokens": 11290,
+            "cacheWriteTokens": 85,
+            "outputTokens": 154
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "3cb33495624745049a0d7f1a0fac621a236716896cb48a6a4b058e78a764bb02",
+        "response": {
+          "text": "I couldn’t book Maria for Sunday at 10; that time isn’t available. The nearest alternatives are Saturday, Nov 7 at 3:00, 2:45, or 2:30 PM with Marco. Which would you like?",
+          "toolCalls": [],
+          "replay": [
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -66,10 +89,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10450,
-            "cachedInputTokens": 10363,
-            "cacheWriteTokens": 84,
-            "outputTokens": 124
+            "inputTokens": 11737,
+            "cachedInputTokens": 11375,
+            "cacheWriteTokens": 359,
+            "outputTokens": 55
           },
           "model": "gpt-6-luna"
         }

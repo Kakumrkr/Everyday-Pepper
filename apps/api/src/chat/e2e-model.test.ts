@@ -1,4 +1,4 @@
-import { isLlmError } from '@pepper/ai';
+import { isLlmError, mappingRequest } from '@pepper/ai';
 import type { LlmMessage, LlmRequest, LlmResponse } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import { E2eModel } from './e2e-model.js';
@@ -207,5 +207,26 @@ describe('E2eModel (the journeys’ scripted model, never in production)', () =>
     const slow = model.respond(request([user('Think slowly')]), { signal: controller.signal });
     controller.abort();
     await expect(slow).rejects.toMatchObject({ code: 'aborted' });
+  });
+
+  it('answers the import mapping suggester from the masked shapes (S56a.2)', async () => {
+    const response = await model.respond(
+      mappingRequest({
+        kind: 'clients',
+        columns: [
+          { column: 'Guest', samples: ['Aaa Aaaaa'] },
+          { column: 'Cell (best)', samples: ['(999) 999-9999', '999.999.9999'] },
+          { column: 'Fav', samples: ['Aaaa'] },
+        ],
+        fields: ['name', 'phone', 'tags'],
+      }),
+    );
+    expect(JSON.parse(response.toolCalls[0]?.arguments ?? '')).toEqual({
+      columns: [
+        { column: 'Guest', field: 'name' },
+        { column: 'Cell (best)', field: 'phone' },
+        { column: 'Fav', field: null },
+      ],
+    });
   });
 });

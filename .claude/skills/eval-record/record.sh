@@ -12,7 +12,9 @@ prefix=${2:?label prefix, e.g. "S32 pass^1"}
 shift 2
 routine=${ROUTINE_MODEL:-gpt-6-luna}
 strong=${STRONG_MODEL:-gpt-6.1-sol}
-phase=${EVAL_PHASE:-7}
+# The phase whose cap the runner checks: required, so a run is never checked against an old
+# phase's cap by default (S56b review).
+phase=${EVAL_PHASE:?set EVAL_PHASE to the current phase, e.g. EVAL_PHASE=12}
 
 cd "$(dirname "$0")/../../../packages/ai" || exit 1
 EVAL_DATABASE_URL=$(cat "$scratch/evaldb.url") || exit 1

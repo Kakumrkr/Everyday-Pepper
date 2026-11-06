@@ -12,12 +12,16 @@ import {
   llmProviderFor,
   type ChatOptions,
 } from './chat.service.js';
+import {
+  ImportSuggestionsController,
+  ImportSuggestionsService,
+} from './import-suggestions.controller.js';
 import { TurnEventLog } from './turn-events.js';
 import { WinBackController, WinBackService } from './win-back.controller.js';
 
 /**
  * Chat with the AI employee (ADR-0030), and its proposals, receipts and autonomy dial (S26,
- * ADR-0031), and the win-back list's drafts (S54.2). Needs `AuthModule` (global) and `ConnectionsModule`
+ * ADR-0031), and the win-back list's drafts (S54.2), and the import mapping's suggestions (S56a.2). Needs `AuthModule` (global) and `ConnectionsModule`
  * (the database and Redis). Without an OpenAI key the AI is off: chat answers with its
  * fallback and every other screen works as before (AC-X-2).
  */
@@ -26,7 +30,13 @@ export class ChatModule {
   static forRoot(options: ChatOptions): DynamicModule {
     return {
       module: ChatModule,
-      controllers: [ChatController, AiActionsController, AutonomyController, WinBackController],
+      controllers: [
+        ChatController,
+        AiActionsController,
+        AutonomyController,
+        WinBackController,
+        ImportSuggestionsController,
+      ],
       providers: [
         { provide: CHAT_OPTIONS, useValue: options },
         { provide: LLM_PROVIDER, useFactory: () => llmProviderFor(options) },
@@ -34,6 +44,7 @@ export class ChatModule {
         ChatService,
         AiActionsService,
         WinBackService,
+        ImportSuggestionsService,
         TurnEventLog,
         RateLimiter,
       ],

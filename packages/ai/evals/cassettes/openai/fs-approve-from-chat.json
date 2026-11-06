@@ -24,9 +24,9 @@
         }
       },
       {
-        "fingerprint": "c4e5e1d7a7d16077c3558293faeeade580ae5dcfd6809c0dde774b64ba855a73",
+        "fingerprint": "b81f773e88e523d1ba615c52dee872e00f3d7eb9f83666db13ab1b31d1a9c281",
         "response": {
-          "text": "I can’t approve or send rebooking emails. Please approve it on its card on Home.",
+          "text": "I can’t approve or send the rebooking email. It’s waiting for your OK on its card on Home.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,10 +36,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9905,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10811,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 16,
-            "outputTokens": 23
+            "outputTokens": 27
           },
           "model": "gpt-6-luna"
         }
@@ -68,11 +68,18 @@
         }
       },
       {
-        "fingerprint": "c4e5e1d7a7d16077c3558293faeeade580ae5dcfd6809c0dde774b64ba855a73",
+        "fingerprint": "b81f773e88e523d1ba615c52dee872e00f3d7eb9f83666db13ab1b31d1a9c281",
         "response": {
-          "text": "I can’t approve or send rebooking emails. Please approve it on its card on Home.",
+          "text": "I can’t approve or send the rebooking email. Please approve it on its card on Home.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0aa3f7cc182908c0016aee446829c887d1837343d902861ed7",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kRoti2C2h_1L3etnB8FX8EdChIUralfHhNPd2Q7Pn6pfa2aZ2yLan-34vZbc6FtPWgrABVsK6hWgYjA6_WhVpQmls4IZ5ixdk4SE4hsX6DwOqfsJLnj28O09Rj2eN9b26npvK0T528JtK4-OpPcwKXSjf8mvUsXWjLrVmoh5YLP-dbEdgKV2DfrZM5WSSFgaotWQeCF-skfTt1HA1Hslh9lj7-hsJJPslWHEybU_-hYmLCEf1hLAja6hEDOOqgiZsLJJdOK_qHZUUc5libBXMHiwbykbVdO5aUWovo41k8s-NZhB9yPRnZE_Rs8nPcmLl5UAcc3u8IhZZYaDPpKRLghglkEeE5_dbkuO9Xsy1hB8VrM5Rwagsbvns5yOihJRIZ2z0mlSZzl6-pp5EH94smgNrtz-keA0PJkfq3Fk1Iyurda9SklQ6-P2_YstW3Cm36MaxLHsD5BPaGBtJM0QGEddXOTUhnzDJ4d2wltFViT_a7SBSwiNs0lMtSajwWpdaBlnw3thXQ-inCxjGW_Fpcd3j57aja67XyqE8FTi616hluQMZy37sxadlwACy5OdjUGioyHTJ7ASdLg2Qbv12KPxQrgNNo_ixIQV9JaR-Sl92Hykth2SzAo1mx6-l3PYy21_p7TeakFVDod6oXkHcL3mNVrz3gf7pRKbSYFqPCNpMZxeW-WFy5Udr5pkpTgEveRPGIv5DkW-vELcRlE4nt7rvJN16_gN9ZOTEHIJuNTaHeejvOr0DU5bfGGw2Q6rC0w_X-CTJ653yZqzuKCKgEBfgOTjRgaiKKzbtlI5ef_Hc7mfxdp3j9Zk5Tlz6XwIrJ1-0RSylFt634kNTZhQbV77cJR91gJW3tEKlRYyOd6Rv92oewjCXN1fmgvx6tp94hi_Rx33RTFTxMSVMpERysXSP92HvO-AsiZE7vMm6ZIDs7LvdaQ9wScgAQz0_0qnTwK2iDYtUxKneHGdjW2mAOgaXTKhqQ2dMtK9VH0mZY9dn29_AFRRkr-JKekWOfbuHkONP9wQa-Ll6wkZCsYkahiKxmC3gPjMDJ7TwlJ3tJOYLe7zwUxUcqpEVZud1XymCFRDOc_qwU0jC18d8SkWhIBa34DcmrqSU_9Efh9wN3f6tSpQoWbawuwCgYDbVTA0fAZLbbQUgmiHJTs3LhhK124pcHtXEd8HMq5VfGjThRfZYwW4sPuvGdxIski73B5eqAriAFgjHlMe7UjMOs6gpOT9sYWAUz-HzaS8NyPzOAUM4H7BjgAlfaQMSomoG3s1DzvqXFO1eyPnxqTrvOQPYN3HEzbpVyBw2jzQWBKokynzKyzwPcfqdeK-oM9Aqw9Mh6QJ_5faCq87UWsA6p-Ujgd81dOQvfS7b0ojUw2oiSi5m5TLyikjSQ7CahnVCEdavhFLRHiLEsX6gNniOWBEb8vQhXyAlpUiqmVWWCchtSzq2_TvnhXxP8BzeLq6cGUHnonQj1gtHEuAIUaYev3IRZ8TzkwrZn1eDrDP0z4wkFTY_FcuHhbkDwLRXUpvp2GnxaZ7b1sl4L0tdy0-o-v53AIwlgRleShjnu_-6CpXCwVpZzv2ozXhttbV3jv7dCAmobAiLdzHp7Ta8c9d08iS8Ofr1jyK0XIz5s0mSadhoimoehgyGbe0TVHlUiRzBXvwMlaK0BVcMi58kcVGyiyF7s5V7mN8Ocy2eWkua0lzlky7cj9l5w2u7JOcYxTdmGEkhwIj1kTTF646jk0tUfMhG9hbhNRAJcZhC0yaXPGwt_DRwqceSk1KTOo7FnYOiUFx45Yk_SXGfk_IwN4pDE4mzEJF5ALVbtaPJLE9ZT9qUWroQnR2MeHGHYz8fXKuO-1uFNVGiiOC-aO9Ij4nJscLOM0eXTGbVAbiyJbONolB-0T2oAraFKkNywVCa0nRqYwXuw6zU4EVSdZlpd6b94jtFG80jxsezT_MHc0Y0xsZpm1LNf6emyZaFE5KhAsRJvVSdBKC5habMbdgZqHC_USLoCasg==",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -80,9 +87,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9905,
-            "cachedInputTokens": 9902,
-            "outputTokens": 23
+            "inputTokens": 10811,
+            "cachedInputTokens": 10808,
+            "outputTokens": 58
           },
           "model": "gpt-6-luna"
         }
@@ -111,11 +118,18 @@
         }
       },
       {
-        "fingerprint": "c4e5e1d7a7d16077c3558293faeeade580ae5dcfd6809c0dde774b64ba855a73",
+        "fingerprint": "b81f773e88e523d1ba615c52dee872e00f3d7eb9f83666db13ab1b31d1a9c281",
         "response": {
           "text": "I can’t approve or send rebooking emails. Please approve it on its card on Home.",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_09444de2a96834a1016aee446b28d087d193f9778a9ac8db60",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kRs970e3VFlNDC_nqKBDwO6g-U_5FeIFohkng4JdqOWiIvEd1pzmC9Gu_LrxH37r5u0PSmSJDBTJwYbGQgDMRoE9jB1AhoKxnD986u15DeBsx6sf8jr6Z_irTtuzEHjnWwZjhFffHvxBziYwYzewNJyxfueqGrZ02vEa7az7k4RwYDWPd_wrA6Te-P6WeponnaYgAHIMtyi0SyUvQVecEGxCg1Xdb0cvIScb6F6tNeQ42R52s1iiF1zmt3c7yc39AsYATIy7D-ux_lINgJABmlbVhjZBoscu8MJejx07wtHosrOb_BTE2hHTfAEAIxfsnf80uETlfkNn0hbGNglLsKJeRV6TIyNbe7cLS0WyJbDuMF28Efsh3eOc89V3VqlNCEj_OzJgaLKHR5a4EDw1ra0SeX7uED7nRKN9htGHZM2QVQhBSB-Dz89AJX_MkMg27JGAYW_eJ8h3L2Aw8yCV_2uLVDhP18QBoL2eyWTRG0NiU0pprJvhppqqAfRxoELvr-uoDneMkV7qM9YIJBFvKtRy6vbRVBi8OgQ2MhiJoqE5eNwxZyMyvgsUg2GpW3N820ZpPCq55NJfZskh56QT3V9HRayKnosp4lWVGsJI2DeJ2p73Y6fNMySRYnRzXWSXYR8EEa0kWE356PcoPWadgezyJ3G9GpMi88d6-dLUff-e_2B60E_Eb947_DMqLuyqOIjVTNiycqyd_p16ASB-81ES0lXUCqeSnn9KaY0sKojNclSK-ZuECbbrAy8BOMqaeq-LrLPVHqiGd8HsyJZnNle6PLBOKIHCGcizm8usg9cF4MWuarFCCbaGZb8PwfXJyvYGl2ESJoHr0SylQl85RtNR7QzigNEwXQ1OBa3T6-d8oVel-kijYpMS1L0nguxph8TzrqvDs2V_frY1b5neZy14bP0din7UvyWSJpJUVC_qZGfHyQkzSyB7xwcAbAJYUvxUnohGX4O-xat6KOdluUcAl4x4tXZXYxDoe7Rit5982WJ3mhoZJeBDZsbNlvA4LeihkNb8mjQosivSKLDRxhhHvySe62uHxyzcozogrRNQulhkONwnUvKD8astUGa74sN-Lx4u0uKE28Z7J71CjpGL5yWG4l9Ig9xv98lBfPhnrww_rRCXPxtkcmMSNjj3Q_E-M32TqLN9RsWiyXHyuuyZn5IqzlAvRK7likH_G21ZIgjbMyEXvGDc2qurYaltPw8flgceXxwDO8vDJ0Zv24Xzzk-PUadNBECuxzFCrIyYXXtHO_9Hnr1TXlu4wMMNZLsDrsPZ3KK4eoQDEeW8vuAhh78ak9aivbCDN5KRzwuN71HlLCfT_nCds_UcQU6qX3ZZ120TDy1C86gWlwliyU_ABhZNidHrByiEuO7_NJBmg6xWRQyNbeHV8jqM7VkzBqyLZ55UUrTsI7kAfMpADy1eR8eraXt4yOFsLTuRuXFo-gXF_w755GQhxnghbA_9qkW3VsYQipjxhci2B0oDeQmbS7x2d6RUhnKDES_UVaRqlVcQgbq7fqdqky6y3nc4IcFShdCKD7HTOF-mdljZYyC_E6_rvG-IXAjuMFXokAaSCzoWA2Y_SmXMT1hCl0M80wUawCv_4vzWqGPf24vT_jKlEEcMBzyY9OfK0vm8DS_y7iRKLd-PCjFhYilQEjxsgvRkIqbj3INa9nl7DdLR8R7U5jvjbUAW-PNuiT5mzRp_M9JFsG_ZKqwpHXX-Zo1ylWuiUjz_9Fdd7PdRjd_6uL4ErjoHXp8OV3utvedwFzNabZ_FcT_h6i7yVJdxryklNMRdLFEXpWZu3ETrab0-R1LUhmdiJ_lVO98zZ1YzV6N2RCHtiawPhTYN611kOULaE89ZhYa3HffAs6hFLpbkd-VvmIo55qadray_WXsSntYmc8cjAbrenCLVrk-N4MhJyJtfwUUeVcnRAk0VSNw2TG-EUmUbfreiUpWYYVW-6V83cRqgcnPeTHmHUAGXTQ5kNeVjEGRWIk_BftNjeCk0yHs526Nq4S2aGt2nLId46br2w1uIEWfJMb78ZroATGv56e3uA1Tv--C4DeXAYfDRFlimZaYceT_JnbGt3uXAfeWDine0Rbeoe-Kc7wUUS-igD_q2-WuSSUPdhK16G81vvJv5aSpedunDt4FLCpg9clPv8jqcQEZVD1y1y3vAqjtopH2UytYmdCPhiPX7J_j3gB6ONrFkZ9BKz7IEkRj3co7-Q5QcC3CcZcAsxYfHFj7QnsCv6sYBBzrGdjYZMvEnpWEyl--JkkD6zDvw1O_acbYAoaukcTd3AbS5bvhr_ZKBcv5jo3mj4iPCh3TCaZoD0nWW8MESCK4eG1IG2Vet0LJi0HMNo18pqkFnzTVqhg7JTLcPJfSdhR2igDdNtHtYr78lCLdgSd2NswP087dA8LZQGO_NBgE7OBsXbS2fp8yhdZ8W8vM0HR2PzAC6CbKqKsIy3_cJjsdIEo19_ssf7Jm0f47DCPRAESUmbKAawXowWC-",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -123,9 +137,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9905,
-            "cachedInputTokens": 9902,
-            "outputTokens": 23
+            "inputTokens": 10811,
+            "cachedInputTokens": 10808,
+            "outputTokens": 95
           },
           "model": "gpt-6-luna"
         }

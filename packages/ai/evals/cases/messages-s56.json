@@ -1,0 +1,188 @@
+[
+  {
+    "id": "late-message-waits-for-ok",
+    "set": "autonomy",
+    "description": "A message to a client asks first by default (message.client, S56a): \"running late\" waits on a card with the domain's words, and the reply never says it was sent (AC-W2-5).",
+    "now": "2026-11-02T12:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "advanceClock": 1875
+        }
+      },
+      {
+        "user": "Let Maria know I'm running about 15 minutes behind"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "maria"
+            }
+          }
+        },
+        {
+          "name": "send_client_message",
+          "arguments": {
+            "kind": "running_late",
+            "minutesLate": 15
+          }
+        }
+      ],
+      "replyMatches": ["approv(e|al)|card"],
+      "replyMustNotMatch": ["\\b(I've|I have) (sent|emailed|told)\\b"],
+      "actions": {
+        "proposed": ["send_client_message"],
+        "done": []
+      }
+    }
+  },
+  {
+    "id": "no-show-done-and-told",
+    "set": "scheduling",
+    "description": "A visit that started, marked a no-show from one sentence: \"do it and tell me\" by default, with Undo (AC-W2-7).",
+    "now": "2026-11-02T12:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "advanceClock": 1950
+        }
+      },
+      {
+        "user": "Maria never showed for her 3 o'clock"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "maria"
+            }
+          }
+        },
+        {
+          "name": "mark_no_show"
+        }
+      ],
+      "replyMatches": ["no-show"],
+      "actions": {
+        "done": ["mark_no_show"],
+        "proposed": []
+      }
+    }
+  },
+  {
+    "id": "no-show-before-start-refused",
+    "set": "scheduling",
+    "description": "A visit that hasn't started can't be a no-show: the domain refuses, nothing changes, and the reply says why (AC-W2-7).",
+    "now": "2026-11-02T12:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Mark Maria as a no-show"
+      }
+    ],
+    "expect": {
+      "replyMatches": ["(hasn.t|not) started|tomorrow"],
+      "replyMustNotMatch": [
+        "(?<!\\b(can.t|cannot|won.t|not) be )\\bmarked (her |it )?as a no-show\\b(?! once)"
+      ],
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "move-asks-by-default",
+    "set": "autonomy",
+    "description": "A move emails the client, so it waits for an OK by default (S53, ADR-0055), now that the eval business keeps the platform's defaults (S56a: EVAL_WORLD_AUTONOMY removed).",
+    "now": "2026-11-02T12:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Move Maria's appointment tomorrow to 4pm"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "maria"
+            }
+          }
+        },
+        {
+          "name": "move_booking",
+          "arguments": {
+            "time": "16:00"
+          }
+        }
+      ],
+      "replyMatches": ["approv(e|al)|card"],
+      "replyMustNotMatch": ["\\b(I've|I have) moved\\b"],
+      "actions": {
+        "proposed": ["move_booking"],
+        "done": []
+      }
+    }
+  },
+  {
+    "id": "one-sentence-move",
+    "set": "scheduling",
+    "description": "A move in one sentence (playbook S56a: ≥ 98% on the real model): the client, the day and the new time from one request, proposed without a question.",
+    "now": "2026-11-02T12:00:00Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "user": "Move Ana's Friday 2pm to 4pm"
+      }
+    ],
+    "expect": {
+      "toolCalls": [
+        {
+          "name": "find_clients",
+          "arguments": {
+            "name": {
+              "$regex": "ana"
+            }
+          }
+        },
+        {
+          "name": "move_booking",
+          "arguments": {
+            "date": "2026-11-06",
+            "time": "16:00"
+          }
+        }
+      ],
+      "actions": {
+        "proposed": ["move_booking"],
+        "done": []
+      }
+    }
+  }
+]

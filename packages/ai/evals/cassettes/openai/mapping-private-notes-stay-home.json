@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "22f0b77d4581204ad2ca97ef2a076ca86dd7ef7a8c0161000cc548d82f54f4c1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_r5Nk56h2JahpGSsz9vklNBBS",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Patron\",\"field\":\"name\"},{\"column\":\"Note to self\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 922,
+            "cachedInputTokens": 0,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "22f0b77d4581204ad2ca97ef2a076ca86dd7ef7a8c0161000cc548d82f54f4c1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_khOTXxty6IyHtqWTmasn9kCQ",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Patron\",\"field\":\"name\"},{\"column\":\"Note to self\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 922,
+            "cachedInputTokens": 0,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "22f0b77d4581204ad2ca97ef2a076ca86dd7ef7a8c0161000cc548d82f54f4c1",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_HxYl8nD3H7yuVwf95LvuFrdw",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Patron\",\"field\":\"name\"},{\"column\":\"Note to self\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 922,
+            "cachedInputTokens": 0,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

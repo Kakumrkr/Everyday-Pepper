@@ -46,7 +46,7 @@ const BATCH: ImportBatch = {
   kind: 'clients',
   format: 'csv',
   preset: null,
-  columns: [{ column: 'Name', field: 'name', by: 'header', later: null }],
+  columns: [{ column: 'Name', field: 'name', by: 'header', later: null, suggestion: null }],
   problems: [],
   notices: [],
   counts: {

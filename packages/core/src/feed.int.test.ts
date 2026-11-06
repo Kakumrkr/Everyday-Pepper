@@ -20,6 +20,8 @@ import {
   withTenant,
   type Database,
   type FeedCandidate,
+  readMorningDueAt,
+  setMorningDueAt,
 } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Actor } from './actor.js';
@@ -394,5 +396,41 @@ describe('the review link for review requests (S55.2)', () => {
       { reviewUrlSet: true },
     ]);
     expect(JSON.stringify(entries)).not.toContain('g.page');
+  });
+});
+
+describe('the drafts pass after the address or the review link is first set (S56a, AC-W4-19)', () => {
+  it('is due again now, once per first setting', async () => {
+    const tomorrow = new Date(Date.parse(NOW) + 86_400_000);
+    const dueAt = () => withTenant(db, tenantId, (tx) => readMorningDueAt(tx, 'drafts'));
+    const later = (minutes: number) =>
+      new ManualClock(new Date(Date.parse(NOW) + minutes * 60_000));
+    await withTenant(db, tenantId, (tx) => setMorningDueAt(tx, 'drafts', tomorrow));
+
+    await changeFeedSettings(
+      db,
+      ana(),
+      { mailingAddress: '12 Main St, Springfield' },
+      { clock: later(1) },
+    );
+    expect(await dueAt()).toEqual(later(1).now());
+    await withTenant(db, tenantId, (tx) => setMorningDueAt(tx, 'drafts', tomorrow));
+    // A changed address (not a first one) leaves it.
+    await changeFeedSettings(
+      db,
+      ana(),
+      { mailingAddress: '14 Main St, Springfield' },
+      { clock: later(2) },
+    );
+    expect(await dueAt()).toEqual(tomorrow);
+    await changeFeedSettings(
+      db,
+      ana(),
+      { reviewUrl: 'https://g.page/r/juniper/review' },
+      { clock: later(3) },
+    );
+    expect(await dueAt()).toEqual(later(3).now());
+
+    await changeFeedSettings(db, ana(), { mailingAddress: null, reviewUrl: null });
   });
 });

@@ -118,7 +118,11 @@ export async function pickBusinessType(page: Page, name: string): Promise<void> 
  */
 export async function onboardOwner(
   page: Page,
-  { business = `Juniper ${unique('studio')}`, type }: { business?: string; type?: string } = {},
+  {
+    business = `Juniper ${unique('studio')}`,
+    type,
+    timeZone = 'America/New_York',
+  }: { business?: string; type?: string; timeZone?: string } = {},
 ): Promise<Owner> {
   const email = `${unique('owner')}@example.test`;
   await signUp(page, email);
@@ -138,7 +142,7 @@ export async function onboardOwner(
             body: JSON.stringify(body),
           })
         ).status,
-      { name: business, slug, timeZone: 'America/New_York', locale: 'en-US' },
+      { name: business, slug, timeZone, locale: 'en-US' },
     );
     expect(status).toBe(201);
     await page.goto('/');

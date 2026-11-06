@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a5d751434bb432a8b5b5afdee47054ced134d0f97f246c206615634fc61dd5d3",
+        "fingerprint": "febc80beb2620a31a6462ad91f2da17b06eff3f915aa77bf36cfc6a8e5538094",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wPUL82khMwjuKJSLgmEL6TmR",
+              "id": "call_NATU7ihcd00n0XIphZutNIj1",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "ad4ddf17d5c375568d00042fe8c5d2545a6dbefb89651efe3d8b02102e1465a0",
+        "fingerprint": "46def7be52ca4685bb6cbcb6f13766b0ba88df8fdf20745db9a4287fd7109d44",
         "response": {
-          "text": "Sara K. is on your suggestions because her last haircut was with Jess on September 28, and her usual 28-day rebooking interval made her due on October 26. The suggestion is to rebook her; it hasn’t been acted on.",
+          "text": "Sara K. is suggested for a rebooking: her last haircut with Jess was September 28, and the system’s 28-day interval marked her due on October 26.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11537,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 1637,
-            "outputTokens": 55
+            "inputTokens": 12497,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 1691,
+            "outputTokens": 40
           },
           "model": "gpt-6-luna"
         }

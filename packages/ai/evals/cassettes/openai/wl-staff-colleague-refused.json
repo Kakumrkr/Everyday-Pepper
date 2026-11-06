@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a94e5bc50bc264ab1d0dcc43e0f2a2cc60c6d8b22d5ece7cf2e9447f071c0a07",
+        "fingerprint": "84284da99f88c09fd529b068ff7859b4c3d137076d25ff6818f08f959b8be7e8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_g4nUxdQNCyY4cp80HlyFqpAW",
+              "id": "call_iuPQGzNkxvSICSyEclbse1X9",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9905,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10811,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 16,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "672e36ac8c594b6a077f1a8b349fade7f7a0ea78a1fe64b53861f3b4197145d9",
+        "fingerprint": "99389ed9fa39ba81e147c28e01482c869939d4c9bd20a398881a4428761169bf",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6HFBWbPgUFWGrtWU3DiWpQPZ",
+              "id": "call_akOyuq7PU8bdniNSLxhdY8Bk",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -38,48 +38,40 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10359,
-            "cachedInputTokens": 9902,
-            "cacheWriteTokens": 454,
+            "inputTokens": 11295,
+            "cachedInputTokens": 10808,
+            "cacheWriteTokens": 484,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6a26a9c1d82b2ccb26e5747ba1d2a706c115260a5a486ca8f48808c43ca6661b",
+        "fingerprint": "8530dbc5dff91cdd7c1aee8e80d36558c80214d23b0f01303d6924fe96e39b7e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GRULjlwHJefgZjBmu6k2jxqJ",
+              "id": "call_Nvdb3V7H1xhhdgrAP0nuPBTK",
               "name": "add_to_waitlist",
               "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"windows\":[{\"date\":\"2026-11-07\",\"start\":\"10:00\",\"end\":\"16:00\"}]}"
             }
           ],
-          "replay": [
-            {
-              "id": "rs_06e0b40baeee89bb016addf8cecd9487d29cbebf4b902b72a6",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3fjQuJXp3Pbl8er4ccx3L6gF62GFqzM1FlWMRAopt3NwYflNh8VKCgA7sGq6jTbSKWUr5WmtA5YSesilYZ0n02lg4cKTX5TLNiaDPWP20nyW6rahDzkaBS0NAOta0jFPcsMjiiLs1E_MNiII7HYqwFP43zJ2Wk5WxFJNTHJBmkUn1hsaVdvElchVB92VJeQ4pQ0bH4hXVn8T6VBUu-l2eL_o9BmbcRjmsd-hio8ueCsJocefSh0ZdaQ7qex-_JEjDUibY7TcmThV6jKtBdKL4oUt2IIG49g1o3cGI9k4KPbWxzFPqpOdAG98nq3X9Ip7VMnwknCh2xgXn7NeWCfg6BpCJuDq6cmK0sK_rUK7n9_l47aGKb5gth7T_9UoOYk_IXv0MxG0_Hozoy6CHrJ1fhlF2TtxB0jN96E7hjkgWgUQna4jQ8T6eRAxGugBAd9GfW1KSAGCiMehu13uOvKL5hG6xPFXbAp0LPx7V_ZnNoLt3RA_CuFXWnhEr-a6J4ILFOtYNdV3lYG7NmcASMtn7nd9qgod1E2RF5dVpMgQDCtn8u8bCFrBg95aGZ6XOCCoMnTQ0M4qPhxO0BRg5RHzV5Gz9HL-p6eaYykoI0FlBFwYycmSGjySr9Q51N4_2g0uwW7YiHZ6MTYqjujOpkaYtUJNiypts6NPHl00rI9yU7gUA-dYY6ap-aSqGKZMkVrhJ_ydn9kQWznJyCPU72bbPm9vrYDxRLSu1JDqNw8SENnrRe3h8dI9jX0Gt-JC_brD5g37c9ikICTmhabSaj_T4xFswlHCW7hnTW7Xc1wU3I2lgGu-IVFJdAMqPHg9V8BQQWJwl-e2nKehplU98C_QcSqU6ctKv_OgzROaMzRo7Do_ChIqsW-hBGzesttjU2GErv3ZiJlvcYxJ2D2yN9zMNpRqX157dmfKFje3kPdWX9-ZFF4NFcaB_u4g2AS3lEer2yJR7EpBPtswJ2LDow2GF_YynaE4vKvdGTaxgjuBSLY505uH8m4R7WUfPuH4AGGOqupWWVGYjgAdy1kgjaiv-5h1QzQtztVbY9ouvcVyeqbH-osyIFgJPSJD9_DBI8MMOl7rzY7pcnux5OiRmysyIvPtQ_mk7BnosQ-t9RMrmtjBucFwMPCCfX334pHUXF1iNpu-2iza3kA2pnOYSD-UmFZZyeWCDT81rEJDn_0N2g5IHSHU1pDjIljZb0HXXel4cE9CHDtYsaT7tK3ZfSoeYszae7IV3lI6hsxKrwTVrDyHfjUVqBCfo3CyK1sVHbIr7BSfb7UvfEJxbmze3shyfDfXJJRfBK5hiFdZ26X1opesXtCCrMuiGTP9ilj0uaKIcCSmOTGb_EQlN2FtDIA7_sGofwu-J2fFyuugMmaz1fBkMbd6QorynVF9sNuN9OqM_C_53HBY8qsBRT4kKA2Zg-_lCDyfaoVmdOjfuUYtzZ98kBahmKVBXKD5uB0cndylyUJk-Wf3D4PhO7xYyGHTz0uwdEaktrdEdt1KHZa64bxKwLIz2FJUI3rrLiPiMhuMnyUVeZnHOIPSAK1vsryy0YU_gCx3wl8d7EgMQGrvrE9OFTcSUEQXDTafkkCU-bLQPtlls-50QZl782WNLvOevzSCdr_3661YVfg9bhy5VJySNYTzhgQ70iu3_9sZ6Sm9_5mdfBqRNAjF5NKP_l8uep7ZmfVViEjnmxv0vrF3_gnNyKiBAN7zGI2KjmqG_lQbvhGCNY4s8sghjCy52gBN_FLYEdCFGr1aeqgDLHZMau-xK2HWw1zUk_ZZlBTCvdUZnN4A6RoY7RpA5BpiabSyOwalqcNS8ktjsa1JnNG_1mT28w0CirxQvCKi1GgbpDXyvufOD8wh0fzRJLN3miyYIYtHFILaxxtuk-Yd6oFRuF9co_X6nDGoGzGiD-g6NAzhBV-tNEP78K4kb4MabWVgJxmYuNatIz3TcwpKUZpjDToPnb93fq9dOMDK9sZLMgD-DAE5Y_fCfXCxu0kqM45r3Tu5ILkiBoWyddIZ3WN_BnRj4nK11gAOAHAV8EDezlXGy5FhUXk5Ie9AU-2Ey5VWXoLaaGsL1QOQfyR5NzkXFrGxZ1wZVLsTplUbUMqDky9zuz8sVxfRpziyachNThs0YFZEyjdw_PGHK8SxrLNNH_arYYGbtM8HP5vzPRSF50JbfUQOYTBNN6QV0jfbm8ft7pZQlWBE5OO2pVVApXdj6NOHWhcrtUoalsyapFEMYYb1xvRzDOYRIXHPEmvNMKfY9BjwHDGjuYVMkc_dWjXZprdxB9GmHcghZ-yWhmn-bj88aqUs46ai5CYbFywFMJmw3T6Meczmyy1Z2r3D6qJ3rdYZVzcj2Xi_eEFTqjxIPeTRXdW03ZcCL7K6-aLeMRIcgyE9yClJ7En_gyQchQPwyKcrCAvXkPVUcd7mN1cTWIbYmwu9doRiRsKxZQ1lv4JjDCo2hMuwd6KVF9YLoxKmIpP70Emk60r6ysqf-tmOrK0yiET24vbTCPSoK3AaYkrSNg9lBX4OkhUeco-5ks-ZYqBvlQY=",
-              "summary": []
-            }
-          ],
+          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10441,
-            "cachedInputTokens": 10356,
-            "cacheWriteTokens": 82,
-            "outputTokens": 208
+            "inputTokens": 11382,
+            "cachedInputTokens": 11292,
+            "cacheWriteTokens": 87,
+            "outputTokens": 134
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d6faf57e8a6d7e493c7e04da2711d79303dec62063091fb24d7ac5190f525afa",
+        "fingerprint": "a5de36f42175ff0eab31d8f42d2cd7a24e8f770f375fe5adeeb736b0605b2fc9",
         "response": {
-          "text": "I couldn’t add Maria to Marco’s Saturday waitlist because your role doesn’t allow it. An owner or manager can add her.",
+          "text": "I couldn’t add Maria to Marco’s Saturday haircut waitlist because your role doesn’t allow it. An owner or manager can add her.",
           "toolCalls": [],
           "replay": [
             {
@@ -89,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10703,
-            "cachedInputTokens": 10438,
-            "cacheWriteTokens": 262,
-            "outputTokens": 31
+            "inputTokens": 11570,
+            "cachedInputTokens": 11379,
+            "cacheWriteTokens": 188,
+            "outputTokens": 32
           },
           "model": "gpt-6-luna"
         }

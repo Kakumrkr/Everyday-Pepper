@@ -57,6 +57,7 @@ describe('AUTONOMY_ACTIONS', () => {
       'booking.create': 'ask',
       'booking.move': 'ask',
       'booking.cancel': 'ask',
+      'booking.no_show': 'notify',
       'booking_request.accept': 'notify',
       'time.block': 'notify',
       'client_note.save': 'notify',
@@ -68,6 +69,7 @@ describe('AUTONOMY_ACTIONS', () => {
       'message.waitlist_offer': 'ask',
       'message.bulk': 'ask',
       'message.review_request': 'ask',
+      'message.client': 'ask',
     });
   });
 

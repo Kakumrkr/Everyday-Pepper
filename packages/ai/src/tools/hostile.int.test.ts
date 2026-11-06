@@ -38,8 +38,10 @@ import {
   depsFor,
   hostileTargets,
   newWorld,
+  NOW,
   OUTBOX_KEY,
   startTestDatabase,
+  tuesdayAt,
   turn,
   TUESDAY,
   type TestDatabase,
@@ -149,7 +151,10 @@ describe('writes when the dial says "ask"', () => {
     const writes = TOOLS.filter((tool) => tool.kind === 'write').map((tool) => tool.name);
     expect(writes.length).toBeGreaterThanOrEqual(6);
     for (const name of writes) {
+      // A no-show is only for a visit that has started (S56a): the booking's 10:00 has, then.
+      if (name === 'mark_no_show') w.clock.set(tuesdayAt('10:30'));
       const outcome = await callTool(depsFor(w, w.owner), name, args[name]);
+      w.clock.set(NOW);
       expect(outcome.status, name).toBe('awaiting_approval');
     }
     expect(await listRecentActions(db, w.owner)).toEqual([]);

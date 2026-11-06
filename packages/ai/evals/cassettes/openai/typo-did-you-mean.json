@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "5437830ff359dd637aa403eacf4fa286690e9e9d0e41115323c46196bd6ec9e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4zhVpt3Mh1jElPZKVIlXYkwR",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Mraia\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10810,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 15,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "4a60d354c86482c7a8865e0b9b8dde3f11b211dcd6f10044ef2205d6b01bcf5f",
+        "response": {
+          "text": "Did you mean Maria L.?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10926,
+            "cachedInputTokens": 10807,
+            "cacheWriteTokens": 116,
+            "outputTokens": 10
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "5437830ff359dd637aa403eacf4fa286690e9e9d0e41115323c46196bd6ec9e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_nByOkaKC4j3QmCwcE2xd5ltB",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Mraia\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10810,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10807,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "75b21a2b9edad5025de1017b53e8d90d60de37640d9340af6552d13e2e6a189e",
+        "response": {
+          "text": "Did you mean Maria L.?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10927,
+            "cachedInputTokens": 10807,
+            "cacheWriteTokens": 117,
+            "outputTokens": 10
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "5437830ff359dd637aa403eacf4fa286690e9e9d0e41115323c46196bd6ec9e4",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_SKcQjqDj934ypdHJNQluTjHw",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Mraia\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10810,
+            "cachedInputTokens": 10807,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "5e2b1ee83932e23461057209f1254bb25d97a7ab2fbac0d3230f150da9aa763e",
+        "response": {
+          "text": "Did you mean Maria L.?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10930,
+            "cachedInputTokens": 10807,
+            "cacheWriteTokens": 120,
+            "outputTokens": 10
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

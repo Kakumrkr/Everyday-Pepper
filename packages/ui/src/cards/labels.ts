@@ -24,6 +24,7 @@ export const ACTION_LABEL: Record<AutonomyAction, string> = {
   'booking.create': 'New booking',
   'booking.move': 'Move',
   'booking.cancel': 'Cancellation',
+  'booking.no_show': 'No-show',
   'booking_request.accept': 'Booking request',
   'time.block': 'Blocked time',
   'client_note.save': 'Client note',
@@ -35,6 +36,7 @@ export const ACTION_LABEL: Record<AutonomyAction, string> = {
   'message.waitlist_offer': 'Waitlist offer',
   'message.bulk': 'Message to many clients',
   'message.review_request': 'Review request',
+  'message.client': 'Message to a client',
 };
 
 /** Each dial action as the Autonomy page names it (the approved prototype's words). */
@@ -42,6 +44,7 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
   'booking.create': 'Create a booking',
   'booking.move': 'Move or reschedule a booking',
   'booking.cancel': 'Cancel a booking',
+  'booking.no_show': 'Mark a visit as a no-show',
   'booking_request.accept': 'Accept requests from your booking page',
   'time.block': 'Block time on a calendar',
   'client_note.save': 'Save notes and preferences about clients',
@@ -53,6 +56,7 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
   'message.waitlist_offer': 'Offering open slots to the waitlist',
   'message.bulk': 'One message to more than 10 clients',
   'message.review_request': 'Asking clients for a review after a visit',
+  'message.client': 'A message you ask me to send a client (running late, a reminder, a note)',
 };
 
 export const LEVEL_LABEL: Record<AutonomyLevel, string> = {
@@ -214,6 +218,18 @@ export function changeRows(
       add('Client', null, text(side, 'clientName'));
       return rows;
     }
+    case 'booking.no_show': {
+      // `mark_no_show` (S56a): the visit, booked → no-show.
+      add('When', null, span(before, 'time', 'endTime'));
+      add('Client', null, text(before, 'clientName'));
+      add('Service', null, text(before, 'serviceName'));
+      add(
+        'Status',
+        STATUS_LABEL[text(before, 'status') ?? ''] ?? null,
+        STATUS_LABEL[text(after, 'status') ?? ''] ?? null,
+      );
+      return rows;
+    }
     case 'time.block': {
       add('Whose', null, text(after, 'staffName'));
       // `unblock_time` (S26b): the block it removes, whole.
@@ -296,6 +312,13 @@ export function changeRows(
       add('With', null, text(after, 'staffName'));
       return rows;
     }
+    case 'message.client':
+      // `send_client_message` (S56a): to whom, what kind, about which visit, and the words.
+      add('To', null, text(after, 'clientName'));
+      add('What', null, MESSAGE_KIND_LABEL[text(after, 'kind') ?? ''] ?? null);
+      add('Visit', null, span(after, 'time', 'endTime'));
+      add('Message', null, text(after, 'message'));
+      return rows;
     case 'message.confirmation':
     case 'message.bulk':
       // No tool makes these yet (messages: Phase 8); the summary says it all.
@@ -303,7 +326,18 @@ export function changeRows(
   }
 }
 
-const STATUS_LABEL: Record<string, string> = { open: 'Open', done: 'Done' };
+const STATUS_LABEL: Record<string, string> = {
+  open: 'Open',
+  done: 'Done',
+  confirmed: 'Booked',
+  no_show: 'No-show',
+};
+
+const MESSAGE_KIND_LABEL: Record<string, string> = {
+  reminder: 'Reminder',
+  running_late: 'Running late',
+  note: 'A note from you',
+};
 
 /** A block's whole span from `unblock_time`'s before: one day or several. */
 function blockSpan(side: ChangeSide | null): string | null {
@@ -360,6 +394,7 @@ const EMAIL_NAME: Record<WouldBeEmail['template'], string> = {
   rebooking_nudge: 'rebooking email',
   waitlist_offer: 'waitlist offer',
   review_request: 'review request',
+  client_message: 'message',
 };
 
 const WOULD_SEND: Record<WouldBeEmail['template'], (name: string) => string> = {
@@ -369,6 +404,7 @@ const WOULD_SEND: Record<WouldBeEmail['template'], (name: string) => string> = {
   rebooking_nudge: (name) => `Emails ${name} the rebooking note below.`,
   waitlist_offer: (name) => `Emails ${name} the open time, first to claim it books it.`,
   review_request: (name) => `Emails ${name} the thank-you below, with your review link.`,
+  client_message: (name) => `Emails ${name} the message above.`,
 };
 
 const ALREADY: Record<WouldBeEmail['template'], (name: string) => string> = {
@@ -378,6 +414,7 @@ const ALREADY: Record<WouldBeEmail['template'], (name: string) => string> = {
   rebooking_nudge: (name) => `${name} was already emailed about rebooking.`,
   waitlist_offer: (name) => `${name} was already offered this time.`,
   review_request: (name) => `${name} was already asked for a review.`,
+  client_message: (name) => `${name} was already emailed this message.`,
 };
 
 /** What happens, or happened, to one email the action involves. */
@@ -500,6 +537,16 @@ export function factLine(fact: AiWhyFact): string | null {
     case 'nudge_last_visit':
       // A rebooking email (S36): the client's last visit, and why they are due.
       return date === null ? null : `Their last visit was on ${formatDate(date)}.`;
+    case 'message_visit':
+      // A message the member asked for (S56a): the visit it's about, still booked.
+      return date === null || time === null
+        ? null
+        : `It’s about their visit on ${formatWhen(date, time)}, which is still booked.`;
+    case 'visit_started':
+      // A no-show (S56a): the visit had started and wasn't marked done or cancelled.
+      return date === null || time === null
+        ? null
+        : `It started on ${formatWhen(date, time)} and was still booked, not done or cancelled.`;
     case 'review_visit':
       // A review request (S55.2): the visit it follows, and the 90-day rule.
       return date === null

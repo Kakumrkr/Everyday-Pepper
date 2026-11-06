@@ -111,6 +111,51 @@ describe('changeRows', () => {
       'They came in on Wed, Nov 4, and I haven’t asked them for a review in the last 90 days.',
     );
     expect(factLine({ kind: 'review_visit', value: {} })).toBeNull();
+    // A message the member asked for (S56a): to whom, what kind, the visit and the words.
+    expect(
+      changeRows('message.client', null, {
+        clientName: 'Maria',
+        kind: 'running_late',
+        date: '2026-11-04',
+        time: '14:00',
+        endTime: '14:45',
+        message: 'Jess is running about 10 minutes late.',
+      }),
+    ).toEqual([
+      { label: 'To', before: null, after: 'Maria' },
+      { label: 'What', before: null, after: 'Running late' },
+      { label: 'Visit', before: null, after: 'Wed, Nov 4 · 2:00 pm–2:45 pm' },
+      { label: 'Message', before: null, after: 'Jess is running about 10 minutes late.' },
+    ]);
+    expect(emailLine({ template: 'client_message' }, 'Maria', 'America/New_York', 0)).toBe(
+      'Emails Maria the message above.',
+    );
+    expect(factLine({ kind: 'message_visit', value: { date: '2026-11-04', time: '14:00' } })).toBe(
+      'It’s about their visit on Wed, Nov 4 · 2:00 pm, which is still booked.',
+    );
+    expect(factLine({ kind: 'visit_started', value: { date: '2026-11-04', time: '14:00' } })).toBe(
+      'It started on Wed, Nov 4 · 2:00 pm and was still booked, not done or cancelled.',
+    );
+    // A no-show (S56a): the visit, booked → no-show.
+    expect(
+      changeRows(
+        'booking.no_show',
+        {
+          date: '2026-11-04',
+          time: '14:00',
+          endTime: '14:45',
+          clientName: 'Jay',
+          serviceName: 'Fade',
+          status: 'confirmed',
+        },
+        { status: 'no_show' },
+      ),
+    ).toEqual([
+      { label: 'When', before: null, after: 'Wed, Nov 4 · 2:00 pm–2:45 pm' },
+      { label: 'Client', before: null, after: 'Jay' },
+      { label: 'Service', before: null, after: 'Fade' },
+      { label: 'Status', before: 'Booked', after: 'No-show' },
+    ]);
     expect(stepLabel('review_requests')).toBe('Looked at yesterday’s visits');
     expect(emailLine({ template: 'review_request' }, 'Ana', 'America/New_York', 0)).toBe(
       'Emails Ana the thank-you below, with your review link.',

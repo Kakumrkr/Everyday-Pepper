@@ -9,6 +9,10 @@ import {
   batchInAddress,
   clientsHref,
   columnNote,
+  leftOutLine,
+  needsSuggestions,
+  suggestionOf,
+  suggestionWords,
   commitImport,
   importSteps,
   importFormatOf,
@@ -86,6 +90,17 @@ describe('previewSentence (AC-W1-21)', () => {
   it('adds the duplicates and the clients already here only when there are any', () => {
     expect(previewSentence({ ...counts, create: 1, skipped: 2, unchanged: 20 })).toBe(
       '1 new client, 12 to fill in, 3 to fix, 2 left out, 20 already here',
+    );
+  });
+
+  it('says only the counts there are, or its first one when there are none (S56b)', () => {
+    expect(previewSentence({ ...counts, create: 2, merge: 0, invalid: 0 })).toBe('2 new clients');
+    expect(previewSentence({ ...counts, create: 0, merge: 5, invalid: 0, unchanged: 20 })).toBe(
+      '5 to fill in, 20 already here',
+    );
+    expect(previewSentence({ ...counts, create: 0, merge: 0, invalid: 0 })).toBe('0 new clients');
+    expect(previewSentence({ ...counts, create: 3, merge: 0, invalid: 1, skipped: 1 })).toBe(
+      '3 new clients, 1 to fix, 1 left out',
     );
   });
 });
@@ -166,10 +181,34 @@ describe('the file', () => {
 });
 
 describe('the mapping (AC-W1-17)', () => {
-  const client: ImportColumn = { column: 'Client', field: 'name', by: 'header', later: null };
-  const nickname: ImportColumn = { column: 'Nickname', field: null, by: null, later: null };
-  const mobile: ImportColumn = { column: 'Mobile', field: 'phone', by: 'values', later: null };
-  const notes: ImportColumn = { column: 'Notes', field: null, by: null, later: 'notes' };
+  const client: ImportColumn = {
+    column: 'Client',
+    field: 'name',
+    by: 'header',
+    later: null,
+    suggestion: null,
+  };
+  const nickname: ImportColumn = {
+    column: 'Nickname',
+    field: null,
+    by: null,
+    later: null,
+    suggestion: null,
+  };
+  const mobile: ImportColumn = {
+    column: 'Mobile',
+    field: 'phone',
+    by: 'values',
+    later: null,
+    suggestion: null,
+  };
+  const notes: ImportColumn = {
+    column: 'Notes',
+    field: null,
+    by: null,
+    later: 'notes',
+    suggestion: null,
+  };
   const columns = [client, nickname, mobile, notes];
 
   it('moves a one-column field to the column chosen, and keeps the rest', () => {
@@ -362,7 +401,13 @@ describe('a visits file (AC-W1-27)', () => {
         { ...visitCounts, past: 1, upcoming: 0, clients: 1, conflict: 0, unchanged: 0 },
         'visits',
       ),
-    ).toBe('1 past visit, 0 upcoming, 1 new client, 3 to fix');
+    ).toBe('1 past visit, 1 new client, 3 to fix');
+  });
+
+  it('says the visits counts there are, or its first one when there are none', () => {
+    const none = { ...visitCounts, past: 0, upcoming: 0, clients: 0, invalid: 0, conflict: 0 };
+    expect(previewSentence({ ...none, unchanged: 0 }, 'visits')).toBe('0 past visits');
+    expect(previewSentence({ ...none, upcoming: 2, unchanged: 0 }, 'visits')).toBe('2 upcoming');
   });
 
   it('lists the times taken apart from the rows to fix', () => {
@@ -527,5 +572,41 @@ describe('batchInAddress', () => {
     expect(batchInAddress(`?batch=${ID}`)).toBe(ID);
     expect(batchInAddress('?batch=not-an-id')).toBeNull();
     expect(batchInAddress('')).toBeNull();
+  });
+});
+
+describe('suggestions and what is left out (S56a.2, AC-W1-46, AC-W1-48)', () => {
+  const column = (part: Partial<ImportColumn> & { column: string }): ImportColumn => ({
+    field: null,
+    by: null,
+    later: null,
+    suggestion: null,
+    ...part,
+  });
+  const name = column({ column: 'Client', field: 'name', by: 'header' });
+  const cell = column({ column: 'Cell', suggestion: { field: 'phone' } });
+  const fav = column({ column: 'Fav', suggestion: { field: null } });
+  const tel = column({ column: 'Tel', by: 'owner' });
+  const notes = column({ column: 'Notes', later: 'notes' });
+  const odd = column({ column: 'Odd' });
+
+  it('asks only while an unplaced column was never asked about', () => {
+    expect(needsSuggestions([name, odd])).toBe(true);
+    expect(needsSuggestions([name, cell, fav, tel, notes])).toBe(false);
+  });
+
+  it('shows a suggestion only while the column isn’t used', () => {
+    expect(suggestionOf(cell)).toBe('phone');
+    expect(suggestionWords('phone')).toBe('Looks like Phone to me.');
+    expect(suggestionOf({ ...cell, field: 'phone', by: 'owner' })).toBeNull();
+    expect(suggestionOf(fav)).toBeNull();
+  });
+
+  it('names each column left out and why, in one line', () => {
+    expect(leftOutLine([name, cell, fav, tel, notes, odd])).toBe(
+      'Not imported: Cell (I think it’s Phone: change it in Columns), Fav (nothing in Pepper fits it), ' +
+        'Tel (you left it out), Notes (notes come later), Odd (nothing in Pepper fits it).',
+    );
+    expect(leftOutLine([name])).toBeNull();
   });
 });

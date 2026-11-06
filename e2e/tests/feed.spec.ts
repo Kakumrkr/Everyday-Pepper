@@ -1,4 +1,13 @@
-import { CurrentBusinessResponseSchema, ServiceSchema, StaffMemberSchema } from '@pepper/contracts';
+import {
+  addDays,
+  BookingSchema,
+  ClientSchema,
+  CurrentBusinessResponseSchema,
+  fromZoned,
+  ServiceSchema,
+  StaffMemberSchema,
+  toZoned,
+} from '@pepper/contracts';
 import { expect, test } from '@playwright/test';
 import { callApi, hydrated, importPastVisit, onboardOwner, ownClientAddress } from './helpers.js';
 
@@ -143,6 +152,102 @@ test('the owner sets the review link for review requests, and turns them off (S5
   await expect(form.getByLabel('Your review link')).toHaveValue('');
   await page.reload();
   await expect(emails.getByTestId('review-link')).toHaveCount(0);
+});
+
+/** A time zone whose local hour is between noon and 10 pm now (one always is: they span 24 h). */
+function afternoonZone(): string {
+  const zones = [
+    'Pacific/Honolulu',
+    'America/Los_Angeles',
+    'America/Denver',
+    'America/Chicago',
+    'America/New_York',
+    'America/Sao_Paulo',
+    'Atlantic/Azores',
+    'Europe/London',
+    'Europe/Berlin',
+    'Europe/Moscow',
+    'Asia/Dubai',
+    'Asia/Kolkata',
+    'Asia/Bangkok',
+    'Asia/Tokyo',
+    'Australia/Sydney',
+    'Pacific/Auckland',
+  ];
+  const zone = zones.find((candidate) => {
+    const hour = Math.floor(toZoned(candidate, Date.now()).minuteOfDay / 60);
+    return hour >= 12 && hour < 22;
+  });
+  if (zone === undefined) throw new Error('no afternoon zone');
+  return zone;
+}
+
+test('the morning’s review request waits on Home, drafted without a model (S56a, AC-W4-19)', async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  // A business where it is afternoon now, whenever CI runs: its morning pass is due today, and
+  // yesterday's 11:00 visit is within the pass's 48 hours.
+  const timeZone = afternoonZone();
+  await onboardOwner(page, { timeZone });
+  const service = await callApi(
+    page,
+    'POST',
+    '/v1/services',
+    { name: 'Haircut', durationMinutes: 60 },
+    ServiceSchema,
+  );
+  const jess = await callApi(
+    page,
+    'POST',
+    '/v1/staff',
+    { displayName: 'Jess', serviceIds: [service.id] },
+    StaffMemberSchema,
+  );
+  const maria = await callApi(
+    page,
+    'POST',
+    '/v1/clients',
+    { name: 'Maria Lopez', email: 'maria.review@example.test' },
+    ClientSchema,
+  );
+  // Yesterday's kept visit (booked with an override: it is in the past).
+  const yesterday = addDays(toZoned(timeZone, Date.now()), -1);
+  await callApi(
+    page,
+    'POST',
+    '/v1/bookings',
+    {
+      clientId: maria.id,
+      serviceId: service.id,
+      staffMemberId: jess.id,
+      startsAt: new Date(fromZoned(timeZone, yesterday, 11 * 60)).toISOString(),
+      override: true,
+    },
+    BookingSchema,
+  );
+  // The address and the review link, set for the first time, make this morning's pass due
+  // again; the stack's worker has no OpenAI key, and review requests need none.
+  const settings = await page.request.fetch('/v1/feed/settings', {
+    method: 'PATCH',
+    data: {
+      mailingAddress: '12 Main St, Springfield, IL 62701',
+      reviewUrl: 'https://g.page/r/juniper/review',
+    },
+    headers: { origin: new URL(page.url()).origin },
+  });
+  expect(settings.status(), await settings.text()).toBe(200);
+
+  const needs = page.getByRole('region', { name: 'Needs your OK' });
+  const card = needs.getByRole('article', { name: 'Review request' });
+  await expect(async () => {
+    await page.goto('/');
+    await expect(card).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 90_000, intervals: [2_000, 5_000] });
+  await expect(card).toContainText('Maria');
+  await expect(card).toContainText('Haircut');
+  await expect(card).toContainText('with your review link');
+  await expect(card.getByRole('button', { name: 'Approve' })).toBeVisible();
 });
 
 test('an unsubscribe link that is not valid says so, without signing in (S36)', async ({

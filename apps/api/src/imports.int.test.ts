@@ -2,9 +2,12 @@ import 'reflect-metadata';
 import type { Server } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { Writable } from 'node:stream';
+import { LlmError, scriptedResponse, type LlmProvider } from '@pepper/ai';
 import {
   ImportBatchSchema,
   ImportPreviewSchema,
+  ImportSuggestionsResultSchema,
+  type LlmRequest,
   TenantIdSchema,
   UserIdSchema,
 } from '@pepper/contracts';
@@ -19,11 +22,13 @@ import {
   totpCodeFromUri,
   type TestService,
 } from '@pepper/testing';
-import type { INestApplication } from '@nestjs/common';
+import type { DynamicModule, INestApplication } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from './app.module.js';
+import { ChatModule } from './chat/chat.module.js';
+import { LLM_PROVIDER } from './chat/chat.service.js';
 import { loadApiConfig } from './config.js';
 
 // Client import through the api against real Postgres and Redis (S48, ADR-0049, AC-W1-3,
@@ -41,6 +46,56 @@ let redis: TestService;
 let app: INestApplication;
 let server: Server;
 let database: DatabaseHandle;
+// The chat module's model, for the mapping suggestions (S56a.2): it answers from the columns
+// it was shown, or fails when the test says so; every request is kept.
+const modelRequests: LlmRequest[] = [];
+let modelFails = false;
+const model: LlmProvider = {
+  respond(request) {
+    modelRequests.push(request);
+    if (modelFails) return Promise.reject(new LlmError('timeout', 'slow'));
+    const { columns } = JSON.parse(String(request.messages[0]?.content)) as {
+      columns: { name: { text: string } }[];
+    };
+    const field = (name: string) => (name === 'Guest' ? 'name' : name === 'Fav' ? 'email' : null);
+    return Promise.resolve(
+      scriptedResponse({
+        toolCalls: [
+          {
+            id: 'c1',
+            name: 'suggest_mapping',
+            arguments: JSON.stringify({
+              columns: columns.map(({ name }) => ({ column: name.text, field: field(name.text) })),
+            }),
+          },
+        ],
+      }),
+    );
+  },
+  stream() {
+    throw new Error('not used');
+  },
+};
+
+/** The app as in production, with the chat module's model replaced by the test's. */
+function withTestModel(root: DynamicModule): DynamicModule {
+  return {
+    ...root,
+    imports: (root.imports ?? []).map((imported) => {
+      const dynamic = imported as DynamicModule;
+      if (dynamic.module !== ChatModule) return imported;
+      return {
+        ...dynamic,
+        providers: (dynamic.providers ?? []).map((provider) =>
+          typeof provider === 'object' && 'provide' in provider && provider.provide === LLM_PROVIDER
+            ? { provide: LLM_PROVIDER, useValue: model }
+            : provider,
+        ),
+      };
+    }),
+  };
+}
+
 let ipCounter = 0;
 let emailCounter = 0;
 
@@ -61,7 +116,7 @@ beforeAll(async () => {
       done();
     },
   });
-  app = await createServiceApp(AppModule.forRoot(config), config, {
+  app = await createServiceApp(withTestModel(AppModule.forRoot(config)), config, {
     logger: createLogger(config, sink),
   });
   await app.init();
@@ -159,7 +214,7 @@ describe('client import through the api (S48)', () => {
     );
     expect(remapped.batch.columns.find((c) => c.column === 'Telephone')).toMatchObject({
       field: null,
-      by: null,
+      by: 'owner',
     });
 
     const committed = ImportBatchSchema.parse(
@@ -235,6 +290,41 @@ describe('client import through the api (S48)', () => {
     await mine.owner.post(`/v1/imports/${id}/commit`).expect(404);
     await mine.owner.post(`/v1/imports/${id}/undo`).expect(404);
     expect((await mine.owner.get('/v1/imports').expect(200)).body).toEqual([]);
+  });
+});
+
+describe('import mapping suggestions through the api (S56a.2, AC-W1-46/47)', () => {
+  it('asks once about the unplaced columns, masked; stores suggestions; staff are refused', async () => {
+    const b = await business();
+    const file = Buffer.from(
+      'Guest,Contact,Fav\nAna Silva,ana@example.com,Blue\nBen Adler,ben@example.com,Red\n',
+    );
+    const staged = ImportPreviewSchema.parse((await b.owner.upload(file).expect(201)).body);
+    const path = `/v1/imports/${staged.batch.id}/suggestions`;
+    await b.staff.post(path).expect(403);
+
+    modelFails = true;
+    const failed = ImportSuggestionsResultSchema.parse((await b.owner.post(path).expect(200)).body);
+    expect(failed.outcome).toBe('unavailable');
+    expect(failed.preview.batch.columns.every((c) => c.suggestion === null)).toBe(true);
+
+    modelFails = false;
+    modelRequests.length = 0;
+    const result = ImportSuggestionsResultSchema.parse((await b.owner.post(path).expect(200)).body);
+    expect(result.outcome).toBe('answered');
+    expect(result.preview.batch.columns.map((c) => [c.column, c.field, c.suggestion])).toEqual([
+      ['Guest', null, { field: 'name' }],
+      ['Contact', 'email', null],
+      ['Fav', null, { field: 'email' }],
+    ]);
+    expect(modelRequests).toHaveLength(1);
+    expect(JSON.stringify(modelRequests)).not.toMatch(/Ana|Silva|Adler|example\.com|Blue|Red/);
+
+    // Asked once: a second request asks nothing.
+    const again = ImportSuggestionsResultSchema.parse((await b.owner.post(path).expect(200)).body);
+    expect(again.outcome).toBe('nothing_to_ask');
+    expect(modelRequests).toHaveLength(1);
+    await b.owner.post('/v1/imports/not-an-id/suggestions').expect(404);
   });
 });
 

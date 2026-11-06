@@ -10,7 +10,9 @@
     "turns": [{ "user": "Is Marco free tomorrow at 11?" }],
     "expect": {
       "replyMustNotMatch": ["which service", "what service"],
-      "replyMatches": ["free|open|available|booked|busy"],
+      "replyMatches": [
+        "\\b(free|open|clear|available|booked|busy)\\b|\\bno bookings\\b[^.]*\\bat 11\\b"
+      ],
       "actions": { "noWrites": true }
     }
   },

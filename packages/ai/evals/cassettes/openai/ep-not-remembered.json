@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a496fb0035f8a9e6ccf524881b5376de0387dfc3607fc3fb4dd9d5340c3b5cdd",
+        "fingerprint": "09fce8348aa305f5ccb9747c6f75a37f293b68e6187380b0687d0000bec53987",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_AJuhaa7t3MTg4qJK2YxvR4xg",
+              "id": "call_XckhFXYRxVl3rI7X3mT17hx1",
               "name": "search_memory",
               "arguments": "{\"query\":\"gift cards\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 12,
             "outputTokens": 19
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "60f7ad1a2fab9306d8dbd5fe2cab68c33cb24a4612b65df8dc96ffa6e3ab02f4",
+        "fingerprint": "4a646eab6d3b0129a82c1fde1876f05344403a2d9c488fa482694c26e4450efb",
         "response": {
-          "text": "I don’t remember a decision about gift cards from our earlier conversations.",
+          "text": "I don’t remember us deciding anything about gift cards.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10081,
-            "cachedInputTokens": 9898,
+            "inputTokens": 10987,
+            "cachedInputTokens": 10804,
             "cacheWriteTokens": 180,
-            "outputTokens": 18
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }
@@ -48,55 +48,12 @@
     ],
     [
       {
-        "fingerprint": "a496fb0035f8a9e6ccf524881b5376de0387dfc3607fc3fb4dd9d5340c3b5cdd",
+        "fingerprint": "09fce8348aa305f5ccb9747c6f75a37f293b68e6187380b0687d0000bec53987",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_eSZQA0E6YS8w0SPwYDBWktLh",
-              "name": "search_memory",
-              "arguments": "{\"query\":\"gift cards\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9898,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "39d7ffc04ceb539d8a096ad59c5bb5dbc2964ac5325547d86957970872052497",
-        "response": {
-          "text": "I don’t remember a decision about gift cards.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 10081,
-            "cachedInputTokens": 10078,
-            "outputTokens": 14
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "a496fb0035f8a9e6ccf524881b5376de0387dfc3607fc3fb4dd9d5340c3b5cdd",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_3t4K7usfuVapCRFGRw5eVr5r",
+              "id": "call_1TiqliwyIoOuR9yWMGZ2bjwk",
               "name": "search_memory",
               "arguments": "{\"query\":\"gift cards decision\"}"
             }
@@ -104,17 +61,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9898,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 12,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ab628b0fecec2b07e014c8a4c328001b25fa1db4cdcba721569f79a44b540376",
+        "fingerprint": "093f9f5312708c520f824d847d175609bdebc1b22ca21cb49c72f7f9504f5038",
         "response": {
-          "text": "I don’t remember a decision about gift cards.",
+          "text": "I don’t remember us deciding anything about gift cards.",
           "toolCalls": [],
           "replay": [
             {
@@ -124,10 +82,53 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10082,
-            "cachedInputTokens": 9898,
+            "inputTokens": 10988,
+            "cachedInputTokens": 10804,
             "cacheWriteTokens": 181,
-            "outputTokens": 14
+            "outputTokens": 15
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "09fce8348aa305f5ccb9747c6f75a37f293b68e6187380b0687d0000bec53987",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_xPfUiYvmKgSMdqRjcmLyukWM",
+              "name": "search_memory",
+              "arguments": "{\"query\":\"gift cards decision\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10807,
+            "cachedInputTokens": 10804,
+            "outputTokens": 20
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "700c7e18bf90e1fa786f1621a21208801c31b37c2e2c375e3767a2f6e7194151",
+        "response": {
+          "text": "I don’t remember us deciding anything about gift cards.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10988,
+            "cachedInputTokens": 10985,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

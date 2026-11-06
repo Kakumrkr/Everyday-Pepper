@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "9d3843a67cb0ff5575f49d4a04dfa01e8fb6d39208cc1b0f901f365dacee5f3d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_tqpzUVBx9qEwo4NdSxTXi7A6",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"When\",\"field\":\"visit_date\"},{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Treatment\",\"field\":\"service\"},{\"column\":\"Stylist\",\"field\":\"staff\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 964,
+            "cachedInputTokens": 0,
+            "outputTokens": 53
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "9d3843a67cb0ff5575f49d4a04dfa01e8fb6d39208cc1b0f901f365dacee5f3d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_No52cCHFFnRwd6vfT1fBtW0H",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"When\",\"field\":\"visit_date\"},{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Treatment\",\"field\":\"service\"},{\"column\":\"Stylist\",\"field\":\"staff\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 964,
+            "cachedInputTokens": 0,
+            "outputTokens": 53
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "9d3843a67cb0ff5575f49d4a04dfa01e8fb6d39208cc1b0f901f365dacee5f3d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Ws1s9E7Uh2zWhOMF1Smm3mrx",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"When\",\"field\":\"visit_date\"},{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Treatment\",\"field\":\"service\"},{\"column\":\"Stylist\",\"field\":\"staff\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 964,
+            "cachedInputTokens": 0,
+            "outputTokens": 53
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "e1814ce92c6edceb3f944cb973815ab38507f5012d26ac8be4ac9296dc2e6e48",
+        "fingerprint": "a33202398ffc7f5daae3ddc912d5053c722c65fbe9e48b2fad99a60a45b83550",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Gb8yJP826d48rEL9j7uTRrgY",
+              "id": "call_NqP2cXCRB6vy5VVD9XTlS8px",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9904,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10810,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 15,
             "outputTokens": 18
           },
@@ -25,31 +25,9 @@
         }
       },
       {
-        "fingerprint": "930078e040a1c702b56467e2600603ac004658d1f6005b3a390c46e36a84c1d6",
+        "fingerprint": "0f882f0b7ab721c3b5468a503e818c297a33831745c73de0841940be035a81dd",
         "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_Cw2AaxVSyeUiX0s7iVwhsuJt",
-              "name": "find_client_bookings",
-              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 10101,
-            "cachedInputTokens": 9901,
-            "cacheWriteTokens": 197,
-            "outputTokens": 41
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "e8d22f9ae3ace8aee5733194022f3d6958afcf1816800e7be3adc71e5214e02e",
-        "response": {
-          "text": "Maria L. is booked for a haircut with Jess tomorrow, November 3, at 3:00 PM. Her record notes an allergy to “PPD.” Her usual service is “Colour with Jess.”",
+          "text": "Maria L. has a remembered PPD allergy. Her usual service is “Colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10677,
-            "cachedInputTokens": 10098,
-            "cacheWriteTokens": 576,
-            "outputTokens": 46
+            "inputTokens": 11004,
+            "cachedInputTokens": 10807,
+            "cacheWriteTokens": 194,
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }
@@ -70,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "e1814ce92c6edceb3f944cb973815ab38507f5012d26ac8be4ac9296dc2e6e48",
+        "fingerprint": "a33202398ffc7f5daae3ddc912d5053c722c65fbe9e48b2fad99a60a45b83550",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BYz9jiW6gzmMqxXzoa4wIN6u",
+              "id": "call_DBKqX5tjABl5D2I4oR8zrzpa",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -83,20 +61,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9904,
-            "cachedInputTokens": 9901,
+            "inputTokens": 10810,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10807,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b91c1ab493e168dd7b51c463d06b0170254364a4cf8145c1d4127de3e3c2c3ed",
+        "fingerprint": "2cb305520b83eda4cc4846b973d61b6fd6b23e282b967001804c5ea69f7e343f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gleXipEENqROFiWUrreabx8X",
+              "id": "call_8hSVVYZZXsl1QOeOcXpTcw5A",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -104,18 +83,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10100,
-            "cachedInputTokens": 9901,
-            "cacheWriteTokens": 196,
+            "inputTokens": 11008,
+            "cachedInputTokens": 10807,
+            "cacheWriteTokens": 198,
             "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "912eacf545acef14864e3dab2a08d8a2a66b452228885bd31f48d236ce49a1b2",
+        "fingerprint": "d660273bee467d679dd79f656ad6525bdcae0933db6df45f2a90e287a8427ca7",
         "response": {
-          "text": "Maria L. is booked tomorrow, November 3, at 3:00 PM for a haircut with Jess. She has a recorded PPD allergy. Her usual service is “Colour with Jess.”",
+          "text": "Maria has a recorded PPD allergy. She’s booked for a haircut with Jess tomorrow, Tue Nov 3, at 3:00 PM. Her usual service is “Colour with Jess.”",
           "toolCalls": [],
           "replay": [
             {
@@ -125,10 +104,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10662,
-            "cachedInputTokens": 10097,
-            "cacheWriteTokens": 562,
-            "outputTokens": 44
+            "inputTokens": 11578,
+            "cachedInputTokens": 11005,
+            "cacheWriteTokens": 570,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }
@@ -136,12 +115,12 @@
     ],
     [
       {
-        "fingerprint": "e1814ce92c6edceb3f944cb973815ab38507f5012d26ac8be4ac9296dc2e6e48",
+        "fingerprint": "a33202398ffc7f5daae3ddc912d5053c722c65fbe9e48b2fad99a60a45b83550",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_IWli1eNxXrTPGSoGmOrjOiZc",
+              "id": "call_GdE0yhCQiEsQUu6s6T8ZqF1b",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -149,20 +128,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9904,
-            "cachedInputTokens": 9901,
+            "inputTokens": 10810,
+            "cachedInputTokens": 10807,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0ddc758f4a3e5a45e6423347f1f0a46f7d25e85aa895d0b208372696c7ead4a2",
+        "fingerprint": "fa91a80192d0c5d19745d5023c7f738efae13dca95f477f69dee6855e116028f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TKXNC8nZSdxrfRjFae6AMBYd",
+              "id": "call_r74hffuJUwyxdgoBPRoLpl0z",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -170,31 +149,31 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10095,
-            "cachedInputTokens": 9901,
-            "cacheWriteTokens": 191,
-            "outputTokens": 40
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "6deea8ea97bd2d29f6047c15782b571fde38977a577615abb2e48b5886dacdbc",
-        "response": {
-          "text": "Maria L. is booked tomorrow, Nov 3, at 3:00 PM for a haircut with Jess. Her recorded allergy is “PPD,” and her usual service is “Colour with Jess.”",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 10640,
-            "cachedInputTokens": 10092,
-            "cacheWriteTokens": 545,
+            "inputTokens": 11010,
+            "cachedInputTokens": 10807,
+            "cacheWriteTokens": 200,
             "outputTokens": 45
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "c1ffc05ba6ce103d58728c0c353b20cb64ee6c73936ba0eeb0a289c4ef5a2dd4",
+        "response": {
+          "text": "Maria L. is booked with Jess for a haircut tomorrow, Tuesday, Nov 3 at 3:00 PM. Her record notes an allergy: “PPD”. Her usual service is “Colour with Jess.”",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11594,
+            "cachedInputTokens": 11007,
+            "cacheWriteTokens": 584,
+            "outputTokens": 47
           },
           "model": "gpt-6-luna"
         }

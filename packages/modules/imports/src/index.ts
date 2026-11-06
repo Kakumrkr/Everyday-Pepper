@@ -8,3 +8,4 @@ export * from './visits.js';
 export * from './export.js';
 export * from './pepper-format.js';
 export * from './services/export.js';
+export * from './suggestions.js';

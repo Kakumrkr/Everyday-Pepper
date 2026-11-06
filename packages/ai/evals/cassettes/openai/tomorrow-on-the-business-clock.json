@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "64368d66c6542172a9efcdbeb43497891f2b719f6ef9be2689b68179adae28dc",
+        "fingerprint": "51be23fae99552b6fcc7f43d36ab2ac6ad310c558a21ee3b64b0065c09539c3c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_lXDu8cKNKZKVNYhe0SlQuUmV",
+              "id": "call_vtVU4mnBrbnJVmGU6wiOkzOU",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
+            "inputTokens": 10805,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9896,
+            "cacheWriteTokens": 10802,
             "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8d2f1ee7c6c8de2b02676bfc25392caee7664b2f0f5bcfe99be50096d2b0db04",
+        "fingerprint": "586f4f5c60b144e0e30a0cb3a6e16d837812ad66d9d74efe682922a07d1cbb22",
         "response": {
-          "text": "Tomorrow, Wednesday, Oct 21, you have Maria L. booked for a haircut at 3:00 PM, and your calendar is blocked from noon to 1:00 PM.",
+          "text": "Tomorrow, Wednesday Oct 21, you have Maria L. booked for a haircut from 3–4 PM, and your calendar is blocked from noon to 1 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10212,
-            "cachedInputTokens": 9896,
-            "cacheWriteTokens": 313,
-            "outputTokens": 42
+            "inputTokens": 11135,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 330,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }
@@ -48,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "64368d66c6542172a9efcdbeb43497891f2b719f6ef9be2689b68179adae28dc",
+        "fingerprint": "51be23fae99552b6fcc7f43d36ab2ac6ad310c558a21ee3b64b0065c09539c3c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_rhpq17zZWTz0sv413u8Rc3GI",
+              "id": "call_EHFC3NRIHWThdTfAuSi4CvUV",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
             }
@@ -61,17 +61,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10805,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10802,
             "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "aa85e84b44dafbc7eb719e2ebe72a3bf6b28385d5042e39a37c06abc001ad5c9",
+        "fingerprint": "2aff991e1e0738c215e2213faf38cf40bac9c80f183e8e1f5c254e7635c92367",
         "response": {
-          "text": "Tomorrow, Wednesday, October 21, you have Maria L. booked for a haircut from 3:00–4:00 PM, and blocked time from 12:00–1:00 PM.",
+          "text": "Tomorrow, Wednesday, October 21, you have Maria L. booked for a haircut from 3–4 PM, and your calendar is blocked from noon–1 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,54 +82,54 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10217,
-            "cachedInputTokens": 9896,
+            "inputTokens": 11134,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 329,
+            "outputTokens": 39
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "51be23fae99552b6fcc7f43d36ab2ac6ad310c558a21ee3b64b0065c09539c3c",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_yXmLw9Gr8Mq0ip3VtLt2iU26",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10805,
+            "cachedInputTokens": 10802,
+            "outputTokens": 29
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "e9c675482125465c5bd071fffa7c63873404a5520d04b019c4b35823b8e2504c",
+        "response": {
+          "text": "Tomorrow, Wednesday, October 21, you have Maria L. booked for a haircut from 3:00 to 4:00 PM, and your calendar is blocked from noon to 1:00 PM.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11123,
+            "cachedInputTokens": 10802,
             "cacheWriteTokens": 318,
-            "outputTokens": 46
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "64368d66c6542172a9efcdbeb43497891f2b719f6ef9be2689b68179adae28dc",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_1E7KIbReXvOBqzuEuCnQBQTD",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-10-21\",\"staffMemberId\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
-            "outputTokens": 29
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "620cc6b3caa750c94a3c8dab11cc0930f7576ea7c688e1cafe621f2ab31c32de",
-        "response": {
-          "text": "Tomorrow, Wednesday, you have Maria L. booked for a haircut from 3:00–4:00 PM, and your calendar is blocked from noon to 1:00 PM.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 10212,
-            "cachedInputTokens": 9896,
-            "cacheWriteTokens": 313,
-            "outputTokens": 42
+            "outputTokens": 47
           },
           "model": "gpt-6-luna"
         }

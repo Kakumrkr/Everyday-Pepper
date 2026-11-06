@@ -36,6 +36,8 @@ import {
   IMPORT_RUN_CHUNK,
   listImports,
   remapImport,
+  importMappingQuestion,
+  saveImportSuggestions,
   runImport,
   stageImport,
   tidyImports,
@@ -191,7 +193,7 @@ describe('staging (AC-W1-17, AC-W1-18)', () => {
     });
     expect(remapped.batch.columns.map((c) => [c.column, c.field, c.by])).toEqual([
       ['Who', 'name', 'owner'],
-      ['Contact', null, null],
+      ['Contact', null, 'owner'],
     ]);
     expect(remapped.batch.problems).toEqual([]);
     expect(remapped.batch.counts).toMatchObject({ create: 2, invalid: 0 });
@@ -200,6 +202,64 @@ describe('staging (AC-W1-17, AC-W1-18)', () => {
         columns: [{ column: 'Nope', field: 'name' }],
       }),
     ).rejects.toBeInstanceOf(ImportMappingInvalidError);
+  });
+
+  it('asks about unplaced columns with masked samples, and stores checked suggestions (AC-W1-46/47)', async () => {
+    const business = await newBusiness();
+    const file = Buffer.from(
+      'Guest,Contact,Fav\nAna Silva,ana@example.com,Blue\nBen Adler,ben@example.com,Red\n',
+    );
+    const staged = await stageImport(db, business.owner, file);
+    const question = await importMappingQuestion(db, business.owner, staged.batch.id);
+    expect(question?.columns).toEqual([
+      { column: 'Guest', samples: ['Aaa Aaaaa'] },
+      { column: 'Fav', samples: ['Aaaa', 'Aaa'] },
+    ]);
+    expect(JSON.stringify(question)).not.toMatch(/Ana|Silva|example|Blue/);
+    if (question === null) throw new Error('two columns are unplaced');
+
+    const suggested = await saveImportSuggestions(db, business.owner, staged.batch.id, question, {
+      columns: [
+        { column: 'Guest', field: 'name' },
+        { column: 'Fav', field: 'email' },
+        { column: 'Contact', field: 'phone' },
+      ],
+    });
+    expect(suggested.batch.columns.map((c) => [c.column, c.field, c.suggestion])).toEqual([
+      ['Guest', null, { field: 'name' }],
+      ['Contact', 'email', null],
+      // Email is a field several columns may fill, so the domain keeps it as a suggestion.
+      ['Fav', null, { field: 'email' }],
+    ]);
+    // Nothing is mapped until the owner uses a suggestion: the plan is unchanged.
+    expect(suggested.batch.counts).toEqual(staged.batch.counts);
+    expect(suggested.batch.problems).toEqual(staged.batch.problems);
+    expect(await importMappingQuestion(db, business.owner, staged.batch.id)).toBeNull();
+
+    const used = await remapImport(db, business.owner, staged.batch.id, {
+      columns: [
+        { column: 'Guest', field: 'name' },
+        { column: 'Contact', field: 'email' },
+      ],
+    });
+    expect(used.batch.columns.map((c) => [c.column, c.field, c.by])).toEqual([
+      ['Guest', 'name', 'owner'],
+      ['Contact', 'email', 'values'],
+      ['Fav', null, null],
+    ]);
+    expect(used.batch.counts).toMatchObject({ create: 2 });
+
+    // Staff can't ask, and a committed import is no longer asked about.
+    await expect(
+      importMappingQuestion(db, await business.member('staff'), staged.batch.id),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    await commitImport(db, business.owner, staged.batch.id, business.clock);
+    await expect(importMappingQuestion(db, business.owner, staged.batch.id)).rejects.toBeInstanceOf(
+      ImportNotStagedError,
+    );
+    await expect(
+      saveImportSuggestions(db, business.owner, staged.batch.id, question, { columns: [] }),
+    ).rejects.toBeInstanceOf(ImportNotStagedError);
   });
 
   it('discards a staged import, and never a committed one', async () => {

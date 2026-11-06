@@ -63,7 +63,12 @@ const DAY_MS = 86_400_000;
 export const DRAFTS_BATCH = 50;
 export const DRAFTS_BATCHES_PER_PASS = 4;
 
-export interface MorningDraftsOptions extends DraftWriterDeps {
+export interface MorningDraftsOptions extends Omit<DraftWriterDeps, 'provider'> {
+  /**
+   * The model that writes the rebooking nudges; `null` without one configured (S56a): the pass
+   * still proposes the review requests, whose words are the domain's, and skips the nudges.
+   */
+  provider: DraftWriterDeps['provider'] | null;
   clock: Clock;
   /** For the nudge's links and its email (the api's and worker's `AUTH_BASE_URL`, outbox key). */
   emails: ToolDeps['emails'];
@@ -152,13 +157,15 @@ export async function runMorningDraftsFor(
     if (claimed !== 'claimed') return { outcome: claimed };
     if (tenant.settings.suggestionsPaused) return { outcome: 'paused' as const };
     // Review requests (S55.2) go on when only the rebooking suggestions are turned off.
-    const nudgesOff = tenant.settings.disabledKinds.includes('rebooking_due');
+    // Without a model only the review requests run (S56a).
+    const nudgesOn =
+      !tenant.settings.disabledKinds.includes('rebooking_due') && options.provider !== null;
     const reviewsOn = tenant.reviewUrl !== null;
-    if (nudgesOff && !reviewsOn) return { outcome: 'paused' as const };
+    if (!nudgesOn && !reviewsOn) return { outcome: 'paused' as const };
     if (tenant.mailingAddress === null) return { outcome: 'no_address' as const };
     const owner = (await listMemberships(tx)).find((member) => member.role === 'owner');
     if (owner === undefined) return { outcome: 'gone' as const };
-    const parts = { nudges: !nudgesOff, reviews: reviewsOn };
+    const parts = { nudges: nudgesOn, reviews: reviewsOn };
     return { outcome: 'claimed' as const, tenant, drafts, today, ownerId: owner.userId, parts };
   });
   if (claim.outcome !== 'claimed') return { outcome: claim.outcome };
@@ -199,11 +206,19 @@ export async function runMorningDraftsFor(
     autonomy: { templateDefaults: {} },
     emails: options.emails,
   };
+  // Candidates exist only with a model (`parts.nudges`).
+  const writer = options.provider;
   for (const candidate of candidates) {
+    // Never true (no candidates without a model); it narrows `writer` for the call below.
+    if (writer === null) break;
     let written: Awaited<ReturnType<typeof writeDraft>>;
     try {
       // Outside any transaction: a model call never holds one open.
-      written = await writeDraft(options, tenantId, candidate.facts);
+      written = await writeDraft(
+        { provider: writer, reserve: options.reserve },
+        tenantId,
+        candidate.facts,
+      );
     } catch {
       result.failed += 1;
       continue;

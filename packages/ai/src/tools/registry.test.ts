@@ -39,6 +39,13 @@ const VALID: Record<string, Record<string, unknown>> = {
     emailClient: false,
   },
   cancel_booking: { bookingId: '0199f4b2-7c1e-7a00-8000-0000000000b1', emailClient: true },
+  mark_no_show: { bookingId: '0199f4b2-7c1e-7a00-8000-0000000000b1' },
+  send_client_message: {
+    bookingId: '0199f4b2-7c1e-7a00-8000-0000000000b1',
+    kind: 'running_late',
+    minutesLate: 10,
+    note: null,
+  },
   block_time: { staffMemberId: null, date: '2026-11-03', from: '12:00', to: '13:00' },
   add_todo: {
     title: 'Call Maria about Friday',
@@ -85,7 +92,7 @@ const VALID: Record<string, Record<string, unknown>> = {
 };
 
 describe('the tool registry', () => {
-  it('has the twenty-one tools, named verb_noun, reads first', () => {
+  it('has the twenty-three tools, named verb_noun, reads first', () => {
     expect(TOOLS.map((tool) => tool.name)).toEqual([
       'find_availability',
       'find_clients',
@@ -99,6 +106,8 @@ describe('the tool registry', () => {
       'create_booking',
       'move_booking',
       'cancel_booking',
+      'mark_no_show',
+      'send_client_message',
       'block_time',
       'unblock_time',
       'add_todo',
@@ -113,7 +122,9 @@ describe('the tool registry', () => {
     // Forgetting is final: no Undo, and it always waits for the member's OK (S30 D-1). A
     // learned rule always waits too (S31, `rule.change` locked to "ask").
     expect(TOOLS.filter((tool) => tool.kind === 'write').map((tool) => tool.tier)).toEqual([
-      ...Array<string>(9).fill('internal_write'),
+      ...Array<string>(4).fill('internal_write'),
+      'external_or_irreversible',
+      ...Array<string>(6).fill('internal_write'),
       'external_or_irreversible',
       'internal_write',
       'internal_write',

@@ -1,6 +1,7 @@
 import {
   getBookingRules,
   getWorkingHours,
+  importVisitBook,
   listWaitlist,
   runBriefingFor,
   runInsightsFor,
@@ -10,7 +11,6 @@ import {
   StaffMemberIdSchema,
   type ConversationId,
   type ConversationTurnId,
-  type AutonomySettings,
   type LlmRequest,
   type LlmStreamEvent,
   type MemoryWarningRule,
@@ -51,6 +51,8 @@ import { writeEpisode } from '../memory/episodes.js';
 import type { LlmCallOptions, LlmProvider } from '../provider.js';
 import { runMorningDraftsFor } from '../drafts/morning.js';
 import { WRITE_DRAFT_TOOL } from '../drafts/writer.js';
+import { SUGGEST_MAPPING_TOOL, suggestImportColumns } from '../imports/mapping-suggester.js';
+import { stageImport } from '@pepper/imports';
 import { approveToolProposal, shownPreview, undoToolAction } from '../tools/registry.js';
 import type { ToolDeps } from '../tools/tool.js';
 import type { EvalCase, EvalTurn } from './case.js';
@@ -61,13 +63,6 @@ import { addUsage, emptyUsage, type Transcript } from './transcript.js';
 // world on Postgres, with the real tools and trust layer, so a case is judged by what the
 // business looks like afterwards, not only by what the model said. Only the model is swapped:
 // a cassette, a fake, or (S27) the real one.
-
-/**
- * The eval business's autonomy (S53, decision D-2): moves "do it and tell me", as it was set up
- * before moves started asking by default (ADR-0055), so the recorded answers stay valid until the
- * whole suite is recorded again in S56b. S56a adds cases for a move that asks and removes this.
- */
-export const EVAL_WORLD_AUTONOMY: AutonomySettings = { 'booking.move': 'notify' };
 
 /** Runs one case: seeds its world, asks `providerFor` for the model, returns what happened. */
 export type EvalSubject = (
@@ -143,7 +138,14 @@ function observed(
     transcript.models.push(response.model);
     // The draft writer's forced answer (S36) is its words, judged by the drafts grader; its
     // refusal is not a reply to the member either.
-    if (request.tools.some((tool) => tool.name === WRITE_DRAFT_TOOL.name)) return;
+    // The mapping suggester's forced answer (S56a.2) is judged by the mapping grader, as stored.
+    if (
+      request.tools.some(
+        (tool) => tool.name === WRITE_DRAFT_TOOL.name || tool.name === SUGGEST_MAPPING_TOOL.name,
+      )
+    ) {
+      return;
+    }
     if (response.refusal !== undefined) transcript.replies.push(response.refusal);
     for (const call of response.toolCalls) {
       let parsed: unknown = null;
@@ -233,7 +235,8 @@ export function loopSubject(
       db,
       actor,
       clock: world.clock,
-      autonomy: { templateDefaults: EVAL_WORLD_AUTONOMY },
+      // The platform's defaults, as a new business has them (S56a: a move asks).
+      autonomy: { templateDefaults: {} },
       memoryWarnings: EVAL_MEMORY_WARNINGS,
       emails: { baseUrl: 'http://localhost:3000', outboxKey: EVAL_OUTBOX_KEY },
       embedder,
@@ -271,6 +274,29 @@ export function loopSubject(
           world.clock.advanceBy(EPISODE_WAIT_MS);
           await writeEpisodes(world, provider, embedder, actor, latestTurns);
           latestTurns.clear();
+        } else if ('importFile' in turn.action) {
+          // As the import screen does: the file staged, then the suggester asked once.
+          const staged = await stageImport(db, owner, Buffer.from(turn.action.importFile), {
+            clock: world.clock,
+            visits: importVisitBook,
+          });
+          const { preview } = await suggestImportColumns(
+            {
+              db,
+              provider,
+              // The run's own cost guard covers real calls; a business budget is not metered.
+              reserve: () => Promise.resolve({ state: 'ok', settle: () => Promise.resolve() }),
+            },
+            owner,
+            staged.batch.id,
+          );
+          transcript.mapping = Object.fromEntries(
+            preview.batch.columns.flatMap(({ column, suggestion }) =>
+              suggestion === null ? [] : [[column, suggestion.field]],
+            ),
+          );
+        } else if ('advanceClock' in turn.action) {
+          world.clock.advanceBy(turn.action.advanceClock * 60_000);
         } else if ('runInsights' in turn.action) {
           await runInsightsFor(db, world.tenantId, {
             clock: world.clock,

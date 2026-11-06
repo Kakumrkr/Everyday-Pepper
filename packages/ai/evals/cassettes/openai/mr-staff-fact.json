@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "6f3c8f3e8e5ee7e209272318ffd532e5ab95ecee0b7ccf151e738b94f054ea36",
+        "fingerprint": "c270be8d394aba9285dfa08d3b680b2ed119e0323075623a3886a10d28a11506",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_QcD6u1TaxFoyqu0FrumDTgNX",
+              "id": "call_Rl8bGg32b5V6FAi4Vrw1tCP8",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 12,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "0038a5d6eb3a5c5b44ea27e56777f6f85d22fa6aa26ccb3b2abcc70143809dc9",
+        "fingerprint": "5e422e231e8d0973800c2ac9b67786387daa5d7ffa8e5bb82498e6b0687ed0b6",
         "response": {
-          "text": "Jess doesn’t work Saturdays, so she can’t take a client this Saturday. Marco works Saturdays from 10:00 to 16:00.",
+          "text": "No—Jess’s schedule says “Doesn't work Saturdays.” Marco works Saturdays from 10:00 AM to 4:00 PM and offers haircuts.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10466,
-            "cachedInputTokens": 9898,
-            "cacheWriteTokens": 565,
-            "outputTokens": 34
+            "inputTokens": 11389,
+            "cachedInputTokens": 10804,
+            "cacheWriteTokens": 582,
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }
@@ -48,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "6f3c8f3e8e5ee7e209272318ffd532e5ab95ecee0b7ccf151e738b94f054ea36",
+        "fingerprint": "c270be8d394aba9285dfa08d3b680b2ed119e0323075623a3886a10d28a11506",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_XShQUlG6Oh5NoOmiTPPQEkIz",
+              "id": "call_EivAq8DdAWozqi4Zx8CyENK1",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -61,17 +61,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9898,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 12,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "59a40791732b08241eb128bbebccfb87fd85fd80d711c92d7721b1d16f4edf6f",
+        "fingerprint": "b0b6c7bd423622c2a6d96d70471bf76328482d2bb4b2362cd86ab024515a50d9",
         "response": {
-          "text": "Jess doesn’t usually work Saturdays. Marco is scheduled this Saturday from 10 AM to 4 PM.",
+          "text": "No. Jess doesn’t work Saturdays. Marco does, from 10:00 AM to 4:00 PM.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,54 +82,54 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10455,
-            "cachedInputTokens": 9898,
-            "cacheWriteTokens": 554,
-            "outputTokens": 25
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "6f3c8f3e8e5ee7e209272318ffd532e5ab95ecee0b7ccf151e738b94f054ea36",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_sjWuCEE3yg4aU8TkvJlmc14W",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9898,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "0e01a1734fc5139321230dac8f869fc01922e554f43ffd5ea1ea74ecbeb6a211",
-        "response": {
-          "text": "Jess doesn’t usually work Saturdays, so she isn’t scheduled to take a client this Saturday.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 10467,
-            "cachedInputTokens": 9898,
+            "inputTokens": 11373,
+            "cachedInputTokens": 10804,
             "cacheWriteTokens": 566,
-            "outputTokens": 23
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "c270be8d394aba9285dfa08d3b680b2ed119e0323075623a3886a10d28a11506",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_jmi5EM5bO369stEBZ4SUoTsD",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10807,
+            "cachedInputTokens": 10804,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "db73a8aa037d7d9b3c5a0d337715c2c864ec2d75ffe08672b0f8d84a7dcdf26e",
+        "response": {
+          "text": "Jess’s schedule says she doesn’t work Saturdays, so she can’t take a client this Saturday. Marco works 10:00–16:00 and offers haircuts.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11374,
+            "cachedInputTokens": 10804,
+            "cacheWriteTokens": 567,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "8926e999cbd3471a13ca113c683ba2294c5acbe8234b7ec925a5ea9d6d3c51c3",
+        "fingerprint": "e4377fc22471e169bbfdaa70b05e6222efb5dd6d1af35dec9c4fdfd225fc8b0e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_5J6XMDg1pbCTJFnkjIIfj6qd",
+              "id": "call_4ez8CfguB1oUVbqliZu4RnOP",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 11,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "d6bd0d12aface1d6dc433ef177251a77af363ec78d27a6846b9f08457946b2e1",
+        "fingerprint": "349e48c5ea80b98cae98246f6a9877cb227ec5d30383eb399cc6c2ed7870ee27",
         "response": {
-          "text": "Marco works this Saturday, November 7, from 10 AM to 4 PM and offers haircuts. Jess doesn’t work Saturdays, and Marco doesn’t offer colour.",
+          "text": "Marco works this Saturday, 10:00 AM–4:00 PM, and offers haircuts. No one is listed as working Saturday for colour.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10356,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 456,
-            "outputTokens": 39
+            "inputTokens": 11284,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 478,
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }
@@ -48,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "8926e999cbd3471a13ca113c683ba2294c5acbe8234b7ec925a5ea9d6d3c51c3",
+        "fingerprint": "e4377fc22471e169bbfdaa70b05e6222efb5dd6d1af35dec9c4fdfd225fc8b0e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_v6EocAVvEQU8PeNLYdqsZgRs",
+              "id": "call_seqY8dL40dJHlG8l1cUJC2P7",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -61,17 +61,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 11,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "72b9fe06a42f4ca771ab4e3a240a3c28cbab875739b1e30cdb67683917df9e88",
+        "fingerprint": "ea2d00b623cd6b0075b5c36595838610da73dd92a96cc1ce52219f8643045200",
         "response": {
-          "text": "Marco works Saturdays, from 10 AM to 4 PM, and offers haircuts. No one is listed as offering colour on Saturdays.",
+          "text": "Marco can take haircut appointments on Saturday, November 7, from 10:00 AM to 4:00 PM. Jess doesn’t work Saturdays, and Marco doesn’t offer colour.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +82,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10361,
-            "cachedInputTokens": 9897,
+            "inputTokens": 11267,
+            "cachedInputTokens": 10803,
             "cacheWriteTokens": 461,
-            "outputTokens": 32
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
@@ -92,12 +93,12 @@
     ],
     [
       {
-        "fingerprint": "8926e999cbd3471a13ca113c683ba2294c5acbe8234b7ec925a5ea9d6d3c51c3",
+        "fingerprint": "e4377fc22471e169bbfdaa70b05e6222efb5dd6d1af35dec9c4fdfd225fc8b0e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_rlphAauUNeMdTArZwSPR13dC",
+              "id": "call_KoO8kQ2oZWJ39OILc73VV1Gs",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -105,17 +106,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10803,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2dc560e939d42b9176a54cec93c86a84f2070d239f44eec0efe0ee0c83cf1aae",
+        "fingerprint": "bf6615c06ebaf4256c204b98745d237b1fd0497da2bf68ac54745ffca95cfdc3",
         "response": {
-          "text": "Marco works this Saturday, November 7, from 10 AM to 4 PM and offers haircuts. Jess doesn’t work Saturdays, and Marco doesn’t offer colour.",
+          "text": "Marco works this Saturday, November 7, from 10:00 AM to 4:00 PM and offers haircuts. Jess doesn’t work Saturdays.",
           "toolCalls": [],
           "replay": [
             {
@@ -125,10 +126,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10369,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 469,
-            "outputTokens": 39
+            "inputTokens": 11284,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 478,
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }

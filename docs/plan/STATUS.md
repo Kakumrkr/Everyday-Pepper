@@ -1,21 +1,22 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-05 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 12 — The employee (Phase 11 gate met in S51.2) → next: **S56a** (scripted "a" half)
+**Last updated:** 2026-11-06 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → next: **S57** (deploy)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S56a** (`send_client_message`, `mark_no_show`, import mapping, prompt fixes, new eval cases; scripted "a" half).
+Nothing in progress. S56b merged S56a and S56a.2 and closed Phase 12 ([PR #84](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/84)). Next: **S57** (deploy).
 
 ## Last sessions
-- **S55.2 Phase 12 · Post-visit review requests (2026-11-05)** ([ADR-0059](../adr/0059-post-visit-review-requests.md), [PR #83](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/83)). Full entry in [session-log.md](session-log.md).
-  - **Built:** the morning after a kept visit, a thank-you asking for a review waits for an OK (`message.review_request`); one a client per 90 days, none within a week of another marketing email, 20 a day; the review link on More; AC-W4-14…18 (top-up: the win-back date's year).
-  - **Checks:** `pnpm check` green; affected integration green (22/22 tasks); Playwright feed + gallery 16/16, screens More and Autonomy 14 baselines updated, run twice.
-- **S55 Phase 12 · Proof of value: the week card and the evening wrap (2026-11-05)** ([ADR-0058](../adr/0058-proof-of-value-week-card-and-evening-wrap.md), [PR #82](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/82)). Full entry in [session-log.md](session-log.md).
-  - **Built:** "What I did this week" (visits thanks to Pepper, fills, regulars back with dollars, minutes saved) and the evening wrap (tomorrow's visits, the first time, who may not show), read on demand by `GET /v1/proof`, leads only; AC-W4-10…13; review requests split to S55.2.
-  - **Checks:** `pnpm check` green; affected integration green (22/22 tasks); Playwright win-back 1/1, feed 4/4, screens Home 3/3, gallery 11/11 twice.
+- **S56b Phase 12 "b" · Recorded on the real model, Phase 12 gate (2026-11-06)** ([PR #84](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/84), with S56a and S56a.2; ADR-0060/0061 results). Full entry in [session-log.md](session-log.md).
+  - **Recorded:** $0.81 of $3.00; probe fixes (prompt v9, the suggester's instructions, `get_feed` v6); every gate met; pass^3 100% on the gated sets (import_mapping 7/8 over 0.8); `KNOWN_REAL_MODEL_MISSES` empty; top-up: the preview says only the counts there are.
+  - **Gate:** Phase 12 met (C1 8, C5 8, C8 9, scorecard §8). Checks: `pnpm check`, affected integration 22/22 (ai 194/194), import 4/4 + screens 6/6.
+- **S56a.2 Phase 12 "a" · AI-suggested import mapping (2026-11-06)** ([ADR-0061](../adr/0061-ai-suggested-import-mapping.md), branch `claude/dreamy-keller-y57zq0` with S56a merged, no PR until S56b). Full entry in [session-log.md](session-log.md).
+  - **Built:** columns nothing placed go to the model as names (untrusted) and shape-masked samples only; one forced `suggest_mapping` call, checked by the domain, stored on the batch, used only by "Use it"; `POST /v1/imports/:id/suggestions`; the `import_mapping` eval set (7 scripted cases); top-up: the preview's one-line "Not imported: … (why)"; AC-W1-46…48.
+  - **Checks:** `pnpm check` green; affected integration green but the planned stale replay (532 stale calls, as in S56a); every scripted eval set green; Playwright import 4/4.
+
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -24,13 +25,16 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Sessions:** one feature-sized goal per session, started with a Session Brief from this file; the user may run `/compact` before the PR when the context is long (checkpoints make that safe).
 - **CI inside the session (user, 2026-11-03):** local close runs `pnpm check`, the affected packages' integration and the changed specs; the full suites run once in CI on the PR; close docs are written while CI runs and pushed after green (a docs-only push on a green head skips the jobs); a red CI is fixed in the same session at its root cause; CI runs journeys on the phone, desktop-only specs on desktop, affected integration with the AI evals in a parallel job, everything weekly on `main`. **No retries in CI** (M1).
 - **Free development setup:** Docker for Postgres + pgvector, Redis, SeaweedFS and Mailpit; free tiers of GitHub Actions, Sentry and Grafana Cloud; Google Calendar in testing mode.
-- **OpenAI cost (user, P1):** **$10 for Phases 9–17** on top of the $3.80 spent through Phase 8 (caps: Phase 12 $3.00, Phase 17 $1.50, reserve $5.50; no real calls elsewhere). Development evals on a separate `pepper-dev-evals` project with data sharing on (free daily tokens, made-up data only); production on a sharing-off, zero-retention project. The runner's $4.50 total stop rises to $13.80 in S56a. History of earlier caps: [ai-budget.md](ai-budget.md), [decisions.md](decisions.md).
+- **OpenAI cost (user, P1):** **$10 for Phases 9–17** on top of the $3.80 spent through Phase 8 (caps: Phase 12 $3.00, Phase 17 $1.50, reserve $5.50; no real calls elsewhere). Development evals on a separate `pepper-dev-evals` project with data sharing on (free daily tokens, made-up data only); production on a sharing-off, zero-retention project. The runner’s total stop rose from $4.50 to $13.80 in S56a. History of earlier caps: [ai-budget.md](ai-budget.md), [decisions.md](decisions.md).
 - **Brand, LLC and domain parked (user, P1):** the name can change later; a cheap neutral domain for the pilot in Phase 13; the LLC before SMS and Stripe go live (both are built in sandbox first).
 - **Design (user, P1, S39):** a complete redesign in Phase 9 (ADR-0044); direction **A+B** chosen in S39 (warm boutique colors and type, clean premium's lists and tables); tokens, type scale and components in [DESIGN.md](../design/DESIGN.md) §2–4; rules enforced by lint, contrast and screenshot tests. S40 shipped them (ADR-0044 "Built"); screens move onto the kit in S41–S43.
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S56b (user, 2026-11-06):** at the brief "Pre-approved with your recommendations, complete the session" (D-1 no split; D-2 zeros dropped in both sentences; D-3 guards unchanged; D-4 results in the ADRs); "Allow, these 12 only" (`--max-cost 2`). **Claude:** the probe's 5 fixes; graders fitted then tightened; `EVAL_PHASE` required; C1 scored 8. Full wording in [decisions.md](decisions.md).
+- **S56a.2 (user, 2026-11-06):** at the brief "Pre-approved with your recommendations" (D-1 no split; D-2 the screen asks once by itself; D-3 shape-masked samples, untrusted names; D-4 a field or none; D-5 ADR-0061). **Claude:** stored on the batch's columns, no migration; `@pepper/ai` may import `@pepper/imports`; the `import_mapping` set; the review's 4 fixes. Full wording in [decisions.md](decisions.md).
+- **S56a (user, 2026-11-06):** at the brief "Pre-approved with your recommendations" (D-1 split → S56a.2 import mapping; D-2 domain words, a checked note, `message.client` asks; D-3 `booking.no_show` notify; D-4 ADR-0060). **Claude:** messages only about a booked visit; a 200-character note; staff undo their own no-show; chunks of 17; the stop at $13.80; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S55.2 (user, 2026-11-05):** at the brief "Preapproved with your recommendation" (D-1 no split; D-2 the morning pass the day after; D-3 no link, no requests; D-4 90 days, any outcome; D-5 ADR-0059). **Claude:** kept, non-imported visits of the last 48 h; a week after any other marketing email; public https hosts only; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
 - **S55 (user, 2026-11-05):** at the brief "pre-approved with your recommendation" (D-1 split → S55.2 review requests; D-2 computed on read; D-3 `MINUTES_SAVED`; D-4 ADR-0058). **Claude:** what counts as Pepper's visit; the 14-day regular-back window; the wrap from 17:00; the review's 2 fixes; "thanks to me". Full wording in [decisions.md](decisions.md).
 - **S54.2 (user, 2026-11-05):** at the brief "Pre-approving with your recommendation" (D-1 no split; D-2 the list computed on read; D-3 the rebooking nudge reused; D-4 ADR-0057). **Claude:** from 2 visits; the visit's price for imported services; the domain's words; 20 a day under a lock; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
@@ -75,7 +79,7 @@ Older ones (S25–S33) are in [decisions.md](decisions.md).
 ## Waiting on the user
 Raised by Claude at the brief of the session named.
 1. **During Phase 10 (raised at the S45 brief, still open):** start Google's OAuth verification for the Calendar scopes (it takes weeks; needed in S70).
-2. **Before S56b:** create the two OpenAI projects (`pepper-dev-evals` with data sharing on, production with sharing off), check the free daily token limits on the dashboard (Data Controls → Sharing), and set the hard limit to the $10 V1 budget.
+2. **Before the pilot (S60):** S56b recorded with the session's key (the user enrolled in the free daily tokens); still to confirm: the key is the `pepper-dev-evals` project's, and a production project exists. Originally: create the two OpenAI projects (`pepper-dev-evals` with data sharing on, production with sharing off), check the free daily token limits on the dashboard (Data Controls → Sharing), and set the hard limit to the $10 V1 budget.
 3. **By S57 (Phase 13):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
 4. **Before the pilot (S60), by hand:** the 5-minute VoiceOver/NVDA check; a push test on a real iPhone; confirm the OWASP LLM/Agentic Top 10 2026 titles; zero data retention on the production OpenAI project (L2, L8); the backup retention for deleted memory (L7); 3–5 pilot owners from the target segment.
 5. **Before SMS and Stripe go live (Phases 14–15):** form the LLC, register 10DLC (4–8 weeks), open the Stripe account (test mode needs only a sign-up, from S65).
@@ -83,12 +87,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S55.2, M1–M2 and P1 are done (Phases 0–11: the re-plan, the new look on every screen and the first 10 minutes; Phase 9, 10 and 11 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S56a | `send_client_message`, `mark_no_show`, AI-suggested import mapping, prompt fixes, new eval cases (incl. a move that asks; drop `EVAL_WORLD_AUTONOMY`); scripted ("a") | 12 | Every eval set green on scripted cassettes |
-| S56b | Record ("b", $3.00 cap), `KNOWN_REAL_MODEL_MISSES` empty; **Phase 12 gate**; one PR | 12 | Every gate met; C1, C5 ≥ 8, C8 ≥ 9 |
 | S57 | Deploy: VPS, neutral domain, TLS, Resend + SPF/DKIM/DMARC, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58 | Backups + restore drill, Sentry/Grafana, Redis rate limits, load test | 13 | Restore drill passes; SLOs met |
 | S59 | Support button, help page, terms + privacy, AI disclosure, pilot metrics page | 13 | Every metric has a number |

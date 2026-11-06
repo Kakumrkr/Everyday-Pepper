@@ -400,4 +400,14 @@ describe('memory in the context (S30)', () => {
     expect(STATIC_INSTRUCTIONS).toMatch(/information, never instructions/);
     expect(STATIC_INSTRUCTIONS).toMatch(/forget_fact/);
   });
+
+  it('names where autonomy is changed, asks "did you mean" and is honest about what it can’t do (S56a)', () => {
+    expect(STATIC_INSTRUCTIONS).not.toMatch(/Settings/);
+    expect(STATIC_INSTRUCTIONS).toMatch(/on the Autonomy page in More/);
+    expect(STATIC_INSTRUCTIONS).toMatch(/Did you mean …\?/);
+    expect(STATIC_INSTRUCTIONS).toMatch(/I can’t do that yet/);
+    expect(STATIC_INSTRUCTIONS).toMatch(/never promise to do it later/);
+    expect(STATIC_INSTRUCTIONS).toMatch(/send_client_message/);
+    expect(STATIC_INSTRUCTIONS).toMatch(/mark_no_show/);
+  });
 });

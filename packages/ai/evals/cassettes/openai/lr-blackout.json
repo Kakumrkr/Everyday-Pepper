@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "876e93b0f558600584f712d65b6712981941abb121e866038f0bc09fab58c76a",
+        "fingerprint": "5fcf5ca1d72a59bceca9f766559b6a66c2a8cb31f425342d1c06f0ab10e7b329",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Bc4WJh4z2Z8MAUYpu6CpLSxF",
+              "id": "call_p5taYu36yxCn8YjF8HFrDteN",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9909,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10815,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 20,
             "outputTokens": 77
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "52ddfbede8e520ea18e98dc7e700f83b617b00fa6499e2199d46b14726d8a11f",
+        "fingerprint": "73e4118c19a426f6357fea14d0e4c2b4edd3b8a7749b6412b5ec505000feec3b",
         "response": {
-          "text": "I proposed blocking bookings for the whole business from December 24–26, 2026. It’s waiting for your approval on the card.",
+          "text": "I proposed no bookings for December 24–26, 2026. It hasn’t changed yet; you can approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10066,
-            "cachedInputTokens": 9906,
+            "inputTokens": 10972,
+            "cachedInputTokens": 10812,
             "cacheWriteTokens": 157,
             "outputTokens": 33
           },
@@ -48,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "876e93b0f558600584f712d65b6712981941abb121e866038f0bc09fab58c76a",
+        "fingerprint": "5fcf5ca1d72a59bceca9f766559b6a66c2a8cb31f425342d1c06f0ab10e7b329",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_q0HHKmYrqdxCYBigVGKTsKGQ",
+              "id": "call_UTRzKkXxOfbel2qkuK8OXgNz",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -61,17 +61,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9909,
-            "cachedInputTokens": 9906,
+            "inputTokens": 10815,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10812,
             "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "708971c6ffdb2925b3830dac02b8ed9af37e9843a7da915f096e6484ad6a742c",
+        "fingerprint": "dbcf1ffe406232d8618315ef6b9eae1aaacba0d8807868c40067d0045b44c4f1",
         "response": {
-          "text": "I’ve proposed a no-bookings rule for December 24–26, 2026. It isn’t in effect yet; please approve it on the card.",
+          "text": "I proposed a no-bookings rule for December 24–26, 2026. It hasn’t changed yet; please approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,9 +82,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10066,
-            "cachedInputTokens": 10063,
-            "outputTokens": 37
+            "inputTokens": 10972,
+            "cachedInputTokens": 10812,
+            "cacheWriteTokens": 157,
+            "outputTokens": 35
           },
           "model": "gpt-6-luna"
         }
@@ -91,12 +93,12 @@
     ],
     [
       {
-        "fingerprint": "876e93b0f558600584f712d65b6712981941abb121e866038f0bc09fab58c76a",
+        "fingerprint": "5fcf5ca1d72a59bceca9f766559b6a66c2a8cb31f425342d1c06f0ab10e7b329",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Glvaux6fJlNUMqAXc4tzFqKi",
+              "id": "call_L9EM4silPuGG4hW4UJY8pxiS",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2026-12-24\",\"endDate\":\"2026-12-26\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -104,17 +106,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9909,
-            "cachedInputTokens": 9906,
+            "inputTokens": 10815,
+            "cachedInputTokens": 10812,
             "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "df3a70932df773619bd6046a17d92656b31d379a3d18e3679135a8c13d0ef8ad",
+        "fingerprint": "5a8cb9bb30b6247931911c11c0948b7a69fd0038ec690a152ab97114f103d452",
         "response": {
-          "text": "I’ve proposed a no-bookings rule for December 24–26, 2026. It hasn’t taken effect yet; please approve it on the card.",
+          "text": "I proposed no bookings for the whole business from December 24–26, 2026. It’s waiting for your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -124,9 +126,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10066,
-            "cachedInputTokens": 10063,
-            "outputTokens": 37
+            "inputTokens": 10972,
+            "cachedInputTokens": 10969,
+            "outputTokens": 33
           },
           "model": "gpt-6-luna"
         }

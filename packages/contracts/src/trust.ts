@@ -25,6 +25,7 @@ export const AutonomyActionSchema = z.enum([
   'booking.create',
   'booking.move',
   'booking.cancel',
+  'booking.no_show',
   'booking_request.accept',
   'time.block',
   'client_note.save',
@@ -36,6 +37,7 @@ export const AutonomyActionSchema = z.enum([
   'message.waitlist_offer',
   'message.bulk',
   'message.review_request',
+  'message.client',
 ]);
 export type AutonomyAction = z.infer<typeof AutonomyActionSchema>;
 
@@ -83,6 +85,15 @@ export const AUTONOMY_ACTIONS = {
     allowsAuto: true,
     permission: 'bookings.manage',
     undo: BOOKING_UNDO,
+  },
+  // A visit that started marked a no-show (S56a, ADR-0060): nothing reaches the client, so it
+  // is done and told by default; Undo puts it back to booked for a day, after the start too.
+  'booking.no_show': {
+    riskTier: 'internal_write',
+    defaultLevel: 'notify',
+    allowsAuto: true,
+    permission: 'bookings.manage',
+    undo: { kind: 'for', minutes: DAY, notAfterAppointmentStart: false },
   },
   'booking_request.accept': {
     riskTier: 'internal_write',
@@ -158,6 +169,15 @@ export const AUTONOMY_ACTIONS = {
   // A thank-you after a visit asking for a review (S55.2, ADR-0059): asks by default, like
   // every marketing email; at most one a client per 90 days.
   'message.review_request': {
+    riskTier: 'external_or_irreversible',
+    defaultLevel: 'ask',
+    allowsAuto: true,
+    permission: 'bookings.manage',
+    undo: UNTIL_SENT,
+  },
+  // One email the member asked for, to one client about one visit (S56a, ADR-0060): a reminder,
+  // "running late" or their own note. It reaches a client, so it asks by default.
+  'message.client': {
     riskTier: 'external_or_irreversible',
     defaultLevel: 'ask',
     allowsAuto: true,

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\": [{\"column\": \"When\", \"field\": \"visit_date\"}, {\"column\": \"Guest\", \"field\": \"name\"}, {\"column\": \"Treatment\", \"field\": \"service\"}, {\"column\": \"Stylist\", \"field\": \"staff\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

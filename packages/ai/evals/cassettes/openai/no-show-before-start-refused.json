@@ -1,0 +1,219 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "fingerprint": "dfbd5afa031108d6b21996fc78f0ae4f017339351608e08838e8cb2f1473b4b5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_TEpN0e0Gb3E1tcGfnf3TdtuA",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10805,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 10,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "72bf85d6b70ccfb69d78576246da71d44f418a46aaf67d2aff7c7074617ce4ce",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3CdgZPGBAIIPH0mHNogM9Vax",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10893,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 88,
+            "outputTokens": 47
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "552dd47ff1e8676ee8d01761a1c1d864f07b1990f7d57c986e58e72f63b212a8",
+        "response": {
+          "text": "Maria’s next appointment is tomorrow, so it hasn’t started and can’t be marked as a no-show. If she missed an earlier visit, tell me which one.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11195,
+            "cachedInputTokens": 10890,
+            "cacheWriteTokens": 302,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "dfbd5afa031108d6b21996fc78f0ae4f017339351608e08838e8cb2f1473b4b5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_DXmjB928pPP9wwx7MiwnkzZ2",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10805,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 10,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "8bb9f9badc3cbf20b6a1cf7d83f0d6e4cc53a8b79a4cff3915edac72f7d745b7",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_PI0NTL0JVSjrrfpwcITVDA9X",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10889,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 84,
+            "outputTokens": 43
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "29d4a7b1d9b64b9a3945cb10041b441bea86818ce67918f78c2c7a60c4d6508d",
+        "response": {
+          "text": "I found Maria’s next appointment tomorrow, Nov 3 at 3:00 PM with Jess, but it hasn’t started yet, and there are no earlier visits listed to mark as a no-show. Which visit did you mean?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_092164cce463debe016aee476f30cc87d1a0f33daffaf5ce99",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kdwdp_OUg4T3Olk-49_MKokTWxxUMJxGvC4AnltbLvQN7iSXnVWdQdD8bGeLP1TqufjzF3HLtKvPErX0DlAD3ye058H2mxkauvUtAwynCEyiK6LLasSOlzy--RpFN5CEVhAxVZ8mcbFTnofX7eU2JgTPr-ZMGj6ZlUY1P_3oo_3463c7VvLMJc1W2twCi7idS0b88zfBCVkHvm7yhoz8i57Nd78cQTRrK32QQ7QM4fYAE-cB0ZGPvVO5frR7lO13rzSpqvjvCInAS5Z_X8yaDo4Jo83oU8Q3PPDl1AD9dcNmlZQYHO9Y6hd6W7k0nms7HN4yDJaM6hbnP9zTfPCn38BWvNiv41VuG8jm-cv4LuOGZfyrSZT-GEN6FQfj2l_6dea7E0uizdZ2ZdtG8mZkHaYAiVVdj5FSXum3Ic3rl0O5QlieqMSKqFtJd5Wf66hC5NYLvb6OhExbkzvDM9tx2ixdH11vmJ6fcR2UT14ZvK-owRZ54RYMaUGvZUj54dUKe3WoSQgzK4W099By07_Tqm0FP21HJ_YiKuBT-SoMKWyV5-COUUiTJhEVDk4IyrFiVz25Si2X_NRIRP6_6zPnTwllwwuUm6udOhNmbdHSqsSXejjzeoNf7iDrg0BfgVza_Jj6koeziSiTDYOaqYFPcNdQapC0xto811lyspk_iM1_GeIGXfCAJyxIK6Pt6CJ983UfCbLqs3RoVg9Vie_nFVI2wqrIjzreYELV4Y3tbRo76oXTLh0hXz7nIfprTva63z6NHMDJVaeh2MTShB8I0b3hufKXwq3-l8AkEMstIsqDi_bg-XBRB72NKXefADYyofUf6F52GKgW0pPD_IcHl3YE3stvDysI1YGmShMXkHo_-LLy_S3XqXEb4A5tJ65G7_6Bx7ybKue_t_HozotXi9oWtjwzbi5xL54dy2lYLATchLTfuZgaYlO8lo4AKYbMDYXS2jqM6EQWxd8DXRDqlEEoX_Am6epDV-unJnEWGNShww5BKLX7hk6uUhEUHlviKyWdkQS2aSmR0TmXApO0qisYJ7_LkZgFtWYiwRYfR_Xff5Ba6Hwofr9cg7Z2msR-c5mdAHjWhNoTsKqr4RWmUXYOwC-bME6ImJwqIuzdTWBg_qR9Sv0MBZyMuo3C1AgLgTql-DZlvYnR34_fwyfVUHVhhvZHQlB_bMRuR57LXEpNOFnayOusYUQKb7C4188wQRgnV56PIio441b-TnvjZa5t2ldCe3rTh7CCqJTWH5NsS5TSSAJDbfNw2-ga4bsKeYRT9QQL8xUYIB7WM9O8lP7jZz3Ed_9qjVjOgAJ61s6IXH9jkFnEYG88TmUPAKKj8rUaFbWW1MX-LBUWgxcQ8M6ezG6FMdH-gi63Va0K-i1Vz379PODAlSb1pBW0p0CpwWJ9VJuR2SRiHgTEZtcMmCJaIHB0vt-VGus7ptPEw1mwUUjUxuef2zupLGEG1rg0P2GSgRyNlORzOeMc-mIMandF9u9l_okns5Cqyz8iIiZOs0bduHRrv9BwoOM_M3UoGU6FXNEO9Pqq2MWbd2gPsSwlFT1zyiaaLcoFD_g643XT1QZ4YMeLNZTlEvM7U9bda2VteGByzUEA5azjJEi-l31FDEkaygrKEyats_MDo5LgwFkMpw0sFJYqVdxXoKyfZ9rn0okSinCQZbHT_jtKzlSgEbaupjvGm12zt1dyKAqufcOGXBTA_koobJU37vOfZm6TqWhCGsWfD-qNz41jGpR7gzPmmbVgw53kCjwYhjnh60MF1eLKdBJYEVDYEkuJKxshV-h4K1j3NsuuCi5I9EWyGxDb6d0htoIrrlWP-hFFvTjTsaoGAJsOEdXvnD1KPekQyo82BwQ15FDTqYs6xS5FCDVBx37_a-RuvDsKUWc0aEkRucVGQ0xB8anRP7SItGdeIPd3GAGD4RAbLbbfO7LkQ8nBfOK7Fu-Prv68JGMh79iCb7SHu2UBCbpzoPf5k9ckgaCFk9eIfbce074ULByScPsW1J1Gto83V-NAlcizKgzqK9v2zpqKODeIs4RM89UIRHqjr1rPR892nMc5UeG4646kO-4ugzKDJBnaPDFVAasogSjit437830n_GCl61bB9YoIerLsEWhyuqJBaGNAlTqRsMiDtctCxd0dZ8_wMkO2DzbOtntxpWkFXANWHpuxKJ_Or2SiMiz6I0rbgcDFJWfg9i3jhEiBIMDNEtflHJbhPa6JnsOrb3ySo6YdY4Mq3-O3WJh1wBPrL8AJNHPDHDZRP6WT1EexZZRFMFZOVKCrmVRjRMnJfsBCwPud_snK0uPXhQlbe31-2a-kjkCTw==",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11181,
+            "cachedInputTokens": 10886,
+            "cacheWriteTokens": 292,
+            "outputTokens": 107
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "dfbd5afa031108d6b21996fc78f0ae4f017339351608e08838e8cb2f1473b4b5",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_bmwQwG184quf0LmyF9Nf8cqQ",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10805,
+            "cachedInputTokens": 10802,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "d5287bcfd19e6ec30c38ad7572346cfabc554f1ea5793ca5443aca99213a5279",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_u7qUMBc9MVkjYlk8gVK1IO64",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10890,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "248890d46f08530e132d82cdbde043ab508c6dbd7d70aa3a5a3a90e2ec4dd594",
+        "response": {
+          "text": "Maria’s only appointment is tomorrow, Tue Nov 3 at 3:00 PM, so it hasn’t started and can’t be marked as a no-show. If you meant a different visit, tell me which one.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "id": "rs_0a1fb5240465689c016aee4775430c87d1a0657cb6eb684f4b",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kd2RKB80d9l_SCH47TUUWns-gRR9QJrxb--dQQfuqPauhq4V2fF3Xca9XjtJda2rIRV7oXqd6ubQz96SjejB5kUVeYu41ynVRUEljqIdS7M0DphZ7qNcyq7TM0iJGZ4kWUPivUJBHsQ3Yb-2T-PsvcwtNIFTLxXT_obyKkR7Zce1mtWcnPmpEyT5z4APIiFOlM-uPMzbiN642mTWGzLBkQx95-iBcwRpxckKqAGYJxDN0DxR2Ng9Srsp0bIXpku1IPd3Esle-d2RG-cJLfBsZW9VfJrXfBe8RedHnNpfvNRB2d6M2Aoc86vry4OS3VtN-Jd3Dgn0UINnNxucLqVSGwfhiFIj_BWB3CR8_j-D8p1rkDsTWOJCe1orpwu04ujy0_fPCzZtPzW4OCDSGSvt6wOGmKQpV-YcE1s7AzAIRemL4RdYpHHVUj13wrqKn4CHcIa8yGs_uuF857uqokAYeWjK7j3iAD0TFIstFNBp1SOIUrfTEud0CwEB5LMqo7oS3Csu5IC7xbWwqgUIVBQSQilIB2qQFYSzl1DJE9kobkmBsBhwVCviBYtsZYbkfpkNR6TXOAgW9HR5P28FDWkas8i7nVjV8lXR1ryUCe2IR1q1UNg-taZIbpnNRMRele8ChK5pGpM4KJFDhmKZfjRygxFaNLN4_ViE40MrIBKBZyzR4Eg_MMDFGCyJm1-tNPse56YbycrxYp2IoG9mHoAT3manN_BSmkRYFnFmm88vJS5uacDu43R47lMxepylsrwavVz3g4UwbiXuCh_lrefZiSQaqx4eJBlWCYdEaj9_iJIgKD-JetEMVEUvZ_k4-ix12NbKx9Czy6PZ4-wXUXlSimvMJXtD_tPN_9Q_gf-VoREKz8ljztch5n905PqlVXR3I6Hsr5sONx8rAGROR_wHRVYl6CVbVCbvenFc808tvCekLl8BTBH1AqnVAGkj9WiT-1G0JTydMW24qFxDJr_8LsJzHumVaYINn009i0nmzWZNmb9RQ6T_9aHBHi7ydOTfdyf2tfuE4e3AESvPnkL3nDxqO7Rv33B_f41ggF5Sr4ojyfVlP2n6B-vJUji2h0sDZJDMERl18cxsXl3yHtheRWUVIOEU1i75W5smOv3duNlrPLXpRzJHrZptpQzThw26t3NunZdN-yyIM2FS-Q-U0f6JJmbHVTDUND3871T3o8l5jp4gmR9pAZEpsxOFKnn-ejTzOMA5BRpBCBE-rujX2ac5eaRPy5BnOrnWMV17CmZeK7KnfZd36-SFgEMfqBoCfN8qLhByp1eHn58tMmdsNjY3CNgoHASYVlAWS2no4h-Xk7xdF_iL3Ci108RwxEOmqfEelE8RxAegHUOzE1Wba1aAVFCFRP8Z7uA6_J9He4oxO45S--S4bAeY7qYTkgaPVi0xIoA_KJPHhZfZ-bxyBtBb2x4ZF3Bnb69SDO2gB3eaLg1MxuCViI3T_J6BHIu4zjWNZr3vTig6-GyBQ56Z2B094iqzr6Pp07URWCEEYbe3GCv9GK11p9tcIQxVvMtkF7hs9UIHsSxt7aVM8A6ABR0LzXn2fQzgb67Rv9JWJDS1qQX9VaKLM8UC8yf_-1BfT7F4BNmYjEdPs2NodL2XPQxG1w0LFHJ7y997xxAMiaExN9ChX2WEeob9jzToq_nm2q2-bsCQCuzIi7QBLtLsztX3htC0STic6PFdXYuRjtinbDlPZ_KRg70Rcb67QTG7u9bOpJtHzJ3cg2Jw5y4CG8ew55mxHoSxA4ikT2F1iOr8wcP5gTCsX1OAwYW7T_o_1ERJRLxo7apTJdXG82ryFB_bqyAq9a-EzLh2-LpXUd0Z9j4I5KyiC5StWjr94kTpoCLQqxM-xVC7FMOv1zDF14DTX6mVOS7E6ggLQEa7iNTIJyqvI3zlw2hrgpvD6Dm9Tn9mW7bZki5COR8VnZ4EEd2Q4l2DW6QLCVYVAL1gUt80UaWjaYfYKR0gJcivKzpbKoN_jFHGX_EN2ht7Gn67ZzgIcR4n9k6CvZV0wsbRp1PH1mRBgpc4ZyxgGd4Iy2xepY-",
+              "summary": []
+            },
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11191,
+            "cachedInputTokens": 10887,
+            "cacheWriteTokens": 301,
+            "outputTokens": 97
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ]
+  ]
+}

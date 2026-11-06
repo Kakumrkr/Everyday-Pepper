@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "20910b02c6eaec9f11e9f3fac9d3d409fccddc01e3accf2174889721dbbc23b3",
+        "fingerprint": "5ac09eef01e3425c84ad298879293c6c38dc9cbd08b3cb83ab4d107463d1299f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TzXkDdknBj4Bh4V2N6AWypLf",
+              "id": "call_rKF5qWBZsDaNgHFtoQrYnN0g",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "1d211f469c7d9f662ce0a942693bcf5554231dab8ae57a0e21e5e2a3872901ee",
+        "fingerprint": "6570a91513ca474b13a626d4934e1308b92fd129a6313212ac48c4e3f641c790",
         "response": {
           "text": "There are no open to-dos on the team list.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9957,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10863,
+            "cachedInputTokens": 10803,
             "cacheWriteTokens": 57,
             "outputTokens": 16
           },
@@ -48,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "20910b02c6eaec9f11e9f3fac9d3d409fccddc01e3accf2174889721dbbc23b3",
+        "fingerprint": "5ac09eef01e3425c84ad298879293c6c38dc9cbd08b3cb83ab4d107463d1299f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_VYtj9owJUyGLBGneDWBBlqhD",
+              "id": "call_ddVfPlW5q26HibEOj08xgMTP",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -61,15 +61,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 11,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b596044ed1173e278cb7f94a44e3fbe8bc41c3afd59c5ab78cd9443b3ea93ca0",
+        "fingerprint": "98c556c5889203023e45ebcbcecf5cad8abd5f1cb45e90fa69c853dbf9313461",
         "response": {
           "text": "There are no open to-dos on the team list.",
           "toolCalls": [],
@@ -81,8 +82,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9957,
-            "cachedInputTokens": 9954,
+            "inputTokens": 10863,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 57,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
@@ -91,12 +93,12 @@
     ],
     [
       {
-        "fingerprint": "20910b02c6eaec9f11e9f3fac9d3d409fccddc01e3accf2174889721dbbc23b3",
+        "fingerprint": "5ac09eef01e3425c84ad298879293c6c38dc9cbd08b3cb83ab4d107463d1299f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_09ZolZftXTaFOUPxYGZ7rVDZ",
+              "id": "call_xTxNqEqmuJc4wXjif5rlxpty",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -104,15 +106,15 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10803,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "7854037151562c983c28ddaa667d5f88c2743af5cd4a9075d1fb117c636d7218",
+        "fingerprint": "e2ced5a6983b30ca67cefce57126d17729f9fe3e27637e106d0951e22815fd2f",
         "response": {
           "text": "There are no open to-dos on the team list.",
           "toolCalls": [],
@@ -124,8 +126,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9957,
-            "cachedInputTokens": 9954,
+            "inputTokens": 10863,
+            "cachedInputTokens": 10860,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"

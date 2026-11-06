@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "af7d50c7f685c2074750c6df247e502c27e03a6a4ede01a460d56d78ec32608a",
+        "fingerprint": "b266aecfd9805096089a5b4558cb347eef496fea1b70fe287f2e1206fe32ed23",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_L74SuzQ0yogN0LfGNvrlecZ1",
+              "id": "call_PlspvpkAvoRB2sxlBssHtzTX",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9898,
+            "inputTokens": 10804,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9895,
+            "cacheWriteTokens": 10801,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "841954821cec160d84911813efe18b7a82a0e220c0b8f7f4d17cc405eabe5386",
+        "fingerprint": "54a88a393d5e62e5e2b69a808cfcf2c5a8479ea58b2c42f7f15b66f1680b6561",
         "response": {
-          "text": "Your feed has 7 suggestions:\n\n• Schedule gaps with Jess: today, Nov 2 (9–5); tomorrow, Nov 3 (9–12 is the longest gap); Wed, Nov 4 (9–5); Thu, Nov 5 (9–5); and Fri, Nov 6 (9–2 is the longest gap).\n• Rebooking reminders: Sara K. is due for a haircut (since Oct 26), and Sarah P. is due for a haircut (since Oct 27).\n• No one is on the waitlist, and there are no items waiting for your OK.",
+          "text": "Your feed has 7 suggestions:\n\nThere are open schedule gaps for you, Jess:\n• Today, Nov 2: one gap, 9 AM–5 PM (480 minutes)\n• Tue, Nov 3: two gaps; the longest is 9 AM–12 PM (300 minutes total)\n• Wed, Nov 4: one gap, 9 AM–5 PM (480 minutes)\n• Thu, Nov 5: one gap, 9 AM–5 PM (480 minutes)\n• Fri, Nov 6: two gaps; the longest is 9 AM–2 PM (410 minutes total)\n\nSara K. and Sarah P. are due for haircuts. There are no waitlist entries or items waiting for your OK.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10821,
-            "cachedInputTokens": 9895,
-            "cacheWriteTokens": 923,
-            "outputTokens": 129
+            "inputTokens": 11803,
+            "cachedInputTokens": 10801,
+            "cacheWriteTokens": 999,
+            "outputTokens": 155
           },
           "model": "gpt-6-luna"
         }

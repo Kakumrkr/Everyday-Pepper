@@ -162,6 +162,18 @@ export class ReviewRequestNotSendableError extends Error {
   }
 }
 
+/**
+ * A message the member asked for can't go to this client (S56a, ADR-0060): the visit isn't
+ * booked any more, a reminder's visit has started, "running late" is too early or too late for
+ * the visit, or the client has no email address.
+ */
+export class ClientMessageNotSendableError extends Error {
+  constructor(readonly reason: 'not_booked' | 'started' | 'too_early' | 'too_late' | 'no_email') {
+    super(`A message can't be sent (${reason})`);
+    this.name = 'ClientMessageNotSendableError';
+  }
+}
+
 /** The task is already done: there is nothing to complete (S26b). */
 export class TaskNotOpenError extends Error {
   constructor() {

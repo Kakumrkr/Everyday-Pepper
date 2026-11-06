@@ -37,6 +37,7 @@ export const ACTION_NOUN: Record<AutonomyAction, string> = {
   'booking.create': 'new bookings',
   'booking.move': 'moves',
   'booking.cancel': 'cancellations',
+  'booking.no_show': 'no-shows',
   'booking_request.accept': 'accepting booking-page requests',
   'time.block': 'blocking time',
   'client_note.save': 'client notes',
@@ -48,6 +49,7 @@ export const ACTION_NOUN: Record<AutonomyAction, string> = {
   'message.waitlist_offer': 'waitlist offers',
   'message.bulk': 'messages to several clients',
   'message.review_request': 'review requests',
+  'message.client': 'messages to a client',
 };
 
 /** One standing rule and where it is changed. */

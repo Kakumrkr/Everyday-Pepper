@@ -24,12 +24,12 @@
         }
       },
       {
-        "fingerprint": "48a719d1d612cb99042d81966e3286993b324587220f4ab7fe3b0500575551d3",
+        "fingerprint": "a409b6e125611c01f81a73ddbf7159221abd6a2442598dc176993478676c2333",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_eKS0fcdBNW2p0aJmj2Tb3TmP",
+              "id": "call_kuKCRUJqdBe15imFuO0FGI7t",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -37,8 +37,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -46,9 +46,9 @@
         }
       },
       {
-        "fingerprint": "b220eb97e40ea8d2925abf2e53e8ae8ab9c482f1df3b75c81e3ad837fc113154",
+        "fingerprint": "775ec8e4a4e50744b49cd5e4dd80eb82f345074060b8dab28469b0715cea147d",
         "response": {
-          "text": "Yes—one item is waiting for your OK on Home: a rebooking email for Sara K. for a haircut with Jess. You can review it on its card.",
+          "text": "Yes—one rebooking email for Sara K. about a haircut with Jess is waiting for your OK on Home. You’ll need to approve or dismiss it on its card.",
           "toolCalls": [],
           "replay": [
             {
@@ -58,10 +58,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11561,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 1661,
-            "outputTokens": 38
+            "inputTokens": 12533,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 1727,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

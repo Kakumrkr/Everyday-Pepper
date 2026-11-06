@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "9a928aae797cd52e120ddfdf23f1a88c57f0a2a6c3b9923c3cfb6f44eef67402",
+        "fingerprint": "147dacac2a06be85dc6b3e62680746970e0f90236254fc34eb8a2b811d94a28a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_aShNAW2a7Lzpt3NNM09w3Cag",
+              "id": "call_gzmacLpTGaUXT7urXe8bVT8B",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9911,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10817,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 22,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "2a77604e711f75cf66c32093a4e08754e076977a119fc58149a414afbdc9fbf4",
+        "fingerprint": "01877a23cdf0bc554f2b503fbf9a73faf1ffed2c423a2f45db03b956218e6435",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_GLMZia5rJwYYSnm0ydRrSNng",
+              "id": "call_bO31LMl5cQov2pEqC7Bc50EQ",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah Park\"}"
             }
@@ -38,21 +38,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10377,
-            "cachedInputTokens": 9908,
-            "cacheWriteTokens": 466,
+            "inputTokens": 11296,
+            "cachedInputTokens": 10814,
+            "cacheWriteTokens": 479,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "68614cab10c3dc10a139c659edd6f0d3fc88f36b4a4245155bc5be895fff95b5",
+        "fingerprint": "2a53397fd4e390240399df57d527633de323ec7697062432900af33f69915c0a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HCDa8JS6VAycGCQjrAJiBrf9",
+              "id": "call_Vq4SKzMPZcbOv5bhK7laJHOU",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"14:30\",\"emailClient\":null}"
             }
@@ -60,18 +60,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10459,
-            "cachedInputTokens": 10374,
-            "cacheWriteTokens": 82,
-            "outputTokens": 114
+            "inputTokens": 11384,
+            "cachedInputTokens": 11293,
+            "cacheWriteTokens": 88,
+            "outputTokens": 122
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "9cb06dde194e373373ac87a20c97d1beca4088e4a5a98317ca12a3080b8614d6",
+        "fingerprint": "c10fdca00f33beea3689aed08724906a1784acbd770f9416c4c4c8ef2515b634",
         "response": {
-          "text": "I’ve proposed Sarah P.’s haircut with Marco for Thursday, November 5 at 2:30 PM. It’s waiting for your approval on the card.",
+          "text": "I’ve proposed Sarah’s haircut with Marco for Thursday, November 5 at 2:30 PM. It’s waiting for your approval on the card; it isn’t booked yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +81,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10653,
-            "cachedInputTokens": 10456,
-            "cacheWriteTokens": 194,
-            "outputTokens": 37
+            "inputTokens": 11586,
+            "cachedInputTokens": 11381,
+            "cacheWriteTokens": 202,
+            "outputTokens": 41
           },
           "model": "gpt-6-luna"
         }
@@ -92,33 +92,12 @@
     ],
     [
       {
-        "fingerprint": "9a928aae797cd52e120ddfdf23f1a88c57f0a2a6c3b9923c3cfb6f44eef67402",
+        "fingerprint": "147dacac2a06be85dc6b3e62680746970e0f90236254fc34eb8a2b811d94a28a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Lu6VhxNEhfwm1A7WjvXYlSOZ",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sarah Park\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9911,
-            "cachedInputTokens": 9908,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "d01bd5249b5859fa718221e45890c5b9ccedae1d03f5f89c233a647931f6ff1b",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_HRp5zUhilltFqDbzuRw3wftj",
+              "id": "call_EUeRwGOHZq5dYDxIYU5E2PCI",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -126,21 +105,43 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9997,
-            "cachedInputTokens": 9908,
-            "cacheWriteTokens": 86,
+            "inputTokens": 10817,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 22,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2080bfdfabce2dece04f96ffd55dce3f8939846e9a2c20ddede0c09083b20c1c",
+        "fingerprint": "c32e1ee63cfc43e4640e74ce68033b323c717faeeac120ba77fd3215d9cef650",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_cUmTkridaMXzzNjneJos3nCT",
+              "id": "call_YOb2sL4JjWwseWLIM7c13O31",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11293,
+            "cachedInputTokens": 10814,
+            "cacheWriteTokens": 476,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "eea6d31cd01f2cf20933bab91cd8e21ccbf744c0fc1c95c632c931ff6217e269",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_QpswSxT2HQ5ozXF7rX6sL3ry",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"14:30\",\"emailClient\":null}"
             }
@@ -148,18 +149,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10467,
-            "cachedInputTokens": 9994,
-            "cacheWriteTokens": 470,
-            "outputTokens": 118
+            "inputTokens": 11382,
+            "cachedInputTokens": 11290,
+            "cacheWriteTokens": 89,
+            "outputTokens": 123
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "093ef22048c52ea1ce10782b2102c23844ce278a09e538f85bbd2a9380969e0e",
+        "fingerprint": "e44c12e8a3fc457527b3199606e152f0c2ead75c5e65afe585048c723a08f15d",
         "response": {
-          "text": "Sarah P.’s haircut with Marco for Thursday, November 5 at 2:30 PM is waiting for your approval on the card.",
+          "text": "Sarah P.’s haircut with Marco for Thursday, November 5 at 2:30 PM is awaiting your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -169,10 +170,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10665,
-            "cachedInputTokens": 10464,
-            "cacheWriteTokens": 198,
-            "outputTokens": 32
+            "inputTokens": 11585,
+            "cachedInputTokens": 11379,
+            "cacheWriteTokens": 203,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }
@@ -180,33 +181,12 @@
     ],
     [
       {
-        "fingerprint": "9a928aae797cd52e120ddfdf23f1a88c57f0a2a6c3b9923c3cfb6f44eef67402",
+        "fingerprint": "147dacac2a06be85dc6b3e62680746970e0f90236254fc34eb8a2b811d94a28a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_YrtHsLXugMudEJPMDD396HaM",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sarah Park\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9911,
-            "cachedInputTokens": 9908,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "03448a4a7812848bec847ac282decc93d0e0f7dd92f5ab91b33e7e4bfb6db3a5",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_OxR1R7CAenFlc5y4TQhg7yjF",
+              "id": "call_wFnkPrUUwnH4eZGyVaQO5qRB",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -214,21 +194,42 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9995,
-            "cachedInputTokens": 9908,
-            "cacheWriteTokens": 84,
+            "inputTokens": 10817,
+            "cachedInputTokens": 10814,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "cd1df369848ec1a4d8a73a7f4a182fbe77768f0f7d8a25d48fb5d0d0172a999e",
+        "fingerprint": "594729830b9d744a6799090eca8319c9c016084a4bb57c50721f362ba3c74f29",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_xeqhPdsaQbnjFDoz5OxMJuqi",
+              "id": "call_IC0d7TXysy58bTWSW9TbcW4p",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11282,
+            "cachedInputTokens": 10814,
+            "cacheWriteTokens": 465,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "17d01cea15168ea1cba130dfc92d27e467ce1b6e0d516140cd849fa67cbd0183",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_fA6tDXeKdyIWHoYuEdQY5vJq",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:marco}}\",\"date\":\"2026-11-05\",\"time\":\"14:30\",\"emailClient\":null}"
             }
@@ -236,18 +237,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10464,
-            "cachedInputTokens": 9992,
-            "cacheWriteTokens": 469,
-            "outputTokens": 118
+            "inputTokens": 11369,
+            "cachedInputTokens": 11279,
+            "cacheWriteTokens": 87,
+            "outputTokens": 119
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "6045b3a5c1160a543b5c8852586dff746926912fb35ab51eb7c907009c2670b9",
+        "fingerprint": "0fb5237506de87ec93fabe9afc52db700fb9ef4c558b25723389d250dd52c675",
         "response": {
-          "text": "Sarah’s haircut with Marco for Thursday, November 5 at 2:30 PM is waiting for your approval on the card. It isn’t booked yet.",
+          "text": "Sarah’s haircut with Marco for Thursday, November 5 at 2:30 PM is awaiting your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -257,10 +258,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10662,
-            "cachedInputTokens": 10461,
-            "cacheWriteTokens": 198,
-            "outputTokens": 36
+            "inputTokens": 11568,
+            "cachedInputTokens": 11366,
+            "cacheWriteTokens": 199,
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

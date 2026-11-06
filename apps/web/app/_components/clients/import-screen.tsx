@@ -32,11 +32,14 @@ import {
   commitImport,
   discardImport,
   FIELD_OPTIONS,
+  fieldLabel,
   importHref,
   IMPORT_PATH,
   importSteps,
   inProgress,
+  leftOutLine,
   loadImport,
+  needsSuggestions,
   moreRowsNote,
   POLL_LIMIT_MS,
   POLL_MS,
@@ -48,6 +51,9 @@ import {
   rowsToFixFirst,
   stepIndex,
   stepOf,
+  suggestImport,
+  suggestionOf,
+  suggestionWords,
   undoable,
   undoImport,
   undoQuestion,
@@ -103,6 +109,38 @@ export function ImportScreen({
       stopped = true;
     };
   }, []);
+
+  // The AI's suggestions for the columns nothing placed (S56a.2, AC-W1-46): asked once per
+  // import when the columns step shows; nothing is mapped until the owner taps "Use it". When
+  // the owner changed a column while it was asked, the import is read again (it has both).
+  const [asking, setAsking] = useState(false);
+  const asked = useRef(new Set<string>());
+  const changes = useRef(0);
+  const batchId = preview?.batch.id ?? null;
+  const wantsSuggestions =
+    step === 'mapping' && preview !== null && needsSuggestions(preview.batch.columns);
+  useEffect(() => {
+    if (!wantsSuggestions || batchId === null || asked.current.has(batchId)) return;
+    asked.current.add(batchId);
+    const before = changes.current;
+    setAsking(true);
+    void suggestImport(batchId)
+      .then(async (answer) => {
+        if (!answer.ok) return;
+        // The owner changed a column meanwhile: read the import as it is now (both are in it).
+        let next = answer.data.preview;
+        if (changes.current !== before) {
+          const seen = changes.current;
+          const current = await loadImport(batchId);
+          if (!current.ok || changes.current !== seen) return;
+          next = current.data;
+        }
+        setPreview((shown) => (shown?.batch.id === next.batch.id ? next : shown));
+      })
+      .finally(() => {
+        setAsking(false);
+      });
+  }, [wantsSuggestions, batchId]);
 
   // Each step starts at its heading, for a screen reader and a phone scrolled down.
   function go(next: ImportStep) {
@@ -163,6 +201,7 @@ export function ImportScreen({
   const remap = (column: string, field: string) =>
     run(async () => {
       if (preview === null) return;
+      changes.current += 1;
       const answer = await remapImport(
         preview.batch.id,
         withField(preview.batch.columns, column, field),
@@ -230,6 +269,7 @@ export function ImportScreen({
         <MappingStep
           batch={preview.batch}
           busy={busy}
+          asking={asking}
           onChange={(column, field) => void remap(column, field)}
           onBack={startOver}
           onNext={() => {
@@ -332,12 +372,15 @@ function UploadStep({ busy, onFile }: { busy: boolean; onFile: (file: File) => v
 function MappingStep({
   batch,
   busy,
+  asking,
   onChange,
   onBack,
   onNext,
 }: {
   batch: ImportBatch;
   busy: boolean;
+  /** The AI is looking at the columns nothing placed. */
+  asking: boolean;
   onChange: (column: string, field: string) => void;
   onBack: () => void;
   onNext: () => void;
@@ -354,21 +397,48 @@ function MappingStep({
             : `This looks like a ${presetName(batch.preset)} export, so I matched its columns. Change any that’s off.`}
         </p>
         <Problems problems={batch.problems} />
+        {asking ? (
+          <p className="m-0 type-body text-ink-2" role="status" data-testid="import-asking">
+            I’m looking at the columns I couldn’t match…
+          </p>
+        ) : null}
         <ul className="m-0 flex list-none flex-col gap-4 p-0" aria-label="Columns of your file">
-          {batch.columns.map((column) => (
-            <li key={column.column} data-testid="import-column">
-              <Select
-                label={column.column}
-                hint={columnNote(column, batch.preset)}
-                value={column.field ?? ''}
-                disabled={busy}
-                options={FIELD_OPTIONS}
-                onChange={(event) => {
-                  onChange(column.column, event.target.value);
-                }}
-              />
-            </li>
-          ))}
+          {batch.columns.map((column) => {
+            const suggested = suggestionOf(column);
+            return (
+              <li key={column.column} className="flex flex-col gap-2" data-testid="import-column">
+                <Select
+                  label={column.column}
+                  hint={columnNote(column, batch.preset)}
+                  value={column.field ?? ''}
+                  disabled={busy}
+                  options={FIELD_OPTIONS}
+                  onChange={(event) => {
+                    onChange(column.column, event.target.value);
+                  }}
+                />
+                {suggested === null ? null : (
+                  <div
+                    className="flex items-center justify-between gap-3 rounded-md bg-brand-soft py-1 pr-1 pl-4"
+                    data-testid="import-suggestion"
+                  >
+                    <span className="type-body text-ink">{suggestionWords(suggested)}</span>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={busy}
+                      aria-label={`Use it: ${column.column} as ${fieldLabel(suggested)}`}
+                      onClick={() => {
+                        onChange(column.column, suggested);
+                      }}
+                    >
+                      Use it
+                    </Button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
       <ActionBar>
@@ -398,6 +468,17 @@ function Problems({ problems }: { problems: readonly string[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** The columns that won't be imported and why, in one line, before Import (AC-W1-48). */
+function LeftOut({ columns }: { columns: ImportBatch['columns'] }) {
+  const line = leftOutLine(columns);
+  if (line === null) return null;
+  return (
+    <p className="m-0 type-body text-ink-2" data-testid="import-left-out">
+      {line}
+    </p>
   );
 }
 
@@ -458,6 +539,7 @@ function PreviewStep({
         </p>
         <Problems problems={batch.problems} />
         <Notices notices={batch.notices} />
+        <LeftOut columns={batch.columns} />
       </section>
       <RowGroup title="To fix" rows={toFix} testId="import-fix" timeZone={timeZone} />
       <RowGroup title="Times taken" rows={taken} testId="import-conflict" timeZone={timeZone} />

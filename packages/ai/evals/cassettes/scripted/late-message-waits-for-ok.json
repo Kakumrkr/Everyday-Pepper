@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_2",
+              "name": "find_client_bookings",
+              "arguments": "{\"clientId\":\"{{client:maria}}\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_3",
+              "name": "send_client_message",
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"kind\":\"running_late\",\"minutesLate\":15,\"note\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      },
+      {
+        "response": {
+          "text": "I've drafted the email telling Maria L. you're running about 15 minutes late for her 3:00 PM. Approve it on the card and it goes.",
+          "toolCalls": [],
+          "replay": [],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

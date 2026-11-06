@@ -185,7 +185,7 @@
   {
     "id": "staff-moves-own-client",
     "set": "permissions",
-    "description": "Jess may move her own client within her own calendar: done (notify).",
+    "description": "Jess may move her own client within her own calendar: proposed, waiting for an OK (a move asks by default, S53/S56a).",
     "holdout": true,
     "now": "2026-11-02T14:00:00Z",
     "timeZone": "America/New_York",
@@ -208,7 +208,8 @@
         }
       ],
       "actions": {
-        "done": ["move_booking"]
+        "proposed": ["move_booking"],
+        "done": []
       }
     }
   }

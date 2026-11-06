@@ -16,6 +16,7 @@ import {
 import type { AvailableSlot, ToolErrorCode } from '@pepper/contracts';
 import {
   ActionTooLateError,
+  ClientMessageNotSendableError,
   ClientNotFoundError,
   DraftRefusedError,
   ForbiddenError,
@@ -76,6 +77,15 @@ const REVIEW_NOT_SENDABLE = {
   no_visit: 'That visit was cancelled or missed, so there is nothing to ask about.',
 } as const;
 
+const MESSAGE_NOT_SENDABLE = {
+  not_booked: 'That visit isn’t booked any more (cancelled, done or missed), so nothing was sent.',
+  started: 'That visit has already started, so a reminder makes no sense. Nothing was sent.',
+  too_early:
+    'That visit is more than 3 hours away; a running-late note goes within 3 hours of it. Nothing was sent.',
+  too_late: 'That visit started over an hour ago, so nothing was sent.',
+  no_email: 'This client has no email address, so I can’t message them yet.',
+} as const;
+
 const NOT_FOUND = [
   BookingNotFoundError,
   ServiceNotFoundError,
@@ -126,7 +136,14 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
         "This member's role doesn't allow that. Tell them plainly, and that an owner or manager can do it; don't try another way.",
     };
   }
-  if (error instanceof BookingNotChangeableError || error instanceof BookingNotStartedError) {
+  if (error instanceof BookingNotStartedError) {
+    return {
+      code: 'not_changeable',
+      message:
+        'That appointment hasn’t started yet, so it can’t be marked a no-show or done. Nothing was changed.',
+    };
+  }
+  if (error instanceof BookingNotChangeableError) {
     return {
       code: 'not_changeable',
       message: "The booking's status doesn't allow that change (a cancelled booking is final).",
@@ -142,7 +159,7 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
     return {
       code: 'memory_paused',
       message:
-        'The owner paused remembering new things; nothing was saved. Say so; it can be turned back on in Settings.',
+        'The owner paused remembering new things; nothing was saved. Say so; it can be turned back on on the "What I know" page in More.',
     };
   }
   if (error instanceof MemoryLimitError) {
@@ -158,11 +175,14 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
   if (error instanceof ReviewRequestNotSendableError) {
     return { code: 'not_changeable', message: REVIEW_NOT_SENDABLE[error.reason] };
   }
+  if (error instanceof ClientMessageNotSendableError) {
+    return { code: 'not_changeable', message: MESSAGE_NOT_SENDABLE[error.reason] };
+  }
   if (error instanceof DraftRefusedError) {
     return {
       code: 'invalid_arguments',
       message:
-        'The email’s words break a rule: no links, contact details or sensitive notes, and at most 120 words.',
+        'The email’s words break a rule: no links, contact details or sensitive notes, and at most 120 words (a note to a client: 200 characters).',
     };
   }
   if (error instanceof WaitlistExpiredError) {

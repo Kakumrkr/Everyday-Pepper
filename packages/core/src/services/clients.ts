@@ -30,6 +30,7 @@ import {
   findClientsByIds,
   insertClient,
   insertWalkInClient,
+  listClientNames,
   listClients as listClientRows,
   mergeClientRows,
   setTransactionClientContact,
@@ -41,6 +42,7 @@ import {
 } from '@pepper/db';
 import { auditActorOf, requirePermission, type Actor } from '../actor.js';
 import { can } from '../permissions.js';
+import { closeNames, CLOSE_NAMES_SHOWN } from './close-names.js';
 import { systemClock, type Clock } from '../clock.js';
 import {
   ClientHasUpcomingVisitsError,
@@ -177,6 +179,28 @@ export async function findClientsByNameIn(
   const { search, limit } = ClientsQuerySchema.parse(query);
   const rows = await listClientRows(tx, { search, limit, namesOnly: true });
   return rows.map(toClient);
+}
+
+/** How many clients a misspelt name is compared with: the most recently changed. */
+const CLOSE_NAME_SCAN = 5_000;
+
+/**
+ * Up to `limit` clients the member may see whose name is close to `search` (a typo: "Mraia" →
+ * Maria), closest first (S56a, ADR-0060): ids and names only, for "Did you mean …?". Never a
+ * match: the member picks.
+ */
+export async function closeClientNamesIn(
+  tx: TenantTx,
+  actor: Actor,
+  search: string,
+  limit = CLOSE_NAMES_SHOWN,
+): Promise<{ id: ClientId; name: string }[]> {
+  requirePermission(actor, 'clients.read');
+  const rows = await listClientNames(tx, CLOSE_NAME_SCAN);
+  return closeNames(search, rows, limit).map((row) => ({
+    id: ClientIdSchema.parse(row.id),
+    name: row.name,
+  }));
 }
 
 /**

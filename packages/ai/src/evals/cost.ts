@@ -1,4 +1,4 @@
-import { DRAFT_LIMITS, type LlmUsage } from '@pepper/contracts';
+import { DRAFT_LIMITS, IMPORT_SUGGESTION_LIMITS, type LlmUsage } from '@pepper/contracts';
 import { z } from 'zod';
 import { agentTools, instructionsFor } from '../agent/context.js';
 import { DEFAULT_LIMITS } from '../agent/loop.js';
@@ -28,9 +28,10 @@ export const DEFAULT_RUN_CAP_USD = 1.5;
 export const MAX_RUN_CAP_USD = 4.5;
 /**
  * The most cases one real run may hold: sets run in chunks (S26b's worst case, ~$0.05 a case;
- * S30's seventeen tools and memory instructions ~$0.06, so 20; S37's twenty-one ~$0.077, so 18).
+ * S30's seventeen tools and memory instructions ~$0.06, so 20; S37's twenty-one ~$0.077, so 18;
+ * S56a's twenty-three ~$0.084, so 17).
  */
-export const MAX_CASES_PER_RUN = 18;
+export const MAX_CASES_PER_RUN = 17;
 /** Output tokens assumed per call when estimating. Generous on purpose. */
 export const OUTPUT_ALLOWANCE_TOKENS = 600;
 /** Characters per token when estimating input: low, so the estimate errs high. */
@@ -87,6 +88,12 @@ export function estimateRunCost(
       if (!('user' in turn) && 'morningDrafts' in turn.action) {
         inputTokens += DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxTokens;
         outputTokens += DRAFTS_PER_PASS_ESTIMATE * DRAFT_LIMITS.maxOutputTokens;
+        continue;
+      }
+      // An imported file (S56a.2): one suggester call at most, its whole allowance in and out.
+      if (!('user' in turn) && 'importFile' in turn.action) {
+        inputTokens += IMPORT_SUGGESTION_LIMITS.maxTokens;
+        outputTokens += IMPORT_SUGGESTION_LIMITS.maxOutputTokens;
         continue;
       }
       if (!('user' in turn)) continue;

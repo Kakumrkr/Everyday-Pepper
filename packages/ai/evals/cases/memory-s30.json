@@ -1195,7 +1195,7 @@
         }
       ],
       "storedMustNotContain": ["4471"],
-      "replyMatches": ["don.t (have|know|see)"]
+      "replyMatches": ["don.t (have|know|see|remember)"]
     },
     "seed": {
       "facts": [

@@ -3,53 +3,31 @@
   "trials": [
     [
       {
-        "fingerprint": "2f389a5e3c944917cfc51668b0b0847441e3698910b0d904dd1648ccaa4f0fa6",
+        "fingerprint": "8e38130a73fc64477ce1e6ade8fb253b532fbac5d94fa3492c90d8f0d54f85f9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_rionYlLESOY7D9uespAXWtMt",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9907,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 9904,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "305f54f9e6d85e3a89efc341c0adb304a4e0a192cf98caf297d31ac07c0faccf",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_lWGercvzKD1LOOumbyHFcotS",
+              "id": "call_SlZxpGdsBlvfKnRENOgdX7vt",
               "name": "propose_rule",
-              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":\"{{staff:jess}}\",\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
+              "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":2,\"notBefore\":\"11:00\",\"notAfter\":null,\"closed\":false}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10366,
-            "cachedInputTokens": 9904,
-            "cacheWriteTokens": 459,
-            "outputTokens": 90
+            "inputTokens": 10813,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10810,
+            "outputTokens": 68
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4b590c2370a7d933ee3d644a7740b6299bf221370c793c4c7323fd653928a9f2",
+        "fingerprint": "887d6ba4edbae5196bb31697407963c8ebcbed2e8558ff16b7c62619682752d6",
         "response": {
-          "text": "I can’t set that rule with my staff permissions. An owner or manager can set it so no one can book you before 11 on Tuesdays.",
+          "text": "I can’t set that rule with my staff permissions. An owner or manager can set it.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10509,
-            "cachedInputTokens": 10363,
-            "cacheWriteTokens": 143,
-            "outputTokens": 34
+            "inputTokens": 10934,
+            "cachedInputTokens": 10810,
+            "cacheWriteTokens": 121,
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }

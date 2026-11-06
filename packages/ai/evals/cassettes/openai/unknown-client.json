@@ -3,34 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "0f6026ef4314a7c26790fb9dc5787219f009e65bf0bdce555e86846a86d5fbbf",
+        "fingerprint": "7f3369ee2a5e857719ad3dddfa4db166ba7aeff12950127554795ae8cbceb5f6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_nNg23U0YxOiE6uxcJshFy95I",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9886,
-            "cacheWriteTokens": 14,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a3f0cdbd7a2b01097eea3413d101a07d0c0f579c6e3314baf4f5d1f949f5872a",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_n4GbNDcn15ClCHUYQ9O1NsOh",
+              "id": "call_mf1EyQyOo2MOanjDs73LtSYN",
               "name": "find_clients",
               "arguments": "{\"name\":\"Zoe Martinez\"}"
             }
@@ -38,20 +16,27 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10352,
-            "cachedInputTokens": 9900,
-            "cacheWriteTokens": 449,
+            "inputTokens": 10809,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 14,
             "outputTokens": 20
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "e2a594cd444e5d76b0903560dbe2ab16bb57e7591115e704c6ac67aa88846525",
+        "fingerprint": "5bfd6cf4147d42585e6d05cbb369363c31c36b6121ee9d345b563178b279abd9",
         "response": {
-          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or give me another name to search?",
+          "text": "I couldn’t find a client named Zoe Martinez. Could you check the spelling or tell me the name she’s booked under?",
           "toolCalls": [],
           "replay": [
+            {
+              "id": "rs_0e111b070a1b20f1016aee3f3e624087d1be4ee336e8c6a28e",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7j8-IMZTn6ejxEVBRub5SDpPJb56Uvsy9wKUQ19yau0l5A6zPha_WBBekr-JRtw_pCoaJk3CJuF0HYNg3XpjDbZYbqP01G__uUTochhiyxHMSyzhDkYgJ4iBunFrco2f0ulLmjIf20ZwxushgyExdiVRlcGLWajGrHsXdLc1XQ8e4CI8DfZBGUy-vqgCCmBY4bnhIfYl7i_vh3Y-DaTfxMjDp3GWmCbIU_gJVpCjl6znqHNl0FG5kBWL5e3gCNI_jSrvMLMgE6fjYvyTYA4pf-qo0mWm0IC0pXZPD-0MhGXgiGFCKoEDT5eqPVkdvt2fdieU5J9XwfmYCOHTyr8cqC_Y76B03bxVbFuQTRvNVgTorcbUtAUTqC0MRNBk7kScJ-Jh-Qx5khewVZ00ZsXZMjB3Zy7S_igtXVJexzfKKoYNf1ySHrzRX6LBOMTOPMMJNc8AVBeok3D-IlgijtiBUQ0Gf8Hj1Uq35-HhtL-G5jOn78RVDygzG-Utj6S8T_PjBJiZlioMcip3hLCh1Dc-iF3hwIXllFVM-FLW4ihmX5vkM91U_yVI7uX1GHuWIaKAYbxLMVM8jx8x4ZoM81sjaaIi66mi-YTfy8nqP18ZnFGyc67RU3sZ32ogce1J3vQs43ZBhFLy4XTDGc218OH8fyIE9wqibespFgDVzXNDkOYEQyRzUZ-d6-pY2eJkGAtqzlUijRScQXAAy2GNS1JndfpN_IeLY46pffA8BAV0gQzF0Q3v3VPbxpaYmZydGu7fHPMvqZ5LM2FDOD4Y7JZ_LupZXO7S-0iROqxvN-uLEe281RhmICIyEfaSpH4R1GklqB1nGU1Y7IbiNRSPUP1E2I0QQ7Sj1Tozsyx1cO1YkNJR52MmoAfEgdno1gOjGee6YHcZPi9GYjaw14W3XXD3vSvOvgr2iv9kSZVmmDiq-xXIxdaKP5wWpNnQb0sHpblFm_RliYmGz7BgtIXqRswkrHlFwIj38UMKCmsPJ8xMUTCVXmdBw3THNPDieIp966PqS9RnJ1nw_lPOXBQ2mA_weRVbxmJ1KTD18O9IVY82m-EP6kdgGHigb0zHSAkCau63Bb-6nlt_Okgh5LFOPhfrKAEXkSCb5iJwAOluUVBiTG2EBoKJ-STnEBXMrwiGfYzu7cOZX5mxCvZKU2rOc4r9ILrIpZFPBWthx2uaSsrxPTAnoCCXsj26nyX6Vgd0m_EeYzM4TlF50Av5jHH4clWfpNYNJJNJ02CMwsLGtGK0z24tAm7GiKHiOQAq8aj7uTFGC9S9jIZSP7bHcNK2eqbr6kQxnLM6cd1XS-0yQT1BD8BNnGR09icVnKzEyTq3twLn6d2jh7109Kmll-4VQyiTgprJ1fSCeHF90DU_Hxzv87KoiCcIx20Vq71_aUOIfQihbI2sbfrGzR7gLgBpFRmSnF5jcglrjgnay1O9DRsx1ApBPwz7jdid1BHn_WXTPx8deCCiaqYqRFMD704PaDvcEB_EF9HFtm93_0-phZrdoQJgTMts8INh1_kDEttryj_qp1zZeSsOR-dpZQ50WBDJMT9QeTJHu8buc_VPQdWPFbKWnVB8sGX_CP-5RTSZLWU6mMJ-40c1RuVICcVDDJbl94qlrr1SytwY-6KcsqqKCWZ8mjEC7v40P26mBtGefu7iWxed4eKFtBMZjB6KQexK-mip23vwW33shl_EkURJcA32Omeo80EGr_tbbPgSyi24y-nA_nplb7q15tX2lD5XDi1l1a6ZVFZgLZ78zw1s75JtxI0=",
+              "summary": []
+            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -59,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10413,
-            "cachedInputTokens": 10349,
+            "inputTokens": 10870,
+            "cachedInputTokens": 10806,
             "cacheWriteTokens": 61,
-            "outputTokens": 27
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }

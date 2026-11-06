@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "6d89dec28a49f5114da6f1075208cf7568436a8ecdc04769646d9fa3b1891a62",
+        "fingerprint": "18a0a2c73c4ba958631be3c279ee4bbe7f3bb06fb645307d93876d15f1b01fe8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6xlzjA1JOQCCvPHRuckdfVqG",
+              "id": "call_9jhYTT5dkHR3gf3U3AahPayZ",
               "name": "search_memory",
               "arguments": "{\"query\":\"Jess Saturdays\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10808,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 13,
             "outputTokens": 19
           },
@@ -25,7 +25,7 @@
         }
       },
       {
-        "fingerprint": "f29b25b3e8f89013710042e1e3a5dab80ebfd41e420cf2ea34823a5b7f4af243",
+        "fingerprint": "797996acbc9894a9ada014e33ed3e5c4748605807046cd9c1d5b653c172ae699",
         "response": {
           "text": "I don’t remember what we decided about Jess and Saturdays.",
           "toolCalls": [],
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9981,
-            "cachedInputTokens": 9899,
+            "inputTokens": 10887,
+            "cachedInputTokens": 10805,
             "cacheWriteTokens": 79,
             "outputTokens": 16
           },
@@ -48,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "6d89dec28a49f5114da6f1075208cf7568436a8ecdc04769646d9fa3b1891a62",
+        "fingerprint": "18a0a2c73c4ba958631be3c279ee4bbe7f3bb06fb645307d93876d15f1b01fe8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_1DQ06Zf5EYYJLBZNhIWGxBZd",
+              "id": "call_zmE2DsaWnzmBdWNlMQqrSHKl",
               "name": "search_memory",
               "arguments": "{\"query\":\"Jess Saturdays\"}"
             }
@@ -61,15 +61,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9899,
+            "inputTokens": 10808,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 13,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "369216cdd6419175b559808bcc20fcbf0e6863e9c0e3595d38d0e544806bcff8",
+        "fingerprint": "e555e390d225070c3417f2a9cd5a0da4ea6a2ba9a37db6a76702c40d9351b065",
         "response": {
           "text": "I don’t remember what we decided about Jess and Saturdays.",
           "toolCalls": [],
@@ -81,8 +82,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9981,
-            "cachedInputTokens": 9978,
+            "inputTokens": 10887,
+            "cachedInputTokens": 10805,
+            "cacheWriteTokens": 79,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
@@ -91,12 +93,12 @@
     ],
     [
       {
-        "fingerprint": "6d89dec28a49f5114da6f1075208cf7568436a8ecdc04769646d9fa3b1891a62",
+        "fingerprint": "18a0a2c73c4ba958631be3c279ee4bbe7f3bb06fb645307d93876d15f1b01fe8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_m7Nng4NOdCgUgXrEF3k6ZOZQ",
+              "id": "call_HwOLWskaHqFKhpABOHIqU7sh",
               "name": "search_memory",
               "arguments": "{\"query\":\"Jess Saturdays\"}"
             }
@@ -104,17 +106,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9899,
+            "inputTokens": 10808,
+            "cachedInputTokens": 10805,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "3a2f020ec305c060d6fa2bcd2e031c430b304f14fa7b07d09c82ead93efca7a0",
+        "fingerprint": "75542e556018a36d34baadd22054b5321c61434b1de5c98d1fe885dc32c8ddcb",
         "response": {
-          "text": "I don’t remember what we decided about Jess and Saturdays.",
+          "text": "I don’t remember us deciding anything about Jess and Saturdays.",
           "toolCalls": [],
           "replay": [
             {
@@ -124,8 +126,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9981,
-            "cachedInputTokens": 9978,
+            "inputTokens": 10887,
+            "cachedInputTokens": 10884,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
