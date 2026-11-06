@@ -198,9 +198,7 @@ test('import (AC-W1-46…48): Pepper suggests a column it couldn’t match, the 
 
   // AC-W1-48: before Import, one line says what is left out and why.
   await page.getByRole('button', { name: 'Check the clients' }).click();
-  await expect(page.getByTestId('import-sentence')).toHaveText(
-    '2 new clients, 0 to fill in, 0 to fix',
-  );
+  await expect(page.getByTestId('import-sentence')).toHaveText('2 new clients');
   await expect(page.getByTestId('import-left-out')).toHaveText(
     'Not imported: Fav (nothing in Pepper fits it).',
   );

@@ -245,28 +245,34 @@ export const count = (n: number, one: string, many: string) =>
 
 /**
  * The preview in one sentence (AC-W1-21): "143 new clients, 12 to fill in, 3 to fix", then the
- * duplicates left out and the clients already here, only when there are any. A visits file's
- * (AC-W1-27): "40 past visits, 6 upcoming, 12 new clients, 3 to fix", then the times taken,
- * the rows left out and the visits already here, only when there are any.
+ * duplicates left out and the clients already here. A visits file's (AC-W1-27): "40 past
+ * visits, 6 upcoming, 12 new clients, 3 to fix", then the times taken, the rows left out and the
+ * visits already here. The first count is always said; every other one only when there are any
+ * ("2 new clients", not "2 new clients, 0 to fill in, 0 to fix"; S56b).
  */
 export function previewSentence(counts: ImportCounts, kind: ImportKind = 'clients'): string {
-  const parts =
+  const parts: readonly (readonly [number, string])[] =
     kind === 'visits'
       ? [
-          count(counts.past, 'past visit', 'past visits'),
-          `${String(counts.upcoming)} upcoming`,
-          count(counts.clients, 'new client', 'new clients'),
-          `${String(counts.invalid)} to fix`,
-          ...(counts.conflict > 0 ? [count(counts.conflict, 'time taken', 'times taken')] : []),
+          [counts.past, count(counts.past, 'past visit', 'past visits')],
+          [counts.upcoming, `${String(counts.upcoming)} upcoming`],
+          [counts.clients, count(counts.clients, 'new client', 'new clients')],
+          [counts.invalid, `${String(counts.invalid)} to fix`],
+          [counts.conflict, count(counts.conflict, 'time taken', 'times taken')],
+          [counts.skipped, `${String(counts.skipped)} left out`],
+          [counts.unchanged, `${String(counts.unchanged)} already here`],
         ]
       : [
-          count(counts.create, 'new client', 'new clients'),
-          `${String(counts.merge)} to fill in`,
-          `${String(counts.invalid)} to fix`,
+          [counts.create, count(counts.create, 'new client', 'new clients')],
+          [counts.merge, `${String(counts.merge)} to fill in`],
+          [counts.invalid, `${String(counts.invalid)} to fix`],
+          [counts.skipped, `${String(counts.skipped)} left out`],
+          [counts.unchanged, `${String(counts.unchanged)} already here`],
         ];
-  if (counts.skipped > 0) parts.push(`${String(counts.skipped)} left out`);
-  if (counts.unchanged > 0) parts.push(`${String(counts.unchanged)} already here`);
-  return parts.join(', ');
+  return parts
+    .filter(([n], i) => i === 0 || n > 0)
+    .map(([, words]) => words)
+    .join(', ');
 }
 
 /** "a, b and c". */
