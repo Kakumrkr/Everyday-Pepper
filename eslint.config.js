@@ -24,7 +24,8 @@ const allowedInternalImports = {
   'packages/templates': ['contracts'],
   // ADR-0029: the AI's tools are thin adapters over the domain services (core and the modules)
   // and run in their member transactions (db's `withMember`, types); never L3 templates.
-  'packages/ai': ['contracts', 'core', 'db', 'appointments', 'testing'],
+  // S56a.2 (ADR-0061): the import mapping suggester calls the imports module's services.
+  'packages/ai': ['contracts', 'core', 'db', 'appointments', 'imports', 'testing'],
   'packages/integrations': ['contracts', 'core'],
   'packages/ui': ['contracts'],
   'packages/runtime': ['contracts', 'core', 'db', 'testing'],
